@@ -8,6 +8,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/11/16 19:37:45  robertk
+ * Added ghostLevel and up support.
+ *
  * Revision 1.1  2004/10/25 16:39:53  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -42,7 +45,7 @@ template < class A, class MX > class Hbnd3PllExternal : public Hbnd3Top < A > {
     typedef typename A :: myhface3_t myhface3_t ;
 	  typedef typename A :: bnd_t     bnd_t ;
   public :
-    inline Hbnd3PllExternal (myhface3_t *, int, ProjectVertex *, const bnd_t bt ) ;
+    inline Hbnd3PllExternal (myhface3_t *, int, ProjectVertex *, const bnd_t bt, IndexManagerType & im  ) ;
     inline ~Hbnd3PllExternal () ;
     ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
     const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -53,10 +56,13 @@ template < class A, class MX > class Hbnd3PllExternal : public Hbnd3Top < A > {
 
 template < class A, class X, class MX > class Hbnd3PllInternal {
   public :
+
+    // for example: A = GitterBasis :: Objects :: Hbnd3Default
     class HbndPll : public A {
       public :
         typedef X mypllx_t ;
       protected :
+        
         typedef typename A :: myhface3_t myhface3_t ;
 	typedef typename A :: balrule_t balrule_t ;
 	typedef typename A :: bnd_t     bnd_t ;
@@ -74,6 +80,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
 // Schwerpunkt des anliegenden Elements beschaffen:
       public:
         inline const double (& barycenter () const)[3] ;
+        inline int ghostLevel () const ;
 // Ende
     } ;
     typedef class HbndPll micro_t ;
@@ -88,11 +95,12 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
 	virtual bool bndNotifyBalance (balrule_t,int) ;
 	virtual bool lockedAgainstCoarsening () const ;
       public :
-        HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt ) ;
+        HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , IndexManagerType & im) ;
        ~HbndPllMacro () ;
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
         const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
         void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+        inline int ghostLevel () const ; 
       private :
         mypllx_t * _mxt ;
     } ;
@@ -110,8 +118,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
 	//
 
 
-template < class A, class MX > inline Hbnd3PllExternal < A, MX > :: Hbnd3PllExternal (myhface3_t * f, int t, ProjectVertex *ppv, const bnd_t bt ) 
-    : Hbnd3Top < A > (0,f,t,ppv,bt), _mxt (new MX (*this)) {
+template < class A, class MX > inline Hbnd3PllExternal < A, MX > :: Hbnd3PllExternal (myhface3_t * f, int t, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im) 
+    : Hbnd3Top < A > (0,f,t,ppv,this,bt,im), _mxt (new MX (*this)) {
   restoreFollowFace () ;
   return ;
 }
@@ -180,10 +188,15 @@ template < class A, class X, class MX > bool Hbnd3PllInternal < A, X, MX > :: Hb
 template < class A, class X, class MX > inline const double (& Hbnd3PllInternal < A, X, MX > :: HbndPll ::  barycenter () const)[3] {
   return _ext.barycenter () ;
 }
+
+template < class A, class X, class MX > inline int Hbnd3PllInternal < A, X, MX > :: HbndPll ::  ghostLevel () const {
+  return _ext.ghostLevel () ;
+}
+
 // Ende
 
-template < class A, class X, class MX > Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , const bnd_t bt ) 
-    : Hbnd3Top < micro_t > (0,f,t,ppv,bt), _mxt (new MX (*this)) {
+template < class A, class X, class MX > Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , const bnd_t bt, IndexManagerType & im ) 
+    : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im), _mxt (new MX (*this)) {
   restoreFollowFace () ;
   return ;
 }
@@ -225,6 +238,10 @@ template < class A, class X, class MX > bool Hbnd3PllInternal < A, X, MX > :: Hb
 template < class A, class X, class MX > bool Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: lockedAgainstCoarsening () const {
   assert (_mxt) ;
   return _mxt->lockedAgainstCoarsening () ;
+}
+
+template < class A, class X, class MX > inline int Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: ghostLevel () const {
+  return level () ;
 }
 
 #endif	// GITTER_TETRA_TOP_PLL_H_INCLUDED
