@@ -1,6 +1,7 @@
-# searches for STL Headers 
+# searches for STL Headers need to compile the code
 
 AC_DEFUN([ALU3D_CHECK_HEADERS],[ AC_REQUIRE([AC_PROG_CXX])
+  AC_LANG_PUSH([C++])
   AC_CHECK_HEADERS(ulimit.h)
   AC_CHECK_HEADERS(assert.h)
   AC_CHECK_HEADERS(stdio.h)
@@ -23,4 +24,6 @@ AC_DEFUN([ALU3D_CHECK_HEADERS],[ AC_REQUIRE([AC_PROG_CXX])
   AC_CHECK_HEADERS(map)
   AC_CHECK_HEADERS(numeric)
   AC_CHECK_HEADERS(rpc/rpc.h)
+  AC_LANG_POP
 ])
+
