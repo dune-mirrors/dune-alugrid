@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/19 13:25:11  robertk
+ * Adapted constructors of VertexGeo for IndexManagement.
+ *
  * Revision 1.1  2004/10/15 09:48:37  robertk
  * Inititial version. Some extenxions for Dune made. Schould be compatible
  * with all other applications done so far.
@@ -333,9 +336,11 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) {
         {
           int l = 1 + level () ;
           assert (_cv == 0 && _dwn == 0) ;
+          // the last myvertex(0) is submitted for the indexmanager
+          // reference
           _cv = new innervertex_t (l, .5 * (myvertex(0)->Point()[0] + myvertex(1)->Point()[0]),
-			      .5 * (myvertex(0)->Point()[1] + myvertex(1)->Point()[1]), 
-			      .5 * (myvertex(0)->Point()[2] + myvertex(1)->Point()[2])) ;
+			      .5 * (myvertex(0)->Point()[1] + myvertex(1)->Point()[1]),  
+			      .5 * (myvertex(0)->Point()[2] + myvertex(1)->Point()[2]) , *(myvertex(0)) ) ;
           assert (_cv) ;
           inneredge_t * e0 = new inneredge_t (l, myvertex(0), _cv) ;
           inneredge_t * e1 = new inneredge_t (l, _cv, myvertex(1)) ;
@@ -543,7 +548,8 @@ template < class A > void Hface4Top < A > :: splitISO4 () {
     BilinearSurfaceMapping map(myvertex (0)->Point(), myvertex (1)->Point(), myvertex (2)->Point(), myvertex (3)->Point()) ;
     double p [3] ;
     map.map2world( .0, .0, p) ;
-    _cv = new innervertex_t (l, p[0], p[1], p[2]) ;
+    // myvertex(0) is submitted for the indexmanager reference 
+    _cv = new innervertex_t (l, p[0], p[1], p[2], *(myvertex(0))) ;
     assert (_cv) ;
   }
   myvertex_t * ev0 = myhedge1(0)->subvertex (0) ;
@@ -1004,7 +1010,7 @@ template < class A > void HexaTop < A > :: splitISO8 () {
 	myvertex(5)->Point(), myvertex(6)->Point(), myvertex(7)->Point()) ;
     double p[3] ;
     map.map2world(.0, .0, .0, p) ;
-    _cv = new innervertex_t (l, p[0], p[1], p[2]) ;
+    _cv = new innervertex_t (l, p[0], p[1], p[2], *(myvertex(0)) ) ;
     assert (_cv) ;
   }
   myvertex_t * fv0 = myhface4 (0)->subvertex (0) ;
