@@ -61,7 +61,7 @@ if test x$HAVE_METIS = x1 ; then
          METIS_LDFLAGS="-L$METIS_LIB_PATH"
          LIBS="$LIBS $METIS_LIBS"],
 	[HAVE_METIS="0"
-	AC_MSG_WARN(libmetis.a found!)])
+	AC_MSG_WARN(libmetis.a not found in $METIS_LIB_PATH)])
 fi
 
 LDFLAGS=$REM_LDFLAGS
