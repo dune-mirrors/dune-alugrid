@@ -1,3 +1,6 @@
+#ifndef __XDRCLASS_INCLUDED__
+#define __XDRCLASS_INCLUDED__
+
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <stdlib.h>
@@ -20,15 +23,15 @@ int write_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);
 XDR *XDRopen(const char *filename,const xdr_op op);
 XDR *XDRclose(XDR *x);
 
-/*
 class XDRstream 
 {
   XDR    _xdrs; 
   FILE * _xdrfile;
+  unsigned int puts_;
 public:  
   enum XDRdir { in , out };
   
-  XDRstream(const char * filename, XDRdir dir )
+  XDRstream(const char * filename, XDRdir dir ) : puts_ (1)
   {
     if(dir == in)
       _xdrfile = fopen(filename, "rb");
@@ -48,42 +51,81 @@ public:
 
   ~XDRstream () 
   {
-    //if(_xdrfile) close(_xdrfile);
+    if(_xdrfile) fclose(_xdrfile);
   }
  
   template <class T> 
   void put (const T & t)
   {
-    xdr_bytes(&_xdrs, ((char **) &t) , 1, sizeof(T) );
+    assert(false); 
+    cout << "Pute \n";
+    //char * tp= const_cast<T *> (&t);
+    //xdr_bytes(&_xdrs, ((char **) &t) , 1, sizeof(T) );
+    //xdr_bytes(&_xdrs, &tp , &puts_, sizeof(T) );
     //xdr_vector(&_xdrs,((char *) &t),1, sizeof(T) ,(xdrproc_t)xdr_double);
   }
+  
+  /*
+  template <> 
+  void put (const char & t)
+  {
+    cout << "put " << t << "\n";
+    xdr_char(&_xdrs, const_cast<char *> (&t) );
+  }
+
   template <> 
   void put (const int & t)
   {
-    xdr_int(&_xdrs, &t );
+    cout << "Put int \n";
+    xdr_int(&_xdrs, const_cast<int *> (&t) );
   }
+  */
   
-  char get ()
+  char get () const
   {
     char t;
-    xdr_char(&_xdrs, &t);
+    read(t);
     return t;
   }
   
   template <class T> 
   void read (T &t) const 
   {
-    xdr_bytes(&_xdrs, ((char **) &t) , 1, sizeof(T) );
+    assert(false); 
+    //xdr_bytes(&_xdrs, ((char **) &t) , 1, sizeof(T) );
+  }
+
+  /*
+  template <> 
+  void read (char &t) const 
+  {
+    cout << "read char \n";
+    xdr_char(const_cast<XDR *> (&_xdrs), &t );
+    cout << t << "\n";
   }
 
   template <> 
   void read (int &t) const 
   {
-    xdr_int(&_xdrs, &t );
+    xdr_int(const_cast<XDR *> (&_xdrs), &t );
+  }
+  */
+
+  bool operator ! () {
+    return _xdrfile ? true : false;
   }
 
-  XDRstream & operator << (const char * t )
+  XDRstream & operator << ( const char * t )
   {
+    cout << " schriebe  char \n";
+    xdr_char(&_xdrs, const_cast<char *> (t));
+    return *this;
+  }
+  
+  XDRstream & operator >> ( const char * t )
+  {
+    cout << " lese char \n";
+    xdr_char(&_xdrs, const_cast<char *> (t));
     return *this;
   }
   
@@ -108,7 +150,6 @@ public:
   void setf ( const A & a, const B & b ) 
   {
   }
- 
 };
 
 class XDRstream_out : public XDRstream 
@@ -125,4 +166,5 @@ public:
     (filename,XDRstream::in) {}
 };
 
-*/
+#endif
+
