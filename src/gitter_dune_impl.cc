@@ -87,8 +87,8 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         for(int i=0; i<idxsize; i++) checkidx[i] = true;
         for( w->first(); ! w->done() ; w->next () )
         {
-          assert( w->item().vertexIndex() < checkidx.size() );
-          checkidx[ w->item().vertexIndex() ] = false;
+          assert( w->item().getIndex() < checkidx.size() );
+          checkidx[ w->item().getIndex() ] = false;
         }
 
         for(int i=0; i<idxsize; i++)
