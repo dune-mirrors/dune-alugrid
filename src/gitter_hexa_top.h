@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.6  2005/03/18 20:07:15  robertk
+ * Added backup and restore for XDRStreams. does not work yet.
+ *
  * Revision 1.5  2005/01/19 18:26:24  robertk
  * removed warnings.
  *
@@ -87,6 +90,10 @@ template < class A > class Hedge1Top : public A {
   public :
     virtual void backup (ostream &) const ;
     virtual void restore (istream &) ;
+    
+    // new xdr methods 
+    virtual void backup (XDRstream_out &) const ;
+    virtual void restore (XDRstream_in &) ;
   public :
     virtual myrule_t getrule () const ;
     virtual void refineImmediate (myrule_t) ;
@@ -344,6 +351,22 @@ template < class A > void Hedge1Top < A > :: backup (ostream & os) const {
 }
 
 template < class A > void Hedge1Top < A > :: restore (istream & is) {
+  char r = (char) is.get () ;
+  //myvertex(0)->restore( is );
+  //myvertex(1)->restore( is );
+  refineImmediate (myrule_t (r)) ;
+  {for (inneredge_t * d = down () ; d ; d = d->next ()) d->restore (is) ; }
+  return ;
+}
+template < class A > void Hedge1Top < A > :: backup (XDRstream_out & os) const {
+  os.put ((char) getrule ()) ;
+  //myvertex(0)->backup( os );
+  //myvertex(1)->backup( os );
+  {for (const inneredge_t * d = down () ; d ; d = d->next ()) d->backup (os) ; }
+  return ;
+}
+
+template < class A > void Hedge1Top < A > :: restore (XDRstream_in & is) {
   char r = (char) is.get () ;
   //myvertex(0)->restore( is );
   //myvertex(1)->restore( is );
