@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.8  2004/11/29 13:03:51  robertk
+ * number of indexmanagers variable (enum ) now.
+ *
  * Revision 1.7  2004/11/29 12:39:17  robertk
  * size of index set is stored aswell. The indexset is completely overwritten
  * after the grid is read from file.
@@ -341,7 +344,7 @@ void Gitter :: backup (ostream & out) {
   bool indices = true; out.put(indices);  // indices == true
   
   // store max indices 
-  for(int i=0; i<5; i++) 
+  for(int i=0; i< numOfIndexManager ; i++) 
     indexManager(i).backupIndexSet(out);
     
   { // backup index of elements 
@@ -374,7 +377,7 @@ void Gitter ::restore (istream & in) {
   bool indices = in.get();
   if(indices)
   {
-    for(int i=0; i<5; i++) 
+    for(int i=0; i< numOfIndexManager ; i++) 
       this->indexManager(i).restoreIndexSet ( in );
     
     // restore index of elements 
