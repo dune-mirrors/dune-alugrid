@@ -7,6 +7,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.5  2005/01/13 16:57:34  robertk
+ * Constructor to initialze method. Not called if we use
+ * DuneParallelGridMover.
+ *
  * Revision 1.4  2004/12/21 17:24:41  robertk
  * new methods for ghost elements on internal boundarys.
  * all new methods to insert internal boundary with ghost element are mostly
@@ -66,7 +70,14 @@
   
 static volatile char RCSId_gitter_pll_mgb_cc [] = "$Id$" ;
 
-ParallelGridMover :: ParallelGridMover (BuilderIF & b) : MacroGridBuilder (b) {
+ParallelGridMover :: ParallelGridMover (BuilderIF & b, bool init) : MacroGridBuilder (b,init) 
+{
+  if(init) initialize();
+}
+
+void ParallelGridMover ::initialize ()
+{
+  assert(_initialized);
   vector < elementKey_t > toDelete ;
   {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; i ++)
     if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).accessPllX ().erasable ()) {
@@ -93,10 +104,12 @@ ParallelGridMover :: ParallelGridMover (BuilderIF & b) : MacroGridBuilder (b) {
   {for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDelete.end () ; i ++ )
     removeElement (*i) ;
   }
+
   return ;
 }
 
 inline ParallelGridMover :: ~ParallelGridMover () {
+  assert(_initialized);
   return ;
 }
 
@@ -201,7 +214,8 @@ inline void ParallelGridMover :: unpackHexa (ObjectStream & os) {
   return ;
 }
 
-inline void ParallelGridMover :: unpackHbnd3 (ObjectStream & os) {
+inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os) {
+
   int b, v [3] ;
   os.readObject (b) ;
   os.readObject (v[0]) ;
@@ -211,14 +225,27 @@ inline void ParallelGridMover :: unpackHbnd3 (ObjectStream & os) {
   // read vertex coord , is neccessary because we dont want to overload the
   // Tetra packAsBnd method, so we read vertex here but do the same as
   // before 
-  if(Gitter :: hbndseg :: bnd_t (b) == Gitter :: hbndseg :: closure )
+  int fake = 0;
+  os.readObject( fake );
+
+  if(fake) 
   {
-    double p [3];
+    double p [3] = {0.0,0.0,0.0};
     os.readObject (p[0]) ;
     os.readObject (p[1]) ;
     os.readObject (p[2]) ;
   }
 
+  InsertUniqueHbnd3 (v, Gitter :: hbndseg :: bnd_t (b)) ;
+  return ;
+}
+
+inline void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os) {
+  int b, v [3] ;
+  os.readObject (b) ;
+  os.readObject (v[0]) ;
+  os.readObject (v[1]) ;
+  os.readObject (v[2]) ;
   InsertUniqueHbnd3 (v, Gitter :: hbndseg :: bnd_t (b)) ;
   return ;
 }
@@ -267,9 +294,11 @@ void ParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
         break ;
 // Ende - Neu am 23.5.02 (BS)
       case MacroGridMoverIF :: HBND3INT :
+        unpackHbnd3Int (os) ;
+      	break ;
       case MacroGridMoverIF :: HBND3EXT :
-        unpackHbnd3 (os) ;
-	break ;
+        unpackHbnd3Ext (os) ;
+      	break ;
       case MacroGridMoverIF :: HBND4INT :
       case MacroGridMoverIF :: HBND4EXT :
 	unpackHbnd4 (os) ;
@@ -286,6 +315,7 @@ void ParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
 }
 
 void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
+  assert(false);
   if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) {
     const long start = clock () ;
     long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
