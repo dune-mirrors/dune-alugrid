@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.7  2004/12/20 13:54:29  robertk
+ * gcc compileable.
+ *
  * Revision 1.6  2004/11/25 18:49:53  robertk
  * removed duneAdapt.
  *
@@ -473,19 +476,19 @@ template < class A > AccessIteratorTT < A > :: ~AccessIteratorTT () {
 }
 
 template < class A > AccessIteratorTT < A > :: HandleBase :: HandleBase (AccessIteratorTT < A > & f, int i) : _fac (f), _l (i) {
-  _fac.ref ++ ;
-  _pw = _fac.iteratorTT ((A *)0,_l) ;
+  this->_fac.ref ++ ;
+  this->_pw = _fac.iteratorTT ((A *)0,_l) ;
 }
 
 template < class A > AccessIteratorTT < A > :: HandleBase :: HandleBase (const AccessIteratorTT < A > :: HandleBase & p) : _fac (p._fac), _l (p._l) {
-  _fac.ref ++ ;
-  _pw = _fac.iteratorTT (p._pw,p._l) ;
+  this->_fac.ref ++ ;
+  this->_pw = _fac.iteratorTT (p._pw,p._l) ;
 }
 
 template < class A > AccessIteratorTT < A > :: HandleBase :: ~HandleBase () {
-  _fac.ref -- ;
-  delete _pw.first ;
-  delete _pw.second ;
+  this->_fac.ref -- ;
+  delete this->_pw.first ;
+  delete this->_pw.second ;
 }
 
 template < class A > AccessIteratorTT < A > :: InnerHandle :: InnerHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) {
@@ -498,24 +501,24 @@ template < class A > AccessIteratorTT < A > :: InnerHandle :: ~InnerHandle () {
 }
 
 template < class A > void AccessIteratorTT < A > :: InnerHandle :: first () {
-  _pw.first->first () ;
+  this->_pw.first->first () ;
 }
 
 template < class A > void AccessIteratorTT < A > :: InnerHandle :: next () {
-  _pw.first->next () ;
+  this->_pw.first->next () ;
 }
 
 template < class A > int AccessIteratorTT < A > :: InnerHandle :: done () const {
-  return _pw.first->done () ;
+  return this->_pw.first->done () ;
 }
 
 template < class A > int AccessIteratorTT < A > :: InnerHandle :: size () {
-  return _pw.first->size () ;
+  return this->_pw.first->size () ;
 }
 
 template < class A > A & AccessIteratorTT < A > :: InnerHandle :: item () const {
   assert ( ! done ()) ;
-  return _pw.first->item () ;
+  return this->_pw.first->item () ;
 }
 
 template < class A > AccessIteratorTT < A > :: OuterHandle :: OuterHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) {
@@ -528,24 +531,24 @@ template < class A > AccessIteratorTT < A > :: OuterHandle :: ~OuterHandle () {
 }
 
 template < class A > void AccessIteratorTT < A > :: OuterHandle :: first () {
-  _pw.second->first () ;
+  this->_pw.second->first () ;
 }
 
 template < class A > void AccessIteratorTT < A > :: OuterHandle :: next () {
-  _pw.second->next () ;
+  this->_pw.second->next () ;
 }
 
 template < class A > int AccessIteratorTT < A > :: OuterHandle :: done () const {
-  return _pw.second->done () ;
+  return this->_pw.second->done () ;
 }
 
 template < class A > int AccessIteratorTT < A > :: OuterHandle :: size () {
-  return _pw.second->size () ;
+  return this->_pw.second->size () ;
 }
 
 template < class A > A & AccessIteratorTT < A > :: OuterHandle :: item () const {
   assert (! done ()) ;
-  return _pw.second->item () ;
+  return this->_pw.second->item () ;
 }
 
 template < class A > listSmartpointer__to__iteratorSTI < A > :: listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handle > & a) : _l (a) {

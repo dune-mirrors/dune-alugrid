@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.9  2004/12/20 13:54:17  robertk
+ * gcc compileable.
+ *
  * Revision 1.8  2004/11/29 13:03:20  robertk
  * enum number of index managers .
  *
@@ -388,7 +391,7 @@ class Gitter {
       public :
         typedef enum { none = 0, inflow = 1, outflow = 2, noslip = 3, slip = 4, sym_xy = 5,
                        sym_xz = 6, sym_yz = 7, reflect = 8, fluxtube3d = 9, periodic = 20,
-                       closure = 111, undefined = 333 } bnd_t ;
+                       closure = 111, ghost_closure = 222 , undefined = 333 } bnd_t ;
         virtual bnd_t bndtype () const = 0 ;
         
         // for dune 
@@ -1004,8 +1007,10 @@ class Gitter {
             typedef VertexGeo   myvertex_t ;
             typedef hedge1_GEO  myhedge1_t ;
             typedef hface3_GEO  myhface3_t ;
-      typedef hface3_GEO  myhface_t ;
-      typedef Hface3Rule  myrule_t ;
+            typedef hface3_GEO  myhface_t ;
+            typedef Hface3Rule  myrule_t ;
+      
+            typedef hbndseg_STI :: bnd_t bnd_t;
     protected :
             inline hbndseg3 (myhface3_t *,int,ProjectVertex *) ;
             inline int postRefinement () ;
@@ -1033,8 +1038,10 @@ class Gitter {
             typedef VertexGeo myvertex_t ;
             typedef hedge1_GEO  myhedge1_t ;
             typedef hface4_GEO  myhface4_t ;
-      typedef hface4_GEO  myhface_t ;
-      typedef Hface4Rule  myrule_t ;
+            typedef hface4_GEO  myhface_t ;
+            typedef Hface4Rule  myrule_t ;
+
+            typedef hbndseg_STI :: bnd_t bnd_t;
     protected :
             inline hbndseg4 (myhface4_t *,int,ProjectVertex *) ;
             inline int postRefinement () ;
@@ -1106,6 +1113,7 @@ class Gitter {
 // Ende - Neu am 23.5.02 (BS)
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
+      virtual hbndseg3_GEO  * insert_hbnd3_p (hface3_GEO *, int, hbndseg_STI :: bnd_t,const double(&p)[3]) = 0 ;
             virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
             IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
             IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
@@ -1126,6 +1134,9 @@ class Gitter {
       virtual void backupCMode (ostream &) const ;
       virtual void backupCMode (const char*,const char *) const ;
           friend class MacroGridBuilder ;
+#ifdef _DUNE_USES_BSGRID_ 
+          friend class DuneParallelGridMover;
+#endif
         } ;
     } ;
   private :
@@ -1775,22 +1786,22 @@ inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const fa
 }
 
 inline pair < Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: front () {
-  assert (!(_v == null)) ;
+  //assert (!(_v == null)) ;
   return _v ;
 }
 
 inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: front () const {
-  assert (!(_v == null)) ;
+  //assert (!(_v == null)) ;
   return pair < const hasFace3 *, int > (_v.first,_v.second) ;
 }
 
 inline pair < Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () {
-  assert (!(_h == null)) ;
+  //assert (!(_h == null)) ;
   return _h ;
 }
 
 inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () const {
-  assert (!(_h == null)) ;
+  //assert (!(_h == null)) ;
   return pair < const hasFace3 *, int > (_h.first,_h.second) ; ;
 }
 

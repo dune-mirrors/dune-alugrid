@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/12/20 13:55:25  robertk
+ * gcc compileable.
+ *
  * Revision 1.3  2004/11/29 18:00:21  robertk
  * 1 instead of true in is_def_true.
  *
@@ -414,17 +417,21 @@ template < class A, class B > inline int Wrapper < A, B > :: done () const {
   return _walk.A :: done () ;
 }
 
-template < class A, class B > inline Wrapper < A, B > :: val_t & Wrapper < A, B > :: item () const {
+template < class A, class B > inline typename Wrapper < A, B > :: val_t & 
+Wrapper < A, B > :: item () const {
   assert (! done ()) ;
   return B ()(_walk.A :: item ()) ;
 }
 
-template < class A, class B, class C > inline AlignIterator < A, B, C > :: AlignIterator (const A & a, const B & b) 
+template < class A, class B, class C > 
+inline AlignIterator < A, B, C > :: 
+AlignIterator (const A & a, const B & b) 
   : _walk1 (a), _walk2 (b), _curr (0), _cnt (-1) {
   return ;
 }
 
-template < class A, class B, class C > inline AlignIterator < A, B, C > :: AlignIterator (const AlignIterator < A, B, C > & a) 
+template < class A, class B, class C > 
+inline AlignIterator < A, B, C > :: AlignIterator (const AlignIterator < A, B, C > & a) 
   : _walk1 (a._walk1), _walk2 (a._walk2), _curr (a._curr), _cnt (-1) {
   return ;
 }
@@ -467,7 +474,8 @@ template < class A > inline VectorAlign < A > :: VectorAlign (const vector < poi
 }
 
 template < class A > VectorAlign < A > :: ~VectorAlign () {
-  for (vector < pointer_t > :: iterator p = _it.begin () ; p != _it.end () ; delete (*p ++)) ;
+  for (typename vector < pointer_t > :: iterator p = _it.begin () 
+      ; p != _it.end () ; delete (*p ++)) ;
   return ;
 }
 
@@ -494,7 +502,8 @@ template < class A > void VectorAlign < A > :: next () {
 template < class A > int VectorAlign < A > :: size () {
   if (_cnt == -1) {
     _cnt = 0 ;
-    for (vector < pointer_t > :: iterator p = _it.begin () ; p != _it.end () ; _cnt += (*p++)->size ()) ;
+    for (typename vector < pointer_t > :: iterator p = _it.begin () ; 
+        p != _it.end () ; _cnt += (*p++)->size ()) ;
   }
   return _cnt ;
 }
@@ -569,7 +578,8 @@ template < class  A, class B > int Insert < A, B > :: size () {
   return _cnt ;
 }
 
-template < class  A, class B > Insert < A, B > :: val_t & Insert < A, B > :: item () const {
+template < class  A, class B > typename Insert < A, B > :: val_t & 
+Insert < A, B > :: item () const {
   assert (! done ()) ; 
   return _inner->B::item () ;
 }
