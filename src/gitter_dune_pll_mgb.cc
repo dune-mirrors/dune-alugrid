@@ -27,19 +27,19 @@
 
 class DuneParallelGridMover : public ParallelGridMover {
   protected :
-    inline void duneUnpackTetra (ObjectStream &,GatherScatterType &) ;
+    void duneUnpackTetra (ObjectStream &,GatherScatterType &) ;
   public :
     DuneParallelGridMover (BuilderIF &i) : ParallelGridMover (i) {};
-    inline ~DuneParallelGridMover () ;
+    ~DuneParallelGridMover () ;
     void duneUnpackAll (vector < ObjectStream > &, GatherScatterType & ) ;
 } ;
 
-inline DuneParallelGridMover :: ~DuneParallelGridMover () {
+DuneParallelGridMover :: ~DuneParallelGridMover () {
     return ;
 }
 
 
-inline void DuneParallelGridMover :: duneUnpackTetra (ObjectStream & os, GatherScatterType & gs) {
+void DuneParallelGridMover :: duneUnpackTetra (ObjectStream & os, GatherScatterType & gs) {
   int v [4] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
