@@ -7,6 +7,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.7  2005/03/22 15:40:31  robertk
+ * Added Indices for Hedge1Top and Hface4Top and HexaTop, also on Hbnd4Top.
+ * Further boundary type on Hbnd4Top added.
+ *
  * Revision 1.6  2005/03/18 20:07:15  robertk
  * Added backup and restore for XDRStreams. does not work yet.
  *
@@ -72,8 +76,13 @@ template < class A > class Hedge1Top : public A {
     inneredge_t * _dwn, * _bbb ;
     innervertex_t * _cv ;
     myrule_t _rule ;
+
+    IndexManagerType & _indexManager; 
   public :
-    inline Hedge1Top (int,myvertex_t *,myvertex_t *) ;
+    // need fro refinement 
+    IndexManagerType & getIndexManager() { return _indexManager; }
+    
+    inline Hedge1Top (int,myvertex_t *,myvertex_t *, IndexManagerType & im) ;
     virtual ~Hedge1Top () ;
     inneredge_t * subedge1 (int) ;
     const inneredge_t * subedge1 (int) const ;
@@ -114,11 +123,17 @@ template < class A > class Hface4Top : public A {
     inneredge_t   * _ed ;
     int _lvl ;
     myrule_t _rule ;
+    IndexManagerType & _indexManager;
+    
     inline myhedge1_t * subedge1 (int,int) ;
     inline const myhedge1_t * subedge1 (int,int) const ;
     void splitISO4 () ;
+    IndexManagerType & getEdgeIndexManager () ;
   public:
-    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+    // for HexaTop, when refinement is done 
+    IndexManagerType & getIndexManager() { return _indexManager; }
+    
+    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im) ;
     virtual ~Hface4Top () ;
     innervertex_t * subvertex (int) ;
     const innervertex_t * subvertex (int) const ;
@@ -152,15 +167,24 @@ template < class A > class Hbnd4Top : public A {
     typedef typename A :: myhface4_t  	myhface4_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
+    typedef typename A :: bnd_t bnd_t;
+    
     void splitISO4 () ;
     bool refineLikeElement (balrule_t) ;
   private :
     innerbndseg_t * _bbb, * _dwn, * _up ;
     int _lvl ;
+    const bnd_t _bt; // type of boundary 
+    IndexManagerType & _indexManager;
+    
     inline bool coarse () ;
     inline void append (innerbndseg_t *) ;
   public :
-    inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, innerbndseg_t * ) ;
+    // constructor for refinement 
+    inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, innerbndseg_t *) ;
+
+    // constructor for macro element
+    inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, const bnd_t bt , IndexManagerType & im) ;
     virtual ~Hbnd4Top () ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
@@ -174,6 +198,7 @@ template < class A > class Hbnd4Top : public A {
     // for dune 
     innerbndseg_t * up () ;
     const innerbndseg_t * up () const ;
+    inline bnd_t bndtype () const { return _bt; }
 } ;
 
 template < class A > class HexaTop : public A {
@@ -190,25 +215,35 @@ template < class A > class HexaTop : public A {
     inline void refineImmediate (myrule_t) ;
     inline void append (innerhexa_t * h) ;
   private :
-    innerhexa_t * _bbb, * _dwn, * _up ; //us
+    innerhexa_t * _bbb, * _dwn, * _up ;
     innerface_t * _fc ;
     inneredge_t * _ed ;
     innervertex_t * _cv ;
     int _lvl ;
     myrule_t _rule, _req ;
+    IndexManagerType & _indexManager; 
+       
     void splitISO8 () ;
     inline myhedge1_t * subedge1 (int,int) ;
     inline const myhedge1_t * subedge1 (int,int) const ;
     inline myhface4_t * subface4 (int,int) ;
     inline const myhface4_t * subface4 (int,int) const ;
+    
+    IndexManagerType & getEdgeIndexManager () ;
+    IndexManagerType & getFaceIndexManager () ;
+
   public:
+    // Constructor for macro elements 
     inline HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-		     myhface4_t *,int,myhface4_t *,int,myhface4_t *,int) ;
+		     myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, IndexManagerType & im) ;
+    
+    // constructor for refinement 
+    inline HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
+		     myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, innerhexa_t * up ) ;
+    
     virtual ~HexaTop () ;
-    //testweise us
     inline innerhexa_t * up () ;
     inline const innerhexa_t * up () const;
-    //testweise us
     inline innerhexa_t * down () ;
     inline const innerhexa_t * down () const ;
     inline innerhexa_t * next () ;
@@ -307,12 +342,14 @@ template < class A > class Periodic4Top : public A {
 // #     #  ######  #####    ####   ######  #####     #      ####   #
 
 
-template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b) 
-  : A (a,b), _lvl (l), _dwn (0), _bbb (0), _cv (0), _rule (myrule_t :: nosplit) {
+template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b, IndexManagerType & im ) 
+  : A (a,b), _lvl (l), _dwn (0), _bbb (0), _cv (0), _rule (myrule_t :: nosplit) , _indexManager (im) {
+  this->setIndex( _indexManager.getIndex() );  
   return ;
 }
 
 template < class A > Hedge1Top < A > :: ~Hedge1Top () {
+  _indexManager.freeIndex( this->getIndex() );
   //_bbb ? (delete _bbb, 0) : 0 ;
   //_dwn ? (delete _dwn, 0) : 0 ;
   //_cv  ? (delete _cv,  0) : 0 ;
@@ -399,8 +436,8 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) {
 			      .5 * (this->myvertex(0)->Point()[1] + this->myvertex(1)->Point()[1]),  
 			      .5 * (this->myvertex(0)->Point()[2] + this->myvertex(1)->Point()[2]) , *(this->myvertex(0)) ) ;
           assert (_cv) ;
-          inneredge_t * e0 = new inneredge_t (l, this->myvertex(0), _cv) ;
-          inneredge_t * e1 = new inneredge_t (l, _cv, this->myvertex(1)) ;
+          inneredge_t * e0 = new inneredge_t (l, this->myvertex(0), _cv, _indexManager ) ;
+          inneredge_t * e1 = new inneredge_t (l, _cv, this->myvertex(1), _indexManager ) ;
           assert (e0 && e1) ;
           (_dwn = e0)->append (e1) ;
           _rule = myrule_t :: iso2 ;
@@ -568,12 +605,16 @@ Hface4Top < A > :: subface4 (int n) const {
 }
 
 template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1, 
-  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3) : A (e0, t0, e1, t1, e2, t2, e3, t3), 
-  _dwn (0), _bbb (0), _cv (0), _ed (0), _lvl (l), _rule (myrule_t :: nosplit) {
+  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3, IndexManagerType & im) 
+  : A (e0, t0, e1, t1, e2, t2, e3, t3), 
+  _dwn (0), _bbb (0), _cv (0), _ed (0), _lvl (l), 
+  _rule (myrule_t :: nosplit) , _indexManager(im) {
+  this->setIndex( _indexManager.getIndex() );  
   return ;
 }
 
 template < class A > Hface4Top < A > :: ~Hface4Top () {
+  _indexManager.freeIndex( this->getIndex() );
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_ed) delete _ed ;
@@ -612,6 +653,10 @@ Hface4Top < A > :: getrule () const {
   return myrule_t (_rule) ;
 }
 
+template < class A > inline IndexManagerType & Hface4Top < A > :: getEdgeIndexManager () {
+  return static_cast<inneredge_t &> (*(this->subedge1(0))).getIndexManager();
+}
+
 template < class A > void Hface4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
   assert (_cv == 0 && _ed == 0 && _dwn == 0) ;
@@ -632,18 +677,20 @@ template < class A > void Hface4Top < A > :: splitISO4 () {
   myvertex_t * ev2 = this->myhedge1(2)->subvertex (0) ;
   myvertex_t * ev3 = this->myhedge1(3)->subvertex (0) ;
   assert(ev0 && ev1 && ev2 && ev3) ;
-  inneredge_t * e0 = new inneredge_t (l, ev0, _cv) ;
-  inneredge_t * e1 = new inneredge_t (l, ev1, _cv) ;
-  inneredge_t * e2 = new inneredge_t (l, ev2, _cv) ;
-  inneredge_t * e3 = new inneredge_t (l, ev3, _cv) ;
+
+  IndexManagerType & im = getEdgeIndexManager();
+  inneredge_t * e0 = new inneredge_t (l, ev0, _cv, im) ;
+  inneredge_t * e1 = new inneredge_t (l, ev1, _cv, im) ;
+  inneredge_t * e2 = new inneredge_t (l, ev2, _cv, im) ;
+  inneredge_t * e3 = new inneredge_t (l, ev3, _cv, im) ;
   assert( e0 && e1 && e2 && e3) ;
   e0->append(e1) ;
   e1->append(e2) ;
   e2->append(e3) ;
-  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), this->twist(0), e0, 0, e3, 1, this->subedge1(3,1), this->twist(3)) ;
-  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e1, 0, e0, 1) ;
-  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), e2, 0) ;
-  innerface_t * f3 = new innerface_t (l, e3, 0, e2, 1, this->subedge1(2,1), this->twist(2), this->subedge1(3,0), this->twist(3)) ;
+  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), this->twist(0), e0, 0, e3, 1, this->subedge1(3,1), this->twist(3), _indexManager ) ;
+  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e1, 0, e0, 1, _indexManager ) ;
+  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), e2, 0, _indexManager ) ;
+  innerface_t * f3 = new innerface_t (l, e3, 0, e2, 1, this->subedge1(2,1), this->twist(2), this->subedge1(3,0), this->twist(3), _indexManager ) ;
   assert (f0 && f1 && f2 && f3) ;  
   f0->append(f1) ;
   f1->append(f2) ;
@@ -773,11 +820,19 @@ template < class A > void Hface4Top < A > :: restore (istream & is) {
 // #     #  #####   #    #  #####       #     #      ####   #
 
 template < class A > inline Hbnd4Top < A > :: Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, innerbndseg_t * up)
-  : A (f, i,ppv), _bbb (0), _dwn (0), _up(up) , _lvl (l) {
+  : A (f, i,ppv), _bbb (0), _dwn (0), _up(up) , _lvl (l), _bt(_up->_bt) , _indexManager(_up->_indexManager) {
+  this->setIndex( _indexManager.getIndex() );  
+  return ;
+}
+
+template < class A > inline Hbnd4Top < A > :: Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, bnd_t bt , IndexManagerType & im )
+  : A (f, i,ppv), _bbb (0), _dwn (0), _up(0) , _lvl (l) , _bt(bt) ,  _indexManager(im) {
+  this->setIndex( _indexManager.getIndex() );  
   return ;
 }
 
 template < class A > Hbnd4Top < A > :: ~Hbnd4Top () {
+  _indexManager.freeIndex( this->getIndex() );
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
@@ -1009,14 +1064,25 @@ template < class A > inline const typename HexaTop < A > :: myhface4_t * HexaTop
 }
 
 template < class A > inline HexaTop < A > :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
-	myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5) 
+	myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5, IndexManagerType & im ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
   , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0), _lvl (l),
-   _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) { //_up eingef. us
+   _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) { 
+  this->setIndex( _indexManager.getIndex() );   
+  return ;
+}
+
+template < class A > inline HexaTop < A > :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
+	myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5, innerhexa_t * up ) 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
+  , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0), _lvl (l),
+   _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(_up->_indexManager) { 
+  this->setIndex( _indexManager.getIndex() );   
   return ;
 }
 
 template < class A > HexaTop < A > :: ~HexaTop () {
+  _indexManager.freeIndex( this->getIndex() );
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_fc) delete _fc ;
@@ -1025,15 +1091,13 @@ template < class A > HexaTop < A > :: ~HexaTop () {
   return ;
 }
 
-//us eingefuegt
 template < class A > inline typename HexaTop < A > :: innerhexa_t * HexaTop < A > :: up () {
   return _up ;
 } 
 
 template < class A > inline const typename HexaTop < A > :: innerhexa_t * HexaTop < A > :: up () const {
-   return _up ; 
+  return _up ; 
 }
-//ende us
 
 template < class A > inline typename HexaTop < A > :: innerhexa_t * HexaTop < A > :: down () {
   return _dwn ;
@@ -1085,6 +1149,14 @@ template < class A > int HexaTop < A > :: level () const {
   return _lvl ;
 }
 
+template < class A > inline IndexManagerType & HexaTop < A > :: getEdgeIndexManager () {
+  return static_cast<inneredge_t &> (*(this->subedge1(0,0))).getIndexManager();
+}
+
+template < class A > inline IndexManagerType & HexaTop < A > :: getFaceIndexManager () {
+  return static_cast<innerface_t &> (*(this->subface4(0,0))).getIndexManager();
+}
+
 template < class A > void HexaTop < A > :: splitISO8 () {
   int l = 1 + level () ;
   assert (_dwn == 0 && _fc == 0 && _ed == 0 && _cv == 0) ;  
@@ -1105,30 +1177,33 @@ template < class A > void HexaTop < A > :: splitISO8 () {
   myvertex_t * fv4 = this->myhface4 (4)->subvertex (0) ;
   myvertex_t * fv5 = this->myhface4 (5)->subvertex (0) ;
   assert(fv0 && fv1 && fv2 && fv3 && fv4 && fv5) ;
-  inneredge_t * e0 = new inneredge_t (l, fv0, _cv) ;
-  inneredge_t * e1 = new inneredge_t (l, fv1, _cv) ;
-  inneredge_t * e2 = new inneredge_t (l, fv2, _cv) ;
-  inneredge_t * e3 = new inneredge_t (l, fv3, _cv) ;
-  inneredge_t * e4 = new inneredge_t (l, fv4, _cv) ;
-  inneredge_t * e5 = new inneredge_t (l, fv5, _cv) ;
+
+  IndexManagerType & im = getEdgeIndexManager();
+  inneredge_t * e0 = new inneredge_t (l, fv0, _cv, im) ;
+  inneredge_t * e1 = new inneredge_t (l, fv1, _cv, im) ;
+  inneredge_t * e2 = new inneredge_t (l, fv2, _cv, im) ;
+  inneredge_t * e3 = new inneredge_t (l, fv3, _cv, im) ;
+  inneredge_t * e4 = new inneredge_t (l, fv4, _cv, im) ;
+  inneredge_t * e5 = new inneredge_t (l, fv5, _cv, im) ;
   assert(e0 && e1 && e2 && e3 && e4 && e5) ;
   e0->append(e1) ;
   e1->append(e2) ;
   e2->append(e3) ;
   e3->append(e4) ;
   e4->append(e5) ;
-  innerface_t * f0 = new innerface_t (l, this->subedge1 (2, 7), 0, e2, 0, e5, 1, this->subedge1 (5, 4), 1) ;
-  innerface_t * f1 = new innerface_t (l, this->subedge1(2, 5), 1, this->subedge1 (3, 7), 0, e3, 0, e2, 1) ;
-  innerface_t * f2 = new innerface_t (l, e3, 1, this->subedge1 (3, 5), 1, this->subedge1 (4, 7), 0, e4, 0) ;
-  innerface_t * f3 = new innerface_t (l, e5, 0, e4, 1, this->subedge1 (4, 5), 1, this->subedge1 (5, 6), 0) ;
-  innerface_t * f4 = new innerface_t (l, this->subedge1 (0, 7), 0, e0, 0, e2, 1, this->subedge1 (2, 4), 1) ;
-  innerface_t * f5 = new innerface_t (l, this->subedge1 (0, 5), 1, this->subedge1 (4, 4), 0, e4, 0, e0, 1) ; 
-  innerface_t * f6 = new innerface_t (l, e4, 1, this->subedge1 (4, 6), 1, this->subedge1 (1, 6), 0, e1, 0) ;
-  innerface_t * f7 = new innerface_t (l, e2, 0, e1, 1, this->subedge1 (1, 4), 1, this->subedge1 (2, 6), 0) ;
-  innerface_t * f8 = new innerface_t (l, this->subedge1 (0, 4), 0, e0, 0, e5, 1, this->subedge1 (5, 7), 1) ;
-  innerface_t * f9 = new innerface_t (l, this->subedge1 (0, 6), 1, this->subedge1 (3, 4), 0, e3, 0, e0, 1) ;
-  innerface_t * f10 = new innerface_t (l, e3, 1, this->subedge1 (3, 6), 1, this->subedge1 (1, 5), 0, e1, 0) ;
-  innerface_t * f11 = new innerface_t (l, e5, 0, e1, 1, this->subedge1 (1, 7), 1, this->subedge1 (5, 5), 0) ;
+  IndexManagerType & faceIm = getFaceIndexManager();
+  innerface_t * f0 = new innerface_t (l, this->subedge1 (2, 7), 0, e2, 0, e5, 1, this->subedge1 (5, 4), 1, faceIm ) ;
+  innerface_t * f1 = new innerface_t (l, this->subedge1(2, 5), 1, this->subedge1 (3, 7), 0, e3, 0, e2, 1, faceIm ) ;
+  innerface_t * f2 = new innerface_t (l, e3, 1, this->subedge1 (3, 5), 1, this->subedge1 (4, 7), 0, e4, 0, faceIm ) ;
+  innerface_t * f3 = new innerface_t (l, e5, 0, e4, 1, this->subedge1 (4, 5), 1, this->subedge1 (5, 6), 0, faceIm ) ;
+  innerface_t * f4 = new innerface_t (l, this->subedge1 (0, 7), 0, e0, 0, e2, 1, this->subedge1 (2, 4), 1, faceIm ) ;
+  innerface_t * f5 = new innerface_t (l, this->subedge1 (0, 5), 1, this->subedge1 (4, 4), 0, e4, 0, e0, 1, faceIm ) ; 
+  innerface_t * f6 = new innerface_t (l, e4, 1, this->subedge1 (4, 6), 1, this->subedge1 (1, 6), 0, e1, 0, faceIm ) ;
+  innerface_t * f7 = new innerface_t (l, e2, 0, e1, 1, this->subedge1 (1, 4), 1, this->subedge1 (2, 6), 0, faceIm ) ;
+  innerface_t * f8 = new innerface_t (l, this->subedge1 (0, 4), 0, e0, 0, e5, 1, this->subedge1 (5, 7), 1, faceIm ) ;
+  innerface_t * f9 = new innerface_t (l, this->subedge1 (0, 6), 1, this->subedge1 (3, 4), 0, e3, 0, e0, 1, faceIm ) ;
+  innerface_t * f10 = new innerface_t (l, e3, 1, this->subedge1 (3, 6), 1, this->subedge1 (1, 5), 0, e1, 0, faceIm ) ;
+  innerface_t * f11 = new innerface_t (l, e5, 0, e1, 1, this->subedge1 (1, 7), 1, this->subedge1 (5, 5), 0, faceIm ) ;
   assert(f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7 && f8 && f9 && f10 && f11) ;
   f0->append(f1) ;
   f1->append(f2) ;
@@ -1141,14 +1216,14 @@ template < class A > void HexaTop < A > :: splitISO8 () {
   f8->append(f9) ;
   f9->append(f10) ;
   f10->append(f11) ;
-  innerhexa_t * h0 = new innerhexa_t (l, this->subface4 (0, 0), this->twist (0), f0, 0, this->subface4 (2, 0), this->twist (2), f4, 0, f8, -4, this->subface4 (5, 0), this->twist (5)) ;
-  innerhexa_t * h1 = new innerhexa_t (l, this->subface4 (0, 3), this->twist (0), f1, 0, this->subface4 (2, 1), this->twist (2), this->subface4 (3, 0), this->twist (3), f9, -4, f4, -1) ;
-  innerhexa_t * h2 = new innerhexa_t (l, this->subface4 (0, 2), this->twist (0), f2, 0,f9, 0, subface4 (3, 1), this->twist (3), this->subface4 (4, 0), this->twist (4), f5, -1) ;
-  innerhexa_t * h3 = new innerhexa_t (l, this->subface4 (0, 1), this->twist (0), f3, 0, f8, 0, f5, 0, this->subface4(4, 1), this->twist (4), this->subface4(5, 3), this->twist (5)) ;
-  innerhexa_t * h4 = new innerhexa_t (l, f0, -1, this->subface4(1, 0), this->twist (1), this->subface4(2, 3), this->twist (2), f7, 0, f11, -4, this->subface4(5, 1), this->twist (5)) ;
-  innerhexa_t * h5 = new innerhexa_t (l, f1, -1, this->subface4(1, 1), this->twist (1), this->subface4(2, 2), this->twist (2), this->subface4(3, 3), this->twist (3), f10, -4, f7, -1) ;
-  innerhexa_t * h6 = new innerhexa_t (l, f2, -1, this->subface4(1, 2), this->twist (1), f10, 0, this->subface4(3, 2), this->twist (3), this->subface4(4, 3), this->twist (4), f6, -1) ;
-  innerhexa_t * h7 = new innerhexa_t (l, f3, -1, this->subface4(1, 3), this->twist (1), f11, 0, f6, 0, this->subface4(4, 2), this->twist (4), this->subface4(5, 2), this->twist (5)) ;
+  innerhexa_t * h0 = new innerhexa_t (l, this->subface4 (0, 0), this->twist (0), f0, 0, this->subface4 (2, 0), this->twist (2), f4, 0, f8, -4, this->subface4 (5, 0), this->twist (5) , this) ;
+  innerhexa_t * h1 = new innerhexa_t (l, this->subface4 (0, 3), this->twist (0), f1, 0, this->subface4 (2, 1), this->twist (2), this->subface4 (3, 0), this->twist (3), f9, -4, f4, -1, this) ;
+  innerhexa_t * h2 = new innerhexa_t (l, this->subface4 (0, 2), this->twist (0), f2, 0,f9, 0, subface4 (3, 1), this->twist (3), this->subface4 (4, 0), this->twist (4), f5, -1        , this) ;
+  innerhexa_t * h3 = new innerhexa_t (l, this->subface4 (0, 1), this->twist (0), f3, 0, f8, 0, f5, 0, this->subface4(4, 1), this->twist (4), this->subface4(5, 3), this->twist (5)    , this) ;
+  innerhexa_t * h4 = new innerhexa_t (l, f0, -1, this->subface4(1, 0), this->twist (1), this->subface4(2, 3), this->twist (2), f7, 0, f11, -4, this->subface4(5, 1), this->twist (5)  , this) ;
+  innerhexa_t * h5 = new innerhexa_t (l, f1, -1, this->subface4(1, 1), this->twist (1), this->subface4(2, 2), this->twist (2), this->subface4(3, 3), this->twist (3), f10, -4, f7, -1 , this) ;
+  innerhexa_t * h6 = new innerhexa_t (l, f2, -1, this->subface4(1, 2), this->twist (1), f10, 0, this->subface4(3, 2), this->twist (3), this->subface4(4, 3), this->twist (4), f6, -1  , this) ;
+  innerhexa_t * h7 = new innerhexa_t (l, f3, -1, this->subface4(1, 3), this->twist (1), f11, 0, f6, 0, this->subface4(4, 2), this->twist (4), this->subface4(5, 2), this->twist (5)   , this) ;
   assert(h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
   h0->append(h1) ;
   h1->append(h2) ;
