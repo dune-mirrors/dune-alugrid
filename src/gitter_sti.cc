@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.12  2005/03/18 19:53:17  robertk
+ * added backup and restore for XDRStream, dosent work yet.
+ *
  * Revision 1.11  2005/01/13 16:49:37  robertk
  * moved goDownHlement to gitter_dune_impl.cc
  *
@@ -80,6 +83,8 @@
 #include "lock.h"
 #include "gitter_sti.h"
 #include "walk.h"
+
+#include "xdrclass.h"
 
 static volatile char RCSId_gitter_sti_cc [] = "$Id$" ;
 
@@ -351,6 +356,19 @@ void Gitter :: backup (ostream & out) {
   return ;
 }
 
+void Gitter :: backup (XDRstream_out & out) {
+/*
+  //assert (debugOption (20) ? (cout << "**INFO Gitter :: backup (ostream & = " << out << ") " << endl, 1) : 1) ;
+  {AccessIterator <hedge_STI> :: Handle fw (container ()) ;
+    for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out) ; }
+  {AccessIterator <hface_STI>::Handle fw (container ()) ;
+    for (fw.first () ; ! fw.done () ; fw.next ()) fw.item().backup(out) ; }
+  {AccessIterator <helement_STI> :: Handle ew (container ()) ;
+    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backup (out) ; }
+*/
+  return ;
+}
+
 void Gitter ::restore (istream & in) {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
   {AccessIterator < hedge_STI > :: Handle ew (container ());
@@ -362,6 +380,22 @@ void Gitter ::restore (istream & in) {
   {AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
     for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; }
   notifyGridChanges () ;
+  return ;
+}
+
+void Gitter ::restore (XDRstream_in & in) {
+  //assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
+/*
+  {AccessIterator < hedge_STI > :: Handle ew (container ());
+    for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ; }
+  {AccessIterator < hface_STI >:: Handle fw(container());
+    for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); }
+  {AccessIterator < helement_STI >:: Handle ew(container());
+    for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); }
+  {AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
+    for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; }
+  notifyGridChanges () ;
+*/
   return ;
 }
 

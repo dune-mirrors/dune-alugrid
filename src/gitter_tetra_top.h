@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.9  2005/03/18 19:52:00  robertk
+ * added backup and restore for XDRStream, dosent work yet.
+ *
  * Revision 1.8  2005/01/19 18:26:24  robertk
  * removed warnings.
  *
@@ -116,6 +119,10 @@ template < class A > class Hface3Top : public A {
   public :
     virtual void backup (ostream &) const ;
     virtual void restore (istream &) ;
+
+    // new xdr methods 
+    virtual void backup (XDRstream_out &) const ;
+    virtual void restore (XDRstream_in &) ;
 } ;
 
 
@@ -223,8 +230,12 @@ template < class A > class TetraTop : public A {
     bool coarse () ;
     bool bndNotifyCoarsen () ;
     void backupCMode (ostream &) const ;
+    
     void backup (ostream &) const ;
     void restore (istream &) ;
+    
+    void backup (XDRstream_out &) const ;
+    void restore (XDRstream_in &) ;
 
     // backup and restore index 
     void backupIndex (ostream &) const ;
@@ -630,6 +641,20 @@ template < class A > void Hface3Top < A > :: backup (ostream & os) const {
 }
 
 template < class A > void Hface3Top < A > :: restore (istream & is) {
+  refineImmediate (myrule_t ((char) is.get ())) ;
+  {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
+  {for (innerface_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
+  return ;
+}
+
+template < class A > void Hface3Top < A > :: backup (XDRstream_out & os) const {
+  os.put ((char) getrule ()) ;
+  {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
+  {for (const innerface_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
+  return ;
+}
+
+template < class A > void Hface3Top < A > :: restore (XDRstream_in & is) {
   refineImmediate (myrule_t ((char) is.get ())) ;
   {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
   {for (innerface_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
@@ -1477,6 +1502,16 @@ template < class A > void TetraTop < A > :: backup (ostream & os) const
   return ;
 }
 
+template < class A > void TetraTop < A > :: backup (XDRstream_out & os) const 
+{
+  os.put ((char) getrule ()) ;
+  {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
+  {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
+  {for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
+  
+  return ;
+}
+
 // overloaded restoreIndex Method 
 template < class A > inline void TetraTop < A > :: restoreIndex (istream & is) 
 {
@@ -1491,6 +1526,59 @@ template < class A > inline void TetraTop < A > :: restoreIndex (istream & is)
 
 // restoreTetra
 template < class A > void TetraTop < A > :: restore (istream & is) {
+
+  // restore () stellt den Elementbaum aus der Verfeinerungs-
+  // geschichte wieder her. Es ruft refine () auf und testet
+  // auf den korrekten Vollzug der Verfeinerung. Danach werden
+  // die inneren Gitterteile restore'd.
+ 
+  myrule_t r ((char) is.get ()) ;
+  assert(getrule() == myrule_t :: nosplit) ;
+  if (r == myrule_t :: nosplit) {
+  
+  // Vorsicht: beim restore m"ussen sich sowohl Element als auch
+  // Randelement um die Korrektheit der Nachbarschaft k"ummern,
+  // und zwar dann wenn sie "on the top" sind (= die gelesene
+  // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
+  // Die nachfolgende L"osung ist weit davon entfernt, sch"on
+  // zu sein - leider. Eventuell wird mit der Verbesserung der
+  // Behandlung der nichtkonf. Situationen mal eine "Anderung
+  // n"otig.
+  
+    for (int i = 0 ; i < 4 ; i ++) {
+      myhface3_t & f (*(this->myhface3 (i))) ;
+      if (!f.leaf ()) {
+        switch (f.getrule ()) {
+    case balrule_t :: e01 :
+    case balrule_t :: e12 :
+    case balrule_t :: e20 :
+      {for (int j = 0 ; j < 2 ; j ++) f.subface3 (j)->nb.complete (f.nb) ;}
+      break ;
+    case balrule_t :: iso4 :
+            {for (int j = 0 ; j < 4 ; j ++) f.subface3 (j)->nb.complete (f.nb) ;}
+      break ;
+    default :
+      abort () ;
+      break ;
+  }
+      }
+    }
+  } else {
+
+  // Auf dem Element gibt es kein refine (myrule_t) deshalb mu"s erst
+  // request (myrule_t) und dann refine () durchgef"uhrt werden.
+  
+    request (r) ;
+    refine () ;
+    assert (getrule() == r) ;
+    {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
+    {for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
+    {for (innertetra_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
+  }
+  
+  return ;
+}
+template < class A > void TetraTop < A > :: restore (XDRstream_in & is) {
 
   // restore () stellt den Elementbaum aus der Verfeinerungs-
   // geschichte wieder her. Es ruft refine () auf und testet
