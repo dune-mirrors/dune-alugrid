@@ -9,6 +9,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.6  2004/12/07 17:43:19  robertk
+ * logFile switched off.
+ *
  * Revision 1.5  2004/11/29 13:04:41  robertk
  * enum for number of index managers
  *
@@ -83,7 +86,7 @@
 
 static volatile char RCSId_gitter_impl_h [] = "$Id$" ;
 
-static ofstream logFile ("logfile");
+//static ofstream logFile ("logfile");
 
   // organizes the indices for boundary faces and the opposite vertices for
   // ghost cells 

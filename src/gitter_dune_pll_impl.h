@@ -23,6 +23,7 @@ public:
   GitterDunePll (const char * filename , MpAccessLocal &mp) 
     : GitterBasisPll (filename,mp) , balanceGrid_ (false) 
   {
+    /*
     char logFileName [32];
     sprintf(logFileName,"logfile.%d",mpAccess().myrank());
     cerr << "open logfile = " << logFileName << "\n";
@@ -30,10 +31,11 @@ public:
     logFile.close();
     logFile.open (logFileName);
     logFile << "logfile of processor " << mpAccess().myrank() << "\n";
+    */
   };
 
   ~GitterDunePll () {
-    logFile.close();
+    //logFile.close();
   }
 
   bool refine (); 
@@ -104,7 +106,7 @@ public:
   
   void duneNotifyGridChanges ()
   {
-    logFile << "call of notifyGridChanges \n";
+    //logFile << "call of notifyGridChanges \n";
     Gitter :: notifyGridChanges () ;
     writeLogFile = true;
     duneExchangeDynamicState () ;

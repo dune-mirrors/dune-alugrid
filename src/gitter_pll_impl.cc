@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.6  2004/12/07 17:43:19  robertk
+ * logFile switched off.
+ *
  * Revision 1.5  2004/11/25 18:48:33  robertk
  * minor changes.
  *
@@ -416,11 +419,13 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 
   //assert(proc_logFile);
   assert( (true) ? (os.writeObject ( mytetra(). getIndex() ) , 1 ) : 1);// number of points written 
+  /*
   if(writeLogFile)
   {
     assert(logFile);
     logFile << "writeDynamicState of el " << mytetra(). getIndex() << "\n";
   }
+  */
 
 #ifdef _DUNE_USES_BSGRID_
   
@@ -932,11 +937,13 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
 
   // siehe writeDynamicState von Tetra 
   assert( (true) ? (os.writeObject ( myhexa(). getIndex() ) , 1 ) : 1);// number of points written 
+  /*
   if(writeLogFile)
   {
     assert(logFile);
     logFile << "writeDynamicState of el " << myhexa(). getIndex() << "\n";
   }
+  */
 
 #ifdef _DUNE_USES_BSGRID_
   
@@ -954,7 +961,8 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
     os.writeObject (p [0]) ;
     os.writeObject (p [1]) ;
     os.writeObject (p [2]) ;
-    
+   
+    /*
     if(writeLogFile)
     {
       logFile << " write p = [";
@@ -962,6 +970,7 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
         logFile << p[i] << ",";
       logFile << "] \n";
     }
+    */
   }
 #endif
   return ;
@@ -1533,7 +1542,6 @@ Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: i
 
 Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) {
   if (b == Gitter :: hbndseg_STI :: closure) {
-    logFile << "generate Internal Boundary \n";
     typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
     return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, _indexmanager[0] ) ;

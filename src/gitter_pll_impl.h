@@ -8,6 +8,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.7  2004/12/07 17:43:19  robertk
+ * logFile switched off.
+ *
  * Revision 1.6  2004/11/25 18:47:55  robertk
  * added ghost_level for BoundaryClosure
  *
@@ -1343,12 +1346,14 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 
     int index;
     assert( (true) ? (os.readObject( index ) , 1 ) : 1) ;
+    /*
     if(writeLogFile)
     {
       //cout << "readDynStat \n";
       assert(logFile);
       logFile << "readDynamicState of el " << index << "\n";
     }
+    */
 
 #ifdef _DUNE_USES_BSGRID_
     // read the real level of ghost 
