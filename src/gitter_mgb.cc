@@ -7,6 +7,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.6  2005/01/13 16:56:24  robertk
+ * Constructor as method initialize now.
+ * initialize is not called in the Base Class.
+ *
  * Revision 1.5  2004/12/21 17:40:16  robertk
  * removed some warnings.
  *
@@ -193,7 +197,8 @@ pair < Gitter :: Geometric :: hexa_GEO *, bool > MacroGridBuilder :: InsertUniqu
   }
 }
 
-bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::bnd_t bt) {
+bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::bnd_t bt) 
+{
   int twst = cyclicReorder (v,v+3) ;
   faceKey_t key (v [0], v [1], v [2]) ;
   if (bt == Gitter :: hbndseg_STI :: closure) {
@@ -308,11 +313,10 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   elementMap_t :: iterator hit = _tetraMap.find (k) ;
   if (hit != _tetraMap.end ()) {
     tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 4 ; i ++) {
-
+    for (int i = 0 ; i < 4 ; i ++) 
+    {
       _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
         tr->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr->myvertex(i)->Point()) ;
-      
     }
     delete tr ;
     _tetraMap.erase (hit) ;
@@ -657,8 +661,14 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
   return ;
 }
 
-MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) 
- : _finalized(false) , _mgb (b) 
+// default of init == true
+MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, bool init) 
+ : _initialized(false) , _finalized(false) , _mgb (b) 
+{
+  if(init) initialize();
+}
+
+void MacroGridBuilder :: initialize () 
 {
   {
     for (list < VertexGeo * > :: iterator i = myBuilder ()._vertexList.begin () ;
@@ -693,7 +703,8 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b)
   {for (list < hbndseg3_GEO * > :: iterator i = myBuilder ()._hbndseg3List.begin () ; i != myBuilder ()._hbndseg3List.end () ;
     myBuilder ()._hbndseg3List.erase (i++)) {
     faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
-    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
+    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
+    {
       _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0)) ;
       delete (*i) ;
     } else {
@@ -722,6 +733,8 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b)
       myBuilder ()._hexaList.erase (i++)) _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
                   (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
   }
+
+  _initialized = true;
   return ; 
 }
 
@@ -734,6 +747,8 @@ MacroGridBuilder :: ~MacroGridBuilder ()
 // clean the map tables 
 void MacroGridBuilder :: finalize () 
 {
+  assert(_initialized);
+  
   {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
     myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
   }
