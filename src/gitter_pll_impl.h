@@ -8,6 +8,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/27 15:11:40  robertk
+ * method container of GitterPll now public for BSGrid.
+ *
  * Revision 1.1  2004/10/25 16:39:52  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -814,12 +817,12 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
   private :
     MpAccessLocal & _mpaccess ;
     MacroGitterPll * _macrogitter ;
-  //protected :
   public :
-    virtual inline MpAccessLocal & mpAccess () ;
-    virtual inline const MpAccessLocal & mpAccess () const ;
     virtual inline Makrogitter & container () ;
     virtual inline const Makrogitter & container () const ;
+  protected :
+    virtual inline MpAccessLocal & mpAccess () ;
+    virtual inline const MpAccessLocal & mpAccess () const ;
     virtual inline MacroGitterPll & containerPll () ;
     virtual inline const MacroGitterPll & containerPll () const ;
     GitterBasisPll (MpAccessLocal & ) ;
