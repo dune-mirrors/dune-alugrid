@@ -157,11 +157,11 @@ void GitterPll :: printSizeTT () {
   }}
   { for (int l = 0 ; l < mpAccess ().nlinks () ; l ++ ) {
     LeafIteratorTT < hedge_STI > w (*this, l) ;
-    cout << "me: " << mpAccess ().myrank () << " link: " << l << " kanten:   [inner|outer] " << w.inner ().size () << " " << w.outer ().size () << endl ;
+    cout << "me: " << mpAccess ().myrank () << " link: " << l << " edges:   [inner|outer] " << w.inner ().size () << " " << w.outer ().size () << endl ;
   }}
   { for (int l = 0 ; l < mpAccess ().nlinks () ; l ++ ) {
     LeafIteratorTT < hface_STI > w (*this, l) ;
-    cout << "me: " << mpAccess ().myrank () << " link: " << l << " fl\"achen: [inner|outer] " << w.inner ().size () << " " << w.outer ().size () << endl ;
+    cout << "me: " << mpAccess ().myrank () << " link: " << l << " faces: [inner|outer] " << w.inner ().size () << " " << w.outer ().size () << endl ;
   }}
   return ;
 }
@@ -208,10 +208,10 @@ void GitterPll :: printsize () {
       nb += (in [i])[4] ;
     }
     cout << "\n GitterPll :: printSize () : \n\n" ;
-    cout << " - Elemente ......... "  << ne << "\n" ;
-    cout << " - R\"ander .......... " << nb << "\n" ;
-    cout << " - Fl\"achen ......... " << nf << "\n" ;
-    cout << " - Kanten ........... "  << nd << "\n" ;
+    cout << " - Elements ......... "  << ne << "\n" ;
+    cout << " - Boundaries ....... " << nb << "\n" ;
+    cout << " - Faces ............ " << nf << "\n" ;
+    cout << " - Edges ............ "  << nd << "\n" ;
     cout << " - Vertices ......... "  << nv << "\n" ;
     cout << endl ;
   }
