@@ -2,10 +2,11 @@
 #ifndef __GHOSTELEMENTS_INCLUDED__
 #define __GHOSTELEMENTS_INCLUDED__
 
+#include "myalloc.h"
 #include "gitter_sti.h"
 
 // interface class for macro ghost point
-class MacroGhostPoint
+class MacroGhostPoint : public MyAlloc 
 {
   public:
     virtual ~MacroGhostPoint () {}
