@@ -1,14 +1,17 @@
 //  Version f"ur DUNE
 //
-	// (c) bernhard schupp 1997 - 1998
+  // (c) bernhard schupp 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-	
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
+  
 /* $Id$
  * $Log$
+ * Revision 1.8  2005/01/13 17:01:46  robertk
+ * getGhost moved to hbndseg interface class.
+ *
  * Revision 1.7  2004/12/21 17:21:17  robertk
  * Some cleanup and new methods setGhost and getGhost.
  * getGhost is virtual and returns pointer to ghost elements.
@@ -93,35 +96,8 @@
 
 static volatile char RCSId_gitter_impl_h [] = "$Id$" ;
 
-static ofstream logFile ("logfile");
+//static ofstream logFile ("logfile");
 
-  // organizes the indices for boundary faces and the opposite vertices for
-  // ghost cells 
-  template <int pdimvx>
-  class Dune_hbndDefault 
-  {
-  protected:
-    enum { dimvx = pdimvx }; 
-    int    _index;
-    double _oppVx[dimvx][3];
-
-  public:
-    inline Dune_hbndDefault ();
-    inline void setOppPoint (int i, const double (&p)[3]);
-    inline const double (& oppositeVertex (int i) const) [3];
-
-    inline int getIndex () const; 
-    inline void setIndex ( int idx ); 
-    inline int dimVx () const; 
-
-    // default implementation is doing nothing for these 3 methods
-    // these methods are overloades just on HbndPll
-    virtual Gitter::helement_STI * getGhost () { return 0; }
-  protected:  
-    inline void splitGhost () {} 
-    inline void setGhost (Gitter::helement_STI *) {}
-  };
-        
 class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
   public :
     class Objects {
@@ -132,7 +108,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
                 IndexManagerType &im) ;
             inline VertexEmpty (int, double, double, double,
                 VertexGeo & ) ;
-	   ~VertexEmpty () {}
+     ~VertexEmpty () {}
             virtual inline int ident () const ;
         } ;
 
@@ -140,12 +116,35 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           public :
             inline VertexEmptyMacro (double, double, double, int,
                 IndexManagerType &im) ;
-	   ~VertexEmptyMacro () {}
+     ~VertexEmptyMacro () {}
             virtual inline int ident () const ;
           private :
             int _idn ;
         } ;
 
+      // organizes the indices for boundary faces and the opposite vertices for
+      // ghost cells 
+      template <int pdimvx>
+      class Dune_hbndDefault 
+      {
+        protected:
+          enum { dimvx = pdimvx }; 
+          int    _index;
+          double _oppVx[dimvx][3];
+
+        public:
+          inline Dune_hbndDefault ();
+          inline void setOppPoint (int i, const double (&p)[3]);
+          inline const double (& oppositeVertex (int i) const) [3];
+
+          inline int getIndex () const; 
+          inline void setIndex ( int idx ); 
+          inline int dimVx () const; 
+
+        protected:  
+          inline void splitGhost () {} 
+          inline void setGhost (Gitter::helement_STI *) {}
+      };
        
         class Hbnd3Default : public hbndseg3_GEO 
 #ifdef _DUNE_USES_BSGRID_
@@ -154,16 +153,20 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         {
           protected :
            inline Hbnd3Default (myhface3_t *, int, ProjectVertex * ) ;
-	   virtual ~Hbnd3Default () {}
+           virtual ~Hbnd3Default () {}
           public :
             typedef hbndseg3_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ; 
+            
+            // default implementation is doing nothing for these 3 methods
+            // these methods are overloades just on HbndPll
+            virtual helement_STI * getGhost () { return 0; }
 
             // points inside ghosts 
             void faceNormal( BSGridVecType & normal) const;
-	} ;
-	typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
+        };
+        typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
 
         class Hbnd4Default : public hbndseg4_GEO 
 #ifdef _DUNE_USES_BSGRID_
@@ -172,37 +175,41 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         {
           protected :
             inline Hbnd4Default (myhface4_t *, int, ProjectVertex *) ;
-	   virtual ~Hbnd4Default () {}
+            virtual ~Hbnd4Default () {}
           public :
             typedef hbndseg4_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ;  
 
+            // default implementation is doing nothing for these 3 methods
+            // these methods are overloades just on HbndPll
+            virtual helement_STI * getGhost () { return 0; }
+
             // points inside ghosts 
             void faceNormal( BSGridVecType & normal) const;
-	} ;
+        };
         typedef Hbnd4Top < Hbnd4Default > hbndseg4_IMPL ;
 
         class Hedge1Empty : public hedge1_GEO {
           protected :
             typedef VertexEmpty innervertex_t ;
             inline Hedge1Empty (myvertex_t *,myvertex_t *) ;
-	   ~Hedge1Empty () {}
+     ~Hedge1Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
            virtual inline void projectInnerVertex(const ProjectVertex &pv) ; 
         } ;
-	
+  
         typedef Hedge1Top < Hedge1Empty > hedge1_IMPL ;
 
         class Hface3Empty : public hface3_GEO {
           protected :
-            typedef VertexEmpty 	innervertex_t ;
-            typedef hedge1_IMPL		inneredge_t ;
+            typedef VertexEmpty   innervertex_t ;
+            typedef hedge1_IMPL   inneredge_t ;
             inline Hface3Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int) ;
-	   ~Hface3Empty () {}
+     ~Hface3Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
            virtual inline void projectVertex(const ProjectVertex &pv) ; 
-	} ;
+  } ;
         typedef Hface3Top < Hface3Empty > hface3_IMPL ;
 
         class Hface4Empty : public hface4_GEO {
@@ -210,45 +217,45 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef VertexEmpty innervertex_t ;
             typedef hedge1_IMPL     inneredge_t ;
             inline Hface4Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int,myhedge1_t *,int) ;
-	   ~Hface4Empty () {}
+     ~Hface4Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
            virtual inline void projectVertex(const ProjectVertex &pv) ; 
         } ;
         typedef Hface4Top < Hface4Empty > hface4_IMPL ;
 
         class TetraEmpty : public tetra_GEO {
-	  protected :
+    protected :
             typedef hface3_IMPL innerface_t ;
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
             inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
            ~TetraEmpty () {}
-	  public :
-	} ;
-	typedef TetraTop < TetraEmpty > tetra_IMPL ;
-	
-	class Periodic3Empty : public periodic3_GEO {
-	  protected :
+    public :
+  } ;
+  typedef TetraTop < TetraEmpty > tetra_IMPL ;
+  
+  class Periodic3Empty : public periodic3_GEO {
+    protected :
             typedef hface3_IMPL innerface_t ;
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
-	    inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
-	   ~Periodic3Empty () {}
-	  public:
-	} ;
-	typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
+      inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
+     ~Periodic3Empty () {}
+    public:
+  } ;
+  typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
 
 // Anfang - Neu am 23.5.02 (BS)
-	class Periodic4Empty : public periodic4_GEO {
-	  protected :
+  class Periodic4Empty : public periodic4_GEO {
+    protected :
             typedef hface4_IMPL innerface_t ;
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
-	    inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
-	   ~Periodic4Empty () {}
-	  public:
-	} ;
-	typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
+      inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
+     ~Periodic4Empty () {}
+    public:
+  } ;
+  typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
 // Ende - Neu am 23.5.02 (BS)
 
         class HexaEmpty : public hexa_GEO {
@@ -266,22 +273,22 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       protected :
         virtual inline VertexGeo     * insert_vertex (double, double, double, int,int = 0) ;
         virtual inline hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
-	virtual inline hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
+  virtual inline hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual inline hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
-	virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+  virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
   // version with point , returns insert_hbnd3 here 
-	virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
+  virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
-	virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
-	virtual inline periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
+  virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
+  virtual inline periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
 // Anfang - Neu am 23.5.02 (BS)
-	virtual inline periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
+  virtual inline periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
 // Ende - Neu am 23.5.02 (BS)
         virtual inline hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
       public :
         inline MacroGitterBasis (istream &) ;
         inline MacroGitterBasis () ;
-      	virtual ~MacroGitterBasis () {}
+        virtual ~MacroGitterBasis () {}
 
         // return index manager mostly for restore and backup 
         inline IndexManagerType & indexManager(int codim); 
@@ -308,14 +315,14 @@ class GitterBasisImpl : public GitterBasis {
 } ;
 
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
 inline GitterBasis :: Objects :: VertexEmpty :: VertexEmpty (int l, double x, double y, double z, IndexManagerType & im)
   : GitterBasis :: VertexGeo (l,x,y,z,im) {
@@ -333,7 +340,7 @@ inline int GitterBasis :: Objects :: VertexEmpty :: ident () const {
 }
 
 inline GitterBasis :: Objects :: VertexEmptyMacro :: VertexEmptyMacro (double x,double y,double z,int i, IndexManagerType &im) 
-	: GitterBasis :: Objects :: VertexEmpty (0,x,y,z,im), _idn (i) {
+  : GitterBasis :: Objects :: VertexEmpty (0,x,y,z,im), _idn (i) {
   return ;
 }
 
@@ -382,7 +389,7 @@ inline void GitterBasis :: Objects :: Hface4Empty :: projectVertex(const Project
 
 // Dune_hbndDefault 
 template <int pdimvx> 
-inline Dune_hbndDefault<pdimvx> :: Dune_hbndDefault () : _index (-1) 
+inline GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: Dune_hbndDefault () : _index (-1) 
 {
   for(int i=0; i<dimvx; i++)
     for(int j=0; j<3; j++)
@@ -391,7 +398,7 @@ inline Dune_hbndDefault<pdimvx> :: Dune_hbndDefault () : _index (-1)
 
 
 template <int pdimvx> 
-inline void Dune_hbndDefault<pdimvx> :: setOppPoint (int i, const double (&p)[3]) 
+inline void GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: setOppPoint (int i, const double (&p)[3]) 
 { 
   assert((i >= 0) && (i < dimvx));
   _oppVx[i][0] = p[0];
@@ -401,28 +408,28 @@ inline void Dune_hbndDefault<pdimvx> :: setOppPoint (int i, const double (&p)[3]
 }
            
 template <int pdimvx> 
-inline const double (& Dune_hbndDefault<pdimvx> ::oppositeVertex (int i) const) [3] 
+inline const double (& GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> ::oppositeVertex (int i) const) [3] 
 {
   assert((i >= 0) && (i < dimvx));
   return _oppVx[i];
 }
 
 template <int pdimvx> inline int 
-Dune_hbndDefault<pdimvx> :: getIndex () const 
+GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: getIndex () const 
 { 
   assert( _index >= 0 );
   return _index;
 }
 
 template <int pdimvx> inline void  
-Dune_hbndDefault<pdimvx> :: setIndex ( int idx ) 
+GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: setIndex ( int idx ) 
 {
   _index = idx;
   return ;
 }
 
 template <int pdimvx> inline int 
-Dune_hbndDefault<pdimvx> :: dimVx () const { return dimvx; }
+GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: dimVx () const { return dimvx; }
 
 // end of Dune_hbndDefault 
 
@@ -551,7 +558,7 @@ inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis () {
 }
 
 inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vertex (double x, double y, double z, int id,int) {
-  return new Objects :: VertexEmptyMacro (x, y, z, id, _indexmanager[3]) ;
+  return new Objects :: VertexEmptyMacro (x, y, z, id, indexManager(3)) ;
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, GitterBasis :: VertexGeo * b) {
@@ -567,7 +574,7 @@ inline GitterBasis :: hface4_GEO * GitterBasis :: MacroGitterBasis :: insert_hfa
 }
 
 inline GitterBasis :: tetra_GEO * GitterBasis :: MacroGitterBasis :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {
-  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], _indexmanager[0] ) ;
+  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], indexManager(0) ) ;
 }
 
 inline GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) {
@@ -586,7 +593,7 @@ inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa 
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
 insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
-  return new Objects :: hbndseg3_IMPL (0,f,i,NULL,NULL ,b, _indexmanager[4] , 0 ) ;
+  return new Objects :: hbndseg3_IMPL (0,f,i,NULL,NULL ,b, indexManager(4) , 0 ) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
@@ -595,7 +602,7 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const dou
 }
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
-  return new Objects :: hbndseg4_IMPL (0,f,i,NULL,NULL );// to be inserted ->  ,b, _indexmanager[4]) ;
+  return new Objects :: hbndseg4_IMPL (0,f,i,NULL,NULL );// to be inserted ->  ,b, indexManager(4)) ;
 }
 
 inline IndexManagerType & GitterBasis :: MacroGitterBasis :: indexManager (int codim ) 
@@ -604,4 +611,4 @@ inline IndexManagerType & GitterBasis :: MacroGitterBasis :: indexManager (int c
   return _indexmanager[codim];
 }
 
-#endif	//	GITTER_IMPL_H_INCLUDED
+#endif  //  GITTER_IMPL_H_INCLUDED
