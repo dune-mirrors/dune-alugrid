@@ -22,10 +22,13 @@ usage () {
     echo "  -d, --debug        switch debug-opts on"
     echo "  -n, --nodebug      switch debug-opts off"
     echo "  -o, --optim        switch optimization on"
+    echo "  --prefix=PATH      directory where the lib and headers will be installed ( default is current path )"
     echo "  --with-metis=PATH  directory with METIS inside"
     echo "  --with-party=PATH  directory with PARTY Partitioning-Library inside"
     echo "  --enable-shared    enable option for building also shared libraries (default == disabled)" 
     echo "  -h, --help         you already found this :)"
+    echo "" 
+    echo "type ./configure --help after you run autogen.sh once for more information "
 }
 
 # no compiler set yet
