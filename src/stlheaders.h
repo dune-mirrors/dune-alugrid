@@ -54,27 +54,4 @@
   #include <map.h>
 #endif
 
-#ifdef _BSGRID_PARALLEL_
-
-// partitioning libs 
-// METIS if not found here then dummy version is included 
-extern "C" {
-#undef METISTITLE 
-#include <metis.h>
-}
-
-
-// PARTY_LIB if not found here then dummy version is included 
-#ifdef VERSION 
-#define _VER_SAVE VERSION 
-#undef VERSION 
-#endif
-#include <party_lib.h>
-#ifdef VERSION 
-#define PARTY_LIB_H_INCLUDED
-#endif
-
-#endif
-
-
 #endif
