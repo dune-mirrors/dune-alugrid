@@ -19,11 +19,12 @@ class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
 protected:  
   bool balanceGrid_;
 public:
+  //class Objects   : public GitterBasisPll :: Objects   {};
+  //class Geometric : public GitterBasisPll :: Geomietric {};
 
   GitterDunePll (const char * filename , MpAccessLocal &mp) 
     : GitterBasisPll (filename,mp) , balanceGrid_ (false) 
   {
-    /*
     char logFileName [32];
     sprintf(logFileName,"logfile.%d",mpAccess().myrank());
     cerr << "open logfile = " << logFileName << "\n";
@@ -31,11 +32,10 @@ public:
     logFile.close();
     logFile.open (logFileName);
     logFile << "logfile of processor " << mpAccess().myrank() << "\n";
-    */
   };
 
   ~GitterDunePll () {
-    //logFile.close();
+    logFile.close();
   }
 
   bool refine (); 
@@ -103,6 +103,7 @@ public:
   bool duneLoadBalance (GatherScatterType & ) ; // call loadBalancer a
 
   void duneRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType & gs) ;
+  void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
   
   void duneNotifyGridChanges ()
   {
