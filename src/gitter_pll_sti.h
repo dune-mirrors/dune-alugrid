@@ -8,6 +8,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/11/16 19:38:43  robertk
+ * Added interface methods writeDynamicState and readDynamicState with
+ * GatherScatterType.
+ *
  * Revision 1.4  2004/11/02 18:55:30  robertk
  * Moved all changed with dune... to seperated gitter_dune_* files.
  *
@@ -260,6 +264,7 @@ class FacePllXIF : public LinkedObject, public MacroGridMoverIF {
     virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) = 0 ;
 } ;
 
+// tpye of ElementPllXIF_t is ElementPllXIF, see parallel.h
 class ElementPllXIF : public MacroGridMoverIF {
   protected :
     typedef Gitter :: Geometric :: hasFace4 :: balrule_t balrule_t ;
@@ -274,6 +279,9 @@ class ElementPllXIF : public MacroGridMoverIF {
     virtual void readStaticState (ObjectStream &, int) = 0 ;
     virtual void writeDynamicState (ObjectStream &, int) const = 0 ;
     virtual void readDynamicState (ObjectStream &, int) = 0 ;
+
+    virtual void writeDynamicState (ObjectStream &, GatherScatterType &) const = 0 ;
+    virtual void readDynamicState (ObjectStream &, GatherScatterType &) = 0 ;
   public :
     virtual int ldbVertexIndex () const = 0 ;
     virtual int & ldbVertexIndex () = 0 ;
@@ -331,6 +339,9 @@ class GitterPll : public virtual Gitter {
         virtual inline int iterators_attached () const ;
         virtual void identification (MpAccessLocal &) ;
         virtual void fullIntegrityCheck (MpAccessLocal &) ;
+
+        // method for Dune index management 
+        virtual IndexManagerType & indexManager(int) = 0;
     } ;
   public :
   
