@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.7  2004/11/29 12:38:20  robertk
+ * some clean up in restore and backup Index methods.
+ *
  * Revision 1.6  2004/11/25 18:43:48  robertk
  * changed vertex backup and restore and added faceNormal for hbndseg.
  *
@@ -618,10 +621,8 @@ class Gitter {
           protected:
             IndexManagerType & _indexmanager;
 #ifdef _DUNE_USES_BSGRID_ 
-          //protected:
-          //  IndexManagerType & _indexmanager;
-            int _idx; 
-          //  mutable int _wrcnt;
+          protected:   
+            int _idx; // the vertex index 
 #endif          
           public:
             Dune_VertexGeo (IndexManagerType & im);
@@ -657,7 +658,7 @@ class Gitter {
       int _lvl ;
 #ifndef _DUNE_USES_BSGRID_
       int _idx ;    // Vertexindex zum Datenrausschreiben
-#endif              // wird auch fuer Dune verwendet
+#endif              // wird nur verwendet, wenn nicht fuer Dune ubersetzt    
         } ;
   
         typedef class hedge1 : public hedge_STI, public MyAlloc {
@@ -1157,6 +1158,10 @@ class Gitter {
     virtual void restore (istream &) ;
     virtual void restore (const char*,const char *) ;
 
+  protected:
+    // return index manager of macro grid 
+    virtual IndexManagerType & indexManager (int codim ) = 0;
+
   friend class LeafIterator < helement_STI > ;
   friend class LeafIterator < vertex_STI > ;
   friend class LeafIterator < hbndseg_STI > ;
@@ -1431,7 +1436,7 @@ inline int Gitter :: Dune_helement :: getIndex () const {
   assert( _index >= 0);
   return _index; 
 #else 
-  std::cerr << "helement::getIndex () -- ERROR: '_DUNE_USES_BSGRID_' is not defined, so index cannot be used! \n";
+  std::cerr << "helement::getIndex () -- ERROR: '_DUNE_USES_BSGRID_' is not defined, so index cannot be used! " << __FILE__ << __LINE__ << "\n";
   abort();
   return -1;
 #endif
@@ -1445,16 +1450,15 @@ inline void Gitter :: Dune_helement :: setIndex (const int index) {
 
 inline void Gitter :: Dune_helement :: backupIndex (ostream & os ) const {
 #ifdef _DUNE_USES_BSGRID_ 
-  assert(false);
-  //os.write( ((const char *) &_index ), sizeof(int) ) ;
+  cerr << "Dune_helement :: backupIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
+  abort();
 #endif
 }
 
 inline void Gitter :: Dune_helement :: restoreIndex (istream & is ) {
 #ifdef _DUNE_USES_BSGRID_ 
-  assert(false);
-  //if(_index != -1) _indexmanager.freeIndex( _index );
-  //is.read ( ((char *) &_index), sizeof(int) ); 
+  cerr << "Dune_helement :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
+  abort();
 #endif
 }
 
@@ -1483,9 +1487,7 @@ inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) 
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, IndexManagerType & im) 
   : 
-//#ifdef _DUNE_USES_BSGRID_
   Dune_VertexGeo (im) ,    
-//#endif
   _lvl (l) {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   return ;
@@ -1493,9 +1495,7 @@ inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y,
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, VertexGeo & vx) 
   :
-//#ifdef _DUNE_USES_BSGRID_
   Dune_VertexGeo ( vx._indexmanager ) , 
-//#endif
   _lvl (l)  {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   return ;
@@ -1559,6 +1559,7 @@ inline void Gitter :: Geometric :: Dune_VertexGeo :: backupIndex ( ostream & os 
 
 inline void Gitter :: Geometric :: Dune_VertexGeo :: restoreIndex ( istream & is ) {
 #ifdef _DUNE_USES_BSGRID_ 
+  //_indexmanager.freeIndex( _idx );
   is.read ( ((char *) &_idx), sizeof(int) ); 
 #endif
 }
