@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/19 13:26:35  robertk
+ * resetRefinedTag is now called from Dune after adaptation.
+ *
  * Revision 1.1  2004/10/15 09:48:37  robertk
  * Inititial version. Some extenxions for Dune made. Schould be compatible
  * with all other applications done so far.
@@ -836,7 +839,7 @@ template < class A > inline TetraTop < A > :: TetraTop (int l, myhface3_t * f0, 
 	myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3, innertetra_t *up) 
 	: A (f0, t0, f1, t1, f2, t2, f3, t3), _up(up), _dwn (0), _bbb (0), _ed (0), _fc (0), _lvl (l), 
 	_rule (myrule_t :: nosplit) 
-  , _indexmanager(up->_indexmanager) 
+  , _indexmanager(up->_indexmanager)  
 { // _up wird im Constructor uebergeben
   this->setIndex( _indexmanager.getIndex() );
   return ;
@@ -1142,11 +1145,8 @@ template < class A > TetraTop < A > :: myrule_t TetraTop < A > :: requestrule ()
   return myrule_t (_req) ;
 }
 
-template < class A > void TetraTop < A > :: request (myrule_t r) {
-  
-  // if element can be refined its not new anymore 
-  this->resetRefinedTag();
-  
+template < class A > void TetraTop < A > :: request (myrule_t r) 
+{
   assert (r.isValid ()) ;
   _req = r ;
   return ;
