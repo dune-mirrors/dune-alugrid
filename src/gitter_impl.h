@@ -93,7 +93,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             virtual helement_STI * getGhost () { return 0; }
 
             // points inside ghosts 
-            void faceNormal( BSGridVecType & normal) const;
+            void faceNormal( double * normal) const;
         };
         typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
 
@@ -115,7 +115,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             virtual helement_STI * getGhost () { return 0; }
 
             // points inside ghosts 
-            void faceNormal( BSGridVecType & normal) const;
+            void faceNormal( double * normal) const;
         };
         typedef Hbnd4Top < Hbnd4Default > hbndseg4_IMPL ;
 
@@ -377,7 +377,7 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: ghostLevel () const {
   return level() ;
 }
 
-inline void GitterBasis :: Objects :: Hbnd3Default :: faceNormal( BSGridVecType & normal) const {
+inline void GitterBasis :: Objects :: Hbnd3Default :: faceNormal( double * normal) const {
 
   hface3_GEO * face = this->myhface3(0);
   int tw = this->twist(0);
@@ -403,7 +403,7 @@ inline int GitterBasis :: Objects :: Hbnd4Default :: ghostLevel () const {
   return level() ;
 }
 
-inline void GitterBasis :: Objects :: Hbnd4Default :: faceNormal( BSGridVecType & normal) const {
+inline void GitterBasis :: Objects :: Hbnd4Default :: faceNormal( double * normal) const {
   cerr << "ERORR: Hbnd4Default :: faceNormal not implemented! " << __FILE__ << __LINE__ << endl;
   return ;
 }

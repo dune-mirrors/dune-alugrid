@@ -28,13 +28,13 @@
 
 // if DUNE uses this grid the _DUNE_USES_BSGRID_ variable should be defined
 // otherwise some dummy are set 
-#ifndef _DUNE_USES_BSGRID_ 
-#include "dummyindexstack.h"  
-  
+#include "indexstack.h"
+#ifdef _DUNE_USES_BSGRID_ 
+enum { lengthOfFiniteStack = 10000 };
+typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;        
+#else 
 typedef DummyIndexStack<int> IndexManagerType; 
-  
-typedef double BSGridVec [3];
-typedef BSGridVec BSGridVecType;  
+typedef BSGridVec double;  
 #endif
 
 // number of different index manager that exists 
@@ -325,14 +325,14 @@ class Gitter {
         // the Dune extentions 
 
         // calculate outer normal of face face
-        virtual void outerNormal(int face, BSGridVecType & normal) 
+        virtual void outerNormal(int face, double * normal) 
         {
           cerr << "helement :: outerNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
           abort();
         }
         
         // calculate outer normal of face face
-        virtual void neighOuterNormal(int faceInNeigh, BSGridVecType & normal) 
+        virtual void neighOuterNormal(int faceInNeigh, double * normal) 
         {
           cerr << "helement :: neighOuterNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
           abort();
@@ -408,7 +408,7 @@ class Gitter {
         // default return 0 means we have no ghost element on this boundary
         // segment, because we only have ghost on interior boundary 
         virtual helement * getGhost () = 0; // should return 0 for not interior boundaries 
-        virtual void faceNormal (BSGridVecType & normal) const = 0 ;
+        virtual void faceNormal (double * normal) const = 0 ;
       public :
   virtual void restoreFollowFace () = 0 ;
     } ;
@@ -855,8 +855,8 @@ class Gitter {
     // Dune extentions 
     
     // calculate outer normal of face face
-    virtual void outerNormal (int face , BSGridVecType & normal );
-    virtual void neighOuterNormal (int faceInNeigh , BSGridVecType & normal );
+    virtual void outerNormal (int face , double * normal );
+    virtual void neighOuterNormal (int faceInNeigh , double * normal );
 
     private :
       myhface3_t * f [4] ;

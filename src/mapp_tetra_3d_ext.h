@@ -1,5 +1,5 @@
-#ifndef __DUNE_MAPP_TETRA_3D_EXT_HH__
-#define __DUNE_MAPP_TETRA_3D_EXT_HH__
+#ifndef __MAPP_TETRA_3D_EXT_HH__
+#define __MAPP_TETRA_3D_EXT_HH__
 
 // BSGridVecType is defined in BSGrid interface to dune or in gitter_sti.hh 
 class BSGridLinearSurfaceMapping : public LinearSurfaceMapping 
@@ -9,7 +9,7 @@ public:
     (const double (&)[3], const double (&)[3], const double (&)[3]);
     
   // same as method normal of LinearSurfaceMapping, just for Dune Vecs 
-  inline void normal(BSGridVecType &normal) const;
+  inline void normal(double * normal) const;
 };
 
 
@@ -19,7 +19,7 @@ const double (&x1)[3], const double (&x2)[3])
 {
 }
 
-inline void BSGridLinearSurfaceMapping :: normal (BSGridVecType & normal) const
+inline void BSGridLinearSurfaceMapping :: normal (double * normal) const
 {
   normal[0] = this->_n[0];
   normal[1] = this->_n[1];

@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.7  2005/03/23 11:36:06  robertk
+ * removed BSGridVecType, which is double * now.
+ *
  * Revision 1.6  2004/12/21 17:36:45  robertk
  * removed some warnings.
  *
@@ -277,7 +280,7 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const double (&center)
          : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
 }
 
-void  Gitter :: Geometric :: Tetra :: outerNormal (int face , BSGridVecType & normal ) 
+void  Gitter :: Geometric :: Tetra :: outerNormal (int face , double * normal ) 
 {
   BSGridLinearSurfaceMapping 
     LSM(this->myvertex(face,0)->Point(),
@@ -288,7 +291,7 @@ void  Gitter :: Geometric :: Tetra :: outerNormal (int face , BSGridVecType & no
   return; 
 }
 
-void  Gitter :: Geometric :: Tetra :: neighOuterNormal (int face , BSGridVecType & normal ) 
+void  Gitter :: Geometric :: Tetra :: neighOuterNormal (int face , double * normal ) 
 {
   // just use with other twist to minus normal 
   BSGridLinearSurfaceMapping 
