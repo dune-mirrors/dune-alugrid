@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/11/16 19:33:48  robertk
+ * Added methods up for Hbnd4Top elements.
+ *
  * Revision 1.1  2004/10/25 16:39:52  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -136,12 +139,12 @@ template < class A > class Hbnd4Top : public A {
     void splitISO4 () ;
     bool refineLikeElement (balrule_t) ;
   private :
-    innerbndseg_t * _bbb, * _dwn ;
+    innerbndseg_t * _bbb, * _dwn, * _up ;
     int _lvl ;
     inline bool coarse () ;
     inline void append (innerbndseg_t *) ;
   public :
-    inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *) ;
+    inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, innerbndseg_t * ) ;
     virtual ~Hbnd4Top () ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
@@ -151,6 +154,10 @@ template < class A > class Hbnd4Top : public A {
     innerbndseg_t * down () ;
     const innerbndseg_t * next () const ;
     const innerbndseg_t * down () const ;
+    
+    // for dune 
+    innerbndseg_t * up () ;
+    const innerbndseg_t * up () const ;
 } ;
 
 template < class A > class HexaTop : public A {
@@ -711,8 +718,8 @@ template < class A > void Hface4Top < A > :: restore (istream & is) {
 // #     #  #    #  #   ##  #    #      #     #     #    #  #
 // #     #  #####   #    #  #####       #     #      ####   #
 
-template < class A > inline Hbnd4Top < A > :: Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv)
-  : A (f, i,ppv), _bbb (0), _dwn (0), _lvl (l) {
+template < class A > inline Hbnd4Top < A > :: Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, innerbndseg_t * up)
+  : A (f, i,ppv), _bbb (0), _dwn (0), _up(up) , _lvl (l) {
   return ;
 }
 
@@ -740,6 +747,14 @@ template < class A > Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: down ()
 
 template < class A > const Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: down () const { 
   return _dwn ;
+}
+
+template < class A > Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: up () { 
+  return _up ;
+}
+
+template < class A > const Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > ::up () const { 
+  return _up ;
 }
 
 template < class A > inline void Hbnd4Top < A > :: append (innerbndseg_t * b) {
@@ -773,10 +788,10 @@ template < class A > inline bool Hbnd4Top < A > :: bndNotifyCoarsen () {
 template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
   assert (_dwn == 0) ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface4 (0,0), twist (0), projection) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface4 (0,1), twist (0), projection) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, subface4 (0,2), twist (0), projection) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, subface4 (0,3), twist (0), projection) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface4 (0,0), twist (0), projection, this) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface4 (0,1), twist (0), projection, this) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, subface4 (0,2), twist (0), projection, this) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, subface4 (0,3), twist (0), projection, this) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
