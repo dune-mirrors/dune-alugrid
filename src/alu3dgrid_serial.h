@@ -5,8 +5,6 @@
 // include all headers 
 #include "stlheaders.h"
 
-void fakelibtest ();
-
 #define _DUNE_USES_ALU3DGRID_
 
 namespace ALU3dGridSpace {
@@ -20,10 +18,15 @@ typedef GatherScatter GatherScatterType;
 #include "serial/serialize.h"
 #include "serial/gitter_sti.h"
 
-#include "parallel/gitter_pll_sti.h"
 
+#ifndef _ALU3DGRID_PARALLEL_
+typedef Gitter::helement_STI  HElemType;    // Interface Element
+typedef Gitter::hbndseg       HGhostType;
+#else 
+#include "parallel/gitter_pll_sti.h"
 typedef GitterPll::helement_STI  HElemType;    // Interface Element
 typedef GitterPll::hbndseg       HGhostType;
+#endif
 
 struct GatherScatter
 {
