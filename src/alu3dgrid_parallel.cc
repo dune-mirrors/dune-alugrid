@@ -33,19 +33,6 @@ struct GatherScatter
 };
 typedef GatherScatter GatherScatterType;
 
-
-// bsgrid original sources 
-#include "serial/gitter_geo.cc" 
-#include "serial/mapp_cube_3d.cc"
-#include "serial/myalloc.cc"
-#include "serial/gitter_mgb.cc"
-#include "serial/mapp_tetra_3d.cc"
-#include "serial/gitter_sti.cc"
-#include "serial/gitter_sti.cc"
-
-// file for duneinterface 
-#include "duneinterface/gitter_dune_impl.cc"
-
 #include "parallel/gitter_pll_sti.cc"
 #include "parallel/gitter_pll_ldb.cc"
 #include "parallel/gitter_pll_impl.cc"
