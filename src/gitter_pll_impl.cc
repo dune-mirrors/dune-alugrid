@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.9  2005/03/18 20:08:01  robertk
+ * Added some comments.
+ *
  * Revision 1.8  2005/01/13 16:59:26  robertk
  * Moved MacroGhostTetra to ghostelements.h
  *
@@ -469,7 +472,8 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
   return ;
 }
 
-TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : TetraPllXBase (t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
+TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : 
+  TetraPllXBase (t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
   static const double x = 0.25 ; // 1./4.
   LinearMapping (mytetra ().myvertex (0)->Point (), mytetra ().myvertex (1)->Point (),
          mytetra ().myvertex (2)->Point (), mytetra ().myvertex (3)->Point ())
@@ -493,8 +497,12 @@ int & TetraPllXBaseMacro :: ldbVertexIndex () {
 }
 
 bool TetraPllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
+  // parameter are: 
+  // - macro vertex index
+  // - number of elementes below macro element 
+  // - bary center 
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size (), _center)) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size (), _center) ) ;
   return true ;
 }
 
@@ -1642,6 +1650,7 @@ insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const dou
     typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
     MacroGhostTetra * ghost = insert_ghosttetra(f,t,p);
     assert(ghost);
+    // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
     return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(5) , ghost ) ;
   } 
@@ -1656,7 +1665,7 @@ Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll ::
 insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b ) {
   if (b == Gitter :: hbndseg_STI :: closure) {
     typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
-    // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
+    // here we have a ghost of the ghost, therefor we need the element index manager 
     return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(0) , 0 ) ;
   } else {
