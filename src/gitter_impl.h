@@ -1,76 +1,4 @@
-//  Version f"ur DUNE
-//
-  // (c) bernhard schupp 1997 - 1998
-
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
-  
-/* $Id$
- * $Log$
- * Revision 1.9  2005/03/22 15:41:10  robertk
- * New Constructors because of IndexManagerType.
- *
- * Revision 1.8  2005/01/13 17:01:46  robertk
- * getGhost moved to hbndseg interface class.
- *
- * Revision 1.7  2004/12/21 17:21:17  robertk
- * Some cleanup and new methods setGhost and getGhost.
- * getGhost is virtual and returns pointer to ghost elements.
- *
- * furthermore new method insert_hbnd3 with given point.
- * here the old insert_hbnd3 is returned.
- *
- * Revision 1.6  2004/12/07 17:43:19  robertk
- * logFile switched off.
- *
- * Revision 1.5  2004/11/29 13:04:41  robertk
- * enum for number of index managers
- *
- * Revision 1.4  2004/11/29 12:37:47  robertk
- * minor changes.
- *
- * Revision 1.3  2004/11/25 18:47:04  robertk
- * added faceNormal for Hbnd3Default, Hbnd4Default has to be implemented.
- *
- * Revision 1.2  2004/11/16 19:29:50  robertk
- * Indices for and oppVertex for boundary Elements.
- * new indexmanager[4] is for boundary.
- *
- * Revision 1.1  2004/10/25 16:39:52  robertk
- * Some off the headers are old and changed from .hh to .h.
- * All changes are made in the headers aswell.
- *
- * Some new file are the parallel grid files mostly have a _pll_ in then name.
- * There some Constructors of Tetra and Hbdn3Top had to be adapted.
- *
- * Revision 1.3  2004/10/22 16:55:33  robertk
- * Boundary type return on Hbnd3Top implemented.
- * Works. To be added on Hbnd4Top.
- *
- * Revision 1.2  2004/10/19 13:21:20  robertk
- * Added Vertex Management for Dune. Using the already implemented variable
- * _idx in VertexGeo. If _DUNE_USES_BSGRID_ is undefined then no vertex
- * numbering is generated.
- *
- * Revision 1.1  2004/10/15 09:48:37  robertk
- * Inititial version. Some extenxions for Dune made. Schould be compatible
- * with all other applications done so far.
- *
- * Revision 1.11  2002/05/23 16:37:41  dedner
- * Test nach Einbau der Periodischen 4-Raender
- *
- * Revision 1.10  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.9  2002/02/25 07:44:47  dedner
- * Atmosphaere als konstanter Wert auf Flaeche gespeichert
- *
- * Revision 1.7  2001/12/10 13:56:37  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/
+// (c) bernhard schupp 1997 - 1998
 
 #ifndef GITTER_IMPL_H_INCLUDED
 #define GITTER_IMPL_H_INCLUDED
@@ -96,8 +24,6 @@
 
 #include "gitter_hexa_top.h"
 #include "gitter_tetra_top.h"
-
-static volatile char RCSId_gitter_impl_h [] = "$Id$" ;
 
 //static ofstream logFile ("logfile");
 
