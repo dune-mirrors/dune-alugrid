@@ -129,7 +129,12 @@ void GitterDunePll :: duneExchangeDynamicState ()
   {
 
   const int nl = mpAccess ().nlinks () ;
+  
+#ifndef NDEBUG 
+  // if debug mode, then count time 
   const int start = clock () ;
+#endif
+  
   try 
   {
     typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
@@ -207,7 +212,9 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs)
   // Regel hier eingeschleift werden.
   {
   const int nl = mpAccess ().nlinks () ;
+#ifndef NDEBUG
   const int start = clock () ;
+#endif
   try 
   {
     typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
@@ -602,7 +609,9 @@ void GitterDunePll :: coarse () {
   // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
   
         a.second = false ;
+#ifndef NDEBUG
         bool b = (*i)->accessPllX ().unlockAndResume (a.first) ;
+#endif
         assert (b == a.first) ;
       }
     }
@@ -617,7 +626,9 @@ void GitterDunePll :: coarse () {
   // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
   // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
       
+#ifndef NDEBUG
       bool b = (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
+#endif
       assert (b == bool (*j)) ;
     }
         }}

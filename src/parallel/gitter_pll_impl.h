@@ -1297,8 +1297,8 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, int) {
   try {
 
-    int index;
-    assert( (true) ? (os.readObject( index ) , 1 ) : 1) ;
+    //int index;
+    //assert( (true) ? (os.readObject( index ) , 1 ) : 1) ;
     /*
     if(writeLogFile)
     {
@@ -1312,8 +1312,10 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
     // read the real level of ghost 
     os.readObject( _ghostLevel );
     //logFile << "readLevel " << _ghostLevel << "\n"; 
-   
+  
+#ifndef NDEBUG
     int dimvx;
+#endif
     assert( (true) ? (os.readObject( dimvx ), (dimvx == myhbnd().dimVx()) ? 1 : 0 ) : 1) ;
     
     double p[3];

@@ -30,7 +30,7 @@ template < class A > vector < vector < A > > doGcollectV
   vector < vector < A > > res (np) ;
   {
     int ln = in.size () ;
-    int test = MPI_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm) ;
+    MY_INT_TEST MPI_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm) ;
     assert (test == MPI_SUCCESS) ;
     displ [0] = 0 ;
     {for (int j = 1 ; j < np ; j ++) {
@@ -66,7 +66,7 @@ static vector < pair < char *, int > > doExchange (const vector < pair < char *,
     assert (req) ;
     {
       for (int link = 0 ; link < nl ; link ++) {
-	int test = MPI_Issend (in [link].first, in [link].second, MPI_BYTE, d [link], 123, comm, & req [link]) ;
+	MY_INT_TEST MPI_Issend (in [link].first, in [link].second, MPI_BYTE, d [link], 123, comm, & req [link]) ;
 	assert (test == MPI_SUCCESS) ;
       }
     }
@@ -74,14 +74,20 @@ static vector < pair < char *, int > > doExchange (const vector < pair < char *,
       for (int link = 0 ; link < nl ; link ++ ) {
 	MPI_Status s ;
 	int cnt ;
-	int test = MPI_Probe (d [link], 123, comm, & s) ; 
-	assert (test == MPI_SUCCESS) ;
-	test = MPI_Get_count ( & s, MPI_BYTE, & cnt ) ;
-	assert (test == MPI_SUCCESS) ;
+  {
+	  MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ; 
+	  assert (test == MPI_SUCCESS) ;
+  }
+  {
+	  MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & cnt ) ;
+	  assert (test == MPI_SUCCESS) ;
+  }
 	char * lne = new char [cnt] ;
 	assert (lne) ;
-	test = MPI_Recv (lne, cnt, MPI_BYTE, d [link], 123, comm, & s) ;
-	assert (test == MPI_SUCCESS) ;
+  {
+	  MY_INT_TEST MPI_Recv (lne, cnt, MPI_BYTE, d [link], 123, comm, & s) ;
+	  assert (test == MPI_SUCCESS) ;
+  }
 	out [link].first = lne ;
 	out [link].second = cnt ;
       }
@@ -89,7 +95,7 @@ static vector < pair < char *, int > > doExchange (const vector < pair < char *,
     {
       MPI_Status * sta = new MPI_Status [nl] ;
       assert (sta) ;
-      int test = MPI_Waitall (nl, req, sta) ;
+      MY_INT_TEST MPI_Waitall (nl, req, sta) ;
       assert (test == MPI_SUCCESS) ;
       delete [] sta ;
     }
@@ -116,7 +122,7 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
 	assert (lne) ;
 	copy (in [link].begin (), in [link].end (), lne) ;
 	buf [link] = lne ;
-	int test = MPI_Issend (lne, size, mpiType, d [link], 123, comm, & req [link]) ;
+	MY_INT_TEST MPI_Issend (lne, size, mpiType, d [link], 123, comm, & req [link]) ;
 	assert (test == MPI_SUCCESS) ;
       } 
     }
@@ -124,14 +130,22 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
       for (int link = 0 ; link < nl ; link ++ ) {
 	MPI_Status s ;
 	int cnt ;
-	int test = MPI_Probe (d [link], 123, comm, & s) ;
-	assert (test == MPI_SUCCESS) ;
-	test = MPI_Get_count ( & s, mpiType, & cnt ) ;
+  {
+	  MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ;
 	  assert (test == MPI_SUCCESS) ;
+  }
+  
+  {
+	  MY_INT_TEST MPI_Get_count ( & s, mpiType, & cnt ) ;
+	  assert (test == MPI_SUCCESS) ;
+  }
+  
 	A * lne = new A [cnt] ;
 	assert (lne) ;
-	test = MPI_Recv (lne, cnt, mpiType, d [link], 123, comm, & s) ;
-	assert (test == MPI_SUCCESS) ;
+  {
+	  MY_INT_TEST MPI_Recv (lne, cnt, mpiType, d [link], 123, comm, & s) ;
+	  assert (test == MPI_SUCCESS) ;
+  }
 	copy (lne, lne + cnt, back_inserter (out[link])) ;
 	delete [] lne ;
       } 
@@ -139,7 +153,10 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
     {
       MPI_Status * sta = new MPI_Status [nl] ;
       assert (sta) ;
-      int test = MPI_Waitall (nl, req, sta) ;
+#ifndef NDEBUG
+      MY_INT_TEST
+#endif
+        MPI_Waitall (nl, req, sta) ;
       assert (test == MPI_SUCCESS) ;
       delete [] sta ;
     }
@@ -152,86 +169,86 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
 
 int MpAccessMPI :: gmax (int i) const {
   int j ;
-  int test = MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 int MpAccessMPI :: gmin (int i) const {
   int j ;
-  int test = MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MIN, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MIN, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 int MpAccessMPI :: gsum (int i) const {
   int j ;
-  int test = MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_SUM, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_SUM, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 long MpAccessMPI :: gmax (long i) const {
   long j ;
-  int test = MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MAX, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MAX, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 long MpAccessMPI :: gmin (long i) const {
   long j ;
-  int test = MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MIN, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MIN, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 long MpAccessMPI :: gsum (long i) const {
   long j ;
-  int test = MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_SUM, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_SUM, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 double MpAccessMPI :: gmax (double a) const {
   double x ;
-  int test = MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MAX, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MAX, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
 double MpAccessMPI :: gmin (double a) const {
   double x ;
-  int test = MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MIN, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MIN, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
 double MpAccessMPI :: gsum (double a) const {
   double x ;
-  int test = MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_SUM, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_SUM, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
 void MpAccessMPI :: gmax (double* a,int size,double *x) const {
-  int test = MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MAX, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MAX, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessMPI :: gmin (double* a,int size,double *x) const {
-  int test = MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MIN, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MIN, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessMPI :: gsum (double* a,int size,double *x) const {
-  int test = MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_SUM, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_SUM, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
 }
 
 pair<double,double> MpAccessMPI :: gmax (pair<double,double> p) const {
   double x[2] ;
   double a[2]={p.first,p.second};
-  int test = MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MAX, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MAX, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
@@ -239,7 +256,7 @@ pair<double,double> MpAccessMPI :: gmax (pair<double,double> p) const {
 pair<double,double> MpAccessMPI :: gmin (pair<double,double> p) const {
   double x[2] ;
   double a[2]={p.first,p.second};
-  int test = MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MIN, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MIN, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
@@ -247,7 +264,7 @@ pair<double,double> MpAccessMPI :: gmin (pair<double,double> p) const {
 pair<double,double> MpAccessMPI :: gsum (pair<double,double> p) const {
   double x[2] ;
   double a[2]={p.first,p.second};
-  int test = MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_SUM, _mpiComm) ;
+  MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_SUM, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
@@ -293,7 +310,7 @@ vector < ObjectStream > MpAccessMPI :: gcollect (const ObjectStream & in) const 
   {    
     char * y = new char [bufSize] ;
     assert (y) ;
-    int test = MPI_Allgatherv (in._buf + in._rb, snum, MPI_BYTE, y, rcounts, displ, MPI_BYTE, _mpiComm) ;
+    MY_INT_TEST MPI_Allgatherv (in._buf + in._rb, snum, MPI_BYTE, y, rcounts, displ, MPI_BYTE, _mpiComm) ;
     assert (test == MPI_SUCCESS) ;
     {for (int i = 0 ; i < np ; i ++ ) {
       if (rcounts [i]) {

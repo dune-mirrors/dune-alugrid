@@ -37,7 +37,12 @@ inline FSLock :: FSLock (const char * name) : _fname (0) {
     _fname = 0 ;
     cerr << "**WARNUNG (IGNORIERT) Lockfile konnte nicht erzeugt werden" << endl ;
   } else {
-    int test = fclose (fp) ;
+    
+    // only test in debug mode 
+#ifndef NDEBUG 
+    int test = 
+#endif
+    fclose (fp) ;
     assert (test == 0) ;
   }
   return ;

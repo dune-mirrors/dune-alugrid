@@ -1,36 +1,4 @@
-	// (c) bernhard schupp 1997 - 1998
-
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-
-/* $Id$
- * $Log$
- * Revision 1.1  2005/03/23 14:58:34  robertk
- * all additional files for parallel version of ALU3dGrid.
- *
- * Revision 1.1  2004/10/25 16:39:54  robertk
- * Some off the headers are old and changed from .hh to .h.
- * All changes are made in the headers aswell.
- *
- * Some new file are the parallel grid files mostly have a _pll_ in then name.
- * There some Constructors of Tetra and Hbdn3Top had to be adapted.
- *
- * Revision 1.7  2002/04/26 12:54:31  dedner
- * Laufzeiterfassung
- *
- * Revision 1.6  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.5  2001/12/21 15:18:31  dedner
- * GROSSER UMBAU: Berechnen von Adaptindikator und divBint und auch Zeitschritt bei Flussberechnung
- *
- * Revision 1.4  2001/12/10 13:56:37  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/
-
+// (c) bernhard schupp 1997 - 1998
 #ifndef MPACCESS_MPI_H_INCLUDED
 #define MPACCESS_MPI_H_INCLUDED
 
@@ -103,36 +71,40 @@ class MpAccessMPI : public MpAccessLocal {
 	//    #    #   ##  #          #    #   ##  #
 	//    #    #    #  ######     #    #    #  ######
 	//
-
+#ifndef NDEBUG
+#define MY_INT_TEST int test =
+#else
+#define MY_INT_TEST
+#endif
 
 inline MpAccessMPI :: MpAccessMPI (MPI_Comm i) {
-  int test = MPI_Comm_dup (i, &_mpiComm) ;
+  MY_INT_TEST MPI_Comm_dup (i, &_mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return ;
 }
 
 inline MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a) {
-  int test = MPI_Comm_dup (a._mpiComm, &_mpiComm) ;
+  MY_INT_TEST MPI_Comm_dup (a._mpiComm, &_mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return ;
 }
 
 inline MpAccessMPI :: ~MpAccessMPI () {
-  int test = MPI_Comm_free (&_mpiComm) ;
+  MY_INT_TEST MPI_Comm_free (&_mpiComm) ;
   assert (test == MPI_SUCCESS) ;
   return ;
 }
 
 inline int MpAccessMPI :: psize () const {
   int i ;
-  int test = MPI_Comm_size (_mpiComm, & i) ;
+  MY_INT_TEST MPI_Comm_size (_mpiComm, & i) ;
   assert (test == MPI_SUCCESS) ;
   return i ;
 }
 
 inline int MpAccessMPI :: myrank () const {
   int i ;
-  int test = MPI_Comm_rank (_mpiComm, & i) ;
+  MY_INT_TEST MPI_Comm_rank (_mpiComm, & i) ;
   assert (test == MPI_SUCCESS) ;
   return i ;
 }

@@ -658,7 +658,9 @@ void GitterPll :: coarse () {
   // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
   
         a.second = false ;
+#ifndef NDEBUG
         bool b = (*i)->accessPllX ().unlockAndResume (a.first) ;
+#endif
         assert (b == a.first) ;
       }
     }
@@ -672,8 +674,10 @@ void GitterPll :: coarse () {
   // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
   // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
   // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
-      
+     
+#ifndef NDEBUG
       bool b = (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
+#endif
       assert (b == bool (*j)) ;
     }
         }}
@@ -777,7 +781,10 @@ void GitterPll :: exchangeDynamicState () {
 }
 {
   const int nl = mpAccess ().nlinks () ;
+
+#ifndef NDEBUG
   const int start = clock () ;
+#endif
   try {
     vector < ObjectStream > osv (nl) ;
     {for (int l = 0 ; l < nl ; l ++) {
@@ -827,7 +834,9 @@ void GitterPll :: exchangeStaticState () {
   // Zustand darf durch Verfeinerung und h"ohere Methoden nicht beeinflusst
   // sein.
 
+#ifndef NDEBUG
   const int start = clock () ;
+#endif
   try {
     const int nl = mpAccess ().nlinks () ;
     vector < ObjectStream > osv (nl) ;
