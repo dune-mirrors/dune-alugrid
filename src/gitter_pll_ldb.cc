@@ -7,6 +7,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.4  2005/03/18 20:43:03  robertk
+ * Removed warning.
+ *
  * Revision 1.3  2005/03/18 20:06:32  robertk
  * minor changes.
  *
@@ -282,7 +285,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
         assert (0 <= (*i).second && (*i).second < np) ;
         int k = part [j] = (*i).second ;
         check [j] = 1 ;
-        vertex_wInt [j] = vertex_w [j] = (*i).first.weight () ;
+        vertex_w [j] = vertex_wInt [j] = (*i).first.weight () ;
 	
 	// Hier besetht die M"oglichkeit auch die Schwerpunktskoordinaten
 	// der Grobgitterelemente auszulesen:
