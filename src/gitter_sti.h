@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.8  2004/11/29 13:03:20  robertk
+ * enum number of index managers .
+ *
  * Revision 1.7  2004/11/29 12:38:20  robertk
  * some clean up in restore and backup Index methods.
  *
@@ -78,7 +81,10 @@ typedef double BSGridVec [3];
 typedef BSGridVec BSGridVecType;  
 #endif
 
-  
+// number of different index manager that exists 
+enum { numOfIndexManager = 5 };
+
+ 
 static volatile char RCSId_gitter_sti_h [] = "$Id$" ;
 
   // Einfacher Referenzenz"ahler mit cast-around-const
