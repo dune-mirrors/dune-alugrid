@@ -8,6 +8,10 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/28 18:55:47  robertk
+ * Added dunePackAll method on TetraPllXBaseMacro that packs Dune data if
+ * repartitioning has to be done.
+ *
  * Revision 1.2  2004/10/27 15:11:40  robertk
  * method container of GitterPll now public for BSGrid.
  *
@@ -277,6 +281,7 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
+    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
