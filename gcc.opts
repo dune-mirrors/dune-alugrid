@@ -8,7 +8,7 @@ COMP="gcc"
 CXXCOMP="g++"
 
 # flags set in any case
-FLAGS="-Wall -Wno-deprecated"
+FLAGS="-Wall"
 
 # additional flags for debugging
 DEBUGFLAGS="-g"
