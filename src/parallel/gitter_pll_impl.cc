@@ -1641,6 +1641,16 @@ GitterBasisPll :: GitterBasisPll (MpAccessLocal & mpa) : _mpaccess (mpa), _macro
 
 GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpaccess (mpa), _macrogitter (0) {
   assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll (const char * = \"" << f << "\" ...)" << endl, 1) : 1) ;
+
+  // read normal macro gitter if myrank is 0 
+  if( mpa.myrank () == 0 )
+  {
+    ifstream in ( f ) ;
+    if (in) _macrogitter = new MacroGitterBasisPll (in) ;
+  }
+
+  // if still no macrogitter, try old method 
+  if(!_macrogitter) 
   {
     char * extendedName = new char [strlen(f) + 200] ;
     sprintf (extendedName, "%s.%u", f, mpa.myrank ()) ;
@@ -1649,12 +1659,13 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
       _macrogitter = new MacroGitterBasisPll (in) ;
     } else {
     assert (debugOption (5) ? 
-        ( cerr << "  GitterBasisPll :: GitterBasisPll () Datei: " << extendedName 
-           << " kann nicht gelesen werden. In " << __FILE__ << " Zeile " << __LINE__ << endl, 1) : 1);
+        ( cerr << "  GitterBasisPll :: GitterBasisPll () file: " << extendedName 
+           << " cannot be read. In " << __FILE__ << " line " << __LINE__ << endl, 1) : 1);
       _macrogitter = new MacroGitterBasisPll () ;
     }
     delete [] extendedName ;
   }
+
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
   return ;
