@@ -8,6 +8,10 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.10  2005/01/13 16:58:49  robertk
+ * Added ghostPoint on BndPllClosure. We nned this to pack the internal
+ * boundary correct.
+ *
  * Revision 1.9  2004/12/21 17:24:41  robertk
  * new methods for ghost elements on internal boundarys.
  * all new methods to insert internal boundary with ghost element are mostly
@@ -87,6 +91,8 @@
 #include "gitter_pll_ldb.h"
 #include "walk.h"
 
+#include "ghostelements.h"
+
 static volatile char RCSId_gitter_pll_impl_h [] = "$Id$" ;
 
   // Der vector < int > wird als sog. linkagepattern, also als
@@ -97,7 +103,6 @@ static volatile char RCSId_gitter_pll_impl_h [] = "$Id$" ;
   // verwaltet. Die Methode secondScan () l"oscht dann immer
   // wieder die unreferenzierten Verbindungsmuster aus dem
   // Container. Es gibt "ubrigens kein firstScan () mehr ...
-class MacroGhostTetra;
 
 typedef vector < int > linkagePattern_t ;
 typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternMap_t ;
@@ -543,6 +548,7 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     typedef A                       myhbnd_t ;
     typedef typename A :: myhface_t myhface_t ;
     inline BndsegPllBaseXMacroClosure (myhbnd_t &) ;
+    inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostPoint * _ghp) ;
     virtual void readStaticState (ObjectStream &, int) ;
   public :
     virtual int   ldbVertexIndex () const ;
@@ -551,6 +557,7 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     virtual void packAsBnd (int,int,ObjectStream &) const ;
   private :
     int _extGraphVertexIndex ;
+    const MacroGhostPoint * _ghPoint; 
 } ;
 
 class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
@@ -1062,10 +1069,16 @@ template < class A > bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBal
   // der Neupartitionierung, der sie das Gewicht der Anzahl aller feinsten
   // Fl"achen "uber der verwalteten Grobgitterfl"ache gibt.
   
-  db.edgeUpdate ( LoadBalancer :: GraphEdge 
-    (((const typename myhface_t :: myconnect_t *)this->myhface ().nb.front ().first)->accessPllX ().ldbVertexIndex (),
-     ((const typename myhface_t :: myconnect_t *)this->myhface ().nb.rear ().first)->accessPllX ().ldbVertexIndex (),
-     TreeIterator < typename Gitter :: hface_STI, is_leaf < Gitter :: hface_STI > > (this->myhface ()).size ())) ;
+  const typename myhface_t :: myconnect_t * mycon1 = this->myhface().nb.front().first;
+  const typename myhface_t :: myconnect_t * mycon2 = this->myhface().nb.rear ().first;
+
+  if(mycon1 && mycon2)
+  {
+    db.edgeUpdate ( LoadBalancer :: GraphEdge 
+      (((const typename myhface_t :: myconnect_t *)this->myhface ().nb.front ().first)->accessPllX ().ldbVertexIndex (),
+       ((const typename myhface_t :: myconnect_t *)this->myhface ().nb.rear ().first)->accessPllX ().ldbVertexIndex (),
+      TreeIterator < typename Gitter :: hface_STI, is_leaf < Gitter :: hface_STI > > (this->myhface ()).size ())) ;
+  }
   return true ;
 }
 
@@ -1265,7 +1278,8 @@ inline const HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () const {
 }
 
 
-template < class A > inline BndsegPllBaseXMacro < A > :: BndsegPllBaseXMacro (myhbnd_t & b) : _hbnd (b) {
+template < class A > inline BndsegPllBaseXMacro < A > :: 
+BndsegPllBaseXMacro (myhbnd_t & b) : _hbnd (b) {
   return ;
 }
 
@@ -1436,7 +1450,13 @@ template < class A > bool BndsegPllBaseXClosure < A > :: unlockAndResume (bool r
 }
 
 template < class A > inline BndsegPllBaseXMacroClosure < A > :: BndsegPllBaseXMacroClosure (myhbnd_t & b)
-  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) {
+  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) , _ghPoint (0) {
+  return ;
+}
+
+template < class A > inline BndsegPllBaseXMacroClosure < A > :: 
+BndsegPllBaseXMacroClosure (myhbnd_t & b, const MacroGhostPoint * ghp)
+  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) , _ghPoint (ghp) {
   return ;
 }
 
@@ -1459,14 +1479,34 @@ template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (O
   return ;
 }
 
-template < class A > void BndsegPllBaseXMacroClosure < A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
+template < class A > void BndsegPllBaseXMacroClosure < A > :: 
+packAsBnd (int fce, int who, ObjectStream & os) const {
   assert (!fce) ;
   assert (this->myhbnd ().bndtype () == Gitter :: hbndseg :: closure) ;
   if (myhface_t :: polygonlength == 3) os.writeObject (MacroGridMoverIF :: HBND3INT) ;
   else if (myhface_t :: polygonlength == 4) os.writeObject (MacroGridMoverIF :: HBND4INT) ;
   else abort () ;
   os.writeObject (this->myhbnd ().bndtype ()) ;
-  {for (int i = 0 ; i < myhface_t :: polygonlength ; i++) os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ()) ; }
+  {
+    for (int i = 0 ; i < myhface_t :: polygonlength ; i++) 
+      os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ()) ; 
+  }
+
+  if(_ghPoint) // is stored ghost point exists
+  {
+    os.writeObject ( 1 ); // 1 == no point transmitted 
+    // the third vertex is the new vertex, see insert_ghosttetra
+    for(int j=0; j<_ghPoint->nop(); j++) // j = 1 for tetra and 4 for hexa
+    {
+      const double (&p)[3] = _ghPoint->getPoint(j);
+      for(int i=0; i<3; i++) os.writeObject ( p[i] ) ;
+    }
+  }
+  else 
+  {
+    os.writeObject ( 0 ); // 0 == no point transmitted 
+  }
+   
   return ;
 }
 
