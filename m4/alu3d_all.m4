@@ -49,7 +49,7 @@ AC_DEFUN([ALU3D_SUMMARY_ALL],[
   # show search results
 
   echo
-  echo "Found the following components for ALU3dGrid (parallel) : "
+  echo "Found the following components for ALU3d-Grid (parallel) : "
   echo
   echo "-----------------------------"
   echo  
