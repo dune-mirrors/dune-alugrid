@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.9  2004/11/29 18:00:45  robertk
+ * implemented the hole regeneration after restoreing the grid.
+ *
  * Revision 1.8  2004/11/29 13:03:51  robertk
  * number of indexmanagers variable (enum ) now.
  *
@@ -364,6 +367,18 @@ void Gitter :: backup (ostream & out) {
   return ;
 }
 
+// go down all children and check index 
+inline void goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
+{
+  typedef Gitter :: helement_STI ElType; 
+  assert( el.getIndex() < idxcheck.size() );
+  idxcheck[ el.getIndex() ] = false;
+  for( ElType * ch = el.down() ; ch ; ch = ch->next())
+    goDownHelement( *ch , idxcheck );
+
+  return ;
+}
+
 void Gitter ::restore (istream & in) {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
   {AccessIterator < hedge_STI > :: Handle ew (container ());
@@ -378,7 +393,7 @@ void Gitter ::restore (istream & in) {
   if(indices)
   {
     for(int i=0; i< numOfIndexManager ; i++) 
-      this->indexManager(i).restoreIndexSet ( in );
+      this->indexManager(i).restoreIndexSet( in );
     
     // restore index of elements 
     { 
@@ -389,6 +404,48 @@ void Gitter ::restore (istream & in) {
     {
       LeafIterator < vertex_STI > w ( *this );  
       for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in);
+    }
+
+    { // reconstruct holes 
+      { 
+        enum { elements = 0 };
+        // for elements 
+        int idxsize = this->indexManager(elements).getMaxIndex();
+        vector < bool > checkidx ( idxsize ); 
+        for(int i=0; i<idxsize; i++) checkidx[i] = true;
+        
+        AccessIterator < helement_STI >:: Handle ew(container());
+        for ( ew.first(); !ew.done(); ew.next()) 
+        { 
+          goDownHelement( ew.item() , checkidx );
+        }
+
+        for(int i=0; i<idxsize; i++)
+        {
+          if(checkidx[i] == true)
+            this->indexManager(elements).freeIndex(i);
+        }
+      }
+      { 
+        enum { vertices = 3 };  
+        // for vertices 
+        LeafIterator < vertex_STI > w ( *this );
+        int idxsize = this->indexManager(vertices).getMaxIndex();
+
+        vector < bool > checkidx ( idxsize ); 
+        for(int i=0; i<idxsize; i++) checkidx[i] = true;
+        for( w->first(); ! w->done() ; w->next () )
+        {
+          assert( w->item().vertexIndex() < checkidx.size() );
+          checkidx[ w->item().vertexIndex() ] = false;
+        }
+
+        for(int i=0; i<idxsize; i++)
+        {
+          if(checkidx[i] == true)
+            this->indexManager(vertices).freeIndex(i);
+        }
+      }
     }
   }
 #endif
