@@ -610,8 +610,9 @@ void GitterDunePll :: coarse () {
   
         a.second = false ;
 #ifndef NDEBUG
-        bool b = (*i)->accessPllX ().unlockAndResume (a.first) ;
+        bool b = 
 #endif
+          (*i)->accessPllX ().unlockAndResume (a.first) ;
         assert (b == a.first) ;
       }
     }
@@ -627,8 +628,9 @@ void GitterDunePll :: coarse () {
   // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
       
 #ifndef NDEBUG
-      bool b = (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
+      bool b = 
 #endif
+        (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
       assert (b == bool (*j)) ;
     }
         }}
