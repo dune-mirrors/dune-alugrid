@@ -79,6 +79,7 @@ bool GitterDunePll :: duneLoadBalance ()
   return true;
 }
 
+// returns true if grid was repartitioned 
 bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs) {
   assert (debugOption (20) ? (cout << "**GitterDunePll :: duneLoadBalance () " << endl, 1) : 1) ;
   const int np = mpAccess ().psize () ;
