@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/28 18:56:31  robertk
+ * TetraPllXBaseMacro :: dunePackAll added for packing dune data.
+ *
  * Revision 1.1  2004/10/25 16:41:19  robertk
  * Parallel grid implementations.
  *
@@ -477,6 +480,34 @@ bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (ENDOFSTREAM) ;
       inlineData (osv [j]) ;
+    }
+    _erasable = true ;
+    return true ;
+  }
+  return false ;
+}
+
+bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
+    GatherScatterType & gs) {
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+    int j = (*i).first ;
+    assert ((osv.begin () + j) < osv.end ()) ;
+    assert (_moveTo.size () == 1) ;
+    osv [j].writeObject (TETRA) ;
+    osv [j].writeObject (mytetra ().myvertex (0)->ident ()) ;
+    osv [j].writeObject (mytetra ().myvertex (1)->ident ()) ;
+    osv [j].writeObject (mytetra ().myvertex (2)->ident ()) ;
+    osv [j].writeObject (mytetra ().myvertex (3)->ident ()) ;
+    {
+      strstream s ;
+      mytetra ().backup (s) ;
+      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
+      osv [j].writeObject (ENDOFSTREAM) ;
+      inlineData (osv [j]) ;
+      
+      // pack Dune data 
+      gs.inlineData( osv[j] , mytetra() );
+
     }
     _erasable = true ;
     return true ;
