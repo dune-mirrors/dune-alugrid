@@ -317,7 +317,6 @@ void GitterDunePll :: duneRestore (const char * fileName)
 
 bool GitterDunePll :: refine () {
   assert (debugOption (5) ? (cout << "**INFO GitterPll :: refine () " << endl, 1) : 1) ;
-  debugOption (5) ? (cout << "**INFO GitterPll :: refine () " << endl) : 0;
   const int nl = mpAccess ().nlinks (), start = clock () ;
   bool state = false ;
   vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;

@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/12/20 21:35:43  robertk
+ * gcc compile.
+ *
  * Revision 1.2  2004/10/25 16:38:12  robertk
  * All header end with .h now. Like the original.
  *
@@ -94,9 +97,11 @@ struct AllocEntry {
 static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
 
 void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) {
-  if (s == 0) {
-    return 0 ;
-  } else {
+  assert(s > 0);
+  //if (s == 0) {
+  //  return 0 ;
+  //} else 
+  {
     AllocEntry & fs ((*freeStore) [s]) ;
     ++ fs.N ;
     if (fs.S.empty ()) {
