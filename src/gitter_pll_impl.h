@@ -8,6 +8,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.6  2004/11/25 18:47:55  robertk
+ * added ghost_level for BoundaryClosure
+ *
  * Revision 1.5  2004/11/16 19:41:16  robertk
  * Added new methods read and write DynamiceState with GatherScatter.
  * Furthermore changed readDynamicState of BoundaryPllClosure. Now the
@@ -518,7 +521,7 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
 // Schwerpunkt des anliegenden Elements beschaffen:
   public:
     const double (& barycenter () const)[3] { return _center ; }
-    int ghostLevel () const { return _ghostLevel; }
+    inline int ghostLevel () const { return _ghostLevel; }
 // Ende
 } ;
 
@@ -1313,19 +1316,17 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
       return false ;
     } else {
       if (myhbnd ().refineLikeElement (r)) {
-      
-    	// Verfeinerung erfolgreich
-    
+    	  // Verfeinerung erfolgreich
         return true ;
       } else {
       
       	// Verfeinerung verhindert irgendwo im Gitter. Dies ist ein Vorbehalt
-	// f"ur den parallelen anisotropen Verfeinerungsalgorithmus. Daher
-	// sollte die Situation im isotropen Fall nicht auftreten.
+      	// f"ur den parallelen anisotropen Verfeinerungsalgorithmus. Daher
+	      // sollte die Situation im isotropen Fall nicht auftreten.
       
         cerr << "**FEHLER (FATAL, weil nicht vorgesehen): Verfeinerung wurde\n" ;
         cerr << "  verhindert am inneren Rand. In " << __FILE__ << " " << __LINE__ << endl ;
-	abort () ;
+      	abort () ;
       }
     }
   }
@@ -1333,7 +1334,6 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
 }
 
 template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, GatherScatterType & gs ) {
-  logFile << "readDyn Data \n";
   gs.recvData( os , myhbnd () );
   return ;
 }
@@ -1351,7 +1351,6 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
     }
 
 #ifdef _DUNE_USES_BSGRID_
-   
     // read the real level of ghost 
     os.readObject( _ghostLevel );
     //logFile << "readLevel " << _ghostLevel << "\n"; 
@@ -1369,14 +1368,15 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
       myhbnd (). setOppPoint ( i , p ) ;
     }
 
+    /*
     if(writeLogFile)
     {
       logFile << "write p = [";
       for(int i=0; i<3; i++)
         logFile << p[i] << ",";
       logFile << "]\n";
-    }    
-    
+    }  
+    */
 #endif
     
   } catch (ObjectStream :: EOFException) {
