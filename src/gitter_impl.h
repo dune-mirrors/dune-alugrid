@@ -9,6 +9,13 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.7  2004/12/21 17:21:17  robertk
+ * Some cleanup and new methods setGhost and getGhost.
+ * getGhost is virtual and returns pointer to ghost elements.
+ *
+ * furthermore new method insert_hbnd3 with given point.
+ * here the old insert_hbnd3 is returned.
+ *
  * Revision 1.6  2004/12/07 17:43:19  robertk
  * logFile switched off.
  *
@@ -86,7 +93,7 @@
 
 static volatile char RCSId_gitter_impl_h [] = "$Id$" ;
 
-//static ofstream logFile ("logfile");
+static ofstream logFile ("logfile");
 
   // organizes the indices for boundary faces and the opposite vertices for
   // ghost cells 
@@ -106,6 +113,13 @@ static volatile char RCSId_gitter_impl_h [] = "$Id$" ;
     inline int getIndex () const; 
     inline void setIndex ( int idx ); 
     inline int dimVx () const; 
+
+    // default implementation is doing nothing for these 3 methods
+    // these methods are overloades just on HbndPll
+    virtual Gitter::helement_STI * getGhost () { return 0; }
+  protected:  
+    inline void splitGhost () {} 
+    inline void setGhost (Gitter::helement_STI *) {}
   };
         
 class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
@@ -140,8 +154,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         {
           protected :
            inline Hbnd3Default (myhface3_t *, int, ProjectVertex * ) ;
-	   ~Hbnd3Default () {}
+	   virtual ~Hbnd3Default () {}
           public :
+            typedef hbndseg3_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ; 
 
@@ -157,8 +172,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         {
           protected :
             inline Hbnd4Default (myhface4_t *, int, ProjectVertex *) ;
-	   ~Hbnd4Default () {}
+	   virtual ~Hbnd4Default () {}
           public :
+            typedef hbndseg4_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ;  
 
@@ -253,6 +269,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 	virtual inline hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual inline hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
 	virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+  // version with point , returns insert_hbnd3 here 
+	virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
 	virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
 	virtual inline periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
@@ -414,7 +432,7 @@ inline GitterBasis :: Objects :: Hbnd3Default :: Hbnd3Default (myhface3_t * f, i
   return ;
 }
 
-inline Gitter :: hbndseg_STI :: bnd_t GitterBasis :: Objects :: Hbnd3Default :: bndtype () const {
+inline GitterBasis :: Objects ::Hbnd3Default :: bnd_t GitterBasis :: Objects :: Hbnd3Default :: bndtype () const {
   return undefined ;
 }
 
@@ -441,7 +459,7 @@ inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, i
   return ;
 }
 
-inline Gitter :: hbndseg_STI :: bnd_t GitterBasis :: Objects :: Hbnd4Default :: bndtype () const {
+inline GitterBasis :: Objects ::Hbnd4Default :: bnd_t GitterBasis :: Objects :: Hbnd4Default :: bndtype () const {
   return undefined ;
 }
 
@@ -566,8 +584,14 @@ inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa 
   return new Objects :: hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5]) ;
 }
 
-inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
-  return new Objects :: hbndseg3_IMPL (0,f,i,NULL,NULL ,b, _indexmanager[4] ) ;
+inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
+  return new Objects :: hbndseg3_IMPL (0,f,i,NULL,NULL ,b, _indexmanager[4] , 0 ) ;
+}
+
+inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const double (&p)[3]) {
+  return insert_hbnd3(f,i,b); 
 }
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
