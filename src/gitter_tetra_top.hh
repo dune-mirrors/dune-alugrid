@@ -8,6 +8,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/10/22 16:55:33  robertk
+ * Boundary type return on Hbnd3Top implemented.
+ * Works. To be added on Hbnd4Top.
+ *
  * Revision 1.3  2004/10/19 16:30:40  robertk
  * vetex backup and restore is not running yet.
  *
@@ -88,10 +92,12 @@ template < class A > class Hbnd3Top : public A {
     typedef typename A :: myhface3_t 	myhface3_t ;
     typedef typename A :: balrule_t	balrule_t ;
     typedef typename A :: myrule_t      myrule_t ;
+    typedef typename A :: bnd_t bnt_t;
     bool refineLikeElement (balrule_t) ;
     inline void append (innerbndseg_t *) ;
   private :
     innerbndseg_t * _bbb, * _dwn ;
+    const bnt_t _bt; // type of boundary 
     int _lvl ;
     void split_e01 () ;
     void split_e12 () ;
@@ -99,7 +105,7 @@ template < class A > class Hbnd3Top : public A {
     void split_iso4 () ;
     inline bool coarse () ;
   public :
-    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *) ;
+    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, const bnd_t) ;
     inline virtual ~Hbnd3Top () ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
@@ -109,6 +115,8 @@ template < class A > class Hbnd3Top : public A {
     inline innerbndseg_t * down () ;
     inline const innerbndseg_t * next () const ;
     inline const innerbndseg_t * down () const ;
+
+    inline bnd_t bndtype () const { return _bt; }
 } ;
 
 template < class A > class TetraTop : public A {
@@ -571,8 +579,9 @@ template < class A > void Hface3Top < A > :: restore (istream & is) {
 // #     #  #    #  #   ##  #    # #     #    #     #    #  #
 // #     #  #####   #    #  #####   #####     #      ####   #
 
-template < class A > inline Hbnd3Top < A > :: Hbnd3Top (int l, myhface3_t * f, int i,ProjectVertex *ppv) 
-	: A (f, i,ppv), _bbb (0), _dwn (0), _lvl (l) {
+template < class A > inline Hbnd3Top < A > :: Hbnd3Top (int l, myhface3_t * f, int i,
+    ProjectVertex *ppv, const bnd_t bt ) 
+	: A (f, i,ppv), _bbb (0), _dwn (0), _lvl (l), _bt (bt) {
   return ;
 }
 
@@ -610,8 +619,8 @@ template < class A > inline void Hbnd3Top < A > :: append (innerbndseg_t * b) {
 
 template < class A > void Hbnd3Top < A > :: split_e01 () {
   int l = 1 + level () ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), projection) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), projection) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), projection, _bt) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), projection, _bt) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -620,8 +629,8 @@ template < class A > void Hbnd3Top < A > :: split_e01 () {
 
 template < class A > void Hbnd3Top < A > :: split_e12 () {
   int l = 1 + level () ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), projection) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), projection) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), projection, _bt) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), projection, _bt) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -630,8 +639,8 @@ template < class A > void Hbnd3Top < A > :: split_e12 () {
 
 template < class A > void Hbnd3Top < A > :: split_e20 () {
   int l = 1 + level () ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), projection) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), projection) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), projection, _bt) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), projection, _bt) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -640,10 +649,10 @@ template < class A > void Hbnd3Top < A > :: split_e20 () {
 
 template < class A > void Hbnd3Top < A > :: split_iso4 () {
   int l = 1 + level () ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), projection) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), projection) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, subface3 (0,2), twist (0), projection) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, subface3 (0,3), twist (0), projection) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), projection, _bt) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), projection, _bt) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, subface3 (0,2), twist (0), projection, _bt) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, subface3 (0,3), twist (0), projection, _bt) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;

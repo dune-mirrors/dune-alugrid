@@ -9,6 +9,10 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/22 16:55:33  robertk
+ * Boundary type return on Hbnd3Top implemented.
+ * Works. To be added on Hbnd4Top.
+ *
  * Revision 1.2  2004/10/19 13:21:20  robertk
  * Added Vertex Management for Dune. Using the already implemented variable
  * _idx in VertexGeo. If _DUNE_USES_BSGRID_ is undefined then no vertex
@@ -423,7 +427,7 @@ inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa 
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
-  return new Objects :: hbndseg3_IMPL (0,f,i,NULL) ;
+  return new Objects :: hbndseg3_IMPL (0,f,i,NULL,b) ;
 }
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
