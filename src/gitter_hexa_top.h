@@ -1,69 +1,11 @@
-	// (c) bernhard schupp 1997 - 1998
-
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-
-/* $Id$
- * $Log$
- * Revision 1.7  2005/03/22 15:40:31  robertk
- * Added Indices for Hedge1Top and Hface4Top and HexaTop, also on Hbnd4Top.
- * Further boundary type on Hbnd4Top added.
- *
- * Revision 1.6  2005/03/18 20:07:15  robertk
- * Added backup and restore for XDRStreams. does not work yet.
- *
- * Revision 1.5  2005/01/19 18:26:24  robertk
- * removed warnings.
- *
- * Revision 1.4  2005/01/19 17:45:25  robertk
- * removed warnings.
- *
- * Revision 1.3  2004/12/20 13:55:08  robertk
- * gcc compileable.
- *
- * Revision 1.2  2004/11/16 19:33:48  robertk
- * Added methods up for Hbnd4Top elements.
- *
- * Revision 1.1  2004/10/25 16:39:52  robertk
- * Some off the headers are old and changed from .hh to .h.
- * All changes are made in the headers aswell.
- *
- * Some new file are the parallel grid files mostly have a _pll_ in then name.
- * There some Constructors of Tetra and Hbdn3Top had to be adapted.
- *
- * Revision 1.3  2004/10/19 16:28:36  robertk
- * backup and restore method for VertexGeo implemented. not runing at the
- * moment.
- *
- * Revision 1.2  2004/10/19 13:25:11  robertk
- * Adapted constructors of VertexGeo for IndexManagement.
- *
- * Revision 1.1  2004/10/15 09:48:37  robertk
- * Inititial version. Some extenxions for Dune made. Schould be compatible
- * with all other applications done so far.
- *
- * Revision 1.6  2002/05/24 09:05:31  dedner
- * Vorl"aufig syntaktisch korrekte, d.h. kompilierbare Version
- *
- * Revision 1.5  2002/05/23 16:37:41  dedner
- * Test nach Einbau der Periodischen 4-Raender
- *
- * Revision 1.4  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.3  2001/12/10 13:56:37  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/
+// (c) bernhard schupp 1997 - 1998
+// modifications for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 
 #ifndef GITTER_HEXA_TOP_H_INCLUDED
 #define GITTER_HEXA_TOP_H_INCLUDED
 
 #include "mapp_cube_3d.h"
-
-static volatile char RCSId_gitter_hexa_top_h [] = "$Id$" ;
 
 template < class A > class Hedge1Top : public A {
   protected :
@@ -79,7 +21,7 @@ template < class A > class Hedge1Top : public A {
 
     IndexManagerType & _indexManager; 
   public :
-    // need fro refinement 
+    // need for refinement 
     IndexManagerType & getIndexManager() { return _indexManager; }
     
     inline Hedge1Top (int,myvertex_t *,myvertex_t *, IndexManagerType & im) ;
@@ -267,8 +209,6 @@ template < class A > class HexaTop : public A {
     void restore (istream &) ;
 } ;
 
-// Anfang - Neu am 23.5.02 (BS)
-
 template < class A > class Periodic4Top : public A {
   protected :
     typedef Periodic4Top < A > 		innerperiodic4_t  ;
@@ -282,7 +222,7 @@ template < class A > class Periodic4Top : public A {
     inline void refineImmediate (myrule_t) ;
     inline void append (innerperiodic4_t * h) ;
   private :
-    innerperiodic4_t * _dwn, * _bbb, * _up ; //us
+    innerperiodic4_t * _dwn, * _bbb, * _up ; 
     int _lvl ;
     myrule_t _rule ;
   private :
@@ -295,10 +235,10 @@ template < class A > class Periodic4Top : public A {
   public:
     inline Periodic4Top (int,myhface4_t *,int,myhface4_t *,int) ;
     virtual inline ~Periodic4Top () ;
-    //testweise us
+
     inline innerperiodic4_t * up () ;
     inline const innerperiodic4_t * up () const;
-    //testweise us
+    
     inline innerperiodic4_t * down () ;
     inline const innerperiodic4_t * down () const ;
     inline innerperiodic4_t * next () ;
@@ -321,8 +261,6 @@ template < class A > class Periodic4Top : public A {
     void backup (ostream &) const ;
     void restore (istream &) ;
 };
-
-// Ende - Neu am 23.5.02 (BS)
 
 	//
 	//    #    #    #  #          #    #    #  ######
@@ -350,9 +288,6 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
 
 template < class A > Hedge1Top < A > :: ~Hedge1Top () {
   _indexManager.freeIndex( this->getIndex() );
-  //_bbb ? (delete _bbb, 0) : 0 ;
-  //_dwn ? (delete _dwn, 0) : 0 ;
-  //_cv  ? (delete _cv,  0) : 0 ;
   if(_bbb) delete _bbb;
   if(_dwn) delete _dwn;
   if(_cv)  delete _cv;
@@ -381,32 +316,24 @@ template < class A > const Hedge1Top < A > * Hedge1Top < A > :: next () const {
 
 template < class A > void Hedge1Top < A > :: backup (ostream & os) const {
   os.put ((char) getrule ()) ;
-  //myvertex(0)->backup( os );
-  //myvertex(1)->backup( os );
   {for (const inneredge_t * d = down () ; d ; d = d->next ()) d->backup (os) ; }
   return ;
 }
 
 template < class A > void Hedge1Top < A > :: restore (istream & is) {
   char r = (char) is.get () ;
-  //myvertex(0)->restore( is );
-  //myvertex(1)->restore( is );
   refineImmediate (myrule_t (r)) ;
   {for (inneredge_t * d = down () ; d ; d = d->next ()) d->restore (is) ; }
   return ;
 }
 template < class A > void Hedge1Top < A > :: backup (XDRstream_out & os) const {
   os.put ((char) getrule ()) ;
-  //myvertex(0)->backup( os );
-  //myvertex(1)->backup( os );
   {for (const inneredge_t * d = down () ; d ; d = d->next ()) d->backup (os) ; }
   return ;
 }
 
 template < class A > void Hedge1Top < A > :: restore (XDRstream_in & is) {
   char r = (char) is.get () ;
-  //myvertex(0)->restore( is );
-  //myvertex(1)->restore( is );
   refineImmediate (myrule_t (r)) ;
   {for (inneredge_t * d = down () ; d ; d = d->next ()) d->restore (is) ; }
   return ;
