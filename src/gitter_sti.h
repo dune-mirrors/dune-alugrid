@@ -1,67 +1,3 @@
-/* $Id$
- * $Log$
- * Revision 1.13  2005/03/18 19:52:40  robertk
- * addeds backup and restore for XDRStream, dsoent work yet.
- *
- * Revision 1.12  2005/01/19 18:26:24  robertk
- * removed warnings.
- *
- * Revision 1.11  2004/12/21 17:29:08  robertk
- * Removed warnings.
- *
- * Revision 1.10  2004/12/21 17:24:41  robertk
- * new methods for ghost elements on internal boundarys.
- * all new methods to insert internal boundary with ghost element are mostly
- * on the DuneParallelGridMover. Some Methods are on GitterPll (insert_hbnd3).
- * MacroGhostTetra has to be moved to other file.
- *
- * Revision 1.9  2004/12/20 13:54:17  robertk
- * gcc compileable.
- *
- * Revision 1.8  2004/11/29 13:03:20  robertk
- * enum number of index managers .
- *
- * Revision 1.7  2004/11/29 12:38:20  robertk
- * some clean up in restore and backup Index methods.
- *
- * Revision 1.6  2004/11/25 18:43:48  robertk
- * changed vertex backup and restore and added faceNormal for hbndseg.
- *
- * Revision 1.5  2004/11/16 19:26:59  robertk
- * virtual method up for hbndseg, and ghostLevel .
- *
- * Revision 1.4  2004/11/02 17:12:41  robertk
- * Removed duneBackup and duneRestore. Now in GitterDuneImpl.
- *
- * Revision 1.3  2004/10/28 16:04:04  robertk
- * minor changes.
- *
- * Revision 1.2  2004/10/27 15:05:59  robertk
- * index restore and backup changed.
- * now index storeage is done at the end of one gitter storage, because we
- * need the backup and restore methods for data communication aof parallel
- * grid.
- *
- * Revision 1.1  2004/10/25 16:39:53  robertk
- * Some off the headers are old and changed from .hh to .h.
- * All changes are made in the headers aswell.
- *
- * Some new file are the parallel grid files mostly have a _pll_ in then name.
- * There some Constructors of Tetra and Hbdn3Top had to be adapted.
- *
- * Revision 1.5  2004/10/19 16:29:21  robertk
- * Dune_VertexGeo added which is holding the extra implementations for Dune
- * for example index backup and restore.
- *
- * Revision 1.4  2004/10/19 13:17:58  robertk
- * Vertex index added. neighOuterNormal added. myinteresction added.
- *
- * Revision 1.2  2004/10/15 11:01:36  robertk
- * if not used by Dune the _DUNE_USED_BSGRID_ is not defined and some things
- * are switched off.
- *
- ***/
-
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
@@ -85,7 +21,6 @@
 #include "myalloc.h"
 #include "parallel.h"
   
-//hinzugefuegt uwe fuer DUNE
 #include "xdrclass.h"
 
 // if DUNE uses this grid the _DUNE_USES_BSGRID_ variable should be defined
@@ -108,8 +43,12 @@ enum { numOfIndexManager = 6 };
 // 4 == boundary elements 
 // 5 == dummy index for unused internal bnd 
 
- 
-static volatile char RCSId_gitter_sti_h [] = "$Id$" ;
+
+class ProjectVertex {
+ public:
+  virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
+};
+
 
   // Einfacher Referenzenz"ahler mit cast-around-const
   // feature, der zum Z"ahlen der Referenzen auf Fl"achen
@@ -117,11 +56,6 @@ static volatile char RCSId_gitter_sti_h [] = "$Id$" ;
   // die einen Z"ahler dieser Klasse enthalten, werden
   // durch Inkrementierung bzw. Dekrementierung des Z"ahlers
   // nicht ver"andert (k"onnen also auch 'const' sein).
-
-class ProjectVertex {
- public:
-  virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
-};
 
 class Refcount {
 #ifndef NDEBUG
@@ -244,17 +178,30 @@ class Gitter {
   // Kanten, Fl"achen, Elemente und Randelemente definiert.
     class Dune_vertex 
     {
+#ifdef _DUNE_USES_BSGRID_
+      protected:
+        int _idx;
+        Dune_vertex () : _idx(-1) {}
+#endif
       public:
         // backup and restore index of vertices 
-        virtual void backupIndex  (ostream & os ) const = 0;
-        virtual void restoreIndex (istream & is ) = 0;
+        virtual void backupIndex  (ostream & os ) const {};
+        virtual void restoreIndex (istream & is ) {};
+
+#ifdef _DUNE_USES_BSGRID_
+        inline int getIndex () const { return _idx; }
+        void setIndex ( const int index ) { _idx = index; }
+#else 
+        inline int getIndex () const { return -1; }
+        void setIndex ( const int index ) {}
+#endif
     };
         
     
   public :
     class vertex : public stiExtender_t :: VertexIF  
 #ifdef _DUNE_USES_BSGRID_
-      , public virtual Dune_vertex 
+      , public Dune_vertex 
 #endif
     {
       protected :
@@ -264,7 +211,7 @@ class Gitter {
         virtual int ident () const = 0 ;
         virtual int level () const = 0 ;
         virtual const double (& Point () const )[3] = 0 ;
-        
+
         // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
         virtual void project(const ProjectVertex &pv) = 0; 
   
@@ -272,12 +219,29 @@ class Gitter {
   // wenn die Daten zur Visualisierung mit GRAPE rausgeschrieben
   // werden sollen:
   
-  virtual int & vertexIndex () { return (abort (), *(int *)0) ; }
-  virtual int   vertexIndex () const { return (abort (), 0) ; }
-  
    } ;
-    
-    class hedge : public stiExtender_t :: EdgeIF {
+   
+    // numbering for hedge and hface 
+    class Dune_hface_or_hedge
+    {
+#ifdef _DUNE_USES_BSGRID_
+      protected: 
+        int  _index; // global_index, unique per level but not per processor
+        Dune_hface_or_hedge () : _index (-1) {}
+#endif
+      public:
+        // use only this methods to get and set the _index 
+        inline int getIndex () const;  
+        inline void setIndex (const int index) ; 
+        
+        virtual void backupIndex (ostream &) const ;   // backup _index  
+
+        // method is virual, because former index set by constructor has to
+        // be freeed , means method has to be overloaded for correct work
+        virtual void restoreIndex (istream &) ;// retore _index  
+    };
+
+    class hedge : public stiExtender_t :: EdgeIF, public Dune_hface_or_hedge  {
       protected :
         hedge () {}
         virtual ~hedge () {}
@@ -302,7 +266,7 @@ class Gitter {
         virtual void projectInnerVertex(const ProjectVertex &pv) = 0; 
     } ;
     
-    class hface : public stiExtender_t :: FaceIF {
+    class hface : public stiExtender_t :: FaceIF , public Dune_hface_or_hedge {
       protected :
         hface () {}
         virtual ~hface () {}
@@ -346,8 +310,8 @@ class Gitter {
         bool hasBeenRefined () const;
         
         // use only this methods to get and set the _index 
-        int getIndex () const;  
-        void setIndex (const int index) ; 
+        inline int getIndex () const;  
+        inline void setIndex (const int index) ; 
         
         virtual void backupIndex (ostream &) const ;   // backup _index  
 
@@ -659,25 +623,11 @@ class Gitter {
             }
 // Ende
         } ;
-     
-        class Dune_VertexGeo : public virtual Dune_vertex 
+
+        class VertexGeo : public vertex_STI, public MyAlloc 
         {
           protected:
             IndexManagerType & _indexmanager;
-#ifdef _DUNE_USES_BSGRID_ 
-          protected:   
-            int _idx; // the vertex index 
-#endif          
-          public:
-            Dune_VertexGeo (IndexManagerType & im);
-            virtual ~Dune_VertexGeo (); 
-            inline void backupIndex  (ostream & os ) const;
-            inline void restoreIndex (istream & is ) ;
-        };
-        
-        class VertexGeo : public vertex_STI, public MyAlloc 
-          , public Dune_VertexGeo 
-        {
           public :
             Refcount ref ;
             // VertexGeo is provided for the vertices on lower levels 
@@ -695,8 +645,8 @@ class Gitter {
   // Extramethode zum Rausschreiben der Elementdaten in einfachem
   // Format f"ur die Visualisierung mit GRAPE:
      
-      inline int & vertexIndex () ;
-      inline int   vertexIndex () const ;
+      //inline int & vertexIndex () ;
+      //inline int   vertexIndex () const ;
     private :
       double _c [3] ;
       int _lvl ;
@@ -1239,6 +1189,7 @@ template < class A > class LeafIterator : public MyAlloc {
   void operator delete (void *) { }
   inline LeafIterator () ;
   public :
+    typedef A val_t;
     inline LeafIterator (Gitter &) ;
     inline LeafIterator (const LeafIterator < A > & ) ;
     inline ~LeafIterator () ;
@@ -1475,6 +1426,38 @@ inline int Gitter :: helement :: leaf () const {
   return ! down () ;
 }
 
+inline int Gitter :: Dune_hface_or_hedge :: getIndex () const {
+#ifdef _DUNE_USES_BSGRID_ 
+  assert( _index >= 0);
+  return _index; 
+#else 
+  std::cerr << "Dune_hface_or_hedge::getIndex () -- ERROR: '_DUNE_USES_BSGRID_' is not defined, so index cannot be used! " << __FILE__ << __LINE__ << "\n";
+  abort();
+  return -1;
+#endif
+}
+
+inline void Gitter :: Dune_hface_or_hedge :: setIndex (const int index) {
+#ifdef _DUNE_USES_BSGRID_ 
+  _index = index; 
+#endif
+}
+
+inline void Gitter :: Dune_hface_or_hedge :: backupIndex (ostream & os ) const {
+#ifdef _DUNE_USES_BSGRID_ 
+  cerr << "Dune_hface_or_hedge :: backupIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
+  abort();
+#endif
+}
+
+inline void Gitter :: Dune_hface_or_hedge :: restoreIndex (istream & is ) {
+#ifdef _DUNE_USES_BSGRID_ 
+  cerr << "Dune_hface_or_hedge :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
+  abort();
+#endif
+}
+
+
 // Dune extensions 
 inline void Gitter :: Dune_helement :: resetRefinedTag () {
 #ifdef _DUNE_USES_BSGRID_ 
@@ -1545,22 +1528,25 @@ inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) 
 //    #     ######  #    #     #    ######  #    #  #####   ######   ####
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, IndexManagerType & im) 
-  : 
-  Dune_VertexGeo (im) ,    
-  _lvl (l) {
+  : _indexmanager (im) 
+  , _lvl (l) 
+{
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
+  this->setIndex( _indexmanager.getIndex() );
   return ;
 }
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, VertexGeo & vx) 
-  :
-  Dune_VertexGeo ( vx._indexmanager ) , 
-  _lvl (l)  {
+  : _indexmanager ( vx._indexmanager ) 
+  , _lvl (l)  
+{
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
+  this->setIndex( _indexmanager.getIndex() );
   return ;
 }
 
 inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () {
+  _indexmanager.freeIndex( this->getIndex() );
   assert (ref ? (cerr << "**WARNUNG Vertex-Refcount war " << ref << endl, 1) : 1) ;
   return ;
 }
@@ -1582,41 +1568,13 @@ inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv)
   }
 }
 
-inline int & Gitter :: Geometric :: VertexGeo :: vertexIndex () {
-  return _idx ;
-}
-
-inline int  Gitter :: Geometric :: VertexGeo :: vertexIndex () const {
-  return _idx ;
-}
-
 inline void Gitter :: Geometric :: VertexGeo :: backup ( ostream & os ) const {
-}
-
-inline void Gitter :: Geometric :: VertexGeo :: restore ( istream & is ) {
-}
-
-inline Gitter :: Geometric :: Dune_VertexGeo :: Dune_VertexGeo ( IndexManagerType & im ) : _indexmanager (im)  
-{
-#ifdef _DUNE_USES_BSGRID_
-  _idx = _indexmanager.getIndex(); 
-#endif
-}
-
-inline Gitter :: Geometric :: Dune_VertexGeo :: ~Dune_VertexGeo () 
-{ 
-#ifdef _DUNE_USES_BSGRID_
-  _indexmanager.freeIndex( _idx );
-#endif
-}
-
-inline void Gitter :: Geometric :: Dune_VertexGeo :: backupIndex ( ostream & os ) const {
 #ifdef _DUNE_USES_BSGRID_
   os.write( ((const char *) &_idx ), sizeof(int) ) ;
 #endif
 }
 
-inline void Gitter :: Geometric :: Dune_VertexGeo :: restoreIndex ( istream & is ) {
+inline void Gitter :: Geometric :: VertexGeo :: restore ( istream & is ) {
 #ifdef _DUNE_USES_BSGRID_ 
   //_indexmanager.freeIndex( _idx );
   is.read ( ((char *) &_idx), sizeof(int) ); 
@@ -2504,8 +2462,6 @@ inline Gitter :: Geometric :: hbndseg4 :: myhface4_t * Gitter :: Geometric :: hb
 inline Gitter :: Geometric :: hbndseg4 :: myrule_t Gitter :: Geometric :: hbndseg4 :: getrule () const {
   return myhface4 (0)->getrule () ;
 }
-
-
 
 #if 0
 template < class A > ConstLeafIterator < A > :: ConstLeafIterator () : _grd (0), _w (0) {
