@@ -1,3 +1,4 @@
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifndef __GHOSTELEMENTS_INCLUDED__
 #define __GHOSTELEMENTS_INCLUDED__
 
@@ -9,7 +10,7 @@ class MacroGhostPoint
   public:
     virtual ~MacroGhostPoint () {}
 
-    virtual const double (& getPoint () const )[3] = 0;
+    virtual const double (& getPoint (int i) const )[3] = 0;
     virtual int nop () const = 0;
 };
 typedef MacroGhostPoint MacroGhostPoint_STI;
@@ -25,7 +26,7 @@ class MacroGhostPointTetra : public MacroGhostPoint
       for(int i=0; i<3; i++) _p[i] = p[i];
     }
 
-    virtual const double (& getPoint () const )[3]
+    virtual const double (& getPoint (int i) const )[3]
     {
       return _p;
     }
