@@ -1,13 +1,16 @@
-	// (c) bernhard schupp 1997 - 1998
+  // (c) bernhard schupp 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-	// $Date$
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
+  // $Date$
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/28 17:59:37  robertk
+ * minor changes.
+ *
  * Revision 1.1  2004/10/25 16:39:53  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -50,35 +53,35 @@
 
 static volatile char RCSId_gitter_pll_sti_h [] = "$Id$" ;
 
-	// Die statische Variable __STATIC_myrank sollte nur zum Debuggen
-	// verwendet werden, da ernstere Bez"uge wohl die thread-safeness
-	// gef"ahrden w"urden. Sie wird auch erst sp"ater irgendwann mit
-	// dem richtigen Wert besetzt. Definiert in gitter_pll_sti.cc .
-	//  __STATIC_turn  enth"alt die globale Runde der adaption, damit
-	// Fehler in der parallelen Ausgabe, die normalerweise entwas
-	// unsortiert ist, zugeordnet werden k"onnen. Die Variablen k"onnen
-	// nur in echt verteilten Anwendungen (nicht mt) zum Debuggen
-	// verwendet werden.
-	// __STATIC_phase enth"alt w"ahrend der Adaption deren Phase:
-	// -1 - ausserhalb der Verfeinerung bzw. Vergr"oberung.
-	//  1 - sequentielle Verfeinerung,
-	//  2 - Fl"achenausgleich des Verfeinerers,
-	//  3 - Kantenausgleich des Verfeinerers,
-	//  4 - sequentielle Vergr"oberung,
-	//  5 - Fl"achenausgleich des Vergr"oberers,
-	//  6 - Kantenausgleich des Vergr"oberers.
-	
+  // Die statische Variable __STATIC_myrank sollte nur zum Debuggen
+  // verwendet werden, da ernstere Bez"uge wohl die thread-safeness
+  // gef"ahrden w"urden. Sie wird auch erst sp"ater irgendwann mit
+  // dem richtigen Wert besetzt. Definiert in gitter_pll_sti.cc .
+  //  __STATIC_turn  enth"alt die globale Runde der adaption, damit
+  // Fehler in der parallelen Ausgabe, die normalerweise entwas
+  // unsortiert ist, zugeordnet werden k"onnen. Die Variablen k"onnen
+  // nur in echt verteilten Anwendungen (nicht mt) zum Debuggen
+  // verwendet werden.
+  // __STATIC_phase enth"alt w"ahrend der Adaption deren Phase:
+  // -1 - ausserhalb der Verfeinerung bzw. Vergr"oberung.
+  //  1 - sequentielle Verfeinerung,
+  //  2 - Fl"achenausgleich des Verfeinerers,
+  //  3 - Kantenausgleich des Verfeinerers,
+  //  4 - sequentielle Vergr"oberung,
+  //  5 - Fl"achenausgleich des Vergr"oberers,
+  //  6 - Kantenausgleich des Vergr"oberers.
+  
 extern int __STATIC_myrank ;
 extern int __STATIC_turn ;
 extern int __STATIC_phase ;
 
 template < class A > class LeafIteratorTT ;
 
-	// Der Smartpointer 'AccessIteratorTT' ist ein Iteratorproxy, das 
-	// genau wie der 'AccessIterator' aus gitter_sti.h funktioniert, aber
-	// f"ur die Identifikationsiteratoren verwendet wird. Deshalb hat es
-	// auch zwei Handle - Klassen: eine f"ur den inneren und eine f"ur
-	// den "ausseren Iterator.
+  // Der Smartpointer 'AccessIteratorTT' ist ein Iteratorproxy, das 
+  // genau wie der 'AccessIterator' aus gitter_sti.h funktioniert, aber
+  // f"ur die Identifikationsiteratoren verwendet wird. Deshalb hat es
+  // auch zwei Handle - Klassen: eine f"ur den inneren und eine f"ur
+  // den "ausseren Iterator.
 
 template < class A > class AccessIteratorTT {
   public :
@@ -121,13 +124,13 @@ template < class A > class AccessIteratorTT {
     } ;
 } ;
 
-	// Die Listen mit den Identifikationsabbildungen enthalten nicht
-	// direkt Objekterefenzen, sondern (teurer aber sicherer) Kopien
-	// von Grobgitteriteratoren, die auf das passende Item zeigen.
-	// Dadurch kann festgestellt werden, ob noch Referenzen vorhanden
-	// sind, wenn z.B. das Gitter umgebaut wird.
-	// Der 'listSmartpointer__to__iteratorSTI' Smartpointer verwaltet
-	// die Iteratorkopien.
+  // Die Listen mit den Identifikationsabbildungen enthalten nicht
+  // direkt Objekterefenzen, sondern (teurer aber sicherer) Kopien
+  // von Grobgitteriteratoren, die auf das passende Item zeigen.
+  // Dadurch kann festgestellt werden, ob noch Referenzen vorhanden
+  // sind, wenn z.B. das Gitter umgebaut wird.
+  // Der 'listSmartpointer__to__iteratorSTI' Smartpointer verwaltet
+  // die Iteratorkopien.
 
 template < class A > class listSmartpointer__to__iteratorSTI : public IteratorSTI < A > {
   list < typename AccessIterator < A > :: Handle > & _l ;
@@ -143,25 +146,25 @@ template < class A > class listSmartpointer__to__iteratorSTI : public IteratorST
     A & item () const ;
 } ;
 
-	// LinkedObjekt ist die Schnittstelle, die im parallelen Gitter zur
-	// Identifikation ben"otigt wird. Das Identifikationsmodul wendet
-	// sich an diese Schnittstelle, um die Schl"ussel f"ur die Objekte
-	// des Gitters und eine obere Absch"atzung f"ur deren Verbindungsstern
-	// zu erhalten. Diese Abschh"atzung kann auch die globale Verbindung
-	// sein, d.h. der Vektor enth"alt alle Gebietsnummern, dann wird aber
-	// die Effizienz des Identifikationsmoduls schlecht.
+  // LinkedObjekt ist die Schnittstelle, die im parallelen Gitter zur
+  // Identifikation ben"otigt wird. Das Identifikationsmodul wendet
+  // sich an diese Schnittstelle, um die Schl"ussel f"ur die Objekte
+  // des Gitters und eine obere Absch"atzung f"ur deren Verbindungsstern
+  // zu erhalten. Diese Abschh"atzung kann auch die globale Verbindung
+  // sein, d.h. der Vektor enth"alt alle Gebietsnummern, dann wird aber
+  // die Effizienz des Identifikationsmoduls schlecht.
 
 class LinkedObject {
   public :
   
-	// Der Identifier wird f"ur alle Gitterobjekte einheitlich verwendet.
-	// Er ist der Schl"ussel f"ur die Identifikation der mehrdeutigen
-	// Gitterobjekte. Kanten benutzen eine Schl"ussell"ange von zwei,
-	// Fl"achen eine von drei und Elemente eine von vier. Wird nicht der
-	// gesamte Schl"ussel benutzt, werden die "ubrigen Eintr"age mit
-	// -1 gepaddet.
-	// Die Schnittstelle wird von den Parallelerweiterungen der Knoten
-	// Kanten, Fl"achen und (sp"ater auch) Elemente implementiert.
+  // Der Identifier wird f"ur alle Gitterobjekte einheitlich verwendet.
+  // Er ist der Schl"ussel f"ur die Identifikation der mehrdeutigen
+  // Gitterobjekte. Kanten benutzen eine Schl"ussell"ange von zwei,
+  // Fl"achen eine von drei und Elemente eine von vier. Wird nicht der
+  // gesamte Schl"ussel benutzt, werden die "ubrigen Eintr"age mit
+  // -1 gepaddet.
+  // Die Schnittstelle wird von den Parallelerweiterungen der Knoten
+  // Kanten, Fl"achen und (sp"ater auch) Elemente implementiert.
   
     class Identifier : public Serializable {
       int _i1, _i2, _i3, _i4 ;
@@ -171,23 +174,23 @@ class LinkedObject {
         inline const Identifier & operator = (const Identifier &) ;
         inline bool operator < (const Identifier &) const ;
         inline bool operator == (const Identifier &) const ;
-	inline void read (vector < int > :: const_iterator &, const vector < int > :: const_iterator &) ;
-	inline void write (vector < int > &) const ;
-	inline bool readObject (ObjectStream &) ;
-	inline void writeObject (ObjectStream &) const ;
-	inline bool isValid () const ;
+  inline void read (vector < int > :: const_iterator &, const vector < int > :: const_iterator &) ;
+  inline void write (vector < int > &) const ;
+  inline bool readObject (ObjectStream &) ;
+  inline void writeObject (ObjectStream &) const ;
+  inline bool isValid () const ;
     } ;
   public :
     virtual Identifier getIdentifier () const = 0 ;
     virtual vector < int > estimateLinkage () const = 0 ;
 } ;
 
-	// Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
-	// der parallele Verfeinerer wendet, um z.B. die Requests heraus-
-	// zufinden und zu setzen. Die Requests werden einfach auf den Strom
-	// geschrieben, und sollten beim einlesen auf ihre G"ultigkeit
-	// getestet werden. Die Schnittstelle wird von den Parallelerweiterungen
-	// der Kanten und der Fl"achen implementiert.
+  // Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
+  // der parallele Verfeinerer wendet, um z.B. die Requests heraus-
+  // zufinden und zu setzen. Die Requests werden einfach auf den Strom
+  // geschrieben, und sollten beim einlesen auf ihre G"ultigkeit
+  // getestet werden. Die Schnittstelle wird von den Parallelerweiterungen
+  // der Kanten und der Fl"achen implementiert.
 
 class RefineableObject {
   protected :
@@ -198,10 +201,10 @@ class RefineableObject {
     virtual bool setRefinementRequest (ObjectStream &) = 0 ;
 } ;
 
-	// Das 'MacroGridMoverIF' mu"s von den Parallelerweiterungen der 
-	// Knoten, Kanten, Fl"achen und Elemente des Grobgitters implementiert
-	// werden, damit der Lastverteiler diese Objekte zuweisen, einpacken
-	// und rekonstruieren kann.
+  // Das 'MacroGridMoverIF' mu"s von den Parallelerweiterungen der 
+  // Knoten, Kanten, Fl"achen und Elemente des Grobgitters implementiert
+  // werden, damit der Lastverteiler diese Objekte zuweisen, einpacken
+  // und rekonstruieren kann.
 
 class MacroGridMoverIF {
   protected :
@@ -281,17 +284,17 @@ class GitterPll : public virtual Gitter {
     static inline bool debugOption (int = 0) ;
   public :
     class MacroGitterPll : public virtual Gitter :: Geometric :: BuilderIF,
-	public AccessIteratorTT < vertex_STI >, public AccessIteratorTT < hedge_STI >, public AccessIteratorTT < hface_STI > {
+  public AccessIteratorTT < vertex_STI >, public AccessIteratorTT < hedge_STI >, public AccessIteratorTT < hface_STI > {
       protected :
       
-	// Die nachfolgenden Vektoren von Listenpaaren sind die Identifikationsabbildung auf dem Grobgitter:
-	// Jeder Vektoreintrag geh"ort zu dem entsprechenden lokalen Link (Verbindung zum Nachbargebiet) und
-	// enth"alt ein paar von zwei Listen ('inner' und 'outer'). Die erste Liste enth"alt Referenzen auf
-	// die Gitterobjekte, die hier und auf dem anderen Teilgebiet (zum Link) vorliegen und die aber hier
-	// als Besitzstand gef"uhrt werden. Die zweite Liste (outer) verweist auf all jene, die zum Besitz
-	// des Nachbargebiets zu rechnen sind. Die Ordnung der Listen ist folgendermassen: Durchl"auft man
-	// hier 'inner', dann korrespondieren auf dem Nachbargebiet die Objekte in 'outer' in der Reihenfolge
-	// des Durchlaufs (und umgekehrt).
+  // Die nachfolgenden Vektoren von Listenpaaren sind die Identifikationsabbildung auf dem Grobgitter:
+  // Jeder Vektoreintrag geh"ort zu dem entsprechenden lokalen Link (Verbindung zum Nachbargebiet) und
+  // enth"alt ein paar von zwei Listen ('inner' und 'outer'). Die erste Liste enth"alt Referenzen auf
+  // die Gitterobjekte, die hier und auf dem anderen Teilgebiet (zum Link) vorliegen und die aber hier
+  // als Besitzstand gef"uhrt werden. Die zweite Liste (outer) verweist auf all jene, die zum Besitz
+  // des Nachbargebiets zu rechnen sind. Die Ordnung der Listen ist folgendermassen: Durchl"auft man
+  // hier 'inner', dann korrespondieren auf dem Nachbargebiet die Objekte in 'outer' in der Reihenfolge
+  // des Durchlaufs (und umgekehrt).
       
         vector < pair < list < AccessIterator < vertex_STI > :: Handle >, list < AccessIterator < vertex_STI > :: Handle > > > _vertexTT ;
         vector < pair < list < AccessIterator < hedge_STI > :: Handle >, list < AccessIterator < hedge_STI > :: Handle > > > _hedgeTT ;
@@ -301,14 +304,14 @@ class GitterPll : public virtual Gitter {
       public :
         MacroGitterPll () {}
         virtual ~MacroGitterPll () {}
-	
-	// Die Identifikationslisten k"onnen nicht direkt von aussen zugegriffen werden, sondern nur "uber ein
-	// Iterationsobjekt, das durch den Aufruf einer der untenstehenden Methoden erzeugt wird, und um dessen
-	// L"oschung der Aufrufer sich k"ummern muss. "Ublicherweise verwendet man das Smartpointerobjekt
-	// AccessIteratorTT < . > :: InnerHandle/OuterHandle um die verwaltung der Iterationsobjekte loszuwerden.
-	// Diese Smartpointer sehen nach aussen aus wie Iteratorenstandardschnittstellen, delegieren aber alles
-	// an die Iterationsobjekte, die sie vom Grobgittercontainer bekommen haben.
-	
+  
+  // Die Identifikationslisten k"onnen nicht direkt von aussen zugegriffen werden, sondern nur "uber ein
+  // Iterationsobjekt, das durch den Aufruf einer der untenstehenden Methoden erzeugt wird, und um dessen
+  // L"oschung der Aufrufer sich k"ummern muss. "Ublicherweise verwendet man das Smartpointerobjekt
+  // AccessIteratorTT < . > :: InnerHandle/OuterHandle um die verwaltung der Iterationsobjekte loszuwerden.
+  // Diese Smartpointer sehen nach aussen aus wie Iteratorenstandardschnittstellen, delegieren aber alles
+  // an die Iterationsobjekte, die sie vom Grobgittercontainer bekommen haben.
+  
         pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > iteratorTT (const vertex_STI *, int) ;
         pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > iteratorTT (const pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > &, int) ;
         pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > iteratorTT (const hedge_STI *, int) ;
@@ -321,10 +324,10 @@ class GitterPll : public virtual Gitter {
     } ;
   public :
   
-	// Das verteilte Gitter "uberschreibt die meisten Methoden der
-	// unterliegenden Monogitter durch eigene Implementierungen.
-	// printSizeTT () ist neu und schreibt die Gr"ossen der
-	// Identifikationsabbildungen auf die Standarausgabe.
+  // Das verteilte Gitter "uberschreibt die meisten Methoden der
+  // unterliegenden Monogitter durch eigene Implementierungen.
+  // printSizeTT () ist neu und schreibt die Gr"ossen der
+  // Identifikationsabbildungen auf die Standarausgabe.
   
     virtual void printsize () ;
     virtual void fullIntegrityCheck () ;
@@ -337,9 +340,11 @@ class GitterPll : public virtual Gitter {
     virtual bool refine () ;
     virtual void coarse () ;
     virtual bool adapt () ;
+    virtual bool duneAdapt () ; // done call notify and loadBalancer 
     virtual void printSizeTT () ;
 
-	// 
+  // 
+    virtual bool duneLoadBalance () ; // call notify and loadBalancer 
     
   protected :
     virtual Makrogitter & container () = 0 ;
@@ -349,17 +354,17 @@ class GitterPll : public virtual Gitter {
     virtual MpAccessLocal & mpAccess () = 0 ;
     virtual const MpAccessLocal & mpAccess () const = 0 ;
     
-	// Der nachfolgende Methodenblock dient dazu, das Verhalten des 
-	// parallelen Gitters einigermassen unter Kontrolle zu bringen.
-	// Dabei wird von einem Schichtenmodell ausgegangen:
-	// - der statische Zustand des Gitters ist die Verteilung des
-	//   Grobgitters und wird nur durch die Lastverteilung ge"andert
-	// - der dynamische Zustand des Gitters ist die Verfeinerungs-
-	//   situation,und "andert sich infolge der Gitterqeitenanpassung.
-	// - "Anderungen in den Benutzerdaten werden nicht modelliert, das
-	//   bleibt der entsprechenden Implemntierung "uberlassen.
-	// Dementsprechend werden die exchange--*-- Methoden immer
-	// aufgerufen, sobald sich der zugeh"orige Zustand ge"andert hat.
+  // Der nachfolgende Methodenblock dient dazu, das Verhalten des 
+  // parallelen Gitters einigermassen unter Kontrolle zu bringen.
+  // Dabei wird von einem Schichtenmodell ausgegangen:
+  // - der statische Zustand des Gitters ist die Verteilung des
+  //   Grobgitters und wird nur durch die Lastverteilung ge"andert
+  // - der dynamische Zustand des Gitters ist die Verfeinerungs-
+  //   situation,und "andert sich infolge der Gitterqeitenanpassung.
+  // - "Anderungen in den Benutzerdaten werden nicht modelliert, das
+  //   bleibt der entsprechenden Implemntierung "uberlassen.
+  // Dementsprechend werden die exchange--*-- Methoden immer
+  // aufgerufen, sobald sich der zugeh"orige Zustand ge"andert hat.
     
     virtual void exchangeStaticState () ;
     virtual void exchangeDynamicState () ;
@@ -369,17 +374,17 @@ class GitterPll : public virtual Gitter {
     virtual void notifyGridChanges () ;
     virtual void notifyMacroGridChanges () ;
     
-	// Die Methoden iteratorTT (const . *, int)  sind der Zugang zu den
-	// Identifikationsabbildungen des hierarchischen Gitters f"ur die
-	// feinsten Objekte in der Hierarchie. Sie erzeugen ein Paar von 
-	// Iterationsobjekten, die zu einem entsprechenden Link, d.h. zu einer
-	// bestimmten Verbindung mit einem benachbarten Teilgitter geh"oren.
-	// Der erste Iterator im Paar verweist auf die Objekte, die es hier
-	// und beim Nachbargitter gibt, die als eigener Besitz gelten.
-	// Der zweite Iterator bezeichnet jene, die sich im Besitz des Nachbarn
-	// befinden. Die Identifikation verl"auft folgendermassen: Die Objekte,
-	// die der erste Iterator hier zeigt, korrespondieren zu denen die der
-	// zweite Iterator auf dem Nachbargitter abl"auft (und umgekehrt).
+  // Die Methoden iteratorTT (const . *, int)  sind der Zugang zu den
+  // Identifikationsabbildungen des hierarchischen Gitters f"ur die
+  // feinsten Objekte in der Hierarchie. Sie erzeugen ein Paar von 
+  // Iterationsobjekten, die zu einem entsprechenden Link, d.h. zu einer
+  // bestimmten Verbindung mit einem benachbarten Teilgitter geh"oren.
+  // Der erste Iterator im Paar verweist auf die Objekte, die es hier
+  // und beim Nachbargitter gibt, die als eigener Besitz gelten.
+  // Der zweite Iterator bezeichnet jene, die sich im Besitz des Nachbarn
+  // befinden. Die Identifikation verl"auft folgendermassen: Die Objekte,
+  // die der erste Iterator hier zeigt, korrespondieren zu denen die der
+  // zweite Iterator auf dem Nachbargitter abl"auft (und umgekehrt).
     
     pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> iteratorTT (const vertex_STI *, int) ;
     pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *> iteratorTT (const hedge_STI *, int) ;
@@ -391,16 +396,16 @@ class GitterPll : public virtual Gitter {
   friend class LeafIteratorTT < hface_STI > ;
   private :
   
-	// Die drei Variablen der Klasse Gitter sollen erstmal als
-	// Murksl"osung dazu dienen, den Lastverteiler "uber ein
-	// File ("lastverteilung.cfg") rekonfigurieren zu k"onnen.
+  // Die drei Variablen der Klasse Gitter sollen erstmal als
+  // Murksl"osung dazu dienen, den Lastverteiler "uber ein
+  // File ("lastverteilung.cfg") rekonfigurieren zu k"onnen.
   
     double  _ldbOver, _ldbUnder ;
     LoadBalancer :: DataBase :: method _ldbMethod ;
     
-	// Die Variable _refineLoops dient nur der Kommunikation
-	// zwischen adapt () und refine (), damit die Zahl der
-	// Iterationen am Ende ausgegeben werden kann.
+  // Die Variable _refineLoops dient nur der Kommunikation
+  // zwischen adapt () und refine (), damit die Zahl der
+  // Iterationen am Ende ausgegeben werden kann.
   
     int _refineLoops ;
 } ;
@@ -420,14 +425,15 @@ template < class A > class LeafIteratorTT {
 } ;
 
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
+
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
 
 inline int GitterPll :: MacroGitterPll :: iterators_attached () const {
@@ -568,8 +574,8 @@ inline const LinkedObject :: Identifier & LinkedObject :: Identifier :: operator
 inline bool LinkedObject :: Identifier :: operator < (const Identifier & x) const {
   assert (isValid () && x.isValid ()) ;
   return (_i1 < x._i1) ? true : (_i1 == x._i1 ? (_i2 < x._i2 ? true : 
-  		(_i2 == x._i2 ? (_i3 < x._i3 ? true : (_i3 == x._i3 ? 
-		(_i4 < x._i4 ? true : false) : false )) : false )) : false ) ;
+      (_i2 == x._i2 ? (_i3 < x._i3 ? true : (_i3 == x._i3 ? 
+    (_i4 < x._i4 ? true : false) : false )) : false )) : false ) ;
 }
 
 inline bool LinkedObject :: Identifier :: operator == (const Identifier & x) const {
@@ -577,7 +583,7 @@ inline bool LinkedObject :: Identifier :: operator == (const Identifier & x) con
 }
 
 inline void LinkedObject :: Identifier :: read (vector < int > :: const_iterator & pos,
-	const vector < int > :: const_iterator & end) {
+  const vector < int > :: const_iterator & end) {
   assert (pos != end ) ; _i1 = * pos ++ ;
   assert (pos != end ) ; _i2 = * pos ++ ; 
   assert (pos != end ) ; _i3 = * pos ++ ;
@@ -638,4 +644,4 @@ template < class A > const inline IteratorSTI < A > & LeafIteratorTT < A > :: ou
   return * _p.second ;
 }
 
-#endif	// GITTER_PLL_STI_H_INCLUDED
+#endif  // GITTER_PLL_STI_H_INCLUDED
