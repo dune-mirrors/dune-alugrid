@@ -1,71 +1,6 @@
-  // (c) bernhard schupp 1997 - 1998
-
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
-  // $Date$
-  
-/* $Id$
- * $Log$
- * Revision 1.10  2005/01/13 16:58:49  robertk
- * Added ghostPoint on BndPllClosure. We nned this to pack the internal
- * boundary correct.
- *
- * Revision 1.9  2004/12/21 17:24:41  robertk
- * new methods for ghost elements on internal boundarys.
- * all new methods to insert internal boundary with ghost element are mostly
- * on the DuneParallelGridMover. Some Methods are on GitterPll (insert_hbnd3).
- * MacroGhostTetra has to be moved to other file.
- *
- * Revision 1.8  2004/12/20 14:19:55  robertk
- * gcc compileable.
- *
- * Revision 1.7  2004/12/07 17:43:19  robertk
- * logFile switched off.
- *
- * Revision 1.6  2004/11/25 18:47:55  robertk
- * added ghost_level for BoundaryClosure
- *
- * Revision 1.5  2004/11/16 19:41:16  robertk
- * Added new methods read and write DynamiceState with GatherScatter.
- * Furthermore changed readDynamicState of BoundaryPllClosure. Now the
- * oppositeVeritces are read for the stream written by writeDynState of Tetra
- * or Hexa.
- *
- * Revision 1.4  2004/11/02 18:55:30  robertk
- * Moved all changed with dune... to seperated gitter_dune_* files.
- *
- * Revision 1.3  2004/10/28 18:55:47  robertk
- * Added dunePackAll method on TetraPllXBaseMacro that packs Dune data if
- * repartitioning has to be done.
- *
- * Revision 1.2  2004/10/27 15:11:40  robertk
- * method container of GitterPll now public for BSGrid.
- *
- * Revision 1.1  2004/10/25 16:39:52  robertk
- * Some off the headers are old and changed from .hh to .h.
- * All changes are made in the headers aswell.
- *
- * Some new file are the parallel grid files mostly have a _pll_ in then name.
- * There some Constructors of Tetra and Hbdn3Top had to be adapted.
- *
- * Revision 1.10  2002/05/24 11:19:19  dedner
- * *** empty log message ***
- *
- * Revision 1.9  2002/05/24 09:05:31  dedner
- * Vorl"aufig syntaktisch korrekte, d.h. kompilierbare Version
- *
- * Revision 1.8  2002/05/23 16:39:50  dedner
- * Test nach Einbau der Periodischen 4-Raender
- *
- * Revision 1.7  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.6  2001/12/10 13:56:37  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/
+// (c) bernhard schupp 1997 - 1998
+// modifications for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 
 #ifndef GITTER_PLL_IMPL_H_INCLUDED
 #define GITTER_PLL_IMPL_H_INCLUDED
@@ -93,8 +28,6 @@
 
 #include "ghostelements.h"
 
-static volatile char RCSId_gitter_pll_impl_h [] = "$Id$" ;
-
   // Der vector < int > wird als sog. linkagepattern, also als
   // Verbindungsmuster eingesetzt. Die Verbindungsmuster werden
   // nicht in jeder Parallelerweiterung gespeichert sondern in
@@ -120,11 +53,11 @@ class VertexPllBaseX : public VertexPllXIF, public MyAlloc {
     virtual vector < int > estimateLinkage () const ;
     virtual bool setLinkage (vector < int >) ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
-// Anfang - Neu am 23.5.02 (BS)
+    
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-// Ende - Neu am 23.5.02 (BS)
+    
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
@@ -173,11 +106,11 @@ class EdgePllBaseXMacro : public EdgePllBaseX {
    ~EdgePllBaseXMacro () ;
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
-// Anfang - Neu am 23.5.02 (BS)
+
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-// Ende - Neu am 23.5.02 (BS)
+
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
@@ -225,11 +158,11 @@ template < class A > class FacePllBaseXMacro : public FacePllBaseX < A > {
     inline ~FacePllBaseXMacro () ;
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
-// Anfang - Neu am 23.5.02 (BS)
+
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-// Ende - Neu am 23.5.02 (BS)
+
   public :
     virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) ;
     virtual void attach2 (int) ;
@@ -326,7 +259,6 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     bool _erasable ;
     double _center [3] ;
 } ;
-  // Neu >
 
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
@@ -376,9 +308,6 @@ class Periodic3PllXBaseMacro : public Periodic3PllXBase {
     bool _erasable ;
     double _center [3] ;
 } ;
-  // < Neu
-
-// Anfang - Neu am 23.5.02 (BS)
 
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #
@@ -428,8 +357,6 @@ class Periodic4PllXBaseMacro : public Periodic4PllXBase {
     bool _erasable ;
     double _center [3] ;
 } ;
-
-// Ende - Neu am 23.5.02 (BS)
 
 // #     #
 // #     #  ######  #    #    ##
@@ -601,16 +528,15 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         class Hedge1EmptyPllMacro : public hedge1_IMPL {
     public :
       typedef EdgePllBaseXMacro mypllx_t ;
-      inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *) ;
+      inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *, IndexManagerType & im) ;
      ~Hedge1EmptyPllMacro () ;
       virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
     private :
       mypllx_t * _pllx ;
-    // friend mypllx_t ;
-    // ### Goettingen ###
-    friend class EdgePllBaseXMacro;
+      
+      friend class EdgePllBaseXMacro;
   } ;
 
       public :
@@ -633,7 +559,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         class Hface3EmptyPllMacro : public hface3_IMPL {
     public :
       typedef FacePllBaseXMacro < hface3_GEO > mypllx_t ;
-      Hface3EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+      Hface3EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im) ;
      ~Hface3EmptyPllMacro () ;
       virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -665,7 +591,8 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         class Hface4EmptyPllMacro : public hface4_IMPL {
     public :
       typedef FacePllBaseXMacro < hface4_GEO > mypllx_t ;
-      Hface4EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+      Hface4EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,
+          myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im) ;
      ~Hface4EmptyPllMacro () ;
       virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -807,7 +734,8 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         class HexaEmptyPllMacro : public hexa_IMPL {
     public :
       typedef HexaPllBaseXMacro mypllx_t ;
-      HexaEmptyPllMacro (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int) ;
+      HexaEmptyPllMacro (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
+              myhface4_t *,int, IndexManagerType & im) ;
      ~HexaEmptyPllMacro () ;
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -1119,8 +1047,6 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     
-  // "Ubergangsl"osung:
-    
     if (A :: polygonlength == 4) osv [j].writeObject (MacroGridMoverIF :: FACE4) ;
     else if (A :: polygonlength == 3) osv [j].writeObject (MacroGridMoverIF :: FACE3) ;
     else abort () ;
@@ -1135,7 +1061,7 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
   // mit einer Verfeinerungsregel identisch ist - sonst gibt's
   // nachher beim Auspacken nur garbage.
     
-      assert (! myhface_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      assert (! typename myhface_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
     
   // Der ganze Baum der Verfeinerungsregeln wird jetzt in den
   // Stringstream geschrieben (anstelle einer Datei) und dann
@@ -1145,9 +1071,9 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
       this->myhface ().backup (s) ;
       {for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;}
       osv [j].writeObject (ENDOFSTREAM) ;
-// Anfang - Neu am 23.5.02 (BS)
+      
       inlineData (osv [j]) ;
-// Ende - Neu am 23.5.02 (BS)
+
     } catch (ObjectStream :: OutOfMemoryException) {
       cerr << "**FEHLER (FATAL) ObjectStream :: OutOfMemoryException aufgetreten in " << __FILE__ << " " << __LINE__ << endl ;
       abort () ;
@@ -1198,9 +1124,8 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
   
     this->myhface ().restore (s) ;
     assert (!s.eof ()) ;
-// Anfang - Neu am 23.5.02 (BS)
+
     xtractData (os) ;
-// Ende - Neu am 23.5.02 (BS)
   }
   return ;
 }
@@ -1217,8 +1142,6 @@ inline const TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () const {
   return _tetra ;
 }
 
-  // Neu >
-  
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
 // #     #  #       #    #     #    #    #  #    #     #    #    #       #
@@ -1239,10 +1162,6 @@ inline const Periodic3PllXBase :: myperiodic3_t & Periodic3PllXBase :: myperiodi
   return _periodic3 ;
 }
   
-  // < Neu
-
-// Anfang - Neu am 23.5.02 (BS)
-
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #
 // #     #  #       #    #     #    #    #  #    #     #    #    # #    #
@@ -1262,8 +1181,6 @@ inline Periodic4PllXBase :: myperiodic4_t & Periodic4PllXBase :: myperiodic4 () 
 inline const Periodic4PllXBase :: myperiodic4_t & Periodic4PllXBase :: myperiodic4 () const {
   return _periodic4 ;
 }
-
-// Ende - Neu am 23.5.02 (BS)
 
 inline HexaPllBaseX :: HexaPllBaseX (myhexa_t & h) : _hexa (h) {
   return ;
