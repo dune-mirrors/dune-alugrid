@@ -7,6 +7,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/28 15:44:36  robertk
+ * if Dune then metis and partylib.h are include elsewhere.
+ *
  * Revision 1.1  2004/10/25 16:41:19  robertk
  * Parallel grid implementations.
  *
@@ -44,9 +47,11 @@
   #include <algo.h>
 #endif
 
+#ifndef _DUNE_USES_BSGRID_
 #include "party_lib.h"
 #include "metis.h"
-
+#endif
+  
 #include "gitter_pll_ldb.h" 
 
 static volatile char RCSId_gitter_pll_ldb_cc [] = "$Id$" ;
