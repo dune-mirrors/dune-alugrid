@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.11  2005/01/13 16:49:37  robertk
+ * moved goDownHlement to gitter_dune_impl.cc
+ *
  * Revision 1.10  2004/12/10 12:19:45  robertk
  * backupIndices removed from gitter_sti and moved to gitter_dune_impl.cc
  *
@@ -345,18 +348,6 @@ void Gitter :: backup (ostream & out) {
   {AccessIterator <helement_STI> :: Handle ew (container ()) ;
     for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backup (out) ; }
     
-  return ;
-}
-
-// go down all children and check index 
-inline void goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
-{
-  typedef Gitter :: helement_STI ElType; 
-  assert( el.getIndex() < idxcheck.size() );
-  idxcheck[ el.getIndex() ] = false;
-  for( ElType * ch = el.down() ; ch ; ch = ch->next())
-    goDownHelement( *ch , idxcheck );
-
   return ;
 }
 
