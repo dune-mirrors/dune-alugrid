@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/11/25 18:42:55  robertk
+ * removed Geschafft comment.
+ *
  * Revision 1.1  2004/10/25 16:41:20  robertk
  * Parallel grid implementations.
  *
@@ -180,7 +183,6 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
 int MpAccessMPI :: gmax (int i) const {
   int j ;
   int test = MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm) ;
-  cout << "Geschafft!!!" << flush;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
