@@ -72,7 +72,7 @@ int main(int args, char *argv[])
   
   if( args < 3) 
   {
-    fprintf(stderr,"usage albert2BSGrid <albert-in-file> <bs-macro-grid> \n");
+    fprintf(stderr,"usage Alberta2ALUGrid <alberta-in-file> <alu3dgrid-macro-grid> <optional: refinement level>\n");
     exit(EXIT_FAILURE);
   }
 
@@ -82,11 +82,21 @@ int main(int args, char *argv[])
   printf("Filename: %s\n",filename);
   
   spidermesh = get_mesh("spider",init_dof_admin,init_leaf_data);
-#ifdef MACRO
   read_macro(spidermesh,filename,initBoundary);
-#else 
-  spidermesh = READ_MESH(filename,NULL,init_leaf_data,NULL); 
-#endif
+  
+  if(args == 4) 
+  { 
+    int level = atoi(argv[3]);
+    printf("refine %d levels! \n",level);
+    global_refine(spidermesh,level);
+
+    write_macro(spidermesh,"fakefile_not_use");
+    write_macro(spidermesh,"fakefile_not_use");
+    free_mesh(spidermesh);
+    spidermesh = get_mesh("spider",init_dof_admin,init_leaf_data);
+    read_macro(spidermesh,"fakefile_not_use",initBoundary);
+    remove ("fakefile_not_use");
+  }
   
   trans2BSMacroGrid(spidermesh,bsoutfile);
 
