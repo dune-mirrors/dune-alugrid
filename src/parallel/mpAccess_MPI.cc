@@ -153,10 +153,7 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
     {
       MPI_Status * sta = new MPI_Status [nl] ;
       assert (sta) ;
-#ifndef NDEBUG
-      MY_INT_TEST
-#endif
-        MPI_Waitall (nl, req, sta) ;
+      MY_INT_TEST MPI_Waitall (nl, req, sta) ;
       assert (test == MPI_SUCCESS) ;
       delete [] sta ;
     }
