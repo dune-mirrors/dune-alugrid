@@ -13,9 +13,8 @@
 	//
 	// Ansprechpartner:
 	// Robert Preis 	<preis@hni.uni-paderborn.de>
-	//
 	// 
-	// /**********************************************************\
+	// **********************************************************
 	// *
 	// *  PARTY PARTITIONING LIBRARY            party_lib.h
 	// *
@@ -24,8 +23,7 @@
 	// *  Universit\"at Paderborn, Germany
 	// *  preis@hni.uni-paderborn.de
 	// *
-	// \**********************************************************/
-	// #define VERSION "PARTY Version 1.1, 16 September 1996"
+	// **********************************************************
 
 #ifndef PARTY_LIB_H_INCLUDED
 #define PARTY_LIB_H_INCLUDED
