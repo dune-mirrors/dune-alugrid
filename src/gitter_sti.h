@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/11/16 19:26:59  robertk
+ * virtual method up for hbndseg, and ghostLevel .
+ *
  * Revision 1.4  2004/11/02 17:12:41  robertk
  * Removed duneBackup and duneRestore. Now in GitterDuneImpl.
  *
@@ -351,8 +354,10 @@ class Gitter {
       public: 
       virtual grid_t type() = 0;
     } ;
+  
     
-    class hbndseg {
+    class hbndseg  
+    {
       protected :
         hbndseg () {}
        ~hbndseg () {}
@@ -361,12 +366,19 @@ class Gitter {
                        sym_xz = 6, sym_yz = 7, reflect = 8, fluxtube3d = 9, periodic = 20,
                        closure = 111, undefined = 333 } bnd_t ;
         virtual bnd_t bndtype () const = 0 ;
+        
+        // for dune 
+        virtual hbndseg * up () = 0 ;
+  virtual const hbndseg * up () const = 0 ;
+  
         virtual hbndseg * down () = 0 ;
   virtual const hbndseg * down () const = 0 ;
         virtual hbndseg * next () = 0 ;
   virtual const hbndseg * next () const = 0 ;
         virtual int level () const = 0 ;
         inline int leaf () const ;
+        // for dune 
+        virtual int ghostLevel () const = 0 ;
       public :
   virtual void restoreFollowFace () = 0 ;
     } ;
@@ -933,6 +945,7 @@ class Gitter {
             inline int preCoarsening () ;
           public :
             static const int prototype [6][4] ;
+            static const int oppositeFace [6] ;
             inline virtual ~Hexa () ;
       inline hface4_GEO * myhface4 (int) ;
             inline const hface4_GEO * myhface4 (int) const ;
@@ -988,6 +1001,7 @@ class Gitter {
       int _twist ;
           protected :
             ProjectVertex *projection;
+          public:  
         } hbndseg3_GEO ;
   
         typedef class hbndseg4 : public hbndseg_STI, public hasFace4, public MyAlloc {
@@ -1015,6 +1029,8 @@ class Gitter {
       int _twist ;
     protected :
             ProjectVertex *projection;
+
+        public:   
         } hbndseg4_GEO ;
   
   class InternalHasFace3 {
@@ -1436,6 +1452,9 @@ inline bool Gitter :: Geometric :: hasFace3 :: bndNotifyBalance (balrule_t,int) 
 inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) {
   return true ;
 }
+
+
+
 
 // #     #                                          #####
 // #     #  ######  #####    #####  ######  #    # #     #  ######   ####
@@ -2046,7 +2065,7 @@ inline const Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric ::
 
 inline pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Tetra :: myneighbour (int i) 
 {
-  return twist (i) < 0 ? myhface3 (i)->nb.front () : myhface3 (i)->nb.rear () ;
+  return twist (i) < 0 ? myhface3 (i)->nb.front () : myhface3 (i)->nb.rear ();
 }
 
 inline pair < const Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Tetra :: myneighbour (int i) const {
