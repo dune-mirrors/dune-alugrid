@@ -1078,27 +1078,32 @@ class Gitter {
     list < hface3_GEO * >    _hface3List ;
     list < tetra_GEO * >     _tetraList ;
     list < periodic3_GEO * > _periodic3List ;
-// Anfang - Neu am 23.5.02 (BS)
+    
           list < periodic4_GEO * > _periodic4List ;
-// Ende - Neu am 23.5.02 (BS)
           list < hexa_GEO * >      _hexaList ;
+
     list < hbndseg3_GEO * >  _hbndseg3List ;
           list < hbndseg4_GEO * >  _hbndseg4List ;
-    bool _modified ;
+          
+          bool _modified ; // true if macro grid was modified 
+
           protected :
-            BuilderIF () : _modified (true) {}
+            BuilderIF () : _modified (true) , _removed(false) {}
             virtual ~BuilderIF () ;
+      
+      // generates macro image from macro file 
       void generateRawHexaImage (istream &, ostream &) ;
+      
       virtual void macrogridBuilder (istream &) ;
-            virtual VertexGeo     * insert_vertex (double, double, double, int,int = 0) = 0 ;
-            virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0 ;
+      virtual VertexGeo     * insert_vertex (double, double, double, int,int = 0) = 0 ;
+      virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0 ;
       virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) = 0 ;
-            virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) = 0 ;
+      virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) = 0 ;
       virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) = 0 ;
+      
       virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) = 0 ;
-// Anfang - Neu am 23.5.02 (BS)
       virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) = 0 ;
-// Ende - Neu am 23.5.02 (BS)
+      
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t,const double(&p)[3]) = 0 ;
@@ -1114,6 +1119,10 @@ class Gitter {
             IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
             IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
     protected :
+            // delete all attached elements, maybe called from MacroGitterBasis 
+            void removeMacroGrid (); 
+            bool _removed; // true if removeMacroGrid was already called 
+            
       IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const ;
             IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const ;
     public :

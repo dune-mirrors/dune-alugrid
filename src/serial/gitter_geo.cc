@@ -1,59 +1,6 @@
-//  Version f"ur DUNE
-//
-  // (c) bernhard schupp, 1997 - 1998
-
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
-
-/* $Id$
- * $Log$
- * Revision 1.1  2005/03/23 14:57:53  robertk
- * all files for serial version of ALU3dGrid.
- *
- * Revision 1.7  2005/03/23 11:36:06  robertk
- * removed BSGridVecType, which is double * now.
- *
- * Revision 1.6  2004/12/21 17:36:45  robertk
- * removed some warnings.
- *
- * Revision 1.5  2004/12/20 21:37:56  robertk
- * reference tetra added.
- *
- * Revision 1.4  2004/11/16 19:32:24  robertk
- * oppositeFace for Hexa.
- *
- * Revision 1.3  2004/10/25 16:38:09  robertk
- * All header end with .h now. Like the original.
- *
- * In the .cc this changes are done.
- *
- * Revision 1.2  2004/10/19 13:19:51  robertk
- * neighOuterNormal added. this method calculates the normal from neighbour
- * point of view but pointing outside of actual element.
- *
- * Revision 1.1  2004/10/15 09:48:37  robertk
- * Inititial version. Some extenxions for Dune made. Schould be compatible
- * with all other applications done so far.
- *
- * Revision 1.10  2002/05/24 09:05:31  dedner
- * Vorl"aufig syntaktisch korrekte, d.h. kompilierbare Version
- *
- * Revision 1.9  2002/05/23 16:37:41  dedner
- * Test nach Einbau der Periodischen 4-Raender
- *
- * Revision 1.8  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.7  2001/12/12 09:49:05  wesenber
- * resetRefinementRequest() added
- *
- * Revision 1.6  2001/12/10 13:35:39  wesenber
- * parameter ``filePath'' for backup() and backupCMode() added
- *
- ***/
-
+// (c) bernhard schupp, 1997 - 1998
+// modification for the dune interface 
+// (c) Robert Kloefkorn 2004 -- 2005 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -377,7 +324,13 @@ int Gitter :: Geometric :: Periodic4 :: tagForBallRefinement (const double (&cen
 
 // Ende - Neu am 23.5.02 (BS)
 
-Gitter :: Geometric :: BuilderIF :: ~BuilderIF () {
+Gitter :: Geometric :: BuilderIF :: ~BuilderIF () 
+{
+  if(!_removed) removeMacroGrid();
+}
+
+void Gitter :: Geometric :: BuilderIF :: removeMacroGrid () 
+{   
   if (iterators_attached ()) 
     cerr << "**WARNUNG (IGNORIERT) beim L\"oschen von BuilderIF: Iterator-Z\"ahler [" << iterators_attached () << "]" << endl ;
   {for (list < hexa_GEO * > :: iterator i = _hexaList.begin () ; i != _hexaList.end () ; delete (*i++)) ; }
@@ -390,6 +343,7 @@ Gitter :: Geometric :: BuilderIF :: ~BuilderIF () {
   {for (list < hface3_GEO * > :: iterator i = _hface3List.begin () ; i != _hface3List.end () ; delete (*i++)) ; }
   {for (list < hedge1_GEO * > :: iterator i = _hedge1List.begin () ; i != _hedge1List.end () ; delete (*i++)) ; }
   {for (list < VertexGeo * > :: iterator i = _vertexList.begin () ; i != _vertexList.end () ; delete (*i++)) ; }
+  _removed = true;
 }
 
 IteratorSTI < Gitter :: vertex_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const vertex_STI *) const {

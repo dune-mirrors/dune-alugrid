@@ -202,22 +202,22 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       protected :
         virtual inline VertexGeo     * insert_vertex (double, double, double, int,int = 0) ;
         virtual inline hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
-  virtual inline hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
+        virtual inline hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual inline hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
-  virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
-  // version with point , returns insert_hbnd3 here 
-  virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
+        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+        // version with point , returns insert_hbnd3 here 
+        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
-  virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
-  virtual inline periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
-// Anfang - Neu am 23.5.02 (BS)
-  virtual inline periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
-// Ende - Neu am 23.5.02 (BS)
+        virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
+        virtual inline periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
+
+        virtual inline periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
         virtual inline hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
       public :
         inline MacroGitterBasis (istream &) ;
         inline MacroGitterBasis () ;
-        virtual ~MacroGitterBasis () {}
+        // implemended here because for this calss we have no implementation section 
+        virtual ~MacroGitterBasis () { this->removeMacroGrid(); }
 
         // return index manager mostly for restore and backup 
         inline IndexManagerType & indexManager(int codim); 
