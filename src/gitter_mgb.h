@@ -7,6 +7,9 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/12/21 17:36:45  robertk
+ * removed some warnings.
+ *
  * Revision 1.3  2004/12/21 17:17:34  robertk
  * Imporoved Hbnd3IntStorage.
  *
@@ -85,11 +88,10 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   protected :
   class Hbnd3IntStorage
   {
-    double _p[3]; 
-    bool _pInit; // true if p was initialized with a value 
-    // public that is can be used like pair 
     hface3_GEO * _first;
     int          _second;
+    bool _pInit; // true if p was initialized with a value 
+    double _p[3]; 
   public:  
     // store point and face and twist  
     Hbnd3IntStorage( hface3_GEO * f, int tw, const double (&p) [3] );

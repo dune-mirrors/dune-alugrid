@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.8  2004/12/21 17:37:35  robertk
+ * removed some warnings.
+ *
  * Revision 1.7  2004/12/20 13:54:29  robertk
  * gcc compileable.
  *
@@ -213,7 +216,7 @@ class LinkedObject {
 class RefineableObject {
   protected :
     RefineableObject () {}
-   ~RefineableObject () {}
+    virtual ~RefineableObject () {}
   public :
     virtual void getRefinementRequest (ObjectStream &) const = 0 ;
     virtual bool setRefinementRequest (ObjectStream &) = 0 ;
@@ -227,7 +230,7 @@ class RefineableObject {
 class MacroGridMoverIF {
   protected :
     MacroGridMoverIF () {}
-   ~MacroGridMoverIF () {}
+    virtual ~MacroGridMoverIF () {}
   public :
     enum { VERTEX = 1, EDGE1, FACE3, FACE4, HEXA, TETRA, PERIODIC3, PERIODIC4, HBND3EXT, HBND4EXT, HBND3INT, HBND4INT, ENDMARKER } ;
     virtual void attach2 (int) = 0 ;

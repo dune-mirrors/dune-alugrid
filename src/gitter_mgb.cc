@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/12/21 17:40:16  robertk
+ * removed some warnings.
+ *
  * Revision 1.4  2004/12/21 17:17:34  robertk
  * Imporoved Hbnd3IntStorage.
  *
@@ -654,7 +657,8 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
   return ;
 }
 
-MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) , _finalized(false) 
+MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) 
+ : _finalized(false) , _mgb (b) 
 {
   {
     for (list < VertexGeo * > :: iterator i = myBuilder ()._vertexList.begin () ;

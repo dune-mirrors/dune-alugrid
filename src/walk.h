@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/12/21 17:36:45  robertk
+ * removed some warnings.
+ *
  * Revision 1.4  2004/12/20 13:55:25  robertk
  * gcc compileable.
  *
@@ -484,7 +487,7 @@ template < class A > void VectorAlign < A > :: first () {
   _ahead = _curr;
   if (_ahead != _it.end ())
     _ahead++;
-  for ( 0 ; (_ahead == _it.end () ? 0 : ((*_ahead)->first (), (*_ahead)->done ())) ; _ahead ++) ;
+  for ( ; (_ahead == _it.end () ? 0 : ((*_ahead)->first (), (*_ahead)->done ())) ; _ahead ++) ;
   return ;
 }
 
@@ -494,7 +497,7 @@ template < class A > void VectorAlign < A > :: next () {
   {
     if (_ahead != _it.end ())
       (_curr = _ahead, _ahead ++) ;
-    for ( 0 ; (_ahead == _it.end () ? 0 : ((*_ahead)->first (), (*_ahead)->done ())) ; _ahead ++) ;
+    for ( ; (_ahead == _it.end () ? 0 : ((*_ahead)->first (), (*_ahead)->done ())) ; _ahead ++) ;
   }
   return ;
 }

@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.6  2004/12/21 17:36:45  robertk
+ * removed some warnings.
+ *
  * Revision 1.5  2004/12/20 21:37:56  robertk
  * reference tetra added.
  *
@@ -206,11 +209,11 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const double (&center)[
 //    #     #          #    #   #   #    #
 //    #     ######     #    #    #  #    #
 
-//
-//
+#if 0
+/*
 //          z          y
 //         3 |-------- 2
-//           |.      /\     faces opposite to vertices 
+//           |.      /\     faces opposite to vertices
 //           |  .   /  \
 //           |    ./    \
 //           |    / .    \
@@ -231,6 +234,8 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const double (&center)[
 //
 //
 //
+*/
+#endif
 
 int Gitter :: Geometric :: Tetra :: test () const {
 //  cerr << "**WARNUNG (IGNORIERT) Tetra :: test () nicht implementiert, in " <<  __FILE__ << " " << __LINE__  << endl;
