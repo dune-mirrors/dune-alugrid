@@ -28,8 +28,6 @@
 #ifndef PARTY_LIB_H_INCLUDED
 #define PARTY_LIB_H_INCLUDED
 
-#warning  -- Compile parallel version without PARTY_LIB !!! 
-
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -41,45 +39,11 @@
   #include <iostream.h>
 #endif
 
-static const char parmess [] = 	"**INFO Aus lizenzrechtlichen Gr\"unden steht die Bibliothek\n"
-				"       PARTY 1.1 nicht im Rahmen der Quelldateien auf diesem\n"
-				"       Datentr\"ager zur Verf\"ugung. Weitere Hinweise sind in\n"
-				"       der Datei " __FILE__ " enthalten." ;
-
-
-inline int global_linear (int,float *,int,float,int *) {
-  cerr << parmess << endl ;
-  abort();
-  return 0 ;
-}
-
-inline int global_scattered (int,float *,int,float,int *) {
-  cerr << parmess << endl ;
-  abort();
-  return 0 ;
-}
-
-inline int global_gain (int,float *,int *,int *,int *,int,float,int *) {
-  cerr << parmess << endl ;
-  abort();
-  return 0 ;
-}
-
-inline int global_farhat (int,float *,int *,int *,int *,int,float,int *) {
-  cerr << parmess << endl ;
-  abort();
-  return 0 ;
-}
-
-inline int local_kl (int,float *,int *,int *,int *,int,float, int *,int) {
-  cerr << parmess << endl ;
-  abort();
-  return 0 ;
-}
-
-inline int local_hs (int n, float *vertex_w, int *edge_p, int *edge, int *edge_w,int p, float add_bal, int *part,int Output) {
-  cerr << parmess << endl ;
-  return 0 ;
-}
+int global_linear (int,float *,int,float,int *);
+int global_scattered (int,float *,int,float,int *);
+int global_gain (int,float *,int *,int *,int *,int,float,int *);
+int global_farhat (int,float *,int *,int *,int *,int,float,int *);
+int local_kl (int,float *,int *,int *,int *,int,float, int *,int);
+int local_hs (int n, float *vertex_w, int *edge_p, int *edge, int *edge_w,int p, float add_bal, int *part,int Output);
 
 #endif

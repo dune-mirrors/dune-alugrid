@@ -3,6 +3,7 @@
 
 #include "alu3dgrid_serial.h"
 
+#if 0
 // partitioning libs 
 // METIS if not found here then dummy version is included 
 extern "C" {
@@ -20,8 +21,9 @@ extern "C" {
 #ifdef VERSION 
 #define PARTY_LIB_H_INCLUDED
 #endif
+#endif
 
-namespace BernhardSchuppGrid {
+namespace ALU3dGridSpace {
 
 // the parallel stuff 
 #include "parallel/gitter_pll_sti.h"

@@ -15,7 +15,7 @@
   #include <stack.h>
 #endif
 
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
 
 template<class T, int length>
 class FiniteStack {

@@ -3,9 +3,7 @@
 
 #include "alu3dgrid_serial.h"
 
-void fakelibtest () {}
-
-namespace BernhardSchuppGrid {
+namespace ALU3dGridSpace {
 
 // bsgrid original sources 
 #include "serial/gitter_geo.cc" 

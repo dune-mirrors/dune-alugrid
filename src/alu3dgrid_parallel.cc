@@ -1,11 +1,35 @@
 #ifndef __ALU3DGRID_PARALLEL_CC_INCLUDED__
 #define __ALU3DGRID_PARALLEL_CC_INCLUDED__
 
-#define _BSGRID_PARALLEL_
-
 #include "alu3dgrid_parallel.h"
 
-namespace BernhardSchuppGrid {
+// partitioning libs 
+// METIS if not found here then dummy version is included 
+extern "C" {
+#undef METISTITLE 
+#include <metis.h>
+#include "parallel/metis.c"
+}
+
+
+// PARTY_LIB if not found here then dummy version is included 
+#ifdef VERSION 
+#define _VER_SAVE VERSION 
+#undef VERSION 
+#endif
+
+#include <party_lib.h>
+#ifdef VERSION 
+#define PARTY_LIB_H_INCLUDED
+#ifdef _VER_SAVE
+#undef VERSION 
+#define VERSION _VER_SAVE
+#endif // end _VER_SAVE 
+#else 
+#include "parallel/party_lib.c"
+#endif
+
+namespace ALU3dGridSpace {
 
 #include "parallel/gitter_pll_sti.cc"
 #include "parallel/gitter_pll_ldb.cc"

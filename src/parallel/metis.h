@@ -1,8 +1,6 @@
 // (c) --
 #ifndef METISTITLE
 
-#warning  -- Compile parallel version without METIS !!!
-
 #ifndef METIS_H_INCLUDED
 #define METIS_H_INCLUDED
 
@@ -19,22 +17,8 @@
 
 typedef int idxtype ;
 
-static const char metmess [] = 	"**INFO Aus lizenzrechtlichen Gr\"unden steht die Bibliothek\n"
-				"       metis 3.0 nicht im Rahmen der Quelldateien auf diesem\n"
-				"       Datentr\"ager zur Verf\"ugung. Weitere Hinweise sind in\n"
-				"       der Datei " __FILE__ " enthalten." ;
-
-inline void METIS_PartGraphKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *) {
-  cerr << metmess << endl ;
-  abort();
-  return ;
-}
-
-inline void METIS_PartGraphRecursive(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *) {
-  cerr << metmess << endl ;
-  abort();
-  return ;
-}
+void METIS_PartGraphKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *);
+void METIS_PartGraphRecursive(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *);
 
 #endif
 #endif

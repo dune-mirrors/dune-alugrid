@@ -26,10 +26,10 @@
   
 #include "xdrclass.h"
 
-// if DUNE uses this grid the _DUNE_USES_BSGRID_ variable should be defined
+// if DUNE uses this grid the _DUNE_USES_ALU3DGRID_ variable should be defined
 // otherwise some dummy are set 
 #include "indexstack.h"
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
 enum { lengthOfFiniteStack = 10000 };
 typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;        
 #else 
@@ -181,7 +181,7 @@ class Gitter {
   // Kanten, Fl"achen, Elemente und Randelemente definiert.
     class Dune_vertex 
     {
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
       protected:
         int _idx;
         Dune_vertex () : _idx(-1) {}
@@ -191,7 +191,7 @@ class Gitter {
         virtual void backupIndex  (ostream & os ) const {};
         virtual void restoreIndex (istream & is ) {};
 
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
         inline int getIndex () const { return _idx; }
         void setIndex ( const int index ) { _idx = index; }
 #else 
@@ -203,7 +203,7 @@ class Gitter {
     
   public :
     class vertex : public stiExtender_t :: VertexIF  
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
       , public Dune_vertex 
 #endif
     {
@@ -227,7 +227,7 @@ class Gitter {
     // numbering for hedge and hface 
     class Dune_hface_or_hedge
     {
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
       protected: 
         int  _index; // global_index, unique per level but not per processor
         Dune_hface_or_hedge () : _index (-1) {}
@@ -300,7 +300,7 @@ class Gitter {
     class Dune_helement 
     {
 
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
       protected: 
         int  _index; // global_index, unique per level but not per processor
         bool _refinedTag; // true if element was refined 
@@ -653,7 +653,7 @@ class Gitter {
     private :
       double _c [3] ;
       int _lvl ;
-#ifndef _DUNE_USES_BSGRID_
+#ifndef _DUNE_USES_ALU3DGRID_
       int _idx ;    // Vertexindex zum Datenrausschreiben
 #endif              // wird nur verwendet, wenn nicht fuer Dune ubersetzt    
         } ;
@@ -1122,7 +1122,7 @@ class Gitter {
       virtual void backupCMode (ostream &) const ;
       virtual void backupCMode (const char*,const char *) const ;
           friend class MacroGridBuilder ;
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
           friend class DuneParallelGridMover;
 #endif
         } ;
@@ -1433,31 +1433,31 @@ inline int Gitter :: helement :: leaf () const {
 }
 
 inline int Gitter :: Dune_hface_or_hedge :: getIndex () const {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   assert( _index >= 0);
   return _index; 
 #else 
-  std::cerr << "Dune_hface_or_hedge::getIndex () -- ERROR: '_DUNE_USES_BSGRID_' is not defined, so index cannot be used! " << __FILE__ << __LINE__ << "\n";
+  std::cerr << "Dune_hface_or_hedge::getIndex () -- ERROR: '_DUNE_USES_ALU3DGRID_' is not defined, so index cannot be used! " << __FILE__ << __LINE__ << "\n";
   abort();
   return -1;
 #endif
 }
 
 inline void Gitter :: Dune_hface_or_hedge :: setIndex (const int index) {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   _index = index; 
 #endif
 }
 
 inline void Gitter :: Dune_hface_or_hedge :: backupIndex (ostream & os ) const {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   cerr << "Dune_hface_or_hedge :: backupIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
   abort();
 #endif
 }
 
 inline void Gitter :: Dune_hface_or_hedge :: restoreIndex (istream & is ) {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   cerr << "Dune_hface_or_hedge :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
   abort();
 #endif
@@ -1466,13 +1466,13 @@ inline void Gitter :: Dune_hface_or_hedge :: restoreIndex (istream & is ) {
 
 // Dune extensions 
 inline void Gitter :: Dune_helement :: resetRefinedTag () {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   _refinedTag = false; 
 #endif
 }
 
 inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   return _refinedTag;
 #else 
   return false;
@@ -1480,31 +1480,31 @@ inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
 }
 
 inline int Gitter :: Dune_helement :: getIndex () const {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   assert( _index >= 0);
   return _index; 
 #else 
-  std::cerr << "helement::getIndex () -- ERROR: '_DUNE_USES_BSGRID_' is not defined, so index cannot be used! " << __FILE__ << __LINE__ << "\n";
+  std::cerr << "helement::getIndex () -- ERROR: '_DUNE_USES_ALU3DGRID_' is not defined, so index cannot be used! " << __FILE__ << __LINE__ << "\n";
   abort();
   return -1;
 #endif
 }
 
 inline void Gitter :: Dune_helement :: setIndex (const int index) {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   _index = index; 
 #endif
 }
 
 inline void Gitter :: Dune_helement :: backupIndex (ostream & os ) const {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   cerr << "Dune_helement :: backupIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
   abort();
 #endif
 }
 
 inline void Gitter :: Dune_helement :: restoreIndex (istream & is ) {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   cerr << "Dune_helement :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
   abort();
 #endif
@@ -1575,13 +1575,13 @@ inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv)
 }
 
 inline void Gitter :: Geometric :: VertexGeo :: backup ( ostream & os ) const {
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
   os.write( ((const char *) &_idx ), sizeof(int) ) ;
 #endif
 }
 
 inline void Gitter :: Geometric :: VertexGeo :: restore ( istream & is ) {
-#ifdef _DUNE_USES_BSGRID_ 
+#ifdef _DUNE_USES_ALU3DGRID_ 
   //_indexmanager.freeIndex( _idx );
   is.read ( ((char *) &_idx), sizeof(int) ); 
 #endif

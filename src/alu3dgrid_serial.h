@@ -7,9 +7,9 @@
 
 void fakelibtest ();
 
-#define _DUNE_USES_BSGRID_
+#define _DUNE_USES_ALU3DGRID_
 
-namespace BernhardSchuppGrid {
+namespace ALU3dGridSpace {
 
 typedef enum {hexa,tetra} grid_t;
 

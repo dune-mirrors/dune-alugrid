@@ -1449,7 +1449,7 @@ template < class A > void TetraTop < A > :: backupCMode (ostream & os) const {
 // buckupTetra 
 template < class A > void TetraTop < A > :: backupIndex (ostream & os) const 
 {
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
   os.write( ((const char *) & this->_index ), sizeof(int) ) ;
   {for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backupIndex (os) ; }
 #endif
@@ -1480,7 +1480,7 @@ template < class A > void TetraTop < A > :: backup (XDRstream_out & os) const
 // overloaded restoreIndex Method 
 template < class A > inline void TetraTop < A > :: restoreIndex (istream & is) 
 {
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
   // free index from constructor
   //_indexManager.freeIndex( this->getIndex() ); 
   is.read ( ((char *) &(this->_index) ), sizeof(int) );

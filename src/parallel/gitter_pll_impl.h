@@ -1308,7 +1308,7 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
     }
     */
 
-#ifdef _DUNE_USES_BSGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
     // read the real level of ghost 
     os.readObject( _ghostLevel );
     //logFile << "readLevel " << _ghostLevel << "\n"; 
