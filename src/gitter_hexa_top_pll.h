@@ -8,6 +8,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/12/20 21:42:20  robertk
+ * gcc compileable.
+ *
  * Revision 1.2  2004/11/16 19:34:28  robertk
  * added ghostLevel for HbndPll and up support.
  *
@@ -118,7 +121,7 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
 	//
 
 template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: Hbnd4PllExternal (myhface4_t * f, int t, ProjectVertex *ppv) : Hbnd4Top < A > (0,f,t,ppv,this), _mxt (new MX (*this)) {
-  restoreFollowFace () ;
+  this->restoreFollowFace () ;
   return ;
 }
 
@@ -148,7 +151,7 @@ template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX > :: 
   return ;
 }
 
-template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPll :: bnd_t Hbnd4PllInternal < A, X, MX > :: HbndPll ::  bndtype () const {
+template < class A, class X, class MX > typename Hbnd4PllInternal < A, X, MX > :: HbndPll :: bnd_t Hbnd4PllInternal < A, X, MX > :: HbndPll ::  bndtype () const {
   return Gitter :: hbndseg_STI :: closure ;
 }
 
@@ -194,7 +197,7 @@ template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX >
 }
 
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv) : Hbnd4Top < micro_t > (0,f,t,ppv,0), _mxt (new MX (*this)) {
-  restoreFollowFace () ;
+  this->restoreFollowFace () ;
   return ;
 }
 
@@ -236,7 +239,7 @@ template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX > :: Hb
 }
 
 template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: ghostLevel () const {
-  return level () ;
+  return this->level () ;
 }
 
 #endif	// GITTER_HEXA_TOP_PLL_H_INCLUDED
