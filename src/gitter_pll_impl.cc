@@ -1,14 +1,19 @@
-	// (c) bernhard schupp 1997 - 1998
+  // (c) bernhard schupp 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-	// $Date$
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
+  // $Date$
 
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/11/16 19:43:07  robertk
+ * changed writeDynamicState of Tetra and Hexa, they now write their
+ * oppositeVertices of the interal boundary face and furterhmore changed the
+ * type of the created Interalface in the insert method.
+ *
  * Revision 1.3  2004/11/02 18:55:29  robertk
  * Moved all changed with dune... to seperated gitter_dune_* files.
  *
@@ -166,7 +171,7 @@ bool EdgePllBaseX :: setRefinementRequest (ObjectStream & os) {
     abort () ;
   }
   return myhedge1_t :: myrule_t (i) == myhedge1_t :: myrule_t :: nosplit ? 
-  	false : (myhedge1 ().refineImmediate (myhedge1_t :: myrule_t (i)), true) ;
+    false : (myhedge1 ().refineImmediate (myhedge1_t :: myrule_t (i)), true) ;
 }
 
 void EdgePllBaseX :: unattach2 (int) {
@@ -337,6 +342,7 @@ void ElementPllBaseX :: readStaticState (ObjectStream &, int) {
 }
 
 void ElementPllBaseX :: readDynamicState (ObjectStream &, int) {
+  assert(false);
   abort () ;
   return ;
 }
@@ -393,24 +399,58 @@ bool ElementPllBaseX :: unlockAndResume (bool) {
 //    #     #          #    #####   ######
 //    #     #          #    #   #   #    #
 //    #     ######     #    #    #  #    #
+void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const {
+  logFile << "send data of tetra " << mytetra().getIndex() << " \n";
+  gs.sendData( os , mytetra () );
+  return ;
+}
 
-void TetraPllXBase :: writeDynamicState (ObjectStream & os, int) const {
-  static const double x = 1./4. ;
-  double p [3] ;
-  LinearMapping (mytetra ().myvertex (0)->Point (), mytetra ().myvertex (1)->Point (),
-    		 mytetra ().myvertex (2)->Point (), mytetra ().myvertex (3)->Point ())
-   	 	.map2world (x,x,x,x,p) ;
+
+void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
+  //static const double x = 0.25 ; // 1./4.
+  //LinearMapping (mytetra ().myvertex (0)->Point (), mytetra ().myvertex (1)->Point (),
+  //       mytetra ().myvertex (2)->Point (), mytetra ().myvertex (3)->Point ())
+  //    .map2world (x,x,x,x,p) ;
+
+  //assert(proc_logFile);
+  assert( (true) ? (os.writeObject ( mytetra(). getIndex() ) , 1 ) : 1);// number of points written 
+  if(writeLogFile)
+  {
+    assert(logFile);
+    logFile << "writeDynamicState of el " << mytetra(). getIndex() << "\n";
+  }
+
+#ifdef _DUNE_USES_BSGRID_
+  
+  // write level to know the level of ghost on the other side
+  //logFile << "writeLevel " << mytetra().level() << "\n";
+  os.writeObject( mytetra().level() );
+  
+  const double (& p) [3] = mytetra ().myvertex (face)->Point ();
+
+  assert( (true) ? (os.writeObject ( 1 ) , 1 ) : 1);// number of points written 
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
+
+  if(writeLogFile)
+  {
+    logFile << " write p = [";
+    for(int i=0; i<3; i++)
+      logFile << p[i] << ",";
+    logFile << "] \n";
+  }
+
+  //cout << "writeDynamicState el " << mytetra().getIndex() << " face = " << face << "\n";
+#endif
   return ;
 }
 
 TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : TetraPllXBase (t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
-  static const double x = 1./4. ;
+  static const double x = 0.25 ; // 1./4.
   LinearMapping (mytetra ().myvertex (0)->Point (), mytetra ().myvertex (1)->Point (),
-    		 mytetra ().myvertex (2)->Point (), mytetra ().myvertex (3)->Point ())
-   	 	.map2world (x,x,x,x,_center) ;
+         mytetra ().myvertex (2)->Point (), mytetra ().myvertex (3)->Point ())
+      .map2world (x,x,x,x,_center) ;
   return ;
 }
 
@@ -431,7 +471,7 @@ int & TetraPllXBaseMacro :: ldbVertexIndex () {
 
 bool TetraPllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-  		TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size (), _center)) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size (), _center)) ;
   return true ;
 }
 
@@ -447,6 +487,7 @@ void TetraPllXBaseMacro :: unattach2 (int i) {
   mytetra ().myhface3 (1)->accessPllX ().unattach2 (i) ;
   mytetra ().myhface3 (2)->accessPllX ().unattach2 (i) ;
   mytetra ().myhface3 (3)->accessPllX ().unattach2 (i) ;
+  //cout << "writeStaticState el " << mytetra().getIndex() << " \n";
   return ;
 }
 
@@ -573,7 +614,7 @@ bool TetraPllXBaseMacro :: erasable () const {
   return _erasable ;
 }
 
-	// Neu >
+  // Neu >
 
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
@@ -585,13 +626,13 @@ bool TetraPllXBaseMacro :: erasable () const {
 
 void Periodic3PllXBase :: writeDynamicState (ObjectStream & os, int) const {
 
-	// Der Schwerpunkt des "flachen" periodischen Randelements wird
-	// auf die Mitte der linken Fl"ache gelegt. Per Definition.
+  // Der Schwerpunkt des "flachen" periodischen Randelements wird
+  // auf die Mitte der linken Fl"ache gelegt. Per Definition.
 
   static const double x = 1./3. ;
   double p [3] ;
   LinearSurfaceMapping (myperiodic3 ().myvertex (0,0)->Point (), myperiodic3 ().myvertex (0,1)->Point (),
-  	myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,p) ;
+    myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,p) ;
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
@@ -601,7 +642,7 @@ void Periodic3PllXBase :: writeDynamicState (ObjectStream & os, int) const {
 Periodic3PllXBaseMacro :: Periodic3PllXBaseMacro (myperiodic3_t & p) : Periodic3PllXBase (p), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
   static const double x = 1./3. ;
   LinearSurfaceMapping (myperiodic3 ().myvertex (0,0)->Point (), myperiodic3 ().myvertex (0,1)->Point (),
-    		 myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,_center) ;
+         myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,_center) ;
   return ;
 }
 
@@ -622,7 +663,7 @@ int & Periodic3PllXBaseMacro :: ldbVertexIndex () {
 
 bool Periodic3PllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-  		TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic3 ()).size (), _center)) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic3 ()).size (), _center)) ;
   return true ;
 }
 
@@ -715,7 +756,7 @@ bool Periodic3PllXBaseMacro :: erasable () const {
   return _erasable ;
 }
 
-	// < Neu 
+  // < Neu 
 
 // Anfang - Neu am 23.5.02 (BS)
 
@@ -729,13 +770,13 @@ bool Periodic3PllXBaseMacro :: erasable () const {
 
 void Periodic4PllXBase :: writeDynamicState (ObjectStream & os, int) const {
 
-	// Der Schwerpunkt des "flachen" periodischen Randelements wird
-	// auf die Mitte der linken Fl"ache gelegt. Per Definition.
+  // Der Schwerpunkt des "flachen" periodischen Randelements wird
+  // auf die Mitte der linken Fl"ache gelegt. Per Definition.
 
   static const double x = .0 ;
   double p [3] ;
   BilinearSurfaceMapping (myperiodic4 ().myvertex (0,0)->Point (), myperiodic4 ().myvertex (0,1)->Point (),
-  	myperiodic4 ().myvertex (0,2)->Point (),myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,p) ;
+    myperiodic4 ().myvertex (0,2)->Point (),myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,p) ;
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
@@ -745,7 +786,7 @@ void Periodic4PllXBase :: writeDynamicState (ObjectStream & os, int) const {
 Periodic4PllXBaseMacro :: Periodic4PllXBaseMacro (myperiodic4_t & p) : Periodic4PllXBase (p), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
   static const double x = .0 ;
   BilinearSurfaceMapping (myperiodic4 ().myvertex (0,0)->Point (), myperiodic4 ().myvertex (0,1)->Point (),
-    		 myperiodic4 ().myvertex (0,2)->Point (), myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,_center) ;
+         myperiodic4 ().myvertex (0,2)->Point (), myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,_center) ;
   return ;
 }
 
@@ -766,7 +807,7 @@ int & Periodic4PllXBaseMacro :: ldbVertexIndex () {
 
 bool Periodic4PllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-  		TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic4 ()).size (), _center)) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic4 ()).size (), _center)) ;
   return true ;
 }
 
@@ -864,16 +905,18 @@ bool Periodic4PllXBaseMacro :: erasable () const {
 
 // Ende - Neu am 23.5.02 (BS)
 
-	// #     #
-	// #     #  ######  #    #    ##
-	// #     #  #        #  #    #  #
-	// #######  #####     ##    #    #
-	// #     #  #         ##    ######
-	// #     #  #        #  #   #    #
-	// #     #  ######  #    #  #    #
+  // #     #
+  // #     #  ######  #    #    ##
+  // #     #  #        #  #    #  #
+  // #######  #####     ##    #    #
+  // #     #  #         ##    ######
+  // #     #  #        #  #   #    #
+  // #     #  ######  #    #  #    #
 
-void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int) const {
+void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
+  /*
   double p [3] ;
+
   TrilinearMapping (myhexa ().myvertex (0)->Point (), myhexa ().myvertex (1)->Point (),
     myhexa ().myvertex (2)->Point (), myhexa ().myvertex (3)->Point (), myhexa ().myvertex (4)->Point (),
     myhexa ().myvertex (5)->Point (), myhexa ().myvertex (6)->Point (), myhexa ().myvertex (7)->Point ())
@@ -881,6 +924,42 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int) const {
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
+  */
+
+  // siehe writeDynamicState von Tetra 
+  assert( (true) ? (os.writeObject ( myhexa(). getIndex() ) , 1 ) : 1);// number of points written 
+  if(writeLogFile)
+  {
+    assert(logFile);
+    logFile << "writeDynamicState of el " << myhexa(). getIndex() << "\n";
+  }
+
+#ifdef _DUNE_USES_BSGRID_
+  
+  // write level to know the level of ghost on the other side
+  //logFile << "writeLevel " << mytetra().level() << "\n";
+  os.writeObject( myhexa().level() );
+
+  enum { dimvx = 4 };
+  int oppFace = myhexa().oppositeFace[ face ];
+  assert( (true) ? (os.writeObject ( dimvx ) , 1 ) : 1);// number of points written 
+  for(int i=0; i<dimvx; i++) 
+  {
+    const double (& p) [3] = myhexa ().myvertex( oppFace , i )->Point ();
+
+    os.writeObject (p [0]) ;
+    os.writeObject (p [1]) ;
+    os.writeObject (p [2]) ;
+    
+    if(writeLogFile)
+    {
+      logFile << " write p = [";
+      for(int i=0; i<3; i++)
+        logFile << p[i] << ",";
+      logFile << "] \n";
+    }
+  }
+#endif
   return ;
 }
 
@@ -910,7 +989,7 @@ int & HexaPllBaseXMacro :: ldbVertexIndex () {
 
 bool HexaPllBaseXMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-  		TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size (), _center)) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size (), _center)) ;
   return true ;
 }
 
@@ -1069,7 +1148,7 @@ const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPll
 }
 
 GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: Hedge1EmptyPllMacro (myvertex_t * a, myvertex_t * b) :
-	GitterBasisPll :: ObjectsPll :: hedge1_IMPL (0, a, b), _pllx (new mypllx_t (*this)) {
+  GitterBasisPll :: ObjectsPll :: hedge1_IMPL (0, a, b), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1104,7 +1183,7 @@ const FacePllXIF_t & GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: accessPll
 }
 
 GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2)
-	: GitterBasisPll :: ObjectsPll :: hface3_IMPL (0,e0,s0,e1,s1,e2,s2), _pllx (new mypllx_t (*this)) {
+  : GitterBasisPll :: ObjectsPll :: hface3_IMPL (0,e0,s0,e1,s1,e2,s2), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1139,7 +1218,7 @@ const FacePllXIF_t & GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: accessPll
 }
 
 GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: Hface4EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3)
-	: GitterBasisPll :: ObjectsPll :: hface4_IMPL (0,e0,s0,e1,s1,e2,s2,e3,s3), _pllx (new mypllx_t (*this)) {
+  : GitterBasisPll :: ObjectsPll :: hface4_IMPL (0,e0,s0,e1,s1,e2,s2,e3,s3), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1166,6 +1245,7 @@ void GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: detachPllXFromMacro 
 }
 
 ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
+  //cout << "accessPllX of Tetra called! \n";
   return _pllx ;
 }
 
@@ -1174,13 +1254,13 @@ const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: accessP
 }
 
 void GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  abort () ;	// Auf dem feinen Element ist die Aktion nicht zul"assig.
+  abort () ;  // Auf dem feinen Element ist die Aktion nicht zul"assig.
   return ;
 }
-	
+  
 GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: TetraEmptyPllMacro (myhface3_t * f0, int t0, myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
                               myhface3_t * f3, int t3, IndexManagerType & im)
-	: GitterBasisPll :: ObjectsPll :: tetra_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,im), _pllx (new mypllx_t (*this)) {
+  : GitterBasisPll :: ObjectsPll :: tetra_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,im), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1205,7 +1285,7 @@ void GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: detachPllXFromMacro (
   _pllx = 0 ;
   return ;
 }
-	// Neu >
+  // Neu >
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
 // #     #  #       #    #     #    #    #  #    #     #    #    #       #
@@ -1223,12 +1303,12 @@ const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: acc
 }
 
 void GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  abort () ;	// Auf dem feinen Element ist die Aktion nicht zul"assig.
+  abort () ;  // Auf dem feinen Element ist die Aktion nicht zul"assig.
   return ;
 }
 
 GitterBasisPll :: ObjectsPll :: Periodic3EmptyPllMacro :: Periodic3EmptyPllMacro (myhface3_t * f0, int t0, myhface3_t * f1, int t1)
-	: GitterBasisPll :: ObjectsPll :: periodic3_IMPL (0,f0,t0,f1,t1), _pllx (new mypllx_t (*this)) {
+  : GitterBasisPll :: ObjectsPll :: periodic3_IMPL (0,f0,t0,f1,t1), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1253,7 +1333,7 @@ void GitterBasisPll :: ObjectsPll :: Periodic3EmptyPllMacro :: detachPllXFromMac
   _pllx = 0 ;
   return ;
 }
-	// < Neu
+  // < Neu
 
 // Anfang - Neu am 23.5.02 (BS)
 
@@ -1274,12 +1354,12 @@ const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: acc
 }
 
 void GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  abort () ;	// Auf dem feinen Element ist die Aktion nicht zul"assig.
+  abort () ;  // Auf dem feinen Element ist die Aktion nicht zul"assig.
   return ;
 }
 
 GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: Periodic4EmptyPllMacro (myhface4_t * f0, int t0, myhface4_t * f1, int t1)
-	: GitterBasisPll :: ObjectsPll :: periodic4_IMPL (0,f0,t0,f1,t1), _pllx (new mypllx_t (*this)) {
+  : GitterBasisPll :: ObjectsPll :: periodic4_IMPL (0,f0,t0,f1,t1), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1320,9 +1400,9 @@ void GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: detachPllXFromMacro () thro
 }
 
 GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: HexaEmptyPllMacro 
-	(myhface4_t * f0, int t0, myhface4_t * f1, int t1, myhface4_t * f2, int t2, 
-	 myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5)
-	: GitterBasisPll :: ObjectsPll :: hexa_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5), _pllx (new mypllx_t (*this)) {
+  (myhface4_t * f0, int t0, myhface4_t * f1, int t1, myhface4_t * f2, int t2, 
+   myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5)
+  : GitterBasisPll :: ObjectsPll :: hexa_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1427,10 +1507,10 @@ Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: inse
   return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], _indexmanager[0]) ;
 }
 
-	// Neu >
+  // Neu >
 Gitter :: Geometric :: periodic3_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) {
   return new ObjectsPll :: Periodic3EmptyPllMacro (f [0], t[0], f [1], t[1]) ;
-}	// < Neu
+} // < Neu
 
 // Anfang - Neu am 23.5.02 (BS)
 Gitter :: Geometric :: periodic4_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) {
@@ -1440,7 +1520,8 @@ Gitter :: Geometric :: periodic4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) {
   if (b == Gitter :: hbndseg_STI :: closure) {
-    return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < hbndseg4_GEO > , BndsegPllBaseXMacroClosure < hbndseg4_GEO > > :: macro_t (f,t,NULL) ;
+    typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
+    return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < Hbnd4DefaultType > , BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t,NULL) ;
   } else {
     return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t,NULL) ;
   }
@@ -1448,9 +1529,12 @@ Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: i
 
 Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) {
   if (b == Gitter :: hbndseg_STI :: closure) {
-    return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < hbndseg3_GEO > , BndsegPllBaseXMacroClosure < hbndseg3_GEO > > :: macro_t (f,t,NULL,b) ;
+    logFile << "generate Internal Boundary \n";
+    typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
+    return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
+          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, _indexmanager[0] ) ;
   } else {
-    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL,b) ;
+    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, _indexmanager[1] ) ;
   }
 }
 
@@ -1512,7 +1596,7 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
     } else {
     assert (debugOption (5) ? 
         ( cerr << "  GitterBasisPll :: GitterBasisPll () Datei: " << extendedName 
-      	   << " kann nicht gelesen werden. In " << __FILE__ << " Zeile " << __LINE__ << endl, 1) : 1);
+           << " kann nicht gelesen werden. In " << __FILE__ << " Zeile " << __LINE__ << endl, 1) : 1);
       _macrogitter = new MacroGitterBasisPll () ;
     }
     delete [] extendedName ;
