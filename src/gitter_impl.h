@@ -9,6 +9,9 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.9  2005/03/22 15:41:10  robertk
+ * New Constructors because of IndexManagerType.
+ *
  * Revision 1.8  2005/01/13 17:01:46  robertk
  * getGhost moved to hbndseg interface class.
  *
@@ -562,15 +565,15 @@ inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vert
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, GitterBasis :: VertexGeo * b) {
-  return new Objects :: hedge1_IMPL (0, a, b) ;
+  return new Objects :: hedge1_IMPL (0, a, b, indexManager(2) ) ;
 }
 
 inline GitterBasis :: hface3_GEO * GitterBasis :: MacroGitterBasis :: insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3]) {
-  return new Objects :: hface3_IMPL (0,e[0],s[0],e[1],s[1],e[2],s[2]) ;
+  return new Objects :: hface3_IMPL (0,e[0],s[0],e[1],s[1],e[2],s[2], indexManager(1) ) ;
 }
 
 inline GitterBasis :: hface4_GEO * GitterBasis :: MacroGitterBasis :: insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4]) {
-  return new Objects :: hface4_IMPL (0, e[0],s[0],e[1],s[1],e[2],s[2],e[3],s[3]) ;
+  return new Objects :: hface4_IMPL (0, e[0],s[0],e[1],s[1],e[2],s[2],e[3],s[3], indexManager(1) ) ;
 }
 
 inline GitterBasis :: tetra_GEO * GitterBasis :: MacroGitterBasis :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {
@@ -588,7 +591,7 @@ inline GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_
 // Ende - Neu am 23.5.02 (BS)
 
 inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) {
-  return new Objects :: hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5]) ;
+  return new Objects :: hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5], indexManager(0) ) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
@@ -602,7 +605,7 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const dou
 }
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
-  return new Objects :: hbndseg4_IMPL (0,f,i,NULL,NULL );// to be inserted ->  ,b, indexManager(4)) ;
+  return new Objects :: hbndseg4_IMPL (0,f,i,NULL, b,indexManager(4));
 }
 
 inline IndexManagerType & GitterBasis :: MacroGitterBasis :: indexManager (int codim ) 
