@@ -9,6 +9,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/11/25 18:47:04  robertk
+ * added faceNormal for Hbnd3Default, Hbnd4Default has to be implemented.
+ *
  * Revision 1.2  2004/11/16 19:29:50  robertk
  * Indices for and oppVertex for boundary Elements.
  * new indexmanager[4] is for boundary.
@@ -66,6 +69,9 @@
 #endif
 
 #include "gitter_sti.h"
+
+#include "mapp_tetra_3d.h"  
+
 #include "gitter_hexa_top.h"
 #include "gitter_tetra_top.h"
 
@@ -94,7 +100,6 @@ static ofstream logFile ("logfile");
     inline int dimVx () const; 
   };
         
-
 class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
   public :
     class Objects {
@@ -131,6 +136,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           public :
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ; 
+
+            // points inside ghosts 
+            void faceNormal( BSGridVecType & normal) const;
 	} ;
 	typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
 
@@ -145,6 +153,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           public :
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ;  
+
+            // points inside ghosts 
+            void faceNormal( BSGridVecType & normal) const;
 	} ;
         typedef Hbnd4Top < Hbnd4Default > hbndseg4_IMPL ;
 
@@ -411,6 +422,19 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: ghostLevel () const {
   return level() ;
 }
 
+inline void GitterBasis :: Objects :: Hbnd3Default :: faceNormal( BSGridVecType & normal) const {
+
+  hface3_GEO * face = this->myhface3(0);
+  int tw = this->twist(0);
+  BSGridLinearSurfaceMapping 
+    LSM(face->myvertex( (tw < 0) ? 0 : 2 )->Point(),
+        face->myvertex( 1                )->Point(),
+        face->myvertex( (tw < 0) ? 2 : 0 )->Point()
+       );
+  LSM.normal(normal);
+  return ;
+}
+
 inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv) : Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv) 
 {
   return ;
@@ -422,6 +446,11 @@ inline Gitter :: hbndseg_STI :: bnd_t GitterBasis :: Objects :: Hbnd4Default :: 
 
 inline int GitterBasis :: Objects :: Hbnd4Default :: ghostLevel () const {
   return level() ;
+}
+
+inline void GitterBasis :: Objects :: Hbnd4Default :: faceNormal( BSGridVecType & normal) const {
+  cerr << "ERORR: Hbnd4Default :: faceNormal not implemented! " << __FILE__ << __LINE__ << endl;
+  return ;
 }
 
 inline GitterBasis :: Objects :: TetraEmpty :: TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
