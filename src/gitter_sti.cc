@@ -9,6 +9,11 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/25 16:38:11  robertk
+ * All header end with .h now. Like the original.
+ *
+ * In the .cc this changes are done.
+ *
  * Revision 1.1  2004/10/15 09:48:37  robertk
  * Inititial version. Some extenxions for Dune made. Schould be compatible
  * with all other applications done so far.
@@ -39,10 +44,10 @@
   #include <fstream.h>
 #endif
 
-#include "lock.hh"
+#include "lock.h"
 
-#include "gitter_sti.hh"
-#include "walk.hh"
+#include "gitter_sti.h"
+#include "walk.h"
 
 static volatile char RCSId_gitter_sti_cc [] = "$Id$" ;
 

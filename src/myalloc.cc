@@ -9,6 +9,11 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/25 16:38:12  robertk
+ * All header end with .h now. Like the original.
+ *
+ * In the .cc this changes are done.
+ *
  * Revision 1.1  2004/10/15 09:48:38  robertk
  * Inititial version. Some extenxions for Dune made. Schould be compatible
  * with all other applications done so far.
@@ -47,7 +52,7 @@
   #include <map.h>
 #endif
 
-#include "myalloc.hh"
+#include "myalloc.h"
 
 static volatile char RCSId_myalloc_cc [] = "$Id$" ;
 

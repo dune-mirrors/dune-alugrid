@@ -7,6 +7,11 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/25 16:38:11  robertk
+ * All header end with .h now. Like the original.
+ *
+ * In the .cc this changes are done.
+ *
  * Revision 1.1  2004/10/15 09:48:37  robertk
  * Inititial version. Some extenxions for Dune made. Schould be compatible
  * with all other applications done so far.
@@ -20,7 +25,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "mapp_cube_3d.hh"
+#include "mapp_cube_3d.h"
 
 static volatile char RCSId_mapp_cube_3d_cc [] = "$Id$" ;
 

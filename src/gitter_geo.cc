@@ -9,6 +9,11 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/25 16:38:09  robertk
+ * All header end with .h now. Like the original.
+ *
+ * In the .cc this changes are done.
+ *
  * Revision 1.2  2004/10/19 13:19:51  robertk
  * neighOuterNormal added. this method calculates the normal from neighbour
  * point of view but pointing outside of actual element.
@@ -54,10 +59,10 @@
   #include <map.h>
 #endif
 
-#include "mapp_cube_3d.hh"
-#include "mapp_tetra_3d.hh"
-#include "gitter_sti.hh"
-#include "walk.hh"
+#include "mapp_cube_3d.h"
+#include "mapp_tetra_3d.h"
+#include "gitter_sti.h"
+#include "walk.h"
 
 static volatile char RCSId_gitter_geo_cc [] = "$Id$" ;
 

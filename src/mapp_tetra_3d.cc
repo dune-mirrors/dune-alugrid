@@ -7,6 +7,11 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/25 16:38:11  robertk
+ * All header end with .h now. Like the original.
+ *
+ * In the .cc this changes are done.
+ *
  * Revision 1.2  2004/10/19 13:16:04  robertk
  * minor changes.
  *
@@ -25,7 +30,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "mapp_tetra_3d.hh"
+#include "mapp_tetra_3d.h"
 
 
 static volatile char RCSId_mapp_tetra_3d_cc [] = "$Id$" ;
