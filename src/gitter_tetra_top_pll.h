@@ -8,6 +8,10 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.5  2005/01/13 16:49:03  robertk
+ * MacroGhost instead of MacroTetra...
+ * macro point is given to BndSegPllClousre.
+ *
  * Revision 1.4  2004/12/21 17:17:59  robertk
  * Some cleanup.
  * Some work is still to do.
@@ -41,7 +45,7 @@
 
 static volatile char RCSId_gitter_tetra_top_pll_h [] = "$Id$" ;
 
-class MacroGhostTetra;
+class MacroGhost;
 
   // Nachfolgend steht ein Template zum Aufbohren der Randklassen f"ur die 
   // physikalischen R"ander aus einem seriellen Gitter zur Verwendung in
@@ -126,7 +130,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
   virtual bool lockedAgainstCoarsening () const ;
       public :
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , IndexManagerType & im, 
-            MacroGhostTetra * gh) ;
+            MacroGhost * gh) ;
        ~HbndPllMacro () ;
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
         const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -134,7 +138,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         inline int ghostLevel () const ; 
 
       private :
-        MacroGhostTetra * _gm;
+        MacroGhost * _gm;
         mypllx_t * _mxt ;
     } ;
     typedef class HbndPllMacro macro_t ;
@@ -266,9 +270,20 @@ setGhost ( Gitter :: helement_STI * gh )
 //***************************************************************************************
 template < class A, class X, class MX > 
 Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: 
-HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , const bnd_t bt, IndexManagerType & im , MacroGhostTetra * gh) 
-    : _gm(gh) , Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,0), _mxt (new MX (*this)) {
-  if(_gm) this->setGhost (_gm->getGhost());   
+HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , const bnd_t bt, IndexManagerType & im , MacroGhost * gh) 
+ : _gm(gh) 
+ , Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,0) 
+{
+  if(_gm) 
+  {
+    this->setGhost (_gm->getGhost());   
+    _mxt = new MX (*this, _gm->getGhostPoints() );
+  }
+  else 
+  {
+    _mxt = new MX (*this);
+  }
+  
   //cout << "Create Macro PLL with " << _gm << "\n";
   //cout << "Create Macro PLL with " << this->_ghost << "\n";
   this->restoreFollowFace () ;
@@ -278,6 +293,7 @@ HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , const bnd_t bt, IndexM
 template < class A, class X, class MX > Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: 
 ~HbndPllMacro () {
   if(_gm) delete _gm;
+  _gm = 0;
   delete _mxt ;
   _mxt = 0 ;
   return ;
