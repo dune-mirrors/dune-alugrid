@@ -1,4 +1,3 @@
-//	(c) christian badura, 1998
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -27,31 +26,22 @@
 
 #include "myalloc.h"
 
-const long MyAlloc :: MAX_HOLD_ADD = 400000 ;	// max MAX_HOLD_ADD Objekte werden gespeichert
-const double MyAlloc :: MAX_HOLD_MULT = 1.3 ;	// max das MAX_HOLD_MULT-fache der momentan
-                               			// aktiven Objekte werden gespeichert
+const long   MyAlloc :: MAX_HOLD_ADD  = 400000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
+const double MyAlloc :: MAX_HOLD_MULT = 1.3 ;     // max das MAX_HOLD_MULT-fache der momentan
+                                                  // aktiven Objekte werden gespeichert
 long MyAlloc :: _init ;
 
 struct AllocEntry {
 
-	// N verfolgt die Anzahl der angelegten Objekte der entsprechenden
-	// Gr"osse, die in Gebrauch sind, auf dem Stack liegen die Objekte,
-	// f"ur die delete aufgerufen wurde, die aber nicht an free () zur"uck-
-	// gegeben werden um Fragmentierung zu vermeiden.
+  // N verfolgt die Anzahl der angelegten Objekte der entsprechenden
+  // Gr"osse, die in Gebrauch sind, auf dem Stack liegen die Objekte,
+  // f"ur die delete aufgerufen wurde, die aber nicht an free () zur"uck-
+  // gegeben werden um Fragmentierung zu vermeiden.
 
   long N ;
 
-#ifdef IBM_XLC
-  //   stack < deque < void * > > S ;
-  // ### Goettingen ###
   stack <void * > S ;
-#else 
-	// Neuerung in der ANSI Standardbibliothek:
-	// stack < dequeue < void * > > -> stack <void * >
-	// dequeue < void * > ist dann default-argument.
 
-  stack <void * > S ;
-#endif
   AllocEntry () : N (0), S () {}
  ~AllocEntry () {
     while (!S.empty ()) {
@@ -64,11 +54,9 @@ struct AllocEntry {
 
 static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
 
-void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) {
+void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) 
+{
   assert(s > 0);
-  //if (s == 0) {
-  //  return 0 ;
-  //} else 
   {
     AllocEntry & fs ((*freeStore) [s]) ;
     ++ fs.N ;
@@ -100,7 +88,7 @@ void MyAlloc :: operator delete (void *ptr, size_t s) {
   --fs.N ;
   fs.S.push (ptr) ;
   if (fs.S.size () >= (unsigned) MAX_HOLD_ADD
-	  && double (fs.S.size()) >= MAX_HOLD_MULT * double (fs.N)) {
+    && double (fs.S.size()) >= MAX_HOLD_MULT * double (fs.N)) {
     assert (!fs.S.empty()) ;
     free (fs.S.top ()) ;
     fs.S.pop() ;
@@ -112,10 +100,10 @@ MyAlloc :: Initializer :: Initializer () {
   if (0 == MyAlloc :: _init ++) {
 #ifdef IBM_XLC
     {
-        // Auf der SP sollte immer das eingestellte Limit von 143 MB umgangen werden.
-        // Der Knoten hat 512 MB, und wird exklusiv benutzt - warum also sparsam sein.
-	// Die Programme m"ussen aber auch mit -bmaxdata:#bytes gelinkt werden, um den
-	// Platz adressieren zu k"onnen.
+      // Auf der SP sollte immer das eingestellte Limit von 143 MB umgangen werden.
+      // Der Knoten hat 512 MB, und wird exklusiv benutzt - warum also sparsam sein.
+      // Die Programme m"ussen aber auch mit -bmaxdata:#bytes gelinkt werden, um den
+      // Platz adressieren zu k"onnen.
     
       long test = ulimit(UL_GETMAXBRK) ;
       if (test == -1) {
@@ -134,8 +122,9 @@ MyAlloc :: Initializer :: Initializer () {
 }
 
 MyAlloc :: Initializer :: ~Initializer () {
-  if (0 == -- MyAlloc :: _init) {
-    delete freeStore ;
+  if (0 == -- MyAlloc :: _init) 
+  {
+    if(freeStore) delete freeStore ;
     freeStore = 0 ;
   }
   return ;
