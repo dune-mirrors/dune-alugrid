@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/12/20 21:37:56  robertk
+ * reference tetra added.
+ *
  * Revision 1.4  2004/11/16 19:32:24  robertk
  * oppositeFace for Hexa.
  *
@@ -202,6 +205,32 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const double (&center)[
 //    #     #          #    #####   ######
 //    #     #          #    #   #   #    #
 //    #     ######     #    #    #  #    #
+
+//
+//
+//          z          y
+//         3 |-------- 2
+//           |.      /\     faces opposite to vertices 
+//           |  .   /  \
+//           |    ./    \
+//           |    / .    \
+//           |   /    .   \
+//           |  /       .  \
+//           | /          . \
+//           |/             .\ 1 
+//         0 ----------------------- x 
+//                              
+// face 0 = {1,3,2}
+// face 1 = {0,2,3}
+// face 2 = {0,3,1}
+// face 3 = {0,1,2} 
+//
+//
+//
+//
+//
+//
+//
 
 int Gitter :: Geometric :: Tetra :: test () const {
 //  cerr << "**WARNUNG (IGNORIERT) Tetra :: test () nicht implementiert, in " <<  __FILE__ << " " << __LINE__  << endl;
