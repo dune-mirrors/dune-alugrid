@@ -1,0 +1,20 @@
+# $Id$
+
+# options for MPI
+# remember to run ./autogen.sh after changing these values!
+
+# name of compiler binary
+COMP="mpicc"
+CXXCOMP="mpicxx"
+
+# flags set in any case
+FLAGS="-DMPI_ACTIVE -D_BSGRID_PARALLEL_ -wn2"
+LDFLAGS="-static"
+#FLAGS="-DMPI_ACTIVE -D_BSGRID_PARALLEL_ -w"
+
+# additional flags for debugging
+DEBUGFLAGS="-g"
+
+# additional flags for optimization
+OPTIMFLAGS="-O3 -unroll -Ob2"
+#OPTIMFLAGS="-O3 -unroll"
