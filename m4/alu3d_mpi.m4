@@ -72,7 +72,6 @@ dune_mpi_getflags () {
 	MPICOMP="$MPICXX"
 ]
 )
-
   # taken from acx_mpi: test succeeded if MPILIBS is not empty
   if test x != x"$MPILIBS" -a x != x"$MPICOMP" ; then
     with_mpi="no"
@@ -101,7 +100,6 @@ dune_mpi_getflags () {
 
         dune_mpi_getflags "-showme" "-c $MPISOURCE"
         MPI_CPPFLAGS="$retval"
-        echo $MPISOURCE
 
         dune_mpi_getflags "-showme" "dummy.o -o dummy"
         MPI_LDFLAGS="$retval"
@@ -123,6 +121,7 @@ dune_mpi_getflags () {
         MPI_LDFLAGS="$retval"
 
         AC_MSG_RESULT([MPICH])
+        #CXX=$MPICXX
       else
         # neither MPICH nor LAM....
         AC_MSG_RESULT([unknown])
@@ -147,6 +146,5 @@ dune_mpi_getflags () {
     AC_SUBST(MPI_LDFLAGS, "")
   fi
 
-  echo "MPI = $MPISOURCE"
   AM_CONDITIONAL(MPI, test x$with_mpi != xno)
 ])
