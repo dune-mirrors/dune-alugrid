@@ -100,7 +100,6 @@ void GitterDunePll :: duneExchangeDynamicState ()
   const int start = clock () ;
   try 
   {
-    writeLogFile = true;
     typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
                 TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
     typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
@@ -156,7 +155,6 @@ void GitterDunePll :: duneExchangeDynamicState ()
         }
       } 
     }
-    writeLogFile = false;
   } 
   catch (Parallel ::  AccessPllException) 
   {

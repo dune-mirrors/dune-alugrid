@@ -11,7 +11,6 @@
 #include "gitter_pll_impl.h"
 #include "gitter_pll_ldb.h"
   
-//static ofstream logFile;
 static bool writeLogFile = false;
 
 class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
