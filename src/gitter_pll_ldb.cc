@@ -7,6 +7,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.3  2005/03/18 20:06:32  robertk
+ * minor changes.
+ *
  * Revision 1.2  2004/10/28 15:44:36  robertk
  * if Dune then metis and partylib.h are include elsewhere.
  *
@@ -91,10 +94,12 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
   {
     int len = _vertexSet.size () ;
     os.writeObject (len) ;
-    {for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; i != _vertexSet.end () ; os.writeObject ((*i++).first)) ;}
+    {for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
+        i != _vertexSet.end () ; os.writeObject ((*i++).first)) ;}
     len = _edgeSet.size () ;
     os.writeObject (len) ;
-    {for (ldb_edge_set_t :: const_iterator i = _edgeSet.begin () ; i != _edgeSet.end () ; os.writeObject (*i++)) ;}
+    {for (ldb_edge_set_t :: const_iterator i = _edgeSet.begin () ; 
+        i != _edgeSet.end () ; os.writeObject (*i++)) ;}
   }
   try {
     vector < ObjectStream > osv = mpa.gcollect (os) ;
@@ -376,7 +381,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
 
 	// optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
 	// Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
-	// abweicht, dann wird 'change'auf 'true' gestezt, damit der Lastverschieber
+	// abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
 	// in Aktion tritt.
 
       optimizeCoverage (np, nel, part, vertex_w, neu, me == 0 ? debugOption (4) : 0) ;

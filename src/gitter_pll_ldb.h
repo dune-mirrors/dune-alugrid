@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2005/03/18 20:05:57  robertk
+ * minor changes.
+ *
  * Revision 1.3  2004/12/21 17:30:23  robertk
  * removed warnings.
  *
@@ -116,10 +119,10 @@ class LoadBalancer {
 		insert_iterator < ldb_edge_set_t >) const ;
       public :
         enum method { 
-	              NONE = 0,
+	        NONE = 0,
 		      COLLECT = 1,
 		      PARTY_helpfulSet = 3, 
-	              PARTY_kernighanLin = 4,
+	        PARTY_kernighanLin = 4,
 		      PARTY_linear = 7,
 		      PARTY_gain = 8,
 		      PARTY_farhat = 9,
