@@ -1,7 +1,7 @@
 // (c) --
 #ifndef METISTITLE
 
-#warning "Compile parallel version without METIS!"
+#warning  -- Compile parallel version without METIS !!!
 
 #ifndef METIS_H_INCLUDED
 #define METIS_H_INCLUDED

@@ -30,7 +30,7 @@
 #ifndef PARTY_LIB_H_INCLUDED
 #define PARTY_LIB_H_INCLUDED
 
-#warning "Compile parallel version without PARTY LIB!"
+#warning  -- Compile parallel version without PARTY_LIB !!! 
 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
