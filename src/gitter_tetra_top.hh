@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/19 16:30:40  robertk
+ * vetex backup and restore is not running yet.
+ *
  * Revision 1.2  2004/10/19 13:26:35  robertk
  * resetRefinedTag is now called from Dune after adaptation.
  *
@@ -1335,6 +1338,7 @@ template < class A > void TetraTop < A > :: backupCMode (ostream & os) const {
   return ;
 }
 
+// buckupTetra 
 template < class A > void TetraTop < A > :: backup (ostream & os) const 
 {
   os.put ((char) getrule ()) ;
@@ -1344,9 +1348,14 @@ template < class A > void TetraTop < A > :: backup (ostream & os) const
   
   // store globalIndex 
   this->backupIndex ( os );
+  /*
+  for(int i=0; i<4; i++)
+    myvertex(i)->backup(os);
+*/
   return ;
 }
 
+// restoreTetra
 template < class A > void TetraTop < A > :: restore (istream & is) {
 
 	// restore () stellt den Elementbaum aus der Verfeinerungs-
@@ -1402,6 +1411,11 @@ template < class A > void TetraTop < A > :: restore (istream & is) {
   
   // restore index from stream 
   this->restoreIndex( is );
+
+  /*
+  for(int i=0; i<4; i++)
+    myvertex(i)->restore(is);
+    */
 
   return ;
 }
