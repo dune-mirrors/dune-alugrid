@@ -1,4 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
+// modifications for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -25,6 +27,11 @@
   #include <algo.h>
 #endif
 
+#ifndef _DUNE_USES_ALU3DGRID_
+#include "party_lib.h"
+#include "metis.h"
+#endif
+  
 #include "gitter_pll_ldb.h" 
 
 void LoadBalancer :: DataBase :: edgeUpdate (const GraphEdge & e) {
@@ -57,6 +64,7 @@ void LoadBalancer :: DataBase :: printLoad () const {
 
 void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa, 
 	insert_iterator < ldb_vertex_map_t > nodes, insert_iterator < ldb_edge_set_t > edges) const {
+  //const int me = mpa.myrank () ;
   const int np = mpa.psize () ;
   ObjectStream os ;
   {
@@ -161,9 +169,7 @@ static bool collectInsulatedNodes (const int nel, const float * const vertex_w, 
 	// periodischen Adapter nur indirekt, d.h. durch die Anzahl der abgehenden
 	// Kanten, unterscheiden lassen (das ist aber ein zu schwaches Kriterium).
 
-#ifndef NDEBUG
   const int ned = edge_p [nel] ;
-#endif
   assert (edge_p [0] == 0) ;
   bool change = false ;
   for (int i = 0 ; i < nel ; i++ ) {
@@ -250,13 +256,14 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
         int j = (*i).first.index () ;
         assert (0 <= j && j < nel) ;
         assert (0 <= (*i).second && (*i).second < np) ;
-
+        part [j] = (*i).second ;
         check [j] = 1 ;
         vertex_w [j] = vertex_wInt [j] = (*i).first.weight () ;
 	
 	// Hier besetht die M"oglichkeit auch die Schwerpunktskoordinaten
 	// der Grobgitterelemente auszulesen:
-  
+	//
+	// double (&p)[3] = (*i).first.center () [0] ;
       }
       
       if (nel != accumulate (check.begin (), check.end (), 0)) {
@@ -316,14 +323,14 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
 	case METIS_PartGraphKway :
 	  {
 	    int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-      :: METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
+	    :: METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
               & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
 	  }
 	  break ;
 	case METIS_PartGraphRecursive :
 	  {
 	    int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-      :: METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
+	    :: METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
               & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
 	  }
 	  break ;
