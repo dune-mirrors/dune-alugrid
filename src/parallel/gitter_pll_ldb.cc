@@ -64,7 +64,7 @@ void LoadBalancer :: DataBase :: printLoad () const {
 
 void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa, 
 	insert_iterator < ldb_vertex_map_t > nodes, insert_iterator < ldb_edge_set_t > edges) const {
-  //const int me = mpa.myrank () ;
+  
   const int np = mpa.psize () ;
   ObjectStream os ;
   {
@@ -169,7 +169,6 @@ static bool collectInsulatedNodes (const int nel, const float * const vertex_w, 
 	// periodischen Adapter nur indirekt, d.h. durch die Anzahl der abgehenden
 	// Kanten, unterscheiden lassen (das ist aber ein zu schwaches Kriterium).
 
-  const int ned = edge_p [nel] ;
   assert (edge_p [0] == 0) ;
   bool change = false ;
   for (int i = 0 ; i < nel ; i++ ) {
