@@ -5,6 +5,8 @@
 // include all headers 
 #include "stlheaders.h"
 
+void fakelibtest ();
+
 #define _DUNE_USES_BSGRID_
 
 namespace BernhardSchuppGrid {
@@ -45,5 +47,8 @@ typedef GatherScatter GatherScatterType;
 #include "serial/key.h"
 #include "serial/lock.h"
 #include "serial/myalloc.h"
+
+#include "duneinterface/gitter_dune_impl.h"
+
 }
 #endif

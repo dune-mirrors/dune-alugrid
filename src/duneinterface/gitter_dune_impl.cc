@@ -109,7 +109,7 @@ void GitterDuneBasis ::restoreIndices (istream & in)
 }
 
 // wird von Dune verwendet 
-void GitterDuneBasis :: duneBackup (const char * fileName)
+void GitterDuneBasis :: duneBackup (const char * fileName) 
 {
   // diese Methode wird von der Dune Schnittstelle aufgerufen und ruft
   // intern lediglich backup (siehe oben) und backupCMode des Makrogitters
