@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.8  2005/01/13 16:59:26  robertk
+ * Moved MacroGhostTetra to ghostelements.h
+ *
  * Revision 1.7  2004/12/21 17:24:41  robertk
  * new methods for ghost elements on internal boundarys.
  * all new methods to insert internal boundary with ghost element are mostly
@@ -588,6 +591,7 @@ void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
     os.writeObject (mytetra ().myvertex (fce,1)->ident ()) ;
     os.writeObject (mytetra ().myvertex (fce,2)->ident ()) ;
 
+    os.writeObject ( 1 ); // 1 == point is transmitted 
     const double (&p)[3] = mytetra ().myvertex (fce)->Point();
     for(int i=0; i<3; i++) os.writeObject ( p[i] ) ;
   }
@@ -752,6 +756,7 @@ void Periodic3PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
     os.writeObject (myperiodic3 ().myvertex (fce,0)->ident ()) ;
     os.writeObject (myperiodic3 ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myperiodic3 ().myvertex (fce,2)->ident ()) ;
+    os.writeObject ( 0 ); // 0 == no point transmitted 
   }
   return ;
 }
@@ -1509,12 +1514,11 @@ set < int, less < int > > GitterBasisPll :: MacroGitterBasisPll :: secondScan ()
 }
 
 Gitter :: Geometric :: VertexGeo * GitterBasisPll :: MacroGitterBasisPll :: insert_vertex (double x,double y,double z,int i, int) {
-  return new ObjectsPll :: VertexPllImplMacro (x,y,z,i,_linkagePatterns,
-      _indexmanager[3]) ;
+  return new ObjectsPll :: VertexPllImplMacro (x,y,z,i,_linkagePatterns,indexManager(3)) ;
 }
 
-Gitter :: Geometric :: VertexGeo * GitterBasisPll :: MacroGitterBasisPll :: insert_ghostvx (const double (&p)[3]) {
-  //return insert_vertex(0.0,0.0,0.0,-1);
+Gitter :: Geometric :: VertexGeo * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_ghostvx (const double (&p)[3]) {
   return GitterBasis :: MacroGitterBasis :: insert_vertex (p[0],p[1],p[2],-1);
 }
 
@@ -1535,7 +1539,7 @@ Gitter :: Geometric :: hexa_GEO * GitterBasisPll :: MacroGitterBasisPll :: inser
 }
 
 Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {
-  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], _indexmanager[0]) ;
+  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], indexManager(0)) ;
 }
 
   // Neu >
@@ -1558,139 +1562,6 @@ Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: i
   }
 }
 
-class MacroGhostTetra 
-{
-  typedef Gitter :: Geometric :: tetra_GEO GhostElement_t;
-  typedef Gitter :: Geometric :: VertexGeo VertexGeo;
-  typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
-  typedef Gitter :: Geometric :: hface3_GEO hface3_GEO;
-  typedef Gitter :: Geometric :: hbndseg3_GEO hbndseg3_GEO;
-  typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
-  typedef Hbnd3Top < Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, 
-              BndsegPllBaseXClosure < Hbnd3DefaultType > ,  
-              BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: micro_t >  hbnd_seg; 
-  VertexGeo * _v;
-  enum { nedges = 6 };
-  hedge1_GEO *(_edges)[nedges];
-  enum { nfaces = 4 };
-  hface3_GEO *(_faces)[nfaces];
-  enum { nhbnd = 3 };
-  hbnd_seg  *(_hbnd)[nhbnd];
-  GhostElement_t * _ghost;
-  
-public:
-  MacroGhostTetra (VertexGeo * v, hedge1_GEO *(&edges)[nedges], 
-          hface3_GEO *(&faces)[nfaces] , hbndseg3_GEO *(&hbnd)[nhbnd] , GhostElement_t * ghost) : 
-    _v(v) , _ghost(ghost) 
-  {
-    for(int i=0; i<nedges; i++)
-     _edges[i] = edges[i];
-    for(int i=0; i<nhbnd; i++)
-     _hbnd[i] = static_cast<hbnd_seg *> (hbnd[i]);
-    for(int i=0; i<nfaces; i++)
-      _faces[i] = faces[i];
-  }
-  
-  ~MacroGhostTetra () 
-  {
-    for(int i=nhbnd-1; i>=0; i--)
-      if(_hbnd[i]) delete _hbnd[i];
-    if(_ghost) delete _ghost;
-    for(int i=nfaces-1; i>=0; i--)
-      if(_faces[i]) delete _faces[i];
-    for(int i=nedges-1; i>=0; i--)
-      if(_edges[i]) delete _edges[i];
-    if(_v) delete _v;
-  }
-
-  GhostElement_t * getGhost() { return _ghost; }
-};
-
-
-static int tet_twist(int tw, int j)
-{
-  return (tw<0) ? ((7 - j + tw) % 3) : ((j + tw) % 3);
-}
-
-static void printFace(ostream & os , Gitter :: Geometric :: hface3_GEO * face, int fce )
-{
-  os << "Face " << fce << endl;
-  for(int i=0; i<3; i++)
-  {
-    os << "Vertex " << i << " = ";
-    for(int j=0; j<3; j++)
-      os << face->myvertex(i)->Point()[j] << " ";
-    os << endl;
-  }
-  for(int e=0; e<3; e++)
-  {
-    os << "Edge " << e << "  | ";
-    for(int j=0; j<3; j++)
-      os << face->myhedge1(e)->myvertex(0)->Point()[j] << " ";
-    os << " connect to ";
-    for(int j=0; j<3; j++)
-      os << face->myhedge1(e)->myvertex(1)->Point()[j] << " ";
-    os << endl;
-  }
-  return ;
-}
-
-static void printTetra(ostream & os , Gitter :: Geometric :: tetra_GEO * item_ )
-{
-  for(int i=0; i<4; i++)
-  {
-    os << "Vertex " << i << " = ";
-    for(int j=0; j<3; j++)
-      os << item_->myvertex(i)->Point()[j] << " ";
-    os << endl;
-  }
-
-  for(int i=0; i<4; i++)
-  {
-    os << "Face " << i << " with twist " << item_->twist(i) << endl;
-    os << "Edge twists = ";
-    for(int j=0; j<3; j++)
-      os << item_->myhface3(i)->twist(j) << " " ;
-    os << endl;
-    os << "Face Vx = ";
-    for(int j=0; j<3; j++)
-    {
-      os << " [";
-      for(int k=0; k<3; k++)
-        os << item_->myhface3(i)->myvertex(j)->Point()[k] << "," ;
-      os << "] ";
-    }
-    os << endl;
-  }
-
-  typedef Gitter :: Geometric :: hface3_GEO hface3_GEO;
-  for(int fce=0; fce<4; fce++)
-  {
-    hface3_GEO * face = item_->myhface3(fce);
-    os << "Face " << fce << endl;
-    for(int e=0; e<3; e++)
-    {
-      os << "Edge " << e << "  | ";
-      for(int j=0; j<3; j++)
-        os << face->myhedge1(e)->myvertex(0)->Point()[j] << " ";
-      os << " connect to ";
-      for(int j=0; j<3; j++)
-        os << face->myhedge1(e)->myvertex(1)->Point()[j] << " ";
-      os << endl;
-    }
-  }
-
-  LinearMapping lm ( 
-      item_->myvertex(0)->Point(),
-      item_->myvertex(1)->Point(),
-      item_->myvertex(2)->Point(),
-      item_->myvertex(3)->Point()
-      );
-  cout << "det = " << lm.det() << "\n";
-  
-  return ;
-
-}
 
 MacroGhostTetra * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_ghosttetra (hface3_GEO * f, int t , const double (&p)[3]) 
@@ -1699,19 +1570,6 @@ insert_ghosttetra (hface3_GEO * f, int t , const double (&p)[3])
   {
     typedef Gitter :: Geometric :: tetra_GEO GhostElement_t;
     typedef Gitter :: Geometric :: VertexGeo VertexGeo;
-
-    /*
-    cout << "We start with face twist = " << t << "\n";
-    for(int i=0; i<3; i++) 
-    {
-      cout << "Edges twist = " << f->twist(i) << endl;
-      cout << "Vertex " << i << " = ";
-      for(int j=0; j<3; j++)
-        cout << f->myvertex(i)->Point()[j] << " ";
-      cout << endl;
-    }
-    cout << "....lets go\n";
-    */
     
     VertexGeo *(vx)[4];
     for(int i=0; i<3; i++) 
@@ -1724,18 +1582,6 @@ insert_ghosttetra (hface3_GEO * f, int t , const double (&p)[3])
     vx[3] = insert_ghostvx(p);
    
     typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
-    /*
-    cout << "We start with face = \n";
-    for(int i=0; i<3; i++) 
-    {
-      cout << "Vertex " << i << " = ";
-      for(int j=0; j<3; j++)
-        cout << vx[i]->Point()[j] << " ";
-      cout << endl;
-    }
-    cout << "....lets go\n";
-    */
-
     hedge1_GEO *(edges)[6];
     edges[0] = GitterBasis :: MacroGitterBasis ::insert_hedge1(vx[0],vx[1]);
     edges[1] = GitterBasis :: MacroGitterBasis ::insert_hedge1(vx[1],vx[2]);
@@ -1777,12 +1623,12 @@ insert_ghosttetra (hface3_GEO * f, int t , const double (&p)[3])
       for(int i=0; i<3; i++)
         hbnd[i] = insert_hbnd3_ghost(faces[i],twst[i]);
     }
-    GhostElement_t * ghost = GitterBasis :: MacroGitterBasis :: insert_tetra(faces,twst);     
 
+    GhostElement_t * ghost = GitterBasis :: MacroGitterBasis :: insert_tetra(faces,twst);     
     assert(ghost);
     //printTetra(cout, ghost);
     
-    gm = new MacroGhostTetra (vx[3],edges,faces,hbnd,ghost);
+    gm = new MacroGhostTetra (vx[3],edges,faces,hbnd,ghost,p);
     //cout << "New Ghost Macro " << gm << "\n";
   }
   return gm;
@@ -1791,16 +1637,17 @@ insert_ghosttetra (hface3_GEO * f, int t , const double (&p)[3])
 // version with point 
 Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const double (&p)[3] ) {
-  if (b == Gitter :: hbndseg_STI :: closure) {
-    //cout << "Called insert_hbnd3_p \n";
-    //cout << "p= {"<< p[0] << "," << p[1] << "," << p[2] << "}\n";
+  if (b == Gitter :: hbndseg_STI :: closure) 
+  {
     typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
     MacroGhostTetra * ghost = insert_ghosttetra(f,t,p);
     assert(ghost);
     return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, _indexmanager[0] , ghost ) ;
-  } else {
-    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, _indexmanager[1] ) ;
+          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(5) , ghost ) ;
+  } 
+  else 
+  {
+    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(1) ) ;
   }
 }
 
@@ -1811,9 +1658,9 @@ insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b ) {
     typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
     // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
     return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, _indexmanager[5] , 0 ) ;
+          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(0) , 0 ) ;
   } else {
-    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, _indexmanager[1] ) ;
+    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(1) ) ;
   }
 }
 
@@ -1821,9 +1668,9 @@ Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll ::
 insert_hbnd3_ghost (hface3_GEO * f, int t) {
   Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
   typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
-  // on this internal bnd we want to store element data ==> indexmanager[0] 
+  // on this internal bnd we want to store element data ==> indexManager[0] 
   return new Hbnd3Top < Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-        BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: micro_t >  (0,f,t,NULL, NULL, b, _indexmanager[0] , 0 ) ;
+        BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: micro_t >  (0,f,t,NULL, NULL, b, indexManager(0) , 0 ) ;
 }
 
 IteratorSTI < Gitter :: vertex_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const vertex_STI * a) const {
