@@ -9,6 +9,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/11/29 13:04:41  robertk
+ * enum for number of index managers
+ *
  * Revision 1.4  2004/11/29 12:37:47  robertk
  * minor changes.
  *
@@ -81,7 +84,6 @@
 static volatile char RCSId_gitter_impl_h [] = "$Id$" ;
 
 static ofstream logFile ("logfile");
-
 
   // organizes the indices for boundary faces and the opposite vertices for
   // ghost cells 
@@ -265,7 +267,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         
       protected: 
         // index provider, for every codim one , 4 is for boundary
-        IndexManagerType _indexmanager[5];
+        IndexManagerType _indexmanager[ numOfIndexManager ];
     } ;
 } ;
 
@@ -571,7 +573,7 @@ inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_h
 
 inline IndexManagerType & GitterBasis :: MacroGitterBasis :: indexManager (int codim ) 
 { 
-  assert((codim >= 0) && (codim < 5));
+  assert((codim >= 0) && (codim < numOfIndexManager ));
   return _indexmanager[codim];
 }
 
