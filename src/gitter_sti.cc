@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/10/28 15:45:17  robertk
+ * minor changes.
+ *
  * Revision 1.3  2004/10/27 15:07:32  robertk
  * at the end of gitter backup and restore index of elements is backed and
  * restored.
@@ -585,4 +588,3 @@ Gitter :: Makrogitter :: ~Makrogitter () {
     cerr << "**WARNUNG (IGNORIERT) in " << __FILE__ << " " << __LINE__ << endl ;
   return ;
 }
-
