@@ -9,6 +9,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/11/02 17:12:04  robertk
+ * Removed duneBackup and duneRestore, now defined in the inherited
+ * GitterDuneImpl class.
+ *
  * Revision 1.4  2004/10/28 15:45:17  robertk
  * minor changes.
  *
@@ -32,6 +36,9 @@
  * parameter ``filePath'' for backup(), backupCMode(), and restore() added
  *
  ***/
+#ifndef GITTER_STI_CC_INCLUDED
+#define GITTER_STI_CC_INCLUDED
+
 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
@@ -52,7 +59,6 @@
 #endif
 
 #include "lock.h"
-
 #include "gitter_sti.h"
 #include "walk.h"
 
@@ -398,52 +404,6 @@ void Gitter :: backup (const char * filePath, const char * fileName) {
   return ;
 }
 
-// wird von Dune verwendet 
-inline void Gitter :: duneBackup (const char * fileName) 
-{
-  // diese Methode wird von der Dune Schnittstelle aufgerufen und ruft
-  // intern lediglich backup (siehe oben) und backupCMode des Makrogitters
-  // auf, allerdings wird hier der path und filename in einer variablen
-  // uebergeben 
-
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: backup (const char * = \""
-                       << fileName << "\") " << endl, 1) : 1) ;
-
-  ofstream out (fileName) ;
-  if (!out) {
-    cerr << "**WARNUNG (IGNORIERT) Gitter :: backup (const char *, double) Fehler beim Anlegen von < " 
-         << (fileName ? fileName : "null") << " >" << endl ;
-  } 
-  else 
-  {
-    FSLock lock (fileName) ;
-    backup (out) ;
-
-    {
-      char *fullName = new char[strlen(fileName)+20];
-      if(!fullName) 
-      {
-        cerr << "**WARNUNG Gitter :: backup (, const char *, double) :";
-        cerr << "couldn't allocate fullName! " << endl; 
-        abort();
-      }
-      sprintf(fullName,"%s.macro",fileName);
-      ofstream macro (fullName) ;
-
-      if(!macro)
-      {
-        cerr << "**WARNUNG (IGNORIERT) Gitter :: backup (const char *, const char *) Fehler beim Anlegen von < " 
-         << (fullName ? fullName : "null") << " >" << endl ;
-      }
-      else 
-      {
-        container ().backupCMode (macro) ;
-      }
-      delete [] fullName;
-    }
-  }
-  return ;
-}
 
 void Gitter :: backupCMode (const char * filePath, const char * fileName) {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: backupCMode (const char * = \""
@@ -488,26 +448,6 @@ void Gitter :: restore (const char * filePath, const char * fileName) {
 
   delete [] fullName;
 
-  return ;
-}
-
-// wird von Dune verwendet 
-inline void Gitter :: duneRestore (const char * fileName) 
-{
-  // diese Methode wird von der Dune Schnittstelle aufgerufen 
-  // diese Methode ruft intern restore auf, hier wird lediglich 
-  // der path und filename in einer variablen uebergeben
-
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (const char * = \""
-                 << fileName << "\") " << endl, 1) : 1) ;
-
-  ifstream in (fileName) ;
-  if (!in) {
-    cerr << "**WARNUNG (IGNORIERT) Gitter :: restore (const char *, double & ) Fehler beim \"Offnen von < " 
-         << (fileName ? fileName : "null") << " > " << endl ;
-  } else {
-    restore (in) ;
-  }
   return ;
 }
 
@@ -588,3 +528,5 @@ Gitter :: Makrogitter :: ~Makrogitter () {
     cerr << "**WARNUNG (IGNORIERT) in " << __FILE__ << " " << __LINE__ << endl ;
   return ;
 }
+
+#endif
