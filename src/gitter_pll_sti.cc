@@ -1,13 +1,16 @@
-	// (c) bernhard schupp 1997 - 1998
+  // (c) bernhard schupp 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-	// $Date$
-	
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
+  // $Date$
+  
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/28 18:00:22  robertk
+ * duneAdapt and duneLoadBalance added.
+ *
  * Revision 1.1  2004/10/25 16:41:20  robertk
  * Parallel grid implementations.
  *
@@ -18,6 +21,9 @@
  * parameter ``filePath'' for backup(), backupCMode(), and restore() added
  *
  ***/
+
+#ifndef _GITTER_PLL_STI_CC_
+#define _GITTER_PLL_STI_CC_
 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
@@ -57,7 +63,7 @@ int __STATIC_turn   = -1 ;
 int __STATIC_phase  = -1 ;
 
 pair < IteratorSTI < GitterPll :: vertex_STI > *, IteratorSTI < GitterPll :: vertex_STI > *> GitterPll :: 
-	iteratorTT (const GitterPll :: vertex_STI *, int l) {
+  iteratorTT (const GitterPll :: vertex_STI *, int l) {
 
   vector < IteratorSTI < vertex_STI > * > _iterators_inner, _iterators_outer ;
 
@@ -67,58 +73,58 @@ pair < IteratorSTI < GitterPll :: vertex_STI > *, IteratorSTI < GitterPll :: ver
     AccessIteratorTT < hedge_STI > :: InnerHandle mie (containerPll (), l) ;
     AccessIteratorTT < hedge_STI > :: OuterHandle moe (containerPll (), l) ;
     Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, 
-	TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > lie (mie) ;
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > lie (mie) ;
     Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, 
-	TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > loe (moe) ;
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > loe (moe) ;
     _iterators_inner.push_back (new Wrapper < Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, 
-	TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (lie)) ;
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (lie)) ;
     _iterators_outer.push_back (new Wrapper < Insert < AccessIteratorTT < hedge_STI > :: OuterHandle,
-	TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (loe)) ;
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (loe)) ;
   }
   {
     AccessIteratorTT < hface_STI > :: InnerHandle mfi (containerPll (), l) ;
     AccessIteratorTT < hface_STI > :: OuterHandle mfo (containerPll (), l) ;
     {
       Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-	TreeIterator < hface_STI, has_int_vertex < hface_STI > > > lfi (mfi) ;
+  TreeIterator < hface_STI, has_int_vertex < hface_STI > > > lfi (mfi) ;
       Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-	TreeIterator < hface_STI, has_int_vertex < hface_STI > > > lfo (mfo) ;
+  TreeIterator < hface_STI, has_int_vertex < hface_STI > > > lfo (mfo) ;
       _iterators_inner.push_back (new Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
-	TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (lfi)) ;
+  TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (lfi)) ;
       _iterators_outer.push_back (new Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-	TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (lfo)) ;
+  TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (lfo)) ;
     }
     {
       Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > > lfi (mfi) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > > lfi (mfi) ;
       Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > > lfo (mfo) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > > lfo (mfo) ;
       Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dlfi (lfi) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dlfi (lfi) ;
       Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dlfo (lfo) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dlfo (lfo) ;
       Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-	TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > vdlfi (dlfi) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > vdlfi (dlfi) ;
       Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-	TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > vdlfo (dlfo) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > vdlfo (dlfo) ;
       _iterators_inner.push_back (new Wrapper < Insert < Wrapper < 
-	Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-	TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (vdlfi)) ;
+  Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (vdlfi)) ;
       _iterators_outer.push_back (new Wrapper < 
-	Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-	TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (vdlfo)) ;
+  Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (vdlfo)) ;
     }
   }
   return pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > 
-	(new VectorAlign < vertex_STI > (_iterators_inner), new VectorAlign < vertex_STI > (_iterators_outer)) ;
+  (new VectorAlign < vertex_STI > (_iterators_inner), new VectorAlign < vertex_STI > (_iterators_outer)) ;
 }
 
 pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll :: hedge_STI > * > GitterPll ::
-	iteratorTT (const GitterPll :: hedge_STI *, int l) {
+  iteratorTT (const GitterPll :: hedge_STI *, int l) {
   AccessIteratorTT < hedge_STI > :: InnerHandle mdi (containerPll (), l) ;
   AccessIteratorTT < hedge_STI > :: OuterHandle mdo (containerPll (), l) ;
 
@@ -132,36 +138,36 @@ pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll :: hedg
   Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, has_int_edge < hface_STI > > > fimo (mfo) ;
 
   Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfimi (fimi) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfimi (fimi) ;
   Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfimo (fimo) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfimo (fimo) ;
 
   Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
-	TreeIterator < hedge_STI, is_leaf < hedge_STI > > > eifi (dfimi) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, is_leaf < hedge_STI > > > eifi (dfimi) ;
 
   Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-	TreeIterator < hedge_STI, is_leaf < hedge_STI > > > eifo (dfimo) ;
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, is_leaf < hedge_STI > > > eifo (dfimo) ;
 
   return pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > 
     (new AlignIterator < Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, TreeIterator < hedge_STI, is_leaf < hedge_STI > > >,
-	Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
-	TreeIterator < hedge_STI, is_leaf < hedge_STI > > >, hedge_STI > (ei,eifi),
+  Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, is_leaf < hedge_STI > > >, hedge_STI > (ei,eifi),
      new AlignIterator < Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, TreeIterator < hedge_STI, is_leaf < hedge_STI > > >,
-	Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-	TreeIterator < hedge_STI, is_leaf < hedge_STI > > >, hedge_STI > (eo, eifo)) ;
+  Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, is_leaf < hedge_STI > > >, hedge_STI > (eo, eifo)) ;
 }
 
 pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
-	GitterPll :: iteratorTT (const GitterPll :: hface_STI *, int l) {
+  GitterPll :: iteratorTT (const GitterPll :: hface_STI *, int l) {
   AccessIteratorTT < hface_STI > :: InnerHandle mif (containerPll (), l) ;
   AccessIteratorTT < hface_STI > :: OuterHandle mof (containerPll (), l) ;
   return pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * >
-	(new Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, is_leaf < hface_STI > > > (mif),
-	 new Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, is_leaf < hface_STI > > > (mof)) ;
+  (new Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, is_leaf < hface_STI > > > (mif),
+   new Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, is_leaf < hface_STI > > > (mof)) ;
 }
 
 void GitterPll :: printSizeTT () {
@@ -248,8 +254,8 @@ void GitterPll :: fullIntegrityCheck () {
 
 void GitterPll :: backupCMode (const char * path, const char * file) {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: backupCMode (const char * = \""
-			      << (path ? path : "null") << ",  const char * = \""
-			      << (file ? file : "null") << "\")" << endl, 1) : 1) ;
+            << (path ? path : "null") << ",  const char * = \""
+            << (file ? file : "null") << "\")" << endl, 1) : 1) ;
   char * extendedName = new char [strlen (file) + 20] ;
   sprintf (extendedName, "%s.%d", file, mpAccess ().myrank ()) ;
   Gitter :: backupCMode (path, extendedName) ;
@@ -265,8 +271,8 @@ void GitterPll :: backupCMode (ostream & out) {
 
 void GitterPll :: backup (const char * path, const char * file) {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: backup (const char * = \"" 
-  			           << (path ? path : "null") << ", const char * = \""
-			           << (file ? file : "null") << "\")" << endl, 1) : 1) ;
+                   << (path ? path : "null") << ", const char * = \""
+                 << (file ? file : "null") << "\")" << endl, 1) : 1) ;
   char * extendedName = new char [strlen (file) + 20] ;
   sprintf (extendedName, "%s.%d", file, mpAccess ().myrank ()) ;
   Gitter :: backup (path, extendedName) ;
@@ -282,8 +288,8 @@ void GitterPll :: backup (ostream & out) {
 
 void GitterPll :: restore (const char * path, const char * file) {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: restore (const char * = \""
-			           << path << ", const char * = \""
-			           << file << "\")" << endl, 1) : 1) ;
+                 << path << ", const char * = \""
+                 << file << "\")" << endl, 1) : 1) ;
   char * extendedName = new char [strlen (file) + 20] ;
   sprintf (extendedName, "%s.%d", file, mpAccess ().myrank ()) ;
   Gitter :: restore (path, extendedName) ;
@@ -301,14 +307,14 @@ pair < IteratorSTI < Gitter :: vertex_STI > *, IteratorSTI < Gitter :: vertex_ST
   GitterPll :: MacroGitterPll :: iteratorTT (const vertex_STI *, int i) {
   assert (i < _vertexTT.size ()) ;
   return pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > 
-	(new listSmartpointer__to__iteratorSTI < vertex_STI > (_vertexTT [i].first), 
+  (new listSmartpointer__to__iteratorSTI < vertex_STI > (_vertexTT [i].first), 
          new listSmartpointer__to__iteratorSTI < vertex_STI > (_vertexTT [i].second)) ;
 }
 
 pair < IteratorSTI < Gitter :: vertex_STI > *, IteratorSTI < Gitter :: vertex_STI > * >
   GitterPll :: MacroGitterPll :: iteratorTT (const pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > & p, int) {
   return pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > 
-	(new listSmartpointer__to__iteratorSTI < vertex_STI > (*(const listSmartpointer__to__iteratorSTI < vertex_STI > *)p.first),
+  (new listSmartpointer__to__iteratorSTI < vertex_STI > (*(const listSmartpointer__to__iteratorSTI < vertex_STI > *)p.first),
          new listSmartpointer__to__iteratorSTI < vertex_STI > (*(const listSmartpointer__to__iteratorSTI < vertex_STI > *)p.second)) ;
 }
 
@@ -316,14 +322,14 @@ pair < IteratorSTI < Gitter :: hedge_STI > *, IteratorSTI < Gitter :: hedge_STI 
   GitterPll :: MacroGitterPll :: iteratorTT (const hedge_STI *, int i) {
   assert (i < _hedgeTT.size ()) ;
   return pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > 
-	(new listSmartpointer__to__iteratorSTI < hedge_STI > (_hedgeTT [i].first),
+  (new listSmartpointer__to__iteratorSTI < hedge_STI > (_hedgeTT [i].first),
          new listSmartpointer__to__iteratorSTI < hedge_STI > (_hedgeTT [i].second)) ;
 }
 
 pair < IteratorSTI < Gitter :: hedge_STI > *, IteratorSTI < Gitter :: hedge_STI > * > 
   GitterPll :: MacroGitterPll :: iteratorTT (const pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > & p, int) {
   return pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > 
-	(new listSmartpointer__to__iteratorSTI < hedge_STI > (*(const listSmartpointer__to__iteratorSTI < hedge_STI > *)p.first),
+  (new listSmartpointer__to__iteratorSTI < hedge_STI > (*(const listSmartpointer__to__iteratorSTI < hedge_STI > *)p.first),
          new listSmartpointer__to__iteratorSTI < hedge_STI > (*(const listSmartpointer__to__iteratorSTI < hedge_STI > *)p.second)) ;
 }
 
@@ -331,7 +337,7 @@ pair < IteratorSTI < Gitter :: hface_STI > *, IteratorSTI < Gitter :: hface_STI 
   GitterPll :: MacroGitterPll :: iteratorTT (const hface_STI *, int i) {
   assert (i < _hfaceTT.size ()) ;
   return pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > 
-	(new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].first),
+  (new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].first),
          new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].second)) ;
 }
 
@@ -349,11 +355,11 @@ bool GitterPll :: refine () {
   vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;
   vector < vector < hface_STI * > > innerFaces (nl), outerFaces (nl) ;
   {
-  	// Erst die Zeiger auf alle Fl"achen und Kanten mit paralleler
-	// Mehrdeutigkeit sichern, da die LeafIteratorTT < . > nach dem 
-	// Verfeinern auf gitter nicht mehr stimmen werden. Die Technik
-	// ist zul"assig, da keine mehrfache Verfeinerung entstehen kann.
-	
+    // Erst die Zeiger auf alle Fl"achen und Kanten mit paralleler
+  // Mehrdeutigkeit sichern, da die LeafIteratorTT < . > nach dem 
+  // Verfeinern auf gitter nicht mehr stimmen werden. Die Technik
+  // ist zul"assig, da keine mehrfache Verfeinerung entstehen kann.
+  
     {for (int l = 0 ; l < nl ; l ++) {
       LeafIteratorTT < hface_STI > fw (*this,l) ;
       LeafIteratorTT < hedge_STI > dw (*this,l) ;
@@ -366,20 +372,20 @@ bool GitterPll :: refine () {
       for (dw.inner ().first () ; ! dw.inner ().done () ; dw.inner ().next ())
         innerEdges [l].push_back (& dw.inner ().item ()) ;
     }}
-    	// jetzt normal verfeinern und den Status der Verfeinerung
-	// [unvollst"andige / vollst"andige Verfeinerung] sichern.
+      // jetzt normal verfeinern und den Status der Verfeinerung
+  // [unvollst"andige / vollst"andige Verfeinerung] sichern.
     
     __STATIC_phase = 1 ;
     
     state = Gitter :: refine () ;
        
-	// Phase des Fl"achenausgleichs an den Schnittfl"achen des
-	// verteilten Gitters. Weil dort im sequentiellen Fall pseudorekursive
-	// Methodenaufrufe vorliegen k"onnen, muss solange iteriert werden,
-	// bis die Situation global station"ar ist.
-	
+  // Phase des Fl"achenausgleichs an den Schnittfl"achen des
+  // verteilten Gitters. Weil dort im sequentiellen Fall pseudorekursive
+  // Methodenaufrufe vorliegen k"onnen, muss solange iteriert werden,
+  // bis die Situation global station"ar ist.
+  
     __STATIC_phase = 2 ;
-	
+  
     bool repeat (false) ;
     _refineLoops = 0 ;
     do {
@@ -387,26 +393,26 @@ bool GitterPll :: refine () {
       {
         vector < ObjectStream > osv (nl) ;
         try {
-	  for (int l = 0 ; l < nl ; l ++) {
+    for (int l = 0 ; l < nl ; l ++) {
             {for (vector < hface_STI * > :: const_iterator i = outerFaces [l].begin () ;
               i != outerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; }
             {for (vector < hface_STI * > :: const_iterator i = innerFaces [l].begin () ;
-      	      i != innerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; }
+              i != innerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; }
           }
-	} catch (Parallel :: AccessPllException) {
+  } catch (Parallel :: AccessPllException) {
           cerr << "**FEHLER (FATAL) AccessPllException in " << __FILE__ << " " << __LINE__ << endl ; abort () ;
         }
-	
+  
         osv = mpAccess ().exchange (osv) ;
-	
+  
         try {
-	  for (int l = 0 ; l < nl ; l ++) {
+    for (int l = 0 ; l < nl ; l ++) {
             {for (vector < hface_STI * > :: const_iterator i = innerFaces [l].begin () ;
               i != innerFaces [l].end () ; repeat |= (*i ++)->accessPllX ().accessOuterPllX ().first->setRefinementRequest (osv [l])) ; }
             {for (vector < hface_STI * > :: const_iterator i = outerFaces [l].begin () ;
               i != outerFaces [l].end () ; repeat |= (*i ++)->accessPllX ().accessOuterPllX ().first->setRefinementRequest (osv [l])) ; }
           }
-	} catch (Parallel :: AccessPllException) {
+  } catch (Parallel :: AccessPllException) {
           cerr << "**FEHLER (FATAL) AccessPllException in " << __FILE__ << " " << __LINE__ << endl ; abort () ;
         }
       }
@@ -414,12 +420,12 @@ bool GitterPll :: refine () {
       _refineLoops ++ ;
     } while (mpAccess ().gmax (repeat ? 1 : 0)) ;
 
-	// Jetzt noch die Kantensituation richtigstellen, es gen"ugt ein Durchlauf,
-	// weil die Verfeinerung einer Kante keine Fernwirkungen hat. Vorsicht: Die
-	// Kanten sind bez"uglich ihrer Identifikation sternf"ormig organisiert, d.h.
-	// es muss die Verfeinerungsinformation einmal am Eigent"umer gesammelt und
-	// dann wieder zur"ucktransportiert werden, eine einfache L"osung, wie bei
-	// den Fl"achen (1/1 Beziehung) scheidet aus.
+  // Jetzt noch die Kantensituation richtigstellen, es gen"ugt ein Durchlauf,
+  // weil die Verfeinerung einer Kante keine Fernwirkungen hat. Vorsicht: Die
+  // Kanten sind bez"uglich ihrer Identifikation sternf"ormig organisiert, d.h.
+  // es muss die Verfeinerungsinformation einmal am Eigent"umer gesammelt und
+  // dann wieder zur"ucktransportiert werden, eine einfache L"osung, wie bei
+  // den Fl"achen (1/1 Beziehung) scheidet aus.
 
     __STATIC_phase = 3 ;
 
@@ -432,9 +438,9 @@ bool GitterPll :: refine () {
       osv = mpAccess ().exchange (osv) ;
       {for (int l = 0 ; l < nl ; l ++)
         for (vector < hedge_STI * > :: const_iterator i = innerEdges [l].begin () ;
-      	  i != innerEdges [l].end () ; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
+          i != innerEdges [l].end () ; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
       }
-    }		// ~vector < ObjectStream > ...	
+    }   // ~vector < ObjectStream > ... 
     {
       vector < ObjectStream > osv (nl) ;
       {for (int l = 0 ; l < nl ; l ++)
@@ -444,9 +450,9 @@ bool GitterPll :: refine () {
       osv = mpAccess ().exchange (osv) ;
       {for (int l = 0 ; l < nl ; l ++)
         for (vector < hedge_STI * > :: const_iterator i = outerEdges [l].begin () ;
-      	  i != outerEdges [l].end () ; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
+          i != outerEdges [l].end () ; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
       }
-    }		// ~vector < ObjectStream > ...	
+    }   // ~vector < ObjectStream > ... 
   }
   
   __STATIC_phase = -1 ;
@@ -461,65 +467,65 @@ void GitterPll :: coarse () {
   {
     vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;
     vector < vector < hface_STI * > > innerFaces (nl), outerFaces (nl) ;
-	
+  
     for (int l = 0 ; l < nl ; l ++) {
     
-	// Zun"achst werden f"ur alle Links die Zeiger auf Gitterojekte mit
-	// Mehrdeutigkeit gesichert, die an der Wurzel einer potentiellen
-	// Vergr"oberungsoperation sitzen -> es sind die Knoten in der Hierarchie,
-	// deren Kinder alle Bl"atter sind. Genau diese Knoten sollen gegen"uber
-	// der Vergr"oberung blockiert werden und dann die Vergr"oberung falls
-	// sie zul"assig ist, sp"ater durchgef"uhrt werden (pending) ;
+  // Zun"achst werden f"ur alle Links die Zeiger auf Gitterojekte mit
+  // Mehrdeutigkeit gesichert, die an der Wurzel einer potentiellen
+  // Vergr"oberungsoperation sitzen -> es sind die Knoten in der Hierarchie,
+  // deren Kinder alle Bl"atter sind. Genau diese Knoten sollen gegen"uber
+  // der Vergr"oberung blockiert werden und dann die Vergr"oberung falls
+  // sie zul"assig ist, sp"ater durchgef"uhrt werden (pending) ;
     
       AccessIteratorTT < hface_STI > :: InnerHandle mfwi (containerPll (),l) ;
       AccessIteratorTT < hface_STI > :: OuterHandle mfwo (containerPll (),l) ;
       AccessIteratorTT < hedge_STI > :: InnerHandle mdwi (containerPll (),l) ;
       AccessIteratorTT < hedge_STI > :: OuterHandle mdwo (containerPll (),l) ;
       
-	// Die inneren und a"usseren Iteratoren der potentiell vergr"oberungsf"ahigen
-	// Fl"achen "uber den Grobgitterfl"achen. In den Elementen passiert erstmal
-	// nichts, solange nicht mit mehrfachen Grobgitterelementen gearbeitet wird.
+  // Die inneren und a"usseren Iteratoren der potentiell vergr"oberungsf"ahigen
+  // Fl"achen "uber den Grobgitterfl"achen. In den Elementen passiert erstmal
+  // nichts, solange nicht mit mehrfachen Grobgitterelementen gearbeitet wird.
       
       Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-      	TreeIterator < hface_STI, childs_are_leafs < hface_STI > > > fwi (mfwi) ;
+        TreeIterator < hface_STI, childs_are_leafs < hface_STI > > > fwi (mfwi) ;
       Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-      	TreeIterator < hface_STI, childs_are_leafs < hface_STI > > > fwo (mfwo) ;
+        TreeIterator < hface_STI, childs_are_leafs < hface_STI > > > fwo (mfwo) ;
       
-	// Die inneren und a"usseren Iteratoren der potentiell vergr"oberungsf"ahigen
-	// Kanten "uber den Grobgitterkanten.
+  // Die inneren und a"usseren Iteratoren der potentiell vergr"oberungsf"ahigen
+  // Kanten "uber den Grobgitterkanten.
       
       Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, 
-      	TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dwi (mdwi) ;
+        TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dwi (mdwi) ;
       Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, 
-      	TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dwo (mdwo) ;
+        TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dwo (mdwo) ;
 
-	// Die inneren und a"usseren Iteratoren der potentiell vergr"oberungsf"ahigen
-	// Kanten "uber den Grobgitterfl"achen. Diese Konstruktion wird beim Tetraeder-
-	// gitter notwendig, weil dort keine Aussage der Form:
-	//
+  // Die inneren und a"usseren Iteratoren der potentiell vergr"oberungsf"ahigen
+  // Kanten "uber den Grobgitterfl"achen. Diese Konstruktion wird beim Tetraeder-
+  // gitter notwendig, weil dort keine Aussage der Form:
+  //
 
       Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-      	TreeIterator < hface_STI, has_int_edge < hface_STI > > > efi (mfwi) ;
+        TreeIterator < hface_STI, has_int_edge < hface_STI > > > efi (mfwi) ;
       Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-      	TreeIterator < hface_STI, has_int_edge < hface_STI > > > efo (mfwo) ;
+        TreeIterator < hface_STI, has_int_edge < hface_STI > > > efo (mfwo) ;
       Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-      	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > eifi (efi) ;
+        TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > eifi (efi) ;
       Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-      	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > eifo (efo) ;
+        TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > eifo (efo) ;
       Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-      	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-	TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dfi (eifi) ;
+        TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dfi (eifi) ;
       Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-      	TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-	TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dfo (eifo) ;
+        TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dfo (eifo) ;
 
-	// Die 'item ()' Resultatwerte (Zeiger) werden in Vektoren gesichert, weil die
-	// Kriterien die zur Erzeugung der Iteratoren angewendet wurden (Filter) nach
-	// einer teilweisen Vergr"oberung nicht mehr g"ultig sein werden, d.h. die 
-	// Iterationsobjekte "andern w"ahrend der Vergr"oberung ihre Eigenschaften.
-	// Deshalb werden sie auch am Ende des Blocks aufgegeben. Der Vektor 'cache'
-	// ist zul"assig, weil kein Objekt auf das eine Referenz im 'cache' vorliegt
-	// beseitigt werden kann. Sie sind alle ein Niveau darunter.
+  // Die 'item ()' Resultatwerte (Zeiger) werden in Vektoren gesichert, weil die
+  // Kriterien die zur Erzeugung der Iteratoren angewendet wurden (Filter) nach
+  // einer teilweisen Vergr"oberung nicht mehr g"ultig sein werden, d.h. die 
+  // Iterationsobjekte "andern w"ahrend der Vergr"oberung ihre Eigenschaften.
+  // Deshalb werden sie auch am Ende des Blocks aufgegeben. Der Vektor 'cache'
+  // ist zul"assig, weil kein Objekt auf das eine Referenz im 'cache' vorliegt
+  // beseitigt werden kann. Sie sind alle ein Niveau darunter.
 
       for (fwi.first () ; ! fwi.done () ; fwi.next ()) innerFaces [l].push_back (& fwi.item ()) ;
       for (fwo.first () ; ! fwo.done () ; fwo.next ()) outerFaces [l].push_back (& fwo.item ()) ;
@@ -529,26 +535,26 @@ void GitterPll :: coarse () {
       for (dfi.first () ; ! dfi.done () ; dfi.next ()) innerEdges [l].push_back (& dfi.item ()) ;
     }
     try {
-	// Erstmal alles was mehrdeutig ist, gegen die drohende Vergr"oberung sichern.
-	// Danach werden sukzessive die Fl"achenlocks aufgehoben, getestet und
-	// eventuell vergr"obert, dann das gleiche Spiel mit den Kanten.
+  // Erstmal alles was mehrdeutig ist, gegen die drohende Vergr"oberung sichern.
+  // Danach werden sukzessive die Fl"achenlocks aufgehoben, getestet und
+  // eventuell vergr"obert, dann das gleiche Spiel mit den Kanten.
 
       for (int l = 0 ; l < nl ; l ++) {
         {for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ;
             i != outerEdges [l].end () ; (*i ++)->accessPllX ().lockAndTry ()) ; }
         {for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ;
-      	    i != innerEdges [l].end () ; (*i ++)->accessPllX ().lockAndTry ()) ; }
+            i != innerEdges [l].end () ; (*i ++)->accessPllX ().lockAndTry ()) ; }
         {for (vector < hface_STI * > :: iterator i = outerFaces [l].begin () ;
             i != outerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ; }
         {for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ;
-      	    i != innerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ; }
+            i != innerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ; }
       }
       
-      	// Gitter :: coarse () ist elementorientiert, d.h. die Vergr"oberung auf Fl"achen und
-	// Kanten wird nur durch Vermittlung eines sich vergr"obernden Knotens in der Element-
-	// hierarchie angestossen. In allen gegen Vergr"oberung 'gelockten' Fl"achen und Kanten
-	// wird die angeforderte Operation zur"uckgewiesen, um erst sp"ater von aussen nochmals
-	// angestossen zu werden.
+        // Gitter :: coarse () ist elementorientiert, d.h. die Vergr"oberung auf Fl"achen und
+  // Kanten wird nur durch Vermittlung eines sich vergr"obernden Knotens in der Element-
+  // hierarchie angestossen. In allen gegen Vergr"oberung 'gelockten' Fl"achen und Kanten
+  // wird die angeforderte Operation zur"uckgewiesen, um erst sp"ater von aussen nochmals
+  // angestossen zu werden.
       
       __STATIC_phase = 4 ;
       
@@ -561,12 +567,12 @@ void GitterPll :: coarse () {
     }
     try {
     
-	// Phase des Fl"achenausgleichs des verteilten Vergr"oberungsalgorithmus
-	// alle Schnittfl"achenpaare werden daraufhin untersucht, ob eine
-	// Vergr"oberung in beiden Teilgittern durchgef"uhrt werden darf,
-	// wenn ja, wird in beiden Teilgittern vergr"obert und der Vollzug
-	// getestet.
-	
+  // Phase des Fl"achenausgleichs des verteilten Vergr"oberungsalgorithmus
+  // alle Schnittfl"achenpaare werden daraufhin untersucht, ob eine
+  // Vergr"oberung in beiden Teilgittern durchgef"uhrt werden darf,
+  // wenn ja, wird in beiden Teilgittern vergr"obert und der Vollzug
+  // getestet.
+  
       __STATIC_phase = 5 ;
     
       vector < vector < int > > clean (nl) ;
@@ -579,21 +585,21 @@ void GitterPll :: coarse () {
         inout = mpAccess ().exchange (inout) ;
         {for (int l = 0 ; l < nl ; l ++) {
           clean [l] = vector < int > (innerFaces [l].size (), long (true)) ;
-	  vector < int > :: iterator j = clean [l].begin (), k = inout [l].begin () ;
+    vector < int > :: iterator j = clean [l].begin (), k = inout [l].begin () ;
           for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ; i != innerFaces [l].end () ; i ++, j++, k++) {
-	    assert (j != clean [l].end ()) ; assert (k != inout [l].end ()) ;
-	    (*j) &= (*k) && (*i)->accessPllX ().accessOuterPllX ().first->lockAndTry () ;
-	  }
+      assert (j != clean [l].end ()) ; assert (k != inout [l].end ()) ;
+      (*j) &= (*k) && (*i)->accessPllX ().accessOuterPllX ().first->lockAndTry () ;
+    }
         }}
       }
       {
         vector < vector < int > > inout (nl) ;
         {for (int l = 0 ; l < nl ; l ++) {
           vector < int > :: iterator j = clean [l].begin () ;
-	  for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ; i != innerFaces [l].end () ; i ++, j++) {
-	    inout [l].push_back (*j) ;
-	    (*i)->accessPllX ().accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
-	  }
+    for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ; i != innerFaces [l].end () ; i ++, j++) {
+      inout [l].push_back (*j) ;
+      (*i)->accessPllX ().accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
+    }
         }}
       
         inout = mpAccess ().exchange (inout) ;
@@ -601,9 +607,9 @@ void GitterPll :: coarse () {
         {for (int l = 0 ; l < nl ; l ++) {
           vector < int > :: iterator j = inout [l].begin () ;
           for (vector < hface_STI * > :: iterator i = outerFaces [l].begin () ; i != outerFaces [l].end () ; i ++, j++) {
-	    assert (j != inout [l].end ()) ;
-	    (*i)->accessPllX ().accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
-	  }
+      assert (j != inout [l].end ()) ;
+      (*i)->accessPllX ().accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
+    }
         }}
       }
     } catch (Parallel :: AccessPllException) {
@@ -613,75 +619,75 @@ void GitterPll :: coarse () {
     }
     try {
     
-	// Phase des Kantenausgleichs im parallelen Vergr"oberungsalgorithmus:
-	
+  // Phase des Kantenausgleichs im parallelen Vergr"oberungsalgorithmus:
+  
       __STATIC_phase  = 6 ;
     
-	// Weil hier jede Kante nur eindeutig auftreten darf, muss sie in einem
-	// map als Adresse hinterlegt werden, dann k"onnen die verschiedenen
-	// Refcounts aus den verschiedenen Links tats"achlich global miteinander
-	// abgemischt werden. Dazu werden zun"achst alle eigenen Kanten auf ihre
-	// Vergr"oberbarkeit hin untersucht und dieser Zustand (true = vergr"oberbar
-	// false = darf nicht vergr"obert werden) im map 'clean' hinterlegt. Dazu
-	// kommt noch ein zweiter 'bool' Wert, der anzeigt ob die Kante schon ab-
-	// schliessend vergr"obert wurde oder nicht. 
+  // Weil hier jede Kante nur eindeutig auftreten darf, muss sie in einem
+  // map als Adresse hinterlegt werden, dann k"onnen die verschiedenen
+  // Refcounts aus den verschiedenen Links tats"achlich global miteinander
+  // abgemischt werden. Dazu werden zun"achst alle eigenen Kanten auf ihre
+  // Vergr"oberbarkeit hin untersucht und dieser Zustand (true = vergr"oberbar
+  // false = darf nicht vergr"obert werden) im map 'clean' hinterlegt. Dazu
+  // kommt noch ein zweiter 'bool' Wert, der anzeigt ob die Kante schon ab-
+  // schliessend vergr"obert wurde oder nicht. 
     
       map < hedge_STI *, pair < bool, bool >, less < hedge_STI * > > clean ;
       
       {for (int l = 0 ; l < nl ; l ++)
         for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; i != innerEdges [l].end () ; i ++)
-	  if (clean.find (*i) == clean.end ()) clean [*i] = pair < bool, bool > ((*i)->accessPllX ().lockAndTry (), true) ;
+    if (clean.find (*i) == clean.end ()) clean [*i] = pair < bool, bool > ((*i)->accessPllX ().lockAndTry (), true) ;
       }
       {
         vector < vector < int > > inout (nl) ;
         {for (int l = 0 ; l < nl ; l ++)
           for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ; i != outerEdges [l].end () ; i ++)
             inout [l].push_back ((*i)->accessPllX ().lockAndTry ()) ;
-	}
+  }
         inout = mpAccess ().exchange (inout) ;
         {for (int l = 0 ; l < nl ; l ++) {
-	  vector < int > :: const_iterator j = inout [l].begin () ;
+    vector < int > :: const_iterator j = inout [l].begin () ;
           for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; i != innerEdges [l].end () ; i ++, j++) {
-	    assert (j != inout [l].end ()) ;
+      assert (j != inout [l].end ()) ;
             assert (clean.find (*i) != clean.end ()) ;
             if (*j == false) clean [*i] = pair < bool, bool > (false, clean[*i].second) ; 
-	  }
+    }
         }}
       }
       {
         vector < vector < int > > inout (nl) ;
         {for (int l = 0 ; l < nl ; l ++) {
-	  for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; i != innerEdges [l].end () ; i ++) {
-	    assert (clean.find (*i) != clean.end ()) ;
-	    pair < bool, bool > & a = clean [*i] ;
-	    inout [l].push_back (a.first) ;
-	    if (a.second) {
-	
-	// Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
-	// sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
-	// einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
-	// mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
-	// vermerkt werden. Dann wird kein zweiter Versuch unternommen.
-	
-	      a.second = false ;
-	      bool b = (*i)->accessPllX ().unlockAndResume (a.first) ;
-	      assert (b == a.first) ;
-	    }
-	  }
+    for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; i != innerEdges [l].end () ; i ++) {
+      assert (clean.find (*i) != clean.end ()) ;
+      pair < bool, bool > & a = clean [*i] ;
+      inout [l].push_back (a.first) ;
+      if (a.second) {
+  
+  // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
+  // sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
+  // einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
+  // mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
+  // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
+  
+        a.second = false ;
+        bool b = (*i)->accessPllX ().unlockAndResume (a.first) ;
+        assert (b == a.first) ;
+      }
+    }
         }}
         inout = mpAccess ().exchange (inout) ;
         {for (int l = 0 ; l < nl ; l ++) {
           vector < int > :: iterator j = inout [l].begin () ;
           for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ; i != outerEdges [l].end () ; i ++, j++) {
-	    assert (j != inout [l].end ()) ;
-	    
-	// Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
-	// vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
-	// Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
-	    
-	    bool b = (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
-	    assert (b == bool (*j)) ;
-	  }
+      assert (j != inout [l].end ()) ;
+      
+  // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
+  // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
+  // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
+      
+      bool b = (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
+      assert (b == bool (*j)) ;
+    }
         }}
       }
     } catch (Parallel :: AccessPllException) {
@@ -718,6 +724,32 @@ bool GitterPll :: adapt () {
   return refined;
 }
 
+bool GitterPll :: duneAdapt () {
+  __STATIC_myrank = mpAccess ().myrank () ;
+  __STATIC_turn ++ ;
+  assert (debugOption (20) ? (cout << "**INFO GitterPll :: adapt ()" << endl, 1) : 1) ;
+  assert (! iterators_attached ()) ;
+  int start = clock () ;
+  bool refined = refine () ;
+  int lap = clock () ;
+  coarse () ;
+  int end = clock () ;
+  if (debugOption (1)) {
+    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
+    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
+    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
+    cout << "**INFO GitterPll :: adapt () [ref (loops)|cse|all] " << u1 << " ("
+         << _refineLoops << ") " << u2 << " " << u3 << endl ;
+  }
+  notifyGridChanges () ;
+  return refined;
+}
+
+bool GitterPll :: duneLoadBalance () {
+  loadBalancerGridChangesNotify () ;
+  return true;
+}
+
 void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
   const int nl = mpa.nlinks (), me = mpa.myrank () ;
   int start = clock () ;
@@ -749,7 +781,7 @@ void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
 #else
           copy (t1.begin (), t1.end (), ostream_iterator < int , char > (cerr, "-")) ;
 #endif
-	  cerr << "\t" ;
+    cerr << "\t" ;
 #ifdef IBM_XLC
           copy (t2.begin (), t2.end (), ostream_iterator < int > (cerr, "-")) ;
 #elif defined(_SGI)
@@ -769,13 +801,13 @@ void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
 
 void GitterPll :: exchangeDynamicState () {
 
-	// Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
-	// Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
-	// die einer "Anderung des statischen Zustands entsprechen. Sie wird in
-	// diesem Fall NACH dem Update des statischen Zustands aufgerufen, und
-	// kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
-	// Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
-	// Regel hier eingeschleift werden.
+  // Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
+  // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
+  // die einer "Anderung des statischen Zustands entsprechen. Sie wird in
+  // diesem Fall NACH dem Update des statischen Zustands aufgerufen, und
+  // kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
+  // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
+  // Regel hier eingeschleift werden.
   int mallocedsize;
 {
   //struct mallinfo minfo = mallinfo();
@@ -813,7 +845,7 @@ void GitterPll :: exchangeDynamicState () {
     cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
   }
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: exchangeDynamicState () used " 
-  	<< (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
+    << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
 
 }
 {
@@ -827,11 +859,11 @@ void GitterPll :: exchangeDynamicState () {
 
 void GitterPll :: exchangeStaticState () {
 
-	// Die Methode wird jedesmal aufgerufen, wenn sich der statische
-	// Zustand (d.h. der Zustand, der mit dem Makrogitter verbunden ist)
-	// ge"andert hat: Makrogitteraufbau und Lastvertielung. Der statische
-	// Zustand darf durch Verfeinerung und h"ohere Methoden nicht beeinflusst
-	// sein.
+  // Die Methode wird jedesmal aufgerufen, wenn sich der statische
+  // Zustand (d.h. der Zustand, der mit dem Makrogitter verbunden ist)
+  // ge"andert hat: Makrogitteraufbau und Lastvertielung. Der statische
+  // Zustand darf durch Verfeinerung und h"ohere Methoden nicht beeinflusst
+  // sein.
 
   const int start = clock () ;
   try {
@@ -866,7 +898,7 @@ void GitterPll :: exchangeStaticState () {
     cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
   }
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: exchangeStaticState () used " 
-  	<< (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
+    << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   return ;
 }
 
@@ -884,13 +916,13 @@ void GitterPll :: loadBalancerGridChangesNotify () {
   }
   bool neu = false ;
   {
-	// Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
-	// 
-	// load  - eigene ElementLast
-	// mean  - mittlere ElementLast
-	// nload - Lastverh"altnis
+  // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
+  // 
+  // load  - eigene ElementLast
+  // mean  - mittlere ElementLast
+  // nload - Lastverh"altnis
 
-	
+  
     double load = db.accVertexLoad () ;
     vector < double > v (mpAccess ().gcollect (load)) ;
     double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
@@ -909,9 +941,9 @@ void GitterPll :: loadBalancerGridChangesNotify () {
 
 void GitterPll :: loadBalancerMacroGridChangesNotify () {
 
-	// Diese Methode beschreibt die Reaktion des Lastverteilers bzw.
-	// seiner Datengrundlage auf "Anderungen des Grobgitters, d.h.
-	// auf "Anderungen in der Grobgitterverteilung, Gr"osse usw.
+  // Diese Methode beschreibt die Reaktion des Lastverteilers bzw.
+  // seiner Datengrundlage auf "Anderungen des Grobgitters, d.h.
+  // auf "Anderungen in der Grobgitterverteilung, Gr"osse usw.
 
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: loadBalancerMacroGridChangesNotify () " << endl, 1) : 1) ;
   int cnt = 0 ;
@@ -956,4 +988,4 @@ GitterPll :: GitterPll () : _ldbOver (1.2), _ldbUnder (0.0), _ldbMethod (LoadBal
   return ;
 }
 
-
+#endif
