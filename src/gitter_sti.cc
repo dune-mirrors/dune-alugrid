@@ -9,6 +9,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.7  2004/11/29 12:39:17  robertk
+ * size of index set is stored aswell. The indexset is completely overwritten
+ * after the grid is read from file.
+ *
  * Revision 1.6  2004/11/25 18:44:17  robertk
  * added vertex backup and restore. not tested yet.
  *
@@ -335,11 +339,17 @@ void Gitter :: backup (ostream & out) {
 #ifdef _DUNE_USES_BSGRID_   
   // backup indices 
   bool indices = true; out.put(indices);  // indices == true
-  {
+  
+  // store max indices 
+  for(int i=0; i<5; i++) 
+    indexManager(i).backupIndexSet(out);
+    
+  { // backup index of elements 
     AccessIterator <helement_STI> :: Handle ew (container ()) ;
     for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backupIndex (out) ; 
   }
-  {
+  { 
+    // backup index of vertices 
     LeafIterator < vertex_STI > w ( *this );  
     for( w->first(); ! w->done() ; w->next () ) w->item().backupIndex(out);
   }
@@ -364,11 +374,15 @@ void Gitter ::restore (istream & in) {
   bool indices = in.get();
   if(indices)
   {
-    // restore index 
+    for(int i=0; i<5; i++) 
+      this->indexManager(i).restoreIndexSet ( in );
+    
+    // restore index of elements 
     { 
       AccessIterator < helement_STI >:: Handle ew(container());
       for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in); 
     }
+    // restore index of vertices
     {
       LeafIterator < vertex_STI > w ( *this );  
       for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in);
