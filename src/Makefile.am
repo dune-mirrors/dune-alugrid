@@ -1,3 +1,4 @@
+# Makefile.am for building the ALU3d-Grid library
 
 # here the headers to install are defined 
 include serial/Makefile.am.include
@@ -14,12 +15,16 @@ lib_LTLIBRARIES = libALU3dGrid.la
 # headers to install 
 nobase_include_HEADERS = alu3dgrid_serial.h alu3dgrid_parallel.h stlheaders.h $(serialhdrs) $(parallelhdrs) $(duneinterfacehdrs)
 
-if MPI
-#CXX=$(MPICXX) 
+if MPI 
+# if MPI was found the parallel version is build 
+
+# add mpi path to cpplags 
 AM_CPPFLAGS += $(MPI_CPPFLAGS)
 # build lib with parallel support 
 nodist_libALU3dGrid_la_SOURCES = alu3dgrid_serial.cc alu3dgrid_parallel.cc 
+
 else 
+
 # build only serial grid lib
 nodist_libALU3dGrid_la_SOURCES = alu3dgrid_serial.cc 
 endif
