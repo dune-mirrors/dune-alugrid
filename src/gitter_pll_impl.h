@@ -8,6 +8,12 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/11/16 19:41:16  robertk
+ * Added new methods read and write DynamiceState with GatherScatter.
+ * Furthermore changed readDynamicState of BoundaryPllClosure. Now the
+ * oppositeVeritces are read for the stream written by writeDynState of Tetra
+ * or Hexa.
+ *
  * Revision 1.4  2004/11/02 18:55:30  robertk
  * Moved all changed with dune... to seperated gitter_dune_* files.
  *
@@ -232,6 +238,9 @@ class ElementPllBaseX : public ElementPllXIF, public MyAlloc {
     void readStaticState (ObjectStream &, int) ;
     virtual void writeDynamicState (ObjectStream &, int) const  = 0 ;
     void readDynamicState (ObjectStream &, int) ;
+
+    virtual void writeDynamicState (ObjectStream &, GatherScatterType &) const {} ;
+    void readDynamicState (ObjectStream &, GatherScatterType &) {}
   public :
     int ldbVertexIndex () const ;
     int & ldbVertexIndex () ;
@@ -264,6 +273,7 @@ class TetraPllXBase : public ElementPllBaseX {
     inline ~TetraPllXBase () {}
   public :
     void writeDynamicState (ObjectStream &, int) const ;
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
   private :
     mytetra_t & _tetra ;
 } ;
@@ -315,6 +325,7 @@ class Periodic3PllXBase : public ElementPllBaseX {
     inline ~Periodic3PllXBase () {}
   public :
     void writeDynamicState (ObjectStream &, int) const ;
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
   private :
     myperiodic3_t & _periodic3 ;
 } ;
@@ -366,6 +377,7 @@ class Periodic4PllXBase : public ElementPllBaseX {
     inline ~Periodic4PllXBase () {}
   public :
     void writeDynamicState (ObjectStream &, int) const ;
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
   private :
     myperiodic4_t & _periodic4 ;
 } ;
@@ -415,6 +427,7 @@ class HexaPllBaseX : public ElementPllBaseX {
     inline HexaPllBaseX (myhexa_t &) ;
     inline ~HexaPllBaseX () {}
     void writeDynamicState (ObjectStream &, int) const ;
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const {};
   private :
     myhexa_t & _hexa ;
 } ;
@@ -448,6 +461,7 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
 class BndsegPllBaseX : public ElementPllBaseX {
   public :
     void writeDynamicState (ObjectStream &, int) const { abort () ; }
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
     pair < ElementPllXIF_t *, int > accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int) ;
     pair < const ElementPllXIF_t *, int > accessOuterPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
     pair < ElementPllXIF_t *, int > accessInnerPllX (const pair < ElementPllXIF_t *, int > &, int) ;
@@ -483,6 +497,9 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     inline BndsegPllBaseXClosure (myhbnd_t &) ;
    ~BndsegPllBaseXClosure () {}
     void readDynamicState (ObjectStream &, int) ;
+
+    void readDynamicState (ObjectStream &, GatherScatterType &);
+    
     void getRefinementRequest (ObjectStream &) ;
     bool setRefinementRequest (ObjectStream &) ;
   public :
@@ -496,9 +513,12 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     double _center [3] ;
     balrule_t _rul ;
     bool _lockCRS ;
+
+    int _ghostLevel;
 // Schwerpunkt des anliegenden Elements beschaffen:
   public:
     const double (& barycenter () const)[3] { return _center ; }
+    int ghostLevel () const { return _ghostLevel; }
 // Ende
 } ;
 
@@ -822,8 +842,14 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         MacroGitterBasisPll (istream &) ;
         MacroGitterBasisPll () ;
        ~MacroGitterBasisPll () ;
+
+       // Dune index management 
+       IndexManagerType & indexManager(int codim) 
+       {
+         return MacroGitterBasis::indexManager(codim);
+       }
     } ;
-  private :
+  protected :
     MpAccessLocal & _mpaccess ;
     MacroGitterPll * _macrogitter ;
   public :
@@ -1241,7 +1267,7 @@ template < class A > void BndsegPllBaseXMacro < A > :: packAsBnd (int fce, int w
   return ;
 }
 
-template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) : _hbnd (b), _lockCRS (false) {
+template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) : _hbnd (b), _lockCRS (false) , _ghostLevel (-1) {
   return ;
 }
 
@@ -1306,15 +1332,58 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
   return (abort (), false) ;
 }
 
+template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, GatherScatterType & gs ) {
+  logFile << "readDyn Data \n";
+  gs.recvData( os , myhbnd () );
+  return ;
+}
+
 template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, int) {
   try {
-    os.readObject (_center [0]) ;
-    os.readObject (_center [1]) ;
-    os.readObject (_center [2]) ;
+
+    int index;
+    assert( (true) ? (os.readObject( index ) , 1 ) : 1) ;
+    if(writeLogFile)
+    {
+      //cout << "readDynStat \n";
+      assert(logFile);
+      logFile << "readDynamicState of el " << index << "\n";
+    }
+
+#ifdef _DUNE_USES_BSGRID_
+   
+    // read the real level of ghost 
+    os.readObject( _ghostLevel );
+    //logFile << "readLevel " << _ghostLevel << "\n"; 
+   
+    int dimvx;
+    assert( (true) ? (os.readObject( dimvx ), (dimvx == myhbnd().dimVx()) ? 1 : 0 ) : 1) ;
+    
+    double p[3];
+    for(int i=0; i<myhbnd().dimVx(); i++)
+    {
+      os.readObject ( p[0] ) ;
+      os.readObject ( p[1] ) ;
+      os.readObject ( p[2] ) ;
+      
+      myhbnd (). setOppPoint ( i , p ) ;
+    }
+
+    if(writeLogFile)
+    {
+      logFile << "write p = [";
+      for(int i=0; i<3; i++)
+        logFile << p[i] << ",";
+      logFile << "]\n";
+    }    
+    
+#endif
+    
   } catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
+
   return ;
 }
 
