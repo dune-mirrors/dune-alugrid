@@ -6,9 +6,6 @@ include serial/Makefile.am.include
 include parallel/Makefile.am.include
 include duneinterface/Makefile.am.include
 
-# use the subdirectories as include dir 
-LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
-
 # work arround for automake versions < 1.8 
 ALU3D_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -I./serial -I./parallel -I./duneinterface 
 
@@ -23,12 +20,16 @@ if MPI
 
 # add mpi path to cpplags 
 AM_CPPFLAGS = $(ALU3D_CPPFLAGS) $(MPI_CPPFLAGS)
+LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
+
 # build lib with parallel support 
 nodist_libalu3dgrid_la_SOURCES = alu3dgrid_serial.cc alu3dgrid_parallel.cc 
+libalu3dgrid_la_LIBADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS) 
 
 else 
 # if no mpi build only serial lib 
 
+LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 AM_CPPFLAGS = $(ALU3D_CPPFLAGS)
 # build only serial grid lib
 nodist_libalu3dgrid_la_SOURCES = alu3dgrid_serial.cc 
