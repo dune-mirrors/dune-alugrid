@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.6  2004/11/25 18:44:17  robertk
+ * added vertex backup and restore. not tested yet.
+ *
  * Revision 1.5  2004/11/02 17:12:04  robertk
  * Removed duneBackup and duneRestore, now defined in the inherited
  * GitterDuneImpl class.
@@ -332,8 +335,14 @@ void Gitter :: backup (ostream & out) {
 #ifdef _DUNE_USES_BSGRID_   
   // backup indices 
   bool indices = true; out.put(indices);  // indices == true
-  {AccessIterator <helement_STI> :: Handle ew (container ()) ;
-    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backupIndex (out) ; }
+  {
+    AccessIterator <helement_STI> :: Handle ew (container ()) ;
+    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backupIndex (out) ; 
+  }
+  {
+    LeafIterator < vertex_STI > w ( *this );  
+    for( w->first(); ! w->done() ; w->next () ) w->item().backupIndex(out);
+  }
 #else 
   // backup indices 
   bool indices = false; out.put(indices);  // indices == false
@@ -356,8 +365,14 @@ void Gitter ::restore (istream & in) {
   if(indices)
   {
     // restore index 
-    {AccessIterator < helement_STI >:: Handle ew(container());
-      for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in); }
+    { 
+      AccessIterator < helement_STI >:: Handle ew(container());
+      for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in); 
+    }
+    {
+      LeafIterator < vertex_STI > w ( *this );  
+      for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in);
+    }
   }
 #endif
     
