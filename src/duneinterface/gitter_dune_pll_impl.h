@@ -1,3 +1,4 @@
+// (c) Robert Kloefkorn 2004 -- 2005 
 #ifndef GITTER_DUNE_PLL_IMPL_H_INCLUDED
 #define GITTER_DUNE_PLL_IMPL_H_INCLUDED
 
@@ -12,7 +13,7 @@
 #include "gitter_pll_impl.h"
 #include "gitter_pll_ldb.h"
   
-static bool writeLogFile = false;
+//static bool writeLogFile = false;
 
 class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
 {

@@ -33,7 +33,8 @@
 
 const linkagePattern_t VertexPllBaseX :: nullPattern ;
 
-VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) : _v (v), _map (m), _lpn (), _moveTo (), _ref () {
+VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) 
+  : _v (v), _map (m), _lpn (), _moveTo (), _ref () {
   linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
   _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (nullPattern,0)).first ;
   (*_lpn).second ++ ;
@@ -937,7 +938,7 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
 }
 
 HexaPllBaseXMacro :: HexaPllBaseXMacro (myhexa_t & h) : HexaPllBaseX (h), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
-  double p [3] ;
+  //double p [3] ;
   TrilinearMapping (myhexa ().myvertex (0)->Point (), myhexa ().myvertex (1)->Point (),
     myhexa ().myvertex (2)->Point (), myhexa ().myvertex (3)->Point (), myhexa ().myvertex (4)->Point (),
     myhexa ().myvertex (5)->Point (), myhexa ().myvertex (6)->Point (), myhexa ().myvertex (7)->Point ())

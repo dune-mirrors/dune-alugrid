@@ -1,35 +1,4 @@
-	// (c) bernhard schupp 1997 - 1998
-
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-
-/* $Id$
- * $Log$
- * Revision 1.1  2005/03/23 14:58:34  robertk
- * all additional files for parallel version of ALU3dGrid.
- *
- * Revision 1.2  2004/11/25 18:42:55  robertk
- * removed Geschafft comment.
- *
- * Revision 1.1  2004/10/25 16:41:20  robertk
- * Parallel grid implementations.
- *
- * Revision 1.9  2002/04/26 12:53:44  dedner
- * Laufzeiterfassung
- *
- * Revision 1.8  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.7  2001/12/21 15:18:31  dedner
- * GROSSER UMBAU: Berechnen von Adaptindikator und divBint und auch Zeitschritt bei Flussberechnung
- *
- * Revision 1.6  2001/12/10 13:57:23  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/ 
-
+// (c) bernhard schupp 1997 - 1998
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -47,8 +16,6 @@
 #endif
 
 #include "mpAccess_MPI.h"
-
-static volatile char RCSId_mpAccess_MPI_cc [] = "$Id$" ;
 
 template < class A > vector < vector < A > > doGcollectV 
 	(const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm) {
@@ -91,9 +58,9 @@ template < class A > vector < vector < A > > doGcollectV
 
 static vector < pair < char *, int > > doExchange (const vector < pair < char *, int > > & in, 
 	MPI_Comm comm, const vector < int > & d) {
+  assert (in.size() == d.size()) ;
   int nl = d.size () ;
   vector < pair < char *, int > > out (nl) ;
-  assert (in.size() == nl) ;
   {
     MPI_Request * req = new MPI_Request [nl] ; 
     assert (req) ;
@@ -134,9 +101,9 @@ static vector < pair < char *, int > > doExchange (const vector < pair < char *,
 template < class A > 
 vector < vector < A > > doExchange (const vector < vector < A > > & in,
 	MPI_Datatype mpiType, MPI_Comm comm, const vector < int > & d) {
+  assert (in.size() == d.size()) ;
   int nl = d.size () ;
   vector < vector < A > > out (nl) ;
-  assert (in.size() == nl) ;
   {
     A ** buf = new A * [nl] ;
     assert (buf) ;
@@ -312,7 +279,7 @@ vector < vector < double > > MpAccessMPI :: gcollect (const vector < double > & 
 }
 
 vector < ObjectStream > MpAccessMPI :: gcollect (const ObjectStream & in) const {
-  const int np = psize (), me = myrank (), snum = in._wb - in._rb ;
+  const int np = psize (), snum = in._wb - in._rb ;
   vector < ObjectStream > o (np) ;
   vector < int > len = gcollect (snum) ;
   int * rcounts = new int [np] ;
@@ -353,24 +320,23 @@ vector < ObjectStream > MpAccessMPI :: gcollect (const ObjectStream & in) const 
 }
 
 vector < vector < int > > MpAccessMPI :: exchange (const vector < vector < int > > & in) const {
-  assert (in.size () == nlinks ()) ;
+  assert (static_cast<int> (in.size ()) == nlinks ()) ;
   return doExchange (in, MPI_INT, _mpiComm, dest ()) ;
 }
 
 vector < vector < double > > MpAccessMPI :: exchange (const vector < vector < double > > & in) const {
-  assert (in.size () == nlinks ()) ;
+  assert (static_cast<int> (in.size ()) == nlinks ()) ;
   return doExchange (in, MPI_DOUBLE, _mpiComm, dest ()) ;
 }
 
 vector < vector < char > > MpAccessMPI :: exchange (const vector < vector < char > > & in) const {
-  assert (in.size () == nlinks ()) ;
+  assert (static_cast<int> (in.size ()) == nlinks ()) ;
   return doExchange (in, MPI_BYTE, _mpiComm, dest ()) ;
 }
 
 vector < ObjectStream > MpAccessMPI :: exchange (const vector < ObjectStream > & in) const {
-  const int me = myrank (), np = psize (), nl = nlinks () ;
-  
-  assert (in.size () == nl) ;
+  const int nl = nlinks () ;
+  assert (static_cast<int> (in.size ()) == nlinks()) ;
   vector < ObjectStream > out (nlinks ()) ;
   vector < pair < char *, int > > v (nlinks ()) ;
   {for (int l = 0 ; l < nl ; l ++ ) {

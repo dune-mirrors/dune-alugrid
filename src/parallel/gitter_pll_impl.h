@@ -65,11 +65,11 @@ class VertexPllBaseX : public VertexPllXIF, public MyAlloc {
     virtual void unpackSelf (ObjectStream &, bool) ;
   private :
     static const linkagePattern_t nullPattern ;
-    Refcount _ref ;
     myvertex_t & _v ;
     linkagePatternMap_t & _map ;
     linkagePatternMap_t :: iterator _lpn ;
     map < int, int, less < int > > _moveTo ;
+    Refcount _ref ;
 } ;
 
 class EdgePllBaseX : public EdgePllXIF, public MyAlloc {

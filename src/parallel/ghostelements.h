@@ -112,11 +112,7 @@ public:
 
 // todo: MacroGhostHexa
 
-static int tet_twist(int tw, int j)
-{
-  return (tw<0) ? ((7 - j + tw) % 3) : ((j + tw) % 3);
-}
-
+#if 0
 static void printFace(ostream & os , Gitter :: Geometric :: hface3_GEO * face, int fce )
 {
   os << "Face " << fce << endl;
@@ -195,5 +191,7 @@ static void printTetra(ostream & os , Gitter :: Geometric :: tetra_GEO * item_ )
 
   return ;
 }
+
+#endif
 
 #endif

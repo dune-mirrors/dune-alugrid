@@ -102,8 +102,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         inline int ghostLevel () const ; 
 
       private :
-        MacroGhost * _gm;
         mypllx_t * _mxt ;
+        MacroGhost * _gm;
     } ;
     typedef class HbndPllMacro macro_t ;
 } ;
@@ -235,8 +235,8 @@ setGhost ( Gitter :: helement_STI * gh )
 template < class A, class X, class MX > 
 Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: 
 HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , const bnd_t bt, IndexManagerType & im , MacroGhost * gh) 
- : _gm(gh) 
- , Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,0) 
+ : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,0) 
+ , _gm(gh) 
 {
   if(_gm) 
   {

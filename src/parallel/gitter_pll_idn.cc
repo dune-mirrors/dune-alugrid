@@ -33,7 +33,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
                 typename lp_map_t :: const_iterator >, 
                 less < typename LinkedObject :: Identifier > > lmap_t ;
 
-  const int me = c.myrank (), np = c.psize (), nl = c.nlinks () ;
+  const int me = c.myrank (), nl = c.nlinks () ;
   
   lp_map_t linkagePatternMap ;
   lmap_t look ;

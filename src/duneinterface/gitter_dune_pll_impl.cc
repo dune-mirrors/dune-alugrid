@@ -7,7 +7,7 @@
 bool GitterDunePll :: duneNotifyNewGrid ()
 {
   assert (debugOption (20) ? (cout << "**GitterPll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
-  const int start = clock (), me = mpAccess ().myrank (), np = mpAccess ().psize () ;
+  const int np = mpAccess ().psize () ;
   LoadBalancer :: DataBase db ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
@@ -81,7 +81,7 @@ bool GitterDunePll :: duneLoadBalance ()
 
 bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs) {
   assert (debugOption (20) ? (cout << "**GitterDunePll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
-  const int start = clock (), me = mpAccess ().myrank (), np = mpAccess ().psize () ;
+  const int np = mpAccess ().psize () ;
   LoadBalancer :: DataBase db ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
@@ -127,7 +127,7 @@ void GitterDunePll :: duneExchangeDynamicState ()
   // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
   // Regel hier eingeschleift werden.
   {
-  int mallocedsize;
+
   const int nl = mpAccess ().nlinks () ;
   const int start = clock () ;
   try 
@@ -206,7 +206,6 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs)
   // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
   // Regel hier eingeschleift werden.
   {
-  int mallocedsize;
   const int nl = mpAccess ().nlinks () ;
   const int start = clock () ;
   try 
@@ -281,7 +280,7 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs)
 
 bool GitterDunePll :: refine () {
   assert (debugOption (5) ? (cout << "**INFO GitterPll :: refine () " << endl, 1) : 1) ;
-  const int nl = mpAccess ().nlinks (), start = clock () ;
+  const int nl = mpAccess ().nlinks () ;
   bool state = false ;
   vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;
   vector < vector < hface_STI * > > innerFaces (nl), outerFaces (nl) ;

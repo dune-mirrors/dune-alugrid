@@ -394,8 +394,8 @@ class GitterPll : public virtual Gitter {
 
 template < class A > class LeafIteratorTT {
   GitterPll & _grd ;
-  A * _a ;
   int _link ;
+  A * _a ;
   pair < IteratorSTI < A > *, IteratorSTI < A > * > _p ;
   public :
     inline IteratorSTI < A > & inner () ;

@@ -1349,18 +1349,21 @@ template < class A > A & IteratorSTI < A > :: item () const {
   return *(val_t *)(p) ;
 }
 
-template < class A > inline AccessIterator < A > :: Handle :: Handle (AccessIterator < A > & f) : _fac (&f), _a (0), _w (0) {
+template < class A > inline AccessIterator < A > :: Handle :: Handle (AccessIterator < A > & f) 
+  : _fac (&f), _a (0), _w (0) {
   _fac->ref ++ ; 
   _w = _fac->iterator (_a) ;
   return ;
 }
 
-template < class A > inline AccessIterator < A > :: Handle :: Handle (const AccessIterator < A > :: Handle & p) : _fac (p._fac), _a (0) { 
+template < class A > inline AccessIterator < A > :: Handle :: Handle (const AccessIterator < A > :: Handle & p) 
+  : _fac (p._fac), _a (0) { 
   _fac ? (_fac->ref ++, _w = _fac->iterator (p._w), 0) : (_w = new IteratorSTI < A > (), 0) ;
   return ;
 }
 
-template < class A > inline AccessIterator < A > :: Handle :: Handle () : _fac (0), _w (0), _a (0) {
+template < class A > inline AccessIterator < A > :: Handle :: Handle () 
+  : _fac (0), _a (0), _w (0) {
   _w = new IteratorSTI < A > () ;
   return ;
 }

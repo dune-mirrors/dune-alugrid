@@ -57,7 +57,7 @@ void LoadBalancer :: DataBase :: printLoad () const {
 
 void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa, 
 	insert_iterator < ldb_vertex_map_t > nodes, insert_iterator < ldb_edge_set_t > edges) const {
-  const int me = mpa.myrank (), np = mpa.psize () ;
+  const int np = mpa.psize () ;
   ObjectStream os ;
   {
     int len = _vertexSet.size () ;
@@ -248,14 +248,13 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
         int j = (*i).first.index () ;
         assert (0 <= j && j < nel) ;
         assert (0 <= (*i).second && (*i).second < np) ;
-        int k = part [j] = (*i).second ;
+
         check [j] = 1 ;
         vertex_w [j] = vertex_wInt [j] = (*i).first.weight () ;
 	
 	// Hier besetht die M"oglichkeit auch die Schwerpunktskoordinaten
 	// der Grobgitterelemente auszulesen:
-	//
-	// double (&p)[3] = (*i).first.center () [0] ;
+  
       }
       
       if (nel != accumulate (check.begin (), check.end (), 0)) {

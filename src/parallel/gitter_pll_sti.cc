@@ -197,7 +197,7 @@ void GitterPll :: printsize () {
   n.push_back (LeafIterator < helement_STI > (*this)->size()) ;
   n.push_back (LeafIterator < hbndseg_STI > (*this)->size() - sumCutFaces) ;
   vector < vector < int > > in = mpAccess ().gcollect (n) ;
-  assert (in.size () == np) ;
+  assert (static_cast<int> (in.size ()) == np) ;
   if (me == 0) {
     int nv = 0, nd = 0, nf = 0, ne = 0, nb = 0 ;
     for (int i = 0 ; i < np ; i ++ ) {
@@ -219,7 +219,6 @@ void GitterPll :: printsize () {
 }
 
 void GitterPll :: fullIntegrityCheck () {
-  const int nl = mpAccess ().nlinks (), me = mpAccess ().myrank () ;
   int start = clock () ;
   Gitter :: fullIntegrityCheck () ;
   containerPll().fullIntegrityCheck (mpAccess ()) ;
@@ -294,7 +293,7 @@ void GitterPll :: restore (XDRstream_in & in) {
 
 pair < IteratorSTI < Gitter :: vertex_STI > *, IteratorSTI < Gitter :: vertex_STI > * >
   GitterPll :: MacroGitterPll :: iteratorTT (const vertex_STI *, int i) {
-  assert (i < _vertexTT.size ()) ;
+  assert (i < static_cast<int> (_vertexTT.size ()) ) ;
   return pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > 
   (new listSmartpointer__to__iteratorSTI < vertex_STI > (_vertexTT [i].first), 
          new listSmartpointer__to__iteratorSTI < vertex_STI > (_vertexTT [i].second)) ;
@@ -309,7 +308,7 @@ pair < IteratorSTI < Gitter :: vertex_STI > *, IteratorSTI < Gitter :: vertex_ST
 
 pair < IteratorSTI < Gitter :: hedge_STI > *, IteratorSTI < Gitter :: hedge_STI > * >
   GitterPll :: MacroGitterPll :: iteratorTT (const hedge_STI *, int i) {
-  assert (i < _hedgeTT.size ()) ;
+  assert (i < static_cast<int> (_hedgeTT.size ())) ;
   return pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > 
   (new listSmartpointer__to__iteratorSTI < hedge_STI > (_hedgeTT [i].first),
          new listSmartpointer__to__iteratorSTI < hedge_STI > (_hedgeTT [i].second)) ;
@@ -324,7 +323,7 @@ pair < IteratorSTI < Gitter :: hedge_STI > *, IteratorSTI < Gitter :: hedge_STI 
 
 pair < IteratorSTI < Gitter :: hface_STI > *, IteratorSTI < Gitter :: hface_STI > * >
   GitterPll :: MacroGitterPll :: iteratorTT (const hface_STI *, int i) {
-  assert (i < _hfaceTT.size ()) ;
+  assert (i < static_cast<int> (_hfaceTT.size ())) ;
   return pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > 
   (new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].first),
          new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].second)) ;
@@ -338,9 +337,8 @@ pair < IteratorSTI < Gitter :: hface_STI > *, IteratorSTI < Gitter :: hface_STI 
 }
 
 bool GitterPll :: refine () {
-  cout << "refinepll \n";
   assert (debugOption (5) ? (cout << "**INFO GitterPll :: refine () " << endl, 1) : 1) ;
-  const int nl = mpAccess ().nlinks (), start = clock () ;
+  const int nl = mpAccess ().nlinks () ;
   bool state = false ;
   vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;
   vector < vector < hface_STI * > > innerFaces (nl), outerFaces (nl) ;
@@ -716,7 +714,7 @@ bool GitterPll :: adapt () {
 
 void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
   const int nl = mpa.nlinks (), me = mpa.myrank () ;
-  int start = clock () ;
+
   try {
     vector < vector < int > > inout (nl) ;
 
@@ -772,7 +770,7 @@ void GitterPll :: exchangeDynamicState () {
   // kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
   // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
   // Regel hier eingeschleift werden.
-  int mallocedsize;
+  
 {
   //struct mallinfo minfo = mallinfo();
   //cerr << "Anfang exchangeDynamicState(): Blocks allocated: " << (mallocedsize=(minfo.usmblks + minfo.uordblks)) << endl;
@@ -868,7 +866,7 @@ void GitterPll :: exchangeStaticState () {
 
 void GitterPll :: loadBalancerGridChangesNotify () {
   assert (debugOption (20) ? (cout << "**GitterPll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
-  const int start = clock (), me = mpAccess ().myrank (), np = mpAccess ().psize () ;
+  const int np = mpAccess ().psize () ;
   LoadBalancer :: DataBase db ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
