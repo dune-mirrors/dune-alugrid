@@ -1,37 +1,4 @@
 //	(c) christian badura, 1998
-
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-	
-	// Auf UNIX zum Raufsetzen des Speicherlimits (Breakvalue)
-
-/* $Id$
- * $Log$
- * Revision 1.1  2005/03/23 14:57:56  robertk
- * all files for serial version of ALU3dGrid.
- *
- * Revision 1.3  2004/12/20 21:35:43  robertk
- * gcc compile.
- *
- * Revision 1.2  2004/10/25 16:38:12  robertk
- * All header end with .h now. Like the original.
- *
- * In the .cc this changes are done.
- *
- * Revision 1.1  2004/10/15 09:48:38  robertk
- * Inititial version. Some extenxions for Dune made. Schould be compatible
- * with all other applications done so far.
- *
- * Revision 1.4  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.3  2001/12/10 13:57:23  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/ 
-
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -59,8 +26,6 @@
 #endif
 
 #include "myalloc.h"
-
-static volatile char RCSId_myalloc_cc [] = "$Id$" ;
 
 const long MyAlloc :: MAX_HOLD_ADD = 400000 ;	// max MAX_HOLD_ADD Objekte werden gespeichert
 const double MyAlloc :: MAX_HOLD_MULT = 1.3 ;	// max das MAX_HOLD_MULT-fache der momentan
