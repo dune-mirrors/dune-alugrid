@@ -213,6 +213,7 @@ class FacePllXIF : public LinkedObject, public MacroGridMoverIF {
     virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const = 0 ;
     virtual pair < ElementPllXIF_t *, int > accessInnerPllX () = 0 ;
     virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const = 0 ;
+
   public :
     virtual void writeStaticState (ObjectStream &) const = 0 ;
     virtual void readStaticState (ObjectStream &) = 0 ;
@@ -231,6 +232,13 @@ class ElementPllXIF : public MacroGridMoverIF {
     virtual pair < ElementPllXIF_t *, int > accessInnerPllX (const pair < ElementPllXIF_t *, int > &, int) = 0 ;
     virtual pair < const ElementPllXIF_t *, int > accessInnerPllX (const pair < const ElementPllXIF_t *, int > &, int) const = 0 ;
   public :
+    virtual Gitter::helement_STI * getGhost () 
+    { 
+      cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      abort(); 
+      return 0; 
+    }
+
     virtual void writeStaticState (ObjectStream &, int) const = 0 ;
     virtual void readStaticState (ObjectStream &, int) = 0 ;
     virtual void writeDynamicState (ObjectStream &, int) const = 0 ;
@@ -405,7 +413,6 @@ template < class A > class LeafIteratorTT {
     inline LeafIteratorTT (GitterPll &, int) ;
     inline ~LeafIteratorTT () ;
 } ;
-
 
 
   //
