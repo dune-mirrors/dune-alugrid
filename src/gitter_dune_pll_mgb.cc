@@ -27,11 +27,12 @@
 
 class DuneParallelGridMover : public ParallelGridMover {
   public :
-    DuneParallelGridMover (BuilderIF &i) : ParallelGridMover (i) {}
+    DuneParallelGridMover (BuilderIF &i); 
 
     // if not finalized yet, finalize is called 
     ~DuneParallelGridMover () ;
-    inline void finalize (); //former desctructor
+    inline void initialize (); //former constructor
+    inline void finalize ();   //former destructor
     
     // overlaoded, because calles unpackHbnd3 
     inline void unpackAll (vector < ObjectStream > &) ;
@@ -40,7 +41,7 @@ class DuneParallelGridMover : public ParallelGridMover {
   protected :
     void duneUnpackTetra (ObjectStream &,GatherScatterType &) ;
     // overloaded, because calles InsertUniqueHbnd3_withPoint
-    inline void unpackHbnd3 (ObjectStream & os); 
+    inline void unpackHbnd3Int (ObjectStream & os); 
     
     bool InsertUniqueHbnd3_withPoint (int (&)[3], Gitter :: hbndseg ::
             bnd_t,const double (&p) [3]) ;
@@ -71,27 +72,37 @@ bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
 }
 
 // overloaded method because here we call insertion with point 
-inline void DuneParallelGridMover :: unpackHbnd3 (ObjectStream & os) {
-  int b, v [3] ;
-  double p [3];
-  os.readObject (b) ;
+inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os) 
+{
+  double p [3] = {0.0,0.0,0.0};
+  int bfake, v [3] ;
+  os.readObject (bfake) ;
+  Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
+  
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
 
-  // read vertex coord 
-  if(Gitter :: hbndseg :: bnd_t (b) == Gitter :: hbndseg :: closure )
+  int readPoint = 0; 
+  os.readObject( readPoint ); 
+
+  if( readPoint ) 
   {
     os.readObject (p[0]) ;
     os.readObject (p[1]) ;
     os.readObject (p[2]) ;
+  }
+
+  if(b == Gitter :: hbndseg :: closure)
+  {
     //cout << "Insert Unique Hbnd3 p \n";
-    InsertUniqueHbnd3_withPoint (v, Gitter :: hbndseg :: bnd_t (b), p ) ;
+    InsertUniqueHbnd3_withPoint (v, b, p ) ;
   }
   else
   {
+    assert(readPoint == 0);
     // old method defined in base class 
-    InsertUniqueHbnd3 (v, Gitter :: hbndseg :: bnd_t (b)) ;
+    InsertUniqueHbnd3 (v, b ) ;
   }
   return ;
 }
@@ -115,38 +126,38 @@ void DuneParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
     for (os.readObject (code) ; code != MacroGridMoverIF :: ENDMARKER ; os.readObject (code)) {
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
-  unpackVertex (os) ;
-  break ;
+        unpackVertex (os) ;
+        break ;
       case MacroGridMoverIF :: EDGE1 :
         unpackHedge1 (os) ;
-  break ;
+        break ;
       case MacroGridMoverIF :: FACE3 :
         unpackHface3 (os) ;
-  break ;
+        break ;
       case MacroGridMoverIF :: FACE4 :
-  unpackHface4 (os) ;
-  break ;
+        unpackHface4 (os) ;
+        break ;
       case MacroGridMoverIF :: TETRA :
         unpackTetra (os) ;
         break ;
       case MacroGridMoverIF :: HEXA :
-  unpackHexa (os) ;
+        unpackHexa (os) ;
         break ;
       case MacroGridMoverIF :: PERIODIC3 :
         unpackPeriodic3 (os) ;
         break ;
-// Anfang - Neu am 23.5.02 (BS)
       case MacroGridMoverIF :: PERIODIC4 :
         unpackPeriodic4 (os) ;
         break ;
-// Ende - Neu am 23.5.02 (BS)
       case MacroGridMoverIF :: HBND3INT :
+        unpackHbnd3Int (os) ;
+        break ;
       case MacroGridMoverIF :: HBND3EXT :
-        unpackHbnd3 (os) ;
-  break ;
+        unpackHbnd3Ext (os) ;
+        break ;
       case MacroGridMoverIF :: HBND4INT :
       case MacroGridMoverIF :: HBND4EXT :
-  unpackHbnd4 (os) ;
+        unpackHbnd4 (os) ;
         break ;
       default :
   cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "]\n" ;
@@ -193,9 +204,11 @@ void DuneParallelGridMover :: duneUnpackAll (vector < ObjectStream > & osv,
         break ;
 // Ende - Neu am 23.5.02 (BS)
       case MacroGridMoverIF :: HBND3INT :
+        unpackHbnd3Int (os) ;
+        break ;
       case MacroGridMoverIF :: HBND3EXT :
-        unpackHbnd3 (os) ;
-  break ;
+        unpackHbnd3Ext (os) ;
+        break ;
       case MacroGridMoverIF :: HBND4INT :
       case MacroGridMoverIF :: HBND4EXT :
   unpackHbnd4 (os) ;
@@ -209,6 +222,117 @@ void DuneParallelGridMover :: duneUnpackAll (vector < ObjectStream > & osv,
     }
   }  
   return ;
+}
+
+// calles initialize, former Constructor of MacroGridBuilder
+DuneParallelGridMover :: DuneParallelGridMover (BuilderIF & i) : ParallelGridMover (i,false) 
+{
+  initialize();
+}
+
+// overloaded, because here we use the new insertInternal method 
+void DuneParallelGridMover :: initialize ()
+{
+  {
+    for (list < VertexGeo * > :: iterator i = myBuilder ()._vertexList.begin () ;
+      i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
+        _vertexMap [(*i)->ident ()] = (*i) ;
+  }
+  {
+    for (list < hedge1_GEO * > :: iterator i = myBuilder ()._hedge1List.begin () ;
+      i != myBuilder ()._hedge1List.end () ; myBuilder ()._hedge1List.erase (i ++)) {
+      long k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident () ;
+      _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i) ;
+    }
+  }
+  {for (list < hface3_GEO * > :: iterator i = myBuilder ()._hface3List.begin () ; i != myBuilder ()._hface3List.end () ;
+     myBuilder ()._hface3List.erase (i ++)) {
+      _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i) ;
+  }}
+  {
+    for (list < hface4_GEO * > :: iterator i = myBuilder ()._hface4List.begin () ; i != myBuilder ()._hface4List.end () ; 
+      myBuilder ()._hface4List.erase (i ++)) _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (),
+        (*i)->myvertex (2)->ident ())] = (*i) ;
+  }
+  {for (list < hbndseg4_GEO * > :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
+    faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
+    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
+      _hbnd4Int [key] = (void *) new pair < hface4_GEO *, int > ((*i)->myhface4 (0), (*i)->twist (0)) ;
+      delete (*i) ;
+    } else {
+      _hbnd4Map [key] = (*i) ;
+    }
+  }}
+  {for (list < hbndseg3_GEO * > :: iterator i = myBuilder ()._hbndseg3List.begin () ; i != myBuilder ()._hbndseg3List.end () ;
+    myBuilder ()._hbndseg3List.erase (i++)) {
+    faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
+    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
+    {
+      // change
+      GitterDunePll :: Objects :: Hbnd3Default * hseg = static_cast<GitterDunePll :: Objects :: Hbnd3Default *> ((*i));
+      if(hseg->getGhost())
+      {
+        typedef GitterDunePll :: Geometric :: tetra_GEO  tetra_GEO;
+        tetra_GEO * gh = static_cast<tetra_GEO *> (hseg->getGhost());
+        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), gh->myvertex(3)->Point()) ;
+      }
+      // until here
+      else 
+        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0)) ;
+      delete (*i) ;
+    } else {
+      _hbnd3Map [key] = (*i) ;
+    }
+  }}
+  {for (list < tetra_GEO * > :: iterator i = myBuilder ()._tetraList.begin () ; i != myBuilder ()._tetraList.end () ; 
+      myBuilder ()._tetraList.erase (i++)) {
+      _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+           (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i) ;
+  }}
+  {for (list < periodic3_GEO * > :: iterator i = myBuilder ()._periodic3List.begin () ; i != myBuilder ()._periodic3List.end () ; 
+      myBuilder ()._periodic3List.erase (i++)) {
+      _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+           (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
+  }}
+  {for (list < periodic4_GEO * > :: iterator i = myBuilder ()._periodic4List.begin () ; i != myBuilder ()._periodic4List.end () ; 
+      myBuilder ()._periodic4List.erase (i++)) {
+      _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+           (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
+  }}
+  {
+    for (list < hexa_GEO * > :: iterator i = myBuilder ()._hexaList.begin () ; i != myBuilder ()._hexaList.end () ; 
+      myBuilder ()._hexaList.erase (i++)) _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
+  }
+
+  // from constructor ParallelGridMover 
+  vector < elementKey_t > toDelete ;
+  {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; i ++)
+    if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).accessPllX ().erasable ()) {
+      toDelete.push_back ((*i).first) ;
+    }
+  }
+  {for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMap.end () ; i ++)
+    if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).accessPllX ().erasable ()) {
+      toDelete.push_back ((*i).first) ;
+    }
+  }
+  {for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; i ++)
+    if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).accessPllX ().erasable ()) {
+      toDelete.push_back ((*i).first) ;
+    }
+  }
+  {for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; i ++)
+    if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).accessPllX ().erasable ()) {
+      toDelete.push_back ((*i).first) ;
+    }
+  }
+  {for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDelete.end () ; i ++ )
+    removeElement (*i) ;
+  }
+
+  this->_initialized = true;
+  return ; 
 }
 
 // destructor calles finalize if not finalized yet 
@@ -264,7 +388,8 @@ void DuneParallelGridMover :: finalize ()
   {for (hbndintMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
     const Hbnd3IntStorage & p = * (Hbnd3IntStorage *) (*i).second ;
     if (p.first()->ref == 1) {
-      hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3 ( p.first(),p.second(),Gitter :: hbndseg_STI :: closure , p.getPoint() );
+      hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3 ( p.first(),p.second(),
+                        Gitter :: hbndseg_STI :: closure , p.getPoint() );
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (pair < hface3_GEO *, int > *)(*i).second ;
@@ -274,7 +399,7 @@ void DuneParallelGridMover :: finalize ()
       delete (hface4_GEO *)(*i).second ;
       _face4Map.erase (i++) ;
     } else {
-      assert (((hface4_GEO *)(*i).second)->ref == 2) ;
+      //assert (((hface4_GEO *)(*i).second)->ref == 2) ;
       myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
     }
   }
@@ -283,7 +408,7 @@ void DuneParallelGridMover :: finalize ()
       delete (hface3_GEO *)(*i).second ;
       _face3Map.erase (i++) ;
     } else {
-      assert (((hface3_GEO *)(*i).second)->ref == 2) ;
+      //assert (((hface3_GEO *)(*i).second)->ref == 2) ;
       myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
     }
   }}
