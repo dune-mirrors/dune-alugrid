@@ -1,63 +1,5 @@
 //   Version f"ur DUNE
-//
-  // (c) bernhard schupp 1997 - 1998
-
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
-
-/* $Id$
- * $Log$
- * Revision 1.12  2005/03/18 19:53:17  robertk
- * added backup and restore for XDRStream, dosent work yet.
- *
- * Revision 1.11  2005/01/13 16:49:37  robertk
- * moved goDownHlement to gitter_dune_impl.cc
- *
- * Revision 1.10  2004/12/10 12:19:45  robertk
- * backupIndices removed from gitter_sti and moved to gitter_dune_impl.cc
- *
- * Revision 1.9  2004/11/29 18:00:45  robertk
- * implemented the hole regeneration after restoreing the grid.
- *
- * Revision 1.8  2004/11/29 13:03:51  robertk
- * number of indexmanagers variable (enum ) now.
- *
- * Revision 1.7  2004/11/29 12:39:17  robertk
- * size of index set is stored aswell. The indexset is completely overwritten
- * after the grid is read from file.
- *
- * Revision 1.6  2004/11/25 18:44:17  robertk
- * added vertex backup and restore. not tested yet.
- *
- * Revision 1.5  2004/11/02 17:12:04  robertk
- * Removed duneBackup and duneRestore, now defined in the inherited
- * GitterDuneImpl class.
- *
- * Revision 1.4  2004/10/28 15:45:17  robertk
- * minor changes.
- *
- * Revision 1.3  2004/10/27 15:07:32  robertk
- * at the end of gitter backup and restore index of elements is backed and
- * restored.
- *
- * Revision 1.2  2004/10/25 16:38:11  robertk
- * All header end with .h now. Like the original.
- *
- * In the .cc this changes are done.
- *
- * Revision 1.1  2004/10/15 09:48:37  robertk
- * Inititial version. Some extenxions for Dune made. Schould be compatible
- * with all other applications done so far.
- *
- * Revision 1.4  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.3  2001/12/10 13:33:45  wesenber
- * parameter ``filePath'' for backup(), backupCMode(), and restore() added
- *
- ***/
+// (c) bernhard schupp 1997 - 1998
 #ifndef GITTER_STI_CC_INCLUDED
 #define GITTER_STI_CC_INCLUDED
 
@@ -251,6 +193,25 @@ IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: iterator (const hbndseg_STI *)
 
 IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const helement_STI *) {
   return new leaf_element__macro_element__iterator (container ()) ;
+}
+
+// --vertex iterator 
+IteratorSTI < Gitter :: vertex_STI > * Gitter :: iterator (const IteratorSTI < vertex_STI > * w) {
+  cerr << "ERROR: method not implemented! " << __FILE__ << " " << __LINE__ << "\n";
+  abort();
+  return 0;
+}
+
+IteratorSTI < Gitter :: hedge_STI > * Gitter :: iterator (const IteratorSTI < hedge_STI > * w) {
+  cerr << "ERROR: method not implemented! " << __FILE__ << " " << __LINE__ << "\n";
+  abort();
+  return 0;
+}
+
+IteratorSTI < Gitter :: hface_STI > * Gitter :: iterator (const IteratorSTI < hface_STI > * w) {
+  cerr << "ERROR: method not implemented! " << __FILE__ << " " << __LINE__ << "\n";
+  abort();
+  return 0;
 }
 
 IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const IteratorSTI < helement_STI > * w) {
