@@ -1,16 +1,7 @@
-// Version f"ur DUNE
-
-// (c) bernhard schupp 1997 - 1998
-
-// $Source$
-// $Revision$
-// $Name$
-// $State$
-
 /* $Id$
  * $Log$
- * Revision 1.3  2004/10/19 13:15:32  robertk
- * minor changes.
+ * Revision 1.4  2004/10/19 13:17:58  robertk
+ * Vertex index added. neighOuterNormal added. myinteresction added.
  *
  * Revision 1.2  2004/10/15 11:01:36  robertk
  * if not used by Dune the _DUNE_USED_BSGRID_ is not defined and some things
@@ -284,7 +275,15 @@ class Gitter {
         // calculate outer normal of face face
         virtual void outerNormal(int face, BSGridVecType & normal) 
         {
-          std::cerr << "helement :: outerNormal(..) : not overloaded! \n";
+          std::cerr << "helement :: outerNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
+          assert(false);
+          abort();
+        }
+        
+        // calculate outer normal of face face
+        virtual void neighOuterNormal(int faceInNeigh, BSGridVecType & normal) 
+        {
+          std::cerr << "helement :: neighOuterNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
           assert(false);
           abort();
         }
@@ -563,9 +562,15 @@ class Gitter {
         } ;
       
         class VertexGeo : public vertex_STI, public MyAlloc {
+#ifdef _DUNE_USES_BSGRID_ 
+          protected:
+            IndexManagerType & _indexmanager;
+#endif          
           public :
             Refcount ref ;
-            inline VertexGeo (int,double,double,double) ;
+            // VertexGeo is provided for the vertices on lower levels 
+            inline VertexGeo (int,double,double,double, VertexGeo & ) ;
+            inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
             inline virtual ~VertexGeo () ;
             inline const double (& Point () const) [3] ;
             inline int level () const ;
@@ -579,8 +584,9 @@ class Gitter {
       inline int   vertexIndex () const ;
     private :
       double _c [3] ;
-            int _lvl ;
+      int _lvl ;
       int _idx ;    // Vertexindex zum Datenrausschreiben
+                    // wird auch fuer Dune verwendet
         } ;
   
         typedef class hedge1 : public hedge_STI, public MyAlloc {
@@ -780,6 +786,7 @@ class Gitter {
     
     // calculate outer normal of face face
     virtual void outerNormal (int face , BSGridVecType & normal );
+    virtual void neighOuterNormal (int faceInNeigh , BSGridVecType & normal );
 
     private :
       myhface3_t * f [4] ;
@@ -1400,12 +1407,31 @@ inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) 
 //   # #    #       #   #      #    #        #  #  #     #  #       #    #
 //    #     ######  #    #     #    ######  #    #  #####   ######   ####
 
-inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z) : _lvl (l) {
+inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, IndexManagerType & im) 
+  : _lvl (l)
+#ifdef _DUNE_USES_BSGRID_
+  , _indexmanager (im )  
+#endif
+{
+  _idx = _indexmanager.getIndex() ;
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   return ;
 }
 
-inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () {
+inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, VertexGeo & vx) 
+  : _lvl (l)
+#ifdef _DUNE_USES_BSGRID_
+ ,  _indexmanager ( vx._indexmanager )  
+#endif
+{
+  _idx = _indexmanager.getIndex() ;
+  _c [0] = x ; _c [1] = y ; _c [2] = z ;
+  return ;
+}
+
+inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () 
+{
+  _indexmanager.freeIndex( _idx );
   assert (ref ? (cerr << "**WARNUNG Vertex-Refcount war " << ref << endl, 1) : 1) ;
   return ;
 }
