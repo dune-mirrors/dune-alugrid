@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/28 16:26:06  robertk
+ * minor changes.
+ *
  * Revision 1.1  2004/10/25 16:39:53  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -28,6 +31,8 @@
 
 #include <math.h>
 #include <stdlib.h>
+
+#include "gitter_sti.h"
 
 static volatile char RCSId_mapp_tetra_3d_h [] = "$Id$" ;
 
@@ -332,7 +337,6 @@ template < class A > inline quadraturTriang2D_1 < A > :: val_t quadraturTriang2D
   }
   return base  ;
 }
-
 #include "mapp_tetra_3d_ext.h"
 
 #endif	// MAPP_TETRA_3D_H_INCLUDED

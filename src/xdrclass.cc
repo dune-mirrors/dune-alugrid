@@ -1,4 +1,4 @@
-#include "xdrclass.hh"
+#include "xdrclass.h"
 
 #ifdef IBM_XLC
   typedef char xdrbuff_t;
