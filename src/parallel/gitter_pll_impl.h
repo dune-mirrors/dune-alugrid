@@ -852,7 +852,7 @@ inline EdgePllBaseX :: EdgePllBaseX (myhedge1_t & e) : _edge (e), _lockCRS (fals
 }
 
 inline EdgePllBaseX :: ~EdgePllBaseX () {
-#ifndef DNDEBUG
+#ifndef NDEBUG
   // Falls die nachfolgende Situation eintritt, ist massiv was faul im
   // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
   // gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
