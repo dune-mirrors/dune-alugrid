@@ -9,6 +9,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/27 15:07:32  robertk
+ * at the end of gitter backup and restore index of elements is backed and
+ * restored.
+ *
  * Revision 1.2  2004/10/25 16:38:11  robertk
  * All header end with .h now. Like the original.
  *
@@ -315,6 +319,17 @@ void Gitter :: backup (ostream & out) {
     for (fw.first () ; ! fw.done () ; fw.next ()) fw.item().backup(out) ; }
   {AccessIterator <helement_STI> :: Handle ew (container ()) ;
     for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backup (out) ; }
+    
+#ifdef _DUNE_USES_BSGRID_   
+  // backup indices 
+  bool indices = true; out.put(indices);  // indices == true
+  {AccessIterator <helement_STI> :: Handle ew (container ()) ;
+    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backupIndex (out) ; }
+#else 
+  // backup indices 
+  bool indices = false; out.put(indices);  // indices == false
+#endif
+
   return ;
 }
 
@@ -326,6 +341,17 @@ void Gitter ::restore (istream & in) {
     for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); }
   {AccessIterator < helement_STI >:: Handle ew(container());
     for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); }
+
+#ifdef _DUNE_USES_BSGRID_   
+  bool indices = in.get();
+  if(indices)
+  {
+    // restore index 
+    {AccessIterator < helement_STI >:: Handle ew(container());
+      for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in); }
+  }
+#endif
+    
   {AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
     for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; }
   notifyGridChanges () ;
