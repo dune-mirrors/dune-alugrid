@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/12/21 17:22:57  robertk
+ * wieght is initalized as int. Check wether int or not .
+ *
  * Revision 1.1  2004/10/25 16:39:53  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -206,7 +209,8 @@ inline void LoadBalancer :: GraphEdge :: writeObject (ObjectStream & os) const {
 inline LoadBalancer :: GraphVertex :: ~GraphVertex () {
 }
 
-inline LoadBalancer :: GraphVertex :: GraphVertex () : _index (-1), _weight (0.0) {
+inline LoadBalancer :: GraphVertex :: GraphVertex () 
+  : _index (-1) , _weight (0) {
   _center [0] = _center [1] = _center [2] = 0.0 ;
   return ;
 }
