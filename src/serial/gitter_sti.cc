@@ -233,18 +233,18 @@ void Gitter :: fullIntegrityCheck () {
 void Gitter :: printsize () {
   cout << "\n Gitter :: printSize () : \n\n" ;
   if (debugOption (10)) {
-    { cout << " - Makroelemente .... "  << AccessIterator < helement_STI > :: Handle (container ()).size() << "\n" ; }
-    { cout << " - Makror\"ander ..... " << AccessIterator < hbndseg_STI > :: Handle (container ()).size() << "\n" ; }
-    { cout << " - Makrofl\"achen .... " << AccessIterator < hface_STI > :: Handle (container ()).size() << "\n" ; }
-    { cout << " - Makrokanten ...... "  << AccessIterator < hedge_STI > :: Handle (container ()).size() << "\n" ; }
-    { cout << " - Makrovertices .... "  << AccessIterator < vertex_STI > :: Handle (container ()).size() << "\n" ; }
+    { cout << " - Macro elements .... "  << AccessIterator < helement_STI > :: Handle (container ()).size() << "\n" ; }
+    { cout << " - Macro boundary .... " << AccessIterator < hbndseg_STI > :: Handle (container ()).size() << "\n" ; }
+    { cout << " - Macro faces ....... " << AccessIterator < hface_STI > :: Handle (container ()).size() << "\n" ; }
+    { cout << " - Macro edges ....... "  << AccessIterator < hedge_STI > :: Handle (container ()).size() << "\n" ; }
+    { cout << " - Makro vertices .... "  << AccessIterator < vertex_STI > :: Handle (container ()).size() << "\n" ; }
     cout << "\n" ;
   }
-  { cout << " - Elemente ......... "  << LeafIterator < helement_STI > (*this)->size() << "\n" ;}
-  { cout << " - R\"ander .......... " << LeafIterator < hbndseg_STI > (*this)->size() << "\n" ;}
-  { cout << " - Fl\"achen ......... " << LeafIterator < hface_STI > (*this)->size() << "\n" ;}
-  { cout << " - Kanten ........... "  << LeafIterator < hedge_STI > (*this)->size() << "\n" ;}
-  { cout << " - Vertices ......... "  << LeafIterator < vertex_STI > (*this)->size() << "\n" ;}
+  { cout << " - Elements ............ "  << LeafIterator < helement_STI > (*this)->size() << "\n" ;}
+  { cout << " - Boundaries .......... " << LeafIterator < hbndseg_STI > (*this)->size() << "\n" ;}
+  { cout << " - Faces  .............. " << LeafIterator < hface_STI > (*this)->size() << "\n" ;}
+  { cout << " - Edges ............... "  << LeafIterator < hedge_STI > (*this)->size() << "\n" ;}
+  { cout << " - Vertices ............ "  << LeafIterator < vertex_STI > (*this)->size() << "\n" ;}
   cout << endl ;
   return ;
 }
