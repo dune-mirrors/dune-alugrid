@@ -34,10 +34,13 @@ class ParallelGridMover : public MacroGridBuilder {
     void unpackTetra (ObjectStream &) ;
     void unpackPeriodic3 (ObjectStream &) ;
     void unpackPeriodic4 (ObjectStream &) ;
-    void unpackHbnd3 (ObjectStream &) ;
+    void unpackHbnd3Int (ObjectStream &) ;
+    void unpackHbnd3Ext (ObjectStream &) ;
     void unpackHbnd4 (ObjectStream &) ;
   public :
-    ParallelGridMover (BuilderIF &) ;
+    ParallelGridMover (BuilderIF &, bool init = true) ;
+    // former constructor 
+    void initialize ();
     ~ParallelGridMover () ;
     void unpackAll (vector < ObjectStream > &) ;
 };
