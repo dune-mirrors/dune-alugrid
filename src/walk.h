@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/11/16 19:26:09  robertk
+ * Added walk option "for all elements" .
+ *
  * Revision 1.1  2004/10/25 16:39:54  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -50,6 +53,13 @@
 #include "gitter_sti.h"
 
 static volatile char RCSId_walk_h [] = "$Id$" ;
+
+template < class A > class is_def_true {
+  public :
+    typedef A val_t ;
+    int operator () (const A * x) const { return true ; }
+    int operator () (const A & x) const { return true ; }
+} ;
 
 template < class A > class is_leaf {
   public :
