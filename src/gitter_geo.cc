@@ -1,14 +1,17 @@
 //  Version f"ur DUNE
 //
-	// (c) bernhard schupp, 1997 - 1998
+  // (c) bernhard schupp, 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/11/16 19:32:24  robertk
+ * oppositeFace for Hexa.
+ *
  * Revision 1.3  2004/10/25 16:38:09  robertk
  * All header end with .h now. Like the original.
  *
@@ -92,24 +95,25 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
 // #     #  #        #  #   #    #
 // #     #  ######  #    #  #    #
 
-	//  Prototyp des Hexaeders wie er im Programm verwendet wird.
-	//  Eckpunkte und Seitenflaechen:
-	//
-	//
-	// 	        7---------6
-	//	       /.        /|
-	// 	      / .  1    / |
-	// 	     /  .      /  |
-	// 	    4---------5   | <-- 4 (hinten)
-	//    5 --> |   .     | 3 |
-	//    	    |   3.....|...2
-	//          |  .      |  /
-	//          | .   2   | / <-- 0 (unten)
-	//          |.        |/
-	//          0---------1
-	//
+  //  Prototyp des Hexaeders wie er im Programm verwendet wird.
+  //  Eckpunkte und Seitenflaechen:
+  //
+  //
+  //              7---------6
+  //             /.        /|
+  //            / .  1    / |
+  //           /  .      /  |
+  //          4---------5   | <-- 4 (hinten)
+  //    5 --> |   .     | 3 |
+  //          |   3.....|...2
+  //          |  .      |  /
+  //          | .   2   | / <-- 0 (unten)
+  //          |.        |/
+  //          0---------1
+  //
 
 const int Gitter :: Geometric :: Hexa :: prototype [6][4] = {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}} ;
+const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of face 
 
 int Gitter :: Geometric :: Hexa :: test () const {
   static const int v0[8][2] = {{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3}} ;
@@ -123,19 +127,19 @@ int Gitter :: Geometric :: Hexa :: test () const {
       int i2 = v2[i][0], j2 = v2[i][1] ;
       if(myvertex (i0, j0) != myvertex (i1, j1)) {
         cerr << "**FEHLER auf level: " << level () << " " ;
-	cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i1 << "," << j1 << ")";
-	cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0) ;
-	cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1) << " " << twist (i1) ;
-	cerr << endl ; 
-	nfaults ++ ;
+  cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i1 << "," << j1 << ")";
+  cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0) ;
+  cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1) << " " << twist (i1) ;
+  cerr << endl ; 
+  nfaults ++ ;
       }
       if(myvertex (i0, j0) != myvertex (i2, j2)) {
         cerr << "**FEHLER auf level: " << level () << " " ;
-	cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i2 << "," << j2 << ")" ;
-	cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0) ;
-	cerr << "\t(" << i2 << "," << j2 << ") =" << myvertex(i2,j2) << " " << twist (i1) ;
-	cerr << endl;
-	nfaults ++ ;
+  cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i2 << "," << j2 << ")" ;
+  cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0) ;
+  cerr << "\t(" << i2 << "," << j2 << ") =" << myvertex(i2,j2) << " " << twist (i1) ;
+  cerr << endl;
+  nfaults ++ ;
       }
     }
   }
@@ -188,7 +192,7 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const double (&center)[
     }
   }
   return hit ? (level () < limit ? (request (myrule_t :: iso8), 1) 
-  	     : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
+         : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
 }
 
 // #######
@@ -221,7 +225,7 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const double (&center)
   if (!hit) {
     const int resolution = 50 ;
     LinearMapping map (myvertex(0)->Point(), myvertex(1)->Point(),
-        		myvertex(2)->Point(), myvertex(3)->Point()) ;
+            myvertex(2)->Point(), myvertex(3)->Point()) ;
     double p [3] ;
     for (int i = 0 ; i < resolution ; i ++ ) {
       double b1 = drand48 () ;
@@ -229,14 +233,14 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const double (&center)
       double b3 = (1.0 - b1 - b2) * drand48 () ;
       double b4 = 1.0 - b1 - b2 - b3 ;
       
-	// Sind das "uberhaupt Zufallspunkte ? Nein. Leider nicht.
-	
+  // Sind das "uberhaupt Zufallspunkte ? Nein. Leider nicht.
+  
       map.map2world (b1, b2, b3, b4, p) ;
       if (insideBall (p,center,radius)) { hit = true ; break ; }
     }
   }
   return hit ? (level () < limit ? (request (myrule_t :: iso8), 1) 
-  	     : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
+         : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
 }
 
 void  Gitter :: Geometric :: Tetra :: outerNormal (int face , BSGridVecType & normal ) 
@@ -374,7 +378,7 @@ IteratorSTI < Gitter :: hface_STI > * Gitter :: Geometric :: BuilderIF :: iterat
 
 IteratorSTI < Gitter :: hface_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const IteratorSTI < hface_STI > * w) const {
   return new AlignIterator < ListIterator < hface4_GEO >, ListIterator < hface3_GEO >, hface_STI > 
-  	(*(const AlignIterator < ListIterator < hface4_GEO >, ListIterator < hface3_GEO >, hface_STI > *)w) ;
+    (*(const AlignIterator < ListIterator < hface4_GEO >, ListIterator < hface3_GEO >, hface_STI > *)w) ;
 }
 
 IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const hbndseg_STI *) const {
@@ -390,9 +394,9 @@ IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: Geometric :: BuilderIF :: iter
 
 IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const helement_STI *) const {
 
-		// Vorsicht ! Falls diese Methode ver"andert wird, muss die selbe "Anderung
-		// in der Kopiermethode (nachfolgend) vorgenommen werden. Sonst f"uhrt die 
-		// statische Typkonversion zu einem schwer nachvollziehbaren Fehler.
+    // Vorsicht ! Falls diese Methode ver"andert wird, muss die selbe "Anderung
+    // in der Kopiermethode (nachfolgend) vorgenommen werden. Sonst f"uhrt die 
+    // statische Typkonversion zu einem schwer nachvollziehbaren Fehler.
 // Anfang - Neu am 23.5.02 (BS)
 
   ListIterator < hexa_GEO > w1 (_hexaList) ;
@@ -404,24 +408,24 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: ite
   AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI > aw34 (w3,w4) ;
 
   return new AlignIterator < AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI >,
- 		AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI > (aw12,aw34) ;
+    AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI > (aw12,aw34) ;
 // Ende - Neu am 23.5.02 (BS)
 }
 
 IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const IteratorSTI < helement_STI > * w) const {
   return new AlignIterator < AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI >,
- 		AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI >
-		(*(const AlignIterator < AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI >,
- 		AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI > *) w) ;
+    AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI >
+    (*(const AlignIterator < AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI >,
+    AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI > *) w) ;
 }
-	// *** Neu: Iterator der nur die "echten" Elemente (ohne period. R"ander)
-	//     iteriert.
-	
+  // *** Neu: Iterator der nur die "echten" Elemente (ohne period. R"ander)
+  //     iteriert.
+  
 IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: pureElementIterator (const helement_STI *) const {
 
-		// Vorsicht ! Falls diese Methode ver"andert wird, muss die selbe "Anderung
-		// in der Kopiermethode (nachfolgend) vorgenommen werden. Sonst f"uhrt die 
-		// statische Typkonversion zu einem schwer nachvollziehbaren Fehler.
+    // Vorsicht ! Falls diese Methode ver"andert wird, muss die selbe "Anderung
+    // in der Kopiermethode (nachfolgend) vorgenommen werden. Sonst f"uhrt die 
+    // statische Typkonversion zu einem schwer nachvollziehbaren Fehler.
 
   ListIterator < hexa_GEO > w1 (_hexaList) ;
   ListIterator < tetra_GEO > w2 (_tetraList) ;
@@ -431,24 +435,24 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: pur
 
 IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: pureElementIterator (const IteratorSTI < helement_STI > * w) const {
   return new AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI > 
-		(*(const AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI > *)w) ;
+    (*(const AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI > *)w) ;
 }
-	// ***
+  // ***
 
 void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
 
-	// Das Compatibility Mode Backup sichert das Makrogitter genau
-	// dann, wenn es zwischenzeitlich ge"andert wurde, was beim
-	// Neuanlegen und bei der Lastverteilung der Fall ist.
+  // Das Compatibility Mode Backup sichert das Makrogitter genau
+  // dann, wenn es zwischenzeitlich ge"andert wurde, was beim
+  // Neuanlegen und bei der Lastverteilung der Fall ist.
 
   map < VertexGeo *, int, less < VertexGeo * > > vm ;
   os.setf (ios::fixed, ios::floatfield) ;
   os.precision (16) ;
   
-	// Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
-	// oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
-	// Hexaedernetz vorliegt. Gemischte Netze sind bez"uglich ihres
-	// Dateiformats noch nicht spezifiziert.
+  // Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
+  // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
+  // Hexaedernetz vorliegt. Gemischte Netze sind bez"uglich ihres
+  // Dateiformats noch nicht spezifiziert.
   
   if (_tetraList.size () == 0) {
     os << "!Hexaeder" << endl ;
@@ -460,7 +464,7 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
     cerr << " In " << __FILE__ << " " << __LINE__ << endl ;
   }
   
-	// In jedem Fall die Vertexkoordinaten rausschreiben.
+  // In jedem Fall die Vertexkoordinaten rausschreiben.
   
   os << _vertexList.size () << endl ;
   {
@@ -523,14 +527,14 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
     }
   }
   {
-  	// Die Vertexidentifierliste hinten anh"angen, damit ein verteiltes
-	// Grobgitter wieder zusammengefunden wird.
+    // Die Vertexidentifierliste hinten anh"angen, damit ein verteiltes
+  // Grobgitter wieder zusammengefunden wird.
   
     for (list < VertexGeo * > :: const_iterator i = _vertexList.begin () ; i != _vertexList.end () ; i ++)
       os << (*i)->ident () << " " << -1 << endl ;
   }
-	// Die Modified - Markierung zur"ucksetzen.
-	// Bisher leider noch mit 'cast around const' feature.
+  // Die Modified - Markierung zur"ucksetzen.
+  // Bisher leider noch mit 'cast around const' feature.
   
 //  ((BuilderIF *)this)->_modified = false ;
   return ;
@@ -555,10 +559,10 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (const char * filePath, con
 
 void Gitter :: Geometric :: BuilderIF :: backup (ostream & os) const {
 
-	// Man sollte sich erstmal darauf einigen, wie ein allgemeines Gitterdateiformat 
-	// auszusehen hat f"ur Hexaeder, Tetraeder und alle m"oglichen Pyramiden.
-	// Solange leiten wir die Methodenaufrufe auf backupCMode (..) um.
-	
+  // Man sollte sich erstmal darauf einigen, wie ein allgemeines Gitterdateiformat 
+  // auszusehen hat f"ur Hexaeder, Tetraeder und alle m"oglichen Pyramiden.
+  // Solange leiten wir die Methodenaufrufe auf backupCMode (..) um.
+  
   cerr << "**WARNUNG (IGNORIERT) Gitter :: Geometric :: BuilderIF :: backup (ostream &) " ;
   cerr << " nach Gitter :: Geometric :: BuilderIF :: backupCMode (ostream &) umgeleitet " << endl ;
   
