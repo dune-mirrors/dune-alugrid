@@ -9,6 +9,11 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/19 13:21:20  robertk
+ * Added Vertex Management for Dune. Using the already implemented variable
+ * _idx in VertexGeo. If _DUNE_USES_BSGRID_ is undefined then no vertex
+ * numbering is generated.
+ *
  * Revision 1.1  2004/10/15 09:48:37  robertk
  * Inititial version. Some extenxions for Dune made. Schould be compatible
  * with all other applications done so far.
@@ -57,14 +62,18 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       public :
         class VertexEmpty : public VertexGeo {
           public :
-            inline VertexEmpty (int, double, double, double) ;
+            inline VertexEmpty (int, double, double, double,
+                IndexManagerType &im) ;
+            inline VertexEmpty (int, double, double, double,
+                VertexGeo & ) ;
 	   ~VertexEmpty () {}
             virtual inline int ident () const ;
         } ;
 
         class VertexEmptyMacro : public VertexEmpty {
           public :
-            inline VertexEmptyMacro (double, double, double, int) ;
+            inline VertexEmptyMacro (double, double, double, int,
+                IndexManagerType &im) ;
 	   ~VertexEmptyMacro () {}
             virtual inline int ident () const ;
           private :
@@ -228,8 +237,13 @@ class GitterBasisImpl : public GitterBasis {
 	//
 
 
-inline GitterBasis :: Objects :: VertexEmpty :: VertexEmpty (int l, double x, double y, double z)
-  : GitterBasis :: VertexGeo (l,x,y,z) {
+inline GitterBasis :: Objects :: VertexEmpty :: VertexEmpty (int l, double x, double y, double z, IndexManagerType & im)
+  : GitterBasis :: VertexGeo (l,x,y,z,im) {
+  return ;
+}
+
+inline GitterBasis :: Objects :: VertexEmpty :: VertexEmpty (int l, double x, double y, double z, VertexGeo & vx )
+  : GitterBasis :: VertexGeo (l,x,y,z,vx) {
   return ;
 }
 
@@ -238,8 +252,8 @@ inline int GitterBasis :: Objects :: VertexEmpty :: ident () const {
   return (abort (), -1) ;
 }
 
-inline GitterBasis :: Objects :: VertexEmptyMacro :: VertexEmptyMacro (double x,double y,double z,int i) 
-	: GitterBasis :: Objects :: VertexEmpty (0,x,y,z), _idn (i) {
+inline GitterBasis :: Objects :: VertexEmptyMacro :: VertexEmptyMacro (double x,double y,double z,int i, IndexManagerType &im) 
+	: GitterBasis :: Objects :: VertexEmpty (0,x,y,z,im), _idn (i) {
   return ;
 }
 
@@ -375,7 +389,7 @@ inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis () {
 }
 
 inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vertex (double x, double y, double z, int id,int) {
-  return new Objects :: VertexEmptyMacro (x, y, z, id) ;
+  return new Objects :: VertexEmptyMacro (x, y, z, id, _indexmanager[3]) ;
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, GitterBasis :: VertexGeo * b) {
