@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.11  2004/12/21 17:29:08  robertk
+ * Removed warnings.
+ *
  * Revision 1.10  2004/12/21 17:24:41  robertk
  * new methods for ghost elements on internal boundarys.
  * all new methods to insert internal boundary with ghost element are mostly
@@ -250,7 +253,7 @@ class Gitter {
     {
       protected :
         vertex () {}
-       ~vertex () {}
+        virtual ~vertex () {}
       public :
         virtual int ident () const = 0 ;
         virtual int level () const = 0 ;
@@ -271,7 +274,7 @@ class Gitter {
     class hedge : public stiExtender_t :: EdgeIF {
       protected :
         hedge () {}
-       ~hedge () {}
+        virtual ~hedge () {}
       public :
         virtual hedge * down () = 0 ;
   virtual const hedge * down () const = 0 ;
@@ -292,7 +295,7 @@ class Gitter {
     class hface : public stiExtender_t :: FaceIF {
       protected :
         hface () {}
-       ~hface () {}
+        virtual ~hface () {}
       public :
         virtual hface * down () = 0 ;
         virtual const hface * down () const = 0 ;
@@ -360,7 +363,7 @@ class Gitter {
     {
       protected :
         helement () {}
-       ~helement () {}
+        virtual ~helement () {}
       public :
         //testweise us
         virtual helement * up () = 0;
@@ -399,7 +402,7 @@ class Gitter {
     {
       protected :
         hbndseg () {}
-       ~hbndseg () {}
+        virtual ~hbndseg () {}
       public :
         typedef enum { none = 0, inflow = 1, outflow = 2, noslip = 3, slip = 4, sym_xy = 5,
                        sym_xz = 6, sym_yz = 7, reflect = 8, fluxtube3d = 9, periodic = 20,
@@ -601,7 +604,7 @@ class Gitter {
       virtual bool bndNotifyCoarsen () = 0 ;
           protected :
             hasFace3 () {}
-           ~hasFace3 () {}
+            virtual ~hasFace3 () {}
       inline bool bndNotifyBalance (balrule_t,int) ;
 
 // Schwerpunkt des anliegenden Elements beschaffen:
@@ -625,7 +628,7 @@ class Gitter {
       virtual bool bndNotifyCoarsen () = 0 ;
     protected :
       hasFace4 () {}
-     ~hasFace4 () {}
+      virtual ~hasFace4 () {}
       inline bool bndNotifyBalance (balrule_t,int) ;
 
 // Schwerpunkt des anliegenden Elements beschaffen:
