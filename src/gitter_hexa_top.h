@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2005/01/19 17:45:25  robertk
+ * removed warnings.
+ *
  * Revision 1.3  2004/12/20 13:55:08  robertk
  * gcc compileable.
  *
@@ -59,9 +62,9 @@ template < class A > class Hedge1Top : public A {
     typedef typename A :: myvertex_t	myvertex_t ;
     typedef typename A :: myrule_t	myrule_t ;
   private :
+    int _lvl ;
     inneredge_t * _dwn, * _bbb ;
     innervertex_t * _cv ;
-    int _lvl ;
     myrule_t _rule ;
   public :
     inline Hedge1Top (int,myvertex_t *,myvertex_t *) ;
@@ -97,8 +100,8 @@ template < class A > class Hface4Top : public A {
     typedef typename A :: myrule_t         myrule_t ;
   private :
     innerface_t * _dwn, * _bbb ;
-    inneredge_t * _ed ;
     innervertex_t * _cv ;
+    inneredge_t   * _ed ;
     int _lvl ;
     myrule_t _rule ;
     inline myhedge1_t * subedge1 (int,int) ;
@@ -978,7 +981,8 @@ template < class A > inline const typename HexaTop < A > :: myhface4_t * HexaTop
 
 template < class A > inline HexaTop < A > :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
 	myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5), _up(0), _dwn (0), _bbb (0), _cv (0), _ed (0), _fc (0), _lvl (l),
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
+  , _bbb (0), _dwn (0), _up(0), _ed (0), _cv (0), _fc (0), _lvl (l),
    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) { //_up eingef. us
   return ;
 }
