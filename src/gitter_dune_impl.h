@@ -6,21 +6,24 @@
 
 class GitterDuneBasis :  public virtual GitterBasis 
 {
-public:
-  virtual void backupIndices  (ostream & out);
-  virtual void restoreIndices (istream & in );
+protected:
+  void backupIndices  (ostream & out);
+  void restoreIndices (istream & in );
+
+  inline void goDownHelement( helement_STI & el , vector<bool> & idxcheck);
   
+public:
   // write status of grid  
   virtual void duneBackup  (const char*) ; 
 
   // read status of grid 
   virtual void duneRestore (const char*) ;
+  // Constructor getting macro file name 
 };
 
-class GitterDuneImpl : public GitterBasisImpl , public virtual GitterDuneBasis 
+class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis 
 {
-public :
-  // Constructor getting macro file name 
+public:
   inline GitterDuneImpl (const char *filename) : GitterBasisImpl ( filename ) {}
 };
 

@@ -25,6 +25,19 @@ void GitterDuneBasis :: backupIndices (ostream & out)
   return ;
 }
 
+// go down all children and check index 
+inline void GitterDuneBasis :: 
+goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
+{
+  typedef Gitter :: helement_STI ElType;
+  assert( el.getIndex() < idxcheck.size() );
+  idxcheck[ el.getIndex() ] = false;
+  for( ElType * ch = el.down() ; ch ; ch = ch->next())
+    goDownHelement( *ch , idxcheck );
+
+  return ;
+}
+
 void GitterDuneBasis ::restoreIndices (istream & in) 
 {
   bool indices = in.get();
@@ -102,25 +115,25 @@ void GitterDuneBasis :: duneBackup (const char * fileName)
   // auf, allerdings wird hier der path und filename in einer variablen
   // uebergeben 
 
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneImpl :: duneBackup (const char * = \""
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: duneBackup (const char * = \""
                        << fileName << "\") " << endl, 1) : 1) ;
 
   ofstream out (fileName) ;
   if (!out) {
-    cerr << "**WARNUNG (IGNORIERT) GitterDuneImpl :: duneBackup (const char *, double) Fehler beim Anlegen von < "
+    cerr << "**WARNUNG (IGNORIERT) GitterDuneBasis :: duneBackup (const char *, double) Fehler beim Anlegen von < "
          << (fileName ? fileName : "null") << " >" << endl ;
   }
   else
   {
     FSLock lock (fileName) ;
-    this->backup (out) ;
-    backupIndices (out) ;
+    Gitter :: backup (out) ;
+    GitterDuneBasis :: backupIndices (out) ;
 
     {
       char *fullName = new char[strlen(fileName)+20];
       if(!fullName)
       {
-        cerr << "**WARNUNG GitterDuneImpl :: duneBackup (, const char *, double) :";
+        cerr << "**WARNUNG GitterDuneBasis :: duneBackup (, const char *, double) :";
         cerr << "couldn't allocate fullName! " << endl;
         abort();
       }
@@ -129,7 +142,7 @@ void GitterDuneBasis :: duneBackup (const char * fileName)
 
       if(!macro)
       {
-        cerr << "**WARNUNG (IGNORIERT) GitterDuneImpl :: duneBackup (const char *, const char *) Fehler beim Anlegen von < "
+        cerr << "**WARNUNG (IGNORIERT) GitterDuneBasis :: duneBackup (const char *, const char *) Fehler beim Anlegen von < "
          << (fullName ? fullName : "null") << " >" << endl ;
       }
       else
@@ -149,16 +162,16 @@ void GitterDuneBasis :: duneRestore (const char * fileName)
   // diese Methode ruft intern restore auf, hier wird lediglich 
   // der path und filename in einer variablen uebergeben
 
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneImpl :: duneRestore (const char * = \""
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: duneRestore (const char * = \""
                  << fileName << "\") " << endl, 1) : 1) ;
 
   ifstream in (fileName) ;
   if (!in) {
-    cerr << "**WARNUNG (IGNORIERT) GitterDuneImpl :: duneRestore (const char *, double & ) Fehler beim \"Offnen von < "
+    cerr << "**WARNUNG (IGNORIERT) GitterDuneBasis :: duneRestore (const char *, double & ) Fehler beim \"Offnen von < "
          << (fileName ? fileName : "null") << " > " << endl ;
   } else {
-    this->restore (in) ;
-    restoreIndices (in);
+    Gitter :: restore (in) ;
+    GitterDuneBasis :: restoreIndices (in);
   }
   return ;
 }
