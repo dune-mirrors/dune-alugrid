@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.9  2005/03/18 20:04:35  robertk
+ * added backup and restore for XDRStreams.
+ *
  * Revision 1.8  2004/12/21 17:37:35  robertk
  * removed some warnings.
  *
@@ -371,10 +374,11 @@ class GitterPll : public virtual Gitter {
     virtual void coarse () ;
     virtual bool adapt () ;
     virtual void printSizeTT () ;
-
-    //virtual bool duneLoadBalance () ; // call loadBalancer 
-    //virtual bool duneLoadBalance (GatherScatterType & ) ; // call loadBalancer and pack DuneData
     
+    // new xdr backup and restore methods 
+    virtual void backup (XDRstream_out &) ;
+    virtual void restore (XDRstream_in &) ;
+
   protected :
     virtual Makrogitter & container () = 0 ;
     virtual const Makrogitter & container () const = 0 ;
