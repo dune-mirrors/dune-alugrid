@@ -477,8 +477,8 @@ notice is found.
 
     ALU3d-Grid - a library for tetrahedral and triangular meshes, adaptive and
     parallel
-    Copyright (C) 1997-2002 Bernhard Schupp, 1998 Christian Badura, 1998 Mario
-    Ohlberger, 2004-2005 Robert Kloefkorn
+    Copyright (C) 1997-2002 Bernhard Schupp, 1998 Mario Ohlberger, 2004-2005
+    Robert Kloefkorn
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
