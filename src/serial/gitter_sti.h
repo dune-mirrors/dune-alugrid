@@ -8,7 +8,7 @@
   #define _ANSI_HEADER
 #endif
 
-#include <assert.h>
+#include <cassert>
 
 #ifdef _ANSI_HEADER
   using namespace std;
