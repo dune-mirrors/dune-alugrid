@@ -5,5 +5,5 @@ alu3dgrid_serial.o
 alu3dgrid_serial.lo
 alu3dgrid_parallel.o
 alu3dgrid_parallel.lo
-.libs/
-
+.libs
+.deps
