@@ -20,6 +20,9 @@ protected:
   bool balanceGrid_;
 
 public:
+  typedef Gitter :: Geometric Geometric;
+  typedef GitterDuneImpl :: Objects  Objects;
+  
   GitterDunePll (const char * filename , MpAccessLocal &mp) 
     : GitterBasisPll (filename,mp) , balanceGrid_ (false) 
   {
