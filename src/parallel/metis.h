@@ -26,11 +26,13 @@ static const char metmess [] = 	"**INFO Aus lizenzrechtlichen Gr\"unden steht di
 
 inline void METIS_PartGraphKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *) {
   cerr << metmess << endl ;
+  abort();
   return ;
 }
 
 inline void METIS_PartGraphRecursive(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *) {
   cerr << metmess << endl ;
+  abort();
   return ;
 }
 

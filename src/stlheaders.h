@@ -55,13 +55,16 @@
 #endif
 
 #ifdef _BSGRID_PARALLEL_
+
 // partitioning libs 
-//namespace METIS {
+// METIS if not found here then dummy version is included 
 extern "C" {
 #undef METISTITLE 
 #include <metis.h>
 }
-//}
+
+
+// PARTY_LIB if not found here then dummy version is included 
 #ifdef VERSION 
 #define _VER_SAVE VERSION 
 #undef VERSION 

@@ -51,26 +51,31 @@ static const char parmess [] = 	"**INFO Aus lizenzrechtlichen Gr\"unden steht di
 
 inline int global_linear (int,float *,int,float,int *) {
   cerr << parmess << endl ;
+  abort();
   return 0 ;
 }
 
 inline int global_scattered (int,float *,int,float,int *) {
   cerr << parmess << endl ;
+  abort();
   return 0 ;
 }
 
 inline int global_gain (int,float *,int *,int *,int *,int,float,int *) {
   cerr << parmess << endl ;
+  abort();
   return 0 ;
 }
 
 inline int global_farhat (int,float *,int *,int *,int *,int,float,int *) {
   cerr << parmess << endl ;
+  abort();
   return 0 ;
 }
 
 inline int local_kl (int,float *,int *,int *,int *,int,float, int *,int) {
   cerr << parmess << endl ;
+  abort();
   return 0 ;
 }
 
