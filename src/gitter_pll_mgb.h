@@ -26,19 +26,19 @@
 
 class ParallelGridMover : public MacroGridBuilder {
   protected :
-    inline void unpackVertex (ObjectStream &) ;
-    inline void unpackHedge1 (ObjectStream &) ;
-    inline void unpackHface3 (ObjectStream &) ;
-    inline void unpackHface4 (ObjectStream &) ;
-    inline void unpackHexa (ObjectStream &) ;
-    inline void unpackTetra (ObjectStream &) ;
-    inline void unpackPeriodic3 (ObjectStream &) ;
-    inline void unpackPeriodic4 (ObjectStream &) ;
-    inline void unpackHbnd3 (ObjectStream &) ;
-    inline void unpackHbnd4 (ObjectStream &) ;
+    void unpackVertex (ObjectStream &) ;
+    void unpackHedge1 (ObjectStream &) ;
+    void unpackHface3 (ObjectStream &) ;
+    void unpackHface4 (ObjectStream &) ;
+    void unpackHexa (ObjectStream &) ;
+    void unpackTetra (ObjectStream &) ;
+    void unpackPeriodic3 (ObjectStream &) ;
+    void unpackPeriodic4 (ObjectStream &) ;
+    void unpackHbnd3 (ObjectStream &) ;
+    void unpackHbnd4 (ObjectStream &) ;
   public :
     ParallelGridMover (BuilderIF &) ;
-    inline ~ParallelGridMover () ;
+    ~ParallelGridMover () ;
     void unpackAll (vector < ObjectStream > &) ;
 };
 #endif
