@@ -1,5 +1,11 @@
 /* $Id$
  * $Log$
+ * Revision 1.10  2004/12/21 17:24:41  robertk
+ * new methods for ghost elements on internal boundarys.
+ * all new methods to insert internal boundary with ghost element are mostly
+ * on the DuneParallelGridMover. Some Methods are on GitterPll (insert_hbnd3).
+ * MacroGhostTetra has to be moved to other file.
+ *
  * Revision 1.9  2004/12/20 13:54:17  robertk
  * gcc compileable.
  *
@@ -76,8 +82,8 @@
 // if DUNE uses this grid the _DUNE_USES_BSGRID_ variable should be defined
 // otherwise some dummy are set 
 #ifndef _DUNE_USES_BSGRID_ 
-  
 #include "dummyindexstack.h"  
+  
 typedef DummyIndexStack<int> IndexManagerType; 
   
 typedef double BSGridVec [3];
@@ -85,7 +91,13 @@ typedef BSGridVec BSGridVecType;
 #endif
 
 // number of different index manager that exists 
-enum { numOfIndexManager = 5 };
+enum { numOfIndexManager = 6 };
+// 0 == elements 
+// 1 == faces 
+// 2 == edges 
+// 3 == vertices
+// 4 == boundary elements 
+// 5 == dummy index for unused internal bnd 
 
  
 static volatile char RCSId_gitter_sti_h [] = "$Id$" ;
@@ -1113,7 +1125,7 @@ class Gitter {
 // Ende - Neu am 23.5.02 (BS)
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
-      virtual hbndseg3_GEO  * insert_hbnd3_p (hface3_GEO *, int, hbndseg_STI :: bnd_t,const double(&p)[3]) = 0 ;
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t,const double(&p)[3]) = 0 ;
             virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
             IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
             IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;

@@ -8,6 +8,12 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.9  2004/12/21 17:24:41  robertk
+ * new methods for ghost elements on internal boundarys.
+ * all new methods to insert internal boundary with ghost element are mostly
+ * on the DuneParallelGridMover. Some Methods are on GitterPll (insert_hbnd3).
+ * MacroGhostTetra has to be moved to other file.
+ *
  * Revision 1.8  2004/12/20 14:19:55  robertk
  * gcc compileable.
  *
@@ -831,8 +837,11 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         virtual VertexGeo     * insert_ghostvx (const double (&p)[3]) ;
         
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
-  virtual hbndseg3_GEO  * insert_hbnd3_p  (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
-  virtual hbndseg3_GEO  * insert_hbnd3  (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
+        // normal insert hbnd3 version
+  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
+        // version that get point and create ghost macro 
+  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
+        // version that created internal boundary on ghost elements 
   virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
@@ -1115,7 +1124,7 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
     
       assert (! myhface_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
     
-      // Der ganze Baum der Verfeinerungsregeln wird jetzt in den
+  // Der ganze Baum der Verfeinerungsregeln wird jetzt in den
   // Stringstream geschrieben (anstelle einer Datei) und dann
   // in den Datenstrom als 'integer' hineinkonvertiert.
     
@@ -1139,7 +1148,7 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
   // aber selbst.
     
       this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, osv [j]) ;
-      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear ().second, j, osv [j]) ;
+      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, osv [j]) ;
     } catch (Parallel :: AccessPllException) {
       cerr << "**FEHLER (FATAL) AccessPllException aufgetreten in " << __FILE__ << " " << __LINE__ << ". Ende." << endl ;
       abort () ;

@@ -7,6 +7,12 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/12/21 17:24:41  robertk
+ * new methods for ghost elements on internal boundarys.
+ * all new methods to insert internal boundary with ghost element are mostly
+ * on the DuneParallelGridMover. Some Methods are on GitterPll (insert_hbnd3).
+ * MacroGhostTetra has to be moved to other file.
+ *
  * Revision 1.3  2004/11/02 18:55:30  robertk
  * Moved all changed with dune... to seperated gitter_dune_* files.
  *
@@ -201,6 +207,18 @@ inline void ParallelGridMover :: unpackHbnd3 (ObjectStream & os) {
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
+
+  // read vertex coord , is neccessary because we dont want to overload the
+  // Tetra packAsBnd method, so we read vertex here but do the same as
+  // before 
+  if(Gitter :: hbndseg :: bnd_t (b) == Gitter :: hbndseg :: closure )
+  {
+    double p [3];
+    os.readObject (p[0]) ;
+    os.readObject (p[1]) ;
+    os.readObject (p[2]) ;
+  }
+
   InsertUniqueHbnd3 (v, Gitter :: hbndseg :: bnd_t (b)) ;
   return ;
 }
