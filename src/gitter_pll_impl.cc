@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/11/25 18:48:33  robertk
+ * minor changes.
+ *
  * Revision 1.4  2004/11/16 19:43:07  robertk
  * changed writeDynamicState of Tetra and Hexa, they now write their
  * oppositeVertices of the interal boundary face and furterhmore changed the
@@ -400,7 +403,6 @@ bool ElementPllBaseX :: unlockAndResume (bool) {
 //    #     #          #    #   #   #    #
 //    #     ######     #    #    #  #    #
 void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const {
-  logFile << "send data of tetra " << mytetra().getIndex() << " \n";
   gs.sendData( os , mytetra () );
   return ;
 }
@@ -433,6 +435,7 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
 
+  /*
   if(writeLogFile)
   {
     logFile << " write p = [";
@@ -440,6 +443,7 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
       logFile << p[i] << ",";
     logFile << "] \n";
   }
+  */
 
   //cout << "writeDynamicState el " << mytetra().getIndex() << " face = " << face << "\n";
 #endif

@@ -4,7 +4,7 @@
 #include "gitter_impl.h"
 #include "lock.h"
 
-class GitterDuneBasis : public GitterBasis {
+class GitterDuneBasis :  public virtual GitterBasis {
 
 public:
   // write status of grid  
@@ -15,7 +15,7 @@ public:
 };
 
 
-class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis 
+class GitterDuneImpl : public GitterBasisImpl , public virtual GitterDuneBasis 
 {
 public :
   // Constructor getting macro file name 
