@@ -475,7 +475,7 @@ have at least the "copyright" line and a pointer to where the full
 notice is found.
 
 
-    ALU3dGrid - a library for tetrahedral and triangular meshes, adaptive and
+    ALU3d-Grid - a library for tetrahedral and triangular meshes, adaptive and
     parallel
     Copyright (C) 1997-2002 Bernhard Schupp, 1998 Christian Badura, 1998 Mario
     Ohlberger, 2004-2005 Robert Kloefkorn
@@ -496,7 +496,7 @@ notice is found.
 
   Albert-Ludwigs-Universitaet Freiburg,Mathematisches Institut, Eckerstraﬂe 1,
   D-79104 Freiburg Germany, hereby disclaims all copyright interest in the
-  library `ALU3dGrid`  written by Bernhard Schupp and Robert Kloefkorn.
+  library `ALU3d-Grid` mainly written by Bernhard Schupp and Robert Kloefkorn.
 
   Freiburg, 24/03/05
   Robert Kloefkorn

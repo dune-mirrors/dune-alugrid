@@ -4,7 +4,7 @@ DUNE-library
 Getting started
 ---------------
 
-To compile a small library ALU3dGrid has to check several components of
+To compile a small library ALU3d-Grid has to check several components of
 your system. Run
 
   ./configure
@@ -17,19 +17,19 @@ You can use
 
   ./configure --prefix=PATH
 
-if you don't want ALU3dGrid to be installed into /usr/local
+if you don't want ALU3d-Grid to be installed into /usr/local
 
 After configuration
 
   make
   make install
 
-build and install ALU3dGrid (you may need root-permissions for the install
+build and install ALU3d-Grid (you may need root-permissions for the install
 part depending on the prefix set)
 
 License
 -------
 
-The ALU3dGrid-library and headers are licensed under the GNU Lesser GPL
+The ALU3d-Grid-library and headers are licensed under the GNU Lesser GPL
 version 2.1. The full license text can be found in the file COPYING
 and via http://www.gnu.org/licenses/lgpl.html
