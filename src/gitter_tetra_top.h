@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.7  2005/01/13 16:43:18  robertk
+ * removed some comments.
+ *
  * Revision 1.6  2004/12/21 17:17:59  robertk
  * Some cleanup.
  * Some work is still to do.
@@ -732,10 +735,6 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
   tetra_GEO *(ghchild)[4] = {0,0,0,0};
   if(gh)
   {
-    //for(tetra_GEO * chi = gh->down(); chi; chi = chi->next())
-    //{
-    //  printTetra(cout,chi);
-    //} 
     hface3_GEO * face = gh->myhface3(3); 
     face = face->down(); 
     for(int i=0; i<4; i++)
@@ -748,8 +747,6 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
       assert(ghch);
       assert(ghch->up() == gh);
       ghchild[i] = ghch;
-      //printTetra(cout,ghchild[i]);
-      //cout << gh << " " << ghchild[i] << " \n";
       face = face->next();
     }
   }
