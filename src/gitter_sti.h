@@ -1,5 +1,11 @@
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/27 15:05:59  robertk
+ * index restore and backup changed.
+ * now index storeage is done at the end of one gitter storage, because we
+ * need the backup and restore methods for data communication aof parallel
+ * grid.
+ *
  * Revision 1.1  2004/10/25 16:39:53  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -264,7 +270,7 @@ class Gitter {
 
 #ifdef _DUNE_USES_BSGRID_
       protected: 
-        int  _index; 
+        int  _index; // global_index, unique per level but not per processor
         bool _refinedTag; // true if element was refined 
         Dune_helement () : _index (-1) , _refinedTag (true) {}
 #endif
@@ -278,8 +284,11 @@ class Gitter {
         int getIndex () const;  
         void setIndex (const int index) ; 
         
-        void backupIndex  (ostream &) const; // backup _index  
-        void restoreIndex (istream &) ;      // retore _index  
+        virtual void backupIndex (ostream &) const ;   // backup _index  
+
+        // method is virual, because former index set by constructor has to
+        // be freeed , means method has to be overloaded for correct work
+        virtual void restoreIndex (istream &) ;// retore _index  
         
         // the Dune extentions 
 
@@ -287,7 +296,6 @@ class Gitter {
         virtual void outerNormal(int face, BSGridVecType & normal) 
         {
           cerr << "helement :: outerNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
-          assert(false);
           abort();
         }
         
@@ -295,7 +303,6 @@ class Gitter {
         virtual void neighOuterNormal(int faceInNeigh, BSGridVecType & normal) 
         {
           cerr << "helement :: neighOuterNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
-          assert(false);
           abort();
         }
     };
@@ -331,8 +338,8 @@ class Gitter {
       public :
         virtual bool refine () = 0 ;
         virtual bool coarse () = 0 ;
-  virtual void backupCMode (ostream &) const = 0 ;
-  virtual void backup (ostream &) const = 0 ;
+        virtual void backupCMode (ostream &) const = 0 ;
+        virtual void backup (ostream &) const = 0 ;
         virtual void restore (istream &) = 0 ;
 
       public: 
@@ -1401,19 +1408,18 @@ inline void Gitter :: Dune_helement :: setIndex (const int index) {
 
 inline void Gitter :: Dune_helement :: backupIndex (ostream & os ) const {
 #ifdef _DUNE_USES_BSGRID_ 
-  //os.put( _index ); 
-  os.write( ((const char *) &_index ), sizeof(int) ) ;
+  assert(false);
+  //os.write( ((const char *) &_index ), sizeof(int) ) ;
 #endif
 }
 
 inline void Gitter :: Dune_helement :: restoreIndex (istream & is ) {
 #ifdef _DUNE_USES_BSGRID_ 
-  //is.read(_index);
-  is.read ( ((char *) &_index), sizeof(int) ); 
+  assert(false);
+  //if(_index != -1) _indexmanager.freeIndex( _index );
+  //is.read ( ((char *) &_index), sizeof(int) ); 
 #endif
 }
-
-
 
 inline int Gitter :: hbndseg :: leaf () const {
   return ! down () ;
