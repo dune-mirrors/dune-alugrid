@@ -271,7 +271,7 @@ void DuneParallelGridMover :: initialize ()
       // change
       if((*i)->getGhost())
       {
-        typedef GitterDunePll :: Geometric :: tetra_GEO  tetra_GEO;
+        typedef Gitter :: Geometric :: tetra_GEO  tetra_GEO;
         tetra_GEO * gh = static_cast<tetra_GEO *> ((*i)->getGhost());
         // see insert_ghosttetra, point 3 is the new point 
         _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), gh->myvertex(3)->Point()) ;
