@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.5  2005/01/19 18:26:24  robertk
+ * removed warnings.
+ *
  * Revision 1.4  2005/01/19 17:45:25  robertk
  * removed warnings.
  *
@@ -185,7 +188,7 @@ template < class A > class HexaTop : public A {
     inneredge_t * _ed ;
     innervertex_t * _cv ;
     int _lvl ;
-    myrule_t _req, _rule ;
+    myrule_t _rule, _req ;
     void splitISO8 () ;
     inline myhedge1_t * subedge1 (int,int) ;
     inline const myhedge1_t * subedge1 (int,int) const ;
@@ -303,9 +306,12 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
 }
 
 template < class A > Hedge1Top < A > :: ~Hedge1Top () {
-  _bbb ? (delete _bbb, 0) : 0 ;
-  _dwn ? (delete _dwn, 0) : 0 ;
-  _cv  ? (delete _cv,  0) : 0 ;
+  //_bbb ? (delete _bbb, 0) : 0 ;
+  //_dwn ? (delete _dwn, 0) : 0 ;
+  //_cv  ? (delete _cv,  0) : 0 ;
+  if(_bbb) delete _bbb;
+  if(_dwn) delete _dwn;
+  if(_cv)  delete _cv;
   return ;
 }
 
@@ -982,7 +988,7 @@ template < class A > inline const typename HexaTop < A > :: myhface4_t * HexaTop
 template < class A > inline HexaTop < A > :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
 	myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
-  , _bbb (0), _dwn (0), _up(0), _ed (0), _cv (0), _fc (0), _lvl (l),
+  , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0), _lvl (l),
    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) { //_up eingef. us
   return ;
 }
@@ -1319,7 +1325,7 @@ template < class A > void HexaTop < A > :: restore (istream & is) {
 
    
 template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, int t0,
-	myhface4_t * f1, int t1) : A (f0, t0, f1, t1), _up(0), _dwn (0), _bbb (0), _lvl (l), 
+	myhface4_t * f1, int t1) : A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(0), _lvl (l), 
 	_rule (myrule_t :: nosplit) {	// ok
   return ;
 }

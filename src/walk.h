@@ -1,12 +1,15 @@
-	// (c) bernhard schupp 1997 - 1998
+  // (c) bernhard schupp 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
 
 /* $Id$
  * $Log$
+ * Revision 1.6  2005/01/19 18:26:24  robertk
+ * removed warnings.
+ *
  * Revision 1.5  2004/12/21 17:36:45  robertk
  * removed some warnings.
  *
@@ -229,21 +232,21 @@ template < class  A, class B > class Insert : public IteratorSTI < typename B ::
     int size () ;
     val_t & item () const ;
   private :
-    comp_t _cmp ;
     A _outer ;
     B * _inner ;
     int _cnt ;
+    comp_t _cmp ;
 } ;
 
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
 
 template < class A > int childs_are_leafs < A > :: operator () (const A * x) const {
@@ -316,7 +319,7 @@ template < class A, class B > inline int TreeIterator < A, B > :: count () {
 }
 
 template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A & s, const B & c) 
-  : _seed (& s), _cnt (-1), _pos (0), _cmp (c) {
+  : _seed (& s), _cmp (c), _pos (0), _cnt (-1) {
   _stack [0] = 0 ;
   _cnt = count () ;
   return ;
@@ -330,7 +333,7 @@ template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A * 
 }
 
 template < class A, class B > inline TreeIterator < A, B > :: TreeIterator ( const TreeIterator < A, B > & w) 
-  : _seed (w._seed), _cnt (w._cnt), _pos (w._pos), _cmp (w._cmp) {
+  : _seed (w._seed), _cmp (w._cmp), _pos (w._pos), _cnt (w._cnt) {
   for(int i = 0 ; i <= _pos ; i ++) _stack [i] = w._stack [i] ;
   return ;
 }

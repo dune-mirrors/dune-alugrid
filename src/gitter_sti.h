@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.12  2005/01/19 18:26:24  robertk
+ * removed warnings.
+ *
  * Revision 1.11  2004/12/21 17:29:08  robertk
  * Removed warnings.
  *
@@ -421,6 +424,9 @@ class Gitter {
         inline int leaf () const ;
         // for dune 
         virtual int ghostLevel () const = 0 ;
+        // default return 0 means we have no ghost element on this boundary
+        // segment, because we only have ghost on interior boundary 
+        virtual helement * getGhost () = 0; // should return 0 for not interior boundaries 
         virtual void faceNormal (BSGridVecType & normal) const = 0 ;
       public :
   virtual void restoreFollowFace () = 0 ;
@@ -1206,8 +1212,8 @@ class Gitter {
   // zu verwalten.
 
 template < class A > class LeafIterator : public MyAlloc {
-  IteratorSTI < A > * _w ;
   Gitter * _grd ;
+  IteratorSTI < A > * _w ;
   const A * _a ;
   void * operator new (size_t) { return 0 ; }
   void operator delete (void *) { }
@@ -1226,8 +1232,8 @@ template < class A > class LeafIterator : public MyAlloc {
 
 #if 0
 template < class A > class ConstLeafIterator : public MyAlloc {
-  ConstIteratorSTI < A > * _w ;
   const Gitter * _grd ;
+  ConstIteratorSTI < A > * _w ;
   const A * _a ;
   void * operator new (size_t) ;
   void operator delete (void *) ;
@@ -1369,7 +1375,7 @@ template < class A > A & IteratorSTI < A > :: item () const {
   return *(val_t *)(p) ;
 }
 
-template < class A > inline AccessIterator < A > :: Handle :: Handle (AccessIterator < A > & f) : _fac (&f), _w (0), _a (0) {
+template < class A > inline AccessIterator < A > :: Handle :: Handle (AccessIterator < A > & f) : _fac (&f), _a (0), _w (0) {
   _fac->ref ++ ; 
   _w = _fac->iterator (_a) ;
   return ;
@@ -1386,7 +1392,8 @@ template < class A > inline AccessIterator < A > :: Handle :: Handle () : _fac (
 }
 
 template < class A > inline AccessIterator < A > :: Handle :: ~Handle () {
-  _fac ? (_fac->ref --, 0) : 0 ; 
+  //_fac ? (_fac->ref --, 0) : 0 ; 
+  if(_fac) _fac->ref-- ;
   delete _w ;
   return ;
 }
@@ -1910,22 +1917,22 @@ inline int Gitter :: Geometric :: hface4 :: face4Neighbour :: complete (const fa
 }
 
 inline pair < Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: front () {
-  assert (!(_v == null)) ;
+  //assert (!(_v == null)) ;
   return _v ;
 }
 
 inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: front () const {
-  assert (!(_v == null)) ;
+  //assert (!(_v == null)) ;
   return pair < const myconnect_t *, int > (_v.first,_v.second) ;
 }
 
 inline pair < Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () {
-  assert (!(_h == null)) ;
+  //assert (!(_h == null)) ;
   return _h ;
 }
 
 inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () const {
-  assert (!(_h == null)) ;
+  //assert (!(_h == null)) ;
   return pair < const myconnect_t *, int > (_h.first,_h.second) ; ;
 }
 

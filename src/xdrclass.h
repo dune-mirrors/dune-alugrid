@@ -14,8 +14,8 @@
   typedef u_int xdrsize_t;
 #endif
 
-static int read_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);
-static int write_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);
+int read_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);
+int write_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);
 
 XDR *XDRopen(const char *filename,const xdr_op op);
 XDR *XDRclose(XDR *x);

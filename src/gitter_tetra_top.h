@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.8  2005/01/19 18:26:24  robertk
+ * removed warnings.
+ *
  * Revision 1.7  2005/01/13 16:43:18  robertk
  * removed some comments.
  *
@@ -952,7 +955,7 @@ template < class A > void Hbnd3Top < A > :: restoreFollowFace () {
 
 template < class A > inline TetraTop < A > :: TetraTop (int l, myhface3_t * f0, int t0,
   myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3, innertetra_t *up) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3), _up(up), _dwn (0), _bbb (0), _ed (0), _fc (0), _lvl (l), 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0), _lvl (l), 
   _rule (myrule_t :: nosplit) 
   , _indexmanager(up->_indexmanager)  
 { // _up wird im Constructor uebergeben
@@ -963,7 +966,7 @@ template < class A > inline TetraTop < A > :: TetraTop (int l, myhface3_t * f0, 
 // constrcutor mit IndexManager uebergabe
 template < class A > inline TetraTop < A > :: TetraTop (int l, myhface3_t * f0, int t0,
   myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3, IndexManagerType & im) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3), _up(0), _dwn (0), _bbb (0), _ed (0), _fc (0), _lvl (l), 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3), _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0), _lvl (l), 
   _rule (myrule_t :: nosplit) , _indexmanager(im)
 { // _up wird im Constructor uebergeben
   this->setIndex( _indexmanager.getIndex() );
@@ -1550,7 +1553,7 @@ template < class A > void TetraTop < A > :: restore (istream & is) {
 // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
    
 template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
-  myhface3_t * f1, int t1) : A (f0, t0, f1, t1), _up(0), _dwn (0), _bbb (0), _lvl (l), 
+  myhface3_t * f1, int t1) : A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(0), _lvl (l), 
   _rule (myrule_t :: nosplit) { //_up eing. us
   return ;
 }
