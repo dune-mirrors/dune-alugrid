@@ -6,7 +6,7 @@
 
 bool GitterDunePll :: duneNotifyNewGrid ()
 {
-  assert (debugOption (20) ? (cout << "**GitterPll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
+  assert (debugOption (20) ? (cout << "**GitterDunePll :: duneNotifyNewGrid () " << endl, 1) : 1) ;
   const int np = mpAccess ().psize () ;
   LoadBalancer :: DataBase db ;
   {
@@ -80,7 +80,7 @@ bool GitterDunePll :: duneLoadBalance ()
 }
 
 bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs) {
-  assert (debugOption (20) ? (cout << "**GitterDunePll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
+  assert (debugOption (20) ? (cout << "**GitterDunePll :: duneLoadBalance () " << endl, 1) : 1) ;
   const int np = mpAccess ().psize () ;
   LoadBalancer :: DataBase db ;
   {
@@ -110,11 +110,12 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs) {
   {
     if (mpAccess ().gmax (_ldbMethod)) 
     {
+      assert (debugOption (5) ? (cout << "**GitterDunePll :: repartitioning macro grid! " << endl, 1) : 1) ;
       duneRepartitionMacroGrid (db, gs) ;
       notifyMacroGridChanges () ;
     }
   }
-  return true;
+  return neu;
 }
 
 void GitterDunePll :: duneExchangeDynamicState () 
@@ -281,12 +282,12 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs)
   {
     cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
   }
-  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: exchangeDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
+  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: duneExchangeData () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   }
 }
 
 bool GitterDunePll :: refine () {
-  assert (debugOption (5) ? (cout << "**INFO GitterPll :: refine () " << endl, 1) : 1) ;
+  assert (debugOption (5) ? (cout << "**INFO GitterDunePll :: refine () " << endl, 1) : 1) ;
   const int nl = mpAccess ().nlinks () ;
   bool state = false ;
   vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;
@@ -400,7 +401,7 @@ bool GitterDunePll :: refine () {
 }
 
 void GitterDunePll :: coarse () {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: coarse () " << endl, 1) : 1) ;
+  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: coarse () " << endl, 1) : 1) ;
   const int nl = mpAccess ().nlinks () ;
   
   {
