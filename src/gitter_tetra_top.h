@@ -8,6 +8,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/11/29 12:40:12  robertk
+ * index is not freed when read from file, because index set is completely
+ * overwirtten.
+ *
  * Revision 1.3  2004/11/16 19:36:14  robertk
  * Added method up for Hbnd3Top and index for support.
  *
@@ -1410,7 +1414,7 @@ template < class A > inline void TetraTop < A > :: restoreIndex (istream & is)
 {
 #ifdef _DUNE_USES_BSGRID_
   // free index from constructor
-  _indexmanager.freeIndex( this->getIndex() ); 
+  //_indexmanager.freeIndex( this->getIndex() ); 
   is.read ( ((char *) &(this->_index) ), sizeof(int) );
   {for (innertetra_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; }
 #endif
