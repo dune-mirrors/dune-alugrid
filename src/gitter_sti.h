@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/11/02 17:12:41  robertk
+ * Removed duneBackup and duneRestore. Now in GitterDuneImpl.
+ *
  * Revision 1.3  2004/10/28 16:04:04  robertk
  * minor changes.
  *
@@ -1121,10 +1124,6 @@ class Gitter {
     virtual void restore (istream &) ;
     virtual void restore (const char*,const char *) ;
 
-    // needed for Dune 
-    void duneBackup (const char*) ;
-    void duneRestore (const char*) ;
-    
   friend class LeafIterator < helement_STI > ;
   friend class LeafIterator < vertex_STI > ;
   friend class LeafIterator < hbndseg_STI > ;
