@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/28 16:04:04  robertk
+ * minor changes.
+ *
  * Revision 1.2  2004/10/27 15:05:59  robertk
  * index restore and backup changed.
  * now index storeage is done at the end of one gitter storage, because we
@@ -581,11 +584,13 @@ class Gitter {
      
         class Dune_VertexGeo 
         {
-#ifdef _DUNE_USES_BSGRID_ 
           protected:
             IndexManagerType & _indexmanager;
+#ifdef _DUNE_USES_BSGRID_ 
+          //protected:
+          //  IndexManagerType & _indexmanager;
             int _idx; 
-            mutable int _wrcnt;
+          //  mutable int _wrcnt;
 #endif          
           public:
             Dune_VertexGeo (IndexManagerType & im);
@@ -1443,9 +1448,9 @@ inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) 
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, IndexManagerType & im) 
   : 
-#ifdef _DUNE_USES_BSGRID_
+//#ifdef _DUNE_USES_BSGRID_
   Dune_VertexGeo (im) ,    
-#endif
+//#endif
   _lvl (l) {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   return ;
@@ -1453,9 +1458,9 @@ inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y,
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, VertexGeo & vx) 
   :
-#ifdef _DUNE_USES_BSGRID_
+//#ifdef _DUNE_USES_BSGRID_
   Dune_VertexGeo ( vx._indexmanager ) , 
-#endif
+//#endif
   _lvl (l)  {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   return ;
@@ -1499,18 +1504,24 @@ inline void Gitter :: Geometric :: VertexGeo :: restore ( istream & is ) {
   this->restoreIndex(is,ref);
 }
 
-inline Gitter :: Geometric :: Dune_VertexGeo :: Dune_VertexGeo ( IndexManagerType & im ) : _indexmanager (im) , _wrcnt (0) 
+inline Gitter :: Geometric :: Dune_VertexGeo :: Dune_VertexGeo ( IndexManagerType & im ) : _indexmanager (im)  
 {
+#ifdef _DUNE_USES_BSGRID_
   _idx = _indexmanager.getIndex(); 
+#endif
 }
 
 inline Gitter :: Geometric :: Dune_VertexGeo :: ~Dune_VertexGeo () 
 { 
+#ifdef _DUNE_USES_BSGRID_
   _indexmanager.freeIndex( _idx );
+#endif
 }
 
 inline void Gitter :: Geometric :: Dune_VertexGeo :: backupIndex ( ostream & os, Refcount refcnt ) const {
 #ifdef _DUNE_USES_BSGRID_
+  assert(false);
+  /*
   //cout << refcnt << " r|w " << _wrcnt << " \n";
   if(_wrcnt == 0)
   {
@@ -1526,11 +1537,14 @@ inline void Gitter :: Geometric :: Dune_VertexGeo :: backupIndex ( ostream & os,
   
   if(refcnt == _wrcnt)
     _wrcnt = 0;
+  */
 #endif
 }
 
 inline void Gitter :: Geometric :: Dune_VertexGeo :: restoreIndex ( istream & is , Refcount refcnt ) {
 #ifdef _DUNE_USES_BSGRID_ 
+  assert(false);
+  /*
   // funktioniert noch nicht
   if(_wrcnt == 0)
   {
@@ -1542,6 +1556,8 @@ inline void Gitter :: Geometric :: Dune_VertexGeo :: restoreIndex ( istream & is
   
   if(refcnt == _wrcnt)
     _wrcnt = 0;
+
+  */  
 #endif
 }
 
