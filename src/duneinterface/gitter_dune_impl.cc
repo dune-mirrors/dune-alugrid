@@ -8,7 +8,7 @@ void GitterDuneBasis :: backupIndices (ostream & out)
 {
   // backup indices 
   int indices = 1; 
-  out.write( ((const char *) & indices ), sizeof(int) );
+  out << indices ; 
 
   // store max indices 
   for(int i=0; i< numOfIndexManager ; i++)
@@ -44,7 +44,8 @@ void GitterDuneBasis ::restoreIndices (istream & in)
 {
   int indices = 0;
   in >> indices ; 
-  cerr << "Read indices falg = " << indices << "\n";
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices: index flag = " << indices << " in "
+                       << __FILE__ << " line = " << __LINE__ <<"\") " << endl, 1) : 1) ;
   
   if(indices == 1) // restore dune indices (see backUpIndices method)
   {
