@@ -7,6 +7,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/28 18:57:25  robertk
+ * new method duneRepartitionMacroGrid which can pass Dune data to
+ * TetraPllXBaseMacro class.
+ *
  * Revision 1.1  2004/10/25 16:41:20  robertk
  * Parallel grid implementations.
  *
@@ -306,6 +310,66 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+    }
+    {
+      for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
+      	(*i++).writeObject (MacroGridMoverIF :: ENDMARKER)) ;
+    }
+    lap2 = clock () ;
+    osv = mpAccess ().exchange (osv) ;
+    lap3 = clock () ;
+    {
+      ParallelGridMover pgm (containerPll ()) ;
+      pgm.unpackAll (osv) ;
+    }
+    lap4 = clock () ;
+    if (MacroGridBuilder :: debugOption (20)) {
+      cout << "**INFO GitterPll :: repartitionMacroGrid () [ass|pck|exc|upk|all] " ;
+      cout << setw (5) << (float)(lap1 - start)/(float)(CLOCKS_PER_SEC) << " " ;
+      cout << setw (5) << (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) << " " ;
+      cout << setw (5) << (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC) << " " ;
+      cout << setw (5) << (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC) << " " ;
+      cout << setw (5) << (float)(lap4 - start)/(float)(CLOCKS_PER_SEC) << " sec." << endl ;
+    }
+  }
+  return ;
+}
+
+
+// for Dune 
+
+void GitterPll :: duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs) {
+  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) {
+    const long start = clock () ;
+    long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
+    mpAccess ().removeLinkage () ;
+    mpAccess ().insertRequestSymetric (db.scan ()) ;
+    const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
+    {
+      AccessIterator < helement > :: Handle w (containerPll ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) {
+      int to = db.getDestination (w.item ().accessPllX ().ldbVertexIndex ()) ;
+        if (me != to)
+          w.item ().accessPllX ().attach2 (mpAccess ().link (to)) ;
+      }
+    }
+    lap1 = clock () ;
+    vector < ObjectStream > osv (nl) ;
+    {
+      AccessIterator < vertex_STI > :: Handle w (containerPll ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+    }
+    {
+      AccessIterator < hedge_STI > :: Handle w (containerPll ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+    }
+    {
+      AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+    }
+    {
+      AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().dunePackAll (osv,gs) ;
     }
     {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
