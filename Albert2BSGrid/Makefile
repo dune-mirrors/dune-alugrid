@@ -6,7 +6,9 @@
 #   uncomment line, if ALBERT_LIB_PATH isn't an environment variable
 
 #   uncomment line, for 
-#GRAPE_LIB = /project/albert/ALBERT-1.0/lib
+CC = gcc
+
+ALBERTA_PATH=../../alberta-1.2-SuSE9.2
 
 ALBERT_LIB_PATH = $(ALBERTA_PATH)/lib
 ALBERT_INCLUDE_PATH = $(ALBERTA_PATH)/include
