@@ -7,6 +7,9 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.5  2005/01/13 16:54:11  robertk
+ * unpackHbnd split to unpackHbndInt and Ext. Todo this for Hexas
+ *
  * Revision 1.4  2004/12/21 17:36:45  robertk
  * removed some warnings.
  *
@@ -88,10 +91,10 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   protected :
   class Hbnd3IntStorage
   {
+    double _p[3]; 
     hface3_GEO * _first;
     int          _second;
     bool _pInit; // true if p was initialized with a value 
-    double _p[3]; 
   public:  
     // store point and face and twist  
     Hbnd3IntStorage( hface3_GEO * f, int tw, const double (&p) [3] );
@@ -151,14 +154,17 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     static void generateRawHexaImage (istream &, ostream &) ;
     static void generateRawTetraImage (istream &, ostream &) ;
     static void cubeHexaGrid (int, ostream &) ;
-    MacroGridBuilder (BuilderIF &) ;
+    MacroGridBuilder (BuilderIF &, bool init = true) ;
     virtual ~MacroGridBuilder () ;
     void inflateMacroGrid (istream &) ;
     void backupMacroGrid (ostream &) ;
 
+    // former constructor 
+    void initialize ();
     // former destructor 
     void finalize ();
   protected:  
+    bool _initialized;
     bool _finalized;
   private :
     BuilderIF & _mgb ;
