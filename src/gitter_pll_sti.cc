@@ -8,6 +8,10 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/28 18:58:21  robertk
+ * new method duneLoadBalance( GatherScatterType & ) which represents the dune
+ * data.
+ *
  * Revision 1.2  2004/10/28 18:00:22  robertk
  * duneAdapt and duneLoadBalance added.
  *
@@ -745,8 +749,46 @@ bool GitterPll :: duneAdapt () {
   return refined;
 }
 
-bool GitterPll :: duneLoadBalance () {
+bool GitterPll :: duneLoadBalance () 
+{
   loadBalancerGridChangesNotify () ;
+  return true;
+}
+
+bool GitterPll :: duneLoadBalance (GatherScatterType & gs) {
+  assert (debugOption (20) ? (cout << "**GitterPll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
+  const int start = clock (), me = mpAccess ().myrank (), np = mpAccess ().psize () ;
+  LoadBalancer :: DataBase db ;
+  {
+    AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphEdge (db) ;
+  }
+  {
+    AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphVertex (db) ;
+  }
+  bool neu = false ;
+  {
+  // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
+  // 
+  // load  - eigene ElementLast
+  // mean  - mittlere ElementLast
+  // nload - Lastverh"altnis
+
+  
+    double load = db.accVertexLoad () ;
+    vector < double > v (mpAccess ().gcollect (load)) ;
+    double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
+
+    for (vector < double > :: iterator i = v.begin () ; i != v.end () ; i ++)
+      neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
+  }
+  if (neu) {
+    if (mpAccess ().gmax (_ldbMethod)) {
+      duneRepartitionMacroGrid (db, gs) ;
+      notifyMacroGridChanges () ;
+    }
+  }
   return true;
 }
 
