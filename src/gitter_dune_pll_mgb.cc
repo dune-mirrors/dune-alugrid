@@ -269,11 +269,11 @@ void DuneParallelGridMover :: initialize ()
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
     {
       // change
-      GitterDunePll :: Objects :: Hbnd3Default * hseg = static_cast<GitterDunePll :: Objects :: Hbnd3Default *> ((*i));
-      if(hseg->getGhost())
+      if((*i)->getGhost())
       {
         typedef GitterDunePll :: Geometric :: tetra_GEO  tetra_GEO;
-        tetra_GEO * gh = static_cast<tetra_GEO *> (hseg->getGhost());
+        tetra_GEO * gh = static_cast<tetra_GEO *> ((*i)->getGhost());
+        // see insert_ghosttetra, point 3 is the new point 
         _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), gh->myvertex(3)->Point()) ;
       }
       // until here
