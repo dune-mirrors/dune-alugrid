@@ -11,14 +11,12 @@
 #ifdef _ANSI_HEADER
   using namespace std;
   #include <iostream>
-  #include <strstream>
   #include <vector>
   #include <functional>
   #include <set>
   #include <map>
 #else
   #include <iostream.h>
-  #include <strstream.h>
   #include <vector.h>
   #include <function.h>
   #include <set.h>

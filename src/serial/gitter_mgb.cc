@@ -10,7 +10,7 @@
 
 #ifdef _ANSI_HEADER
   using namespace std;
-  #include <strstream>
+  #include <sstream>
   #include <iterator>
   #include <vector>
   #include <utility>
@@ -29,7 +29,7 @@
 
 #include "gitter_sti.h"
 #include "gitter_mgb.h"
-
+  
 pair < Gitter :: Geometric :: VertexGeo *, bool > MacroGridBuilder :: 
 InsertUniqueVertex (double x, double y, double z, int i) {
   vertexMap_t :: const_iterator hit = _vertexMap.find (i) ;
@@ -871,7 +871,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
 }
 
 void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) {
-  strstream raw ;
+  strstream_t raw ;
   MacroGridBuilder mm (*this) ;
   int c = in.get () ;
   assert (!in.eof ()) ;
@@ -882,7 +882,7 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) {
   // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
   // und auf 'Tetraeder' oder 'Hexaeder' untersuchen.
 
-    strstreambuf buf ;
+    strstreambuf_t buf ;
     in.get () ;   // Das Kommentarzeichen wird entfernt.
     in.get (buf) ;
     int len = in.gcount () ;

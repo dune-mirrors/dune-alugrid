@@ -11,7 +11,7 @@
 
 #ifdef _ANSI_HEADER
   using namespace std;
-  #include <strstream>
+  #include <sstream>
   #include <set>
   #include <map>
   #include <functional>
@@ -220,7 +220,7 @@ bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
     osv [j].writeObject (myhedge1 ().myvertex (0)->ident ()) ;
     osv [j].writeObject (myhedge1 ().myvertex (1)->ident ()) ;
     {
-      strstream s ;
+      strstream_t s ;
       myhedge1 ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (ENDOFSTREAM) ;
@@ -233,7 +233,7 @@ bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
 }
 
 void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
-  strstream s ;
+  strstream_t s ;
   int c ;
   try {
     for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
@@ -484,7 +484,7 @@ bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
     osv [j].writeObject (mytetra ().myvertex (2)->ident ()) ;
     osv [j].writeObject (mytetra ().myvertex (3)->ident ()) ;
     {
-      strstream s ;
+      strstream_t s ;
       mytetra ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (ENDOFSTREAM) ;
@@ -508,7 +508,7 @@ bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
     osv [j].writeObject (mytetra ().myvertex (2)->ident ()) ;
     osv [j].writeObject (mytetra ().myvertex (3)->ident ()) ;
     {
-      strstream s ;
+      strstream_t s ;
       mytetra ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (ENDOFSTREAM) ;
@@ -543,7 +543,7 @@ void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
 
 void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
   assert (i) ;
-  strstream s ;
+  strstream_t s ;
   int c ;
   try {
     for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
@@ -562,7 +562,7 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
 void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
   & gs , bool i) {
   assert (i) ;
-  strstream s ;
+  strstream_t s ;
   int c ;
   try {
     for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
@@ -677,7 +677,7 @@ bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
     osv [j].writeObject (myperiodic3 ().myvertex (4)->ident ()) ;
     osv [j].writeObject (myperiodic3 ().myvertex (5)->ident ()) ;
     {
-      strstream s ;
+      strstream_t s ;
       myperiodic3 ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (-1) ;
@@ -706,7 +706,7 @@ void Periodic3PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
 
 void Periodic3PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
   assert (i) ;
-  strstream s ;
+  strstream_t s ;
   int c ;
   try {
     for (os.readObject (c) ; c != -1 ; os.readObject (c)) s.put ((char)c) ;
@@ -824,7 +824,7 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
     osv [j].writeObject (myperiodic4 ().myvertex (6)->ident ()) ;
     osv [j].writeObject (myperiodic4 ().myvertex (7)->ident ()) ;
     {
-      strstream s ;
+      strstream_t s ;
       myperiodic4 ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (-1) ;
@@ -853,7 +853,7 @@ void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
 
 void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
   assert (i) ;
-  strstream s ;
+  strstream_t s ;
   int c ;
   try {
     for (os.readObject (c) ; c != -1 ; os.readObject (c)) s.put ((char)c) ;
@@ -1018,7 +1018,7 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
     osv [j].writeObject (myhexa ().myvertex (6)->ident ()) ;
     osv [j].writeObject (myhexa ().myvertex (7)->ident ()) ;
     {
-      strstream s ;
+      strstream_t s ;
       myhexa ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (-1) ;
@@ -1047,7 +1047,7 @@ void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
 
 void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
   assert (i) ;
-  strstream s ;
+  strstream_t s ;
   int c ;
   try {
     for (os.readObject (c) ; c != -1 ; os.readObject (c)) s.put ((char)c) ;

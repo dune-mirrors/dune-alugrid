@@ -15,16 +15,24 @@
   #include <utility>
   #include <iostream>
   #include <list>
+  #include <sstream>
+  // typdef these stream because this code uses a lot strstream 
+  typedef basic_stringbuf   <char> strstreambuf_t ; 
+  typedef basic_stringstream<char> strstream_t;
 #else
   #include <pair.h>
   #include <iostream.h>
   #include <list.h>
+  #include <strstream.h>
+
+  typedef strstreambuf strstreambuf_t ; 
+  typedef strstream    strstream_t;
 #endif
 
 #include "myalloc.h"
 #include "parallel.h"
-  
 #include "xdrclass.h"
+  
 
 // if DUNE uses this grid the _DUNE_USES_ALU3DGRID_ variable should be defined
 // otherwise some dummy are set 

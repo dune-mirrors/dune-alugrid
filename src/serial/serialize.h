@@ -13,7 +13,7 @@
 #ifdef _ANSI_HEADER
   using namespace std;
   #include <iomanip>
-  #include <strstream>
+  #include <sstream>
   #include <utility>
 #else
   #include <iomanip.h>
@@ -35,7 +35,7 @@ class Serializable {
 
 	//  'ObjectStream' ist bereits die volle Implementierung eines einfachen
 	//  Objektstrommodells auf der Basis der Bibliotheksfunktionen f"ur
-	//  den Stringstream (strstream). Die Implemetierung ist eher im Sinne
+	//  den Stringstream (sstream). Die Implemetierung ist eher im Sinne
 	//  eines rohen Datenformats mit einigen Testm"oglichkeiten zu sehen.
 	
 class ObjectStream {

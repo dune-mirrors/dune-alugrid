@@ -13,10 +13,12 @@
   using namespace std;
   #include <algorithm>
   #include <vector>
+  #include <sstream>
   #include <set>
 #else
   #include <algo.h>
   #include <vector.h>
+  #include <strstream.h>
   #include <set.h>
 #endif
 
@@ -1067,7 +1069,7 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
   // Stringstream geschrieben (anstelle einer Datei) und dann
   // in den Datenstrom als 'integer' hineinkonvertiert.
     
-      strstream s ;
+      strstream_t s ;
       this->myhface ().backup (s) ;
       {for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;}
       osv [j].writeObject (ENDOFSTREAM) ;
@@ -1107,7 +1109,7 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
   // einen bestehenden Fl"achenbaum durch die Lastverschiebung neue
   // Daten aufgebracht werden - dies ist dann hier zu realisieren.
 
-  strstream s ;
+  strstream_t s ;
   int c ;
   try {
     for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put (char(c)) ;

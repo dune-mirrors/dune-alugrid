@@ -18,7 +18,7 @@
   using namespace std;
   #include <iostream>
   #include <fstream>
-  #include <strstream>
+  #include <sstream>
   #include <iterator>
   #include <functional>
   #include <algorithm>
