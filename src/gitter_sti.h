@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.6  2004/11/25 18:43:48  robertk
+ * changed vertex backup and restore and added faceNormal for hbndseg.
+ *
  * Revision 1.5  2004/11/16 19:26:59  robertk
  * virtual method up for hbndseg, and ghostLevel .
  *
@@ -206,9 +209,21 @@ class Gitter {
    
   // Nachfolgend sind die Iterationsschnittstellen der Knoten,
   // Kanten, Fl"achen, Elemente und Randelemente definiert.
+    class Dune_vertex 
+    {
+      public:
+        // backup and restore index of vertices 
+        virtual void backupIndex  (ostream & os ) const = 0;
+        virtual void restoreIndex (istream & is ) = 0;
+    };
+        
     
   public :
-    class vertex : public stiExtender_t :: VertexIF {
+    class vertex : public stiExtender_t :: VertexIF  
+#ifdef _DUNE_USES_BSGRID_
+      , public virtual Dune_vertex 
+#endif
+    {
       protected :
         vertex () {}
        ~vertex () {}
@@ -379,6 +394,7 @@ class Gitter {
         inline int leaf () const ;
         // for dune 
         virtual int ghostLevel () const = 0 ;
+        virtual void faceNormal (BSGridVecType & normal) const = 0 ;
       public :
   virtual void restoreFollowFace () = 0 ;
     } ;
@@ -597,7 +613,7 @@ class Gitter {
 // Ende
         } ;
      
-        class Dune_VertexGeo 
+        class Dune_VertexGeo : public virtual Dune_vertex 
         {
           protected:
             IndexManagerType & _indexmanager;
@@ -610,8 +626,8 @@ class Gitter {
           public:
             Dune_VertexGeo (IndexManagerType & im);
             virtual ~Dune_VertexGeo (); 
-            inline void backupIndex  (ostream & os, Refcount refcnt ) const;
-            inline void restoreIndex (istream & is, Refcount refcnt ) ;
+            inline void backupIndex  (ostream & os ) const;
+            inline void restoreIndex (istream & is ) ;
         };
         
         class VertexGeo : public vertex_STI, public MyAlloc 
@@ -719,6 +735,7 @@ class Gitter {
       virtual myrule_t getrule () const = 0 ;
       virtual bool refine (myrule_t,int) = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
+
           protected :
       myhedge1_t * e [polygonlength] ;
             signed char s [polygonlength] ;
@@ -1515,11 +1532,9 @@ inline int  Gitter :: Geometric :: VertexGeo :: vertexIndex () const {
 }
 
 inline void Gitter :: Geometric :: VertexGeo :: backup ( ostream & os ) const {
-  this->backupIndex(os,ref);
 }
 
 inline void Gitter :: Geometric :: VertexGeo :: restore ( istream & is ) {
-  this->restoreIndex(is,ref);
 }
 
 inline Gitter :: Geometric :: Dune_VertexGeo :: Dune_VertexGeo ( IndexManagerType & im ) : _indexmanager (im)  
@@ -1536,46 +1551,15 @@ inline Gitter :: Geometric :: Dune_VertexGeo :: ~Dune_VertexGeo ()
 #endif
 }
 
-inline void Gitter :: Geometric :: Dune_VertexGeo :: backupIndex ( ostream & os, Refcount refcnt ) const {
+inline void Gitter :: Geometric :: Dune_VertexGeo :: backupIndex ( ostream & os ) const {
 #ifdef _DUNE_USES_BSGRID_
-  assert(false);
-  /*
-  //cout << refcnt << " r|w " << _wrcnt << " \n";
-  if(_wrcnt == 0)
-  {
-    //cout << "write " << _idx << " \n";
-    os.write( ((const char *) &_idx ), sizeof(int) ) ;
-    _wrcnt = refcnt.operator int ();
-    os.write( ((const char *) &_wrcnt ), sizeof(int) ) ;
-    _wrcnt = 1;
-    return;
-  }
- 
-  _wrcnt ++ ;
-  
-  if(refcnt == _wrcnt)
-    _wrcnt = 0;
-  */
+  os.write( ((const char *) &_idx ), sizeof(int) ) ;
 #endif
 }
 
-inline void Gitter :: Geometric :: Dune_VertexGeo :: restoreIndex ( istream & is , Refcount refcnt ) {
+inline void Gitter :: Geometric :: Dune_VertexGeo :: restoreIndex ( istream & is ) {
 #ifdef _DUNE_USES_BSGRID_ 
-  assert(false);
-  /*
-  // funktioniert noch nicht
-  if(_wrcnt == 0)
-  {
-    //cout << "read " << _idx << " \n";
-    is.read ( ((char *) &_idx), sizeof(int) ); 
-    is.read ( ((char *) &_wrcnt), sizeof(int) ); 
-    return;
-  }
-  
-  if(refcnt == _wrcnt)
-    _wrcnt = 0;
-
-  */  
+  is.read ( ((char *) &_idx), sizeof(int) ); 
 #endif
 }
 
