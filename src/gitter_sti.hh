@@ -9,33 +9,12 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/19 13:15:32  robertk
+ * minor changes.
+ *
  * Revision 1.2  2004/10/15 11:01:36  robertk
  * if not used by Dune the _DUNE_USED_BSGRID_ is not defined and some things
  * are switched off.
- *
- * Revision 1.21  2002/06/18 12:21:20  wesenber
- * calculation of errors added
- *
- * Revision 1.20  2002/05/24 12:53:11  dedner
- * fertig.
- *
- * Revision 1.19  2002/05/23 16:39:50  dedner
- * Test nach Einbau der Periodischen 4-Raender
- *
- * Revision 1.18  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.17  2002/02/26 08:35:37  dedner
- * XDR output for Visual added
- *
- * Revision 1.16  2002/02/25 07:44:16  dedner
- * Atmosphaere als Konstanter Wert auf Flaeche gespeichert
- *
- * Revision 1.14  2001/12/12 09:49:05  wesenber
- * resetRefinementRequest() added
- *
- * Revision 1.13  2001/12/10 13:33:45  wesenber
- * parameter ``filePath'' for backup(), backupCMode(), and restore() added
  *
  ***/
 

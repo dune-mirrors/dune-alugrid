@@ -1,12 +1,15 @@
-	// (c) mario ohlberger 1998
+// (c) mario ohlberger 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
+// $Source$
+// $Revision$
+// $Name$
+// $State$
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/19 13:16:04  robertk
+ * minor changes.
+ *
  * Revision 1.1  2004/10/15 09:48:37  robertk
  * Inititial version. Some extenxions for Dune made. Schould be compatible
  * with all other applications done so far.
