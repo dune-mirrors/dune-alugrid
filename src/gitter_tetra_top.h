@@ -8,6 +8,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.6  2004/12/21 17:17:59  robertk
+ * Some cleanup.
+ * Some work is still to do.
+ *
  * Revision 1.5  2004/12/20 13:54:46  robertk
  * gcc compileable.
  *
@@ -533,6 +537,7 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist) {
       case myrule_t :: iso4 :
       {
 
+  // --thetwist
   bool a = false;      
   if( this->nb.rear().first && this->nb.front().first )
   {
@@ -635,9 +640,10 @@ template < class A > void Hface3Top < A > :: restore (istream & is) {
 
 template < class A > inline Hbnd3Top < A > :: Hbnd3Top (int l, myhface3_t * f, int i,
     ProjectVertex *ppv, innerbndseg_t * up, bnd_t bt, 
-    IndexManagerType & im , typename Gitter::helement_STI * gh) 
+    IndexManagerType & im , Gitter::helement_STI * gh) 
   : A (f, i, ppv ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , _indexmanager(im) {
   this->setGhost ( gh );
+  //if(gh) printTetra(cout,gh);
   this->setIndex( _indexmanager.getIndex() );
   return ;
 }
@@ -722,9 +728,14 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
   typedef typename Gitter :: Geometric :: tetra_GEO  tetra_GEO;
   typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
   tetra_GEO * gh = static_cast<tetra_GEO *> (this->getGhost()); 
+
   tetra_GEO *(ghchild)[4] = {0,0,0,0};
   if(gh)
   {
+    //for(tetra_GEO * chi = gh->down(); chi; chi = chi->next())
+    //{
+    //  printTetra(cout,chi);
+    //} 
     hface3_GEO * face = gh->myhface3(3); 
     face = face->down(); 
     for(int i=0; i<4; i++)
@@ -737,12 +748,12 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
       assert(ghch);
       assert(ghch->up() == gh);
       ghchild[i] = ghch;
-      cout << gh << " " << ghchild[i] << " \n";
+      //printTetra(cout,ghchild[i]);
+      //cout << gh << " " << ghchild[i] << " \n";
       face = face->next();
     }
   }
 
-  cout << "Mach jetzt die innerbndsegs \n";
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexmanager, ghchild[0] ) ;
   innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexmanager, ghchild[1] ) ;
   innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this->projection, this , _bt, _indexmanager, ghchild[2] ) ;

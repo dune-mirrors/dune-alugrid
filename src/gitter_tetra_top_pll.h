@@ -8,6 +8,10 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/12/21 17:17:59  robertk
+ * Some cleanup.
+ * Some work is still to do.
+ *
  * Revision 1.3  2004/12/21 10:42:02  robertk
  * gcc compile and ghost support.
  *
@@ -232,7 +236,7 @@ inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost ()
 {
   if(_ghost)
   {
-    cout << "splite Ghost " << _ghost->getIndex() << " \n";
+    //cout << "splite Ghost " << _ghost->getIndex() << " \n";
     (*_ghost).request( Gitter::Geometric::TetraRule::iso8 );
     (*_ghost).refine();
   }
@@ -247,14 +251,18 @@ inline Gitter :: helement_STI * Hbnd3PllInternal < A, X, MX > :: HbndPll :: getG
 
 template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  
-setGhost (Gitter :: helement_STI * gh ) 
+setGhost ( Gitter :: helement_STI * gh ) 
 {
-  if(gh) _ghost = static_cast<GhostElement_t *> (gh); 
+  if(gh)
+  {
+    _ghost = static_cast<GhostElement_t *> (gh); 
+    //cout << "Set Ghost " << _ghost->getIndex() << "\n";
+  }
   else _ghost = 0;
 }
 
 //***************************************************************************************
-// HbndPllMacro
+//  --HbndPllMacro
 //***************************************************************************************
 template < class A, class X, class MX > 
 Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: 
@@ -262,7 +270,7 @@ HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , const bnd_t bt, IndexM
     : _gm(gh) , Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,0), _mxt (new MX (*this)) {
   if(_gm) this->setGhost (_gm->getGhost());   
   //cout << "Create Macro PLL with " << _gm << "\n";
-  cout << "Create Macro PLL with " << this->_ghost << "\n";
+  //cout << "Create Macro PLL with " << this->_ghost << "\n";
   this->restoreFollowFace () ;
   return ;
 }
