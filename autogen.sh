@@ -17,12 +17,14 @@ usage () {
     echo "Usage: ./autogen.sh [options]"
     echo "  -i, --intel        use intel compiler"
     echo "  -g, --gnu          use gnu compiler (default)"
-    echo "  -m, --mpi          use mpicc"
+    echo "  -m, --mpi          use mpiCC"
     echo "  --opts=FILE        use compiler-options from FILE"
     echo "  -d, --debug        switch debug-opts on"
     echo "  -n, --nodebug      switch debug-opts off"
     echo "  -o, --optim        switch optimization on"
-    echo "  --with-dune=PATH   directory with dune/ inside"
+    echo "  --with-metis=PATH  directory with METIS inside"
+    echo "  --with-party=PATH  directory with PARTY Partitioning-Library inside"
+    echo "  --enable-shared    enable option for building also shared libraries (default == disabled)" 
     echo "  -h, --help         you already found this :)"
 }
 
