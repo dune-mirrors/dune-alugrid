@@ -1,57 +1,6 @@
-  // (c) bernhard schupp 1997 - 1998
-
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
-
-/* $Id$
- * $Log$
- * Revision 1.7  2005/03/22 15:56:59  robertk
- * Removed warning.
- *
- * Revision 1.6  2005/01/13 16:56:24  robertk
- * Constructor as method initialize now.
- * initialize is not called in the Base Class.
- *
- * Revision 1.5  2004/12/21 17:40:16  robertk
- * removed some warnings.
- *
- * Revision 1.4  2004/12/21 17:17:34  robertk
- * Imporoved Hbnd3IntStorage.
- *
- * removed all new ghost methods and moved them to DuneParallelGridMover
- * class.
- *
- * Revision 1.3  2004/12/20 21:41:40  robertk
- * Added coord ghost coord on hndbint.
- *
- * Revision 1.2  2004/10/25 16:38:10  robertk
- * All header end with .h now. Like the original.
- *
- * In the .cc this changes are done.
- *
- * Revision 1.1  2004/10/15 09:48:37  robertk
- * Inititial version. Some extenxions for Dune made. Schould be compatible
- * with all other applications done so far.
- *
- * Revision 1.11  2002/05/24 11:19:19  dedner
- * *** empty log message ***
- *
- * Revision 1.10  2002/05/24 09:05:31  dedner
- * Vorl"aufig syntaktisch korrekte, d.h. kompilierbare Version
- *
- * Revision 1.9  2002/05/23 16:37:41  dedner
- * Test nach Einbau der Periodischen 4-Raender
- *
- * Revision 1.8  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.7  2001/12/10 13:57:23  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/ 
-
+// (c) bernhard schupp 1997 - 1998
+// modifications for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -80,8 +29,6 @@
 
 #include "gitter_sti.h"
 #include "gitter_mgb.h"
-
-static volatile char RCSId_gitter_mgb_cc [] = "$Id$" ;
 
 pair < Gitter :: Geometric :: VertexGeo *, bool > MacroGridBuilder :: 
 InsertUniqueVertex (double x, double y, double z, int i) {
