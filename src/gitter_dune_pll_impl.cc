@@ -4,19 +4,60 @@
 #include "gitter_dune_pll_impl.h"
 #include "gitter_dune_pll_mgb.cc"
 
-#if 0
-bool GitterDunePll :: duneAdapt () 
+bool GitterDunePll :: duneNotifyNewGrid ()
+{
+  assert (debugOption (20) ? (cout << "**GitterPll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
+  const int start = clock (), me = mpAccess ().myrank (), np = mpAccess ().psize () ;
+  LoadBalancer :: DataBase db ;
+  {
+    AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphEdge (db) ;
+  }
+  {
+    AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphVertex (db) ;
+  }
+  bool neu = false ;
+  {
+    // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
+    // 
+    // load  - eigene ElementLast
+    // mean  - mittlere ElementLast
+    // nload - Lastverh"altnis
+
+    double load = db.accVertexLoad () ;
+    vector < double > v (mpAccess ().gcollect (load)) ;
+    double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
+
+    for (vector < double > :: iterator i = v.begin () ; i != v.end () ; i ++)
+      neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
+  }
+  return neu;
+}
+
+
+
+void GitterDunePll :: duneNotifyGridChanges ()
+{
+  Gitter :: notifyGridChanges () ;
+  duneExchangeDynamicState () ;
+  return ;
+}
+
+
+// done call notify and loadBalancer  
+bool GitterDunePll :: duneAdapt ()   
 {
   __STATIC_myrank = mpAccess ().myrank () ;
   __STATIC_turn ++ ;
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: duneAdapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
   int start = clock () ;
-  bool refined = refine () ;
+  bool refined = this->refine() ;
   int lap = clock () ;
-  coarse () ;
+  this->coarse ();
   int end = clock () ;
-  if (debugOption (1)) 
+  if (debugOption (1))
   {
     float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
     float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
@@ -25,20 +66,11 @@ bool GitterDunePll :: duneAdapt ()
          << _refineLoops << ") " << u2 << " " << u3 << endl ;
   }
   duneNotifyGridChanges () ;
+  balanceGrid_ = duneNotifyNewGrid();
+
   return refined;
 }
-#endif
 
-#if 0
-void GitterDunePll :: notifyGridChanges () {
-  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: notifyGridChanges () " << endl, 1) : 1 ) ;
-  Gitter :: notifyGridChanges () ;
-  writeLogFile = true;
-  duneExchangeDynamicState () ;
-  writeLogFile = false;
-  return ;
-}
-#endif
 
 
 bool GitterDunePll :: duneLoadBalance () 
@@ -245,74 +277,6 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs)
   }
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: exchangeDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   }
-}
-
-
-// wird von Dune verwendet 
-void GitterDunePll :: duneBackup (const char * fileName)
-{
-  // diese Methode wird von der Dune Schnittstelle aufgerufen und ruft
-  // intern lediglich backup (siehe oben) und backupCMode des Makrogitters
-  // auf, allerdings wird hier der path und filename in einer variablen
-  // uebergeben 
-
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneImpl :: duneBackup (const char * = \""
-                       << fileName << "\") " << endl, 1) : 1) ;
-
-  ofstream out (fileName) ;
-  if (!out) {
-    cerr << "**WARNUNG (IGNORIERT) GitterDuneImpl :: duneBackup (const char *, double) Fehler beim Anlegen von < "
-         << (fileName ? fileName : "null") << " >" << endl ;
-  }
-  else
-  {
-    FSLock lock (fileName) ;
-    this->backup (out) ;
-
-    {
-      char *fullName = new char[strlen(fileName)+20];
-      if(!fullName)
-      {
-        cerr << "**WARNUNG GitterDuneImpl :: duneBackup (, const char *, double) :";
-        cerr << "couldn't allocate fullName! " << endl;
-        abort();
-      }
-      sprintf(fullName,"%s.macro",fileName);
-      ofstream macro (fullName) ;
-
-      if(!macro)
-      {
-        cerr << "**WARNUNG (IGNORIERT) GitterDuneImpl :: duneBackup (const char *, const char *) Fehler beim Anlegen von < "
-         << (fullName ? fullName : "null") << " >" << endl ;
-      }
-      else
-      {
-        container ().backupCMode (macro) ;
-      }
-      delete [] fullName;
-    }
-  }
-  return ;
-}
-
-// wird von Dune verwendet 
-void GitterDunePll :: duneRestore (const char * fileName)
-{
-  // diese Methode wird von der Dune Schnittstelle aufgerufen 
-  // diese Methode ruft intern restore auf, hier wird lediglich 
-  // der path und filename in einer variablen uebergeben
-
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneImpl :: duneRestore (const char * = \""
-                 << fileName << "\") " << endl, 1) : 1) ;
-
-  ifstream in (fileName) ;
-  if (!in) {
-    cerr << "**WARNUNG (IGNORIERT) GitterDuneImpl :: duneRestore (const char *, double & ) Fehler beim \"Offnen von < "
-         << (fileName ? fileName : "null") << " > " << endl ;
-  } else {
-    this->restore (in) ;
-  }
-  return ;
 }
 
 bool GitterDunePll :: refine () {
