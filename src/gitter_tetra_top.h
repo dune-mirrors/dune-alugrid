@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/27 15:06:47  robertk
+ * index storage seperated to restoreIndex and backupIndex methods.
+ *
  * Revision 1.1  2004/10/25 16:39:53  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -191,6 +194,10 @@ template < class A > class TetraTop : public A {
     void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
     void restore (istream &) ;
+
+    // backup and restore index 
+    void backupIndex (ostream &) const ;
+    void restoreIndex (istream &) ;
 };
 
 template < class A > class Periodic3Top : public A {
@@ -886,6 +893,7 @@ template < class A > inline TetraTop < A > :: ~TetraTop ()
   return ;
 }
 
+
 template < class A > inline int TetraTop < A > :: level () const {
   return _lvl ;
 }
@@ -1357,6 +1365,16 @@ template < class A > void TetraTop < A > :: backupCMode (ostream & os) const {
 }
 
 // buckupTetra 
+template < class A > void TetraTop < A > :: backupIndex (ostream & os) const 
+{
+#ifdef _DUNE_USES_BSGRID_
+  os.write( ((const char *) & this->_index ), sizeof(int) ) ;
+  {for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backupIndex (os) ; }
+#endif
+  return;
+}
+
+// buckupTetra 
 template < class A > void TetraTop < A > :: backup (ostream & os) const 
 {
   os.put ((char) getrule ()) ;
@@ -1364,13 +1382,19 @@ template < class A > void TetraTop < A > :: backup (ostream & os) const
   {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
   {for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
   
-  // store globalIndex 
-  this->backupIndex ( os );
-  /*
-  for(int i=0; i<4; i++)
-    myvertex(i)->backup(os);
-*/
   return ;
+}
+
+// overloaded restoreIndex Method 
+template < class A > inline void TetraTop < A > :: restoreIndex (istream & is) 
+{
+#ifdef _DUNE_USES_BSGRID_
+  // free index from constructor
+  _indexmanager.freeIndex( this->getIndex() ); 
+  is.read ( ((char *) &(this->_index) ), sizeof(int) );
+  {for (innertetra_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; }
+#endif
+  return;
 }
 
 // restoreTetra
@@ -1381,8 +1405,6 @@ template < class A > void TetraTop < A > :: restore (istream & is) {
 	// auf den korrekten Vollzug der Verfeinerung. Danach werden
 	// die inneren Gitterteile restore'd.
  
-  //_indexmanager.checkAndSetMax(this->_globalIndex);
-
   myrule_t r ((char) is.get ()) ;
   assert(getrule() == myrule_t :: nosplit) ;
   if (r == myrule_t :: nosplit) {
@@ -1427,14 +1449,6 @@ template < class A > void TetraTop < A > :: restore (istream & is) {
     {for (innertetra_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
   }
   
-  // restore index from stream 
-  this->restoreIndex( is );
-
-  /*
-  for(int i=0; i<4; i++)
-    myvertex(i)->restore(is);
-    */
-
   return ;
 }
 
