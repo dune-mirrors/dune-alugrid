@@ -25,9 +25,7 @@
   #include <map.h>
 #endif
 
-#ifndef SERIALIZE_H_INCLUDED
 #include "serialize.h"
-#endif
 
 class MpAccessGlobal {
   public :

@@ -1,15 +1,9 @@
 // (c) bernhard schupp 1997 - 1998
-
 #ifndef GITTER_HEXA_TOP_PLL_H_INCLUDED
 #define GITTER_HEXA_TOP_PLL_H_INCLUDED
 
-#ifndef PARALLEL_H_INCLUDED
 #include "parallel.h"
-#endif
-
-#ifndef GITTER_HEXA_TOP_H_INCLUDED
 #include "gitter_hexa_top.h"
-#endif
 
 template < class A, class MX > class Hbnd4PllExternal : public Hbnd4Top < A > {
   public :

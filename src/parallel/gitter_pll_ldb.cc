@@ -1,5 +1,4 @@
 // (c) bernhard schupp 1997 - 1998
-
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif

@@ -24,12 +24,8 @@
   #include <algo.h>
 #endif
 
-#ifndef MAPP_CUBE_3D_H_INCLUDED
 #include "mapp_cube_3d.h"
-#endif
-#ifndef MAPP_TETRA_3D_H_INCLUDED
 #include "mapp_tetra_3d.h"
-#endif
   
 #include "gitter_pll_impl.h"
 #include "gitter_hexa_top_pll.h"

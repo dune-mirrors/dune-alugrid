@@ -1,29 +1,4 @@
-	// (c) bernhard schupp 1997 - 1998
-
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-
-/* $Id$
- * $Log$
- * Revision 1.1  2005/03/23 14:58:32  robertk
- * all additional files for parallel version of ALU3dGrid.
- *
- * Revision 1.2  2004/12/20 14:19:27  robertk
- * gcc compileable.
- *
- * Revision 1.1  2004/10/25 16:41:19  robertk
- * Parallel grid implementations.
- *
- * Revision 1.4  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.3  2001/12/10 13:57:23  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/ 
-
+// (c) bernhard schupp 1997 - 1998
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -44,9 +19,6 @@
 #endif
 
 #include "gitter_pll_sti.h"
-
-static volatile char RCSId_gitter_pll_idn_cc [] = "$Id$" ;
-
 
 	// vorsicht mit optimierenden compilern bei dem untenstehnden template !
 

@@ -19,10 +19,7 @@
   #include <iterator.h>
 #endif
 
-#ifndef KEY_H_INCLUDED
 #include "key.h"
-#endif
-  
 #include "mpAccess.h"
 
 class LoadBalancer {

@@ -20,13 +20,8 @@
   #include <algo.h>
 #endif
 
-#ifndef SERIALIZE_H_INCLUDED
 #include "serialize.h"
-#endif
-
-#ifndef GITTER_MGB_H_INCLUDED
 #include "gitter_mgb.h"
-#endif
 
 #include "gitter_pll_sti.h"
 

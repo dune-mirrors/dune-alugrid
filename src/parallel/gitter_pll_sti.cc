@@ -1,43 +1,6 @@
-  // (c) bernhard schupp 1997 - 1998
-
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
-  // $Date$
-  
-/* $Id$
- * $Log$
- * Revision 1.1  2005/03/23 14:58:33  robertk
- * all additional files for parallel version of ALU3dGrid.
- *
- * Revision 1.6  2005/03/18 20:05:17  robertk
- * Added backup and restore for XDRStream, does not work right now.
- *
- * Revision 1.5  2004/11/25 18:49:34  robertk
- * removed duneAdaptm which is now in gitter_dune_pll_impl.*
- *
- * Revision 1.4  2004/11/02 18:55:30  robertk
- * Moved all changed with dune... to seperated gitter_dune_* files.
- *
- * Revision 1.3  2004/10/28 18:58:21  robertk
- * new method duneLoadBalance( GatherScatterType & ) which represents the dune
- * data.
- *
- * Revision 1.2  2004/10/28 18:00:22  robertk
- * duneAdapt and duneLoadBalance added.
- *
- * Revision 1.1  2004/10/25 16:41:20  robertk
- * Parallel grid implementations.
- *
- * Revision 1.6  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.5  2001/12/10 13:34:59  wesenber
- * parameter ``filePath'' for backup(), backupCMode(), and restore() added
- *
- ***/
-
+// (c) bernhard schupp 1997 - 1998
+// modifications for dune interface 
+// (c) Robet Kloefkorn 2004 - 2005 
 #ifndef _GITTER_PLL_STI_CC_
 #define _GITTER_PLL_STI_CC_
 
@@ -70,10 +33,7 @@
 #endif
 
 #include "gitter_pll_sti.h"
-
-#ifndef WALK_H_INCLUDED
 #include "walk.h"
-#endif
 
 int __STATIC_myrank = -1 ;
 int __STATIC_turn   = -1 ;

@@ -4,15 +4,9 @@
 #ifndef GITTER_TETRA_TOP_PLL_H_INCLUDED
 #define GITTER_TETRA_TOP_PLL_H_INCLUDED
 
-#ifndef PARALLEL_H_INCLUDED
 #include "parallel.h"
-#endif
-
 #include "gitter_pll_impl.h"
-
-#ifndef GITTER_TETRATOP_H_INCLUDED
 #include "gitter_tetra_top.h"
-#endif
 
 class MacroGhost;
 
