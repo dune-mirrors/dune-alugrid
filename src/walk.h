@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/11/29 18:00:21  robertk
+ * 1 instead of true in is_def_true.
+ *
  * Revision 1.2  2004/11/16 19:26:09  robertk
  * Added walk option "for all elements" .
  *
@@ -57,8 +60,8 @@ static volatile char RCSId_walk_h [] = "$Id$" ;
 template < class A > class is_def_true {
   public :
     typedef A val_t ;
-    int operator () (const A * x) const { return true ; }
-    int operator () (const A & x) const { return true ; }
+    int operator () (const A * x) const { return 1 ; }
+    int operator () (const A & x) const { return 1 ; }
 } ;
 
 template < class A > class is_leaf {
