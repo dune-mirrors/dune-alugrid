@@ -38,7 +38,8 @@ LDFLAGS="$LDFLAGS -L$METIS_LIB_PATH"
 CPPFLAGS="$CPPFLAGS $METISDEF -I$METIS_INCLUDE_PATH"
 
 # check for header
-AC_CHECK_HEADER([metis.h], 
+  AC_LANG_PUSH([C])
+  AC_CHECK_HEADER([metis.h], 
    [METIS_CPPFLAGS="$METISDEF -I$METIS_INCLUDE_PATH"
 	HAVE_METIS="1"],
   AC_MSG_WARN([metis.h not found in $METIS_INCLUDE_PATH]))
@@ -64,6 +65,9 @@ if test x$HAVE_METIS = x1 ; then
 fi
 
 LDFLAGS=$REM_LDFLAGS
+
+# pop default language 
+AC_LANG_POP 
 
 ## end of metis check (--without wasn't set)
 fi
