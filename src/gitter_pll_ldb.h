@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/12/21 17:30:23  robertk
+ * removed warnings.
+ *
  * Revision 1.2  2004/12/21 17:22:57  robertk
  * wieght is initalized as int. Check wether int or not .
  *
@@ -59,7 +62,7 @@ class LoadBalancer {
       public :
         inline GraphEdge () ;
         inline GraphEdge (int,int,int) ;
-        inline ~GraphEdge () ;
+        inline virtual ~GraphEdge () ;
         inline int leftNode () const ;
         inline int rightNode () const ;
         inline int weight () const ;
@@ -76,7 +79,7 @@ class LoadBalancer {
       public :
         inline GraphVertex () ;
         inline GraphVertex (int,int,const double (&)[3]) ;
-        inline ~GraphVertex () ;
+        inline virtual ~GraphVertex () ;
         inline int index () const ;
         inline int weight () const ;
 	inline const double (&center () const)[3] ;
