@@ -8,6 +8,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/11/02 18:55:30  robertk
+ * Moved all changed with dune... to seperated gitter_dune_* files.
+ *
  * Revision 1.3  2004/10/28 18:55:47  robertk
  * Added dunePackAll method on TetraPllXBaseMacro that packs Dune data if
  * repartitioning has to be done.
@@ -284,6 +287,7 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
+    virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
     virtual bool erasable () const ;
   private :
     int _ldbVertexIndex ;

@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/11/02 18:55:29  robertk
+ * Moved all changed with dune... to seperated gitter_dune_* files.
+ *
  * Revision 1.2  2004/10/28 18:56:31  robertk
  * TetraPllXBaseMacro :: dunePackAll added for packing dune data.
  *
@@ -503,11 +506,10 @@ bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
       mytetra ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (ENDOFSTREAM) ;
-      inlineData (osv [j]) ;
       
+      inlineData (osv [j]) ;
       // pack Dune data 
       gs.inlineData( osv[j] , mytetra() );
-
     }
     _erasable = true ;
     return true ;
@@ -543,6 +545,26 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
     mytetra ().restore (s) ;
     assert (!s.eof ()) ;
     xtractData (os) ;
+  }
+  return ;
+}
+
+void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
+  & gs , bool i) {
+  assert (i) ;
+  strstream s ;
+  int c ;
+  try {
+    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
+  } catch (ObjectStream :: EOFException) {
+    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+  }
+  if (i) {
+    mytetra ().restore (s) ;
+    assert (!s.eof ()) ;
+    xtractData (os) ;
+    gs.xtractData( os , mytetra() );
   }
   return ;
 }
@@ -1488,8 +1510,9 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
     if (in) {
       _macrogitter = new MacroGitterBasisPll (in) ;
     } else {
-      cerr << "  GitterBasisPll :: GitterBasisPll () Datei: " << extendedName 
-      	   << " kann nicht gelesen werden. In " << __FILE__ << " Zeile " << __LINE__ << endl ;
+    assert (debugOption (5) ? 
+        ( cerr << "  GitterBasisPll :: GitterBasisPll () Datei: " << extendedName 
+      	   << " kann nicht gelesen werden. In " << __FILE__ << " Zeile " << __LINE__ << endl, 1) : 1);
       _macrogitter = new MacroGitterBasisPll () ;
     }
     delete [] extendedName ;

@@ -8,6 +8,9 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/11/02 18:55:30  robertk
+ * Moved all changed with dune... to seperated gitter_dune_* files.
+ *
  * Revision 1.3  2004/10/28 18:58:21  robertk
  * new method duneLoadBalance( GatherScatterType & ) which represents the dune
  * data.
@@ -728,6 +731,7 @@ bool GitterPll :: adapt () {
   return refined;
 }
 
+/*
 bool GitterPll :: duneAdapt () {
   __STATIC_myrank = mpAccess ().myrank () ;
   __STATIC_turn ++ ;
@@ -791,6 +795,7 @@ bool GitterPll :: duneLoadBalance (GatherScatterType & gs) {
   }
   return true;
 }
+*/
 
 void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
   const int nl = mpa.nlinks (), me = mpa.myrank () ;

@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/11/02 18:55:30  robertk
+ * Moved all changed with dune... to seperated gitter_dune_* files.
+ *
  * Revision 1.3  2004/10/28 18:59:38  robertk
  * new default method dunePackAll on Element..X class.
  * on GitterPll new methods duneLoadBalance (GatherScatterType &)
@@ -220,8 +223,9 @@ class MacroGridMoverIF {
     virtual void attach2 (int) = 0 ;
     virtual void unattach2 (int) = 0 ;
     virtual bool packAll (vector < ObjectStream > &) = 0 ;
-    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) {};
+    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) { return false; }
     virtual void unpackSelf (ObjectStream &,bool) = 0 ;
+    virtual void duneUnpackSelf (ObjectStream &,GatherScatterType &,bool) {};
 } ;
 
 class VertexPllXIF : public LinkedObject, public MacroGridMoverIF {
@@ -346,12 +350,11 @@ class GitterPll : public virtual Gitter {
     virtual bool refine () ;
     virtual void coarse () ;
     virtual bool adapt () ;
-    virtual bool duneAdapt () ; // done call notify and loadBalancer 
+    //virtual bool duneAdapt () ; // done call notify and loadBalancer 
     virtual void printSizeTT () ;
 
-  // 
-    virtual bool duneLoadBalance () ; // call loadBalancer 
-    virtual bool duneLoadBalance (GatherScatterType & ) ; // call loadBalancer and pack DuneData
+    //virtual bool duneLoadBalance () ; // call loadBalancer 
+    //virtual bool duneLoadBalance (GatherScatterType & ) ; // call loadBalancer and pack DuneData
     
   protected :
     virtual Makrogitter & container () = 0 ;
@@ -378,8 +381,8 @@ class GitterPll : public virtual Gitter {
     virtual void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
     
     // for Dune 
-    virtual void duneRepartitionMacroGrid (LoadBalancer :: DataBase &,
-        GatherScatterType & gs) ;
+    //virtual void duneRepartitionMacroGrid (LoadBalancer :: DataBase &,
+    //    GatherScatterType & gs) ;
     
     virtual void loadBalancerGridChangesNotify () ;
     virtual void loadBalancerMacroGridChangesNotify () ;
@@ -406,7 +409,7 @@ class GitterPll : public virtual Gitter {
   friend class LeafIteratorTT < vertex_STI > ;
   friend class LeafIteratorTT < hedge_STI > ;
   friend class LeafIteratorTT < hface_STI > ;
-  private :
+  protected :
   
   // Die drei Variablen der Klasse Gitter sollen erstmal als
   // Murksl"osung dazu dienen, den Lastverteiler "uber ein
@@ -418,7 +421,7 @@ class GitterPll : public virtual Gitter {
   // Die Variable _refineLoops dient nur der Kommunikation
   // zwischen adapt () und refine (), damit die Zahl der
   // Iterationen am Ende ausgegeben werden kann.
-  
+ 
     int _refineLoops ;
 } ;
 
