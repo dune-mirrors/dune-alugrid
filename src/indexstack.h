@@ -110,23 +110,7 @@ private:
   }
   
   // clear all stored indices 
-  void clearStack () 
-  {
-    if(stack_) 
-    {
-      delete stack_;
-      stack_ = new StackType();
-      assert(stack_);
-    }
-
-    while( !fullStackList_.empty() )
-    {
-      StackType * st = fullStackList_.top();
-      if(st) delete st; 
-      fullStackList_.pop();
-    }
-    return;
-  }
+  void clearStack ();
 };  // end class IndexStack 
 
 //****************************************************************
@@ -233,6 +217,24 @@ inline void IndexStack<T,length>::restoreIndexSet ( istream & is )
   return ;
 }
 
+template <class T, int length>
+inline void IndexStack<T,length>::clearStack () 
+{
+  if(stack_) 
+  {
+    delete stack_;
+    stack_ = new StackType();
+    assert(stack_);
+  }
+
+  while( !fullStackList_.empty() )
+  {
+    StackType * st = fullStackList_.top();
+    if(st) delete st; 
+    fullStackList_.pop();
+  }
+  return;
+}
 
 
 #else 
