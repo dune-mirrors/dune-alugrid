@@ -1,4 +1,3 @@
-//   Version f"ur DUNE
 // (c) bernhard schupp 1997 - 1998
 #ifndef GITTER_STI_CC_INCLUDED
 #define GITTER_STI_CC_INCLUDED
@@ -27,8 +26,6 @@
 #include "walk.h"
 
 #include "xdrclass.h"
-
-static volatile char RCSId_gitter_sti_cc [] = "$Id$" ;
 
 extern "C" { double drand48 (void) ; }
 
