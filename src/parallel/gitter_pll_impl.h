@@ -465,11 +465,17 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     bool _lockCRS ;
 
     int _ghostLevel;
-// Schwerpunkt des anliegenden Elements beschaffen:
   public:
     const double (& barycenter () const)[3] { return _center ; }
     inline int ghostLevel () const { return _ghostLevel; }
-// Ende
+
+    // to be revised (works for the moment )
+    virtual Gitter::helement_STI * getGhost () 
+    { 
+      //assert(false);
+      //cout << "getGhost \n";
+      return myhbnd().getGhost(); 
+    }
 } ;
 
 template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClosure < A > {
