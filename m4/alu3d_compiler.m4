@@ -13,6 +13,9 @@ AC_ARG_ENABLE(compilercheck,
 SUPPORTED_COMPILER="gcc (>= 3.4.1) or icc (>= 7.0)"
 
 AC_REQUIRE([AC_PROG_CXX])
+AC_REQUIRE([AC_PROG_CPP])
+AC_REQUIRE([AC_PROG_CXXCPP])
+    
 cat >conftest.cc <<_ACEOF
 #ifdef __xlC__
   #if __xlC__ >= 0x0600

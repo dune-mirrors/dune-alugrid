@@ -8,8 +8,6 @@
 AC_DEFUN([ALU3D_CHECK_ALL],[
   AC_LANG_PUSH([C++])
 dnl check for programs
-  AC_REQUIRE([AC_PROG_CXX])
-  AC_REQUIRE([AC_PROG_CPP])
   AC_REQUIRE([ALU3D_CHECK_COMPILER])
   AC_REQUIRE([AC_PROG_INSTALL])
   AC_REQUIRE([AC_PROG_LN_S])
@@ -22,8 +20,6 @@ dnl checks for header files.
   AC_CHECK_HEADERS([malloc.h string.h])
 
 dnl checks for typedefs, structures, and compiler characteristics.
-#  doesn't work, but we don't need it currently
-#  AC_REQUIRE([AC_HEADER_STDBOOL])
   AC_REQUIRE([AC_C_CONST])
   AC_REQUIRE([AC_C_INLINE])
   AC_REQUIRE([AC_TYPE_SIZE_T])
@@ -31,19 +27,16 @@ dnl checks for typedefs, structures, and compiler characteristics.
 
 dnl check for library functions
   AC_REQUIRE([AC_FUNC_MALLOC])
-#  doesn't work, but we don't need it currently
-#  AC_REQUIRE([AC_FUNC_REALLOC])
-
   AC_LANG_PUSH([C++])
   AC_CHECK_LIB([m], [pow])
   AC_CHECK_FUNCS([sqrt strchr])
   AC_LANG_POP([C++])
 
 dnl check all components
+  AC_REQUIRE([ALU3D_CHECK_HEADERS])
   AC_REQUIRE([ALU3D_PATH_METIS])
   AC_REQUIRE([ALU3D_PATH_PARTY])
   AC_REQUIRE([ALU3D_MPI])
-  AC_REQUIRE([ALU3D_XDR])
 
   # convenience-variables if every found package should be used
   AC_SUBST(ALL_PKG_LIBS, "$LIBS $ALU3D_PKG_LIBS")
