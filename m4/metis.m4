@@ -31,15 +31,11 @@ if test x$with_metis != x && test x$with_metis != xno ; then
 METIS_LIB_PATH="$METISROOT"
 METIS_INCLUDE_PATH="$METISROOT/Lib"
 
-# Alberta needs special defined symbols
-
-METISDEF="-DDIM=$with_problem_dim -DDIM_OF_WORLD=$with_world_dim"
-
 # set variables so that tests can use them
 REM_CPPFLAGS=$CPPFLAGS
 
 LDFLAGS="$LDFLAGS -L$METIS_LIB_PATH"
-CPPFLAGS="$CPPFLAGS $METISDEF -DEL_INDEX=0 -I$METIS_INCLUDE_PATH"
+CPPFLAGS="$CPPFLAGS $METISDEF -I$METIS_INCLUDE_PATH"
 
 # check for header
 AC_CHECK_HEADER([metis.h], 
@@ -55,7 +51,7 @@ REM_LDFLAGS=$LDFLAGS
 # TODO: check if static flag exists 
 # link_static_flag defines the flag for the linker to link only static
 # didnt work, with $link_static_flag, so quick hack here
-LDFLAGS="$LDFLAGS -static"
+LDFLAGS="$LDFLAGS"
 
 # if header is found...
 if test x$HAVE_METIS = x1 ; then
