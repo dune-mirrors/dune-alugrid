@@ -1,12 +1,15 @@
-	// (c) bernhard schupp 1997 - 1998
+  // (c) bernhard schupp 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-	
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
+  
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/12/20 21:41:41  robertk
+ * Added coord ghost coord on hndbint.
+ *
  * Revision 1.1  2004/10/25 16:39:52  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -73,22 +76,46 @@ template < class RandomAccessIterator > inline int cyclicReorder (RandomAccessIt
 }
 
 class MacroGridBuilder : protected Gitter :: Geometric {
+  class Hbnd3IntStorage
+  {
+    double _p[3]; 
+
+  public:  
+    hface3_GEO * first;
+    int second;
+    
+    Hbnd3IntStorage( hface3_GEO * f, int tw, const double (&p) [3] ) 
+      : first(f) , second(tw) 
+    {
+      for(int i=0; i<3; i++) _p[i] = p[i];
+    }
+    
+    const double (& getPoint () const )[3]
+    { 
+      return _p;
+    }
+  };
+
   protected :
     enum ElementRawID {TETRA_RAW=4, HEXA_RAW=8, PERIODIC3_RAW=33, PERIODIC4_RAW=44} ; 
   protected :
-    typedef long 		vertexKey_t ;
-    typedef pair < int, int > 	edgeKey_t ;
-    typedef Key3 < int > 	faceKey_t ;
-    typedef Key4 < int > 	elementKey_t ;
+    typedef long    vertexKey_t ;
+    typedef pair < int, int >   edgeKey_t ;
+    typedef Key3 < int >  faceKey_t ;
+    typedef Key4 < int >  elementKey_t ;
 
-    typedef map < vertexKey_t , VertexGeo *, less < vertexKey_t > > 	vertexMap_t ;
-    typedef map < edgeKey_t, hedge1_GEO *, less < edgeKey_t > >      	edgeMap_t ;
-    typedef map < faceKey_t, void *, less < faceKey_t > >            	faceMap_t ;
-    typedef map < elementKey_t, void *, less < elementKey_t > >      	elementMap_t ;
+    typedef map < vertexKey_t , VertexGeo *, less < vertexKey_t > >     vertexMap_t ;
+    typedef map < edgeKey_t,    hedge1_GEO *, less < edgeKey_t > >      edgeMap_t ;
+    typedef map < faceKey_t,    void *, less < faceKey_t > >            faceMap_t ;
+    typedef map < faceKey_t,    Hbnd3IntStorage *, less < faceKey_t > > hbndintMap_t ;
+    typedef map < elementKey_t, void *, less < elementKey_t > >         elementMap_t ;
   
     vertexMap_t  _vertexMap ;
     edgeMap_t    _edgeMap ;
-    faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd3Int, _hbnd4Map, _hbnd4Int ;
+    
+    //faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd3Int, _hbnd4Map, _hbnd4Int ;
+    faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd4Map, _hbnd4Int ;
+    hbndintMap_t _hbnd3Int; // new type here, so we dont have to cast to void *
 // Anfang - Neu am 23.5.02 (BS)
     elementMap_t _hexaMap, _tetraMap, _periodic3Map, _periodic4Map ;
 // Ende - Neu am 23.5.02 (BS)
@@ -107,8 +134,14 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     virtual pair < periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&)[8]) ;
 // Ende - Neu am 23.5.02 (BS)
     virtual pair < hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8]) ;
-    virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter :: hbndseg :: bnd_t) ;
+    
+    virtual bool InsertUniqueHbnd3   (int (&)[3], Gitter :: hbndseg :: bnd_t) ;
+    virtual bool InsertUniqueHbnd3_p (int (&)[3], Gitter :: hbndseg :: bnd_t,const double (&p) [3]) ;
+    
     virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter :: hbndseg :: bnd_t) ;
+
+    hbndseg3_GEO * insertInternalHbnd3 ( hface3_GEO * f,int i, 
+        Gitter :: hbndseg :: bnd_t b, const double (&p)[3] );
 //    virtual void removeHexa (int (&)[8]) ;
 //    virtual void removePeriodic3 (int (&)[6]) ;
 // Anfang - Neu am 23.5.02 (BS)
@@ -129,14 +162,14 @@ class MacroGridBuilder : protected Gitter :: Geometric {
 } ;
 
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
 inline Gitter :: Geometric :: BuilderIF & MacroGridBuilder :: myBuilder () {
   return _mgb ;

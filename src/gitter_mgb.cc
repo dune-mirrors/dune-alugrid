@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/12/20 21:41:40  robertk
+ * Added coord ghost coord on hndbint.
+ *
  * Revision 1.2  2004/10/25 16:38:10  robertk
  * All header end with .h now. Like the original.
  *
@@ -64,7 +67,8 @@
 
 static volatile char RCSId_gitter_mgb_cc [] = "$Id$" ;
 
-pair < Gitter :: Geometric :: VertexGeo *, bool > MacroGridBuilder :: InsertUniqueVertex (double x, double y, double z, int i) {
+pair < Gitter :: Geometric :: VertexGeo *, bool > MacroGridBuilder :: 
+InsertUniqueVertex (double x, double y, double z, int i) {
   vertexMap_t :: const_iterator hit = _vertexMap.find (i) ;
   if (hit == _vertexMap.end ()) {
     VertexGeo * v = myBuilder ().insert_vertex (x,y,z,i) ;
@@ -180,13 +184,16 @@ pair < Gitter :: Geometric :: hexa_GEO *, bool > MacroGridBuilder :: InsertUniqu
   }
 }
 
-bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3], Gitter :: hbndseg_STI ::bnd_t bt) {
+bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::bnd_t bt) {
   int twst = cyclicReorder (v,v+3) ;
   faceKey_t key (v [0], v [1], v [2]) ;
   if (bt == Gitter :: hbndseg_STI :: closure) {
     if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      _hbnd3Int [key] = (void *) new pair < hface3_GEO *, int > (face,twst) ;
+      //_hbnd3Int [key] = (void *) new pair < hface3_GEO *, int > (face,twst) ;
+      double p[3] = {-666.0,-666.0,-666.0}; 
+      cout << "Insert old hbndface \n";
+      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,p) ;
       return true ;
     }
   } else {
@@ -198,6 +205,36 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3], Gitter :: hbndseg_STI :
     }
   }
   return false ;
+}
+
+// new method that gets coord of ghost point 
+bool MacroGridBuilder :: InsertUniqueHbnd3_p (int (&v)[3], 
+      Gitter :: hbndseg_STI ::bnd_t bt, const double (&p)[3]) {
+  
+  int twst = cyclicReorder (v,v+3) ;
+  faceKey_t key (v [0], v [1], v [2]) ;
+  if (bt == Gitter :: hbndseg_STI :: closure) {
+    if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
+      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
+      //_hbnd3Int [key] = (void *) new pair < hface3_GEO *, int > (face,twst) ;
+      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,p) ;
+      return true ;
+    }
+  } else {
+    if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
+      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
+      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt) ;
+      _hbnd3Map [key] = hb3 ;
+      return true ;
+    }
+  }
+  return false ;
+}
+
+// new method that gets coord of ghost point 
+Gitter :: Geometric :: hbndseg3_GEO * MacroGridBuilder :: 
+insertInternalHbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const double (&p)[3] ) {
+  return myBuilder().insert_hbnd3_p (f,i,b,p);
 }
 
 bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI ::bnd_t bt) {
@@ -296,8 +333,13 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   if (hit != _tetraMap.end ()) {
     tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
     for (int i = 0 ; i < 4 ; i ++) {
-    _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
-    	tr->myhface3 (i)->myvertex (2)->ident ())] = new pair < hface3_GEO *, int > (tr->myhface3 (i), tr->twist (i)) ;
+
+      //_hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
+    	//  tr->myhface3 (i)->myvertex (2)->ident ())] = new pair < hface3_GEO *, int > (tr->myhface3 (i), tr->twist (i)) ;
+       
+      _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
+    	  tr->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr->myvertex(i)->Point()) ;
+      
     }
     delete tr ;
     _tetraMap.erase (hit) ;
@@ -318,8 +360,11 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   if (hit != _periodic3Map.end ()) {
     periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
     for (int i = 0 ; i < 2 ; i ++) {
+      double p[3] = {-666.0,-666.0,-666.0};
+      //_hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), p3->myhface3 (i)->myvertex (1)->ident (), 
+    	//p3->myhface3 (i)->myvertex (2)->ident ())] = new pair < hface3_GEO *, int > (p3->myhface3 (i), p3->twist (i)) ;
       _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), p3->myhface3 (i)->myvertex (1)->ident (), 
-    	p3->myhface3 (i)->myvertex (2)->ident ())] = new pair < hface3_GEO *, int > (p3->myhface3 (i), p3->twist (i)) ;
+    	p3->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (p3->myhface3 (i), p3->twist (i),p) ;
     }
     delete p3 ;
     _periodic3Map.erase (hit) ;
@@ -698,6 +743,7 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
 }
 
 MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) {
+
   {
     for (list < VertexGeo * > :: iterator i = myBuilder ()._vertexList.begin () ;
       i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
@@ -732,7 +778,9 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) {
     myBuilder ()._hbndseg3List.erase (i++)) {
     faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
-      _hbnd3Int [key] = (void *) new pair < hface3_GEO *, int > ((*i)->myhface3 (0), (*i)->twist (0)) ;
+      double p[3] = {-666.0,-666.0,-666.0};
+      //_hbnd3Int [key] = (void *) new pair < hface3_GEO *, int > ((*i)->myhface3 (0), (*i)->twist (0)) ;
+      _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), p) ;
       delete (*i) ;
     } else {
       _hbnd3Map [key] = (*i) ;
@@ -764,6 +812,7 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) {
 }
 
 MacroGridBuilder :: ~MacroGridBuilder () {
+
   {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
     myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
   }
@@ -802,10 +851,15 @@ MacroGridBuilder :: ~MacroGridBuilder () {
     }
     delete (pair < hface4_GEO *, int > *)(*i).second ;
   }}
-  {for (faceMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
-    const pair < hface3_GEO *, int > & p = * (pair < hface3_GEO *, int > *)(*i).second ;
+
+  // here the internal boundary elements are created 
+  {for (hbndintMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
+    //const pair < hface3_GEO *, int > & p = * (pair < hface3_GEO *, int > *)(*i).second ;
+    const Hbnd3IntStorage & p = * (Hbnd3IntStorage *) (*i).second ;
     if (p.first->ref == 1) {
-      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (p.first,p.second,Gitter :: hbndseg_STI :: closure) ;    
+      // default is return insert_hbnd3 
+      hbndseg3_GEO * hb3 = insertInternalHbnd3 ( p.first,p.second,Gitter :: hbndseg_STI :: closure , p.getPoint() );
+      //myBuilder ().insert_hbnd3 (p.first,p.second,Gitter :: hbndseg_STI :: closure) ;    
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (pair < hface3_GEO *, int > *)(*i).second ;
@@ -815,7 +869,7 @@ MacroGridBuilder :: ~MacroGridBuilder () {
       delete (hface4_GEO *)(*i).second ;
       _face4Map.erase (i++) ;
     } else {
-      assert (((hface4_GEO *)(*i).second)->ref == 2) ;
+      //assert (((hface4_GEO *)(*i).second)->ref == 2) ;
       myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
     }
   }
@@ -824,7 +878,7 @@ MacroGridBuilder :: ~MacroGridBuilder () {
       delete (hface3_GEO *)(*i).second ;
       _face3Map.erase (i++) ;
     } else {
-      assert (((hface3_GEO *)(*i).second)->ref == 2) ;
+      //assert (((hface3_GEO *)(*i).second)->ref == 2) ;
       myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
     }
   }}
@@ -833,7 +887,7 @@ MacroGridBuilder :: ~MacroGridBuilder () {
       delete (*i).second ;
       _edgeMap.erase (i++) ;
     } else {
-      assert ((*i).second->ref >= 1) ;
+      //assert ((*i).second->ref >= 1) ;
       myBuilder ()._hedge1List.push_back ((*i ++).second) ;
     }
   }
@@ -842,7 +896,7 @@ MacroGridBuilder :: ~MacroGridBuilder () {
       delete (*i).second ;
       _vertexMap.erase (i++) ;
     } else {
-      assert ((*i).second->ref >= 2) ;
+      //assert ((*i).second->ref >= 2) ;
       myBuilder ()._vertexList.push_back ((*i ++).second) ;
     }
   }
