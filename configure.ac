@@ -1,11 +1,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.50)
-AC_INIT(alu3dgrid, 0.0, robertk@mathematik.uni-freiburg.de)
-AM_INIT_AUTOMAKE(alu3dgrid, 0.0, robertk@mathematik.uni-freiburg.de)
+AC_INIT(ALU3d-Grid, 0.1, robertk@mathematik.uni-freiburg.de)
+AM_INIT_AUTOMAKE(ALU3dGrid, 0.1, robertk@mathematik.uni-freiburg.de)
+
+AC_PREFIX_DEFAULT([`pwd`])
 
 # check if we're in the right directory
-#AC_CONFIG_SRCDIR([scr/Makefile.am])
+AC_CONFIG_SRCDIR([src/serial/gitter_sti.h])
 # which header-file is created
 AM_CONFIG_HEADER(config.h)
 
@@ -14,10 +16,16 @@ ALU3D_CHECK_ALL
 
 # implicitly set the ALU3dGrid-include everywhere
 CPPFLAGS="$CPPFLAGS $ALU3D_CPPFLAGS"
+# implicitly set the Dune-flags everywhere
+LDFLAGS="$ALU3D_LDFLAGS"
+LIBS="$ALU3D_LIBS"
+
 
 # generate Makefiles
 AC_CONFIG_FILES([Makefile
+                 src/Makefile
                  ])
+
 AC_OUTPUT
 
 # show search results
