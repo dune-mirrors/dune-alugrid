@@ -3,6 +3,97 @@
 
 #include "gitter_dune_impl.h"
 
+void GitterDuneBasis :: backupIndices (ostream & out)
+{
+  // backup indices 
+  bool indices = true; out.put(indices);  // indices == true
+
+  // store max indices 
+  for(int i=0; i< numOfIndexManager ; i++)
+    indexManager(i).backupIndexSet(out);
+
+  { // backup index of elements 
+    AccessIterator <helement_STI> :: Handle ew (container ()) ;
+    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backupIndex (out) ;
+  }
+  {
+    // backup index of vertices 
+    LeafIterator < vertex_STI > w ( *this );
+    for( w->first(); ! w->done() ; w->next () ) w->item().backupIndex(out);
+  }
+
+  return ;
+}
+
+void GitterDuneBasis ::restoreIndices (istream & in) 
+{
+  bool indices = in.get();
+  if(indices)
+  {
+    for(int i=0; i< numOfIndexManager ; i++)
+      this->indexManager(i).restoreIndexSet( in );
+
+    // restore index of elements 
+    {
+      AccessIterator < helement_STI >:: Handle ew(container());
+      for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in);
+    }
+    // restore index of vertices
+    {
+      LeafIterator < vertex_STI > w ( *this );
+      for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in);
+    }
+
+    { // reconstruct holes 
+      {
+        enum { elements = 0 };
+        // for elements 
+        int idxsize = this->indexManager(elements).getMaxIndex();
+        vector < bool > checkidx ( idxsize );
+        for(int i=0; i<idxsize; i++) checkidx[i] = true;
+
+        AccessIterator < helement_STI >:: Handle ew(container());
+        for ( ew.first(); !ew.done(); ew.next())
+        {
+          goDownHelement( ew.item() , checkidx );
+        }
+
+        for(int i=0; i<idxsize; i++)
+        {
+          if(checkidx[i] == true)
+            this->indexManager(elements).freeIndex(i);
+        }
+      }
+      {
+        enum { vertices = 3 };
+        // for vertices 
+        LeafIterator < vertex_STI > w ( *this );
+        int idxsize = this->indexManager(vertices).getMaxIndex();
+
+        vector < bool > checkidx ( idxsize );
+        for(int i=0; i<idxsize; i++) checkidx[i] = true;
+        for( w->first(); ! w->done() ; w->next () )
+        {
+          assert( w->item().vertexIndex() < checkidx.size() );
+          checkidx[ w->item().vertexIndex() ] = false;
+        }
+
+        for(int i=0; i<idxsize; i++)
+        {
+          if(checkidx[i] == true)
+            this->indexManager(vertices).freeIndex(i);
+        }
+      }
+    }
+  }
+  else 
+  {
+    cerr<< "WARNING: indices not read! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
+  }
+    
+  return ;
+}
+
 // wird von Dune verwendet 
 void GitterDuneBasis :: duneBackup (const char * fileName)
 {
@@ -23,6 +114,7 @@ void GitterDuneBasis :: duneBackup (const char * fileName)
   {
     FSLock lock (fileName) ;
     this->backup (out) ;
+    backupIndices (out) ;
 
     {
       char *fullName = new char[strlen(fileName)+20];
@@ -66,6 +158,7 @@ void GitterDuneBasis :: duneRestore (const char * fileName)
          << (fileName ? fileName : "null") << " > " << endl ;
   } else {
     this->restore (in) ;
+    restoreIndices (in);
   }
   return ;
 }

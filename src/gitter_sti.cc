@@ -9,6 +9,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.10  2004/12/10 12:19:45  robertk
+ * backupIndices removed from gitter_sti and moved to gitter_dune_impl.cc
+ *
  * Revision 1.9  2004/11/29 18:00:45  robertk
  * implemented the hole regeneration after restoreing the grid.
  *
@@ -342,28 +345,6 @@ void Gitter :: backup (ostream & out) {
   {AccessIterator <helement_STI> :: Handle ew (container ()) ;
     for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backup (out) ; }
     
-#ifdef _DUNE_USES_BSGRID_   
-  // backup indices 
-  bool indices = true; out.put(indices);  // indices == true
-  
-  // store max indices 
-  for(int i=0; i< numOfIndexManager ; i++) 
-    indexManager(i).backupIndexSet(out);
-    
-  { // backup index of elements 
-    AccessIterator <helement_STI> :: Handle ew (container ()) ;
-    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backupIndex (out) ; 
-  }
-  { 
-    // backup index of vertices 
-    LeafIterator < vertex_STI > w ( *this );  
-    for( w->first(); ! w->done() ; w->next () ) w->item().backupIndex(out);
-  }
-#else 
-  // backup indices 
-  bool indices = false; out.put(indices);  // indices == false
-#endif
-
   return ;
 }
 
@@ -387,69 +368,6 @@ void Gitter ::restore (istream & in) {
     for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); }
   {AccessIterator < helement_STI >:: Handle ew(container());
     for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); }
-
-#ifdef _DUNE_USES_BSGRID_   
-  bool indices = in.get();
-  if(indices)
-  {
-    for(int i=0; i< numOfIndexManager ; i++) 
-      this->indexManager(i).restoreIndexSet( in );
-    
-    // restore index of elements 
-    { 
-      AccessIterator < helement_STI >:: Handle ew(container());
-      for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in); 
-    }
-    // restore index of vertices
-    {
-      LeafIterator < vertex_STI > w ( *this );  
-      for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in);
-    }
-
-    { // reconstruct holes 
-      { 
-        enum { elements = 0 };
-        // for elements 
-        int idxsize = this->indexManager(elements).getMaxIndex();
-        vector < bool > checkidx ( idxsize ); 
-        for(int i=0; i<idxsize; i++) checkidx[i] = true;
-        
-        AccessIterator < helement_STI >:: Handle ew(container());
-        for ( ew.first(); !ew.done(); ew.next()) 
-        { 
-          goDownHelement( ew.item() , checkidx );
-        }
-
-        for(int i=0; i<idxsize; i++)
-        {
-          if(checkidx[i] == true)
-            this->indexManager(elements).freeIndex(i);
-        }
-      }
-      { 
-        enum { vertices = 3 };  
-        // for vertices 
-        LeafIterator < vertex_STI > w ( *this );
-        int idxsize = this->indexManager(vertices).getMaxIndex();
-
-        vector < bool > checkidx ( idxsize ); 
-        for(int i=0; i<idxsize; i++) checkidx[i] = true;
-        for( w->first(); ! w->done() ; w->next () )
-        {
-          assert( w->item().vertexIndex() < checkidx.size() );
-          checkidx[ w->item().vertexIndex() ] = false;
-        }
-
-        for(int i=0; i<idxsize; i++)
-        {
-          if(checkidx[i] == true)
-            this->indexManager(vertices).freeIndex(i);
-        }
-      }
-    }
-  }
-#endif
-    
   {AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
     for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; }
   notifyGridChanges () ;
