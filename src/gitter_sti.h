@@ -1,5 +1,8 @@
 /* $Id$
  * $Log$
+ * Revision 1.13  2005/03/18 19:52:40  robertk
+ * addeds backup and restore for XDRStream, dsoent work yet.
+ *
  * Revision 1.12  2005/01/19 18:26:24  robertk
  * removed warnings.
  *
@@ -289,8 +292,12 @@ class Gitter {
         inline  int leaf () const ;
       public :
         virtual bool coarse () = 0 ;
-  virtual void backup (ostream &) const = 0 ;
+        virtual void backup (ostream &) const = 0 ;
         virtual void restore (istream &) = 0 ;
+
+        // new xdr methods 
+        //virtual void backup (XDRstream_out &) const {};
+        //virtual void restore (XDRstream_in &) {};
         // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
         virtual void projectInnerVertex(const ProjectVertex &pv) = 0; 
     } ;
@@ -312,8 +319,12 @@ class Gitter {
         inline int leaf () const ;
       public :
         virtual bool coarse () = 0 ;
-  virtual void backup (ostream &) const = 0 ;
+        virtual void backup (ostream &) const = 0 ;
         virtual void restore (istream &) = 0 ;
+        
+        //virtual void backup (XDRstream_out &) const {};
+        //virtual void restore (XDRstream_in &) {};
+        
         // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
         virtual void projectVertex(const ProjectVertex &pv) = 0; 
     } ;
@@ -395,7 +406,10 @@ class Gitter {
         virtual void backupCMode (ostream &) const = 0 ;
         virtual void backup (ostream &) const = 0 ;
         virtual void restore (istream &) = 0 ;
-
+        
+        // xdr methods 
+        //virtual void backup (XDRstream_out &) const {};
+        //virtual void restore (XDRstream_in &) {};
       public: 
       virtual grid_t type() = 0;
     } ;
@@ -1192,9 +1206,15 @@ class Gitter {
     virtual void backupCMode (ostream &) ;
     virtual void backupCMode (const char*,const char *) ;
     virtual void backup (ostream &) ;
+    
+    
     virtual void backup (const char*,const char *) ;
     virtual void restore (istream &) ;
     virtual void restore (const char*,const char *) ;
+
+    // new xdr backup and restore method
+    virtual void backup (XDRstream_out &) ;
+    virtual void restore (XDRstream_in &) ;
 
   protected:
     // return index manager of macro grid 
