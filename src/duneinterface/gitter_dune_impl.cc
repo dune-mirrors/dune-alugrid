@@ -7,7 +7,8 @@
 void GitterDuneBasis :: backupIndices (ostream & out)
 {
   // backup indices 
-  bool indices = true; out.put(indices);  // indices == true
+  int indices = 1; 
+  out.write( ((const char *) & indices ), sizeof(int) );
 
   // store max indices 
   for(int i=0; i< numOfIndexManager ; i++)
@@ -41,8 +42,11 @@ goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
 
 void GitterDuneBasis ::restoreIndices (istream & in) 
 {
-  bool indices = in.get();
-  if(indices)
+  int indices = 0;
+  in >> indices ; 
+  cerr << "Read indices falg = " << indices << "\n";
+  
+  if(indices == 1) // restore dune indices (see backUpIndices method)
   {
     for(int i=0; i< numOfIndexManager ; i++)
       this->indexManager(i).restoreIndexSet( in );
@@ -99,12 +103,25 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         }
       }
     }
+    return ;
   }
-  else 
+
+  if(indices == 3) // convert indices to leafindices 
   {
-    cerr<< "WARNING: indices not read! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
+    //assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices : set new leaf index \n" << endl, 1) : 1) ;
+    cerr<< "INFO: create new leaf indices! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
+    int idx = 0;
+    LeafIterator < helement_STI > ew(*this);
+    for ( ew->first(); !ew->done(); ew->next()) 
+    {
+      ew->item().setIndex( idx );
+      idx++;
+    }
+    this->indexManager(0).setMaxIndex ( idx-1 );
+    return ;
   }
-    
+  
+  cerr<< "WARNING: indices not read! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
   return ;
 }
 
