@@ -1,49 +1,12 @@
-  // (c) bernhard schupp 1997 - 1998
-
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
-  // $Date$
-  
-/* $Id$
- * $Log$
- * Revision 1.5  2005/01/13 16:49:03  robertk
- * MacroGhost instead of MacroTetra...
- * macro point is given to BndSegPllClousre.
- *
- * Revision 1.4  2004/12/21 17:17:59  robertk
- * Some cleanup.
- * Some work is still to do.
- *
- * Revision 1.3  2004/12/21 10:42:02  robertk
- * gcc compile and ghost support.
- *
- * Revision 1.2  2004/11/16 19:37:45  robertk
- * Added ghostLevel and up support.
- *
- * Revision 1.1  2004/10/25 16:39:53  robertk
- * Some off the headers are old and changed from .hh to .h.
- * All changes are made in the headers aswell.
- *
- * Some new file are the parallel grid files mostly have a _pll_ in then name.
- * There some Constructors of Tetra and Hbdn3Top had to be adapted.
- *
- * Revision 1.5  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.4  2001/12/10 13:56:37  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/
-
+// (c) bernhard schupp 1997 - 1998
+// modification for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifndef GITTER_TETRA_TOP_PLL_H_INCLUDED
 #define GITTER_TETRA_TOP_PLL_H_INCLUDED
 
 #include "parallel.h"
+#include "gitter_pll_impl.h"
 #include "gitter_tetra_top.h"
-
-static volatile char RCSId_gitter_tetra_top_pll_h [] = "$Id$" ;
 
 class MacroGhost;
 
@@ -79,10 +42,11 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         typedef X mypllx_t ;
       protected :
         
-        typedef GitterDunePll::Objects::tetra_IMPL GhostElement_t;
+        typedef typename GitterBasisImpl::Objects::tetra_IMPL GhostElement_t;
         typedef typename A :: myhface3_t myhface3_t ;
-  typedef typename A :: balrule_t balrule_t ;
-  typedef typename A :: bnd_t     bnd_t ;
+        typedef typename A :: balrule_t balrule_t ;
+        typedef typename A :: bnd_t     bnd_t ;
+        
         inline HbndPll (myhface3_t *, int, ProjectVertex * );
         ~HbndPll () {}
         virtual bool bndNotifyBalance (balrule_t,int) ;
