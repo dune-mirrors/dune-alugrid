@@ -33,3 +33,18 @@ License
 The ALU3d-Grid-library and headers are licensed under the GNU Lesser GPL
 version 2.1. The full license text can be found in the file COPYING
 and via http://www.gnu.org/licenses/lgpl.html
+
+Debug Options
+--------------
+
+There are serveral debug options that can be set an shell environment
+variable and that forces the code to produce debug output. To use this
+feature, the code must be compiled without the CPP variable NDEBUG set. 
+The following variables can be set to a level of verbosity (higher is
+better).
+
+VERBOSE      general verbose output  
+VERBOSE_MGB  output produced by the macro grid builder 
+VERBOSE_LDB  output produced while partitioning. 
+VERBOSE_PLL  output produced by parallel grid methods
+
