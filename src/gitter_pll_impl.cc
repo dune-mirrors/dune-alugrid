@@ -1,66 +1,6 @@
-  // (c) bernhard schupp 1997 - 1998
-
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
-  // $Date$
-
-
-/* $Id$
- * $Log$
- * Revision 1.9  2005/03/18 20:08:01  robertk
- * Added some comments.
- *
- * Revision 1.8  2005/01/13 16:59:26  robertk
- * Moved MacroGhostTetra to ghostelements.h
- *
- * Revision 1.7  2004/12/21 17:24:41  robertk
- * new methods for ghost elements on internal boundarys.
- * all new methods to insert internal boundary with ghost element are mostly
- * on the DuneParallelGridMover. Some Methods are on GitterPll (insert_hbnd3).
- * MacroGhostTetra has to be moved to other file.
- *
- * Revision 1.6  2004/12/07 17:43:19  robertk
- * logFile switched off.
- *
- * Revision 1.5  2004/11/25 18:48:33  robertk
- * minor changes.
- *
- * Revision 1.4  2004/11/16 19:43:07  robertk
- * changed writeDynamicState of Tetra and Hexa, they now write their
- * oppositeVertices of the interal boundary face and furterhmore changed the
- * type of the created Interalface in the insert method.
- *
- * Revision 1.3  2004/11/02 18:55:29  robertk
- * Moved all changed with dune... to seperated gitter_dune_* files.
- *
- * Revision 1.2  2004/10/28 18:56:31  robertk
- * TetraPllXBaseMacro :: dunePackAll added for packing dune data.
- *
- * Revision 1.1  2004/10/25 16:41:19  robertk
- * Parallel grid implementations.
- *
- * Revision 1.11  2002/05/24 12:53:11  dedner
- * fertig.
- *
- * Revision 1.10  2002/05/24 11:19:19  dedner
- * *** empty log message ***
- *
- * Revision 1.9  2002/05/24 09:05:31  dedner
- * Vorl"aufig syntaktisch korrekte, d.h. kompilierbare Version
- *
- * Revision 1.8  2002/05/23 16:39:50  dedner
- * Test nach Einbau der Periodischen 4-Raender
- *
- * Revision 1.7  2002/04/19 15:36:07  wesenber
- * modifications required for IBM VisualAge C++ Version 5.0
- *
- * Revision 1.6  2001/12/10 13:57:23  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/ 
-
+// (c) bernhard schupp 1997 - 1998
+// modifications for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -89,8 +29,6 @@
 #include "gitter_pll_impl.h"
 #include "gitter_hexa_top_pll.h"
 #include "gitter_tetra_top_pll.h"
-
-static volatile char RCSId_gitter_pll_impl_cc [] = "$Id$" ;
 
 const linkagePattern_t VertexPllBaseX :: nullPattern ;
 
@@ -150,9 +88,9 @@ bool VertexPllBaseX :: packAll (vector < ObjectStream > & osv) {
     osv [j].writeObject (myvertex ().Point ()[0]) ;
     osv [j].writeObject (myvertex ().Point ()[1]) ;
     osv [j].writeObject (myvertex ().Point ()[2]) ;
-// Anfang - Neu am 23.5.02 (BS)
+    
     inlineData (osv [j]) ;
-// Ende - Neu am 23.5.02 (BS)
+    
     action = true ;
   }
   return action ;
@@ -160,9 +98,7 @@ bool VertexPllBaseX :: packAll (vector < ObjectStream > & osv) {
 
 void VertexPllBaseX :: unpackSelf (ObjectStream & os, bool i) {
   if (i) {
-// Anfang - Neu am 23.5.02 (BS)
     xtractData (os) ;
-// Ende - Neu am 23.5.02 (BS)
   }
   return ;
 }
@@ -286,9 +222,8 @@ bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
       myhedge1 ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
       osv [j].writeObject (ENDOFSTREAM) ;
-// Anfang - Neu am 23.5.02 (BS)
+      
       inlineData (osv [j]) ;
-// Ende - Neu am 23.5.02 (BS)
     }
     action = true ;
   }
@@ -307,9 +242,8 @@ void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
   if (i) {
     myhedge1 ().restore (s) ;
     assert (!s.eof ()) ;
-// Anfang - Neu am 23.5.02 (BS)
+    
     xtractData (os) ;
-// Ende - Neu am 23.5.02 (BS)
   }
   return ;
 }
@@ -427,7 +361,6 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & 
   return ;
 }
 
-
 void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
   //static const double x = 0.25 ; // 1./4.
   //LinearMapping (mytetra ().myvertex (0)->Point (), mytetra ().myvertex (1)->Point (),
@@ -474,7 +407,7 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 
 TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : 
   TetraPllXBase (t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
-  static const double x = 0.25 ; // 1./4.
+  static const double x = 0.25 ; 
   LinearMapping (mytetra ().myvertex (0)->Point (), mytetra ().myvertex (1)->Point (),
          mytetra ().myvertex (2)->Point (), mytetra ().myvertex (3)->Point ())
       .map2world (x,x,x,x,_center) ;
@@ -1186,8 +1119,9 @@ const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPll
   return _pllx ;
 }
 
-GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: Hedge1EmptyPllMacro (myvertex_t * a, myvertex_t * b) :
-  GitterBasisPll :: ObjectsPll :: hedge1_IMPL (0, a, b), _pllx (new mypllx_t (*this)) {
+GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: Hedge1EmptyPllMacro (myvertex_t * a, myvertex_t * b, IndexManagerType & im) :
+  GitterBasisPll :: ObjectsPll :: hedge1_IMPL (0, a, b, im)
+    , _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1221,8 +1155,8 @@ const FacePllXIF_t & GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: accessPll
   return _pllx ;
 }
 
-GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2)
-  : GitterBasisPll :: ObjectsPll :: hface3_IMPL (0,e0,s0,e1,s1,e2,s2), _pllx (new mypllx_t (*this)) {
+GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, IndexManagerType & im)
+  : GitterBasisPll :: ObjectsPll :: hface3_IMPL (0,e0,s0,e1,s1,e2,s2,im), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1256,8 +1190,8 @@ const FacePllXIF_t & GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: accessPll
   return _pllx ;
 }
 
-GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: Hface4EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3)
-  : GitterBasisPll :: ObjectsPll :: hface4_IMPL (0,e0,s0,e1,s1,e2,s2,e3,s3), _pllx (new mypllx_t (*this)) {
+GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: Hface4EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3, IndexManagerType & im)
+  : GitterBasisPll :: ObjectsPll :: hface4_IMPL (0,e0,s0,e1,s1,e2,s2,e3,s3,im), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1284,7 +1218,6 @@ void GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: detachPllXFromMacro 
 }
 
 ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  //cout << "accessPllX of Tetra called! \n";
   return _pllx ;
 }
 
@@ -1440,8 +1373,8 @@ void GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: detachPllXFromMacro () thro
 
 GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: HexaEmptyPllMacro 
   (myhface4_t * f0, int t0, myhface4_t * f1, int t1, myhface4_t * f2, int t2, 
-   myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5)
-  : GitterBasisPll :: ObjectsPll :: hexa_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5), _pllx (new mypllx_t (*this)) {
+   myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5, IndexManagerType & im)
+  : GitterBasisPll :: ObjectsPll :: hexa_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5,im), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1531,19 +1464,19 @@ insert_ghostvx (const double (&p)[3]) {
 }
 
 Gitter :: Geometric :: hedge1_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hedge1 (VertexGeo *a, VertexGeo *b) {
-  return new ObjectsPll :: Hedge1EmptyPllMacro (a,b) ;
+  return new ObjectsPll :: Hedge1EmptyPllMacro (a,b,indexManager(2) ) ;
 }
 
 Gitter :: Geometric :: hface4_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4]) {
-  return new ObjectsPll :: Hface4EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], e [3], s [3]) ;
+  return new ObjectsPll :: Hface4EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], e [3], s [3], indexManager(1) ) ;
 }
 
 Gitter :: Geometric :: hface3_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3]) {
-  return new ObjectsPll :: Hface3EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2]) ;
+  return new ObjectsPll :: Hface3EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], indexManager(1) ) ;
 }
 
 Gitter :: Geometric :: hexa_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) {
-  return new ObjectsPll :: HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5]) ;
+  return new ObjectsPll :: HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5], indexManager(0) ) ;
 }
 
 Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {
