@@ -1,5 +1,9 @@
 /* $Id$
  * $Log$
+ * Revision 1.5  2004/10/19 16:29:21  robertk
+ * Dune_VertexGeo added which is holding the extra implementations for Dune
+ * for example index backup and restore.
+ *
  * Revision 1.4  2004/10/19 13:17:58  robertk
  * Vertex index added. neighOuterNormal added. myinteresction added.
  *
@@ -560,12 +564,25 @@ class Gitter {
             }
 // Ende
         } ;
-      
-        class VertexGeo : public vertex_STI, public MyAlloc {
+     
+        class Dune_VertexGeo 
+        {
 #ifdef _DUNE_USES_BSGRID_ 
           protected:
             IndexManagerType & _indexmanager;
+            int _idx; 
+            mutable int _wrcnt;
 #endif          
+          public:
+            Dune_VertexGeo (IndexManagerType & im);
+            virtual ~Dune_VertexGeo (); 
+            inline void backupIndex  (ostream & os, Refcount refcnt ) const;
+            inline void restoreIndex (istream & is, Refcount refcnt ) ;
+        };
+        
+        class VertexGeo : public vertex_STI, public MyAlloc 
+          , public Dune_VertexGeo 
+        {
           public :
             Refcount ref ;
             // VertexGeo is provided for the vertices on lower levels 
@@ -576,17 +593,21 @@ class Gitter {
             inline int level () const ;
             // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
             virtual inline void project(const ProjectVertex &pv) ; 
+            
+            inline void backup  (ostream & os ) const;
+            inline void restore (istream & is ) ;
 
   // Extramethode zum Rausschreiben der Elementdaten in einfachem
   // Format f"ur die Visualisierung mit GRAPE:
-    
+     
       inline int & vertexIndex () ;
       inline int   vertexIndex () const ;
     private :
       double _c [3] ;
       int _lvl ;
+#ifndef _DUNE_USES_BSGRID_
       int _idx ;    // Vertexindex zum Datenrausschreiben
-                    // wird auch fuer Dune verwendet
+#endif              // wird auch fuer Dune verwendet
         } ;
   
         typedef class hedge1 : public hedge_STI, public MyAlloc {
@@ -1408,30 +1429,26 @@ inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) 
 //    #     ######  #    #     #    ######  #    #  #####   ######   ####
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, IndexManagerType & im) 
-  : _lvl (l)
+  : 
 #ifdef _DUNE_USES_BSGRID_
-  , _indexmanager (im )  
+  Dune_VertexGeo (im) ,    
 #endif
-{
-  _idx = _indexmanager.getIndex() ;
+  _lvl (l) {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   return ;
 }
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, VertexGeo & vx) 
-  : _lvl (l)
+  :
 #ifdef _DUNE_USES_BSGRID_
- ,  _indexmanager ( vx._indexmanager )  
+  Dune_VertexGeo ( vx._indexmanager ) , 
 #endif
-{
-  _idx = _indexmanager.getIndex() ;
+  _lvl (l)  {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   return ;
 }
 
-inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () 
-{
-  _indexmanager.freeIndex( _idx );
+inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () {
   assert (ref ? (cerr << "**WARNUNG Vertex-Refcount war " << ref << endl, 1) : 1) ;
   return ;
 }
@@ -1461,6 +1478,59 @@ inline int  Gitter :: Geometric :: VertexGeo :: vertexIndex () const {
   return _idx ;
 }
 
+inline void Gitter :: Geometric :: VertexGeo :: backup ( ostream & os ) const {
+  this->backupIndex(os,ref);
+}
+
+inline void Gitter :: Geometric :: VertexGeo :: restore ( istream & is ) {
+  this->restoreIndex(is,ref);
+}
+
+inline Gitter :: Geometric :: Dune_VertexGeo :: Dune_VertexGeo ( IndexManagerType & im ) : _indexmanager (im) , _wrcnt (0) 
+{
+  _idx = _indexmanager.getIndex(); 
+}
+
+inline Gitter :: Geometric :: Dune_VertexGeo :: ~Dune_VertexGeo () 
+{ 
+  _indexmanager.freeIndex( _idx );
+}
+
+inline void Gitter :: Geometric :: Dune_VertexGeo :: backupIndex ( ostream & os, Refcount refcnt ) const {
+#ifdef _DUNE_USES_BSGRID_
+  //cout << refcnt << " r|w " << _wrcnt << " \n";
+  if(_wrcnt == 0)
+  {
+    //cout << "write " << _idx << " \n";
+    os.write( ((const char *) &_idx ), sizeof(int) ) ;
+    _wrcnt = refcnt.operator int ();
+    os.write( ((const char *) &_wrcnt ), sizeof(int) ) ;
+    _wrcnt = 1;
+    return;
+  }
+ 
+  _wrcnt ++ ;
+  
+  if(refcnt == _wrcnt)
+    _wrcnt = 0;
+#endif
+}
+
+inline void Gitter :: Geometric :: Dune_VertexGeo :: restoreIndex ( istream & is , Refcount refcnt ) {
+#ifdef _DUNE_USES_BSGRID_ 
+  // funktioniert noch nicht
+  if(_wrcnt == 0)
+  {
+    //cout << "read " << _idx << " \n";
+    is.read ( ((char *) &_idx), sizeof(int) ); 
+    is.read ( ((char *) &_wrcnt), sizeof(int) ); 
+    return;
+  }
+  
+  if(refcnt == _wrcnt)
+    _wrcnt = 0;
+#endif
+}
 
 // #     #                                    #    ######
 // #     #  ######  #####    ####   ######   ##    #     #  #    #  #       ######
