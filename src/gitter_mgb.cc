@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.7  2005/03/22 15:56:59  robertk
+ * Removed warning.
+ *
  * Revision 1.6  2005/01/13 16:56:24  robertk
  * Constructor as method initialize now.
  * initialize is not called in the Base Class.
@@ -114,7 +117,6 @@ pair < Gitter :: Geometric :: hface3_GEO *, bool > MacroGridBuilder :: InsertUni
   faceKey_t key (v[0],v[1],v[2]) ;
   faceMap_t :: const_iterator hit = _face3Map.find (key) ;
   if (hit == _face3Map.end ()) {
-    const int check = _edgeMap.size () ;
     hedge1_GEO * edge [3] ;
     int dire [3] = { 0, 0, 1 } ;
     edge [0] = InsertUniqueHedge1 (v[0],v[1]).first ;
@@ -134,7 +136,7 @@ pair < Gitter :: Geometric :: hface4_GEO *, bool > MacroGridBuilder :: InsertUni
   faceMap_t :: const_iterator hit = _face4Map.find (key) ;
   if (hit == _face4Map.end ()) {
     hedge1_GEO * edge [4] ;
-    int dire [4], check = _edgeMap.size () ;
+    int dire [4]; 
     edge [0] = InsertUniqueHedge1 (v[0],v[1]).first ;
     edge [1] = InsertUniqueHedge1 (v[1],v[2]).first ;
     edge [2] = InsertUniqueHedge1 (v[2],v[3]).first ;

@@ -1,4 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
+// modifications for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifndef GITTER_STI_CC_INCLUDED
 #define GITTER_STI_CC_INCLUDED
 
@@ -462,7 +464,7 @@ void Gitter :: refineRandom (double p) {
     {
        leaf_element__macro_element__iterator w (container ()) ;
        for (w.first () ; ! w.done () ; w.next ()) 
-         drand48 () < p ? (w.item (). tagForGlobalRefinement (), 0) : 0 ;
+         if( drand48 () < p )  w.item ().tagForGlobalRefinement (); 
     }
     adapt () ;
     if (debugOption (2))
