@@ -8,6 +8,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.6  2004/11/25 18:49:53  robertk
+ * removed duneAdapt.
+ *
  * Revision 1.5  2004/11/16 19:38:43  robertk
  * Added interface methods writeDynamicState and readDynamicState with
  * GatherScatterType.
@@ -361,7 +364,6 @@ class GitterPll : public virtual Gitter {
     virtual bool refine () ;
     virtual void coarse () ;
     virtual bool adapt () ;
-    //virtual bool duneAdapt () ; // done call notify and loadBalancer 
     virtual void printSizeTT () ;
 
     //virtual bool duneLoadBalance () ; // call loadBalancer 
