@@ -1,3 +1,4 @@
+// Robert Kloefkorn (c) 2004 - 2005 
 #ifndef GITTER_DUNE_IMPL_CC_INCLUDED
 #define GITTER_DUNE_IMPL_CC_INCLUDED
 
@@ -30,7 +31,7 @@ inline void GitterDuneBasis ::
 goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
 {
   typedef Gitter :: helement_STI ElType;
-  assert( el.getIndex() < idxcheck.size() );
+  assert( (static_cast<size_t> (el.getIndex())) < idxcheck.size() );
   idxcheck[ el.getIndex() ] = false;
   for( ElType * ch = el.down() ; ch ; ch = ch->next())
     goDownHelement( *ch , idxcheck );
@@ -87,7 +88,7 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         for(int i=0; i<idxsize; i++) checkidx[i] = true;
         for( w->first(); ! w->done() ; w->next () )
         {
-          assert( w->item().getIndex() < checkidx.size() );
+          assert( (static_cast<size_t> (w->item().getIndex())) < checkidx.size() );
           checkidx[ w->item().getIndex() ] = false;
         }
 
