@@ -8,6 +8,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/11/16 19:34:28  robertk
+ * added ghostLevel for HbndPll and up support.
+ *
  * Revision 1.1  2004/10/25 16:39:52  robertk
  * Some off the headers are old and changed from .hh to .h.
  * All changes are made in the headers aswell.
@@ -73,6 +76,9 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
 // Schwerpunkt des anliegenden Elements beschaffen:
       public:
         inline const double (& barycenter () const)[3] ;
+
+        // for dune 
+        inline int ghostLevel () const ;
 // Ende
 // Ende - Neu am 23.5.02 (BS)
     } ;
@@ -92,6 +98,9 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
         const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
         void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+
+        // for dune 
+        inline int ghostLevel () const ;
       private :
         mypllx_t * _mxt ;
     } ;
@@ -108,7 +117,7 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
 	//    #    #    #  ######     #    #    #  ######
 	//
 
-template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: Hbnd4PllExternal (myhface4_t * f, int t, ProjectVertex *ppv) : Hbnd4Top < A > (0,f,t,ppv), _mxt (new MX (*this)) {
+template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: Hbnd4PllExternal (myhface4_t * f, int t, ProjectVertex *ppv) : Hbnd4Top < A > (0,f,t,ppv,this), _mxt (new MX (*this)) {
   restoreFollowFace () ;
   return ;
 }
@@ -180,8 +189,11 @@ template < class A, class X, class MX > inline const double (& Hbnd4PllInternal 
 }
 // Ende
 // Ende - Neu am 23.5.02 (BS)
+template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX > :: HbndPll ::  ghostLevel () const {
+  return _ext.ghostLevel () ;
+}
 
-template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv) : Hbnd4Top < micro_t > (0,f,t,ppv), _mxt (new MX (*this)) {
+template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv) : Hbnd4Top < micro_t > (0,f,t,ppv,0), _mxt (new MX (*this)) {
   restoreFollowFace () ;
   return ;
 }
@@ -221,6 +233,10 @@ template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX > :: Hb
 
 template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: lockedAgainstCoarsening () const {
   return _mxt->lockedAgainstCoarsening () ;
+}
+
+template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: ghostLevel () const {
+  return level () ;
 }
 
 #endif	// GITTER_HEXA_TOP_PLL_H_INCLUDED
