@@ -8,6 +8,11 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/28 18:59:38  robertk
+ * new default method dunePackAll on Element..X class.
+ * on GitterPll new methods duneLoadBalance (GatherScatterType &)
+ * and new method duneRepartitionMacroGrid ( gs ..) .
+ *
  * Revision 1.2  2004/10/28 17:59:37  robertk
  * minor changes.
  *
@@ -215,6 +220,7 @@ class MacroGridMoverIF {
     virtual void attach2 (int) = 0 ;
     virtual void unattach2 (int) = 0 ;
     virtual bool packAll (vector < ObjectStream > &) = 0 ;
+    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) {};
     virtual void unpackSelf (ObjectStream &,bool) = 0 ;
 } ;
 
@@ -344,7 +350,8 @@ class GitterPll : public virtual Gitter {
     virtual void printSizeTT () ;
 
   // 
-    virtual bool duneLoadBalance () ; // call notify and loadBalancer 
+    virtual bool duneLoadBalance () ; // call loadBalancer 
+    virtual bool duneLoadBalance (GatherScatterType & ) ; // call loadBalancer and pack DuneData
     
   protected :
     virtual Makrogitter & container () = 0 ;
@@ -369,6 +376,11 @@ class GitterPll : public virtual Gitter {
     virtual void exchangeStaticState () ;
     virtual void exchangeDynamicState () ;
     virtual void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
+    
+    // for Dune 
+    virtual void duneRepartitionMacroGrid (LoadBalancer :: DataBase &,
+        GatherScatterType & gs) ;
+    
     virtual void loadBalancerGridChangesNotify () ;
     virtual void loadBalancerMacroGridChangesNotify () ;
     virtual void notifyGridChanges () ;
