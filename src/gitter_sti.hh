@@ -1,17 +1,17 @@
 // Version f"ur DUNE
 
-  // (c) bernhard schupp 1997 - 1998
+// (c) bernhard schupp 1997 - 1998
 
-  // $Source$
-  // $Revision$
-  // $Name$
-  // $State$
+// $Source$
+// $Revision$
+// $Name$
+// $State$
 
 /* $Id$
  * $Log$
- * Revision 1.1  2004/10/15 09:48:37  robertk
- * Inititial version. Some extenxions for Dune made. Schould be compatible
- * with all other applications done so far.
+ * Revision 1.2  2004/10/15 11:01:36  robertk
+ * if not used by Dune the _DUNE_USED_BSGRID_ is not defined and some things
+ * are switched off.
  *
  * Revision 1.21  2002/06/18 12:21:20  wesenber
  * calculation of errors added
@@ -65,11 +65,17 @@
 //hinzugefuegt uwe fuer DUNE
 #include "xdrclass.hh"
 
-// if the BSGridVecType is not defined then define dummy to double [3]
-#ifndef BSGridVecType 
+// if DUNE uses this grid the _DUNE_USES_BSGRID_ variable should be defined
+// otherwise some dummy are set 
+#ifndef _DUNE_USES_BSGRID_ 
+  
+#include "dummyindexstack.hh"  
+typedef DummyIndexStack<int> IndexManagerType; 
+  
 typedef double BSGridVec [3];
-#define BSGridVecType BSGridVec  
+typedef BSGridVec BSGridVecType;  
 #endif
+
   
 static volatile char RCSId_gitter_sti_h [] = "$Id$" ;
 
@@ -274,10 +280,13 @@ class Gitter {
     // class with all extensions for helement 
     class Dune_helement 
     {
+
+#ifdef _DUNE_USES_BSGRID_
       protected: 
         int  _index; 
         bool _refinedTag; // true if element was refined 
         Dune_helement () : _index (-1) , _refinedTag (true) {}
+#endif
       public:
         // reset the _refinedTag to false 
         void resetRefinedTag(); 
@@ -1346,13 +1355,13 @@ inline int Gitter :: helement :: leaf () const {
 
 // Dune extensions 
 inline void Gitter :: Dune_helement :: resetRefinedTag () {
-#ifdef _BSGRID_USE_INDEX_ 
+#ifdef _DUNE_USES_BSGRID_ 
   _refinedTag = false; 
 #endif
 }
 
 inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
-#ifdef _BSGRID_USE_INDEX_ 
+#ifdef _DUNE_USES_BSGRID_ 
   return _refinedTag;
 #else 
   return false;
@@ -1360,31 +1369,31 @@ inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
 }
 
 inline int Gitter :: Dune_helement :: getIndex () const {
-#ifdef _BSGRID_USE_INDEX_ 
+#ifdef _DUNE_USES_BSGRID_ 
   assert( _index >= 0);
   return _index; 
 #else 
-  std::cerr << "helement::getIndex () -- ERROR: '_BSGRID_USE_INDEX_' is not defined, so index cannot be used! \n";
+  std::cerr << "helement::getIndex () -- ERROR: '_DUNE_USES_BSGRID_' is not defined, so index cannot be used! \n";
   abort();
   return -1;
 #endif
 }
 
 inline void Gitter :: Dune_helement :: setIndex (const int index) {
-#ifdef _BSGRID_USE_INDEX_ 
+#ifdef _DUNE_USES_BSGRID_ 
   _index = index; 
 #endif
 }
 
 inline void Gitter :: Dune_helement :: backupIndex (ostream & os ) const {
-#ifdef _BSGRID_USE_INDEX_ 
+#ifdef _DUNE_USES_BSGRID_ 
   //os.put( _index ); 
   os.write( ((const char *) &_index ), sizeof(int) ) ;
 #endif
 }
 
 inline void Gitter :: Dune_helement :: restoreIndex (istream & is ) {
-#ifdef _BSGRID_USE_INDEX_ 
+#ifdef _DUNE_USES_BSGRID_ 
   //is.read(_index);
   is.read ( ((char *) &_index), sizeof(int) ); 
 #endif
