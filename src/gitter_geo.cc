@@ -9,6 +9,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/10/19 13:19:51  robertk
+ * neighOuterNormal added. this method calculates the normal from neighbour
+ * point of view but pointing outside of actual element.
+ *
  * Revision 1.1  2004/10/15 09:48:37  robertk
  * Inititial version. Some extenxions for Dune made. Schould be compatible
  * with all other applications done so far.
@@ -236,6 +240,18 @@ void  Gitter :: Geometric :: Tetra :: outerNormal (int face , BSGridVecType & no
     LSM(this->myvertex(face,0)->Point(),
         this->myvertex(face,1)->Point(),
         this->myvertex(face,2)->Point()
+       );
+  LSM.normal(normal);
+  return; 
+}
+
+void  Gitter :: Geometric :: Tetra :: neighOuterNormal (int face , BSGridVecType & normal ) 
+{
+  // just use with other twist to minus normal 
+  BSGridLinearSurfaceMapping 
+    LSM(this->myvertex(face,2)->Point(),
+        this->myvertex(face,1)->Point(),
+        this->myvertex(face,0)->Point()
        );
   LSM.normal(normal);
   return; 
