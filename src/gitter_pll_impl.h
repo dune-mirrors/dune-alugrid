@@ -1,13 +1,16 @@
-	// (c) bernhard schupp 1997 - 1998
+  // (c) bernhard schupp 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-	// $Date$
-	
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
+  // $Date$
+  
 /* $Id$
  * $Log$
+ * Revision 1.8  2004/12/20 14:19:55  robertk
+ * gcc compileable.
+ *
  * Revision 1.7  2004/12/07 17:43:19  robertk
  * logFile switched off.
  *
@@ -80,14 +83,15 @@
 
 static volatile char RCSId_gitter_pll_impl_h [] = "$Id$" ;
 
-	// Der vector < int > wird als sog. linkagepattern, also als
-	// Verbindungsmuster eingesetzt. Die Verbindungsmuster werden
-	// nicht in jeder Parallelerweiterung gespeichert sondern in
-	// einem zentralen Container im verteilten Grobgitter, dem
-	// 'linkagePatternMap' und mit Z"ahlung der Referenzen 
-	// verwaltet. Die Methode secondScan () l"oscht dann immer
-	// wieder die unreferenzierten Verbindungsmuster aus dem
-	// Container. Es gibt "ubrigens kein firstScan () mehr ...
+  // Der vector < int > wird als sog. linkagepattern, also als
+  // Verbindungsmuster eingesetzt. Die Verbindungsmuster werden
+  // nicht in jeder Parallelerweiterung gespeichert sondern in
+  // einem zentralen Container im verteilten Grobgitter, dem
+  // 'linkagePatternMap' und mit Z"ahlung der Referenzen 
+  // verwaltet. Die Methode secondScan () l"oscht dann immer
+  // wieder die unreferenzierten Verbindungsmuster aus dem
+  // Container. Es gibt "ubrigens kein firstScan () mehr ...
+class MacroGhostTetra;
 
 typedef vector < int > linkagePattern_t ;
 typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternMap_t ;
@@ -230,9 +234,9 @@ class ElementPllBaseX : public ElementPllXIF, public MyAlloc {
   protected :
     enum { ENDOFSTREAM = -1 } ;
     
-	// Alle Methoden in dieser Klasse sind Dummies und erzeugen
-	// Laufzeitfehler. Sie m"ussen von abgeleiteten Klassen 
-	// mit den richtigen Inhalten "uberschrieben werden.
+  // Alle Methoden in dieser Klasse sind Dummies und erzeugen
+  // Laufzeitfehler. Sie m"ussen von abgeleiteten Klassen 
+  // mit den richtigen Inhalten "uberschrieben werden.
 
   public :
     pair < ElementPllXIF_t *, int > accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int) ;
@@ -311,7 +315,7 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     bool _erasable ;
     double _center [3] ;
 } ;
-	// Neu >
+  // Neu >
 
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
@@ -361,7 +365,7 @@ class Periodic3PllXBaseMacro : public Periodic3PllXBase {
     bool _erasable ;
     double _center [3] ;
 } ;
-	// < Neu
+  // < Neu
 
 // Anfang - Neu am 23.5.02 (BS)
 
@@ -548,183 +552,183 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     class ObjectsPll : public GitterBasis :: Objects {
       public :
         class VertexPllImplMacro : public VertexEmptyMacro {
-	  public :
-	    typedef VertexPllBaseX mypllx_t ;
+    public :
+      typedef VertexPllBaseX mypllx_t ;
           public :
             VertexPllImplMacro (double,double,double,int,linkagePatternMap_t &,  
                                 IndexManagerType &im) ;
-	   ~VertexPllImplMacro () ;
+     ~VertexPllImplMacro () ;
             virtual VertexPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const VertexPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t * _pllx ;
-	  // friend class mypllx_t ;
-	  // ### Goettingen ###
+      virtual const VertexPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t * _pllx ;
+    // friend class mypllx_t ;
+    // ### Goettingen ###
           friend class VertexPllBaseX;
         } ;
       public :
 
         class Hedge1EmptyPll : public Hedge1Empty {
-	  protected :
-	    inline bool lockedAgainstCoarsening () const ;
-	  public :
-	    typedef EdgePllBaseX mypllx_t ;
-	    inline Hedge1EmptyPll (myvertex_t *,myvertex_t *) ;
-	    virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t _pllx ;
-	  // friend mypllx_t ;
-	  // ### Goettingen ###
+    protected :
+      inline bool lockedAgainstCoarsening () const ;
+    public :
+      typedef EdgePllBaseX mypllx_t ;
+      inline Hedge1EmptyPll (myvertex_t *,myvertex_t *) ;
+      virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t _pllx ;
+    // friend mypllx_t ;
+    // ### Goettingen ###
           friend class EdgePllBaseX;
-	} ;
-	typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
+  } ;
+  typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
       public :
         class Hedge1EmptyPllMacro : public hedge1_IMPL {
-	  public :
-	    typedef EdgePllBaseXMacro mypllx_t ;
-	    inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *) ;
-	   ~Hedge1EmptyPllMacro () ;
-	    virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t * _pllx ;
-	  // friend mypllx_t ;
-	  // ### Goettingen ###
-	  friend class EdgePllBaseXMacro;
-	} ;
+    public :
+      typedef EdgePllBaseXMacro mypllx_t ;
+      inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *) ;
+     ~Hedge1EmptyPllMacro () ;
+      virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t * _pllx ;
+    // friend mypllx_t ;
+    // ### Goettingen ###
+    friend class EdgePllBaseXMacro;
+  } ;
 
       public :
         class Hface3EmptyPll : public Hface3Empty {
-	  protected :
-	    typedef hedge1_IMPL inneredge_t ;
-	  public :
-	    typedef FacePllBaseX < hface3_GEO > mypllx_t ;
-	    inline Hface3EmptyPll (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-	    virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t _pllx ;
-	  //	  friend mypllx_t ;
-	  // ### Goettingen ###
-	  friend class FacePllBaseX < hface3_GEO >;
-	} ;
+    protected :
+      typedef hedge1_IMPL inneredge_t ;
+    public :
+      typedef FacePllBaseX < hface3_GEO > mypllx_t ;
+      inline Hface3EmptyPll (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t _pllx ;
+    //    friend mypllx_t ;
+    // ### Goettingen ###
+    friend class FacePllBaseX < hface3_GEO >;
+  } ;
         typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
-	
+  
         class Hface3EmptyPllMacro : public hface3_IMPL {
-	  public :
-	    typedef FacePllBaseXMacro < hface3_GEO > mypllx_t ;
-	    Hface3EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-	   ~Hface3EmptyPllMacro () ;
-	    virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t * _pllx ;
-	  // friend mypllx_t ;
-	  // ### Goettingen ###
-	  friend class FacePllBaseXMacro < hface3_GEO >;
-	} ;
+    public :
+      typedef FacePllBaseXMacro < hface3_GEO > mypllx_t ;
+      Hface3EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+     ~Hface3EmptyPllMacro () ;
+      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t * _pllx ;
+    // friend mypllx_t ;
+    // ### Goettingen ###
+    friend class FacePllBaseXMacro < hface3_GEO >;
+  } ;
 
       public :
         class Hface4EmptyPll : public Hface4Empty {
-	  protected :
-	    typedef hedge1_IMPL inneredge_t ;
-	  public :
-	    typedef FacePllBaseX < hface4_GEO > mypllx_t ;
-	    inline Hface4EmptyPll (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-	    virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	  private:
-	    mypllx_t _pllx ;
-	    // friend mypllx_t ;
-	    // ### Goettingen ###
-	    friend class FacePllBaseX < hface4_GEO >;
-	} ;
+    protected :
+      typedef hedge1_IMPL inneredge_t ;
+    public :
+      typedef FacePllBaseX < hface4_GEO > mypllx_t ;
+      inline Hface4EmptyPll (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+    private:
+      mypllx_t _pllx ;
+      // friend mypllx_t ;
+      // ### Goettingen ###
+      friend class FacePllBaseX < hface4_GEO >;
+  } ;
         typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
-	
+  
         class Hface4EmptyPllMacro : public hface4_IMPL {
-	  public :
-	    typedef FacePllBaseXMacro < hface4_GEO > mypllx_t ;
-	    Hface4EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-	   ~Hface4EmptyPllMacro () ;
-	    virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t * _pllx ;
-	  // friend mypllx_t ;
-	  // ### Goettingen ###
-	  friend class FacePllBaseXMacro < hface4_GEO >;
-	} ;
+    public :
+      typedef FacePllBaseXMacro < hface4_GEO > mypllx_t ;
+      Hface4EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+     ~Hface4EmptyPllMacro () ;
+      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t * _pllx ;
+    // friend mypllx_t ;
+    // ### Goettingen ###
+    friend class FacePllBaseXMacro < hface4_GEO >;
+  } ;
       public :
 
         class TetraEmptyPll : public TetraEmpty {
-	  protected :
-	    typedef hedge1_IMPL inneredge_t ;
-	    typedef hface3_IMPL innerface_t ;
-	  public :
-	    typedef TetraPllXBase mypllx_t ;
-	    inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
+    protected :
+      typedef hedge1_IMPL inneredge_t ;
+      typedef hface3_IMPL innerface_t ;
+    public :
+      typedef TetraPllXBase mypllx_t ;
+      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
            ~TetraEmptyPll () {}
-	    virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
           private :
-	    mypllx_t _pllx ;
-	} ;
-	typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
+      mypllx_t _pllx ;
+  } ;
+  typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
 
         class TetraEmptyPllMacro : public tetra_IMPL {
-	  public :
-	    typedef TetraPllXBaseMacro mypllx_t ;
-	    TetraEmptyPllMacro (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
+    public :
+      typedef TetraPllXBaseMacro mypllx_t ;
+      TetraEmptyPllMacro (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
             myhface3_t *,int, IndexManagerType & im) ;
-	   ~TetraEmptyPllMacro () ;
-	    virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t * _pllx ;
-	  // friend mypllx_t ;
-	  // ### Goettingen ###
-	  friend class TetraPllXBaseMacro;
-	} ;
-	// Neu >
+     ~TetraEmptyPllMacro () ;
+      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t * _pllx ;
+    // friend mypllx_t ;
+    // ### Goettingen ###
+    friend class TetraPllXBaseMacro;
+  } ;
+  // Neu >
       public :
         class Periodic3EmptyPll : public Periodic3Empty {
-	  protected :
-	    typedef hedge1_IMPL inneredge_t ;
-	    typedef hface3_IMPL innerface_t ;
-	  public :
-	    typedef Periodic3PllXBase mypllx_t ;
-	    inline Periodic3EmptyPll (myhface3_t *,int,myhface3_t *,int) ;
-	   ~Periodic3EmptyPll () {}
-	    virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    protected :
+      typedef hedge1_IMPL inneredge_t ;
+      typedef hface3_IMPL innerface_t ;
+    public :
+      typedef Periodic3PllXBase mypllx_t ;
+      inline Periodic3EmptyPll (myhface3_t *,int,myhface3_t *,int) ;
+     ~Periodic3EmptyPll () {}
+      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
           private :
-	    mypllx_t _pllx ;
-	} ;
-	typedef Periodic3Top < Periodic3EmptyPll > periodic3_IMPL ;
-	
-	class Periodic3EmptyPllMacro : public periodic3_IMPL {
-	  public :
-	    typedef Periodic3PllXBaseMacro mypllx_t ;
-	    Periodic3EmptyPllMacro (myhface3_t *,int,myhface3_t *,int) ;
-	   ~Periodic3EmptyPllMacro () ;
-	    virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t * _pllx ;
-	  // friend mypllx_t ;
-	  // ### Goettingen ###
-	  friend class Periodic3PllXBaseMacro;
-	} ;
-	// < Neu
+      mypllx_t _pllx ;
+  } ;
+  typedef Periodic3Top < Periodic3EmptyPll > periodic3_IMPL ;
+  
+  class Periodic3EmptyPllMacro : public periodic3_IMPL {
+    public :
+      typedef Periodic3PllXBaseMacro mypllx_t ;
+      Periodic3EmptyPllMacro (myhface3_t *,int,myhface3_t *,int) ;
+     ~Periodic3EmptyPllMacro () ;
+      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t * _pllx ;
+    // friend mypllx_t ;
+    // ### Goettingen ###
+    friend class Periodic3PllXBaseMacro;
+  } ;
+  // < Neu
 
 // Anfang - Neu am 23.5.02 (BS)
 
@@ -738,81 +742,81 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
 
       public :
         class Periodic4EmptyPll : public Periodic4Empty {
-	  protected :
-	    typedef hedge1_IMPL inneredge_t ;
-	    typedef hface4_IMPL innerface_t ;
-	  public :
-	    typedef Periodic4PllXBase mypllx_t ;
-	    inline Periodic4EmptyPll (myhface4_t *,int,myhface4_t *,int) ;
-	   ~Periodic4EmptyPll () {}
-	    virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    protected :
+      typedef hedge1_IMPL inneredge_t ;
+      typedef hface4_IMPL innerface_t ;
+    public :
+      typedef Periodic4PllXBase mypllx_t ;
+      inline Periodic4EmptyPll (myhface4_t *,int,myhface4_t *,int) ;
+     ~Periodic4EmptyPll () {}
+      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
           private :
-	    mypllx_t _pllx ;
-	} ;
-	typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL ;
-	
-	class Periodic4EmptyPllMacro : public periodic4_IMPL {
-	  public :
-	    typedef Periodic4PllXBaseMacro mypllx_t ;
-	    Periodic4EmptyPllMacro (myhface4_t *,int,myhface4_t *,int) ;
-	   ~Periodic4EmptyPllMacro () ;
-	    virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-	  private :
-	    mypllx_t * _pllx ;
-	  // friend mypllx_t ;
-	  // ### Goettingen ###
-	  friend class Periodic4PllXBaseMacro;
-	} ;
+      mypllx_t _pllx ;
+  } ;
+  typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL ;
+  
+  class Periodic4EmptyPllMacro : public periodic4_IMPL {
+    public :
+      typedef Periodic4PllXBaseMacro mypllx_t ;
+      Periodic4EmptyPllMacro (myhface4_t *,int,myhface4_t *,int) ;
+     ~Periodic4EmptyPllMacro () ;
+      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    private :
+      mypllx_t * _pllx ;
+    // friend mypllx_t ;
+    // ### Goettingen ###
+    friend class Periodic4PllXBaseMacro;
+  } ;
 
 // Ende - Neu am 23.5.02 (BS)
 
       public :
         class HexaEmptyPll : public HexaEmpty {
-	  protected :
-	    typedef hedge1_IMPL inneredge_t ;
-	    typedef hface4_IMPL innerface_t ;
-	  public :
-	    typedef HexaPllBaseX mypllx_t ;
-	    inline HexaEmptyPll (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int) ;
+    protected :
+      typedef hedge1_IMPL inneredge_t ;
+      typedef hface4_IMPL innerface_t ;
+    public :
+      typedef HexaPllBaseX mypllx_t ;
+      inline HexaEmptyPll (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int) ;
             inline ~HexaEmptyPll () {}
-	    virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
           private :
-	    mypllx_t _pllx ;
-	} ;
-	typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
+      mypllx_t _pllx ;
+  } ;
+  typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
 
         class HexaEmptyPllMacro : public hexa_IMPL {
-	  public :
-	    typedef HexaPllBaseXMacro mypllx_t ;
-	    HexaEmptyPllMacro (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int) ;
-	   ~HexaEmptyPllMacro () ;
-	    virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-	    virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-	    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-	
-	// Hier, und auch beim Tetraeder besteht die M"oglichkeit das refine
-	// auf dem Grobgitterelement zu "uberschreiben, um gegebenenfalls noch
-	// andere Funktionen mit aufzuklemmen:  
-	// virtual int refine () ;
-	  
-	  private :
-	    mypllx_t * _pllx ;
-	  // friend mypllx_t ;
-	  // ### Goettingen ###
-	  friend class HexaPllBaseXMacro;
-	} ;
-	
-	// Die Randelemente des verteilten Gitters werden aus Templates 
-	// in 'gitter_hexa_top_pll.h' und 'gitter_tetra_top_pll.h' erzeugt
-	// indem diese die Randelementklassen des sequentiellen Verfahrens
-	// "ubernehmen und mit passenden Extendern anreichern.
-	
+    public :
+      typedef HexaPllBaseXMacro mypllx_t ;
+      HexaEmptyPllMacro (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int) ;
+     ~HexaEmptyPllMacro () ;
+      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+  
+  // Hier, und auch beim Tetraeder besteht die M"oglichkeit das refine
+  // auf dem Grobgitterelement zu "uberschreiben, um gegebenenfalls noch
+  // andere Funktionen mit aufzuklemmen:  
+  // virtual int refine () ;
+    
+    private :
+      mypllx_t * _pllx ;
+    // friend mypllx_t ;
+    // ### Goettingen ###
+    friend class HexaPllBaseXMacro;
+  } ;
+  
+  // Die Randelemente des verteilten Gitters werden aus Templates 
+  // in 'gitter_hexa_top_pll.h' und 'gitter_tetra_top_pll.h' erzeugt
+  // indem diese die Randelementklassen des sequentiellen Verfahrens
+  // "ubernehmen und mit passenden Extendern anreichern.
+  
     } ;
 
   public :
@@ -822,17 +826,23 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         set < int, less < int > > secondScan () ;
       protected :
         int iterators_attached () const ;
+        
         virtual VertexGeo     * insert_vertex (double,double,double,int,int = 0) ;
+        virtual VertexGeo     * insert_ghostvx (const double (&p)[3]) ;
+        
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
-	virtual hbndseg3_GEO  * insert_hbnd3  (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
+  virtual hbndseg3_GEO  * insert_hbnd3_p  (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
+  virtual hbndseg3_GEO  * insert_hbnd3  (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
+  virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
-	virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
+  virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
-	virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
-	virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
+  virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
+  virtual MacroGhostTetra    * insert_ghosttetra (hface3_GEO *, int , const double (&p)[3]) ;
+  virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
 // Anfang - Neu am 23.5.02 (BS)
-	virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
+  virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
 // Ende - Neu am 23.5.02 (BS)
         IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
         IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
@@ -874,14 +884,14 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
 } ;
 
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
 inline VertexPllBaseX :: myvertex_t & VertexPllBaseX :: myvertex () {
   return _v ;
@@ -897,11 +907,11 @@ inline EdgePllBaseX :: EdgePllBaseX (myhedge1_t & e) : _edge (e), _lockCRS (fals
 
 inline EdgePllBaseX :: ~EdgePllBaseX () {
 #ifndef DNDEBUG
-	// Falls die nachfolgende Situation eintritt, ist massiv was faul im
-	// parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
-	// gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
-	// die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
-	// gehoben wird.
+  // Falls die nachfolgende Situation eintritt, ist massiv was faul im
+  // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
+  // gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
+  // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
+  // gehoben wird.
 
   if (_lockCRS) {
     cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
@@ -923,18 +933,18 @@ template < class A > inline FacePllBaseX < A > :: FacePllBaseX (myhface_t & f) :
   return ;
 }
 
-template < class A > inline FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () {
+template < class A > inline typename FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () {
   return _face ;
 }
 
-template < class A > inline const FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () const {
+template < class A > inline const typename FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () const {
   return _face ;
 }
 template < class A > vector < int > FacePllBaseX < A > :: estimateLinkage () const {
   return (abort (), vector < int > ()) ;
 }
 
-template < class A > LinkedObject :: Identifier FacePllBaseX < A > :: getIdentifier () const {
+template < class A > typename LinkedObject :: Identifier FacePllBaseX < A > :: getIdentifier () const {
   return (abort (), LinkedObject :: Identifier ()) ;
 }
 
@@ -1007,18 +1017,18 @@ template < class A > inline FacePllBaseXMacro < A > :: ~FacePllBaseXMacro () {
 
 template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage () const {
 
-	// Diese Methode sch"atzt den Verbindungsstern der Grobgitterfl"ache,
-	// indem sie die Schnittmenge der Verbindungssterne der anliegenden
-	// Grobgitterknoten bildet. Je besser die Sch"atzung, desto schneller
-	// arbeitet das Identifikationsmodul. Falls keine Sch"atzung m"oglich
-	// ist, kann man auch einfach aller log. Teilgiternummern in einem 
-	// Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
+  // Diese Methode sch"atzt den Verbindungsstern der Grobgitterfl"ache,
+  // indem sie die Schnittmenge der Verbindungssterne der anliegenden
+  // Grobgitterknoten bildet. Je besser die Sch"atzung, desto schneller
+  // arbeitet das Identifikationsmodul. Falls keine Sch"atzung m"oglich
+  // ist, kann man auch einfach aller log. Teilgiternummern in einem 
+  // Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
 
   vector < int > t1, t2, est ;
-  vector < int > l0 = myhface ().myhedge1 (0)->accessPllX ().estimateLinkage () ;
-  vector < int > l1 = myhface ().myhedge1 (1)->accessPllX ().estimateLinkage () ;
-  vector < int > l2 = myhface ().myhedge1 (2)->accessPllX ().estimateLinkage () ;
-  vector < int > l3 = myhface ().myhedge1 (A :: polygonlength == 3 ? 2 : 3)->accessPllX ().estimateLinkage () ;
+  vector < int > l0 = this->myhface ().myhedge1 (0)->accessPllX ().estimateLinkage () ;
+  vector < int > l1 = this->myhface ().myhedge1 (1)->accessPllX ().estimateLinkage () ;
+  vector < int > l2 = this->myhface ().myhedge1 (2)->accessPllX ().estimateLinkage () ;
+  vector < int > l3 = this->myhface ().myhedge1 (A :: polygonlength == 3 ? 2 : 3)->accessPllX ().estimateLinkage () ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (t1), less < int > ()) ;
   set_intersection (l2.begin (), l2.end (), l3.begin (), l3.end (), back_inserter (t2), less < int > ()) ;
   set_intersection (t1.begin (), t1.end (), t2.begin (), t2.end (), back_inserter (est), less < int > ()) ;
@@ -1027,37 +1037,39 @@ template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage (
 
 template < class A > LinkedObject :: Identifier FacePllBaseXMacro < A > :: getIdentifier () const {
 
-	// Diese Methode erzeugt den Schl"ussel einer Grobgitterfl"ache im Auftrag
-	// des Identifikationsmoduls 'gitter_pll_idn.cc'. Der Schl"ussel besteht
-	// aus drei Integer Werten 'key.h', die aus der globelen Ausrichtung der
-	// Fl"ache folgen und auch f"ur Fl"achen mit mehr als drei Knoten korrekt
-	// (d.h. gleiche Fl"ache in versch. Teilgittern -> gleicher Schl"ussel) sind.
+  // Diese Methode erzeugt den Schl"ussel einer Grobgitterfl"ache im Auftrag
+  // des Identifikationsmoduls 'gitter_pll_idn.cc'. Der Schl"ussel besteht
+  // aus drei Integer Werten 'key.h', die aus der globelen Ausrichtung der
+  // Fl"ache folgen und auch f"ur Fl"achen mit mehr als drei Knoten korrekt
+  // (d.h. gleiche Fl"ache in versch. Teilgittern -> gleicher Schl"ussel) sind.
 
-  return LinkedObject :: Identifier (myhface ().myvertex (0)->ident (), myhface ().myvertex (1)->ident (), myhface ().myvertex (2)->ident ()) ;
+  return LinkedObject :: Identifier (this->myhface ().myvertex (0)->ident (), 
+      this->myhface ().myvertex (1)->ident (), this->myhface ().myvertex (2)->ident ()) ;
 }
 
 template < class A > bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & db) {
   
-	// Diese Methode erzeugt eine Kante im Graphen f"ur die Berechnung
-	// der Neupartitionierung, der sie das Gewicht der Anzahl aller feinsten
-	// Fl"achen "uber der verwalteten Grobgitterfl"ache gibt.
+  // Diese Methode erzeugt eine Kante im Graphen f"ur die Berechnung
+  // der Neupartitionierung, der sie das Gewicht der Anzahl aller feinsten
+  // Fl"achen "uber der verwalteten Grobgitterfl"ache gibt.
   
   db.edgeUpdate ( LoadBalancer :: GraphEdge 
-  	(((const myhface_t :: myconnect_t *)myhface ().nb.front ().first)->accessPllX ().ldbVertexIndex (),
-  	 ((const myhface_t :: myconnect_t *)myhface ().nb.rear ().first)->accessPllX ().ldbVertexIndex (),
-  	 TreeIterator < Gitter :: hface_STI, is_leaf < Gitter :: hface_STI > > (myhface ()).size ())) ;
+    (((const typename myhface_t :: myconnect_t *)this->myhface ().nb.front ().first)->accessPllX ().ldbVertexIndex (),
+     ((const typename myhface_t :: myconnect_t *)this->myhface ().nb.rear ().first)->accessPllX ().ldbVertexIndex (),
+     TreeIterator < typename Gitter :: hface_STI, is_leaf < Gitter :: hface_STI > > (this->myhface ()).size ())) ;
   return true ;
 }
 
 template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i) {
 
-	// Diese Methode bindet die Fl"ache von einer Zuweisung zu einem neuen
-	// Teilgitter ab. D.h. der Eintrag in der Zuweisungsliste wird gel"oscht,
-	// und dann wird die M"oglichkeit an die anliegenden Kanten weitervermittelt.
+  // Diese Methode bindet die Fl"ache von einer Zuweisung zu einem neuen
+  // Teilgitter ab. D.h. der Eintrag in der Zuweisungsliste wird gel"oscht,
+  // und dann wird die M"oglichkeit an die anliegenden Kanten weitervermittelt.
 
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  {for (int j = 0 ; j < A :: polygonlength ; j ++) myhface ().myhedge1 (j)->accessPllX ().unattach2 (i) ;}
+  {for (int j = 0 ; j < A :: polygonlength ; j ++) 
+    this->myhface ().myhedge1 (j)->accessPllX ().unattach2 (i) ;}
   return ;
 }
 
@@ -1068,46 +1080,47 @@ template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) {
   } else {
     (*pos).second ++ ;
   }
-  {for (int j = 0 ; j < A :: polygonlength ; j ++) myhface ().myhedge1 (j)->accessPllX ().attach2 (i) ;}
+  {for (int j = 0 ; j < A :: polygonlength ; j ++) 
+    this->myhface ().myhedge1 (j)->accessPllX ().attach2 (i) ;}
   return ;  
 }
 
 template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStream > & osv) {
 
-	// Die Methode packAll () verpackt die Fl"ache auf alle Datenstr"ome,
-	// die zu Teilgittern f"uhren, an die sie zugewiesen wurde mit attach2 ().
-	// Ausserdem geht die Methode noch an die anliegenden Elemente (Randelemente)
-	// "uber.
+  // Die Methode packAll () verpackt die Fl"ache auf alle Datenstr"ome,
+  // die zu Teilgittern f"uhren, an die sie zugewiesen wurde mit attach2 ().
+  // Ausserdem geht die Methode noch an die anliegenden Elemente (Randelemente)
+  // "uber.
 
   bool action = false ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     
-	// "Ubergangsl"osung:
+  // "Ubergangsl"osung:
     
-    if (A :: polygonlength == 4) osv [j].writeObject (FACE4) ;
-    else if (A :: polygonlength == 3) osv [j].writeObject (FACE3) ;
+    if (A :: polygonlength == 4) osv [j].writeObject (MacroGridMoverIF :: FACE4) ;
+    else if (A :: polygonlength == 3) osv [j].writeObject (MacroGridMoverIF :: FACE3) ;
     else abort () ;
     
     {
       for (int k = 0 ; k < A :: polygonlength ; k ++)
-        osv [j].writeObject (myhface ().myvertex (k)->ident ()) ;
+        osv [j].writeObject (this->myhface ().myvertex (k)->ident ()) ;
     }
     try {
     
-	// Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
-	// mit einer Verfeinerungsregel identisch ist - sonst gibt's
-	// nachher beim Auspacken nur garbage.
+  // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
+  // mit einer Verfeinerungsregel identisch ist - sonst gibt's
+  // nachher beim Auspacken nur garbage.
     
       assert (! myhface_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
     
-    	// Der ganze Baum der Verfeinerungsregeln wird jetzt in den
-	// Stringstream geschrieben (anstelle einer Datei) und dann
-	// in den Datenstrom als 'integer' hineinkonvertiert.
+      // Der ganze Baum der Verfeinerungsregeln wird jetzt in den
+  // Stringstream geschrieben (anstelle einer Datei) und dann
+  // in den Datenstrom als 'integer' hineinkonvertiert.
     
       strstream s ;
-      myhface ().backup (s) ;
+      this->myhface ().backup (s) ;
       {for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;}
       osv [j].writeObject (ENDOFSTREAM) ;
 // Anfang - Neu am 23.5.02 (BS)
@@ -1119,14 +1132,14 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
     }
     try {
     
- 	// Wenn die Fl"ache auf den j. Strom des Lastverschiebers
-	// geschrieben wurde, dann mu"ussen auch die anliegenden
-	// Elemente daraufhin untersucht werden, ob sie sich nicht
-	// als Randelemente dorthin schreiben sollen - das tun sie
-	// aber selbst.
+  // Wenn die Fl"ache auf den j. Strom des Lastverschiebers
+  // geschrieben wurde, dann mu"ussen auch die anliegenden
+  // Elemente daraufhin untersucht werden, ob sie sich nicht
+  // als Randelemente dorthin schreiben sollen - das tun sie
+  // aber selbst.
     
-      myhface ().nb.front ().first->accessPllX ().packAsBnd (myhface ().nb.front ().second, j, osv [j]) ;
-      myhface ().nb.rear ().first->accessPllX ().packAsBnd (myhface ().nb.rear ().second, j, osv [j]) ;
+      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, osv [j]) ;
+      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear ().second, j, osv [j]) ;
     } catch (Parallel :: AccessPllException) {
       cerr << "**FEHLER (FATAL) AccessPllException aufgetreten in " << __FILE__ << " " << __LINE__ << ". Ende." << endl ;
       abort () ;
@@ -1138,13 +1151,13 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
 
 template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & os, bool i) {
 
-	// Die Methode wird eine Fl"ache aus dem Datenstrom rekonstruieren,
-	// die der MacrogridBuilder angelegt hat, oder sie wird nur die
-	// Verfeinerungsregeln aus dem Strom nehmen, falls schon vorher
-	// eine identische Fl"ache bestand. Dies wird vom MacrogridBuilder
-	// durch die 'bool' Variable mitgeteilt. Trotzdem k"onnen auch auf
-	// einen bestehenden Fl"achenbaum durch die Lastverschiebung neue
-	// Daten aufgebracht werden - dies ist dann hier zu realisieren.
+  // Die Methode wird eine Fl"ache aus dem Datenstrom rekonstruieren,
+  // die der MacrogridBuilder angelegt hat, oder sie wird nur die
+  // Verfeinerungsregeln aus dem Strom nehmen, falls schon vorher
+  // eine identische Fl"ache bestand. Dies wird vom MacrogridBuilder
+  // durch die 'bool' Variable mitgeteilt. Trotzdem k"onnen auch auf
+  // einen bestehenden Fl"achenbaum durch die Lastverschiebung neue
+  // Daten aufgebracht werden - dies ist dann hier zu realisieren.
 
   strstream s ;
   int c ;
@@ -1156,12 +1169,12 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
   }
   if (i) {
   
-	// Sobald der Stringstream mit den 'byte' Verfeinerungsregeln
-	// voll ist, kann mit dem normalen restore der ganze Fl"achen-
-	// baum wieder hochgezogen werden. Analog zur Wiederherstellung
-	// aus einer Datei.
+  // Sobald der Stringstream mit den 'byte' Verfeinerungsregeln
+  // voll ist, kann mit dem normalen restore der ganze Fl"achen-
+  // baum wieder hochgezogen werden. Analog zur Wiederherstellung
+  // aus einer Datei.
   
-    myhface ().restore (s) ;
+    this->myhface ().restore (s) ;
     assert (!s.eof ()) ;
 // Anfang - Neu am 23.5.02 (BS)
     xtractData (os) ;
@@ -1182,8 +1195,8 @@ inline const TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () const {
   return _tetra ;
 }
 
-	// Neu >
-	
+  // Neu >
+  
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
 // #     #  #       #    #     #    #    #  #    #     #    #    #       #
@@ -1203,8 +1216,8 @@ inline Periodic3PllXBase :: myperiodic3_t & Periodic3PllXBase :: myperiodic3 () 
 inline const Periodic3PllXBase :: myperiodic3_t & Periodic3PllXBase :: myperiodic3 () const {
   return _periodic3 ;
 }
-	
-	// < Neu
+  
+  // < Neu
 
 // Anfang - Neu am 23.5.02 (BS)
 
@@ -1247,11 +1260,11 @@ template < class A > inline BndsegPllBaseXMacro < A > :: BndsegPllBaseXMacro (my
   return ;
 }
 
-template < class A > inline BndsegPllBaseXMacro < A > :: myhbnd_t & BndsegPllBaseXMacro < A > :: myhbnd () {
+template < class A > inline typename BndsegPllBaseXMacro < A > :: myhbnd_t & BndsegPllBaseXMacro < A > :: myhbnd () {
   return _hbnd ;
 }
 
-template < class A > inline const BndsegPllBaseXMacro < A > :: myhbnd_t & BndsegPllBaseXMacro < A > :: myhbnd () const {
+template < class A > inline const typename BndsegPllBaseXMacro < A > :: myhbnd_t & BndsegPllBaseXMacro < A > :: myhbnd () const {
   return _hbnd ;
 }
 
@@ -1265,8 +1278,8 @@ template < class  A > int & BndsegPllBaseXMacro < A > :: ldbVertexIndex () {
 
 template < class A > void BndsegPllBaseXMacro < A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
   assert (!fce) ;
-  if (myhface_t :: polygonlength == 3) os.writeObject (HBND3EXT) ;
-  else if (myhface_t :: polygonlength == 4) os.writeObject (HBND4EXT) ;
+  if (myhface_t :: polygonlength == 3) os.writeObject (MacroGridMoverIF :: HBND3EXT) ;
+  else if (myhface_t :: polygonlength == 4) os.writeObject (MacroGridMoverIF :: HBND4EXT) ;
   else abort () ;
   os.writeObject (myhbnd ().bndtype ()) ;
   {for (int i = 0 ; i < myhface_t :: polygonlength ; i++) os.writeObject (myhbnd ().myvertex (fce,i)->ident ()) ; }
@@ -1277,11 +1290,11 @@ template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure
   return ;
 }
 
-template < class A > inline BndsegPllBaseXClosure < A > :: myhbnd_t & BndsegPllBaseXClosure < A > :: myhbnd () {
+template < class A > inline typename BndsegPllBaseXClosure < A > :: myhbnd_t & BndsegPllBaseXClosure < A > :: myhbnd () {
   return _hbnd ;
 }
 
-template < class A > inline const BndsegPllBaseXClosure < A > :: myhbnd_t & BndsegPllBaseXClosure < A > :: myhbnd () const {
+template < class A > inline const typename BndsegPllBaseXClosure < A > :: myhbnd_t & BndsegPllBaseXClosure < A > :: myhbnd () const {
   return _hbnd ;
 }
 
@@ -1298,10 +1311,10 @@ template < class A > void BndsegPllBaseXClosure < A > :: getRefinementRequest (O
 
 template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (ObjectStream & os) {
 
-	// Die Methode schickt die Regel aus dem Nachbargitter in das
-	// eigene Teilgitter hinein. Sie liefert "true" immer dann, wenn
-	// sich das eigene Gitter g"andert hat -> f"uhrt zu einer weiteren
-	// Iteration des parallelen refine ().
+  // Die Methode schickt die Regel aus dem Nachbargitter in das
+  // eigene Teilgitter hinein. Sie liefert "true" immer dann, wenn
+  // sich das eigene Gitter g"andert hat -> f"uhrt zu einer weiteren
+  // Iteration des parallelen refine ().
 
   int i ;
   try {
@@ -1319,17 +1332,17 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
       return false ;
     } else {
       if (myhbnd ().refineLikeElement (r)) {
-    	  // Verfeinerung erfolgreich
+        // Verfeinerung erfolgreich
         return true ;
       } else {
       
-      	// Verfeinerung verhindert irgendwo im Gitter. Dies ist ein Vorbehalt
-      	// f"ur den parallelen anisotropen Verfeinerungsalgorithmus. Daher
-	      // sollte die Situation im isotropen Fall nicht auftreten.
+        // Verfeinerung verhindert irgendwo im Gitter. Dies ist ein Vorbehalt
+        // f"ur den parallelen anisotropen Verfeinerungsalgorithmus. Daher
+        // sollte die Situation im isotropen Fall nicht auftreten.
       
         cerr << "**FEHLER (FATAL, weil nicht vorgesehen): Verfeinerung wurde\n" ;
         cerr << "  verhindert am inneren Rand. In " << __FILE__ << " " << __LINE__ << endl ;
-      	abort () ;
+        abort () ;
       }
     }
   }
@@ -1439,12 +1452,12 @@ template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (O
 
 template < class A > void BndsegPllBaseXMacroClosure < A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
   assert (!fce) ;
-  assert (myhbnd ().bndtype () == Gitter :: hbndseg :: closure) ;
-  if (myhface_t :: polygonlength == 3) os.writeObject (HBND3INT) ;
-  else if (myhface_t :: polygonlength == 4) os.writeObject (HBND4INT) ;
+  assert (this->myhbnd ().bndtype () == Gitter :: hbndseg :: closure) ;
+  if (myhface_t :: polygonlength == 3) os.writeObject (MacroGridMoverIF :: HBND3INT) ;
+  else if (myhface_t :: polygonlength == 4) os.writeObject (MacroGridMoverIF :: HBND4INT) ;
   else abort () ;
-  os.writeObject (myhbnd ().bndtype ()) ;
-  {for (int i = 0 ; i < myhface_t :: polygonlength ; i++) os.writeObject (myhbnd ().myvertex (fce,i)->ident ()) ; }
+  os.writeObject (this->myhbnd ().bndtype ()) ;
+  {for (int i = 0 ; i < myhface_t :: polygonlength ; i++) os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ()) ; }
   return ;
 }
 
@@ -1458,28 +1471,28 @@ inline bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: lockedAgainstCoars
 }
 
 inline GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: Hface3EmptyPll (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
-	GitterBasis :: Objects :: Hface3Empty (e0,s0,e1,s1,e2,s2), _pllx (*this) {
+  GitterBasis :: Objects :: Hface3Empty (e0,s0,e1,s1,e2,s2), _pllx (*this) {
   return ;
 }
 
 inline GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: Hface4EmptyPll 
-	(myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
-	GitterBasis :: Objects :: Hface4Empty (e0,s0,e1,s1,e2,s2,e3,s3), _pllx (*this) {
+  (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
+  GitterBasis :: Objects :: Hface4Empty (e0,s0,e1,s1,e2,s2,e3,s3), _pllx (*this) {
   return ;
 }
 
 inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: TetraEmptyPll (myhface3_t * f0, int t0, myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3)
-	: GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3), _pllx (*this) {
+  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3), _pllx (*this) {
   return ;
 }
 
-	// Neu >
-	
+  // Neu >
+  
 inline GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: Periodic3EmptyPll (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
-	: GitterBasis :: Objects :: Periodic3Empty (f0,t0,f1,t1), _pllx (*this) {
+  : GitterBasis :: Objects :: Periodic3Empty (f0,t0,f1,t1), _pllx (*this) {
   return ;
 }
-	// < Neu
+  // < Neu
 
 // Anfang - Neu am 23.5.02 (BS)
 
@@ -1492,14 +1505,14 @@ inline GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: Periodic3EmptyPll (m
 // #        ######  #    #     #     ####   #####      #     ####       #
 
 inline GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: Periodic4EmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
-	: GitterBasis :: Objects :: Periodic4Empty (f0,t0,f1,t1), _pllx (*this) {
+  : GitterBasis :: Objects :: Periodic4Empty (f0,t0,f1,t1), _pllx (*this) {
   return ;
 }
 
 // Ende - Neu am 23.5.02 (BS)
 
 inline GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: HexaEmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1, myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5)
-	: GitterBasis :: Objects :: HexaEmpty (f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5), _pllx (*this) {
+  : GitterBasis :: Objects :: HexaEmpty (f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5), _pllx (*this) {
   return ;
 }
 

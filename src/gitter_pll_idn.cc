@@ -7,6 +7,9 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.2  2004/12/20 14:19:27  robertk
+ * gcc compileable.
+ *
  * Revision 1.1  2004/10/25 16:41:19  robertk
  * Parallel grid implementations.
  *
@@ -50,7 +53,10 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
   
   typedef set < vector < int >, less < vector < int > > > lp_map_t ;
 
-  typedef map < LinkedObject :: Identifier, pair < AccessIterator < A > :: Handle, lp_map_t :: const_iterator >, less < LinkedObject :: Identifier > > lmap_t ;
+  typedef map < typename LinkedObject :: Identifier, 
+                pair < typename AccessIterator < A > :: Handle, 
+                typename lp_map_t :: const_iterator >, 
+                less < typename LinkedObject :: Identifier > > lmap_t ;
 
   const int me = c.myrank (), np = c.psize (), nl = c.nlinks () ;
   
@@ -76,9 +82,9 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
     {for (int l = 0 ; l < nl ; l ++ ) {
       vector < int > :: const_iterator pos = inout [l].begin (), end = inout [l].end () ;
       while (pos != end) {
-        LinkedObject :: Identifier id ;
+        typename LinkedObject :: Identifier id ;
         id.read (pos,end) ;
-        lmap_t :: iterator hit = look.find (id) ;
+        typename lmap_t :: iterator hit = look.find (id) ;
         if (hit != look.end ()) {
           vector < int > lpn (*(*hit).second.second) ;
           if (find (lpn.begin (), lpn.end (), d [l]) == lpn.end ()) {
@@ -90,14 +96,16 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
       }
     }}
   }
-  tt = vector < pair < list < AccessIterator < A > :: Handle >, list < AccessIterator < A > :: Handle > > > (nl) ;
+  tt = vector < pair < list < typename AccessIterator < A > :: Handle >, 
+                       list < typename AccessIterator < A > :: Handle > > > (nl) ;
   {
     vector < vector < int > > inout (nl) ;
-    {for (lmap_t :: const_iterator pos = look.begin () ; pos != look.end () ; pos ++) {
+    {for (typename lmap_t :: const_iterator pos = look.begin () ; 
+        pos != look.end () ; pos ++) {
       const vector < int > & lk (*(*pos).second.second) ;
       if (* lk.begin () == me) {
-        LinkedObject :: Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier () ;
-        {for (vector < int > :: const_iterator i = lk.begin () ; i != lk.end () ; i ++) {
+        typename LinkedObject :: Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier () ;
+        {for (typename vector < int > :: const_iterator i = lk.begin () ; i != lk.end () ; i ++) {
           if (*i != me) {
             int l = c.link (*i) ;
             tt [l].first.push_back ((*pos).second.first) ;
@@ -108,9 +116,9 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
     }}
     inout = c.exchange (inout) ;
     {for (int i = 0 ; i < nl ; i ++ ) {
-      vector < int > :: const_iterator pos = inout [i].begin (), end = inout [i].end () ;
+      typename vector < int > :: const_iterator pos = inout [i].begin (), end = inout [i].end () ;
       while (pos != inout [i].end ()) {
-        LinkedObject :: Identifier id ;
+        typename LinkedObject :: Identifier id ;
         id.read (pos,end) ;
         assert (look.find (id) != look.end ()) ;
         tt [i].second.push_back ((*look.find (id)).second.first) ;
