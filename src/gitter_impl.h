@@ -9,6 +9,9 @@
 	
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/11/29 12:37:47  robertk
+ * minor changes.
+ *
  * Revision 1.3  2004/11/25 18:47:04  robertk
  * added faceNormal for Hbnd3Default, Hbnd4Default has to be implemented.
  *
@@ -257,11 +260,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         inline MacroGitterBasis () ;
       	virtual ~MacroGitterBasis () {}
 
-        IndexManagerType & indexManager(int codim) 
-        { 
-          assert((codim >= 0) && (codim < 5));
-          return _indexmanager[codim];
-        }
+        // return index manager mostly for restore and backup 
+        inline IndexManagerType & indexManager(int codim); 
         
       protected: 
         // index provider, for every codim one , 4 is for boundary
@@ -276,10 +276,7 @@ class GitterBasisImpl : public GitterBasis {
   inline Makrogitter & container () ;
   inline const Makrogitter & container () const ;
   public :
-     IndexManagerType & indexManager(int codim) 
-     { 
-       return _macrogitter->indexManager(codim);
-     }
+    inline IndexManagerType & indexManager(int codim);
         
     inline GitterBasisImpl () ;
     inline GitterBasisImpl (istream &) ;
@@ -296,7 +293,6 @@ class GitterBasisImpl : public GitterBasis {
 	//    #    #   ##  #          #    #   ##  #
 	//    #    #    #  ######     #    #    #  ######
 	//
-
 
 inline GitterBasis :: Objects :: VertexEmpty :: VertexEmpty (int l, double x, double y, double z, IndexManagerType & im)
   : GitterBasis :: VertexGeo (l,x,y,z,im) {
@@ -517,6 +513,11 @@ inline const Gitter :: Makrogitter & GitterBasisImpl :: container () const {
   return * _macrogitter ;
 }
 
+inline IndexManagerType & GitterBasisImpl :: indexManager (int codim) 
+{ 
+  return _macrogitter->indexManager(codim);
+}
+
 inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (istream & in) {
   macrogridBuilder (in) ;
   return ;
@@ -566,6 +567,12 @@ inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: insert_h
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
   return new Objects :: hbndseg4_IMPL (0,f,i,NULL,NULL );// to be inserted ->  ,b, _indexmanager[4]) ;
+}
+
+inline IndexManagerType & GitterBasis :: MacroGitterBasis :: indexManager (int codim ) 
+{ 
+  assert((codim >= 0) && (codim < 5));
+  return _indexmanager[codim];
 }
 
 #endif	//	GITTER_IMPL_H_INCLUDED
