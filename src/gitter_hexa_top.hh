@@ -7,6 +7,10 @@
 
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/10/19 16:28:36  robertk
+ * backup and restore method for VertexGeo implemented. not runing at the
+ * moment.
+ *
  * Revision 1.2  2004/10/19 13:25:11  robertk
  * Adapted constructors of VertexGeo for IndexManagement.
  *
@@ -307,12 +311,16 @@ template < class A > const Hedge1Top < A > * Hedge1Top < A > :: next () const {
 
 template < class A > void Hedge1Top < A > :: backup (ostream & os) const {
   os.put ((char) getrule ()) ;
+  //myvertex(0)->backup( os );
+  //myvertex(1)->backup( os );
   {for (const inneredge_t * d = down () ; d ; d = d->next ()) d->backup (os) ; }
   return ;
 }
 
 template < class A > void Hedge1Top < A > :: restore (istream & is) {
   char r = (char) is.get () ;
+  //myvertex(0)->restore( is );
+  //myvertex(1)->restore( is );
   refineImmediate (myrule_t (r)) ;
   {for (inneredge_t * d = down () ; d ; d = d->next ()) d->restore (is) ; }
   return ;
@@ -336,8 +344,7 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) {
         {
           int l = 1 + level () ;
           assert (_cv == 0 && _dwn == 0) ;
-          // the last myvertex(0) is submitted for the indexmanager
-          // reference
+          // the last myvertex(0) is submitted for the indexmanager reference, rk
           _cv = new innervertex_t (l, .5 * (myvertex(0)->Point()[0] + myvertex(1)->Point()[0]),
 			      .5 * (myvertex(0)->Point()[1] + myvertex(1)->Point()[1]),  
 			      .5 * (myvertex(0)->Point()[2] + myvertex(1)->Point()[2]) , *(myvertex(0)) ) ;
