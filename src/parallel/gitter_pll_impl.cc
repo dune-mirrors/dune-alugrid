@@ -364,20 +364,6 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & 
 }
 
 void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
-  //static const double x = 0.25 ; // 1./4.
-  //LinearMapping (mytetra ().myvertex (0)->Point (), mytetra ().myvertex (1)->Point (),
-  //       mytetra ().myvertex (2)->Point (), mytetra ().myvertex (3)->Point ())
-  //    .map2world (x,x,x,x,p) ;
-
-  //assert(proc_logFile);
-  assert( (true) ? (os.writeObject ( mytetra(). getIndex() ) , 1 ) : 1);// number of points written 
-  /*
-  if(writeLogFile)
-  {
-    assert(logFile);
-    logFile << "writeDynamicState of el " << mytetra(). getIndex() << "\n";
-  }
-  */
 
 #ifdef _DUNE_USES_ALU3DGRID_
   
@@ -387,22 +373,11 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
   
   const double (& p) [3] = mytetra ().myvertex (face)->Point ();
 
-  assert( (true) ? (os.writeObject ( 1 ) , 1 ) : 1);// number of points written 
+  //assert( (true) ? (os.writeObject ( 1 ) , 1 ) : 1);// number of points written 
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
 
-  /*
-  if(writeLogFile)
-  {
-    logFile << " write p = [";
-    for(int i=0; i<3; i++)
-      logFile << p[i] << ",";
-    logFile << "] \n";
-  }
-  */
-
-  //cout << "writeDynamicState el " << mytetra().getIndex() << " face = " << face << "\n";
 #endif
   return ;
 }

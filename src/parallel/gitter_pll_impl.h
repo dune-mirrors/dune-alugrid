@@ -1299,26 +1299,21 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, int) {
   try {
 
-    //int index;
-    //assert( (true) ? (os.readObject( index ) , 1 ) : 1) ;
-    /*
-    if(writeLogFile)
-    {
-      //cout << "readDynStat \n";
-      assert(logFile);
-      logFile << "readDynamicState of el " << index << "\n";
-    }
-    */
-
 #ifdef _DUNE_USES_ALU3DGRID_
     // read the real level of ghost 
     os.readObject( _ghostLevel );
-    //logFile << "readLevel " << _ghostLevel << "\n"; 
   
 #ifndef NDEBUG
+    /*
     int dimvx;
+    os.readObject( dimvx );
+    if( dimvx != myhbnd().dimVx())
+    {
+      cerr << "dimvx != myhbnd.dimVx() " << dimvx << " | " << myhbnd().dimVx() << "\n";
+      assert(false);
+    }
+    */
 #endif
-    assert( (true) ? (os.readObject( dimvx ), (dimvx == myhbnd().dimVx()) ? 1 : 0 ) : 1) ;
     
     double p[3];
     for(int i=0; i<myhbnd().dimVx(); i++)
@@ -1330,15 +1325,6 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
       myhbnd (). setOppPoint ( i , p ) ;
     }
 
-    /*
-    if(writeLogFile)
-    {
-      logFile << "write p = [";
-      for(int i=0; i<3; i++)
-        logFile << p[i] << ",";
-      logFile << "]\n";
-    }  
-    */
 #endif
     
   } catch (ObjectStream :: EOFException) {
