@@ -1,12 +1,18 @@
-	// (c) bernhard schupp 1997 - 1998
+  // (c) bernhard schupp 1997 - 1998
 
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
+  // $Source$
+  // $Revision$
+  // $Name$
+  // $State$
 
 /* $Id$
  * $Log$
+ * Revision 1.4  2004/12/21 17:17:34  robertk
+ * Imporoved Hbnd3IntStorage.
+ *
+ * removed all new ghost methods and moved them to DuneParallelGridMover
+ * class.
+ *
  * Revision 1.3  2004/12/20 21:41:40  robertk
  * Added coord ghost coord on hndbint.
  *
@@ -190,10 +196,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   if (bt == Gitter :: hbndseg_STI :: closure) {
     if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      //_hbnd3Int [key] = (void *) new pair < hface3_GEO *, int > (face,twst) ;
-      double p[3] = {-666.0,-666.0,-666.0}; 
-      cout << "Insert old hbndface \n";
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,p) ;
+      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst) ;
       return true ;
     }
   } else {
@@ -205,36 +208,6 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
     }
   }
   return false ;
-}
-
-// new method that gets coord of ghost point 
-bool MacroGridBuilder :: InsertUniqueHbnd3_p (int (&v)[3], 
-      Gitter :: hbndseg_STI ::bnd_t bt, const double (&p)[3]) {
-  
-  int twst = cyclicReorder (v,v+3) ;
-  faceKey_t key (v [0], v [1], v [2]) ;
-  if (bt == Gitter :: hbndseg_STI :: closure) {
-    if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
-      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      //_hbnd3Int [key] = (void *) new pair < hface3_GEO *, int > (face,twst) ;
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,p) ;
-      return true ;
-    }
-  } else {
-    if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
-      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt) ;
-      _hbnd3Map [key] = hb3 ;
-      return true ;
-    }
-  }
-  return false ;
-}
-
-// new method that gets coord of ghost point 
-Gitter :: Geometric :: hbndseg3_GEO * MacroGridBuilder :: 
-insertInternalHbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const double (&p)[3] ) {
-  return myBuilder().insert_hbnd3_p (f,i,b,p);
 }
 
 bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI ::bnd_t bt) {
@@ -259,10 +232,10 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
 
 pair < Gitter :: Geometric :: periodic3_GEO *, bool > MacroGridBuilder :: InsertUniquePeriodic3 (int (&v)[6]) {
 
-	// Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
-	// dummerweise mit dem eines Hexaeders verwechselt, falls nicht
-	// der letzte Knoten negativ (mit umgekehrtem Vorzeichen) in die
-	// Schl"ussel eingef"ugt wird.
+  // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
+  // dummerweise mit dem eines Hexaeders verwechselt, falls nicht
+  // der letzte Knoten negativ (mit umgekehrtem Vorzeichen) in die
+  // Schl"ussel eingef"ugt wird.
 
   elementKey_t key (v [0], v [1], v [2], -(v [3])-1) ;
   elementMap_t :: const_iterator hit = _periodic3Map.find (key) ;
@@ -289,10 +262,10 @@ pair < Gitter :: Geometric :: periodic3_GEO *, bool > MacroGridBuilder :: Insert
 // Anfang - Neu am 23.5.02 (BS)
 pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: InsertUniquePeriodic4 (int (&v)[8]) {
 
-	// Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
-	// dummerweise mit dem eines Hexaeders verwechselt, falls nicht
-	// der letzte Knoten negativ (mit umgekehrtem Vorzeichen) in die
-	// Schl"ussel eingef"ugt wird.
+  // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
+  // dummerweise mit dem eines Hexaeders verwechselt, falls nicht
+  // der letzte Knoten negativ (mit umgekehrtem Vorzeichen) in die
+  // Schl"ussel eingef"ugt wird.
 
   elementKey_t key (v [0], v [1], v [3], -(v [4])-1) ;
   elementMap_t :: const_iterator hit = _periodic4Map.find (key) ;
@@ -320,13 +293,13 @@ pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: Insert
 
 void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   
-	// Der Schl"ussel sollte nur in genau einer Map vorliegen.
+  // Der Schl"ussel sollte nur in genau einer Map vorliegen.
 
 // Anfang - Neu am 23.5.02 (BS)
   assert ((_hexaMap.find (k) == _hexaMap.end () ? 0 : 1)
         + (_tetraMap.find(k) == _tetraMap.end () ? 0 : 1)
         + (_periodic3Map.find (k) == _periodic3Map.end () ? 0 : 1)
-	+ (_periodic4Map.find (k) == _periodic4Map.end () ? 0 : 1) == 1) ;
+  + (_periodic4Map.find (k) == _periodic4Map.end () ? 0 : 1) == 1) ;
 // Ende - Neu am 23.5.02 (BS)
 
   elementMap_t :: iterator hit = _tetraMap.find (k) ;
@@ -334,11 +307,8 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
     tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
     for (int i = 0 ; i < 4 ; i ++) {
 
-      //_hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
-    	//  tr->myhface3 (i)->myvertex (2)->ident ())] = new pair < hface3_GEO *, int > (tr->myhface3 (i), tr->twist (i)) ;
-       
       _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
-    	  tr->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr->myvertex(i)->Point()) ;
+        tr->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr->myvertex(i)->Point()) ;
       
     }
     delete tr ;
@@ -350,7 +320,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
     hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
     for (int i = 0 ; i < 6 ; i ++) {
       _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), hx->myhface4 (i)->myvertex (1)->ident (), 
-    	hx->myhface4 (i)->myvertex (2)->ident ())] = new pair < hface4_GEO *, int > (hx->myhface4 (i), hx->twist (i)) ;
+      hx->myhface4 (i)->myvertex (2)->ident ())] = new pair < hface4_GEO *, int > (hx->myhface4 (i), hx->twist (i)) ;
     }
     delete hx ;
     _hexaMap.erase (hit) ;
@@ -360,11 +330,8 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   if (hit != _periodic3Map.end ()) {
     periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
     for (int i = 0 ; i < 2 ; i ++) {
-      double p[3] = {-666.0,-666.0,-666.0};
-      //_hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), p3->myhface3 (i)->myvertex (1)->ident (), 
-    	//p3->myhface3 (i)->myvertex (2)->ident ())] = new pair < hface3_GEO *, int > (p3->myhface3 (i), p3->twist (i)) ;
       _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), p3->myhface3 (i)->myvertex (1)->ident (), 
-    	p3->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (p3->myhface3 (i), p3->twist (i),p) ;
+      p3->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (p3->myhface3 (i), p3->twist (i)) ;
     }
     delete p3 ;
     _periodic3Map.erase (hit) ;
@@ -376,7 +343,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
     periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second ;
     for (int i = 0 ; i < 2 ; i ++) {
       _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), p4->myhface4 (i)->myvertex (1)->ident (), 
-    	p4->myhface4 (i)->myvertex (2)->ident ())] = new pair < hface4_GEO *, int > (p4->myhface4 (i), p4->twist (i)) ;
+      p4->myhface4 (i)->myvertex (2)->ident ())] = new pair < hface4_GEO *, int > (p4->myhface4 (i), p4->twist (i)) ;
     }
     delete p4 ;
     _periodic4Map.erase (hit) ;
@@ -386,71 +353,16 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   abort () ;
   return ;
 }
-/* Test
-void MacroGridBuilder :: removeTetra (int (&v)[4]) {
-  elementMap_t :: iterator hit = _tetraMap.find (elementKey_t (v[0], v[1], v[2], v[3])) ;
-  assert (hit != _tetraMap.end ()) ;
-  tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
-  for (int i = 0 ; i < 4 ; i ++) {
-    _hbnd3Int [faceKey_t  (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
-    	tr->myhface3 (i)->myvertex (2)->ident ())] = new pair < hface3_GEO *, int > (tr->myhface3 (i), tr->twist (i)) ;
-  }
-  delete tr ;
-  _tetraMap.erase (hit) ;
-  return ;
-}
-
-void MacroGridBuilder :: removePeriodic3 (int (&v)[6]) {
-  elementMap_t :: iterator hit = _periodic3Map.find (elementKey_t (v[0], v[1], v[2], -(v[3])-1)) ;
-  assert (hit != _periodic3Map.end ()) ;
-  periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
-  for (int i = 0 ; i < 2 ; i ++) {
-    _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), p3->myhface3 (i)->myvertex (1)->ident (), 
-    	p3->myhface3 (i)->myvertex (2)->ident ())] = new pair < hface3_GEO *, int > (p3->myhface3 (i), p3->twist (i)) ;
-  }
-  delete p3 ;
-  _periodic3Map.erase (hit) ;
-  return ;
-}
-
-// Anfang - Neu am 23.5.02 (BS)
-void MacroGridBuilder :: removePeriodic4 (int (&v)[8]) {
-  elementMap_t :: iterator hit = _periodic4Map.find (elementKey_t (v[0], v[1], v[3], -(v[4])-1)) ;
-  assert (hit != _periodic4Map.end ()) ;
-  periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second ;
-  for (int i = 0 ; i < 2 ; i ++) {
-    _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), p4->myhface4 (i)->myvertex (1)->ident (), 
-    	p4->myhface4 (i)->myvertex (2)->ident ())] = new pair < hface4_GEO *, int > (p4->myhface4 (i), p4->twist (i)) ;
-  }
-  delete p4 ;
-  _periodic4Map.erase (hit) ;
-  return ;
-}
-// Ende - Neu am 23.5.02 (BS)
-
-void MacroGridBuilder :: removeHexa (int (&v)[8]) {
-  elementMap_t :: iterator hit = _hexaMap.find (elementKey_t (v[0], v[1], v[3], v[4])) ;
-  assert (hit != _hexaMap.end ()) ;
-  hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
-  for (int i = 0 ; i < 6 ; i ++) {
-    _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), hx->myhface4 (i)->myvertex (1)->ident (), 
-    	hx->myhface4 (i)->myvertex (2)->ident ())] = new pair < hface4_GEO *, int > (hx->myhface4 (i), hx->twist (i)) ;
-  }
-  delete hx ;
-  _hexaMap.erase (hit) ;
-  return ;
-}
-*/
 
 void MacroGridBuilder :: cubeHexaGrid (int n, ostream & out) {
 
-	// cubeHexaGrid () ist eine statische Methode, die einen ASCII Strom
-	// mit einem gleichm"assigen Hexaedernetz auf dem Einheitsw"urfel
-	// [0,1]^3 beschreibt, wobei <n> die Aufl"osung der Raumrichtungen
-	// vorgibt: Es entstehen n^3 Hexaederelemente, und (n+1)^3 Knoten.
-	// Es ist als Servicemethode f"ur die 'ball' und 'ball_pll' Test-
-	// programme n"otig und deshalb in der MacrogridBuilder Klasse 
-	// beheimatet.
+  // cubeHexaGrid () ist eine statische Methode, die einen ASCII Strom
+  // mit einem gleichm"assigen Hexaedernetz auf dem Einheitsw"urfel
+  // [0,1]^3 beschreibt, wobei <n> die Aufl"osung der Raumrichtungen
+  // vorgibt: Es entstehen n^3 Hexaederelemente, und (n+1)^3 Knoten.
+  // Es ist als Servicemethode f"ur die 'ball' und 'ball_pll' Test-
+  // programme n"otig und deshalb in der MacrogridBuilder Klasse 
+  // beheimatet.
 
   const int bndtype = -1 ;
   out.setf(ios::fixed, ios::floatfield) ;
@@ -484,7 +396,7 @@ void MacroGridBuilder :: cubeHexaGrid (int n, ostream & out) {
     out << endl ;  
   }
   out << 6 * n * n << endl ;
-  {	// unten und oben
+  { // unten und oben
     int l = n * npe * npe ;
     for(int j = 0 ; j < n ; j ++) {
       int jpea = (j + 1) * npe, ja = j * npe ;
@@ -497,7 +409,7 @@ void MacroGridBuilder :: cubeHexaGrid (int n, ostream & out) {
     }
     out << endl ;
   }
-  {	// links und rechts
+  { // links und rechts
     int l = n * npe ;
     for(int j = 0 ; j < n ; j ++) {
       int jpea = (j + 1) * npe * npe, ja = j * npe * npe ;
@@ -505,12 +417,12 @@ void MacroGridBuilder :: cubeHexaGrid (int n, ostream & out) {
         int kpea = (ka + 1) ;
         out << bndtype << "  " << 4 << "  " << ka + jpea << "  " << kpea + jpea << "  " 
             << kpea + ja << "  " << ka + ja << "\n" << bndtype << "  " << 4 << "  " 
-	    << kpea + ja + l << "  " << kpea + jpea + l << "  " << ka + jpea + l << "  " << ka + ja + l << "\n" ;
+      << kpea + ja + l << "  " << kpea + jpea + l << "  " << ka + jpea + l << "  " << ka + ja + l << "\n" ;
       }
     }
     out << endl ;
   }
-  {	// hinten und vorne
+  { // hinten und vorne
     int l = n ;
     for(int j = 0 ; j < n ; j ++) {
       int jpea = (j + 1) * npe * npe, ja = j * npe * npe ;
@@ -518,7 +430,7 @@ void MacroGridBuilder :: cubeHexaGrid (int n, ostream & out) {
         int kpea = (k + 1) * npe, ka = k * npe ;
         out << bndtype << "  " << 4 << "  " << kpea + ja << "  " << kpea + jpea << "  " 
             << ka + jpea << "  " << ka + ja << "\n" << bndtype << "  " << 4 << "  " 
-            << ka + jpea + l << "  " << kpea + jpea + l << "  " << kpea + ja + l << "  " << ka + ja + l << "\n" ;	
+            << ka + jpea + l << "  " << kpea + jpea + l << "  " << kpea + ja + l << "  " << ka + ja + l << "\n" ; 
       }
     }
     out << endl ;
@@ -528,28 +440,28 @@ void MacroGridBuilder :: cubeHexaGrid (int n, ostream & out) {
 
 void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
 
-	// generateRawHexaImage () ist im nur ein Adapter, der aus den 
-	// bisherigen Hexaederdateiformaten ein entsprechendes 'rohes'
-	// Dateiformat f"ur den Macrogridinflator erzeugt. Damit bleibt
-	// die Option erhalten das Format der rohen Dateien auf weitere
-	// Elemente auszudehnen und zu modifizieren, ohne die 
-	// Kompatibilit"at zu den alten Hexaederdateien zu verlieren.
-	// Das alte Format sieht im wesentlichen so aus:
-	//
-	// <Anzahl der Knoten : int >			/* 1.Zeile der Datei
-	// <x-Koordinate : float>  <y-Koo. : float>  <z-Koo. : float>
-	// ...						/* f"ur den letzten Knoten
-	// <Anzahl der Elemente : int>
-	// <KnotenNr. 0: int> ... <KnotenNr. 7: int>	/* f"ur das erste Hexaederelement
-	// ...						/* f"ur das letzte Hexaederelement
-	// <Anzahl der Randfl"achen : int>
-	// <Randtyp>  4  <KnotenNr. 0> ... <KnotenNr. 3>/* erste Randfl"ache
-	// ...						/* letzte Randfl"ache
-	// <Identifier f"ur den 0. Knoten : int>	/* Identifierliste ist im seriellen
-	// ...						/* Verfahren oder beim Aufsetzen aus
-	// <Identifier f"ur den letzten Knoten : int>	/* einem Gitter optional, sonst muss
-	//						/* jeder Vertex eine eigene Nummer haben
-	
+  // generateRawHexaImage () ist im nur ein Adapter, der aus den 
+  // bisherigen Hexaederdateiformaten ein entsprechendes 'rohes'
+  // Dateiformat f"ur den Macrogridinflator erzeugt. Damit bleibt
+  // die Option erhalten das Format der rohen Dateien auf weitere
+  // Elemente auszudehnen und zu modifizieren, ohne die 
+  // Kompatibilit"at zu den alten Hexaederdateien zu verlieren.
+  // Das alte Format sieht im wesentlichen so aus:
+  //
+  // <Anzahl der Knoten : int >     /* 1.Zeile der Datei
+  // <x-Koordinate : float>  <y-Koo. : float>  <z-Koo. : float>
+  // ...            /* f"ur den letzten Knoten
+  // <Anzahl der Elemente : int>
+  // <KnotenNr. 0: int> ... <KnotenNr. 7: int>  /* f"ur das erste Hexaederelement
+  // ...            /* f"ur das letzte Hexaederelement
+  // <Anzahl der Randfl"achen : int>
+  // <Randtyp>  4  <KnotenNr. 0> ... <KnotenNr. 3>/* erste Randfl"ache
+  // ...            /* letzte Randfl"ache
+  // <Identifier f"ur den 0. Knoten : int>  /* Identifierliste ist im seriellen
+  // ...            /* Verfahren oder beim Aufsetzen aus
+  // <Identifier f"ur den letzten Knoten : int> /* einem Gitter optional, sonst muss
+  //            /* jeder Vertex eine eigene Nummer haben
+  
   const int start = clock () ;
   int nv = 0, ne = 0, nb = 0, nper = 0 ;
   int (* vnum)[8] = 0, (* bvec)[5] = 0, (* pervec)[8] = 0, * pident = 0 ;
@@ -581,13 +493,13 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
       in >> identification >> n;
       if (n == 4) {
         in >> bvec [nb][0] >> bvec [nb][1] >> bvec [nb][2] >> bvec [nb][3] ;
-	bvec [nb][4] = identification ;
-	nb++; 
-      }	
+  bvec [nb][4] = identification ;
+  nb++; 
+      } 
       else if (n == 8 && identification == -20) {
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >> pervec [nper][3]
-	   >> pervec [nper][4] >> pervec [nper][5] >> pervec [nper][6] >> pervec [nper][7] ;
-	nper++;
+     >> pervec [nper][4] >> pervec [nper][5] >> pervec [nper][6] >> pervec [nper][7] ;
+  nper++;
       }
       else {
         cerr << "**FEHLER (FATAL):  "__FILE__ << " " << __LINE__ << " ... Exiting." << endl ;
@@ -621,23 +533,23 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
     os << (ne + nper) << endl ;
     for (int i = 0 ; i < ne ; i ++)
       os << HEXA_RAW << " " << pident [vnum [i][0]] << " " << pident [vnum [i][1]] << " "
-	 << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << " " << pident [vnum [i][4]] << " " 
-	 << pident [vnum [i][5]] << " " << pident [vnum [i][6]] << " " << pident [vnum [i][7]] << endl ;
+   << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << " " << pident [vnum [i][4]] << " " 
+   << pident [vnum [i][5]] << " " << pident [vnum [i][6]] << " " << pident [vnum [i][7]] << endl ;
   }
   {
 // Anfang - Neu am 23.5.02 (BS)
     for (int i = 0 ; i < nper ; i ++)
       os << PERIODIC4_RAW << " " << pident [pervec [i][0]] << " " << pident [pervec [i][1]] << " "
-	 		<< pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
-	 		<< pident [pervec [i][4]] << " " << pident [pervec [i][5]] << " " 
- 			<< pident [pervec [i][6]] << " " << pident [pervec [i][7]] << endl ;
+      << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
+      << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << " " 
+      << pident [pervec [i][6]] << " " << pident [pervec [i][7]] << endl ;
 // Ende - Neu am 23.5.02 (BS)
   }
   {
     os << nb << endl ;
     for (int i = 0 ; i < nb ; i ++)
       os << 4 << " " << pident [bvec [i][0]] << " " << pident [bvec [i][1]] << " "
-	 << pident [bvec [i][2]] << " " << pident [bvec [i][3]] << " " << bvec [i][4] << endl ;
+   << pident [bvec [i][2]] << " " << pident [bvec [i][3]] << " " << bvec [i][4] << endl ;
   }
   delete [] vnum ;
   delete [] coord ;
@@ -681,13 +593,13 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
       in >> identification >> n;
       if (n==3) {
         in >> bvec [nb][0] >> bvec [nb][1] >> bvec [nb][2] ;
-	bvec [nb][3] = identification ;
-	nb++; 
-      }	
+  bvec [nb][3] = identification ;
+  nb++; 
+      } 
       else if (n == 6 && identification == -20) {
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >>
-	      pervec [nper][3] >> pervec [nper][4] >> pervec [nper][5];
-	nper++;
+        pervec [nper][3] >> pervec [nper][4] >> pervec [nper][5];
+  nper++;
       }
       else 
         abort();
@@ -720,17 +632,17 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
     os << ne+nper << endl ;
     for (i = 0 ; i < ne ; i ++)
       os << TETRA_RAW << " " << pident [vnum [i][0]] << " " << pident [vnum [i][1]] << " "
-	 		<< pident [vnum [i][2]] << " " << pident [vnum [i][3]] << endl ;
+      << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << endl ;
     for (i = 0 ; i < nper ; i ++)
       os << PERIODIC3_RAW << " " << pident [pervec [i][0]] << " " << pident [pervec [i][1]] << " "
-	 		<< pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
-	 		<< pident [pervec [i][4]] << " " << pident [pervec [i][5]] << endl ;
+      << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
+      << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << endl ;
   }
   {
     os << nb << endl ;
     for (int i = 0 ; i < nb ; i ++)
       os << 3 << " " << pident [bvec [i][0]] << " " << pident [bvec [i][1]] << " "
-	 << pident [bvec [i][2]] << " " << " " << bvec [i][3] << endl ;
+   << pident [bvec [i][2]] << " " << " " << bvec [i][3] << endl ;
   }
   delete [] vnum ;
   delete [] coord ;
@@ -742,12 +654,12 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
   return ;
 }
 
-MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) {
-
+MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) , _finalized(false) 
+{
   {
     for (list < VertexGeo * > :: iterator i = myBuilder ()._vertexList.begin () ;
       i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
-      	_vertexMap [(*i)->ident ()] = (*i) ;
+        _vertexMap [(*i)->ident ()] = (*i) ;
   }
   {
     for (list < hedge1_GEO * > :: iterator i = myBuilder ()._hedge1List.begin () ;
@@ -763,7 +675,7 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) {
   {
     for (list < hface4_GEO * > :: iterator i = myBuilder ()._hface4List.begin () ; i != myBuilder ()._hface4List.end () ; 
       myBuilder ()._hface4List.erase (i ++)) _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (),
-      	(*i)->myvertex (2)->ident ())] = (*i) ;
+        (*i)->myvertex (2)->ident ())] = (*i) ;
   }
   {for (list < hbndseg4_GEO * > :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
     faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
@@ -778,9 +690,7 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) {
     myBuilder ()._hbndseg3List.erase (i++)) {
     faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
-      double p[3] = {-666.0,-666.0,-666.0};
-      //_hbnd3Int [key] = (void *) new pair < hface3_GEO *, int > ((*i)->myhface3 (0), (*i)->twist (0)) ;
-      _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), p) ;
+      _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0)) ;
       delete (*i) ;
     } else {
       _hbnd3Map [key] = (*i) ;
@@ -789,30 +699,37 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b) : _mgb (b) {
   {for (list < tetra_GEO * > :: iterator i = myBuilder ()._tetraList.begin () ; i != myBuilder ()._tetraList.end () ; 
       myBuilder ()._tetraList.erase (i++)) {
       _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-      		 (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i) ;
+           (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i) ;
   }}
   {for (list < periodic3_GEO * > :: iterator i = myBuilder ()._periodic3List.begin () ; i != myBuilder ()._periodic3List.end () ; 
       myBuilder ()._periodic3List.erase (i++)) {
       _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-      		 (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
+           (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
   }}
 // Anfang - Neu am 23.5.02 (BS)
   {for (list < periodic4_GEO * > :: iterator i = myBuilder ()._periodic4List.begin () ; i != myBuilder ()._periodic4List.end () ; 
       myBuilder ()._periodic4List.erase (i++)) {
       _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-      		 (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
+           (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
   }}
 // Ende - Neu am 23.5.02 (BS)
   {
     for (list < hexa_GEO * > :: iterator i = myBuilder ()._hexaList.begin () ; i != myBuilder ()._hexaList.end () ; 
       myBuilder ()._hexaList.erase (i++)) _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-      						(*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
+                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
   }
   return ; 
 }
 
-MacroGridBuilder :: ~MacroGridBuilder () {
+MacroGridBuilder :: ~MacroGridBuilder () 
+{
+  // _finalized is true if the method was called in inherited classes 
+  if(!_finalized) finalize();
+}
 
+// clean the map tables 
+void MacroGridBuilder :: finalize () 
+{
   {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
     myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
   }
@@ -822,11 +739,11 @@ MacroGridBuilder :: ~MacroGridBuilder () {
   {for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; _periodic3Map.erase (i++))
     myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
   }
-// Anfang - Neu am 23.5.02 (BS)
+  
   {for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; _periodic4Map.erase (i++))
     myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
   }
-// Ende - Neu am 23.5.02 (BS)
+
   {for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Map.end () ; )
     if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) {
       delete (hbndseg4_GEO *)(*i).second ;
@@ -854,12 +771,9 @@ MacroGridBuilder :: ~MacroGridBuilder () {
 
   // here the internal boundary elements are created 
   {for (hbndintMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
-    //const pair < hface3_GEO *, int > & p = * (pair < hface3_GEO *, int > *)(*i).second ;
     const Hbnd3IntStorage & p = * (Hbnd3IntStorage *) (*i).second ;
-    if (p.first->ref == 1) {
-      // default is return insert_hbnd3 
-      hbndseg3_GEO * hb3 = insertInternalHbnd3 ( p.first,p.second,Gitter :: hbndseg_STI :: closure , p.getPoint() );
-      //myBuilder ().insert_hbnd3 (p.first,p.second,Gitter :: hbndseg_STI :: closure) ;    
+    if (p.first()->ref == 1) {
+      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure) ;    
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (pair < hface3_GEO *, int > *)(*i).second ;
@@ -869,7 +783,7 @@ MacroGridBuilder :: ~MacroGridBuilder () {
       delete (hface4_GEO *)(*i).second ;
       _face4Map.erase (i++) ;
     } else {
-      //assert (((hface4_GEO *)(*i).second)->ref == 2) ;
+      assert (((hface4_GEO *)(*i).second)->ref == 2) ;
       myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
     }
   }
@@ -878,7 +792,7 @@ MacroGridBuilder :: ~MacroGridBuilder () {
       delete (hface3_GEO *)(*i).second ;
       _face3Map.erase (i++) ;
     } else {
-      //assert (((hface3_GEO *)(*i).second)->ref == 2) ;
+      assert (((hface3_GEO *)(*i).second)->ref == 2) ;
       myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
     }
   }}
@@ -887,7 +801,7 @@ MacroGridBuilder :: ~MacroGridBuilder () {
       delete (*i).second ;
       _edgeMap.erase (i++) ;
     } else {
-      //assert ((*i).second->ref >= 1) ;
+      assert ((*i).second->ref >= 1) ;
       myBuilder ()._hedge1List.push_back ((*i ++).second) ;
     }
   }
@@ -896,11 +810,12 @@ MacroGridBuilder :: ~MacroGridBuilder () {
       delete (*i).second ;
       _vertexMap.erase (i++) ;
     } else {
-      //assert ((*i).second->ref >= 2) ;
+      assert ((*i).second->ref >= 2) ;
       myBuilder ()._vertexList.push_back ((*i ++).second) ;
     }
   }
-  myBuilder ()._modified = true ;	// wichtig !
+  myBuilder ()._modified = true ; // wichtig !
+  _finalized = true;
   return ;
 }
 
@@ -924,38 +839,38 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
       rawInput >> elementType ;
       switch (elementType) {
         case HEXA_RAW :
-	  {
+    {
             int v [8] ;
             rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
-	    InsertUniqueHexa (v) ;
-	  }
-	  break ;
+      InsertUniqueHexa (v) ;
+    }
+    break ;
         case TETRA_RAW :
           {
-	    int v [4] ;
+      int v [4] ;
             rawInput >> v [0] >> v [1] >> v [2] >> v [3] ;
             InsertUniqueTetra (v) ;
           }
-	  break ;
-	case PERIODIC3_RAW :
-	  {
-	    int v [6] ;
-	    rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] ;
-	    InsertUniquePeriodic3 (v) ;
-	  }
-	  break ;
-	case PERIODIC4_RAW :
+    break ;
+  case PERIODIC3_RAW :
+    {
+      int v [6] ;
+      rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] ;
+      InsertUniquePeriodic3 (v) ;
+    }
+    break ;
+  case PERIODIC4_RAW :
           {
             int v [8] ;
-	    rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
-	    InsertUniquePeriodic4 (v) ;
+      rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
+      InsertUniquePeriodic4 (v) ;
           }
           break ;
-	default :
-	  cerr << "**FEHLER (FATAL): Unbekannte ElementID im Rawformat File [" 
-	       << elementType << "] in "__FILE__ << " " << __LINE__ << " ... Exiting. " << endl ;
+  default :
+    cerr << "**FEHLER (FATAL): Unbekannte ElementID im Rawformat File [" 
+         << elementType << "] in "__FILE__ << " " << __LINE__ << " ... Exiting. " << endl ;
           exit (1) ;
-	  break ;
+    break ;
       }
     }
   }
@@ -974,7 +889,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
         rawInput >> v [0] >> v [1] >> v [2] >> bt ;
         InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(-bt)) ;
       } else {
-	cerr << " MacroGridBuilder :: inflateMacroGrid (istream &) FEHLER (fatal): kann" ;
+  cerr << " MacroGridBuilder :: inflateMacroGrid (istream &) FEHLER (fatal): kann" ;
         cerr << " Randelement mit Polygonl\"ange " << polygonLen << " NICHT erzeugen " << endl ;
         abort () ;
       }
@@ -996,29 +911,29 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) {
   assert (in.good ()) ;
   if (c == int ('!')) {
   
-	// Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
-	// und auf 'Tetraeder' oder 'Hexaeder' untersuchen.
+  // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
+  // und auf 'Tetraeder' oder 'Hexaeder' untersuchen.
 
     strstreambuf buf ;
-    in.get () ;		// Das Kommentarzeichen wird entfernt.
+    in.get () ;   // Das Kommentarzeichen wird entfernt.
     in.get (buf) ;
     int len = in.gcount () ;
-    in.get () ;		// Der folgende Zeilenumbruchwird auch entfernt.
+    in.get () ;   // Der folgende Zeilenumbruchwird auch entfernt.
     istream is (& buf) ;
     char * str = new char [len + 1] ;
     assert (str) ;
-    is >> str ;		// Das erste Wort nach dem Kommentar steht jetzt in str.
-    			// Alle weiteren k"onnen noch aus is gelesen werden, das
-			// array str ist so lang, wie die gesamte Zeile in 'buf'.
+    is >> str ;   // Das erste Wort nach dem Kommentar steht jetzt in str.
+          // Alle weiteren k"onnen noch aus is gelesen werden, das
+      // array str ist so lang, wie die gesamte Zeile in 'buf'.
 
     if (0 == strcmp (str, "Tetraeder")) {
     
-    			// Versuchen wir's mal mit Tetraedern
+          // Versuchen wir's mal mit Tetraedern
     
       MacroGridBuilder :: generateRawTetraImage (in,raw) ;
     } else if (0 == strcmp (str, "Hexaeder")) {
     
-			// oder andernfalls mit Hexaedern.
+      // oder andernfalls mit Hexaedern.
     
       MacroGridBuilder :: generateRawHexaImage (in,raw) ;
     } else {

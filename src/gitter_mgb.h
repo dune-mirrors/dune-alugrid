@@ -7,6 +7,12 @@
   
 /* $Id$
  * $Log$
+ * Revision 1.3  2004/12/21 17:17:34  robertk
+ * Imporoved Hbnd3IntStorage.
+ *
+ * removed all new ghost methods and moved them to DuneParallelGridMover
+ * class.
+ *
  * Revision 1.2  2004/12/20 21:41:41  robertk
  * Added coord ghost coord on hndbint.
  *
@@ -76,24 +82,26 @@ template < class RandomAccessIterator > inline int cyclicReorder (RandomAccessIt
 }
 
 class MacroGridBuilder : protected Gitter :: Geometric {
+  protected :
   class Hbnd3IntStorage
   {
     double _p[3]; 
-
+    bool _pInit; // true if p was initialized with a value 
+    // public that is can be used like pair 
+    hface3_GEO * _first;
+    int          _second;
   public:  
-    hface3_GEO * first;
-    int second;
+    // store point and face and twist  
+    Hbnd3IntStorage( hface3_GEO * f, int tw, const double (&p) [3] );
     
-    Hbnd3IntStorage( hface3_GEO * f, int tw, const double (&p) [3] ) 
-      : first(f) , second(tw) 
-    {
-      for(int i=0; i<3; i++) _p[i] = p[i];
-    }
-    
-    const double (& getPoint () const )[3]
-    { 
-      return _p;
-    }
+    // store face and twist and set point to default 
+    Hbnd3IntStorage( hface3_GEO * f, int tw ); 
+
+    // return reference to _p
+    const double (& getPoint () const )[3];
+
+    hface3_GEO * first  () const { return _first;  }
+    int          second () const { return _second; }
   };
 
   protected :
@@ -113,13 +121,12 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     vertexMap_t  _vertexMap ;
     edgeMap_t    _edgeMap ;
     
-    //faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd3Int, _hbnd4Map, _hbnd4Int ;
     faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd4Map, _hbnd4Int ;
     hbndintMap_t _hbnd3Int; // new type here, so we dont have to cast to void *
-// Anfang - Neu am 23.5.02 (BS)
+    // todo here: same thing for hbnd4int 
+    
     elementMap_t _hexaMap, _tetraMap, _periodic3Map, _periodic4Map ;
-// Ende - Neu am 23.5.02 (BS)
-
+    
     inline BuilderIF & myBuilder () ;
     inline const BuilderIF & myBuilder () const ;
     void removeElement (const elementKey_t &) ;
@@ -130,24 +137,13 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     virtual pair < hface4_GEO *, bool >    InsertUniqueHface4 (int (&)[4]) ;
     virtual pair < tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4]) ;
     virtual pair < periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&)[6]) ;
-// Anfang - Neu am 23.5.02 (BS)
+
     virtual pair < periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&)[8]) ;
-// Ende - Neu am 23.5.02 (BS)
     virtual pair < hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8]) ;
     
-    virtual bool InsertUniqueHbnd3   (int (&)[3], Gitter :: hbndseg :: bnd_t) ;
-    virtual bool InsertUniqueHbnd3_p (int (&)[3], Gitter :: hbndseg :: bnd_t,const double (&p) [3]) ;
-    
+    virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter :: hbndseg :: bnd_t) ;
     virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter :: hbndseg :: bnd_t) ;
 
-    hbndseg3_GEO * insertInternalHbnd3 ( hface3_GEO * f,int i, 
-        Gitter :: hbndseg :: bnd_t b, const double (&p)[3] );
-//    virtual void removeHexa (int (&)[8]) ;
-//    virtual void removePeriodic3 (int (&)[6]) ;
-// Anfang - Neu am 23.5.02 (BS)
-//    virtual void removePeriodic4 (int (&)[8]) ;
-// Ende - Neu am 23.5.02 (BS)
-//    virtual void removeTetra (int (&)[4]) ;
   public :
     static bool debugOption (int) ;
     static void generateRawHexaImage (istream &, ostream &) ;
@@ -157,20 +153,24 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     virtual ~MacroGridBuilder () ;
     void inflateMacroGrid (istream &) ;
     void backupMacroGrid (ostream &) ;
+
+    // former destructor 
+    void finalize ();
+  protected:  
+    bool _finalized;
   private :
     BuilderIF & _mgb ;
 } ;
 
 
-  //
-  //    #    #    #  #          #    #    #  ######
-  //    #    ##   #  #          #    ##   #  #
-  //    #    # #  #  #          #    # #  #  #####
-  //    #    #  # #  #          #    #  # #  #
-  //    #    #   ##  #          #    #   ##  #
-  //    #    #    #  ######     #    #    #  ######
-  //
-
+//
+//    #    #    #  #          #    #    #  ######
+//    #    ##   #  #          #    ##   #  #
+//    #    # #  #  #          #    # #  #  #####
+//    #    #  # #  #          #    #  # #  #
+//    #    #   ##  #          #    #   ##  #
+//    #    #    #  ######     #    #    #  ######
+//
 inline Gitter :: Geometric :: BuilderIF & MacroGridBuilder :: myBuilder () {
   return _mgb ;
 }
@@ -181,6 +181,26 @@ inline const Gitter :: Geometric :: BuilderIF & MacroGridBuilder :: myBuilder ()
 
 inline bool MacroGridBuilder :: debugOption (int level) {
   return (getenv ("VERBOSE_MGB") ? ( atoi (getenv ("VERBOSE_MGB")) > level ? true : (level == 0)) : false) ;
+}
+
+inline MacroGridBuilder :: Hbnd3IntStorage :: 
+Hbnd3IntStorage( hface3_GEO * f, int tw, const double (&p) [3] )
+ : _first(f) , _second(tw) , _pInit(true)
+{
+  for(int i=0; i<3; i++) _p[i] = p[i];
+}
+    
+inline MacroGridBuilder :: Hbnd3IntStorage :: 
+Hbnd3IntStorage( hface3_GEO * f, int tw )
+ : _first(f) , _second(tw) , _pInit(false)
+{
+  for(int i=0; i<3; i++) _p[i] = -666.0;
+}
+
+inline const double (& MacroGridBuilder :: Hbnd3IntStorage :: getPoint () const )[3]
+{ 
+  assert(_pInit);
+  return _p;
 }
 
 #endif
