@@ -69,7 +69,7 @@ public:
   void duneExchangeDynamicState ();
   
   // exchange data of dune 
-  void duneExchangeData (GatherScatterType &, bool leaf);
+  void duneExchangeData (GatherScatterType &, bool leaf = false );
 
   // return indexmanger 
   IndexManagerType & indexManager(int codim)
