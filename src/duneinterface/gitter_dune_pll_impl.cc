@@ -203,7 +203,83 @@ void GitterDunePll :: duneExchangeDynamicState ()
   }
 }
 
-void GitterDunePll :: duneExchangeData (GatherScatterType & gs) 
+// reun only over leaf Level 
+void GitterDunePll :: duneExchangeDataLeaf (GatherScatterType & gs) 
+{
+  // Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
+  // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
+  // die einer "Anderung des statischen Zustands entsprechen. Sie wird in
+  // diesem Fall NACH dem Update des statischen Zustands aufgerufen, und
+  // kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
+  // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
+  // Regel hier eingeschleift werden.
+  {
+  const int nl = mpAccess ().nlinks () ;
+#ifndef NDEBUG
+  const int start = clock () ;
+#endif
+  try 
+  {
+    typedef LeafIteratorTT< hface_STI > InnerIteratorType;
+    typedef LeafIteratorTT< hface_STI > OuterIteratorType;
+                
+    vector < ObjectStream > osv (nl) ;
+    {
+      for (int l = 0 ; l < nl ; l ++) 
+      {
+        {
+          LeafIteratorTT < hface_STI > w (*this,l);
+          for (w.inner() .first () ; ! w.inner().done () ; w.inner().next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = w.inner().item ().accessPllX ().accessInnerPllX () ;
+            p.first->writeDynamicState (osv [l], p.second) ;
+            p.first->writeDynamicState (osv [l], gs) ;
+          }
+        
+          for (w.outer().first () ; ! w.outer().done () ; w.outer().next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = w.outer().item ().accessPllX ().accessInnerPllX () ;
+            p.first->writeDynamicState (osv [l], p.second) ;
+            p.first->writeDynamicState (osv [l], gs) ;
+          }
+        }
+      } 
+    }
+    
+    osv = mpAccess ().exchange (osv) ;
+    
+    { 
+      for (int l = 0 ; l < nl ; l ++ ) 
+      {
+        {
+          LeafIteratorTT< hface_STI > w (*this,l) ;
+          for (w.outer().first () ; ! w.outer().done () ; w.outer().next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = w.outer().item ().accessPllX ().accessOuterPllX () ;
+            p.first->readDynamicState (osv [l], p.second) ;
+            p.first->readDynamicState (osv [l], gs) ;
+          }
+        
+          for (w.inner().first () ; ! w.inner().done () ; w.inner().next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = w.inner().item ().accessPllX ().accessOuterPllX () ;
+            p.first->readDynamicState (osv [l], p.second) ;
+            p.first->readDynamicState (osv [l], gs ) ;
+          }
+        }
+      } 
+    }
+  } 
+  catch (Parallel ::  AccessPllException) 
+  {
+    cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
+  }
+  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: duneExchangeData () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
+  }
+}
+
+// go over all levels 
+void GitterDunePll :: duneExchangeDataAll (GatherScatterType & gs) 
 {
   // Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
   // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
@@ -285,6 +361,16 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs)
   }
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: duneExchangeData () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   }
+}
+
+void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf) 
+{
+  if(leaf) 
+    this->duneExchangeDataLeaf(gs);
+  else 
+    this->duneExchangeDataAll(gs);
+
+  return; 
 }
 
 bool GitterDunePll :: refine () {
