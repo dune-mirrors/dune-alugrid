@@ -203,6 +203,7 @@ void GitterDunePll :: duneExchangeDynamicState ()
   }
 }
 
+#if 0
 // reun only over leaf Level 
 void GitterDunePll :: duneExchangeDataLeaf (GatherScatterType & gs) 
 {
@@ -277,6 +278,7 @@ void GitterDunePll :: duneExchangeDataLeaf (GatherScatterType & gs)
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: duneExchangeData () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   }
 }
+#endif
 
 // go over all levels 
 void GitterDunePll :: duneExchangeDataAll (GatherScatterType & gs) 
@@ -365,11 +367,10 @@ void GitterDunePll :: duneExchangeDataAll (GatherScatterType & gs)
 
 void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf) 
 {
-  if(leaf) 
-    this->duneExchangeDataLeaf(gs);
-  else 
-    this->duneExchangeDataAll(gs);
-
+  //if(leaf) 
+  //  this->duneExchangeDataLeaf(gs);
+  //else 
+  this->duneExchangeDataAll(gs);
   return; 
 }
 
