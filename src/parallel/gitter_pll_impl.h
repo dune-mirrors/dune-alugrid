@@ -619,13 +619,15 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       typedef hface3_IMPL innerface_t ;
     public :
       typedef TetraPllXBase mypllx_t ;
-      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
+      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
            ~TetraEmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
           private :
       mypllx_t _pllx ;
+
+      friend class TetraTop < TetraEmptyPll >;
   } ;
   typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
 
@@ -633,7 +635,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     public :
       typedef TetraPllXBaseMacro mypllx_t ;
       TetraEmptyPllMacro (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-            myhface3_t *,int, IndexManagerType & im) ;
+            myhface3_t *,int, IndexManagerType &, Gitter * ) ;
      ~TetraEmptyPllMacro () ;
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -807,8 +809,10 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
         IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
       public :
-        MacroGitterBasisPll (istream &) ;
-        MacroGitterBasisPll () ;
+        // Gitter is here a reference to the actual grid this macro grid
+        // belongs to 
+        MacroGitterBasisPll (Gitter * , istream &) ;
+        MacroGitterBasisPll (Gitter * ) ;
        ~MacroGitterBasisPll () ;
 
        // Dune index management 
@@ -1443,8 +1447,8 @@ inline GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: Hface4EmptyPll
   return ;
 }
 
-inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: TetraEmptyPll (myhface3_t * f0, int t0, myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3)
-  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3), _pllx (*this) {
+inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: TetraEmptyPll (myhface3_t * f0, int t0, myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3, Gitter * mygrid)
+  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3,mygrid), _pllx (*this) {
   return ;
 }
 
