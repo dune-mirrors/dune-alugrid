@@ -423,13 +423,17 @@ inline GitterBasis :: Objects :: TetraEmpty :: TetraEmpty (myhface3_t * f0, int 
   return ;
 }
 
+// calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: TetraEmpty :: preCoarsening () 
 {
+  assert( _myGrid );
   return _myGrid->preCoarsening(*this);
 }
 
+// calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: TetraEmpty :: postRefinement () 
 {
+  assert( _myGrid );
   return _myGrid->postRefinement(*this);
 }
 
@@ -438,12 +442,10 @@ inline GitterBasis :: Objects :: Periodic3Empty :: Periodic3Empty (myhface3_t * 
   return ;
 }
 
-// Anfang - Neu am 23.5.02 (BS)
 inline GitterBasis :: Objects :: Periodic4Empty :: Periodic4Empty (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
   : Gitter :: Geometric :: Periodic4 (f0, t0, f1, t1) {
   return ;
 }
-// Ende - Neu am 23.5.02 (BS)
 
 inline GitterBasis :: Objects :: HexaEmpty :: HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
   myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5)
