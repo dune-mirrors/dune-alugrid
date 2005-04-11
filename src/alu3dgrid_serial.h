@@ -14,9 +14,12 @@ typedef enum {hexa,tetra} grid_t;
 struct GatherScatter;
 typedef GatherScatter GatherScatterType;
 
+
 #include "serial/key.h"
 #include "serial/serialize.h"
 #include "serial/gitter_sti.h"
+
+typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
 
 
 #ifndef _ALU3DGRID_PARALLEL_
