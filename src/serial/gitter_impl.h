@@ -157,9 +157,16 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef hface3_IMPL innerface_t ;
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
-            inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
+            inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
+
            ~TetraEmpty () {}
-    public :
+            int preCoarsening  () ; 
+            int postRefinement () ;
+
+            Gitter * _myGrid;
+            
+       // for _myGrid     
+       friend class TetraTop < TetraEmpty > ;     
   } ;
   typedef TetraTop < TetraEmpty > tetra_IMPL ;
   
@@ -214,8 +221,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual inline periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
         virtual inline hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
       public :
-        inline MacroGitterBasis (istream &) ;
-        inline MacroGitterBasis () ;
+        // Gitter is a reference to our grid 
+        inline MacroGitterBasis (Gitter * , istream &) ;
+        inline MacroGitterBasis (Gitter * ) ;
         // implemended here because for this calss we have no implementation section 
         virtual ~MacroGitterBasis () { this->removeMacroGrid(); }
 
@@ -225,6 +233,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       protected: 
         // index provider, for every codim one , 4 is for boundary
         IndexManagerType _indexmanager[ numOfIndexManager ];
+        // reference to our grid, for insert_tetra mainly 
+        Gitter * _myGrid; 
     } ;
 } ;
 
@@ -409,8 +419,18 @@ inline void GitterBasis :: Objects :: Hbnd4Default :: faceNormal( double * norma
 }
 
 inline GitterBasis :: Objects :: TetraEmpty :: TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
-  myhface3_t * f2, int t2, myhface3_t * f3, int t3) : Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) {
+  myhface3_t * f2, int t2, myhface3_t * f3, int t3, Gitter * mygrid ) : Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) , _myGrid(mygrid) {
   return ;
+}
+
+inline int GitterBasis :: Objects :: TetraEmpty :: preCoarsening () 
+{
+  return _myGrid->preCoarsening(*this);
+}
+
+inline int GitterBasis :: Objects :: TetraEmpty :: postRefinement () 
+{
+  return _myGrid->postRefinement(*this);
 }
 
 inline GitterBasis :: Objects :: Periodic3Empty :: Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
@@ -432,14 +452,14 @@ inline GitterBasis :: Objects :: HexaEmpty :: HexaEmpty (myhface4_t * f0, int t0
 }
 
 inline GitterBasisImpl :: GitterBasisImpl () : _macrogitter (0) {
-  _macrogitter = new MacroGitterBasis () ;
+  _macrogitter = new MacroGitterBasis ( this ) ;
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
   return ;
 }
 
 inline GitterBasisImpl :: GitterBasisImpl (istream & in) : _macrogitter (0) {
-  _macrogitter = new MacroGitterBasis (in) ;
+  _macrogitter = new MacroGitterBasis ( this , in) ;
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
   return ;
@@ -450,9 +470,9 @@ inline GitterBasisImpl :: GitterBasisImpl (const char * file) : _macrogitter (0)
   if (!in) {
     cerr << "  GitterBasisImpl :: GitterBasisImpl (const char *) FEHLER (IGNORIERT) " ;
     cerr << "beim \"Offnen der Datei " << (file ? file : "\"null\"" ) << endl ;
-    _macrogitter = new MacroGitterBasis () ;
+    _macrogitter = new MacroGitterBasis ( this ) ;
   } else {
-    _macrogitter = new MacroGitterBasis (in) ;
+    _macrogitter = new MacroGitterBasis ( this, in) ;
   }
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
@@ -477,12 +497,12 @@ inline IndexManagerType & GitterBasisImpl :: indexManager (int codim)
   return _macrogitter->indexManager(codim);
 }
 
-inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (istream & in) {
+inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid, istream & in) : _myGrid(mygrid) {
   macrogridBuilder (in) ;
   return ;
 }
 
-inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis () {
+inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid) : _myGrid(mygrid) {
   return ;
 }
 
@@ -503,7 +523,7 @@ inline GitterBasis :: hface4_GEO * GitterBasis :: MacroGitterBasis :: insert_hfa
 }
 
 inline GitterBasis :: tetra_GEO * GitterBasis :: MacroGitterBasis :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {
-  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], indexManager(0) ) ;
+  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], indexManager(0) , _myGrid ) ;
 }
 
 inline GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) {
