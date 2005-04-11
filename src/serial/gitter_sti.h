@@ -347,6 +347,15 @@ class Gitter {
         }
     };
 
+
+    class helement;
+    struct AdaptRestrictProlong
+    {
+      virtual int preCoarsening (helement & elem )   = 0;
+      virtual int postRefinement (helement  & elem ) = 0;
+    };
+    typedef AdaptRestrictProlong AdaptRestrictProlongType;
+
     class helement : public virtual stiExtender_t :: ElementIF 
         , public Dune_helement 
     {
@@ -869,7 +878,7 @@ class Gitter {
     private :
       myhface3_t * f [4] ;
       signed char s [4] ;
-        } tetra_GEO ;
+   } tetra_GEO ;
   
   // Geometriesockelklasse des periodischen Randelements mit zwei
   // 3-Punkt-Fl"achen.
@@ -1166,7 +1175,12 @@ class Gitter {
   protected :
     Gitter () {}
     virtual ~Gitter () ;
+
   public :
+    // callback for Dune 
+    virtual int preCoarsening ( helement_STI & ) { return 0; }
+    virtual int postRefinement( helement_STI & ) { return 0; }
+
     virtual void fullIntegrityCheck () ;
     virtual void printsize () ;
     virtual bool adapt () ;
@@ -1176,8 +1190,7 @@ class Gitter {
     virtual void backupCMode (ostream &) ;
     virtual void backupCMode (const char*,const char *) ;
     virtual void backup (ostream &) ;
-    
-    
+
     virtual void backup (const char*,const char *) ;
     virtual void restore (istream &) ;
     virtual void restore (const char*,const char *) ;
@@ -1186,10 +1199,10 @@ class Gitter {
     virtual void backup (XDRstream_out &) ;
     virtual void restore (XDRstream_in &) ;
 
-  protected:
     // return index manager of macro grid 
-    virtual IndexManagerType & indexManager (int codim ) = 0;
+    virtual IndexManagerType & indexManager (int codim) = 0;
 
+  protected:
   friend class LeafIterator < helement_STI > ;
   friend class LeafIterator < vertex_STI > ;
   friend class LeafIterator < hbndseg_STI > ;
@@ -2111,11 +2124,11 @@ inline pair < const Gitter :: Geometric :: hface3_GEO *, int > Gitter :: Geometr
 }
 
 inline int Gitter :: Geometric :: Tetra :: postRefinement () {
-  return 0 ;
+  return 0;
 }
 
 inline int Gitter :: Geometric :: Tetra :: preCoarsening () {
-  return 0 ;
+  return 0; 
 }
 
 // ######                                                           #####
