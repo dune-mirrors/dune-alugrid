@@ -195,5 +195,80 @@ void GitterDuneBasis :: duneRestore (const char * fileName)
   return ;
 }
 
+int GitterDuneBasis :: preCoarsening  (Gitter::helement_STI & elem)
+{
+  // if _arp is set then the extrenal preCoarsening is called 
+  if(_arp) return (*_arp).preCoarsening(elem);
+  else return 0;
+}
+
+int GitterDuneBasis :: postRefinement (Gitter::helement_STI & elem)
+{
+  // if _arp is set then the extrenal postRefinement is called 
+  if(_arp) return (*_arp).postRefinement(elem);
+  else return 0;
+}
+
+void GitterDuneBasis ::
+setAdaptRestrictProlongOp( AdaptRestrictProlongType & arp )
+{
+  if(_arp) 
+  {
+    cerr<< "WARNING: GitterDuneBasis :: setAdaptRestrictProlongOp: _arp not NULL! in:" <<  __FILE__ << " line="<<__LINE__ << endl; 
+  }
+  _arp = &arp;
+}
+
+void GitterDuneBasis :: removeAdaptRestrictProlongOp()
+{
+  _arp = 0;
+}
+
+bool GitterDuneBasis :: refine () {
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
+  bool x = true ;
+  {
+    leaf_element__macro_element__iterator i (container ()) ;
+    for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+  }
+  return x ;
+}
+
+void GitterDuneBasis :: coarse() {
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: coarse ()" << endl, 1) : 1) ;
+  {AccessIterator < helement_STI > :: Handle i (container ()) ;
+    for( i.first(); ! i.done() ; i.next()) i.item ().coarse () ; }
+  return ;
+}
+
+bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp) {
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: duneAdapt ()" << endl, 1) : 1) ;
+  assert (! iterators_attached ()) ;
+  const int start = clock () ;
+
+  setAdaptRestrictProlongOp(arp); 
+  bool refined = this->refine ();
+  if (!refined) {
+    cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
+    cerr << "  diese Option ist eigentlich dem parallelen Verfeinerer vorbehalten.\n" ;
+    cerr << "  Der Fehler trat auf in " << __FILE__ << " " << __LINE__ << endl ;
+  }
+  int lap = clock () ;
+  this->coarse () ;
+  int end = clock () ;
+  if (debugOption (1)) {
+    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
+    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
+    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
+    cout << "**INFO GitterDuneBasis :: duneAdapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
+  }
+  removeAdaptRestrictProlongOp ();
+  return refined;
+}
+
+
+
+
+
 
 #endif
