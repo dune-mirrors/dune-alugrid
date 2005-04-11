@@ -1208,8 +1208,8 @@ void GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: detachPllXFromMacro () thr
 }
   
 GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: TetraEmptyPllMacro (myhface3_t * f0, int t0, myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
-                              myhface3_t * f3, int t3, IndexManagerType & im)
-  : GitterBasisPll :: ObjectsPll :: tetra_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,im), _pllx (new mypllx_t (*this)) {
+                              myhface3_t * f3, int t3, IndexManagerType & im , Gitter * mygrid)
+  : GitterBasisPll :: ObjectsPll :: tetra_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,im,mygrid), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1377,12 +1377,12 @@ void GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: detachPllXFromMacro ()
   return ;
 }
 
-GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (istream & in) : GitterPll :: MacroGitterPll () {
+GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid , istream & in) : GitterPll :: MacroGitterPll () , GitterBasis:: MacroGitterBasis (mygrid) {
   macrogridBuilder (in) ;
   return ;
 }
 
-GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll () : GitterPll :: MacroGitterPll () {
+GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid) : GitterPll :: MacroGitterPll () , GitterBasis :: MacroGitterBasis (mygrid) {
   return ;
 }
 
@@ -1457,7 +1457,7 @@ Gitter :: Geometric :: hexa_GEO * GitterBasisPll :: MacroGitterBasisPll :: inser
 }
 
 Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {
-  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], indexManager(0)) ;
+  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], indexManager(0), this->_myGrid ) ;
 }
 
   // Neu >
@@ -1633,7 +1633,7 @@ IteratorSTI < Gitter :: hbndseg_STI > * GitterBasisPll :: MacroGitterBasisPll ::
 }
 
 GitterBasisPll :: GitterBasisPll (MpAccessLocal & mpa) : _mpaccess (mpa), _macrogitter (0) {
-  _macrogitter = new MacroGitterBasisPll () ;
+  _macrogitter = new MacroGitterBasisPll (this) ;
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
   return ;
@@ -1646,7 +1646,7 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
   if( mpa.myrank () == 0 )
   {
     ifstream in ( f ) ;
-    if (in) _macrogitter = new MacroGitterBasisPll (in) ;
+    if (in) _macrogitter = new MacroGitterBasisPll (this,in) ;
   }
 
   // if still no macrogitter, try old method 
@@ -1656,12 +1656,12 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
     sprintf (extendedName, "%s.%u", f, mpa.myrank ()) ;
     ifstream in (extendedName) ;
     if (in) {
-      _macrogitter = new MacroGitterBasisPll (in) ;
+      _macrogitter = new MacroGitterBasisPll (this,in) ;
     } else {
     assert (debugOption (5) ? 
         ( cerr << "  GitterBasisPll :: GitterBasisPll () file: " << extendedName 
            << " cannot be read. In " << __FILE__ << " line " << __LINE__ << endl, 1) : 1);
-      _macrogitter = new MacroGitterBasisPll () ;
+      _macrogitter = new MacroGitterBasisPll (this) ;
     }
     delete [] extendedName ;
   }
