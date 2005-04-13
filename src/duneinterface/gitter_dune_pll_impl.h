@@ -50,8 +50,12 @@ public:
 
   void coarse ();
 
-  // done call notify and loadBalancer  
+  // adapts and calls notify and loadBalancer  
   bool duneAdapt ();
+
+  // adapts and calls notify and loadBalancer, also preCoarsening and
+  // postRefinement is called 
+  bool duneAdapt (AdaptRestrictProlongType & arp);
 
   // return true if grid has to be balanced again 
   bool duneNotifyNewGrid ();

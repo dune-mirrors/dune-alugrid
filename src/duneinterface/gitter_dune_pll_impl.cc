@@ -66,12 +66,19 @@ bool GitterDunePll :: duneAdapt ()
          << _refineLoops << ") " << u2 << " " << u3 << endl ;
   }
   duneNotifyGridChanges () ;
-  balanceGrid_ = duneNotifyNewGrid();
-
+  //balanceGrid_ = duneNotifyNewGrid();
+  
   return refined;
 }
 
-
+// done call notify and loadBalancer  
+bool GitterDunePll :: duneAdapt (AdaptRestrictProlongType & arp)   
+{
+  this->setAdaptRestrictProlongOp(arp);
+  bool refined = this->duneAdapt();
+  this->removeAdaptRestrictProlongOp ();
+  return refined;
+}
 
 bool GitterDunePll :: duneLoadBalance () 
 {
