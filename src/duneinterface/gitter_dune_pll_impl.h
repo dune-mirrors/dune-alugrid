@@ -51,7 +51,7 @@ public:
   void coarse ();
 
   // adapts and calls notify and loadBalancer  
-  bool duneAdapt ();
+  bool dAdapt ();
 
   // adapts and calls notify and loadBalancer, also preCoarsening and
   // postRefinement is called 

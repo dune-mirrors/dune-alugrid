@@ -20,9 +20,11 @@ protected:
 
   virtual void setAdaptRestrictProlongOp ( AdaptRestrictProlongType & arp );
   virtual void removeAdaptRestrictProlongOp ();
-  
+
+  // maxlevel of the grid 
+  int maxlevel_;
 public:
-  GitterDuneBasis() : _arp(0) {}
+  GitterDuneBasis() : _arp(0) , maxlevel_(0) {}
   
   // write status of grid  
   virtual void duneBackup  (const char*) ; 

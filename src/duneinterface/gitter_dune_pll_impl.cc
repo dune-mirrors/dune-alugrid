@@ -46,11 +46,11 @@ void GitterDunePll :: duneNotifyGridChanges ()
 
 
 // done call notify and loadBalancer  
-bool GitterDunePll :: duneAdapt ()   
+bool GitterDunePll :: dAdapt ()   
 {
   __STATIC_myrank = mpAccess ().myrank () ;
   __STATIC_turn ++ ;
-  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: duneAdapt ()" << endl, 1) : 1) ;
+  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: dAdapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
   int start = clock () ;
   bool refined = this->refine() ;
@@ -75,7 +75,7 @@ bool GitterDunePll :: duneAdapt ()
 bool GitterDunePll :: duneAdapt (AdaptRestrictProlongType & arp)   
 {
   this->setAdaptRestrictProlongOp(arp);
-  bool refined = this->duneAdapt();
+  bool refined = this->dAdapt();
   this->removeAdaptRestrictProlongOp ();
   return refined;
 }
