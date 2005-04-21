@@ -72,7 +72,7 @@ int main(int args, char *argv[])
   
   if( args < 3) 
   {
-    fprintf(stderr,"usage Alberta2ALUGrid <alberta-in-file> <alu3dgrid-macro-grid> <optional: refinement level>\n");
+    fprintf(stderr,"usage Alberta2ALUGrid <alberta-in-file> <alu3dgrid-macro-grid> <optional: refinement level> <optional: keep new Alberta Macro file>\n");
     exit(EXIT_FAILURE);
   }
 
@@ -84,9 +84,10 @@ int main(int args, char *argv[])
   spidermesh = get_mesh("spider",init_dof_admin,init_leaf_data);
   read_macro(spidermesh,filename,initBoundary);
   
-  if(args == 4) 
+  int level = 0;
+  if(args >= 4) 
   { 
-    int level = atoi(argv[3]);
+    level = atoi(argv[3]);
     printf("refine %d levels! \n",level);
     global_refine(spidermesh,level);
 
@@ -95,11 +96,10 @@ int main(int args, char *argv[])
     free_mesh(spidermesh);
     spidermesh = get_mesh("spider",init_dof_admin,init_leaf_data);
     read_macro(spidermesh,"fakefile_not_use",initBoundary);
-    remove ("fakefile_not_use");
+    if(args == 4) remove ("fakefile_not_use");
   }
   
-  trans2BSMacroGrid(spidermesh,bsoutfile);
-
+  trans2BSMacroGrid(spidermesh,bsoutfile,level);
   return (EXIT_SUCCESS);
 }
 
