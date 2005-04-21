@@ -10,9 +10,9 @@
 #   C and FORTRAN compilers and loader                                 #
 ########################################################################
 
-CC = cc
-FC = f77
-LD = cc
+CC = gcc
+FC = g77
+LD = gcc
 
 ########################################################################
 #   default settings                                                   #
@@ -20,7 +20,7 @@ LD = cc
 
 MOFLAG = 
 #CFLAGS = 
-OFLAG = -O2
+OFLAG = -O3 -Wall
 DEBUG = 0
 XDR=1
 
