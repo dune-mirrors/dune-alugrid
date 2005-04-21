@@ -10,8 +10,10 @@ static int map [N_VERTICES] = { 0, 3, 2 ,1 };
 static int faces[4][3] = { { 3 , 1 , 2 },
                            { 3 , 2 , 0 },
                            { 3 , 0 , 1 },
-                           { 2 , 0 , 1 }
+                           { 2 , 1 , 0 }
                          };
+
+static int refinedlevel = 0;
 
 /* fill coord vector */
 static void fillCoords(const EL_INFO * elf)
@@ -52,7 +54,8 @@ static void writeBound(const EL_INFO * elf)
   {
     if(elf->neigh[k] == NULL) 
     {
-      fprintf(file,"%d 3 ",-ABS(elf->boundary[k]->bound));
+      int boundval = -ABS(elf->boundary[k]->bound);
+      fprintf(file,"%d 3 ",boundval);
       /* the three vertices */
       if(elf->orientation < 0)
       {
@@ -72,10 +75,12 @@ static void writeBound(const EL_INFO * elf)
   }
 }
 
-void trans2BSMacroGrid(MESH * mesh, const char * filename)
+void trans2BSMacroGrid(MESH * mesh, const char * filename, int level)
 {
   int k;
   MACRO_EL * mel = NULL;
+
+  refinedlevel = level;
 
   file = fopen(filename,"w");
   assert(file);
