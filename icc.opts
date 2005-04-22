@@ -8,10 +8,10 @@ COMP="icc"
 CXXCOMP="icpc"
 
 # flags set in any case
-FLAGS="-wn2 -DHAVE_ICC -D__interface=myinterface"
+FLAGS="-wn2 -DHAVE_ICC -D__interface=myinterface "
 
 # additional flags for debugging
 DEBUGFLAGS="-O0 -g"
 
 # additional flags for optimization
-OPTIMFLAGS="-O3"
+OPTIMFLAGS="-O3 -Ob2 -unroll -DNDEBUG"
