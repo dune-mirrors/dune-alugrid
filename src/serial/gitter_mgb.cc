@@ -574,7 +574,7 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
   }
   if (!in.good()) {
     cerr << "**WARNING (ignored) MacroGridBuilder :: generateRawTetraImage () -- " ;
-    cerr << "identifier list uncomplete or not available. Therefore no parallel " ;
+    cerr << "identifier list incomplete or not available. Therefore no parallel " ;
     cerr << "identification possible if macro grid restored from more than one Grid." << endl ;
     for (int i = 0 ; i < nv ; i ++ ) pident [i] = i ;
   }
