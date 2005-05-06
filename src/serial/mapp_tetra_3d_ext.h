@@ -13,6 +13,10 @@ public:
     
   // same as method normal of LinearSurfaceMapping, just for Dune Vecs 
   inline void normal(double * normal) const;
+  
+  // same as method normal of LinearSurfaceMapping, just for Dune Vecs 
+  template <class VecType> 
+  inline void normal(VecType & normal) const;
 };
 
 
@@ -28,6 +32,15 @@ const double (&x1)[3], const double (&x2)[3])
 }
 
 inline void BSGridLinearSurfaceMapping :: normal (double * normal) const
+{
+  normal[0] = this->_n[0];
+  normal[1] = this->_n[1];
+  normal[2] = this->_n[2];
+  return ;
+}
+
+template <class VecType>
+inline void BSGridLinearSurfaceMapping :: normal (VecType & normal) const
 {
   normal[0] = this->_n[0];
   normal[1] = this->_n[1];
