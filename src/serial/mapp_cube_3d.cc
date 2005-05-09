@@ -1,29 +1,4 @@
-	// (c) bernhard schupp 1997 - 1998
-
-	// $Source$
-	// $Revision$
-	// $Name$
-	// $State$
-	
-/* $Id$
- * $Log$
- * Revision 1.1  2005/03/23 14:57:55  robertk
- * all files for serial version of ALU3dGrid.
- *
- * Revision 1.2  2004/10/25 16:38:11  robertk
- * All header end with .h now. Like the original.
- *
- * In the .cc this changes are done.
- *
- * Revision 1.1  2004/10/15 09:48:37  robertk
- * Inititial version. Some extenxions for Dune made. Schould be compatible
- * with all other applications done so far.
- *
- * Revision 1.2  2001/12/10 13:57:23  wesenber
- * RCS Log history and/or RCSId-variable added
- *
- ***/ 
-
+// (c) bernhard schupp 1997 - 1998
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
