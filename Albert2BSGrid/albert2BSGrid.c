@@ -92,7 +92,6 @@ int main(int args, char *argv[])
     global_refine(spidermesh,level);
 
     write_macro(spidermesh,"fakefile_not_use");
-    write_macro(spidermesh,"fakefile_not_use");
     free_mesh(spidermesh);
     spidermesh = get_mesh("spider",init_dof_admin,init_leaf_data);
     read_macro(spidermesh,"fakefile_not_use",initBoundary);
