@@ -384,6 +384,7 @@ class Gitter {
   virtual int tagForBallRefinement (const double (&)[3],double,int) = 0 ;
         virtual int test () const = 0 ;
         inline  int leaf () const ;
+        virtual bool isboundary() const = 0;      
       public :
         virtual bool refine () = 0 ;
         virtual bool coarse () = 0 ;
@@ -395,7 +396,7 @@ class Gitter {
         //virtual void backup (XDRstream_out &) const {};
         //virtual void restore (XDRstream_in &) {};
       public: 
-      virtual grid_t type() = 0;
+      virtual grid_t type() const = 0;
     } ;
   
     
@@ -619,8 +620,8 @@ class Gitter {
             }
 // Ende
           public:
-            virtual int calcSortnr (int,int) {return (abort(),0);}   
-            virtual bool isboundary() = 0;      
+            virtual int calcSortnr (int,int) {return (assert(0),abort(),0);}   
+            virtual bool isboundary() const = 0;      
 
             virtual helement_STI * mySelf() { return ((helement_STI *) this); }
         } ;
@@ -866,11 +867,9 @@ class Gitter {
       int tagForGlobalRefinement () ;
             int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-    virtual bool isboundary() {return false;}
-    virtual grid_t type() {return tetra;}
+    virtual bool isboundary() const { return false; }
+    virtual grid_t type() const { return tetra; }
 
-    // Dune extentions 
-    
     // calculate outer normal of face face
     virtual void outerNormal (int face , double * normal );
     virtual void neighOuterNormal (int faceInNeigh , double * normal );
@@ -911,14 +910,12 @@ class Gitter {
       int tagForGlobalRefinement () ;
             int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-    virtual bool isboundary() {return true;}
-    virtual grid_t type() {return tetra;}
+    virtual bool isboundary() const { return true; }
+    virtual grid_t type() const { return tetra; }
     private :
       myhface3_t * f [2] ;
       signed char s [2] ;
         } periodic3_GEO ;
-
-// Anfang - Neu am 23.5.02 (BS)
 
   // Geometriesockelklasse des periodischen Randelements mit zwei
   // 4-Punkt-Fl"achen.
@@ -945,8 +942,8 @@ class Gitter {
       inline pair < const hasFace4 *, int > myneighbour (int) const ;
             inline int twist (int) const ;
             int test () const ;
-    virtual bool isboundary() {return true;}
-    virtual grid_t type() {return hexa;}
+    virtual bool isboundary() const { return true; }
+    virtual grid_t type() const { return hexa;}
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
@@ -957,8 +954,6 @@ class Gitter {
       myhface4_t * f [2] ;
       signed char s [2] ;
         } periodic4_GEO ;
-
-// Ende - Neu am 23.5.02 (BS)
 
   // Der Prototyp f"ur das Hexaederelement bedingt eine im Uhrzeigersinn
   // umlaufende Numerierung der lokalen Knoten einer Aussenfl"ache, falls
@@ -995,8 +990,8 @@ class Gitter {
       int tagForGlobalRefinement () ;
             int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-    virtual bool isboundary() {return false;}
-    virtual grid_t type() {return hexa;}
+    virtual bool isboundary() const { return false; }
+    virtual grid_t type() const { return hexa; }
     private :
       myhface4_t * f [6] ;
       signed char s [6] ;
@@ -1029,7 +1024,7 @@ class Gitter {
             inline myhface3_t * myhface3 (int) const ;
             inline int twist (int) const ;
             inline hface3_GEO * subface3 (int,int) const ;
-            virtual bool isboundary() {return true;}
+            virtual bool isboundary() const {return true;}
     private :
       myhface3_t * _face ;
       int _twist ;
