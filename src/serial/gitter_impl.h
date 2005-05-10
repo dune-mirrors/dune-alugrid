@@ -194,15 +194,23 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
   typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
 // Ende - Neu am 23.5.02 (BS)
 
-        class HexaEmpty : public hexa_GEO {
-          protected :
-            typedef hface4_IMPL innerface_t ;
-            typedef hedge1_IMPL inneredge_t ;
-            typedef VertexEmpty innervertex_t ;
-            inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int) ;
-           ~HexaEmpty () {}
-        } ;
-        typedef HexaTop < HexaEmpty > hexa_IMPL ;
+      class HexaEmpty : public hexa_GEO {
+      protected :
+        typedef hface4_IMPL innerface_t ;
+        typedef hedge1_IMPL inneredge_t ;
+        typedef VertexEmpty innervertex_t ;
+        inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, Gitter*) ;
+        ~HexaEmpty () {}
+      
+        // Neu: burriad 29.4.05
+        int preCoarsening(); 
+        int postRefinement();
+
+        Gitter* _myGrid;
+
+        friend class HexaTop<HexaEmpty>;
+      } ;
+      typedef HexaTop < HexaEmpty > hexa_IMPL ;
     } ;
   public :
     class MacroGitterBasis : public virtual BuilderIF {
@@ -418,8 +426,12 @@ inline void GitterBasis :: Objects :: Hbnd4Default :: faceNormal( double * norma
   return ;
 }
 
-inline GitterBasis :: Objects :: TetraEmpty :: TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
-  myhface3_t * f2, int t2, myhface3_t * f3, int t3, Gitter * mygrid ) : Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) , _myGrid(mygrid) {
+inline GitterBasis :: Objects :: TetraEmpty :: 
+TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
+            myhface3_t * f2, int t2, myhface3_t * f3, int t3,
+            Gitter * mygrid ) : 
+  Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) , 
+  _myGrid(mygrid) {
   return ;
 }
 
@@ -447,11 +459,28 @@ inline GitterBasis :: Objects :: Periodic4Empty :: Periodic4Empty (myhface4_t * 
   return ;
 }
 
-inline GitterBasis :: Objects :: HexaEmpty :: HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
-  myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5)
-  : Gitter :: Geometric :: hexa_GEO (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5) {
+// Neu: burriad 29.4.05
+inline GitterBasis :: Objects :: HexaEmpty :: 
+HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
+           myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
+           myhface4_t * f4, int t4, myhface4_t * f5, int t5,
+           Gitter* mygrid) : 
+  Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5),
+  _myGrid(mygrid) {
   return ;
 }
+
+inline int GitterBasis::Objects::HexaEmpty::preCoarsening() {
+  assert(_myGrid);
+  return _myGrid->preCoarsening(*this);
+}
+
+inline int GitterBasis::Objects::HexaEmpty::postRefinement() {
+  assert(_myGrid);
+  return _myGrid->postRefinement(*this);
+}
+
+// Ende - Neu 29.4.05
 
 inline GitterBasisImpl :: GitterBasisImpl () : _macrogitter (0) {
   _macrogitter = new MacroGitterBasis ( this ) ;
@@ -539,7 +568,7 @@ inline GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_
 // Ende - Neu am 23.5.02 (BS)
 
 inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) {
-  return new Objects :: hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5], indexManager(0) ) ;
+  return new Objects :: hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5], indexManager(0), _myGrid ) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 

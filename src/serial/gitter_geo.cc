@@ -57,19 +57,21 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
   //  Prototyp des Hexaeders wie er im Programm verwendet wird.
   //  Eckpunkte und Seitenflaechen:
   //
-  //
+  //              x3
+  //              |
   //              7---------6
   //             /.        /|
   //            / .  1    / |
   //           /  .      /  |
   //          4---------5   | <-- 4 (hinten)
   //    5 --> |   .     | 3 |
-  //          |   3.....|...2
+  //          |   3.....|...2 -- x2
   //          |  .      |  /
   //          | .   2   | / <-- 0 (unten)
   //          |.        |/
   //          0---------1
-  //
+  //         /
+  //        x1
 
 const int Gitter :: Geometric :: Hexa :: prototype [6][4] = {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}} ;
 const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of face 
@@ -154,6 +156,27 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const double (&center)[
          : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
 }
 
+void 
+Gitter::Geometric::Hexa::
+outerNormal(int face, double *normal) {
+  //  BSBilinearSurfaceMapping map(this->myvertex(face, 0)->Point(),
+  //                             this->myvertex(face, 1)->Point(),
+  //                             this->myvertex(face, 2)->Point(),
+  //                             this->myvertex(face, 3)->Point());
+  //map.normal(local, normal);
+}
+
+void 
+Gitter::Geometric::Hexa::
+neighOuterNormal(int face, double* normal) {
+  // Store with a twist
+  // * check that!
+  //BSBilinearSurfaceMapping map(this->myvertex(face, 0)->Point(),
+  //                             this->myvertex(face, 3)->Point(),
+  //                             this->myvertex(face, 2)->Point(),
+  //                             this->myvertex(face, 1)->Point());
+  //map.normal(local, normal);
+}
 // #######
 //    #     ######   #####  #####     ##
 //    #     #          #    #    #   #  #
@@ -230,7 +253,9 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const double (&center)
          : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
 }
 
-void  Gitter :: Geometric :: Tetra :: outerNormal (int face , double * normal ) 
+void  
+Gitter :: Geometric :: Tetra :: 
+outerNormal (int face, double * normal ) 
 {
   BSGridLinearSurfaceMapping 
     LSM(this->myvertex(face,0)->Point(),
@@ -241,7 +266,9 @@ void  Gitter :: Geometric :: Tetra :: outerNormal (int face , double * normal )
   return; 
 }
 
-void  Gitter :: Geometric :: Tetra :: neighOuterNormal (int face , double * normal ) 
+void  
+Gitter :: Geometric :: Tetra :: 
+neighOuterNormal (int face , double * normal ) 
 {
   // just use with other twist to minus normal 
   BSGridLinearSurfaceMapping 

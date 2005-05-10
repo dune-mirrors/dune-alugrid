@@ -9,7 +9,6 @@
 #include "gitter_sti.h"
 #include "gitter_hexa_top.h"
 
-
 static volatile char RCSId_gitter_tetra_top_h [] = "$Id$" ;
 
 template < class A > class Hface3Top : public A {
@@ -939,21 +938,26 @@ template < class A > void Hbnd3Top < A > :: restoreFollowFace () {
 //    #     #          #    #   #   #    #    #     #    #  #
 //    #     ######     #    #    #  #    #    #      ####   #
 
-template < class A > inline TetraTop < A > :: TetraTop (int l, myhface3_t * f0, int t0,
-  myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3, innertetra_t *up) 
+template < class A > inline TetraTop < A > 
+:: TetraTop (int l, myhface3_t * f0, int t0,
+             myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
+             myhface3_t * f3, int t3, innertetra_t *up) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid ), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0), _lvl (l), 
-  _rule (myrule_t :: nosplit) 
-  , _indexManager(up->_indexManager)  
+    _rule (myrule_t :: nosplit),
+    _indexManager(up->_indexManager)  
 { // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
   return ;
 }
 
 // constrcutor mit IndexManager uebergabe
-template < class A > inline TetraTop < A > :: TetraTop (int l, myhface3_t * f0, int t0,
-  myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3, IndexManagerType & im, Gitter * mygrid) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid), _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0), _lvl (l), 
-  _rule (myrule_t :: nosplit) , _indexManager(im)
+template < class A > inline TetraTop < A > :: 
+TetraTop (int l, myhface3_t * f0, int t0,
+          myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
+          myhface3_t * f3, int t3, IndexManagerType & im, Gitter * mygrid) 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
+    _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0), _lvl (l), 
+    _rule (myrule_t :: nosplit) , _indexManager(im)
 { // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
   return ;

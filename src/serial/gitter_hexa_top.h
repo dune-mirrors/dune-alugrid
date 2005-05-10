@@ -67,6 +67,7 @@ template < class A > class Hface4Top : public A {
     myrule_t _rule ;
     IndexManagerType & _indexManager;
     
+  private:
     inline myhedge1_t * subedge1 (int,int) ;
     inline const myhedge1_t * subedge1 (int,int) const ;
     void splitISO4 () ;
@@ -164,24 +165,28 @@ template < class A > class HexaTop : public A {
     int _lvl ;
     myrule_t _rule, _req ;
     IndexManagerType & _indexManager; 
-       
+
+private:    
+    IndexManagerType & getEdgeIndexManager () ;
+    IndexManagerType & getFaceIndexManager () ;
+
     void splitISO8 () ;
+protected:
     inline myhedge1_t * subedge1 (int,int) ;
     inline const myhedge1_t * subedge1 (int,int) const ;
     inline myhface4_t * subface4 (int,int) ;
     inline const myhface4_t * subface4 (int,int) const ;
     
-    IndexManagerType & getEdgeIndexManager () ;
-    IndexManagerType & getFaceIndexManager () ;
-
   public:
     // Constructor for macro elements 
     inline HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-		     myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, IndexManagerType & im) ;
+                    myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
+                    IndexManagerType & im, Gitter* mygrid) ;
     
     // constructor for refinement 
     inline HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-		     myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, innerhexa_t * up ) ;
+                    myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, 
+                    innerhexa_t * up) ;
     
     virtual ~HexaTop () ;
     inline innerhexa_t * up () ;
@@ -199,6 +204,7 @@ template < class A > class HexaTop : public A {
     int level () const ;
   public :
     myrule_t getrule () const ;
+  myrule_t requestrule () const ;
     bool refine () ;
     void request (myrule_t) ;
     bool refineBalance (balrule_t,int) ;
@@ -990,20 +996,25 @@ template < class A > inline const typename HexaTop < A > :: myhface4_t * HexaTop
     (abort (), (const myhface4_t *)0) ;
 }
 
-template < class A > inline HexaTop < A > :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
-	myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5, IndexManagerType & im ) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
+template < class A > inline HexaTop < A > 
+:: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
+            myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
+            int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
   , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0), _lvl (l),
-   _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) { 
+    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im)
+{ 
   this->setIndex( _indexManager.getIndex() );   
   return ;
 }
 
-template < class A > inline HexaTop < A > :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
-	myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5, innerhexa_t * up ) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
+template < class A > inline HexaTop < A > 
+:: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
+            myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
+            int t4, myhface4_t * f5, int t5, innerhexa_t * up ) 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
   , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0), _lvl (l),
-   _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(_up->_indexManager) { 
+    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(_up->_indexManager) { 
   this->setIndex( _indexManager.getIndex() );   
   return ;
 }
@@ -1168,6 +1179,10 @@ template < class A > void HexaTop < A > :: splitISO8 () {
 
 template < class A > typename HexaTop < A > :: myrule_t HexaTop < A > :: getrule () const {
   return myrule_t (_rule) ;
+}
+
+template < class A > typename HexaTop < A > :: myrule_t HexaTop < A > :: requestrule () const {
+  return myrule_t (_req) ;
 }
 
 template < class A > void HexaTop < A > :: request (myrule_t r) {

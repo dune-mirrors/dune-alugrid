@@ -5,28 +5,28 @@
 #define GITTER_STI_H_INCLUDED
 
 #ifdef IBM_XLC
-  #define _ANSI_HEADER
+#define _ANSI_HEADER
 #endif
 
 #include <cassert>
 
 #ifdef _ANSI_HEADER
-  using namespace std;
-  #include <utility>
-  #include <iostream>
-  #include <list>
-  #include <sstream>
-  // typdef these stream because this code uses a lot strstream 
-  typedef basic_stringbuf   <char> strstreambuf_t ; 
-  typedef basic_stringstream<char> strstream_t;
+using namespace std;
+#include <utility>
+#include <iostream>
+#include <list>
+#include <sstream>
+// typdef these stream because this code uses a lot strstream 
+typedef basic_stringbuf   <char> strstreambuf_t ; 
+typedef basic_stringstream<char> strstream_t;
 #else
-  #include <pair.h>
-  #include <iostream.h>
-  #include <list.h>
-  #include <strstream.h>
+#include <pair.h>
+#include <iostream.h>
+#include <list.h>
+#include <strstream.h>
 
-  typedef strstreambuf strstreambuf_t ; 
-  typedef strstream    strstream_t;
+typedef strstreambuf strstreambuf_t ; 
+typedef strstream    strstream_t;
 #endif
 
 #include "myalloc.h"
@@ -56,17 +56,17 @@ enum { numOfIndexManager = 6 };
 
 
 class ProjectVertex {
- public:
+public:
   virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
 };
 
 
-  // Einfacher Referenzenz"ahler mit cast-around-const
-  // feature, der zum Z"ahlen der Referenzen auf Fl"achen
-  // Kanten und Knoten verwendet wird. Vorteil: Objekte,
-  // die einen Z"ahler dieser Klasse enthalten, werden
-  // durch Inkrementierung bzw. Dekrementierung des Z"ahlers
-  // nicht ver"andert (k"onnen also auch 'const' sein).
+// Einfacher Referenzenz"ahler mit cast-around-const
+// feature, der zum Z"ahlen der Referenzen auf Fl"achen
+// Kanten und Knoten verwendet wird. Vorteil: Objekte,
+// die einen Z"ahler dieser Klasse enthalten, werden
+// durch Inkrementierung bzw. Dekrementierung des Z"ahlers
+// nicht ver"andert (k"onnen also auch 'const' sein).
 
 class Refcount {
 #ifndef NDEBUG
@@ -77,73 +77,73 @@ class Refcount {
 
   class Globalcount {
     int _c ;
-    public :
-      inline Globalcount() ;
-     ~Globalcount() ;
-      inline void operator ++ (int) const ;
-      inline void operator -- (int) const ;
+  public :
+    inline Globalcount() ;
+    ~Globalcount() ;
+    inline void operator ++ (int) const ;
+    inline void operator -- (int) const ;
   } ;
   static Globalcount _g ;
 #endif 
   int _c ;
-  public :
-    inline Refcount () ;
-    inline ~Refcount () ;
-    inline int operator ++ (int) const ;
-    inline int operator ++ () const ;
-    inline int operator -- (int) const ;
-    inline int operator -- () const ;
-    inline bool operator ! () const ;
-    inline operator int () const ;
+public :
+  inline Refcount () ;
+  inline ~Refcount () ;
+  inline int operator ++ (int) const ;
+  inline int operator ++ () const ;
+  inline int operator -- (int) const ;
+  inline int operator -- () const ;
+  inline bool operator ! () const ;
+  inline operator int () const ;
 } ;
 
-  // Schnittstelle des Iterationsobjekts vgl. Gamma, Helm, Johnson &
-  // Vlissides: Design Patterns; Addison Wesley 
-  // Die Schnittstellenbeschreibung wird sowohl polymorph als auch
-  // in den verschiedenen Schablonen f"ur einfache Iterationsobjekte
-  // s.a. Datei 'walk.h' verwendet.
+// Schnittstelle des Iterationsobjekts vgl. Gamma, Helm, Johnson &
+// Vlissides: Design Patterns; Addison Wesley 
+// Die Schnittstellenbeschreibung wird sowohl polymorph als auch
+// in den verschiedenen Schablonen f"ur einfache Iterationsobjekte
+// s.a. Datei 'walk.h' verwendet.
 
 template < class A > class IteratorSTI {
   const IteratorSTI < A > & operator = (const IteratorSTI < A > &) ;
   IteratorSTI (const IteratorSTI < A > &) {}
-  public :
-    typedef A val_t ;
-    IteratorSTI () {}
-    virtual ~IteratorSTI () {}
-    virtual void first () ;
-    virtual void next () ;
-    virtual int done () const ;
-    virtual int size () ;
-    virtual val_t & item () const ;
+public :
+  typedef A val_t ;
+  IteratorSTI () {}
+  virtual ~IteratorSTI () {}
+  virtual void first () ;
+  virtual void next () ;
+  virtual int done () const ;
+  virtual int size () ;
+  virtual val_t & item () const ;
 } ;
 
-  // sobald die const-correctness verbessert wird ...
+// sobald die const-correctness verbessert wird ...
 
 template < class A > class ConstIteratorSTI {
   const ConstIteratorSTI < A > & operator = (const ConstIteratorSTI < A > &) ;
   ConstIteratorSTI (const ConstIteratorSTI < A > &) {}
-  public :
-    typedef A val_t ;
-    ConstIteratorSTI () {}
-    virtual ~ConstIteratorSTI () {}
-    virtual void first () ;
-    virtual void next () ;
-    virtual int done () const ;
-    virtual int size () ;
-    virtual const val_t & item () const ;
+public :
+  typedef A val_t ;
+  ConstIteratorSTI () {}
+  virtual ~ConstIteratorSTI () {}
+  virtual void first () ;
+  virtual void next () ;
+  virtual int done () const ;
+  virtual int size () ;
+  virtual const val_t & item () const ;
 } ;
 
-  // AccessIterator < . > ist eine Schnittstellenschablone, die
-  // ausgepr"agt mit vertex, hedge, hface, helement und hbndseg
-  // die Schnittstellen des Grobgittercontainers zur Erstellung
-  // und Kopie von Iterationsobjekten erzeugt.
+// AccessIterator < . > ist eine Schnittstellenschablone, die
+// ausgepr"agt mit vertex, hedge, hface, helement und hbndseg
+// die Schnittstellen des Grobgittercontainers zur Erstellung
+// und Kopie von Iterationsobjekten erzeugt.
 
 template < class A > class AccessIterator {
-  public :
-    Refcount ref ; 
-    virtual IteratorSTI < A > * iterator (const A *) const = 0 ;
-    virtual IteratorSTI < A > * iterator (const IteratorSTI < A > *) const = 0 ;
-  public :
+public :
+  Refcount ref ; 
+  virtual IteratorSTI < A > * iterator (const A *) const = 0 ;
+  virtual IteratorSTI < A > * iterator (const IteratorSTI < A > *) const = 0 ;
+public :
   
   // Handle ist ein einfaches Iteratorproxy, das ein abstraktes
   // Iterationsobjekt verwendet, um nach aussen die entsprechenden
@@ -152,27 +152,27 @@ template < class A > class AccessIterator {
   // zu bekommen ist, bzw. wie ein bestehender mit einer Schnittstellen-
   // methode kopiert werden kann.
   
-    class Handle : public IteratorSTI < A > {
-      AccessIterator < A > * _fac ;
-      A * _a ;
-      IteratorSTI < A > * _w ;
-      public :
-        inline Handle (AccessIterator < A > &) ;
-        inline Handle (const AccessIterator < A > :: Handle &) ;
-        inline Handle () ;
-        inline ~Handle () ;
-        inline const Handle & operator = (const AccessIterator < A > :: Handle &) ;
-        inline bool operator == (const AccessIterator < A > :: Handle &) const ;
-        inline bool operator < (const AccessIterator < A > :: Handle &) const ;
-        inline void first () ;
-        inline void next () ;
-        inline int done () const ;
-        inline int size () ;
-        inline A & item () const ;
-    } ;
-  protected :
-    AccessIterator () {}
-    virtual ~AccessIterator () { assert (!ref) ; }
+  class Handle : public IteratorSTI < A > {
+    AccessIterator < A > * _fac ;
+    A * _a ;
+    IteratorSTI < A > * _w ;
+  public :
+    inline Handle (AccessIterator < A > &) ;
+    inline Handle (const AccessIterator < A > :: Handle &) ;
+    inline Handle () ;
+    inline ~Handle () ;
+    inline const Handle & operator = (const AccessIterator < A > :: Handle &) ;
+    inline bool operator == (const AccessIterator < A > :: Handle &) const ;
+    inline bool operator < (const AccessIterator < A > :: Handle &) const ;
+    inline void first () ;
+    inline void next () ;
+    inline int done () const ;
+    inline int size () ;
+    inline A & item () const ;
+  } ;
+protected :
+  AccessIterator () {}
+  virtual ~AccessIterator () { assert (!ref) ; }
 } ;
 
 template < class A > class LeafIterator ;
@@ -180,262 +180,261 @@ template < class A > class ConstLeafIterator ;
 
 class Gitter {
   Refcount ref ;
-  public :
-    static inline bool debugOption (int = 0) ;
+public :
+  static inline bool debugOption (int = 0) ;
 
-    typedef Parallel stiExtender_t ;  // parallel.h
+  typedef Parallel stiExtender_t ;  // parallel.h
    
   // Nachfolgend sind die Iterationsschnittstellen der Knoten,
   // Kanten, Fl"achen, Elemente und Randelemente definiert.
-    class Dune_vertex 
-    {
+  class Dune_vertex 
+  {
 #ifdef _DUNE_USES_ALU3DGRID_
-      protected:
-        int _idx;
-        Dune_vertex () : _idx(-1) {}
+  protected:
+    int _idx;
+    Dune_vertex () : _idx(-1) {}
 #endif
-      public:
-        // backup and restore index of vertices 
-        virtual void backupIndex  (ostream & os ) const {};
-        virtual void restoreIndex (istream & is ) {};
+  public:
+    // backup and restore index of vertices 
+    virtual void backupIndex  (ostream & os ) const {};
+    virtual void restoreIndex (istream & is ) {};
 
 #ifdef _DUNE_USES_ALU3DGRID_
-        inline int getIndex () const { return _idx; }
-        void setIndex ( const int index ) { _idx = index; }
+    inline int getIndex () const { return _idx; }
+    void setIndex ( const int index ) { _idx = index; }
 #else 
-        inline int getIndex () const { return -1; }
-        void setIndex ( const int index ) {}
+    inline int getIndex () const { return -1; }
+    void setIndex ( const int index ) {}
 #endif
-    };
+  };
         
     
-  public :
-    class vertex : public stiExtender_t :: VertexIF  
+public :
+  class vertex : public stiExtender_t :: VertexIF  
 #ifdef _DUNE_USES_ALU3DGRID_
-      , public Dune_vertex 
+               , public Dune_vertex 
 #endif
-    {
-      protected :
-        vertex () {}
-        virtual ~vertex () {}
-      public :
-        virtual int ident () const = 0 ;
-        virtual int level () const = 0 ;
-        virtual const double (& Point () const )[3] = 0 ;
+  {
+  protected :
+    vertex () {}
+    virtual ~vertex () {}
+  public :
+    virtual int ident () const = 0 ;
+    virtual int level () const = 0 ;
+    virtual const double (& Point () const )[3] = 0 ;
 
-        // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-        virtual void project(const ProjectVertex &pv) = 0; 
+    // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
+    virtual void project(const ProjectVertex &pv) = 0; 
   
-  // Extrainteger, damit die Element zu Vertex Zuordnug klappt,
-  // wenn die Daten zur Visualisierung mit GRAPE rausgeschrieben
-  // werden sollen:
+    // Extrainteger, damit die Element zu Vertex Zuordnug klappt,
+    // wenn die Daten zur Visualisierung mit GRAPE rausgeschrieben
+    // werden sollen:
   
-   } ;
+  } ;
    
-    // numbering for hedge and hface 
-    class Dune_hface_or_hedge
-    {
+  // numbering for hedge and hface 
+  class Dune_hface_or_hedge
+  {
 #ifdef _DUNE_USES_ALU3DGRID_
-      protected: 
-        int  _index; // global_index, unique per level but not per processor
-        Dune_hface_or_hedge () : _index (-1) {}
+  protected: 
+    int  _index; // global_index, unique per level but not per processor
+    Dune_hface_or_hedge () : _index (-1) {}
 #endif
-      public:
-        // use only this methods to get and set the _index 
-        inline int getIndex () const;  
-        inline void setIndex (const int index) ; 
+  public:
+    // use only this methods to get and set the _index 
+    inline int getIndex () const;  
+    inline void setIndex (const int index) ; 
         
-        virtual void backupIndex (ostream &) const ;   // backup _index  
+    virtual void backupIndex (ostream &) const ;   // backup _index  
 
-        // method is virual, because former index set by constructor has to
-        // be freeed , means method has to be overloaded for correct work
-        virtual void restoreIndex (istream &) ;// retore _index  
-    };
+    // method is virual, because former index set by constructor has to
+    // be freeed , means method has to be overloaded for correct work
+    virtual void restoreIndex (istream &) ;// retore _index  
+  };
 
-    class hedge : public stiExtender_t :: EdgeIF, public Dune_hface_or_hedge  {
-      protected :
-        hedge () {}
-        virtual ~hedge () {}
-      public :
-        virtual hedge * down () = 0 ;
-  virtual const hedge * down () const = 0 ;
-        virtual hedge  * next () = 0 ;
-        virtual const hedge  * next () const = 0 ;
-  virtual vertex * innerVertex () = 0 ;
-        virtual const vertex * innerVertex () const = 0 ;
-        virtual int level () const = 0 ;
-        inline  int leaf () const ;
-      public :
-        virtual bool coarse () = 0 ;
-        virtual void backup (ostream &) const = 0 ;
-        virtual void restore (istream &) = 0 ;
-
-        // new xdr methods 
-        //virtual void backup (XDRstream_out &) const {};
-        //virtual void restore (XDRstream_in &) {};
-        // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-        virtual void projectInnerVertex(const ProjectVertex &pv) = 0; 
-    } ;
-    
-    class hface : public stiExtender_t :: FaceIF , public Dune_hface_or_hedge {
-      protected :
-        hface () {}
-        virtual ~hface () {}
-      public :
-        virtual hface * down () = 0 ;
-        virtual const hface * down () const = 0 ;
-  virtual hface * next () = 0 ;
-        virtual const hface * next () const = 0 ;
-  virtual vertex * innerVertex () = 0 ;
-        virtual const vertex * innerVertex () const = 0 ;
-        virtual hedge  * innerHedge () = 0 ;
-  virtual const hedge  * innerHedge () const = 0 ;
-        virtual int level () const = 0 ;
-        inline int leaf () const ;
-      public :
-        virtual bool coarse () = 0 ;
-        virtual void backup (ostream &) const = 0 ;
-        virtual void restore (istream &) = 0 ;
-        
-        //virtual void backup (XDRstream_out &) const {};
-        //virtual void restore (XDRstream_in &) {};
-        
-        // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-        virtual void projectVertex(const ProjectVertex &pv) = 0; 
-    } ;
-
-    // class with all extensions for helement 
-    class Dune_helement 
-    {
-
-#ifdef _DUNE_USES_ALU3DGRID_
-      protected: 
-        int  _index; // global_index, unique per level but not per processor
-        bool _refinedTag; // true if element was refined 
-        Dune_helement () : _index (-1) , _refinedTag (true) {}
-#endif
-      public:
-        // reset the _refinedTag to false 
-        void resetRefinedTag(); 
-        // true if element was refined this adaptation step 
-        bool hasBeenRefined () const;
-        
-        // use only this methods to get and set the _index 
-        inline int getIndex () const;  
-        inline void setIndex (const int index) ; 
-        
-        virtual void backupIndex (ostream &) const ;   // backup _index  
-
-        // method is virual, because former index set by constructor has to
-        // be freeed , means method has to be overloaded for correct work
-        virtual void restoreIndex (istream &) ;// retore _index  
-        
-        // the Dune extentions 
-
-        // calculate outer normal of face face
-        virtual void outerNormal(int face, double * normal) 
-        {
-          cerr << "helement :: outerNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
-          abort();
-        }
-        
-        // calculate outer normal of face face
-        virtual void neighOuterNormal(int faceInNeigh, double * normal) 
-        {
-          cerr << "helement :: neighOuterNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
-          abort();
-        }
-    };
-
-
-    class helement;
-    struct AdaptRestrictProlong
-    {
-      virtual int preCoarsening (helement & elem )   = 0;
-      virtual int postRefinement (helement  & elem ) = 0;
-    };
-    typedef AdaptRestrictProlong AdaptRestrictProlongType;
-
-    class helement : public virtual stiExtender_t :: ElementIF 
-        , public Dune_helement 
-    {
-      protected :
-        helement () {}
-        virtual ~helement () {}
-      public :
-        //testweise us
-        virtual helement * up () = 0;
-        virtual const helement * up () const = 0;
-        //us
-        virtual helement * down () = 0 ;
-  virtual const helement * down () const = 0 ;
-        virtual helement * next () = 0 ;
-  virtual const helement * next () const = 0 ;
-        virtual vertex * innerVertex () = 0 ;
-  virtual const vertex * innerVertex () const = 0 ;
-        virtual hedge * innerHedge () = 0 ;
-  virtual const hedge * innerHedge () const = 0 ;
-        virtual hface * innerHface () = 0 ;
-  virtual const hface * innerHface () const = 0 ;
-        virtual int level () const = 0 ;
-
-        virtual int tagForGlobalRefinement () = 0 ;
-        virtual int resetRefinementRequest () = 0 ;
-  virtual int tagForBallRefinement (const double (&)[3],double,int) = 0 ;
-        virtual int test () const = 0 ;
-        inline  int leaf () const ;
-        virtual bool isboundary() const = 0;      
-      public :
-        virtual bool refine () = 0 ;
-        virtual bool coarse () = 0 ;
-        virtual void backupCMode (ostream &) const = 0 ;
-        virtual void backup (ostream &) const = 0 ;
-        virtual void restore (istream &) = 0 ;
-        
-        // xdr methods 
-        //virtual void backup (XDRstream_out &) const {};
-        //virtual void restore (XDRstream_in &) {};
-      public: 
-      virtual grid_t type() const = 0;
-    } ;
-  
-    
-    class hbndseg  
-    {
-      protected :
-        hbndseg () {}
-        virtual ~hbndseg () {}
-      public :
-        typedef enum { none = 0, inflow = 1, outflow = 2, noslip = 3, slip = 4, sym_xy = 5,
-                       sym_xz = 6, sym_yz = 7, reflect = 8, fluxtube3d = 9, periodic = 20,
-                       closure = 111, ghost_closure = 222 , undefined = 333 } bnd_t ;
-        virtual bnd_t bndtype () const = 0 ;
-        
-        // for dune 
-        virtual hbndseg * up () = 0 ;
-  virtual const hbndseg * up () const = 0 ;
-  
-        virtual hbndseg * down () = 0 ;
-  virtual const hbndseg * down () const = 0 ;
-        virtual hbndseg * next () = 0 ;
-  virtual const hbndseg * next () const = 0 ;
-        virtual int level () const = 0 ;
-        inline int leaf () const ;
-        // for dune 
-        virtual int ghostLevel () const = 0 ;
-        // default return 0 means we have no ghost element on this boundary
-        // segment, because we only have ghost on interior boundary 
-        virtual helement * getGhost () = 0; // should return 0 for not interior boundaries 
-        virtual void faceNormal (double * normal) const = 0 ;
-      public :
-  virtual void restoreFollowFace () = 0 ;
-    } ;
+  class hedge : public stiExtender_t :: EdgeIF, public Dune_hface_or_hedge  {
+  protected :
+    hedge () {}
+    virtual ~hedge () {}
   public :
-    typedef hbndseg hbndseg_STI ;
-    typedef helement  helement_STI ;
-    typedef hface hface_STI ;
-    typedef hedge hedge_STI ;
-    typedef vertex  vertex_STI ;
+    virtual hedge * down () = 0 ;
+    virtual const hedge * down () const = 0 ;
+    virtual hedge  * next () = 0 ;
+    virtual const hedge  * next () const = 0 ;
+    virtual vertex * innerVertex () = 0 ;
+    virtual const vertex * innerVertex () const = 0 ;
+    virtual int level () const = 0 ;
+    inline  int leaf () const ;
+  public :
+    virtual bool coarse () = 0 ;
+    virtual void backup (ostream &) const = 0 ;
+    virtual void restore (istream &) = 0 ;
+
+    // new xdr methods 
+    //virtual void backup (XDRstream_out &) const {};
+    //virtual void restore (XDRstream_in &) {};
+    // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
+    virtual void projectInnerVertex(const ProjectVertex &pv) = 0; 
+  } ;
+    
+  class hface : public stiExtender_t :: FaceIF , public Dune_hface_or_hedge {
+  protected :
+    hface () {}
+    virtual ~hface () {}
+  public :
+    virtual hface * down () = 0 ;
+    virtual const hface * down () const = 0 ;
+    virtual hface * next () = 0 ;
+    virtual const hface * next () const = 0 ;
+    virtual vertex * innerVertex () = 0 ;
+    virtual const vertex * innerVertex () const = 0 ;
+    virtual hedge  * innerHedge () = 0 ;
+    virtual const hedge  * innerHedge () const = 0 ;
+    virtual int level () const = 0 ;
+    inline int leaf () const ;
+  public :
+    virtual bool coarse () = 0 ;
+    virtual void backup (ostream &) const = 0 ;
+    virtual void restore (istream &) = 0 ;
+        
+    //virtual void backup (XDRstream_out &) const {};
+    //virtual void restore (XDRstream_in &) {};
+        
+    // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
+    virtual void projectVertex(const ProjectVertex &pv) = 0; 
+  } ;
+
+  // class with all extensions for helement 
+  class Dune_helement 
+  {
+
+#ifdef _DUNE_USES_ALU3DGRID_
+  protected: 
+    int  _index; // global_index, unique per level but not per processor
+    bool _refinedTag; // true if element was refined 
+    Dune_helement () : _index (-1) , _refinedTag (true) {}
+#endif
+  public:
+    // reset the _refinedTag to false 
+    void resetRefinedTag(); 
+    // true if element was refined this adaptation step 
+    bool hasBeenRefined () const;
+        
+    // use only this methods to get and set the _index 
+    inline int getIndex () const;  
+    inline void setIndex (const int index) ; 
+        
+    virtual int nFaces() const = 0;
+
+    virtual void backupIndex (ostream &) const ;   // backup _index  
+
+    // method is virual, because former index set by constructor has to
+    // be freeed , means method has to be overloaded for correct work
+    virtual void restoreIndex (istream &) ;// retore _index  
+        
+    // the Dune extentions 
+
+    // calculate outer normal of face face
+    virtual void outerNormal(int face,  double * normal) 
+    {
+      cerr << "helement :: outerNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
+      abort();
+    }
+        
+    // calculate outer normal of face face
+    virtual void neighOuterNormal(int faceInNeigh,  double * normal) 
+    {
+      cerr << "helement :: neighOuterNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
+      abort();
+    }
+  };
+
+
+  class helement;
+  struct AdaptRestrictProlong
+  {
+    virtual int preCoarsening (helement & elem )   = 0;
+    virtual int postRefinement (helement  & elem ) = 0;
+  };
+  typedef AdaptRestrictProlong AdaptRestrictProlongType;
+
+  class helement : public virtual stiExtender_t :: ElementIF 
+                 , public Dune_helement 
+  {
+  protected :
+    helement () {}
+    virtual ~helement () {}
+  public :
+    //testweise us
+    virtual helement * up () = 0;
+    virtual const helement * up () const = 0;
+    //us
+    virtual helement * down () = 0 ;
+    virtual const helement * down () const = 0 ;
+    virtual helement * next () = 0 ;
+    virtual const helement * next () const = 0 ;
+    virtual vertex * innerVertex () = 0 ;
+    virtual const vertex * innerVertex () const = 0 ;
+    virtual hedge * innerHedge () = 0 ;
+    virtual const hedge * innerHedge () const = 0 ;
+    virtual hface * innerHface () = 0 ;
+    virtual const hface * innerHface () const = 0 ;
+    virtual int level () const = 0 ;
+
+    virtual int tagForGlobalRefinement () = 0 ;
+    virtual int resetRefinementRequest () = 0 ;
+    virtual int tagForBallRefinement (const double (&)[3],double,int) = 0 ;
+    virtual int test () const = 0 ;
+    inline  int leaf () const ;
+  public :
+    virtual bool refine () = 0 ;
+    virtual bool coarse () = 0 ;
+    virtual void backupCMode (ostream &) const = 0 ;
+    virtual void backup (ostream &) const = 0 ;
+    virtual void restore (istream &) = 0 ;
+    // xdr methods 
+    //virtual void backup (XDRstream_out &) const {};
+    //virtual void restore (XDRstream_in &) {};
+  public: 
+    virtual grid_t type() = 0;
+  } ;
+    
+  class hbndseg  
+  {
+  protected :
+    hbndseg () {}
+    virtual ~hbndseg () {}
+  public :
+    typedef enum { none = 0, inflow = 1, outflow = 2, noslip = 3, slip = 4, sym_xy = 5,
+                   sym_xz = 6, sym_yz = 7, reflect = 8, fluxtube3d = 9, periodic = 20,
+                   closure = 111, ghost_closure = 222 , undefined = 333 } bnd_t ;
+    virtual bnd_t bndtype () const = 0 ;
+        
+    // for dune 
+    virtual hbndseg * up () = 0 ;
+    virtual const hbndseg * up () const = 0 ;
+  
+    virtual hbndseg * down () = 0 ;
+    virtual const hbndseg * down () const = 0 ;
+    virtual hbndseg * next () = 0 ;
+    virtual const hbndseg * next () const = 0 ;
+    virtual int level () const = 0 ;
+    inline int leaf () const ;
+    // for dune 
+    virtual int ghostLevel () const = 0 ;
+    // default return 0 means we have no ghost element on this boundary
+    // segment, because we only have ghost on interior boundary 
+    virtual helement * getGhost () = 0; // should return 0 for not interior boundaries 
+    virtual void faceNormal (double * normal) const = 0 ;
+  public :
+    virtual void restoreFollowFace () = 0 ;
+  } ;
+public :
+  typedef hbndseg hbndseg_STI ;
+  typedef helement  helement_STI ;
+  typedef hface hface_STI ;
+  typedef hedge hedge_STI ;
+  typedef vertex  vertex_STI ;
 
   // Die Klassen Internal-*- sind nur daf"ur da, aus einem Element, einer
   // Fl"ache oder einer Kante die inneren geometrischen Objekte, die von
@@ -443,39 +442,39 @@ class Gitter {
   // um z.B. von einem Iterator mit Element-Item auf einen Teilbaumiterator
   // der inneren Fl"achen "uberzugehen.
 
-    class InternalVertex {
-      public :
-        typedef vertex_STI val_t ;
-        val_t & operator () (helement_STI & e) const { return * e.innerVertex () ; }
-        val_t & operator () (hface_STI & f) const { return * f.innerVertex () ; }
-        val_t & operator () (hedge_STI & d) const { return * d.innerVertex () ; }
-        val_t & operator () (vertex_STI & v) const { return v ; }
-    } ;
-    class InternalEdge {
-      public :
-        typedef hedge_STI val_t ;
-        val_t & operator () (helement_STI & e) const { return * e.innerHedge () ; }
-        val_t & operator () (hface_STI & f) const { return * f.innerHedge () ; }
-        val_t & operator () (hedge_STI & e) const { return e ; }
-    } ;
-    class InternalFace {
-      public :
-        typedef hface_STI val_t ;
-        val_t & operator () (helement_STI & e) const { return * e.innerHface () ; }
-        val_t & operator () (hface_STI & f) const { return f ; }
-    } ;
-    class InternalBndseg {
-      public :
-        typedef hbndseg_STI val_t ;
-        val_t & operator () (hbndseg_STI & b) const { return b ; }
-    } ;
-    class InternalElement {
-      public :
-        typedef helement_STI val_t ;
-        val_t & operator () (helement_STI & e) const { return e ; }
-    } ;
-
+  class InternalVertex {
   public :
+    typedef vertex_STI val_t ;
+    val_t & operator () (helement_STI & e) const { return * e.innerVertex () ; }
+    val_t & operator () (hface_STI & f) const { return * f.innerVertex () ; }
+    val_t & operator () (hedge_STI & d) const { return * d.innerVertex () ; }
+    val_t & operator () (vertex_STI & v) const { return v ; }
+  } ;
+  class InternalEdge {
+  public :
+    typedef hedge_STI val_t ;
+    val_t & operator () (helement_STI & e) const { return * e.innerHedge () ; }
+    val_t & operator () (hface_STI & f) const { return * f.innerHedge () ; }
+    val_t & operator () (hedge_STI & e) const { return e ; }
+  } ;
+  class InternalFace {
+  public :
+    typedef hface_STI val_t ;
+    val_t & operator () (helement_STI & e) const { return * e.innerHface () ; }
+    val_t & operator () (hface_STI & f) const { return f ; }
+  } ;
+  class InternalBndseg {
+  public :
+    typedef hbndseg_STI val_t ;
+    val_t & operator () (hbndseg_STI & b) const { return b ; }
+  } ;
+  class InternalElement {
+  public :
+    typedef helement_STI val_t ;
+    val_t & operator () (helement_STI & e) const { return e ; }
+  } ;
+
+public :
   
   // Die allgemeinste Schnittstelle zum Grobgittercontainer enth"alt Methoden zum
   // Anfordern und Kopieren von Iterationsobjekten, die aber nur im Sinne ihres
@@ -483,52 +482,52 @@ class Gitter {
   // Das Makrogitterinterface beerbt erst mal die verschiedenen Auspr"agungen f"ur
   // Schnittstellen zu Anforderung von Iterationsobjekten. Alles ganz abstrakt bis hier.
   
-    class Makrogitter : public AccessIterator < vertex_STI >, public AccessIterator < hedge_STI >,
-                  public AccessIterator < hface_STI >, public AccessIterator < hbndseg_STI >, 
-            public AccessIterator < helement_STI > {
-      protected :
-        Makrogitter () {}
-  virtual ~Makrogitter () ;
-      public :
-        virtual int iterators_attached () const ;
-  virtual void backup (ostream &) const = 0 ;
-  virtual void backup (const char*,const char *) const = 0 ;
-  virtual void backupCMode (ostream &) const = 0 ;
-  virtual void backupCMode (const char *,const char *) const = 0 ;
+  class Makrogitter : public AccessIterator < vertex_STI >, public AccessIterator < hedge_STI >,
+                      public AccessIterator < hface_STI >, public AccessIterator < hbndseg_STI >, 
+                      public AccessIterator < helement_STI > {
+  protected :
+    Makrogitter () {}
+    virtual ~Makrogitter () ;
+  public :
+    virtual int iterators_attached () const ;
+    virtual void backup (ostream &) const = 0 ;
+    virtual void backup (const char*,const char *) const = 0 ;
+    virtual void backupCMode (ostream &) const = 0 ;
+    virtual void backupCMode (const char *,const char *) const = 0 ;
   
     // Methoden f"ur den Strahlungstransportl"oser
-  virtual void sortmacrogrid () {abort();}
-    } ;
+    virtual void sortmacrogrid () {abort();}
+  } ;
+public :
+  class Geometric {
+    
+    // Innerhalb des Namensraums Geometric sind zuerst die Klassen mit den
+    // Verfeinerungsregeln und dann die Geometriesockelklassen VertexGeo,
+    // Hedge1, Hface3, Hface4, Tetra, Hexa, Hbndseg3/4
+    // sowie die Polygonverbinder (Schnittstellen) hasFace3/4 definiert.
+    
   public :
-    class Geometric {
-    
-  // Innerhalb des Namensraums Geometric sind zuerst die Klassen mit den
-  // Verfeinerungsregeln und dann die Geometriesockelklassen VertexGeo,
-  // Hedge1, Hface3, Hface4, Tetra, Hexa, Hbndseg3/4
-  // sowie die Polygonverbinder (Schnittstellen) hasFace3/4 definiert.
-    
-      public :
-        class VertexGeo ;
-        class hedge1 ;
-        class hface4 ;
-  class hface3 ;
-  class hasFace3 ;
-        class hasFace4 ;
-  class Tetra ;
-        class Hexa ;
-  class hbndseg3 ;
-        class hbndseg4 ;
-      public :
+    class VertexGeo ;
+    class hedge1 ;
+    class hface4 ;
+    class hface3 ;
+    class hasFace3 ;
+    class hasFace4 ;
+    class Tetra ;
+    class Hexa ;
+    class hbndseg3 ;
+    class hbndseg4 ;
+  public :
       
-  // Die Verfeinerungsregeln sind nur enumerierte Typen, mit Zuweisung
-  // Vergleich und Typkonversion, im Falle der Regeln f"ur die Dreiecks-
-  // bzw Vierecksfl"ache sind aber auch Methoden n"otig, die eine Regel
-  // mit dem Twist der Fl"ache mitdrehen, damit der "Ubergang der
-  // Verfeinerung stimmt.
+    // Die Verfeinerungsregeln sind nur enumerierte Typen, mit Zuweisung
+    // Vergleich und Typkonversion, im Falle der Regeln f"ur die Dreiecks-
+    // bzw Vierecksfl"ache sind aber auch Methoden n"otig, die eine Regel
+    // mit dem Twist der Fl"ache mitdrehen, damit der "Ubergang der
+    // Verfeinerung stimmt.
       
-        class Hedge1Rule {
-          public :
-            typedef enum { invalid=0, nosplit=1, iso2 } rule_t ;
+    class Hedge1Rule {
+    public :
+      typedef enum { invalid=0, nosplit=1, iso2 } rule_t ;
     private :
       rule_t _r ;
     public :
@@ -538,11 +537,11 @@ class Gitter {
       inline operator int () const ;
       inline bool isValid () const ;
       inline Hedge1Rule rotate (int) const ;
-        } ;
+    } ;
       
-        class Hface3Rule {
-          public :
-            typedef enum { nosplit=1, e01, e12, e20, iso4 } rule_t ;
+    class Hface3Rule {
+    public :
+      typedef enum { nosplit=1, e01, e12, e20, iso4 } rule_t ;
     public :
       inline Hface3Rule (int) ;
       inline Hface3Rule (rule_t = nosplit) ;
@@ -552,11 +551,11 @@ class Gitter {
       inline Hface3Rule rotate (int) const ;
     private :
       rule_t _r ;
-        } ;
+    } ;
       
-        class Hface4Rule {
-          public :
-            typedef enum { nosplit=1, iso4, ni02, ni13 } rule_t ;
+    class Hface4Rule {
+    public :
+      typedef enum { nosplit=1, iso4, ni02, ni13 } rule_t ;
     public :
       inline Hface4Rule (int) ;
       inline Hface4Rule (rule_t = nosplit) ;
@@ -566,11 +565,11 @@ class Gitter {
       inline Hface4Rule rotate (int) const ;
     private :
       rule_t _r ;
-        } ;
+    } ;
       
-        class TetraRule {
-          public :
-            typedef enum { crs = -1, nosplit = 1, e01, e12, e20, e23, e30, e31, iso8 } rule_t ;
+    class TetraRule {
+    public :
+      typedef enum { crs = -1, nosplit = 1, e01, e12, e20, e23, e30, e31, iso8 } rule_t ;
     public :
       inline TetraRule (int) ;
       inline TetraRule (rule_t = nosplit) ;
@@ -579,11 +578,11 @@ class Gitter {
       inline bool isValid () const ;
     private :
       rule_t _r ;
-        } ;
+    } ;
       
-        class HexaRule {
-          public :
-            typedef enum { crs = -1, nosplit = 1, iso8 } rule_t ;
+    class HexaRule {
+    public :
+      typedef enum { crs = -1, nosplit = 1, iso8 } rule_t ;
     public :
       inline HexaRule (int) ;
       inline HexaRule (rule_t = nosplit) ;
@@ -592,41 +591,41 @@ class Gitter {
       inline bool isValid () const ;
     private :
       rule_t _r ;
-        } ;
+    } ;
      
-      public :
+  public :
 
-  // Die Geometriesockelklassen sind die Grundlage zur Implementierung
-  // numerischer Verfahren auf den bestimmten Elementtypen, und erlauben
-  // alle Man"over, die "uber die geometrische Information verf"ugen
-  // m"ussen, wie z.B. Navigation zur Fl"ache, zu den Kanten und Knoten,
-  // aber auch Anforderungen an den Nachbarn.
+    // Die Geometriesockelklassen sind die Grundlage zur Implementierung
+    // numerischer Verfahren auf den bestimmten Elementtypen, und erlauben
+    // alle Man"over, die "uber die geometrische Information verf"ugen
+    // m"ussen, wie z.B. Navigation zur Fl"ache, zu den Kanten und Knoten,
+    // aber auch Anforderungen an den Nachbarn.
 
-        class hasFace3 : public virtual stiExtender_t :: ElementIF {
+    class hasFace3 : public virtual stiExtender_t :: ElementIF {
     public :
       typedef Hface3Rule balrule_t ;
       virtual bool refineBalance (balrule_t,int) = 0 ;
       virtual bool bndNotifyCoarsen () = 0 ;
-          protected :
-            hasFace3 () {}
-            virtual ~hasFace3 () {}
+    protected :
+      hasFace3 () {}
+      virtual ~hasFace3 () {}
       inline bool bndNotifyBalance (balrule_t,int) ;
 
-// Schwerpunkt des anliegenden Elements beschaffen:
-          public:
-            virtual const double (& barycenter () const)[3] {
-              static double p [3] = {.0,.0,.0} ;
-              return p ;
-            }
-// Ende
-          public:
-            virtual int calcSortnr (int,int) {return (assert(0),abort(),0);}   
-            virtual bool isboundary() const = 0;      
+      // Schwerpunkt des anliegenden Elements beschaffen:
+    public:
+      virtual const double (& barycenter () const)[3] {
+        static double p [3] = {.0,.0,.0} ;
+        return p ;
+      }
+      // Ende
+    public:
+      virtual int calcSortnr (int,int) {return (abort(),0);}   
+      virtual bool isboundary() = 0;      
 
-            virtual helement_STI * mySelf() { return ((helement_STI *) this); }
-        } ;
+      virtual helement_STI * mySelf() { return ((helement_STI *) this); }
+    } ;
 
-        class hasFace4 : public virtual stiExtender_t :: ElementIF {
+    class hasFace4 : public virtual stiExtender_t :: ElementIF {
     public :
       typedef Hface4Rule balrule_t ;
       virtual bool refineBalance (balrule_t,int) = 0 ;
@@ -636,35 +635,36 @@ class Gitter {
       virtual ~hasFace4 () {}
       inline bool bndNotifyBalance (balrule_t,int) ;
 
-// Schwerpunkt des anliegenden Elements beschaffen:
-          public:
-            virtual const double (& barycenter () const)[3] {
-              static double p [3] = {.0,.0,.0} ;
-              return p ;
-            }
-// Ende
-        } ;
+      // Schwerpunkt des anliegenden Elements beschaffen:
+    public:
+      virtual const double (& barycenter () const)[3] {
+        static double p [3] = {.0,.0,.0} ;
+        return p ;
+      }
+      virtual bool isboundary() = 0;
+      // Ende
+    } ;
 
-        class VertexGeo : public vertex_STI, public MyAlloc 
-        {
-          protected:
-            IndexManagerType & _indexmanager;
-          public :
-            Refcount ref ;
-            // VertexGeo is provided for the vertices on lower levels 
-            inline VertexGeo (int,double,double,double, VertexGeo & ) ;
-            inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
-            inline virtual ~VertexGeo () ;
-            inline const double (& Point () const) [3] ;
-            inline int level () const ;
-            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-            virtual inline void project(const ProjectVertex &pv) ; 
+    class VertexGeo : public vertex_STI, public MyAlloc 
+    {
+    protected:
+      IndexManagerType & _indexmanager;
+    public :
+      Refcount ref ;
+      // VertexGeo is provided for the vertices on lower levels 
+      inline VertexGeo (int,double,double,double, VertexGeo & ) ;
+      inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
+      inline virtual ~VertexGeo () ;
+      inline const double (& Point () const) [3] ;
+      inline int level () const ;
+      // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
+      virtual inline void project(const ProjectVertex &pv) ; 
             
-            inline void backup  (ostream & os ) const;
-            inline void restore (istream & is ) ;
+      inline void backup  (ostream & os ) const;
+      inline void restore (istream & is ) ;
 
-  // Extramethode zum Rausschreiben der Elementdaten in einfachem
-  // Format f"ur die Visualisierung mit GRAPE:
+      // Extramethode zum Rausschreiben der Elementdaten in einfachem
+      // Format f"ur die Visualisierung mit GRAPE:
      
       //inline int & vertexIndex () ;
       //inline int   vertexIndex () const ;
@@ -674,178 +674,179 @@ class Gitter {
 #ifndef _DUNE_USES_ALU3DGRID_
       int _idx ;    // Vertexindex zum Datenrausschreiben
 #endif              // wird nur verwendet, wenn nicht fuer Dune ubersetzt    
-        } ;
+    } ;
   
-        typedef class hedge1 : public hedge_STI, public MyAlloc {
-          protected :
-            typedef VertexGeo myvertex_t ;
-            inline hedge1 (myvertex_t *,myvertex_t *) ;
+    typedef class hedge1 : public hedge_STI, public MyAlloc {
+    protected :
+      typedef VertexGeo myvertex_t ;
+      inline hedge1 (myvertex_t *,myvertex_t *) ;
       inline int postRefinement () ;
-            inline int preCoarsening () ;
+      inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const ;
-          public :
+    public :
       typedef Hedge1Rule myrule_t ;
-            inline virtual ~hedge1 () ;
-            Refcount ref ;
+      inline virtual ~hedge1 () ;
+      Refcount ref ;
       inline myvertex_t * myvertex (int) ;
-            inline const myvertex_t * myvertex (int) const ;
-            virtual myvertex_t * subvertex (int) = 0 ;
+      inline const myvertex_t * myvertex (int) const ;
+      virtual myvertex_t * subvertex (int) = 0 ;
       virtual const myvertex_t * subvertex (int) const = 0 ;
-            virtual hedge1 * subedge1 (int) = 0 ;
+      virtual hedge1 * subedge1 (int) = 0 ;
       virtual const hedge1 * subedge1 (int) const = 0 ;
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
     private :
       myvertex_t * v0, * v1 ;
-        } hedge1_GEO ;
+    } hedge1_GEO ;
   
-  typedef class hface3 : public hface_STI, public MyAlloc {
-          public :
+    typedef class hface3 : public hface_STI, public MyAlloc {
+    public :
       typedef hasFace3  myconnect_t ;
       enum { polygonlength = 3 } ;
-            class face3Neighbour {
-              pair < hasFace3 *, int > _v, _h ;
-              public :
-                static const pair < myconnect_t *, int > null ;
-                inline face3Neighbour () ;
-    inline void operator = (const face3Neighbour &) ;
-    inline int complete (const face3Neighbour &) ;
-                inline pair < myconnect_t *, int > front () ;
-    inline pair < const myconnect_t *, int > front () const ;
-                inline pair < myconnect_t *, int > rear () ;
-    inline pair < const myconnect_t *, int > rear () const ;
-              friend class hface3 ;
-            } nb ;
-          protected :
-            typedef VertexGeo   myvertex_t ;
-            typedef hedge1_GEO  myhedge1_t ;
+      class face3Neighbour {
+        pair < hasFace3 *, int > _v, _h ;
+      public :
+        static const pair < myconnect_t *, int > null ;
+        inline face3Neighbour () ;
+        inline void operator = (const face3Neighbour &) ;
+        inline int complete (const face3Neighbour &) ;
+        inline pair < myconnect_t *, int > front () ;
+        inline pair < const myconnect_t *, int > front () const ;
+        inline pair < myconnect_t *, int > rear () ;
+        inline pair < const myconnect_t *, int > rear () const ;
+        friend class hface3 ;
+      } nb ;
+    protected :
+      typedef VertexGeo   myvertex_t ;
+      typedef hedge1_GEO  myhedge1_t ;
     public :
       typedef Hface3Rule myrule_t ;
-          protected :
+    protected :
       inline hface3 (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
       inline int postRefinement () ;
-            inline int preCoarsening () ;
-          public :
-            inline virtual ~hface3 () ;
-            Refcount ref ;
+      inline int preCoarsening () ;
+    public :
+      inline virtual ~hface3 () ;
+      Refcount ref ;
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
       inline void detachElement (int) ;
     public :
-            inline int twist (int) const ;
+      inline int twist (int) const ;
       inline myvertex_t * myvertex (int) ;
-            inline const myvertex_t * myvertex (int) const ;
-            inline myhedge1_t * myhedge1 (int) ;
+      inline const myvertex_t * myvertex (int) const ;
+      inline myhedge1_t * myhedge1 (int) ;
       inline const myhedge1_t * myhedge1 (int) const ;
-            virtual hface3 * down () = 0 ;
+      virtual hface3 * down () = 0 ;
       virtual const hface3 * down () const = 0 ;
       virtual hface3 * next () = 0 ;
-            virtual const hface3 * next () const = 0 ;
+      virtual const hface3 * next () const = 0 ;
       virtual myvertex_t * subvertex (int) = 0 ;
-            virtual const myvertex_t * subvertex (int) const = 0 ;
+      virtual const myvertex_t * subvertex (int) const = 0 ;
       virtual myhedge1_t * subedge1 (int) = 0 ;
-            virtual const myhedge1_t * subedge1 (int) const = 0 ;
+      virtual const myhedge1_t * subedge1 (int) const = 0 ;
       virtual hface3 * subface3 (int) = 0 ;
-            virtual const hface3 * subface3 (int) const = 0 ;
+      virtual const hface3 * subface3 (int) const = 0 ;
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual bool refine (myrule_t,int) = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
 
-          protected :
+    protected :
       myhedge1_t * e [polygonlength] ;
-            signed char s [polygonlength] ;
+      signed char s [polygonlength] ;
 
-// H"ohere Ordnung: 1. Regel des Elternelements, 2. Nummer in der Reihe der Kinder
-//                  3. Nichtkonforme Situation vorne, 4. Ninchtkonforme Situation hinten
-//                  bei 3. + 4. ja=1, nein=0
-            signed char _parRule, _nChild, _nonv, _nonh ;
-// Ende: H"ohere Ordnung
+      // H"ohere Ordnung: 1. Regel des Elternelements, 2. Nummer in der Reihe der Kinder
+      //                  3. Nichtkonforme Situation vorne, 4. Ninchtkonforme Situation hinten
+      //                  bei 3. + 4. ja=1, nein=0
+      signed char _parRule, _nChild, _nonv, _nonh ;
+      // Ende: H"ohere Ordnung
 
-        } hface3_GEO ;
+    } hface3_GEO ;
 
-        typedef class hface4 : public hface_STI, public MyAlloc {
-          public :
+    typedef class hface4 : public hface_STI, public MyAlloc {
+    public :
       typedef hasFace4  myconnect_t ;
       enum { polygonlength = 4 } ;
-            class face4Neighbour {
-              pair < myconnect_t *, int > _v, _h ;
-              public :
-                static const pair < myconnect_t *, int > null ;
-                inline face4Neighbour () ;
-    inline void operator = (const face4Neighbour &) ;
-    inline int complete (const face4Neighbour &) ;
-                inline pair < myconnect_t *, int > front () ;
-    inline pair < const myconnect_t *, int > front () const ;
-                inline pair < myconnect_t *, int > rear () ;
-    inline pair < const myconnect_t *, int > rear () const ;
-              friend class hface4 ;
-            } nb ;
-          protected :
-            typedef VertexGeo  myvertex_t ;
-            typedef hedge1_GEO  myhedge1_t ;
+      class face4Neighbour {
+        pair < myconnect_t *, int > _v, _h ;
+      public :
+        static const pair < myconnect_t *, int > null ;
+        inline face4Neighbour () ;
+        inline void operator = (const face4Neighbour &) ;
+        inline int complete (const face4Neighbour &) ;
+        inline pair < myconnect_t *, int > front () ;
+        inline pair < const myconnect_t *, int > front () const ;
+        inline pair < myconnect_t *, int > rear () ;
+        inline pair < const myconnect_t *, int > rear () const ;
+        friend class hface4 ;
+      } nb ;
+    protected :
+      typedef VertexGeo  myvertex_t ;
+      typedef hedge1_GEO  myhedge1_t ;
     public :
       typedef Hface4Rule myrule_t ;
-          protected :
+    protected :
       inline hface4 (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
       inline int postRefinement () ;
-            inline int preCoarsening () ;
-          public :
-            inline virtual ~hface4 () ;
-            Refcount ref ;
+      inline int preCoarsening () ;
+    public :
+      inline virtual ~hface4 () ;
+      Refcount ref ;
       inline void attachElement (const pair < hasFace4 *, int > &,int) ;
       inline void detachElement (int) ;
     public :
-            inline int twist (int) const ;
+      inline int twist (int) const ;
       inline myvertex_t * myvertex (int) ;
-            inline const myvertex_t * myvertex (int) const ;
-            inline myhedge1_t * myhedge1 (int) ;
+      inline const myvertex_t * myvertex (int) const ;
+      inline myhedge1_t * myhedge1 (int) ;
       inline const myhedge1_t * myhedge1 (int) const ;
-            virtual hface4 * down () = 0 ;
+      virtual hface4 * down () = 0 ;
       virtual const hface4 * down () const = 0 ;
       virtual hface4 * next () = 0 ;
-            virtual const hface4 * next () const = 0 ;
+      virtual const hface4 * next () const = 0 ;
       virtual myvertex_t * subvertex (int) = 0 ;
-            virtual const myvertex_t * subvertex (int) const = 0 ;
+      virtual const myvertex_t * subvertex (int) const = 0 ;
       virtual myhedge1_t * subedge1 (int) = 0 ;
-            virtual const myhedge1_t * subedge1 (int) const = 0 ;
+      virtual const myhedge1_t * subedge1 (int) const = 0 ;
       virtual hface4 * subface4 (int) = 0 ;
-            virtual const hface4 * subface4 (int) const = 0 ;
+      virtual const hface4 * subface4 (int) const = 0 ;
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual bool refine (myrule_t,int) = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
 
-          private :
+    private :
       myhedge1_t * e [polygonlength] ;
-            signed char s [polygonlength] ;
-        } hface4_GEO ;
+      signed char s [polygonlength] ;
+    } hface4_GEO ;
   
-  // Geometriesockelklasse des Tetraeders: Vorsicht der Prototyp der dem
-  // Tetraeder zugrunde liegt, hat eine nach links (gegen Uhrzeigersinn)
-  // umlaufende Numerierung der Knoten auf den Randfl"achen, wenn aus
-  // dem Element herausgeblickt wird. Die Konvention f"ur den Hexaeder
-  // ist leider genau umgekehrt. Dies sollte beim Aufbau von Pyramiden
-  // und Prismen sorgf"altig bedacht werden.
-  // Der Prototyp steht in 'gitter_geo.cc'.
+    // Geometriesockelklasse des Tetraeders: Vorsicht der Prototyp der dem
+    // Tetraeder zugrunde liegt, hat eine nach links (gegen Uhrzeigersinn)
+    // umlaufende Numerierung der Knoten auf den Randfl"achen, wenn aus
+    // dem Element herausgeblickt wird. Die Konvention f"ur den Hexaeder
+    // ist leider genau umgekehrt. Dies sollte beim Aufbau von Pyramiden
+    // und Prismen sorgf"altig bedacht werden.
+    // Der Prototyp steht in 'gitter_geo.cc'.
   
-  typedef class Tetra : public helement_STI, public hasFace3, public MyAlloc {
-          protected :
-            typedef VertexGeo  myvertex_t ;
-            typedef hedge1_GEO myhedge1_t ;
-            typedef hface3_GEO myhface3_t ;
+    typedef class Tetra : public helement_STI, public hasFace3, public MyAlloc {
+    protected :
+      typedef VertexGeo  myvertex_t ;
+      typedef hedge1_GEO myhedge1_t ;
+      typedef hface3_GEO myhface3_t ;
       typedef TetraRule  myrule_t ;
-            inline Tetra (myhface3_t *, int, myhface3_t *, int, myhface3_t *, int, myhface3_t *, int) ;
-            inline int postRefinement () ;
-            inline int preCoarsening () ;
-          public :
-            static const int prototype [4][3] ;
-            inline virtual ~Tetra () ;
+      inline Tetra (myhface3_t *, int, myhface3_t *, int, 
+                    myhface3_t *, int, myhface3_t *, int) ;
+      inline int postRefinement () ;
+      inline int preCoarsening () ;
+    public :
+      static const int prototype [4][3] ;
+      inline virtual ~Tetra () ;
       inline hface3_GEO * myhface3 (int) ;
-            inline const hface3_GEO * myhface3 (int) const ;
-            inline VertexGeo * myvertex (int) ;
+      inline const hface3_GEO * myhface3 (int) const ;
+      inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-            inline VertexGeo * myvertex (int,int) ;
+      inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace3 *, int > myneighbour (int) ;
       inline pair < const hasFace3 *, int > myneighbour (int) const ;
@@ -855,8 +856,9 @@ class Gitter {
       inline pair < hface3_GEO *, int > myintersection (int) ;
       inline pair < const hface3_GEO *, int > myintersection (int) const;
       
-            inline int twist (int) const ;
-            int test () const ;
+      virtual int nFaces() const { return 4; }
+      inline int twist (int) const ;
+      int test () const ;
     public :
       virtual myrule_t getrule () const = 0 ;
       
@@ -865,243 +867,270 @@ class Gitter {
 
       virtual void request (myrule_t) = 0 ;
       int tagForGlobalRefinement () ;
-            int resetRefinementRequest () ;
+      int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-    virtual bool isboundary() const { return false; }
-    virtual grid_t type() const { return tetra; }
 
-    // calculate outer normal of face face
-    virtual void outerNormal (int face , double * normal );
-    virtual void neighOuterNormal (int faceInNeigh , double * normal );
+      virtual bool isboundary() {return false;}
+      virtual grid_t type() {return tetra;}
+      // Dune extentions 
+    
+      // calculate outer normal of face face
+      virtual void outerNormal (int face,   double * normal );
+      virtual void neighOuterNormal (int faceInNeigh,   double * normal );
 
     private :
       myhface3_t * f [4] ;
       signed char s [4] ;
-   } tetra_GEO ;
+    } tetra_GEO ;
   
-  // Geometriesockelklasse des periodischen Randelements mit zwei
-  // 3-Punkt-Fl"achen.
+    // Geometriesockelklasse des periodischen Randelements mit zwei
+    // 3-Punkt-Fl"achen.
   
-  typedef class Periodic3 : public helement_STI, public hasFace3, public MyAlloc {
-          protected :
-            typedef VertexGeo  myvertex_t ;
-            typedef hedge1_GEO myhedge1_t ;
-            typedef hface3_GEO myhface3_t ;
+    typedef class Periodic3 : public helement_STI, public hasFace3, public MyAlloc {
+    protected :
+      typedef VertexGeo  myvertex_t ;
+      typedef hedge1_GEO myhedge1_t ;
+      typedef hface3_GEO myhface3_t ;
       typedef Hface3Rule myrule_t ;
-            inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
-            inline int postRefinement () ;
-            inline int preCoarsening () ;
-          public :
-            static const int prototype [2][3] ;
-            inline virtual ~Periodic3 () ;
+      inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
+      inline int postRefinement () ;
+      inline int preCoarsening () ;
+    public :
+      static const int prototype [2][3] ;
+      inline virtual ~Periodic3 () ;
       inline hface3_GEO * myhface3 (int) ;
-            inline const hface3_GEO * myhface3 (int) const ;
-            inline VertexGeo * myvertex (int) ;
+      inline const hface3_GEO * myhface3 (int) const ;
+      inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-            inline VertexGeo * myvertex (int,int) ;
+      inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace3 *, int > myneighbour (int) ;
       inline pair < const hasFace3 *, int > myneighbour (int) const ;
-            inline int twist (int) const ;
-            int test () const ;
+      virtual int nFaces() const { return 2; }
+      inline int twist (int) const ;
+      int test () const ;
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
       int tagForGlobalRefinement () ;
-            int resetRefinementRequest () ;
+      int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-    virtual bool isboundary() const { return true; }
-    virtual grid_t type() const { return tetra; }
+      virtual bool isboundary() {return true;}
+      virtual grid_t type() {return tetra;}
+
     private :
       myhface3_t * f [2] ;
       signed char s [2] ;
-        } periodic3_GEO ;
+    } periodic3_GEO ;
 
-  // Geometriesockelklasse des periodischen Randelements mit zwei
-  // 4-Punkt-Fl"achen.
+    // Anfang - Neu am 23.5.02 (BS)
+
+    // Geometriesockelklasse des periodischen Randelements mit zwei
+    // 4-Punkt-Fl"achen.
   
-  typedef class Periodic4 : public helement_STI, public hasFace4, public MyAlloc {
-          protected :
-            typedef VertexGeo  myvertex_t ;
-            typedef hedge1_GEO myhedge1_t ;
-            typedef hface4_GEO myhface4_t ;
+    typedef class Periodic4 : public helement_STI, public hasFace4, public MyAlloc {
+    protected :
+      typedef VertexGeo  myvertex_t ;
+      typedef hedge1_GEO myhedge1_t ;
+      typedef hface4_GEO myhface4_t ;
       typedef Hface4Rule myrule_t ;
-            inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
-            inline int postRefinement () ;
-            inline int preCoarsening () ;
-          public :
-            static const int prototype [2][4] ;
-            inline virtual ~Periodic4 () ;
+      inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
+      inline int postRefinement () ;
+      inline int preCoarsening () ;
+    public :
+      static const int prototype [2][4] ;
+      inline virtual ~Periodic4 () ;
       inline hface4_GEO * myhface4 (int) ;
-            inline const hface4_GEO * myhface4 (int) const ;
-            inline VertexGeo * myvertex (int) ;
+      inline const hface4_GEO * myhface4 (int) const ;
+      inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-            inline VertexGeo * myvertex (int,int) ;
+      inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace4 *, int > myneighbour (int) ;
       inline pair < const hasFace4 *, int > myneighbour (int) const ;
-            inline int twist (int) const ;
-            int test () const ;
-    virtual bool isboundary() const { return true; }
-    virtual grid_t type() const { return hexa;}
+
+      virtual int nFaces() const { return 2; }
+      inline int twist (int) const ;
+      int test () const ;
+      virtual bool isboundary() {return true;}
+      virtual grid_t type() {return hexa;}
+
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
       int tagForGlobalRefinement () ;
-            int resetRefinementRequest () ;
+      int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
     private :
       myhface4_t * f [2] ;
       signed char s [2] ;
-        } periodic4_GEO ;
+    } periodic4_GEO ;
 
-  // Der Prototyp f"ur das Hexaederelement bedingt eine im Uhrzeigersinn
-  // umlaufende Numerierung der lokalen Knoten einer Aussenfl"ache, falls
-  // aus dem Element herausgeschaut wird. Gegensatz zum Tetraeder.
-  // Der Prototyp steht in 'gitter_geo.cc'
+    // Ende - Neu am 23.5.02 (BS)
+
+    // Der Prototyp f"ur das Hexaederelement bedingt eine im Uhrzeigersinn
+    // umlaufende Numerierung der lokalen Knoten einer Aussenfl"ache, falls
+    // aus dem Element herausgeschaut wird. Gegensatz zum Tetraeder.
+    // Der Prototyp steht in 'gitter_geo.cc'
   
-        typedef class Hexa : public helement_STI, public hasFace4, public MyAlloc {
-          protected :
-            typedef VertexGeo myvertex_t ;
-            typedef hedge1_GEO myhedge1_t ;
-            typedef hface4_GEO myhface4_t ;
+    typedef class Hexa : public helement_STI, public hasFace4, public MyAlloc {
+    protected :
+      typedef VertexGeo myvertex_t ;
+      typedef hedge1_GEO myhedge1_t ;
+      typedef hface4_GEO myhface4_t ;
       typedef HexaRule  myrule_t ;
-            inline Hexa (myhface4_t *, int, myhface4_t *, int, myhface4_t *, int,
-                         myhface4_t *, int, myhface4_t *, int, myhface4_t *, int) ;
-            inline int postRefinement () ;
-            inline int preCoarsening () ;
-          public :
-            static const int prototype [6][4] ;
-            static const int oppositeFace [6] ;
-            inline virtual ~Hexa () ;
+      inline Hexa (myhface4_t *, int, myhface4_t *, int,
+                   myhface4_t *, int, myhface4_t *, int, 
+                   myhface4_t *, int, myhface4_t *, int) ;
+      inline int postRefinement () ;
+      inline int preCoarsening () ;
+    public :
+      static const int prototype [6][4] ;
+      static const int oppositeFace [6] ;
+      inline virtual ~Hexa () ;
       inline hface4_GEO * myhface4 (int) ;
-            inline const hface4_GEO * myhface4 (int) const ;
-            inline VertexGeo * myvertex (int) ;
+      inline const hface4_GEO * myhface4 (int) const ;
+      inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-            inline VertexGeo * myvertex (int,int) ;
+      inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace4 *, int > myneighbour (int) ;
       inline pair < const hasFace4 *, int > myneighbour (int) const ;
-            inline int twist (int) const ;
-            int test () const ;
+
+      // Dune extension
+      // return pair, first = pointer to face, second = twist of face
+      inline pair < hface4_GEO *, int > myintersection (int) ;
+      inline pair < const hface4_GEO *, int > myintersection (int) const;
+      virtual int nFaces() const { return 6; }
+
+      inline int twist (int) const ;
+      int test () const ;
     public :
       virtual myrule_t getrule () const = 0 ;
+      virtual myrule_t requestrule () const = 0;
       virtual void request (myrule_t) = 0 ;
       int tagForGlobalRefinement () ;
-            int resetRefinementRequest () ;
+      int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-    virtual bool isboundary() const { return false; }
-    virtual grid_t type() const { return hexa; }
+      virtual bool isboundary() {return false;}
+      virtual grid_t type() {return hexa;}
+      // Dune extensions
+
+      // calculate outer normal of face face
+      virtual void outerNormal (int face,   double* normal);
+      virtual void neighOuterNormal(int faceInNeigh,  double* normal);
+
     private :
       myhface4_t * f [6] ;
       signed char s [6] ;
-        } hexa_GEO ;
+    } hexa_GEO ;
   
-  // Auch hier ist Vorsicht geboten: Der Protoyp des Dreiecksrandelement
-  // numeriert seine Knoten gegen den Uhrzeigersinn, wenn aus dem Randelement
-  // auf die Randfl"ache geschaut wird. Das Vierecksrandelement hat die
-  // entgegengesetzte Konvention.
+    // Auch hier ist Vorsicht geboten: Der Protoyp des Dreiecksrandelement
+    // numeriert seine Knoten gegen den Uhrzeigersinn, wenn aus dem Randelement
+    // auf die Randfl"ache geschaut wird. Das Vierecksrandelement hat die
+    // entgegengesetzte Konvention.
   
-  typedef class hbndseg3 : public hbndseg_STI, public hasFace3, public MyAlloc {
-          public :
-            typedef VertexGeo   myvertex_t ;
-            typedef hedge1_GEO  myhedge1_t ;
-            typedef hface3_GEO  myhface3_t ;
-            typedef hface3_GEO  myhface_t ;
-            typedef Hface3Rule  myrule_t ;
+    typedef class hbndseg3 : public hbndseg_STI, public hasFace3, public MyAlloc {
+    public :
+      typedef VertexGeo   myvertex_t ;
+      typedef hedge1_GEO  myhedge1_t ;
+      typedef hface3_GEO  myhface3_t ;
+      typedef hface3_GEO  myhface_t ;
+      typedef Hface3Rule  myrule_t ;
       
-            typedef hbndseg_STI :: bnd_t bnd_t;
+      typedef hbndseg_STI :: bnd_t bnd_t;
     protected :
-            inline hbndseg3 (myhface3_t *,int,ProjectVertex *) ;
-            inline int postRefinement () ;
-            inline int preCoarsening () ;
+      inline hbndseg3 (myhface3_t *,int,ProjectVertex *) ;
+      inline int postRefinement () ;
+      inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
-          public :
-            inline virtual ~hbndseg3 () ;
-            inline myrule_t getrule () const ;
+    public :
+      inline virtual ~hbndseg3 () ;
+      inline myrule_t getrule () const ;
       virtual bool refineLikeElement (balrule_t) = 0 ;
-            inline myvertex_t * myvertex (int,int) const ;
-            inline myhface3_t * myhface3 (int) const ;
-            inline int twist (int) const ;
-            inline hface3_GEO * subface3 (int,int) const ;
-            virtual bool isboundary() const {return true;}
+      inline myvertex_t * myvertex (int,int) const ;
+      inline myhface3_t * myhface3 (int) const ;
+      inline int twist (int) const ;
+      inline hface3_GEO * subface3 (int,int) const ;
+      virtual bool isboundary() {return true;}
     private :
       myhface3_t * _face ;
       int _twist ;
-          protected :
-            ProjectVertex *projection;
-          public:  
-        } hbndseg3_GEO ;
-  
-        typedef class hbndseg4 : public hbndseg_STI, public hasFace4, public MyAlloc {
-          public :
-            typedef VertexGeo myvertex_t ;
-            typedef hedge1_GEO  myhedge1_t ;
-            typedef hface4_GEO  myhface4_t ;
-            typedef hface4_GEO  myhface_t ;
-            typedef Hface4Rule  myrule_t ;
-
-            typedef hbndseg_STI :: bnd_t bnd_t;
     protected :
-            inline hbndseg4 (myhface4_t *,int,ProjectVertex *) ;
-            inline int postRefinement () ;
-            inline int preCoarsening () ;
+      ProjectVertex *projection;
+    public:  
+    } hbndseg3_GEO ;
+  
+    typedef class hbndseg4 : public hbndseg_STI, public hasFace4, public MyAlloc {
+    public :
+      typedef VertexGeo myvertex_t ;
+      typedef hedge1_GEO  myhedge1_t ;
+      typedef hface4_GEO  myhface4_t ;
+      typedef hface4_GEO  myhface_t ;
+      typedef Hface4Rule  myrule_t ;
+
+      typedef hbndseg_STI :: bnd_t bnd_t;
+    protected :
+      inline hbndseg4 (myhface4_t *,int,ProjectVertex *) ;
+      inline int postRefinement () ;
+      inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
-          public :
-            inline virtual ~hbndseg4 () ;
-            inline myrule_t getrule () const ;
+    public :
+      inline virtual ~hbndseg4 () ;
+      inline myrule_t getrule () const ;
       virtual bool refineLikeElement (balrule_t) = 0 ;
-            inline myvertex_t * myvertex (int,int) const ;
-            inline myhface4_t * myhface4 (int) const ;
-            inline int twist (int) const ;
-            inline hface4_GEO * subface4 (int,int) const ;
+      inline myvertex_t * myvertex (int,int) const ;
+      inline myhface4_t * myhface4 (int) const ;
+      inline int twist (int) const ;
+      inline hface4_GEO * subface4 (int,int) const ;
+      virtual bool isboundary() {return true;}
     private :
       myhface4_t * _face ;
       int _twist ;
     protected :
-            ProjectVertex *projection;
+      ProjectVertex *projection;
 
-        public:   
-        } hbndseg4_GEO ;
+    public:   
+    } hbndseg4_GEO ;
   
-  class InternalHasFace3 {
-          public :
-            typedef hasFace3 val_t ;
-            val_t * operator () (hasFace3 * x) const { return x ; }
-            val_t & operator () (hasFace3 & x) const { return x ; }
-        } ;
+    class InternalHasFace3 {
+    public :
+      typedef hasFace3 val_t ;
+      val_t * operator () (hasFace3 * x) const { return x ; }
+      val_t & operator () (hasFace3 & x) const { return x ; }
+    } ;
   
-        class InternalHasFace4 {
-          public :
-            typedef hasFace4 val_t ;
-            val_t * operator () (hasFace4 * x) const { return x ; }
-            val_t & operator () (hasFace4 & x) const { return x ; }
-        } ;
-      public :
-        class BuilderIF : public Makrogitter {
+    class InternalHasFace4 {
+    public :
+      typedef hasFace4 val_t ;
+      val_t * operator () (hasFace4 * x) const { return x ; }
+      val_t & operator () (hasFace4 & x) const { return x ; }
+    } ;
+  public :
+    class BuilderIF : public Makrogitter {
   
-  // BuilderIF ist die Stelle des Makrogitters an der der Builder angreift, wenn das
-  // Gitter erbaut werden soll. Der Builder geht direkt mit den Listen um und
-  // wendet sich an die Factorymethoden insert_--*-- (), um neue Objekte zu erhalten.
+      // BuilderIF ist die Stelle des Makrogitters an der der Builder angreift, wenn das
+      // Gitter erbaut werden soll. Der Builder geht direkt mit den Listen um und
+      // wendet sich an die Factorymethoden insert_--*-- (), um neue Objekte zu erhalten.
   
-          list < VertexGeo * >     _vertexList ;
-          list < hedge1_GEO * >    _hedge1List ;
-          list < hface4_GEO * >    _hface4List ;
-    list < hface3_GEO * >    _hface3List ;
-    list < tetra_GEO * >     _tetraList ;
-    list < periodic3_GEO * > _periodic3List ;
+      list < VertexGeo * >     _vertexList ;
+      list < hedge1_GEO * >    _hedge1List ;
+      list < hface4_GEO * >    _hface4List ;
+      list < hface3_GEO * >    _hface3List ;
+      list < tetra_GEO * >     _tetraList ;
+      list < periodic3_GEO * > _periodic3List ;
     
-          list < periodic4_GEO * > _periodic4List ;
-          list < hexa_GEO * >      _hexaList ;
+      list < periodic4_GEO * > _periodic4List ;
+      list < hexa_GEO * >      _hexaList ;
 
-    list < hbndseg3_GEO * >  _hbndseg3List ;
-          list < hbndseg4_GEO * >  _hbndseg4List ;
+      list < hbndseg3_GEO * >  _hbndseg3List ;
+      list < hbndseg4_GEO * >  _hbndseg4List ;
           
-          bool _modified ; // true if macro grid was modified 
+      bool _modified ; // true if macro grid was modified 
 
-          protected :
-            BuilderIF () : _modified (true) , _removed(false) {}
-            virtual ~BuilderIF () ;
+    protected :
+      BuilderIF () : _modified (true) , _removed(false) {}
+      virtual ~BuilderIF () ;
       
       // generates macro image from macro file 
       void generateRawHexaImage (istream &, ostream &) ;
@@ -1119,85 +1148,85 @@ class Gitter {
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t,const double(&p)[3]) = 0 ;
-            virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
-            IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
-            IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
-            IteratorSTI < hedge_STI >  * iterator (const hedge_STI *) const ;
-            IteratorSTI < hedge_STI >  * iterator (const IteratorSTI < hedge_STI > *) const ;
-            IteratorSTI < hface_STI >  * iterator (const hface_STI *) const ;
-            IteratorSTI < hface_STI >  * iterator (const IteratorSTI < hface_STI > *) const ;
-            IteratorSTI < helement_STI > * iterator (const helement_STI *) const ;
-            IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) const ;
-            IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
-            IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
+      IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
+      IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
+      IteratorSTI < hedge_STI >  * iterator (const hedge_STI *) const ;
+      IteratorSTI < hedge_STI >  * iterator (const IteratorSTI < hedge_STI > *) const ;
+      IteratorSTI < hface_STI >  * iterator (const hface_STI *) const ;
+      IteratorSTI < hface_STI >  * iterator (const IteratorSTI < hface_STI > *) const ;
+      IteratorSTI < helement_STI > * iterator (const helement_STI *) const ;
+      IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) const ;
+      IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
+      IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
     protected :
-            // delete all attached elements, maybe called from MacroGitterBasis 
-            void removeMacroGrid (); 
-            bool _removed; // true if removeMacroGrid was already called 
+      // delete all attached elements, maybe called from MacroGitterBasis 
+      void removeMacroGrid (); 
+      bool _removed; // true if removeMacroGrid was already called 
             
       IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const ;
-            IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const ;
+      IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const ;
     public :
       virtual void backup (ostream &) const ;
       virtual void backup (const char*,const char *) const ;
       virtual void backupCMode (ostream &) const ;
       virtual void backupCMode (const char*,const char *) const ;
-          friend class MacroGridBuilder ;
+      friend class MacroGridBuilder ;
 #ifdef _DUNE_USES_ALU3DGRID_ 
-          friend class DuneParallelGridMover;
+      friend class DuneParallelGridMover;
 #endif
-        } ;
     } ;
-  private :
-    IteratorSTI < vertex_STI >   * iterator (const vertex_STI *) ;
-    IteratorSTI < vertex_STI >   * iterator (const IteratorSTI < vertex_STI > *) ;
-    IteratorSTI < hedge_STI >    * iterator (const hedge_STI *) ;
-    IteratorSTI < hedge_STI >    * iterator (const IteratorSTI < hedge_STI > *) ;
-    IteratorSTI < hface_STI >    * iterator (const hface_STI *) ;
-    IteratorSTI < hface_STI >    * iterator (const IteratorSTI < hface_STI > *) ;
-    IteratorSTI < hbndseg_STI >  * iterator (const hbndseg_STI *) ;
-    IteratorSTI < hbndseg_STI >  * iterator (const IteratorSTI < hbndseg_STI > *) ;
-    IteratorSTI < helement_STI > * iterator (const helement_STI *) ;
-    IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) ;
-  protected :
-    virtual bool refine () ;
-    virtual void coarse () ;
-    virtual Makrogitter & container () = 0 ;
-    virtual const Makrogitter & container () const = 0 ;
-    virtual inline int iterators_attached () const ;
-    virtual void notifyGridChanges () ;
-    virtual void notifyMacroGridChanges () ;
-  protected :
-    Gitter () {}
-    virtual ~Gitter () ;
+  } ;
+private :
+  IteratorSTI < vertex_STI >   * iterator (const vertex_STI *) ;
+  IteratorSTI < vertex_STI >   * iterator (const IteratorSTI < vertex_STI > *) ;
+  IteratorSTI < hedge_STI >    * iterator (const hedge_STI *) ;
+  IteratorSTI < hedge_STI >    * iterator (const IteratorSTI < hedge_STI > *) ;
+  IteratorSTI < hface_STI >    * iterator (const hface_STI *) ;
+  IteratorSTI < hface_STI >    * iterator (const IteratorSTI < hface_STI > *) ;
+  IteratorSTI < hbndseg_STI >  * iterator (const hbndseg_STI *) ;
+  IteratorSTI < hbndseg_STI >  * iterator (const IteratorSTI < hbndseg_STI > *) ;
+  IteratorSTI < helement_STI > * iterator (const helement_STI *) ;
+  IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) ;
+protected :
+  virtual bool refine () ;
+  virtual void coarse () ;
+  virtual Makrogitter & container () = 0 ;
+  virtual const Makrogitter & container () const = 0 ;
+  virtual inline int iterators_attached () const ;
+  virtual void notifyGridChanges () ;
+  virtual void notifyMacroGridChanges () ;
+protected :
+  Gitter () {}
+  virtual ~Gitter () ;
 
-  public :
-    // callback for Dune 
-    virtual int preCoarsening ( helement_STI & ) { return 0; }
-    virtual int postRefinement( helement_STI & ) { return 0; }
+public :
+  // callback for Dune 
+  virtual int preCoarsening ( helement_STI & ) { return 0; }
+  virtual int postRefinement( helement_STI & ) { return 0; }
 
-    virtual void fullIntegrityCheck () ;
-    virtual void printsize () ;
-    virtual bool adapt () ;
-    virtual void refineGlobal () ;
-    virtual void refineBall (const double (&)[3],double,int) ;
-    virtual void refineRandom (double) ;
-    virtual void backupCMode (ostream &) ;
-    virtual void backupCMode (const char*,const char *) ;
-    virtual void backup (ostream &) ;
+  virtual void fullIntegrityCheck () ;
+  virtual void printsize () ;
+  virtual bool adapt () ;
+  virtual void refineGlobal () ;
+  virtual void refineBall (const double (&)[3],double,int) ;
+  virtual void refineRandom (double) ;
+  virtual void backupCMode (ostream &) ;
+  virtual void backupCMode (const char*,const char *) ;
+  virtual void backup (ostream &) ;
 
-    virtual void backup (const char*,const char *) ;
-    virtual void restore (istream &) ;
-    virtual void restore (const char*,const char *) ;
+  virtual void backup (const char*,const char *) ;
+  virtual void restore (istream &) ;
+  virtual void restore (const char*,const char *) ;
 
-    // new xdr backup and restore method
-    virtual void backup (XDRstream_out &) ;
-    virtual void restore (XDRstream_in &) ;
+  // new xdr backup and restore method
+  virtual void backup (XDRstream_out &) ;
+  virtual void restore (XDRstream_in &) ;
 
-    // return index manager of macro grid 
-    virtual IndexManagerType & indexManager (int codim) = 0;
+  // return index manager of macro grid 
+  virtual IndexManagerType & indexManager (int codim) = 0;
 
-  protected:
+protected:
   friend class LeafIterator < helement_STI > ;
   friend class LeafIterator < vertex_STI > ;
   friend class LeafIterator < hbndseg_STI > ;
@@ -1205,9 +1234,9 @@ class Gitter {
   friend class LeafIterator < hface_STI > ;
 } ;
 
-  // "Ausseres Iteratorproxy oder auch einfach ein Smartpointer
-  // um von aussen vom Gitter Iterationsobjekte zu bekommen und
-  // zu verwalten.
+// "Ausseres Iteratorproxy oder auch einfach ein Smartpointer
+// um von aussen vom Gitter Iterationsobjekte zu bekommen und
+// zu verwalten.
 
 template < class A > class LeafIterator : public MyAlloc {
   Gitter * _grd ;
@@ -1216,18 +1245,18 @@ template < class A > class LeafIterator : public MyAlloc {
   void * operator new (size_t) { return 0 ; }
   void operator delete (void *) { }
   inline LeafIterator () ;
-  public :
-    typedef A val_t;
-    inline LeafIterator (Gitter &) ;
-    inline LeafIterator (const LeafIterator < A > & ) ;
-    inline ~LeafIterator () ;
-    inline IteratorSTI < A > * operator -> () const ;
-    inline IteratorSTI < A > & operator * () const ;
+public :
+  typedef A val_t;
+  inline LeafIterator (Gitter &) ;
+  inline LeafIterator (const LeafIterator < A > & ) ;
+  inline ~LeafIterator () ;
+  inline IteratorSTI < A > * operator -> () const ;
+  inline IteratorSTI < A > & operator * () const ;
 } ;
 
-  // Die const-correctness ist leider noch nicht soweit, dass
-  // zwischen const und non-const Gitterreferenzen vern"unftig
-  // schon an dieser Stelle unterschieden wird.
+// Die const-correctness ist leider noch nicht soweit, dass
+// zwischen const und non-const Gitterreferenzen vern"unftig
+// schon an dieser Stelle unterschieden wird.
 
 #if 0
 template < class A > class ConstLeafIterator : public MyAlloc {
@@ -1237,40 +1266,40 @@ template < class A > class ConstLeafIterator : public MyAlloc {
   void * operator new (size_t) ;
   void operator delete (void *) ;
   inline ConstLeafIterator () ;
-  public :
-    inline ConstLeafIterator (const Gitter &) ;
-    inline ConstLeafIterator (const ConstLeafIterator < A > & ) ;
-    inline ~ConstLeafIterator () ;
-    inline ConstIteratorSTI < A > * operator -> () const ;
-    inline ConstIteratorSTI < A > & operator * () const ;
+public :
+  inline ConstLeafIterator (const Gitter &) ;
+  inline ConstLeafIterator (const ConstLeafIterator < A > & ) ;
+  inline ~ConstLeafIterator () ;
+  inline ConstIteratorSTI < A > * operator -> () const ;
+  inline ConstIteratorSTI < A > & operator * () const ;
 } ;
 #endif
 
-  //
-  //    #    #    #  #          #    #    #  ######
-  //    #    ##   #  #          #    ##   #  #
-  //    #    # #  #  #          #    # #  #  #####
-  //    #    #  # #  #          #    #  # #  #
-  //    #    #   ##  #          #    #   ##  #
-  //    #    #    #  ######     #    #    #  ######
-  //
+//
+//    #    #    #  #          #    #    #  ######
+//    #    ##   #  #          #    ##   #  #
+//    #    # #  #  #          #    # #  #  #####
+//    #    #  # #  #          #    #  # #  #
+//    #    #   ##  #          #    #   ##  #
+//    #    #    #  ######     #    #    #  ######
+//
 
 inline pair < int, int > operator += (pair < int, int> & a, const pair < int, int > & b) {
   return pair < int, int > (a.first += b.first, a.second += b.second) ;
 }
 
 /*
-inline ostream & operator << (ostream & out, const pair < const int, int > & p) {
+  inline ostream & operator << (ostream & out, const pair < const int, int > & p) {
   return (out << p.first << " " << p.second << " ") ;
-}
+  }
 
-inline ostream & operator << (ostream & out, const pair < int, int > & p) {
+  inline ostream & operator << (ostream & out, const pair < int, int > & p) {
   return (out << p.first << " " << p.second << " ") ;
-}
+  }
 
-inline istream & operator >> (istream & in, pair < int, int > & p) {
+  inline istream & operator >> (istream & in, pair < int, int > & p) {
   return (in >> p.first >> p.second) ;
-}
+  }
 */
 #ifndef NDEBUG
 inline Refcount :: Globalcount :: Globalcount () : _c (0) {
@@ -1401,10 +1430,10 @@ template < class A > inline AccessIterator < A > :: Handle :: ~Handle () {
 }
 
 template < class A > inline const typename AccessIterator < A > :: Handle & AccessIterator < A > :: Handle :: operator = (const AccessIterator < A > :: Handle & x) {
-   delete _w, _w = 0 ;
-   x._fac ? ((_fac ? _fac->ref -- : 0), _w = (_fac = x._fac)->iterator (x._w), _fac->ref ++)
-   : ((_fac ? _fac->ref -- : 0), _fac = 0, _w = new IteratorSTI < A > (), 0) ;
-   return x ;
+  delete _w, _w = 0 ;
+  x._fac ? ((_fac ? _fac->ref -- : 0), _w = (_fac = x._fac)->iterator (x._w), _fac->ref ++)
+    : ((_fac ? _fac->ref -- : 0), _fac = 0, _w = new IteratorSTI < A > (), 0) ;
+  return x ;
 }
 
 template < class A > inline bool AccessIterator < A > :: Handle :: operator == (const AccessIterator < A > :: Handle & x) const {
@@ -1644,14 +1673,14 @@ inline bool Gitter :: Geometric :: Hedge1Rule :: isValid () const {
 inline Gitter :: Geometric :: Hedge1Rule Gitter :: Geometric :: Hedge1Rule :: rotate (int i) const {
   assert (i == 0 || i == 1) ;
   switch (_r) {
-    case nosplit :
-      return Hedge1Rule (nosplit) ;
-    case iso2 :
-      return Hedge1Rule (iso2) ;
-    default :
-      cerr << __FILE__ << " " << __LINE__ << endl ;
-      abort () ;
-      return Hedge1Rule (nosplit) ;
+  case nosplit :
+    return Hedge1Rule (nosplit) ;
+  case iso2 :
+    return Hedge1Rule (iso2) ;
+  default :
+    cerr << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+    return Hedge1Rule (nosplit) ;
   }
 }
 
@@ -1729,26 +1758,26 @@ inline bool Gitter :: Geometric :: Hface3Rule :: isValid () const {
 inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: rotate (int t) const {
   assert ((-4 < t) && (t < 3)) ;
   switch (_r) {
-    case nosplit :
-      return Hface3Rule (nosplit) ;
-    case e01 :
-    case e12 :
-    case e20 :
-      if (t == 0 || t == -3) {    // twist 0 bzw. -2 : e01 bleibt und e12 <-> e20 event. swappen
-        return Hface3Rule (_r == e01 ? e01 : (_r == e12 ? (t == 0 ? e12 : e20) : (t == 0 ? e20 : e12))) ;
-      } else if (t == 1 || t == -1) { // twist 1 bzw. -1 : e20 -> e01 (beidesmal)
-        return Hface3Rule (_r == e20 ? e01 : (_r == e12 ? (t == 1 ? e20 : e12) : (t == 1 ? e12 : e20))) ;
-      } else if (t == 2 || t == -2) { // twist 2 bzw. -3 : e12 -> e01 (beidesmal)
-        return Hface3Rule (_r == e12 ? e01 : (_r == e01 ? (t == 2 ? e20 : e12) : (t == 2 ? e12 : e20))) ;
-      } else {
-        abort () ;
-      }
-    case iso4 :
-      return Hface3Rule (iso4) ;
-    default :
-      cerr << __FILE__ << " " << __LINE__ << endl ;
+  case nosplit :
+    return Hface3Rule (nosplit) ;
+  case e01 :
+  case e12 :
+  case e20 :
+    if (t == 0 || t == -3) {    // twist 0 bzw. -2 : e01 bleibt und e12 <-> e20 event. swappen
+      return Hface3Rule (_r == e01 ? e01 : (_r == e12 ? (t == 0 ? e12 : e20) : (t == 0 ? e20 : e12))) ;
+    } else if (t == 1 || t == -1) { // twist 1 bzw. -1 : e20 -> e01 (beidesmal)
+      return Hface3Rule (_r == e20 ? e01 : (_r == e12 ? (t == 1 ? e20 : e12) : (t == 1 ? e12 : e20))) ;
+    } else if (t == 2 || t == -2) { // twist 2 bzw. -3 : e12 -> e01 (beidesmal)
+      return Hface3Rule (_r == e12 ? e01 : (_r == e01 ? (t == 2 ? e20 : e12) : (t == 2 ? e12 : e20))) ;
+    } else {
       abort () ;
-      return Hface3Rule (nosplit) ;
+    }
+  case iso4 :
+    return Hface3Rule (iso4) ;
+  default :
+    cerr << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+    return Hface3Rule (nosplit) ;
   }
 }
 
@@ -1782,25 +1811,25 @@ inline bool Gitter :: Geometric :: Hface4Rule :: isValid () const {
 
 inline Gitter :: Geometric :: Hface4Rule Gitter :: Geometric :: Hface4Rule :: rotate (int t) const {
   switch (_r) {
-    case nosplit :
-      return Hface4Rule (nosplit) ;
-    case iso4 :
-      return Hface4Rule (iso4) ;
-    default :
-      cerr << __FILE__ << " " << __LINE__ << endl ;
-      abort () ;
-      return Hface4Rule (nosplit) ;
+  case nosplit :
+    return Hface4Rule (nosplit) ;
+  case iso4 :
+    return Hface4Rule (iso4) ;
+  default :
+    cerr << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+    return Hface4Rule (nosplit) ;
   }
 }
  
-  //                                         #####
-  // #    #  ######    ##     ####   ###### #     #
-  // #    #  #        #  #   #    #  #            #
-  // ######  #####   #    #  #       #####   #####
-  // #    #  #       ######  #       #            #
-  // #    #  #       #    #  #    #  #      #     #
-  // #    #  #       #    #   ####   ######  #####
-  //
+//                                         #####
+// #    #  ######    ##     ####   ###### #     #
+// #    #  #        #  #   #    #  #            #
+// ######  #####   #    #  #       #####   #####
+// #    #  #       ######  #       #            #
+// #    #  #       #    #  #    #  #      #     #
+// #    #  #       #    #   ####   ######  #####
+//
   
 inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour () : _v (null), _h (null) {
   return ;
@@ -1841,10 +1870,10 @@ inline Gitter :: Geometric :: hface3 :: hface3 (myhedge1_t * e0, int s0, myhedge
   (e [0] = e0)->ref ++ ; s [0] = s0 ;
   (e [1] = e1)->ref ++ ; s [1] = s1 ;
   (e [2] = e2)->ref ++ ; s [2] = s2 ;
-// H"ohere Ordnung:
+  // H"ohere Ordnung:
   _parRule = _nChild = (signed char) -1 ; // Test.
   _nonv = _nonh = (signed char) 1 ;
-// Ende: H"ohere Ordnung
+  // Ende: H"ohere Ordnung
   return ;
 }
 
@@ -1857,14 +1886,14 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
 }
 
 inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t) {
-// H"ohere Ordnung, bisher: " t < 0 ? nb._h = p : nb._v = p ;"
+  // H"ohere Ordnung, bisher: " t < 0 ? nb._h = p : nb._v = p ;"
   t < 0 ? (_nonh = 0, nb._h = p) : (_nonv = 0, nb._v = p) ;
   ref ++ ;
   return ;
 }
 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t) {
-// H"ohere Ordnung, bisher: "t < 0 ? nb._h = nb.null : nb._v = nb.null ;"
+  // H"ohere Ordnung, bisher: "t < 0 ? nb._h = nb.null : nb._v = nb.null ;"
   t < 0 ? (_nonh = 1, nb._h = nb.null) : (_nonv = 1, nb._v = nb.null) ;
   ref -- ;
   return ;
@@ -2046,8 +2075,9 @@ inline bool Gitter :: Geometric :: TetraRule :: isValid () const {
 //    #     #          #    #   #   #    #
 //    #     ######     #    #    #  #    #
 
-inline Gitter :: Geometric :: Tetra :: Tetra (myhface3_t * f0, int t0, myhface3_t * f1,
-  int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3) {
+inline Gitter :: Geometric :: Tetra :: 
+Tetra (myhface3_t * f0, int t0, myhface3_t * f1, int t1, 
+       myhface3_t * f2, int t2, myhface3_t * f3, int t3) {
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
   (f [2] = f2)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 2),(s [2] = t2)) ;
@@ -2103,7 +2133,7 @@ inline pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Te
 
 inline pair < const Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Tetra :: myneighbour (int i) const {
   return twist (i) < 0 ? pair < const hasFace3 *, int > (myhface3 (i)->nb.front ().first, myhface3 (i)->nb.front ().second)
-       : pair < const hasFace3 *, int > (myhface3 (i)->nb.rear ().first, myhface3 (i)->nb.rear ().second) ;
+    : pair < const hasFace3 *, int > (myhface3 (i)->nb.rear ().first, myhface3 (i)->nb.rear ().second) ;
 }
 
 inline pair < Gitter :: Geometric :: hface3_GEO *, int > Gitter :: Geometric :: Tetra :: myintersection (int i) 
@@ -2173,7 +2203,7 @@ inline const Gitter :: Geometric :: Periodic3 :: myvertex_t * Gitter :: Geometri
 inline Gitter :: Geometric :: Periodic3 :: myvertex_t * Gitter :: Geometric :: Periodic3 :: myvertex (int i) {
   assert (0 <= i && i < 6) ;
   
-    // Der Ausdruck liefert 0-> (0,0)
+  // Der Ausdruck liefert 0-> (0,0)
   //      1-> (0,1)
   //      2-> (0,2)
   //      3-> (1,0)
@@ -2195,7 +2225,7 @@ inline pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Pe
 inline pair < const Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Periodic3 :: myneighbour (int i) const {
   assert (0 <= i && i < 2) ;
   return twist (i) < 0 ? pair < const hasFace3 *, int > (myhface3 (i)->nb.front ().first, myhface3 (i)->nb.front ().second)
-       : pair < const hasFace3 *, int > (myhface3 (i)->nb.rear ().first, myhface3 (i)->nb.rear ().second) ;
+    : pair < const hasFace3 *, int > (myhface3 (i)->nb.rear ().first, myhface3 (i)->nb.rear ().second) ;
 }
 
 inline int Gitter :: Geometric :: Periodic3 :: postRefinement () {
@@ -2271,7 +2301,7 @@ inline pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Pe
 inline pair < const Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Periodic4 :: myneighbour (int i) const {
   assert (0 <= i && i < 2) ;
   return twist (i) < 0 ? pair < const hasFace4 *, int > (myhface4 (i)->nb.front ().first, myhface4 (i)->nb.front ().second)
-       : pair < const hasFace4 *, int > (myhface4 (i)->nb.rear ().first, myhface4 (i)->nb.rear ().second) ;
+    : pair < const hasFace4 *, int > (myhface4 (i)->nb.rear ().first, myhface4 (i)->nb.rear ().second) ;
 }
 
 inline int Gitter :: Geometric :: Periodic4 :: postRefinement () {
@@ -2321,8 +2351,10 @@ inline bool Gitter :: Geometric :: HexaRule :: isValid () const {
 // #     #  #        #  #   #    #
 // #     #  ######  #    #  #    #
 
-inline Gitter :: Geometric :: Hexa :: Hexa (myhface4_t * f0, int t0, myhface4_t * f1, int t1, myhface4_t * f2, int t2,
-  myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5) {
+inline Gitter :: Geometric :: Hexa :: 
+Hexa (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
+      myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
+      myhface4_t * f4, int t4, myhface4_t * f5, int t5) {
   (f [0] = f0)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1)) ;
   (f [2] = f2)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 2),(s [2] = t2)) ;
@@ -2381,7 +2413,17 @@ inline pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: He
 
 inline pair < const Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Hexa :: myneighbour (int i) const {
   return twist (i) < 0 ? pair < const hasFace4 *, int > (myhface4 (i)->nb.front ().first, myhface4 (i)->nb.front ().second)
-       : pair < const hasFace4 *, int > (myhface4 (i)->nb.rear ().first, myhface4 (i)->nb.rear ().second) ;
+    : pair < const hasFace4 *, int > (myhface4 (i)->nb.rear ().first, myhface4 (i)->nb.rear ().second) ;
+}
+
+inline pair<Gitter::Geometric::hface4_GEO*, int> 
+Gitter::Geometric::Hexa::myintersection(int i) {
+  return make_pair(myhface4(i), twist(i));
+}
+
+inline pair<const Gitter::Geometric::hface4_GEO*, int> 
+Gitter::Geometric::Hexa::myintersection(int i) const {
+  return make_pair(myhface4(i), twist(i));
 }
 
 inline int Gitter :: Geometric :: Hexa :: postRefinement () {
