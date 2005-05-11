@@ -390,8 +390,10 @@ void DuneParallelGridMover :: finalize ()
   {for (hbndintMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
     const Hbnd3IntStorage & p = * (Hbnd3IntStorage *) (*i).second ;
     if (p.first()->ref == 1) {
+      //hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3 ( p.first(),p.second(),
+      //                  Gitter :: hbndseg_STI :: closure , p.getPoint() );
       hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3 ( p.first(),p.second(),
-                        Gitter :: hbndseg_STI :: closure , p.getPoint() );
+                        Gitter :: hbndseg_STI :: closure );
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (pair < hface3_GEO *, int > *)(*i).second ;
