@@ -1350,8 +1350,8 @@ void GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: detachPllXFromMacro () thro
 
 GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: HexaEmptyPllMacro 
   (myhface4_t * f0, int t0, myhface4_t * f1, int t1, myhface4_t * f2, int t2, 
-   myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5, IndexManagerType & im)
-  : GitterBasisPll :: ObjectsPll :: hexa_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5,im), _pllx (new mypllx_t (*this)) {
+   myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter * gitter)
+  : GitterBasisPll :: ObjectsPll :: hexa_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5,im,gitter), _pllx (new mypllx_t (*this)) {
   return ;
 }
 
@@ -1453,7 +1453,7 @@ Gitter :: Geometric :: hface3_GEO * GitterBasisPll :: MacroGitterBasisPll :: ins
 }
 
 Gitter :: Geometric :: hexa_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) {
-  return new ObjectsPll :: HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5], indexManager(0) ) ;
+  return new ObjectsPll :: HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5], indexManager(0), this->_myGrid ) ;
 }
 
 Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {

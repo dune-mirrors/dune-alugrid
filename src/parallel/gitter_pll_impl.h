@@ -748,7 +748,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     public :
       typedef HexaPllBaseXMacro mypllx_t ;
       HexaEmptyPllMacro (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-              myhface4_t *,int, IndexManagerType & im) ;
+              myhface4_t *,int, IndexManagerType & im, Gitter * gitter ) ;
      ~HexaEmptyPllMacro () ;
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -812,8 +812,6 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
         IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
       public :
-        // Gitter is here a reference to the actual grid this macro grid
-        // belongs to 
         MacroGitterBasisPll (Gitter * , istream &) ;
         MacroGitterBasisPll (Gitter * ) ;
        ~MacroGitterBasisPll () ;
