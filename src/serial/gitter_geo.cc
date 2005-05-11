@@ -322,8 +322,6 @@ int Gitter :: Geometric :: Periodic3 :: tagForBallRefinement (const double (&cen
   return 0 ;
 }
 
-// Anfang - Neu am 23.5.02 (BS)
-
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #
 // #     #  #       #    #     #    #    #  #    #     #    #    # #    #
@@ -349,17 +347,11 @@ int Gitter :: Geometric :: Periodic4 :: tagForBallRefinement (const double (&cen
   return 0 ;
 }
 
-// Ende - Neu am 23.5.02 (BS)
-
 Gitter :: Geometric :: BuilderIF :: ~BuilderIF () 
 {
-  if(!_removed) removeMacroGrid();
-}
-
-void Gitter :: Geometric :: BuilderIF :: removeMacroGrid () 
-{   
   if (iterators_attached ()) 
-    cerr << "**WARNUNG (IGNORIERT) beim L\"oschen von BuilderIF: Iterator-Z\"ahler [" << iterators_attached () << "]" << endl ;
+    cerr << "**WARNING (IGNORED) while deleting BuilderIF: iterator-count [" << iterators_attached () << "]" << endl ;
+
   {for (list < hexa_GEO * > :: iterator i = _hexaList.begin () ; i != _hexaList.end () ; delete (*i++)) ; }
   {for (list < tetra_GEO * > :: iterator i = _tetraList.begin () ; i != _tetraList.end () ; delete (*i++)) ; }
   {for (list < periodic3_GEO * > :: iterator i = _periodic3List.begin () ; i != _periodic3List.end () ; delete (*i++)) ; }
@@ -370,7 +362,6 @@ void Gitter :: Geometric :: BuilderIF :: removeMacroGrid ()
   {for (list < hface3_GEO * > :: iterator i = _hface3List.begin () ; i != _hface3List.end () ; delete (*i++)) ; }
   {for (list < hedge1_GEO * > :: iterator i = _hedge1List.begin () ; i != _hedge1List.end () ; delete (*i++)) ; }
   {for (list < VertexGeo * > :: iterator i = _vertexList.begin () ; i != _vertexList.end () ; delete (*i++)) ; }
-  _removed = true;
 }
 
 IteratorSTI < Gitter :: vertex_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const vertex_STI *) const {
