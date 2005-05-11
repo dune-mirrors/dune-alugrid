@@ -35,8 +35,8 @@ extern "C" { double drand48 (void) ; }
 Refcount :: Globalcount Refcount :: _g ;
 
 Refcount :: Globalcount :: ~Globalcount () {
-  assert (_c ? (cerr << "**WARNUNG Refcount :: Globalcount :: ~Globalcount() " << _c 
-           << " objekte sind stehen geblieben" << endl, 1) : 1) ;
+  assert (_c ? (cerr << "**WARNING Refcount :: Globalcount :: ~Globalcount() " << _c 
+           << " objects have not been removed correctly!" << endl, 1) : 1) ;
   return ;
 }
 #endif
@@ -286,7 +286,7 @@ bool Gitter :: adapt () {
     float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
     cout << "**INFO Gitter :: adapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
   }
-  return refined;
+  return true;
 }
 
 void Gitter :: backupCMode (ostream & out) {
