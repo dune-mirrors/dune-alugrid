@@ -232,15 +232,13 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         // Gitter is a reference to our grid 
         inline MacroGitterBasis (Gitter * , istream &) ;
         inline MacroGitterBasis (Gitter * ) ;
-        // implemended here because for this calss we have no implementation section 
-        virtual ~MacroGitterBasis () { this->removeMacroGrid(); }
+        
+        virtual ~MacroGitterBasis () {}
 
         // return index manager mostly for restore and backup 
-        inline IndexManagerType & indexManager(int codim); 
+        inline IndexManagerType & indexManager(int codim);
         
       protected: 
-        // index provider, for every codim one , 4 is for boundary
-        IndexManagerType _indexmanager[ numOfIndexManager ];
         // reference to our grid, for insert_tetra mainly 
         Gitter * _myGrid; 
     } ;
@@ -561,11 +559,9 @@ inline GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_
   return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
 }
 
-// Anfang - Neu am 23.5.02 (BS)
 inline GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) {
   return new Objects :: periodic4_IMPL (0,f[0],t[0],f[1],t[1]) ;
 }
-// Ende - Neu am 23.5.02 (BS)
 
 inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) {
   return new Objects :: hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5], indexManager(0), _myGrid ) ;
