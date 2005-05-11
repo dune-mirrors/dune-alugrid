@@ -263,7 +263,7 @@ bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp) {
     cout << "**INFO GitterDuneBasis :: duneAdapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
   }
   removeAdaptRestrictProlongOp ();
-  return refined;
+  return true;
 }
 
 

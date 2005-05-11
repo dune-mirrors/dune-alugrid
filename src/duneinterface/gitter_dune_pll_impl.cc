@@ -68,7 +68,8 @@ bool GitterDunePll :: dAdapt ()
   duneNotifyGridChanges () ;
   //balanceGrid_ = duneNotifyNewGrid();
   
-  return refined;
+  return true;
+  //return refined;
 }
 
 // done call notify and loadBalancer  
