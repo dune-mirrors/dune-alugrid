@@ -954,11 +954,30 @@ GitterPll :: GitterPll () : _ldbOver (1.2), _ldbUnder (0.0), _ldbMethod (LoadBal
     in >> i;
     _ldbMethod = (LoadBalancer :: DataBase :: method) i ;
   } else {
-    cerr << "**WARNUNG (IGNORIERT) Datei < lastverteilung.cfg > konnte nicht ge\"offnet werden. Es werden die Standardwerte verwendet." << endl ;
+    cerr << "**WARNING (ignored) could'nt open file < lastverteilung.cfg > . The default values will be used." << endl ;
   }
-  cout << "**INFO GitterPll :: GitterPll () " << _ldbUnder << " < [Balance der Verteilung] < " << _ldbOver << ",\n" 
-       << "       Methode zur Partitionierung \"" << LoadBalancer :: DataBase :: methodToString (_ldbMethod) << "\"" << endl ;
+  cout << "**INFO GitterPll :: GitterPll () " << _ldbUnder << " < [balance of distribution] < " << _ldbOver << ",\n" 
+       << "       method for partitioning \"" << LoadBalancer :: DataBase :: methodToString (_ldbMethod) << "\"" << endl ;
+  return;
+#if 0
+  }
+  { 
+    ifstream in ("loadbalance.cfg") ;
+    if (in) {
+      int i ;
+      in >> _ldbUnder ;
+      in >> _ldbOver ;
+      in >> i;
+      _ldbMethod = (LoadBalancer :: DataBase :: method) i ;
+    } else {
+      cerr << "**WARNING (ignored) could'nt open file < loadbalance.cfg > . The default values will be used." << endl ;
+    }
+    cout << "**INFO GitterPll :: GitterPll () " << _ldbUnder << " < [Balance of distribution] < " << _ldbOver << ",\n" 
+         << "       Methode for partitioning \"" << LoadBalancer :: DataBase :: methodToString (_ldbMethod) << "\"" << endl ;
+    return;
+  }
   return ;
+#endif
 }
 
 #endif
