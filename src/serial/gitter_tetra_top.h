@@ -515,6 +515,7 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist) {
       {
 
   // --thetwist
+  /*
   bool a = false;      
   if( this->nb.rear().first && this->nb.front().first )
   {
@@ -528,9 +529,11 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist) {
     if(this->nb.front().first)
       a = this->nb.front ().first->refineBalance (r,this->nb.front().second);
   }
- 
-  //bool a = twist < 0 ? nb.front ().first->refineBalance (r,nb.front ().second)
-  //                         : nb.rear ().first->refineBalance (r,nb.rear ().second) ;
+  */
+
+  // old piece of code 
+  bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+         : this->nb.rear ().first->refineBalance (r,this->nb.rear ().second) ;
       
   if (a) {  
     if (getrule () == myrule_t :: nosplit) {
