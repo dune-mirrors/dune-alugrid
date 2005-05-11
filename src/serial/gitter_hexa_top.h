@@ -587,7 +587,7 @@ Hface4Top < A > :: getrule () const {
 }
 
 template < class A > inline IndexManagerType & Hface4Top < A > :: getEdgeIndexManager () {
-  return static_cast<inneredge_t &> (*(this->subedge1(0))).getIndexManager();
+  return static_cast<inneredge_t &> (*(this->myhedge1(0))).getIndexManager();
 }
 
 template < class A > void Hface4Top < A > :: splitISO4 () {
