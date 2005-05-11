@@ -213,7 +213,8 @@ inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost ()
 template < class A, class X, class MX > 
 inline Gitter :: helement_STI * Hbnd3PllInternal < A, X, MX > :: HbndPll :: getGhost () 
 {
-  assert(_ghost);
+  // assert is not needed here when we dont use ghost cells 
+  //assert(_ghost);
   return _ghost; 
 }
 
@@ -224,7 +225,6 @@ setGhost ( Gitter :: helement_STI * gh )
   if(gh)
   {
     _ghost = static_cast<GhostElement_t *> (gh); 
-    //cout << "Set Ghost " << _ghost->getIndex() << "\n";
   }
   else _ghost = 0;
 }
