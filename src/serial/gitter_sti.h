@@ -1129,7 +1129,7 @@ public :
       bool _modified ; // true if macro grid was modified 
 
     protected :
-      BuilderIF () : _modified (true) , _removed(false) {}
+      BuilderIF () : _modified (true) {}
       virtual ~BuilderIF () ;
       
       // generates macro image from macro file 
@@ -1160,10 +1160,11 @@ public :
       IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
       IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
     protected :
-      // delete all attached elements, maybe called from MacroGitterBasis 
-      void removeMacroGrid (); 
-      bool _removed; // true if removeMacroGrid was already called 
-            
+      // this variable is located here, because all the elements in
+      // this lists use this objects to get  thier numbers 
+      // index provider, for every codim one , 4 is for boundary
+      IndexManagerType _indexmanager[ numOfIndexManager ];
+
       IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const ;
       IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const ;
     public :
