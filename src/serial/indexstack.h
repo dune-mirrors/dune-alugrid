@@ -99,15 +99,10 @@ public:
   void restoreIndexSet ( istream & is );
 private:
   // no copy constructor allowed 
-  IndexStack( const IndexStack<T,length> & s) : maxIndex_ (0) , stack_(0) {}
+  IndexStack( const IndexStack<T,length> & s);
  
   // no assignment operator allowed 
-  IndexStack<T,length> & operator = ( const IndexStack<T,length> & s) 
-  {
-    cout << "IndexStack::operator = () not allowed! in: " __FILE__ << " line:" << __LINE__ << "\n";
-    abort();
-    return *this; 
-  }
+  IndexStack<T,length> & operator = ( const IndexStack<T,length> & s);
   
   // clear all stored indices 
   void clearStack ();
