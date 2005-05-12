@@ -1553,14 +1553,14 @@ inline void Gitter :: Dune_helement :: setIndex (const int index) {
 
 inline void Gitter :: Dune_helement :: backupIndex (ostream & os ) const {
 #ifdef _DUNE_USES_ALU3DGRID_ 
-  cerr << "Dune_helement :: backupIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
+  cerr << "Dune_helement :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
   abort();
 #endif
 }
 
 inline void Gitter :: Dune_helement :: restoreIndex (istream & is ) {
 #ifdef _DUNE_USES_ALU3DGRID_ 
-  cerr << "Dune_helement :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
+  cerr << "Dune_helement :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
   abort();
 #endif
 }
