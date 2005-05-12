@@ -1,8 +1,11 @@
 // (c) bernhard schupp 1997 - 1998
+// modification for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifndef GITTER_HEXA_TOP_PLL_H_INCLUDED
 #define GITTER_HEXA_TOP_PLL_H_INCLUDED
 
 #include "parallel.h"
+#include "gitter_pll_impl.h"
 #include "gitter_hexa_top.h"
 
 template < class A, class MX > class Hbnd4PllExternal : public Hbnd4Top < A > {
@@ -10,8 +13,10 @@ template < class A, class MX > class Hbnd4PllExternal : public Hbnd4Top < A > {
     typedef MX mypllx_t ;
   protected :
     typedef typename A :: myhface4_t myhface4_t ;
+    typedef typename A :: bnd_t     bnd_t ;
   public :
-    inline Hbnd4PllExternal (myhface4_t *, int,ProjectVertex *) ;
+    inline Hbnd4PllExternal (myhface4_t *, int,ProjectVertex *, 
+                  const bnd_t bt, IndexManagerType & im  ) ;
     inline ~Hbnd4PllExternal () ;
     ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
     const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -22,17 +27,26 @@ template < class A, class MX > class Hbnd4PllExternal : public Hbnd4Top < A > {
 
 template < class A, class X, class MX > class Hbnd4PllInternal {
   public :
+
+    //***************************************************************
+    //  HbndPll
+    //***************************************************************
+    // for example: A = GitterBasis :: Objects :: Hbnd4Default
     class HbndPll : public A {
       public :
         typedef X mypllx_t ;
       protected :
+
+        typedef typename GitterBasisImpl::Objects::tetra_IMPL GhostElement_t;
         typedef typename A :: myhface4_t myhface4_t ;
-	typedef typename A :: balrule_t  balrule_t ;
-	typedef typename A :: bnd_t     bnd_t ;
+        typedef typename A :: balrule_t  balrule_t ;
+        typedef typename A :: bnd_t     bnd_t ;
+
         inline HbndPll (myhface4_t *, int, ProjectVertex *) ;
        ~HbndPll () {}
         virtual bool bndNotifyBalance (balrule_t,int) ;
-	virtual bool lockedAgainstCoarsening () const ;
+        virtual bool lockedAgainstCoarsening () const ;
+
       public :
         bnd_t bndtype () const ;
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
@@ -40,17 +54,32 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
       private :
         mypllx_t _ext ;
-// Anfang - Neu am 23.5.02 (BS)
-// Schwerpunkt des anliegenden Elements beschaffen:
+
+      protected :
+        // ghost element behind pllx bnd, can be pointer to null 
+        GhostElement_t * _ghost;
+
+        // refine ghost if face is refined and ghost is not zero 
+        void splitGhost ();
+
+        // set ghost pointer, use this method otherwise all constructors
+        // have to be changed 
+        void setGhost (Gitter::helement_STI *gh);
+      public:
+        // return ghost pointer 
+        Gitter::helement_STI * getGhost ();
+
       public:
         inline const double (& barycenter () const)[3] ;
 
         // for dune 
         inline int ghostLevel () const ;
-// Ende
-// Ende - Neu am 23.5.02 (BS)
     } ;
     typedef class HbndPll micro_t ;
+
+    // NOTE: ghost element support is missing. 
+    // the necessary changes are similar to the changes in 
+    // gitter_tetra_top* 
   public :
     class HbndPllMacro : public Hbnd4Top < micro_t > {
       public :
@@ -58,10 +87,13 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
       protected :
         typedef typename A :: myhface4_t myhface4_t ;
         typedef typename A :: balrule_t  balrule_t ;
-	virtual bool bndNotifyBalance (balrule_t,int) ;
-	virtual bool lockedAgainstCoarsening () const ;
+        typedef typename A :: bnd_t     bnd_t ;
+
+        virtual bool bndNotifyBalance (balrule_t,int) ;
+        virtual bool lockedAgainstCoarsening () const ;
       public :
-        HbndPllMacro (myhface4_t *,int, ProjectVertex *) ;
+        HbndPllMacro (myhface4_t *,int, ProjectVertex *,
+              const bnd_t bt , IndexManagerType & im, MacroGhost * gh) ;
        ~HbndPllMacro () ;
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
         const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -71,21 +103,25 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         inline int ghostLevel () const ;
       private :
         mypllx_t * _mxt ;
+        MacroGhost * _gm;
     } ;
     typedef class HbndPllMacro macro_t ;
 } ;
 
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
-template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: Hbnd4PllExternal (myhface4_t * f, int t, ProjectVertex *ppv) : Hbnd4Top < A > (0,f,t,ppv,this), _mxt (new MX (*this)) {
+template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: 
+Hbnd4PllExternal (myhface4_t * f, int t, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im) 
+  : Hbnd4Top < A > (0,f,t,ppv,bt,im), _mxt (new MX (*this)) 
+{
   this->restoreFollowFace () ;
   return ;
 }
@@ -112,7 +148,8 @@ template < class A, class MX > void Hbnd4PllExternal < A, MX > :: detachPllXFrom
   return ;
 }
 
-template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX > :: HbndPll :: HbndPll (myhface4_t * f, int t, ProjectVertex *ppv) : A (f,t,ppv), _ext (*this) {
+template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX > :: HbndPll :: 
+HbndPll (myhface4_t * f, int t, ProjectVertex *ppv) : A (f,t,ppv), _ext (*this) , _ghost(0) {
   return ;
 }
 
@@ -148,20 +185,61 @@ template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX > :: Hb
   return _ext.lockedAgainstCoarsening () ;
 }
 
-// Anfang - Neu am 23.5.02 (BS)
 // Schwerpunkt des anliegenden Elements beschaffen:
 // Vorsicht: Basisklasse des Extenders X bzw. MX muss die Methode barycenter  () bereitstellen !
 // Standard: Datei gitter_pll_impl.h, Klasse BndsegPllBaseXClosure < A >
 template < class A, class X, class MX > inline const double (& Hbnd4PllInternal < A, X, MX > :: HbndPll ::  barycenter () const)[3] {
   return _ext.barycenter () ;
 }
-// Ende
-// Ende - Neu am 23.5.02 (BS)
+
 template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX > :: HbndPll ::  ghostLevel () const {
   return _ext.ghostLevel () ;
 }
 
-template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv) : Hbnd4Top < micro_t > (0,f,t,ppv,0), _mxt (new MX (*this)) {
+template < class A, class X, class MX >
+inline Gitter :: helement_STI * Hbnd4PllInternal < A, X, MX > :: HbndPll :: getGhost ()
+{
+  // assert is not needed here when we dont use ghost cells 
+  //assert(_ghost);
+  return _ghost;
+}
+
+template < class A, class X, class MX >
+inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::
+setGhost ( Gitter :: helement_STI * gh )
+{
+  if(gh)
+  {
+    _ghost = static_cast<GhostElement_t *> (gh);
+  }
+  else _ghost = 0;
+}
+
+template < class A, class X, class MX >
+inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  splitGhost ()
+{
+  if(_ghost)
+  {
+    (*_ghost).request( Gitter::Geometric::HexaRule::iso8 );
+    (*_ghost).refine();
+  }
+}
+  
+template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: 
+HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv,
+    const bnd_t bt, IndexManagerType & im , MacroGhost * gh) 
+: Hbnd4Top < micro_t > (0,f,t,ppv,bt,im), _mxt (0) , _gm(gh) {
+
+  if(_gm)
+  {
+    this->setGhost (_gm->getGhost());   
+    _mxt = new MX (*this, _gm->getGhostPoints() );
+  }
+  else
+  { 
+    _mxt = new MX (*this);
+  }
+
   this->restoreFollowFace () ;
   return ;
 }
@@ -207,4 +285,4 @@ template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX >
   return this->level () ;
 }
 
-#endif	// GITTER_HEXA_TOP_PLL_H_INCLUDED
+#endif  // GITTER_HEXA_TOP_PLL_H_INCLUDED
