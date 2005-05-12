@@ -50,7 +50,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         inline HbndPll (myhface3_t *, int, ProjectVertex * );
         ~HbndPll () {}
         virtual bool bndNotifyBalance (balrule_t,int) ;
-  virtual bool lockedAgainstCoarsening () const ;
+        virtual bool lockedAgainstCoarsening () const ;
       public :
         bnd_t bndtype () const ;
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
@@ -117,7 +117,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
 //    #    #   ##  #          #    #   ##  #
 //    #    #    #  ######     #    #    #  ######
 //
-template < class A, class MX > inline Hbnd3PllExternal < A, MX > :: Hbnd3PllExternal (myhface3_t * f, int t, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im) 
+template < class A, class MX > inline Hbnd3PllExternal < A, MX > :: 
+Hbnd3PllExternal (myhface3_t * f, int t, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im) 
     : Hbnd3Top < A > (0,f,t,ppv,this,bt,im,0), _mxt (new MX (*this)) {
   this->restoreFollowFace () ;
   return ;
@@ -204,7 +205,6 @@ inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost ()
 {
   if(_ghost)
   {
-    //cout << "splite Ghost " << _ghost->getIndex() << " \n";
     (*_ghost).request( Gitter::Geometric::TetraRule::iso8 );
     (*_ghost).refine();
   }
@@ -234,8 +234,10 @@ setGhost ( Gitter :: helement_STI * gh )
 //***************************************************************************************
 template < class A, class X, class MX > 
 Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: 
-HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , const bnd_t bt, IndexManagerType & im , MacroGhost * gh) 
+HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , 
+    const bnd_t bt, IndexManagerType & im , MacroGhost * gh) 
  : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,0) 
+ , _mxt(0)
  , _gm(gh) 
 {
   if(_gm) 
