@@ -101,7 +101,11 @@ template < class A > class Hface4Top : public A {
     virtual bool coarse () ;
   public :
     virtual void backup (ostream &) const ;
-    virtual void restore (istream &) ;
+    virtual void restore (istream &) ;   
+
+  // new xdr methods 
+    virtual void backup (XDRstream_out &) const ;
+    virtual void restore (XDRstream_in &) ;
 } ;
 
 template < class A > class Hbnd4Top : public A {
@@ -213,6 +217,13 @@ protected:
     void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
     void restore (istream &) ;
+
+    // backup and restore index 
+    void backupIndex (ostream &) const ;
+    void restoreIndex (istream &) ;
+
+    void backup(XDRstream_out& os) const;
+    void restore(XDRstream_in& is);
 } ;
 
 template < class A > class Periodic4Top : public A {
@@ -744,6 +755,22 @@ template < class A > void Hface4Top < A > :: restore (istream & is) {
   return ;
 }
 
+template < class A > 
+void Hface4Top < A > :: 
+backup (XDRstream_out & os) const {
+  os.put ((char) getrule ()) ;
+  {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
+  {for (const innerface_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
+  return ;
+}
+
+template < class A > void Hface4Top < A > :: restore (XDRstream_in & is) {
+  refineImmediate (myrule_t ((char) is.get ())) ;
+  {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
+  {for (innerface_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
+  return ;
+}
+
 // #     #                         #       #######
 // #     #  #####   #    #  #####  #    #     #      ####   #####
 // #     #  #    #  ##   #  #    # #    #     #     #    #  #    #
@@ -752,9 +779,12 @@ template < class A > void Hface4Top < A > :: restore (istream & is) {
 // #     #  #    #  #   ##  #    #      #     #     #    #  #
 // #     #  #####   #    #  #####       #     #      ####   #
 
+
 template < class A > inline Hbnd4Top < A > :: 
-Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, innerbndseg_t * up)
-  : A (f, i,ppv), _bbb (0), _dwn (0), _up(up) , _lvl (l), _bt(_up->_bt) , _indexManager(_up->_indexManager) {
+Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, 
+          innerbndseg_t * up) : 
+  A (f, i,ppv), _bbb (0), _dwn (0), _up(up) , _lvl (l), _bt(_up->_bt) ,
+  _indexManager(_up->_indexManager) {
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -1314,11 +1344,90 @@ template < class A > void HexaTop < A > :: backupCMode (ostream & os) const {
   return ;
 }
 
+template < class A > void HexaTop < A > :: backupIndex (ostream & os) const {
+#ifdef _DUNE_USES_ALU3DGRID_
+  os.write(((const char *) & this->_index ), sizeof(int));
+  for (const innerhexa_t* c = down(); c; c = c->next()) {
+    c->backupIndex(os);
+  }
+#endif
+  return;
+}
+
 template < class A > void HexaTop < A > :: backup (ostream & os) const {
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
   {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
   {for (const innerhexa_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
+  return ;
+}
+
+template < class A > void HexaTop < A > :: restoreIndex (istream & is) {
+#ifdef _DUNE_USES_ALU3DGRID_
+  // free index from constructor
+  //_indexManager.freeIndex( this->getIndex() ); 
+  is.read ( ((char *) &(this->_index) ), sizeof(int) );
+  {for (innerhexa_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; }
+#endif
+  return;
+}
+
+template < class A > void HexaTop < A > :: backup (XDRstream_out & os) const 
+{
+  os.put ((char) getrule ()) ;
+  {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
+  {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
+  {for (const innerhexa_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
+  
+  return ;
+}
+
+template < class A > void HexaTop < A > :: restore (XDRstream_in & is) {
+
+  // restore () stellt den Elementbaum aus der Verfeinerungs-
+  // geschichte wieder her. Es ruft refine () auf und testet
+  // auf den korrekten Vollzug der Verfeinerung. Danach werden
+  // die inneren Gitterteile restore'd.
+ 
+  myrule_t r ((char) is.get ()) ;
+  assert(getrule() == myrule_t :: nosplit) ;
+  if (r == myrule_t :: nosplit) {
+  
+  // Vorsicht: beim restore m"ussen sich sowohl Element als auch
+  // Randelement um die Korrektheit der Nachbarschaft k"ummern,
+  // und zwar dann wenn sie "on the top" sind (= die gelesene
+  // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
+  // Die nachfolgende L"osung ist weit davon entfernt, sch"on
+  // zu sein - leider. Eventuell wird mit der Verbesserung der
+  // Behandlung der nichtkonf. Situationen mal eine "Anderung
+  // n"otig.
+  
+    for (int i = 0 ; i < 6 ; i ++) {
+      myhface4_t & f (*(this->myhface4 (i))) ;
+      if (!f.leaf ()) {
+        switch (f.getrule ()) {
+    case balrule_t :: iso4 :
+            {for (int j = 0 ; j < 4 ; j ++) f.subface4 (j)->nb.complete (f.nb) ;}
+      break ;
+    default :
+      abort () ;
+      break ;
+  }
+      }
+    }
+  } else {
+
+  // Auf dem Element gibt es kein refine (myrule_t) deshalb mu"s erst
+  // request (myrule_t) und dann refine () durchgef"uhrt werden.
+  
+    request (r) ;
+    refine () ;
+    assert (getrule() == r) ;
+    {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
+    {for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
+    {for (innerhexa_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
+  }
+  
   return ;
 }
 
