@@ -106,11 +106,11 @@ template < class A > class Hface4Top : public A {
 
 template < class A > class Hbnd4Top : public A {
   protected :
-    typedef Hbnd4Top < A >        	innerbndseg_t ;
+    typedef Hbnd4Top < A >        	    innerbndseg_t ;
     typedef typename A :: myhface4_t  	myhface4_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
-    typedef typename A :: bnd_t bnd_t;
+    typedef typename A :: bnd_t         bnd_t;
     
     void splitISO4 () ;
     bool refineLikeElement (balrule_t) ;
@@ -752,13 +752,15 @@ template < class A > void Hface4Top < A > :: restore (istream & is) {
 // #     #  #    #  #   ##  #    #      #     #     #    #  #
 // #     #  #####   #    #  #####       #     #      ####   #
 
-template < class A > inline Hbnd4Top < A > :: Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, innerbndseg_t * up)
+template < class A > inline Hbnd4Top < A > :: 
+Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, innerbndseg_t * up)
   : A (f, i,ppv), _bbb (0), _dwn (0), _up(up) , _lvl (l), _bt(_up->_bt) , _indexManager(_up->_indexManager) {
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
 
-template < class A > inline Hbnd4Top < A > :: Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, bnd_t bt , IndexManagerType & im )
+template < class A > inline Hbnd4Top < A > :: 
+Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im )
   : A (f, i,ppv), _bbb (0), _dwn (0), _up(0) , _lvl (l) , _bt(bt) ,  _indexManager(im) {
   this->setIndex( _indexManager.getIndex() );  
   return ;
