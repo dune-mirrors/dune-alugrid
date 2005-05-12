@@ -1474,9 +1474,11 @@ Gitter :: Geometric :: periodic4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) {
   if (b == Gitter :: hbndseg_STI :: closure) {
     typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
-    return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < Hbnd4DefaultType > , BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t,NULL) ;
+    return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < Hbnd4DefaultType > , 
+          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(0) , 0 ) ;
   } else {
-    return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t,NULL) ;
+    return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
+        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t,NULL, b, indexManager(1) ) ;
   }
 }
 
@@ -1566,7 +1568,8 @@ insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const dou
   } 
   else 
   {
-    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(1) ) ;
+    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, 
+        BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(1) ) ;
   }
 }
 
