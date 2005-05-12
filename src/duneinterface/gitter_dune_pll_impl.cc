@@ -53,7 +53,8 @@ bool GitterDunePll :: dAdapt ()
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: dAdapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
   int start = clock () ;
-  bool refined = this->refine() ;
+  //bool refined = 
+  this->refine() ;
   int lap = clock () ;
   this->coarse ();
   int end = clock () ;
