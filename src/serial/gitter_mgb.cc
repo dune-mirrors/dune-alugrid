@@ -435,7 +435,7 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
     for (int i = 0 ; i < ne ; i ++ )
       in >> vnum [i][0] >> vnum [i][1] >> vnum [i][2] >> vnum [i][3] >> vnum [i][4] >> vnum [i][5] >> vnum [i][6] >> vnum [i][7] ;
   }
-// Anfang - Neu am 23.5.02 (BS)
+  
   {
     int temp_nb;
     in >> temp_nb ;
@@ -463,7 +463,7 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
       }
     }
   }
-// Ende - Neu am 23.5.02 (BS)
+  
   if (! in.good ()) {
     cerr << "**FEHLER (FATAL): Dateiende zu fr\"uh erreicht (inkonsistente Datei). " ;
     cerr << __FILE__ << " " << __LINE__ << " ... Exiting." << endl ;
@@ -670,13 +670,11 @@ void MacroGridBuilder :: initialize ()
       _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
   }}
-// Anfang - Neu am 23.5.02 (BS)
   {for (list < periodic4_GEO * > :: iterator i = myBuilder ()._periodic4List.begin () ; i != myBuilder ()._periodic4List.end () ; 
       myBuilder ()._periodic4List.erase (i++)) {
       _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
   }}
-// Ende - Neu am 23.5.02 (BS)
   {
     for (list < hexa_GEO * > :: iterator i = myBuilder ()._hexaList.begin () ; i != myBuilder ()._hexaList.end () ; 
       myBuilder ()._hexaList.erase (i++)) _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
