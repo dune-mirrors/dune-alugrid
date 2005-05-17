@@ -701,9 +701,6 @@ bool Periodic3PllXBaseMacro :: erasable () const {
   return _erasable ;
 }
 
-  // < Neu 
-
-// Anfang - Neu am 23.5.02 (BS)
 
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #
@@ -831,7 +828,7 @@ void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
   strstream_t s ;
   int c ;
   try {
-    for (os.readObject (c) ; c != -1 ; os.readObject (c)) s.put ((char)c) ;
+    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
   } catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
@@ -847,8 +844,6 @@ void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
 bool Periodic4PllXBaseMacro :: erasable () const {
   return _erasable ;
 }
-
-// Ende - Neu am 23.5.02 (BS)
 
   // #     #
   // #     #  ######  #    #    ##
@@ -969,7 +964,7 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
       strstream_t s ;
       myhexa ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject (-1) ;
+      osv [j].writeObject ( ENDOFSTREAM ) ;
       inlineData (osv [j]) ;
     }
     _erasable = true ;
@@ -998,7 +993,7 @@ bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
       strstream_t s ;
       myhexa ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject (-1) ;
+      osv [j].writeObject ( ENDOFSTREAM ) ;
       inlineData (osv [j]) ;
 
       // pack Dune data 
@@ -1030,7 +1025,7 @@ void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
   strstream_t s ;
   int c ;
   try {
-    for (os.readObject (c) ; c != -1 ; os.readObject (c)) s.put ((char)c) ;
+    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
   } catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
@@ -1048,7 +1043,7 @@ void HexaPllBaseXMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType &
   strstream_t s ;
   int c ;
   try {
-    for (os.readObject (c) ; c != -1 ; os.readObject (c)) s.put ((char)c) ;
+    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
   } catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
