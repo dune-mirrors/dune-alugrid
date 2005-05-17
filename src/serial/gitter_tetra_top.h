@@ -9,8 +9,6 @@
 #include "gitter_sti.h"
 #include "gitter_hexa_top.h"
 
-static volatile char RCSId_gitter_tetra_top_h [] = "$Id$" ;
-
 template < class A > class Hface3Top : public A {
   protected :
     typedef Hface3Top < A >     innerface_t ;
