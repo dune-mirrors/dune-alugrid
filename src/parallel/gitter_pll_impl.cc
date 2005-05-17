@@ -859,27 +859,9 @@ bool Periodic4PllXBaseMacro :: erasable () const {
   // #     #  ######  #    #  #    #
 
 void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
-  /*
-  double p [3] ;
-
-  TrilinearMapping (myhexa ().myvertex (0)->Point (), myhexa ().myvertex (1)->Point (),
-    myhexa ().myvertex (2)->Point (), myhexa ().myvertex (3)->Point (), myhexa ().myvertex (4)->Point (),
-    myhexa ().myvertex (5)->Point (), myhexa ().myvertex (6)->Point (), myhexa ().myvertex (7)->Point ())
-    .map2world (.0,.0,.0,p) ;
-  os.writeObject (p [0]) ;
-  os.writeObject (p [1]) ;
-  os.writeObject (p [2]) ;
-  */
-
+  
   // siehe writeDynamicState von Tetra 
-  assert( (true) ? (os.writeObject ( myhexa(). getIndex() ) , 1 ) : 1);// number of points written 
-  /*
-  if(writeLogFile)
-  {
-    assert(logFile);
-    logFile << "writeDynamicState of el " << myhexa(). getIndex() << "\n";
-  }
-  */
+  //assert( (true) ? (os.writeObject ( myhexa(). getIndex() ) , 1 ) : 1);// number of points written 
 
 #ifdef _DUNE_USES_ALU3DGRID_
   
@@ -889,7 +871,8 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
 
   enum { dimvx = 4 };
   int oppFace = myhexa().oppositeFace[ face ];
-  assert( (true) ? (os.writeObject ( dimvx ) , 1 ) : 1);// number of points written 
+  
+  //assert( (true) ? (os.writeObject ( dimvx ) , 1 ) : 1);// number of points written 
   for(int i=0; i<dimvx; i++) 
   {
     const double (& p) [3] = myhexa ().myvertex( oppFace , i )->Point ();
@@ -897,16 +880,6 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
     os.writeObject (p [0]) ;
     os.writeObject (p [1]) ;
     os.writeObject (p [2]) ;
-   
-    /*
-    if(writeLogFile)
-    {
-      logFile << " write p = [";
-      for(int i=0; i<3; i++)
-        logFile << p[i] << ",";
-      logFile << "] \n";
-    }
-    */
   }
 #endif
   return ;
@@ -1034,6 +1007,25 @@ void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
     myhexa ().restore (s) ;
     assert (!s.eof ()) ;
     xtractData (os) ;
+  }
+  return ;
+}
+
+void HexaPllBaseXMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType & gs , bool i) {
+  assert (i) ;
+  strstream_t s ;
+  int c ;
+  try {
+    for (os.readObject (c) ; c != -1 ; os.readObject (c)) s.put ((char)c) ;
+  } catch (ObjectStream :: EOFException) {
+    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+  }
+  if (i) {
+    myhexa ().restore (s) ;
+    assert (!s.eof ()) ;
+    xtractData (os) ;
+    gs.xtractData( os , myhexa() );
   }
   return ;
 }

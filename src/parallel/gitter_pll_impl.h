@@ -394,10 +394,16 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
+    
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
+
+    // pack and unpack funtions for dune 
+    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
+    virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
+    
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
