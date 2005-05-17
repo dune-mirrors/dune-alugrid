@@ -632,10 +632,12 @@ template < class A > void Hface3Top < A > :: restore (XDRstream_in & is) {
 // #     #  #    #  #   ##  #    # #     #    #     #    #  #
 // #     #  #####   #    #  #####   #####     #      ####   #
 
-template < class A > inline Hbnd3Top < A > :: Hbnd3Top (int l, myhface3_t * f, int i,
-    ProjectVertex *ppv, innerbndseg_t * up, bnd_t bt, 
-    IndexManagerType & im , Gitter::helement_STI * gh) 
-  : A (f, i, ppv ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , _indexManager(im) {
+template < class A > inline Hbnd3Top < A > :: 
+Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
+          innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
+          Gitter::helement_STI * gh) : 
+  A (f, i, ppv ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
+  _indexManager(im) {
   this->setGhost ( gh );
   //if(gh) printTetra(cout,gh);
   this->setIndex( _indexManager.getIndex() );

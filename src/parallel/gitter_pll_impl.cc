@@ -854,7 +854,6 @@ bool Periodic4PllXBaseMacro :: erasable () const {
   // #     #  ######  #    #  #    #
 
 void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
-  
   // siehe writeDynamicState von Tetra 
   //assert( (true) ? (os.writeObject ( myhexa(). getIndex() ) , 1 ) : 1);// number of points written 
 
