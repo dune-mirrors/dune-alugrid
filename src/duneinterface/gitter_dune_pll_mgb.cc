@@ -42,6 +42,7 @@ class DuneParallelGridMover : public ParallelGridMover {
 
   protected :
     void duneUnpackTetra (ObjectStream &,GatherScatterType &) ;
+    void duneUnpackHexa (ObjectStream &,GatherScatterType &) ;
     // overloaded, because calles InsertUniqueHbnd3_withPoint
     inline void unpackHbnd3Int (ObjectStream & os); 
     
@@ -121,6 +122,21 @@ void DuneParallelGridMover :: duneUnpackTetra (ObjectStream & os, GatherScatterT
   return ;
 }
 
+void DuneParallelGridMover :: duneUnpackHexa (ObjectStream & os, GatherScatterType & gs) {
+  int v [8] ;
+  os.readObject (v[0]) ;
+  os.readObject (v[1]) ;
+  os.readObject (v[2]) ;
+  os.readObject (v[3]) ;
+  os.readObject (v[4]) ;
+  os.readObject (v[5]) ;
+  os.readObject (v[6]) ;
+  os.readObject (v[7]) ;
+  pair < hexa_GEO *, bool > p = InsertUniqueHexa (v) ;
+  p.first->accessPllX ().duneUnpackSelf (os,gs,p.second) ;
+  return ;
+}
+
 void DuneParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
   for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; j ++) {
     ObjectStream & os (*j) ;
@@ -180,31 +196,29 @@ void DuneParallelGridMover :: duneUnpackAll (vector < ObjectStream > & osv,
     for (os.readObject (code) ; code != MacroGridMoverIF :: ENDMARKER ; os.readObject (code)) {
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
-  unpackVertex (os) ;
-  break ;
+        unpackVertex (os) ;
+        break ;
       case MacroGridMoverIF :: EDGE1 :
         unpackHedge1 (os) ;
-  break ;
+        break ;
       case MacroGridMoverIF :: FACE3 :
         unpackHface3 (os) ;
-  break ;
+        break ;
       case MacroGridMoverIF :: FACE4 :
-  unpackHface4 (os) ;
-  break ;
+        unpackHface4 (os) ;
+        break ;
       case MacroGridMoverIF :: TETRA :
         duneUnpackTetra (os,gs) ;
         break ;
       case MacroGridMoverIF :: HEXA :
-  unpackHexa (os) ;
+        duneUnpackHexa (os,gs) ;
         break ;
       case MacroGridMoverIF :: PERIODIC3 :
         unpackPeriodic3 (os) ;
         break ;
-// Anfang - Neu am 23.5.02 (BS)
       case MacroGridMoverIF :: PERIODIC4 :
         unpackPeriodic4 (os) ;
         break ;
-// Ende - Neu am 23.5.02 (BS)
       case MacroGridMoverIF :: HBND3INT :
         unpackHbnd3Int (os) ;
         break ;
@@ -213,11 +227,12 @@ void DuneParallelGridMover :: duneUnpackAll (vector < ObjectStream > & osv,
         break ;
       case MacroGridMoverIF :: HBND4INT :
       case MacroGridMoverIF :: HBND4EXT :
-  unpackHbnd4 (os) ;
+        unpackHbnd4 (os) ;
         break ;
       default :
   cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "]\n" ;
   cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << endl ;
+  assert(false);
   abort () ;
         break ;
       }
