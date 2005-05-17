@@ -978,6 +978,38 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
   return false ;
 }
 
+// pack all function for dune 
+bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
+    GatherScatterType & gs) {
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+    int j = (*i).first ;
+    assert ((osv.begin () + j) < osv.end ()) ;
+    assert (_moveTo.size () == 1) ;
+    osv [j].writeObject (HEXA) ;
+    osv [j].writeObject (myhexa ().myvertex (0)->ident ()) ;
+    osv [j].writeObject (myhexa ().myvertex (1)->ident ()) ;
+    osv [j].writeObject (myhexa ().myvertex (2)->ident ()) ;
+    osv [j].writeObject (myhexa ().myvertex (3)->ident ()) ;
+    osv [j].writeObject (myhexa ().myvertex (4)->ident ()) ;
+    osv [j].writeObject (myhexa ().myvertex (5)->ident ()) ;
+    osv [j].writeObject (myhexa ().myvertex (6)->ident ()) ;
+    osv [j].writeObject (myhexa ().myvertex (7)->ident ()) ;
+    {
+      strstream_t s ;
+      myhexa ().backup (s) ;
+      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
+      osv [j].writeObject (-1) ;
+      inlineData (osv [j]) ;
+
+      // pack Dune data 
+      gs.inlineData( osv[j] , myhexa() );
+    }
+    _erasable = true ;
+    return true ;
+  }
+  return false ;
+}
+
 void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const {
   bool hit = _moveTo.size () == 0 ? true : false ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++ )
