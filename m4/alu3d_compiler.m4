@@ -36,7 +36,7 @@ cat >conftest.cc <<_ACEOF
   #endif
 #endif
 #ifndef CXX_SUPPORTED
-  #error Your compiler is not officially supprted by dune
+  #error Your compiler is not officially supprted by ALU3dGrid
 #endif
 int main() { return 0; }
 _ACEOF
@@ -47,8 +47,8 @@ else
   if $CXX conftest.cc -o conftest.$ac_exeext >&5; then
     rm -f conftest.$ac_exeext
   else
-    AC_MSG_ERROR([Your compiler is not officially supported by dune
-                  dune is known to work with $SUPPORTED_COMPILER])
+    AC_MSG_ERROR([Your compiler is not officially supported by ALU3dGrid
+                  ALU3dGrid is known to work with $SUPPORTED_COMPILER])
   fi
 fi
 
