@@ -1,4 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
+// modifications for dune 
+// (c) Robert Kloefkorn 2004 - 2005
 
 #ifndef GITTER_MGB_H_INCLUDED
 #define GITTER_MGB_H_INCLUDED
@@ -26,8 +28,6 @@
 
 #include "key.h"
 #include "gitter_sti.h"
-
-static volatile char RCSId_gitter_mgb_h [] = "$Id$" ;
 
 template < class RandomAccessIterator > inline int cyclicReorder (RandomAccessIterator begin, RandomAccessIterator end) {
   RandomAccessIterator middle = min_element (begin,end) ;

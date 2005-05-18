@@ -5,8 +5,6 @@
 
 #include "mapp_cube_3d.h"
 
-static volatile char RCSId_mapp_cube_3d_cc [] = "$Id$" ;
-
 const double TrilinearMapping :: _epsilon = 1.0e-8 ;
 const double QuadraturCube3Dbasis :: _p2 [4][3] = { { .816496580927726, .0,  .5773502691896258},
                                                     { .0, .816496580927726, -.5773502691896258},

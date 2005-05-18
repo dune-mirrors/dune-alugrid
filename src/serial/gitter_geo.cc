@@ -26,8 +26,6 @@
 #include "gitter_sti.h"
 #include "walk.h"
 
-static volatile char RCSId_gitter_geo_cc [] = "$Id$" ;
-
 extern "C" { double drand48 (void) ; }
 
 const pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: null 

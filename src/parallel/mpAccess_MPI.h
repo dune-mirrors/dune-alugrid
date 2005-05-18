@@ -22,8 +22,6 @@
 
 #include "mpAccess.h"
 
-static volatile char RCSId_mpAccess_MPI_h [] = "$Id$" ;
-
 class MpAccessMPI : public MpAccessLocal {
     MPI_Comm _mpiComm ;
     inline int mpi_allgather (int *, int , int *, int) const ;
