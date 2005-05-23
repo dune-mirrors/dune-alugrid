@@ -3,7 +3,6 @@
 
 AC_DEFUN([ALU3D_PATH_PARTY],[
   AC_REQUIRE([AC_PROG_CC])
-  AC_REQUIRE([AC_PATH_XTRA])
 
   AC_ARG_WITH(party,
     AC_HELP_STRING([--with-party=PATH],[directory with PARTY (version >= 1.1)  inside]))
