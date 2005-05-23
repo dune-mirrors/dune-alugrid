@@ -3,7 +3,6 @@
 
 AC_DEFUN([ALU3D_PATH_METIS],[
   AC_REQUIRE([AC_PROG_CC])
-  AC_REQUIRE([AC_PATH_XTRA])
 
   AC_ARG_WITH(metis,
     AC_HELP_STRING([--with-metis=PATH],[directory with METIS (version >= 4.0)  inside]))
