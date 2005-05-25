@@ -41,64 +41,132 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
   {
     vector < vector < int > > inout (nl) ;
     lp_map_t :: const_iterator meIt = linkagePatternMap.insert (vector < int >  (1L, me)).first ;
-    {for (mi.first () ; ! mi.done () ; mi.next ()) {
-      vector < int > estimate = mi.item ().accessPllX ().estimateLinkage () ;
-      if (estimate.size ()) {
-        LinkedObject :: Identifier id = mi.item ().accessPllX ().getIdentifier () ;
-        look [id].first = mi ;
-        look [id].second = meIt ;
-	{for (vector < int > :: const_iterator i = estimate.begin (); i != estimate.end (); i ++ )
-          id.write (inout [c.link (*i)]) ;
+    {
+      vector < int > count (nl);
+      for(int k=0; k<nl; k++) count[k] =0;
+      typename AccessIterator < A > :: Handle micopy ( mi );
+      for (micopy.first () ; ! micopy.done () ; micopy.next ()) 
+      {
+        vector < int > estimate = micopy.item ().accessPllX ().estimateLinkage () ;
+        if (estimate.size ()) 
+        {
+          for (vector < int > :: const_iterator i = estimate.begin (); i != estimate.end (); i ++ )
+          {
+            count[c.link (*i)] += 4;
+          }
         }
       }
-    }}
+      for(int k=0; k<nl; k++) inout[k].reserve( count[k] );
+    }
+    
+    {
+      for (mi.first () ; ! mi.done () ; mi.next ()) 
+      {
+        vector < int > estimate = mi.item ().accessPllX ().estimateLinkage () ;
+        if (estimate.size ()) 
+        {
+          LinkedObject :: Identifier id = mi.item ().accessPllX ().getIdentifier () ;
+          look [id].first = mi ;
+          look [id].second = meIt ;
+	        {
+            for (vector < int > :: const_iterator i = estimate.begin (); i != estimate.end (); i ++ )
+              id.write (inout [c.link (*i)]) ;
+          }
+        }
+      }
+    }
+    
     inout = c.exchange (inout) ;
+
     vector < int > d = c.dest () ;
-    {for (int l = 0 ; l < nl ; l ++ ) {
-      vector < int > :: const_iterator pos = inout [l].begin (), end = inout [l].end () ;
-      while (pos != end) {
-        typename LinkedObject :: Identifier id ;
-        id.read (pos,end) ;
-        typename lmap_t :: iterator hit = look.find (id) ;
-        if (hit != look.end ()) {
-          vector < int > lpn (*(*hit).second.second) ;
-          if (find (lpn.begin (), lpn.end (), d [l]) == lpn.end ()) {
-	    lpn.push_back (d [l]) ;
-	    sort (lpn.begin (), lpn.end (), less < int > ()) ;
-	    (*hit).second.second = linkagePatternMap.insert (lpn).first ;
-	  }
+    { 
+      for (int l = 0 ; l < nl ; l ++ ) 
+      {
+        vector < int > :: const_iterator pos = inout [l].begin (), end = inout [l].end () ;
+        while (pos != end) 
+        {
+          typename LinkedObject :: Identifier id ;
+          id.read (pos,end) ;
+          typename lmap_t :: iterator hit = look.find (id) ;
+          if (hit != look.end ()) 
+          {
+            vector < int > lpn (*(*hit).second.second) ;
+            if (find (lpn.begin (), lpn.end (), d [l]) == lpn.end ()) 
+            {
+	            lpn.push_back (d [l]) ;
+	            sort (lpn.begin (), lpn.end (), less < int > ()) ;
+	            (*hit).second.second = linkagePatternMap.insert (lpn).first ;
+	          }
+          }
         }
-      }
-    }}
+      } 
+    }
   }
+
   tt = vector < pair < list < typename AccessIterator < A > :: Handle >, 
                        list < typename AccessIterator < A > :: Handle > > > (nl) ;
   {
     vector < vector < int > > inout (nl) ;
-    {for (typename lmap_t :: const_iterator pos = look.begin () ; 
-        pos != look.end () ; pos ++) {
-      const vector < int > & lk (*(*pos).second.second) ;
-      if (* lk.begin () == me) {
-        typename LinkedObject :: Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier () ;
-        {for (typename vector < int > :: const_iterator i = lk.begin () ; i != lk.end () ; i ++) {
-          if (*i != me) {
-            int l = c.link (*i) ;
-            tt [l].first.push_back ((*pos).second.first) ;
-            id.write (inout [l]) ;
+    {
+      vector <int> count(nl);
+      for(int k=0; k<nl; k++) count[k] =0;
+
+      for (typename lmap_t :: const_iterator pos = look.begin () ; 
+        pos != look.end () ; pos ++) 
+      {
+        const vector < int > & lk (*(*pos).second.second) ;
+        if (* lk.begin () == me) 
+        {
+          for (typename vector < int > :: const_iterator i = lk.begin () ; i != lk.end () ; i ++) 
+          {
+            if (*i != me) 
+            {
+              int l = c.link (*i) ;
+              count[l] += 4; 
+            }
           }
-        }}
+        }
       }
-    }}
+      for(int k=0; k<nl; k++) inout[k].reserve( count[k] );
+    }
+    
+    {
+      for (typename lmap_t :: const_iterator pos = look.begin () ; 
+        pos != look.end () ; pos ++) 
+      {
+        const vector < int > & lk (*(*pos).second.second) ;
+        if (* lk.begin () == me) 
+        {
+          typename LinkedObject :: Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier () ;
+          { 
+            for (typename vector < int > :: const_iterator i = lk.begin () ; i != lk.end () ; i ++) 
+            {
+              if (*i != me) 
+              {
+                int l = c.link (*i) ;
+                tt [l].first.push_back ((*pos).second.first) ;
+                id.write (inout [l]) ;
+              }
+            } 
+         }
+        }
+      }
+    }
     inout = c.exchange (inout) ;
-    {for (int i = 0 ; i < nl ; i ++ ) {
-      typename vector < int > :: const_iterator pos = inout [i].begin (), end = inout [i].end () ;
-      while (pos != inout [i].end ()) {
-        typename LinkedObject :: Identifier id ;
-        id.read (pos,end) ;
-        assert (look.find (id) != look.end ()) ;
-        tt [i].second.push_back ((*look.find (id)).second.first) ;
-      } 
-    }}
+    
+    {
+      for (int i = 0 ; i < nl ; i ++ ) 
+      {
+        typename vector < int > :: const_iterator pos = inout [i].begin (), end = inout [i].end () ;
+        while (pos != inout [i].end ()) 
+        {
+          typename LinkedObject :: Identifier id ;
+          id.read (pos,end) ;
+          assert (look.find (id) != look.end ()) ;
+          tt [i].second.push_back ((*look.find (id)).second.first) ;
+        } 
+      }
+    }
   }
   return ;
 }
