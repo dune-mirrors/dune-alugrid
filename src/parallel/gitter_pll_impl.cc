@@ -1664,11 +1664,13 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
   assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll (const char * = \"" << f << "\" ...)" << endl, 1) : 1) ;
 
   // read normal macro gitter if myrank is 0 
+  /*
   if( mpa.myrank () == 0 )
   {
     ifstream in ( f ) ;
     if (in) _macrogitter = new MacroGitterBasisPll (this,in) ;
   }
+  */
 
   // if still no macrogitter, try old method 
   if(!_macrogitter) 
