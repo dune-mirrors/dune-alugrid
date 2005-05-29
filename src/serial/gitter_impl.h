@@ -53,31 +53,39 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
       // organizes the indices for boundary faces and the opposite vertices for
       // ghost cells 
-      template <int pdimvx>
       class Dune_hbndDefault 
       {
         protected:
-          enum { dimvx = pdimvx }; 
-          int    _index;
-          double _oppVx[dimvx][3];
+          int _index;
 
         public:
           inline Dune_hbndDefault ();
-          inline void setOppPoint (int i, const double (&p)[3]);
-          inline const double (& oppositeVertex (int i) const) [3];
 
           inline int getIndex () const; 
           inline void setIndex ( int idx ); 
-          inline int dimVx () const; 
 
         protected:  
           inline void splitGhost () {} 
           inline void setGhost (Gitter::helement_STI *) {}
       };
-       
+
+      class Dune_hbndDefault_triangle : public Dune_hbndDefault
+      {
+        protected:
+          enum { _dimvx = 1 }; 
+          double _oppVx[3];
+
+        public:
+          inline Dune_hbndDefault_triangle ();
+          inline void setOppPoint (int i, const double (&p)[3]);
+          inline const double (& oppositeVertex (int i) const) [3];
+
+          inline int dimVx () const; 
+      };
+
         class Hbnd3Default : public hbndseg3_GEO 
 #ifdef _DUNE_USES_ALU3DGRID_
-           , public Dune_hbndDefault<1>
+           , public Dune_hbndDefault_triangle
 #endif
         {
           protected :
@@ -97,9 +105,23 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         };
         typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
 
+      class Dune_hbndDefault_quad : public Dune_hbndDefault
+      {
+        protected:
+          enum { _dimvx = 4 }; 
+          double _oppVx[_dimvx][3];
+
+        public:
+          inline Dune_hbndDefault_quad ();
+          inline void setOppPoint (int i, const double (&p)[3]);
+          inline const double (& oppositeVertex (int i) const) [3];
+
+          inline int dimVx () const; 
+      };
+
         class Hbnd4Default : public hbndseg4_GEO 
 #ifdef _DUNE_USES_ALU3DGRID_
-           , public Dune_hbndDefault<4>
+           , public Dune_hbndDefault_quad
 #endif
         {
           protected :
@@ -333,53 +355,72 @@ inline void GitterBasis :: Objects :: Hface4Empty :: projectVertex(const Project
 
 
 // Dune_hbndDefault 
-template <int pdimvx> 
-inline GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: Dune_hbndDefault () : _index (-1) 
-{
-  for(int i=0; i<dimvx; i++)
-    for(int j=0; j<3; j++)
-      _oppVx[i][j] = 0.0;
+inline GitterBasis :: Objects :: Dune_hbndDefault :: Dune_hbndDefault () : _index (-1) {}
+
+inline int GitterBasis :: Objects :: Dune_hbndDefault :: getIndex () const 
+{ 
+  assert( _index >= 0 );
+  return _index;
 }
 
+inline void  GitterBasis :: Objects :: Dune_hbndDefault :: setIndex ( int idx ) 
+{
+  _index = idx;
+  return ;
+}
 
-template <int pdimvx> 
-inline void GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: setOppPoint (int i, const double (&p)[3]) 
+inline GitterBasis :: Objects :: Dune_hbndDefault_triangle ::Dune_hbndDefault_triangle () 
+{
+  for(int j=0; j<3; j++) _oppVx[j] = 0.0;
+}
+
+inline void GitterBasis :: Objects :: Dune_hbndDefault_triangle 
+:: setOppPoint (int i, const double (&p)[3]) 
 { 
-  assert((i >= 0) && (i < dimvx));
+  assert((i >= 0) && (i < _dimvx));
+  _oppVx[0] = p[0];
+  _oppVx[1] = p[1];
+  _oppVx[2] = p[2];
+  return;
+}
+           
+inline const double (& GitterBasis :: Objects :: Dune_hbndDefault_triangle ::oppositeVertex (int i) const) [3] 
+{
+  assert((i >= 0) && (i < _dimvx));
+  return _oppVx;
+}
+
+inline int GitterBasis :: Objects :: Dune_hbndDefault_triangle :: dimVx () const { return _dimvx; }
+
+inline GitterBasis :: Objects :: Dune_hbndDefault_quad ::Dune_hbndDefault_quad () 
+{
+  for(int i=0; i<_dimvx; i++)
+    for(int j=0; j<3; j++) _oppVx[i][j] = 0.0;
+}
+
+inline void GitterBasis :: Objects :: Dune_hbndDefault_quad 
+:: setOppPoint (int i, const double (&p)[3]) 
+{ 
+  assert((i >= 0) && (i < _dimvx));
   _oppVx[i][0] = p[0];
   _oppVx[i][1] = p[1];
   _oppVx[i][2] = p[2];
   return;
 }
            
-template <int pdimvx> 
-inline const double (& GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> ::oppositeVertex (int i) const) [3] 
+inline const double (& GitterBasis :: Objects :: Dune_hbndDefault_quad ::oppositeVertex (int i) const) [3] 
 {
-  assert((i >= 0) && (i < dimvx));
+  assert((i >= 0) && (i < _dimvx));
   return _oppVx[i];
 }
 
-template <int pdimvx> inline int 
-GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: getIndex () const 
-{ 
-  assert( _index >= 0 );
-  return _index;
-}
-
-template <int pdimvx> inline void  
-GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: setIndex ( int idx ) 
-{
-  _index = idx;
-  return ;
-}
-
-template <int pdimvx> inline int 
-GitterBasis :: Objects :: Dune_hbndDefault<pdimvx> :: dimVx () const { return dimvx; }
+inline int GitterBasis :: Objects :: Dune_hbndDefault_quad :: dimVx () const { return _dimvx; }
 
 // end of Dune_hbndDefault 
 
 
-inline GitterBasis :: Objects :: Hbnd3Default :: Hbnd3Default (myhface3_t * f, int i, ProjectVertex *ppv) : Gitter :: Geometric :: hbndseg3_GEO (f, i, ppv) 
+inline GitterBasis :: Objects :: Hbnd3Default :: Hbnd3Default (myhface3_t * f, int i, ProjectVertex *ppv) :
+  Gitter :: Geometric :: hbndseg3_GEO (f, i, ppv) 
 {
   return ;
 }
@@ -406,7 +447,8 @@ inline void GitterBasis :: Objects :: Hbnd3Default :: faceNormal( double * norma
   return ;
 }
 
-inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv) : Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv) 
+inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv) : 
+  Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv) 
 {
   return ;
 }
