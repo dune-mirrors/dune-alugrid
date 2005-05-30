@@ -18,6 +18,7 @@ usage () {
     echo "  -i, --intel        use intel compiler"
     echo "  -g, --gnu          use gnu compiler (default)"
     echo "  -m, --mpi          use mpiCC"
+    echo "  -b, --ibm          use mpCC, the ibm compiler"
     echo "  --opts=FILE        use compiler-options from FILE"
     echo "  -d, --debug        switch debug-opts on"
     echo "  -n, --nodebug      switch debug-opts off"
@@ -45,6 +46,7 @@ for OPT in $* ; do
 	-i|--intel)   . ./icc.opts ; COMPSET=1 ;;
 	-g|--gnu)     . ./gcc.opts ; COMPSET=1 ;;
 	-m|--mpi)     . ./mpi.opts ; COMPSET=1 ;;
+	-b|--ibm)     . ./ibm.opts ; COMPSET=1 ;;
 	--opts=*)
 	    if [ -r $arg ] ; then
 	      echo "reading options from $arg..."
