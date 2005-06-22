@@ -38,7 +38,7 @@ class Parallel {
       public :
         inline virtual ElementPllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const ElementPllXIF_t & accessPllX () const throw (AccessPllException) ;
-	inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+      	inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
 } ;
 

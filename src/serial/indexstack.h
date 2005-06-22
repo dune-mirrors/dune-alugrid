@@ -80,7 +80,8 @@ public:
   //! set index as maxIndex
   void setMaxIndex(T index) { maxIndex_ = index; }
 
-  //! set index as maxIndex
+  //! returns the larges index used + 1, actually this is the size of the
+  //! index set 
   int getMaxIndex() const { return maxIndex_;  }
   
   //! restore index from stack or create new index 
