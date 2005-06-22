@@ -227,6 +227,10 @@ class TetraPllXBase : public ElementPllBaseX {
   public :
     inline TetraPllXBase (mytetra_t &) ;
     inline ~TetraPllXBase () {}
+
+    // method to get internal tetra located behind this parallel interface 
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
+
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
@@ -255,6 +259,10 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
     virtual bool erasable () const ;
+    
+    // method to get internal tetra located behind this parallel interface 
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
+
   private :
     int _ldbVertexIndex ;
     map < int, int, less < int > > _moveTo ;
@@ -378,6 +386,10 @@ class HexaPllBaseX : public ElementPllBaseX {
     inline ~HexaPllBaseX () {}
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const {};
+    
+    // method to get internal hexa located behind this parallel interface 
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
+
   private :
     myhexa_t & _hexa ;
 } ;
@@ -404,6 +416,9 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
     virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
     
+    // method to get internal hexa located behind this parallel interface 
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
+
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -422,6 +437,7 @@ class BndsegPllBaseX : public ElementPllBaseX {
     pair < const ElementPllXIF_t *, int > accessOuterPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
     pair < ElementPllXIF_t *, int > accessInnerPllX (const pair < ElementPllXIF_t *, int > &, int) ;
     pair < const ElementPllXIF_t *, int > accessInnerPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
+
 } ;
 
 template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
@@ -438,6 +454,10 @@ template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
     virtual int & ldbVertexIndex () ;
   public :
     virtual void packAsBnd (int,int,ObjectStream &) const ;
+    
+    // method to get internal bnd located behind this parallel interface 
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
+
   private :
     myhbnd_t & _hbnd ;
 } ;
@@ -464,6 +484,10 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
   public :
     virtual void notifyBalance (balrule_t,int) ;
     virtual bool lockedAgainstCoarsening () const ;
+    
+    // method to get internal bnd located behind this parallel interface 
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
+    
   private :
     myhbnd_t & _hbnd ;
     double _center [3] ;
@@ -837,10 +861,12 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
   protected :
     virtual inline MpAccessLocal & mpAccess () ;
     virtual inline const MpAccessLocal & mpAccess () const ;
+    GitterBasisPll (MpAccessLocal & ) ;
+
+  public :
     virtual inline MacroGitterPll & containerPll () ;
     virtual inline const MacroGitterPll & containerPll () const ;
-    GitterBasisPll (MpAccessLocal & ) ;
-  public :
+
     GitterBasisPll (const char *, MpAccessLocal &) ;
     virtual ~GitterBasisPll () ;
 // sp"ater   virtual void adapt () ;
@@ -1161,6 +1187,18 @@ inline const TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () const {
   return _tetra ;
 }
 
+inline void TetraPllXBase :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+{
+  p.first  = & mytetra();
+  p.second = 0;
+}
+
+inline void TetraPllXBaseMacro :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+{
+  p.first  = & mytetra();
+  p.second = 0;
+}
+
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
 // #     #  #       #    #     #    #    #  #    #     #    #    #       #
@@ -1213,6 +1251,17 @@ inline const HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () const {
   return _hexa ;
 }
 
+inline void HexaPllBaseX :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
+{
+  p.first  = & myhexa();
+  p.second = 0;
+}
+
+inline void HexaPllBaseXMacro :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
+{
+  p.first  = & myhexa();
+  p.second = 0;
+}
 
 template < class A > inline BndsegPllBaseXMacro < A > :: 
 BndsegPllBaseXMacro (myhbnd_t & b) : _hbnd (b) {
@@ -1242,6 +1291,22 @@ template < class A > void BndsegPllBaseXMacro < A > :: packAsBnd (int fce, int w
   else abort () ;
   os.writeObject (myhbnd ().bndtype ()) ;
   {for (int i = 0 ; i < myhface_t :: polygonlength ; i++) os.writeObject (myhbnd ().myvertex (fce,i)->ident ()) ; }
+  return ;
+}
+
+template < class A > inline void BndsegPllBaseXMacro < A > :: 
+getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+{
+  p.first  = 0;
+  p.second = & myhbnd (); 
+  return ;
+}
+
+template < class A > inline void BndsegPllBaseXClosure < A > :: 
+getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+{
+  p.first  = 0;
+  p.second = & myhbnd (); 
   return ;
 }
 
@@ -1319,18 +1384,6 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 #ifdef _DUNE_USES_ALU3DGRID_
     // read the real level of ghost 
     os.readObject( _ghostLevel );
-  
-#ifndef NDEBUG
-    /*
-    int dimvx;
-    os.readObject( dimvx );
-    if( dimvx != myhbnd().dimVx())
-    {
-      cerr << "dimvx != myhbnd.dimVx() " << dimvx << " | " << myhbnd().dimVx() << "\n";
-      assert(false);
-    }
-    */
-#endif
     
     double p[3];
     for(int i=0; i<myhbnd().dimVx(); i++)
