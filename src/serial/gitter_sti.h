@@ -247,9 +247,9 @@ public :
         
     virtual void backupIndex (ostream &) const ;   // backup _index  
 
-    // method is virual, because former index set by constructor has to
+    // method is virtual, because former index set by constructor has to
     // be freeed , means method has to be overloaded for correct work
-    virtual void restoreIndex (istream &) ;// retore _index  
+    virtual void restoreIndex (istream &) ;// restore _index  
   };
 
   class hedge : public stiExtender_t :: EdgeIF, public Dune_hface_or_hedge  {
@@ -328,7 +328,7 @@ public :
 
     virtual void backupIndex (ostream &) const ;   // backup _index  
 
-    // method is virual, because former index set by constructor has to
+    // method is virtual, because former index set by constructor has to
     // be freeed , means method has to be overloaded for correct work
     virtual void restoreIndex (istream &) ;// retore _index  
         
@@ -405,9 +405,21 @@ public :
     hbndseg () {}
     virtual ~hbndseg () {}
   public :
-    typedef enum { none = 0, inflow = 1, outflow = 2, noslip = 3, slip = 4, sym_xy = 5,
-                   sym_xz = 6, sym_yz = 7, reflect = 8, fluxtube3d = 9, periodic = 20,
-                   closure = 111, ghost_closure = 222 , undefined = 333 } bnd_t ;
+    typedef enum { 
+      none = 0, 
+      inflow = 1, 
+      outflow = 2, 
+      noslip = 3, 
+      slip = 4, 
+      sym_xy = 5,
+      sym_xz = 6, 
+      sym_yz = 7, 
+      reflect = 8, 
+      fluxtube3d = 9, 
+      periodic = 20,
+      closure = 111, 
+      ghost_closure = 222 , 
+      undefined = 333 } bnd_t ;
     virtual bnd_t bndtype () const = 0 ;
         
     // for dune 
@@ -423,8 +435,9 @@ public :
     // for dune 
     virtual int ghostLevel () const = 0 ;
     // default return 0 means we have no ghost element on this boundary
-    // segment, because we only have ghost on interior boundary 
-    virtual helement * getGhost () = 0; // should return 0 for not interior boundaries 
+    // segment, because we only have ghost on interior boundary.
+    // should return 0 for non-interior boundaries 
+    virtual helement * getGhost () = 0; 
     virtual void faceNormal (double * normal) const = 0 ;
   public :
     virtual void restoreFollowFace () = 0 ;
@@ -620,9 +633,8 @@ public :
       // Ende
     public:
       virtual int calcSortnr (int,int) {return (abort(),0);}   
-      virtual bool isboundary() = 0;      
+      virtual bool isboundary() const = 0;      
 
-      virtual helement_STI * mySelf() { return ((helement_STI *) this); }
     } ;
 
     class hasFace4 : public virtual stiExtender_t :: ElementIF {
@@ -641,8 +653,9 @@ public :
         static double p [3] = {.0,.0,.0} ;
         return p ;
       }
-      virtual bool isboundary() = 0;
+      virtual bool isboundary() const = 0;
       // Ende
+
     } ;
 
     class VertexGeo : public vertex_STI, public MyAlloc 
@@ -751,15 +764,25 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual bool refine (myrule_t,int) = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
-
+    public :
+      int nChild() const;
+      myrule_t parentRule() const;
+      bool isConforming() const;
     protected :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
 
-      // H"ohere Ordnung: 1. Regel des Elternelements, 2. Nummer in der Reihe der Kinder
-      //                  3. Nichtkonforme Situation vorne, 4. Ninchtkonforme Situation hinten
-      //                  bei 3. + 4. ja=1, nein=0
-      signed char _parRule, _nChild, _nonv, _nonh ;
+      // H"ohere Ordnung: 
+      // 1. Regel des Elternelements, 
+      // 2. Nummer in der Reihe der Kinder
+      // 3. Nichtkonforme Situation vorne, 
+      // 4. Nichtkonforme Situation hinten
+      // bei 3. + 4. ja=1, nein=0
+      signed char _parRule, _nChild, _nonv, _nonh;
+      /* new
+         myrule_t _parRule; 
+         int _nChild;
+         bool _nonv, _nonh ; */
       // Ende: H"ohere Ordnung
 
     } hface3_GEO ;
@@ -815,10 +838,19 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual bool refine (myrule_t,int) = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
-
+    public :
+      int nChild() const;
+      myrule_t parentRule() const;
     private :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
+
+    protected:
+      myrule_t _parRule;
+      int _nChild;
+      //bool _nonv;
+      //bool _nonh;
+
     } hface4_GEO ;
   
     // Geometriesockelklasse des Tetraeders: Vorsicht der Prototyp der dem
@@ -870,7 +902,7 @@ public :
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
 
-      virtual bool isboundary() {return false;}
+      virtual bool isboundary() const {return false;}
       virtual grid_t type() {return tetra;}
       // Dune extentions 
     
@@ -915,7 +947,7 @@ public :
       int tagForGlobalRefinement () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-      virtual bool isboundary() {return true;}
+      virtual bool isboundary() const {return true;}
       virtual grid_t type() {return tetra;}
 
     private :
@@ -952,7 +984,7 @@ public :
       virtual int nFaces() const { return 2; }
       inline int twist (int) const ;
       int test () const ;
-      virtual bool isboundary() {return true;}
+      virtual bool isboundary() const {return true;}
       virtual grid_t type() {return hexa;}
 
     public :
@@ -1012,7 +1044,7 @@ public :
       int tagForGlobalRefinement () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-      virtual bool isboundary() {return false;}
+      virtual bool isboundary() const {return false;}
       virtual grid_t type() {return hexa;}
       // Dune extensions
 
@@ -1052,7 +1084,7 @@ public :
       inline myhface3_t * myhface3 (int) const ;
       inline int twist (int) const ;
       inline hface3_GEO * subface3 (int,int) const ;
-      virtual bool isboundary() {return true;}
+      virtual bool isboundary() const {return true;}
     private :
       myhface3_t * _face ;
       int _twist ;
@@ -1083,7 +1115,7 @@ public :
       inline myhface4_t * myhface4 (int) const ;
       inline int twist (int) const ;
       inline hface4_GEO * subface4 (int,int) const ;
-      virtual bool isboundary() {return true;}
+      virtual bool isboundary() const {return true;}
     private :
       myhface4_t * _face ;
       int _twist ;
@@ -1933,6 +1965,19 @@ inline const Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :
   return myhedge1 (i)->myvertex (s[i]) ;
 }
 
+inline int Gitter :: Geometric :: hface3 :: nChild () const {
+  return _nChild;
+}
+
+inline Gitter::Geometric::hface3::myrule_t 
+Gitter::Geometric::hface3::parentRule() const {
+  return (myrule_t) _parRule;
+}
+
+inline bool Gitter :: Geometric :: hface3 :: isConforming () const {
+  return !(_nonv + _nonh == 1);
+}
+
 //                                        #
 // #    #  ######    ##     ####   ###### #    #
 // #    #  #        #  #   #    #  #      #    #
@@ -1975,7 +2020,11 @@ inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter
   return pair < const myconnect_t *, int > (_h.first,_h.second) ; ;
 }
 
-inline Gitter :: Geometric :: hface4 :: hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) {
+inline Gitter :: Geometric :: hface4 :: hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
+  // * higher order
+  _parRule(Hface4Rule::nosplit),
+  _nChild(-1)
+{
   assert(e0 && e1 && e2 && e3) ;
   (e [0] = e0)->ref ++ ; s [0] = s0 ;
   (e [1] = e1)->ref ++ ; s [1] = s1 ;
@@ -2036,6 +2085,15 @@ inline Gitter :: Geometric :: hface4 :: myvertex_t * Gitter :: Geometric :: hfac
 inline const Gitter :: Geometric :: hface4 :: myvertex_t * Gitter :: Geometric :: hface4 :: myvertex (int i) const {
   assert(0<=i && i < 4) ;
   return myhedge1 (i)->myvertex (s[i]) ;
+}
+
+inline int Gitter :: Geometric :: hface4 :: nChild () const {
+  return _nChild;
+}
+
+inline Gitter::Geometric::hface4::myrule_t
+Gitter::Geometric::hface4::parentRule() const {
+  return _parRule;
 }
 
 // #######                                 ######
