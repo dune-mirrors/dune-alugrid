@@ -1,4 +1,6 @@
-// (c) bernhard schupp 1997 - 1998
+// (c) Bernhard Schupp 1997 - 1998
+// modifications for dune interface 
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifndef WALK_H_INCLUDED
 #define WALK_H_INCLUDED
 
@@ -22,6 +24,7 @@
 #include "myalloc.h"
 #include "gitter_sti.h"
 
+// always returns 1 for walk over all elements   
 template < class A > class is_def_true {
   public :
     typedef A val_t ;
@@ -29,6 +32,7 @@ template < class A > class is_def_true {
     int operator () (const A & x) const { return 1 ; }
 } ;
 
+// for leaf iterator , return true is elements is leaf 
 template < class A > class is_leaf {
   public :
     typedef A val_t ;
@@ -36,6 +40,7 @@ template < class A > class is_leaf {
     int operator () (const A & x) const { return x.leaf () ; }
 } ;
 
+// for leaf iterator , return true is elements is not leaf 
 template < class A > class is_not_leaf {
   public :
     typedef A val_t ;
@@ -43,6 +48,8 @@ template < class A > class is_not_leaf {
     int operator () (const A & x) const { return ! x.leaf () ; }
 } ;
 
+
+// returns true if given element has the level 
 template < class A > class any_has_level {
   int lvl ;
   public :
@@ -89,6 +96,57 @@ template < class A > class childs_are_leafs {
     int operator () (const A *) const ;
     int operator () (const A &) const ;
 } ;
+
+//! new rule for Dune LeafIterator 
+//! all entities with hav either the level or are leaf entities with one
+//! level <= the desired level 
+template < class A > class leaf_or_has_level
+{
+  int lvl_;
+  public :
+    //! Constructor storing the level 
+    leaf_or_has_level (int i = 0) : lvl_ (i) { }
+
+    //! check if go next
+    int operator () (const A * x) const
+    {
+      return ((x->level () == lvl_) || (x->leaf () && (x->level () <= lvl_) )) ? 1 : 0 ;
+    }
+
+    //! check if go next
+    int operator () (const A & x) const
+    {
+      return ((x.level  () == lvl_) || (x.leaf  () && (x.level  () <= lvl_) )) ? 1 : 0 ;
+    }
+};
+
+//! new rule for Dune LeafIterator minus one 
+//! all entities with are either leaf entities or thier children are leaf entities 
+template < class A > class leaf_minus_one
+{
+  public :
+    typedef A val_t ;
+
+    //! Constructor storing the level 
+    leaf_minus_one () {}
+
+    //! check if go next
+    int operator () (const A * x) const
+    {
+      return ( x->leaf() || ( (!x->leaf()) && (x->down()->leaf()) ) ) ? 1 : 0 ;
+    }
+
+    //! check if go next
+    int operator () (const A & x) const
+    {
+      return ( x->leaf() || ( (!x->leaf()) && (x->down()->leaf() ) ) ) ? 1 : 0 ;
+    }
+};
+
+
+//**********************************************************************************
+//**********************************************************************************
+//**********************************************************************************
 
 template < class A > class ListIterator : public IteratorSTI < A >, public MyAlloc {
   list < A * > & _list ;
