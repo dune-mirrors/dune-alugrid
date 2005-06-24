@@ -667,6 +667,14 @@ template < class A > void Hface4Top < A > :: refineImmediate (myrule_t r) {
 // ??	// Fl"ache die Situation nach der Verfeinerung vervollst"andigen.
 // ??	
 // ??   {for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = nb ; }
+
+    // * higher order
+    int i = 0;
+    for (innerface_t* f = down(); f; f = f->next(), ++i) {
+      f->_parRule = getrule();
+      f->_nChild = i;
+    }
+
     this->postRefinement () ;
   }
   return ;
