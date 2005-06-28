@@ -92,9 +92,19 @@ template < class A > class Hbnd3Top : public A {
    
     IndexManagerType & _indexManager;
   public:
+    // constructor for serial macro boundary elements  
+    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, 
+                     const bnd_t b, IndexManagerType & im ) ;
+    
+    // constructor for children 
     inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, 
                     innerbndseg_t * up, const bnd_t b, 
                     IndexManagerType & im, typename Gitter::helement_STI * gh) ;
+    // constructor for macro elements 
+    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, 
+                    innerbndseg_t * up, const bnd_t b, 
+                    IndexManagerType & im, Gitter * grd, 
+                    typename Gitter::helement_STI * gh) ;
     inline virtual ~Hbnd3Top () ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
@@ -630,11 +640,32 @@ template < class A > void Hface3Top < A > :: restore (XDRstream_in & is) {
 // #     #  #    #  #   ##  #    # #     #    #     #    #  #
 // #     #  #####   #    #  #####   #####     #      ####   #
 
+// serial macro bnd constructor 
+template < class A > inline Hbnd3Top < A > :: 
+Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
+          bnd_t bt, IndexManagerType & im ) : 
+  A (f, i, ppv , 0 ), _bbb (0), _dwn (0), _up (0) , _lvl (l), _bt (bt) , _indexManager(im) {
+  this->setIndex( _indexManager.getIndex() );
+  return ;
+}
+
 template < class A > inline Hbnd3Top < A > :: 
 Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
           Gitter::helement_STI * gh) : 
-  A (f, i, ppv ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
+  A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
+  _indexManager(im) {
+  this->setGhost ( gh );
+  //if(gh) printTetra(cout,gh);
+  this->setIndex( _indexManager.getIndex() );
+  return ;
+}
+
+template < class A > inline Hbnd3Top < A > :: 
+Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
+          innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
+          Gitter * grd , Gitter::helement_STI * gh) : 
+  A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
   this->setGhost ( gh );
   //if(gh) printTetra(cout,gh);
@@ -822,9 +853,9 @@ template < class A > inline bool Hbnd3Top < A > :: refineBalance (balrule_t r, i
       abort () ;
     }
     
-      // postRefinement () gibt die M"oglichkeit auf dem Niveau des
-  // Template-Arguments eine Methode aufzurufen, um eventuelle
-  // Operationen auf dem verfeinerten Randst"uck durchzuf"uhren.
+    // postRefinement () gibt die M"oglichkeit auf dem Niveau des
+    // Template-Arguments eine Methode aufzurufen, um eventuelle
+    // Operationen auf dem verfeinerten Randst"uck durchzuf"uhren.
     
     this->postRefinement () ;
     return true ;
