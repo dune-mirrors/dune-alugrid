@@ -1493,10 +1493,10 @@ Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: i
   if (b == Gitter :: hbndseg_STI :: closure) {
     typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
     return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < Hbnd4DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(0) , 0 ) ;
+          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(0) , this->_myGrid , 0 ) ;
   } else {
     return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
-        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t,NULL, b, indexManager(1) ) ;
+        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(4) , 0 ) ;
   }
 }
 
@@ -1582,12 +1582,13 @@ insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const dou
     assert(ghost);
     // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
     return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(5) , ghost ) ;
+          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: 
+              macro_t (f,t,NULL, b, indexManager(5) , this->_myGrid , ghost ) ;
   } 
   else 
   {
     return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, 
-        BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(1) ) ;
+        BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(4) , 0 ) ;
   }
 }
 
@@ -1598,9 +1599,9 @@ insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b ) {
     typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
     // here we have a ghost of the ghost, therefor we need the element index manager 
     return new Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(0) , 0 ) ;
+          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(0) , this->_myGrid , 0 ) ;
   } else {
-    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(1) ) ;
+    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(4), 0 ) ;
   }
 }
 
