@@ -351,10 +351,13 @@ public :
 
 
   class helement;
+  class hbndseg;
   struct AdaptRestrictProlong
   {
     virtual int preCoarsening (helement & elem )   = 0;
     virtual int postRefinement (helement  & elem ) = 0;
+    virtual int preCoarsening (hbndseg & bnd )   = 0;
+    virtual int postRefinement (hbndseg & bnd ) = 0;
   };
   typedef AdaptRestrictProlong AdaptRestrictProlongType;
 
@@ -392,14 +395,40 @@ public :
     virtual void backupCMode (ostream &) const = 0 ;
     virtual void backup (ostream &) const = 0 ;
     virtual void restore (istream &) = 0 ;
+
     // xdr methods 
     //virtual void backup (XDRstream_out &) const {};
     //virtual void restore (XDRstream_in &) {};
   public: 
-    virtual grid_t type() = 0;
+    virtual grid_t type() const = 0;
   } ;
-    
-  class hbndseg  
+  
+
+  // organizes the indices for boundary faces and 
+  // the opposite vertices for ghost cells 
+  class Dune_hbndDefault
+  {
+    protected:
+      int _index; // index of the bnd element
+      bool _refinedTag; // true if element was refined 
+
+    public:
+      inline Dune_hbndDefault () : _index (-1), _refinedTag(false) {} 
+
+      inline int getIndex () const { assert( _index >= 0 ); return _index; }
+      inline void setIndex ( int idx ) { _index = idx; return ; }
+      
+      // reset the _refinedTag to false 
+      void resetRefinedTag() { _refinedTag = false; }
+      // true if element was refined this adaptation step 
+      bool hasBeenRefined () const { return _refinedTag; }
+    protected:
+      inline void splitGhost () {}
+      inline void setGhost (helement *) {}
+
+  };
+
+  class hbndseg  : public Dune_hbndDefault
   {
   protected :
     hbndseg () {}
@@ -902,8 +931,8 @@ public :
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
 
-      virtual bool isboundary() const {return false;}
-      virtual grid_t type() {return tetra;}
+      virtual bool isboundary() const { return false; }
+      virtual grid_t type() const { return tetra; }
       // Dune extentions 
     
       // calculate outer normal of face face
@@ -947,8 +976,8 @@ public :
       int tagForGlobalRefinement () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-      virtual bool isboundary() const {return true;}
-      virtual grid_t type() {return tetra;}
+      virtual bool isboundary() const { return true; }
+      virtual grid_t type() const { return tetra; }
 
     private :
       myhface3_t * f [2] ;
@@ -984,8 +1013,9 @@ public :
       virtual int nFaces() const { return 2; }
       inline int twist (int) const ;
       int test () const ;
-      virtual bool isboundary() const {return true;}
-      virtual grid_t type() {return hexa;}
+
+      virtual bool isboundary() const { return true; }
+      virtual grid_t type() const { return hexa; }
 
     public :
       virtual myrule_t getrule () const = 0 ;
@@ -1044,8 +1074,9 @@ public :
       int tagForGlobalRefinement () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
-      virtual bool isboundary() const {return false;}
-      virtual grid_t type() {return hexa;}
+
+      virtual bool isboundary() const { return false; }
+      virtual grid_t type() const { return hexa; }
       // Dune extensions
 
       // calculate outer normal of face face
@@ -1084,7 +1115,8 @@ public :
       inline myhface3_t * myhface3 (int) const ;
       inline int twist (int) const ;
       inline hface3_GEO * subface3 (int,int) const ;
-      virtual bool isboundary() const {return true;}
+      
+      virtual bool isboundary() const { return true; }
     private :
       myhface3_t * _face ;
       int _twist ;
@@ -1115,7 +1147,9 @@ public :
       inline myhface4_t * myhface4 (int) const ;
       inline int twist (int) const ;
       inline hface4_GEO * subface4 (int,int) const ;
-      virtual bool isboundary() const {return true;}
+      
+      virtual bool isboundary() const { return true; }
+
     private :
       myhface4_t * _face ;
       int _twist ;
@@ -1237,6 +1271,9 @@ public :
   // callback for Dune 
   virtual int preCoarsening ( helement_STI & ) { return 0; }
   virtual int postRefinement( helement_STI & ) { return 0; }
+  // callback for Dune 
+  virtual int preCoarsening ( hbndseg_STI & ) { return 0; }
+  virtual int postRefinement( hbndseg_STI & ) { return 0; }
 
   virtual void fullIntegrityCheck () ;
   virtual void printsize () ;
