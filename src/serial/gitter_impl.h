@@ -50,6 +50,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             int _idn ;
         } ;
 
+#if 0
       // organizes the indices for boundary faces and 
       // the opposite vertices for ghost cells 
       class Dune_hbndDefault 
@@ -67,8 +68,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           inline void splitGhost () {} 
           inline void setGhost (Gitter::helement_STI *) {}
       };
+#endif
 
-      class Dune_Hbnd3Default : public Dune_hbndDefault
+      class Dune_Hbnd3Default 
       {
         protected:
           enum { _dimvx = 1 }; 
@@ -88,7 +90,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 #endif
         {
           protected :
-           inline Hbnd3Default (myhface3_t *, int, ProjectVertex * ) ;
+           inline Hbnd3Default (myhface3_t *, int, ProjectVertex * , Gitter * ) ;
            virtual ~Hbnd3Default () {}
           public :
             typedef hbndseg3_GEO :: bnd_t bnd_t;
@@ -101,10 +103,15 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
             // points inside ghosts 
             void faceNormal( double * normal) const;
+
+            inline int preCoarsening  () ;
+            inline int postRefinement () ;
+          protected:
+            Gitter * _myGrid; 
         };
         typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
 
-      class Dune_Hbnd4Default : public Dune_hbndDefault
+      class Dune_Hbnd4Default //: public Dune_hbndDefault
       {
         protected:
           enum { _dimvx = 4 }; 
@@ -124,7 +131,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 #endif
         {
           protected :
-            inline Hbnd4Default (myhface4_t *, int, ProjectVertex *) ;
+            inline Hbnd4Default (myhface4_t *, int, ProjectVertex *, Gitter *) ;
             virtual ~Hbnd4Default () {}
           public :
             typedef hbndseg4_GEO :: bnd_t bnd_t;
@@ -137,6 +144,11 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
             // points inside ghosts 
             void faceNormal( double * normal) const;
+
+            inline int preCoarsening  () ; 
+            inline int postRefinement () ;
+          protected:
+            Gitter * _myGrid; 
         };
         typedef Hbnd4Top < Hbnd4Default > hbndseg4_IMPL ;
 
@@ -356,6 +368,7 @@ inline void GitterBasis :: Objects :: Hface4Empty :: projectVertex(const Project
 // Dune hbnd Default , store the opposite vectices for generating 
 // a ghost cell 
 //******************************************************************
+#if 0
 inline GitterBasis :: Objects :: Dune_hbndDefault :: 
 Dune_hbndDefault () : _index (-1) {}
 
@@ -370,6 +383,7 @@ inline void  GitterBasis :: Objects :: Dune_hbndDefault :: setIndex ( int idx )
   _index = idx;
   return ;
 }
+#endif
 
 inline GitterBasis :: Objects :: Dune_Hbnd3Default ::Dune_Hbnd3Default () 
 {
@@ -422,10 +436,38 @@ inline int GitterBasis :: Objects :: Dune_Hbnd4Default :: dimVx () const { retur
 // end of Dune_hbndDefault 
 //***************************************************************************
 
-inline GitterBasis :: Objects :: Hbnd3Default :: Hbnd3Default (myhface3_t * f, int i, ProjectVertex *ppv) :
-  Gitter :: Geometric :: hbndseg3_GEO (f, i, ppv) 
+inline GitterBasis :: Objects :: Hbnd3Default :: Hbnd3Default (myhface3_t * f, int i, ProjectVertex *ppv, Gitter * grd ) :
+  Gitter :: Geometric :: hbndseg3_GEO (f, i, ppv) , _myGrid(grd) 
 {
   return ;
+}
+
+// calles method on grid which return 0 for default impl 
+inline int GitterBasis :: Objects :: Hbnd3Default :: preCoarsening () 
+{
+  // grid pointer only exists in the case of internal bnds 
+  if(_myGrid)
+  {
+    return _myGrid->preCoarsening(*this);
+  }
+  else 
+  {
+    return 0;
+  }
+}
+
+// calles method on grid which return 0 for default impl 
+inline int GitterBasis :: Objects :: Hbnd3Default :: postRefinement () 
+{
+  // grid pointer only exists in the case of internal bnds 
+  if(_myGrid)
+  {
+    return _myGrid->postRefinement(*this);
+  }
+  else 
+  {
+    return 0;
+  }
 }
 
 inline GitterBasis :: Objects ::Hbnd3Default :: bnd_t GitterBasis :: Objects :: Hbnd3Default :: bndtype () const {
@@ -433,7 +475,6 @@ inline GitterBasis :: Objects ::Hbnd3Default :: bnd_t GitterBasis :: Objects :: 
 }
 
 inline int GitterBasis :: Objects :: Hbnd3Default :: ghostLevel () const {
-  assert(false);
   return level() ;
 }
 
@@ -450,10 +491,28 @@ inline void GitterBasis :: Objects :: Hbnd3Default :: faceNormal( double * norma
   return ;
 }
 
-inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv) : 
-  Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv) 
+inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv, Gitter * grd ) : 
+  Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv) , _myGrid(grd) 
 {
   return ;
+}
+
+// calles method on grid which return 0 for default impl 
+inline int GitterBasis :: Objects :: Hbnd4Default :: preCoarsening () 
+{
+  if(_myGrid)
+    return _myGrid->preCoarsening(*this);
+  else 
+    return 0;
+}
+
+// calles method on grid which return 0 for default impl 
+inline int GitterBasis :: Objects :: Hbnd4Default :: postRefinement () 
+{
+  if(_myGrid)
+    return _myGrid->postRefinement(*this);
+  else 
+    return 0;
 }
 
 inline GitterBasis :: Objects ::Hbnd4Default :: bnd_t GitterBasis :: Objects :: Hbnd4Default :: bndtype () const {
@@ -614,7 +673,10 @@ inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa 
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
 insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
-  return new Objects :: hbndseg3_IMPL (0,f,i,NULL,NULL ,b, indexManager(4) , 0 ) ;
+  // the two last zeros are the following: 
+  // the first pointer is pointer to grid which we dont need in the serial
+  // case and the second is a pointer to ghost Element 
+  return new Objects :: hbndseg3_IMPL ( 0,f,i,NULL, b, indexManager(4) ) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
@@ -623,7 +685,7 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const dou
 }
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
-  return new Objects :: hbndseg4_IMPL (0,f,i,NULL, b,indexManager(4));
+  return new Objects :: hbndseg4_IMPL ( 0,f,i,NULL, b,indexManager(4) );
 }
 
 inline IndexManagerType & GitterBasis :: MacroGitterBasis :: indexManager (int codim ) 
