@@ -209,6 +209,20 @@ int GitterDuneBasis :: postRefinement (Gitter::helement_STI & elem)
   else return 0;
 }
 
+int GitterDuneBasis :: preCoarsening  (Gitter::hbndseg_STI & bnd)
+{
+  // if _arp is set then the extrenal preCoarsening is called 
+  if(_arp) return (*_arp).preCoarsening(bnd);
+  else return 0;
+}
+
+int GitterDuneBasis :: postRefinement (Gitter::hbndseg_STI & bnd)
+{
+  // if _arp is set then the extrenal postRefinement is called 
+  if(_arp) return (*_arp).postRefinement(bnd);
+  else return 0;
+}
+
 void GitterDuneBasis ::
 setAdaptRestrictProlongOp( AdaptRestrictProlongType & arp )
 {

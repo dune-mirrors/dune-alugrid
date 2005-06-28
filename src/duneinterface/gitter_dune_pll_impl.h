@@ -61,7 +61,7 @@ public:
   bool duneNotifyNewGrid ();
 
   bool duneLoadBalance () ; // call loadBalancer 
-  bool duneLoadBalance (GatherScatterType & ) ; // call loadBalancer a
+  bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ) ; // call loadBalancer a
 
   void duneRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType & gs) ;
   void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
