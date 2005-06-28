@@ -89,7 +89,9 @@ bool GitterDunePll :: duneLoadBalance ()
 }
 
 // returns true if grid was repartitioned 
-bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs) {
+bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProlongType & arp) {
+  
+  this->setAdaptRestrictProlongOp(arp);
   assert (debugOption (20) ? (cout << "**GitterDunePll :: duneLoadBalance () " << endl, 1) : 1) ;
   const int np = mpAccess ().psize () ;
   LoadBalancer :: DataBase db ;
@@ -125,6 +127,7 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs) {
       notifyMacroGridChanges () ;
     }
   }
+  this->removeAdaptRestrictProlongOp ();
   return neu;
 }
 

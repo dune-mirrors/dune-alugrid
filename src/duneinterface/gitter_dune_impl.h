@@ -17,6 +17,10 @@ protected:
   // call preCoarsening and postRefinement of arp
   virtual int preCoarsening  (Gitter::helement_STI &);
   virtual int postRefinement (Gitter::helement_STI &);
+  
+  // call preCoarsening and postRefinement of arp
+  virtual int preCoarsening  (Gitter::hbndseg_STI &);
+  virtual int postRefinement (Gitter::hbndseg_STI &);
 
   virtual void setAdaptRestrictProlongOp ( AdaptRestrictProlongType & arp );
   virtual void removeAdaptRestrictProlongOp ();
