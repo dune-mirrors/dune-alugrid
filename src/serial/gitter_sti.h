@@ -583,7 +583,7 @@ public :
       
     class Hface3Rule {
     public :
-      typedef enum { nosplit=1, e01, e12, e20, iso4 } rule_t ;
+      typedef enum { nosplit=1, e01, e12, e20, iso4 , undefined = -2 } rule_t ;
     public :
       inline Hface3Rule (int) ;
       inline Hface3Rule (rule_t = nosplit) ;
@@ -597,7 +597,7 @@ public :
       
     class Hface4Rule {
     public :
-      typedef enum { nosplit=1, iso4, ni02, ni13 } rule_t ;
+      typedef enum { nosplit=1, iso4, ni02, ni13 , undefined = -2 } rule_t ;
     public :
       inline Hface4Rule (int) ;
       inline Hface4Rule (rule_t = nosplit) ;
@@ -808,10 +808,6 @@ public :
       // 4. Nichtkonforme Situation hinten
       // bei 3. + 4. ja=1, nein=0
       signed char _parRule, _nChild, _nonv, _nonh;
-      /* new
-         myrule_t _parRule; 
-         int _nChild;
-         bool _nonv, _nonh ; */
       // Ende: H"ohere Ordnung
 
     } hface3_GEO ;
@@ -1935,14 +1931,20 @@ inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter
   return pair < const hasFace3 *, int > (_h.first,_h.second) ; ;
 }
 
-inline Gitter :: Geometric :: hface3 :: hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) {
+inline Gitter :: Geometric :: hface3 :: 
+hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
+  _parRule (Hface3Rule::undefined),
+  _nChild(-1), _nonv(1) , _nonh(1) 
+{
   assert(e0 && e1 && e2) ;
   (e [0] = e0)->ref ++ ; s [0] = s0 ;
   (e [1] = e1)->ref ++ ; s [1] = s1 ;
   (e [2] = e2)->ref ++ ; s [2] = s2 ;
   // H"ohere Ordnung:
-  _parRule = _nChild = (signed char) -1 ; // Test.
-  _nonv = _nonh = (signed char) 1 ;
+  //_nChild = _parRule = (signed char) -1 ; // Test.
+  //_parRule = (signed char) 1 ; // Test.
+  //_nChild = 0 ; 
+  //_nonv = _nonh = (signed char) 1 ;
   // Ende: H"ohere Ordnung
   return ;
 }
@@ -2057,9 +2059,10 @@ inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter
   return pair < const myconnect_t *, int > (_h.first,_h.second) ; ;
 }
 
-inline Gitter :: Geometric :: hface4 :: hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
+inline Gitter :: Geometric :: hface4 :: 
+hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
   // * higher order
-  _parRule(Hface4Rule::nosplit),
+  _parRule(Hface4Rule::undefined),
   _nChild(-1)
 {
   assert(e0 && e1 && e2 && e3) ;
