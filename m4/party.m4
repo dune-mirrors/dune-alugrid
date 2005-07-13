@@ -1,4 +1,3 @@
-# $Id$
 # searches for PARTY header and lib 
 
 AC_DEFUN([ALU3D_PATH_PARTY],[

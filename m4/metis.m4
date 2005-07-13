@@ -1,4 +1,3 @@
-# $Id$
 # searches for METIS header and lib 
 
 AC_DEFUN([ALU3D_PATH_METIS],[

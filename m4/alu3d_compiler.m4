@@ -1,4 +1,3 @@
-# $Id$
 # check for supported compilers
 
 AC_DEFUN([ALU3D_CHECK_COMPILER],[
