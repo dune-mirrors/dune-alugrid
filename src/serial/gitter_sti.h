@@ -2541,7 +2541,8 @@ inline int Gitter :: Geometric :: Hexa :: preCoarsening () {
 // #     #  #    #  #   ##  #    #  #    #  #       #    # #     #
 // #     #  #####   #    #  #####    ####   ######   ####   #####
 
-inline Gitter :: Geometric :: hbndseg3 :: hbndseg3 (myhface3_t * a, int b, ProjectVertex *ppv) : _face (a), _twist (b), projection(ppv) {
+inline Gitter :: Geometric :: hbndseg3 :: 
+hbndseg3 (myhface3_t * a, int b, ProjectVertex *ppv) : _face (a), _twist (b), projection(ppv) {
   _face->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this),0), _twist) ;
   return ;
 }
