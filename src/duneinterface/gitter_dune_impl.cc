@@ -8,8 +8,8 @@ void GitterDuneBasis :: backupIndices (ostream & out)
 {
   // backup indices 
   int indices = 1; 
-  out << indices; 
-  //out.write( ((const char *) & indices ), sizeof(int) ) ; 
+  // operator >> doesn't work for some reason, didn;t find out why. this works 
+  out.write( ((const char *) & indices ), sizeof(int) ) ; 
 
   // store max indices 
   for(int i=0; i< numOfIndexManager ; i++)
@@ -44,8 +44,10 @@ goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
 void GitterDuneBasis ::restoreIndices (istream & in) 
 {
   int indices = 0;
-  in >> indices ; 
-  //in.read ( ((char *) &(indices) ), sizeof(int) );
+  // operator >> doesn't work for some reason, didn;t find out why. this works 
+  in.read ( ((char *) &(indices) ), sizeof(int) );
+
+  // set VERBOSE to 20 and you have the indices value printed 
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices: index flag = " << indices << " in "
                        << __FILE__ << " line = " << __LINE__ <<"\") " << endl, 1) : 1) ;
   
@@ -120,11 +122,11 @@ void GitterDuneBasis ::restoreIndices (istream & in)
       idx++;
     }
     this->indexManager(0).setMaxIndex ( idx );
-    cerr<< "INFO: create new leaf indices size = " << idx << " ! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
+    assert (debugOption (20) ? (cout << endl << "INFO: create new leaf indices with size = " << idx << " ! file = "<< __FILE__ << ", line = " << __LINE__ << endl, 1) : 1) ;
     return ;
   }
   
-  cerr<< "WARNING: indices not read! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
+  cerr<< "WARNING: indices (id = " << indices << ") not read! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
   return ;
 }
 
