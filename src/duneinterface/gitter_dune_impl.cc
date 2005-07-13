@@ -8,7 +8,8 @@ void GitterDuneBasis :: backupIndices (ostream & out)
 {
   // backup indices 
   int indices = 1; 
-  out << indices ; 
+  out << indices; 
+  //out.write( ((const char *) & indices ), sizeof(int) ) ; 
 
   // store max indices 
   for(int i=0; i< numOfIndexManager ; i++)
@@ -44,6 +45,7 @@ void GitterDuneBasis ::restoreIndices (istream & in)
 {
   int indices = 0;
   in >> indices ; 
+  //in.read ( ((char *) &(indices) ), sizeof(int) );
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices: index flag = " << indices << " in "
                        << __FILE__ << " line = " << __LINE__ <<"\") " << endl, 1) : 1) ;
   
@@ -110,7 +112,6 @@ void GitterDuneBasis ::restoreIndices (istream & in)
   if(indices == 3) // convert indices to leafindices 
   {
     //assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices : set new leaf index \n" << endl, 1) : 1) ;
-    cerr<< "INFO: create new leaf indices! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
     int idx = 0;
     LeafIterator < helement_STI > ew(*this);
     for ( ew->first(); !ew->done(); ew->next()) 
@@ -118,7 +119,8 @@ void GitterDuneBasis ::restoreIndices (istream & in)
       ew->item().setIndex( idx );
       idx++;
     }
-    this->indexManager(0).setMaxIndex ( idx-1 );
+    this->indexManager(0).setMaxIndex ( idx );
+    cerr<< "INFO: create new leaf indices size = " << idx << " ! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
     return ;
   }
   
