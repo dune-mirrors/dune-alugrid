@@ -1,12 +1,8 @@
 #!/bin/sh
-#### barf on errors
 set -e
 
 # everybody who checks out the CVS wants the maintainer-mode to be enabled
 # (should be off for source distributions, this should happen automatically)
-#
-# we suppose that (right now) most of the persons checking out from
-# CVS will have a local installation of dune -> enable-localdune
 DEFAULTCONFOPT=""
 
 # default values
@@ -60,18 +56,15 @@ for OPT in $* ; do
 	-n|--nodebug) DEBUG=0 ;;
 	-o|--optim)   OPTIM=1 ;;
 	-h|--help) usage ; exit 0 ;;
-	# special hack: use the with-dune-dir for aclocal-includes
 	# pass unknown opts to ./configure
 	*) CONFOPT="$CONFOPT $OPT" ;;
     esac
 done
 
-# set special m4-path if --with-dune is set
-    # aclocal from automake 1.8 seems to need an absolute path for inclusion
-# use the nonfree compiler as default :-(
+# if no compiler choosen use default 
 if [ "$COMPSET" != "1" ] ; then
-    echo "No compiler set, using Intel compiler as default"
-    . ./icc.opts
+    echo "No compiler set, using GNU compiler as default"
+    . ./gcc.opts
 fi
 
 # create flags
@@ -96,8 +89,6 @@ libtoolize --force
 
 echo "--> aclocal..."
 aclocal -I m4 
-
-# sanity check to catch missing --with-dune
 
 echo "--> autoheader..."
 autoheader
