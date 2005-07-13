@@ -7,25 +7,18 @@
 
 #   uncomment line, for 
 CC = gcc
-
 ALBERTA_PATH=../../alberta-1.2-SuSE9.2
 
 ALBERT_LIB_PATH = $(ALBERTA_PATH)/lib
 ALBERT_INCLUDE_PATH = $(ALBERTA_PATH)/include
 
 DEFAULT = al2bsgrid 
-
-MOFLAG =   # -mips2-4 on SGIs, e.g.
-
 DEBUG = 0  # may be 0 or 1
-
 
 include Makefile.al
 
-#CFLAGS = 
 CFLAGS = -g -Wall -I$(ALBERT_INCLUDE_PATH)
 OFLAG = -O2
-#OFLAG = -g
 
 ########################################################################
 #   DFLAGS: DIM, DIM_OF_WORLD, NEIGH_IN_EL, EL_INDEX                   #
