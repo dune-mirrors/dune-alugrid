@@ -1,10 +1,16 @@
-DUNE-library
+ALU3d-Grid library
 ============
 
 Getting started
 ---------------
 
-To compile a small library ALU3d-Grid has to check several components of
+To create the normal configure script run 
+
+  ./autogen.sh
+
+For possible options run ./autogen.sh --help  .
+
+To compile the library ALU3d-Grid has to check several components of
 your system. Run
 
   ./configure
@@ -17,22 +23,23 @@ You can use
 
   ./configure --prefix=PATH
 
-if you don't want ALU3d-Grid to be installed into /usr/local
+if you don't want ALU3d-Grid to be installed into the working directory.
 
 After configuration
 
   make
   make install
 
-build and install ALU3d-Grid (you may need root-permissions for the install
-part depending on the prefix set)
+build and install ALU3d-Grid.  
+
 
 License
 -------
 
-The ALU3d-Grid-library and headers are licensed under the GNU Lesser GPL
+The ALU3d-Grid library and headers are licensed under the GNU Lesser GPL
 version 2.1. The full license text can be found in the file COPYING
 and via http://www.gnu.org/licenses/lgpl.html
+
 
 Debug Options
 --------------
@@ -40,11 +47,20 @@ Debug Options
 There are serveral debug options that can be set an shell environment
 variable and that forces the code to produce debug output. To use this
 feature, the code must be compiled without the CPP variable NDEBUG set. 
-The following variables can be set to a level of verbosity (higher is
-better).
+The following shell environment variables can be set to a level of 
+verbosity (higher is better).
 
 VERBOSE      general verbose output  
 VERBOSE_MGB  output produced by the macro grid builder 
 VERBOSE_LDB  output produced while partitioning. 
 VERBOSE_PLL  output produced by parallel grid methods
+
+
+Optimisation 
+-------------
+
+The ALU3d-Grid code is highly riddled with assert statements. 
+Therefore it is recommened to compile the library and the application code
+with the CPP variable NDEBUG set (i.e. -DNDEBUG) to avoid all asserts
+statement tests.
 
