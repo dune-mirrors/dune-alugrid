@@ -118,9 +118,12 @@ void GitterDuneBasis ::restoreIndices (istream & in)
     LeafIterator < helement_STI > ew(*this);
     for ( ew->first(); !ew->done(); ew->next()) 
     {
-      if( ew->item().type() != tetra ) continue;
-      ew->item().setIndex( idx );
-      idx++;
+      ALUElementType eltype = ew->item().type();
+      if( (eltype == tetra) || (eltype == hexa))
+      {
+        ew->item().setIndex( idx );
+        idx++;
+      }
     }
     this->indexManager(0).setMaxIndex ( idx );
     assert (debugOption (20) ? (cout << endl << "**INFO GitterDuneBasis :: restoreIndices: create new leaf indices with size = " << idx << " ! file: "<< __FILE__ << ", line: " << __LINE__ << endl, 1) : 1) ;
