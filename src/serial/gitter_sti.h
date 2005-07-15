@@ -34,6 +34,10 @@ typedef strstream    strstream_t;
 #include "xdrclass.h"
   
 
+// typedef of the element types moved to alu3dgrid_serial.h 
+// typedef enum { hexa , tetra , hexa_periodic , tetra_periodic } grid_t;
+
+
 // if DUNE uses this grid the _DUNE_USES_ALU3DGRID_ variable should be defined
 // otherwise some dummy are set 
 #include "indexstack.h"
@@ -973,7 +977,7 @@ public :
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
       virtual bool isboundary() const { return true; }
-      virtual grid_t type() const { return tetra; }
+      virtual grid_t type() const { return tetra_periodic; }
 
     private :
       myhface3_t * f [2] ;
@@ -1011,7 +1015,7 @@ public :
       int test () const ;
 
       virtual bool isboundary() const { return true; }
-      virtual grid_t type() const { return hexa; }
+      virtual grid_t type() const { return hexa_periodic; }
 
     public :
       virtual myrule_t getrule () const = 0 ;
