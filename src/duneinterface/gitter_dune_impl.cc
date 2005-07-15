@@ -4,12 +4,13 @@
 
 #include "gitter_dune_impl.h"
 
+enum IndexType { no_index = 0 , hierarchic_index = 1, leaf_index = 3 };
+
 void GitterDuneBasis :: backupIndices (ostream & out)
 {
-  // backup indices 
-  int indices = 1; 
-  // operator >> doesn't work for some reason, didn;t find out why. this works 
-  out.write( ((const char *) & indices ), sizeof(int) ) ; 
+  // backup indices, our index type is hierarchic_index 
+  unsigned char indices = hierarchic_index;
+  out << indices;
 
   // store max indices 
   for(int i=0; i< numOfIndexManager ; i++)
@@ -43,15 +44,15 @@ goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
 
 void GitterDuneBasis ::restoreIndices (istream & in) 
 {
-  int indices = 0;
-  // operator >> doesn't work for some reason, didn;t find out why. this works 
-  in.read ( ((char *) &(indices) ), sizeof(int) );
+  unsigned char indices = no_index;
+  in >> indices;
 
   // set VERBOSE to 20 and you have the indices value printed 
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices: index flag = " << indices << " in "
-                       << __FILE__ << " line = " << __LINE__ <<"\") " << endl, 1) : 1) ;
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices: index flag = " << (int)indices << " file: "
+                       << __FILE__ << " line: " << __LINE__ <<") " << endl, 1) : 1) ;
   
-  if(indices == 1) // restore dune indices (see backUpIndices method)
+  // restore dune indices (see backUpIndices method)
+  if(indices == hierarchic_index) 
   {
     for(int i=0; i< numOfIndexManager ; i++)
       this->indexManager(i).restoreIndexSet( in );
@@ -111,9 +112,8 @@ void GitterDuneBasis ::restoreIndices (istream & in)
     return ;
   }
 
-  if(indices == 3) // convert indices to leafindices 
+  if(indices == leaf_index) // convert indices to leafindices 
   {
-    //assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices : set new leaf index \n" << endl, 1) : 1) ;
     int idx = 0;
     LeafIterator < helement_STI > ew(*this);
     for ( ew->first(); !ew->done(); ew->next()) 
@@ -122,11 +122,11 @@ void GitterDuneBasis ::restoreIndices (istream & in)
       idx++;
     }
     this->indexManager(0).setMaxIndex ( idx );
-    assert (debugOption (20) ? (cout << endl << "INFO: create new leaf indices with size = " << idx << " ! file = "<< __FILE__ << ", line = " << __LINE__ << endl, 1) : 1) ;
+    assert (debugOption (20) ? (cout << endl << "**INFO GitterDuneBasis :: restoreIndices: create new leaf indices with size = " << idx << " ! file: "<< __FILE__ << ", line: " << __LINE__ << endl, 1) : 1) ;
     return ;
   }
   
-  cerr<< "WARNING: indices (id = " << indices << ") not read! file = "<< __FILE__ << ", line = " << __LINE__ << "\n";
+  cerr<< "**WARNING: GitterDuneBasis :: restoreIndices: indices (id = " << indices << ") not read! file: "<< __FILE__ << ", line: " << __LINE__ << "\n";
   return ;
 }
 
