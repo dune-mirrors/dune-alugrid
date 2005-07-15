@@ -9,7 +9,7 @@
 
 namespace ALU3dGridSpace {
 
-typedef enum {hexa,tetra} grid_t;
+typedef enum ALUElementType { hexa , tetra , hexa_periodic , tetra_periodic } grid_t;
 
 struct GatherScatter;
 typedef GatherScatter GatherScatterType;
