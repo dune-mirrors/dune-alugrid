@@ -122,69 +122,6 @@ template < class A > class leaf_or_has_level
     }
 };
 
-//! same rule as 'leaf_or_has_level' but this time without the periodic
-//! elements , if the Gitter has them 
-template < class A > class leaf_or_has_level_without_periodic 
-{
-  int lvl_;
-  public :
-    //! Constructor storing the level 
-    leaf_or_has_level_without_periodic (int i = 0) : lvl_ (i) { }
-
-    //! check if go next
-    int operator () (const A * x) const
-    {
-      ALUElementType eltype = x->type();
-      if((eltype == tetra) || (eltype == hexa))
-      {
-        int level = x->level () ;
-        return ((level == lvl_) || (x->leaf () && (level <= lvl_) )) ? 1 : 0 ;
-      }
-      else return 0;
-    }
-
-    //! check if go next
-    int operator () (const A & x) const
-    {
-      ALUElementType eltype = x.type();
-      if((eltype == tetra) || (eltype == hexa))
-      {
-        int level = x.level ();
-        return ((level == lvl_) || (x.leaf  () && (level <= lvl_) )) ? 1 : 0 ;
-      }
-      else return 0;
-    }
-};
-
-//! level <= the desired level , but this time without the periodic elements 
-template < class A > class any_has_level_without_periodic 
-{
-  int lvl_;
-  public :
-    //! Constructor storing the level 
-    any_has_level_without_periodic (int i = 0) : lvl_ (i) { }
-
-    //! check if go next
-    int operator () (const A * x) const
-    {
-      ALUElementType eltype = x->type();
-      if((eltype == tetra) || (eltype == hexa))
-        return (x->level  () == lvl_) ? 1 : 0 ;
-      else 
-        return 0;
-    }
-
-    //! check if go next
-    int operator () (const A & x) const
-    {
-      ALUElementType eltype = x.type();
-      if((eltype == tetra) || (eltype == hexa))
-        return (x.level  () == lvl_) ? 1 : 0 ;
-      else 
-        return 0;
-    }
-};
-
 //! new rule for Dune LeafIterator minus one 
 //! all entities with are either leaf entities or thier children are leaf entities 
 template < class A > class leaf_minus_one
