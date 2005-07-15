@@ -147,6 +147,14 @@ public :
   Refcount ref ; 
   virtual IteratorSTI < A > * iterator (const A *) const = 0 ;
   virtual IteratorSTI < A > * iterator (const IteratorSTI < A > *) const = 0 ;
+
+  // this methods are needed because for the PureElementAccessIterator we
+  // want to call overloaded method that only insert lists with elements 
+  // but for edges,faces,vertices this method is the same, therefor default
+  // implementation 
+  virtual IteratorSTI < A > * pureElementIterator (const A * a) const { return iterator(a); }
+  virtual IteratorSTI < A > * pureElementIterator (const IteratorSTI < A > *a) const { return iterator(a); }
+
 public :
   
   // Handle ist ein einfaches Iteratorproxy, das ein abstraktes
@@ -157,6 +165,7 @@ public :
   // methode kopiert werden kann.
   
   class Handle : public IteratorSTI < A > {
+  protected:
     AccessIterator < A > * _fac ;
     A * _a ;
     IteratorSTI < A > * _w ;
@@ -543,6 +552,9 @@ public :
   
     // Methoden f"ur den Strahlungstransportl"oser
     virtual void sortmacrogrid () {abort();}
+
+    virtual IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const = 0 ;
+    virtual IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const = 0 ;
   } ;
 public :
   class Geometric {
@@ -1493,7 +1505,6 @@ template < class A > inline AccessIterator < A > :: Handle :: Handle ()
 }
 
 template < class A > inline AccessIterator < A > :: Handle :: ~Handle () {
-  //_fac ? (_fac->ref --, 0) : 0 ; 
   if(_fac) _fac->ref-- ;
   delete _w ;
   return ;
