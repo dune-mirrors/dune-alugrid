@@ -4,7 +4,20 @@
 
 #include "gitter_dune_impl.h"
 
-enum IndexType { no_index = 0 , hierarchic_index = 1, leaf_index = 3 };
+IteratorSTI < Gitter :: helement_STI > * GitterDuneImpl :: leafIterator (const helement_STI *) 
+{
+  return new Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
+  TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > (container ()) ;
+}
+
+IteratorSTI < Gitter :: helement_STI > * GitterDuneImpl:: leafIterator (const IteratorSTI < helement_STI > * p) 
+{
+  return new Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
+  TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > 
+  (*(const Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
+  TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > *) p) ;
+}
+
 
 void GitterDuneBasis :: backupIndices (ostream & out)
 {
@@ -115,15 +128,11 @@ void GitterDuneBasis ::restoreIndices (istream & in)
   if(indices == leaf_index) // convert indices to leafindices 
   {
     int idx = 0;
-    LeafIterator < helement_STI > ew(*this);
+    PureElementLeafIterator < helement_STI > ew(*this);
     for ( ew->first(); !ew->done(); ew->next()) 
     {
-      ALUElementType eltype = ew->item().type();
-      if( (eltype == tetra) || (eltype == hexa))
-      {
-        ew->item().setIndex( idx );
-        idx++;
-      }
+      ew->item().setIndex( idx );
+      idx++;
     }
     this->indexManager(0).setMaxIndex ( idx );
     assert (debugOption (20) ? (cout << endl << "**INFO GitterDuneBasis :: restoreIndices: create new leaf indices with size = " << idx << " ! file: "<< __FILE__ << ", line: " << __LINE__ << endl, 1) : 1) ;
