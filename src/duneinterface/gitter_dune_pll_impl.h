@@ -17,6 +17,11 @@
 
 class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
 {
+ 
+  virtual IteratorSTI < Gitter :: helement_STI > * 
+    leafIterator (const Gitter :: helement_STI *) ;
+  virtual IteratorSTI < Gitter :: helement_STI > * 
+    leafIterator (const IteratorSTI < Gitter :: helement_STI > *) ;
   
 protected:  
   bool balanceGrid_;

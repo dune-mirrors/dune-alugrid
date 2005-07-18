@@ -4,13 +4,15 @@
 
 #include "gitter_dune_impl.h"
 
-IteratorSTI < Gitter :: helement_STI > * GitterDuneImpl :: leafIterator (const helement_STI *) 
+IteratorSTI < Gitter :: helement_STI > * GitterDuneImpl :: 
+leafIterator (const helement_STI *) 
 {
   return new Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
   TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > (container ()) ;
 }
 
-IteratorSTI < Gitter :: helement_STI > * GitterDuneImpl:: leafIterator (const IteratorSTI < helement_STI > * p) 
+IteratorSTI < Gitter :: helement_STI > * GitterDuneImpl :: 
+leafIterator (const IteratorSTI < helement_STI > * p) 
 {
   return new Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
   TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > 

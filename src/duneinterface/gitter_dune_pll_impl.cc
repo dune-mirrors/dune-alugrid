@@ -4,6 +4,24 @@
 #include "gitter_dune_pll_impl.h"
 #include "gitter_dune_pll_mgb.cc"
 
+
+IteratorSTI < Gitter :: helement_STI > * GitterDunePll :: 
+leafIterator (const helement_STI *)
+{
+  return new Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
+  TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > (container ()) ;
+}
+
+IteratorSTI < Gitter :: helement_STI > * GitterDunePll ::
+leafIterator (const IteratorSTI < helement_STI > * p)
+{
+  return new Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
+  TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > >
+  (*(const Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
+  TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > *) p) ;
+}
+
+
 bool GitterDunePll :: duneNotifyNewGrid ()
 {
   assert (debugOption (20) ? (cout << "**GitterDunePll :: duneNotifyNewGrid () " << endl, 1) : 1) ;
