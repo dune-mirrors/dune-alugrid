@@ -371,13 +371,15 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
   //logFile << "writeLevel " << mytetra().level() << "\n";
   os.writeObject( mytetra().level() );
   
+#ifdef __USE_INTERNAL_FACES__  
   const double (& p) [3] = mytetra ().myvertex (face)->Point ();
 
   //assert( (true) ? (os.writeObject ( 1 ) , 1 ) : 1);// number of points written 
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
-
+#endif
+  
 #endif
   return ;
 }
@@ -863,9 +865,10 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
   //logFile << "writeLevel " << mytetra().level() << "\n";
   os.writeObject( myhexa().level() );
 
+#ifdef __USE_INTERNAL_FACES__  
   enum { dimvx = 4 };
   int oppFace = myhexa().oppositeFace[ face ];
-  
+ 
   //assert( (true) ? (os.writeObject ( dimvx ) , 1 ) : 1);// number of points written 
   for(int i=0; i<dimvx; i++) 
   {
@@ -875,6 +878,8 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
     os.writeObject (p [1]) ;
     os.writeObject (p [2]) ;
   }
+#endif
+  
 #endif
   return ;
 }

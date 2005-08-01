@@ -1384,7 +1384,8 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 #ifdef _DUNE_USES_ALU3DGRID_
     // read the real level of ghost 
     os.readObject( _ghostLevel );
-    
+   
+#ifdef __USE_INTERNAL_FACES__  
     double p[3];
     for(int i=0; i<myhbnd().dimVx(); i++)
     {
@@ -1394,6 +1395,7 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
       
       myhbnd (). setOppPoint ( i , p ) ;
     }
+#endif
 
 #endif
     
