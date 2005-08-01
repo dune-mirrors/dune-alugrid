@@ -522,8 +522,13 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist) {
       case myrule_t :: iso4 :
       {
 
+  // old piece of code 
+#ifdef __USE_INTERNAL_FACES__
+  bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+         : this->nb.rear ().first->refineBalance (r,this->nb.rear ().second) ;
+
+#else 
   // --thetwist
-  /*
   bool a = false;      
   if( this->nb.rear().first && this->nb.front().first )
   {
@@ -537,12 +542,8 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist) {
     if(this->nb.front().first)
       a = this->nb.front ().first->refineBalance (r,this->nb.front().second);
   }
-  */
+#endif
 
-  // old piece of code 
-  bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-         : this->nb.rear ().first->refineBalance (r,this->nb.rear ().second) ;
-      
   if (a) {  
     if (getrule () == myrule_t :: nosplit) {
       refineImmediate (r) ;
