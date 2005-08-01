@@ -1609,9 +1609,11 @@ Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll ::
 insert_hbnd3_ghost (hface3_GEO * f, int t) {
   Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
   typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
-  // on this internal bnd we want to store element data ==> indexManager[0] 
+
+  // switched off for the moment 
+  // normaly on this internal bnd we want to store element data ==> indexManager[0] 
   return new Hbnd3Top < Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-        BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: micro_t >  (0,f,t,NULL, NULL, b, indexManager(0) , 0 ) ;
+        BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: micro_t >  (0,f,t, NULL, b, indexManager(5) ) ;
 }
 
 IteratorSTI < Gitter :: vertex_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const vertex_STI * a) const {
