@@ -35,13 +35,13 @@ const pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: hfa
   = pair < Gitter :: Geometric :: hasFace4 *, int > (Gitter :: Geometric :: InternalHasFace4 ()(0), -1) ;
 
 
-// prototype of Tetra tpye ( the faces of a tetrahedron )
+// prototype of Tetra type ( the faces of a tetrahedron )
 const int Gitter :: Geometric :: Tetra :: prototype [4][3] = {{1,3,2},{0,2,3},{0,3,1},{0,1,2}} ;
   
-// prototype of periodic 3 tpye 
+// prototype of periodic 3 type 
 const int Gitter :: Geometric :: Periodic3 :: prototype [2][3] = {{0,1,2},{3,5,4}} ;
 
-// prototype of periodic 4 tpye 
+// prototype of periodic 4 type 
 const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5,6,7}} ;
 
 
