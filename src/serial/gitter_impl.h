@@ -50,26 +50,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             int _idn ;
         } ;
 
-#if 0
-      // organizes the indices for boundary faces and 
-      // the opposite vertices for ghost cells 
-      class Dune_hbndDefault 
-      {
-        protected:
-          int _index;
-
-        public:
-          inline Dune_hbndDefault ();
-
-          inline int getIndex () const; 
-          inline void setIndex ( int idx ); 
-
-        protected:  
-          inline void splitGhost () {} 
-          inline void setGhost (Gitter::helement_STI *) {}
-      };
-#endif
-
       class Dune_Hbnd3Default 
       {
         protected:
@@ -402,8 +382,14 @@ inline void GitterBasis :: Objects :: Dune_Hbnd3Default
            
 inline const double (& GitterBasis :: Objects :: Dune_Hbnd3Default ::oppositeVertex (int i) const) [3] 
 {
+#ifdef __USE_INTERNAL_FACES__  
   assert((i >= 0) && (i < _dimvx));
   return _oppVx;
+#else 
+  cerr << "Dune_Hbnd3Default ::oppositeVertex is not supported when compiled without the '__USE_INTERNAL_FACES__' cpp variable! in: "<<__FILE__<<" line: " <<__LINE__<<endl; 
+  abort();
+  return _oppVx;
+#endif
 }
 
 inline int GitterBasis :: Objects :: Dune_Hbnd3Default :: dimVx () const { return _dimvx; }
@@ -427,8 +413,14 @@ inline void GitterBasis :: Objects :: Dune_Hbnd4Default
            
 inline const double (& GitterBasis :: Objects :: Dune_Hbnd4Default ::oppositeVertex (int i) const) [3] 
 {
+#ifdef __USE_INTERNAL_FACES__  
   assert((i >= 0) && (i < _dimvx));
   return _oppVx[i];
+#else 
+  cerr << "Dune_Hbnd4Default ::oppositeVertex is not supported when compiled without the '__USE_INTERNAL_FACES__' cpp variable! in: "<<__FILE__<<" line: " <<__LINE__<<endl; 
+  abort();
+  return _oppVx[i];
+#endif
 }
 
 inline int GitterBasis :: Objects :: Dune_Hbnd4Default :: dimVx () const { return _dimvx; }
