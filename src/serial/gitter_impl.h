@@ -445,6 +445,7 @@ inline GitterBasis :: Objects :: Hbnd3Default :: Hbnd3Default (myhface3_t * f, i
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: Hbnd3Default :: preCoarsening () 
 {
+#ifdef __USE_INTERNAL_FACES__  
   // grid pointer only exists in the case of internal bnds 
   if(_myGrid)
   {
@@ -454,11 +455,15 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: preCoarsening ()
   {
     return 0;
   }
+#else 
+  return 0;
+#endif
 }
 
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: Hbnd3Default :: postRefinement () 
 {
+#ifdef __USE_INTERNAL_FACES__  
   // grid pointer only exists in the case of internal bnds 
   if(_myGrid)
   {
@@ -468,6 +473,9 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: postRefinement ()
   {
     return 0;
   }
+#else
+  return 0;
+#endif
 }
 
 inline GitterBasis :: Objects ::Hbnd3Default :: bnd_t GitterBasis :: Objects :: Hbnd3Default :: bndtype () const {
