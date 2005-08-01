@@ -369,8 +369,8 @@ public :
   {
     virtual int preCoarsening (helement & elem )   = 0;
     virtual int postRefinement (helement  & elem ) = 0;
-    virtual int preCoarsening (hbndseg & bnd )   = 0;
-    virtual int postRefinement (hbndseg & bnd ) = 0;
+    virtual int preCoarsening (hbndseg & bnd )     = 0;
+    virtual int postRefinement (hbndseg & bnd )    = 0;
   };
   typedef AdaptRestrictProlong AdaptRestrictProlongType;
 
