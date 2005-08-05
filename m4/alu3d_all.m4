@@ -33,10 +33,9 @@ dnl check for library functions
   AC_LANG_POP([C++])
 
 dnl check all components
-  AC_REQUIRE([ALU3D_CHECK_HEADERS])
   AC_REQUIRE([ALU3D_PATH_METIS])
   AC_REQUIRE([ALU3D_PATH_PARTY])
-  AC_REQUIRE([ALU3D_MPI])
+  AC_REQUIRE([ALU3D_SERIAL_PARALLEL])
 
   # convenience-variables if every found package should be used
   AC_SUBST(ALL_PKG_LIBS, "$LIBS $ALU3D_PKG_LIBS")
@@ -55,7 +54,7 @@ AC_DEFUN([ALU3D_SUMMARY_ALL],[
   echo  
   echo "METIS............: $with_metis"
   echo "PARTY............: $with_party"
-  echo "MPI..............: $with_mpi"
+  echo "MPI..............: $with_parallel"
   echo
   echo "-----------------------------"
   echo
