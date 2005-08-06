@@ -1,5 +1,23 @@
 ALU3d-Grid library
-============
+===================
+
+License
+-------
+
+The ALU3d-Grid library and headers are licensed under the GNU Lesser GPL
+version 2.1. The full license text can be found in the file COPYING
+and via http://www.gnu.org/licenses/lgpl.html
+
+
+
+Compiler 
+-------------
+
+The ALU3d-Grid code in known to compiler with the GNU Compiler version 3.4.x or higher. 
+Also with the INTEL C++ Compiler version 8.1 or higher the code compiles.
+Furthermore the code compiles with the IBM xlC compiler version 6 or higher. 
+
+
 
 Getting started
 ---------------
@@ -16,8 +34,13 @@ your system. Run
   ./configure
 
 to commence those tests. If you intend to use the parallel version of the
-grid, make sure that you have MPI and Metis or PARTY and supply the
+grid, make sure that you have MPI and METIS or PARTY and supply the
 respective flags to the configure script.
+
+For parallel computation MPI is needed, 
+common packages are MPICH (version 1.2.5 or higher) or LAM MPI (version 7.x).
+For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ .
+For PARTY Lib (version 1.1 or higher) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
 
 You can use
 
@@ -32,13 +55,6 @@ After configuration
 
 build and install ALU3d-Grid.  
 
-
-License
--------
-
-The ALU3d-Grid library and headers are licensed under the GNU Lesser GPL
-version 2.1. The full license text can be found in the file COPYING
-and via http://www.gnu.org/licenses/lgpl.html
 
 
 Debug Options
@@ -62,5 +78,8 @@ Optimisation
 The ALU3d-Grid code is highly riddled with assert statements. 
 Therefore it is recommened to compile the library and the application code
 with the CPP variable NDEBUG set (i.e. -DNDEBUG) to avoid all asserts
-statement tests.
+statement tests. 
+
+Known bugs: On Intel ia64 architectures the optimisation option -O3 dosen't
+work with the INTEL C++ Compiler. 
 

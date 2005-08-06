@@ -33,7 +33,8 @@ AC_DEFUN([ALU3D_SERIAL_PARALLEL],[
   if test x$with_mpi != xno ; then
     AC_CHECK_HEADER([alu3dgrid_parallel.h],[with_parallel="parallel"],
       AC_MSG_WARN([alu3dgrid_parallel.h could not be found or compiled! 
-      Maybe you should use  < $MPICXX > instead of < $CXX > !!]) 
+      Maybe you should use  < $MPICXX > instead of < $CXX > ! 
+      See the README file for more information on compilers!]) 
     )
   fi
  fi
