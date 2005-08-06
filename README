@@ -17,7 +17,9 @@ The ALU3d-Grid code in known to compiler with the GNU Compiler version 3.4.x or 
 Also with the INTEL C++ Compiler version 8.1 or higher the code compiles.
 Furthermore the code compiles with the IBM xlC compiler version 6 or higher. 
 
-
+The compiler can be choosen by editing the fields COMP and CXXCOMP in the
+*.opts files. For parallel computations the MPI compiler, like mpiCC should
+be used or the include path and lib path adapted. 
 
 Getting started
 ---------------

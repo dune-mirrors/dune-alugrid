@@ -3,7 +3,7 @@
 
 # name of compiler binary
 COMP="mpicc"
-CXXCOMP="mpicxx"
+CXXCOMP="mpiCC"
 
 # flags set in any case
 FLAGS=""
