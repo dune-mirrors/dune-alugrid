@@ -19,12 +19,14 @@ void globaladapt(GitterBasisImpl* grid, int Anzahl) {
        grid->adapt ();
        grid->printsize () ;
    }
-  //initialValue();
 }
 
 void levelwalk(GitterBasisImpl* grid, int level) {
-   typedef Insert <AccessIterator <Gitter::helement_STI>::Handle, TreeIterator <Gitter :: helement_STI, any_has_level <Gitter::helement_STI> > > MacIt;
-      MacIt mac (grid->container(), level);
+   typedef Insert <AccessIterator <
+     Gitter::helement_STI>::Handle, 
+     TreeIterator <Gitter :: helement_STI, any_has_level <Gitter::helement_STI> > > MacIt;
+
+   MacIt mac (grid->container(), level);
    int i = 0;
    for (mac.first(); !mac.done(); mac.next()) {
       cout << "<" << i++ << ">";

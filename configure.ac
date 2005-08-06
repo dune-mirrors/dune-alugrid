@@ -32,6 +32,9 @@ LIBS="$ALU3D_LIBS"
 # generate Makefiles
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 src/serial/Makefile
+                 src/parallel/Makefile
+                 src/duneinterface/Makefile
                  ])
 
 AC_OUTPUT
