@@ -2,7 +2,7 @@
 AC_PREREQ(2.50)
 
 # current version of ALU3d-Grid
-AC_INIT(ALU3d-Grid, 0.1, alu3dgridk@mathematik.uni-freiburg.de)
+AC_INIT(ALU3d-Grid, 0.1, alu3dgrid@mathematik.uni-freiburg.de)
 AM_INIT_AUTOMAKE(ALU3dGrid, 0.1, alu3dgrid@mathematik.uni-freiburg.de)
 
 # default install path is current directory 
