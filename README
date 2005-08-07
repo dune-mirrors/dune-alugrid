@@ -9,9 +9,8 @@ version 2.1. The full license text can be found in the file COPYING
 and via http://www.gnu.org/licenses/lgpl.html
 
 
-
 Compiler 
--------------
+--------
 
 The ALU3d-Grid code in known to compiler with the GNU Compiler version 3.4.x or higher. 
 Also with the INTEL C++ Compiler version 8.1 or higher the code compiles.
@@ -21,26 +20,28 @@ The compiler can be choosen by editing the fields COMP and CXXCOMP in the
 *.opts files. For parallel computations the MPI compiler, like mpiCC should
 be used or the include path and lib path adapted. 
 
+
 Getting started
 ---------------
-
-To create the normal configure script run 
-
-  ./autogen.sh
-
-For possible options run ./autogen.sh --help  .
 
 To compile the library ALU3d-Grid has to check several components of
 your system. Run
 
   ./configure
 
-to commence those tests. If you intend to use the parallel version of the
-grid, make sure that you have MPI and METIS or PARTY and supply the
-respective flags to the configure script.
+to commence those tests. See ./configure --help for deatil help on optins. 
+If you intend to use the parallel version of the
+grid, make sure that you have a version of MPI, and METIS (--with-metis=PATH), or 
+PARTY (--with-party=PATH) and supply the respective flags to the 
+configure script.
 
-For parallel computation MPI is needed, 
-common packages are MPICH (version 1.2.5 or higher) or LAM MPI (version 7.x).
+For parallel computation MPI is needed, common packages are 
+MPICH (version 1.2.5 or higher) or LAM MPI (version 7.x).
+To compile the parallel version of the library use the MPI compiler script
+(i.e. mpiCC) by passing this as CXX variable to the configure script 
+(i.e. ./configure CXX=mpiCC). If not using the MPI compiler scripts just
+make sure that all include path and library paths are set the right way.
+
 For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ .
 For PARTY Lib (version 1.1 or higher) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
 
@@ -48,7 +49,8 @@ You can use
 
   ./configure --prefix=PATH
 
-if you don't want ALU3d-Grid to be installed into the working directory.
+if you don't want ALU3d-Grid to be installed into the default directory
+(i.e. the path were ALU3d-Grid was unpacked).
 
 After configuration
 
@@ -56,7 +58,6 @@ After configuration
   make install
 
 build and install ALU3d-Grid.  
-
 
 
 Debug Options
@@ -74,7 +75,7 @@ VERBOSE_LDB  output produced while partitioning.
 VERBOSE_PLL  output produced by parallel grid methods
 
 
-Optimisation 
+Optimization 
 -------------
 
 The ALU3d-Grid code is highly riddled with assert statements. 

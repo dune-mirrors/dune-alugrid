@@ -3,7 +3,7 @@ AC_PREREQ(2.50)
 
 # current version of ALU3d-Grid
 AC_INIT(ALU3d-Grid, 0.1, alu3dgrid@mathematik.uni-freiburg.de)
-AM_INIT_AUTOMAKE(ALU3dGrid, 0.1, alu3dgrid@mathematik.uni-freiburg.de)
+AM_INIT_AUTOMAKE(ALU3d-Grid, 0.1, alu3dgrid@mathematik.uni-freiburg.de)
 
 # default install path is current directory 
 AC_PREFIX_DEFAULT([`pwd`])
@@ -35,6 +35,9 @@ AC_CONFIG_FILES([Makefile
                  src/serial/Makefile
                  src/parallel/Makefile
                  src/duneinterface/Makefile
+                 misc/Makefile
+                 misc/macrogrids/Makefile
+                 misc/examples/Makefile
                  ])
 
 AC_OUTPUT

@@ -2,4 +2,4 @@
 AUTOMAKE_OPTIONS = foreign 1.5
 
 # do everything in the subdirs
-SUBDIRS = src
+SUBDIRS = src misc 

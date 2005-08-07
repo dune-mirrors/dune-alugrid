@@ -30,13 +30,11 @@ AC_DEFUN([ALU3D_SERIAL_PARALLEL],[
 
  if test x$with_serial != xno ; then 
   with_parallel="serial"
-  if test x$with_mpi != xno ; then
     AC_CHECK_HEADER([alu3dgrid_parallel.h],[with_parallel="parallel"],
       AC_MSG_WARN([alu3dgrid_parallel.h could not be found or compiled! 
       Maybe you should use  < $MPICXX > instead of < $CXX > ! 
       See the README file for more information on compilers!]) 
     )
-  fi
  fi
     
   AC_MSG_CHECKING([for which type of run mode ALU-Grid can be used])
@@ -48,5 +46,5 @@ AC_DEFUN([ALU3D_SERIAL_PARALLEL],[
   CXXFLAGS="$REM_CXXFLAGS"
   REM_CPPFLAGS=
       
-  AM_CONDITIONAL(MPI, test x$with_parallel != xno)
+  AM_CONDITIONAL(MPI, test x$with_parallel = xparallel)
 ])
