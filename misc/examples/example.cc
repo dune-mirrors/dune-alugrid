@@ -85,14 +85,14 @@ int main (int argc, const char ** argv, const char ** envp)
    int mxl = 3; 
    if (argc < 2) 
    {
-      cout << "usage: ./"<< argv[0] << " <macro grid> <opt: level> \n";
+      cout << "usage: "<< argv[0] << " <macro grid> <opt: level> \n";
       abort();
    }
 
    if (argc < 3)
-   {
-      cout << "Default level = "<< mxl << "choosen! \n";
-   }
+     cout << "Default level = "<< mxl << "choosen! \n";
+   else 
+     mxl = atoi(argv[2]);
 
    std::string macroname( argv[1] );
 
