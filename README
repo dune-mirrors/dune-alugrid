@@ -47,7 +47,8 @@ command can look as follows:
 
 ./configure CXX=mpiCC --with-metis="metis_path" 
 
-For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ .
+For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ ,
+see also the section Known bugs, when you using METIS. 
 For PARTY Lib (version 1.1 or higher) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
 
 You can use
