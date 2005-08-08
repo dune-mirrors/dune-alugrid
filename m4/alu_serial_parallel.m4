@@ -5,7 +5,8 @@ AC_DEFUN([ALU3D_SERIAL_PARALLEL],[
 
   with_mpi="no"
   # implicitly sets the HAVE_MPI-define and the MPICXX-substitution
-  ACX_MPI([with_mpi="yes"])
+  # if MPI was found yes is returned 
+  CHECK_MPI([with_mpi="yes"])
 
   # get compilation script
   AC_LANG_CASE([C],[
@@ -32,8 +33,9 @@ AC_DEFUN([ALU3D_SERIAL_PARALLEL],[
   with_parallel="serial"
     AC_CHECK_HEADER([alu3dgrid_parallel.h],[with_parallel="parallel"],
       AC_MSG_WARN([alu3dgrid_parallel.h could not be found or compiled! 
-      Maybe you should use  < $MPICXX > instead of < $CXX > ! 
-      See the README file for more information on compilers!]) 
+      Maybe you should rerun configure with the parameter CXX=$MPICXX 
+      instead the choosen way! See the README file for more 
+      information on compilers!]) 
     )
  fi
     
