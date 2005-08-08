@@ -9,7 +9,7 @@ AC_LANG_PUSH([C++])
 AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
 
 # check different mpic compiler scripts 
-AC_CHECK_PROGS(MPICXX, mpic++ mpiCC mpCC hcp mpxlC mpxlC_r cmpic++, $CXX)
+AC_CHECK_PROGS(MPICXX, mpic++ mpicxx mpiCC mpCC hcp mpxlC mpxlC_r cmpic++, $CXX)
 REM_CXX="$CXX"
 CXX="$MPICXX"
 AC_SUBST(MPICXX)
