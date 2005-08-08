@@ -42,6 +42,11 @@ To compile the parallel version of the library use the MPI compiler script
 (i.e. ./configure CXX=mpiCC). If not using the MPI compiler scripts just
 make sure that all include path and library paths are set the right way.
 
+For example to compile the parallel version of ALU3d-Grid the configure
+command can look as follows: 
+
+./configure CXX=mpiCC --with-metis="metis_path" 
+
 For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ .
 For PARTY Lib (version 1.1 or higher) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
 
@@ -85,4 +90,19 @@ statement tests.
 
 Known bugs: On Intel ia64 architectures the optimisation option -O3 dosen't
 work with the INTEL C++ Compiler. 
+
+
+Knowns Bugs 
+-----------
+
+Intel ia64 architectures: On Intel ia64 architectures the 
+optimisation option -O3 dosen't work with the INTEL C++ Compiler. 
+
+METIS bug: 
+
+If you want to use the METIS library for partitioning, comment 
+in the metis_dir/Lib/proto.h line 462 the function declaration 
+int log2(int);
+
+This bug has been reported and hopefully will be fixed soon.
 
