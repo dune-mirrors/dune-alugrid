@@ -67,6 +67,37 @@ After configuration
 build and install ALU3d-Grid.  
 
 
+Dynamic Load Balancing Options
+------------------------------
+
+If the compiled code is used for parallel computations including dynamic
+load balancing, then a parameter file named "lastverteilung.cfg" should be
+available in the dicrectory the program is launched. See
+"misc/lastverteilung.cfg" for an example file. 
+
+The file must contain three values: 
+first row: ldb_under (value < 1.0), for example 0.0
+second row: ldb_over (value > 1.0), for example 1.2 
+third row: Graph partitioning method, for example 11 
+
+Available methods are: 
+
+NONE = 0
+COLLECT = 1
+
+PARTY_helpfulSet = 3
+PARTY_kernighanLin = 4
+PARTY_linear = 7
+PARTY_gain = 8
+PARTY_farhat = 9
+
+METIS_PartGraphKway = 11
+METIS_PartGraphRecursive = 12
+
+See the documentation of the corresponding package for detail on the
+methods. 
+
+
 Debug Options
 --------------
 
