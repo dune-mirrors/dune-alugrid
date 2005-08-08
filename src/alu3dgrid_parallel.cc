@@ -3,9 +3,11 @@
 
 #include "alu3dgrid_parallel.h"
 
+int log2(int);
 // partitioning libs 
 // METIS if not found here then dummy version is included 
 extern "C" {
+// METISTITLE is defined by the metis header file. 
 #undef METISTITLE 
 #include <metis.h>
 #include "parallel/metis.c"
