@@ -31,9 +31,10 @@ your system. Run
 
 to commence those tests. See ./configure --help for deatil help on optins. 
 If you intend to use the parallel version of the
-grid, make sure that you have a version of MPI, and METIS (--with-metis=PATH), or 
+grid, make sure that you have a version of MPI, and METIS (--with-metis=PATH), and 
 PARTY (--with-party=PATH) and supply the respective flags to the 
-configure script.
+configure script. Dynamic load balancing can only be used if either METIS
+or PARTY Lib or both are linked to the ALU3d-Grid Library.
 
 For parallel computation MPI is needed, common packages are 
 MPICH (version 1.2.5 or higher) or LAM MPI (version 7.x).
@@ -45,7 +46,7 @@ make sure that all include path and library paths are set the right way.
 For example to compile the parallel version of ALU3d-Grid the configure
 command can look as follows: 
 
-./configure CXX=mpiCC --with-metis="metis_path" 
+./configure CXX=mpiCC --with-metis="metis_path" --with-party="partylib_path"
 
 For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ ,
 see also the section Known bugs, when you using METIS. 
