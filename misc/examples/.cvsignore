@@ -7,3 +7,4 @@ alu3dgrid_parallel.lo
 .libs
 .deps
 libalu3dgrid.la
+example
