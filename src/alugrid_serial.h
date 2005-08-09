@@ -1,6 +1,10 @@
 #ifndef __ALUGRID_SERIAL_H_INCLUDED__
 #define __ALUGRID_SERIAL_H_INCLUDED__
 
+#ifndef NDEBUG
+#warning -- Compiling ALUGrid library in debug mode !!!
+#endif
+
 #define _ANSI_HEADER
 // include all headers 
 #include "stlheaders.h"
