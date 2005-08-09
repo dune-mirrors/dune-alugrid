@@ -1,3 +1,3 @@
 paralleldir = parallel
-parallelhdrs = $(paralleldir)/ghostelements.h $(paralleldir)/gitter_pll_ldb.h $(paralleldir)/gitter_tetra_top_pll.h $(paralleldir)/mpAccess_MPI.h\
+parallelhdrs = $(paralleldir)/ghost_elements.h $(paralleldir)/gitter_pll_ldb.h $(paralleldir)/gitter_tetra_top_pll.h $(paralleldir)/mpAccess_MPI.h\
 	$(paralleldir)/gitter_hexa_top_pll.h $(paralleldir)/gitter_pll_mgb.h $(paralleldir)/metis.h $(paralleldir)/party_lib.h $(paralleldir)/gitter_pll_impl.h $(paralleldir)/gitter_pll_sti.h  $(paralleldir)/mpAccess.h
