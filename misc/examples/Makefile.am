@@ -7,4 +7,4 @@ AM_CPPFLAGS = -I$(SOURCE_DIR) -I$(SOURCE_DIR)/serial -I$(SOURCE_DIR)/parallel -I
 
 # headers to install 
 noinst_PROGRAMS = example
-example_SOURCES = example.cc $(SOURCE_DIR)/alu3dgrid_serial.cc 
+example_SOURCES = example.cc $(SOURCE_DIR)/alugrid_serial.cc 

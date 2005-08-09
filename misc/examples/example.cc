@@ -1,6 +1,6 @@
 //***********************************************************************
 //
-//  Example program how to use ALU3d-Grid. 
+//  Example program how to use ALUGrid. 
 //  Author: Robert Kloefkorn 
 //
 //  This little program read one of the macrogrids and generates a grid. 
@@ -11,9 +11,9 @@
 using namespace std;
 
 
-// include serial part of ALU3d-Grid 
-#include <alu3dgrid_serial.h>
-using namespace ALU3dGridSpace;
+// include serial part of ALUGrid 
+#include <alugrid_serial.h>
+using namespace ALUGridSpace;
 
 // refine grid globally, i.e. mark all elements and then call adapt 
 void globalRefine(GitterBasisImpl* grid, int refcount) {
