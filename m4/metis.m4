@@ -1,6 +1,6 @@
 # searches for METIS header and lib 
 
-AC_DEFUN([ALU3D_PATH_METIS],[
+AC_DEFUN([ALUGRID_PATH_METIS],[
   AC_REQUIRE([AC_PROG_CC])
 
   AC_ARG_WITH(metis,
@@ -46,10 +46,7 @@ CPPFLAGS="$REM_CPPFLAGS $METISDEF -I$METIS_INCLUDE_PATH"
 REM_CPPFLAGS=
 
 REM_LDFLAGS=$LDFLAGS
-
-# TODO: check if static flag exists 
-# link_static_flag defines the flag for the linker to link only static
-# didnt work, with $link_static_flag, so quick hack here
+# add math library 
 LDFLAGS="$LDFLAGS -lm"
 
 # if header is found...
@@ -78,9 +75,9 @@ if test x$HAVE_METIS = x1 ; then
   AC_DEFINE(HAVE_METIS, 1, [Define to 1 if metis-library is found])
 
   # add to global list
-  ALU3D_PKG_LDFLAGS="$ALU3D_PKG_LDFLAGS $METIS_LDFLAGS"
-  ALU3D_PKG_LIBS="$ALU3D_PKG_LIBS $METIS_LIBS"
-  ALU3D_PKG_CPPFLAGS="$ALU3D_PKG_CPPFLAGS $METIS_CPPFLAGS"
+  ALUGRID_PKG_LDFLAGS="$ALUGRID_PKG_LDFLAGS $METIS_LDFLAGS"
+  ALUGRID_PKG_LIBS="$ALUGRID_PKG_LIBS $METIS_LIBS"
+  ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $METIS_CPPFLAGS"
 
   # set variable for summary
   with_metis="yes"
