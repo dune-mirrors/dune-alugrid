@@ -2,7 +2,7 @@
 #define __ALUGRID_SERIAL_H_INCLUDED__
 
 #ifndef NDEBUG
-#warning -- Compiling ALUGrid library in debug mode !!!
+#warning -- Compiling ALUGrid code in debug mode !!!
 #endif
 
 #define _ANSI_HEADER
