@@ -16,10 +16,6 @@
 #include <limits.h>
 #include <time.h>
 
-#ifdef _BSGRID_PARALLEL_
-#include <mpi.h>
-#endif
-
 #include <rpc/rpc.h>
 
 #ifdef _ANSI_HEADER
