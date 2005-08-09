@@ -1,9 +1,9 @@
 Makefile
 Makefile.in
-alu3dgrid_serial.o
-alu3dgrid_serial.lo
-alu3dgrid_parallel.o
-alu3dgrid_parallel.lo
+alugrid_serial.o
+alugrid_serial.lo
+alugrid_parallel.o
+alugrid_parallel.lo
 .libs
 .deps
-libalu3dgrid.la
+libalugrid.la
