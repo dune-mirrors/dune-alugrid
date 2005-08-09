@@ -28,7 +28,7 @@
   
 #include "gitter_pll_sti.h"
 #include "gitter_pll_ldb.h"
-#include "ghostelements.h"
+#include "ghost_elements.h"
 
   // Der vector < int > wird als sog. linkagepattern, also als
   // Verbindungsmuster eingesetzt. Die Verbindungsmuster werden
