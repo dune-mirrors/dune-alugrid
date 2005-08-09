@@ -1,5 +1,5 @@
-#ifndef __ALU3DGRID_SERIAL_H_INCLUDED__
-#define __ALU3DGRID_SERIAL_H_INCLUDED__
+#ifndef __ALUGRID_SERIAL_H_INCLUDED__
+#define __ALUGRID_SERIAL_H_INCLUDED__
 
 #define _ANSI_HEADER
 // include all headers 
@@ -7,7 +7,7 @@
 
 #define _DUNE_USES_ALU3DGRID_
 
-namespace ALU3dGridSpace {
+namespace ALUGridSpace {
 
 typedef enum ALUElementType { hexa , tetra , hexa_periodic , tetra_periodic } grid_t;
 
@@ -22,14 +22,14 @@ typedef GatherScatter GatherScatterType;
 typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
 
 
-#ifndef _ALU3DGRID_PARALLEL_
+//#ifndef _ALU3DGRID_PARALLEL_
 typedef Gitter::helement_STI  HElemType;    // Interface Element
 typedef Gitter::hbndseg       HGhostType;
-#else 
-#include "parallel/gitter_pll_sti.h"
-typedef GitterPll::helement_STI  HElemType;    // Interface Element
-typedef GitterPll::hbndseg       HGhostType;
-#endif
+//#else 
+//#include "parallel/gitter_pll_sti.h"
+//typedef GitterPll::helement_STI  HElemType;    // Interface Element
+//typedef GitterPll::hbndseg       HGhostType;
+//#endif
 
 struct GatherScatter
 {

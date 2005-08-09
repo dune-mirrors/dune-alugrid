@@ -1,13 +1,16 @@
-#ifndef _ALU3DGRID_PARALLEL_h_INCLUDED_
-#define _ALU3DGRID_PARALLEL_h_INCLUDED_
+#ifndef _ALUGRID_PARALLEL_h_INCLUDED_
+#define _ALUGRID_PARALLEL_h_INCLUDED_
 
 // is this is defined the internal faces are used as ghost elements 
 // needs to be defined before all headers are included 
 #define __USE_INTERNAL_FACES__
-  
-#include "alu3dgrid_serial.h"
 
-namespace ALU3dGridSpace {
+// the message passing interface (MPI) headers 
+#include <mpi.h>
+
+#include "alugrid_serial.h"
+
+namespace ALUGridSpace {
 
 // the parallel stuff 
 #include "parallel/gitter_pll_sti.h"

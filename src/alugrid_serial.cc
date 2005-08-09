@@ -1,9 +1,9 @@
-#ifndef __ALU3DGRID_PARALLEL_CC_INCLUDED__
-#define __ALU3DGRID_PARALLEL_CC_INCLUDED__
+#ifndef __ALUGRID_PARALLEL_CC_INCLUDED__
+#define __ALUGRID_PARALLEL_CC_INCLUDED__
 
-#include "alu3dgrid_serial.h"
+#include "alugrid_serial.h"
 
-namespace ALU3dGridSpace {
+namespace ALUGridSpace {
 
 // bsgrid original sources 
 #include "serial/gitter_geo.cc" 

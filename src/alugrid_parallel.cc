@@ -1,15 +1,15 @@
-#ifndef __ALU3DGRID_PARALLEL_CC_INCLUDED__
-#define __ALU3DGRID_PARALLEL_CC_INCLUDED__
+#ifndef __ALUGRID_PARALLEL_CC_INCLUDED__
+#define __ALUGRID_PARALLEL_CC_INCLUDED__
 
-#include "alu3dgrid_parallel.h"
+#include "alugrid_parallel.h"
 
-int log2(int);
 // partitioning libs 
 // METIS if not found here then dummy version is included 
 extern "C" {
 // METISTITLE is defined by the metis header file. 
 #undef METISTITLE 
 #include <metis.h>
+// if METISTITLE is still undefined then the dummy is included 
 #include "parallel/metis.c"
 }
 
@@ -31,7 +31,7 @@ extern "C" {
 #include "parallel/party_lib.c"
 #endif
 
-namespace ALU3dGridSpace {
+namespace ALUGridSpace {
 
 #include "parallel/gitter_pll_sti.cc"
 #include "parallel/gitter_pll_ldb.cc"
