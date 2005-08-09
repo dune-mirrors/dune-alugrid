@@ -1,7 +1,6 @@
-# check for thing needed to compile the ALU-Grid library. 
+# check for thing needed to compile the ALUGrid library. 
 
 AC_DEFUN([ALUGRID_CHECK_ALL],[
-
 
 dnl check for programs
   AC_REQUIRE([AC_PROG_CXX])
@@ -14,15 +13,15 @@ dnl check for programs
   AC_REQUIRE([AC_PROG_LIBTOOL])
 
 dnl checks for header files.
-  #AC_REQUIRE([AC_HEADER_STDC])
+  AC_REQUIRE([AC_HEADER_STDC])
 
-  #AC_CHECK_HEADERS([malloc.h string.h])
+  AC_CHECK_HEADERS([malloc.h string.h])
 
 dnl checks for typedefs, structures, and compiler characteristics.
-  #AC_REQUIRE([AC_C_CONST])
-  #AC_REQUIRE([AC_C_INLINE])
-  #AC_REQUIRE([AC_TYPE_SIZE_T])
-  #AC_REQUIRE([AC_STRUCT_TM])
+  AC_REQUIRE([AC_C_CONST])
+  AC_REQUIRE([AC_C_INLINE])
+  AC_REQUIRE([AC_TYPE_SIZE_T])
+  AC_REQUIRE([AC_STRUCT_TM])
 
 dnl check for library functions
   AC_REQUIRE([AC_FUNC_MALLOC])
@@ -37,9 +36,9 @@ dnl check all components
   AC_REQUIRE([ALUGRID_SERIAL_PARALLEL])
 
   # convenience-variables if every found package should be used
-  AC_SUBST(ALL_PKG_LIBS, "$LIBS $ALU3D_PKG_LIBS")
-  AC_SUBST(ALL_PKG_LDFLAGS, "$LDFLAGS $ALU3D_PKG_LDFLAGS")
-  AC_SUBST(ALL_PKG_CPPFLAGS, "$CPPFLAGS $ALU3D_PKG_CPPFLAGS")
+  AC_SUBST(ALL_PKG_LIBS, "$LIBS $ALUGRID_PKG_LIBS")
+  AC_SUBST(ALL_PKG_LDFLAGS, "$LDFLAGS $ALUGRID_PKG_LDFLAGS")
+  AC_SUBST(ALL_PKG_CPPFLAGS, "$CPPFLAGS $ALUGRID_PKG_CPPFLAGS")
 ])
 
 

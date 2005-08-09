@@ -3,8 +3,6 @@
 AC_DEFUN([CHECK_MPI], [
 AC_PREREQ(2.50) dnl requires autoconf version 2.50 or higher
 
-AC_REQUIRE([AC_PROG_CXX])
-
 AC_LANG_PUSH([C++])
 AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
 
