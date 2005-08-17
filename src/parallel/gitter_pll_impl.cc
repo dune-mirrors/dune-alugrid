@@ -1494,11 +1494,34 @@ Gitter :: Geometric :: periodic4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 }
 // Ende - Neu am 23.5.02 (BS)
 
-Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) {
+Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) {
   if (b == Gitter :: hbndseg_STI :: closure) {
     typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
     return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < Hbnd4DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(0) , this->_myGrid , 0 ) ;
+  } else {
+    return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
+        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(4) , 0 ) ;
+  }
+}
+
+MacroGhostHexa * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_ghosthexa (hface4_GEO * f, int t, const double (&p)[4][3]) 
+{
+  return 0;
+}
+
+
+Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const double (&p)[4][3]) 
+{   
+  if (b == Gitter :: hbndseg_STI :: closure) {
+    typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
+    MacroGhostHexa * ghost = insert_ghosthexa(f,t,p);
+    assert(ghost);
+    return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < Hbnd4DefaultType > , 
+          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(0) , this->_myGrid , ghost ) ;
   } else {
     return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
         BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(4) , 0 ) ;
