@@ -188,7 +188,7 @@ inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os) {
 
   if(fake) 
   {
-    double p [3] = {0.0,0.0,0.0};
+    double p [3];
     os.readObject (p[0]) ;
     os.readObject (p[1]) ;
     os.readObject (p[2]) ;
@@ -208,7 +208,33 @@ inline void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os) {
   return ;
 }
 	
-inline void ParallelGridMover :: unpackHbnd4 (ObjectStream & os) {
+inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os) {
+  int b, v [4] ;
+  os.readObject (b) ;
+  os.readObject (v[0]) ;
+  os.readObject (v[1]) ;
+  os.readObject (v[2]) ;
+  os.readObject (v[3]) ;
+
+  int fake = 0;
+  os.readObject( fake );
+
+  if(fake) 
+  {
+    for(int i=0; i<4; i++)
+    {
+      double p [3];
+      os.readObject (p[0]) ;
+      os.readObject (p[1]) ;
+      os.readObject (p[2]) ;
+    }
+  }
+
+  InsertUniqueHbnd4 (v, Gitter :: hbndseg :: bnd_t (b)) ;
+  return ;
+}
+
+inline void ParallelGridMover :: unpackHbnd4Ext (ObjectStream & os) {
   int b, v [4] ;
   os.readObject (b) ;
   os.readObject (v[0]) ;
@@ -226,31 +252,29 @@ void ParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
     for (os.readObject (code) ; code != MacroGridMoverIF :: ENDMARKER ; os.readObject (code)) {
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
-	unpackVertex (os) ;
-	break ;
+	      unpackVertex (os) ;
+	      break ;
       case MacroGridMoverIF :: EDGE1 :
         unpackHedge1 (os) ;
-	break ;
+	      break ;
       case MacroGridMoverIF :: FACE3 :
         unpackHface3 (os) ;
-	break ;
+	      break ;
       case MacroGridMoverIF :: FACE4 :
-	unpackHface4 (os) ;
-	break ;
+	      unpackHface4 (os) ;
+	      break ;
       case MacroGridMoverIF :: TETRA :
         unpackTetra (os) ;
         break ;
       case MacroGridMoverIF :: HEXA :
-	unpackHexa (os) ;
+      	unpackHexa (os) ;
         break ;
       case MacroGridMoverIF :: PERIODIC3 :
         unpackPeriodic3 (os) ;
         break ;
-// Anfang - Neu am 23.5.02 (BS)
       case MacroGridMoverIF :: PERIODIC4 :
         unpackPeriodic4 (os) ;
         break ;
-// Ende - Neu am 23.5.02 (BS)
       case MacroGridMoverIF :: HBND3INT :
         unpackHbnd3Int (os) ;
       	break ;
@@ -258,8 +282,10 @@ void ParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
         unpackHbnd3Ext (os) ;
       	break ;
       case MacroGridMoverIF :: HBND4INT :
+        unpackHbnd4Int (os) ;
+        break; 
       case MacroGridMoverIF :: HBND4EXT :
-	unpackHbnd4 (os) ;
+      	unpackHbnd4Ext (os) ;
         break ;
       default :
 	cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "]\n" ;
