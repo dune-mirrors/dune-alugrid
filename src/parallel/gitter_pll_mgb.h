@@ -37,7 +37,8 @@ class ParallelGridMover : public MacroGridBuilder {
     void unpackPeriodic4 (ObjectStream &) ;
     void unpackHbnd3Int (ObjectStream &) ;
     void unpackHbnd3Ext (ObjectStream &) ;
-    void unpackHbnd4 (ObjectStream &) ;
+    void unpackHbnd4Int (ObjectStream &) ;
+    void unpackHbnd4Ext (ObjectStream &) ;
   public :
     ParallelGridMover (BuilderIF &, bool init = true) ;
     // former constructor 
