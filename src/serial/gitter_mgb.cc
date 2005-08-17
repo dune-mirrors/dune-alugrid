@@ -173,7 +173,8 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
   if (bt == Gitter :: hbndseg_STI :: closure) {
     if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      _hbnd4Int [key] = (void *) new pair < hface4_GEO *, int > (face,twst) ;
+      _hbnd4Int [key] = new Hbnd4IntStorage (face,twst) ;
+      //_hbnd4Int [key] = (void *) new pair < hface4_GEO *, int > (face,twst) ;
       return true ;
     }
   } else {
@@ -275,8 +276,10 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   if (hit != _hexaMap.end ()) {
     hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
     for (int i = 0 ; i < 6 ; i ++) {
+      int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[i];
       _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), hx->myhface4 (i)->myvertex (1)->ident (), 
-      hx->myhface4 (i)->myvertex (2)->ident ())] = new pair < hface4_GEO *, int > (hx->myhface4 (i), hx->twist (i)) ;
+        hx->myhface4 (i)->myvertex (2)->ident ())] = 
+          new Hbnd4IntStorage (hx->myhface4 (i), hx->twist (i), hx->myhface4(oppFace));
     }
     delete hx ;
     _hexaMap.erase (hit) ;
@@ -299,7 +302,9 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
     periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second ;
     for (int i = 0 ; i < 2 ; i ++) {
       _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), p4->myhface4 (i)->myvertex (1)->ident (), 
-      p4->myhface4 (i)->myvertex (2)->ident ())] = new pair < hface4_GEO *, int > (p4->myhface4 (i), p4->twist (i)) ;
+      p4->myhface4 (i)->myvertex (2)->ident ())] = 
+        new Hbnd4IntStorage (p4->myhface4 (i), p4->twist (i));
+        //new pair < hface4_GEO *, int > (p4->myhface4 (i), p4->twist (i)) ;
     }
     delete p4 ;
     _periodic4Map.erase (hit) ;
@@ -643,7 +648,8 @@ void MacroGridBuilder :: initialize ()
   {for (list < hbndseg4_GEO * > :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
     faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
-      _hbnd4Int [key] = (void *) new pair < hface4_GEO *, int > ((*i)->myhface4 (0), (*i)->twist (0)) ;
+      _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
+        //(void *) new pair < hface4_GEO *, int > ((*i)->myhface4 (0), (*i)->twist (0)) ;
       delete (*i) ;
     } else {
       _hbnd4Map [key] = (*i) ;
@@ -726,23 +732,23 @@ void MacroGridBuilder :: finalize ()
       myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
     }
   }
-  {for (faceMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
-    const pair < hface4_GEO *, int > & p = * (pair < hface4_GEO *, int > *)(*i).second ;
-    if (p.first->ref == 1) {
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first,p.second,Gitter :: hbndseg_STI :: closure) ;
+  {for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
+    const Hbnd4IntStorage & p = * ((*i).second);
+    if (p.first()->ref == 1) {
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure) ;
       myBuilder ()._hbndseg4List.push_back (hb4) ;
     }
-    delete (pair < hface4_GEO *, int > *)(*i).second ;
+    delete (*i).second;
   }}
 
   // here the internal boundary elements are created 
-  {for (hbndintMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
-    const Hbnd3IntStorage & p = * (Hbnd3IntStorage *) (*i).second ;
+  {for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
+    const Hbnd3IntStorage & p = * ((*i).second);
     if (p.first()->ref == 1) {
       hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure) ;    
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
-    delete (pair < hface3_GEO *, int > *)(*i).second ;
+    delete (*i).second;
   }}
   {for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Map.end () ; )
     if (!((hface4_GEO *)(*i).second)->ref) {
