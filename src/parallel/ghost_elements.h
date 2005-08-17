@@ -38,6 +38,31 @@ class MacroGhostPointTetra : public MacroGhostPoint
     }
 };
 
+class MacroGhostPointHexa : public MacroGhostPoint
+{
+  protected:
+    double _p[4][3];
+
+  public:
+    MacroGhostPointHexa( const double (&p)[4][3] )
+    {
+      for(int vx=0; vx<4; vx++)
+        for(int i=0; i<3; i++) _p[vx][i] = p[vx][i];
+    }
+
+    virtual const double (& getPoint (int i) const )[3]
+    {
+      assert(i >= 0 );
+      assert(i < 4);
+      return _p[i];
+    }
+
+    virtual int nop () const
+    {
+      return 4;
+    }
+};
+
 // todo: MacroGhostPointHexa
 
 // interface class for macro ghost 
@@ -80,7 +105,7 @@ public:
   MacroGhostTetra (VertexGeo * v, hedge1_GEO *(&edges)[nedges],
           hface3_GEO *(&faces)[nfaces] , hbndseg3_GEO *(&hbnd)[nhbnd] ,
           GhostTetra_t * ghost, const double (&p)[3]) :
-    _v(v) , _ghost(ghost) , _ghPoint(p)
+          _v(v) , _ghost(ghost) , _ghPoint(p)
   { 
     for(int i=0; i<nedges; i++)
      _edges[i] = edges[i];
@@ -111,7 +136,65 @@ public:
   }
 };
 
+
 // todo: MacroGhostHexa
+class MacroGhostHexa : public MacroGhost
+{
+  typedef Gitter :: helement_STI GhostElement_t;
+
+  typedef Gitter :: Geometric :: hexa_GEO GhostHexa_t;
+  typedef Gitter :: Geometric :: VertexGeo VertexGeo;
+  typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
+  typedef Gitter :: Geometric :: hface4_GEO hface4_GEO;
+  typedef Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
+  typedef hbndseg4_GEO hbnd_seg;
+  
+  VertexGeo * _v;
+  enum { nedges = 12 };
+  hedge1_GEO *(_edges)[nedges];
+  enum { nfaces = 6 };
+  hface4_GEO *(_faces)[nfaces];
+  enum { nhbnd = 5 };
+  hbnd_seg  *(_hbnd)[nhbnd];
+  GhostHexa_t * _ghost;
+
+  MacroGhostPointHexa _ghPoint;
+
+public:
+  MacroGhostHexa (VertexGeo * v, hedge1_GEO *(&edges)[nedges],
+          hface4_GEO *(&faces)[nfaces] , hbndseg4_GEO *(&hbnd)[nhbnd] ,
+          GhostHexa_t * ghost, const double (&p)[4][3]) :
+    _v(v) , _ghost(ghost) , _ghPoint(p)
+  { 
+    for(int i=0; i<nedges; i++)
+     _edges[i] = edges[i];
+    for(int i=0; i<nhbnd; i++)
+     _hbnd[i] = static_cast<hbnd_seg *> (hbnd[i]);
+    for(int i=0; i<nfaces; i++)
+      _faces[i] = faces[i];
+  }
+  
+  ~MacroGhostHexa ()
+  { 
+    for(int i=nhbnd-1; i>=0; i--)
+      if(_hbnd[i]) delete _hbnd[i];
+    if(_ghost) delete _ghost;
+    for(int i=nfaces-1; i>=0; i--)
+      if(_faces[i]) delete _faces[i];
+    for(int i=nedges-1; i>=0; i--)
+      if(_edges[i]) delete _edges[i];
+    if(_v) delete _v;
+  }
+  
+  GhostElement_t * getGhost() { return _ghost; }
+
+  // for storage in PllClosure Elements, if packed, we need the point 
+  const MacroGhostPoint * getGhostPoints () const
+  {
+    return &_ghPoint;
+  }
+};
+
 
 #if 0
 static void printFace(ostream & os , Gitter :: Geometric :: hface3_GEO * face, int fce )
