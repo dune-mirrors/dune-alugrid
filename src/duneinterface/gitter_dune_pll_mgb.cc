@@ -274,7 +274,15 @@ void DuneParallelGridMover :: initialize ()
   {for (list < hbndseg4_GEO * > :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
     faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
-      _hbnd4Int [key] = (void *) new pair < hface4_GEO *, int > ((*i)->myhface4 (0), (*i)->twist (0)) ;
+      //_hbnd4Int [key] = (void *) new pair < hface4_GEO *, int > ((*i)->myhface4 (0), (*i)->twist (0)) ;
+      // new code 
+      if((*i)->getGhost())
+      {
+        int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[0];
+        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0), (*i)->twist (0), (*i)->myhface4 (oppFace)) ;
+      }
+      else 
+        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
       delete (*i) ;
     } else {
       _hbnd4Map [key] = (*i) ;
@@ -392,18 +400,23 @@ void DuneParallelGridMover :: finalize ()
       myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
     }
   }
-  {for (faceMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
-    const pair < hface4_GEO *, int > & p = * (pair < hface4_GEO *, int > *)(*i).second ;
-    if (p.first->ref == 1) {
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first,p.second,Gitter :: hbndseg_STI :: closure) ;
+  {for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
+    const Hbnd4IntStorage & p = * ((*i).second) ;
+    if (p.first()->ref == 1) {
+#ifdef __USE_INTERNAL_FACES__
+      // old method 
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure) ;
+#else 
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure,p.getPoints());
+#endif
       myBuilder ()._hbndseg4List.push_back (hb4) ;
     }
-    delete (pair < hface4_GEO *, int > *)(*i).second ;
+    delete (*i).second;
   }}
 
   // here the internal boundary elements are created 
-  {for (hbndintMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
-    const Hbnd3IntStorage & p = * (Hbnd3IntStorage *) (*i).second ;
+  {for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
+    const Hbnd3IntStorage & p = *((*i).second);
     if (p.first()->ref == 1) {
 #ifdef __USE_INTERNAL_FACES__
       // old method 
@@ -415,7 +428,7 @@ void DuneParallelGridMover :: finalize ()
 #endif
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
-    delete (pair < hface3_GEO *, int > *)(*i).second ;
+    delete (*i).second; 
   }}
   {for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Map.end () ; )
     if (!((hface4_GEO *)(*i).second)->ref) {
@@ -453,7 +466,7 @@ void DuneParallelGridMover :: finalize ()
       myBuilder ()._vertexList.push_back ((*i ++).second) ;
     }
   }
-  myBuilder ()._modified = true ;	// wichtig !
+  myBuilder ()._modified = true ; // wichtig !
   this->_finalized = true;
   return ;
 }
