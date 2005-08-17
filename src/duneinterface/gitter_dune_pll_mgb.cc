@@ -46,8 +46,16 @@ class DuneParallelGridMover : public ParallelGridMover {
     // overloaded, because calles InsertUniqueHbnd3_withPoint
     inline void unpackHbnd3Int (ObjectStream & os); 
     
+    // overloaded, because calles InsertUniqueHbnd4_withPoint
+    inline void unpackHbnd4Int (ObjectStream & os); 
+
+    // creates Hbnd3IntStorage with point if needed 
     bool InsertUniqueHbnd3_withPoint (int (&)[3], Gitter :: hbndseg ::
             bnd_t,const double (&p) [3]) ;
+
+    // creates Hbnd4IntStorage with point if needed 
+    bool InsertUniqueHbnd4_withPoint (int (&)[4], Gitter :: hbndseg ::
+            bnd_t,const double (&p) [4][3]) ;
         
 };
 
@@ -68,6 +76,29 @@ bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
       hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt) ;
       _hbnd3Map [key] = hb3 ;
+      return true ;
+    }
+  }
+  return false ;
+}
+
+// new method that gets coord of ghost point 
+bool DuneParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],         
+      Gitter :: hbndseg_STI ::bnd_t bt, const double (&p)[4][3]) 
+{
+  int twst = cyclicReorder (v,v+4) ;
+  faceKey_t key (v [0], v [1], v [2]) ;
+  if (bt == Gitter :: hbndseg_STI :: closure) {
+    if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
+      hface4_GEO * face =  InsertUniqueHface4 (v).first ;
+      _hbnd4Int [key] = new Hbnd4IntStorage (face,twst,p) ;
+      return true ;
+    }
+  } else {
+    if (_hbnd4Map.find (key) == _hbnd4Map.end ()) {
+      hface4_GEO * face =  InsertUniqueHface4 (v).first ;
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt) ;
+      _hbnd4Map [key] = hb4 ;
       return true ;
     }
   }
@@ -106,6 +137,47 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
     assert(readPoint == 0);
     // old method defined in base class 
     InsertUniqueHbnd3 (v, b ) ;
+  }
+  return ;
+}
+
+// overloaded method because here we call insertion with point 
+inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os) 
+{
+  double p [4][3];
+  int bfake, v [4] ;
+  os.readObject (bfake) ;
+  Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
+  
+  os.readObject (v[0]) ;
+  os.readObject (v[1]) ;
+  os.readObject (v[2]) ;
+  os.readObject (v[3]) ;
+
+  int readPoint = 0; 
+  os.readObject( readPoint ); 
+
+  if( readPoint ) 
+  {
+    for(int i=0; i<4; i++) 
+    {
+      double (&pr) [3] = p[i];
+      os.readObject (pr[0]) ;
+      os.readObject (pr[1]) ;
+      os.readObject (pr[2]) ;
+    }
+  }
+
+  if(b == Gitter :: hbndseg :: closure)
+  {
+    //cout << "Insert Unique Hbnd4 p \n";
+    InsertUniqueHbnd4_withPoint (v, b, p ) ;
+  }
+  else
+  {
+    assert(readPoint == 0);
+    // old method defined in base class 
+    InsertUniqueHbnd4 (v, b ) ;
   }
   return ;
 }
@@ -174,8 +246,10 @@ void DuneParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
         unpackHbnd3Ext (os) ;
         break ;
       case MacroGridMoverIF :: HBND4INT :
+        unpackHbnd4Int (os) ;
+        break; 
       case MacroGridMoverIF :: HBND4EXT :
-        unpackHbnd4 (os) ;
+        unpackHbnd4Ext (os) ;
         break ;
       default :
   cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "]\n" ;
@@ -226,8 +300,10 @@ void DuneParallelGridMover :: duneUnpackAll (vector < ObjectStream > & osv,
         unpackHbnd3Ext (os) ;
         break ;
       case MacroGridMoverIF :: HBND4INT :
+        unpackHbnd4Int (os) ;
+        break; 
       case MacroGridMoverIF :: HBND4EXT :
-        unpackHbnd4 (os) ;
+        unpackHbnd4Ext (os) ;
         break ;
       default :
   cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "]\n" ;
