@@ -75,6 +75,9 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     // store point and face and twist  
     Hbnd4IntStorage( hface4_GEO * f, int tw, const hface4_GEO * oppface);
     
+    // store point and face and twist  
+    Hbnd4IntStorage( hface4_GEO * f, int tw, const double (&p) [4][3]);
+    
     // store face and twist and set point to default 
     Hbnd4IntStorage( hface4_GEO * f, int tw ); 
 
@@ -200,6 +203,17 @@ Hbnd4IntStorage( hface4_GEO * f, int tw, const hface4_GEO * oppface)
   {
     const double (&p) [3] = oppface->myvertex(vx)->Point();
     for(int i=0; i<3; i++) _p[vx][i] = p[i];
+  }
+}
+    
+// hface4 storage
+inline MacroGridBuilder :: Hbnd4IntStorage :: 
+Hbnd4IntStorage( hface4_GEO * f, int tw, const double (&p) [4][3])
+ : _first(f) , _second(tw) , _pInit(true)
+{
+  for(int vx=0; vx<4; vx++)
+  {
+    for(int i=0; i<3; i++) _p[vx][i] = p[vx][i];
   }
 }
     
