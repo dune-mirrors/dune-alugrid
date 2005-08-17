@@ -813,8 +813,12 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         
         virtual VertexGeo     * insert_vertex (double,double,double,int,int = 0) ;
         virtual VertexGeo     * insert_ghostvx (const double (&p)[3]) ;
-        
+       
+        // insert hbnd_int without ghost hexa 
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
+        // insert hbnd_int with ghost hexa 
+        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t,const double (&p)[4][3]) ;
+        
         // normal insert hbnd3 version
   virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
         // version that get point and create ghost macro 
@@ -826,7 +830,12 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
   virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
   virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
+
+  // insertes a new ghost tetra which is stored inside the MacroGhostTetra 
   virtual MacroGhostTetra    * insert_ghosttetra (hface3_GEO *, int , const double (&p)[3]) ;
+  // insertes new ghost hexa which is strored inside the MacroGhostHexa 
+  virtual MacroGhostHexa     * insert_ghosthexa (hface4_GEO *, int , const double (&p)[4][3]) ;
+  
   virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
 // Anfang - Neu am 23.5.02 (BS)
   virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
