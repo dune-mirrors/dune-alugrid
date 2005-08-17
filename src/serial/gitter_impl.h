@@ -236,6 +236,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         // version with point , returns insert_hbnd3 here 
         virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const double (&p)[4][3]) ;
         virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
         virtual inline periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
 
@@ -686,6 +687,10 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const dou
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
   return new Objects :: hbndseg4_IMPL ( 0,f,i,NULL, b,indexManager(4) );
+}
+
+inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const double (&p) [4][3]) {
+  return insert_hbnd4 (f,i,b); 
 }
 
 inline IndexManagerType & GitterBasis :: MacroGitterBasis :: indexManager (int codim ) 
