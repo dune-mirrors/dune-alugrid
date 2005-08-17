@@ -1224,9 +1224,15 @@ public :
       virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) = 0 ;
       
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
+      
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
+      // method to insert internal boundary with ghost 
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t,const double(&p)[3]) = 0 ;
+      
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
+
+      // method to insert internal boundary with ghost 
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t, const double (&p)[4][3]) = 0 ;
       IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
       IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
       IteratorSTI < hedge_STI >  * iterator (const hedge_STI *) const ;
