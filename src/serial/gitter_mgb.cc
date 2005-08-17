@@ -174,7 +174,6 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
     if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
       _hbnd4Int [key] = new Hbnd4IntStorage (face,twst) ;
-      //_hbnd4Int [key] = (void *) new pair < hface4_GEO *, int > (face,twst) ;
       return true ;
     }
   } else {
