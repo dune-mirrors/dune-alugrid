@@ -500,6 +500,7 @@ bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
   return false ;
 }
 
+// packs macro element as internal bnd for other proc 
 void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const {
   bool hit = _moveTo.size () == 0 ? true : false ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++ )
@@ -511,9 +512,11 @@ void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
     os.writeObject (mytetra ().myvertex (fce,1)->ident ()) ;
     os.writeObject (mytetra ().myvertex (fce,2)->ident ()) ;
 
+    // see method unpackHbnd3Int 
     os.writeObject ( 1 ); // 1 == point is transmitted 
+    // store the missing point to form a tetra 
     const double (&p)[3] = mytetra ().myvertex (fce)->Point();
-    for(int i=0; i<3; i++) os.writeObject ( p[i] ) ;
+    for(int j=0; j<3; j++) os.writeObject ( p[j] ) ;
   }
   return ;
 }
@@ -559,8 +562,6 @@ void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
 bool TetraPllXBaseMacro :: erasable () const {
   return _erasable ;
 }
-
-  // Neu >
 
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
@@ -821,6 +822,7 @@ void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
     os.writeObject (myperiodic4 ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myperiodic4 ().myvertex (fce,2)->ident ()) ;
     os.writeObject (myperiodic4 ().myvertex (fce,3)->ident ()) ;
+    os.writeObject ( 0 ); // 0 == no point transmitted 
   }
   return ;
 }
@@ -1009,6 +1011,7 @@ bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
   return false ;
 }
 
+// packs macro element as internal bnd for other proc 
 void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const {
   bool hit = _moveTo.size () == 0 ? true : false ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++ )
@@ -1020,6 +1023,16 @@ void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
     os.writeObject (myhexa ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myhexa ().myvertex (fce,2)->ident ()) ;
     os.writeObject (myhexa ().myvertex (fce,3)->ident ()) ;
+
+    // see method unpackHbnd4Int 
+    os.writeObject ( 1 ); // 1 == point is transmitted 
+    int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
+    // store the four points of the opposite face 
+    for(int vx=0; vx<4; vx++)
+    {
+      const double (&p)[3] = myhexa().myvertex(oppFace,vx)->Point();
+      for(int j=0; j<3; j++) os.writeObject ( p[j] ) ;
+    }
   }
   return ;
 }
@@ -1257,7 +1270,8 @@ void GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: detachPllXFromMacro (
   _pllx = 0 ;
   return ;
 }
-  // Neu >
+
+
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
 // #     #  #       #    #     #    #    #  #    #     #    #    #       #
@@ -1305,9 +1319,7 @@ void GitterBasisPll :: ObjectsPll :: Periodic3EmptyPllMacro :: detachPllXFromMac
   _pllx = 0 ;
   return ;
 }
-  // < Neu
 
-// Anfang - Neu am 23.5.02 (BS)
 
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #
@@ -1356,7 +1368,7 @@ void GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: detachPllXFromMac
   _pllx = 0 ;
   return ;
 }
-// Ende - Neu am 23.5.02 (BS)
+
 
 ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
   return _pllx ;
