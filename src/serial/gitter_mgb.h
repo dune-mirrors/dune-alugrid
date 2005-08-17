@@ -41,7 +41,9 @@ template < class RandomAccessIterator > inline int cyclicReorder (RandomAccessIt
 }
 
 class MacroGridBuilder : protected Gitter :: Geometric {
-  protected :
+  
+  protected:  
+  // stores a hface3 and the other point needed to build a tetra  
   class Hbnd3IntStorage
   {
     double _p[3]; 
@@ -62,6 +64,27 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     int          second () const { return _second; }
   };
 
+  // stores a hface4 and the other points needed to build a hexa
+  class Hbnd4IntStorage
+  {
+    double _p[4][3]; 
+    hface4_GEO * _first;
+    int          _second;
+    bool _pInit; // true if p was initialized with a value 
+  public:  
+    // store point and face and twist  
+    Hbnd4IntStorage( hface4_GEO * f, int tw, const hface4_GEO * oppface);
+    
+    // store face and twist and set point to default 
+    Hbnd4IntStorage( hface4_GEO * f, int tw ); 
+
+    // return reference to _p
+    const double (& getPoints () const )[4][3];
+
+    hface4_GEO * first  () const { return _first;  }
+    int          second () const { return _second; }
+  };
+
   protected :
     enum ElementRawID {TETRA_RAW=4, HEXA_RAW=8, PERIODIC3_RAW=33, PERIODIC4_RAW=44} ; 
   protected :
@@ -73,15 +96,19 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     typedef map < vertexKey_t , VertexGeo *, less < vertexKey_t > >     vertexMap_t ;
     typedef map < edgeKey_t,    hedge1_GEO *, less < edgeKey_t > >      edgeMap_t ;
     typedef map < faceKey_t,    void *, less < faceKey_t > >            faceMap_t ;
-    typedef map < faceKey_t,    Hbnd3IntStorage *, less < faceKey_t > > hbndintMap_t ;
     typedef map < elementKey_t, void *, less < elementKey_t > >         elementMap_t ;
   
+    typedef map < faceKey_t, Hbnd3IntStorage *, less < faceKey_t > > hbnd3intMap_t ;
+    typedef map < faceKey_t, Hbnd4IntStorage *, less < faceKey_t > > hbnd4intMap_t ;
+    
     vertexMap_t  _vertexMap ;
     edgeMap_t    _edgeMap ;
     
-    faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd4Map, _hbnd4Int ;
-    hbndintMap_t _hbnd3Int; // new type here, so we dont have to cast to void *
-    // todo here: same thing for hbnd4int 
+    faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd4Map; // _hbnd3Int,_hbnd4Int
+    
+    // new type here, so we dont have to cast to void *
+    hbnd3intMap_t _hbnd3Int;
+    hbnd4intMap_t _hbnd4Int; 
     
     elementMap_t _hexaMap, _tetraMap, _periodic3Map, _periodic4Map ;
     
@@ -159,6 +186,34 @@ Hbnd3IntStorage( hface3_GEO * f, int tw )
 }
 
 inline const double (& MacroGridBuilder :: Hbnd3IntStorage :: getPoint () const )[3]
+{ 
+  assert(_pInit);
+  return _p;
+}
+
+// hface4 storage
+inline MacroGridBuilder :: Hbnd4IntStorage :: 
+Hbnd4IntStorage( hface4_GEO * f, int tw, const hface4_GEO * oppface)
+ : _first(f) , _second(tw) , _pInit(true)
+{
+  for(int vx=0; vx<4; vx++)
+  {
+    const double (&p) [3] = oppface->myvertex(vx)->Point();
+    for(int i=0; i<3; i++) _p[vx][i] = p[i];
+  }
+}
+    
+inline MacroGridBuilder :: Hbnd4IntStorage :: 
+Hbnd4IntStorage( hface4_GEO * f, int tw )
+ : _first(f) , _second(tw) , _pInit(false)
+{
+  for(int vx=0; vx<4; vx++)
+  {
+    for(int i=0; i<3; i++) _p[vx][i] = -666.0;
+  }
+}
+
+inline const double (& MacroGridBuilder :: Hbnd4IntStorage :: getPoints() const )[4][3]
 { 
   assert(_pInit);
   return _p;
