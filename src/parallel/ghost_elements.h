@@ -265,7 +265,7 @@ public:
   }
 };
 
-
+#if 0
 static void printFace(ostream & os , Gitter :: Geometric :: hface3_GEO * face, int fce )
 {
   os << "Face " << fce << endl;
@@ -442,6 +442,7 @@ inline void printHexa(ostream & os , Gitter :: Geometric :: hexa_GEO * item_)
   
   return ;
 }
+#endif
 
 
 #endif
