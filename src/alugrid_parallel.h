@@ -3,7 +3,7 @@
 
 // is this is defined the internal faces are used as ghost elements 
 // needs to be defined before all headers are included 
-#define __USE_INTERNAL_FACES__
+//#define __USE_INTERNAL_FACES__
 
 // the message passing interface (MPI) headers 
 #include <mpi.h>
