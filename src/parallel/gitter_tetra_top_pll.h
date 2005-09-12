@@ -68,7 +68,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         
         // set ghost pointer, use this method otherwise all constructors
         // have to be changed 
-        void setGhost (Gitter::helement_STI *gh);
+        void setGhost (Gitter::helement_STI *gh, int);
       public:
         // return ghost pointer 
         Gitter::helement_STI * getGhost (); 
@@ -220,7 +220,7 @@ inline Gitter :: helement_STI * Hbnd3PllInternal < A, X, MX > :: HbndPll :: getG
 
 template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  
-setGhost ( Gitter :: helement_STI * gh ) 
+setGhost ( Gitter :: helement_STI * gh , int ) 
 {
   if(gh)
   {
@@ -242,7 +242,7 @@ HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv ,
 {
   if(_gm) 
   {
-    this->setGhost (_gm->getGhost());   
+    this->setGhost (_gm->getGhost(),3);   
     _mxt = new MX (*this, _gm->getGhostPoints() );
   }
   else 

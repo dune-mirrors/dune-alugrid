@@ -55,7 +55,7 @@ class DuneParallelGridMover : public ParallelGridMover {
 
     // creates Hbnd4IntStorage with point if needed 
     bool InsertUniqueHbnd4_withPoint (int (&)[4], Gitter :: hbndseg ::
-            bnd_t,const double (&p) [4][3]) ;
+            bnd_t, const Hbnd4IntStoragePoints & p );
         
 };
 
@@ -84,7 +84,7 @@ bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
 
 // new method that gets coord of ghost point 
 bool DuneParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],         
-      Gitter :: hbndseg_STI ::bnd_t bt, const double (&p)[4][3]) 
+      Gitter :: hbndseg_STI ::bnd_t bt, const Hbnd4IntStoragePoints & p ) 
 {
   int twst = cyclicReorder (v,v+4) ;
   faceKey_t key (v [0], v [1], v [2]) ;
@@ -157,8 +157,19 @@ inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   int readPoint = 0; 
   os.readObject( readPoint ); 
 
+  int vert[8] = { 0,0,0,0,0,0,0,0 }; 
+  int vertface[4] = { 0,0,0,0 }; 
+  int fce; 
   if( readPoint ) 
   {
+    os.readObject ( fce );
+    
+    for(int i=0; i<8; i++)
+      os.readObject ( vert[i] );
+    
+    for(int i=0; i<4; i++)
+      os.readObject ( vertface[i] );
+    
     for(int i=0; i<4; i++) 
     {
       double (&pr) [3] = p[i];
@@ -171,7 +182,8 @@ inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   if(b == Gitter :: hbndseg :: closure)
   {
     //cout << "Insert Unique Hbnd4 p \n";
-    InsertUniqueHbnd4_withPoint (v, b, p ) ;
+    Hbnd4IntStoragePoints hp ( p, vert, vertface , fce );
+    InsertUniqueHbnd4_withPoint (v, b, hp ) ;
   }
   else
   {
@@ -354,8 +366,11 @@ void DuneParallelGridMover :: initialize ()
       // new code 
       if((*i)->getGhost())
       {
-        int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[0];
-        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0), (*i)->twist (0), (*i)->myhface4 (oppFace)) ;
+        assert(false);
+        typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
+        hexa_GEO * gh = static_cast<hexa_GEO *> ((*i)->getGhost());
+        //int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[0];
+        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0), (*i)->twist (0), gh , 0 ) ;
       }
       else 
         _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
@@ -385,6 +400,7 @@ void DuneParallelGridMover :: initialize ()
       _hbnd3Map [key] = (*i) ;
     }
   }}
+
   {for (list < tetra_GEO * > :: iterator i = myBuilder ()._tetraList.begin () ; i != myBuilder ()._tetraList.end () ; 
       myBuilder ()._tetraList.erase (i++)) {
       _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
@@ -483,7 +499,7 @@ void DuneParallelGridMover :: finalize ()
       // old method 
       hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure) ;
 #else 
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure,p.getPoints());
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure, p.getPoints());
 #endif
       myBuilder ()._hbndseg4List.push_back (hb4) ;
     }

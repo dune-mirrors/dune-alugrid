@@ -64,6 +64,8 @@ public:
   virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
 };
 
+class Hbnd4IntStoragePoints;
+
 
 // Einfacher Referenzenz"ahler mit cast-around-const
 // feature, der zum Z"ahlen der Referenzen auf Fl"achen
@@ -402,6 +404,8 @@ public :
     virtual int tagForBallRefinement (const double (&)[3],double,int) = 0 ;
     virtual int test () const = 0 ;
     inline  int leaf () const ;
+
+    //virtual double determinant () const { return 0.0; }
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
@@ -437,7 +441,7 @@ public :
       bool hasBeenRefined () const { return _refinedTag; }
     protected:
       inline void splitGhost () {}
-      inline void setGhost (helement *) {}
+      inline void setGhost (helement *, int) {}
 
   };
 
@@ -1232,7 +1236,7 @@ public :
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
       // method to insert internal boundary with ghost 
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t, const double (&p)[4][3]) = 0 ;
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t, const Hbnd4IntStoragePoints &) = 0 ;
       IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
       IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
       IteratorSTI < hedge_STI >  * iterator (const hedge_STI *) const ;

@@ -656,7 +656,7 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
           Gitter::helement_STI * gh) : 
   A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
-  this->setGhost ( gh );
+  this->setGhost ( gh , 3);
   //if(gh) printTetra(cout,gh);
   this->setIndex( _indexManager.getIndex() );
   return ;
@@ -668,7 +668,7 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
           Gitter * grd , Gitter::helement_STI * gh) : 
   A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
-  this->setGhost ( gh );
+  this->setGhost ( gh , 3);
   //if(gh) printTetra(cout,gh);
   this->setIndex( _indexManager.getIndex() );
   return ;

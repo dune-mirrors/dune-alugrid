@@ -816,8 +816,10 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
        
         // insert hbnd_int without ghost hexa 
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
+        // insert hbnd_int without ghost hexa 
+        virtual hbndseg4_GEO  * insert_hbnd4_ghost (hface4_GEO *, int) ;
         // insert hbnd_int with ghost hexa 
-        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t,const double (&p)[4][3]) ;
+        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, const Hbnd4IntStoragePoints &);
         
         // normal insert hbnd3 version
   virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
@@ -826,6 +828,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         // version that created internal boundary on ghost elements 
   virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
+        hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int ) ;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
   virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
@@ -834,7 +837,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
   // insertes a new ghost tetra which is stored inside the MacroGhostTetra 
   virtual MacroGhostTetra    * insert_ghosttetra (hface3_GEO *, int , const double (&p)[3]) ;
   // insertes new ghost hexa which is strored inside the MacroGhostHexa 
-  virtual MacroGhostHexa     * insert_ghosthexa (hface4_GEO *, int , const double (&p)[4][3]) ;
+  virtual MacroGhostHexa     * insert_ghosthexa (hface4_GEO *, int ,const Hbnd4IntStoragePoints & ) ;
   
   virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
 // Anfang - Neu am 23.5.02 (BS)

@@ -275,10 +275,9 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   if (hit != _hexaMap.end ()) {
     hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
     for (int i = 0 ; i < 6 ; i ++) {
-      int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[i];
       _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), hx->myhface4 (i)->myvertex (1)->ident (), 
         hx->myhface4 (i)->myvertex (2)->ident ())] = 
-          new Hbnd4IntStorage (hx->myhface4 (i), hx->twist (i), hx->myhface4(oppFace));
+          new Hbnd4IntStorage (hx->myhface4 (i), hx->twist (i), hx, i );
     }
     delete hx ;
     _hexaMap.erase (hit) ;

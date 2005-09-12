@@ -29,6 +29,29 @@
 #include "key.h"
 #include "gitter_sti.h"
 
+// little storage class for points and vertex numbers 
+class Hbnd4IntStoragePoints : public MyAlloc
+{
+  double _p[4][3]; 
+  int _vx[8];
+  int _vxface[4];
+
+  int _fce;
+public:  
+  Hbnd4IntStoragePoints();
+  Hbnd4IntStoragePoints(const Hbnd4IntStoragePoints & copy );
+  Hbnd4IntStoragePoints(const Gitter:: Geometric :: hexa_GEO * hexa, int fce);
+  Hbnd4IntStoragePoints(const double (&p)[4][3], const int (&vx)[8] , const int (&vxface)[4], int fce );
+
+  // return reference to _p
+  const double (& getPoints () const )[4][3];
+  
+  const int (& getIdents () const )[8];
+  const int (& getFaceIdents () const )[4];
+
+  int getFaceNumber () const ;
+};
+
 template < class RandomAccessIterator > inline int cyclicReorder (RandomAccessIterator begin, RandomAccessIterator end) {
   RandomAccessIterator middle = min_element (begin,end) ;
   int pos = middle == begin ? 0 : (rotate (begin,middle,end), (end - middle)) ;
@@ -44,7 +67,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   
   protected:  
   // stores a hface3 and the other point needed to build a tetra  
-  class Hbnd3IntStorage
+  class Hbnd3IntStorage : public MyAlloc 
   {
     double _p[3]; 
     hface3_GEO * _first;
@@ -60,30 +83,32 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     // return reference to _p
     const double (& getPoint () const )[3];
 
+    // this two method are just like in pair 
     hface3_GEO * first  () const { return _first;  }
     int          second () const { return _second; }
   };
 
   // stores a hface4 and the other points needed to build a hexa
-  class Hbnd4IntStorage
+  class Hbnd4IntStorage : public MyAlloc 
   {
-    double _p[4][3]; 
+    Hbnd4IntStoragePoints _p;
     hface4_GEO * _first;
     int          _second;
     bool _pInit; // true if p was initialized with a value 
+
   public:  
     // store point and face and twist  
-    Hbnd4IntStorage( hface4_GEO * f, int tw, const hface4_GEO * oppface);
+    Hbnd4IntStorage( hface4_GEO * f, int tw, const hexa_GEO * hexa, int fce);
     
     // store point and face and twist  
-    Hbnd4IntStorage( hface4_GEO * f, int tw, const double (&p) [4][3]);
+    Hbnd4IntStorage( hface4_GEO * f, int tw, const Hbnd4IntStoragePoints & p);
     
     // store face and twist and set point to default 
     Hbnd4IntStorage( hface4_GEO * f, int tw ); 
 
-    // return reference to _p
-    const double (& getPoints () const )[4][3];
+    const Hbnd4IntStoragePoints & getPoints () const;
 
+    // this two method are just like in pair 
     hface4_GEO * first  () const { return _first;  }
     int          second () const { return _second; }
   };
@@ -194,40 +219,95 @@ inline const double (& MacroGridBuilder :: Hbnd3IntStorage :: getPoint () const 
   return _p;
 }
 
-// hface4 storage
-inline MacroGridBuilder :: Hbnd4IntStorage :: 
-Hbnd4IntStorage( hface4_GEO * f, int tw, const hface4_GEO * oppface)
- : _first(f) , _second(tw) , _pInit(true)
-{
-  for(int vx=0; vx<4; vx++)
-  {
-    const double (&p) [3] = oppface->myvertex(vx)->Point();
-    for(int i=0; i<3; i++) _p[vx][i] = p[i];
-  }
-}
-    
-// hface4 storage
-inline MacroGridBuilder :: Hbnd4IntStorage :: 
-Hbnd4IntStorage( hface4_GEO * f, int tw, const double (&p) [4][3])
- : _first(f) , _second(tw) , _pInit(true)
-{
-  for(int vx=0; vx<4; vx++)
-  {
-    for(int i=0; i<3; i++) _p[vx][i] = p[vx][i];
-  }
-}
-    
-inline MacroGridBuilder :: Hbnd4IntStorage :: 
-Hbnd4IntStorage( hface4_GEO * f, int tw )
- : _first(f) , _second(tw) , _pInit(false)
+//********************************************************************8
+inline Hbnd4IntStoragePoints :: Hbnd4IntStoragePoints ()
 {
   for(int vx=0; vx<4; vx++)
   {
     for(int i=0; i<3; i++) _p[vx][i] = -666.0;
+    _vxface[vx] = -1;
   }
+  for(int i=0; i<8; i++) _vx[i] = -1;
+  _fce = -1;
 }
 
-inline const double (& MacroGridBuilder :: Hbnd4IntStorage :: getPoints() const )[4][3]
+inline Hbnd4IntStoragePoints :: 
+Hbnd4IntStoragePoints (const Gitter :: Geometric :: hexa_GEO * hexa, int fce)
+{
+  int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[fce];
+  for(int vx=0; vx<4; vx++)
+  {
+    const double (&p) [3] = hexa->myvertex(oppFace,vx)->Point();
+    for(int j=0; j<3; j++) _p[vx][j] = p[j];
+  }
+  for(int i=0; i<8; i++) _vx[i] = hexa->myvertex(i)->ident();
+  for(int i=0; i<4; i++) _vxface[i] = hexa->myhface4(oppFace)->myvertex(i)->ident();
+
+  _fce = fce;
+}
+
+inline Hbnd4IntStoragePoints :: 
+Hbnd4IntStoragePoints (const Hbnd4IntStoragePoints & copy ) 
+{
+  for(int k=0; k<4; k++)
+  {
+    for(int j=0; j<3; j++) _p[k][j] = copy._p[k][j];
+  }
+  for(int i=0; i<8; i++) _vx[i] = copy._vx[i];
+  for(int i=0; i<4; i++) _vxface[i] = copy._vxface[i];
+
+  _fce = copy._fce;
+}
+
+inline Hbnd4IntStoragePoints :: 
+Hbnd4IntStoragePoints (const double (&p)[4][3], const int (&vx)[8], 
+    const int (&vxface)[4] , int fce ) 
+{
+  for(int k=0; k<4; k++)
+  {
+    for(int j=0; j<3; j++) _p[k][j] = p[k][j];
+  }
+  for(int i=0; i<8; i++) _vx[i] = vx[i];
+  for(int i=0; i<4; i++) _vxface[i] = vxface[i];
+
+  _fce = fce;
+}
+
+inline const double (& Hbnd4IntStoragePoints :: getPoints() const )[4][3]
+{ 
+  return _p;
+}
+
+inline const int (& Hbnd4IntStoragePoints :: getIdents() const )[8]
+{ 
+  return _vx;
+}
+
+inline const int (& Hbnd4IntStoragePoints :: getFaceIdents() const )[4]
+{ 
+  return _vxface;
+}
+
+inline int Hbnd4IntStoragePoints :: getFaceNumber () const
+{ 
+  return _fce;
+}
+
+// hface4 storage
+inline MacroGridBuilder :: Hbnd4IntStorage :: 
+Hbnd4IntStorage( hface4_GEO * f, int tw, const hexa_GEO * hexa, int fce)
+ : _p(hexa,fce), _first(f) , _second(tw) , _pInit(true) {}
+    
+// hface4 storage
+inline MacroGridBuilder :: Hbnd4IntStorage :: 
+Hbnd4IntStorage( hface4_GEO * f, int tw, const Hbnd4IntStoragePoints & p)
+ : _p(p) , _first(f) , _second(tw) , _pInit(true) {}
+    
+inline MacroGridBuilder :: Hbnd4IntStorage :: 
+Hbnd4IntStorage( hface4_GEO * f, int tw )
+ : _p() , _first(f) , _second(tw) , _pInit(false) {}
+
+inline const Hbnd4IntStoragePoints & MacroGridBuilder :: Hbnd4IntStorage :: getPoints() const
 { 
   assert(_pInit);
   return _p;

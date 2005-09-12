@@ -218,9 +218,17 @@ inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os) {
 
   int fake = 0;
   os.readObject( fake );
-
+  
   if(fake) 
   {
+    os.readObject( fake );
+    
+    for(int i=0; i<8; i++)
+      os.readObject( fake );
+    
+    for(int i=0; i<4; i++)
+      os.readObject( fake );
+    
     for(int i=0; i<4; i++)
     {
       double p [3];

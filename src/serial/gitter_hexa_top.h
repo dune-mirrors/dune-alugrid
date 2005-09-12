@@ -6,6 +6,7 @@
 #define GITTER_HEXA_TOP_H_INCLUDED
 
 #include "mapp_cube_3d.h"
+extern void printHexa(ostream & os , Gitter :: Geometric :: hexa_GEO * item_);
 
 template < class A > class Hedge1Top : public A {
   protected :
@@ -128,7 +129,7 @@ template < class A > class Hbnd4Top : public A {
     inline void append (innerbndseg_t *) ;
   public :
     // constructor for refinement 
-    inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, innerbndseg_t *) ;
+    inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, innerbndseg_t *, Gitter::helement_STI *, int) ;
 
     // constructor for macro element
     inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, const bnd_t bt , IndexManagerType & , Gitter * ) ;
@@ -690,9 +691,26 @@ template < class A > bool Hface4Top < A > :: refine (myrule_t r, int twist) {
     switch(r) {
       case myrule_t :: iso4 :
       {
-	
+
+#ifdef __USE_INTERNAL_FACES__
 	bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-                           : this->nb.rear ().first->refineBalance  (r,this->nb.rear  ().second) ;
+                      : this->nb.rear ().first->refineBalance (r,this->nb.rear  ().second) ;
+#else
+  // --thetwist
+  bool a = false;
+  if( this->nb.rear().first && this->nb.front().first )
+  {
+    a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+                   : this->nb.rear ().first->refineBalance (r,this->nb.rear  ().second) ;
+  }
+  else
+  {
+    if(this->nb.rear().first)
+      a = this->nb.rear  ().first->refineBalance (r,this->nb.rear ().second);
+    if(this->nb.front().first)
+      a = this->nb.front ().first->refineBalance (r,this->nb.front().second);
+  }
+#endif
 	
 	if (a) {	
 	  if (getrule () == myrule_t :: nosplit) {
@@ -793,9 +811,10 @@ template < class A > void Hface4Top < A > :: restore (XDRstream_in & is) {
 
 template < class A > inline Hbnd4Top < A > :: 
 Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, 
-          innerbndseg_t * up) : 
+          innerbndseg_t * up, Gitter::helement_STI * gh, int gFace ) : 
   A (f, i,ppv,up->_myGrid), _bbb (0), _dwn (0), _up(up) , _lvl (l), _bt(_up->_bt) ,
   _indexManager(_up->_indexManager) {
+  this->setGhost ( gh , gFace );
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -880,10 +899,43 @@ template < class A > inline bool Hbnd4Top < A > :: bndNotifyCoarsen () {
 template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
   assert (_dwn == 0) ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this) ;
+
+  // get the childs 
+  typedef typename Gitter :: Geometric :: hexa_GEO  hexa_GEO;
+  typedef typename Gitter :: Geometric :: hface4_GEO hface4_GEO;
+
+  hexa_GEO *(ghchild)[4] = {0,0,0,0};
+  int gFace = this->getGhostFaceNumber();
+#ifndef __USE_INTERNAL_FACES__
+  // refine ghost element 
+  this->splitGhost();
+
+  hexa_GEO * gh = static_cast<hexa_GEO *> (this->getGhost());
+
+  if(gh)
+  {
+    hface4_GEO * face = gh->myhface4( gFace );
+    face = face->down();
+    for(int i=0; i<4; i++)
+    {
+      assert(face);
+      hexa_GEO * ghch = static_cast<hexa_GEO *> (face->nb.front().first);
+      if(ghch){ if(ghch->up() != gh) ghch = static_cast<hexa_GEO *> (face->nb.rear().first);}
+      else { ghch = static_cast<hexa_GEO *> (face->nb.rear().first); }
+
+      assert(ghch);
+      assert(ghch->up() == gh);
+      ghchild[i] = ghch;
+      face = face->next();
+      //printHexa(cout,ghch);
+    }
+  }
+#endif
+
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghchild[0],gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghchild[1],gFace) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghchild[2],gFace) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghchild[3],gFace) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
