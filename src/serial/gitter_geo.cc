@@ -176,6 +176,8 @@ neighOuterNormal(int face, double* normal) {
   //                             this->myvertex(face, 1)->Point());
   //map.normal(local, normal);
 }
+
+
 // #######
 //    #     ######   #####  #####     ##
 //    #     #          #    #    #   #  #
@@ -187,25 +189,27 @@ neighOuterNormal(int face, double* normal) {
 /*
 //          z          y
 //         3 |-------- 2
-//           |.      /\     faces opposite to vertices
-//           |  .   /  \
-//           |    ./    \
-//           |    / .    \
-//           |   /    .   \
-//           |  /       .  \
-//           | /          . \
-//           |/             .\ 1 
-//         0 ----------------------- x 
+//           |\      .|     faces opposite to vertices
+//           | \    . | 
+//           |  \  .  | 
+//           |   \.   |   
+//           |   .\   |    
+//           |  .  \  |     
+//           | .    \ |      
+//           |.      \|1 
+//         0 ------------ x 
 //                              
 // face 0 = {1,3,2}
 // face 1 = {0,2,3}
 // face 2 = {0,3,1}
 // face 3 = {0,1,2} 
 //
-//
-//
-//
-//
+// edge 0 = {0,1}
+// edge 1 = {0,3}
+// edge 2 = {1,2}
+// edge 3 = {0,2}
+// edge 4 = {1,3}
+// edge 5 = {2,3}
 //
 //
 */

@@ -923,6 +923,41 @@ public :
       inline const hface3_GEO * myhface3 (int) const ;
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
+
+      inline const  hedge1_GEO * myhedge1(int edge) const 
+      {
+        int KI;
+        switch(edge)
+        {
+          case 0 :
+             if (twist(3) > -1) KI = (0 + twist(3)) % 3;
+             else               KI = (6 - 0 + twist(3)) % 3; //6
+             return myhface3(3)->myhedge1(KI);
+//Originalkanten-nr: 0
+          case 1 :
+             if (twist(3) > -1) KI = (2 + twist(3)) % 3;
+             else               KI = (6 - 2 + twist(3)) % 3;
+             return myhface3(3)->myhedge1(KI); //OKN: 2
+          case 2 :
+             if (twist(1) > -1) KI = (2 + twist(1)) % 3;
+             else               KI = (6 - 2 + twist(1)) % 3;
+             return myhface3(1)->myhedge1(KI); //OKN: 2
+          case 3 :
+             if (twist(0) > -1) KI = (2 + twist(0)) % 3;
+             else               KI = (6 - 2 + twist(0)) % 3;
+             return myhface3(0)->myhedge1(KI); //OKN: 2
+          case 4 :
+             if (twist(0) > -1) KI = (0 + twist(0)) % 3;
+             else               KI = (6 - 0 + twist(0)) % 3;
+             return myhface3(0)->myhedge1(KI); //OKN: 0
+          case 5 :
+             if (twist(0) > -1) KI = (1 + twist(0)) % 3;
+             else               KI = (6 - 1 + twist(0)) % 3;
+             return myhface3(0)->myhedge1(KI); //OKN: 1
+        }
+        assert(false);
+        return 0;
+      }
       inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace3 *, int > myneighbour (int) ;
