@@ -918,14 +918,14 @@ public :
       inline int preCoarsening () ;
     public :
       static const int prototype [4][3] ;
+      static const int edgeMap [6][2] ;
       inline virtual ~Tetra () ;
       inline hface3_GEO * myhface3 (int) ;
       inline const hface3_GEO * myhface3 (int) const ;
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-
-      inline hedge1_GEO * myhedge1(int edge);
-      inline const  hedge1_GEO * myhedge1(int edge) const;
+      inline hedge1_GEO * myhedge1(int);
+      inline const  hedge1_GEO * myhedge1(int) const;
       inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace3 *, int > myneighbour (int) ;
@@ -937,6 +937,7 @@ public :
       inline pair < const hface3_GEO *, int > myintersection (int) const;
       
       virtual int nFaces() const { return 4; }
+      virtual int nEdges() const { return 6; }
       inline int twist (int) const ;
       int test () const ;
     public :
@@ -959,6 +960,9 @@ public :
       virtual void neighOuterNormal (int faceInNeigh,   double * normal );
 
     private :
+      int evalVertexTwist(int, int) const;
+      int evalEdgeTwist(int, int) const;
+    private:
       myhface3_t * f [4] ;
       signed char s [4] ;
     } tetra_GEO ;
@@ -1068,11 +1072,14 @@ public :
     public :
       static const int prototype [6][4] ;
       static const int oppositeFace [6] ;
+      static const int edgeMap [12][2];
       inline virtual ~Hexa () ;
       inline hface4_GEO * myhface4 (int) ;
       inline const hface4_GEO * myhface4 (int) const ;
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
+      inline hedge1_GEO * myhedge1(int);
+      inline const  hedge1_GEO * myhedge1(int) const;
       inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace4 *, int > myneighbour (int) ;
@@ -1103,6 +1110,9 @@ public :
       virtual void neighOuterNormal(int faceInNeigh,  double* normal);
 
     private :
+      int evalVertexTwist(int, int) const;
+      int evalEdgeTwist(int, int) const;
+    private:
       myhface4_t * f [6] ;
       signed char s [6] ;
     } hexa_GEO ;
@@ -2235,80 +2245,48 @@ inline const Gitter :: Geometric :: Tetra :: myhface3_t * Gitter :: Geometric ::
   return f [i] ;
 }
 
+inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const {
+  return (twist(face) < 0 ? 
+          (7 - vertex + twist(face)) % 3 : 
+          (vertex + twist(face)) % 3);
+}
+
+inline int Gitter::Geometric::Tetra::evalEdgeTwist(int face, int vertex) const {
+  return (twist(face) < 0 ? 
+          (6 - vertex + twist(face)) % 3 : 
+          (vertex + twist(face)) % 3);
+}
+
 inline Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric :: Tetra :: myhedge1 (int edge) 
 {
-  int KI;
-  switch(edge)
-  {
-    case 0 :
-       if (twist(3) > -1) KI = (0 + twist(3)) % 3;
-       else               KI = (6 - 0 + twist(3)) % 3; //6
-       return myhface3(3)->myhedge1(KI);
-    case 1 :
-       if (twist(3) > -1) KI = (2 + twist(3)) % 3;
-       else               KI = (6 - 2 + twist(3)) % 3;
-       return myhface3(3)->myhedge1(KI); //OKN: 2
-    case 2 :
-       if (twist(1) > -1) KI = (2 + twist(1)) % 3;
-       else               KI = (6 - 2 + twist(1)) % 3;
-       return myhface3(1)->myhedge1(KI); //OKN: 2
-    case 3 :
-       if (twist(0) > -1) KI = (2 + twist(0)) % 3;
-       else               KI = (6 - 2 + twist(0)) % 3;
-       return myhface3(0)->myhedge1(KI); //OKN: 2
-    case 4 :
-       if (twist(0) > -1) KI = (0 + twist(0)) % 3;
-       else               KI = (6 - 0 + twist(0)) % 3;
-       return myhface3(0)->myhedge1(KI); //OKN: 0
-    case 5 :
-       if (twist(0) > -1) KI = (1 + twist(0)) % 3;
-       else               KI = (6 - 1 + twist(0)) % 3;
-       return myhface3(0)->myhedge1(KI); //OKN: 1
-  }
-  assert(false);
-  return 0;
+  assert(edge >= 0 && edge < 6);
+
+  typedef Gitter::Geometric::Tetra MyType;
+
+  return myhface3(MyType::edgeMap[edge][0])->
+    myhedge1(evalEdgeTwist(MyType::edgeMap[edge][0],MyType::edgeMap[edge][1]));
+
 }
 
 inline const Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric :: Tetra :: myhedge1 (int edge) const
 {
-  int KI;
-  switch(edge)
-  {
-    case 0 :
-       if (twist(3) > -1) KI = (0 + twist(3)) % 3;
-       else               KI = (6 - 0 + twist(3)) % 3; //6
-       return myhface3(3)->myhedge1(KI);
-    case 1 :
-       if (twist(3) > -1) KI = (2 + twist(3)) % 3;
-       else               KI = (6 - 2 + twist(3)) % 3;
-       return myhface3(3)->myhedge1(KI); //OKN: 2
-    case 2 :
-       if (twist(1) > -1) KI = (2 + twist(1)) % 3;
-       else               KI = (6 - 2 + twist(1)) % 3;
-       return myhface3(1)->myhedge1(KI); //OKN: 2
-    case 3 :
-       if (twist(0) > -1) KI = (2 + twist(0)) % 3;
-       else               KI = (6 - 2 + twist(0)) % 3;
-       return myhface3(0)->myhedge1(KI); //OKN: 2
-    case 4 :
-       if (twist(0) > -1) KI = (0 + twist(0)) % 3;
-       else               KI = (6 - 0 + twist(0)) % 3;
-       return myhface3(0)->myhedge1(KI); //OKN: 0
-    case 5 :
-       if (twist(0) > -1) KI = (1 + twist(0)) % 3;
-       else               KI = (6 - 1 + twist(0)) % 3;
-       return myhface3(0)->myhedge1(KI); //OKN: 1
-  }
-  assert(false);
-  return 0;
+  assert(edge >= 0 && edge < 6);
+
+  typedef Gitter::Geometric::Tetra MyType;
+
+  return myhface3(MyType::edgeMap[edge][0])->
+    myhedge1(evalEdgeTwist(MyType::edgeMap[edge][0],MyType::edgeMap[edge][1]));
+
 }
 
 inline Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i, int j) {
-  return (twist(i) < 0) ? myhface3(i)->myvertex((7 - j + twist(i)) % 3) : myhface3(i)->myvertex((j + twist(i)) % 3) ;
+  return myhface3(i)->myvertex(evalVertexTwist(i, j));
+  //return (twist(i) < 0) ? myhface3(i)->myvertex((7 - j + twist(i)) % 3) : myhface3(i)->myvertex((j + twist(i)) % 3) ;
 }
 
 inline const Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i, int j) const {
-  return (twist(i) < 0) ? myhface3(i)->myvertex((7 - j + twist(i)) % 3) : myhface3(i)->myvertex((j + twist(i)) % 3) ;
+  return myhface3(i)->myvertex(evalVertexTwist(i, j));
+  //return (twist(i) < 0) ? myhface3(i)->myvertex((7 - j + twist(i)) % 3) : myhface3(i)->myvertex((j + twist(i)) % 3) ;
 }
 
 inline Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i) {
@@ -2602,6 +2580,22 @@ inline const Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: 
   return (i < 4) ? myvertex (0, (4 - i) % 4) : myvertex (1, i - 4) ;
 }
 
+inline Gitter :: Geometric :: Hexa :: myhedge1_t * Gitter :: Geometric :: Hexa :: myhedge1(int i) {
+  assert (0 <= i && i < 12);
+
+  typedef Gitter::Geometric::Hexa MyType;
+  return myhface4(MyType::edgeMap[i][0])->
+    myhedge1(evalEdgeTwist(MyType::edgeMap[i][0], MyType::edgeMap[i][1]));
+}
+
+inline const Gitter :: Geometric :: Hexa :: myhedge1_t * Gitter :: Geometric :: Hexa :: myhedge1(int i) const {
+  assert (0 <= i && i < 12);
+
+  typedef Gitter::Geometric::Hexa MyType;
+  return myhface4(MyType::edgeMap[i][0])->
+    myhedge1(evalEdgeTwist(MyType::edgeMap[i][0], MyType::edgeMap[i][1]));
+}
+
 inline pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Hexa :: myneighbour (int i) {
   return twist (i) < 0 ? myhface4 (i)->nb.front () : myhface4 (i)->nb.rear () ;
 }
@@ -2628,6 +2622,19 @@ inline int Gitter :: Geometric :: Hexa :: postRefinement () {
 inline int Gitter :: Geometric :: Hexa :: preCoarsening () {
   return 0 ;
 }
+
+inline int Gitter :: Geometric :: Hexa :: evalVertexTwist (int face, int vertex) const {
+  return (twist(face) < 0 ? 
+          (9 - vertex + twist(face)) % 4 :
+          (vertex + twist(face)) % 4);
+}
+
+inline int Gitter :: Geometric :: Hexa :: evalEdgeTwist (int face, int edge) const {
+  return (twist(face) < 0 ? 
+          (8 - edge + twist(face)) % 4 :
+          (edge + twist(face)) % 4);
+}
+
 
 // #     #                                                  #####
 // #     #  #####   #    #  #####    ####   ######   ####  #     #

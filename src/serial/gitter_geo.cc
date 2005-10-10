@@ -38,6 +38,20 @@ const pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: hfa
 // prototype of Tetra type ( the faces of a tetrahedron )
 const int Gitter :: Geometric :: Tetra :: prototype [4][3] = {{1,3,2},{0,2,3},{0,3,1},{0,1,2}} ;
   
+//const int Gitter :: Geometric :: Tetra :: edgeMap [6][2] = {{3, 0},
+//                                                            {1, 0},
+//                                                            {2, 0},
+//                                                            {0, 1},
+//                                                            {0, 2},
+//                                                            {0, 0}};
+
+const int Gitter :: Geometric :: Tetra :: edgeMap [6][2] = {{3, 0},
+                                                            {3, 2},
+                                                            {1, 2},
+                                                            {0, 2},
+                                                            {0, 0},
+                                                            {0, 1}};
+
 // prototype of periodic 3 type 
 const int Gitter :: Geometric :: Periodic3 :: prototype [2][3] = {{0,1,2},{3,5,4}} ;
 
@@ -74,6 +88,18 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
 
 const int Gitter :: Geometric :: Hexa :: prototype [6][4] = {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}} ;
 const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of face 
+const int Gitter :: Geometric :: Hexa :: edgeMap [12][2] = {{0, 3},
+                                                            {0, 0},
+                                                            {2, 3},
+                                                            {0, 2},
+                                                            {2, 1},
+                                                            {0, 1},
+                                                            {4, 3},
+                                                            {4, 1},
+                                                            {1, 0},
+                                                            {1, 3},
+                                                            {1, 1},
+                                                            {1, 2}};
 
 int Gitter :: Geometric :: Hexa :: test () const {
   static const int v0[8][2] = {{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3}} ;
@@ -205,9 +231,9 @@ neighOuterNormal(int face, double* normal) {
 // face 3 = {0,1,2} 
 //
 // edge 0 = {0,1}
-// edge 1 = {0,3}
-// edge 2 = {1,2}
-// edge 3 = {0,2}
+// edge 1 = {0,2}
+// edge 2 = {0,3}
+// edge 3 = {1,2}
 // edge 4 = {1,3}
 // edge 5 = {2,3}
 //
