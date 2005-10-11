@@ -13,7 +13,7 @@
 
 namespace ALUGridSpace {
 
-typedef enum ALUElementType { hexa , tetra , hexa_periodic , tetra_periodic } grid_t;
+typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
 struct GatherScatter;
 typedef GatherScatter GatherScatterType;
