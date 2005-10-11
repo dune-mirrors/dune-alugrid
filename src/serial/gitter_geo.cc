@@ -37,14 +37,8 @@ const pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: hfa
 
 // prototype of Tetra type ( the faces of a tetrahedron )
 const int Gitter :: Geometric :: Tetra :: prototype [4][3] = {{1,3,2},{0,2,3},{0,3,1},{0,1,2}} ;
-  
-//const int Gitter :: Geometric :: Tetra :: edgeMap [6][2] = {{3, 0},
-//                                                            {1, 0},
-//                                                            {2, 0},
-//                                                            {0, 1},
-//                                                            {0, 2},
-//                                                            {0, 0}};
 
+// edge which tell from which face with which edge number we get edge 0 to 5 
 const int Gitter :: Geometric :: Tetra :: edgeMap [6][2] = {{3, 0},
                                                             {3, 2},
                                                             {1, 2},
@@ -70,24 +64,40 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
   //  Prototyp des Hexaeders wie er im Programm verwendet wird.
   //  Eckpunkte und Seitenflaechen:
   //
-  //              x3
-  //              |
+  //              
   //              7---------6
-  //             /.        /|
-  //            / .  1    / |
-  //           /  .      /  |
+  //         x3  /.        /|
+  //          | / .  1    / |
+  //          |/  .      /  |
   //          4---------5   | <-- 4 (hinten)
   //    5 --> |   .     | 3 |
-  //          |   3.....|...2 -- x2
+  //          |   3.....|...2
   //          |  .      |  /
   //          | .   2   | / <-- 0 (unten)
   //          |.        |/
-  //          0---------1
+  //          0---------1 --x1 
   //         /
-  //        x1
+  //       -x2
+  //
+  //  edge[0]  = [0,1]   [0 0 0] [1 0 0] 
+  //  edge[1]  = [0,3]   [0 0 0] [0 1 0] 
+  //  edge[2]  = [0,4]   [0 0 0] [0 0 1] 
+  //  edge[3]  = [1,2]   [1 0 0] [1 1 0] 
+  //  edge[4]  = [1,5]   [1 0 0] [1 0 1] 
+  //  edge[5]  = [2,3]   [1 1 0] [0 1 0] 
+  //  edge[6]  = [2,6]   [1 1 0] [1 1 1] 
+  //  edge[7]  = [3,7]   [0 1 0] [0 1 1] 
+  //  edge[8]  = [4,5]   [0 0 1] [1 0 1] 
+  //  edge[9]  = [4,7]   [0 0 1] [0 1 1] 
+  //  edge[10] = [5,6]   [1 0 1] [1 1 1] 
+  //  edge[11] = [6,7]   [1 1 1] [0 1 1]
+  //
+  //       
 
 const int Gitter :: Geometric :: Hexa :: prototype [6][4] = {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}} ;
 const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of face 
+
+// defines how we get an edge from an hexa , first is face , second is edge 
 const int Gitter :: Geometric :: Hexa :: edgeMap [12][2] = {{0, 3},
                                                             {0, 0},
                                                             {2, 3},
