@@ -2,7 +2,7 @@
 #define __ALUGRID_SERIAL_H_INCLUDED__
 
 #ifndef NDEBUG
-#warning -- Compiling ALUGrid code in debug mode !!!
+#warning -- Compiling ALUGrid code in debug mode !!! Use -DNDEBUG to get more optimized code!!!
 #endif
 
 #define _ANSI_HEADER
@@ -25,15 +25,8 @@ typedef GatherScatter GatherScatterType;
 
 typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
 
-
-//#ifndef _ALU3DGRID_PARALLEL_
 typedef Gitter::helement_STI  HElemType;    // Interface Element
 typedef Gitter::hbndseg       HGhostType;
-//#else 
-//#include "parallel/gitter_pll_sti.h"
-//typedef GitterPll::helement_STI  HElemType;    // Interface Element
-//typedef GitterPll::hbndseg       HGhostType;
-//#endif
 
 struct GatherScatter
 {
