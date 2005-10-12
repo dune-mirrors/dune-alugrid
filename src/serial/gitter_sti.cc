@@ -196,19 +196,19 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const helement_STI 
 
 // --vertex iterator 
 IteratorSTI < Gitter :: vertex_STI > * Gitter :: iterator (const IteratorSTI < vertex_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " " << __LINE__ << "\n";
+  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
   abort();
   return 0;
 }
 
 IteratorSTI < Gitter :: hedge_STI > * Gitter :: iterator (const IteratorSTI < hedge_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " " << __LINE__ << "\n";
+  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
   abort();
   return 0;
 }
 
 IteratorSTI < Gitter :: hface_STI > * Gitter :: iterator (const IteratorSTI < hface_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " " << __LINE__ << "\n";
+  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
   abort();
   return 0;
 }
@@ -217,6 +217,130 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const IteratorSTI <
   return new leaf_element__macro_element__iterator (*(const leaf_element__macro_element__iterator *) w) ;
 }
 
+//**************************************************************************
+// all the level iterators 
+//************************************************************************** 
+IteratorSTI < Gitter :: vertex_STI > * Gitter :: levelIterator (const Gitter :: vertex_STI * a, const any_has_level< vertex_STI > & vhl) {
+
+  cerr << "WARNING: method levelIterator for vertex_STI returns LeafIterator see: " << __FILE__ << " line: " << __LINE__ << "\n";
+  return iterator(a);
+}
+
+// create level edge iterator 
+IteratorSTI < Gitter :: hedge_STI > * Gitter :: levelIterator (const hedge_STI *, const any_has_level<hedge_STI> & ahl) {
+  
+  typedef Insert < AccessIterator < hedge_STI > :: Handle, 
+    TreeIterator < hedge_STI, any_has_level < hedge_STI > > >  
+                                  level_edge__macro_edge__iterator ;
+
+  vector < IteratorSTI < hedge_STI > * > _iterators ; 
+  
+  _iterators.push_back ( new level_edge__macro_edge__iterator (container (),ahl)) ;
+  Insert < AccessIterator < hface_STI > :: Handle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > > nf (container ()) ;
+  Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > > ne (container ()) ;
+  Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > ef (nf) ;
+  Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge > ee (ne) ;
+  
+  _iterators.push_back ( new  Insert < Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, any_has_level < hedge_STI > > > (ef,ahl)) ;
+  _iterators.push_back ( new Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, any_has_level < hedge_STI > > > (ee,ahl)) ;
+  Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > > nef (container ()) ;
+  Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fnef (nef) ;
+  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > > fie (fnef) ;
+  Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > efie (fie) ;
+  _iterators.push_back (new Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, any_has_level < hedge_STI > > > (efie,ahl)) ;
+  return new VectorAlign < hedge_STI > (_iterators) ;
+}
+
+
+// create level face iterator 
+IteratorSTI < Gitter :: hface_STI > * Gitter :: 
+levelIterator (const hface_STI *, const any_has_level<hface_STI> & ahl ) {
+  typedef Insert < AccessIterator < hface_STI > :: Handle, 
+    TreeIterator < hface_STI, any_has_level < hface_STI > > > 
+                                      level_face__macro_face__iterator ;
+
+  level_face__macro_face__iterator w1 (container (),ahl) ;
+  Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > > nw (container ()) ;
+  Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > ww (nw) ;
+  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, any_has_level < hface_STI > > > www (nw,ahl) ;
+  return new AlignIterator < level_face__macro_face__iterator, 
+  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, any_has_level < hface_STI > > >, hface_STI > (w1, www) ;
+}
+
+// create level element iterator 
+IteratorSTI < Gitter :: helement_STI > * Gitter :: levelIterator (const helement_STI * , const any_has_level<helement_STI> & ahl) {
+  typedef Insert < AccessIterator < Gitter :: helement_STI > :: Handle, 
+    TreeIterator < Gitter :: helement_STI, any_has_level < Gitter :: helement_STI> > > 
+      level_element__macro_element__iterator ;
+
+  return new level_element__macro_element__iterator (container (),ahl) ;
+}
+
+IteratorSTI < Gitter :: helement_STI > * Gitter :: levelIterator (const IteratorSTI < helement_STI > * w) {
+  typedef Insert < AccessIterator < Gitter :: helement_STI > :: Handle, 
+    TreeIterator < Gitter :: helement_STI, any_has_level < Gitter :: helement_STI> > > 
+      level_element__macro_element__iterator ;
+  return new level_element__macro_element__iterator (*(const level_element__macro_element__iterator *) w) ;
+}
+
+IteratorSTI < Gitter :: vertex_STI > * Gitter :: levelIterator (const IteratorSTI < vertex_STI > * w) {
+  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
+  abort();
+  return 0;
+}
+
+IteratorSTI < Gitter :: hedge_STI > * Gitter :: levelIterator (const IteratorSTI < hedge_STI > * w) {
+  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
+  abort();
+  return 0;
+}
+
+IteratorSTI < Gitter :: hface_STI > * Gitter :: levelIterator (const IteratorSTI < hface_STI > * w) {
+  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
+  abort();
+  return 0;
+}
+
+IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: levelIterator (const hbndseg_STI *, const any_has_level<hbndseg_STI> & ahl) {
+  typedef Insert < AccessIterator < hbndseg_STI > :: Handle, 
+    TreeIterator < hbndseg_STI, any_has_level < hbndseg_STI> > >  
+          level_bnd__macro_bnd__iterator ;
+  return new level_bnd__macro_bnd__iterator (container (),ahl) ;
+}
+
+IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: levelIterator (const IteratorSTI < hbndseg_STI > * ) 
+{
+  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
+  abort();
+  return 0;
+}
+
+//*******************************************
+//  other methods on class Gitter 
+//*******************************************
 void Gitter :: fullIntegrityCheck () {
   const int start = clock() ;
   int count = 0 ;
