@@ -53,14 +53,19 @@ template < class A > class is_not_leaf {
 template < class A > class any_has_level {
   int lvl ;
   public :
+    typedef A val_t ;
     any_has_level (int i = 0) : lvl (i) { }
     int operator () (const A * x) const { return x->level () == lvl ? 1 : 0 ; }
     int operator () (const A & x) const { return x.level () == lvl ? 1 : 0 ; }
+
+    // return given level 
+    int level () const { return lvl; }
 } ;
 
 template < class A > class leaf_has_level {
   int lvl ;
   public :
+    typedef A val_t ;
     leaf_has_level (int i = 0) : lvl (i) { }
     int operator () (const A * x) const { return x->level () == lvl ? x->leaf () : 0 ; }
     int operator () (const A & x) const { return x.level () == lvl ? x.leaf () : 0 ; }
@@ -124,13 +129,13 @@ template < class A > class leaf_or_has_level
 
 //! new rule for Dune LeafIterator minus one 
 //! all entities with are either leaf entities or thier children are leaf entities 
-template < class A > class leaf_minus_one
+template < class A > class leaf_or_father_of_leaf
 {
   public :
     typedef A val_t ;
 
     //! Constructor storing the level 
-    leaf_minus_one () {}
+    leaf_or_father_of_leaf () {}
 
     //! check if go next
     int operator () (const A * x) const
