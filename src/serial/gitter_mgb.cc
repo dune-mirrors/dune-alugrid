@@ -907,15 +907,15 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) {
     
       MacroGridBuilder :: generateRawHexaImage (in,raw) ;
     } else {
-      cerr << "**WARNUNG (IGNORIERT) Unbekannter Kommentar zum Gitterformat: " << str ;
+      cerr << "**WARNING (IGNORED) Unknown comment to file format: " << str ;
       cerr << " In : " << __FILE__ << " " << __LINE__ << endl ;
       delete [] str ;
       return ;
     }
     delete [] str ;
   } else {
-    cerr << "**WARNUNG (IGNORIERT) Kein Bezeichner f\"ur das Dateiformat vorhanden.\n" ;
-    cerr << "  -> Versuche es als Hexaedernetz zu lesen." << endl ;
+    cerr << "**WARNING (IGNORED) No identifier for file format found!\n" ;
+    cerr << "  -> Try to read as hexa mesh." << endl ;
     MacroGridBuilder :: generateRawHexaImage (in,raw) ;
   }
   mm.inflateMacroGrid (raw) ;
