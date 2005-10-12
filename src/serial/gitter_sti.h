@@ -32,7 +32,7 @@ typedef strstream    strstream_t;
 #include "myalloc.h"
 #include "parallel.h"
 #include "xdrclass.h"
-  
+
 
 // typedef of the element types moved to alu3dgrid_serial.h 
 // typedef enum { hexa , tetra , hexa_periodic , tetra_periodic } grid_t;
@@ -144,11 +144,19 @@ public :
 // die Schnittstellen des Grobgittercontainers zur Erstellung
 // und Kopie von Iterationsobjekten erzeugt.
 
+template < class A > class any_has_level;
+
 template < class A > class AccessIterator {
 public :
   Refcount ref ; 
+
+  // creates leaf iterators 
   virtual IteratorSTI < A > * iterator (const A *) const = 0 ;
   virtual IteratorSTI < A > * iterator (const IteratorSTI < A > *) const = 0 ;
+
+  // creates level iterators 
+  virtual IteratorSTI < A > * levelIterator (const A * a, const any_has_level < A  > & ) const {  return iterator(a); } 
+  virtual IteratorSTI < A > * levelIterator (const IteratorSTI < A > * a) const { return iterator(a); }
 
   // this methods are needed because for the PureElementAccessIterator we
   // want to call overloaded method that only insert lists with elements 
@@ -190,8 +198,14 @@ protected :
   virtual ~AccessIterator () { assert (!ref) ; }
 } ;
 
+// the Leaf Iterators 
 template < class A > class LeafIterator ;
+
 template < class A > class ConstLeafIterator ;
+
+// the Level Iterators 
+template < class A > class LevelIterator ;
+
 
 class Gitter {
   Refcount ref ;
@@ -1290,6 +1304,17 @@ private :
   IteratorSTI < hbndseg_STI >  * iterator (const IteratorSTI < hbndseg_STI > *) ;
   IteratorSTI < helement_STI > * iterator (const helement_STI *) ;
   IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) ;
+
+  IteratorSTI < vertex_STI >   * levelIterator (const vertex_STI *, const any_has_level<vertex_STI> &) ;
+  IteratorSTI < vertex_STI >   * levelIterator (const IteratorSTI < vertex_STI > *) ;
+  IteratorSTI < hedge_STI >    * levelIterator (const hedge_STI *, const any_has_level<hedge_STI> & ) ;
+  IteratorSTI < hedge_STI >    * levelIterator (const IteratorSTI < hedge_STI > *) ;
+  IteratorSTI < hface_STI >    * levelIterator (const hface_STI * , const any_has_level<hface_STI> &) ;
+  IteratorSTI < hface_STI >    * levelIterator (const IteratorSTI < hface_STI > *) ;
+  IteratorSTI < hbndseg_STI >  * levelIterator (const hbndseg_STI *, const any_has_level<hbndseg_STI> &) ;
+  IteratorSTI < hbndseg_STI >  * levelIterator (const IteratorSTI < hbndseg_STI > *) ;
+  IteratorSTI < helement_STI > * levelIterator (const helement_STI *, const any_has_level<helement_STI> &) ;
+  IteratorSTI < helement_STI > * levelIterator (const IteratorSTI < helement_STI > *) ;
 protected :
   virtual bool refine () ;
   virtual void coarse () ;
@@ -1332,11 +1357,18 @@ public :
   virtual IndexManagerType & indexManager (int codim) = 0;
 
 protected:
+  // these classes are friend because the must call the method iterator on grid 
   friend class LeafIterator < helement_STI > ;
   friend class LeafIterator < vertex_STI > ;
   friend class LeafIterator < hbndseg_STI > ;
   friend class LeafIterator < hedge_STI > ;
   friend class LeafIterator < hface_STI > ;
+  
+  friend class LevelIterator < helement_STI > ;
+  friend class LevelIterator < vertex_STI > ;
+  friend class LevelIterator < hbndseg_STI > ;
+  friend class LevelIterator < hedge_STI > ;
+  friend class LevelIterator < hface_STI > ;
 } ;
 
 // "Ausseres Iteratorproxy oder auch einfach ein Smartpointer
@@ -1359,26 +1391,25 @@ public :
   inline IteratorSTI < A > & operator * () const ;
 } ;
 
-// Die const-correctness ist leider noch nicht soweit, dass
-// zwischen const und non-const Gitterreferenzen vern"unftig
-// schon an dieser Stelle unterschieden wird.
-
-#if 0
-template < class A > class ConstLeafIterator : public MyAlloc {
-  const Gitter * _grd ;
-  ConstIteratorSTI < A > * _w ;
+// LevelIterator is the same construct as LeafIterator, but the iterator
+// rule differs, here we use any_has_level, see walk.h 
+template < class A > class LevelIterator : public MyAlloc {
+  Gitter * _grd ;
+  const any_has_level < A > _ahl;
+  IteratorSTI   < A > * _w ;
   const A * _a ;
-  void * operator new (size_t) ;
-  void operator delete (void *) ;
-  inline ConstLeafIterator () ;
+  void * operator new (size_t) { return 0 ; }
+  void operator delete (void *) { }
+  inline LevelIterator () ;
 public :
-  inline ConstLeafIterator (const Gitter &) ;
-  inline ConstLeafIterator (const ConstLeafIterator < A > & ) ;
-  inline ~ConstLeafIterator () ;
-  inline ConstIteratorSTI < A > * operator -> () const ;
-  inline ConstIteratorSTI < A > & operator * () const ;
+  typedef A val_t;
+  // constructor with no level given creates macro iterator
+  inline LevelIterator (Gitter &, int l = 0) ;
+  inline LevelIterator (const LevelIterator < A > & ) ;
+  inline ~LevelIterator () ;
+  inline IteratorSTI < A > * operator -> () const ;
+  inline IteratorSTI < A > & operator * () const ;
 } ;
-#endif
 
 //
 //    #    #    #  #          #    #    #  ######
@@ -1393,19 +1424,6 @@ inline pair < int, int > operator += (pair < int, int> & a, const pair < int, in
   return pair < int, int > (a.first += b.first, a.second += b.second) ;
 }
 
-/*
-  inline ostream & operator << (ostream & out, const pair < const int, int > & p) {
-  return (out << p.first << " " << p.second << " ") ;
-  }
-
-  inline ostream & operator << (ostream & out, const pair < int, int > & p) {
-  return (out << p.first << " " << p.second << " ") ;
-  }
-
-  inline istream & operator >> (istream & in, pair < int, int > & p) {
-  return (in >> p.first >> p.second) ;
-  }
-*/
 #ifndef NDEBUG
 inline Refcount :: Globalcount :: Globalcount () : _c (0) {
   return ;
@@ -2739,38 +2757,6 @@ inline Gitter :: Geometric :: hbndseg4 :: myrule_t Gitter :: Geometric :: hbndse
   return myhface4 (0)->getrule () ;
 }
 
-#if 0
-template < class A > ConstLeafIterator < A > :: ConstLeafIterator () : _grd (0), _w (0) {
-  return ;
-}
-
-template < class A > ConstLeafIterator < A > :: ConstLeafIterator (const Gitter & g) : _grd (&g), _w (0) {
-  _grd->ref ++ ;
-  _w = _grd->iterator (_a) ;
-  return ;
-}
-
-template < class A > ConstLeafIterator < A > :: ConstLeafIterator (const ConstLeafIterator < A > & x) : _grd (x._grd), _w (0) {
-  _grd->ref ++ ;
-  _w = _grd->iterator (x._w) ;
-  return ;
-}
-
-template < class A > ConstLeafIterator < A > :: ~ConstLeafIterator () {
-  if (_grd) _grd->ref -- ;
-  if(_w) delete _w ;
-  return ;
-}
-
-template < class A > IteratorSTI < A > * ConstLeafIterator < A > :: operator -> () const {
-  return _w ;
-}
-
-template < class A > IteratorSTI < A > & ConstLeafIterator < A > :: operator * () const {
-  return * _w ;
-}
-#endif
-
 
 // #                                 ###
 // #        ######    ##    ######    #      #####  ######  #####     ##     #####   ####   #####
@@ -2807,6 +2793,46 @@ template < class A > IteratorSTI < A > * LeafIterator < A > :: operator -> () co
 }
 
 template < class A > IteratorSTI < A > & LeafIterator < A > :: operator * () const {
+  return * _w ;
+}
+
+// #                                 ###
+// #        ######    ##    ######    #      #####  ######  #####     ##     #####   ####   #####
+// #        #        #  #   #         #        #    #       #    #   #  #      #    #    #  #    #
+// #        #####   #    #  #####     #        #    #####   #    #  #    #     #    #    #  #    #
+// #        #       ######  #         #        #    #       #####   ######     #    #    #  #####
+// #        #       #    #  #         #        #    #       #   #   #    #     #    #    #  #   #
+// #######  ######  #    #  #        ###       #    ######  #    #  #    #     #     ####   #    #
+
+template < class A > LevelIterator < A > :: LevelIterator () : _grd (0), _w (0) {
+  return ;
+}
+
+template < class A > LevelIterator < A > :: LevelIterator (Gitter & g , int l ) : _grd (&g), _ahl (l) , _w (0) 
+{
+  _grd->ref ++ ;
+  _w = _grd->levelIterator (_a,_ahl) ;
+  return ;
+}
+
+template < class A > LevelIterator < A > :: LevelIterator (const LevelIterator < A > & x) : _grd (x._grd), _w (0) 
+{
+  _grd->ref ++ ;
+  _w = _grd->levelIterator (x._w,x._ahl) ;
+  return ;
+}
+
+template < class A > LevelIterator < A > :: ~LevelIterator () {
+  if (_grd) _grd->ref -- ;
+  if(_w) delete _w ;
+  return ;
+}
+
+template < class A > IteratorSTI < A > * LevelIterator < A > :: operator -> () const {
+  return _w ;
+}
+
+template < class A > IteratorSTI < A > & LevelIterator < A > :: operator * () const {
   return * _w ;
 }
 
