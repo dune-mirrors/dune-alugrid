@@ -88,7 +88,7 @@ echo "--> libtoolize..."
 libtoolize --force
 
 echo "--> aclocal..."
-aclocal -I m4 
+aclocal -I m4 -I ./
 
 echo "--> autoheader..."
 autoheader
