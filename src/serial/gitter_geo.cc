@@ -64,7 +64,9 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
   //  Prototyp des Hexaeders wie er im Programm verwendet wird.
   //  Eckpunkte und Seitenflaechen:
   //
-  //              
+  //                      x2 
+  //                      /
+  //                     /
   //              7---------6
   //         x3  /.        /|
   //          | / .  1    / |
@@ -76,8 +78,8 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
   //          | .   2   | / <-- 0 (unten)
   //          |.        |/
   //          0---------1 --x1 
-  //         /
-  //       -x2
+  //         
+  //       
   //
   //  edge[0]  = [0,1]   [0 0 0] [1 0 0] 
   //  edge[1]  = [0,3]   [0 0 0] [0 1 0] 
@@ -191,29 +193,6 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const double (&center)[
          : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
 }
 
-void 
-Gitter::Geometric::Hexa::
-outerNormal(int face, double *normal) {
-  //  BSBilinearSurfaceMapping map(this->myvertex(face, 0)->Point(),
-  //                             this->myvertex(face, 1)->Point(),
-  //                             this->myvertex(face, 2)->Point(),
-  //                             this->myvertex(face, 3)->Point());
-  //map.normal(local, normal);
-}
-
-void 
-Gitter::Geometric::Hexa::
-neighOuterNormal(int face, double* normal) {
-  // Store with a twist
-  // * check that!
-  //BSBilinearSurfaceMapping map(this->myvertex(face, 0)->Point(),
-  //                             this->myvertex(face, 3)->Point(),
-  //                             this->myvertex(face, 2)->Point(),
-  //                             this->myvertex(face, 1)->Point());
-  //map.normal(local, normal);
-}
-
-
 // #######
 //    #     ######   #####  #####     ##
 //    #     #          #    #    #   #  #
@@ -235,8 +214,8 @@ neighOuterNormal(int face, double* normal) {
 //           |.      \|1 
 //         0 ------------ x 
 //                              
-// face 0 = {1,3,2}
-// face 1 = {0,2,3}
+// face 0 = {1,3,2}   all faces are oriented such that when one looks from
+// face 1 = {0,2,3}   the inside, they are oriented math. postitve
 // face 2 = {0,3,1}
 // face 3 = {0,1,2} 
 //
@@ -288,33 +267,6 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const double (&center)
   }
   return hit ? (level () < limit ? (request (myrule_t :: iso8), 1) 
          : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
-}
-
-void  
-Gitter :: Geometric :: Tetra :: 
-outerNormal (int face, double * normal ) 
-{
-  BSGridLinearSurfaceMapping 
-    LSM(this->myvertex(face,0)->Point(),
-        this->myvertex(face,1)->Point(),
-        this->myvertex(face,2)->Point()
-       );
-  LSM.normal(normal);
-  return; 
-}
-
-void  
-Gitter :: Geometric :: Tetra :: 
-neighOuterNormal (int face , double * normal ) 
-{
-  // just use with other twist to minus normal 
-  BSGridLinearSurfaceMapping 
-    LSM(this->myvertex(face,2)->Point(),
-        this->myvertex(face,1)->Point(),
-        this->myvertex(face,0)->Point()
-       );
-  LSM.normal(normal);
-  return; 
 }
 
 // ######                                                           #####
