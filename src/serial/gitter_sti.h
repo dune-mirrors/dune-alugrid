@@ -354,28 +354,13 @@ public :
     inline void setIndex (const int index) ; 
         
     virtual int nFaces() const = 0;
+    virtual int nEdges() const = 0;
 
     virtual void backupIndex (ostream &) const ;   // backup _index  
 
     // method is virtual, because former index set by constructor has to
     // be freeed , means method has to be overloaded for correct work
     virtual void restoreIndex (istream &) ;// retore _index  
-        
-    // the Dune extentions 
-
-    // calculate outer normal of face face
-    virtual void outerNormal(int face,  double * normal) 
-    {
-      cerr << "helement :: outerNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
-      abort();
-    }
-        
-    // calculate outer normal of face face
-    virtual void neighOuterNormal(int faceInNeigh,  double * normal) 
-    {
-      cerr << "helement :: neighOuterNormal(..) : in " << __FILE__ << " " <<  __LINE__ << " not overloaded! \n";
-      abort();
-    }
   };
 
 
@@ -967,12 +952,7 @@ public :
 
       virtual bool isboundary() const { return false; }
       virtual grid_t type() const { return tetra; }
-      // Dune extentions 
     
-      // calculate outer normal of face face
-      virtual void outerNormal (int face,   double * normal );
-      virtual void neighOuterNormal (int faceInNeigh,   double * normal );
-
     private :
       int evalVertexTwist(int, int) const;
       int evalEdgeTwist(int, int) const;
@@ -1005,6 +985,9 @@ public :
       inline pair < hasFace3 *, int > myneighbour (int) ;
       inline pair < const hasFace3 *, int > myneighbour (int) const ;
       virtual int nFaces() const { return 2; }
+      virtual int nEdges() const { 
+        cerr << "Periodic3 :: nEdges not implemented! \n"; abort(); return 6; 
+      }
       inline int twist (int) const ;
       int test () const ;
     public :
@@ -1048,6 +1031,9 @@ public :
       inline pair < const hasFace4 *, int > myneighbour (int) const ;
 
       virtual int nFaces() const { return 2; }
+      virtual int nEdges() const { 
+        cerr << "Periodic4 :: nEdges not implemented! \n"; abort(); return 8; 
+      }
       inline int twist (int) const ;
       int test () const ;
 
@@ -1104,6 +1090,7 @@ public :
       inline pair < hface4_GEO *, int > myintersection (int) ;
       inline pair < const hface4_GEO *, int > myintersection (int) const;
       virtual int nFaces() const { return 6; }
+      virtual int nEdges() const { return 12; }
 
       inline int twist (int) const ;
       int test () const ;
@@ -1117,11 +1104,6 @@ public :
 
       virtual bool isboundary() const { return false; }
       virtual grid_t type() const { return hexa; }
-      // Dune extensions
-
-      // calculate outer normal of face face
-      virtual void outerNormal (int face,   double* normal);
-      virtual void neighOuterNormal(int faceInNeigh,  double* normal);
 
     private :
       int evalVertexTwist(int, int) const;
