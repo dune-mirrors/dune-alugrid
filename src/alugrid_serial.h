@@ -30,6 +30,7 @@ typedef Gitter::hbndseg       HGhostType;
 
 struct GatherScatter
 {
+  virtual ~GatherScatter () {}
   virtual void inlineData ( ObjectStream & str , HElemType & elem ) = 0;
   virtual void xtractData ( ObjectStream & str , HElemType & elem ) = 0;
   virtual void sendData ( ObjectStream & str , const HElemType  & elem ) = 0;

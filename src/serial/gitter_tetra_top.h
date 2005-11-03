@@ -588,7 +588,7 @@ template < class A > bool Hface3Top < A > :: coarse () {
       f->coarse () ;
       x = false ;
     }
-  } while (f = f->next()) ;
+  } while ( (f = f->next()) ) ;
   if (x) {
     
   // Hier wird tats"achlich vergr"obert, d.h. alle Kinder 
@@ -792,8 +792,8 @@ template < class A > bool Hbnd3Top < A > :: coarse () {
   if (!b) return false ;
   bool x = true ;
   do {
-    if(b->myhface3(0)->ref > 1) (b->coarse (), x = false) ;
-  } while (b = b->next()) ;
+    if( (b->myhface3(0)->ref > 1) ) ((b->coarse ()), x = false) ;
+  } while ( (b = b->next()) ) ;
   if (x) {
     if (!this->lockedAgainstCoarsening ()) {
       this->preCoarsening () ;
@@ -1923,7 +1923,7 @@ template < class A > bool Periodic3Top < A > :: bndNotifyCoarsen () {
     if (p->myhface3 (0)->ref > 1) (x = false) ;
     if (p->myhface3 (1)->ref > 1) (x = false) ;
 
-  } while (p = p->next ()) ;
+  } while ( (p = p->next ()) ) ;
   if (x) {
   
   // Falls keine Fl"achen anliegen, die auf Kinder oder Kindes- 

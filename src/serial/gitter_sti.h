@@ -61,6 +61,7 @@ enum { numOfIndexManager = 6 };
 
 class ProjectVertex {
 public:
+  virtual ~ProjectVertex () {}
   virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
 };
 
@@ -224,6 +225,7 @@ public :
     Dune_vertex () : _idx(-1) {}
 #endif
   public:
+    virtual ~Dune_vertex () {}
     // backup and restore index of vertices 
     virtual void backupIndex  (ostream & os ) const {};
     virtual void restoreIndex (istream & is ) {};
@@ -270,6 +272,7 @@ public :
     Dune_hface_or_hedge () : _index (-1) {}
 #endif
   public:
+    virtual ~Dune_hface_or_hedge () {}
     // use only this methods to get and set the _index 
     inline int getIndex () const;  
     inline void setIndex (const int index) ; 
@@ -344,6 +347,7 @@ public :
     Dune_helement () : _index (-1) , _refinedTag (true) {}
 #endif
   public:
+    virtual ~Dune_helement () {}
     // reset the _refinedTag to false 
     void resetRefinedTag(); 
     // true if element was refined this adaptation step 
@@ -368,6 +372,7 @@ public :
   class hbndseg;
   struct AdaptRestrictProlong
   {
+    virtual ~AdaptRestrictProlong () {}
     virtual int preCoarsening (helement & elem )   = 0;
     virtual int postRefinement (helement  & elem ) = 0;
     virtual int preCoarsening (hbndseg & bnd )     = 0;
@@ -717,6 +722,7 @@ public :
       inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
       inline virtual ~VertexGeo () ;
       inline const double (& Point () const) [3] ;
+      // return level of vertex 
       inline int level () const ;
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
       virtual inline void project(const ProjectVertex &pv) ; 

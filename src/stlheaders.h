@@ -33,6 +33,7 @@
   #include <stack>
   #include <map>
   #include <numeric>
+  #include <set>
 #else
   #include <memory.h>
   #include <iostream.h>
@@ -47,6 +48,7 @@
   #include <deque.h>
   #include <stack.h>
   #include <map.h>
+  #include <set.h>
 #endif
 
 #endif

@@ -149,6 +149,7 @@ class LinkedObject {
   inline bool isValid () const ;
     } ;
   public :
+    virtual ~LinkedObject () {}
     virtual Identifier getIdentifier () const = 0 ;
     virtual vector < int > estimateLinkage () const = 0 ;
 } ;

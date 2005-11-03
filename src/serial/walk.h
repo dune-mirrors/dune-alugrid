@@ -329,7 +329,7 @@ template < class A, class B > inline int TreeIterator < A, B > :: pushdown () {
 }
 
 template < class A, class B > inline int TreeIterator < A, B > :: pullup () {
-  for( ; _pos >= 0 ; _pos -- ) if (_stack [_pos] = _stack [_pos]->next ()) break ;
+  for( ; _pos >= 0 ; _pos -- ) if ( (_stack [_pos] = _stack [_pos]->next () ) ) break ;
   return _pos < 0 ? 0 : 1 ; 
 }
 

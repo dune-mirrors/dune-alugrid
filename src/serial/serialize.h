@@ -29,6 +29,8 @@ class ObjectStream;
 
 class Serializable {
   friend class ObjectStream ;
+public:  
+  virtual ~Serializable () {}
   virtual bool readObject (ObjectStream &) = 0 ;
   virtual void writeObject (ObjectStream &) const = 0 ;
 } ;

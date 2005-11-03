@@ -15,6 +15,7 @@ class Parallel {
   
     class VertexIF {
       public :
+        virtual ~VertexIF () {}
         typedef class Key1SLZ identifier_t ;
         inline virtual VertexPllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const VertexPllXIF_t & accessPllX () const throw (AccessPllException) ;
@@ -22,6 +23,7 @@ class Parallel {
     } ;
     class EdgeIF {
       public :
+        virtual ~EdgeIF () {}
         typedef class Key2SLZ identifier_t ;
         inline virtual EdgePllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const EdgePllXIF_t & accessPllX () const throw (AccessPllException) ;
@@ -29,6 +31,7 @@ class Parallel {
     } ;
     class FaceIF {
       public :
+        virtual ~FaceIF () {}
         typedef class Key3SLZ identifier_t ;
         inline virtual FacePllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const FacePllXIF_t & accessPllX () const throw (AccessPllException) ;
@@ -36,6 +39,7 @@ class Parallel {
     } ;
     class ElementIF {
       public :
+        virtual ~ElementIF () {}
         inline virtual ElementPllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const ElementPllXIF_t & accessPllX () const throw (AccessPllException) ;
       	inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
