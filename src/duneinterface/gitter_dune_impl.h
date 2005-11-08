@@ -184,7 +184,7 @@ template < class A > PureElementLeafIterator < A > :: PureElementLeafIterator ()
 
 // new LEafIterator which only iterates over elements 
 template < class A > inline PureElementLeafIterator < A > :: 
-PureElementLeafIterator (GitterDuneBasis & g) : _grd (&g), _w (0) {
+PureElementLeafIterator (GitterDuneBasis & g) : _grd (&g), _w (0) , _a(0) {
   _w = _grd->leafIterator (_a) ;
   return ;
 }
