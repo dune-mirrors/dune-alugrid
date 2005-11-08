@@ -2758,7 +2758,7 @@ template < class A > LeafIterator < A > :: LeafIterator () : _grd (0), _w (0) {
   return ;
 }
 
-template < class A > LeafIterator < A > :: LeafIterator (Gitter & g) : _grd (&g), _w (0) {
+template < class A > LeafIterator < A > :: LeafIterator (Gitter & g) : _grd (&g), _w (0) , _a(0) {
   _grd->ref ++ ;
   _w = _grd->iterator (_a) ;
   return ;
