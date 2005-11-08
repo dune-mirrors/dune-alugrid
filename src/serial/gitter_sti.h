@@ -2796,7 +2796,7 @@ template < class A > LevelIterator < A > :: LevelIterator () : _grd (0), _w (0) 
   return ;
 }
 
-template < class A > LevelIterator < A > :: LevelIterator (Gitter & g , int l ) : _grd (&g), _ahl (l) , _w (0) 
+template < class A > LevelIterator < A > :: LevelIterator (Gitter & g , int l ) : _grd (&g), _ahl (l) , _w (0) , _a(0)
 {
   _grd->ref ++ ;
   _w = _grd->levelIterator (_a,_ahl) ;
