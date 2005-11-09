@@ -178,12 +178,12 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             int preCoarsening  () ; 
             int postRefinement () ;
 
-            double _determinant; 
+            //double _determinant; 
 
             Gitter * _myGrid;
 
     public: 
-          inline double determinant () const { return _determinant; } 
+          //inline double determinant () const { return _determinant; } 
             
        // for _myGrid     
        friend class TetraTop < TetraEmpty > ;     
@@ -541,10 +541,12 @@ TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
             myhface3_t * f2, int t2, myhface3_t * f3, int t3,
             Gitter * mygrid ) : 
   Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) , 
+  /*
   _determinant(6.0 * quadraturTetra3D < VolumeCalc > (LinearMapping (
           myvertex(0)->Point(), myvertex(1)->Point(),
           myvertex(2)->Point(),
           myvertex(3)->Point())).integrate1 (0.0)) ,
+          */
   _myGrid(mygrid) 
 {
   return ;
