@@ -1,0 +1,961 @@
+
+#ifndef __HEADER__HANDLE
+#define __HEADER__HANDLE
+
+static volatile char RCSId_handle_h [] = "$Id$";
+
+#include <assert.h>
+#include <malloc.h>
+
+#include "grid.h"                               
+#include "indexstack.h"
+typedef IndexStack<int,10000> IndexManagerType;
+enum { lengthOfFiniteStack = 10000 };
+// typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;
+// number of different index manager that exists
+enum { numOfIndexManager = 4 };
+// 0 == elements
+// 1 == edges
+// 2 == vertices
+// 3 == boundary elements
+class Hmesh_basic;
+
+template < class A > class Listwalkptr ;
+
+template < class A > class Listagent ;
+
+template < class A > class Listwalk_impl ;	// echter iterator
+
+template < class A > class Listwalk ;	        // interface-klasse
+
+template < class A > class Hier ;		// hierarchie-template in grid.h
+
+template < class A > class Macro ;
+
+template < class A > class Listagency {
+
+  Hmesh_basic *hdl;
+
+  A * first_list ;
+
+  A * last_list ;
+
+  int number_list ;
+  
+  int nlistwalks ;
+  
+  void listwalkattach() { nlistwalks ++ ; } 
+    
+  void listwalkdetach() { nlistwalks -- ; }
+
+  int operator == (const Listagency & a) { return (void *)this == (void *) & a ; }
+
+  public :
+
+  void detach(A * a) {
+
+    if(a == last_list)  last_list = a->prev_list ;
+
+    if(a == first_list) first_list = a->next_list ;
+
+    if(a->prev_list) a->prev_list->next_list = a->next_list ;
+
+    if(a->next_list) a->next_list->prev_list = a->prev_list ;
+
+    a->next_list = 0 ;
+
+    a->prev_list = 0 ;
+
+    a->number_list = 0 ;
+      
+    a->agnc = 0 ;
+                        
+    number_list -- ;
+
+
+  }
+
+  public :
+
+  Listagency(Hmesh_basic *phdl) : hdl(phdl),
+  first_list(0), last_list(0), number_list(0), nlistwalks(0) { }
+
+   ~Listagency() { 
+      assert(! busy()) ;
+
+      A * curr = first_list ;
+
+      while(curr) {
+
+        A * next_list = curr->next_list ;
+
+        delete curr ;
+
+        curr = next_list ;
+      }
+
+    }
+
+    int renumber() {
+
+      A * curr = first_list ;
+
+      int count = 0 ;
+
+      while(curr) {
+
+        curr->number_list = count ++ ;
+
+        curr = curr->next_list ;
+
+      }
+
+      return count ;
+
+    }
+
+    void insert(A * a) {
+      if (last_list) last_list->next_list = a;
+      else first_list = a;
+      a->prev_list = last_list;
+      a->agnc = this;
+      last_list = a;
+      a->sethdl(hdl);
+      number_list ++ ;
+
+    }
+
+    int size() const { return number_list ; }
+
+    int busy() const { /*return nlistwalks ;*/ return 0; }
+  
+  friend class Listagent < A > ;
+    
+  friend class Listwalk_impl < A > ;
+
+} ;
+
+// +----------------------------------------------------------------------------+
+// | das template Listwalk < . > stellt im wesentlichen nur das interface dar,  |
+// | falls es instantiiert wird, erh"alt man einen g"ultigen null-iterator      |
+// +----------------------------------------------------------------------------+
+
+template < class A > class Listwalk {
+
+  public :
+
+    Listwalk & operator=(const Listwalk &) { return * this ; }
+
+    Listwalk(const Listwalk &) { }
+  
+    Listwalk() { }
+    
+    virtual ~Listwalk() { }
+
+  
+    virtual void first() { }
+
+    virtual void last() { }
+    
+    virtual void next() { }
+    
+    virtual void prev() { }
+    
+    virtual int done() const { return 1 ; }
+
+    virtual int size() { return 0 ; }
+    
+    virtual A & getitem() const { 
+    
+      void * p = (void *)(0) ;	// schlechter Trick ...
+    
+      abort() ;			// .. und Tsch"uss !
+      
+      return *(A *)(p) ;	// never reached .
+      
+    }
+
+} ;
+
+// +----------------------------------------------------------------------------+
+// |  das template Alignwalk < ., ., . > erm"oglicht das hintereinanderh"angen  |
+// |  von bestehenden iteratoren, falls es eine gemeinsamen basisklasse gibt,   |
+// |  die durch das dritte argument eingef"uhrt wird.                           |
+// +----------------------------------------------------------------------------+
+
+template < class A, class B, class C > class Alignwalk : public Listwalk < C > {
+
+  Listwalk < A > & walk1 ;
+
+  Listwalk < B > & walk2 ;
+
+  int curr ;
+
+  public :
+
+    Alignwalk(Listwalk < A > & a, Listwalk < B > & b)
+
+	: walk1(a), walk2(b), curr(0) { }
+
+   ~Alignwalk() { }
+
+    void first() { 
+
+      curr = 0 ;
+
+      walk1.first() ;
+
+      if(walk1.done()) {
+
+        curr = 1 ;
+
+        walk2.first() ;
+
+      }
+
+    }
+
+    void last() {
+
+      curr = 1 ;
+
+      walk2.last() ;
+
+      if(walk2.done()) {
+
+        curr = 0 ;
+
+        walk1.last() ;
+
+      }
+
+    }
+
+    void next() {
+
+      !curr ? (walk1.next(), (walk1.done() ? (walk2.first(), curr = 1) : 0)) : (walk2.next(), 0) ;
+
+    }
+
+    void prev() {
+
+      curr ? (walk2.prev(), (walk2.done() ? (walk1.last(), curr = 0) : 0)) : (walk1.prev(), 0) ;
+
+    }
+
+    int size() {
+
+      return walk1.size() + walk2.size() ;
+
+    }
+
+    int done() const {
+
+      return curr ? walk2.done() : 0 ;
+
+    }
+
+    C & getitem() const {
+
+      if(curr) return walk2.getitem() ; 
+ 
+      else return walk1.getitem() ;
+
+    }
+
+} ;
+
+// +----------------------------------------------------------------------------+
+// |  f"ur intrusive listen die das template Listagent < . > enthalten, gibt    |
+// |  der folgende aufruf eine iterator instanz: Listwalk_impl < . > (agency), wobei |
+// |  der konstruktor mit einer referenz auf eine Listagency < . > instanz ver- |
+// |  sorgt werden muss. keine leeren listen als default.                       |
+// +----------------------------------------------------------------------------+
+
+template < class A > class Listwalk_impl : public Listwalk < A > {
+
+  Listagency < A > & agency ;
+
+  A * curr ;
+  
+  public :
+
+    Listwalk_impl ( const Listwalk_impl & w) : agency(w.agency), curr(w.curr) { agency.listwalkattach() ; }
+
+    Listwalk_impl ( Listagency < A > & a) : agency(a), curr(0) { agency.listwalkattach() ; }
+
+   ~Listwalk_impl() { agency.listwalkdetach() ; }
+
+
+    void first() { curr = agency.first_list ; }
+
+    void last()  { curr = agency.last_list ; }
+
+    void next()  { if(curr) curr = curr->Listagent < A > :: next() ; }
+
+    void prev()  { if(curr) curr = curr->Listagent < A > :: prev() ; }
+
+    int done() const { return (curr == 0) ? 1 : 0 ; }
+
+    int size() { return agency.number_list ; }
+
+    A & getitem() const { 
+
+      if(!curr) abort() ; 
+
+      return * curr ; 
+
+    }
+
+} ;
+
+template < class A > class Macro : public Listagent < Macro < A > > {
+
+  public :
+
+    typedef Hier < A > hier_t ;
+
+  private :
+  
+    hier_t & el ;
+   
+    Macro(const Macro & e) : el(e.el) { }
+
+    Macro & operator = (const Macro &) { }
+    
+  public :
+
+    void sethdl(Hmesh_basic *phdl) {el.sethdl(phdl);}
+    
+    Macro(hier_t & e) : el(e) { } ;
+     
+   ~Macro() { delete & el ; }
+
+    hier_t * operator->() const { return & el ; }
+
+    hier_t & operator * () const { return el ; }
+
+    hier_t & operator [](int ) const { return el ; }
+  
+} ;
+
+// +----------------------------------------------------------------------------+
+// | Das Leafwalk template versetzt einen in die Lage, f"ur alle Typen, die     |
+// | eine h < typ > basisklasse haben, und f"ur die eine Liste von Macro < typ >|
+// | vorliegt mit einer Listagency < Macro < typ > > im handle, einen Listen -  |
+// | Iterator zu bekommen, der nur "uber die Bl"atter l"auft.                   |
+// +----------------------------------------------------------------------------+
+
+template < class A > class Leafwalk : public Listwalk < Hier < A > > {
+ 
+  public :
+
+    typedef Macro < A > macro_t ;
+
+    typedef Hier < A > hier_t ;
+ 
+  private :
+
+    enum { max = 100 } ;
+
+    Listagency < macro_t > & agency ;
+
+    Listwalk_impl < macro_t > * macro ;
+    
+    hier_t ** stack ;
+  
+    int pos ;
+    
+  public :
+  
+    Leafwalk(Listagency < macro_t > & a) : agency(a) { 
+
+      stack = new hier_t * [max] ;
+  
+      pos = 0 ;
+
+      macro = new Listwalk_impl < macro_t > (agency) ;
+
+      assert(macro) ;
+
+      assert(stack) ;
+
+    }
+
+    Leafwalk(const Leafwalk & w) : agency(w.agency), macro(w.macro) {
+
+      stack = new hier_t * [max] ;
+
+      assert(stack) ;
+
+      for(pos = 0 ; pos <= w.pos ; pos ++ ) stack [pos] = w.stack [pos] ;
+
+    }
+    
+   ~Leafwalk() {
+
+      delete macro ;
+
+      delete[] stack ;
+
+    }
+   
+    void first()  {
+
+      pos = 0 ;
+
+      macro->first() ;
+
+      * stack = macro->done() ? 0 : & * macro->getitem() ;
+  
+      for( hier_t * e = stack[pos] ; e ? ! e->leaf() : 0 ; assert(pos < max) ) 
+
+        stack[ ++ pos] = (e = e->down()) ;
+  
+    }
+
+    void last() {
+
+      macro->last() ;
+
+      pos = 0 ;
+
+      hier_t * e = ( * stack = macro->done() ? 0 : & * macro->getitem() ) ;
+
+      for( ; e ? ! e->leaf() : 0 ; ) {
+
+        for( e = e->down() ; e->next() ; e = e->next()) ;
+
+        stack [ ++ pos] = e ;
+
+      }
+
+    }
+    
+    void next() {
+  
+      for( ; pos > 0 ; pos -- )
+      
+        if(stack[pos] = stack[pos]->next()) break ;
+      
+   
+      if(pos == 0) {
+    
+        macro->next() ;
+         
+        * stack = macro->done() ? 0 : & * macro->getitem() ;
+  
+      }
+
+      for( hier_t * e = stack[pos] ; e ? ! e->leaf() : 0 ; assert(pos < max)) 
+
+        stack[ ++ pos] = (e = e->down()) ;
+    
+    }
+    
+    void prev() {
+
+      for( ; pos > 0 ; pos -- )
+
+        if(stack[pos - 1]->down() != stack[pos]) break ;
+
+
+      if(pos == 0) {
+
+        macro->prev() ;
+
+        * stack = macro->done() ? 0 : & * macro->getitem() ;
+
+      }
+
+      else pos -- ;
+
+      hier_t * e = stack [pos] ;
+
+      hier_t * u = stack [pos + 1] ;
+
+      for( ; e ? ! e->leaf() : 0 ; ) {
+
+        for( e = e->down() ; ! (e->next() == u || e->next() == 0 ) ; e = e->next()) ;
+
+        stack[ ++ pos] = e ;
+
+      }
+
+    }
+  
+    int size() {
+
+      Listwalk_impl < macro_t > walk (agency) ;
+
+      int lsize = 0 ;
+
+      for( walk.first() ; ! walk.done() ; walk.next())
+
+        lsize += walk.getitem()->count() ;
+
+      return lsize ;
+  
+   }
+
+   int done() const { return macro->done() ; }
+   
+   hier_t & getitem() const {
+
+      if(!stack[pos]) abort() ;
+
+      return * stack[pos] ;
+  
+   }
+
+} ;
+
+// +----------------------------------------------------------------------------+
+// | Das Levelwalk template versetzt einen in die Lage, einen Listen - Iterator |
+// | zu bekommen, der nur "uber die Elemente eines Levels l"auft.               |
+// +----------------------------------------------------------------------------+
+
+template < class A > class Levelwalk : public Listwalk < Hier < A > > {
+ 
+  public :
+
+    typedef Macro < A > macro_t ;
+
+    typedef Hier < A > hier_t ;
+ 
+  private :
+
+    Listagency < macro_t > & agency ;
+
+    Listwalk_impl < macro_t > * macro ;
+    
+    hier_t ** stack ;
+  
+    int pos ;
+
+    int depth ;
+
+    int pushdown() {
+
+      for( hier_t * e = stack [pos] ; pos < depth ; stack[ ++ pos] = (e = e->down()))
+
+        if(e->leaf()) break ;
+
+      return pos == depth ? 1 : 0 ;
+
+    }
+
+    int pullup() {
+
+      for( ; pos > 0 ; pos -- ) if(stack[pos] = stack[pos]->next()) break ;
+
+      return pos == 0 ? 0 : 1 ; 
+
+    }
+
+  public :
+
+    Levelwalk( Listagency < macro_t > & a, int d) : agency(a), depth(d) {
+ 
+      stack = new hier_t * [d + 1] ;
+  
+      pos = 0 ;
+
+      macro = new Listwalk_impl < macro_t > (agency) ;
+
+      assert(macro) ;
+
+      assert(stack) ;
+
+    }
+
+    Levelwalk( const Levelwalk & w) : agency(w.agency), macro(w.macro), depth(w.depth) {
+
+      stack = new hier_t * [depth + 1] ;
+
+      assert(stack) ;
+
+      for(pos = 0 ; pos < w.pos ;  pos ++) stack [pos] = w.stack [pos] ;
+
+    }
+
+   ~Levelwalk() {
+
+      delete macro ;
+
+      delete[] stack ;
+
+    }
+
+    void first()  {
+
+      pos = 0 ;
+  
+      for( macro->first() ; ! macro->done(); macro->next()) {
+
+        * stack = & * macro->getitem() ;
+
+        pos = 0 ;
+
+        do {
+
+          if(pushdown()) return ; // treffer
+
+        } while(pullup()) ;
+
+      }
+  
+    }
+
+    void last() {
+
+      cerr << "Levelwalk < . > .last() geht nicht" << endl ;
+
+    }
+
+    void next() {
+
+      do {
+
+        while(pullup())
+
+          if(pushdown()) return ;
+
+        pos = 0 ;
+
+        macro->next() ;
+
+        if(macro->done()) { * stack = 0 ; return ; }
+
+        else { 
+
+          * stack = & * macro->getitem() ;
+
+          if(pushdown()) return ;
+
+        }
+
+      } while(depth) ;
+
+    }
+
+    void prev() {
+
+      cerr << "Levelwalk < . > .prev() geht nicht" << endl ;
+
+    }
+
+    int size() {
+
+      Listwalk_impl < macro_t > walk (agency) ;
+
+      int lsize = 0 ;
+
+      for( walk.first() ; ! walk.done() ; walk.next())
+
+        lsize += walk.getitem()->count(depth) ;
+
+      return lsize ;
+  
+    }
+
+    int done() const { return macro->done() ; }
+
+    hier_t & getitem() const {
+
+      if(!stack[pos]) abort() ;
+
+      assert(stack[pos]->level() == depth) ;
+
+      return * stack[pos] ;
+
+    }
+
+    macro_t & getmacro() const 
+    {
+      if (!stack[pos]) 
+        abort() ;
+      assert(stack[pos]->level() == depth) ;
+      assert(depth==0);
+      return macro->getitem() ;
+    }
+
+} ;
+
+/*
+ * SubtreeIterator-Instanzen koennen benutz werden um ueber einen Unterbaum
+ * einer Hier<t>-Struktur zu iterieren. Dazu benutzt man die stIterator-Methode der
+ * Hier<t> Klasse mit dem entsprechenden Knoten als Argument.
+ */
+
+template <class T>
+class SubtreeIterator {
+  static const int nbr = 100;
+  Hier<T>* stack[nbr];
+  bool done;
+  int pos;
+
+  SubtreeIterator(Hier<T>* root) {
+    pos = 0;
+    done = false;
+    stack[pos] = root;
+  }
+
+public:
+  SubtreeIterator(const SubtreeIterator& other) {
+    pos = other.pos;
+    for( int i=0 ; i<=pos ; i++ )
+      stack[pos] = other.stack[pos];
+  }
+
+  SubtreeIterator& operator++ () { // prefix
+    if( !done ) {
+      if( stack[pos]->down() ) {
+        stack[pos+1] = stack[pos]->down();
+        pos++;
+      } else if( stack[pos]->next() ) {
+        stack[pos+1] = stack[pos]->next();
+        pos++;
+      } else {
+        for( ; pos > 0 ; pos-- ) {
+          if( stack[pos-1]->next() == stack[pos] ||
+              stack[pos-1]->next() == 0 )
+            stack[pos] = 0;
+          else {
+            stack[pos] = stack[pos-1]->next();
+            break;
+          }
+        }
+        if( pos == 0 )
+          done = true;
+      }
+    }
+    return *this;
+  }
+
+  void first_leaf() {
+    pos = 0;
+    done = false;
+    while( !done && !(stack[pos]->leaf()) )
+      (*this)++;
+  }
+
+  void next_leaf() {
+    while( !done && !(stack[pos]->leaf()) )
+      (*this)++;
+  }
+
+  int done_leaf() {
+    return (done == true ? 0 : 1);
+  }
+
+  operator int() const { return (done == true ? 0 : 1); }
+
+  Hier<T>* operator-> () const {
+    return (done ? NULL : stack[pos]);
+  }
+
+  friend class Hier<T>;
+};
+
+// +----------------------------------------------------------------------------+
+// | Vorsicht ! Die Reihenfolge der Deklarationen ist wesentlich: Zuerst werden |
+// |	        die Rand- Elemente abgebaut, dann erst die Vertices,  damit ist |
+// |	        sicher, dass der Refcount runtergez"ahlt war. Sonst knirsch ... |
+// +----------------------------------------------------------------------------+
+
+
+class Hmesh;
+
+class Hmesh_basic {
+
+  public :
+
+    typedef Hier < Element > helement_t ;
+
+    typedef Hier < Bndel > hbndel_t ;
+
+    typedef Macro < Element > macroelement_t ;
+
+    typedef Macro < Bndel > macrobndel_t ;
+
+  protected :
+
+    IndexManagerType indexmanager[numOfIndexManager];
+
+    Listagency < Vertex > vl;
+
+    Listagency < macroelement_t > mel ;
+
+    Listagency < macrobndel_t >  mbl;
+    
+    Listwalk < helement_t > * walk( helement_t *) { return new Leafwalk < Element > (mel) ; }
+
+    Listwalk < Vertex > * walk(Vertex *) { return new Listwalk_impl < Vertex > (vl) ; }
+
+    Listwalk < macroelement_t > * walk(macroelement_t *) { return new Listwalk_impl < macroelement_t > (mel) ; }
+    
+    Listwalk < hbndel_t > * walk( hbndel_t *) { return new Leafwalk < Bndel > (mbl) ; }
+
+    Listwalk < helement_t > * walk(const Listwalk < helement_t > * ) ;
+
+    Listwalk < hbndel_t > * walk(const Listwalk < hbndel_t > * ) ;
+
+    Listwalk < Vertex > * walk(const Listwalk < Vertex > * ) ;
+
+    Listwalk < macroelement_t > * walk(const Listwalk < macroelement_t > * ) ;
+
+    Hmesh_basic(const Hmesh_basic &) ;
+    
+    Hmesh_basic & operator = (const Hmesh_basic &) ;
+
+ protected:
+    void asciwritetriang(ofstream &) ;
+    
+    void ascireadtriang(ifstream &) ;
+
+  public :
+
+    Hmesh_basic() : 
+      vl(this), 
+      mel(this), 
+      mbl(this) { };
+
+      ~Hmesh_basic() {  
+	//assert(indexmanager[0].usedindex()==0);
+	//assert(indexmanager[1].usedindex()==0);
+	//assert(indexmanager[2].usedindex()==0);
+	//assert(indexmanager[3].usedindex()==0);
+      } ;    
+
+   void printIndex() {
+     for (int i=0;i<numOfIndexManager;i++)
+       cerr << i << " maxindex: " << indexmanager[i].getMaxIndex() << " " 
+	    << "index in use: " << indexmanager[i].usedindex() << endl;
+   }
+   int getIndex(int indextype) {
+     return indexmanager[indextype].getIndex();
+   }
+   void freeIndex(int indextype,int index) {
+     indexmanager[indextype].freeIndex(index);
+   }
+    
+    void makeneighbours() ;
+           
+    virtual void refresh() { }
+       
+  friend class Listwalkptr < helement_t > ;
+ 
+  friend class Listwalkptr < Vertex > ;
+  
+  friend class Listwalkptr < hbndel_t > ;
+
+  friend class Listwalkptr < macroelement_t > ;
+
+} ;
+
+class Hmesh : public Hmesh_basic {
+
+  Hmesh & operator=(const Hmesh &) ;
+
+  Hmesh(const Hmesh &) ;
+
+  Multivertexadapter * adp ;
+
+  int _nconfDeg;
+
+  Refco::tag_t refinement_rule;
+
+  Prolong_basic *_pro_el;
+  Restrict_basic *_rest_el;
+  nconf_vtx_t *ncv;
+
+  void setup_grid(char *);
+
+  bool ascireadtriang(const char *,double&, unsigned long int&) ;
+
+  bool ascireadtriang(ifstream &,double&, unsigned long int&) ;
+
+  void asciwritetriang(const char *,double , unsigned long int) ;
+
+  public :
+
+  Hmesh();
+
+  Hmesh(char *,int,Refco::tag_t pref_rule) ;
+
+  Hmesh(char *,Refco::tag_t pref_rule=Refco::ref_1) ;
+
+  Hmesh(char *,int) ;
+
+    ~Hmesh() ;
+
+    void storeGrid(const char*,
+		   double , unsigned long int);
+
+    bool recoverGrid(const char*,
+                     double&, unsigned long int&);
+
+    void refine() ;
+
+    bool checkConf();
+
+    void coarse() ;
+
+    void refresh() ;
+
+    void setdata(void (*)(Element &)) ;
+
+    void draw(Xdisplay & ) ; 
+
+} ;
+
+template < class A > class Listwalkptr {
+
+  Listwalk < A > * walk ;
+
+  Hmesh_basic * hdl ;
+  
+  A * a ;
+
+  void * operator new (size_t ) { return 0 ; }
+
+  void operator delete (void *) { }
+ 
+  public :
+  
+    Listwalkptr() : hdl(0) { walk = new Listwalk < A > () ; }
+
+    Listwalkptr(Hmesh_basic &h) : hdl(&h) { walk = h.walk(a) ; }
+
+    Listwalkptr(const Listwalkptr & p) : hdl(p.hdl) { walk = hdl->walk(p.walk) ; }
+    
+   ~Listwalkptr() { delete walk ; }
+
+    Listwalkptr & operator=(const Listwalkptr & p) {
+
+      delete walk ;
+
+      hdl = p.hdl ;
+
+      walk = hdl ? hdl->walk(p.walk) : new Listwalk < A > () ;
+
+      return *this ;
+
+    }
+   
+    Listwalk < A > * operator -> () { return walk ; }
+    
+    Listwalk < A > & operator * ()  { return * walk ; }
+    
+    Listwalk < A > & operator [] (int ) { return * walk ; }
+
+} ;
+
+void get_memory(struct mallinfo &old_info);
+void get_memory_diff(struct mallinfo &old_info);
+void write_memory(ostream &out,char *header);
+void write_memory(ostream &out,char *header,struct mallinfo &old_info);
+void write_memory_diff(ostream &out,char *header,struct mallinfo &old_info);
+
+#endif
