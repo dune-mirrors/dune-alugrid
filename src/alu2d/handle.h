@@ -870,7 +870,7 @@ class Hmesh : public Hmesh_basic {
   Restrict_basic *_rest_el;
   nconf_vtx_t *ncv;
 
-  void setup_grid(char *);
+  void setup_grid(const char *);
 
   bool ascireadtriang(const char *,double&, unsigned long int&) ;
 
@@ -882,11 +882,11 @@ class Hmesh : public Hmesh_basic {
 
   Hmesh();
 
-  Hmesh(char *,int,Refco::tag_t pref_rule) ;
+  Hmesh(const char *,int,Refco::tag_t pref_rule) ;
 
-  Hmesh(char *,Refco::tag_t pref_rule=Refco::ref_1) ;
+  Hmesh(const char *,Refco::tag_t pref_rule=Refco::ref_1) ;
 
-  Hmesh(char *,int) ;
+  Hmesh(const char *,int) ;
 
     ~Hmesh() ;
 

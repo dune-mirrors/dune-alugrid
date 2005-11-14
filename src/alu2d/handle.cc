@@ -40,20 +40,20 @@ Hmesh::Hmesh() : _nconfDeg(-1), refinement_rule(Refco::none),
 		 _pro_el(0), _rest_el(0) {
 }
 
-Hmesh::Hmesh(char *macroname,int pnconfDeg,Refco::tag_t pref_rule) :
+Hmesh::Hmesh(const char *macroname,int pnconfDeg,Refco::tag_t pref_rule) :
   _nconfDeg(pnconfDeg), refinement_rule(pref_rule) {
   setup_grid(macroname);      
 }
-Hmesh::Hmesh(char *macroname,int pnconfDeg) :
+Hmesh::Hmesh(const char *macroname,int pnconfDeg) :
   _nconfDeg(pnconfDeg), refinement_rule(Refco::quart) {
   setup_grid(macroname);    
 }
-Hmesh::Hmesh(char *macroname,Refco::tag_t pref_rule) :
+Hmesh::Hmesh(const char *macroname,Refco::tag_t pref_rule) :
   _nconfDeg(0), refinement_rule(pref_rule) {
   setup_grid(macroname);    
 }
 
-void Hmesh::setup_grid(char *macroname) {
+void Hmesh::setup_grid(const char *macroname) {
   ncv=NULL;
   adp = new Multivertexadapter;
   _pro_el=new Prolong_basic;
