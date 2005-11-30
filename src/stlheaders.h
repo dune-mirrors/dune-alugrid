@@ -1,8 +1,8 @@
-#ifndef __BSGRID_SYSTEMINCLUDES_HH__
-#define __BSGRID_SYSTEMINCLUDES_HH__
+#ifndef __ALUGRID_SYSTEMINCLUDES_HH__
+#define __ALUGRID_SYSTEMINCLUDES_HH__
 
 // here we include all system header files, otherwise the we have to 
-// put the BernhardSchuppGrid namespace in every file of the original
+// put the ALUGridSpace namespace in every file of the original
 // source and we dont want to do that. so the idea is first to include 
 // the system header and then include the original BernhardSchuppGrid
 // sources within the namespace defined in bsinclude.hh
