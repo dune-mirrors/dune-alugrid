@@ -42,6 +42,7 @@ get_memory(prog_meminfo);
 write_memory(cerr,"start of program");
 
 { // Main program
+ 
   double t;
   long unsigned int n;
   //Hmesh hdl("triang.git"); 
