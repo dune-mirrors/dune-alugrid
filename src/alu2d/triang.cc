@@ -1299,11 +1299,11 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
         //                                   (1)
 
       if (0) {
-	Xdisplay disp(g_argc,g_argv,"a","Grid",
-		      350.,450.,450.);
+	//Xdisplay disp(g_argc,g_argv,"a","Grid",
+  //		      350.,450.,450.);
 	double p1[2],p2[2];
 	double bary[3]={1./3.,1./3.,1./3.};
-	mesh->draw(disp);
+	//mesh->draw(disp);
 	{
 	  this->fromlocal(bary,p1);
 	  this->fromlocal(bary,p2);
@@ -1313,7 +1313,7 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
 	  p2[1]+=0.05;
 	  Fullvertex pp1(p1,-1);
 	  Fullvertex pp2(p2,-1);
-	  disp.linedraw(&pp1,&pp2,disp.bcol[17]);
+	  //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
 	}
 	{
 	  this->fromlocal(bary,p1);
@@ -1324,7 +1324,7 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
 	  p2[1]-=0.05;
 	  Fullvertex pp1(p1,-1);
 	  Fullvertex pp2(p2,-1);
-	  disp.linedraw(&pp1,&pp2,disp.bcol[17]);
+	  //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
 	}
       }
         Triang *newtr[4];
@@ -1671,11 +1671,11 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
     }
     if (lcancoarsen) {
       if (0) {
-	Xdisplay disp(g_argc,g_argv,"a","Grid",
-		      350.,450.,450.);
+	//Xdisplay disp(g_argc,g_argv,"a","Grid",
+	//	      350.,450.,450.);
 	double p1[2],p2[2];
 	double bary[3]={1./3.,1./3.,1./3.};
-	mesh->draw(disp);
+	//mesh->draw(disp);
 	{
 	  this->fromlocal(bary,p1);
 	  this->fromlocal(bary,p2);
@@ -1685,7 +1685,7 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
 	  p2[1]+=0.05;
 	  Fullvertex pp1(p1,-1);
 	  Fullvertex pp2(p2,-1);
-	  disp.linedraw(&pp1,&pp2,disp.bcol[17]);
+	  //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
 	}
 	{
 	  this->fromlocal(bary,p1);
@@ -1696,7 +1696,7 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
 	  p2[1]-=0.05;
 	  Fullvertex pp1(p1,-1);
 	  Fullvertex pp2(p2,-1);
-	  disp.linedraw(&pp1,&pp2,disp.bcol[17]);
+	  //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
 	}
       }
       // Nachbarschaften stimmen (hoffe ich)
