@@ -7,7 +7,7 @@
 
 #   uncomment line, for 
 CC = gcc
-ALBERTA_PATH=../../alberta-1.2-SuSE9.2
+ALBERTA_PATH=../../alberta-1.2-src
 
 ALBERT_LIB_PATH = $(ALBERTA_PATH)/lib
 ALBERT_INCLUDE_PATH = $(ALBERTA_PATH)/include
@@ -34,14 +34,13 @@ XDR=1
 #   and now the user's files                                           #
 ########################################################################
 
-Albert2BSGrid = albert2BSGrid.o
-al2bsgrid: $(Albert2BSGrid)
-	$(LD) $(MOFLAG) -o $@ $(Albert2BSGrid) $(LIBS)
+Albert2ALUGrid = albert2ALUGrid.o
+alberta2ALUgrid: $(Albert2ALUGrid)
+	$(LD) $(MOFLAG) -o $@ $(Albert2ALUGrid) $(LIBS)
 
 
-albert2BSGrid.o : albert2BSGrid.c trans2BSMacro.c 
-
+albert2ALUGrid.o : albert2ALUGrid.c trans2ALUMacro.c 
 
 clean:
-			-rm *.o al2bsgrid
+			-rm *.o alberta2ALUgrid
 												
