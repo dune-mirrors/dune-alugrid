@@ -72,7 +72,7 @@ int main(int args, char *argv[])
   
   if( args < 3) 
   {
-    fprintf(stderr,"usage Alberta2ALUGrid <alberta-in-file> <alu3dgrid-macro-grid> <optional: refinement level> <optional: keep new Alberta Macro file>\n");
+    fprintf(stderr,"usage Alberta2ALUGrid <alberta-in-file> <alu3dgrid-out-file> <optional: refinement level> <optional: keep new Alberta Macro file>\n");
     exit(EXIT_FAILURE);
   }
 
