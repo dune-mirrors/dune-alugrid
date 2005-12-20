@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <alberta.h>
 
-#include "trans2BSMacro.c"
+#include "trans2ALUMacro.c"
 
 #define MACRO
 

@@ -7,12 +7,12 @@
 
 #   uncomment line, for 
 CC = gcc
-ALBERTA_PATH=../../alberta-1.2-src
+ALBERTA_PATH=../../alberta-1.2
 
 ALBERT_LIB_PATH = $(ALBERTA_PATH)/lib
 ALBERT_INCLUDE_PATH = $(ALBERTA_PATH)/include
 
-DEFAULT = al2bsgrid 
+DEFAULT = alberta2ALUgrid 
 DEBUG = 0  # may be 0 or 1
 
 include Makefile.al
@@ -34,12 +34,12 @@ XDR=1
 #   and now the user's files                                           #
 ########################################################################
 
-Albert2ALUGrid = albert2ALUGrid.o
-alberta2ALUgrid: $(Albert2ALUGrid)
-	$(LD) $(MOFLAG) -o $@ $(Albert2ALUGrid) $(LIBS)
+Alberta2ALUGrid = alberta2ALUGrid.o
+alberta2ALUgrid: $(Alberta2ALUGrid)
+	$(LD) $(MOFLAG) -o $@ $(Alberta2ALUGrid) $(LIBS)
 
 
-albert2ALUGrid.o : albert2ALUGrid.c trans2ALUMacro.c 
+alberta2ALUGrid.o : alberta2ALUGrid.c trans2ALUMacro.c 
 
 clean:
 			-rm *.o alberta2ALUgrid
