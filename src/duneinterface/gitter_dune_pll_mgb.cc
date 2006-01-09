@@ -145,49 +145,65 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
 inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os) 
 {
   double p [4][3];
-  int bfake, v [4] ;
+  int bfake, v [4] = {-1,-1,-1,-1};
+
   os.readObject (bfake) ;
   Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
-  
+
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
   os.readObject (v[3]) ;
 
+  /*
+  logFile << "reaf verts = [";
+  for(int vx=0; vx<4; ++vx )
+    logFile << v[vx] << ", ";
+  logFile << "] \n";
+  */
+
   int readPoint = 0; 
   os.readObject( readPoint ); 
+  
+  //logFile << readPoint << " readp on p = " << __STATIC_myrank << "\n";
 
-  int vert[8] = { 0,0,0,0,0,0,0,0 }; 
-  int vertface[4] = { 0,0,0,0 }; 
+  int vert[8] = { -1,-1,-1,-1,-1,-1,-1,-1 }; 
+  int vertface[4] = { -1,-1,-1,-1 }; 
   int fce; 
-  if( readPoint ) 
+  if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
     os.readObject ( fce );
+    //logFile << fce << " read face on p = " << __STATIC_myrank << "\n";
     
     for(int i=0; i<8; i++)
-      os.readObject ( vert[i] );
-    
-    for(int i=0; i<4; i++)
-      os.readObject ( vertface[i] );
-    
-    for(int i=0; i<4; i++) 
     {
+      os.readObject ( vert[i] );
+      //logFile << vert[i] << " read vx on p = " << __STATIC_myrank << "\n";
+    }
+
+    for(int i=0; i<4; i++)
+    {
+      os.readObject ( vertface[i] );
       double (&pr) [3] = p[i];
       os.readObject (pr[0]) ;
       os.readObject (pr[1]) ;
       os.readObject (pr[2]) ;
+      //logFile << vertface[i] << " read vertface on p = " << __STATIC_myrank << "\n";
     }
   }
 
+  //logFile.flush();
   if(b == Gitter :: hbndseg :: closure)
   {
-    //cout << "Insert Unique Hbnd4 p \n";
+    //logFile << "Insert Unique Hbnd4 p = " << __STATIC_myrank << "\n";
     Hbnd4IntStoragePoints hp ( p, vert, vertface , fce );
     InsertUniqueHbnd4_withPoint (v, b, hp ) ;
+    //logFile << "Insertion done! on p = " <<  __STATIC_myrank  <<"\n";
+    //logFile.flush();
   }
   else
   {
-    assert(readPoint == 0);
+    assert(readPoint == MacroGridMoverIF :: NO_POINT );
     // old method defined in base class 
     InsertUniqueHbnd4 (v, b ) ;
   }
@@ -318,7 +334,7 @@ void DuneParallelGridMover :: duneUnpackAll (vector < ObjectStream > & osv,
         unpackHbnd4Ext (os) ;
         break ;
       default :
-  cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "]\n" ;
+  cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n" ;
   cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << endl ;
   assert(false);
   abort () ;
@@ -366,9 +382,10 @@ void DuneParallelGridMover :: initialize ()
       // new code 
       if((*i)->getGhost())
       {
-        assert(false);
+        //assert(false);
         typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
         hexa_GEO * gh = static_cast<hexa_GEO *> ((*i)->getGhost());
+        assert( gh );
         //int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[0];
         _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0), (*i)->twist (0), gh , 0 ) ;
       }
@@ -657,7 +674,11 @@ void GitterDunePll :: duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, G
     }
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().dunePackAll (osv,gs) ;
+      for (w.first () ; ! w.done () ; w.next ()) 
+      {
+        //logFile << "Pack elements on p =" << __STATIC_myrank << "\n";
+        w.item ().accessPllX ().dunePackAll (osv,gs) ;
+      }
     }
     {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
@@ -668,6 +689,8 @@ void GitterDunePll :: duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, G
     lap3 = clock () ;
     {
       DuneParallelGridMover pgm (containerPll ()) ;
+      cout.flush();
+      cerr.flush();
       pgm.duneUnpackAll (osv,gs) ;
     }
     lap4 = clock () ;
