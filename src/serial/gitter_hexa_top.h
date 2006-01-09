@@ -694,14 +694,14 @@ template < class A > bool Hface4Top < A > :: refine (myrule_t r, int twist) {
 
 #ifdef __USE_INTERNAL_FACES__
 	bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-                      : this->nb.rear ().first->refineBalance (r,this->nb.rear  ().second) ;
+                     : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
 #else
   // --thetwist
   bool a = false;
   if( this->nb.rear().first && this->nb.front().first )
   {
     a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-                   : this->nb.rear ().first->refineBalance (r,this->nb.rear  ().second) ;
+                  : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
   }
   else
   {
@@ -906,6 +906,7 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
 
   hexa_GEO *(ghchild)[4] = {0,0,0,0};
   int gFace = this->getGhostFaceNumber();
+
 #ifndef __USE_INTERNAL_FACES__
   // refine ghost element 
   this->splitGhost();
