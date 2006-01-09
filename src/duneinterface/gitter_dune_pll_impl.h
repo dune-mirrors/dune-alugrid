@@ -14,6 +14,7 @@
 #include "gitter_pll_ldb.h"
   
 //static bool writeLogFile = false;
+//extern std::ofstream logFile;
 
 class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
 {
@@ -33,22 +34,24 @@ public:
   GitterDunePll (const char * filename , MpAccessLocal &mp) 
     : GitterBasisPll (filename,mp) , balanceGrid_ (false) 
   {
-    // logfile is defined in gitter_impl.h    
+#ifndef NDEBUG
+    __STATIC_myrank = mp.myrank(); 
+#endif
     /*
+    // logfile is defined in gitter_impl.h    
     char logFileName [32];
     sprintf(logFileName,"logfile.%d",mpAccess().myrank());
     cerr << "open logfile = " << logFileName << "\n";
 
-    logFile.close();
-    logFile.open (logFileName);
+    logFile.clear();
+    logFile.open (logFileName );
     logFile << "logfile of processor " << mpAccess().myrank() << "\n";
+    logFile.flush();
     */
   };
 
   ~GitterDunePll () {
-    /*
-    logFile.close();
-    */
+    //logFile.close();
   }
 
   bool refine (); 

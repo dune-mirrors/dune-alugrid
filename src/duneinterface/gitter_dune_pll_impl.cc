@@ -4,7 +4,6 @@
 #include "gitter_dune_pll_impl.h"
 #include "gitter_dune_pll_mgb.cc"
 
-
 IteratorSTI < Gitter :: helement_STI > * GitterDunePll :: 
 leafIterator (const helement_STI *)
 {

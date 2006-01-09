@@ -2126,7 +2126,8 @@ inline Gitter :: Geometric :: hface4 :: ~hface4 () {
   return ;
 }
 
-inline void Gitter :: Geometric :: hface4 :: attachElement (const pair < myconnect_t *, int > & p, int t) {
+inline void Gitter :: Geometric :: hface4 :: attachElement (const pair < myconnect_t *, int > & p, int t) 
+{
   t < 0 ? nb._h = p : nb._v = p ;
   ref ++ ;
   return ;
@@ -2533,7 +2534,8 @@ inline bool Gitter :: Geometric :: HexaRule :: isValid () const {
 inline Gitter :: Geometric :: Hexa :: 
 Hexa (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
       myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
-      myhface4_t * f4, int t4, myhface4_t * f5, int t5) {
+      myhface4_t * f4, int t4, myhface4_t * f5, int t5) 
+{
   (f [0] = f0)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1)) ;
   (f [2] = f2)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 2),(s [2] = t2)) ;
