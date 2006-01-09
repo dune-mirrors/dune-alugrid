@@ -103,6 +103,7 @@ template < class A > class Hface4Top : public A {
     innerface_t * next () ;
     const innerface_t * next () const ;
     void append (innerface_t * f) ;
+
   public :
     virtual myrule_t getrule () const ;
     virtual bool refine (myrule_t,int) ;

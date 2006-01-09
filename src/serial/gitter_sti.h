@@ -734,6 +734,8 @@ public :
       inline void backup  (ostream & os ) const;
       inline void restore (istream & is ) ;
 
+      int nChild () const { return 0 ; }
+
       // Extramethode zum Rausschreiben der Elementdaten in einfachem
       // Format f"ur die Visualisierung mit GRAPE:
      
