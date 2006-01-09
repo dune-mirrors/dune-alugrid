@@ -291,6 +291,7 @@ void ElementPllBaseX :: writeStaticState (ObjectStream &, int) const {
 }
 
 void ElementPllBaseX :: readStaticState (ObjectStream &, int) {
+  assert(false);
   abort () ;
   return ;
 }
@@ -368,7 +369,6 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 #ifdef _DUNE_USES_ALU3DGRID_
   
   // write level to know the level of ghost on the other side
-  //logFile << "writeLevel " << mytetra().level() << "\n";
   os.writeObject( mytetra().level() );
   
 #ifdef __USE_INTERNAL_FACES__  
@@ -513,7 +513,7 @@ void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
     os.writeObject (mytetra ().myvertex (fce,2)->ident ()) ;
 
     // see method unpackHbnd3Int 
-    os.writeObject ( 1 ); // 1 == point is transmitted 
+    os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); // 1 == point is transmitted 
     // store the missing point to form a tetra 
     const double (&p)[3] = mytetra ().myvertex (fce)->Point();
     for(int j=0; j<3; j++) os.writeObject ( p[j] ) ;
@@ -658,7 +658,7 @@ bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       strstream_t s ;
       myperiodic3 ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject (-1) ;
+      osv [j].writeObject (ENDOFSTREAM) ;
       inlineData (osv [j]) ;
     }
     _erasable = true ;
@@ -677,7 +677,7 @@ void Periodic3PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
     os.writeObject (myperiodic3 ().myvertex (fce,0)->ident ()) ;
     os.writeObject (myperiodic3 ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myperiodic3 ().myvertex (fce,2)->ident ()) ;
-    os.writeObject ( 0 ); // 0 == no point transmitted 
+    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // 0 == no point transmitted 
   }
   return ;
 }
@@ -802,7 +802,7 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       strstream_t s ;
       myperiodic4 ().backup (s) ;
       for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject (-1) ;
+      osv [j].writeObject ( ENDOFSTREAM ) ;
       inlineData (osv [j]) ;
     }
     _erasable = true ;
@@ -822,7 +822,7 @@ void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
     os.writeObject (myperiodic4 ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myperiodic4 ().myvertex (fce,2)->ident ()) ;
     os.writeObject (myperiodic4 ().myvertex (fce,3)->ident ()) ;
-    os.writeObject ( 0 ); // 0 == no point transmitted 
+    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // 0 == no point transmitted 
   }
   return ;
 }
@@ -864,10 +864,10 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
 #ifdef _DUNE_USES_ALU3DGRID_
   
   // write level to know the level of ghost on the other side
-  //logFile << "writeLevel " << mytetra().level() << "\n";
   os.writeObject( myhexa().level() );
 
 #ifdef __USE_INTERNAL_FACES__  
+  assert(false);
   enum { dimvx = 4 };
   int oppFace = myhexa().oppositeFace[ face ];
  
@@ -982,10 +982,13 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
 // pack all function for dune 
 bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
     GatherScatterType & gs) {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+  
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
+
     osv [j].writeObject (HEXA) ;
     osv [j].writeObject (myhexa ().myvertex (0)->ident ()) ;
     osv [j].writeObject (myhexa ().myvertex (1)->ident ()) ;
@@ -1019,6 +1022,11 @@ void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
   if (hit) {
     os.writeObject (HBND4INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
+    
+    for(int vx=0; vx<4; vx++) 
+    {
+      int vxid = myhexa().myvertex(fce,vx)->ident(); 
+    }
 
     os.writeObject (myhexa ().myvertex (fce,0)->ident ()) ;
     os.writeObject (myhexa ().myvertex (fce,1)->ident ()) ;
@@ -1026,27 +1034,27 @@ void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
     os.writeObject (myhexa ().myvertex (fce,3)->ident ()) ;
 
     // see method unpackHbnd4Int 
-    os.writeObject ( 1 ); // 1 == points are transmitted 
+    int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; 
+    os.writeObject ( writePoint ); // 1 == points are transmitted 
 
     // know which face is the internal bnd 
     os.writeObject (fce);
    
     for(int k=0; k<8; k++) 
-      os.writeObject (myhexa ().myvertex (k)->ident ()) ;
-
-    int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
-    //const Gitter :: Geometric :: hface4_GEO * myface = myhexa().myhface4(oppFace); 
-    for(int vx=0; vx<4; vx++)
     {
-      os.writeObject ( myhexa().myvertex(oppFace,vx)->ident() ) ;
+      int vx = myhexa ().myvertex (k)->ident ();
+      os.writeObject ( vx ) ;
     }
 
-    // store the four points of the opposite face 
+    int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
     for(int vx=0; vx<4; vx++)
     {
-      const double (&p)[3] = myhexa().myvertex(oppFace,vx)->Point();
-      //const double (&p)[3] = myface->myvertex(vx)->Point();
-      for(int j=0; j<3; j++) os.writeObject ( p[j] ) ;
+      const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
+      os.writeObject( vertex->ident() );
+      const double (&p)[3] = vertex->Point();
+      os.writeObject ( p[0] ) ;
+      os.writeObject ( p[1] ) ;
+      os.writeObject ( p[2] ) ;
     }
   }
   return ;
@@ -1551,209 +1559,8 @@ insert_hbnd4_ghost (hface4_GEO * f, int t) {
 MacroGhostHexa * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_ghosthexa (hface4_GEO * f, int t, const Hbnd4IntStoragePoints & hp) 
 {
-
-  MacroGhostHexa * gm = 0;
-#if 0
-  {
-    typedef Gitter :: Geometric :: hexa_GEO GhostElement_t;
-    typedef Gitter :: Geometric :: VertexGeo VertexGeo;
-   
-    const double (&p)[4][3] = hp.getPoints();
-    const int (&vertices)[8] = hp.getIdents(); 
-    const int (&oppVerts)[4] = hp.getFaceIdents();
-
-    //const int (&protoType)[6][4] = Gitter :: Geometric :: hexa_GEO :: protoType; 
-    
-    int vxorgface [4] = { 
-      f->myvertex(0)->ident() , 
-      f->myvertex(1)->ident() , 
-      f->myvertex(2)->ident() , 
-      f->myvertex(3)->ident()  
-    }; 
- 
-    // know for the first 4 vertices which number in the hexa they have 
-    int vxmap[8] = { -1, -1, -1,-1,-1,-1,-1 -1 };
-    for(int i=0; i<4; i++) 
-    {   
-      for(int k=0; k<8; k++) 
-      {
-        if(vertices[k] == vxorgface[i])
-        { 
-          vxmap[i] = k;  
-        }
-      }
-    }
-    for(int i=0; i<4; i++) 
-    {   
-      for(int k=0; k<8; k++) 
-      {
-        if(vertices[k] == oppVerts[i])
-        { 
-          vxmap[4+i] = k;  
-        }
-      }
-    }
-#ifndef NDEBUG
-    for(int i=0 ;i<8; i++) assert( vxmap[i] >= 0 );
-#endif
-    // **********************************************8
-    
-    VertexGeo *(vx)[8];
-    VertexGeo *(vx_save)[4];
-
-    for(int i=0; i<4; i++) 
-    {
-      vx[vxmap[i]] = f->myvertex(i);
-    }
-    
-    // insert new point with ghost coord p 
-    for(int i=0; i<4; i++)
-    {
-      vx_save[i] = vx[vxmap[4+i]] = insert_ghostvx(p[i]);
-    }
-
-    MacroGridBuilder * mgb = new MacroGridBuilder ( *this );
-    for(int i=0; i<8; i++)
-    {
-      const double (&px)[3] = vx[i]->Point();
-      mgb->InsertUniqueVertex(px[0],px[1],px[2],vertices[i]);
-    } 
-
-    int v[8];
-    for(int i=0; i<8; i++) v[i] = vertices[i];
-    hexa_GEO * ghost = mgb->InsertUniqueHexa (v).first ;
-
-    printHexa(cout,ghost,p);
-    
-    // vertices done 
-    //*****************************************************
-  
-    /*
-    typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
-    hedge1_GEO *(edges)[12];
-    // create 12 edges 
-   
-    // the first four belong to the internal face 
-    edges[0]  = insert_hedge1_twist(vx[0],vertices[0],vx[1],vertices[1], es[0]);
-    edges[1]  = insert_hedge1_twist(vx[1],vertices[1],vx[2],vertices[2], es[1]);
-    edges[2]  = insert_hedge1_twist(vx[2],vertices[2],vx[3],vertices[3], es[2]);
-    edges[3]  = insert_hedge1_twist(vx[3],vertices[3],vx[0],vertices[0], es[3]);
-
-    // the second four are connecting the two faces 
-    edges[4]  = insert_hedge1_twist(vx[0],vertices[0],vx[4],vertices[4], es[4]);
-    edges[5]  = insert_hedge1_twist(vx[1],vertices[1],vx[5],vertices[5], es[5]);
-    edges[6]  = insert_hedge1_twist(vx[2],vertices[2],vx[6],vertices[6], es[6]);
-    edges[7]  = insert_hedge1_twist(vx[3],vertices[3],vx[7],vertices[7], es[7]);
-
-    // the third four belong to the opposite face  
-    edges[8]   = insert_hedge1_twist(vx[4],vertices[4],vx[5],vertices[5], es[8]);
-    edges[9]   = insert_hedge1_twist(vx[5],vertices[5],vx[6],vertices[6], es[9]);
-    edges[10]  = insert_hedge1_twist(vx[6],vertices[6],vx[7],vertices[7], es[10]);
-    edges[11]  = insert_hedge1_twist(vx[7],vertices[7],vx[4],vertices[4], es[11]);
-
-    typedef Gitter :: Geometric :: hface4_GEO hface3_GEO;
-    hface4_GEO *(faces)[6];
-
-    int twst [6] ;
-    for (int fce = 0 ; fce < 6 ; fce ++) 
-    {
-      int x [4] ;
-      x [0] = vertices [prototype [fce][0]] ;
-      x [1] = vertices [prototype [fce][1]] ;
-      x [2] = vertices [prototype [fce][2]] ;
-      x [3] = vertices [prototype [fce][3]] ;
-      twst  [fce] = cyclicReorder (x,x+4) ;
-      faces [fce] =  InsertUniqueHface4 (x).first ;
-    }
-
-
-    // see ref hexa in gitter_geo.cc 
-    { 
-      // twist 1 means the edge points from higher local number vertex to
-      // lower, i.e. edge[3],edge[7] and edge[11] 
-      {
-        // face 0 
-        // all twists are zero because all edges are oriented the right
-        // way. 
-        int s[4] = { es[0] , es[1] , es[2] , es[3] };
-        hedge1_GEO *(e)[4] = { edges[0] , edges[1] , edges[2] , edges[3] };
-        faces[0] = GitterBasis :: MacroGitterBasis ::insert_hface4 (e,s);
-      }
-      {
-        // face 1 
-        int s[4] = { 0 , 0 , 0 , 1 };
-        hedge1_GEO *(e)[4] = { edges[8] , edges[9] , edges[10] , edges[11] };
-        faces[1] = GitterBasis :: MacroGitterBasis ::insert_hface4 (e,s);
-      }
-      {
-        // face 2 
-        int s[4] = { 0 , 0 , 0 , 0 };
-        hedge1_GEO *(e)[4] = { edges[0] , edges[5] , edges[8] , edges[4] };
-        faces[2] = GitterBasis :: MacroGitterBasis ::insert_hface4 (e,s);
-      }
-      {
-        // face 3 
-        int s[4] = { 0 , 0 , 0 , 0 };
-        hedge1_GEO *(e)[4] = { edges[1] , edges[6] , edges[9] , edges[5] };
-        faces[3] = GitterBasis :: MacroGitterBasis ::insert_hface4 (e,s);
-      }
-      {
-        // face 4 
-        int s[4] = { 0 , 1 , 0 , 0 };
-        hedge1_GEO *(e)[4] = { edges[2] , edges[7] , edges[10] , edges[6] };
-        faces[4] = GitterBasis :: MacroGitterBasis ::insert_hface4 (e,s);
-      }
-      {
-        // face 5 
-        int s[4] = { 1 , 0 , 1 , 1 };
-        hedge1_GEO *(e)[4] = { edges[3] , edges[4] , edges[11] , edges[7] };
-        faces[5] = GitterBasis :: MacroGitterBasis ::insert_hface4 (e,s);
-      }
-    }
-
-    for(int i=0; i<6; i++) printFace4(cout,faces[i],i);
-
-    int twst[6] = { -1 , 0 , -1 ,  0 , -1 , 0 }; 
-
-    typedef Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
-    hbndseg4_GEO *(hbnd)[6];
-    {
-      for(int i=0; i<6; i++)
-        hbnd[i] = insert_hbnd4_ghost(faces[i],twst[i]);
-    }
-
-    GhostElement_t * ghost = GitterBasis :: MacroGitterBasis :: insert_hexa(faces,twst);     
-    assert(ghost);
-  
-    for(int i=0; i<8; i++)
-    {
-      cout << "const vx " << i << " = [";
-          for(int j=0; j<2; j++)
-            cout << vx[i]->Point()[j] << ",";
-      cout << vx[i]->Point()[2] << "] \n";
-
-    }
-    for(int i=0; i<4; i++)
-    {
-      cout << "org face vx " << i << " = [";
-          for(int j=0; j<2; j++)
-            cout << f->myvertex(i)->Point()[j] << ",";
-      cout << f->myvertex(i)->Point()[2] << "] \n";
-
-    }
-    */
-
-    printHexa(cout, ghost, p);
-    
-    hedge1_GEO *(edges)[12];
-    hface4_GEO *(faces)[6];
-    hbndseg4_GEO *(hbnd)[6];
-
-    gm = new MacroGhostHexa (vx_save,edges,faces,hbnd,ghost,p);
-    //cout << "New Ghost Macro " << gm << "\n";
-  }
-#endif
-  return gm;
+  assert(false);
+  return 0;
 }
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
