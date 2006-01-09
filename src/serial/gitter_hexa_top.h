@@ -10,10 +10,10 @@ extern void printHexa(ostream & os , Gitter :: Geometric :: hexa_GEO * item_);
 
 template < class A > class Hedge1Top : public A {
   protected :
-    typedef Hedge1Top < A >      	inneredge_t ;
-    typedef typename A :: innervertex_t	innervertex_t ;
-    typedef typename A :: myvertex_t	myvertex_t ;
-    typedef typename A :: myrule_t	myrule_t ;
+    typedef Hedge1Top < A >       inneredge_t ;
+    typedef typename A :: innervertex_t innervertex_t ;
+    typedef typename A :: myvertex_t  myvertex_t ;
+    typedef typename A :: myrule_t  myrule_t ;
   private :
     int _lvl ;
     inneredge_t * _dwn, * _bbb ;
@@ -21,11 +21,13 @@ template < class A > class Hedge1Top : public A {
     myrule_t _rule ;
 
     IndexManagerType & _indexManager; 
+    const signed char _nChild;
   public :
     // need for refinement 
     IndexManagerType & getIndexManager() { return _indexManager; }
     
     inline Hedge1Top (int,myvertex_t *,myvertex_t *, IndexManagerType & im) ;
+    inline Hedge1Top (int,myvertex_t *,myvertex_t *, IndexManagerType & im, int nChild ) ;
     virtual ~Hedge1Top () ;
     inneredge_t * subedge1 (int) ;
     const inneredge_t * subedge1 (int) const ;
@@ -33,7 +35,8 @@ template < class A > class Hedge1Top : public A {
     const inneredge_t * down () const ;
     inneredge_t * next () ;
     const inneredge_t * next () const ;
-    int level () const ;
+    inline int level () const ;
+    inline int nChild () const ;
     inline void append (inneredge_t *) ;
     innervertex_t * innerVertex () ;
     const innervertex_t * innerVertex () const ;
@@ -67,6 +70,7 @@ template < class A > class Hface4Top : public A {
     int _lvl ;
     myrule_t _rule ;
     IndexManagerType & _indexManager;
+    const signed char _nChild;
     
   private:
     inline myhedge1_t * subedge1 (int,int) ;
@@ -77,7 +81,10 @@ template < class A > class Hface4Top : public A {
     // for HexaTop, when refinement is done 
     IndexManagerType & getIndexManager() { return _indexManager; }
     
+    // constructor for macro faces 
     inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im) ;
+    // constructor for refined faces 
+    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im, int nChild ) ;
     virtual ~Hface4Top () ;
     innervertex_t * subvertex (int) ;
     const innervertex_t * subvertex (int) const ;
@@ -85,7 +92,8 @@ template < class A > class Hface4Top : public A {
     const inneredge_t * subedge1 (int) const ;
     innerface_t * subface4 (int) ;
     const innerface_t * subface4 (int) const ;
-    int level () const ;
+    inline int level () const ;
+    inline int nChild () const ;
     innervertex_t * innerVertex () ;
     const innervertex_t * innerVertex () const ;
     inneredge_t * innerHedge () ;
@@ -111,8 +119,8 @@ template < class A > class Hface4Top : public A {
 
 template < class A > class Hbnd4Top : public A {
   protected :
-    typedef Hbnd4Top < A >        	    innerbndseg_t ;
-    typedef typename A :: myhface4_t  	myhface4_t ;
+    typedef Hbnd4Top < A >              innerbndseg_t ;
+    typedef typename A :: myhface4_t    myhface4_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
     typedef typename A :: bnd_t         bnd_t;
@@ -154,15 +162,15 @@ template < class A > class Hbnd4Top : public A {
 
 template < class A > class HexaTop : public A {
   protected :
-    typedef HexaTop < A >         	innerhexa_t ;
-    typedef typename A :: innerface_t	innerface_t ;
-    typedef typename A :: inneredge_t	inneredge_t ;
-    typedef typename A :: innervertex_t	innervertex_t ;
-    typedef typename A :: myhface4_t  	myhface4_t ;
-    typedef typename A :: myhedge1_t	myhedge1_t ;
-    typedef typename A :: myvertex_t	myvertex_t ;
-    typedef typename A :: myrule_t	myrule_t ;
-    typedef typename A :: balrule_t 	balrule_t ;
+    typedef HexaTop < A >           innerhexa_t ;
+    typedef typename A :: innerface_t innerface_t ;
+    typedef typename A :: inneredge_t inneredge_t ;
+    typedef typename A :: innervertex_t innervertex_t ;
+    typedef typename A :: myhface4_t    myhface4_t ;
+    typedef typename A :: myhedge1_t  myhedge1_t ;
+    typedef typename A :: myvertex_t  myvertex_t ;
+    typedef typename A :: myrule_t  myrule_t ;
+    typedef typename A :: balrule_t   balrule_t ;
     inline void refineImmediate (myrule_t) ;
     inline void append (innerhexa_t * h) ;
   private :
@@ -173,6 +181,7 @@ template < class A > class HexaTop : public A {
     int _lvl ;
     myrule_t _rule, _req ;
     IndexManagerType & _indexManager; 
+    const signed char _nChild; 
 
 private:    
     IndexManagerType & getEdgeIndexManager () ;
@@ -194,7 +203,7 @@ protected:
     // constructor for refinement 
     inline HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
                     myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, 
-                    innerhexa_t * up) ;
+                    innerhexa_t * up, int nChild ) ;
     
     virtual ~HexaTop () ;
     inline innerhexa_t * up () ;
@@ -209,10 +218,11 @@ protected:
     inline const inneredge_t * innerHedge () const ;
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
-    int level () const ;
+    inline int level () const ;
+    inline int nChild () const ;
   public :
     myrule_t getrule () const ;
-  myrule_t requestrule () const ;
+    myrule_t requestrule () const ;
     bool refine () ;
     void request (myrule_t) ;
     bool refineBalance (balrule_t,int) ;
@@ -232,13 +242,13 @@ protected:
 
 template < class A > class Periodic4Top : public A {
   protected :
-    typedef Periodic4Top < A > 		innerperiodic4_t  ;
+    typedef Periodic4Top < A >    innerperiodic4_t  ;
     typedef typename A :: innervertex_t innervertex_t ;
-    typedef typename A :: inneredge_t 	inneredge_t ;
-    typedef typename A :: innerface_t 	innerface_t ;
-    typedef typename A :: myhedge1_t 	myhedge1_t ;
-    typedef typename A :: myhface4_t 	myhface4_t ;
-    typedef typename A :: myrule_t 	myrule_t ;
+    typedef typename A :: inneredge_t   inneredge_t ;
+    typedef typename A :: innerface_t   innerface_t ;
+    typedef typename A :: myhedge1_t  myhedge1_t ;
+    typedef typename A :: myhface4_t  myhface4_t ;
+    typedef typename A :: myrule_t  myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
     inline void refineImmediate (myrule_t) ;
     inline void append (innerperiodic4_t * h) ;
@@ -246,6 +256,7 @@ template < class A > class Periodic4Top : public A {
     innerperiodic4_t * _dwn, * _bbb, * _up ; 
     int _lvl ;
     myrule_t _rule ;
+    const signed char _nChild; 
   private :
     void splitISO4 () ;
   protected :
@@ -255,6 +266,8 @@ template < class A > class Periodic4Top : public A {
     const myhface4_t * subface4 (int i, int j) const ;
   public:
     inline Periodic4Top (int,myhface4_t *,int,myhface4_t *,int) ;
+    inline Periodic4Top (int,myhface4_t *,int,myhface4_t *,int,
+        innerperiodic4_t * up, int nChild ) ;
     virtual inline ~Periodic4Top () ;
 
     inline innerperiodic4_t * up () ;
@@ -271,6 +284,7 @@ template < class A > class Periodic4Top : public A {
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
     inline int level () const ;
+    inline int nChild () const ;
   public :
     myrule_t getrule () const ;
     bool refine () ;
@@ -283,14 +297,14 @@ template < class A > class Periodic4Top : public A {
     void restore (istream &) ;
 };
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
 // #     #                                    #    #######
 // #     #  ######  #####    ####   ######   ##       #      ####   #####
@@ -302,7 +316,13 @@ template < class A > class Periodic4Top : public A {
 
 
 template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b, IndexManagerType & im ) 
-  : A (a,b), _lvl (l), _dwn (0), _bbb (0), _cv (0), _rule (myrule_t :: nosplit) , _indexManager (im) {
+  : A (a,b), _lvl (l), _dwn (0), _bbb (0), _cv (0), _rule (myrule_t :: nosplit) , _indexManager (im) , _nChild(0) {
+  this->setIndex( _indexManager.getIndex() );  
+  return ;
+}
+
+template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b, IndexManagerType & im, int nChild ) 
+  : A (a,b), _lvl (l), _dwn (0), _bbb (0), _cv (0), _rule (myrule_t :: nosplit) , _indexManager (im) ,_nChild(nChild) {
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -315,8 +335,13 @@ template < class A > Hedge1Top < A > :: ~Hedge1Top () {
   return ;
 }
 
-template < class A > int Hedge1Top < A > :: level () const {
+template < class A > inline int Hedge1Top < A > :: level () const {
   return _lvl ;
+}
+
+template < class A > inline int Hedge1Top < A > :: nChild () const {
+  assert( _nChild >= 0 && _nChild < 2 );
+  return _nChild ;
 }
 
 template < class A > Hedge1Top < A > * Hedge1Top < A > :: down () {
@@ -381,11 +406,11 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) {
           assert (_cv == 0 && _dwn == 0) ;
           // the last myvertex(0) is submitted for the indexmanager reference, rk
           _cv = new innervertex_t (l, .5 * (this->myvertex(0)->Point()[0] + this->myvertex(1)->Point()[0]),
-			      .5 * (this->myvertex(0)->Point()[1] + this->myvertex(1)->Point()[1]),  
-			      .5 * (this->myvertex(0)->Point()[2] + this->myvertex(1)->Point()[2]) , *(this->myvertex(0)) ) ;
+            .5 * (this->myvertex(0)->Point()[1] + this->myvertex(1)->Point()[1]),  
+            .5 * (this->myvertex(0)->Point()[2] + this->myvertex(1)->Point()[2]) , *(this->myvertex(0)) ) ;
           assert (_cv) ;
-          inneredge_t * e0 = new inneredge_t (l, this->myvertex(0), _cv, _indexManager ) ;
-          inneredge_t * e1 = new inneredge_t (l, _cv, this->myvertex(1), _indexManager ) ;
+          inneredge_t * e0 = new inneredge_t (l, this->myvertex(0), _cv, _indexManager, 0 ) ;
+          inneredge_t * e1 = new inneredge_t (l, _cv, this->myvertex(1), _indexManager, 1 ) ;
           assert (e0 && e1) ;
           (_dwn = e0)->append (e1) ;
           _rule = myrule_t :: iso2 ;
@@ -406,12 +431,12 @@ template < class A > bool Hedge1Top < A > :: coarse () {
   if (this->leaf ()) return false ;
   bool x = true ;
 
-	// Der Wert von x bleibt 'true' falls alle Kinder der Kante
-	// Bl"atter sind und zudem keine Referenzen auf diese Kanten
-	// gesetzt sind. Andernfalls liegt kein vergr"oberungsf"ahiger
-	// Knoten vor.
-	// Vorsicht: Im parallelen Gitter bleiben auch Kanten ohne
-	// Refcount stehen, um konsistente "Uberg"ange zu erhalten.
+  // Der Wert von x bleibt 'true' falls alle Kinder der Kante
+  // Bl"atter sind und zudem keine Referenzen auf diese Kanten
+  // gesetzt sind. Andernfalls liegt kein vergr"oberungsf"ahiger
+  // Knoten vor.
+  // Vorsicht: Im parallelen Gitter bleiben auch Kanten ohne
+  // Refcount stehen, um konsistente "Uberg"ange zu erhalten.
 
   for (inneredge_t * f = this->down () ; f ; f = f->next ()) {
     if (f->leaf ()) {
@@ -423,9 +448,9 @@ template < class A > bool Hedge1Top < A > :: coarse () {
   }
   if (x) {
 
-	// Falls lockedAgainstCoarsening () aufgerufen 'true' liefert
-	// soll die Operation des Vergr"oberns nicht sofort ausgef"uhrt
-	// sondern (pending) zur"uckgestellt werden.
+  // Falls lockedAgainstCoarsening () aufgerufen 'true' liefert
+  // soll die Operation des Vergr"oberns nicht sofort ausgef"uhrt
+  // sondern (pending) zur"uckgestellt werden.
 
     if (!this->lockedAgainstCoarsening ()) {
       delete _dwn ; 
@@ -492,8 +517,13 @@ template < class A > const typename Hface4Top < A > :: innerface_t * Hface4Top <
   return _bbb ;
 }
 
-template < class A > int Hface4Top < A > :: level () const {
+template < class A > inline int Hface4Top < A > :: level () const {
   return _lvl ;
+}
+
+template < class A > inline int Hface4Top < A > :: nChild () const {
+  assert( _nChild >= 0 && _nChild < 4 );
+  return _nChild ;
 }
 
 template < class A > typename Hface4Top < A > :: myhedge1_t * 
@@ -556,7 +586,20 @@ template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0
   myhedge1_t * e2, int t2, myhedge1_t * e3, int t3, IndexManagerType & im) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
   _dwn (0), _bbb (0), _cv (0), _ed (0), _lvl (l), 
-  _rule (myrule_t :: nosplit) , _indexManager(im) {
+  _rule (myrule_t :: nosplit) , _indexManager(im) , _nChild(0) {
+  this->setIndex( _indexManager.getIndex() );  
+  return ;
+}
+
+template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1, 
+  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3, IndexManagerType & im,
+  int nChild ) 
+  : A (e0, t0, e1, t1, e2, t2, e3, t3), 
+  _dwn (0), _bbb (0), _cv (0), _ed (0), _lvl (l), 
+  _rule (myrule_t :: nosplit) 
+  , _indexManager(im) 
+  , _nChild(nChild)
+{
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -635,10 +678,10 @@ template < class A > void Hface4Top < A > :: splitISO4 () {
   e0->append(e1) ;
   e1->append(e2) ;
   e2->append(e3) ;
-  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), this->twist(0), e0, 0, e3, 1, this->subedge1(3,1), this->twist(3), _indexManager ) ;
-  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e1, 0, e0, 1, _indexManager ) ;
-  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), e2, 0, _indexManager ) ;
-  innerface_t * f3 = new innerface_t (l, e3, 0, e2, 1, this->subedge1(2,1), this->twist(2), this->subedge1(3,0), this->twist(3), _indexManager ) ;
+  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), this->twist(0), e0, 0, e3, 1, this->subedge1(3,1), this->twist(3), _indexManager , 0) ;
+  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e1, 0, e0, 1, _indexManager , 1) ;
+  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), e2, 0, _indexManager , 2) ;
+  innerface_t * f3 = new innerface_t (l, e3, 0, e2, 1, this->subedge1(2,1), this->twist(2), this->subedge1(3,0), this->twist(3), _indexManager , 3) ;
   assert (f0 && f1 && f2 && f3) ;  
   f0->append(f1) ;
   f1->append(f2) ;
@@ -667,16 +710,14 @@ template < class A > void Hface4Top < A > :: refineImmediate (myrule_t r) {
       abort () ;
       break ;
     }
-// ??	// Die nichtkonforme Nachbarschaft noch erg"anzen und auf der
-// ??	// Fl"ache die Situation nach der Verfeinerung vervollst"andigen.
-// ??	
+// ?? // Die nichtkonforme Nachbarschaft noch erg"anzen und auf der
+// ?? // Fl"ache die Situation nach der Verfeinerung vervollst"andigen.
+// ?? 
 // ??   {for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = nb ; }
 
-    // * higher order
-    int i = 0;
-    for (innerface_t* f = down(); f; f = f->next(), ++i) {
+    // * higher order, this is a hack
+    for (innerface_t* f = down(); f; f = f->next()) { //, ++i) {
       f->_parRule = getrule();
-      f->_nChild = i;
     }
 
     this->postRefinement () ;
@@ -687,13 +728,13 @@ template < class A > void Hface4Top < A > :: refineImmediate (myrule_t r) {
 template < class A > bool Hface4Top < A > :: refine (myrule_t r, int twist) {
   if (r != getrule ()) {
     assert (getrule () == myrule_t :: nosplit ? 1 : 
-    	(cerr << "**FEHLER beim Verfeinern mit Regel " << r << " auf " << getrule () << endl, 0)) ;
+      (cerr << "**FEHLER beim Verfeinern mit Regel " << r << " auf " << getrule () << endl, 0)) ;
     switch(r) {
       case myrule_t :: iso4 :
       {
 
 #ifdef __USE_INTERNAL_FACES__
-	bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+  bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
                      : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
 #else
   // --thetwist
@@ -711,18 +752,18 @@ template < class A > bool Hface4Top < A > :: refine (myrule_t r, int twist) {
       a = this->nb.front ().first->refineBalance (r,this->nb.front().second);
   }
 #endif
-	
-	if (a) {	
-	  if (getrule () == myrule_t :: nosplit) {
-	    refineImmediate (r) ;
-	    {for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = this->nb ; }
-	  } else {
-	    assert (getrule () == myrule_t :: iso4) ;
-	  }
-	  return true ;
-	} else {
-	  return false ;
-	}
+  
+  if (a) {  
+    if (getrule () == myrule_t :: nosplit) {
+      refineImmediate (r) ;
+      {for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = this->nb ; }
+    } else {
+      assert (getrule () == myrule_t :: iso4) ;
+    }
+    return true ;
+  } else {
+    return false ;
+  }
       }
       default :
         cerr << "**WARNUNG (IGNORIERT) falsche Verfeinerungsregel gefunden: " ;
@@ -739,12 +780,12 @@ template < class A > bool Hface4Top < A > :: coarse () {
   bool x = true ;
   do {
 
-	// Falls eine Kind-Fl"ache noch referenziert wird, kann
-	// nicht auf diesem Level vergr"obert werden.
-	// Daher wird nur die nichtkonforme Nachbarschaft ver-
-	// vollst"andigt, die eventuell durch Elementvergr"oberung
-	// durcheinander gekommen war. Die Vergr"oberung geht dann
-	// auf das n"achste Level "uber.
+  // Falls eine Kind-Fl"ache noch referenziert wird, kann
+  // nicht auf diesem Level vergr"obert werden.
+  // Daher wird nur die nichtkonforme Nachbarschaft ver-
+  // vollst"andigt, die eventuell durch Elementvergr"oberung
+  // durcheinander gekommen war. Die Vergr"oberung geht dann
+  // auf das n"achste Level "uber.
   
     if (f->ref) {
       if (f->ref == 1) f->nb.complete (this->nb) ;
@@ -754,9 +795,9 @@ template < class A > bool Hface4Top < A > :: coarse () {
   } while ( (f = f->next()) ) ;
   if (x) {
     
-	// Hier wird tats"achlich vergr"obert, d.h. alle Kinder 
-	// werden beseitigt, und das Bezugsobjekt wird zum neuen
-	// Blatt im Baum.
+  // Hier wird tats"achlich vergr"obert, d.h. alle Kinder 
+  // werden beseitigt, und das Bezugsobjekt wird zum neuen
+  // Blatt im Baum.
     
     delete _dwn ; 
     _dwn = 0 ;
@@ -947,30 +988,30 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
 
 template < class A > inline bool Hbnd4Top < A > :: refineBalance (balrule_t r, int b) {
 
-	// Die Methode refineBalance () f"uhrt auf dem Randabschluss entweder
-	// unbedingt die Verfeinerung durch, da im Verlauf der Verfeinerung keine
-	// weiteren Anforerungen mehr an den Randabschluss  gerichtet werden 
-	// ODER gibt die Verfeinerung als nicht erf"ullt zur"uck: Dann liegt
-	// es am Aufrufer die Verfeinerung nochmals anzuforern.
+  // Die Methode refineBalance () f"uhrt auf dem Randabschluss entweder
+  // unbedingt die Verfeinerung durch, da im Verlauf der Verfeinerung keine
+  // weiteren Anforerungen mehr an den Randabschluss  gerichtet werden 
+  // ODER gibt die Verfeinerung als nicht erf"ullt zur"uck: Dann liegt
+  // es am Aufrufer die Verfeinerung nochmals anzuforern.
 
   assert (b == 0) ;
   assert (this->leaf ()) ;
   if (! bndNotifyBalance (r,b)) {
   
-  	// Hier kann der innere Rand [parallel] die Verfeinerung
-	// verhindern, damit z.B. das Durchverfeinern im anisotropen
-	// Fall erstmal nicht stattfindet, wenn nicht klar ist, wie die
-	// weitere Rekursion aussieht. Dazu muss auf dem Niveau der Klasse
-	// des Template-Arguments die Methode bndNotifyBalance () "uber-
-	// schrieben werden. Die Defaultmethode liefert immer 'true'.
+    // Hier kann der innere Rand [parallel] die Verfeinerung
+  // verhindern, damit z.B. das Durchverfeinern im anisotropen
+  // Fall erstmal nicht stattfindet, wenn nicht klar ist, wie die
+  // weitere Rekursion aussieht. Dazu muss auf dem Niveau der Klasse
+  // des Template-Arguments die Methode bndNotifyBalance () "uber-
+  // schrieben werden. Die Defaultmethode liefert immer 'true'.
   
     return false ;
   } else {
     if(r == myrule_t :: iso4) {
     
-    	// Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
-	// sich selbst, weil die Anforderung durch die Fl"ache kam, und
-	// dahinter keine Balancierung stattfinden muss.
+      // Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
+  // sich selbst, weil die Anforderung durch die Fl"ache kam, und
+  // dahinter keine Balancierung stattfinden muss.
     
       this->myhface4 (0)->refineImmediate (r) ;
       splitISO4 () ;
@@ -981,9 +1022,9 @@ template < class A > inline bool Hbnd4Top < A > :: refineBalance (balrule_t r, i
       abort () ;
     }
     
-    	// postRefinement () gibt die M"oglichkeit auf dem Niveau des
-	// Template-Arguments eine Methode aufzurufen, um eventuelle
-	// Operationen auf dem verfeinerten Randst"uck aufzurufen.
+      // postRefinement () gibt die M"oglichkeit auf dem Niveau des
+  // Template-Arguments eine Methode aufzurufen, um eventuelle
+  // Operationen auf dem verfeinerten Randst"uck aufzurufen.
     
     this->postRefinement () ;
     return true ;
@@ -992,38 +1033,38 @@ template < class A > inline bool Hbnd4Top < A > :: refineBalance (balrule_t r, i
 
 template < class A > inline bool Hbnd4Top < A > :: refineLikeElement (balrule_t r) {
 
-	// Mit der Methode refineLikeElement () verh"alt sich ein Randabschluss
-	// in der Verfeinerung wie ein Element: Es wird zuerst gepr"uft ob eine
-	// Balancierung der Vererfeinerung durch die Fl"ache hindurch erfolgreich
-	// ist und nur genau dann die Verfeinerung durchgef"uhrt mit R"uckgabewert
-	// 'true'. Diese Methode bedient eigentlich nur die parallele Verfeinerung
-	// kann aber auch auf jedem beliebigen Randelement im seriellen Fall auf-
-	// gerufen werden ohne Schaden anzurichten: Eine 1-Level Verfeinerung am
-	// Rand ist jedoch wirkungslos, da sie beim n"achsten Vergr"obern wieder
-	// aufgel"ost ist. Erst die mehrfache Anwendung f"uhrt durch die 
-	// Balancierung zu einer "Anderung am Elementgitter.
+  // Mit der Methode refineLikeElement () verh"alt sich ein Randabschluss
+  // in der Verfeinerung wie ein Element: Es wird zuerst gepr"uft ob eine
+  // Balancierung der Vererfeinerung durch die Fl"ache hindurch erfolgreich
+  // ist und nur genau dann die Verfeinerung durchgef"uhrt mit R"uckgabewert
+  // 'true'. Diese Methode bedient eigentlich nur die parallele Verfeinerung
+  // kann aber auch auf jedem beliebigen Randelement im seriellen Fall auf-
+  // gerufen werden ohne Schaden anzurichten: Eine 1-Level Verfeinerung am
+  // Rand ist jedoch wirkungslos, da sie beim n"achsten Vergr"obern wieder
+  // aufgel"ost ist. Erst die mehrfache Anwendung f"uhrt durch die 
+  // Balancierung zu einer "Anderung am Elementgitter.
 
   if (r == myrule_t :: nosplit) {
     cerr << "**WARNUNG (IGNORIERT) beim Versuch mit nosplit zu Verfeinern" ;
     cerr << "  in " << __FILE__ << " " << __LINE__ << endl ;
     
-    	// Eine Anforderung mit nosplit zu Verfeinern nur erf"ullt,
-	// falls die zugeh"orige Fl"achenregel auch nosplit ist, sonst
-	// wird die Anforderung als nicht erf"ullt zur"uckgegeben.
+      // Eine Anforderung mit nosplit zu Verfeinern nur erf"ullt,
+  // falls die zugeh"orige Fl"achenregel auch nosplit ist, sonst
+  // wird die Anforderung als nicht erf"ullt zur"uckgegeben.
     
     return this->getrule () == balrule_t :: nosplit ? true : false ;
   } else {
     if (this->getrule () == r) {
     
-    	// Alles schon wie es sein soll -> true.
+      // Alles schon wie es sein soll -> true.
     
       return true ;
     } else {
   
-	// Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
-	// der Fl"ache, da getrule () auf myhface4 (0)->getrule () umgeleitet
-	// ist.
-	
+  // Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
+  // der Fl"ache, da getrule () auf myhface4 (0)->getrule () umgeleitet
+  // ist.
+  
       assert (this->getrule () == myrule_t :: nosplit) ;
       switch (r) {
       case balrule_t :: iso4 :
@@ -1041,23 +1082,23 @@ template < class A > inline bool Hbnd4Top < A > :: refineLikeElement (balrule_t 
 
 template < class A > void Hbnd4Top < A > :: restoreFollowFace () {
 
-	// retoreFollowFace () veranlasst das Randelement sich am 
-	// bestehenden Fl"achenbaum wiederherzustellen durch die
-	// entsprechende Verfeinerung.
-	
+  // retoreFollowFace () veranlasst das Randelement sich am 
+  // bestehenden Fl"achenbaum wiederherzustellen durch die
+  // entsprechende Verfeinerung.
+  
   myhface4_t & f (*(this->myhface4 (0))) ;
   if (!f.leaf ()) {
     balrule_t r = f.getrule () ;
     switch (r) {
       case myrule_t :: iso4 :
         splitISO4 () ;
-	break ;
+  break ;
       default :
         cerr << "**FEHLER (FATAL, weil nicht vorgesehen) beim Verfeinern am " ;
         cerr << "Randst\"uck mit der Regel [" << r << "] in " ;
         cerr << __FILE__ << " " << __LINE__ << endl ;
         abort () ;
-	break ;
+  break ;
     }
     this->postRefinement () ;
     {for (innerbndseg_t * b = down () ; b ; b = b->next ()) b->restoreFollowFace () ; }
@@ -1083,14 +1124,14 @@ template < class A > inline typename HexaTop < A > :: myhedge1_t * HexaTop < A >
 template < class A > inline const typename HexaTop < A > :: myhedge1_t * HexaTop < A > :: subedge1 (int i, int j) const {
   return (j < 4) ? ((this->twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + this->twist (i)) % 4) : 
       this->myhface4 (i)->myhedge1 ((j + this->twist (i)) % 4)) : 
-	((this->twist (i) < 0) ? this->myhface4 (i)->subedge1 ((12 - j + this->twist (i)) % 4) : 
-	this->myhface4 (i)->subedge1 ((j + this->twist (i)) % 4)) ;
+  ((this->twist (i) < 0) ? this->myhface4 (i)->subedge1 ((12 - j + this->twist (i)) % 4) : 
+  this->myhface4 (i)->subedge1 ((j + this->twist (i)) % 4)) ;
 }
     
 template < class A > inline typename HexaTop < A > :: myhface4_t * HexaTop < A > :: subface4 (int i, int j) {
   return (this->myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
-	this->myhface4(i)->subface4(this->twist(i) < 0 ? (9 - j + this->twist(i)) % 4 : (j + this->twist(i)) % 4) :
-	(abort (), (myhface4_t *)0) ;
+  this->myhface4(i)->subface4(this->twist(i) < 0 ? (9 - j + this->twist(i)) % 4 : (j + this->twist(i)) % 4) :
+  (abort (), (myhface4_t *)0) ;
 }
     
 template < class A > inline const typename HexaTop < A > :: myhface4_t * HexaTop < A > :: subface4 (int i, int j) const {
@@ -1105,7 +1146,7 @@ template < class A > inline HexaTop < A >
             int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
   , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0), _lvl (l),
-    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im)
+    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) , _nChild(0) 
 { 
   this->setIndex( _indexManager.getIndex() );   
   return ;
@@ -1114,10 +1155,11 @@ template < class A > inline HexaTop < A >
 template < class A > inline HexaTop < A > 
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
-            int t4, myhface4_t * f5, int t5, innerhexa_t * up ) 
+            int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
   , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0), _lvl (l),
-    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(_up->_indexManager) { 
+    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
+  , _indexManager(_up->_indexManager), _nChild(nChild) { 
   this->setIndex( _indexManager.getIndex() );   
   return ;
 }
@@ -1186,8 +1228,13 @@ template < class A > inline void HexaTop < A > :: append (HexaTop < A > * h) {
   return ;
 }
 
-template < class A > int HexaTop < A > :: level () const {
+template < class A > inline int HexaTop < A > :: level () const {
   return _lvl ;
+}
+
+template < class A > inline int HexaTop < A > :: nChild () const {
+  assert( _nChild >= 0 && _nChild < 8 );
+  return _nChild ;
 }
 
 template < class A > inline IndexManagerType & HexaTop < A > :: getEdgeIndexManager () {
@@ -1204,8 +1251,8 @@ template < class A > void HexaTop < A > :: splitISO8 () {
   {
     TrilinearMapping map(
         this->myvertex(0)->Point(), this->myvertex(1)->Point(),
-	this->myvertex(2)->Point(), this->myvertex(3)->Point(), this->myvertex(4)->Point(),
-	this->myvertex(5)->Point(), this->myvertex(6)->Point(), this->myvertex(7)->Point()) ;
+  this->myvertex(2)->Point(), this->myvertex(3)->Point(), this->myvertex(4)->Point(),
+  this->myvertex(5)->Point(), this->myvertex(6)->Point(), this->myvertex(7)->Point()) ;
     double p[3] ;
     map.map2world(.0, .0, .0, p) ;
     _cv = new innervertex_t (l, p[0], p[1], p[2], *(this->myvertex(0)) ) ;
@@ -1257,14 +1304,14 @@ template < class A > void HexaTop < A > :: splitISO8 () {
   f8->append(f9) ;
   f9->append(f10) ;
   f10->append(f11) ;
-  innerhexa_t * h0 = new innerhexa_t (l, this->subface4 (0, 0), this->twist (0), f0, 0, this->subface4 (2, 0), this->twist (2), f4, 0, f8, -4, this->subface4 (5, 0), this->twist (5) , this) ;
-  innerhexa_t * h1 = new innerhexa_t (l, this->subface4 (0, 3), this->twist (0), f1, 0, this->subface4 (2, 1), this->twist (2), this->subface4 (3, 0), this->twist (3), f9, -4, f4, -1, this) ;
-  innerhexa_t * h2 = new innerhexa_t (l, this->subface4 (0, 2), this->twist (0), f2, 0,f9, 0, subface4 (3, 1), this->twist (3), this->subface4 (4, 0), this->twist (4), f5, -1        , this) ;
-  innerhexa_t * h3 = new innerhexa_t (l, this->subface4 (0, 1), this->twist (0), f3, 0, f8, 0, f5, 0, this->subface4(4, 1), this->twist (4), this->subface4(5, 3), this->twist (5)    , this) ;
-  innerhexa_t * h4 = new innerhexa_t (l, f0, -1, this->subface4(1, 0), this->twist (1), this->subface4(2, 3), this->twist (2), f7, 0, f11, -4, this->subface4(5, 1), this->twist (5)  , this) ;
-  innerhexa_t * h5 = new innerhexa_t (l, f1, -1, this->subface4(1, 1), this->twist (1), this->subface4(2, 2), this->twist (2), this->subface4(3, 3), this->twist (3), f10, -4, f7, -1 , this) ;
-  innerhexa_t * h6 = new innerhexa_t (l, f2, -1, this->subface4(1, 2), this->twist (1), f10, 0, this->subface4(3, 2), this->twist (3), this->subface4(4, 3), this->twist (4), f6, -1  , this) ;
-  innerhexa_t * h7 = new innerhexa_t (l, f3, -1, this->subface4(1, 3), this->twist (1), f11, 0, f6, 0, this->subface4(4, 2), this->twist (4), this->subface4(5, 2), this->twist (5)   , this) ;
+  innerhexa_t * h0 = new innerhexa_t (l, this->subface4 (0, 0), this->twist (0), f0, 0, this->subface4 (2, 0), this->twist (2), f4, 0, f8, -4, this->subface4 (5, 0), this->twist (5) , this, 0) ;
+  innerhexa_t * h1 = new innerhexa_t (l, this->subface4 (0, 3), this->twist (0), f1, 0, this->subface4 (2, 1), this->twist (2), this->subface4 (3, 0), this->twist (3), f9, -4, f4, -1, this, 1) ;
+  innerhexa_t * h2 = new innerhexa_t (l, this->subface4 (0, 2), this->twist (0), f2, 0,f9, 0, subface4 (3, 1), this->twist (3), this->subface4 (4, 0), this->twist (4), f5, -1        , this, 2) ;
+  innerhexa_t * h3 = new innerhexa_t (l, this->subface4 (0, 1), this->twist (0), f3, 0, f8, 0, f5, 0, this->subface4(4, 1), this->twist (4), this->subface4(5, 3), this->twist (5)    , this, 3) ;
+  innerhexa_t * h4 = new innerhexa_t (l, f0, -1, this->subface4(1, 0), this->twist (1), this->subface4(2, 3), this->twist (2), f7, 0, f11, -4, this->subface4(5, 1), this->twist (5)  , this, 4) ;
+  innerhexa_t * h5 = new innerhexa_t (l, f1, -1, this->subface4(1, 1), this->twist (1), this->subface4(2, 2), this->twist (2), this->subface4(3, 3), this->twist (3), f10, -4, f7, -1 , this, 5) ;
+  innerhexa_t * h6 = new innerhexa_t (l, f2, -1, this->subface4(1, 2), this->twist (1), f10, 0, this->subface4(3, 2), this->twist (3), this->subface4(4, 3), this->twist (4), f6, -1  , this, 6) ;
+  innerhexa_t * h7 = new innerhexa_t (l, f3, -1, this->subface4(1, 3), this->twist (1), f11, 0, f6, 0, this->subface4(4, 2), this->twist (4), this->subface4(5, 2), this->twist (5)   , this, 7) ;
   assert(h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
   h0->append(h1) ;
   h1->append(h2) ;
@@ -1299,11 +1346,11 @@ template < class A > void HexaTop < A > :: refineImmediate (myrule_t r) {
   switch(r) {
     case myrule_t :: iso8 :
     
-	// Das refineImmediate (..) auf allen Fl"achen wird vom Hexa :: refine (..)
-	// zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind wenn
-	// "uberall hface4 :: refine (..) true geliefert hat, wohl aber z.B. von
-	// restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
-	// erzwingen m"ussen und d"urfen.
+  // Das refineImmediate (..) auf allen Fl"achen wird vom Hexa :: refine (..)
+  // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind wenn
+  // "uberall hface4 :: refine (..) true geliefert hat, wohl aber z.B. von
+  // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
+  // erzwingen m"ussen und d"urfen.
     
       {
         typedef typename myhface4_t :: myrule_t myhface4rule_t;
@@ -1332,11 +1379,11 @@ template < class A > bool HexaTop < A > :: refine () {
         case myrule_t :: nosplit :
           return true ;
         case myrule_t :: iso8 :
-	  {
+    {
       typedef typename myhface4_t :: myrule_t myhface4rule_t;
       for (int i = 0 ; i < 6 ; i ++ )
             if (!this->myhface4 (i)->refine (myhface4rule_t (myhface4_t :: myrule_t :: iso4)
-	  					.rotate (this->twist (i)), this->twist (i))) return false ;
+              .rotate (this->twist (i)), this->twist (i))) return false ;
           }
           refineImmediate (r) ;
           return true ;
@@ -1357,7 +1404,7 @@ template < class A > bool HexaTop < A > :: refineBalance (balrule_t r, int fce) 
       for (int i = 0 ; i < 6 ; i ++)
         if (i != fce)
           if (!this->myhface4 (i)->refine (balrule_t (balrule_t :: iso4).rotate (this->twist (i)), this->twist (i))) 
-	    return false ;
+      return false ;
       _req = myrule_t :: nosplit ;
       refineImmediate (myrule_t :: iso8) ;
     }
@@ -1390,9 +1437,9 @@ template < class A > bool HexaTop < A > :: coarse () {
       _rule = myrule_t :: nosplit ;
       {
         for (int i = 0 ; i < 6 ; i ++ ) {
-      	  this->myneighbour (i).first->bndNotifyCoarsen () ;
+          this->myneighbour (i).first->bndNotifyCoarsen () ;
           this->myhface4 (i)->coarse () ;
-	}
+  }
       }
       return false ;
     }
@@ -1406,10 +1453,10 @@ template < class A > bool HexaTop < A > :: bndNotifyCoarsen () {
 
 template < class A > void HexaTop < A > :: backupCMode (ostream & os) const {
 
-	// Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
-	// vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
-	// noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
-	// zu k"onnen.
+  // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
+  // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
+  // noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
+  // zu k"onnen.
 
   os << getrule () << " " ;
   return ;
@@ -1504,19 +1551,19 @@ template < class A > void HexaTop < A > :: restore (XDRstream_in & is) {
 
 template < class A > void HexaTop < A > :: restore (istream & is) {
 
-	// restore () stellt den Elmentbaum aus der Verfeinerungs
-	// geschichte wieder her. Es ruft refine () auf und testet
-	// auf den korrekten Vollzug der Verfeinerung. Danach werden
-	// die inneren Gitterteile restore'd.
+  // restore () stellt den Elmentbaum aus der Verfeinerungs
+  // geschichte wieder her. Es ruft refine () auf und testet
+  // auf den korrekten Vollzug der Verfeinerung. Danach werden
+  // die inneren Gitterteile restore'd.
 
   myrule_t r ((char) is.get ()) ;
   assert(getrule() == myrule_t :: nosplit) ;
   if (r == myrule_t :: nosplit) {
   
-	// Vorsicht: beim restore m"ussen sich sowohl Element als auch
-	// Randelement um die Korrektheit der Nachbarschaft k"ummern,
-	// und zwar dann wenn sie "on the top" sind (= die gelesene
-	// Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
+  // Vorsicht: beim restore m"ussen sich sowohl Element als auch
+  // Randelement um die Korrektheit der Nachbarschaft k"ummern,
+  // und zwar dann wenn sie "on the top" sind (= die gelesene
+  // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
   
     for (int i = 0 ; i < 6 ; i ++) {
       myhface4_t & f (*(this->myhface4 (i))) ;
@@ -1547,22 +1594,33 @@ template < class A > void HexaTop < A > :: restore (istream & is) {
 
    
 template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, int t0,
-	myhface4_t * f1, int t1) : A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(0), _lvl (l), 
-	_rule (myrule_t :: nosplit) {	// ok
+  myhface4_t * f1, int t1) : A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(0), _lvl (l), 
+  _rule (myrule_t :: nosplit) , _nChild (0) { 
   return ;
 }
 
-template < class A > inline Periodic4Top < A > :: ~Periodic4Top () {	// ok
+template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, 
+    int t0, myhface4_t * f1, int t1, innerperiodic4_t * up, int nChild )
+: A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(up), _lvl (l), 
+  _rule (myrule_t :: nosplit) , _nChild (nChild) { 
+  return ;
+}
+
+template < class A > inline Periodic4Top < A > :: ~Periodic4Top () {  // ok
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
 }
 
-template < class A > inline int Periodic4Top < A > :: level () const {	// ok
+template < class A > inline int Periodic4Top < A > :: level () const {  // ok
   return _lvl ;
 }
 
-//us eingefuegt
+template < class A > inline int Periodic4Top < A > :: nChild () const { 
+  assert( _nChild >= 0 && _nChild < 4 );
+  return _nChild ;
+}
+
 template < class A > inline typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: up () {
   return _up ;
 }
@@ -1570,7 +1628,6 @@ template < class A > inline typename Periodic4Top < A > :: innerperiodic4_t * Pe
 template < class A > inline const typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: up () const {
    return _up ; 
 }
-//ende us
 
 template < class A > inline typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: down () { // ok
   return _dwn ;
@@ -1618,9 +1675,9 @@ template < class A > inline void Periodic4Top < A > :: append (Periodic4Top < A 
   return ;
 }
 
-template < class A > typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) {	// ??
+template < class A > typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) {  // ??
   assert (getrule () == myrule_t :: iso4) ;
-  return (j < 4) ? ((this->twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + this->twist (i)) % 4) : 	// aus dem Hexaeder
+  return (j < 4) ? ((this->twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + this->twist (i)) % 4) :  // aus dem Hexaeder
     this->myhface4 (i)->myhedge1 ((j + this->twist (i)) % 4)) : 
     ((this->twist (i) < 0) ? this->myhface4 (i)->subedge1 ((12 - j + this->twist (i)) % 4) : 
     this->myhface4 (i)->subedge1 ((j + this->twist (i)) % 4)) ;
@@ -1632,8 +1689,8 @@ template < class A > const typename Periodic4Top < A > :: myhedge1_t * Periodic4
 
 template < class A > typename Periodic4Top < A > ::  myhface4_t * Periodic4Top < A > :: subface4 (int i, int j) { // ok
   return (this->myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
-	this->myhface4(i)->subface4(this->twist(i) < 0 ? (9 - j + this->twist(i)) % 4 : (j + this->twist(i)) % 4) :	// Zeile aus dem Hexaeder
-	(abort (), (myhface4_t *)0) ;
+  this->myhface4(i)->subface4(this->twist(i) < 0 ? (9 - j + this->twist(i)) % 4 : (j + this->twist(i)) % 4) : // Zeile aus dem Hexaeder
+  (abort (), (myhface4_t *)0) ;
 }
 
 template < class A > const typename Periodic4Top < A > ::  myhface4_t * Periodic4Top < A > :: subface4 (int i, int j) const {
@@ -1646,18 +1703,18 @@ template < class A > typename Periodic4Top < A > :: myrule_t Periodic4Top < A > 
 
 template < class A > void Periodic4Top < A > :: request (myrule_t) {
 
-	// Einen Request zur Verfeinerung zu setzen, ist vorl"aufig inhaltlich nicht
-	// vorgesehen und wird deshalb ignoriert (leise).
+  // Einen Request zur Verfeinerung zu setzen, ist vorl"aufig inhaltlich nicht
+  // vorgesehen und wird deshalb ignoriert (leise).
 
   return ;
 }
 
-template < class A > void Periodic4Top < A > :: splitISO4 () {	// ok
+template < class A > void Periodic4Top < A > :: splitISO4 () {  // ok
   int l = 1 + level () ;
-  innerperiodic4_t * p0 = new innerperiodic4_t (l, this->subface4 (0,0), this->twist (0), this->subface4 (1,0), this->twist (1)) ;
-  innerperiodic4_t * p1 = new innerperiodic4_t (l, this->subface4 (0,1), this->twist (0), this->subface4 (1,3), this->twist (1)) ;
-  innerperiodic4_t * p2 = new innerperiodic4_t (l, this->subface4 (0,2), this->twist (0), this->subface4 (1,2), this->twist (1)) ;
-  innerperiodic4_t * p3 = new innerperiodic4_t (l, this->subface4 (0,3), this->twist (0), this->subface4 (1,1), this->twist (1)) ;
+  innerperiodic4_t * p0 = new innerperiodic4_t (l, this->subface4 (0,0), this->twist (0), this->subface4 (1,0), this->twist (1), this, 0) ;
+  innerperiodic4_t * p1 = new innerperiodic4_t (l, this->subface4 (0,1), this->twist (0), this->subface4 (1,3), this->twist (1), this, 1) ;
+  innerperiodic4_t * p2 = new innerperiodic4_t (l, this->subface4 (0,2), this->twist (0), this->subface4 (1,2), this->twist (1), this, 2) ;
+  innerperiodic4_t * p3 = new innerperiodic4_t (l, this->subface4 (0,3), this->twist (0), this->subface4 (1,1), this->twist (1), this, 3) ;
   assert (p0 && p1 && p2 && p3) ;
   p0->append(p1) ;
   p1->append(p2) ;
@@ -1669,19 +1726,19 @@ template < class A > void Periodic4Top < A > :: splitISO4 () {	// ok
 
 template < class A > void Periodic4Top < A > :: refineImmediate (myrule_t r) {
 
-	// Die Methode wird nur vom restore () und vom refineBalance () auf-
-	// gerufen und geht davon aus, dass das betroffene Element noch nicht
-	// verfeinert ist -> ist ein Blatt der Hierarchie.
+  // Die Methode wird nur vom restore () und vom refineBalance () auf-
+  // gerufen und geht davon aus, dass das betroffene Element noch nicht
+  // verfeinert ist -> ist ein Blatt der Hierarchie.
 
   assert (this->leaf()) ;
   switch (r) {
     case myrule_t :: iso4 :
     
-	// Das refineImmediate (..) auf allen Fl"achen wird vom periodic4 :: refine (..)
-	// zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
-	// "uberall hface4 :: refine (..) true geliefert hat, wohl aber z.B. von
-	// restore () oder abgeleiteten Funktionen, die eine direkte Verfeinerung
-	// erzwingen m"ussen und d"urfen.
+  // Das refineImmediate (..) auf allen Fl"achen wird vom periodic4 :: refine (..)
+  // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
+  // "uberall hface4 :: refine (..) true geliefert hat, wohl aber z.B. von
+  // restore () oder abgeleiteten Funktionen, die eine direkte Verfeinerung
+  // erzwingen m"ussen und d"urfen.
     
       typedef typename myhface4_t :: myrule_t myhface4rule_t;
       this->myhface4 (0)->refineImmediate (myhface4rule_t (r).rotate (this->twist (0))) ;
@@ -1700,9 +1757,9 @@ template < class A > void Periodic4Top < A > :: refineImmediate (myrule_t r) {
 
 template < class A > bool Periodic4Top < A > :: refine () { // ok
 
-	// Das refine () reagiert nicht auf die Elementaktivierung zur Verfeinerung
-	// in der globalen Schleife, weil das perioodische Randelement sich nur auf
-	// Anforderung zur Balancierung aus einem anliegenden Element direkt verfeinert.
+  // Das refine () reagiert nicht auf die Elementaktivierung zur Verfeinerung
+  // in der globalen Schleife, weil das perioodische Randelement sich nur auf
+  // Anforderung zur Balancierung aus einem anliegenden Element direkt verfeinert.
 
   return true ;
 }
@@ -1710,21 +1767,21 @@ template < class A > bool Periodic4Top < A > :: refine () { // ok
 template < class A > bool Periodic4Top < A > :: refineBalance (balrule_t r, int fce) {  // ok
   if (r != balrule_t :: iso4) {
     cerr << "**WARNUNG (IGNORIERT) in Periodic4Top < A > :: refineBalance (..) nachschauen, Datei " 
-    	 << __FILE__ << " Zeile " << __LINE__ << endl ;
-	 
-	// Bisher kann die Balancierung nur die isotrope Achtelung handhaben,
-	// falls mehr gew"unscht wird, muss es hier eingebaut werden. Im Moment wird
-	// die Balancierung einfach verweigert, d.h. die Verfeinerung des anfordernden
-	// Elements f"allt flach.
-	
+       << __FILE__ << " Zeile " << __LINE__ << endl ;
+   
+  // Bisher kann die Balancierung nur die isotrope Achtelung handhaben,
+  // falls mehr gew"unscht wird, muss es hier eingebaut werden. Im Moment wird
+  // die Balancierung einfach verweigert, d.h. die Verfeinerung des anfordernden
+  // Elements f"allt flach.
+  
     return false ;
   } else {
   
-	// Der nachfolgende Aufruf nutzt aus, dass die Regel der periodischen R"ander
-	// sich direkt auf die Balancierungsregel des entsprechenden Polygonverbinders
-	// projezieren l"asst (n"amlich 1:1). Deshalb unterscheidet der Aufruf nicht nach
-	// der angeforderten Regel in einer 'case' Anweisung.
-	
+  // Der nachfolgende Aufruf nutzt aus, dass die Regel der periodischen R"ander
+  // sich direkt auf die Balancierungsregel des entsprechenden Polygonverbinders
+  // projezieren l"asst (n"amlich 1:1). Deshalb unterscheidet der Aufruf nicht nach
+  // der angeforderten Regel in einer 'case' Anweisung.
+  
     typedef typename myhface4_t :: myrule_t myhface4rule_t;
     int opp = fce == 0 ? 1 : 0 ;
     if (this->myhface4 (opp)->refine (myhface4rule_t (r).rotate (this->twist (opp)), this->twist (opp))) {
@@ -1738,8 +1795,8 @@ template < class A > bool Periodic4Top < A > :: refineBalance (balrule_t r, int 
 
 template < class A > bool Periodic4Top < A > :: coarse () { // ok
 
-	// Das Vergr"obern geschieht auch passiv, sobald ein anliegendes Element
-	// vergr"obert wird durch den Aufruf von "bndNotifyCoarsen ()" s.u.
+  // Das Vergr"obern geschieht auch passiv, sobald ein anliegendes Element
+  // vergr"obert wird durch den Aufruf von "bndNotifyCoarsen ()" s.u.
 
   bndNotifyCoarsen () ;
   return false ;
@@ -1747,22 +1804,22 @@ template < class A > bool Periodic4Top < A > :: coarse () { // ok
 
 template < class A > bool Periodic4Top < A > :: bndNotifyCoarsen () {
 
-	// Wie beim Randelement auch: Die Vergr"oberung eines anliegenden Elements
-	// l"ost einen Vorgang aus, der feststellt ob das periodische RE ebenfalls
-	// vergr"obert werden soll.
+  // Wie beim Randelement auch: Die Vergr"oberung eines anliegenden Elements
+  // l"ost einen Vorgang aus, der feststellt ob das periodische RE ebenfalls
+  // vergr"obert werden soll.
   
   innerperiodic4_t * p = down () ;
   if (!p) return false ;
   bool x = true ;
   do {
 
-	// Falls p kein Blatt der Hierarchie ist, 
-	// die Vergr"oberungsm"oglichkeit weitergeben.
+  // Falls p kein Blatt der Hierarchie ist, 
+  // die Vergr"oberungsm"oglichkeit weitergeben.
 
     if (!p->leaf ()) p->coarse () ;
 
-	// F"ur die hintere und vordere Fl"ache feststellen, ob
-	// der Referenzenz"ahler mehr als einen Eintrag ergibt.
+  // F"ur die hintere und vordere Fl"ache feststellen, ob
+  // der Referenzenz"ahler mehr als einen Eintrag ergibt.
 
     if (p->myhface4 (0)->ref > 1) (x = false) ;
     if (p->myhface4 (1)->ref > 1) (x = false) ;
@@ -1770,10 +1827,10 @@ template < class A > bool Periodic4Top < A > :: bndNotifyCoarsen () {
   } while ( (p = p->next ()) ) ;
   if (x) {
   
-	// Falls keine Fl"achen anliegen, die auf Kinder oder Kindes- 
-	// mit mehr als einer Referenz f"uhren, ist sicher, dass das
-	// Bezugsrandelement zwischen zwei 'relativ groben' Elementen
-	// liegt. Somit kann es vergr"obert werden.
+  // Falls keine Fl"achen anliegen, die auf Kinder oder Kindes- 
+  // mit mehr als einer Referenz f"uhren, ist sicher, dass das
+  // Bezugsrandelement zwischen zwei 'relativ groben' Elementen
+  // liegt. Somit kann es vergr"obert werden.
   
     this->preCoarsening () ;
     delete _dwn ;
@@ -1787,11 +1844,11 @@ template < class A > bool Periodic4Top < A > :: bndNotifyCoarsen () {
 
 template < class A > void Periodic4Top < A > :: backupCMode (ostream & os) const {
 
-	// Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
-	// vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
-	// noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
-	// zu k"onnen.
-	
+  // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
+  // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
+  // noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
+  // zu k"onnen.
+  
   os << getrule () << " " ;
   return ;
 }
@@ -1804,21 +1861,21 @@ template < class A > void Periodic4Top < A > :: backup (ostream & os) const {
 
 template < class A > void Periodic4Top < A > :: restore (istream & is) {
   myrule_t r ((char) is.get ()) ;
-  assert(getrule () == myrule_t :: nosplit) ;	// Testen auf unverfeinerten Zustand
+  assert(getrule () == myrule_t :: nosplit) ; // Testen auf unverfeinerten Zustand
   if (r == myrule_t :: nosplit) {
     for (int i = 0 ; i < 2 ; i ++) {
       myhface4_t & f (*(this->myhface4 (i))) ;
       if (!f.leaf ()) {
         switch (f.getrule ()) {
-	  case balrule_t :: iso4 :
+    case balrule_t :: iso4 :
             {for (int j = 0 ; j < 4 ; j ++) f.subface4 (j)->nb.complete (f.nb) ;}
-	    break ;
-	  default :
-	    cerr << "**FEHLER (FATAL) beim restore mit unbekannter Balancierungsregel: "
+      break ;
+    default :
+      cerr << "**FEHLER (FATAL) beim restore mit unbekannter Balancierungsregel: "
                  << "[" << r << "]. In " << __FILE__ << __LINE__ << endl ;
-	    abort () ;
-	    break ;
-	}
+      abort () ;
+      break ;
+  }
       }
     }
   } else {
@@ -1831,4 +1888,4 @@ template < class A > void Periodic4Top < A > :: restore (istream & is) {
 
 // Ende - Neu am 23.5.02 (BS)
 
-#endif	//	GITTER_HEXA_TOP_H_INCLUDED
+#endif  //  GITTER_HEXA_TOP_H_INCLUDED

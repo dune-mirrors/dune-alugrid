@@ -296,6 +296,7 @@ public :
     virtual vertex * innerVertex () = 0 ;
     virtual const vertex * innerVertex () const = 0 ;
     virtual int level () const = 0 ;
+    virtual int nChild () const = 0; 
     inline  int leaf () const ;
   public :
     virtual bool coarse () = 0 ;
@@ -323,6 +324,7 @@ public :
     virtual hedge  * innerHedge () = 0 ;
     virtual const hedge  * innerHedge () const = 0 ;
     virtual int level () const = 0 ;
+    virtual int nChild () const = 0; 
     inline int leaf () const ;
   public :
     virtual bool coarse () = 0 ;
@@ -402,6 +404,7 @@ public :
     virtual hface * innerHface () = 0 ;
     virtual const hface * innerHface () const = 0 ;
     virtual int level () const = 0 ;
+    virtual int nChild () const = 0 ;
 
     virtual int tagForGlobalRefinement () = 0 ;
     virtual int resetRefinementRequest () = 0 ;
@@ -481,6 +484,7 @@ public :
     virtual hbndseg * next () = 0 ;
     virtual const hbndseg * next () const = 0 ;
     virtual int level () const = 0 ;
+    virtual int nChild () const = 0 ;
     inline int leaf () const ;
     // for dune 
     virtual int ghostLevel () const = 0 ;
@@ -819,7 +823,6 @@ public :
       virtual bool refine (myrule_t,int) = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
     public :
-      int nChild() const;
       myrule_t parentRule() const;
       bool isConforming() const;
     protected :
@@ -832,7 +835,7 @@ public :
       // 3. Nichtkonforme Situation vorne, 
       // 4. Nichtkonforme Situation hinten
       // bei 3. + 4. ja=1, nein=0
-      signed char _parRule, _nChild, _nonv, _nonh;
+      signed char _parRule, _nonv, _nonh;
       // Ende: H"ohere Ordnung
 
     } hface3_GEO ;
@@ -889,7 +892,6 @@ public :
       virtual bool refine (myrule_t,int) = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
     public :
-      int nChild() const;
       myrule_t parentRule() const;
     private :
       myhedge1_t * e [polygonlength] ;
@@ -897,7 +899,6 @@ public :
 
     protected:
       myrule_t _parRule;
-      int _nChild;
       //bool _nonv;
       //bool _nonh;
 
@@ -1148,6 +1149,7 @@ public :
       inline hface3_GEO * subface3 (int,int) const ;
       
       virtual bool isboundary() const { return true; }
+      virtual int nChild () const;
     private :
       myhface3_t * _face ;
       int _twist ;
@@ -1180,7 +1182,7 @@ public :
       inline hface4_GEO * subface4 (int,int) const ;
       
       virtual bool isboundary() const { return true; }
-
+      virtual int nChild () const;
     private :
       myhface4_t * _face ;
       int _twist ;
@@ -1978,16 +1980,15 @@ inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter
 inline Gitter :: Geometric :: hface3 :: 
 hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
   _parRule (Hface3Rule::undefined),
-  _nChild(-1), _nonv(1) , _nonh(1) 
+  _nonv(1) , _nonh(1) 
 {
   assert(e0 && e1 && e2) ;
   (e [0] = e0)->ref ++ ; s [0] = s0 ;
   (e [1] = e1)->ref ++ ; s [1] = s1 ;
   (e [2] = e2)->ref ++ ; s [2] = s2 ;
   // H"ohere Ordnung:
-  //_nChild = _parRule = (signed char) -1 ; // Test.
+  //_parRule = (signed char) -1 ; // Test.
   //_parRule = (signed char) 1 ; // Test.
-  //_nChild = 0 ; 
   //_nonv = _nonh = (signed char) 1 ;
   // Ende: H"ohere Ordnung
   return ;
@@ -2048,10 +2049,6 @@ inline const Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :
   return myhedge1 (i)->myvertex (s[i]) ;
 }
 
-inline int Gitter :: Geometric :: hface3 :: nChild () const {
-  return _nChild;
-}
-
 inline Gitter::Geometric::hface3::myrule_t 
 Gitter::Geometric::hface3::parentRule() const {
   return (myrule_t) _parRule;
@@ -2106,8 +2103,7 @@ inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter
 inline Gitter :: Geometric :: hface4 :: 
 hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
   // * higher order
-  _parRule(Hface4Rule::undefined),
-  _nChild(-1)
+  _parRule(Hface4Rule::undefined)
 {
   assert(e0 && e1 && e2 && e3) ;
   (e [0] = e0)->ref ++ ; s [0] = s0 ;
@@ -2170,10 +2166,6 @@ inline Gitter :: Geometric :: hface4 :: myvertex_t * Gitter :: Geometric :: hfac
 inline const Gitter :: Geometric :: hface4 :: myvertex_t * Gitter :: Geometric :: hface4 :: myvertex (int i) const {
   assert(0<=i && i < 4) ;
   return myhedge1 (i)->myvertex (s[i]) ;
-}
-
-inline int Gitter :: Geometric :: hface4 :: nChild () const {
-  return _nChild;
 }
 
 inline Gitter::Geometric::hface4::myrule_t
@@ -2696,6 +2688,11 @@ inline Gitter :: Geometric :: hbndseg3 :: myrule_t Gitter :: Geometric :: hbndse
   return myhface3 (0)->getrule () ;
 }
 
+inline int Gitter :: Geometric :: hbndseg3 :: nChild () const {
+  assert(_face);
+  return _face->nChild () ;
+}
+
 // #     #                                                 #
 // #     #  #####   #    #  #####    ####   ######   ####  #    #
 // #     #  #    #  ##   #  #    #  #       #       #    # #    #
@@ -2745,6 +2742,11 @@ inline Gitter :: Geometric :: hbndseg4 :: myhface4_t * Gitter :: Geometric :: hb
 
 inline Gitter :: Geometric :: hbndseg4 :: myrule_t Gitter :: Geometric :: hbndseg4 :: getrule () const {
   return myhface4 (0)->getrule () ;
+}
+
+inline int Gitter :: Geometric :: hbndseg4 :: nChild () const {
+  assert(_face);
+  return _face->nChild () ;
 }
 
 
