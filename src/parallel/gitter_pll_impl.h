@@ -967,7 +967,16 @@ template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > ::
 }
 
 template < class A > pair < ElementPllXIF_t *, int > FacePllBaseX < A > :: accessInnerPllX () {
-  return myhface ().nb.front ().first->accessPllX ().accessInnerPllX (pair < ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
+
+  assert(myhface ().nb.front().first );
+  //logFile << myhface() . getIndex() << " access face \n";
+  //logFile . flush();
+  assert(myhface ().nb.rear ().first );
+  return myhface ().nb.front ().
+    first->accessPllX ().accessInnerPllX (
+        pair < ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), 
+          myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
+  //return myhface ().nb.front ().first->accessPllX ().accessInnerPllX (pair < ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
 }
 
 template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > :: accessInnerPllX () const {
@@ -1398,6 +1407,8 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
     os.readObject( _ghostLevel );
    
 #ifdef __USE_INTERNAL_FACES__  
+    // this is deperecated 
+    assert(false);
     double p[3];
     for(int i=0; i<myhbnd().dimVx(); i++)
     {
@@ -1472,12 +1483,18 @@ template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (O
 
 template < class A > void BndsegPllBaseXMacroClosure < A > :: 
 packAsBnd (int fce, int who, ObjectStream & os) const {
-  assert (!fce) ;
+  assert (!fce) ; // fce should be 0, because we only have 1 face 
   assert (this->myhbnd ().bndtype () == Gitter :: hbndseg :: closure) ;
+
   if (myhface_t :: polygonlength == 3) os.writeObject (MacroGridMoverIF :: HBND3INT) ;
   else if (myhface_t :: polygonlength == 4) os.writeObject (MacroGridMoverIF :: HBND4INT) ;
-  else abort () ;
+  else 
+  {
+    cerr << "BndsegPllBaseXMacroClosure :: packAsBnd: Wrong face type!in: "<<__FILE__ << " line: " <<__LINE__ << endl; 
+    abort () ;
+  }
   os.writeObject (this->myhbnd ().bndtype ()) ;
+  
   {
     for (int i = 0 ; i < myhface_t :: polygonlength ; i++) 
       os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ()) ; 
@@ -1485,17 +1502,13 @@ packAsBnd (int fce, int who, ObjectStream & os) const {
 
   if(_ghPoint) // is stored ghost point exists
   {
-    os.writeObject ( 1 ); // 1 == no point transmitted 
-    // the third vertex is the new vertex, see insert_ghosttetra
-    for(int j=0; j<_ghPoint->nop(); j++) // j = 1 for tetra and 4 for hexa
-    {
-      const double (&p)[3] = _ghPoint->getPoint(j);
-      for(int i=0; i<3; i++) os.writeObject ( p[i] ) ;
-    }
+    os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); 
+    // see ghost_elements.h for implementation of this functions 
+    _ghPoint->inlineGhostElement(os);
   }
   else 
   {
-    os.writeObject ( 0 ); // 0 == no point transmitted 
+    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // no point transmitted 
   }
    
   return ;
