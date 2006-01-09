@@ -16,6 +16,7 @@ class MacroGhostPoint : public MyAlloc
 
     virtual const double (& getPoint (int i) const )[3] = 0;
     virtual int nop () const = 0;
+    virtual void inlineGhostElement(ObjectStream & os) const = 0; 
 };
 typedef MacroGhostPoint MacroGhostPoint_STI;
 
@@ -35,6 +36,16 @@ class MacroGhostPointTetra : public MacroGhostPoint
       return _p;
     }
 
+    // write information to stream, used in 
+    // BndsegPllBaseXMacroClosure < A > :: packAsBnd
+    // gitter_pll_impl.h , line 1481 
+    virtual void inlineGhostElement(ObjectStream & os) const
+    {
+      os.writeObject( _p[0] ); 
+      os.writeObject( _p[1] ); 
+      os.writeObject( _p[2] ); 
+    }; 
+    
     virtual int nop () const
     {
       return 1;
@@ -44,15 +55,36 @@ class MacroGhostPointTetra : public MacroGhostPoint
 class MacroGhostPointHexa : public MacroGhostPoint
 {
   protected:
+    // coords of opp face  
     double _p[4][3];
+    // global vertex numbers of hexa
+    int _verts[8];
+    // global numbers of opposite face 
+    int _oppVerts[4]; 
+    // local face number 
+    int _fce; 
 
   public:
-    MacroGhostPointHexa( const double (&p)[4][3] )
+    MacroGhostPointHexa(const Hbnd4IntStoragePoints & allp) 
     {
-      for(int vx=0; vx<4; vx++)
-        for(int i=0; i<3; i++) _p[vx][i] = p[vx][i];
+      const double (&p)[4][3]  = allp.getPoints();
+      const int (&vertices)[8] = allp.getIdents();
+      const int (&oppVerts)[4] = allp.getOppFaceIdents();
+    
+      for(int vx=0; vx<4; ++vx)
+      {
+        _p[vx][0]     = p[vx][0];
+        _p[vx][1]     = p[vx][1];
+        _p[vx][2]     = p[vx][2];
+        _oppVerts[vx] = oppVerts[vx];
+      }
+
+      for(int i=0; i<8; ++i) _verts[i]    = vertices[i];
+
+      _fce = allp.getFaceNumber();
     }
 
+    // get coordinate vector of point i 
     virtual const double (& getPoint (int i) const )[3]
     {
       assert(i >= 0 );
@@ -60,10 +92,38 @@ class MacroGhostPointHexa : public MacroGhostPoint
       return _p[i];
     }
 
+    // write information to stream, used in 
+    // BndsegPllBaseXMacroClosure < A > :: packAsBnd
+    // gitter_pll_impl.h , line 1481 
+    // check also gitter_pll_impl.cc packAsBnd of hexa  
+    virtual void inlineGhostElement(ObjectStream & os) const 
+    {
+      // local face number 
+      os.writeObject( _fce );
+
+      // global vertex number of the hexas vertices  
+      for(int i=0; i<8; ++i) os.writeObject(_verts[i]);
+      
+      // global vertex numbers of the face not existing on this partition  
+      for(int i=0; i<4; ++i) 
+      {
+        os.writeObject(_oppVerts[i]);
+        os.writeObject( _p[i][0] ); 
+        os.writeObject( _p[i][1] ); 
+        os.writeObject( _p[i][2] ); 
+      }
+    }; 
+   
+    // number of coordinates stored 
     virtual int nop () const
     {
       return 4;
     }
+
+    // number of interface face (process boundary face)
+    int internalFace () const { return _fce; }
+    // reference to the 8 verteices of the hexa 
+    int (& vertices () )[8] { return _verts; }
 };
 
 class MacroGhostBuilder : public MacroGridBuilder 
@@ -88,12 +148,57 @@ class MacroGhostBuilder : public MacroGridBuilder
       // if not true then MacroGridBuilder removes
       // elements which leads to error
     }
+
+    // insert existing Vertex to vertex map
+    // this means, that already exsisting vertices are not created again
+    // this is important for Lagrange Elements etc.
+    void InsertExistingVertex (VertexGeo * v ) 
+    {
+      int i = v->ident();
+#ifndef NDEBUG
+      vertexMap_t :: const_iterator hit = _vertexMap.find (i) ;
+      assert( hit == _vertexMap.end () );
+#endif
+      this->_vertexMap [i] = v ;
+    }
+
+    // insert already existing edge into the list of this grid builder 
+    void InsertExistingHedge1 (hedge1_GEO * h) 
+    {
+      int l = h->myvertex(0)->ident();
+      int r = h->myvertex(1)->ident();
+     
+      // swap is neccessary
+      assert( l < r );
+      edgeKey_t key (l,r) ;
+#ifndef NDEBUG
+      edgeMap_t :: const_iterator hit = _edgeMap.find (key) ;
+      assert( hit == _edgeMap.end () ); 
+      vertexMap_t :: const_iterator a = _vertexMap.find (l), b = _vertexMap.find (r), end = _vertexMap.end () ;
+      assert( a != end );
+      assert( b != end ); 
+#endif
+      _edgeMap [key] = h ;
+    }
+
+    // insert existing edge into map 
+    void InsertExistingHface4 (hface4_GEO * f4)
+    {
+      int v[4];
+      for(int i=0; i<4; ++i) v[i] = f4->myvertex(i)->ident();
+      cyclicReorder (v,v+4) ;
+      faceKey_t key (v[0],v[1],v[2]) ;
+#ifndef NDEBUG
+      // f4 should not be in list already 
+      faceMap_t :: const_iterator hit = _face4Map.find (key) ;
+      assert( hit == _face4Map.end () );
+#endif
+      _face4Map [key] = f4 ;
+    }
 };
 
-
-
 // interface class for macro ghost 
-class MacroGhost
+class MacroGhost : public MyAlloc
 {
   typedef Gitter :: helement_STI GhostElement_t;
 
@@ -172,6 +277,7 @@ class MacroGhostHexa : public MacroGhost
   typedef Gitter :: Geometric :: VertexGeo VertexGeo;
   typedef Gitter :: Geometric :: hface4_GEO hface4_GEO;
   typedef Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
+  typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
   typedef Gitter :: Geometric :: hexa_GEO hexa_GEO;
 
   typedef Gitter :: Geometric :: BuilderIF BuilderIF;
@@ -182,38 +288,66 @@ class MacroGhostHexa : public MacroGhost
   
   hexa_GEO * _ghost;
   
-  int _internalFace;
-  
 public:
   MacroGhostHexa( BuilderIF & bi, const Hbnd4IntStoragePoints & allp, hface4_GEO * face) :
-    _mgb(bi) , _ghPoint(allp.getPoints()) , _ghost(0) , _internalFace (-1)
+    _mgb(bi) , _ghPoint(allp) , _ghost(0) 
   { 
     typedef Gitter :: Geometric :: VertexGeo VertexGeo;
 
     const double (&p)[4][3]  = allp.getPoints();
     const int (&vertices)[8] = allp.getIdents();
-    const int (&oppVerts)[4] = allp.getFaceIdents();
+    const int (&oppVerts)[4] = allp.getOppFaceIdents();
 
-    int vxface[4];
-    for(int i=0; i<4; i++)
+    // we create 8 new points, which are stored in the lists of our
+    // internal grid builder 
+    for(int i=0; i<4; ++i)
     {
       VertexGeo * vx = face->myvertex(i);
-      const double (&px)[3] = vx->Point();
-      vxface[i] = vx->ident();
-      _mgb.InsertUniqueVertex(px[0],px[1],px[2],vx->ident());
+      _mgb.InsertExistingVertex( vx );
     }
+
+    for(int i=0; i<4; ++i)
+    {
+      hedge1_GEO * h = face->myhedge1(i);
+      _mgb.InsertExistingHedge1( h );
+    }
+
+    // isnert the face, we need this because we wnat to have the same
+    // numbers for the face (Lagrange Elements)
+    //logFile << face->getIndex() << " create face \n";
+    //_mgb.InsertExistingHface4( face );
     
-    for(int i=0; i<4; i++)
+    for(int i=0; i<4; ++i)
     {
       const double (&px)[3] = p[i];
       _mgb.InsertUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
     }
 
-    // InsertUniqueHexa doesn't accept const int & 
-    int v[8]; 
-    for(int i=0; i<8; i++) v[i] = vertices[i];
-    _ghost = _mgb.InsertUniqueHexa (v).first ;
-    
+    // InsertUniqueHexa gets the global vertex numbers 
+    _ghost = _mgb.InsertUniqueHexa ( _ghPoint.vertices() ).first ;
+    assert( _ghost );
+
+    int v[4];
+    for(int i=0; i<6; ++i)
+    {
+      //if(i == _ghPoint.internalFace()) continue;
+      const hface4_GEO * myface = _ghost->myhface4(i); 
+      for(int vx = 0; vx<4; ++vx)
+        v[vx] = myface->myvertex(vx)->ident();
+      _mgb.InsertUniqueHbnd4( v , Gitter :: hbndseg :: ghost_closure );
+    }
+   
+    /*
+    logFile << "new hexa is = [";
+    for(int i=0 ;i<8; i++) 
+    {
+      logFile << "(" <<_ghost->myvertex(i)->getIndex() << ", " << _ghost->myvertex(i)->ident() << ") , ";
+    }
+    logFile << "] \n";
+    */
+
+ 
+#ifndef NDEBUG 
   double vol = (QuadraturCube3D < VolumeCalc > (TrilinearMapping (
       _ghost->myvertex(0)->Point(), 
       _ghost->myvertex(1)->Point(), 
@@ -223,40 +357,43 @@ public:
       _ghost->myvertex(5)->Point(), 
       _ghost->myvertex(6)->Point(), 
       _ghost->myvertex(7)->Point())).integrate2 (0.0));
+
+    assert( vol > 0.0 );
   
-  
-    _internalFace = allp.getFaceNumber();
-#ifndef NDEBUG 
     int count = 0; 
-    hface4_GEO * intface = _ghost->myhface4(_internalFace);
+    hface4_GEO * intface = _ghost->myhface4(_ghPoint.internalFace());
     for(int i=0; i<4; i++) 
     {
       if(intface->myvertex(i)->ident() == face->myvertex(i)->ident())
         count ++ ;
     }
     assert(count == 4);
-#endif
-    assert( _internalFace >= 0 );
-
-    cout << _internalFace << " int face \n";     
-    if( vol < 1e-10 ) 
+    
+    count = 0; 
+    int oppFace = hexa_GEO :: oppositeFace[ _ghPoint.internalFace() ];
+    //logFile << "created face with twist = "<< _ghost->twist(oppFace) << "\n";
+    intface = _ghost->myhface4(oppFace);
+    for(int i=0; i<4; i++) 
     {
-      cout << "vol  = " << vol << " on p = " << __STATIC_myrank << "\n";
-      for(int i=0 ;i<4; i++) 
-        cout << "face ident(" << i << ") = " << vxface[i] << "\n";
-      for(int i=0 ;i<4; i++) 
-        cout << "opp face ident(" << i << ") = " << oppVerts[i] << "\n";
-
-      cout.flush();
-      printHexa(cout,_ghost);
+      int idx = intface->myvertex(i)->ident();
+      for( int j=0; j<4 ; j++) 
+      {
+        if(idx == face->myvertex(j)->ident())
+          count ++ ;
+      }
     }
+    assert(count == 0);
+#endif
+    //logFile.flush();
   }
-  
+
+  // nothing to do here
   ~MacroGhostHexa () {}
   
   GhostElement_t * getGhost() { return _ghost; }
 
-  int ghostFaceNumber () const { return _internalFace; } 
+  // return local number of fake face 
+  int ghostFaceNumber () const { return _ghPoint.internalFace(); } 
 
   // for storage in PllClosure Elements, if packed, we need the point 
   const MacroGhostPoint * getGhostPoints () const
