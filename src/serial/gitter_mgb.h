@@ -47,7 +47,7 @@ public:
   const double (& getPoints () const )[4][3];
   
   const int (& getIdents () const )[8];
-  const int (& getFaceIdents () const )[4];
+  const int (& getOppFaceIdents () const )[4];
 
   int getFaceNumber () const ;
 };
@@ -237,12 +237,18 @@ Hbnd4IntStoragePoints (const Gitter :: Geometric :: hexa_GEO * hexa, int fce)
   int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[fce];
   for(int vx=0; vx<4; vx++)
   {
-    const double (&p) [3] = hexa->myvertex(oppFace,vx)->Point();
-    for(int j=0; j<3; j++) _p[vx][j] = p[j];
+    const Gitter :: Geometric :: VertexGeo * vertex = hexa->myvertex(oppFace,vx);
+    _vxface[vx] = vertex->ident();
+    const double (&p) [3] = vertex->Point();
+    _p[vx][0] = p[0];
+    _p[vx][1] = p[1];
+    _p[vx][2] = p[2];
   }
-  for(int i=0; i<8; i++) _vx[i] = hexa->myvertex(i)->ident();
-  for(int i=0; i<4; i++) _vxface[i] = hexa->myhface4(oppFace)->myvertex(i)->ident();
-
+  
+  for(int i=0; i<8; i++) 
+  {
+    _vx[i] = hexa->myvertex(i)->ident();
+  }
   _fce = fce;
 }
 
@@ -251,7 +257,9 @@ Hbnd4IntStoragePoints (const Hbnd4IntStoragePoints & copy )
 {
   for(int k=0; k<4; k++)
   {
-    for(int j=0; j<3; j++) _p[k][j] = copy._p[k][j];
+    _p[k][0] = copy._p[k][0];
+    _p[k][1] = copy._p[k][1];
+    _p[k][2] = copy._p[k][2];
   }
   for(int i=0; i<8; i++) _vx[i] = copy._vx[i];
   for(int i=0; i<4; i++) _vxface[i] = copy._vxface[i];
@@ -265,10 +273,13 @@ Hbnd4IntStoragePoints (const double (&p)[4][3], const int (&vx)[8],
 {
   for(int k=0; k<4; k++)
   {
-    for(int j=0; j<3; j++) _p[k][j] = p[k][j];
+    _p[k][0]   = p[k][0];
+    _p[k][1]   = p[k][1];
+    _p[k][2]   = p[k][2];
+    _vxface[k] = vxface[k];
   }
+
   for(int i=0; i<8; i++) _vx[i] = vx[i];
-  for(int i=0; i<4; i++) _vxface[i] = vxface[i];
 
   _fce = fce;
 }
@@ -283,7 +294,7 @@ inline const int (& Hbnd4IntStoragePoints :: getIdents() const )[8]
   return _vx;
 }
 
-inline const int (& Hbnd4IntStoragePoints :: getFaceIdents() const )[4]
+inline const int (& Hbnd4IntStoragePoints :: getOppFaceIdents() const )[4]
 { 
   return _vxface;
 }
@@ -296,7 +307,9 @@ inline int Hbnd4IntStoragePoints :: getFaceNumber () const
 // hface4 storage
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
 Hbnd4IntStorage( hface4_GEO * f, int tw, const hexa_GEO * hexa, int fce)
- : _p(hexa,fce), _first(f) , _second(tw) , _pInit(true) {}
+ : _p(hexa,fce), _first(f) , _second(tw) , _pInit(true) 
+ {
+ }
     
 // hface4 storage
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
