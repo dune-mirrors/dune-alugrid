@@ -208,9 +208,16 @@ inline void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os) {
   return ;
 }
 	
-inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os) {
+inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os) 
+{
   int b, v [4] ;
   os.readObject (b) ;
+
+#ifndef NDEBUG
+  int idx = -1; 
+  os.readObject ( idx );
+#endif
+  
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
@@ -219,7 +226,7 @@ inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os) {
   int fake = 0;
   os.readObject( fake );
   
-  if(fake) 
+  if(fake == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
     os.readObject( fake );
     
