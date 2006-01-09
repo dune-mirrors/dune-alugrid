@@ -220,10 +220,89 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const IteratorSTI <
 //**************************************************************************
 // all the level iterators 
 //************************************************************************** 
-IteratorSTI < Gitter :: vertex_STI > * Gitter :: levelIterator (const Gitter :: vertex_STI * a, const any_has_level< vertex_STI > & vhl) {
-
-  cerr << "WARNING: method levelIterator for vertex_STI returns LeafIterator see: " << __FILE__ << " line: " << __LINE__ << "\n";
-  return iterator(a);
+IteratorSTI < Gitter :: vertex_STI > * Gitter :: 
+levelIterator (const Gitter :: vertex_STI * a, const any_has_level< vertex_STI > & vhl) 
+{
+  vector < IteratorSTI < vertex_STI > * > _iterators ;
+  {
+    _iterators.push_back ( new AccessIterator < vertex_STI > :: Handle (container ())) ;
+  }
+  Insert < AccessIterator < hedge_STI > :: Handle, 
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > dw (container ()) ;
+  _iterators.push_back ( new Wrapper < Insert < AccessIterator < hedge_STI > :: Handle, 
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (dw)) ;
+  {
+    Insert < AccessIterator < hface_STI > :: Handle,
+  TreeIterator < hface_STI, has_int_vertex < hface_STI > > > fw (container ()) ;
+    _iterators.push_back ( new Wrapper < Insert < AccessIterator < hface_STI > :: Handle,
+  TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (fw)) ;
+  }
+  {
+    Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_vertex < helement_STI > > > ew (container ()) ;
+    _iterators.push_back ( new Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_vertex < helement_STI > > >, InternalVertex > (ew)) ;
+  }
+  {
+    Insert < AccessIterator < hface_STI > :: Handle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > > fw (container ()) ;
+    Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > df (fw) ;
+    Insert < Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > > dif (df) ;
+    _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > >, InternalVertex > (dif)) ;
+  }
+  {
+    Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > > ew (container ()) ;
+    Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge > de (ew) ;
+    Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > > die (de) ;
+    _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
+  TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > >, InternalVertex > (die)) ;
+  }
+  {
+    Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > > ew (container ()) ;
+    Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fe (ew) ;
+    Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
+  TreeIterator < hface_STI, has_int_vertex < hface_STI > > > fie (fe) ;
+    _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (fie)) ;
+  }
+  {
+    Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > > ew (container ()) ;
+    Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fe (ew) ;
+    Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > > fie (fe) ;
+    Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfie (fie) ;
+    Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > difie (dfie) ;
+    _iterators.push_back (new Wrapper < Insert < Wrapper < Insert < Wrapper < 
+  Insert < AccessIterator < helement_STI > :: Handle, 
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (difie)) ;
+  }
+  return new VectorAlign < vertex_STI > (_iterators) ;
+  //cerr << "WARNING: method levelIterator for vertex_STI returns LeafIterator see: " << __FILE__ << " line: " << __LINE__ << "\n";
+  //return iterator(a);
 }
 
 // create level edge iterator 
