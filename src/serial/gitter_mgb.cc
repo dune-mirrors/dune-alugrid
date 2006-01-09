@@ -123,7 +123,8 @@ pair < Gitter :: Geometric :: tetra_GEO *, bool > MacroGridBuilder :: InsertUniq
   }
 }
 
-pair < Gitter :: Geometric :: hexa_GEO *, bool > MacroGridBuilder :: InsertUniqueHexa (int (&v)[8]) {
+pair < Gitter :: Geometric :: hexa_GEO *, bool > MacroGridBuilder :: InsertUniqueHexa (int (&v)[8]) 
+{
   elementKey_t key (v [0], v [1], v [3], v[4]) ;
   elementMap_t :: const_iterator hit = _hexaMap.find (key) ;
   if (hit == _hexaMap.end ()) {
@@ -275,9 +276,10 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
   if (hit != _hexaMap.end ()) {
     hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
     for (int i = 0 ; i < 6 ; i ++) {
-      _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), hx->myhface4 (i)->myvertex (1)->ident (), 
-        hx->myhface4 (i)->myvertex (2)->ident ())] = 
-          new Hbnd4IntStorage (hx->myhface4 (i), hx->twist (i), hx, i );
+      _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), 
+                            hx->myhface4 (i)->myvertex (1)->ident (), 
+                            hx->myhface4 (i)->myvertex (2)->ident ())
+                ] = new Hbnd4IntStorage (hx->myhface4 (i), hx->twist (i), hx, i );
     }
     delete hx ;
     _hexaMap.erase (hit) ;
@@ -810,8 +812,8 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
       switch (elementType) {
         case HEXA_RAW :
     {
-            int v [8] ;
-            rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
+      int v [8] ;
+      rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
       InsertUniqueHexa (v) ;
     }
     break ;
