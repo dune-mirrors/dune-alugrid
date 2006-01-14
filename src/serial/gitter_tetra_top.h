@@ -397,8 +397,8 @@ template < class A > void Hface3Top < A > :: split_e01 () {
   assert(ev0) ;
   inneredge_t * e0 = new inneredge_t (l, ev0, this->myvertex (2), getEdgeIndexManager() ) ;
   assert( e0 ) ;
-  innerface_t * f0 = new innerface_t (l, this->myhedge1(2), this->twist(2), this->subedge1(0,0), this->twist(0) , e0, 0, _indexManager ) ;
-  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(0,1), this->twist(0), this->myhedge1(1),  this->twist(1), _indexManager ) ;
+  innerface_t * f0 = new innerface_t (l, this->myhedge1(2), this->twist(2), this->subedge1(0,0), this->twist(0) , e0, 0, _indexManager, 0) ;
+  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(0,1), this->twist(0), this->myhedge1(1),  this->twist(1), _indexManager, 1) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
   _ed  = e0 ;
@@ -413,8 +413,8 @@ template < class A > void Hface3Top < A > :: split_e12 () {
   assert(ev0) ;
   inneredge_t * e0 = new inneredge_t (l, ev0, this->myvertex (0), getEdgeIndexManager()) ;
   assert( e0 ) ;
-  innerface_t * f0 = new innerface_t (l, this->myhedge1(0), this->twist(0), this->subedge1(1,0), this->twist(1) , e0, 0, _indexManager ) ;
-  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(1,1), this->twist(1), this->myhedge1(2),  this->twist(2), _indexManager ) ;
+  innerface_t * f0 = new innerface_t (l, this->myhedge1(0), this->twist(0), this->subedge1(1,0), this->twist(1) , e0, 0, _indexManager, 0 ) ;
+  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(1,1), this->twist(1), this->myhedge1(2),  this->twist(2), _indexManager, 1 ) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
   _ed  = e0 ;
@@ -429,8 +429,8 @@ template < class A > void Hface3Top < A > :: split_e20 () {
   assert(ev0) ;
   inneredge_t * e0 = new inneredge_t (l, ev0, this->myvertex(1), getEdgeIndexManager()) ;
   assert( e0 ) ;
-  innerface_t * f0 = new innerface_t (l, this->myhedge1(1), this->twist(1), this->subedge1(2,0), this->twist(2) , e0, 0, _indexManager ) ;
-  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(2,1), this->twist(2), this->myhedge1(0),  this->twist(0), _indexManager ) ;
+  innerface_t * f0 = new innerface_t (l, this->myhedge1(1), this->twist(1), this->subedge1(2,0), this->twist(2) , e0, 0, _indexManager, 0 ) ;
+  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(2,1), this->twist(2), this->myhedge1(0),  this->twist(0), _indexManager, 1 ) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
   _ed  = e0 ;
@@ -452,10 +452,10 @@ template < class A > void Hface3Top < A > :: split_iso4 () {
   assert( e0 && e1 && e2 ) ;
   e0->append(e1) ;
   e1->append(e2) ;
-  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), this->twist(0), e2, 1, this->subedge1(2,1), this->twist(2), _indexManager ) ;
-  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e0, 1, _indexManager ) ;
-  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), _indexManager ) ;
-  innerface_t * f3 = new innerface_t (l, e0, 0, e1, 0, e2, 0, _indexManager ) ;
+  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), this->twist(0), e2, 1, this->subedge1(2,1), this->twist(2), _indexManager, 0) ;
+  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e0, 1, _indexManager, 1) ;
+  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), _indexManager, 2) ;
+  innerface_t * f3 = new innerface_t (l, e0, 0, e1, 0, e2, 0, _indexManager, 3 ) ;
   assert (f0 && f1 && f2 && f3) ;
   f0->append(f1) ;
   f1->append(f2) ;
