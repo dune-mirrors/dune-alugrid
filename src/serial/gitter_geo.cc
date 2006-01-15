@@ -73,7 +73,7 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
   //          |/  .      /  |
   //          4---------5   | <-- 4 (hinten)
   //    5 --> |   .     | 3 |
-  //          |   3.....|...2
+  //  (links) |   3.....|...2
   //          |  .      |  /
   //          | .   2   | / <-- 0 (unten)
   //          |.        |/
@@ -96,10 +96,13 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
   //
   //       
 
+// defines from which vertices one face is created 
 const int Gitter :: Geometric :: Hexa :: prototype [6][4] = {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}} ;
-const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of face 
+
+const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of given face 
 
 // defines how we get an edge from an hexa , first is face , second is edge 
+// for example the 0th edge is defined by the 3th edge of the 0th face
 const int Gitter :: Geometric :: Hexa :: edgeMap [12][2] = {{0, 3},
                                                             {0, 0},
                                                             {2, 3},
