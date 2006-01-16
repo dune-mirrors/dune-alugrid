@@ -1022,12 +1022,8 @@ void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
   if (hit) {
     os.writeObject (HBND4INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
-    
-    for(int vx=0; vx<4; vx++) 
-    {
-      int vxid = myhexa().myvertex(fce,vx)->ident(); 
-    }
-
+  
+    // write the four identifiers of the hexa 
     os.writeObject (myhexa ().myvertex (fce,0)->ident ()) ;
     os.writeObject (myhexa ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myhexa ().myvertex (fce,2)->ident ()) ;
