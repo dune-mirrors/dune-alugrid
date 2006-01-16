@@ -90,8 +90,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         typedef typename A :: myhface3_t myhface3_t ;
         typedef typename A :: balrule_t  balrule_t ; 
         typedef typename A :: bnd_t     bnd_t ;
-  virtual bool bndNotifyBalance (balrule_t,int) ;
-  virtual bool lockedAgainstCoarsening () const ;
+        virtual bool bndNotifyBalance (balrule_t,int) ;
+        virtual bool lockedAgainstCoarsening () const ;
       public :
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
                       IndexManagerType & im, Gitter * , MacroGhost * ) ;
