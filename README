@@ -125,6 +125,14 @@ Known bugs: On Intel ia64 architectures the optimisation option -O3 dosen't
 work with the INTEL C++ Compiler. 
 
 
+Debug
+-----
+
+For debugging the code the preprocessor variable NDEBUG must not be defined
+and additionally the preprocessor variable DEBUG_ALUGRID can be defined
+for object reference counting.
+
+
 Knowns Bugs 
 -----------
 
