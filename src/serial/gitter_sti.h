@@ -76,11 +76,15 @@ class Hbnd4IntStoragePoints;
 // nicht ver"andert (k"onnen also auch 'const' sein).
 
 class Refcount {
+  
 #ifndef NDEBUG
-
+#ifdef DEBUG_ALUGRID
   // Der Globale Z"ahler soll helfen, nicht gel"oschte
   // Gitterobjekte oder Iteratorobjekte zu erkennen.
   // (Wird aber nur in den DEBUG-Versionen angelegt.) 
+  //
+  // Refcounting only turned on, if NDEBUG is not defined and
+  // DEBUG_ALUGRID is defined 
 
   class Globalcount {
     int _c ;
@@ -92,6 +96,10 @@ class Refcount {
   } ;
   static Globalcount _g ;
 #endif 
+  // end DEBUG_ALUGRID
+#endif 
+  // end NDEBUG
+
   int _c ;
 public :
   inline Refcount () ;
@@ -1417,6 +1425,7 @@ inline pair < int, int > operator += (pair < int, int> & a, const pair < int, in
 }
 
 #ifndef NDEBUG
+#ifdef DEBUG_ALUGRID 
 inline Refcount :: Globalcount :: Globalcount () : _c (0) {
   return ;
 }
@@ -1441,15 +1450,15 @@ inline Refcount :: ~Refcount () {
   _g -- ;
   return ;
 }
-#else
-inline Refcount :: Refcount () : _c (0) {
-  return ;
-}
-
-inline Refcount :: ~Refcount () {
-  return ;
-}
+#else // else DEBUG_ALUGRID 
+inline Refcount :: Refcount () : _c (0) { return ; }
+inline Refcount :: ~Refcount () {  return ;}
+#endif 
+#else  
+inline Refcount :: Refcount () : _c (0) { return ; }
+inline Refcount :: ~Refcount () {  return ;}
 #endif
+
 inline int Refcount :: operator ++ (int) const {
   return ((int &)_c) ++ ;
 }

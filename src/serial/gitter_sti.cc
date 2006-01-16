@@ -32,6 +32,7 @@
 extern "C" { double drand48 (void) ; }
 
 #ifndef NDEBUG
+#ifdef DEBUG_ALUGRID
 Refcount :: Globalcount Refcount :: _g ;
 
 Refcount :: Globalcount :: ~Globalcount () {
@@ -39,6 +40,7 @@ Refcount :: Globalcount :: ~Globalcount () {
            << " objects have not been removed correctly!" << endl, 1) : 1) ;
   return ;
 }
+#endif
 #endif
 
 typedef Wrapper < AccessIterator < Gitter :: vertex_STI > :: Handle, 
