@@ -529,7 +529,7 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) {
 // H"ohere Ordnung:
     {
       assert (getrule () < SCHAR_MAX) ;
-      int i = 0 ;
+      //int i = 0 ;
       for (innerface_t * f = down () ; f ; f = f->next ()) {
         f->_parRule = (signed char) getrule () ;
         //f->_nChild  = (signed char) i++ ;
