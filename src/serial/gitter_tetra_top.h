@@ -535,7 +535,7 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) {
         //f->_nChild  = (signed char) i++ ;
         f->_nonv = f->_nonh = (signed char) 1 ;
       }
-      assert (i < SCHAR_MAX) ;
+      //assert (i < SCHAR_MAX) ;
     }
 // Ende: H"ohere Ordnung
     this->postRefinement () ;
