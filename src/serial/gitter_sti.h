@@ -34,10 +34,6 @@ typedef strstream    strstream_t;
 #include "xdrclass.h"
 
 
-// typedef of the element types moved to alu3dgrid_serial.h 
-// typedef enum { hexa , tetra , hexa_periodic , tetra_periodic } grid_t;
-
-
 // if DUNE uses this grid the _DUNE_USES_ALU3DGRID_ variable should be defined
 // otherwise some dummy are set 
 #include "indexstack.h"
