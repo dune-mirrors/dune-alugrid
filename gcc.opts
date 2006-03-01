@@ -12,4 +12,4 @@ FLAGS="-Wall"
 DEBUGFLAGS="-g"
 
 # additional flags for optimization
-OPTIMFLAGS="-O3 -unroll -DNDEBUG"
+OPTIMFLAGS="-O3 -unroll -DNDEBUG --param max-inline-insns-single=1000 --param large-function-growth=1500"
