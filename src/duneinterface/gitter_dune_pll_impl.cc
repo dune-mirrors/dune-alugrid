@@ -403,6 +403,158 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf)
   return; 
 }
 
+//template < class DataHandle>
+void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& data, int, int) { //, InterfaceType iftype, CommunicationDirection dir) 
+
+   std::cout << "c1() am Werk ...\n";
+   //das ist mal der Versuch der Kommunikation "uber Partitionsgrenzen
+   
+   int dim, codim, nl = mpAccess ().nlinks (), i;
+
+   vector < vector < double > > vec; //das soll ausgetauscht werden
+
+   pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
+   pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>   b;
+   pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
+
+   vector < double > :: const_iterator m ;  
+   for (i = 0; i < mpAccess ().nlinks (); i++) {
+      if (dim - codim == 0) {
+         a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
+         for (a.second->first (); ! a.second->done () ; a.second->next ()) {
+//            a.second->item().accessVRTData().DataRead(v); //!!!
+//            vec[i].push_back(v[k]);
+         }
+         delete a.first;
+         delete a.second;	    
+      }
+      if (dim - codim == 1) {
+         b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+         for (b.second->first (); ! b.second->done () ; b.second->next ()) {
+//            b.second->item().accessVRTData().DataRead(v); //!!!
+//            vec[i].push_back(v[k]);
+         }
+         delete b.first;
+         delete b.second;	    
+      }
+      if (dim - codim == 2) {
+         c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
+         for (c.second->first (); ! c.second->done () ; c.second->next ()) {
+//            c.second->item().accessVRTData().DataRead(v); //!!!
+//            vec[i].push_back(v[k]);
+         }
+         delete c.first;
+         delete c.second;	    
+      }
+   }
+   
+   //den anderen Partitionen die Slave-Daten senden
+   vec = mpAccess ().exchange (vec);
+   
+   //und dort den Master-Knoten "ubergeben
+   for (i = 0; i < mpAccess ().nlinks (); i++) { 
+      if (dim - codim == 0) {
+         a = iteratorTT ((vertex_STI *)0,i);
+//         m = vec[i].begin () ;
+         for (a.first->first (); ! a.first->done () ; a.first->next ()) {
+//            for (int k = 0; k < max; k++) v[k] = *m++; 
+//               a.first->item ().accessVRTData().DataWrite(v, c) ;
+         }
+         delete a.first;
+         delete a.second;
+      }
+      if (dim - codim == 1) {
+         b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+//         m = vec[i].begin () ;
+         for (b.first->first (); ! b.first->done () ; b.first->next ()) {
+//            for (int k = 0; k < max; k++) v[k] = *m++;
+//               b.first->item ().accessVRTData().DataWrite(v) ;
+         }
+         delete b.first;
+         delete b.second;
+      }
+      if (dim - codim == 2) {
+         c = iteratorTT ((hface_STI *)0,i);
+//         m = vec[i].begin () ;
+         for (c.first->first (); ! c.first->done () ; c.first->next ()) {
+//            for (int k = 0; k < max; k++) v[k] = *m++; 
+//                c.first->item ().accessVRTData().DataWrite(v) ;
+         }
+         delete c.first;
+         delete c.second;
+      }
+   }
+
+   //MasterknotenDaten sammeln
+   for (i = 0; i < mpAccess ().nlinks (); i++) {
+      if (dim - codim == 0) {
+         a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
+         for (a.first->first (); ! a.first->done () ; a.first->next ()) {
+//            a.first->item().accessVRTData().DataRead(v); //!!!
+//            vec[i].push_back(v[k]);
+         }
+         delete a.first;
+         delete a.second;	    
+      }
+      if (dim - codim == 1) {
+         b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+         for (b.first->first (); ! b.first->done () ; b.first->next ()) {
+//            b.first->item().accessVRTData().DataRead(v); //!!!
+//            vec[i].push_back(v[k]);
+         }
+         delete b.first;
+         delete b.second;	    
+      }
+      if (dim - codim == 2) {
+         c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
+         for (c.first->first (); ! c.first->done () ; c.first->next ()) {
+//            c.first->item().accessVRTData().DataRead(v); //!!!
+//            vec[i].push_back(v[k]);
+         }
+         delete c.first;
+         delete c.second;	    
+      }
+   }
+   
+   //den anderen Partitionen die Slave-Daten senden
+   vec = mpAccess ().exchange (vec);
+   
+   //und auf die Slave-Knoten draufschreiben
+   for (i = 0; i < mpAccess ().nlinks (); i++) { 
+      if (dim - codim == 0) {
+         a = iteratorTT ((vertex_STI *)0,i);
+//         m = vec[i].begin () ;
+         for (a.second->first (); ! a.second->done () ; a.second->next ()) {
+//            for (int k = 0; k < max; k++) v[k] = *m++; 
+//               a.second->item ().accessVRTData().DataWrite(v, c) ;
+         }
+         delete a.first;
+         delete a.second;
+      }
+      if (dim - codim == 1) {
+         b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+//         m = vec[i].begin () ;
+         for (b.second->first (); ! b.second->done () ; b.second->next ()) {
+//            for (int k = 0; k < max; k++) v[k] = *m++;
+//               b.second->item ().accessVRTData().DataWrite(v) ;
+         }
+         delete b.first;
+         delete b.second;
+      }
+      if (dim - codim == 2) {
+         c = iteratorTT ((hface_STI *)0,i);
+//         m = vec[i].begin () ;
+         for (c.second->first (); ! c.second->done () ; c.second->next ()) {
+//            for (int k = 0; k < max; k++) v[k] = *m++; 
+//                c.second->item ().accessVRTData().DataWrite(v) ;
+         }
+         delete c.first;
+         delete c.second;
+      }
+   }
+}
+
+
 bool GitterDunePll :: refine () {
   assert (debugOption (5) ? (cout << "**INFO GitterDunePll :: refine () " << endl, 1) : 1) ;
   const int nl = mpAccess ().nlinks () ;

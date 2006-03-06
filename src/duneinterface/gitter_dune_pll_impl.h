@@ -83,6 +83,9 @@ public:
   // exchange data of dune 
   void duneExchangeData (GatherScatterType &, bool leaf = false );
 
+  // 
+  void ALUcomm (GatherScatterType & );  
+
   // return indexmanger 
   IndexManagerType & indexManager(int codim)
   {

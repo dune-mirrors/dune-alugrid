@@ -75,6 +75,8 @@ public:
 
   void coarse ();
 
+//  void c1() { std::cout << "GitterDuneBasis::c1() \n"; }
+
   // done call notify and loadBalancer  
   bool duneAdapt (AdaptRestrictProlongType & arp);
 };
