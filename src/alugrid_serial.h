@@ -26,15 +26,28 @@ typedef GatherScatter GatherScatterType;
 typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
 
 typedef Gitter::helement_STI  HElemType;    // Interface Element
+typedef Gitter::hface_STI     HFaceType;    // Interface Element
+typedef Gitter::hedge_STI     HEdgeType;    // Interface Element
+typedef Gitter::vertex_STI    HVertexType;  // Interface Element
 typedef Gitter::hbndseg       HGhostType;
 
 struct GatherScatter
 {
   virtual ~GatherScatter () {}
-  virtual void inlineData ( ObjectStream & str , HElemType & elem ) = 0;
-  virtual void xtractData ( ObjectStream & str , HElemType & elem ) = 0;
-  virtual void sendData ( ObjectStream & str , const HElemType  & elem ) = 0;
-  virtual void recvData ( ObjectStream & str , HGhostType & elem ) = 0;
+  virtual void inlineData ( ObjectStream & str , HElemType & elem ) { abort(); }
+  virtual void xtractData ( ObjectStream & str , HElemType & elem ) { abort(); }
+  
+  virtual void inlineData ( ObjectStream & str , HFaceType & elem ) { abort(); }
+  virtual void xtractData ( ObjectStream & str , HFaceType & elem ) { abort(); }
+  
+  virtual void inlineData ( ObjectStream & str , HEdgeType & elem ) { abort(); }
+  virtual void xtractData ( ObjectStream & str , HEdgeType & elem ) { abort(); }
+  
+  virtual void inlineData ( ObjectStream & str , HVertexType & elem ) { abort(); }
+  virtual void xtractData ( ObjectStream & str , HVertexType & elem ) { abort(); }
+
+  virtual void sendData ( ObjectStream & str , const HElemType  & elem ) { abort(); }
+  virtual void recvData ( ObjectStream & str , HGhostType & elem ) { abort(); }
 };
 typedef GatherScatter GatherScatterType;
 
@@ -53,6 +66,5 @@ typedef GatherScatter GatherScatterType;
 #include "serial/myalloc.h"
 
 #include "duneinterface/gitter_dune_impl.h"
-
 }
 #endif
