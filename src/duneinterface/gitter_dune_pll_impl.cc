@@ -403,16 +403,18 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf)
   return; 
 }
 
-//template < class DataHandle>
-void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& data, int, int) { //, InterfaceType iftype, CommunicationDirection dir) 
+// communicate data
+void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
 
-   std::cout << "c1() am Werk ...\n";
    //das ist mal der Versuch der Kommunikation "uber Partitionsgrenzen
-   
-   int dim = 3 , codim = 3;
    const int nl = mpAccess ().nlinks ();
 
-   vector < vector < double > > vec; //das soll ausgetauscht werden
+   const bool containsVertices = gs.contains(3,3);
+   const bool containsEdges    = gs.contains(3,2);
+   const bool containsFaces    = gs.contains(3,1);
+
+   // the message buffas 
+   vector < ObjectStream > vec (nl) ;
 
    pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
    pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>   b;
@@ -420,16 +422,17 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
 
    vector < double > :: const_iterator m ;  
    for (int i = 0; i < nl ; i++) {
-      if (dim - codim == 0) {
+      if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
          for (a.second->first (); ! a.second->done () ; a.second->next ()) {
+           gs.inlineData(vec[i],a.second->item());
 //            a.second->item().accessVRTData().DataRead(v); //!!!
 //            vec[i].push_back(v[k]);
          }
          delete a.first;
          delete a.second;	    
       }
-      if (dim - codim == 1) {
+      if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
          for (b.second->first (); ! b.second->done () ; b.second->next ()) {
 //            b.second->item().accessVRTData().DataRead(v); //!!!
@@ -438,7 +441,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
          delete b.first;
          delete b.second;	    
       }
-      if (dim - codim == 2) {
+      if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
          for (c.second->first (); ! c.second->done () ; c.second->next ()) {
 //            c.second->item().accessVRTData().DataRead(v); //!!!
@@ -454,17 +457,15 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
    
    //und dort den Master-Knoten "ubergeben
    for (int i = 0; i < nl; i++) { 
-      if (dim - codim == 0) {
+      if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i);
-//         m = vec[i].begin () ;
          for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-//            for (int k = 0; k < max; k++) v[k] = *m++; 
-//               a.first->item ().accessVRTData().DataWrite(v, c) ;
+           gs.xtractData(vec[i],a.first->item ());
          }
          delete a.first;
          delete a.second;
       }
-      if (dim - codim == 1) {
+      if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
 //         m = vec[i].begin () ;
          for (b.first->first (); ! b.first->done () ; b.first->next ()) {
@@ -474,7 +475,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
          delete b.first;
          delete b.second;
       }
-      if (dim - codim == 2) {
+      if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i);
 //         m = vec[i].begin () ;
          for (c.first->first (); ! c.first->done () ; c.first->next ()) {
@@ -488,16 +489,17 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
 
    //MasterknotenDaten sammeln
    for (int i = 0; i < nl; i++) {
-      if (dim - codim == 0) {
+      if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
          for (a.first->first (); ! a.first->done () ; a.first->next ()) {
+           gs.inlineData(vec[i],a.first->item ());
 //            a.first->item().accessVRTData().DataRead(v); //!!!
 //            vec[i].push_back(v[k]);
          }
          delete a.first;
          delete a.second;	    
       }
-      if (dim - codim == 1) {
+      if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
          for (b.first->first (); ! b.first->done () ; b.first->next ()) {
 //            b.first->item().accessVRTData().DataRead(v); //!!!
@@ -506,7 +508,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
          delete b.first;
          delete b.second;	    
       }
-      if (dim - codim == 2) {
+      if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
          for (c.first->first (); ! c.first->done () ; c.first->next ()) {
 //            c.first->item().accessVRTData().DataRead(v); //!!!
@@ -522,17 +524,18 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
    
    //und auf die Slave-Knoten draufschreiben
    for (int i = 0; i < nl; i++) { 
-      if (dim - codim == 0) {
+      if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i);
 //         m = vec[i].begin () ;
          for (a.second->first (); ! a.second->done () ; a.second->next ()) {
+           gs.setData(vec[i],a.second->item ());
 //            for (int k = 0; k < max; k++) v[k] = *m++; 
 //               a.second->item ().accessVRTData().DataWrite(v, c) ;
          }
          delete a.first;
          delete a.second;
       }
-      if (dim - codim == 1) {
+      if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
 //         m = vec[i].begin () ;
          for (b.second->first (); ! b.second->done () ; b.second->next ()) {
@@ -542,7 +545,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
          delete b.first;
          delete b.second;
       }
-      if (dim - codim == 2) {
+      if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i);
 //         m = vec[i].begin () ;
          for (c.second->first (); ! c.second->done () ; c.second->next ()) {
