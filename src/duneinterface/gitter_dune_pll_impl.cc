@@ -409,7 +409,8 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
    std::cout << "c1() am Werk ...\n";
    //das ist mal der Versuch der Kommunikation "uber Partitionsgrenzen
    
-   int dim, codim, nl = mpAccess ().nlinks (), i;
+   int dim = 3 , codim = 3;
+   const int nl = mpAccess ().nlinks ();
 
    vector < vector < double > > vec; //das soll ausgetauscht werden
 
@@ -418,7 +419,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
    pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
 
    vector < double > :: const_iterator m ;  
-   for (i = 0; i < mpAccess ().nlinks (); i++) {
+   for (int i = 0; i < nl ; i++) {
       if (dim - codim == 0) {
          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
          for (a.second->first (); ! a.second->done () ; a.second->next ()) {
@@ -452,7 +453,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
    vec = mpAccess ().exchange (vec);
    
    //und dort den Master-Knoten "ubergeben
-   for (i = 0; i < mpAccess ().nlinks (); i++) { 
+   for (int i = 0; i < nl; i++) { 
       if (dim - codim == 0) {
          a = iteratorTT ((vertex_STI *)0,i);
 //         m = vec[i].begin () ;
@@ -486,7 +487,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
    }
 
    //MasterknotenDaten sammeln
-   for (i = 0; i < mpAccess ().nlinks (); i++) {
+   for (int i = 0; i < nl; i++) {
       if (dim - codim == 0) {
          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
          for (a.first->first (); ! a.first->done () ; a.first->next ()) {
@@ -520,7 +521,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) { //    DataHandle& dat
    vec = mpAccess ().exchange (vec);
    
    //und auf die Slave-Knoten draufschreiben
-   for (i = 0; i < mpAccess ().nlinks (); i++) { 
+   for (int i = 0; i < nl; i++) { 
       if (dim - codim == 0) {
          a = iteratorTT ((vertex_STI *)0,i);
 //         m = vec[i].begin () ;
