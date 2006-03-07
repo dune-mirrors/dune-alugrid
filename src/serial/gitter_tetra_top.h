@@ -146,6 +146,7 @@ template < class A > class TetraTop : public A {
     int _lvl ;
     myrule_t _req, _rule ;
     IndexManagerType & _indexManager;
+    const double _volume;
     const signed char _nChild;
     
   private :
@@ -188,6 +189,7 @@ template < class A > class TetraTop : public A {
     inline const innerface_t * innerHface () const ;
     inline int level () const ;
     inline int nChild () const ;
+    inline double volume () const ;
   public :
     myrule_t getrule () const ;
     myrule_t requestrule () const ;
@@ -1011,7 +1013,10 @@ template < class A > inline TetraTop < A >
              myhface3_t * f3, int t3, innertetra_t *up, int nChild) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid ), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0), _lvl (l), 
     _rule (myrule_t :: nosplit)
-  , _indexManager(up->_indexManager)  
+  , _indexManager(up->_indexManager) 
+  , _volume(quadraturTetra3D < VolumeCalc > 
+    (LinearMapping ( this->myvertex(0)->Point(), this->myvertex(1)->Point(),
+                     this->myvertex(2)->Point(), this->myvertex(3)->Point())).integrate1 (0.0))
   , _nChild(nChild) 
 { // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
@@ -1027,6 +1032,9 @@ TetraTop (int l, myhface3_t * f0, int t0,
   : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
     _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0), _lvl (l) 
   , _rule (myrule_t :: nosplit) , _indexManager(im)
+  , _volume(quadraturTetra3D < VolumeCalc > 
+    (LinearMapping ( this->myvertex(0)->Point(), this->myvertex(1)->Point(),
+                     this->myvertex(2)->Point(), this->myvertex(3)->Point())).integrate1 (0.0))
   , _nChild(0)  // we are macro ==> nChild 0 
 { // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
@@ -1046,6 +1054,10 @@ template < class A > inline TetraTop < A > :: ~TetraTop ()
 
 template < class A > inline int TetraTop < A > :: level () const {
   return _lvl ;
+}
+
+template < class A > inline double TetraTop < A > :: volume () const {
+  return _volume ;
 }
 
 template < class A > inline int TetraTop < A > :: nChild () const {
@@ -1108,7 +1120,7 @@ template < class A > inline void TetraTop < A > :: append (TetraTop < A > * h) {
   return ;
 }
 
-template < class A > typename TetraTop < A > :: myhedge1_t * TetraTop < A > :: subedge1 (int i, int j) {
+template < class A > inline typename TetraTop < A > :: myhedge1_t * TetraTop < A > :: subedge1 (int i, int j) {
   switch (this->myhface3(i)->getrule()) {
   case myhface3_t :: myrule_t :: e01 :
     assert( j == 0 );
@@ -1130,12 +1142,12 @@ template < class A > typename TetraTop < A > :: myhedge1_t * TetraTop < A > :: s
   return 0 ;
 }
 
-template < class A > const typename TetraTop < A > :: myhedge1_t * TetraTop < A > :: subedge1 (int i, int j) const {
+template < class A > inline const typename TetraTop < A > :: myhedge1_t * TetraTop < A > :: subedge1 (int i, int j) const {
   return ((TetraTop < A > *)this)->subedge1 (i,j) ;
 }
 
 
-template < class A > typename TetraTop < A > ::  myhface3_t * TetraTop < A > :: subface3 (int i, int j) {
+template < class A > inline typename TetraTop < A > ::  myhface3_t * TetraTop < A > :: subface3 (int i, int j) {
   switch (this->myhface3(i)->getrule()) {
   case myhface3_t :: myrule_t :: e01 :
     assert( j < 2 );
@@ -1178,7 +1190,7 @@ template < class A > typename TetraTop < A > ::  myhface3_t * TetraTop < A > :: 
   return 0 ;
 }
 
-template < class A > const typename TetraTop < A > ::  myhface3_t * TetraTop < A > :: subface3 (int i, int j) const {
+template < class A > inline const typename TetraTop < A > ::  myhface3_t * TetraTop < A > :: subface3 (int i, int j) const {
   return ((TetraTop < A > *)this)->subface3 (i,j) ;
 }
 
@@ -1190,7 +1202,7 @@ template < class A > inline IndexManagerType &  TetraTop < A > :: getEdgeIndexMa
    return static_cast<inneredge_t &> (*(static_cast<TetraTop < A > *> (this)->subedge1(0,0))).getIndexManager();
 }
 
-template < class A > void TetraTop < A > :: split_e01 () {
+template < class A > inline void TetraTop < A > :: split_e01 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
@@ -1204,7 +1216,7 @@ template < class A > void TetraTop < A > :: split_e01 () {
   return ;
 }
 
-template < class A > void TetraTop < A > :: split_e12 () {
+template < class A > inline void TetraTop < A > :: split_e12 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0 ) ;
@@ -1218,7 +1230,7 @@ template < class A > void TetraTop < A > :: split_e12 () {
   return ;
 }
 
-template < class A > void TetraTop < A > :: split_e20 () {
+template < class A > inline void TetraTop < A > :: split_e20 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
@@ -1232,7 +1244,7 @@ template < class A > void TetraTop < A > :: split_e20 () {
   return ;
 }
 
-template < class A > void TetraTop < A > :: split_e23 () {
+template < class A > inline void TetraTop < A > :: split_e23 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
@@ -1246,7 +1258,7 @@ template < class A > void TetraTop < A > :: split_e23 () {
   return ;
 }
 
-template < class A > void TetraTop < A > :: split_e30 () {
+template < class A > inline void TetraTop < A > :: split_e30 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
@@ -1260,7 +1272,7 @@ template < class A > void TetraTop < A > :: split_e30 () {
   return ;
 }
 
-template < class A > void TetraTop < A > :: split_e31 () {
+template < class A > inline void TetraTop < A > :: split_e31 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager()) ;
   assert(f0) ;
@@ -1274,7 +1286,7 @@ template < class A > void TetraTop < A > :: split_e31 () {
   return ;
 }
 
-template < class A > void TetraTop < A > :: split_iso8 () {
+template < class A > inline void TetraTop < A > :: split_iso8 () {
   typedef typename A :: myvertex_t  myvertex_t;
   typedef typename A :: inneredge_t inneredge_t;
   int l = 1 + level () ; 
@@ -1325,22 +1337,22 @@ template < class A > void TetraTop < A > :: split_iso8 () {
   return ;
 }
 
-template < class A > typename TetraTop < A > :: myrule_t TetraTop < A > :: getrule () const {
+template < class A > inline typename TetraTop < A > :: myrule_t TetraTop < A > :: getrule () const {
   return myrule_t (_rule) ;
 }
 
-template < class A > typename TetraTop < A > :: myrule_t TetraTop < A > :: requestrule () const {
+template < class A > inline typename TetraTop < A > :: myrule_t TetraTop < A > :: requestrule () const {
   return myrule_t (_req) ;
 }
 
-template < class A > void TetraTop < A > :: request (myrule_t r) 
+template < class A > inline void TetraTop < A > :: request (myrule_t r) 
 {
   assert (r.isValid ()) ;
   _req = r ;
   return ;
 }
 
-template < class A > void TetraTop < A > :: refineImmediate (myrule_t r) {
+template < class A > inline void TetraTop < A > :: refineImmediate (myrule_t r) {
   assert (getrule () == myrule_t :: nosplit) ;
   typedef typename myhface3_t :: myrule_t myhface3rule_t;
   switch(r) {
@@ -1397,7 +1409,7 @@ template < class A > void TetraTop < A > :: refineImmediate (myrule_t r) {
   return ;
 }
 
-template < class A > bool TetraTop < A > :: refine () {
+template < class A > inline bool TetraTop < A > :: refine () {
   
   myrule_t r = _req ;
   if (r != myrule_t :: crs && r != myrule_t :: nosplit) {
@@ -1453,7 +1465,7 @@ template < class A > bool TetraTop < A > :: refine () {
   return true ;
 }
 
-template < class A > bool TetraTop < A > :: refineBalance (balrule_t r, int fce) {
+template < class A > inline bool TetraTop < A > :: refineBalance (balrule_t r, int fce) {
   if (r != balrule_t :: iso4) {
     cerr << "**WARNUNG (IGNORIERT) in TetraTop < A > :: refineBalance (..) nachschauen, Datei " 
        << __FILE__ << " Zeile " << __LINE__ << endl ;
@@ -1478,7 +1490,7 @@ template < class A > bool TetraTop < A > :: refineBalance (balrule_t r, int fce)
   return true ;
 }
 
-template < class A > bool TetraTop < A > :: coarse () {
+template < class A > inline bool TetraTop < A > :: coarse () {
   if (this->leaf ()) {
     assert (_req == myrule_t :: nosplit || _req == myrule_t :: crs) ;
     myrule_t w = _req ;
@@ -1511,11 +1523,11 @@ template < class A > bool TetraTop < A > :: coarse () {
   return false ;
 }
 
-template < class A > bool TetraTop < A > :: bndNotifyCoarsen () {
+template < class A > inline bool TetraTop < A > :: bndNotifyCoarsen () {
   return true ;
 }
 
-template < class A > void TetraTop < A > :: backupCMode (ostream & os) const {
+template < class A > inline void TetraTop < A > :: backupCMode (ostream & os) const {
 
   // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
   // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
@@ -1527,7 +1539,7 @@ template < class A > void TetraTop < A > :: backupCMode (ostream & os) const {
 }
 
 // buckupTetra 
-template < class A > void TetraTop < A > :: backupIndex (ostream & os) const 
+template < class A > inline void TetraTop < A > :: backupIndex (ostream & os) const 
 {
 #ifdef _DUNE_USES_ALU3DGRID_
   os.write( ((const char *) & this->_index ), sizeof(int) ) ;
@@ -1537,7 +1549,7 @@ template < class A > void TetraTop < A > :: backupIndex (ostream & os) const
 }
 
 // buckupTetra 
-template < class A > void TetraTop < A > :: backup (ostream & os) const 
+template < class A > inline void TetraTop < A > :: backup (ostream & os) const 
 {
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
@@ -1547,7 +1559,7 @@ template < class A > void TetraTop < A > :: backup (ostream & os) const
   return ;
 }
 
-template < class A > void TetraTop < A > :: backup (XDRstream_out & os) const 
+template < class A > inline void TetraTop < A > :: backup (XDRstream_out & os) const 
 {
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
@@ -1570,7 +1582,7 @@ template < class A > inline void TetraTop < A > :: restoreIndex (istream & is)
 }
 
 // restoreTetra
-template < class A > void TetraTop < A > :: restore (istream & is) {
+template < class A > inline void TetraTop < A > :: restore (istream & is) {
 
   // restore () stellt den Elementbaum aus der Verfeinerungs-
   // geschichte wieder her. Es ruft refine () auf und testet
@@ -1623,7 +1635,7 @@ template < class A > void TetraTop < A > :: restore (istream & is) {
   
   return ;
 }
-template < class A > void TetraTop < A > :: restore (XDRstream_in & is) {
+template < class A > inline void TetraTop < A > :: restore (XDRstream_in & is) {
 
   // restore () stellt den Elementbaum aus der Verfeinerungs-
   // geschichte wieder her. Es ruft refine () auf und testet

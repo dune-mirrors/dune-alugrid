@@ -182,6 +182,7 @@ template < class A > class HexaTop : public A {
     int _lvl ;
     myrule_t _rule, _req ;
     IndexManagerType & _indexManager; 
+    const double _volume; 
     const signed char _nChild; 
 
 private:    
@@ -221,6 +222,7 @@ protected:
     inline const innerface_t * innerHface () const ;
     inline int level () const ;
     inline int nChild () const ;
+    inline double volume () const ;
   public :
     myrule_t getrule () const ;
     myrule_t requestrule () const ;
@@ -1147,7 +1149,13 @@ template < class A > inline HexaTop < A >
             int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
   , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0), _lvl (l),
-    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) , _nChild(0) 
+    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) 
+  ,  _volume (QuadraturCube3D < VolumeCalc >
+   (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
+                      this->myvertex(2)->Point(), this->myvertex(3)->Point(),
+                      this->myvertex(4)->Point(), this->myvertex(5)->Point(),
+                      this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0))
+  , _nChild(0) 
 { 
   this->setIndex( _indexManager.getIndex() );   
   return ;
@@ -1160,7 +1168,14 @@ template < class A > inline HexaTop < A >
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
   , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0), _lvl (l),
     _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
-  , _indexManager(_up->_indexManager), _nChild(nChild) { 
+  , _indexManager(_up->_indexManager)
+  ,  _volume (QuadraturCube3D < VolumeCalc >
+   (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
+                      this->myvertex(2)->Point(), this->myvertex(3)->Point(),
+                      this->myvertex(4)->Point(), this->myvertex(5)->Point(),
+                      this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0))
+  , _nChild(nChild) 
+{ 
   this->setIndex( _indexManager.getIndex() );   
   return ;
 }
@@ -1231,6 +1246,10 @@ template < class A > inline void HexaTop < A > :: append (HexaTop < A > * h) {
 
 template < class A > inline int HexaTop < A > :: level () const {
   return _lvl ;
+}
+
+template < class A > inline double HexaTop < A > :: volume () const {
+  return _volume;
 }
 
 template < class A > inline int HexaTop < A > :: nChild () const {

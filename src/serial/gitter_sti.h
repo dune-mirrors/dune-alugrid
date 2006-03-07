@@ -416,7 +416,7 @@ public :
     virtual int test () const = 0 ;
     inline  int leaf () const ;
 
-    //virtual double determinant () const { return 0.0; }
+    virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
