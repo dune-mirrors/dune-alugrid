@@ -62,6 +62,12 @@ class ObjectStream {
     inline void readObject (double &) throw (EOFException) ;
     inline void writeObject (int) throw (OutOfMemoryException) ;
     inline void readObject (int &) throw (EOFException) ;
+    
+    inline void write (double a) throw (OutOfMemoryException) {
+      writeObject(a); }
+    inline void read (double &a) throw (EOFException) { readObject(a);}
+    inline void write (int a) throw (OutOfMemoryException) {writeObject(a);}
+    inline void read (int &a) throw (EOFException) {readObject(a);}
   friend class MpAccessMPI ;
 } ;
 
