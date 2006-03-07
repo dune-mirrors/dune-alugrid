@@ -791,12 +791,18 @@ class Hmesh_basic {
     
     Listwalk < helement_t > * walk( helement_t *) { return new Leafwalk < Element > (mel) ; }
 
+    // von mir dazugeschrieben...
+    Listwalk < helement_t > * walk( helement_t *, int level) { return new Levelwalk < Element > (mel, level) ; }
+    
     Listwalk < Vertex > * walk(Vertex *) { return new Listwalk_impl < Vertex > (vl) ; }
 
     Listwalk < macroelement_t > * walk(macroelement_t *) { return new Listwalk_impl < macroelement_t > (mel) ; }
     
     Listwalk < hbndel_t > * walk( hbndel_t *) { return new Leafwalk < Bndel > (mbl) ; }
-
+    
+    // von mir dazugeschrieben...
+    Listwalk < hbndel_t > * walk( hbndel_t *, int level) { return new Levelwalk < Bndel > (mbl, level) ; }
+    
     Listwalk < helement_t > * walk(const Listwalk < helement_t > * ) ;
 
     Listwalk < hbndel_t > * walk(const Listwalk < hbndel_t > * ) ;
@@ -918,16 +924,19 @@ template < class A > class Listwalkptr {
   
   A * a ;
 
-  void * operator new (size_t ) { return 0 ; }
+  //void * operator new (size_t ) { return 0 ; }
 
-  void operator delete (void *) { }
+  //void operator delete (void *) { }
  
   public :
   
     Listwalkptr() : hdl(0) { walk = new Listwalk < A > () ; }
-
+    
     Listwalkptr(Hmesh_basic &h) : hdl(&h) { walk = h.walk(a) ; }
 
+    // von mir dazugeschrieben...
+    Listwalkptr(Hmesh_basic &h, int level) : hdl(&h) { walk = h.walk(a, level) ; }
+    
     Listwalkptr(const Listwalkptr & p) : hdl(p.hdl) { walk = hdl->walk(p.walk) ; }
     
    ~Listwalkptr() { delete walk ; }
