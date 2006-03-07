@@ -37,23 +37,23 @@ struct GatherScatter
 
   virtual bool contains(int,int) const = 0;
   
-  virtual void inlineData ( ObjectStream & str , HElemType & elem ) { abort(); }
-  virtual void xtractData ( ObjectStream & str , HElemType & elem ) { abort(); }
+  virtual void inlineData ( ObjectStream & str , HElemType & elem ) { assert(false); abort(); }
+  virtual void xtractData ( ObjectStream & str , HElemType & elem ) { assert(false); abort(); }
   
-  virtual void inlineData ( ObjectStream & str , HFaceType & elem ) { abort(); }
-  virtual void xtractData ( ObjectStream & str , HFaceType & elem ) { abort(); }
-  virtual void setData    ( ObjectStream & str , HFaceType & elem ) { abort(); }
+  virtual void inlineData ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
+  virtual void xtractData ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
+  virtual void setData    ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   
-  virtual void inlineData ( ObjectStream & str , HEdgeType & elem ) { abort(); }
-  virtual void xtractData ( ObjectStream & str , HEdgeType & elem ) { abort(); }
-  virtual void setData    ( ObjectStream & str , HEdgeType & elem ) { abort(); }
+  virtual void inlineData ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
+  virtual void xtractData ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
+  virtual void setData    ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   
-  virtual void inlineData ( ObjectStream & str , HVertexType & elem ) { abort(); }
-  virtual void xtractData ( ObjectStream & str , HVertexType & elem ) { abort(); }
-  virtual void setData    ( ObjectStream & str , HVertexType & elem ) { abort(); }
+  virtual void inlineData ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
+  virtual void xtractData ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
+  virtual void setData    ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
 
-  virtual void sendData ( ObjectStream & str , const HElemType  & elem ) { abort(); }
-  virtual void recvData ( ObjectStream & str , HGhostType & elem ) { abort(); }
+  virtual void sendData ( ObjectStream & str , const HElemType  & elem ) { assert(false); abort(); }
+  virtual void recvData ( ObjectStream & str , HGhostType & elem ) { assert(false); abort(); }
 };
 typedef GatherScatter GatherScatterType;
 
