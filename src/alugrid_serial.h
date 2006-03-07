@@ -34,17 +34,23 @@ typedef Gitter::hbndseg       HGhostType;
 struct GatherScatter
 {
   virtual ~GatherScatter () {}
+
+  virtual bool contains(int,int) const = 0;
+  
   virtual void inlineData ( ObjectStream & str , HElemType & elem ) { abort(); }
   virtual void xtractData ( ObjectStream & str , HElemType & elem ) { abort(); }
   
   virtual void inlineData ( ObjectStream & str , HFaceType & elem ) { abort(); }
   virtual void xtractData ( ObjectStream & str , HFaceType & elem ) { abort(); }
+  virtual void setData    ( ObjectStream & str , HFaceType & elem ) { abort(); }
   
   virtual void inlineData ( ObjectStream & str , HEdgeType & elem ) { abort(); }
   virtual void xtractData ( ObjectStream & str , HEdgeType & elem ) { abort(); }
+  virtual void setData    ( ObjectStream & str , HEdgeType & elem ) { abort(); }
   
   virtual void inlineData ( ObjectStream & str , HVertexType & elem ) { abort(); }
   virtual void xtractData ( ObjectStream & str , HVertexType & elem ) { abort(); }
+  virtual void setData    ( ObjectStream & str , HVertexType & elem ) { abort(); }
 
   virtual void sendData ( ObjectStream & str , const HElemType  & elem ) { abort(); }
   virtual void recvData ( ObjectStream & str , HGhostType & elem ) { abort(); }
