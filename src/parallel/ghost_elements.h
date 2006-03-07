@@ -295,7 +295,7 @@ public:
     typedef Gitter :: Geometric :: VertexGeo VertexGeo;
 
     const double (&p)[4][3]  = allp.getPoints();
-    const int (&vertices)[8] = allp.getIdents();
+    //const int (&vertices)[8] = allp.getIdents();
     const int (&oppVerts)[4] = allp.getOppFaceIdents();
 
     // we create 8 new points, which are stored in the lists of our
