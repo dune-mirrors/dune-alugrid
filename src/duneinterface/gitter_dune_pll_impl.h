@@ -83,8 +83,11 @@ public:
   // exchange data of dune 
   void duneExchangeData (GatherScatterType &, bool leaf = false );
 
-  // 
-  void ALUcomm (GatherScatterType & );  
+  // communication of data 
+  void GitterDunePll :: ALUcomm (
+         GatherScatterType & vertexData ,
+         GatherScatterType & edgeData,
+         GatherScatterType & faceData );
 
   // return indexmanger 
   IndexManagerType & indexManager(int codim)

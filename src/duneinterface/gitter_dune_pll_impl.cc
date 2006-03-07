@@ -404,14 +404,18 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf)
 }
 
 // communicate data
-void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
+void GitterDunePll :: ALUcomm ( 
+      GatherScatterType & vertexData , 
+      GatherScatterType & edgeData,  
+      GatherScatterType & faceData ) 
+{
 
    //das ist mal der Versuch der Kommunikation "uber Partitionsgrenzen
    const int nl = mpAccess ().nlinks ();
 
-   const bool containsVertices = gs.contains(3,3);
-   const bool containsEdges    = gs.contains(3,2);
-   const bool containsFaces    = gs.contains(3,1);
+   const bool containsVertices = vertexData.contains(3,3);
+   const bool containsEdges    = edgeData.contains(3,2);
+   const bool containsFaces    = faceData.contains(3,1);
 
    // the message buffas 
    vector < ObjectStream > vec (nl) ;
@@ -420,12 +424,12 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
    pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>   b;
    pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
 
-   vector < double > :: const_iterator m ;  
+   //vector < double > :: const_iterator m ;  
    for (int i = 0; i < nl ; i++) {
       if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
          for (a.second->first (); ! a.second->done () ; a.second->next ()) {
-           gs.inlineData(vec[i],a.second->item());
+           vertexData.inlineData(vec[i],a.second->item());
 //            a.second->item().accessVRTData().DataRead(v); //!!!
 //            vec[i].push_back(v[k]);
          }
@@ -435,6 +439,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
       if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
          for (b.second->first (); ! b.second->done () ; b.second->next ()) {
+           edgeData.inlineData(vec[i],b.second->item());
 //            b.second->item().accessVRTData().DataRead(v); //!!!
 //            vec[i].push_back(v[k]);
          }
@@ -444,6 +449,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
       if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
          for (c.second->first (); ! c.second->done () ; c.second->next ()) {
+           faceData.inlineData(vec[i],c.second->item());
 //            c.second->item().accessVRTData().DataRead(v); //!!!
 //            vec[i].push_back(v[k]);
          }
@@ -460,27 +466,23 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
       if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i);
          for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-           gs.xtractData(vec[i],a.first->item ());
+           vertexData.xtractData(vec[i],a.first->item ());
          }
          delete a.first;
          delete a.second;
       }
       if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-//         m = vec[i].begin () ;
          for (b.first->first (); ! b.first->done () ; b.first->next ()) {
-//            for (int k = 0; k < max; k++) v[k] = *m++;
-//               b.first->item ().accessVRTData().DataWrite(v) ;
+           edgeData.xtractData(vec[i],b.first->item());
          }
          delete b.first;
          delete b.second;
       }
       if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i);
-//         m = vec[i].begin () ;
          for (c.first->first (); ! c.first->done () ; c.first->next ()) {
-//            for (int k = 0; k < max; k++) v[k] = *m++; 
-//                c.first->item ().accessVRTData().DataWrite(v) ;
+           faceData.xtractData(vec[i],c.first->item());
          }
          delete c.first;
          delete c.second;
@@ -492,9 +494,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
       if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
          for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-           gs.inlineData(vec[i],a.first->item ());
-//            a.first->item().accessVRTData().DataRead(v); //!!!
-//            vec[i].push_back(v[k]);
+           vertexData.inlineData(vec[i],a.first->item ());
          }
          delete a.first;
          delete a.second;	    
@@ -502,8 +502,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
       if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
          for (b.first->first (); ! b.first->done () ; b.first->next ()) {
-//            b.first->item().accessVRTData().DataRead(v); //!!!
-//            vec[i].push_back(v[k]);
+           edgeData.inlineData(vec[i],b.first->item ());
          }
          delete b.first;
          delete b.second;	    
@@ -511,8 +510,7 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
       if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
          for (c.first->first (); ! c.first->done () ; c.first->next ()) {
-//            c.first->item().accessVRTData().DataRead(v); //!!!
-//            vec[i].push_back(v[k]);
+           faceData.inlineData(vec[i],c.first->item ());
          }
          delete c.first;
          delete c.second;	    
@@ -526,31 +524,24 @@ void GitterDunePll :: ALUcomm ( GatherScatterType & gs ) {
    for (int i = 0; i < nl; i++) { 
       if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i);
-//         m = vec[i].begin () ;
          for (a.second->first (); ! a.second->done () ; a.second->next ()) {
-           gs.setData(vec[i],a.second->item ());
-//            for (int k = 0; k < max; k++) v[k] = *m++; 
-//               a.second->item ().accessVRTData().DataWrite(v, c) ;
+           vertexData.setData(vec[i],a.second->item ());
          }
          delete a.first;
          delete a.second;
       }
       if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-//         m = vec[i].begin () ;
          for (b.second->first (); ! b.second->done () ; b.second->next ()) {
-//            for (int k = 0; k < max; k++) v[k] = *m++;
-//               b.second->item ().accessVRTData().DataWrite(v) ;
+           edgeData.setData(vec[i],b.second->item ());
          }
          delete b.first;
          delete b.second;
       }
       if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i);
-//         m = vec[i].begin () ;
          for (c.second->first (); ! c.second->done () ; c.second->next ()) {
-//            for (int k = 0; k < max; k++) v[k] = *m++; 
-//                c.second->item ().accessVRTData().DataWrite(v) ;
+           edgeData.setData(vec[i],b.second->item ());
          }
          delete c.first;
          delete c.second;
