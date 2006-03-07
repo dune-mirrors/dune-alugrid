@@ -1744,15 +1744,6 @@ GitterBasisPll :: GitterBasisPll (MpAccessLocal & mpa) : _mpaccess (mpa), _macro
 GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpaccess (mpa), _macrogitter (0) {
   assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll (const char * = \"" << f << "\" ...)" << endl, 1) : 1) ;
 
-  // read normal macro gitter if myrank is 0 
-  /*
-  if( mpa.myrank () == 0 )
-  {
-    ifstream in ( f ) ;
-    if (in) _macrogitter = new MacroGitterBasisPll (this,in) ;
-  }
-  */
-
   // if still no macrogitter, try old method 
   if(!_macrogitter) 
   {
@@ -1762,13 +1753,23 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
     if (in) {
       _macrogitter = new MacroGitterBasisPll (this,in) ;
     } else {
-    assert (debugOption (5) ? 
+      assert (debugOption (5) ? 
         ( cerr << "  GitterBasisPll :: GitterBasisPll () file: " << extendedName 
-           << " cannot be read. In " << __FILE__ << " line " << __LINE__ << endl, 1) : 1);
-      _macrogitter = new MacroGitterBasisPll (this) ;
+           << " cannot be read. Try " << f << " instead. In " << __FILE__ << " line " << __LINE__ << endl, 1) : 1);
+      // don't create macrogitter, first check normal macro file 
+      //_macrogitter = new MacroGitterBasisPll (this) ;
     }
     delete [] extendedName ;
   }
+
+  // read normal macro gitter if myrank is 0 
+  if( (mpa.myrank () == 0) && !_macrogitter )
+  {
+    ifstream in ( f ) ;
+    if (in) _macrogitter = new MacroGitterBasisPll (this,in) ;
+  }
+  
+  if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (this) ;
 
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
