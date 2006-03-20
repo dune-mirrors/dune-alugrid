@@ -845,7 +845,13 @@ class Hmesh_basic {
    void freeIndex(int indextype,int index) {
      indexmanager[indextype].freeIndex(index);
    }
-    
+   
+   // von mir dazugesetzt...
+   int indexManagerSize (int cd) {
+     assert(cd>2 && cd<0);
+     return indexmanager[cd].size();
+   }
+   
     void makeneighbours() ;
            
     virtual void refresh() { }

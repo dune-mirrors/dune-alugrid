@@ -83,6 +83,8 @@ public:
   //! returns the larges index used + 1, actually this is the size of the
   //! index set 
   int getMaxIndex() const { return maxIndex_;  }
+
+  int size() const {return getMaxIndex();}
   
   //! restore index from stack or create new index 
   T getIndex (); 
