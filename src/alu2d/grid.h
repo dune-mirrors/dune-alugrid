@@ -289,8 +289,6 @@ class Edge : public Basic {
     ~Edge();
     void write(ofstream &) const ;
     void read(ifstream &) ;
-    // von mir:
-    int level(){return -1;}
 };
 class Triang;
 class Bndel_triang;
