@@ -289,6 +289,8 @@ class Edge : public Basic {
     ~Edge();
     void write(ofstream &) const ;
     void read(ifstream &) ;
+    // von mir:
+    int level(){return -1;}
 };
 class Triang;
 class Bndel_triang;
@@ -435,17 +437,20 @@ class Refco_el : protected Refco {
 
   private :
 
-    Refco::tag_t tag ;   
-
+    Refco::tag_t tag, tag_last ;   
+    
   public :
 
-    Refco_el() : tag(none) { }
+    Refco_el() : tag(none), tag_last(none) { }
 
     void clear(Refco::tag_t t = none) { tag = (t == tag) ? none : tag ; }
       
-    void mark(Refco::tag_t t) { tag = t ; }
+    void mark(Refco::tag_t t) { tag_last = tag; tag = t ; }
       
     int is(Refco::tag_t t) const { return tag == t ? 1 : 0 ; }
+
+    // so kann diese Funktion nicht bleiben...
+    int was(Refco::tag_t t) const { return tag_last == t ? 1 : 0 ; }    
 
 } ;
 // #end(class)
