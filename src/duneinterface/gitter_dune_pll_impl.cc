@@ -428,7 +428,7 @@ void GitterDunePll :: ALUcomm (
       if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
          for (a.second->first (); ! a.second->done () ; a.second->next ()) {
-           vertexData.inlineData(vec[i],a.second->item());
+           vertexData.sendData(vec[i],a.second->item());
          }
          delete a.first;
          delete a.second;	    
@@ -436,7 +436,7 @@ void GitterDunePll :: ALUcomm (
       if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
          for (b.second->first (); ! b.second->done () ; b.second->next ()) {
-           edgeData.inlineData(vec[i],b.second->item());
+           edgeData.sendData(vec[i],b.second->item());
          }
          delete b.first;
          delete b.second;	    
@@ -444,7 +444,7 @@ void GitterDunePll :: ALUcomm (
       if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
          for (c.second->first (); ! c.second->done () ; c.second->next ()) {
-           faceData.inlineData(vec[i],c.second->item());
+           faceData.sendData(vec[i],c.second->item());
          }
          delete c.first;
          delete c.second;	    
@@ -459,7 +459,7 @@ void GitterDunePll :: ALUcomm (
       if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i);
          for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-           vertexData.xtractData(vec[i],a.first->item ());
+           vertexData.recvData(vec[i],a.first->item ());
          }
          delete a.first;
          delete a.second;
@@ -467,7 +467,7 @@ void GitterDunePll :: ALUcomm (
       if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
          for (b.first->first (); ! b.first->done () ; b.first->next ()) {
-           edgeData.xtractData(vec[i],b.first->item());
+           edgeData.recvData(vec[i],b.first->item());
          }
          delete b.first;
          delete b.second;
@@ -475,7 +475,7 @@ void GitterDunePll :: ALUcomm (
       if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i);
          for (c.first->first (); ! c.first->done () ; c.first->next ()) {
-           faceData.xtractData(vec[i],c.first->item());
+           faceData.recvData(vec[i],c.first->item());
          }
          delete c.first;
          delete c.second;
@@ -487,7 +487,7 @@ void GitterDunePll :: ALUcomm (
       if (containsVertices) {
          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
          for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-           vertexData.inlineData(vec[i],a.first->item ());
+           vertexData.sendData(vec[i],a.first->item ());
          }
          delete a.first;
          delete a.second;	    
@@ -495,7 +495,7 @@ void GitterDunePll :: ALUcomm (
       if (containsEdges) {
          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
          for (b.first->first (); ! b.first->done () ; b.first->next ()) {
-           edgeData.inlineData(vec[i],b.first->item ());
+           edgeData.sendData(vec[i],b.first->item ());
          }
          delete b.first;
          delete b.second;	    
@@ -503,7 +503,7 @@ void GitterDunePll :: ALUcomm (
       if (containsFaces) {
          c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
          for (c.first->first (); ! c.first->done () ; c.first->next ()) {
-           faceData.inlineData(vec[i],c.first->item ());
+           faceData.sendData(vec[i],c.first->item ());
          }
          delete c.first;
          delete c.second;	    
