@@ -30,27 +30,53 @@
 #include "gitter_sti.h"
 
 // little storage class for points and vertex numbers 
-class Hbnd4IntStoragePoints : public MyAlloc
+// of transmitted macro elements to become ghosts 
+template <int points>
+class HbndIntStoragePoints : public MyAlloc
 {
-  double _p[4][3]; 
-  int _vx[8];
-  int _vxface[4];
+public:
+  enum { noVx     = (points == 4) ? 8 : 4 };
+  enum { noFaceVx = (points == 4) ? 4 : 1 };  
+  
+private:
+  double _p[points][3]; 
+  int _vx[noVx];
+  int _vxface[noFaceVx];
 
   int _fce;
 public:  
-  Hbnd4IntStoragePoints();
-  Hbnd4IntStoragePoints(const Hbnd4IntStoragePoints & copy );
-  Hbnd4IntStoragePoints(const Gitter:: Geometric :: hexa_GEO * hexa, int fce);
-  Hbnd4IntStoragePoints(const double (&p)[4][3], const int (&vx)[8] , const int (&vxface)[4], int fce );
+  HbndIntStoragePoints();
+  HbndIntStoragePoints(const HbndIntStoragePoints & copy );
+  // constructor for hexas 
+  HbndIntStoragePoints(const Gitter:: Geometric :: hexa_GEO * hexa  , int fce);
+  // contructor for tetras 
+  HbndIntStoragePoints(const Gitter:: Geometric :: tetra_GEO * tetra, int fce);
+  HbndIntStoragePoints(const double (&p)[points][3], const int (&vx)[noVx] , const int (&vxface)[noFaceVx], int fce );
 
   // return reference to _p
-  const double (& getPoints () const )[4][3];
+  const double (& getPoints () const )[points][3]
+  {
+    return _p;
+  }
   
-  const int (& getIdents () const )[8];
-  const int (& getOppFaceIdents () const )[4];
+  const int (& getIdents () const )[noVx]
+  {
+    return _vx; 
+  }
+  
+  const int (& getOppFaceIdents () const )[noFaceVx]
+  {
+    return _vxface;
+  }
 
-  int getFaceNumber () const ;
+  int getFaceNumber () const 
+  {
+    return _fce; 
+  }
 };
+
+typedef HbndIntStoragePoints<4> Hbnd4IntStoragePoints;
+typedef HbndIntStoragePoints<1> Hbnd3IntStoragePoints;
 
 template < class RandomAccessIterator > inline int cyclicReorder (RandomAccessIterator begin, RandomAccessIterator end) {
   RandomAccessIterator middle = min_element (begin,end) ;
@@ -69,20 +95,22 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   // stores a hface3 and the other point needed to build a tetra  
   class Hbnd3IntStorage : public MyAlloc 
   {
-    double _p[3]; 
+    Hbnd3IntStoragePoints _p;
     hface3_GEO * _first;
     int          _second;
     bool _pInit; // true if p was initialized with a value 
   public:  
     // store point and face and twist  
-    Hbnd3IntStorage( hface3_GEO * f, int tw, const double (&p) [3] );
+    Hbnd3IntStorage( hface3_GEO * f, int tw, const tetra_GEO * tetra, int fce);
+    
+    // store point and face and twist  
+    Hbnd3IntStorage( hface3_GEO * f, int tw, const Hbnd3IntStoragePoints &p);
     
     // store face and twist and set point to default 
     Hbnd3IntStorage( hface3_GEO * f, int tw ); 
 
-    // return reference to _p
-    const double (& getPoint () const )[3];
-
+    const Hbnd3IntStoragePoints & getPoints () const;
+    
     // this two method are just like in pair 
     hface3_GEO * first  () const { return _first;  }
     int          second () const { return _second; }
@@ -199,43 +227,27 @@ inline bool MacroGridBuilder :: debugOption (int level) {
   return (getenv ("VERBOSE_MGB") ? ( atoi (getenv ("VERBOSE_MGB")) > level ? true : (level == 0)) : false) ;
 }
 
-inline MacroGridBuilder :: Hbnd3IntStorage :: 
-Hbnd3IntStorage( hface3_GEO * f, int tw, const double (&p) [3] )
- : _first(f) , _second(tw) , _pInit(true)
-{
-  for(int i=0; i<3; i++) _p[i] = p[i];
-}
-    
-inline MacroGridBuilder :: Hbnd3IntStorage :: 
-Hbnd3IntStorage( hface3_GEO * f, int tw )
- : _first(f) , _second(tw) , _pInit(false)
-{
-  for(int i=0; i<3; i++) _p[i] = -666.0;
-}
-
-inline const double (& MacroGridBuilder :: Hbnd3IntStorage :: getPoint () const )[3]
-{ 
-  assert(_pInit);
-  return _p;
-}
-
 //********************************************************************8
-inline Hbnd4IntStoragePoints :: Hbnd4IntStoragePoints ()
+template <int points> 
+inline HbndIntStoragePoints<points> :: HbndIntStoragePoints ()
 {
-  for(int vx=0; vx<4; vx++)
+  for(int vx=0; vx<points; vx++)
   {
     for(int i=0; i<3; i++) _p[vx][i] = -666.0;
     _vxface[vx] = -1;
   }
-  for(int i=0; i<8; i++) _vx[i] = -1;
+  for(int i=0; i<noVx; i++) _vx[i] = -1;
   _fce = -1;
 }
 
-inline Hbnd4IntStoragePoints :: 
-Hbnd4IntStoragePoints (const Gitter :: Geometric :: hexa_GEO * hexa, int fce)
+template<int points>
+inline HbndIntStoragePoints<points> :: 
+HbndIntStoragePoints (const Gitter :: Geometric :: hexa_GEO * hexa, int fce)
 {
+  // dont call for points == 1
+  assert( points == 4 );
   int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[fce];
-  for(int vx=0; vx<4; vx++)
+  for(int vx=0; vx<points; vx++)
   {
     const Gitter :: Geometric :: VertexGeo * vertex = hexa->myvertex(oppFace,vx);
     _vxface[vx] = vertex->ident();
@@ -245,66 +257,100 @@ Hbnd4IntStoragePoints (const Gitter :: Geometric :: hexa_GEO * hexa, int fce)
     _p[vx][2] = p[2];
   }
   
-  for(int i=0; i<8; i++) 
+  for(int i=0; i<noVx; i++) 
   {
     _vx[i] = hexa->myvertex(i)->ident();
   }
   _fce = fce;
 }
 
-inline Hbnd4IntStoragePoints :: 
-Hbnd4IntStoragePoints (const Hbnd4IntStoragePoints & copy ) 
+template<int points>
+inline HbndIntStoragePoints<points> :: 
+HbndIntStoragePoints (const Gitter :: Geometric :: tetra_GEO * tetra, int fce)
 {
-  for(int k=0; k<4; k++)
+  assert( points == 1 );
+  const Gitter :: Geometric :: VertexGeo * vertex = tetra->myvertex(fce);
+  for(int vx=0; vx<points; vx++)
+  {
+    _vxface[vx] = vertex->ident();
+    const double (&p) [3] = vertex->Point();
+    _p[vx][0] = p[0];
+    _p[vx][1] = p[1];
+    _p[vx][2] = p[2];
+  }
+  
+  for(int i=0; i<noVx; i++) 
+  {
+    _vx[i] = tetra->myvertex(i)->ident();
+  }
+
+  _fce = fce;
+}
+
+template <int points>
+inline HbndIntStoragePoints<points> :: 
+HbndIntStoragePoints (const HbndIntStoragePoints<points> & copy ) 
+{
+  for(int k=0; k<points; k++)
   {
     _p[k][0] = copy._p[k][0];
     _p[k][1] = copy._p[k][1];
     _p[k][2] = copy._p[k][2];
   }
-  for(int i=0; i<8; i++) _vx[i] = copy._vx[i];
-  for(int i=0; i<4; i++) _vxface[i] = copy._vxface[i];
+  for(int i=0; i<noVx; i++) _vx[i] = copy._vx[i];
+  for(int i=0; i<noFaceVx; i++) _vxface[i] = copy._vxface[i];
 
   _fce = copy._fce;
 }
 
-inline Hbnd4IntStoragePoints :: 
-Hbnd4IntStoragePoints (const double (&p)[4][3], const int (&vx)[8], 
-    const int (&vxface)[4] , int fce ) 
+template <int points>
+inline HbndIntStoragePoints<points> :: 
+HbndIntStoragePoints (const double (&p)[points][3], const int (&vx)[noVx], 
+    const int (&vxface)[noFaceVx] , int fce ) 
 {
-  for(int k=0; k<4; k++)
+  for(int k=0; k<points; ++k)
   {
     _p[k][0]   = p[k][0];
     _p[k][1]   = p[k][1];
     _p[k][2]   = p[k][2];
+  }
+
+  for(int k=0; k<noFaceVx; ++k)
+  {
     _vxface[k] = vxface[k];
   }
 
-  for(int i=0; i<8; i++) _vx[i] = vx[i];
+  for(int i=0; i<noVx; ++i) _vx[i] = vx[i];
 
   _fce = fce;
 }
 
-inline const double (& Hbnd4IntStoragePoints :: getPoints() const )[4][3]
+//- Hbnd3IntStorage 
+inline MacroGridBuilder :: Hbnd3IntStorage :: 
+Hbnd3IntStorage( hface3_GEO * f, int tw, const tetra_GEO * tetra, int fce)
+ : _p(tetra,fce) , _first(f) , _second(tw) , _pInit(true)
+{
+}
+    
+inline MacroGridBuilder :: Hbnd3IntStorage :: 
+Hbnd3IntStorage( hface3_GEO * f, int tw, const Hbnd3IntStoragePoints &p)
+ : _p(p) , _first(f) , _second(tw) , _pInit(true)
+{
+}
+    
+inline MacroGridBuilder :: Hbnd3IntStorage :: 
+Hbnd3IntStorage( hface3_GEO * f, int tw )
+ : _p(), _first(f) , _second(tw) , _pInit(false)
+{
+}
+
+inline const Hbnd3IntStoragePoints & MacroGridBuilder :: Hbnd3IntStorage :: getPoints () const
 { 
+  assert(_pInit);
   return _p;
 }
 
-inline const int (& Hbnd4IntStoragePoints :: getIdents() const )[8]
-{ 
-  return _vx;
-}
-
-inline const int (& Hbnd4IntStoragePoints :: getOppFaceIdents() const )[4]
-{ 
-  return _vxface;
-}
-
-inline int Hbnd4IntStoragePoints :: getFaceNumber () const
-{ 
-  return _fce;
-}
-
-// hface4 storage
+//- Hbnd4IntStorage 
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
 Hbnd4IntStorage( hface4_GEO * f, int tw, const hexa_GEO * hexa, int fce)
  : _p(hexa,fce), _first(f) , _second(tw) , _pInit(true) 

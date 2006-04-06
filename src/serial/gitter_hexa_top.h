@@ -951,7 +951,6 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   hexa_GEO *(ghchild)[4] = {0,0,0,0};
   int gFace = this->getGhostFaceNumber();
 
-#ifndef __USE_INTERNAL_FACES__
   // refine ghost element 
   this->splitGhost();
 
@@ -972,10 +971,8 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
       assert(ghch->up() == gh);
       ghchild[i] = ghch;
       face = face->next();
-      //printHexa(cout,ghch);
     }
   }
-#endif
 
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghchild[0],gFace) ;
   innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghchild[1],gFace) ;
@@ -1484,7 +1481,7 @@ template < class A > void HexaTop < A > :: backupCMode (ostream & os) const {
 
 template < class A > void HexaTop < A > :: backupIndex (ostream & os) const {
 #ifdef _DUNE_USES_ALU3DGRID_
-  os.write(((const char *) & this->_index ), sizeof(int));
+  os.write(((const char *) & this->_idx ), sizeof(int));
   for (const innerhexa_t* c = down(); c; c = c->next()) {
     c->backupIndex(os);
   }
@@ -1503,8 +1500,8 @@ template < class A > void HexaTop < A > :: backup (ostream & os) const {
 template < class A > void HexaTop < A > :: restoreIndex (istream & is) {
 #ifdef _DUNE_USES_ALU3DGRID_
   // free index from constructor
-  //_indexManager.freeIndex( this->getIndex() ); 
-  is.read ( ((char *) &(this->_index) ), sizeof(int) );
+  // indexManager is cleared from outside 
+  is.read ( ((char *) &(this->_idx) ), sizeof(int) );
   {for (innerhexa_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; }
 #endif
   return;

@@ -63,6 +63,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         // ghost element behind pllx bnd, can be pointer to null 
         GhostElement_t * _ghost;
 
+        int _ghostFace;
+
         // refine ghost if face is refined and ghost is not zero 
         void splitGhost (); 
         
@@ -72,7 +74,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
       public:
         // return ghost pointer 
         Gitter::helement_STI * getGhost (); 
-
+        int getGhostFaceNumber () const;
+        
         // Schwerpunkt des anliegenden Elements beschaffen:
         inline const double (& barycenter () const)[3] ;
         inline int ghostLevel () const ;
@@ -104,6 +107,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
       private :
         mypllx_t * _mxt ;
         MacroGhost * _gm;
+        int _ghostFace;
     } ;
     typedef class HbndPllMacro macro_t ;
 } ;
@@ -219,14 +223,26 @@ inline Gitter :: helement_STI * Hbnd3PllInternal < A, X, MX > :: HbndPll :: getG
 }
 
 template < class A, class X, class MX > 
+inline int Hbnd3PllInternal < A, X, MX > :: HbndPll :: getGhostFaceNumber () const
+{
+  // assert is not needed here when we dont use ghost cells 
+  return _ghostFace; 
+}
+
+template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  
-setGhost ( Gitter :: helement_STI * gh , int ) 
+setGhost ( Gitter :: helement_STI * gh , int gFace ) 
 {
   if(gh)
   {
     _ghost = static_cast<GhostElement_t *> (gh); 
+    _ghostFace = gFace;
   }
-  else _ghost = 0;
+  else 
+  {
+    _ghost = 0;
+    _ghostFace = -1;
+  }
 }
 
 //***************************************************************************************
@@ -242,7 +258,7 @@ HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv ,
 {
   if(_gm) 
   {
-    this->setGhost (_gm->getGhost(),3);   
+    this->setGhost (_gm->getGhost(), _gm->ghostFaceNumber() );   
     _mxt = new MX (*this, _gm->getGhostPoints() );
   }
   else 

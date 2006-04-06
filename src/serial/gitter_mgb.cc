@@ -266,7 +266,8 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
     for (int i = 0 ; i < 4 ; i ++) 
     {
       _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
-        tr->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr->myvertex(i)->Point()) ;
+        tr->myhface3 (i)->myvertex (2)->ident ())] = 
+        new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr , i ) ;
     }
     delete tr ;
     _tetraMap.erase (hit) ;

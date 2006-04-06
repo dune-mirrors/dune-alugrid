@@ -61,7 +61,10 @@ public:
   virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
 };
 
-class Hbnd4IntStoragePoints;
+
+template <int points> class HbndIntStoragePoints;
+typedef HbndIntStoragePoints<4> Hbnd4IntStoragePoints;
+typedef HbndIntStoragePoints<1> Hbnd3IntStoragePoints;
 
 
 // Einfacher Referenzenz"ahler mit cast-around-const
@@ -221,33 +224,50 @@ public :
    
   // Nachfolgend sind die Iterationsschnittstellen der Knoten,
   // Kanten, Fl"achen, Elemente und Randelemente definiert.
-  class Dune_vertex 
+  class DuneIndexProvider 
   {
 #ifdef _DUNE_USES_ALU3DGRID_
   protected:
     int _idx;
-    Dune_vertex () : _idx(-1) {}
+    DuneIndexProvider () : _idx(-1) {}
 #endif
   public:
-    virtual ~Dune_vertex () {}
+    virtual ~DuneIndexProvider () {}
     // backup and restore index of vertices 
-    virtual void backupIndex  (ostream & os ) const {};
-    virtual void restoreIndex (istream & is ) {};
+    virtual void backupIndex  (ostream & os ) const {
+#ifdef _DUNE_USES_ALU3DGRID_ 
+      cerr << "DuneIndexProvider :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
+      abort();
+#endif
+    }
+    virtual void restoreIndex (istream & is ) {
+#ifdef _DUNE_USES_ALU3DGRID_ 
+      cerr << "DuneIndexProvider :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
+      abort();
+#endif
+    }
 
 #ifdef _DUNE_USES_ALU3DGRID_
-    inline int getIndex () const { return _idx; }
-    void setIndex ( const int index ) { _idx = index; }
+    inline int getIndex () const 
+    { 
+      assert( _idx >= 0);
+      return _idx; 
+    }
+    inline void setIndex ( const int index ) 
+    { 
+      assert( index >= 0 );
+      _idx = index; 
+    }
 #else 
     inline int getIndex () const { return -1; }
     void setIndex ( const int index ) {}
 #endif
   };
-        
     
 public :
   class vertex : public stiExtender_t :: VertexIF  
 #ifdef _DUNE_USES_ALU3DGRID_
-               , public Dune_vertex 
+               , public DuneIndexProvider 
 #endif
   {
   protected :
@@ -267,28 +287,7 @@ public :
   
   } ;
    
-  // numbering for hedge and hface 
-  class Dune_hface_or_hedge
-  {
-#ifdef _DUNE_USES_ALU3DGRID_
-  protected: 
-    int  _index; // global_index, unique per level but not per processor
-    Dune_hface_or_hedge () : _index (-1) {}
-#endif
-  public:
-    virtual ~Dune_hface_or_hedge () {}
-    // use only this methods to get and set the _index 
-    inline int getIndex () const;  
-    inline void setIndex (const int index) ; 
-        
-    virtual void backupIndex (ostream &) const ;   // backup _index  
-
-    // method is virtual, because former index set by constructor has to
-    // be freeed , means method has to be overloaded for correct work
-    virtual void restoreIndex (istream &) ;// restore _index  
-  };
-
-  class hedge : public stiExtender_t :: EdgeIF, public Dune_hface_or_hedge  {
+  class hedge : public stiExtender_t :: EdgeIF, public DuneIndexProvider  {
   protected :
     hedge () {}
     virtual ~hedge () {}
@@ -314,7 +313,7 @@ public :
     virtual void projectInnerVertex(const ProjectVertex &pv) = 0; 
   } ;
     
-  class hface : public stiExtender_t :: FaceIF , public Dune_hface_or_hedge {
+  class hface : public stiExtender_t :: FaceIF , public DuneIndexProvider {
   protected :
     hface () {}
     virtual ~hface () {}
@@ -335,22 +334,18 @@ public :
     virtual void backup (ostream &) const = 0 ;
     virtual void restore (istream &) = 0 ;
         
-    //virtual void backup (XDRstream_out &) const {};
-    //virtual void restore (XDRstream_in &) {};
-        
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void projectVertex(const ProjectVertex &pv) = 0; 
   } ;
 
   // class with all extensions for helement 
-  class Dune_helement 
+  class Dune_helement : public DuneIndexProvider 
   {
 
 #ifdef _DUNE_USES_ALU3DGRID_
   protected: 
-    int  _index; // global_index, unique per level but not per processor
     bool _refinedTag; // true if element was refined 
-    Dune_helement () : _index (-1) , _refinedTag (true) {}
+    Dune_helement () : DuneIndexProvider(), _refinedTag (true) {}
 #endif
   public:
     virtual ~Dune_helement () {}
@@ -359,18 +354,8 @@ public :
     // true if element was refined this adaptation step 
     bool hasBeenRefined () const;
         
-    // use only this methods to get and set the _index 
-    inline int getIndex () const;  
-    inline void setIndex (const int index) ; 
-        
     virtual int nFaces() const = 0;
     virtual int nEdges() const = 0;
-
-    virtual void backupIndex (ostream &) const ;   // backup _index  
-
-    // method is virtual, because former index set by constructor has to
-    // be freeed , means method has to be overloaded for correct work
-    virtual void restoreIndex (istream &) ;// retore _index  
   };
 
 
@@ -434,18 +419,14 @@ public :
 
   // organizes the indices for boundary faces and 
   // the opposite vertices for ghost cells 
-  class Dune_hbndDefault
+  class Dune_hbndDefault : public DuneIndexProvider 
   {
     protected:
-      int _index; // index of the bnd element
       bool _refinedTag; // true if element was refined 
 
     public:
-      inline Dune_hbndDefault () : _index (-1), _refinedTag(false) {} 
+      inline Dune_hbndDefault () : DuneIndexProvider(), _refinedTag(false) {} 
 
-      inline int getIndex () const { assert( _index >= 0 ); return _index; }
-      inline void setIndex ( int idx ) { _index = idx; return ; }
-      
       // reset the _refinedTag to false 
       void resetRefinedTag() { _refinedTag = false; }
       // true if element was refined this adaptation step 
@@ -453,7 +434,6 @@ public :
     protected:
       inline void splitGhost () {}
       inline void setGhost (helement *, int) {}
-
   };
 
   class hbndseg  : public Dune_hbndDefault
@@ -1241,7 +1221,8 @@ public :
       void generateRawHexaImage (istream &, ostream &) ;
       
       virtual void macrogridBuilder (istream &) ;
-      virtual VertexGeo     * insert_vertex (double, double, double, int,int = 0) = 0 ;
+      virtual VertexGeo     * insert_vertex (double, double, double, int) = 0 ;
+      virtual VertexGeo     * insert_ghostvx(double, double, double, int) = 0 ;
       virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0 ;
       virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) = 0 ;
       virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) = 0 ;
@@ -1254,7 +1235,7 @@ public :
       
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
       // method to insert internal boundary with ghost 
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t,const double(&p)[3]) = 0 ;
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) = 0 ;
       
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
@@ -1284,6 +1265,7 @@ public :
       virtual void backupCMode (ostream &) const ;
       virtual void backupCMode (const char*,const char *) const ;
       friend class MacroGridBuilder ;
+      friend class MacroGhostBuilder;
 #ifdef _DUNE_USES_ALU3DGRID_ 
       friend class DuneParallelGridMover;
 #endif
@@ -1605,6 +1587,7 @@ inline int Gitter :: helement :: leaf () const {
   return ! down () ;
 }
 
+/*
 inline int Gitter :: Dune_hface_or_hedge :: getIndex () const {
 #ifdef _DUNE_USES_ALU3DGRID_ 
   assert( _index >= 0);
@@ -1635,7 +1618,7 @@ inline void Gitter :: Dune_hface_or_hedge :: restoreIndex (istream & is ) {
   abort();
 #endif
 }
-
+*/
 
 // Dune extensions 
 inline void Gitter :: Dune_helement :: resetRefinedTag () {
@@ -1652,6 +1635,7 @@ inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
 #endif
 }
 
+/*
 inline int Gitter :: Dune_helement :: getIndex () const {
 #ifdef _DUNE_USES_ALU3DGRID_ 
   assert( _index >= 0);
@@ -1682,6 +1666,7 @@ inline void Gitter :: Dune_helement :: restoreIndex (istream & is ) {
   abort();
 #endif
 }
+*/
 
 inline int Gitter :: hbndseg :: leaf () const {
   return ! down () ;
@@ -1726,7 +1711,7 @@ inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y,
 
 inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () {
   _indexmanager.freeIndex( this->getIndex() );
-  assert (ref ? (cerr << "**WARNUNG Vertex-Refcount war " << ref << endl, 1) : 1) ;
+  assert (ref ? (cerr << "**WARNING VertexGeo::refcount was " << ref << endl, 1) : 1) ;
   return ;
 }
 
@@ -1818,7 +1803,7 @@ inline Gitter :: Geometric :: hedge1 :: hedge1 (myvertex_t * a, myvertex_t * b) 
 }
 
 inline Gitter :: Geometric :: hedge1 :: ~hedge1 () {
-  assert (ref ? (cerr << "**WARNUNG Kante-Refcount war " << ref << endl, 1) : 1) ;
+  assert (ref ? (cerr << "**WARNING hedge1::refcount was " << ref << endl, 1) : 1) ;
   v0->ref -- ; 
   v1->ref -- ;
   return ;
@@ -2002,7 +1987,7 @@ hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s
 }
 
 inline Gitter :: Geometric :: hface3 :: ~hface3 () {
-  assert (ref ? (cerr << "**WARNUNG Dreiecksfl\"ache :: Refcount war " << ref << endl, 1) : 1) ;
+  assert (ref ? (cerr << "**WARNING hface3::refcount was " << ref << endl, 1) : 1) ;
   e [0] -> ref -- ;
   e [1] -> ref -- ;
   e [2] -> ref -- ;
@@ -2121,7 +2106,7 @@ hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s
 }
 
 inline Gitter :: Geometric :: hface4 :: ~hface4 () {
-  assert (ref ? (cerr << "**WARNUNG Fl\"ache-Refcount war " << ref << endl, 1) : 1) ;
+  assert (ref ? (cerr << "**WARNING hface4::refcount was " << ref << endl, 1) : 1) ;
   e [0] -> ref -- ;
   e [1] -> ref -- ;
   e [2] -> ref -- ;

@@ -788,11 +788,12 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
   typedef typename Gitter :: Geometric :: tetra_GEO  tetra_GEO;
   typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
   tetra_GEO * gh = static_cast<tetra_GEO *> (this->getGhost()); 
+  int gFace = this->getGhostFaceNumber();
 
   tetra_GEO *(ghchild)[4] = {0,0,0,0};
   if(gh)
   {
-    hface3_GEO * face = gh->myhface3(3); 
+    hface3_GEO * face = gh->myhface3( gFace ); 
     face = face->down(); 
     for(int i=0; i<4; i++)
     {
@@ -1542,7 +1543,7 @@ template < class A > inline void TetraTop < A > :: backupCMode (ostream & os) co
 template < class A > inline void TetraTop < A > :: backupIndex (ostream & os) const 
 {
 #ifdef _DUNE_USES_ALU3DGRID_
-  os.write( ((const char *) & this->_index ), sizeof(int) ) ;
+  os.write( ((const char *) & this->_idx ), sizeof(int) ) ;
   {for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backupIndex (os) ; }
 #endif
   return;
@@ -1574,8 +1575,7 @@ template < class A > inline void TetraTop < A > :: restoreIndex (istream & is)
 {
 #ifdef _DUNE_USES_ALU3DGRID_
   // free index from constructor
-  //_indexManager.freeIndex( this->getIndex() ); 
-  is.read ( ((char *) &(this->_index) ), sizeof(int) );
+  is.read ( ((char *) &(this->_idx) ), sizeof(int) );
   {for (innertetra_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; }
 #endif
   return;

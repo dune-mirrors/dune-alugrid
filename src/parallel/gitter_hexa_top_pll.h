@@ -106,7 +106,6 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
       private :
         mypllx_t * _mxt ;
         MacroGhost * _gm;
-        int _ghostFace;
     } ;
     typedef class HbndPllMacro macro_t ;
 } ;
@@ -260,6 +259,8 @@ HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv,
 }
 
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: ~HbndPllMacro () {
+  delete _gm;
+  _gm = 0;
   delete _mxt ;
   _mxt = 0 ;
   return ;

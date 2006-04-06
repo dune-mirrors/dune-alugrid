@@ -216,7 +216,7 @@ IteratorSTI < Gitter :: hface_STI > * Gitter :: iterator (const IteratorSTI < hf
 }
 
 IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const IteratorSTI < helement_STI > * w) {
-  return new leaf_element__macro_element__iterator (*(const leaf_element__macro_element__iterator *) w) ;
+  return new leaf_element__macro_element__iterator ( *(const leaf_element__macro_element__iterator *) w) ;
 }
 
 //**************************************************************************

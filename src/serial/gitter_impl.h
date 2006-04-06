@@ -235,13 +235,14 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
   public :
     class MacroGitterBasis : public virtual BuilderIF {
       protected :
-        virtual inline VertexGeo     * insert_vertex (double, double, double, int,int = 0) ;
+        virtual inline VertexGeo     * insert_vertex (double, double, double, int) ;
+        virtual inline VertexGeo     * insert_ghostvx (double, double, double, int) ;
         virtual inline hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         virtual inline hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual inline hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
         virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
         // version with point , returns insert_hbnd3 here 
-        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const double (&p)[3]) ;
+        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const Hbnd4IntStoragePoints &) ;
         virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
@@ -654,8 +655,12 @@ inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid) : _
   return ;
 }
 
-inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vertex (double x, double y, double z, int id,int) {
+inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vertex (double x, double y, double z, int id) {
   return new Objects :: VertexEmptyMacro (x, y, z, id, indexManager(3)) ;
+}
+
+inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_ghostvx (double x, double y, double z, int id) {
+  return GitterBasis :: MacroGitterBasis :: insert_vertex(x,y,z,id); 
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, VertexGeo * b) {
@@ -695,7 +700,7 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const double (&p)[3]) {
+insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd3IntStoragePoints &) {
   return insert_hbnd3(f,i,b); 
 }
 
