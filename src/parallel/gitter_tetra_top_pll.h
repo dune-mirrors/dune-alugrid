@@ -123,7 +123,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
 //
 template < class A, class MX > inline Hbnd3PllExternal < A, MX > :: 
 Hbnd3PllExternal (myhface3_t * f, int t, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im, Gitter * grd ) 
-    : Hbnd3Top < A > (0,f,t,ppv,this,bt,im,grd,0), _mxt (new MX (*this)) {
+    : Hbnd3Top < A > (0,f,t,ppv,this,bt,im,grd), _mxt (new MX (*this)) {
   this->restoreFollowFace () ;
   return ;
 }
@@ -252,7 +252,7 @@ template < class A, class X, class MX >
 Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: 
 HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , 
     const bnd_t bt, IndexManagerType & im , Gitter * grd, MacroGhost * gh) 
- : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,grd,0) 
+ : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,grd) 
  , _mxt(0)
  , _gm(gh) 
 {

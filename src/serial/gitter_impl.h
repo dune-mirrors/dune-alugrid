@@ -696,7 +696,7 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
   // the two last zeros are the following: 
   // the first pointer is pointer to grid which we dont need in the serial
   // case and the second is a pointer to ghost Element 
-  return new Objects :: hbndseg3_IMPL ( 0,f,i,NULL, b, indexManager(4) ) ;
+  return new Objects :: hbndseg3_IMPL ( 0,f,i, NULL,NULL, b, indexManager(4), _myGrid) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 

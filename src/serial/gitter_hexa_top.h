@@ -949,12 +949,12 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   typedef typename Gitter :: Geometric :: hface4_GEO hface4_GEO;
 
   hexa_GEO *(ghchild)[4] = {0,0,0,0};
-  int gFace = this->getGhostFaceNumber();
 
   // refine ghost element 
   this->splitGhost();
 
   hexa_GEO * gh = static_cast<hexa_GEO *> (this->getGhost());
+  int gFace = this->getGhostFaceNumber();
 
   if(gh)
   {
@@ -974,10 +974,10 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
     }
   }
 
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghchild[0],gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghchild[1],gFace) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghchild[2],gFace) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghchild[3],gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghchild[0] ,gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghchild[1] ,gFace) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghchild[2] ,gFace) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghchild[3] ,gFace) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;

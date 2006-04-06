@@ -98,18 +98,19 @@ template < class A > class Hbnd3Top : public A {
     IndexManagerType & _indexManager;
   public:
     // constructor for serial macro boundary elements  
-    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, 
-                     const bnd_t b, IndexManagerType & im ) ;
+    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *,
+                     innerbndseg_t * up,const bnd_t b, 
+                     IndexManagerType & im , Gitter * ) ;
     
     // constructor for children 
     inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, 
                     innerbndseg_t * up, const bnd_t b, 
-                    IndexManagerType & im, typename Gitter::helement_STI * gh) ;
+                    IndexManagerType & im, typename Gitter::helement_STI * gh, int gFace ) ;
     // constructor for macro elements 
     inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, 
                     innerbndseg_t * up, const bnd_t b, 
                     IndexManagerType & im, Gitter * grd, 
-                    typename Gitter::helement_STI * gh) ;
+                    typename Gitter::helement_STI * gh, int ) ;
     inline virtual ~Hbnd3Top () ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
@@ -678,8 +679,8 @@ template < class A > void Hface3Top < A > :: restore (XDRstream_in & is) {
 // serial macro bnd constructor 
 template < class A > inline Hbnd3Top < A > :: 
 Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
-          bnd_t bt, IndexManagerType & im ) : 
-  A (f, i, ppv , 0 ), _bbb (0), _dwn (0), _up (0) , _lvl (l), _bt (bt) , _indexManager(im) {
+          innerbndseg_t * up, const bnd_t bt, IndexManagerType & im , Gitter * grd ) : 
+  A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (0) , _lvl (l), _bt (bt) , _indexManager(im) {
   this->setIndex( _indexManager.getIndex() );
   return ;
 }
@@ -687,10 +688,10 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
 template < class A > inline Hbnd3Top < A > :: 
 Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
-          Gitter::helement_STI * gh) : 
+          Gitter::helement_STI * gh, int gFace ) : 
   A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
-  this->setGhost ( gh , 3);
+  this->setGhost ( gh , gFace );
   //if(gh) printTetra(cout,gh);
   this->setIndex( _indexManager.getIndex() );
   return ;
@@ -699,10 +700,10 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
 template < class A > inline Hbnd3Top < A > :: 
 Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
-          Gitter * grd , Gitter::helement_STI * gh) : 
+          Gitter * grd , Gitter::helement_STI * gh, int gFace) : 
   A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
-  this->setGhost ( gh , 3);
+  this->setGhost ( gh , gFace);
   //if(gh) printTetra(cout,gh);
   this->setIndex( _indexManager.getIndex() );
   return ;
@@ -751,8 +752,9 @@ template < class A > inline void Hbnd3Top < A > :: append (innerbndseg_t * b) {
 
 template < class A > void Hbnd3Top < A > :: split_e01 () {
   int l = 1 + level () ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0 ) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0 ) ;
+  int gFace = this->getGhostFaceNumber(); 
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -761,8 +763,9 @@ template < class A > void Hbnd3Top < A > :: split_e01 () {
 
 template < class A > void Hbnd3Top < A > :: split_e12 () {
   int l = 1 + level () ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0 ) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0 ) ;
+  int gFace = this->getGhostFaceNumber(); 
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -771,8 +774,9 @@ template < class A > void Hbnd3Top < A > :: split_e12 () {
 
 template < class A > void Hbnd3Top < A > :: split_e20 () {
   int l = 1 + level () ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0) ;
+  int gFace = this->getGhostFaceNumber(); 
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0, gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0, gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -785,7 +789,7 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
   this->splitGhost();
 
   // get the childs 
-  typedef typename Gitter :: Geometric :: tetra_GEO  tetra_GEO;
+  typedef typename Gitter :: Geometric :: tetra_GEO tetra_GEO;
   typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
   tetra_GEO * gh = static_cast<tetra_GEO *> (this->getGhost()); 
   int gFace = this->getGhostFaceNumber();
@@ -794,25 +798,32 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
   if(gh)
   {
     hface3_GEO * face = gh->myhface3( gFace ); 
-    face = face->down(); 
-    for(int i=0; i<4; i++)
+    face = face->down();
+    for( int i=0; i<4; i++)
     {
       assert(face);
       tetra_GEO * ghch = static_cast<tetra_GEO *> (face->nb.front().first);
-      if(ghch){ if(ghch->up() != gh) ghch = static_cast<tetra_GEO *> (face->nb.rear().first);}
-      else { ghch = static_cast<tetra_GEO *> (face->nb.rear().first); }
+      if(ghch)
+      { 
+        if(ghch->up() != gh) ghch = static_cast<tetra_GEO *> (face->nb.rear().first);
+      }
+      else 
+      { 
+        ghch = static_cast<tetra_GEO *> (face->nb.rear().first);  
+      }
       
       assert(ghch);
       assert(ghch->up() == gh);
+
       ghchild[i] = ghch;
       face = face->next();
     }
   }
 
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[0] ) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[1] ) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[2] ) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[3] ) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[0], gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[1], gFace) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[2], gFace) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[3], gFace) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
