@@ -849,7 +849,8 @@ class Hmesh_basic {
    // von mir dazugesetzt...
    int indexManagerSize (int cd) {
      assert(cd<3 && cd>=0);
-     return indexmanager[cd].size();
+     //return indexmanager[cd].size();
+     return indexmanager[cd].usedindex();
    }
    
     void makeneighbours() ;
