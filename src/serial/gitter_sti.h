@@ -381,6 +381,9 @@ public :
     //testweise us
     virtual helement * up () = 0;
     virtual const helement * up () const = 0;
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { assert(false); }
+    virtual void os2EdgeData(ObjectStream &, GatherScatterType &) { assert(false); } 
+    virtual void os2FaceData(ObjectStream &, GatherScatterType &) { assert(false); } 
     //us
     virtual helement * down () = 0 ;
     virtual const helement * down () const = 0 ;
@@ -923,6 +926,9 @@ public :
       inline pair < hasFace3 *, int > myneighbour (int) ;
       inline pair < const hasFace3 *, int > myneighbour (int) const ;
 
+      //testweise
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra ";  }
+      virtual void readVertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra "; }
       // Dune extension 
       // return pair, first = pointer to face, second = twist of face
       inline pair < hface3_GEO *, int > myintersection (int) ;
@@ -981,6 +987,10 @@ public :
       virtual int nEdges() const { 
         cerr << "Periodic3 :: nEdges not implemented! \n"; abort(); return 6; 
       }
+      //testweise
+      virtual void readVertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 "; }
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 ";  }
+    
       inline int twist (int) const ;
       int test () const ;
     public :

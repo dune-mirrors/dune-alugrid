@@ -234,7 +234,10 @@ class TetraPllXBase : public ElementPllBaseX {
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
-  private :
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &) ;
+    virtual void EdgeData2os(ObjectStream &, GatherScatterType &) ;
+    virtual void FaceData2os(ObjectStream &, GatherScatterType &) ; 
+  private:
     mytetra_t & _tetra ;
 } ;
 
@@ -289,6 +292,11 @@ class Periodic3PllXBase : public ElementPllBaseX {
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
+//    virtual void VertexData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P3 wVD";}
+//    virtual void EdgeData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P3 wED";}
+//    virtual void FaceData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P3 wFD";} 
+//    virtual void writeElementData(ObjectStream &, GatherScatterType &) {std::cerr << "P3 wED"; }
+	    
   private :
     myperiodic3_t & _periodic3 ;
 } ;
@@ -336,6 +344,9 @@ class Periodic4PllXBase : public ElementPllBaseX {
     inline Periodic4PllXBase (myperiodic4_t &) ;
     inline ~Periodic4PllXBase () {}
   public :
+//    virtual void VertexData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P4 wVD";}
+//    virtual void EdgeData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P4 wED";}
+//    virtual void FaceData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P4 wFD";} 
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
   private :
@@ -386,7 +397,10 @@ class HexaPllBaseX : public ElementPllBaseX {
     inline ~HexaPllBaseX () {}
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const {};
-    
+ 
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &) ;
+    virtual void EdgeData2os(ObjectStream &, GatherScatterType &) ;
+    virtual void FaceData2os(ObjectStream &, GatherScatterType &) ;
     // method to get internal hexa located behind this parallel interface 
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 
@@ -654,7 +668,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-          private :
+    private :
       mypllx_t _pllx ;
 
       friend class TetraTop < TetraEmptyPll >;
@@ -769,7 +783,8 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-          private :
+    private :
+    private :
       mypllx_t _pllx ;
   } ;
   typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
