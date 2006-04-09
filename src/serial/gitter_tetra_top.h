@@ -137,7 +137,10 @@ template < class A > class TetraTop : public A {
     typedef typename A :: myhedge1_t  myhedge1_t ;
     typedef typename A :: myhface3_t  myhface3_t ;
     typedef typename A :: myrule_t  myrule_t ;
+    typedef innertetra_t  myhghost_t ;
+  public:
     typedef typename A :: balrule_t     balrule_t ;
+  protected:
     inline void refineImmediate (myrule_t) ;
     inline void append (innertetra_t * h) ;
   private :

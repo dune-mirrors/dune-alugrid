@@ -337,7 +337,6 @@ public:
     typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
 
     const double (&p)[1][3]  = allp.getPoints();
-    //const int (&vertices)[8] = allp.getIdents();
     const int (&oppVerts)[1] = allp.getOppFaceIdents();
 
     // we create 8 new points, which are stored in the lists of our
@@ -420,11 +419,13 @@ public:
     //const int (&vertices)[8] = allp.getIdents();
     const int (&oppVerts)[4] = allp.getOppFaceIdents();
 
+    //int vertices [8];
     // we create 8 new points, which are stored in the lists of our
     // internal grid builder 
     for(int i=0; i<4; ++i)
     {
       VertexGeo * vx = face->myvertex(i);
+      //vertices[i] = vx->ident();
       mgb.InsertExistingVertex( vx );
     }
 
@@ -439,10 +440,12 @@ public:
     for(int i=0; i<4; ++i)
     {
       const double (&px)[3] = p[i];
+      //vertices[i+4] = oppVerts[i];
       mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
     }
 
     // InsertUniqueHexa gets the global vertex numbers 
+    //_ghost = mgb.InsertUniqueHexa ( vertices ).first ;
     _ghost = mgb.InsertUniqueHexa ( _ghPoint.vertices() ).first ;
     assert( _ghost );
 
