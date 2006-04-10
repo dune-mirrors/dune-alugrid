@@ -173,7 +173,21 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
             inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
-
+            virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs) {
+               std::cout << "[rVD]";
+               for (int i = 0; i < 4; i++) {
+                  std::cout << myvertex(i)->Point()[0] << "/" <<
+                               myvertex(i)->Point()[1] << "/" <<
+                               myvertex(i)->Point()[2] << " ";
+	          gs.recvData( os, *myvertex(i));
+               }
+            }
+            virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
+               std::cout << "[rED]";
+               for (int i = 0; i < 6; i++) {
+	          gs.recvData( os, *myhedge1(i));
+               }
+	    }
            ~TetraEmpty () {}
             int preCoarsening  () ; 
             int postRefinement () ;
@@ -226,7 +240,25 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         int preCoarsening(); 
         int postRefinement();
 
-        Gitter* _myGrid;
+        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs) {
+          std::cout << "[rVD]";
+          for (int i = 0; i < 8; i++) {
+            std::cout << myvertex(i)->Point()[0] << "/" <<
+                         myvertex(i)->Point()[1] << "/" <<
+                         myvertex(i)->Point()[2] << " ";
+            gs.recvData( os, *myvertex(i));
+          }
+        }
+        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
+          std::cout << "[rED]";
+          for (int i = 0; i < 12; i++) gs.recvData( os, *myhedge1(i));
+	}
+        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
+          std::cout << "[rED]";
+          for (int i = 0; i < 6; i++) gs.recvData( os, *myhface4(i));
+	}
+
+	Gitter* _myGrid;
 
         friend class HexaTop<HexaEmpty>;
       } ;
@@ -660,7 +692,7 @@ inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vert
 }
 
 inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_ghostvx (double x, double y, double z, int id) {
-  return this->insert_vertex(x,y,z,id); 
+  return GitterBasis :: MacroGitterBasis :: insert_vertex(x,y,z,id); 
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, VertexGeo * b) {
