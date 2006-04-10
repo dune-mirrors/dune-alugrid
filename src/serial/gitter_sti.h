@@ -381,9 +381,6 @@ public :
     //testweise us
     virtual helement * up () = 0;
     virtual const helement * up () const = 0;
-    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { assert(false); }
-    virtual void os2EdgeData(ObjectStream &, GatherScatterType &) { assert(false); } 
-    virtual void os2FaceData(ObjectStream &, GatherScatterType &) { assert(false); } 
     //us
     virtual helement * down () = 0 ;
     virtual const helement * down () const = 0 ;
@@ -926,9 +923,6 @@ public :
       inline pair < hasFace3 *, int > myneighbour (int) ;
       inline pair < const hasFace3 *, int > myneighbour (int) const ;
 
-      //testweise
-    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra ";  }
-      virtual void readVertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra "; }
       // Dune extension 
       // return pair, first = pointer to face, second = twist of face
       inline pair < hface3_GEO *, int > myintersection (int) ;
@@ -987,10 +981,6 @@ public :
       virtual int nEdges() const { 
         cerr << "Periodic3 :: nEdges not implemented! \n"; abort(); return 6; 
       }
-      //testweise
-      virtual void readVertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 "; }
-    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 ";  }
-    
       inline int twist (int) const ;
       int test () const ;
     public :
@@ -1154,42 +1144,6 @@ public :
     public:  
     } hbndseg3_GEO ;
   
-    typedef class htetraghost : public hbndseg_STI, public hasFace3, public MyAlloc {
-    public :
-      typedef VertexGeo   myvertex_t ;
-      typedef hedge1_GEO  myhedge1_t ;
-      typedef hface3_GEO  myhface3_t ;
-      typedef hface3_GEO  myhface_t ;
-      typedef tetra_GEO   myelement_t ;
-      typedef Hface3Rule  myrule_t ;
-      
-      //typedef TetraRule   myrule_t ;
-      
-      typedef hbndseg_STI :: bnd_t bnd_t;
-    protected :
-      inline htetraghost (myhface3_t *,int,ProjectVertex *) ;
-      inline int postRefinement () ;
-      inline int preCoarsening () ;
-      inline bool lockedAgainstCoarsening () const { return false ; }
-    public :
-      inline virtual ~htetraghost () ;
-      inline myrule_t getrule () const ;
-      virtual bool refineLikeElement (balrule_t) = 0 ;
-      inline myvertex_t * myvertex (int,int) const ;
-      inline myhface3_t * myhface3 (int) const ;
-      inline int twist (int) const ;
-      inline hface3_GEO * subface3 (int,int) const ;
-      
-      virtual bool isboundary() const { return true; }
-      virtual int nChild () const;
-    private :
-      myhface3_t * _face ;
-      int _twist ;
-    protected :
-      ProjectVertex *projection;
-    public:  
-    } htetraghost_GEO ;
-  
     typedef class hbndseg4 : public hbndseg_STI, public hasFace4, public MyAlloc {
     public :
       typedef VertexGeo myvertex_t ;
@@ -1256,8 +1210,6 @@ public :
 
       list < hbndseg3_GEO * >  _hbndseg3List ;
       list < hbndseg4_GEO * >  _hbndseg4List ;
-      
-      list < htetraghost_GEO * >     _htetraGhostList ;
           
       bool _modified ; // true if macro grid was modified 
 
@@ -1283,7 +1235,7 @@ public :
       
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
       // method to insert internal boundary with ghost 
-      virtual htetraghost_GEO * insert_internalhbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) = 0 ;
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) = 0 ;
       
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
@@ -2729,70 +2681,6 @@ inline Gitter :: Geometric :: hbndseg3 :: myrule_t Gitter :: Geometric :: hbndse
 }
 
 inline int Gitter :: Geometric :: hbndseg3 :: nChild () const {
-  assert(_face);
-  return _face->nChild () ;
-}
-
-
-// #     #                                                  #####
-// #     #  #####   #    #  #####    ####   ######   ####  #     #
-// #     #  #    #  ##   #  #    #  #       #       #    #       #
-// #######  #####   # #  #  #    #   ####   #####   #       #####
-// #     #  #    #  #  # #  #    #       #  #       #  ###       #
-// #     #  #    #  #   ##  #    #  #    #  #       #    # #     #
-// #     #  #####   #    #  #####    ####   ######   ####   #####
-
-// tetra ghost 
-
-inline Gitter :: Geometric :: htetraghost :: 
-htetraghost (myhface3_t * a, int b, ProjectVertex *ppv) : _face (a), _twist (b), projection(ppv) {
-  _face->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this),0), _twist) ;
-  return ;
-}
-
-inline Gitter :: Geometric :: htetraghost :: ~htetraghost () {
-  _face->detachElement (_twist) ;
-  return ;
-}
-
-inline int Gitter :: Geometric :: htetraghost :: postRefinement () {
-  if (projection) {
-    myhface3(0)->projectVertex(*projection);
-  }
-  return 0 ;
-}
-
-inline int Gitter :: Geometric :: htetraghost :: preCoarsening () {
-  return 0 ;
-}
-
-inline int Gitter :: Geometric :: htetraghost :: twist (int i) const {
-  assert (i == 0) ;
-  return _twist ;
-}
-
-inline Gitter :: Geometric :: htetraghost :: myhface3_t * 
-Gitter :: Geometric :: htetraghost :: myhface3 (int i) const {
-  assert (i == 0) ;
-  return _face ;
-}
-
-inline Gitter :: Geometric :: htetraghost :: myvertex_t * 
-Gitter :: Geometric :: htetraghost :: myvertex (int,int j) const {
-  return (twist (0) < 0) ? myhface3 (0)->myvertex ((7 - j + twist (0)) % 3) : myhface3 (0)->myvertex ((j + twist (0)) % 3) ;
-}
-
-inline Gitter :: Geometric :: htetraghost :: myhface3_t * 
-Gitter :: Geometric :: htetraghost :: subface3 (int,int i) const {
-  return myhface3 (0)->subface3 (i) ;
-}
-
-inline Gitter :: Geometric :: htetraghost :: myrule_t 
-Gitter :: Geometric :: htetraghost :: getrule () const {
-  return myhface3 (0)->getrule () ;
-}
-
-inline int Gitter :: Geometric :: htetraghost :: nChild () const {
   assert(_face);
   return _face->nChild () ;
 }
