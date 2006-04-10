@@ -381,6 +381,9 @@ public :
     //testweise us
     virtual helement * up () = 0;
     virtual const helement * up () const = 0;
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { assert(false); }
+    virtual void os2EdgeData(ObjectStream &, GatherScatterType &) { assert(false); } 
+    virtual void os2FaceData(ObjectStream &, GatherScatterType &) { assert(false); } 
     //us
     virtual helement * down () = 0 ;
     virtual const helement * down () const = 0 ;
@@ -923,6 +926,9 @@ public :
       inline pair < hasFace3 *, int > myneighbour (int) ;
       inline pair < const hasFace3 *, int > myneighbour (int) const ;
 
+      //testweise
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra ";  }
+      virtual void readVertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra "; }
       // Dune extension 
       // return pair, first = pointer to face, second = twist of face
       inline pair < hface3_GEO *, int > myintersection (int) ;
@@ -981,6 +987,10 @@ public :
       virtual int nEdges() const { 
         cerr << "Periodic3 :: nEdges not implemented! \n"; abort(); return 6; 
       }
+      //testweise
+      virtual void readVertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 "; }
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 ";  }
+    
       inline int twist (int) const ;
       int test () const ;
     public :
@@ -1144,6 +1154,7 @@ public :
     public:  
     } hbndseg3_GEO ;
   
+
     typedef class hbndseg4 : public hbndseg_STI, public hasFace4, public MyAlloc {
     public :
       typedef VertexGeo myvertex_t ;
@@ -1210,7 +1221,7 @@ public :
 
       list < hbndseg3_GEO * >  _hbndseg3List ;
       list < hbndseg4_GEO * >  _hbndseg4List ;
-          
+      
       bool _modified ; // true if macro grid was modified 
 
     protected :
@@ -1234,8 +1245,10 @@ public :
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
-      // method to insert internal boundary with ghost 
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) = 0 ;
+
+      // insert ghost element 
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI
+          :: bnd_t, const Hbnd3IntStoragePoints &) = 0 ;
       
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
@@ -2684,6 +2697,7 @@ inline int Gitter :: Geometric :: hbndseg3 :: nChild () const {
   assert(_face);
   return _face->nChild () ;
 }
+
 
 // #     #                                                 #
 // #     #  #####   #    #  #####    ####   ######   ####  #    #
