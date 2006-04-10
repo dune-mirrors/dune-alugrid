@@ -137,10 +137,7 @@ template < class A > class TetraTop : public A {
     typedef typename A :: myhedge1_t  myhedge1_t ;
     typedef typename A :: myhface3_t  myhface3_t ;
     typedef typename A :: myrule_t  myrule_t ;
-    typedef innertetra_t  myhghost_t ;
-  public:
     typedef typename A :: balrule_t     balrule_t ;
-  protected:
     inline void refineImmediate (myrule_t) ;
     inline void append (innertetra_t * h) ;
   private :
@@ -695,7 +692,6 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
   A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
   this->setGhost ( gh , gFace );
-  //if(gh) printTetra(cout,gh);
   this->setIndex( _indexManager.getIndex() );
   return ;
 }
@@ -707,7 +703,6 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
   A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
   this->setGhost ( gh , gFace);
-  //if(gh) printTetra(cout,gh);
   this->setIndex( _indexManager.getIndex() );
   return ;
 }
@@ -795,25 +790,37 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
   typedef typename Gitter :: Geometric :: tetra_GEO tetra_GEO;
   typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
   tetra_GEO * gh = static_cast<tetra_GEO *> (this->getGhost()); 
-  int gFace = this->getGhostFaceNumber();
 
+  // I hate this piece of code, R.K. 
   tetra_GEO *(ghchild)[4] = {0,0,0,0};
+  int gFace[4] = {-1,-1,-1,-1};
   if(gh)
   {
-    hface3_GEO * face = gh->myhface3( gFace ); 
+    hface3_GEO * face = gh->myhface3( this->getGhostFaceNumber() ); 
     face = face->down();
     for( int i=0; i<4; i++)
     {
       assert(face);
-      tetra_GEO * ghch = static_cast<tetra_GEO *> (face->nb.front().first);
+      typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
+      neigh_t neighbour = face->nb.front();
+      tetra_GEO * ghch = static_cast<tetra_GEO *> (neighbour.first);
       if(ghch)
       { 
-        if(ghch->up() != gh) ghch = static_cast<tetra_GEO *> (face->nb.rear().first);
+        if(ghch->up() != gh) 
+        {
+          neighbour = face->nb.rear();
+          ghch = static_cast<tetra_GEO *> (neighbour.first);
+        }
+
       }
       else 
       { 
-        ghch = static_cast<tetra_GEO *> (face->nb.rear().first);  
+        neighbour = face->nb.rear();
+        ghch = static_cast<tetra_GEO *> (neighbour.first);
       }
+      
+      // gFace might be differnent from ghostFaceNumber, unfortuneately 
+      gFace[i] = neighbour.second; 
       
       assert(ghch);
       assert(ghch->up() == gh);
@@ -823,10 +830,10 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
     }
   }
 
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[0], gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[1], gFace) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[2], gFace) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[3], gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[0], gFace[0]) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[1], gFace[1]) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[2], gFace[2]) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[3], gFace[3]) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
