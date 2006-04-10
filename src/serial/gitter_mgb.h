@@ -279,7 +279,7 @@ HbndIntStoragePoints (const Gitter :: Geometric :: tetra_GEO * tetra, int fce)
     _p[vx][2] = p[2];
   }
   
-  for(int i=0; i<noVx; i++) 
+  for(int i=0; i<noVx; ++i) 
   {
     _vx[i] = tetra->myvertex(i)->ident();
   }
