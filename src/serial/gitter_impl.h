@@ -74,7 +74,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
            virtual ~Hbnd3Default () {}
           public :
             typedef hbndseg3_GEO :: bnd_t bnd_t;
-            typedef myhface3_t      myhghost_t; 
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ; 
             
@@ -92,35 +91,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             Gitter * _myGrid; 
         };
         typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
-
-        class TetraGhostEmpty : public htetraghost_GEO 
-#ifdef _DUNE_USES_ALU3DGRID_
-           , public Dune_Hbnd3Default
-#endif
-        {
-          protected :
-           inline TetraGhostEmpty (myhface3_t *, int, ProjectVertex * , Gitter * ) ;
-           virtual ~TetraGhostEmpty () {}
-          public :
-            typedef hbndseg3_GEO :: bnd_t bnd_t;
-            typedef myhface3_t      myhghost_t; 
-            virtual inline bnd_t bndtype () const ;
-            virtual int ghostLevel () const ; 
-            
-            // default implementation is doing nothing for these 3 methods
-            // these methods are overloades just on HbndPll
-            virtual helement_STI * getGhost () { return 0; }
-            virtual int getGhostFaceNumber () const { return -1; }
-
-            // points inside ghosts 
-            void faceNormal( double * normal) const;
-
-            inline int preCoarsening  () ;
-            inline int postRefinement () ;
-          protected:
-            Gitter * _myGrid; 
-        };
-        typedef Hbnd3Top < TetraGhostEmpty > tetraghost_IMPL ;
 
       class Dune_Hbnd4Default //: public Dune_hbndDefault
       {
@@ -203,21 +173,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
             inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
-            virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs) {
-               std::cout << "[rVD]";
-               for (int i = 0; i < 4; i++) {
-                  std::cout << myvertex(i)->Point()[0] << "/" <<
-                               myvertex(i)->Point()[1] << "/" <<
-                               myvertex(i)->Point()[2] << " ";
-	          gs.recvData( os, *myvertex(i));
-               }
-            }
-            virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-               std::cout << "[rED]";
-               for (int i = 0; i < 6; i++) {
-	          gs.recvData( os, *myhedge1(i));
-               }
-	    }
+
            ~TetraEmpty () {}
             int preCoarsening  () ; 
             int postRefinement () ;
@@ -270,25 +226,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         int preCoarsening(); 
         int postRefinement();
 
-        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs) {
-          std::cout << "[rVD]";
-          for (int i = 0; i < 8; i++) {
-            std::cout << myvertex(i)->Point()[0] << "/" <<
-                         myvertex(i)->Point()[1] << "/" <<
-                         myvertex(i)->Point()[2] << " ";
-            gs.recvData( os, *myvertex(i));
-          }
-        }
-        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-          std::cout << "[rED]";
-          for (int i = 0; i < 12; i++) gs.recvData( os, *myhedge1(i));
-	}
-        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
-          std::cout << "[rED]";
-          for (int i = 0; i < 6; i++) gs.recvData( os, *myhface4(i));
-	}
-
-	Gitter* _myGrid;
+        Gitter* _myGrid;
 
         friend class HexaTop<HexaEmpty>;
       } ;
@@ -304,7 +242,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual inline hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
         virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
         // version with point , returns insert_hbnd3 here 
-        virtual inline htetraghost_GEO * insert_internalhbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) ;
+        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const Hbnd4IntStoragePoints &) ;
         virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
@@ -562,73 +500,6 @@ inline void GitterBasis :: Objects :: Hbnd3Default :: faceNormal( double * norma
   return ;
 }
 
-// tetra  ghost 
-inline GitterBasis :: Objects :: TetraGhostEmpty :: TetraGhostEmpty (myhface3_t * f, int i, ProjectVertex *ppv, Gitter * grd ) :
-  Gitter :: Geometric :: htetraghost_GEO (f, i, ppv) , _myGrid(grd) 
-{
-  return ;
-}
-
-// calles method on grid which return 0 for default impl 
-inline int GitterBasis :: Objects :: TetraGhostEmpty :: preCoarsening () 
-{
-#ifdef __USE_INTERNAL_FACES__  
-  // grid pointer only exists in the case of internal bnds 
-  if(_myGrid)
-  {
-    return _myGrid->preCoarsening(*this);
-  }
-  else 
-  {
-    return 0;
-  }
-#else 
-  return 0;
-#endif
-}
-
-// calles method on grid which return 0 for default impl 
-inline int GitterBasis :: Objects :: TetraGhostEmpty :: postRefinement () 
-{
-#ifdef __USE_INTERNAL_FACES__  
-  // grid pointer only exists in the case of internal bnds 
-  if(_myGrid)
-  {
-    return _myGrid->postRefinement(*this);
-  }
-  else 
-  {
-    return 0;
-  }
-#else
-  return 0;
-#endif
-}
-
-inline GitterBasis :: Objects :: TetraGhostEmpty :: bnd_t  
-GitterBasis :: Objects :: TetraGhostEmpty :: bndtype () const {
-  return Gitter :: hbndseg :: closure ;
-}
-
-inline int GitterBasis :: Objects :: TetraGhostEmpty :: ghostLevel () const {
-  return level() ;
-}
-
-inline void GitterBasis :: Objects :: TetraGhostEmpty :: faceNormal( double * normal) const {
-
-  /*
-  hface3_GEO * face = this->myhface3(0);
-  int tw = this->twist(0);
-  BSGridLinearSurfaceMapping 
-    LSM(face->myvertex( (tw < 0) ? 0 : 2 )->Point(),
-        face->myvertex( 1                )->Point(),
-        face->myvertex( (tw < 0) ? 2 : 0 )->Point()
-       );
-  LSM.normal(normal);
-  */
-  return ;
-}
-
 inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv, Gitter * grd ) : 
   Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv) , _myGrid(grd) 
 {
@@ -789,7 +660,7 @@ inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vert
 }
 
 inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_ghostvx (double x, double y, double z, int id) {
-  return GitterBasis :: MacroGitterBasis :: insert_vertex(x,y,z,id); 
+  return this->insert_vertex(x,y,z,id); 
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, VertexGeo * b) {
@@ -828,11 +699,9 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
   return new Objects :: hbndseg3_IMPL ( 0,f,i, NULL,NULL, b, indexManager(4), _myGrid) ;
 }
 
-inline GitterBasis :: htetraghost_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_internalhbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd3IntStoragePoints &) {
-  abort();
-  // in serial this just msut no be called 
-  return 0; 
+inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd3IntStoragePoints &) {
+  return insert_hbnd3(f,i,b); 
 }
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
