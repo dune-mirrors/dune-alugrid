@@ -839,8 +839,9 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         // normal insert hbnd3 version
   virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
         // version that get point and create ghost macro 
-  virtual htetraghost_GEO * insert_internalhbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) ;
+  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) ;
         // version that created internal boundary on ghost elements 
+  virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int ) ;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
