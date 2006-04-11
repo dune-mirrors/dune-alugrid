@@ -4,7 +4,7 @@
 #ifndef GITTER_HEXA_TOP_PLL_H_INCLUDED
 #define GITTER_HEXA_TOP_PLL_H_INCLUDED
 
-#include "parallel.h"
+#include "../serial/parallel.h"
 #include "gitter_pll_impl.h"
 #include "gitter_hexa_top.h"
 

@@ -21,6 +21,7 @@ typedef GatherScatter GatherScatterType;
 
 #include "serial/key.h"
 #include "serial/serialize.h"
+#include "serial/parallel.h" // only tpyedefs mainly 
 #include "serial/gitter_sti.h"
 
 typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;

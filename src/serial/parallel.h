@@ -1,5 +1,4 @@
 // (c) bernhard schupp, 1997 - 1998
-//
 #ifndef PARALLEL_H_INCLUDED
 #define PARALLEL_H_INCLUDED
 
