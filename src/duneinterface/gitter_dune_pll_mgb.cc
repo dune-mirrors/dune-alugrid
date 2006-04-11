@@ -50,11 +50,9 @@ class DuneParallelGridMover : public ParallelGridMover {
     inline void unpackHbnd4Int (ObjectStream & os); 
 
     // creates Hbnd3IntStorage with point if needed 
-    bool InsertUniqueHbnd3_withPoint (int (&)[3], Gitter :: hbndseg ::
-            bnd_t, 
-            const Hbnd3IntStoragePoints & p
-            //const double (&p) [3]
-            ) ;
+    bool InsertUniqueHbnd3_withPoint (int (&)[3], 
+                              Gitter :: hbndseg :: bnd_t, 
+                              const Hbnd3IntStoragePoints & p ) ;
 
     // creates Hbnd4IntStorage with point if needed 
     bool InsertUniqueHbnd4_withPoint (int (&)[4], Gitter :: hbndseg ::
@@ -541,12 +539,9 @@ void DuneParallelGridMover :: finalize ()
   {for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
     const Hbnd3IntStorage & p = *((*i).second);
     if (p.first()->ref == 1) {
-      htetraghost_GEO * hb3 = myBuilder().insert_internalhbnd3 ( p.first(),p.second(),
+      hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p.first(),p.second(),
                         Gitter :: hbndseg_STI :: closure , p.getPoints() );
-      //tetra_GEO * hb3 = myBuilder().insert_internalhbnd3 ( p.first(),p.second(),
-      //                  Gitter :: hbndseg_STI :: closure , p.getPoints() );
-      myBuilder ()._htetraGhostList.push_back(hb3);
-      //myBuilder ()._hbndseg3List.push_back (hb3) ;
+      myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (*i).second; 
   }}
