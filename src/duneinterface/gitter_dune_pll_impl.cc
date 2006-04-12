@@ -417,10 +417,10 @@ void GitterDunePll :: ALUcomm (
    const bool containsFaces    = faceData.contains(3,1);
    const bool containsElements = elementData.contains(3,0);
    
-   if (containsVertices) std::cout << "(containsVertices)=true\n";
-   if (containsEdges) std::cout << "(containsEdges)=true\n";
-   if (containsFaces) std::cout << "(containsFaces)=true\n";
-   if (containsElements) std::cout << "(containsElements)=true\n";
+   assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsVertices)=true " << endl, 1) : 1) ;
+   assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsEdges)=true " << endl, 1) : 1) ;
+   assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsFaces)=true " << endl, 1) : 1) ;
+   assert ((debugOption (5) && containsElements) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsElements)=true " << endl, 1) : 1) ;
    
    // the message buffas 
    vector < ObjectStream > vec (nl) ;
