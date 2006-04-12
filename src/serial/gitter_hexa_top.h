@@ -954,18 +954,35 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   this->splitGhost();
 
   hexa_GEO * gh = static_cast<hexa_GEO *> (this->getGhost());
-  int gFace = this->getGhostFaceNumber();
 
+  int gFace[4] = { -1,-1,-1,-1 };
   if(gh)
   {
-    hface4_GEO * face = gh->myhface4( gFace );
+    hface4_GEO * face = gh->myhface4( this->getGhostFaceNumber() );
     face = face->down();
     for(int i=0; i<4; i++)
     {
       assert(face);
-      hexa_GEO * ghch = static_cast<hexa_GEO *> (face->nb.front().first);
-      if(ghch){ if(ghch->up() != gh) ghch = static_cast<hexa_GEO *> (face->nb.rear().first);}
-      else { ghch = static_cast<hexa_GEO *> (face->nb.rear().first); }
+      typedef pair < Gitter :: Geometric :: hasFace4 *, int > neigh_t;
+      neigh_t neighbour = face->nb.front();
+      hexa_GEO * ghch = static_cast<hexa_GEO *> (neighbour.first);
+
+      if(ghch)
+      { 
+        if(ghch->up() != gh) 
+        {
+          neighbour = face->nb.rear();
+          ghch = static_cast<hexa_GEO *> (neighbour.first);
+        }
+      }
+      else 
+      { 
+        neighbour = face->nb.rear();
+        ghch = static_cast<hexa_GEO *> (neighbour.first);
+      }
+
+      // gFace might be differnent from ghostFaceNumber, unfortuneately 
+      gFace[i] = neighbour.second;
 
       assert(ghch);
       assert(ghch->up() == gh);
@@ -974,10 +991,10 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
     }
   }
 
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghchild[0] ,gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghchild[1] ,gFace) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghchild[2] ,gFace) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghchild[3] ,gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghchild[0] ,gFace[0]) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghchild[1] ,gFace[1]) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghchild[2] ,gFace[2]) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghchild[3] ,gFace[3]) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
