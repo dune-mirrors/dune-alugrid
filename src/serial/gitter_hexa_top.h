@@ -958,7 +958,13 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   int gFace[4] = { -1,-1,-1,-1 };
   if(gh)
   {
-    hface4_GEO * face = gh->myhface4( this->getGhostFaceNumber() );
+    int gFaceNum = this->getGhostFaceNumber();
+    assert( gFaceNum >= 0 );
+    assert( gFaceNum < 6 );
+
+    hface4_GEO * face = gh->myhface4( gFaceNum );
+    assert( face );
+
     face = face->down();
     for(int i=0; i<4; i++)
     {
