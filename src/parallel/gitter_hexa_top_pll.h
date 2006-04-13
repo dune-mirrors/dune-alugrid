@@ -37,7 +37,7 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         typedef X mypllx_t ;
       protected :
 
-        typedef typename GitterBasisImpl::Objects::tetra_IMPL GhostElement_t;
+        typedef typename GitterBasisImpl::Objects::hexa_IMPL GhostElement_t;
         typedef typename A :: myhface4_t myhface4_t ;
         typedef typename A :: balrule_t  balrule_t ;
         typedef typename A :: bnd_t     bnd_t ;
@@ -203,7 +203,7 @@ template < class A, class X, class MX >
 inline Gitter :: helement_STI * Hbnd4PllInternal < A, X, MX > :: HbndPll :: getGhost ()
 {
   // assert is not needed here when we dont use ghost cells 
-  //assert(_ghost);
+  assert(_ghost);
   return _ghost;
 }
 
@@ -232,9 +232,11 @@ setGhost ( Gitter :: helement_STI * gh , int gFace)
 template < class A, class X, class MX >
 inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  splitGhost ()
 {
+  assert( _ghost );
   if(_ghost)
   {
     (*_ghost).request( Gitter::Geometric::HexaRule::iso8 );
+    assert( Gitter::Geometric::HexaRule::iso8 == _ghost->requestrule () ); 
     (*_ghost).refine();
   }
 }
@@ -242,8 +244,8 @@ inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  splitGhost ()
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: 
 HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv,
     const bnd_t bt, IndexManagerType & im , Gitter * grd , MacroGhost * gh) 
-: Hbnd4Top < micro_t > (0,f,t,ppv,bt,im,grd), _mxt (0) , _gm(gh) {
-
+: Hbnd4Top < micro_t > (0,f,t,ppv,bt,im,grd), _mxt (0) , _gm(gh) 
+{
   if(_gm)
   {
     this->setGhost (_gm->getGhost(), _gm->ghostFaceNumber());   
