@@ -410,221 +410,253 @@ void GitterDunePll :: ALUcomm (
       GatherScatterType & faceData ,
       GatherScatterType & elementData ) 
 {
-   const int nl = mpAccess ().nlinks ();
+  const int nl = mpAccess ().nlinks ();
 
-   const bool containsVertices = vertexData.contains(3,3);
-   const bool containsEdges    = edgeData.contains(3,2);
-   const bool containsFaces    = faceData.contains(3,1);
-   const bool containsElements = elementData.contains(3,0);
+  const bool containsVertices = vertexData.contains(3,3);
+  const bool containsEdges    = edgeData.contains(3,2);
+  const bool containsFaces    = faceData.contains(3,1);
+  const bool containsElements = elementData.contains(3,0);
+
+  const bool haveHigherCodimData = containsVertices || 
+                                   containsEdges ||  
+                                   containsFaces ;
    
-   assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsVertices)=true " << endl, 1) : 1) ;
-   assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsEdges)=true " << endl, 1) : 1) ;
-   assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsFaces)=true " << endl, 1) : 1) ;
-   assert ((debugOption (5) && containsElements) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsElements)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsVertices)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsEdges)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsFaces)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsElements) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsElements)=true " << endl, 1) : 1) ;
    
-   // the message buffas 
-   vector < ObjectStream > vec (nl) ;
+  /* could use LeafIteratorTT:
+   *       LeafIteratorTT < hface_STI > c (*this,l) ;
+   *       for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ())  -> first iterator i.e. master
+   *       for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ())  -> second iterator i.e. slave
+   * the delete statements are done in destructor
+   */
 
-   /* could use LeafIteratorTT:
-    *       LeafIteratorTT < hface_STI > c (*this,l) ;
-    *       for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ())  -> first iterator i.e. master
-    *       for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ())  -> second iterator i.e. slave
-    * the delete statements are done in destructor
-    */
-   pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
-   pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>   b;
-   pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
+  if( haveHigherCodimData )
+  {
+    // the message buffas 
+    vector < ObjectStream > vec (nl) ;
 
-   for (int i = 0; i < nl ; i++) {
-      if (containsVertices) {
-         a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten 
-         for (a.second->first (); ! a.second->done () ; a.second->next ()) {
-           vertexData.sendData(vec[i],a.second->item());
-         }
-         delete a.first;
-         delete a.second;	    
+    pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
+    pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>   b;
+    pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
+
+    for (int i = 0; i < nl ; i++) 
+    {
+      if (containsVertices) 
+      {
+        a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten 
+        for (a.second->first (); ! a.second->done () ; a.second->next ()) 
+        {
+          vertexData.sendData(vec[i],a.second->item());
+        }
+        delete a.first;
+        delete a.second;      
       }
-      if (containsEdges) {
-         b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten (leaf-iterator!)
-         for (b.second->first (); ! b.second->done () ; b.second->next ()) {
-           edgeData.sendData(vec[i],b.second->item());
-         }
-         delete b.first;
-         delete b.second;	    
+      if (containsEdges) 
+      {
+        b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten (leaf-iterator!)
+        for (b.second->first (); ! b.second->done () ; b.second->next ()) {
+          edgeData.sendData(vec[i],b.second->item());
+        }
+        delete b.first;
+        delete b.second;      
       }
-      if (containsFaces) {
-         c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten (leaf-iterator!)
-         for (c.second->first (); ! c.second->done () ; c.second->next ()) {
-           faceData.sendData(vec[i],c.second->item());
-         }
-         delete c.first;
-         delete c.second;	    
+      if (containsFaces) 
+      {
+        c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten (leaf-iterator!)
+        for (c.second->first (); ! c.second->done () ; c.second->next ()) {
+          faceData.sendData(vec[i],c.second->item());
+        }
+        delete c.first;
+        delete c.second;      
       }
-   }
-   //std::cout << "(" << mpAccess ().myrank() << ") 111 " << flush;
-   //den anderen Partitionen die Slave-Daten senden
-   vec = mpAccess ().exchange (vec);
+    }
+    //std::cout << "(" << mpAccess ().myrank() << ") 111 " << flush;
+    //den anderen Partitionen die Slave-Daten senden
+    vec = mpAccess ().exchange (vec);
    
-   //und dort den Master-Knoten "ubergeben
-   for (int i = 0; i < nl; i++) { 
-      if (containsVertices) {
-         a = iteratorTT ((vertex_STI *)0,i);
-         for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-                 //std::cout << a.first->item().Point()[0] << "/" << a.first->item().Point()[1] << "/" <<a.first->item().Point()[2] << " ";
-      		 vertexData.recvData(vec[i],a.first->item ());
-         }
-         delete a.first;
-         delete a.second;
+    //und dort den Master-Knoten "ubergeben
+    for (int i = 0; i < nl; i++) 
+    { 
+      if (containsVertices) 
+      {
+        a = iteratorTT ((vertex_STI *)0,i);
+        for (a.first->first (); ! a.first->done () ; a.first->next ()) {
+                //std::cout << a.first->item().Point()[0] << "/" << a.first->item().Point()[1] << "/" <<a.first->item().Point()[2] << " ";
+          vertexData.recvData(vec[i],a.first->item ());
+        }
+        delete a.first;
+        delete a.second;
       }
-      if (containsEdges) {
-         b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-         for (b.first->first (); ! b.first->done () ; b.first->next ()) {
-           edgeData.recvData(vec[i],b.first->item());
-         }
-         delete b.first;
-         delete b.second;
+      if (containsEdges) 
+      {
+        b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+        for (b.first->first (); ! b.first->done () ; b.first->next ()) {
+          edgeData.recvData(vec[i],b.first->item());
+        }
+        delete b.first;
+        delete b.second;
       }
-      if (containsFaces) {
-         c = iteratorTT ((hface_STI *)0,i);
-         for (c.first->first (); ! c.first->done () ; c.first->next ()) {
-           faceData.recvData(vec[i],c.first->item());
-         }
-         delete c.first;
-         delete c.second;
+      if (containsFaces) 
+      {
+        c = iteratorTT ((hface_STI *)0,i);
+        for (c.first->first (); ! c.first->done () ; c.first->next ()) {
+          faceData.recvData(vec[i],c.first->item());
+        }
+        delete c.first;
+        delete c.second;
       }
-   }
+    }
 
-   //MasterknotenDaten sammeln
-   for (int i = 0; i < nl; i++) {
-      if (containsVertices) {
-         a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
-         for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-           vertexData.sendData(vec[i],a.first->item ());
-         }
-         delete a.first;
-         delete a.second;	    
+    //MasterknotenDaten sammeln
+    for (int i = 0; i < nl; i++) 
+    {
+      if (containsVertices) 
+      {
+        a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
+        for (a.first->first (); ! a.first->done () ; a.first->next ()) {
+          vertexData.sendData(vec[i],a.first->item ());
+        }
+        delete a.first;
+        delete a.second;     
       }
-      if (containsEdges) {
-         b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-         for (b.first->first (); ! b.first->done () ; b.first->next ()) {
-           edgeData.sendData(vec[i],b.first->item ());
-         }
-         delete b.first;
-         delete b.second;	    
+      if (containsEdges) 
+      {
+        b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+        for (b.first->first (); ! b.first->done () ; b.first->next ()) {
+          edgeData.sendData(vec[i],b.first->item ());
+        }
+        delete b.first;
+        delete b.second;     
       }
-      if (containsFaces) {
-         c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
-         for (c.first->first (); ! c.first->done () ; c.first->next ()) {
-           faceData.sendData(vec[i],c.first->item ());
-         }
-         delete c.first;
-         delete c.second;	    
+      if (containsFaces) 
+      {
+        c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
+        for (c.first->first (); ! c.first->done () ; c.first->next ()) {
+          faceData.sendData(vec[i],c.first->item ());
+        }
+        delete c.first;
+        delete c.second;     
       }
-   }
+    }
    
-   //den anderen Partitionen die Slave-Daten senden
-   vec = mpAccess ().exchange (vec);
+    //den anderen Partitionen die Slave-Daten senden
+    vec = mpAccess ().exchange (vec);
    
-   //und auf die Slave-Knoten draufschreiben
-   for (int i = 0; i < nl; i++) { 
-      if (containsVertices) {
-         a = iteratorTT ((vertex_STI *)0,i);
-         for (a.second->first (); ! a.second->done () ; a.second->next ()) {
-           vertexData.setData(vec[i],a.second->item ());
-         }
-         delete a.first;
-         delete a.second;
+    //und auf die Slave-Knoten draufschreiben
+    for (int i = 0; i < nl; i++) 
+    { 
+      if (containsVertices) 
+      {
+        a = iteratorTT ((vertex_STI *)0,i);
+        for (a.second->first (); ! a.second->done () ; a.second->next ()) {
+          vertexData.setData(vec[i],a.second->item ());
+        }
+        delete a.first;
+        delete a.second;
       }
-      if (containsEdges) {
-         b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-         for (b.second->first (); ! b.second->done () ; b.second->next ()) {
-           edgeData.setData(vec[i],b.second->item ());
-         }
-         delete b.first;
-         delete b.second;
+      if (containsEdges) 
+      {
+        b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+        for (b.second->first (); ! b.second->done () ; b.second->next ()) {
+          edgeData.setData(vec[i],b.second->item ());
+        }
+        delete b.first;
+        delete b.second;
       }
-      if (containsFaces) {
-         c = iteratorTT ((hface_STI *)0,i);
-         for (c.second->first (); ! c.second->done () ; c.second->next ()) {
-           faceData.setData(vec[i],c.second->item ());
-         }
-         delete c.first;
-         delete c.second;
+      if (containsFaces) 
+      {
+        c = iteratorTT ((hface_STI *)0,i);
+        for (c.second->first (); ! c.second->done () ; c.second->next ()) {
+          faceData.setData(vec[i],c.second->item ());
+        }
+        delete c.first;
+        delete c.second;
       }
-   }
+    }
 
-   //2. 
-//   if (have_ghosts) {                            coming soon...
-      vector < ObjectStream > osv (nl) ;
+ } // end haveHigherCodimData 
 
-//      pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
+  {
+    vector < ObjectStream > osv (nl) ;
 
-      for (int l = 0 ; l < nl ; l ++) {        //sammle die Daten meine (echten) helements.
-         LeafIteratorTT < hface_STI > w (*this,l) ;
-         for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) {
-            pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessPllX ().accessInnerPllX () ;
-	    if (containsVertices) p.first->VertexData2os(osv[l], vertexData);
-            if (containsEdges)    p.first->EdgeData2os(osv[l], edgeData);
-	    if (containsFaces)    p.first->FaceData2os(osv[l], faceData);
-            if (containsElements) {
-              pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-              p.first->getAttachedElement(p1);
-              elementData.sendData(osv[l], *p1.first);
-            }
-         }
-         for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) {
-            pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessPllX ().accessInnerPllX () ;
-	    if (containsVertices) p.first->VertexData2os(osv[l], vertexData);
-            if (containsEdges)    p.first->EdgeData2os(osv[l], edgeData);
-	    if (containsFaces)    p.first->FaceData2os(osv[l], faceData);
-            if (containsElements) {
-              pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-              p.first->getAttachedElement(p1);
-              elementData.sendData(osv[l], *p1.first);
-            }
-	 }
+    for (int l = 0 ; l < nl ; l ++) 
+    {  
+      //sammle die Daten meine (echten) helements.
+      LeafIteratorTT < hface_STI > w (*this,l) ;
+      for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) 
+      {
+        pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessPllX ().accessInnerPllX () ;
+        if (containsVertices) p.first->VertexData2os(osv[l], vertexData);
+        if (containsEdges)    p.first->EdgeData2os(osv[l], edgeData);
+        if (containsFaces)    p.first->FaceData2os(osv[l], faceData);
+        if (containsElements) 
+        {
+          //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
+          //p.first->getAttachedElement(p1);
+          //elementData.sendData(osv[l], *p1.first);
+          p.first->writeDynamicState (osv [l], p.second) ;
+          p.first->writeDynamicState (osv [l], elementData ) ;
+        }
       }
-      osv = mpAccess ().exchange (osv) ;
-      //all ghost cells get new data
-      for (int l = 0 ; l < nl ; l ++ ) {           
-         LeafIteratorTT < hface_STI > w (*this,l) ;
-	 for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) {
-            pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessPllX ().accessOuterPllX () ;
-	    if (containsVertices) p.first->getGhost()->os2VertexData(osv[l], vertexData);
-            if (containsEdges)    p.first->getGhost()->os2EdgeData(osv[l], edgeData);
-	    if (containsFaces)    p.first->getGhost()->os2FaceData(osv[l], faceData);
-            if (containsElements) {
-              pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-              p.first->getAttachedElement(p1);
-              elementData.recvData(osv[l], *(p1.second));
-            }
-	    //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-	    //p.first->getAttachedElement(p1);
-	    //if (containsElements) {std::cout << "Z"; elementData.recvData(osv[l], *(p1.second)) ;}
-	    //if (containsVertices) {std::cout << "Z"; p.first->getGhost()->os2VertexData(osv[l], vertexData); }
-            //if (containsEdges)    p1.first->readEdgeData(osv[l], edgeData);
-            //if (containsFaces)    p1.first->readFaceData(osv[l], faceData);
-         }
-         for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) {
-            pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessPllX ().accessOuterPllX () ;
-	    if (containsVertices) p.first->getGhost()->os2VertexData(osv[l], vertexData);
-            if (containsEdges)    p.first->getGhost()->os2EdgeData(osv[l], edgeData);
-	    if (containsFaces)    p.first->getGhost()->os2FaceData(osv[l], faceData);
-            if (containsElements) {
-              pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-              p.first->getAttachedElement(p1);
-              elementData.recvData(osv[l], *(p1.second));
-            }
-	    //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-	    //p.first->getAttachedElement(p1);
-	    //if (containsElements) {std::cout << "A["; elementData.recvData(osv[l], *(p1.second)) ; }
-	    //if (containsVertices) {std::cout << "A"; p.first->getGhost()->os2VertexData(osv[l], vertexData); }
-            //if (containsEdges)    p1.first->readEdgeData(osv[l], edgeData);
-            //if (containsFaces)    p1.first->readFaceData(osv[l], faceData);
-	 }
+      for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) 
+      {
+        pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessPllX ().accessInnerPllX () ;
+        if (containsVertices) p.first->VertexData2os(osv[l], vertexData);
+        if (containsEdges)    p.first->EdgeData2os(osv[l], edgeData);
+        if (containsFaces)    p.first->FaceData2os(osv[l], faceData);
+        if (containsElements) 
+        {
+          //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
+          //p.first->getAttachedElement(p1);
+          //elementData.sendData(osv[l], *p1.first);
+          p.first->writeDynamicState (osv [l], p.second) ;
+          p.first->writeDynamicState (osv [l], elementData ) ;
+        }
       }
-
-//   }
+    }
+     
+    osv = mpAccess ().exchange (osv) ;
+     
+    //all ghost cells get new data
+    for (int l = 0 ; l < nl ; l ++ ) 
+    {           
+      LeafIteratorTT < hface_STI > w (*this,l) ;
+      for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) 
+      {
+        pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessPllX ().accessOuterPllX () ;
+        if (containsVertices) p.first->getGhost()->os2VertexData(osv[l], vertexData);
+        if (containsEdges)    p.first->getGhost()->os2EdgeData(osv[l], edgeData);
+        if (containsFaces)    p.first->getGhost()->os2FaceData(osv[l], faceData);
+        if (containsElements) 
+        {
+          //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
+          //p.first->getAttachedElement(p1);
+          //elementData.recvData(osv[l], *(p1.second));
+          p.first->readDynamicState (osv [l], p.second) ;
+          p.first->readDynamicState (osv [l], elementData ) ;
+        }
+      }
+        
+      for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) 
+      {
+        pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessPllX ().accessOuterPllX () ;
+        if (containsVertices) p.first->getGhost()->os2VertexData(osv[l], vertexData);
+        if (containsEdges)    p.first->getGhost()->os2EdgeData(osv[l], edgeData);
+        if (containsFaces)    p.first->getGhost()->os2FaceData(osv[l], faceData);
+        if (containsElements) 
+        {
+          //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
+          //p.first->getAttachedElement(p1);
+          //elementData.recvData(osv[l], *(p1.second));
+          p.first->readDynamicState (osv [l], p.second) ;
+          p.first->readDynamicState (osv [l], elementData ) ;
+        }
+      }
+    }
+  } // end element communication 
 }
 
 
