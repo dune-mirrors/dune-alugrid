@@ -396,7 +396,7 @@ class HexaPllBaseX : public ElementPllBaseX {
     inline HexaPllBaseX (myhexa_t &) ;
     inline ~HexaPllBaseX () {}
     void writeDynamicState (ObjectStream &, int) const ;
-    void writeDynamicState (ObjectStream &, GatherScatterType &) const {};
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
  
     virtual void VertexData2os(ObjectStream &, GatherScatterType &) ;
     virtual void EdgeData2os(ObjectStream &, GatherScatterType &) ;
@@ -1415,21 +1415,6 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 #ifdef _DUNE_USES_ALU3DGRID_
     // read the real level of ghost 
     os.readObject( _ghostLevel );
-   
-#ifdef __USE_INTERNAL_FACES__  
-    // this is deperecated 
-    assert(false);
-    double p[3];
-    for(int i=0; i<myhbnd().dimVx(); i++)
-    {
-      os.readObject ( p[0] ) ;
-      os.readObject ( p[1] ) ;
-      os.readObject ( p[2] ) ;
-      
-      myhbnd (). setOppPoint ( i , p ) ;
-    }
-#endif
-
 #endif
     
   } catch (ObjectStream :: EOFException) {

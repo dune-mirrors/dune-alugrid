@@ -370,16 +370,7 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
   
   // write level to know the level of ghost on the other side
   os.writeObject( mytetra().level() );
-  
-#ifdef __USE_INTERNAL_FACES__  
-  const double (& p) [3] = mytetra ().myvertex (face)->Point ();
 
-  //assert( (true) ? (os.writeObject ( 1 ) , 1 ) : 1);// number of points written 
-  os.writeObject (p [0]) ;
-  os.writeObject (p [1]) ;
-  os.writeObject (p [2]) ;
-#endif
-  
 #endif
   return ;
 }
@@ -971,31 +962,18 @@ bool Periodic4PllXBaseMacro :: erasable () const {
   // #     #  #        #  #   #    #
   // #     #  ######  #    #  #    #
 
+void HexaPllBaseX  :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const {
+  gs.sendData( os , myhexa () );
+  return ;
+}
 void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
   // siehe writeDynamicState von Tetra 
-  //assert( (true) ? (os.writeObject ( myhexa(). getIndex() ) , 1 ) : 1);// number of points written 
 
 #ifdef _DUNE_USES_ALU3DGRID_
   
   // write level to know the level of ghost on the other side
   os.writeObject( myhexa().level() );
 
-#ifdef __USE_INTERNAL_FACES__  
-  assert(false);
-  enum { dimvx = 4 };
-  int oppFace = myhexa().oppositeFace[ face ];
- 
-  //assert( (true) ? (os.writeObject ( dimvx ) , 1 ) : 1);// number of points written 
-  for(int i=0; i<dimvx; i++) 
-  {
-    const double (& p) [3] = myhexa ().myvertex( oppFace , i )->Point ();
-
-    os.writeObject (p [0]) ;
-    os.writeObject (p [1]) ;
-    os.writeObject (p [2]) ;
-  }
-#endif
-  
 #endif
   return ;
 }
