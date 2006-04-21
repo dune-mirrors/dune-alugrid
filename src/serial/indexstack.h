@@ -99,8 +99,10 @@ public:
   // restore from in stream 
   void restoreIndexSet ( istream & is );
 
-  bool disabled() { return disabled_; }
+  // return whether index stack is used to produce numbers or not 
+  bool disabled() const { return disabled_; }
 
+  // disable index stack, no numbers produced any longer 
   void disable() { disabled_ = true; }  //if 'Ghost grid'
 
 private:
