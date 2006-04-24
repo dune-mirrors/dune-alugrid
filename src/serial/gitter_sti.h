@@ -258,9 +258,15 @@ public :
       assert( index >= 0 );
       _idx = index; 
     }
+    
+    inline void freeIndex ( IndexManagerType & im ) 
+    {
+      // hier free index implementieren 
+    }
 #else 
     inline int getIndex () const { return -1; }
     void setIndex ( const int index ) {}
+    inline void freeIndex ( IndexManagerType & im ) {} 
 #endif
   };
     
