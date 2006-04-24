@@ -376,35 +376,19 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 }
 
 void TetraPllXBase :: VertexData2os(ObjectStream & os, GatherScatterType & gs) {
-  std::cout << "wVD";
-  for (int i = 0; i < 4; i++) {
-    std::cout << (*mytetra().myvertex(i)).Point()[0] << "/" << 
-	         (*mytetra().myvertex(i)).Point()[1] << "/" << 
-		 (*mytetra().myvertex(i)).Point()[2] << " ";
-      gs.sendData( os, *mytetra().myvertex(i));
-   }
+  for (int i = 0; i < 4; i++) gs.sendData( os, *mytetra().myvertex(i));
 }
 
 void TetraPllXBase :: EdgeData2os(ObjectStream & os, GatherScatterType & gs) {
-   for (int i = 0; i < 6; i++) {
-      gs.sendData( os, *mytetra().myhedge1(i));
-   }
+   for (int i = 0; i < 6; i++) gs.sendData( os, *mytetra().myhedge1(i));
 }
 
 void TetraPllXBase :: FaceData2os(ObjectStream & os, GatherScatterType & gs) {
-   for (int i = 0; i < 4; i++) {
-      gs.sendData( os, *mytetra().myhface3(i));
-   }
+   for (int i = 0; i < 4; i++) gs.sendData( os, *mytetra().myhface3(i));
 } 
 
 void HexaPllBaseX :: VertexData2os(ObjectStream & os, GatherScatterType & gs) {
-  std::cout << "HEXwVD";
-  for (int i = 0; i < 8; i++) {
-    std::cout << (*myhexa().myvertex(i)).Point()[0] << "/" << 
-	         (*myhexa().myvertex(i)).Point()[1] << "/" << 
-		 (*myhexa().myvertex(i)).Point()[2] << " ";
-      gs.sendData( os, *myhexa().myvertex(i));
-   }
+  for (int i = 0; i < 8; i++) gs.sendData( os, *myhexa().myvertex(i));
 }
 
 void HexaPllBaseX :: EdgeData2os(ObjectStream & os, GatherScatterType & gs) {
@@ -414,57 +398,6 @@ void HexaPllBaseX :: EdgeData2os(ObjectStream & os, GatherScatterType & gs) {
 void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs) {
   for (int i = 0; i < 6; i++) gs.sendData( os, *myhexa().myhface4(i));
 }
-/*void TetraPllXBase :: writeElementData(ObjectStream & os, GatherScatterType & gs) {
-  gs.sendData( os, mytetra());
-}*/
-/*
-void GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: os2VertexData(ObjectStream & os, GatherScatterType & gs) {
-	std::cout << "rVD";
-     	for (int i = 0; i < 4; i++) {
-   std::cout << myvertex(i)->Point()[0] << "/" <<
-                myvertex(i)->Point()[1] << "/" <<
-                myvertex(i)->Point()[2] << " ";
-      gs.recvData( os, *myvertex(i));
-   }
-}
-
-void GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-   for (int i = 0; i < 6; i++) {
-      gs.recvData( os, *myhedge1(i));
-   }
-}
-
-void GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: os2FaceData(ObjectStream & os, GatherScatterType & gs) {
-   for (int i = 0; i < 4; i++) {
-      gs.recvData( os, *myhface3(i));
-   }
-}
-
-void GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: os2VertexData(ObjectStream & os, GatherScatterType & gs) {
-	std::cout << "rVD";
-     	for (int i = 0; i < 8; i++) {
-   std::cout << myvertex(i)->Point()[0] << "/" <<
-                myvertex(i)->Point()[1] << "/" <<
-                myvertex(i)->Point()[2] << " ";
-      gs.recvData( os, *myvertex(i));
-   }
-}
-
-void GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-   for (int i = 0; i < 12; i++) {
-      gs.recvData( os, *myhedge1(i));
-   }
-}
-
-void GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: os2FaceData(ObjectStream & os, GatherScatterType & gs) {
-   for (int i = 0; i < 6; i++) {
-      gs.recvData( os, *myhface4(i));
-   }
-}
-
-void GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: readElementData(ObjectStream & os, GatherScatterType & gs) {
-  gs.recvData( os, *this);
-}*/
 
 TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : 
   TetraPllXBase (t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
