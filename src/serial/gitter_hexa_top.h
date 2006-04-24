@@ -331,7 +331,7 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
 }
 
 template < class A > Hedge1Top < A > :: ~Hedge1Top () {
-  _indexManager.freeIndex( this->getIndex() );
+  this->freeIndex( this->_indexManager );
   if(_bbb) delete _bbb;
   if(_dwn) delete _dwn;
   if(_cv)  delete _cv;
