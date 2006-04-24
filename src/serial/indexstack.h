@@ -98,13 +98,6 @@ public:
 
   // restore from in stream 
   void restoreIndexSet ( istream & is );
-
-  // return whether index stack is used to produce numbers or not 
-  bool disabled() const { return disabled_; }
-
-  // disable index stack, no numbers produced any longer 
-  void disable() { disabled_ = true; }  //if 'Ghost grid'
-
 private:
   // no copy constructor allowed 
   IndexStack( const IndexStack<T,length> & s);
@@ -114,8 +107,6 @@ private:
   
   // clear all stored indices 
   void clearStack ();
-
-  bool disabled_; // for 'Ghost grid'
 };  // end class IndexStack 
 
 //****************************************************************
@@ -123,7 +114,7 @@ private:
 // ***************************************************************
 template <class T, int length>
 inline IndexStack<T,length>::IndexStack()
-  : stack_ ( new StackType () ) , maxIndex_ (0) , disabled_(false) {} 
+  : stack_ ( new StackType () ) , maxIndex_ (0) {} 
   
 template <class T, int length>
 inline IndexStack<T,length>::~IndexStack () 
@@ -148,46 +139,39 @@ inline IndexStack<T,length>::~IndexStack ()
 template <class T, int length>
 inline T IndexStack<T,length>::getIndex () 
 {
-  if (!disabled_) 
+  if((*stack_).empty()) 
   {
-    if((*stack_).empty()) 
+    if( fullStackList_.size() <= 0)
     {
-      if( fullStackList_.size() <= 0)
-      {
-        return maxIndex_++;
-      }
-      else 
-      {
-        emptyStackList_.push( stack_ );
-        stack_ = fullStackList_.top();
-        fullStackList_.pop();
-      }
+      return maxIndex_++;
     }
-    return (*stack_).pop();
+    else 
+    {
+      emptyStackList_.push( stack_ );
+      stack_ = fullStackList_.top();
+      fullStackList_.pop();
+    }
   }
-  else return -1;
+  return (*stack_).pop();
 }
 
 template <class T, int length>
 inline void IndexStack<T,length>::freeIndex ( T index ) 
 {
-  if (!disabled_) 
+  if((*stack_).full())
   {
-    if((*stack_).full())
+    fullStackList_.push(  stack_ );
+    if(emptyStackList_.size() <= 0)
     {
-      fullStackList_.push(  stack_ );
-      if(emptyStackList_.size() <= 0)
-      {
-        stack_ = new StackType (); 
-      }
-      else 
-      {
-        stack_ = emptyStackList_.top();
-        emptyStackList_.pop();
-      }
+      stack_ = new StackType (); 
     }
-    (*stack_).push(index); 
+    else 
+    {
+      stack_ = emptyStackList_.top();
+      emptyStackList_.pop();
+    }
   }
+  (*stack_).push(index); 
 }
 
 template <class T, int length>
