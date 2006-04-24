@@ -222,7 +222,7 @@ setGhost ( Gitter :: helement_STI * gh , int gFace)
     _ghost = static_cast<GhostElement_t *> (gh);
     _ghostFace = gFace;
     // copy indices from internal boundry to myhface3(.) of ghost
-    gh->setIndices(this->myhface4(0), gFace);
+    gh->setIndices(*this->myhface4(0), gFace);
   }
   else 
   {
