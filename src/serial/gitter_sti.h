@@ -264,6 +264,14 @@ public :
     {
       if (!_isCopy) im.freeIndex(_idx); 
     }
+    //for the ghost helements
+    inline void setIndex ( IndexManagerType & im, const int index )
+    {
+      freeIndex(im);
+      assert( index >= 0 );
+      _idx = index;
+      _isCopy = true;
+    }
 #else 
     inline int getIndex () const { return -1; }
     void setIndex ( const int index ) {}
