@@ -178,29 +178,38 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             }
             virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
               for (int i = 0; i < 6; i++) gs.recvData( os, *myhedge1(i));
-	    }
+      	    }
             virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
               for (int i = 0; i < 4; i++) gs.recvData( os, *myhface3(i));
-	    }
+	          }
             //ghost tetra gets indices of grid, to which it belongs actually
-	    virtual void setIndices(myhface3_t * face, int face_nr) 
+      	    virtual void setIndices(const hface_STI & f, int face_nr) 
             {
-               //the edges which don't belong to face [1st index].
-               //int edge [4][3] =  {{0,1,2}, {0,3,4}, {1,3,5}, {2,4,5}};
-               for (int i = 0; i < 3; i++) 
-               {
-                  myhface3(face_nr)->myvertex(i)->setIndex(_myGrid->indexManager(3), face->myvertex(i)->getIndex());
-                  myhface3(face_nr)->myhedge1(i)->setIndex(_myGrid->indexManager(2), face->myhedge1(i)->getIndex());
-               }
+            	const myhface3_t & face = static_cast<const myhface3_t &> (f); 
+
+              myhface3_t & myface = *(myhface3(face_nr));
+
+              // set index of face 
+              myface.setIndex(_myGrid->indexManager(1), face.getIndex());
+
+              IndexManagerType & vxIm = _myGrid->indexManager(3);
+              IndexManagerType & edIm = _myGrid->indexManager(2);
+              
+              for (int i = 0; i < 3; ++i) 
+              {
+                myface.myvertex(i)->setIndex( vxIm , face.myvertex(i)->getIndex() );
+                myface.myhedge1(i)->setIndex( edIm , face.myhedge1(i)->getIndex() );
+              }
             }
-	    ~TetraEmpty () {}
+            
+      	    ~TetraEmpty () {}
+            
             int preCoarsening  () ; 
             int postRefinement () ;
 
             //double _determinant; 
 
             Gitter * _myGrid;
-
     public: 
           //inline double determinant () const { return _determinant; } 
             
@@ -250,28 +259,30 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         }
         virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
           for (int i = 0; i < 12; i++) gs.recvData( os, *myhedge1(i));
-	}
+      	}
         virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
           for (int i = 0; i < 6; i++) gs.recvData( os, *myhface4(i));
-	}
+	      }
 
         //ghost hexa gets indices of grid, to which it belongs actually
-        virtual void setIndices(myhface4_t * face, int face_nr)  
+        virtual void setIndices(const hface_STI & f, int face_nr)  
         {
-           //the vertices which don't belong to face [1st index].
-           //int vertex [6][4] =  {{4,5,6,7}, {0,1,2,3,}, {2,3,6,7}, {0,3,4,5}, {0,1,4,5}, {1,2,5,6}};
-           //the edges ...
-           //int edge [6][8] = {{2,4,6,7,8,9,10,11}, {0,1,2,3,4,5,6,7}, 
-           //                   {1,3,5,6,7,9,10,11}, {0,1,2,5,7,8,9,11},
-           //                   {0,1,2,3,4,8,9,10}, {0,3,4,5,6,8,10,11}};
-           for (int i = 0; i < 4; i++) 
-           {
-              myhface4(face_nr)->myvertex(i)->setIndex(_myGrid->indexManager(3), face->myvertex(i)->getIndex());
-              myhface4(face_nr)->myhedge1(i)->setIndex(_myGrid->indexManager(2), face->myhedge1(i)->getIndex());
-           }
-	}
-	Gitter* _myGrid;
+           const myhface4_t & face = static_cast<const myhface4_t &> (f); 
+           
+           IndexManagerType & vxIm = _myGrid->indexManager(3);
+           IndexManagerType & edIm = _myGrid->indexManager(2);
 
+           myhface4_t & myface = *(myhface4(face_nr));
+
+           myface.setIndex( _myGrid->indexManager(1) , face.getIndex ());
+           for (int i = 0; i < 4; ++i) 
+           {
+             myface.myvertex(i)->setIndex(vxIm, face.myvertex(i)->getIndex());
+             myface.myhedge1(i)->setIndex(edIm, face.myhedge1(i)->getIndex());
+           }
+        }
+
+      	Gitter* _myGrid;
         friend class HexaTop<HexaEmpty>;
       } ;
       typedef HexaTop < HexaEmpty > hexa_IMPL ;
@@ -704,7 +715,8 @@ inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vert
 }
 
 inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_ghostvx (double x, double y, double z, int id) {
-  return GitterBasis :: MacroGitterBasis :: insert_vertex(x,y,z,id); 
+  return new Objects :: VertexEmptyMacro (x, y, z, id, indexManager(3)) ;
+  //return GitterBasis :: MacroGitterBasis :: insert_vertex(x,y,z,id); 
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, VertexGeo * b) {

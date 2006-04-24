@@ -268,8 +268,7 @@ public :
     inline void setIndex ( IndexManagerType & im, const int index )
     {
       freeIndex(im);
-      assert( index >= 0 );
-      _idx = index;
+      setIndex(index); 
       _isCopy = true;
     }
 #else 
@@ -420,7 +419,7 @@ public :
     inline  int leaf () const ;
 
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
-    virtual void setIndices(hface * , int ) {assert(false); abort(); }
+    virtual void setIndices(const hface & , int ) { assert(false); abort(); }
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
