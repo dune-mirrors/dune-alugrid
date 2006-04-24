@@ -473,7 +473,6 @@ void GitterDunePll :: ALUcomm (
         delete c.second;      
       }
     }
-    //std::cout << "(" << mpAccess ().myrank() << ") 111 " << flush;
     //den anderen Partitionen die Slave-Daten senden
     vec = mpAccess ().exchange (vec);
    
@@ -484,7 +483,6 @@ void GitterDunePll :: ALUcomm (
       {
         a = iteratorTT ((vertex_STI *)0,i);
         for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-                //std::cout << a.first->item().Point()[0] << "/" << a.first->item().Point()[1] << "/" <<a.first->item().Point()[2] << " ";
           vertexData.recvData(vec[i],a.first->item ());
         }
         delete a.first;
