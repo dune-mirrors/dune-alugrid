@@ -420,7 +420,7 @@ public :
     inline  int leaf () const ;
 
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
-    virtual void set_indices(hface * , int ) {assert(false); abort(); }
+    virtual void setIndices(hface * , int ) {assert(false); abort(); }
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;

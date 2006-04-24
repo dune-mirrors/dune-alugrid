@@ -183,8 +183,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
               for (int i = 0; i < 4; i++) gs.recvData( os, *myhface3(i));
 	    }
             //ghost tetra gets indices of grid, to which it belongs actually
-	    virtual void set_indices(myhface3_t * face, int face_nr) //, int v0, 
-                                     //int e0, int e1, int e2, int f0, int f1, int f2)  
+	    virtual void setIndices(myhface3_t * face, int face_nr) 
             {
                //the edges which don't belong to face [1st index].
                //int edge [4][3] =  {{0,1,2}, {0,3,4}, {1,3,5}, {2,4,5}};
@@ -257,11 +256,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 	}
 
         //ghost hexa gets indices of grid, to which it belongs actually
-        virtual void set_indices(myhface4_t * face, int face_nr) //, 
-                                 /*int v0, int v1, int v2, int v3,
-                                 int e0, int e1, int e2, int e3,
-                                 int e4, int e5, int e6, int e7,
-                                 int f0, int f1, int f2, int f3, int f4)   */
+        virtual void setIndices(myhface4_t * face, int face_nr)  
         {
            //the vertices which don't belong to face [1st index].
            //int vertex [6][4] =  {{4,5,6,7}, {0,1,2,3,}, {2,3,6,7}, {0,3,4,5}, {0,1,4,5}, {1,2,5,6}};
