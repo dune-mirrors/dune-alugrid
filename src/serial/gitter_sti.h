@@ -229,7 +229,8 @@ public :
 #ifdef _DUNE_USES_ALU3DGRID_
   protected:
     int _idx;
-    DuneIndexProvider () : _idx(-1) {}
+    bool _isCopy;
+    DuneIndexProvider () : _idx(-1), _isCopy(false) {}
 #endif
   public:
     virtual ~DuneIndexProvider () {}
@@ -261,7 +262,7 @@ public :
     
     inline void freeIndex ( IndexManagerType & im ) 
     {
-      // hier free index implementieren 
+      if (!_isCopy) im.freeIndex(_idx); 
     }
 #else 
     inline int getIndex () const { return -1; }
@@ -411,6 +412,7 @@ public :
     inline  int leaf () const ;
 
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
+    virtual void set_indices(hface * , int ) {assert(false); abort(); }
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
@@ -1729,7 +1731,7 @@ inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y,
 }
 
 inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () {
-  _indexmanager.freeIndex( this->getIndex() );
+  this->freeIndex( this->_indexmanager );
   assert (ref ? (cerr << "**WARNING VertexGeo::refcount was " << ref << endl, 1) : 1) ;
   return ;
 }
