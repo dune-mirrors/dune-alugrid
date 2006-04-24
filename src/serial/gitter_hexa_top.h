@@ -608,7 +608,7 @@ template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0
 }
 
 template < class A > Hface4Top < A > :: ~Hface4Top () {
-  _indexManager.freeIndex( this->getIndex() );
+  this->freeIndex( this->_indexManager );
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_ed) delete _ed ;
@@ -878,7 +878,7 @@ Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , Ind
 }
 
 template < class A > Hbnd4Top < A > :: ~Hbnd4Top () {
-  _indexManager.freeIndex( this->getIndex() );
+  this->freeIndex( this->_indexManager );
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
@@ -1201,7 +1201,7 @@ template < class A > inline HexaTop < A >
 }
 
 template < class A > HexaTop < A > :: ~HexaTop () {
-  _indexManager.freeIndex( this->getIndex() );
+  this->freeIndex( this->_indexManager );
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_fc) delete _fc ;
