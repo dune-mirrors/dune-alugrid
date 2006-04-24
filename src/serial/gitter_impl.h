@@ -190,16 +190,13 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
                //int edge [4][3] =  {{0,1,2}, {0,3,4}, {1,3,5}, {2,4,5}};
                for (int i = 0; i < 3; i++) 
                {
+                  myhface3(face_nr)->myvertex(i)->freeIndex(_myGrid->indexManager(3));
                   myhface3(face_nr)->myvertex(i)->setIndex(face->myvertex(i)->getIndex());
+		  myhface3(face_nr)->myvertex(i)->mark_as_copy();
+		  myhface3(face_nr)->myhedge1(i)->freeIndex(_myGrid->indexManager(2));
                   myhface3(face_nr)->myhedge1(i)->setIndex(face->myhedge1(i)->getIndex());
+		  myhface3(face_nr)->myhedge1(i)->mark_as_copy();
                }
-               /*myhface3(face_nr+1)->setIndex(f0);
-               myhface3(face_nr+2)->setIndex(f1);
-               myhface3(face_nr+3)->setIndex(f2);
-               myhedge1(edge[face_nr][0])->setIndex(e0);
-               myhedge1(edge[face_nr][1])->setIndex(e1);
-               myhedge1(edge[face_nr][2])->setIndex(e2);
-               myvertex(face_nr)->setIndex(v0); */
             }
 	    ~TetraEmpty () {}
             int preCoarsening  () ; 
@@ -278,26 +275,13 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
            //                   {0,1,2,3,4,8,9,10}, {0,3,4,5,6,8,10,11}};
            for (int i = 0; i < 4; i++) 
            {
+              myhface4(face_nr)->myvertex(i)->freeIndex(_myGrid->indexManager(3));
               myhface4(face_nr)->myvertex(i)->setIndex(face->myvertex(i)->getIndex());
+              myhface4(face_nr)->myvertex(i)->mark_as_copy();
+              myhface4(face_nr)->myhedge1(i)->freeIndex(_myGrid->indexManager(2));
               myhface4(face_nr)->myhedge1(i)->setIndex(face->myhedge1(i)->getIndex());
+              myhface4(face_nr)->myhedge1(i)->mark_as_copy();
            }
-           /*myhface4(face_nr+1)->setIndex(f0);
-           myhface4(face_nr+2)->setIndex(f1);
-           myhface4(face_nr+3)->setIndex(f2);
-           myhface4(face_nr+4)->setIndex(f3);
-           myhface4(face_nr+5)->setIndex(f4);
-           myhedge1(edge[face_nr][0])->setIndex(e0);
-           myhedge1(edge[face_nr][1])->setIndex(e1);
-           myhedge1(edge[face_nr][2])->setIndex(e2);
-           myhedge1(edge[face_nr][3])->setIndex(e3);
-           myhedge1(edge[face_nr][4])->setIndex(e4);
-           myhedge1(edge[face_nr][5])->setIndex(e5);
-           myhedge1(edge[face_nr][6])->setIndex(e6);
-           myhedge1(edge[face_nr][7])->setIndex(e7);
-	   myvertex(vertex[face_nr][0])->setIndex(v0);
-           myvertex(vertex[face_nr][1])->setIndex(v1);
-           myvertex(vertex[face_nr][2])->setIndex(v2);
-           myvertex(vertex[face_nr][3])->setIndex(v3); */
 	}
 	Gitter* _myGrid;
 
