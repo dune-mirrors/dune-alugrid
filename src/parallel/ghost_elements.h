@@ -167,6 +167,7 @@ class MacroGhostBuilder : public MacroGridBuilder
       }
     }
 
+    /*
     // insert existing Vertex to vertex map
     // this means, that already exsisting vertices are not created again
     // this is important for Lagrange Elements etc.
@@ -200,6 +201,7 @@ class MacroGhostBuilder : public MacroGridBuilder
       _existingEdge[key] = h;
       _edgeMap [key] = h ;
     }
+    */
 
     // delete all elementes and stuff 
     void finalize ()
@@ -339,18 +341,13 @@ public:
     const double (&p)[1][3]  = allp.getPoints();
     const int (&oppVerts)[1] = allp.getOppFaceIdents();
 
-    // we create 8 new points, which are stored in the lists of our
-    // internal grid builder 
+    // here all entities have to be created new, because otherwise 
+    // the index generation will fail 
     for(int i=0; i<3; ++i)
     {
-      VertexGeo * vx = face->myvertex(i);
-      mgb.InsertExistingVertex( vx );
-    }
-
-    for(int i=0; i<3; ++i)
-    {
-      hedge1_GEO * h = face->myhedge1(i);
-      mgb.InsertExistingHedge1( h );
+      const VertexGeo * vx = face->myvertex(i);
+      const double (&p)[3] = vx->Point();
+      mgb.InsertNewUniqueVertex(p[0],p[1],p[2],vx->ident());
     }
 
     const double (&px)[3] = p[0];
@@ -431,18 +428,13 @@ public:
     const double (&p)[4][3]  = allp.getPoints();
     const int (&oppVerts)[4] = allp.getOppFaceIdents();
 
-    // we create 8 new points, which are stored in the lists of our
-    // internal grid builder 
+    // here all entities have to be created new, because otherwise 
+    // the index generation will fail 
     for(int i=0; i<4; ++i)
     {
-      VertexGeo * vx = face->myvertex(i);
-      mgb.InsertExistingVertex( vx );
-    }
-
-    for(int i=0; i<4; ++i)
-    {
-      hedge1_GEO * h = face->myhedge1(i);
-      mgb.InsertExistingHedge1( h );
+      const VertexGeo * vx = face->myvertex(i);
+      const double (&p)[3] = vx->Point();
+      mgb.InsertNewUniqueVertex(p[0],p[1],p[2],vx->ident());
     }
 
     // isnert the face, we need this because we wnat to have the same
