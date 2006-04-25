@@ -24,19 +24,27 @@ public :
   FiniteStack () : _f(0) {}
 
   // Returns true if the stack is empty
-  bool empty () const { return _f==0; }
+  bool empty () const { return _f <= 0; }
 
   // Returns true if the stack is full
   bool full () const { return (_f >= length); }
 
   // Puts a new object onto the stack
-  void push (const T& t) { _s[_f++] = t; }
+  void push (const T& t) { 
+    assert( _f < length-1 );
+    _s[_f++] = t; }
 
   // Removes and returns the uppermost object from the stack
-  T pop () { return _s[--_f]; }
+  T pop () { 
+    assert( _f > 0 );
+    return _s[--_f]; 
+  }
 
   // Returns the uppermost object on the stack
-  T top () const { return _s[_f-1]; }
+  T top () const { 
+    assert( _f > 0 );
+    return _s[_f-1]; 
+  }
 
   // stacksize
   int size () const { return _f; }
