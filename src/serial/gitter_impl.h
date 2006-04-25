@@ -167,7 +167,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         } ;
         typedef Hface4Top < Hface4Empty > hface4_IMPL ;
 
-        class TetraEmpty : public tetra_GEO {
+        class TetraEmpty : public tetra_GEO 
+        {
     protected :
             typedef hface3_IMPL innerface_t ;
             typedef hedge1_IMPL inneredge_t ;
@@ -182,6 +183,15 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
               for (int i = 0; i < 4; i++) gs.recvData( os, *myhface3(i));
 	          }
+
+    protected:     
+      	    ~TetraEmpty () {}
+            
+            int preCoarsening  () ; 
+            int postRefinement () ;
+
+            Gitter * _myGrid;
+    public: 
             //ghost tetra gets indices of grid, to which it belongs actually
       	    virtual void setIndices(const hface_STI & f, int face_nr) 
             {
@@ -201,17 +211,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
                 myface.myhedge1(i)->setIndex( edIm , face.myhedge1(i)->getIndex() );
               }
             }
-            
-      	    ~TetraEmpty () {}
-            
-            int preCoarsening  () ; 
-            int postRefinement () ;
-
-            //double _determinant; 
-
-            Gitter * _myGrid;
-    public: 
-          //inline double determinant () const { return _determinant; } 
             
        // for _myGrid     
        friend class TetraTop < TetraEmpty > ;     
@@ -264,6 +263,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           for (int i = 0; i < 6; i++) gs.recvData( os, *myhface4(i));
 	      }
 
+      	Gitter* _myGrid;
+        friend class HexaTop<HexaEmpty>;
+      public:
         //ghost hexa gets indices of grid, to which it belongs actually
         virtual void setIndices(const hface_STI & f, int face_nr)  
         {
@@ -281,9 +283,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
              myface.myhedge1(i)->setIndex(edIm, face.myhedge1(i)->getIndex());
            }
         }
-
-      	Gitter* _myGrid;
-        friend class HexaTop<HexaEmpty>;
       } ;
       typedef HexaTop < HexaEmpty > hexa_IMPL ;
     } ;
