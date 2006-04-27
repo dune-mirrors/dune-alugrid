@@ -31,7 +31,7 @@ public :
 
   // Puts a new object onto the stack
   void push (const T& t) { 
-    assert( _f < length-1 );
+    assert( _f < length );
     _s[_f++] = t; }
 
   // Removes and returns the uppermost object from the stack
