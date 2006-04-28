@@ -5,13 +5,13 @@
 
 namespace ALU2dGridSpace {
 
-#include "grid.cc"
-#include "handle.cc"
-#include "triang.cc"
-#include "hdlrw.cc"
-#include "mknbrs.cc"
-#include "vmmap.cc"
-#include "vtx_btree.cc"
+#include "alu2d/grid.cc"
+#include "alu2d/handle.cc"
+#include "alu2d/triang.cc"
+#include "alu2d/hdlrw.cc"
+#include "alu2d/mknbrs.cc"
+#include "alu2d/vmmap.cc"
+#include "alu2d/vtx_btree.cc"
   
 } //end namespace 
 

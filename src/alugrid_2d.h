@@ -11,14 +11,13 @@
 
 namespace ALU2dGridSpace { 
 
-#undef INDEXSTACK_H_INCLUDED
-#include "serial/indexstack.h"
+#include "alu2d/indexstack2d.h"
 
-#include "grid.h"
-#include "triang.h"
-#include "handle.h"
-#include "vtx_btree.h"
-#include "vmmap.h"
+#include "alu2d/grid.h"
+#include "alu2d/triang.h"
+#include "alu2d/handle.h"
+#include "alu2d/vtx_btree.h"
+#include "alu2d/vmmap.h"
 
 }
 #include "alugrid_2d.cc"

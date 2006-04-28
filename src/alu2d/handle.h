@@ -1,15 +1,12 @@
-
 #ifndef __HEADER__HANDLE
 #define __HEADER__HANDLE
-
-static volatile char RCSId_handle_h [] = "$Id$";
 
 #include <assert.h>
 #include <malloc.h>
 
 #include "grid.h"                               
-#include "indexstack.h"
-typedef IndexStack<int,10000> IndexManagerType;
+
+typedef IndexStack2d<int,10000> IndexManagerType;
 enum { lengthOfFiniteStack = 10000 };
 // typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;
 // number of different index manager that exists
