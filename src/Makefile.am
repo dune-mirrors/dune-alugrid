@@ -7,16 +7,16 @@ SUBDIRS = serial parallel duneinterface alu2d
 include serial/Makefile.am.include
 include parallel/Makefile.am.include
 include duneinterface/Makefile.am.include
+include alu2d/Makefile.am.include
 
 # work arround for automake versions < 1.8 
-ALUGRID_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -I./serial -I./parallel -I./duneinterface 
+ALUGRID_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -I./serial -I./parallel -I./duneinterface -I./alu2d
 
 # build libALU3dGrid 
 lib_LTLIBRARIES = libalugrid.la
 
 # headers to install 
-nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h stlheaders.h $(serialhdrs) $(parallelhdrs) $(duneinterfacehdrs)
-
+nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h alugrid_2d.h alugrid_2d.cc stlheaders.h $(serialhdrs) $(parallelhdrs) $(duneinterfacehdrs) $(alu2dhdrs)
 
 if MPI 
 # if MPI was found the parallel version is build 
