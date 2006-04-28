@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <alloca.h>
 #include <assert.h>
 
 #ifdef _ANSI_HEADER
@@ -434,7 +433,8 @@ Hmesh::storeGrid(const char* fbase,
 {
   char *filename;
 
-  filename=(char*)alloca(strlen(fbase)+15);
+  filename=new char[strlen(fbase)+15];
+  // filename=(char*)alloca(strlen(fbase)+15);
   sprintf(filename,"%s.macro",fbase);
 
   asciwritetriang (filename,time,nbr);
@@ -473,6 +473,7 @@ Hmesh::storeGrid(const char* fbase,
     out << walk.getitem();
   }
 
+  delete [] filename;
   cout << " done." << endl;
 }
 

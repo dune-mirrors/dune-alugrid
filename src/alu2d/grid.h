@@ -650,6 +650,8 @@ template < class A > class Hier : public A {
 
   int lvl ;
 
+  int childNr_;
+
   protected :
 
     int numchild ;
@@ -679,6 +681,8 @@ template < class A > class Hier : public A {
     int leaf() const { return ! dwn ; }
 
     int level() const { return lvl ; }
+
+    int childNr() const { return childNr_; }
 
     int nchild() const { return numchild ; }
 
@@ -770,11 +774,15 @@ template < class A > class Hier : public A {
 
 	dwn->up = this;
 
+	dwn->childNr_ = 0;
+
         for(int i = 1 ; i < numchild ; i ++ ) {
 
           ((Hier *)els[i])->lvl = lvl + 1 ;
 
           ((Hier *)els[i])->up = this ;
+
+	  ((Hier *)els[i])->childNr_ = i;
 
           ((Hier *)els[i-1])->nxt = (Hier *)els[i] ;
 
