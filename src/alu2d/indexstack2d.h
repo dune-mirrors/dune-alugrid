@@ -1,10 +1,6 @@
 // (c) Robert Kloefkorn 2004 - 2005 
-#ifndef INDEXSTACK_H_INCLUDED
-#define INDEXSTACK_H_INCLUDED
-
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
+#ifndef INDEXSTACK2D_H_INCLUDED
+#define INDEXSTACK2D_H_INCLUDED
 
 #include <assert.h>
 
@@ -14,8 +10,6 @@
 #else
   #include <stack.h>
 #endif
-
-#ifdef _DUNE_USES_ALU3DGRID_
 
 template<class T, int length>
 class FiniteStack {
@@ -49,12 +43,12 @@ private:
 
 //******************************************************
 //
-//  IndexStack providing indices via getIndex and freeIndex
+//  IndexStack2d providing indices via getIndex and freeIndex
 //  indices that are freed, are put on a stack and get
 //
 //******************************************************
 template <class T, int length> 
-class IndexStack 
+class IndexStack2d 
 {
   typedef FiniteStack<T,length> StackType;
   typedef stack < StackType * > StackListType;
@@ -68,11 +62,11 @@ class IndexStack
   // current maxIndex 
   int maxIndex_; 
 public:
-  //! Constructor, create new IndexStack
-  IndexStack(); 
+  //! Constructor, create new IndexStack2d
+  IndexStack2d(); 
 
   //! Destructor, deleting all stacks 
-  inline ~IndexStack (); 
+  inline ~IndexStack2d (); 
 
   //! set index as maxIndex if index is bigger than maxIndex
   void checkAndSetMax(T index) { if(index > maxIndex_) maxIndex_ = index;  }
@@ -105,24 +99,24 @@ public:
   void restoreIndexSet ( istream & is );
 private:
   // no copy constructor allowed 
-  IndexStack( const IndexStack<T,length> & s);
+  IndexStack2d( const IndexStack2d<T,length> & s);
  
   // no assignment operator allowed 
-  IndexStack<T,length> & operator = ( const IndexStack<T,length> & s);
+  IndexStack2d<T,length> & operator = ( const IndexStack2d<T,length> & s);
   
   // clear all stored indices 
   void clearStack ();
-};  // end class IndexStack 
+};  // end class IndexStack2d 
 
 //****************************************************************
 // Inline implementation 
 // ***************************************************************
 template <class T, int length>
-inline IndexStack<T,length>::IndexStack()
+inline IndexStack2d<T,length>::IndexStack2d()
   : stack_ ( new StackType () ) , maxIndex_ (0) {} 
   
 template <class T, int length>
-inline IndexStack<T,length>::~IndexStack () 
+inline IndexStack2d<T,length>::~IndexStack2d () 
 {
   assert(usedindex()==0);
   if(stack_) delete stack_;
@@ -143,7 +137,7 @@ inline IndexStack<T,length>::~IndexStack ()
 }
 
 template <class T, int length>
-inline T IndexStack<T,length>::getIndex () 
+inline T IndexStack2d<T,length>::getIndex () 
 {
   if((*stack_).empty()) 
   {
@@ -162,7 +156,7 @@ inline T IndexStack<T,length>::getIndex ()
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::freeIndex ( T index ) 
+inline void IndexStack2d<T,length>::freeIndex ( T index ) 
 {
   if((*stack_).full())
   {
@@ -181,7 +175,7 @@ inline void IndexStack<T,length>::freeIndex ( T index )
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::test () 
+inline void IndexStack2d<T,length>::test () 
 {
   T vec[2*length];
 
@@ -198,13 +192,13 @@ inline void IndexStack<T,length>::test ()
     printf(" index [%d] = %d \n",i,vec[i]);
 }
 template <class T, int length>
-  inline int IndexStack<T,length>::usedindex () 
+  inline int IndexStack2d<T,length>::usedindex () 
 {
   return maxIndex_-(fullStackList_.size()*length+stack_->size());
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::backupIndexSet ( ostream & os ) 
+inline void IndexStack2d<T,length>::backupIndexSet ( ostream & os ) 
 {
   // holes are not stored at the moment 
   os.write( ((const char *) &maxIndex_ ), sizeof(int) ) ;
@@ -212,7 +206,7 @@ inline void IndexStack<T,length>::backupIndexSet ( ostream & os )
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::restoreIndexSet ( istream & is )
+inline void IndexStack2d<T,length>::restoreIndexSet ( istream & is )
 {
   is.read ( ((char *) &maxIndex_), sizeof(int) );
   clearStack ();
@@ -221,7 +215,7 @@ inline void IndexStack<T,length>::restoreIndexSet ( istream & is )
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::clearStack () 
+inline void IndexStack2d<T,length>::clearStack () 
 {
   if(stack_) 
   {
@@ -238,45 +232,4 @@ inline void IndexStack<T,length>::clearStack ()
   }
   return;
 }
-
-
-#else 
-
-//*********************************************************************
-//
-// Dummy implementation for the index stack, if index is not used 
-//
-//*********************************************************************
-template <class T>
-struct DummyIndexStack 
-{
-  //! set index as maxIndex if index is bigger than maxIndex
-  inline void checkAndSetMax(T index)
-  {
-  }
-  
-  //! set index as maxIndex
-  inline void setMaxIndex(T index)
-  {
-  }
-  
-  //! restore index from stack or create new index 
-  T getIndex () 
-  {
-    return -1;
-  }
-
-  //! store index on stack 
-  inline void freeIndex(T index)
-  {
-  }
-
-  //! test stack funtcionality
-  inline void test ()
-  {
-  }
-};  // end class DummyIndexStack 
-
-#endif 
-
 #endif
