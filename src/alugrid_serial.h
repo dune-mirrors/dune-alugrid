@@ -74,4 +74,9 @@ typedef GatherScatter GatherScatterType;
 
 #include "duneinterface/gitter_dune_impl.h"
 }
+
+namespace ALU2dGridSpace { 
+#include "alu2d/includeall.hh"
+}
+  
 #endif
