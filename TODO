@@ -1,10 +1,10 @@
-A: Geisterelemente fuer Hexa/Tetraedergitter
+A: Geisterelemente fuer Hexa/Tetraedergitter : done 
 B: Parallelisierung unabhaengig vom Gitter aufbauen mit ParMetis
 C: Einlesen des Makrogitters flexibler gestallten - keine Orientierung
    und festes Makroelement vorschreiben
 D: Konforme Bisektion eibauen
 E: GlobalID
-F: Kommunikate fuer alle Codims
+F: Kommunikate fuer alle Codims, almost done 
 
 Prioritaet:
 Vorschlag 1: F, A, B, E, D, C
