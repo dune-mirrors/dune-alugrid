@@ -1,4 +1,4 @@
-ALU3d-Grid library
+ALU-Grid library
 ===================
 
 Getting started
@@ -12,7 +12,7 @@ For detailed description
 of the options run ./autogen.sh --help . Therefore newer versions of 
 the GNU programs automake,autoconf, and libtool are needed. See also README.
 
-To compile the library ALU3d-Grid has to check several components of
+To compile the library ALU-Grid has to check several components of
 your system. Run
 
   ./configure
@@ -37,12 +37,12 @@ You can use
 
   ./configure --prefix=PATH
 
-if you don't want ALU3d-Grid to be installed into the default directory
-(i.e. the path were ALU3d-Grid was unpacked).
+if you don't want ALU-Grid to be installed into the default directory
+(i.e. the path were ALU-Grid was unpacked).
 
 After configuration
 
   make
   make install
 
-build and install ALU3d-Grid.  
+build and install ALU-Grid.  

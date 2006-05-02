@@ -1,10 +1,10 @@
-ALU3d-Grid library
+ALU-Grid library
 ===================
 
 License
 -------
 
-The ALU3d-Grid library and headers are licensed under the GNU Lesser GPL
+The ALU-Grid library and headers are licensed under the GNU Lesser GPL
 version 2.1. The full license text can be found in the file COPYING
 and via http://www.gnu.org/licenses/lgpl.html
 
@@ -12,7 +12,7 @@ and via http://www.gnu.org/licenses/lgpl.html
 Compiler 
 --------
 
-The ALU3d-Grid code in known to compiler with the GNU Compiler version 3.4.x or higher. 
+The ALU-Grid code in known to compile with the GNU Compiler version 3.4.x or higher. 
 Also with the INTEL C++ Compiler version 8.1 or higher the code compiles.
 Furthermore the code compiles with the IBM xlC compiler version 6 or higher. 
 
@@ -24,7 +24,7 @@ be used or the include path and lib path adapted.
 Getting started
 ---------------
 
-To compile the library ALU3d-Grid has to check several components of
+To compile the library ALU-Grid has to check several components of
 your system. Run
 
   ./configure
@@ -34,7 +34,7 @@ If you intend to use the parallel version of the
 grid, make sure that you have a version of MPI, and METIS (--with-metis=PATH), and 
 PARTY (--with-party=PATH) and supply the respective flags to the 
 configure script. Dynamic load balancing can only be used if either METIS
-or PARTY Lib or both are linked to the ALU3d-Grid Library.
+or PARTY Lib or both are linked to the ALU-Grid Library.
 
 For parallel computation MPI is needed, common packages are 
 MPICH (version 1.2.5 or higher) or LAM MPI (version 7.x).
@@ -43,7 +43,7 @@ To compile the parallel version of the library use the MPI compiler script
 (i.e. ./configure CXX=mpiCC). If not using the MPI compiler scripts just
 make sure that all include path and library paths are set the right way.
 
-For example to compile the parallel version of ALU3d-Grid the configure
+For example to compile the parallel version of ALU-Grid the configure
 command can look as follows: 
 
 ./configure CXX=mpiCC --with-metis="metis_path" --with-party="partylib_path"
@@ -56,15 +56,15 @@ You can use
 
   ./configure --prefix=PATH
 
-if you don't want ALU3d-Grid to be installed into the default directory
-(i.e. the path were ALU3d-Grid was unpacked).
+if you don't want ALU-Grid to be installed into the default directory
+(i.e. the path were ALU-Grid was unpacked).
 
 After configuration
 
   make
   make install
 
-build and install ALU3d-Grid.  
+build and install ALU-Grid.  
 
 
 Dynamic Load Balancing Options
@@ -116,7 +116,7 @@ VERBOSE_PLL  output produced by parallel grid methods
 Optimization 
 -------------
 
-The ALU3d-Grid code is highly riddled with assert statements. 
+The ALU-Grid code is highly riddled with assert statements. 
 Therefore it is recommened to compile the library and the application code
 with the CPP variable NDEBUG set (i.e. -DNDEBUG) to avoid all asserts
 statement tests. 
