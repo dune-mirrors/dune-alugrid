@@ -2,8 +2,6 @@
 #ifndef __HEADER__GRID
 #define __HEADER__GRID
 
-static volatile char RCSId_grid_h [] = "$Id$";
-
 // ***************************************************
 // #begin(header)
 // #filename:
