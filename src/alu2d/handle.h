@@ -432,8 +432,10 @@ template < class A > class Leafwalk : public Listwalk < Hier < A > > {
     void next() {
   
       for( ; pos > 0 ; pos -- )
-      
-        if(stack[pos] = stack[pos]->next()) break ;
+      {
+        stack[pos] = stack[pos]->next();
+        if(stack[pos]) break ;
+      }
       
    
       if(pos == 0) {

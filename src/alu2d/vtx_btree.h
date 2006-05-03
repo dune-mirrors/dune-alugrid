@@ -1,8 +1,5 @@
-
 #ifndef __HEADER__VTX_BTREE
 #define __HEADER__VTX_BTREE
-
-static volatile char RCSId_vtx_btree_h [] = "$Id$";
 
 #include "xdisplay.h"
 
@@ -23,11 +20,11 @@ class Vtx_btree {
  public:
     // Implementation eines Knotens des binaeren Baumes
     struct Node {
-      Node* next;
-      Node* prev;
       Vertex* vtx;
       Thinelement *lnb;
       Thinelement *rnb;
+      Node* next;
+      Node* prev;
       int _lidx,_ridx;
       Node(Vertex* invtx,Thinelement *plnb,Thinelement *prnb)
 	: vtx(invtx), lnb(plnb), rnb(prnb), next(0), prev(0)
@@ -72,7 +69,7 @@ class Vtx_btree {
   public:
 
     Vtx_btree(Vertex* invtx,Thinelement *plnb,Thinelement *prnb)
-      : rvtx(invtx), lnb(plnb), rnb(prnb), head(0){
+      : head(0), rvtx(invtx), lnb(plnb), rnb(prnb) {
       assert(rvtx);
       assert(plnb);
       assert(prnb);

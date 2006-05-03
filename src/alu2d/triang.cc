@@ -218,6 +218,7 @@ int Element::facevertex(int fce, int loc) const {
   return (fce+loc+1)%connect.nv ; 
 }
 
+/*
 // ***************************************************
 // #begin(method)
 // #method:
@@ -239,6 +240,7 @@ int Element::facevertex(int fce, int loc) const {
 //   die eine 1 als R"uckgabewert haben.
 // #end(method)
 // ***************************************************
+*/
 int Element::normaldir(int fce) const
 {
   assert(0 <= fce) ;
@@ -878,7 +880,7 @@ int Element::setrefine()
   return maxkante==0;
 }
 
-// ***************************************************
+/****************************************************
 // #begin(method)
 // #method:
 //   int Element::setorientation()
@@ -889,7 +891,7 @@ int Element::setrefine()
 //   vorher im Uhrzeigersinn war, 1 falls keine Umsortierung der Punkte
 //   n"otig war. L"a"st die Verfeinerungskante umber"uhrt 
 // #end(method)
-// ***************************************************
+***************************************************/
 int Element::setorientation()
 {
   double o;
@@ -939,7 +941,7 @@ int Element::setorientation()
   return (o>0);
 }
 
-// ***************************************************
+/***************************************************
 // #begin(method)
 // #method:
 //   void Element::addhvtx(Vertex* invtx, int fce)
@@ -950,7 +952,7 @@ int Element::setorientation()
 //   Fuegt den uebergebenen Knoten als haengenden Knoten
 //   in das Empfaengerelement auf der Seite fce ein.
 // #end(method)
-// ***************************************************
+***************************************************/
 void Element::addhvtx(Vertex* invtx, Thinelement *lnb,Thinelement *rnb,int fce)
 {
   if( invtx ) {
@@ -965,7 +967,7 @@ void Element::addhvtx(Vertex* invtx, Thinelement *lnb,Thinelement *rnb,int fce)
 }
 
 
-// ***************************************************
+/***************************************************
 // #begin(method)
 // #method:
 //   void Triang::newNeighbour(Triang* nb, int fce, int nbfce, splitrule_t sr, bool setnormal)
@@ -983,7 +985,7 @@ void Element::addhvtx(Vertex* invtx, Thinelement *lnb,Thinelement *rnb,int fce)
 //   Legt nach Verfeinerung eines Elementes die Nachbarschaften
 //   ueber die nicht verfeinerten Kanten rekursiv fest.
 // #end(method)
-// ***************************************************
+***************************************************/
 
 void Triang::newNeighbour(Triang* nb, int fce, int nbfce,
                           splitrule_t sr, bool setnormal)
@@ -1013,7 +1015,7 @@ void Triang::newNeighbour(Triang* nb, int fce, int nbfce,
 }
 
 extern Hmesh *mesh;
-// ***************************************************
+/***************************************************
 // #begin(method)
 // #method:
 //   int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
@@ -1027,7 +1029,7 @@ extern Hmesh *mesh;
 // #description:\
 //   (Nicht konformes) Verfeinern eines Elementes durch Bisektion.
 // #end(method)
-// ***************************************************
+***************************************************/
 
 int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
                   Multivertexadapter & mva, 

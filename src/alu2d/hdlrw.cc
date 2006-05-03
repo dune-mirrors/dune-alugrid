@@ -6,8 +6,8 @@
   using namespace std;
   #include <iostream>
   #include <sstream>
-// typdef these stream because this code uses a lot strstream
-typedef std::basic_stringbuf   <char> strstreambuf_t ;
+  // typdef these stream because this code uses a lot strstream
+  typedef basic_stringbuf<char>  strstreambuf_t ;
 #else 
   #include <iostream.h>
   #include <strstream.h>
@@ -22,8 +22,6 @@ typedef std::basic_stringbuf   <char> strstreambuf_t ;
 
 bool Hmesh :: ascireadtriang(const char *filename,
 			     double& time, unsigned long int& nbr) {
-  int isbackup = false;
-
   cerr << "\n  Hmesh_basic::ascireadtriang(?) \"offnet: " ;
   
   cerr << filename << "\n" << endl ;

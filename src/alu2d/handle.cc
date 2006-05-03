@@ -156,7 +156,6 @@ void Hmesh::refine() {
   assert( ! vl.busy()) ;
 
   int count = 0 ;
-  bool done = false;
 
   do {
     int lcount = 0;

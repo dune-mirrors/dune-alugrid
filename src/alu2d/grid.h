@@ -2,7 +2,7 @@
 #ifndef __HEADER__GRID
 #define __HEADER__GRID
 
-// ***************************************************
+/***************************************************
 // #begin(header)
 // #filename:
 //   grid.h
@@ -24,7 +24,7 @@
 // #copyright:
 //   IAM Freiburg
 // #end(header)
-// ***************************************************
+***************************************************/
 #define _DUNE_USES_ALU3DGRID_ 
 
 #include <stdio.h>
@@ -60,7 +60,7 @@ class Basic {
 
   protected :
 
-    Basic() : refcount(0), hdl(0), _idx(-1) {}
+    Basic() : refcount(0), _idx(-1), hdl(0) {}
 
     virtual ~Basic() { assert(!refcount) ; }
 
@@ -93,10 +93,11 @@ class Multivertexadapter ;
 template < class A > class Listagency ;
 template <class A> class Hier;
 
-// ***************************************************
+/***************************************************
 // #begin(class)
 // #description:
 // #definition: 
+****************************************************/
 template < class A > class Listagent {
 
   A * next_list ;
@@ -963,6 +964,7 @@ class Bndel : public Thinelement, public Refco {
 class Restrict_basic
 {
   public: 
+  virtual ~Restrict_basic () {}
   virtual void operator ()(Element *parent,Element **child,
                            int anzahl)
   {
@@ -972,6 +974,7 @@ class Restrict_basic
 class Prolong_basic
 {
   public:
+  virtual ~Prolong_basic () {}
   virtual void operator ()(const Element *parent,Element **child,
                            int anzahl)
   {
