@@ -2320,7 +2320,7 @@ int Bndel_periodic::docoarsen(nconf_vtx_t *ncv,
     assert(periodic_nb->nbel(0));
     assert(!(periodic_nb->nbel(0)->leaf()));    
     Hier<Element> *h=periodic_nb->nbel(0)->down();
-    int coarsen_flags=0;
+
     while (h)
     {
       if (!h->is(Refco::crs))
