@@ -1745,10 +1745,10 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
 // ***************************************************
 void Element::draw(Xdisplay &xd)
 {
+  /*
   int i;
 
-  //for(i=0;i<connect.nf;i++) xd.linedraw(vertex(i),vertex(i+1));
-  /*
+  for(i=0;i<connect.nf;i++) xd.linedraw(vertex(i),vertex(i+1));
   for (i=0;i<3;i++) {
     if (nbel(i)) {
       if (!connect.hvtx[i])
@@ -1773,10 +1773,9 @@ void Element::draw(Xdisplay &xd)
 // ***************************************************
 int Element::c::check()
 {
-  int i;
-  for (i=0;i<nv;i++)
+  for (int i=0;i<nv;i++)
     assert( vtx[i] );
-  for (i=0;i<nf;i++)
+  for (int i=0;i<nf;i++)
   {
     if (nb[i]->thinis(element_like))
     {

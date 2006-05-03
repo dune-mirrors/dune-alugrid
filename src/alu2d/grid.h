@@ -113,7 +113,7 @@ template < class A > class Listagent {
 
   protected :
   
-    Listagent() : agnc(0), prev_list(0), next_list(0) { }
+    Listagent() : next_list(0), prev_list(0), agnc(0) { }
      
   public :
   
@@ -654,7 +654,7 @@ template < class A > class Hier : public A {
 
     int numchild ;
 
-    Hier() : nxt(0), dwn(0), lvl(0), up(0) { }
+    Hier() : dwn(0), nxt(0), up(0), lvl(0) { }
 
     void deletesubtree() { delete dwn ; dwn = 0; 
       //  this->check();
@@ -943,8 +943,8 @@ class Bndel : public Thinelement, public Refco {
 
     int setorientation() 
     {
-      int ret;
-      if ( ret=(connect.vtx[0] != connect.nb->vertex(connect.bck+1)) )
+      int ret = (connect.vtx[0] != connect.nb->vertex(connect.bck+1));
+      if(ret)
       {
         Vertex *tmpv=connect.vtx[0];
         connect.vtx[0]=connect.vtx[1];

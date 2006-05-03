@@ -542,12 +542,14 @@ template < class A > class Levelwalk : public Listwalk < Hier < A > > {
 
     }
 
-    int pullup() {
-
-      for( ; pos > 0 ; pos -- ) if(stack[pos] = stack[pos]->next()) break ;
-
+    int pullup() 
+    {
+      for( ; pos > 0 ; pos -- ) 
+      {
+        stack[pos] = stack[pos]->next();
+        if(stack[pos]) break ;
+      }
       return pos == 0 ? 0 : 1 ; 
-
     }
 
   public :
@@ -824,7 +826,7 @@ class Hmesh_basic {
       mel(this), 
       mbl(this) { };
 
-      ~Hmesh_basic() {  
+    virtual ~Hmesh_basic() {  
 	//assert(indexmanager[0].usedindex()==0);
 	//assert(indexmanager[1].usedindex()==0);
 	//assert(indexmanager[2].usedindex()==0);
@@ -899,7 +901,7 @@ class Hmesh : public Hmesh_basic {
 
   Hmesh(const char *,int) ;
 
-    ~Hmesh() ;
+    virtual ~Hmesh() ;
 
     void storeGrid(const char*,
 		   double , unsigned long int);
