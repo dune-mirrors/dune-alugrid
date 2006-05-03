@@ -21,7 +21,7 @@ nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h alugrid_2d.h alugri
 
 if MPI 
 # if MPI was found the parallel version is build 
-include_HEADERS = parallel/alu3dgrid_defineparallel.h
+include_HEADERS = parallel/alugrid_defineparallel.h
 
 # add mpi path to cpplags 
 AM_CPPFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS)
@@ -33,7 +33,7 @@ libalugrid_la_LIBADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(METIS_LDFLAGS) $(METIS_L
 
 else 
 # if no mpi build only serial lib 
-include_HEADERS = serial/alu3dgrid_defineparallel.h
+include_HEADERS = serial/alugrid_defineparallel.h
 
 LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 AM_CPPFLAGS = $(ALUGRID_CPPFLAGS)
