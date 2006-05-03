@@ -33,10 +33,6 @@ LIBS="$ALUGRID_LIBS"
 # generate Makefiles
 AC_CONFIG_FILES([Makefile
                  src/Makefile
-                 src/serial/Makefile
-                 src/parallel/Makefile
-                 src/duneinterface/Makefile
-                 src/alu2d/Makefile
                  misc/Makefile
                  misc/macrogrids/Makefile
                  misc/examples/Makefile
