@@ -314,8 +314,8 @@ class Refco {
     void mark(Refco::tag_t t) {  }
 
   protected:
-    virtual void writeToWas();
-    virtual void clearWas();
+    virtual void writeToWas() {};
+    virtual void clearWas() {};
 } ;
 // #end(class)
 // ***************************************************
@@ -806,7 +806,6 @@ template < class A > class Hier : public A {
     int refine(Listagency < Vertex > * a, Multivertexadapter * b,
 	       nconf_vtx_t *ncv,
 	       int nconfDeg,Refco::tag_t default_ref,Prolong_basic *pro_el) {
-      this->clearWas();
       int count =  nxt ? nxt->refine(a, b,ncv, nconfDeg,default_ref,pro_el) : 0 ;
       
       if(dwn) count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;

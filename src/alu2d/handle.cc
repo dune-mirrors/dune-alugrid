@@ -157,6 +157,11 @@ void Hmesh::refine() {
 
   int count = 0 ;
 
+  Listwalk_impl <macroelement_t> walk(mel);
+  for( walk.first() ; !walk.done() ; walk.next() )
+    walk.getitem()->clearWas();
+      
+  
   do {
     int lcount = 0;
     Listwalk_impl <macroelement_t> walk(mel);
