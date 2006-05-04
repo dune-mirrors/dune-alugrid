@@ -312,7 +312,10 @@ class Refco {
     int is(tag_t ) const { return 0 ; }  // ist nie irgendein tag
 
     void mark(Refco::tag_t t) {  }
-      
+
+  protected:
+    virtual void writeToWas();
+    virtual void clearWas();
 } ;
 // #end(class)
 // ***************************************************
@@ -442,13 +445,16 @@ class Refco_el : protected Refco {
 
     void clear(Refco::tag_t t = none) { tag = (t == tag) ? none : tag ; }
       
-    void mark(Refco::tag_t t) { tag_last = tag; tag = t ; }
+    void mark(Refco::tag_t t) { tag = t ; }
       
     int is(Refco::tag_t t) const { return tag == t ? 1 : 0 ; }
 
     // so kann diese Funktion nicht bleiben...
-    int was(Refco::tag_t t) const { return tag_last == t ? 1 : 0 ; }    
+    int wasRefined() const { return tag_last == ref ? 1 : 0 ; }    
 
+  protected:
+    void writeToWas() { tag_last = ref; }
+    void clearWas() { tag_last = none;}
 } ;
 // #end(class)
 // ***************************************************
@@ -772,7 +778,7 @@ template < class A > class Hier : public A {
         dwn->lvl = lvl + 1 ;
 
 	dwn->up = this;
-
+  dwn->writeToWas();
 	dwn->childNr_ = 0;
 
         for(int i = 1 ; i < numchild ; i ++ ) {
@@ -780,7 +786,7 @@ template < class A > class Hier : public A {
           ((Hier *)els[i])->lvl = lvl + 1 ;
 
           ((Hier *)els[i])->up = this ;
-
+          ((Hier *)els[i])->writeToWas();
 	  ((Hier *)els[i])->childNr_ = i;
 
           ((Hier *)els[i-1])->nxt = (Hier *)els[i] ;
@@ -800,7 +806,7 @@ template < class A > class Hier : public A {
     int refine(Listagency < Vertex > * a, Multivertexadapter * b,
 	       nconf_vtx_t *ncv,
 	       int nconfDeg,Refco::tag_t default_ref,Prolong_basic *pro_el) {
-
+      this->clearWas();
       int count =  nxt ? nxt->refine(a, b,ncv, nconfDeg,default_ref,pro_el) : 0 ;
       
       if(dwn) count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
