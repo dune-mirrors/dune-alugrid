@@ -1,4 +1,4 @@
-# Makefile.am for building the ALU3d-Grid library
+# Makefile.am for building the ALUGrid library
 AUTOMAKE_OPTIONS = foreign 1.5
 
 SUBDIRS = 
@@ -13,7 +13,7 @@ include alu2d/Makefile.am.include
 # work arround for automake versions < 1.8 
 ALUGRID_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -I./serial -I./parallel -I./duneinterface -I./alu2d
 
-# build libALU3dGrid 
+# build libALUGrid 
 lib_LTLIBRARIES = libalugrid.la
 
 # headers to install 
