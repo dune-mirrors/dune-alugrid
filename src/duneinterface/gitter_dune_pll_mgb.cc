@@ -394,43 +394,48 @@ void DuneParallelGridMover :: initialize ()
   }
   {for (list < hbndseg4_GEO * > :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
     faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
-    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
-      //_hbnd4Int [key] = (void *) new pair < hface4_GEO *, int > ((*i)->myhface4 (0), (*i)->twist (0)) ;
-      // new code 
-      if((*i)->getGhost())
+    // if internal face 
+    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
+    {
+       
+      typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
+      hexa_GEO * gh = static_cast<hexa_GEO *> ((*i)->getGhost());
+      if( gh )
       {
-        //assert(false);
-        typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
-        hexa_GEO * gh = static_cast<hexa_GEO *> ((*i)->getGhost());
-        assert( gh );
-        //int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[0];
-        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0), (*i)->twist (0), gh , 0 ) ;
+        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0), (*i)->twist (0), 
+                                               gh, (*i)->getGhostFaceNumber() ) ;
       }
       else 
         _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
       delete (*i) ;
-    } else {
+    } 
+    else 
+    {
       _hbnd4Map [key] = (*i) ;
     }
   }}
   {for (list < hbndseg3_GEO * > :: iterator i = myBuilder ()._hbndseg3List.begin () ; i != myBuilder ()._hbndseg3List.end () ;
     myBuilder ()._hbndseg3List.erase (i++)) {
     faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
+    // if internal face 
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
     {
-      // change
-      if((*i)->getGhost())
+      // check for ghost element 
+      typedef Gitter :: Geometric :: tetra_GEO  tetra_GEO;
+      tetra_GEO * gh = static_cast<tetra_GEO *> ((*i)->getGhost());
+      if( gh )
       {
-        typedef Gitter :: Geometric :: tetra_GEO  tetra_GEO;
-        tetra_GEO * gh = static_cast<tetra_GEO *> ((*i)->getGhost());
-        // see insert_ghosttetra, point 3 is the new point 
-        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), gh , 0) ;
+        // insert new internal storage 
+        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), 
+                                               gh , (*i)->getGhostFaceNumber() ) ;
       }
       // until here
       else 
         _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0)) ;
       delete (*i) ;
-    } else {
+    } 
+    else 
+    {
       _hbnd3Map [key] = (*i) ;
     }
   }}

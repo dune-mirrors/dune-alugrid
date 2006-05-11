@@ -13,9 +13,6 @@
 #include "gitter_pll_impl.h"
 #include "gitter_pll_ldb.h"
   
-//static bool writeLogFile = false;
-//extern std::ofstream logFile;
-
 class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
 {
  
@@ -44,7 +41,7 @@ public:
     cerr << "open logfile = " << logFileName << "\n";
 
     logFile.clear();
-    logFile.open (logFileName );
+    logFile.open ( logFileName );
     logFile << "logfile of processor " << mpAccess().myrank() << "\n";
     logFile.flush();
     */
