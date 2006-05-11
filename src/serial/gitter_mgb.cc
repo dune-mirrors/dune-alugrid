@@ -48,9 +48,13 @@ pair < Gitter :: Geometric :: hedge1_GEO *, bool > MacroGridBuilder :: InsertUni
   }
   edgeKey_t key (l,r) ;
   edgeMap_t :: const_iterator hit = _edgeMap.find (key) ;
-  if (hit == _edgeMap.end ()) {
+  if (hit == _edgeMap.end ()) 
+  {
     vertexMap_t :: const_iterator a = _vertexMap.find (l), b = _vertexMap.find (r), end = _vertexMap.end () ;
-    if (a == end || b == end) abort () ;
+
+    assert( a != end );
+    assert( b != end );
+    
     hedge1_GEO * h = myBuilder ().insert_hedge1 ((*a).second,(*b).second) ;
     _edgeMap [key] = h ;
     return pair < hedge1_GEO *, bool > (h,true) ;

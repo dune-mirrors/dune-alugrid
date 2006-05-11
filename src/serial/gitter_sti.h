@@ -66,6 +66,7 @@ template <int points> class HbndIntStoragePoints;
 typedef HbndIntStoragePoints<4> Hbnd4IntStoragePoints;
 typedef HbndIntStoragePoints<1> Hbnd3IntStoragePoints;
 
+//extern std::ofstream logFile;
 
 // Einfacher Referenzenz"ahler mit cast-around-const
 // feature, der zum Z"ahlen der Referenzen auf Fl"achen
@@ -500,6 +501,10 @@ public :
     // segment, because we only have ghost on interior boundary.
     // should return 0 for non-interior boundaries 
     virtual helement * getGhost () = 0; 
+    
+    // return local number of internal face 
+    virtual int getGhostFaceNumber () const = 0; 
+
     virtual void faceNormal (double * normal) const = 0 ;
   public :
     virtual void restoreFollowFace () = 0 ;

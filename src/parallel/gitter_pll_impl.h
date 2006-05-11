@@ -1491,7 +1491,7 @@ packAsBnd (int fce, int who, ObjectStream & os) const {
   os.writeObject (this->myhbnd ().bndtype ()) ;
   
   {
-    for (int i = 0 ; i < myhface_t :: polygonlength ; i++) 
+    for (int i = 0 ; i < myhface_t :: polygonlength ; ++i) 
       os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ()) ; 
   }
 
@@ -1503,6 +1503,7 @@ packAsBnd (int fce, int who, ObjectStream & os) const {
   }
   else 
   {
+    std::cout << "No point inlined \n";
     os.writeObject ( MacroGridMoverIF :: NO_POINT ); // no point transmitted 
   }
    

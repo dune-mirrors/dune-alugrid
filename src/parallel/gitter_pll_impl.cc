@@ -524,10 +524,10 @@ void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
   {
     os.writeObject (HBND3INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
-    os.writeObject (mytetra ().myvertex (fce,0)->ident ()) ;
-    os.writeObject (mytetra ().myvertex (fce,1)->ident ()) ;
-    os.writeObject (mytetra ().myvertex (fce,2)->ident ()) ;
-
+    os.writeObject ( mytetra ().myvertex (fce,0)->ident () ) ;
+    os.writeObject ( mytetra ().myvertex (fce,1)->ident () ) ;
+    os.writeObject ( mytetra ().myvertex (fce,2)->ident () ) ;
+    
     // see method unpackHbnd3Int 
     int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; // 1 == point is transmitted 
     os.writeObject ( writePoint ); // 1 == points are transmitted 
@@ -544,10 +544,9 @@ void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
     {
       const Gitter :: Geometric :: VertexGeo * vertex = mytetra().myvertex(fce);
       assert( vertex );
+
       // know identifier of transmitted point 
-      
-      int vx = vertex->ident ();
-      os.writeObject ( vx ) ;
+      os.writeObject ( vertex->ident ()) ;
 
       // store the missing point to form a tetra 
       const double (&p)[3] = vertex->Point();

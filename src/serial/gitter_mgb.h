@@ -270,7 +270,8 @@ HbndIntStoragePoints (const Gitter :: Geometric :: tetra_GEO * tetra, int fce)
 {
   assert( points == 1 );
   const Gitter :: Geometric :: VertexGeo * vertex = tetra->myvertex(fce);
-  for(int vx=0; vx<points; vx++)
+  assert( vertex );
+  for(int vx=0; vx<points; ++vx)
   {
     _vxface[vx] = vertex->ident();
     const double (&p) [3] = vertex->Point();
@@ -297,9 +298,12 @@ HbndIntStoragePoints (const HbndIntStoragePoints<points> & copy )
     _p[k][1] = copy._p[k][1];
     _p[k][2] = copy._p[k][2];
   }
-  for(int i=0; i<noVx; i++) _vx[i] = copy._vx[i];
-  for(int i=0; i<noFaceVx; i++) _vxface[i] = copy._vxface[i];
 
+  for(int i=0; i<noVx; ++i) _vx[i] = copy._vx[i];
+  for(int i=0; i<noFaceVx; ++i) 
+  {
+    _vxface[i] = copy._vxface[i];
+  }
   _fce = copy._fce;
 }
 

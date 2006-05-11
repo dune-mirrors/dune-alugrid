@@ -81,6 +81,7 @@ class MacroGhostPointImpl : public MacroGhostPoint
       for(int i=0; i<points; ++i) 
       {
         os.writeObject(_oppVerts[i]);
+        //logFile << "Inlining p=" << _oppVerts[i] << "\n";
         os.writeObject( _p[i][0] ); 
         os.writeObject( _p[i][1] ); 
         os.writeObject( _p[i][2] ); 
@@ -346,13 +347,39 @@ public:
     for(int i=0; i<3; ++i)
     {
       const VertexGeo * vx = face->myvertex(i);
-      const double (&p)[3] = vx->Point();
-      mgb.InsertNewUniqueVertex(p[0],p[1],p[2],vx->ident());
+#ifndef NDEBUG
+      int idx = vx->ident();
+      //logFile << "Insert new point " << idx << "\n";
+      bool found = false;
+      for(int j=0; j<4; ++j) 
+        if(_ghPoint.vertices()[j] == idx) found = true;
+      assert( found );
+#endif
+      const double (&point)[3] = vx->Point();
+      mgb.InsertNewUniqueVertex(point[0],point[1],point[2],vx->ident());
     }
 
+    //logFile.flush();
+
+#ifndef NDEBUG 
+    int idx = oppVerts[0];
+    //logFile << "Insert new point " << oppVerts[0] << "\n";
+    bool found = false;
+    for(int j=0; j<4; ++j) 
+      if(_ghPoint.vertices()[j] == idx) found = true;
+    assert( found );
+#endif
     const double (&px)[3] = p[0];
     mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
 
+    /*
+    logFile << "Create Tetra with ["; 
+    for(int i=0; i<4; i++)
+      logFile << _ghPoint.vertices()[i] << ",";
+    logFile << "]\n";
+    logFile.flush();
+    */
+    
     // InsertUniqueHexa gets the global vertex numbers 
     _ghost = mgb.InsertUniqueTetra ( _ghPoint.vertices() ).first ;
     assert( _ghost );
