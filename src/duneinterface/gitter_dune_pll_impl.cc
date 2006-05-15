@@ -433,6 +433,16 @@ void GitterDunePll :: ALUcomm (
    * the delete statements are done in destructor
    */
 
+  typedef leaf_or_father_of_leaf < hface_STI > StopRule_t;
+
+  typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
+    TreeIterator < hface_STI, StopRule_t > > InnerIteratorType;
+
+  typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
+    TreeIterator < hface_STI, StopRule_t > > OuterIteratorType;
+
+  typedef IteratorSTI < hface_STI > IteratorType;
+	
   if( haveHigherCodimData )
   {
     // the message buffas 
@@ -465,13 +475,12 @@ void GitterDunePll :: ALUcomm (
       }
       if (containsFaces) 
       {
-        c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten (leaf-iterator!)
-        for (c.second->first (); ! c.second->done () ; c.second->next ()) {
-          faceData.sendData(vec[i],c.second->item());
+        AccessIteratorTT < hface_STI > :: OuterHandle mof1_(containerPll (), i);     //f"ur Slaves
+	OuterIteratorType mof_(mof1_); 
+	for (mof_.first () ; ! mof_.done () ; mof_.next ()) {
+          faceData.sendData(vec[i], mof_.item());
         }
-        delete c.first;
-        delete c.second;      
-      }
+      }	
     }
     //den anderen Partitionen die Slave-Daten senden
     vec = mpAccess ().exchange (vec);
@@ -499,12 +508,11 @@ void GitterDunePll :: ALUcomm (
       }
       if (containsFaces) 
       {
-        c = iteratorTT ((hface_STI *)0,i);
-        for (c.first->first (); ! c.first->done () ; c.first->next ()) {
-          faceData.recvData(vec[i],c.first->item());
+        AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), i);
+	InnerIteratorType mif_(mif1_);
+	for (mif_.first () ; ! mif_.done () ; mif_.next ()) {
+          faceData.recvData(vec[i], mif_.item());
         }
-        delete c.first;
-        delete c.second;
       }
     }
 
@@ -531,13 +539,13 @@ void GitterDunePll :: ALUcomm (
       }
       if (containsFaces) 
       {
-        c = iteratorTT ((hface_STI *)0,i); //ueber alle meine Slave-Knoten
-        for (c.first->first (); ! c.first->done () ; c.first->next ()) {
-          faceData.sendData(vec[i],c.first->item ());
+         AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), i);
+         InnerIteratorType mif_(mif1_);
+	for (mif_.first () ; ! mif_.done () ; mif_.next ()) {
+          faceData.sendData(vec[i], mif_.item());
         }
-        delete c.first;
-        delete c.second;     
       }
+
     }
    
     //den anderen Partitionen die Slave-Daten senden
@@ -566,12 +574,11 @@ void GitterDunePll :: ALUcomm (
       }
       if (containsFaces) 
       {
-        c = iteratorTT ((hface_STI *)0,i);
-        for (c.second->first (); ! c.second->done () ; c.second->next ()) {
-          faceData.setData(vec[i],c.second->item ());
+         AccessIteratorTT < hface_STI > :: OuterHandle mof1_(containerPll (), i);
+	      OuterIteratorType mof_(mof1_);
+	for (mof_.first () ; ! mof_.done () ; mof_.next ()) {
+          faceData.setData(vec[i], mof_.item());
         }
-        delete c.first;
-        delete c.second;
       }
     }
 
@@ -589,12 +596,9 @@ void GitterDunePll :: ALUcomm (
         pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessPllX ().accessInnerPllX () ;
         if (containsVertices) p.first->VertexData2os(osv[l], vertexData);
         if (containsEdges)    p.first->EdgeData2os(osv[l], edgeData);
-        if (containsFaces)    p.first->FaceData2os(osv[l], faceData);
+        if (containsFaces)    p.first->FaceData2os(osv[l], faceData); 
         if (containsElements) 
         {
-          //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-          //p.first->getAttachedElement(p1);
-          //elementData.sendData(osv[l], *p1.first);
           p.first->writeDynamicState (osv [l], p.second) ;
           p.first->writeDynamicState (osv [l], elementData ) ;
         }
@@ -604,12 +608,9 @@ void GitterDunePll :: ALUcomm (
         pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessPllX ().accessInnerPllX () ;
         if (containsVertices) p.first->VertexData2os(osv[l], vertexData);
         if (containsEdges)    p.first->EdgeData2os(osv[l], edgeData);
-        if (containsFaces)    p.first->FaceData2os(osv[l], faceData);
+        if (containsFaces)    p.first->FaceData2os(osv[l], faceData); 
         if (containsElements) 
         {
-          //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-          //p.first->getAttachedElement(p1);
-          //elementData.sendData(osv[l], *p1.first);
           p.first->writeDynamicState (osv [l], p.second) ;
           p.first->writeDynamicState (osv [l], elementData ) ;
         }
@@ -630,9 +631,6 @@ void GitterDunePll :: ALUcomm (
         if (containsFaces)    p.first->getGhost()->os2FaceData(osv[l], faceData);
         if (containsElements) 
         {
-          //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-          //p.first->getAttachedElement(p1);
-          //elementData.recvData(osv[l], *(p1.second));
           p.first->readDynamicState (osv [l], p.second) ;
           p.first->readDynamicState (osv [l], elementData ) ;
         }
@@ -643,12 +641,9 @@ void GitterDunePll :: ALUcomm (
         pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessPllX ().accessOuterPllX () ;
         if (containsVertices) p.first->getGhost()->os2VertexData(osv[l], vertexData);
         if (containsEdges)    p.first->getGhost()->os2EdgeData(osv[l], edgeData);
-        if (containsFaces)    p.first->getGhost()->os2FaceData(osv[l], faceData);
+        if (containsFaces)    p.first->getGhost()->os2FaceData(osv[l], faceData); 
         if (containsElements) 
         {
-          //pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p1;
-          //p.first->getAttachedElement(p1);
-          //elementData.recvData(osv[l], *(p1.second));
           p.first->readDynamicState (osv [l], p.second) ;
           p.first->readDynamicState (osv [l], elementData ) ;
         }
