@@ -292,10 +292,6 @@ class Periodic3PllXBase : public ElementPllBaseX {
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
-//    virtual void VertexData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P3 wVD";}
-//    virtual void EdgeData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P3 wED";}
-//    virtual void FaceData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P3 wFD";} 
-//    virtual void writeElementData(ObjectStream &, GatherScatterType &) {std::cerr << "P3 wED"; }
 	    
   private :
     myperiodic3_t & _periodic3 ;
