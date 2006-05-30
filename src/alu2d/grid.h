@@ -313,9 +313,10 @@ class Refco {
 
     void mark(Refco::tag_t t) {  }
 
+    virtual void clearWas() {};    
+    
   protected:
     virtual void writeToWas() {};
-    virtual void clearWas() {};
 } ;
 // #end(class)
 // ***************************************************
@@ -452,9 +453,10 @@ class Refco_el : protected Refco {
     // so kann diese Funktion nicht bleiben...
     int wasRefined() const { return tag_last == ref ? 1 : 0 ; }    
 
+    void clearWas() { tag_last = none;}    
+    
   protected:
     void writeToWas() { tag_last = ref; }
-    void clearWas() { tag_last = none;}
 } ;
 // #end(class)
 // ***************************************************
