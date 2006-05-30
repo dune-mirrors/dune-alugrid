@@ -17,25 +17,6 @@ static volatile char RCSId_handle_cc [] = "$Id$";
 #include "triang.h"
 #include "vmmap.h"
 
-
-Listwalk < Vertex > * Hmesh_basic::walk(const Listwalk < Vertex > * w ) {
-
-  return new Listwalk_impl < Vertex > ( *(Listwalk_impl < Vertex > *) w) ;
-
-}
-
-Listwalk < Hier < Bndel > > * Hmesh_basic::walk(const Listwalk < hbndel_t > * w) {
-
-  return new Leafwalk < Bndel > ( *(Leafwalk < Bndel > *) w) ;
-
-}
-
-Listwalk < Hier < Element > > * Hmesh_basic::walk(const Listwalk < helement_t > * w) {
-
-  return new Leafwalk < Element > ( *(Leafwalk < Element > *) w) ;
-
-}
-
 Hmesh::Hmesh() : _nconfDeg(-1), refinement_rule(Refco::none),
 		 _pro_el(0), _rest_el(0) {
 }
