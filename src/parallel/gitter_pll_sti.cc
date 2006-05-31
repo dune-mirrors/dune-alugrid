@@ -954,10 +954,18 @@ GitterPll :: GitterPll () : _ldbOver (1.2), _ldbUnder (0.0), _ldbMethod (LoadBal
     in >> i;
     _ldbMethod = (LoadBalancer :: DataBase :: method) i ;
   } else {
-    cerr << "**WARNING (ignored) could'nt open file < lastverteilung.cfg > . The default values will be used." << endl ;
+    /*
+    if (mpAccess().myrank()==0) {
+      cerr << "**WARNING (ignored) could'nt open file "
+	   << "< lastverteilung.cfg > . "
+	   << "Using default values: " << endl ;
+      cerr << _ldbUnder << " < [balance] < " << _ldbOver << " " 
+	   << "  partitioning method\"" 
+	   << LoadBalancer :: DataBase :: methodToString (_ldbMethod) 
+	   << "\"" << endl ;
+    }
+    */
   }
-  cout << "**INFO GitterPll :: GitterPll () " << _ldbUnder << " < [balance of distribution] < " << _ldbOver << ",\n" 
-       << "       method for partitioning \"" << LoadBalancer :: DataBase :: methodToString (_ldbMethod) << "\"" << endl ;
   return;
 #if 0
   }
