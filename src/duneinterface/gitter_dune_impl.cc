@@ -138,7 +138,7 @@ void GitterDuneBasis ::restoreIndices (istream & in)
     }
     this->indexManager(0).setMaxIndex ( idx );
     assert (debugOption (20) ? (cout << endl << "**INFO GitterDuneBasis :: restoreIndices: create new leaf indices with size = " << idx << " ! file: "<< __FILE__ << ", line: " << __LINE__ << endl, 1) : 1) ;
-    printsize ();
+    // printsize ();
     return ;
   }
 
