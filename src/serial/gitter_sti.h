@@ -231,7 +231,8 @@ public :
   protected:
     int _idx;
     bool _isCopy;
-    DuneIndexProvider () : _idx(-1), _isCopy(false) {}
+    int leafref;
+    DuneIndexProvider () : _idx(-1), _isCopy(false), leafref(0) {}
 #endif
   public:
     virtual ~DuneIndexProvider () {}
@@ -277,11 +278,26 @@ public :
       setIndex(index); 
       _isCopy = true;
     }
+
+    //for defining leaf entities in dune notation:] 
+    inline void addleaf() {
+      ++leafref;
+    }
+    inline void removeleaf() {
+      --leafref;
+      if (leafref<0) std::cerr << "remove error!" << std::endl; 
+    }
+    inline bool isLeafEntity() {
+      return (leafref>0);
+    }
 #else 
     inline int getIndex () const { return -1; }
     void setIndex ( const int index ) {}
     inline void freeIndex ( IndexManagerType & im ) {} 
     inline void setIndex ( IndexManagerType & im, const int index ) {}
+    inline void addleaf() {}
+    inline void removeleaf() {}
+    inline bool isLeafEntity() {return false;}
 #endif
   };
     
@@ -356,7 +372,10 @@ public :
     virtual void restore (istream &) = 0 ;
         
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-    virtual void projectVertex(const ProjectVertex &pv) = 0; 
+    virtual void projectVertex(const ProjectVertex &pv) = 0;
+    virtual bool isInteriorLeaf() const 
+    {cout << "in hface::isInteriorLeaf()" << endl;
+      return (abort(),false);}
   } ;
 
   // class with all extensions for helement 
@@ -497,7 +516,8 @@ public :
     inline int leaf () const ;
     // for dune 
     virtual int ghostLevel () const = 0 ;
-    // default return 0 means we have no ghost element on this boundary
+    virtual bool ghostLeaf () const = 0 ;
+     // default return 0 means we have no ghost element on this boundary
     // segment, because we only have ghost on interior boundary.
     // should return 0 for non-interior boundaries 
     virtual helement * getGhost () = 0; 
@@ -508,6 +528,8 @@ public :
     virtual void faceNormal (double * normal) const = 0 ;
   public :
     virtual void restoreFollowFace () = 0 ;
+    virtual void attachleafs() { abort(); }
+    virtual void detachleafs() { abort(); }
   } ;
 public :
   typedef hbndseg hbndseg_STI ;
@@ -703,8 +725,9 @@ public :
       // Ende
     public:
       virtual int calcSortnr (int,int) {return (abort(),0);}   
-      virtual bool isboundary() const = 0;      
-
+      virtual bool isboundary() const = 0;    
+      virtual int nbLevel() const {return (abort(),-1);}
+      virtual int nbLeaf() const {return (abort(),-1);}
     } ;
 
     class hasFace4 : public virtual stiExtender_t :: ElementIF {
@@ -724,6 +747,8 @@ public :
         return p ;
       }
       virtual bool isboundary() const = 0;
+      virtual int nbLevel() const {return (abort(),-1);}
+      virtual int nbLeaf() const {return (abort(),-1);}
       // Ende
 
     } ;
@@ -840,6 +865,17 @@ public :
     public :
       myrule_t parentRule() const;
       bool isConforming() const;
+      virtual bool isInteriorLeaf() const {
+	if (nb.front().first->isboundary())
+	  return ( nb.rear().first->nbLeaf() && 
+		   nb.rear().first->nbLevel() == this->level());
+	else if (nb.rear().first->isboundary())
+	  return ( nb.front().first->nbLeaf() && 
+		   nb.front().first->nbLevel() == this->level());
+	else
+	  return (nb.rear().first->nbLeaf() ||
+		  (nb.front().first->nbLeaf()));
+      }
     protected :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
@@ -902,6 +938,17 @@ public :
       virtual const myhedge1_t * subedge1 (int) const = 0 ;
       virtual hface4 * subface4 (int) = 0 ;
       virtual const hface4 * subface4 (int) const = 0 ;
+      virtual bool isInteriorLeaf() const {
+	if (nb.front().first->isboundary())
+	  return ( nb.rear().first->nbLeaf() && 
+		   nb.rear().first->nbLevel() == this->level());
+	else if (nb.rear().first->isboundary())
+	  return ( nb.front().first->nbLeaf() && 
+		   nb.front().first->nbLevel() == this->level());
+	else
+	  return (nb.rear().first->nbLeaf() ||
+		  (nb.front().first->nbLeaf()));
+      }
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual bool refine (myrule_t,int) = 0 ;
@@ -964,6 +1011,8 @@ public :
       virtual int nEdges() const { return 6; }
       inline int twist (int) const ;
       int test () const ;
+      virtual int nbLevel() const {return level();}
+      virtual int nbLeaf() const {return leaf();}
     public :
       virtual myrule_t getrule () const = 0 ;
       
@@ -977,7 +1026,8 @@ public :
 
       virtual bool isboundary() const { return false; }
       virtual grid_t type() const { return tetra; }
-    
+      virtual void attachleafs() { abort(); }
+      virtual void detachleafs() { abort(); }
     private :
       int evalVertexTwist(int, int) const;
       int evalEdgeTwist(int, int) const;
@@ -1027,7 +1077,8 @@ public :
       int tagForBallRefinement (const double (&)[3],double,int) ;
       virtual bool isboundary() const { return true; }
       virtual grid_t type() const { return tetra_periodic; }
-
+      virtual int nbLevel() const {return level();}
+      virtual int nbLeaf() const {return leaf();}
     private :
       myhface3_t * f [2] ;
       signed char s [2] ;
@@ -1075,6 +1126,8 @@ public :
       int tagForGlobalRefinement () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
+      virtual int nbLevel() const {return level();}
+      virtual int nbLeaf() const {return leaf();}
     private :
       myhface4_t * f [2] ;
       signed char s [2] ;
@@ -1123,6 +1176,8 @@ public :
 
       inline int twist (int) const ;
       int test () const ;
+      virtual int nbLevel() const {return level();}
+      virtual int nbLeaf() const {return leaf();}
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
@@ -1134,6 +1189,8 @@ public :
       virtual bool isboundary() const { return false; }
       virtual grid_t type() const { return hexa; }
 
+      virtual void attachleafs() { abort(); }
+      virtual void detachleafs() { abort(); }
     private :
       int evalVertexTwist(int, int) const;
       int evalEdgeTwist(int, int) const;
@@ -1172,6 +1229,22 @@ public :
       
       virtual bool isboundary() const { return true; }
       virtual int nChild () const;
+      virtual int nbLevel() const {return level();}
+      virtual int nbLeaf() const {return leaf();}
+      virtual void attachleafs() {
+	myhface3(0)->addleaf();
+	for (int i=0;i<3;i++) {
+	  myhface3(0)->myhedge1(i)->addleaf();
+	  myhface3(0)->myvertex(i)->addleaf();
+	}
+      }
+      virtual void detachleafs() {
+	myhface3(0)->removeleaf();
+	for (int i=0;i<3;i++) {
+	  myhface3(0)->myhedge1(i)->removeleaf();
+	  myhface3(0)->myvertex(i)->removeleaf();
+	}
+      }
     private :
       myhface3_t * _face ;
       int _twist ;
@@ -1206,6 +1279,22 @@ public :
       
       virtual bool isboundary() const { return true; }
       virtual int nChild () const;
+      virtual int nbLevel() const {return level();}
+      virtual int nbLeaf() const {return leaf();}
+      virtual void attachleafs() {
+	myhface4(0)->addleaf();
+	for (int i=0;i<4;i++) {
+	  myhface4(0)->myhedge1(i)->addleaf();
+	  myhface4(0)->myvertex(i)->addleaf();
+	}
+      }
+      virtual void detachleafs() {
+	myhface4(0)->removeleaf();
+	for (int i=0;i<4;i++) {
+	  myhface4(0)->myhedge1(i)->removeleaf();
+	  myhface4(0)->myvertex(i)->removeleaf();
+	}
+      }
     private :
       myhface4_t * _face ;
       int _twist ;

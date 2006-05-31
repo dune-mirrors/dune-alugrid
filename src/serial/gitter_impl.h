@@ -76,6 +76,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef hbndseg3_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ; 
+            virtual bool ghostLeaf () const {return leaf();}
             
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -118,6 +119,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef hbndseg4_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ;  
+            virtual bool ghostLeaf () const {return leaf();}
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -175,14 +177,26 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef VertexEmpty innervertex_t ;
             inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
             virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs) {
-               for (int i = 0; i < 4; i++) gs.recvData( os, *myvertex(i));
+	      for (int i = 0; i < 4; i++) gs.setData( os, *myvertex(i));
             }
             virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-              for (int i = 0; i < 6; i++) gs.recvData( os, *myhedge1(i));
+              for (int i = 0; i < 6; i++) gs.setData( os, *myhedge1(i));
       	    }
             virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
-              for (int i = 0; i < 4; i++) gs.recvData( os, *myhface3(i));
+              for (int i = 0; i < 4; i++) gs.setData( os, *myhface3(i));
 	          }
+	    virtual void attachleafs() {  
+	      addleaf();
+	      for (int i = 0; i < 4 ;i++) myhface3(i)->addleaf();
+	      for (int i = 0; i < 6 ;i++) myhedge1(i)->addleaf();
+	      for (int i = 0; i < 4 ;i++) myvertex(i)->addleaf();
+	    }
+	    virtual void detachleafs() { 
+	      removeleaf();
+	      for (int i = 0; i < 4 ;i++) myhface3(i)->removeleaf();
+	      for (int i = 0; i < 6 ;i++) myhedge1(i)->removeleaf();
+	      for (int i = 0; i < 4 ;i++) myvertex(i)->removeleaf();
+	    }
 
     protected:     
       	    ~TetraEmpty () {}
@@ -195,7 +209,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             //ghost tetra gets indices of grid, to which it belongs actually
       	    virtual void setIndices(const hface_STI & f, int face_nr) 
             {
-            	const myhface3_t & face = static_cast<const myhface3_t &> (f); 
+	      const myhface3_t & face = static_cast<const myhface3_t &> (f); 
 
               myhface3_t & myface = *(myhface3(face_nr));
 
@@ -207,6 +221,12 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
               
               for (int i = 0; i < 3; ++i) 
               {
+		assert(fabs(myface.myvertex(i)->Point()[0]-
+			    face.myvertex(i)->Point()[0])<1e-8);
+		assert(fabs(myface.myvertex(i)->Point()[1]-
+			    face.myvertex(i)->Point()[1])<1e-8);
+		assert(fabs(myface.myvertex(i)->Point()[2]-
+			    face.myvertex(i)->Point()[2])<1e-8);
                 myface.myvertex(i)->setIndex( vxIm , face.myvertex(i)->getIndex() );
                 myface.myhedge1(i)->setIndex( edIm , face.myhedge1(i)->getIndex() );
               }
@@ -254,14 +274,26 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         int postRefinement();
 
         virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs) {
-          for (int i = 0; i < 8; i++) gs.recvData( os, *myvertex(i));
+          for (int i = 0; i < 8; i++) gs.setData( os, *myvertex(i));
         }
         virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-          for (int i = 0; i < 12; i++) gs.recvData( os, *myhedge1(i));
+          for (int i = 0; i < 12; i++) gs.setData( os, *myhedge1(i));
       	}
         virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
-          for (int i = 0; i < 6; i++) gs.recvData( os, *myhface4(i));
+          for (int i = 0; i < 6; i++) gs.setData( os, *myhface4(i));
 	      }
+	virtual void attachleafs() {  
+	  addleaf();
+	  for (int i = 0; i < 6 ;i++) myhface4(i)->addleaf();
+	  for (int i = 0; i < 12 ;i++) myhedge1(i)->addleaf();
+	  for (int i = 0; i < 8 ;i++) myvertex(i)->addleaf();
+	}
+	virtual void detachleafs() { 
+	  removeleaf();
+	  for (int i = 0; i < 6 ;i++) myhface4(i)->removeleaf();
+	  for (int i = 0; i < 12 ;i++) myhedge1(i)->removeleaf();
+	  for (int i = 0; i < 8 ;i++) myvertex(i)->removeleaf();
+	}
 
       	Gitter* _myGrid;
         friend class HexaTop<HexaEmpty>;
@@ -604,6 +636,7 @@ TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
           */
   _myGrid(mygrid) 
 {
+  attachleafs();
   return ;
 }
 
@@ -639,6 +672,7 @@ HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
            Gitter* mygrid) : 
   Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5),
   _myGrid(mygrid) {
+    attachleafs();
   return ;
 }
 

@@ -879,6 +879,9 @@ Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , Ind
 
 template < class A > Hbnd4Top < A > :: ~Hbnd4Top () {
   this->freeIndex( this->_indexManager );
+  if (this->ghostLeaf() && this->ghostLevel() == this->level()
+      && this->bndtype()== Gitter::hbndseg_STI::closure)
+    this->detachleafs();
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
@@ -1202,6 +1205,7 @@ template < class A > inline HexaTop < A >
 
 template < class A > HexaTop < A > :: ~HexaTop () {
   this->freeIndex( this->_indexManager );
+  if (!_dwn) this->detachleafs();
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_fc) delete _fc ;
@@ -1364,6 +1368,7 @@ template < class A > void HexaTop < A > :: splitISO8 () {
   _fc = f0 ;
   _dwn = h0 ;
   _rule = myrule_t :: iso8 ;
+  this->detachleafs();
   return ;
 }
 
@@ -1466,6 +1471,7 @@ template < class A > bool HexaTop < A > :: coarse () {
     {for (innerhexa_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; }
     if (x) {
       this->preCoarsening () ;
+      this->attachleafs();
       delete _dwn ; 
       _dwn = 0 ;
       delete _fc ;

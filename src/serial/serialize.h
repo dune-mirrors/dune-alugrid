@@ -53,6 +53,7 @@ class ObjectStream {
     class EOFException {} ;
     class OutOfMemoryException {} ;
     inline ObjectStream () throw (OutOfMemoryException) ;
+    inline void clear();
     inline ~ObjectStream () ;
     inline ObjectStream (const ObjectStream &) throw (OutOfMemoryException) ;
     inline const ObjectStream & operator = (const ObjectStream &) throw (OutOfMemoryException);
@@ -143,6 +144,11 @@ inline ObjectStream :: ObjectStream () throw (OutOfMemoryException)
     throw OutOfMemoryException () ;
   }
   return ;
+}
+
+inline void ObjectStream :: clear () {
+  _rb = 0;
+  _wb = 0;
 }
 
 inline ObjectStream :: ~ObjectStream () {

@@ -709,6 +709,9 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
 
 template < class A > inline Hbnd3Top < A > :: ~Hbnd3Top () {
   this->freeIndex( this->_indexManager );
+  if (this->ghostLeaf() && this->ghostLevel() == this->level()
+      && this->bndtype()== Gitter::hbndseg_STI::closure)
+    this->detachleafs();
   if (_bbb) delete _bbb ; 
   if (_dwn) delete _dwn ;
   return ; 
@@ -1066,6 +1069,7 @@ TetraTop (int l, myhface3_t * f0, int t0,
 template < class A > inline TetraTop < A > :: ~TetraTop () 
 {
   this->freeIndex( this->_indexManager );
+  if (!_dwn) this->detachleafs();
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_fc) delete _fc ;
@@ -1355,7 +1359,8 @@ template < class A > inline void TetraTop < A > :: split_iso8 () {
   _fc = f0 ;
   _dwn = h0 ;
   _rule = myrule_t :: iso8 ;
-
+  
+  this->detachleafs();
   return ;
 }
 
@@ -1526,6 +1531,7 @@ template < class A > inline bool TetraTop < A > :: coarse () {
     {for (innertetra_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; }
     if (x) {
       this->preCoarsening () ;
+      this->attachleafs();
       delete _dwn ; 
       _dwn = 0 ;
       delete _fc ;
