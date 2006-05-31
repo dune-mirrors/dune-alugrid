@@ -240,6 +240,27 @@ class ElementPllXIF : public MacroGridMoverIF {
       return 0; 
     }
 
+    virtual int ghostLevel () const
+    { 
+      cerr << "ERROR: method ghostLevel of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      abort(); 
+      return 0; 
+    }
+
+    virtual bool checkGhostLevel () const  
+    {
+      cerr << "ERROR: method checkGhostLevel of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      abort(); 
+      return 0; 
+    }
+
+    virtual bool ghostLeaf () const
+    { 
+      cerr << "ERROR: method ghostLeaf of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      abort(); 
+      return 0; 
+    }
+
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
     {
       cerr << "Overload method in the classes file:" << __FILE__ << " line:" << __LINE__ << "\n";

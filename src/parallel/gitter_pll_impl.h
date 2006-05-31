@@ -508,6 +508,7 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     int _ghostLeaf;
   public:
     const double (& barycenter () const)[3] { return _center ; }
+    inline bool checkGhostLevel () const { return _ghostLevel == myhbnd().level(); }
     inline int ghostLevel () const { return _ghostLevel; }
     inline bool ghostLeaf () const { 
       return (_ghostLeaf==1); }
