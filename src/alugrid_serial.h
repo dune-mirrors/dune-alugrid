@@ -44,14 +44,17 @@ struct GatherScatter
   virtual void sendData ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   virtual void setData    ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
+  virtual void removeData ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   
   virtual void sendData ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   virtual void setData    ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
+  virtual void removeData ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   
   virtual void sendData ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
   virtual void setData    ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
+  virtual void removeData ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
 
   virtual void sendData ( ObjectStream & str , const HElemType  & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStream & str , HGhostType & elem ) { assert(false); abort(); }
