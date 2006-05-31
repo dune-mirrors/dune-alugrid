@@ -481,7 +481,7 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     inline const myhbnd_t & myhbnd () const ;
   public :
     inline BndsegPllBaseXClosure (myhbnd_t &) ;
-   ~BndsegPllBaseXClosure () {}
+    ~BndsegPllBaseXClosure () {}
     void readDynamicState (ObjectStream &, int) ;
 
     void readDynamicState (ObjectStream &, GatherScatterType &);
@@ -505,9 +505,12 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     bool _lockCRS ;
 
     int _ghostLevel;
+    int _ghostLeaf;
   public:
     const double (& barycenter () const)[3] { return _center ; }
     inline int ghostLevel () const { return _ghostLevel; }
+    inline bool ghostLeaf () const { 
+      return (_ghostLeaf==1); }
 
     // to be revised (works for the moment )
     virtual Gitter::helement_STI * getGhost () 
@@ -1337,7 +1340,7 @@ getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p 
   return ;
 }
 
-template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) : _hbnd (b), _lockCRS (false) , _ghostLevel (-1) {
+template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) : _hbnd (b), _lockCRS (false) , _ghostLevel (-1), _ghostLeaf(0) {
   return ;
 }
 
@@ -1410,7 +1413,19 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 
 #ifdef _DUNE_USES_ALU3DGRID_
     // read the real level of ghost 
+    bool wasLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
+    
     os.readObject( _ghostLevel );
+    os.readObject( _ghostLeaf );
+
+    bool nowLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
+
+    if (!wasLeaf && nowLeaf) {
+      myhbnd().attachleafs();
+    }
+    else if (wasLeaf && !nowLeaf){
+      myhbnd().detachleafs();
+    }
 #endif
     
   } catch (ObjectStream :: EOFException) {
