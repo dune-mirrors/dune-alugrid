@@ -1423,9 +1423,11 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 
     if (!wasLeaf && nowLeaf) {
       myhbnd().attachleafs();
+      myhbnd().addleaf();
     }
     else if (wasLeaf && !nowLeaf){
       myhbnd().detachleafs();
+      myhbnd().removeleaf();
     }
 #endif
     

@@ -879,9 +879,11 @@ Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , Ind
 
 template < class A > Hbnd4Top < A > :: ~Hbnd4Top () {
   this->freeIndex( this->_indexManager );
-  if (this->ghostLeaf() && this->ghostLevel() == this->level()
-      && this->bndtype()== Gitter::hbndseg_STI::closure)
+  // if (this->ghostLeaf() && this->ghostLevel() == this->level()
+  //    && this->bndtype()== Gitter::hbndseg_STI::closure) {
+  if (this->isLeafEntity()) {
     this->detachleafs();
+  }
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
