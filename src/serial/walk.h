@@ -198,14 +198,18 @@ template < class A > class ListIterator : public IteratorSTI < A >, public MyAll
   list < A * > & _list ;
   typename list < A * > :: iterator _curr ;
   public :
-    inline ListIterator (const ListIterator < A > &) ;
+    // createing ListIterator, default status is done 
     inline ListIterator (const list < A * > &) ;
+    // create ListIterator by making a copy  
+    inline ListIterator (const ListIterator < A > &) ;
     inline ~ListIterator () ;
     inline void first () ;
     inline void next () ;
     inline int done () const ;
     inline int size () ;
     inline A & item () const ;
+    // make a copy of the iterator 
+    inline virtual IteratorSTI < A > * clone () const;
 } ;
 
 template < class A, class B > class TreeIterator : public IteratorSTI < A >, public MyAlloc {
@@ -222,16 +226,22 @@ template < class A, class B > class TreeIterator : public IteratorSTI < A >, pub
     inline int size () ;
     inline int done () const ;
     inline val_t & item () const ;
+    inline virtual IteratorSTI < A > * clone () const;
   private :
-    enum { max = 100 } ;
+    // maximal depth of a grid hierarchy, not possible an a 64bit system yet.
+    // this is a secure upper bound 
+    enum { maxStackDepth = 64 } ;
+
     A * _seed ;
-    A * _stack [max] ;
+    A * _stack [ maxStackDepth ] ;
     B _cmp ;
     int _pos ;
     int _cnt ;
     inline int pushdown () ;
     inline int pullup () ;
     inline int count () ;
+    // make a copy of given iterator 
+    inline void assignIterator (const TreeIterator < A, B > &) ;
 } ;
 
 template < class A, class B > class Wrapper : public IteratorSTI < typename B :: val_t >, public MyAlloc {
@@ -246,6 +256,7 @@ template < class A, class B > class Wrapper : public IteratorSTI < typename B ::
     inline int size () ;
     inline int done () const ;
     inline val_t & item () const ;
+    inline virtual IteratorSTI < val_t > * clone () const ;
 } ;
 
 template < class A, class B, class C > class AlignIterator : public IteratorSTI < C >, public MyAlloc {
@@ -261,6 +272,8 @@ template < class A, class B, class C > class AlignIterator : public IteratorSTI 
     inline int size () ;
     inline int done () const ;
     inline C & item () const ;
+    inline IteratorSTI < C > * clone () const;
+  private:  
 } ;
 
 template < class A > class VectorAlign : public IteratorSTI < A >, public MyAlloc {
@@ -268,15 +281,16 @@ template < class A > class VectorAlign : public IteratorSTI < A >, public MyAllo
   vector < pointer_t > _it ;
   typename vector < pointer_t > :: const_iterator _curr, _ahead ;
   int _cnt ;
-  VectorAlign (const VectorAlign < A > &) ;
   public :
     inline VectorAlign (const vector < pointer_t > &) ;
+    inline VectorAlign (const VectorAlign < A > &) ;
     inline ~VectorAlign () ;
     inline void first () ;
     inline void next () ;
     inline int size () ;
     inline int done () const ;
     inline A & item () const ;
+    inline virtual IteratorSTI < A > * clone () const;
 } ;
 
 template < class  A, class B > class Insert : public IteratorSTI < typename B :: val_t >, public MyAlloc {
@@ -291,6 +305,7 @@ template < class  A, class B > class Insert : public IteratorSTI < typename B ::
     int done () const ;
     int size () ;
     val_t & item () const ;
+    inline virtual IteratorSTI < val_t > * clone () const;
   private :
     A _outer ;
     B * _inner ;
@@ -327,12 +342,21 @@ template < class A > int childs_are_leafs < A > :: operator () (const A & x) con
   return 1 ;
 }
 
-template < class A > inline ListIterator < A > :: ListIterator (const list < A * > & l) : _list ((list < A * > &)l), _curr () {
+template < class A > inline ListIterator < A > :: ListIterator (const list < A * > & l) 
+  : _list ((list < A * > &)l), _curr (_list.end()) {
   return ;
 }
 
-template < class A > inline ListIterator < A > :: ListIterator (const ListIterator < A > & w) : _list (w._list), _curr (w._curr) {
+template < class A > inline ListIterator < A > :: 
+ListIterator (const ListIterator < A > & w) : _list(w._list) , _curr(w._curr)
+{
   return ;
+}
+
+template < class A > inline IteratorSTI< A > * ListIterator < A > :: 
+clone () const
+{
+  return new ListIterator < A > (*this);
 }
 
 template < class A > inline ListIterator < A > :: ~ListIterator () {
@@ -345,7 +369,7 @@ template < class A > inline void ListIterator < A > :: first () {
 }
 
 template < class A > inline void ListIterator < A > :: next ()  {
-  _curr ++ ;
+  ++ _curr ;
   return ;
 }
 
@@ -361,6 +385,12 @@ template < class A > inline A & ListIterator < A > :: item () const {
   return ** _curr ;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////
+//
+//  --TreeIterator 
+//
+/////////////////////////////////////////////////////////////////////////////////////
+
 template < class A, class B > inline int TreeIterator < A, B > :: pushdown () {
   A * e = _stack [_pos] ;
   for( ; e ? ! _cmp (e) : 0 ; _stack [ ++ _pos] = (e = e->down ())) ;
@@ -374,7 +404,7 @@ template < class A, class B > inline int TreeIterator < A, B > :: pullup () {
 
 template < class A, class B > inline int TreeIterator < A, B > :: count () {
   int i = 0 ;
-  for (first () ; ! done () ; next ()) i ++ ;
+  for (first () ; ! done () ; next ()) ++ i ;
   return i ;
 }
 
@@ -393,21 +423,37 @@ template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A * 
 }
 
 template < class A, class B > inline TreeIterator < A, B > :: TreeIterator ( const TreeIterator < A, B > & w) 
-  : _seed (w._seed), _cmp (w._cmp), _pos (w._pos), _cnt (w._cnt) {
-  for(int i = 0 ; i <= _pos ; i ++) _stack [i] = w._stack [i] ;
+{
+  assignIterator(w);
   return ;
+}
+
+template < class A, class B > inline IteratorSTI < A > *  TreeIterator < A, B > :: 
+clone () const
+{
+  return new TreeIterator < A, B > (*this);
 }
 
 template < class A, class B > inline TreeIterator < A, B > :: ~TreeIterator () {
   return ;
 }
 
-template < class A, class B > inline const TreeIterator < A, B > & TreeIterator < A, B > :: operator = (const TreeIterator < A, B > & w) {
+template < class A, class B > inline void TreeIterator < A, B > :: 
+assignIterator (const TreeIterator < A, B > & w) 
+{
+  // make a copy of iterator 
   _seed = w._seed ;
-  _cnt = w._cnt ;
-  _pos = w._pos ;
-  _cmp = w._cmp ;
-  for (int i = 0 ; i < _pos + 1 ; i ++) _stack [i] = w._stack [i] ;
+  _cnt  = w._cnt ;
+  _pos  = w._pos ;
+  _cmp  = w._cmp ;
+
+  assert( _pos < maxStackDepth );
+  for (int i = 0 ; i <= _pos ; ++i) _stack [i] = w._stack [i] ;
+}
+
+template < class A, class B > inline const TreeIterator < A, B > & TreeIterator < A, B > :: operator = (const TreeIterator < A, B > & w) 
+{
+  assignIterator(w);
   return w ;
 }
 
@@ -445,6 +491,8 @@ template < class A, class B > inline int TreeIterator < A , B > :: size () {
 }
 
 template < class A, class B > inline int TreeIterator < A , B > :: done () const {
+  assert( _pos >= 0 );
+  assert( _pos < maxStackDepth );
   return ! _stack [_pos] ;
 }
 
@@ -453,12 +501,25 @@ template < class A, class B > inline A & TreeIterator < A , B > :: item () const
   return * _stack [_pos] ;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////
+//
+//  --Wrapper 
+//
+////////////////////////////////////////////////////////////////////////////////////////
+
 template < class A, class B > inline Wrapper < A, B > :: Wrapper (const A & w) : _walk (w) {
   return ;
 }
 
 template < class A, class B > inline Wrapper < A, B > :: Wrapper (const Wrapper < A, B > & w) : _walk (w._walk) {
   return ;
+}
+
+template < class A, class B > inline IteratorSTI< typename B::val_t > * 
+Wrapper < A, B > :: clone () const
+{
+  return new Wrapper < A, B > (*this);
 }
 
 template < class A, class B > inline Wrapper < A, B > :: ~Wrapper () {
@@ -489,6 +550,12 @@ Wrapper < A, B > :: item () const {
   return B ()(_walk.A :: item ()) ;
 }
 
+////////////////////////////////////////////////////////////////////////////
+//
+//  --AlignIterator 
+//
+////////////////////////////////////////////////////////////////////////////
+
 template < class A, class B, class C > 
 inline AlignIterator < A, B, C > :: 
 AlignIterator (const A & a, const B & b) 
@@ -500,6 +567,13 @@ template < class A, class B, class C >
 inline AlignIterator < A, B, C > :: AlignIterator (const AlignIterator < A, B, C > & a) 
   : _walk1 (a._walk1), _walk2 (a._walk2), _curr (a._curr), _cnt (-1) {
   return ;
+}
+
+template < class A, class B, class C > 
+inline IteratorSTI < C > * AlignIterator < A, B, C > :: 
+clone () const
+{
+  return new AlignIterator < A, B, C > (*this);
 }
 
 template < class A, class B, class C > inline AlignIterator < A, B, C > :: ~AlignIterator () {
@@ -535,13 +609,50 @@ template < class A, class B, class C > inline C & AlignIterator < A, B, C > :: i
   else return (C &) _walk1.A::item () ;
 }
 
-template < class A > inline VectorAlign < A > :: VectorAlign (const vector < pointer_t > & l) : _it (l), _curr (), _ahead (), _cnt (-1) {
+////////////////////////////////////////////////////////////////////////////////
+//
+//  --VectorAlign 
+//
+////////////////////////////////////////////////////////////////////////////////
+
+template < class A > inline VectorAlign < A > :: 
+VectorAlign (const vector < pointer_t > & l) 
+  : _it (l), _curr (_it.end()), _ahead (_it.end()), _cnt (-1) {
   return ;
 }
 
+template < class A > inline VectorAlign < A > :: 
+VectorAlign (const VectorAlign < A > & org ) 
+  : _it(org._it.size(),0) , _curr(_it.end()) , _ahead(_it.end()) , _cnt(org._cnt) 
+{
+  // _it is a vector with pointers of iterators, we have to clone all
+  // pointers of the vector, therefore iterate over vector and call clone  
+  typedef typename vector < pointer_t > :: iterator iterator_t ; 
+  typedef typename vector < pointer_t > :: const_iterator constiterator_t ; 
+  constiterator_t orgit = org._it.begin();
+  iterator_t pend   = _it.end (); 
+  for (iterator_t p = _it.begin (); p != pend ; ++ p , ++ orgit ) 
+  {
+    (*p) = (*orgit)->clone();
+    if( org._curr  == orgit ) _curr  = p;
+    if( org._ahead == orgit ) _ahead = p;
+  }
+
+  assert( (! org.done()) ? (_curr  != _it.end()) : 1 );
+  assert( (! org.done()) ? ((org._ahead != org._it.end()) ? (_ahead != _it.end()) : 1) : 1 );
+  assert( (! org.done()) ? (!done()) : 1); 
+}
+
+template < class A > inline IteratorSTI < A > * 
+VectorAlign < A > :: clone () const 
+{
+  return new VectorAlign < A > (*this);
+}
+
 template < class A > VectorAlign < A > :: ~VectorAlign () {
-  for (typename vector < pointer_t > :: iterator p = _it.begin () 
-      ; p != _it.end () ; delete (*p ++)) ;
+  typedef typename vector < pointer_t > :: iterator iterator_t ; 
+  iterator_t pend = _it.end (); 
+  for (iterator_t p = _it.begin (); p != pend ; delete (*p ++)) ;
   return ;
 }
 
@@ -583,6 +694,12 @@ template < class A > inline A & VectorAlign < A > :: item () const {
   return (*_curr)->item () ;
 }
 
+////////////////////////////////////////////////////////////////////////////
+//
+//  --Insert 
+//
+////////////////////////////////////////////////////////////////////////////
+
 template < class  A, class B > Insert < A, B > :: Insert (const A & w, comp_t c)
   : _outer (w), _inner (0), _cnt (0), _cmp (c) { 
   for( first () ; ! done () ; next ()) _cnt ++ ;
@@ -593,6 +710,12 @@ template < class  A, class B > inline Insert < A, B > :: Insert (const Insert < 
   : _outer (w._outer), _inner (0), _cnt (w._cnt), _cmp (w._cmp) { 
   _inner = w._inner ? new B (* w._inner) : 0 ;
   return ;
+}
+
+template < class  A, class B > inline IteratorSTI< typename B :: val_t > * 
+Insert < A, B > :: clone () const
+{
+  return new Insert < A, B > (*this); 
 }
 
 template < class  A, class B > Insert < A, B > :: ~Insert () { 
