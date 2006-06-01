@@ -172,7 +172,8 @@ Handle (const PureElementAccessIterator < A > :: Handle & p)
   : AccessIterator < A > :: Handle ()
 {
   this->_fac = p._fac; 
-  this->_fac ? (this->_fac->ref ++, this->_w = this->_fac->pureElementIterator (p._w), 0) : (this->_w = new IteratorSTI < A > (), 0) ;
+  if( this->_fac ) this->_fac->ref ++; 
+  this->_w = p._w->clone(); 
   return ;
 } 
 
