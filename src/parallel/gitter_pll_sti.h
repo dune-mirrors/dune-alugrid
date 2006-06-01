@@ -65,6 +65,15 @@ template < class A > class AccessIteratorTT {
         pair < IteratorSTI < A > *, IteratorSTI < A > * > _pw ;
         HandleBase (AccessIteratorTT < A > &, int) ;
         HandleBase (const HandleBase &) ;
+
+        // HandleBase behaves like EmptyIterator (see gitter_sti.h )
+        virtual void first () ; 
+        virtual void next ()  ; 
+        virtual int done () const ;
+        virtual int size () ; 
+        virtual A & item () const ;
+        virtual IteratorSTI < A > * clone () const ;
+
       public :
         virtual ~HandleBase () ;
     } ;
@@ -78,6 +87,7 @@ template < class A > class AccessIteratorTT {
         int done () const ;
         int size () ;
         A & item () const ;
+        IteratorSTI < A > * clone () const ;
     } ;
     class OuterHandle : public HandleBase {
       public :
@@ -89,6 +99,7 @@ template < class A > class AccessIteratorTT {
         int done () const ;
         int size () ;
         A & item () const ;
+        IteratorSTI < A > * clone () const ;
     } ;
 } ;
 
@@ -112,6 +123,7 @@ template < class A > class listSmartpointer__to__iteratorSTI : public IteratorST
     int done () const ;
     int size () ;
     A & item () const ;
+    IteratorSTI< A > * clone () const ;
 } ;
 
   // LinkedObjekt ist die Schnittstelle, die im parallelen Gitter zur
@@ -463,85 +475,140 @@ inline int GitterPll :: MacroGitterPll :: iterators_attached () const {
   return AccessIteratorTT < vertex_STI > :: ref + AccessIteratorTT < hedge_STI > :: ref + AccessIteratorTT < hface_STI > :: ref ;
 }
 
-template < class A > AccessIteratorTT < A > :: ~AccessIteratorTT () {
+template < class A > inline AccessIteratorTT < A > :: ~AccessIteratorTT () {
   assert (!ref) ;
 }
 
-template < class A > AccessIteratorTT < A > :: HandleBase :: HandleBase (AccessIteratorTT < A > & f, int i) : _fac (f), _l (i) {
+template < class A > inline AccessIteratorTT < A > :: HandleBase :: 
+HandleBase (AccessIteratorTT < A > & f, int i) : _fac (f), _l (i) 
+{
   this->_fac.ref ++ ;
   this->_pw = _fac.iteratorTT ((A *)0,_l) ;
 }
 
-template < class A > AccessIteratorTT < A > :: HandleBase :: HandleBase (const AccessIteratorTT < A > :: HandleBase & p) : _fac (p._fac), _l (p._l) {
+template < class A > inline AccessIteratorTT < A > :: HandleBase :: 
+HandleBase (const AccessIteratorTT < A > :: HandleBase & p) 
+  : _fac (p._fac), _l (p._l) 
+  , _pw( p._pw.first ->clone() , p._pw.second->clone() )
+{
   this->_fac.ref ++ ;
-  this->_pw = _fac.iteratorTT (p._pw,p._l) ;
 }
 
-template < class A > AccessIteratorTT < A > :: HandleBase :: ~HandleBase () {
+template < class A > inline AccessIteratorTT < A > :: HandleBase :: 
+~HandleBase () {
   this->_fac.ref -- ;
   delete this->_pw.first ;
   delete this->_pw.second ;
 }
 
-template < class A > AccessIteratorTT < A > :: InnerHandle :: InnerHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) {
+template < class A > inline void AccessIteratorTT < A > :: HandleBase :: 
+first () 
+{
+} 
+
+template < class A > inline void AccessIteratorTT < A > :: HandleBase :: 
+next ()  
+{
+} 
+
+template < class A > inline int AccessIteratorTT < A > :: HandleBase :: 
+done () const 
+{ 
+  return 1; 
 }
 
-template < class A > AccessIteratorTT < A > :: InnerHandle :: InnerHandle (const InnerHandle & p) : HandleBase (p) {
+template < class A > inline int AccessIteratorTT < A > :: HandleBase :: 
+size () 
+{ 
+  return 0; 
 }
 
-template < class A > AccessIteratorTT < A > :: InnerHandle :: ~InnerHandle () {
+template < class A > inline A & AccessIteratorTT < A > :: HandleBase :: 
+item () const 
+{ 
+  assert( ! done ()); 
+  A * a = 0;
+  return *a; 
 }
 
-template < class A > void AccessIteratorTT < A > :: InnerHandle :: first () {
+template < class A > inline IteratorSTI < A > * AccessIteratorTT < A > :: HandleBase :: 
+clone () const 
+{
+  return new typename AccessIteratorTT < A > :: HandleBase (*this);
+}
+
+template < class A > inline AccessIteratorTT < A > :: InnerHandle :: InnerHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) {
+}
+
+template < class A > inline AccessIteratorTT < A > :: InnerHandle :: InnerHandle (const InnerHandle & p) : HandleBase (p) {
+}
+
+template < class A > inline AccessIteratorTT < A > :: InnerHandle :: ~InnerHandle () {
+}
+
+template < class A > inline void AccessIteratorTT < A > :: InnerHandle :: first () {
   this->_pw.first->first () ;
 }
 
-template < class A > void AccessIteratorTT < A > :: InnerHandle :: next () {
+template < class A > inline void AccessIteratorTT < A > :: InnerHandle :: next () {
   this->_pw.first->next () ;
 }
 
-template < class A > int AccessIteratorTT < A > :: InnerHandle :: done () const {
+template < class A > inline int AccessIteratorTT < A > :: InnerHandle :: done () const {
   return this->_pw.first->done () ;
 }
 
-template < class A > int AccessIteratorTT < A > :: InnerHandle :: size () {
+template < class A > inline int AccessIteratorTT < A > :: InnerHandle :: size () {
   return this->_pw.first->size () ;
 }
 
-template < class A > A & AccessIteratorTT < A > :: InnerHandle :: item () const {
+template < class A > inline A & AccessIteratorTT < A > :: InnerHandle :: item () const {
   assert ( ! done ()) ;
   return this->_pw.first->item () ;
 }
 
-template < class A > AccessIteratorTT < A > :: OuterHandle :: OuterHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) {
+template < class A > inline IteratorSTI < A > * AccessIteratorTT < A > :: InnerHandle ::  
+clone () const 
+{
+  return new typename AccessIteratorTT < A > :: InnerHandle (*this);
 }
 
-template < class A > AccessIteratorTT < A > :: OuterHandle :: OuterHandle (const OuterHandle & p) : HandleBase (p) {
+template < class A > inline AccessIteratorTT < A > :: OuterHandle :: OuterHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) {
 }
 
-template < class A > AccessIteratorTT < A > :: OuterHandle :: ~OuterHandle () {
+template < class A > inline AccessIteratorTT < A > :: OuterHandle :: OuterHandle (const OuterHandle & p) : HandleBase (p) {
 }
 
-template < class A > void AccessIteratorTT < A > :: OuterHandle :: first () {
+template < class A > inline AccessIteratorTT < A > :: OuterHandle :: ~OuterHandle () {
+}
+
+template < class A > inline void AccessIteratorTT < A > :: OuterHandle :: first () {
   this->_pw.second->first () ;
 }
 
-template < class A > void AccessIteratorTT < A > :: OuterHandle :: next () {
+template < class A > inline void AccessIteratorTT < A > :: OuterHandle :: next () {
   this->_pw.second->next () ;
 }
 
-template < class A > int AccessIteratorTT < A > :: OuterHandle :: done () const {
+template < class A > inline int AccessIteratorTT < A > :: OuterHandle :: done () const {
   return this->_pw.second->done () ;
 }
 
-template < class A > int AccessIteratorTT < A > :: OuterHandle :: size () {
+template < class A > inline int AccessIteratorTT < A > :: OuterHandle :: size () {
   return this->_pw.second->size () ;
 }
 
-template < class A > A & AccessIteratorTT < A > :: OuterHandle :: item () const {
+template < class A > inline A & AccessIteratorTT < A > :: OuterHandle :: item () const {
   assert (! done ()) ;
   return this->_pw.second->item () ;
 }
+
+template < class A > inline IteratorSTI < A > * AccessIteratorTT < A > :: OuterHandle ::  
+clone () const 
+{
+  return new typename AccessIteratorTT < A > :: OuterHandle (*this);
+}
+
 
 template < class A > listSmartpointer__to__iteratorSTI < A > :: listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handle > & a) : _l (a) {
 }
@@ -572,6 +639,18 @@ template < class A > A & listSmartpointer__to__iteratorSTI < A > :: item () cons
   assert (! done ()) ;
   return (*_curr).item () ;
 }
+
+template < class A > IteratorSTI < A > * listSmartpointer__to__iteratorSTI < A > :: 
+clone () const 
+{
+  return new listSmartpointer__to__iteratorSTI < A > (*this);
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//  --LinkedObject
+//
+///////////////////////////////////////////////////////////////////
 
 inline bool LinkedObject :: Identifier :: isValid () const {
   return _i1 == -1 ? false : true ;
