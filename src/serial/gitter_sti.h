@@ -119,7 +119,6 @@ public :
 // s.a. Datei 'walk.h' verwendet.
 
 template < class A > class IteratorSTI {
-  const IteratorSTI < A > & operator = (const IteratorSTI < A > &) ;
   IteratorSTI (const IteratorSTI < A > &) {}
 public :
   typedef A val_t ;
@@ -130,6 +129,7 @@ public :
   virtual int done () const ;
   virtual int size () ;
   virtual val_t & item () const ;
+  virtual IteratorSTI < A > * clone () const;
 } ;
 
 // sobald die const-correctness verbessert wird ...
@@ -201,6 +201,7 @@ public :
     inline int done () const ;
     inline int size () ;
     inline A & item () const ;
+    inline virtual IteratorSTI< A > * clone () const;
   } ;
 protected :
   AccessIterator () {}
@@ -259,7 +260,9 @@ public :
     inline void setIndex ( const int index ) 
     { 
       assert( index >= 0 );
-      _idx = index; 
+      _idx    = index; 
+      // if index is set from outside, freeIndex, when freeIndex is called
+      //_isCopy = false;
     }
     
     inline void freeIndex ( IndexManagerType & im ) 
@@ -1495,6 +1498,10 @@ public :
   inline ~LeafIterator () ;
   inline IteratorSTI < A > * operator -> () const ;
   inline IteratorSTI < A > & operator * () const ;
+  inline LeafIterator < A > & operator = (const LeafIterator < A > &) ;
+private: 
+  inline void removeObj();
+  inline void assign(const LeafIterator < A > & );
 } ;
 
 // LevelIterator is the same construct as LeafIterator, but the iterator
@@ -1515,6 +1522,10 @@ public :
   inline ~LevelIterator () ;
   inline IteratorSTI < A > * operator -> () const ;
   inline IteratorSTI < A > & operator * () const ;
+  inline LevelIterator < A > & operator = (const LevelIterator < A > &) ;
+private: 
+  inline void removeObj();
+  inline void assign(const LevelIterator < A > & );
 } ;
 
 //
@@ -1633,6 +1644,12 @@ template < class A > A & IteratorSTI < A > :: item () const {
   return *(val_t *)(p) ;
 }
 
+template < class A > IteratorSTI < A > * IteratorSTI < A > :: clone () const 
+{
+  abort() ;
+  return 0; 
+}
+
 template < class A > inline AccessIterator < A > :: Handle :: Handle (AccessIterator < A > & f) 
   : _fac (&f), _a (0), _w (0) {
   _fac->ref ++ ; 
@@ -1641,10 +1658,37 @@ template < class A > inline AccessIterator < A > :: Handle :: Handle (AccessIter
 }
 
 template < class A > inline AccessIterator < A > :: Handle :: Handle (const AccessIterator < A > :: Handle & p) 
-  : _fac (p._fac), _a (0) { 
+  : _fac (p._fac), _a (0) 
+{ 
   _fac ? (_fac->ref ++, _w = _fac->iterator (p._w), 0) : (_w = new IteratorSTI < A > (), 0) ;
+  //assignIterator(p);
   return ;
 }
+
+template < class A > inline IteratorSTI< A > * AccessIterator < A > :: Handle :: 
+clone () const
+{
+  typedef typename AccessIterator < A > :: Handle HandleType;
+  return new HandleType (*this);
+}
+
+/*
+template < class A > inline void AccessIterator < A > :: Handle :: 
+assign(const IteratorSTI< A > & org)
+{
+  typedef typename AccessIterator < A > :: Handle HandleType;
+  const HandleType & p = dynamic_cast<const  HandleType &> (org);
+  assignIterator(p);
+}
+
+
+template < class A > inline void AccessIterator < A > :: Handle :: 
+assignIterator(const AccessIterator < A > :: Handle & p)
+{
+  _fac = p._fac; 
+  _fac ? (_fac->ref ++, _w = _fac->iterator (p._w), 0) : (_w = new IteratorSTI < A > (), 0) ;
+}
+*/
 
 template < class A > inline AccessIterator < A > :: Handle :: Handle () 
   : _fac (0), _a (0), _w (0) {
@@ -2879,74 +2923,123 @@ inline int Gitter :: Geometric :: hbndseg4 :: nChild () const {
 // #        #       #    #  #         #        #    #       #   #   #    #     #    #    #  #   #
 // #######  ######  #    #  #        ###       #    ######  #    #  #    #     #     ####   #    #
 
-template < class A > LeafIterator < A > :: LeafIterator () : _grd (0), _w (0) {
+template < class A > inline LeafIterator < A > :: LeafIterator () : _grd (0), _w (0) {
   return ;
 }
 
-template < class A > LeafIterator < A > :: LeafIterator (Gitter & g) : _grd (&g), _w (0) , _a(0) {
+template < class A > inline LeafIterator < A > :: LeafIterator (Gitter & g) : _grd (&g), _w (0) , _a(0) {
   _grd->ref ++ ;
   _w = _grd->iterator (_a) ;
   return ;
 }
 
-template < class A > LeafIterator < A > :: LeafIterator (const LeafIterator < A > & x) : _grd (x._grd), _w (0) {
-  _grd->ref ++ ;
-  _w = _grd->iterator (x._w) ;
+template < class A > inline LeafIterator < A > :: LeafIterator (const LeafIterator < A > & x) : _grd(0), _w(0), _a(0) 
+{
+  assign(x);
   return ;
 }
 
-template < class A > LeafIterator < A > :: ~LeafIterator () {
+template < class A > inline LeafIterator < A > & 
+LeafIterator < A > :: operator = (const LeafIterator < A > & x) 
+{
+  this->removeObj();
+  assign(x);
+  return *this;
+}
+
+template < class A > inline LeafIterator < A > :: ~LeafIterator () {
+  this->removeObj();
+  return ;
+}
+
+template < class A > inline void LeafIterator < A > :: removeObj () 
+{
   if (_grd) _grd->ref -- ;
+  _grd = 0;
   if(_w) delete _w ;
-  return ;
+  _w = 0;
 }
 
-template < class A > IteratorSTI < A > * LeafIterator < A > :: operator -> () const {
+template < class A > inline void LeafIterator < A > :: assign (const LeafIterator < A > & x)  
+{
+  assert( _grd == 0 );
+  assert( _w   == 0 );
+  _grd = x._grd; 
+  _grd->ref ++ ;
+  assert( x._w );
+  _w = x._w->clone();
+}
+
+template < class A > inline IteratorSTI < A > * LeafIterator < A > :: operator -> () const {
   return _w ;
 }
 
-template < class A > IteratorSTI < A > & LeafIterator < A > :: operator * () const {
+template < class A > inline IteratorSTI < A > & LeafIterator < A > :: operator * () const {
   return * _w ;
 }
 
-// #                                 ###
-// #        ######    ##    ######    #      #####  ######  #####     ##     #####   ####   #####
-// #        #        #  #   #         #        #    #       #    #   #  #      #    #    #  #    #
-// #        #####   #    #  #####     #        #    #####   #    #  #    #     #    #    #  #    #
-// #        #       ######  #         #        #    #       #####   ######     #    #    #  #####
-// #        #       #    #  #         #        #    #       #   #   #    #     #    #    #  #   #
-// #######  ######  #    #  #        ###       #    ######  #    #  #    #     #     ####   #    #
+//////////////////////////////////////////////////////////////////////////////
+//
+//  --LevelIterator 
+//
+//////////////////////////////////////////////////////////////////////////////
 
-template < class A > LevelIterator < A > :: LevelIterator () : _grd (0), _w (0) {
+template < class A > inline LevelIterator < A > :: LevelIterator () : _grd (0), _w (0) {
   return ;
 }
 
-template < class A > LevelIterator < A > :: LevelIterator (Gitter & g , int l ) : _grd (&g), _ahl (l) , _w (0) , _a(0)
+template < class A > inline LevelIterator < A > :: LevelIterator (Gitter & g , int l ) : _grd (&g), _ahl (l) , _w (0) , _a(0)
 {
   _grd->ref ++ ;
   _w = _grd->levelIterator (_a,_ahl) ;
   return ;
 }
 
-template < class A > LevelIterator < A > :: LevelIterator (const LevelIterator < A > & x) : _grd (x._grd), _w (0) 
+template < class A > inline LevelIterator < A > :: LevelIterator (const LevelIterator < A > & x) 
+: _grd (0), _w (0) , _a(0) 
 {
-  _grd->ref ++ ;
-  _w = _grd->levelIterator (x._w,x._ahl) ;
+  assign(x);
   return ;
 }
 
-template < class A > LevelIterator < A > :: ~LevelIterator () {
-  if (_grd) _grd->ref -- ;
-  if(_w) delete _w ;
+template < class A > inline LevelIterator < A > & 
+LevelIterator < A > :: operator = (const LevelIterator < A > & x) 
+{
+  this->removeObj();
+  assign(x);
+  return *this;
+}
+
+
+template < class A > inline LevelIterator < A > :: ~LevelIterator () {
+  this->removeObj();
   return ;
 }
 
-template < class A > IteratorSTI < A > * LevelIterator < A > :: operator -> () const {
+template < class A > inline IteratorSTI < A > * LevelIterator < A > :: operator -> () const {
   return _w ;
 }
 
-template < class A > IteratorSTI < A > & LevelIterator < A > :: operator * () const {
+template < class A > inline IteratorSTI < A > & LevelIterator < A > :: operator * () const {
   return * _w ;
+}
+
+template < class A > inline void LevelIterator < A > :: removeObj () 
+{
+  if (_grd) _grd->ref -- ;
+  _grd = 0;
+  if(_w) delete _w ;
+  _w = 0;
+}
+
+template < class A > inline void LevelIterator < A > :: assign (const LevelIterator < A > & x)  
+{
+  assert( _grd == 0 );
+  assert( _w == 0 );
+  _grd = x._grd; 
+  _grd->ref ++ ;
+  assert( x._w );
+  _w = x._w->clone();
 }
 
 #endif  // GITTER_STI_H_INCLUDED
