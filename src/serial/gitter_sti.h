@@ -112,40 +112,45 @@ public :
   inline operator int () const ;
 } ;
 
+////////////////////////////////////////////////////////////////////
+//
 // Schnittstelle des Iterationsobjekts vgl. Gamma, Helm, Johnson &
 // Vlissides: Design Patterns; Addison Wesley 
 // Die Schnittstellenbeschreibung wird sowohl polymorph als auch
 // in den verschiedenen Schablonen f"ur einfache Iterationsobjekte
 // s.a. Datei 'walk.h' verwendet.
-
-template < class A > class IteratorSTI {
-  IteratorSTI (const IteratorSTI < A > &) {}
+//
+////////////////////////////////////////////////////////////////////
+template < class A > class IteratorSTI 
+{
+protected:  
+  IteratorSTI () {}
 public :
   typedef A val_t ;
-  IteratorSTI () {}
   virtual ~IteratorSTI () {}
+  virtual void first () = 0 ;
+  virtual void next () = 0 ;
+  virtual int done () const = 0 ;
+  virtual int size () = 0 ;
+  virtual val_t & item () const = 0 ;
+  virtual IteratorSTI < A > * clone () const = 0;
+} ;
+
+
+// EmptyIterator is an iterator of an empty set  
+// for some default values 
+template < class A > class EmptyIterator : public IteratorSTI < A > {
+  EmptyIterator (const EmptyIterator < A > &) {}
+public :
+  typedef A val_t ;
+  EmptyIterator () {}
+  virtual ~EmptyIterator () {}
   virtual void first () ;
   virtual void next () ;
   virtual int done () const ;
   virtual int size () ;
   virtual val_t & item () const ;
-  virtual IteratorSTI < A > * clone () const;
-} ;
-
-// sobald die const-correctness verbessert wird ...
-
-template < class A > class ConstIteratorSTI {
-  const ConstIteratorSTI < A > & operator = (const ConstIteratorSTI < A > &) ;
-  ConstIteratorSTI (const ConstIteratorSTI < A > &) {}
-public :
-  typedef A val_t ;
-  ConstIteratorSTI () {}
-  virtual ~ConstIteratorSTI () {}
-  virtual void first () ;
-  virtual void next () ;
-  virtual int done () const ;
-  virtual int size () ;
-  virtual const val_t & item () const ;
+  virtual IteratorSTI < A > * clone () const ;
 } ;
 
 // AccessIterator < . > ist eine Schnittstellenschablone, die
@@ -202,6 +207,9 @@ public :
     inline int size () ;
     inline A & item () const ;
     inline virtual IteratorSTI< A > * clone () const;
+  private: 
+    void removeObj(); 
+    void assign (const AccessIterator < A > :: Handle &);
   } ;
 protected :
   AccessIterator () {}
@@ -211,11 +219,8 @@ protected :
 // the Leaf Iterators 
 template < class A > class LeafIterator ;
 
-template < class A > class ConstLeafIterator ;
-
 // the Level Iterators 
 template < class A > class LevelIterator ;
-
 
 class Gitter {
   Refcount ref ;
@@ -1600,68 +1605,54 @@ inline Refcount :: operator int () const {
   return _c ;
 }
 
-template < class A > void ConstIteratorSTI < A > :: first () {
+//////////////////////////////////////////////////////////////////
+//
+// Empty Iterator  
+//
+//////////////////////////////////////////////////////////////////
+
+template < class A > inline void EmptyIterator < A > :: first () {
   return ;
 }
 
-template < class A > void ConstIteratorSTI < A > :: next () {
+template < class A > inline void EmptyIterator < A > :: next () {
   return ;
 }
 
-template < class A > int ConstIteratorSTI < A > :: done () const {
+template < class A > inline int EmptyIterator < A > :: done () const {
   return 1 ;
 }
 
-template < class A > int ConstIteratorSTI < A > :: size () {
+template < class A > inline int EmptyIterator < A > :: size () {
   return 0 ;
 }
 
-template < class A > const A & ConstIteratorSTI < A > :: item () const {
-  void * p = (void *)(0) ;
-  abort () ;
-  return * (const val_t *)p ;
-}
-
-template < class A > void IteratorSTI < A > :: first () {
-  return ;
-}
-
-template < class A > void IteratorSTI < A > :: next () {
-  return ;
-}
-
-template < class A > int IteratorSTI < A > :: done () const {
-  return 1 ;
-}
-
-template < class A > int IteratorSTI < A > :: size () {
-  return 0 ;
-}
-
-template < class A > A & IteratorSTI < A > :: item () const {
-  void * p = (void *)(0) ;
-  abort() ;
-  return *(val_t *)(p) ;
-}
-
-template < class A > IteratorSTI < A > * IteratorSTI < A > :: clone () const 
+template < class A > inline A & EmptyIterator < A > :: item () const 
 {
+  // don't dereference an empty iterator 
+  assert( ! done () );
   abort() ;
-  return 0; 
+  A * p = 0;
+  return *p;
+}
+
+template < class A > inline IteratorSTI < A > * EmptyIterator < A > :: clone () const 
+{
+  return new EmptyIterator < A > (*this);
 }
 
 template < class A > inline AccessIterator < A > :: Handle :: Handle (AccessIterator < A > & f) 
-  : _fac (&f), _a (0), _w (0) {
+  : _fac (&f), _a (0), _w (0) 
+{
   _fac->ref ++ ; 
   _w = _fac->iterator (_a) ;
   return ;
 }
 
 template < class A > inline AccessIterator < A > :: Handle :: Handle (const AccessIterator < A > :: Handle & p) 
-  : _fac (p._fac), _a (0) 
+  : _fac (0), _a (0) , _w(0) 
 { 
-  _fac ? (_fac->ref ++, _w = _fac->iterator (p._w), 0) : (_w = new IteratorSTI < A > (), 0) ;
-  //assignIterator(p);
+  assign(p);
   return ;
 }
 
@@ -1672,41 +1663,43 @@ clone () const
   return new HandleType (*this);
 }
 
-/*
-template < class A > inline void AccessIterator < A > :: Handle :: 
-assign(const IteratorSTI< A > & org)
-{
-  typedef typename AccessIterator < A > :: Handle HandleType;
-  const HandleType & p = dynamic_cast<const  HandleType &> (org);
-  assignIterator(p);
-}
-
-
-template < class A > inline void AccessIterator < A > :: Handle :: 
-assignIterator(const AccessIterator < A > :: Handle & p)
-{
-  _fac = p._fac; 
-  _fac ? (_fac->ref ++, _w = _fac->iterator (p._w), 0) : (_w = new IteratorSTI < A > (), 0) ;
-}
-*/
-
 template < class A > inline AccessIterator < A > :: Handle :: Handle () 
-  : _fac (0), _a (0), _w (0) {
-  _w = new IteratorSTI < A > () ;
+  : _fac (0), _a (0), _w ( new EmptyIterator < A > () ) 
+{
   return ;
 }
 
 template < class A > inline AccessIterator < A > :: Handle :: ~Handle () {
-  if(_fac) _fac->ref-- ;
-  delete _w ;
+  removeObj();
   return ;
 }
 
-template < class A > inline const typename AccessIterator < A > :: Handle & AccessIterator < A > :: Handle :: operator = (const AccessIterator < A > :: Handle & x) {
-  delete _w, _w = 0 ;
-  x._fac ? ((_fac ? _fac->ref -- : 0), _w = (_fac = x._fac)->iterator (x._w), _fac->ref ++)
-    : ((_fac ? _fac->ref -- : 0), _fac = 0, _w = new IteratorSTI < A > (), 0) ;
+template < class A > inline void AccessIterator < A > :: Handle :: 
+removeObj () 
+{
+  if(_fac) _fac->ref-- ;
+  _fac = 0; 
+  if(_w) delete _w ;
+  _w = 0;
+  return ;
+}
+
+template < class A > inline const typename AccessIterator < A > :: Handle & AccessIterator < A > :: Handle :: operator = (const AccessIterator < A > :: Handle & x) 
+{
+  removeObj();
+  assign(x);
   return x ;
+}
+
+template < class A > inline void 
+AccessIterator < A > :: Handle :: assign (const AccessIterator < A > :: Handle & x) 
+{
+  assert( _fac == 0 );
+  assert( _w == 0 );
+  
+  _fac = x._fac; 
+  if( _fac ) _fac->ref ++ ;
+  _w = x._w->clone();
 }
 
 template < class A > inline bool AccessIterator < A > :: Handle :: operator == (const AccessIterator < A > :: Handle & x) const {
@@ -2942,13 +2935,13 @@ template < class A > inline LeafIterator < A > :: LeafIterator (const LeafIterat
 template < class A > inline LeafIterator < A > & 
 LeafIterator < A > :: operator = (const LeafIterator < A > & x) 
 {
-  this->removeObj();
+  removeObj();
   assign(x);
   return *this;
 }
 
 template < class A > inline LeafIterator < A > :: ~LeafIterator () {
-  this->removeObj();
+  removeObj();
   return ;
 }
 
@@ -3005,14 +2998,14 @@ template < class A > inline LevelIterator < A > :: LevelIterator (const LevelIte
 template < class A > inline LevelIterator < A > & 
 LevelIterator < A > :: operator = (const LevelIterator < A > & x) 
 {
-  this->removeObj();
+  removeObj();
   assign(x);
   return *this;
 }
 
 
 template < class A > inline LevelIterator < A > :: ~LevelIterator () {
-  this->removeObj();
+  removeObj();
   return ;
 }
 
