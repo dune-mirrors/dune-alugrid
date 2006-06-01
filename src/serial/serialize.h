@@ -53,7 +53,11 @@ class ObjectStream {
     class EOFException {} ;
     class OutOfMemoryException {} ;
     inline ObjectStream () throw (OutOfMemoryException) ;
+    
+    // set read and write counter to zero, i.e. like a newly created
+    // ObjectStream 
     inline void clear();
+
     inline ~ObjectStream () ;
     inline ObjectStream (const ObjectStream &) throw (OutOfMemoryException) ;
     inline const ObjectStream & operator = (const ObjectStream &) throw (OutOfMemoryException);
@@ -69,7 +73,8 @@ class ObjectStream {
     inline void read (double &a) throw (EOFException) { readObject(a);}
     inline void write (int a) throw (OutOfMemoryException) {writeObject(a);}
     inline void read (int &a) throw (EOFException) {readObject(a);}
-  friend class MpAccessMPI ;
+
+    friend class MpAccessMPI ;
 } ;
 
 
