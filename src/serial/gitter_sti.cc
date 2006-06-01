@@ -196,29 +196,6 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const helement_STI 
   return new leaf_element__macro_element__iterator (container ()) ;
 }
 
-// --vertex iterator 
-IteratorSTI < Gitter :: vertex_STI > * Gitter :: iterator (const IteratorSTI < vertex_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
-  abort();
-  return 0;
-}
-
-IteratorSTI < Gitter :: hedge_STI > * Gitter :: iterator (const IteratorSTI < hedge_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
-  abort();
-  return 0;
-}
-
-IteratorSTI < Gitter :: hface_STI > * Gitter :: iterator (const IteratorSTI < hface_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
-  abort();
-  return 0;
-}
-
-IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const IteratorSTI < helement_STI > * w) {
-  return new leaf_element__macro_element__iterator ( *(const leaf_element__macro_element__iterator *) w) ;
-}
-
 //**************************************************************************
 // all the level iterators 
 //************************************************************************** 
@@ -303,8 +280,6 @@ levelIterator (const Gitter :: vertex_STI * a, const any_has_level< vertex_STI >
   TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (difie)) ;
   }
   return new VectorAlign < vertex_STI > (_iterators) ;
-  //cerr << "WARNING: method levelIterator for vertex_STI returns LeafIterator see: " << __FILE__ << " line: " << __LINE__ << "\n";
-  //return iterator(a);
 }
 
 // create level edge iterator 
@@ -380,43 +355,11 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: levelIterator (const helement
   return new level_element__macro_element__iterator (container (),ahl) ;
 }
 
-IteratorSTI < Gitter :: helement_STI > * Gitter :: levelIterator (const IteratorSTI < helement_STI > * w) {
-  typedef Insert < AccessIterator < Gitter :: helement_STI > :: Handle, 
-    TreeIterator < Gitter :: helement_STI, any_has_level < Gitter :: helement_STI> > > 
-      level_element__macro_element__iterator ;
-  return new level_element__macro_element__iterator (*(const level_element__macro_element__iterator *) w) ;
-}
-
-IteratorSTI < Gitter :: vertex_STI > * Gitter :: levelIterator (const IteratorSTI < vertex_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
-  abort();
-  return 0;
-}
-
-IteratorSTI < Gitter :: hedge_STI > * Gitter :: levelIterator (const IteratorSTI < hedge_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
-  abort();
-  return 0;
-}
-
-IteratorSTI < Gitter :: hface_STI > * Gitter :: levelIterator (const IteratorSTI < hface_STI > * w) {
-  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
-  abort();
-  return 0;
-}
-
 IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: levelIterator (const hbndseg_STI *, const any_has_level<hbndseg_STI> & ahl) {
   typedef Insert < AccessIterator < hbndseg_STI > :: Handle, 
     TreeIterator < hbndseg_STI, any_has_level < hbndseg_STI> > >  
           level_bnd__macro_bnd__iterator ;
   return new level_bnd__macro_bnd__iterator (container (),ahl) ;
-}
-
-IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: levelIterator (const IteratorSTI < hbndseg_STI > * ) 
-{
-  cerr << "ERROR: method not implemented! " << __FILE__ << " line: " << __LINE__ << "\n";
-  abort();
-  return 0;
 }
 
 //*******************************************
