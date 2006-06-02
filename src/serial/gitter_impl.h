@@ -283,12 +283,14 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           for (int i = 0; i < 6; i++) gs.setData( os, *myhface4(i));
 	      }
 	virtual void attachleafs() {  
+	  assert(this->leafRefCount()==0);
 	  addleaf();
 	  for (int i = 0; i < 6 ;i++) myhface4(i)->addleaf();
 	  for (int i = 0; i < 12 ;i++) myhedge1(i)->addleaf();
 	  for (int i = 0; i < 8 ;i++) myvertex(i)->addleaf();
 	}
-	virtual void detachleafs() { 
+	virtual void detachleafs() {
+	  assert(this->leafRefCount()==1);
 	  removeleaf();
 	  for (int i = 0; i < 6 ;i++) myhface4(i)->removeleaf();
 	  for (int i = 0; i < 12 ;i++) myhedge1(i)->removeleaf();
@@ -303,14 +305,20 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         {
            const myhface4_t & face = static_cast<const myhface4_t &> (f); 
            
+           myhface4_t & myface = *(myhface4(face_nr));
+
            IndexManagerType & vxIm = _myGrid->indexManager(3);
            IndexManagerType & edIm = _myGrid->indexManager(2);
-
-           myhface4_t & myface = *(myhface4(face_nr));
 
            myface.setIndex( _myGrid->indexManager(1) , face.getIndex ());
            for (int i = 0; i < 4; ++i) 
            {
+	     assert(fabs(myface.myvertex(i)->Point()[0]-
+			 face.myvertex(i)->Point()[0])<1e-8);
+	     assert(fabs(myface.myvertex(i)->Point()[1]-
+			 face.myvertex(i)->Point()[1])<1e-8);
+	     assert(fabs(myface.myvertex(i)->Point()[2]-
+			 face.myvertex(i)->Point()[2])<1e-8);
              myface.myvertex(i)->setIndex(vxIm, face.myvertex(i)->getIndex());
              myface.myhedge1(i)->setIndex(edIm, face.myhedge1(i)->getIndex());
            }

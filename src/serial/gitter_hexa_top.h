@@ -1208,6 +1208,7 @@ template < class A > inline HexaTop < A >
 template < class A > HexaTop < A > :: ~HexaTop () {
   this->freeIndex( this->_indexManager );
   if (!_dwn) this->detachleafs();
+  else assert(!this->isLeafEntity());
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_fc) delete _fc ;

@@ -298,6 +298,9 @@ public :
     inline bool isLeafEntity() {
       return (leafref>0);
     }
+    inline int leafRefCount() {
+      return leafref;
+    }
 #else 
     inline int getIndex () const { return -1; }
     void setIndex ( const int index ) {}
@@ -1240,6 +1243,7 @@ public :
       virtual int nbLevel() const {return level();}
       virtual int nbLeaf() const {return leaf();}
       virtual void attachleafs() {
+	this->addleaf();
 	myhface3(0)->addleaf();
 	for (int i=0;i<3;i++) {
 	  myhface3(0)->myhedge1(i)->addleaf();
@@ -1247,6 +1251,7 @@ public :
 	}
       }
       virtual void detachleafs() {
+	this->removeleaf();
 	myhface3(0)->removeleaf();
 	for (int i=0;i<3;i++) {
 	  myhface3(0)->myhedge1(i)->removeleaf();
@@ -1290,6 +1295,7 @@ public :
       virtual int nbLevel() const {return level();}
       virtual int nbLeaf() const {return leaf();}
       virtual void attachleafs() {
+	this->addleaf();
 	myhface4(0)->addleaf();
 	for (int i=0;i<4;i++) {
 	  myhface4(0)->myhedge1(i)->addleaf();
@@ -1297,6 +1303,7 @@ public :
 	}
       }
       virtual void detachleafs() {
+	this->removeleaf();
 	myhface4(0)->removeleaf();
 	for (int i=0;i<4;i++) {
 	  myhface4(0)->myhedge1(i)->removeleaf();

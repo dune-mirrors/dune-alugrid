@@ -1414,6 +1414,7 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 
 #ifdef _DUNE_USES_ALU3DGRID_
     // read the real level of ghost 
+    assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
     bool wasLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
     
     os.readObject( _ghostLevel );
@@ -1423,11 +1424,18 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 
     if (!wasLeaf && nowLeaf) {
       myhbnd().attachleafs();
-      myhbnd().addleaf();
     }
     else if (wasLeaf && !nowLeaf){
       myhbnd().detachleafs();
-      myhbnd().removeleaf();
+    }
+    assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
+    
+
+    if (!nowLeaf) {
+      assert(myhbnd().leafRefCount()==0);
+    }
+    if (nowLeaf) {
+      assert(myhbnd().leafRefCount()==1);
     }
 #endif
     

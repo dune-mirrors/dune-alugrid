@@ -410,6 +410,7 @@ void GitterDunePll :: ALUcomm (
       GatherScatterType & faceData ,
       GatherScatterType & elementData ) 
 {
+  const bool showpos = false;
   const int nl = mpAccess ().nlinks ();
 
   const bool containsVertices = vertexData.contains(3,3);
@@ -438,7 +439,7 @@ void GitterDunePll :: ALUcomm (
 		   TreeIterator < hface_STI, RecvRule_t > > OuterRecvIteratorType;
   typedef IteratorSTI < hface_STI > IteratorType;
 
-  duneExchangeDynamicState ();
+  // duneExchangeDynamicState ();
 
   vector < ObjectStream > vec (nl) ;
   if (haveHigherCodimData )
@@ -448,9 +449,11 @@ void GitterDunePll :: ALUcomm (
       pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>   b;
       pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
       
-      //mpAccess ().barrier();
-      //std::cerr << "SEND1 : " << mpAccess().myrank() << std::endl;
-      //mpAccess ().barrier();
+      if (showpos) {
+	mpAccess ().barrier();
+	std::cerr << "SEND1 : " << mpAccess().myrank() << std::endl;
+	mpAccess ().barrier();
+      }
       for (int i = 0; i < nl ; i++)  {
 	vec[i].clear();
 	if (containsVertices){
@@ -490,10 +493,12 @@ void GitterDunePll :: ALUcomm (
       }
       //den anderen Partitionen die Slave-Daten senden
       vec = mpAccess ().exchange (vec);
-      //und dort den Master-Knoten "ubergeben
-      //mpAccess ().barrier();
-      //std::cerr << "RECV1 : " << mpAccess().myrank() << std::endl;
-      //mpAccess ().barrier();
+      //und dort den Master-Knoten "ubergeben]
+      if (showpos) {
+	mpAccess ().barrier();
+	std::cerr << "RECV1 : " << mpAccess().myrank() << std::endl;
+	mpAccess ().barrier();
+      }
       for (int i = 0; i < nl; i++) { 
 	if (containsVertices) {
 	  int hasdata;
@@ -552,9 +557,11 @@ void GitterDunePll :: ALUcomm (
       pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
       
       //MasterknotenDaten sammeln
-      //mpAccess ().barrier();
-      //std::cerr << "SEND2 : " << mpAccess().myrank() << std::endl;
-      //mpAccess ().barrier();
+      if (showpos) {
+	mpAccess ().barrier();
+	std::cerr << "SEND2 : " << mpAccess().myrank() << std::endl;
+	mpAccess ().barrier();
+      }
       for (int i = 0; i < nl; i++) {
 	vec[i].clear();
 	if (containsVertices) {
@@ -594,9 +601,11 @@ void GitterDunePll :: ALUcomm (
       //den anderen Partitionen die Slave-Daten senden
       vec = mpAccess ().exchange (vec);
       //und auf die Slave-Knoten draufschreiben
-      //mpAccess ().barrier();
-      //std::cerr << "RECV2 : " << mpAccess().myrank() << std::endl;
-      //mpAccess ().barrier();
+      if (showpos) {
+	mpAccess ().barrier();
+	std::cerr << "RECV2 : " << mpAccess().myrank() << std::endl;
+	mpAccess ().barrier();
+      }
       for (int i = 0; i < nl; i++) { 
 	if (containsVertices) {
 	  int hasdata;
@@ -651,10 +660,11 @@ void GitterDunePll :: ALUcomm (
   } // end haveHigherCodimData 
   if (1)
   {
-    //mpAccess ().barrier();
-    //std::cerr << "GHOST SEND" << std::endl;
-    //mpAccess ().barrier();
-    //vector < ObjectStream > osv (nl) ;
+    if (showpos) {
+      mpAccess ().barrier();
+      std::cerr << "GHOST SEND" << std::endl;
+      mpAccess ().barrier();
+    }
     for (int l = 0 ; l < nl ; l ++) { 	
       vec[l].clear();
       {
@@ -699,9 +709,11 @@ void GitterDunePll :: ALUcomm (
       }
     }
     vec = mpAccess ().exchange (vec) ;     
-    //mpAccess ().barrier();
-    //std::cerr << "GHOST RECV" << std::endl;
-    //mpAccess ().barrier();
+    if (showpos) {
+      mpAccess ().barrier();
+      std::cerr << "GHOST RECV" << std::endl;
+      mpAccess ().barrier();
+    }
     //all ghost cells get new data
     for (int l = 0 ; l < nl ; l ++ ) 
     {  
