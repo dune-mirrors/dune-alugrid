@@ -105,8 +105,8 @@ pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll :: hedg
   AccessIteratorTT < hedge_STI > :: InnerHandle mdi (containerPll (), l) ;
   AccessIteratorTT < hedge_STI > :: OuterHandle mdo (containerPll (), l) ;
 
-  Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, TreeIterator < hedge_STI, is_leaf < hedge_STI > > > ei (mdi) ;  
-  Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, TreeIterator < hedge_STI, is_leaf < hedge_STI > > > eo (mdo) ;
+  Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, TreeIterator < hedge_STI, is_def_true < hedge_STI > > > ei (mdi) ;  
+  Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, TreeIterator < hedge_STI, is_def_true < hedge_STI > > > eo (mdo) ;
   
   AccessIteratorTT < hface_STI > :: InnerHandle mfi (containerPll (), l) ;
   AccessIteratorTT < hface_STI > :: OuterHandle mfo (containerPll (), l) ;
@@ -121,21 +121,21 @@ pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll :: hedg
 
   Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
   TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
-  TreeIterator < hedge_STI, is_leaf < hedge_STI > > > eifi (dfimi) ;
+  TreeIterator < hedge_STI, is_def_true < hedge_STI > > > eifi (dfimi) ;
 
   Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
   TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-  TreeIterator < hedge_STI, is_leaf < hedge_STI > > > eifo (dfimo) ;
+  TreeIterator < hedge_STI, is_def_true < hedge_STI > > > eifo (dfimo) ;
 
   return pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > 
-    (new AlignIterator < Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, TreeIterator < hedge_STI, is_leaf < hedge_STI > > >,
+    (new AlignIterator < Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, TreeIterator < hedge_STI, is_def_true < hedge_STI > > >,
   Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
   TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
-  TreeIterator < hedge_STI, is_leaf < hedge_STI > > >, hedge_STI > (ei,eifi),
-     new AlignIterator < Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, TreeIterator < hedge_STI, is_leaf < hedge_STI > > >,
+  TreeIterator < hedge_STI, is_def_true < hedge_STI > > >, hedge_STI > (ei,eifi),
+     new AlignIterator < Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, TreeIterator < hedge_STI, is_def_true < hedge_STI > > >,
   Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
   TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-  TreeIterator < hedge_STI, is_leaf < hedge_STI > > >, hedge_STI > (eo, eifo)) ;
+  TreeIterator < hedge_STI, is_def_true < hedge_STI > > >, hedge_STI > (eo, eifo)) ;
 }
 
 pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 

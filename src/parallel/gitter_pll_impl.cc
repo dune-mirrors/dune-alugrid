@@ -376,10 +376,12 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 }
 
 void TetraPllXBase :: VertexData2os(ObjectStream & os, GatherScatterType & gs) {
+  assert(mytetra().isLeafEntity());
   for (int i = 0; i < 4; i++) gs.sendData( os, *mytetra().myvertex(i));
 }
 
 void TetraPllXBase :: EdgeData2os(ObjectStream & os, GatherScatterType & gs) {
+   assert(mytetra().isLeafEntity());
    for (int i = 0; i < 6; i++) gs.sendData( os, *mytetra().myhedge1(i));
 }
 
@@ -388,11 +390,16 @@ void TetraPllXBase :: FaceData2os(ObjectStream & os, GatherScatterType & gs) {
 } 
 
 void HexaPllBaseX :: VertexData2os(ObjectStream & os, GatherScatterType & gs) {
+   assert(myhexa().isLeafEntity());
   for (int i = 0; i < 8; i++) gs.sendData( os, *myhexa().myvertex(i));
 }
 
 void HexaPllBaseX :: EdgeData2os(ObjectStream & os, GatherScatterType & gs) {
-  for (int i = 0; i < 12; i++) gs.sendData( os, *myhexa().myhedge1(i));
+	assert(myhexa().isLeafEntity());
+  for (int i = 0; i < 12; i++) {
+    assert(myhexa().myhedge1(i)->isLeafEntity());
+    gs.sendData( os, *myhexa().myhedge1(i));
+  }
 }
 
 void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs) {

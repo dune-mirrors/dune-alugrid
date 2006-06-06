@@ -1295,20 +1295,22 @@ public :
       virtual int nbLevel() const {return level();}
       virtual int nbLeaf() const {return leaf();}
       virtual void attachleafs() {
-	this->addleaf();
-	myhface4(0)->addleaf();
-	for (int i=0;i<4;i++) {
-	  myhface4(0)->myhedge1(i)->addleaf();
-	  myhface4(0)->myvertex(i)->addleaf();
-	}
+        assert(this->leafRefCount()==0);
+	      this->addleaf();
+	      myhface4(0)->addleaf();
+	      for (int i=0;i<4;i++) {
+	        myhface4(0)->myhedge1(i)->addleaf();
+	        myhface4(0)->myvertex(i)->addleaf();
+	      }
       }
       virtual void detachleafs() {
-	this->removeleaf();
-	myhface4(0)->removeleaf();
-	for (int i=0;i<4;i++) {
-	  myhface4(0)->myhedge1(i)->removeleaf();
-	  myhface4(0)->myvertex(i)->removeleaf();
-	}
+        assert(this->leafRefCount()==1);
+	      this->removeleaf();
+	      myhface4(0)->removeleaf();
+	      for (int i=0;i<4;i++) {
+	        myhface4(0)->myhedge1(i)->removeleaf();
+	        myhface4(0)->myvertex(i)->removeleaf();
+	      }
       }
     private :
       myhface4_t * _face ;

@@ -185,18 +185,18 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
               for (int i = 0; i < 4; i++) gs.setData( os, *myhface3(i));
 	          }
-	    virtual void attachleafs() {  
-	      addleaf();
-	      for (int i = 0; i < 4 ;i++) myhface3(i)->addleaf();
-	      for (int i = 0; i < 6 ;i++) myhedge1(i)->addleaf();
-	      for (int i = 0; i < 4 ;i++) myvertex(i)->addleaf();
-	    }
-	    virtual void detachleafs() { 
-	      removeleaf();
-	      for (int i = 0; i < 4 ;i++) myhface3(i)->removeleaf();
-	      for (int i = 0; i < 6 ;i++) myhedge1(i)->removeleaf();
-	      for (int i = 0; i < 4 ;i++) myvertex(i)->removeleaf();
-	    }
+	          virtual void attachleafs() {  
+	            addleaf();
+	            for (int i = 0; i < 4 ;i++) myhface3(i)->addleaf();
+	            for (int i = 0; i < 6 ;i++) myhedge1(i)->addleaf();
+	            for (int i = 0; i < 4 ;i++) myvertex(i)->addleaf();
+	          }
+	          virtual void detachleafs() { 
+	            removeleaf();
+	            for (int i = 0; i < 4 ;i++) myhface3(i)->removeleaf();
+	            for (int i = 0; i < 6 ;i++) myhedge1(i)->removeleaf();
+	            for (int i = 0; i < 4 ;i++) myvertex(i)->removeleaf();
+	          }
 
     protected:     
       	    ~TetraEmpty () {}
@@ -277,25 +277,27 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           for (int i = 0; i < 8; i++) gs.setData( os, *myvertex(i));
         }
         virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-          for (int i = 0; i < 12; i++) gs.setData( os, *myhedge1(i));
+          for (int i = 0; i < 12; i++) {
+	          gs.setData( os, *myhedge1(i));
+	        }
       	}
         virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
           for (int i = 0; i < 6; i++) gs.setData( os, *myhface4(i));
+        }
+	      virtual void attachleafs() {  
+	        assert(this->leafRefCount()==0);
+	        addleaf();
+	        for (int i = 0; i < 6 ;i++) myhface4(i)->addleaf();
+	        for (int i = 0; i < 12 ;i++) myhedge1(i)->addleaf();
+	        for (int i = 0; i < 8 ;i++) myvertex(i)->addleaf();
 	      }
-	virtual void attachleafs() {  
-	  assert(this->leafRefCount()==0);
-	  addleaf();
-	  for (int i = 0; i < 6 ;i++) myhface4(i)->addleaf();
-	  for (int i = 0; i < 12 ;i++) myhedge1(i)->addleaf();
-	  for (int i = 0; i < 8 ;i++) myvertex(i)->addleaf();
-	}
-	virtual void detachleafs() {
-	  assert(this->leafRefCount()==1);
-	  removeleaf();
-	  for (int i = 0; i < 6 ;i++) myhface4(i)->removeleaf();
-	  for (int i = 0; i < 12 ;i++) myhedge1(i)->removeleaf();
-	  for (int i = 0; i < 8 ;i++) myvertex(i)->removeleaf();
-	}
+	      virtual void detachleafs() {
+	        assert(this->leafRefCount()==1);
+	        removeleaf();
+	        for (int i = 0; i < 6 ;i++) myhface4(i)->removeleaf();
+	        for (int i = 0; i < 12 ;i++) myhedge1(i)->removeleaf();
+	        for (int i = 0; i < 8 ;i++) myvertex(i)->removeleaf();
+	      }
 
       	Gitter* _myGrid;
         friend class HexaTop<HexaEmpty>;
