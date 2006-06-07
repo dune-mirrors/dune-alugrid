@@ -443,190 +443,253 @@ void GitterDunePll :: ALUcomm (
 
   vector < ObjectStream > vec (nl) ;
   if (haveHigherCodimData )
+  {
     {
-      {
-  pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
-  pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>   b;
-  pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
+      pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
+      pair < IteratorSTI < hedge_STI >  *, IteratorSTI < hedge_STI  > *> b;
+      pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> c;
       
-  if (showpos) {
-    mpAccess ().barrier();
-    std::cerr << "SEND1 : " << mpAccess().myrank() << std::endl;
-    mpAccess ().barrier();
-  }
-  for (int i = 0; i < nl ; i++)  {
-    vec[i].clear();
-    if (containsVertices){
-      a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten 
-      for (a.second->first (); ! a.second->done () ; a.second->next ()) {
-        if (a.second->item().isLeafEntity()) {
-    vec[i].writeObject(1);
-    vertexData.sendData(vec[i],a.second->item());
-        } else vec[i].writeObject(0);
-      }
-      delete a.first;
-      delete a.second;      
-    }
-    if (containsEdges) {
-      b = iteratorTT ((hedge_STI *)0,i); 
-      //ueber alle meine Slave-Knoten (leaf-iterator!) (FEHLER!!!!!!!!!)
-      for (b.second->first (); ! b.second->done () ; b.second->next ()) {
-        if (b.second->item().isLeafEntity()) {
-    vec[i].writeObject(1);
-    edgeData.sendData(vec[i],b.second->item());
-        } else vec[i].writeObject(0);
-      }
-      delete b.first;
-      delete b.second;      
-    }
-    if (containsFaces) {
-      AccessIteratorTT < hface_STI > :: OuterHandle mof1_(containerPll (), i);          //f"ur Slaves
-      OuterSendIteratorType mof_(mof1_); 
-      for (mof_.first () ; ! mof_.done () ; mof_.next ()) {
-        if (mof_.item().isLeafEntity()) {
-    vec[i].writeObject(1);
-    faceData.sendData(vec[i], mof_.item());
-        }
-        else vec[i].writeObject(0);
-      }
-    } 
-  }
-  //den anderen Partitionen die Slave-Daten senden
-  vec = mpAccess ().exchange (vec);
-  //und dort den Master-Knoten "ubergeben]
-  if (showpos) {
-    mpAccess ().barrier();
-    std::cerr << "RECV1 : " << mpAccess().myrank() << std::endl;
-    mpAccess ().barrier();
-  }
-  for (int i = 0; i < nl; i++) { 
-    if (containsVertices) {
-      int hasdata;
-      a = iteratorTT ((vertex_STI *)0,i);
-      for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-        vec[i].readObject(hasdata);
-        assert(hasdata==0 || hasdata==1);
-        if (hasdata) {
-    if (a.first->item().isLeafEntity()) {
-      vertexData.recvData(vec[i],a.first->item ());
-    }
-    else {
-      vertexData.removeData(vec[i],a.first->item ());
-    }
-        }
-      }
-      delete a.first;
-      delete a.second;
-    }
-    if (containsEdges) {
-      int hasdata;
-      b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-      for (b.first->first (); ! b.first->done () ; b.first->next ()) {
-        vec[i].readObject(hasdata);
-        if (hasdata) {
-    if (b.first->item().isLeafEntity()) {
-      edgeData.recvData(vec[i],b.first->item());
-    } else {
-      edgeData.removeData(vec[i],b.first->item ());
-    }
-        }
-      }
-      delete b.first;
-      delete b.second;
-    }
-    if (containsFaces) {
-      int hasdata;
-      AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), i);
-      InnerRecvIteratorType mif_(mif1_);
-      for (mif_.first () ; ! mif_.done () ; mif_.next ()) {
-        vec[i].readObject(hasdata);
-        if (hasdata) {
-    if (mif_.item().isLeafEntity()) {
-      faceData.recvData(vec[i], mif_.item());
-    } else {
-      faceData.removeData(vec[i],mif_.item());
-    }
-        }
-      }
-    }
-  }
-      }
+      if (showpos) 
       {
-  pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
-  pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>   b;
-  pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   c;
+        mpAccess ().barrier();
+        std::cerr << "SEND1 : " << mpAccess().myrank() << std::endl;
+        mpAccess ().barrier();
+      }
+
+      for (int i = 0; i < nl ; i++)  
+      {
+        vec[i].clear();
+        if (containsVertices)
+        {
+          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten 
+          for (a.second->first (); ! a.second->done () ; a.second->next ()) 
+          {
+            if (a.second->item().isLeafEntity()) 
+            {
+              vec[i].writeObject(1);
+              vertexData.sendData(vec[i],a.second->item());
+            } else vec[i].writeObject(0);
+          }
+          delete a.first;
+          delete a.second;      
+        }
+        
+        if (containsEdges) 
+        {
+          b = iteratorTT ((hedge_STI *)0,i); 
+          //ueber alle meine Slave-Knoten (leaf-iterator!) (FEHLER!!!!!!!!!)
+          for (b.second->first (); ! b.second->done () ; b.second->next ()) 
+          {
+            if (b.second->item().isLeafEntity()) 
+            {
+              vec[i].writeObject(1);
+              edgeData.sendData(vec[i],b.second->item());
+            } 
+            else 
+              vec[i].writeObject(0);
+          }
+          delete b.first;
+          delete b.second;      
+        }
+        
+        if (containsFaces) 
+        {
+          AccessIteratorTT < hface_STI > :: OuterHandle mof1_(containerPll (), i);          //f"ur Slaves
+          OuterSendIteratorType mof_(mof1_); 
+          for (mof_.first () ; ! mof_.done () ; mof_.next ()) 
+          {
+            if (mof_.item().isLeafEntity()) 
+            {
+              vec[i].writeObject(1);
+              faceData.sendData(vec[i], mof_.item());
+            }
+            else 
+              vec[i].writeObject(0);
+          }
+        } 
+      }
       
-  //MasterknotenDaten sammeln
-  if (showpos) {
-    mpAccess ().barrier();
-    std::cerr << "SEND2 : " << mpAccess().myrank() << std::endl;
-    mpAccess ().barrier();
-  }
-  for (int i = 0; i < nl; i++) {
-    vec[i].clear();
-    if (containsVertices) {
-      a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
-      for (a.first->first (); ! a.first->done () ; a.first->next ()) {
-        if (a.first->item().isLeafEntity()) {
-    vec[i].writeObject(int(1));
-    vertexData.sendData(vec[i],a.first->item ());
-        } else vec[i].writeObject(int(0));
+      //den anderen Partitionen die Slave-Daten senden
+      vec = mpAccess ().exchange (vec);
+      //und dort den Master-Knoten "ubergeben]
+      
+      if (showpos) 
+      {
+        mpAccess ().barrier();
+        std::cerr << "RECV1 : " << mpAccess().myrank() << std::endl;
+        mpAccess ().barrier();
       }
-      delete a.first;
-      delete a.second;     
-    }
-    if (containsEdges) {
-      b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-      for (b.first->first (); ! b.first->done () ; b.first->next ()) {
-        if (b.first->item().isLeafEntity()) {
-    vec[i].writeObject(1);
-    edgeData.sendData(vec[i],b.first->item ());
-        } else vec[i].writeObject(0);
-      }
-      delete b.first;
-      delete b.second;     
-    }
-    if (containsFaces) {
-      AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), i);
-      InnerSendIteratorType mif_(mif1_);
-      for (mif_.first () ; ! mif_.done () ; mif_.next ()) {
-        if (mif_.item().isLeafEntity()) {
-    vec[i].writeObject(1);
-    faceData.sendData(vec[i], mif_.item());
+      
+      for (int i = 0; i < nl; i++) 
+      { 
+        if (containsVertices) 
+        {
+          int hasdata;
+          a = iteratorTT ((vertex_STI *)0,i);
+          for (a.first->first (); ! a.first->done () ; a.first->next ()) 
+          {
+            vec[i].readObject(hasdata);
+            assert(hasdata==0 || hasdata==1);
+            if (hasdata) 
+            {
+              if (a.first->item().isLeafEntity()) 
+                vertexData.recvData(vec[i],a.first->item ());
+              else 
+                vertexData.removeData(vec[i],a.first->item ());
+            }
+          }
+          delete a.first;
+          delete a.second;
         }
-        else vec[i].writeObject(0);
-      }
-    }
-  }
-  //den anderen Partitionen die Slave-Daten senden
-  vec = mpAccess ().exchange (vec);
-  //und auf die Slave-Knoten draufschreiben
-  if (showpos) {
-    mpAccess ().barrier();
-    std::cerr << "RECV2 : " << mpAccess().myrank() << std::endl;
-    mpAccess ().barrier();
-  }
-  for (int i = 0; i < nl; i++) { 
-    if (containsVertices) {
-      int hasdata;
-      a = iteratorTT ((vertex_STI *)0,i);
-      for (a.second->first (); ! a.second->done () ; a.second->next ()) {
-        vec[i].readObject(hasdata);
-        assert(hasdata==0 || hasdata==1);
-        if (hasdata) {
-    if (a.second->item().isLeafEntity()) {
-      vertexData.setData(vec[i],a.second->item ());
-    } else {
-      vertexData.removeData(vec[i],a.second->item ());
-    }
+
+        if (containsEdges) 
+        {
+          int hasdata;
+          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+          for (b.first->first (); ! b.first->done () ; b.first->next ()) 
+          {
+            vec[i].readObject(hasdata);
+            if (hasdata) 
+            {
+              if (b.first->item().isLeafEntity()) 
+                edgeData.recvData(vec[i],b.first->item());
+              else 
+                edgeData.removeData(vec[i],b.first->item ());
+            }
+          }
+          delete b.first;
+          delete b.second;
+        }
+
+        if (containsFaces) 
+        {
+          int hasdata;
+          AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), i);
+          InnerRecvIteratorType mif_(mif1_);
+          for (mif_.first () ; ! mif_.done () ; mif_.next ()) 
+          {
+            vec[i].readObject(hasdata);
+            if (hasdata) 
+            {
+              if (mif_.item().isLeafEntity()) 
+                faceData.recvData(vec[i], mif_.item());
+              else 
+                faceData.removeData(vec[i],mif_.item());
+            }
+          }
         }
       }
-      delete a.first;
-      delete a.second;
     }
-    if (containsEdges) {
-      int hasdata;
-      b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+
+    // next round 
+    {
+      pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
+      pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> b;
+      pair < IteratorSTI < hface_STI  > *, IteratorSTI < hface_STI  > *> c;
+      
+      //MasterknotenDaten sammeln
+      if (showpos) {
+        mpAccess ().barrier();
+        std::cerr << "SEND2 : " << mpAccess().myrank() << std::endl;
+        mpAccess ().barrier();
+      }
+      
+      for (int i = 0; i < nl; i++) 
+      {
+        vec[i].clear();
+        if (containsVertices) 
+        {
+          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
+          for (a.first->first (); ! a.first->done () ; a.first->next ()) 
+          {
+            if (a.first->item().isLeafEntity()) 
+            {
+              vec[i].writeObject(int(1));
+              vertexData.sendData(vec[i],a.first->item ());
+            } 
+            else 
+              vec[i].writeObject(int(0));
+          }
+          delete a.first;
+          delete a.second;     
+        }
+        
+        if (containsEdges) 
+        {
+          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+          for (b.first->first (); ! b.first->done () ; b.first->next ()) 
+          {
+            if (b.first->item().isLeafEntity()) 
+            {
+              vec[i].writeObject(1);
+              edgeData.sendData(vec[i],b.first->item ());
+            } 
+            else 
+              vec[i].writeObject(0);
+          }
+          delete b.first;
+          delete b.second;     
+        }
+        
+        if (containsFaces) 
+        {
+          AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), i);
+          InnerSendIteratorType mif_(mif1_);
+          
+          for (mif_.first () ; ! mif_.done () ; mif_.next ()) 
+          {
+            if (mif_.item().isLeafEntity()) 
+            {
+              vec[i].writeObject(1);
+              faceData.sendData(vec[i], mif_.item());
+            }
+            else 
+              vec[i].writeObject(0);
+          }
+        }
+      }
+      
+      //den anderen Partitionen die Slave-Daten senden
+      vec = mpAccess ().exchange (vec);
+      
+      //und auf die Slave-Knoten draufschreiben
+      if (showpos) 
+      {
+        mpAccess ().barrier();
+        std::cerr << "RECV2 : " << mpAccess().myrank() << std::endl;
+        mpAccess ().barrier();
+      }
+      
+      for (int i = 0; i < nl; i++) 
+      { 
+        if (containsVertices) 
+        {
+          int hasdata;
+          a = iteratorTT ((vertex_STI *)0,i);
+          for (a.second->first (); ! a.second->done () ; a.second->next ()) {
+            vec[i].readObject(hasdata);
+            assert(hasdata==0 || hasdata==1);
+            
+            if (hasdata) 
+            {
+              if (a.second->item().isLeafEntity()) 
+              {
+                vertexData.setData(vec[i],a.second->item ());
+              } 
+              else 
+              {
+                vertexData.removeData(vec[i],a.second->item ());
+              }
+            }
+          }
+          delete a.first;
+          delete a.second;
+        }
+        
+        if (containsEdges) 
+        {
+          int hasdata;
+          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
       for (b.second->first (); ! b.second->done () ; b.second->next ()) {
         vec[i].readObject(hasdata);
         if (hasdata) {
@@ -658,6 +721,9 @@ void GitterDunePll :: ALUcomm (
   }
       }
     } // end haveHigherCodimData 
+
+
+
   if (1)
     {
       if (showpos) {
