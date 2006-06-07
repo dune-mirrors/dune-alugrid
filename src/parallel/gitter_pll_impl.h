@@ -500,26 +500,19 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     
   private :
     myhbnd_t & _hbnd ;
-    double _center [3] ;
     balrule_t _rul ;
     bool _lockCRS ;
 
     int _ghostLevel;
     int _ghostLeaf;
   public:
-    const double (& barycenter () const)[3] { return _center ; }
     inline bool checkGhostLevel () const { return _ghostLevel == myhbnd().level(); }
     inline int ghostLevel () const { return _ghostLevel; }
-    inline bool ghostLeaf () const { 
-      return (_ghostLeaf==1); }
+    inline bool ghostLeaf () const { return (_ghostLeaf==1); }
 
+    typedef Gitter :: ghostpair_STI ghostpair_STI;
     // to be revised (works for the moment )
-    virtual Gitter::helement_STI * getGhost () 
-    { 
-      //assert(false);
-      //cout << "getGhost \n";
-      return myhbnd().getGhost(); 
-    }
+    virtual ghostpair_STI getGhost () { return myhbnd().getGhost(); }
 } ;
 
 template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClosure < A > {
