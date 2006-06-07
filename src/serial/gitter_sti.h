@@ -487,8 +487,11 @@ public :
       // true if element was refined this adaptation step 
       bool hasBeenRefined () const { return _refinedTag; }
     protected:
-      inline void splitGhost () {}
-      inline void setGhost (helement *, int) {}
+      // if ghost element exists, then ghost is splitted, when bnd is splitted 
+      virtual inline void splitGhost () {}
+      // if ghost element exists, then ghost is coarsened, when bnd is coarsened  
+      virtual inline void coarseGhost () {}
+      virtual inline void setGhost ( const pair< helement * , int > & ) {}
   };
 
   class hbndseg  : public Dune_hbndDefault
@@ -528,15 +531,13 @@ public :
     // for dune 
     virtual int ghostLevel () const = 0 ;
     virtual bool ghostLeaf () const = 0 ;
-     // default return 0 means we have no ghost element on this boundary
-    // segment, because we only have ghost on interior boundary.
-    // should return 0 for non-interior boundaries 
-    virtual helement * getGhost () = 0; 
     
-    // return local number of internal face 
-    virtual int getGhostFaceNumber () const = 0; 
-
-    virtual void faceNormal (double * normal) const = 0 ;
+    // getGhost returns pointer to ghost, which might be 0 in case that
+    // bndseg is external bnd seg, 
+    // the int is -1 by default, or the internal ghostFace number (
+    // getGhostFaceNumber) when ghost is non-zero 
+    virtual const pair < helement * ,int> & getGhost () const = 0; 
+    
   public :
     virtual void restoreFollowFace () = 0 ;
     virtual void attachleafs() { abort(); }
@@ -548,6 +549,7 @@ public :
   typedef hface hface_STI ;
   typedef hedge hedge_STI ;
   typedef vertex  vertex_STI ;
+  typedef pair < helement_STI * , int > ghostpair_STI;
 
   // Die Klassen Internal-*- sind nur daf"ur da, aus einem Element, einer
   // Fl"ache oder einer Kante die inneren geometrischen Objekte, die von
@@ -727,13 +729,6 @@ public :
       virtual ~hasFace3 () {}
       inline bool bndNotifyBalance (balrule_t,int) ;
 
-      // Schwerpunkt des anliegenden Elements beschaffen:
-    public:
-      virtual const double (& barycenter () const)[3] {
-        static double p [3] = {.0,.0,.0} ;
-        return p ;
-      }
-      // Ende
     public:
       virtual int calcSortnr (int,int) {return (abort(),0);}   
       virtual bool isboundary() const = 0;    
@@ -751,17 +746,10 @@ public :
       virtual ~hasFace4 () {}
       inline bool bndNotifyBalance (balrule_t,int) ;
 
-      // Schwerpunkt des anliegenden Elements beschaffen:
-    public:
-      virtual const double (& barycenter () const)[3] {
-        static double p [3] = {.0,.0,.0} ;
-        return p ;
-      }
+    public :
       virtual bool isboundary() const = 0;
       virtual int nbLevel() const {return (abort(),-1);}
       virtual int nbLeaf() const {return (abort(),-1);}
-      // Ende
-
     } ;
 
     class VertexGeo : public vertex_STI, public MyAlloc 
@@ -877,15 +865,15 @@ public :
       myrule_t parentRule() const;
       bool isConforming() const;
       virtual bool isInteriorLeaf() const {
-	if (nb.front().first->isboundary())
-	  return ( nb.rear().first->nbLeaf() && 
-		   nb.rear().first->nbLevel() == this->level());
-	else if (nb.rear().first->isboundary())
-	  return ( nb.front().first->nbLeaf() && 
-		   nb.front().first->nbLevel() == this->level());
-	else
-	  return (nb.rear().first->nbLeaf() ||
-		  (nb.front().first->nbLeaf()));
+  if (nb.front().first->isboundary())
+    return ( nb.rear().first->nbLeaf() && 
+       nb.rear().first->nbLevel() == this->level());
+  else if (nb.rear().first->isboundary())
+    return ( nb.front().first->nbLeaf() && 
+       nb.front().first->nbLevel() == this->level());
+  else
+    return (nb.rear().first->nbLeaf() ||
+      (nb.front().first->nbLeaf()));
       }
     protected :
       myhedge1_t * e [polygonlength] ;
@@ -950,15 +938,15 @@ public :
       virtual hface4 * subface4 (int) = 0 ;
       virtual const hface4 * subface4 (int) const = 0 ;
       virtual bool isInteriorLeaf() const {
-	if (nb.front().first->isboundary())
-	  return ( nb.rear().first->nbLeaf() && 
-		   nb.rear().first->nbLevel() == this->level());
-	else if (nb.rear().first->isboundary())
-	  return ( nb.front().first->nbLeaf() && 
-		   nb.front().first->nbLevel() == this->level());
-	else
-	  return (nb.rear().first->nbLeaf() ||
-		  (nb.front().first->nbLeaf()));
+  if (nb.front().first->isboundary())
+    return ( nb.rear().first->nbLeaf() && 
+       nb.rear().first->nbLevel() == this->level());
+  else if (nb.rear().first->isboundary())
+    return ( nb.front().first->nbLeaf() && 
+       nb.front().first->nbLevel() == this->level());
+  else
+    return (nb.rear().first->nbLeaf() ||
+      (nb.front().first->nbLeaf()));
       }
     public :
       virtual myrule_t getrule () const = 0 ;
@@ -1242,21 +1230,25 @@ public :
       virtual int nChild () const;
       virtual int nbLevel() const {return level();}
       virtual int nbLeaf() const {return leaf();}
-      virtual void attachleafs() {
-	this->addleaf();
-	myhface3(0)->addleaf();
-	for (int i=0;i<3;i++) {
-	  myhface3(0)->myhedge1(i)->addleaf();
-	  myhface3(0)->myvertex(i)->addleaf();
-	}
+      virtual void attachleafs() 
+      {
+        this->addleaf();
+        myhface3(0)->addleaf();
+        for (int i=0;i<3;i++) 
+        {
+          myhface3(0)->myhedge1(i)->addleaf();
+          myhface3(0)->myvertex(i)->addleaf();
+        }
       }
-      virtual void detachleafs() {
-	this->removeleaf();
-	myhface3(0)->removeleaf();
-	for (int i=0;i<3;i++) {
-	  myhface3(0)->myhedge1(i)->removeleaf();
-	  myhface3(0)->myvertex(i)->removeleaf();
-	}
+      virtual void detachleafs() 
+      {
+	      this->removeleaf();
+	      myhface3(0)->removeleaf();
+	      for (int i=0;i<3;i++) 
+        {
+	        myhface3(0)->myhedge1(i)->removeleaf();
+	        myhface3(0)->myvertex(i)->removeleaf();
+      	}
       }
     private :
       myhface3_t * _face ;
@@ -1294,20 +1286,24 @@ public :
       virtual int nChild () const;
       virtual int nbLevel() const {return level();}
       virtual int nbLeaf() const {return leaf();}
-      virtual void attachleafs() {
+      virtual void attachleafs() 
+      {
         assert(this->leafRefCount()==0);
 	      this->addleaf();
 	      myhface4(0)->addleaf();
-	      for (int i=0;i<4;i++) {
+	      for (int i=0;i<4;i++) 
+        {
 	        myhface4(0)->myhedge1(i)->addleaf();
 	        myhface4(0)->myvertex(i)->addleaf();
 	      }
       }
-      virtual void detachleafs() {
+      virtual void detachleafs() 
+      {
         assert(this->leafRefCount()==1);
 	      this->removeleaf();
 	      myhface4(0)->removeleaf();
-	      for (int i=0;i<4;i++) {
+	      for (int i=0;i<4;i++) 
+        {
 	        myhface4(0)->myhedge1(i)->removeleaf();
 	        myhface4(0)->myvertex(i)->removeleaf();
 	      }
@@ -2929,7 +2925,8 @@ template < class A > inline LeafIterator < A > :: LeafIterator () : _grd (0), _w
   return ;
 }
 
-template < class A > inline LeafIterator < A > :: LeafIterator (Gitter & g) : _grd (&g), _w (0) , _a(0) {
+template < class A > inline LeafIterator < A > :: LeafIterator (Gitter & g) 
+  : _grd (&g), _w (0) , _a(0) {
   _grd->ref ++ ;
   _w = _grd->iterator (_a) ;
   return ;
