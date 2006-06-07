@@ -397,13 +397,15 @@ void DuneParallelGridMover :: initialize ()
     // if internal face 
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
     {
-       
+      typedef Gitter :: ghostpair_STI ghostpair_STI;
       typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
-      hexa_GEO * gh = static_cast<hexa_GEO *> ((*i)->getGhost());
+
+      ghostpair_STI gpair = (*i)->getGhost();
+      hexa_GEO * gh = dynamic_cast<hexa_GEO *> (gpair.first);
       if( gh )
       {
         _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0), (*i)->twist (0), 
-                                               gh, (*i)->getGhostFaceNumber() ) ;
+                                               gh, gpair.second ) ;
       }
       else 
         _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
@@ -421,13 +423,16 @@ void DuneParallelGridMover :: initialize ()
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
     {
       // check for ghost element 
+      typedef Gitter :: ghostpair_STI ghostpair_STI;
+      ghostpair_STI gpair = (*i)->getGhost();
+
       typedef Gitter :: Geometric :: tetra_GEO  tetra_GEO;
-      tetra_GEO * gh = static_cast<tetra_GEO *> ((*i)->getGhost());
+      tetra_GEO * gh = dynamic_cast<tetra_GEO *> (gpair.first);
       if( gh )
       {
         // insert new internal storage 
         _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), 
-                                               gh , (*i)->getGhostFaceNumber() ) ;
+                                               gh , gpair.second ) ;
       }
       // until here
       else 
