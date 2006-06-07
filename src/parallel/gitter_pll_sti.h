@@ -238,6 +238,7 @@ class FacePllXIF : public LinkedObject, public MacroGridMoverIF {
 class ElementPllXIF : public MacroGridMoverIF {
   protected :
     typedef Gitter :: Geometric :: hasFace4 :: balrule_t balrule_t ;
+    typedef Gitter :: ghostpair_STI ghostpair_STI;
     virtual ~ElementPllXIF () {}
   public :
     virtual pair < ElementPllXIF_t *, int > accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int) = 0 ;
@@ -245,11 +246,11 @@ class ElementPllXIF : public MacroGridMoverIF {
     virtual pair < ElementPllXIF_t *, int > accessInnerPllX (const pair < ElementPllXIF_t *, int > &, int) = 0 ;
     virtual pair < const ElementPllXIF_t *, int > accessInnerPllX (const pair < const ElementPllXIF_t *, int > &, int) const = 0 ;
   public :
-    virtual Gitter::helement_STI * getGhost () 
+    virtual ghostpair_STI getGhost () 
     { 
       cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
       abort(); 
-      return 0; 
+      return ghostpair_STI (0,-1); 
     }
 
     virtual int ghostLevel () const
@@ -576,7 +577,8 @@ clone () const
 template < class A > inline AccessIteratorTT < A > :: OuterHandle :: OuterHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) {
 }
 
-template < class A > inline AccessIteratorTT < A > :: OuterHandle :: OuterHandle (const OuterHandle & p) : HandleBase (p) {
+template < class A > inline AccessIteratorTT < A > :: OuterHandle :: 
+OuterHandle (const OuterHandle & p) : HandleBase (p) {
 }
 
 template < class A > inline AccessIteratorTT < A > :: OuterHandle :: ~OuterHandle () {
@@ -610,10 +612,12 @@ clone () const
 }
 
 
-template < class A > listSmartpointer__to__iteratorSTI < A > :: listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handle > & a) : _l (a) {
+template < class A > listSmartpointer__to__iteratorSTI < A > :: 
+listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handle > & a) : _l (a) {
 }
 
-template < class A > listSmartpointer__to__iteratorSTI < A > :: listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > & a) : _l (a._l) {
+template < class A > listSmartpointer__to__iteratorSTI < A > :: 
+listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > & a) : _l (a._l) {
 }
 
 template < class A > listSmartpointer__to__iteratorSTI < A > :: ~listSmartpointer__to__iteratorSTI () {
