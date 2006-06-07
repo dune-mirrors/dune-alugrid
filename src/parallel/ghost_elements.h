@@ -306,11 +306,11 @@ class MacroGhostBuilder : public MacroGridBuilder
 // interface class for macro ghost 
 class MacroGhost : public MyAlloc
 {
-  typedef Gitter :: helement_STI GhostElement_t;
+  typedef Gitter :: ghostpair_STI ghostpair_STI; 
 
   public:
     virtual ~MacroGhost () {}
-    virtual GhostElement_t * getGhost()  = 0;
+    virtual ghostpair_STI getGhost() = 0;
     virtual const MacroGhostPoint * getGhostPoints () const = 0;
     virtual int ghostFaceNumber () const { return 0; } 
 };
@@ -321,6 +321,7 @@ extern void printHexa(ostream & os , Gitter :: Geometric :: hexa_GEO * item_);
 class MacroGhostTetra : public MacroGhost
 {
   typedef Gitter :: helement_STI GhostElement_t;
+  typedef Gitter :: ghostpair_STI ghostpair_STI; 
   typedef Gitter :: Geometric :: BuilderIF BuilderIF;
 
   typedef Gitter :: Geometric :: tetra_GEO GhostTetra_t;
@@ -329,10 +330,11 @@ class MacroGhostTetra : public MacroGhost
   MacroGhostBuilder    _mgb; 
   MacroGhostPointTetra _ghPoint;
 
-  GhostTetra_t * _ghost;
+  ghostpair_STI _ghostPair; 
+
 public:
   MacroGhostTetra( BuilderIF & bi, const Hbnd3IntStoragePoints & allp, hface3_GEO * face) :
-    _mgb(bi) , _ghPoint(allp) , _ghost(0) 
+    _mgb(bi) , _ghPoint(allp) , _ghostPair(0,-1) 
   { 
     MacroGhostBuilder & mgb = _mgb;
 
@@ -381,13 +383,16 @@ public:
     */
     
     // InsertUniqueHexa gets the global vertex numbers 
-    _ghost = mgb.InsertUniqueTetra ( _ghPoint.vertices() ).first ;
-    assert( _ghost );
+    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( _ghPoint.vertices() ).first ;
+    _ghostPair.first = ghost;
+    assert( _ghostPair.first );
+    _ghostPair.second = _ghPoint.internalFace(); 
+    assert( _ghostPair.second >= 0 );
 
     int v[3];
     for(int i=0; i<4; ++i)
     {
-      const hface3_GEO * myface = _ghost->myhface3(i); 
+      const hface3_GEO * myface = ghost->myhface3(i); 
       for(int vx = 0; vx<3; ++vx) 
         v[vx] = myface->myvertex(vx)->ident();
 
@@ -397,10 +402,10 @@ public:
    
 #ifndef NDEBUG
     LinearMapping lm (
-       _ghost->myvertex(0)->Point(),
-       _ghost->myvertex(1)->Point(),
-       _ghost->myvertex(2)->Point(),
-       _ghost->myvertex(3)->Point()
+       ghost->myvertex(0)->Point(),
+       ghost->myvertex(1)->Point(),
+       ghost->myvertex(2)->Point(),
+       ghost->myvertex(3)->Point()
        );
     assert( lm.det() > 0.0 );
 #endif
@@ -410,13 +415,18 @@ public:
   ~MacroGhostTetra () {
   }
   
-  GhostElement_t * getGhost() {
-    assert(_ghost); 
-    return _ghost; 
+  ghostpair_STI getGhost() 
+  {
+    assert(_ghostPair.first); 
+    return _ghostPair; 
   }
 
   // return local number of fake face 
-  int ghostFaceNumber () const { return _ghPoint.internalFace(); } 
+  int ghostFaceNumber () const 
+  { 
+    assert(_ghostPair.second >= 0);
+    return _ghostPair.second; 
+  } 
 
   // for storage in PllClosure Elements, if packed, we need the point 
   const MacroGhostPoint * getGhostPoints () const
@@ -430,6 +440,8 @@ public:
 class MacroGhostHexa : public MacroGhost
 {
   typedef Gitter :: helement_STI GhostElement_t;
+  typedef Gitter :: ghostpair_STI ghostpair_STI; 
+
   typedef Gitter :: Geometric :: VertexGeo VertexGeo;
   typedef Gitter :: Geometric :: hface4_GEO hface4_GEO;
   typedef Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
@@ -442,11 +454,11 @@ class MacroGhostHexa : public MacroGhost
   MacroGhostBuilder   _mgb; 
   MacroGhostPointHexa _ghPoint;
   
-  hexa_GEO * _ghost;
+  ghostpair_STI _ghostPair; 
   
 public:
   MacroGhostHexa( BuilderIF & bi, const Hbnd4IntStoragePoints & allp, hface4_GEO * face) :
-    _mgb(bi) , _ghPoint(allp) , _ghost(0) 
+    _mgb(bi) , _ghPoint(allp) , _ghostPair(0,-1) 
   { 
     MacroGhostBuilder & mgb = _mgb;
     
@@ -473,13 +485,16 @@ public:
     }
 
     // InsertUniqueHexa gets the global vertex numbers 
-    _ghost = mgb.InsertUniqueHexa ( _ghPoint.vertices() ).first ;
-    assert( _ghost );
+    hexa_GEO * ghost = mgb.InsertUniqueHexa ( _ghPoint.vertices() ).first ;
+    assert( ghost );
+
+    _ghostPair.first  = ghost;
+    _ghostPair.second = _ghPoint.internalFace();
 
     int v[4];
     for(int i=0; i<6; ++i)
     {
-      const hface4_GEO * myface = _ghost->myhface4(i); 
+      const hface4_GEO * myface = ghost->myhface4(i); 
       for(int vx = 0; vx<4; ++vx)
         v[vx] = myface->myvertex(vx)->ident();
       mgb.InsertUniqueHbnd4( v , Gitter :: hbndseg :: ghost_closure );
@@ -492,10 +507,18 @@ public:
   ~MacroGhostHexa () {
   }
   
-  GhostElement_t * getGhost() { return _ghost; }
+  ghostpair_STI getGhost() 
+  { 
+    assert( _ghostPair.first );
+    return _ghostPair; 
+  }
 
   // return local number of fake face 
-  int ghostFaceNumber () const { return _ghPoint.internalFace(); } 
+  int ghostFaceNumber () const 
+  { 
+    assert( _ghostPair.second >= 0 );
+    return _ghostPair.second; 
+  }
 
   // for storage in PllClosure Elements, if packed, we need the point 
   const MacroGhostPoint * getGhostPoints () const
