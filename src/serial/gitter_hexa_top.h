@@ -857,8 +857,11 @@ template < class A > inline Hbnd4Top < A > ::
 Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, Gitter::helement_STI * gh, int gFace ) : 
   A (f, i,ppv,up->_myGrid), _bbb (0), _dwn (0), _up(up) , _lvl (l), _bt(_up->_bt) ,
-  _indexManager(_up->_indexManager) {
-  this->setGhost ( gh , gFace );
+  _indexManager(_up->_indexManager) 
+{
+  typedef Gitter :: ghostpair_STI ghostpair_STI;
+  ghostpair_STI p ( gh, gFace );
+  this->setGhost ( p );
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -932,9 +935,11 @@ template < class A > bool Hbnd4Top < A > :: coarse () {
   } while ( (b = b->next()) ) ;
   if (x) {
     if (! this->lockedAgainstCoarsening ()) {
+
       this->preCoarsening () ;
-      delete _dwn ;
-      _dwn = 0 ;
+      //this->coarseGhost();
+      
+      delete _dwn ; _dwn = 0 ;
       this->myhface4 (0)->coarse () ;
     }
   }
@@ -950,6 +955,8 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   assert (_dwn == 0) ;
 
   // get the childs 
+
+  typedef Gitter :: ghostpair_STI ghostpair_STI;
   typedef typename Gitter :: Geometric :: hexa_GEO  hexa_GEO;
   typedef typename Gitter :: Geometric :: hface4_GEO hface4_GEO;
 
@@ -958,12 +965,14 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   // refine ghost element 
   this->splitGhost();
 
-  hexa_GEO * gh = static_cast<hexa_GEO *> (this->getGhost());
+  ghostpair_STI ghostpair = this->getGhost();
+
+  hexa_GEO * gh = dynamic_cast<hexa_GEO *> (ghostpair.first);
 
   int gFace[4] = { -1,-1,-1,-1 };
   if(gh)
   {
-    int gFaceNum = this->getGhostFaceNumber();
+    int gFaceNum = ghostpair.second; 
     assert( gFaceNum >= 0 );
     assert( gFaceNum < 6 );
 

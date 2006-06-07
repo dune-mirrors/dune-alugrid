@@ -691,7 +691,8 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
           Gitter::helement_STI * gh, int gFace ) : 
   A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
-  this->setGhost ( gh , gFace );
+  typedef Gitter :: ghostpair_STI ghostpair_STI;
+  this->setGhost ( ghostpair_STI (gh , gFace) );
   this->setIndex( _indexManager.getIndex() );
   return ;
 }
@@ -702,7 +703,8 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
           Gitter * grd , Gitter::helement_STI * gh, int gFace) : 
   A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
   _indexManager(im) {
-  this->setGhost ( gh , gFace);
+  typedef Gitter :: ghostpair_STI ghostpair_STI;
+  this->setGhost ( ghostpair_STI (gh , gFace) );
   this->setIndex( _indexManager.getIndex() );
   return ;
 }
@@ -755,7 +757,7 @@ template < class A > inline void Hbnd3Top < A > :: append (innerbndseg_t * b) {
 
 template < class A > void Hbnd3Top < A > :: split_e01 () {
   int l = 1 + level () ;
-  int gFace = this->getGhostFaceNumber(); 
+  int gFace = this->getGhost().second ;
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
   innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
   assert (b0 && b1) ;
@@ -766,7 +768,7 @@ template < class A > void Hbnd3Top < A > :: split_e01 () {
 
 template < class A > void Hbnd3Top < A > :: split_e12 () {
   int l = 1 + level () ;
-  int gFace = this->getGhostFaceNumber(); 
+  int gFace = this->getGhost().second ;
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
   innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
   assert (b0 && b1) ;
@@ -777,7 +779,7 @@ template < class A > void Hbnd3Top < A > :: split_e12 () {
 
 template < class A > void Hbnd3Top < A > :: split_e20 () {
   int l = 1 + level () ;
-  int gFace = this->getGhostFaceNumber(); 
+  int gFace = this->getGhost().second ;
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0, gFace) ;
   innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, 0, gFace) ;
   assert (b0 && b1) ;
@@ -792,16 +794,24 @@ template < class A > void Hbnd3Top < A > :: split_iso4 () {
   this->splitGhost();
 
   // get the childs 
+  typedef typename Gitter :: ghostpair_STI ghostpair_STI; 
   typedef typename Gitter :: Geometric :: tetra_GEO tetra_GEO;
   typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
-  tetra_GEO * gh = static_cast<tetra_GEO *> (this->getGhost()); 
+
+  ghostpair_STI ghostpair = this->getGhost();
+  
+  tetra_GEO * gh = dynamic_cast<tetra_GEO *> (ghostpair.first); 
 
   // I hate this piece of code, R.K. 
   tetra_GEO *(ghchild)[4] = {0,0,0,0};
   int gFace[4] = {-1,-1,-1,-1};
+
+  // if ghost exists 
   if(gh)
   {
-    hface3_GEO * face = gh->myhface3( this->getGhostFaceNumber() ); 
+    // ghostpair.second is the internal face number of the face 
+    // connected to the interior of the process 
+    hface3_GEO * face = gh->myhface3( ghostpair.second ); 
     face = face->down();
     for( int i=0; i<4; i++)
     {
@@ -857,9 +867,11 @@ template < class A > bool Hbnd3Top < A > :: coarse () {
   } while ( (b = b->next()) ) ;
   if (x) {
     if (!this->lockedAgainstCoarsening ()) {
+      
       this->preCoarsening () ;
-      delete _dwn ;
-      _dwn = 0 ;
+      //this->coarseGhost();
+      
+      delete _dwn ; _dwn = 0 ;
       this->myhface3 (0)->coarse () ;
     }
   }
