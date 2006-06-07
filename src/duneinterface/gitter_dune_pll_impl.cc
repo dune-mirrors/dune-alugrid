@@ -695,14 +695,14 @@ void GitterDunePll :: ALUcomm (
         w.item ().accessPllX ().accessInnerPllX () ;
       // p.first->writeDynamicState (vec [l], p.second) ;
       // vec[l].writeObject(w.item().level());
-      if (w.item().isInteriorLeaf()) {
+      if (w.item().isInteriorLeaf()) 
+      {
         vec[l].writeObject(1);
         if (containsVertices) p.first->VertexData2os(vec[l], vertexData);
         if (containsEdges)    p.first->EdgeData2os(vec[l], edgeData);
         if (containsFaces)    p.first->FaceData2os(vec[l], faceData);
-        if (containsElements) {
-    p.first->writeDynamicState (vec [l], elementData) ;
-        }
+        if (containsElements) 
+          p.first->writeDynamicState (vec [l], elementData) ;
       }
       else vec[l].writeObject(0);
     }
