@@ -42,6 +42,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         typedef X mypllx_t ;
       protected :
         
+        typedef Gitter :: ghostpair_STI  ghostpair_STI;
         typedef typename GitterBasisImpl::Objects::tetra_IMPL GhostElement_t;
         typedef typename A :: myhface3_t myhface3_t ;
         typedef typename A :: balrule_t balrule_t ;
@@ -61,23 +62,23 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
 
       protected :
         // ghost element behind pllx bnd, can be pointer to null 
-        GhostElement_t * _ghost;
-
-        int _ghostFace;
+        mutable ghostpair_STI _ghostPair;
 
         // refine ghost if face is refined and ghost is not zero 
         void splitGhost (); 
         
+        // coarse ghost if face is coarsened 
+        void coarseGhost (); 
+        
         // set ghost pointer, use this method otherwise all constructors
         // have to be changed 
-        void setGhost (Gitter::helement_STI *gh, int);
+        void setGhost ( const ghostpair_STI & gpair );
+
       public:
         // return ghost pointer 
-        Gitter::helement_STI * getGhost (); 
-        int getGhostFaceNumber () const;
+        const ghostpair_STI & getGhost () const; 
         
         // Schwerpunkt des anliegenden Elements beschaffen:
-        inline const double (& barycenter () const)[3] ;
         inline int ghostLevel () const ;
     } ;
     typedef class HbndPll micro_t ;
@@ -107,7 +108,6 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
       private :
         mypllx_t * _mxt ;
         MacroGhost * _gm;
-        int _ghostFace;
     } ;
     typedef class HbndPllMacro macro_t ;
 } ;
@@ -152,7 +152,7 @@ template < class A, class MX > void Hbnd3PllExternal < A, MX > :: detachPllXFrom
 
 template < class A, class X, class MX > inline Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
 HbndPll (myhface3_t * f, int t, ProjectVertex *ppv , Gitter * grd )
-  : A (f,t,ppv,grd), _ext (*this), _ghost(0) {
+  : A (f,t,ppv,grd), _ext (*this), _ghostPair(0,-1) {
   return ;
 }
 
@@ -191,14 +191,6 @@ bool Hbnd3PllInternal < A, X, MX > :: HbndPll :: lockedAgainstCoarsening () cons
   return _ext.lockedAgainstCoarsening () ;
 }
 
-// Schwerpunkt des anliegenden Elements beschaffen:
-// Vorsicht: Basisklasse des Extenders X bzw. MX muss die Methode barycenter  () bereitstellen !
-// Standard: Datei gitter_pll_impl.h, Klasse BndsegPllBaseXClosure < A >
-template < class A, class X, class MX > 
-inline const double (& Hbnd3PllInternal < A, X, MX > :: HbndPll ::  barycenter () const)[3] {
-  return _ext.barycenter () ;
-}
-
 template < class A, class X, class MX > 
 inline int Hbnd3PllInternal < A, X, MX > :: HbndPll ::  ghostLevel () const {
   return _ext.ghostLevel () ;
@@ -207,43 +199,51 @@ inline int Hbnd3PllInternal < A, X, MX > :: HbndPll ::  ghostLevel () const {
 template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost () 
 {
-  if(_ghost)
+  if(_ghostPair.first)
   {
-    (*_ghost).request( Gitter::Geometric::TetraRule::iso8 );
-    (*_ghost).refine();
+    GhostElement_t & ghost = static_cast<GhostElement_t &> (*_ghostPair.first); 
+    ghost.request( Gitter::Geometric::TetraRule::iso8 );
+    assert( Gitter::Geometric::TetraRule::iso8 == ghost.requestrule ());  
+    ghost.refine();
   }
 }
 
 template < class A, class X, class MX > 
-inline Gitter :: helement_STI * Hbnd3PllInternal < A, X, MX > :: HbndPll :: getGhost () 
+inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  coarseGhost () 
 {
-  // assert is not needed here when we dont use ghost cells 
-  //assert(_ghost);
-  return _ghost; 
+  if(_ghostPair.first)
+  {
+    GhostElement_t & ghost = static_cast<GhostElement_t &> (*_ghostPair.first); 
+    ghost.request( Gitter::Geometric::TetraRule::crs );
+    assert( Gitter::Geometric::TetraRule::crs == ghost.requestrule ());  
+    ghost.coarse();
+    assert( ghost.leaf() );
+  }
 }
 
 template < class A, class X, class MX > 
-inline int Hbnd3PllInternal < A, X, MX > :: HbndPll :: getGhostFaceNumber () const
+inline const Gitter :: ghostpair_STI &
+Hbnd3PllInternal < A, X, MX > :: HbndPll :: getGhost () const
 {
-  // assert is not needed here when we dont use ghost cells 
-  return _ghostFace; 
+  return _ghostPair; 
 }
 
 template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  
-setGhost ( Gitter :: helement_STI * gh , int gFace ) 
+setGhost ( const ghostpair_STI & gpair ) 
 {
-  if(gh)
+  if(gpair.first)
   {
-    _ghost = static_cast<GhostElement_t *> (gh); 
-    _ghostFace = gFace;
+    _ghostPair = gpair; 
+    assert( _ghostPair.first );
+    
     // copy indices from internal boundry to myhface3(.) of ghost
-    _ghost->setIndices( *this->myhface3(0) , gFace);
+    _ghostPair.first->setIndices( *(this->myhface3(0)) , _ghostPair.second );
   }
   else 
   {
-    _ghost = 0;
-    _ghostFace = -1;
+    _ghostPair.first  =  0 ;
+    _ghostPair.second = -1 ;
   }
 }
 
@@ -260,7 +260,7 @@ HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv ,
 {
   if(_gm) 
   {
-    this->setGhost (_gm->getGhost(), _gm->ghostFaceNumber() );   
+    this->setGhost ( _gm->getGhost() );   
     _mxt = new MX (*this, _gm->getGhostPoints() );
   }
   else 
@@ -268,8 +268,6 @@ HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv ,
     _mxt = new MX (*this);
   }
   
-  //cout << "Create Macro PLL with " << _gm << "\n";
-  //cout << "Create Macro PLL with " << this->_ghost << "\n";
   this->restoreFollowFace () ;
   return ;
 }
