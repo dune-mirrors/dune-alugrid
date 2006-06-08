@@ -404,6 +404,50 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf)
 }
 
 // communicate data
+void GitterDunePll :: exchangeLinkage () 
+{
+#if 0
+  const int nl = mpAccess ().nlinks ();
+
+  vector < ObjectStream > vec (nl) ;
+
+  for (int link = 0; link < nl ; link++)  
+  {
+    vec[link].clear();
+    pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
+      a = iteratorTT ((vertex_STI *)0,link); //ueber alle meine Master-Knoten 
+
+    for (a.first->first (); ! a.first->done () ; a.first->next ()) 
+    {
+      a.first->item().accessPllX ().inlineLinkage(vec[link],link);
+    }
+    delete a.first;
+    delete a.second;      
+  }
+
+  /////////////////////////////////////////////////////
+  // den anderen Partitionen die Slave-Daten senden
+  /////////////////////////////////////////////////////
+  vec = mpAccess ().exchange (vec);
+  //und dort den Master-Knoten "ubergeben]
+    
+  for (int link = 0; link < nl ; link++)  
+  {
+    pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
+      a = iteratorTT ((vertex_STI *)0,link); //ueber alle meine Slave-Knoten 
+
+    for (a.second->first (); ! a.second->done () ; a.second->next ()) 
+    {
+      a.second->item().accessPllX ().xtractLinkage(vec[link],link);
+    }
+    delete a.first;
+    delete a.second;      
+  }
+#endif
+}
+
+
+// communicate data
 void GitterDunePll :: ALUcomm ( 
              GatherScatterType & vertexData , 
              GatherScatterType & edgeData,  
@@ -412,6 +456,7 @@ void GitterDunePll :: ALUcomm (
 {
   const bool showpos = false;
   const int nl = mpAccess ().nlinks ();
+  const int nlData = nl+1;
 
   const bool containsVertices = vertexData.contains(3,3);
   const bool containsEdges    = edgeData.contains(3,2);
@@ -440,14 +485,20 @@ void GitterDunePll :: ALUcomm (
   typedef IteratorSTI < hface_STI > IteratorType;
 
   // duneExchangeDynamicState ();
+  exchangeLinkage();
+
+  // identifier for no data transmitted 
+  const int noData = 0;
 
   vector < ObjectStream > vec (nl) ;
   if (haveHigherCodimData )
   {
+    typedef vector< vector<double> > DataType;
+    map < int , DataType > masterData;
+
+    ObjectStream osTmp;
+    
     {
-      pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
-      pair < IteratorSTI < hedge_STI >  *, IteratorSTI < hedge_STI  > *> b;
-      pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> c;
       
       if (showpos) 
       {
@@ -456,27 +507,66 @@ void GitterDunePll :: ALUcomm (
         mpAccess ().barrier();
       }
 
+      // gather all data from slaves 
       for (int i = 0; i < nl ; i++)  
       {
         vec[i].clear();
         if (containsVertices)
         {
-          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten 
+          pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
+            a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten 
           for (a.second->first (); ! a.second->done () ; a.second->next ()) 
           {
-            if (a.second->item().isLeafEntity()) 
+            vertex_STI & vx = a.second->item();
+            if (vx.isLeafEntity()) 
             {
               vec[i].writeObject(1);
-              vertexData.sendData(vec[i],a.second->item());
-            } else vec[i].writeObject(0);
+              vertexData.sendData(vec[i],vx);
+            } 
+            else 
+              vec[i].writeObject(noData);
           }
+         
+          /*
+          for (a.first->first (); ! a.first->done () ; a.first->next ()) 
+          {
+            vertex_STI & vx = a.first->item();
+            if (vx.isLeafEntity()) 
+            {
+              int idx = vx.getIndex(); 
+              DataType & data = masterData[idx];
+              if(data.size() <= 0) data.resize(nlData);
+
+              {
+                // pack slave data to tmnp buffer 
+                vector<double> & v = data[nl]; 
+                const size_t s = vertexData.size(vx);
+                if(v.size() <= 0) v.resize(s);
+
+                osTmp.clear();
+                vertexData.sendData(osTmp,vx);
+
+                // copy data to tmp buffer 
+                for(size_t i=0; i<s; ++i) 
+                {
+                  double val;
+                  osTmp.readObject(val);
+                  v[i] = val;
+                }
+              }
+            } 
+            else 
+              vec[i].writeObject(noData);
+          }
+          */
           delete a.first;
           delete a.second;      
         }
         
         if (containsEdges) 
         {
-          b = iteratorTT ((hedge_STI *)0,i); 
+          pair < IteratorSTI < hedge_STI >  *, IteratorSTI < hedge_STI  > *>
+            b = iteratorTT ((hedge_STI *)0,i); 
           //ueber alle meine Slave-Knoten (leaf-iterator!) (FEHLER!!!!!!!!!)
           for (b.second->first (); ! b.second->done () ; b.second->next ()) 
           {
@@ -486,7 +576,7 @@ void GitterDunePll :: ALUcomm (
               edgeData.sendData(vec[i],b.second->item());
             } 
             else 
-              vec[i].writeObject(0);
+              vec[i].writeObject(noData);
           }
           delete b.first;
           delete b.second;      
@@ -504,13 +594,16 @@ void GitterDunePll :: ALUcomm (
               faceData.sendData(vec[i], mof_.item());
             }
             else 
-              vec[i].writeObject(0);
+              vec[i].writeObject(noData);
           }
         } 
       }
-      
-      //den anderen Partitionen die Slave-Daten senden
+     
+      /////////////////////////////////////////////////////
+      // den anderen Partitionen die Slave-Daten senden
+      /////////////////////////////////////////////////////
       vec = mpAccess ().exchange (vec);
+
       //und dort den Master-Knoten "ubergeben]
       
       if (showpos) 
@@ -520,22 +613,64 @@ void GitterDunePll :: ALUcomm (
         mpAccess ().barrier();
       }
       
-      for (int i = 0; i < nl; i++) 
+      for (int link = 0; link < nl; link++) 
       { 
         if (containsVertices) 
         {
           int hasdata;
-          a = iteratorTT ((vertex_STI *)0,i);
+          pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
+            a = iteratorTT ((vertex_STI *)0,link);
+          
           for (a.first->first (); ! a.first->done () ; a.first->next ()) 
           {
-            vec[i].readObject(hasdata);
-            assert(hasdata==0 || hasdata==1);
-            if (hasdata) 
+            vertex_STI & vx = a.first->item();
+            vec[link].readObject(hasdata);
+            
+            int idx = vx.getIndex(); 
+            DataType & data = masterData[idx];
+            if(data.size() <= 0) data.resize(nlData);
+            const size_t s = vertexData.size(vx);
+
+            if (vx.isLeafEntity()) 
             {
-              if (a.first->item().isLeafEntity()) 
-                vertexData.recvData(vec[i],a.first->item ());
-              else 
-                vertexData.removeData(vec[i],a.first->item ());
+              // pack master data 
+              {
+                vector<double> & mData = data[nl]; 
+                if(mData.size() <= 0) mData.resize(s);
+
+                osTmp.clear();
+                // write master data to fake buffer 
+                vertexData.sendData(osTmp,vx);
+
+                // read size 
+                int ms = s; 
+                //osTmp.readObject(ms);
+                assert( s == ms );
+                
+                // copy data to tmp buffer 
+                for(int i=0; i<ms; ++i) 
+                {
+                  double val;
+                  osTmp.readObject(val);
+                  mData[i] = val;
+                }
+              }
+            }
+
+            // if data has been send, read data 
+            if (hasdata != noData) 
+            {
+              // pack slave data to tmnp buffer 
+              vector<double> & v = data[link]; 
+              if(v.size() <= 0) v.resize(s);
+
+              // copy data to tmp buffer 
+              for(size_t i=0; i<s; ++i) 
+              {
+                double val;
+                vec[link].readObject(val);
+                v[i] = val;
+              }
             }
           }
           delete a.first;
@@ -545,16 +680,17 @@ void GitterDunePll :: ALUcomm (
         if (containsEdges) 
         {
           int hasdata;
-          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+          pair < IteratorSTI < hedge_STI >  *, IteratorSTI < hedge_STI  > *>
+            b = iteratorTT ((hedge_STI *)0,link); //ueber alle meine Slave-Knoten
           for (b.first->first (); ! b.first->done () ; b.first->next ()) 
           {
-            vec[i].readObject(hasdata);
+            vec[link].readObject(hasdata);
             if (hasdata) 
             {
               if (b.first->item().isLeafEntity()) 
-                edgeData.recvData(vec[i],b.first->item());
+                edgeData.recvData(vec[link],b.first->item());
               else 
-                edgeData.removeData(vec[i],b.first->item ());
+                edgeData.removeData(vec[link],b.first->item ());
             }
           }
           delete b.first;
@@ -564,17 +700,17 @@ void GitterDunePll :: ALUcomm (
         if (containsFaces) 
         {
           int hasdata;
-          AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), i);
+          AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), link);
           InnerRecvIteratorType mif_(mif1_);
           for (mif_.first () ; ! mif_.done () ; mif_.next ()) 
           {
-            vec[i].readObject(hasdata);
+            vec[link].readObject(hasdata);
             if (hasdata) 
             {
               if (mif_.item().isLeafEntity()) 
-                faceData.recvData(vec[i], mif_.item());
+                faceData.recvData(vec[link], mif_.item());
               else 
-                faceData.removeData(vec[i],mif_.item());
+                faceData.removeData(vec[link],mif_.item());
             }
           }
         }
@@ -583,10 +719,6 @@ void GitterDunePll :: ALUcomm (
 
     // next round 
     {
-      pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> a;
-      pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> b;
-      pair < IteratorSTI < hface_STI  > *, IteratorSTI < hface_STI  > *> c;
-      
       //MasterknotenDaten sammeln
       if (showpos) {
         mpAccess ().barrier();
@@ -599,16 +731,46 @@ void GitterDunePll :: ALUcomm (
         vec[i].clear();
         if (containsVertices) 
         {
-          a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
+          pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
+            a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
           for (a.first->first (); ! a.first->done () ; a.first->next ()) 
           {
-            if (a.first->item().isLeafEntity()) 
+            vertex_STI & vx = a.first->item();
+            if (vx.isLeafEntity()) 
+            {
+              int idx = vx.getIndex();
+
+              DataType & data = masterData[idx];
+              for(int link = 0; link<nl; ++link)
+              {
+                osTmp.clear();
+                vector<double> & v = data[link];
+                int s = v.size();
+                for(int k=0; k<s; ++k) osTmp.writeObject(v[k]);
+
+                // scatter on master 
+                if(s > 0) vertexData.recvData(osTmp,vx);
+              }
+            } 
+            
             {
               vec[i].writeObject(int(1));
-              vertexData.sendData(vec[i],a.first->item ());
+              vec[i].writeObject(nl); // write Number of links 
+
+              int idx = vx.getIndex();
+              DataType & data = masterData[idx];
+              for(int link = 0; link<nl; ++link)
+              {
+                // if i == link then write master data
+                // instead of data of link 
+                // we do not send link i its own data
+                int l = (link == i) ? nl : link;
+                vector<double> & v = data[l];
+                int s = (int) v.size(); // if no data for this link, then s == 0
+                vec[i].writeObject(s);
+                for(int k=0; k<s; ++k) vec[i].writeObject(v[k]);
+              }
             } 
-            else 
-              vec[i].writeObject(int(0));
           }
           delete a.first;
           delete a.second;     
@@ -616,7 +778,8 @@ void GitterDunePll :: ALUcomm (
         
         if (containsEdges) 
         {
-          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+          pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *>
+            b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
           for (b.first->first (); ! b.first->done () ; b.first->next ()) 
           {
             if (b.first->item().isLeafEntity()) 
@@ -625,7 +788,7 @@ void GitterDunePll :: ALUcomm (
               edgeData.sendData(vec[i],b.first->item ());
             } 
             else 
-              vec[i].writeObject(0);
+              vec[i].writeObject(noData);
           }
           delete b.first;
           delete b.second;     
@@ -644,7 +807,7 @@ void GitterDunePll :: ALUcomm (
               faceData.sendData(vec[i], mif_.item());
             }
             else 
-              vec[i].writeObject(0);
+              vec[i].writeObject(noData);
           }
         }
       }
@@ -665,20 +828,36 @@ void GitterDunePll :: ALUcomm (
         if (containsVertices) 
         {
           int hasdata;
-          a = iteratorTT ((vertex_STI *)0,i);
+          pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
+            a = iteratorTT ((vertex_STI *)0,i);
           for (a.second->first (); ! a.second->done () ; a.second->next ()) {
             vec[i].readObject(hasdata);
             assert(hasdata==0 || hasdata==1);
             
             if (hasdata) 
             {
-              if (a.second->item().isLeafEntity()) 
+              vertex_STI & vx = a.second->item();
+              int nlinks;
+              vec[i].readObject(nlinks); // read number of links 
+              if(vx.isLeafEntity())
               {
-                vertexData.setData(vec[i],a.second->item ());
-              } 
+                // for number of recived data, do scatter 
+                for(int link = 0; link<nlinks; ++link)
+                {
+                  int s;
+                  vec[i].readObject(s);
+                  if(s > 0) vertexData.recvData(vec[i],vx);
+                }
+              }
               else 
               {
-                vertexData.removeData(vec[i],a.second->item ());
+                // for number of recived data, do remove  
+                for(int link = 0; link<nlinks; ++link)
+                {
+                  int s;
+                  vec[i].readObject(s); // if no data for link exists, s == 0
+                  if(s > 0) vertexData.removeData(vec[i],vx);
+                }
               }
             }
           }
@@ -689,36 +868,51 @@ void GitterDunePll :: ALUcomm (
         if (containsEdges) 
         {
           int hasdata;
-          b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-      for (b.second->first (); ! b.second->done () ; b.second->next ()) {
-        vec[i].readObject(hasdata);
-        if (hasdata) {
-    if (b.second->item().isLeafEntity()) {
-      edgeData.setData(vec[i],b.second->item ());
-    } else {
-      edgeData.removeData(vec[i],b.second->item ());
-    }
+          pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *>
+            b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
+          for (b.second->first (); ! b.second->done () ; b.second->next ()) 
+          {
+            vec[i].readObject(hasdata);
+            if (hasdata) 
+            {
+              if (b.second->item().isLeafEntity()) 
+              {
+                edgeData.setData(vec[i],b.second->item ());
+              } 
+              else 
+              {
+                edgeData.removeData(vec[i],b.second->item ());
+              }
+            }
+          }
+          delete b.first;
+          delete b.second;
+        }
+
+        
+        if (containsFaces) 
+        {
+          int hasdata;
+          AccessIteratorTT < hface_STI > :: OuterHandle mof1_(containerPll (), i);
+          OuterRecvIteratorType mof_(mof1_);
+          
+          for (mof_.first () ; ! mof_.done () ; mof_.next ()) 
+          {
+            vec[i].readObject(hasdata);
+            if (hasdata) 
+            {
+              if (mof_.item().isLeafEntity()) 
+              {
+                faceData.setData(vec[i], mof_.item());
+              } 
+              else 
+              {
+                faceData.removeData(vec[i],mof_.item ());
+              }
+            }
+          }
         }
       }
-      delete b.first;
-      delete b.second;
-    }
-    if (containsFaces) {
-      int hasdata;
-      AccessIteratorTT < hface_STI > :: OuterHandle mof1_(containerPll (), i);
-      OuterRecvIteratorType mof_(mof1_);
-      for (mof_.first () ; ! mof_.done () ; mof_.next ()) {
-        vec[i].readObject(hasdata);
-        if (hasdata) {
-    if (mof_.item().isLeafEntity()) {
-      faceData.setData(vec[i], mof_.item());
-    } else {
-      faceData.removeData(vec[i],mof_.item ());
-    }
-        }
-      }
-    }
-  }
       }
     } // end haveHigherCodimData 
 
@@ -750,7 +944,7 @@ void GitterDunePll :: ALUcomm (
     p.first->writeDynamicState (vec [l], elementData) ;
         }
       }     
-      else vec[l].writeObject(0);
+      else vec[l].writeObject(noData);
     }
   }
   {
@@ -770,7 +964,7 @@ void GitterDunePll :: ALUcomm (
         if (containsElements) 
           p.first->writeDynamicState (vec [l], elementData) ;
       }
-      else vec[l].writeObject(0);
+      else vec[l].writeObject(noData);
     }
   }
       }
@@ -813,6 +1007,8 @@ void GitterDunePll :: ALUcomm (
         }
       }
     }
+
+
     {
       AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), l);
       InnerRecvIteratorType w(mif1_);
@@ -848,7 +1044,6 @@ void GitterDunePll :: ALUcomm (
   }
     } // end element communication 
 }
-
 
 bool GitterDunePll :: refine () {
   assert (debugOption (5) ? (cout << "**INFO GitterDunePll :: refine () " << endl, 1) : 1) ;
