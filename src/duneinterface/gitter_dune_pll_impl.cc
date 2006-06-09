@@ -403,51 +403,11 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf)
   return; 
 }
 
+////////////////////////////////////////////////////////
+//
 // communicate data
-void GitterDunePll :: exchangeLinkage () 
-{
-#if 0
-  const int nl = mpAccess ().nlinks ();
-
-  vector < ObjectStream > vec (nl) ;
-
-  for (int link = 0; link < nl ; link++)  
-  {
-    vec[link].clear();
-    pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
-      a = iteratorTT ((vertex_STI *)0,link); //ueber alle meine Master-Knoten 
-
-    for (a.first->first (); ! a.first->done () ; a.first->next ()) 
-    {
-      a.first->item().accessPllX ().inlineLinkage(vec[link],link);
-    }
-    delete a.first;
-    delete a.second;      
-  }
-
-  /////////////////////////////////////////////////////
-  // den anderen Partitionen die Slave-Daten senden
-  /////////////////////////////////////////////////////
-  vec = mpAccess ().exchange (vec);
-  //und dort den Master-Knoten "ubergeben]
-    
-  for (int link = 0; link < nl ; link++)  
-  {
-    pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
-      a = iteratorTT ((vertex_STI *)0,link); //ueber alle meine Slave-Knoten 
-
-    for (a.second->first (); ! a.second->done () ; a.second->next ()) 
-    {
-      a.second->item().accessPllX ().xtractLinkage(vec[link],link);
-    }
-    delete a.first;
-    delete a.second;      
-  }
-#endif
-}
-
-
-// communicate data
+// 
+////////////////////////////////////////////////////////
 void GitterDunePll :: ALUcomm ( 
              GatherScatterType & vertexData , 
              GatherScatterType & edgeData,  
@@ -483,9 +443,6 @@ void GitterDunePll :: ALUcomm (
   typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
     TreeIterator < hface_STI, RecvRule_t > > OuterRecvIteratorType;
   typedef IteratorSTI < hface_STI > IteratorType;
-
-  // duneExchangeDynamicState ();
-  exchangeLinkage();
 
   // identifier for no data transmitted 
   const int noData = 0;
@@ -527,38 +484,6 @@ void GitterDunePll :: ALUcomm (
               vec[i].writeObject(noData);
           }
          
-          /*
-          for (a.first->first (); ! a.first->done () ; a.first->next ()) 
-          {
-            vertex_STI & vx = a.first->item();
-            if (vx.isLeafEntity()) 
-            {
-              int idx = vx.getIndex(); 
-              DataType & data = masterData[idx];
-              if(data.size() <= 0) data.resize(nlData);
-
-              {
-                // pack slave data to tmnp buffer 
-                vector<double> & v = data[nl]; 
-                const size_t s = vertexData.size(vx);
-                if(v.size() <= 0) v.resize(s);
-
-                osTmp.clear();
-                vertexData.sendData(osTmp,vx);
-
-                // copy data to tmp buffer 
-                for(size_t i=0; i<s; ++i) 
-                {
-                  double val;
-                  osTmp.readObject(val);
-                  v[i] = val;
-                }
-              }
-            } 
-            else 
-              vec[i].writeObject(noData);
-          }
-          */
           delete a.first;
           delete a.second;      
         }
