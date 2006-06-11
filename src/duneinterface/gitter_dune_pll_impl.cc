@@ -487,7 +487,15 @@ void GitterDunePll :: ALUcomm (
             if (vx.isLeafEntity()) 
             {
               vec[i].writeObject(1);
+              osTmp.clear();
+              vertexData.sendData(osTmp,vx);
+              int s = osTmp.size();
+              cout << s << " wrote size \n";
+              vec[i].writeObject(s);
+              vec[i].writeObject(osTmp);
+              /*
               vertexData.sendData(vec[i],vx);
+              */
             } 
             else 
               vec[i].writeObject(noData);
@@ -549,6 +557,8 @@ void GitterDunePll :: ALUcomm (
       
       for (int link = 0; link < nl; link++) 
       { 
+        ObjectStream & recvBuff = vec[link];
+        
         if (containsVertices) 
         {
           int hasdata;
@@ -558,43 +568,29 @@ void GitterDunePll :: ALUcomm (
           for (a.first->first (); ! a.first->done () ; a.first->next ()) 
           {
             vertex_STI & vx = a.first->item();
-            vec[link].readObject(hasdata);
+            recvBuff.readObject(hasdata);
             
             int idx = vx.getIndex(); 
             const size_t s = vertexData.size(vx);
             
             //DataType & data = masterData[idx];
-            if(!vx.hasBuffer()) vx.createBuffer(nlData);
+            vx.reserveBuffer(nlData);
             DataType & data = vx.commBuffer();
             
-            if( data.size() <= nlData ) data.resize(nlData);
+            //if( data.size() <= nlData ) data.resize(nlData);
 
             if (vx.isLeafEntity()) 
             {
               // pack master data 
               {
                 BuffType & mData = data[nl]; 
-                mData.clear();
                 
-                //vertexData.sendData(mData,vx);
-
-                //if(mData.size() <= 0) mData.reserve(s*sizeof(double));
                 osTmp.clear();
                 // write master data to fake buffer 
                 vertexData.sendData(osTmp,vx);
 
-                // read size 
-                int ms = s; 
-                //osTmp.readObject(ms);
-                assert( (int) s == ms );
-                
-                // copy data to tmp buffer 
-                for(int i=0; i<ms; ++i) 
-                {
-                  double val;
-                  osTmp.readObject(val);
-                  mData.writeObject(val);
-                }
+                mData.clear();
+                osTmp.readObject(mData);
               }
             }
 
@@ -605,42 +601,9 @@ void GitterDunePll :: ALUcomm (
               BuffType & v = data[link]; 
               v.clear();
 
-              double val = 1.25;
-              for(size_t i=0; i<s; ++i) 
-              {
-                v.writeObject(val);
-              }
-              
-              val = 0.0;
-              for(size_t i=0; i<s; ++i)
-              {
-                v.readObject(val);
-                val -= 1.25;
-                val = (val < 0.0) ? -val : val;
-                assert( val < 1e-10 );
-              }
-              
-              v.clear();
-              
-              // copy data to tmp buffer 
-              for(size_t i=0; i<s; ++i) 
-              {
-                double val;
-                vec[link].readObject(val);
-                v.writeObject(val);
-              }
-
-              /*
-              if(v.size() <= 0) v.resize(s);
-
-              // copy data to tmp buffer 
-              for(size_t i=0; i<s; ++i) 
-              {
-                double val;
-                vec[link].readObject(val);
-                v[i] = val;
-              }
-              */
+              int dataSize; 
+              recvBuff.readObject(dataSize);
+              recvBuff.readObject(v,dataSize);
             }
           }
           delete a.first;

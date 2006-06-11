@@ -84,6 +84,7 @@ class SmallObjectStream {
     {
       assign(os);
     }
+    
     inline const SmallObjectStream & operator = (const SmallObjectStream & os) throw (OutOfMemoryException)
     {
       removeObj();
@@ -119,6 +120,26 @@ class SmallObjectStream {
       return ;
     }
 
+    inline void write2Stream (const char * buff , int length)
+    {
+      if( length <= 0 ) return ;
+
+      int newWb = _wb + length;
+      if (newWb > _len) 
+      {
+        _len = newWb ;
+        _buf = (char *) realloc (_buf, _len) ;
+
+        if (!_buf) {
+          perror ("**AUSNAHME in ObjectStream :: writeObject (double) ") ;
+          throw OutOfMemoryException () ;
+        }
+      }
+      memcpy( _buf + _wb , buff , length );
+      _wb = newWb;
+      return ;
+    }
+    
   private:
     void removeObj() 
     {
@@ -185,21 +206,48 @@ class ObjectStream {
 
     friend class MpAccessMPI ;
     
-    inline void writeObject (const SmallObjectStream & sm) 
-      throw (OutOfMemoryException) 
+    inline void readObject (SmallObjectStream & sm) 
     {
-      if( sm._len <= 0 ) return ;
+      // to read hole stream, nothing should be read before 
+      assert( _rb == 0 );
+      sm.write2Stream(_buf,_wb);
+    }
 
-      int newWb = _wb + sm._len + 1 ;
-      if (newWb > _len) {
+    inline void readObject (SmallObjectStream & sm, int length) 
+    {
+      if( length <= 0 ) return ;
+      // actual read position 
+      sm.write2Stream(_buf + _rb ,length);
+      _rb += length; 
+      assert( _rb <= _wb );
+    }
+
+    inline void writeObject (const SmallObjectStream & sm) throw (OutOfMemoryException) 
+    {
+      write2Stream(sm._buf,sm._wb);
+    }
+    
+    inline void writeObject (const ObjectStream & os) throw (OutOfMemoryException) 
+    {
+      write2Stream(os._buf, os._wb );
+    }
+   
+    inline void write2Stream(const char * buff, int length )
+    {
+      if( length <= 0 ) return ;
+
+      int newWb = _wb + length;
+      if (newWb > _len) 
+      {
         _len = newWb ;
         _buf = (char *) realloc (_buf, _len) ;
+
         if (!_buf) {
           perror ("**AUSNAHME in ObjectStream :: writeObject (double) ") ;
           throw OutOfMemoryException () ;
         }
       }
-      memcpy( _buf + _wb , sm._buf, sm._len );
+      memcpy( _buf + _wb , buff , length );
       _wb = newWb;
       return ;
     }

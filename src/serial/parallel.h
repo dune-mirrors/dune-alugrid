@@ -15,15 +15,21 @@ class Parallel {
       protected:
         typedef vector < SmallObjectStream > BufferType; 
         BufferType * _buff; 
+
         CommunicationBuffer () : _buff(0) {}
         ~CommunicationBuffer () { if(_buff) delete _buff; }
       public:   
-        bool hasBuffer () const { return (_buff != 0); }
-        void createBuffer (int size)
+        void reserveBuffer (int size)
         {
-          assert( _buff == 0 );
-          //_buff = new SmallObjectStream (size);
-          _buff = new BufferType(size); 
+          if(_buff) 
+          {
+            if(size > (int) _buff->size())
+              _buff->resize(size);
+          }
+          else 
+          {
+            _buff = new BufferType(size); 
+          }
         }
         BufferType & commBuffer () { assert(_buff); return *_buff; }
         const BufferType & commBuffer () const { assert(_buff); return *_buff; }
