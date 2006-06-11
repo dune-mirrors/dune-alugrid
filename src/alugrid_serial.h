@@ -37,6 +37,11 @@ struct GatherScatter
   virtual ~GatherScatter () {}
 
   virtual bool contains(int,int) const = 0;
+    
+  virtual size_t size(HElemType   & elem ) { assert(false); abort(); }
+  virtual size_t size(HFaceType   & elem ) { assert(false); abort(); }
+  virtual size_t size(HEdgeType   & elem ) { assert(false); abort(); }
+  virtual size_t size(HVertexType & elem ) { assert(false); abort(); }
   
   virtual void inlineData ( ObjectStream & str , HElemType & elem ) { assert(false); abort(); }
   virtual void xtractData ( ObjectStream & str , HElemType & elem ) { assert(false); abort(); }
