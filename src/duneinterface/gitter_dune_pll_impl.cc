@@ -447,16 +447,25 @@ void GitterDunePll :: ALUcomm (
   // identifier for no data transmitted 
   const int noData = 0;
 
+  // create vector of message buffers 
+  // this vector is created here, that the buffer is allocated only once 
   vector < ObjectStream > vec (nl) ;
+ 
+  // if data on entities of higer codim exists
+  // then communication if more complicated 
   if (haveHigherCodimData )
   {
-    typedef vector< vector<double> > DataType;
-    map < int , DataType > masterData;
+    // buffer on master 
+    //typedef vector< double > BuffType;
+    typedef SmallObjectStream BuffType;
+    typedef vector< BuffType > DataType;
 
+    //map < int , DataType > masterData;
+
+    // temporay object stream 
     ObjectStream osTmp;
     
     {
-      
       if (showpos) 
       {
         mpAccess ().barrier();
@@ -552,17 +561,24 @@ void GitterDunePll :: ALUcomm (
             vec[link].readObject(hasdata);
             
             int idx = vx.getIndex(); 
-            DataType & data = masterData[idx];
-            if(data.size() <= 0) data.resize(nlData);
             const size_t s = vertexData.size(vx);
+            
+            //DataType & data = masterData[idx];
+            if(!vx.hasBuffer()) vx.createBuffer(nlData);
+            DataType & data = vx.commBuffer();
+            
+            if( data.size() <= nlData ) data.resize(nlData);
 
             if (vx.isLeafEntity()) 
             {
               // pack master data 
               {
-                vector<double> & mData = data[nl]; 
-                if(mData.size() <= 0) mData.resize(s);
+                BuffType & mData = data[nl]; 
+                mData.clear();
+                
+                //vertexData.sendData(mData,vx);
 
+                //if(mData.size() <= 0) mData.reserve(s*sizeof(double));
                 osTmp.clear();
                 // write master data to fake buffer 
                 vertexData.sendData(osTmp,vx);
@@ -570,14 +586,14 @@ void GitterDunePll :: ALUcomm (
                 // read size 
                 int ms = s; 
                 //osTmp.readObject(ms);
-                assert( s == ms );
+                assert( (int) s == ms );
                 
                 // copy data to tmp buffer 
                 for(int i=0; i<ms; ++i) 
                 {
                   double val;
                   osTmp.readObject(val);
-                  mData[i] = val;
+                  mData.writeObject(val);
                 }
               }
             }
@@ -586,7 +602,35 @@ void GitterDunePll :: ALUcomm (
             if (hasdata != noData) 
             {
               // pack slave data to tmnp buffer 
-              vector<double> & v = data[link]; 
+              BuffType & v = data[link]; 
+              v.clear();
+
+              double val = 1.25;
+              for(size_t i=0; i<s; ++i) 
+              {
+                v.writeObject(val);
+              }
+              
+              val = 0.0;
+              for(size_t i=0; i<s; ++i)
+              {
+                v.readObject(val);
+                val -= 1.25;
+                val = (val < 0.0) ? -val : val;
+                assert( val < 1e-10 );
+              }
+              
+              v.clear();
+              
+              // copy data to tmp buffer 
+              for(size_t i=0; i<s; ++i) 
+              {
+                double val;
+                vec[link].readObject(val);
+                v.writeObject(val);
+              }
+
+              /*
               if(v.size() <= 0) v.resize(s);
 
               // copy data to tmp buffer 
@@ -596,6 +640,7 @@ void GitterDunePll :: ALUcomm (
                 vec[link].readObject(val);
                 v[i] = val;
               }
+              */
             }
           }
           delete a.first;
@@ -610,7 +655,7 @@ void GitterDunePll :: ALUcomm (
           for (b.first->first (); ! b.first->done () ; b.first->next ()) 
           {
             vec[link].readObject(hasdata);
-            if (hasdata) 
+            if (hasdata != noData) 
             {
               if (b.first->item().isLeafEntity()) 
                 edgeData.recvData(vec[link],b.first->item());
@@ -630,7 +675,7 @@ void GitterDunePll :: ALUcomm (
           for (mif_.first () ; ! mif_.done () ; mif_.next ()) 
           {
             vec[link].readObject(hasdata);
-            if (hasdata) 
+            if (hasdata != noData) 
             {
               if (mif_.item().isLeafEntity()) 
                 faceData.recvData(vec[link], mif_.item());
@@ -654,6 +699,8 @@ void GitterDunePll :: ALUcomm (
       for (int i = 0; i < nl; i++) 
       {
         vec[i].clear();
+        vec[i].writeObject(nl); // write Number of links 
+
         if (containsVertices) 
         {
           pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
@@ -665,35 +712,61 @@ void GitterDunePll :: ALUcomm (
             {
               int idx = vx.getIndex();
 
-              DataType & data = masterData[idx];
+              DataType & data = vx.commBuffer();
+              //DataType & data = masterData[idx];
               for(int link = 0; link<nl; ++link)
               {
-                osTmp.clear();
-                vector<double> & v = data[link];
+                BuffType & v = data[link];
+                v.resetReadPosition();
                 int s = v.size();
-                for(int k=0; k<s; ++k) osTmp.writeObject(v[k]);
-
-                // scatter on master 
-                if(s > 0) vertexData.recvData(osTmp,vx);
+                if( s > 0 ) 
+                {
+                  int ns = vertexData.size(vx);
+                  osTmp.clear();
+                  for(int k=0; k<ns; ++k) 
+                  {
+                    double val;
+                    v.readObject(val);
+                    osTmp.writeObject(val); 
+                  }
+                  vertexData.recvData(osTmp,vx);
+                }
               }
             } 
             
             {
-              vec[i].writeObject(int(1));
-              vec[i].writeObject(nl); // write Number of links 
+              vec[i].writeObject(1);
 
               int idx = vx.getIndex();
-              DataType & data = masterData[idx];
+              DataType & data = vx.commBuffer();
+              //DataType & data = masterData[idx];
+
               for(int link = 0; link<nl; ++link)
               {
                 // if i == link then write master data
                 // instead of data of link 
                 // we do not send link i its own data
                 int l = (link == i) ? nl : link;
-                vector<double> & v = data[l];
-                int s = (int) v.size(); // if no data for this link, then s == 0
+                BuffType & v = data[l];
+                v.resetReadPosition();
+                int s = v.size();
                 vec[i].writeObject(s);
+                if( s > 0 ) 
+                { 
+                  int ns = vertexData.size(vx);
+                  for(int k=0; k<ns; ++k) 
+                  {
+                    double val;
+                    v.readObject(val);
+                    vec[i].writeObject(val);
+                  }
+                  //vec[i].writeObject(v);
+                }
+                
+                /*
+                int s = (int) v.size(); // if no data for this link, then s == 0
                 for(int k=0; k<s; ++k) vec[i].writeObject(v[k]);
+                */
               }
             } 
           }
@@ -750,24 +823,25 @@ void GitterDunePll :: ALUcomm (
       
       for (int i = 0; i < nl; i++) 
       { 
+        int nOtherlinks;
+        vec[i].readObject(nOtherlinks); // read number of links 
+
         if (containsVertices) 
         {
           int hasdata;
           pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
             a = iteratorTT ((vertex_STI *)0,i);
-          for (a.second->first (); ! a.second->done () ; a.second->next ()) {
+          
+          for (a.second->first (); ! a.second->done () ; a.second->next ()) 
+          {
             vec[i].readObject(hasdata);
-            assert(hasdata==0 || hasdata==1);
-            
-            if (hasdata) 
+            if (hasdata != noData) 
             {
               vertex_STI & vx = a.second->item();
-              int nlinks;
-              vec[i].readObject(nlinks); // read number of links 
               if(vx.isLeafEntity())
               {
                 // for number of recived data, do scatter 
-                for(int link = 0; link<nlinks; ++link)
+                for(int link = 0; link<nOtherlinks; ++link)
                 {
                   int s;
                   vec[i].readObject(s);
@@ -777,7 +851,7 @@ void GitterDunePll :: ALUcomm (
               else 
               {
                 // for number of recived data, do remove  
-                for(int link = 0; link<nlinks; ++link)
+                for(int link = 0; link<nOtherlinks; ++link)
                 {
                   int s;
                   vec[i].readObject(s); // if no data for link exists, s == 0
@@ -798,7 +872,7 @@ void GitterDunePll :: ALUcomm (
           for (b.second->first (); ! b.second->done () ; b.second->next ()) 
           {
             vec[i].readObject(hasdata);
-            if (hasdata) 
+            if (hasdata != noData) 
             {
               if (b.second->item().isLeafEntity()) 
               {
@@ -824,7 +898,7 @@ void GitterDunePll :: ALUcomm (
           for (mof_.first () ; ! mof_.done () ; mof_.next ()) 
           {
             vec[i].readObject(hasdata);
-            if (hasdata) 
+            if (hasdata != noData) 
             {
               if (mof_.item().isLeafEntity()) 
               {
@@ -905,16 +979,16 @@ void GitterDunePll :: ALUcomm (
     {
       AccessIteratorTT < hface_STI > :: OuterHandle mif1_(containerPll (), l);
       OuterRecvIteratorType w(mif1_);
-      // int ghostLevel;
+
       int hasdata;        
-      for (w.first () ; ! w.done () ; w.next ()) {
+      for (w.first () ; ! w.done () ; w.next ()) 
+      {
         pair < ElementPllXIF_t *, int > p = 
         w.item ().accessPllX ().accessOuterPllX () ;
-        // p.first->readDynamicState (vec [l], p.second) ;
-        // vec[l].readObject(ghostLevel);
         vec[l].readObject(hasdata);
-        assert(hasdata==0 || hasdata==1);
-        if (hasdata) {
+
+        if (hasdata != noData) 
+        {
           assert(p.first->checkGhostLevel());
           assert(p.first->ghostLeaf());
 
@@ -937,17 +1011,14 @@ void GitterDunePll :: ALUcomm (
     {
       AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), l);
       InnerRecvIteratorType w(mif1_);
-      // int ghostLevel;
       int hasdata;        
       for (w.first () ; ! w.done () ; w.next ()) 
       {
         pair < ElementPllXIF_t *, int > p = 
         w.item ().accessPllX ().accessOuterPllX () ;
-        //p.first->readDynamicState (vec [l], p.second) ;
-        // vec[l].readObject(ghostLevel);
+        
         vec[l].readObject(hasdata);
-        assert(hasdata==0 || hasdata==1);
-        if (hasdata) 
+        if (hasdata != noData) 
         {
           assert(p.first->checkGhostLevel());
           assert(p.first->ghostLeaf());
