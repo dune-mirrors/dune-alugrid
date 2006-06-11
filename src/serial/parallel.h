@@ -10,15 +10,34 @@ typedef class ElementPllXIF ElementPllXIF_t ;
 class Parallel {
   public :
 
+    class CommunicationBuffer 
+    {
+      protected:
+        typedef vector < SmallObjectStream > BufferType; 
+        BufferType * _buff; 
+        CommunicationBuffer () : _buff(0) {}
+        ~CommunicationBuffer () { if(_buff) delete _buff; }
+      public:   
+        bool hasBuffer () const { return (_buff != 0); }
+        void createBuffer (int size)
+        {
+          assert( _buff == 0 );
+          //_buff = new SmallObjectStream (size);
+          _buff = new BufferType(size); 
+        }
+        BufferType & commBuffer () { assert(_buff); return *_buff; }
+        const BufferType & commBuffer () const { assert(_buff); return *_buff; }
+    };
+    
     class AccessPllException {} ;
   
-    class VertexIF {
+    class VertexIF : public CommunicationBuffer {
       public :
         virtual ~VertexIF () {}
         typedef class Key1SLZ identifier_t ;
         inline virtual VertexPllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const VertexPllXIF_t & accessPllX () const throw (AccessPllException) ;
-	inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+        inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
     class EdgeIF {
       public :
@@ -26,7 +45,7 @@ class Parallel {
         typedef class Key2SLZ identifier_t ;
         inline virtual EdgePllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const EdgePllXIF_t & accessPllX () const throw (AccessPllException) ;
-	inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+  inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
     class FaceIF {
       public :
@@ -34,26 +53,25 @@ class Parallel {
         typedef class Key3SLZ identifier_t ;
         inline virtual FacePllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const FacePllXIF_t & accessPllX () const throw (AccessPllException) ;
-	inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+  inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
     class ElementIF {
       public :
         virtual ~ElementIF () {}
         inline virtual ElementPllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const ElementPllXIF_t & accessPllX () const throw (AccessPllException) ;
-      	inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+        inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
 } ;
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
-
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
 inline VertexPllXIF_t & Parallel :: VertexIF :: accessPllX () throw (AccessPllException) {
   assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
