@@ -447,6 +447,9 @@ void GitterDunePll :: ALUcomm (
   // identifier for no data transmitted 
   const int noData = 0;
 
+  // identifier for no data transmitted 
+  const int transmittedData = 1;
+
   // create vector of message buffers 
   // this vector is created here, that the buffer is allocated only once 
   vector < ObjectStream > vec (nl) ;
@@ -476,7 +479,9 @@ void GitterDunePll :: ALUcomm (
       // gather all data from slaves 
       for (int i = 0; i < nl ; i++)  
       {
-        vec[i].clear();
+        ObjectStream & sendBuff = vec[i];
+        
+        sendBuff.clear();
         if (containsVertices)
         {
           pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
@@ -486,19 +491,18 @@ void GitterDunePll :: ALUcomm (
             vertex_STI & vx = a.second->item();
             if (vx.isLeafEntity()) 
             {
-              vec[i].writeObject(1);
+              sendBuff.writeObject(transmittedData);
               osTmp.clear();
+
+              // write data to fake buff to determine size of data package
               vertexData.sendData(osTmp,vx);
+
               int s = osTmp.size();
-              cout << s << " wrote size \n";
-              vec[i].writeObject(s);
-              vec[i].writeObject(osTmp);
-              /*
-              vertexData.sendData(vec[i],vx);
-              */
+              sendBuff.writeObject(s);
+              sendBuff.writeObject(osTmp);
             } 
             else 
-              vec[i].writeObject(noData);
+              sendBuff.writeObject(noData);
           }
          
           delete a.first;
@@ -514,11 +518,11 @@ void GitterDunePll :: ALUcomm (
           {
             if (b.second->item().isLeafEntity()) 
             {
-              vec[i].writeObject(1);
-              edgeData.sendData(vec[i],b.second->item());
+              sendBuff.writeObject(transmittedData);
+              edgeData.sendData(sendBuff,b.second->item());
             } 
             else 
-              vec[i].writeObject(noData);
+              sendBuff.writeObject(noData);
           }
           delete b.first;
           delete b.second;      
@@ -532,11 +536,11 @@ void GitterDunePll :: ALUcomm (
           {
             if (mof_.item().isLeafEntity()) 
             {
-              vec[i].writeObject(1);
-              faceData.sendData(vec[i], mof_.item());
+              sendBuff.writeObject(transmittedData);
+              faceData.sendData(sendBuff, mof_.item());
             }
             else 
-              vec[i].writeObject(noData);
+              sendBuff.writeObject(noData);
           }
         } 
       }
@@ -661,8 +665,10 @@ void GitterDunePll :: ALUcomm (
       
       for (int i = 0; i < nl; i++) 
       {
-        vec[i].clear();
-        vec[i].writeObject(nl); // write Number of links 
+        ObjectStream & sendBuff = vec[i];
+        
+        sendBuff.clear();
+        sendBuff.writeObject(nl); // write Number of links 
 
         if (containsVertices) 
         {
@@ -671,34 +677,26 @@ void GitterDunePll :: ALUcomm (
           for (a.first->first (); ! a.first->done () ; a.first->next ()) 
           {
             vertex_STI & vx = a.first->item();
+
+            // scatter on master 
             if (vx.isLeafEntity()) 
             {
               int idx = vx.getIndex();
 
               DataType & data = vx.commBuffer();
               //DataType & data = masterData[idx];
+
               for(int link = 0; link<nl; ++link)
               {
                 BuffType & v = data[link];
                 v.resetReadPosition();
                 int s = v.size();
-                if( s > 0 ) 
-                {
-                  int ns = vertexData.size(vx);
-                  osTmp.clear();
-                  for(int k=0; k<ns; ++k) 
-                  {
-                    double val;
-                    v.readObject(val);
-                    osTmp.writeObject(val); 
-                  }
-                  vertexData.recvData(osTmp,vx);
-                }
+                if( s > 0 ) vertexData.recvData(v,vx);
               }
             } 
             
             {
-              vec[i].writeObject(1);
+              sendBuff.writeObject(transmittedData);
 
               int idx = vx.getIndex();
               DataType & data = vx.commBuffer();
@@ -710,26 +708,12 @@ void GitterDunePll :: ALUcomm (
                 // instead of data of link 
                 // we do not send link i its own data
                 int l = (link == i) ? nl : link;
+
                 BuffType & v = data[l];
-                v.resetReadPosition();
                 int s = v.size();
-                vec[i].writeObject(s);
-                if( s > 0 ) 
-                { 
-                  int ns = vertexData.size(vx);
-                  for(int k=0; k<ns; ++k) 
-                  {
-                    double val;
-                    v.readObject(val);
-                    vec[i].writeObject(val);
-                  }
-                  //vec[i].writeObject(v);
-                }
-                
-                /*
-                int s = (int) v.size(); // if no data for this link, then s == 0
-                for(int k=0; k<s; ++k) vec[i].writeObject(v[k]);
-                */
+                sendBuff.writeObject(s);
+                // if buffer size > 0 write hole buffer to stream 
+                if( s > 0 ) sendBuff.writeObject(v);
               }
             } 
           }
@@ -745,7 +729,7 @@ void GitterDunePll :: ALUcomm (
           {
             if (b.first->item().isLeafEntity()) 
             {
-              vec[i].writeObject(1);
+              vec[i].writeObject(transmittedData);
               edgeData.sendData(vec[i],b.first->item ());
             } 
             else 
@@ -764,7 +748,7 @@ void GitterDunePll :: ALUcomm (
           {
             if (mif_.item().isLeafEntity()) 
             {
-              vec[i].writeObject(1);
+              vec[i].writeObject(transmittedData);
               faceData.sendData(vec[i], mif_.item());
             }
             else 
@@ -786,8 +770,10 @@ void GitterDunePll :: ALUcomm (
       
       for (int i = 0; i < nl; i++) 
       { 
+        ObjectStream & recvBuff = vec[i];
+        
         int nOtherlinks;
-        vec[i].readObject(nOtherlinks); // read number of links 
+        recvBuff.readObject(nOtherlinks); // read number of links 
 
         if (containsVertices) 
         {
@@ -797,7 +783,7 @@ void GitterDunePll :: ALUcomm (
           
           for (a.second->first (); ! a.second->done () ; a.second->next ()) 
           {
-            vec[i].readObject(hasdata);
+            recvBuff.readObject(hasdata);
             if (hasdata != noData) 
             {
               vertex_STI & vx = a.second->item();
@@ -807,8 +793,8 @@ void GitterDunePll :: ALUcomm (
                 for(int link = 0; link<nOtherlinks; ++link)
                 {
                   int s;
-                  vec[i].readObject(s);
-                  if(s > 0) vertexData.recvData(vec[i],vx);
+                  recvBuff.readObject(s);
+                  if(s > 0) vertexData.recvData(recvBuff,vx);
                 }
               }
               else 
@@ -817,8 +803,8 @@ void GitterDunePll :: ALUcomm (
                 for(int link = 0; link<nOtherlinks; ++link)
                 {
                   int s;
-                  vec[i].readObject(s); // if no data for link exists, s == 0
-                  if(s > 0) vertexData.removeData(vec[i],vx);
+                  recvBuff.readObject(s); // if no data for link exists, s == 0
+                  if(s > 0) vertexData.removeData(recvBuff,vx);
                 }
               }
             }
@@ -895,10 +881,10 @@ void GitterDunePll :: ALUcomm (
     for (w.first () ; ! w.done () ; w.next ()) {
       pair < ElementPllXIF_t *, int > p = 
         w.item ().accessPllX ().accessInnerPllX () ;
-      //p.first->writeDynamicState (vec [l], p.second) ;
-      // vec[l].writeObject(w.item().level());
-      if (w.item().isInteriorLeaf()) {
-        vec[l].writeObject(1);
+
+      if (w.item().isInteriorLeaf()) 
+      {
+        vec[l].writeObject(transmittedData);
         if (containsVertices) p.first->VertexData2os(vec[l], vertexData);
         if (containsEdges)    p.first->EdgeData2os(vec[l], edgeData);
         if (containsFaces)    p.first->FaceData2os(vec[l], faceData);
@@ -915,11 +901,10 @@ void GitterDunePll :: ALUcomm (
     for (w.first () ; ! w.done () ; w.next ()) {
       pair < ElementPllXIF_t *, int > p = 
         w.item ().accessPllX ().accessInnerPllX () ;
-      // p.first->writeDynamicState (vec [l], p.second) ;
-      // vec[l].writeObject(w.item().level());
+
       if (w.item().isInteriorLeaf()) 
       {
-        vec[l].writeObject(1);
+        vec[l].writeObject(transmittedData);
         if (containsVertices) p.first->VertexData2os(vec[l], vertexData);
         if (containsEdges)    p.first->EdgeData2os(vec[l], edgeData);
         if (containsFaces)    p.first->FaceData2os(vec[l], faceData);

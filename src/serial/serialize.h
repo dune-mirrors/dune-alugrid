@@ -249,9 +249,10 @@ class ObjectStream {
       if( length <= 0 ) return ;
 
       int sD = sizeof(double);
+      // calculate next double position, to be revised 
       int ap = sD * ((_wb + sD - 1)/sD) ;
+
       int newWb = ap + length;
-      
       if (newWb > _len) 
       {
         _len = newWb + BufChunk ;

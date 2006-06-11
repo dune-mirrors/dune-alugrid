@@ -46,16 +46,22 @@ struct GatherScatter
   virtual void inlineData ( ObjectStream & str , HElemType & elem ) { assert(false); abort(); }
   virtual void xtractData ( ObjectStream & str , HElemType & elem ) { assert(false); abort(); }
   
+  virtual void sendData ( SmallObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
+  virtual void recvData ( SmallObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   virtual void sendData ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   virtual void setData    ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   virtual void removeData ( ObjectStream & str , HFaceType & elem ) { assert(false); abort(); }
   
+  virtual void sendData ( SmallObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
+  virtual void recvData ( SmallObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   virtual void sendData ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   virtual void setData    ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   virtual void removeData ( ObjectStream & str , HEdgeType & elem ) { assert(false); abort(); }
   
+  virtual void sendData ( SmallObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
+  virtual void recvData ( SmallObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
   virtual void sendData ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
   virtual void setData    ( ObjectStream & str , HVertexType & elem ) { assert(false); abort(); }
