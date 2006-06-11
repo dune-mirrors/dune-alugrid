@@ -93,6 +93,12 @@ class SmallObjectStream {
     }
 
     template <class T> 
+    inline void write (const T & a) throw (OutOfMemoryException) 
+    {
+      writeObject(a);
+    }
+    
+    template <class T> 
     inline void writeObject (const T & a) throw (OutOfMemoryException) 
     {
       const int sizeOfObj = sizeof(T);
@@ -107,6 +113,12 @@ class SmallObjectStream {
       }
       (T &) _buf [ap] = a ;
       return ;
+    }
+    
+    template <class T> 
+    inline void read (T & a) throw (EOFException) 
+    {
+      readObject(a);
     }
     
     template <class T> 
@@ -236,10 +248,13 @@ class ObjectStream {
     {
       if( length <= 0 ) return ;
 
-      int newWb = _wb + length;
+      int sD = sizeof(double);
+      int ap = sD * ((_wb + sD - 1)/sD) ;
+      int newWb = ap + length;
+      
       if (newWb > _len) 
       {
-        _len = newWb ;
+        _len = newWb + BufChunk ;
         _buf = (char *) realloc (_buf, _len) ;
 
         if (!_buf) {
@@ -247,7 +262,8 @@ class ObjectStream {
           throw OutOfMemoryException () ;
         }
       }
-      memcpy( _buf + _wb , buff , length );
+      
+      memcpy( _buf + ap , buff , length );
       _wb = newWb;
       return ;
     }
