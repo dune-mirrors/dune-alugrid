@@ -45,7 +45,7 @@ class Parallel {
         inline virtual const VertexPllXIF_t & accessPllX () const throw (AccessPllException) ;
         inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
-    class EdgeIF {
+    class EdgeIF : public CommunicationBuffer {
       public :
         virtual ~EdgeIF () {}
         typedef class Key2SLZ identifier_t ;
