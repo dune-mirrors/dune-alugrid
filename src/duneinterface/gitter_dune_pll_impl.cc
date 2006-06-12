@@ -403,6 +403,31 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf)
   return; 
 }
 
+pair < IteratorSTI < GitterPll :: vertex_STI > *, IteratorSTI < GitterPll :: vertex_STI > *> 
+GitterDunePll :: borderIteratorTT (const vertex_STI * v, int link )
+{
+  // return default vertex iterator 
+  return this->iteratorTT(v, link);
+}
+
+pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll :: hedge_STI > *> 
+GitterDunePll :: borderIteratorTT (const hedge_STI * e, int link )
+{
+  // return edge iterator over all edges 
+  is_def_true< hedge_STI > * s = 0;
+  return this->createEdgeIteratorTT(s, link);
+}
+
+/*
+pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
+GitterDunePll :: borderIteratorTT (const hface_STI * f, int link )
+{
+  // return default vertex iterator 
+  //is_def_true< hface_STI > * s = 0;
+  return this->iteratorTT(f, link);
+}
+*/
+
 template <class ObjectStreamType, class HItemType> 
 void GitterDunePll :: sendSlaves (
     ObjectStreamType & sendBuff, 
@@ -413,7 +438,7 @@ void GitterDunePll :: sendSlaves (
   SmallObjectStream osTmp; 
 
   pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
-    a = iteratorTT (fakeItem, link ); //ueber alle meine Slave-Knoten 
+    a = borderIteratorTT (fakeItem, link ); //ueber alle meine Slave-Knoten 
   
   for (a.second->first (); ! a.second->done () ; a.second->next ()) 
   {
@@ -421,6 +446,7 @@ void GitterDunePll :: sendSlaves (
     // gather all data on slaves 
     if ( dataHandle.containsItem(item) ) 
     {
+      // write marker that show data is transmitted 
       sendBuff.writeObject( transmittedData );
 
       osTmp.clear();
@@ -434,7 +460,10 @@ void GitterDunePll :: sendSlaves (
       sendBuff.writeStream(osTmp);
     } 
     else 
-      sendBuff.writeObject(noData);
+    {
+      // write noData marker 
+      sendBuff.writeObject( noData );
+    }
   }
   delete a.first;
   delete a.second;      
@@ -455,13 +484,14 @@ void GitterDunePll :: unpackOnMaster (
   typedef vector< BufferType > DataBufferType;
 
   pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
-    a = iteratorTT (determType, link);
+    a = borderIteratorTT (determType, link);
  
   // for all master items 
   for (a.first->first (); ! a.first->done () ; a.first->next ()) 
   {
     HItemType & item = a.first->item();
-    
+   
+    // read data marker 
     recvBuff.readObject(hasdata);
     
     //DataType & data = masterData[idx];
@@ -475,13 +505,11 @@ void GitterDunePll :: unpackOnMaster (
     if ( dataHandle.containsItem( item ) ) 
     {
       // pack master data 
-      {
-        BufferType & mData = data[nl]; 
-        mData.clear();
+      BufferType & mData = data[nl]; 
+      mData.clear();
         
-        // write master data to fake buffer 
-        dataHandle.sendData(mData,item);
-      }
+      // write master data to fake buffer 
+      dataHandle.sendData(mData,item);
     }
 
     // if data has been send, read data 
@@ -514,7 +542,7 @@ void GitterDunePll :: sendMaster (
   typedef vector< BufferType > DataBufferType;
 
   pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
-    a = iteratorTT (determType , myLink ); //ueber alle meine Slave-Knoten
+    a = borderIteratorTT (determType , myLink ); //ueber alle meine Slave-Knoten
   
   // for all master items 
   for (a.first->first (); ! a.first->done () ; a.first->next ()) 
@@ -541,6 +569,7 @@ void GitterDunePll :: sendMaster (
    
     // pack for slaves 
     {
+      // write data marker 
       sendBuff.writeObject(transmittedData);
 
       for(int link = 0; link<nl; ++link)
@@ -574,11 +603,13 @@ void GitterDunePll :: unpackOnSlaves (
   int hasdata;
 
   pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
-    a = iteratorTT (determType, myLink );
+    a = borderIteratorTT (determType, myLink );
   
   for (a.second->first (); ! a.second->done () ; a.second->next ()) 
   {
+    // read data marker 
     recvBuff.readObject(hasdata);
+
     if (hasdata != noData) 
     {
       HItemType & item = a.second->item();
@@ -640,12 +671,12 @@ void GitterDunePll :: ALUcomm (
   assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsFaces)=true " << endl, 1) : 1) ;
   assert ((debugOption (5) && containsElements) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsElements)=true " << endl, 1) : 1) ;
    
-  typedef FaceLeafCheck < hface_STI > SendRule_t;
+  typedef is_def_true < hface_STI > SendRule_t;
   typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
     TreeIterator < hface_STI, SendRule_t > > InnerSendIteratorType;
   typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
     TreeIterator < hface_STI, SendRule_t > > OuterSendIteratorType;
-  typedef GhostLeafCheck < hface_STI > RecvRule_t;
+  typedef is_def_true < hface_STI > RecvRule_t;
   typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
     TreeIterator < hface_STI, RecvRule_t > > InnerRecvIteratorType;
   typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
@@ -695,21 +726,8 @@ void GitterDunePll :: ALUcomm (
         
         if (containsEdges) 
         {
-          pair < IteratorSTI < hedge_STI >  *, IteratorSTI < hedge_STI  > *>
-            b = iteratorTT ((hedge_STI *)0,i); 
-          //ueber alle meine Slave-Knoten (leaf-iterator!) (FEHLER!!!!!!!!!)
-          for (b.second->first (); ! b.second->done () ; b.second->next ()) 
-          {
-            if (b.second->item().isLeafEntity()) 
-            {
-              sendBuff.writeObject(transmittedData);
-              edgeData.sendData(sendBuff,b.second->item());
-            } 
-            else 
-              sendBuff.writeObject(noData);
-          }
-          delete b.first;
-          delete b.second;      
+          hedge_STI * determType = 0;
+          sendSlaves(sendBuff,determType, edgeData ,i);
         }
         
         if (containsFaces) 
@@ -755,22 +773,8 @@ void GitterDunePll :: ALUcomm (
 
         if (containsEdges) 
         {
-          int hasdata;
-          pair < IteratorSTI < hedge_STI >  *, IteratorSTI < hedge_STI  > *>
-            b = iteratorTT ((hedge_STI *)0,link); //ueber alle meine Slave-Knoten
-          for (b.first->first (); ! b.first->done () ; b.first->next ()) 
-          {
-            vec[link].readObject(hasdata);
-            if (hasdata != noData) 
-            {
-              if (b.first->item().isLeafEntity()) 
-                edgeData.recvData(vec[link],b.first->item());
-              else 
-                edgeData.removeData(vec[link],b.first->item ());
-            }
-          }
-          delete b.first;
-          delete b.second;
+          hedge_STI * determType = 0;
+          unpackOnMaster(recvBuff,determType,edgeData,nl,link);
         }
 
         if (containsFaces) 
@@ -817,20 +821,8 @@ void GitterDunePll :: ALUcomm (
         
         if (containsEdges) 
         {
-          pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *>
-            b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-          for (b.first->first (); ! b.first->done () ; b.first->next ()) 
-          {
-            if (b.first->item().isLeafEntity()) 
-            {
-              vec[i].writeObject(transmittedData);
-              edgeData.sendData(vec[i],b.first->item ());
-            } 
-            else 
-              vec[i].writeObject(noData);
-          }
-          delete b.first;
-          delete b.second;     
+          hedge_STI * determType = 0;
+          sendMaster(sendBuff,determType,edgeData,nl, i );
         }
         
         if (containsFaces) 
@@ -873,33 +865,14 @@ void GitterDunePll :: ALUcomm (
 
         if (containsVertices) 
         {
-
           vertex_STI * determType = 0;
           unpackOnSlaves(recvBuff,determType,vertexData, nOtherlinks, i );
         }
         
         if (containsEdges) 
         {
-          int hasdata;
-          pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *>
-            b = iteratorTT ((hedge_STI *)0,i); //ueber alle meine Slave-Knoten
-          for (b.second->first (); ! b.second->done () ; b.second->next ()) 
-          {
-            vec[i].readObject(hasdata);
-            if (hasdata != noData) 
-            {
-              if (b.second->item().isLeafEntity()) 
-              {
-                edgeData.setData(vec[i],b.second->item ());
-              } 
-              else 
-              {
-                edgeData.removeData(vec[i],b.second->item ());
-              }
-            }
-          }
-          delete b.first;
-          delete b.second;
+          hedge_STI * determType = 0;
+          unpackOnSlaves(recvBuff,determType, edgeData, nOtherlinks, i );
         }
 
         
@@ -928,8 +901,6 @@ void GitterDunePll :: ALUcomm (
       }
       }
     } // end haveHigherCodimData 
-
-
 
   if (1)
     {

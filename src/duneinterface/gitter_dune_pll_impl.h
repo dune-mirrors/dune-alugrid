@@ -118,11 +118,21 @@ private:
       HItemType * determType,
       GatherScatterType & dataHandle , 
       const int nOtherLinks, const int myLink) ; 
-    
+
   // only echange leaf data 
   //void duneExchangeDataLeaf (GatherScatterType &);
 
   // exchange all data 
   void duneExchangeDataAll (GatherScatterType &);
+
+public:
+  typedef GitterPll :: vertex_STI vertex_STI; 
+  typedef GitterPll :: hedge_STI  hedge_STI; 
+  typedef GitterPll :: hface_STI  hface_STI; 
+
+  pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int) ;
+  pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> borderIteratorTT (const hedge_STI  *, int) ;
+  pair < IteratorSTI < hface_STI  > *, IteratorSTI < hface_STI  > *> borderTteratorTT (const hface_STI  *, int) ;
+    
 };
 #endif
