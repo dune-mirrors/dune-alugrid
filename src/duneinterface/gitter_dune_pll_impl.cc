@@ -498,8 +498,10 @@ void GitterDunePll :: ALUcomm (
               vertexData.sendData(osTmp,vx);
 
               int s = osTmp.size();
+              // first write size 
               sendBuff.writeObject(s);
-              sendBuff.writeObject(osTmp);
+              // then write bytes 
+              sendBuff.writeStream(osTmp);
             } 
             else 
               sendBuff.writeObject(noData);
@@ -588,13 +590,10 @@ void GitterDunePll :: ALUcomm (
               // pack master data 
               {
                 BuffType & mData = data[nl]; 
-                
-                osTmp.clear();
-                // write master data to fake buffer 
-                vertexData.sendData(osTmp,vx);
-
                 mData.clear();
-                osTmp.readObject(mData);
+                
+                // write master data to fake buffer 
+                vertexData.sendData(mData,vx);
               }
             }
 
@@ -607,7 +606,7 @@ void GitterDunePll :: ALUcomm (
 
               int dataSize; 
               recvBuff.readObject(dataSize);
-              recvBuff.readObject(v,dataSize);
+              recvBuff.readStream(v,dataSize);
             }
           }
           delete a.first;
@@ -692,9 +691,7 @@ void GitterDunePll :: ALUcomm (
                 if( v.size() > 0 ) 
                 {
                   v.resetReadPosition();
-                  osTmp.clear();
-                  osTmp.writeObject(v);
-                  vertexData.recvData(osTmp,vx);
+                  vertexData.recvData(v,vx);
                 }
               }
             } 
@@ -719,7 +716,7 @@ void GitterDunePll :: ALUcomm (
                 int s = v.size();
                 sendBuff.writeObject(s);
                 // if buffer size > 0 write hole buffer to stream 
-                if( s > 0 ) sendBuff.writeObject(v);
+                if( s > 0 ) sendBuff.writeStream(v);
               }
             } 
           }
@@ -802,14 +799,7 @@ void GitterDunePll :: ALUcomm (
                 {
                   int s;
                   recvBuff.readObject(s);
-                  if(s > 0) 
-                  {
-                    osTmp.clear();
-                    // read data as they have been written to keep
-                    // alignment 
-                    recvBuff.readObject(osTmp , s);
-                    vertexData.recvData(osTmp,vx);
-                  }
+                  if(s > 0) vertexData.recvData(recvBuff,vx);
                 }
               }
               else 
@@ -820,6 +810,8 @@ void GitterDunePll :: ALUcomm (
                   int s;
                   recvBuff.readObject(s); 
                   // if no data for link exists, s == 0
+                  // otherwise remove s bytes from stream by increasing 
+                  // read byte counter 
                   if(s > 0) recvBuff.removeObject( s );
                 }
               }
