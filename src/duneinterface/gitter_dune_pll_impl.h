@@ -94,6 +94,31 @@ public:
   }
 
 private:
+  enum { transmittedData = 1 , noData = 0 };
+
+  template <class ObjectStreamType, class HItemType>
+  void sendSlaves (ObjectStreamType & sendBuff,
+      HItemType * determType,
+      GatherScatterType & dataHandle , const int link ) ; 
+    
+  template <class ObjectStreamType, class HItemType>
+  void unpackOnMaster(ObjectStreamType & recvBuff,
+      HItemType * determType,
+      GatherScatterType & dataHandle , 
+      const int nl, const int link) ; 
+    
+  template <class ObjectStreamType, class HItemType>
+  void sendMaster(ObjectStreamType & sendBuff,
+      HItemType * determType,
+      GatherScatterType & dataHandle , 
+      const int nl, const int myLink) ; 
+    
+  template <class ObjectStreamType, class HItemType>
+  void unpackOnSlaves(ObjectStreamType & recvBuff,
+      HItemType * determType,
+      GatherScatterType & dataHandle , 
+      const int nOtherLinks, const int myLink) ; 
+    
   // only echange leaf data 
   //void duneExchangeDataLeaf (GatherScatterType &);
 

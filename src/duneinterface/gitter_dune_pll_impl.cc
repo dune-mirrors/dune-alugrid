@@ -403,6 +403,215 @@ void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf)
   return; 
 }
 
+template <class ObjectStreamType, class HItemType> 
+void GitterDunePll :: sendSlaves (
+    ObjectStreamType & sendBuff, 
+    HItemType * fakeItem ,
+    GatherScatterType & dataHandle, const int link )
+{
+  // temporary buffer 
+  SmallObjectStream osTmp; 
+
+  pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
+    a = iteratorTT (fakeItem, link ); //ueber alle meine Slave-Knoten 
+  
+  for (a.second->first (); ! a.second->done () ; a.second->next ()) 
+  {
+    HItemType & item = a.second->item();
+    // gather all data on slaves 
+    if ( dataHandle.containsItem(item) ) 
+    {
+      sendBuff.writeObject( transmittedData );
+
+      osTmp.clear();
+      // write data to fake buff to determine size of data package
+      dataHandle.sendData(osTmp,item);
+
+      int s = osTmp.size();
+      // first write size 
+      sendBuff.writeObject(s);
+      // then write bytes 
+      sendBuff.writeStream(osTmp);
+    } 
+    else 
+      sendBuff.writeObject(noData);
+  }
+  delete a.first;
+  delete a.second;      
+
+  return ;
+}
+
+template <class ObjectStreamType, class HItemType> 
+void GitterDunePll :: unpackOnMaster (
+    ObjectStreamType & recvBuff, 
+    HItemType * determType,
+    GatherScatterType & dataHandle ,
+    const int nl, const int link )
+{
+  int hasdata;
+
+  typedef SmallObjectStream BufferType;
+  typedef vector< BufferType > DataBufferType;
+
+  pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
+    a = iteratorTT (determType, link);
+ 
+  // for all master items 
+  for (a.first->first (); ! a.first->done () ; a.first->next ()) 
+  {
+    HItemType & item = a.first->item();
+    
+    recvBuff.readObject(hasdata);
+    
+    //DataType & data = masterData[idx];
+    //int idx = vx.getIndex(); 
+    //const size_t s = vertexData.size(vx);
+    //if( data.size() <= nlData ) data.resize(nlData);
+    
+    item.reserveBuffer( nl + 1 );
+    DataBufferType & data = item.commBuffer();
+
+    if ( dataHandle.containsItem( item ) ) 
+    {
+      // pack master data 
+      {
+        BufferType & mData = data[nl]; 
+        mData.clear();
+        
+        // write master data to fake buffer 
+        dataHandle.sendData(mData,item);
+      }
+    }
+
+    // if data has been send, read data 
+    if (hasdata != noData) 
+    {
+      // pack slave data to tmnp buffer 
+      BufferType & v = data[link]; 
+      v.clear();
+
+      int dataSize; 
+      recvBuff.readObject(dataSize);
+      recvBuff.readStream(v,dataSize);
+    }
+  }
+  delete a.first;
+  delete a.second;
+
+  return ;
+}
+
+template <class ObjectStreamType, class HItemType> 
+void GitterDunePll :: sendMaster (
+    ObjectStreamType & sendBuff, 
+    HItemType * determType,
+    GatherScatterType & dataHandle ,
+    const int nl , 
+    const int myLink )
+{
+  typedef SmallObjectStream BufferType;
+  typedef vector< BufferType > DataBufferType;
+
+  pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
+    a = iteratorTT (determType , myLink ); //ueber alle meine Slave-Knoten
+  
+  // for all master items 
+  for (a.first->first (); ! a.first->done () ; a.first->next ()) 
+  {
+    HItemType & item = a.first->item();
+    DataBufferType & dataBuff = item.commBuffer();
+    
+    //int idx = vx.getIndex();
+    //DataType & data = masterData[idx];
+    
+    // scatter on master 
+    if ( dataHandle.containsItem( item ) ) 
+    {
+      for(int link = 0; link<nl; ++link)
+      {
+        BufferType & localBuff = dataBuff[link];
+        if( localBuff.size() > 0 ) 
+        {
+          localBuff.resetReadPosition();
+          dataHandle.recvData(localBuff, item);
+        }
+      }
+    } 
+   
+    // pack for slaves 
+    {
+      sendBuff.writeObject(transmittedData);
+
+      for(int link = 0; link<nl; ++link)
+      {
+        // if myLink == link then write master data
+        // instead of data of link 
+        // we do not send link i its own data
+        int l = (link == myLink) ? nl : link;
+
+        BufferType & localBuff = dataBuff[l];
+        int s = localBuff.size();
+        sendBuff.writeObject(s);
+        // if buffer size > 0 write hole buffer to stream 
+        if( s > 0 ) sendBuff.writeStream( localBuff );
+      }
+    } 
+  }
+  delete a.first;
+  delete a.second;     
+
+  return ;
+}
+
+template <class ObjectStreamType, class HItemType> 
+void GitterDunePll :: unpackOnSlaves (
+    ObjectStreamType & recvBuff, 
+    HItemType * determType,
+    GatherScatterType & dataHandle ,
+    const int nOtherlinks, const int myLink)
+{
+  int hasdata;
+
+  pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
+    a = iteratorTT (determType, myLink );
+  
+  for (a.second->first (); ! a.second->done () ; a.second->next ()) 
+  {
+    recvBuff.readObject(hasdata);
+    if (hasdata != noData) 
+    {
+      HItemType & item = a.second->item();
+      if( dataHandle.containsItem( item ) )
+      {
+        // for number of recived data, do scatter 
+        for(int link = 0; link<nOtherlinks; ++link)
+        {
+          int s;
+          recvBuff.readObject(s);
+          if(s > 0) dataHandle.recvData(recvBuff, item );
+        }
+      }
+      else 
+      {
+        // for number of recived data, do remove  
+        for(int link = 0; link<nOtherlinks; ++link)
+        {
+          int s;
+          recvBuff.readObject(s); 
+          // if no data for link exists, s == 0
+          // otherwise remove s bytes from stream by increasing 
+          // read byte counter 
+          if(s > 0) recvBuff.removeObject( s );
+        }
+      }
+    }
+  }
+  delete a.first;
+  delete a.second;
+}
+
+
 ////////////////////////////////////////////////////////
 //
 // communicate data
@@ -416,7 +625,6 @@ void GitterDunePll :: ALUcomm (
 {
   const bool showpos = false;
   const int nl = mpAccess ().nlinks ();
-  const int nlData = nl+1;
 
   const bool containsVertices = vertexData.contains(3,3);
   const bool containsEdges    = edgeData.contains(3,2);
@@ -465,9 +673,6 @@ void GitterDunePll :: ALUcomm (
 
     //map < int , DataType > masterData;
 
-    // temporay object stream 
-    ObjectStream osTmp;
-    
     {
       if (showpos) 
       {
@@ -480,35 +685,12 @@ void GitterDunePll :: ALUcomm (
       for (int i = 0; i < nl ; i++)  
       {
         ObjectStream & sendBuff = vec[i];
-        
         sendBuff.clear();
+
         if (containsVertices)
         {
-          pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
-            a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten 
-          for (a.second->first (); ! a.second->done () ; a.second->next ()) 
-          {
-            vertex_STI & vx = a.second->item();
-            if (vx.isLeafEntity()) 
-            {
-              sendBuff.writeObject(transmittedData);
-              osTmp.clear();
-
-              // write data to fake buff to determine size of data package
-              vertexData.sendData(osTmp,vx);
-
-              int s = osTmp.size();
-              // first write size 
-              sendBuff.writeObject(s);
-              // then write bytes 
-              sendBuff.writeStream(osTmp);
-            } 
-            else 
-              sendBuff.writeObject(noData);
-          }
-         
-          delete a.first;
-          delete a.second;      
+          vertex_STI * determType = 0;
+          sendSlaves(sendBuff,determType,vertexData ,i);
         }
         
         if (containsEdges) 
@@ -561,56 +743,14 @@ void GitterDunePll :: ALUcomm (
         mpAccess ().barrier();
       }
       
-      for (int link = 0; link < nl; link++) 
+      for (int link = 0; link < nl; ++link) 
       { 
         ObjectStream & recvBuff = vec[link];
         
         if (containsVertices) 
         {
-          int hasdata;
-          pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
-            a = iteratorTT ((vertex_STI *)0,link);
-          
-          for (a.first->first (); ! a.first->done () ; a.first->next ()) 
-          {
-            vertex_STI & vx = a.first->item();
-            recvBuff.readObject(hasdata);
-            
-            //DataType & data = masterData[idx];
-            //int idx = vx.getIndex(); 
-            //const size_t s = vertexData.size(vx);
-            
-            vx.reserveBuffer(nlData);
-            DataType & data = vx.commBuffer();
-            
-            //if( data.size() <= nlData ) data.resize(nlData);
-
-            if (vx.isLeafEntity()) 
-            {
-              // pack master data 
-              {
-                BuffType & mData = data[nl]; 
-                mData.clear();
-                
-                // write master data to fake buffer 
-                vertexData.sendData(mData,vx);
-              }
-            }
-
-            // if data has been send, read data 
-            if (hasdata != noData) 
-            {
-              // pack slave data to tmnp buffer 
-              BuffType & v = data[link]; 
-              v.clear();
-
-              int dataSize; 
-              recvBuff.readObject(dataSize);
-              recvBuff.readStream(v,dataSize);
-            }
-          }
-          delete a.first;
-          delete a.second;
+          vertex_STI * determType = 0;
+          unpackOnMaster(recvBuff,determType,vertexData,nl,link);
         }
 
         if (containsEdges) 
@@ -671,57 +811,8 @@ void GitterDunePll :: ALUcomm (
 
         if (containsVertices) 
         {
-          pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
-            a = iteratorTT ((vertex_STI *)0,i); //ueber alle meine Slave-Knoten
-          for (a.first->first (); ! a.first->done () ; a.first->next ()) 
-          {
-            vertex_STI & vx = a.first->item();
-
-            // scatter on master 
-            if (vx.isLeafEntity()) 
-            {
-              DataType & data = vx.commBuffer();
-
-              //int idx = vx.getIndex();
-              //DataType & data = masterData[idx];
-
-              for(int link = 0; link<nl; ++link)
-              {
-                BuffType & v = data[link];
-                if( v.size() > 0 ) 
-                {
-                  v.resetReadPosition();
-                  vertexData.recvData(v,vx);
-                }
-              }
-            } 
-           
-            // pack for slaves 
-            {
-              sendBuff.writeObject(transmittedData);
-
-              DataType & data = vx.commBuffer();
-
-              //int idx = vx.getIndex();
-              //DataType & data = masterData[idx];
-
-              for(int link = 0; link<nl; ++link)
-              {
-                // if i == link then write master data
-                // instead of data of link 
-                // we do not send link i its own data
-                int l = (link == i) ? nl : link;
-
-                BuffType & v = data[l];
-                int s = v.size();
-                sendBuff.writeObject(s);
-                // if buffer size > 0 write hole buffer to stream 
-                if( s > 0 ) sendBuff.writeStream(v);
-              }
-            } 
-          }
-          delete a.first;
-          delete a.second;     
+          vertex_STI * determType = 0;
+          sendMaster(sendBuff,determType,vertexData,nl, i );
         }
         
         if (containsEdges) 
@@ -782,43 +873,9 @@ void GitterDunePll :: ALUcomm (
 
         if (containsVertices) 
         {
-          int hasdata;
-          pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> 
-            a = iteratorTT ((vertex_STI *)0,i);
-          
-          for (a.second->first (); ! a.second->done () ; a.second->next ()) 
-          {
-            recvBuff.readObject(hasdata);
-            if (hasdata != noData) 
-            {
-              vertex_STI & vx = a.second->item();
-              if(vx.isLeafEntity())
-              {
-                // for number of recived data, do scatter 
-                for(int link = 0; link<nOtherlinks; ++link)
-                {
-                  int s;
-                  recvBuff.readObject(s);
-                  if(s > 0) vertexData.recvData(recvBuff,vx);
-                }
-              }
-              else 
-              {
-                // for number of recived data, do remove  
-                for(int link = 0; link<nOtherlinks; ++link)
-                {
-                  int s;
-                  recvBuff.readObject(s); 
-                  // if no data for link exists, s == 0
-                  // otherwise remove s bytes from stream by increasing 
-                  // read byte counter 
-                  if(s > 0) recvBuff.removeObject( s );
-                }
-              }
-            }
-          }
-          delete a.first;
-          delete a.second;
+
+          vertex_STI * determType = 0;
+          unpackOnSlaves(recvBuff,determType,vertexData, nOtherlinks, i );
         }
         
         if (containsEdges) 
