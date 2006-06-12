@@ -418,15 +418,13 @@ GitterDunePll :: borderIteratorTT (const hedge_STI * e, int link )
   return this->createEdgeIteratorTT(s, link);
 }
 
-/*
 pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
 GitterDunePll :: borderIteratorTT (const hface_STI * f, int link )
 {
   // return default vertex iterator 
-  //is_def_true< hface_STI > * s = 0;
-  return this->iteratorTT(f, link);
+  is_def_true< hface_STI > * s = 0;
+  return this->createFaceIteratorTT(s, link);
 }
-*/
 
 template <class ObjectStreamType, class HItemType> 
 void GitterDunePll :: sendSlaves (
@@ -439,10 +437,11 @@ void GitterDunePll :: sendSlaves (
 
   pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
     a = borderIteratorTT (fakeItem, link ); //ueber alle meine Slave-Knoten 
-  
-  for (a.second->first (); ! a.second->done () ; a.second->next ()) 
+ 
+  IteratorSTI < HItemType > & iter = *(a.second);
+  for (iter.first (); ! iter.done () ; iter.next ()) 
   {
-    HItemType & item = a.second->item();
+    HItemType & item = iter.item();
     // gather all data on slaves 
     if ( dataHandle.containsItem(item) ) 
     {
@@ -486,10 +485,12 @@ void GitterDunePll :: unpackOnMaster (
   pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
     a = borderIteratorTT (determType, link);
  
+  IteratorSTI < HItemType > & iter = *(a.first);
+
   // for all master items 
-  for (a.first->first (); ! a.first->done () ; a.first->next ()) 
+  for (iter.first (); ! iter.done () ; iter.next ()) 
   {
-    HItemType & item = a.first->item();
+    HItemType & item = iter.item();
    
     // read data marker 
     recvBuff.readObject(hasdata);
@@ -543,11 +544,13 @@ void GitterDunePll :: sendMaster (
 
   pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
     a = borderIteratorTT (determType , myLink ); //ueber alle meine Slave-Knoten
-  
+ 
+  IteratorSTI < HItemType > & iter = *(a.first);
+
   // for all master items 
-  for (a.first->first (); ! a.first->done () ; a.first->next ()) 
+  for (iter.first (); ! iter.done () ; iter.next ()) 
   {
-    HItemType & item = a.first->item();
+    HItemType & item = iter.item();
     DataBufferType & dataBuff = item.commBuffer();
     
     //int idx = vx.getIndex();
@@ -604,15 +607,18 @@ void GitterDunePll :: unpackOnSlaves (
 
   pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
     a = borderIteratorTT (determType, myLink );
+
+  // get slave iterator 
+  IteratorSTI < HItemType > & iter = *(a.second);
   
-  for (a.second->first (); ! a.second->done () ; a.second->next ()) 
+  for (iter.first (); ! iter.done () ; iter.next ()) 
   {
     // read data marker 
     recvBuff.readObject(hasdata);
 
     if (hasdata != noData) 
     {
-      HItemType & item = a.second->item();
+      HItemType & item = iter.item();
       if( dataHandle.containsItem( item ) )
       {
         // for number of recived data, do scatter 
@@ -642,6 +648,223 @@ void GitterDunePll :: unpackOnSlaves (
   delete a.second;
 }
 
+template <class ObjectStreamType, class HItemType> 
+void GitterDunePll :: sendFaces (
+    ObjectStreamType & sendBuff, 
+    HItemType * fakeItem ,
+    IteratorSTI < HItemType > * iter , 
+    GatherScatterType & faceData )
+{
+  // temporary object buffer  
+  SmallObjectStream osTmp; 
+  
+  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  {
+    hface_STI & face = iter->item();
+    if ( faceData.containsItem( face ) ) 
+    {
+      sendBuff.writeObject(transmittedData);
+      osTmp.clear();
+      faceData.sendData(osTmp, face );
+
+      int size = osTmp.size();
+      // determin size of data to be able to remove 
+      sendBuff.writeObject(size);
+      if( size > 0 ) sendBuff.writeStream( osTmp );
+    }
+    else 
+    {
+      sendBuff.writeObject(noData);
+    }
+  }
+}
+
+template <class ObjectStreamType, class HItemType> 
+void GitterDunePll :: unpackFaces (
+    ObjectStreamType & recvBuff, 
+    HItemType * fakeItem ,
+    IteratorSTI < HItemType > * iter , 
+    GatherScatterType & faceData )
+{
+  int hasdata;
+  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  {
+    recvBuff.readObject(hasdata);
+    if (hasdata != noData) 
+    {
+      hface_STI & face = iter->item();
+      int size; 
+      recvBuff.readObject(size); 
+      if( size > 0 )
+      {
+        // if entity is not contained just remove data from stream 
+        if ( faceData.containsItem( face ) ) 
+          faceData.recvData(recvBuff , face );
+        else 
+          recvBuff.removeObject( size );
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////
+//
+// communication of higher codim data (vertices,edges,faces)
+//
+////////////////////////////////////////////////////////
+
+void GitterDunePll :: doBorderBorderComm( 
+    vector< ObjectStream > & osvec ,
+    GatherScatterType & vertexData , 
+    GatherScatterType & edgeData,  
+    GatherScatterType & faceData )
+{
+  const int nl = mpAccess ().nlinks ();
+  
+  const bool containsVertices = vertexData.contains(3,3);
+  const bool containsEdges    = edgeData.contains(3,2);
+  const bool containsFaces    = faceData.contains(3,1);
+
+  const bool haveVerticesOrEdges = containsVertices || containsEdges;
+   
+  assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsVertices)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsEdges)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsFaces)=true " << endl, 1) : 1) ;
+   
+  // buffer on master 
+  //typedef vector< double > BuffType;
+  //typedef SmallObjectStream BuffType;
+  //typedef vector< BuffType > DataType;
+  //map < int , DataType > masterData;
+
+  {
+    // gather all data from slaves 
+    for (int link = 0; link < nl ; ++link )  
+    {
+      ObjectStream & sendBuff = osvec[link];
+      sendBuff.clear();
+
+      if (containsVertices)
+      {
+        vertex_STI * determType = 0;
+        sendSlaves(sendBuff,determType,vertexData , link);
+      }
+      
+      if (containsEdges) 
+      {
+        hedge_STI * determType = 0;
+        sendSlaves(sendBuff,determType, edgeData , link);
+      }
+      
+      if (containsFaces) 
+      {
+        hface_STI * determType = 0;
+        pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * >
+          iterpair = borderIteratorTT(determType , link );
+       
+        // pack all faces that we are master on 
+        sendFaces( sendBuff, determType, iterpair.first  , faceData ); 
+        // pack also all faces that we are not master on 
+        sendFaces( sendBuff, determType, iterpair.second , faceData ); 
+
+        delete iterpair.first;
+        delete iterpair.second;
+      } 
+    }
+   
+    /////////////////////////////////////////////////////
+    // den anderen Partitionen die Slave-Daten senden
+    /////////////////////////////////////////////////////
+    osvec = mpAccess ().exchange (osvec);
+
+    // now get all sended data and store on master item in local buffers
+    for (int link = 0; link < nl; ++link) 
+    { 
+      ObjectStream & recvBuff = osvec[link];
+      
+      if (containsVertices) 
+      {
+        vertex_STI * determType = 0;
+        unpackOnMaster(recvBuff,determType,vertexData,nl,link);
+      }
+
+      if (containsEdges) 
+      {
+        hedge_STI * determType = 0;
+        unpackOnMaster(recvBuff,determType,edgeData,nl,link);
+      }
+
+      if (containsFaces) 
+      {
+        hface_STI * determType = 0;
+        pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * >
+          iterpair = borderIteratorTT( determType , link );
+
+        // first unpack slave data 
+        unpackFaces(recvBuff,determType,iterpair.second,faceData);
+        // then unpack all master data 
+        unpackFaces(recvBuff,determType,iterpair.first ,faceData);
+
+        delete iterpair.first;
+        delete iterpair.second;
+      }
+    }
+  }
+
+  // now get all data from the local buffer of the master 
+  // and send this data to the slaves (only for vertices and edges)
+  if( haveVerticesOrEdges )
+  {
+    for (int link = 0; link < nl; ++link ) 
+    {
+      ObjectStream & sendBuff = osvec[link];
+      sendBuff.clear();
+      
+      // write Number of my links 
+      sendBuff.writeObject(nl); 
+
+      if (containsVertices) 
+      {
+        vertex_STI * determType = 0;
+        sendMaster(sendBuff,determType,vertexData,nl, link );
+      }
+      
+      if (containsEdges) 
+      {
+        hedge_STI * determType = 0;
+        sendMaster(sendBuff,determType,edgeData,nl, link );
+      }
+    }
+   
+    ///////////////////////////////////////////////////
+    // exchange all gathered data 
+    ///////////////////////////////////////////////////
+    osvec = mpAccess ().exchange (osvec);
+   
+    // now unpack all data on slave items 
+    for (int link = 0; link < nl; ++link) 
+    { 
+      ObjectStream & recvBuff = osvec[link];
+      
+      int nOtherlinks;
+      recvBuff.readObject(nOtherlinks); // read number of links 
+
+      if (containsVertices) 
+      {
+        vertex_STI * determType = 0;
+        unpackOnSlaves(recvBuff,determType,vertexData, nOtherlinks, link );
+      }
+      
+      if (containsEdges) 
+      {
+        hedge_STI * determType = 0;
+        unpackOnSlaves(recvBuff,determType, edgeData, nOtherlinks, link );
+      }
+    }
+  } // end second loop over vertices and edges 
+
+  return ;
+}
 
 ////////////////////////////////////////////////////////
 //
@@ -654,7 +877,6 @@ void GitterDunePll :: ALUcomm (
              GatherScatterType & faceData ,
              GatherScatterType & elementData ) 
 {
-  const bool showpos = false;
   const int nl = mpAccess ().nlinks ();
 
   const bool containsVertices = vertexData.contains(3,3);
@@ -697,53 +919,46 @@ void GitterDunePll :: ALUcomm (
   // then communication if more complicated 
   if (haveHigherCodimData )
   {
+    doBorderBorderComm( vec, vertexData, edgeData, faceData );
+#if 0
     // buffer on master 
     //typedef vector< double > BuffType;
-    typedef SmallObjectStream BuffType;
-    typedef vector< BuffType > DataType;
-
+    //typedef SmallObjectStream BuffType;
+    //typedef vector< BuffType > DataType;
     //map < int , DataType > masterData;
 
     {
-      if (showpos) 
-      {
-        mpAccess ().barrier();
-        std::cerr << "SEND1 : " << mpAccess().myrank() << std::endl;
-        mpAccess ().barrier();
-      }
-
       // gather all data from slaves 
-      for (int i = 0; i < nl ; i++)  
+      for (int link = 0; link < nl ; ++link )  
       {
-        ObjectStream & sendBuff = vec[i];
+        ObjectStream & sendBuff = vec[link];
         sendBuff.clear();
 
         if (containsVertices)
         {
           vertex_STI * determType = 0;
-          sendSlaves(sendBuff,determType,vertexData ,i);
+          sendSlaves(sendBuff,determType,vertexData , link);
         }
         
         if (containsEdges) 
         {
           hedge_STI * determType = 0;
-          sendSlaves(sendBuff,determType, edgeData ,i);
+          sendSlaves(sendBuff,determType, edgeData , link);
         }
         
         if (containsFaces) 
         {
-          AccessIteratorTT < hface_STI > :: OuterHandle mof1_(containerPll (), i);          //f"ur Slaves
-          OuterSendIteratorType mof_(mof1_); 
-          for (mof_.first () ; ! mof_.done () ; mof_.next ()) 
-          {
-            if (mof_.item().isLeafEntity()) 
-            {
-              sendBuff.writeObject(transmittedData);
-              faceData.sendData(sendBuff, mof_.item());
-            }
-            else 
-              sendBuff.writeObject(noData);
-          }
+          hface_STI * determType = 0;
+          pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * >
+            iterpair = borderIteratorTT(determType , link );
+         
+          // pack all faces that we are master on 
+          sendFaces( sendBuff, determType, iterpair.first  , faceData ); 
+          // pack also all faces that we are not master on 
+          sendFaces( sendBuff, determType, iterpair.second , faceData ); 
+
+          delete iterpair.first;
+          delete iterpair.second;
         } 
       }
      
@@ -752,15 +967,7 @@ void GitterDunePll :: ALUcomm (
       /////////////////////////////////////////////////////
       vec = mpAccess ().exchange (vec);
 
-      //und dort den Master-Knoten "ubergeben]
-      
-      if (showpos) 
-      {
-        mpAccess ().barrier();
-        std::cerr << "RECV1 : " << mpAccess().myrank() << std::endl;
-        mpAccess ().barrier();
-      }
-      
+      // now get all sended data and store on master item in local buffers
       for (int link = 0; link < nl; ++link) 
       { 
         ObjectStream & recvBuff = vec[link];
@@ -779,86 +986,55 @@ void GitterDunePll :: ALUcomm (
 
         if (containsFaces) 
         {
-          int hasdata;
-          AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), link);
-          InnerRecvIteratorType mif_(mif1_);
-          for (mif_.first () ; ! mif_.done () ; mif_.next ()) 
-          {
-            vec[link].readObject(hasdata);
-            if (hasdata != noData) 
-            {
-              if (mif_.item().isLeafEntity()) 
-                faceData.recvData(vec[link], mif_.item());
-              else 
-                faceData.removeData(vec[link],mif_.item());
-            }
-          }
+          hface_STI * determType = 0;
+          pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * >
+            iterpair = borderIteratorTT( determType , link );
+
+          // first unpack slave data 
+          unpackFaces(recvBuff,determType,iterpair.second,faceData);
+          // then unpack all master data 
+          unpackFaces(recvBuff,determType,iterpair.first ,faceData);
+
+          delete iterpair.first;
+          delete iterpair.second;
         }
       }
     }
 
-    // next round 
+    // now get all data from the local buffer of the master 
+    // and send this data to the slaves (only for vertices and edges)
+    if( containsVertices || containsEdges )
     {
-      //MasterknotenDaten sammeln
-      if (showpos) {
-        mpAccess ().barrier();
-        std::cerr << "SEND2 : " << mpAccess().myrank() << std::endl;
-        mpAccess ().barrier();
-      }
-      
-      for (int i = 0; i < nl; i++) 
+      for (int link = 0; link < nl; ++link ) 
       {
-        ObjectStream & sendBuff = vec[i];
-        
+        ObjectStream & sendBuff = vec[link];
         sendBuff.clear();
-        sendBuff.writeObject(nl); // write Number of links 
+        
+        // write Number of my links 
+        sendBuff.writeObject(nl); 
 
         if (containsVertices) 
         {
           vertex_STI * determType = 0;
-          sendMaster(sendBuff,determType,vertexData,nl, i );
+          sendMaster(sendBuff,determType,vertexData,nl, link );
         }
         
         if (containsEdges) 
         {
           hedge_STI * determType = 0;
-          sendMaster(sendBuff,determType,edgeData,nl, i );
-        }
-        
-        if (containsFaces) 
-        {
-          AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), i);
-          InnerSendIteratorType mif_(mif1_);
-          
-          for (mif_.first () ; ! mif_.done () ; mif_.next ()) 
-          {
-            if (mif_.item().isLeafEntity()) 
-            {
-              vec[i].writeObject(transmittedData);
-              faceData.sendData(vec[i], mif_.item());
-            }
-            else 
-              vec[i].writeObject(noData);
-          }
+          sendMaster(sendBuff,determType,edgeData,nl, link );
         }
       }
      
       ///////////////////////////////////////////////////
-      //den anderen Partitionen die Slave-Daten senden
+      // exchange all gathered data 
       ///////////////////////////////////////////////////
       vec = mpAccess ().exchange (vec);
-      
-      //und auf die Slave-Knoten draufschreiben
-      if (showpos) 
-      {
-        mpAccess ().barrier();
-        std::cerr << "RECV2 : " << mpAccess().myrank() << std::endl;
-        mpAccess ().barrier();
-      }
-      
-      for (int i = 0; i < nl; i++) 
+     
+      // now unpack all data on slave items 
+      for (int link = 0; link < nl; ++link) 
       { 
-        ObjectStream & recvBuff = vec[i];
+        ObjectStream & recvBuff = vec[link];
         
         int nOtherlinks;
         recvBuff.readObject(nOtherlinks); // read number of links 
@@ -866,163 +1042,140 @@ void GitterDunePll :: ALUcomm (
         if (containsVertices) 
         {
           vertex_STI * determType = 0;
-          unpackOnSlaves(recvBuff,determType,vertexData, nOtherlinks, i );
+          unpackOnSlaves(recvBuff,determType,vertexData, nOtherlinks, link );
         }
         
         if (containsEdges) 
         {
           hedge_STI * determType = 0;
-          unpackOnSlaves(recvBuff,determType, edgeData, nOtherlinks, i );
+          unpackOnSlaves(recvBuff,determType, edgeData, nOtherlinks, link );
         }
+      }
+    } // end second loop over vertices and edges 
+#endif  
+    
+  } // end haveHigherCodimData 
 
-        
-        if (containsFaces) 
+    {
+      for (int l = 0 ; l < nl ; l ++) 
+      {   
+        vec[l].clear();
         {
-          int hasdata;
-          AccessIteratorTT < hface_STI > :: OuterHandle mof1_(containerPll (), i);
-          OuterRecvIteratorType mof_(mof1_);
-          
-          for (mof_.first () ; ! mof_.done () ; mof_.next ()) 
+          AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), l);
+          InnerSendIteratorType w(mif1_);
+          for (w.first () ; ! w.done () ; w.next ()) 
           {
-            vec[i].readObject(hasdata);
-            if (hasdata != noData) 
+            pair < ElementPllXIF_t *, int > p = 
+              w.item ().accessPllX ().accessInnerPllX () ;
+
+            if (w.item().isInteriorLeaf()) 
             {
-              if (mof_.item().isLeafEntity()) 
+              vec[l].writeObject(transmittedData);
+              if (containsVertices) p.first->VertexData2os(vec[l], vertexData);
+              if (containsEdges)    p.first->EdgeData2os(vec[l], edgeData);
+              if (containsFaces)    p.first->FaceData2os(vec[l], faceData);
+              if (containsElements) 
               {
-                faceData.setData(vec[i], mof_.item());
-              } 
-              else 
-              {
-                faceData.removeData(vec[i],mof_.item ());
+                p.first->writeDynamicState (vec [l], elementData) ;
               }
-            }
+            }     
+            else vec[l].writeObject(noData);
+          }
+        }
+        
+      {
+        AccessIteratorTT < hface_STI > :: OuterHandle mif1_(containerPll (), l);
+        OuterSendIteratorType w(mif1_);
+        for (w.first () ; ! w.done () ; w.next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = 
+            w.item ().accessPllX ().accessInnerPllX () ;
+
+          if (w.item().isInteriorLeaf()) 
+          {
+            vec[l].writeObject(transmittedData);
+            if (containsVertices) p.first->VertexData2os(vec[l], vertexData);
+            if (containsEdges)    p.first->EdgeData2os(vec[l], edgeData);
+            if (containsFaces)    p.first->FaceData2os(vec[l], faceData);
+            if (containsElements) 
+              p.first->writeDynamicState (vec [l], elementData) ;
+          }
+          else vec[l].writeObject(noData);
+        }
+      }
+    }
+
+    ///////////////////////////////////////////
+    // exchange data 
+    ///////////////////////////////////////////
+    vec = mpAccess ().exchange (vec) ;     
+    
+    //all ghost cells get new data
+    for (int l = 0 ; l < nl ; l ++ ) 
+    {  
+      {
+        AccessIteratorTT < hface_STI > :: OuterHandle mif1_(containerPll (), l);
+        OuterRecvIteratorType w(mif1_);
+
+        int hasdata;        
+        for (w.first () ; ! w.done () ; w.next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = 
+            w.item ().accessPllX ().accessOuterPllX () ;
+          vec[l].readObject(hasdata);
+
+          if (hasdata != noData) 
+          {
+            assert(p.first->checkGhostLevel());
+            assert(p.first->ghostLeaf());
+
+            Gitter :: helement_STI * ghost = p.first->getGhost().first;
+            assert( ghost );
+          
+            if (containsVertices) 
+              ghost->os2VertexData(vec[l], vertexData);
+            if (containsEdges)    
+              ghost->os2EdgeData(vec[l], edgeData);
+            if (containsFaces)    
+              ghost->os2FaceData(vec[l], faceData);
+            if (containsElements) 
+              p.first->readDynamicState (vec [l], elementData);
           }
         }
       }
-      }
-    } // end haveHigherCodimData 
 
-  if (1)
-    {
-      if (showpos) {
-  mpAccess ().barrier();
-  std::cerr << "GHOST SEND" << std::endl;
-  mpAccess ().barrier();
-      }
-      for (int l = 0 ; l < nl ; l ++) {   
-  vec[l].clear();
-  {
-    AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), l);
-    InnerSendIteratorType w(mif1_);
-    for (w.first () ; ! w.done () ; w.next ()) {
-      pair < ElementPllXIF_t *, int > p = 
-        w.item ().accessPllX ().accessInnerPllX () ;
 
-      if (w.item().isInteriorLeaf()) 
-      {
-        vec[l].writeObject(transmittedData);
-        if (containsVertices) p.first->VertexData2os(vec[l], vertexData);
-        if (containsEdges)    p.first->EdgeData2os(vec[l], edgeData);
-        if (containsFaces)    p.first->FaceData2os(vec[l], faceData);
-        if (containsElements) {
-    p.first->writeDynamicState (vec [l], elementData) ;
-        }
-      }     
-      else vec[l].writeObject(noData);
-    }
-  }
-  {
-    AccessIteratorTT < hface_STI > :: OuterHandle mif1_(containerPll (), l);
-    OuterSendIteratorType w(mif1_);
-    for (w.first () ; ! w.done () ; w.next ()) {
-      pair < ElementPllXIF_t *, int > p = 
-        w.item ().accessPllX ().accessInnerPllX () ;
-
-      if (w.item().isInteriorLeaf()) 
-      {
-        vec[l].writeObject(transmittedData);
-        if (containsVertices) p.first->VertexData2os(vec[l], vertexData);
-        if (containsEdges)    p.first->EdgeData2os(vec[l], edgeData);
-        if (containsFaces)    p.first->FaceData2os(vec[l], faceData);
-        if (containsElements) 
-          p.first->writeDynamicState (vec [l], elementData) ;
-      }
-      else vec[l].writeObject(noData);
-    }
-  }
-      }
-      vec = mpAccess ().exchange (vec) ;     
-      if (showpos) {
-  mpAccess ().barrier();
-  std::cerr << "GHOST RECV" << std::endl;
-  mpAccess ().barrier();
-      }
-      //all ghost cells get new data
-      for (int l = 0 ; l < nl ; l ++ ) 
-  {  
-    {
-      AccessIteratorTT < hface_STI > :: OuterHandle mif1_(containerPll (), l);
-      OuterRecvIteratorType w(mif1_);
-
-      int hasdata;        
-      for (w.first () ; ! w.done () ; w.next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = 
-        w.item ().accessPllX ().accessOuterPllX () ;
-        vec[l].readObject(hasdata);
-
-        if (hasdata != noData) 
+      { 
+        AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), l);
+        InnerRecvIteratorType w(mif1_);
+        int hasdata;        
+        for (w.first () ; ! w.done () ; w.next ()) 
         {
-          assert(p.first->checkGhostLevel());
-          assert(p.first->ghostLeaf());
-
-          Gitter :: helement_STI * ghost = p.first->getGhost().first;
-          assert( ghost );
-          
-          if (containsVertices) 
-            ghost->os2VertexData(vec[l], vertexData);
-          if (containsEdges)    
-            ghost->os2EdgeData(vec[l], edgeData);
-          if (containsFaces)    
-            ghost->os2FaceData(vec[l], faceData);
-          if (containsElements) 
-            p.first->readDynamicState (vec [l], elementData);
-        }
-      }
-    }
-
-
-    {
-      AccessIteratorTT < hface_STI > :: InnerHandle mif1_(containerPll (), l);
-      InnerRecvIteratorType w(mif1_);
-      int hasdata;        
-      for (w.first () ; ! w.done () ; w.next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = 
-        w.item ().accessPllX ().accessOuterPllX () ;
+          pair < ElementPllXIF_t *, int > p = 
+            w.item ().accessPllX ().accessOuterPllX () ;
         
-        vec[l].readObject(hasdata);
-        if (hasdata != noData) 
-        {
-          assert(p.first->checkGhostLevel());
-          assert(p.first->ghostLeaf());
+          vec[l].readObject(hasdata);
+          if (hasdata != noData) 
+          {
+            assert(p.first->checkGhostLevel());
+            assert(p.first->ghostLeaf());
           
-          Gitter :: helement_STI * ghost = p.first->getGhost().first;
-          assert( ghost );
+            Gitter :: helement_STI * ghost = p.first->getGhost().first;
+            assert( ghost );
           
-          if (containsVertices) 
-            ghost->os2VertexData(vec[l], vertexData);
-          if (containsEdges)    
-            ghost->os2EdgeData(vec[l], edgeData);
-          if (containsFaces)    
-            ghost->os2FaceData(vec[l], faceData);
-          if (containsElements) 
-            p.first->readDynamicState (vec [l], elementData) ;
+            if (containsVertices) 
+              ghost->os2VertexData(vec[l], vertexData);
+            if (containsEdges)    
+              ghost->os2EdgeData(vec[l], edgeData);
+            if (containsFaces)    
+              ghost->os2FaceData(vec[l], faceData);
+            if (containsElements) 
+              p.first->readDynamicState (vec [l], elementData) ;
+          }
         }
       }
     }
-  }
-    } // end element communication 
+  } // end element communication 
 }
 
 bool GitterDunePll :: refine () {

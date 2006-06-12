@@ -119,11 +119,30 @@ private:
       GatherScatterType & dataHandle , 
       const int nOtherLinks, const int myLink) ; 
 
+  template <class ObjectStreamType, class HItemType>
+  void sendFaces (ObjectStreamType & sendBuff,
+      HItemType * determType,
+      IteratorSTI < HItemType > * iter, 
+      GatherScatterType & dataHandle ) ; 
+    
+  template <class ObjectStreamType, class HItemType>
+  void unpackFaces (ObjectStreamType & recvBuff,
+      HItemType * determType,
+      IteratorSTI < HItemType > * iter, 
+      GatherScatterType & dataHandle ) ; 
+    
   // only echange leaf data 
   //void duneExchangeDataLeaf (GatherScatterType &);
 
   // exchange all data 
   void duneExchangeDataAll (GatherScatterType &);
+
+  // communication of data 
+  void doBorderBorderComm (
+      vector< ObjectStream > & osvec ,
+      GatherScatterType & vertexData ,
+      GatherScatterType & edgeData,
+      GatherScatterType & faceData );
 
 public:
   typedef GitterPll :: vertex_STI vertex_STI; 
@@ -132,7 +151,7 @@ public:
 
   pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int) ;
   pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> borderIteratorTT (const hedge_STI  *, int) ;
-  pair < IteratorSTI < hface_STI  > *, IteratorSTI < hface_STI  > *> borderTteratorTT (const hface_STI  *, int) ;
+  pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   borderIteratorTT (const hface_STI  *, int) ;
     
 };
 #endif
