@@ -432,6 +432,13 @@ class GitterPll : public virtual Gitter {
   friend class LeafIteratorTT < hedge_STI > ;
   friend class LeafIteratorTT < hface_STI > ;
   protected :
+    template <class StopRule_t> 
+    inline pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *> 
+    createEdgeIteratorTT (const StopRule_t *, int) ;
+
+    template <class StopRule_t> 
+    inline pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
+    createFaceIteratorTT (const StopRule_t *, int) ;
   
   // Die drei Variablen der Klasse Gitter sollen erstmal als
   // Murksl"osung dazu dienen, den Lastverteiler "uber ein
@@ -724,6 +731,57 @@ inline void LinkedObject :: Identifier :: writeObject (ObjectStream & os) const 
 inline bool GitterPll :: debugOption (int level) {
   return (getenv ("VERBOSE_PLL") ? ( atoi (getenv ("VERBOSE_PLL")) > level ? true : (level == 0)) : false) ;
 }
+
+template <class StopRule_t>
+inline pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll :: hedge_STI > * > GitterPll ::
+  createEdgeIteratorTT(const StopRule_t * fake, int l) {
+
+  AccessIteratorTT < hedge_STI > :: InnerHandle mdi (containerPll (), l) ;
+  AccessIteratorTT < hedge_STI > :: OuterHandle mdo (containerPll (), l) ;
+
+  Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, TreeIterator < hedge_STI, StopRule_t> > ei (mdi) ;
+  Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, TreeIterator < hedge_STI, StopRule_t> > eo (mdo) ;
+
+  AccessIteratorTT < hface_STI > :: InnerHandle mfi (containerPll (), l) ;
+  AccessIteratorTT < hface_STI > :: OuterHandle mfo (containerPll (), l) ;
+
+  Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, has_int_edge < hface_STI > > > fimi (mfi) ;
+  Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, has_int_edge < hface_STI > > > fimo (mfo) ;
+  
+  Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfimi (fimi) ;
+  Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfimo (fimo) ;
+  
+  Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, StopRule_t> > eifi (dfimi) ;
+  
+  Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, StopRule_t> > eifo (dfimo) ;
+
+  return pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * >
+    (new AlignIterator < Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, TreeIterator < hedge_STI, StopRule_t> >,
+  Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, StopRule_t> >, hedge_STI > (ei,eifi),
+     new AlignIterator < Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, TreeIterator < hedge_STI, StopRule_t> >,
+  Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, StopRule_t> >, hedge_STI > (eo, eifo)) ;
+}
+
+template <class StopRule_t>
+inline pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
+  GitterPll :: createFaceIteratorTT (const StopRule_t *, int l) {
+  AccessIteratorTT < hface_STI > :: InnerHandle mif (containerPll (), l) ;
+  AccessIteratorTT < hface_STI > :: OuterHandle mof (containerPll (), l) ;
+  return pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * >
+  (new Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, StopRule_t > > (mif),
+   new Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, StopRule_t > > (mof)) ;
+}
+
 
 template < class A > inline LeafIteratorTT < A > :: LeafIteratorTT (GitterPll & g, int l) : _grd (g), _link (l), _a (0) {
   _p = _grd.iteratorTT (_a, _link) ;
