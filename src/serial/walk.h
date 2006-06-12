@@ -149,47 +149,6 @@ template < class A > class leaf_or_father_of_leaf
       return ( x.leaf() || ( (!x.leaf()) && (x.down()->leaf() ) ) ) ? 1 : 0 ;
     }
 };
-template < class A > class FaceLeafCheck
-{
-  public :
-    typedef A val_t ;
-
-    //! Constructor storing the level 
-    FaceLeafCheck () {}
-
-    //! check if go next
-    int operator () (const A * x) const
-    {
-      return true;
-    }
-
-    //! check if go next
-    int operator () (const A & x) const
-    {
-      return true;
-    }
-};
-template < class A > class GhostLeafCheck
-{
-  public :
-    typedef A val_t ;
-
-    //! Constructor storing the level 
-    GhostLeafCheck () {}
-
-    //! check if go next
-    int operator () (const A * x) const
-    {
-      return true;
-    }
-
-    //! check if go next
-    int operator () (const A & x) const
-    {
-      return true;
-    }
-};
-
 //**********************************************************************************
 //**********************************************************************************
 //**********************************************************************************
