@@ -574,10 +574,10 @@ void GitterDunePll :: ALUcomm (
             vertex_STI & vx = a.first->item();
             recvBuff.readObject(hasdata);
             
-            int idx = vx.getIndex(); 
-            const size_t s = vertexData.size(vx);
-            
             //DataType & data = masterData[idx];
+            //int idx = vx.getIndex(); 
+            //const size_t s = vertexData.size(vx);
+            
             vx.reserveBuffer(nlData);
             DataType & data = vx.commBuffer();
             
@@ -681,25 +681,31 @@ void GitterDunePll :: ALUcomm (
             // scatter on master 
             if (vx.isLeafEntity()) 
             {
-              int idx = vx.getIndex();
-
               DataType & data = vx.commBuffer();
+
+              //int idx = vx.getIndex();
               //DataType & data = masterData[idx];
 
               for(int link = 0; link<nl; ++link)
               {
                 BuffType & v = data[link];
-                v.resetReadPosition();
-                int s = v.size();
-                if( s > 0 ) vertexData.recvData(v,vx);
+                if( v.size() > 0 ) 
+                {
+                  v.resetReadPosition();
+                  osTmp.clear();
+                  osTmp.writeObject(v);
+                  vertexData.recvData(osTmp,vx);
+                }
               }
             } 
-            
+           
+            // pack for slaves 
             {
               sendBuff.writeObject(transmittedData);
 
-              int idx = vx.getIndex();
               DataType & data = vx.commBuffer();
+
+              //int idx = vx.getIndex();
               //DataType & data = masterData[idx];
 
               for(int link = 0; link<nl; ++link)
@@ -756,8 +762,10 @@ void GitterDunePll :: ALUcomm (
           }
         }
       }
-      
+     
+      ///////////////////////////////////////////////////
       //den anderen Partitionen die Slave-Daten senden
+      ///////////////////////////////////////////////////
       vec = mpAccess ().exchange (vec);
       
       //und auf die Slave-Knoten draufschreiben
@@ -794,7 +802,14 @@ void GitterDunePll :: ALUcomm (
                 {
                   int s;
                   recvBuff.readObject(s);
-                  if(s > 0) vertexData.recvData(recvBuff,vx);
+                  if(s > 0) 
+                  {
+                    osTmp.clear();
+                    // read data as they have been written to keep
+                    // alignment 
+                    recvBuff.readObject(osTmp , s);
+                    vertexData.recvData(osTmp,vx);
+                  }
                 }
               }
               else 
@@ -803,8 +818,9 @@ void GitterDunePll :: ALUcomm (
                 for(int link = 0; link<nOtherlinks; ++link)
                 {
                   int s;
-                  recvBuff.readObject(s); // if no data for link exists, s == 0
-                  if(s > 0) vertexData.removeData(recvBuff,vx);
+                  recvBuff.readObject(s); 
+                  // if no data for link exists, s == 0
+                  if(s > 0) recvBuff.removeObject( s );
                 }
               }
             }

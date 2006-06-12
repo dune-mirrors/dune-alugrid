@@ -185,7 +185,7 @@ class ObjectStream {
   enum { BufChunk = 0x40000, MemLimit = 0x1000000 } ;
   char * _buf ;
   int _rb, _wb, _len ;
-//  dequeue < pair < char *, int > > dqe ;
+
   public :
     class EOFException {} ;
     class OutOfMemoryException {} ;
@@ -234,6 +234,21 @@ class ObjectStream {
       assert( _rb <= _wb );
     }
 
+    // increments the read position without actualy read data
+    inline void removeObject(int length)
+    {
+      _rb += length; 
+      assert( _rb <= _wb );
+    }
+    
+    inline void readObject (ObjectStream & sm, int length) 
+    {
+      if( length <= 0 ) return ;
+      // actual read position 
+      sm.write2Stream(_buf + _rb ,length);
+      removeObject(length);
+    }
+
     inline void writeObject (const SmallObjectStream & sm) throw (OutOfMemoryException) 
     {
       write2Stream(sm._buf,sm._wb);
@@ -248,9 +263,10 @@ class ObjectStream {
     {
       if( length <= 0 ) return ;
 
-      int sD = sizeof(double);
+      //int sD = sizeof(double);
       // calculate next double position, to be revised 
-      int ap = sD * ((_wb + sD - 1)/sD) ;
+      //int ap = sD * ((_wb + sD - 1)/sD) ;
+      int ap = _wb;
 
       int newWb = ap + length;
       if (newWb > _len) 
