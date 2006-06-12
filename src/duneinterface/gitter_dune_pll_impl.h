@@ -119,17 +119,29 @@ private:
       GatherScatterType & dataHandle , 
       const int nOtherLinks, const int myLink) ; 
 
-  template <class ObjectStreamType, class HItemType>
-  void sendFaces (ObjectStreamType & sendBuff,
-      HItemType * determType,
-      IteratorSTI < HItemType > * iter, 
+  void sendFaces (ObjectStream & sendBuff,
+      IteratorSTI < hface_STI > * iter, 
       GatherScatterType & dataHandle ) ; 
     
-  template <class ObjectStreamType, class HItemType>
-  void unpackFaces (ObjectStreamType & recvBuff,
-      HItemType * determType,
-      IteratorSTI < HItemType > * iter, 
+  void unpackFaces (ObjectStream & recvBuff,
+      IteratorSTI < hface_STI > * iter, 
       GatherScatterType & dataHandle ) ; 
+    
+  void sendInteriorData (
+    ObjectStream & sendBuff,
+    IteratorSTI < hface_STI > * iter ,
+    GatherScatterType & vertexData ,
+    GatherScatterType & edgeData,
+    GatherScatterType & faceData,
+    GatherScatterType & elementData );
+ 
+  void unpackInteriorData (
+    ObjectStream & recvBuff,
+    IteratorSTI < hface_STI > * iter ,
+    GatherScatterType & vertexData ,
+    GatherScatterType & edgeData,
+    GatherScatterType & faceData,
+    GatherScatterType & elementData );
     
   // only echange leaf data 
   //void duneExchangeDataLeaf (GatherScatterType &);
@@ -137,12 +149,20 @@ private:
   // exchange all data 
   void duneExchangeDataAll (GatherScatterType &);
 
-  // communication of data 
+  // communication of data on border 
   void doBorderBorderComm (
       vector< ObjectStream > & osvec ,
       GatherScatterType & vertexData ,
       GatherScatterType & edgeData,
       GatherScatterType & faceData );
+
+  // communication of interior data 
+  void doInteriorBorderComm(
+    vector< ObjectStream > & osvec ,
+    GatherScatterType & vertexData ,
+    GatherScatterType & edgeData,
+    GatherScatterType & faceData,
+    GatherScatterType & elementData );
 
 public:
   typedef GitterPll :: vertex_STI vertex_STI; 
