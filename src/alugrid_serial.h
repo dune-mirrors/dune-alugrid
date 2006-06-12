@@ -34,6 +34,7 @@ typedef Gitter::hbndseg       HGhostType;
 
 struct GatherScatter
 {
+  // type of used object stream 
   typedef ObjectStreamImpl ObjectStreamType;
 
   virtual ~GatherScatter () {}
@@ -44,11 +45,6 @@ struct GatherScatter
   virtual bool containsItem(HFaceType   & elem ) const { assert(false); abort(); }
   virtual bool containsItem(HEdgeType   & elem ) const { assert(false); abort(); }
   virtual bool containsItem(HVertexType & elem ) const { assert(false); abort(); }
-  
-  virtual size_t size(HElemType   & elem ) { assert(false); abort(); }
-  virtual size_t size(HFaceType   & elem ) { assert(false); abort(); }
-  virtual size_t size(HEdgeType   & elem ) { assert(false); abort(); }
-  virtual size_t size(HVertexType & elem ) { assert(false); abort(); }
   
   virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) { assert(false); abort(); }
   virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) { assert(false); abort(); }
