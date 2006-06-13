@@ -307,6 +307,8 @@ class Refco {
 
 		 quart=9, notcrs = -10  } tag_t ;
       
+    virtual ~Refco () {} 
+   
     void clear(tag_t ) { }
       
     int is(tag_t ) const { return 0 ; }  // ist nie irgendein tag
