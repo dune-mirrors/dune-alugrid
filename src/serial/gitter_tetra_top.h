@@ -126,6 +126,9 @@ template < class A > class Hbnd3Top : public A {
     inline const innerbndseg_t * up () const ;
     
     inline bnd_t bndtype () const { return _bt; }
+  protected:
+    // set boundary id for all item connected to this hbnd
+    inline void setBoundaryId( const int id ); 
 } ;
 
 template < class A > class TetraTop : public A {
@@ -469,6 +472,7 @@ template < class A > void Hface3Top < A > :: split_iso4 () {
   return ;
 }
 
+// constructor called during refinement 
 template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0, 
   int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2,
   IndexManagerType & im , int nChild ) : 
@@ -481,6 +485,7 @@ template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0
   return ;
 }
 
+// constructor called while creating macro face 
 template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0, 
   int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2,
   IndexManagerType & im ) : 
@@ -682,6 +687,7 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
           innerbndseg_t * up, const bnd_t bt, IndexManagerType & im , Gitter * grd ) : 
   A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (0) , _lvl (l), _bt (bt) , _indexManager(im) {
   this->setIndex( _indexManager.getIndex() );
+  setBoundaryId( _bt ); 
   return ;
 }
 
@@ -694,6 +700,8 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
   this->setIndex( _indexManager.getIndex() );
+  
+  setBoundaryId( _bt ); 
   return ;
 }
 
@@ -702,23 +710,37 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
           innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
           Gitter * grd , Gitter::helement_STI * gh, int gFace) : 
   A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
-  _indexManager(im) {
+  _indexManager(im) 
+{
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
   this->setIndex( _indexManager.getIndex() );
+
+  // set boundary tpye to bnd id of all items 
+  setBoundaryId( _bt ); 
   return ;
 }
 
-template < class A > inline Hbnd3Top < A > :: ~Hbnd3Top () {
+template < class A > inline Hbnd3Top < A > :: ~Hbnd3Top () 
+{
   this->freeIndex( this->_indexManager );
-  //if (this->ghostLeaf() && this->ghostLevel() == this->level()
-  //    && this->bndtype()== Gitter::hbndseg_STI::closure)
-  if (this->isLeafEntity()) {
-    this->detachleafs();
-  }
+  if (this->isLeafEntity()) this->detachleafs();
   if (_bbb) delete _bbb ; 
   if (_dwn) delete _dwn ;
   return ; 
+}
+
+template < class A > inline void Hbnd3Top < A > :: 
+setBoundaryId (const int id ) 
+{
+  myhface3_t & face = *(this->myhface3(0));
+  face.setBndId( id );
+  // 3 vertices and edges 
+  for(int i=0; i<3; ++i) 
+  {
+    face.myvertex(i)->setBndId( id );
+    face.myhedge1(i)->setBndId( id );
+  }
 }
 
 template < class A > inline int Hbnd3Top < A > :: level () const {
