@@ -24,9 +24,14 @@ class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
 protected:  
   bool balanceGrid_;
 
+  typedef enum { Border_Border_Comm , 
+                 Interior_Ghost_Comm , 
+                 Ghost_Interior_Comm , 
+                 All_All_Comm  } CommunicationType ; 
 public:
   typedef Gitter :: Geometric Geometric;
   typedef GitterDuneImpl :: Objects  Objects;
+
   
   GitterDunePll (const char * filename , MpAccessLocal &mp) 
     : GitterBasisPll (filename,mp) , balanceGrid_ (false) 
@@ -80,12 +85,33 @@ public:
   // exchange data of dune 
   void duneExchangeData (GatherScatterType &, bool leaf = false );
 
-  // communication of data 
-  void ALUcomm (
+  // communication of border data 
+  void borderBorderCommunication (
          GatherScatterType & vertexData ,
          GatherScatterType & edgeData,
          GatherScatterType & faceData ,
-	 GatherScatterType & elementData );
+	       GatherScatterType & elementData );
+
+  // communication of border data 
+  void interiorGhostCommunication (
+         GatherScatterType & vertexData ,
+         GatherScatterType & edgeData,
+         GatherScatterType & faceData ,
+	       GatherScatterType & elementData );
+
+  // communication of border data 
+  void ghostInteriorCommunication (
+         GatherScatterType & vertexData ,
+         GatherScatterType & edgeData,
+         GatherScatterType & faceData ,
+	       GatherScatterType & elementData );
+
+  // communication of border data 
+  void allAllCommunication (
+         GatherScatterType & vertexData ,
+         GatherScatterType & edgeData,
+         GatherScatterType & faceData ,
+	       GatherScatterType & elementData );
 
   // return indexmanger 
   IndexManagerType & indexManager(int codim)
@@ -94,6 +120,14 @@ public:
   }
 
 private:
+  // communication of data 
+  void ALUcomm (
+         GatherScatterType & vertexData ,
+         GatherScatterType & edgeData,
+         GatherScatterType & faceData ,
+      	 GatherScatterType & elementData ,
+         const CommunicationType commType);
+
   enum { transmittedData = 1 , noData = 0 };
 
   template <class ObjectStreamType, class HItemType>
@@ -127,15 +161,17 @@ private:
       IteratorSTI < hface_STI > * iter, 
       GatherScatterType & dataHandle ) ; 
     
-  void sendInteriorData (
+  void sendInteriorGhostData (
     ObjectStream & sendBuff,
     IteratorSTI < hface_STI > * iter ,
     GatherScatterType & vertexData ,
     GatherScatterType & edgeData,
     GatherScatterType & faceData,
-    GatherScatterType & elementData );
+    GatherScatterType & elementData ,
+    const bool packInterior , 
+    const bool packGhosts );
  
-  void unpackInteriorData (
+  void unpackInteriorGhostData (
     ObjectStream & recvBuff,
     IteratorSTI < hface_STI > * iter ,
     GatherScatterType & vertexData ,
@@ -157,12 +193,13 @@ private:
       GatherScatterType & faceData );
 
   // communication of interior data 
-  void doInteriorBorderComm(
+  void doInteriorGhostComm(
     vector< ObjectStream > & osvec ,
     GatherScatterType & vertexData ,
     GatherScatterType & edgeData,
     GatherScatterType & faceData,
-    GatherScatterType & elementData );
+    GatherScatterType & elementData ,
+    const CommunicationType commType );
 
 public:
   typedef GitterPll :: vertex_STI vertex_STI; 
@@ -171,7 +208,7 @@ public:
 
   pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int) ;
   pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> borderIteratorTT (const hedge_STI  *, int) ;
-  pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>   borderIteratorTT (const hface_STI  *, int) ;
+  pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> borderIteratorTT (const hface_STI  *, int) ;
     
 };
 #endif
