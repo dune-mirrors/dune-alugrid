@@ -157,88 +157,169 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
            virtual inline void projectVertex(const ProjectVertex &pv) ; 
   } ;
         typedef Hface3Top < Hface3Empty > hface3_IMPL ;
+        
 
-        class Hface4Empty : public hface4_GEO {
-          protected :
-            typedef VertexEmpty innervertex_t ;
-            typedef hedge1_IMPL     inneredge_t ;
-            inline Hface4Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int,myhedge1_t *,int) ;
-     ~Hface4Empty () {}
+        class Hface4Empty : public hface4_GEO 
+        {
+         protected :
+           typedef VertexEmpty innervertex_t ;
+           typedef hedge1_IMPL     inneredge_t ;
+           inline Hface4Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int,myhedge1_t *,int) ;
+           ~Hface4Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
            virtual inline void projectVertex(const ProjectVertex &pv) ; 
         } ;
         typedef Hface4Top < Hface4Empty > hface4_IMPL ;
 
-        class TetraEmpty : public tetra_GEO 
-        {
+
+      class TetraEmpty : public tetra_GEO 
+      {
     protected :
-            typedef hface3_IMPL innerface_t ;
-            typedef hedge1_IMPL inneredge_t ;
-            typedef VertexEmpty innervertex_t ;
-            inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
-            virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs) {
-              for (int i = 0; i < 4; i++) gs.setData( os, *myvertex(i));
-            }
-            virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-              for (int i = 0; i < 6; i++) gs.setData( os, *myhedge1(i));
-            }
-            virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
-              for (int i = 0; i < 4; i++) gs.setData( os, *myhface3(i));
-	          }
-	          virtual void attachleafs() 
-            {  
-	            addleaf();
-	            for (int i = 0; i < 4 ; ++i) myhface3(i)->addleaf();
-	            for (int i = 0; i < 6 ; ++i) myhedge1(i)->addleaf();
-	            for (int i = 0; i < 4 ; ++i) myvertex(i)->addleaf();
-	          }
-            
-	          virtual void detachleafs() 
-            { 
-	            removeleaf();
-	            for (int i = 0; i < 4 ; ++i) myhface3(i)->removeleaf();
-	            for (int i = 0; i < 6 ; ++i) myhedge1(i)->removeleaf();
-	            for (int i = 0; i < 4 ; ++i) myvertex(i)->removeleaf();
-	          }
+        typedef hface3_IMPL innerface_t ;
+        typedef hedge1_IMPL inneredge_t ;
+        typedef VertexEmpty innervertex_t ;
+        inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
 
-    protected:     
-            ~TetraEmpty () {}
-            
-            int preCoarsening  () ; 
-            int postRefinement () ;
+        ////////////////////////////////////////////////
+        // read of data 
+        ////////////////////////////////////////////////
+        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs , int borderFace ) 
+        {
+          // only one opposite vertex for tetras 
+          gs.setData( os, *myvertex( borderFace ));
+        }
+        
+        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+        {
+          const int (&edgesNotOnFace)[3] = 
+            Gitter :: Geometric :: tetra_GEO :: edgesNotOnFace( borderFace );
+          for(int e = 0; e<3; ++e)
+          {
+            gs.setData( os, *myhedge1( edgesNotOnFace[e] ) );
+          }
+        }
+        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+        {
+          for (int i = 0; i < 4; ++i) 
+          {
+            if( i == borderFace ) continue; 
+            gs.setData( os, *myhface3(i) );
+          }
+        }
 
-            Gitter * _myGrid;
-    public: 
-            //ghost tetra gets indices of grid, to which it belongs actually
-            virtual void setIndices(const hface_STI & f, int face_nr) 
-            {
-        const myhface3_t & face = static_cast<const myhface3_t &> (f); 
+        /////////////////////////////////////////
+        //  writing of data 
+        /////////////////////////////////////////
+        virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace )
+        {
+          // only send one vertex
+          gs.sendData( os, *myvertex(borderFace) );
+        }
+        
+        virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace)
+        {
+          const int (&edgesNotOnFace)[3] =
+            Gitter :: Geometric :: tetra_GEO :: edgesNotOnFace( borderFace );
+          for(int e=0; e<3; ++e)
+          {
+            gs.sendData( os, *myhedge1( edgesNotOnFace[e] ) );
+          }
+        }
+        
+        virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
+        {
+          for (int i = 0; i < 4; ++i)
+          {
+            if( i == borderFace ) continue;
+            gs.sendData( os,  *myhface3(i) );
+          }
+        }
 
-              myhface3_t & myface = *(myhface3(face_nr));
+        /////////////////////////////////////////
 
-              // set index of face 
-              myface.setIndex(_myGrid->indexManager(1), face.getIndex());
+        virtual void attachleafs() 
+        {  
+          addleaf();
+          for (int i = 0; i < 4 ; ++i) myhface3(i)->addleaf();
+          for (int i = 0; i < 6 ; ++i) myhedge1(i)->addleaf();
+          for (int i = 0; i < 4 ; ++i) myvertex(i)->addleaf();
+        }
+        
+        virtual void detachleafs() 
+        { 
+          removeleaf();
+          for (int i = 0; i < 4 ; ++i) myhface3(i)->removeleaf();
+          for (int i = 0; i < 6 ; ++i) myhedge1(i)->removeleaf();
+          for (int i = 0; i < 4 ; ++i) myvertex(i)->removeleaf();
+        }
 
-              IndexManagerType & vxIm = _myGrid->indexManager(3);
-              IndexManagerType & edIm = _myGrid->indexManager(2);
-              
-              for (int i = 0; i < 3; ++i) 
-              {
-    assert(fabs(myface.myvertex(i)->Point()[0]-
-          face.myvertex(i)->Point()[0])<1e-8);
-    assert(fabs(myface.myvertex(i)->Point()[1]-
-          face.myvertex(i)->Point()[1])<1e-8);
-    assert(fabs(myface.myvertex(i)->Point()[2]-
-          face.myvertex(i)->Point()[2])<1e-8);
-                myface.myvertex(i)->setIndex( vxIm , face.myvertex(i)->getIndex() );
-                myface.myhedge1(i)->setIndex( edIm , face.myhedge1(i)->getIndex() );
-              }
-            }
-            
+protected:     
+        ~TetraEmpty () {}
+        
+        int preCoarsening  () ; 
+        int postRefinement () ;
+
+        Gitter * _myGrid;
+public: 
+        //ghost tetra gets indices of grid, to which it belongs actually
+        virtual void setIndicesAndBndId (const hface_STI & f, int face_nr) 
+        {
+          // set all items to ghost bnd id 
+          setGhostBoundaryIds();
+          
+          typedef Gitter :: Geometric :: vertex_GEO vertex_GEO; 
+          typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO; 
+      
+          const myhface3_t & face = static_cast<const myhface3_t &> (f); 
+          const int bndid = face.bndId ();
+
+          myhface3_t & myface = *(myhface3(face_nr));
+
+          // set index of face 
+          myface.setIndex(_myGrid->indexManager(1), face.getIndex());
+          // set bnd id of face 
+          myface.setGhostBndId( bndid );
+
+          IndexManagerType & vxIm = _myGrid->indexManager(3);
+          IndexManagerType & edIm = _myGrid->indexManager(2);
+          
+          for (int i = 0; i < 3; ++i) 
+          {
+            assert(fabs(myface.myvertex(i)->Point()[0]-
+                   face.myvertex(i)->Point()[0])<1e-8);
+            assert(fabs(myface.myvertex(i)->Point()[1]-
+                   face.myvertex(i)->Point()[1])<1e-8);
+            assert(fabs(myface.myvertex(i)->Point()[2]-
+                   face.myvertex(i)->Point()[2])<1e-8);
+
+            vertex_GEO * vx = myface.myvertex(i); 
+            vx->setIndex( vxIm , face.myvertex(i)->getIndex() );
+            vx->setGhostBndId( bndid );
+           
+            hedge1_GEO * edge = myface.myhedge1(i);
+            edge->setIndex( edIm , face.myhedge1(i)->getIndex() );
+            edge->setGhostBndId( bndid );
+          }
+        }
+    
+    private:     
+        //ghost tetra gets indices of grid, to which it belongs actually
+        void setGhostBoundaryIds() 
+        {
+          assert( this->bndId() == 0 );
+          // value of ghost_closure 
+          const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
+          this->setGhostBndId( bndid );
+          for( int i=0; i<4 ; ++i) myhface3(i)->setGhostBndId( bndid );
+          for( int i=0; i<6 ; ++i) myhedge1(i)->setGhostBndId( bndid );
+          for( int i=0; i<4 ; ++i) myvertex(i)->setGhostBndId( bndid );
+        }
        // for _myGrid     
        friend class TetraTop < TetraEmpty > ;     
-  } ;
-  typedef TetraTop < TetraEmpty > tetra_IMPL ;
+    } ;
+    typedef TetraTop < TetraEmpty > tetra_IMPL ;
+
+  
   
   class Periodic3Empty : public periodic3_GEO {
     protected :
@@ -250,6 +331,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
     public:
   } ;
   typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
+
+
 
 // Anfang - Neu am 23.5.02 (BS)
   class Periodic4Empty : public periodic4_GEO {
@@ -276,57 +359,149 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         int preCoarsening(); 
         int postRefinement();
 
-        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs) {
-          for (int i = 0; i < 8; ++i) gs.setData( os, *myvertex(i));
-        }
-        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs) {
-          for (int i = 0; i < 12; ++i) gs.setData( os, *myhedge1(i));
-        }
-        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs) {
-          for (int i = 0; i < 6; ++i) gs.setData( os, *myhface4(i));
+        ////////////////////////////////////////////////
+        // read of data 
+        ////////////////////////////////////////////////
+        // scatter only on ghosts 
+        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+        {
+          const int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[borderFace];
+
+          // get all that are not located on borderFace 
+          const int (&vertices)[4] = Gitter :: Geometric :: hexa_GEO :: prototype [ oppFace ];
+
+          // for all that vertices set data
+          for (int i = 0; i < 4; ++i) 
+          {
+            gs.setData( os, *myvertex( vertices[i] ) );
+          }
         }
         
-	      virtual void attachleafs() {  
-	        assert(this->leafRefCount()==0);
-	        addleaf();
-	        for (int i = 0; i < 6 ;i++) myhface4(i)->addleaf();
-	        for (int i = 0; i < 12 ;i++) myhedge1(i)->addleaf();
-	        for (int i = 0; i < 8 ;i++) myvertex(i)->addleaf();
-	      }
-	      virtual void detachleafs() 
+        // scatter data on ghost edges  
+        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
         {
-	        assert(this->leafRefCount()==1);
-	        removeleaf();
-	        for (int i = 0; i < 6 ;i++) myhface4(i)->removeleaf();
-	        for (int i = 0; i < 12 ;i++) myhedge1(i)->removeleaf();
-	        for (int i = 0; i < 8 ;i++) myvertex(i)->removeleaf();
-	      }
+          const int (&edgesNotOnFace)[8] = 
+            Gitter :: Geometric :: hexa_GEO :: edgesNotOnFace( borderFace );
+          for(int e = 0; e<8; ++e)
+          {
+            gs.setData( os, *myhedge1( edgesNotOnFace[e] ) );
+          }
+        }
 
-        Gitter* _myGrid;
+        // scatter data on ghost faces 
+        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+        {
+          for (int i = 0; i < 6; ++i) 
+          {
+            // skip the face connected to proc boundary 
+            if( i == borderFace ) continue; 
+            gs.setData( os, *myhface4(i) );
+          }
+        }
+
+        //////////////////////////////////////////
+        //  writing of data 
+        //////////////////////////////////////////
+        virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace )
+        {
+          int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[borderFace];
+          // get vertices of opposite face of gFace 
+          const int (& vertices)[4] = Gitter :: Geometric :: hexa_GEO :: prototype [ oppFace ];
+
+          for (int i = 0; i < 4; ++i)
+          {
+            gs.sendData( os, *myvertex( vertices[i] ) );
+          }
+        }
+        
+        virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace)
+        {
+          const int (& edgesNotOnFace)[8] =
+            Gitter :: Geometric :: hexa_GEO :: edgesNotOnFace( borderFace );
+          for(int e=0; e<8; ++e)
+          {
+            gs.sendData( os, *myhedge1( edgesNotOnFace[e] ) );
+          }
+        }
+        
+        virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
+        {
+          for (int i = 0; i < 6; ++i)
+          {
+            if( i == borderFace ) continue;
+            gs.sendData( os, *myhface4(i) );
+          }
+        }
+
+        virtual void attachleafs() {  
+          assert(this->leafRefCount()==0);
+          addleaf();
+          for (int i = 0; i < 6 ; ++i) myhface4(i)->addleaf();
+          for (int i = 0; i < 12; ++i) myhedge1(i)->addleaf();
+          for (int i = 0; i < 8 ; ++i) myvertex(i)->addleaf();
+        }
+        virtual void detachleafs() 
+        {
+          assert(this->leafRefCount()==1);
+          removeleaf();
+          for (int i = 0; i < 6 ; ++i) myhface4(i)->removeleaf();
+          for (int i = 0; i < 12; ++i) myhedge1(i)->removeleaf();
+          for (int i = 0; i < 8 ; ++i) myvertex(i)->removeleaf();
+        }
+
+        Gitter * _myGrid;
         friend class HexaTop<HexaEmpty>;
       public:
         //ghost hexa gets indices of grid, to which it belongs actually
-        virtual void setIndices(const hface_STI & f, int face_nr)  
+        virtual void setIndicesAndBndId (const hface_STI & f, int face_nr)  
         {
+           // set all items to ghost bnd id
+           setGhostBoundaryIds();
+          
+           typedef Gitter :: Geometric :: vertex_GEO vertex_GEO; 
+           typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO; 
+          
            const myhface4_t & face = static_cast<const myhface4_t &> (f); 
+           const int bndid = face.bndId();
            
            myhface4_t & myface = *(myhface4(face_nr));
 
            IndexManagerType & vxIm = _myGrid->indexManager(3);
            IndexManagerType & edIm = _myGrid->indexManager(2);
 
+           // set index of face 
            myface.setIndex( _myGrid->indexManager(1) , face.getIndex ());
+           // set bnd id of face 
+           myface.setGhostBndId( bndid );
+           
            for (int i = 0; i < 4; ++i) 
            {
-	     assert(fabs(myface.myvertex(i)->Point()[0]-
-			 face.myvertex(i)->Point()[0])<1e-8);
-	     assert(fabs(myface.myvertex(i)->Point()[1]-
-			 face.myvertex(i)->Point()[1])<1e-8);
-	     assert(fabs(myface.myvertex(i)->Point()[2]-
-			 face.myvertex(i)->Point()[2])<1e-8);
-             myface.myvertex(i)->setIndex(vxIm, face.myvertex(i)->getIndex());
-             myface.myhedge1(i)->setIndex(edIm, face.myhedge1(i)->getIndex());
+             assert(fabs(myface.myvertex(i)->Point()[0]-
+                    face.myvertex(i)->Point()[0])<1e-8);
+             assert(fabs(myface.myvertex(i)->Point()[1]-
+                    face.myvertex(i)->Point()[1])<1e-8);
+             assert(fabs(myface.myvertex(i)->Point()[2]-
+                    face.myvertex(i)->Point()[2])<1e-8);
+             
+             vertex_GEO * vx = myface.myvertex(i); 
+             vx->setIndex(vxIm, face.myvertex(i)->getIndex());
+             vx->setGhostBndId( bndid );
+             
+             hedge1_GEO * edge = myface.myhedge1(i);
+             edge->setIndex(edIm, face.myhedge1(i)->getIndex());
+             edge->setGhostBndId( bndid );
            }
+        }
+      private:
+        //ghost tetra gets indices of grid, to which it belongs actually
+        void setGhostBoundaryIds() 
+        {
+          // value of ghost_closure 
+          const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
+          this->setGhostBndId( bndid );
+          for( int i=0; i<6 ; ++i) myhface4(i)->setGhostBndId( bndid );
+          for( int i=0; i<12; ++i) myhedge1(i)->setGhostBndId( bndid );
+          for( int i=0; i<8 ; ++i) myvertex(i)->setGhostBndId( bndid );
         }
       } ;
       typedef HexaTop < HexaEmpty > hexa_IMPL ;
