@@ -375,35 +375,41 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
   return ;
 }
 
-void TetraPllXBase :: VertexData2os(ObjectStream & os, GatherScatterType & gs) {
+void TetraPllXBase :: 
+VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
+{
   assert(mytetra().isLeafEntity());
-  for (int i = 0; i < 4; i++) gs.sendData( os, *mytetra().myvertex(i));
+  mytetra().VertexData2os(os,gs,borderFace);
 }
 
-void TetraPllXBase :: EdgeData2os(ObjectStream & os, GatherScatterType & gs) {
-   assert(mytetra().isLeafEntity());
-   for (int i = 0; i < 6; i++) gs.sendData( os, *mytetra().myhedge1(i));
+void TetraPllXBase :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  assert(mytetra().isLeafEntity());
+  mytetra().EdgeData2os(os,gs,borderFace);
 }
 
-void TetraPllXBase :: FaceData2os(ObjectStream & os, GatherScatterType & gs) {
-   for (int i = 0; i < 4; i++) gs.sendData( os, *mytetra().myhface3(i));
+void TetraPllXBase :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  assert(mytetra().isLeafEntity());
+  mytetra().FaceData2os(os,gs,borderFace);
 } 
 
-void HexaPllBaseX :: VertexData2os(ObjectStream & os, GatherScatterType & gs) {
-   assert(myhexa().isLeafEntity());
-  for (int i = 0; i < 8; i++) gs.sendData( os, *myhexa().myvertex(i));
+void HexaPllBaseX :: VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  assert(myhexa().isLeafEntity());
+  myhexa().VertexData2os(os,gs,borderFace);
 }
 
-void HexaPllBaseX :: EdgeData2os(ObjectStream & os, GatherScatterType & gs) {
-	assert(myhexa().isLeafEntity());
-  for (int i = 0; i < 12; i++) {
-    assert(myhexa().myhedge1(i)->isLeafEntity());
-    gs.sendData( os, *myhexa().myhedge1(i));
-  }
+void HexaPllBaseX :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  assert(myhexa().isLeafEntity());
+  myhexa().EdgeData2os(os,gs,borderFace);
 }
 
-void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs) {
-  for (int i = 0; i < 6; i++) gs.sendData( os, *myhexa().myhface4(i));
+void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  assert(myhexa().isLeafEntity());
+  myhexa().FaceData2os(os,gs,borderFace);
 }
 
 TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : 
