@@ -233,14 +233,28 @@ public :
   // Kanten, Fl"achen, Elemente und Randelemente definiert.
   class DuneIndexProvider 
   {
+  public:
+    enum { interior = 0 , border = 111 , ghost = 222 };
+    // das wird hier ja langsam zur eierlegenden Wollmilchsau
 #ifdef _DUNE_USES_ALU3DGRID_
   protected:
+    // internal index of item 
     int _idx;
+    // true if index is copy from outside and should noit freeded
     bool _isCopy;
-    int leafref;
-    DuneIndexProvider () : _idx(-1), _isCopy(false), leafref(0) {}
+    // reference counter of leaf elements holding pointer to this item 
+    int _leafref;
+    
+    // boundary id, zero for internal items, 
+    // otherwise > 0 (but always positive )
+    // negative id are for internal usage only 
+    int _bndid;
+    
+    // constructor 
+    DuneIndexProvider () : _idx(-1), _isCopy(false), _leafref(0) , _bndid(interior) {}
 #endif
   public:
+    
     virtual ~DuneIndexProvider () {}
     // backup and restore index of vertices 
     virtual void backupIndex  (ostream & os ) const {
@@ -257,11 +271,13 @@ public :
     }
 
 #ifdef _DUNE_USES_ALU3DGRID_
+    // return index of item 
     inline int getIndex () const 
     { 
       assert( _idx >= 0);
       return _idx; 
     }
+    // set index of item 
     inline void setIndex ( const int index ) 
     { 
       assert( index >= 0 );
@@ -279,36 +295,83 @@ public :
       }
     }
 
-    //for the ghost helements
+    //for the ghost helements, set index from outside 
     inline void setIndex ( IndexManagerType & im, const int index )
     {
+      // free old index 
       freeIndex(im);
+      // set given index 
       setIndex(index); 
+      // now it's a copy 
       _isCopy = true;
     }
 
     //for defining leaf entities in dune notation:] 
     inline void addleaf() {
-      ++leafref;
+      ++_leafref;
     }
+    // decrease reference counter by one  
     inline void removeleaf() {
-      --leafref;
-      if (leafref<0) std::cerr << "remove error!" << std::endl; 
+      --_leafref;
+      assert( _leafref >= 0 );
     }
-    inline bool isLeafEntity() {
-      return (leafref>0);
+    // returns true, if item is leaf item 
+    inline bool isLeafEntity() const {
+      return ( _leafref > 0 );
     }
-    inline int leafRefCount() {
-      return leafref;
+    inline int leafRefCount() const {
+      return _leafref;
+    }
+
+    // return bnd id 
+    inline int bndId() const { return _bndid; }
+
+    // set bnd id, id is only set if id is larger then actual id
+    inline void setBndId (const int id) 
+    { 
+      if( id > _bndid ) _bndid = id; 
+    }
+    
+    // set bnd id, id is overwritten in any case 
+    inline void setGhostBndId (const int id) 
+    { 
+      _bndid = id; 
+    }
+
+    // returns trus, if item is interior item (not ghost or border)
+    bool isInterior () const 
+    { 
+      // interior is also external boundary which is not 0
+      return ((bndId() != ghost) && (bndId() != border)); 
+    }
+   
+    // returns true if item is ghost item 
+    bool isGhost () const 
+    {
+      return (bndId() == ghost);
+    }
+    
+    // returns trus, if item is border item 
+    bool isBorder () const 
+    {
+      return (bndId() == border);
     }
 #else 
+    // empty methods when not using with Dune 
     inline int getIndex () const { return -1; }
     void setIndex ( const int index ) {}
     inline void freeIndex ( IndexManagerType & im ) {} 
     inline void setIndex ( IndexManagerType & im, const int index ) {}
     inline void addleaf() {}
     inline void removeleaf() {}
-    inline bool isLeafEntity() {return false;}
+    inline bool isLeafEntity() const {return false;}
+    inline int leafRefCount() const { return 0; }
+    inline int bndId() const { return 0; }
+    inline void setBndId (const int id) {}
+    inline void setGhostBndId (const int id) {}
+    bool isGhost () const { return false; } 
+    bool isBorder () const { return false; } 
+    bool isInterior () const { return true; }
 #endif
   };
     
@@ -432,9 +495,13 @@ public :
     //testweise us
     virtual helement * up () = 0;
     virtual const helement * up () const = 0;
-    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { assert(false); }
-    virtual void os2EdgeData(ObjectStream &, GatherScatterType &) { assert(false); } 
-    virtual void os2FaceData(ObjectStream &, GatherScatterType &) { assert(false); } 
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
+    virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
+    virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
+
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
+    virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
+    virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
     //us
     virtual helement * down () = 0 ;
     virtual const helement * down () const = 0 ;
@@ -456,7 +523,7 @@ public :
     inline  int leaf () const ;
 
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
-    virtual void setIndices(const hface & , int ) { assert(false); abort(); }
+    virtual void setIndicesAndBndId (const hface & , int ) { assert(false); abort(); }
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
@@ -501,7 +568,7 @@ public :
     virtual ~hbndseg () {}
   public :
     typedef enum { 
-      none = 0, 
+      none = DuneIndexProvider :: interior, // also the value of interior items 
       inflow = 1, 
       outflow = 2, 
       noslip = 3, 
@@ -512,8 +579,8 @@ public :
       reflect = 8, 
       fluxtube3d = 9, 
       periodic = 20,
-      closure = 111, 
-      ghost_closure = 222 , 
+      closure = DuneIndexProvider :: border,  // also the value of border items 
+      ghost_closure = DuneIndexProvider :: ghost , // also the value of ghost items 
       undefined = 333 } bnd_t ;
     virtual bnd_t bndtype () const = 0 ;
         
@@ -752,7 +819,7 @@ public :
       virtual int nbLeaf() const {return (abort(),-1);}
     } ;
 
-    class VertexGeo : public vertex_STI, public MyAlloc 
+    typedef class VertexGeo : public vertex_STI, public MyAlloc 
     {
     protected:
       IndexManagerType & _indexmanager;
@@ -784,7 +851,7 @@ public :
 #ifndef _DUNE_USES_ALU3DGRID_
       int _idx ;    // Vertexindex zum Datenrausschreiben
 #endif              // wird nur verwendet, wenn nicht fuer Dune ubersetzt    
-    } ;
+    } vertex_GEO ;
   
     typedef class hedge1 : public hedge_STI, public MyAlloc {
     protected :
@@ -864,17 +931,19 @@ public :
     public :
       myrule_t parentRule() const;
       bool isConforming() const;
-      virtual bool isInteriorLeaf() const {
-  if (nb.front().first->isboundary())
-    return ( nb.rear().first->nbLeaf() && 
-       nb.rear().first->nbLevel() == this->level());
-  else if (nb.rear().first->isboundary())
-    return ( nb.front().first->nbLeaf() && 
-       nb.front().first->nbLevel() == this->level());
-  else
-    return (nb.rear().first->nbLeaf() ||
-      (nb.front().first->nbLeaf()));
+      virtual bool isInteriorLeaf() const 
+      {
+        if (nb.front().first->isboundary())
+          return ( nb.rear().first->nbLeaf() && 
+                   nb.rear().first->nbLevel() == this->level());
+        else if (nb.rear().first->isboundary())
+          return ( nb.front().first->nbLeaf() && 
+                   nb.front().first->nbLevel() == this->level());
+        else
+          return (nb.rear().first->nbLeaf() ||
+                 (nb.front().first->nbLeaf()));
       }
+
     protected :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
@@ -986,6 +1055,9 @@ public :
     public :
       static const int prototype [4][3] ;
       static const int edgeMap [6][2] ;
+      static const int protoEdges [6][2];
+      static int (& edgesNotOnFace( const int face ) )[3]; 
+      
       inline virtual ~Tetra () ;
       inline hface3_GEO * myhface3 (int) ;
       inline const hface3_GEO * myhface3 (int) const ;
@@ -999,7 +1071,7 @@ public :
       inline pair < const hasFace3 *, int > myneighbour (int) const ;
 
       //testweise
-    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra ";  }
+      virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra ";  }
       virtual void readVertexData(ObjectStream &, GatherScatterType &) { std::cout << "Tetra "; }
       // Dune extension 
       // return pair, first = pointer to face, second = twist of face
@@ -1064,7 +1136,7 @@ public :
       }
       //testweise
       virtual void readVertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 "; }
-    virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 ";  }
+      virtual void os2VertexData(ObjectStream &, GatherScatterType &) { std::cout << "Per3 ";  }
     
       inline int twist (int) const ;
       int test () const ;
@@ -1153,7 +1225,11 @@ public :
     public :
       static const int prototype [6][4] ;
       static const int oppositeFace [6] ;
+      static const int protoEdges [12][2];
       static const int edgeMap [12][2];
+
+      static int (& edgesNotOnFace( const int face ) )[8]; 
+
       inline virtual ~Hexa () ;
       inline hface4_GEO * myhface4 (int) ;
       inline const hface4_GEO * myhface4 (int) const ;
@@ -1290,22 +1366,27 @@ public :
       {
         assert(this->leafRefCount()==0);
 	      this->addleaf();
-	      myhface4(0)->addleaf();
+        
+        hface4_GEO & face = *(myhface4(0));
+        face.addleaf();
 	      for (int i=0;i<4;i++) 
         {
-	        myhface4(0)->myhedge1(i)->addleaf();
-	        myhface4(0)->myvertex(i)->addleaf();
+	        face.myhedge1(i)->addleaf();
+	        face.myvertex(i)->addleaf();
 	      }
       }
+      
       virtual void detachleafs() 
       {
         assert(this->leafRefCount()==1);
 	      this->removeleaf();
-	      myhface4(0)->removeleaf();
+
+        hface4_GEO & face = *(myhface4(0));
+	      face.removeleaf();
 	      for (int i=0;i<4;i++) 
         {
-	        myhface4(0)->myhedge1(i)->removeleaf();
-	        myhface4(0)->myvertex(i)->removeleaf();
+	        face.myhedge1(i)->removeleaf();
+	        face.myvertex(i)->removeleaf();
 	      }
       }
     private :
