@@ -159,6 +159,9 @@ template < class A > class Hbnd4Top : public A {
     innerbndseg_t * up () ;
     const innerbndseg_t * up () const ;
     inline bnd_t bndtype () const { return _bt; }
+  protected: 
+    inline void setBoundaryId (const int id);
+    
 } ;
 
 template < class A > class HexaTop : public A {
@@ -863,6 +866,7 @@ Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv,
   ghostpair_STI p ( gh, gFace );
   this->setGhost ( p );
   this->setIndex( _indexManager.getIndex() );  
+  setBoundaryId( _bt );
   return ;
 }
 
@@ -870,6 +874,7 @@ template < class A > inline Hbnd4Top < A > ::
 Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im , Gitter * grd )
   : A (f, i,ppv,grd), _bbb (0), _dwn (0), _up(0) , _lvl (l) , _bt(bt) ,  _indexManager(im) {
   this->setIndex( _indexManager.getIndex() );  
+  setBoundaryId( _bt );
   return ;
 }
 
@@ -877,46 +882,56 @@ template < class A > inline Hbnd4Top < A > ::
 Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im )
   : A (f, i,ppv, 0 ), _bbb (0), _dwn (0), _up(0) , _lvl (l) , _bt(bt) ,  _indexManager(im) {
   this->setIndex( _indexManager.getIndex() );  
+  setBoundaryId( _bt );
   return ;
 }
 
 template < class A > Hbnd4Top < A > :: ~Hbnd4Top () {
   this->freeIndex( this->_indexManager );
-  // if (this->ghostLeaf() && this->ghostLevel() == this->level()
-  //    && this->bndtype()== Gitter::hbndseg_STI::closure) {
-  if (this->isLeafEntity()) {
-    this->detachleafs();
-  }
+  if (this->isLeafEntity()) this->detachleafs();
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
 }
 
-template < class A > int Hbnd4Top < A > :: level () const {
+template < class A > inline void Hbnd4Top < A > :: 
+setBoundaryId( const int id ) 
+{
+  myhface4_t & face = *(this->myhface4(0));
+  face.setBndId( id );
+  // 4 fertices and edges  
+  for(int i=0; i<4; ++i)
+  {
+    face.myvertex(i)->setBndId( id );
+    face.myhedge1(i)->setBndId( id );
+  }
+}
+
+template < class A > inline int Hbnd4Top < A > :: level () const {
   return _lvl ;
 }
 
-template < class A > typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: next () { 
+template < class A > inline typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: next () { 
   return _bbb ;
 }
 
-template < class A > const typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: next () const { 
+template < class A > inline const typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: next () const { 
   return _bbb ;
 }
 
-template < class A > typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: down () { 
+template < class A > inline typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: down () { 
   return _dwn ;
 }
 
-template < class A > const typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: down () const { 
+template < class A > inline const typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: down () const { 
   return _dwn ;
 }
 
-template < class A > typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: up () { 
+template < class A > inline typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > :: up () { 
   return _up ;
 }
 
-template < class A > const typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > ::up () const { 
+template < class A > inline const typename Hbnd4Top < A > :: innerbndseg_t * Hbnd4Top < A > ::up () const { 
   return _up ;
 }
 
