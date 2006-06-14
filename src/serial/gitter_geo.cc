@@ -46,6 +46,56 @@ const int Gitter :: Geometric :: Tetra :: edgeMap [6][2] = {{3, 0},
                                                             {0, 0},
                                                             {0, 1}};
 
+// tell which vertices belong to which edge 
+const int Gitter :: Geometric :: Tetra :: protoEdges [6][2] = {{0, 1},
+                                                               {0, 2},
+                                                               {0, 3},
+                                                               {1, 2},
+                                                               {1, 3},
+                                                               {2, 3}};
+
+// return list with edges that lie not on given face 
+int (& Gitter :: Geometric :: Tetra :: edgesNotOnFace( const int face ))[3] 
+{
+  static int edgesNotFace[4][3];
+  static bool calculated = false;
+  if( ! calculated ) 
+  {
+    for(int f = 0; f<4; ++f ) 
+    {
+      const int (&edges)[6][2] = protoEdges;           
+      const int (&vertices)[3] = prototype [ f ];
+
+      int edgeCount = 0;
+      for (int e = 0; e < 6; ++e)
+      {
+        const int (&edgeVx)[2] = edges[e];
+        int count = 0;
+        for(int v=0; v<3; ++v)
+        {
+          if( vertices[v] == edgeVx[0] || vertices[v] == edgeVx[1] )
+            ++count;
+        } 
+        if (count < 2) 
+        {
+          edgesNotFace[f][edgeCount] = e;
+          ++edgeCount;
+        }
+      }
+      assert( edgeCount == 3 );
+
+      /*
+      cout << "edges not on face "<< f<< " = {";
+      for(int i=0; i<3; ++i) 
+        cout << edgesNotFace[f][i] << " , ";
+      cout << "} \n";
+      */
+    }
+    calculated = true;
+  }
+  return edgesNotFace[face];
+}
+
 // prototype of periodic 3 type 
 const int Gitter :: Geometric :: Periodic3 :: prototype [2][3] = {{0,1,2},{3,5,4}} ;
 
@@ -100,6 +150,52 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
 const int Gitter :: Geometric :: Hexa :: prototype [6][4] = {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}} ;
 
 const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of given face 
+
+// vertices of the edges of an Hexa 
+const int Gitter :: Geometric :: Hexa :: protoEdges [12][2] = 
+   { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
+     {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
+
+int (& Gitter :: Geometric :: Hexa :: edgesNotOnFace( const int face ))[8] 
+{
+  static int edgesNotFace[6][8];
+  static bool calculated = false;
+  if( ! calculated ) 
+  {
+    for(int f = 0; f<6; ++f ) 
+    {
+      const int (&edges)[12][2] = protoEdges;           
+      const int (&vertices)[4]  = prototype [ f ];
+
+      int edgeCount = 0;
+      for (int e = 0; e < 12; ++e)
+      {
+        const int (&edgeVx)[2] = edges[e];
+        int count = 0;
+        for(int v=0; v<4; ++v)
+        {
+          if( vertices[v] == edgeVx[0] || vertices[v] == edgeVx[1] )
+            ++count;
+        } 
+        if (count < 2) 
+        {
+          edgesNotFace[f][edgeCount] = e;
+          ++edgeCount;
+        }
+      }
+      assert( edgeCount == 8 );
+
+      /*
+      cout << "edges not on face "<< f<< " = {";
+      for(int i=0; i<8; ++i) 
+        cout << edgesNotFace[f][i] << " , ";
+      cout << "} \n";
+      */
+    }
+    calculated = true;
+  }
+  return edgesNotFace[face];
+}
 
 // defines how we get an edge from an hexa , first is face , second is edge 
 // for example the 0th edge is defined by the 3th edge of the 0th face
