@@ -287,11 +287,11 @@ class ElementPllXIF : public MacroGridMoverIF {
     virtual void writeDynamicState (ObjectStream &, int) const = 0 ;
     virtual void readDynamicState (ObjectStream &, int) = 0 ;
 
-    virtual void VertexData2os(ObjectStream &, GatherScatterType &) {std::cout << "ich bin die falsche...\n" << flush;}
-    virtual void EdgeData2os(ObjectStream &, GatherScatterType &) {std::cout << "ich bin die falsche...1\n" << flush;}
-    virtual void FaceData2os(ObjectStream &, GatherScatterType &) {std::cout << "ich bin die falsche...2\n" << flush;}
-    virtual void writeElementData(ObjectStream &, GatherScatterType &) {std::cout << "ich bin die falsche...3\n" << flush;}
-    virtual void writeDynamicState (ObjectStream &, GatherScatterType &) const = 0 ;
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...\n" << flush;}
+    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...1\n" << flush;}
+    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...2\n" << flush;}
+    virtual void writeElementData (ObjectStream &, GatherScatterType &) {std::cout << "ich bin die falsche...3\n" << flush;}
+    virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const = 0 ;
     virtual void readDynamicState (ObjectStream &, GatherScatterType &) = 0 ;
   public :
     virtual int ldbVertexIndex () const = 0 ;
