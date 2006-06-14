@@ -238,7 +238,7 @@ setGhost ( const ghostpair_STI & gpair )
     assert( _ghostPair.first );
     
     // copy indices from internal boundry to myhface3(.) of ghost
-    _ghostPair.first->setIndices( *(this->myhface3(0)) , _ghostPair.second );
+    _ghostPair.first->setIndicesAndBndId ( *(this->myhface3(0)) , _ghostPair.second );
   }
   else 
   {
