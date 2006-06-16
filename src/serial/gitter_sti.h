@@ -1538,6 +1538,10 @@ public :
   virtual void fullIntegrityCheck () ;
   virtual void printsize () ;
   virtual bool adapt () ;
+  // this method just calls adapt 
+  virtual bool adaptWithoutLoadBalancing() ;
+  // adaptation with callback functionality 
+  virtual bool duneAdapt ( AdaptRestrictProlongType & arp ) ;
   virtual void refineGlobal () ;
   virtual void refineBall (const double (&)[3],double,int) ;
   virtual void refineRandom (double) ;

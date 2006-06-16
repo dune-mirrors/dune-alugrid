@@ -437,6 +437,15 @@ bool Gitter :: adapt () {
   return true;
 }
 
+bool Gitter :: adaptWithoutLoadBalancing() {
+  return adapt();
+}
+bool Gitter :: duneAdapt (AdaptRestrictProlongType & arp) 
+{
+  cerr << "Gitter :: duneAdapt: method not overloaded! in file:"<< __FILE__ << "  line:" << __LINE__<< endl;
+  return adapt();
+}
+
 void Gitter :: backupCMode (ostream & out) {
 
   // das Kompatibilit"ats - Backup f"ur backups im alten Modus.
