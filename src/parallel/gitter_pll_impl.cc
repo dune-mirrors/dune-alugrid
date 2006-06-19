@@ -378,37 +378,31 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 void TetraPllXBase :: 
 VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
 {
-  assert(mytetra().isLeafEntity());
   mytetra().VertexData2os(os,gs,borderFace);
 }
 
 void TetraPllXBase :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
-  assert(mytetra().isLeafEntity());
   mytetra().EdgeData2os(os,gs,borderFace);
 }
 
 void TetraPllXBase :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
-  assert(mytetra().isLeafEntity());
   mytetra().FaceData2os(os,gs,borderFace);
 } 
 
 void HexaPllBaseX :: VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
-  assert(myhexa().isLeafEntity());
   myhexa().VertexData2os(os,gs,borderFace);
 }
 
 void HexaPllBaseX :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
-  assert(myhexa().isLeafEntity());
   myhexa().EdgeData2os(os,gs,borderFace);
 }
 
 void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
-  assert(myhexa().isLeafEntity());
   myhexa().FaceData2os(os,gs,borderFace);
 }
 
