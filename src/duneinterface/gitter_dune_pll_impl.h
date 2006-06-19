@@ -24,6 +24,7 @@ class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
 protected:  
   bool balanceGrid_;
 
+  // enums for communication type
   typedef enum { Border_Border_Comm , 
                  Interior_Ghost_Comm , 
                  Ghost_Interior_Comm , 
@@ -60,11 +61,11 @@ public:
 
   void coarse ();
 
-  // adapts and calls notify and loadBalancer  
-  bool dAdapt ();
+  // adapts and witout calling loadBalancer  
+  bool adaptWithoutLoadBalancing ();
 
-  // adapts and calls notify and loadBalancer, also preCoarsening and
-  // postRefinement is called 
+  // adapts and calls preCoarsening and
+  // postRefinement, no loadBalancing done   
   bool duneAdapt (AdaptRestrictProlongType & arp);
 
   // return true if grid has to be balanced again 
@@ -128,6 +129,7 @@ private:
       	 GatherScatterType & elementData ,
          const CommunicationType commType);
 
+  // message tag for communication 
   enum { transmittedData = 1 , noData = 0 };
 
   template <class ObjectStreamType, class HItemType>
