@@ -46,8 +46,8 @@ struct GatherScatter
   virtual bool containsItem(const HEdgeType   & elem ) const { assert(false); abort(); return false; }
   virtual bool containsItem(const HVertexType & elem ) const { assert(false); abort(); return false; }
   
-  virtual bool containsInterior (const HFaceType  & elem )     const { assert(false); abort(); return false; }
-  virtual bool containsGhost    (const ElementPllXIF_t & elif) const { assert(false); abort(); return false; }
+  virtual bool containsInterior (const HFaceType  & face )     const { assert(false); abort(); return false; }
+  virtual bool containsGhost    (const HFaceType  & face ,const ElementPllXIF_t & elif) const { assert(false); abort(); return false; }
   
   virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) { assert(false); abort(); }
   virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) { assert(false); abort(); }
