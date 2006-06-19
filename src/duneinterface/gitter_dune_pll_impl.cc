@@ -62,39 +62,38 @@ void GitterDunePll :: duneNotifyGridChanges ()
 }
 
 
-// done call notify and loadBalancer  
-bool GitterDunePll :: dAdapt ()   
+// adapt, no loadBalancing done   
+bool GitterDunePll :: adaptWithoutLoadBalancing ()   
 {
   __STATIC_myrank = mpAccess ().myrank () ;
   __STATIC_turn ++ ;
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: dAdapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
+  
   int start = clock () ;
-  //bool refined = 
-  this->refine() ;
+  bool refined = this->refine() ;
   int lap = clock () ;
   this->coarse ();
+  
   int end = clock () ;
   if (debugOption (1))
-    {
-      float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
-      float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
-      float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
-      cout << "**INFO GitterDunePll :: adapt () [ref (loops)|cse|all] " << u1 << " ("
-     << _refineLoops << ") " << u2 << " " << u3 << endl ;
-    }
+  {
+    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
+    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
+    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
+    cout << "**INFO GitterDunePll :: adapt () [ref (loops)|cse|all] " << u1 << " ("
+       << _refineLoops << ") " << u2 << " " << u3 << endl ;
+  }
+
   duneNotifyGridChanges () ;
-  //balanceGrid_ = duneNotifyNewGrid();
-  
-  return true;
-  //return refined;
+  return refined;
 }
 
 // done call notify and loadBalancer  
 bool GitterDunePll :: duneAdapt (AdaptRestrictProlongType & arp)   
 {
   this->setAdaptRestrictProlongOp(arp);
-  bool refined = this->dAdapt();
+  bool refined = this->adaptWithoutLoadBalancing();
   this->removeAdaptRestrictProlongOp ();
   return refined;
 }
@@ -135,15 +134,17 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProl
     for (vector < double > :: iterator i = v.begin () ; i != v.end () ; i ++)
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false));
   }
+
   if (neu) 
-    {
-      if (mpAccess ().gmax (_ldbMethod)) 
   {
-    assert (debugOption (5) ? (cout << "**GitterDunePll :: repartitioning macro grid! " << endl, 1) : 1) ;
-    duneRepartitionMacroGrid (db, gs) ;
-    notifyMacroGridChanges () ;
-  }
+    if (mpAccess ().gmax (_ldbMethod)) 
+    {
+      assert (debugOption (5) ? (cout << "**GitterDunePll :: repartitioning macro grid! " << endl, 1) : 1) ;
+      duneRepartitionMacroGrid (db, gs) ;
+      notifyMacroGridChanges () ;
     }
+  }
+
   this->removeAdaptRestrictProlongOp ();
   return neu;
 }
@@ -232,82 +233,6 @@ void GitterDunePll :: duneExchangeDynamicState ()
   }
 }
 
-#if 0
-// reun only over leaf Level 
-void GitterDunePll :: duneExchangeDataLeaf (GatherScatterType & gs) 
-{
-  // Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
-  // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
-  // die einer "Anderung des statischen Zustands entsprechen. Sie wird in
-  // diesem Fall NACH dem Update des statischen Zustands aufgerufen, und
-  // kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
-  // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
-  // Regel hier eingeschleift werden.
-  {
-    const int nl = mpAccess ().nlinks () ;
-#ifndef NDEBUG
-    const int start = clock () ;
-#endif
-    try 
-      {
-  typedef LeafIteratorTT< hface_STI > InnerIteratorType;
-  typedef LeafIteratorTT< hface_STI > OuterIteratorType;
-                
-  vector < ObjectStream > osv (nl) ;
-  {
-    for (int l = 0 ; l < nl ; l ++) 
-      {
-        {
-    LeafIteratorTT < hface_STI > w (*this,l);
-    for (w.inner() .first () ; ! w.inner().done () ; w.inner().next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = w.inner().item ().accessPllX ().accessInnerPllX () ;
-        p.first->writeDynamicState (osv [l], p.second) ;
-        p.first->writeDynamicState (osv [l], gs) ;
-      }
-        
-    for (w.outer().first () ; ! w.outer().done () ; w.outer().next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = w.outer().item ().accessPllX ().accessInnerPllX () ;
-        p.first->writeDynamicState (osv [l], p.second) ;
-        p.first->writeDynamicState (osv [l], gs) ;
-      }
-        }
-      } 
-  }
-    
-  osv = mpAccess ().exchange (osv) ;
-    
-  { 
-    for (int l = 0 ; l < nl ; l ++ ) 
-      {
-        {
-    LeafIteratorTT< hface_STI > w (*this,l) ;
-    for (w.outer().first () ; ! w.outer().done () ; w.outer().next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = w.outer().item ().accessPllX ().accessOuterPllX () ;
-        p.first->readDynamicState (osv [l], p.second) ;
-        p.first->readDynamicState (osv [l], gs) ;
-      }
-        
-    for (w.inner().first () ; ! w.inner().done () ; w.inner().next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = w.inner().item ().accessPllX ().accessOuterPllX () ;
-        p.first->readDynamicState (osv [l], p.second) ;
-        p.first->readDynamicState (osv [l], gs ) ;
-      }
-        }
-      } 
-  }
-      } 
-    catch (Parallel ::  AccessPllException) 
-      {
-  cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
-      }
-    assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: duneExchangeData () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
-  }
-}
-#endif
 
 // go over all levels 
 void GitterDunePll :: duneExchangeDataAll (GatherScatterType & gs) 
@@ -396,9 +321,6 @@ void GitterDunePll :: duneExchangeDataAll (GatherScatterType & gs)
 
 void GitterDunePll :: duneExchangeData (GatherScatterType & gs, bool leaf) 
 {
-  //if(leaf) 
-  //  this->duneExchangeDataLeaf(gs);
-  //else 
   this->duneExchangeDataAll(gs);
   return; 
 }
@@ -421,7 +343,7 @@ GitterDunePll :: borderIteratorTT (const hedge_STI * e, int link )
 pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
 GitterDunePll :: borderIteratorTT (const hface_STI * f, int link )
 {
-  // return default vertex iterator 
+  // return face iterator over all faces 
   is_def_true< hface_STI > * s = 0;
   return this->createFaceIteratorTT(s, link);
 }
@@ -495,11 +417,6 @@ void GitterDunePll :: unpackOnMaster (
     // read data marker 
     recvBuff.readObject(hasdata);
     
-    //DataType & data = masterData[idx];
-    //int idx = vx.getIndex(); 
-    //const size_t s = vertexData.size(vx);
-    //if( data.size() <= nlData ) data.resize(nlData);
-    
     item.reserveBuffer( nl + 1 );
     DataBufferType & data = item.commBuffer();
 
@@ -552,9 +469,6 @@ void GitterDunePll :: sendMaster (
   {
     HItemType & item = iter.item();
     DataBufferType & dataBuff = item.commBuffer();
-    
-    //int idx = vx.getIndex();
-    //DataType & data = masterData[idx];
     
     // scatter on master 
     if ( dataHandle.containsItem( item ) ) 
@@ -726,12 +640,6 @@ void GitterDunePll :: doBorderBorderComm(
   assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsEdges)=true " << endl, 1) : 1) ;
   assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsFaces)=true " << endl, 1) : 1) ;
    
-  // buffer on master 
-  //typedef vector< double > BuffType;
-  //typedef SmallObjectStream BuffType;
-  //typedef vector< BuffType > DataType;
-  //map < int , DataType > masterData;
-
   {
     // gather all data from slaves 
     for (int link = 0; link < nl ; ++link )  
@@ -876,6 +784,11 @@ void GitterDunePll :: sendInteriorGhostData (
   const bool containsVertices = vertexData.contains(3,3);
   const bool containsEdges    = edgeData.contains(3,2);
   const bool containsFaces    = faceData.contains(3,1);
+  
+  const bool haveHigherCodimData = containsVertices || 
+    containsEdges ||  
+    containsFaces ;
+
   const bool containsElements = elementData.contains(3,0);
 
   // temporary object buffer  
@@ -886,9 +799,8 @@ void GitterDunePll :: sendInteriorGhostData (
     // check ghost leaf 
     pair < ElementPllXIF_t *, int > bnd = face.accessPllX ().accessOuterPllX () ;
 
-    
-    const int interiorLeaf = ( elementData.containsInterior(face)        && packInterior) ? 1 : 0;
-    const int ghostLeaf    = ( elementData.containsGhost( *(bnd.first) ) && packGhosts)   ? 2 : 0;
+    const int interiorLeaf = ( elementData.containsInterior(face) && packInterior) ? 1 : 0;
+    const int ghostLeaf    = ( elementData.containsGhost( face , *(bnd.first) ) && packGhosts)   ? 2 : 0;
 
     const int transmit = interiorLeaf + ghostLeaf ;
     // transmit = 1 interior, transmit = 2 ghost, transmit = 3 both 
@@ -902,12 +814,15 @@ void GitterDunePll :: sendInteriorGhostData (
       {
         pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessInnerPllX () ;
 
-        if (containsVertices) 
-          p.first->VertexData2os(sendBuff, vertexData, p.second );
-        if (containsEdges)    
-          p.first->EdgeData2os  (sendBuff, edgeData  , p.second );
-        if (containsFaces)    
-          p.first->FaceData2os  (sendBuff, faceData  , p.second );
+        if( haveHigherCodimData )
+        {
+          if (containsVertices) 
+            p.first->VertexData2os(sendBuff, vertexData, p.second );
+          if (containsEdges)    
+            p.first->EdgeData2os  (sendBuff, edgeData  , p.second );
+          if (containsFaces)    
+            p.first->FaceData2os  (sendBuff, faceData  , p.second );
+        }
 
         if (containsElements) 
           p.first->writeDynamicState (sendBuff , elementData) ;
@@ -920,12 +835,16 @@ void GitterDunePll :: sendInteriorGhostData (
         Gitter :: ghostpair_STI gpair = bnd.first->getGhost();
         assert( gpair.first );
       
-        if (containsVertices) 
-          gpair.first->VertexData2os( sendBuff , vertexData, gpair.second );
-        if (containsEdges)    
-          gpair.first->EdgeData2os  ( sendBuff , edgeData, gpair.second );
-        if (containsFaces)    
-          gpair.first->FaceData2os  ( sendBuff , faceData, gpair.second );
+        if( haveHigherCodimData )
+        {
+          if (containsVertices) 
+            gpair.first->VertexData2os( sendBuff , vertexData, gpair.second );
+          if (containsEdges)    
+            gpair.first->EdgeData2os  ( sendBuff , edgeData, gpair.second );
+          if (containsFaces)    
+            gpair.first->FaceData2os  ( sendBuff , faceData, gpair.second );
+        }
+        
         if (containsElements) 
           elementData.sendData ( sendBuff, *(gpair.first) );
       }
@@ -952,6 +871,12 @@ void GitterDunePll :: unpackInteriorGhostData (
   const bool containsEdges    = edgeData.contains(3,2);
   const bool containsFaces    = faceData.contains(3,1);
   const bool containsElements = elementData.contains(3,0);
+  
+
+  const bool haveHigherCodimData = containsVertices || 
+    containsEdges ||  
+    containsFaces ;
+
   
   for (iter->first () ; ! iter->done () ; iter->next ()) 
   {
@@ -982,12 +907,16 @@ void GitterDunePll :: unpackInteriorGhostData (
           Gitter :: ghostpair_STI gpair = p.first->getGhost();
           assert( gpair.first );
         
-          if (containsVertices) 
-            gpair.first->os2VertexData( recvBuff , vertexData, gpair.second );
-          if (containsEdges)    
-            gpair.first->os2EdgeData  ( recvBuff , edgeData, gpair.second );
-          if (containsFaces)    
-            gpair.first->os2FaceData  ( recvBuff , faceData, gpair.second );
+          if( haveHigherCodimData )
+          {
+            if (containsVertices) 
+              gpair.first->os2VertexData( recvBuff , vertexData, gpair.second );
+            if (containsEdges)    
+              gpair.first->os2EdgeData  ( recvBuff , edgeData, gpair.second );
+            if (containsFaces)    
+              gpair.first->os2FaceData  ( recvBuff , faceData, gpair.second );
+          }
+
           if (containsElements) 
             p.first->readDynamicState ( recvBuff , elementData);
         }
@@ -1001,12 +930,16 @@ void GitterDunePll :: unpackInteriorGhostData (
           pll.first->getAttachedElement( p );
           assert( p.first );
 
-          if (containsVertices) 
-            p.first->os2VertexData( recvBuff , vertexData, pll.second );
-          if (containsEdges)    
-            p.first->os2EdgeData( recvBuff , edgeData, pll.second );
-          if (containsFaces)    
-            p.first->os2FaceData( recvBuff , faceData, pll.second );
+          if( haveHigherCodimData )
+          {
+            if (containsVertices) 
+              p.first->os2VertexData( recvBuff , vertexData, pll.second );
+            if (containsEdges)    
+              p.first->os2EdgeData( recvBuff , edgeData, pll.second );
+            if (containsFaces)    
+              p.first->os2FaceData( recvBuff , faceData, pll.second );
+          }
+
           if (containsElements) 
             elementData.recvData( recvBuff , *(p.first) );
         }
