@@ -111,9 +111,13 @@ template < class A > class AccessIteratorTT {
   // Der 'listSmartpointer__to__iteratorSTI' Smartpointer verwaltet
   // die Iteratorkopien.
 
-template < class A > class listSmartpointer__to__iteratorSTI : public IteratorSTI < A > {
+template < class A > class listSmartpointer__to__iteratorSTI : public IteratorSTI < A > 
+{
+  // list to iterate 
   list < typename AccessIterator < A > :: Handle > & _l ;
+  // current item 
   typename list < typename AccessIterator < A > :: Handle > :: iterator _curr ;
+
   public :
     listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handle > &) ;
     listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > &) ;
@@ -465,6 +469,7 @@ template < class A > class LeafIteratorTT {
     inline IteratorSTI < A > & outer () ;
     inline const IteratorSTI < A > & outer () const ;
     inline LeafIteratorTT (GitterPll &, int) ;
+    inline LeafIteratorTT (const LeafIteratorTT & ) ;
     inline ~LeafIteratorTT () ;
 } ;
 
@@ -495,9 +500,9 @@ HandleBase (AccessIteratorTT < A > & f, int i) : _fac (f), _l (i)
 }
 
 template < class A > inline AccessIteratorTT < A > :: HandleBase :: 
-HandleBase (const AccessIteratorTT < A > :: HandleBase & p) 
-  : _fac (p._fac), _l (p._l) 
-  , _pw( p._pw.first ->clone() , p._pw.second->clone() )
+HandleBase (const AccessIteratorTT < A > :: HandleBase & org) 
+  : _fac (org._fac), _l (org._l) 
+  , _pw( org._pw.first ->clone() , org._pw.second->clone() )
 {
   this->_fac.ref ++ ;
 }
@@ -545,10 +550,13 @@ clone () const
   return new typename AccessIteratorTT < A > :: HandleBase (*this);
 }
 
-template < class A > inline AccessIteratorTT < A > :: InnerHandle :: InnerHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) {
+template < class A > inline AccessIteratorTT < A > :: InnerHandle :: 
+InnerHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) 
+{
 }
 
-template < class A > inline AccessIteratorTT < A > :: InnerHandle :: InnerHandle (const InnerHandle & p) : HandleBase (p) {
+template < class A > inline AccessIteratorTT < A > :: InnerHandle :: 
+InnerHandle (const InnerHandle & p) : HandleBase (p) {
 }
 
 template < class A > inline AccessIteratorTT < A > :: InnerHandle :: ~InnerHandle () {
@@ -585,7 +593,8 @@ template < class A > inline AccessIteratorTT < A > :: OuterHandle :: OuterHandle
 }
 
 template < class A > inline AccessIteratorTT < A > :: OuterHandle :: 
-OuterHandle (const OuterHandle & p) : HandleBase (p) {
+OuterHandle (const OuterHandle & p) : HandleBase (p) 
+{
 }
 
 template < class A > inline AccessIteratorTT < A > :: OuterHandle :: ~OuterHandle () {
@@ -624,8 +633,8 @@ listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handl
 }
 
 template < class A > listSmartpointer__to__iteratorSTI < A > :: 
-listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > & a) : _l (a._l) {
-}
+listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > & a) 
+  : _l (a._l) , _curr(a._curr) {}
 
 template < class A > listSmartpointer__to__iteratorSTI < A > :: ~listSmartpointer__to__iteratorSTI () {
 }
@@ -634,8 +643,9 @@ template < class A > void listSmartpointer__to__iteratorSTI < A > :: first () {
   _curr = _l.begin () ;
 }
 
-template < class A > void listSmartpointer__to__iteratorSTI < A > :: next () {
-  _curr ++ ;
+template < class A > void listSmartpointer__to__iteratorSTI < A > :: next () 
+{
+  ++_curr ;
 }
 
 template < class A > int listSmartpointer__to__iteratorSTI < A > :: done () const {
@@ -774,9 +784,10 @@ inline pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll 
 
 template <class StopRule_t>
 inline pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
-  GitterPll :: createFaceIteratorTT (const StopRule_t *, int l) {
-  AccessIteratorTT < hface_STI > :: InnerHandle mif (containerPll (), l) ;
-  AccessIteratorTT < hface_STI > :: OuterHandle mof (containerPll (), l) ;
+  GitterPll :: createFaceIteratorTT (const StopRule_t *, int l) 
+{
+  AccessIteratorTT < hface_STI > :: InnerHandle mif (containerPll () , l) ;
+  AccessIteratorTT < hface_STI > :: OuterHandle mof (containerPll () , l) ;
   return pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * >
   (new Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, StopRule_t > > (mif),
    new Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, StopRule_t > > (mof)) ;
@@ -785,6 +796,12 @@ inline pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll 
 
 template < class A > inline LeafIteratorTT < A > :: LeafIteratorTT (GitterPll & g, int l) : _grd (g), _link (l), _a (0) {
   _p = _grd.iteratorTT (_a, _link) ;
+}
+
+template < class A > inline LeafIteratorTT < A > :: LeafIteratorTT (const LeafIteratorTT & org)
+  : _grd (org._grd), _link (org._link), _a (0) 
+  , _p( org._p.first->clone() , org._p.second->clone() ) 
+{
 }
 
 template < class A > inline LeafIteratorTT < A > :: ~LeafIteratorTT () {

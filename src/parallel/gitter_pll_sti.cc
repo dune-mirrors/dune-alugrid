@@ -295,7 +295,7 @@ pair < IteratorSTI < Gitter :: hface_STI > *, IteratorSTI < Gitter :: hface_STI 
   assert (i < static_cast<int> (_hfaceTT.size ())) ;
   return pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > 
   (new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].first),
-         new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].second)) ;
+   new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].second)) ;
 }
 
 pair < IteratorSTI < Gitter :: hface_STI > *, IteratorSTI < Gitter :: hface_STI > * > 
