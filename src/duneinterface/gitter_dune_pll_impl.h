@@ -91,28 +91,28 @@ public:
          GatherScatterType & vertexData ,
          GatherScatterType & edgeData,
          GatherScatterType & faceData ,
-	       GatherScatterType & elementData );
+         GatherScatterType & elementData );
 
   // communication of border data 
   void interiorGhostCommunication (
          GatherScatterType & vertexData ,
          GatherScatterType & edgeData,
          GatherScatterType & faceData ,
-	       GatherScatterType & elementData );
+         GatherScatterType & elementData );
 
   // communication of border data 
   void ghostInteriorCommunication (
          GatherScatterType & vertexData ,
          GatherScatterType & edgeData,
          GatherScatterType & faceData ,
-	       GatherScatterType & elementData );
+         GatherScatterType & elementData );
 
   // communication of border data 
   void allAllCommunication (
          GatherScatterType & vertexData ,
          GatherScatterType & edgeData,
          GatherScatterType & faceData ,
-	       GatherScatterType & elementData );
+         GatherScatterType & elementData );
 
   // return indexmanger 
   IndexManagerType & indexManager(int codim)
@@ -126,7 +126,7 @@ private:
          GatherScatterType & vertexData ,
          GatherScatterType & edgeData,
          GatherScatterType & faceData ,
-      	 GatherScatterType & elementData ,
+         GatherScatterType & elementData ,
          const CommunicationType commType);
 
   // message tag for communication 
@@ -210,7 +210,9 @@ public:
 
   pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int) ;
   pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> borderIteratorTT (const hedge_STI  *, int) ;
-  pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> borderIteratorTT (const hface_STI  *, int) ;
-    
+  pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> borderIteratorTT  (const hface_STI  *, int) ;
+  
+  pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> leafBorderIteratorTT  (const hface_STI  *, int) ;
+  pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> levelBorderIteratorTT (const hface_STI  *, int link , int level) ;
 };
 #endif

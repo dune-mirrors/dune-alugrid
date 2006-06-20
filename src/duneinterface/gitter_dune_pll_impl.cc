@@ -344,8 +344,25 @@ pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hfac
 GitterDunePll :: borderIteratorTT (const hface_STI * f, int link )
 {
   // return face iterator over all faces 
-  is_def_true< hface_STI > * s = 0;
-  return this->createFaceIteratorTT(s, link);
+  is_def_true< hface_STI > rule ;
+  return this->createFaceIteratorTT( rule , link);
+}
+
+pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
+GitterDunePll :: leafBorderIteratorTT (const hface_STI * f, int link )
+{
+  // return face iterator over all faces that are 
+  // leaf faces in the DUNE context
+  is_leaf_entity < hface_STI > rule;
+  return this->createFaceIteratorTT( rule , link);
+}
+
+pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
+GitterDunePll :: levelBorderIteratorTT (const hface_STI * f, int link , int level)
+{
+  // return face iterator over faces with given level 
+  any_has_level < hface_STI > rule(level);
+  return this->createFaceIteratorTT( rule, link);
 }
 
 template <class ObjectStreamType, class HItemType> 
@@ -900,8 +917,8 @@ void GitterDunePll :: unpackInteriorGhostData (
         {
           pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessOuterPllX () ;
 
-          assert( p.first->checkGhostLevel() );
-          assert( p.first->ghostLeaf() );
+          //assert( p.first->checkGhostLevel() );
+          //assert( p.first->ghostLeaf() );
 
           // get pair < ghost, local face num > 
           Gitter :: ghostpair_STI gpair = p.first->getGhost();

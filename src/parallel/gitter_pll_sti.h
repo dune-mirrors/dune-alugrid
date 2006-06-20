@@ -442,7 +442,7 @@ class GitterPll : public virtual Gitter {
 
     template <class StopRule_t> 
     inline pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
-    createFaceIteratorTT (const StopRule_t *, int) ;
+    createFaceIteratorTT (const StopRule_t rule , int) ;
   
   // Die drei Variablen der Klasse Gitter sollen erstmal als
   // Murksl"osung dazu dienen, den Lastverteiler "uber ein
@@ -784,13 +784,13 @@ inline pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll 
 
 template <class StopRule_t>
 inline pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
-  GitterPll :: createFaceIteratorTT (const StopRule_t *, int l) 
+  GitterPll :: createFaceIteratorTT (const StopRule_t rule , int l) 
 {
   AccessIteratorTT < hface_STI > :: InnerHandle mif (containerPll () , l) ;
   AccessIteratorTT < hface_STI > :: OuterHandle mof (containerPll () , l) ;
   return pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * >
-  (new Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, StopRule_t > > (mif),
-   new Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, StopRule_t > > (mof)) ;
+  (new Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, StopRule_t > > (mif,rule),
+   new Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, StopRule_t > > (mof,rule)) ;
 }
 
 

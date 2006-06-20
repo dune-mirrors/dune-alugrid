@@ -112,7 +112,7 @@ pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll :: hedg
 pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
   GitterPll :: iteratorTT (const GitterPll :: hface_STI *, int l) 
 {
-  is_leaf< hface_STI > * rule = 0; 
+  is_leaf< hface_STI > rule; 
   return this->createFaceIteratorTT(rule, l);
 }
 
