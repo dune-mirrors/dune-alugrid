@@ -55,6 +55,7 @@ template < class A > class any_has_level {
   public :
     typedef A val_t ;
     any_has_level (int i = 0) : lvl (i) { }
+    any_has_level ( const any_has_level & org ) : lvl (org.lvl) { }
     int operator () (const A * x) const { return x->level () == lvl ? 1 : 0 ; }
     int operator () (const A & x) const { return x.level () == lvl ? 1 : 0 ; }
 
