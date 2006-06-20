@@ -149,6 +149,29 @@ template < class A > class leaf_or_father_of_leaf
       return ( x.leaf() || ( (!x.leaf()) && (x.down()->leaf() ) ) ) ? 1 : 0 ;
     }
 };
+
+//! new rule for Dune LeafIterator minus one 
+//! all entities with are either leaf entities or thier children are leaf entities 
+template < class A > class is_leaf_entity
+{
+  public :
+    typedef A val_t ;
+
+    //! Constructor storing the level 
+    is_leaf_entity () {}
+
+    //! check if go next
+    int operator () (const A * x) const
+    {
+      return ( x->isLeafEntity() ) ? 1 : 0; 
+    }
+
+    //! check if go next
+    int operator () (const A & x) const
+    {
+      return ( x.isLeafEntity() ) ? 1 : 0; 
+    }
+};
 //**********************************************************************************
 //**********************************************************************************
 //**********************************************************************************
@@ -266,6 +289,8 @@ template < class  A, class B > class Insert : public IteratorSTI < typename B ::
     val_t & item () const ;
     inline virtual IteratorSTI < val_t > * clone () const;
   private :
+    void removeObj(); 
+
     A _outer ;
     B * _inner ;
     int _cnt ;
@@ -666,8 +691,11 @@ template < class  A, class B > Insert < A, B > :: Insert (const A & w, comp_t c)
 }
 
 template < class  A, class B > inline Insert < A, B > :: Insert (const Insert < A, B > & w) 
-  : _outer (w._outer), _inner (0), _cnt (w._cnt), _cmp (w._cmp) { 
-  _inner = w._inner ? new B (* w._inner) : 0 ;
+  : _outer (w._outer)
+  // if w_inner exsists, call copy constructor 
+  , _inner ( (w._inner) ? new B (* (w._inner) ) : 0 )
+  , _cnt (w._cnt), _cmp (w._cmp) 
+{ 
   return ;
 }
 
@@ -677,23 +705,33 @@ Insert < A, B > :: clone () const
   return new Insert < A, B > (*this); 
 }
 
-template < class  A, class B > Insert < A, B > :: ~Insert () { 
-  if (_inner) delete _inner ;
+template < class  A, class B > Insert < A, B > :: ~Insert () 
+{ 
+  removeObj(); 
+}
+
+template < class  A, class B > inline void Insert < A, B > :: removeObj () 
+{ 
+  if (_inner) 
+  { 
+    delete _inner ;
+    _inner = 0;
+  }
   return ;
 }
 
-template < class  A, class B > void Insert < A, B > :: first () {
-  if (_inner) { 
-    delete _inner ;
-    _inner = 0 ;
-  }
-  for (_outer.A::first () ; ! _outer.A::done () ; _outer.A::next ()) {
+template < class  A, class B > void Insert < A, B > :: first () 
+{
+  // deletes _inner 
+  removeObj(); 
+  
+  for (_outer.A::first () ; ! _outer.A::done () ; _outer.A::next ()) 
+  {
     _inner = new B (_outer.A::item (), _cmp) ;
     _inner->B::first () ;
     if(!_inner->B::done ()) break ;
     else { 
-      delete _inner ;
-      _inner = 0 ;
+      removeObj();
     }
   }
   return ;
@@ -702,17 +740,18 @@ template < class  A, class B > void Insert < A, B > :: first () {
 template < class  A, class B > void Insert < A, B > :: next () {
   assert(_inner) ;
   _inner->B::next () ;
-  if(_inner->B::done ()) {
-    delete _inner ;
-    _inner = 0 ;
-    for(_outer.A::next () ; ! _outer.A::done () ; _outer.A::next ()) {
+  if(_inner->B::done ()) 
+  {
+    removeObj();
+    
+    for(_outer.A::next () ; ! _outer.A::done () ; _outer.A::next ()) 
+    {
       _inner = new B(_outer.A::item (), _cmp) ;
       _inner->B::first () ;
-      if(!_inner->B::done ()) break ;
-      else { 
-        delete _inner ;
-        _inner = 0 ;
-      }
+      if(!_inner->B::done ()) 
+        break ;
+      else 
+        removeObj();
     }
   }
   return ;
@@ -727,7 +766,8 @@ template < class  A, class B > int Insert < A, B > :: size () {
 }
 
 template < class  A, class B > typename Insert < A, B > :: val_t & 
-Insert < A, B > :: item () const {
+Insert < A, B > :: item () const 
+{
   assert (! done ()) ; 
   return _inner->B::item () ;
 }
