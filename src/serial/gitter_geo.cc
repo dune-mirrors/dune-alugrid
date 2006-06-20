@@ -55,6 +55,12 @@ const int Gitter :: Geometric :: Tetra :: protoEdges [6][2] = {{0, 1},
                                                                {2, 3}};
 
 // return list with edges that lie not on given face 
+int Gitter :: Geometric :: Tetra :: numEdgesNotOnFace() 
+{
+  return 3;
+}
+
+// return list with edges that lie not on given face 
 int (& Gitter :: Geometric :: Tetra :: edgesNotOnFace( const int face ))[3] 
 {
   static int edgesNotFace[4][3];
@@ -155,6 +161,12 @@ const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 
 const int Gitter :: Geometric :: Hexa :: protoEdges [12][2] = 
    { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
      {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
+
+// return list with edges that lie not on given face 
+int Gitter :: Geometric :: Hexa :: numEdgesNotOnFace() 
+{
+  return 8;
+}
 
 int (& Gitter :: Geometric :: Hexa :: edgesNotOnFace( const int face ))[8] 
 {

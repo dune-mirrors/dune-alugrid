@@ -1056,6 +1056,8 @@ public :
       static const int prototype [4][3] ;
       static const int edgeMap [6][2] ;
       static const int protoEdges [6][2];
+      // returns 3 which is the lenght of the edges not on face number
+      static int numEdgesNotOnFace () ; 
       static int (& edgesNotOnFace( const int face ) )[3]; 
       
       inline virtual ~Tetra () ;
@@ -1228,6 +1230,8 @@ public :
       static const int protoEdges [12][2];
       static const int edgeMap [12][2];
 
+      // returns 8 which is the lenght of the edges not on face number
+      static int numEdgesNotOnFace () ; 
       static int (& edgesNotOnFace( const int face ) )[8]; 
 
       inline virtual ~Hexa () ;

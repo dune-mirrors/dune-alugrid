@@ -1,5 +1,5 @@
 // (c) Bernhard Schupp 1997 - 1998
-// modification for the dun interface 
+// modification for the dune interface 
 // (c) Robert Kloefkorn 2004 - 2005 
 #ifndef GITTER_IMPL_H_INCLUDED
 #define GITTER_IMPL_H_INCLUDED
