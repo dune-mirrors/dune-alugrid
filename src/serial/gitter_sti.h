@@ -1056,9 +1056,9 @@ public :
       static const int prototype [4][3] ;
       static const int edgeMap [6][2] ;
       static const int protoEdges [6][2];
+
       // returns 3 which is the lenght of the edges not on face number
-      static int numEdgesNotOnFace () ; 
-      static int (& edgesNotOnFace( const int face ) )[3]; 
+      static const vector<int> & edgesNotOnFace( const int face ) ; 
       
       inline virtual ~Tetra () ;
       inline hface3_GEO * myhface3 (int) ;
@@ -1230,9 +1230,7 @@ public :
       static const int protoEdges [12][2];
       static const int edgeMap [12][2];
 
-      // returns 8 which is the lenght of the edges not on face number
-      static int numEdgesNotOnFace () ; 
-      static int (& edgesNotOnFace( const int face ) )[8]; 
+      static const vector<int> & edgesNotOnFace( const int face ); 
 
       inline virtual ~Hexa () ;
       inline hface4_GEO * myhface4 (int) ;

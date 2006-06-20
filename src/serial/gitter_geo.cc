@@ -54,21 +54,21 @@ const int Gitter :: Geometric :: Tetra :: protoEdges [6][2] = {{0, 1},
                                                                {1, 3},
                                                                {2, 3}};
 
-// return list with edges that lie not on given face 
-int Gitter :: Geometric :: Tetra :: numEdgesNotOnFace() 
-{
-  return 3;
-}
 
 // return list with edges that lie not on given face 
-int (& Gitter :: Geometric :: Tetra :: edgesNotOnFace( const int face ))[3] 
+const vector<int> & Gitter :: Geometric :: Tetra :: edgesNotOnFace( const int face ) 
 {
-  static int edgesNotFace[4][3];
+  assert( face >= 0 );
+  assert( face < 4 );
+  
+  static vector<int> edgesNotFace[4];
   static bool calculated = false;
   if( ! calculated ) 
   {
     for(int f = 0; f<4; ++f ) 
     {
+      edgesNotFace[f].resize(3); 
+
       const int (&edges)[6][2] = protoEdges;           
       const int (&vertices)[3] = prototype [ f ];
 
@@ -89,13 +89,6 @@ int (& Gitter :: Geometric :: Tetra :: edgesNotOnFace( const int face ))[3]
         }
       }
       assert( edgeCount == 3 );
-
-      /*
-      cout << "edges not on face "<< f<< " = {";
-      for(int i=0; i<3; ++i) 
-        cout << edgesNotFace[f][i] << " , ";
-      cout << "} \n";
-      */
     }
     calculated = true;
   }
@@ -162,20 +155,19 @@ const int Gitter :: Geometric :: Hexa :: protoEdges [12][2] =
    { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
      {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
 
-// return list with edges that lie not on given face 
-int Gitter :: Geometric :: Hexa :: numEdgesNotOnFace() 
+const vector<int> & Gitter :: Geometric :: Hexa :: edgesNotOnFace( const int face )
 {
-  return 8;
-}
-
-int (& Gitter :: Geometric :: Hexa :: edgesNotOnFace( const int face ))[8] 
-{
-  static int edgesNotFace[6][8];
+  assert( face >= 0 );
+  assert( face < 6 );
+  
+  static vector<int> edgesNotFace[6];
   static bool calculated = false;
   if( ! calculated ) 
   {
     for(int f = 0; f<6; ++f ) 
     {
+      edgesNotFace[f].resize(8);
+      
       const int (&edges)[12][2] = protoEdges;           
       const int (&vertices)[4]  = prototype [ f ];
 
@@ -196,13 +188,6 @@ int (& Gitter :: Geometric :: Hexa :: edgesNotOnFace( const int face ))[8]
         }
       }
       assert( edgeCount == 8 );
-
-      /*
-      cout << "edges not on face "<< f<< " = {";
-      for(int i=0; i<8; ++i) 
-        cout << edgesNotFace[f][i] << " , ";
-      cout << "} \n";
-      */
     }
     calculated = true;
   }

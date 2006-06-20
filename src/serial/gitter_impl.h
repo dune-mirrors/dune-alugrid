@@ -191,9 +191,11 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         
         virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
         {
-          const int (&edgesNotOnFace)[3] = 
+          const vector<int> & edgesNotOnFace = 
             Gitter :: Geometric :: tetra_GEO :: edgesNotOnFace( borderFace );
-          for(int e = 0; e<3; ++e)
+          const int numEdges = edgesNotOnFace.size();
+          assert( numEdges == 3 );
+          for(int e = 0; e<numEdges; ++e)
           {
             gs.setData( os, *myhedge1( edgesNotOnFace[e] ) );
           }
@@ -218,9 +220,11 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         
         virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace)
         {
-          const int (&edgesNotOnFace)[3] =
+          const vector<int> & edgesNotOnFace = 
             Gitter :: Geometric :: tetra_GEO :: edgesNotOnFace( borderFace );
-          for(int e=0; e<3; ++e)
+          const int numEdges = edgesNotOnFace.size();
+          assert( numEdges == 3 );
+          for(int e=0; e<numEdges; ++e)
           {
             gs.sendData( os, *myhedge1( edgesNotOnFace[e] ) );
           }
@@ -380,9 +384,11 @@ public:
         // scatter data on ghost edges  
         virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
         {
-          const int (&edgesNotOnFace)[8] = 
+          const vector<int> & edgesNotOnFace = 
             Gitter :: Geometric :: hexa_GEO :: edgesNotOnFace( borderFace );
-          for(int e = 0; e<8; ++e)
+          const int numEdges = edgesNotOnFace.size();
+          assert( numEdges == 8 );
+          for(int e = 0; e<numEdges; ++e)
           {
             gs.setData( os, *myhedge1( edgesNotOnFace[e] ) );
           }
@@ -416,9 +422,11 @@ public:
         
         virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace)
         {
-          const int (& edgesNotOnFace)[8] =
+          const vector<int> & edgesNotOnFace = 
             Gitter :: Geometric :: hexa_GEO :: edgesNotOnFace( borderFace );
-          for(int e=0; e<8; ++e)
+          const int numEdges = edgesNotOnFace.size();
+          assert( numEdges == 8 );
+          for(int e=0; e<numEdges; ++e)
           {
             gs.sendData( os, *myhedge1( edgesNotOnFace[e] ) );
           }
