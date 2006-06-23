@@ -54,6 +54,25 @@ const int Gitter :: Geometric :: Tetra :: protoEdges [6][2] = {{0, 1},
                                                                {1, 3},
                                                                {2, 3}};
 
+// return list with edges that lie not on given face 
+const vector<int> & Gitter :: Geometric :: Tetra :: verticesNotOnFace( const int face ) 
+{
+  assert( face >= 0 );
+  assert( face < 4 );
+  
+  static vector<int> verticesNotFace[4];
+  static bool calculated = false;
+  if( ! calculated ) 
+  {
+    for(int f=0; f<4; ++f)
+    {
+      verticesNotFace[f].resize(1);
+      verticesNotFace[f][0] = f;
+    }
+    calculated = true;
+  }
+  return verticesNotFace[face];
+}
 
 // return list with edges that lie not on given face 
 const vector<int> & Gitter :: Geometric :: Tetra :: edgesNotOnFace( const int face ) 
@@ -93,6 +112,33 @@ const vector<int> & Gitter :: Geometric :: Tetra :: edgesNotOnFace( const int fa
     calculated = true;
   }
   return edgesNotFace[face];
+}
+
+// return list with edges that lie not on given face 
+const vector<int> & Gitter :: Geometric :: Tetra :: facesNotOnFace( const int face ) 
+{
+  assert( face >= 0 );
+  assert( face < 4 );
+  
+  static vector<int> facesNotFace[4];
+  static bool calculated = false;
+  if( ! calculated ) 
+  {
+    for(int f=0; f<4; ++f)
+    {
+      facesNotFace[f].resize( 3 );
+      int count = 0;
+      for(int i=0; i<4; ++i)
+      {
+        if( i == f ) continue;
+        facesNotFace[f][count] = i;
+        ++count;
+      }
+      assert( count == 3 );
+    }
+    calculated = true;
+  }
+  return facesNotFace[face];
 }
 
 // prototype of periodic 3 type 
@@ -155,6 +201,34 @@ const int Gitter :: Geometric :: Hexa :: protoEdges [12][2] =
    { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
      {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
 
+// return list with edges that lie not on given face 
+const vector<int> & Gitter :: Geometric :: Hexa :: verticesNotOnFace( const int face ) 
+{
+  assert( face >= 0 );
+  assert( face < 6 );
+  
+  static vector<int> verticesNotFace[6];
+  static bool calculated = false;
+  if( ! calculated ) 
+  {
+    for(int f=0; f<6; ++f)
+    {
+      verticesNotFace[f].resize( 4 );
+      int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[ f ];
+
+      // get vertices of opposite face of gFace 
+      const int (& vertices)[4] = Gitter :: Geometric :: hexa_GEO :: prototype [ oppFace ];
+
+      for (int i = 0; i < 4; ++i)
+      {
+        verticesNotFace[f][i] = vertices[i];
+      }
+    }
+    calculated = true;
+  }
+  return verticesNotFace[face];
+}
+
 const vector<int> & Gitter :: Geometric :: Hexa :: edgesNotOnFace( const int face )
 {
   assert( face >= 0 );
@@ -192,6 +266,33 @@ const vector<int> & Gitter :: Geometric :: Hexa :: edgesNotOnFace( const int fac
     calculated = true;
   }
   return edgesNotFace[face];
+}
+
+// return list with edges that lie not on given face 
+const vector<int> & Gitter :: Geometric :: Hexa :: facesNotOnFace( const int face ) 
+{
+  assert( face >= 0 );
+  assert( face < 6 );
+  
+  static vector<int> facesNotFace[6];
+  static bool calculated = false;
+  if( ! calculated ) 
+  {
+    for(int f=0; f<6; ++f)
+    {
+      facesNotFace[f].resize( 5 );
+      int count = 0;
+      for(int i=0; i<6; ++i)
+      {
+        if( i == f ) continue;
+        facesNotFace[f][count] = i;
+        ++count;
+      }
+      assert( count == 5 );
+    }
+    calculated = true;
+  }
+  return facesNotFace[face];
 }
 
 // defines how we get an edge from an hexa , first is face , second is edge 

@@ -166,18 +166,15 @@ public :
 
   // creates leaf iterators 
   virtual IteratorSTI < A > * iterator (const A *) const = 0 ;
-  virtual IteratorSTI < A > * iterator (const IteratorSTI < A > *) const = 0 ;
 
   // creates level iterators 
   virtual IteratorSTI < A > * levelIterator (const A * a, const any_has_level < A  > & ) const {  return iterator(a); } 
-  virtual IteratorSTI < A > * levelIterator (const IteratorSTI < A > * a) const { return iterator(a); }
 
   // this methods are needed because for the PureElementAccessIterator we
   // want to call overloaded method that only insert lists with elements 
   // but for edges,faces,vertices this method is the same, therefor default
   // implementation 
   virtual IteratorSTI < A > * pureElementIterator (const A * a) const { return iterator(a); }
-  virtual IteratorSTI < A > * pureElementIterator (const IteratorSTI < A > *a) const { return iterator(a); }
 
 public :
   
@@ -223,8 +220,8 @@ template < class A > class LeafIterator ;
 template < class A > class LevelIterator ;
 
 class Gitter {
-  Refcount ref ;
 public :
+  Refcount ref ;
   static inline bool debugOption (int = 0) ;
 
   typedef Parallel stiExtender_t ;  // parallel.h
@@ -447,10 +444,10 @@ public :
         
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void projectVertex(const ProjectVertex &pv) = 0;
-    virtual bool isInteriorLeaf() const 
-    {cout << "in hface::isInteriorLeaf()" << endl;
-      return (abort(),false);}
-  } ;
+
+    // returns true if element conected to face is leaf 
+    virtual bool isInteriorLeaf() const = 0;
+  };
 
   // class with all extensions for helement 
   class Dune_helement : public DuneIndexProvider 
@@ -531,9 +528,6 @@ public :
     virtual void backup (ostream &) const = 0 ;
     virtual void restore (istream &) = 0 ;
 
-    // xdr methods 
-    //virtual void backup (XDRstream_out &) const {};
-    //virtual void restore (XDRstream_in &) {};
   public: 
     virtual grid_t type() const = 0;
   } ;
@@ -931,18 +925,7 @@ public :
     public :
       myrule_t parentRule() const;
       bool isConforming() const;
-      virtual bool isInteriorLeaf() const 
-      {
-        if (nb.front().first->isboundary())
-          return ( nb.rear().first->nbLeaf() && 
-                   nb.rear().first->nbLevel() == this->level());
-        else if (nb.rear().first->isboundary())
-          return ( nb.front().first->nbLeaf() && 
-                   nb.front().first->nbLevel() == this->level());
-        else
-          return (nb.rear().first->nbLeaf() ||
-                 (nb.front().first->nbLeaf()));
-      }
+      virtual bool isInteriorLeaf() const ;
 
     protected :
       myhedge1_t * e [polygonlength] ;
@@ -1006,17 +989,8 @@ public :
       virtual const myhedge1_t * subedge1 (int) const = 0 ;
       virtual hface4 * subface4 (int) = 0 ;
       virtual const hface4 * subface4 (int) const = 0 ;
-      virtual bool isInteriorLeaf() const {
-  if (nb.front().first->isboundary())
-    return ( nb.rear().first->nbLeaf() && 
-       nb.rear().first->nbLevel() == this->level());
-  else if (nb.rear().first->isboundary())
-    return ( nb.front().first->nbLeaf() && 
-       nb.front().first->nbLevel() == this->level());
-  else
-    return (nb.rear().first->nbLeaf() ||
-      (nb.front().first->nbLeaf()));
-      }
+      virtual bool isInteriorLeaf() const ;
+
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual bool refine (myrule_t,int) = 0 ;
@@ -1029,8 +1003,6 @@ public :
 
     protected:
       myrule_t _parRule;
-      //bool _nonv;
-      //bool _nonh;
 
     } hface4_GEO ;
   
@@ -1058,7 +1030,9 @@ public :
       static const int protoEdges [6][2];
 
       // returns 3 which is the lenght of the edges not on face number
+      static const vector<int> & verticesNotOnFace( const int face ) ; 
       static const vector<int> & edgesNotOnFace( const int face ) ; 
+      static const vector<int> & facesNotOnFace( const int face ) ; 
       
       inline virtual ~Tetra () ;
       inline hface3_GEO * myhface3 (int) ;
@@ -1230,7 +1204,9 @@ public :
       static const int protoEdges [12][2];
       static const int edgeMap [12][2];
 
+      static const vector<int> & verticesNotOnFace( const int face ); 
       static const vector<int> & edgesNotOnFace( const int face ); 
+      static const vector<int> & facesNotOnFace( const int face ); 
 
       inline virtual ~Hexa () ;
       inline hface4_GEO * myhface4 (int) ;
@@ -1320,13 +1296,13 @@ public :
       }
       virtual void detachleafs() 
       {
-	      this->removeleaf();
-	      myhface3(0)->removeleaf();
-	      for (int i=0;i<3;i++) 
+        this->removeleaf();
+        myhface3(0)->removeleaf();
+        for (int i=0;i<3;i++) 
         {
-	        myhface3(0)->myhedge1(i)->removeleaf();
-	        myhface3(0)->myvertex(i)->removeleaf();
-      	}
+          myhface3(0)->myhedge1(i)->removeleaf();
+          myhface3(0)->myvertex(i)->removeleaf();
+        }
       }
     private :
       myhface3_t * _face ;
@@ -1367,29 +1343,29 @@ public :
       virtual void attachleafs() 
       {
         assert(this->leafRefCount()==0);
-	      this->addleaf();
+        this->addleaf();
         
         hface4_GEO & face = *(myhface4(0));
         face.addleaf();
-	      for (int i=0;i<4;i++) 
+        for (int i=0;i<4;i++) 
         {
-	        face.myhedge1(i)->addleaf();
-	        face.myvertex(i)->addleaf();
-	      }
+          face.myhedge1(i)->addleaf();
+          face.myvertex(i)->addleaf();
+        }
       }
       
       virtual void detachleafs() 
       {
         assert(this->leafRefCount()==1);
-	      this->removeleaf();
+        this->removeleaf();
 
         hface4_GEO & face = *(myhface4(0));
-	      face.removeleaf();
-	      for (int i=0;i<4;i++) 
+        face.removeleaf();
+        for (int i=0;i<4;i++) 
         {
-	        face.myhedge1(i)->removeleaf();
-	        face.myvertex(i)->removeleaf();
-	      }
+          face.myhedge1(i)->removeleaf();
+          face.myvertex(i)->removeleaf();
+        }
       }
     private :
       myhface4_t * _face ;
@@ -1497,26 +1473,30 @@ public :
   } ;
 private :
   IteratorSTI < vertex_STI >   * iterator (const vertex_STI *) ;
-  IteratorSTI < vertex_STI >   * iterator (const IteratorSTI < vertex_STI > *) ;
   IteratorSTI < hedge_STI >    * iterator (const hedge_STI *) ;
-  IteratorSTI < hedge_STI >    * iterator (const IteratorSTI < hedge_STI > *) ;
   IteratorSTI < hface_STI >    * iterator (const hface_STI *) ;
-  IteratorSTI < hface_STI >    * iterator (const IteratorSTI < hface_STI > *) ;
   IteratorSTI < hbndseg_STI >  * iterator (const hbndseg_STI *) ;
-  IteratorSTI < hbndseg_STI >  * iterator (const IteratorSTI < hbndseg_STI > *) ;
   IteratorSTI < helement_STI > * iterator (const helement_STI *) ;
-  IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) ;
 
   IteratorSTI < vertex_STI >   * levelIterator (const vertex_STI *, const any_has_level<vertex_STI> &) ;
-  IteratorSTI < vertex_STI >   * levelIterator (const IteratorSTI < vertex_STI > *) ;
   IteratorSTI < hedge_STI >    * levelIterator (const hedge_STI *, const any_has_level<hedge_STI> & ) ;
-  IteratorSTI < hedge_STI >    * levelIterator (const IteratorSTI < hedge_STI > *) ;
   IteratorSTI < hface_STI >    * levelIterator (const hface_STI * , const any_has_level<hface_STI> &) ;
-  IteratorSTI < hface_STI >    * levelIterator (const IteratorSTI < hface_STI > *) ;
   IteratorSTI < hbndseg_STI >  * levelIterator (const hbndseg_STI *, const any_has_level<hbndseg_STI> &) ;
-  IteratorSTI < hbndseg_STI >  * levelIterator (const IteratorSTI < hbndseg_STI > *) ;
   IteratorSTI < helement_STI > * levelIterator (const helement_STI *, const any_has_level<helement_STI> &) ;
-  IteratorSTI < helement_STI > * levelIterator (const IteratorSTI < helement_STI > *) ;
+
+public:
+  template <class StopRule_t >
+  IteratorSTI < hedge_STI >    * createIterator(const hedge_STI * , const StopRule_t rule);
+  
+  template <class StopRule_t >
+  IteratorSTI < hface_STI >    * createIterator(const hface_STI * , const StopRule_t rule);
+  
+  template <class StopRule_t >
+  IteratorSTI < helement_STI > * createIterator(const helement_STI * ,const StopRule_t rule);
+  
+  template <class StopRule_t >
+  IteratorSTI < hbndseg_STI >  * createIterator(const hbndseg_STI * , const StopRule_t rule);
+  
 protected :
   virtual bool refine () ;
   virtual void coarse () ;
@@ -1599,6 +1579,26 @@ public :
 private: 
   inline void removeObj();
   inline void assign(const LeafIterator < A > & );
+} ;
+
+template < class A, class StopRule_t > class GridIterator : public MyAlloc {
+  Gitter * _grd ;
+  IteratorSTI < A > * _w ;
+  const A * _a ;
+  void * operator new (size_t) { return 0 ; }
+  void operator delete (void *) { }
+  inline GridIterator () ;
+public :
+  typedef A val_t;
+  inline GridIterator (Gitter &, const StopRule_t ) ;
+  inline GridIterator (const GridIterator < A , StopRule_t > & ) ;
+  inline ~GridIterator () ;
+  inline IteratorSTI < A > * operator -> () const ;
+  inline IteratorSTI < A > & operator * () const ;
+  inline GridIterator < A , StopRule_t > & operator = (const GridIterator < A , StopRule_t > &) ;
+private: 
+  inline void removeObj();
+  inline void assign(const GridIterator < A , StopRule_t > & );
 } ;
 
 // LevelIterator is the same construct as LeafIterator, but the iterator
@@ -1822,6 +1822,92 @@ template < class A > inline int AccessIterator < A > :: Handle :: size () {
 
 template < class A > inline A & AccessIterator < A > :: Handle :: item () const {
   return _w->item () ;
+}
+
+#include "walk.h"
+
+
+template <class StopRule_t> 
+inline IteratorSTI< Gitter ::hedge_STI > * Gitter :: createIterator(const hedge_STI * , const StopRule_t rule)
+{
+  typedef Insert < AccessIterator < hedge_STI > :: Handle,
+                   TreeIterator < hedge_STI, StopRule_t > > level_edge__macro_edge__iterator ;
+
+  vector < IteratorSTI < hedge_STI > * > _iterators ;
+
+  _iterators.push_back ( new level_edge__macro_edge__iterator (container (), rule )) ;
+  Insert < AccessIterator < hface_STI > :: Handle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > > nf (container ()) ;
+  Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > > ne (container ()) ;
+  Wrapper < Insert < AccessIterator < hface_STI > :: Handle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > ef (nf) ;
+  Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge > ee (ne) ;
+
+  _iterators.push_back ( new  Insert < Wrapper < Insert < AccessIterator < hface_STI > :: Handle,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, StopRule_t > > (ef , rule )) ;
+  _iterators.push_back ( new Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, StopRule_t > > (ee, rule )) ;
+  Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > > nef (container ()) ;
+  Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fnef (nef) ;
+  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > > fie (fnef) ;
+  Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > efie (fie) ;
+  _iterators.push_back (new Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+  TreeIterator < hedge_STI, StopRule_t > > (efie, rule )) ;
+  return new VectorAlign < hedge_STI > (_iterators) ;
+}
+
+template <class StopRule_t> 
+inline IteratorSTI< Gitter :: hface_STI > * Gitter :: createIterator(const hface_STI * , const StopRule_t rule)
+{
+  typedef Insert < AccessIterator < hface_STI > :: Handle,
+                   TreeIterator < hface_STI, StopRule_t > >  macro_face__iterator ;
+
+  macro_face__iterator w1 (container (), rule ) ;
+  Insert < AccessIterator < helement_STI > :: Handle,
+           TreeIterator < helement_STI, has_int_face < helement_STI > > > nw (container ()) ;
+
+  Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+            TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > ww (nw) ;
+
+  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+              TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+              TreeIterator < hface_STI, StopRule_t > > www (nw, rule ) ;
+
+  return new AlignIterator < macro_face__iterator,
+  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
+  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
+  TreeIterator < hface_STI, StopRule_t > >, hface_STI > (w1, www) ;
+}
+
+template <class StopRule_t> 
+inline IteratorSTI< Gitter :: helement_STI > * Gitter :: createIterator(const helement_STI * , const StopRule_t rule)
+{
+  typedef Insert < AccessIterator < Gitter :: helement_STI > :: Handle,
+                   TreeIterator < Gitter :: helement_STI, StopRule_t > >
+             tree_element__macro_element__iterator ;
+
+  return new tree_element__macro_element__iterator (container (), rule ) ;
+}
+
+template <class StopRule_t> 
+inline IteratorSTI< Gitter :: hbndseg_STI > * Gitter :: createIterator(const hbndseg_STI * ,const StopRule_t rule)
+{
+  typedef Insert < AccessIterator < hbndseg_STI > :: Handle,
+    TreeIterator < hbndseg_STI, StopRule_t > >
+          tree_bnd__macro_bnd__iterator ;
+  return new tree_bnd__macro_bnd__iterator (container (), rule ) ;
 }
 
 inline bool Gitter :: debugOption (int level) {
@@ -2307,6 +2393,20 @@ inline bool Gitter :: Geometric :: hface3 :: isConforming () const {
   return !(_nonv + _nonh == 1);
 }
 
+inline bool Gitter :: Geometric :: hface3 :: 
+isInteriorLeaf() const 
+{
+  if (nb.front().first->isboundary())
+    return ( nb.rear().first->nbLeaf() && 
+             nb.rear().first->nbLevel() == this->level());
+  else if (nb.rear().first->isboundary())
+    return ( nb.front().first->nbLeaf() && 
+             nb.front().first->nbLevel() == this->level());
+  else
+    return (nb.rear().first->nbLeaf() ||
+           (nb.front().first->nbLeaf()));
+}
+
 //                                        #
 // #    #  ######    ##     ####   ###### #    #
 // #    #  #        #  #   #    #  #      #    #
@@ -2421,6 +2521,21 @@ inline Gitter::Geometric::hface4::myrule_t
 Gitter::Geometric::hface4::parentRule() const {
   return _parRule;
 }
+
+inline bool 
+Gitter::Geometric::hface4::isInteriorLeaf() const 
+{
+  if (nb.front().first->isboundary())
+    return ( nb.rear().first->nbLeaf() && 
+             nb.rear().first->nbLevel() == this->level());
+  else if (nb.rear().first->isboundary())
+    return ( nb.front().first->nbLeaf() && 
+             nb.front().first->nbLevel() == this->level());
+  else
+    return (nb.rear().first->nbLeaf() ||
+           (nb.front().first->nbLeaf()));
+}
+
 
 // #######                                 ######
 //    #     ######   #####  #####     ##   #     #  #    #  #       ######
@@ -3061,6 +3176,89 @@ template < class A > inline IteratorSTI < A > * LeafIterator < A > :: operator -
 }
 
 template < class A > inline IteratorSTI < A > & LeafIterator < A > :: operator * () const {
+  return * _w ;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+//
+//  --GridIterator
+//
+///////////////////////////////////////////////////////////////////////////////////
+
+template < class A , class StopRule_t > 
+inline GridIterator < A , StopRule_t > :: GridIterator () : _grd (0), _w (0) {
+  return ;
+}
+
+template < class A , class StopRule_t > 
+inline GridIterator < A , StopRule_t > :: 
+GridIterator (Gitter & g , const StopRule_t rule ) 
+  : _grd (&g), _w (0) , _a(0) 
+{
+  _grd->ref ++ ;
+  _w = _grd->createIterator(_a,rule); 
+  return ;
+}
+
+template < class A , class StopRule_t > 
+inline GridIterator < A , StopRule_t > :: GridIterator (const GridIterator < A , StopRule_t > & x) 
+  : _grd(0), _w(0), _a(0) 
+{
+  assign(x);
+  return ;
+}
+
+template < class A , class StopRule_t > 
+inline GridIterator < A , StopRule_t > & 
+GridIterator < A , StopRule_t > :: operator = (const GridIterator < A , StopRule_t > & x) 
+{
+  removeObj();
+  assign(x);
+  return *this;
+}
+
+template < class A , class StopRule_t > 
+inline GridIterator < A , StopRule_t > :: ~GridIterator () {
+  removeObj();
+  return ;
+}
+
+template < class A , class StopRule_t > 
+inline void GridIterator < A , StopRule_t > :: removeObj () 
+{
+  if (_grd) 
+  {
+    _grd->ref -- ;
+    _grd = 0;
+  }
+  if(_w) 
+  { 
+    delete _w ;
+    _w = 0;
+  }
+}
+
+template < class A , class StopRule_t > 
+inline void GridIterator < A , StopRule_t > :: 
+assign (const GridIterator < A , StopRule_t > & x)  
+{
+  assert( _grd == 0 );
+  assert( _w   == 0 );
+  _grd = x._grd; 
+  _grd->ref ++ ;
+  assert( x._w );
+  _w = x._w->clone();
+}
+
+template < class A , class StopRule_t > 
+inline IteratorSTI < A > * 
+GridIterator < A , StopRule_t > :: operator -> () const {
+  return _w ;
+}
+
+template < class A , class StopRule_t > 
+inline IteratorSTI < A > & 
+GridIterator < A , StopRule_t > :: operator * () const {
   return * _w ;
 }
 

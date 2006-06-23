@@ -202,10 +202,13 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         }
         virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
         {
-          for (int i = 0; i < 4; ++i) 
+          const vector<int> & facesNotOnFace = 
+            Gitter :: Geometric :: tetra_GEO :: facesNotOnFace( borderFace );
+          const int numFaces = facesNotOnFace.size();
+          assert( numFaces == 3 );
+          for (int i = 0; i <numFaces; ++i) 
           {
-            if( i == borderFace ) continue; 
-            gs.setData( os, *myhface3(i) );
+            gs.setData( os, *myhface3( facesNotOnFace[i] ) );
           }
         }
 
@@ -232,10 +235,13 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         
         virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
         {
-          for (int i = 0; i < 4; ++i)
+          const vector<int> & facesNotOnFace = 
+            Gitter :: Geometric :: tetra_GEO :: facesNotOnFace( borderFace );
+          const int numFaces = facesNotOnFace.size();
+          assert( numFaces == 3 );
+          for (int i = 0; i <numFaces; ++i)
           {
-            if( i == borderFace ) continue;
-            gs.sendData( os,  *myhface3(i) );
+            gs.sendData( os,  *myhface3( facesNotOnFace[i] ) );
           }
         }
 
@@ -369,15 +375,13 @@ public:
         // scatter only on ghosts 
         virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
         {
-          const int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[borderFace];
-
-          // get all that are not located on borderFace 
-          const int (&vertices)[4] = Gitter :: Geometric :: hexa_GEO :: prototype [ oppFace ];
-
-          // for all that vertices set data
-          for (int i = 0; i < 4; ++i) 
+          const vector<int> & verticesNotOnFace = 
+            Gitter :: Geometric :: hexa_GEO :: verticesNotOnFace( borderFace );
+          const int numVertices = verticesNotOnFace.size();
+          assert( numVertices == 4 );
+          for (int i = 0; i <numVertices; ++i) 
           {
-            gs.setData( os, *myvertex( vertices[i] ) );
+            gs.setData( os, *myvertex( verticesNotOnFace[i] ) );
           }
         }
         
@@ -397,11 +401,13 @@ public:
         // scatter data on ghost faces 
         virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
         {
-          for (int i = 0; i < 6; ++i) 
+          const vector<int> & facesNotOnFace = 
+            Gitter :: Geometric :: hexa_GEO :: facesNotOnFace( borderFace );
+          const int numFaces = facesNotOnFace.size();
+          assert( numFaces == 5 );
+          for (int i = 0; i <numFaces; ++i) 
           {
-            // skip the face connected to proc boundary 
-            if( i == borderFace ) continue; 
-            gs.setData( os, *myhface4(i) );
+            gs.setData( os, *myhface4( facesNotOnFace[i] ) );
           }
         }
 
@@ -410,13 +416,13 @@ public:
         //////////////////////////////////////////
         virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace )
         {
-          int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[borderFace];
-          // get vertices of opposite face of gFace 
-          const int (& vertices)[4] = Gitter :: Geometric :: hexa_GEO :: prototype [ oppFace ];
-
-          for (int i = 0; i < 4; ++i)
+          const vector<int> & verticesNotOnFace = 
+            Gitter :: Geometric :: hexa_GEO :: verticesNotOnFace( borderFace );
+          const int numVertices = verticesNotOnFace.size();
+          assert( numVertices == 4 );
+          for (int i = 0; i <numVertices; ++i)
           {
-            gs.sendData( os, *myvertex( vertices[i] ) );
+            gs.sendData( os, *myvertex( verticesNotOnFace[i] ) );
           }
         }
         
@@ -434,10 +440,13 @@ public:
         
         virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
         {
-          for (int i = 0; i < 6; ++i)
+          const vector<int> & facesNotOnFace = 
+            Gitter :: Geometric :: hexa_GEO :: facesNotOnFace( borderFace );
+          const int numFaces = facesNotOnFace.size();
+          assert( numFaces == 5 );
+          for (int i = 0; i < numFaces; ++i)
           {
-            if( i == borderFace ) continue;
-            gs.sendData( os, *myhface4(i) );
+            gs.sendData( os, *myhface4( facesNotOnFace[i] ) );
           }
         }
 
