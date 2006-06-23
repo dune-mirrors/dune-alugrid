@@ -173,6 +173,30 @@ template < class A > class is_leaf_entity
       return ( x.isLeafEntity() ) ? 1 : 0; 
     }
 };
+
+//! new rule for Dune LeafIterator minus one 
+//! all entities with are either leaf entities or thier children are leaf entities 
+template < class A > class is_interior_leaf_entity
+{
+  public :
+    typedef A val_t ;
+
+    //! Constructor storing the level 
+    is_interior_leaf_entity () {}
+
+    //! check if go next
+    int operator () (const A * x) const
+    {
+      return ( x->isLeafEntity() && x->isInterior() ) ? 1 : 0; 
+    }
+
+    //! check if go next
+    int operator () (const A & x) const
+    {
+      return ( x.isLeafEntity() && x.isInterior() ) ? 1 : 0; 
+    }
+};
+
 //**********************************************************************************
 //**********************************************************************************
 //**********************************************************************************
