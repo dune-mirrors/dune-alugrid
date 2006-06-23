@@ -6,7 +6,7 @@ COMP="mpicc"
 CXXCOMP="mpiCC"
 
 # flags set in any case
-FLAGS=""
+FLAGS="-Wall"
 
 # additional flags for debugging
 DEBUGFLAGS="-g"
