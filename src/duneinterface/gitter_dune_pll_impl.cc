@@ -814,10 +814,13 @@ void GitterDunePll :: sendInteriorGhostData (
     hface_STI & face = iter->item(); 
     
     // check ghost leaf 
-    pair < ElementPllXIF_t *, int > bnd = face.accessPllX ().accessOuterPllX () ;
+    pair < ElementPllXIF_t *, int > bnd   = face.accessPllX ().accessOuterPllX () ;
+    pair < ElementPllXIF_t *, int > inner = face.accessPllX ().accessInnerPllX () ;
 
-    const int interiorLeaf = ( elementData.containsInterior(face) && packInterior) ? 1 : 0;
-    const int ghostLeaf    = ( elementData.containsGhost( face , *(bnd.first) ) && packGhosts)   ? 2 : 0;
+    const int interiorLeaf = ( elementData.containsInterior(face, *(inner.first) ) 
+                               && packInterior) ? 1 : 0;
+    const int ghostLeaf    = ( elementData.containsGhost( face , *(bnd.first) ) 
+                               && packGhosts)   ? 2 : 0;
 
     const int transmit = interiorLeaf + ghostLeaf ;
     // transmit = 1 interior, transmit = 2 ghost, transmit = 3 both 
@@ -829,20 +832,19 @@ void GitterDunePll :: sendInteriorGhostData (
       // first interior elements are packed 
       if( interiorLeaf  > 0 )
       {
-        pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessInnerPllX () ;
 
         if( haveHigherCodimData )
         {
           if (containsVertices) 
-            p.first->VertexData2os(sendBuff, vertexData, p.second );
+            inner.first->VertexData2os(sendBuff, vertexData, inner.second );
           if (containsEdges)    
-            p.first->EdgeData2os  (sendBuff, edgeData  , p.second );
+            inner.first->EdgeData2os  (sendBuff, edgeData  , inner.second );
           if (containsFaces)    
-            p.first->FaceData2os  (sendBuff, faceData  , p.second );
+            inner.first->FaceData2os  (sendBuff, faceData  , inner.second );
         }
 
         if (containsElements) 
-          p.first->writeDynamicState (sendBuff , elementData) ;
+          inner.first->writeDynamicState (sendBuff , elementData) ;
       }
 
       // then ghost elements 
@@ -924,6 +926,8 @@ void GitterDunePll :: unpackInteriorGhostData (
           Gitter :: ghostpair_STI gpair = p.first->getGhost();
           assert( gpair.first );
         
+          //assert( elementData.containsItem( *gpair.first ));
+          
           if( haveHigherCodimData )
           {
             if (containsVertices) 
@@ -1090,7 +1094,6 @@ void GitterDunePll :: ALUcomm (
     containsFaces ;
 
   const bool containsSomeThing = containsElements || haveHigherCodimData;
-
 
   if(!containsSomeThing) 
   {
