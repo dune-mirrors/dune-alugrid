@@ -952,7 +952,7 @@ template < class A > bool Hbnd4Top < A > :: coarse () {
     if (! this->lockedAgainstCoarsening ()) {
 
       this->preCoarsening () ;
-      //this->coarseGhost();
+      this->coarseGhost();
       
       delete _dwn ; _dwn = 0 ;
       this->myhface4 (0)->coarse () ;

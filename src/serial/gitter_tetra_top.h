@@ -891,7 +891,7 @@ template < class A > bool Hbnd3Top < A > :: coarse () {
     if (!this->lockedAgainstCoarsening ()) {
       
       this->preCoarsening () ;
-      //this->coarseGhost();
+      this->coarseGhost();
       
       delete _dwn ; _dwn = 0 ;
       this->myhface3 (0)->coarse () ;
