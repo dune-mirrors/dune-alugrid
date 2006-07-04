@@ -618,7 +618,11 @@ class Element : public Thinelement, public Refco_el {
 	delete connect.hvtx[fce];
 	connect.hvtx[fce] = 0;
       } else {
-	bool found=connect.hvtx[fce]->remove(vtx);
+#ifndef NDEBUG
+  // only used in assert 
+	bool found=
+#endif
+    connect.hvtx[fce]->remove(vtx);
 	assert(found);
       }
     }
