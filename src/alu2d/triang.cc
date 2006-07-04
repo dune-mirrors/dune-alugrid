@@ -1610,7 +1610,13 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
           } else
             setnormdir(1, 1);
           setnormdir(0, -1);
-	  bool didcoarse=((Hier<Element>*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
+          
+#ifndef NDEBUG
+          // only used in assert 
+          bool didcoarse = 
+#endif
+            // do coarsen 
+            ((Hier<Element>*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
           assert( didcoarse );
           lcancoarsen=1;
         }

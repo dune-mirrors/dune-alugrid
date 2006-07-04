@@ -41,25 +41,11 @@ static volatile char RCSId_mknbrs_cc [] = "$Id$";
 
 void Hmesh_basic::makeneighbours() {
 
+#ifndef NDEBUG
   int start = clock() ;
+#endif
 
   int count = 0 ;
-
-/*
-  struct k {
-
-    Thinelement * a ;
-
-    int b ;
-
-    k(const struct k & l) : a(l.a), b(l.b) { }
-
-    k() { }
-
-    k(Thinelement * x, int y) : a(x), b(y) { }
-
-  } ; 
-*/
 
   map < vector < Vertex * > , struct k , less < vector < Vertex * > > > m ;
 
@@ -108,16 +94,11 @@ void Hmesh_basic::makeneighbours() {
     }
 
 #ifndef NDEBUG
-
   float used = (float)(clock() - start)/(float)(CLOCKS_PER_SEC) ;
           
   cerr << "\n  Hmesh_basic::makeneighbours(?) resulted in " << count << " hits, " ;
           
   cerr << m.size() << " faults, used time: " << (float)(used) << "\n" << endl ;
-
 #endif
- 
- 
   }
-
 }
