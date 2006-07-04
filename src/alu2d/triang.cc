@@ -1751,6 +1751,7 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
 //   Zeichnet das Dreieck in das Fenster xd.
 // #end(method)
 // ***************************************************
+#if USE_ALUGRID_XDISPLAY
 void Element::draw(Xdisplay &xd)
 {
   /*
@@ -1769,6 +1770,7 @@ void Element::draw(Xdisplay &xd)
   }
   */
 }
+#endif
 // ***************************************************
 // #begin(method)
 // #method:
@@ -2083,6 +2085,7 @@ int Bndel_triang::docoarsen(nconf_vtx_t *ncv,
   return 1;  
 } 
 
+#if USE_ALUGRID_XDISPLAY 
 void Bndel::draw(Xdisplay &xd)
 {
   int i;
@@ -2235,9 +2238,9 @@ void Bndel::draw(Xdisplay &xd)
         exit(1);
     }
     //xd.linedraw(&p1,&p2,col);
-    
   }
 }
+#endif
 
 int periodic_flag=0;
 

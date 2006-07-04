@@ -146,6 +146,7 @@ Vtx_btree::Node::nbconnect(int opp, Thinelement *el , int i) {
     next->nbconnect(opp,el,i);  
 }
 
+#if USE_ALUGRID_XDISPLAY 
 void 
 Vtx_btree::draw(Xdisplay &xd,Element *el) {
   /*  
@@ -188,7 +189,7 @@ void nb_draw(Xdisplay &xd,Element *el1,Element *el2) {
   p1[1]+=0.025;
   Fullvertex pp1(p1,-1);
   Fullvertex pp2(p2,-1); 
-  //xd.linedraw(&pp1,&pp2,xd.bcol[12]);
+  xd.linedraw(&pp1,&pp2,xd.bcol[12]);
 }
 
 int Vtx_btree::Node::remove(Vertex *pvtx) {
@@ -210,4 +211,5 @@ int Vtx_btree::Node::remove(Vertex *pvtx) {
   }
   return right+left;
 }
+#endif
 

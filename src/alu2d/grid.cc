@@ -1,6 +1,3 @@
-
-static volatile char RCSId_grid_cc [] = "$Id$";
-
 // ***************************************************
 // #begin(header)
 // #filename:

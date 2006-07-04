@@ -210,13 +210,6 @@ void Hmesh::coarse() {
   }
 
   vl.renumber() ;
-
-  //cerr << "  coarse() Anzahl der Elemente / Vertices : " ;
-
-  //cerr << Leafwalk < Element > (mel).size() << "  " ;
-
-  //cerr << Listwalk_impl < Vertex > (vl).size() << endl ;
-
 }
 
 void Hmesh::setdata(void (*f)(Element &)) 
@@ -226,6 +219,7 @@ void Hmesh::setdata(void (*f)(Element &))
     f(walk.getitem());
 }
 
+#if USE_ALUGRID_XDISPLAY
 void Hmesh::draw(Xdisplay &disp ) {
   Leafwalk < Element > walk(mel) ;
   Leafwalk < Bndel > walkb(mbl) ;
@@ -239,6 +233,7 @@ void Hmesh::draw(Xdisplay &disp ) {
     walkb.getitem().draw(disp);
   }
 } 
+#endif
 
 void get_memory(struct mallinfo &old_info)
 {

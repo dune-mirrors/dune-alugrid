@@ -1,8 +1,5 @@
-
 #ifndef __HEADER__XDISPLAY
 #define __HEADER__XDISPLAY
-
-static volatile char RCSId_xdisplay_h [] = "$Id$";
 
 // ***************************************************
 // #begin(header)
@@ -17,9 +14,14 @@ static volatile char RCSId_xdisplay_h [] = "$Id$";
 // #end(header)
 // ***************************************************
 
+#ifdef USE_ALUGRID_XDISPLAY 
+#define USE_ALUGRID_XDISPLAY 0
+#endif
+
+#if USE_ALUGRID_XDISPLAY
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-// #include <X11/Xos.h>
 
 class Vertex;
 
@@ -60,7 +62,7 @@ class Xdisplay
     void linedraw(Vertex *, Vertex *, XColor) const;
     void linedraw(Vertex *, Vertex *, char [30]) const;
 };
+#endif
 // #end(class)
 // ***************************************************
-
 #endif

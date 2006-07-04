@@ -13,8 +13,9 @@ class Element;
 // der dem Konstruktor uebergeben wird.
 // ============================================================
 
+#if USE_ALUGRID_XDISPLAY 
 void nb_draw(Xdisplay &xd,Element *el1,Element *el2);
-
+#endif
 
 class Vtx_btree {
  public:
@@ -50,7 +51,10 @@ class Vtx_btree {
       int remove(Vertex *pvtx);
 
       void nbconnect(int , Thinelement * , int ) ;
+
+#if USE_ALUGRID_XDISPLAY 
       void draw(Xdisplay &xd,Element *el);
+#endif
 
     }* head;
  public:
@@ -92,7 +96,9 @@ class Vtx_btree {
 
     void nbconnect(int , Thinelement * , int ) ;
 
+#if USE_ALUGRID_XDISPLAY 
     void draw(Xdisplay &xd,Element *el);
+#endif
 
     int deepestLevel() {
       return (head ? head->deepestLevel() : 0);

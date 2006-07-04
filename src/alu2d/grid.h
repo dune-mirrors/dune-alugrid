@@ -402,7 +402,9 @@ class Thinelement : public Basic {
 
     virtual int docoarsen(nconf_vtx_t*,int,Restrict_basic *rest_el) { return 1; };
 
+#if USE_ALUGRID_XDISPLAY 
     virtual void draw(Xdisplay & ) {};
+#endif
 
     Triang * nbel(int l) const
     {
@@ -629,7 +631,9 @@ class Element : public Thinelement, public Refco_el {
 
     int check() ;
 
+#if USE_ALUGRID_XDISPLAY 
     void draw(Xdisplay & ) ;
+#endif
 
     friend ostream&
       operator<< (ostream& out, const Element& elem) {
@@ -967,7 +971,9 @@ class Bndel : public Thinelement, public Refco {
       return ret;
     }
  
+#if USE_ALUGRID_XDISPLAY 
     void draw(Xdisplay & ) ; 
+#endif
 } ;
 // #end(class)
 // ***************************************************

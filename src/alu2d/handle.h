@@ -935,7 +935,9 @@ class Hmesh : public Hmesh_basic {
 
     void setdata(void (*)(Element &)) ;
 
+#if USE_ALUGRID_XDISPLAY
     void draw(Xdisplay & ) ; 
+#endif
 
 } ;
 
