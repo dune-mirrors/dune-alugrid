@@ -28,7 +28,7 @@ AM_CPPFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS)
 LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 
 # build lib with parallel support 
-dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_parallel.cc 
+dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_parallel.cc alugrid_2d.cc
 libalugrid_la_LIBADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS) 
 
 else 
@@ -38,6 +38,6 @@ include_HEADERS = serial/alugrid_defineparallel.h
 LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 AM_CPPFLAGS = $(ALUGRID_CPPFLAGS)
 # build only serial grid lib
-dist_libalugrid_la_SOURCES = alugrid_serial.cc 
+dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_2d.cc
 
 endif
