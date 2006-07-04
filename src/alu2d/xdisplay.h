@@ -15,7 +15,7 @@
 // ***************************************************
 
 #ifdef USE_ALUGRID_XDISPLAY 
-#define USE_ALUGRID_XDISPLAY 1
+#define USE_ALUGRID_XDISPLAY 0
 #endif
 
 #if USE_ALUGRID_XDISPLAY
