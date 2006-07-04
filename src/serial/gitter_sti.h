@@ -253,13 +253,16 @@ public :
   public:
     
     virtual ~DuneIndexProvider () {}
-    // backup and restore index of vertices 
+    // backup and restore index of vertices, should be overloaded in
+    // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const {
 #ifdef _DUNE_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
       abort();
 #endif
     }
+    // backup and restore index of vertices, should be overloaded in
+    // derived classes, because some need to go down the hierarchiy
     virtual void restoreIndex (istream & is ) {
 #ifdef _DUNE_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
@@ -829,22 +832,21 @@ public :
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
       virtual inline void project(const ProjectVertex &pv) ; 
             
-      inline void backup  (ostream & os ) const;
-      inline void restore (istream & is ) ;
+      // overload backupIndex and restoreIndex here
+      inline void backupIndex  (ostream & os ) const;
+      inline void restoreIndex (istream & is ) ;
+
+      // backup does nothing 
+      inline void backup (ostream & os ) const {}
+      inline void restore (istream & is ) {}
 
       int nChild () const { return 0 ; }
 
-      // Extramethode zum Rausschreiben der Elementdaten in einfachem
-      // Format f"ur die Visualisierung mit GRAPE:
-     
-      //inline int & vertexIndex () ;
-      //inline int   vertexIndex () const ;
     private :
+      // the coordinates of this vertex 
       double _c [3] ;
+      // the level of creation 
       int _lvl ;
-#ifndef _DUNE_USES_ALU3DGRID_
-      int _idx ;    // Vertexindex zum Datenrausschreiben
-#endif              // wird nur verwendet, wenn nicht fuer Dune ubersetzt    
     } vertex_GEO ;
   
     typedef class hedge1 : public hedge_STI, public MyAlloc {
@@ -1930,39 +1932,6 @@ inline int Gitter :: helement :: leaf () const {
   return ! down () ;
 }
 
-/*
-inline int Gitter :: Dune_hface_or_hedge :: getIndex () const {
-#ifdef _DUNE_USES_ALU3DGRID_ 
-  assert( _index >= 0);
-  return _index; 
-#else 
-  std::cerr << "Dune_hface_or_hedge::getIndex () -- ERROR: '_DUNE_USES_ALU3DGRID_' is not defined, so index cannot be used! " << __FILE__ << __LINE__ << "\n";
-  abort();
-  return -1;
-#endif
-}
-
-inline void Gitter :: Dune_hface_or_hedge :: setIndex (const int index) {
-#ifdef _DUNE_USES_ALU3DGRID_ 
-  _index = index; 
-#endif
-}
-
-inline void Gitter :: Dune_hface_or_hedge :: backupIndex (ostream & os ) const {
-#ifdef _DUNE_USES_ALU3DGRID_ 
-  cerr << "Dune_hface_or_hedge :: backupIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
-  abort();
-#endif
-}
-
-inline void Gitter :: Dune_hface_or_hedge :: restoreIndex (istream & is ) {
-#ifdef _DUNE_USES_ALU3DGRID_ 
-  cerr << "Dune_hface_or_hedge :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
-  abort();
-#endif
-}
-*/
-
 // Dune extensions 
 inline void Gitter :: Dune_helement :: resetRefinedTag () {
 #ifdef _DUNE_USES_ALU3DGRID_ 
@@ -1977,39 +1946,6 @@ inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
   return false;
 #endif
 }
-
-/*
-inline int Gitter :: Dune_helement :: getIndex () const {
-#ifdef _DUNE_USES_ALU3DGRID_ 
-  assert( _index >= 0);
-  return _index; 
-#else 
-  std::cerr << "helement::getIndex () -- ERROR: '_DUNE_USES_ALU3DGRID_' is not defined, so index cannot be used! " << __FILE__ << __LINE__ << "\n";
-  abort();
-  return -1;
-#endif
-}
-
-inline void Gitter :: Dune_helement :: setIndex (const int index) {
-#ifdef _DUNE_USES_ALU3DGRID_ 
-  _index = index; 
-#endif
-}
-
-inline void Gitter :: Dune_helement :: backupIndex (ostream & os ) const {
-#ifdef _DUNE_USES_ALU3DGRID_ 
-  cerr << "Dune_helement :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
-  abort();
-#endif
-}
-
-inline void Gitter :: Dune_helement :: restoreIndex (istream & is ) {
-#ifdef _DUNE_USES_ALU3DGRID_ 
-  cerr << "Dune_helement :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
-  abort();
-#endif
-}
-*/
 
 inline int Gitter :: hbndseg :: leaf () const {
   return ! down () ;
@@ -2075,15 +2011,14 @@ inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv)
   }
 }
 
-inline void Gitter :: Geometric :: VertexGeo :: backup ( ostream & os ) const {
+inline void Gitter :: Geometric :: VertexGeo :: backupIndex ( ostream & os ) const {
 #ifdef _DUNE_USES_ALU3DGRID_
   os.write( ((const char *) &_idx ), sizeof(int) ) ;
 #endif
 }
 
-inline void Gitter :: Geometric :: VertexGeo :: restore ( istream & is ) {
+inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is ) {
 #ifdef _DUNE_USES_ALU3DGRID_ 
-  //_indexmanager.freeIndex( _idx );
   is.read ( ((char *) &_idx), sizeof(int) ); 
 #endif
 }
