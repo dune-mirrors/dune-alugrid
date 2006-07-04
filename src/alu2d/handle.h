@@ -998,4 +998,26 @@ void write_memory(ostream &out,char *header);
 void write_memory(ostream &out,char *header,struct mallinfo &old_info);
 void write_memory_diff(ostream &out,char *header,struct mallinfo &old_info);
 
+
+//////////////////////////////////////////////////////////
+//
+//  inline implementation 
+//
+//////////////////////////////////////////////////////////
+#if USE_ALUGRID_XDISPLAY
+inline void Hmesh::draw(Xdisplay &disp ) {
+  Leafwalk < Element > walk(mel) ;
+  Leafwalk < Bndel > walkb(mbl) ;
+  for( walk.first() ; ! walk.done() ; walk.next())
+  {
+    ((Triang*)&walk.getitem())->check();
+    walk.getitem().draw(disp);
+  }
+  for( walkb.first() ; ! walkb.done() ; walkb.next()) 
+  {
+    walkb.getitem().draw(disp);
+  }
+} 
+#endif
+
 #endif

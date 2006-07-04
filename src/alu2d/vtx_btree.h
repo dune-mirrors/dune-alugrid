@@ -28,7 +28,7 @@ class Vtx_btree {
       Node* prev;
       int _lidx,_ridx;
       Node(Vertex* invtx,Thinelement *plnb,Thinelement *prnb)
-	: vtx(invtx), lnb(plnb), rnb(prnb), next(0), prev(0)
+  : vtx(invtx), lnb(plnb), rnb(prnb), next(0), prev(0)
       {assert(invtx);}
 
       ~Node() {
@@ -91,7 +91,7 @@ class Vtx_btree {
     void insert(Vertex* invtx,Thinelement *plnb,Thinelement *prnb);
     
     void splitTree(Vtx_btree*& inleft, Vtx_btree*& inright);
-		
+    
     void merge(Vtx_btree* inleft, Vtx_btree* inright);
 
     void nbconnect(int , Thinelement * , int ) ;

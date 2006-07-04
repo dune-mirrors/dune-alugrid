@@ -1,6 +1,3 @@
-
-static volatile char RCSId_vtx_btree_cc [] = "$Id$";
-
 #include <math.h>
 #include "grid.h"
 #include "triang.h"
@@ -146,52 +143,6 @@ Vtx_btree::Node::nbconnect(int opp, Thinelement *el , int i) {
     next->nbconnect(opp,el,i);  
 }
 
-#if USE_ALUGRID_XDISPLAY 
-void 
-Vtx_btree::draw(Xdisplay &xd,Element *el) {
-  /*  
-  if (lnb)
-    nb_draw(xd,el,(Element*)lnb);
-  if (rnb)
-    nb_draw(xd,el,(Element*)rnb);
-  */
-  if (head)
-    head->draw(xd,el);
-}
-void 
-Vtx_btree::Node::draw(Xdisplay &xd,Element *el) {
-  /*
-  if (lnb)
-    nb_draw(xd,el,(Element*)lnb);
-  if (rnb)
-    nb_draw(xd,el,(Element*)rnb);
-  */
-  if (prev)
-    prev->draw(xd,el);
-  else {
-    // assert(((Triang*)lnb)->leaf());
-    nb_draw(xd,el,(Element*)lnb);
-  }
-  if (next)
-    next->draw(xd,el);    
-  else {
-    // assert(((Triang*)rnb)->leaf());
-    nb_draw(xd,el,(Element*)rnb);
-  }
-}
-
-void nb_draw(Xdisplay &xd,Element *el1,Element *el2) {
-  double p1[2],p2[2];
-  double bary[3]={1./3.,1./3.,1./3.};
-  el1->fromlocal(bary,p1);
-  el2->fromlocal(bary,p2);
-  p1[0]+=0.01;
-  p1[1]+=0.025;
-  Fullvertex pp1(p1,-1);
-  Fullvertex pp2(p2,-1); 
-  xd.linedraw(&pp1,&pp2,xd.bcol[12]);
-}
-
 int Vtx_btree::Node::remove(Vertex *pvtx) {
   if (vtx==pvtx) {
     assert(!prev && !next);
@@ -211,5 +162,4 @@ int Vtx_btree::Node::remove(Vertex *pvtx) {
   }
   return right+left;
 }
-#endif
 

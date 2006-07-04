@@ -219,22 +219,6 @@ void Hmesh::setdata(void (*f)(Element &))
     f(walk.getitem());
 }
 
-#if USE_ALUGRID_XDISPLAY
-void Hmesh::draw(Xdisplay &disp ) {
-  Leafwalk < Element > walk(mel) ;
-  Leafwalk < Bndel > walkb(mbl) ;
-  for( walk.first() ; ! walk.done() ; walk.next())
-  {
-    ((Triang*)&walk.getitem())->check();
-    walk.getitem().draw(disp); 
-  }
-  for( walkb.first() ; ! walkb.done() ; walkb.next())
-  {
-    walkb.getitem().draw(disp);
-  }
-} 
-#endif
-
 void get_memory(struct mallinfo &old_info)
 {
   old_info = mallinfo();
