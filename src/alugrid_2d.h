@@ -20,5 +20,4 @@ namespace ALU2dGridSpace {
 #include "alu2d/vmmap.h"
 
 }
-#include "alugrid_2d.cc"
 #endif
