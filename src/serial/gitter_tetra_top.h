@@ -144,7 +144,7 @@ template < class A > class TetraTop : public A {
     inline void refineImmediate (myrule_t) ;
     inline void append (innertetra_t * h) ;
   private :
-    innertetra_t * _dwn, * _bbb, * _up ; //us
+    innertetra_t * _dwn, * _bbb, * _up ; 
     innerface_t * _fc ;
     inneredge_t * _ed ;
     int _lvl ;
@@ -177,10 +177,8 @@ template < class A > class TetraTop : public A {
     inline TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
                      myhface3_t *,int, IndexManagerType & , Gitter * mygrid ) ;
     virtual inline ~TetraTop () ;
-    //testweise us
     inline innertetra_t * up () ;
     inline const innertetra_t * up () const;
-    //testweise us
     inline innertetra_t * down () ;
     inline const innertetra_t * down () const ;
     inline innertetra_t * next () ;
@@ -248,10 +246,8 @@ template < class A > class Periodic3Top : public A {
     // construtor for refined elements 
     inline Periodic3Top (int,myhface3_t *,int,myhface3_t *,int,innerperiodic3_t * up, int nChild ) ;
     virtual inline ~Periodic3Top () ;
-    //testweise us
     inline innerperiodic3_t * up () ;
     inline const innerperiodic3_t * up () const;
-    //testweise us
     inline innerperiodic3_t * down () ;
     inline const innerperiodic3_t * down () const ;
     inline innerperiodic3_t * next () ;
@@ -1127,14 +1123,12 @@ template < class A > inline int TetraTop < A > :: nChild () const {
   return _nChild ;
 }
 
-//testweise us
 template < class A > inline typename TetraTop < A > :: innertetra_t * TetraTop < A > :: up () {
   return _up ;
 }
 template < class A > inline const typename TetraTop < A > :: innertetra_t * TetraTop < A> :: up () const {
   return _up ;
 } 
-//us ende
 
 template < class A > inline typename TetraTop < A > :: innertetra_t * TetraTop < A > :: down () {
   return _dwn ;
@@ -1274,7 +1268,7 @@ template < class A > inline void TetraTop < A > :: split_e01 () {
   h0->append(h1) ;
   _fc = f0 ;
   _dwn = h0 ;
-  h0->_up = h1->_up = this; //us
+  h0->_up = h1->_up = this; 
   return ;
 }
 
