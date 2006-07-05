@@ -1679,13 +1679,13 @@ template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_
   return ;
 }
 
-template < class A > inline Periodic4Top < A > :: ~Periodic4Top () {  // ok
+template < class A > inline Periodic4Top < A > :: ~Periodic4Top () {  
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
 }
 
-template < class A > inline int Periodic4Top < A > :: level () const {  // ok
+template < class A > inline int Periodic4Top < A > :: level () const {
   return _lvl ;
 }
 
@@ -1702,53 +1702,53 @@ template < class A > inline const typename Periodic4Top < A > :: innerperiodic4_
    return _up ; 
 }
 
-template < class A > inline typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: down () { // ok
+template < class A > inline typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: down () {
   return _dwn ;
 }
 
-template < class A > inline const typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: down () const { // ok
+template < class A > inline const typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: down () const { 
   return _dwn ;
 }
 
-template < class A > inline typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: next () { // ok
+template < class A > inline typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: next () { 
   return _bbb ;
 }
 
-template < class A > inline const typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: next () const { // ok
+template < class A > inline const typename Periodic4Top < A > :: innerperiodic4_t * Periodic4Top < A > :: next () const { 
   return _bbb ;
 }
 
-template < class A > inline typename Periodic4Top < A > :: innervertex_t * Periodic4Top < A > :: innerVertex () { // ok
+template < class A > inline typename Periodic4Top < A > :: innervertex_t * Periodic4Top < A > :: innerVertex () { 
   return 0 ;
 }
 
-template < class A > inline const typename Periodic4Top < A > :: innervertex_t * Periodic4Top < A > :: innerVertex () const { // ok
+template < class A > inline const typename Periodic4Top < A > :: innervertex_t * Periodic4Top < A > :: innerVertex () const { 
   return 0 ;
 }
 
-template < class A > inline typename Periodic4Top < A > :: inneredge_t * Periodic4Top < A > :: innerHedge () { // ok
+template < class A > inline typename Periodic4Top < A > :: inneredge_t * Periodic4Top < A > :: innerHedge () { 
   return 0 ;
 }
 
-template < class A > inline const typename Periodic4Top < A > :: inneredge_t * Periodic4Top < A > :: innerHedge () const { // ok
+template < class A > inline const typename Periodic4Top < A > :: inneredge_t * Periodic4Top < A > :: innerHedge () const { 
   return 0 ;
 }
 
-template < class A > inline typename Periodic4Top < A > :: innerface_t * Periodic4Top < A > :: innerHface () { // ok
+template < class A > inline typename Periodic4Top < A > :: innerface_t * Periodic4Top < A > :: innerHface () { 
   return 0 ;
 }
 
-template < class A > inline const typename Periodic4Top < A > :: innerface_t * Periodic4Top < A > :: innerHface () const { // ok
+template < class A > inline const typename Periodic4Top < A > :: innerface_t * Periodic4Top < A > :: innerHface () const { 
   return 0 ;
 }
 
-template < class A > inline void Periodic4Top < A > :: append (Periodic4Top < A > * h) { // ok
+template < class A > inline void Periodic4Top < A > :: append (Periodic4Top < A > * h) { 
   assert (_bbb == 0) ;
   _bbb = h ;
   return ;
 }
 
-template < class A > typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) {  // ??
+template < class A > typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) {  
   assert (getrule () == myrule_t :: iso4) ;
   return (j < 4) ? ((this->twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + this->twist (i)) % 4) :  // aus dem Hexaeder
     this->myhface4 (i)->myhedge1 ((j + this->twist (i)) % 4)) : 
@@ -1756,11 +1756,11 @@ template < class A > typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < 
     this->myhface4 (i)->subedge1 ((j + this->twist (i)) % 4)) ;
 }
 
-template < class A > const typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) const { // ok
+template < class A > const typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) const { 
   return ((Periodic4Top < A > *)this)->subedge1 (i,j) ;
 }
 
-template < class A > typename Periodic4Top < A > ::  myhface4_t * Periodic4Top < A > :: subface4 (int i, int j) { // ok
+template < class A > typename Periodic4Top < A > ::  myhface4_t * Periodic4Top < A > :: subface4 (int i, int j) { 
   return (this->myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
   this->myhface4(i)->subface4(this->twist(i) < 0 ? (9 - j + this->twist(i)) % 4 : (j + this->twist(i)) % 4) : // Zeile aus dem Hexaeder
   (abort (), (myhface4_t *)0) ;
@@ -1782,7 +1782,7 @@ template < class A > void Periodic4Top < A > :: request (myrule_t) {
   return ;
 }
 
-template < class A > void Periodic4Top < A > :: splitISO4 () {  // ok
+template < class A > void Periodic4Top < A > :: splitISO4 () {  
   int l = 1 + level () ;
   innerperiodic4_t * p0 = new innerperiodic4_t (l, this->subface4 (0,0), this->twist (0), this->subface4 (1,0), this->twist (1), this, 0) ;
   innerperiodic4_t * p1 = new innerperiodic4_t (l, this->subface4 (0,1), this->twist (0), this->subface4 (1,3), this->twist (1), this, 1) ;
@@ -1828,7 +1828,7 @@ template < class A > void Periodic4Top < A > :: refineImmediate (myrule_t r) {
   return ;
 }
 
-template < class A > bool Periodic4Top < A > :: refine () { // ok
+template < class A > bool Periodic4Top < A > :: refine () { 
 
   // Das refine () reagiert nicht auf die Elementaktivierung zur Verfeinerung
   // in der globalen Schleife, weil das perioodische Randelement sich nur auf
@@ -1837,7 +1837,7 @@ template < class A > bool Periodic4Top < A > :: refine () { // ok
   return true ;
 }
 
-template < class A > bool Periodic4Top < A > :: refineBalance (balrule_t r, int fce) {  // ok
+template < class A > bool Periodic4Top < A > :: refineBalance (balrule_t r, int fce) {  
   if (r != balrule_t :: iso4) {
     cerr << "**WARNUNG (IGNORIERT) in Periodic4Top < A > :: refineBalance (..) nachschauen, Datei " 
        << __FILE__ << " Zeile " << __LINE__ << endl ;
@@ -1866,7 +1866,7 @@ template < class A > bool Periodic4Top < A > :: refineBalance (balrule_t r, int 
   }
 }
 
-template < class A > bool Periodic4Top < A > :: coarse () { // ok
+template < class A > bool Periodic4Top < A > :: coarse () { 
 
   // Das Vergr"obern geschieht auch passiv, sobald ein anliegendes Element
   // vergr"obert wird durch den Aufruf von "bndNotifyCoarsen ()" s.u.
