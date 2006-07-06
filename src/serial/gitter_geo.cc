@@ -54,6 +54,33 @@ const int Gitter :: Geometric :: Tetra :: protoEdges [6][2] = {{0, 1},
                                                                {1, 3},
                                                                {2, 3}};
 
+// calculation Fomula is 
+// edgeTwist = twist(face) < 0 ?
+//          (6 - vertex + twist(face)) % 3 :
+//          (vertex + twist(face)) % 3);
+const int Gitter :: Geometric :: Tetra :: edgeTwist[6][3] = {
+                                                              {0, 2, 1}, // twist -3
+                                                              {1, 0, 2}, // twist -2
+                                                              {2, 1, 0}, // twist -1
+                                                              {0, 1, 2}, // twist 0
+                                                              {1, 2, 0}, // twist 1
+                                                              {2, 0, 1}, // twist 2
+                                                                    };
+
+// calculation Fomula is 
+// vertexTwist = (twist(face) < 0 ?
+//                 (7 - vertex + twist(face)) % 3 :
+//                 (vertex + twist(face)) % 3);
+const int Gitter :: Geometric :: Tetra :: vertexTwist[6][3] = {
+                                                              {1, 0, 2}, // twist -3
+                                                              {2, 1, 0}, // twist -2
+                                                              {0, 2, 1}, // twist -1
+                                                              {0, 1, 2}, // twist 0
+                                                              {1, 2, 0}, // twist 1
+                                                              {2, 0, 1}, // twist 2
+                                                                    };
+                                                                    
+                                                                    
 // return list with edges that lie not on given face 
 const vector<int> & Gitter :: Geometric :: Tetra :: verticesNotOnFace( const int face ) 
 {
