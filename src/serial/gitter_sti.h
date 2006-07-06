@@ -1029,6 +1029,8 @@ public :
     public :
       static const int prototype [4][3] ;
       static const int edgeMap [6][2] ;
+      static const int edgeTwist [6][3] ;
+      static const int vertexTwist [6][3] ;
       static const int protoEdges [6][2];
 
       // returns 3 which is the lenght of the edges not on face number
@@ -2544,47 +2546,74 @@ inline const Gitter :: Geometric :: Tetra :: myhface3_t * Gitter :: Geometric ::
 }
 
 inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const {
+#if 1
+  assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
+  assert( vertex >= 0 && vertex < 3 );
+/*
+#ifndef NDEBUG 
+  // check implementation of edgeTwist with original formula 
+  int vxTw = (twist(face) < 0 ? 
+          (7 - vertex + twist(face)) % 3 : 
+          (vertex + twist(face)) % 3);
+  assert( vxTw == vertexTwist[twist(face)+3][vertex] );
+#endif
+*/
+  return vertexTwist[twist(face)+3][vertex];  
+#else 
   return (twist(face) < 0 ? 
           (7 - vertex + twist(face)) % 3 : 
           (vertex + twist(face)) % 3);
+#endif
 }
 
-inline int Gitter::Geometric::Tetra::evalEdgeTwist(int face, int vertex) const {
+inline int Gitter::Geometric::Tetra::evalEdgeTwist(int face, int vertex) const 
+{
+#if 1
+  assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
+  assert( vertex >= 0 && vertex < 3 );
+/*
+#ifndef NDEBUG
+  int edgTw = (twist(face) < 0 ? 
+          (6 - vertex + twist(face)) % 3 : 
+          (vertex + twist(face)) % 3);
+  assert( edgTw == edgeTwist[twist(face)+3][vertex]);
+#endif
+*/
+  return edgeTwist[twist(face)+3][vertex];
+#else 
   return (twist(face) < 0 ? 
           (6 - vertex + twist(face)) % 3 : 
           (vertex + twist(face)) % 3);
+#endif
 }
 
 inline Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric :: Tetra :: myhedge1 (int edge) 
 {
   assert(edge >= 0 && edge < 6);
 
-  typedef Gitter::Geometric::Tetra MyType;
+  typedef Gitter::Geometric::Tetra ThisType;
 
-  return myhface3(MyType::edgeMap[edge][0])->
-    myhedge1(evalEdgeTwist(MyType::edgeMap[edge][0],MyType::edgeMap[edge][1]));
-
+  return myhface3(ThisType::edgeMap[edge][0])->
+    myhedge1(evalEdgeTwist(ThisType::edgeMap[edge][0],ThisType::edgeMap[edge][1]));
 }
 
 inline const Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric :: Tetra :: myhedge1 (int edge) const
 {
   assert(edge >= 0 && edge < 6);
 
-  typedef Gitter::Geometric::Tetra MyType;
+  typedef Gitter::Geometric::Tetra ThisType;
 
-  return myhface3(MyType::edgeMap[edge][0])->
-    myhedge1(evalEdgeTwist(MyType::edgeMap[edge][0],MyType::edgeMap[edge][1]));
+  return myhface3(ThisType::edgeMap[edge][0])->
+    myhedge1(evalEdgeTwist(ThisType::edgeMap[edge][0],ThisType::edgeMap[edge][1]));
 
 }
 
 inline Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i, int j) {
   return myhface3(i)->myvertex(evalVertexTwist(i, j));
-  //return (twist(i) < 0) ? myhface3(i)->myvertex((7 - j + twist(i)) % 3) : myhface3(i)->myvertex((j + twist(i)) % 3) ;
 }
 
 inline const Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i, int j) const {
   return myhface3(i)->myvertex(evalVertexTwist(i, j));
-  //return (twist(i) < 0) ? myhface3(i)->myvertex((7 - j + twist(i)) % 3) : myhface3(i)->myvertex((j + twist(i)) % 3) ;
 }
 
 inline Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i) {
