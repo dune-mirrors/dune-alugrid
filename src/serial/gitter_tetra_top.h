@@ -1503,7 +1503,7 @@ template < class A > inline bool TetraTop < A > :: refine () {
           if (!this->myhface3 (2)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (2)), this->twist (2))) return false ;      
           break ;
   case myrule_t :: iso8 :
-    {for (int i = 0 ; i < 4 ; i ++ )
+    {for (int i = 0 ; i < 4 ; ++i )
             if (!this->myhface3 (i)->refine (myhface3rule_t (myhface3_t :: myrule_t :: iso4).rotate (this->twist (i)), this->twist (i))) return false ; }
           break ;
         default :
@@ -1558,8 +1558,11 @@ template < class A > inline bool TetraTop < A > :: coarse () {
   } else {
     assert (_req == myrule_t :: nosplit) ;
     bool x = true ;
-    {for (innertetra_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; }
-    if (x) {
+    {
+      for (innertetra_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; 
+    }
+    if (x) 
+    {
       this->preCoarsening () ;
       this->attachleafs();
       delete _dwn ; 
@@ -1570,10 +1573,11 @@ template < class A > inline bool TetraTop < A > :: coarse () {
       _ed = 0 ;
       _rule = myrule_t :: nosplit ;
       {
-        for (int i = 0 ; i < 4 ; i ++ ) {
+        for (int i = 0 ; i < 4 ; ++i ) 
+        {
           this->myneighbour (i).first->bndNotifyCoarsen () ;
           this->myhface3 (i)->coarse () ;
-  }
+        }
       }
       return false ;
     }
