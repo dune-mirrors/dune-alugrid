@@ -130,7 +130,7 @@ class Bndel_periodic : public Bndel_triang
       return periodic_nb->nbel(0)->area();
     }
 
-    virtual Bndel *create(Vertex *v1 , Vertex *v2) const
+    virtual Bndel *create(Vertex *v1 , Vertex *v2, int) const
     {
       return new Bndel_periodic(v1,v2);
     }
