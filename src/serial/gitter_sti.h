@@ -210,7 +210,14 @@ public :
   } ;
 protected :
   AccessIterator () {}
-  virtual ~AccessIterator () { assert (!ref) ; }
+  virtual ~AccessIterator () 
+  { 
+#ifndef NDEBUG 
+    if(ref) 
+      cerr << "WARNING: (IGNORED) There still exist iterators while corresponding grid is deleted! in: " << __FILE__ << " line: " << __LINE__ << endl; 
+    //assert (!ref) ; 
+#endif
+  }
 } ;
 
 // the Leaf Iterators 
