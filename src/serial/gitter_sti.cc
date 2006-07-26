@@ -701,7 +701,7 @@ void Gitter :: notifyMacroGridChanges () {
 
 Gitter :: ~Gitter () {
   if (ref)
-    cerr << "**WARNUNG (IGNORIERT) Gitter-Referenzz\"ahler beim L\"oschen [" << ref << "]" << endl ;
+    cerr << "**WARNUNG (IGNORED) Grid-Reference counter [" << ref << "] not zero a point of removal" << endl ;
   return ;
 }
 
@@ -713,7 +713,7 @@ int Gitter :: Makrogitter :: iterators_attached () const {
 
 Gitter :: Makrogitter :: ~Makrogitter () {
   if (iterators_attached())
-    cerr << "**WARNUNG (IGNORIERT) in " << __FILE__ << " " << __LINE__ << endl ;
+    cerr << "**WARNING: (IGNORED) There are still iterators attached to the grid, remove them before removal of the grid to avoid errors! in " << __FILE__ << " " << __LINE__ << endl ;
   return ;
 }
 
