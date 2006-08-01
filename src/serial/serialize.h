@@ -1,4 +1,5 @@
 // (c) bernhard schupp, 1997 - 1998
+// (c) new implementation by Robert Kloefkorn 2006 
 
 #ifndef SERIALIZE_H_INCLUDED
 #define SERIALIZE_H_INCLUDED
