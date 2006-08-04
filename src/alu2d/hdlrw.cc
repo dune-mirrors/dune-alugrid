@@ -21,7 +21,7 @@
 //static const double EPS=1e-8;
 
 bool Hmesh :: ascireadtriang(const char *filename,
-			     double& time, unsigned long int& nbr) {
+           double& time, unsigned long int& nbr) {
   cerr << "\n  Hmesh_basic::ascireadtriang(?) \"offnet: " ;
   
   cerr << filename << "\n" << endl ;
@@ -40,7 +40,7 @@ bool Hmesh :: ascireadtriang(const char *filename,
   return ascireadtriang(in,time,nbr);
 }
 bool Hmesh :: ascireadtriang(ifstream &in,
-			     double& time, unsigned long int& nbr)
+           double& time, unsigned long int& nbr)
 
 {
   bool isbackup=false;
@@ -50,7 +50,6 @@ bool Hmesh :: ascireadtriang(ifstream &in,
   in.putback (c) ;
   assert (in.good ()) ;
   if (c == int ('!')) {
-    cerr << "Backup-file found" << endl;
     // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
     // und auf 'Backup' untersuchen.
     strstreambuf_t buf ;
@@ -66,6 +65,7 @@ bool Hmesh :: ascireadtriang(ifstream &in,
     // array str ist so lang, wie die gesamte Zeile in 'buf'.
     
     if (0 == strcmp (str, "Backup")) {
+      cerr << "Backup-file found" << endl;
       // cerr << "STIRNG: " << buf << endl;
       int rrule;
       is >> time >> nbr;
@@ -74,9 +74,11 @@ bool Hmesh :: ascireadtriang(ifstream &in,
       assert(_nconfDeg>=0);
       assert(_nconfDeg==0 || refinement_rule==Refco::quart);
       isbackup=true;
-    } else {
+    } 
+    else if (0 != strcmp (str, "Triangles")) 
+    {
       cerr << "Error in Hmesh :: ascireadtriang: "
-	   << "Wrong macrogrid format: " << endl;
+           << "Wrong macrogrid format: " << endl;
       cerr << "file with !-line but command not recognized" << endl;
       abort();
     }
@@ -93,7 +95,7 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
   int nv = 0 ;
 
   {
-     
+    
     in >> nv ;
     
     cerr << "    Anzahl der Vertices:       " << nv << endl ;
@@ -183,17 +185,17 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 
       switch (t)
       {
-	case Bndel::periodic:
+  case Bndel::periodic:
           b=new Bndel_periodic();
-	  break;
-	case Bndel::general_periodic:
-	  t=Bndel::periodic;
+    break;
+  case Bndel::general_periodic:
+    t=Bndel::periodic;
           b=new Bndel_periodic();
-	  generalperbnd=1;
-	  break;
+    generalperbnd=1;
+    break;
         default:
           b=new Bndel_triang(t);
-	  break;
+    break;
       }
 
       b->read(in, v, nv) ;
@@ -202,71 +204,71 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 
       if (t==Bndel::periodic)
       {
-	if (generalperbnd) {
-	  int pernb;
-	  in >> pernb;
+  if (generalperbnd) {
+    int pernb;
+    in >> pernb;
           if (pernb<i) {
-	    assert(perbnd_list[pernb].pernb==i);
-	    ((Bndel_periodic*)b)->set_pnb(perbnd_list[pernb].b);
-	    ((Bndel_periodic*)perbnd_list[pernb].b)->set_pnb(b);
-	    perbnd_ok++;
-	  }
-	  else {
-	    perbnd_list[i].b=b;
-	    perbnd_list[i].pernb=pernb;
-	    perbnd_card++;
-	  }
-	}
+      assert(perbnd_list[pernb].pernb==i);
+      ((Bndel_periodic*)b)->set_pnb(perbnd_list[pernb].b);
+      ((Bndel_periodic*)perbnd_list[pernb].b)->set_pnb(b);
+      perbnd_ok++;
+    }
+    else {
+      perbnd_list[i].b=b;
+      perbnd_list[i].pernb=pernb;
+      perbnd_card++;
+    }
+  }
         else if (fabs(b->vertex(0)->coord()[0]-b->vertex(1)->coord()[0])<EPS)
-	{
+  {
 
           double y0,y1;
           if (b->vertex(0)->coord()[1]<b->vertex(1)->coord()[1])
-	    { y0=b->vertex(0)->coord()[1];y1=b->vertex(1)->coord()[1]; }
+      { y0=b->vertex(0)->coord()[1];y1=b->vertex(1)->coord()[1]; }
           else
-	    { y0=b->vertex(1)->coord()[1];y1=b->vertex(0)->coord()[1]; }
+      { y0=b->vertex(1)->coord()[1];y1=b->vertex(0)->coord()[1]; }
           int y;
           for (y=0;y<y_card;y++)
             if (fabs(y_axis[y].p0-y0)+fabs(y_axis[y].p1-y1)<EPS)
-	    {
+      {
               ((Bndel_periodic*)b)->set_pnb(y_axis[y].b);
               ((Bndel_periodic*)y_axis[y].b)->set_pnb(b);
               y_ok++;
               break;
-      	    }
+            }
           if (y==y_card)
-	  {
+    {
             y_axis[y_card].p0=y0;
             y_axis[y_card].p1=y1;
             y_axis[y_card].b=b;
             y_card++;
-	  }
+    }
         }
         else 
-	{
+  {
           assert(fabs(b->vertex(0)->coord()[1]-b->vertex(1)->coord()[1])<EPS);
 
           double x0,x1;
           if (b->vertex(0)->coord()[0]<b->vertex(1)->coord()[0])
-	    { x0=b->vertex(0)->coord()[0];x1=b->vertex(1)->coord()[0]; }
+      { x0=b->vertex(0)->coord()[0];x1=b->vertex(1)->coord()[0]; }
           else
-	    { x0=b->vertex(1)->coord()[0];x1=b->vertex(0)->coord()[0]; }
+      { x0=b->vertex(1)->coord()[0];x1=b->vertex(0)->coord()[0]; }
           int x;
           for (x=0;x<x_card;x++)
             if (fabs(x_axis[x].p0-x0)+fabs(x_axis[x].p1-x1)<EPS)
-	    {
+      {
               ((Bndel_periodic*)b)->set_pnb(x_axis[x].b);
               ((Bndel_periodic*)x_axis[x].b)->set_pnb(b);
               x_ok++;
               break;
-      	    }
+            }
           if (x==x_card)
-	  {
+    {
             x_axis[x_card].p0=x0;
             x_axis[x_card].p1=x1;
             x_axis[x_card].b=b;
             x_card++;
-	  }
+    }
         }
       }
 
@@ -303,12 +305,12 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
           if (tr.neighbour(l)->thinis(Thinelement::element_like))
             tr.nbel(l)->setnormdir(tr.opposite(l),-1); 
         }
-	if (tr.neighbour(l)->edge(tr.opposite(l))) {
-	  tr.edgeconnect(l,tr.neighbour(l)->edge(tr.opposite(l)));
-	} else {
-	  Edge *e=new Edge(this);
-	  tr.edgeconnect(l,e);
-	}
+  if (tr.neighbour(l)->edge(tr.opposite(l))) {
+    tr.edgeconnect(l,tr.neighbour(l)->edge(tr.opposite(l)));
+  } else {
+    Edge *e=new Edge(this);
+    tr.edgeconnect(l,e);
+  }
       }
     }
     for (walk.first() ; !walk.done() ; walk.next() )
@@ -327,7 +329,7 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 }
 
 void Hmesh::asciwritetriang(const char *filename,
-				  double time, unsigned long int nbr) {
+          double time, unsigned long int nbr) {
 
   cerr << "\n  Hmesh_basic::asciwritetriang(?) \"offnet: " ;
   
@@ -371,7 +373,7 @@ void Hmesh_basic::asciwritetriang(ofstream &out) {
 
       if (v.level()==-1) 
             
-	v.write(out) ;
+  v.write(out) ;
     
     }
     
@@ -427,7 +429,7 @@ void Hmesh_basic::asciwritetriang(ofstream &out) {
 
 void
 Hmesh::storeGrid(const char* fbase,
-		 double time, unsigned long int nbr)
+     double time, unsigned long int nbr)
 {
   char *filename;
 
@@ -507,37 +509,37 @@ Hmesh::recoverGrid(const char* recoverFile,
         int flag;
         in >> flag;
         switch (flag)
-	{
-	  case Thinelement::unsplit:
+  {
+    case Thinelement::unsplit:
             break;
-	  case Thinelement::triang_bnd:
+    case Thinelement::triang_bnd:
             cerr << "ERROR (Hmesh::recoverGrid()): "
-		 << "splitrule \"triang_bnd\" is not allowed for elements!"
-		 << endl;
+     << "splitrule \"triang_bnd\" is not allowed for elements!"
+     << endl;
             abort();
             break;
-	  case Thinelement::triang_conf2:
+    case Thinelement::triang_conf2:
             walk.getitem().mark(Refco::ref_1);
             break;
-	  case Thinelement::triang_quarter:          
+    case Thinelement::triang_quarter:          
             walk.getitem().mark(Refco::quart);
             break;
-	  case Thinelement::compatibility:
+    case Thinelement::compatibility:
             if (!compwarn)
-	    {
+      {
               cerr << "WARNING (Hmesh::recoverGrid()): "
-		   << "using compatibility mode for obsolete file format!"
-		   << endl;
+       << "using compatibility mode for obsolete file format!"
+       << endl;
               compwarn = 1;
-	    }
+      }
             walk.getitem().mark(Refco::ref_1);
             break;
-	  default:
+    default:
             cerr << "ERROR (Hmesh::recoverGrid()): "
-		 << "unknown splitrule!"
-		 << endl;
+     << "unknown splitrule!"
+     << endl;
             abort();
-	}
+  }
       }
     }
     refine();
