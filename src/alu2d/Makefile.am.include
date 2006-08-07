@@ -1,2 +1,2 @@
 alu = alu2d
-alu2dhdrs= $(alu)/grid.h  $(alu)/handle.h  $(alu)/triang.h $(alu)/vmmap.h  $(alu)/vtx_btree.h  $(alu)/xdisplay.h $(alu)/indexstack2d.h $(alu)/xdisplay_imp.hh
+alu2dhdrs= $(alu)/grid.h  $(alu)/handle.h  $(alu)/triang.h $(alu)/vmmap.h  $(alu)/vtx_btree.h  $(alu)/xdisplay.h $(alu)/indexstack2d.h $(alu)/xdisplay_imp.hh  $(alu)/grid_imp.cc

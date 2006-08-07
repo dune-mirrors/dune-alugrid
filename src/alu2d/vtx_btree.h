@@ -36,6 +36,22 @@ class Vtx_btree {
         if(prev) delete prev;
       }
 
+      Node* leftNode() {
+        return prev;
+      }
+      Node* rightNode() {
+        return next;
+      }
+      Thinelement* leftElement() {
+        return lnb;
+      }
+      Thinelement* rightElement() {
+        return rnb;
+      }
+      Vertex* vertex() {
+        return vtx;
+      }
+
       // Gibt die Anzahl von Knoten des laengsten "Zweiges" des Baumes zurueck
       int deepestLevel(int prevLvl = 0) const {
         int left  = (prev ? prev->deepestLevel(prevLvl+1) : prevLvl+1);

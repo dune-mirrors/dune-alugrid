@@ -92,6 +92,7 @@ Vtx_btree::splitTree(Vtx_btree*& ioleft, Vtx_btree*& ioright)
   head->prev = head->next = 0;
 }
 
+
 // ------------------------------------------------------------
 //  void merge(Vtx_btree* inleft, Vtx_btree* inright)
 //                                                  - public -

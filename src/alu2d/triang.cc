@@ -88,7 +88,7 @@ extern int g_argc;
 #include "vtx_btree.h"
 
 
-static const double EPS = 1e-8;
+// static const double EPS = 1e-8;
 
 // int Element::_nconfDeg = 1;
 
@@ -136,11 +136,14 @@ Triang::Triang(Vertex * v0,Vertex * v1, Vertex * v2) {
 //   Liefert die Punkte auf der eten Kante modulo 3
 // #end(method)
 // ***************************************************
+
+/*
 void Element::edge_vtx(int e, Vertex *(&v) [2]) const {
   assert(0 <= e) ;
   v[0] = connect.vtx[(e+1)%connect.nv] ;
   v[1] = connect.vtx[(e+2)%connect.nv] ;
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -152,10 +155,12 @@ void Element::edge_vtx(int e, Vertex *(&v) [2]) const {
 //   Liefert iten Punkt zur"uck modulo 3
 // #end(method)
 // ***************************************************
+/*
 Vertex * Element::vertex(int i) const {
   assert(0 <= i) ;
   return connect.vtx[i%connect.nv] ; 
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -167,10 +172,12 @@ Vertex * Element::vertex(int i) const {
 //   Liefert Nachbaren gegen"uber der Kante mit Nr. fce modulo 3
 // #end(method)
 // ***************************************************
+/*
 Thinelement * Element::neighbour(int fce) const {
   assert(0 <= fce) ;
   return connect.nb[fce%connect.nf] ;
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -183,6 +190,7 @@ Thinelement * Element::neighbour(int fce) const {
 //   mit this gemeinsamm hat (wird auch modulo 3 gerechnet)
 // #end(method)
 // ***************************************************
+/*
 int Element::opposite(int fce) const {
   assert(0 <= fce) ;
   return connect.bck [fce%connect.nf] ;
@@ -195,6 +203,7 @@ Edge *Element::edge(int fce) const {
   assert(0 <= fce) ;
   return connect.edge[fce];
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -208,6 +217,7 @@ Edge *Element::edge(int fce) const {
 //   lokalen Nr. fce
 // #end(method)
 // ***************************************************
+/*
 int Element::facevertex(int fce, int loc) const { 
   assert(0 <= fce) ;
   assert(0 <= loc) ;
@@ -215,7 +225,7 @@ int Element::facevertex(int fce, int loc) const {
   loc %= connect.pv ;
   return (fce+loc+1)%connect.nv ; 
 }
-
+*/
 /*
 // ***************************************************
 // #begin(method)
@@ -239,13 +249,14 @@ int Element::facevertex(int fce, int loc) const {
 // #end(method)
 // ***************************************************
 */
+/*
 int Element::normaldir(int fce) const
 {
   assert(0 <= fce) ;
   fce%=connect.nf;
   return connect.normdir[fce] ;
 }
-
+*/
 // ***************************************************
 // #begin(method)
 // #method:
@@ -341,6 +352,7 @@ bool Triang::confLevelExceeded(int nconfDeg) const
 //   an.
 // #end(method)
 // ***************************************************
+/*
 void Element::nbconnect(int fce, Thinelement * n, int b) { 
   assert(0 <= fce) ;
   fce %= connect.nf ;
@@ -355,6 +367,7 @@ void Element::edgeconnect(int fce, Edge * n) {
   connect.edge[fce] = n ; 
   n->attach();
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -367,13 +380,13 @@ void Element::edgeconnect(int fce, Edge * n) {
 //   Legt die Richtung der gerichteten Normalen an der Kante mit der Nr. fce fest
 // #end(method)
 // ***************************************************
-void Element::setnormdir(int fce, int dir) {
+/*void Element::setnormdir(int fce, int dir) {
   assert( 0 <= fce );
   fce %= connect.nf ;
   assert( dir == 1 || dir == -1);
   connect.normdir[fce] = dir;
 }
-
+*/
 // ***************************************************
 // #begin(method)
 // #method:
@@ -383,10 +396,12 @@ void Element::setnormdir(int fce, int dir) {
 //   Konstruktor f"ur connect Daten (privat)
 // #end(method)
 // ***************************************************
+/*
 Element::c::c() {
   for( int i = 0 ; i < nv ; i ++ ) { vtx[i] = 0; hvtx[i] = 0; }
   for( int j = 0 ; j < nf ; j ++ ) { nb[j] = 0 ; bck[j] = -1 ; normdir[j]=0 ; edge[j] = 0;}  
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -397,12 +412,14 @@ Element::c::c() {
 //   Destruktor f"ur connect Daten (privat)
 // #end(method)
 // ***************************************************
+/*
 Element::c::~c() {
   for(int i = 0 ; i < nv ; i ++ ) {
     if(vtx[i]) vtx[i]->detach() ;
     if(hvtx[i]) delete hvtx[i];
   }
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -413,6 +430,7 @@ Element::c::~c() {
 //   Ausschreiben der connect-Daten (privat)
 // #end(method)
 // ***************************************************
+/*
 void Element::c::write(ofstream &out) const {
   for(int i = 0 ; i < nv ; i ++ ) 
   {
@@ -422,6 +440,7 @@ void Element::c::write(ofstream &out) const {
 //    vtx[i]-> write(out);
   }
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -432,6 +451,7 @@ void Element::c::write(ofstream &out) const {
 // #description:
 // #end(method)
 // ***************************************************
+/*
 void Element::c::read(ifstream & in, Vertex ** v, const int l) {
   int c ;
   for(int i = 0 ; i < nv ; i ++ ) {
@@ -440,6 +460,7 @@ void Element::c::read(ifstream & in, Vertex ** v, const int l) {
     if(c != -1) set((Vertex *)v[c], i) ;
   }
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -452,12 +473,13 @@ void Element::c::read(ifstream & in, Vertex ** v, const int l) {
 //   Liefert unskalierte "au"sere Normale in n zur"uck
 // #end(method)
 // ***************************************************
+/*
 void Element::outernormal(int fce,double (&n)[ncoord]) const
 {
   n[0]= _outernormal[fce%connect.nf][0];
   n[1]= _outernormal[fce%connect.nf][1];
 }
-
+*/
 // ***************************************************
 // #begin(method)
 // #method:
@@ -469,13 +491,14 @@ void Element::outernormal(int fce,double (&n)[ncoord]) const
 //   Liefert unskalierte gerichtete Normale in n zur"uck
 // #end(method)
 // ***************************************************
+ /*
 void Element::dirnormal(int fce,double (&n)[ncoord]) const
 {
   outernormal(fce,n);
   for (int i=0;i<ncoord;i++)
     n[i]*=normaldir(fce);
 }
-
+ */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -505,6 +528,7 @@ void Element::dirnormal(int fce,double (&n)[ncoord]) const
 //             (l2)   ad-bc (-c   a) (f)
 // #end(method)
 // ***************************************************
+  /*
 void Element::tolocal(const double (&v)[ncoord], double (&bary)[3]) const
 {
   const double (&v0)[ncoord]=connect.vtx[0]->coord();
@@ -525,7 +549,7 @@ void Element::tolocal(const double (&v)[ncoord], double (&bary)[3]) const
   bary[2] = (a * f - c * e) / det;
   bary[0] = 1.0 - bary[1] - bary[2];
 }
-
+  */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -538,6 +562,7 @@ void Element::tolocal(const double (&v)[ncoord], double (&bary)[3]) const
 //   in globale (x,y)-Koordinaten um
 // #end(method)
 // ***************************************************
+   /*
 void Element::fromlocal(const double (&bary)[3],double (&v)[ncoord]) const
 {
   const double (&v0)[ncoord]=connect.vtx[0]->coord();
@@ -549,7 +574,7 @@ void Element::fromlocal(const double (&bary)[3],double (&v)[ncoord]) const
           bary[1]*v1[i]+
           bary[2]*v2[i];  
 }
-
+   */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -562,12 +587,13 @@ void Element::fromlocal(const double (&bary)[3],double (&v)[ncoord]) const
 //   in baryzentrischen Koordinaten
 // #end(method)
 // ***************************************************
+    /*
 void Element::midpoint(int fce, double (&bary)[3]) const
 {
   for (int i=0;i<3;i++)
     bary[i]=((i==fce%3) ? 0.0 : 0.5);
 }
-
+    */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -581,6 +607,7 @@ void Element::midpoint(int fce, double (&bary)[3]) const
 //   gilt bary = P0 + pos * (P1 - P0).
 // #end(method)
 // ***************************************************
+     /*
 void Element::facepoint(int fce, double pos, double (&bary)[3]) const
 {
   bary[fce%3] = 0.0;
@@ -596,6 +623,7 @@ void Element::facepoint(int fce, double pos, double (&bary)[3]) const
     bary[(fce+2)%3] = 1.0 - pos;
   }
 }
+     */
 
 // ***************************************************
 // #begin(method)
@@ -614,6 +642,7 @@ void Element::facepoint(int fce, double pos, double (&bary)[3]) const
 //   so wird 1 zur"uckgegeben, ansonsten 0. 
 // #end(method)
 // ***************************************************
+      /*
 int Element::isecpoint(int fce, const double (&pa)[ncoord],
                        double (&bary)[3]) const
 {
@@ -648,7 +677,7 @@ int Element::isecpoint(int fce, const double (&pa)[ncoord],
 
   return ret;
 }
-
+      */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -666,6 +695,7 @@ int Element::isecpoint(int fce, const double (&pa)[ncoord],
 //   so wird 1 zur"uckgegeben, ansonsten 0. 
 // #end(method)
 // ***************************************************
+       /*
 int Element::isecpoint(int fce, const double (&pa)[ncoord],
                        double (&pret)[ncoord]) const
 {
@@ -699,7 +729,7 @@ int Element::isecpoint(int fce, const double (&pa)[ncoord],
 
   return ret;
 }
-
+       */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -710,6 +740,7 @@ int Element::isecpoint(int fce, const double (&pa)[ncoord],
 //   1 falls innerhalb und -1 falls v auf einer Kante liegt
 // #end(method)
 // ***************************************************
+	/*
 int Element::inside(Vertex &v) const
 {
   double n[ncoord];
@@ -736,7 +767,37 @@ int Element::inside(Vertex &v) const
   }
   return ret;  
 }
+	*/
 
+// ***************************************************
+// #begin(method)
+// #method:
+//   int Element::getAllNb(Vtx_btree* vtx, vector<Thinelement *> vec) const
+// #parameters: 
+// #description:
+//   will return all neighbours associated with the element in a vector
+// #end(method)
+// ***************************************************
+	 /*
+void Element::getAllNb(Vtx_btree::Node* node, stack<Thinelement *> vec) 
+{
+  if(!node->leftNode())
+    vec.push(node->leftElement());
+  else {
+    getAllNb(node->leftNode(), vec);
+  }
+  if(!node->rightNode())
+    vec.push(node->rightElement());
+  else {
+      getAllNb(node->rightNode(), vec);
+  }    
+  //if(!vtx->right())
+  //  vec.push_back(vtx->getrnb());
+  //else {    
+  //  getAllNb(vtx->right(), vec);        
+  //}
+}
+	 */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -748,6 +809,7 @@ int Element::inside(Vertex &v) const
 //   Dreiecks liegt, 0 sonst.
 // #end(method)
 // ***************************************************
+	  /*
 int Element::inside(const double (&point)[2]) const
 {
   int i,ret = 1;
@@ -761,7 +823,7 @@ int Element::inside(const double (&point)[2]) const
 
   return ret;
 }
-
+	  */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -772,6 +834,7 @@ int Element::inside(const double (&point)[2]) const
 //   Macht die Kante mit der lokalen Nr. fce zur Verfeinerungskante
 // #end(method)
 // ***************************************************
+	   /*
 void Element::setrefine(int fce) 
 {
   assert( 0<=fce );
@@ -800,7 +863,7 @@ void Element::setrefine(int fce)
     _outernormal[j][1] = tmp_ony[(fce+j)%connect.nv];
   }
 }
-
+	   */
 // ***************************************************
 // #begin(method)
 // #method:
@@ -810,9 +873,10 @@ void Element::setrefine(int fce)
 //   Initialisierung der Instanzvariablen
 // #end(method)
 // ***************************************************
+/*
 void Element::init()
 {
-  /* calculate area */
+// calculate area 
 
   const double (&vc0)[ncoord]=connect.vtx[0]->coord();
   const double (&vc1)[ncoord]=connect.vtx[1]->coord();
@@ -824,7 +888,7 @@ void Element::init()
 
   assert(_area > 0.0);
 
-  /* calculate outer normal and sidelength */
+//calculate outer normal and sidelength
 
   int i;
 
@@ -837,7 +901,7 @@ void Element::init()
                           + _outernormal[i][1]*_outernormal[i][1]);
   }
 
-  /* calculate minheight */
+// calculate minheight
 
   double maxlen = _sidelength[0];
   for (i=1;i<3;i++)
@@ -847,6 +911,7 @@ void Element::init()
   _minheight = 2.0 * _area / maxlen;
 
 }
+*/
 
 // ***************************************************
 // #begin(method)
@@ -859,6 +924,7 @@ void Element::init()
 //   1 sonst
 // #end(method)
 // ***************************************************
+	     /*
 int Element::setrefine()
 {
   double maxkantenlen=-1.0,kantenlen;
@@ -877,6 +943,7 @@ int Element::setrefine()
     setrefine(maxkante);
   return maxkante==0;
 }
+	     */
 
 /****************************************************
 // #begin(method)
@@ -890,6 +957,7 @@ int Element::setrefine()
 //   n"otig war. L"a"st die Verfeinerungskante umber"uhrt 
 // #end(method)
 ***************************************************/
+	      /*
 int Element::setorientation()
 {
   double o;
@@ -938,6 +1006,7 @@ int Element::setorientation()
   }
   return (o>0);
 }
+	      */
 
 /***************************************************
 // #begin(method)
@@ -951,6 +1020,7 @@ int Element::setorientation()
 //   in das Empfaengerelement auf der Seite fce ein.
 // #end(method)
 ***************************************************/
+  /*
 void Element::addhvtx(Vertex* invtx, Thinelement *lnb,Thinelement *rnb,int fce)
 {
   if( invtx ) {
@@ -963,7 +1033,7 @@ void Element::addhvtx(Vertex* invtx, Thinelement *lnb,Thinelement *rnb,int fce)
     assert(!connect.hvtx[fce]); 
   }
 }
-
+  */
 
 /***************************************************
 // #begin(method)
@@ -1192,8 +1262,10 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
           else {
             ((Element*)connect.nb[0])->addhvtx(nv, t1,t2, connect.bck[0]);
           }
-          if (connect.hvtx[0])
+          if (connect.hvtx[0]) {
             delete connect.hvtx[0];
+            connect.hvtx[0] = 0;
+          }
           t1->connect.hvtx[0] = connect.hvtx[2];
           t2->connect.hvtx[0] = connect.hvtx[1];
           connect.hvtx[0] = connect.hvtx[1] = connect.hvtx[2] = 0;

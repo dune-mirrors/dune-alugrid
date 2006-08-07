@@ -134,6 +134,7 @@ template < class A > class Listagent {
 
 
 class Element;
+class Bndel;
 
 class Restrict_basic;
 class Prolong_basic;
@@ -267,6 +268,7 @@ class Fullvertex : public Vertex {
 
    ~Fullvertex() { }
   
+    const double (& coordTest() const )[ncoord] { return vcoord ; }
     const double (& coord() const )[ncoord] { return vcoord ; }
 
     void write(ofstream &) const ;
@@ -289,8 +291,8 @@ class Edge : public Basic {
     void write(ofstream &) const ;
     void read(ifstream &) ;
 };
-class Triang;
-class Bndel_triang;
+class Triang ;
+class Bndel_triang ;
 // ***************************************************
 // #begin(class)
 // #description:
@@ -366,26 +368,23 @@ class Thinelement : public Basic {
 
     int numvertices() const { return nvertices ; }
 
-    virtual double area() const = 0;
+    //virtual double area() const = 0;
 
-    virtual void edge_vtx(int , Vertex * (&) [2]) const = 0 ;
-
+    //virtual void edge_vtx(int , Vertex * (&) [2]) const = 0 ;
 
     virtual int numfacevertices(int ) const = 0 ;
     
     virtual int facevertex(int , int ) const = 0 ;
 
-
     virtual Vertex * vertex(int ) const = 0 ;
     
     inline Vertex * vertex(int fce, int j) const { return vertex(facevertex(fce, j)) ; }
-
 
     virtual Thinelement * neighbour(int ) const = 0 ;
 
     virtual int opposite(int fce) const = 0 ;
 
-    virtual int edge_idx(int fce) const = 0 ;
+    //virtual int edge_idx(int fce) const = 0 ;
 
     virtual Edge *edge(int fce) const = 0 ;
 
@@ -454,7 +453,6 @@ class Refco_el : protected Refco {
       
     int is(Refco::tag_t t) const { return tag == t ? 1 : 0 ; }
 
-    // so kann diese Funktion nicht bleiben...
     int wasRefined() const { return tag_last == ref ? 1 : 0 ; }    
 
     void clearWas() { tag_last = none;}    
@@ -554,8 +552,9 @@ class Element : public Thinelement, public Refco_el {
 
     Vertex * vertex(int ) const ;
 
-    Vertex * vertex(int fce, int j) const { return vertex(facevertex(fce, j)) ; }
+    Fullvertex * vertexTest(int ) const ;
 
+    Vertex * vertex(int fce, int j) const { return vertex(facevertex(fce, j)) ; }
     
     Thinelement * neighbour(int ) const ;
 
@@ -586,7 +585,7 @@ class Element : public Thinelement, public Refco_el {
 
     double minheight() const { return _minheight; }
 
-    virtual double area() const { return _area; }
+    double area() const { return _area; }
 
     void outernormal(int ,double (& )[ncoord]) const;
 
@@ -614,6 +613,21 @@ class Element : public Thinelement, public Refco_el {
       return (connect.hvtx[fce] != 0);
     }
 
+    bool hasHangingNode(int fce) const {
+     return (connect.hvtx[fce] && connect.hvtx[fce]->head);
+    }
+    
+    int getNbList(int fce, stack<Thinelement*> vec)  {
+      assert(connect.hvtx[fce]);
+      assert(connect.hvtx[fce]->head);      
+      getAllNb(connect.hvtx[fce]->head, vec);
+      return vec.size();
+    }
+
+  private:
+    void getAllNb(Vtx_btree::Node* node, stack<Thinelement*> vec) ;
+   
+  public:
     void removehvtx(int fce,Vertex *vtx) {
       if (connect.hvtx[fce]->count()==1) {
 	assert(connect.hvtx[fce]->getHead()==vtx);
@@ -955,7 +969,7 @@ class Bndel : public Thinelement, public Refco {
 
     void mirror(const double (& )[2], double (& )[2]) const ;
 
-    virtual double area() const ;
+    double area() const ;
 
     virtual Bndel *create(Vertex * , Vertex *,bnd_t) const = 0;
 
@@ -1179,8 +1193,11 @@ inline void Bndel::draw(Xdisplay &xd)
     xd.linedraw(&p1,&p2,col);
   }
 }
+
+
 #endif // end USE_ALUGRID_XDISPLAY 
 
+#include "grid_imp.cc"
 
 #endif
 
