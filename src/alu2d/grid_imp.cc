@@ -1135,6 +1135,4 @@ inline void Element::addhvtx(Vertex* invtx, Thinelement *lnb,Thinelement *rnb,in
   }
 }
 
-
-
 #endif
