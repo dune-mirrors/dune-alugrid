@@ -5,7 +5,6 @@
 
 namespace ALU2dGridSpace {
 
-#include "alu2d/grid.cc"
 #include "alu2d/handle.cc"
 #include "alu2d/triang.cc"
 #include "alu2d/hdlrw.cc"
