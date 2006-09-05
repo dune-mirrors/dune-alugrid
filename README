@@ -6,7 +6,7 @@ License
 
 The ALU-Grid library and headers are licensed under the GNU Lesser GPL
 version 2.1. The full license text can be found in the file COPYING
-and via http://www.gnu.org/licenses/lgpl.html
+and via http://www.gnu.org/licenses/lgpl.html .
 
 
 Compiler 
@@ -16,7 +16,7 @@ The ALU-Grid code in known to compile with the GNU Compiler version 3.4.x or hig
 Also with the INTEL C++ Compiler version 8.1 or higher the code compiles.
 Furthermore the code compiles with the IBM xlC compiler version 6 or higher. 
 
-The compiler can be choosen by editing the fields COMP and CXXCOMP in the
+The compiler can be chosen by editing the fields COMP and CXXCOMP in the
 *.opts files. For parallel computations the MPI compiler, like mpiCC should
 be used or the include path and lib path adapted. 
 
@@ -29,7 +29,7 @@ your system. Run
 
   ./configure
 
-to commence those tests. See ./configure --help for deatil help on optins. 
+to commence those tests. See ./configure --help for detail help on options. 
 If you intend to use the parallel version of the
 grid, make sure that you have a version of MPI, and METIS (--with-metis=PATH), and 
 PARTY (--with-party=PATH) and supply the respective flags to the 
