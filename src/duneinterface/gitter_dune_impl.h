@@ -121,9 +121,12 @@ template < class A > inline PureElementAccessIterator < A > :: Handle ::
 Handle (AccessIterator < A > & f) 
  : AccessIterator < A > :: Handle () 
 {
+  this->removeObj();
+  
   this->_fac = &f;
   this->_fac->ref ++ ;
 
+  assert( this->_w == 0 );
   // this is the difference to the normal AccessIterator, we insert
   // pureElementIterator, all other things are the same   
   this->_w = this->_fac->pureElementIterator(this->_a) ;
@@ -132,12 +135,8 @@ Handle (AccessIterator < A > & f)
 
 template < class A > inline PureElementAccessIterator < A > :: Handle :: 
 Handle (const PureElementAccessIterator < A > :: Handle & p) 
-  : AccessIterator < A > :: Handle ()
+  : AccessIterator < A > :: Handle (p)
 {
-  this->_fac = p._fac; 
-  if( this->_fac ) this->_fac->ref ++; 
-  this->_w = p._w->clone(); 
-  return ;
 } 
 
 template < class A > inline PureElementAccessIterator < A > :: Handle :: Handle () 

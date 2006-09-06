@@ -204,7 +204,7 @@ public :
     inline int size () ;
     inline A & item () const ;
     inline virtual IteratorSTI< A > * clone () const;
-  private: 
+  protected: 
     void removeObj(); 
     void assign (const AccessIterator < A > :: Handle &);
   } ;
@@ -1761,7 +1761,9 @@ clone () const
 }
 
 template < class A > inline AccessIterator < A > :: Handle :: Handle () 
-  : _fac (0), _a (0), _w ( new EmptyIterator < A > () ) 
+  : _fac (0)
+  , _a (0)
+  , _w ( new EmptyIterator < A > () ) 
 {
   return ;
 }
