@@ -133,14 +133,14 @@ inline IndexStack<T,length>::~IndexStack ()
   while( !fullStackList_.empty() )
   {
     StackType * st = fullStackList_.top();
-    if(st) delete st; 
     fullStackList_.pop();
+    delete st; 
   }
   while( !emptyStackList_.empty() )
   {
     StackType * st = emptyStackList_.top();
-    if(st) delete st; 
     emptyStackList_.pop();
+    delete st; 
   }
 }
 
@@ -149,8 +149,9 @@ inline T IndexStack<T,length>::getIndex ()
 {
   if((*stack_).empty()) 
   {
-    if( fullStackList_.size() <= 0)
+    if( fullStackList_.empty() )
     {
+      assert( fullStackList_.size() <= 0 );
       return maxIndex_++;
     }
     else 
@@ -169,8 +170,10 @@ inline void IndexStack<T,length>::freeIndex ( T index )
   if((*stack_).full())
   {
     fullStackList_.push(  stack_ );
-    if(emptyStackList_.size() <= 0)
+    //if(emptyStackList_.size() <= 0)
+    if( emptyStackList_.empty() )
     {
+      assert( emptyStackList_.size() <= 0 );
       stack_ = new StackType (); 
     }
     else 
@@ -230,12 +233,11 @@ inline void IndexStack<T,length>::clearStack ()
   while( !fullStackList_.empty() )
   {
     StackType * st = fullStackList_.top();
-    if(st) delete st; 
     fullStackList_.pop();
+    if(st) delete st; 
   }
   return;
 }
-
 
 #else 
 
