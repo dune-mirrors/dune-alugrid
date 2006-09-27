@@ -557,45 +557,32 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist) {
       case myrule_t :: e20 :
       case myrule_t :: iso4 :
       {
+        bool a = (twist < 0) 
+               ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+               : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
 
-  // old piece of code 
-#ifdef __USE_INTERNAL_FACES__
-  bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-         : this->nb.rear ().first->refineBalance (r,this->nb.rear ().second) ;
+        if (a) 
+        {  
+          if (getrule () == myrule_t :: nosplit) {
+            refineImmediate (r) ;
+            { 
+              for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = this->nb ; 
+            }
+          } 
+          else 
+          {
+            // Als Test absichern, da"s die Verfeinerung durchgekommen ist. Im
+            // anisotropen Fall darf das so nicht mehr gemacht werden.
+            assert (getrule () == r) ;
+          }
 
-#else 
-  // --thetwist
-  bool a = false;      
-  if( this->nb.rear().first && this->nb.front().first )
-  {
-    a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-                  : this->nb.rear ().first->refineBalance  (r,this->nb.rear  ().second) ;
-  }
-  else 
-  {
-    if(this->nb.rear().first)
-      a = this->nb.rear  ().first->refineBalance (r,this->nb.rear ().second);
-    if(this->nb.front().first)
-      a = this->nb.front ().first->refineBalance (r,this->nb.front().second);
-  }
-#endif
-
-  if (a) {  
-    if (getrule () == myrule_t :: nosplit) {
-      refineImmediate (r) ;
-      {for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = this->nb ; }
-    } else {
-    
-  // Als Test absichern, da"s die Verfeinerung durchgekommen ist. Im
-  // anisotropen Fall darf das so nicht mehr gemacht werden.
-    
-      assert (getrule () == r) ;
-    }
           this->postRefinement () ;
           return true ;
-  } else {
-    return false ;
-  }
+        } 
+        else 
+        {
+          return false ;
+        }
       }
       default :
         cerr << "**WARNUNG (IGNORIERT) falsche Verfeinerungsregel gefunden: " ;
@@ -806,67 +793,19 @@ template < class A > void Hbnd3Top < A > :: split_e20 () {
   return ;
 }
 
-template < class A > void Hbnd3Top < A > :: split_iso4 () {
+template < class A > void Hbnd3Top < A > :: split_iso4 () 
+{
   int l = 1 + level () ;
-  
-  this->splitGhost();
+ 
+  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
+  GhostChildrenInfo ghostInfo;
+  // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
+  this->splitGhost( ghostInfo );
 
-  // get the childs 
-  typedef typename Gitter :: ghostpair_STI ghostpair_STI; 
-  typedef typename Gitter :: Geometric :: tetra_GEO tetra_GEO;
-  typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
-
-  ghostpair_STI ghostpair = this->getGhost();
-  
-  tetra_GEO * gh = dynamic_cast<tetra_GEO *> (ghostpair.first); 
-
-  // I hate this piece of code, R.K. 
-  tetra_GEO *(ghchild)[4] = {0,0,0,0};
-  int gFace[4] = {-1,-1,-1,-1};
-
-  // if ghost exists 
-  if(gh)
-  {
-    // ghostpair.second is the internal face number of the face 
-    // connected to the interior of the process 
-    hface3_GEO * face = gh->myhface3( ghostpair.second ); 
-    face = face->down();
-    for( int i=0; i<4; i++)
-    {
-      assert(face);
-      typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
-      neigh_t neighbour = face->nb.front();
-      tetra_GEO * ghch = static_cast<tetra_GEO *> (neighbour.first);
-      if(ghch)
-      { 
-        if(ghch->up() != gh) 
-        {
-          neighbour = face->nb.rear();
-          ghch = static_cast<tetra_GEO *> (neighbour.first);
-        }
-
-      }
-      else 
-      { 
-        neighbour = face->nb.rear();
-        ghch = static_cast<tetra_GEO *> (neighbour.first);
-      }
-      
-      // gFace might be differnent from ghostFaceNumber, unfortuneately 
-      gFace[i] = neighbour.second; 
-      
-      assert(ghch);
-      assert(ghch->up() == gh);
-
-      ghchild[i] = ghch;
-      face = face->next();
-    }
-  }
-
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[0], gFace[0]) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[1], gFace[1]) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[2], gFace[2]) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this->projection, this , _bt, _indexManager, ghchild[3], gFace[3]) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, ghostInfo.child(0), ghostInfo.face(0)) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->projection, this , _bt, _indexManager, ghostInfo.child(1), ghostInfo.face(1)) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this->projection, this , _bt, _indexManager, ghostInfo.child(2), ghostInfo.face(2)) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this->projection, this , _bt, _indexManager, ghostInfo.child(3), ghostInfo.face(3)) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
@@ -910,35 +849,41 @@ template < class A > inline bool Hbnd3Top < A > :: refineBalance (balrule_t r, i
 
   assert (b == 0) ;
   assert (this->leaf ()) ;
-  if (!bndNotifyBalance (r,b)) {
+  if (!bndNotifyBalance (r,b)) 
+  {
   
     // Hier kann der innere Rand [parallel] die Verfeinerung
-  // verhindern, damit z.B. das Durchverfeinern im anisotropen
-  // Fall erstmal nicht stattfindet, wenn nicht klar ist, wie die
-  // weitere Rekursion aussieht. Dazu muss auf dem Niveau der Klasse
-  // des Template-Arguments die Methode bndNotifyBalance () "uber-
-  // schrieben werden. Die Defaultmethode liefert immer 'true'.
+    // verhindern, damit z.B. das Durchverfeinern im anisotropen
+    // Fall erstmal nicht stattfindet, wenn nicht klar ist, wie die
+    // weitere Rekursion aussieht. Dazu muss auf dem Niveau der Klasse
+    // des Template-Arguments die Methode bndNotifyBalance () "uber-
+    // schrieben werden. Die Defaultmethode liefert immer 'true'.
   
     return false ;
-  } else {
-    if(r == myrule_t :: iso4) {
-    
+  } 
+  else {
+    if(r == myrule_t :: iso4) 
+    {
       // Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
-  // sich selbst, weil die Anforderung durch die Fl"ache kam, und
-  // dahinter keine Balancierung stattfinden muss.
+      // sich selbst, weil die Anforderung durch die Fl"ache kam, und
+      // dahinter keine Balancierung stattfinden muss.
     
       this->myhface3 (0)->refineImmediate (r) ;
       split_iso4 () ;
-    } else if (r == myrule_t :: e01) {
+    } 
+    else if (r == myrule_t :: e01) {
       this->myhface3 (0)->refineImmediate (r) ;
       split_e01 () ;
-    } else if (r == myrule_t :: e12) {
+    } 
+    else if (r == myrule_t :: e12) {
       this->myhface3 (0)->refineImmediate (r) ;
       split_e12 () ;
-    } else if (r == myrule_t :: e20) {
+    } 
+    else if (r == myrule_t :: e20) {
       this->myhface3 (0)->refineImmediate (r) ;
       split_e20 () ;
-    } else {
+    } 
+    else {
       cerr << "**FEHLER (FATAL, weil nicht vorgesehen) beim Verfeinern am " ;
       cerr << "Randst\"uck mit der Regel [" << r << "] in " ;
       cerr << __FILE__ << " " << __LINE__ << endl ;
