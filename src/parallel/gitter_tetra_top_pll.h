@@ -43,7 +43,9 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
       protected :
         
         typedef Gitter :: ghostpair_STI  ghostpair_STI;
-        typedef typename GitterBasisImpl::Objects::tetra_IMPL GhostElement_t;
+        typedef Gitter :: GhostChildrenInfo GhostChildrenInfo_t; 
+        typedef Gitter :: helement_STI GhostElement_t;
+        typedef typename GitterBasisImpl::Objects::tetra_IMPL GhostTetra_t;
         typedef typename A :: myhface3_t myhface3_t ;
         typedef typename A :: balrule_t balrule_t ;
         typedef typename A :: bnd_t     bnd_t ;
@@ -65,8 +67,10 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         mutable ghostpair_STI _ghostPair;
 
         // refine ghost if face is refined and ghost is not zero 
-        void splitGhost (); 
+        void splitGhost (GhostChildrenInfo_t & ); 
         
+        // mark all children for coarsening 
+        void markDescendents( GhostElement_t & elem );
         // coarse ghost if face is coarsened 
         void coarseGhost (); 
         
@@ -197,14 +201,75 @@ inline int Hbnd3PllInternal < A, X, MX > :: HbndPll ::  ghostLevel () const {
 }
 
 template < class A, class X, class MX > 
-inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost () 
+inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
+(GhostChildrenInfo_t & info ) 
 {
   if(_ghostPair.first)
   {
-    GhostElement_t & ghost = static_cast<GhostElement_t &> (*_ghostPair.first); 
-    ghost.request( Gitter::Geometric::TetraRule::iso8 );
-    assert( Gitter::Geometric::TetraRule::iso8 == ghost.requestrule ());  
-    ghost.refine();
+    GhostTetra_t & ghost = static_cast<GhostTetra_t &> (*_ghostPair.first); 
+    if(!ghost.down())
+    {
+      ghost.tagForGlobalRefinement();
+      ghost.refine();
+    }
+
+    // get the childs 
+    typedef typename Gitter :: Geometric :: tetra_GEO tetra_GEO;
+    typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
+
+    // ghostpair.second is the internal face number of the face 
+    // connected to the interior of the process 
+    hface3_GEO * face = ghost.myhface3( _ghostPair.second ); 
+    int count = 0;
+    for(face = face->down(); face; face = face->next())
+    {
+      assert(face);
+
+      // NOTE: we need here tetra_GEO because we cannot cast from hasFace
+      // to tetra_IMPL (GhostTetra_t)
+      tetra_GEO * ghch = 0;
+
+      typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
+      neigh_t neighbour = face->nb.front();
+      if( ! neighbour.first->isboundary ())
+      {
+        ghch = dynamic_cast<tetra_GEO *> (neighbour.first);
+        assert(ghch);
+        assert( ghch->up() == &ghost );
+      }
+      else 
+      {
+        neighbour = face->nb.rear();
+        assert( ! neighbour.first->isboundary () );
+        ghch = dynamic_cast<tetra_GEO *> (neighbour.first);
+      }
+      
+      assert(ghch);
+      assert(ghch->up() == &ghost );
+     
+      // set element pointer and local face number 
+      info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
+
+      ++count ;
+    }
+  }
+}
+
+template < class A, class X, class MX > 
+inline void Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
+markDescendents( GhostElement_t & elem ) 
+{
+  for( GhostElement_t * child = elem.down(); child; child = child->next() )
+  {
+    if( child->leaf()) 
+    {
+      child->tagForGlobalCoarsening(); 
+    }
+    else 
+    {
+      child->resetRefinementRequest(); 
+    }
+    this->markDescendents( *child );
   }
 }
 
@@ -213,11 +278,21 @@ inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
 {
   if(_ghostPair.first)
   {
-    GhostElement_t & ghost = static_cast<GhostElement_t &> (*_ghostPair.first); 
-    ghost.request( Gitter::Geometric::TetraRule::crs );
-    assert( Gitter::Geometric::TetraRule::crs == ghost.requestrule ());  
-    ghost.coarse();
-    assert( ghost.leaf() );
+    GhostElement_t & ghost = (*_ghostPair.first); 
+    if( ghost.leaf() ) return ;
+
+    GhostTetra_t & tetra = static_cast<GhostTetra_t &> (ghost);
+    while ( ! tetra.leaf() )
+    {
+      this->markDescendents( tetra ); 
+      
+      // set me status to nosplit 
+      tetra.resetRefinementRequest();
+
+      assert( tetra.requestrule () == Gitter :: Geometric::TetraRule::nosplit );
+      // coarse element 
+      tetra.coarse();
+    }
   }
 }
 

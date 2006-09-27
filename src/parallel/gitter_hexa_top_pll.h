@@ -38,6 +38,8 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
       protected :
 
         typedef Gitter :: ghostpair_STI ghostpair_STI;
+        typedef Gitter :: helement_STI helement_STI;
+        typedef Gitter :: GhostChildrenInfo GhostChildrenInfo_t ;
         typedef typename GitterBasisImpl::Objects::hexa_IMPL GhostElement_t;
         typedef typename A :: myhface4_t myhface4_t ;
         typedef typename A :: balrule_t  balrule_t ;
@@ -61,8 +63,9 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         mutable ghostpair_STI _ghostPair;
 
         // refine ghost if face is refined and ghost is not zero 
-        void splitGhost ();
+        void splitGhost ( GhostChildrenInfo_t & );
 
+        void markDescendents ( helement_STI & );
         // coarse ghost if face is coarsened  
         void coarseGhost ();
 
@@ -219,27 +222,98 @@ setGhost ( const ghostpair_STI & gpair )
 }
 
 template < class A, class X, class MX >
-inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  splitGhost ()
+inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  
+splitGhost ( GhostChildrenInfo_t & info )
 {
   if(_ghostPair.first)
   {
-    GhostElement_t & ghost = static_cast<GhostElement_t &> (*(_ghostPair.first)); 
-    ghost.request( Gitter::Geometric::HexaRule::iso8 );
-    assert( Gitter::Geometric::HexaRule::iso8 == ghost.requestrule () ); 
-    ghost.refine();
+    typedef typename Gitter :: Geometric :: hexa_GEO  hexa_GEO;
+    typedef typename Gitter :: Geometric :: hface4_GEO hface4_GEO;
+
+    hexa_GEO & ghost = static_cast<hexa_GEO &> (*(_ghostPair.first)); 
+    if(!ghost.down())
+    {
+      ghost.tagForGlobalRefinement();
+      ghost.refine();
+    } 
+
+    int gFaceNum = _ghostPair.second;
+    assert( gFaceNum >= 0 );
+    assert( gFaceNum < 6 );
+
+    hface4_GEO * face = ghost.myhface4( gFaceNum );
+    assert( face );
+
+    int count = 0; 
+    for(face = face->down(); face; face = face->next() )
+    {
+      assert(face);
+      hexa_GEO * ghch = 0; 
+
+      typedef pair < Gitter :: Geometric :: hasFace4 *, int > neigh_t;
+      neigh_t neighbour = face->nb.front();
+
+      if( ! neighbour.first->isboundary ())
+      {
+        ghch = dynamic_cast<hexa_GEO *> (neighbour.first);
+        assert(ghch);
+        assert( ghch->up() == &ghost );
+      }
+      else
+      {
+        neighbour = face->nb.rear();
+        assert( ! neighbour.first->isboundary () );
+        ghch = dynamic_cast<hexa_GEO *> (neighbour.first);
+      }
+
+      assert(ghch);
+      assert(ghch->up() == &ghost );
+
+      // set element pointer and local face number 
+      info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
+
+      ++count ;
+    }
   }
 }
-  
+ 
+template < class A, class X, class MX >
+inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::
+markDescendents( helement_STI & elem )
+{
+  for( helement_STI * child = elem.down(); child; child = child->next() )
+  {
+    if( child->leaf())
+    {
+      child->tagForGlobalCoarsening();
+    }
+    else
+    {
+      child->resetRefinementRequest();
+    }
+    this->markDescendents( *child );
+  }
+}
+ 
 template < class A, class X, class MX >
 inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
 {
   if(_ghostPair.first)
   {
-    GhostElement_t & ghost = static_cast<GhostElement_t &> (*(_ghostPair.first)); 
-    ghost.request( Gitter::Geometric::HexaRule::crs );
-    assert( Gitter::Geometric::HexaRule::crs == ghost.requestrule () ); 
-    ghost.coarse();
-    assert( ghost.leaf() ); 
+    GhostElement_t & ghost = static_cast<GhostElement_t &> (*_ghostPair.first);
+    if( ghost.leaf() ) return ;
+
+    while ( ! ghost.leaf() )
+    {
+      this->markDescendents( ghost );
+
+      // set me status to nosplit 
+      ghost.resetRefinementRequest();
+
+      assert( ghost.requestrule () == Gitter :: Geometric::HexaRule::nosplit );
+      // coarse element 
+      ghost.coarse();
+    }
   }
 }
   

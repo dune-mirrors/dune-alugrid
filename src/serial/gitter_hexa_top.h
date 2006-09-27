@@ -739,25 +739,9 @@ template < class A > bool Hface4Top < A > :: refine (myrule_t r, int twist) {
       case myrule_t :: iso4 :
       {
 
-#ifdef __USE_INTERNAL_FACES__
-  bool a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-                     : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
-#else
-  // --thetwist
-  bool a = false;
-  if( this->nb.rear().first && this->nb.front().first )
-  {
-    a = twist < 0 ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-                  : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
-  }
-  else
-  {
-    if(this->nb.rear().first)
-      a = this->nb.rear  ().first->refineBalance (r,this->nb.rear ().second);
-    if(this->nb.front().first)
-      a = this->nb.front ().first->refineBalance (r,this->nb.front().second);
-  }
-#endif
+  bool a = (twist < 0) 
+          ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+          : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
   
   if (a) {  
     if (getrule () == myrule_t :: nosplit) {
@@ -969,67 +953,16 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
   assert (_dwn == 0) ;
 
-  // get the childs 
+  // refine ghost element and fill ghost info 
+  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
+  GhostChildrenInfo ghostInfo;
+  // ghostInfo is filled by splitGhost, see gitter_hexa_top_pll.h  
+  this->splitGhost( ghostInfo );
 
-  typedef Gitter :: ghostpair_STI ghostpair_STI;
-  typedef typename Gitter :: Geometric :: hexa_GEO  hexa_GEO;
-  typedef typename Gitter :: Geometric :: hface4_GEO hface4_GEO;
-
-  hexa_GEO *(ghchild)[4] = {0,0,0,0};
-
-  // refine ghost element 
-  this->splitGhost();
-
-  ghostpair_STI ghostpair = this->getGhost();
-
-  hexa_GEO * gh = dynamic_cast<hexa_GEO *> (ghostpair.first);
-
-  int gFace[4] = { -1,-1,-1,-1 };
-  if(gh)
-  {
-    int gFaceNum = ghostpair.second; 
-    assert( gFaceNum >= 0 );
-    assert( gFaceNum < 6 );
-
-    hface4_GEO * face = gh->myhface4( gFaceNum );
-    assert( face );
-
-    face = face->down();
-    for(int i=0; i<4; i++)
-    {
-      assert(face);
-      typedef pair < Gitter :: Geometric :: hasFace4 *, int > neigh_t;
-      neigh_t neighbour = face->nb.front();
-      hexa_GEO * ghch = static_cast<hexa_GEO *> (neighbour.first);
-
-      if(ghch)
-      { 
-        if(ghch->up() != gh) 
-        {
-          neighbour = face->nb.rear();
-          ghch = static_cast<hexa_GEO *> (neighbour.first);
-        }
-      }
-      else 
-      { 
-        neighbour = face->nb.rear();
-        ghch = static_cast<hexa_GEO *> (neighbour.first);
-      }
-
-      // gFace might be differnent from ghostFaceNumber, unfortuneately 
-      gFace[i] = neighbour.second;
-
-      assert(ghch);
-      assert(ghch->up() == gh);
-      ghchild[i] = ghch;
-      face = face->next();
-    }
-  }
-
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghchild[0] ,gFace[0]) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghchild[1] ,gFace[1]) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghchild[2] ,gFace[2]) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghchild[3] ,gFace[3]) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghostInfo.child(0), ghostInfo.face(0)) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghostInfo.child(1), ghostInfo.face(1)) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghostInfo.child(2), ghostInfo.face(2)) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghostInfo.child(3), ghostInfo.face(3)) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
