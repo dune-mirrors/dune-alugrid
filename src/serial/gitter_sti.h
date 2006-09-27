@@ -523,7 +523,11 @@ public :
     virtual int level () const = 0 ;
     virtual int nChild () const = 0 ;
 
+    // mark element for using iso8 rule 
     virtual int tagForGlobalRefinement () = 0 ;
+    // mark element for coarsening 
+    virtual int tagForGlobalCoarsening () = 0 ;
+    // set marker of element to nosplit 
     virtual int resetRefinementRequest () = 0 ;
     virtual int tagForBallRefinement (const double (&)[3],double,int) = 0 ;
     virtual int test () const = 0 ;
@@ -541,7 +545,41 @@ public :
   public: 
     virtual grid_t type() const = 0;
   } ;
-  
+
+  // this little helper class stored information for the splitGhost 
+  // method but is only needed for the parallel case 
+  class GhostChildrenInfo 
+  {
+    helement *(_ghchl)[4]; 
+    int _gFace[4]; 
+    public: 
+      GhostChildrenInfo()  
+      {
+        _ghchl[0] = _ghchl[1] = _ghchl[2] = _ghchl[3] = 0; 
+        _gFace[0] = _gFace[1] = _gFace[2] = _gFace[3] = -1;
+      }
+
+      helement * child(int i) const
+      {
+        assert( i >= 0 && i < 4 );
+        return _ghchl[i];
+      }
+
+      int face(int i) const
+      {
+        assert( i >= 0 && i < 4 );
+        return _gFace[i];
+      }
+
+      void setGhostPair(const pair < helement * , int > & g, int i)
+      {
+        assert( i >= 0 && i < 4 );
+        assert( g.first );
+        _ghchl[i] = g.first;
+        assert( g.second >=0 );
+        _gFace[i] = g.second;
+      }
+  };
 
   // organizes the indices for boundary faces and 
   // the opposite vertices for ghost cells 
@@ -559,7 +597,11 @@ public :
       bool hasBeenRefined () const { return _refinedTag; }
     protected:
       // if ghost element exists, then ghost is splitted, when bnd is splitted 
-      virtual inline void splitGhost () {}
+      // info will be filled with the new ghost cells and local face to the
+      // internal boundary, default just does nothing 
+      // implementation see gitter_{tetra,hexa}_top_pll.h 
+      virtual inline void splitGhost ( GhostChildrenInfo & info ) {}
+
       // if ghost element exists, then ghost is coarsened, when bnd is coarsened  
       virtual inline void coarseGhost () {}
       virtual inline void setGhost ( const pair< helement * , int > & ) {}
@@ -823,6 +865,39 @@ public :
       virtual int nbLeaf() const {return (abort(),-1);}
     } ;
 
+    // hasFace_t is hasFace3 and hasFace4 
+    // this class is used as default value for the face neighbour
+    // the pointer is set in gitter_geo.cc where the null neigbours are
+    // initialized. This means that having no neighbour will not result in 
+    // a segementation falut, but just return some default values 
+    template <class hasFace_t>
+    class hasFaceEmpty : public hasFace_t 
+    {
+    public :
+      typedef typename hasFace_t::balrule_t balrule_t ;
+      typedef hasFaceEmpty<hasFace_t> ThisType ;
+      // returning true, means that face is also refined 
+      bool refineBalance (balrule_t,int) { return true; }
+      // true means coarsening allowed 
+      bool bndNotifyCoarsen () { return true; }
+      // return reference to the one instance we need 
+      static ThisType & instance () 
+      { 
+        static ThisType singleton;
+        return singleton;
+      }
+    private:
+      hasFaceEmpty () {}
+      hasFaceEmpty (const hasFaceEmpty & );
+
+    public:
+      int calcSortnr (int,int) {return (abort(),0);}   
+      // this is counted as boundary to seperate from elements 
+      bool isboundary() const { return true; }    
+      int nbLevel() const { return (assert(false),abort(),-1); }
+      int nbLeaf() const { return (assert(false),abort(),-1);}
+    } ;
+
     typedef class VertexGeo : public vertex_STI, public MyAlloc 
     {
     protected:
@@ -1076,6 +1151,7 @@ public :
 
       virtual void request (myrule_t) = 0 ;
       int tagForGlobalRefinement () ;
+      int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
 
@@ -1125,6 +1201,7 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
       int tagForGlobalRefinement () ;
+      int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
       virtual bool isboundary() const { return true; }
@@ -1176,6 +1253,7 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
       int tagForGlobalRefinement () ;
+      int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
       virtual int nbLevel() const {return level();}
@@ -1241,6 +1319,7 @@ public :
       virtual myrule_t requestrule () const = 0;
       virtual void request (myrule_t) = 0 ;
       int tagForGlobalRefinement () ;
+      int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
 
