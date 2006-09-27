@@ -29,10 +29,13 @@
 extern "C" { double drand48 (void) ; }
 
 const pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: null 
-  = pair < Gitter :: Geometric :: hasFace3 *, int > (Gitter :: Geometric :: InternalHasFace3 ()(0), -1) ;
+  = pair < Gitter :: Geometric :: hasFace3 *, int > (
+      & (Gitter :: Geometric :: hasFaceEmpty<Gitter :: Geometric :: hasFace3>::instance() ), -1) ;
 
 const pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: null 
-  = pair < Gitter :: Geometric :: hasFace4 *, int > (Gitter :: Geometric :: InternalHasFace4 ()(0), -1) ;
+  = pair < Gitter :: Geometric :: hasFace4 *, int > ( 
+      & (Gitter :: Geometric :: hasFaceEmpty<Gitter :: Geometric :: hasFace4>::instance() ), -1) ;
+      //Gitter :: Geometric :: InternalHasFace4 () 0 , -1) ;
 
 
 // prototype of Tetra type ( the faces of a tetrahedron )
@@ -372,8 +375,12 @@ int Gitter :: Geometric :: Hexa :: tagForGlobalRefinement () {
   return (request (myrule_t :: iso8), 1) ;
 }
 
-int Gitter :: Geometric :: Hexa :: resetRefinementRequest () {
+int Gitter :: Geometric :: Hexa :: tagForGlobalCoarsening () {
   return (request (myrule_t :: crs), 1) ;
+}
+
+int Gitter :: Geometric :: Hexa :: resetRefinementRequest () {
+  return (request (myrule_t :: nosplit), 1) ;
 }
 
 static inline bool insideBall (const double (&p)[3], const double (&c)[3], double r) {
@@ -462,8 +469,12 @@ int Gitter :: Geometric :: Tetra :: tagForGlobalRefinement () {
   return (request (myrule_t :: iso8), 1) ;
 }
 
-int Gitter :: Geometric :: Tetra :: resetRefinementRequest () {
+int Gitter :: Geometric :: Tetra :: tagForGlobalCoarsening () {
   return (request (myrule_t :: crs), 1) ;
+}
+
+int Gitter :: Geometric :: Tetra :: resetRefinementRequest () {
+  return (request (myrule_t :: nosplit), 1) ;
 }
 
 int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const double (&center)[3], double radius, int limit) {
@@ -527,6 +538,10 @@ int Gitter :: Geometric :: Periodic3 :: tagForGlobalRefinement () {
   return 0 ;
 }
 
+int Gitter :: Geometric :: Periodic3 :: tagForGlobalCoarsening () {
+  return 0 ;
+}
+
 int Gitter :: Geometric :: Periodic3 :: resetRefinementRequest () {
   return 0 ;
 }
@@ -549,6 +564,10 @@ int Gitter :: Geometric :: Periodic4 :: test () const {
 }
 
 int Gitter :: Geometric :: Periodic4 :: tagForGlobalRefinement () {
+  return 0 ;
+}
+
+int Gitter :: Geometric :: Periodic4 :: tagForGlobalCoarsening () {
   return 0 ;
 }
 
