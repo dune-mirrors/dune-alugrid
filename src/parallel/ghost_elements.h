@@ -344,18 +344,37 @@ public:
     assert( _ghostPair.first );
     _ghostPair.second = _ghPoint.internalFace(); 
     assert( _ghostPair.second >= 0 );
+  }
 
-    int v[3];
-    for(int i=0; i<4; ++i)
+  /*
+  void refineElement(GhostTetra_t * ghost, int count)
+  {
+    if(ghost->level() >= count) return;
+
+    ghost->request( Gitter::Geometric::TetraRule:: iso8 ) ;
+    ghost->refine();
+    assert( ghost->down() );
+    bool ok = true;
+    for( GhostElement_t * child = ghost->down(); child; child = child->next() )
     {
-      const hface3_GEO * myface = ghost->myhface3(i); 
-      for(int vx = 0; vx<3; ++vx) 
-        v[vx] = myface->myvertex(vx)->ident();
-
-      mgb.InsertUniqueHbnd3( v , Gitter :: hbndseg :: ghost_closure );
-      assert( myface->ref == 2 );
+      GhostTetra_t & ch = static_cast<GhostTetra_t &> (*child);
+      for(int i=0; i<4; ++i) 
+      {
+        if( ch.myhface3(i)->ref < 1 )
+        {
+          cout << ch.myhface3(i)->ref << " for face["<<i<<"] = " << ch.myhface3(i)->getIndex() << "\n"; 
+          ok = false;
+        }
+      }
+    }
+    assert( ok );
+    for( GhostElement_t * child = ghost->down(); child; child = child->next() )
+    {
+      GhostTetra_t * ch = static_cast<GhostTetra_t *> (child);
+      refineElement( ch , count );
     }
   }
+  */
   
   ~MacroGhostTetra () {
   }
@@ -436,16 +455,21 @@ public:
     _ghostPair.first  = ghost;
     _ghostPair.second = _ghPoint.internalFace();
 
+    // fake boundary not needed as we ehave default neighbours 
+    /*
     int v[4];
     for(int i=0; i<6; ++i)
     {
       const hface4_GEO * myface = ghost->myhface4(i); 
       for(int vx = 0; vx<4; ++vx)
+      {
         v[vx] = myface->myvertex(vx)->ident();
-      mgb.InsertUniqueHbnd4( v , Gitter :: hbndseg :: ghost_closure );
+      }
 
+      mgb.InsertUniqueHbnd4( v , Gitter :: hbndseg :: ghost_closure );
       assert( myface->ref == 2 );
     }
+    */
   }
 
   // nothing to do here
