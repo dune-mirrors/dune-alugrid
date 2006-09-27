@@ -208,7 +208,7 @@ protected:
     // constructor for refinement 
     inline HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
                     myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, 
-                    innerhexa_t * up, int nChild ) ;
+                    innerhexa_t * up, int nChild , double vol ) ;
     
     virtual ~HexaTop () ;
     inline innerhexa_t * up () ;
@@ -1192,6 +1192,7 @@ template < class A > inline const typename HexaTop < A > :: myhface4_t * HexaTop
     (abort (), (const myhface4_t *)0) ;
 }
 
+// constructor for macro elements  
 template < class A > inline HexaTop < A > 
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
@@ -1210,22 +1211,34 @@ template < class A > inline HexaTop < A >
   return ;
 }
 
+// constructor for refinement 
 template < class A > inline HexaTop < A > 
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
-            int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild ) 
+            int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild , double vol ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
   , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0), _lvl (l),
     _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _indexManager(_up->_indexManager)
-  ,  _volume (QuadraturCube3D < VolumeCalc >
+  , _volume ( vol )
+  /*
+      QuadraturCube3D < VolumeCalc >
    (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
                       this->myvertex(2)->Point(), this->myvertex(3)->Point(),
                       this->myvertex(4)->Point(), this->myvertex(5)->Point(),
                       this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0))
+  */
   , _nChild(nChild) 
 { 
   this->setIndex( _indexManager.getIndex() );   
+
+  // make sure that given volume is the same as calulated 
+  assert( fabs (
+      QuadraturCube3D < VolumeCalc >
+       (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
+                          this->myvertex(2)->Point(), this->myvertex(3)->Point(),
+                          this->myvertex(4)->Point(), this->myvertex(5)->Point(),
+                          this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0) - _volume) < 1e-10 );
   return ;
 }
 
@@ -1375,14 +1388,18 @@ template < class A > void HexaTop < A > :: splitISO8 () {
   f8->append(f9) ;
   f9->append(f10) ;
   f10->append(f11) ;
-  innerhexa_t * h0 = new innerhexa_t (l, this->subface4 (0, 0), this->twist (0), f0, 0, this->subface4 (2, 0), this->twist (2), f4, 0, f8, -4, this->subface4 (5, 0), this->twist (5) , this, 0) ;
-  innerhexa_t * h1 = new innerhexa_t (l, this->subface4 (0, 3), this->twist (0), f1, 0, this->subface4 (2, 1), this->twist (2), this->subface4 (3, 0), this->twist (3), f9, -4, f4, -1, this, 1) ;
-  innerhexa_t * h2 = new innerhexa_t (l, this->subface4 (0, 2), this->twist (0), f2, 0,f9, 0, subface4 (3, 1), this->twist (3), this->subface4 (4, 0), this->twist (4), f5, -1        , this, 2) ;
-  innerhexa_t * h3 = new innerhexa_t (l, this->subface4 (0, 1), this->twist (0), f3, 0, f8, 0, f5, 0, this->subface4(4, 1), this->twist (4), this->subface4(5, 3), this->twist (5)    , this, 3) ;
-  innerhexa_t * h4 = new innerhexa_t (l, f0, -1, this->subface4(1, 0), this->twist (1), this->subface4(2, 3), this->twist (2), f7, 0, f11, -4, this->subface4(5, 1), this->twist (5)  , this, 4) ;
-  innerhexa_t * h5 = new innerhexa_t (l, f1, -1, this->subface4(1, 1), this->twist (1), this->subface4(2, 2), this->twist (2), this->subface4(3, 3), this->twist (3), f10, -4, f7, -1 , this, 5) ;
-  innerhexa_t * h6 = new innerhexa_t (l, f2, -1, this->subface4(1, 2), this->twist (1), f10, 0, this->subface4(3, 2), this->twist (3), this->subface4(4, 3), this->twist (4), f6, -1  , this, 6) ;
-  innerhexa_t * h7 = new innerhexa_t (l, f3, -1, this->subface4(1, 3), this->twist (1), f11, 0, f6, 0, this->subface4(4, 2), this->twist (4), this->subface4(5, 2), this->twist (5)   , this, 7) ;
+
+  // calculate child volume which is volume divided by 8 
+  double childVolume = 0.125 * _volume;
+
+  innerhexa_t * h0 = new innerhexa_t (l, this->subface4 (0, 0), this->twist (0), f0, 0, this->subface4 (2, 0), this->twist (2), f4, 0, f8, -4, this->subface4 (5, 0), this->twist (5) , this, 0, childVolume) ;
+  innerhexa_t * h1 = new innerhexa_t (l, this->subface4 (0, 3), this->twist (0), f1, 0, this->subface4 (2, 1), this->twist (2), this->subface4 (3, 0), this->twist (3), f9, -4, f4, -1, this, 1, childVolume) ;
+  innerhexa_t * h2 = new innerhexa_t (l, this->subface4 (0, 2), this->twist (0), f2, 0,f9, 0, subface4 (3, 1), this->twist (3), this->subface4 (4, 0), this->twist (4), f5, -1        , this, 2, childVolume) ;
+  innerhexa_t * h3 = new innerhexa_t (l, this->subface4 (0, 1), this->twist (0), f3, 0, f8, 0, f5, 0, this->subface4(4, 1), this->twist (4), this->subface4(5, 3), this->twist (5)    , this, 3, childVolume) ;
+  innerhexa_t * h4 = new innerhexa_t (l, f0, -1, this->subface4(1, 0), this->twist (1), this->subface4(2, 3), this->twist (2), f7, 0, f11, -4, this->subface4(5, 1), this->twist (5)  , this, 4, childVolume) ;
+  innerhexa_t * h5 = new innerhexa_t (l, f1, -1, this->subface4(1, 1), this->twist (1), this->subface4(2, 2), this->twist (2), this->subface4(3, 3), this->twist (3), f10, -4, f7, -1 , this, 5, childVolume) ;
+  innerhexa_t * h6 = new innerhexa_t (l, f2, -1, this->subface4(1, 2), this->twist (1), f10, 0, this->subface4(3, 2), this->twist (3), this->subface4(4, 3), this->twist (4), f6, -1  , this, 6, childVolume) ;
+  innerhexa_t * h7 = new innerhexa_t (l, f3, -1, this->subface4(1, 3), this->twist (1), f11, 0, f6, 0, this->subface4(4, 2), this->twist (4), this->subface4(5, 2), this->twist (5)   , this, 7, childVolume) ;
   assert(h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
   h0->append(h1) ;
   h1->append(h2) ;

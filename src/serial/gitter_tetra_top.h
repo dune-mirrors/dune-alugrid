@@ -172,7 +172,7 @@ template < class A > class TetraTop : public A {
   public:
     // constructor for refined elements 
     inline TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                     myhface3_t *,int,innertetra_t *up, int nChild) ;
+                     myhface3_t *,int,innertetra_t *up, int nChild, double vol ) ;
     // constructor for macro elements 
     inline TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
                      myhface3_t *,int, IndexManagerType & , Gitter * mygrid ) ;
@@ -1067,16 +1067,23 @@ template < class A > void Hbnd3Top < A > :: restoreFollowFace () {
 template < class A > inline TetraTop < A > 
 :: TetraTop (int l, myhface3_t * f0, int t0,
              myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
-             myhface3_t * f3, int t3, innertetra_t *up, int nChild) 
+             myhface3_t * f3, int t3, innertetra_t *up, int nChild, double vol) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid ), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0), _lvl (l), 
     _rule (myrule_t :: nosplit)
   , _indexManager(up->_indexManager) 
-  , _volume(quadraturTetra3D < VolumeCalc > 
-    (LinearMapping ( this->myvertex(0)->Point(), this->myvertex(1)->Point(),
-                     this->myvertex(2)->Point(), this->myvertex(3)->Point())).integrate1 (0.0))
+  , _volume(vol) 
   , _nChild(nChild) 
 { // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
+
+  // check that volume is calculated correctly 
+  assert( 
+      fabs( 
+    quadraturTetra3D < VolumeCalc > (
+      LinearMapping ( this->myvertex(0)->Point(), 
+                      this->myvertex(1)->Point(),
+                      this->myvertex(2)->Point(), 
+                      this->myvertex(3)->Point())).integrate1 (0.0)  - _volume ) < 1e-10 );
   return ;
 }
 
@@ -1262,8 +1269,10 @@ template < class A > inline void TetraTop < A > :: split_e01 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1) ;
+
+  double childVolume = 0.5 * _volume;
+  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _fc = f0 ;
@@ -1276,8 +1285,9 @@ template < class A > inline void TetraTop < A > :: split_e12 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0 ) ;
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1) ;
+  double childVolume = 0.5 * _volume;
+  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _fc = f0 ;
@@ -1290,8 +1300,9 @@ template < class A > inline void TetraTop < A > :: split_e20 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1) ;
+  double childVolume = 0.5 * _volume;
+  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _fc = f0 ;
@@ -1304,8 +1315,9 @@ template < class A > inline void TetraTop < A > :: split_e23 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1) ;
+  double childVolume = 0.5 * _volume;
+  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _fc = f0 ;
@@ -1318,8 +1330,9 @@ template < class A > inline void TetraTop < A > :: split_e30 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1) ;
+  double childVolume = 0.5 * _volume;
+  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _fc = f0 ;
@@ -1332,8 +1345,9 @@ template < class A > inline void TetraTop < A > :: split_e31 () {
   int l = 1 + level () ;
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager()) ;
   assert(f0) ;
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1) ;
+  double childVolume = 0.5 * _volume;
+  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _fc = f0 ;
@@ -1342,7 +1356,8 @@ template < class A > inline void TetraTop < A > :: split_e31 () {
   return ;
 }
 
-template < class A > inline void TetraTop < A > :: split_iso8 () {
+template < class A > inline void TetraTop < A > :: split_iso8 () 
+{
   typedef typename A :: myvertex_t  myvertex_t;
   typedef typename A :: inneredge_t inneredge_t;
   int l = 1 + level () ; 
@@ -1368,15 +1383,18 @@ template < class A > inline void TetraTop < A > :: split_iso8 () {
   f4->append(f5) ;
   f5->append(f6) ;
   f6->append(f7) ;
+
+  // we divide by 8 means we divide the volume by 8
+  double childVolume = 0.125 * _volume; 
   // this is the pointer to the father element 
-  innertetra_t * h0 = new innertetra_t (l, f0, -1, this->subface3(1, 0), this->twist(1), this->subface3(2, 0), this->twist(2), this->subface3(3, 0), this->twist(3), this, 0) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 0), this->twist(0), f1, -3, this->subface3(2, 2), this->twist(2), this->subface3(3, 1), this->twist(3), this, 1) ;
-  innertetra_t * h2 = new innertetra_t (l, this->subface3(0, 2), this->twist(0), this->subface3(1, 1), this->twist(1), f2, -1, this->subface3(3, 2), this->twist(3), this, 2) ;
-  innertetra_t * h3 = new innertetra_t (l, this->subface3(0, 1), this->twist(0), this->subface3(1, 2), this->twist(1), this->subface3(2, 1), this->twist(2), f3, 0,  this, 3) ;
-  innertetra_t * h4 = new innertetra_t (l, f7, -3, this->subface3(2, 3), ((this->twist(2)>=0) ? ((this->twist(2)+2)%3) : this->twist(2)) , f4, 2, f0, 0, this, 4) ;  
-  innertetra_t * h5 = new innertetra_t (l, f4, -3, f1, 0, f5, 2, this->subface3(3, 3), ((this->twist(3)>=0) ? (this->twist(3)+1)%3 : (this->twist(3)-1)%3-1), this, 5) ;
-  innertetra_t * h6 = new innertetra_t (l, f3, -1, f6, -3, this->subface3(1, 3), ((this->twist(1)>=0) ? this->twist(1) : this->twist(1)%3-1), f7, 1, this, 6) ;
-  innertetra_t * h7 = new innertetra_t (l, this->subface3(0, 3), ((this->twist(0)>=0) ? (this->twist(0)+1)%3 : (this->twist(0)-1)%3-1), f5, -3, f2, 0, f6, 1, this, 7) ;
+  innertetra_t * h0 = new innertetra_t (l, f0, -1, this->subface3(1, 0), this->twist(1), this->subface3(2, 0), this->twist(2), this->subface3(3, 0), this->twist(3), this, 0 , childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 0), this->twist(0), f1, -3, this->subface3(2, 2), this->twist(2), this->subface3(3, 1), this->twist(3), this, 1 , childVolume) ;
+  innertetra_t * h2 = new innertetra_t (l, this->subface3(0, 2), this->twist(0), this->subface3(1, 1), this->twist(1), f2, -1, this->subface3(3, 2), this->twist(3), this, 2 , childVolume) ;
+  innertetra_t * h3 = new innertetra_t (l, this->subface3(0, 1), this->twist(0), this->subface3(1, 2), this->twist(1), this->subface3(2, 1), this->twist(2), f3, 0,  this, 3 , childVolume) ;
+  innertetra_t * h4 = new innertetra_t (l, f7, -3, this->subface3(2, 3), ((this->twist(2)>=0) ? ((this->twist(2)+2)%3) : this->twist(2)) , f4, 2, f0, 0, this, 4 , childVolume) ;  
+  innertetra_t * h5 = new innertetra_t (l, f4, -3, f1, 0, f5, 2, this->subface3(3, 3), ((this->twist(3)>=0) ? (this->twist(3)+1)%3 : (this->twist(3)-1)%3-1), this, 5 , childVolume) ;
+  innertetra_t * h6 = new innertetra_t (l, f3, -1, f6, -3, this->subface3(1, 3), ((this->twist(1)>=0) ? this->twist(1) : this->twist(1)%3-1), f7, 1, this, 6 , childVolume) ;
+  innertetra_t * h7 = new innertetra_t (l, this->subface3(0, 3), ((this->twist(0)>=0) ? (this->twist(0)+1)%3 : (this->twist(0)-1)%3-1), f5, -3, f2, 0, f6, 1, this, 7 , childVolume) ;
   assert(h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
   h0->append(h1) ;
   h1->append(h2) ;
@@ -1547,20 +1565,33 @@ template < class A > inline bool TetraTop < A > :: refineBalance (balrule_t r, i
   return true ;
 }
 
-template < class A > inline bool TetraTop < A > :: coarse () {
-  if (this->leaf ()) {
+template < class A > inline bool TetraTop < A > :: coarse () 
+{
+  if (this->leaf ()) 
+  {
     assert (_req == myrule_t :: nosplit || _req == myrule_t :: crs) ;
     myrule_t w = _req ;
     _req = myrule_t :: nosplit ;
+    // end recursion if rule is not croarsen 
     if (w != myrule_t :: crs) return false ;
-    for (int i = 0 ; i < 4 ; i ++) if (!this->myhface3 (i)->leaf ()) return false ;
+   
+    // if I have faces that are not leaf, we cannot coarsen 
+    for (int i = 0 ; i < 4 ; ++i) 
+    {
+      if ( ! this->myhface3 (i)->leaf ()) return false ;
+    }
+    // else coarsen 
     return true ;
-  } else {
+  } 
+  else 
+  {
     assert (_req == myrule_t :: nosplit) ;
     bool x = true ;
     {
       for (innertetra_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; 
     }
+    // if x is true, then all children are marked for coarsening and have
+    // not faces that are not leaf 
     if (x) 
     {
       this->preCoarsening () ;
@@ -1575,6 +1606,10 @@ template < class A > inline bool TetraTop < A > :: coarse () {
       {
         for (int i = 0 ; i < 4 ; ++i ) 
         {
+          // hier nochmal untersuchen, wieso Nachbar 0x0 ist 
+          //hasFace3 * neigh = this->myneighbour (i).first;
+          //if( neigh ) neigh->bndNotifyCoarsen () ;
+          //if( this->myneighbour (i).first )
           this->myneighbour (i).first->bndNotifyCoarsen () ;
           this->myhface3 (i)->coarse () ;
         }
