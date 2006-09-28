@@ -837,6 +837,9 @@ public :
       typedef Hface3Rule balrule_t ;
       virtual bool refineBalance (balrule_t,int) = 0 ;
       virtual bool bndNotifyCoarsen () = 0 ;
+
+      // returns true, if underlying object is real 
+      virtual bool isRealObject () const { return true; }
     protected :
       hasFace3 () {}
       virtual ~hasFace3 () {}
@@ -854,6 +857,9 @@ public :
       typedef Hface4Rule balrule_t ;
       virtual bool refineBalance (balrule_t,int) = 0 ;
       virtual bool bndNotifyCoarsen () = 0 ;
+
+      // returns true, if underlying object is real 
+      virtual bool isRealObject () const { return true; }
     protected :
       hasFace4 () {}
       virtual ~hasFace4 () {}
@@ -886,6 +892,9 @@ public :
         static ThisType singleton;
         return singleton;
       }
+
+      // as we have not a real element or boundary here, return false 
+      bool isRealObject () const { return false; }
     private:
       hasFaceEmpty () {}
       hasFaceEmpty (const hasFaceEmpty & );
