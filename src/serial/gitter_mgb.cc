@@ -104,7 +104,9 @@ pair < Gitter :: Geometric :: hface4_GEO *, bool > MacroGridBuilder :: InsertUni
   }
 }
 
-pair < Gitter :: Geometric :: tetra_GEO *, bool > MacroGridBuilder :: InsertUniqueTetra (int (&v)[4]) {
+pair < Gitter :: Geometric :: tetra_GEO *, bool > MacroGridBuilder :: 
+InsertUniqueTetra (int (&v)[4]) 
+{
   elementKey_t key (v [0], v [1], v [2], v [3]) ;
   elementMap_t :: const_iterator hit = _tetraMap.find (key) ;
   if (hit == _tetraMap.end ()) {
@@ -155,13 +157,16 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
 {
   int twst = cyclicReorder (v,v+3) ;
   faceKey_t key (v [0], v [1], v [2]) ;
-  if (bt == Gitter :: hbndseg_STI :: closure) {
+  if (bt == Gitter :: hbndseg_STI :: closure) 
+  {
     if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
       _hbnd3Int [key] = new Hbnd3IntStorage (face,twst) ;
       return true ;
     }
-  } else {
+  } 
+  else 
+  {
     if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
       hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt) ;
@@ -559,13 +564,13 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
       in >> identification >> n;
       if (n==3) {
         in >> bvec [nb][0] >> bvec [nb][1] >> bvec [nb][2] ;
-  bvec [nb][3] = identification ;
-  nb++; 
+        bvec [nb][3] = identification ;
+        nb++; 
       } 
       else if (n == 6 && identification == -20) {
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >>
         pervec [nper][3] >> pervec [nper][4] >> pervec [nper][5];
-  nper++;
+        nper++;
       }
       else 
         abort();
@@ -844,9 +849,9 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           }
           break ;
   default :
-    cerr << "**FEHLER (FATAL): Unbekannte ElementID im Rawformat File [" 
+    cerr << "**ERROR (FATAL): unknown ElementID in Rawformat File [" 
          << elementType << "] in "__FILE__ << " " << __LINE__ << " ... Exiting. " << endl ;
-          exit (1) ;
+         exit (1) ;
     break ;
       }
     }
@@ -854,20 +859,26 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
   {
     int nb = 0 ;
     rawInput >> nb ;
-    for (int i = 0 ; i < nb ; i ++) {
+    for (int i = 0 ; i < nb ; i ++) 
+    {
       int polygonLen ;
       rawInput >> polygonLen ;
-      if (polygonLen == 4) {
+      if (polygonLen == 4) 
+      {
         int bt, v [4] ;
         rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> bt ;
         InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(-bt)) ;
-      } else if (polygonLen == 3) {
+      } 
+      else if (polygonLen == 3) 
+      {
         int bt, v [3] ;
         rawInput >> v [0] >> v [1] >> v [2] >> bt ;
         InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(-bt)) ;
-      } else {
-  cerr << " MacroGridBuilder :: inflateMacroGrid (istream &) FEHLER (fatal): kann" ;
-        cerr << " Randelement mit Polygonl\"ange " << polygonLen << " NICHT erzeugen " << endl ;
+      } 
+      else 
+      {
+        cerr << " MacroGridBuilder :: inflateMacroGrid (istream &) ERROR (fatal): cannot" ;
+        cerr << " create BoundarySegments with polygon length " << polygonLen << "!" << endl ;
         abort () ;
       }
     }
@@ -886,10 +897,10 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) {
   assert (!in.eof ()) ;
   in.putback (c) ;
   assert (in.good ()) ;
-  if (c == int ('!')) {
-  
-  // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
-  // und auf 'Tetraeder' oder 'Hexaeder' untersuchen.
+  if (c == int ('!')) 
+  {
+    // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
+    // und auf 'Tetraeder' oder 'Hexaeder' untersuchen.
 
     strstreambuf_t buf ;
     in.get () ;   // Das Kommentarzeichen wird entfernt.
@@ -903,17 +914,21 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) {
           // Alle weiteren k"onnen noch aus is gelesen werden, das
       // array str ist so lang, wie die gesamte Zeile in 'buf'.
 
-    if (0 == strcmp (str, "Tetraeder")) {
-    
-          // Versuchen wir's mal mit Tetraedern
-    
+    if ((0 == strcmp (str, "Tetraeder")) ||
+        (0 == strcmp (str, "Tetrahedra")))
+    {
+      // Versuchen wir's mal mit Tetraedern
       MacroGridBuilder :: generateRawTetraImage (in,raw) ;
-    } else if (0 == strcmp (str, "Hexaeder")) {
-    
+    } 
+    else if 
+      ((0 == strcmp (str, "Hexaeder")) || 
+       (0 == strcmp (str, "Hexahedra")))
+    {
       // oder andernfalls mit Hexaedern.
-    
       MacroGridBuilder :: generateRawHexaImage (in,raw) ;
-    } else {
+    } 
+    else 
+    {
       cerr << "**WARNING (IGNORED) Unknown comment to file format: " << str ;
       cerr << " In : " << __FILE__ << " " << __LINE__ << endl ;
       delete [] str ;
