@@ -22,7 +22,7 @@
 
 bool Hmesh :: ascireadtriang(const char *filename,
            double& time, unsigned long int& nbr) {
-  cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
+  //cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
   
   cerr << filename << "\n" << endl ;
   
@@ -95,10 +95,9 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
   int nv = 0 ;
 
   {
-    
     in >> nv ;
     
-    cerr << "    Number of Vertices:       " << nv << endl ;
+    //cerr << "    Number of Vertices:           " << nv << endl ;
     
     v = new Vertex *[nv] ;
 
@@ -124,7 +123,7 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
     
     in >> ne ;
    
-    cerr << "    Number of MacroElements:  " << ne << endl ;
+    //cerr << "    Number of MacroElements:      " << ne << endl ;
     
  
     for(int i = 0; i < ne ; i ++) {
@@ -145,7 +144,7 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 
     in >> nb ;
 
-    cerr << "    Number of BoundarySegments:   " << nb << endl ;
+    //cerr << "    Number of BoundarySegments:   " << nb << endl ;
 
     typedef struct
       {
@@ -287,7 +286,7 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 
   delete[] v ;
   
-  cerr << "\n  -------------------------- closed.\n" <<endl ;
+  //cerr << "\n  -------------------------- closed.\n" <<endl ;
 
   vl.renumber() ;
 
