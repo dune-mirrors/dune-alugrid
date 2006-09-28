@@ -446,11 +446,14 @@ bool Gitter :: refine () {
   return x ;
 }
 
-void Gitter :: coarse() {
+bool Gitter :: coarse() {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: coarse ()" << endl, 1) : 1) ;
-  {AccessIterator < helement_STI > :: Handle i (container ()) ;
-    for( i.first(); ! i.done() ; i.next()) i.item ().coarse () ; }
-  return ;
+  bool x = true; 
+  {
+    AccessIterator < helement_STI > :: Handle i (container ()) ;
+      for( i.first(); ! i.done() ; i.next()) x &= i.item ().coarse () ; 
+  }
+  return x;
 }
 
 bool Gitter :: adapt () {

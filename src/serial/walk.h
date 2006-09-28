@@ -420,14 +420,14 @@ template < class A, class B > inline int TreeIterator < A, B > :: count () {
 template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A & s, const B & c) 
   : _seed (& s), _cmp (c), _pos (0), _cnt (-1) {
   _stack [0] = 0 ;
-  _cnt = count () ;
+  //_cnt = count () ;
   return ;
 }
 
 template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A * s, const B & c) 
   : _seed (s), _cnt (-1), _pos (0), _cmp (c) {
   _stack [0] = 0 ;
-  _cnt = count () ;
+  //_cnt = count () ;
   return ;
 }
 
@@ -495,8 +495,8 @@ template < class A, class B > inline void TreeIterator < A , B > :: next () {
 }
 
 template < class A, class B > inline int TreeIterator < A , B > :: size () {
-  assert (_cnt != -1) ;
-  return  _cnt ;
+  //assert (_cnt != -1) ;
+  return  (_cnt == -1) ? (_cnt = count()) : _cnt ;
 }
 
 template < class A, class B > inline int TreeIterator < A , B > :: done () const {
@@ -710,8 +710,9 @@ template < class A > inline A & VectorAlign < A > :: item () const {
 ////////////////////////////////////////////////////////////////////////////
 
 template < class  A, class B > Insert < A, B > :: Insert (const A & w, comp_t c)
-  : _outer (w), _inner (0), _cnt (0), _cmp (c) { 
-  for( first () ; ! done () ; next ()) _cnt ++ ;
+  : _outer (w), _inner (0), _cnt (-1), _cmp (c) 
+{ 
+  //for( first () ; ! done () ; next ()) _cnt ++ ;
   return ;
 }
 
@@ -787,6 +788,12 @@ template < class  A, class B > int Insert < A, B > :: done () const {
 }
 
 template < class  A, class B > int Insert < A, B > :: size () {
+  
+  if(_cnt == -1)
+  {
+    _cnt = 0;
+    for( first () ; ! done () ; next ()) ++ _cnt ;
+  }
   return _cnt ;
 }
 

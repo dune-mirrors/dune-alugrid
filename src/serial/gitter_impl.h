@@ -930,7 +930,6 @@ inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vert
 
 inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_ghostvx (double x, double y, double z, int id) {
   return new Objects :: VertexEmptyMacro (x, y, z, id, indexManager(3)) ;
-  //return GitterBasis :: MacroGitterBasis :: insert_vertex(x,y,z,id); 
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, VertexGeo * b) {
@@ -966,7 +965,7 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
   // the two last zeros are the following: 
   // the first pointer is pointer to grid which we dont need in the serial
   // case and the second is a pointer to ghost Element 
-  return new Objects :: hbndseg3_IMPL ( 0,f,i, NULL,NULL, b, indexManager(4), _myGrid) ;
+  return new Objects :: hbndseg3_IMPL ( 0,f,i, (ProjectVertex *) NULL, (Objects :: hbndseg3_IMPL *)NULL, b, indexManager(4), _myGrid) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 

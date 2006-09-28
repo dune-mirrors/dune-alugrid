@@ -1592,7 +1592,7 @@ public:
   
 protected :
   virtual bool refine () ;
-  virtual void coarse () ;
+  virtual bool coarse () ;
   virtual Makrogitter & container () = 0 ;
   virtual const Makrogitter & container () const = 0 ;
   virtual inline int iterators_attached () const ;
