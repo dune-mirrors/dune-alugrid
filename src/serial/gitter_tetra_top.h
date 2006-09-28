@@ -103,7 +103,7 @@ template < class A > class Hbnd3Top : public A {
                      IndexManagerType & im , Gitter * ) ;
     
     // constructor for children 
-    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, 
+    inline Hbnd3Top (int,myhface3_t *,int, ProjectVertex *, 
                     innerbndseg_t * up, const bnd_t b, 
                     IndexManagerType & im, typename Gitter::helement_STI * gh, int gFace ) ;
     // constructor for macro elements 
@@ -679,7 +679,8 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
           innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
           Gitter::helement_STI * gh, int gFace ) : 
   A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
-  _indexManager(im) {
+  _indexManager(im) 
+{
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
   this->setIndex( _indexManager.getIndex() );
@@ -730,27 +731,27 @@ template < class A > inline int Hbnd3Top < A > :: level () const {
   return _lvl ;
 }
 
-template < class A > typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: next () { 
+template < class A > inline typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: next () { 
   return _bbb ;
 }
 
-template < class A > const typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: next () const { 
+template < class A > inline const typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: next () const { 
   return _bbb ;
 }
 
-template < class A > typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: down () { 
+template < class A > inline typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: down () { 
   return _dwn ;
 }
 
-template < class A > const typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: down () const { 
+template < class A > inline const typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: down () const { 
   return _dwn ;
 }
 
-template < class A > typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: up () { 
+template < class A > inline typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: up () { 
   return _up ;
 }
 
-template < class A > const typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: up () const { 
+template < class A > inline const typename Hbnd3Top < A > :: innerbndseg_t * Hbnd3Top < A > :: up () const { 
   return _up ;
 }
 
@@ -760,7 +761,7 @@ template < class A > inline void Hbnd3Top < A > :: append (innerbndseg_t * b) {
   return ;
 }
 
-template < class A > void Hbnd3Top < A > :: split_e01 () {
+template < class A > inline void Hbnd3Top < A > :: split_e01 () {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
@@ -771,7 +772,7 @@ template < class A > void Hbnd3Top < A > :: split_e01 () {
   return ;
 }
 
-template < class A > void Hbnd3Top < A > :: split_e12 () {
+template < class A > inline void Hbnd3Top < A > :: split_e12 () {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0 , gFace) ;
@@ -782,7 +783,7 @@ template < class A > void Hbnd3Top < A > :: split_e12 () {
   return ;
 }
 
-template < class A > void Hbnd3Top < A > :: split_e20 () {
+template < class A > inline void Hbnd3Top < A > :: split_e20 () {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->projection, this , _bt, _indexManager, 0, gFace) ;
@@ -793,7 +794,7 @@ template < class A > void Hbnd3Top < A > :: split_e20 () {
   return ;
 }
 
-template < class A > void Hbnd3Top < A > :: split_iso4 () 
+template < class A > inline void Hbnd3Top < A > :: split_iso4 () 
 {
   int l = 1 + level () ;
  
@@ -815,7 +816,7 @@ template < class A > void Hbnd3Top < A > :: split_iso4 ()
   return ;
 }
 
-template < class A > bool Hbnd3Top < A > :: coarse () {
+template < class A > inline bool Hbnd3Top < A > :: coarse () {
   innerbndseg_t * b = down () ;
   if (!b) return false ;
   bool x = true ;
@@ -939,15 +940,15 @@ template < class A > inline bool Hbnd3Top < A > :: refineLikeElement (balrule_t 
       switch (r) {
       case balrule_t :: e01 :
         if (!this->myhface3 (0)->refine (balrule_t (balrule_t :: e01).rotate (this->twist (0)), this->twist (0))) return false ;
-  split_e01 () ;
+        split_e01 () ;
         break;
       case balrule_t :: e12 :
         if (!this->myhface3 (0)->refine (balrule_t (balrule_t :: e12).rotate (this->twist (0)), this->twist (0))) return false ;
-  split_e12 () ;
+        split_e12 () ;
         break;
       case balrule_t :: e20 :
         if (!this->myhface3 (0)->refine (balrule_t (balrule_t :: e20).rotate (this->twist (0)), this->twist (0))) return false ;
-  split_e20 () ;
+        split_e20 () ;
         break;
       case balrule_t :: iso4 :
         if (!this->myhface3 (0)->refine (balrule_t (balrule_t :: iso4).rotate (this->twist (0)), this->twist (0))) return false ;
@@ -968,7 +969,7 @@ template < class A > inline bool Hbnd3Top < A > :: refineLikeElement (balrule_t 
   }
 }
 
-template < class A > void Hbnd3Top < A > :: restoreFollowFace () {
+template < class A > inline void Hbnd3Top < A > :: restoreFollowFace () {
 
   // retoreFollowFace () veranlasst das Randelement sich am 
   // bestehenden Fl"achenbaum wiederherzustellen durch die
@@ -980,20 +981,20 @@ template < class A > void Hbnd3Top < A > :: restoreFollowFace () {
     switch (r) {
       case myrule_t :: e01 :
         split_e01 () ;
-  break ;
+        break ;
       case myrule_t :: e12 :
         split_e12 () ;
-  break ;
+        break ;
       case myrule_t :: e20 :
         split_e20 () ;
-  break ;
+        break ;
       case myrule_t :: iso4 :
         split_iso4 () ;
-  break ;
+        break ;
       default :
         cerr << "**FEHLER (FATAL) beim Verfeinern am Randst\"uck mit der Regel [" << r << "] in " << __FILE__ << " " << __LINE__ << endl ;
         abort () ;
-  break ;
+        break ;
     }
     this->postRefinement () ;
     {for (innerbndseg_t * b = down () ; b ; b = b->next ()) b->restoreFollowFace () ; }
