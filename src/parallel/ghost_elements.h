@@ -340,10 +340,16 @@ public:
 
     // InsertUniqueHexa gets the global vertex numbers 
     GhostTetra_t * ghost = mgb.InsertUniqueTetra ( _ghPoint.vertices() ).first ;
+
+    // set ghost and number 
     _ghostPair.first = ghost;
     assert( _ghostPair.first );
     _ghostPair.second = _ghPoint.internalFace(); 
     assert( _ghostPair.second >= 0 );
+
+    // NOTE: we do not insert boundary faces, because we don't need them
+    // here. This is ok because of the hasFaceEmpty class (gitter_sti.h) 
+    // which acts as empty boundary. 
   }
 
   /*
@@ -452,24 +458,13 @@ public:
     hexa_GEO * ghost = mgb.InsertUniqueHexa ( _ghPoint.vertices() ).first ;
     assert( ghost );
 
+    // set ghost values 
     _ghostPair.first  = ghost;
     _ghostPair.second = _ghPoint.internalFace();
 
-    // fake boundary not needed as we ehave default neighbours 
-    /*
-    int v[4];
-    for(int i=0; i<6; ++i)
-    {
-      const hface4_GEO * myface = ghost->myhface4(i); 
-      for(int vx = 0; vx<4; ++vx)
-      {
-        v[vx] = myface->myvertex(vx)->ident();
-      }
-
-      mgb.InsertUniqueHbnd4( v , Gitter :: hbndseg :: ghost_closure );
-      assert( myface->ref == 2 );
-    }
-    */
+    // NOTE: we do not insert boundary faces, because we don't need them
+    // here. This is ok because of the hasFaceEmpty class (gitter_sti.h) 
+    // which acts as empty boundary. 
   }
 
   // nothing to do here
