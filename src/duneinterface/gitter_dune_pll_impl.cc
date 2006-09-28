@@ -1282,10 +1282,12 @@ bool GitterDunePll :: refine () {
   return state ;
 }
 
-void GitterDunePll :: coarse () {
+bool GitterDunePll :: coarse () {
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: coarse () " << endl, 1) : 1) ;
   const int nl = mpAccess ().nlinks () ;
-  
+ 
+  bool x = true ;
+
   {
     vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;
     vector < vector < hface_STI * > > innerFaces (nl), outerFaces (nl) ;
@@ -1336,10 +1338,10 @@ void GitterDunePll :: coarse () {
         TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > eifo (efo) ;
       Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
         TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-  TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dfi (eifi) ;
-      Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-        TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-  TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dfo (eifo) ;
+      TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dfi (eifi) ;
+        Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
+          TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+      TreeIterator < hedge_STI, childs_are_leafs < hedge_STI > > > dfo (eifo) ;
 
       // Die 'item ()' Resultatwerte (Zeiger) werden in Vektoren gesichert, weil die
       // Kriterien die zur Erzeugung der Iteratoren angewendet wurden (Filter) nach
@@ -1380,7 +1382,7 @@ void GitterDunePll :: coarse () {
       
       __STATIC_phase = 4 ;
       
-      Gitter :: coarse () ;
+      x = Gitter :: coarse () ;
       
     } catch (Parallel :: AccessPllException) {
       cerr << "**FEHLER (FATAL) AccessPllException beim Vergr\"obern der Elementhierarchie oder\n" ;
@@ -1527,7 +1529,7 @@ void GitterDunePll :: coarse () {
   
   __STATIC_phase = -1 ;
   
-  return ;
+  return x;
 }
 
 #endif

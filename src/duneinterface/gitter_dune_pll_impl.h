@@ -57,9 +57,11 @@ public:
     //logFile.close();
   }
 
+  // refine alle leaf elements 
   bool refine (); 
 
-  void coarse ();
+  // coarse all leaf elements if possible 
+  bool coarse ();
 
   // adapts and witout calling loadBalancer  
   bool adaptWithoutLoadBalancing ();

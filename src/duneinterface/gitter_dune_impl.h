@@ -70,10 +70,12 @@ public:
   // read status of grid 
   virtual void duneRestore (const char*) ;
   // Constructor getting macro file name 
-  
+ 
+  // refine all leaf elements 
   bool refine ();
 
-  void coarse ();
+  // coarse all leaf elements if possible 
+  bool coarse ();
 
   // done call notify and loadBalancer  
   bool duneAdapt (AdaptRestrictProlongType & arp);

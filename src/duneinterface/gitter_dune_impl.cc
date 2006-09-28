@@ -264,16 +264,25 @@ bool GitterDuneBasis :: refine () {
   bool x = true ;
   {
     leaf_element__macro_element__iterator i (container ()) ;
-    for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+    for( i.first(); ! i.done() ; i.next()) 
+    {
+      x &= i.item ().refine () ;
+    }
   }
   return x ;
 }
 
-void GitterDuneBasis :: coarse() {
+bool GitterDuneBasis :: coarse() {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: coarse ()" << endl, 1) : 1) ;
-  {AccessIterator < helement_STI > :: Handle i (container ()) ;
-    for( i.first(); ! i.done() ; i.next()) i.item ().coarse () ; }
-  return ;
+  bool x = true ;
+  {
+    AccessIterator < helement_STI > :: Handle i (container ()) ;
+    for( i.first(); ! i.done() ; i.next()) 
+    {
+      x &= i.item ().coarse () ; 
+    }
+  }
+  return x;
 }
 
 bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp) {
@@ -289,7 +298,7 @@ bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp) {
     cerr << "  Der Fehler trat auf in " << __FILE__ << " " << __LINE__ << endl ;
   }
   int lap = clock () ;
-  this->coarse () ;
+  bool coarsened = this->coarse () ;
   int end = clock () ;
   if (debugOption (1)) {
     float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
@@ -298,6 +307,8 @@ bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp) {
     cout << "**INFO GitterDuneBasis :: duneAdapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
   }
   removeAdaptRestrictProlongOp ();
+
+  if( !refined && !coarsened ) return false;
   return true;
 }
 
