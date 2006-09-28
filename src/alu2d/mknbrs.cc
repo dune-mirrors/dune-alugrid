@@ -93,12 +93,12 @@ void Hmesh_basic::makeneighbours() {
 
     }
 
+  /*
 #ifndef NDEBUG
   float used = (float)(clock() - start)/(float)(CLOCKS_PER_SEC) ;
-          
   cerr << "\n  Hmesh_basic::makeneighbours(?) resulted in " << count << " hits, " ;
-          
   cerr << m.size() << " faults, used time: " << (float)(used) << "\n" << endl ;
 #endif
+  */
   }
 }
