@@ -1545,7 +1545,12 @@ inline GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: Hface4EmptyPll
   return ;
 }
 
-inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: TetraEmptyPll (myhface3_t * f0, int t0, myhface3_t * f1, int t1, myhface3_t * f2, int t2, myhface3_t * f3, int t3, Gitter * mygrid)
+inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: 
+TetraEmptyPll (myhface3_t * f0, int t0, 
+               myhface3_t * f1, int t1, 
+               myhface3_t * f2, int t2, 
+               myhface3_t * f3, int t3, 
+               Gitter * mygrid)
   : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3,mygrid), _pllx (*this) {
   return ;
 }
