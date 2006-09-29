@@ -417,11 +417,10 @@ bool GitterPll :: refine () {
   return state ;
 }
 
-bool GitterPll :: coarse () {
+void GitterPll :: coarse () {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: coarse () " << endl, 1) : 1) ;
   const int nl = mpAccess ().nlinks () ;
 
-  bool x = true;
   {
     vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;
     vector < vector < hface_STI * > > innerFaces (nl), outerFaces (nl) ;
@@ -516,7 +515,7 @@ bool GitterPll :: coarse () {
       
       __STATIC_phase = 4 ;
       
-      x = Gitter :: coarse () ;
+      Gitter :: coarse () ;
       
     } catch (Parallel :: AccessPllException) {
       cerr << "**FEHLER (FATAL) AccessPllException beim Vergr\"obern der Elementhierarchie oder\n" ;
@@ -663,7 +662,7 @@ bool GitterPll :: coarse () {
   
   __STATIC_phase = -1 ;
   
-  return x;
+  return ;
 }
 
 bool GitterPll :: adapt () {

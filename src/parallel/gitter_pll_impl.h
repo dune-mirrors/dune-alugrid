@@ -656,8 +656,8 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       typedef hface3_IMPL innerface_t ;
     public :
       typedef TetraPllXBase mypllx_t ;
-      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
-           ~TetraEmptyPll () {}
+      inline TetraEmptyPll (int l, myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
+      ~TetraEmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
@@ -691,7 +691,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       typedef hface3_IMPL innerface_t ;
     public :
       typedef Periodic3PllXBase mypllx_t ;
-      inline Periodic3EmptyPll (myhface3_t *,int,myhface3_t *,int) ;
+      inline Periodic3EmptyPll (int l, myhface3_t *,int,myhface3_t *,int) ;
      ~Periodic3EmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -734,7 +734,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       typedef hface4_IMPL innerface_t ;
     public :
       typedef Periodic4PllXBase mypllx_t ;
-      inline Periodic4EmptyPll (myhface4_t *,int,myhface4_t *,int) ;
+      inline Periodic4EmptyPll (int l,myhface4_t *,int,myhface4_t *,int) ;
      ~Periodic4EmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -768,7 +768,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       typedef hface4_IMPL innerface_t ;
     public :
       typedef HexaPllBaseX mypllx_t ;
-      inline HexaEmptyPll (myhface4_t *,int,myhface4_t *,int,
+      inline HexaEmptyPll (int l,myhface4_t *,int,myhface4_t *,int,
                            myhface4_t *,int,myhface4_t *,int,
                            myhface4_t *,int,myhface4_t *,int,
                            Gitter* gitter) ;
@@ -1546,19 +1546,20 @@ inline GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: Hface4EmptyPll
 }
 
 inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: 
-TetraEmptyPll (myhface3_t * f0, int t0, 
+TetraEmptyPll (int l, myhface3_t * f0, int t0, 
                myhface3_t * f1, int t1, 
                myhface3_t * f2, int t2, 
                myhface3_t * f3, int t3, 
                Gitter * mygrid)
-  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3,mygrid), _pllx (*this) {
+  : GitterBasis :: Objects :: TetraEmpty (l,f0,t0,f1,t1,f2,t2,f3,t3,mygrid), _pllx (*this) {
   return ;
 }
 
   // Neu >
   
-inline GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: Periodic3EmptyPll (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
-  : GitterBasis :: Objects :: Periodic3Empty (f0,t0,f1,t1), _pllx (*this) {
+inline GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: 
+Periodic3EmptyPll (int l, myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
+  : GitterBasis :: Objects :: Periodic3Empty (l,f0,t0,f1,t1), _pllx (*this) {
   return ;
 }
   // < Neu
@@ -1573,19 +1574,20 @@ inline GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: Periodic3EmptyPll (m
 // #        #       #   #      #    #    #  #    #     #    #    #      #
 // #        ######  #    #     #     ####   #####      #     ####       #
 
-inline GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: Periodic4EmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
-  : GitterBasis :: Objects :: Periodic4Empty (f0,t0,f1,t1), _pllx (*this) {
+inline GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: 
+Periodic4EmptyPll (int l,myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
+  : GitterBasis :: Objects :: Periodic4Empty (l,f0,t0,f1,t1), _pllx (*this) {
   return ;
 }
 
 // Ende - Neu am 23.5.02 (BS)
 
 inline GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: 
-HexaEmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
+HexaEmptyPll (int l,myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
               myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
               myhface4_t * f4, int t4, myhface4_t * f5, int t5,
               Gitter* gitter) :
-  GitterBasis::Objects::HexaEmpty(f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5,gitter),
+  GitterBasis::Objects::HexaEmpty(l,f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5,gitter),
   _pllx (*this) {
   return ;
 }

@@ -473,7 +473,8 @@ void TetraPllXBaseMacro :: attach2 (int i) {
 }
 
 bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;

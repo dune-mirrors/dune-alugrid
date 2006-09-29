@@ -374,7 +374,7 @@ class GitterPll : public virtual Gitter {
     virtual void restore (const char *,const char *) ;
     virtual void restore (istream &) ;
     virtual bool refine () ;
-    virtual bool coarse () ;
+    virtual void coarse () ;
     virtual bool adapt () ;
     virtual void printSizeTT () ;
     
