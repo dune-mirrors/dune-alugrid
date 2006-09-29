@@ -290,9 +290,6 @@ bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp)
   assert (! iterators_attached ()) ;
   const int start = clock () ;
 
-  // reset max level 
-  this->resetMaxLevel();  
-  
   setAdaptRestrictProlongOp(arp); 
   bool refined = this->refine ();
   if (!refined) {

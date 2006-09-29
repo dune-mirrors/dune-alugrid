@@ -70,9 +70,6 @@ bool GitterDunePll :: adaptWithoutLoadBalancing ()
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: dAdapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
 
-  //set max level to zero 
-  this->resetMaxLevel();
-  
   int start = clock () ;
   bool refined = this->refine() ;
   int lap = clock () ;
