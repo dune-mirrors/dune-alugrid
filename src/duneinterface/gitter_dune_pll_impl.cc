@@ -69,6 +69,9 @@ bool GitterDunePll :: adaptWithoutLoadBalancing ()
   __STATIC_turn ++ ;
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: dAdapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
+
+  //set max level to zero 
+  this->resetMaxLevel();
   
   int start = clock () ;
   bool refined = this->refine() ;
@@ -1282,11 +1285,9 @@ bool GitterDunePll :: refine () {
   return state ;
 }
 
-bool GitterDunePll :: coarse () {
+void GitterDunePll :: coarse () {
   assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: coarse () " << endl, 1) : 1) ;
   const int nl = mpAccess ().nlinks () ;
- 
-  bool x = true ;
 
   {
     vector < vector < hedge_STI * > > innerEdges (nl), outerEdges (nl) ;
@@ -1382,7 +1383,7 @@ bool GitterDunePll :: coarse () {
       
       __STATIC_phase = 4 ;
       
-      x = Gitter :: coarse () ;
+      Gitter :: coarse () ;
       
     } catch (Parallel :: AccessPllException) {
       cerr << "**FEHLER (FATAL) AccessPllException beim Vergr\"obern der Elementhierarchie oder\n" ;
@@ -1529,7 +1530,7 @@ bool GitterDunePll :: coarse () {
   
   __STATIC_phase = -1 ;
   
-  return x;
+  return ;
 }
 
 #endif

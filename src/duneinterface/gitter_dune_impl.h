@@ -75,7 +75,7 @@ public:
   bool refine ();
 
   // coarse all leaf elements if possible 
-  bool coarse ();
+  void coarse ();
 
   // done call notify and loadBalancer  
   bool duneAdapt (AdaptRestrictProlongType & arp);

@@ -182,20 +182,16 @@ inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   int readPoint = 0; 
   os.readObject( readPoint ); 
   
-  //logFile << readPoint << " readp on p = " << __STATIC_myrank << "\n";
-
   int vert[8] = { -1,-1,-1,-1,-1,-1,-1,-1 }; 
   int vertface[4] = { -1,-1,-1,-1 }; 
   int fce; 
   if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
     os.readObject ( fce );
-    //logFile << fce << " read face on p = " << __STATIC_myrank << "\n";
   
     for(int i=0; i<8; i++)
     {
       os.readObject ( vert[i] );
-      //logFile << vert[i] << " read vx on p = " << __STATIC_myrank << "\n";
     }
 
     for(int i=0; i<4; i++)
@@ -205,21 +201,18 @@ inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
       os.readObject (pr[0]) ;
       os.readObject (pr[1]) ;
       os.readObject (pr[2]) ;
-      //logFile << vertface[i] << " read vertface on p = " << __STATIC_myrank << "\n";
     }
   }
 
-  //logFile.flush();
+  // if internal boundary, create internal bnd face 
   if(b == Gitter :: hbndseg :: closure)
   {
-    //logFile << "Insert Unique Hbnd4 p = " << __STATIC_myrank << "\n";
     Hbnd4IntStoragePoints hp ( p, vert, vertface , fce );
     InsertUniqueHbnd4_withPoint (v, b, hp ) ;
-    //logFile << "Insertion done! on p = " <<  __STATIC_myrank  <<"\n";
-    //logFile.flush();
   }
   else
   {
+    // create normal bnd face, and make sure that no Point was send
     assert(readPoint == MacroGridMoverIF :: NO_POINT );
     // old method defined in base class 
     InsertUniqueHbnd4 (v, b ) ;
@@ -692,7 +685,6 @@ void GitterDunePll :: duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, G
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) 
       {
-        //logFile << "Pack elements on p =" << __STATIC_myrank << "\n";
         w.item ().accessPllX ().dunePackAll (osv,gs) ;
       }
     }

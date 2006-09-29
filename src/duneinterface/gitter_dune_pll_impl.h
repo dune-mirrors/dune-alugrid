@@ -61,7 +61,7 @@ public:
   bool refine (); 
 
   // coarse all leaf elements if possible 
-  bool coarse ();
+  void coarse ();
 
   // adapts and witout calling loadBalancer  
   bool adaptWithoutLoadBalancing ();
