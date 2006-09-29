@@ -456,9 +456,6 @@ void Gitter :: coarse() {
 
 bool Gitter :: adapt () 
 {
-  // set max level to 0 
-  this->resetMaxLevel(); 
-  
   assert (debugOption (20) ? (cout << "**INFO Gitter :: adapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
   const int start = clock () ;

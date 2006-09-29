@@ -1030,6 +1030,7 @@ template < class A > inline TetraTop < A >
 {
   // set level 
   assert( this->level() == l );
+  this->_myGrid->addToLevel( l );
   
   // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
@@ -1061,6 +1062,8 @@ TetraTop (int l, myhface3_t * f0, int t0,
   , _nChild(0)  // we are macro ==> nChild 0 
 { 
   assert( this->level() == l );
+  this->_myGrid->addToLevel( l );
+
   // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
   return ;
@@ -1069,6 +1072,7 @@ TetraTop (int l, myhface3_t * f0, int t0,
 template < class A > inline TetraTop < A > :: ~TetraTop () 
 {
   this->freeIndex( this->_indexManager );
+  this->_myGrid->removeFromLevel(this->level());
   if (!_dwn) this->detachleafs();
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
@@ -1238,8 +1242,6 @@ template < class A > inline IndexManagerType &  TetraTop < A > :: getEdgeIndexMa
 
 template < class A > inline void TetraTop < A > :: split_e01 () {
   int l = 1 + this->level () ;
-  // check max level 
-  this->_myGrid->checkAndSetMaxLevel(l);
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
@@ -1257,8 +1259,6 @@ template < class A > inline void TetraTop < A > :: split_e01 () {
 
 template < class A > inline void TetraTop < A > :: split_e12 () {
   int l = 1 + this->level () ;
-  // check max level 
-  this->_myGrid->checkAndSetMaxLevel(l);
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0 ) ;
@@ -1275,8 +1275,6 @@ template < class A > inline void TetraTop < A > :: split_e12 () {
 
 template < class A > inline void TetraTop < A > :: split_e20 () {
   int l = 1 + this->level () ;
-  // check max level 
-  this->_myGrid->checkAndSetMaxLevel(l);
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
@@ -1293,8 +1291,6 @@ template < class A > inline void TetraTop < A > :: split_e20 () {
 
 template < class A > inline void TetraTop < A > :: split_e23 () {
   int l = 1 + this->level () ;
-  // check max level 
-  this->_myGrid->checkAndSetMaxLevel(l);
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
@@ -1311,8 +1307,6 @@ template < class A > inline void TetraTop < A > :: split_e23 () {
 
 template < class A > inline void TetraTop < A > :: split_e30 () {
   int l = 1 + this->level () ;
-  // check max level 
-  this->_myGrid->checkAndSetMaxLevel(l);
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
@@ -1329,8 +1323,6 @@ template < class A > inline void TetraTop < A > :: split_e30 () {
 
 template < class A > inline void TetraTop < A > :: split_e31 () {
   int l = 1 + this->level () ;
-  // check max level 
-  this->_myGrid->checkAndSetMaxLevel(l);
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager()) ;
   assert(f0) ;
@@ -1351,9 +1343,6 @@ template < class A > inline void TetraTop < A > :: split_iso8 ()
   typedef typename A :: inneredge_t inneredge_t;
   int l = 1 + this->level () ; 
 
-  // check max level 
-  this->_myGrid->checkAndSetMaxLevel(l);
-  
   myvertex_t * e31 = this->myhface3 (0)->myhedge1 ((this->twist(0) < 0) ? ((9+this->twist(0))%3) : (this->twist(0)%3))->subvertex (0) ;
   myvertex_t * e20 = this->myhface3 (1)->myhedge1 ((this->twist(1) < 0) ? ((9+this->twist(1))%3) : (this->twist(1)%3))->subvertex (0) ;
   assert(e31 && e20);
@@ -1568,9 +1557,6 @@ template < class A > inline bool TetraTop < A > :: coarse ()
     // end recursion if rule is not croarsen 
     if (w != myrule_t :: crs) 
     {
-      // check max level 
-      this->_myGrid->checkAndSetMaxLevel(this->level());
-      
       return false ;
     }
    
@@ -1584,9 +1570,6 @@ template < class A > inline bool TetraTop < A > :: coarse ()
   } 
   else 
   {
-    // check max level 
-    this->_myGrid->checkAndSetMaxLevel(this->level());
-      
     assert (_req == myrule_t :: nosplit) ;
     bool x = true ;
     {

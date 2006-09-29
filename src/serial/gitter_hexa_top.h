@@ -1142,6 +1142,9 @@ template < class A > inline HexaTop < A >
                       this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0))
   , _nChild(0) 
 { 
+  assert( this->level() == l );
+  this->_myGrid->addToLevel( l );
+  
   this->setIndex( _indexManager.getIndex() );   
   return ;
 }
@@ -1166,6 +1169,9 @@ template < class A > inline HexaTop < A >
   */
   , _nChild(nChild) 
 { 
+  assert( this->level() == l );
+  this->_myGrid->addToLevel( l );
+
   this->setIndex( _indexManager.getIndex() );   
 
   // make sure that given volume is the same as calulated 
@@ -1180,6 +1186,8 @@ template < class A > inline HexaTop < A >
 
 template < class A > HexaTop < A > :: ~HexaTop () {
   this->freeIndex( this->_indexManager );
+  this->_myGrid->removeFromLevel(this->level());
+    
   if (!_dwn) this->detachleafs();
   else assert(!this->isLeafEntity());
   if (_bbb) delete _bbb ;
@@ -1270,8 +1278,6 @@ template < class A > inline IndexManagerType & HexaTop < A > :: getFaceIndexMana
 template < class A > void HexaTop < A > :: splitISO8 () 
 {
   int l = 1 + this->level () ;
-  // check max level 
-  this->_myGrid->checkAndSetMaxLevel(l);
 
   assert (_dwn == 0 && _fc == 0 && _ed == 0 && _cv == 0) ;  
   {
@@ -1453,8 +1459,6 @@ template < class A > bool HexaTop < A > :: coarse () {
     _req = myrule_t :: nosplit ;
     if (w != myrule_t :: crs)
     {
-      // check max level 
-      this->_myGrid->checkAndSetMaxLevel(this->level());
       return false ;
     }
     for (int i = 0 ; i < 6 ; ++i) 
@@ -1465,9 +1469,6 @@ template < class A > bool HexaTop < A > :: coarse () {
   } 
   else 
   {
-    // check max level 
-    this->_myGrid->checkAndSetMaxLevel(this->level());
-
     assert (_req == myrule_t :: nosplit) ;
     bool x = true ;
     {

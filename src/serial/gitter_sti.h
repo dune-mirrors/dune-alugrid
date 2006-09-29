@@ -1602,19 +1602,45 @@ protected :
   virtual void notifyGridChanges () ;
   virtual void notifyMacroGridChanges () ;
 protected :
-  Gitter () : _maxLevel(0) {}
+  enum { MAXL = 64 };
+  //Gitter () : _maxLevel(0) {}
+  Gitter () {
+    for(int i=0; i<MAXL; ++i) _maxLevels[i] = 0; 
+  }
   virtual ~Gitter () ;
 
   // internal max level 
-  int _maxLevel; 
+  // upper bound is 64 
+  int _maxLevels[MAXL]; 
 
 public :
-  // set max level if given mxl is bigger than maxLevel 
-  void checkAndSetMaxLevel(int mxl) {if(mxl > _maxLevel) _maxLevel = mxl;}
+  
+  // increase count of elements from level 
+  void addToLevel(int level) 
+  {
+    assert( level >= 0 );
+    assert( level < MAXL );
+    ++_maxLevels[level];
+  }
 
-  void resetMaxLevel() { _maxLevel = 0; }
+  // decrease count of elements from level 
+  void removeFromLevel(int level) 
+  {
+    assert( level >= 0 );
+    assert( level < MAXL );
+    --_maxLevels[level];
+    assert( _maxLevels[level] >= 0 );
+  }
 
-  int maxLevel() const { return _maxLevel; }
+  // return maximal level of elements 
+  int maxLevel() const 
+  { 
+    for(int i=MAXL-1; i>=0; --i) 
+    {
+      if( _maxLevels[i] > 0 ) return i;
+    }
+    return 0; 
+  }
     
   // callback for Dune 
   virtual int preCoarsening ( helement_STI & ) { return 0; }
