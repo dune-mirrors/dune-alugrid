@@ -496,7 +496,9 @@ public :
                  , public Dune_helement 
   {
   protected :
-    helement () {}
+    int _lvl;
+    //helement () : _lvl(-1) {}
+    helement (int l) : _lvl(l) {}
     virtual ~helement () {}
   public :
     //testweise us
@@ -520,7 +522,7 @@ public :
     virtual const hedge * innerHedge () const = 0 ;
     virtual hface * innerHface () = 0 ;
     virtual const hface * innerHface () const = 0 ;
-    virtual int level () const = 0 ;
+    int level () const { return _lvl; };
     virtual int nChild () const = 0 ;
 
     // mark element for using iso8 rule 
@@ -918,6 +920,7 @@ public :
       inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
       inline virtual ~VertexGeo () ;
       inline const double (& Point () const) [3] ;
+      inline const double (& getPoint () const) [3] ;
       // return level of vertex 
       inline int level () const ;
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
@@ -1113,7 +1116,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface3_GEO myhface3_t ;
       typedef TetraRule  myrule_t ;
-      inline Tetra (myhface3_t *, int, myhface3_t *, int, 
+      inline Tetra (int l, myhface3_t *, int, myhface3_t *, int, 
                     myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
@@ -1185,7 +1188,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface3_GEO myhface3_t ;
       typedef Hface3Rule myrule_t ;
-      inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
+      inline Periodic3 (int l,myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
@@ -1233,7 +1236,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface4_GEO myhface4_t ;
       typedef Hface4Rule myrule_t ;
-      inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
+      inline Periodic4 (int l,myhface4_t *, int, myhface4_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
@@ -1285,7 +1288,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface4_GEO myhface4_t ;
       typedef HexaRule  myrule_t ;
-      inline Hexa (myhface4_t *, int, myhface4_t *, int,
+      inline Hexa (int l,myhface4_t *, int, myhface4_t *, int,
                    myhface4_t *, int, myhface4_t *, int, 
                    myhface4_t *, int, myhface4_t *, int) ;
       inline int postRefinement () ;
@@ -1592,17 +1595,27 @@ public:
   
 protected :
   virtual bool refine () ;
-  virtual bool coarse () ;
+  virtual void coarse () ;
   virtual Makrogitter & container () = 0 ;
   virtual const Makrogitter & container () const = 0 ;
   virtual inline int iterators_attached () const ;
   virtual void notifyGridChanges () ;
   virtual void notifyMacroGridChanges () ;
 protected :
-  Gitter () {}
+  Gitter () : _maxLevel(0) {}
   virtual ~Gitter () ;
 
+  // internal max level 
+  int _maxLevel; 
+
 public :
+  // set max level if given mxl is bigger than maxLevel 
+  void checkAndSetMaxLevel(int mxl) {if(mxl > _maxLevel) _maxLevel = mxl;}
+
+  void resetMaxLevel() { _maxLevel = 0; }
+
+  int maxLevel() const { return _maxLevel; }
+    
   // callback for Dune 
   virtual int preCoarsening ( helement_STI & ) { return 0; }
   virtual int postRefinement( helement_STI & ) { return 0; }
@@ -2088,6 +2101,10 @@ inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () {
 }
 
 inline const double (& Gitter :: Geometric :: VertexGeo :: Point () const) [3] {
+  return _c ;
+}
+
+inline const double (& Gitter :: Geometric :: VertexGeo :: getPoint () const) [3] {
   return _c ;
 }
 
@@ -2604,8 +2621,10 @@ inline bool Gitter :: Geometric :: TetraRule :: isValid () const {
 //    #     ######     #    #    #  #    #
 
 inline Gitter :: Geometric :: Tetra :: 
-Tetra (myhface3_t * f0, int t0, myhface3_t * f1, int t1, 
-       myhface3_t * f2, int t2, myhface3_t * f3, int t3) {
+Tetra (int l, myhface3_t * f0, int t0, myhface3_t * f1, int t1, 
+       myhface3_t * f2, int t2, myhface3_t * f3, int t3) 
+: helement(l) 
+{
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
   (f [2] = f2)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 2),(s [2] = t2)) ;
@@ -2755,7 +2774,10 @@ inline int Gitter :: Geometric :: Tetra :: preCoarsening () {
 // #        #       #   #      #    #    #  #    #     #    #    # #     #
 // #        ######  #    #     #     ####   #####      #     ####   #####
 
-inline Gitter :: Geometric :: Periodic3 :: Periodic3 (myhface3_t * f0, int t0, myhface3_t * f1, int t1) {
+inline Gitter :: Geometric :: Periodic3 :: 
+Periodic3 (int l,myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
+  : helement(l) 
+{
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
   return ;
@@ -2837,7 +2859,10 @@ inline int Gitter :: Geometric :: Periodic3 :: preCoarsening () {
 // #        #       #   #      #    #    #  #    #     #    #    #      #
 // #        ######  #    #     #     ####   #####      #     ####       #
 
-inline Gitter :: Geometric :: Periodic4 :: Periodic4 (myhface4_t * f0, int t0, myhface4_t * f1, int t1) {
+inline Gitter :: Geometric :: Periodic4 :: 
+Periodic4 (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
+  : helement(l) 
+{
   (f [0] = f0)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1)) ;
   return ;
@@ -2943,9 +2968,10 @@ inline bool Gitter :: Geometric :: HexaRule :: isValid () const {
 // #     #  ######  #    #  #    #
 
 inline Gitter :: Geometric :: Hexa :: 
-Hexa (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
+Hexa (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1,
       myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
       myhface4_t * f4, int t4, myhface4_t * f5, int t5) 
+: helement(l) 
 {
   (f [0] = f0)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1)) ;
