@@ -446,17 +446,19 @@ bool Gitter :: refine () {
   return x ;
 }
 
-bool Gitter :: coarse() {
+void Gitter :: coarse() {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: coarse ()" << endl, 1) : 1) ;
-  bool x = true; 
   {
     AccessIterator < helement_STI > :: Handle i (container ()) ;
-      for( i.first(); ! i.done() ; i.next()) x &= i.item ().coarse () ; 
+      for( i.first(); ! i.done() ; i.next()) i.item ().coarse () ; 
   }
-  return x;
 }
 
-bool Gitter :: adapt () {
+bool Gitter :: adapt () 
+{
+  // set max level to 0 
+  this->resetMaxLevel(); 
+  
   assert (debugOption (20) ? (cout << "**INFO Gitter :: adapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
   const int start = clock () ;
@@ -476,7 +478,7 @@ bool Gitter :: adapt () {
     float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
     cout << "**INFO Gitter :: adapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
   }
-  return true;
+  return refined;
 }
 
 bool Gitter :: adaptWithoutLoadBalancing() {
