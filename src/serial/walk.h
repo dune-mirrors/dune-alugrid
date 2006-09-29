@@ -246,7 +246,7 @@ template < class A, class B > class TreeIterator : public IteratorSTI < A >, pub
     int _cnt ;
     inline int pushdown () ;
     inline int pullup () ;
-    inline int count () ;
+    inline int count () const ;
     // make a copy of given iterator 
     inline void assignIterator (const TreeIterator < A, B > &) ;
 } ;
@@ -315,6 +315,8 @@ template < class  A, class B > class Insert : public IteratorSTI < typename B ::
     inline virtual IteratorSTI < val_t > * clone () const;
   private :
     void removeObj(); 
+    // count items 
+    int count () const; 
 
     A _outer ;
     B * _inner ;
@@ -411,23 +413,25 @@ template < class A, class B > inline int TreeIterator < A, B > :: pullup () {
   return _pos < 0 ? 0 : 1 ; 
 }
 
-template < class A, class B > inline int TreeIterator < A, B > :: count () {
+template < class A, class B > inline int TreeIterator < A, B > :: count () const
+{
+  // we cannot use our own iterator, because counting will cahnge the
+  // status of the iterator 
+  TreeIterator < A, B > counter(*this); 
   int i = 0 ;
-  for (first () ; ! done () ; next ()) ++ i ;
+  for (counter.first () ; ! counter.done () ; counter.next ()) ++ i ;
   return i ;
 }
 
 template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A & s, const B & c) 
   : _seed (& s), _cmp (c), _pos (0), _cnt (-1) {
   _stack [0] = 0 ;
-  //_cnt = count () ;
   return ;
 }
 
 template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A * s, const B & c) 
   : _seed (s), _cnt (-1), _pos (0), _cmp (c) {
   _stack [0] = 0 ;
-  //_cnt = count () ;
   return ;
 }
 
@@ -495,7 +499,6 @@ template < class A, class B > inline void TreeIterator < A , B > :: next () {
 }
 
 template < class A, class B > inline int TreeIterator < A , B > :: size () {
-  //assert (_cnt != -1) ;
   return  (_cnt == -1) ? (_cnt = count()) : _cnt ;
 }
 
@@ -712,7 +715,6 @@ template < class A > inline A & VectorAlign < A > :: item () const {
 template < class  A, class B > Insert < A, B > :: Insert (const A & w, comp_t c)
   : _outer (w), _inner (0), _cnt (-1), _cmp (c) 
 { 
-  //for( first () ; ! done () ; next ()) _cnt ++ ;
   return ;
 }
 
@@ -746,7 +748,7 @@ template < class  A, class B > inline void Insert < A, B > :: removeObj ()
   return ;
 }
 
-template < class  A, class B > void Insert < A, B > :: first () 
+template < class  A, class B > inline void Insert < A, B > :: first () 
 {
   // deletes _inner 
   removeObj(); 
@@ -763,7 +765,7 @@ template < class  A, class B > void Insert < A, B > :: first ()
   return ;
 }
 
-template < class  A, class B > void Insert < A, B > :: next () {
+template < class  A, class B > inline void Insert < A, B > :: next () {
   assert(_inner) ;
   _inner->B::next () ;
   if(_inner->B::done ()) 
@@ -783,25 +785,28 @@ template < class  A, class B > void Insert < A, B > :: next () {
   return ;
 }
     
-template < class  A, class B > int Insert < A, B > :: done () const {
+template < class  A, class B > inline int Insert < A, B > :: done () const {
   return _outer.A::done () ? 1 : _inner ? _inner->B::done () : 1 ;
 }
 
-template < class  A, class B > int Insert < A, B > :: size () {
-  
-  if(_cnt == -1)
-  {
-    _cnt = 0;
-    for( first () ; ! done () ; next ()) ++ _cnt ;
-  }
-  return _cnt ;
+template < class  A, class B > inline int Insert < A, B > :: size () 
+{
+  return (_cnt == -1) ? (_cnt = count()) : _cnt;
 }
 
-template < class  A, class B > typename Insert < A, B > :: val_t & 
+template < class  A, class B > inline typename Insert < A, B > :: val_t & 
 Insert < A, B > :: item () const 
 {
   assert (! done ()) ; 
   return _inner->B::item () ;
+}
+
+template < class  A, class B > inline int Insert < A, B > :: count () const
+{
+  Insert < A, B > counter(*this);
+  int i = 0;
+  for(counter.first(); !counter.done(); counter.next()) ++ i;
+  return i;
 }
 
 #endif  // WALK_H_INCLUDED
