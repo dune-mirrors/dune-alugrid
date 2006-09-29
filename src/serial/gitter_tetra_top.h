@@ -147,7 +147,7 @@ template < class A > class TetraTop : public A {
     innertetra_t * _dwn, * _bbb, * _up ; 
     innerface_t * _fc ;
     inneredge_t * _ed ;
-    int _lvl ;
+    //int _lvl ;
     myrule_t _req, _rule ;
     IndexManagerType & _indexManager;
     const double _volume;
@@ -189,9 +189,16 @@ template < class A > class TetraTop : public A {
     inline const inneredge_t * innerHedge () const ;
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
-    inline int level () const ;
+
+    // non virtual method now, because used very often 
+    //typedef Gitter :: helement_STI helement_STI;
+    //using helement_STI::level;
+    //inline int level () const ;
+    
     inline int nChild () const ;
     inline double volume () const ;
+    // non-virtual volume method 
+    inline double getVolume () const ;
   public :
     myrule_t getrule () const ;
     myrule_t requestrule () const ;
@@ -227,7 +234,7 @@ template < class A > class Periodic3Top : public A {
     inline void append (innerperiodic3_t * h) ;
   private :
     innerperiodic3_t * _dwn, * _bbb, * _up ; 
-    int _lvl ;
+    //int _lvl ;
     myrule_t _rule ;
     const signed char _nChild; 
   private :
@@ -258,7 +265,7 @@ template < class A > class Periodic3Top : public A {
     inline const inneredge_t * innerHedge () const ;
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
-    inline int level () const ;
+    //inline int level () const ;
     inline int nChild () const ;
   public :
     myrule_t getrule () const ;
@@ -290,15 +297,15 @@ template < class A > class Periodic3Top : public A {
 // #     #  #       #    #   ####   ######  #####     #      ####   #
 
 
-template < class A > typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: down () {
+template < class A > inline typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: down () {
   return _dwn ;
 }
 
-template < class A > const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: down () const {
+template < class A > inline const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: down () const {
   return _dwn ;
 }
 
-template < class A > typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: next () {
+template < class A > inline typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: next () {
   return _bbb ;
 }
 
@@ -315,77 +322,77 @@ template < class A > inline int Hface3Top < A > :: nChild () const {
   return _nChild ;
 }
 
-template < class A > typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: innerVertex () {
+template < class A > inline typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: innerVertex () {
   return 0 ;
 }
 
-template < class A > const typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: innerVertex () const {
+template < class A > inline const typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: innerVertex () const {
   return 0 ;
 }
 
-template < class A > typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: innerHedge () {
+template < class A > inline typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: innerHedge () {
   return _ed ;
 }
 
-template < class A > const typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: innerHedge () const {
+template < class A > inline const typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: innerHedge () const {
   return _ed ;
 }
 
-template < class A > typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: subvertex (int) {
+template < class A > inline typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: subvertex (int) {
   assert (getrule() == myrule_t :: iso4) ;
   return 0 ;
 }
 
-template < class A > const typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: subvertex (int) const {
+template < class A > inline const typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: subvertex (int) const {
   assert (getrule() == myrule_t :: iso4) ;
   return 0 ;
 }
 
-template < class A > typename Hface3Top < A > :: myhedge1_t * Hface3Top < A > :: subedge1 (int i,int j) {
+template < class A > inline typename Hface3Top < A > :: myhedge1_t * Hface3Top < A > :: subedge1 (int i,int j) {
   assert(j == 0 || j == 1) ;
   return this->myhedge1 (i)->subedge1 (j ? 1 - this->twist(i) : this->twist(i)) ;
 }
 
-template < class A > const typename Hface3Top < A > :: myhedge1_t * Hface3Top < A > :: subedge1 (int i,int j) const {
+template < class A > inline const typename Hface3Top < A > :: myhedge1_t * Hface3Top < A > :: subedge1 (int i,int j) const {
   assert(j == 0 || j == 1) ;
   return this->myhedge1 (i)->subedge1 (j ? 1 - this->twist(i) : this->twist(i)) ;
 }
 
-template < class A > typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) {
+template < class A > inline typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) {
   inneredge_t * e = _ed ;
   for (int i = 0 ; i < n ; i ++ ) e = e ? e->next () : 0 ;
   assert (e) ;
   return e ;
 }
 
-template < class A > const typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) const {
+template < class A > inline const typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) const {
   inneredge_t * e = _ed ;
   for (int i = 0 ; i < n ; i ++ ) e = e ? e->next () : 0 ;
   assert (e) ;
   return e ;
 }
 
-template < class A > typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface3 (int n) {
+template < class A > inline typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface3 (int n) {
   innerface_t * f = down() ;
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;
   return f ;
 }
 
-template < class A > const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface3 (int n) const {
+template < class A > inline const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface3 (int n) const {
   const innerface_t * f = down () ;
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;
   return f ;
 }
 
-template < class A > void Hface3Top < A > :: append (innerface_t * f) {
+template < class A > inline void Hface3Top < A > :: append (innerface_t * f) {
   assert (!_bbb) ;
   _bbb = f ;
   return ;
 }
 
-template < class A > typename Hface3Top < A > :: myrule_t Hface3Top < A > :: getrule () const {
+template < class A > inline typename Hface3Top < A > :: myrule_t Hface3Top < A > :: getrule () const {
   return myrule_t (_rule) ;
 }
 
@@ -393,7 +400,7 @@ template < class A > inline IndexManagerType & Hface3Top < A > :: getEdgeIndexMa
   return static_cast<inneredge_t &> (*(this->myhedge1(0))).getIndexManager();
 }
 
-template < class A > void Hface3Top < A > :: split_e01 () {
+template < class A > inline void Hface3Top < A > :: split_e01 () {
   int l = 1 + level () ;
   myvertex_t * ev0 = this->myhedge1(1)->subvertex (2) ;
   assert(ev0) ;
@@ -409,7 +416,7 @@ template < class A > void Hface3Top < A > :: split_e01 () {
   return ;
 }
 
-template < class A > void Hface3Top < A > :: split_e12 () {
+template < class A > inline void Hface3Top < A > :: split_e12 () {
   int l = 1 + level () ;
   myvertex_t * ev0 = this->myhedge1(1)->subvertex (0) ;
   assert(ev0) ;
@@ -425,7 +432,7 @@ template < class A > void Hface3Top < A > :: split_e12 () {
   return ;
 }
 
-template < class A > void Hface3Top < A > :: split_e20 () {
+template < class A > inline void Hface3Top < A > :: split_e20 () {
   int l = 1 + level () ;
   myvertex_t * ev0 = this->myhedge1(1)->subvertex (1) ;
   assert(ev0) ;
@@ -441,7 +448,7 @@ template < class A > void Hface3Top < A > :: split_e20 () {
   return ;
 }
 
-template < class A > void Hface3Top < A > :: split_iso4 () {
+template < class A > inline void Hface3Top < A > :: split_iso4 () {
   int l = 1 + level () ;
   myvertex_t * ev0 = this->myhedge1(0)->subvertex (0) ;
   myvertex_t * ev1 = this->myhedge1(1)->subvertex (0) ;
@@ -1014,12 +1021,17 @@ template < class A > inline TetraTop < A >
 :: TetraTop (int l, myhface3_t * f0, int t0,
              myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
              myhface3_t * f3, int t3, innertetra_t *up, int nChild, double vol) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid ), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0), _lvl (l), 
-    _rule (myrule_t :: nosplit)
+  : A (l, f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid ), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0)
+  //, _lvl (l), 
+  , _rule (myrule_t :: nosplit)
   , _indexManager(up->_indexManager) 
   , _volume(vol) 
   , _nChild(nChild) 
-{ // _up wird im Constructor uebergeben
+{
+  // set level 
+  assert( this->level() == l );
+  
+  // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
 
   // check that volume is calculated correctly 
@@ -1039,14 +1051,17 @@ template < class A > inline TetraTop < A > ::
 TetraTop (int l, myhface3_t * f0, int t0,
           myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
           myhface3_t * f3, int t3, IndexManagerType & im, Gitter * mygrid) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
-    _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0), _lvl (l) 
+  : A (l,f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
+    _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0)
+  //, _lvl (l) 
   , _rule (myrule_t :: nosplit) , _indexManager(im)
   , _volume(quadraturTetra3D < VolumeCalc > 
     (LinearMapping ( this->myvertex(0)->Point(), this->myvertex(1)->Point(),
                      this->myvertex(2)->Point(), this->myvertex(3)->Point())).integrate1 (0.0))
   , _nChild(0)  // we are macro ==> nChild 0 
-{ // _up wird im Constructor uebergeben
+{ 
+  assert( this->level() == l );
+  // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
   return ;
 }
@@ -1062,12 +1077,22 @@ template < class A > inline TetraTop < A > :: ~TetraTop ()
   return ;
 }
 
-
+/*
 template < class A > inline int TetraTop < A > :: level () const {
   return _lvl ;
 }
 
+// non virtual method returning level 
+template < class A > inline int TetraTop < A > :: getLevel () const {
+  return _lvl ;
+}
+*/
+
 template < class A > inline double TetraTop < A > :: volume () const {
+  return _volume ;
+}
+
+template < class A > inline double TetraTop < A > :: getVolume () const {
   return _volume ;
 }
 
@@ -1212,7 +1237,10 @@ template < class A > inline IndexManagerType &  TetraTop < A > :: getEdgeIndexMa
 }
 
 template < class A > inline void TetraTop < A > :: split_e01 () {
-  int l = 1 + level () ;
+  int l = 1 + this->level () ;
+  // check max level 
+  this->_myGrid->checkAndSetMaxLevel(l);
+  
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
 
@@ -1228,7 +1256,10 @@ template < class A > inline void TetraTop < A > :: split_e01 () {
 }
 
 template < class A > inline void TetraTop < A > :: split_e12 () {
-  int l = 1 + level () ;
+  int l = 1 + this->level () ;
+  // check max level 
+  this->_myGrid->checkAndSetMaxLevel(l);
+  
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0 ) ;
   double childVolume = 0.5 * _volume;
@@ -1243,7 +1274,10 @@ template < class A > inline void TetraTop < A > :: split_e12 () {
 }
 
 template < class A > inline void TetraTop < A > :: split_e20 () {
-  int l = 1 + level () ;
+  int l = 1 + this->level () ;
+  // check max level 
+  this->_myGrid->checkAndSetMaxLevel(l);
+  
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
   double childVolume = 0.5 * _volume;
@@ -1258,7 +1292,10 @@ template < class A > inline void TetraTop < A > :: split_e20 () {
 }
 
 template < class A > inline void TetraTop < A > :: split_e23 () {
-  int l = 1 + level () ;
+  int l = 1 + this->level () ;
+  // check max level 
+  this->_myGrid->checkAndSetMaxLevel(l);
+  
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
   double childVolume = 0.5 * _volume;
@@ -1273,7 +1310,10 @@ template < class A > inline void TetraTop < A > :: split_e23 () {
 }
 
 template < class A > inline void TetraTop < A > :: split_e30 () {
-  int l = 1 + level () ;
+  int l = 1 + this->level () ;
+  // check max level 
+  this->_myGrid->checkAndSetMaxLevel(l);
+  
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager() ) ;
   assert(f0) ;
   double childVolume = 0.5 * _volume;
@@ -1288,7 +1328,10 @@ template < class A > inline void TetraTop < A > :: split_e30 () {
 }
 
 template < class A > inline void TetraTop < A > :: split_e31 () {
-  int l = 1 + level () ;
+  int l = 1 + this->level () ;
+  // check max level 
+  this->_myGrid->checkAndSetMaxLevel(l);
+  
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager()) ;
   assert(f0) ;
   double childVolume = 0.5 * _volume;
@@ -1306,7 +1349,11 @@ template < class A > inline void TetraTop < A > :: split_iso8 ()
 {
   typedef typename A :: myvertex_t  myvertex_t;
   typedef typename A :: inneredge_t inneredge_t;
-  int l = 1 + level () ; 
+  int l = 1 + this->level () ; 
+
+  // check max level 
+  this->_myGrid->checkAndSetMaxLevel(l);
+  
   myvertex_t * e31 = this->myhface3 (0)->myhedge1 ((this->twist(0) < 0) ? ((9+this->twist(0))%3) : (this->twist(0)%3))->subvertex (0) ;
   myvertex_t * e20 = this->myhface3 (1)->myhedge1 ((this->twist(1) < 0) ? ((9+this->twist(1))%3) : (this->twist(1)%3))->subvertex (0) ;
   assert(e31 && e20);
@@ -1519,7 +1566,13 @@ template < class A > inline bool TetraTop < A > :: coarse ()
     myrule_t w = _req ;
     _req = myrule_t :: nosplit ;
     // end recursion if rule is not croarsen 
-    if (w != myrule_t :: crs) return false ;
+    if (w != myrule_t :: crs) 
+    {
+      // check max level 
+      this->_myGrid->checkAndSetMaxLevel(this->level());
+      
+      return false ;
+    }
    
     // if I have faces that are not leaf, we cannot coarsen 
     for (int i = 0 ; i < 4 ; ++i) 
@@ -1531,6 +1584,9 @@ template < class A > inline bool TetraTop < A > :: coarse ()
   } 
   else 
   {
+    // check max level 
+    this->_myGrid->checkAndSetMaxLevel(this->level());
+      
     assert (_req == myrule_t :: nosplit) ;
     bool x = true ;
     {
@@ -1740,15 +1796,19 @@ template < class A > inline void TetraTop < A > :: restore (XDRstream_in & is) {
 // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
    
 template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
-  myhface3_t * f1, int t1) : A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(0), _lvl (l), 
-  _rule (myrule_t :: nosplit), _nChild(0) { 
+  myhface3_t * f1, int t1) : A (l,f0, t0, f1, t1)
+ , _dwn (0), _bbb (0), _up(0)
+ //, _lvl (l) 
+ , _rule (myrule_t :: nosplit), _nChild(0) { 
  return ;
 }
 
 template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
   myhface3_t * f1, int t1, innerperiodic3_t * up, int nChild ) 
-  : A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(up), _lvl (l), 
-  _rule (myrule_t :: nosplit) , _nChild (nChild) 
+  : A (l,f0, t0, f1, t1)
+  , _dwn (0), _bbb (0), _up(up)
+  //, _lvl (l) 
+  , _rule (myrule_t :: nosplit) , _nChild (nChild) 
 {
   return ;
 }
@@ -1759,9 +1819,11 @@ template < class A > inline Periodic3Top < A > :: ~Periodic3Top () {
   return ;
 }
 
+/*
 template < class A > inline int Periodic3Top < A > :: level () const {
   return _lvl ;
 }
+*/
 
 template < class A > inline int Periodic3Top < A > :: nChild () const {
   assert( _nChild >= 0 && _nChild < 4 );
@@ -1903,7 +1965,7 @@ template < class A > void Periodic3Top < A > :: request (myrule_t) {
 }
 
 template < class A > void Periodic3Top < A > :: split_iso4 () {
-  int l = 1 + level () ;
+  int l = 1 + this->level () ;
   innerperiodic3_t * p0 = new innerperiodic3_t (l, this->subface3 (0,0), this->twist (0), this->subface3 (1,0), this->twist (1), this , 0) ;
   innerperiodic3_t * p1 = new innerperiodic3_t (l, this->subface3 (0,1), this->twist (0), this->subface3 (1,2), this->twist (1), this , 1) ;
   innerperiodic3_t * p2 = new innerperiodic3_t (l, this->subface3 (0,2), this->twist (0), this->subface3 (1,1), this->twist (1), this , 2) ;

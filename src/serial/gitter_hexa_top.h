@@ -182,7 +182,7 @@ template < class A > class HexaTop : public A {
     innerface_t * _fc ;
     inneredge_t * _ed ;
     innervertex_t * _cv ;
-    int _lvl ;
+    //int _lvl ;
     myrule_t _rule, _req ;
     IndexManagerType & _indexManager; 
     const double _volume; 
@@ -223,7 +223,8 @@ protected:
     inline const inneredge_t * innerHedge () const ;
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
-    inline int level () const ;
+    // implemented in helement 
+    //inline int level () const ;
     inline int nChild () const ;
     inline double volume () const ;
   public :
@@ -260,7 +261,7 @@ template < class A > class Periodic4Top : public A {
     inline void append (innerperiodic4_t * h) ;
   private :
     innerperiodic4_t * _dwn, * _bbb, * _up ; 
-    int _lvl ;
+    //int _lvl ;
     myrule_t _rule ;
     const signed char _nChild; 
   private :
@@ -289,7 +290,7 @@ template < class A > class Periodic4Top : public A {
     inline const inneredge_t * innerHedge () const ;
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
-    inline int level () const ;
+    //inline int level () const ;
     inline int nChild () const ;
   public :
     myrule_t getrule () const ;
@@ -1130,9 +1131,10 @@ template < class A > inline HexaTop < A >
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
             int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
-  , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0), _lvl (l),
-    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) 
+  : A (l,f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
+  , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0)
+  //, _lvl (l)
+  ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) 
   ,  _volume (QuadraturCube3D < VolumeCalc >
    (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
                       this->myvertex(2)->Point(), this->myvertex(3)->Point(),
@@ -1149,9 +1151,10 @@ template < class A > inline HexaTop < A >
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
             int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild , double vol ) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
-  , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0), _lvl (l),
-    _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
+  : A (l,f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
+  , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0)
+  //, _lvl (l)
+  ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _indexManager(_up->_indexManager)
   , _volume ( vol )
   /*
@@ -1241,9 +1244,11 @@ template < class A > inline void HexaTop < A > :: append (HexaTop < A > * h) {
   return ;
 }
 
+/*
 template < class A > inline int HexaTop < A > :: level () const {
   return _lvl ;
 }
+*/
 
 template < class A > inline double HexaTop < A > :: volume () const {
   return _volume;
@@ -1262,19 +1267,25 @@ template < class A > inline IndexManagerType & HexaTop < A > :: getFaceIndexMana
   return static_cast<innerface_t &> (*(this->subface4(0,0))).getIndexManager();
 }
 
-template < class A > void HexaTop < A > :: splitISO8 () {
-  int l = 1 + level () ;
+template < class A > void HexaTop < A > :: splitISO8 () 
+{
+  int l = 1 + this->level () ;
+  // check max level 
+  this->_myGrid->checkAndSetMaxLevel(l);
+
   assert (_dwn == 0 && _fc == 0 && _ed == 0 && _cv == 0) ;  
   {
     TrilinearMapping map(
         this->myvertex(0)->Point(), this->myvertex(1)->Point(),
-  this->myvertex(2)->Point(), this->myvertex(3)->Point(), this->myvertex(4)->Point(),
-  this->myvertex(5)->Point(), this->myvertex(6)->Point(), this->myvertex(7)->Point()) ;
+        this->myvertex(2)->Point(), this->myvertex(3)->Point(), this->myvertex(4)->Point(),
+        this->myvertex(5)->Point(), this->myvertex(6)->Point(), this->myvertex(7)->Point()) ;
     double p[3] ;
     map.map2world(.0, .0, .0, p) ;
+    
     _cv = new innervertex_t (l, p[0], p[1], p[2], *(this->myvertex(0)) ) ;
     assert (_cv) ;
   }
+
   myvertex_t * fv0 = this->myhface4 (0)->subvertex (0) ;
   myvertex_t * fv1 = this->myhface4 (1)->subvertex (0) ;
   myvertex_t * fv2 = this->myhface4 (2)->subvertex (0) ;
@@ -1435,18 +1446,35 @@ template < class A > bool HexaTop < A > :: refineBalance (balrule_t r, int fce) 
 }
 
 template < class A > bool HexaTop < A > :: coarse () {
-  if (this->leaf ()) {
+  if (this->leaf ()) 
+  {
     assert (_req == myrule_t :: nosplit || _req == myrule_t :: crs) ;
     myrule_t w = _req ;
     _req = myrule_t :: nosplit ;
-    if (w != myrule_t :: crs) return false ;
-    for (int i = 0 ; i < 6 ; i ++) if (!this->myhface4 (i)->leaf ()) return false ;
+    if (w != myrule_t :: crs)
+    {
+      // check max level 
+      this->_myGrid->checkAndSetMaxLevel(this->level());
+      return false ;
+    }
+    for (int i = 0 ; i < 6 ; ++i) 
+    {
+      if (!this->myhface4 (i)->leaf ()) return false ;
+    }
     return true ;
-  } else {
+  } 
+  else 
+  {
+    // check max level 
+    this->_myGrid->checkAndSetMaxLevel(this->level());
+
     assert (_req == myrule_t :: nosplit) ;
     bool x = true ;
-    {for (innerhexa_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; }
-    if (x) {
+    {
+      for (innerhexa_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; 
+    }
+    if (x) 
+    {
       this->preCoarsening () ;
       this->attachleafs();
       delete _dwn ; 
@@ -1459,10 +1487,11 @@ template < class A > bool HexaTop < A > :: coarse () {
       _cv = 0 ;
       _rule = myrule_t :: nosplit ;
       {
-        for (int i = 0 ; i < 6 ; i ++ ) {
+        for (int i = 0 ; i < 6 ; ++i) 
+        {
           this->myneighbour (i).first->bndNotifyCoarsen () ;
           this->myhface4 (i)->coarse () ;
-  }
+        }
       }
       return false ;
     }
@@ -1617,15 +1646,19 @@ template < class A > void HexaTop < A > :: restore (istream & is) {
 
    
 template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, int t0,
-  myhface4_t * f1, int t1) : A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(0), _lvl (l), 
-  _rule (myrule_t :: nosplit) , _nChild (0) { 
+  myhface4_t * f1, int t1) : A (l,f0, t0, f1, t1)
+  , _dwn (0), _bbb (0), _up(0)
+  //, _lvl (l) 
+  , _rule (myrule_t :: nosplit) , _nChild (0) { 
   return ;
 }
 
 template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, 
     int t0, myhface4_t * f1, int t1, innerperiodic4_t * up, int nChild )
-: A (f0, t0, f1, t1), _dwn (0), _bbb (0), _up(up), _lvl (l), 
-  _rule (myrule_t :: nosplit) , _nChild (nChild) { 
+: A (l,f0, t0, f1, t1)
+  , _dwn (0), _bbb (0), _up(up)
+  //, _lvl (l)
+  , _rule (myrule_t :: nosplit) , _nChild (nChild) { 
   return ;
 }
 
@@ -1635,9 +1668,11 @@ template < class A > inline Periodic4Top < A > :: ~Periodic4Top () {
   return ;
 }
 
+/*
 template < class A > inline int Periodic4Top < A > :: level () const {
   return _lvl ;
 }
+*/
 
 template < class A > inline int Periodic4Top < A > :: nChild () const { 
   assert( _nChild >= 0 && _nChild < 4 );
@@ -1733,7 +1768,7 @@ template < class A > void Periodic4Top < A > :: request (myrule_t) {
 }
 
 template < class A > void Periodic4Top < A > :: splitISO4 () {  
-  int l = 1 + level () ;
+  int l = 1 + this->level () ;
   innerperiodic4_t * p0 = new innerperiodic4_t (l, this->subface4 (0,0), this->twist (0), this->subface4 (1,0), this->twist (1), this, 0) ;
   innerperiodic4_t * p1 = new innerperiodic4_t (l, this->subface4 (0,1), this->twist (0), this->subface4 (1,3), this->twist (1), this, 1) ;
   innerperiodic4_t * p2 = new innerperiodic4_t (l, this->subface4 (0,2), this->twist (0), this->subface4 (1,2), this->twist (1), this, 2) ;
