@@ -197,8 +197,6 @@ template < class A > class TetraTop : public A {
     
     inline int nChild () const ;
     inline double volume () const ;
-    // non-virtual volume method 
-    inline double getVolume () const ;
   public :
     myrule_t getrule () const ;
     myrule_t requestrule () const ;
@@ -1093,10 +1091,6 @@ template < class A > inline int TetraTop < A > :: getLevel () const {
 */
 
 template < class A > inline double TetraTop < A > :: volume () const {
-  return _volume ;
-}
-
-template < class A > inline double TetraTop < A > :: getVolume () const {
   return _volume ;
 }
 
