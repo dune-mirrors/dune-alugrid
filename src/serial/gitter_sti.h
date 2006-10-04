@@ -394,7 +394,9 @@ public :
   public :
     virtual int ident () const = 0 ;
     virtual int level () const = 0 ;
-    virtual const double (& Point () const )[3] = 0 ;
+
+    // make Piont non-virtual, because it's only used on VertexGeo 
+    //virtual const double (& Point () const )[3] = 0 ;
 
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void project(const ProjectVertex &pv) = 0; 
@@ -919,8 +921,9 @@ public :
       inline VertexGeo (int,double,double,double, VertexGeo & ) ;
       inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
       inline virtual ~VertexGeo () ;
+
+      // return coordinates of vertex  
       inline const double (& Point () const) [3] ;
-      inline const double (& getPoint () const) [3] ;
       // return level of vertex 
       inline int level () const ;
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
@@ -2127,10 +2130,6 @@ inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () {
 }
 
 inline const double (& Gitter :: Geometric :: VertexGeo :: Point () const) [3] {
-  return _c ;
-}
-
-inline const double (& Gitter :: Geometric :: VertexGeo :: getPoint () const) [3] {
   return _c ;
 }
 
