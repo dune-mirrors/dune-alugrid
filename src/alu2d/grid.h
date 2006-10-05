@@ -135,9 +135,41 @@ template < class A > class Listagent {
 
 class Element;
 class Bndel;
+struct AdaptRestrictProlong
+{
+  virtual ~AdaptRestrictProlong () {}
+  virtual int preCoarsening (Hier<Element> & elem )   = 0;
+  virtual int postRefinement (Hier<Element>  & elem ) = 0;
+};
+typedef AdaptRestrictProlong AdaptRestrictProlongType;
 
-class Restrict_basic;
-class Prolong_basic;
+class Restrict_basic
+{
+  public: 
+  virtual ~Restrict_basic () {}
+  /*
+  virtual void operator ()(Element *parent,Element **child,
+                           int anzahl)
+  {
+  }
+  */
+  virtual void operator ()(Hier<Element> *) = 0;
+  virtual void operator ()(Hier<Bndel> *) = 0;
+};
+
+class Prolong_basic
+{
+  public:
+  virtual ~Prolong_basic () {}
+  /*
+  virtual void operator ()(const Element *parent,Element **child,
+                           int anzahl)
+  {
+  }
+  */
+  virtual void operator ()(Hier<Element> *) = 0;
+  virtual void operator ()(Hier<Bndel> *) = 0;
+};
 
 typedef struct nconf_vtx
 {
@@ -746,11 +778,11 @@ template < class A > class Hier : public A {
 
       if(dwn ? dwn->coarse(ncv,nconfDeg,rest_el) == numchild : 0 )
 
-        if ( this->docoarsen(ncv,nconfDeg,rest_el) )
-	{
+      if ( this->docoarsen(ncv,nconfDeg,rest_el) )
+	    {
           this->deletesubtree();
           this->mysplit = this->unsplit;
-	}
+	    }
 
       int i = (nxt ? nxt->coarse(ncv,nconfDeg,rest_el) : 0 ) + (this->is(Refco::crs) ? 1 : 0 ) ;
 
@@ -770,11 +802,11 @@ template < class A > class Hier : public A {
       assert( leaf() );
 
       if (this->is(Refco::ref))
-	this->mark(default_ref);
+	      this->mark(default_ref);
 
       if(this->is(Refco::quart) || 
-	 this->is(Refco::ref_1) || this->is(Refco::ref_2) || 
-	 this->thinis(this->bndel_like)) {
+	       this->is(Refco::ref_1) || this->is(Refco::ref_2) || 
+	       this->thinis(this->bndel_like)) {
           
         void * els [this->nparts] ;
 
@@ -785,27 +817,27 @@ template < class A > class Hier : public A {
         }
         else if (this->is(Refco::ref_1))
         {
-          numchild = split(els, a, *b, ncv, this->triang_conf2,nconfDeg,default_ref,pro_el);
+          numchild = this->split(els, a, *b, ncv, this->triang_conf2,nconfDeg,default_ref,pro_el);
           this->clear(Refco::ref_1);
         }
         else if (this->is(Refco::ref_2))
         {
-          numchild = split(els, a, *b, ncv, this->triang_conf2,nconfDeg,default_ref,pro_el);
+          numchild = this->split(els, a, *b, ncv, this->triang_conf2,nconfDeg,default_ref,pro_el);
           this->clear(Refco::ref_2);
         }
         else
-	{
+	      {
           assert(this->thinis(this->bndel_like));
-          this->numchild = split(els, a, *b, ncv, this->triang_bnd,nconfDeg,default_ref,pro_el);
-	}
+          this->numchild = this->split(els, a, *b, ncv, this->triang_bnd,nconfDeg,default_ref,pro_el);
+	      }
 
         dwn = (Hier *)els[0] ;
 
         dwn->lvl = lvl + 1 ;
 
-	dwn->up = this;
-  dwn->writeToWas();
-	dwn->childNr_ = 0;
+	      dwn->up = this;
+        dwn->writeToWas();
+	      dwn->childNr_ = 0;
 
         for(int i = 1 ; i < numchild ; i ++ ) {
 
@@ -813,13 +845,16 @@ template < class A > class Hier : public A {
 
           ((Hier *)els[i])->up = this ;
           ((Hier *)els[i])->writeToWas();
-	  ((Hier *)els[i])->childNr_ = i;
+	        ((Hier *)els[i])->childNr_ = i;
 
           ((Hier *)els[i-1])->nxt = (Hier *)els[i] ;
 
         }
+
+	      if (pro_el)
+	        pro_el->operator()(this);
 	
-	//this->check();
+	      //this->check();
 
         count = numchild;
 
@@ -829,13 +864,20 @@ template < class A > class Hier : public A {
 
     }
 
+    void clearAllWas() {
+      this->clearWas();
+      if (nxt)
+	nxt->clearAllWas();
+      if (dwn)
+	dwn->clearAllWas();
+    }
+
     int refine(Listagency < Vertex > * a, Multivertexadapter * b,
 	       nconf_vtx_t *ncv,
 	       int nconfDeg,Refco::tag_t default_ref,Prolong_basic *pro_el) {
       int count =  nxt ? nxt->refine(a, b,ncv, nconfDeg,default_ref,pro_el) : 0 ;
-      
-      if(dwn) count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
-
+      if(dwn) 
+	count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
       else {
 
  // Neue Behandlung der Bl"atter:
@@ -994,25 +1036,6 @@ class Bndel : public Thinelement, public Refco {
 
 
 
-class Restrict_basic
-{
-  public: 
-  virtual ~Restrict_basic () {}
-  virtual void operator ()(Element *parent,Element **child,
-                           int anzahl)
-  {
-  }
-};
-
-class Prolong_basic
-{
-  public:
-  virtual ~Prolong_basic () {}
-  virtual void operator ()(const Element *parent,Element **child,
-                           int anzahl)
-  {
-  }
-};
 
 //////////////////////////////////////////////////////////////
 //

@@ -37,8 +37,8 @@ Hmesh::Hmesh(const char *macroname,Refco::tag_t pref_rule) :
 void Hmesh::setup_grid(const char *macroname) {
   ncv=NULL;
   adp = new Multivertexadapter;
-  _pro_el=new Prolong_basic;
-  _rest_el=new Restrict_basic;
+  _pro_el=0;  // new Prolong_basic;
+  _rest_el=0; // new Restrict_basic;
 
   double time;
   long unsigned int nbr;
@@ -82,7 +82,7 @@ void Hmesh::setup_grid(const char *macroname) {
     double time2;
     long unsigned int nbr2;
     recoverGrid(macroname,time2,nbr2);
-    if (time2!=time || nbr2!=nbr) {
+    if (fabs(time2-time) + fabs(nbr2-nbr)>1e-5) {
       cerr << "ERROR in Hmesh::setup_grid: "
 	   << "backup-file and macro-grid file not compatible" << endl;
       abort();
@@ -127,6 +127,46 @@ bool Hmesh::checkConf()
 
 Hmesh *mesh;
 
+class RestrictDune : public Restrict_basic
+{
+  AdaptRestrictProlongType & restop;
+  public: 
+  RestrictDune(AdaptRestrictProlongType & arp) : restop(arp) {}
+  virtual ~RestrictDune() {}
+  virtual void operator ()(Hier<Element> *parent) {
+    restop.preCoarsening(*parent);
+  }
+  virtual void operator ()(Hier<Bndel> *parent) {
+  }
+};
+
+class ProlongDune : public Prolong_basic
+{
+  AdaptRestrictProlongType & restop;
+  public:
+  ProlongDune(AdaptRestrictProlongType & arp) : restop(arp) {}
+  virtual ~ProlongDune () {}
+  virtual void operator ()(Hier<Element> *parent) {
+    restop.postRefinement(*parent);
+  }
+  virtual void operator ()(Hier<Bndel> *parent) {
+  }
+};
+
+bool Hmesh::duneAdapt(AdaptRestrictProlongType & arp) {
+  ProlongDune produne(arp);
+  RestrictDune restdune(arp);
+  Prolong_basic *pro_el_old = _pro_el;
+  Restrict_basic *rest_el_old = _rest_el;
+  _pro_el=&produne;
+  _rest_el=&restdune;
+  this->refine ();
+  this->coarse () ;
+  _pro_el=pro_el_old;
+  _rest_el=rest_el_old;
+  return true;
+}
+
 void Hmesh::refine() {
   mesh=this;
 
@@ -140,8 +180,7 @@ void Hmesh::refine() {
 
   Listwalk_impl <macroelement_t> walk(mel);
   for( walk.first() ; !walk.done() ; walk.next() )
-    walk.getitem()->clearWas();
-      
+    walk.getitem()->clearAllWas();  
   
   do {
     int lcount = 0;

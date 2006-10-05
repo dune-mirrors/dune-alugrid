@@ -1332,9 +1332,10 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
 	}
         e[0] = t1;
         e[1] = t2;
+	/*
 	if (pro_el)
 	  pro_el->operator()(this, (Element**)e, 2);
-
+	*/
         ret = 2;
       }
       break;
@@ -1570,9 +1571,10 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
 	  }
 	}
 
+	/*
 	if (pro_el)
 	  pro_el->operator()(this, (Element**)newtr, 4);
-
+	*/
         ret = 4;
       }
       break;
@@ -1717,7 +1719,9 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
         Element *e[2];
         e[0]=down();
         e[1]=down()->next();
-        rest_el->operator()(this,e,2);
+        // rest_el->operator()(this,e,2);
+	if (rest_el) 
+	  rest_el->operator()(this);
         lcancoarsen=2;
       }
     }
@@ -1725,7 +1729,9 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
       Element *e[2];
       e[0]=down();
       e[1]=down()->next();
-      rest_el->operator()(this,e,2);
+      //rest_el->operator()(this,e,2);
+      if (rest_el)
+	rest_el->operator()(this);
     }
     if (lcancoarsen==2) {
       deletesubtree();

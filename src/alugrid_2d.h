@@ -19,6 +19,7 @@ namespace ALU2dGridSpace {
 #include "alu2d/vtx_btree.h"
 #include "alu2d/vmmap.h"
 #include "alu2d/xdisplay_imp.hh"
+typedef AdaptRestrictProlong AdaptRestrictProlongType;
 
 }
 #endif

@@ -865,8 +865,9 @@ class Hmesh_basic {
    int indexManagerSize (int cd) {
      enum{dim = 2};
      assert(cd<3 && cd>=0);
-     //return indexmanager[cd].size();
-     return indexmanager[dim-cd].usedindex();
+     // printIndex();
+     return indexmanager[dim-cd].getMaxIndex();
+     // return indexmanager[dim-cd].usedindex();
    }
    
     void makeneighbours() ;
@@ -926,6 +927,9 @@ class Hmesh : public Hmesh_basic {
                      double&, unsigned long int&);
 
     void refine() ;
+
+    // done call notify and loadBalancer
+    bool duneAdapt (AdaptRestrictProlongType & arp);
 
     bool checkConf();
 
