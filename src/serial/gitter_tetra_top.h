@@ -126,6 +126,7 @@ template < class A > class Hbnd3Top : public A {
     inline const innerbndseg_t * up () const ;
     
     inline bnd_t bndtype () const { return _bt; }
+    
   protected:
     // set boundary id for all item connected to this hbnd
     inline void setBoundaryId( const int id ); 
@@ -1606,8 +1607,8 @@ template < class A > inline void TetraTop < A > :: backupIndex (ostream & os) co
   // write my index 
   os.write( ((const char *) & this->_idx ), sizeof(int) ) ;
 
-  // write interior indices 
   /*
+  // write interior indices 
   {
     const vertex_STI * vx = this->innerVertex(); 
     if( vx ) vx->backupIndex( os );
@@ -1623,6 +1624,7 @@ template < class A > inline void TetraTop < A > :: backupIndex (ostream & os) co
     }
   }
   */
+
   // write children 
   {
     for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backupIndex (os) ; 
@@ -1658,7 +1660,28 @@ template < class A > inline void TetraTop < A > :: restoreIndex (istream & is)
 #ifdef _DUNE_USES_ALU3DGRID_
   // free index from constructor
   is.read ( ((char *) &(this->_idx) ), sizeof(int) );
-  {for (innertetra_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; }
+
+  /*
+  // write interior indices 
+  {
+    const vertex_STI * vx = this->innerVertex(); 
+    if( vx ) vx->restoreIndex( is );
+
+    for(const hedge_STI * e = this->innerHedge () ; e ; e = e->next ())
+    {
+      e->restoreIndex( is ); 
+    }
+
+    for(const hface_STI * f = this->innerHface () ; f ; f = f->next ())
+    {
+      f->restoreIndex( is ); 
+    }
+  }
+  */
+
+  {
+    for (innertetra_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; 
+  }
 #endif
   return;
 }
