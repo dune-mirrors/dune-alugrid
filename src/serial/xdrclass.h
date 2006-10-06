@@ -83,7 +83,7 @@ public:
   
   char get () const
   {
-    char t;
+    char t = 0 ;
     read(t);
     return t;
   }
