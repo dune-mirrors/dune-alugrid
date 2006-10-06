@@ -33,16 +33,15 @@ typedef strstream    strstream_t;
 #include "parallel.h"
 #include "xdrclass.h"
 
-
 // if DUNE uses this grid the _DUNE_USES_ALU3DGRID_ variable should be defined
-// otherwise some dummy are set 
-#include "indexstack.h"
-#ifdef _DUNE_USES_ALU3DGRID_ 
+// otherwise some dummy are set
+#include "../indexstack.h"
+#ifdef _DUNE_USES_ALU3DGRID_
 enum { lengthOfFiniteStack = 10000 };
-typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;        
-#else 
-typedef DummyIndexStack<int> IndexManagerType; 
-typedef BSGridVec double;  
+typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;
+#else
+typedef DummyIndexStack<int> IndexManagerType;
+typedef BSGridVec double;
 #endif
 
 // number of different index manager that exists 

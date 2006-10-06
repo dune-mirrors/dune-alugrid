@@ -9,10 +9,9 @@
 // include all headers 
 #include "stlheaders.h"
 
-#define _DUNE_USES_ALU3DGRID_
-
 namespace ALUGridSpace {
-
+#define _DUNE_USES_ALU3DGRID_
+#include "indexstack.h"
 typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
 struct GatherScatter;
@@ -85,6 +84,7 @@ typedef GatherScatter GatherScatterType;
 #include "serial/myalloc.h"
 
 #include "duneinterface/gitter_dune_impl.h"
+#undef _DUNE_USES_ALU3DGRID_
 }
 
 #endif

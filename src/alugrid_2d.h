@@ -9,17 +9,18 @@
 // include all headers 
 #include "stlheaders.h"
 
-namespace ALU2dGridSpace { 
-
-#include "alu2d/indexstack2d.h"
-
+namespace ALUGridSpace { 
+#define _DUNE_USES_ALU3DGRID_
+#include "indexstack.h"
+#undef _DUNE_USES_ALU3DGRID_
+using namespace std;
 #include "alu2d/grid.h"
 #include "alu2d/triang.h"
 #include "alu2d/handle.h"
 #include "alu2d/vtx_btree.h"
 #include "alu2d/vmmap.h"
 #include "alu2d/xdisplay_imp.hh"
-typedef AdaptRestrictProlong AdaptRestrictProlongType;
+typedef AdaptRestrictProlong2d AdaptRestrictProlong2dType;
 
 }
 #endif

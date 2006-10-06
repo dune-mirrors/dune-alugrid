@@ -6,11 +6,11 @@
 
 #include "grid.h"                               
 
-typedef IndexStack2d<int,10000> IndexManagerType;
-enum { lengthOfFiniteStack = 10000 };
+typedef IndexStack<int,10000> IndexManager2dType;
+// enum { lengthOfFiniteStack = 10000 };
 // typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;
 // number of different index manager that exists
-enum { numOfIndexManager = 4 };
+enum { numOfIndexManager2d = 4 };
 // 0 == elements
 // 1 == edges
 // 2 == vertices
@@ -715,16 +715,18 @@ template <class T>
 class SubtreeIterator {
   static const int nbr = 100;
   Hier<T>* stack[nbr];
-  bool done;
+  Hier<T>* root_;
+  bool done_;
   int pos;
 
+public:
   SubtreeIterator(Hier<T>* root) {
     pos = 0;
-    done = false;
+    done_ = false;
     stack[pos] = root;
+    root_ = root;
   }
 
-public:
   SubtreeIterator(const SubtreeIterator& other) {
     pos = other.pos;
     for( int i=0 ; i<=pos ; i++ )
@@ -732,7 +734,7 @@ public:
   }
 
   SubtreeIterator& operator++ () { // prefix
-    if( !done ) {
+    if( !done_ ) {
       if( stack[pos]->down() ) {
         stack[pos+1] = stack[pos]->down();
         pos++;
@@ -750,32 +752,48 @@ public:
           }
         }
         if( pos == 0 )
-          done = true;
+          done_ = true;
       }
     }
     return *this;
   }
 
+  void first() {
+    pos = 0;
+    done_ = false;
+    stack [pos] = root_;
+  }
+  void next() {
+    ++(*this);
+  }
+  int done() {
+    return (!done_ ? 0 : 1);
+  }
+
   void first_leaf() {
     pos = 0;
-    done = false;
-    while( !done && !(stack[pos]->leaf()) )
-      (*this)++;
+    done_ = false;
+    while( !done_ && !(stack[pos]->leaf()) )
+      ++(*this);
   }
 
   void next_leaf() {
-    while( !done && !(stack[pos]->leaf()) )
-      (*this)++;
+    while( !done_ && !(stack[pos]->leaf()) )
+      ++(*this);
   }
 
   int done_leaf() {
-    return (done == true ? 0 : 1);
+    return (!done_ ? 0 : 1);
   }
 
-  operator int() const { return (done == true ? 0 : 1); }
+  operator int() const { return (done_ == true ? 0 : 1); }
 
   Hier<T>* operator-> () const {
-    return (done ? NULL : stack[pos]);
+    return (done_ ? NULL : stack[pos]);
+  }
+  Hier<T>& getitem() const {	
+    assert(!done_);
+    return *(stack[pos]);
   }
 
   friend class Hier<T>;
@@ -804,7 +822,7 @@ class Hmesh_basic {
 
   protected :
 
-    IndexManagerType indexmanager[numOfIndexManager];
+    IndexManager2dType indexmanager[numOfIndexManager2d];
 
     Listagency < Vertex > vl;
 
@@ -848,12 +866,13 @@ class Hmesh_basic {
   //assert(indexmanager[2].usedindex()==0);
   //assert(indexmanager[3].usedindex()==0);
       } ;    
-
+    /*
    void printIndex() {
      for (int i=0;i<numOfIndexManager;i++)
        cerr << i << " maxindex: " << indexmanager[i].getMaxIndex() << " " 
       << "index in use: " << indexmanager[i].usedindex() << endl;
    }
+    */
    int getIndex(int indextype) {
      return indexmanager[indextype].getIndex();
    }
@@ -926,10 +945,13 @@ class Hmesh : public Hmesh_basic {
     bool recoverGrid(const char*,
                      double&, unsigned long int&);
 
+    void storeIndicies(ostream& out);
+    void recoverIndicies(istream& in);
+
     void refine() ;
 
     // done call notify and loadBalancer
-    bool duneAdapt (AdaptRestrictProlongType & arp);
+    bool duneAdapt (AdaptRestrictProlong2dType & arp);
 
     bool checkConf();
 

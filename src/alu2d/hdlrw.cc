@@ -434,7 +434,7 @@ Hmesh::storeGrid(const char* fbase,
 
   filename=new char[strlen(fbase)+15];
   // filename=(char*)alloca(strlen(fbase)+15);
-  sprintf(filename,"%s.macro",fbase);
+  sprintf(filename,"%s",fbase);
 
   asciwritetriang (filename,time,nbr);
 
@@ -446,13 +446,14 @@ Hmesh::storeGrid(const char* fbase,
   ofstream out(filename, ios::out|ios::trunc);
   assert(out);
 
-  out.setf(ios::scientific, ios::floatfield);
-  out.precision(16);
+  // out.setf(ios::scientific, ios::floatfield);
+  // out.precision(16);
 
   // Zeit und Nummer des Zeitschritts schreiben
+  /*
   out << time << " ";
   out << nbr << endl;
-
+  */
   // Status des Gitters sichern
   for( int level = 0 ;; level++ ) {
     Levelwalk<Element> walk(mel, level);
@@ -460,20 +461,55 @@ Hmesh::storeGrid(const char* fbase,
       break;
     } else {
       for( walk.first() ; !walk.done() ; walk.next() )
-        out << walk.getitem().splitrule() << " ";
+	out.put(walk.getitem().splitrule());
+      // out << walk.getitem().splitrule() << " ";
     }
-    out << endl;
+    // out << endl;
   }
-  out << endl;
+  // out << endl;
 
+  /*
   // Daten sichern
   Leafwalk<Element> walk(mel);
   for( walk.first() ; !walk.done() ; walk.next() ) {
     out << walk.getitem();
   }
+  */
+  storeIndicies(out);
 
   delete [] filename;
   cout << " done." << endl;
+}
+void
+Hmesh::storeIndicies(ostream& out) {
+  for (int i=0;i<numOfIndexManager2d;i++) 
+    indexmanager[i].backupIndexSet(out);
+  {
+    Listwalk_impl < Vertex > walk(vl) ;
+    for( walk.first() ; ! walk.done() ; walk.next() ) {
+      // out << walk.getitem().getIndex() << " ";
+      int idx=walk.getitem().getIndex();
+      out.write( ((const char *) &idx ), sizeof(int) ) ;
+    }
+  }
+  //out << endl;
+  {
+    Levelwalk<Element> walk(mel, 0);
+    for( walk.first() ; !walk.done() ; walk.next() ) {
+      SubtreeIterator<Element> hier(&(walk.getitem()));
+      for (hier.first() ; !hier.done() ; hier.next() ) {
+	// out << hier.getitem().getIndex () << " ";
+	int idx=hier.getitem().getIndex();
+	out.write( ((const char *) &idx ), sizeof(int) ) ;
+	for (int e=0;e<3;e++) {
+	  //out << hier.getitem().edge(e)->getIndex () << " ";
+	  int idx=hier.getitem().edge(e)->getIndex();
+	  out.write( ((const char *) &idx ), sizeof(int) ) ;
+	}
+      }
+    }
+  }
+  //out << endl;
 }
 
 bool
@@ -496,8 +532,8 @@ Hmesh::recoverGrid(const char* recoverFile,
   }
 
   // Zeit und Nummer des Zeitschritts lesen
-  in >> time;
-  in >> nbr;
+  // in >> time;
+  // in >> nbr;
   // Gitter wiederherstellen
   for( int level = 0 ;; level++ ) {
     {
@@ -505,40 +541,39 @@ Hmesh::recoverGrid(const char* recoverFile,
       if( !walk.size() )
         break;
       for( walk.first() ; !walk.done() ; walk.next() ) {
-        int flag;
-        in >> flag;
-        switch (flag)
-  {
-    case Thinelement::unsplit:
-            break;
-    case Thinelement::triang_bnd:
-            cerr << "ERROR (Hmesh::recoverGrid()): "
-     << "splitrule \"triang_bnd\" is not allowed for elements!"
-     << endl;
-            abort();
-            break;
-    case Thinelement::triang_conf2:
-            walk.getitem().mark(Refco::ref_1);
-            break;
-    case Thinelement::triang_quarter:          
-            walk.getitem().mark(Refco::quart);
-            break;
-    case Thinelement::compatibility:
-            if (!compwarn)
-      {
+        char flag;
+        in.get(flag);
+        switch (flag) {
+	case Thinelement::unsplit:
+	  break;
+	case Thinelement::triang_bnd:
+	  cerr << "ERROR (Hmesh::recoverGrid()): "
+	       << "splitrule \"triang_bnd\" is not allowed for elements!"
+	       << endl;
+	  abort();
+	  break;
+	case Thinelement::triang_conf2:
+	  walk.getitem().mark(Refco::ref_1);
+	  break;
+	case Thinelement::triang_quarter:          
+	  walk.getitem().mark(Refco::quart);
+	  break;
+	case Thinelement::compatibility:
+	  if (!compwarn)
+	    {
               cerr << "WARNING (Hmesh::recoverGrid()): "
-       << "using compatibility mode for obsolete file format!"
-       << endl;
+		   << "using compatibility mode for obsolete file format!"
+		   << endl;
               compwarn = 1;
-      }
-            walk.getitem().mark(Refco::ref_1);
-            break;
-    default:
-            cerr << "ERROR (Hmesh::recoverGrid()): "
-     << "unknown splitrule!"
-     << endl;
-            abort();
-  }
+	    }
+	  walk.getitem().mark(Refco::ref_1);
+	  break;
+	default:
+	  cerr << "ERROR (Hmesh::recoverGrid()): "
+	       << "unknown splitrule!"
+	       << endl;
+	  abort();
+	}
       }
     }
     refine();
@@ -546,12 +581,38 @@ Hmesh::recoverGrid(const char* recoverFile,
 
 
   /* read data */
-
+  /*
   Leafwalk<Element> walk(mel);
   for( walk.first() ; !walk.done() ; walk.next() )
     in >> walk.getitem();
-
+  */
+  recoverIndicies(in);
+ 
   cout << " done." << endl;
 
   return true;
+}
+void
+Hmesh::recoverIndicies(istream& in) {
+  for (int i=0;i<numOfIndexManager2d;i++) {
+    indexmanager[i].restoreIndexSet(in);
+  }
+  {
+    Listwalk_impl < Vertex > walk(vl) ;
+    for( walk.first() ; ! walk.done() ; walk.next() ) {
+      in.read ( ((char *) &(walk.getitem().setIndex())), sizeof(int) );
+    }
+  }
+  {
+    Levelwalk<Element> walk(mel, 0);
+    for( walk.first() ; !walk.done() ; walk.next() ) {
+      SubtreeIterator<Element> hier(&(walk.getitem()));
+      for (hier.first() ; !hier.done() ; hier.next() ) {
+	in.read ( ((char *) &(hier.getitem().setIndex())), sizeof(int) );
+	for (int e=0;e<3;e++) {
+	  in.read ( ((char *) &(hier.getitem().edge(e)->setIndex())), sizeof(int) );
+	}
+      }
+    } 
+  }
 }

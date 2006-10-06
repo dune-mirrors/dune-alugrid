@@ -3,7 +3,7 @@
 
 #include "alugrid_2d.h"
 
-namespace ALU2dGridSpace {
+namespace ALUGridSpace {
 
 #include "alu2d/handle.cc"
 #include "alu2d/triang.cc"

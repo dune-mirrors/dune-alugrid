@@ -79,8 +79,8 @@ void Hmesh::setup_grid(const char *macroname) {
   }
   /* END: set periodic neighbours of vertices */
   if (restart) {
-    double time2;
-    long unsigned int nbr2;
+    double time2 = time;
+    long unsigned int nbr2 = nbr;
     recoverGrid(macroname,time2,nbr2);
     if (fabs(time2-time) + fabs(nbr2-nbr)>1e-5) {
       cerr << "ERROR in Hmesh::setup_grid: "
@@ -129,9 +129,9 @@ Hmesh *mesh;
 
 class RestrictDune : public Restrict_basic
 {
-  AdaptRestrictProlongType & restop;
+  AdaptRestrictProlong2dType & restop;
   public: 
-  RestrictDune(AdaptRestrictProlongType & arp) : restop(arp) {}
+  RestrictDune(AdaptRestrictProlong2dType & arp) : restop(arp) {}
   virtual ~RestrictDune() {}
   virtual void operator ()(Hier<Element> *parent) {
     restop.preCoarsening(*parent);
@@ -142,9 +142,9 @@ class RestrictDune : public Restrict_basic
 
 class ProlongDune : public Prolong_basic
 {
-  AdaptRestrictProlongType & restop;
+  AdaptRestrictProlong2dType & restop;
   public:
-  ProlongDune(AdaptRestrictProlongType & arp) : restop(arp) {}
+  ProlongDune(AdaptRestrictProlong2dType & arp) : restop(arp) {}
   virtual ~ProlongDune () {}
   virtual void operator ()(Hier<Element> *parent) {
     restop.postRefinement(*parent);
@@ -153,7 +153,7 @@ class ProlongDune : public Prolong_basic
   }
 };
 
-bool Hmesh::duneAdapt(AdaptRestrictProlongType & arp) {
+bool Hmesh::duneAdapt(AdaptRestrictProlong2dType & arp) {
   ProlongDune produne(arp);
   RestrictDune restdune(arp);
   Prolong_basic *pro_el_old = _pro_el;

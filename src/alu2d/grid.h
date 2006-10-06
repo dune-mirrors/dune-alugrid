@@ -25,7 +25,6 @@
 //   IAM Freiburg
 // #end(header)
 ***************************************************/
-#define _DUNE_USES_ALU3DGRID_ 
 
 #include <stdio.h>
 
@@ -44,10 +43,13 @@
   #include <iostream.h>
 #endif
 
+#include "../indexstack.h"
+
 #include "xdisplay.h"
 #include "vtx_btree.h"
 
 class Hmesh_basic;
+class Hmesh;
 class Basic {
 
   private :
@@ -86,6 +88,8 @@ class Basic {
 
     virtual void read(ifstream &) = 0 ;
 
+
+    friend class Hmesh;
 } ;
 
 class Vertex;
@@ -135,13 +139,13 @@ template < class A > class Listagent {
 
 class Element;
 class Bndel;
-struct AdaptRestrictProlong
+struct AdaptRestrictProlong2d
 {
-  virtual ~AdaptRestrictProlong () {}
+  virtual ~AdaptRestrictProlong2d () {}
   virtual int preCoarsening (Hier<Element> & elem )   = 0;
   virtual int postRefinement (Hier<Element>  & elem ) = 0;
 };
-typedef AdaptRestrictProlong AdaptRestrictProlongType;
+typedef AdaptRestrictProlong2d AdaptRestrictProlong2dType;
 
 class Restrict_basic
 {
