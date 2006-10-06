@@ -233,7 +233,7 @@ inline void IndexStack<T,length>::backupIndexSet ( ostream & os )
   assert( stack_ ); 
   stack_->backup( os ); 
   
-  if ( !fullStackList_.empty() )
+  // if ( !fullStackList_.empty() )
   {
     int s = fullStackList_.size();
     os.write( ((const char *) &s ), sizeof(int) ) ;
