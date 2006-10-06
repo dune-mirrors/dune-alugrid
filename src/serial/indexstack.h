@@ -52,22 +52,22 @@ public :
   // backup stack to ostream 
   void backup ( ostream & os ) const 
   {
-    os << size(); 
+    os.write( ((const char *) &_f ), sizeof(int) ) ;
     for(int i=0; i<size(); ++i)
     {
-      os << _s[i];
+      os.write( ((const char *) &_s[i] ), sizeof(int) ) ;
     }
   }
    
   // restore stack from istream 
   void restore ( istream & is )  
   {
-    is >> _f;  
+    is.read ( ((char *) &_f), sizeof(int) );
     assert( _f >= 0 );
     assert( _f < length );
     for(int i=0; i<size(); ++i)
     {
-      is >> _s[i];
+      is.read ( ((char *) &_s[i]), sizeof(int) );
     }
   }
     
@@ -236,7 +236,7 @@ inline void IndexStack<T,length>::backupIndexSet ( ostream & os )
   if ( !fullStackList_.empty() )
   {
     int s = fullStackList_.size();
-    os << s; 
+    os.write( ((const char *) &s ), sizeof(int) ) ;
     
     // make a copy of the stack, so we can empty it 
     // without changeing the state of our object 
@@ -262,7 +262,7 @@ inline void IndexStack<T,length>::restoreIndexSet ( istream & is )
   stack_->restore( is ); 
 
   int s; 
-  is >> s; 
+  is.read ( ((char *) &s), sizeof(int) );
 
   // if full stacks have been backuped 
   if( s > 0 ) 
