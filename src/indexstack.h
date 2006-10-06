@@ -233,11 +233,11 @@ inline void IndexStack<T,length>::backupIndexSet ( ostream & os )
   assert( stack_ ); 
   stack_->backup( os ); 
   
-  // if ( !fullStackList_.empty() )
+  int s = fullStackList_.size();
+  os.write( ((const char *) &s ), sizeof(int) ) ;
+  
+  if ( s > 0 )
   {
-    int s = fullStackList_.size();
-    os.write( ((const char *) &s ), sizeof(int) ) ;
-    
     // make a copy of the stack, so we can empty it 
     // without changeing the state of our object 
     StackListType backupStack = fullStackList_;

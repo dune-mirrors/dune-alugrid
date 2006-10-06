@@ -3,8 +3,7 @@ AUTOMAKE_OPTIONS = foreign 1.5
 
 CXXFLAGS = -O3 -DNDEBUG -unroll
 
-SUBDIRS = serial parallel duneinterface 
-#serial parallel duneinterface alu2d
+SUBDIRS = serial parallel duneinterface alu2d 
 
 # here the headers to install are defined 
 include serial/Makefile.am.include
