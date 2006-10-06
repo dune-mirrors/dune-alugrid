@@ -1,8 +1,6 @@
 # Makefile.am for building the ALU3d-Grid library
 AUTOMAKE_OPTIONS = foreign 1.5
 
-CXXFLAGS = -O3 -DNDEBUG -unroll
-
 SUBDIRS = serial parallel duneinterface alu2d 
 
 # here the headers to install are defined 
