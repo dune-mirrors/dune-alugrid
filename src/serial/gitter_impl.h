@@ -178,11 +178,11 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         typedef hface3_IMPL innerface_t ;
         typedef hedge1_IMPL inneredge_t ;
         typedef VertexEmpty innervertex_t ;
-        inline TetraEmpty (int l, 
-              myhface3_t *,int,
-              myhface3_t *,int,
-              myhface3_t *,int,
-              myhface3_t *,int, Gitter *) ;
+        inline TetraEmpty (myhface3_t *,int,
+                           myhface3_t *,int,
+                           myhface3_t *,int,
+                           myhface3_t *,int, 
+                           Gitter *) ;
 
         ////////////////////////////////////////////////
         // read of data 
@@ -340,36 +340,35 @@ public:
             typedef hface3_IMPL innerface_t ;
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
-      inline Periodic3Empty (int l, myhface3_t *,int,myhface3_t *,int) ;
+      inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
      ~Periodic3Empty () {}
     public:
   } ;
   typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
 
 
-
-// Anfang - Neu am 23.5.02 (BS)
   class Periodic4Empty : public periodic4_GEO {
     protected :
             typedef hface4_IMPL innerface_t ;
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
-      inline Periodic4Empty (int l, myhface4_t *,int,myhface4_t *,int) ;
+      inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
      ~Periodic4Empty () {}
     public:
   } ;
   typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
-// Ende - Neu am 23.5.02 (BS)
 
+  ////////////////////////////////////////////////
+  //  --HexaEmpty
+  ///////////////////////////////////////////////
       class HexaEmpty : public hexa_GEO {
       protected :
         typedef hface4_IMPL innerface_t ;
         typedef hedge1_IMPL inneredge_t ;
         typedef VertexEmpty innervertex_t ;
-        inline HexaEmpty (int l, myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, Gitter*) ;
+        inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, Gitter*) ;
         ~HexaEmpty () {}
       
-        // Neu: burriad 29.4.05
         int preCoarsening(); 
         int postRefinement();
 
@@ -815,10 +814,10 @@ inline int GitterBasis :: Objects :: Hbnd4Default :: ghostLevel () const {
 }
 
 inline GitterBasis :: Objects :: TetraEmpty :: 
-TetraEmpty (int l, myhface3_t * f0, int t0, myhface3_t * f1, int t1,
+TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
             myhface3_t * f2, int t2, myhface3_t * f3, int t3,
             Gitter * mygrid ) : 
-  Gitter :: Geometric :: Tetra (l,f0, t0, f1, t1, f2, t2, f3, t3) , 
+  Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) , 
   _myGrid(mygrid) 
 {
   attachleafs();
@@ -840,26 +839,27 @@ inline int GitterBasis :: Objects :: TetraEmpty :: postRefinement ()
 }
 
 inline GitterBasis :: Objects :: Periodic3Empty :: 
-Periodic3Empty (int l, myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
-  : Gitter :: Geometric :: Periodic3 (l,f0, t0, f1, t1) {
+Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
+  : Gitter :: Geometric :: Periodic3 (f0, t0, f1, t1) {
   return ;
 }
 
 inline GitterBasis :: Objects :: Periodic4Empty :: 
-Periodic4Empty (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
-  : Gitter :: Geometric :: Periodic4 (l,f0, t0, f1, t1) {
+Periodic4Empty (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
+  : Gitter :: Geometric :: Periodic4 (f0, t0, f1, t1) {
   return ;
 }
 
 // Neu: burriad 29.4.05
 inline GitterBasis :: Objects :: HexaEmpty :: 
-HexaEmpty (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1,
+HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
            myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
            myhface4_t * f4, int t4, myhface4_t * f5, int t5,
            Gitter* mygrid) : 
-  Gitter::Geometric::hexa_GEO(l,f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5),
-  _myGrid(mygrid) {
-    attachleafs();
+  Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5),
+  _myGrid(mygrid) 
+{
+  attachleafs();
   return ;
 }
 

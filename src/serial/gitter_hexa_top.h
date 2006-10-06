@@ -182,7 +182,7 @@ template < class A > class HexaTop : public A {
     innerface_t * _fc ;
     inneredge_t * _ed ;
     innervertex_t * _cv ;
-    //int _lvl ;
+    int _lvl ;
     myrule_t _rule, _req ;
     IndexManagerType & _indexManager; 
     const double _volume; 
@@ -223,8 +223,7 @@ protected:
     inline const inneredge_t * innerHedge () const ;
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
-    // implemented in helement 
-    //inline int level () const ;
+    inline int level () const ;
     inline int nChild () const ;
     inline double volume () const ;
   public :
@@ -261,7 +260,7 @@ template < class A > class Periodic4Top : public A {
     inline void append (innerperiodic4_t * h) ;
   private :
     innerperiodic4_t * _dwn, * _bbb, * _up ; 
-    //int _lvl ;
+    int _lvl ;
     myrule_t _rule ;
     const signed char _nChild; 
   private :
@@ -290,7 +289,7 @@ template < class A > class Periodic4Top : public A {
     inline const inneredge_t * innerHedge () const ;
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
-    //inline int level () const ;
+    inline int level () const ;
     inline int nChild () const ;
   public :
     myrule_t getrule () const ;
@@ -304,14 +303,14 @@ template < class A > class Periodic4Top : public A {
     void restore (istream &) ;
 };
 
-  //
-  //    #    #    #  #          #    #    #  ######
-  //    #    ##   #  #          #    ##   #  #
-  //    #    # #  #  #          #    # #  #  #####
-  //    #    #  # #  #          #    #  # #  #
-  //    #    #   ##  #          #    #   ##  #
-  //    #    #    #  ######     #    #    #  ######
-  //
+//
+//    #    #    #  #          #    #    #  ######
+//    #    ##   #  #          #    ##   #  #
+//    #    # #  #  #          #    # #  #  #####
+//    #    #  # #  #          #    #  # #  #
+//    #    #   ##  #          #    #   ##  #
+//    #    #    #  ######     #    #    #  ######
+//
 
 // #     #                                    #    #######
 // #     #  ######  #####    ####   ######   ##       #      ####   #####
@@ -1131,9 +1130,9 @@ template < class A > inline HexaTop < A >
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
             int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
-  : A (l,f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
   , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0)
-  //, _lvl (l)
+  , _lvl (l)
   ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) 
   ,  _volume (QuadraturCube3D < VolumeCalc >
    (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
@@ -1154,9 +1153,9 @@ template < class A > inline HexaTop < A >
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
             int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild , double vol ) 
-  : A (l,f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
   , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0)
-  //, _lvl (l)
+  , _lvl (l)
   ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _indexManager(_up->_indexManager)
   , _volume ( vol )
@@ -1252,11 +1251,9 @@ template < class A > inline void HexaTop < A > :: append (HexaTop < A > * h) {
   return ;
 }
 
-/*
 template < class A > inline int HexaTop < A > :: level () const {
   return _lvl ;
 }
-*/
 
 template < class A > inline double HexaTop < A > :: volume () const {
   return _volume;
@@ -1647,18 +1644,19 @@ template < class A > void HexaTop < A > :: restore (istream & is) {
 
    
 template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, int t0,
-  myhface4_t * f1, int t1) : A (l,f0, t0, f1, t1)
+  myhface4_t * f1, int t1) 
+  : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(0)
-  //, _lvl (l) 
+  , _lvl (l) 
   , _rule (myrule_t :: nosplit) , _nChild (0) { 
   return ;
 }
 
 template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, 
     int t0, myhface4_t * f1, int t1, innerperiodic4_t * up, int nChild )
-: A (l,f0, t0, f1, t1)
+: A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
-  //, _lvl (l)
+  , _lvl (l)
   , _rule (myrule_t :: nosplit) , _nChild (nChild) { 
   return ;
 }
@@ -1669,11 +1667,9 @@ template < class A > inline Periodic4Top < A > :: ~Periodic4Top () {
   return ;
 }
 
-/*
 template < class A > inline int Periodic4Top < A > :: level () const {
   return _lvl ;
 }
-*/
 
 template < class A > inline int Periodic4Top < A > :: nChild () const { 
   assert( _nChild >= 0 && _nChild < 4 );

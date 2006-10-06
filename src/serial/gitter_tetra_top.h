@@ -147,7 +147,7 @@ template < class A > class TetraTop : public A {
     innertetra_t * _dwn, * _bbb, * _up ; 
     innerface_t * _fc ;
     inneredge_t * _ed ;
-    //int _lvl ;
+    int _lvl ;
     myrule_t _req, _rule ;
     IndexManagerType & _indexManager;
     const double _volume;
@@ -190,11 +190,7 @@ template < class A > class TetraTop : public A {
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
 
-    // non virtual method now, because used very often 
-    //typedef Gitter :: helement_STI helement_STI;
-    //using helement_STI::level;
-    //inline int level () const ;
-    
+    inline int level () const ;
     inline int nChild () const ;
     inline double volume () const ;
   public :
@@ -232,7 +228,7 @@ template < class A > class Periodic3Top : public A {
     inline void append (innerperiodic3_t * h) ;
   private :
     innerperiodic3_t * _dwn, * _bbb, * _up ; 
-    //int _lvl ;
+    int _lvl ;
     myrule_t _rule ;
     const signed char _nChild; 
   private :
@@ -263,7 +259,7 @@ template < class A > class Periodic3Top : public A {
     inline const inneredge_t * innerHedge () const ;
     inline innerface_t * innerHface () ;
     inline const innerface_t * innerHface () const ;
-    //inline int level () const ;
+    inline int level () const ;
     inline int nChild () const ;
   public :
     myrule_t getrule () const ;
@@ -1019,8 +1015,8 @@ template < class A > inline TetraTop < A >
 :: TetraTop (int l, myhface3_t * f0, int t0,
              myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
              myhface3_t * f3, int t3, innertetra_t *up, int nChild, double vol) 
-  : A (l, f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid ), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0)
-  //, _lvl (l), 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid ), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0)
+  , _lvl (l) 
   , _rule (myrule_t :: nosplit)
   , _indexManager(up->_indexManager) 
   , _volume(vol) 
@@ -1050,9 +1046,9 @@ template < class A > inline TetraTop < A > ::
 TetraTop (int l, myhface3_t * f0, int t0,
           myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
           myhface3_t * f3, int t3, IndexManagerType & im, Gitter * mygrid) 
-  : A (l,f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
     _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0)
-  //, _lvl (l) 
+  , _lvl (l) 
   , _rule (myrule_t :: nosplit) , _indexManager(im)
   , _volume(quadraturTetra3D < VolumeCalc > 
     (LinearMapping ( this->myvertex(0)->Point(), this->myvertex(1)->Point(),
@@ -1079,16 +1075,9 @@ template < class A > inline TetraTop < A > :: ~TetraTop ()
   return ;
 }
 
-/*
 template < class A > inline int TetraTop < A > :: level () const {
   return _lvl ;
 }
-
-// non virtual method returning level 
-template < class A > inline int TetraTop < A > :: getLevel () const {
-  return _lvl ;
-}
-*/
 
 template < class A > inline double TetraTop < A > :: volume () const {
   return _volume ;
@@ -1585,10 +1574,6 @@ template < class A > inline bool TetraTop < A > :: coarse ()
       {
         for (int i = 0 ; i < 4 ; ++i ) 
         {
-          // hier nochmal untersuchen, wieso Nachbar 0x0 ist 
-          //hasFace3 * neigh = this->myneighbour (i).first;
-          //if( neigh ) neigh->bndNotifyCoarsen () ;
-          //if( this->myneighbour (i).first )
           this->myneighbour (i).first->bndNotifyCoarsen () ;
           this->myhface3 (i)->coarse () ;
         }
@@ -1618,8 +1603,30 @@ template < class A > inline void TetraTop < A > :: backupCMode (ostream & os) co
 template < class A > inline void TetraTop < A > :: backupIndex (ostream & os) const 
 {
 #ifdef _DUNE_USES_ALU3DGRID_
+  // write my index 
   os.write( ((const char *) & this->_idx ), sizeof(int) ) ;
-  {for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backupIndex (os) ; }
+
+  // write interior indices 
+  /*
+  {
+    const vertex_STI * vx = this->innerVertex(); 
+    if( vx ) vx->backupIndex( os );
+
+    for(const hedge_STI * e = this->innerHedge () ; e ; e = e->next ())
+    {
+      e->backupIndex( os ); 
+    }
+
+    for(const hface_STI * f = this->innerHface () ; f ; f = f->next ())
+    {
+      f->backupIndex( os ); 
+    }
+  }
+  */
+  // write children 
+  {
+    for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backupIndex (os) ; 
+  }
 #endif
   return;
 }
@@ -1773,18 +1780,19 @@ template < class A > inline void TetraTop < A > :: restore (XDRstream_in & is) {
 // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
    
 template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
-  myhface3_t * f1, int t1) : A (l,f0, t0, f1, t1)
+  myhface3_t * f1, int t1) 
+ : A (f0, t0, f1, t1)
  , _dwn (0), _bbb (0), _up(0)
- //, _lvl (l) 
+ , _lvl (l) 
  , _rule (myrule_t :: nosplit), _nChild(0) { 
  return ;
 }
 
 template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
   myhface3_t * f1, int t1, innerperiodic3_t * up, int nChild ) 
-  : A (l,f0, t0, f1, t1)
+  : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
-  //, _lvl (l) 
+  , _lvl (l) 
   , _rule (myrule_t :: nosplit) , _nChild (nChild) 
 {
   return ;
@@ -1796,11 +1804,9 @@ template < class A > inline Periodic3Top < A > :: ~Periodic3Top () {
   return ;
 }
 
-/*
 template < class A > inline int Periodic3Top < A > :: level () const {
   return _lvl ;
 }
-*/
 
 template < class A > inline int Periodic3Top < A > :: nChild () const {
   assert( _nChild >= 0 && _nChild < 4 );

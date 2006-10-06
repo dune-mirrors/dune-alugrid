@@ -498,9 +498,7 @@ public :
                  , public Dune_helement 
   {
   protected :
-    int _lvl;
-    //helement () : _lvl(-1) {}
-    helement (int l) : _lvl(l) {}
+    helement () {}
     virtual ~helement () {}
   public :
     //testweise us
@@ -524,7 +522,9 @@ public :
     virtual const hedge * innerHedge () const = 0 ;
     virtual hface * innerHface () = 0 ;
     virtual const hface * innerHface () const = 0 ;
-    int level () const { return _lvl; };
+    // return level of element, implemented in Top classes 
+    virtual int level () const = 0; 
+    // return number of child 
     virtual int nChild () const = 0 ;
 
     // mark element for using iso8 rule 
@@ -1119,7 +1119,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface3_GEO myhface3_t ;
       typedef TetraRule  myrule_t ;
-      inline Tetra (int l, myhface3_t *, int, myhface3_t *, int, 
+      inline Tetra (myhface3_t *, int, myhface3_t *, int, 
                     myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
@@ -1175,8 +1175,8 @@ public :
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
     private :
-      int evalVertexTwist(int, int) const;
-      int evalEdgeTwist(int, int) const;
+      inline int evalVertexTwist(int, int) const;
+      inline int evalEdgeTwist(int, int) const;
     private:
       myhface3_t * f [4] ;
       signed char s [4] ;
@@ -1191,7 +1191,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface3_GEO myhface3_t ;
       typedef Hface3Rule myrule_t ;
-      inline Periodic3 (int l,myhface3_t *, int, myhface3_t *, int) ;
+      inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
@@ -1239,7 +1239,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface4_GEO myhface4_t ;
       typedef Hface4Rule myrule_t ;
-      inline Periodic4 (int l,myhface4_t *, int, myhface4_t *, int) ;
+      inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
@@ -1291,7 +1291,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface4_GEO myhface4_t ;
       typedef HexaRule  myrule_t ;
-      inline Hexa (int l,myhface4_t *, int, myhface4_t *, int,
+      inline Hexa (myhface4_t *, int, myhface4_t *, int,
                    myhface4_t *, int, myhface4_t *, int, 
                    myhface4_t *, int, myhface4_t *, int) ;
       inline int postRefinement () ;
@@ -1344,8 +1344,8 @@ public :
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
     private :
-      int evalVertexTwist(int, int) const;
-      int evalEdgeTwist(int, int) const;
+      inline int evalVertexTwist(int, int) const;
+      inline int evalEdgeTwist(int, int) const;
     private:
       myhface4_t * f [6] ;
       signed char s [6] ;
@@ -2646,9 +2646,8 @@ inline bool Gitter :: Geometric :: TetraRule :: isValid () const {
 //    #     ######     #    #    #  #    #
 
 inline Gitter :: Geometric :: Tetra :: 
-Tetra (int l, myhface3_t * f0, int t0, myhface3_t * f1, int t1, 
+Tetra (myhface3_t * f0, int t0, myhface3_t * f1, int t1, 
        myhface3_t * f2, int t2, myhface3_t * f3, int t3) 
-: helement(l) 
 {
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
@@ -2681,7 +2680,7 @@ inline const Gitter :: Geometric :: Tetra :: myhface3_t * Gitter :: Geometric ::
 }
 
 inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const {
-#if 1
+#if 0
   assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
   assert( vertex >= 0 && vertex < 3 );
 /*
@@ -2703,7 +2702,7 @@ inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const
 
 inline int Gitter::Geometric::Tetra::evalEdgeTwist(int face, int vertex) const 
 {
-#if 1
+#if 0
   assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
   assert( vertex >= 0 && vertex < 3 );
 /*
@@ -2800,8 +2799,7 @@ inline int Gitter :: Geometric :: Tetra :: preCoarsening () {
 // #        ######  #    #     #     ####   #####      #     ####   #####
 
 inline Gitter :: Geometric :: Periodic3 :: 
-Periodic3 (int l,myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
-  : helement(l) 
+Periodic3 (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
 {
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
@@ -2885,8 +2883,7 @@ inline int Gitter :: Geometric :: Periodic3 :: preCoarsening () {
 // #        ######  #    #     #     ####   #####      #     ####       #
 
 inline Gitter :: Geometric :: Periodic4 :: 
-Periodic4 (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
-  : helement(l) 
+Periodic4 (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
 {
   (f [0] = f0)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1)) ;
@@ -2993,10 +2990,9 @@ inline bool Gitter :: Geometric :: HexaRule :: isValid () const {
 // #     #  ######  #    #  #    #
 
 inline Gitter :: Geometric :: Hexa :: 
-Hexa (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1,
+Hexa (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
       myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
       myhface4_t * f4, int t4, myhface4_t * f5, int t5) 
-: helement(l) 
 {
   (f [0] = f0)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1)) ;
