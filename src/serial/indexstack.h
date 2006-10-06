@@ -49,6 +49,28 @@ public :
   // stacksize
   int size () const { return _f; }
 
+  // backup stack to ostream 
+  void backup ( ostream & os ) const 
+  {
+    os << size(); 
+    for(int i=0; i<size(); ++i)
+    {
+      os << _s[i];
+    }
+  }
+   
+  // restore stack from istream 
+  void restore ( istream & is )  
+  {
+    is >> _f;  
+    assert( _f >= 0 );
+    assert( _f < length );
+    for(int i=0; i<size(); ++i)
+    {
+      is >> _s[i];
+    }
+  }
+    
 private:
    T   _s[length]; // the stack 
    int _f;         // actual position in stack  
@@ -170,7 +192,6 @@ inline void IndexStack<T,length>::freeIndex ( T index )
   if((*stack_).full())
   {
     fullStackList_.push(  stack_ );
-    //if(emptyStackList_.size() <= 0)
     if( emptyStackList_.empty() )
     {
       assert( emptyStackList_.size() <= 0 );
@@ -208,6 +229,26 @@ inline void IndexStack<T,length>::backupIndexSet ( ostream & os )
 {
   // holes are not stored at the moment 
   os.write( ((const char *) &maxIndex_ ), sizeof(int) ) ;
+  
+  assert( stack_ ); 
+  stack_->backup( os ); 
+  
+  if ( !fullStackList_.empty() )
+  {
+    int s = fullStackList_.size();
+    os << s; 
+    
+    // make a copy of the stack, so we can empty it 
+    // without changeing the state of our object 
+    StackListType backupStack = fullStackList_;
+    while ( ! backupStack.empty()) 
+    {
+      StackType * st = backupStack.top();
+      assert( st );
+      backupStack.pop();
+      st->backup( os );
+    }
+  }
   return ;
 }
 
@@ -217,6 +258,24 @@ inline void IndexStack<T,length>::restoreIndexSet ( istream & is )
   is.read ( ((char *) &maxIndex_), sizeof(int) );
   clearStack ();
 
+  assert( stack_ );
+  stack_->restore( is ); 
+
+  int s; 
+  is >> s; 
+
+  // if full stacks have been backuped 
+  if( s > 0 ) 
+  {
+    // create as many stacks as have been backuped
+    for(int i=0; i<s; ++i) 
+    {
+      StackType * st = new StackType();
+      assert( st );
+      st->restore( is );
+      fullStackList_.push( st );
+    }
+  }
   return ;
 }
 
