@@ -1,6 +1,3 @@
-
-static volatile char RCSId_handle_cc [] = "$Id$";
-
 #include <stdlib.h>
 #include <assert.h>
 #include <malloc.h>
