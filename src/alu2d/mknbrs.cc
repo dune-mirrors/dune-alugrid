@@ -40,10 +40,11 @@ static volatile char RCSId_mknbrs_cc [] = "$Id$";
 
 
 void Hmesh_basic::makeneighbours() {
-
+/*
 #ifndef NDEBUG
   int start = clock() ;
 #endif
+*/
 
   int count = 0 ;
 
