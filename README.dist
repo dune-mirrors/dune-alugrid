@@ -1,0 +1,12 @@
+ALU-Grid library
+===================
+
+How-to create a discribution
+----------------------------
+
+0) set version number in configure.ac and update ChangeLog 
+1) run ./autogen.sh 
+2) make dist 
+This will create the desired ALUGrid-'version-number'.tar.gz 
+4) run date to remember when dist was create and add this to the file 'lastVersion'
+
