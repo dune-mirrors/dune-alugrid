@@ -75,7 +75,7 @@ bool Hmesh :: ascireadtriang(ifstream &in,
       assert(_nconfDeg==0 || refinement_rule==Refco::quart);
       isbackup=true;
     } 
-    else if (0 != strcmp (str, "Triangle")) 
+    else if (0 != strcmp (str, "Triangles")) 
     {
       cerr << "Error in Hmesh :: ascireadtriang: "
            << "Wrong macrogrid format: " << endl;
