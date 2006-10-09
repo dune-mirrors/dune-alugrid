@@ -85,9 +85,6 @@ public:
   // exchange changed elements  
   void duneExchangeDynamicState ();
   
-  // exchange data of dune 
-  void duneExchangeData (GatherScatterType &, bool leaf = false );
-
   // communication of border data 
   void borderBorderCommunication (
          GatherScatterType & vertexData ,
