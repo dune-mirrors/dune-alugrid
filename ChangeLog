@@ -1,0 +1,13 @@
+Changed from version 0.3 to version 0.4 
+
+* optimization in TreeIterator and Insert
+* maxLevel calculation included in Gitter and used by TetraTop and HexaTop 
+* ALU3d and ALU2d using the same IndexStack 
+* backup and restore methods also working for 2d version 
+* method Point only on VertexGeo 
+* backup and restore for IndexStack 
+* bug fix for coarseing of ghost elements 
+* resetRefinementRequest now setting nospilt and added
+  tagForGlobalCoarseing method 
+* added Tags for macro grid file , Tetrahedra, Hexahedra and Triangles 
+
