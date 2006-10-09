@@ -1,6 +1,6 @@
 // (c) Robert Kloefkorn 2004 - 2005 
-#ifndef INDEXSTACK_H_INCLUDED
-#define INDEXSTACK_H_INCLUDED
+#ifndef ALUGRIDINDEXSTACK_H_INCLUDED
+#define ALUGRIDINDEXSTACK_H_INCLUDED
 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
@@ -18,10 +18,10 @@
 #ifdef _DUNE_USES_ALU3DGRID_
 
 template<class T, int length>
-class FiniteStack {
+class ALUGridFiniteStack {
 public :
   // Makes empty stack
-  FiniteStack () : _f(0) {}
+  ALUGridFiniteStack () : _f(0) {}
 
   // Returns true if the stack is empty
   bool empty () const { return _f <= 0; }
@@ -79,14 +79,14 @@ private:
 
 //******************************************************
 //
-//  IndexStack providing indices via getIndex and freeIndex
+//  ALUGridIndexStack providing indices via getIndex and freeIndex
 //  indices that are freed, are put on a stack and get
 //
 //******************************************************
 template <class T, int length> 
-class IndexStack 
+class ALUGridIndexStack 
 {
-  typedef FiniteStack<T,length> StackType;
+  typedef ALUGridFiniteStack<T,length> StackType;
   typedef stack < StackType * > StackListType;
   
   StackListType fullStackList_;
@@ -98,11 +98,11 @@ class IndexStack
   // current maxIndex 
   int maxIndex_; 
 public:
-  //! Constructor, create new IndexStack
-  IndexStack(); 
+  //! Constructor, create new ALUGridIndexStack
+  ALUGridIndexStack(); 
 
   //! Destructor, deleting all stacks 
-  inline ~IndexStack (); 
+  inline ~ALUGridIndexStack (); 
 
   //! set index as maxIndex if index is bigger than maxIndex
   void checkAndSetMax(T index) { if(index > maxIndex_) maxIndex_ = index;  }
@@ -130,24 +130,24 @@ public:
   void restoreIndexSet ( istream & is );
 private:
   // no copy constructor allowed 
-  IndexStack( const IndexStack<T,length> & s);
+  ALUGridIndexStack( const ALUGridIndexStack<T,length> & s);
  
   // no assignment operator allowed 
-  IndexStack<T,length> & operator = ( const IndexStack<T,length> & s);
+  ALUGridIndexStack<T,length> & operator = ( const ALUGridIndexStack<T,length> & s);
   
   // clear all stored indices 
   void clearStack ();
-};  // end class IndexStack 
+};  // end class ALUGridIndexStack 
 
 //****************************************************************
 // Inline implementation 
 // ***************************************************************
 template <class T, int length>
-inline IndexStack<T,length>::IndexStack()
+inline ALUGridIndexStack<T,length>::ALUGridIndexStack()
   : stack_ ( new StackType () ) , maxIndex_ (0) {} 
   
 template <class T, int length>
-inline IndexStack<T,length>::~IndexStack () 
+inline ALUGridIndexStack<T,length>::~ALUGridIndexStack () 
 {
   if(stack_) delete stack_;
   stack_ = 0;
@@ -167,7 +167,7 @@ inline IndexStack<T,length>::~IndexStack ()
 }
 
 template <class T, int length>
-inline T IndexStack<T,length>::getIndex () 
+inline T ALUGridIndexStack<T,length>::getIndex () 
 {
   if((*stack_).empty()) 
   {
@@ -187,7 +187,7 @@ inline T IndexStack<T,length>::getIndex ()
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::freeIndex ( T index ) 
+inline void ALUGridIndexStack<T,length>::freeIndex ( T index ) 
 {
   if((*stack_).full())
   {
@@ -207,7 +207,7 @@ inline void IndexStack<T,length>::freeIndex ( T index )
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::test () 
+inline void ALUGridIndexStack<T,length>::test () 
 {
   T vec[2*length];
 
@@ -225,7 +225,7 @@ inline void IndexStack<T,length>::test ()
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::backupIndexSet ( ostream & os ) 
+inline void ALUGridIndexStack<T,length>::backupIndexSet ( ostream & os ) 
 {
   // holes are not stored at the moment 
   os.write( ((const char *) &maxIndex_ ), sizeof(int) ) ;
@@ -253,7 +253,7 @@ inline void IndexStack<T,length>::backupIndexSet ( ostream & os )
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::restoreIndexSet ( istream & is )
+inline void ALUGridIndexStack<T,length>::restoreIndexSet ( istream & is )
 {
   is.read ( ((char *) &maxIndex_), sizeof(int) );
   clearStack ();
@@ -280,7 +280,7 @@ inline void IndexStack<T,length>::restoreIndexSet ( istream & is )
 }
 
 template <class T, int length>
-inline void IndexStack<T,length>::clearStack () 
+inline void ALUGridIndexStack<T,length>::clearStack () 
 {
   if(stack_) 
   {
