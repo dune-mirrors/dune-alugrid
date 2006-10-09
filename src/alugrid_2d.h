@@ -9,10 +9,11 @@
 // include all headers 
 #include "stlheaders.h"
 
-namespace ALUGridSpace { 
-#define _DUNE_USES_ALU3DGRID_
 #include "indexstack.h"
-#undef _DUNE_USES_ALU3DGRID_
+
+namespace ALUGridSpace { 
+#define _ANSI_HEADER
+
 using namespace std;
 #include "alu2d/grid.h"
 #include "alu2d/triang.h"
@@ -23,4 +24,5 @@ using namespace std;
 typedef AdaptRestrictProlong2d AdaptRestrictProlong2dType;
 
 }
+#undef _ANSI_HEADER
 #endif

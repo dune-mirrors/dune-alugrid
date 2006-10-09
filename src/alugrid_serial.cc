@@ -3,6 +3,8 @@
 
 #include "alugrid_serial.h"
 
+#define _ANSI_HEADER 
+
 namespace ALUGridSpace {
 
 // bsgrid original sources 
@@ -19,4 +21,5 @@ namespace ALUGridSpace {
 
 } //end namespace 
 
+#undef _ANSI_HEADER 
 #endif

@@ -5,12 +5,15 @@
 
 namespace ALUGridSpace {
 
+#define _ANSI_HEADER 
 #include "alu2d/handle.cc"
 #include "alu2d/triang.cc"
 #include "alu2d/hdlrw.cc"
 #include "alu2d/mknbrs.cc"
 #include "alu2d/vmmap.cc"
 #include "alu2d/vtx_btree.cc"
+
+#undef _ANSI_HEADER 
   
 } //end namespace 
 

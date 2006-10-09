@@ -6,17 +6,22 @@
 #endif
 
 #define _ANSI_HEADER
+
+// if DUNE_NOT_USES_ALUGRID is defined, then index management is deactivated
+//#define _DUNE_NOT_USES_ALU3DGRID_
+
 // include all headers 
 #include "stlheaders.h"
 
-namespace ALUGridSpace {
-#define _DUNE_USES_ALU3DGRID_
+// defines IndexManagerType
 #include "indexstack.h"
+
+namespace ALUGridSpace {
+
 typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
 struct GatherScatter;
 typedef GatherScatter GatherScatterType;
-
 
 #include "serial/key.h"
 #include "serial/serialize.h"
@@ -84,7 +89,7 @@ typedef GatherScatter GatherScatterType;
 #include "serial/myalloc.h"
 
 #include "duneinterface/gitter_dune_impl.h"
-#undef _DUNE_USES_ALU3DGRID_
 }
 
+#undef _ANSI_HEADER 
 #endif

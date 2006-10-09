@@ -3,6 +3,8 @@
 
 #include "alugrid_parallel.h"
 
+#define _ANSI_HEADER 
+
 // partitioning libs 
 // METIS if not found here then dummy version is included 
 extern "C" {
@@ -47,4 +49,5 @@ namespace ALUGridSpace {
 
 } //end namespace 
 
+#undef _ANSI_HEADER 
 #endif

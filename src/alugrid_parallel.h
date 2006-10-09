@@ -5,10 +5,13 @@
 // needs to be defined before all headers are included 
 //#define __USE_INTERNAL_FACES__
 
+
 // the message passing interface (MPI) headers 
 #include <mpi.h>
 
 #include "alugrid_serial.h"
+
+#define _ANSI_HEADER 
 
 namespace ALUGridSpace {
 
@@ -26,5 +29,6 @@ namespace ALUGridSpace {
 #include "duneinterface/gitter_dune_pll_impl.h"
 
 }
-  
+
+#undef _ANSI_HEADER
 #endif
