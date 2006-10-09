@@ -2,10 +2,6 @@
 #ifndef ALUGRIDINDEXSTACK_H_INCLUDED
 #define ALUGRIDINDEXSTACK_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
 #include <assert.h>
 
 #ifdef _ANSI_HEADER
@@ -15,8 +11,8 @@
   #include <stack.h>
 #endif
 
-#ifdef _DUNE_USES_ALU3DGRID_
-
+namespace ALUGridSpace {
+  
 template<class T, int length>
 class ALUGridFiniteStack {
 public :
@@ -298,43 +294,8 @@ inline void ALUGridIndexStack<T,length>::clearStack ()
   return;
 }
 
-#else 
+enum { lengthOfFiniteStack = 10000 };
+typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
 
-//*********************************************************************
-//
-// Dummy implementation for the index stack, if index is not used 
-//
-//*********************************************************************
-template <class T>
-struct DummyIndexStack 
-{
-  //! set index as maxIndex if index is bigger than maxIndex
-  inline void checkAndSetMax(T index)
-  {
-  }
-  
-  //! set index as maxIndex
-  inline void setMaxIndex(T index)
-  {
-  }
-  
-  //! restore index from stack or create new index 
-  T getIndex () 
-  {
-    return -1;
-  }
-
-  //! store index on stack 
-  inline void freeIndex(T index)
-  {
-  }
-
-  //! test stack funtcionality
-  inline void test ()
-  {
-  }
-};  // end class DummyIndexStack 
-
-#endif 
-
+} // end namespace 
 #endif
