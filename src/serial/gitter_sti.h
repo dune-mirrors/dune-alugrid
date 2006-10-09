@@ -33,17 +33,6 @@ typedef strstream    strstream_t;
 #include "parallel.h"
 #include "xdrclass.h"
 
-// if DUNE uses this grid the _DUNE_USES_ALU3DGRID_ variable should be defined
-// otherwise some dummy are set
-#include "../indexstack.h"
-#ifdef _DUNE_USES_ALU3DGRID_
-enum { lengthOfFiniteStack = 10000 };
-typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
-#else
-typedef DummyIndexStack<int> IndexManagerType;
-typedef BSGridVec double;
-#endif
-
 // number of different index manager that exists 
 enum { numOfIndexManager = 6 };
 // 0 == elements 
@@ -239,7 +228,7 @@ public :
   public:
     enum { interior = 0 , border = 111 , ghost = 222 };
     // das wird hier ja langsam zur eierlegenden Wollmilchsau
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   protected:
     // internal index of item 
     int _idx;
@@ -262,7 +251,7 @@ public :
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const {
-#ifdef _DUNE_USES_ALU3DGRID_ 
+#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
       abort();
 #endif
@@ -270,13 +259,13 @@ public :
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
     virtual void restoreIndex (istream & is ) {
-#ifdef _DUNE_USES_ALU3DGRID_ 
+#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
       abort();
 #endif
     }
 
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
     // return index of item 
     inline int getIndex () const 
     { 
@@ -383,7 +372,7 @@ public :
     
 public :
   class vertex : public stiExtender_t :: VertexIF  
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
                , public DuneIndexProvider 
 #endif
   {
@@ -464,7 +453,7 @@ public :
   class Dune_helement : public DuneIndexProvider 
   {
 
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   protected: 
     bool _refinedTag; // true if element was refined 
     Dune_helement () : DuneIndexProvider(), _refinedTag (true) {}
@@ -1564,7 +1553,7 @@ public :
       virtual void backupCMode (const char*,const char *) const ;
       friend class MacroGridBuilder ;
       friend class MacroGhostBuilder;
-#ifdef _DUNE_USES_ALU3DGRID_ 
+#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       friend class DuneParallelGridMover;
 #endif
     } ;
@@ -2068,13 +2057,13 @@ inline int Gitter :: helement :: leaf () const {
 
 // Dune extensions 
 inline void Gitter :: Dune_helement :: resetRefinedTag () {
-#ifdef _DUNE_USES_ALU3DGRID_ 
+#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
   _refinedTag = false; 
 #endif
 }
 
 inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
-#ifdef _DUNE_USES_ALU3DGRID_ 
+#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
   return _refinedTag;
 #else 
   return false;
@@ -2146,13 +2135,13 @@ inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv)
 }
 
 inline void Gitter :: Geometric :: VertexGeo :: backupIndex ( ostream & os ) const {
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   os.write( ((const char *) &_idx ), sizeof(int) ) ;
 #endif
 }
 
 inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is ) {
-#ifdef _DUNE_USES_ALU3DGRID_ 
+#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
   is.read ( ((char *) &_idx), sizeof(int) ); 
 #endif
 }

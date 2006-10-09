@@ -65,7 +65,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       };
 
         class Hbnd3Default : public hbndseg3_GEO 
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
            , public Dune_Hbnd3Default
 #endif
         {
@@ -108,7 +108,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       };
 
         class Hbnd4Default : public hbndseg4_GEO 
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
            , public Dune_Hbnd4Default
 #endif
         {
