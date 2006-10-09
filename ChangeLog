@@ -10,4 +10,5 @@ Changed from version 0.3 to version 0.4
 * resetRefinementRequest now setting nospilt and added
   tagForGlobalCoarseing method 
 * added Tags for macro grid file , Tetrahedra, Hexahedra and Triangles 
+* volume calculation for Hexa and Tetra is done in split method 
 
