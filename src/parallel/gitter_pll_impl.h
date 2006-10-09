@@ -1399,7 +1399,7 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, int) {
   try {
 
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
     // read the real level of ghost 
     assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
     bool wasLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );

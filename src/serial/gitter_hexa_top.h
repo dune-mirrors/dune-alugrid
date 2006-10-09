@@ -1513,7 +1513,7 @@ template < class A > void HexaTop < A > :: backupCMode (ostream & os) const {
 }
 
 template < class A > void HexaTop < A > :: backupIndex (ostream & os) const {
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   os.write(((const char *) & this->_idx ), sizeof(int));
   for (const innerhexa_t* c = down(); c; c = c->next()) {
     c->backupIndex(os);
@@ -1531,7 +1531,7 @@ template < class A > void HexaTop < A > :: backup (ostream & os) const {
 }
 
 template < class A > void HexaTop < A > :: restoreIndex (istream & is) {
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   // free index from constructor
   // indexManager is cleared from outside 
   is.read ( ((char *) &(this->_idx) ), sizeof(int) );

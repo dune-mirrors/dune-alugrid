@@ -27,7 +27,7 @@
   #include <algo.h>
 #endif
 
-#ifndef _DUNE_USES_ALU3DGRID_
+#ifdef _DUNE_NOT_USES_ALU3DGRID_
 #include "party_lib.h"
 #include "metis.h"
 #endif

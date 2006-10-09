@@ -1603,7 +1603,7 @@ template < class A > inline void TetraTop < A > :: backupCMode (ostream & os) co
 // buckupTetra 
 template < class A > inline void TetraTop < A > :: backupIndex (ostream & os) const 
 {
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write my index 
   os.write( ((const char *) & this->_idx ), sizeof(int) ) ;
 
@@ -1657,7 +1657,7 @@ template < class A > inline void TetraTop < A > :: backup (XDRstream_out & os) c
 // overloaded restoreIndex Method 
 template < class A > inline void TetraTop < A > :: restoreIndex (istream & is) 
 {
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   // free index from constructor
   is.read ( ((char *) &(this->_idx) ), sizeof(int) );
 

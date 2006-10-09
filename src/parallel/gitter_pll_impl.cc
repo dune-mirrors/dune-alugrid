@@ -365,7 +365,7 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & 
 }
 void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   
   // write level to know the level of ghost on the other side
   os.writeObject( mytetra().level() );
@@ -909,7 +909,7 @@ void HexaPllBaseX  :: writeDynamicState (ObjectStream & os, GatherScatterType & 
 void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
   // siehe writeDynamicState von Tetra 
 
-#ifdef _DUNE_USES_ALU3DGRID_
+#ifndef _DUNE_NOT_USES_ALU3DGRID_
   
   // write level to know the level of ghost on the other side
   os.writeObject( myhexa().level() );
