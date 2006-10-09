@@ -8,5 +8,8 @@ How-to create a discribution
 1) run ./autogen.sh 
 2) make dist 
 This will create the desired ALUGrid-'version-number'.tar.gz 
-4) run date to remember when dist was create and add this to the file 'lastVersion'
+4) run date to remember when dist was create and add this 
+to the file 'lastVersion'
+5) copy ALUGrid-'version-number'.tar.gz to webspace and don't forget to
+relink the ALUGrid-latest.tar.gz link
 
