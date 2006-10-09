@@ -6,9 +6,9 @@
 
 #include "grid.h"                               
 
-typedef IndexStack<int,10000> IndexManager2dType;
-// enum { lengthOfFiniteStack = 10000 };
-// typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;
+// is defined in indexstack.h 
+typedef IndexManagerType IndexManager2dType;
+
 // number of different index manager that exists
 enum { numOfIndexManager2d = 4 };
 // 0 == elements
