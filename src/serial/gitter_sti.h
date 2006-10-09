@@ -38,7 +38,7 @@ typedef strstream    strstream_t;
 #include "../indexstack.h"
 #ifdef _DUNE_USES_ALU3DGRID_
 enum { lengthOfFiniteStack = 10000 };
-typedef IndexStack<int,lengthOfFiniteStack> IndexManagerType;
+typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
 #else
 typedef DummyIndexStack<int> IndexManagerType;
 typedef BSGridVec double;
