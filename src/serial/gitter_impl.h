@@ -892,8 +892,8 @@ inline GitterBasisImpl :: GitterBasisImpl (istream & in) : _macrogitter (0) {
 inline GitterBasisImpl :: GitterBasisImpl (const char * file) : _macrogitter (0) {
   ifstream in (file) ;
   if (!in) {
-    cerr << "  GitterBasisImpl :: GitterBasisImpl (const char *) FEHLER (IGNORIERT) " ;
-    cerr << "beim \"Offnen der Datei " << (file ? file : "\"null\"" ) << endl ;
+    //cerr << "  GitterBasisImpl :: GitterBasisImpl (const char *) FEHLER (IGNORIERT) " ;
+    //cerr << "beim \"Offnen der Datei " << (file ? file : "\"null\"" ) << endl ;
     _macrogitter = new MacroGitterBasis ( this ) ;
   } else {
     _macrogitter = new MacroGitterBasis ( this, in) ;
