@@ -3,5 +3,8 @@ C: Einlesen des Makrogitters flexibler gestallten - keine Orientierung
    und festes Makroelement vorschreiben
 D: Konforme Bisektion eibauen
 
+E: Spezielle Verfeinerungsregel fuer Geisterelemente welche statt 8 nur 4
+Kinder anlegt. 
+
 Prioritaet:
 Vorschlag 1: B, D, C
