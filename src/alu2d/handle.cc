@@ -79,9 +79,10 @@ void Hmesh::setup_grid(const char *macroname) {
     double time2 = time;
     long unsigned int nbr2 = nbr;
     recoverGrid(macroname,time2,nbr2);
-    if (fabs(time2-time) + fabs(nbr2-nbr)>1e-5) {
+    if (fabs(time2-time) + 
+        fabs((double (nbr2-nbr)))> 1e-5) {
       cerr << "ERROR in Hmesh::setup_grid: "
-	   << "backup-file and macro-grid file not compatible" << endl;
+      	   << "backup-file and macro-grid file not compatible" << endl;
       abort();
     }
   }
