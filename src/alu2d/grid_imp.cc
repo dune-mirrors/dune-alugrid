@@ -883,34 +883,6 @@ inline int Element::inside(Vertex &v) const
 // ***************************************************
 // #begin(method)
 // #method:
-//   int Element::getAllNb(Vtx_btree* vtx, vector<Thinelement *> vec) const
-// #parameters: 
-// #description:
-//   will return all neighbours associated with the element in a vector
-// #end(method)
-// ***************************************************
-inline void Element::getAllNb(Vtx_btree::Node* node, stack<Thinelement *> vec) 
-{
-  if(!node->leftNode())
-    vec.push(node->leftElement());
-  else {
-    getAllNb(node->leftNode(), vec);
-  }
-  if(!node->rightNode())
-    vec.push(node->rightElement());
-  else {
-      getAllNb(node->rightNode(), vec);
-  }    
-  //if(!vtx->right())
-  //  vec.push_back(vtx->getrnb());
-  //else {    
-  //  getAllNb(vtx->right(), vec);        
-  //}
-}
-
-// ***************************************************
-// #begin(method)
-// #method:
 //   int Element::inside(const double (&)[2]) const
 // #parameters:
 //   \ const double (&)[2] | point | Punktkoordinaten

@@ -653,13 +653,14 @@ class Element : public Thinelement, public Refco_el {
      return (connect.hvtx[fce] && connect.hvtx[fce]->head);
     }
     
-    int getNbList(int fce, stack<Thinelement*> vec)  {
-      assert(connect.hvtx[fce]);
-      assert(connect.hvtx[fce]->head);      
-      getAllNb(connect.hvtx[fce]->head, vec);
-      return vec.size();
+    Thinelement* getLeftIntersection(int fce) {
+      return connect.hvtx[fce]->head->leftElement();
     }
-
+    
+    Thinelement* getRightIntersection(int fce) {
+      return connect.hvtx[fce]->head->rightElement();
+    }
+        
   private:
     void getAllNb(Vtx_btree::Node* node, stack<Thinelement*> vec) ;
    
