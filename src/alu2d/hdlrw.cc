@@ -330,9 +330,10 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 void Hmesh::asciwritetriang(const char *filename,
           double time, unsigned long int nbr) {
 
-  cerr << "\n  Hmesh_basic::asciwritetriang(?) \"offnet: " ;
-  
+#ifndef NDEBUG
+  cerr << "\n  Hmesh_basic::asciwritetriang(?) opens: " ;
   cerr << filename << "\n" << endl ;
+#endif
 
   vl.renumber() ;
   
@@ -353,7 +354,9 @@ void Hmesh_basic::asciwritetriang(ofstream &out) {
  
     Listwalk_impl < Vertex > walk(vl) ;
   
-    cerr << "    Anzahl der Vertices:       " << walk.size() << endl ;
+#ifndef NDEBUG
+    cerr << "    Number of Vertices:       " << walk.size() << endl ;
+#endif
     
     int nr = 0;
     
@@ -364,15 +367,15 @@ void Hmesh_basic::asciwritetriang(ofstream &out) {
       if (v.level()==-1) ++nr;
               
     }
-    out << nr << "\n" ;
+
+    out << nr << endl;
 
     for( walk.first() ; ! walk.done() ; walk.next() ) {
     
       Vertex & v = walk.getitem() ;
 
       if (v.level()==-1) 
-            
-  v.write(out) ;
+        v.write(out) ;
     
     }
     
@@ -384,9 +387,11 @@ void Hmesh_basic::asciwritetriang(ofstream &out) {
 
     int count = 0 ;
     
-    cerr << "    Anzahl der Makroelemente:  " << walk.size() << endl ;
+#ifndef NDEBUG
+    cerr << "    Number of macro Elements:  " << walk.size() << endl ;
+#endif
     
-    out << walk.size() << "\n" ;
+    out << walk.size() << endl;
     
     for( walk.first() ; ! walk.done() ; walk.next() ) {
     
@@ -396,7 +401,9 @@ void Hmesh_basic::asciwritetriang(ofstream &out) {
 
     }
 
-    cerr << "    Anzahl der Elemente:       " << count << endl ;
+#ifndef NDEBUG
+    cerr << "    Number of Elements:       " << count << endl ;
+#endif
 
   }
   
@@ -406,9 +413,11 @@ void Hmesh_basic::asciwritetriang(ofstream &out) {
 
    int count = 0 ;
     
-    cerr << "    Anzahl der Macrorandelemente:   " << walk.size() << endl ;
+#ifndef NDEBUG
+    cerr << "    Number of macro boundary Elements:   " << walk.size() << endl ;
+#endif
     
-    out << walk.size() << "\n" ;
+    out << walk.size() << endl ;
     
     for( walk.first() ; ! walk.done() ; walk.next() ) {
     
@@ -418,11 +427,15 @@ void Hmesh_basic::asciwritetriang(ofstream &out) {
 
     }
 
-    cerr << "    Anzahl der Randelemente:       " << count << endl ;
+#ifndef NDEBUG
+    cerr << "    Number of boundary Elements:       " << count << endl ;
+#endif
 
   }
   
+#ifndef NDEBUG
   cerr << "\n  -------------------------- closed.\n" <<endl ;
+#endif
  
 }
 
@@ -440,8 +453,10 @@ Hmesh::storeGrid(const char* fbase,
 
   sprintf(filename,"%s.refine",fbase);
 
-  cout << "Hmesh::writeRecoverFile(): writing file \""
+#ifndef NDEBUG
+  cerr << "Hmesh::writeRecoverFile(): writing file \""
        << filename << "\" ...";
+#endif
 
   ofstream out(filename, ios::out|ios::trunc);
   assert(out);
