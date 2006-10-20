@@ -4,6 +4,8 @@
 
 #include <assert.h>
 
+namespace ALUGridSpace {
+  
 #ifdef _ANSI_HEADER
   using namespace std;
   #include <stack>
@@ -11,8 +13,6 @@
   #include <stack.h>
 #endif
 
-namespace ALUGridSpace {
-  
 template<class T, int length>
 class ALUGridFiniteStack {
 public :
