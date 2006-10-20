@@ -6,6 +6,8 @@
 
 namespace ALUGridSpace {
   
+// using namespace std has always to be called inside the namespace
+// ALUGridSpace 
 #ifdef _ANSI_HEADER
   using namespace std;
   #include <stack>
