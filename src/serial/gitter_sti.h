@@ -1165,6 +1165,9 @@ public :
     private :
       inline int evalVertexTwist(int, int) const;
       inline int evalEdgeTwist(int, int) const;
+      
+      inline int originalVertexTwist(int, int) const;
+      inline int originalEdgeTwist(int, int) const;
     private:
       myhface3_t * f [4] ;
       signed char s [4] ;
@@ -2667,45 +2670,44 @@ inline const Gitter :: Geometric :: Tetra :: myhface3_t * Gitter :: Geometric ::
   return f [i] ;
 }
 
-inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const {
-#if 0
-  assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
-  assert( vertex >= 0 && vertex < 3 );
-/*
-#ifndef NDEBUG 
-  // check implementation of edgeTwist with original formula 
-  int vxTw = (twist(face) < 0 ? 
-          (7 - vertex + twist(face)) % 3 : 
-          (vertex + twist(face)) % 3);
-  assert( vxTw == vertexTwist[twist(face)+3][vertex] );
-#endif
-*/
-  return vertexTwist[twist(face)+3][vertex];  
-#else 
+inline int Gitter::Geometric::Tetra::originalVertexTwist(int face, int vertex) const {
   return (twist(face) < 0 ? 
           (7 - vertex + twist(face)) % 3 : 
           (vertex + twist(face)) % 3);
+}
+
+inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const {
+#if 1
+  // make sure vertex and face are in range is 
+  assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
+  assert( vertex >= 0 && vertex < 3 );
+  // make sure that we get the same result 
+  assert( originalVertexTwist(face,vertex) == vertexTwist[twist(face)+3][vertex] );
+  return vertexTwist[twist(face)+3][vertex];  
+#else 
+  return originalVertexTwist(face,vertex);
 #endif
+}
+
+inline int Gitter::Geometric::Tetra::originalEdgeTwist(int face, int vertex) const 
+{
+  return (twist(face) < 0 ? 
+          (6 - vertex + twist(face)) % 3 : 
+          (vertex + twist(face)) % 3);
 }
 
 inline int Gitter::Geometric::Tetra::evalEdgeTwist(int face, int vertex) const 
 {
-#if 0
+#if 1
+  // make sure vertex and face are in range is 
   assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
   assert( vertex >= 0 && vertex < 3 );
-/*
-#ifndef NDEBUG
-  int edgTw = (twist(face) < 0 ? 
-          (6 - vertex + twist(face)) % 3 : 
-          (vertex + twist(face)) % 3);
-  assert( edgTw == edgeTwist[twist(face)+3][vertex]);
-#endif
-*/
+  // make sure that we get the same result 
+  assert( originalEdgeTwist(face,vertex) == edgeTwist[twist(face)+3][vertex]);
   return edgeTwist[twist(face)+3][vertex];
 #else 
-  return (twist(face) < 0 ? 
-          (6 - vertex + twist(face)) % 3 : 
-          (vertex + twist(face)) % 3);
+  // use original formula 
+  return originalEdgeTwist(face,vertex); 
 #endif
 }
 
