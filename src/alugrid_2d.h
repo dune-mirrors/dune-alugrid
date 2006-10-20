@@ -14,7 +14,6 @@
 namespace ALUGridSpace { 
 #define _ANSI_HEADER
 
-using namespace std;
 #include "alu2d/grid.h"
 #include "alu2d/triang.h"
 #include "alu2d/handle.h"
