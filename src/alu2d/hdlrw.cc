@@ -23,8 +23,7 @@
 bool Hmesh :: ascireadtriang(const char *filename,
            double& time, unsigned long int& nbr) {
   //cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
-  
-  cerr << filename << "\n" << endl ;
+  //cerr << filename << "\n" << endl ;
   
   ifstream in;
   in.open(filename, ios::in) ;
