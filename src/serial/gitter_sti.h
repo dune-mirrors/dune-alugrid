@@ -718,8 +718,6 @@ public :
     // Methoden f"ur den Strahlungstransportl"oser
     virtual void sortmacrogrid () {abort();}
 
-    virtual IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const = 0 ;
-    virtual IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const = 0 ;
   } ;
 public :
   class Geometric {
@@ -1547,6 +1545,17 @@ public :
       // index provider, for every codim one , 4 is for boundary
       IndexManagerType _indexmanager[ numOfIndexManager ];
 
+      // default implementations just use the iterator method  
+      IteratorSTI < vertex_STI > * pureElementIterator (const vertex_STI * a) const { return iterator(a); }
+      IteratorSTI < vertex_STI > * pureElementIterator (const IteratorSTI < vertex_STI > * a) const { return iterator(a); }
+      IteratorSTI < hedge_STI > * pureElementIterator (const hedge_STI * a) const { return iterator(a); }
+      IteratorSTI < hedge_STI > * pureElementIterator (const IteratorSTI < hedge_STI > * a) const { return iterator(a); }
+      IteratorSTI < hface_STI > * pureElementIterator (const hface_STI * a) const { return iterator(a); }
+      IteratorSTI < hface_STI > *   pureElementIterator (const IteratorSTI < hface_STI > * a) const { return iterator(a); }
+      IteratorSTI < hbndseg_STI > * pureElementIterator (const hbndseg_STI * a) const { return iterator(a); }
+      IteratorSTI < hbndseg_STI > *   pureElementIterator (const IteratorSTI < hbndseg_STI > * a) const { return iterator(a); }
+
+      // different implementation for elements 
       IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const ;
       IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const ;
     public :
