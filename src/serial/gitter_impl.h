@@ -26,6 +26,8 @@
 #include "gitter_hexa_top.h"
 #include "gitter_tetra_top.h"
 
+// include of ghost_elements in line 959
+ 
 class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
   public :
     class Objects {
@@ -65,7 +67,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       };
 
         class Hbnd3Default : public hbndseg3_GEO 
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
            , public Dune_Hbnd3Default
 #endif
         {
@@ -108,7 +110,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       };
 
         class Hbnd4Default : public hbndseg4_GEO 
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
+#ifdef _DUNE_USES_ALU3DGRID_
            , public Dune_Hbnd4Default
 #endif
         {
@@ -178,11 +180,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         typedef hface3_IMPL innerface_t ;
         typedef hedge1_IMPL inneredge_t ;
         typedef VertexEmpty innervertex_t ;
-        inline TetraEmpty (myhface3_t *,int,
-                           myhface3_t *,int,
-                           myhface3_t *,int,
-                           myhface3_t *,int, 
-                           Gitter *) ;
+        inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
 
         ////////////////////////////////////////////////
         // read of data 
@@ -340,6 +338,9 @@ public:
             typedef hface3_IMPL innerface_t ;
             typedef hedge1_IMPL inneredge_t ;
             typedef VertexEmpty innervertex_t ;
+	    //us
+	    typedef tetra_IMPL GhostElement_t;
+
       inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
      ~Periodic3Empty () {}
     public:
@@ -347,20 +348,6 @@ public:
   typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
 
 
-  class Periodic4Empty : public periodic4_GEO {
-    protected :
-            typedef hface4_IMPL innerface_t ;
-            typedef hedge1_IMPL inneredge_t ;
-            typedef VertexEmpty innervertex_t ;
-      inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
-     ~Periodic4Empty () {}
-    public:
-  } ;
-  typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
-
-  ////////////////////////////////////////////////
-  //  --HexaEmpty
-  ///////////////////////////////////////////////
       class HexaEmpty : public hexa_GEO {
       protected :
         typedef hface4_IMPL innerface_t ;
@@ -369,6 +356,7 @@ public:
         inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, Gitter*) ;
         ~HexaEmpty () {}
       
+        // Neu: burriad 29.4.05
         int preCoarsening(); 
         int postRefinement();
 
@@ -525,6 +513,22 @@ public:
         }
       } ;
       typedef HexaTop < HexaEmpty > hexa_IMPL ;
+
+      // Anfang - Neu am 23.5.02 (BS)
+      class Periodic4Empty : public periodic4_GEO {
+        protected :
+            typedef hface4_IMPL innerface_t ;
+            typedef hedge1_IMPL inneredge_t ;
+            typedef VertexEmpty innervertex_t ;
+	    //us
+	    typedef hexa_IMPL GhostElement_t;
+          inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
+         ~Periodic4Empty () {}
+        public:
+      } ;
+      typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
+      // Ende - Neu am 23.5.02 (BS)
+ 
     } ;
   public :
     class MacroGitterBasis : public virtual BuilderIF {
@@ -838,14 +842,12 @@ inline int GitterBasis :: Objects :: TetraEmpty :: postRefinement ()
   return _myGrid->postRefinement(*this);
 }
 
-inline GitterBasis :: Objects :: Periodic3Empty :: 
-Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
+inline GitterBasis :: Objects :: Periodic3Empty :: Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
   : Gitter :: Geometric :: Periodic3 (f0, t0, f1, t1) {
   return ;
 }
 
-inline GitterBasis :: Objects :: Periodic4Empty :: 
-Periodic4Empty (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
+inline GitterBasis :: Objects :: Periodic4Empty :: Periodic4Empty (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
   : Gitter :: Geometric :: Periodic4 (f0, t0, f1, t1) {
   return ;
 }
@@ -857,9 +859,8 @@ HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
            myhface4_t * f4, int t4, myhface4_t * f5, int t5,
            Gitter* mygrid) : 
   Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5),
-  _myGrid(mygrid) 
-{
-  attachleafs();
+  _myGrid(mygrid) {
+    attachleafs();
   return ;
 }
 
@@ -892,8 +893,8 @@ inline GitterBasisImpl :: GitterBasisImpl (istream & in) : _macrogitter (0) {
 inline GitterBasisImpl :: GitterBasisImpl (const char * file) : _macrogitter (0) {
   ifstream in (file) ;
   if (!in) {
-    //cerr << "  GitterBasisImpl :: GitterBasisImpl (const char *) FEHLER (IGNORIERT) " ;
-    //cerr << "beim \"Offnen der Datei " << (file ? file : "\"null\"" ) << endl ;
+    cerr << "  GitterBasisImpl :: GitterBasisImpl (const char *) FEHLER (IGNORIERT) " ;
+    cerr << "beim \"Offnen der Datei " << (file ? file : "\"null\"" ) << endl ;
     _macrogitter = new MacroGitterBasis ( this ) ;
   } else {
     _macrogitter = new MacroGitterBasis ( this, in) ;
@@ -954,12 +955,60 @@ inline GitterBasis :: tetra_GEO * GitterBasis :: MacroGitterBasis :: insert_tetr
   return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], indexManager(0) , _myGrid ) ;
 }
 
+// inlcudes implementation of MacroGhostTetra and MacroGhostHexa 
+#include "ghost_elements.h"
+
 inline GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) {
-  return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
+
+  Objects :: periodic3_IMPL * per3 = new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
+      
+  double v[3]; //Verschiebungsvektor (von SW(myhface3(0) zu SW(myhface3(1))
+  for (int i = 0; i < 3; i++) {
+    v[i] = 0.3333333333*(f[1]->myvertex(0)->Point()[i] +
+                         f[1]->myvertex(1)->Point()[i] +
+                         f[1]->myvertex(2)->Point()[i] -
+                         f[0]->myvertex(0)->Point()[i] -
+                         f[0]->myvertex(1)->Point()[i] -
+                         f[0]->myvertex(2)->Point()[i]); 
+  }
+
+  tetra_GEO * mytetra0 = static_cast<tetra_GEO * > (per3->myneighbour(0).first), //Tetra an Fl 0 (an dieser liegt Ghost0 an)
+            * mytetra1 = static_cast<tetra_GEO * > (per3->myneighbour(1).first); //Tetra an Fl 1 ( - " -               1   )
+
+  const Hbnd3IntStoragePoints allp0 (mytetra0, per3->myneighbour(0).second);
+  const Hbnd3IntStoragePoints allp1 (mytetra1, per3->myneighbour(1).second);
+  MacroGhostTetra * ghost0 = new MacroGhostTetra(*this, allp1, &(*mytetra1), v, -1.0);
+  MacroGhostTetra * ghost1 = new MacroGhostTetra(*this, allp0, &(*mytetra0), v,  1.0);
+  per3->setGhost(ghost0->getGhost(), 0);
+  per3->setGhost(ghost1->getGhost(), 1);
+  return per3;    
+  //ohne Geister: return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
 }
 
 inline GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) {
-  return new Objects :: periodic4_IMPL (0,f[0],t[0],f[1],t[1]) ;
+  Objects :: periodic4_IMPL * per4 = new Objects :: periodic4_IMPL (0, f [0], t[0], f [1], t[1]) ;
+  double v [3]; //Verschiebung von Schwerpunkt(myhface4(0)) zu Schwerpunkt(myhface4(1))
+  for (int i = 0; i < 4; i++) {
+    v[i] = 0.25*(f[1]->myvertex(0)->Point()[i] +
+                 f[1]->myvertex(1)->Point()[i] +
+                 f[1]->myvertex(2)->Point()[i] -
+                 f[0]->myvertex(0)->Point()[i] -
+                 f[0]->myvertex(1)->Point()[i] -
+                 f[0]->myvertex(2)->Point()[i]);
+  }
+
+  /*
+  hexa_GEO * myhexa0 = static_cast<hexa_GEO * > (per4->myneighbour(0).first), //Hexa an Fl 0 (an dieser liegt Ghost0 an)
+           * myhexa1 = static_cast<hexa_GEO * > (per4->myneighbour(1).first); //Hexa an Fl 1 ( - " -               1   )
+
+  const Hbnd4IntStoragePoints  allp0 (myhexa0, per4->myneighbour(0).second);
+  const Hbnd4IntStoragePoints  allp1 (myhexa1, per4->myneighbour(1).second);
+  MacroGhostHexa * ghost0 = new MacroGhostHexa(*this, allp1, &(*myhexa1), v, -1.0);
+  MacroGhostHexa * ghost1 = new MacroGhostHexa(*this, allp0, &(*myhexa0), v,  1.0);
+  per4->setGhost(ghost0->getGhost(), 0);
+  per4->setGhost(ghost1->getGhost(), 1);  
+  */
+  return per4;   //  return new ObjectsPll :: Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1]) ;  
 }
 
 inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) {
@@ -971,7 +1020,7 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
   // the two last zeros are the following: 
   // the first pointer is pointer to grid which we dont need in the serial
   // case and the second is a pointer to ghost Element 
-  return new Objects :: hbndseg3_IMPL ( 0,f,i, (ProjectVertex *) NULL, (Objects :: hbndseg3_IMPL *)NULL, b, indexManager(4), _myGrid) ;
+  return new Objects :: hbndseg3_IMPL ( 0,f,i, NULL,NULL, b, indexManager(4), _myGrid) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 

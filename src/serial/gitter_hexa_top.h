@@ -258,6 +258,11 @@ template < class A > class Periodic4Top : public A {
     typedef typename A :: balrule_t     balrule_t ;
     inline void refineImmediate (myrule_t) ;
     inline void append (innerperiodic4_t * h) ;
+    
+    //us
+    typedef typename A :: GhostElement_t GhostElement_t;
+    typedef Gitter :: ghostpair_STI ghostpair_STI;
+    
   private :
     innerperiodic4_t * _dwn, * _bbb, * _up ; 
     int _lvl ;
@@ -301,6 +306,18 @@ template < class A > class Periodic4Top : public A {
     void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
     void restore (istream &) ;
+
+    //Per4-Geister: (us)
+    const ghostpair_STI & getGhost (int) const ;
+    virtual inline void setGhost ( const pair< Gitter :: helement * , int > & pair, int nr);
+  private:
+    mutable ghostpair_STI _ghostPair [2];
+    //_ghostPair[0] liegt an myhface4[0] und ist das affine Bild vom Hexa an myhface4(1)
+ 
+    // refine ghost if face is refined and ghost is not zero
+    void splitGhosts () ;
+    // coarse ghost if face is coarsened
+    void coarseGhosts () ;
 };
 
 //
@@ -1724,6 +1741,38 @@ template < class A > inline const typename Periodic4Top < A > :: innerface_t * P
   return 0 ;
 }
 
+template < class A > const typename Gitter :: ghostpair_STI & Periodic4Top < A > :: getGhost (int g) const {
+  assert (g == 0 || g == 1);
+  return _ghostPair[g];
+}
+
+template < class A > inline void Periodic4Top < A > :: setGhost ( const pair< Gitter:: helement * , int > & pair, int nr) {
+  _ghostPair[nr] = pair;
+}
+
+template < class A > void Periodic4Top < A > :: splitGhosts () {
+  for (int g = 0; g < 2; ++g) {
+    ghostpair_STI ghostpair = _ghostPair[g]; 
+    if (ghostpair.first) {
+      GhostElement_t & ghost = static_cast<GhostElement_t &> (*ghostpair.first);
+      ghost.request( Gitter::Geometric::HexaRule::iso8 );
+      assert( Gitter::Geometric::HexaRule::iso8 == ghost.requestrule ());
+      ghost.refine();
+    }
+  }
+}
+
+template < class A > void Periodic4Top < A > :: coarseGhosts () {
+  for (int g = 0; g < 2; ++g) {
+    if(_ghostPair[g].first) {
+      GhostElement_t & ghost = static_cast<GhostElement_t &> (*(_ghostPair[g].first));
+      ghost.request( Gitter::Geometric::HexaRule::crs );
+      assert( Gitter::Geometric::HexaRule::crs == ghost.requestrule ());
+      ghost.coarse();
+      assert( ghost.leaf() );
+    }
+  }
+}
 template < class A > inline void Periodic4Top < A > :: append (Periodic4Top < A > * h) { 
   assert (_bbb == 0) ;
   _bbb = h ;
@@ -1764,7 +1813,65 @@ template < class A > void Periodic4Top < A > :: request (myrule_t) {
   return ;
 }
 
-template < class A > void Periodic4Top < A > :: splitISO4 () {  
+template < class A > void Periodic4Top < A > :: splitISO4 () 
+{  
+  assert (_dwn == 0) ;
+
+  // get the childs 
+  typedef Gitter :: ghostpair_STI ghostpair_STI;
+  typedef typename Gitter :: Geometric :: hexa_GEO  hexa_GEO;
+  typedef typename Gitter :: Geometric :: hface4_GEO hface4_GEO;
+  
+  hexa_GEO *(ghchild)[4] = {0,0,0,0};
+  
+  // refine ghost element 
+  this->splitGhosts();
+  
+  for (int g = 0; g < 2; g++) {  
+    ghostpair_STI ghostpair = _ghostPair[g];
+  
+    hexa_GEO * gh = dynamic_cast<hexa_GEO *> ((ghostpair).first);
+  
+    int gFace[4] = { -1,-1,-1,-1 };
+    if(gh)
+    {
+      int gFaceNum = ghostpair.second; 
+      assert( gFaceNum >= 0 );
+      assert( gFaceNum < 6 );
+      hface4_GEO * face = gh->myhface4( gFaceNum );
+      assert( face );
+    
+      face = face->down();
+      for(int i=0; i<4; i++)
+      {
+        assert(face);
+        typedef pair < Gitter :: Geometric :: hasFace4 *, int > neigh_t;
+        neigh_t neighbour = face->nb.front();
+        hexa_GEO * ghch = static_cast<hexa_GEO *> (neighbour.first);
+        if(ghch)
+        { 
+          if(ghch->up() != gh) 
+          {
+            neighbour = face->nb.rear();
+            ghch = static_cast<hexa_GEO *> (neighbour.first);
+          }
+        }
+        else 
+        { 
+          neighbour = face->nb.rear();
+          ghch = static_cast<hexa_GEO *> (neighbour.first);
+        }
+ 
+        // gFace might be differnent from ghostFaceNumber, unfortuneately 
+        gFace[i] = neighbour.second;
+        assert(ghch);
+        assert(ghch->up() == gh);
+        ghchild[i] = ghch;
+        face = face->next();
+      }
+    }
+  }
+
   int l = 1 + this->level () ;
   innerperiodic4_t * p0 = new innerperiodic4_t (l, this->subface4 (0,0), this->twist (0), this->subface4 (1,0), this->twist (1), this, 0) ;
   innerperiodic4_t * p1 = new innerperiodic4_t (l, this->subface4 (0,1), this->twist (0), this->subface4 (1,3), this->twist (1), this, 1) ;
@@ -1888,6 +1995,10 @@ template < class A > bool Periodic4Top < A > :: bndNotifyCoarsen () {
   // liegt. Somit kann es vergr"obert werden.
   
     this->preCoarsening () ;
+    
+    // coarse ghost elements 
+    this->coarseGhosts() ;
+
     delete _dwn ;
     _dwn = 0 ;
     _rule = myrule_t :: nosplit ;

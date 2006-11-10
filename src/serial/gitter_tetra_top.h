@@ -227,6 +227,11 @@ template < class A > class Periodic3Top : public A {
     typedef typename A :: balrule_t     balrule_t ;
     inline void refineImmediate (myrule_t) ;
     inline void append (innerperiodic3_t * h) ;
+    
+    //us
+    typedef typename A :: GhostElement_t GhostElement_t;
+    typedef Gitter :: ghostpair_STI ghostpair_STI;
+    
   private :
     innerperiodic3_t * _dwn, * _bbb, * _up ; 
     int _lvl ;
@@ -272,6 +277,20 @@ template < class A > class Periodic3Top : public A {
     void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
     void restore (istream &) ;
+
+    // get ghost pair 
+    inline const ghostpair_STI & getGhost (int) const ;
+    // set ghost pair, nr should be 0 or 1, I guess 
+    inline void setGhost ( const pair< Gitter :: helement * , int > & pair, int nr);
+
+  private:
+    mutable ghostpair_STI _ghostPair [2];
+    //_ghostPair[0] liegt an myhface3[0] und ist das affine Bild vom Tetra an myhface3(1)
+    
+    // refine ghost if face is refined and ghost is not zero
+    void splitGhosts () ; 
+    // coarse ghost if face is coarsened
+    void coarseGhosts () ;
 };
   //
   //    #    #    #  #          #    #    #  ######
@@ -1970,7 +1989,77 @@ template < class A > void Periodic3Top < A > :: request (myrule_t) {
   return ;
 }
 
-template < class A > void Periodic3Top < A > :: split_iso4 () {
+template < class A > 
+inline void  Periodic3Top < A > :: setGhost ( const pair< Gitter :: helement * , int > & pair, int nr)
+{
+  assert( (nr >= 0) && (nr < 2));  
+  _ghostPair[nr] = pair;
+}
+
+template < class A > 
+inline const Gitter :: ghostpair_STI & 
+Periodic3Top < A > :: getGhost ( int nr ) const 
+{
+  assert( (nr >= 0) && (nr < 2));  
+  return _ghostPair[nr];
+}
+
+template < class A > void Periodic3Top < A > :: split_iso4 () 
+{
+
+  //von Hbnd kopiert ...
+  this->splitGhosts();
+
+  // get the childs 
+  typedef typename Gitter :: ghostpair_STI ghostpair_STI;
+  typedef typename Gitter :: Geometric :: tetra_GEO tetra_GEO;
+  typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
+  for (int g = 0; g < 2; ++g) 
+  {
+    ghostpair_STI ghostpair = this->getGhost(g);
+    tetra_GEO * gh = static_cast<tetra_GEO *> (ghostpair.first); 
+
+    // I hate this piece of code, R.K. 
+    tetra_GEO *(ghchild)[4] = {0,0,0,0};
+    int gFace[4] = {-1,-1,-1,-1};
+    if(gh)
+    {
+      hface3_GEO * face = gh->myhface3( ghostpair.second ); 
+      face = face->down();
+      for( int i=0; i<4; i++)
+      {
+        assert(face);
+        typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
+        neigh_t neighbour = face->nb.front();
+        tetra_GEO * ghch = static_cast<tetra_GEO *> (neighbour.first);
+        if(ghch)
+        { 
+          if(ghch->up() != gh) 
+          {
+            neighbour = face->nb.rear();
+            ghch = static_cast<tetra_GEO *> (neighbour.first);
+          }
+ 
+        }
+        else 
+        { 
+          neighbour = face->nb.rear();
+          ghch = static_cast<tetra_GEO *> (neighbour.first);
+        }
+      
+        // gFace might be differnent from ghostFaceNumber, unfortuneately 
+        gFace[i] = neighbour.second; 
+       
+        assert(ghch);
+        assert(ghch->up() == gh);
+
+        ghchild[i] = ghch;
+        face = face->next();
+      }
+    }
+  }
+  //soweit von Hbnd
+	
   int l = 1 + this->level () ;
   innerperiodic3_t * p0 = new innerperiodic3_t (l, this->subface3 (0,0), this->twist (0), this->subface3 (1,0), this->twist (1), this , 0) ;
   innerperiodic3_t * p1 = new innerperiodic3_t (l, this->subface3 (0,1), this->twist (0), this->subface3 (1,2), this->twist (1), this , 1) ;
@@ -2106,6 +2195,10 @@ template < class A > bool Periodic3Top < A > :: bndNotifyCoarsen () {
   // liegt. Somit kann es vergr"obert werden.
   
     this->preCoarsening () ;
+    
+    //mit Geistern (us)
+    this->coarseGhosts();
+    
     delete _dwn ;
     _dwn = 0 ;
     _rule = myrule_t :: nosplit ;
