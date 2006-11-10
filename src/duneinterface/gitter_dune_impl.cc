@@ -313,9 +313,154 @@ bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp)
   return refined;
 }
 
+#if 0
+void GitterDuneBasis :: ALUcomm (
+      GatherScatterType & vertexData ,
+      GatherScatterType & edgeData,
+      GatherScatterType & faceData ,
+      GatherScatterType & elementData,
+      const CommunicationType commType )
+{
+  const int nl = mpAccess ().nlinks ();
 
+  const bool containsVertices = vertexData.contains(3,3);
+  const bool containsEdges    = edgeData.contains(3,2);
+  const bool containsFaces    = faceData.contains(3,1);
+  const bool containsElements = elementData.contains(3,0);
+  const bool haveHigherCodimData = containsVertices ||
+                                   containsEdges ||
+                                   containsFaces ;
 
+  const bool containsSomeThing = containsElements || haveHigherCodimData;
 
+  if(!containsSomeThing)
+  {
+    cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
+    return ;
+  }
 
+  assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDuneBasis :: ALUcomm (): (containsVertices)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDuneBasis :: ALUcomm (): (containsEdges)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDuneBasis :: ALUcomm (): (containsFaces)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsElements) ? (cout << "**INFO GitterDuneBasis :: ALUcomm (): (containsElements)=true " << endl, 1) : 1) ;
+
+  // create vector of message buffers
+  // this vector is created here, that the buffer is allocated only once
+  vector < ObjectStream > vec (nl) ;
+
+  // if data on entities of higer codim exists
+  // then communication if more complicated
+  if ( haveHigherCodimData )
+  {
+    doBorderBorderComm( vec, vertexData, edgeData, faceData );
+  }
+  if( commType != Border_Border_Comm ) // otherwise only border border
+  {
+    doInteriorGhostComm( vec, vertexData, edgeData, faceData, elementData , commType );
+  }
+  return ;
+}
+
+void GitterDunePll :: doInteriorGhostComm( 
+  vector< ObjectStream > & osvec ,
+  GatherScatterType & vertexData , 
+  GatherScatterType & edgeData,  
+  GatherScatterType & faceData, 
+  GatherScatterType & elementData ,
+  const CommunicationType commType )
+{
+  //Entwurf der periodischen R"ander-Ghost-Kommunikation:
+  /*
+  it = Iterator "uber alle periodischen R"ander
+  for (it = begin; !.it.done(); it++) {
+    periodic & per =  it.item()
+    osvec[0].clear();
+    per.myneighbour(0).gather (osvec[0]);
+    per.getGhost(1).scatter (osvec[0]);
+    osvec[0].clear();
+    per.myneighbour(1).gather(osvec[0]);
+    per.getGhost(0).scatter(osvec[0]);
+
+  }
+  */
+	
+  const int nl = mpAccess ().nlinks ();
+	    
+  const bool containsVertices = vertexData.contains(3,3);
+  const bool containsEdges    = edgeData.contains(3,2);
+  const bool containsFaces    = faceData.contains(3,1);
+  const bool containsElements = elementData.contains(3,0);
+
+  const bool containsSomeThing = containsVertices || 
+                                 containsEdges || containsFaces || containsElements ;
+
+  const bool packInterior = (commType == All_All_Comm) || 
+                            (commType == Interior_Ghost_Comm);
+		        
+  const bool packGhosts   = (commType == All_All_Comm) || 
+                            (commType == Ghost_Interior_Comm);
+
+  assert( !packGhosts );
+
+  if(!containsSomeThing) 
+  {
+    cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
+    return ;
+  }
+			        
+  for (int link = 0 ; link < nl ; ++link ) 
+  {   
+    ObjectStream & sendBuff = osvec[link]; 
+    sendBuff.clear();
+						    
+    {
+      hface_STI * determType = 0; // only for type determination 
+      pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
+        iterpair = borderIteratorTT( determType , link );
+
+      // write all data belong to interior of master faces 
+      sendInteriorGhostData( sendBuff, iterpair.first , 
+                             vertexData, edgeData,
+                             faceData, elementData, 
+                             packInterior , packGhosts );
+      // write all data belong to interior of slave faces 
+      sendInteriorGhostData( sendBuff, iterpair.second , 
+                             vertexData, edgeData,
+                             faceData, elementData ,
+                             packInterior , packGhosts );
+      delete iterpair.first; 
+      delete iterpair.second; 
+    }
+  }
+  ///////////////////////////////////////////
+  // exchange data 
+  ///////////////////////////////////////////
+  osvec = mpAccess ().exchange (osvec) ;     
+                                                                                                       
+  //all ghost cells get new data
+  for (int link = 0 ; link < nl ; ++link ) 
+  {  
+    ObjectStream & recvBuff = osvec[link];
+    {
+      hface_STI * determType = 0; // only for type determination 
+      pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
+        iterpair = borderIteratorTT( determType , link );
+      // first unpack slave data, because this has been pack from master
+      // first , see above 
+      unpackInteriorGhostData( recvBuff, iterpair.second , 
+                               vertexData, edgeData,
+                               faceData, elementData );
+      // now unpack data sended from slaves to master 
+      unpackInteriorGhostData( recvBuff, iterpair.first , 
+                               vertexData, edgeData,
+                               faceData, elementData );
+      delete iterpair.first;
+      delete iterpair.second;
+    }
+  }
+  // end element communication 
+  return ;
+}
+#endif
 
 #endif

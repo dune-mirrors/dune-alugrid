@@ -79,6 +79,26 @@ public:
 
   // done call notify and loadBalancer  
   bool duneAdapt (AdaptRestrictProlongType & arp);
+  
+private:  
+  /*
+  // communication of data
+  void ALUcomm (
+    GatherScatterType & vertexData ,
+    GatherScatterType & edgeData,
+    GatherScatterType & faceData ,
+    GatherScatterType & elementData ,
+    const CommunicationType commType);
+
+  // communication of interior data
+  void doInteriorGhostComm(
+    vector< ObjectStream > & osvec ,
+    GatherScatterType & vertexData ,
+    GatherScatterType & edgeData,
+    GatherScatterType & faceData,
+    GatherScatterType & elementData ,
+    const CommunicationType commType );
+    */
 };
 
 class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis 
