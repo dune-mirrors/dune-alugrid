@@ -288,9 +288,9 @@ template < class A > class Periodic3Top : public A {
     //_ghostPair[0] liegt an myhface3[0] und ist das affine Bild vom Tetra an myhface3(1)
     
     // refine ghost if face is refined and ghost is not zero
-    void splitGhosts () ; 
+    void splitGhosts () {} ; 
     // coarse ghost if face is coarsened
-    void coarseGhosts () ;
+    void coarseGhosts () {};
 };
   //
   //    #    #    #  #          #    #    #  ######
@@ -2006,7 +2006,6 @@ Periodic3Top < A > :: getGhost ( int nr ) const
 
 template < class A > void Periodic3Top < A > :: split_iso4 () 
 {
-
   //von Hbnd kopiert ...
   this->splitGhosts();
 
