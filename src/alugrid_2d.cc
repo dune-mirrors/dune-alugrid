@@ -3,6 +3,10 @@
 
 #include "alugrid_2d.h"
 
+#ifndef NDEBUG
+#warning -- Compiling ALUGrid code in debug mode!!! Use -DNDEBUG to get more optimized code!!!
+#endif
+
 namespace ALUGridSpace {
 
 #define _ANSI_HEADER 

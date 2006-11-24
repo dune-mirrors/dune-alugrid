@@ -1,10 +1,6 @@
 #ifndef __ALUGRID_SERIAL_H_INCLUDED__
 #define __ALUGRID_SERIAL_H_INCLUDED__
 
-#ifndef NDEBUG
-#warning -- Compiling ALUGrid code in debug mode!!! Use -DNDEBUG to get more optimized code!!!
-#endif
-
 #define _ANSI_HEADER
 
 // if DUNE_NOT_USES_ALUGRID is defined, then index management is deactivated

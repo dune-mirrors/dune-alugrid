@@ -1,10 +1,6 @@
 #ifndef __ALUGRID_2D_H_INCLUDED__
 #define __ALUGRID_2D_H_INCLUDED__
 
-#ifndef NDEBUG
-#warning -- Compiling ALUGrid code in debug mode!!! Use -DNDEBUG to get more optimized code!!!
-#endif
-
 #define _ANSI_HEADER
 // include all headers 
 #include "stlheaders.h"

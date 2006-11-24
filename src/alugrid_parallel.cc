@@ -3,6 +3,10 @@
 
 #include "alugrid_parallel.h"
 
+#ifndef NDEBUG
+#warning -- Compiling ALUGrid code in debug mode!!! Use -DNDEBUG to get more optimized code!!!
+#endif
+
 #define _ANSI_HEADER 
 
 // partitioning libs 
