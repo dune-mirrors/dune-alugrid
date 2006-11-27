@@ -21,9 +21,12 @@
 //static const double EPS=1e-8;
 
 bool Hmesh :: ascireadtriang(const char *filename,
-           double& time, unsigned long int& nbr) {
-  //cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
-  //cerr << filename << "\n" << endl ;
+           double& time, unsigned long int& nbr) 
+{
+#ifndef NDEBUG 
+  cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
+  cerr << filename << "\n" << endl ;
+#endif
   
   ifstream in;
   in.open(filename, ios::in) ;
@@ -96,7 +99,9 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
   {
     in >> nv ;
     
-    //cerr << "    Number of Vertices:           " << nv << endl ;
+#ifndef NDEBUG
+    cerr << "    Number of Vertices:           " << nv << endl ;
+#endif
     
     v = new Vertex *[nv] ;
 
@@ -121,8 +126,10 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
     int ne = 0 ;
     
     in >> ne ;
-   
-    //cerr << "    Number of MacroElements:      " << ne << endl ;
+  
+#ifndef NDEBUG
+    cerr << "    Number of MacroElements:      " << ne << endl ;
+#endif
     
  
     for(int i = 0; i < ne ; i ++) {
@@ -143,7 +150,9 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 
     in >> nb ;
 
-    //cerr << "    Number of BoundarySegments:   " << nb << endl ;
+#ifndef NDEBUG 
+    cerr << "    Number of BoundarySegments:   " << nb << endl ;
+#endif
 
     typedef struct
       {
@@ -285,7 +294,9 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 
   delete[] v ;
   
-  //cerr << "\n  -------------------------- closed.\n" <<endl ;
+#ifndef NDEBUG
+  cerr << "\n  -------------------------- closed.\n" <<endl ;
+#endif
 
   vl.renumber() ;
 
@@ -492,7 +503,9 @@ Hmesh::storeGrid(const char* fbase,
   storeIndicies(out);
 
   delete [] filename;
+#ifndef NDEBUG
   cout << " done." << endl;
+#endif
 }
 void
 Hmesh::storeIndicies(ostream& out) {
