@@ -588,7 +588,7 @@ class Element : public Thinelement, public Refco_el {
 
     Vertex * vertex(int ) const ;
 
-    Fullvertex * vertexTest(int ) const ;
+    Fullvertex * getVertex(int ) const ;
 
     Vertex * vertex(int fce, int j) const { return vertex(facevertex(fce, j)) ; }
     

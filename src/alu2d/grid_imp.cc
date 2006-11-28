@@ -371,7 +371,7 @@ inline void Element::edge_vtx(int e, Vertex *(&v) [2]) const {
 //   Liefert iten Punkt zur"uck modulo 3
 // #end(method)
 // ***************************************************
-inline Fullvertex * Element::vertexTest(int i) const {
+inline Fullvertex * Element::getVertex(int i) const {
   assert(0 <= i) ;
   return (Fullvertex*)(connect.vtx[i%connect.nv]) ; 
 }

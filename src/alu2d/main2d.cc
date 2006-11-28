@@ -7,11 +7,14 @@ static volatile char RCSId_main2d_cc [] = "$Id$";
 #include <alloca.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include "../indexstack.h"
+using namespace ALUGridSpace;
 
 #include "grid.h"
 #include "triang.h"
 #include "handle.h"
-
+#include "../alugrid_2d.h"
+#include "handle.cc"
 #ifndef EPS
   #define EPS 1e-12
 #endif
@@ -25,10 +28,6 @@ void draw_grid(int argc, char ** argv, Hmesh &hdl) {
   sprintf(header,"#elements: %d, #vertices: %d, #belements: %d"
                 ,walk->size(),walkv->size(),walkb->size());
   cerr << "INDEXSETS:" << endl;
-  hdl.printIndex();
-  Xdisplay disp(argc,argv,header,"Grid",
-  	350.,450.,450.);
-  hdl.draw(disp);
 }
 
 char ** g_argv;
@@ -37,9 +36,6 @@ int main(int argc, char ** argv, char ** envp)
 {
 g_argc=argc;
 g_argv=argv;
-struct mallinfo prog_meminfo;
-get_memory(prog_meminfo);
-write_memory(cerr,"start of program");
 
 { // Main program
  
@@ -166,8 +162,6 @@ for (int k=0;k<1;k++) {
   draw_grid(argc,argv,hdl);
   }
 }
-write_memory(cerr,"end of program");
-write_memory_diff(cerr,"end of program",prog_meminfo);
 
   return 0;
 }
