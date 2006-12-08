@@ -110,7 +110,12 @@ class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis
   friend class PureElementLeafIterator < Gitter :: helement_STI > ;
 public:
 
-  inline GitterDuneImpl (const char *filename) : GitterBasisImpl ( filename ) {}
+  //! constructor creating grid from macro grid file 
+  inline GitterDuneImpl (const char *filename) : 
+    GitterBasisImpl ( filename ) {}
+  
+  //! constructor creating empty grid 
+  inline GitterDuneImpl () : GitterBasisImpl () {}
 };
 
 
