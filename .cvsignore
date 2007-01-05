@@ -17,3 +17,4 @@ dune-*.tar.gz
 lib
 include
 .deps
+alugrid.pc
