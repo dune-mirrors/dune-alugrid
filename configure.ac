@@ -40,6 +40,7 @@ AC_CONFIG_FILES([Makefile
                  misc/Makefile
                  misc/macrogrids/Makefile
                  misc/examples/Makefile
+                 alugrid.pc
                  ])
 
 AC_OUTPUT
