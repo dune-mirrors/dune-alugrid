@@ -3381,7 +3381,7 @@ template < class A > inline LevelIterator < A > :: LevelIterator (Gitter & g , i
 }
 
 template < class A > inline LevelIterator < A > :: LevelIterator (const LevelIterator < A > & x) 
-: _grd (0), _w (0) , _a(0) 
+: _grd (0), _ahl(x._ahl), _w (0) , _a(0) 
 {
   assign(x);
   return ;
