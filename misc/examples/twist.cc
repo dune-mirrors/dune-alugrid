@@ -26,6 +26,10 @@ int evalEdgeTwist(int twist, int edge)
               (edge + twist) % 4);
 }
 
+int vertex2Face (int i)
+{
+  return (i < 4) ? (4 - i) % 4 : i - 4 ;
+}
 
 int main() 
 {
@@ -71,6 +75,18 @@ int main()
       }
     }
     std::cout << " // twist = " << tw-4 << "\n";
+  }
+  
+  std::cout << "Hexa Vertex 2 Face \n";
+  for(int vx=0; vx<8; ++vx) 
+  {
+    int newvx = vertex2Face(vx);
+    int fvx = (vx < 4) ? 0 : 1;
+    std::cout << "{" << fvx << "," << newvx;
+    
+    if(vx < 7) std::cout << "},";
+    else std::cout << "} ";
+    std::cout << "// vx = " << vx << "\n"; 
   }
   return 0;
 }
