@@ -92,17 +92,18 @@ template < class A > class Hface4Top : public A {
     const inneredge_t * subedge1 (int) const ;
     innerface_t * subface4 (int) ;
     const innerface_t * subface4 (int) const ;
+    
     inline int level () const ;
     inline int nChild () const ;
-    innervertex_t * innerVertex () ;
-    const innervertex_t * innerVertex () const ;
-    inneredge_t * innerHedge () ;
-    const inneredge_t * innerHedge () const ;
-    innerface_t * down () ;
-    const innerface_t * down () const ;
-    innerface_t * next () ;
-    const innerface_t * next () const ;
-    void append (innerface_t * f) ;
+    inline innervertex_t * innerVertex () ;
+    inline const innervertex_t * innerVertex () const ;
+    inline inneredge_t * innerHedge () ;
+    inline const inneredge_t * innerHedge () const ;
+    inline innerface_t * down () ;
+    inline const innerface_t * down () const ;
+    inline innerface_t * next () ;
+    inline const innerface_t * next () const ;
+    inline void append (innerface_t * f) ;
 
   public :
     virtual myrule_t getrule () const ;
@@ -113,7 +114,7 @@ template < class A > class Hface4Top : public A {
     virtual void backup (ostream &) const ;
     virtual void restore (istream &) ;   
 
-  // new xdr methods 
+    // new xdr methods 
     virtual void backup (XDRstream_out &) const ;
     virtual void restore (XDRstream_in &) ;
 } ;
@@ -524,19 +525,23 @@ template < class A > inline const typename Hedge1Top < A > :: innervertex_t * He
 // #     #  #       #    #   ####   ######      #     #      ####   #
 
 
-template < class A > typename Hface4Top < A > :: innerface_t * Hface4Top < A > :: down () {
+template < class A > 
+inline typename Hface4Top < A > :: innerface_t * Hface4Top < A > :: down () {
   return _dwn ;
 }
 
-template < class A > const typename Hface4Top < A > :: innerface_t * Hface4Top < A > :: down () const {
+template < class A > 
+inline const typename Hface4Top < A > :: innerface_t * Hface4Top < A > :: down () const {
   return _dwn ;
 }
 
-template < class A > typename Hface4Top < A > :: innerface_t * Hface4Top < A > :: next () {
+template < class A > 
+inline typename Hface4Top < A > :: innerface_t * Hface4Top < A > :: next () {
   return _bbb ;
 }
 
-template < class A > const typename Hface4Top < A > :: innerface_t * Hface4Top < A > :: next () const {
+template < class A > 
+inline const typename Hface4Top < A > :: innerface_t * Hface4Top < A > :: next () const {
   return _bbb ;
 }
 
@@ -561,13 +566,13 @@ Hface4Top < A > :: subedge1 (int i,int j) const {
   return this->myhedge1 (i)->subedge1 (j ? 1 - this->twist(i) : this->twist(i)) ;
 }
 
-template < class A > typename Hface4Top < A > :: innervertex_t * 
+template < class A > inline typename Hface4Top < A > :: innervertex_t * 
 Hface4Top < A > :: subvertex (int) {
   assert (getrule() == myrule_t :: iso4) ;
   return _cv ;
 }
 
-template < class A > const typename Hface4Top < A > :: innervertex_t * 
+template < class A > inline const typename Hface4Top < A > :: innervertex_t * 
 Hface4Top < A > :: subvertex (int) const {
   assert (getrule() == myrule_t :: iso4) ;
   return _cv ;
@@ -589,7 +594,7 @@ Hface4Top < A > :: subedge1 (int n) const {
   return e ;
 }
 
-template < class A > typename Hface4Top < A > :: innerface_t * 
+template < class A > inline typename Hface4Top < A > :: innerface_t * 
 Hface4Top < A > :: subface4 (int n) {
   innerface_t * f = this->down () ;
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
@@ -597,7 +602,7 @@ Hface4Top < A > :: subface4 (int n) {
   return f ;
 }
 
-template < class A > const typename Hface4Top < A > :: innerface_t * 
+template < class A > inline const typename Hface4Top < A > :: innerface_t * 
 Hface4Top < A > :: subface4 (int n) const {
   const innerface_t * f = this->down () ;
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
@@ -636,22 +641,22 @@ template < class A > Hface4Top < A > :: ~Hface4Top () {
   return ;
 }
 
-template < class A > typename Hface4Top < A > :: innervertex_t * 
+template < class A > inline typename Hface4Top < A > :: innervertex_t * 
 Hface4Top < A > :: innerVertex () {
   return _cv ;
 }
 
-template < class A > const typename Hface4Top < A > :: innervertex_t * 
+template < class A > inline const typename Hface4Top < A > :: innervertex_t * 
 Hface4Top < A > :: innerVertex () const {
   return _cv ;
 }
 
-template < class A > typename Hface4Top < A > :: inneredge_t * 
+template < class A > inline typename Hface4Top < A > :: inneredge_t * 
 Hface4Top < A > :: innerHedge () {
   return _ed ;
 }
 
-template < class A > const typename Hface4Top < A > :: inneredge_t * 
+template < class A > inline const typename Hface4Top < A > :: inneredge_t * 
 Hface4Top < A > :: innerHedge () const {
   return _ed ;
 }
@@ -662,7 +667,7 @@ template < class A > inline void Hface4Top < A > :: append (innerface_t * f) {
   return ;
 }
 
-template < class A > typename Hface4Top < A > :: myrule_t 
+template < class A > inline typename Hface4Top < A > :: myrule_t 
 Hface4Top < A > :: getrule () const {
   return myrule_t (_rule) ;
 }
@@ -671,7 +676,7 @@ template < class A > inline IndexManagerType & Hface4Top < A > :: getEdgeIndexMa
   return static_cast<inneredge_t &> (*(this->myhedge1(0))).getIndexManager();
 }
 
-template < class A > void Hface4Top < A > :: splitISO4 () {
+template < class A > inline void Hface4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
   assert (_cv == 0 && _ed == 0 && _dwn == 0) ;
   {
