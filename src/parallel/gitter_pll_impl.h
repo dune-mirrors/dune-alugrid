@@ -229,7 +229,7 @@ class TetraPllXBase : public ElementPllBaseX {
     inline ~TetraPllXBase () {}
 
     // method to get internal tetra located behind this parallel interface 
-    virtual pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > getAttachedElement ();
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
 
   public :
     void writeDynamicState (ObjectStream &, int) const ;
@@ -264,7 +264,7 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     virtual bool erasable () const ;
     
     // method to get internal tetra located behind this parallel interface 
-    virtual pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > getAttachedElement ();
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
 
   private :
     int _ldbVertexIndex ;
@@ -398,7 +398,7 @@ class HexaPllBaseX : public ElementPllBaseX {
     virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) ;
     virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) ;
     // method to get internal hexa located behind this parallel interface 
-    virtual pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > getAttachedElement ();
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 
   private :
     myhexa_t & _hexa ;
@@ -427,7 +427,7 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
     virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
     
     // method to get internal hexa located behind this parallel interface 
-    virtual pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > getAttachedElement ();
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -466,7 +466,7 @@ template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     
     // method to get internal bnd located behind this parallel interface 
-    virtual pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > getAttachedElement ();
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 
   private :
     myhbnd_t & _hbnd ;
@@ -496,7 +496,7 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     virtual bool lockedAgainstCoarsening () const ;
     
     // method to get internal bnd located behind this parallel interface 
-    virtual pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > getAttachedElement ();
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
     
   private :
     myhbnd_t & _hbnd ;
@@ -1205,14 +1205,16 @@ inline const TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () const {
   return _tetra ;
 }
 
-inline pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > TetraPllXBase :: getAttachedElement ()
+inline void TetraPllXBase :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
-  return pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > (&mytetra(),0);
+  p.first  = & mytetra();
+  p.second = 0;
 }
 
-inline  pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > TetraPllXBaseMacro :: getAttachedElement ()
+inline void TetraPllXBaseMacro :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
-  return pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > (&mytetra(),0);
+  p.first  = & mytetra();
+  p.second = 0;
 }
 
 // ######                                                           #####
@@ -1267,14 +1269,16 @@ inline const HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () const {
   return _hexa ;
 }
 
-inline pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > HexaPllBaseX :: getAttachedElement ()
+inline void HexaPllBaseX :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
 {
-  return pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > (& myhexa() , 0);
+  p.first  = & myhexa();
+  p.second = 0;
 }
 
-inline pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > HexaPllBaseXMacro :: getAttachedElement ()
+inline void HexaPllBaseXMacro :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
 {
-  return pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > (& myhexa() , 0);
+  p.first  = & myhexa();
+  p.second = 0;
 }
 
 template < class A > inline BndsegPllBaseXMacro < A > :: 
@@ -1308,18 +1312,20 @@ template < class A > void BndsegPllBaseXMacro < A > :: packAsBnd (int fce, int w
   return ;
 }
 
-template < class A > inline 
-pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > BndsegPllBaseXMacro < A > :: 
-getAttachedElement ()
+template < class A > inline void BndsegPllBaseXMacro < A > :: 
+getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
-  return pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > ( 0, & myhbnd ()); 
+  p.first  = 0;
+  p.second = & myhbnd (); 
+  return ;
 }
 
-template < class A > inline 
-pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > BndsegPllBaseXClosure < A > :: 
-getAttachedElement ()
+template < class A > inline void BndsegPllBaseXClosure < A > :: 
+getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
-  return pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > ( 0, & myhbnd ()); 
+  p.first  = 0;
+  p.second = & myhbnd (); 
+  return ;
 }
 
 template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) : _hbnd (b), _lockCRS (false) , _ghostLevel (-1), _ghostLeaf(0) {
