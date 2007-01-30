@@ -1010,6 +1010,8 @@ public :
     public :
       myrule_t parentRule() const;
       bool isConforming() const;
+
+      // returns true, if element conected to face is leaf 
       virtual bool isInteriorLeaf() const ;
 
     protected :
@@ -1074,6 +1076,8 @@ public :
       virtual const myhedge1_t * subedge1 (int) const = 0 ;
       virtual hface4 * subface4 (int) = 0 ;
       virtual const hface4 * subface4 (int) const = 0 ;
+
+      // returns true, if element connected to face is leaf 
       virtual bool isInteriorLeaf() const ;
 
     public :
@@ -1112,9 +1116,9 @@ public :
     public :
       static const int prototype [4][3] ;
       static const int edgeMap [6][2] ;
+
       static const int edgeTwist [6][3] ;
       static const int vertexTwist [6][3] ;
-      static const int protoEdges [6][2];
 
       // returns 3 which is the lenght of the edges not on face number
       static const vector<int> & verticesNotOnFace( const int face ) ; 
@@ -1142,7 +1146,9 @@ public :
       virtual int nEdges() const { return 6; }
       inline int twist (int) const ;
       int test () const ;
+      // returns level of this object 
       virtual int nbLevel() const {return level();}
+      // returns leaf 
       virtual int nbLeaf() const {return leaf();}
     public :
       virtual myrule_t getrule () const = 0 ;
@@ -1210,7 +1216,10 @@ public :
       int tagForBallRefinement (const double (&)[3],double,int) ;
       virtual bool isboundary() const { return true; }
       virtual grid_t type() const { return tetra_periodic; }
+
+      // just returns level 
       virtual int nbLevel() const {return level();}
+      // just returns leaf 
       virtual int nbLeaf() const {return leaf();}
     private :
       myhface3_t * f [2] ;
@@ -1260,7 +1269,9 @@ public :
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
+      // just returns level 
       virtual int nbLevel() const {return level();}
+      // just returns leaf 
       virtual int nbLeaf() const {return leaf();}
     private :
       myhface4_t * f [2] ;
@@ -1285,11 +1296,18 @@ public :
                    myhface4_t *, int, myhface4_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
+
     public :
       static const int prototype [6][4] ;
       static const int oppositeFace [6] ;
-      static const int protoEdges [12][2];
       static const int edgeMap [12][2];
+
+      // cached possible twists 
+      static const int edgeTwist [8][4] ;
+      static const int vertexTwist [8][4] ;
+      
+      static const int vertex2Face[8][2];
+      
 
       static const vector<int> & verticesNotOnFace( const int face ); 
       static const vector<int> & edgesNotOnFace( const int face ); 
@@ -1316,7 +1334,9 @@ public :
 
       inline int twist (int) const ;
       int test () const ;
+      // just returns level 
       virtual int nbLevel() const {return level();}
+      // just returns leaf 
       virtual int nbLeaf() const {return leaf();}
     public :
       virtual myrule_t getrule () const = 0 ;
@@ -1333,6 +1353,11 @@ public :
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
     private :
+      // original formulas of twist evaluation 
+      inline int originalVertexTwist(int, int) const;
+      inline int originalEdgeTwist(int, int) const;
+
+      // cached twist 
       inline int evalVertexTwist(int, int) const;
       inline int evalEdgeTwist(int, int) const;
     private:
@@ -1370,7 +1395,9 @@ public :
       
       virtual bool isboundary() const { return true; }
       virtual int nChild () const;
+      // just returns level 
       virtual int nbLevel() const {return level();}
+      // just returns leaf 
       virtual int nbLeaf() const {return leaf();}
       virtual void attachleafs() 
       {
@@ -2686,16 +2713,12 @@ inline int Gitter::Geometric::Tetra::originalVertexTwist(int face, int vertex) c
 }
 
 inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const {
-#if 1
   // make sure vertex and face are in range is 
   assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
   assert( vertex >= 0 && vertex < 3 );
   // make sure that we get the same result 
   assert( originalVertexTwist(face,vertex) == vertexTwist[twist(face)+3][vertex] );
   return vertexTwist[twist(face)+3][vertex];  
-#else 
-  return originalVertexTwist(face,vertex);
-#endif
 }
 
 inline int Gitter::Geometric::Tetra::originalEdgeTwist(int face, int vertex) const 
@@ -2707,17 +2730,12 @@ inline int Gitter::Geometric::Tetra::originalEdgeTwist(int face, int vertex) con
 
 inline int Gitter::Geometric::Tetra::evalEdgeTwist(int face, int vertex) const 
 {
-#if 1
   // make sure vertex and face are in range is 
   assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
   assert( vertex >= 0 && vertex < 3 );
   // make sure that we get the same result 
   assert( originalEdgeTwist(face,vertex) == edgeTwist[twist(face)+3][vertex]);
   return edgeTwist[twist(face)+3][vertex];
-#else 
-  // use original formula 
-  return originalEdgeTwist(face,vertex); 
-#endif
 }
 
 inline Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric :: Tetra :: myhedge1 (int edge) 
@@ -3027,22 +3045,28 @@ inline const Gitter :: Geometric :: Hexa :: myhface4_t * Gitter :: Geometric :: 
   return f [i] ;
 }
 
-inline Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: Hexa :: myvertex (int i, int j) {
-  return (twist(i) < 0) ? myhface4(i)->myvertex((9 - j + twist(i)) % 4) : myhface4(i)->myvertex((j + twist(i)) % 4) ;
+inline Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: Hexa :: myvertex (int i, int j) 
+{
+  return myhface4(i)->myvertex(evalVertexTwist(i, j));
 }
 
-inline const Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: Hexa :: myvertex (int i, int j) const {
-  return (twist(i) < 0) ? myhface4(i)->myvertex((9 - j + twist(i)) % 4) : myhface4(i)->myvertex((j + twist(i)) % 4) ;
+inline const Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: Hexa :: myvertex (int i, int j) const 
+{
+  return myhface4(i)->myvertex(evalVertexTwist(i, j));
 }
 
-inline Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: Hexa :: myvertex (int i) {
+inline Gitter :: Geometric :: Hexa :: myvertex_t * 
+Gitter :: Geometric :: Hexa :: myvertex (int i) 
+{
   assert (0 <= i && i < 8) ;
-  return (i < 4) ? myvertex (0, (4 - i) % 4) : myvertex (1, i - 4) ;
+  return myvertex( vertex2Face[i][0] , vertex2Face[i][1] );
 }
 
-inline const Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: Hexa :: myvertex (int i) const {
+inline const Gitter :: Geometric :: Hexa :: myvertex_t * 
+Gitter :: Geometric :: Hexa :: myvertex (int i) const 
+{
   assert (0 <= i && i < 8) ;
-  return (i < 4) ? myvertex (0, (4 - i) % 4) : myvertex (1, i - 4) ;
+  return myvertex( vertex2Face[i][0] , vertex2Face[i][1] );
 }
 
 inline Gitter :: Geometric :: Hexa :: myhedge1_t * Gitter :: Geometric :: Hexa :: myhedge1(int i) {
@@ -3088,13 +3112,32 @@ inline int Gitter :: Geometric :: Hexa :: preCoarsening () {
   return 0 ;
 }
 
-inline int Gitter :: Geometric :: Hexa :: evalVertexTwist (int face, int vertex) const {
+inline int Gitter :: Geometric :: Hexa :: evalVertexTwist (int face, int vertex) const 
+{
+  assert( (twist(face) + 4 >= 0) && (twist(face)+4 < 8) );
+  assert( vertex >= 0 && vertex < 4 );
+  // make sure that we get the same result 
+  assert( originalVertexTwist(face,vertex) == vertexTwist[twist(face)+4][vertex] );
+  return vertexTwist[twist(face)+4][vertex];
+}
+
+inline int Gitter :: Geometric :: Hexa :: evalEdgeTwist (int face, int edge) const 
+{
+  assert( (twist(face) + 4 >= 0) && (twist(face)+4 < 8) );
+  assert( edge >= 0 && edge < 4 );
+  // make sure that we get the same result 
+  assert( originalEdgeTwist(face,edge) == edgeTwist[twist(face)+4][edge] );
+  return edgeTwist[twist(face)+4][edge];
+}
+
+
+inline int Gitter :: Geometric :: Hexa :: originalVertexTwist (int face, int vertex) const {
   return (twist(face) < 0 ? 
           (9 - vertex + twist(face)) % 4 :
           (vertex + twist(face)) % 4);
 }
 
-inline int Gitter :: Geometric :: Hexa :: evalEdgeTwist (int face, int edge) const {
+inline int Gitter :: Geometric :: Hexa :: originalEdgeTwist (int face, int edge) const {
   return (twist(face) < 0 ? 
           (8 - edge + twist(face)) % 4 :
           (edge + twist(face)) % 4);
