@@ -318,16 +318,18 @@ public:
         //ghost tetra gets indices of grid, to which it belongs actually
         void setGhostBoundaryIds() 
         {
-          assert( this->bndId() == 0 );
-          // value of ghost_closure 
           const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
+          if( this->bndId() == bndid ) return;
+          //assert( this->bndId() == 0 );
+          // value of ghost_closure 
           this->setGhostBndId( bndid );
           for( int i=0; i<4 ; ++i) myhface3(i)->setGhostBndId( bndid );
           for( int i=0; i<6 ; ++i) myhedge1(i)->setGhostBndId( bndid );
           for( int i=0; i<4 ; ++i) myvertex(i)->setGhostBndId( bndid );
         }
-       // for _myGrid     
-       friend class TetraTop < TetraEmpty > ;     
+        
+        // for _myGrid     
+        friend class TetraTop < TetraEmpty > ;     
     } ;
     typedef TetraTop < TetraEmpty > tetra_IMPL ;
 
@@ -504,8 +506,9 @@ public:
         //ghost tetra gets indices of grid, to which it belongs actually
         void setGhostBoundaryIds() 
         {
-          // value of ghost_closure 
           const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
+          if( this->bndId() == bndid ) return;
+          // value of ghost_closure 
           this->setGhostBndId( bndid );
           for( int i=0; i<6 ; ++i) myhface4(i)->setGhostBndId( bndid );
           for( int i=0; i<12; ++i) myhedge1(i)->setGhostBndId( bndid );
