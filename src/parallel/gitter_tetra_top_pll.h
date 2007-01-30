@@ -261,14 +261,16 @@ markDescendents( GhostElement_t & elem )
 {
   for( GhostElement_t * child = elem.down(); child; child = child->next() )
   {
-    if( child->leaf()) 
+    //if( child->leaf() ) 
     {
       child->tagForGlobalCoarsening(); 
     }
+    /*
     else 
     {
       child->resetRefinementRequest(); 
     }
+    */
     this->markDescendents( *child );
   }
 }
@@ -276,6 +278,7 @@ markDescendents( GhostElement_t & elem )
 template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  coarseGhost () 
 {
+  /*
   if(_ghostPair.first)
   {
     GhostElement_t & ghost = (*_ghostPair.first); 
@@ -290,10 +293,12 @@ inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
       tetra.resetRefinementRequest();
 
       assert( tetra.requestrule () == Gitter :: Geometric::TetraRule::nosplit );
+
       // coarse element 
       tetra.coarse();
     }
   }
+  */
 }
 
 template < class A, class X, class MX > 

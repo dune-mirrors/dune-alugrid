@@ -298,6 +298,7 @@ markDescendents( helement_STI & elem )
 template < class A, class X, class MX >
 inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
 {
+  /*
   if(_ghostPair.first)
   {
     GhostElement_t & ghost = static_cast<GhostElement_t &> (*_ghostPair.first);
@@ -315,6 +316,7 @@ inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
       ghost.coarse();
     }
   }
+  */
 }
   
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: 
