@@ -37,7 +37,6 @@ const pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: hfa
       & (Gitter :: Geometric :: hasFaceEmpty<Gitter :: Geometric :: hasFace4>::instance() ), -1) ;
       //Gitter :: Geometric :: InternalHasFace4 () 0 , -1) ;
 
-
 // prototype of Tetra type ( the faces of a tetrahedron )
 const int Gitter :: Geometric :: Tetra :: prototype [4][3] = {{1,3,2},{0,2,3},{0,3,1},{0,1,2}} ;
 
@@ -48,14 +47,6 @@ const int Gitter :: Geometric :: Tetra :: edgeMap [6][2] = {{3, 0},
                                                             {0, 2},
                                                             {0, 0},
                                                             {0, 1}};
-
-// tell which vertices belong to which edge 
-const int Gitter :: Geometric :: Tetra :: protoEdges [6][2] = {{0, 1},
-                                                               {0, 2},
-                                                               {0, 3},
-                                                               {1, 2},
-                                                               {1, 3},
-                                                               {2, 3}};
 
 // calculation Fomula is 
 // edgeTwist = twist(face) < 0 ?
@@ -117,6 +108,14 @@ const vector<int> & Gitter :: Geometric :: Tetra :: edgesNotOnFace( const int fa
     for(int f = 0; f<4; ++f ) 
     {
       edgesNotFace[f].resize(3); 
+
+      // tell which vertices belong to which edge 
+      static const int protoEdges [6][2] = {{0, 1},
+                                            {0, 2},
+                                            {0, 3},
+                                            {1, 2},
+                                            {1, 3},
+                                            {2, 3}};
 
       const int (&edges)[6][2] = protoEdges;           
       const int (&vertices)[3] = prototype [ f ];
@@ -222,14 +221,10 @@ const int Gitter :: Geometric :: Periodic4 :: prototype [2][4] = {{0,3,2,1},{4,5
   //       
 
 // defines from which vertices one face is created 
-const int Gitter :: Geometric :: Hexa :: prototype [6][4] = {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}} ;
+const int Gitter :: Geometric :: Hexa :: prototype [6][4] = 
+        {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}} ;
 
 const int Gitter :: Geometric :: Hexa :: oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of given face 
-
-// vertices of the edges of an Hexa 
-const int Gitter :: Geometric :: Hexa :: protoEdges [12][2] = 
-   { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
-     {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
 
 // return list with edges that lie not on given face 
 const vector<int> & Gitter :: Geometric :: Hexa :: verticesNotOnFace( const int face ) 
@@ -272,6 +267,11 @@ const vector<int> & Gitter :: Geometric :: Hexa :: edgesNotOnFace( const int fac
     {
       edgesNotFace[f].resize(8);
       
+      // vertices of the edges of an Hexa 
+      static const int protoEdges [12][2] = 
+          { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
+            {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
+
       const int (&edges)[12][2] = protoEdges;           
       const int (&vertices)[4]  = prototype [ f ];
 
@@ -340,6 +340,50 @@ const int Gitter :: Geometric :: Hexa :: edgeMap [12][2] = {{0, 3},
                                                             {1, 1},
                                                             {1, 2}};
 
+// calculation Fomula is 
+// vertexTwist = twist(face) < 0 ?
+//                   (9 - vertex + twist(face)) % 4 :
+//                   (vertex + twist(face)) % 4)
+const int Gitter :: Geometric :: Hexa :: 
+vertexTwist[8][4] = {
+  {1,0,3,2}, // twist = -4
+  {2,1,0,3}, // twist = -3
+  {3,2,1,0}, // twist = -2
+  {0,3,2,1}, // twist = -1
+  {0,1,2,3}, // twist = 0
+  {1,2,3,0}, // twist = 1
+  {2,3,0,1}, // twist = 2
+  {3,0,1,2}  // twist = 3
+};
+                                                                    
+// calculation Fomula is 
+// edgeTwist = twist(face) < 0 ?
+//          (6 - vertex + twist(face)) % 3 :
+//          (vertex + twist(face)) % 3);
+const int Gitter :: Geometric :: Hexa :: 
+edgeTwist[8][4] = {
+  {0,3,2,1}, // twist = -4
+  {1,0,3,2}, // twist = -3
+  {2,1,0,3}, // twist = -2
+  {3,2,1,0}, // twist = -1
+  {0,1,2,3}, // twist = 0
+  {1,2,3,0}, // twist = 1
+  {2,3,0,1}, // twist = 2
+  {3,0,1,2}  // twist = 3
+ };
+
+const int Gitter :: Geometric :: Hexa :: 
+vertex2Face [8][2] = { 
+  {0,0},// vx = 0
+  {0,3},// vx = 1
+  {0,2},// vx = 2
+  {0,1},// vx = 3
+  {1,0},// vx = 4
+  {1,1},// vx = 5
+  {1,2},// vx = 6
+  {1,3} // vx = 7
+};
+                                                                    
 int Gitter :: Geometric :: Hexa :: test () const {
   static const int v0[8][2] = {{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3}} ;
   static const int v1[8][2] = {{2,0},{4,1},{3,1},{2,1},{2,3},{2,2},{3,2},{4,2}} ;
