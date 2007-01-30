@@ -854,8 +854,9 @@ void GitterDunePll :: unpackInteriorGhostData (
         if( interiorLeaf )
         {
           pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
-          pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p = pll.first->getAttachedElement();
+          pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p (0,0);
 
+          pll.first->getAttachedElement( p );
           assert( p.first );
 
           if( haveHigherCodimData )
