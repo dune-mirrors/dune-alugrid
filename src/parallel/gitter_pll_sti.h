@@ -278,12 +278,11 @@ class ElementPllXIF : public MacroGridMoverIF {
       return 0; 
     }
 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
+    virtual pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > getAttachedElement ()
     {
       cerr << "Overload method in the classes file:" << __FILE__ << " line:" << __LINE__ << "\n";
       abort();
-      p.first  = 0;
-      p.second = 0;
+      return pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > (0,0);
     }
 
     virtual void writeStaticState (ObjectStream &, int) const = 0 ;
