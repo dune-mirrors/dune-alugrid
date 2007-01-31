@@ -699,8 +699,10 @@ void GitterDunePll :: sendInteriorGhostElementData (
     const bool packInterior ,
     const bool packGhosts )
 {
+#ifndef NDEBUG
   const bool containsElements = elementData.contains(3,0);
   assert( containsElements );
+#endif
 
   pair < ElementPllXIF_t *, int > bnd(0,-1);
 
@@ -866,8 +868,10 @@ void GitterDunePll :: unpackInteriorGhostElementData (
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & elementData )
 {
+#ifndef NDEBUG
   const bool containsElements = elementData.contains(3,0);
   assert( containsElements );
+#endif
   
   for (iter->first () ; ! iter->done () ; iter->next ()) 
   {
