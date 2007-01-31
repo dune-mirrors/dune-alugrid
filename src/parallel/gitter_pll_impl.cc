@@ -368,7 +368,7 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write level to know the level of ghost on the other side
   os.writeObject( mytetra().level() );
-  int leaf = (mytetra().leaf() ? 1:0);
+  const int leaf = (mytetra().leaf() ? 1:0);
   os.writeObject( leaf );
 #endif
   return ;
@@ -911,7 +911,7 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write level to know the level of ghost on the other side
   os.writeObject( myhexa().level() );
-  int leaf = (myhexa().leaf() ? 1 : 0);
+  const int leaf = (myhexa().leaf() ? 1 : 0);
   os.writeObject( leaf );
 #endif
 
