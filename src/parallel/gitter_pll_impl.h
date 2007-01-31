@@ -1402,28 +1402,25 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
     // read the real level of ghost 
     assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
-    bool wasLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
+    const bool wasLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
     
     os.readObject( _ghostLevel );
     os.readObject( _ghostLeaf );
 
-    bool nowLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
+    const bool nowLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
 
-    if (!wasLeaf && nowLeaf) {
+    if (!wasLeaf && nowLeaf) 
+    {
       myhbnd().attachleafs();
     }
-    else if (wasLeaf && !nowLeaf){
+    else if (wasLeaf && !nowLeaf)
+    {
       myhbnd().detachleafs();
     }
-    assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
     
-
-    if (!nowLeaf) {
-      assert(myhbnd().leafRefCount()==0);
-    }
-    if (nowLeaf) {
-      assert(myhbnd().leafRefCount()==1);
-    }
+    assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
+    assert( (!nowLeaf) ? (myhbnd().leafRefCount()==0) : 1);
+    assert( ( nowLeaf) ? (myhbnd().leafRefCount()==1) : 1);
 #endif
     
   } catch (ObjectStream :: EOFException) {

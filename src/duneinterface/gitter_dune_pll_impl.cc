@@ -159,7 +159,6 @@ void GitterDunePll :: duneExchangeDynamicState ()
   // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
   // Regel hier eingeschleift werden.
   {
-
     const int nl = mpAccess ().nlinks () ;
   
 #ifndef NDEBUG 
@@ -168,67 +167,64 @@ void GitterDunePll :: duneExchangeDynamicState ()
 #endif
   
     try 
-      {
-  typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
-    TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
-  typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-    TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
+    {
+      typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
+         TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
+      typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
+        TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
                 
-  vector < ObjectStream > osv (nl) ;
-  {
-    for (int l = 0 ; l < nl ; l ++) 
+      vector < ObjectStream > osv (nl) ;
       {
+        for (int l = 0 ; l < nl ; l ++) 
         {
-    AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
-    AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
 
-    InnerIteratorType wi (mif);
-    for (wi.first () ; ! wi.done () ; wi.next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = wi.item ().accessPllX ().accessInnerPllX () ;
-        p.first->writeDynamicState (osv [l], p.second) ;
+          InnerIteratorType wi (mif);
+          for (wi.first () ; ! wi.done () ; wi.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wi.item ().accessPllX ().accessInnerPllX () ;
+            p.first->writeDynamicState (osv [l], p.second) ;
+          }
+      
+          OuterIteratorType wo (mof);
+          for (wo.first () ; ! wo.done () ; wo.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wo.item ().accessPllX ().accessInnerPllX () ;
+            p.first->writeDynamicState (osv [l], p.second) ;
+          }
+        }  
       }
-        
-    OuterIteratorType wo (mof);
-    for (wo.first () ; ! wo.done () ; wo.next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = wo.item ().accessPllX ().accessInnerPllX () ;
-        p.first->writeDynamicState (osv [l], p.second) ;
-      }
-        }
-      } 
-  }
     
-  osv = mpAccess ().exchange (osv) ;
+      // exchange data 
+      osv = mpAccess ().exchange (osv) ;
     
-  { 
-    for (int l = 0 ; l < nl ; l ++ ) 
-      {
+      { 
+        for (int l = 0 ; l < nl ; l ++ ) 
         {
-    AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
-    AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
-        
-    OuterIteratorType wo (mof) ;
-    for (wo.first () ; ! wo.done () ; wo.next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = wo.item ().accessPllX ().accessOuterPllX () ;
-        p.first->readDynamicState (osv [l], p.second) ;
-      }
-        
-    InnerIteratorType wi (mif);
-    for (wi.first () ; ! wi.done () ; wi.next ()) 
-      {
-        pair < ElementPllXIF_t *, int > p = wi.item ().accessPllX ().accessOuterPllX () ;
-        p.first->readDynamicState (osv [l], p.second) ;
-      }
+          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
+      
+          OuterIteratorType wo (mof) ;
+          for (wo.first () ; ! wo.done () ; wo.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wo.item ().accessPllX ().accessOuterPllX () ;
+            p.first->readDynamicState (osv [l], p.second) ;
+          }
+      
+          InnerIteratorType wi (mif);
+          for (wi.first () ; ! wi.done () ; wi.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wi.item ().accessPllX ().accessOuterPllX () ;
+            p.first->readDynamicState (osv [l], p.second) ;
+          }
         }
-      } 
-  }
-      } 
-    catch (Parallel ::  AccessPllException) 
-      {
-  cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
       }
+    } 
+    catch (Parallel ::  AccessPllException) 
+    {
+      cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
+    }
     assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: exchangeDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   }
 }
