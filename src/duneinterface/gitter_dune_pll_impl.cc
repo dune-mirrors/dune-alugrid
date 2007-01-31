@@ -692,7 +692,75 @@ void GitterDunePll :: doBorderBorderComm(
 
 
 // pack element data to stream 
-void GitterDunePll :: sendInteriorGhostData (
+void GitterDunePll :: sendInteriorGhostElementData (
+    ObjectStream & sendBuff, 
+    IteratorSTI < hface_STI > * iter , 
+    GatherScatterType & elementData ,
+    const bool packInterior ,
+    const bool packGhosts )
+{
+  const bool containsElements = elementData.contains(3,0);
+  assert( containsElements );
+
+  pair < ElementPllXIF_t *, int > bnd(0,-1);
+
+  // temporary object buffer  
+  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  {
+    hface_STI & face = iter->item(); 
+    
+    // check ghost leaf 
+    pair < ElementPllXIF_t *, int > inner = face.accessPllX ().accessInnerPllX () ;
+
+    int interiorLeaf = 0;
+    int ghostLeaf = 0;
+
+    if(packInterior) 
+    {
+      interiorLeaf = (elementData.containsInterior(face, *(inner.first) )) ? 1 : 0;
+    }
+
+    if(packGhosts)
+    {
+      bnd = face.accessPllX ().accessOuterPllX () ;
+      ghostLeaf = (elementData.containsGhost(face , *(bnd.first))) ? 2 : 0;
+    }
+
+    const int transmit = interiorLeaf + ghostLeaf ;
+    // transmit = 1 interior, transmit = 2 ghost, transmit = 3 both 
+    // if at least one of this possibilities is true then send data
+    if ( transmit > 0 ) 
+    { 
+      sendBuff.writeObject(transmit);
+
+      // first interior elements are packed 
+      if( interiorLeaf > 0 )
+      {
+        inner.first->writeDynamicState (sendBuff , elementData) ;
+      }
+
+      // then ghost elements 
+      if( ghostLeaf > 0 ) 
+      {
+        // get pair < ghost, local face num > 
+        Gitter :: ghostpair_STI gpair = bnd.first->getGhost();
+        assert( gpair.first );
+      
+        elementData.sendData ( sendBuff, *(gpair.first) );
+        bnd.first = 0;
+      }
+    }     
+    else 
+    {
+      sendBuff.writeObject(noData);
+    }
+  }
+
+  return ;
+}
+
+// pack all data to stream 
+void GitterDunePll :: sendInteriorGhostAllData (
     ObjectStream & sendBuff, 
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & vertexData , 
@@ -711,6 +779,8 @@ void GitterDunePll :: sendInteriorGhostData (
     containsFaces ;
 
   const bool containsElements = elementData.contains(3,0);
+  
+  pair < ElementPllXIF_t *, int > bnd(0,-1);
 
   // temporary object buffer  
   for (iter->first () ; ! iter->done () ; iter->next ()) 
@@ -718,13 +788,21 @@ void GitterDunePll :: sendInteriorGhostData (
     hface_STI & face = iter->item(); 
     
     // check ghost leaf 
-    pair < ElementPllXIF_t *, int > bnd   = face.accessPllX ().accessOuterPllX () ;
     pair < ElementPllXIF_t *, int > inner = face.accessPllX ().accessInnerPllX () ;
 
-    const int interiorLeaf = ( elementData.containsInterior(face, *(inner.first) ) 
-                               && packInterior) ? 1 : 0;
-    const int ghostLeaf    = ( elementData.containsGhost( face , *(bnd.first) ) 
-                               && packGhosts)   ? 2 : 0;
+    int interiorLeaf = 0;
+    int ghostLeaf = 0;
+
+    if(packInterior) 
+    {
+      interiorLeaf = (elementData.containsInterior(face, *(inner.first) )) ? 1 : 0;
+    }
+
+    if(packGhosts)
+    {
+      bnd = face.accessPllX ().accessOuterPllX () ;
+      ghostLeaf = (elementData.containsGhost(face , *(bnd.first))) ? 2 : 0;
+    }
 
     const int transmit = interiorLeaf + ghostLeaf ;
     // transmit = 1 interior, transmit = 2 ghost, transmit = 3 both 
@@ -736,7 +814,6 @@ void GitterDunePll :: sendInteriorGhostData (
       // first interior elements are packed 
       if( interiorLeaf  > 0 )
       {
-
         if( haveHigherCodimData )
         {
           if (containsVertices) 
@@ -770,6 +847,8 @@ void GitterDunePll :: sendInteriorGhostData (
         
         if (containsElements) 
           elementData.sendData ( sendBuff, *(gpair.first) );
+
+        bnd.first = 0;
       }
     }     
     else 
@@ -781,8 +860,63 @@ void GitterDunePll :: sendInteriorGhostData (
   return ;
 }
 
-// unpack element data from stream 
-void GitterDunePll :: unpackInteriorGhostData (
+// unpack all data from stream 
+void GitterDunePll :: unpackInteriorGhostElementData (
+    ObjectStream & recvBuff, 
+    IteratorSTI < hface_STI > * iter , 
+    GatherScatterType & elementData )
+{
+  const bool containsElements = elementData.contains(3,0);
+  assert( containsElements );
+  
+  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  {
+    int hasdata;        
+    recvBuff.readObject(hasdata);
+
+    if(hasdata != noData)
+    {
+      // interiorLeaf is true, if on other side ghostLeaf has been packed
+      const bool interiorLeaf = (hasdata > 1);
+
+      // ghostLeaf is true if on other side interior has been packed
+      const bool ghostLeaf    = (hasdata == 1) || (hasdata == 3);
+
+      // if data has been send, read it from stream 
+      if (interiorLeaf || ghostLeaf) 
+      {
+        hface_STI & face = iter->item ();
+        // first unpack ghosts 
+        if( ghostLeaf ) 
+        {
+          pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessOuterPllX () ;
+
+          // get pair < ghost, local face num > 
+          Gitter :: ghostpair_STI gpair = p.first->getGhost();
+          assert( gpair.first );
+        
+          p.first->readDynamicState ( recvBuff , elementData);
+        }
+
+        // then unpack interior 
+        if( interiorLeaf )
+        {
+          pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
+          pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p (0,0);
+
+          pll.first->getAttachedElement( p );
+          assert( p.first );
+
+          elementData.recvData( recvBuff , *(p.first) );
+        }
+      }
+    }
+  }
+  return ;
+}
+
+// unpack all data from stream 
+void GitterDunePll :: unpackInteriorGhostAllData (
     ObjectStream & recvBuff, 
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & vertexData , 
@@ -797,8 +931,8 @@ void GitterDunePll :: unpackInteriorGhostData (
   
 
   const bool haveHigherCodimData = containsVertices || 
-    containsEdges ||  
-    containsFaces ;
+                                   containsEdges ||  
+                                   containsFaces ;
 
   
   for (iter->first () ; ! iter->done () ; iter->next ()) 
@@ -823,15 +957,10 @@ void GitterDunePll :: unpackInteriorGhostData (
         {
           pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessOuterPllX () ;
 
-          //assert( p.first->checkGhostLevel() );
-          //assert( p.first->ghostLeaf() );
-
           // get pair < ghost, local face num > 
           Gitter :: ghostpair_STI gpair = p.first->getGhost();
           assert( gpair.first );
         
-          //assert( elementData.containsItem( *gpair.first ));
-          
           if( haveHigherCodimData )
           {
             if (containsVertices) 
@@ -896,8 +1025,11 @@ void GitterDunePll :: doInteriorGhostComm(
   const bool containsFaces    = faceData.contains(3,1);
   const bool containsElements = elementData.contains(3,0);
 
-  const bool containsSomeThing = containsVertices || 
-      containsEdges || containsFaces || containsElements ;
+  const bool haveHigherCodimData = containsVertices || 
+                                   containsEdges ||  
+                                   containsFaces ;
+
+  const bool containsSomeThing = haveHigherCodimData || containsElements ;
 
   const bool packInterior = (commType == All_All_Comm) || 
                             (commType == Interior_Ghost_Comm);
@@ -912,62 +1044,89 @@ void GitterDunePll :: doInteriorGhostComm(
     cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
     return ;
   }
-    
-  for (int link = 0 ; link < nl ; ++link ) 
-  {   
-    ObjectStream & sendBuff = osvec[link]; 
-    sendBuff.clear();
-    
-    {
-      hface_STI * determType = 0; // only for type determination 
-      pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
-        iterpair = borderIteratorTT( determType , link );
-
-      // write all data belong to interior of master faces 
-      sendInteriorGhostData( sendBuff, iterpair.first , 
-                        vertexData, edgeData,
-                        faceData, elementData, 
-                        packInterior , packGhosts );
+   
+  {
+    for (int link = 0 ; link < nl ; ++link ) 
+    {   
+      ObjectStream & sendBuff = osvec[link]; 
+      sendBuff.clear();
       
-      // write all data belong to interior of slave faces 
-      sendInteriorGhostData( sendBuff, iterpair.second , 
-                        vertexData, edgeData,
-                        faceData, elementData ,
-                        packInterior , packGhosts );
+      {
+        hface_STI * determType = 0; // only for type determination 
+        pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
+          iterpair = borderIteratorTT( determType , link );
 
-      delete iterpair.first; 
-      delete iterpair.second; 
+        if(haveHigherCodimData)
+        {
+          // write all data belong to interior of master faces 
+          sendInteriorGhostAllData( sendBuff, iterpair.first , 
+                            vertexData, edgeData,
+                            faceData, elementData, 
+                            packInterior , packGhosts );
+        
+          // write all data belong to interior of slave faces 
+          sendInteriorGhostAllData( sendBuff, iterpair.second , 
+                            vertexData, edgeData,
+                            faceData, elementData ,
+                            packInterior , packGhosts );
+        }
+        else 
+        {
+          // write all data belong to interior of master faces 
+          sendInteriorGhostElementData( sendBuff, iterpair.first , 
+                            elementData, packInterior , packGhosts );
+        
+          // write all data belong to interior of slave faces 
+          sendInteriorGhostElementData( sendBuff, iterpair.second , 
+                            elementData, packInterior , packGhosts );
+        }
+
+        delete iterpair.first; 
+        delete iterpair.second; 
+      }
     }
-  }
 
-  ///////////////////////////////////////////
-  // exchange data 
-  ///////////////////////////////////////////
-  osvec = mpAccess ().exchange (osvec) ;     
-  
-  //all ghost cells get new data
-  for (int link = 0 ; link < nl ; ++link ) 
-  {  
-    ObjectStream & recvBuff = osvec[link];
+    ///////////////////////////////////////////
+    // exchange data 
+    ///////////////////////////////////////////
+    osvec = mpAccess ().exchange (osvec) ;     
+    
+    //all ghost cells get new data
+    for (int link = 0 ; link < nl ; ++link ) 
+    {  
+      ObjectStream & recvBuff = osvec[link];
 
-    {
-      hface_STI * determType = 0; // only for type determination 
-      pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
-        iterpair = borderIteratorTT( determType , link );
+      {
+        hface_STI * determType = 0; // only for type determination 
+        pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
+          iterpair = borderIteratorTT( determType , link );
 
-      // first unpack slave data, because this has been pack from master
-      // first , see above 
-      unpackInteriorGhostData( recvBuff, iterpair.second , 
-                          vertexData, edgeData,
-                          faceData, elementData );
-     
-      // now unpack data sended from slaves to master 
-      unpackInteriorGhostData( recvBuff, iterpair.first , 
-                          vertexData, edgeData,
-                          faceData, elementData );
+        if(haveHigherCodimData)
+        {
+          // first unpack slave data, because this has been pack from master
+          // first , see above 
+          unpackInteriorGhostAllData( recvBuff, iterpair.second , 
+                              vertexData, edgeData,
+                              faceData, elementData );
+         
+          // now unpack data sended from slaves to master 
+          unpackInteriorGhostAllData( recvBuff, iterpair.first , 
+                              vertexData, edgeData,
+                              faceData, elementData );
+        }
+        else 
+        {
+          // first unpack slave data, because this has been pack from master
+          // first , see above 
+          unpackInteriorGhostElementData( recvBuff, iterpair.second, elementData );
+         
+          // now unpack data sended from slaves to master 
+          unpackInteriorGhostElementData( recvBuff, iterpair.first, elementData );
+        }
 
-      delete iterpair.first;
-      delete iterpair.second;
+        delete iterpair.first;
+        delete iterpair.second;
+      }
     }
   }
 
@@ -979,7 +1138,7 @@ void GitterDunePll :: doInteriorGhostComm(
 // communicate data
 // 
 ////////////////////////////////////////////////////////
-void GitterDunePll :: ALUcomm ( 
+void GitterDunePll :: doCommunication ( 
              GatherScatterType & vertexData , 
              GatherScatterType & edgeData,  
              GatherScatterType & faceData ,
@@ -1005,10 +1164,10 @@ void GitterDunePll :: ALUcomm (
     return ;
   }
    
-  assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsVertices)=true " << endl, 1) : 1) ;
-  assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsEdges)=true " << endl, 1) : 1) ;
-  assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsFaces)=true " << endl, 1) : 1) ;
-  assert ((debugOption (5) && containsElements) ? (cout << "**INFO GitterDunePll :: ALUcomm (): (containsElements)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDunePll :: doCommunication (): (containsVertices)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: doCommunication (): (containsEdges)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: doCommunication (): (containsFaces)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsElements) ? (cout << "**INFO GitterDunePll :: doCommunication (): (containsElements)=true " << endl, 1) : 1) ;
    
   // create vector of message buffers 
   // this vector is created here, that the buffer is allocated only once 
@@ -1036,7 +1195,7 @@ void GitterDunePll :: borderBorderCommunication (
              GatherScatterType & faceData ,
              GatherScatterType & elementData )
 {
-  ALUcomm(vertexData,edgeData,faceData,elementData,Border_Border_Comm);
+  doCommunication(vertexData,edgeData,faceData,elementData,Border_Border_Comm);
 }
 
 // interior ghost comm 
@@ -1046,7 +1205,7 @@ void GitterDunePll :: interiorGhostCommunication (
              GatherScatterType & faceData ,
              GatherScatterType & elementData )
 {
-  ALUcomm(vertexData,edgeData,faceData,elementData,Interior_Ghost_Comm);
+  doCommunication(vertexData,edgeData,faceData,elementData,Interior_Ghost_Comm);
 }
 
 // ghost to interior comm 
@@ -1056,7 +1215,7 @@ void GitterDunePll :: ghostInteriorCommunication (
              GatherScatterType & faceData ,
              GatherScatterType & elementData )
 {
-  ALUcomm(vertexData,edgeData,faceData,elementData,Ghost_Interior_Comm);
+  doCommunication(vertexData,edgeData,faceData,elementData,Ghost_Interior_Comm);
 }
 
 // all all comm 
@@ -1066,7 +1225,7 @@ void GitterDunePll :: allAllCommunication (
              GatherScatterType & faceData ,
              GatherScatterType & elementData )
 {
-  ALUcomm(vertexData,edgeData,faceData,elementData,All_All_Comm);
+  doCommunication(vertexData,edgeData,faceData,elementData,All_All_Comm);
 }
 
 ////////////////////////////////////////////////////////////////////////////

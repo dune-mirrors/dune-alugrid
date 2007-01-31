@@ -121,7 +121,7 @@ public:
 
 private:
   // communication of data 
-  void ALUcomm (
+  void doCommunication(
          GatherScatterType & vertexData ,
          GatherScatterType & edgeData,
          GatherScatterType & faceData ,
@@ -162,7 +162,7 @@ private:
       IteratorSTI < hface_STI > * iter, 
       GatherScatterType & dataHandle ) ; 
     
-  void sendInteriorGhostData (
+  void sendInteriorGhostAllData (
     ObjectStream & sendBuff,
     IteratorSTI < hface_STI > * iter ,
     GatherScatterType & vertexData ,
@@ -172,7 +172,14 @@ private:
     const bool packInterior , 
     const bool packGhosts );
  
-  void unpackInteriorGhostData (
+  void sendInteriorGhostElementData (
+    ObjectStream & sendBuff,
+    IteratorSTI < hface_STI > * iter ,
+    GatherScatterType & elementData ,
+    const bool packInterior , 
+    const bool packGhosts );
+ 
+  void unpackInteriorGhostAllData (
     ObjectStream & recvBuff,
     IteratorSTI < hface_STI > * iter ,
     GatherScatterType & vertexData ,
@@ -180,12 +187,11 @@ private:
     GatherScatterType & faceData,
     GatherScatterType & elementData );
     
-  // only echange leaf data 
-  //void duneExchangeDataLeaf (GatherScatterType &);
-
-  // exchange all data 
-  void duneExchangeDataAll (GatherScatterType &);
-
+  void unpackInteriorGhostElementData (
+    ObjectStream & recvBuff,
+    IteratorSTI < hface_STI > * iter ,
+    GatherScatterType & elementData );
+    
   // communication of data on border 
   void doBorderBorderComm (
       vector< ObjectStream > & osvec ,
