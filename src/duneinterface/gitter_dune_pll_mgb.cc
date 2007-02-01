@@ -184,7 +184,7 @@ inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   
   int vert[8] = { -1,-1,-1,-1,-1,-1,-1,-1 }; 
   int vertface[4] = { -1,-1,-1,-1 }; 
-  int fce; 
+  int fce = -1; 
   if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
     os.readObject ( fce );
