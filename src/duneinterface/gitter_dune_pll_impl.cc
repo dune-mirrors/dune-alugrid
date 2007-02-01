@@ -1041,6 +1041,8 @@ void GitterDunePll :: doInteriorGhostComm(
   const bool packGhosts   = (commType == All_All_Comm) || 
                             (commType == Ghost_Interior_Comm);
 
+  const bool onlyLeafData = elementData.onlyLeafData();
+
   assert( !packGhosts );
 
   if(!containsSomeThing) 
@@ -1058,7 +1060,9 @@ void GitterDunePll :: doInteriorGhostComm(
       {
         hface_STI * determType = 0; // only for type determination 
         pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
-          iterpair = borderIteratorTT( determType , link );
+          iterpair = (onlyLeafData) ? 
+                (leafBorderIteratorTT( determType , link )) : 
+                (borderIteratorTT( determType , link ));
 
         if(haveHigherCodimData)
         {
@@ -1103,7 +1107,9 @@ void GitterDunePll :: doInteriorGhostComm(
       {
         hface_STI * determType = 0; // only for type determination 
         pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
-          iterpair = borderIteratorTT( determType , link );
+          iterpair = (onlyLeafData) ? 
+                (leafBorderIteratorTT( determType , link )) : 
+                (borderIteratorTT( determType , link ));
 
         if(haveHigherCodimData)
         {
