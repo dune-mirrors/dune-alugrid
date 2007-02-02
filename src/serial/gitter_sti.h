@@ -838,8 +838,8 @@ public :
     public:
       virtual int calcSortnr (int,int) {return (abort(),0);}   
       virtual bool isboundary() const = 0;    
-      virtual int nbLevel() const {return (abort(),-1);}
-      virtual int nbLeaf() const {return (abort(),-1);}
+      virtual int nbLevel() const = 0;
+      virtual int nbLeaf() const = 0;
     } ;
 
     class hasFace4 : public virtual stiExtender_t :: ElementIF {
@@ -857,8 +857,8 @@ public :
 
     public :
       virtual bool isboundary() const = 0;
-      virtual int nbLevel() const {return (abort(),-1);}
-      virtual int nbLeaf() const {return (abort(),-1);}
+      virtual int nbLevel() const  = 0;
+      virtual int nbLeaf() const = 0; 
     } ;
 
     // hasFace_t is hasFace3 and hasFace4 
@@ -2501,15 +2501,21 @@ inline bool Gitter :: Geometric :: hface3 :: isConforming () const {
 inline bool Gitter :: Geometric :: hface3 :: 
 isInteriorLeaf() const 
 {
-  if (nb.front().first->isboundary())
-    return ( nb.rear().first->nbLeaf() && 
-             nb.rear().first->nbLevel() == this->level());
-  else if (nb.rear().first->isboundary())
-    return ( nb.front().first->nbLeaf() && 
-             nb.front().first->nbLevel() == this->level());
+  const myconnect_t & nbRear  = *(nb.rear().first);
+  const myconnect_t & nbFront = *(nb.front().first);
+
+  if( nbFront.isboundary() )
+  {
+    return (nbRear.nbLeaf() && nbRear.nbLevel() == this->level());
+  }
+  else if (nbRear.isboundary())
+  {
+    return (nbFront.nbLeaf() && nbFront.nbLevel() == this->level());
+  }
   else
-    return (nb.rear().first->nbLeaf() ||
-           (nb.front().first->nbLeaf()));
+  {
+    return (nbRear.nbLeaf() || (nbFront.nbLeaf()));
+  }
 }
 
 //                                        #
