@@ -175,9 +175,7 @@ private:
   void sendInteriorGhostElementData (
     ObjectStream & sendBuff,
     IteratorSTI < hface_STI > * iter ,
-    GatherScatterType & elementData ,
-    const bool packInterior , 
-    const bool packGhosts );
+    GatherScatterType & elementData);
  
   void unpackInteriorGhostAllData (
     ObjectStream & recvBuff,

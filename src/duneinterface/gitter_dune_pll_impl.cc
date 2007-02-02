@@ -695,18 +695,12 @@ void GitterDunePll :: doBorderBorderComm(
 void GitterDunePll :: sendInteriorGhostElementData (
     ObjectStream & sendBuff, 
     IteratorSTI < hface_STI > * iter , 
-    GatherScatterType & elementData ,
-    const bool packInterior ,
-    const bool packGhosts )
+    GatherScatterType & elementData)
 {
 #ifndef NDEBUG
   const bool containsElements = elementData.contains(3,0);
   assert( containsElements );
 #endif
-
-  pair < ElementPllXIF_t *, int > bnd(0,-1);
-
-  // temporary object buffer  
   for (iter->first () ; ! iter->done () ; iter->next ()) 
   {
     hface_STI & face = iter->item(); 
@@ -714,43 +708,13 @@ void GitterDunePll :: sendInteriorGhostElementData (
     // check ghost leaf 
     pair < ElementPllXIF_t *, int > inner = face.accessPllX ().accessInnerPllX () ;
 
-    int interiorLeaf = 0;
-    int ghostLeaf = 0;
-
-    if(packInterior) 
-    {
-      interiorLeaf = (elementData.containsInterior(face, *(inner.first) )) ? 1 : 0;
-    }
-
-    if(packGhosts)
-    {
-      bnd = face.accessPllX ().accessOuterPllX () ;
-      ghostLeaf = (elementData.containsGhost(face , *(bnd.first))) ? 2 : 0;
-    }
-
-    const int transmit = interiorLeaf + ghostLeaf ;
-    // transmit = 1 interior, transmit = 2 ghost, transmit = 3 both 
-    // if at least one of this possibilities is true then send data
-    if ( transmit > 0 ) 
+    int transmit = (elementData.containsInterior(face, *(inner.first) )) ? 1 : 0;
+    if ( transmit ) 
     { 
       sendBuff.writeObject(transmit);
 
       // first interior elements are packed 
-      if( interiorLeaf > 0 )
-      {
-        inner.first->writeDynamicState (sendBuff , elementData) ;
-      }
-
-      // then ghost elements 
-      if( ghostLeaf > 0 ) 
-      {
-        // get pair < ghost, local face num > 
-        Gitter :: ghostpair_STI gpair = bnd.first->getGhost();
-        assert( gpair.first );
-      
-        elementData.sendData ( sendBuff, *(gpair.first) );
-        bnd.first = 0;
-      }
+      inner.first->writeDynamicState (sendBuff , elementData) ;
     }     
     else 
     {
@@ -873,47 +837,15 @@ void GitterDunePll :: unpackInteriorGhostElementData (
   assert( containsElements );
 #endif
   
+  int hasdata = 0;        
   for (iter->first () ; ! iter->done () ; iter->next ()) 
   {
-    int hasdata;        
     recvBuff.readObject(hasdata);
 
-    if(hasdata != noData)
+    if( hasdata ) 
     {
-      // interiorLeaf is true, if on other side ghostLeaf has been packed
-      const bool interiorLeaf = (hasdata > 1);
-
-      // ghostLeaf is true if on other side interior has been packed
-      const bool ghostLeaf    = (hasdata == 1) || (hasdata == 3);
-
-      // if data has been send, read it from stream 
-      if (interiorLeaf || ghostLeaf) 
-      {
-        hface_STI & face = iter->item ();
-        // first unpack ghosts 
-        if( ghostLeaf ) 
-        {
-          pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessOuterPllX () ;
-
-          // get pair < ghost, local face num > 
-          Gitter :: ghostpair_STI gpair = p.first->getGhost();
-          assert( gpair.first );
-        
-          p.first->readDynamicState ( recvBuff , elementData);
-        }
-
-        // then unpack interior 
-        if( interiorLeaf )
-        {
-          pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
-          pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p (0,0);
-
-          pll.first->getAttachedElement( p );
-          assert( p.first );
-
-          elementData.recvData( recvBuff , *(p.first) );
-        }
-      }
+      pair < ElementPllXIF_t *, int > p = iter->item ().accessPllX ().accessOuterPllX () ;
+      p.first->readDynamicState ( recvBuff , elementData);
     }
   }
   return ;
@@ -952,55 +884,52 @@ void GitterDunePll :: unpackInteriorGhostAllData (
       // ghostLeaf is true if on other side interior has been packed
       const bool ghostLeaf    = (hasdata == 1) || (hasdata == 3);
 
-      // if data has been send, read it from stream 
-      if (interiorLeaf || ghostLeaf) 
+      // get face 
+      hface_STI & face = iter->item ();
+      // first unpack ghosts 
+      if( ghostLeaf ) 
       {
-        hface_STI & face = iter->item ();
-        // first unpack ghosts 
-        if( ghostLeaf ) 
+        pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessOuterPllX () ;
+
+        // get pair < ghost, local face num > 
+        Gitter :: ghostpair_STI gpair = p.first->getGhost();
+        assert( gpair.first );
+      
+        if( haveHigherCodimData )
         {
-          pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessOuterPllX () ;
-
-          // get pair < ghost, local face num > 
-          Gitter :: ghostpair_STI gpair = p.first->getGhost();
-          assert( gpair.first );
-        
-          if( haveHigherCodimData )
-          {
-            if (containsVertices) 
-              gpair.first->os2VertexData( recvBuff , vertexData, gpair.second );
-            if (containsEdges)    
-              gpair.first->os2EdgeData  ( recvBuff , edgeData, gpair.second );
-            if (containsFaces)    
-              gpair.first->os2FaceData  ( recvBuff , faceData, gpair.second );
-          }
-
-          if (containsElements) 
-            p.first->readDynamicState ( recvBuff , elementData);
+          if (containsVertices) 
+            gpair.first->os2VertexData( recvBuff , vertexData, gpair.second );
+          if (containsEdges)    
+            gpair.first->os2EdgeData  ( recvBuff , edgeData, gpair.second );
+          if (containsFaces)    
+            gpair.first->os2FaceData  ( recvBuff , faceData, gpair.second );
         }
 
-        // then unpack interior 
-        if( interiorLeaf )
+        if (containsElements) 
+          p.first->readDynamicState ( recvBuff , elementData);
+      }
+
+      // then unpack interior 
+      if( interiorLeaf )
+      {
+        pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
+        pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p (0,0);
+
+        pll.first->getAttachedElement( p );
+        assert( p.first );
+
+        if( haveHigherCodimData )
         {
-          pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
-          pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p (0,0);
-
-          pll.first->getAttachedElement( p );
-          assert( p.first );
-
-          if( haveHigherCodimData )
-          {
-            if (containsVertices) 
-              p.first->os2VertexData( recvBuff , vertexData, pll.second );
-            if (containsEdges)    
-              p.first->os2EdgeData( recvBuff , edgeData, pll.second );
-            if (containsFaces)    
-              p.first->os2FaceData( recvBuff , faceData, pll.second );
-          }
-
-          if (containsElements) 
-            elementData.recvData( recvBuff , *(p.first) );
+          if (containsVertices) 
+            p.first->os2VertexData( recvBuff , vertexData, pll.second );
+          if (containsEdges)    
+            p.first->os2EdgeData( recvBuff , edgeData, pll.second );
+          if (containsFaces)    
+            p.first->os2FaceData( recvBuff , faceData, pll.second );
         }
+
+        if (containsElements) 
+          elementData.recvData( recvBuff , *(p.first) );
       }
     }
   }
@@ -1064,7 +993,7 @@ void GitterDunePll :: doInteriorGhostComm(
                 (leafBorderIteratorTT( determType , link )) : 
                 (borderIteratorTT( determType , link ));
 
-        if(haveHigherCodimData)
+        if(haveHigherCodimData || packGhosts )
         {
           // write all data belong to interior of master faces 
           sendInteriorGhostAllData( sendBuff, iterpair.first , 
@@ -1081,12 +1010,10 @@ void GitterDunePll :: doInteriorGhostComm(
         else 
         {
           // write all data belong to interior of master faces 
-          sendInteriorGhostElementData( sendBuff, iterpair.first , 
-                            elementData, packInterior , packGhosts );
+          sendInteriorGhostElementData( sendBuff, iterpair.first, elementData);
         
           // write all data belong to interior of slave faces 
-          sendInteriorGhostElementData( sendBuff, iterpair.second , 
-                            elementData, packInterior , packGhosts );
+          sendInteriorGhostElementData( sendBuff, iterpair.second, elementData);
         }
 
         delete iterpair.first; 
