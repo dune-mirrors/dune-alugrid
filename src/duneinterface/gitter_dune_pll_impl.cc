@@ -701,6 +701,7 @@ void GitterDunePll :: sendInteriorGhostElementData (
   const bool containsElements = elementData.contains(3,0);
   assert( containsElements );
 #endif
+  const int transmit = 1;
   for (iter->first () ; ! iter->done () ; iter->next ()) 
   {
     hface_STI & face = iter->item(); 
@@ -708,8 +709,7 @@ void GitterDunePll :: sendInteriorGhostElementData (
     // check ghost leaf 
     pair < ElementPllXIF_t *, int > inner = face.accessPllX ().accessInnerPllX () ;
 
-    int transmit = (elementData.containsInterior(face, *(inner.first) )) ? 1 : 0;
-    if ( transmit ) 
+    if ( elementData.containsInterior(face, *(inner.first) ) ) 
     { 
       sendBuff.writeObject(transmit);
 
@@ -970,8 +970,6 @@ void GitterDunePll :: doInteriorGhostComm(
   const bool packGhosts   = (commType == All_All_Comm) || 
                             (commType == Ghost_Interior_Comm);
 
-  const bool onlyLeafData = elementData.onlyLeafData();
-
   assert( !packGhosts );
 
   if(!containsSomeThing) 
@@ -989,9 +987,7 @@ void GitterDunePll :: doInteriorGhostComm(
       {
         hface_STI * determType = 0; // only for type determination 
         pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
-          iterpair = (onlyLeafData) ? 
-                (leafBorderIteratorTT( determType , link )) : 
-                (borderIteratorTT( determType , link ));
+          iterpair = borderIteratorTT( determType , link );
 
         if(haveHigherCodimData || packGhosts )
         {
@@ -1034,11 +1030,9 @@ void GitterDunePll :: doInteriorGhostComm(
       {
         hface_STI * determType = 0; // only for type determination 
         pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
-          iterpair = (onlyLeafData) ? 
-                (leafBorderIteratorTT( determType , link )) : 
-                (borderIteratorTT( determType , link ));
+          iterpair = borderIteratorTT( determType , link );
 
-        if(haveHigherCodimData)
+        if(haveHigherCodimData || packGhosts )
         {
           // first unpack slave data, because this has been pack from master
           // first , see above 
