@@ -1396,27 +1396,35 @@ public :
       virtual bool isboundary() const { return true; }
       virtual int nChild () const;
       // just returns level 
-      virtual int nbLevel() const {return level();}
+      virtual int nbLevel() const { return level(); }
       // just returns leaf 
-      virtual int nbLeaf() const {return leaf();}
+      virtual int nbLeaf() const { return leaf(); }
+      
+      // mark edges and vertices as leaf 
       virtual void attachleafs() 
       {
         this->addleaf();
-        myhface3(0)->addleaf();
-        for (int i=0;i<3;i++) 
+        
+        myhface3_t & face = *(myhface3(0));
+        face.addleaf();
+        for (int i=0; i<3; ++i) 
         {
-          myhface3(0)->myhedge1(i)->addleaf();
-          myhface3(0)->myvertex(i)->addleaf();
+          face.myhedge1(i)->addleaf();
+          face.myvertex(i)->addleaf();
         }
       }
+
+      // unmark edges and vertices as leaf 
       virtual void detachleafs() 
       {
         this->removeleaf();
-        myhface3(0)->removeleaf();
-        for (int i=0;i<3;i++) 
+
+        myhface3_t & face = *(myhface3(0));
+        face.removeleaf();
+        for (int i=0; i<3; ++i) 
         {
-          myhface3(0)->myhedge1(i)->removeleaf();
-          myhface3(0)->myvertex(i)->removeleaf();
+          face.myhedge1(i)->removeleaf();
+          face.myvertex(i)->removeleaf();
         }
       }
     private :
@@ -1462,7 +1470,7 @@ public :
         
         hface4_GEO & face = *(myhface4(0));
         face.addleaf();
-        for (int i=0;i<4;i++) 
+        for (int i=0; i<4; ++i) 
         {
           face.myhedge1(i)->addleaf();
           face.myvertex(i)->addleaf();
@@ -1476,7 +1484,7 @@ public :
 
         hface4_GEO & face = *(myhface4(0));
         face.removeleaf();
-        for (int i=0;i<4;i++) 
+        for (int i=0; i<4; ++i) 
         {
           face.myhedge1(i)->removeleaf();
           face.myvertex(i)->removeleaf();
