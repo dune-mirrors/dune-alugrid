@@ -359,17 +359,18 @@ bool ElementPllBaseX :: unlockAndResume (bool) {
 //    #     #          #    #####   ######
 //    #     #          #    #   #   #    #
 //    #     ######     #    #    #  #    #
-void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const {
+void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
+{
   gs.sendData( os , mytetra () );
   return ;
 }
-void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const {
 
+void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const 
+{
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write level to know the level of ghost on the other side
   os.writeObject( mytetra().level() );
-  const int leaf = (mytetra().leaf() ? 1:0);
-  os.writeObject( leaf );
+  os.writeObject( ((int) (mytetra().leaf() ? 1 : 0)) );
 #endif
   return ;
 }
