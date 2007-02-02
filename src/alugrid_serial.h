@@ -41,9 +41,6 @@ struct GatherScatter
 
   virtual bool contains(int,int) const = 0;
 
-  // default implementation returns false
-  virtual bool onlyLeafData() const { return false; }
-    
   virtual bool containsItem(const HElemType   & elem ) const { assert(false); abort(); return false; }
   virtual bool containsItem(const HFaceType   & elem ) const { assert(false); abort(); return false; }
   virtual bool containsItem(const HEdgeType   & elem ) const { assert(false); abort(); return false; }
