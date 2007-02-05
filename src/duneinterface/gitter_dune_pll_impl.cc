@@ -725,6 +725,31 @@ void GitterDunePll :: sendInteriorGhostElementData (
   return ;
 }
 
+// unpack all data from stream 
+void GitterDunePll :: unpackInteriorGhostElementData (
+    ObjectStream & recvBuff, 
+    IteratorSTI < hface_STI > * iter , 
+    GatherScatterType & elementData )
+{
+#ifndef NDEBUG
+  const bool containsElements = elementData.contains(3,0);
+  assert( containsElements );
+#endif
+  
+  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  {
+    int hasdata = 0;        
+    recvBuff.readObject(hasdata);
+
+    if( hasdata ) 
+    {
+      pair < ElementPllXIF_t *, int > p = iter->item ().accessPllX ().accessOuterPllX () ;
+      p.first->readDynamicState ( recvBuff , elementData);
+    }
+  }
+  return ;
+}
+
 // pack all data to stream 
 void GitterDunePll :: sendInteriorGhostAllData (
     ObjectStream & sendBuff, 
@@ -823,31 +848,6 @@ void GitterDunePll :: sendInteriorGhostAllData (
     }
   }
 
-  return ;
-}
-
-// unpack all data from stream 
-void GitterDunePll :: unpackInteriorGhostElementData (
-    ObjectStream & recvBuff, 
-    IteratorSTI < hface_STI > * iter , 
-    GatherScatterType & elementData )
-{
-#ifndef NDEBUG
-  const bool containsElements = elementData.contains(3,0);
-  assert( containsElements );
-#endif
-  
-  int hasdata = 0;        
-  for (iter->first () ; ! iter->done () ; iter->next ()) 
-  {
-    recvBuff.readObject(hasdata);
-
-    if( hasdata ) 
-    {
-      pair < ElementPllXIF_t *, int > p = iter->item ().accessPllX ().accessOuterPllX () ;
-      p.first->readDynamicState ( recvBuff , elementData);
-    }
-  }
   return ;
 }
 
