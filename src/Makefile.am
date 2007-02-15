@@ -28,7 +28,7 @@ LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 
 # build lib with parallel support 
 dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_parallel.cc alugrid_2d.cc
-libalugrid_la_LIBADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS) 
+libalugrid_la_LIBADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS)
 
 else 
 # if no mpi build only serial lib 
