@@ -31,9 +31,10 @@ dnl check for library functions
   AC_LANG_POP
 
 dnl check all components
-  AC_REQUIRE([ALUGRID_PATH_METIS])
-  AC_REQUIRE([ALUGRID_PATH_PARTY])
   AC_REQUIRE([ALUGRID_SERIAL_PARALLEL])
+  AC_REQUIRE([ALUGRID_PATH_METIS])
+  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
+  AC_REQUIRE([ALUGRID_PATH_PARTY])
 
   # convenience-variables if every found package should be used
   AC_SUBST(ALL_PKG_LIBS, "$LIBS $ALUGRID_PKG_LIBS")
@@ -57,6 +58,7 @@ if test x$with_parallel = xparallel ; then
   echo "------------------------------------"
   echo  
   echo "METIS............: $with_metis"
+  echo "ParMETIS.........: $with_parmetis"
   echo "PARTY............: $with_party"
   echo "MPI..............: $with_mpi"
   echo

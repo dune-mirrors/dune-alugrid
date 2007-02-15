@@ -13,6 +13,11 @@ ac_save_LIBS="$LIBS"
 LIBS=""
 
 ## do nothing if no --with-metis was supplied
+if test x$with_metis == x && test x$with_parmetis != x ; then
+  with_metis=$with_parmetis
+fi 
+
+## do nothing if no --with-metis was supplied
 if test x$with_metis != x && test x$with_metis != xno ; then
 
   if test x$with_metis == xyes ; then
@@ -27,7 +32,12 @@ if test x$with_metis != x && test x$with_metis != xno ; then
   fi
 
 METIS_LIB_PATH="$METISROOT"
+METIS_INCLUDE_PATH="$METISROOT/METISLib"
+
+# if not ParMETIS is used, then check for old METIS Version
+if test ! -f "$METIS_INCLUDE_PATH/metis.h" ; then
 METIS_INCLUDE_PATH="$METISROOT/Lib"
+fi
 
 # set variables so that tests can use them
 REM_CPPFLAGS=$CPPFLAGS
