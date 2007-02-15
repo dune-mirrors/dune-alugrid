@@ -19,6 +19,15 @@ extern "C" {
 #include "parallel/metis.c"
 }
 
+// partitioning libs 
+// ParMETIS if not found here then dummy version is included 
+extern "C" {
+//  __parmetis_h__ is defined by the parmetis header file. 
+#include <parmetis.h>
+// if __parmetis_h__ is still undefined then the dummy is included 
+#include "parallel/parmetis.c"
+}
+
 
 // PARTY_LIB if not found here then dummy version is included 
 #ifdef VERSION 
