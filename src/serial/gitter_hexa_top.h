@@ -1195,6 +1195,9 @@ template < class A > inline HexaTop < A >
 
   this->setIndex( _indexManager.getIndex() );   
 
+  // set bndid to fathers bndid now 
+  this->_bndid = _up->bndId();
+
   // make sure that given volume is the same as calulated 
   assert( fabs (
       QuadraturCube3D < VolumeCalc >

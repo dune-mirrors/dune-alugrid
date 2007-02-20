@@ -1049,6 +1049,9 @@ template < class A > inline TetraTop < A >
   // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
 
+  // we need boundary id now, for elements is the same as fathers 
+  this->_bndid = _up->bndId();
+
   // check that volume is calculated correctly 
   assert( 
       fabs( 

@@ -835,14 +835,16 @@ TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
 inline int GitterBasis :: Objects :: TetraEmpty :: preCoarsening () 
 {
   assert( _myGrid );
-  return _myGrid->preCoarsening(*this);
+  // only call preCoarsening on non ghost elements 
+  return ((this->isGhost()) ? 0 : _myGrid->preCoarsening(*this));
 }
 
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: TetraEmpty :: postRefinement () 
 {
   assert( _myGrid );
-  return _myGrid->postRefinement(*this);
+  // only call postRefinement on non ghost elements 
+  return ((this->isGhost()) ? 0 : _myGrid->postRefinement(*this));
 }
 
 inline GitterBasis :: Objects :: Periodic3Empty :: Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
@@ -869,12 +871,14 @@ HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
 
 inline int GitterBasis::Objects::HexaEmpty::preCoarsening() {
   assert(_myGrid);
-  return _myGrid->preCoarsening(*this);
+  // only call preCoarsening on non ghost elements 
+  return ((this->isGhost()) ? 0 : _myGrid->preCoarsening(*this));
 }
 
 inline int GitterBasis::Objects::HexaEmpty::postRefinement() {
   assert(_myGrid);
-  return _myGrid->postRefinement(*this);
+  // only call postRefinement on non ghost elements 
+  return ((this->isGhost()) ? 0 : _myGrid->postRefinement(*this));
 }
 
 // Ende - Neu 29.4.05
