@@ -1,7 +1,7 @@
 // (c) --
 #ifndef __parmetis_h__
 
-#warning  -- Compiling parallel version without METIS !!!
+#warning  -- Compiling parallel version without PARMETIS !!!
 
 #ifndef PARMETIS_C_INCLUDED
 #define PARMETIS_C_INCLUDED
