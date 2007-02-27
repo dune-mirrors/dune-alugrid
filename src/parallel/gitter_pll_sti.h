@@ -297,6 +297,15 @@ class ElementPllXIF : public MacroGridMoverIF {
     virtual void writeElementData (ObjectStream &, GatherScatterType &) {std::cout << "ich bin die falsche...3\n" << flush;}
     virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const = 0 ;
     virtual void readDynamicState (ObjectStream &, GatherScatterType &) = 0 ;
+
+    // pack as ghost, default does nothing but macro elements are pack as
+    // ghosts 
+    virtual void packAsGhost(ObjectStream &,int) const {}
+
+    // unpack as ghost data and insert ghost cell, default does nothing
+    virtual void insertGhostCell(ObjectStream &,int) {
+    }
+    
   public :
     virtual int ldbVertexIndex () const = 0 ;
     virtual int & ldbVertexIndex () = 0 ;
@@ -354,9 +363,6 @@ class GitterPll : public virtual Gitter {
         virtual inline int iterators_attached () const ;
         virtual void identification (MpAccessLocal &) ;
         virtual void fullIntegrityCheck (MpAccessLocal &) ;
-
-        // method for Dune index management 
-        virtual IndexManagerType & indexManager(int) = 0;
     } ;
   public :
   
