@@ -258,6 +258,8 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
+    // pack ghost information 
+    virtual void packAsGhost(ObjectStream &,int) const ;
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
@@ -265,7 +267,9 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     
     // method to get internal tetra located behind this parallel interface 
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
-
+  protected:
+    void packAsBndNow (int, ObjectStream &) const;
+    
   private :
     int _ldbVertexIndex ;
     map < int, int, less < int > > _moveTo ;
@@ -527,6 +531,10 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     virtual int & ldbVertexIndex () ;
   public :
     virtual void packAsBnd (int,int,ObjectStream &) const ;
+    
+    // unpack ghost information and insert ghost cell 
+    virtual void insertGhostCell(ObjectStream &,int);
+
   private :
     int _extGraphVertexIndex ;
     const MacroGhostPoint * _ghPoint; 
@@ -854,12 +862,6 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         MacroGitterBasisPll (Gitter * , istream &) ;
         MacroGitterBasisPll (Gitter * ) ;
        ~MacroGitterBasisPll () ;
-
-       // Dune index management 
-       IndexManagerType & indexManager(int codim) 
-       {
-         return MacroGitterBasis::indexManager(codim);
-       }
     } ;
   protected :
     MpAccessLocal & _mpaccess ;
@@ -1509,14 +1511,21 @@ packAsBnd (int fce, int who, ObjectStream & os) const {
   }
   else 
   {
-    std::cout << "No point inlined \n";
     os.writeObject ( MacroGridMoverIF :: NO_POINT ); // no point transmitted 
   }
    
   return ;
 }
 
-GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: Hedge1EmptyPll (VertexGeo * a, VertexGeo * b) :
+template < class A > inline void BndsegPllBaseXMacroClosure < A > :: 
+insertGhostCell(ObjectStream & os, int fce)
+{
+  assert( _ghPoint == 0 );
+  _ghPoint = (MacroGhostPoint*) this->myhbnd().buildGhostCell(os , fce);
+  assert( _ghPoint );
+}
+  
+inline GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: Hedge1EmptyPll (VertexGeo * a, VertexGeo * b) :
   GitterBasis :: Objects :: Hedge1Empty (a,b), _pllx (*this) {
   return ;
 }
