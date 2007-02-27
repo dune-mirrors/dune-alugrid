@@ -502,19 +502,27 @@ void Gitter :: backupCMode (ostream & out) {
   return ;
 }
 
-void Gitter :: backup (ostream & out) {
+void Gitter :: backup (ostream & out) 
+{
   assert (debugOption (20) ? (cout << "**INFO Gitter :: backup (ostream & = " << out << ") " << endl, 1) : 1) ;
-  {AccessIterator <hedge_STI> :: Handle fw (container ()) ;
-    for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out) ; }
-  {AccessIterator <hface_STI>::Handle fw (container ()) ;
-    for (fw.first () ; ! fw.done () ; fw.next ()) fw.item().backup(out) ; }
-  {AccessIterator <helement_STI> :: Handle ew (container ()) ;
-    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backup (out) ; }
-    
+  {
+    AccessIterator <hedge_STI> :: Handle fw (container ()) ;
+    for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out) ; 
+  }
+  {
+    AccessIterator <hface_STI>::Handle fw (container ()) ;
+    for (fw.first () ; ! fw.done () ; fw.next ()) fw.item().backup(out) ; 
+  }
+  {
+    AccessIterator <helement_STI> :: Handle ew (container ()) ;
+    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backup (out) ; 
+  }
   return ;
 }
 
 void Gitter :: backup (XDRstream_out & out) {
+  assert(false);
+  abort();
 /*
   //assert (debugOption (20) ? (cout << "**INFO Gitter :: backup (ostream & = " << out << ") " << endl, 1) : 1) ;
   {AccessIterator <hedge_STI> :: Handle fw (container ()) ;
@@ -529,19 +537,30 @@ void Gitter :: backup (XDRstream_out & out) {
 
 void Gitter ::restore (istream & in) {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
-  {AccessIterator < hedge_STI > :: Handle ew (container ());
-    for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ; }
-  {AccessIterator < hface_STI >:: Handle fw(container());
-    for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); }
-  {AccessIterator < helement_STI >:: Handle ew(container());
-    for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); }
-  {AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
-    for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; }
+  {
+    AccessIterator < hedge_STI > :: Handle ew (container ());
+    for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ; 
+  }
+  {
+    AccessIterator < hface_STI >:: Handle fw(container());
+    for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); 
+  }
+  {
+    AccessIterator < helement_STI >:: Handle ew(container());
+    for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
+  }
+    
+  {
+    AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
+    for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; 
+  }
   notifyGridChanges () ;
   return ;
 }
 
 void Gitter ::restore (XDRstream_in & in) {
+  assert(false);
+  abort();
   //assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
 /*
   {AccessIterator < hedge_STI > :: Handle ew (container ());

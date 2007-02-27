@@ -64,6 +64,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           inline const double (& oppositeVertex (int i) const) [3];
 
           inline int dimVx () const; 
+
       };
 
         class Hbnd3Default : public hbndseg3_GEO 
@@ -90,6 +91,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
             inline int preCoarsening  () ;
             inline int postRefinement () ;
+            virtual void* buildGhostCell(ObjectStream&, int) { return 0; }
           protected:
             Gitter * _myGrid; 
         };
@@ -131,6 +133,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
               return p;
             }
 
+            virtual void* buildGhostCell(ObjectStream&, int) { return 0; }
             inline int preCoarsening  () ; 
             inline int postRefinement () ;
           protected:
@@ -558,9 +561,6 @@ public:
         
         virtual ~MacroGitterBasis () {}
 
-        // return index manager mostly for restore and backup 
-        inline IndexManagerType & indexManager(int codim);
-        
       protected: 
         // reference to our grid, for insert_tetra mainly 
         Gitter * _myGrid; 
@@ -1041,12 +1041,6 @@ inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_h
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd4IntStoragePoints & hp) {
   return insert_hbnd4 (f,i,b); 
-}
-
-inline IndexManagerType & GitterBasis :: MacroGitterBasis :: indexManager (int codim ) 
-{ 
-  assert((codim >= 0) && (codim < numOfIndexManager ));
-  return _indexmanager[codim];
 }
 
 #endif  //  GITTER_IMPL_H_INCLUDED

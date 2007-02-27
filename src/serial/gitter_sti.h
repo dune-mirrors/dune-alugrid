@@ -1594,6 +1594,12 @@ public :
       IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const ;
       IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const ;
     public :
+      virtual IndexManagerType& indexManager(int codim) 
+      {
+        assert( codim >= 0 && codim < numOfIndexManager );
+        return _indexmanager[ codim ];
+      }
+      
       virtual void backup (ostream &) const ;
       virtual void backup (const char*,const char *) const ;
       virtual void backupCMode (ostream &) const ;
