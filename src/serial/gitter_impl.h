@@ -28,6 +28,8 @@
 
 // include of ghost_elements in line 959
  
+class MacroGhostPoint; 
+
 class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
   public :
     class Objects {
@@ -91,7 +93,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
             inline int preCoarsening  () ;
             inline int postRefinement () ;
-            virtual void* buildGhostCell(ObjectStream&, int) { return 0; }
+
+            // default implementation returns 0
+            virtual const MacroGhostPoint* buildGhostCell(ObjectStream&, int) { return 0; }
           protected:
             Gitter * _myGrid; 
         };
@@ -133,7 +137,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
               return p;
             }
 
-            virtual void* buildGhostCell(ObjectStream&, int) { return 0; }
+            // default implementation returns 0
+            virtual const MacroGhostPoint* buildGhostCell(ObjectStream&, int) { return 0; }
             inline int preCoarsening  () ; 
             inline int postRefinement () ;
           protected:
@@ -252,6 +257,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
         /////////////////////////////////////////
 
+        // declare this element and all parts leaf  
         virtual void attachleafs() 
         {  
           addleaf();
@@ -260,6 +266,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           for (int i = 0; i < 4 ; ++i) myvertex(i)->addleaf();
         }
         
+        // this element is not leaf anymore 
         virtual void detachleafs() 
         { 
           removeleaf();
@@ -268,6 +275,31 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           for (int i = 0; i < 4 ; ++i) myvertex(i)->removeleaf();
         }
 
+        // check that all indices are within range of index manager
+        virtual void resetGhostIndices() 
+        {  
+          assert( this->isGhost() ); 
+
+          // check my index first 
+          resetGhostIndex(_myGrid->indexManager(0));
+         
+          {
+            // get index manager of faces 
+            IndexManagerType & im = _myGrid->indexManager(1);
+            for (int i = 0; i < 4 ; ++i) myhface3(i)->resetGhostIndex(im);
+          }
+          {
+            // get index manager of edges 
+            IndexManagerType & im = _myGrid->indexManager(2);
+            for (int i = 0; i < 6 ; ++i) myhedge1(i)->resetGhostIndex(im);
+          }
+          {
+            // get index manager of vertices 
+            IndexManagerType & im = _myGrid->indexManager(3);
+            for (int i = 0; i < 4 ; ++i) myvertex(i)->resetGhostIndex(im);
+          }
+        }
+        
 protected:     
         ~TetraEmpty () {}
         
@@ -300,6 +332,7 @@ public:
           
           for (int i = 0; i < 3; ++i) 
           {
+            // make sure we got the right face 
             assert(fabs(myface.myvertex(i)->Point()[0]-
                    face.myvertex(i)->Point()[0])<1e-8);
             assert(fabs(myface.myvertex(i)->Point()[1]-
@@ -322,7 +355,7 @@ public:
         void setGhostBoundaryIds() 
         {
           const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
-          if( this->bndId() == bndid ) return;
+          // if( this->bndId() == bndid ) return;
           //assert( this->bndId() == 0 );
           // value of ghost_closure 
           this->setGhostBndId( bndid );
@@ -340,14 +373,15 @@ public:
   
   class Periodic3Empty : public periodic3_GEO {
     protected :
-            typedef hface3_IMPL innerface_t ;
-            typedef hedge1_IMPL inneredge_t ;
-            typedef VertexEmpty innervertex_t ;
-	    //us
+      typedef hface3_IMPL innerface_t ;
+      typedef hedge1_IMPL inneredge_t ;
+      typedef VertexEmpty innervertex_t ;
 	    typedef tetra_IMPL GhostElement_t;
 
       inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
-     ~Periodic3Empty () {}
+      ~Periodic3Empty () {}
+      // do nothing here 
+      virtual void resetGhostIndices() {}
     public:
   } ;
   typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
@@ -462,6 +496,30 @@ public:
           for (int i = 0; i < 8 ; ++i) myvertex(i)->removeleaf();
         }
 
+        // check that all indices are within range of index manager
+        virtual void resetGhostIndices() 
+        {  
+          assert( this->isGhost() ); 
+          // check my index first 
+          resetGhostIndex(_myGrid->indexManager(0));
+         
+          {
+            // get index manager of faces 
+            IndexManagerType & im = _myGrid->indexManager(1);
+            for (int i = 0; i < 6 ; ++i) myhface4(i)->resetGhostIndex(im);
+          }
+          {
+            // get index manager of edges 
+            IndexManagerType & im = _myGrid->indexManager(2);
+            for (int i = 0; i < 12 ; ++i) myhedge1(i)->resetGhostIndex(im);
+          }
+          {
+            // get index manager of vertices 
+            IndexManagerType & im = _myGrid->indexManager(3);
+            for (int i = 0; i < 8 ; ++i) myvertex(i)->resetGhostIndex(im);
+          }
+        }
+        
         Gitter * _myGrid;
         friend class HexaTop<HexaEmpty>;
       public:
@@ -489,6 +547,7 @@ public:
            
            for (int i = 0; i < 4; ++i) 
            {
+             // make sure we got the right face 
              assert(fabs(myface.myvertex(i)->Point()[0]-
                     face.myvertex(i)->Point()[0])<1e-8);
              assert(fabs(myface.myvertex(i)->Point()[1]-
@@ -510,7 +569,7 @@ public:
         void setGhostBoundaryIds() 
         {
           const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
-          if( this->bndId() == bndid ) return;
+          //if( this->bndId() == bndid ) return;
           // value of ghost_closure 
           this->setGhostBndId( bndid );
           for( int i=0; i<6 ; ++i) myhface4(i)->setGhostBndId( bndid );
@@ -520,20 +579,21 @@ public:
       } ;
       typedef HexaTop < HexaEmpty > hexa_IMPL ;
 
-      // Anfang - Neu am 23.5.02 (BS)
       class Periodic4Empty : public periodic4_GEO {
         protected :
-            typedef hface4_IMPL innerface_t ;
-            typedef hedge1_IMPL inneredge_t ;
-            typedef VertexEmpty innervertex_t ;
-	    //us
-	    typedef hexa_IMPL GhostElement_t;
+          typedef hface4_IMPL innerface_t ;
+          typedef hedge1_IMPL inneredge_t ;
+          typedef VertexEmpty innervertex_t ;
+	        typedef hexa_IMPL GhostElement_t;
+
           inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
-         ~Periodic4Empty () {}
+          ~Periodic4Empty () {}
+         
+          // so nothing here 
+          virtual void resetGhostIndices() {}
         public:
       } ;
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
-      // Ende - Neu am 23.5.02 (BS)
  
     } ;
   public :

@@ -276,9 +276,7 @@ public :
     inline void setIndex ( const int index ) 
     { 
       assert( index >= 0 );
-      _idx    = index; 
-      // if index is set from outside, freeIndex, when freeIndex is called
-      //_isCopy = false;
+      _idx = index; 
     }
     
     inline void freeIndex ( IndexManagerType & im ) 
@@ -299,6 +297,19 @@ public :
       setIndex(index); 
       // now it's a copy 
       _isCopy = true;
+    }
+
+    //for the ghost helements, set index from outside 
+    inline void resetGhostIndex( IndexManagerType & im )
+    {
+      // if already copy then do nothing
+      if( ! _isCopy )
+      {
+        // only call this method on ghosts 
+        assert( this->isGhost() );
+        // set new index 
+        setIndex( im.getIndex() );
+      }
     }
 
     //for defining leaf entities in dune notation:] 
@@ -527,6 +538,7 @@ public :
 
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
     virtual void setIndicesAndBndId (const hface & , int ) { assert(false); abort(); }
+    virtual void resetGhostIndices() = 0;
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
