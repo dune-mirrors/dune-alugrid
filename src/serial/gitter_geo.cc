@@ -743,9 +743,9 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
   // Dateiformats noch nicht spezifiziert.
   
   if (_tetraList.size () == 0) {
-    os << "!Hexaeder" << endl ;
+    os << "!Hexahedra" << endl ;
   } else if (_hexaList.size () == 0 && _tetraList.size () != 0) {
-    os << "!Tetraeder" << endl ;
+    os << "!Tetrahedra" << endl ;
   } else {
     cerr << "**WARNUNG (IGNORIERT) Gitter :: Geometric :: BuilderIF :: backupCMode (ostream &)" ;
     cerr << "  schreibt nur entweder reine Hexaedernetze oder reine Tetraedernetze." ;
