@@ -20,21 +20,24 @@ leafIterator (const IteratorSTI < helement_STI > * p)
   TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > *) p) ;
 }
 
-
 void GitterDuneBasis :: backupIndices (ostream & out)
 {
   // backup indices, our index type is hierarchic_index 
   unsigned char indices = hierarchic_index;
   out << indices;
 
+  enum { numOfIndexManager = Gitter :: Geometric :: BuilderIF ::  numOfIndexManager };
   // store max indices 
-  for(int i=0; i< numOfIndexManager ; i++)
-    indexManager(i).backupIndexSet(out);
+  for(int i=0; i< numOfIndexManager ; ++i)
+    this->indexManager(i).backupIndexSet(out);
 
   { // backup index of elements 
     AccessIterator <helement_STI> :: Handle ew (container ()) ;
     for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backupIndex (out) ;
   }
+
+  // TODO: backup face and edge indices 
+  
   {
     // backup index of vertices 
     LeafIterator < vertex_STI > w ( *this );
@@ -48,8 +51,10 @@ void GitterDuneBasis :: backupIndices (ostream & out)
 inline void GitterDuneBasis :: 
 goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
 {
+  assert( el.isInterior() );
   typedef Gitter :: helement_STI ElType;
   assert( (static_cast<size_t> (el.getIndex())) < idxcheck.size() );
+  assert( idxcheck[ el.getIndex() ]  == true );
   idxcheck[ el.getIndex() ] = false;
   for( ElType * ch = el.down() ; ch ; ch = ch->next())
     goDownHelement( *ch , idxcheck );
@@ -65,11 +70,14 @@ void GitterDuneBasis ::restoreIndices (istream & in)
   // set VERBOSE to 20 and you have the indices value printed 
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices: index flag = " << (int)indices << " file: "
                        << __FILE__ << " line: " << __LINE__ <<") " << endl, 1) : 1) ;
+
+  typedef Gitter :: Geometric :: BuilderIF  BuilderIF;
+  enum { numOfIndexManager = BuilderIF :: numOfIndexManager };
   
   // restore dune indices (see backUpIndices method)
   if(indices == hierarchic_index) 
   {
-    for(int i=0; i< numOfIndexManager ; i++)
+    for(int i=0; i< numOfIndexManager ; ++i)
       this->indexManager(i).restoreIndexSet( in );
 
     // restore index of elements 
@@ -82,14 +90,19 @@ void GitterDuneBasis ::restoreIndices (istream & in)
       LeafIterator < vertex_STI > w ( *this );
       for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in);
     }
+    
+    // reconstruct holes 
 
-    { // reconstruct holes 
+    { 
+      /////////////////////////////////
+      //  Elements 
+      /////////////////////////////////
       {
-        enum { elements = 0 };
         // for elements 
-        int idxsize = this->indexManager(elements).getMaxIndex();
+        IndexManagerType& elementManager = this->indexManager(BuilderIF :: IM_Elements);
+        const int idxsize = elementManager.getMaxIndex();
         vector < bool > checkidx ( idxsize );
-        for(int i=0; i<idxsize; i++) checkidx[i] = true;
+        for(int i=0; i<idxsize; ++i) checkidx[i] = true;
 
         AccessIterator < helement_STI >:: Handle ew(container());
         for ( ew.first(); !ew.done(); ew.next())
@@ -97,17 +110,24 @@ void GitterDuneBasis ::restoreIndices (istream & in)
           goDownHelement( ew.item() , checkidx );
         }
 
-        for(int i=0; i<idxsize; i++)
+        // all remaining indices are treated as holes 
+        for(int i=0; i<idxsize; ++i)
         {
           if(checkidx[i] == true)
-            this->indexManager(elements).freeIndex(i);
+          {
+            elementManager.freeIndex(i);
+          }
         }
       }
+
+      /////////////////////////////////
+      //  Vertices  
+      /////////////////////////////////
       {
-        enum { vertices = 3 };
         // for vertices 
         LeafIterator < vertex_STI > w ( *this );
-        int idxsize = this->indexManager(vertices).getMaxIndex();
+        IndexManagerType& vertexManager = this->indexManager(BuilderIF :: IM_Vertices);
+        const int idxsize = vertexManager.getMaxIndex();
 
         vector < bool > checkidx ( idxsize );
         for(int i=0; i<idxsize; i++) checkidx[i] = true;
@@ -117,11 +137,15 @@ void GitterDuneBasis ::restoreIndices (istream & in)
           checkidx[ w->item().getIndex() ] = false;
         }
 
+        // all remaining indices are treated as holes.
         for(int i=0; i<idxsize; i++)
         {
           if(checkidx[i] == true)
-            this->indexManager(vertices).freeIndex(i);
+          {
+            vertexManager.freeIndex(i);
+          }
         }
+
       }
     }
     return ;
@@ -134,15 +158,13 @@ void GitterDuneBasis ::restoreIndices (istream & in)
     for ( ew->first(); !ew->done(); ew->next()) 
     {
       ew->item().setIndex( idx );
-      idx++;
+      ++idx;
     }
     this->indexManager(0).setMaxIndex ( idx );
     assert (debugOption (20) ? (cout << endl << "**INFO GitterDuneBasis :: restoreIndices: create new leaf indices with size = " << idx << " ! file: "<< __FILE__ << ", line: " << __LINE__ << endl, 1) : 1) ;
-    // printsize ();
     return ;
   }
 
-  
   cerr<< "**WARNING: GitterDuneBasis :: restoreIndices: indices (id = " << indices << ") not read! file: "<< __FILE__ << ", line: " << __LINE__ << "\n";
   return ;
 }
@@ -167,7 +189,8 @@ void GitterDuneBasis :: duneBackup (const char * fileName)
   {
     FSLock lock (fileName) ;
     Gitter :: backup (out) ;
-    GitterDuneBasis :: backupIndices (out) ;
+
+    this->backupIndices (out) ;
 
     {
       char *fullName = new char[strlen(fileName)+20];
@@ -211,7 +234,7 @@ void GitterDuneBasis :: duneRestore (const char * fileName)
          << (fileName ? fileName : "null") << " > " << endl ;
   } else {
     Gitter :: restore (in) ;
-    GitterDuneBasis :: restoreIndices (in);
+    this->restoreIndices (in);
   }
   return ;
 }
@@ -219,29 +242,25 @@ void GitterDuneBasis :: duneRestore (const char * fileName)
 int GitterDuneBasis :: preCoarsening  (Gitter::helement_STI & elem)
 {
   // if _arp is set then the extrenal preCoarsening is called 
-  if(_arp) return (*_arp).preCoarsening(elem);
-  else return 0;
+  return (_arp) ? (*_arp).preCoarsening(elem) : 0;
 }
 
 int GitterDuneBasis :: postRefinement (Gitter::helement_STI & elem)
 {
   // if _arp is set then the extrenal postRefinement is called 
-  if(_arp) return (*_arp).postRefinement(elem);
-  else return 0;
+  return (_arp) ? (*_arp).postRefinement(elem) : 0;
 }
 
 int GitterDuneBasis :: preCoarsening  (Gitter::hbndseg_STI & bnd)
 {
   // if _arp is set then the extrenal preCoarsening is called 
-  if(_arp) return (*_arp).preCoarsening(bnd);
-  else return 0;
+  return (_arp) ? (*_arp).preCoarsening(bnd) : 0;
 }
 
 int GitterDuneBasis :: postRefinement (Gitter::hbndseg_STI & bnd)
 {
   // if _arp is set then the extrenal postRefinement is called 
-  if(_arp) return (*_arp).postRefinement(bnd);
-  else return 0;
+  return (_arp) ? (*_arp).postRefinement(bnd) : 0;
 }
 
 void GitterDuneBasis ::
