@@ -126,6 +126,11 @@ public:
 
   // restore from in stream 
   void restoreIndexSet ( istream & is );
+
+  // all entries in vector with value true 
+  // are inserted as holes 
+  void generateHoles(const vector<bool> & isHole);
+
 private:
   // no copy constructor allowed 
   ALUGridIndexStack( const ALUGridIndexStack<T,length> & s);
@@ -303,6 +308,19 @@ inline void ALUGridIndexStack<T,length>::clearStack ()
   return;
 }
 
+template <class T, int length>
+inline void ALUGridIndexStack<T,length>::
+generateHoles(const vector<bool> & isHole) 
+{
+  const int idxsize = isHole.size();
+  assert( idxsize == maxIndex_ );
+  for(int i=0; i<idxsize; ++i)
+  {
+    // all entries marked true will be inserted as free 
+    if(isHole[i] == true) freeIndex(i);
+  }
+}
+ 
 enum { lengthOfFiniteStack = 10000 };
 typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
 
