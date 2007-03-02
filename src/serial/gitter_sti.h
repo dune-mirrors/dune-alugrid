@@ -33,16 +33,6 @@ typedef strstream    strstream_t;
 #include "parallel.h"
 #include "xdrclass.h"
 
-// number of different index manager that exists 
-enum { numOfIndexManager = 6 };
-// 0 == elements 
-// 1 == faces 
-// 2 == edges 
-// 3 == vertices
-// 4 == boundary elements 
-// 5 == dummy index for unused internal bnd 
-
-
 class ProjectVertex {
 public:
   virtual ~ProjectVertex () {}
@@ -303,10 +293,9 @@ public :
     inline void resetGhostIndex( IndexManagerType & im )
     {
       // if already copy then do nothing
-      if( ! _isCopy )
+      if( ! _isCopy && this->isGhost() )
       {
         // only call this method on ghosts 
-        assert( this->isGhost() );
         // set new index 
         setIndex( im.getIndex() );
       }
@@ -1586,7 +1575,18 @@ public :
       IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) const ;
       IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
       IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
-    protected :
+    public:  
+      // number of different index manager that exists 
+      enum { numOfIndexManager = 6 };
+
+      enum { IM_Elements = 0, // 0 == elements 
+             IM_Faces = 1,    // 1 == faces 
+             IM_Edges = 2,    // 2 == edges 
+             IM_Vertices = 3, // 3 == vertices
+             IM_Bnd = 4,      // 4 == boundary elements 
+             IM_Dummy = 5     // 5 == dummy index for unused internal bnd 
+      };
+    protected:
       // this variable is located here, because all the elements in
       // this lists use this objects to get  thier numbers 
       // index provider, for every codim one , 4 is for boundary
@@ -1606,6 +1606,7 @@ public :
       IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const ;
       IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const ;
     public :
+      // return reference to indexManager 
       virtual IndexManagerType& indexManager(int codim) 
       {
         assert( codim >= 0 && codim < numOfIndexManager );
