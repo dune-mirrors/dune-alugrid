@@ -580,7 +580,6 @@ void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
 // packs macro element as internal bnd for other proc 
 void TetraPllXBaseMacro :: packAsGhost(ObjectStream & os, int fce) const 
 {
-  cout << "Pack Tetra as ghost! \n";
   packAsBndNow(fce,os);
 }
 
@@ -1065,44 +1064,61 @@ bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
   return false ;
 }
 
+
+void HexaPllBaseXMacro :: packAsBndNow(int fce, ObjectStream & os) const 
+{
+  os.writeObject (HBND4INT) ;
+  os.writeObject (Gitter :: hbndseg :: closure) ;
+
+  // write the four identifiers of the hexa 
+  os.writeObject (myhexa ().myvertex (fce,0)->ident ()) ;
+  os.writeObject (myhexa ().myvertex (fce,1)->ident ()) ;
+  os.writeObject (myhexa ().myvertex (fce,2)->ident ()) ;
+  os.writeObject (myhexa ().myvertex (fce,3)->ident ()) ;
+
+  // see method unpackHbnd4Int 
+  int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; 
+  os.writeObject ( writePoint ); // 1 == points are transmitted 
+
+  // know which face is the internal bnd 
+  os.writeObject (fce);
+ 
+  for(int k=0; k<8; k++) 
+  {
+    int vx = myhexa ().myvertex (k)->ident ();
+    os.writeObject ( vx ) ;
+  }
+
+  int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
+  for(int vx=0; vx<4; vx++)
+  {
+    const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
+    os.writeObject( vertex->ident() );
+    const double (&p)[3] = vertex->Point();
+    os.writeObject ( p[0] ) ;
+    os.writeObject ( p[1] ) ;
+    os.writeObject ( p[2] ) ;
+  }
+}
+
+void HexaPllBaseXMacro :: packAsGhost(ObjectStream & os, int fce) const 
+{
+  packAsBndNow(fce, os);
+}
+
 // packs macro element as internal bnd for other proc 
-void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const {
+void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
+{
   bool hit = _moveTo.size () == 0 ? true : false ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++ )
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
+       i != _moveTo.end () ; i ++ )
+  {
     if ((*i).first != who) hit = true ;
-  if (hit) {
-    os.writeObject (HBND4INT) ;
-    os.writeObject (Gitter :: hbndseg :: closure) ;
-  
-    // write the four identifiers of the hexa 
-    os.writeObject (myhexa ().myvertex (fce,0)->ident ()) ;
-    os.writeObject (myhexa ().myvertex (fce,1)->ident ()) ;
-    os.writeObject (myhexa ().myvertex (fce,2)->ident ()) ;
-    os.writeObject (myhexa ().myvertex (fce,3)->ident ()) ;
+  }
 
-    // see method unpackHbnd4Int 
-    int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; 
-    os.writeObject ( writePoint ); // 1 == points are transmitted 
-
-    // know which face is the internal bnd 
-    os.writeObject (fce);
-   
-    for(int k=0; k<8; k++) 
-    {
-      int vx = myhexa ().myvertex (k)->ident ();
-      os.writeObject ( vx ) ;
-    }
-
-    int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
-    for(int vx=0; vx<4; vx++)
-    {
-      const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
-      os.writeObject( vertex->ident() );
-      const double (&p)[3] = vertex->Point();
-      os.writeObject ( p[0] ) ;
-      os.writeObject ( p[1] ) ;
-      os.writeObject ( p[2] ) ;
-    }
+  if (hit) 
+  {
+    packAsBndNow( fce, os );
   }
   return ;
 }
@@ -1541,7 +1557,7 @@ set < int, less < int > > GitterBasisPll :: MacroGitterBasisPll :: secondScan ()
 }
 
 Gitter :: Geometric :: VertexGeo * GitterBasisPll :: MacroGitterBasisPll :: insert_vertex (double x,double y,double z,int i) {
-  return new ObjectsPll :: VertexPllImplMacro (x,y,z,i,_linkagePatterns,indexManager(3)) ;
+  return new ObjectsPll :: VertexPllImplMacro (x,y,z,i,_linkagePatterns,indexManager(IM_Vertices)) ;
 }
 
 Gitter :: Geometric :: VertexGeo * GitterBasisPll :: MacroGitterBasisPll :: 
@@ -1550,76 +1566,97 @@ insert_ghostvx (double x, double y, double z, int i)
   return GitterBasis :: MacroGitterBasis :: insert_vertex (x,y,z,i);
 }
 
-Gitter :: Geometric :: hedge1_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hedge1 (VertexGeo *a, VertexGeo *b) {
-  return new ObjectsPll :: Hedge1EmptyPllMacro (a,b,indexManager(2) ) ;
+Gitter :: Geometric :: hedge1_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_hedge1 (VertexGeo *a, VertexGeo *b) 
+{
+  return new ObjectsPll :: Hedge1EmptyPllMacro (a,b,indexManager(IM_Edges) ) ;
 }
 
-Gitter :: Geometric :: hedge1_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hedge1_twist (VertexGeo *a, int aid,  VertexGeo *b , int bid ) {
+Gitter :: Geometric :: hedge1_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_hedge1_twist (VertexGeo *a, int aid,  VertexGeo *b , int bid ) 
+{
   if(aid < bid) 
     return GitterBasis :: MacroGitterBasis :: insert_hedge1 (a,b);
   else 
     return GitterBasis :: MacroGitterBasis :: insert_hedge1 (b,a);
 } 
 
-Gitter :: Geometric :: hface4_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4]) {
-  return new ObjectsPll :: Hface4EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], e [3], s [3], indexManager(1) ) ;
+Gitter :: Geometric :: hface4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4]) 
+{
+  return new ObjectsPll :: Hface4EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], e [3], s [3], indexManager(IM_Faces) ) ;
 }
 
-Gitter :: Geometric :: hface3_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3]) {
-  return new ObjectsPll :: Hface3EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], indexManager(1) ) ;
+Gitter :: Geometric :: hface3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3]) 
+{
+  return new ObjectsPll :: Hface3EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], indexManager(IM_Faces) ) ;
 }
 
-Gitter :: Geometric :: hexa_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) {
-  return new ObjectsPll :: HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5], indexManager(0), this->_myGrid ) ;
+Gitter :: Geometric :: hexa_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) 
+{
+  return new ObjectsPll :: HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5], 
+                                              indexManager(IM_Elements), this->_myGrid ) ;
 }
 
-Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {
-  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], indexManager(0), this->_myGrid ) ;
+Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) 
+{
+  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], 
+                                               indexManager(IM_Elements), this->_myGrid ) ;
 }
 
-  // Neu >
-Gitter :: Geometric :: periodic3_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) {
+Gitter :: Geometric :: periodic3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) 
+{
   return new ObjectsPll :: Periodic3EmptyPllMacro (f [0], t[0], f [1], t[1]) ;
-} // < Neu
+} 
 
-// Anfang - Neu am 23.5.02 (BS)
-Gitter :: Geometric :: periodic4_GEO * GitterBasisPll :: MacroGitterBasisPll :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) {
+Gitter :: Geometric :: periodic4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
+insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) 
+{
   return new ObjectsPll :: Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1]) ;
 }
-// Ende - Neu am 23.5.02 (BS)
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) {
-  if (b == Gitter :: hbndseg_STI :: closure) {
+insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) 
+{
+  if (b == Gitter :: hbndseg_STI :: closure) 
+  {
+    // internal face always get dummy index manager      
     typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
-    return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < Hbnd4DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(0) , this->_myGrid , 0 ) ;
+    return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
+          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(IM_Dummy) , this->_myGrid , *this ) ;
   } else {
     return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
-        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(4) , 0 ) ;
+        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(IM_Bnd) , 0 ) ;
   }
 }
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd4_ghost (hface4_GEO * f, int t) {
+insert_hbnd4_ghost (hface4_GEO * f, int t) 
+{
   Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
   return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
-    BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(4) , 0 ) ;
+    BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(IM_Dummy) , 0 ) ;
 }
 
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd4IntStoragePoints & hp) 
-{   
-  if (b == Gitter :: hbndseg_STI :: closure) {
-    typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
-    MacroGhostHexa * ghost = new MacroGhostHexa (*this,hp,f); 
-    assert(ghost);
-    return new Hbnd4PllInternal < GitterBasis :: Objects :: Hbnd4Default, BndsegPllBaseXClosure < Hbnd4DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(0) , this->_myGrid , ghost ) ;
-  } else {
-    return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
-        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(4) , 0 ) ;
+{ 
+  typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
+  // if internal boundary create ghost 
+  if (b == Gitter :: hbndseg_STI :: closure) 
+  {
+    return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
+          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(IM_Dummy) , this->_myGrid , *this, hp) ;
+  } 
+  else 
+  {
+    return new Hbnd4PllExternal < Hbnd4DefaultType , 
+        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(IM_Bnd) , 0 ) ;
   }
 }
 
@@ -1627,51 +1664,48 @@ insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const Hbn
 Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd3IntStoragePoints & hp ) 
 {
+  typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
   if (b == Gitter :: hbndseg_STI :: closure) 
   {
-    typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
 
-    //MacroGhostTetra * ghost = new MacroGhostTetra(*this, hp, f );
-    //assert(ghost);
-    
     // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
     return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: 
-              macro_t (f,t,NULL, b, indexManager(5) , this->_myGrid , *this, hp ) ;
+              macro_t (f,t,NULL, b, indexManager(IM_Dummy) , this->_myGrid , *this, hp ) ;
   } 
   else 
   {
-    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, 
-        BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(4) , 0 ) ;
+    return new Hbnd3PllExternal < Hbnd3DefaultType , 
+        BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(IM_Bnd) , 0 ) ;
   }
 }
 
 // version without point 
 Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b ) {
-  if (b == Gitter :: hbndseg_STI :: closure) {
-    typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
+insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b ) 
+{
+  typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
+  if (b == Gitter :: hbndseg_STI :: closure) 
+  {
     // here we have a ghost of the ghost, therefor we need the element index manager 
     return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(0) , this->_myGrid , *this ) ;
-  } else {
-    return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(4), 0 ) ;
+          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(IM_Dummy) , this->_myGrid , *this ) ;
+  } 
+  else 
+  {
+    return new Hbnd3PllExternal < Hbnd3DefaultType , 
+           BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(IM_Bnd), 0 ) ;
   }
 }
 
 Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd3_ghost (hface3_GEO * f, int t) {
+insert_hbnd3_ghost (hface3_GEO * f, int t) 
+{
   Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
   typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
 
-  // switched off for the moment 
-  // normaly on this internal bnd we want to store element data ==> indexManager[0] 
-
-  // cahnged to normal external bnds
-  //return new Hbnd3Top < Hbnd3PllInternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-  //      BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: micro_t >  (0,f,t, NULL, b, indexManager(5) ) ;
-  
-  return new Hbnd3PllExternal < GitterBasis :: Objects :: Hbnd3Default, BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(4), 0 ) ;
+  return new Hbnd3PllExternal < Hbnd3DefaultType , 
+         BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t,NULL, b, indexManager(IM_Bnd), 0 ) ;
 }
 
 IteratorSTI < Gitter :: vertex_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const vertex_STI * a) const {
@@ -1732,12 +1766,12 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
     ifstream in (extendedName) ;
     if (in) {
       _macrogitter = new MacroGitterBasisPll (this,in) ;
-    } else {
+    } 
+    else 
+    {
       assert (debugOption (5) ? 
         ( cerr << "  GitterBasisPll :: GitterBasisPll () file: " << extendedName 
            << " cannot be read. Try " << f << " instead. In " << __FILE__ << " line " << __LINE__ << endl, 1) : 1);
-      // don't create macrogitter, first check normal macro file 
-      //_macrogitter = new MacroGitterBasisPll (this) ;
     }
     delete [] extendedName ;
   }
@@ -1750,6 +1784,7 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpacce
     if (in) _macrogitter = new MacroGitterBasisPll (this,in) ;
   }
   
+  // create empty macro gitter 
   if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (this) ;
 
   assert (_macrogitter) ;
