@@ -278,42 +278,51 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         // check that all indices are within range of index manager
         virtual void resetGhostIndices() 
         {  
-          assert( this->isGhost() ); 
+          // only set indices for macro level ghosts 
+          if( this->level() > 0 ) return ;
+          
+          {
+            typedef Gitter :: Geometric :: BuilderIF BuilderIF;
+            // only call for ghosts 
+            assert( this->isGhost() ); 
 
-          // check my index first 
-          resetGhostIndex(_myGrid->indexManager(0));
-         
-          {
-            // get index manager of faces 
-            IndexManagerType & im = _myGrid->indexManager(1);
-            for (int i = 0; i < 4 ; ++i) myhface3(i)->resetGhostIndex(im);
-          }
-          {
-            // get index manager of edges 
-            IndexManagerType & im = _myGrid->indexManager(2);
-            for (int i = 0; i < 6 ; ++i) myhedge1(i)->resetGhostIndex(im);
-          }
-          {
-            // get index manager of vertices 
-            IndexManagerType & im = _myGrid->indexManager(3);
-            for (int i = 0; i < 4 ; ++i) myvertex(i)->resetGhostIndex(im);
+            // check my index first 
+            resetGhostIndex(_myGrid->indexManager(BuilderIF :: IM_Elements ));
+           
+            {
+              // get index manager of faces 
+              IndexManagerType & im = _myGrid->indexManager(BuilderIF :: IM_Faces);
+              for (int i = 0; i < 4 ; ++i) myhface3(i)->resetGhostIndex(im);
+            }
+            {
+              // get index manager of edges 
+              IndexManagerType & im = _myGrid->indexManager(BuilderIF :: IM_Edges);
+              for (int i = 0; i < 6 ; ++i) myhedge1(i)->resetGhostIndex(im);
+            }
+            {
+              // get index manager of vertices 
+              IndexManagerType & im = _myGrid->indexManager(BuilderIF :: IM_Vertices);
+              for (int i = 0; i < 4 ; ++i) myvertex(i)->resetGhostIndex(im);
+            }
           }
         }
         
-protected:     
+      protected:     
         ~TetraEmpty () {}
         
         int preCoarsening  () ; 
         int postRefinement () ;
 
         Gitter * _myGrid;
-public: 
+      public: 
         //ghost tetra gets indices of grid, to which it belongs actually
         virtual void setIndicesAndBndId (const hface_STI & f, int face_nr) 
         {
           // set all items to ghost bnd id 
           setGhostBoundaryIds();
           
+          typedef Gitter :: Geometric :: BuilderIF BuilderIF;
+            
           typedef Gitter :: Geometric :: vertex_GEO vertex_GEO; 
           typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO; 
       
@@ -323,12 +332,12 @@ public:
           myhface3_t & myface = *(myhface3(face_nr));
 
           // set index of face 
-          myface.setIndex(_myGrid->indexManager(1), face.getIndex());
+          myface.setIndex(_myGrid->indexManager(BuilderIF :: IM_Faces), face.getIndex());
           // set bnd id of face 
           myface.setGhostBndId( bndid );
 
-          IndexManagerType & vxIm = _myGrid->indexManager(3);
-          IndexManagerType & edIm = _myGrid->indexManager(2);
+          IndexManagerType & vxIm = _myGrid->indexManager(BuilderIF :: IM_Vertices);
+          IndexManagerType & edIm = _myGrid->indexManager(BuilderIF :: IM_Edges);
           
           for (int i = 0; i < 3; ++i) 
           {
@@ -499,24 +508,32 @@ public:
         // check that all indices are within range of index manager
         virtual void resetGhostIndices() 
         {  
-          assert( this->isGhost() ); 
-          // check my index first 
-          resetGhostIndex(_myGrid->indexManager(0));
-         
+          // only set indices for macro level ghosts 
+          if( this->level() > 0 ) return ;
+          
           {
-            // get index manager of faces 
-            IndexManagerType & im = _myGrid->indexManager(1);
-            for (int i = 0; i < 6 ; ++i) myhface4(i)->resetGhostIndex(im);
-          }
-          {
-            // get index manager of edges 
-            IndexManagerType & im = _myGrid->indexManager(2);
-            for (int i = 0; i < 12 ; ++i) myhedge1(i)->resetGhostIndex(im);
-          }
-          {
-            // get index manager of vertices 
-            IndexManagerType & im = _myGrid->indexManager(3);
-            for (int i = 0; i < 8 ; ++i) myvertex(i)->resetGhostIndex(im);
+            typedef Gitter :: Geometric :: BuilderIF BuilderIF;
+            // only call for ghosts 
+            assert( this->isGhost() ); 
+
+            // check my index first 
+            resetGhostIndex(_myGrid->indexManager(BuilderIF :: IM_Elements ));
+           
+            {
+              // get index manager of faces 
+              IndexManagerType & im = _myGrid->indexManager(BuilderIF :: IM_Faces);
+              for (int i = 0; i < 6 ; ++i) myhface4(i)->resetGhostIndex(im);
+            }
+            {
+              // get index manager of edges 
+              IndexManagerType & im = _myGrid->indexManager(BuilderIF :: IM_Edges);
+              for (int i = 0; i < 12 ; ++i) myhedge1(i)->resetGhostIndex(im);
+            }
+            {
+              // get index manager of vertices 
+              IndexManagerType & im = _myGrid->indexManager(BuilderIF :: IM_Vertices);
+              for (int i = 0; i < 8 ; ++i) myvertex(i)->resetGhostIndex(im);
+            }
           }
         }
         
@@ -529,6 +546,8 @@ public:
            // set all items to ghost bnd id
            setGhostBoundaryIds();
           
+           typedef Gitter :: Geometric :: BuilderIF BuilderIF;
+            
            typedef Gitter :: Geometric :: vertex_GEO vertex_GEO; 
            typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO; 
           
@@ -537,11 +556,11 @@ public:
            
            myhface4_t & myface = *(myhface4(face_nr));
 
-           IndexManagerType & vxIm = _myGrid->indexManager(3);
-           IndexManagerType & edIm = _myGrid->indexManager(2);
+           IndexManagerType & vxIm = _myGrid->indexManager(BuilderIF :: IM_Vertices);
+           IndexManagerType & edIm = _myGrid->indexManager(BuilderIF :: IM_Edges);
 
            // set index of face 
-           myface.setIndex( _myGrid->indexManager(1) , face.getIndex ());
+           myface.setIndex( _myGrid->indexManager(BuilderIF :: IM_Faces) , face.getIndex ());
            // set bnd id of face 
            myface.setGhostBndId( bndid );
            
@@ -999,27 +1018,30 @@ inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid) : _
 }
 
 inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_vertex (double x, double y, double z, int id) {
-  return new Objects :: VertexEmptyMacro (x, y, z, id, indexManager(3)) ;
+  return new Objects :: VertexEmptyMacro (x, y, z, id, indexManager(IM_Vertices)) ;
 }
 
 inline GitterBasis :: VertexGeo * GitterBasis :: MacroGitterBasis :: insert_ghostvx (double x, double y, double z, int id) {
-  return new Objects :: VertexEmptyMacro (x, y, z, id, indexManager(3)) ;
+  return new Objects :: VertexEmptyMacro (x, y, z, id, indexManager(IM_Vertices)) ;
 }
 
 inline GitterBasis :: hedge1_GEO * GitterBasis :: MacroGitterBasis :: insert_hedge1 (VertexGeo * a, VertexGeo * b) {
-  return new Objects :: hedge1_IMPL (0, a, b, indexManager(2) ) ;
+  return new Objects :: hedge1_IMPL (0, a, b, indexManager(IM_Edges) ) ;
 }
 
 inline GitterBasis :: hface3_GEO * GitterBasis :: MacroGitterBasis :: insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3]) {
-  return new Objects :: hface3_IMPL (0,e[0],s[0],e[1],s[1],e[2],s[2], indexManager(1) ) ;
+  return new Objects :: hface3_IMPL (0,e[0],s[0],e[1],s[1],e[2],s[2], indexManager(IM_Faces) ) ;
 }
 
 inline GitterBasis :: hface4_GEO * GitterBasis :: MacroGitterBasis :: insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4]) {
-  return new Objects :: hface4_IMPL (0, e[0],s[0],e[1],s[1],e[2],s[2],e[3],s[3], indexManager(1) ) ;
+  return new Objects :: hface4_IMPL (0, e[0],s[0],e[1],s[1],e[2],s[2],e[3],s[3], indexManager(IM_Faces) ) ;
 }
 
-inline GitterBasis :: tetra_GEO * GitterBasis :: MacroGitterBasis :: insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) {
-  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], indexManager(0) , _myGrid ) ;
+inline GitterBasis :: tetra_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) 
+{
+  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], 
+                                    indexManager(IM_Elements) , _myGrid ) ;
 }
 
 // inlcudes implementation of MacroGhostTetra and MacroGhostHexa 
@@ -1078,16 +1100,20 @@ inline GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_
   return per4;   //  return new ObjectsPll :: Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1]) ;  
 }
 
-inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) {
-  return new Objects :: hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5], indexManager(0), _myGrid ) ;
+inline GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) 
+{
+  return new Objects :: hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5], 
+                                   indexManager(IM_Elements), _myGrid ) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
+insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) 
+{
   // the two last zeros are the following: 
   // the first pointer is pointer to grid which we dont need in the serial
   // case and the second is a pointer to ghost Element 
-  return new Objects :: hbndseg3_IMPL ( 0,f,i, NULL,NULL, b, indexManager(4), _myGrid) ;
+  return new Objects :: hbndseg3_IMPL ( 0,f,i, NULL,NULL, b, indexManager(IM_Bnd), _myGrid) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
@@ -1095,11 +1121,14 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const Hbn
   return insert_hbnd3(f,i,b); 
 }
 
-inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) {
-  return new Objects :: hbndseg4_IMPL ( 0,f,i,NULL, b,indexManager(4) );
+inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) 
+{
+  return new Objects :: hbndseg4_IMPL ( 0,f,i,NULL, b,indexManager(IM_Bnd) );
 }
 
-inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd4IntStoragePoints & hp) {
+inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd4IntStoragePoints & hp) {
   return insert_hbnd4 (f,i,b); 
 }
 
