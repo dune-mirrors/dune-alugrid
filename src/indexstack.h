@@ -118,7 +118,7 @@ public:
   //! store index on stack 
   void freeIndex(T index);
 
-  //! test stack funtcionality
+  //! test stack functionality
   void test ();
 
   // backup set to out stream 
@@ -226,8 +226,11 @@ template <class T, int length>
 inline void ALUGridIndexStack<T,length>::backupIndexSet ( ostream & os ) 
 {
   // holes are not stored at the moment 
+  // they are reconstructed when gitter is 
+  // restored 
   os.write( ((const char *) &maxIndex_ ), sizeof(int) ) ;
   
+  /*
   assert( stack_ ); 
   stack_->backup( os ); 
   
@@ -247,6 +250,7 @@ inline void ALUGridIndexStack<T,length>::backupIndexSet ( ostream & os )
       st->backup( os );
     }
   }
+  */
   return ;
 }
 
@@ -254,8 +258,10 @@ template <class T, int length>
 inline void ALUGridIndexStack<T,length>::restoreIndexSet ( istream & is )
 {
   is.read ( ((char *) &maxIndex_), sizeof(int) );
+  // clear stack fro reconstruction of holes 
   clearStack ();
 
+  /*
   assert( stack_ );
   stack_->restore( is ); 
 
@@ -274,6 +280,7 @@ inline void ALUGridIndexStack<T,length>::restoreIndexSet ( istream & is )
       fullStackList_.push( st );
     }
   }
+  */
   return ;
 }
 
