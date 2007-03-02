@@ -607,39 +607,84 @@ Hmesh::recoverGrid(const char* recoverFile,
   }
 
 
-  /* read data */
-  /*
-  Leafwalk<Element> walk(mel);
-  for( walk.first() ; !walk.done() ; walk.next() )
-    in >> walk.getitem();
-  */
+  // read indices 
   recoverIndicies(in);
  
   cout << " done." << endl;
 
   return true;
 }
+
 void
-Hmesh::recoverIndicies(istream& in) {
-  for (int i=0;i<numOfIndexManager2d;i++) {
+Hmesh::recoverIndicies(istream& in) 
+{
+  // reads maxIndex of Index Manager 
+  for (int i=0;i<numOfIndexManager2d; ++i) 
+  {
     indexmanager[i].restoreIndexSet(in);
   }
+  
+  //////////////////////////////////////////
+  //  read vertices 
+  //////////////////////////////////////////
   {
+    IndexManager2dType& vertexManager = indexmanager[IM_Vertices];
+    const int idxSize = vertexManager.getMaxIndex();
+    // create vector, all entries are marked true 
+    vector<bool> isHole (idxSize, true );
+
     Listwalk_impl < Vertex > walk(vl) ;
-    for( walk.first() ; ! walk.done() ; walk.next() ) {
-      in.read ( ((char *) &(walk.getitem().setIndex())), sizeof(int) );
+    for( walk.first() ; ! walk.done() ; walk.next() ) 
+    {
+      Vertex& vx = walk.getitem();
+      in.read ( ((char *) &(vx.setIndex())), sizeof(int) );
+      assert( vx.getIndex() < idxSize );
+      isHole[vx.getIndex()] = false;  
     }
+
+    // all remaining indices are reinserted as holes 
+    vertexManager.generateHoles( isHole );
   }
+  
+  //////////////////////////////////////////
+  //  read elements and edges 
+  //////////////////////////////////////////
   {
+    IndexManager2dType& elementManager = indexmanager[IM_Elements];
+    const int elSize = elementManager.getMaxIndex();
+    
+    IndexManager2dType& edgeManager = indexmanager[IM_Edges];
+    const int edgeSize = elementManager.getMaxIndex();
+    // create vector, all entries are marked true
+    vector<bool> elementIsHole (elSize, true );
+    vector<bool> edgeIsHole  (edgeSize, true );
+    
     Levelwalk<Element> walk(mel, 0);
-    for( walk.first() ; !walk.done() ; walk.next() ) {
+    for( walk.first() ; !walk.done() ; walk.next() ) 
+    {
       SubtreeIterator<Element> hier(&(walk.getitem()));
-      for (hier.first() ; !hier.done() ; hier.next() ) {
-	in.read ( ((char *) &(hier.getitem().setIndex())), sizeof(int) );
-	for (int e=0;e<3;e++) {
-	  in.read ( ((char *) &(hier.getitem().edge(e)->setIndex())), sizeof(int) );
-	}
+      for (hier.first() ; !hier.done() ; hier.next() ) 
+      {
+        Element& elem = hier.getitem();
+
+        // read element index 
+      	in.read ( ((char *) &(elem.setIndex())), sizeof(int) );
+        assert( elem.getIndex() < elSize );
+        elementIsHole[elem.getIndex()] = false;
+        
+        // read edges 
+       	for (int e=0; e<3; ++e) 
+        {
+          Edge* edge = elem.edge(e);
+	        in.read ( ((char *) &(edge->setIndex())), sizeof(int) );
+          assert( edge->getIndex() < edgeSize );
+          edgeIsHole[edge->getIndex()] = false;
+	      }
       }
     } 
+
+    // reinsert remaining indices as holes 
+    elementManager.generateHoles( elementIsHole );
+    edgeManager.generateHoles( edgeIsHole );
   }
 }

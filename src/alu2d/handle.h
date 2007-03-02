@@ -854,39 +854,30 @@ class Hmesh_basic {
     void ascireadtriang(ifstream &) ;
 
   public :
-
-    Hmesh_basic() : 
+   Hmesh_basic() : 
       vl(this), 
       mel(this), 
-      mbl(this) { };
+      mbl(this) 
+   {}
 
-    virtual ~Hmesh_basic() {  
-  //assert(indexmanager[0].usedindex()==0);
-  //assert(indexmanager[1].usedindex()==0);
-  //assert(indexmanager[2].usedindex()==0);
-  //assert(indexmanager[3].usedindex()==0);
-      } ;    
-    /*
-   void printIndex() {
-     for (int i=0;i<numOfIndexManager;i++)
-       cerr << i << " maxindex: " << indexmanager[i].getMaxIndex() << " " 
-      << "index in use: " << indexmanager[i].usedindex() << endl;
-   }
-    */
+   virtual ~Hmesh_basic() {}     
+
    int getIndex(int indextype) {
+     assert( indextype >= 0 && indextype < numOfIndexManager2d );
      return indexmanager[indextype].getIndex();
    }
-   void freeIndex(int indextype,int index) {
+
+   void freeIndex(int indextype, int index) {
+     assert( indextype >= 0 && indextype < numOfIndexManager2d );
      indexmanager[indextype].freeIndex(index);
    }
    
    // von mir dazugesetzt...
-   int indexManagerSize (int cd) {
+   int indexManagerSize (int cd) 
+   {
      enum{dim = 2};
      assert(cd<3 && cd>=0);
-     // printIndex();
      return indexmanager[dim-cd].getMaxIndex();
-     // return indexmanager[dim-cd].usedindex();
    }
    
     void makeneighbours() ;
@@ -928,6 +919,12 @@ class Hmesh : public Hmesh_basic {
   void asciwritetriang(const char *,double , unsigned long int) ;
 
   public :
+   enum { IM_Elements = 2, // index manager id for elements 
+          IM_Edges = 1,    // index manager id for edges  
+          IM_Vertices = 0, // index manager id for vertices  
+          IM_Bnd = 3       // index manager id for bnd 
+   };
+
 
   Hmesh();
 

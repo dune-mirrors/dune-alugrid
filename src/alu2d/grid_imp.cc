@@ -291,45 +291,50 @@ inline int Bndel::get_splitpoint(double (&ppoint) [2])
 inline void Fullvertex::sethdl(Hmesh_basic *phdl) {
   hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(0);
+  _idx=hdl->getIndex(Hmesh::IM_Vertices);
 }
 inline void Edge::sethdl(Hmesh_basic *phdl) {
   hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(1);
+  _idx=hdl->getIndex(Hmesh::IM_Edges);
 }
 inline Edge::~Edge() {
   assert(isfree());
-  hdl->freeIndex(1,_idx);
+  hdl->freeIndex(Hmesh::IM_Edges,_idx);
 }
-inline void Element::sethdl(Hmesh_basic *phdl) {
+inline void Element::sethdl(Hmesh_basic *phdl) 
+{
   hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(2);
+  _idx=hdl->getIndex(Hmesh::IM_Elements);
 }
-inline void Bndel::sethdl(Hmesh_basic *phdl) {
+inline void Bndel::sethdl(Hmesh_basic *phdl) 
+{
   hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(3);
+  _idx=hdl->getIndex(Hmesh::IM_Bnd);
 }
 inline Vertex::~Vertex() {
   if (hdl) {
     assert(_idx>=0);
-    hdl->freeIndex(0,_idx);
+    hdl->freeIndex(Hmesh::IM_Vertices,_idx);
   }
 }
-inline Element::~Element() {
-  for (int i=0;i<3;i++) {
-    if (connect.edge[i]) {
+inline Element::~Element() 
+{
+  for (int i=0;i<3;++i) 
+  {
+    if (connect.edge[i]) 
+    {
       connect.edge[i]->detach();
       if (connect.edge[i]->isfree())
-	delete connect.edge[i];
+	    delete connect.edge[i];
     }
   }
   assert(hdl);
   if (hdl) {
     assert(_idx>=0);
-    hdl->freeIndex(2,_idx);
+    hdl->freeIndex(Hmesh::IM_Elements,_idx);
   }
 }
 inline Bndel::~Bndel() {
@@ -340,7 +345,7 @@ inline Bndel::~Bndel() {
   }
   if (hdl) {
     assert(_idx>=0);
-    hdl->freeIndex(3,_idx);
+    hdl->freeIndex(Hmesh::IM_Bnd,_idx);
   }
 }
 
