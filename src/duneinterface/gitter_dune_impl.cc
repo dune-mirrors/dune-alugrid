@@ -54,6 +54,7 @@ goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
   assert( el.isInterior() );
   typedef Gitter :: helement_STI ElType;
   assert( (static_cast<size_t> (el.getIndex())) < idxcheck.size() );
+  // make sue we only visit an element once 
   assert( idxcheck[ el.getIndex() ]  == true );
   idxcheck[ el.getIndex() ] = false;
   for( ElType * ch = el.down() ; ch ; ch = ch->next())
@@ -101,6 +102,7 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         // for elements 
         IndexManagerType& elementManager = this->indexManager(BuilderIF :: IM_Elements);
         const int idxsize = elementManager.getMaxIndex();
+        
         vector < bool > checkidx ( idxsize );
         for(int i=0; i<idxsize; ++i) checkidx[i] = true;
 
@@ -120,6 +122,9 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         }
       }
 
+      // TODO restore indices of faces and 
+      // edges 
+
       /////////////////////////////////
       //  Vertices  
       /////////////////////////////////
@@ -130,7 +135,8 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         const int idxsize = vertexManager.getMaxIndex();
 
         vector < bool > checkidx ( idxsize );
-        for(int i=0; i<idxsize; i++) checkidx[i] = true;
+        for(int i=0; i<idxsize; ++i) checkidx[i] = true;
+
         for( w->first(); ! w->done() ; w->next () )
         {
           assert( (static_cast<size_t> (w->item().getIndex())) < checkidx.size() );
@@ -138,7 +144,7 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         }
 
         // all remaining indices are treated as holes.
-        for(int i=0; i<idxsize; i++)
+        for(int i=0; i<idxsize; ++i)
         {
           if(checkidx[i] == true)
           {
