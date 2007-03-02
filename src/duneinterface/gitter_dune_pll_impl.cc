@@ -52,8 +52,6 @@ bool GitterDunePll :: duneNotifyNewGrid ()
   return neu;
 }
 
-
-
 void GitterDunePll :: duneNotifyGridChanges ()
 {
   Gitter :: notifyGridChanges () ;
@@ -1521,6 +1519,214 @@ void GitterDunePll :: coarse () {
   
   __STATIC_phase = -1 ;
   
+  return ;
+}
+
+// rebuild ghost cells 
+void GitterDunePll :: rebuildGhostCells() 
+{
+  const int nl = mpAccess ().nlinks () ;
+
+  try 
+  {
+    vector < ObjectStream > osv (nl) ;
+    
+    const hface_STI* determType = 0;
+
+    // pack all elements neighbouring to internal boundary 
+    // as ghost elements 
+    {
+      for (int link = 0 ; link < nl ; ++link ) 
+      {
+        pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
+              w = levelBorderIteratorTT (determType, link, 0 );
+        
+        ObjectStream & os = osv[link];
+        
+        {
+          IteratorSTI < hface_STI > & inner = *w.first;
+        
+          for ( inner.first () ; ! inner.done () ; inner.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = inner.item ().accessPllX ().accessInnerPllX () ;
+            p.first->packAsGhost(os, p.second) ;
+          }
+        }
+
+        {
+          IteratorSTI < hface_STI > & outer = *w.second;
+          for (outer.first () ; ! outer.done () ; outer.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = outer.item ().accessPllX ().accessInnerPllX () ;
+            p.first->packAsGhost(os, p.second) ;
+          }
+        }
+
+        delete w.first;
+        delete w.second;
+      } 
+    }
+    
+    // exchange gathered data 
+    osv = mpAccess ().exchange (osv) ;
+    
+    // unpack all data on internal boundary and create 
+    // ghost cells 
+    {
+      for (int link = 0 ; link < nl ; ++link ) 
+      {
+        pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
+              w = levelBorderIteratorTT (determType, link, 0 );
+        
+        ObjectStream & os = osv[link];
+
+        {
+          IteratorSTI < hface_STI > & outer = *w.second;
+          for (outer.first () ; ! outer.done () ; outer.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = outer.item ().accessPllX ().accessOuterPllX () ;
+            p.first->insertGhostCell(os, p.second) ;
+          }
+        }
+        {
+          IteratorSTI < hface_STI > & inner = *w.first;
+          for (inner.first () ; ! inner.done () ; inner.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = inner.item ().accessPllX ().accessOuterPllX () ;
+            p.first->insertGhostCell(os, p.second) ;
+          }
+        }
+
+        delete w.first;
+        delete w.second;
+      } 
+    }
+  } 
+  catch (Parallel ::  AccessPllException) 
+  {
+    cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
+  }
+
+  return ;
+}
+
+void GitterDunePll :: checkGhostIndices() 
+{
+  // get number of links 
+  const int nl = mpAccess ().nlinks () ;
+  
+  const hface_STI* determType = 0;
+  {
+    // for all links check all ghost elements 
+    for (int link = 0 ; link < nl ; ++link ) 
+    {
+      pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
+            w = levelBorderIteratorTT (determType, link , 0);
+      
+      {
+        IteratorSTI < hface_STI > & outer = *w.second;
+        for (outer.first () ; ! outer.done () ; outer.next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = outer.item ().accessPllX ().accessOuterPllX () ;
+
+          // get pair < ghost, local face num > 
+          Gitter :: ghostpair_STI gpair = p.first->getGhost();
+          assert( gpair.first );
+
+          gpair.first->resetGhostIndices();
+        }
+      }
+
+      {
+        IteratorSTI < hface_STI > & inner = *w.first;
+        for (inner.first () ; ! inner.done () ; inner.next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = inner.item ().accessPllX ().accessOuterPllX () ;
+
+          // get pair < ghost, local face num > 
+          Gitter :: ghostpair_STI gpair = p.first->getGhost();
+          assert( gpair.first );
+
+          gpair.first->resetGhostIndices();
+        }
+      }
+
+      // free interators 
+      delete w.first;
+      delete w.second;
+    } 
+  } 
+
+  return ;
+}
+
+void GitterDunePll :: duneBackup(const char *filename) 
+{
+  // backup grid, same as in serial case 
+  GitterDuneBasis::duneBackup(filename);
+}
+
+// wird von Dune verwendet 
+void GitterDunePll ::restore (istream & in) 
+{
+  typedef Gitter :: Geometric :: BuilderIF BuilderIF;
+  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: restore (istream & = " << in << ") " << endl, 1) : 1) ;
+  {
+    AccessIterator < hedge_STI > :: Handle ew (container ());
+    for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ;
+  }
+  {
+    AccessIterator < hface_STI >:: Handle fw(container());
+    for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in);
+  }
+  {
+    AccessIterator < helement_STI >:: Handle ew(container());
+    for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in);
+  }
+
+  // restore indices before ghosts are created 
+  // otherwise indices of ghost will be wrong 
+  this->restoreIndices (in);
+ 
+#ifndef NDEBUG 
+  const int maxIndexBefore = this->indexManager(BuilderIF :: IM_Elements).getMaxIndex();
+#endif
+
+  // set ghost indices new for level 0 ghosts 
+  checkGhostIndices ();
+
+  // now restore faces and by this ghosts 
+  // will be refined 
+  {
+    AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
+    for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ;
+  }
+  
+  // max index should not be largen than before
+  assert( (this->indexManager(BuilderIF :: IM_Elements).getMaxIndex() != maxIndexBefore) ?
+      (cout << maxIndexBefore << " vor | nach " << this->indexManager(BuilderIF :: IM_Elements).getMaxIndex() << "\n",0) : 1);
+
+  duneNotifyGridChanges () ;
+  return ;
+}
+
+void GitterDunePll :: duneRestore(const char *fileName) 
+{
+  assert (debugOption (20) ? 
+      (cout << "**INFO GitterDuneBasis :: duneRestore (const char * = \""
+            << fileName << "\") " << endl, 1) : 1) ;
+                 
+  ifstream in (fileName) ;
+  if (!in) {
+    cerr << "**WARNUNG (IGNORIERT) GitterDunePll :: ";
+    cerr <<" duneRestore (const char *, double & ) Fehler beim \"Offnen von < "
+         << (fileName ? fileName : "null") << " > " << endl ;
+  } 
+  else 
+  {
+    restore(in) ;
+  }
+
   return ;
 }
 

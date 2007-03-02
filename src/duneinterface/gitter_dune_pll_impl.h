@@ -40,21 +40,11 @@ public:
 #ifndef NDEBUG
     __STATIC_myrank = mp.myrank(); 
 #endif
-    /*
-    // logfile is defined in gitter_impl.h    
-    char logFileName [32];
-    sprintf(logFileName,"logfile.%d",mpAccess().myrank());
-    cerr << "open logfile = " << logFileName << "\n";
-
-    logFile.clear();
-    logFile.open ( logFileName );
-    logFile << "logfile of processor " << mpAccess().myrank() << "\n";
-    logFile.flush();
-    */
-  };
+    // if grid is created from backup, then restore ghost cells 
+    rebuildGhostCells();
+  }
 
   ~GitterDunePll () {
-    //logFile.close();
   }
 
   // refine alle leaf elements 
@@ -119,7 +109,24 @@ public:
     return containerPll().indexManager(codim);
   }
 
+  // restore parallel grid from before
+  virtual void duneRestore (const char*) ;
+  // backup current grid status 
+  virtual void duneBackup (const char*) ;
+
 private:
+  // restore grid from istream, needed to be overloaded 
+  // because before restoring follow faces, index manager has to be
+  // restored 
+  virtual void restore(istream & in);
+
+  // rebuild ghost cells by exchanging bounndary info on macro level 
+  void rebuildGhostCells();
+  
+  // check that indices of ghost cells are within range of
+  // the index managers maxIndex  
+  void checkGhostIndices();
+  
   // communication of data 
   void doCommunication(
          GatherScatterType & vertexData ,
