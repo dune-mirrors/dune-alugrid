@@ -4,8 +4,6 @@
 #include "gitter_impl.h"
 #include "lock.h"
 
-enum IndexType { no_index = 0 , hierarchic_index = 1, leaf_index = 3 };
-
 template < class A > class PureElementAccessIterator : public AccessIterator <A> 
 {
   public :
@@ -34,10 +32,8 @@ template < class A > class PureElementLeafIterator;
 
 class GitterDuneBasis :  public virtual GitterBasis 
 {
+  enum IndexType { no_index = 0 , hierarchic_index = 1, leaf_index = 3 };
 protected:
-  void backupIndices  (ostream & out);
-  void restoreIndices (istream & in );
-
   inline void goDownHelement( helement_STI & el , vector<bool> & idxcheck);
 
   AdaptRestrictProlongType * _arp;
@@ -64,6 +60,9 @@ protected:
 public:
   GitterDuneBasis() : _arp(0) , maxlevel_(0) {}
   
+  virtual void backupIndices  (ostream & out);
+  virtual void restoreIndices (istream & in );
+
   // write status of grid  
   virtual void duneBackup  (const char*) ; 
 
@@ -198,5 +197,4 @@ template < class A > inline IteratorSTI < A > * PureElementLeafIterator < A > ::
 template < class A > inline IteratorSTI < A > & PureElementLeafIterator < A > :: operator * () const {
   return * _w ;
 }
-
 #endif
