@@ -103,8 +103,8 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         IndexManagerType& elementManager = this->indexManager(BuilderIF :: IM_Elements);
         const int idxsize = elementManager.getMaxIndex();
         
-        vector < bool > checkidx ( idxsize );
-        for(int i=0; i<idxsize; ++i) checkidx[i] = true;
+        // create vector, default all entries true
+        vector < bool > checkidx ( idxsize, true );
 
         AccessIterator < helement_STI >:: Handle ew(container());
         for ( ew.first(); !ew.done(); ew.next())
@@ -113,13 +113,7 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         }
 
         // all remaining indices are treated as holes 
-        for(int i=0; i<idxsize; ++i)
-        {
-          if(checkidx[i] == true)
-          {
-            elementManager.freeIndex(i);
-          }
-        }
+        elementManager.generateHoles( checkidx );
       }
 
       // TODO restore indices of faces and 
@@ -134,8 +128,8 @@ void GitterDuneBasis ::restoreIndices (istream & in)
         IndexManagerType& vertexManager = this->indexManager(BuilderIF :: IM_Vertices);
         const int idxsize = vertexManager.getMaxIndex();
 
-        vector < bool > checkidx ( idxsize );
-        for(int i=0; i<idxsize; ++i) checkidx[i] = true;
+        // create vector, default all entries true
+        vector < bool > checkidx ( idxsize , true );
 
         for( w->first(); ! w->done() ; w->next () )
         {
@@ -143,15 +137,8 @@ void GitterDuneBasis ::restoreIndices (istream & in)
           checkidx[ w->item().getIndex() ] = false;
         }
 
-        // all remaining indices are treated as holes.
-        for(int i=0; i<idxsize; ++i)
-        {
-          if(checkidx[i] == true)
-          {
-            vertexManager.freeIndex(i);
-          }
-        }
-
+        // all remaining indices are treated as holes 
+        vertexManager.generateHoles( checkidx );
       }
     }
     return ;
