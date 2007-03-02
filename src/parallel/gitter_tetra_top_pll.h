@@ -106,8 +106,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         virtual bool lockedAgainstCoarsening () const ;
       public :
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
-                      IndexManagerType & im, Gitter * , BuilderIF& , const
-                      Hbnd3IntStoragePoints & ) ;
+                      IndexManagerType & im, Gitter * , 
+                      BuilderIF& , const Hbnd3IntStoragePoints & ) ;
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
                       IndexManagerType & im, Gitter * , BuilderIF& ) ;
        ~HbndPllMacro () ;
@@ -369,6 +369,7 @@ HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv ,
  , _mgb(mgb)
  , _gm( 0 ) 
 {
+  assert( _mxt );
   this->restoreFollowFace () ;
   return ;
 }

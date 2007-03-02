@@ -422,6 +422,8 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
     virtual void unattach2 (int) ;
     
     virtual bool packAll (vector < ObjectStream > &) ;
+    // pack ghost information 
+    virtual void packAsGhost(ObjectStream &,int) const ;
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
@@ -436,6 +438,8 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+
+    void packAsBndNow (int, ObjectStream &) const;
   private :
     int _ldbVertexIndex ;
     map < int, int, less < int > > _moveTo ;
