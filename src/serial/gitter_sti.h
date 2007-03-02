@@ -1584,7 +1584,7 @@ public :
              IM_Edges = 2,    // 2 == edges 
              IM_Vertices = 3, // 3 == vertices
              IM_Bnd = 4,      // 4 == boundary elements 
-             IM_Dummy = 5     // 5 == dummy index for unused internal bnd 
+             IM_Internal = 5  // 5 == internal bnds, parallel only 
       };
     protected:
       // this variable is located here, because all the elements in

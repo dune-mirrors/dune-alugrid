@@ -1627,7 +1627,7 @@ insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b)
     // internal face always get dummy index manager      
     typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
     return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(IM_Dummy) , this->_myGrid , *this ) ;
+          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(IM_Internal) , this->_myGrid , *this ) ;
   } else {
     return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
         BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(IM_Bnd) , 0 ) ;
@@ -1639,7 +1639,7 @@ insert_hbnd4_ghost (hface4_GEO * f, int t)
 {
   Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
   return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
-    BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(IM_Dummy) , 0 ) ;
+    BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, NULL, b, indexManager(IM_Internal) , 0 ) ;
 }
 
 
@@ -1651,7 +1651,7 @@ insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const Hbn
   if (b == Gitter :: hbndseg_STI :: closure) 
   {
     return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(IM_Dummy) , this->_myGrid , *this, hp) ;
+          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(IM_Internal) , this->_myGrid , *this, hp) ;
   } 
   else 
   {
@@ -1671,7 +1671,7 @@ insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const Hbn
     // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
     return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: 
-              macro_t (f,t,NULL, b, indexManager(IM_Dummy) , this->_myGrid , *this, hp ) ;
+              macro_t (f,t,NULL, b, indexManager(IM_Internal) , this->_myGrid , *this, hp ) ;
   } 
   else 
   {
@@ -1689,7 +1689,7 @@ insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b )
   {
     // here we have a ghost of the ghost, therefor we need the element index manager 
     return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(IM_Dummy) , this->_myGrid , *this ) ;
+          BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: macro_t (f,t,NULL, b, indexManager(IM_Internal) , this->_myGrid , *this ) ;
   } 
   else 
   {
