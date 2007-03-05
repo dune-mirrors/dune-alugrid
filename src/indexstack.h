@@ -314,7 +314,8 @@ generateHoles(const vector<bool> & isHole)
 {
   const int idxsize = isHole.size();
   assert( idxsize == maxIndex_ );
-  for(int i=0; i<idxsize; ++i)
+  // big indices are inserted first 
+  for(int i=idxsize-1; i>=0; --i)
   {
     // all entries marked true will be inserted as free 
     if(isHole[i] == true) freeIndex(i);
