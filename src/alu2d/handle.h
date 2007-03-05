@@ -11,10 +11,8 @@ typedef IndexManagerType IndexManager2dType;
 
 // number of different index manager that exists
 enum { numOfIndexManager2d = 4 };
-// 0 == elements
-// 1 == edges
-// 2 == vertices
-// 3 == boundary elements
+// see specific codes in class Hmesh below 
+
 class Hmesh_basic;
 
 template < class A > class Listwalkptr ;
@@ -862,22 +860,24 @@ class Hmesh_basic {
 
    virtual ~Hmesh_basic() {}     
 
-   int getIndex(int indextype) {
+   int getIndex(int indextype) 
+   {
      assert( indextype >= 0 && indextype < numOfIndexManager2d );
      return indexmanager[indextype].getIndex();
    }
 
-   void freeIndex(int indextype, int index) {
+   void freeIndex(int indextype, int index) 
+   {
      assert( indextype >= 0 && indextype < numOfIndexManager2d );
      indexmanager[indextype].freeIndex(index);
    }
    
-   // von mir dazugesetzt...
-   int indexManagerSize (int cd) 
+   // return current size of used indices 
+   int indexManagerSize (int cd) const 
    {
-     enum{dim = 2};
+     // only for elements, edges, and vertices 
      assert(cd<3 && cd>=0);
-     return indexmanager[dim-cd].getMaxIndex();
+     return indexmanager[cd].getMaxIndex();
    }
    
     void makeneighbours() ;
@@ -919,9 +919,9 @@ class Hmesh : public Hmesh_basic {
   void asciwritetriang(const char *,double , unsigned long int) ;
 
   public :
-   enum { IM_Elements = 2, // index manager id for elements 
+   enum { IM_Elements = 0, // index manager id for elements 
           IM_Edges = 1,    // index manager id for edges  
-          IM_Vertices = 0, // index manager id for vertices  
+          IM_Vertices = 2, // index manager id for vertices  
           IM_Bnd = 3       // index manager id for bnd 
    };
 

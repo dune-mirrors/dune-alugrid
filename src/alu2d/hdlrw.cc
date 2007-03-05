@@ -482,11 +482,14 @@ Hmesh::storeGrid(const char* fbase,
   // Status des Gitters sichern
   for( int level = 0 ;; level++ ) {
     Levelwalk<Element> walk(mel, level);
-    if( !walk.size() ) {
+    if( !walk.size() ) 
+    {
       break;
-    } else {
+    } 
+    else 
+    {
       for( walk.first() ; !walk.done() ; walk.next() )
-	out.put(walk.getitem().splitrule());
+      	out.put(walk.getitem().splitrule());
       // out << walk.getitem().splitrule() << " ";
     }
     // out << endl;
@@ -508,35 +511,47 @@ Hmesh::storeGrid(const char* fbase,
 #endif
 }
 void
-Hmesh::storeIndicies(ostream& out) {
-  for (int i=0;i<numOfIndexManager2d;i++) 
+Hmesh::storeIndicies(ostream& out) 
+{
+  // backup index managers 
+  for (int i=0;i<numOfIndexManager2d; ++i) 
+  {
     indexmanager[i].backupIndexSet(out);
+  }
+
+  // backup vertex indices 
   {
     Listwalk_impl < Vertex > walk(vl) ;
-    for( walk.first() ; ! walk.done() ; walk.next() ) {
-      // out << walk.getitem().getIndex() << " ";
+    for( walk.first() ; ! walk.done() ; walk.next() ) 
+    {
       int idx=walk.getitem().getIndex();
       out.write( ((const char *) &idx ), sizeof(int) ) ;
     }
   }
-  //out << endl;
+  
+  // backup element and edge indices 
   {
     Levelwalk<Element> walk(mel, 0);
-    for( walk.first() ; !walk.done() ; walk.next() ) {
+    for( walk.first() ; !walk.done() ; walk.next() ) 
+    {
       SubtreeIterator<Element> hier(&(walk.getitem()));
-      for (hier.first() ; !hier.done() ; hier.next() ) {
-	// out << hier.getitem().getIndex () << " ";
-	int idx=hier.getitem().getIndex();
-	out.write( ((const char *) &idx ), sizeof(int) ) ;
-	for (int e=0;e<3;e++) {
-	  //out << hier.getitem().edge(e)->getIndex () << " ";
-	  int idx=hier.getitem().edge(e)->getIndex();
-	  out.write( ((const char *) &idx ), sizeof(int) ) ;
-	}
+      for (hier.first() ; !hier.done() ; hier.next() ) 
+      {
+        // element 
+        {
+	        int idx=hier.getitem().getIndex();
+	        out.write( ((const char *) &idx ), sizeof(int) ) ;
+        }
+
+        // edges 
+	      for (int e=0;e<3; ++e) 
+        {
+	        int idx=hier.getitem().edge(e)->getIndex();
+	        out.write( ((const char *) &idx ), sizeof(int) ) ;
+	      }
       }
     }
   }
-  //out << endl;
 }
 
 bool
@@ -654,7 +669,7 @@ Hmesh::recoverIndicies(istream& in)
     const int elSize = elementManager.getMaxIndex();
     
     IndexManager2dType& edgeManager = indexmanager[IM_Edges];
-    const int edgeSize = elementManager.getMaxIndex();
+    const int edgeSize = edgeManager.getMaxIndex();
     // create vector, all entries are marked true
     vector<bool> elementIsHole (elSize, true );
     vector<bool> edgeIsHole  (edgeSize, true );
@@ -675,10 +690,12 @@ Hmesh::recoverIndicies(istream& in)
         // read edges 
        	for (int e=0; e<3; ++e) 
         {
-          Edge* edge = elem.edge(e);
-	        in.read ( ((char *) &(edge->setIndex())), sizeof(int) );
-          assert( edge->getIndex() < edgeSize );
-          edgeIsHole[edge->getIndex()] = false;
+          int edgeNum = -1; 
+	        in.read ( ((char *) &(edgeNum)), sizeof(int) );
+          assert( edgeNum < edgeSize );
+          edgeIsHole[edgeNum] = false;
+          // set edge index 
+          elem.edge(e)->setIndex() = edgeNum;
 	      }
       }
     } 
