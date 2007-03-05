@@ -921,6 +921,9 @@ inline int GitterBasis :: Objects :: TetraEmpty :: preCoarsening ()
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: TetraEmpty :: postRefinement () 
 {
+  // reset refined tag of this element because no leaf anymore 
+  this->resetRefinedTag();
+
   assert( _myGrid );
   // only call postRefinement on non ghost elements 
   return ((this->isGhost()) ? 0 : _myGrid->postRefinement(*this));
@@ -954,7 +957,11 @@ inline int GitterBasis::Objects::HexaEmpty::preCoarsening() {
   return ((this->isGhost()) ? 0 : _myGrid->preCoarsening(*this));
 }
 
-inline int GitterBasis::Objects::HexaEmpty::postRefinement() {
+inline int GitterBasis::Objects::HexaEmpty::postRefinement() 
+{
+  // reset refined tag of this element because no leaf anymore 
+  this->resetRefinedTag();
+  
   assert(_myGrid);
   // only call postRefinement on non ghost elements 
   return ((this->isGhost()) ? 0 : _myGrid->postRefinement(*this));
