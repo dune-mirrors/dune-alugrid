@@ -248,7 +248,7 @@ public :
     }
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
-    virtual void restoreIndex (istream & is ) {
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
       abort();
@@ -918,7 +918,8 @@ public :
             
       // overload backupIndex and restoreIndex here
       inline void backupIndex  (ostream & os ) const;
-      inline void restoreIndex (istream & is ) ;
+      inline void restoreIndex (istream & is , vector<bool>(&)[4] );
+      //inline void restoreIndex (istream & is ) ;
 
       // backup does nothing 
       inline void backup (ostream & os ) const {}
@@ -2206,9 +2207,16 @@ inline void Gitter :: Geometric :: VertexGeo :: backupIndex ( ostream & os ) con
 #endif
 }
 
-inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is ) {
+inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is, vector<bool>(&isHole)[4] ) 
+{
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
   is.read ( ((char *) &_idx), sizeof(int) ); 
+
+  // mark vertex entry as not a hole 
+  typedef Gitter :: Geometric :: BuilderIF BuilderIF;
+  // make sure sizes match 
+  assert( _idx < (int) isHole[BuilderIF :: IM_Vertices].size() );
+  isHole[BuilderIF :: IM_Vertices][_idx] = false;
 #endif
 }
 

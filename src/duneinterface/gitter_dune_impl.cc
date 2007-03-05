@@ -47,22 +47,6 @@ void GitterDuneBasis :: backupIndices (ostream & out)
   return ;
 }
 
-// go down all children and check index 
-inline void GitterDuneBasis :: 
-goDownHelement( Gitter::helement_STI & el , vector<bool> & idxcheck)
-{
-  assert( el.isInterior() );
-  typedef Gitter :: helement_STI ElType;
-  assert( (static_cast<size_t> (el.getIndex())) < idxcheck.size() );
-  // make sue we only visit an element once 
-  assert( idxcheck[ el.getIndex() ]  == true );
-  idxcheck[ el.getIndex() ] = false;
-  for( ElType * ch = el.down() ; ch ; ch = ch->next())
-    goDownHelement( *ch , idxcheck );
-
-  return ;
-}
-
 void GitterDuneBasis ::restoreIndices (istream & in) 
 {
   unsigned char indices = no_index;
@@ -81,65 +65,50 @@ void GitterDuneBasis ::restoreIndices (istream & in)
     for(int i=0; i< numOfIndexManager ; ++i)
       this->indexManager(i).restoreIndexSet( in );
 
+    // will fail if numbering was changed 
+    // and one forgot to apply changes here 
+    assert( BuilderIF ::IM_Vertices+1 == 4 );
+
+    // create vector, default all internal types for 
+    // elements to vertices 
+    vector < bool > isHole[4]; 
+    
+    // resize and reset 
+    for(int i=0; i<4; ++i)
+    {
+      vector<bool> & vec = isHole[i];
+      {
+        const int size = this->indexManager(i).getMaxIndex();
+        vec.resize(size);
+        // all entries are holes by default 
+        for(int l=0; l<size; ++l) vec[l] = true;
+      }
+    }
+
     // restore index of elements 
+    // mark all visited items as not a hole 
     {
       AccessIterator < helement_STI >:: Handle ew(container());
-      for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in);
+      for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, isHole );
     }
     // restore index of vertices
+    // mark all visited items as not a hole 
     {
       LeafIterator < vertex_STI > w ( *this );
-      for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in);
+      for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in, isHole );
     }
     
     // reconstruct holes 
-
-    { 
-      /////////////////////////////////
-      //  Elements 
-      /////////////////////////////////
-      {
-        // for elements 
-        IndexManagerType& elementManager = this->indexManager(BuilderIF :: IM_Elements);
-        const int idxsize = elementManager.getMaxIndex();
-        
-        // create vector, default all entries true
-        vector < bool > checkidx ( idxsize, true );
-
-        AccessIterator < helement_STI >:: Handle ew(container());
-        for ( ew.first(); !ew.done(); ew.next())
-        {
-          goDownHelement( ew.item() , checkidx );
-        }
-
-        // all remaining indices are treated as holes 
-        elementManager.generateHoles( checkidx );
-      }
-
-      // TODO restore indices of faces and 
-      // edges 
-
-      /////////////////////////////////
-      //  Vertices  
-      /////////////////////////////////
-      {
-        // for vertices 
-        LeafIterator < vertex_STI > w ( *this );
-        IndexManagerType& vertexManager = this->indexManager(BuilderIF :: IM_Vertices);
-        const int idxsize = vertexManager.getMaxIndex();
-
-        // create vector, default all entries true
-        vector < bool > checkidx ( idxsize , true );
-
-        for( w->first(); ! w->done() ; w->next () )
-        {
-          assert( (static_cast<size_t> (w->item().getIndex())) < checkidx.size() );
-          checkidx[ w->item().getIndex() ] = false;
-        }
-
-        // all remaining indices are treated as holes 
-        vertexManager.generateHoles( checkidx );
-      }
+    {
+      IndexManagerType& elementManager = this->indexManager(BuilderIF :: IM_Elements);
+      elementManager.generateHoles( isHole[BuilderIF :: IM_Elements] );
+    }
+    
+    // TODO indices for faces and edges 
+    
+    {
+      IndexManagerType& vertexManager = this->indexManager(BuilderIF :: IM_Vertices);
+      vertexManager.generateHoles( isHole[BuilderIF ::IM_Vertices] );
     }
     return ;
   }

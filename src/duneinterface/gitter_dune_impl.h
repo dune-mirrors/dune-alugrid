@@ -33,9 +33,8 @@ template < class A > class PureElementLeafIterator;
 class GitterDuneBasis :  public virtual GitterBasis 
 {
   enum IndexType { no_index = 0 , hierarchic_index = 1, leaf_index = 3 };
-protected:
-  inline void goDownHelement( helement_STI & el , vector<bool> & idxcheck);
 
+protected:
   AdaptRestrictProlongType * _arp;
 
   // call preCoarsening and postRefinement of arp

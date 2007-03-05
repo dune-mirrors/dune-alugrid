@@ -212,7 +212,7 @@ template < class A > class TetraTop : public A {
 
     // backup and restore index 
     void backupIndex (ostream &) const ;
-    void restoreIndex (istream &) ;
+    void restoreIndex (istream &, vector<bool>(&)[4] ) ;
 };
 
 template < class A > class Periodic3Top : public A {
@@ -1677,12 +1677,24 @@ template < class A > inline void TetraTop < A > :: backup (XDRstream_out & os) c
 }
 
 // overloaded restoreIndex Method 
-template < class A > inline void TetraTop < A > :: restoreIndex (istream & is) 
+template < class A > inline void TetraTop < A > :: 
+restoreIndex (istream & is, vector<bool> (& isHole) [4] ) 
 {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   // free index from constructor
   is.read ( ((char *) &(this->_idx) ), sizeof(int) );
 
+  // mark this element a non hole 
+  typedef typename Gitter :: Geometric :: BuilderIF BuilderIF; 
+
+  // make sure sizes match 
+  assert( this->getIndex() < (int) isHole[BuilderIF::IM_Elements].size() );
+  // set entry to false, because this is not a hole  
+  isHole[BuilderIF :: IM_Elements][this->getIndex()] = false;
+
+  // TODO 
+  // restore other indices 
+  
   /*
   // write interior indices 
   {
@@ -1702,7 +1714,7 @@ template < class A > inline void TetraTop < A > :: restoreIndex (istream & is)
   */
 
   {
-    for (innertetra_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; 
+    for (innertetra_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is, isHole ) ; 
   }
 #endif
   return;

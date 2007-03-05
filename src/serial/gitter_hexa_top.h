@@ -241,7 +241,8 @@ protected:
 
     // backup and restore index 
     void backupIndex (ostream &) const ;
-    void restoreIndex (istream &) ;
+    // set entry of element to false when index is read 
+    void restoreIndex (istream &, vector<bool>(&) [4]) ;
 
     void backup(XDRstream_out& os) const;
     void restore(XDRstream_in& is);
@@ -1555,12 +1556,23 @@ template < class A > void HexaTop < A > :: backup (ostream & os) const {
   return ;
 }
 
-template < class A > void HexaTop < A > :: restoreIndex (istream & is) {
+template < class A > void HexaTop < A > :: 
+restoreIndex (istream & is, vector<bool> (&isHole) [4]) 
+{
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   // free index from constructor
   // indexManager is cleared from outside 
   is.read ( ((char *) &(this->_idx) ), sizeof(int) );
-  {for (innerhexa_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is) ; }
+
+  // mark this element a non hole 
+  typedef typename Gitter :: Geometric :: BuilderIF BuilderIF;
+
+  // make sure sizes match 
+  assert( this->getIndex() < (int) isHole[BuilderIF::IM_Elements].size() );
+  // set entry to false, because this is not a hole 
+  isHole[BuilderIF :: IM_Elements][this->getIndex()] = false;
+  
+  {for (innerhexa_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is, isHole ) ; }
 #endif
   return;
 }
