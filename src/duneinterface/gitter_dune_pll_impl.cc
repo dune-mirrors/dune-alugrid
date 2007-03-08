@@ -820,12 +820,12 @@ void GitterDunePll :: sendInteriorGhostAllData (
       // then ghost elements 
       if( ghostLeaf > 0 ) 
       {
-        // get pair < ghost, local face num > 
-        Gitter :: ghostpair_STI gpair = bnd.first->getGhost();
-        assert( gpair.first );
-      
         if( haveHigherCodimData )
         {
+          // get pair < ghost, local face num > 
+          Gitter :: ghostpair_STI gpair = bnd.first->getGhost();
+          assert( gpair.first );
+
           if (containsVertices) 
             gpair.first->VertexData2os( sendBuff , vertexData, gpair.second );
           if (containsEdges)    
@@ -834,9 +834,13 @@ void GitterDunePll :: sendInteriorGhostAllData (
             gpair.first->FaceData2os  ( sendBuff , faceData, gpair.second );
         }
         
-        if (containsElements) 
-          elementData.sendData ( sendBuff, *(gpair.first) );
+        if( containsElements ) 
+        {
+          assert( bnd.first );
+          bnd.first->writeDynamicState(sendBuff, elementData );
+        }
 
+        // reset bnd pointer 
         bnd.first = 0;
       }
     }     
@@ -968,8 +972,6 @@ void GitterDunePll :: doInteriorGhostComm(
   const bool packGhosts   = (commType == All_All_Comm) || 
                             (commType == Ghost_Interior_Comm);
 
-  assert( !packGhosts );
-
   if(!containsSomeThing) 
   {
     cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
@@ -983,7 +985,7 @@ void GitterDunePll :: doInteriorGhostComm(
       sendBuff.clear();
       
       {
-        hface_STI * determType = 0; // only for type determination 
+        const hface_STI * determType = 0; // only for type determination 
         pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
           iterpair = borderIteratorTT( determType , link );
 
@@ -1026,7 +1028,7 @@ void GitterDunePll :: doInteriorGhostComm(
       ObjectStream & recvBuff = osvec[link];
 
       {
-        hface_STI * determType = 0; // only for type determination 
+        const hface_STI * determType = 0; // only for type determination 
         pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
           iterpair = borderIteratorTT( determType , link );
 

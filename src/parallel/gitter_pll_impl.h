@@ -493,6 +493,7 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     void readDynamicState (ObjectStream &, int) ;
 
     void readDynamicState (ObjectStream &, GatherScatterType &);
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const;
     
     void getRefinementRequest (ObjectStream &) ;
     bool setRefinementRequest (ObjectStream &) ;
@@ -1395,6 +1396,11 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
     }
   }
   return (abort (), false) ;
+}
+
+template < class A > void BndsegPllBaseXClosure < A > :: writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const {
+  gs.sendData( os , myhbnd () );
+  return ;
 }
 
 template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, GatherScatterType & gs ) {

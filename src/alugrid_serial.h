@@ -65,6 +65,7 @@ struct GatherScatter
   virtual void setData  ( ObjectStreamType & str , HVertexType & elem ) { assert(false); abort(); }
 
   virtual void sendData ( ObjectStreamType & str , const HElemType  & elem ) { assert(false); abort(); }
+  virtual void sendData ( ObjectStreamType & str , const HGhostType & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStreamType & str , HGhostType & elem ) { assert(false); abort(); }
   virtual void recvData ( ObjectStreamType & str , HElemType  & elem ) { assert(false); abort(); }
 };
