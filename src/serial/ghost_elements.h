@@ -190,6 +190,10 @@ class MacroGhostBuilder : public MacroGridBuilder
         }
       } 
       
+      assert( this->_hbnd3Int.empty ());
+      assert( this->_hbnd4Int.empty ());
+
+      /*
       { 
         typedef hbnd3intMap_t :: iterator iterator;
         iterator end = this->_hbnd3Int.end ();
@@ -205,7 +209,11 @@ class MacroGhostBuilder : public MacroGridBuilder
              i != end; this->_hbnd4Int.erase(i++)) 
           delete ((hbndseg4_GEO *)(*i).second);
       } 
+      */
 
+      assert( this->_hbnd3Map.empty ());
+      assert( this->_hbnd4Map.empty ());
+      /*
       { 
         typedef hbnd3Map_t :: iterator iterator;
         iterator end = this->_hbnd3Map.end ();
@@ -223,6 +231,7 @@ class MacroGhostBuilder : public MacroGridBuilder
           delete ((hbndseg4_GEO *)(*i).second);
         }
       } 
+      */
 
       // faces 
       {
@@ -279,8 +288,6 @@ class MacroGhost : public MyAlloc
     virtual int ghostFaceNumber () const { return 0; } 
 };
 typedef MacroGhost MacroGhost_STI;
-
-extern void printHexa(ostream & os , Gitter :: Geometric :: hexa_GEO * item_);
 
 class MacroGhostTetra : public MacroGhost
 {
@@ -352,41 +359,12 @@ public:
     // which acts as empty boundary. 
   }
 
-  /*
-  void refineElement(GhostTetra_t * ghost, int count)
-  {
-    if(ghost->level() >= count) return;
-
-    ghost->request( Gitter::Geometric::TetraRule:: iso8 ) ;
-    ghost->refine();
-    assert( ghost->down() );
-    bool ok = true;
-    for( GhostElement_t * child = ghost->down(); child; child = child->next() )
-    {
-      GhostTetra_t & ch = static_cast<GhostTetra_t &> (*child);
-      for(int i=0; i<4; ++i) 
-      {
-        if( ch.myhface3(i)->ref < 1 )
-        {
-          cout << ch.myhface3(i)->ref << " for face["<<i<<"] = " << ch.myhface3(i)->getIndex() << "\n"; 
-          ok = false;
-        }
-      }
-    }
-    assert( ok );
-    for( GhostElement_t * child = ghost->down(); child; child = child->next() )
-    {
-      GhostTetra_t * ch = static_cast<GhostTetra_t *> (child);
-      refineElement( ch , count );
-    }
-  }
-  */
-  
   //alternative Konstruktor fuer die Geister, die an Periodischen
   //Raendern haengen
   //sign = +/- 1  und ist dafuer da, um den Vektor 
   //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
-  MacroGhostTetra( BuilderIF & bi, const Hbnd3IntStoragePoints & allp, Gitter::Geometric::tetra_GEO * orig, double (&vec)[3] , double sign) :
+  MacroGhostTetra( BuilderIF & bi, const Hbnd3IntStoragePoints & allp, 
+      Gitter::Geometric::tetra_GEO * orig, double (&vec)[3] , double sign) :
     _mgb(bi) , _ghPoint(allp), _ghostPair(0,-1)
   {
     MacroGhostBuilder & mgb = _mgb;
