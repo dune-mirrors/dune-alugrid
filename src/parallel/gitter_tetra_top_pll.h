@@ -71,8 +71,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         // refine ghost if face is refined and ghost is not zero 
         void splitGhost (GhostChildrenInfo_t & ); 
         
-        // mark all children for coarsening 
-        void markDescendents( GhostElement_t & elem );
+        // mark all children for coarsening and call coarse on elem
+        void removeDescendents( GhostElement_t & elem );
         // coarse ghost if face is coarsened 
         void coarseGhost (); 
         
@@ -267,48 +267,51 @@ inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
 
 template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
-markDescendents( GhostElement_t & elem ) 
+removeDescendents( GhostElement_t & elem ) 
 {
+  elem.resetRefinementRequest(); 
+  // check all children first 
   for( GhostElement_t * child = elem.down(); child; child = child->next() )
   {
-    //if( child->leaf() ) 
-    {
-      child->tagForGlobalCoarsening(); 
-    }
-    /*
-    else 
-    {
-      child->resetRefinementRequest(); 
-    }
-    */
-    this->markDescendents( *child );
+    // if child is not leaf coarse childs first 
+    if( ! child->leaf() )
+      removeDescendents( *child );
+    
+    assert( child->leaf () );
+    // mark child for coarsening 
+    child->tagForGlobalCoarsening(); 
+  }
+
+#ifndef NDEBUG
+  for( GhostElement_t * child = elem.down(); child; child = child->next() )
+  {
+    assert( child->isGhost ());
+    child->tagForGlobalCoarsening();
+    GhostTetra_t * tet = (GhostTetra_t *) child;
+    assert( tet->requestrule() == Gitter :: Geometric :: TetraRule :: crs ); 
+  }
+#endif
+
+  // if element is not already leaf call coarse 
+  if( ! elem.leaf () )
+  {
+    elem.coarse();
   }
 }
 
 template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  coarseGhost () 
 {
-  /*
   if(_ghostPair.first)
   {
     GhostElement_t & ghost = (*_ghostPair.first); 
     if( ghost.leaf() ) return ;
 
     GhostTetra_t & tetra = static_cast<GhostTetra_t &> (ghost);
-    while ( ! tetra.leaf() )
-    {
-      this->markDescendents( tetra ); 
-      
-      // set me status to nosplit 
-      tetra.resetRefinementRequest();
 
-      assert( tetra.requestrule () == Gitter :: Geometric::TetraRule::nosplit );
-
-      // coarse element 
-      tetra.coarse();
-    }
+    // remove all descendents if possible 
+    removeDescendents( tetra );
   }
-  */
 }
 
 template < class A, class X, class MX > 
