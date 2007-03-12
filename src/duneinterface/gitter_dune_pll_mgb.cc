@@ -52,7 +52,7 @@ class DuneParallelGridMover : public ParallelGridMover {
     // creates Hbnd3IntStorage with point if needed 
     bool InsertUniqueHbnd3_withPoint (int (&)[3], 
                               Gitter :: hbndseg :: bnd_t, 
-                              const Hbnd3IntStoragePoints & p ) ;
+                              Hbnd3IntStoragePoints * ) ;
 
     // creates Hbnd4IntStorage with point if needed 
     bool InsertUniqueHbnd4_withPoint (int (&)[4], Gitter :: hbndseg ::
@@ -62,8 +62,7 @@ class DuneParallelGridMover : public ParallelGridMover {
 
 // new method that gets coord of ghost point 
 bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],         
-      Gitter :: hbndseg_STI ::bnd_t bt, 
-      const Hbnd3IntStoragePoints & p ) 
+      Gitter :: hbndseg_STI ::bnd_t bt, Hbnd3IntStoragePoints * p ) 
 {
   int twst = cyclicReorder (v,v+3) ;
   faceKey_t key (v [0], v [1], v [2]) ;
@@ -117,7 +116,6 @@ bool DuneParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],
 // overloaded method because here we call insertion with point 
 inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os) 
 {
-  double p[1][3] = { {-1.0,-1.0,-1.0} };
   int bfake, v [3] ;
   os.readObject (bfake) ;
   Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
@@ -129,31 +127,17 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   int readPoint = 0; 
   os.readObject( readPoint ); 
 
-  int vert[4] = { -1,-1,-1,-1 }; 
-  int vertface[1] = {-1};
-  int fce = -1; 
+  Hbnd3IntStoragePoints * hp = 0;
   if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
-    // read local face number
-    os.readObject ( fce );
-    
-    for(int i=0; i<4; i++)
-    {
-      os.readObject ( vert[i] );
-    }
-    
-    // read identifier of transmitted point 
-    os.readObject ( vertface[0] );
-    
-    // read point coordinates 
-    os.readObject (p[0][0]) ;
-    os.readObject (p[0][1]) ;
-    os.readObject (p[0][2]) ;
+    hp = new Hbnd3IntStoragePoints(); 
+    assert( hp );
+    hp->read( os );
   }
 
   if(b == Gitter :: hbndseg :: closure)
   {
-    Hbnd3IntStoragePoints hp ( p, vert, vertface , fce );
+    assert( hp );
     InsertUniqueHbnd3_withPoint (v, b, hp ) ;
   }
   else
@@ -540,10 +524,13 @@ void DuneParallelGridMover :: finalize ()
 
   // here the internal boundary elements are created 
   {for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
-    const Hbnd3IntStorage & p = *((*i).second);
-    if (p.first()->ref == 1) {
+    Hbnd3IntStorage & p = *((*i).second);
+    if (p.first()->ref == 1) 
+    {
+      // release pointer from storage 
+      Hbnd3IntStoragePoints * hp = p.release();
       hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p.first(),p.second(),
-                        Gitter :: hbndseg_STI :: closure , p.getPoints() );
+                        Gitter :: hbndseg_STI :: closure , hp);
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (*i).second; 

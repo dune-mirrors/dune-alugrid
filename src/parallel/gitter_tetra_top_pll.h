@@ -107,7 +107,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
       public :
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
                       IndexManagerType & im, Gitter * , 
-                      BuilderIF& , const Hbnd3IntStoragePoints & ) ;
+                      BuilderIF& , Hbnd3IntStoragePoints * ) ;
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
                       IndexManagerType & im, Gitter * , BuilderIF& ) ;
        ~HbndPllMacro () ;
@@ -348,7 +348,7 @@ Hbnd3PllInternal < A, X, MX > :: HbndPllMacro ::
 HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , 
     const bnd_t bt, IndexManagerType & im , Gitter * grd, 
     BuilderIF& mgb ,
-    const Hbnd3IntStoragePoints & hp ) 
+    Hbnd3IntStoragePoints * hp ) 
  : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,grd) 
  , _mxt(0)
  , _mgb(mgb)
@@ -429,7 +429,6 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
   assert( code == MacroGridMoverIF :: HBND3INT );
 
   {
-    double p[1][3] = { {-1.0,-1.0,-1.0} };
     int bfake, v [3] ;
     os.readObject (bfake) ;
 #ifndef NDEBUG 
@@ -444,32 +443,16 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
     int readPoint = 0;
     os.readObject( readPoint );
 
-    int vert[4] = { -1,-1,-1,-1 };
-    int vertface[1] = {-1};
-    int fce = -1;
+    Hbnd3IntStoragePoints * hp = 0;
     if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED )
     {
-      // read local face number
-      os.readObject ( fce );
-
-      for(int i=0; i<4; i++)
-      {
-        os.readObject ( vert[i] );
-      }
-
-      // read identifier of transmitted point 
-      os.readObject ( vertface[0] );
-
-      // read point coordinates 
-      os.readObject (p[0][0]) ;
-      os.readObject (p[0][1]) ;
-      os.readObject (p[0][2]) ;
+      hp = new Hbnd3IntStoragePoints();
+      assert( hp );
+      hp->read ( os );
     }
 
-
     {
-      Hbnd3IntStoragePoints hp ( p, vert, vertface , fce );
-      
+      assert( hp );
       myhface3_t * f = this->myhface3(0);
       assert( f );
 

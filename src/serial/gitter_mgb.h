@@ -59,7 +59,8 @@ public:
     return _p;
   }
   
-  const int (& getIdents () const )[noVx]
+  // return idents of element  
+  int (& getIdents () )[noVx]
   {
     return _vx; 
   }
@@ -73,6 +74,11 @@ public:
   {
     return _fce; 
   }
+
+  // write internal data to stream 
+  void write(ObjectStream&) const;
+  // read internal data from stream 
+  void read(ObjectStream&);
 };
 
 typedef HbndIntStoragePoints<4> Hbnd4IntStoragePoints;
@@ -95,7 +101,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   // stores a hface3 and the other point needed to build a tetra  
   class Hbnd3IntStorage : public MyAlloc 
   {
-    Hbnd3IntStoragePoints _p;
+    auto_ptr<Hbnd3IntStoragePoints> _ptr;
     hface3_GEO * _first;
     int          _second;
     bool _pInit; // true if p was initialized with a value 
@@ -104,12 +110,15 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     Hbnd3IntStorage( hface3_GEO * f, int tw, const tetra_GEO * tetra, int fce);
     
     // store point and face and twist  
-    Hbnd3IntStorage( hface3_GEO * f, int tw, const Hbnd3IntStoragePoints &p);
+    Hbnd3IntStorage( hface3_GEO * f, int tw, Hbnd3IntStoragePoints* p);
     
     // store face and twist and set point to default 
     Hbnd3IntStorage( hface3_GEO * f, int tw ); 
 
     const Hbnd3IntStoragePoints & getPoints () const;
+    
+    // release internal Hbnd3IntStoragePoints pointer
+    Hbnd3IntStoragePoints * release ();
     
     // this two method are just like in pair 
     hface3_GEO * first  () const { return _first;  }
@@ -231,12 +240,14 @@ inline bool MacroGridBuilder :: debugOption (int level) {
 template <int points> 
 inline HbndIntStoragePoints<points> :: HbndIntStoragePoints ()
 {
+/*
   for(int vx=0; vx<points; vx++)
   {
     for(int i=0; i<3; i++) _p[vx][i] = -666.0;
     _vxface[vx] = -1;
   }
   for(int i=0; i<noVx; i++) _vx[i] = -1;
+*/
   _fce = -1;
 }
 
@@ -329,29 +340,83 @@ HbndIntStoragePoints (const double (&p)[points][3], const int (&vx)[noVx],
   _fce = fce;
 }
 
+template<int points>
+inline void HbndIntStoragePoints<points> :: 
+write (ObjectStream & os ) const
+{
+ // local face number 
+  os.writeObject( _fce );
+
+  // global vertex number of the hexas vertices  
+  for(int i=0; i<noVx; ++i) os.writeObject( _vx[i] );
+  
+  // global vertex numbers of the face not existing on this partition  
+  for(int i=0; i<noFaceVx; ++i) 
+  {
+    os.writeObject( _vxface[i] );
+    os.writeObject( _p[i][0] ); 
+    os.writeObject( _p[i][1] ); 
+    os.writeObject( _p[i][2] ); 
+  }
+}
+
+template<int points>
+inline void HbndIntStoragePoints<points> :: 
+read (ObjectStream & os ) 
+{
+  // read local face number
+  os.readObject ( _fce );
+
+  // read vertices of element
+  for(int i=0; i<noVx; ++i)
+  {
+    os.readObject ( _vx[i] );
+  }
+
+  // read vertices of face an coordinates 
+  for(int i=0; i<noFaceVx; ++i)
+  {
+    os.readObject ( _vxface[i] );
+    double (&pr) [3] = _p[i];
+
+    os.readObject (pr[0]) ;
+    os.readObject (pr[1]) ;
+    os.readObject (pr[2]) ;
+  }
+
+  assert( _fce >= 0 );
+}
+
 //- Hbnd3IntStorage 
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
 Hbnd3IntStorage( hface3_GEO * f, int tw, const tetra_GEO * tetra, int fce)
- : _p(tetra,fce) , _first(f) , _second(tw) , _pInit(true)
+ : _ptr(new Hbnd3IntStoragePoints(tetra,fce))
+ , _first(f) , _second(tw) , _pInit(true)
 {
 }
     
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
-Hbnd3IntStorage( hface3_GEO * f, int tw, const Hbnd3IntStoragePoints &p)
- : _p(p) , _first(f) , _second(tw) , _pInit(true)
+Hbnd3IntStorage( hface3_GEO * f, int tw, Hbnd3IntStoragePoints *p)
+ : _ptr(p) , _first(f) , _second(tw) , _pInit(true)
 {
 }
     
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
 Hbnd3IntStorage( hface3_GEO * f, int tw )
- : _p(), _first(f) , _second(tw) , _pInit(false)
+ : _ptr( new Hbnd3IntStoragePoints() ), _first(f) , _second(tw) , _pInit(false)
 {
 }
 
 inline const Hbnd3IntStoragePoints & MacroGridBuilder :: Hbnd3IntStorage :: getPoints () const
 { 
   assert(_pInit);
-  return _p;
+  return *_ptr;
+}
+
+inline Hbnd3IntStoragePoints* MacroGridBuilder :: Hbnd3IntStorage :: release ()
+{ 
+  assert(_pInit);
+  return _ptr.release();
 }
 
 //- Hbnd4IntStorage 

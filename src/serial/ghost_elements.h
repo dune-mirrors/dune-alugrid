@@ -23,38 +23,18 @@ typedef MacroGhostPoint MacroGhostPoint_STI;
 template <int points> 
 class MacroGhostPointImpl : public MacroGhostPoint
 {
+  
     enum { noVx     = HbndIntStoragePoints<points> :: noVx  };
     enum { noFaceVx = HbndIntStoragePoints<points> :: noFaceVx  };
+
+    typedef HbndIntStoragePoints<points> HbndIntStoragePointsType;
   protected:
-    // coords of opp face  
-    double _p[points][3];
-    // global vertex numbers of hexa
-    int _verts[noVx];
-    // global numbers of opposite face 
-    int _oppVerts[noFaceVx]; 
-    // local face number 
-    int _fce; 
+    auto_ptr<HbndIntStoragePointsType> _pointPtr;
 
   public:
-    MacroGhostPointImpl(const HbndIntStoragePoints<points> & allp) 
+    MacroGhostPointImpl(HbndIntStoragePoints<points> * allPtr) 
+      : _pointPtr(allPtr)
     {
-      const double (&p)[points][3]  = allp.getPoints();
-      const int (&vertices)[noVx] = allp.getIdents();
-      const int (&oppVerts)[noFaceVx] = allp.getOppFaceIdents();
-    
-      assert(noFaceVx == points);
-
-      for(int vx=0; vx<noFaceVx; ++vx)
-      {
-        _p[vx][0]     = p[vx][0];
-        _p[vx][1]     = p[vx][1];
-        _p[vx][2]     = p[vx][2];
-        _oppVerts[vx] = oppVerts[vx];
-      }
-
-      for(int i=0; i<noVx; ++i) _verts[i]    = vertices[i];
-
-      _fce = allp.getFaceNumber();
     }
 
     // get coordinate vector of point i 
@@ -62,7 +42,7 @@ class MacroGhostPointImpl : public MacroGhostPoint
     {
       assert(i >= 0 );
       assert(i < noVx);
-      return _p[i];
+      return (*_pointPtr).getPoints()[i];
     }
 
     // write information to stream, used in 
@@ -71,22 +51,8 @@ class MacroGhostPointImpl : public MacroGhostPoint
     // check also gitter_pll_impl.cc packAsBnd of hexa  
     virtual void inlineGhostElement(ObjectStream & os) const 
     {
-      // local face number 
-      os.writeObject( _fce );
-
-      // global vertex number of the hexas vertices  
-      for(int i=0; i<noVx; ++i) os.writeObject(_verts[i]);
-      
-      // global vertex numbers of the face not existing on this partition  
-      for(int i=0; i<points; ++i) 
-      {
-        os.writeObject(_oppVerts[i]);
-        //logFile << "Inlining p=" << _oppVerts[i] << "\n";
-        os.writeObject( _p[i][0] ); 
-        os.writeObject( _p[i][1] ); 
-        os.writeObject( _p[i][2] ); 
-      }
-    }; 
+      _pointPtr->write(os);
+    } 
    
     // number of coordinates stored 
     virtual int nop () const
@@ -95,10 +61,13 @@ class MacroGhostPointImpl : public MacroGhostPoint
     }
 
     // number of interface face (process boundary face)
-    int internalFace () const { return _fce; }
-    // reference to the 8 verteices of the hexa 
-    int (& vertices () )[noVx] { return _verts; }
+    int internalFace () const { return (*_pointPtr).getFaceNumber(); }
+    
+    // reference to the 8 vertices of the hexa, or 4 vertices of the
+    // tetra 
+    int (& vertices () )[noVx] { return (*_pointPtr).getIdents(); }
 };
+
 typedef MacroGhostPointImpl<4> MacroGhostPointHexa;
 typedef MacroGhostPointImpl<1> MacroGhostPointTetra;
 
@@ -193,45 +162,8 @@ class MacroGhostBuilder : public MacroGridBuilder
       assert( this->_hbnd3Int.empty ());
       assert( this->_hbnd4Int.empty ());
 
-      /*
-      { 
-        typedef hbnd3intMap_t :: iterator iterator;
-        iterator end = this->_hbnd3Int.end ();
-        for (iterator i = this->_hbnd3Int.begin () ; 
-             i != end; this->_hbnd3Int.erase(i++)) 
-          delete ((hbndseg3_GEO *)(*i).second);
-      } 
-
-      { 
-        typedef hbnd4intMap_t :: iterator iterator;
-        iterator end = this->_hbnd4Int.end ();
-        for (iterator i = this->_hbnd4Int.begin () ; 
-             i != end; this->_hbnd4Int.erase(i++)) 
-          delete ((hbndseg4_GEO *)(*i).second);
-      } 
-      */
-
       assert( this->_hbnd3Map.empty ());
       assert( this->_hbnd4Map.empty ());
-      /*
-      { 
-        typedef hbnd3Map_t :: iterator iterator;
-        iterator end = this->_hbnd3Map.end ();
-        for (iterator i = this->_hbnd3Map.begin () ; 
-             i != end; this->_hbnd3Map.erase(i++)) 
-          delete ((hbndseg3_GEO *)(*i).second);
-      } 
-
-      { 
-        typedef hbnd4Map_t :: iterator iterator;
-        iterator end = this->_hbnd4Map.end ();
-        for (iterator i = this->_hbnd4Map.begin () ; 
-             i != end; this->_hbnd4Map.erase(i++)) 
-        {
-          delete ((hbndseg4_GEO *)(*i).second);
-        }
-      } 
-      */
 
       // faces 
       {
@@ -304,7 +236,7 @@ class MacroGhostTetra : public MacroGhost
   ghostpair_STI _ghostPair; 
 
 public:
-  MacroGhostTetra( BuilderIF & bi, const Hbnd3IntStoragePoints & allp, hface3_GEO * face) :
+  MacroGhostTetra( BuilderIF & bi, Hbnd3IntStoragePoints * allp, hface3_GEO * face) :
     _mgb(bi) , _ghPoint(allp) , _ghostPair(0,-1) 
   { 
     MacroGhostBuilder & mgb = _mgb;
@@ -312,8 +244,8 @@ public:
     typedef Gitter :: Geometric :: VertexGeo VertexGeo;
     typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
 
-    const double (&p)[1][3]  = allp.getPoints();
-    const int (&oppVerts)[1] = allp.getOppFaceIdents();
+    const double (&p)[1][3]  = allp->getPoints();
+    const int (&oppVerts)[1] = allp->getOppFaceIdents();
 
     // here all entities have to be created new, because otherwise 
     // the index generation will fail 
@@ -363,10 +295,11 @@ public:
   //Raendern haengen
   //sign = +/- 1  und ist dafuer da, um den Vektor 
   //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
-  MacroGhostTetra( BuilderIF & bi, const Hbnd3IntStoragePoints & allp, 
+  MacroGhostTetra( BuilderIF & bi, Hbnd3IntStoragePoints * allp, 
       Gitter::Geometric::tetra_GEO * orig, double (&vec)[3] , double sign) :
     _mgb(bi) , _ghPoint(allp), _ghostPair(0,-1)
   {
+    /*
     MacroGhostBuilder & mgb = _mgb;
     for (int i = 0; i < 4; i++) {
       mgb.InsertNewUniqueVertex(orig->myvertex(i)->Point()[0] + sign*vec[0],
@@ -384,6 +317,7 @@ public:
     // NOTE: we do not insert boundary faces, because we don't need them
     // here. This is ok because of the hasFaceEmpty class (gitter_sti.h) 
     // which acts as empty boundary. 
+    */
   }
     
   ~MacroGhostTetra () {
@@ -432,7 +366,7 @@ class MacroGhostHexa : public MacroGhost
   
 public:
   MacroGhostHexa( BuilderIF & bi, const Hbnd4IntStoragePoints & allp, hface4_GEO * face) :
-    _mgb(bi) , _ghPoint(allp) , _ghostPair(0,-1) 
+    _mgb(bi) , _ghPoint(&(const_cast<Hbnd4IntStoragePoints&> (allp))) , _ghostPair(0,-1) 
   { 
     MacroGhostBuilder & mgb = _mgb;
     

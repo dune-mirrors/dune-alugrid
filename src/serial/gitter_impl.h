@@ -625,7 +625,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual inline hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
         virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
         // version with point , returns insert_hbnd3 here 
-        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const Hbnd3IntStoragePoints &) ;
+        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, Hbnd3IntStoragePoints *) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, const Hbnd4IntStoragePoints &) ;
         virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
@@ -1068,15 +1068,17 @@ inline GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_
                          f[0]->myvertex(2)->Point()[i]); 
   }
 
-  tetra_GEO * mytetra0 = static_cast<tetra_GEO * > (per3->myneighbour(0).first), //Tetra an Fl 0 (an dieser liegt Ghost0 an)
-            * mytetra1 = static_cast<tetra_GEO * > (per3->myneighbour(1).first); //Tetra an Fl 1 ( - " -               1   )
+  //tetra_GEO * mytetra0 = static_cast<tetra_GEO * > (per3->myneighbour(0).first), //Tetra an Fl 0 (an dieser liegt Ghost0 an)
+  //          * mytetra1 = static_cast<tetra_GEO * > (per3->myneighbour(1).first); //Tetra an Fl 1 ( - " -               1   )
 
+  /*
   const Hbnd3IntStoragePoints allp0 (mytetra0, per3->myneighbour(0).second);
   const Hbnd3IntStoragePoints allp1 (mytetra1, per3->myneighbour(1).second);
   MacroGhostTetra * ghost0 = new MacroGhostTetra(*this, allp1, &(*mytetra1), v, -1.0);
   MacroGhostTetra * ghost1 = new MacroGhostTetra(*this, allp0, &(*mytetra0), v,  1.0);
   per3->setGhost(ghost0->getGhost(), 0);
   per3->setGhost(ghost1->getGhost(), 1);
+  */
   return per3;    
   //ohne Geister: return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
 }
@@ -1124,7 +1126,7 @@ insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b)
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd3IntStoragePoints &) {
+insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, Hbnd3IntStoragePoints *) {
   return insert_hbnd3(f,i,b); 
 }
 

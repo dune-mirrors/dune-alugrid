@@ -1560,7 +1560,7 @@ public :
 
       // insert ghost element 
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI
-          :: bnd_t, const Hbnd3IntStoragePoints &) = 0 ;
+          :: bnd_t, Hbnd3IntStoragePoints *) = 0 ;
       
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
