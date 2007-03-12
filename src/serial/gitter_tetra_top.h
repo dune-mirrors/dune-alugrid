@@ -844,14 +844,16 @@ template < class A > inline bool Hbnd3Top < A > :: coarse () {
   do {
     if( (b->myhface3(0)->ref > 1) ) ((b->coarse ()), x = false) ;
   } while ( (b = b->next()) ) ;
-  if (x) {
-    if (!this->lockedAgainstCoarsening ()) {
-      
+  if (x) 
+  {
+    if (!this->lockedAgainstCoarsening ()) 
+    {
       this->preCoarsening () ;
-      this->coarseGhost();
       
       delete _dwn ; _dwn = 0 ;
       this->myhface3 (0)->coarse () ;
+
+      this->coarseGhost();
     }
   }
   return x ;
@@ -1581,6 +1583,7 @@ template < class A > inline bool TetraTop < A > :: coarse ()
     {
       for (innertetra_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; 
     }
+
     // if x is true, then all children are marked for coarsening and have
     // not faces that are not leaf 
     if (x) 
