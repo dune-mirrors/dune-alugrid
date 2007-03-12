@@ -33,7 +33,7 @@ dnl check for library functions
 dnl check all components
   AC_REQUIRE([ALUGRID_SERIAL_PARALLEL])
   AC_REQUIRE([ALUGRID_PATH_METIS])
-  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
+#  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
   AC_REQUIRE([ALUGRID_PATH_PARTY])
 
   # convenience-variables if every found package should be used
@@ -58,7 +58,7 @@ if test x$with_parallel = xparallel ; then
   echo "------------------------------------"
   echo  
   echo "METIS............: $with_metis"
-  echo "ParMETIS.........: $with_parmetis"
+#  echo "ParMETIS.........: $with_parmetis"
   echo "PARTY............: $with_party"
   echo "MPI..............: $with_mpi"
   echo
