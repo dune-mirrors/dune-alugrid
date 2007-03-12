@@ -6,7 +6,6 @@
 #define GITTER_HEXA_TOP_H_INCLUDED
 
 #include "mapp_cube_3d.h"
-extern void printHexa(ostream & os , Gitter :: Geometric :: hexa_GEO * item_);
 
 template < class A > class Hedge1Top : public A {
   protected :
