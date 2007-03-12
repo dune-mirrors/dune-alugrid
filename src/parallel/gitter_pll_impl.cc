@@ -1644,14 +1644,17 @@ insert_hbnd4_ghost (hface4_GEO * f, int t)
 
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const Hbnd4IntStoragePoints & hp) 
+insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, 
+              MacroGhostInfoHexa* ghInfo) 
 { 
   typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
   // if internal boundary create ghost 
   if (b == Gitter :: hbndseg_STI :: closure) 
   {
+    assert( ghInfo );
     return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
-          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(IM_Internal) , this->_myGrid , *this, hp) ;
+          BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: 
+          macro_t (f,t, NULL, b, indexManager(IM_Internal) , this->_myGrid , *this, ghInfo ) ;
   } 
   else 
   {
@@ -1662,16 +1665,17 @@ insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, const Hbn
 
 // version with point 
 Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, Hbnd3IntStoragePoints * hp ) 
+insert_hbnd3 (hface3_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b, 
+              MacroGhostInfoTetra * ghInfo) 
 {
   typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
   if (b == Gitter :: hbndseg_STI :: closure) 
   {
-    assert( hp );
+    assert( ghInfo );
     // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
     return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > :: 
-              macro_t (f,t,NULL, b, indexManager(IM_Internal) , this->_myGrid , *this, hp ) ;
+              macro_t (f,t,NULL, b, indexManager(IM_Internal) , this->_myGrid , *this, ghInfo ) ;
   } 
   else 
   {

@@ -529,7 +529,7 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     typedef A                       myhbnd_t ;
     typedef typename A :: myhface_t myhface_t ;
     inline BndsegPllBaseXMacroClosure (myhbnd_t &) ;
-    inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostPoint * _ghp) ;
+    inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* ) ;
     virtual void readStaticState (ObjectStream &, int) ;
   public :
     virtual int   ldbVertexIndex () const ;
@@ -542,7 +542,7 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
 
   private :
     int _extGraphVertexIndex ;
-    const MacroGhostPoint * _ghPoint; 
+    const MacroGhostInfo_STI * _ghInfo; 
 } ;
 
 class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
@@ -834,12 +834,12 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         // insert hbnd_int without ghost hexa 
         virtual hbndseg4_GEO  * insert_hbnd4_ghost (hface4_GEO *, int) ;
         // insert hbnd_int with ghost hexa 
-        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, const Hbnd4IntStoragePoints &);
+        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* );
         
         // normal insert hbnd3 version
   virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
         // version that get point and create ghost macro 
-  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, Hbnd3IntStoragePoints *) ;
+  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
         // version that created internal boundary on ghost elements 
   virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
@@ -1465,13 +1465,13 @@ template < class A > bool BndsegPllBaseXClosure < A > :: unlockAndResume (bool r
 }
 
 template < class A > inline BndsegPllBaseXMacroClosure < A > :: BndsegPllBaseXMacroClosure (myhbnd_t & b)
-  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) , _ghPoint (0) {
+  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) , _ghInfo (0) {
   return ;
 }
 
 template < class A > inline BndsegPllBaseXMacroClosure < A > :: 
-BndsegPllBaseXMacroClosure (myhbnd_t & b, const MacroGhostPoint * ghp)
-  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) , _ghPoint (ghp) {
+BndsegPllBaseXMacroClosure (myhbnd_t & b, const MacroGhostInfo_STI* ghinfo)
+  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) , _ghInfo (ghinfo) {
   return ;
 }
 
@@ -1513,11 +1513,11 @@ packAsBnd (int fce, int who, ObjectStream & os) const {
       os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ()) ; 
   }
 
-  if(_ghPoint) // is stored ghost point exists
+  if(_ghInfo) // is stored ghost point exists
   {
     os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); 
-    // see ghost_elements.h for implementation of this functions 
-    _ghPoint->inlineGhostElement(os);
+    // see ghost_info.h for implementation of this functions 
+    _ghInfo->inlineGhostElement(os);
   }
   else 
   {
@@ -1530,9 +1530,9 @@ packAsBnd (int fce, int who, ObjectStream & os) const {
 template < class A > inline void BndsegPllBaseXMacroClosure < A > :: 
 insertGhostCell(ObjectStream & os, int fce)
 {
-  assert( _ghPoint == 0 );
-  _ghPoint = (MacroGhostPoint*) this->myhbnd().buildGhostCell(os , fce);
-  assert( _ghPoint );
+  assert( _ghInfo == 0 );
+  _ghInfo = this->myhbnd().buildGhostCell(os , fce);
+  assert( _ghInfo );
 }
   
 inline GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: Hedge1EmptyPll (VertexGeo * a, VertexGeo * b) :

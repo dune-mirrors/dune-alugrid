@@ -101,7 +101,7 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         HbndPllMacro (myhface4_t *,int, ProjectVertex *,
                       const bnd_t bt , IndexManagerType & im, 
                       Gitter * , BuilderIF & ,
-                      const Hbnd4IntStoragePoints &) ;
+                      MacroGhostInfoHexa* ) ;
         HbndPllMacro (myhface4_t *,int, ProjectVertex *,
                       const bnd_t bt , IndexManagerType & im, 
                       Gitter * , BuilderIF & );
@@ -112,7 +112,7 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
   
         // builds ghost cell if not exists 
-        virtual const MacroGhostPoint* buildGhostCell(ObjectStream& os, int fce);
+        virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
         // for dune 
         inline int ghostLevel () const ;
       private :
@@ -333,15 +333,15 @@ template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > ::
 HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv,
               const bnd_t bt, IndexManagerType & im , 
               Gitter * grd , BuilderIF & mgb,
-              const Hbnd4IntStoragePoints & hp)
+              MacroGhostInfoHexa* ghInfo ) 
 : Hbnd4Top < micro_t > (0,f,t,ppv,bt,im,grd)
 , _mxt (0) 
 , _mgb(mgb) 
-, _gm(  new MacroGhostHexa( _mgb , hp, f ) )  
+, _gm(  new MacroGhostHexa( _mgb , ghInfo, f ) )  
 {
   assert( _gm );
   this->setGhost ( _gm->getGhost() );   
-  _mxt = new MX (*this, _gm->getGhostPoints() );
+  _mxt = new MX (*this, _gm->getGhostInfo() );
   assert( _mxt );
 
   this->restoreFollowFace () ;
@@ -403,7 +403,7 @@ HbndPllMacro :: lockedAgainstCoarsening () const {
 }
 
 template < class A, class X, class MX >
-inline const MacroGhostPoint* Hbnd4PllInternal < A, X, MX > ::
+inline const MacroGhostInfo_STI* Hbnd4PllInternal < A, X, MX > ::
 HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
 {
   assert( _gm == 0 );
@@ -412,7 +412,6 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
   assert( code == MacroGridMoverIF :: HBND4INT );
 
   {
-    double p [4][3];
     int bfake, v [4] = {-1,-1,-1,-1};
 
     os.readObject (bfake) ;
@@ -429,44 +428,28 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
     int readPoint = 0; 
     os.readObject( readPoint ); 
     
-    int vert[8] = { -1,-1,-1,-1,-1,-1,-1,-1 }; 
-    int vertface[4] = { -1,-1,-1,-1 }; 
-    int fce = -1; 
-
     // read ghost information 
+    MacroGhostInfoHexa* ghInfo = 0;
     if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
     {
-      os.readObject ( fce );
-    
-      for(int i=0; i<8; ++i)
-      {
-        os.readObject ( vert[i] );
-      }
-
-      for(int i=0; i<4; ++i)
-      {
-        os.readObject ( vertface[i] );
-        double (&pr) [3] = p[i];
-        os.readObject (pr[0]) ;
-        os.readObject (pr[1]) ;
-        os.readObject (pr[2]) ;
-      }
+      // read data from stream 
+      ghInfo = new MacroGhostInfoHexa( os );
     }
 
     // create macro ghost cell     
     {
-      Hbnd4IntStoragePoints hp ( p, vert, vertface , fce );
+      assert( ghInfo );
 
       myhface4_t * f = this->myhface4(0);
       assert( f );
 
-      _gm = new MacroGhostHexa( _mgb , hp, f );
+      _gm = new MacroGhostHexa( _mgb , ghInfo, f );
       this->setGhost ( _gm->getGhost() );
     }
   }
 
   assert( _gm );
-  return _gm->getGhostPoints();
+  return _gm->getGhostInfo();
 }
 
 template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: ghostLevel () const {

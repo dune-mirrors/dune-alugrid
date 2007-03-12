@@ -28,61 +28,7 @@
 
 #include "key.h"
 #include "gitter_sti.h"
-
-// little storage class for points and vertex numbers 
-// of transmitted macro elements to become ghosts 
-template <int points>
-class HbndIntStoragePoints : public MyAlloc
-{
-public:
-  enum { noVx     = (points == 4) ? 8 : 4 };
-  enum { noFaceVx = (points == 4) ? 4 : 1 };  
-  
-private:
-  double _p[points][3]; 
-  int _vx[noVx];
-  int _vxface[noFaceVx];
-
-  int _fce;
-public:  
-  HbndIntStoragePoints();
-  HbndIntStoragePoints(const HbndIntStoragePoints & copy );
-  // constructor for hexas 
-  HbndIntStoragePoints(const Gitter:: Geometric :: hexa_GEO * hexa  , int fce);
-  // contructor for tetras 
-  HbndIntStoragePoints(const Gitter:: Geometric :: tetra_GEO * tetra, int fce);
-  HbndIntStoragePoints(const double (&p)[points][3], const int (&vx)[noVx] , const int (&vxface)[noFaceVx], int fce );
-
-  // return reference to _p
-  const double (& getPoints () const )[points][3]
-  {
-    return _p;
-  }
-  
-  // return idents of element  
-  int (& getIdents () )[noVx]
-  {
-    return _vx; 
-  }
-  
-  const int (& getOppFaceIdents () const )[noFaceVx]
-  {
-    return _vxface;
-  }
-
-  int getFaceNumber () const 
-  {
-    return _fce; 
-  }
-
-  // write internal data to stream 
-  void write(ObjectStream&) const;
-  // read internal data from stream 
-  void read(ObjectStream&);
-};
-
-typedef HbndIntStoragePoints<4> Hbnd4IntStoragePoints;
-typedef HbndIntStoragePoints<1> Hbnd3IntStoragePoints;
+#include "ghost_info.h"
 
 template < class RandomAccessIterator > inline int cyclicReorder (RandomAccessIterator begin, RandomAccessIterator end) {
   RandomAccessIterator middle = min_element (begin,end) ;
@@ -101,8 +47,11 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   // stores a hface3 and the other point needed to build a tetra  
   class Hbnd3IntStorage : public MyAlloc 
   {
-    auto_ptr<Hbnd3IntStoragePoints> _ptr;
+    // info about ghost element, see ghost_info.h  
+    auto_ptr<MacroGhostInfoTetra> _ptr;
+    // internal face 
     hface3_GEO * _first;
+    // internal face number 
     int          _second;
     bool _pInit; // true if p was initialized with a value 
   public:  
@@ -110,15 +59,13 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     Hbnd3IntStorage( hface3_GEO * f, int tw, const tetra_GEO * tetra, int fce);
     
     // store point and face and twist  
-    Hbnd3IntStorage( hface3_GEO * f, int tw, Hbnd3IntStoragePoints* p);
+    Hbnd3IntStorage( hface3_GEO * f, int tw, MacroGhostInfoTetra* p);
     
     // store face and twist and set point to default 
     Hbnd3IntStorage( hface3_GEO * f, int tw ); 
 
-    const Hbnd3IntStoragePoints & getPoints () const;
-    
-    // release internal Hbnd3IntStoragePoints pointer
-    Hbnd3IntStoragePoints * release ();
+    // release internal MacroGhostInfoTetra pointer
+    MacroGhostInfoTetra * release ();
     
     // this two method are just like in pair 
     hface3_GEO * first  () const { return _first;  }
@@ -128,8 +75,11 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   // stores a hface4 and the other points needed to build a hexa
   class Hbnd4IntStorage : public MyAlloc 
   {
-    Hbnd4IntStoragePoints _p;
+    // info about ghost element, see ghost_info.h
+    auto_ptr<MacroGhostInfoHexa> _ptr;
+    // internal face 
     hface4_GEO * _first;
+    // internal face number 
     int          _second;
     bool _pInit; // true if p was initialized with a value 
 
@@ -138,12 +88,14 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     Hbnd4IntStorage( hface4_GEO * f, int tw, const hexa_GEO * hexa, int fce);
     
     // store point and face and twist  
-    Hbnd4IntStorage( hface4_GEO * f, int tw, const Hbnd4IntStoragePoints & p);
+    Hbnd4IntStorage( hface4_GEO * f, int tw, MacroGhostInfoHexa* );
     
     // store face and twist and set point to default 
     Hbnd4IntStorage( hface4_GEO * f, int tw ); 
 
-    const Hbnd4IntStoragePoints & getPoints () const;
+
+    // release internal ghost info pointer 
+    MacroGhostInfoHexa* release ();
 
     // this two method are just like in pair 
     hface4_GEO * first  () const { return _first;  }
@@ -236,184 +188,27 @@ inline bool MacroGridBuilder :: debugOption (int level) {
   return (getenv ("VERBOSE_MGB") ? ( atoi (getenv ("VERBOSE_MGB")) > level ? true : (level == 0)) : false) ;
 }
 
-//********************************************************************8
-template <int points> 
-inline HbndIntStoragePoints<points> :: HbndIntStoragePoints ()
-{
-/*
-  for(int vx=0; vx<points; vx++)
-  {
-    for(int i=0; i<3; i++) _p[vx][i] = -666.0;
-    _vxface[vx] = -1;
-  }
-  for(int i=0; i<noVx; i++) _vx[i] = -1;
-*/
-  _fce = -1;
-}
-
-template<int points>
-inline HbndIntStoragePoints<points> :: 
-HbndIntStoragePoints (const Gitter :: Geometric :: hexa_GEO * hexa, int fce)
-{
-  // dont call for points == 1
-  assert( points == 4 );
-  int oppFace = Gitter :: Geometric :: hexa_GEO :: oppositeFace[fce];
-  for(int vx=0; vx<points; vx++)
-  {
-    const Gitter :: Geometric :: VertexGeo * vertex = hexa->myvertex(oppFace,vx);
-    _vxface[vx] = vertex->ident();
-    const double (&p) [3] = vertex->Point();
-    _p[vx][0] = p[0];
-    _p[vx][1] = p[1];
-    _p[vx][2] = p[2];
-  }
-  
-  for(int i=0; i<noVx; i++) 
-  {
-    _vx[i] = hexa->myvertex(i)->ident();
-  }
-  _fce = fce;
-}
-
-template<int points>
-inline HbndIntStoragePoints<points> :: 
-HbndIntStoragePoints (const Gitter :: Geometric :: tetra_GEO * tetra, int fce)
-{
-  assert( points == 1 );
-  const Gitter :: Geometric :: VertexGeo * vertex = tetra->myvertex(fce);
-  assert( vertex );
-  for(int vx=0; vx<points; ++vx)
-  {
-    _vxface[vx] = vertex->ident();
-    const double (&p) [3] = vertex->Point();
-    _p[vx][0] = p[0];
-    _p[vx][1] = p[1];
-    _p[vx][2] = p[2];
-  }
-  
-  for(int i=0; i<noVx; ++i) 
-  {
-    _vx[i] = tetra->myvertex(i)->ident();
-  }
-
-  _fce = fce;
-}
-
-template <int points>
-inline HbndIntStoragePoints<points> :: 
-HbndIntStoragePoints (const HbndIntStoragePoints<points> & copy ) 
-{
-  for(int k=0; k<points; k++)
-  {
-    _p[k][0] = copy._p[k][0];
-    _p[k][1] = copy._p[k][1];
-    _p[k][2] = copy._p[k][2];
-  }
-
-  for(int i=0; i<noVx; ++i) _vx[i] = copy._vx[i];
-  for(int i=0; i<noFaceVx; ++i) 
-  {
-    _vxface[i] = copy._vxface[i];
-  }
-  _fce = copy._fce;
-}
-
-template <int points>
-inline HbndIntStoragePoints<points> :: 
-HbndIntStoragePoints (const double (&p)[points][3], const int (&vx)[noVx], 
-    const int (&vxface)[noFaceVx] , int fce ) 
-{
-  for(int k=0; k<points; ++k)
-  {
-    _p[k][0]   = p[k][0];
-    _p[k][1]   = p[k][1];
-    _p[k][2]   = p[k][2];
-  }
-
-  for(int k=0; k<noFaceVx; ++k)
-  {
-    _vxface[k] = vxface[k];
-  }
-
-  for(int i=0; i<noVx; ++i) _vx[i] = vx[i];
-
-  _fce = fce;
-}
-
-template<int points>
-inline void HbndIntStoragePoints<points> :: 
-write (ObjectStream & os ) const
-{
- // local face number 
-  os.writeObject( _fce );
-
-  // global vertex number of the hexas vertices  
-  for(int i=0; i<noVx; ++i) os.writeObject( _vx[i] );
-  
-  // global vertex numbers of the face not existing on this partition  
-  for(int i=0; i<noFaceVx; ++i) 
-  {
-    os.writeObject( _vxface[i] );
-    os.writeObject( _p[i][0] ); 
-    os.writeObject( _p[i][1] ); 
-    os.writeObject( _p[i][2] ); 
-  }
-}
-
-template<int points>
-inline void HbndIntStoragePoints<points> :: 
-read (ObjectStream & os ) 
-{
-  // read local face number
-  os.readObject ( _fce );
-
-  // read vertices of element
-  for(int i=0; i<noVx; ++i)
-  {
-    os.readObject ( _vx[i] );
-  }
-
-  // read vertices of face an coordinates 
-  for(int i=0; i<noFaceVx; ++i)
-  {
-    os.readObject ( _vxface[i] );
-    double (&pr) [3] = _p[i];
-
-    os.readObject (pr[0]) ;
-    os.readObject (pr[1]) ;
-    os.readObject (pr[2]) ;
-  }
-
-  assert( _fce >= 0 );
-}
-
 //- Hbnd3IntStorage 
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
 Hbnd3IntStorage( hface3_GEO * f, int tw, const tetra_GEO * tetra, int fce)
- : _ptr(new Hbnd3IntStoragePoints(tetra,fce))
+ : _ptr(new MacroGhostInfoTetra(tetra,fce))
  , _first(f) , _second(tw) , _pInit(true)
 {
 }
     
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
-Hbnd3IntStorage( hface3_GEO * f, int tw, Hbnd3IntStoragePoints *p)
+Hbnd3IntStorage( hface3_GEO * f, int tw, MacroGhostInfoTetra *p)
  : _ptr(p) , _first(f) , _second(tw) , _pInit(true)
 {
 }
     
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
 Hbnd3IntStorage( hface3_GEO * f, int tw )
- : _ptr( new Hbnd3IntStoragePoints() ), _first(f) , _second(tw) , _pInit(false)
+ : _ptr(), _first(f) , _second(tw) , _pInit(false)
 {
 }
 
-inline const Hbnd3IntStoragePoints & MacroGridBuilder :: Hbnd3IntStorage :: getPoints () const
-{ 
-  assert(_pInit);
-  return *_ptr;
-}
-
-inline Hbnd3IntStoragePoints* MacroGridBuilder :: Hbnd3IntStorage :: release ()
+inline MacroGhostInfoTetra* MacroGridBuilder :: Hbnd3IntStorage :: release ()
 { 
   assert(_pInit);
   return _ptr.release();
@@ -422,23 +217,23 @@ inline Hbnd3IntStoragePoints* MacroGridBuilder :: Hbnd3IntStorage :: release ()
 //- Hbnd4IntStorage 
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
 Hbnd4IntStorage( hface4_GEO * f, int tw, const hexa_GEO * hexa, int fce)
- : _p(hexa,fce), _first(f) , _second(tw) , _pInit(true) 
- {
- }
+ : _ptr( new MacroGhostInfoHexa(hexa,fce) ), _first(f) , _second(tw) , _pInit(true) 
+{
+}
     
 // hface4 storage
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
-Hbnd4IntStorage( hface4_GEO * f, int tw, const Hbnd4IntStoragePoints & p)
- : _p(p) , _first(f) , _second(tw) , _pInit(true) {}
+Hbnd4IntStorage( hface4_GEO * f, int tw, MacroGhostInfoHexa* p)
+ : _ptr(p) , _first(f) , _second(tw) , _pInit(true) {}
     
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
 Hbnd4IntStorage( hface4_GEO * f, int tw )
- : _p() , _first(f) , _second(tw) , _pInit(false) {}
+ : _ptr() , _first(f) , _second(tw) , _pInit(false) {}
 
-inline const Hbnd4IntStoragePoints & MacroGridBuilder :: Hbnd4IntStorage :: getPoints() const
+inline MacroGhostInfoHexa* MacroGridBuilder :: Hbnd4IntStorage :: release() 
 { 
-  assert(_pInit);
-  return _p;
+  assert( _pInit );
+  return _ptr.release();
 }
 
 #endif

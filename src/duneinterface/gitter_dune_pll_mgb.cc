@@ -49,20 +49,20 @@ class DuneParallelGridMover : public ParallelGridMover {
     // overloaded, because calles InsertUniqueHbnd4_withPoint
     inline void unpackHbnd4Int (ObjectStream & os); 
 
-    // creates Hbnd3IntStorage with point if needed 
+    // creates Hbnd3IntStorage with ghost info if needed 
     bool InsertUniqueHbnd3_withPoint (int (&)[3], 
                               Gitter :: hbndseg :: bnd_t, 
-                              Hbnd3IntStoragePoints * ) ;
+                              MacroGhostInfoTetra* ) ;
 
-    // creates Hbnd4IntStorage with point if needed 
+    // creates Hbnd4IntStorage with ghost info if needed 
     bool InsertUniqueHbnd4_withPoint (int (&)[4], Gitter :: hbndseg ::
-            bnd_t, const Hbnd4IntStoragePoints & p );
+            bnd_t, MacroGhostInfoHexa* );
         
 };
 
 // new method that gets coord of ghost point 
 bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],         
-      Gitter :: hbndseg_STI ::bnd_t bt, Hbnd3IntStoragePoints * p ) 
+      Gitter :: hbndseg_STI ::bnd_t bt, MacroGhostInfoTetra * ghInfo) 
 {
   int twst = cyclicReorder (v,v+3) ;
   faceKey_t key (v [0], v [1], v [2]) ;
@@ -72,7 +72,7 @@ bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
     {
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
       // here the point is stored 
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,p) ;
+      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,ghInfo) ;
       return true ;
     }
   } 
@@ -92,14 +92,14 @@ bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
 // new method that gets coord of ghost point 
 bool DuneParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],         
       Gitter :: hbndseg_STI ::bnd_t bt, 
-      const Hbnd4IntStoragePoints & p ) 
+      MacroGhostInfoHexa* ghInfo) 
 {
   int twst = cyclicReorder (v,v+4) ;
   faceKey_t key (v [0], v [1], v [2]) ;
   if (bt == Gitter :: hbndseg_STI :: closure) {
     if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      _hbnd4Int [key] = new Hbnd4IntStorage (face,twst,p) ;
+      _hbnd4Int [key] = new Hbnd4IntStorage (face,twst,ghInfo) ;
       return true ;
     }
   } else {
@@ -127,22 +127,26 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   int readPoint = 0; 
   os.readObject( readPoint ); 
 
-  Hbnd3IntStoragePoints * hp = 0;
+  MacroGhostInfoTetra * ghInfo = 0;
   if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
-    hp = new Hbnd3IntStoragePoints(); 
-    assert( hp );
-    hp->read( os );
+    // read ghost data from stream 
+    ghInfo = new MacroGhostInfoTetra(os); 
   }
 
+  // if internal boundary, create internal bnd face 
   if(b == Gitter :: hbndseg :: closure)
   {
-    assert( hp );
-    InsertUniqueHbnd3_withPoint (v, b, hp ) ;
+    assert( ghInfo );
+    InsertUniqueHbnd3_withPoint (v, b, ghInfo ) ;
   }
   else
   {
-    assert(readPoint == 0);
+    // delete ghost info not needed any longer 
+    if( ghInfo ) delete ghInfo;
+
+    // create normal bnd face, and make sure that no Point was send
+    assert(readPoint == MacroGridMoverIF :: NO_POINT );
     // old method defined in base class 
     InsertUniqueHbnd3 (v, b ) ;
   }
@@ -152,7 +156,6 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
 // overloaded method because here we call insertion with point 
 inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os) 
 {
-  double p [4][3];
   int bfake, v [4] = {-1,-1,-1,-1};
 
   os.readObject (bfake) ;
@@ -166,36 +169,24 @@ inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   int readPoint = 0; 
   os.readObject( readPoint ); 
   
-  int vert[8] = { -1,-1,-1,-1,-1,-1,-1,-1 }; 
-  int vertface[4] = { -1,-1,-1,-1 }; 
-  int fce = -1; 
+  MacroGhostInfoHexa* ghInfo = 0;
   if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
-    os.readObject ( fce );
-  
-    for(int i=0; i<8; i++)
-    {
-      os.readObject ( vert[i] );
-    }
-
-    for(int i=0; i<4; i++)
-    {
-      os.readObject ( vertface[i] );
-      double (&pr) [3] = p[i];
-      os.readObject (pr[0]) ;
-      os.readObject (pr[1]) ;
-      os.readObject (pr[2]) ;
-    }
+    // read ghost data from stream 
+    ghInfo = new MacroGhostInfoHexa(os); 
   }
 
   // if internal boundary, create internal bnd face 
   if(b == Gitter :: hbndseg :: closure)
   {
-    Hbnd4IntStoragePoints hp ( p, vert, vertface , fce );
-    InsertUniqueHbnd4_withPoint (v, b, hp ) ;
+    assert( ghInfo );
+    InsertUniqueHbnd4_withPoint (v, b, ghInfo ) ;
   }
   else
   {
+    // delete ghost info not needed any longer 
+    if( ghInfo ) delete ghInfo;
+
     // create normal bnd face, and make sure that no Point was send
     assert(readPoint == MacroGridMoverIF :: NO_POINT );
     // old method defined in base class 
@@ -513,24 +504,33 @@ void DuneParallelGridMover :: finalize ()
       myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
     }
   }
-  {for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
-    const Hbnd4IntStorage & p = * ((*i).second) ;
-    if (p.first()->ref == 1) {
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure, p.getPoints());
-      myBuilder ()._hbndseg4List.push_back (hb4) ;
-    }
-    delete (*i).second;
-  }}
+  {
+    for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) 
+    {
+      Hbnd4IntStorage & p = * ((*i).second) ;
+      if (p.first()->ref == 1) 
+      {
+        // get ghost info from storage and release pointer 
+        MacroGhostInfoHexa* ghInfo = p.release();
+
+        hbndseg4_GEO * hb4 = myBuilder ().
+              insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure, ghInfo );
+        myBuilder ()._hbndseg4List.push_back (hb4) ;
+      }
+      delete (*i).second;
+    } 
+  }
 
   // here the internal boundary elements are created 
   {for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
     Hbnd3IntStorage & p = *((*i).second);
     if (p.first()->ref == 1) 
     {
-      // release pointer from storage 
-      Hbnd3IntStoragePoints * hp = p.release();
+      // get ghost info from storage and release pointer 
+      MacroGhostInfoTetra* ghInfo = p.release();
+
       hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p.first(),p.second(),
-                        Gitter :: hbndseg_STI :: closure , hp);
+                        Gitter :: hbndseg_STI :: closure , ghInfo );
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (*i).second; 

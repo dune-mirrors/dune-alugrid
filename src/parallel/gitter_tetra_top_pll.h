@@ -107,7 +107,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
       public :
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
                       IndexManagerType & im, Gitter * , 
-                      BuilderIF& , Hbnd3IntStoragePoints * ) ;
+                      BuilderIF& , MacroGhostInfoTetra* ) ;
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
                       IndexManagerType & im, Gitter * , BuilderIF& ) ;
        ~HbndPllMacro () ;
@@ -116,7 +116,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
         inline int ghostLevel () const ; 
 
-        virtual const MacroGhostPoint* buildGhostCell(ObjectStream& os, int fce);
+        virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
 
       private :
         mypllx_t * _mxt ;
@@ -348,15 +348,15 @@ Hbnd3PllInternal < A, X, MX > :: HbndPllMacro ::
 HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , 
     const bnd_t bt, IndexManagerType & im , Gitter * grd, 
     BuilderIF& mgb ,
-    Hbnd3IntStoragePoints * hp ) 
+    MacroGhostInfoTetra* ghInfo) 
  : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,grd) 
  , _mxt(0)
  , _mgb(mgb)
- , _gm( new MacroGhostTetra( _mgb , hp, f ) ) 
+ , _gm( new MacroGhostTetra( _mgb , ghInfo, f ) ) 
 {
   assert( _gm );
   this->setGhost ( _gm->getGhost() );   
-  _mxt = new MX (*this, _gm->getGhostPoints() );
+  _mxt = new MX (*this, _gm->getGhostInfo() );
   
   this->restoreFollowFace () ;
   return ;
@@ -420,7 +420,7 @@ template < class A, class X, class MX > bool Hbnd3PllInternal < A, X, MX > :: Hb
 }
 
 template < class A, class X, class MX > 
-inline const MacroGhostPoint* Hbnd3PllInternal < A, X, MX > :: 
+inline const MacroGhostInfo_STI* Hbnd3PllInternal < A, X, MX > :: 
 HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
 {
   assert( _gm == 0 ); 
@@ -443,26 +443,25 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
     int readPoint = 0;
     os.readObject( readPoint );
 
-    Hbnd3IntStoragePoints * hp = 0;
+    MacroGhostInfoTetra * ghInfo = 0;
     if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED )
     {
-      hp = new Hbnd3IntStoragePoints();
-      assert( hp );
-      hp->read ( os );
+      // create ghInfo and read data from stream 
+      ghInfo = new MacroGhostInfoTetra(os);
     }
 
     {
-      assert( hp );
+      assert( ghInfo );
       myhface3_t * f = this->myhface3(0);
       assert( f );
 
-      _gm = new MacroGhostTetra( _mgb , hp, f );
+      _gm = new MacroGhostTetra( _mgb , ghInfo,  f );
       this->setGhost ( _gm->getGhost() );   
     }
   }
 
   assert( _gm );
-  return _gm->getGhostPoints();
+  return _gm->getGhostInfo();
 }
 
 

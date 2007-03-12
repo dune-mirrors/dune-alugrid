@@ -40,9 +40,9 @@ public:
 };
 
 
-template <int points> class HbndIntStoragePoints;
-typedef HbndIntStoragePoints<4> Hbnd4IntStoragePoints;
-typedef HbndIntStoragePoints<1> Hbnd3IntStoragePoints;
+// forward declaration, see ghost_info.h 
+class MacroGhostInfoHexa;
+class MacroGhostInfoTetra;
 
 //extern std::ofstream logFile;
 
@@ -1559,13 +1559,15 @@ public :
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
       // insert ghost element 
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI
-          :: bnd_t, Hbnd3IntStoragePoints *) = 0 ;
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI:: bnd_t, 
+                                            MacroGhostInfoTetra* ) = 0 ;
       
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
       // method to insert internal boundary with ghost 
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t, const Hbnd4IntStoragePoints &) = 0 ;
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t, 
+                                            MacroGhostInfoHexa* ) = 0 ;
+
       IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
       IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
       IteratorSTI < hedge_STI >  * iterator (const hedge_STI *) const ;
