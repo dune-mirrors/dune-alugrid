@@ -12,4 +12,4 @@ FLAGS="-Wall"
 DEBUGFLAGS="-g"
 
 # additional flags for optimization
-OPTIMFLAGS="-O3 -funroll-loops -DNDEBUG"
+OPTIMFLAGS="-O3 -funroll-loops -DNDEBUG -finline-functions"
