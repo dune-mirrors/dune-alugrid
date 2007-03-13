@@ -769,11 +769,13 @@ void MacroGridBuilder :: finalize ()
       myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
     }
   }
-  {for (faceMap_t :: iterator i = _face3Map.begin () ; i != _face3Map.end () ; ) {
+  {
+    for (faceMap_t :: iterator i = _face3Map.begin () ; i != _face3Map.end () ; ) {
     if (!((hface3_GEO *)(*i).second)->ref) {
       delete (hface3_GEO *)(*i).second ;
       _face3Map.erase (i++) ;
-    } else {
+    } else 
+    {
       assert (((hface3_GEO *)(*i).second)->ref == 2) ;
       myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
     }

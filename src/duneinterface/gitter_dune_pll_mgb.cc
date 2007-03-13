@@ -70,6 +70,7 @@ bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
   {
     if (_hbnd3Int.find (key) == _hbnd3Int.end ()) 
     {
+      assert( ghInfo );
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
       // here the point is stored 
       _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,ghInfo) ;
@@ -96,14 +97,20 @@ bool DuneParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],
 {
   int twst = cyclicReorder (v,v+4) ;
   faceKey_t key (v [0], v [1], v [2]) ;
-  if (bt == Gitter :: hbndseg_STI :: closure) {
-    if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
+  if (bt == Gitter :: hbndseg_STI :: closure) 
+  {
+    if (_hbnd4Int.find (key) == _hbnd4Int.end ()) 
+    {
+      assert( ghInfo );
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
       _hbnd4Int [key] = new Hbnd4IntStorage (face,twst,ghInfo) ;
       return true ;
     }
-  } else {
-    if (_hbnd4Map.find (key) == _hbnd4Map.end ()) {
+  } 
+  else 
+  {
+    if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
+    {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
       hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt) ;
       _hbnd4Map [key] = hb4 ;
@@ -275,8 +282,9 @@ void DuneParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
   return ;
 }
 
-void DuneParallelGridMover :: duneUnpackAll (vector < ObjectStream > & osv,
-    GatherScatterType & gs) {
+void DuneParallelGridMover :: 
+duneUnpackAll (vector < ObjectStream > & osv, GatherScatterType & gs) 
+{
   for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; j ++) {
     ObjectStream & os (*j) ;
     int code = MacroGridMoverIF :: ENDMARKER ;
@@ -628,7 +636,7 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     }
     lap4 = clock () ;
     if (MacroGridBuilder :: debugOption (20)) {
-      cout << "**INFO GitterDunePll :: repartitionMacroGrid () [ass|pck|exc|upk|all] " ;
+      cout << "**INFO GitterDunePll["<<me<<"] :: repartitionMacroGrid () [ass|pck|exc|upk|all] " ;
       cout << setw (5) << (float)(lap1 - start)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC) << " " ;
@@ -638,9 +646,11 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
   }
   return ;
 }
-void GitterDunePll :: duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs) {
-
-  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) {
+void GitterDunePll :: 
+duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs) 
+{
+  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
+  {
     const long start = clock () ;
     long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
     mpAccess ().removeLinkage () ;
@@ -684,13 +694,11 @@ void GitterDunePll :: duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, G
     lap3 = clock () ;
     {
       DuneParallelGridMover pgm (containerPll ()) ;
-      cout.flush();
-      cerr.flush();
       pgm.duneUnpackAll (osv,gs) ;
     }
     lap4 = clock () ;
     if (MacroGridBuilder :: debugOption (20)) {
-      cout << "**INFO GitterDunePll :: repartitionMacroGrid () [ass|pck|exc|upk|all] " ;
+      cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [ass|pck|exc|upk|all] " ;
       cout << setw (5) << (float)(lap1 - start)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC) << " " ;

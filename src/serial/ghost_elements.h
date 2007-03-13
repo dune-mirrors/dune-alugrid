@@ -27,123 +27,125 @@ class MacroGhostBuilder : public MacroGridBuilder
   vertexMap_t _existingVertex;   
   edgeMap_t   _existingEdge;
 
-  public:  
-    // constructor 
-    MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi,false) 
-    {
-      // create Builder with empty lists 
-      this->_initialized = true;
+  // do not copy 
+  MacroGhostBuilder(const MacroGhostBuilder& );
+public:  
+  // constructor 
+  MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi,false) 
+  {
+    // create Builder with empty lists 
+    this->_initialized = true;
+  }
+
+  // desctructor 
+  ~MacroGhostBuilder () 
+  {
+    // remove all faces that already exist from the lists 
+    {  
+      typedef edgeMap_t :: iterator iterator;
+      iterator end = _existingEdge.end();
+      for (iterator i = _existingEdge.begin () ; i != end ; ++i )
+      {
+        edgeKey_t e = (*i).first;
+        this->_edgeMap.erase(e);
+      }
+    }
+    
+    // remove all faces that already exist from the lists 
+    {  
+      typedef vertexMap_t :: iterator iterator;
+      iterator end = _existingVertex.end();
+      for (iterator i = _existingVertex.begin () ; i != end ; ++i )
+      {
+        vertexKey_t v = (*i).first;
+        this->_vertexMap.erase(v);
+      }
     }
 
-    // desctructor 
-    ~MacroGhostBuilder () 
+    finalize();
+  }
+
+  // insert new Vertex without linkagePattern 
+  void InsertNewUniqueVertex (double x, double y, double z, int i) 
+  {
+    typedef GitterBasis :: MacroGitterBasis SerialMacroGridBuilder_t;
+    vertexMap_t :: const_iterator hit = this->_vertexMap.find (i) ;
+    if (hit == _vertexMap.end ()) 
     {
-      // remove all faces that already exist from the lists 
+      VertexGeo * v = myBuilder ().insert_ghostvx (x,y,z,i) ;
+      this->_vertexMap [i] = v ;
+    }
+  }
+
+  // delete all elementes and stuff 
+  void finalize ()
+  {
+    { 
+      typedef elementMap_t :: iterator iterator;
+      iterator end = this->_hexaMap.end ();
+      for (iterator i = this->_hexaMap.begin () ; 
+           i != end; this->_hexaMap.erase(i++)) 
       {  
-        typedef edgeMap_t :: iterator iterator;
-        iterator end = _existingEdge.end();
-        for (iterator i = _existingEdge.begin () ; i != end ; ++i )
-        {
-          edgeKey_t e = (*i).first;
-          this->_edgeMap.erase(e);
-        }
+        delete ((hexa_GEO *)(*i).second);
       }
-      
-      // remove all faces that already exist from the lists 
-      {  
-        typedef vertexMap_t :: iterator iterator;
-        iterator end = _existingVertex.end();
-        for (iterator i = _existingVertex.begin () ; i != end ; ++i )
-        {
-          vertexKey_t v = (*i).first;
-          this->_vertexMap.erase(v);
-        }
+    } 
+    { 
+      typedef elementMap_t :: iterator iterator;
+      iterator end = this->_tetraMap.end ();
+      for (iterator i = this->_tetraMap.begin () ; 
+           i != end; this->_tetraMap.erase(i++)) 
+      {
+        delete ((tetra_GEO *)(*i).second);
       }
+    } 
+    
+    assert( this->_hbnd3Int.empty ());
+    assert( this->_hbnd4Int.empty ());
 
-      finalize();
-    }
+    assert( this->_hbnd3Map.empty ());
+    assert( this->_hbnd4Map.empty ());
 
-    // insert new Vertex without linkagePattern 
-    void InsertNewUniqueVertex (double x, double y, double z, int i) 
+    // faces 
     {
-      typedef GitterBasis :: MacroGitterBasis SerialMacroGridBuilder_t;
-      vertexMap_t :: const_iterator hit = this->_vertexMap.find (i) ;
-      if (hit == _vertexMap.end ()) 
+      typedef faceMap_t :: iterator iterator;
+      iterator end = this->_face4Map.end ();
+      for (iterator i = this->_face4Map.begin () ; 
+           i != end; this->_face4Map.erase(i++)) 
       {
-        VertexGeo * v = myBuilder ().insert_ghostvx (x,y,z,i) ;
-        this->_vertexMap [i] = v ;
+        delete ((hface4_GEO *)(*i).second); 
       }
-    }
-
-    // delete all elementes and stuff 
-    void finalize ()
+    } 
     {
-      { 
-        typedef elementMap_t :: iterator iterator;
-        iterator end = this->_hexaMap.end ();
-        for (iterator i = this->_hexaMap.begin () ; 
-             i != end; this->_hexaMap.erase(i++)) 
-        {  
-          delete ((hexa_GEO *)(*i).second);
-        }
-      } 
-      { 
-        typedef elementMap_t :: iterator iterator;
-        iterator end = this->_tetraMap.end ();
-        for (iterator i = this->_tetraMap.begin () ; 
-             i != end; this->_tetraMap.erase(i++)) 
-        {
-          delete ((tetra_GEO *)(*i).second);
-        }
-      } 
-      
-      assert( this->_hbnd3Int.empty ());
-      assert( this->_hbnd4Int.empty ());
-
-      assert( this->_hbnd3Map.empty ());
-      assert( this->_hbnd4Map.empty ());
-
-      // faces 
+      typedef faceMap_t :: iterator iterator;
+      iterator end = this->_face3Map.end ();
+      for (iterator i = this->_face3Map.begin () ; 
+           i != end; this->_face3Map.erase(i++)) 
       {
-        typedef faceMap_t :: iterator iterator;
-        iterator end = this->_face4Map.end ();
-        for (iterator i = this->_face4Map.begin () ; 
-             i != end; this->_face4Map.erase(i++)) 
-        {
-          delete ((hface4_GEO *)(*i).second); 
-        }
-      } 
-      {
-        typedef faceMap_t :: iterator iterator;
-        iterator end = this->_face3Map.end ();
-        for (iterator i = this->_face3Map.begin () ; 
-             i != end; this->_face3Map.erase(i++)) 
-        {
-          delete (hface3_GEO *) (*i).second; 
-        }
-      } 
+        delete (hface3_GEO *) (*i).second; 
+      }
+    } 
 
+    {
+      typedef edgeMap_t :: iterator iterator;
+      iterator end = this->_edgeMap.end ();
+      for (iterator i = this->_edgeMap.begin () ; 
+           i != end; this->_edgeMap.erase(i++)) 
       {
-        typedef edgeMap_t :: iterator iterator;
-        iterator end = this->_edgeMap.end ();
-        for (iterator i = this->_edgeMap.begin () ; 
-             i != end; this->_edgeMap.erase(i++)) 
-        {
-          delete (hedge1_GEO *) (*i).second; 
-        }
-      } 
+        delete (hedge1_GEO *) (*i).second; 
+      }
+    } 
 
+    {
+      typedef vertexMap_t :: iterator iterator;
+      iterator end = this->_vertexMap.end ();
+      for (iterator i = this->_vertexMap.begin () ; 
+           i != end; this->_vertexMap.erase(i++)) 
       {
-        typedef vertexMap_t :: iterator iterator;
-        iterator end = this->_vertexMap.end ();
-        for (iterator i = this->_vertexMap.begin () ; 
-             i != end; this->_vertexMap.erase(i++)) 
-        {
-          delete (VertexGeo *) (*i).second; 
-        }
-      } 
-      this->_finalized = true;
-    }
+        delete (VertexGeo *) (*i).second; 
+      }
+    } 
+    this->_finalized = true;
+  }
 };
 
 // interface class for macro ghost 
