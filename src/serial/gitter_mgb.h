@@ -48,13 +48,16 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   class Hbnd3IntStorage : public MyAlloc 
   {
     // info about ghost element, see ghost_info.h  
-    auto_ptr<MacroGhostInfoTetra> _ptr;
+    MacroGhostInfoTetra * _ptr;
     // internal face 
     hface3_GEO * _first;
     // internal face number 
     int          _second;
-    bool _pInit; // true if p was initialized with a value 
+
   public:  
+    // destructor deleting _ptr if not zero 
+    ~Hbnd3IntStorage(); 
+
     // store point and face and twist  
     Hbnd3IntStorage( hface3_GEO * f, int tw, const tetra_GEO * tetra, int fce);
     
@@ -76,14 +79,16 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   class Hbnd4IntStorage : public MyAlloc 
   {
     // info about ghost element, see ghost_info.h
-    auto_ptr<MacroGhostInfoHexa> _ptr;
+    MacroGhostInfoHexa * _ptr;
     // internal face 
     hface4_GEO * _first;
     // internal face number 
     int          _second;
-    bool _pInit; // true if p was initialized with a value 
 
   public:  
+    // destructor deleting _ptr if not zero 
+    ~Hbnd4IntStorage (); 
+
     // store point and face and twist  
     Hbnd4IntStorage( hface4_GEO * f, int tw, const hexa_GEO * hexa, int fce);
     
@@ -92,7 +97,6 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     
     // store face and twist and set point to default 
     Hbnd4IntStorage( hface4_GEO * f, int tw ); 
-
 
     // release internal ghost info pointer 
     MacroGhostInfoHexa* release ();
@@ -192,48 +196,65 @@ inline bool MacroGridBuilder :: debugOption (int level) {
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
 Hbnd3IntStorage( hface3_GEO * f, int tw, const tetra_GEO * tetra, int fce)
  : _ptr(new MacroGhostInfoTetra(tetra,fce))
- , _first(f) , _second(tw) , _pInit(true)
+ , _first(f) , _second(tw)
 {
 }
     
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
 Hbnd3IntStorage( hface3_GEO * f, int tw, MacroGhostInfoTetra *p)
- : _ptr(p) , _first(f) , _second(tw) , _pInit(true)
+ : _ptr(p) , _first(f) , _second(tw)
 {
+  assert( _ptr );
 }
     
 inline MacroGridBuilder :: Hbnd3IntStorage :: 
 Hbnd3IntStorage( hface3_GEO * f, int tw )
- : _ptr(), _first(f) , _second(tw) , _pInit(false)
+ : _ptr(0), _first(f) , _second(tw) 
 {
+}
+
+inline MacroGridBuilder :: Hbnd3IntStorage :: ~Hbnd3IntStorage () 
+{
+  if( _ptr ) delete _ptr;
 }
 
 inline MacroGhostInfoTetra* MacroGridBuilder :: Hbnd3IntStorage :: release ()
 { 
-  assert(_pInit);
-  return _ptr.release();
+  assert( _ptr );
+  MacroGhostInfoTetra* p = _ptr;
+  _ptr = 0;
+  return p;
 }
 
 //- Hbnd4IntStorage 
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
 Hbnd4IntStorage( hface4_GEO * f, int tw, const hexa_GEO * hexa, int fce)
- : _ptr( new MacroGhostInfoHexa(hexa,fce) ), _first(f) , _second(tw) , _pInit(true) 
+ : _ptr( new MacroGhostInfoHexa(hexa,fce) ), _first(f) , _second(tw)  
 {
 }
     
 // hface4 storage
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
 Hbnd4IntStorage( hface4_GEO * f, int tw, MacroGhostInfoHexa* p)
- : _ptr(p) , _first(f) , _second(tw) , _pInit(true) {}
+ : _ptr(p) , _first(f) , _second(tw) 
+{ 
+  assert( _ptr ); 
+}
     
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
 Hbnd4IntStorage( hface4_GEO * f, int tw )
- : _ptr() , _first(f) , _second(tw) , _pInit(false) {}
+ : _ptr(0) , _first(f) , _second(tw) {}
 
+inline MacroGridBuilder :: Hbnd4IntStorage :: ~Hbnd4IntStorage () 
+{
+  if( _ptr ) delete _ptr;
+}
 inline MacroGhostInfoHexa* MacroGridBuilder :: Hbnd4IntStorage :: release() 
 { 
-  assert( _pInit );
-  return _ptr.release();
+  assert( _ptr );
+  MacroGhostInfoHexa* p = _ptr;
+  _ptr = 0;
+  return p;
 }
 
 #endif

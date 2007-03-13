@@ -103,6 +103,8 @@ protected:
 class MacroGhostInfoTetra : public MacroGhostInfoStorage<1> 
 {
   enum { points = 1 };
+  // do not copy 
+  MacroGhostInfoTetra(const MacroGhostInfoTetra&);
 public:  
   // create storage by reading data from stream 
   MacroGhostInfoTetra(ObjectStream& os) { this->readData(os); }
@@ -116,6 +118,8 @@ public:
 class MacroGhostInfoHexa : public MacroGhostInfoStorage<4> 
 {
   enum { points = 4 };
+  // no copying 
+  MacroGhostInfoHexa(const MacroGhostInfoHexa&);
 public:  
   // create storage by reading data from stream 
   MacroGhostInfoHexa(ObjectStream& os) { this->readData(os); }

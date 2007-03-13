@@ -174,10 +174,11 @@ class MacroGhostTetra : public MacroGhost
   MacroGhostBuilder    _mgb; 
 
   // store info about ghost element as pointer 
-  auto_ptr<MacroGhostInfoTetra> _ghInfoPtr;
+  MacroGhostInfoTetra * _ghInfoPtr;
 
   ghostpair_STI _ghostPair; 
 
+  MacroGhostTetra(const MacroGhostTetra& );
 public:
   MacroGhostTetra( BuilderIF & bi, 
                    MacroGhostInfoTetra * allp, 
@@ -262,7 +263,11 @@ public:
     // which acts as empty boundary. 
   }
     
-  virtual ~MacroGhostTetra () {
+  // desctructor deleting _ghInforPtr
+  virtual ~MacroGhostTetra () 
+  {
+    assert( _ghInfoPtr );
+    delete _ghInfoPtr;
   }
   
   ghostpair_STI getGhost() 
@@ -281,7 +286,8 @@ public:
   // for storage in PllClosure Elements, if packed, we need the point 
   const MacroGhostInfo_STI * getGhostInfo () const
   {
-    return _ghInfoPtr.operator -> ();
+    assert( _ghInfoPtr );
+    return _ghInfoPtr;
   }
 };
 
@@ -304,11 +310,13 @@ class MacroGhostHexa : public MacroGhost
   MacroGhostBuilder   _mgb; 
 
 
-  auto_ptr<MacroGhostInfoHexa> _ghInfoPtr;
+  MacroGhostInfoHexa* _ghInfoPtr;
   
   ghostpair_STI _ghostPair; 
   
+  MacroGhostHexa (const MacroGhostHexa& ); 
 public:
+  // constructor 
   MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * face) :
     _mgb(bi) , _ghInfoPtr(allp) , _ghostPair(0,-1) 
   { 
@@ -350,8 +358,10 @@ public:
     // which acts as empty boundary. 
   }
 
-  // nothing to do here
+  // desctructor deleting _ghInforPtr
   virtual ~MacroGhostHexa () {
+    assert( _ghInfoPtr );
+    delete _ghInfoPtr;
   }
   
   ghostpair_STI getGhost() 
@@ -370,7 +380,8 @@ public:
   // for storage in PllClosure Elements, if packed, we need the point 
   const MacroGhostInfo_STI * getGhostInfo () const
   {
-    return _ghInfoPtr.operator -> ();
+    assert( _ghInfoPtr );
+    return _ghInfoPtr; 
   }
 };
 #endif
