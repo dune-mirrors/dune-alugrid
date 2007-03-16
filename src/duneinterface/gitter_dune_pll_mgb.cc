@@ -27,6 +27,17 @@
 #include "gitter_pll_sti.h"
 #include "gitter_pll_mgb.h"
 
+float __STATIC_unpackCount = 0.0;  
+float __STATIC_packCount   = 0.0;  
+
+extern bool __STATIC_restoreTetra;
+
+static float __STATIC_pgmInitalize = 0.0; 
+static float __STATIC_pgmFinalize = 0.0; 
+
+static float __STATIC_unpackTetra = 0.0; 
+static float __STATIC_unpackHbndInt = 0.0; 
+
 class DuneParallelGridMover : public ParallelGridMover {
   public :
     DuneParallelGridMover (BuilderIF &i); 
@@ -123,6 +134,7 @@ bool DuneParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],
 // overloaded method because here we call insertion with point 
 inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os) 
 {
+  const long start = clock ();
   int bfake, v [3] ;
   os.readObject (bfake) ;
   Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
@@ -157,6 +169,9 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
     // old method defined in base class 
     InsertUniqueHbnd3 (v, b ) ;
   }
+
+  const long end = clock ();
+  __STATIC_unpackHbndInt += (float)(end - start)/(float)(CLOCKS_PER_SEC);
   return ;
 }
 
@@ -203,7 +218,9 @@ inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
 }
 
 
-void DuneParallelGridMover :: duneUnpackTetra (ObjectStream & os, GatherScatterType & gs) {
+void DuneParallelGridMover :: duneUnpackTetra (ObjectStream & os, GatherScatterType & gs) 
+{
+  const long start = clock ();
   int v [4] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -211,6 +228,9 @@ void DuneParallelGridMover :: duneUnpackTetra (ObjectStream & os, GatherScatterT
   os.readObject (v[3]) ;
   pair < tetra_GEO *, bool > p = InsertUniqueTetra (v) ;
   p.first->accessPllX ().duneUnpackSelf (os,gs,p.second) ;
+
+  const long end = clock ();
+  __STATIC_unpackTetra += (float)(end - start)/(float)(CLOCKS_PER_SEC);
   return ;
 }
 
@@ -347,6 +367,7 @@ DuneParallelGridMover :: DuneParallelGridMover (BuilderIF & i) : ParallelGridMov
 // overloaded, because here we use the new insertInternal method 
 void DuneParallelGridMover :: initialize ()
 {
+  const long start = clock ();
   {
     for (list < VertexGeo * > :: iterator i = myBuilder ()._vertexList.begin () ;
       i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
@@ -368,33 +389,44 @@ void DuneParallelGridMover :: initialize ()
       myBuilder ()._hface4List.erase (i ++)) _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (),
         (*i)->myvertex (2)->ident ())] = (*i) ;
   }
-  {for (list < hbndseg4_GEO * > :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
-    faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
-    // if internal face 
-    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
+  { for (list < hbndseg4_GEO * > :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) 
     {
-      typedef Gitter :: ghostpair_STI ghostpair_STI;
-      typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
-
-      ghostpair_STI gpair = (*i)->getGhost();
-      hexa_GEO * gh = dynamic_cast<hexa_GEO *> (gpair.first);
-      if( gh )
+      typedef Gitter :: Geometric :: hface4_GEO hface4_GEO;
+      hface4_GEO * face = (*i)->myhface4 (0);
+      assert( face );
+      faceKey_t key (face->myvertex (0)->ident (), 
+                     face->myvertex (1)->ident (), 
+                     face->myvertex (2)->ident ()) ;
+      // if internal face 
+      if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
       {
-        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0), (*i)->twist (0), 
-                                               gh, gpair.second ) ;
-      }
+        typedef Gitter :: ghostpair_STI ghostpair_STI;
+        typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
+
+        ghostpair_STI gpair = (*i)->getGhost();
+        hexa_GEO * gh = dynamic_cast<hexa_GEO *> (gpair.first);
+        if( gh )
+        {
+          _hbnd4Int [key] = new Hbnd4IntStorage (face , (*i)->twist (0), 
+                                                 gh, gpair.second ) ;
+        }
+        else 
+          _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->twist (0)) ;
+        delete (*i) ;
+      } 
       else 
-        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
-      delete (*i) ;
-    } 
-    else 
-    {
-      _hbnd4Map [key] = (*i) ;
+      {
+        _hbnd4Map [key] = (*i) ;
+      }
     }
-  }}
+  }
   {for (list < hbndseg3_GEO * > :: iterator i = myBuilder ()._hbndseg3List.begin () ; i != myBuilder ()._hbndseg3List.end () ;
-    myBuilder ()._hbndseg3List.erase (i++)) {
-    faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
+    myBuilder ()._hbndseg3List.erase (i++)) 
+  {
+    typedef Gitter :: Geometric :: hface3_GEO hface3_GEO;
+    hface3_GEO * face = (*i)->myhface3 (0);
+    assert( face );
+    faceKey_t key ( face->myvertex (0)->ident (), face->myvertex (1)->ident (), face->myvertex (2)->ident ()) ;
     // if internal face 
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
     {
@@ -407,12 +439,12 @@ void DuneParallelGridMover :: initialize ()
       if( gh )
       {
         // insert new internal storage 
-        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0), 
+        _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0), 
                                                gh , gpair.second ) ;
       }
       // until here
       else 
-        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0)) ;
+        _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0)) ;
       delete (*i) ;
     } 
     else 
@@ -469,6 +501,8 @@ void DuneParallelGridMover :: initialize ()
   }
 
   this->_initialized = true;
+  const long end = clock ();
+  __STATIC_pgmInitalize = (float)(end - start)/(float)(CLOCKS_PER_SEC);
   return ; 
 }
 
@@ -481,6 +515,7 @@ DuneParallelGridMover :: ~DuneParallelGridMover ()
 // overloaded, because here we use the new insertInternal method 
 void DuneParallelGridMover :: finalize ()
 {
+  const long start = clock();
   //cout << "finalize on DuneParallelGridMover called! \n";
   {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
     myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
@@ -530,19 +565,22 @@ void DuneParallelGridMover :: finalize ()
   }
 
   // here the internal boundary elements are created 
-  {for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
-    Hbnd3IntStorage & p = *((*i).second);
-    if (p.first()->ref == 1) 
+  {
+    for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) 
     {
-      // get ghost info from storage and release pointer 
-      MacroGhostInfoTetra* ghInfo = p.release();
+      Hbnd3IntStorage & p = *((*i).second);
+      if (p.first()->ref == 1) 
+      {
+        // get ghost info from storage and release pointer 
+        MacroGhostInfoTetra* ghInfo = p.release();
 
-      hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p.first(),p.second(),
-                        Gitter :: hbndseg_STI :: closure , ghInfo );
-      myBuilder ()._hbndseg3List.push_back (hb3) ;
+        hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p.first(),p.second(),
+                          Gitter :: hbndseg_STI :: closure , ghInfo );
+        myBuilder ()._hbndseg3List.push_back (hb3) ;
+      }
+      delete (*i).second; 
     }
-    delete (*i).second; 
-  }}
+  }
   {for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Map.end () ; )
     if (!((hface4_GEO *)(*i).second)->ref) {
       delete (hface4_GEO *)(*i).second ;
@@ -552,15 +590,21 @@ void DuneParallelGridMover :: finalize ()
       myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
     }
   }
-  {for (faceMap_t :: iterator i = _face3Map.begin () ; i != _face3Map.end () ; ) {
-    if (!((hface3_GEO *)(*i).second)->ref) {
-      delete (hface3_GEO *)(*i).second ;
-      _face3Map.erase (i++) ;
-    } else {
-      //assert (((hface3_GEO *)(*i).second)->ref == 2) ;
-      myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
+  {
+    for (faceMap_t :: iterator i = _face3Map.begin () ; i != _face3Map.end () ; ) 
+    {
+      if (!((hface3_GEO *)(*i).second)->ref) 
+      {
+        delete (hface3_GEO *)(*i).second ;
+        _face3Map.erase (i++) ;
+      } 
+      else 
+      {
+        //assert (((hface3_GEO *)(*i).second)->ref == 2) ;
+        myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
+      }
     }
-  }}
+  }
   {for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != _edgeMap.end () ; )
     if (!(*i).second->ref) {
       delete (*i).second ;
@@ -570,17 +614,27 @@ void DuneParallelGridMover :: finalize ()
       myBuilder ()._hedge1List.push_back ((*i ++).second) ;
     }
   }
-  {for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != _vertexMap.end () ; )
-    if (!(*i).second->ref) {
-      delete (*i).second ;
-      _vertexMap.erase (i++) ;
-    } else {
-      assert ((*i).second->ref >= 2) ;
-      myBuilder ()._vertexList.push_back ((*i ++).second) ;
+  {
+    for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != _vertexMap.end () ; )
+    {
+      if (!(*i).second->ref) 
+      {
+        delete (*i).second ;
+        _vertexMap.erase (i++) ;
+      } 
+      else 
+      {
+        assert ((*i).second->ref >= 2) ;
+        myBuilder ()._vertexList.push_back ((*i ++).second) ;
+      }
     }
   }
   myBuilder ()._modified = true ; // wichtig !
   this->_finalized = true;
+  
+  const long end = clock ();
+  __STATIC_pgmFinalize = (float)(end - start)/(float)(CLOCKS_PER_SEC);
+  
   return ;
 }
 
@@ -653,6 +707,7 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
   {
     const long start = clock () ;
     long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
+    long pack (start), packdone(start);
     mpAccess ().removeLinkage () ;
     mpAccess ().insertRequestSymetric (db.scan ()) ;
     const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
@@ -679,11 +734,14 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
       for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
     }
     {
+      __STATIC_packCount = 0.0;
+      pack = clock();
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) 
       {
         w.item ().accessPllX ().dunePackAll (osv,gs) ;
       }
+      packdone = clock();
     }
     {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
@@ -692,18 +750,34 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
     lap2 = clock () ;
     osv = mpAccess ().exchange (osv) ;
     lap3 = clock () ;
+
+    __STATIC_unpackCount  = 0.0;
+    __STATIC_pgmInitalize = 0.0; 
+    __STATIC_pgmFinalize  = 0.0; 
+    __STATIC_unpackTetra   = 0.0;
+    __STATIC_unpackHbndInt = 0.0;
+
     {
       DuneParallelGridMover pgm (containerPll ()) ;
       pgm.duneUnpackAll (osv,gs) ;
     }
     lap4 = clock () ;
-    if (MacroGridBuilder :: debugOption (20)) {
-      cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [ass|pck|exc|upk|all] " ;
+    if (MacroGridBuilder :: debugOption (20)) 
+    {
+      cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [ass|pck|exc|upk|pdata|pdune|undune|init|fin|utet|uhbnd|all] " ;
       cout << setw (5) << (float)(lap1 - start)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC) << " " ;
-      cout << setw (5) << (float)(lap4 - start)/(float)(CLOCKS_PER_SEC) << " sec." << endl ;
+      cout << setw (5) << (float)(packdone - pack)/(float)(CLOCKS_PER_SEC) << " " ;
+      cout << setw (5) << __STATIC_packCount << " ";
+      cout << setw (5) << __STATIC_unpackCount << " " ;
+      cout << setw (5) << __STATIC_pgmInitalize << " ";
+      cout << setw (5) << __STATIC_pgmFinalize << " " ;
+      cout << setw (5) << __STATIC_unpackTetra << " ";
+      cout << setw (5) << __STATIC_unpackHbndInt << " " ;
+      cout << setw (5) << (float)(lap4 - start)/(float)(CLOCKS_PER_SEC) << " "; 
+      cout << " sec." << endl ;
     }
   }
   return ;
