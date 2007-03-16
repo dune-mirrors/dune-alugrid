@@ -902,11 +902,11 @@ inline int GitterBasis :: Objects :: Hbnd4Default :: ghostLevel () const {
 inline GitterBasis :: Objects :: TetraEmpty :: 
 TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
             myhface3_t * f2, int t2, myhface3_t * f3, int t3,
-            Gitter * mygrid ) : 
+            Gitter * mygrid , bool attachLeafs = true ) : 
   Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) , 
   _myGrid(mygrid) 
 {
-  attachleafs();
+  if(attachLeafs) attachleafs();
   return ;
 }
 
@@ -946,8 +946,9 @@ HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
            myhface4_t * f4, int t4, myhface4_t * f5, int t5,
            Gitter* mygrid) : 
   Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5),
-  _myGrid(mygrid) {
-    attachleafs();
+  _myGrid(mygrid) 
+{
+  attachleafs();
   return ;
 }
 
