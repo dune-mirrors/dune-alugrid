@@ -51,8 +51,8 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     MacroGhostInfoTetra * _ptr;
     // internal face 
     hface3_GEO * _first;
-    // internal face number 
-    int          _second;
+    // twist of face 
+    int _second;
 
   public:  
     // destructor deleting _ptr if not zero 
@@ -82,8 +82,8 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     MacroGhostInfoHexa * _ptr;
     // internal face 
     hface4_GEO * _first;
-    // internal face number 
-    int          _second;
+    // twist of face 
+    int _second;
 
   public:  
     // destructor deleting _ptr if not zero 
