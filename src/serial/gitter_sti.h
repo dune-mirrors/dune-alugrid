@@ -1663,8 +1663,8 @@ protected :
   virtual void notifyMacroGridChanges () ;
 protected :
   enum { MAXL = 64 };
-  //Gitter () : _maxLevel(0) {}
-  Gitter () {
+  Gitter () 
+  {
     for(int i=0; i<MAXL; ++i) _maxLevels[i] = 0; 
   }
   virtual ~Gitter () ;
@@ -1686,6 +1686,7 @@ public :
   // decrease count of elements from level 
   void removeFromLevel(int level) 
   {
+    assert( level >= 0 );
     assert( level >= 0 );
     assert( level < MAXL );
     --_maxLevels[level];
