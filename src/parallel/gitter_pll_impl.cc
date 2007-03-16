@@ -33,6 +33,9 @@
 
 const linkagePattern_t VertexPllBaseX :: nullPattern ;
 
+extern float __STATIC_unpackCount;
+extern float __STATIC_packCount;
+
 VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) 
   : _v (v), _map (m), _lpn (), _moveTo (), _ref () {
   linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
@@ -514,8 +517,18 @@ bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
       osv [j].writeObject (ENDOFSTREAM) ;
       
       inlineData (osv [j]) ;
+      
+      // count how long dune unpack lasts 
+      const long start = clock();
+    
       // pack Dune data 
       gs.inlineData( osv[j] , mytetra() );
+
+      // count how long dune unpack lasts 
+      const long end = clock();
+
+      __STATIC_packCount += (float)(end-start)/(float)(CLOCKS_PER_SEC);
+    
     }
     _erasable = true ;
     return true ;
@@ -602,7 +615,8 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
 }
 
 void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
-  & gs , bool i) {
+  & gs , bool i) 
+{
   assert (i) ;
   strstream_t s ;
   int c ;
@@ -612,11 +626,21 @@ void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  if (i) {
+  if (i) 
+  {
     mytetra ().restore (s) ;
     assert (!s.eof ()) ;
     xtractData (os) ;
+    
+    // count how long dune unpack lasts 
+    const long start = clock();
+    
     gs.xtractData( os , mytetra() );
+
+    // count how long dune unpack lasts 
+    const long end = clock();
+
+    __STATIC_unpackCount += (float)(end-start)/(float)(CLOCKS_PER_SEC);
   }
   return ;
 }

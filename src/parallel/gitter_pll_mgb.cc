@@ -52,13 +52,13 @@ void ParallelGridMover ::initialize ()
       toDelete.push_back ((*i).first) ;
     }
   }
-// Anfang - Neu am 23.5.02 (BS)
+
   {for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; i ++)
     if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).accessPllX ().erasable ()) {
       toDelete.push_back ((*i).first) ;
     }
   }
-// Ende - Neu am 23.5.02 (BS)
+  
   {for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDelete.end () ; i ++ )
     removeElement (*i) ;
   }
