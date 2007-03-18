@@ -188,7 +188,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         typedef hface3_IMPL innerface_t ;
         typedef hedge1_IMPL inneredge_t ;
         typedef VertexEmpty innervertex_t ;
-        inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
+        inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *, bool attachLeafs) ;
 
         ////////////////////////////////////////////////
         // read of data 
@@ -902,7 +902,7 @@ inline int GitterBasis :: Objects :: Hbnd4Default :: ghostLevel () const {
 inline GitterBasis :: Objects :: TetraEmpty :: 
 TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
             myhface3_t * f2, int t2, myhface3_t * f3, int t3,
-            Gitter * mygrid , bool attachLeafs = true ) : 
+            Gitter * mygrid , bool attachLeafs ) : 
   Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) , 
   _myGrid(mygrid) 
 {

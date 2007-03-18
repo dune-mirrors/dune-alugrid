@@ -38,6 +38,10 @@
   // verwaltet. Die Methode secondScan () l"oscht dann immer
   // wieder die unreferenzierten Verbindungsmuster aus dem
   // Container. Es gibt "ubrigens kein firstScan () mehr ...
+  
+extern float __STATIC_strFace;
+extern float __STATIC_resFace;
+
 
 typedef vector < int > linkagePattern_t ;
 typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternMap_t ;
@@ -669,7 +673,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       typedef hface3_IMPL innerface_t ;
     public :
       typedef TetraPllXBase mypllx_t ;
-      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
+      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *, bool ) ;
       ~TetraEmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -1180,23 +1184,30 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
   strstream_t s ;
   int c ;
   try {
+    Timer streamT; 
     for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put (char(c)) ;
-  } catch (ObjectStream :: EOFException) {
+    __STATIC_strFace += streamT.elapsed();
+  } 
+  catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  if (i) {
-  
-  // Sobald der Stringstream mit den 'byte' Verfeinerungsregeln
-  // voll ist, kann mit dem normalen restore der ganze Fl"achen-
-  // baum wieder hochgezogen werden. Analog zur Wiederherstellung
-  // aus einer Datei.
-  
+
+  if (i) 
+  {
+    Timer restoreT;
+    // Sobald der Stringstream mit den 'byte' Verfeinerungsregeln
+    // voll ist, kann mit dem normalen restore der ganze Fl"achen-
+    // baum wieder hochgezogen werden. Analog zur Wiederherstellung
+    // aus einer Datei.
+    
     this->myhface ().restore (s) ;
     assert (!s.eof ()) ;
 
     xtractData (os) ;
+    __STATIC_resFace += restoreT.elapsed();
   }
+
   return ;
 }
 
@@ -1560,8 +1571,8 @@ TetraEmptyPll (myhface3_t * f0, int t0,
                myhface3_t * f1, int t1, 
                myhface3_t * f2, int t2, 
                myhface3_t * f3, int t3, 
-               Gitter * mygrid)
-  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3,mygrid), _pllx (*this) {
+               Gitter * mygrid, bool attachLeafs )
+  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3,mygrid,attachLeafs), _pllx (*this) {
   return ;
 }
 

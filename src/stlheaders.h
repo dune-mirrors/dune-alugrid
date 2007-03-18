@@ -15,6 +15,8 @@
 #include <math.h>
 #include <limits.h>
 #include <time.h>
+// headers for getrusage(2)
+#include <sys/resource.h>
 
 #include <rpc/rpc.h>
 

@@ -39,6 +39,31 @@ public:
   virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
 };
 
+class Timer
+{
+public:
+  //! A new timer, start immediately
+  Timer () 
+  {
+    reset();
+  }
+
+  //! Reset timer
+  void reset() 
+  {
+    cstart = clock();
+  }
+
+  //! Get elapsed user-time in seconds
+  double elapsed () 
+  {
+    return (clock()-cstart) / static_cast<double>(CLOCKS_PER_SEC);
+  }
+
+private:
+  clock_t cstart;
+}; // end class Timer 
+
 
 // forward declaration, see ghost_info.h 
 class MacroGhostInfoHexa;
@@ -1662,47 +1687,10 @@ protected :
   virtual void notifyGridChanges () ;
   virtual void notifyMacroGridChanges () ;
 protected :
-  enum { MAXL = 64 };
-  Gitter () 
-  {
-    for(int i=0; i<MAXL; ++i) _maxLevels[i] = 0; 
-  }
+  Gitter () {} 
   virtual ~Gitter () ;
 
-  // internal max level 
-  // upper bound is 64 
-  int _maxLevels[MAXL]; 
-
 public :
-  
-  // increase count of elements from level 
-  void addToLevel(int level) 
-  {
-    assert( level >= 0 );
-    assert( level < MAXL );
-    ++_maxLevels[level];
-  }
-
-  // decrease count of elements from level 
-  void removeFromLevel(int level) 
-  {
-    assert( level >= 0 );
-    assert( level >= 0 );
-    assert( level < MAXL );
-    --_maxLevels[level];
-    assert( _maxLevels[level] >= 0 );
-  }
-
-  // return maximal level of elements 
-  int maxLevel() const 
-  { 
-    for(int i=MAXL-1; i>=0; --i) 
-    {
-      if( _maxLevels[i] > 0 ) return i;
-    }
-    return 0; 
-  }
-    
   // callback for Dune 
   virtual int preCoarsening ( helement_STI & ) { return 0; }
   virtual int postRefinement( helement_STI & ) { return 0; }

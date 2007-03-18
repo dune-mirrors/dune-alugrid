@@ -36,6 +36,12 @@ const linkagePattern_t VertexPllBaseX :: nullPattern ;
 extern float __STATIC_unpackCount;
 extern float __STATIC_packCount;
 
+extern float __STATIC_strEdge;
+extern float __STATIC_resEdge;
+
+extern float __STATIC_strTetra;
+extern float __STATIC_resTetra;
+
 VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) 
   : _v (v), _map (m), _lpn (), _moveTo (), _ref () {
   linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
@@ -239,16 +245,21 @@ void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
   strstream_t s ;
   int c ;
   try {
+    Timer t; 
     for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
-  } catch (ObjectStream :: EOFException) {
+    __STATIC_strEdge += t.elapsed();
+  } 
+  catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
   if (i) {
+    Timer t; 
     myhedge1 ().restore (s) ;
     assert (!s.eof ()) ;
     
     xtractData (os) ;
+    __STATIC_resEdge += t.elapsed();
   }
   return ;
 }
@@ -601,15 +612,21 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
   strstream_t s ;
   int c ;
   try {
+    Timer strT;
     for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
-  } catch (ObjectStream :: EOFException) {
+    __STATIC_strTetra += strT.elapsed();
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
   if (i) {
+    Timer strT;
     mytetra ().restore (s) ;
     assert (!s.eof ()) ;
     xtractData (os) ;
+    __STATIC_resTetra += strT.elapsed();
   }
   return ;
 }

@@ -9,8 +9,6 @@
 #include "gitter_sti.h"
 #include "gitter_hexa_top.h"
 
-extern bool __STATIC_restoreTetra;
-
 template < class A > class Hface3Top : public A {
   protected :
     typedef Hface3Top < A >     innerface_t ;
@@ -1050,7 +1048,6 @@ template < class A > inline TetraTop < A >
 {
   // set level 
   assert( this->level() == l );
-  this->_myGrid->addToLevel( l );
   
   // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
@@ -1075,7 +1072,7 @@ template < class A > inline TetraTop < A > ::
 TetraTop (int l, myhface3_t * f0, int t0,
           myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
           myhface3_t * f3, int t3, IndexManagerType & im, Gitter * mygrid) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid, true ),
     _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0)
   , _lvl (l) 
   , _rule (myrule_t :: nosplit) , _indexManager(im)
@@ -1085,7 +1082,6 @@ TetraTop (int l, myhface3_t * f0, int t0,
   , _nChild(0)  // we are macro ==> nChild 0 
 { 
   assert( this->level() == l );
-  this->_myGrid->addToLevel( l );
 
   // _up wird im Constructor uebergeben
   this->setIndex( _indexManager.getIndex() );
@@ -1095,7 +1091,6 @@ TetraTop (int l, myhface3_t * f0, int t0,
 template < class A > inline TetraTop < A > :: ~TetraTop () 
 {
   this->freeIndex( this->_indexManager );
-  this->_myGrid->removeFromLevel(this->level());
   // attachleafs is called in constructor of TetraEmpty
   // if delete is called on macro we only call this method on leaf
   if (!_dwn ) this->detachleafs();
@@ -1335,7 +1330,8 @@ template < class A > inline void TetraTop < A > :: split_e30 () {
   return ;
 }
 
-template < class A > inline void TetraTop < A > :: split_e31 () {
+template < class A > inline void TetraTop < A > :: split_e31 () 
+{
   int l = 1 + this->level () ;
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0, getFaceIndexManager()) ;
@@ -1427,7 +1423,8 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
   return ;
 }
 
-template < class A > inline void TetraTop < A > :: refineImmediate (myrule_t r, bool detachLeafs) {
+template < class A > inline void TetraTop < A > :: refineImmediate (myrule_t r, bool detachLeafs) 
+{
   assert (getrule () == myrule_t :: nosplit) ;
   typedef typename myhface3_t :: myrule_t myhface3rule_t;
   switch(r) {
@@ -1469,8 +1466,10 @@ template < class A > inline void TetraTop < A > :: refineImmediate (myrule_t r, 
   // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
   // erzwingen m"ussen und d"urfen.
     
-      {for (int i = 0 ; i < 4 ; i ++)
-        this->myhface3 (i)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: iso4).rotate (this->twist (i))) ; }
+      {
+        for (int i = 0 ; i < 4 ; i ++)
+          this->myhface3 (i)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: iso4).rotate (this->twist (i))) ; 
+      }
       split_iso8 (detachLeafs) ;
       break ;
     default :
@@ -1751,7 +1750,7 @@ template < class A > inline void TetraTop < A > :: restore (istream & is)
   assert(getrule() == myrule_t :: nosplit) ;
   if (r == myrule_t :: nosplit) 
   {
-    if( __STATIC_restoreTetra ) this->attachleafs();
+    this->attachleafs();
   
     // Vorsicht: beim restore m"ussen sich sowohl Element als auch
     // Randelement um die Korrektheit der Nachbarschaft k"ummern,

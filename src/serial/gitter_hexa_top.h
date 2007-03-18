@@ -1164,7 +1164,6 @@ template < class A > inline HexaTop < A >
   , _nChild(0) 
 { 
   assert( this->level() == l );
-  this->_myGrid->addToLevel( l );
   
   this->setIndex( _indexManager.getIndex() );   
   return ;
@@ -1181,17 +1180,9 @@ template < class A > inline HexaTop < A >
   ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _indexManager(_up->_indexManager)
   , _volume ( vol )
-  /*
-      QuadraturCube3D < VolumeCalc >
-   (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
-                      this->myvertex(2)->Point(), this->myvertex(3)->Point(),
-                      this->myvertex(4)->Point(), this->myvertex(5)->Point(),
-                      this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0))
-  */
   , _nChild(nChild) 
 { 
   assert( this->level() == l );
-  this->_myGrid->addToLevel( l );
 
   this->setIndex( _indexManager.getIndex() );   
 
@@ -1208,9 +1199,9 @@ template < class A > inline HexaTop < A >
   return ;
 }
 
-template < class A > HexaTop < A > :: ~HexaTop () {
+template < class A > inline HexaTop < A > :: ~HexaTop () 
+{
   this->freeIndex( this->_indexManager );
-  this->_myGrid->removeFromLevel(this->level());
     
   if (!_dwn) this->detachleafs();
   else assert(!this->isLeafEntity());

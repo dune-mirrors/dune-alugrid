@@ -30,7 +30,14 @@
 float __STATIC_unpackCount = 0.0;  
 float __STATIC_packCount   = 0.0;  
 
-extern bool __STATIC_restoreTetra;
+float __STATIC_strEdge= 0.0;  
+float __STATIC_resEdge= 0.0;  
+
+float __STATIC_strFace= 0.0;  
+float __STATIC_resFace= 0.0;  
+
+float __STATIC_strTetra =0.0;  
+float __STATIC_resTetra =0.0;  
 
 static float __STATIC_pgmInitalize = 0.0; 
 static float __STATIC_pgmFinalize = 0.0; 
@@ -305,56 +312,124 @@ void DuneParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
 void DuneParallelGridMover :: 
 duneUnpackAll (vector < ObjectStream > & osv, GatherScatterType & gs) 
 {
-  for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; j ++) {
+  Timer overall; 
+  double uVertex = 0.0;
+  double uHedge = 0.0;
+  double uHface = 0.0;
+  double uTetra = 0.0;
+  double uHbnd = 0.0;
+  double uHbndInt = 0.0;
+
+  __STATIC_strEdge = 0.0;
+  __STATIC_resEdge = 0.0;
+
+  __STATIC_strFace = 0.0;
+  __STATIC_resFace = 0.0;
+
+  __STATIC_strTetra = 0.0;
+  __STATIC_resTetra = 0.0;
+
+  for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; j ++) 
+  {
     ObjectStream & os (*j) ;
     int code = MacroGridMoverIF :: ENDMARKER ;
-    for (os.readObject (code) ; code != MacroGridMoverIF :: ENDMARKER ; os.readObject (code)) {
+    for (os.readObject (code) ; code != MacroGridMoverIF :: ENDMARKER ; os.readObject (code)) 
+    {
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
+        {
+        Timer timer;
         unpackVertex (os) ;
+        uVertex += timer.elapsed();
         break ;
+        }
       case MacroGridMoverIF :: EDGE1 :
+        {
+        Timer timer;
         unpackHedge1 (os) ;
+        uHedge += timer.elapsed();
         break ;
+        }
       case MacroGridMoverIF :: FACE3 :
+        {
+        Timer timer;
         unpackHface3 (os) ;
+        uHface += timer.elapsed();
         break ;
+        }
       case MacroGridMoverIF :: FACE4 :
         unpackHface4 (os) ;
+        abort();
         break ;
       case MacroGridMoverIF :: TETRA :
+        {
+        Timer timer;
         duneUnpackTetra (os,gs) ;
+        uTetra += timer.elapsed();
         break ;
+        }
       case MacroGridMoverIF :: HEXA :
         duneUnpackHexa (os,gs) ;
+        abort();
         break ;
       case MacroGridMoverIF :: PERIODIC3 :
         unpackPeriodic3 (os) ;
+        abort();
         break ;
       case MacroGridMoverIF :: PERIODIC4 :
         unpackPeriodic4 (os) ;
+        abort();
         break ;
       case MacroGridMoverIF :: HBND3INT :
+        {
+        Timer timer;
         unpackHbnd3Int (os) ;
+        uHbndInt += timer.elapsed();
         break ;
+        }
       case MacroGridMoverIF :: HBND3EXT :
+        {
+        Timer timer;
         unpackHbnd3Ext (os) ;
+        uHbnd += timer.elapsed();
         break ;
+        }
       case MacroGridMoverIF :: HBND4INT :
         unpackHbnd4Int (os) ;
+        abort();
         break; 
       case MacroGridMoverIF :: HBND4EXT :
         unpackHbnd4Ext (os) ;
+        abort();
         break ;
       default :
-  cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n" ;
-  cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << endl ;
-  assert(false);
-  abort () ;
+        cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n" ;
+        cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << endl ;
+        assert(false);
+        abort () ;
         break ;
       }
     }
   }  
+
+  if (MacroGridBuilder :: debugOption (20)) 
+  {
+    cout << "**INFO : duneUnpackAll: [vx|edg|fce|tet|hbnint|hbnd|all] : ";
+    cout << setw (5) << uVertex << " " ;
+    cout << setw (5) << uHedge << " " ;
+    cout << setw (5) << uHface << " " ;
+    cout << setw (5) << uTetra << " " ;
+    cout << setw (5) << uHbndInt << " " ;
+    cout << setw (5) << uHbnd << " " ;
+    cout << setw (5) << overall.elapsed() << " sec. \n";
+    cout << "**INFO : duneUnpackAll: [edgstr|edgres|fcestr|fceres|tetstr|tetres] : ";
+    cout << setw (5) << __STATIC_strEdge << " " ;
+    cout << setw (5) << __STATIC_resEdge << " " ;
+    cout << setw (5) << __STATIC_strFace << " " ;
+    cout << setw (5) << __STATIC_resFace << " " ;
+    cout << setw (5) << __STATIC_strTetra << " " ;
+    cout << setw (5) << __STATIC_resTetra << " sec.\n" ;
+  }
   return ;
 }
 
@@ -757,9 +832,14 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
     __STATIC_unpackTetra   = 0.0;
     __STATIC_unpackHbndInt = 0.0;
 
+    double unpackUsed = 0.0;
+    double initPGM = 0.0;
     {
+      Timer unpackPGM;
       DuneParallelGridMover pgm (containerPll ()) ;
+      initPGM = unpackPGM.elapsed();
       pgm.duneUnpackAll (osv,gs) ;
+      unpackUsed = unpackPGM.elapsed();
     }
     lap4 = clock () ;
     if (MacroGridBuilder :: debugOption (20)) 
@@ -778,6 +858,9 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
       cout << setw (5) << __STATIC_unpackHbndInt << " " ;
       cout << setw (5) << (float)(lap4 - start)/(float)(CLOCKS_PER_SEC) << " "; 
       cout << " sec." << endl ;
+
+      cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [pgm|unpack] ";
+      cout << setw(5) << initPGM << " " << setw(5) << "\n";
     }
   }
   return ;
