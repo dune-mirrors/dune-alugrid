@@ -241,22 +241,34 @@ bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv)
 
 void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) 
 {
-  ObjectStream s;
-  try 
-  {
-    for ( char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put ( c );
-  } 
-  catch (ObjectStream :: EOFException) 
-  {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
   if (i) 
   {
-    myhedge1 ().restore (s) ;
-    assert (!s.eof ()) ;
+    myhedge1 ().restore ( os ) ;
     
+    // stream should be at position ENDOFSTREAM now
+    char c = os.get(); 
+    if( c != ENDOFSTREAM )
+    {
+      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
+      abort();
+    }
+    
+    // remove data if have any 
     xtractData (os) ;
+  }
+  else 
+  {
+    // remove dummy data from stream until ENDOFSTREAM 
+    ObjectStream s;
+    try 
+    {
+      for ( char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put ( c );
+    } 
+    catch (ObjectStream :: EOFException) 
+    {
+      cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
+      abort () ;
+    }
   }
   return ;
 }

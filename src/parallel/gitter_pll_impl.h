@@ -1181,6 +1181,7 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
   return action ;
 }
 
+//- --unpackSelf
 template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & os, bool i) {
 
   // Die Methode wird eine Fl"ache aus dem Datenstrom rekonstruieren,
@@ -1191,17 +1192,6 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
   // einen bestehenden Fl"achenbaum durch die Lastverschiebung neue
   // Daten aufgebracht werden - dies ist dann hier zu realisieren.
 
-  ObjectStream s;
-  try 
-  {
-    for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put (c) ;
-  } 
-  catch (ObjectStream :: EOFException) 
-  {
-    cerr << "**FEHLER EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
-
   if (i) 
   {
     // Sobald der Stringstream mit den 'byte' Verfeinerungsregeln
@@ -1209,11 +1199,31 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
     // baum wieder hochgezogen werden. Analog zur Wiederherstellung
     // aus einer Datei.
     
-    this->myhface ().restore (s) ;
-    assert ( !s.eof () ) ;
+    this->myhface ().restore ( os ) ;
+
+    char c = os.get();
+    if( c != ENDOFSTREAM )
+    {
+      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
+      abort();
+    }
 
     // restore internal data if have any 
     xtractData (os) ;
+  }
+  else 
+  {
+    // remove data from stream anyway 
+    ObjectStream s;
+    try 
+    {
+      for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put (c) ;
+    } 
+    catch (ObjectStream :: EOFException) 
+    {
+      cerr << "**FEHLER EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
+      abort () ;
+    }
   }
 
   return ;
