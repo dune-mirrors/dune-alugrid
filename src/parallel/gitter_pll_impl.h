@@ -48,7 +48,7 @@ typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternM
 
 class VertexPllBaseX : public VertexPllXIF, public MyAlloc {
   protected :
-    enum { ENDOFSTREAM = -1 } ;
+    enum { ENDOFSTREAM = ObjectStream :: ENDOFSTREAM } ;
   protected :
     typedef Gitter :: Geometric :: VertexGeo myvertex_t ;
     inline myvertex_t & myvertex () ;
@@ -106,7 +106,7 @@ class EdgePllBaseX : public EdgePllXIF, public MyAlloc {
 
 class EdgePllBaseXMacro : public EdgePllBaseX {
   protected :
-    enum { ENDOFSTREAM = -1 } ;
+    enum { ENDOFSTREAM = ObjectStream :: ENDOFSTREAM } ;
   public :
     EdgePllBaseXMacro (myhedge1_t &) ;
    ~EdgePllBaseXMacro () ;
@@ -156,8 +156,9 @@ template < class A > class FacePllBaseX : public FacePllXIF, public MyAlloc {
     myhface_t & _face ;
 } ;
 
-template < class A > class FacePllBaseXMacro : public FacePllBaseX < A > {
-  enum { ENDOFSTREAM = -1 } ;
+template < class A > class FacePllBaseXMacro : public FacePllBaseX < A > 
+{
+  enum { ENDOFSTREAM = ObjectStream :: ENDOFSTREAM } ;
   public :
     typedef typename FacePllBaseX < A > :: myhface_t myhface_t ;
     inline FacePllBaseXMacro (myhface_t &) ;
@@ -180,9 +181,10 @@ template < class A > class FacePllBaseXMacro : public FacePllBaseX < A > {
     Refcount _ref ;
 } ;
 
-class ElementPllBaseX : public ElementPllXIF, public MyAlloc {
+class ElementPllBaseX : public ElementPllXIF, public MyAlloc 
+{
   protected :
-    enum { ENDOFSTREAM = -1 } ;
+    enum { ENDOFSTREAM = ObjectStream :: ENDOFSTREAM } ;
     
   // Alle Methoden in dieser Klasse sind Dummies und erzeugen
   // Laufzeitfehler. Sie m"ussen von abgeleiteten Klassen 
@@ -667,13 +669,14 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
   } ;
       public :
 
-        class TetraEmptyPll : public TetraEmpty {
+  class TetraEmptyPll : public TetraEmpty 
+  {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface3_IMPL innerface_t ;
     public :
       typedef TetraPllXBase mypllx_t ;
-      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *, bool ) ;
+      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
       ~TetraEmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -1117,36 +1120,47 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
   // "uber.
 
   bool action = false ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     
-    if (A :: polygonlength == 4) osv [j].writeObject (MacroGridMoverIF :: FACE4) ;
-    else if (A :: polygonlength == 3) osv [j].writeObject (MacroGridMoverIF :: FACE3) ;
-    else abort () ;
+    ObjectStream& os = osv[j];
+    if (A :: polygonlength == 4) 
+    {
+      os.writeObject (MacroGridMoverIF :: FACE4) ;
+    }
+    else if (A :: polygonlength == 3) 
+    {
+      os.writeObject (MacroGridMoverIF :: FACE3) ;
+    }
+    else 
+    {
+      // something wrong 
+      assert(false);
+      abort () ;
+    }
     
     {
-      for (int k = 0 ; k < A :: polygonlength ; k ++)
-        osv [j].writeObject (this->myhface ().myvertex (k)->ident ()) ;
+      // write vertex idents 
+      for (int k = 0 ; k < A :: polygonlength ; ++ k)
+      {
+        os.writeObject (this->myhface ().myvertex (k)->ident ()) ;
+      }
     }
     try {
     
-  // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
-  // mit einer Verfeinerungsregel identisch ist - sonst gibt's
-  // nachher beim Auspacken nur garbage.
+      // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
+      // mit einer Verfeinerungsregel identisch ist - sonst gibt's
+      // nachher beim Auspacken nur garbage.
     
       assert (! typename myhface_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
     
-  // Der ganze Baum der Verfeinerungsregeln wird jetzt in den
-  // Stringstream geschrieben (anstelle einer Datei) und dann
-  // in den Datenstrom als 'integer' hineinkonvertiert.
-    
-      strstream_t s ;
-      this->myhface ().backup (s) ;
-      {for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;}
-      osv [j].writeObject (ENDOFSTREAM) ;
-      
-      inlineData (osv [j]) ;
+      this->myhface ().backup ( os );
+      os.put( ENDOFSTREAM );
+
+      // inline internal data if has any 
+      inlineData ( os ) ;
 
     } catch (ObjectStream :: OutOfMemoryException) {
       cerr << "**FEHLER (FATAL) ObjectStream :: OutOfMemoryException aufgetreten in " << __FILE__ << " " << __LINE__ << endl ;
@@ -1154,14 +1168,14 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
     }
     try {
     
-  // Wenn die Fl"ache auf den j. Strom des Lastverschiebers
-  // geschrieben wurde, dann mu"ussen auch die anliegenden
-  // Elemente daraufhin untersucht werden, ob sie sich nicht
-  // als Randelemente dorthin schreiben sollen - das tun sie
-  // aber selbst.
+      // Wenn die Fl"ache auf den j. Strom des Lastverschiebers
+      // geschrieben wurde, dann mu"ussen auch die anliegenden
+      // Elemente daraufhin untersucht werden, ob sie sich nicht
+      // als Randelemente dorthin schreiben sollen - das tun sie
+      // aber selbst.
     
-      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, osv [j]) ;
-      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, osv [j]) ;
+      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os ) ;
+      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os ) ;
     } catch (Parallel :: AccessPllException) {
       cerr << "**FEHLER (FATAL) AccessPllException aufgetreten in " << __FILE__ << " " << __LINE__ << ". Ende." << endl ;
       abort () ;
@@ -1181,14 +1195,18 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
   // einen bestehenden Fl"achenbaum durch die Lastverschiebung neue
   // Daten aufgebracht werden - dies ist dann hier zu realisieren.
 
-  strstream_t s ;
-  int c ;
-  try {
+  //strstream_t s ;
+  ObjectStream s;
+  try 
+  {
+    //int c ;
     Timer streamT; 
-    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put (char(c)) ;
+    //for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put (char(c)) ;
+    for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put (c) ;
     __STATIC_strFace += streamT.elapsed();
   } 
-  catch (ObjectStream :: EOFException) {
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
@@ -1571,8 +1589,8 @@ TetraEmptyPll (myhface3_t * f0, int t0,
                myhface3_t * f1, int t1, 
                myhface3_t * f2, int t2, 
                myhface3_t * f3, int t3, 
-               Gitter * mygrid, bool attachLeafs )
-  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3,mygrid,attachLeafs), _pllx (*this) {
+               Gitter * mygrid)
+  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3,mygrid), _pllx (*this) {
   return ;
 }
 
