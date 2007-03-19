@@ -38,10 +38,6 @@
   // verwaltet. Die Methode secondScan () l"oscht dann immer
   // wieder die unreferenzierten Verbindungsmuster aus dem
   // Container. Es gibt "ubrigens kein firstScan () mehr ...
-  
-extern float __STATIC_strFace;
-extern float __STATIC_resFace;
-
 
 typedef vector < int > linkagePattern_t ;
 typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternMap_t ;
@@ -1195,15 +1191,10 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
   // einen bestehenden Fl"achenbaum durch die Lastverschiebung neue
   // Daten aufgebracht werden - dies ist dann hier zu realisieren.
 
-  //strstream_t s ;
   ObjectStream s;
   try 
   {
-    //int c ;
-    Timer streamT; 
-    //for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put (char(c)) ;
     for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put (c) ;
-    __STATIC_strFace += streamT.elapsed();
   } 
   catch (ObjectStream :: EOFException) 
   {
@@ -1213,7 +1204,6 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
 
   if (i) 
   {
-    Timer restoreT;
     // Sobald der Stringstream mit den 'byte' Verfeinerungsregeln
     // voll ist, kann mit dem normalen restore der ganze Fl"achen-
     // baum wieder hochgezogen werden. Analog zur Wiederherstellung
@@ -1222,8 +1212,8 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
     this->myhface ().restore (s) ;
     assert (!s.eof ()) ;
 
+    // restore internal data if have any 
     xtractData (os) ;
-    __STATIC_resFace += restoreT.elapsed();
   }
 
   return ;
