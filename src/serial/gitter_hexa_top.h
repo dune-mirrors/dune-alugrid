@@ -42,16 +42,21 @@ template < class A > class Hedge1Top : public A {
     innervertex_t * subvertex (int) ;
     const innervertex_t * subvertex (int) const ;
   public :
-    virtual void backup (ostream &) const ;
-    virtual void restore (istream &) ;
-    
-    // new xdr methods 
-    virtual void backup (XDRstream_out &) const ;
-    virtual void restore (XDRstream_in &) ;
-  public :
     virtual myrule_t getrule () const ;
     virtual void refineImmediate (myrule_t) ;
     virtual bool coarse () ;
+
+  public :
+    virtual void backup (ostream &) const ;
+    virtual void restore (istream &) ;
+    
+    virtual void backup (ObjectStream&) const ;
+    virtual void restore (ObjectStream&) ;
+  protected:
+    template <class OutStream_t> 
+    void doBackup(OutStream_t &) const ;  
+    template <class InStream_t> 
+    void doRestore(InStream_t &) ;  
 } ;
 
 template < class A > class Hface4Top : public A {
@@ -113,9 +118,13 @@ template < class A > class Hface4Top : public A {
     virtual void backup (ostream &) const ;
     virtual void restore (istream &) ;   
 
-    // new xdr methods 
-    virtual void backup (XDRstream_out &) const ;
-    virtual void restore (XDRstream_in &) ;
+    virtual void backup (ObjectStream&) const ;
+    virtual void restore (ObjectStream&) ;
+  protected:
+    template <class OutStream_t> 
+    void doBackup(OutStream_t &) const ;  
+    template <class InStream_t> 
+    void doRestore(InStream_t &) ;  
 } ;
 
 template < class A > class Hbnd4Top : public A {
@@ -243,8 +252,13 @@ protected:
     // set entry of element to false when index is read 
     void restoreIndex (istream &, vector<bool>(&) [4]) ;
 
-    void backup(XDRstream_out& os) const;
-    void restore(XDRstream_in& is);
+    void backup (ObjectStream&) const ;
+    void restore (ObjectStream&) ;
+  protected:
+    template <class OutStream_t> 
+    void doBackup(OutStream_t &) const ;  
+    template <class InStream_t> 
+    void doRestore(InStream_t &) ;  
 } ;
 
 template < class A > class Periodic4Top : public A {
@@ -304,10 +318,6 @@ template < class A > class Periodic4Top : public A {
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;
-    void backupCMode (ostream &) const ;
-    void backup (ostream &) const ;
-    void restore (istream &) ;
-
     //Per4-Geister: (us)
     const ghostpair_STI & getGhost (int) const ;
     virtual inline void setGhost ( const pair< Gitter :: helement * , int > & pair, int nr);
@@ -319,6 +329,18 @@ template < class A > class Periodic4Top : public A {
     void splitGhosts () ;
     // coarse ghost if face is coarsened
     void coarseGhosts () ;
+  public:  
+    void backupCMode (ostream &) const ;
+    void backup (ostream &) const ;
+    void restore (istream &) ;
+
+    void backup (ObjectStream&) const ;
+    void restore (ObjectStream&) ;
+  protected:
+    template <class OutStream_t> 
+    void doBackup(OutStream_t &) const ;  
+    template <class InStream_t> 
+    void doRestore(InStream_t &) ;  
 };
 
 //
@@ -384,25 +406,36 @@ template < class A > const Hedge1Top < A > * Hedge1Top < A > :: next () const {
   return _bbb ;
 }
 
-template < class A > void Hedge1Top < A > :: backup (ostream & os) const {
+template < class A > inline void Hedge1Top < A > :: backup (ostream & os) const 
+{
+  doBackup( os );
+}
+
+template < class A > inline void Hedge1Top < A > :: backup (ObjectStream& os) const 
+{
+  doBackup( os );
+}
+
+template < class A > template <class OutStream_t>
+inline void Hedge1Top < A > :: doBackup (OutStream_t& os) const 
+{
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * d = down () ; d ; d = d->next ()) d->backup (os) ; }
   return ;
 }
 
-template < class A > void Hedge1Top < A > :: restore (istream & is) {
-  char r = (char) is.get () ;
-  refineImmediate (myrule_t (r)) ;
-  {for (inneredge_t * d = down () ; d ; d = d->next ()) d->restore (is) ; }
-  return ;
+template < class A > inline void Hedge1Top < A > :: restore (istream & is) 
+{
+  doRestore( is );
 }
-template < class A > void Hedge1Top < A > :: backup (XDRstream_out & os) const {
-  os.put ((char) getrule ()) ;
-  {for (const inneredge_t * d = down () ; d ; d = d->next ()) d->backup (os) ; }
-  return ;
+template < class A > inline void Hedge1Top < A > :: restore (ObjectStream& is) 
+{
+  doRestore( is );
 }
 
-template < class A > void Hedge1Top < A > :: restore (XDRstream_in & is) {
+template < class A > template <class InStream_t>
+inline void Hedge1Top < A > :: doRestore (InStream_t & is) 
+{
   char r = (char) is.get () ;
   refineImmediate (myrule_t (r)) ;
   {for (inneredge_t * d = down () ; d ; d = d->next ()) d->restore (is) ; }
@@ -823,30 +856,36 @@ template < class A > bool Hface4Top < A > :: coarse () {
   return x ;
 }
 
-template < class A > void Hface4Top < A > :: backup (ostream & os) const {
+template < class A > inline void Hface4Top < A > :: backup (ostream & os) const 
+{
+  doBackup(os);
+}
+template < class A > inline void Hface4Top < A > :: backup (ObjectStream& os) const 
+{
+  doBackup(os);
+}
+
+template < class A > template <class OutStream_t>
+inline void Hface4Top < A > :: doBackup (OutStream_t& os) const 
+{
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
   {for (const innerface_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
   return ;
 }
 
-template < class A > void Hface4Top < A > :: restore (istream & is) {
-  refineImmediate (myrule_t ((char) is.get ())) ;
-  {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
-  {for (innerface_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
-  return ;
+template < class A > inline void Hface4Top < A > :: restore (istream & is) 
+{
+  doRestore( is );
 }
-
-template < class A > 
-void Hface4Top < A > :: 
-backup (XDRstream_out & os) const {
-  os.put ((char) getrule ()) ;
-  {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
-  {for (const innerface_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
-  return ;
+template < class A > inline void Hface4Top < A > :: restore (ObjectStream& is) 
+{
+  doRestore( is );
 }
-
-template < class A > void Hface4Top < A > :: restore (XDRstream_in & is) {
+  
+template < class A > template <class InStream_t>
+inline void Hface4Top < A > :: doRestore (InStream_t & is) 
+{
   refineImmediate (myrule_t ((char) is.get ())) ;
   {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
   {for (innerface_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
@@ -1517,7 +1556,7 @@ template < class A > bool HexaTop < A > :: bndNotifyCoarsen () {
   return true ;
 }
 
-template < class A > void HexaTop < A > :: backupCMode (ostream & os) const {
+template < class A > inline void HexaTop < A > :: backupCMode (ostream & os) const {
 
   // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
   // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
@@ -1528,7 +1567,7 @@ template < class A > void HexaTop < A > :: backupCMode (ostream & os) const {
   return ;
 }
 
-template < class A > void HexaTop < A > :: backupIndex (ostream & os) const {
+template < class A > inline void HexaTop < A > :: backupIndex (ostream & os) const {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   os.write(((const char *) & this->_idx ), sizeof(int));
   for (const innerhexa_t* c = down(); c; c = c->next()) {
@@ -1538,7 +1577,18 @@ template < class A > void HexaTop < A > :: backupIndex (ostream & os) const {
   return;
 }
 
-template < class A > void HexaTop < A > :: backup (ostream & os) const {
+template < class A > inline void HexaTop < A > :: backup (ostream & os) const 
+{
+  doBackup( os );
+}
+template < class A > inline void HexaTop < A > :: backup (ObjectStream& os) const 
+{
+  doBackup( os );
+}
+
+template < class A > template <class OutStream_t>
+inline void HexaTop < A > :: doBackup (OutStream_t& os) const 
+{
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
   {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
@@ -1546,7 +1596,7 @@ template < class A > void HexaTop < A > :: backup (ostream & os) const {
   return ;
 }
 
-template < class A > void HexaTop < A > :: 
+template < class A > inline void HexaTop < A > :: 
 restoreIndex (istream & is, vector<bool> (&isHole) [4]) 
 {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
@@ -1567,67 +1617,18 @@ restoreIndex (istream & is, vector<bool> (&isHole) [4])
   return;
 }
 
-template < class A > void HexaTop < A > :: backup (XDRstream_out & os) const 
+template < class A > inline void HexaTop < A > :: restore (istream & is) 
 {
-  os.put ((char) getrule ()) ;
-  {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
-  {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
-  {for (const innerhexa_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
-  
-  return ;
+  doRestore( is );
+}
+template < class A > inline void HexaTop < A > :: restore (ObjectStream& is) 
+{
+  doRestore( is );
 }
 
-template < class A > void HexaTop < A > :: restore (XDRstream_in & is) {
-
-  // restore () stellt den Elementbaum aus der Verfeinerungs-
-  // geschichte wieder her. Es ruft refine () auf und testet
-  // auf den korrekten Vollzug der Verfeinerung. Danach werden
-  // die inneren Gitterteile restore'd.
- 
-  myrule_t r ((char) is.get ()) ;
-  assert(getrule() == myrule_t :: nosplit) ;
-  if (r == myrule_t :: nosplit) {
-  
-  // Vorsicht: beim restore m"ussen sich sowohl Element als auch
-  // Randelement um die Korrektheit der Nachbarschaft k"ummern,
-  // und zwar dann wenn sie "on the top" sind (= die gelesene
-  // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
-  // Die nachfolgende L"osung ist weit davon entfernt, sch"on
-  // zu sein - leider. Eventuell wird mit der Verbesserung der
-  // Behandlung der nichtkonf. Situationen mal eine "Anderung
-  // n"otig.
-  
-    for (int i = 0 ; i < 6 ; i ++) {
-      myhface4_t & f (*(this->myhface4 (i))) ;
-      if (!f.leaf ()) {
-        switch (f.getrule ()) {
-    case balrule_t :: iso4 :
-            {for (int j = 0 ; j < 4 ; j ++) f.subface4 (j)->nb.complete (f.nb) ;}
-      break ;
-    default :
-      abort () ;
-      break ;
-  }
-      }
-    }
-  } else {
-
-  // Auf dem Element gibt es kein refine (myrule_t) deshalb mu"s erst
-  // request (myrule_t) und dann refine () durchgef"uhrt werden.
-  
-    request (r) ;
-    refine () ;
-    assert (getrule() == r) ;
-    {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
-    {for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
-    {for (innerhexa_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
-  }
-  
-  return ;
-}
-
-template < class A > void HexaTop < A > :: restore (istream & is) {
-
+template < class A > template <class InStream_t>
+inline void HexaTop < A > :: doRestore (InStream_t & is) 
+{
   // restore () stellt den Elmentbaum aus der Verfeinerungs
   // geschichte wieder her. Es ruft refine () auf und testet
   // auf den korrekten Vollzug der Verfeinerung. Danach werden
@@ -2029,13 +2030,34 @@ template < class A > void Periodic4Top < A > :: backupCMode (ostream & os) const
   return ;
 }
 
-template < class A > void Periodic4Top < A > :: backup (ostream & os) const {
+template < class A > inline void Periodic4Top < A > :: backup (ostream & os) const 
+{
+  doBackup( os );
+}
+template < class A > inline void Periodic4Top < A > :: backup (ObjectStream& os) const 
+{
+  doBackup( os );
+}
+template < class A > template <class OutStream_t>
+inline void Periodic4Top < A > :: doBackup (OutStream_t& os) const 
+{
   os.put ((char) getrule ()) ;
   {for (const innerperiodic4_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
   return ;
 }
 
-template < class A > void Periodic4Top < A > :: restore (istream & is) {
+template < class A > inline void Periodic4Top < A > :: restore (istream & is) 
+{
+  doRestore( is );
+}
+template < class A > inline void Periodic4Top < A > :: restore (ObjectStream& is) 
+{
+  doRestore( is );
+}
+
+template < class A > template <class InStream_t>
+inline void Periodic4Top < A > :: doRestore (InStream_t& is) 
+{
   myrule_t r ((char) is.get ()) ;
   assert(getrule () == myrule_t :: nosplit) ; // Testen auf unverfeinerten Zustand
   if (r == myrule_t :: nosplit) {
@@ -2054,7 +2076,9 @@ template < class A > void Periodic4Top < A > :: restore (istream & is) {
   }
       }
     }
-  } else {
+  } 
+  else 
+  {
     refineImmediate (r) ;
     assert (getrule() == r) ;
     {for (innerperiodic4_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }

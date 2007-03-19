@@ -69,10 +69,16 @@ template < class A > class Hface3Top : public A {
 
     virtual void backup (ostream &) const ;
     virtual void restore (istream &) ;
+    
+    virtual void backup (ObjectStream &) const ;
+    virtual void restore (ObjectStream &) ;
 
-    // new xdr methods 
-    virtual void backup (XDRstream_out &) const ;
-    virtual void restore (XDRstream_in &) ;
+  protected:
+    template <class OutStream_t> 
+    void doBackup(OutStream_t &) const;
+    
+    template <class InStream_t> 
+    void doRestore(InStream_t &);
 } ;
 
 
@@ -142,7 +148,7 @@ template < class A > class TetraTop : public A {
     typedef typename A :: myhface3_t  myhface3_t ;
     typedef typename A :: myrule_t  myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
-    inline void refineImmediate (myrule_t, bool detachLeafs = true) ;
+    inline void refineImmediate (myrule_t) ;
     inline void append (innertetra_t * h) ;
   private :
     innertetra_t * _dwn, * _bbb, * _up ; 
@@ -164,7 +170,7 @@ template < class A > class TetraTop : public A {
     void split_e23 () ;
     void split_e30 () ;
     void split_e31 () ;
-    void split_iso8 (bool detachLeafs = true) ;
+    void split_iso8 () ;
   protected :
     myhedge1_t * subedge1 (int,int) ;
     const myhedge1_t * subedge1 (int,int) const ;
@@ -173,7 +179,7 @@ template < class A > class TetraTop : public A {
   public:
     // constructor for refined elements 
     inline TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                     myhface3_t *,int,innertetra_t *up, int nChild, double vol, bool attachLeafs = true) ;
+                     myhface3_t *,int,innertetra_t *up, int nChild, double vol) ;
     // constructor for macro elements 
     inline TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
                      myhface3_t *,int, IndexManagerType & , Gitter * mygrid ) ;
@@ -207,14 +213,18 @@ template < class A > class TetraTop : public A {
     void backup (ostream &) const ;
     void restore (istream &) ;
     
-    void backup (XDRstream_out &) const ;
-    void restore (XDRstream_in &) ;
-
+    void backup (ObjectStream &) const ;
+    void restore (ObjectStream &) ;
+    
     // backup and restore index 
     void backupIndex (ostream &) const ;
     void restoreIndex (istream &, vector<bool>(&)[4] ) ;
   protected:  
-    bool doRefine (bool) ;
+    template <class OutStream_t> 
+    void doBackup(OutStream_t &) const;
+    
+    template <class InStream_t> 
+    void doRestore(InStream_t &);
 };
 
 template < class A > class Periodic3Top : public A {
@@ -276,10 +286,21 @@ template < class A > class Periodic3Top : public A {
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;
+  public:
     void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
     void restore (istream &) ;
-
+    
+    void backup (ObjectStream &) const ;
+    void restore (ObjectStream &) ;
+  protected:  
+    template <class OutStream_t> 
+    void doBackup(OutStream_t &) const;
+    
+    template <class InStream_t> 
+    void doRestore(InStream_t &);
+    
+  public:   
     // get ghost pair 
     inline const ghostpair_STI & getGhost (int) const ;
     // set ghost pair, nr should be 0 or 1, I guess 
@@ -293,6 +314,7 @@ template < class A > class Periodic3Top : public A {
     void splitGhosts () {} ; 
     // coarse ghost if face is coarsened
     void coarseGhosts () {};
+
 };
   //
   //    #    #    #  #          #    #    #  ######
@@ -651,28 +673,40 @@ template < class A > bool Hface3Top < A > :: coarse () {
   return x ;
 }
 
-template < class A > void Hface3Top < A > :: backup (ostream & os) const {
+template < class A > inline void Hface3Top < A > :: backup (ostream & os) const 
+{
+  doBackup( os );
+}
+
+template < class A > inline void Hface3Top < A > :: backup (ObjectStream & os) const 
+{
+  doBackup( os );
+}
+
+template < class A > 
+template < class OutStream_t>
+inline void Hface3Top < A > :: doBackup (OutStream_t & os) const 
+{
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
   {for (const innerface_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
   return ;
 }
 
-template < class A > void Hface3Top < A > :: restore (istream & is) {
-  refineImmediate (myrule_t ((char) is.get ())) ;
-  {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
-  {for (innerface_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
-  return ;
+template < class A > inline void Hface3Top < A > :: restore (istream & is) 
+{
+  doRestore( is );
 }
 
-template < class A > void Hface3Top < A > :: backup (XDRstream_out & os) const {
-  os.put ((char) getrule ()) ;
-  {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
-  {for (const innerface_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
-  return ;
+template < class A > inline void Hface3Top < A > :: restore (ObjectStream& is) 
+{
+  doRestore( is );
 }
 
-template < class A > void Hface3Top < A > :: restore (XDRstream_in & is) {
+
+template < class A > template <class InStream_t> 
+inline void Hface3Top < A > :: doRestore (InStream_t & is) 
+{
   refineImmediate (myrule_t ((char) is.get ())) ;
   {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
   {for (innerface_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
@@ -1038,8 +1072,8 @@ template < class A > inline void Hbnd3Top < A > :: restoreFollowFace () {
 template < class A > inline TetraTop < A > 
 :: TetraTop (int l, myhface3_t * f0, int t0,
              myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
-             myhface3_t * f3, int t3, innertetra_t *up, int nChild, double vol, bool attachLeafs) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid, attachLeafs ), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0)
+             myhface3_t * f3, int t3, innertetra_t *up, int nChild, double vol) 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0)
   , _lvl (l) 
   , _rule (myrule_t :: nosplit)
   , _indexManager(up->_indexManager) 
@@ -1072,7 +1106,7 @@ template < class A > inline TetraTop < A > ::
 TetraTop (int l, myhface3_t * f0, int t0,
           myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
           myhface3_t * f3, int t3, IndexManagerType & im, Gitter * mygrid) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid, true ),
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
     _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0)
   , _lvl (l) 
   , _rule (myrule_t :: nosplit) , _indexManager(im)
@@ -1348,7 +1382,7 @@ template < class A > inline void TetraTop < A > :: split_e31 ()
 }
 
 template < class A > inline void TetraTop < A > :: 
-split_iso8 (bool detachLeafs) 
+split_iso8 () 
 {
   typedef typename A :: myvertex_t  myvertex_t;
   typedef typename A :: inneredge_t inneredge_t;
@@ -1380,14 +1414,14 @@ split_iso8 (bool detachLeafs)
   // we divide by 8 means we divide the volume by 8
   double childVolume = 0.125 * _volume; 
   // pointer `this' is the pointer to the father element 
-  innertetra_t * h0 = new innertetra_t (l, f0, -1, this->subface3(1, 0), this->twist(1), this->subface3(2, 0), this->twist(2), this->subface3(3, 0), this->twist(3), this, 0 , childVolume, detachLeafs) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 0), this->twist(0), f1, -3, this->subface3(2, 2), this->twist(2), this->subface3(3, 1), this->twist(3), this, 1 , childVolume, detachLeafs) ;
-  innertetra_t * h2 = new innertetra_t (l, this->subface3(0, 2), this->twist(0), this->subface3(1, 1), this->twist(1), f2, -1, this->subface3(3, 2), this->twist(3), this, 2 , childVolume, detachLeafs) ;
-  innertetra_t * h3 = new innertetra_t (l, this->subface3(0, 1), this->twist(0), this->subface3(1, 2), this->twist(1), this->subface3(2, 1), this->twist(2), f3, 0,  this, 3 , childVolume, detachLeafs) ;
-  innertetra_t * h4 = new innertetra_t (l, f7, -3, this->subface3(2, 3), ((this->twist(2)>=0) ? ((this->twist(2)+2)%3) : this->twist(2)) , f4, 2, f0, 0, this, 4 , childVolume, detachLeafs) ;  
-  innertetra_t * h5 = new innertetra_t (l, f4, -3, f1, 0, f5, 2, this->subface3(3, 3), ((this->twist(3)>=0) ? (this->twist(3)+1)%3 : (this->twist(3)-1)%3-1), this, 5 , childVolume, detachLeafs) ;
-  innertetra_t * h6 = new innertetra_t (l, f3, -1, f6, -3, this->subface3(1, 3), ((this->twist(1)>=0) ? this->twist(1) : this->twist(1)%3-1), f7, 1, this, 6 , childVolume, detachLeafs) ;
-  innertetra_t * h7 = new innertetra_t (l, this->subface3(0, 3), ((this->twist(0)>=0) ? (this->twist(0)+1)%3 : (this->twist(0)-1)%3-1), f5, -3, f2, 0, f6, 1, this, 7 , childVolume, detachLeafs) ;
+  innertetra_t * h0 = new innertetra_t (l, f0, -1, this->subface3(1, 0), this->twist(1), this->subface3(2, 0), this->twist(2), this->subface3(3, 0), this->twist(3), this, 0 , childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 0), this->twist(0), f1, -3, this->subface3(2, 2), this->twist(2), this->subface3(3, 1), this->twist(3), this, 1 , childVolume) ;
+  innertetra_t * h2 = new innertetra_t (l, this->subface3(0, 2), this->twist(0), this->subface3(1, 1), this->twist(1), f2, -1, this->subface3(3, 2), this->twist(3), this, 2 , childVolume) ;
+  innertetra_t * h3 = new innertetra_t (l, this->subface3(0, 1), this->twist(0), this->subface3(1, 2), this->twist(1), this->subface3(2, 1), this->twist(2), f3, 0,  this, 3 , childVolume) ;
+  innertetra_t * h4 = new innertetra_t (l, f7, -3, this->subface3(2, 3), ((this->twist(2)>=0) ? ((this->twist(2)+2)%3) : this->twist(2)) , f4, 2, f0, 0, this, 4 , childVolume) ;  
+  innertetra_t * h5 = new innertetra_t (l, f4, -3, f1, 0, f5, 2, this->subface3(3, 3), ((this->twist(3)>=0) ? (this->twist(3)+1)%3 : (this->twist(3)-1)%3-1), this, 5 , childVolume) ;
+  innertetra_t * h6 = new innertetra_t (l, f3, -1, f6, -3, this->subface3(1, 3), ((this->twist(1)>=0) ? this->twist(1) : this->twist(1)%3-1), f7, 1, this, 6 , childVolume) ;
+  innertetra_t * h7 = new innertetra_t (l, this->subface3(0, 3), ((this->twist(0)>=0) ? (this->twist(0)+1)%3 : (this->twist(0)-1)%3-1), f5, -3, f2, 0, f6, 1, this, 7 , childVolume) ;
   assert(h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
   h0->append(h1) ;
   h1->append(h2) ;
@@ -1401,10 +1435,7 @@ split_iso8 (bool detachLeafs)
   _dwn = h0 ;
   _rule = myrule_t :: iso8 ;
   
-  if( detachLeafs )
-  {
-    this->detachleafs();
-  }
+  this->detachleafs();
   return ;
 }
 
@@ -1423,7 +1454,7 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
   return ;
 }
 
-template < class A > inline void TetraTop < A > :: refineImmediate (myrule_t r, bool detachLeafs) 
+template < class A > inline void TetraTop < A > :: refineImmediate (myrule_t r) 
 {
   assert (getrule () == myrule_t :: nosplit) ;
   typedef typename myhface3_t :: myrule_t myhface3rule_t;
@@ -1470,7 +1501,7 @@ template < class A > inline void TetraTop < A > :: refineImmediate (myrule_t r, 
         for (int i = 0 ; i < 4 ; i ++)
           this->myhface3 (i)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: iso4).rotate (this->twist (i))) ; 
       }
-      split_iso8 (detachLeafs) ;
+      split_iso8 () ;
       break ;
     default :
       cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
@@ -1485,15 +1516,11 @@ template < class A > inline void TetraTop < A > :: refineImmediate (myrule_t r, 
 
 template < class A > inline bool TetraTop < A > :: refine () 
 {
-  return doRefine(true);
-}
-
-template < class A > inline bool TetraTop < A > :: 
-doRefine (bool detachLeafs) 
-{
   myrule_t r = _req ;
-  if (r != myrule_t :: crs && r != myrule_t :: nosplit) {
-    if (r != getrule ()) {
+  if (r != myrule_t :: crs && r != myrule_t :: nosplit) 
+  {
+    if (r != getrule ()) 
+    {
       assert (getrule () == myrule_t :: nosplit) ;
       _req = myrule_t :: nosplit ;
       switch (r) {
@@ -1538,7 +1565,7 @@ doRefine (bool detachLeafs)
   // Vorsicht: Im Fall eines konformen Verfeinerers mu"s hier die entstandene Verfeinerung
   // untersucht werden und dann erst das Element danach verfeinert werden.
       
-      refineImmediate (r, detachLeafs ) ;
+      refineImmediate (r) ;
       return true ;
     }
   }
@@ -1676,15 +1703,15 @@ template < class A > inline void TetraTop < A > :: backupIndex (ostream & os) co
 // buckupTetra 
 template < class A > inline void TetraTop < A > :: backup (ostream & os) const 
 {
-  os.put ((char) getrule ()) ;
-  {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
-  {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
-  {for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
-  
-  return ;
+  doBackup( os );
+}
+template < class A > inline void TetraTop < A > :: backup (ObjectStream& os) const 
+{
+  doBackup( os );
 }
 
-template < class A > inline void TetraTop < A > :: backup (XDRstream_out & os) const 
+template < class A > template <class OutStream_t> 
+inline void TetraTop < A > :: doBackup (OutStream_t & os) const 
 {
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
@@ -1741,6 +1768,17 @@ restoreIndex (istream & is, vector<bool> (& isHole) [4] )
 // restoreTetra
 template < class A > inline void TetraTop < A > :: restore (istream & is) 
 {
+  doRestore( is );
+}
+
+template < class A > inline void TetraTop < A > :: restore (ObjectStream & is) 
+{
+  doRestore( is );
+}
+
+template < class A > template <class InStream_t>
+inline void TetraTop < A > :: doRestore (InStream_t & is) 
+{
   // restore () stellt den Elementbaum aus der Verfeinerungs-
   // geschichte wieder her. Es ruft refine () auf und testet
   // auf den korrekten Vollzug der Verfeinerung. Danach werden
@@ -1750,8 +1788,6 @@ template < class A > inline void TetraTop < A > :: restore (istream & is)
   assert(getrule() == myrule_t :: nosplit) ;
   if (r == myrule_t :: nosplit) 
   {
-    this->attachleafs();
-  
     // Vorsicht: beim restore m"ussen sich sowohl Element als auch
     // Randelement um die Korrektheit der Nachbarschaft k"ummern,
     // und zwar dann wenn sie "on the top" sind (= die gelesene
@@ -1791,7 +1827,7 @@ template < class A > inline void TetraTop < A > :: restore (istream & is)
     // request read rule 
     request (r) ;
     // refine tetra 
-    doRefine (false) ;
+    refine() ;
     
     assert (getrule() == r) ;
 
@@ -1803,59 +1839,6 @@ template < class A > inline void TetraTop < A > :: restore (istream & is)
     { 
       for (innertetra_t * c = down () ; c ; c = c->next ()) c->restore (is) ; 
     }
-  }
-  
-  return ;
-}
-template < class A > inline void TetraTop < A > :: restore (XDRstream_in & is) {
-
-  // restore () stellt den Elementbaum aus der Verfeinerungs-
-  // geschichte wieder her. Es ruft refine () auf und testet
-  // auf den korrekten Vollzug der Verfeinerung. Danach werden
-  // die inneren Gitterteile restore'd.
- 
-  myrule_t r ((char) is.get ()) ;
-  assert(getrule() == myrule_t :: nosplit) ;
-  if (r == myrule_t :: nosplit) {
-  
-  // Vorsicht: beim restore m"ussen sich sowohl Element als auch
-  // Randelement um die Korrektheit der Nachbarschaft k"ummern,
-  // und zwar dann wenn sie "on the top" sind (= die gelesene
-  // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
-  // Die nachfolgende L"osung ist weit davon entfernt, sch"on
-  // zu sein - leider. Eventuell wird mit der Verbesserung der
-  // Behandlung der nichtkonf. Situationen mal eine "Anderung
-  // n"otig.
-  
-    for (int i = 0 ; i < 4 ; i ++) {
-      myhface3_t & f (*(this->myhface3 (i))) ;
-      if (!f.leaf ()) {
-        switch (f.getrule ()) {
-    case balrule_t :: e01 :
-    case balrule_t :: e12 :
-    case balrule_t :: e20 :
-      {for (int j = 0 ; j < 2 ; j ++) f.subface3 (j)->nb.complete (f.nb) ;}
-      break ;
-    case balrule_t :: iso4 :
-            {for (int j = 0 ; j < 4 ; j ++) f.subface3 (j)->nb.complete (f.nb) ;}
-      break ;
-    default :
-      abort () ;
-      break ;
-  }
-      }
-    }
-  } else {
-
-  // Auf dem Element gibt es kein refine (myrule_t) deshalb mu"s erst
-  // request (myrule_t) und dann refine () durchgef"uhrt werden.
-  
-    request (r) ;
-    refine () ;
-    assert (getrule() == r) ;
-    {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
-    {for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
-    {for (innertetra_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
   }
   
   return ;
@@ -2266,13 +2249,35 @@ template < class A > void Periodic3Top < A > :: backupCMode (ostream & os) const
   return ;
 }
 
-template < class A > void Periodic3Top < A > :: backup (ostream & os) const {
+template < class A > inline void Periodic3Top < A > :: backup (ostream & os) const 
+{
+  doBackup( os );
+}
+template < class A > inline void Periodic3Top < A > :: backup (ObjectStream& os) const 
+{
+  doBackup( os );
+}
+
+template < class A > template <class OutStream_t>
+inline void Periodic3Top < A > :: doBackup (OutStream_t& os) const 
+{
   os.put ((char) getrule ()) ;
   {for (const innerperiodic3_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
   return ;
 }
 
-template < class A > void Periodic3Top < A > :: restore (istream & is) {
+template < class A > inline void Periodic3Top < A > :: restore (istream & is) 
+{
+  doRestore( is );
+}
+template < class A > inline void Periodic3Top < A > :: restore (ObjectStream& is) 
+{
+  doRestore( is );
+}
+
+template < class A > template <class InStream_t> 
+inline void Periodic3Top < A > :: doRestore (InStream_t & is) 
+{
   myrule_t r ((char) is.get ()) ;
   assert(getrule () == myrule_t :: nosplit) ; // Testen auf unverfeinerten Zustand
   if (r == myrule_t :: nosplit) {
@@ -2291,7 +2296,8 @@ template < class A > void Periodic3Top < A > :: restore (istream & is) {
   }
       }
     }
-  } else {
+  } 
+  else {
     refineImmediate (r) ;
     assert (getrule() == r) ;
     {for (innerperiodic3_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
