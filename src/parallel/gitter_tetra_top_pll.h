@@ -282,16 +282,6 @@ removeDescendents( helement_STI & elem )
     child->tagForGlobalCoarsening(); 
   }
 
-#ifndef NDEBUG
-  for( helement_STI* child = elem.down(); child; child = child->next() )
-  {
-    assert( child->isGhost ());
-    child->tagForGlobalCoarsening();
-    GhostTetra_t * tet = dynamic_cast<GhostTetra_t *> (child);
-    assert( tet->requestrule() == Gitter :: Geometric :: TetraRule :: crs ); 
-  }
-#endif
-
   // if element is not already leaf call coarse 
   if( ! elem.leaf () )
   {
