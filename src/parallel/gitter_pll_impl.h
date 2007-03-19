@@ -1210,7 +1210,7 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
     // aus einer Datei.
     
     this->myhface ().restore (s) ;
-    assert (!s.eof ()) ;
+    assert ( !s.eof () ) ;
 
     // restore internal data if have any 
     xtractData (os) ;
