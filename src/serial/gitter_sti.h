@@ -439,6 +439,9 @@ public :
     virtual void backup (ostream &) const = 0 ;
     virtual void restore (istream &) = 0 ;
 
+    virtual void backup (ObjectStream &) const = 0 ;
+    virtual void restore (ObjectStream &) = 0 ;
+
     // new xdr methods 
     //virtual void backup (XDRstream_out &) const {};
     //virtual void restore (XDRstream_in &) {};
@@ -466,6 +469,9 @@ public :
     virtual bool coarse () = 0 ;
     virtual void backup (ostream &) const = 0 ;
     virtual void restore (istream &) = 0 ;
+        
+    virtual void backup (ObjectStream &) const = 0 ;
+    virtual void restore (ObjectStream &) = 0 ;
         
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void projectVertex(const ProjectVertex &pv) = 0;
@@ -559,6 +565,9 @@ public :
     virtual void backupCMode (ostream &) const = 0 ;
     virtual void backup (ostream &) const = 0 ;
     virtual void restore (istream &) = 0 ;
+    
+    virtual void backup (ObjectStream &) const = 0 ;
+    virtual void restore (ObjectStream &) = 0 ;
 
   public: 
     virtual grid_t type() const = 0;
