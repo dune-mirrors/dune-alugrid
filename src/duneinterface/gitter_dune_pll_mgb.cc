@@ -860,7 +860,7 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
       cout << " sec." << endl ;
 
       cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [pgm|unpack] ";
-      cout << setw(5) << initPGM << " " << setw(5) << "\n";
+      cout << setw(5) << initPGM << " " << setw(5) << unpackUsed << " \n";
     }
   }
   return ;
