@@ -12,4 +12,4 @@ FLAGS="-Wall"
 DEBUGFLAGS="-g"
 
 # additional flags for optimization
-OPTIMFLAGS="-O3 -funroll-loops -DNDEBUG --param max-inline-insns-single=1000 --param large-function-growth=1500"
+OPTIMFLAGS="-O3 -funroll-loops -DNDEBUG -finline-functions"
