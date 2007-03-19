@@ -220,40 +220,48 @@ void EdgePllBaseXMacro :: attach2 (int i) {
   return ;
 }
 
-bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
+bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv) 
+{
   bool action (false) ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
-    osv [j].writeObject (EDGE1) ;
-    osv [j].writeObject (myhedge1 ().myvertex (0)->ident ()) ;
-    osv [j].writeObject (myhedge1 ().myvertex (1)->ident ()) ;
+
     {
-      strstream_t s ;
-      myhedge1 ().backup (s) ;
-      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject (ENDOFSTREAM) ;
+      ObjectStream & os = osv[j];
+      os.writeObject (EDGE1) ;
+      os.writeObject (myhedge1 ().myvertex (0)->ident ()) ;
+      os.writeObject (myhedge1 ().myvertex (1)->ident ()) ;
       
-      inlineData (osv [j]) ;
+      // make sure ENDOFSTREAM is not a valid refinement rule 
+      assert( ! myhedge1_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+
+      // pack refinement information 
+      myhedge1 ().backup ( os ) ;
+      os.put( ENDOFSTREAM );
+      
+      inlineData ( os ) ;
     }
     action = true ;
   }
   return action ;
 }
 
-void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
-  strstream_t s ;
-  int c ;
+void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) 
+{
+  ObjectStream s;
   try {
     Timer t; 
-    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
+    for ( char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put ( c );
     __STATIC_strEdge += t.elapsed();
   } 
   catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  if (i) {
+  if (i) 
+  {
     Timer t; 
     myhedge1 ().restore (s) ;
     assert (!s.eof ()) ;
@@ -492,17 +500,23 @@ bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
-    osv [j].writeObject (TETRA) ;
-    osv [j].writeObject (mytetra ().myvertex (0)->ident ()) ;
-    osv [j].writeObject (mytetra ().myvertex (1)->ident ()) ;
-    osv [j].writeObject (mytetra ().myvertex (2)->ident ()) ;
-    osv [j].writeObject (mytetra ().myvertex (3)->ident ()) ;
     {
-      strstream_t s ;
-      mytetra ().backup (s) ;
-      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject (ENDOFSTREAM) ;
-      inlineData (osv [j]) ;
+      ObjectStream & os = osv[j];
+      os.writeObject (TETRA) ;
+      os.writeObject (mytetra ().myvertex (0)->ident ()) ;
+      os.writeObject (mytetra ().myvertex (1)->ident ()) ;
+      os.writeObject (mytetra ().myvertex (2)->ident ()) ;
+      os.writeObject (mytetra ().myvertex (3)->ident ()) ;
+      
+      // make sure ENDOFSTREAM is not a valid refinement rule 
+      assert( ! mytetra_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+
+      // pack refinement information 
+      mytetra ().backup ( os ) ;
+      os.put( ENDOFSTREAM );
+      
+      // inline data if has any 
+      inlineData ( os ) ;
     }
     _erasable = true ;
     return true ;
@@ -511,35 +525,42 @@ bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
 }
 
 bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
-    GatherScatterType & gs) {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+                                        GatherScatterType & gs) 
+{
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
-    osv [j].writeObject (TETRA) ;
-    osv [j].writeObject (mytetra ().myvertex (0)->ident ()) ;
-    osv [j].writeObject (mytetra ().myvertex (1)->ident ()) ;
-    osv [j].writeObject (mytetra ().myvertex (2)->ident ()) ;
-    osv [j].writeObject (mytetra ().myvertex (3)->ident ()) ;
     {
-      strstream_t s ;
-      mytetra ().backup (s) ;
-      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject (ENDOFSTREAM) ;
+      ObjectStream& os = osv[j];
+
+      os.writeObject (TETRA) ;
+      os.writeObject (mytetra ().myvertex (0)->ident ()) ;
+      os.writeObject (mytetra ().myvertex (1)->ident ()) ;
+      os.writeObject (mytetra ().myvertex (2)->ident ()) ;
+      os.writeObject (mytetra ().myvertex (3)->ident ()) ;
+
+      // make sure ENDOFSTREAM is not a valid refinement rule 
+      assert( ! mytetra_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
       
-      inlineData (osv [j]) ;
+      // pack refinement information 
+      mytetra ().backup ( os );
+      os.put( ENDOFSTREAM );
+
+      // pack internal data if has any 
+      inlineData ( os ) ;
       
       // count how long dune unpack lasts 
       const long start = clock();
     
       // pack Dune data 
-      gs.inlineData( osv[j] , mytetra() );
+      gs.inlineData( os , mytetra() );
 
       // count how long dune unpack lasts 
       const long end = clock();
 
       __STATIC_packCount += (float)(end-start)/(float)(CLOCKS_PER_SEC);
-    
     }
     _erasable = true ;
     return true ;
@@ -607,13 +628,15 @@ void TetraPllXBaseMacro :: packAsGhost(ObjectStream & os, int fce) const
   packAsBndNow(fce,os);
 }
 
-void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
+void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) 
+{
   assert (i) ;
-  strstream_t s ;
-  int c ;
-  try {
+  ObjectStream s ;
+  try 
+  {
     Timer strT;
-    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
+    // read stream until end of stream marker 
+    for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
     __STATIC_strTetra += strT.elapsed();
   } 
   catch (ObjectStream :: EOFException) 
@@ -635,16 +658,21 @@ void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
   & gs , bool i) 
 {
   assert (i) ;
-  strstream_t s ;
-  int c ;
-  try {
-    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
-  } catch (ObjectStream :: EOFException) {
+  ObjectStream s;
+  try 
+  {
+    Timer strT;
+    for(char c = os.get();  c != ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
+    __STATIC_strTetra += strT.elapsed();
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
   if (i) 
   {
+    Timer strT;
     mytetra ().restore (s) ;
     assert (!s.eof ()) ;
     xtractData (os) ;
@@ -658,6 +686,7 @@ void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
     const long end = clock();
 
     __STATIC_unpackCount += (float)(end-start)/(float)(CLOCKS_PER_SEC);
+    __STATIC_resTetra += strT.elapsed();
   }
   return ;
 }
@@ -750,19 +779,22 @@ bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
-    osv [j].writeObject (PERIODIC3) ;
-    osv [j].writeObject (myperiodic3 ().myvertex (0)->ident ()) ;
-    osv [j].writeObject (myperiodic3 ().myvertex (1)->ident ()) ;
-    osv [j].writeObject (myperiodic3 ().myvertex (2)->ident ()) ;
-    osv [j].writeObject (myperiodic3 ().myvertex (3)->ident ()) ;
-    osv [j].writeObject (myperiodic3 ().myvertex (4)->ident ()) ;
-    osv [j].writeObject (myperiodic3 ().myvertex (5)->ident ()) ;
     {
-      strstream_t s ;
-      myperiodic3 ().backup (s) ;
-      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject (ENDOFSTREAM) ;
-      inlineData (osv [j]) ;
+      ObjectStream& os = osv[j];
+      os.writeObject (PERIODIC3) ;
+      os.writeObject (myperiodic3 ().myvertex (0)->ident ()) ;
+      os.writeObject (myperiodic3 ().myvertex (1)->ident ()) ;
+      os.writeObject (myperiodic3 ().myvertex (2)->ident ()) ;
+      os.writeObject (myperiodic3 ().myvertex (3)->ident ()) ;
+      os.writeObject (myperiodic3 ().myvertex (4)->ident ()) ;
+      os.writeObject (myperiodic3 ().myvertex (5)->ident ()) ;
+      
+      // pack refinement information 
+      myperiodic3 ().backup ( os ) ;
+      os.put( ENDOFSTREAM );
+
+      // pack internal data if has any 
+      inlineData ( os ) ;
     }
     _erasable = true ;
     return true ;
@@ -787,17 +819,21 @@ void Periodic3PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
 
 void Periodic3PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
   assert (i) ;
-  strstream_t s ;
-  int c ;
-  try {
-    for (os.readObject (c) ; c != -1 ; os.readObject (c)) s.put ((char)c) ;
-  } catch (ObjectStream :: EOFException) {
+  ObjectStream s;
+  try 
+  {
+    for (char c = os.get() ; c != ENDOFSTREAM; os.read( c ) ) s.put ( c ) ;
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  if (i) {
+  if (i) 
+  {
     myperiodic3 ().restore (s) ;
     assert (!s.eof ()) ;
+    
     xtractData (os) ;
   }
   return ;
@@ -892,21 +928,25 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
-    osv [j].writeObject (PERIODIC4) ;
-    osv [j].writeObject (myperiodic4 ().myvertex (0)->ident ()) ;
-    osv [j].writeObject (myperiodic4 ().myvertex (1)->ident ()) ;
-    osv [j].writeObject (myperiodic4 ().myvertex (2)->ident ()) ;
-    osv [j].writeObject (myperiodic4 ().myvertex (3)->ident ()) ;
-    osv [j].writeObject (myperiodic4 ().myvertex (4)->ident ()) ;
-    osv [j].writeObject (myperiodic4 ().myvertex (5)->ident ()) ;
-    osv [j].writeObject (myperiodic4 ().myvertex (6)->ident ()) ;
-    osv [j].writeObject (myperiodic4 ().myvertex (7)->ident ()) ;
     {
-      strstream_t s ;
-      myperiodic4 ().backup (s) ;
-      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject ( ENDOFSTREAM ) ;
-      inlineData (osv [j]) ;
+      ObjectStream& os = osv[j];
+      
+      os.writeObject (PERIODIC4) ;
+      os.writeObject (myperiodic4 ().myvertex (0)->ident ()) ;
+      os.writeObject (myperiodic4 ().myvertex (1)->ident ()) ;
+      os.writeObject (myperiodic4 ().myvertex (2)->ident ()) ;
+      os.writeObject (myperiodic4 ().myvertex (3)->ident ()) ;
+      os.writeObject (myperiodic4 ().myvertex (4)->ident ()) ;
+      os.writeObject (myperiodic4 ().myvertex (5)->ident ()) ;
+      os.writeObject (myperiodic4 ().myvertex (6)->ident ()) ;
+      os.writeObject (myperiodic4 ().myvertex (7)->ident ()) ;
+
+      // pack refinement information 
+      myperiodic4 ().backup ( osv[j] ) ;
+      os.put( ENDOFSTREAM );
+      
+      // pack internal data if has any 
+      inlineData ( os ) ;
     }
     _erasable = true ;
     return true ;
@@ -914,11 +954,16 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
   return false ;
 }
 
-void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const {
+void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
+{
   bool hit = _moveTo.size () == 0 ? true : false ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++ )
+  {
     if ((*i).first != who) hit = true ;
-  if (hit) {
+  }
+
+  if (hit) 
+  {
     os.writeObject (HBND4INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
     os.writeObject (myperiodic4 ().myvertex (fce,0)->ident ()) ;
@@ -930,17 +975,21 @@ void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
   return ;
 }
 
-void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
+void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) 
+{
   assert (i) ;
-  strstream_t s ;
-  int c ;
-  try {
-    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
-  } catch (ObjectStream :: EOFException) {
+  ObjectStream s; 
+  try 
+  {
+    for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put ( c ) ;
+  } 
+  catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  if (i) {
+  
+  if (i) 
+  {
     myperiodic4 ().restore (s) ;
     assert (!s.eof ()) ;
     xtractData (os) ;
@@ -1048,21 +1097,27 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
-    osv [j].writeObject (HEXA) ;
-    osv [j].writeObject (myhexa ().myvertex (0)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (1)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (2)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (3)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (4)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (5)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (6)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (7)->ident ()) ;
     {
-      strstream_t s ;
-      myhexa ().backup (s) ;
-      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject ( ENDOFSTREAM ) ;
-      inlineData (osv [j]) ;
+      ObjectStream& os = osv[j];
+      os.writeObject (HEXA) ;
+      os.writeObject (myhexa ().myvertex (0)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (1)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (2)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (3)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (4)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (5)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (6)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (7)->ident ()) ;
+      
+      // make sure ENDOFSTREAM is not a valid refinement rule 
+      assert( ! myhexa_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      
+      // pack refinement information 
+      myhexa(). backup( os );
+      os.put( ENDOFSTREAM );
+
+      // pack internal data if has any 
+      inlineData ( os ) ;
     }
     _erasable = true ;
     return true ;
@@ -1072,32 +1127,38 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
 
 // pack all function for dune 
 bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
-    GatherScatterType & gs) {
-  
+                                       GatherScatterType & gs) 
+{
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
   {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
-
-    osv [j].writeObject (HEXA) ;
-    osv [j].writeObject (myhexa ().myvertex (0)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (1)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (2)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (3)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (4)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (5)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (6)->ident ()) ;
-    osv [j].writeObject (myhexa ().myvertex (7)->ident ()) ;
     {
-      strstream_t s ;
-      myhexa ().backup (s) ;
-      for (int c = s.get () ; ! s.eof () ; c = s.get ()) osv [j].writeObject (c) ;
-      osv [j].writeObject ( ENDOFSTREAM ) ;
-      inlineData (osv [j]) ;
+      ObjectStream& os = osv[j];
+      
+      os.writeObject (HEXA) ;
+      os.writeObject (myhexa ().myvertex (0)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (1)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (2)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (3)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (4)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (5)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (6)->ident ()) ;
+      os.writeObject (myhexa ().myvertex (7)->ident ()) ;
+
+      // make sure ENDOFSTREAM is not a valid refinement rule 
+      assert( ! myhexa_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      
+      // backup refinement information 
+      myhexa(). backup ( os );
+      os.put( ENDOFSTREAM );
+      
+      // pack internal data if has any 
+      inlineData ( os ) ;
 
       // pack Dune data 
-      gs.inlineData( osv[j] , myhexa() );
+      gs.inlineData( os , myhexa() );
     }
     _erasable = true ;
     return true ;
@@ -1166,15 +1227,18 @@ void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
 
 void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
   assert (i) ;
-  strstream_t s ;
-  int c ;
-  try {
-    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
-  } catch (ObjectStream :: EOFException) {
+  ObjectStream s;
+  try 
+  {
+    for (char c = os.get() ; c != ENDOFSTREAM ; c = os.get() ) s.put ( c ) ;
+  } 
+  catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  if (i) {
+
+  if (i) 
+  {
     myhexa ().restore (s) ;
     assert (!s.eof ()) ;
     xtractData (os) ;
@@ -1182,20 +1246,28 @@ void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
   return ;
 }
 
-void HexaPllBaseXMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType & gs , bool i) {
+void HexaPllBaseXMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType & gs , bool i) 
+{
   assert (i) ;
-  strstream_t s ;
-  int c ;
-  try {
-    for (os.readObject (c) ; c != ENDOFSTREAM ; os.readObject (c)) s.put ((char)c) ;
-  } catch (ObjectStream :: EOFException) {
+  // data has to be read anyway 
+  ObjectStream s;
+  try 
+  {
+    for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put (c) ;
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  if (i) {
+  if (i) 
+  {
+    // unpack refinement data and restore 
     myhexa ().restore (s) ;
-    assert (!s.eof ()) ;
+    assert ( !s.eof () ) ;
+    // unpack internal data if has any 
     xtractData (os) ;
+    // unpack dune data 
     gs.xtractData( os , myhexa() );
   }
   return ;
