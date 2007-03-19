@@ -258,11 +258,14 @@ void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i)
   }
   else 
   {
-    // remove dummy data from stream until ENDOFSTREAM 
-    ObjectStream s;
     try 
     {
-      for ( char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put ( c );
+      char c = os.get() ; 
+      // read stream until ENDOFSTREAM 
+      while ( c != ENDOFSTREAM ) 
+      {
+        os.read(c) ;
+      }
     } 
     catch (ObjectStream :: EOFException) 
     {

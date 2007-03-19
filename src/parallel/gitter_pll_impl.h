@@ -1213,11 +1213,14 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
   }
   else 
   {
-    // remove data from stream anyway 
-    ObjectStream s;
     try 
     {
-      for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put (c) ;
+      char c = os.get() ; 
+      // read stream until ENDOFSTREAM 
+      while ( c != ENDOFSTREAM ) 
+      {
+        os.read(c) ;
+      }
     } 
     catch (ObjectStream :: EOFException) 
     {
