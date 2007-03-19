@@ -33,15 +33,6 @@
 
 const linkagePattern_t VertexPllBaseX :: nullPattern ;
 
-extern float __STATIC_unpackCount;
-extern float __STATIC_packCount;
-
-extern float __STATIC_strEdge;
-extern float __STATIC_resEdge;
-
-extern float __STATIC_strTetra;
-extern float __STATIC_resTetra;
-
 VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) 
   : _v (v), _map (m), _lpn (), _moveTo (), _ref () {
   linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
@@ -251,10 +242,9 @@ bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv)
 void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) 
 {
   ObjectStream s;
-  try {
-    Timer t; 
+  try 
+  {
     for ( char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put ( c );
-    __STATIC_strEdge += t.elapsed();
   } 
   catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
@@ -262,12 +252,10 @@ void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i)
   }
   if (i) 
   {
-    Timer t; 
     myhedge1 ().restore (s) ;
     assert (!s.eof ()) ;
     
     xtractData (os) ;
-    __STATIC_resEdge += t.elapsed();
   }
   return ;
 }
@@ -551,16 +539,8 @@ bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
       // pack internal data if has any 
       inlineData ( os ) ;
       
-      // count how long dune unpack lasts 
-      const long start = clock();
-    
       // pack Dune data 
       gs.inlineData( os , mytetra() );
-
-      // count how long dune unpack lasts 
-      const long end = clock();
-
-      __STATIC_packCount += (float)(end-start)/(float)(CLOCKS_PER_SEC);
     }
     _erasable = true ;
     return true ;
@@ -634,36 +614,8 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
   ObjectStream s ;
   try 
   {
-    Timer strT;
     // read stream until end of stream marker 
     for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
-    __STATIC_strTetra += strT.elapsed();
-  } 
-  catch (ObjectStream :: EOFException) 
-  {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
-  if (i) {
-    Timer strT;
-    mytetra ().restore (s) ;
-    assert (!s.eof ()) ;
-    xtractData (os) ;
-    __STATIC_resTetra += strT.elapsed();
-  }
-  return ;
-}
-
-void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
-  & gs , bool i) 
-{
-  assert (i) ;
-  ObjectStream s;
-  try 
-  {
-    Timer strT;
-    for(char c = os.get();  c != ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
-    __STATIC_strTetra += strT.elapsed();
   } 
   catch (ObjectStream :: EOFException) 
   {
@@ -672,21 +624,37 @@ void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType
   }
   if (i) 
   {
-    Timer strT;
     mytetra ().restore (s) ;
     assert (!s.eof ()) ;
     xtractData (os) ;
+  }
+  return ;
+}
+
+void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, 
+    GatherScatterType & gs , bool i) 
+{
+  assert (i) ;
+  ObjectStream s;
+  try 
+  {
+    for(char c = os.get();  c != ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
+    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+  }
+  if (i) 
+  {
+    // restore refinement information 
+    mytetra ().restore (s) ;
+    assert (!s.eof ()) ;
+    // restore internal data if have any 
+    xtractData (os) ;
     
-    // count how long dune unpack lasts 
-    const long start = clock();
-    
+    // unpack Dune data 
     gs.xtractData( os , mytetra() );
-
-    // count how long dune unpack lasts 
-    const long end = clock();
-
-    __STATIC_unpackCount += (float)(end-start)/(float)(CLOCKS_PER_SEC);
-    __STATIC_resTetra += strT.elapsed();
   }
   return ;
 }
@@ -788,6 +756,9 @@ bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       os.writeObject (myperiodic3 ().myvertex (3)->ident ()) ;
       os.writeObject (myperiodic3 ().myvertex (4)->ident ()) ;
       os.writeObject (myperiodic3 ().myvertex (5)->ident ()) ;
+      
+      // make sure ENDOFSTREAM is not a valid refinement rule 
+      assert( ! myperiodic3_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
       
       // pack refinement information 
       myperiodic3 ().backup ( os ) ;
@@ -923,8 +894,10 @@ void Periodic4PllXBaseMacro :: attach2 (int i) {
   return ;
 }
 
-bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) 
+{
+  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
@@ -941,6 +914,9 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       os.writeObject (myperiodic4 ().myvertex (6)->ident ()) ;
       os.writeObject (myperiodic4 ().myvertex (7)->ident ()) ;
 
+      // make sure ENDOFSTREAM is not a valid refinement rule 
+      assert( ! myperiodic4_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      
       // pack refinement information 
       myperiodic4 ().backup ( osv[j] ) ;
       os.put( ENDOFSTREAM );

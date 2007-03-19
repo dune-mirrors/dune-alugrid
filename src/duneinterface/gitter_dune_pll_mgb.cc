@@ -27,24 +27,6 @@
 #include "gitter_pll_sti.h"
 #include "gitter_pll_mgb.h"
 
-float __STATIC_unpackCount = 0.0;  
-float __STATIC_packCount   = 0.0;  
-
-float __STATIC_strEdge= 0.0;  
-float __STATIC_resEdge= 0.0;  
-
-float __STATIC_strFace= 0.0;  
-float __STATIC_resFace= 0.0;  
-
-float __STATIC_strTetra =0.0;  
-float __STATIC_resTetra =0.0;  
-
-static float __STATIC_pgmInitalize = 0.0; 
-static float __STATIC_pgmFinalize = 0.0; 
-
-static float __STATIC_unpackTetra = 0.0; 
-static float __STATIC_unpackHbndInt = 0.0; 
-
 class DuneParallelGridMover : public ParallelGridMover {
   public :
     DuneParallelGridMover (BuilderIF &i); 
@@ -141,7 +123,6 @@ bool DuneParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],
 // overloaded method because here we call insertion with point 
 inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os) 
 {
-  const long start = clock ();
   int bfake, v [3] ;
   os.readObject (bfake) ;
   Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
@@ -177,8 +158,6 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
     InsertUniqueHbnd3 (v, b ) ;
   }
 
-  const long end = clock ();
-  __STATIC_unpackHbndInt += (float)(end - start)/(float)(CLOCKS_PER_SEC);
   return ;
 }
 
@@ -227,7 +206,6 @@ inline void DuneParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
 
 void DuneParallelGridMover :: duneUnpackTetra (ObjectStream & os, GatherScatterType & gs) 
 {
-  const long start = clock ();
   int v [4] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -235,9 +213,6 @@ void DuneParallelGridMover :: duneUnpackTetra (ObjectStream & os, GatherScatterT
   os.readObject (v[3]) ;
   pair < tetra_GEO *, bool > p = InsertUniqueTetra (v) ;
   p.first->accessPllX ().duneUnpackSelf (os,gs,p.second) ;
-
-  const long end = clock ();
-  __STATIC_unpackTetra += (float)(end - start)/(float)(CLOCKS_PER_SEC);
   return ;
 }
 
@@ -256,8 +231,10 @@ void DuneParallelGridMover :: duneUnpackHexa (ObjectStream & os, GatherScatterTy
   return ;
 }
 
-void DuneParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
-  for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; j ++) {
+void DuneParallelGridMover :: unpackAll (vector < ObjectStream > & osv) 
+{
+  for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; j ++) 
+  {
     ObjectStream & os (*j) ;
     int code = MacroGridMoverIF :: ENDMARKER ;
     for (os.readObject (code) ; code != MacroGridMoverIF :: ENDMARKER ; os.readObject (code)) {
@@ -312,23 +289,6 @@ void DuneParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
 void DuneParallelGridMover :: 
 duneUnpackAll (vector < ObjectStream > & osv, GatherScatterType & gs) 
 {
-  Timer overall; 
-  double uVertex = 0.0;
-  double uHedge = 0.0;
-  double uHface = 0.0;
-  double uTetra = 0.0;
-  double uHbnd = 0.0;
-  double uHbndInt = 0.0;
-
-  __STATIC_strEdge = 0.0;
-  __STATIC_resEdge = 0.0;
-
-  __STATIC_strFace = 0.0;
-  __STATIC_resFace = 0.0;
-
-  __STATIC_strTetra = 0.0;
-  __STATIC_resTetra = 0.0;
-
   for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; j ++) 
   {
     ObjectStream & os (*j) ;
@@ -338,70 +298,64 @@ duneUnpackAll (vector < ObjectStream > & osv, GatherScatterType & gs)
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
         {
-        Timer timer;
-        unpackVertex (os) ;
-        uVertex += timer.elapsed();
-        break ;
+          unpackVertex (os) ;
+          break ;
         }
       case MacroGridMoverIF :: EDGE1 :
         {
-        Timer timer;
-        unpackHedge1 (os) ;
-        uHedge += timer.elapsed();
-        break ;
+          unpackHedge1 (os) ;
+          break ;
         }
       case MacroGridMoverIF :: FACE3 :
         {
-        Timer timer;
-        unpackHface3 (os) ;
-        uHface += timer.elapsed();
-        break ;
+          unpackHface3 (os) ;
+          break ;
         }
       case MacroGridMoverIF :: FACE4 :
-        unpackHface4 (os) ;
-        abort();
-        break ;
+        {
+          unpackHface4 (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: TETRA :
         {
-        Timer timer;
-        duneUnpackTetra (os,gs) ;
-        uTetra += timer.elapsed();
-        break ;
+          duneUnpackTetra (os,gs) ;
+          break ;
         }
       case MacroGridMoverIF :: HEXA :
-        duneUnpackHexa (os,gs) ;
-        abort();
-        break ;
+        {
+          duneUnpackHexa (os,gs) ;
+          break ;
+        }
       case MacroGridMoverIF :: PERIODIC3 :
-        unpackPeriodic3 (os) ;
-        abort();
-        break ;
+        {
+          unpackPeriodic3 (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: PERIODIC4 :
-        unpackPeriodic4 (os) ;
-        abort();
-        break ;
+        {
+          unpackPeriodic4 (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: HBND3INT :
         {
-        Timer timer;
-        unpackHbnd3Int (os) ;
-        uHbndInt += timer.elapsed();
-        break ;
+          unpackHbnd3Int (os) ;
+          break ;
         }
       case MacroGridMoverIF :: HBND3EXT :
         {
-        Timer timer;
-        unpackHbnd3Ext (os) ;
-        uHbnd += timer.elapsed();
-        break ;
+          unpackHbnd3Ext (os) ;
+          break ;
         }
       case MacroGridMoverIF :: HBND4INT :
-        unpackHbnd4Int (os) ;
-        abort();
-        break; 
+        {
+          unpackHbnd4Int (os) ;
+          break; 
+        }
       case MacroGridMoverIF :: HBND4EXT :
-        unpackHbnd4Ext (os) ;
-        abort();
-        break ;
+        {
+          unpackHbnd4Ext (os) ;
+          break ;
+        }
       default :
         cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n" ;
         cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << endl ;
@@ -411,25 +365,6 @@ duneUnpackAll (vector < ObjectStream > & osv, GatherScatterType & gs)
       }
     }
   }  
-
-  if (MacroGridBuilder :: debugOption (20)) 
-  {
-    cout << "**INFO : duneUnpackAll: [vx|edg|fce|tet|hbnint|hbnd|all] : ";
-    cout << setw (5) << uVertex << " " ;
-    cout << setw (5) << uHedge << " " ;
-    cout << setw (5) << uHface << " " ;
-    cout << setw (5) << uTetra << " " ;
-    cout << setw (5) << uHbndInt << " " ;
-    cout << setw (5) << uHbnd << " " ;
-    cout << setw (5) << overall.elapsed() << " sec. \n";
-    cout << "**INFO : duneUnpackAll: [edgstr|edgres|fcestr|fceres|tetstr|tetres] : ";
-    cout << setw (5) << __STATIC_strEdge << " " ;
-    cout << setw (5) << __STATIC_resEdge << " " ;
-    cout << setw (5) << __STATIC_strFace << " " ;
-    cout << setw (5) << __STATIC_resFace << " " ;
-    cout << setw (5) << __STATIC_strTetra << " " ;
-    cout << setw (5) << __STATIC_resTetra << " sec.\n" ;
-  }
   return ;
 }
 
@@ -442,7 +377,6 @@ DuneParallelGridMover :: DuneParallelGridMover (BuilderIF & i) : ParallelGridMov
 // overloaded, because here we use the new insertInternal method 
 void DuneParallelGridMover :: initialize ()
 {
-  const long start = clock ();
   {
     for (list < VertexGeo * > :: iterator i = myBuilder ()._vertexList.begin () ;
       i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
@@ -576,8 +510,6 @@ void DuneParallelGridMover :: initialize ()
   }
 
   this->_initialized = true;
-  const long end = clock ();
-  __STATIC_pgmInitalize = (float)(end - start)/(float)(CLOCKS_PER_SEC);
   return ; 
 }
 
@@ -590,8 +522,6 @@ DuneParallelGridMover :: ~DuneParallelGridMover ()
 // overloaded, because here we use the new insertInternal method 
 void DuneParallelGridMover :: finalize ()
 {
-  const long start = clock();
-  //cout << "finalize on DuneParallelGridMover called! \n";
   {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
     myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
   }
@@ -706,10 +636,6 @@ void DuneParallelGridMover :: finalize ()
   }
   myBuilder ()._modified = true ; // wichtig !
   this->_finalized = true;
-  
-  const long end = clock ();
-  __STATIC_pgmFinalize = (float)(end - start)/(float)(CLOCKS_PER_SEC);
-  
   return ;
 }
 
@@ -719,7 +645,8 @@ void DuneParallelGridMover :: finalize ()
 // method was overloaded because here we use our DuneParallelGridMover 
 void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
 
-  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) {
+  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
+  {
     
     const long start = clock () ;
     long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
@@ -780,18 +707,21 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
 {
   if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
   {
-    const long start = clock () ;
-    long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
-    long pack (start), packdone(start);
+    const clock_t start = clock () ;
+    clock_t lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
+    
     mpAccess ().removeLinkage () ;
     mpAccess ().insertRequestSymetric (db.scan ()) ;
     const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
     {
       AccessIterator < helement > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) {
-      int to = db.getDestination (w.item ().accessPllX ().ldbVertexIndex ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) 
+      {
+        int to = db.getDestination (w.item ().accessPllX ().ldbVertexIndex ()) ;
         if (me != to)
+        {
           w.item ().accessPllX ().attach2 (mpAccess ().link (to)) ;
+        }
       }
     }
     lap1 = clock () ;
@@ -809,58 +739,38 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
       for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
     }
     {
-      __STATIC_packCount = 0.0;
-      pack = clock();
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) 
       {
         w.item ().accessPllX ().dunePackAll (osv,gs) ;
       }
-      packdone = clock();
     }
     {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
         (*i++).writeObject (MacroGridMoverIF :: ENDMARKER)) ;
     }
+
+    // exchange gathered data 
     lap2 = clock () ;
     osv = mpAccess ().exchange (osv) ;
     lap3 = clock () ;
 
-    __STATIC_unpackCount  = 0.0;
-    __STATIC_pgmInitalize = 0.0; 
-    __STATIC_pgmFinalize  = 0.0; 
-    __STATIC_unpackTetra   = 0.0;
-    __STATIC_unpackHbndInt = 0.0;
-
-    double unpackUsed = 0.0;
-    double initPGM = 0.0;
+    // unpack all data 
     {
-      Timer unpackPGM;
       DuneParallelGridMover pgm (containerPll ()) ;
-      initPGM = unpackPGM.elapsed();
       pgm.duneUnpackAll (osv,gs) ;
-      unpackUsed = unpackPGM.elapsed();
     }
+    
     lap4 = clock () ;
     if (MacroGridBuilder :: debugOption (20)) 
     {
-      cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [ass|pck|exc|upk|pdata|pdune|undune|init|fin|utet|uhbnd|all] " ;
+      cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [ass|pck|exc|upk|all] " ;
       cout << setw (5) << (float)(lap1 - start)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC) << " " ;
-      cout << setw (5) << (float)(packdone - pack)/(float)(CLOCKS_PER_SEC) << " " ;
-      cout << setw (5) << __STATIC_packCount << " ";
-      cout << setw (5) << __STATIC_unpackCount << " " ;
-      cout << setw (5) << __STATIC_pgmInitalize << " ";
-      cout << setw (5) << __STATIC_pgmFinalize << " " ;
-      cout << setw (5) << __STATIC_unpackTetra << " ";
-      cout << setw (5) << __STATIC_unpackHbndInt << " " ;
       cout << setw (5) << (float)(lap4 - start)/(float)(CLOCKS_PER_SEC) << " "; 
       cout << " sec." << endl ;
-
-      cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [pgm|unpack] ";
-      cout << setw(5) << initPGM << " " << setw(5) << unpackUsed << " \n";
     }
   }
   return ;
