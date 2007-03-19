@@ -307,16 +307,6 @@ removeDescendents( helement_STI & elem )
     child->tagForGlobalCoarsening();
   } 
     
-#ifndef NDEBUG
-  for( helement_STI * child = elem.down(); child; child = child->next() )
-  { 
-    assert( child->isGhost ());
-    child->tagForGlobalCoarsening();
-    GhostHexa_t * hexa = dynamic_cast<GhostHexa_t *> (child);
-    assert( hexa->requestrule() == Gitter :: Geometric :: HexaRule :: crs );
-  }
-#endif
-
   // if element is not already leaf call coarse 
   if( ! elem.leaf () )
   {
