@@ -246,7 +246,8 @@ void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i)
   {
     for ( char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put ( c );
   } 
-  catch (ObjectStream :: EOFException) {
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
@@ -611,6 +612,7 @@ void TetraPllXBaseMacro :: packAsGhost(ObjectStream & os, int fce) const
 void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) 
 {
   assert (i) ;
+  /*
   ObjectStream s ;
   try 
   {
@@ -622,11 +624,25 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
+  */
   if (i) 
   {
-    mytetra ().restore (s) ;
-    assert (!s.eof ()) ;
+    mytetra ().restore (os) ;
+    //assert (!s.eof ()) ;
+    
+    char c = os.get(); 
+    if( c != ENDOFSTREAM )
+    {
+      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
+      abort();
+    }
+    
     xtractData (os) ;
+  }
+  else 
+  {
+    cerr << "**FEHLER (FATAL) i=false, should be true! in " << __FILE__ << " " << __LINE__ << endl;
+    abort();
   }
   return ;
 }
@@ -635,26 +651,28 @@ void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os,
     GatherScatterType & gs , bool i) 
 {
   assert (i) ;
-  ObjectStream s;
-  try 
-  {
-    for(char c = os.get();  c != ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
-  } 
-  catch (ObjectStream :: EOFException) 
-  {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
   if (i) 
   {
     // restore refinement information 
-    mytetra ().restore (s) ;
-    assert (!s.eof ()) ;
+    mytetra ().restore (os) ;
+
+    char c = os.get(); 
+    if( c != ENDOFSTREAM )
+    {
+      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
+      abort();
+    }
+    
     // restore internal data if have any 
     xtractData (os) ;
     
     // unpack Dune data 
     gs.xtractData( os , mytetra() );
+  }
+  else 
+  {
+    cerr << "**FEHLER (FATAL) i=false, should be true! in " << __FILE__ << " " << __LINE__ << endl;
+    abort();
   }
   return ;
 }
@@ -788,24 +806,28 @@ void Periodic3PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
   return ;
 }
 
-void Periodic3PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) {
+void Periodic3PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) 
+{
   assert (i) ;
-  ObjectStream s;
-  try 
-  {
-    for (char c = os.get() ; c != ENDOFSTREAM; os.read( c ) ) s.put ( c ) ;
-  } 
-  catch (ObjectStream :: EOFException) 
-  {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
+
   if (i) 
   {
-    myperiodic3 ().restore (s) ;
-    assert (!s.eof ()) ;
+    myperiodic3 ().restore ( os ) ;
     
+    char c = os.get();
+    if( c != ENDOFSTREAM )
+    {
+      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
+      abort();
+    }
+    
+    // unpack internal data if has any 
     xtractData (os) ;
+  }
+  else 
+  {
+    cerr << "**FEHLER (FATAL) i=false, should be true! in " << __FILE__ << " " << __LINE__ << endl;
+    abort();
   }
   return ;
 }
@@ -918,7 +940,7 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv)
       assert( ! myperiodic4_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
       
       // pack refinement information 
-      myperiodic4 ().backup ( osv[j] ) ;
+      myperiodic4 ().backup ( os ) ;
       os.put( ENDOFSTREAM );
       
       // pack internal data if has any 
@@ -954,21 +976,24 @@ void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
 void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) 
 {
   assert (i) ;
-  ObjectStream s; 
-  try 
-  {
-    for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put ( c ) ;
-  } 
-  catch (ObjectStream :: EOFException) {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
-  
   if (i) 
   {
-    myperiodic4 ().restore (s) ;
-    assert (!s.eof ()) ;
+    myperiodic4 ().restore (os) ;
+    
+    char c = os.get();
+    if( c != ENDOFSTREAM )
+    {
+      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
+      abort();
+    }
+    
+    // unpack internal data if has any 
     xtractData (os) ;
+  }
+  else 
+  {
+    cerr << "**FEHLER (FATAL) i=false, should be true! in " << __FILE__ << " " << __LINE__ << endl;
+    abort();
   }
   return ;
 }
@@ -1201,23 +1226,28 @@ void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
   return ;
 }
 
-void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
+void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) 
+{
   assert (i) ;
-  ObjectStream s;
-  try 
-  {
-    for (char c = os.get() ; c != ENDOFSTREAM ; c = os.get() ) s.put ( c ) ;
-  } 
-  catch (ObjectStream :: EOFException) {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
-
   if (i) 
   {
-    myhexa ().restore (s) ;
-    assert (!s.eof ()) ;
+    // restore refinement tree 
+    myhexa ().restore ( os ) ;
+
+    char c = os.get();
+    if( c != ENDOFSTREAM )
+    {
+      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
+      abort();
+    }
+    
+    // restore internal data if have any 
     xtractData (os) ;
+  }
+  else 
+  {
+    cerr << "**FEHLER (FATAL) i=false, should be true! in " << __FILE__ << " " << __LINE__ << endl;
+    abort();
   }
   return ;
 }
@@ -1225,26 +1255,28 @@ void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) {
 void HexaPllBaseXMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType & gs , bool i) 
 {
   assert (i) ;
-  // data has to be read anyway 
-  ObjectStream s;
-  try 
-  {
-    for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put (c) ;
-  } 
-  catch (ObjectStream :: EOFException) 
-  {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
   if (i) 
   {
     // unpack refinement data and restore 
-    myhexa ().restore (s) ;
-    assert ( !s.eof () ) ;
+    myhexa ().restore ( os ) ;
+
+    // stream should now be at position ENDOFSTREAM 
+    char c = os.get();
+    if( c != ENDOFSTREAM )
+    {
+      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
+      abort();
+    }
+    
     // unpack internal data if has any 
     xtractData (os) ;
     // unpack dune data 
     gs.xtractData( os , myhexa() );
+  }
+  else 
+  {
+    cerr << "**FEHLER (FATAL) i=false, should be true! in " << __FILE__ << " " << __LINE__ << endl;
+    abort();
   }
   return ;
 }
