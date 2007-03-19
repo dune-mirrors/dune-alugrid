@@ -46,7 +46,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         
         typedef Gitter :: ghostpair_STI  ghostpair_STI;
         typedef Gitter :: GhostChildrenInfo GhostChildrenInfo_t; 
-        typedef Gitter :: helement_STI GhostElement_t;
+        typedef Gitter :: helement_STI helement_STI;
         typedef typename GitterBasisImpl::Objects::tetra_IMPL GhostTetra_t;
         typedef typename A :: myhface3_t myhface3_t ;
         typedef typename A :: balrule_t balrule_t ;
@@ -72,7 +72,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         void splitGhost (GhostChildrenInfo_t & ); 
         
         // mark all children for coarsening and call coarse on elem
-        void removeDescendents( GhostElement_t & elem );
+        void removeDescendents( helement_STI & elem );
         // coarse ghost if face is coarsened 
         void coarseGhost (); 
         
@@ -267,11 +267,11 @@ inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
 
 template < class A, class X, class MX > 
 inline void Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
-removeDescendents( GhostElement_t & elem ) 
+removeDescendents( helement_STI & elem ) 
 {
   elem.resetRefinementRequest(); 
   // check all children first 
-  for( GhostElement_t * child = elem.down(); child; child = child->next() )
+  for( helement_STI* child = elem.down(); child; child = child->next() )
   {
     // if child is not leaf coarse childs first 
     if( ! child->leaf() )
@@ -283,11 +283,11 @@ removeDescendents( GhostElement_t & elem )
   }
 
 #ifndef NDEBUG
-  for( GhostElement_t * child = elem.down(); child; child = child->next() )
+  for( helement_STI* child = elem.down(); child; child = child->next() )
   {
     assert( child->isGhost ());
     child->tagForGlobalCoarsening();
-    GhostTetra_t * tet = (GhostTetra_t *) child;
+    GhostTetra_t * tet = dynamic_cast<GhostTetra_t *> (child);
     assert( tet->requestrule() == Gitter :: Geometric :: TetraRule :: crs ); 
   }
 #endif
@@ -304,13 +304,11 @@ inline void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
 {
   if(_ghostPair.first)
   {
-    GhostElement_t & ghost = (*_ghostPair.first); 
+    helement_STI& ghost = (*_ghostPair.first); 
     if( ghost.leaf() ) return ;
 
-    GhostTetra_t & tetra = static_cast<GhostTetra_t &> (ghost);
-
     // remove all descendents if possible 
-    removeDescendents( tetra );
+    removeDescendents( ghost );
   }
 }
 

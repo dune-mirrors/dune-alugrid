@@ -40,7 +40,7 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         typedef Gitter :: ghostpair_STI ghostpair_STI;
         typedef Gitter :: helement_STI helement_STI;
         typedef Gitter :: GhostChildrenInfo GhostChildrenInfo_t ;
-        typedef typename GitterBasisImpl::Objects::hexa_IMPL GhostElement_t;
+        typedef typename GitterBasisImpl::Objects::hexa_IMPL GhostHexa_t;
         typedef typename A :: myhface4_t myhface4_t ;
         typedef typename A :: balrule_t  balrule_t ;
         typedef typename A :: bnd_t     bnd_t ;
@@ -65,7 +65,9 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         // refine ghost if face is refined and ghost is not zero 
         void splitGhost ( GhostChildrenInfo_t & );
 
-        void markDescendents ( helement_STI & );
+        // mark children for coarsening and call coarse 
+        void removeDescendents ( helement_STI & );
+
         // coarse ghost if face is coarsened  
         void coarseGhost ();
 
@@ -289,44 +291,51 @@ splitGhost ( GhostChildrenInfo_t & info )
  
 template < class A, class X, class MX >
 inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::
-markDescendents( helement_STI & elem )
+removeDescendents( helement_STI & elem )
 {
+  elem.resetRefinementRequest(); 
+
+  // check all children first 
   for( helement_STI * child = elem.down(); child; child = child->next() )
+  { 
+    // if child is not leaf coarse childs first 
+    if( ! child->leaf() )
+      removeDescendents( *child );
+        
+    assert( child->leaf () );
+    // mark child for coarsening 
+    child->tagForGlobalCoarsening();
+  } 
+    
+#ifndef NDEBUG
+  for( helement_STI * child = elem.down(); child; child = child->next() )
+  { 
+    assert( child->isGhost ());
+    child->tagForGlobalCoarsening();
+    GhostHexa_t * hexa = dynamic_cast<GhostHexa_t *> (child);
+    assert( hexa->requestrule() == Gitter :: Geometric :: HexaRule :: crs );
+  }
+#endif
+
+  // if element is not already leaf call coarse 
+  if( ! elem.leaf () )
   {
-    if( child->leaf())
-    {
-      child->tagForGlobalCoarsening();
-    }
-    else
-    {
-      child->resetRefinementRequest();
-    }
-    this->markDescendents( *child );
+    elem.coarse();
   }
 }
  
 template < class A, class X, class MX >
 inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
 {
-  /*
   if(_ghostPair.first)
   {
-    GhostElement_t & ghost = static_cast<GhostElement_t &> (*_ghostPair.first);
+    helement_STI & ghost = (*_ghostPair.first);
     if( ghost.leaf() ) return ;
 
-    while ( ! ghost.leaf() )
-    {
-      this->markDescendents( ghost );
-
-      // set me status to nosplit 
-      ghost.resetRefinementRequest();
-
-      assert( ghost.requestrule () == Gitter :: Geometric::HexaRule::nosplit );
-      // coarse element 
-      ghost.coarse();
-    }
+    // remove all descendents if possible 
+    removeDescendents( ghost );
   }
-  */
+
 }
   
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: 
