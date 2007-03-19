@@ -80,7 +80,7 @@ public :
   template <class T> 
   inline void write (const T & a)
   {
-    register size_t ap = _wb;
+    size_t ap = _wb;
     _wb = ap + sizeof(T) ;
     if (_wb > _len) reallocateBuffer(_wb);
     assert( _wb <= _len );
@@ -93,7 +93,7 @@ public :
   template <class T> 
   inline void read (T & a) throw (EOFException) 
   {
-    register size_t ap = _rb;
+    size_t ap = _rb;
     _rb = ap + sizeof(T);
     
     if (_rb > _wb) throw EOFException () ;
@@ -199,6 +199,10 @@ class ObjectStream : public ObjectStreamImpl
   enum { BufChunk = 0x40000 } ;
 
 public :
+  // ENDOFSTREAM should be in range of char, i.e. -127 to 128 
+  // and not conflict with refinement rules in gitter_sti.h 
+  enum { ENDOFSTREAM = -3 };
+  
   inline ObjectStream () : BaseType(BufChunk) 
   {
     this->reallocateBuffer(BufChunk);
@@ -218,6 +222,19 @@ public :
   inline void readObject (double & a) { this->read(a);  }
   inline void writeObject (int a)     { this->write(a); } 
   inline void readObject (int & a)    { this->read(a);  }
+
+  ////////////////////////////////////
+  // to behave like stringstream 
+  ////////////////////////////////////
+  inline void put (const char a)  { this->write(a); }
+  inline char get () 
+  { 
+    char a;
+    this->read(a);  
+    return a;
+  }
+  bool eof () const { return (this->_rb > this->_wb); }
+  /////////////////////////////////////
     
   friend class MpAccessMPI ;
 } ;
