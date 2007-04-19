@@ -35,7 +35,6 @@ public:
   //  den Stringstream (sstream). Die Implemetierung ist eher im Sinne
   //  eines rohen Datenformats mit einigen Testm"oglichkeiten zu sehen.
   
-//template <int BufChunk> 
 class ObjectStreamImpl 
 {
 protected:
