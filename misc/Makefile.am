@@ -1,3 +1,4 @@
 AUTOMAKE_OPTIONS = foreign 1.5
-SUBDIRS= macrogrids examples
+SUBDIRS= macrogrids examples versioncheck
 EXTRA_DIST=lastverteilung.cfg
+inst_PROGRAM=alugrid-version.sh
