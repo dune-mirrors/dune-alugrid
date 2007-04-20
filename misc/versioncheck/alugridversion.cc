@@ -17,7 +17,7 @@ int main(int argc, char ** argv)
     {
       // check wether given version is bigger than actual 
       // package version 
-      int result = strcmp(argv[2],PACKAGE_VERSION);
+      int result = strcmp(PACKAGE_VERSION,argv[2]);
       std::cout << result << std::endl; 
       return result;
     }
