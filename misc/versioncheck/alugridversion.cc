@@ -1,18 +1,33 @@
 #include <config.h>
 #include <iostream>
+#include <string>
 
 int main(int argc, char ** argv)
 {
-  if(argc < 2) 
+  if(argc >= 2) 
   {
-    std::cerr << "usage: " << argv[0] << " <version number to check> " << std::endl;  
-    std::cerr << "result is -1 if version number is smaller, 0 if equal, and 1 if larger! \n";
-    exit(1);
+    std::string argument (argv[1]);
+    if( argument == "-v" )
+    {
+      std::cout << PACKAGE_VERSION << std::endl; 
+      return 0; 
+    }
+
+    if( argument == "-c" && argc >= 3 )
+    {
+      // check wether given version is bigger than actual 
+      // package version 
+      int result = strcmp(argv[2],PACKAGE_VERSION);
+      std::cout << result << std::endl; 
+      return result;
+    }
   }
- 
-  // check wether given version is bigger than actual 
-  // package version 
-  int result = strcmp(argv[1],PACKAGE_VERSION); 
-  std::cout << result; 
-  return result;
+  
+  std::cerr << "usage: " << argv[0] << std::endl; 
+  std::cerr << "  -c <version number to check>  compares version numbers" << std::endl;  
+  std::cerr << "     result is -1 if version number is smaller, 0 if equal, and 1 if larger! \n" << std::endl;
+  std::cerr << "  -v print version number of package " << std::endl;  
+  exit(1);
+    
+  return 0;
 }
