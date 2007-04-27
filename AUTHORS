@@ -1,4 +1,9 @@
 /**************************************************************************
+
+  ALUGrid - a library providing a mesh manager supporting simplicial
+  and hexahedral meshes, local grid adaptivity for use in parallel
+  computations including dynamic load balancing.
+
   Copyright (C) 2004 - 2007 Robert Kloefkorn
   Copyright (C) 2005 - 2007 Andreas Dedner
   Copyright (C) 1998 - 2002 Mario Ohlberger 
