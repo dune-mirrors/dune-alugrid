@@ -1,6 +1,3 @@
-// (c) Bernhard Schupp 1997 - 1998
-// modifications for Dune Interface 
-// (c) Robert Kloefkorn 2004 - 2005 
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
@@ -15,16 +12,19 @@ using namespace std;
 #include <utility>
 #include <iostream>
 #include <list>
+
 #include <sstream>
 // typdef these stream because this code uses a lot strstream 
-typedef basic_stringbuf   <char> strstreambuf_t ; 
-typedef basic_stringstream<char> strstream_t;
+typedef stringbuf     strstreambuf_t ; 
+typedef stringstream  strstream_t;
+
 #else
 #include <pair.h>
 #include <iostream.h>
 #include <list.h>
 #include <strstream.h>
 
+// old types of streams 
 typedef strstreambuf strstreambuf_t ; 
 typedef strstream    strstream_t;
 #endif
