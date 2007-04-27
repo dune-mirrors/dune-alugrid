@@ -1895,7 +1895,9 @@ GitterBasisPll :: GitterBasisPll (MpAccessLocal & mpa) : _mpaccess (mpa), _macro
   return ;
 }
 
-GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) : _mpaccess (mpa), _macrogitter (0) {
+GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) 
+  : GitterPll(mpa.myrank() == 0) , _mpaccess (mpa), _macrogitter (0) 
+{
   assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll (const char * = \"" << f << "\" ...)" << endl, 1) : 1) ;
 
   // if still no macrogitter, try old method 

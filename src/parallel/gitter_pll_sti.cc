@@ -914,47 +914,44 @@ void GitterPll :: notifyMacroGridChanges () {
   return ;
 }
 
-GitterPll :: GitterPll () : _ldbOver (1.2), _ldbUnder (0.0), _ldbMethod (LoadBalancer :: DataBase :: METIS_PartGraphKway) {
-  ifstream in ("lastverteilung.cfg") ;
-  if (in) {
+GitterPll :: GitterPll (bool verbose) : _ldbOver (1.2), _ldbUnder (0.0), _ldbMethod (LoadBalancer :: DataBase :: METIS_PartGraphKway) 
+{
+  ifstream in ("loadbalancing.cfg") ;
+  if (in) 
+  {
     int i ;
     in >> _ldbUnder ;
     in >> _ldbOver ;
     in >> i;
     _ldbMethod = (LoadBalancer :: DataBase :: method) i ;
-  } else {
-    /*
-    if (mpAccess().myrank()==0) {
-      cerr << "**WARNING (ignored) could'nt open file "
-	   << "< lastverteilung.cfg > . "
-	   << "Using default values: " << endl ;
-      cerr << _ldbUnder << " < [balance] < " << _ldbOver << " " 
-	   << "  partitioning method\"" 
-	   << LoadBalancer :: DataBase :: methodToString (_ldbMethod) 
-	   << "\"" << endl ;
+  } 
+  else 
+  {
+    ifstream in2 ("lastverteilung.cfg") ;
+    if (in2) 
+    {
+      if(verbose) 
+      {
+        cerr << endl << "**WARNING (ignored) < lastverteilung.cfg > is deprecated! Change filename to < loadbalancing.cfg > !" << endl << endl;
+      }
+      int i ;
+      in2 >> _ldbUnder ;
+      in2 >> _ldbOver ;
+      in2 >> i;
+      _ldbMethod = (LoadBalancer :: DataBase :: method) i ;
     }
-    */
+    else if(verbose) 
+    {
+      cerr << endl << "**WARNING (ignored) could'nt open file "
+           << "< loadbalancing.cfg > . "
+           << "Using default values: " << endl ;
+      cerr << _ldbUnder << " < [balance] < " << _ldbOver << " " 
+           << "  partitioning method \"" 
+           << LoadBalancer :: DataBase :: methodToString (_ldbMethod) 
+           << "\"" << endl << endl;
+    }
   }
   return;
-#if 0
-  }
-  { 
-    ifstream in ("loadbalance.cfg") ;
-    if (in) {
-      int i ;
-      in >> _ldbUnder ;
-      in >> _ldbOver ;
-      in >> i;
-      _ldbMethod = (LoadBalancer :: DataBase :: method) i ;
-    } else {
-      cerr << "**WARNING (ignored) could'nt open file < loadbalance.cfg > . The default values will be used." << endl ;
-    }
-    cout << "**INFO GitterPll :: GitterPll () " << _ldbUnder << " < [Balance of distribution] < " << _ldbOver << ",\n" 
-         << "       Methode for partitioning \"" << LoadBalancer :: DataBase :: methodToString (_ldbMethod) << "\"" << endl ;
-    return;
-  }
-  return ;
-#endif
 }
 
 #endif

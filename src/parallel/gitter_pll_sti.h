@@ -436,7 +436,9 @@ class GitterPll : public virtual Gitter {
     pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> iteratorTT (const vertex_STI *, int) ;
     pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *> iteratorTT (const hedge_STI *, int) ;
     pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> iteratorTT (const hface_STI *, int) ;
-    GitterPll () ;
+
+    // constructor, if verbose = true, output is given 
+    GitterPll (bool verbose = false) ;
    ~GitterPll () {}
   friend class LeafIteratorTT < vertex_STI > ;
   friend class LeafIteratorTT < hedge_STI > ;
