@@ -1,3 +1,6 @@
+// (c) bernhard schupp 1997 - 1998
+// modifications for Dune Interface 
+// (c) Robert Kloefkorn 2004 - 2007 
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
@@ -68,8 +71,6 @@ private:
 // forward declaration, see ghost_info.h 
 class MacroGhostInfoHexa;
 class MacroGhostInfoTetra;
-
-//extern std::ofstream logFile;
 
 // Einfacher Referenzenz"ahler mit cast-around-const
 // feature, der zum Z"ahlen der Referenzen auf Fl"achen
