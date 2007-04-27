@@ -2,6 +2,11 @@
 AUTHORS=$1
 FILE=$2
 OUT=tmp.cc.$LOGNAME 
-cat $AUTHORS $FILE > $OUT
+echo "/**************************************************************************" > $OUT
+echo " " >> $OUT 
+cat $AUTHORS >> $OUT 
+echo " " >> $OUT 
+echo "**************************************************************************/" >> $OUT
+cat $FILE >> $OUT
 cp $OUT $FILE 
 rm -f $OUT
