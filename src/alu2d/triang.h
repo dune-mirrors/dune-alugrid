@@ -12,7 +12,6 @@
 // #classes:
 //   class Triang : public Hier < Element >
 //   class Bndel_triang   : public Hier < Bndel >
-// #copyright: IAM Freiburg
 // #end(header)
 // *************************************************** 
 

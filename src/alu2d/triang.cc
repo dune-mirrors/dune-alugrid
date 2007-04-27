@@ -62,8 +62,6 @@ extern int g_argc;
 //   Bndel_outflow::reconstr_data
 //   Bndel_periodic::reconstr_data
 //   Bndel_absorbing::reconstr_data
-// #copyright:
-//   IAM Freiburg
 // #end(header)
 // ***************************************************
 

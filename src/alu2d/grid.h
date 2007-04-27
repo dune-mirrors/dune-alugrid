@@ -21,8 +21,6 @@
 //   class Element : public Thinelement, public Refco_el
 //   template < class A > class Hier : public A
 //   class Bndel : public Thinelement, protected Refco
-// #copyright:
-//   IAM Freiburg
 // #end(header)
 ***************************************************/
 

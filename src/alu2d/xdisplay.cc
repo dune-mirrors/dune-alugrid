@@ -11,8 +11,6 @@ static volatile char RCSId_xdisplay_cc [] = "$Id$";
 //   Xdisplay::Xdisplay()
 //   Xdisplay::~Xdisplay()
 //   Xdisplay::linedraw() 
-// #copyright:
-//   IAM Freiburg
 // #end(header)
 // ***************************************************
 

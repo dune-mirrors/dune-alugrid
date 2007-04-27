@@ -9,8 +9,6 @@
 //   Basisklasse f"ur einfache Grafikausgabe 
 // #classes:
 //   class Xdisplay
-// #copyright:
-//   IAM Freiburg
 // #end(header)
 // ***************************************************
 
