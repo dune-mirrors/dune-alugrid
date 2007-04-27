@@ -1,4 +1,3 @@
-// (c) Robert Kloefkorn 2004 - 2005 
 #ifndef ALUGRIDINDEXSTACK_H_INCLUDED
 #define ALUGRIDINDEXSTACK_H_INCLUDED
 
