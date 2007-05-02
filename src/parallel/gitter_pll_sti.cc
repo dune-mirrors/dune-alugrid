@@ -916,7 +916,7 @@ void GitterPll :: notifyMacroGridChanges () {
 
 GitterPll :: GitterPll (bool verbose) : _ldbOver (1.2), _ldbUnder (0.0), _ldbMethod (LoadBalancer :: DataBase :: METIS_PartGraphKway) 
 {
-  ifstream in ("loadbalancing.cfg") ;
+  ifstream in ("alugrid.cfg") ;
   if (in) 
   {
     int i ;
@@ -932,7 +932,7 @@ GitterPll :: GitterPll (bool verbose) : _ldbOver (1.2), _ldbUnder (0.0), _ldbMet
     {
       if(verbose) 
       {
-        cerr << endl << "**WARNING (ignored) < lastverteilung.cfg > is deprecated! Change filename to < loadbalancing.cfg > !" << endl << endl;
+        cerr << endl << "**WARNING (ignored) < lastverteilung.cfg > is deprecated! Change filename to < alugrid.cfg > !" << endl << endl;
       }
       int i ;
       in2 >> _ldbUnder ;
@@ -943,7 +943,7 @@ GitterPll :: GitterPll (bool verbose) : _ldbOver (1.2), _ldbUnder (0.0), _ldbMet
     else if(verbose) 
     {
       cerr << endl << "**WARNING (ignored) could'nt open file "
-           << "< loadbalancing.cfg > . "
+           << "< alugrid.cfg > . "
            << "Using default values: " << endl ;
       cerr << _ldbUnder << " < [balance] < " << _ldbOver << " " 
            << "  partitioning method \"" 
