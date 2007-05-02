@@ -1,14 +1,21 @@
-Changed from version 0.3 to version 0.4 
+Changed from version 0.41 to version 1.0
 
-* optimization in TreeIterator and Insert
-* maxLevel calculation included in Gitter and used by TetraTop and HexaTop 
-* ALU3d and ALU2d using the same IndexStack 
-* backup and restore methods also working for 2d version 
-* method Point only on VertexGeo 
-* backup and restore for IndexStack 
-* bug fix for coarseing of ghost elements 
-* resetRefinementRequest now setting nospilt and added
-  tagForGlobalCoarseing method 
-* added Tags for macro grid file , Tetrahedra, Hexahedra and Triangles 
-* volume calculation for Hexa and Tetra is done in split method 
+major changes: 
+
+- NOTE: change of licence from GNU LGPL to GNU GPL (see COPYING)
+- added version information 
+
+minor changes: 
+- changes of implementation of ghost information
+- the load balance config file was renamed from `lastverteilung.cfg' to
+  `loadbalancing.cfg' 
+- twist lookup table also for hexa 
+
+bug fixes: 
+
+- restart from checkpoint works again 
+- when coarsening ghost cell a never ending loop was removed 
+- slight changes in the stream reading and writing procedure during load
+  balancing 
+
 
