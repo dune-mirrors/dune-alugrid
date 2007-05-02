@@ -1,4 +1,4 @@
-Changed from version 0.41 to version 1.0
+Changed from version 0.41 --> 1.0
 
 major changes: 
 
@@ -16,6 +16,7 @@ bug fixes:
 - restart from checkpoint works again 
 - when coarsening ghost cell a never ending loop was removed 
 - slight changes in the stream reading and writing procedure during load
-  balancing 
+  balancing which caused extreme long load balancing times on large
+  meshes 
 
 
