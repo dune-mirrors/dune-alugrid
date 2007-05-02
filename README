@@ -72,9 +72,9 @@ Dynamic Load Balancing Options
 ------------------------------
 
 If the compiled code is used for parallel computations including dynamic
-load balancing, then a parameter file named "loadbalancing.cfg" should be
+load balancing, then a parameter file named "alugrid.cfg" should be
 available in the directory the program is launched. See
-"misc/loadbalancing.cfg" for an example file. 
+"misc/alugrid.cfg" for an example file. 
 
 The file must contain three values: 
 first row:  ldb_under (value < 1.0),  default value is 0.0

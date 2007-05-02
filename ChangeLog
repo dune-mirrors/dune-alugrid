@@ -8,7 +8,7 @@ major changes:
 minor changes: 
 - changes of implementation of ghost information
 - the load balance config file was renamed from `lastverteilung.cfg' to
-  `loadbalancing.cfg' 
+  `alugrid.cfg' 
 - twist lookup table also for hexa 
 
 bug fixes: 
