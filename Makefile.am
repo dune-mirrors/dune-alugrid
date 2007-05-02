@@ -6,5 +6,7 @@ SUBDIRS = src misc
 
 # add library name, authors list, and licence to progam files
 dist-hook:
-	find $(distdir) -name "*.h*" -exec ./addauthors.sh ./AUTHORS {} \;
-	find $(distdir) -name "*.c*" -exec ./addauthors.sh ./AUTHORS {} \;
+	find $(distdir) -name "*.h" -exec ./addauthors.sh ./AUTHORS {} \;
+	find $(distdir) -name "*.hh" -exec ./addauthors.sh ./AUTHORS {} \;
+	find $(distdir) -name "*.c" -exec ./addauthors.sh ./AUTHORS {} \;
+	find $(distdir) -name "*.cc" -exec ./addauthors.sh ./AUTHORS {} \;
