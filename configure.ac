@@ -39,7 +39,6 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  misc/Makefile
                  misc/macrogrids/Makefile
-                 misc/examples/Makefile
                  misc/versioncheck/Makefile
                  alugrid.pc
                  ])
