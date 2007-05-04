@@ -1,6 +1,4 @@
-//	(c) christian badura 1998
-//      -*- C++ -*-
-
+// (c) bernhard schupp 1998
 #ifndef MYALLOC_H_INCLUDED
 #define MYALLOC_H_INCLUDED
 
