@@ -118,11 +118,11 @@ Optimization
 -------------
 
 The ALUGrid code is highly riddled with assert statements. 
-Therefore it is recommened to compile the library and the application code
+Therefore it is recommended to compile the library and the application code
 with the CPP variable NDEBUG set (i.e. -DNDEBUG) to avoid all asserts
 statement tests. 
 
-Known bugs: On Intel ia64 architectures the optimisation option -O3 dosen't
+Known bugs: On Intel ia64 architectures the optimisation option -O3 doesn't
 work with the INTEL C++ Compiler. 
 
 
@@ -138,7 +138,7 @@ Knowns Bugs
 -----------
 
 Intel ia64 architectures: On Intel ia64 architectures the 
-optimisation option -O3 dosen't work with the INTEL C++ Compiler. 
+optimisation option -O3 doesn't work with the INTEL C++ Compiler. 
 
 METIS bug: 
 
