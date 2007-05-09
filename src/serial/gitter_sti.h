@@ -42,32 +42,6 @@ public:
   virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
 };
 
-class Timer
-{
-public:
-  //! A new timer, start immediately
-  Timer () 
-  {
-    reset();
-  }
-
-  //! Reset timer
-  void reset() 
-  {
-    cstart = clock();
-  }
-
-  //! Get elapsed user-time in seconds
-  double elapsed () 
-  {
-    return (clock()-cstart) / static_cast<double>(CLOCKS_PER_SEC);
-  }
-
-private:
-  clock_t cstart;
-}; // end class Timer 
-
-
 // forward declaration, see ghost_info.h 
 class MacroGhostInfoHexa;
 class MacroGhostInfoTetra;
