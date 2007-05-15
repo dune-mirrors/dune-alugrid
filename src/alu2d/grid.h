@@ -722,7 +722,7 @@ template < class A > class Hier : public A {
 
     int numchild ;
 
-    Hier() : dwn(0), nxt(0), up(0), lvl(0) { }
+    Hier() : dwn(0), nxt(0), up(0), lvl(0) , childNr_(0) , numchild (0) {}
 
     void deletesubtree() { delete dwn ; dwn = 0; 
       //  this->check();
