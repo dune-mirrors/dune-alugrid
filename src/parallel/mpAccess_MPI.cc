@@ -57,7 +57,8 @@ template < class A > vector < vector < A > > doGcollectV
 }
 
 static vector < pair < char *, int > > doExchange (const vector < pair < char *, int > > & in, 
-	MPI_Comm comm, const vector < int > & d) {
+	MPI_Comm comm, const vector < int > & d) 
+{
   assert (in.size() == d.size()) ;
   int nl = d.size () ;
   vector < pair < char *, int > > out (nl) ;
@@ -65,31 +66,33 @@ static vector < pair < char *, int > > doExchange (const vector < pair < char *,
     MPI_Request * req = new MPI_Request [nl] ; 
     assert (req) ;
     {
-      for (int link = 0 ; link < nl ; link ++) {
-	MY_INT_TEST MPI_Issend (in [link].first, in [link].second, MPI_BYTE, d [link], 123, comm, & req [link]) ;
-	assert (test == MPI_SUCCESS) ;
+      for (int link = 0 ; link < nl ; link ++) 
+      {
+      	MY_INT_TEST MPI_Issend (in [link].first, in [link].second, MPI_BYTE, d [link], 123, comm, & req [link]) ;
+      	assert (test == MPI_SUCCESS) ;
       }
     }
     {
-      for (int link = 0 ; link < nl ; link ++ ) {
-	MPI_Status s ;
-	int cnt ;
-  {
-	  MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ; 
-	  assert (test == MPI_SUCCESS) ;
-  }
-  {
-	  MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & cnt ) ;
-	  assert (test == MPI_SUCCESS) ;
-  }
-	char * lne = new char [cnt] ;
-	assert (lne) ;
-  {
-	  MY_INT_TEST MPI_Recv (lne, cnt, MPI_BYTE, d [link], 123, comm, & s) ;
-	  assert (test == MPI_SUCCESS) ;
-  }
-	out [link].first = lne ;
-	out [link].second = cnt ;
+      for (int link = 0 ; link < nl ; link ++ ) 
+      {
+      	MPI_Status s ;
+      	int cnt ;
+        {
+	        MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ; 
+	        assert (test == MPI_SUCCESS) ;
+        }
+        {
+	        MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & cnt ) ;
+	        assert (test == MPI_SUCCESS) ;
+        }
+	      char * lne = new char [cnt] ;
+	      assert (lne) ;
+        {
+	        MY_INT_TEST MPI_Recv (lne, cnt, MPI_BYTE, d [link], 123, comm, & s) ;
+	        assert (test == MPI_SUCCESS) ;
+        }
+	      out [link].first = lne ;
+	      out [link].second = cnt ;
       }
     }
     {
@@ -106,7 +109,10 @@ static vector < pair < char *, int > > doExchange (const vector < pair < char *,
 
 template < class A > 
 vector < vector < A > > doExchange (const vector < vector < A > > & in,
-	MPI_Datatype mpiType, MPI_Comm comm, const vector < int > & d) {
+                                  	MPI_Datatype mpiType, 
+                                    MPI_Comm comm, 
+                                    const vector < int > & d) 
+{
   assert (in.size() == d.size()) ;
   int nl = d.size () ;
   vector < vector < A > > out (nl) ;
@@ -116,40 +122,44 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
     MPI_Request * req = new MPI_Request [nl] ;
     assert (req) ;
     {
-      for (int link = 0 ; link < nl ; link ++) {
-	int size = in [link].size() ;
-	A * lne = new A [size] ;
-	assert (lne) ;
-	copy (in [link].begin (), in [link].end (), lne) ;
-	buf [link] = lne ;
-	MY_INT_TEST MPI_Issend (lne, size, mpiType, d [link], 123, comm, & req [link]) ;
-	assert (test == MPI_SUCCESS) ;
+      for (int link = 0 ; link < nl ; link ++) 
+      {
+        int size = in [link].size() ;
+        A * lne = new A [size] ;
+        assert (lne) ;
+        copy (in [link].begin (), in [link].end (), lne) ;
+        buf [link] = lne ;
+        MY_INT_TEST MPI_Issend (lne, size, mpiType, d [link], 123, comm, & req [link]) ;
+        assert (test == MPI_SUCCESS) ;
       } 
     }
+    
     {
-      for (int link = 0 ; link < nl ; link ++ ) {
-	MPI_Status s ;
-	int cnt ;
-  {
-	  MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ;
-	  assert (test == MPI_SUCCESS) ;
-  }
-  
-  {
-	  MY_INT_TEST MPI_Get_count ( & s, mpiType, & cnt ) ;
-	  assert (test == MPI_SUCCESS) ;
-  }
-  
-	A * lne = new A [cnt] ;
-	assert (lne) ;
-  {
-	  MY_INT_TEST MPI_Recv (lne, cnt, mpiType, d [link], 123, comm, & s) ;
-	  assert (test == MPI_SUCCESS) ;
-  }
-	copy (lne, lne + cnt, back_inserter (out[link])) ;
-	delete [] lne ;
+      for (int link = 0 ; link < nl ; link ++ ) 
+      {
+        MPI_Status s ;
+        int cnt ;
+        {
+          MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ;
+          assert (test == MPI_SUCCESS) ;
+        }
+        
+        {
+          MY_INT_TEST MPI_Get_count ( & s, mpiType, & cnt ) ;
+          assert (test == MPI_SUCCESS) ;
+        }
+        
+        A * lne = new A [cnt] ;
+        assert (lne) ;
+        {
+          MY_INT_TEST MPI_Recv (lne, cnt, mpiType, d [link], 123, comm, & s) ;
+          assert (test == MPI_SUCCESS) ;
+        }
+        copy (lne, lne + cnt, back_inserter (out[link])) ;
+        delete [] lne ;
       } 
     }
+
     {
       MPI_Status * sta = new MPI_Status [nl] ;
       assert (sta) ;
@@ -157,7 +167,9 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
       assert (test == MPI_SUCCESS) ;
       delete [] sta ;
     }
-    {for (int i = 0 ; i < nl ; i ++) delete [] buf [i] ; }
+    {
+      for (int i = 0 ; i < nl ; i ++) delete [] buf [i] ; 
+    }
     delete [] buf ;
     delete [] req ;
   }
@@ -351,22 +363,32 @@ vector < vector < char > > MpAccessMPI :: exchange (const vector < vector < char
 vector < ObjectStream > MpAccessMPI :: exchange (const vector < ObjectStream > & in) const {
   const int nl = nlinks () ;
   assert (static_cast<int> (in.size ()) == nlinks()) ;
-  vector < ObjectStream > out (nlinks ()) ;
-  vector < pair < char *, int > > v (nlinks ()) ;
-  {for (int l = 0 ; l < nl ; l ++ ) {
-    v [l].first = in [l]._buf + in [l]._rb ;
-    v [l].second = in [l]._wb - in [l]._rb ;
-  }}
+  
+  vector < ObjectStream > out (nl) ;
+  vector < pair < char *, int > > v (nl) ;
+  {
+    for (int l = 0 ; l < nl ; l ++ ) 
+    {
+      v [l].first = in [l]._buf + in [l]._rb ;
+      v [l].second = in [l]._wb - in [l]._rb ;
+    } 
+  }
+  
   v = doExchange (v, _mpiComm, dest ()) ;
-  {for (int l = 0 ; l < nl ; l ++ ) {
-    if (v [l].second > 0) {
-      out [l]._buf = (char *) realloc (out [l]._buf, out [l]._len += v [l].second) ;
-      assert (out [l]._wb + v [l].second < out [l]._len) ;
-      memcpy (out [l]._buf + out [l]._wb , v [l].first, v[l].second) ;
-      out [l]._wb += v [l].second ;
+  
+  {
+    for (int l = 0 ; l < nl ; l ++ ) 
+    {
+      if (v [l].second > 0) 
+      {
+        out [l]._buf = (char *) realloc (out [l]._buf, out [l]._len += v [l].second) ;
+        assert (out [l]._wb + v [l].second < out [l]._len) ;
+        memcpy (out [l]._buf + out [l]._wb , v [l].first, v[l].second) ;
+        out [l]._wb += v [l].second ;
+      }
+      delete [] v [l].first ;
     }
-    delete [] v [l].first ;
-  }}
+  }
   return out ;
 }
 
