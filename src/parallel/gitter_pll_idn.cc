@@ -221,40 +221,32 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & c) {
   return ;
 }
 
-void GitterPll :: MacroGitterPll :: identification (MpAccessLocal & c) {
-  _vertexTT.erase (_vertexTT.begin (), _vertexTT.end ()) ;
-  _hedgeTT.erase (_hedgeTT.begin (), _hedgeTT.end ()) ;
-  _hfaceTT.erase (_hfaceTT.begin (), _hfaceTT.end ()) ;
+void GitterPll :: MacroGitterPll :: identification (MpAccessLocal & c) 
+{
+  //_vertexTT.erase (_vertexTT.begin (), _vertexTT.end ()) ;
+  //_hedgeTT.erase (_hedgeTT.begin (), _hedgeTT.end ()) ;
+  //_hfaceTT.erase (_hfaceTT.begin (), _hfaceTT.end ()) ;
+  // clear all entries 
+  _vertexTT.clear(); 
+  _hedgeTT.clear();
+  _hfaceTT.clear();
   c.removeLinkage () ;
   
   int lap1 = clock () ;
   vertexLinkageEstimate (c) ;
+
   c.insertRequestSymetric (secondScan ()) ;
   if (debugOption (2)) c.printLinkage (cout) ;
+
   int lap2 = clock () ;
-#ifdef IBM_XLC
-  //  identify (AccessIterator < vertex_STI > :: Handle (*this), _vertexTT, c) ;
-  // ### Goettingen ###
   identify < vertex_STI > (AccessIterator < vertex_STI > :: Handle (*this), _vertexTT, c) ;
-#else
-  identify < vertex_STI > (AccessIterator < vertex_STI > :: Handle (*this), _vertexTT, c) ;
-#endif
+  
   int lap3 = clock () ;
-#ifdef IBM_XLC
-  //  identify (AccessIterator < hedge_STI > :: Handle (*this), _hedgeTT, c) ;
-  // ### Goettingen ###
   identify < hedge_STI > (AccessIterator < hedge_STI > :: Handle (*this), _hedgeTT, c) ;
-#else
-  identify < hedge_STI > (AccessIterator < hedge_STI > :: Handle (*this), _hedgeTT, c) ;
-#endif
+  
   int lap4 = clock () ;
-#ifdef IBM_XLC
-  //  identify (AccessIterator < hface_STI > :: Handle (*this), _hfaceTT, c) ;
-  // ### Goettingen ###
   identify < hface_STI > (AccessIterator < hface_STI > :: Handle (*this), _hfaceTT, c) ;
-#else
-  identify < hface_STI > (AccessIterator < hface_STI > :: Handle (*this), _hfaceTT, c) ;
-#endif
+
   int lap5 = clock () ;
   if (debugOption (2)) {
     float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) ;
