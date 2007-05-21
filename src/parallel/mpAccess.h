@@ -54,7 +54,7 @@ class MpAccessGlobal {
 } ;
 
 class MpAccessLocal : public MpAccessGlobal {
-  map < int, int, less < int > > linkage ;
+  map < int, int, less < int > > _linkage ;
   public :
     inline virtual ~MpAccessLocal () ;
     void printLinkage (ostream &) const ;
@@ -86,16 +86,18 @@ inline MpAccessLocal :: ~MpAccessLocal () {
 }
 
 inline int MpAccessLocal :: link (int i) const {
-  assert (linkage.end () != linkage.find (i)) ;
-  return (* linkage.find (i)).second ;
+  assert (_linkage.end () != _linkage.find (i)) ;
+  return (* _linkage.find (i)).second ;
 }
 
 inline int MpAccessLocal :: nlinks () const {
-  return linkage.size () ;
+  return _linkage.size () ;
 }
 
-inline void MpAccessLocal :: removeLinkage () {
-  linkage.erase (linkage.begin (), linkage.end ()) ;
+inline void MpAccessLocal :: removeLinkage () 
+{
+  _linkage.clear();
+  //_linkage.erase (_linkage.begin (), _linkage.end ()) ;
   return ;
 }
 
