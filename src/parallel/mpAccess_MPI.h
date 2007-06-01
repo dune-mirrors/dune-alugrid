@@ -22,8 +22,10 @@
 
 #include "mpAccess.h"
 
-class MpAccessMPI : public MpAccessLocal {
+class MpAccessMPI : public MpAccessLocal 
+{
     MPI_Comm _mpiComm ;
+    
     inline int mpi_allgather (int *, int , int *, int) const ;
     inline int mpi_allgather (char *, int, char *, int) const ;
     inline int mpi_allgather (double *, int, double *, int ) const ;
@@ -75,21 +77,33 @@ class MpAccessMPI : public MpAccessLocal {
 #define MY_INT_TEST
 #endif
 
+#define USE_MPI_COMM_DUP
+
 inline MpAccessMPI :: MpAccessMPI (MPI_Comm i) {
+#ifdef USE_MPI_COMM_DUP
   MY_INT_TEST MPI_Comm_dup (i, &_mpiComm) ;
   assert (test == MPI_SUCCESS) ;
+#else 
+  _mpiComm = i;
+#endif
   return ;
 }
 
 inline MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a) {
+#ifdef USE_MPI_COMM_DUP
   MY_INT_TEST MPI_Comm_dup (a._mpiComm, &_mpiComm) ;
   assert (test == MPI_SUCCESS) ;
+#else 
+  _mpiComm = a._mpiComm;
+#endif
   return ;
 }
 
 inline MpAccessMPI :: ~MpAccessMPI () {
+#ifdef USE_MPI_COMM_DUP
   MY_INT_TEST MPI_Comm_free (&_mpiComm) ;
   assert (test == MPI_SUCCESS) ;
+#endif
   return ;
 }
 
@@ -123,4 +137,5 @@ inline int MpAccessMPI :: mpi_allgather (double * i, int si, double * o, int so)
   return MPI_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm) ;
 }
 
+#undef USE_MPI_COMM_DUP
 #endif
