@@ -735,7 +735,8 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
 
   map < VertexGeo *, int, less < VertexGeo * > > vm ;
   os.setf (ios::fixed, ios::floatfield) ;
-  os.precision (16) ;
+  //os.precision (16) ;
+  os << scientific ;
   
   // Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
   // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
