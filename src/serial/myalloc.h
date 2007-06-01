@@ -33,6 +33,8 @@ class MyAlloc {
     MyAlloc () {}
    ~MyAlloc () {}
   public :
+    // operator new that gets memory from outside 
+    //void * operator new (size_t, void * p ) { return p; }
     void * operator new (size_t) throw (OutOfMemoryException) ;
     void operator delete (void *,size_t) ;
 } ;
