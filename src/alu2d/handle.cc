@@ -26,7 +26,7 @@ Hmesh::Hmesh(const char *macroname,int pnconfDeg) :
   _nconfDeg(pnconfDeg), refinement_rule(Refco::quart) {
   setup_grid(macroname);    
 }
-Hmesh::Hmesh(const char *macroname,Refco::tag_t pref_rule) :
+Hmesh::Hmesh(const char *macroname, Refco::tag_t  pref_rule) :
   _nconfDeg(0), refinement_rule(pref_rule) {
   setup_grid(macroname);    
 }
@@ -123,7 +123,10 @@ bool Hmesh::checkConf()
   return elem_marked;
 }
 
+#ifdef USE_ALUGRID_XDISPLAY
+// for displaying during refinement and coarsening
 Hmesh *mesh;
+#endif
 
 class RestrictDune : public Restrict_basic
 {
@@ -166,7 +169,9 @@ bool Hmesh::duneAdapt(AdaptRestrictProlong2dType & arp) {
 }
 
 void Hmesh::refine() {
+#ifdef USE_ALUGRID_XDISPLAY
   mesh=this;
+#endif
 
   assert( ! mel.busy()) ;
 
@@ -202,7 +207,9 @@ void Hmesh::refine() {
 }
 
 void Hmesh::coarse() {
+#ifdef USE_ALUGRID_XDISPLAY
   mesh=this;
+#endif
 
   assert( ! mel.busy()) ;
 

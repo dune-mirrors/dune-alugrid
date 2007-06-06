@@ -1374,7 +1374,9 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
 	  //		      350.,450.,450.);
 	  double p1[2],p2[2];
 	  double bary[3]={1./3.,1./3.,1./3.};
-	  //mesh->draw(disp);
+#ifdef USE_ALUGRID_XDISPLAY
+	  mesh->draw(disp);
+#endif
 	  {
 	    this->fromlocal(bary,p1);
 	    this->fromlocal(bary,p2);
@@ -1759,7 +1761,9 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
 	//	      350.,450.,450.);
 	double p1[2],p2[2];
 	double bary[3]={1./3.,1./3.,1./3.};
-	//mesh->draw(disp);
+#ifdef USE_ALUGRID_XDISPLAY
+	mesh->draw(disp);
+#endif
 	{
 	  this->fromlocal(bary,p1);
 	  this->fromlocal(bary,p2);

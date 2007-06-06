@@ -930,7 +930,7 @@ class Hmesh : public Hmesh_basic {
 
   Hmesh(const char *,int,Refco::tag_t pref_rule) ;
 
-  Hmesh(const char *,Refco::tag_t pref_rule=Refco::ref_1) ;
+  Hmesh(const char *, Refco::tag_t pref_rule = Refco::ref_1 ) ;
 
   Hmesh(const char *,int) ;
 
