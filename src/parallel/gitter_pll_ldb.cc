@@ -116,14 +116,27 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
 	// alter und neuer Teilgebietszuordnung beschreiben soll.
 
   vector < vector < int > > cov (nparts, vector < int > (nparts, 0L)) ;
-  { for (int k = 0 ; k < len ; k ++) cov [reference [k]][proposal[k]] += 1 + int (sqrt(weight [k])) ; }
+
+  { 
+    for (int k = 0 ; k < len ; k ++) cov [reference [k]][proposal[k]] += 1 + int (sqrt(weight [k])) ; 
+  }
+  
   map < int, pair < int, int >, greater_equal < int > > max ;
   set < int, less < int > > freeIndex ;
-  {for (int i = 0 ; i < nparts ; i ++ ) {
-    freeIndex.insert (i) ;
-    vector < int > :: const_iterator pos = max_element (cov [i].begin (), cov [i].end ()) ;
-    max [*pos] = pair < int, int > (i, pos - cov [i].begin ()) ;
-  }}
+  
+  {
+    for (int i = 0 ; i < nparts ; ++i ) 
+    {
+      freeIndex.insert (i) ;
+      vector < int > :: iterator covBegin = cov [i].begin ();
+      vector < int > :: const_iterator pos = max_element (covBegin, cov [i].end ()) ;
+      int distance = (pos - covBegin);
+      pair<int, int> val (i,distance);
+      max [*pos] = val; 
+      //pair < int, int > (i, distance);
+      //(pos - cov [i].begin ())) ;
+    } 
+  }
   vector < int > renumber (nparts, -1L) ;
   {for (map < int, pair < int, int >, greater_equal < int > > :: const_iterator i = max.begin () ; i != max.end () ; i ++ ) {
     if (renumber [(*i).second.second] == -1) {
@@ -134,26 +147,40 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
       }
     }
   }}
-  for (int j = 0; j != nparts ; j ++) {
-    if (renumber [j] == -1) {
-      if (freeIndex.find (j) != freeIndex.end ()) {
-	renumber [j] = j ;
-	freeIndex.erase (j) ;
-      } else {
-	renumber [j] = * freeIndex.begin () ;
-	freeIndex.erase (freeIndex.begin ()) ;
+  
+  for (int j = 0; j != nparts ; ++j) 
+  {
+    if (renumber [j] == -1) 
+    {
+      if (freeIndex.find (j) != freeIndex.end ()) 
+      {
+      	renumber [j] = j ;
+      	freeIndex.erase (j) ;
+      } 
+      else 
+      {
+      	renumber [j] = * freeIndex.begin () ;
+      	freeIndex.erase (freeIndex.begin ()) ;
       }
     }
   }
-  if (verbose) {
+
+  if (verbose) 
+  {
     cout << "**INFO optimizeCoverage (): " << endl ;
-    for (int i = 0 ; i < nparts ; i ++) {
+    for (int i = 0 ; i < nparts ; i ++) 
+    {
       for (int j = 0 ; j < nparts ; j ++)
-	cout << "  " << setw (4) << cov [i][j] << " " ;
+      	cout << "  " << setw (4) << cov [i][j] << " " ;
+
       cout << "| " << i << " -> " << renumber [i] << endl ;
     }
   }
-  { for (int i = 0 ; i < len ; i ++ ) proposal [i] = renumber [proposal [i]] ; }
+  { 
+    for (int i = 0 ; i < len ; i ++ ) proposal [i] = renumber [proposal [i]] ; 
+  }
+
+  freeIndex.clear();
   return ;
 }
 
