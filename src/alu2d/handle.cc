@@ -15,7 +15,7 @@
 #include "vmmap.h"
 
 Hmesh::Hmesh() : _nconfDeg(-1), refinement_rule(Refco::none),
-		 _pro_el(0), _rest_el(0) {
+     _pro_el(0), _rest_el(0) {
 }
 
 Hmesh::Hmesh(const char *macroname,int pnconfDeg,Refco::tag_t pref_rule) :
@@ -47,7 +47,7 @@ void Hmesh::setup_grid(const char *macroname) {
     {
       Bndel_triang *bel = (Bndel_triang *)&(walkb->getitem());
       if (bel->type() == Bndel::periodic)
-	{
+      {
         Bndel_triang *nbbel = ((Bndel_periodic *)bel)->periodic_nb;
         assert(nbbel);
         bel->vertex(0)->set_pernb(nbbel->vertex(1));
@@ -65,11 +65,11 @@ void Hmesh::setup_grid(const char *macroname) {
       {
         int i,j;
         for (i=0;i<2;i++)
-	{
+  {
           Vertex *pnv = v->get_pernb(i);
           for (j=0;j<pnv->get_nr_of_per_nbs();j++)
             v->set_pernb(pnv->get_pernb(j));
-	}
+  }
         assert(v->get_nr_of_per_nbs() == 3);
       }
     }
@@ -82,7 +82,7 @@ void Hmesh::setup_grid(const char *macroname) {
     if (fabs(time2-time) + 
         fabs((double (nbr2-nbr)))> 1e-5) {
       cerr << "ERROR in Hmesh::setup_grid: "
-      	   << "backup-file and macro-grid file not compatible" << endl;
+           << "backup-file and macro-grid file not compatible" << endl;
       abort();
     }
   }
@@ -115,8 +115,8 @@ bool Hmesh::checkConf()
       walk->getitem().mark(refinement_rule);
     }
     if (((Triang*)&walk->getitem())->is(Refco::quart) ||
-	((Triang*)&walk->getitem())->is(Refco::ref_1) ||
-	((Triang*)&walk->getitem())->is(Refco::ref_2) ) {
+  ((Triang*)&walk->getitem())->is(Refco::ref_1) ||
+  ((Triang*)&walk->getitem())->is(Refco::ref_2) ) {
       elem_marked = true;
     }
   }
@@ -227,7 +227,7 @@ void Hmesh::coarse() {
       
   }
 
-  {	// sch.... konstruktion 
+  { // sch.... konstruktion 
 
     Listwalk_impl < Vertex > walk (vl) ;
 
