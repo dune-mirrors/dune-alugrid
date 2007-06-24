@@ -8,11 +8,11 @@
 // sources within the namespace defined in bsinclude.hh
 
 #include <ulimit.h>
-#include <assert.h>
+#include <cassert>
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
-#include <math.h>
+#include <cmath>
 #include <limits.h>
 #include <time.h>
 // headers for getrusage(2)
