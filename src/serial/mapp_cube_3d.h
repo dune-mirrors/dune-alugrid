@@ -26,6 +26,29 @@ class TrilinearMapping {
     inline void map2world (const double (&)[3], double (&)[3]) const ;
     inline void map2world (const double , const double , const double , double (&)[3]) const ;
     void world2map (const double (&)[3], double (&)[3]) ;
+
+    static inline void barycenter(const double (&p0)[3], const double (&p1)[3], const double (&p2)[3], const double (&p3)[3],
+                                  const double (&p4)[3], const double (&p5)[3], const double (&p6)[3], const double (&p7)[3],
+                                  double (&barycenter)[3])
+    {
+      barycenter[0] = 0.125 * (p0[0] + p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0]);
+      barycenter[1] = 0.125 * (p0[1] + p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1]);
+      barycenter[2] = 0.125 * (p0[2] + p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2]);
+
+#ifndef NDEBUG 
+      {
+        TrilinearMapping map(p0,p1,p2,p3,p4,p5,p6,p7);
+        double p[3] ;
+        map.map2world(.0, .0, .0, p) ;
+        for(int j=0; j<3; ++j)
+        {
+          assert( fabs(barycenter[j] - p[j]) < 1e-8 );
+        }
+      }
+#endif
+  
+    }
+        
 } ;
 
 class QuadraturCube3Dbasis {

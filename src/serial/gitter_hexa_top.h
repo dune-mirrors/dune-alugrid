@@ -1333,12 +1333,13 @@ template < class A > void HexaTop < A > :: splitISO8 ()
 
   assert (_dwn == 0 && _fc == 0 && _ed == 0 && _cv == 0) ;  
   {
-    TrilinearMapping map(
+    double p[3] ;
+    // calculate barycenter 
+    TrilinearMapping::barycenter(
         this->myvertex(0)->Point(), this->myvertex(1)->Point(),
         this->myvertex(2)->Point(), this->myvertex(3)->Point(), this->myvertex(4)->Point(),
-        this->myvertex(5)->Point(), this->myvertex(6)->Point(), this->myvertex(7)->Point()) ;
-    double p[3] ;
-    map.map2world(.0, .0, .0, p) ;
+        this->myvertex(5)->Point(), this->myvertex(6)->Point(), this->myvertex(7)->Point(), 
+        p) ;
     
     _cv = new innervertex_t (l, p[0], p[1], p[2], *(this->myvertex(0)) ) ;
     assert (_cv) ;
