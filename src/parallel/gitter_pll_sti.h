@@ -58,7 +58,9 @@ template < class A > class AccessIteratorTT {
   public :
     virtual pair < IteratorSTI < A > *, IteratorSTI < A > * > iteratorTT (const A *, int) = 0 ;
     virtual pair < IteratorSTI < A > *, IteratorSTI < A > * > iteratorTT (const pair < IteratorSTI < A > *, IteratorSTI < A > * > &, int) = 0 ;
-    class HandleBase : public IteratorSTI < A > {
+    class HandleBase : public IteratorSTI < A > 
+                     , public MyAlloc  
+    {
       AccessIteratorTT < A > & _fac ;
       int _l ;
       protected :
@@ -112,6 +114,7 @@ template < class A > class AccessIteratorTT {
   // die Iteratorkopien.
 
 template < class A > class listSmartpointer__to__iteratorSTI : public IteratorSTI < A > 
+                                                             , public MyAlloc 
 {
   // list to iterate 
   list < typename AccessIterator < A > :: Handle > & _l ;
@@ -466,7 +469,8 @@ class GitterPll : public virtual Gitter {
     int _refineLoops ;
 } ;
 
-template < class A > class LeafIteratorTT {
+template < class A > class LeafIteratorTT : public MyAlloc 
+{
   GitterPll & _grd ;
   int _link ;
   A * _a ;

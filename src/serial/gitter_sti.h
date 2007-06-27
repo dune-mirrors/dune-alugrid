@@ -117,7 +117,9 @@ public :
 
 // EmptyIterator is an iterator of an empty set  
 // for some default values 
-template < class A > class EmptyIterator : public IteratorSTI < A > {
+template < class A > class EmptyIterator : public IteratorSTI < A > ,
+                                           public MyAlloc 
+{
   EmptyIterator (const EmptyIterator < A > &) {}
 public :
   typedef A val_t ;
@@ -163,7 +165,7 @@ public :
   // zu bekommen ist, bzw. wie ein bestehender mit einer Schnittstellen-
   // methode kopiert werden kann.
   
-  class Handle : public IteratorSTI < A > {
+  class Handle : public IteratorSTI < A > , public MyAlloc {
   protected:
     AccessIterator < A > * _fac ;
     A * _a ;
