@@ -14,9 +14,12 @@ namespace ALUGridSpace {
 #else
   #include <stack.h>
 #endif
+  
+#include "serial/myalloc.h"
 
 template<class T, int length>
-class ALUGridFiniteStack {
+class ALUGridFiniteStack
+{
 public :
   // Makes empty stack
   ALUGridFiniteStack () : _f(0) {}
@@ -322,7 +325,7 @@ generateHoles(const vector<bool> & isHole)
   }
 }
  
-enum { lengthOfFiniteStack = 10000 };
+enum { lengthOfFiniteStack = 262144 }; // 2^18 
 typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
 
 } // end namespace 
