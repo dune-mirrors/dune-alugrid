@@ -3,6 +3,8 @@
 
 #define _ANSI_HEADER
 
+#define USE_ALUGRID_ALLOC 0
+
 // if DUNE_NOT_USES_ALUGRID is defined, then index management is deactivated
 //#define _DUNE_NOT_USES_ALU3DGRID_
 

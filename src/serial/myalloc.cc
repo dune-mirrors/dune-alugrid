@@ -1,3 +1,5 @@
+#if USE_ALUGRID_ALLOC
+
 #ifdef IBM_XLC
   #define _ANSI_HEADER
 #endif
@@ -129,3 +131,4 @@ MyAlloc :: Initializer :: ~Initializer () {
   }
   return ;
 }
+#endif // USE_ALUGRID_ALLOC 

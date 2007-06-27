@@ -1,6 +1,10 @@
 // (c) bernhard schupp 1998
+// modifications for dune 
+// (c) robert kloefkorn 2007 
 #ifndef MYALLOC_H_INCLUDED
 #define MYALLOC_H_INCLUDED
+
+#if USE_ALUGRID_ALLOC 
 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
@@ -35,11 +39,18 @@ class MyAlloc {
   public :
     // operator new that gets memory from outside 
     //void * operator new (size_t, void * p ) { return p; }
+
     void * operator new (size_t) throw (OutOfMemoryException) ;
     void operator delete (void *,size_t) ;
 } ;
 
 static MyAlloc :: Initializer allocatorInitializer ;
 
-#endif // MYALLOC_H_INCLUDED
+#else // USE_ALUGRID_ALLOC 
 
+// dummy class 
+class MyAlloc {};
+
+#endif // USE_ALUGRID_ALLOC
+
+#endif // MYALLOC_H_INCLUDED
