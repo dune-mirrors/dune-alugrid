@@ -185,7 +185,6 @@ protected:
     _wb = newWb;
     return ;
   }
-  //friend class ObjectStream ; 
 } ;
 
 // bufchunk 0.25 Megabyte 
@@ -195,7 +194,8 @@ class ObjectStream : public ObjectStreamImpl
   
   // 1/4 Megabyte als Chunksize, und 16 MegaByte als oberes Limit,
   // wobei dieses noch nicht getestet wird.
-  enum { BufChunk = 0x40000 } ;
+  //enum { BufChunk = 0x40000 } ;
+  enum { BufChunk = 65536 * sizeof(double) } ;
 
 public :
   // ENDOFSTREAM should be in range of char, i.e. -127 to 128 
@@ -238,7 +238,7 @@ public :
   friend class MpAccessMPI ;
 } ;
 
-// bufchunk 4 doubls Megabyte 
+// bufchunk 4 doubles 
 class SmallObjectStream : public ObjectStreamImpl
 {
   typedef ObjectStreamImpl BaseType;
@@ -257,7 +257,6 @@ public:
   inline void readObject (double & a) { this->read(a);  }
   inline void writeObject (int a)     { this->write(a); } 
   inline void readObject (int & a)    { this->read(a);  }
-    
 };
 
   //
