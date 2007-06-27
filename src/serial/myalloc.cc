@@ -29,10 +29,13 @@
 #include "myalloc.h"
 
 const long   MyAlloc :: MAX_HOLD_ADD  = 40000000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
-const double MyAlloc :: MAX_HOLD_MULT = 1.3 ;     // max das MAX_HOLD_MULT-fache der momentan
-                                                  // aktiven Objekte werden gespeichert
+const double MyAlloc :: MAX_HOLD_MULT = 1.3 ; // max das MAX_HOLD_MULT-fache der momentan
+                                              // aktiven Objekte werden gespeichert
 // MyAlloc initialize flag                                                   
 bool MyAlloc :: _initialized = false;
+
+// if true objects could be freeed  
+bool MyAlloc :: _freeAllowed = true;
 
 // class to store items of same size in a stack 
 // also number of used items outside is stored 
@@ -62,6 +65,16 @@ struct AllocEntry {
 
 // map holding AllocEntries for sizes 
 static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
+
+void MyAlloc :: lockFree () 
+{
+  _freeAllowed = false; 
+}
+
+void MyAlloc :: unlockFree () 
+{
+  _freeAllowed = true; 
+}
 
 void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) 
 {
@@ -103,20 +116,21 @@ void MyAlloc :: operator delete (void *ptr, size_t s)
   assert (fs.N > 0) ;
   --fs.N ;
   fs.S.push (ptr) ;
-  
-  /*
-  // check if max size is exceeded 
-  const size_t stackSize = fs.S.size ();
-  if ( ( stackSize >= (unsigned) MAX_HOLD_ADD ) && 
-       ( double (stackSize) >= MAX_HOLD_MULT * double (fs.N) )
-     ) 
+ 
+  // if free of objects is allowd 
+  if( _freeAllowed )
   {
-    assert (!fs.S.empty()) ;
-    free (fs.S.top ()) ;
-    fs.S.pop() ;
+    // check if max size is exceeded 
+    const size_t stackSize = fs.S.size ();
+    if ( ( stackSize >= (unsigned) MAX_HOLD_ADD ) && 
+         ( double (stackSize) >= MAX_HOLD_MULT * double (fs.N) )
+       ) 
+    {
+      assert (!fs.S.empty()) ;
+      free (fs.S.top ()) ;
+      fs.S.pop() ;
+    }
   }
-  */
-
   return ;
 }
 

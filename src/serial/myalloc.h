@@ -25,6 +25,10 @@ class MyAlloc {
 
   // true if initialized 
   static bool _initialized ;
+
+  // if true objects are not free, only pushed to stack 
+  static bool _freeAllowed ;
+  
   public :
     class Initializer {
 	// initializer versucht, die statischen Objekte der Speicherverwaltung
@@ -35,8 +39,15 @@ class MyAlloc {
         Initializer () ;
        ~Initializer () ;
     } ;
+    
     class OutOfMemoryException { };
     friend class Initializer;
+
+    // if called, freeing objects is allowed again 
+    static void unlockFree();
+
+    // if called free of objects is not allowed 
+    static void lockFree (); 
   protected :
     MyAlloc () {}
    ~MyAlloc () {}
@@ -44,7 +55,9 @@ class MyAlloc {
     // operator new that gets memory from outside 
     //void * operator new (size_t, void * p ) { return p; }
 
+    // new version of operator new 
     void * operator new (size_t) throw (OutOfMemoryException) ;
+    // corresponding version of operator delete 
     void operator delete (void *,size_t) ;
 } ;
 
