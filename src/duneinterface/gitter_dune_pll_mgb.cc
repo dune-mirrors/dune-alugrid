@@ -454,6 +454,7 @@ void DuneParallelGridMover :: initialize ()
       // until here
       else 
         _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0)) ;
+      
       delete (*i) ;
     } 
     else 
@@ -537,7 +538,8 @@ void DuneParallelGridMover :: finalize ()
   }
 
   {for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Map.end () ; )
-    if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) {
+    if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
+    {
       delete (hbndseg4_GEO *)(*i).second ;
       _hbnd4Map.erase (i++) ;
     } else {
@@ -643,11 +645,10 @@ void DuneParallelGridMover :: finalize ()
 //  repartition method of class GitterDunePll 
 //*************************************************************************
 // method was overloaded because here we use our DuneParallelGridMover 
-void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
-
+void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) 
+{
   if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
   {
-    
     const long start = clock () ;
     long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
     mpAccess ().removeLinkage () ;
@@ -662,7 +663,11 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
       }
     }
     lap1 = clock () ;
+    
+    // create vector of object streams 
     vector < ObjectStream > osv (nl) ;
+
+    // pack all stuff 
     {
       AccessIterator < vertex_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
@@ -683,13 +688,20 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
         (*i++).writeObject (MacroGridMoverIF :: ENDMARKER)) ;
     }
+
     lap2 = clock () ;
+    
+    // exchange stuff 
     osv = mpAccess ().exchange (osv) ;
     lap3 = clock () ;
+    
+    // delete and unpack  
     {
       DuneParallelGridMover pgm (containerPll ()) ;
       pgm.unpackAll (osv) ;
     }
+
+    // result 
     lap4 = clock () ;
     if (MacroGridBuilder :: debugOption (20)) {
       cout << "**INFO GitterDunePll["<<me<<"] :: repartitionMacroGrid () [ass|pck|exc|upk|all] " ;
@@ -725,19 +737,26 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
       }
     }
     lap1 = clock () ;
+    
+    // create object stream with size 
     vector < ObjectStream > osv (nl) ;
+
+    // pack vertices 
     {
       AccessIterator < vertex_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
     }
+    // pack edges 
     {
       AccessIterator < hedge_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
     }
+    // pack faces 
     {
       AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
     }
+    // pack elements
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) 
@@ -745,14 +764,18 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
         w.item ().accessPllX ().dunePackAll (osv,gs) ;
       }
     }
+    
+    // write end marker 
     {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
         (*i++).writeObject (MacroGridMoverIF :: ENDMARKER)) ;
     }
 
-    // exchange gathered data 
     lap2 = clock () ;
+
+    // exchange gathered data 
     osv = mpAccess ().exchange (osv) ;
+    
     lap3 = clock () ;
 
     // unpack all data 

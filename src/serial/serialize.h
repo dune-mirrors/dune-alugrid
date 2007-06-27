@@ -40,17 +40,17 @@ class ObjectStreamImpl
 protected:
   char * _buf ;
   size_t _rb, _wb, _len ;
-  const size_t BufChunk; 
+  const size_t _bufChunk; 
 
 public :
   class EOFException {} ;
   class OutOfMemoryException {} ;
   inline ObjectStreamImpl (size_t chunk) 
-    : _buf(0), _rb(0) , _wb(0) , _len (0) , BufChunk(chunk)
+    : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(chunk)
   {
   }
   inline ObjectStreamImpl (const ObjectStreamImpl & os)
-    : _buf(0), _rb(0) , _wb(0) , _len (0) , BufChunk(os.BufChunk)
+    : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(os._bufChunk)
   {
     assign(os);
   }
@@ -134,7 +134,7 @@ protected:
 
   void reallocateBuffer(size_t newSize) throw (OutOfMemoryException)
   {
-    _len += BufChunk; 
+    _len += _bufChunk; 
     if(_len < newSize) _len = newSize;
     _buf = (char *) realloc (_buf, _len) ;
     if (!_buf) {
@@ -160,7 +160,7 @@ protected:
       _len = os._len;
       _wb  = os._wb; 
       _rb  = os._rb; 
-      const_cast<size_t &> (BufChunk) = os.BufChunk;
+      const_cast<size_t &> (_bufChunk) = os._bufChunk;
       
       _buf = (char *) malloc (_len) ;
       if (!_buf) {
@@ -202,6 +202,7 @@ public :
   // and not conflict with refinement rules in gitter_sti.h 
   enum { ENDOFSTREAM = -3 };
   
+  // create object stream with BufChunk allocated 
   inline ObjectStream () : BaseType(BufChunk) 
   {
     this->reallocateBuffer(BufChunk);
