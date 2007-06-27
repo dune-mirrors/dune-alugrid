@@ -4,7 +4,7 @@
 #ifndef MYALLOC_H_INCLUDED
 #define MYALLOC_H_INCLUDED
 
-#if USE_ALUGRID_ALLOC 
+#ifndef DONT_USE_ALUGRID_ALLOC 
 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
@@ -18,9 +18,13 @@
 #endif
 
 class MyAlloc {
+  // max number of storable items per stack 
   static const long MAX_HOLD_ADD ;
+  // overestimation factor 
   static const double MAX_HOLD_MULT ;
-  static long _init ;
+
+  // true if initialized 
+  static bool _initialized ;
   public :
     class Initializer {
 	// initializer versucht, die statischen Objekte der Speicherverwaltung
@@ -46,11 +50,11 @@ class MyAlloc {
 
 static MyAlloc :: Initializer allocatorInitializer ;
 
-#else // USE_ALUGRID_ALLOC 
+#else // DONT_USE_ALUGRID_ALLOC 
 
 // dummy class 
 class MyAlloc {};
 
-#endif // USE_ALUGRID_ALLOC
+#endif // DONT_USE_ALUGRID_ALLOC
 
 #endif // MYALLOC_H_INCLUDED

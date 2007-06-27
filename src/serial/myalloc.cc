@@ -1,4 +1,4 @@
-#if USE_ALUGRID_ALLOC
+#ifndef DONT_USE_ALUGRID_ALLOC
 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
@@ -28,11 +28,14 @@
 
 #include "myalloc.h"
 
-const long   MyAlloc :: MAX_HOLD_ADD  = 400000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
+const long   MyAlloc :: MAX_HOLD_ADD  = 40000000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
 const double MyAlloc :: MAX_HOLD_MULT = 1.3 ;     // max das MAX_HOLD_MULT-fache der momentan
                                                   // aktiven Objekte werden gespeichert
-long MyAlloc :: _init ;
+// MyAlloc initialize flag                                                   
+bool MyAlloc :: _initialized = false;
 
+// class to store items of same size in a stack 
+// also number of used items outside is stored 
 struct AllocEntry {
 
   // N verfolgt die Anzahl der angelegten Objekte der entsprechenden
@@ -45,8 +48,11 @@ struct AllocEntry {
   stack <void * > S ;
 
   AllocEntry () : N (0), S () {}
- ~AllocEntry () {
-    while (!S.empty ()) {
+
+  ~AllocEntry () 
+  {
+    while (!S.empty ()) 
+    {
       free (S.top ()) ;
       S.pop () ;
     }
@@ -54,6 +60,7 @@ struct AllocEntry {
   }
 } ;
 
+// map holding AllocEntries for sizes 
 static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
 
 void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) 
@@ -76,7 +83,10 @@ void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException)
         throw OutOfMemoryException () ;
       }
       return p ;
-    } else {
+    } 
+    else 
+    {
+      // get pointer from stack 
       void * p = fs.S.top () ;
       fs.S.pop () ;
       return p ;
@@ -84,22 +94,36 @@ void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException)
   }
 }
 
-void MyAlloc :: operator delete (void *ptr, size_t s) {
+// operator delete, put pointer to stack 
+void MyAlloc :: operator delete (void *ptr, size_t s) 
+{
+  // get stack for size s 
   AllocEntry & fs ((*freeStore) [s]) ;
+  // push pointer to stack 
   assert (fs.N > 0) ;
   --fs.N ;
   fs.S.push (ptr) ;
-  if (fs.S.size () >= (unsigned) MAX_HOLD_ADD
-    && double (fs.S.size()) >= MAX_HOLD_MULT * double (fs.N)) {
+  
+  /*
+  // check if max size is exceeded 
+  const size_t stackSize = fs.S.size ();
+  if ( ( stackSize >= (unsigned) MAX_HOLD_ADD ) && 
+       ( double (stackSize) >= MAX_HOLD_MULT * double (fs.N) )
+     ) 
+  {
     assert (!fs.S.empty()) ;
     free (fs.S.top ()) ;
     fs.S.pop() ;
   }
+  */
+
   return ;
 }
 
-MyAlloc :: Initializer :: Initializer () {
-  if (0 == MyAlloc :: _init ++) {
+MyAlloc :: Initializer :: Initializer () 
+{
+  if ( ! MyAlloc :: _initialized ) 
+  {
 #ifdef IBM_XLC
     {
       // Auf der SP sollte immer das eingestellte Limit von 143 MB umgangen werden.
@@ -119,16 +143,19 @@ MyAlloc :: Initializer :: Initializer () {
 #endif
     freeStore = new map < size_t, AllocEntry, less < size_t > > ;
     assert (freeStore) ;
+
+    MyAlloc :: _initialized = true;
   }
   return ;
 }
 
 MyAlloc :: Initializer :: ~Initializer () {
-  if (0 == -- MyAlloc :: _init) 
+  if ( MyAlloc :: _initialized ) 
   {
     if(freeStore) delete freeStore ;
     freeStore = 0 ;
+    MyAlloc :: _initialized = false;
   }
   return ;
 }
-#endif // USE_ALUGRID_ALLOC 
+#endif // DONT_USE_ALUGRID_ALLOC 
