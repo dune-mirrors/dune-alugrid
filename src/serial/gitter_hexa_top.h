@@ -461,13 +461,24 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) {
         {
           int l = 1 + level () ;
           assert (_cv == 0 && _dwn == 0) ;
+         
+          innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex(0));
+          innervertex_t* v1 = static_cast<innervertex_t *> (this->myvertex(1));
+          // get the vertex coordinates   
+          const double (&p0)[3] = v0->Point();
+          const double (&p1)[3] = v1->Point();
+          
           // the last myvertex(0) is submitted for the indexmanager reference, rk
-          _cv = new innervertex_t (l, .5 * (this->myvertex(0)->Point()[0] + this->myvertex(1)->Point()[0]),
-            .5 * (this->myvertex(0)->Point()[1] + this->myvertex(1)->Point()[1]),  
-            .5 * (this->myvertex(0)->Point()[2] + this->myvertex(1)->Point()[2]) , *(this->myvertex(0)) ) ;
+          _cv = new innervertex_t (l, 
+                                   0.5 * (p0[0] + p1[0]),
+                                   0.5 * (p0[1] + p1[1]),  
+                                   0.5 * (p0[2] + p1[2]), 
+                                   *v0 ) ;
           assert (_cv) ;
-          inneredge_t * e0 = new inneredge_t (l, this->myvertex(0), _cv, _indexManager, 0 ) ;
-          inneredge_t * e1 = new inneredge_t (l, _cv, this->myvertex(1), _indexManager, 1 ) ;
+
+          inneredge_t * e0 = new inneredge_t (l, v0 , _cv, _indexManager, 0 ) ;
+          inneredge_t * e1 = new inneredge_t (l, _cv, v1, _indexManager, 1 ) ;
+
           assert (e0 && e1) ;
           (_dwn = e0)->append (e1) ;
           _rule = myrule_t :: iso2 ;
@@ -712,18 +723,23 @@ template < class A > inline IndexManagerType & Hface4Top < A > :: getEdgeIndexMa
 template < class A > inline void Hface4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
   assert (_cv == 0 && _ed == 0 && _dwn == 0) ;
+
   {
-    BilinearSurfaceMapping 
-      map(this->myvertex (0)->Point(),
+    // calculate barycenter of face 
+    innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex (0));
+    double p [3] ;
+    BilinearSurfaceMapping :: barycenter(
+          v0->Point(),
           this->myvertex (1)->Point(), 
           this->myvertex (2)->Point(), 
-          this->myvertex (3)->Point()) ;
-    double p [3] ;
-    map.map2world( .0, .0, p) ;
+          this->myvertex (3)->Point(),
+          p ) ;
+
     // myvertex(0) is submitted for the indexmanager reference 
-    _cv = new innervertex_t (l, p[0], p[1], p[2], *(this->myvertex(0))) ;
+    _cv = new innervertex_t (l, p[0], p[1], p[2], *v0 ) ;
     assert (_cv) ;
   }
+  
   myvertex_t * ev0 = this->myhedge1(0)->subvertex (0) ;
   myvertex_t * ev1 = this->myhedge1(1)->subvertex (0) ;
   myvertex_t * ev2 = this->myhedge1(2)->subvertex (0) ;
