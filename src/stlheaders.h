@@ -20,37 +20,21 @@
 
 #include <rpc/rpc.h>
 
-#ifdef _ANSI_HEADER
-  #include <memory>
-  #include <iostream>
-  #include <fstream>
-  #include <vector>
-  #include <utility>
-  #include <functional>
-  #include <algorithm>
-  #include <list>
-  #include <iomanip>
-  #include <sstream>
-  #include <deque>
-  #include <stack>
-  #include <map>
-  #include <numeric>
-  #include <set>
-#else
-  #include <memory.h>
-  #include <iostream.h>
-  #include <fstream.h>
-  #include <vector.h>
-  #include <pair.h>
-  #include <function.h>
-  #include <algo.h>
-  #include <list.h>
-  #include <iomanip.h>
-  #include <strstream.h>
-  #include <deque.h>
-  #include <stack.h>
-  #include <map.h>
-  #include <set.h>
-#endif
+#include <memory>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <utility>
+#include <functional>
+#include <algorithm>
+#include <list>
+#include <iomanip>
+#include <sstream>
+#include <deque>
+#include <bits/stl_queue.h>
+#include <stack>
+#include <map>
+#include <numeric>
+#include <set>
 
 #endif
