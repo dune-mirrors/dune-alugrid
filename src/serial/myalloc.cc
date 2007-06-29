@@ -28,9 +28,9 @@
 
 #include "myalloc.h"
 
-const long   MyAlloc :: MAX_HOLD_ADD  = 40000000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
-const double MyAlloc :: MAX_HOLD_MULT = 1.3 ; // max das MAX_HOLD_MULT-fache der momentan
-                                              // aktiven Objekte werden gespeichert
+const long   MyAlloc :: MAX_HOLD_ADD  = 40000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
+const double MyAlloc :: MAX_HOLD_MULT = 0.25 ;   // max das MAX_HOLD_MULT-fache der momentan
+                                                 // aktiven Objekte werden gespeichert
 // MyAlloc initialize flag                                                   
 bool MyAlloc :: _initialized = false;
 
