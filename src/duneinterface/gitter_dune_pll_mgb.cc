@@ -517,7 +517,16 @@ void DuneParallelGridMover :: initialize ()
 // destructor calles finalize if not finalized yet 
 DuneParallelGridMover :: ~DuneParallelGridMover () 
 {
-  if(!_finalized) finalize();
+  if(!_finalized) 
+  {
+    // compress index manager 
+    for(int i=0; i<Gitter :: Geometric :: BuilderIF :: numOfIndexManager; ++i)
+    {
+      this->_mgb.indexManager(i).compress();
+    }
+
+    finalize();
+  }
 }   
 
 // overloaded, because here we use the new insertInternal method 
