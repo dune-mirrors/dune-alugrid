@@ -844,14 +844,6 @@ void GitterPll :: exchangeStaticState () {
   return ;
 }
 
-void GitterPll :: compressIndexManagers ()
-{
-  for(int i=0; i<Gitter :: Geometric :: BuilderIF :: numOfIndexManager; ++i)
-  {
-    this->containerPll().indexManager(i).compress();
-  }
-}
-
 void GitterPll :: loadBalancerGridChangesNotify () {
   assert (debugOption (20) ? (cout << "**GitterPll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
   const int np = mpAccess ().psize () ;
@@ -919,9 +911,6 @@ void GitterPll :: notifyMacroGridChanges () {
   loadBalancerMacroGridChangesNotify () ;
   exchangeStaticState () ;
   exchangeDynamicState () ;
-
-  // compress index Manager 
-  this->compressIndexManagers ();
   return ;
 }
 
