@@ -277,7 +277,9 @@ removeDescendents( helement_STI & elem )
     if( ! child->leaf() )
       removeDescendents( *child );
     
-    assert( child->leaf () );
+    // if something went wrong, return ghosts are removed later 
+    if( ! child->leaf () ) return ;
+
     // mark child for coarsening 
     child->tagForGlobalCoarsening(); 
   }
