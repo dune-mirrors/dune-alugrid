@@ -31,9 +31,11 @@ public :
   bool full () const { return (_f >= length); }
 
   // Puts a new object onto the stack
-  void push (const T& t) { 
+  void push (const T& t) 
+  { 
     assert( _f < length );
-    _s[_f++] = t; }
+    _s[_f++] = t; 
+  }
 
   // Removes and returns the uppermost object from the stack
   T pop () { 
@@ -134,6 +136,9 @@ public:
   // are inserted as holes 
   void generateHoles(const vector<bool> & isHole);
 
+  // remove all indices that are not used (if possible)
+  void compress ();
+
 private:
   // no copy constructor allowed 
   ALUGridIndexStack( const ALUGridIndexStack<T,length> & s);
@@ -195,21 +200,29 @@ inline T ALUGridIndexStack<T,length>::getIndex ()
 template <class T, int length>
 inline void ALUGridIndexStack<T,length>::freeIndex ( T index ) 
 {
-  if((*stack_).full())
+  if(index == (maxIndex_ -1)) 
   {
-    fullStackList_.push(  stack_ );
-    if( emptyStackList_.empty() )
-    {
-      assert( emptyStackList_.size() <= 0 );
-      stack_ = new StackType (); 
-    }
-    else 
-    {
-      stack_ = emptyStackList_.top();
-      emptyStackList_.pop();
-    }
+    --maxIndex_;
+    return ;
   }
-  (*stack_).push(index); 
+  else 
+  {
+    if((*stack_).full())
+    {
+      fullStackList_.push(  stack_ );
+      if( emptyStackList_.empty() )
+      {
+        assert( emptyStackList_.size() <= 0 );
+        stack_ = new StackType (); 
+      }
+      else 
+      {
+        stack_ = emptyStackList_.top();
+        emptyStackList_.pop();
+      }
+    }
+    (*stack_).push(index); 
+  }
 }
 
 template <class T, int length>
@@ -238,27 +251,6 @@ inline void ALUGridIndexStack<T,length>::backupIndexSet ( ostream & os )
   // restored 
   os.write( ((const char *) &maxIndex_ ), sizeof(int) ) ;
   
-  /*
-  assert( stack_ ); 
-  stack_->backup( os ); 
-  
-  int s = fullStackList_.size();
-  os.write( ((const char *) &s ), sizeof(int) ) ;
-  
-  if ( s > 0 )
-  {
-    // make a copy of the stack, so we can empty it 
-    // without changeing the state of our object 
-    StackListType backupStack = fullStackList_;
-    while ( ! backupStack.empty()) 
-    {
-      StackType * st = backupStack.top();
-      assert( st );
-      backupStack.pop();
-      st->backup( os );
-    }
-  }
-  */
   return ;
 }
 
@@ -269,26 +261,6 @@ inline void ALUGridIndexStack<T,length>::restoreIndexSet ( istream & is )
   // clear stack fro reconstruction of holes 
   clearStack ();
 
-  /*
-  assert( stack_ );
-  stack_->restore( is ); 
-
-  int s; 
-  is.read ( ((char *) &s), sizeof(int) );
-
-  // if full stacks have been backuped 
-  if( s > 0 ) 
-  {
-    // create as many stacks as have been backuped
-    for(int i=0; i<s; ++i) 
-    {
-      StackType * st = new StackType();
-      assert( st );
-      st->restore( is );
-      fullStackList_.push( st );
-    }
-  }
-  */
   return ;
 }
 
@@ -310,7 +282,6 @@ inline void ALUGridIndexStack<T,length>::clearStack ()
   }
   return;
 }
-
 template <class T, int length>
 inline void ALUGridIndexStack<T,length>::
 generateHoles(const vector<bool> & isHole) 
@@ -325,6 +296,53 @@ generateHoles(const vector<bool> & isHole)
   }
 }
  
+template <class T, int length>
+inline void ALUGridIndexStack<T,length>::
+compress() 
+{
+  std::priority_queue<int> tmpStack;
+
+  if( stack_ )
+  {
+    StackType& stack = *stack_;
+    while( ! stack.empty() )
+    {
+      tmpStack.push(stack.pop());
+    }
+    delete stack_; stack_ = 0;
+  }
+  
+  while( !fullStackList_.empty() )
+  {
+    StackType * st = fullStackList_.top();
+    fullStackList_.pop();
+    if( st )
+    {
+      StackType& stack = *st;
+      while( ! stack.empty() )
+      {
+        tmpStack.push(stack.pop());
+      }
+      delete st; 
+    }
+  }
+
+  while ( tmpStack.top() == (maxIndex_-1) )
+  {
+    --maxIndex_;
+    tmpStack.pop();
+  }
+
+  stack_ = new StackType();
+  assert( stack_ );
+  while( ! tmpStack.empty ())
+  {
+    freeIndex( tmpStack.top() );
+    tmpStack.pop();
+  }
+}
+
+// define index stack tpye for all grids 
 enum { lengthOfFiniteStack = 262144 }; // 2^18 
 typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
 
