@@ -167,7 +167,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   protected:  
     bool _initialized;
     bool _finalized;
-  protected :
+  private :
     BuilderIF & _mgb ;
 } ;
 
