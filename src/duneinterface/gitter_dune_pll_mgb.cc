@@ -485,29 +485,55 @@ void DuneParallelGridMover :: initialize ()
   }
 
   // from constructor ParallelGridMover 
+  const size_t vecSize = _hexaMap.size() + _tetraMap.size() +
+                         _periodic3Map.size() + _periodic4Map.size(); 
+  
   vector < elementKey_t > toDelete ;
-  {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).accessPllX ().erasable ()) {
-      toDelete.push_back ((*i).first) ;
+
+  // reserve memory 
+  toDelete.reserve( vecSize );
+  
+  {
+    for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; i ++)
+    {
+      if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).accessPllX ().erasable ()) 
+      {
+        toDelete.push_back ((*i).first) ;
+      }
     }
   }
-  {for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMap.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).accessPllX ().erasable ()) {
-      toDelete.push_back ((*i).first) ;
+  {
+    for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMap.end () ; i ++)
+    {
+      if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).accessPllX ().erasable ()) 
+      {
+        toDelete.push_back ((*i).first) ;
+      }
     }
   }
-  {for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).accessPllX ().erasable ()) {
-      toDelete.push_back ((*i).first) ;
+  {
+    for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; i ++)
+    {
+      if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).accessPllX ().erasable ()) 
+      {
+        toDelete.push_back ((*i).first) ;
+      }
     }
   }
-  {for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).accessPllX ().erasable ()) {
-      toDelete.push_back ((*i).first) ;
+  {
+    for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; i ++)
+    {
+      if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).accessPllX ().erasable ()) 
+      {
+        toDelete.push_back ((*i).first) ;
+      }
     }
   }
-  {for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDelete.end () ; i ++ )
-    removeElement (*i) ;
+
+  // delete all elements 
+  {
+    for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDelete.end () ; i ++ )
+      removeElement (*i) ;
   }
 
   this->_initialized = true;
@@ -519,12 +545,13 @@ DuneParallelGridMover :: ~DuneParallelGridMover ()
 {
   if(!_finalized) 
   {
-    // compress index manager 
+    // compress index manager before new elements are created 
     for(int i=0; i<Gitter :: Geometric :: BuilderIF :: numOfIndexManager; ++i)
     {
-      this->_mgb.indexManager(i).compress();
+      myBuilder().indexManager(i).compress();
     }
 
+    // finalize mover 
     finalize();
   }
 }   
