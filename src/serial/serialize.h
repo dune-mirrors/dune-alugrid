@@ -41,16 +41,18 @@ protected:
   char * _buf ;
   size_t _rb, _wb, _len ;
   const size_t _bufChunk; 
+  mutable bool _owner;
 
 public :
   class EOFException {} ;
   class OutOfMemoryException {} ;
   inline ObjectStreamImpl (size_t chunk) 
-    : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(chunk)
+    : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(chunk) , _owner(true)
   {
   }
+  
   inline ObjectStreamImpl (const ObjectStreamImpl & os)
-    : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(os._bufChunk)
+    : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(os._bufChunk) , _owner(true)
   {
     assign(os);
   }
@@ -68,6 +70,7 @@ public :
   // delete stream 
   inline ~ObjectStreamImpl () { removeObj(); }
 
+  //! assign buffer from os the local buffer, os ownership is false afterwards
   inline const ObjectStreamImpl & operator = (const ObjectStreamImpl & os)
   {
     removeObj();
@@ -79,6 +82,7 @@ public :
   template <class T> 
   inline void write (const T & a)
   {
+    assert( _owner );
     size_t ap = _wb;
     _wb = ap + sizeof(T) ;
     if (_wb > _len) reallocateBuffer(_wb);
@@ -101,6 +105,7 @@ public :
     return ;
   }
 
+  // read this stream and write to os 
   inline void readStream (ObjectStreamImpl & os) 
   {
     readStream(os,_wb);
@@ -127,13 +132,41 @@ public :
     _rb += length; 
     if( _rb > _wb) throw EOFException () ;
   }
+ 
+  //! free allocated memory 
+  void reset() 
+  {
+    removeObj();
+  }
+ 
+  // static alloc of char buffer for use in mpAccess_MPI 
+  static char * allocateBuffer(size_t newSize) throw (OutOfMemoryException)
+  {
+    // make sure that char has size of 1, otherwise check doExchange in
+    // mpAccess_MPI.cc 
+    char * buffer = (char *) malloc (newSize * sizeof(char)) ;
+    if ( ! buffer ) 
+    {
+      perror ("**EXCEPTION in ObjectStream :: allocateBuffer(size_t) ") ;
+      throw OutOfMemoryException () ;
+    }
+    return buffer;
+  }
   
+  // static free for use in mpAccess_MPI 
+  static void freeBuffer(char * buffer)
+  {
+    assert( buffer );
+    free ( buffer );
+  }
 protected:
   inline char * getBuff (const size_t ap) { return (_buf + ap); }
   inline const char * getBuff (const size_t ap) const { return (_buf + ap); }
 
+  // reallocated the buffer if necessary 
   void reallocateBuffer(size_t newSize) throw (OutOfMemoryException)
   {
+    assert( _owner );
     _len += _bufChunk; 
     if(_len < newSize) _len = newSize;
     _buf = (char *) realloc (_buf, _len) ;
@@ -146,11 +179,11 @@ protected:
   // delete buffer 
   void removeObj() 
   {
-    if( _buf ) free (_buf) ;
-    _buf = 0; _len = 0; _wb = 0; _rb = 0;
+    if( _buf && _owner ) free (_buf) ;
+    _buf = 0; _len = 0; _wb = 0; _rb = 0; _owner = true;
     return ;
   }
- 
+  
   // assign buffer 
   void assign(const ObjectStreamImpl & os) throw (OutOfMemoryException)
   {
@@ -161,21 +194,19 @@ protected:
       _wb  = os._wb; 
       _rb  = os._rb; 
       const_cast<size_t &> (_bufChunk) = os._bufChunk;
-      
-      _buf = (char *) malloc (_len) ;
-      if (!_buf) {
-        perror ("**AUSNAHME in ObjectStream :: writeObject (double) ") ;
-        throw OutOfMemoryException () ;
-      }
 
-      assert( os._buf );
-      memcpy(_buf, os._buf, _len );
+      // overtake buffer and set ownership of os to false  
+      _buf = os._buf;
+      os._owner = false;
+      // we are owner now 
+      _owner = true;
     }
     return ;
   }
   
   inline void write2Stream(const char * buff, const size_t length )
   {
+    assert( _owner );
     if( length == 0 ) return ;
 
     size_t newWb = _wb + length;
@@ -183,6 +214,26 @@ protected:
     
     memcpy( getBuff(_wb) , buff , length );
     _wb = newWb;
+    return ;
+  }
+  
+  inline void assign(char * buff, const size_t length )
+  {
+    if( length == 0 ) return ;
+
+    // if length > 0, buff should be valid 
+    assert( buff );
+    
+    // set length 
+    _wb = _len = length;
+    // set buffer 
+    _buf = buff;
+
+    // read status is zero 
+    _rb = 0;
+    
+    // we are the owner 
+    _owner = true; 
     return ;
   }
 } ;
@@ -202,13 +253,17 @@ public :
   // and not conflict with refinement rules in gitter_sti.h 
   enum { ENDOFSTREAM = -3 };
   
-  // create object stream with BufChunk allocated 
+  // create empty object stream 
   inline ObjectStream () : BaseType(BufChunk) 
   {
-    this->reallocateBuffer(BufChunk);
   } 
   
+  // copy constructor 
   inline ObjectStream (const ObjectStream & os) : BaseType(os) {} 
+ 
+public:  
+  // assigment of streams, owner ship of buffer is 
+  // passed from os to this stream to avoid copy of large memory areas 
   inline const ObjectStream & operator = (const ObjectStream & os) 
   {
     BaseType::operator =(os); 
@@ -226,16 +281,33 @@ public :
   ////////////////////////////////////
   // to behave like stringstream 
   ////////////////////////////////////
+  // put char 
   inline void put (const char a)  { this->write(a); }
+  // get char 
   inline char get () 
   { 
     char a;
     this->read(a);  
     return a;
   }
+  // eof function 
   bool eof () const { return (this->_rb > this->_wb); }
   /////////////////////////////////////
     
+protected:  
+  // assign pair of char buffer and size to this object stream 
+  // osvec will contain zeros after that assignment 
+  // used by mpAccess_MPI.cc 
+  inline ObjectStream & operator = (pair< char* , int > & osvec)  
+  {
+    BaseType :: removeObj();
+    BaseType :: assign( osvec.first , osvec.second );
+    // reset osvec
+    osvec.first = 0;
+    osvec.second = 0;
+    return *this;
+  }
+  
   friend class MpAccessMPI ;
 } ;
 
@@ -245,9 +317,13 @@ class SmallObjectStream : public ObjectStreamImpl
   typedef ObjectStreamImpl BaseType;
   enum { BufChunk = 4 * sizeof(double) };
 public:  
+  // create empty stream 
   inline SmallObjectStream () : BaseType(BufChunk) {} 
   
+  // copy constructor 
   inline SmallObjectStream (const SmallObjectStream & os) : BaseType(os) {} 
+  
+  // assignment , ownership changes 
   inline const SmallObjectStream & operator = (const SmallObjectStream & os) 
   {
     BaseType::operator =(os); 
