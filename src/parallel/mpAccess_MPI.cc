@@ -17,12 +17,13 @@
 
 #include "mpAccess_MPI.h"
 
-template < class A > vector < vector < A > > doGcollectV 
-	(const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm) {
+template < class A > vector < vector < A > > 
+doGcollectV (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm) 
+{
   int np, me, test ;
-  test = MPI_Comm_rank (comm, & me) ; 			
+  test = MPI_Comm_rank (comm, & me) ;       
   assert (test == MPI_SUCCESS) ;
-  test = MPI_Comm_size (comm, & np) ; 			
+  test = MPI_Comm_size (comm, & np) ;       
   assert (test == MPI_SUCCESS) ;
   int * rcounts = new int [np] ;
   int * displ = new int [np] ;
@@ -56,45 +57,60 @@ template < class A > vector < vector < A > > doGcollectV
   return res ;
 }
 
-static vector < pair < char *, int > > doExchange (const vector < pair < char *, int > > & in, 
-	MPI_Comm comm, const vector < int > & d) 
+// exchange of char buffers 
+static vector < pair < char *, int > > 
+doExchange (const vector < pair < char *, int > > & in, MPI_Comm comm, const vector < int > & d) 
 {
   assert (in.size() == d.size()) ;
-  int nl = d.size () ;
+  // get number of links 
+  const int nl = d.size () ;
+
+  // create ouput vector
   vector < pair < char *, int > > out (nl) ;
+  
   {
     MPI_Request * req = new MPI_Request [nl] ; 
     assert (req) ;
+
+    // send data 
     {
       for (int link = 0 ; link < nl ; link ++) 
       {
-      	MY_INT_TEST MPI_Issend (in [link].first, in [link].second, MPI_BYTE, d [link], 123, comm, & req [link]) ;
-      	assert (test == MPI_SUCCESS) ;
+        MY_INT_TEST MPI_Issend (in [link].first, in [link].second, MPI_BYTE, d [link], 123, comm, & req [link]) ;
+        assert (test == MPI_SUCCESS) ;
       }
     }
+
+    // receive  data 
     {
-      for (int link = 0 ; link < nl ; link ++ ) 
+      for (int link = 0 ; link < nl ; ++link ) 
       {
-      	MPI_Status s ;
-      	int cnt ;
+        MPI_Status s ;
+        int cnt ;
         {
-	        MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ; 
-	        assert (test == MPI_SUCCESS) ;
+          MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ; 
+          assert (test == MPI_SUCCESS) ;
         }
         {
-	        MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & cnt ) ;
-	        assert (test == MPI_SUCCESS) ;
+          MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & cnt ) ;
+          assert (test == MPI_SUCCESS) ;
         }
-	      char * lne = new char [cnt] ;
-	      assert (lne) ;
+
+        // use alloc from objects stream because this is the 
+        // buffer of the object stream
+        char * lne = ObjectStream :: allocateBuffer( cnt );
+        
         {
-	        MY_INT_TEST MPI_Recv (lne, cnt, MPI_BYTE, d [link], 123, comm, & s) ;
-	        assert (test == MPI_SUCCESS) ;
+          MY_INT_TEST MPI_Recv (lne, cnt, MPI_BYTE, d [link], 123, comm, & s) ;
+          assert (test == MPI_SUCCESS) ;
         }
-	      out [link].first = lne ;
-	      out [link].second = cnt ;
+
+        // set pointers 
+        out [link].first = lne ;
+        out [link].second = cnt ;
       }
     }
+    
     {
       MPI_Status * sta = new MPI_Status [nl] ;
       assert (sta) ;
@@ -109,7 +125,7 @@ static vector < pair < char *, int > > doExchange (const vector < pair < char *,
 
 template < class A > 
 vector < vector < A > > doExchange (const vector < vector < A > > & in,
-                                  	MPI_Datatype mpiType, 
+                                    MPI_Datatype mpiType, 
                                     MPI_Comm comm, 
                                     const vector < int > & d) 
 {
@@ -287,7 +303,8 @@ vector < int > MpAccessMPI :: gcollect (int i) const {
   return r ;
 }
 
-vector < double > MpAccessMPI :: gcollect (double a) const {
+vector < double > MpAccessMPI :: gcollect (double a) const 
+{
   vector < double > r (psize (),0.0) ;
   double * v = new double [psize ()] ;
   mpi_allgather (& a, 1, v, 1) ;
@@ -304,44 +321,60 @@ vector < vector < double > > MpAccessMPI :: gcollect (const vector < double > & 
   return doGcollectV (v, MPI_DOUBLE, _mpiComm) ;
 }
 
-vector < ObjectStream > MpAccessMPI :: gcollect (const ObjectStream & in) const {
-  const int np = psize (), snum = in._wb - in._rb ;
+vector < ObjectStream > MpAccessMPI :: gcollect (const ObjectStream & in) const 
+{
+  // number of processes 
+  const int np = psize (); 
+  
+  // size of buffer 
+  const int snum = in._wb - in._rb ;
+  
+  // create empty objects streams 
   vector < ObjectStream > o (np) ;
+  
+  // collect sizes for all processors 
   vector < int > len = gcollect (snum) ;
+
   int * rcounts = new int [np] ;
   assert (rcounts) ;
   copy (len.begin (), len.end (), rcounts) ;
   int * const displ = new int [np] ;
   assert (displ) ;
+  
+  // set offsets 
   displ [0] = 0 ;
-  for (int j = 1 ; j < np ; j ++) { displ [j] = displ [j - 1] + rcounts [j - 1] ; }
+  for (int j = 1 ; j < np ; ++j ) 
+  { 
+    displ [j] = displ [j - 1] + rcounts [j - 1] ; 
+  }
+  
+  // overall buffer size 
   const int bufSize = displ [np - 1] + rcounts [np - 1] ;
   {    
-    char * y = new char [bufSize] ;
+    // allocate buffer 
+    char * y = ObjectStream :: allocateBuffer(bufSize);
     assert (y) ;
+    
+    // gather all data 
     MY_INT_TEST MPI_Allgatherv (in._buf + in._rb, snum, MPI_BYTE, y, rcounts, displ, MPI_BYTE, _mpiComm) ;
     assert (test == MPI_SUCCESS) ;
-    {for (int i = 0 ; i < np ; i ++ ) {
-      if (rcounts [i]) {
-        o [i]._buf = (char *) realloc (o [i]._buf, (o [i]._len = rcounts [i])) ;
-	if (o [i]._buf) {
-          memcpy (o [i]._buf, y + displ [i], rcounts [i]) ;
-	  o [i]._rb = 0 ;
-          o [i]._wb = rcounts [i] ;
-	} else {
-	  perror ("in MpAccessMPI :: gcollect (const ObjectStream &)") ;
-	  exit (1) ;
-	}
-      } else {
-        free (o [i]._buf) ;
-	o [i]._buf = 0 ;
-	o [i]._len = o [i]._rb = o [i]._wb = 0 ;
+    // copy data to object streams 
+    for (int i = 0 ; i < np ; ++ i ) 
+    {
+      // write data to stream 
+      if( rcounts [i] )
+      {
+        o [i]. write2Stream( y + displ [i], rcounts [i] );
       }
-    }}
-    delete [] y ;
+    }
+
+    // delete buffer 
+    ObjectStream :: freeBuffer( y );
   }
+  // delete helper functions 
   delete [] displ ;
   delete [] rcounts ;
+  
   return o ;
 }
 
@@ -360,49 +393,37 @@ vector < vector < char > > MpAccessMPI :: exchange (const vector < vector < char
   return doExchange (in, MPI_BYTE, _mpiComm, dest ()) ;
 }
 
-vector < ObjectStream > MpAccessMPI :: exchange (const vector < ObjectStream > & in) const {
+// --exchange
+vector < ObjectStream > MpAccessMPI :: exchange (const vector < ObjectStream > & in) const 
+{
+  // get number of links 
   const int nl = nlinks () ;
+
   assert (static_cast<int> (in.size ()) == nlinks()) ;
   
-  vector < ObjectStream > out (nl) ;
+  // create vector with pair buffer,size 
   vector < pair < char *, int > > v (nl) ;
+
+  // set pointers 
+  for (int l = 0 ; l < nl ; ++l ) 
   {
-    for (int l = 0 ; l < nl ; l ++ ) 
-    {
-      v [l].first = in [l]._buf + in [l]._rb ;
-      v [l].second = in [l]._wb - in [l]._rb ;
-    } 
-  }
+    v [l].first  = in [l]._buf + in [l]._rb ;
+    v [l].second = in [l]._wb  - in [l]._rb ;
+  } 
   
+  // exchange data 
   v = doExchange (v, _mpiComm, dest ()) ;
   
+  // create vector of empty streams 
+  vector < ObjectStream > out (nl) ;
+
+  // v contains the newly created recv buffers 
+  // which are re-used as objects streams 
+  for (int l = 0 ; l < nl ; ++l ) 
   {
-    for (int l = 0 ; l < nl ; l ++ ) 
-    {
-      if (v [l].second > 0) 
-      {
-        out [l]._buf = (char *) realloc (out [l]._buf, out [l]._len += v [l].second) ;
-        assert (out [l]._wb + v [l].second < out [l]._len) ;
-        memcpy (out [l]._buf + out [l]._wb , v [l].first, v[l].second) ;
-        out [l]._wb += v [l].second ;
-      }
-      delete [] v [l].first ;
-    }
+    // set pointer as the streams buffer 
+    // v is not valid after that 
+    out [l] = v [l] ; 
   }
   return out ;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
