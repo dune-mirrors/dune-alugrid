@@ -67,6 +67,7 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
   
   const int np = mpa.psize () ;
   ObjectStream os ;
+
   {
     int len = _vertexSet.size () ;
     os.writeObject (len) ;
@@ -78,29 +79,50 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
         i != _edgeSet.end () ; os.writeObject (*i++)) ;}
   }
   try {
+    // exchange data 
     vector < ObjectStream > osv = mpa.gcollect (os) ;
-    {for (int i = 0 ; i < np ; i ++) {
-      int len ;
-      osv [i].readObject (len) ;
-      assert (len >= 0) ;
-      {for (int j = 0 ; j < len ; j ++) {
-	GraphVertex x ;
-        osv [i].readObject (x) ;
-        * nodes ++ = pair < const GraphVertex, int > (x,i) ;
-      }}
-      osv [i].readObject (len) ;
-      assert (len >= 0) ;
-      {for (int j = 0 ; j < len ; j ++) {
-        GraphEdge x ;
-        osv [i].readObject (x) ;
-	* edges ++ = x ;
-	* edges ++ = - x ;
-      }}
-    }}
-  } catch (ObjectStream :: EOFException) {
+
+    // free memory 
+    os.reset ();
+
+    {
+      for (int i = 0 ; i < np ; i ++) 
+      {
+        int len ;
+        osv [i].readObject (len) ;
+        assert (len >= 0) ;
+        {
+          for (int j = 0 ; j < len ; ++j) 
+          {
+            GraphVertex x ;
+            osv [i].readObject (x) ;
+            * nodes ++ = pair < const GraphVertex, int > (x,i) ;
+          } 
+        }
+        osv [i].readObject (len) ;
+        assert (len >= 0) ;
+        {
+          for (int j = 0 ; j < len ; ++j) 
+          {
+            GraphEdge x ;
+            osv [i].readObject (x) ;
+            * edges ++ = x ;
+            * edges ++ = - x ;
+          }
+        }
+
+        // free memory of osv[i]
+        osv[i].reset();
+      }
+    }
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
-  } catch (ObjectStream :: OutOfMemoryException) {
+  } 
+  catch (ObjectStream :: OutOfMemoryException) 
+  {
     cerr << "**FEHLER (FATAL) Out Of Memory in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
@@ -133,8 +155,6 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
       int distance = (pos - covBegin);
       pair<int, int> val (i,distance);
       max [*pos] = val; 
-      //pair < int, int > (i, distance);
-      //(pos - cov [i].begin ())) ;
     } 
   }
   vector < int > renumber (nparts, -1L) ;
@@ -230,11 +250,14 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
   
   if (mth == NONE) return false ;
   
+  // create maps for edges and vertices 
   ldb_edge_set_t   edges ;
-  ldb_vertex_map_t nodes ;
+  ldb_vertex_map_t nodes ; 
 
-    graphCollect (mpa,insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
-  			insert_iterator < ldb_edge_set_t > (edges,edges.begin ())) ;
+  graphCollect (mpa,
+                insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
+          			insert_iterator < ldb_edge_set_t > (edges,edges.begin ())
+               ) ;
   
 	// 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
 	// Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
@@ -247,27 +270,31 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
   const int ned = edges.size () ;
   const int nel = nodes.size () ;
   
-  if (edges.size ()) {
-    if (!((*edges.rbegin ()).leftNode () < nel)) {
+  if (edges.size ()) 
+  {
+    if (!((*edges.rbegin ()).leftNode () < nel)) 
+    {
       cerr << "**WARNUNG (FEHLER IGNORIERT) Die Indexmenge ist nicht volls\"andig\n" ;
       cerr << "  \"uberdeckt zur Neupartitionierung. In " << __FILE__ << " " << __LINE__ << endl ;
       return false ;
     }
+
+    // allocate edge memory for graph partitioners 
     int    * const edge_p      = new int [nel + 1] ;
     int    * const edge        = new int [ned] ;
     int    * const edge_w      = new int [ned] ;
-    float  * const vertex_w    = new float [nel] ;
-    int    * const vertex_wInt = new int [nel] ;
-    int    * part              = new int [nel] ;
-    
-    assert (edge_p && edge && edge_w && vertex_w && vertex_wInt && part) ;
+
+    assert ( edge_p && edge && edge_w ) ;
     
     {
       int * edge_pPos = edge_p ;
       int count = 0, index = -1 ;
       
-      for (ldb_edge_set_t :: const_iterator i = edges.begin () ; i != edges.end () ; i ++) {
-        if ((*i).leftNode () != index) {
+      for (ldb_edge_set_t :: const_iterator i = edges.begin () ; 
+           i != edges.end () ; i ++) 
+      {
+        if ((*i).leftNode () != index) 
+        {
           assert ((*i).leftNode () < nel) ;
           * edge_pPos ++ = count ;
           index = (*i).leftNode () ;
@@ -278,28 +305,38 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
       }
       * edge_pPos = count ;
       assert (edge_p [0] == 0 && edge_p [nel] == ned) ;
+
+      // free memory, not needed anymore 
+      edges.clear();
     }
+    
+    // get vertex memory 
+    float  * const vertex_w    = new float [nel] ;
+    int    * const vertex_wInt = new int [nel] ;
+    int    * part              = new int [nel] ;
+    
+    assert ( vertex_w && vertex_wInt && part) ;
     {
       vector < int > check (nel, 0L) ;
-      for (ldb_vertex_map_t :: const_iterator i = nodes.begin () ; i != nodes.end () ; i ++ ) {
+      for (ldb_vertex_map_t :: const_iterator i = nodes.begin () ; i != nodes.end () ; i ++ ) 
+      {
         int j = (*i).first.index () ;
         assert (0 <= j && j < nel) ;
         assert (0 <= (*i).second && (*i).second < np) ;
         part [j] = (*i).second ;
         check [j] = 1 ;
         vertex_w [j] = vertex_wInt [j] = (*i).first.weight () ;
-	
-	// Hier besetht die M"oglichkeit auch die Schwerpunktskoordinaten
-	// der Grobgitterelemente auszulesen:
-	//
-	// double (&p)[3] = (*i).first.center () [0] ;
       }
+
+      // free memory, not needed anymore
+      nodes.clear();
       
-      if (nel != accumulate (check.begin (), check.end (), 0)) {
+      if (nel != accumulate (check.begin (), check.end (), 0)) 
+      {
         cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
         cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
-	delete [] part ;
-	delete [] vertex_wInt ;
+	      delete [] part ;
+      	delete [] vertex_wInt ;
         delete [] vertex_w ;
         delete [] edge_w ;
         delete [] edge ;
@@ -307,70 +344,75 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
         return false ;
       }
     }
-    if (np > 1) {
-    
-	// Abfangen, falls nur ein teilgebiet gebildet werden soll,
-	// sonst Speicherallocationsfehler in den Partitionierern,
-	// zumindest bei PARTY 1.1.
+
+    if (np > 1) 
+    {
+    	// Abfangen, falls nur ein teilgebiet gebildet werden soll,
+	    // sonst Speicherallocationsfehler in den Partitionierern,
+	    // zumindest bei PARTY 1.1.
 
       int * neu = new int [nel] ;
       assert (neu) ;
       copy (part, part + nel, neu) ;
       
-      switch (mth) {
+      switch (mth) 
+      {
+        // Die Methode 'collect' sammelt alle Elemente in einer Partition ein.
 
-	// Die Methode 'collect' sammelt alle Elemente in einer Partition ein.
-
-	case COLLECT :
-	  fill (neu, neu + nel, 0L) ;
-	  break ;
+        case COLLECT :
+          fill (neu, neu + nel, 0L) ;
+          break ;
+          
         case PARTY_linear :
-	  global_linear (nel, vertex_w, np, 0.0, neu) ;
-	  break ;
-	case PARTY_gain :
-	  global_gain (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu) ;
-	  break ;
-	case PARTY_farhat :
-	  global_farhat (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu) ;
-	  break ;
+          global_linear (nel, vertex_w, np, 0.0, neu) ;
+          break ;
+          
+        case PARTY_gain :
+          global_gain (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu) ;
+          break ;
+          
+        case PARTY_farhat :
+          global_farhat (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu) ;
+          break ;
+          
         case PARTY_kernighanLin :
-	
-	// Die dreifache Anwendung der Helpful-Set bzw. Kenighan-Lin Heuristik
-	// basiert auf Erfahrungswerten und liefert einigermassen ausiterierte
-	// Partitionen.
-	
+          // Die dreifache Anwendung der Helpful-Set bzw. Kenighan-Lin Heuristik
+          // basiert auf Erfahrungswerten und liefert einigermassen ausiterierte
+          // Partitionen.
+        
           local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 3.0, neu, 0) ;
-	  local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 1.0, neu, 0) ;
-	  local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu, 0) ;
-	  break ;
-	case PARTY_helpfulSet :
-          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 2.0, neu, 0) ;
-	  local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 1.0, neu, 0) ;
-	  local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu, 0) ;
-	  break ;
+          local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 1.0, neu, 0) ;
+          local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu, 0) ;
+          break ;
+          
+        case PARTY_helpfulSet :
+                local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 2.0, neu, 0) ;
+          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 1.0, neu, 0) ;
+          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu, 0) ;
+          break ;
 
-	case METIS_PartGraphKway :
-	  {
-	    int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-	    :: METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
-              & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
-	  }
-	  break ;
-	case METIS_PartGraphRecursive :
-	  {
-	    int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-	    :: METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
-              & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
-	  }
-	  break ;
+        case METIS_PartGraphKway :
+          {
+            int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
+            :: METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
+                    & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
+          }
+          break ;
+        case METIS_PartGraphRecursive :
+          {
+            int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
+            :: METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
+                    & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
+          }
+          break ;
+
         default :
-
-	  cerr << "**WARNUNG (FEHLER IGNORIERT) Ung\"ultige Methode [" << mth << "] zur\n" ;
-	  cerr << "  Neupartitionierung angegeben. In " << __FILE__ << " " << __LINE__ << endl ;
-	    
-	  delete [] neu ;
-	  delete [] part ;
-	  delete [] vertex_wInt ;
+          cerr << "**WARNUNG (FEHLER IGNORIERT) Ung\"ultige Methode [" << mth << "] zur\n" ;
+          cerr << "  Neupartitionierung angegeben. In " << __FILE__ << " " << __LINE__ << endl ;
+            
+          delete [] neu ;
+          delete [] part ;
+          delete [] vertex_wInt ;
           delete [] vertex_w ;
           delete [] edge_w ;
           delete [] edge ;
@@ -378,33 +420,35 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
           return false ;
       }
 
-	// collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
-	// diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
-	// zusammen.
+      // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
+      // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
+      // zusammen.
 
       collectInsulatedNodes (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
 
-	// optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
-	// Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
-	// abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
-	// in Aktion tritt.
+      // optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
+      // Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
+      // abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
+      // in Aktion tritt.
 
       optimizeCoverage (np, nel, part, vertex_w, neu, me == 0 ? debugOption (4) : 0) ;
 
-	// Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
+      // Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
 
       change = ! equal (neu, neu + nel, part) ;
 
-      if (change) {
-
-	// Hier die neue Zuordnung auf den eigenen Lastvertex-Container schreiben.
-	// Dadurch werden die Grobgitterelemente an das neue Teilgebiet zugewiesen. 
+      if (change) 
+      {
+        // Hier die neue Zuordnung auf den eigenen Lastvertex-Container schreiben.
+        // Dadurch werden die Grobgitterelemente an das neue Teilgebiet zugewiesen. 
 
         for (ldb_vertex_map_t :: iterator i = _vertexSet.begin () ; i != _vertexSet.end () ; i ++)
           _connect.insert ((*i).second = neu [(*i).first.index ()]) ;
       }
+      
       delete [] neu ;
     }
+
     delete [] part ;
     delete [] vertex_wInt ;
     delete [] vertex_w ;
@@ -412,6 +456,8 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
     delete [] edge ;
     delete [] edge_p ;
   }
+
+
   if (debugOption (3) && ! me) {
     cout << "**INFO LoadBalancerPll :: DataBase :: repartition ()\n"
          << "       globalen Graphen mit " << (ned/2) << " Kanten und " << nel << " Knoten erzeugt\n"
