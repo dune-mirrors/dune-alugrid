@@ -34,17 +34,28 @@
   
 #include "gitter_pll_ldb.h" 
 
-void LoadBalancer :: DataBase :: edgeUpdate (const GraphEdge & e) {
-  if (e.isValid ()) {
-    _edgeSet.find (e) != _edgeSet.end() ? (_edgeSet.erase (_edgeSet.find (e)), _edgeSet.insert (e), 0) : (_edgeSet.insert (e), 0) ;
+void LoadBalancer :: DataBase :: edgeUpdate (const GraphEdge & e) 
+{
+  if (e.isValid ()) 
+  {
+    //_edgeSet.find (e) != _edgeSet.end() ? (_edgeSet.erase (_edgeSet.find (e)), _edgeSet.insert (e), 0) : (_edgeSet.insert (e), 0) ;
+    ldb_edge_set_t :: iterator it =  _edgeSet.find (e);
+    if ( it != _edgeSet.end() )
+    {
+      _edgeSet.erase (it);
+    }
+    
+    _edgeSet.insert (e);
   }
   return ;
 }
 
-void LoadBalancer :: DataBase :: vertexUpdate (const GraphVertex & v) {
+void LoadBalancer :: DataBase :: vertexUpdate (const GraphVertex & v) 
+{
   assert (v.isValid ()) ;
   _maxVertexLoad = _maxVertexLoad < v.weight () ? v.weight () : _maxVertexLoad ;
-  _vertexSet.find (v) != _vertexSet.end () ? (_vertexSet.erase (v), _vertexSet [v] = -1) : _vertexSet [v] = -1 ;
+  _vertexSet.find (v) != _vertexSet.end () ? 
+    (_vertexSet.erase (v), _vertexSet [v] = -1) : _vertexSet [v] = -1 ;
   return ;
 }
 
@@ -63,7 +74,7 @@ void LoadBalancer :: DataBase :: printLoad () const {
 } 
 
 void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa, 
-	insert_iterator < ldb_vertex_map_t > nodes, insert_iterator < ldb_edge_set_t > edges) const {
+  insert_iterator < ldb_vertex_map_t > nodes, insert_iterator < ldb_edge_set_t > edges) const {
   
   const int np = mpa.psize () ;
   ObjectStream os ;
@@ -71,14 +82,23 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
   {
     int len = _vertexSet.size () ;
     os.writeObject (len) ;
-    {for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
-        i != _vertexSet.end () ; os.writeObject ((*i++).first)) ;}
+    {
+      ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
+      for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
+        i != iEnd; os.writeObject ((*i++).first)) ;
+    }
+    
     len = _edgeSet.size () ;
     os.writeObject (len) ;
-    {for (ldb_edge_set_t :: const_iterator i = _edgeSet.begin () ; 
-        i != _edgeSet.end () ; os.writeObject (*i++)) ;}
+    {
+      ldb_edge_set_t :: const_iterator iEnd = _edgeSet.end () ;
+      for (ldb_edge_set_t :: const_iterator i = _edgeSet.begin () ; 
+        i != iEnd; os.writeObject (*i++)) ;
+    }
   }
-  try {
+
+  try 
+  {
     // exchange data 
     vector < ObjectStream > osv = mpa.gcollect (os) ;
 
@@ -131,11 +151,11 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
 
 static void optimizeCoverage (const int nparts, const int len, const int * const reference, const float * const weight, int * const proposal, const int verbose) {
 
-	// 'reference' ist das Referenzarray, das mit dem 'proposal'
-	// Vorschlagsvektor optimal abgeglichen werden soll, indem
-	// auf 'proposal' eine Indexpermutationangewendet wird.
-	// cov ist das 'coverage' Array, das die "Uberdeckung von
-	// alter und neuer Teilgebietszuordnung beschreiben soll.
+  // 'reference' ist das Referenzarray, das mit dem 'proposal'
+  // Vorschlagsvektor optimal abgeglichen werden soll, indem
+  // auf 'proposal' eine Indexpermutationangewendet wird.
+  // cov ist das 'coverage' Array, das die "Uberdeckung von
+  // alter und neuer Teilgebietszuordnung beschreiben soll.
 
   vector < vector < int > > cov (nparts, vector < int > (nparts, 0L)) ;
 
@@ -157,16 +177,23 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
       max [*pos] = val; 
     } 
   }
+
   vector < int > renumber (nparts, -1L) ;
-  {for (map < int, pair < int, int >, greater_equal < int > > :: const_iterator i = max.begin () ; i != max.end () ; i ++ ) {
-    if (renumber [(*i).second.second] == -1) {
-      int neue = (*i).second.first ;
-      if (freeIndex.find (neue) != freeIndex.end ()) {
-	renumber [(*i).second.second] = neue ;
-	freeIndex.erase (neue) ;
+  {
+    for (map < int, pair < int, int >, greater_equal < int > > :: const_iterator i = max.begin () ; 
+         i != max.end () ; i ++ ) 
+    {
+      if (renumber [(*i).second.second] == -1) 
+      {
+        int neue = (*i).second.first ;
+        if (freeIndex.find (neue) != freeIndex.end ()) 
+        {
+          renumber [(*i).second.second] = neue ;
+          freeIndex.erase (neue) ;
+        }
       }
-    }
-  }}
+    } 
+  }
   
   for (int j = 0; j != nparts ; ++j) 
   {
@@ -174,13 +201,13 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
     {
       if (freeIndex.find (j) != freeIndex.end ()) 
       {
-      	renumber [j] = j ;
-      	freeIndex.erase (j) ;
+        renumber [j] = j ;
+        freeIndex.erase (j) ;
       } 
       else 
       {
-      	renumber [j] = * freeIndex.begin () ;
-      	freeIndex.erase (freeIndex.begin ()) ;
+        renumber [j] = * freeIndex.begin () ;
+        freeIndex.erase (freeIndex.begin ()) ;
       }
     }
   }
@@ -191,7 +218,7 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
     for (int i = 0 ; i < nparts ; i ++) 
     {
       for (int j = 0 ; j < nparts ; j ++)
-      	cout << "  " << setw (4) << cov [i][j] << " " ;
+        cout << "  " << setw (4) << cov [i][j] << " " ;
 
       cout << "| " << i << " -> " << renumber [i] << endl ;
     }
@@ -206,15 +233,15 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
 
 static bool collectInsulatedNodes (const int nel, const float * const vertex_w, const int * const edge_p, const int * const edge, const int * const edge_w, const int np, int * neu) {
 
-	// 'collectInsulatedNodes (.)' ist eine Behelfsl"osung, damit der MHD Code
-	// mit seinen periodischen Randelementen nicht zu Bruch geht. Da es sich
-	// bei den periodischen Randelementen nur um Adapter ohne eigenen Daten-
-	// inhalt handelt, d"urfen diese niemals isoliert von ihren Nachbarelementen
-	// in ein Teilgebiet zugewiesen werden. Diese Prozedur sammelt grunds"atzlich
-	// alle isolierten Elemente auf eine einigermassen vern"unftige Art zusammen,
-	// weil sich auf dem Niveau des Partitionierers 'echte' Elemente und die
-	// periodischen Adapter nur indirekt, d.h. durch die Anzahl der abgehenden
-	// Kanten, unterscheiden lassen (das ist aber ein zu schwaches Kriterium).
+  // 'collectInsulatedNodes (.)' ist eine Behelfsl"osung, damit der MHD Code
+  // mit seinen periodischen Randelementen nicht zu Bruch geht. Da es sich
+  // bei den periodischen Randelementen nur um Adapter ohne eigenen Daten-
+  // inhalt handelt, d"urfen diese niemals isoliert von ihren Nachbarelementen
+  // in ein Teilgebiet zugewiesen werden. Diese Prozedur sammelt grunds"atzlich
+  // alle isolierten Elemente auf eine einigermassen vern"unftige Art zusammen,
+  // weil sich auf dem Niveau des Partitionierers 'echte' Elemente und die
+  // periodischen Adapter nur indirekt, d.h. durch die Anzahl der abgehenden
+  // Kanten, unterscheiden lassen (das ist aber ein zu schwaches Kriterium).
 
 #ifndef NDEBUG
   const int ned = edge_p [nel] ;
@@ -234,7 +261,7 @@ static bool collectInsulatedNodes (const int nel, const float * const vertex_w, 
         cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
       } else {
 //        cerr << "!!! Pass mal auf, ich weise dem Knoten " << i << " jetzt das Gebiet " << neu[edge [max]] << " zu." << endl ;
-        neu [i] = neu [edge [max]] ;		
+        neu [i] = neu [edge [max]] ;    
         change = true ;
       }
     }
@@ -256,16 +283,16 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
 
   graphCollect (mpa,
                 insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
-          			insert_iterator < ldb_edge_set_t > (edges,edges.begin ())
+                insert_iterator < ldb_edge_set_t > (edges,edges.begin ())
                ) ;
   
-	// 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
-	// Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
-	// durch Zusammenführen der einzelnen Container aus den Teilgrobgittern.
-	// Der Container 'edges' enthält alle Kanten des gesamten Grobgittergraphen
-	// doppelt, einmal mit jeder Orientierung (vorw"arts/r"uckw"arts). Diese Form
-	// der Datenhaltung ist vorteilhaft, wenn die Eingangsdaten der Partitionierer
-	// im CSR Format daraus erstellt werden m"ussen.
+  // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
+  // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
+  // durch Zusammenführen der einzelnen Container aus den Teilgrobgittern.
+  // Der Container 'edges' enthält alle Kanten des gesamten Grobgittergraphen
+  // doppelt, einmal mit jeder Orientierung (vorw"arts/r"uckw"arts). Diese Form
+  // der Datenhaltung ist vorteilhaft, wenn die Eingangsdaten der Partitionierer
+  // im CSR Format daraus erstellt werden m"ussen.
   
   const int ned = edges.size () ;
   const int nel = nodes.size () ;
@@ -335,8 +362,8 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
       {
         cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
         cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
-	      delete [] part ;
-      	delete [] vertex_wInt ;
+        delete [] part ;
+        delete [] vertex_wInt ;
         delete [] vertex_w ;
         delete [] edge_w ;
         delete [] edge ;
@@ -347,9 +374,9 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
 
     if (np > 1) 
     {
-    	// Abfangen, falls nur ein teilgebiet gebildet werden soll,
-	    // sonst Speicherallocationsfehler in den Partitionierern,
-	    // zumindest bei PARTY 1.1.
+      // Abfangen, falls nur ein teilgebiet gebildet werden soll,
+      // sonst Speicherallocationsfehler in den Partitionierern,
+      // zumindest bei PARTY 1.1.
 
       int * neu = new int [nel] ;
       assert (neu) ;
