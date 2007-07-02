@@ -23,6 +23,24 @@ class LinearMapping {
     void map2world (const double (&)[4], double (&)[3]) const ;
     void map2world (const double , const double , const double, const double, double (&)[3]) const ;
     void world2map (const double (&)[3], double (&)[4]) ;
+
+    static inline void barycenter(const double (&p0)[3], const double (&p1)[3], 
+                                  const double (&p2)[3], const double (&p3)[3], 
+                                  double (&barycenter)[3])
+    {
+      barycenter[0] = 0.25 * (p0[0] + p1[0] + p2[0] + p3[0]);
+      barycenter[1] = 0.25 * (p0[1] + p1[1] + p2[1] + p3[1]);
+      barycenter[2] = 0.25 * (p0[2] + p1[2] + p2[2] + p3[2]);
+#ifndef NDEBUG
+      LinearMapping map(p0,p1,p2,p3);
+      double p[3] ;
+      map.map2world(.25, .25, .25, .25, p) ;
+      for(int j=0; j<3; ++j)
+      {
+        assert( fabs(barycenter[j] - p[j]) < 1e-8 );
+      }
+#endif
+    }
 } ;
 
 class quadraturTetra3Dbasis {
