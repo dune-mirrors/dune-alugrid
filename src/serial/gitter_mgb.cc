@@ -258,8 +258,8 @@ pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: Insert
 }
 // Ende - Neu am 23.5.02 (BS)
 
-void MacroGridBuilder :: removeElement (const elementKey_t & k) {
-  
+void MacroGridBuilder :: removeElement (const elementKey_t & k) 
+{
   // Der Schl"ussel sollte nur in genau einer Map vorliegen.
 
 // Anfang - Neu am 23.5.02 (BS)
@@ -270,7 +270,8 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
 // Ende - Neu am 23.5.02 (BS)
 
   elementMap_t :: iterator hit = _tetraMap.find (k) ;
-  if (hit != _tetraMap.end ()) {
+  if (hit != _tetraMap.end ()) 
+  {
     tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
     for (int i = 0 ; i < 4 ; i ++) 
     {
@@ -283,7 +284,8 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k) {
     return ;
   }
   hit = _hexaMap.find (k) ;
-  if (hit != _hexaMap.end ()) {
+  if (hit != _hexaMap.end ()) 
+  {
     hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
     for (int i = 0 ; i < 6 ; i ++) {
       _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), 
