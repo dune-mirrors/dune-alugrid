@@ -1174,19 +1174,32 @@ bool GitterDunePll :: refine () {
     // Verfeinern auf gitter nicht mehr stimmen werden. Die Technik
     // ist zul"assig, da keine mehrfache Verfeinerung entstehen kann.
   
-    {for (int l = 0 ; l < nl ; l ++) {
-  //cout << "refinepll \n";
-  LeafIteratorTT < hface_STI > fw (*this,l) ;
-  LeafIteratorTT < hedge_STI > dw (*this,l) ;
-  for (fw.outer ().first () ; ! fw.outer().done () ; fw.outer ().next ())
-    outerFaces [l].push_back (& fw.outer ().item ()) ;
-  for (fw.inner ().first () ; ! fw.inner ().done () ; fw.inner ().next ())
-    innerFaces [l].push_back (& fw.inner ().item ()) ;
-  for (dw.outer ().first () ; ! dw.outer().done () ; dw.outer ().next ())
-    outerEdges [l].push_back (& dw.outer ().item ()) ;
-  for (dw.inner ().first () ; ! dw.inner ().done () ; dw.inner ().next ())
-    innerEdges [l].push_back (& dw.inner ().item ()) ;
-      }}
+    {
+      for (int l = 0 ; l < nl ; l ++) 
+      {
+        //cout << "refinepll \n";
+        LeafIteratorTT < hface_STI > fw (*this,l) ;
+        LeafIteratorTT < hedge_STI > dw (*this,l) ;
+
+        // reserve memory first 
+        outerFaces[l].reserve(fw.outer().size());
+        innerFaces[l].reserve(fw.inner().size());
+        
+        for (fw.outer ().first () ; ! fw.outer().done () ; fw.outer ().next ())
+          outerFaces [l].push_back (& fw.outer ().item ()) ;
+        for (fw.inner ().first () ; ! fw.inner ().done () ; fw.inner ().next ())
+          innerFaces [l].push_back (& fw.inner ().item ()) ;
+
+        // reserve memory first 
+        outerEdges[l].reserve(dw.outer().size());
+        innerEdges[l].reserve(dw.inner().size());
+        
+        for (dw.outer ().first () ; ! dw.outer().done () ; dw.outer ().next ())
+          outerEdges [l].push_back (& dw.outer ().item ()) ;
+        for (dw.inner ().first () ; ! dw.inner ().done () ; dw.inner ().next ())
+          innerEdges [l].push_back (& dw.inner ().item ()) ;
+      }
+    }
     // jetzt normal verfeinern und den Status der Verfeinerung
     // [unvollst"andige / vollst"andige Verfeinerung] sichern.
     
@@ -1208,27 +1221,46 @@ bool GitterDunePll :: refine () {
       {
         vector < ObjectStream > osv (nl) ;
         try {
-    //cout << "refinepll 2 \n";
-    for (int l = 0 ; l < nl ; l ++) {
-            {for (vector < hface_STI * > :: const_iterator i = outerFaces [l].begin () ;
-      i != outerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; }
-            {for (vector < hface_STI * > :: const_iterator i = innerFaces [l].begin () ;
-      i != innerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; }
+          for (int l = 0 ; l < nl ; l ++) 
+          {
+            {
+              vector < hface_STI * > :: const_iterator iEnd = outerFaces[l].end () ;
+              for (vector < hface_STI * > :: const_iterator i = outerFaces [l].begin () ;
+                   i != iEnd; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; 
+            }
+            {
+              vector < hface_STI * > :: const_iterator iEnd = innerFaces[l].end () ;
+              for (vector < hface_STI * > :: const_iterator i = innerFaces [l].begin () ;
+                   i != iEnd; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; 
+            }
           }
-  } catch (Parallel :: AccessPllException) {
+        } 
+        catch (Parallel :: AccessPllException) 
+        {
           cerr << "**FEHLER (FATAL) AccessPllException in " << __FILE__ << " " << __LINE__ << endl ; abort () ;
         }
   
+        // exchange data 
         osv = mpAccess ().exchange (osv) ;
   
-        try {
-    for (int l = 0 ; l < nl ; l ++) {
-            {for (vector < hface_STI * > :: const_iterator i = innerFaces [l].begin () ;
-      i != innerFaces [l].end () ; repeat |= (*i ++)->accessPllX ().accessOuterPllX ().first->setRefinementRequest (osv [l])) ; }
-            {for (vector < hface_STI * > :: const_iterator i = outerFaces [l].begin () ;
-      i != outerFaces [l].end () ; repeat |= (*i ++)->accessPllX ().accessOuterPllX ().first->setRefinementRequest (osv [l])) ; }
+        try 
+        {
+          for (int l = 0 ; l < nl ; l ++) 
+          {
+            {
+              vector < hface_STI * > :: const_iterator iEnd = innerFaces[l].end () ;
+              for (vector < hface_STI * > :: const_iterator i = innerFaces [l].begin () ;
+                i != iEnd; repeat |= (*i ++)->accessPllX ().accessOuterPllX ().first->setRefinementRequest (osv [l])) ; 
+            }
+            {
+              vector < hface_STI * > :: const_iterator iEnd = outerFaces[l].end () ; 
+              for (vector < hface_STI * > :: const_iterator i = outerFaces [l].begin () ;
+                i != iEnd; repeat |= (*i ++)->accessPllX ().accessOuterPllX ().first->setRefinementRequest (osv [l])) ; 
+            }
           }
-  } catch (Parallel :: AccessPllException) {
+        } 
+        catch (Parallel :: AccessPllException) 
+        {
           cerr << "**FEHLER (FATAL) AccessPllException in " << __FILE__ << " " << __LINE__ << endl ; abort () ;
         }
       }
@@ -1247,26 +1279,49 @@ bool GitterDunePll :: refine () {
 
     {
       vector < ObjectStream > osv (nl) ;
-      {for (int l = 0 ; l < nl ; l ++) 
-    for (vector < hedge_STI * > :: const_iterator i = outerEdges [l].begin () ;
-         i != outerEdges [l].end () ; (*i ++)->accessPllX ().getRefinementRequest (osv [l])) ;
+      {
+        for (int l = 0 ; l < nl ; l ++) 
+        {
+          vector < hedge_STI * > :: const_iterator iEnd = outerEdges[l].end () ;
+          for (vector < hedge_STI * > :: const_iterator i = outerEdges [l].begin () ;
+            i != iEnd; (*i ++)->accessPllX ().getRefinementRequest (osv [l])) ;
+        }
       }
+      
+      // exchange data 
       osv = mpAccess ().exchange (osv) ;
-      {for (int l = 0 ; l < nl ; l ++)
-    for (vector < hedge_STI * > :: const_iterator i = innerEdges [l].begin () ;
-         i != innerEdges [l].end () ; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
+      
+      {
+        for (int l = 0 ; l < nl ; l ++)
+        {
+          vector < hedge_STI * > :: const_iterator iEnd = innerEdges[l].end () ;
+          for (vector < hedge_STI * > :: const_iterator i = innerEdges [l].begin () ;
+            i != iEnd; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
+        }
       }
-    }   // ~vector < ObjectStream > ... 
+    } // ~vector < ObjectStream > ... 
+     
     {
       vector < ObjectStream > osv (nl) ;
-      {for (int l = 0 ; l < nl ; l ++)
-    for (vector < hedge_STI * > :: const_iterator i = innerEdges [l].begin () ;
-         i != innerEdges [l].end () ; (*i ++)->accessPllX ().getRefinementRequest (osv [l])) ;
+      {
+        for (int l = 0 ; l < nl ; l ++)
+        {
+          vector < hedge_STI * > :: const_iterator iEnd = innerEdges[l].end () ;
+          for (vector < hedge_STI * > :: const_iterator i = innerEdges [l].begin () ;
+            i != iEnd; (*i ++)->accessPllX ().getRefinementRequest (osv [l])) ;
+        }
       }
+      
+      // exchange data 
       osv = mpAccess ().exchange (osv) ;
-      {for (int l = 0 ; l < nl ; l ++)
-    for (vector < hedge_STI * > :: const_iterator i = outerEdges [l].begin () ;
-         i != outerEdges [l].end () ; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
+      
+      {
+        for (int l = 0 ; l < nl ; l ++)
+        {
+          vector < hedge_STI * > :: const_iterator iEnd = outerEdges [l].end () ;
+          for (vector < hedge_STI * > :: const_iterator i = outerEdges [l].begin () ;
+            i != iEnd; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
+        }
       }
     }   // ~vector < ObjectStream > ... 
   }
@@ -1343,6 +1398,10 @@ void GitterDunePll :: coarse () {
       // ist zul"assig, weil kein Objekt auf das eine Referenz im 'cache' vorliegt
       // beseitigt werden kann. Sie sind alle ein Niveau darunter.
 
+      // reserve memory first 
+      innerEdges[l].reserve(fwi.size() + dwi.size() + dfi.size());
+      outerEdges[l].reserve(fwo.size() + dwo.size() + dfo.size());
+        
       for (fwi.first () ; ! fwi.done () ; fwi.next ()) innerFaces [l].push_back (& fwi.item ()) ;
       for (fwo.first () ; ! fwo.done () ; fwo.next ()) outerFaces [l].push_back (& fwo.item ()) ;
       for (dwo.first () ; ! dwo.done () ; dwo.next ()) outerEdges [l].push_back (& dwo.item ()) ;
@@ -1350,20 +1409,35 @@ void GitterDunePll :: coarse () {
       for (dwi.first () ; ! dwi.done () ; dwi.next ()) innerEdges [l].push_back (& dwi.item ()) ;
       for (dfi.first () ; ! dfi.done () ; dfi.next ()) innerEdges [l].push_back (& dfi.item ()) ;
     }
-    try {
+
+    try 
+    {
       // Erstmal alles was mehrdeutig ist, gegen die drohende Vergr"oberung sichern.
       // Danach werden sukzessive die Fl"achenlocks aufgehoben, getestet und
       // eventuell vergr"obert, dann das gleiche Spiel mit den Kanten.
 
-      for (int l = 0 ; l < nl ; l ++) {
-        {for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ;
-        i != outerEdges [l].end () ; (*i ++)->accessPllX ().lockAndTry ()) ; }
-        {for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ;
-        i != innerEdges [l].end () ; (*i ++)->accessPllX ().lockAndTry ()) ; }
-        {for (vector < hface_STI * > :: iterator i = outerFaces [l].begin () ;
-        i != outerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ; }
-        {for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ;
-        i != innerFaces [l].end () ; (*i ++)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ; }
+      for (int l = 0 ; l < nl ; l ++) 
+      {
+        {
+          vector < hedge_STI * > :: iterator iEnd = outerEdges [l].end () ;
+          for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ;
+               i != iEnd; (*i ++)->accessPllX ().lockAndTry ()) ; 
+        }
+        {
+          vector < hedge_STI * > :: iterator iEnd = innerEdges [l].end () ;
+          for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ;
+               i != iEnd; (*i ++)->accessPllX ().lockAndTry ()) ; 
+        }
+        {
+          vector < hface_STI * > :: iterator iEnd = outerFaces [l].end () ;
+          for (vector < hface_STI * > :: iterator i = outerFaces [l].begin () ;
+               i != iEnd; (*i ++)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ; 
+        }
+        {
+          vector < hface_STI * > :: iterator iEnd = innerFaces [l].end () ;
+          for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ;
+               i != iEnd; (*i ++)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ; 
+        }
       }
       
       // Gitter :: coarse () ist elementorientiert, d.h. die Vergr"oberung auf Fl"achen und
@@ -1376,11 +1450,14 @@ void GitterDunePll :: coarse () {
       
       Gitter :: coarse () ;
       
-    } catch (Parallel :: AccessPllException) {
+    } 
+    catch (Parallel :: AccessPllException) 
+    {
       cerr << "**FEHLER (FATAL) AccessPllException beim Vergr\"obern der Elementhierarchie oder\n" ;
       cerr << "  beim locken der Fl\"achen- bzw. Kantenb\"aume aufgetreten. In " << __FILE__ << " " << __LINE__ << endl ;
       abort () ;
     }
+    
     try {
     
       // Phase des Fl"achenausgleichs des verteilten Vergr"oberungsalgorithmus
@@ -1394,46 +1471,86 @@ void GitterDunePll :: coarse () {
       vector < vector < int > > clean (nl) ;
       {
         vector < vector < int > > inout (nl) ;
-        {for (int l = 0 ; l < nl ; l ++)
-      for (vector < hface_STI * > :: iterator i = outerFaces [l].begin () ; i != outerFaces [l].end () ; i ++)
-        inout [l].push_back ((*i)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ;
+        {
+          for (int l = 0 ; l < nl ; l ++)
+          {
+            // reserve memory first 
+            inout[l].reserve( outerFaces [l].size() );
+            // get end iterator 
+            vector < hface_STI * > :: iterator iEnd = outerFaces [l].end () ;
+            for (vector < hface_STI * > :: iterator i = outerFaces [l].begin () ; 
+                 i != iEnd; i ++)
+            {
+              inout [l].push_back ((*i)->accessPllX ().accessOuterPllX ().first->lockAndTry ()) ;
+            }
+          }
         }
+
+        // exchange data 
         inout = mpAccess ().exchange (inout) ;
-        {for (int l = 0 ; l < nl ; l ++) {
-      clean [l] = vector < int > (innerFaces [l].size (), long (true)) ;
-      vector < int > :: iterator j = clean [l].begin (), k = inout [l].begin () ;
-      for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ; i != innerFaces [l].end () ; i ++, j++, k++) {
-        assert (j != clean [l].end ()) ; assert (k != inout [l].end ()) ;
-        (*j) &= (*k) && (*i)->accessPllX ().accessOuterPllX ().first->lockAndTry () ;
+        
+        {
+          for (int l = 0 ; l < nl ; l ++) 
+          {
+            clean [l] = vector < int > (innerFaces [l].size (), long (true)) ;
+            vector < int > :: iterator j = clean [l].begin (), k = inout [l].begin () ;
+            vector < hface_STI * > :: iterator iEnd = innerFaces [l].end () ;
+            for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ; 
+                 i != iEnd; i ++, j++, k++) 
+            {
+              assert (j != clean [l].end ()) ; assert (k != inout [l].end ()) ;
+              (*j) &= (*k) && (*i)->accessPllX ().accessOuterPllX ().first->lockAndTry () ;
+            }
+          } 
+        }
       }
-    }}
-      }
+      
       {
         vector < vector < int > > inout (nl) ;
-        {for (int l = 0 ; l < nl ; l ++) {
-      vector < int > :: iterator j = clean [l].begin () ;
-      for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ; i != innerFaces [l].end () ; i ++, j++) {
-        inout [l].push_back (*j) ;
-        (*i)->accessPllX ().accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
-      }
-    }}
+        {
+          for (int l = 0 ; l < nl ; l ++) 
+          {
+            // reserve memory first 
+            inout[l].reserve( innerFaces [l].size() );
+
+            vector < int > :: iterator j = clean [l].begin () ;
+            vector < hface_STI * > :: iterator iEnd = innerFaces [l].end () ;
+            for (vector < hface_STI * > :: iterator i = innerFaces [l].begin () ; 
+                 i != iEnd; i ++, j++) 
+            {
+              inout [l].push_back (*j) ;
+              (*i)->accessPllX ().accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
+            }
+          }     
+        }
       
+        // exchange data 
         inout = mpAccess ().exchange (inout) ;
       
-        {for (int l = 0 ; l < nl ; l ++) {
-      vector < int > :: iterator j = inout [l].begin () ;
-      for (vector < hface_STI * > :: iterator i = outerFaces [l].begin () ; i != outerFaces [l].end () ; i ++, j++) {
-        assert (j != inout [l].end ()) ;
-        (*i)->accessPllX ().accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
+        {
+          for (int l = 0 ; l < nl ; l ++) 
+          {
+            vector < int > :: iterator j = inout [l].begin () ;
+            vector < hface_STI * > :: iterator iEnd = outerFaces [l].end () ;
+            for (vector < hface_STI * > :: iterator i = outerFaces [l].begin () ; 
+                 i != iEnd; i ++, j++) 
+            {
+              assert (j != inout [l].end ()) ;
+              (*i)->accessPllX ().accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
+            }
+          }     
+        }
       }
-    }}
-      }
-    } catch (Parallel :: AccessPllException) {
+    } 
+    catch (Parallel :: AccessPllException) 
+    {
       cerr << "**FEHLER (FATAL) AccessPllException beim Vergr\"obern der Fl\"achenb\"aume\n" ;
       cerr << "  aufgetreten. In " << __FILE__ << " " << __LINE__ << endl ;
       abort () ;
     }
-    try {
+    
+    try 
+    {
     
       // Phase des Kantenausgleichs im parallelen Vergr"oberungsalgorithmus:
   
@@ -1450,69 +1567,122 @@ void GitterDunePll :: coarse () {
     
       map < hedge_STI *, pair < bool, bool >, less < hedge_STI * > > clean ;
       
-      {for (int l = 0 ; l < nl ; l ++)
-    for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; i != innerEdges [l].end () ; i ++)
-      if (clean.find (*i) == clean.end ()) clean [*i] = pair < bool, bool > ((*i)->accessPllX ().lockAndTry (), true) ;
-      }
       {
-        vector < vector < int > > inout (nl) ;
-        {for (int l = 0 ; l < nl ; l ++)
-      for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ; i != outerEdges [l].end () ; i ++)
-        inout [l].push_back ((*i)->accessPllX ().lockAndTry ()) ;
-  }
-        inout = mpAccess ().exchange (inout) ;
-        {for (int l = 0 ; l < nl ; l ++) {
-      vector < int > :: const_iterator j = inout [l].begin () ;
-      for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; i != innerEdges [l].end () ; i ++, j++) {
-        assert (j != inout [l].end ()) ;
-        assert (clean.find (*i) != clean.end ()) ;
-        if (*j == false) clean [*i] = pair < bool, bool > (false, clean[*i].second) ; 
-      }
-    }}
-      }
-      {
-        vector < vector < int > > inout (nl) ;
-        {for (int l = 0 ; l < nl ; l ++) {
-      for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; i != innerEdges [l].end () ; i ++) {
-        assert (clean.find (*i) != clean.end ()) ;
-        pair < bool, bool > & a = clean [*i] ;
-        inout [l].push_back (a.first) ;
-        if (a.second) {
-  
-    // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
-    // sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
-    // einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
-    // mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
-    // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
-  
-    a.second = false ;
-#ifndef NDEBUG
-    bool b = 
-#endif
-      (*i)->accessPllX ().unlockAndResume (a.first) ;
-    assert (b == a.first) ;
+        for (int l = 0 ; l < nl ; l ++)
+        {
+          vector < hedge_STI * > :: iterator iEnd = innerEdges [l].end () ;
+          for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; 
+               i != iEnd; i ++)
+          {
+            if (clean.find (*i) == clean.end ()) 
+            {
+              clean [*i] = pair < bool, bool > ((*i)->accessPllX ().lockAndTry (), true) ;
+            }
+          }
         }
       }
-    }}
+      
+      {
+        vector < vector < int > > inout (nl) ;
+        {
+          for (int l = 0 ; l < nl ; l ++)
+          {
+            // reserve memory first 
+            inout[l].reserve( outerEdges [l].size() );
+            // get end iterator 
+            vector < hedge_STI * > :: iterator iEnd = outerEdges [l].end () ;
+            for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ; 
+                 i != iEnd; i ++)
+            {
+              inout [l].push_back ((*i)->accessPllX ().lockAndTry ()) ;
+            }
+          }
+        }
+        
+        // exchange data 
         inout = mpAccess ().exchange (inout) ;
-        {for (int l = 0 ; l < nl ; l ++) {
-      vector < int > :: iterator j = inout [l].begin () ;
-      for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ; i != outerEdges [l].end () ; i ++, j++) {
-        assert (j != inout [l].end ()) ;
+        
+        {
+          for (int l = 0 ; l < nl ; l ++) 
+          {
+            vector < int > :: const_iterator j = inout [l].begin () ;
+            // get end iterator 
+            vector < hedge_STI * > :: iterator iEnd = innerEdges [l].end () ;
+            for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; 
+                 i != iEnd; i ++, j++) 
+            {
+              assert (j != inout [l].end ()) ;
+              assert (clean.find (*i) != clean.end ()) ;
+              if (*j == false) clean [*i] = pair < bool, bool > (false, clean[*i].second) ; 
+            }
+          }
+        }
+      }
       
-        // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
-        // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
-        // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
-      
+      {
+        vector < vector < int > > inout (nl) ;
+        {
+          for (int l = 0 ; l < nl ; l ++) 
+          {
+            // reserve memory first 
+            inout[l].reserve( innerEdges [l].size() );
+            // get end iterator 
+            vector < hedge_STI * > :: iterator iEnd = innerEdges [l].end () ;
+            for (vector < hedge_STI * > :: iterator i = innerEdges [l].begin () ; 
+                 i != iEnd; i ++) 
+            {
+              assert (clean.find (*i) != clean.end ()) ;
+              pair < bool, bool > & a = clean [*i] ;
+              inout [l].push_back (a.first) ;
+              if (a.second) 
+              {
+                // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
+                // sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
+                // einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
+                // mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
+                // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
+              
+                a.second = false ;
 #ifndef NDEBUG
-        bool b = 
+                bool b = 
 #endif
-    (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
-        assert (b == bool (*j)) ;
+                  (*i)->accessPllX ().unlockAndResume (a.first) ;
+                assert (b == a.first) ;
+              }
+            }
+          }
+        }
+        
+        // exchange data 
+        inout = mpAccess ().exchange (inout) ;
+        
+        {
+          for (int l = 0 ; l < nl ; l ++) 
+          {
+            vector < int > :: iterator j = inout [l].begin () ;
+            // get end iterator 
+            vector < hedge_STI * > :: iterator iEnd = outerEdges [l].end () ;
+            for (vector < hedge_STI * > :: iterator i = outerEdges [l].begin () ; 
+                 i != iEnd; i ++, j++) 
+            {
+              assert (j != inout [l].end ()) ;
+      
+              // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
+              // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
+              // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
+            
+#ifndef NDEBUG
+              bool b = 
+#endif
+                (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
+              assert (b == bool (*j)) ;
+            }
+          }
+        }
       }
-    }}
-      }
-    } catch (Parallel :: AccessPllException) {
+    } 
+    catch (Parallel :: AccessPllException) 
+    {
       cerr << "**FEHLER (FATAL) AccessPllException beim Vergr\"obern der Kantenb\"aume\n" ;
       cerr << "  aufgetreten. In " << __FILE__ << " " << __LINE__ << endl ;
       abort () ;
