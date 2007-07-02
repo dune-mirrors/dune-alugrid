@@ -24,8 +24,8 @@
 
 template < class A > void identify (typename AccessIterator < A > :: Handle mi, 
   vector < pair < list < typename AccessIterator < A > :: Handle >, 
-  list < typename AccessIterator < A > :: Handle > > > & tt, const MpAccessLocal & c) {
-  
+  list < typename AccessIterator < A > :: Handle > > > & tt, const MpAccessLocal & c) 
+{
   typedef set < vector < int >, less < vector < int > > > lp_map_t ;
 
   typedef map < typename LinkedObject :: Identifier, 
@@ -43,19 +43,23 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
     lp_map_t :: const_iterator meIt = linkagePatternMap.insert (vector < int >  (1L, me)).first ;
     {
       vector < int > count (nl);
-      for(int k=0; k<nl; k++) count[k] =0;
+      for(int k=0; k<nl; ++k) count[k] = 0;
+      
       typename AccessIterator < A > :: Handle micopy ( mi );
       for (micopy.first () ; ! micopy.done () ; micopy.next ()) 
       {
         vector < int > estimate = micopy.item ().accessPllX ().estimateLinkage () ;
         if (estimate.size ()) 
         {
-          for (vector < int > :: const_iterator i = estimate.begin (); i != estimate.end (); i ++ )
+          vector < int > :: const_iterator iEnd =  estimate.end ();
+          for (vector < int > :: const_iterator i = estimate.begin (); 
+               i != iEnd; ++i )
           {
             count[c.link (*i)] += 4;
           }
         }
       }
+      // reserve memory 
       for(int k=0; k<nl; k++) inout[k].reserve( count[k] );
     }
     
@@ -69,18 +73,21 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
           look [id].first = mi ;
           look [id].second = meIt ;
 	        {
-            for (vector < int > :: const_iterator i = estimate.begin (); i != estimate.end (); i ++ )
+            vector < int > :: const_iterator iEnd = estimate.end ();
+            for (vector < int > :: const_iterator i = estimate.begin (); 
+                 i != iEnd; ++i )
               id.write (inout [c.link (*i)]) ;
           }
         }
       }
     }
     
+    // exchange data 
     inout = c.exchange (inout) ;
 
     vector < int > d = c.dest () ;
     { 
-      for (int l = 0 ; l < nl ; l ++ ) 
+      for (int l = 0 ; l < nl ; ++l ) 
       {
         vector < int > :: const_iterator pos = inout [l].begin (), end = inout [l].end () ;
         while (pos != end) 
@@ -109,7 +116,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
     vector < vector < int > > inout (nl) ;
     {
       vector <int> count(nl);
-      for(int k=0; k<nl; k++) count[k] =0;
+      for(int k=0; k<nl; k++) count[k] = 0;
 
       for (typename lmap_t :: const_iterator pos = look.begin () ; 
         pos != look.end () ; pos ++) 
@@ -117,7 +124,9 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
         const vector < int > & lk (*(*pos).second.second) ;
         if (* lk.begin () == me) 
         {
-          for (typename vector < int > :: const_iterator i = lk.begin () ; i != lk.end () ; i ++) 
+          typename vector < int > :: const_iterator iEnd = lk.end () ;
+          for (typename vector < int > :: const_iterator i = lk.begin () ; 
+               i != iEnd; i ++) 
           {
             if (*i != me) 
             {
@@ -127,6 +136,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
           }
         }
       }
+      // reserve memory 
       for(int k=0; k<nl; k++) inout[k].reserve( count[k] );
     }
     
@@ -139,7 +149,9 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
         {
           typename LinkedObject :: Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier () ;
           { 
-            for (typename vector < int > :: const_iterator i = lk.begin () ; i != lk.end () ; i ++) 
+            typename vector < int > :: const_iterator iEnd = lk.end () ;
+            for (typename vector < int > :: const_iterator i = lk.begin () ; 
+                 i != iEnd; i ++) 
             {
               if (*i != me) 
               {
@@ -152,6 +164,8 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
         }
       }
     }
+
+    // exchange data 
     inout = c.exchange (inout) ;
     
     {
@@ -197,24 +211,32 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & c) {
       map [id] = w ;
     }
   }
+
+  // exchange data 
   vector < ObjectStream > osv = c.gcollect (os) ;
+
   {
-    for (int i = 0 ; i < np ; i ++ ) {
-      if (i != me) {
+    for (int i = 0 ; i < np ; i ++ ) 
+    {
+      if (i != me) 
+      {
         int num ;
         osv [i].readObject (num) ;
-        for (int j = 0 ; j < num ; j ++ ) {
-	  int id ;
-	  osv [i].readObject (id) ;
+        for (int j = 0 ; j < num ; j ++ ) 
+        {
+      	  int id ;
+      	  osv [i].readObject (id) ;
           map_t :: const_iterator hit = map.find (id) ;
-	  if (hit != map.end ()) {
-	    vector < int > s = (*hit).second.item ().accessPllX ().estimateLinkage () ;
-	    if (find (s.begin (), s.end (), i) == s.end ()) {
-	      s.push_back (i) ;
-	      (*hit).second.item ().accessPllX ().setLinkage (s) ;
-	    }
-	  }
-	}
+      	  if (hit != map.end ()) 
+          {
+      	    vector < int > s = (*hit).second.item ().accessPllX ().estimateLinkage () ;
+	          if (find (s.begin (), s.end (), i) == s.end ()) 
+            {
+      	      s.push_back (i) ;
+	            (*hit).second.item ().accessPllX ().setLinkage (s) ;
+	          }
+	        }
+      	}
       }
     }
   }
