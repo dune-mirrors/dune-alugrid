@@ -433,18 +433,30 @@ void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int 
 }
 
 TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : 
-  TetraPllXBase (t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
-  static const double x = 0.25 ; 
-  LinearMapping (mytetra ().myvertex (0)->Point (), mytetra ().myvertex (1)->Point (),
-         mytetra ().myvertex (2)->Point (), mytetra ().myvertex (3)->Point ())
-      .map2world (x,x,x,x,_center) ;
+  TetraPllXBase (t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) 
+{
+  LinearMapping :: barycenter(
+      mytetra ().myvertex (0)->Point (), 
+      mytetra ().myvertex (1)->Point (),
+      mytetra ().myvertex (2)->Point (),
+      mytetra ().myvertex (3)->Point (),
+      _center);
   return ;
 }
 
 TetraPllXBaseMacro :: ~TetraPllXBaseMacro () {
   vector < int > v ;
-  {for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; v.push_back ((*i++).first)) ;}
-  {for (vector < int > :: const_iterator i = v.begin () ; i != v.end () ; unattach2 (*i++)) ;}
+  {
+    // reserve memory 
+    v.reserve( _moveTo.size() );
+    map < int, int, less < int > > :: const_iterator iEnd = _moveTo.end() ;
+    for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
+         i != iEnd; v.push_back ((*i++).first)) ;
+  }
+  {
+    vector < int > :: const_iterator iEnd = v.end () ;
+    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd ; unattach2 (*i++)) ;
+  }
   return ;
 }
 
@@ -728,7 +740,10 @@ Periodic3PllXBaseMacro :: Periodic3PllXBaseMacro (myperiodic3_t & p) : Periodic3
 
 Periodic3PllXBaseMacro :: ~Periodic3PllXBaseMacro () {
   vector < int > v ;
-  {for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; v.push_back ((*i++).first)) ;}
+  {
+    v.reserve( _moveTo.size() );
+    for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; v.push_back ((*i++).first)) ;
+  }
   {for (vector < int > :: const_iterator i = v.begin () ; i != v.end () ; unattach2 (*i++)) ;}
   return ;
 }
@@ -884,7 +899,10 @@ Periodic4PllXBaseMacro :: Periodic4PllXBaseMacro (myperiodic4_t & p) : Periodic4
 
 Periodic4PllXBaseMacro :: ~Periodic4PllXBaseMacro () {
   vector < int > v ;
-  {for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; v.push_back ((*i++).first)) ;}
+  {
+    v.reserve( _moveTo.size() ); 
+    for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; v.push_back ((*i++).first)) ;
+  }
   {for (vector < int > :: const_iterator i = v.begin () ; i != v.end () ; unattach2 (*i++)) ;}
   return ;
 }
@@ -1042,19 +1060,36 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
   return ;
 }
 
-HexaPllBaseXMacro :: HexaPllBaseXMacro (myhexa_t & h) : HexaPllBaseX (h), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
-  //double p [3] ;
-  TrilinearMapping (myhexa ().myvertex (0)->Point (), myhexa ().myvertex (1)->Point (),
-    myhexa ().myvertex (2)->Point (), myhexa ().myvertex (3)->Point (), myhexa ().myvertex (4)->Point (),
-    myhexa ().myvertex (5)->Point (), myhexa ().myvertex (6)->Point (), myhexa ().myvertex (7)->Point ())
-    .map2world (.0,.0,.0,_center) ;
+HexaPllBaseXMacro :: HexaPllBaseXMacro (myhexa_t & h) : HexaPllBaseX (h), _ldbVertexIndex (-1), _moveTo (), _erasable (false) 
+{
+  // calculate bary center 
+  TrilinearMapping :: barycenter (
+      myhexa ().myvertex (0)->Point (), 
+      myhexa ().myvertex (1)->Point (),
+      myhexa ().myvertex (2)->Point (), 
+      myhexa ().myvertex (3)->Point (), 
+      myhexa ().myvertex (4)->Point (),
+      myhexa ().myvertex (5)->Point (), 
+      myhexa ().myvertex (6)->Point (), 
+      myhexa ().myvertex (7)->Point (),
+      _center );
   return ;
 }
 
 HexaPllBaseXMacro :: ~HexaPllBaseXMacro () {
   vector < int > v ;
-  {for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; v.push_back ((*i++).first)) ;}
-  {for (vector < int > :: const_iterator i = v.begin () ; i != v.end () ; unattach2 (*i++)) ;}
+  {
+    // reserve memory 
+    v.reserve( _moveTo.size() );
+    map < int, int, less < int > > :: const_iterator iEnd = _moveTo.end() ;
+    for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
+      i != iEnd; v.push_back ((*i++).first)) ;
+  }
+  {
+    vector < int > :: const_iterator iEnd = v.end () ; 
+    for (vector < int > :: const_iterator i = v.begin () ; 
+        i != iEnd; unattach2 (*i++)) ;
+  }
   return ;
 }
 
