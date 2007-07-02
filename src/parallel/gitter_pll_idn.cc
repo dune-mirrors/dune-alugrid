@@ -223,9 +223,6 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & c) {
 
 void GitterPll :: MacroGitterPll :: identification (MpAccessLocal & c) 
 {
-  //_vertexTT.erase (_vertexTT.begin (), _vertexTT.end ()) ;
-  //_hedgeTT.erase (_hedgeTT.begin (), _hedgeTT.end ()) ;
-  //_hfaceTT.erase (_hfaceTT.begin (), _hfaceTT.end ()) ;
   // clear all entries 
   _vertexTT.clear(); 
   _hedgeTT.clear();
