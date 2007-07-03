@@ -59,7 +59,13 @@ class MpAccessMPI : public MpAccessLocal
       vector < vector < int > > exchange (const vector < vector < int > > &) const ;
       vector < vector < double > > exchange (const vector < vector < double > > &) const ;
       vector < vector < char > > exchange (const vector < vector < char > > &) const ;
+      
       vector < ObjectStream > exchange (const vector < ObjectStream > &) const ;
+
+      // symectric exchange with same buffer size 
+      void exchange (const vector < ObjectStream > & in,
+                     vector< ObjectStream > & out) const;
+        
 } ;
 
 
