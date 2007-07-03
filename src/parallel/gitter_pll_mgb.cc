@@ -32,7 +32,7 @@ ParallelGridMover :: ParallelGridMover (BuilderIF & b, bool init) : MacroGridBui
 {
   // lock MyAlloc so that objects are not freed  
   // because we want to reuse them  
-  MyAlloc :: lockFree () ;
+  MyAlloc :: lockFree ((void *) this) ;
 
   if(init) initialize();
 }
@@ -74,7 +74,7 @@ inline ParallelGridMover :: ~ParallelGridMover () {
   assert(_initialized);
 
   // unlock MyAlloc so that objects can be freed again 
-  MyAlloc :: unlockFree () ;
+  MyAlloc :: unlockFree ((void *) this) ;
 
   return ;
 }

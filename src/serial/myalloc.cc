@@ -65,15 +65,23 @@ struct AllocEntry {
 
 // map holding AllocEntries for sizes 
 static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
+static set < void * > myAllocFreeLockers;
 
-void MyAlloc :: lockFree () 
+void MyAlloc :: lockFree (void * addr) 
 {
+  // remember address of locker 
+  myAllocFreeLockers.insert( addr );
   _freeAllowed = false; 
 }
 
-void MyAlloc :: unlockFree () 
+void MyAlloc :: unlockFree (void * addr) 
 {
-  _freeAllowed = true; 
+  myAllocFreeLockers.erase( addr );
+  // only if no-one else has locked 
+  if( myAllocFreeLockers.empty () )
+  {
+    _freeAllowed = true; 
+  }
 }
 
 void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) 

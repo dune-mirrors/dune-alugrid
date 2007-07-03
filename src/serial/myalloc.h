@@ -44,10 +44,10 @@ class MyAlloc {
     friend class Initializer;
 
     // if called, freeing objects is allowed again 
-    static void unlockFree();
+    static void unlockFree(void *);
 
     // if called free of objects is not allowed 
-    static void lockFree (); 
+    static void lockFree (void *); 
   protected :
     MyAlloc () {}
    ~MyAlloc () {}
