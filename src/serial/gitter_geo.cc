@@ -758,7 +758,7 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
   os << _vertexList.size () << endl ;
   {
     int index (0) ;
-    for (list < VertexGeo * > :: const_iterator i = _vertexList.begin () ; i != _vertexList.end () ; i ++) {
+    for (vertexlist_t :: const_iterator i = _vertexList.begin () ; i != _vertexList.end () ; i ++) {
       os << (*i)->Point ()[0] << " " << (*i)->Point ()[1] << " " << (*i)->Point ()[2] << endl ;
       vm [*i] = index ++ ;
     }
@@ -767,48 +767,46 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
     assert (_hbndseg3List.size () == 0) ;
     os << _hexaList.size () << endl ;
     {
-      for (list < hexa_GEO * > :: const_iterator i = _hexaList.begin () ; i != _hexaList.end () ; i ++ ) {
+      for (hexalist_t :: const_iterator i = _hexaList.begin () ; i != _hexaList.end () ; i ++ ) {
         for (int j = 0 ; j < 8 ; os << vm [(*i)->myvertex (j ++)] << "  ") ;
         os << endl ;
       }
     }
-// Anfang - Neu am 23.5.02 (BS)
     os << _hbndseg4List.size () + _periodic4List.size () << endl ;
-// Ende - Neu am 23.5.02 (BS)
     {
-      for (list < hbndseg4_GEO * > :: const_iterator i = _hbndseg4List.begin () ; i != _hbndseg4List.end () ; i ++) {
+      for (hbndseg4list_t :: const_iterator i = _hbndseg4List.begin () ; i != _hbndseg4List.end () ; i ++) {
         os << -(int)(*i)->bndtype () << "  " << 4 << "  " ;
         for (int j = 0 ; j < 4 ; os << vm [(*i)->myvertex (0,j ++)] << "  ") ;
         os << endl ;
       }
     }
-// Anfang - Neu am 23.5.02 (BS)
     {
-      for (list < periodic4_GEO * > :: const_iterator i = _periodic4List.begin () ; i != _periodic4List.end () ; i ++) {
+      for (periodic4list_t :: const_iterator i = _periodic4List.begin () ; i != _periodic4List.end () ; i ++) {
         os << -(int)(hbndseg :: periodic) << "  " << 8 << "  " ;
         for (int j = 0 ; j < 8 ; os << vm [(*i)->myvertex (j ++)] << "  ") ;
         os << endl ;
       }
     }
-// Ende - Neu am 23.5.02 (BS)
-  } else if (_hexaList.size () == 0 && _tetraList.size () != 0) {
+  } 
+  else if (_hexaList.size () == 0 && _tetraList.size () != 0) 
+  {
     os << _tetraList.size () << endl ;
     {
-      for (list < tetra_GEO * > :: const_iterator i = _tetraList.begin () ; i != _tetraList.end () ; i ++ ) {
+      for (tetralist_t :: const_iterator i = _tetraList.begin () ; i != _tetraList.end () ; i ++ ) {
         for (int j = 0 ; j < 4 ; os << vm [(*i)->myvertex (j ++)] << "  ") ;
         os << endl ;
       }
     }
     os << _hbndseg3List.size () + _periodic3List.size () << endl ;
     {
-      for (list < hbndseg3_GEO * > :: const_iterator i = _hbndseg3List.begin () ; i != _hbndseg3List.end () ; i ++) {
+      for (hbndseg3list_t :: const_iterator i = _hbndseg3List.begin () ; i != _hbndseg3List.end () ; i ++) {
         os << -(int)(*i)->bndtype () << "  " << 3 << "  " ;
         for (int j = 0 ; j < 3 ; os << vm [(*i)->myvertex (0,j ++)] << "  ") ;
         os << endl ;
       }
     }
     {
-      for (list < periodic3_GEO * > :: const_iterator i = _periodic3List.begin () ; i != _periodic3List.end () ; i ++) {
+      for (periodic3list_t :: const_iterator i = _periodic3List.begin () ; i != _periodic3List.end () ; i ++) {
         os << -(int)(hbndseg :: periodic) << "  " << 6 << "  " ;
         for (int j = 0 ; j < 6 ; os << vm [(*i)->myvertex (j ++)] << "  ") ;
         os << endl ;
@@ -819,7 +817,7 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
     // Die Vertexidentifierliste hinten anh"angen, damit ein verteiltes
   // Grobgitter wieder zusammengefunden wird.
   
-    for (list < VertexGeo * > :: const_iterator i = _vertexList.begin () ; i != _vertexList.end () ; i ++)
+    for (vertexlist_t :: const_iterator i = _vertexList.begin () ; i != _vertexList.end () ; i ++)
       os << (*i)->ident () << " " << -1 << endl ;
   }
   // Die Modified - Markierung zur"ucksetzen.
