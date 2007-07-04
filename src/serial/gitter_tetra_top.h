@@ -575,18 +575,14 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) {
         abort () ;
         break ;
     }
-// H"ohere Ordnung:
+
+    // set parent rule 
     {
       assert (getrule () < SCHAR_MAX) ;
-      //int i = 0 ;
       for (innerface_t * f = down () ; f ; f = f->next ()) {
         f->_parRule = (signed char) getrule () ;
-        //f->_nChild  = (signed char) i++ ;
-        f->_nonv = f->_nonh = (signed char) 1 ;
       }
-      //assert (i < SCHAR_MAX) ;
     }
-// Ende: H"ohere Ordnung
     this->postRefinement () ;
   }
   return ;
