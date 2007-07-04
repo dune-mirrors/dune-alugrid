@@ -201,12 +201,14 @@ template < class A > class is_interior_leaf_entity
 //**********************************************************************************
 //**********************************************************************************
 
-template < class A > class ListIterator : public IteratorSTI < A >, public MyAlloc {
-  list < A * > & _list ;
-  typename list < A * > :: iterator _curr ;
+template < class A > class ListIterator : public IteratorSTI < A >, public MyAlloc 
+{
+  typedef list < A * > ListType;
+  ListType& _list ;
+  typename ListType :: iterator _curr ;
   public :
     // createing ListIterator, default status is done 
-    inline ListIterator (const list < A * > &) ;
+    inline ListIterator (const ListType &) ;
     // create ListIterator by making a copy  
     inline ListIterator (const ListIterator < A > &) ;
     inline ~ListIterator () ;
@@ -353,8 +355,8 @@ template < class A > int childs_are_leafs < A > :: operator () (const A & x) con
   return 1 ;
 }
 
-template < class A > inline ListIterator < A > :: ListIterator (const list < A * > & l) 
-  : _list ((list < A * > &)l), _curr (_list.end()) {
+template < class A > inline ListIterator < A > :: ListIterator (const ListType& l) 
+  : _list ((ListType &)l), _curr (_list.end()) {
   return ;
 }
 
