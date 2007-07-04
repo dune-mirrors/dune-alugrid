@@ -890,7 +890,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
 
     virtual ~GitterBasisPll () ;
     
-    virtual void printMemUsage();
+    //virtual void printMemUsage();
 } ;
 
 

@@ -1975,6 +1975,7 @@ GitterBasisPll :: ~GitterBasisPll () {
   return ;
 }
 
+#if 0
 void GitterBasisPll :: printMemUsage ()
 {
   typedef GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro tetra_IMPL ; 
@@ -2065,4 +2066,5 @@ void GitterBasisPll :: printMemUsage ()
     cout << "\n" ;
   }
 }
+#endif
 
