@@ -714,37 +714,59 @@ void MacroGridBuilder :: finalize ()
 {
   assert(_initialized);
   
-  {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
-    myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
+  {
+    //myBuilder ()._hexaList.reserve(_hexaMap.size());
+    for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
+      myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
   }
-  {for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMap.end () ; _tetraMap.erase (i++))
-    myBuilder ()._tetraList.push_back ((tetra_GEO *)(*i).second) ;
+  {
+    //myBuilder ()._tetraList.reserve(_tetraMap.size());
+    for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMap.end () ; _tetraMap.erase (i++))
+      myBuilder ()._tetraList.push_back ((tetra_GEO *)(*i).second) ;
   }
-  {for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; _periodic3Map.erase (i++))
-    myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
+  {
+    //myBuilder ()._periodic3List.reserve(_periodic3Map.size());
+    for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; _periodic3Map.erase (i++))
+      myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
   }
   
-  {for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; _periodic4Map.erase (i++))
-    myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
+  {
+    //myBuilder ()._periodic4List.reserve(_periodic4Map.size());
+    for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; _periodic4Map.erase (i++))
+      myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
   }
 
-  {for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Map.end () ; )
-    if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) {
-      delete (hbndseg4_GEO *)(*i).second ;
-      _hbnd4Map.erase (i++) ;
-    } else {
-      myBuilder ()._hbndseg4List.push_back ((hbndseg4_GEO *)(*i ++).second) ;
+  {
+    //myBuilder ()._hbndseg4List.reserve(_hbnd4Map.size() + _hbnd4Int.size());
+    for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Map.end () ; )
+    {
+      if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
+      {
+        delete (hbndseg4_GEO *)(*i).second ;
+        _hbnd4Map.erase (i++) ;
+      } 
+      else 
+      {
+        myBuilder ()._hbndseg4List.push_back ((hbndseg4_GEO *)(*i ++).second) ;
+      }
     }
   }
-  {for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != _hbnd3Map.end () ; )
-    if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) {
-      delete (hbndseg3_GEO *)(*i).second ;
-      _hbnd3Map.erase (i++) ;
-    } else {
-      myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
+  {
+    //myBuilder ()._hbndseg3List.reserve(_hbnd3Map.size() + _hbnd3Int.size());
+    for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != _hbnd3Map.end () ; )
+    {
+      if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) {
+        delete (hbndseg3_GEO *)(*i).second ;
+        _hbnd3Map.erase (i++) ;
+      } 
+      else 
+      {
+        myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
+      }
     }
   }
-  {for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
+  {
+    for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
     const Hbnd4IntStorage & p = * ((*i).second);
     if (p.first()->ref == 1) {
       hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure) ;
@@ -762,7 +784,9 @@ void MacroGridBuilder :: finalize ()
     }
     delete (*i).second;
   }}
-  {for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Map.end () ; )
+  {
+    //myBuilder ()._hface4List.reserve( _face4Map.size() );
+    for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Map.end () ; )
     if (!((hface4_GEO *)(*i).second)->ref) {
       delete (hface4_GEO *)(*i).second ;
       _face4Map.erase (i++) ;
@@ -772,6 +796,7 @@ void MacroGridBuilder :: finalize ()
     }
   }
   {
+    //myBuilder ()._hface3List.reserve( _face3Map.size() );
     for (faceMap_t :: iterator i = _face3Map.begin () ; i != _face3Map.end () ; ) {
     if (!((hface3_GEO *)(*i).second)->ref) {
       delete (hface3_GEO *)(*i).second ;
@@ -782,7 +807,9 @@ void MacroGridBuilder :: finalize ()
       myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
     }
   }}
-  {for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != _edgeMap.end () ; )
+  {
+    //myBuilder ()._hedge1List.reserve(_edgeMap.size());
+    for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != _edgeMap.end () ; )
     if (!(*i).second->ref) {
       delete (*i).second ;
       _edgeMap.erase (i++) ;
@@ -791,7 +818,9 @@ void MacroGridBuilder :: finalize ()
       myBuilder ()._hedge1List.push_back ((*i ++).second) ;
     }
   }
-  {for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != _vertexMap.end () ; )
+  {
+    //myBuilder ()._vertexList.reserve(_vertexMap.size());
+    for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != _vertexMap.end () ; )
     if (!(*i).second->ref) {
       delete (*i).second ;
       _vertexMap.erase (i++) ;

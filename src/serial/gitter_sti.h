@@ -1576,6 +1576,21 @@ public :
       typedef list < hbndseg3_GEO * >  hbndseg3list_t ;
       typedef list < hbndseg4_GEO * >  hbndseg4list_t ;
       
+      /*
+      typedef vector < VertexGeo * >     vertexlist_t;  
+      typedef vector < hedge1_GEO * >    hedge1list_t ;
+      typedef vector < hface4_GEO * >    hface4list_t ;
+      typedef vector < hface3_GEO * >    hface3list_t ;
+      typedef vector < tetra_GEO * >     tetralist_t ;
+      typedef vector < periodic3_GEO * > periodic3list_t ;
+    
+      typedef vector < periodic4_GEO * > periodic4list_t ;
+      typedef vector < hexa_GEO * >      hexalist_t ;
+
+      typedef vector < hbndseg3_GEO * >  hbndseg3list_t ;
+      typedef vector < hbndseg4_GEO * >  hbndseg4list_t ;
+      */
+      
     private: 
       vertexlist_t    _vertexList ;
       hedge1list_t    _hedge1List ;
