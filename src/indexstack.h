@@ -73,7 +73,7 @@ public :
       is.read ( ((char *) &_s[i]), sizeof(int) );
     }
   }
-    
+
 private:
    T   _s[length]; // the stack 
    int _f;         // actual position in stack  
@@ -139,6 +139,9 @@ public:
   // remove all indices that are not used (if possible)
   void compress ();
 
+  // return size of used memory in bytes 
+  size_t memUsage () const ;
+    
 private:
   // no copy constructor allowed 
   ALUGridIndexStack( const ALUGridIndexStack<T,length> & s);
@@ -340,6 +343,18 @@ compress()
     freeIndex( tmpStack.top() );
     tmpStack.pop();
   }
+}
+
+template <class T, int length>
+inline size_t ALUGridIndexStack<T,length>::
+memUsage () const 
+{
+  size_t mySize = sizeof(ALUGridIndexStack<T,length>);
+  size_t stackSize = sizeof(StackType);
+  if(stack_) mySize += stackSize;
+  mySize += stackSize * fullStackList_.size();
+  mySize += stackSize * emptyStackList_.size();
+  return mySize;
 }
 
 // define index stack tpye for all grids 
