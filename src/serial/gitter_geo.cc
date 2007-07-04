@@ -868,11 +868,28 @@ void Gitter :: Geometric :: BuilderIF :: backup (const char * filePath, const ch
   return ;
 }
 
+size_t Gitter :: Geometric :: BuilderIF :: memUsage () const 
+{
+  size_t mySize = 0;
+  mySize += _vertexList.size()*sizeof(VertexGeo *);
+  mySize += _hedge1List.size()*sizeof(hedge1_GEO *);
+  mySize += sizeof(hface4_GEO *) * _hface4List.size();
+  mySize += sizeof(hface3_GEO *) * _hface3List.size();
+  mySize += sizeof(tetra_GEO * ) * _tetraList.size();
+  mySize += sizeof(periodic3_GEO *) * _periodic3List.size();
+  mySize += sizeof(periodic4_GEO *) * _periodic4List.size();
+  mySize += sizeof(hexa_GEO *)      * _hexaList.size();
+  mySize += sizeof(hbndseg3_GEO *)  * _hbndseg3List.size();
+  mySize += sizeof(hbndseg4_GEO *)  * _hbndseg4List.size();
 
+  mySize *= 3;
 
+  mySize += sizeof(BuilderIF);
 
+  for(int i=0; i<numOfIndexManager; ++i)
+  {
+    mySize += _indexmanager[i].memUsage();
+  }
 
-
-
-
-
+  return mySize;
+}

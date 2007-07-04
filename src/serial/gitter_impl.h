@@ -34,21 +34,19 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
   public :
     class Objects {
       public :
-        class VertexEmpty : public VertexGeo {
+        class VertexEmpty : public VertexGeo 
+        {
           public :
-            inline VertexEmpty (int, double, double, double,
-                IndexManagerType &im) ;
-            inline VertexEmpty (int, double, double, double,
-                VertexGeo & ) ;
-     ~VertexEmpty () {}
+            inline VertexEmpty (int, double, double, double,IndexManagerType &im) ;
+            inline VertexEmpty (int, double, double, double,VertexGeo & ) ;
+           ~VertexEmpty () {}
             virtual inline int ident () const ;
         } ;
 
         class VertexEmptyMacro : public VertexEmpty {
           public :
-            inline VertexEmptyMacro (double, double, double, int,
-                IndexManagerType &im) ;
-     ~VertexEmptyMacro () {}
+            inline VertexEmptyMacro (double, double, double, int,IndexManagerType &im) ;
+            ~VertexEmptyMacro () {}
             virtual inline int ident () const ;
           private :
             int _idn ;
@@ -327,7 +325,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO; 
       
           const myhface3_t & face = static_cast<const myhface3_t &> (f); 
-          const int bndid = face.bndId ();
+          const unsigned char bndid = face.bndId ();
 
           myhface3_t & myface = *(myhface3(face_nr));
 
@@ -364,8 +362,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         void setGhostBoundaryIds() 
         {
           const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
-          // if( this->bndId() == bndid ) return;
-          //assert( this->bndId() == 0 );
+          
           // value of ghost_closure 
           this->setGhostBndId( bndid );
           for( int i=0; i<4 ; ++i) myhface3(i)->setGhostBndId( bndid );
@@ -552,7 +549,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
            typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO; 
           
            const myhface4_t & face = static_cast<const myhface4_t &> (f); 
-           const int bndid = face.bndId();
+           const unsigned char bndid = face.bndId();
            
            myhface4_t & myface = *(myhface4(face_nr));
 
@@ -588,7 +585,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         void setGhostBoundaryIds() 
         {
           const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
-          //if( this->bndId() == bndid ) return;
+
           // value of ghost_closure 
           this->setGhostBndId( bndid );
           for( int i=0; i<6 ; ++i) myhface4(i)->setGhostBndId( bndid );
@@ -659,6 +656,8 @@ class GitterBasisImpl : public GitterBasis {
     inline GitterBasisImpl (istream &) ;
     inline GitterBasisImpl (const char *) ;
     inline ~GitterBasisImpl () ;
+
+    virtual void printMemUsage ();
 } ;
 
 
@@ -1140,5 +1139,90 @@ inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis ::
 insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, MacroGhostInfoHexa* ) {
   return insert_hbnd4 (f,i,b); 
 }
+
+inline void GitterBasisImpl :: printMemUsage ()
+{
+  typedef GitterBasis :: Objects :: tetra_IMPL tetra_IMPL ; 
+  typedef GitterBasis :: Objects :: hexa_IMPL  hexa_IMPL ; 
+  typedef GitterBasis :: Objects :: hbndseg3_IMPL hbndseg3_IMPL ; 
+  typedef GitterBasis :: Objects :: hbndseg4_IMPL hbndseg4_IMPL ; 
+  typedef GitterBasis :: Objects :: hface3_IMPL hface3_IMPL ; 
+  typedef GitterBasis :: Objects :: hface4_IMPL hface4_IMPL ; 
+  typedef GitterBasis :: Objects :: hedge1_IMPL hedge1_IMPL ; 
+  typedef GitterBasis :: Objects :: VertexEmptyMacro VertexEmptyMacro; 
+  typedef GitterBasis :: Objects :: VertexEmpty VertexEmpty; 
+  typedef Gitter :: Geometric :: VertexGeo VertexGeo; 
+  cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
+  
+  cout << "Tetrasize = " << sizeof(tetra_IMPL) << endl;
+  cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
+  cout << "Hface4 = " << sizeof(hface4_IMPL) << endl;
+  cout << "Hface3 = " << sizeof(hface3_IMPL) << endl;
+  cout << "Hface1 = " << sizeof(hedge1_IMPL) << endl;
+  cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
+  cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
+  cout << "Vertex = " << sizeof(VertexEmpty) << endl;
+  cout << "Hbnd3  = " << sizeof(hbndseg3_IMPL) << endl;
+  cout << "Hbnd4  = " << sizeof(hbndseg4_IMPL) << endl;
+
+  {
+    int totalSize = 0; 
+    bool simplex = false;
+    {
+      AccessIterator < helement_STI > :: Handle iter (container ());
+      int size = iter.size();
+      iter.first(); 
+      if( !iter.done() )
+      {
+        if( iter.item().type() == tetra )
+        {
+          simplex = true;
+          size *= sizeof(tetra_IMPL);
+        } 
+        else
+        {
+          size *= sizeof(hexa_IMPL);
+        } 
+      } 
+      totalSize += size;
+      cout << "Macro elements: size = " << size/1024/1024 << " MB \n";
+    } 
+    
+    {
+      int size = AccessIterator < hbndseg_STI > :: Handle (container ()).size();
+      size *= (simplex) ?  sizeof(hbndseg3_IMPL) : sizeof(hbndseg4_IMPL);
+      cout << "Macro boundary : size = " << size/1024/1024 << " MB \n";
+      totalSize += size;
+    }
+
+    {
+      int size = AccessIterator < hface_STI > :: Handle (container ()).size();
+      size *= (simplex) ?  sizeof(hface3_IMPL) : sizeof(hface4_IMPL);
+      cout << "Macro faces : size = " << size/1024/1024 << " MB \n";
+      totalSize += size;
+    }
+
+    {
+      int size = AccessIterator < hedge_STI > :: Handle (container ()).size();
+      size *= sizeof(hedge1_IMPL);
+      cout << "Macro edges : size = " << size/1024/1024 << " MB \n";
+      totalSize += size;
+    }
+
+    {
+      int size = AccessIterator < vertex_STI > :: Handle (container ()).size();
+      size *= sizeof(VertexEmptyMacro);
+      cout << "Macro vertices : size = " << size/1024/1024 << " MB \n";
+      totalSize += size;
+    }
+
+    size_t build = container().memUsage();
+    cout << "BuilderIF size = " << build/1024/1024 << " MB \n";
+    totalSize += build;
+    cout << "Overall size = " << totalSize/1024/1024 << " MB \n";
+    cout << "\n" ;
+  }
+}
+
 
 #endif  //  GITTER_IMPL_H_INCLUDED
