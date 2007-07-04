@@ -224,33 +224,42 @@ public :
   protected:
     // internal index of item 
     int _idx;
-    // true if index is copy from outside and should noit freeded
-    bool _isCopy;
-    // reference counter of leaf elements holding pointer to this item 
-    int _leafref;
     
     // boundary id, zero for internal items, 
     // otherwise > 0 (but always positive )
     // negative id are for internal usage only 
-    int _bndid;
+    unsigned char _bndid;
+    
+    // reference counter of leaf elements holding pointer to this item 
+    unsigned char _leafref;
+    
+    // true if index is copy from outside and should noit freeded
+    bool _isCopy;
     
     // constructor 
-    DuneIndexProvider () : _idx(-1), _isCopy(false), _leafref(0) , _bndid(interior) {}
+    DuneIndexProvider () : _idx(-1)
+                         , _bndid(interior) 
+                         , _leafref(0) 
+                         , _isCopy(false)
+    {}
 #endif
   public:
     
-    virtual ~DuneIndexProvider () {}
+    // destructor 
+    ~DuneIndexProvider () {}
+    
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
-    virtual void backupIndex  (ostream & os ) const {
+    void backupIndexErr  () const {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
       abort();
 #endif
     }
+
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) {
+    void restoreIndexErr () {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
       abort();
@@ -316,21 +325,21 @@ public :
     inline bool isLeafEntity() const {
       return ( _leafref > 0 );
     }
-    inline int leafRefCount() const {
+    inline unsigned char leafRefCount() const {
       return _leafref;
     }
 
     // return bnd id 
-    inline int bndId() const { return _bndid; }
+    inline unsigned char bndId() const { return _bndid; }
 
     // set bnd id, id is only set if id is larger then actual id
-    inline void setBndId (const int id) 
+    inline void setBndId (const unsigned char id) 
     { 
       if( id > _bndid ) _bndid = id; 
     }
     
     // set bnd id, id is overwritten in any case 
-    inline void setGhostBndId (const int id) 
+    inline void setGhostBndId (const unsigned char id) 
     { 
       _bndid = id; 
     }
@@ -362,8 +371,8 @@ public :
     inline void addleaf() {}
     inline void removeleaf() {}
     inline bool isLeafEntity() const {return false;}
-    inline int leafRefCount() const { return 0; }
-    inline int bndId() const { return 0; }
+    inline unsigned char leafRefCount() const { return 0; }
+    inline unsigned char bndId() const { return 0; }
     inline void setBndId (const int id) {}
     inline void setGhostBndId (const int id) {}
     bool isGhost () const { return false; } 
@@ -385,16 +394,15 @@ public :
     virtual int ident () const = 0 ;
     virtual int level () const = 0 ;
 
-    // make Piont non-virtual, because it's only used on VertexGeo 
-    //virtual const double (& Point () const )[3] = 0 ;
-
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void project(const ProjectVertex &pv) = 0; 
+    
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); } 
+    virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
   
     // Extrainteger, damit die Element zu Vertex Zuordnug klappt,
     // wenn die Daten zur Visualisierung mit GRAPE rausgeschrieben
     // werden sollen:
-  
   } ;
    
   class hedge : public stiExtender_t :: EdgeIF, public DuneIndexProvider  {
@@ -419,9 +427,9 @@ public :
     virtual void backup (ObjectStream &) const = 0 ;
     virtual void restore (ObjectStream &) = 0 ;
 
-    // new xdr methods 
-    //virtual void backup (XDRstream_out &) const {};
-    //virtual void restore (XDRstream_in &) {};
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); } 
+    virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
+  
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void projectInnerVertex(const ProjectVertex &pv) = 0; 
   } ;
@@ -455,26 +463,25 @@ public :
 
     // returns true if element conected to face is leaf 
     virtual bool isInteriorLeaf() const = 0;
+
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); } 
+    virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
   };
 
   // class with all extensions for helement 
   class Dune_helement : public DuneIndexProvider 
   {
-
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   protected: 
     bool _refinedTag; // true if element was refined 
     Dune_helement () : DuneIndexProvider(), _refinedTag (true) {}
 #endif
   public:
-    virtual ~Dune_helement () {}
+    ~Dune_helement () {}
     // reset the _refinedTag to false 
     void resetRefinedTag(); 
     // true if element was refined this adaptation step 
     bool hasBeenRefined () const;
-        
-    virtual int nFaces() const = 0;
-    virtual int nEdges() const = 0;
   };
 
 
@@ -497,16 +504,8 @@ public :
     helement () {}
     virtual ~helement () {}
   public :
-    //testweise us
     virtual helement * up () = 0;
     virtual const helement * up () const = 0;
-    virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
-    virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
-    virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
-
-    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
-    virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
-    virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
     //us
     virtual helement * down () = 0 ;
     virtual const helement * down () const = 0 ;
@@ -523,6 +522,11 @@ public :
     // return number of child 
     virtual int nChild () const = 0 ;
 
+    // number of faces 
+    virtual int nFaces() const = 0;
+    // number of edges 
+    virtual int nEdges() const = 0;
+    
     // mark element for using iso8 rule 
     virtual int tagForGlobalRefinement () = 0 ;
     // mark element for coarsening 
@@ -536,6 +540,14 @@ public :
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
     virtual void setIndicesAndBndId (const hface & , int ) { assert(false); abort(); }
     virtual void resetGhostIndices() = 0;
+
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
+    virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
+    virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
+
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
+    virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
+    virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
@@ -546,6 +558,8 @@ public :
     virtual void backup (ObjectStream &) const = 0 ;
     virtual void restore (ObjectStream &) = 0 ;
 
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); } 
+    virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
   public: 
     virtual grid_t type() const = 0;
   } ;
@@ -593,7 +607,11 @@ public :
       bool _refinedTag; // true if element was refined 
 
     public:
+      // default constructor 
       inline Dune_hbndDefault () : DuneIndexProvider(), _refinedTag(false) {} 
+
+      // virtual destructor 
+      virtual ~Dune_hbndDefault () {}
 
       // reset the _refinedTag to false 
       void resetRefinedTag() { _refinedTag = false; }
@@ -631,7 +649,8 @@ public :
       periodic = 20,
       closure = DuneIndexProvider :: border,  // also the value of border items 
       ghost_closure = DuneIndexProvider :: ghost , // also the value of ghost items 
-      undefined = 333 } bnd_t ;
+      undefined = 255 } bnd_t ;
+    
     virtual bnd_t bndtype () const = 0 ;
         
     // for dune 
@@ -730,6 +749,7 @@ public :
     // Methoden f"ur den Strahlungstransportl"oser
     virtual void sortmacrogrid () {abort();}
 
+    virtual size_t memUsage () const = 0;
   } ;
 public :
   class Geometric {
@@ -911,10 +931,7 @@ public :
 
     typedef class VertexGeo : public vertex_STI, public MyAlloc 
     {
-    protected:
-      IndexManagerType & _indexmanager;
     public :
-      Refcount ref ;
       // VertexGeo is provided for the vertices on lower levels 
       inline VertexGeo (int,double,double,double, VertexGeo & ) ;
       inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
@@ -941,6 +958,12 @@ public :
     private :
       // the coordinates of this vertex 
       double _c [3] ;
+    protected:
+      IndexManagerType & _indexmanager;
+
+    public:  
+      Refcount ref ;
+    private:  
       // the level of creation 
       int _lvl ;
     } vertex_GEO ;
@@ -955,7 +978,6 @@ public :
     public :
       typedef Hedge1Rule myrule_t ;
       inline virtual ~hedge1 () ;
-      Refcount ref ;
       inline myvertex_t * myvertex (int) ;
       inline const myvertex_t * myvertex (int) const ;
       virtual myvertex_t * subvertex (int) = 0 ;
@@ -965,8 +987,13 @@ public :
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
+
     private :
+      // pointer to vertices 
       myvertex_t * v0, * v1 ;
+    public:  
+      // reference counter 
+      Refcount ref ;
     } hedge1_GEO ;
   
     typedef class hface3 : public hface_STI, public MyAlloc {
@@ -997,7 +1024,6 @@ public :
       inline int preCoarsening () ;
     public :
       inline virtual ~hface3 () ;
-      Refcount ref ;
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
       inline void detachElement (int) ;
     public :
@@ -1022,7 +1048,6 @@ public :
       virtual void refineImmediate (myrule_t) = 0 ;
     public :
       myrule_t parentRule() const;
-      bool isConforming() const;
 
       // returns true, if element conected to face is leaf 
       virtual bool isInteriorLeaf() const ;
@@ -1031,22 +1056,22 @@ public :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
 
-      // H"ohere Ordnung: 
-      // 1. Regel des Elternelements, 
-      // 2. Nummer in der Reihe der Kinder
-      // 3. Nichtkonforme Situation vorne, 
-      // 4. Nichtkonforme Situation hinten
-      // bei 3. + 4. ja=1, nein=0
-      signed char _parRule, _nonv, _nonh;
-      // Ende: H"ohere Ordnung
+    public:  
+      // reference counter 
+      Refcount ref ;
 
+    protected:  
+      myrule_t _parRule;
     } hface3_GEO ;
 
-    typedef class hface4 : public hface_STI, public MyAlloc {
+    typedef class hface4 : public hface_STI, public MyAlloc 
+    {
     public :
       typedef hasFace4  myconnect_t ;
       enum { polygonlength = 4 } ;
-      class face4Neighbour {
+      
+      class face4Neighbour 
+      {
         pair < myconnect_t *, int > _v, _h ;
       public :
         static const pair < myconnect_t *, int > null ;
@@ -1070,7 +1095,6 @@ public :
       inline int preCoarsening () ;
     public :
       inline virtual ~hface4 () ;
-      Refcount ref ;
       inline void attachElement (const pair < hasFace4 *, int > &,int) ;
       inline void detachElement (int) ;
     public :
@@ -1103,6 +1127,9 @@ public :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
 
+    public:  
+      // reference counter 
+      Refcount ref ;
     protected:
       myrule_t _parRule;
 
@@ -1155,14 +1182,14 @@ public :
       inline pair < hface3_GEO *, int > myintersection (int) ;
       inline pair < const hface3_GEO *, int > myintersection (int) const;
       
-      virtual int nFaces() const { return 4; }
-      virtual int nEdges() const { return 6; }
+      int nFaces() const { return 4; }
+      int nEdges() const { return 6; }
       inline int twist (int) const ;
       int test () const ;
       // returns level of this object 
-      virtual int nbLevel() const {return level();}
+      int nbLevel() const {return level();}
       // returns leaf 
-      virtual int nbLeaf() const {return leaf();}
+      int nbLeaf() const {return leaf();}
     public :
       virtual myrule_t getrule () const = 0 ;
       
@@ -1175,8 +1202,8 @@ public :
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
 
-      virtual bool isboundary() const { return false; }
-      virtual grid_t type() const { return tetra; }
+      bool isboundary() const { return false; }
+      grid_t type() const { return tetra; }
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
     private :
@@ -1342,26 +1369,27 @@ public :
       // return pair, first = pointer to face, second = twist of face
       inline pair < hface4_GEO *, int > myintersection (int) ;
       inline pair < const hface4_GEO *, int > myintersection (int) const;
-      virtual int nFaces() const { return 6; }
-      virtual int nEdges() const { return 12; }
+      int nFaces() const { return 6; }
+      int nEdges() const { return 12; }
 
       inline int twist (int) const ;
       int test () const ;
       // just returns level 
-      virtual int nbLevel() const {return level();}
+      int nbLevel() const {return level();}
       // just returns leaf 
-      virtual int nbLeaf() const {return leaf();}
+      int nbLeaf() const {return leaf();}
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
       virtual void request (myrule_t) = 0 ;
+      
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
 
-      virtual bool isboundary() const { return false; }
-      virtual grid_t type() const { return hexa; }
+      bool isboundary() const { return false; }
+      grid_t type() const { return hexa; }
 
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
@@ -1526,12 +1554,12 @@ public :
       val_t & operator () (hasFace4 & x) const { return x ; }
     } ;
   public :
-    class BuilderIF : public Makrogitter {
-  
+    class BuilderIF : public Makrogitter 
+    {
       // BuilderIF ist die Stelle des Makrogitters an der der Builder angreift, wenn das
       // Gitter erbaut werden soll. Der Builder geht direkt mit den Listen um und
       // wendet sich an die Factorymethoden insert_--*-- (), um neue Objekte zu erhalten.
-  
+
       list < VertexGeo * >     _vertexList ;
       list < hedge1_GEO * >    _hedge1List ;
       list < hface4_GEO * >    _hface4List ;
@@ -1544,7 +1572,7 @@ public :
 
       list < hbndseg3_GEO * >  _hbndseg3List ;
       list < hbndseg4_GEO * >  _hbndseg4List ;
-      
+
       bool _modified ; // true if macro grid was modified 
 
     protected :
@@ -1590,6 +1618,9 @@ public :
       IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
       IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
     public:  
+      // return memUsage of BuilderIF in bytes 
+      virtual size_t memUsage () const ;
+      
       // number of different index manager that exists 
       enum { numOfIndexManager = 6 };
 
@@ -1631,6 +1662,7 @@ public :
       virtual void backup (const char*,const char *) const ;
       virtual void backupCMode (ostream &) const ;
       virtual void backupCMode (const char*,const char *) const ;
+
       friend class MacroGridBuilder ;
       friend class MacroGhostBuilder;
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
@@ -1686,6 +1718,7 @@ public :
 
   virtual void fullIntegrityCheck () ;
   virtual void printsize () ;
+  virtual void printMemUsage () {}
   virtual bool adapt () ;
   // this method just calls adapt 
   virtual bool adaptWithoutLoadBalancing() ;
@@ -2422,19 +2455,13 @@ inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter
 }
 
 inline Gitter :: Geometric :: hface3 :: 
-hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
-  _parRule (Hface3Rule::undefined),
-  _nonv(1) , _nonh(1) 
+hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
+  : _parRule (Hface3Rule::undefined)
 {
   assert(e0 && e1 && e2) ;
   (e [0] = e0)->ref ++ ; s [0] = s0 ;
   (e [1] = e1)->ref ++ ; s [1] = s1 ;
   (e [2] = e2)->ref ++ ; s [2] = s2 ;
-  // H"ohere Ordnung:
-  //_parRule = (signed char) -1 ; // Test.
-  //_parRule = (signed char) 1 ; // Test.
-  //_nonv = _nonh = (signed char) 1 ;
-  // Ende: H"ohere Ordnung
   return ;
 }
 
@@ -2446,16 +2473,16 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
   return ;
 }
 
-inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t) {
-  // H"ohere Ordnung, bisher: " t < 0 ? nb._h = p : nb._v = p ;"
-  t < 0 ? (_nonh = 0, nb._h = p) : (_nonv = 0, nb._v = p) ;
+inline void Gitter :: Geometric :: hface3 :: 
+attachElement (const pair < myconnect_t *, int > & p, int t) 
+{
+  t < 0 ? (nb._h = p) : (nb._v = p) ;
   ref ++ ;
   return ;
 }
 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t) {
-  // H"ohere Ordnung, bisher: "t < 0 ? nb._h = nb.null : nb._v = nb.null ;"
-  t < 0 ? (_nonh = 1, nb._h = nb.null) : (_nonv = 1, nb._v = nb.null) ;
+  t < 0 ? (nb._h = nb.null) : (nb._v = nb.null) ;
   ref -- ;
   return ;
 }
@@ -2496,10 +2523,6 @@ inline const Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :
 inline Gitter::Geometric::hface3::myrule_t 
 Gitter::Geometric::hface3::parentRule() const {
   return (myrule_t) _parRule;
-}
-
-inline bool Gitter :: Geometric :: hface3 :: isConforming () const {
-  return !(_nonv + _nonh == 1);
 }
 
 inline bool Gitter :: Geometric :: hface3 :: 
