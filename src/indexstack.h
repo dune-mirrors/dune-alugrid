@@ -15,8 +15,6 @@ namespace ALUGridSpace {
   #include <stack.h>
 #endif
   
-#include "serial/myalloc.h"
-
 template<class T, int length>
 class ALUGridFiniteStack
 {
