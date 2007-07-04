@@ -34,7 +34,8 @@
 const linkagePattern_t VertexPllBaseX :: nullPattern ;
 
 VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) 
-  : _v (v), _map (m), _lpn (), _moveTo (), _ref () {
+  : _v (v), _map (m), _lpn (), _moveTo (), _ref () 
+{
   linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
   _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (nullPattern,0)).first ;
   (*_lpn).second ++ ;
@@ -1972,5 +1973,96 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa)
 GitterBasisPll :: ~GitterBasisPll () {
   delete _macrogitter ;
   return ;
+}
+
+void GitterBasisPll :: printMemUsage ()
+{
+  typedef GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro tetra_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro  hexa_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: hbndseg3_IMPL hbndseg3_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: hbndseg4_IMPL hbndseg4_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro hface3_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro hface4_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro hedge1_IMPL ; 
+  //typedef GitterBasisPll :: ObjectsPll :: VertexPllImplMacro VertexMacro; 
+  typedef VertexPllBaseX VertexMacro; 
+  /*
+  typedef GitterBasisPll :: ObjectsPll :: tetra_IMPL tetra_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: hexa_IMPL  hexa_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: hbndseg3_IMPL hbndseg3_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: hbndseg4_IMPL hbndseg4_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: hface3_IMPL hface3_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: hface4_IMPL hface4_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: hedge1_IMPL hedge1_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: VertexPllImplMacro VertexMacro; 
+  */
+  cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
+  
+  cout << "Tetrasize = " << sizeof(tetra_IMPL) << endl;
+  cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
+  cout << "Hface4 = " << sizeof(hface4_IMPL) << endl;
+  cout << "Hface3 = " << sizeof(hface3_IMPL) << endl;
+  cout << "Hface1 = " << sizeof(hedge1_IMPL) << endl;
+  cout << "VertexMacro = " << sizeof(VertexMacro) << endl;
+  cout << "Hbnd3  = " << sizeof(hbndseg3_IMPL) << endl;
+  cout << "Hbnd4  = " << sizeof(hbndseg4_IMPL) << endl;
+
+  {
+    int totalSize = 0; 
+    bool simplex = false;
+    {
+      AccessIterator < helement_STI > :: Handle iter (container ());
+      int size = iter.size();
+      iter.first(); 
+      if( !iter.done() )
+      {
+        if( iter.item().type() == tetra )
+        {
+          simplex = true;
+          size *= sizeof(tetra_IMPL);
+        } 
+        else
+        {
+          size *= sizeof(hexa_IMPL);
+        } 
+      } 
+      totalSize += size;
+      cout << "Macro elements: size = " << size/1024/1024 << " MB \n";
+    } 
+    
+    {
+      int size = AccessIterator < hbndseg_STI > :: Handle (container ()).size();
+      size *= (simplex) ?  sizeof(hbndseg3_IMPL) : sizeof(hbndseg4_IMPL);
+      cout << "Macro boundary : size = " << size/1024/1024 << " MB \n";
+      totalSize += size;
+    }
+
+    {
+      int size = AccessIterator < hface_STI > :: Handle (container ()).size();
+      size *= (simplex) ?  sizeof(hface3_IMPL) : sizeof(hface4_IMPL);
+      cout << "Macro faces : size = " << size/1024/1024 << " MB \n";
+      totalSize += size;
+    }
+
+    {
+      int size = AccessIterator < hedge_STI > :: Handle (container ()).size();
+      size *= sizeof(hedge1_IMPL);
+      cout << "Macro edges : size = " << size/1024/1024 << " MB \n";
+      totalSize += size;
+    }
+
+    {
+      int size = AccessIterator < vertex_STI > :: Handle (container ()).size();
+      size *= sizeof(VertexMacro);
+      cout << "Macro vertices : size = " << size/1024/1024 << " MB \n";
+      totalSize += size;
+    }
+
+    size_t build = container().memUsage();
+    cout << "BuilderIF size = " << build/1024/1024 << " MB \n";
+    totalSize += build;
+    cout << "Overall size = " << totalSize/1024/1024 << " MB \n";
+    cout << "\n" ;
+  }
 }
 

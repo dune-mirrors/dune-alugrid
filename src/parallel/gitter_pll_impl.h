@@ -562,9 +562,9 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       virtual const VertexPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
     private :
-      mypllx_t * _pllx ;
-    // friend class mypllx_t ;
-    // ### Goettingen ###
+        mypllx_t * _pllx ;
+        // friend class mypllx_t ;
+        // ### Goettingen ###
           friend class VertexPllBaseX;
         } ;
       public :
@@ -887,8 +887,10 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     virtual inline const MacroGitterPll & containerPll () const ;
 
     GitterBasisPll (const char *, MpAccessLocal &) ;
+
     virtual ~GitterBasisPll () ;
-// sp"ater   virtual void adapt () ;
+    
+    virtual void printMemUsage();
 } ;
 
 
