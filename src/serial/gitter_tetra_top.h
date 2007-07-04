@@ -20,10 +20,10 @@ template < class A > class Hface3Top : public A {
   private :
     innerface_t * _dwn, * _bbb ;
     inneredge_t * _ed ;
+    IndexManagerType & _indexManager;
+
     int _lvl ;
     myrule_t _rule ;
-
-    IndexManagerType & _indexManager;
     const signed char _nChild;
 
   private:
@@ -93,15 +93,17 @@ template < class A > class Hbnd3Top : public A {
     inline void append (innerbndseg_t *) ;
   private :
     innerbndseg_t * _bbb, * _dwn , * _up ;
+    IndexManagerType & _indexManager;
+
     int _lvl ;
+    const bnd_t _bt; // type of boundary 
+
     void split_e01 () ;
     void split_e12 () ;
     void split_e20 () ;
     void split_iso4 () ;
     inline bool coarse () ;
-    const bnd_t _bt; // type of boundary 
    
-    IndexManagerType & _indexManager;
   public:
     // constructor for serial macro boundary elements  
     inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *,
@@ -154,10 +156,11 @@ template < class A > class TetraTop : public A {
     innertetra_t * _dwn, * _bbb, * _up ; 
     innerface_t * _fc ;
     inneredge_t * _ed ;
-    int _lvl ;
-    myrule_t _req, _rule ;
     IndexManagerType & _indexManager;
     const double _volume;
+
+    int _lvl ;
+    myrule_t _req, _rule ;
     const signed char _nChild;
     
   private :
@@ -518,9 +521,10 @@ template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0
   int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2,
   IndexManagerType & im , int nChild ) : 
   A (e0, t0, e1, t1, e2, t2), 
-  _dwn (0), _bbb (0), _ed (0), _lvl (l), _rule (myrule_t :: nosplit)
-  , _indexManager (im) 
-  , _nChild (nChild) 
+  _dwn (0), _bbb (0), _ed (0) ,
+  _indexManager (im) ,
+  _lvl (l), _rule (myrule_t :: nosplit) ,
+  _nChild (nChild) 
 {
   this->setIndex( _indexManager.getIndex() );
   return ;
@@ -531,9 +535,10 @@ template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0
   int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2,
   IndexManagerType & im ) : 
   A (e0, t0, e1, t1, e2, t2), 
-  _dwn (0), _bbb (0), _ed (0), _lvl (l), _rule (myrule_t :: nosplit) 
-  , _indexManager (im) 
-  , _nChild (0) 
+  _dwn (0), _bbb (0), _ed (0), 
+  _indexManager (im) ,
+  _lvl (l), _rule (myrule_t :: nosplit) ,
+  _nChild (0) 
 {
   this->setIndex( _indexManager.getIndex() );
   return ;
@@ -722,7 +727,10 @@ inline void Hface3Top < A > :: doRestore (InStream_t & is)
 template < class A > inline Hbnd3Top < A > :: 
 Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, const bnd_t bt, IndexManagerType & im , Gitter * grd ) : 
-  A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (0) , _lvl (l), _bt (bt) , _indexManager(im) {
+  A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (0) , 
+  _indexManager(im) ,
+  _lvl (l), _bt (bt) 
+{
   this->setIndex( _indexManager.getIndex() );
   setBoundaryId( _bt ); 
   return ;
@@ -732,8 +740,9 @@ template < class A > inline Hbnd3Top < A > ::
 Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
           Gitter::helement_STI * gh, int gFace ) : 
-  A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
-  _indexManager(im) 
+  A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , 
+  _indexManager(im) ,
+  _lvl (l), _bt (bt)  
 {
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
@@ -747,8 +756,9 @@ template < class A > inline Hbnd3Top < A > ::
 Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
           Gitter * grd , Gitter::helement_STI * gh, int gFace) : 
-  A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , _lvl (l), _bt (bt) , 
-  _indexManager(im) 
+  A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , 
+  _indexManager(im) ,
+  _lvl (l), _bt (bt) 
 {
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
@@ -1071,10 +1081,10 @@ template < class A > inline TetraTop < A >
              myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
              myhface3_t * f3, int t3, innertetra_t *up, int nChild, double vol) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, up->_myGrid), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0)
-  , _lvl (l) 
-  , _rule (myrule_t :: nosplit)
   , _indexManager(up->_indexManager) 
   , _volume(vol) 
+  , _lvl (l) 
+  , _rule (myrule_t :: nosplit)
   , _nChild(nChild) 
 {
   // set level 
@@ -1105,11 +1115,12 @@ TetraTop (int l, myhface3_t * f0, int t0,
           myhface3_t * f3, int t3, IndexManagerType & im, Gitter * mygrid) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, mygrid),
     _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0)
-  , _lvl (l) 
-  , _rule (myrule_t :: nosplit) , _indexManager(im)
+  , _indexManager(im)
   , _volume(quadraturTetra3D < VolumeCalc > 
     (LinearMapping ( this->myvertex(0)->Point(), this->myvertex(1)->Point(),
                      this->myvertex(2)->Point(), this->myvertex(3)->Point())).integrate1 (0.0))
+  , _lvl (l) 
+  , _rule (myrule_t :: nosplit) 
   , _nChild(0)  // we are macro ==> nChild 0 
 { 
   assert( this->level() == l );

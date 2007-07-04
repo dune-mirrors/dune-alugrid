@@ -234,6 +234,7 @@ public :
     
     // true if index is copy from outside and should noit freeded
     bool _isCopy;
+
     // constructor 
     DuneIndexProvider () : 
       _idx(-1), 
@@ -444,7 +445,6 @@ public :
     // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
     virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
-
   } ;
     
   class hface : public stiExtender_t :: FaceIF , public DuneIndexProvider {
@@ -764,9 +764,9 @@ public :
     virtual void backupCMode (ostream &) const = 0 ;
     virtual void backupCMode (const char *,const char *) const = 0 ;
   
-    // Methoden f"ur den Strahlungstransportl"oser
-    virtual void sortmacrogrid () {abort();}
-
+    // return size of used memory of macro gitter 
+    // (size of lists storing the pointers )
+    virtual size_t memUsage () const = 0;
   } ;
 public :
   class Geometric {
@@ -948,10 +948,7 @@ public :
 
     typedef class VertexGeo : public vertex_STI, public MyAlloc 
     {
-    protected:
-      IndexManagerType & _indexmanager;
-    public :
-      Refcount ref ;
+    public:  
       // VertexGeo is provided for the vertices on lower levels 
       inline VertexGeo (int,double,double,double, VertexGeo & ) ;
       inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
@@ -967,7 +964,6 @@ public :
       // overload backupIndex and restoreIndex here
       inline void backupIndex  (ostream & os ) const;
       inline void restoreIndex (istream & is , vector<bool>(&)[4] );
-      //inline void restoreIndex (istream & is ) ;
 
       // backup does nothing 
       inline void backup (ostream & os ) const {}
@@ -978,8 +974,15 @@ public :
     private :
       // the coordinates of this vertex 
       double _c [3] ;
+    protected:
+      // index manager
+      IndexManagerType & _indexmanager;
+    private:   
       // the level of creation 
       int _lvl ;
+    public :
+      // reference counter 
+      Refcount ref ;
     } vertex_GEO ;
   
     typedef class hedge1 : public hedge_STI, public MyAlloc {
@@ -992,7 +995,6 @@ public :
     public :
       typedef Hedge1Rule myrule_t ;
       inline virtual ~hedge1 () ;
-      Refcount ref ;
       inline myvertex_t * myvertex (int) ;
       inline const myvertex_t * myvertex (int) const ;
       virtual myvertex_t * subvertex (int) = 0 ;
@@ -1004,6 +1006,8 @@ public :
       virtual void refineImmediate (myrule_t) = 0 ;
     private :
       myvertex_t * v0, * v1 ;
+    public:  
+      Refcount ref ;
     } hedge1_GEO ;
   
     typedef class hface3 : public hface_STI, public MyAlloc {
@@ -1034,7 +1038,6 @@ public :
       inline int preCoarsening () ;
     public :
       inline virtual ~hface3 () ;
-      Refcount ref ;
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
       inline void detachElement (int) ;
     public :
@@ -1067,7 +1070,9 @@ public :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
 
-      myrule_t _parRule; 
+      myrule_t _parRule;
+    public:  
+      Refcount ref ;
     } hface3_GEO ;
 
     typedef class hface4 : public hface_STI, public MyAlloc {

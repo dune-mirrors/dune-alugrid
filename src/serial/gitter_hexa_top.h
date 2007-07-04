@@ -14,13 +14,14 @@ template < class A > class Hedge1Top : public A {
     typedef typename A :: myvertex_t  myvertex_t ;
     typedef typename A :: myrule_t  myrule_t ;
   private :
-    int _lvl ;
     inneredge_t * _dwn, * _bbb ;
     innervertex_t * _cv ;
-    myrule_t _rule ;
+    IndexManagerType & _indexManager;
 
-    IndexManagerType & _indexManager; 
-    const signed char _nChild;
+    myrule_t _rule ;  
+    int _lvl ;       
+    const signed char _nChild;  
+    
   public :
     // need for refinement 
     IndexManagerType & getIndexManager() { return _indexManager; }
@@ -71,9 +72,10 @@ template < class A > class Hface4Top : public A {
     innerface_t * _dwn, * _bbb ;
     innervertex_t * _cv ;
     inneredge_t   * _ed ;
+    IndexManagerType & _indexManager;
+
     int _lvl ;
     myrule_t _rule ;
-    IndexManagerType & _indexManager;
     const signed char _nChild;
     
   private:
@@ -139,9 +141,9 @@ template < class A > class Hbnd4Top : public A {
     bool refineLikeElement (balrule_t) ;
   private :
     innerbndseg_t * _bbb, * _dwn, * _up ;
+    IndexManagerType & _indexManager;
     int _lvl ;
     const bnd_t _bt; // type of boundary 
-    IndexManagerType & _indexManager;
     
     inline bool coarse () ;
     inline void append (innerbndseg_t *) ;
@@ -191,10 +193,10 @@ template < class A > class HexaTop : public A {
     innerface_t * _fc ;
     inneredge_t * _ed ;
     innervertex_t * _cv ;
-    int _lvl ;
-    myrule_t _rule, _req ;
     IndexManagerType & _indexManager; 
     const double _volume; 
+    int _lvl ;
+    myrule_t _rule, _req ;
     const signed char _nChild; 
 
 private:    
@@ -362,13 +364,23 @@ template < class A > class Periodic4Top : public A {
 
 
 template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b, IndexManagerType & im ) 
-  : A (a,b), _lvl (l), _dwn (0), _bbb (0), _cv (0), _rule (myrule_t :: nosplit) , _indexManager (im) , _nChild(0) {
+  : A (a,b), 
+  _dwn (0), _bbb (0), _cv (0), 
+  _indexManager (im) , 
+  _rule (myrule_t :: nosplit) , 
+  _lvl (l), 
+  _nChild(0) {
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
 
 template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b, IndexManagerType & im, int nChild ) 
-  : A (a,b), _lvl (l), _dwn (0), _bbb (0), _cv (0), _rule (myrule_t :: nosplit) , _indexManager (im) ,_nChild(nChild) {
+  : A (a,b), 
+  _dwn (0), _bbb (0), _cv (0), 
+  _indexManager (im) ,
+  _rule (myrule_t :: nosplit) , 
+  _lvl (l), 
+  _nChild(nChild) {
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -657,8 +669,11 @@ Hface4Top < A > :: subface4 (int n) const {
 template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1, 
   myhedge1_t * e2, int t2, myhedge1_t * e3, int t3, IndexManagerType & im) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
-  _dwn (0), _bbb (0), _cv (0), _ed (0), _lvl (l), 
-  _rule (myrule_t :: nosplit) , _indexManager(im) , _nChild(0) {
+  _dwn (0), _bbb (0), _cv (0), _ed (0), 
+  _indexManager(im) ,
+  _lvl (l), 
+  _rule (myrule_t :: nosplit)  
+  , _nChild(0) {
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -667,10 +682,11 @@ template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0
   myhedge1_t * e2, int t2, myhedge1_t * e3, int t3, IndexManagerType & im,
   int nChild ) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
-  _dwn (0), _bbb (0), _cv (0), _ed (0), _lvl (l), 
-  _rule (myrule_t :: nosplit) 
-  , _indexManager(im) 
-  , _nChild(nChild)
+  _dwn (0), _bbb (0), _cv (0), _ed (0), 
+  _indexManager(im) ,
+  _lvl (l), 
+  _rule (myrule_t :: nosplit) ,
+  _nChild(nChild)
 {
   this->setIndex( _indexManager.getIndex() );  
   return ;
@@ -920,8 +936,9 @@ inline void Hface4Top < A > :: doRestore (InStream_t & is)
 template < class A > inline Hbnd4Top < A > :: 
 Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, Gitter::helement_STI * gh, int gFace ) : 
-  A (f, i,ppv,up->_myGrid), _bbb (0), _dwn (0), _up(up) , _lvl (l), _bt(_up->_bt) ,
-  _indexManager(_up->_indexManager) 
+  A (f, i,ppv,up->_myGrid), _bbb (0), _dwn (0), _up(up) , 
+  _indexManager(_up->_indexManager) ,
+  _lvl (l), _bt(_up->_bt)
 {
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   ghostpair_STI p ( gh, gFace );
@@ -933,7 +950,10 @@ Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv,
 
 template < class A > inline Hbnd4Top < A > :: 
 Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im , Gitter * grd )
-  : A (f, i,ppv,grd), _bbb (0), _dwn (0), _up(0) , _lvl (l) , _bt(bt) ,  _indexManager(im) {
+  : A (f, i,ppv,grd), _bbb (0), _dwn (0), _up(0) , 
+  _indexManager(im) ,
+  _lvl (l) , _bt(bt)  
+{
   this->setIndex( _indexManager.getIndex() );  
   setBoundaryId( _bt );
   return ;
@@ -941,7 +961,10 @@ Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , Ind
 
 template < class A > inline Hbnd4Top < A > :: 
 Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im )
-  : A (f, i,ppv, 0 ), _bbb (0), _dwn (0), _up(0) , _lvl (l) , _bt(bt) ,  _indexManager(im) {
+  : A (f, i,ppv, 0 ), _bbb (0), _dwn (0), _up(0) , 
+  _indexManager(im) ,
+  _lvl (l) , _bt(bt) 
+{
   this->setIndex( _indexManager.getIndex() );  
   setBoundaryId( _bt );
   return ;
@@ -1209,13 +1232,14 @@ template < class A > inline HexaTop < A >
             int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
   , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0)
-  , _lvl (l)
-  ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit), _indexManager(im) 
+  ,  _indexManager(im) 
   ,  _volume (QuadraturCube3D < VolumeCalc >
    (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
                       this->myvertex(2)->Point(), this->myvertex(3)->Point(),
                       this->myvertex(4)->Point(), this->myvertex(5)->Point(),
                       this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0))
+  , _lvl (l)
+  ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
   , _nChild(0) 
 { 
   assert( this->level() == l );
@@ -1231,10 +1255,10 @@ template < class A > inline HexaTop < A >
             int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild , double vol ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
   , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0)
-  , _lvl (l)
-  ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _indexManager(_up->_indexManager)
   , _volume ( vol )
+  , _lvl (l)
+  ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _nChild(nChild) 
 { 
   assert( this->level() == l );

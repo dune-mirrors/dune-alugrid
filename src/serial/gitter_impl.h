@@ -32,7 +32,8 @@ class MacroGhostInfo;
 
 class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
   public :
-    class Objects {
+    class Objects 
+    {
       public :
         class VertexEmpty : public VertexGeo 
         {
@@ -64,7 +65,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           inline const double (& oppositeVertex (int i) const) [3];
 
           inline int dimVx () const; 
-
       };
 
         class Hbnd3Default : public hbndseg3_GEO 
@@ -1142,6 +1142,7 @@ insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, MacroGhos
 
 inline void GitterBasisImpl :: printMemUsage ()
 {
+  typedef GitterBasis :: DuneIndexProvider DuneIndexProvider; 
   typedef GitterBasis :: Objects :: tetra_IMPL tetra_IMPL ; 
   typedef GitterBasis :: Objects :: hexa_IMPL  hexa_IMPL ; 
   typedef GitterBasis :: Objects :: hbndseg3_IMPL hbndseg3_IMPL ; 
@@ -1153,6 +1154,8 @@ inline void GitterBasisImpl :: printMemUsage ()
   typedef GitterBasis :: Objects :: VertexEmpty VertexEmpty; 
   typedef Gitter :: Geometric :: VertexGeo VertexGeo; 
   cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
+  cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n";
+  cout << "HedgeRule = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
   
   cout << "Tetrasize = " << sizeof(tetra_IMPL) << endl;
   cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
