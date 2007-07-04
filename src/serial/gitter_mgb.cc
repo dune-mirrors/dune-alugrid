@@ -638,37 +638,36 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, bool init)
 void MacroGridBuilder :: initialize () 
 {
   {
-    for (list < VertexGeo * > :: iterator i = myBuilder ()._vertexList.begin () ;
+    for ( BuilderIF :: vertexlist_t :: iterator i = myBuilder ()._vertexList.begin () ;
       i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
         _vertexMap [(*i)->ident ()] = (*i) ;
   }
   {
-    for (list < hedge1_GEO * > :: iterator i = myBuilder ()._hedge1List.begin () ;
+    for ( BuilderIF :: hedge1list_t :: iterator i = myBuilder ()._hedge1List.begin () ;
       i != myBuilder ()._hedge1List.end () ; myBuilder ()._hedge1List.erase (i ++)) {
       long k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident () ;
       _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i) ;
     }
   }
-  {for (list < hface3_GEO * > :: iterator i = myBuilder ()._hface3List.begin () ; i != myBuilder ()._hface3List.end () ;
+  {for ( BuilderIF :: hface3list_t :: iterator i = myBuilder ()._hface3List.begin () ; i != myBuilder ()._hface3List.end () ;
      myBuilder ()._hface3List.erase (i ++)) {
       _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i) ;
   }}
   {
-    for (list < hface4_GEO * > :: iterator i = myBuilder ()._hface4List.begin () ; i != myBuilder ()._hface4List.end () ; 
+    for ( BuilderIF :: hface4list_t :: iterator i = myBuilder ()._hface4List.begin () ; i != myBuilder ()._hface4List.end () ; 
       myBuilder ()._hface4List.erase (i ++)) _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (),
         (*i)->myvertex (2)->ident ())] = (*i) ;
   }
-  {for (list < hbndseg4_GEO * > :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
+  {for ( BuilderIF :: hbndseg4list_t :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
     faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
       _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
-        //(void *) new pair < hface4_GEO *, int > ((*i)->myhface4 (0), (*i)->twist (0)) ;
       delete (*i) ;
     } else {
       _hbnd4Map [key] = (*i) ;
     }
   }}
-  {for (list < hbndseg3_GEO * > :: iterator i = myBuilder ()._hbndseg3List.begin () ; i != myBuilder ()._hbndseg3List.end () ;
+  {for ( BuilderIF :: hbndseg3list_t :: iterator i = myBuilder ()._hbndseg3List.begin () ; i != myBuilder ()._hbndseg3List.end () ;
     myBuilder ()._hbndseg3List.erase (i++)) {
     faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
     if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
@@ -679,23 +678,23 @@ void MacroGridBuilder :: initialize ()
       _hbnd3Map [key] = (*i) ;
     }
   }}
-  {for (list < tetra_GEO * > :: iterator i = myBuilder ()._tetraList.begin () ; i != myBuilder ()._tetraList.end () ; 
+  {for ( BuilderIF :: tetralist_t :: iterator i = myBuilder ()._tetraList.begin () ; i != myBuilder ()._tetraList.end () ; 
       myBuilder ()._tetraList.erase (i++)) {
       _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i) ;
   }}
-  {for (list < periodic3_GEO * > :: iterator i = myBuilder ()._periodic3List.begin () ; i != myBuilder ()._periodic3List.end () ; 
+  {for (BuilderIF :: periodic3list_t :: iterator i = myBuilder ()._periodic3List.begin () ; i != myBuilder ()._periodic3List.end () ; 
       myBuilder ()._periodic3List.erase (i++)) {
       _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
   }}
-  {for (list < periodic4_GEO * > :: iterator i = myBuilder ()._periodic4List.begin () ; i != myBuilder ()._periodic4List.end () ; 
+  {for (BuilderIF :: periodic4list_t :: iterator i = myBuilder ()._periodic4List.begin () ; i != myBuilder ()._periodic4List.end () ; 
       myBuilder ()._periodic4List.erase (i++)) {
       _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
   }}
   {
-    for (list < hexa_GEO * > :: iterator i = myBuilder ()._hexaList.begin () ; i != myBuilder ()._hexaList.end () ; 
+    for (BuilderIF :: hexalist_t :: iterator i = myBuilder ()._hexaList.begin () ; i != myBuilder ()._hexaList.end () ; 
       myBuilder ()._hexaList.erase (i++)) _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
                   (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
   }

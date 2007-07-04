@@ -1562,18 +1562,33 @@ public :
       // Gitter erbaut werden soll. Der Builder geht direkt mit den Listen um und
       // wendet sich an die Factorymethoden insert_--*-- (), um neue Objekte zu erhalten.
 
-      list < VertexGeo * >     _vertexList ;
-      list < hedge1_GEO * >    _hedge1List ;
-      list < hface4_GEO * >    _hface4List ;
-      list < hface3_GEO * >    _hface3List ;
-      list < tetra_GEO * >     _tetraList ;
-      list < periodic3_GEO * > _periodic3List ;
+    public:  
+      typedef list < VertexGeo * >     vertexlist_t;  
+      typedef list < hedge1_GEO * >    hedge1list_t ;
+      typedef list < hface4_GEO * >    hface4list_t ;
+      typedef list < hface3_GEO * >    hface3list_t ;
+      typedef list < tetra_GEO * >     tetralist_t ;
+      typedef list < periodic3_GEO * > periodic3list_t ;
     
-      list < periodic4_GEO * > _periodic4List ;
-      list < hexa_GEO * >      _hexaList ;
+      typedef list < periodic4_GEO * > periodic4list_t ;
+      typedef list < hexa_GEO * >      hexalist_t ;
 
-      list < hbndseg3_GEO * >  _hbndseg3List ;
-      list < hbndseg4_GEO * >  _hbndseg4List ;
+      typedef list < hbndseg3_GEO * >  hbndseg3list_t ;
+      typedef list < hbndseg4_GEO * >  hbndseg4list_t ;
+      
+    private: 
+      vertexlist_t    _vertexList ;
+      hedge1list_t    _hedge1List ;
+      hface4list_t    _hface4List ;
+      hface3list_t    _hface3List ;
+      tetralist_t     _tetraList ;
+      periodic3list_t _periodic3List ;
+    
+      periodic4list_t _periodic4List ;
+      hexalist_t      _hexaList ;
+
+      hbndseg3list_t  _hbndseg3List ;
+      hbndseg4list_t  _hbndseg4List ;
 
       bool _modified ; // true if macro grid was modified 
 

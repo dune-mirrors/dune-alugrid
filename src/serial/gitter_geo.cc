@@ -628,16 +628,16 @@ Gitter :: Geometric :: BuilderIF :: ~BuilderIF ()
   if (iterators_attached ()) 
     cerr << "**WARNING (IGNORED) while deleting BuilderIF: iterator-count [" << iterators_attached () << "]" << endl ;
 
-  {for (list < hexa_GEO * > :: iterator i = _hexaList.begin () ; i != _hexaList.end () ; delete (*i++)) ; }
-  {for (list < tetra_GEO * > :: iterator i = _tetraList.begin () ; i != _tetraList.end () ; delete (*i++)) ; }
-  {for (list < periodic3_GEO * > :: iterator i = _periodic3List.begin () ; i != _periodic3List.end () ; delete (*i++)) ; }
-  {for (list < periodic4_GEO * > :: iterator i = _periodic4List.begin () ; i != _periodic4List.end () ; delete (*i++)) ; }
-  {for (list < hbndseg4_GEO * > :: iterator i = _hbndseg4List.begin () ; i != _hbndseg4List.end () ; delete (*i++)) ; }
-  {for (list < hbndseg3_GEO * > :: iterator i = _hbndseg3List.begin () ; i != _hbndseg3List.end () ; delete (*i++)) ; }
-  {for (list < hface4_GEO * > :: iterator i = _hface4List.begin () ; i != _hface4List.end () ; delete (*i++)) ; }
-  {for (list < hface3_GEO * > :: iterator i = _hface3List.begin () ; i != _hface3List.end () ; delete (*i++)) ; }
-  {for (list < hedge1_GEO * > :: iterator i = _hedge1List.begin () ; i != _hedge1List.end () ; delete (*i++)) ; }
-  {for (list < VertexGeo * > :: iterator i = _vertexList.begin () ; i != _vertexList.end () ; delete (*i++)) ; }
+  {for (hexalist_t  :: iterator i = _hexaList.begin () ; i != _hexaList.end () ; delete (*i++)) ; }
+  {for (tetralist_t :: iterator i = _tetraList.begin () ; i != _tetraList.end () ; delete (*i++)) ; }
+  {for (periodic3list_t :: iterator i = _periodic3List.begin () ; i != _periodic3List.end () ; delete (*i++)) ; }
+  {for (periodic4list_t :: iterator i = _periodic4List.begin () ; i != _periodic4List.end () ; delete (*i++)) ; }
+  {for (hbndseg4list_t  :: iterator i = _hbndseg4List.begin () ; i != _hbndseg4List.end () ; delete (*i++)) ; }
+  {for (hbndseg3list_t  :: iterator i = _hbndseg3List.begin () ; i != _hbndseg3List.end () ; delete (*i++)) ; }
+  {for (hface4list_t  :: iterator i = _hface4List.begin () ; i != _hface4List.end () ; delete (*i++)) ; }
+  {for (hface3list_t  :: iterator i = _hface3List.begin () ; i != _hface3List.end () ; delete (*i++)) ; }
+  {for (hedge1list_t  :: iterator i = _hedge1List.begin () ; i != _hedge1List.end () ; delete (*i++)) ; }
+  {for (vertexlist_t  :: iterator i = _vertexList.begin () ; i != _vertexList.end () ; delete (*i++)) ; }
 }
 
 IteratorSTI < Gitter :: vertex_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const vertex_STI *) const {
