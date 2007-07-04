@@ -117,9 +117,7 @@ public :
 
 // EmptyIterator is an iterator of an empty set  
 // for some default values 
-template < class A > class EmptyIterator : public IteratorSTI < A > ,
-                                           public MyAlloc 
-{
+template < class A > class EmptyIterator : public IteratorSTI < A > {
   EmptyIterator (const EmptyIterator < A > &) {}
 public :
   typedef A val_t ;
@@ -165,7 +163,7 @@ public :
   // zu bekommen ist, bzw. wie ein bestehender mit einer Schnittstellen-
   // methode kopiert werden kann.
   
-  class Handle : public IteratorSTI < A > , public MyAlloc {
+  class Handle : public IteratorSTI < A > {
   protected:
     AccessIterator < A > * _fac ;
     A * _a ;
@@ -195,7 +193,6 @@ protected :
 #ifndef NDEBUG 
     if(ref) 
       cerr << "WARNING: (IGNORED) There still exist iterators while corresponding grid is deleted! in: " << __FILE__ << " line: " << __LINE__ << endl; 
-    //assert (!ref) ; 
 #endif
   }
 } ;
@@ -224,42 +221,46 @@ public :
   protected:
     // internal index of item 
     int _idx;
-    
+
     // boundary id, zero for internal items, 
     // otherwise > 0 (but always positive )
     // negative id are for internal usage only 
-    unsigned char _bndid;
+    typedef unsigned char bndid_t ;
+    bndid_t _bndid;
     
     // reference counter of leaf elements holding pointer to this item 
-    unsigned char _leafref;
+    typedef unsigned char leafref_t;
+    leafref_t _leafref;
     
     // true if index is copy from outside and should noit freeded
     bool _isCopy;
-    
     // constructor 
-    DuneIndexProvider () : _idx(-1)
-                         , _bndid(interior) 
-                         , _leafref(0) 
-                         , _isCopy(false)
+    DuneIndexProvider () : 
+      _idx(-1), 
+      _bndid(interior),
+      _leafref(0) , 
+      _isCopy(false) 
     {}
 #endif
   public:
+    // returns true if bnd id is in range 
+    static bool bndRangeCheck (const int bt) 
+    {
+      if( (bt < -254) || (bt >= 0) ) 
+        return false;
+      else 
+        return true;
+    }
     
-    // destructor 
-    ~DuneIndexProvider () {}
-    
-    // backup and restore index of vertices, should be overloaded in
-    // derived classes, because some need to go down the hierarchiy
-    void backupIndexErr  () const {
+    // backupIndexErr message 
+    void backupIndexErr () const {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
       abort();
 #endif
     }
-
-    // backup and restore index of vertices, should be overloaded in
-    // derived classes, because some need to go down the hierarchiy
-    void restoreIndexErr () {
+    // restoreIndexErr message 
+    void restoreIndexErr () const {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
       abort();
@@ -325,24 +326,25 @@ public :
     inline bool isLeafEntity() const {
       return ( _leafref > 0 );
     }
-    inline unsigned char leafRefCount() const {
+    // return actual leaf ref counter 
+    inline leafref_t leafRefCount() const {
       return _leafref;
     }
 
     // return bnd id 
-    inline unsigned char bndId() const { return _bndid; }
+    inline bndid_t bndId() const { return _bndid; }
 
     // set bnd id, id is only set if id is larger then actual id
-    inline void setBndId (const unsigned char id) 
+    inline void setBndId (const bndid_t id) 
     { 
-      assert( id >= 0 && id < 255 );
+      assert( bndRangeCheck( id ) );
       if( id > _bndid ) _bndid = id; 
     }
     
     // set bnd id, id is overwritten in any case 
-    inline void setGhostBndId (const unsigned char id) 
+    inline void setGhostBndId (const bndid_t id) 
     { 
-      assert( id >= 0 && id < 255 );
+      assert( bndRangeCheck( id ) );
       _bndid = id; 
     }
 
@@ -373,8 +375,8 @@ public :
     inline void addleaf() {}
     inline void removeleaf() {}
     inline bool isLeafEntity() const {return false;}
-    inline unsigned char leafRefCount() const { return 0; }
-    inline unsigned char bndId() const { return 0; }
+    inline int leafRefCount() const { return 0; }
+    inline int bndId() const { return 0; }
     inline void setBndId (const int id) {}
     inline void setGhostBndId (const int id) {}
     bool isGhost () const { return false; } 
@@ -398,13 +400,16 @@ public :
 
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void project(const ProjectVertex &pv) = 0; 
-    
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); } 
-    virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
   
     // Extrainteger, damit die Element zu Vertex Zuordnug klappt,
     // wenn die Daten zur Visualisierung mit GRAPE rausgeschrieben
     // werden sollen:
+  
+    // backup and restore index of vertices, should be overloaded in
+    // derived classes, because some need to go down the hierarchiy
+    virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
+
   } ;
    
   class hedge : public stiExtender_t :: EdgeIF, public DuneIndexProvider  {
@@ -429,11 +434,17 @@ public :
     virtual void backup (ObjectStream &) const = 0 ;
     virtual void restore (ObjectStream &) = 0 ;
 
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); } 
-    virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
-  
+    // new xdr methods 
+    //virtual void backup (XDRstream_out &) const {};
+    //virtual void restore (XDRstream_in &) {};
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void projectInnerVertex(const ProjectVertex &pv) = 0; 
+
+    // backup and restore index of vertices, should be overloaded in
+    // derived classes, because some need to go down the hierarchiy
+    virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
+
   } ;
     
   class hface : public stiExtender_t :: FaceIF , public DuneIndexProvider {
@@ -466,8 +477,11 @@ public :
     // returns true if element conected to face is leaf 
     virtual bool isInteriorLeaf() const = 0;
 
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); } 
+    // backup and restore index of vertices, should be overloaded in
+    // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
+
   };
 
   // class with all extensions for helement 
@@ -479,7 +493,6 @@ public :
     Dune_helement () : DuneIndexProvider(), _refinedTag (true) {}
 #endif
   public:
-    ~Dune_helement () {}
     // reset the _refinedTag to false 
     void resetRefinedTag(); 
     // true if element was refined this adaptation step 
@@ -506,8 +519,16 @@ public :
     helement () {}
     virtual ~helement () {}
   public :
+    //testweise us
     virtual helement * up () = 0;
     virtual const helement * up () const = 0;
+    virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
+    virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
+    virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
+
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
+    virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
+    virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
     //us
     virtual helement * down () = 0 ;
     virtual const helement * down () const = 0 ;
@@ -524,9 +545,7 @@ public :
     // return number of child 
     virtual int nChild () const = 0 ;
 
-    // number of faces 
     virtual int nFaces() const = 0;
-    // number of edges 
     virtual int nEdges() const = 0;
     
     // mark element for using iso8 rule 
@@ -542,14 +561,6 @@ public :
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
     virtual void setIndicesAndBndId (const hface & , int ) { assert(false); abort(); }
     virtual void resetGhostIndices() = 0;
-
-    virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
-    virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
-    virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
-
-    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
-    virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
-    virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
@@ -560,8 +571,11 @@ public :
     virtual void backup (ObjectStream &) const = 0 ;
     virtual void restore (ObjectStream &) = 0 ;
 
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); } 
+    // backup and restore index of vertices, should be overloaded in
+    // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
+    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
+
   public: 
     virtual grid_t type() const = 0;
   } ;
@@ -609,26 +623,12 @@ public :
       bool _refinedTag; // true if element was refined 
 
     public:
-      // default constructor 
       inline Dune_hbndDefault () : DuneIndexProvider(), _refinedTag(false) {} 
-
-      // virtual destructor 
-      virtual ~Dune_hbndDefault () {}
 
       // reset the _refinedTag to false 
       void resetRefinedTag() { _refinedTag = false; }
       // true if element was refined this adaptation step 
       bool hasBeenRefined () const { return _refinedTag; }
-    protected:
-      // if ghost element exists, then ghost is splitted, when bnd is splitted 
-      // info will be filled with the new ghost cells and local face to the
-      // internal boundary, default just does nothing 
-      // implementation see gitter_{tetra,hexa}_top_pll.h 
-      virtual inline void splitGhost ( GhostChildrenInfo & info ) {}
-
-      // if ghost element exists, then ghost is coarsened, when bnd is coarsened  
-      virtual inline void coarseGhost () {}
-      virtual inline void setGhost ( const pair< helement * , int > & ) {}
   };
 
   class hbndseg  : public Dune_hbndDefault
@@ -652,6 +652,12 @@ public :
       closure = DuneIndexProvider :: border,  // also the value of border items 
       ghost_closure = DuneIndexProvider :: ghost , // also the value of ghost items 
       undefined = 255 } bnd_t ;
+
+    // returns true if bnd id is in range 
+    static bool bndRangeCheck (const int bt) 
+    {
+      return DuneIndexProvider :: bndRangeCheck (bt); 
+    }
     
     virtual bnd_t bndtype () const = 0 ;
         
@@ -665,7 +671,7 @@ public :
     virtual const hbndseg * next () const = 0 ;
     virtual int level () const = 0 ;
     virtual int nChild () const = 0 ;
-    inline int leaf () const ;
+    inline  int leaf () const ;
     // for dune 
     virtual int ghostLevel () const = 0 ;
     virtual bool ghostLeaf () const = 0 ;
@@ -676,6 +682,16 @@ public :
     // getGhostFaceNumber) when ghost is non-zero 
     virtual const pair < helement * ,int> & getGhost () const = 0; 
     
+  protected:
+    // if ghost element exists, then ghost is splitted, when bnd is splitted 
+    // info will be filled with the new ghost cells and local face to the
+    // internal boundary, default just does nothing 
+    // implementation see gitter_{tetra,hexa}_top_pll.h 
+    virtual inline void splitGhost ( GhostChildrenInfo & info ) {}
+
+    // if ghost element exists, then ghost is coarsened, when bnd is coarsened  
+    virtual inline void coarseGhost () {}
+    virtual inline void setGhost ( const pair< helement * , int > & ) {}
   public :
     virtual void restoreFollowFace () = 0 ;
     virtual void attachleafs() { abort(); }
@@ -751,7 +767,6 @@ public :
     // Methoden f"ur den Strahlungstransportl"oser
     virtual void sortmacrogrid () {abort();}
 
-    virtual size_t memUsage () const = 0;
   } ;
 public :
   class Geometric {
@@ -933,7 +948,10 @@ public :
 
     typedef class VertexGeo : public vertex_STI, public MyAlloc 
     {
+    protected:
+      IndexManagerType & _indexmanager;
     public :
+      Refcount ref ;
       // VertexGeo is provided for the vertices on lower levels 
       inline VertexGeo (int,double,double,double, VertexGeo & ) ;
       inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
@@ -960,12 +978,6 @@ public :
     private :
       // the coordinates of this vertex 
       double _c [3] ;
-    protected:
-      IndexManagerType & _indexmanager;
-
-    public:  
-      Refcount ref ;
-    private:  
       // the level of creation 
       int _lvl ;
     } vertex_GEO ;
@@ -980,6 +992,7 @@ public :
     public :
       typedef Hedge1Rule myrule_t ;
       inline virtual ~hedge1 () ;
+      Refcount ref ;
       inline myvertex_t * myvertex (int) ;
       inline const myvertex_t * myvertex (int) const ;
       virtual myvertex_t * subvertex (int) = 0 ;
@@ -989,13 +1002,8 @@ public :
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
-
     private :
-      // pointer to vertices 
       myvertex_t * v0, * v1 ;
-    public:  
-      // reference counter 
-      Refcount ref ;
     } hedge1_GEO ;
   
     typedef class hface3 : public hface_STI, public MyAlloc {
@@ -1026,6 +1034,7 @@ public :
       inline int preCoarsening () ;
     public :
       inline virtual ~hface3 () ;
+      Refcount ref ;
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
       inline void detachElement (int) ;
     public :
@@ -1050,6 +1059,7 @@ public :
       virtual void refineImmediate (myrule_t) = 0 ;
     public :
       myrule_t parentRule() const;
+      bool isConforming() const;
 
       // returns true, if element conected to face is leaf 
       virtual bool isInteriorLeaf() const ;
@@ -1058,22 +1068,22 @@ public :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
 
-    public:  
-      // reference counter 
-      Refcount ref ;
+      // H"ohere Ordnung: 
+      // 1. Regel des Elternelements, 
+      // 2. Nummer in der Reihe der Kinder
+      // 3. Nichtkonforme Situation vorne, 
+      // 4. Nichtkonforme Situation hinten
+      // bei 3. + 4. ja=1, nein=0
+      signed char _parRule, _nonv, _nonh;
+      // Ende: H"ohere Ordnung
 
-    protected:  
-      myrule_t _parRule;
     } hface3_GEO ;
 
-    typedef class hface4 : public hface_STI, public MyAlloc 
-    {
+    typedef class hface4 : public hface_STI, public MyAlloc {
     public :
       typedef hasFace4  myconnect_t ;
       enum { polygonlength = 4 } ;
-      
-      class face4Neighbour 
-      {
+      class face4Neighbour {
         pair < myconnect_t *, int > _v, _h ;
       public :
         static const pair < myconnect_t *, int > null ;
@@ -1097,6 +1107,7 @@ public :
       inline int preCoarsening () ;
     public :
       inline virtual ~hface4 () ;
+      Refcount ref ;
       inline void attachElement (const pair < hasFace4 *, int > &,int) ;
       inline void detachElement (int) ;
     public :
@@ -1129,9 +1140,6 @@ public :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
 
-    public:  
-      // reference counter 
-      Refcount ref ;
     protected:
       myrule_t _parRule;
 
@@ -1184,14 +1192,14 @@ public :
       inline pair < hface3_GEO *, int > myintersection (int) ;
       inline pair < const hface3_GEO *, int > myintersection (int) const;
       
-      int nFaces() const { return 4; }
-      int nEdges() const { return 6; }
+      virtual int nFaces() const { return 4; }
+      virtual int nEdges() const { return 6; }
       inline int twist (int) const ;
       int test () const ;
       // returns level of this object 
-      int nbLevel() const {return level();}
+      virtual int nbLevel() const {return level();}
       // returns leaf 
-      int nbLeaf() const {return leaf();}
+      virtual int nbLeaf() const {return leaf();}
     public :
       virtual myrule_t getrule () const = 0 ;
       
@@ -1204,8 +1212,8 @@ public :
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
 
-      bool isboundary() const { return false; }
-      grid_t type() const { return tetra; }
+      virtual bool isboundary() const { return false; }
+      virtual grid_t type() const { return tetra; }
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
     private :
@@ -1371,27 +1379,26 @@ public :
       // return pair, first = pointer to face, second = twist of face
       inline pair < hface4_GEO *, int > myintersection (int) ;
       inline pair < const hface4_GEO *, int > myintersection (int) const;
-      int nFaces() const { return 6; }
-      int nEdges() const { return 12; }
+      virtual int nFaces() const { return 6; }
+      virtual int nEdges() const { return 12; }
 
       inline int twist (int) const ;
       int test () const ;
       // just returns level 
-      int nbLevel() const {return level();}
+      virtual int nbLevel() const {return level();}
       // just returns leaf 
-      int nbLeaf() const {return leaf();}
+      virtual int nbLeaf() const {return leaf();}
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
       virtual void request (myrule_t) = 0 ;
-      
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
       int tagForBallRefinement (const double (&)[3],double,int) ;
 
-      bool isboundary() const { return false; }
-      grid_t type() const { return hexa; }
+      virtual bool isboundary() const { return false; }
+      virtual grid_t type() const { return hexa; }
 
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
@@ -1556,49 +1563,34 @@ public :
       val_t & operator () (hasFace4 & x) const { return x ; }
     } ;
   public :
-    class BuilderIF : public Makrogitter 
-    {
+    class BuilderIF : public Makrogitter {
+  
       // BuilderIF ist die Stelle des Makrogitters an der der Builder angreift, wenn das
       // Gitter erbaut werden soll. Der Builder geht direkt mit den Listen um und
       // wendet sich an die Factorymethoden insert_--*-- (), um neue Objekte zu erhalten.
-
-    public:  
-      typedef list < VertexGeo * >     vertexlist_t;  
+    public:
+      typedef list < VertexGeo * >     vertexlist_t;
       typedef list < hedge1_GEO * >    hedge1list_t ;
       typedef list < hface4_GEO * >    hface4list_t ;
       typedef list < hface3_GEO * >    hface3list_t ;
       typedef list < tetra_GEO * >     tetralist_t ;
       typedef list < periodic3_GEO * > periodic3list_t ;
-    
+
       typedef list < periodic4_GEO * > periodic4list_t ;
       typedef list < hexa_GEO * >      hexalist_t ;
 
       typedef list < hbndseg3_GEO * >  hbndseg3list_t ;
       typedef list < hbndseg4_GEO * >  hbndseg4list_t ;
-      
-      /*
-      typedef vector < VertexGeo * >     vertexlist_t;  
-      typedef vector < hedge1_GEO * >    hedge1list_t ;
-      typedef vector < hface4_GEO * >    hface4list_t ;
-      typedef vector < hface3_GEO * >    hface3list_t ;
-      typedef vector < tetra_GEO * >     tetralist_t ;
-      typedef vector < periodic3_GEO * > periodic3list_t ;
-    
-      typedef vector < periodic4_GEO * > periodic4list_t ;
-      typedef vector < hexa_GEO * >      hexalist_t ;
 
-      typedef vector < hbndseg3_GEO * >  hbndseg3list_t ;
-      typedef vector < hbndseg4_GEO * >  hbndseg4list_t ;
-      */
-      
-    private: 
+    private:   
+      // macro object lists 
       vertexlist_t    _vertexList ;
       hedge1list_t    _hedge1List ;
       hface4list_t    _hface4List ;
       hface3list_t    _hface3List ;
       tetralist_t     _tetraList ;
       periodic3list_t _periodic3List ;
-    
+
       periodic4list_t _periodic4List ;
       hexalist_t      _hexaList ;
 
@@ -1610,6 +1602,9 @@ public :
     protected :
       BuilderIF () : _modified (true) {}
       virtual ~BuilderIF () ;
+
+      // return size of used memory in bytes 
+      virtual size_t memUsage () const
       
       // generates macro image from macro file 
       void generateRawHexaImage (istream &, ostream &) ;
@@ -1650,9 +1645,6 @@ public :
       IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
       IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
     public:  
-      // return memUsage of BuilderIF in bytes 
-      virtual size_t memUsage () const ;
-      
       // number of different index manager that exists 
       enum { numOfIndexManager = 6 };
 
@@ -1694,7 +1686,6 @@ public :
       virtual void backup (const char*,const char *) const ;
       virtual void backupCMode (ostream &) const ;
       virtual void backupCMode (const char*,const char *) const ;
-
       friend class MacroGridBuilder ;
       friend class MacroGhostBuilder;
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
@@ -1750,7 +1741,6 @@ public :
 
   virtual void fullIntegrityCheck () ;
   virtual void printsize () ;
-  virtual void printMemUsage () {}
   virtual bool adapt () ;
   // this method just calls adapt 
   virtual bool adaptWithoutLoadBalancing() ;
@@ -2487,13 +2477,19 @@ inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter
 }
 
 inline Gitter :: Geometric :: hface3 :: 
-hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
-  : _parRule (Hface3Rule::undefined)
+hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
+  _parRule (Hface3Rule::undefined),
+  _nonv(1) , _nonh(1) 
 {
   assert(e0 && e1 && e2) ;
   (e [0] = e0)->ref ++ ; s [0] = s0 ;
   (e [1] = e1)->ref ++ ; s [1] = s1 ;
   (e [2] = e2)->ref ++ ; s [2] = s2 ;
+  // H"ohere Ordnung:
+  //_parRule = (signed char) -1 ; // Test.
+  //_parRule = (signed char) 1 ; // Test.
+  //_nonv = _nonh = (signed char) 1 ;
+  // Ende: H"ohere Ordnung
   return ;
 }
 
@@ -2505,16 +2501,16 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
   return ;
 }
 
-inline void Gitter :: Geometric :: hface3 :: 
-attachElement (const pair < myconnect_t *, int > & p, int t) 
-{
-  t < 0 ? (nb._h = p) : (nb._v = p) ;
+inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t) {
+  // H"ohere Ordnung, bisher: " t < 0 ? nb._h = p : nb._v = p ;"
+  t < 0 ? (_nonh = 0, nb._h = p) : (_nonv = 0, nb._v = p) ;
   ref ++ ;
   return ;
 }
 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t) {
-  t < 0 ? (nb._h = nb.null) : (nb._v = nb.null) ;
+  // H"ohere Ordnung, bisher: "t < 0 ? nb._h = nb.null : nb._v = nb.null ;"
+  t < 0 ? (_nonh = 1, nb._h = nb.null) : (_nonv = 1, nb._v = nb.null) ;
   ref -- ;
   return ;
 }
@@ -2555,6 +2551,10 @@ inline const Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :
 inline Gitter::Geometric::hface3::myrule_t 
 Gitter::Geometric::hface3::parentRule() const {
   return (myrule_t) _parRule;
+}
+
+inline bool Gitter :: Geometric :: hface3 :: isConforming () const {
+  return !(_nonv + _nonh == 1);
 }
 
 inline bool Gitter :: Geometric :: hface3 :: 

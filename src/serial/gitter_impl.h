@@ -325,7 +325,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO; 
       
           const myhface3_t & face = static_cast<const myhface3_t &> (f); 
-          const unsigned char bndid = face.bndId ();
+          const bndid_t bndid = face.bndId ();
 
           myhface3_t & myface = *(myhface3(face_nr));
 
@@ -361,7 +361,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         //ghost tetra gets indices of grid, to which it belongs actually
         void setGhostBoundaryIds() 
         {
-          const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
+          const bndid_t bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
           
           // value of ghost_closure 
           this->setGhostBndId( bndid );
@@ -549,7 +549,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
            typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO; 
           
            const myhface4_t & face = static_cast<const myhface4_t &> (f); 
-           const unsigned char bndid = face.bndId();
+           const bndid_t bndid = face.bndId();
            
            myhface4_t & myface = *(myhface4(face_nr));
 
@@ -584,7 +584,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         //ghost tetra gets indices of grid, to which it belongs actually
         void setGhostBoundaryIds() 
         {
-          const int bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
+          const bndid_t bndid = Gitter :: hbndseg_STI :: ghost_closure ; 
 
           // value of ghost_closure 
           this->setGhostBndId( bndid );
@@ -657,7 +657,7 @@ class GitterBasisImpl : public GitterBasis {
     inline GitterBasisImpl (const char *) ;
     inline ~GitterBasisImpl () ;
 
-    virtual void printMemUsage ();
+    //virtual void printMemUsage ();
 } ;
 
 
@@ -1140,6 +1140,7 @@ insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, MacroGhos
   return insert_hbnd4 (f,i,b); 
 }
 
+/*
 inline void GitterBasisImpl :: printMemUsage ()
 {
   typedef GitterBasis :: Objects :: tetra_IMPL tetra_IMPL ; 
@@ -1223,6 +1224,5 @@ inline void GitterBasisImpl :: printMemUsage ()
     cout << "\n" ;
   }
 }
-
-
+*/
 #endif  //  GITTER_IMPL_H_INCLUDED
