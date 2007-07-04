@@ -526,6 +526,7 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
   }
   delete [] vnum ;
   delete [] coord ;
+  delete [] pervec ;
   delete [] bvec ;
   delete [] pident ;
   if (debugOption (4))
