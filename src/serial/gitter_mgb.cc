@@ -466,13 +466,13 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
       in >> identification >> n;
       if (n == 4) {
         in >> bvec [nb][0] >> bvec [nb][1] >> bvec [nb][2] >> bvec [nb][3] ;
-  bvec [nb][4] = identification ;
-  nb++; 
+        bvec [nb][4] = identification ;
+        nb++; 
       } 
       else if (n == 8 && identification == -20) {
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >> pervec [nper][3]
-     >> pervec [nper][4] >> pervec [nper][5] >> pervec [nper][6] >> pervec [nper][7] ;
-  nper++;
+           >> pervec [nper][4] >> pervec [nper][5] >> pervec [nper][6] >> pervec [nper][7] ;
+        nper++;
       }
       else {
         cerr << "**FEHLER (FATAL):  "__FILE__ << " " << __LINE__ << " ... Exiting." << endl ;
@@ -510,13 +510,13 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
    << pident [vnum [i][5]] << " " << pident [vnum [i][6]] << " " << pident [vnum [i][7]] << endl ;
   }
   {
-// Anfang - Neu am 23.5.02 (BS)
     for (int i = 0 ; i < nper ; i ++)
+    {
       os << PERIODIC4_RAW << " " << pident [pervec [i][0]] << " " << pident [pervec [i][1]] << " "
       << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
       << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << " " 
       << pident [pervec [i][6]] << " " << pident [pervec [i][7]] << endl ;
-// Ende - Neu am 23.5.02 (BS)
+    }
   }
   {
     os << nb << endl ;
@@ -849,43 +849,45 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
   {
     int ne = 0 ;
     rawInput >> ne ;
-    for (int i = 0 ; i < ne ; i ++ ) {
+    for (int i = 0 ; i < ne ; i ++ ) 
+    {
       int elementType ;
       rawInput >> elementType ;
-      switch (elementType) {
-        case HEXA_RAW :
-    {
-      int v [8] ;
-      rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
-      InsertUniqueHexa (v) ;
-    }
-    break ;
-        case TETRA_RAW :
-          {
-      int v [4] ;
-            rawInput >> v [0] >> v [1] >> v [2] >> v [3] ;
-            InsertUniqueTetra (v) ;
-          }
-    break ;
-  case PERIODIC3_RAW :
-    {
-      int v [6] ;
-      rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] ;
-      InsertUniquePeriodic3 (v) ;
-    }
-    break ;
-  case PERIODIC4_RAW :
-          {
-            int v [8] ;
-      rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
-      InsertUniquePeriodic4 (v) ;
-          }
-          break ;
-  default :
-    cerr << "**ERROR (FATAL): unknown ElementID in Rawformat File [" 
-         << elementType << "] in "__FILE__ << " " << __LINE__ << " ... Exiting. " << endl ;
-         exit (1) ;
-    break ;
+      switch (elementType) 
+      {
+      case HEXA_RAW :
+        {
+          int v [8] ;
+          rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
+          InsertUniqueHexa (v) ;
+        }
+        break ;
+      case TETRA_RAW :
+        {
+          int v [4] ;
+          rawInput >> v [0] >> v [1] >> v [2] >> v [3] ;
+          InsertUniqueTetra (v) ;
+        }
+        break ;
+      case PERIODIC3_RAW :
+        {
+          int v [6] ;
+          rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] ;
+          InsertUniquePeriodic3 (v) ;
+        }
+        break ;
+      case PERIODIC4_RAW :
+        {
+          int v [8] ;
+          rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
+          InsertUniquePeriodic4 (v) ;
+        }
+        break ;
+      default :
+        cerr << "**ERROR (FATAL): unknown ElementID in Rawformat File [" 
+             << elementType << "] in "__FILE__ << " " << __LINE__ << " ... Exiting. " << endl ;
+             exit (1) ;
+        break ;
       }
     }
   }
@@ -900,12 +902,22 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
       {
         int bt, v [4] ;
         rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> bt ;
+        if( ! ( Gitter :: hbndseg_STI :: bndRangeCheck(bt) ) )
+        {
+          cerr << "**ERROR (FATAL): boundary id = " << bt << " out of range, valid are: [-254,...,-1]" << endl ;
+          exit(1);
+        }
         InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(-bt)) ;
       } 
       else if (polygonLen == 3) 
       {
         int bt, v [3] ;
         rawInput >> v [0] >> v [1] >> v [2] >> bt ;
+        if( ! ( Gitter :: hbndseg_STI :: bndRangeCheck(bt) ) )
+        {
+          cerr << "**ERROR (FATAL): boundary id = " << bt << " out of range, valid are: [-254,...,-1]" << endl ;
+          exit(1);
+        }
         InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(-bt)) ;
       } 
       else 
