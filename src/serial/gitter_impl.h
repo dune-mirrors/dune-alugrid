@@ -657,7 +657,7 @@ class GitterBasisImpl : public GitterBasis {
     inline GitterBasisImpl (const char *) ;
     inline ~GitterBasisImpl () ;
 
-    //virtual void printMemUsage ();
+    virtual void printMemUsage ();
 } ;
 
 
@@ -1140,7 +1140,6 @@ insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, MacroGhos
   return insert_hbnd4 (f,i,b); 
 }
 
-/*
 inline void GitterBasisImpl :: printMemUsage ()
 {
   typedef GitterBasis :: Objects :: tetra_IMPL tetra_IMPL ; 
@@ -1224,5 +1223,4 @@ inline void GitterBasisImpl :: printMemUsage ()
     cout << "\n" ;
   }
 }
-*/
 #endif  //  GITTER_IMPL_H_INCLUDED

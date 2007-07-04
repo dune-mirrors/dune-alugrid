@@ -578,9 +578,10 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) {
 
     // set parent rule 
     {
-      assert (getrule () < SCHAR_MAX) ;
-      for (innerface_t * f = down () ; f ; f = f->next ()) {
-        f->_parRule = (signed char) getrule () ;
+      myrule_t myRule = getrule();
+      for (innerface_t * f = down () ; f ; f = f->next ()) 
+      {
+        f->_parRule = myRule;
       }
     }
     this->postRefinement () ;

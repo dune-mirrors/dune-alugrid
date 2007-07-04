@@ -1059,7 +1059,6 @@ public :
       virtual void refineImmediate (myrule_t) = 0 ;
     public :
       myrule_t parentRule() const;
-      bool isConforming() const;
 
       // returns true, if element conected to face is leaf 
       virtual bool isInteriorLeaf() const ;
@@ -1068,15 +1067,7 @@ public :
       myhedge1_t * e [polygonlength] ;
       signed char s [polygonlength] ;
 
-      // H"ohere Ordnung: 
-      // 1. Regel des Elternelements, 
-      // 2. Nummer in der Reihe der Kinder
-      // 3. Nichtkonforme Situation vorne, 
-      // 4. Nichtkonforme Situation hinten
-      // bei 3. + 4. ja=1, nein=0
-      signed char _parRule, _nonv, _nonh;
-      // Ende: H"ohere Ordnung
-
+      myrule_t _parRule; 
     } hface3_GEO ;
 
     typedef class hface4 : public hface_STI, public MyAlloc {
@@ -1604,7 +1595,7 @@ public :
       virtual ~BuilderIF () ;
 
       // return size of used memory in bytes 
-      virtual size_t memUsage () const
+      virtual size_t memUsage () const;
       
       // generates macro image from macro file 
       void generateRawHexaImage (istream &, ostream &) ;
@@ -2478,18 +2469,12 @@ inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter
 
 inline Gitter :: Geometric :: hface3 :: 
 hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
-  _parRule (Hface3Rule::undefined),
-  _nonv(1) , _nonh(1) 
+  _parRule (Hface3Rule::undefined)
 {
   assert(e0 && e1 && e2) ;
   (e [0] = e0)->ref ++ ; s [0] = s0 ;
   (e [1] = e1)->ref ++ ; s [1] = s1 ;
   (e [2] = e2)->ref ++ ; s [2] = s2 ;
-  // H"ohere Ordnung:
-  //_parRule = (signed char) -1 ; // Test.
-  //_parRule = (signed char) 1 ; // Test.
-  //_nonv = _nonh = (signed char) 1 ;
-  // Ende: H"ohere Ordnung
   return ;
 }
 
@@ -2502,15 +2487,13 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
 }
 
 inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t) {
-  // H"ohere Ordnung, bisher: " t < 0 ? nb._h = p : nb._v = p ;"
-  t < 0 ? (_nonh = 0, nb._h = p) : (_nonv = 0, nb._v = p) ;
+  t < 0 ? nb._h = p : nb._v = p ;
   ref ++ ;
   return ;
 }
 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t) {
-  // H"ohere Ordnung, bisher: "t < 0 ? nb._h = nb.null : nb._v = nb.null ;"
-  t < 0 ? (_nonh = 1, nb._h = nb.null) : (_nonv = 1, nb._v = nb.null) ;
+  t < 0 ? nb._h = nb.null : nb._v = nb.null;
   ref -- ;
   return ;
 }
@@ -2551,10 +2534,6 @@ inline const Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :
 inline Gitter::Geometric::hface3::myrule_t 
 Gitter::Geometric::hface3::parentRule() const {
   return (myrule_t) _parRule;
-}
-
-inline bool Gitter :: Geometric :: hface3 :: isConforming () const {
-  return !(_nonv + _nonh == 1);
 }
 
 inline bool Gitter :: Geometric :: hface3 :: 
@@ -2621,7 +2600,6 @@ inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter
 
 inline Gitter :: Geometric :: hface4 :: 
 hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
-  // * higher order
   _parRule(Hface4Rule::undefined)
 {
   assert(e0 && e1 && e2 && e3) ;
