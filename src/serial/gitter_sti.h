@@ -335,12 +335,14 @@ public :
     // set bnd id, id is only set if id is larger then actual id
     inline void setBndId (const unsigned char id) 
     { 
+      assert( id >= 0 && id < 255 );
       if( id > _bndid ) _bndid = id; 
     }
     
     // set bnd id, id is overwritten in any case 
     inline void setGhostBndId (const unsigned char id) 
     { 
+      assert( id >= 0 && id < 255 );
       _bndid = id; 
     }
 
