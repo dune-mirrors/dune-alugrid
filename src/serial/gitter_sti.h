@@ -244,15 +244,6 @@ public :
     {}
 #endif
   public:
-    // returns true if bnd id is in range 
-    static bool bndRangeCheck (const int bt) 
-    {
-      if( (bt < -254) || (bt >= 0) ) 
-        return false;
-      else 
-        return true;
-    }
-    
     // backupIndexErr message 
     void backupIndexErr () const {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
@@ -315,13 +306,16 @@ public :
     }
 
     //for defining leaf entities in dune notation:] 
-    inline void addleaf() {
+    inline void addleaf() 
+    {
+      // check upper limit of unsigned char 
       ++_leafref;
     }
+    
     // decrease reference counter by one  
-    inline void removeleaf() {
+    inline void removeleaf() 
+    {
       --_leafref;
-      assert( _leafref >= 0 );
     }
     // returns true, if item is leaf item 
     inline bool isLeafEntity() const {
@@ -338,14 +332,12 @@ public :
     // set bnd id, id is only set if id is larger then actual id
     inline void setBndId (const bndid_t id) 
     { 
-      assert( bndRangeCheck( id ) );
       if( id > _bndid ) _bndid = id; 
     }
     
     // set bnd id, id is overwritten in any case 
     inline void setGhostBndId (const bndid_t id) 
     { 
-      assert( bndRangeCheck( id ) );
       _bndid = id; 
     }
 
@@ -656,7 +648,10 @@ public :
     // returns true if bnd id is in range 
     static bool bndRangeCheck (const int bt) 
     {
-      return DuneIndexProvider :: bndRangeCheck (bt); 
+      if( (bt < -254) || (bt >= 0) ) 
+        return false;
+      else 
+        return true;
     }
     
     virtual bnd_t bndtype () const = 0 ;
