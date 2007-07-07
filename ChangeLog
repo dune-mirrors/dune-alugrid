@@ -1,22 +1,23 @@
-Changed from version 0.41 --> 1.0
+Changed from version 1.0 --> 1.1
 
-major changes: 
-
-- NOTE: change of license from GNU LGPL to GNU GPL (see COPYING)
-- added version information 
+major changes:
+- some refactoring of MpAccessMPI, avoid double allocation of 
+	message buffers 
+- ObjectStream looses ownership when assignment operator is used 
+	to avoid copying of large memory areas that is not needed actualy
+- on reapartition of macro grid the order of memory allocation was
+	changed which saves a little memory 
+- when vectors are used and filled via push_back then first memory is
+	reserved, if possible, which leads to some performance enhancment	
 
 minor changes: 
-- changes of implementation of ghost information
-- the load balance config file was renamed from `lastverteilung.cfg' to
-  `alugrid.cfg' 
-- twist lookup table also for hexa 
+- boundary ids are check on read of macro grid 
+- ParallelGridMover can lock and unlock MyAlloc to avoid unnecessary 
+	free of memory during load balancing.
+- Some reordering of member variables of the element classes which lead
+	to 10% memory savings
+- 
 
 bug fixes: 
-
-- restart from checkpoint works again 
-- when coarsening ghost cell a never ending loop was removed 
-- slight changes in the stream reading and writing procedure during load
-  balancing which caused extreme long load balancing times on large
-  meshes 
-
+- removed little memory leak in generateRawHexaImage 
 
