@@ -113,7 +113,7 @@ public:
 
   //! returns the larges index used + 1, actually this is the size of the
   //! index set 
-  int getMaxIndex() const { return maxIndex_;  }
+  int getMaxIndex() const {  return maxIndex_;  }
   
   //! restore index from stack or create new index 
   T getIndex (); 
@@ -141,6 +141,9 @@ public:
   size_t memUsage () const ;
     
 private:
+  //! push index to stack 
+  inline void pushIndex(T index);
+
   // no copy constructor allowed 
   ALUGridIndexStack( const ALUGridIndexStack<T,length> & s);
  
@@ -149,6 +152,7 @@ private:
   
   // clear all stored indices 
   void clearStack ();
+
 };  // end class ALUGridIndexStack 
 
 //****************************************************************
@@ -208,22 +212,29 @@ inline void ALUGridIndexStack<T,length>::freeIndex ( T index )
   }
   else 
   {
-    if((*stack_).full())
-    {
-      fullStackList_.push(  stack_ );
-      if( emptyStackList_.empty() )
-      {
-        assert( emptyStackList_.size() <= 0 );
-        stack_ = new StackType (); 
-      }
-      else 
-      {
-        stack_ = emptyStackList_.top();
-        emptyStackList_.pop();
-      }
-    }
-    (*stack_).push(index); 
+    pushIndex(index);
   }
+}
+
+
+template <class T, int length>
+inline void ALUGridIndexStack<T,length>::pushIndex( T index ) 
+{
+  if((*stack_).full())
+  {
+    fullStackList_.push(  stack_ );
+    if( emptyStackList_.empty() )
+    {
+      assert( emptyStackList_.size() <= 0 );
+      stack_ = new StackType (); 
+    }
+    else 
+    {
+      stack_ = emptyStackList_.top();
+      emptyStackList_.pop();
+    }
+  }
+  (*stack_).push(index); 
 }
 
 template <class T, int length>
@@ -258,7 +269,9 @@ inline void ALUGridIndexStack<T,length>::backupIndexSet ( ostream & os )
 template <class T, int length>
 inline void ALUGridIndexStack<T,length>::restoreIndexSet ( istream & is )
 {
+  // read maxIndex from stream 
   is.read ( ((char *) &maxIndex_), sizeof(int) );
+
   // clear stack fro reconstruction of holes 
   clearStack ();
 
@@ -292,8 +305,9 @@ generateHoles(const vector<bool> & isHole)
   // big indices are inserted first 
   for(int i=idxsize-1; i>=0; --i)
   {
-    // all entries marked true will be inserted as free 
-    if(isHole[i] == true) freeIndex(i);
+    // all entries marked true will be pushed to stack
+    // to create the exact index manager status from before
+    if(isHole[i] == true) pushIndex(i);
   }
 }
  
