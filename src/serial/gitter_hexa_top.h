@@ -488,8 +488,16 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) {
                                    *v0 ) ;
           assert (_cv) ;
 
+#ifdef USE_MALLOC_AT_ONCE
+          void* edgeMem[2] = {0,0};
+          this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 2 );
+
+          inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, v0 , _cv, _indexManager, 0 ) ;
+          inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, _cv, v1, _indexManager, 1 ) ;
+#else
           inneredge_t * e0 = new inneredge_t (l, v0 , _cv, _indexManager, 0 ) ;
           inneredge_t * e1 = new inneredge_t (l, _cv, v1, _indexManager, 1 ) ;
+#endif
 
           assert (e0 && e1) ;
           (_dwn = e0)->append (e1) ;
@@ -763,18 +771,40 @@ template < class A > inline void Hface4Top < A > :: splitISO4 () {
   assert(ev0 && ev1 && ev2 && ev3) ;
 
   IndexManagerType & im = getEdgeIndexManager();
+#ifdef USE_MALLOC_AT_ONCE
+  void* edgeMem[4] = {0,0,0,0};
+  this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 4 );
+
+  inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, ev0, _cv, im) ;
+  inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, ev1, _cv, im) ;
+  inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, ev2, _cv, im) ;
+  inneredge_t * e3 = new (edgeMem[3]) inneredge_t (l, ev3, _cv, im) ;
+#else
   inneredge_t * e0 = new inneredge_t (l, ev0, _cv, im) ;
   inneredge_t * e1 = new inneredge_t (l, ev1, _cv, im) ;
   inneredge_t * e2 = new inneredge_t (l, ev2, _cv, im) ;
   inneredge_t * e3 = new inneredge_t (l, ev3, _cv, im) ;
+#endif
   assert( e0 && e1 && e2 && e3) ;
   e0->append(e1) ;
   e1->append(e2) ;
   e2->append(e3) ;
+
+#ifdef USE_MALLOC_AT_ONCE
+  void* faceMem[4] = {0,0,0,0};
+  this->mallocAtOnce( sizeof(innerface_t), faceMem, 4 );
+
+  innerface_t * f0 = new (faceMem[0]) innerface_t (l, this->subedge1(0,0), this->twist(0), e0, 0, e3, 1, this->subedge1(3,1), this->twist(3), _indexManager , 0) ;
+  innerface_t * f1 = new (faceMem[1]) innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e1, 0, e0, 1, _indexManager , 1) ;
+  innerface_t * f2 = new (faceMem[2]) innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), e2, 0, _indexManager , 2) ;
+  innerface_t * f3 = new (faceMem[3]) innerface_t (l, e3, 0, e2, 1, this->subedge1(2,1), this->twist(2), this->subedge1(3,0), this->twist(3), _indexManager , 3) ;
+#else 
   innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), this->twist(0), e0, 0, e3, 1, this->subedge1(3,1), this->twist(3), _indexManager , 0) ;
   innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e1, 0, e0, 1, _indexManager , 1) ;
   innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), e2, 0, _indexManager , 2) ;
   innerface_t * f3 = new innerface_t (l, e3, 0, e2, 1, this->subedge1(2,1), this->twist(2), this->subedge1(3,0), this->twist(3), _indexManager , 3) ;
+#endif
+
   assert (f0 && f1 && f2 && f3) ;  
   f0->append(f1) ;
   f1->append(f2) ;
@@ -1059,10 +1089,20 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   // ghostInfo is filled by splitGhost, see gitter_hexa_top_pll.h  
   this->splitGhost( ghostInfo );
 
+#ifdef USE_MALLOC_AT_ONCE
+  void* bndMem[8] = {0,0,0,0};
+  this->mallocAtOnce( sizeof(innerbndseg_t), bndMem, 4 );
+
+  innerbndseg_t * b0 = new (bndMem[0]) innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghostInfo.child(0), ghostInfo.face(0)) ;
+  innerbndseg_t * b1 = new (bndMem[1]) innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghostInfo.child(1), ghostInfo.face(1)) ;
+  innerbndseg_t * b2 = new (bndMem[2]) innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghostInfo.child(2), ghostInfo.face(2)) ;
+  innerbndseg_t * b3 = new (bndMem[3]) innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghostInfo.child(3), ghostInfo.face(3)) ;
+#else
   innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghostInfo.child(0), ghostInfo.face(0)) ;
   innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghostInfo.child(1), ghostInfo.face(1)) ;
   innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghostInfo.child(2), ghostInfo.face(2)) ;
   innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghostInfo.child(3), ghostInfo.face(3)) ;
+#endif 
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
@@ -1394,12 +1434,25 @@ template < class A > void HexaTop < A > :: splitISO8 ()
   assert(fv0 && fv1 && fv2 && fv3 && fv4 && fv5) ;
 
   IndexManagerType & im = getEdgeIndexManager();
+#ifdef USE_MALLOC_AT_ONCE
+  void* edgeMem[6] = {0,0,0,0,0,0};
+  // allocate 6 * sizeof innerege_t 
+  this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 6 );
+  inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, fv0, _cv, im) ;
+  inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, fv1, _cv, im) ;
+  inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, fv2, _cv, im) ;
+  inneredge_t * e3 = new (edgeMem[3]) inneredge_t (l, fv3, _cv, im) ;
+  inneredge_t * e4 = new (edgeMem[4]) inneredge_t (l, fv4, _cv, im) ;
+  inneredge_t * e5 = new (edgeMem[5]) inneredge_t (l, fv5, _cv, im) ;
+#else 
   inneredge_t * e0 = new inneredge_t (l, fv0, _cv, im) ;
   inneredge_t * e1 = new inneredge_t (l, fv1, _cv, im) ;
   inneredge_t * e2 = new inneredge_t (l, fv2, _cv, im) ;
   inneredge_t * e3 = new inneredge_t (l, fv3, _cv, im) ;
   inneredge_t * e4 = new inneredge_t (l, fv4, _cv, im) ;
   inneredge_t * e5 = new inneredge_t (l, fv5, _cv, im) ;
+#endif
+
   assert(e0 && e1 && e2 && e3 && e4 && e5) ;
   e0->append(e1) ;
   e1->append(e2) ;
@@ -1407,6 +1460,23 @@ template < class A > void HexaTop < A > :: splitISO8 ()
   e3->append(e4) ;
   e4->append(e5) ;
   IndexManagerType & faceIm = getFaceIndexManager();
+
+#ifdef USE_MALLOC_AT_ONCE
+  void* faceMem[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+  this->mallocAtOnce( sizeof(innerface_t), faceMem, 12 );
+  innerface_t * f0 = new (faceMem[0]) innerface_t (l, this->subedge1 (2, 7), 0, e2, 0, e5, 1, this->subedge1 (5, 4), 1, faceIm ) ;
+  innerface_t * f1 = new (faceMem[1]) innerface_t (l, this->subedge1(2, 5), 1, this->subedge1 (3, 7), 0, e3, 0, e2, 1, faceIm ) ;
+  innerface_t * f2 = new (faceMem[2]) innerface_t (l, e3, 1, this->subedge1 (3, 5), 1, this->subedge1 (4, 7), 0, e4, 0, faceIm ) ;
+  innerface_t * f3 = new (faceMem[3]) innerface_t (l, e5, 0, e4, 1, this->subedge1 (4, 5), 1, this->subedge1 (5, 6), 0, faceIm ) ;
+  innerface_t * f4 = new (faceMem[4]) innerface_t (l, this->subedge1 (0, 7), 0, e0, 0, e2, 1, this->subedge1 (2, 4), 1, faceIm ) ;
+  innerface_t * f5 = new (faceMem[5]) innerface_t (l, this->subedge1 (0, 5), 1, this->subedge1 (4, 4), 0, e4, 0, e0, 1, faceIm ) ; 
+  innerface_t * f6 = new (faceMem[6]) innerface_t (l, e4, 1, this->subedge1 (4, 6), 1, this->subedge1 (1, 6), 0, e1, 0, faceIm ) ;
+  innerface_t * f7 = new (faceMem[7]) innerface_t (l, e2, 0, e1, 1, this->subedge1 (1, 4), 1, this->subedge1 (2, 6), 0, faceIm ) ;
+  innerface_t * f8 = new (faceMem[8]) innerface_t (l, this->subedge1 (0, 4), 0, e0, 0, e5, 1, this->subedge1 (5, 7), 1, faceIm ) ;
+  innerface_t * f9 = new (faceMem[9]) innerface_t (l, this->subedge1 (0, 6), 1, this->subedge1 (3, 4), 0, e3, 0, e0, 1, faceIm ) ;
+  innerface_t * f10 = new (faceMem[10]) innerface_t (l, e3, 1, this->subedge1 (3, 6), 1, this->subedge1 (1, 5), 0, e1, 0, faceIm ) ;
+  innerface_t * f11 = new (faceMem[11]) innerface_t (l, e5, 0, e1, 1, this->subedge1 (1, 7), 1, this->subedge1 (5, 5), 0, faceIm ) ;
+#else 
   innerface_t * f0 = new innerface_t (l, this->subedge1 (2, 7), 0, e2, 0, e5, 1, this->subedge1 (5, 4), 1, faceIm ) ;
   innerface_t * f1 = new innerface_t (l, this->subedge1(2, 5), 1, this->subedge1 (3, 7), 0, e3, 0, e2, 1, faceIm ) ;
   innerface_t * f2 = new innerface_t (l, e3, 1, this->subedge1 (3, 5), 1, this->subedge1 (4, 7), 0, e4, 0, faceIm ) ;
@@ -1419,6 +1489,8 @@ template < class A > void HexaTop < A > :: splitISO8 ()
   innerface_t * f9 = new innerface_t (l, this->subedge1 (0, 6), 1, this->subedge1 (3, 4), 0, e3, 0, e0, 1, faceIm ) ;
   innerface_t * f10 = new innerface_t (l, e3, 1, this->subedge1 (3, 6), 1, this->subedge1 (1, 5), 0, e1, 0, faceIm ) ;
   innerface_t * f11 = new innerface_t (l, e5, 0, e1, 1, this->subedge1 (1, 7), 1, this->subedge1 (5, 5), 0, faceIm ) ;
+#endif
+
   assert(f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7 && f8 && f9 && f10 && f11) ;
   f0->append(f1) ;
   f1->append(f2) ;
@@ -1435,6 +1507,19 @@ template < class A > void HexaTop < A > :: splitISO8 ()
   // calculate child volume which is volume divided by 8 
   double childVolume = 0.125 * _volume;
 
+#ifdef USE_MALLOC_AT_ONCE
+  void* hexaMem[8] = {0,0,0,0,0,0,0,0};
+  this->mallocAtOnce( sizeof(innerhexa_t), hexaMem, 8 );
+
+  innerhexa_t * h0 = new (hexaMem[0]) innerhexa_t (l, this->subface4 (0, 0), this->twist (0), f0, 0, this->subface4 (2, 0), this->twist (2), f4, 0, f8, -4, this->subface4 (5, 0), this->twist (5) , this, 0, childVolume) ;
+  innerhexa_t * h1 = new (hexaMem[1]) innerhexa_t (l, this->subface4 (0, 3), this->twist (0), f1, 0, this->subface4 (2, 1), this->twist (2), this->subface4 (3, 0), this->twist (3), f9, -4, f4, -1, this, 1, childVolume) ;
+  innerhexa_t * h2 = new (hexaMem[2]) innerhexa_t (l, this->subface4 (0, 2), this->twist (0), f2, 0,f9, 0, subface4 (3, 1), this->twist (3), this->subface4 (4, 0), this->twist (4), f5, -1        , this, 2, childVolume) ;
+  innerhexa_t * h3 = new (hexaMem[3]) innerhexa_t (l, this->subface4 (0, 1), this->twist (0), f3, 0, f8, 0, f5, 0, this->subface4(4, 1), this->twist (4), this->subface4(5, 3), this->twist (5)    , this, 3, childVolume) ;
+  innerhexa_t * h4 = new (hexaMem[4]) innerhexa_t (l, f0, -1, this->subface4(1, 0), this->twist (1), this->subface4(2, 3), this->twist (2), f7, 0, f11, -4, this->subface4(5, 1), this->twist (5)  , this, 4, childVolume) ;
+  innerhexa_t * h5 = new (hexaMem[5]) innerhexa_t (l, f1, -1, this->subface4(1, 1), this->twist (1), this->subface4(2, 2), this->twist (2), this->subface4(3, 3), this->twist (3), f10, -4, f7, -1 , this, 5, childVolume) ;
+  innerhexa_t * h6 = new (hexaMem[6]) innerhexa_t (l, f2, -1, this->subface4(1, 2), this->twist (1), f10, 0, this->subface4(3, 2), this->twist (3), this->subface4(4, 3), this->twist (4), f6, -1  , this, 6, childVolume) ;
+  innerhexa_t * h7 = new (hexaMem[7]) innerhexa_t (l, f3, -1, this->subface4(1, 3), this->twist (1), f11, 0, f6, 0, this->subface4(4, 2), this->twist (4), this->subface4(5, 2), this->twist (5)   , this, 7, childVolume) ;
+#else 
   innerhexa_t * h0 = new innerhexa_t (l, this->subface4 (0, 0), this->twist (0), f0, 0, this->subface4 (2, 0), this->twist (2), f4, 0, f8, -4, this->subface4 (5, 0), this->twist (5) , this, 0, childVolume) ;
   innerhexa_t * h1 = new innerhexa_t (l, this->subface4 (0, 3), this->twist (0), f1, 0, this->subface4 (2, 1), this->twist (2), this->subface4 (3, 0), this->twist (3), f9, -4, f4, -1, this, 1, childVolume) ;
   innerhexa_t * h2 = new innerhexa_t (l, this->subface4 (0, 2), this->twist (0), f2, 0,f9, 0, subface4 (3, 1), this->twist (3), this->subface4 (4, 0), this->twist (4), f5, -1        , this, 2, childVolume) ;
@@ -1443,6 +1528,8 @@ template < class A > void HexaTop < A > :: splitISO8 ()
   innerhexa_t * h5 = new innerhexa_t (l, f1, -1, this->subface4(1, 1), this->twist (1), this->subface4(2, 2), this->twist (2), this->subface4(3, 3), this->twist (3), f10, -4, f7, -1 , this, 5, childVolume) ;
   innerhexa_t * h6 = new innerhexa_t (l, f2, -1, this->subface4(1, 2), this->twist (1), f10, 0, this->subface4(3, 2), this->twist (3), this->subface4(4, 3), this->twist (4), f6, -1  , this, 6, childVolume) ;
   innerhexa_t * h7 = new innerhexa_t (l, f3, -1, this->subface4(1, 3), this->twist (1), f11, 0, f6, 0, this->subface4(4, 2), this->twist (4), this->subface4(5, 2), this->twist (5)   , this, 7, childVolume) ;
+#endif
+
   assert(h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
   h0->append(h1) ;
   h1->append(h2) ;

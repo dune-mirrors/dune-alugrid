@@ -84,6 +84,43 @@ void MyAlloc :: unlockFree (void * addr)
   }
 }
 
+#ifdef USE_MALLOC_AT_ONCE
+void  MyAlloc :: mallocAtOnce(size_t s, void* vec[], size_t vecSize) throw (OutOfMemoryException) 
+{
+  assert(s > 0);
+  {
+    AllocEntry & fs ((*freeStore) [s]) ;
+    for(size_t i=0; i<vecSize; ++i)
+    {
+      ++ fs.N ;
+      if (fs.S.empty ()) 
+      {
+        vec[i] = malloc (s) ;
+        if (vec[i] == NULL) 
+        {
+          perror ("**FEHLER (FATAL) in MyAlloc :: operator new ()") ;
+          cerr << "**INFO MyAlloc :: operator new (" << s << "): Der gesamte belegte Speicherbereich war " 
+#ifdef IBM_XLC
+             << (mallinfo ().arena /1024)
+#else
+             << "[FEHLER: mallinfo() nicht verfuegbar] "
+#endif
+             << "kb als das Programm out-of-memory lief." << endl ;
+          throw OutOfMemoryException () ;
+        }
+      } 
+      else 
+      {
+        // get pointer from stack 
+        vec[i] = fs.S.top () ;
+        fs.S.pop () ;
+      }
+    }
+  }
+  return ;
+}
+#endif
+
 void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) 
 {
   assert(s > 0);
