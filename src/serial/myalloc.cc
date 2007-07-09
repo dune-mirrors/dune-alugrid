@@ -85,6 +85,7 @@ void MyAlloc :: unlockFree (void * addr)
 }
 
 #ifdef USE_MALLOC_AT_ONCE
+#warning "MyAlloc :: mallocAtOnce() enabled! "
 void  MyAlloc :: mallocAtOnce(size_t s, void* vec[], size_t vecSize) throw (OutOfMemoryException) 
 {
   assert(s > 0);
