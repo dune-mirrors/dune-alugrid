@@ -397,7 +397,7 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write level to know the level of ghost on the other side
   os.writeObject( mytetra().level() );
-  os.writeObject( ((int) (mytetra().leaf() ? 1 : 0)) );
+  os.writeObject( mytetra().leaf()  );
 #endif
   return ;
 }
@@ -1044,18 +1044,20 @@ bool Periodic4PllXBaseMacro :: erasable () const {
   // #     #  #        #  #   #    #
   // #     #  ######  #    #  #    #
 
-void HexaPllBaseX  :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const {
+void HexaPllBaseX  :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
+{
   gs.sendData( os , myhexa () );
   return ;
 }
-void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const {
+
+void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const 
+{
   // siehe writeDynamicState von Tetra 
 
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write level to know the level of ghost on the other side
   os.writeObject( myhexa().level() );
-  const int leaf = (myhexa().leaf() ? 1 : 0);
-  os.writeObject( leaf );
+  os.writeObject( myhexa().leaf()  );
 #endif
 
   return ;
