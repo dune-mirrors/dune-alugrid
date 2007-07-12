@@ -298,7 +298,7 @@ class Periodic3PllXBase : public ElementPllBaseX {
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
-	    
+      
   private :
     myperiodic3_t & _periodic3 ;
 } ;
@@ -517,9 +517,8 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     int _ghostLevel;
     int _ghostLeaf;
   public:
-    inline bool checkGhostLevel () const { return _ghostLevel == myhbnd().level(); }
     inline int ghostLevel () const { return _ghostLevel; }
-    inline bool ghostLeaf () const { return (_ghostLeaf==1); }
+    inline bool ghostLeaf () const { return (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1); }
 
     typedef Gitter :: ghostpair_STI ghostpair_STI;
     // to be revised (works for the moment )
@@ -1369,7 +1368,9 @@ getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p 
   return ;
 }
 
-template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) : _hbnd (b), _lockCRS (false) , _ghostLevel (-1), _ghostLeaf(0) {
+template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) 
+  : _hbnd (b), _lockCRS (false) , _ghostLevel (-1), _ghostLeaf(0) 
+{
   return ;
 }
 
@@ -1432,7 +1433,9 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
   return (abort (), false) ;
 }
 
-template < class A > void BndsegPllBaseXClosure < A > :: writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const {
+template < class A > void BndsegPllBaseXClosure < A > :: writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const 
+{
+  assert( ghostLeaf () );
   gs.sendData( os , myhbnd () );
   return ;
 }
@@ -1442,20 +1445,26 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
   return ;
 }
 
-template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, int) {
-  try {
+template < class A > void BndsegPllBaseXClosure < A > :: 
+readDynamicState (ObjectStream & os, int) 
+{
+  try 
+  {
 
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
     // read the real level of ghost 
     assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
-    const bool wasLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
-    
+    const bool wasLeaf = this->ghostLeaf() ;
+   
+    // read level and leaf of interior element on other side
+    // this changes the state of this leaf or not leaf
     os.readObject( _ghostLevel );
     os.readObject( _ghostLeaf );
 
-    const bool nowLeaf  = ( (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1) );
+    const bool nowLeaf = this->ghostLeaf() ;
 
-    if (!wasLeaf && nowLeaf) 
+    // if leaf state has changed the attach or detach 
+    if (! wasLeaf && nowLeaf) 
     {
       myhbnd().attachleafs();
     }
@@ -1464,12 +1473,14 @@ template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (Objec
       myhbnd().detachleafs();
     }
     
-    assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
-    assert( (!nowLeaf) ? (myhbnd().leafRefCount()==0) : 1);
-    assert( ( nowLeaf) ? (myhbnd().leafRefCount()==1) : 1);
+    assert( myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1 );
+    assert( (!nowLeaf) ? (! myhbnd().isLeafEntity()) : 1);
+    assert( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
 #endif
     
-  } catch (ObjectStream :: EOFException) {
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
