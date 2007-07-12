@@ -267,13 +267,6 @@ class ElementPllXIF : public MacroGridMoverIF {
       return 0; 
     }
 
-    virtual bool checkGhostLevel () const  
-    {
-      cerr << "ERROR: method checkGhostLevel of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
-      abort(); 
-      return 0; 
-    }
-
     virtual bool ghostLeaf () const
     { 
       cerr << "ERROR: method ghostLeaf of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
