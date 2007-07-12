@@ -4,7 +4,7 @@
 #define _ANSI_HEADER
 
 // toggle ALUGRID alloc at once during refinement 
-#define USE_MALLOC_AT_ONCE 
+//#define USE_MALLOC_AT_ONCE 
 
 // toggle ALUGRID alloc for grid objects like elements 
 // use withc care 
