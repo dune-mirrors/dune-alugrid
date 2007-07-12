@@ -2673,15 +2673,23 @@ Gitter::Geometric::hface4::parentRule() const {
 inline bool 
 Gitter::Geometric::hface4::isInteriorLeaf() const 
 {
-  if (nb.front().first->isboundary())
-    return ( nb.rear().first->nbLeaf() && 
-             nb.rear().first->nbLevel() == this->level());
-  else if (nb.rear().first->isboundary())
-    return ( nb.front().first->nbLeaf() && 
-             nb.front().first->nbLevel() == this->level());
+  const myconnect_t & nbRear  = *(nb.rear().first);
+  const myconnect_t & nbFront = *(nb.front().first);
+  
+  if (nbFront.isboundary())
+  {
+    return ( nbRear.nbLeaf() && 
+             nbRear.nbLevel() == this->level());
+  }
+  else if (nbRear.isboundary())
+  {
+    return ( nbFront.nbLeaf() && 
+             nbFront.nbLevel() == this->level());
+  }
   else
-    return (nb.rear().first->nbLeaf() ||
-           (nb.front().first->nbLeaf()));
+  {
+    return (nbRear.nbLeaf() || nbFront.nbLeaf());
+  }
 }
 
 
