@@ -524,7 +524,7 @@ exchange (const vector < ObjectStream > & in,
     vout[l]. second = v[l].second; 
 
     // make sure buffer size is large enough
-    assert( out[l]._len >= vout[l]. second ); 
+    assert( (int) out[l]._len >= vout[l]. second ); 
   } 
   
   // exchange data 
