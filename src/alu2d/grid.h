@@ -341,7 +341,7 @@ class Refco {
 
                  ref_1 = 2, ref_2 = 3, ref_3 = 4, ref_4 = 5, notref = 10,
 
-		 quart=9, notcrs = -10  } tag_t ;
+     quart=9, notcrs = -10  } tag_t ;
       
     virtual ~Refco () {} 
    
@@ -431,7 +431,7 @@ class Thinelement : public Basic {
 
     virtual int split(void * (&) [nparts], Listagency < Vertex > *,
                       Multivertexadapter &,nconf_vtx_t *,splitrule_t,
-		      int,Refco::tag_t,Prolong_basic *pro_el) = 0 ;
+          int,Refco::tag_t,Prolong_basic *pro_el) = 0 ;
 
     virtual int docoarsen(nconf_vtx_t*,int,Restrict_basic *rest_el) { return 1; };
 
@@ -515,7 +515,7 @@ class Element : public Thinelement, public Refco_el {
 
   protected:
 
-    struct c {	//  die vertex und (thin-)element verbindungen
+    struct c {  //  die vertex und (thin-)element verbindungen
 
       enum {pv=2,nv=3,nf=3};
 
@@ -659,18 +659,22 @@ class Element : public Thinelement, public Refco_el {
     void getAllNb(Vtx_btree::Node* node, stack<Thinelement*> vec) ;
    
   public:
-    void removehvtx(int fce,Vertex *vtx) {
-      if (connect.hvtx[fce]->count()==1) {
-	assert(connect.hvtx[fce]->getHead()==vtx);
-	delete connect.hvtx[fce];
-	connect.hvtx[fce] = 0;
-      } else {
+    void removehvtx(int fce,Vertex *vtx) 
+    {
+      if (connect.hvtx[fce]->count()==1) 
+      {
+        assert(connect.hvtx[fce]->getHead()==vtx);
+        delete connect.hvtx[fce];
+        connect.hvtx[fce] = 0;
+      } 
+      else 
+      {
 #ifndef NDEBUG
-  // only used in assert 
-	bool found=
+        // only used in assert 
+        bool found=
 #endif
-    connect.hvtx[fce]->remove(vtx);
-	assert(found);
+          connect.hvtx[fce]->remove(vtx);
+        assert(found);
       }
     }
 
@@ -687,7 +691,7 @@ class Element : public Thinelement, public Refco_el {
 
     friend istream&
       operator>> (istream& in, Element& elem) {
-	return in;
+  return in;
       }
 } ;
 // #author:
@@ -778,10 +782,10 @@ template < class A > class Hier : public A {
       if(dwn ? dwn->coarse(ncv,nconfDeg,rest_el) == numchild : 0 )
 
       if ( this->docoarsen(ncv,nconfDeg,rest_el) )
-	    {
+      {
           this->deletesubtree();
           this->mysplit = this->unsplit;
-	    }
+      }
 
       int i = (nxt ? nxt->coarse(ncv,nconfDeg,rest_el) : 0 ) + (this->is(Refco::crs) ? 1 : 0 ) ;
 
@@ -792,20 +796,20 @@ template < class A > class Hier : public A {
     }
 
     int refine_leaf(Listagency < Vertex > * a, 
-		    Multivertexadapter * b ,nconf_vtx_t *ncv,
-		    int nconfDeg,Refco::tag_t default_ref,
-		    Prolong_basic *pro_el)  {
+        Multivertexadapter * b ,nconf_vtx_t *ncv,
+        int nconfDeg,Refco::tag_t default_ref,
+        Prolong_basic *pro_el)  {
 
       int count = 0;
 
       assert( leaf() );
 
       if (this->is(Refco::ref))
-	      this->mark(default_ref);
+        this->mark(default_ref);
 
       if(this->is(Refco::quart) || 
-	       this->is(Refco::ref_1) || this->is(Refco::ref_2) || 
-	       this->thinis(this->bndel_like)) {
+         this->is(Refco::ref_1) || this->is(Refco::ref_2) || 
+         this->thinis(this->bndel_like)) {
           
         void * els [this->nparts] ;
 
@@ -825,18 +829,18 @@ template < class A > class Hier : public A {
           this->clear(Refco::ref_2);
         }
         else
-	      {
+        {
           assert(this->thinis(this->bndel_like));
           this->numchild = this->split(els, a, *b, ncv, this->triang_bnd,nconfDeg,default_ref,pro_el);
-	      }
+        }
 
         dwn = (Hier *)els[0] ;
 
         dwn->lvl = lvl + 1 ;
 
-	      dwn->up = this;
+        dwn->up = this;
         dwn->writeToWas();
-	      dwn->childNr_ = 0;
+        dwn->childNr_ = 0;
 
         for(int i = 1 ; i < numchild ; i ++ ) {
 
@@ -844,16 +848,16 @@ template < class A > class Hier : public A {
 
           ((Hier *)els[i])->up = this ;
           ((Hier *)els[i])->writeToWas();
-	        ((Hier *)els[i])->childNr_ = i;
+          ((Hier *)els[i])->childNr_ = i;
 
           ((Hier *)els[i-1])->nxt = (Hier *)els[i] ;
 
         }
 
-	      if (pro_el)
-	        pro_el->operator()(this);
-	
-	      //this->check();
+        if (pro_el)
+          pro_el->operator()(this);
+  
+        //this->check();
 
         count = numchild;
 
@@ -866,17 +870,17 @@ template < class A > class Hier : public A {
     void clearAllWas() {
       this->clearWas();
       if (nxt)
-	nxt->clearAllWas();
+  nxt->clearAllWas();
       if (dwn)
-	dwn->clearAllWas();
+  dwn->clearAllWas();
     }
 
     int refine(Listagency < Vertex > * a, Multivertexadapter * b,
-	       nconf_vtx_t *ncv,
-	       int nconfDeg,Refco::tag_t default_ref,Prolong_basic *pro_el) {
+         nconf_vtx_t *ncv,
+         int nconfDeg,Refco::tag_t default_ref,Prolong_basic *pro_el) {
       int count =  nxt ? nxt->refine(a, b,ncv, nconfDeg,default_ref,pro_el) : 0 ;
       if(dwn) 
-	count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
+  count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
       else {
 
  // Neue Behandlung der Bl"atter:
