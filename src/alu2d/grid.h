@@ -439,24 +439,17 @@ class Thinelement : public Basic {
     virtual void draw(Xdisplay & ) {};
 #endif
 
-    Triang * nbel(int l) const
+    Triang * nbel(const int l) const
     {
-      Thinelement *el=neighbour(l);
-      if (el->thinis(element_like))
-        return (Triang*)el;
-      else
-        return NULL;
+      Thinelement *el = neighbour(l);
+      return (el->thinis(element_like)) ? ((Triang*)el) : 0;
     }   
+
     Bndel_triang * nbbnd(int l) const
     {
       Thinelement *el=neighbour(l);
-      //if (el==NULL)
-      //return NULL;
-      assert(el!=NULL);
-      if (el->thinis(bndel_like))
-        return (Bndel_triang*)el;
-      else
-        return NULL;
+      assert(el != NULL);
+      return (el->thinis(bndel_like)) ? ((Bndel_triang*)el) : 0;
     }   
 
 } ;
@@ -643,19 +636,22 @@ class Element : public Thinelement, public Refco_el {
 
     void addhvtx(Vertex* inv, Thinelement *lnb,Thinelement *rnb,int fce);
 
-    int hashvtx(int fce) const {
+    int hashvtx(const int fce) const 
+    {
       return (connect.hvtx[fce] != 0);
     }
 
-    bool hasHangingNode(int fce) const {
-     return (connect.hvtx[fce] && connect.hvtx[fce]->head);
+    // return whether hanging node for given face exsits 
+    bool hasHangingNode(const int fce) const 
+    {
+      return (connect.hvtx[fce] && connect.hvtx[fce]->head);
     }
     
-    Thinelement* getLeftIntersection(int fce) {
+    Thinelement* getLeftIntersection(const int fce) {
       return connect.hvtx[fce]->head->leftElement();
     }
     
-    Thinelement* getRightIntersection(int fce) {
+    Thinelement* getRightIntersection(const int fce) {
       return connect.hvtx[fce]->head->rightElement();
     }
         
