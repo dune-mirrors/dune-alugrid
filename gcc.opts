@@ -11,5 +11,12 @@ FLAGS="-Wall"
 # additional flags for debugging
 DEBUGFLAGS="-g"
 
-# additional flags for optimization
-OPTIMFLAGS="-O3 -funroll-loops -DNDEBUG -finline-functions"
+# additional flags for optimizatio
+#OPTIMFLAGS="-O3 -DNDEBUG -funroll-loops -finline-functions"
+OPTIMFLAGS="-O3 -DNDEBUG \
+  -funroll-loops -finline-functions \
+  -fomit-frame-pointer \
+  -msse3 -mfpmath=sse -march=pentium4m \
+  --param max-inline-insns-single=6000 \
+  --param large-function-growth=6500 \
+  --param inline-unit-growth=6000"
