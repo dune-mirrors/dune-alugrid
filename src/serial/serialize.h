@@ -83,12 +83,18 @@ public :
   inline void write (const T & a)
   {
     assert( _owner );
-    size_t ap = _wb;
-    _wb = ap + sizeof(T) ;
-    if (_wb > _len) reallocateBuffer(_wb);
+    const size_t ap = _wb;
+    _wb += sizeof(T) ;
+
+    // if buffer is to small, reallocate 
+    if (_wb > _len) 
+    {
+      reallocateBuffer(_wb);
+    }
     assert( _wb <= _len );
-    T & val = *((T *) getBuff(ap) );
-    val = a;
+
+    // call assignment operator of type T 
+    static_cast<T &> (*((T *) getBuff(ap) )) = a;
     return ;
   }
  
@@ -96,12 +102,16 @@ public :
   template <class T> 
   inline void read (T & a) throw (EOFException) 
   {
-    size_t ap = _rb;
-    _rb = ap + sizeof(T);
+    const size_t ap = _rb;
+    _rb += sizeof(T);
     
+#ifndef NDEBUG 
+    assert( _rb <= _wb );
     if (_rb > _wb) throw EOFException () ;
-    const T & val = *((const T *) getBuff(ap) );
-    a = val;
+#endif
+
+    // call assignment operator of type T 
+    a = static_cast<const T &> (*((const T *) getBuff(ap) ));
     return ;
   }
 
@@ -134,13 +144,13 @@ public :
   }
  
   //! free allocated memory 
-  void reset() 
+  inline void reset() 
   {
     removeObj();
   }
  
   // static alloc of char buffer for use in mpAccess_MPI 
-  static char * allocateBuffer(size_t newSize) throw (OutOfMemoryException)
+  inline static char * allocateBuffer(size_t newSize) throw (OutOfMemoryException)
   {
     // make sure that char has size of 1, otherwise check doExchange in
     // mpAccess_MPI.cc 
@@ -154,7 +164,7 @@ public :
   }
   
   // static free for use in mpAccess_MPI 
-  static void freeBuffer(char * buffer)
+  inline static void freeBuffer(char * buffer)
   {
     assert( buffer );
     free ( buffer );
@@ -164,7 +174,7 @@ protected:
   inline const char * getBuff (const size_t ap) const { return (_buf + ap); }
 
   // reallocated the buffer if necessary 
-  void reallocateBuffer(size_t newSize) throw (OutOfMemoryException)
+  inline void reallocateBuffer(size_t newSize) throw (OutOfMemoryException)
   {
     assert( _owner );
     _len += _bufChunk; 
@@ -177,7 +187,7 @@ protected:
   }
 
   // delete buffer 
-  void removeObj() 
+  inline void removeObj() 
   {
     if( _buf && _owner ) free (_buf) ;
     _buf = 0; _len = 0; _wb = 0; _rb = 0; _owner = true;
@@ -185,7 +195,7 @@ protected:
   }
   
   // assign buffer 
-  void assign(const ObjectStreamImpl & os) throw (OutOfMemoryException)
+  inline void assign(const ObjectStreamImpl & os) throw (OutOfMemoryException)
   {
     assert( _buf == 0 );
     if( os._len > 0 ) 
