@@ -323,7 +323,8 @@ void ParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
 
 void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
   assert(false);
-  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) {
+  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
+  {
     const long start = clock () ;
     long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
     mpAccess ().removeLinkage () ;

@@ -26,7 +26,8 @@ class LoadBalancer {
   public :
     static inline bool debugOption (int = 0) ;
   public :
-    class GraphEdge : public Serializable {
+    class GraphEdge : public Serializable 
+    {
       int _leftNode, _rightNode, _weight ;
       public :
         inline GraphEdge () ;
@@ -36,33 +37,38 @@ class LoadBalancer {
         inline int rightNode () const ;
         inline int weight () const ;
         inline bool operator < (const GraphEdge &) const ;
-	inline bool operator == (const GraphEdge &) const ;
+        inline bool operator == (const GraphEdge &) const ;
         inline GraphEdge operator - () const ;
-	inline bool isValid () const ;
-	inline bool readObject (ObjectStream &) ;
-	inline void writeObject (ObjectStream &) const ;
+        inline bool isValid () const ;
+        inline bool readObject (ObjectStream &) ;
+        inline void writeObject (ObjectStream &) const ;
     } ;
-    class GraphVertex : public Serializable {
-      int _index, _weight ;	// globale Nummer, Gewicht
-      double _center [3] ;	// und Schwerpunktskoordinaten
+
+    class GraphVertex : public Serializable 
+    {
+      double _center [3] ;  // Schwerpunktskoordinaten
+      int _index, _weight ; // globale Nummer, Gewicht
       public :
         inline GraphVertex () ;
         inline GraphVertex (int,int,const double (&)[3]) ;
+        // constructor without center is initializing center and weight to zero 
+        inline GraphVertex (int) ;
         inline virtual ~GraphVertex () ;
         inline int index () const ;
         inline int weight () const ;
-	inline const double (&center () const)[3] ;
+        inline const double (&center () const)[3] ;
         inline bool operator < (const GraphVertex &) const ;
-	inline bool operator == (const GraphVertex &) const ;
+        inline bool operator == (const GraphVertex &) const ;
         inline bool isValid () const ;
-	inline bool readObject (ObjectStream &) ;
-	inline void writeObject (ObjectStream &) const ;
+        inline bool readObject (ObjectStream &) ;
+        inline void writeObject (ObjectStream &) const ;
     } ;
+
   public :
     class DataBase {
       public :
-        typedef map < GraphVertex, int, less < GraphVertex > > 	ldb_vertex_map_t ;
-        typedef set < GraphEdge, less < GraphEdge > > 		ldb_edge_set_t ;
+        typedef map < GraphVertex, int, less < GraphVertex > >  ldb_vertex_map_t ;
+        typedef set < GraphEdge, less < GraphEdge > >     ldb_edge_set_t ;
       public :
         class AccVertexLoad {
           public :
@@ -75,53 +81,53 @@ class LoadBalancer {
       private :
         int _minFaceLoad ;
         int _maxFaceLoad ;
-	int _minVertexLoad ;
+        int _minVertexLoad ;
         int _maxVertexLoad ;
-	set < int, less < int > > _connect ;
-        ldb_edge_set_t 	 _edgeSet ;
+        set < int, less < int > > _connect ;
+        ldb_edge_set_t   _edgeSet ;
         ldb_vertex_map_t _vertexSet ;
       private :
-	void graphCollect (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,
-		insert_iterator < ldb_edge_set_t >) const ;
+        void graphCollect (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,
+                           insert_iterator < ldb_edge_set_t >) const ;
       public :
         enum method { 
-	        NONE = 0,
-		      COLLECT = 1,
-		      PARTY_helpfulSet = 3, 
-	        PARTY_kernighanLin = 4,
-		      PARTY_linear = 7,
-		      PARTY_gain = 8,
-		      PARTY_farhat = 9,
-		      METIS_PartGraphKway = 11,
-		      METIS_PartGraphRecursive = 12
-		    } ;
-	static const char * methodToString (method) ;
+          NONE = 0,
+          COLLECT = 1,
+          PARTY_helpfulSet = 3, 
+          PARTY_kernighanLin = 4,
+          PARTY_linear = 7,
+          PARTY_gain = 8,
+          PARTY_farhat = 9,
+          METIS_PartGraphKway = 11,
+          METIS_PartGraphRecursive = 12
+        } ;
+        static const char * methodToString (method) ;
         inline DataBase () ;
         inline DataBase (const DataBase &) ;
         inline virtual ~DataBase () ;
-	inline int nEdges () const ;
-	inline int nVertices () const ;
+        inline int nEdges () const ;
+        inline int nVertices () const ;
         void edgeUpdate (const GraphEdge &) ;
         void vertexUpdate (const GraphVertex &) ;
         void printLoad () const ;
-	int accVertexLoad ()const ;
-	int accEdgeLoad () const ;
-	inline int maxVertexLoad () const ;
+        int accVertexLoad ()const ;
+        int accEdgeLoad () const ;
+        inline int maxVertexLoad () const ;
       public :
         bool repartition (MpAccessGlobal &, method) ;
-	int getDestination (int) const ;
-	set < int, less < int > > scan () const ;
+        int getDestination (int) const ;
+        set < int, less < int > > scan () const ;
     } ;
 } ;
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
 inline bool LoadBalancer :: debugOption (int level) {
   return (getenv ("VERBOSE_LDB") ? ( atoi (getenv ("VERBOSE_LDB")) > level ? true : (level == 0)) : false) ;
@@ -194,6 +200,13 @@ inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w, const double (&
   return ;
 }
 
+inline LoadBalancer :: GraphVertex :: GraphVertex (int i) 
+  : _index (i), _weight (0) 
+{
+  _center [0] = _center [1] = _center [2] = 0.0 ;
+  return ;
+}
+
 inline int LoadBalancer :: GraphVertex :: index () const {
   return _index ;
 }
@@ -237,13 +250,13 @@ inline void LoadBalancer :: GraphVertex :: writeObject (ObjectStream & os) const
 }
 
 inline LoadBalancer :: DataBase :: DataBase () : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-	_edgeSet (), _vertexSet () {
+  _edgeSet (), _vertexSet () {
   return ;
 }
 
 inline LoadBalancer :: DataBase :: DataBase (const DataBase & b) : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
-	  _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
-	  _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) {
+    _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
+    _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) {
   return ;
 }
 
