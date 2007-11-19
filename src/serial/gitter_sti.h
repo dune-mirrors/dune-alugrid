@@ -168,14 +168,16 @@ public :
     AccessIterator < A > * _fac ;
     A * _a ;
     IteratorSTI < A > * _w ;
+    // typedef handle 
+    typedef typename AccessIterator < A > :: Handle ThisType;
   public :
     inline Handle (AccessIterator < A > &) ;
-    inline Handle (const AccessIterator < A > :: Handle &) ;
+    inline Handle (const ThisType &) ;
     inline Handle () ;
     inline ~Handle () ;
-    inline const Handle & operator = (const AccessIterator < A > :: Handle &) ;
-    inline bool operator == (const AccessIterator < A > :: Handle &) const ;
-    inline bool operator < (const AccessIterator < A > :: Handle &) const ;
+    inline const Handle & operator = (const ThisType &) ;
+    inline bool operator == (const ThisType &) const ;
+    inline bool operator < (const ThisType &) const ;
     inline void first () ;
     inline void next () ;
     inline int done () const ;
@@ -184,7 +186,7 @@ public :
     inline virtual IteratorSTI< A > * clone () const;
   protected: 
     void removeObj(); 
-    void assign (const AccessIterator < A > :: Handle &);
+    void assign (const ThisType &);
   } ;
 protected :
   AccessIterator () {}
@@ -1954,7 +1956,7 @@ template < class A > inline AccessIterator < A > :: Handle :: Handle (AccessIter
   return ;
 }
 
-template < class A > inline AccessIterator < A > :: Handle :: Handle (const AccessIterator < A > :: Handle & p) 
+template < class A > inline AccessIterator < A > :: Handle :: Handle (const ThisType & p) 
   : _fac (0), _a (0) , _w(0) 
 { 
   assign(p);
@@ -1964,8 +1966,7 @@ template < class A > inline AccessIterator < A > :: Handle :: Handle (const Acce
 template < class A > inline IteratorSTI< A > * AccessIterator < A > :: Handle :: 
 clone () const
 {
-  typedef typename AccessIterator < A > :: Handle HandleType;
-  return new HandleType (*this);
+  return new ThisType (*this);
 }
 
 template < class A > inline AccessIterator < A > :: Handle :: Handle () 
@@ -1991,7 +1992,7 @@ removeObj ()
   return ;
 }
 
-template < class A > inline const typename AccessIterator < A > :: Handle & AccessIterator < A > :: Handle :: operator = (const AccessIterator < A > :: Handle & x) 
+template < class A > inline const typename AccessIterator < A > :: Handle & AccessIterator < A > :: Handle :: operator = (const ThisType & x) 
 {
   removeObj();
   assign(x);
@@ -1999,7 +2000,7 @@ template < class A > inline const typename AccessIterator < A > :: Handle & Acce
 }
 
 template < class A > inline void 
-AccessIterator < A > :: Handle :: assign (const AccessIterator < A > :: Handle & x) 
+AccessIterator < A > :: Handle :: assign (const ThisType & x) 
 {
   assert( _fac == 0 );
   assert( _w == 0 );
@@ -2009,11 +2010,11 @@ AccessIterator < A > :: Handle :: assign (const AccessIterator < A > :: Handle &
   _w = x._w->clone();
 }
 
-template < class A > inline bool AccessIterator < A > :: Handle :: operator == (const AccessIterator < A > :: Handle & x) const {
+template < class A > inline bool AccessIterator < A > :: Handle :: operator == (const ThisType & x) const {
   return (x._fac == _fac) ? ((& x._w->item ()) == (& _w->item ()) ? 1 : 0) : 0 ;
 }
 
-template < class A > inline bool AccessIterator < A > :: Handle :: operator < (const AccessIterator < A > :: Handle & x) const {
+template < class A > inline bool AccessIterator < A > :: Handle :: operator < (const ThisType & x) const {
   return (abort (), false ) ;
 }
 

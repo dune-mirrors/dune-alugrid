@@ -17,9 +17,11 @@ template < class A > class PureElementAccessIterator : public AccessIterator <A>
   // that doesn't iterator over periodic elements 
 
   class Handle : public AccessIterator <A> :: Handle {
+      // type of handle 
+      typedef typename PureElementAccessIterator < A > :: Handle ThisType;
     public :
       inline Handle (AccessIterator < A > &) ;
-      inline Handle (const PureElementAccessIterator < A > :: Handle &) ;
+      inline Handle (const ThisType &) ;
       inline Handle (); 
   } ;
 
@@ -159,7 +161,7 @@ Handle (AccessIterator < A > & f)
 } 
 
 template < class A > inline PureElementAccessIterator < A > :: Handle :: 
-Handle (const PureElementAccessIterator < A > :: Handle & p) 
+Handle (const ThisType& p) 
   : AccessIterator < A > :: Handle (p)
 {
 } 

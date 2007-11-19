@@ -29,8 +29,6 @@
 
 #include "xdrclass.h"
 
-extern "C" { double drand48 (void) ; }
-
 #ifndef NDEBUG
 #ifdef DEBUG_ALUGRID
 Refcount :: Globalcount Refcount :: _g ;

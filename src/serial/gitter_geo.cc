@@ -26,8 +26,6 @@
 #include "gitter_sti.h"
 #include "walk.h"
 
-extern "C" { double drand48 (void) ; }
-
 const pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: null 
   = pair < Gitter :: Geometric :: hasFace3 *, int > (
       & (Gitter :: Geometric :: hasFaceEmpty<Gitter :: Geometric :: hasFace3>::instance() ), -1) ;
