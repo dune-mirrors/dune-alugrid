@@ -2042,7 +2042,7 @@ void Bndel::c::read(ifstream & in, Vertex ** v, const int l) {
 
 }
 
-void Bndel_triang::restrict(Bndel **pbel, int pnr)
+void Bndel_triang::restrictLocal(Bndel **pbel, int pnr)
 {
   assert(   ((Bndel_triang*)(pbel[0]))->time
 	    == ((Bndel_triang*)(pbel[1]))->time);
@@ -2050,7 +2050,7 @@ void Bndel_triang::restrict(Bndel **pbel, int pnr)
   time = ((Bndel_triang*)(pbel[0]))->time; 
 }
 
-void Bndel_triang::prolong(Bndel **pbel, int pnr) const
+void Bndel_triang::prolongLocal(Bndel **pbel, int pnr) const
 {
   for (int i=0;i<pnr;i++)
     ((Bndel_triang*)(pbel[i]))->time = time;
@@ -2113,7 +2113,7 @@ int Bndel_triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
   t2->edgeconnect(0,ncv->el[1]->edge(idx[1]));
   e[0]=t1;
   e[1]=t2;
-  prolong((Bndel **)e,2);
+  prolongLocal((Bndel **)e,2);
 
   delete ncv;
   ncv=NULL;
@@ -2130,7 +2130,7 @@ int Bndel_triang::docoarsen(nconf_vtx_t *ncv,
   Bndel *bel[2];
   bel[0]=down();
   bel[1]=down()->next();
-  restrict(bel,2);
+  restrictLocal(bel,2);
   deletesubtree();
   mysplit = unsplit;
   return 1;  

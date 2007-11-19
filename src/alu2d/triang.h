@@ -73,9 +73,9 @@ class Bndel_triang : public Hier < Bndel > {
 
     double time;
 
-    virtual void restrict(Bndel **, int);
+    virtual void restrictLocal(Bndel **, int);
 
-    virtual void prolong(Bndel **, int) const;
+    virtual void prolongLocal(Bndel **, int) const;
 
   public :
 
