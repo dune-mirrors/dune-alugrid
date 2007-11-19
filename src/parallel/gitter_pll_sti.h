@@ -63,6 +63,8 @@ template < class A > class AccessIteratorTT {
     {
       AccessIteratorTT < A > & _fac ;
       int _l ;
+
+      typedef typename AccessIteratorTT< A > :: HandleBase ThisType;
       protected :
         pair < IteratorSTI < A > *, IteratorSTI < A > * > _pw ;
         HandleBase (AccessIteratorTT < A > &, int) ;
@@ -501,7 +503,7 @@ HandleBase (AccessIteratorTT < A > & f, int i) : _fac (f), _l (i)
 }
 
 template < class A > inline AccessIteratorTT < A > :: HandleBase :: 
-HandleBase (const AccessIteratorTT < A > :: HandleBase & org) 
+HandleBase (const ThisType& org) 
   : _fac (org._fac), _l (org._l) 
   , _pw( org._pw.first ->clone() , org._pw.second->clone() )
 {
@@ -548,7 +550,7 @@ item () const
 template < class A > inline IteratorSTI < A > * AccessIteratorTT < A > :: HandleBase :: 
 clone () const 
 {
-  return new typename AccessIteratorTT < A > :: HandleBase (*this);
+  return new ThisType(*this);
 }
 
 template < class A > inline AccessIteratorTT < A > :: InnerHandle :: 
