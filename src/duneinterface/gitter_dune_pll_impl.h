@@ -214,10 +214,6 @@ private:
     const CommunicationType commType );
 
 public:
-  typedef GitterPll :: vertex_STI vertex_STI; 
-  typedef GitterPll :: hedge_STI  hedge_STI; 
-  typedef GitterPll :: hface_STI  hface_STI; 
-
   pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int) ;
   pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> borderIteratorTT (const hedge_STI  *, int) ;
   pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> borderIteratorTT  (const hface_STI  *, int) ;
