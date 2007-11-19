@@ -494,9 +494,12 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
   return change ;
 }
 
-int LoadBalancer :: DataBase :: getDestination (int i) const {
-  const double p [3] = {0.0,0.0,0.0} ;
-  GraphVertex e (i,0,p) ;
+int LoadBalancer :: DataBase :: getDestination (int i) const 
+{
+  //const double p [3] = {0.0,0.0,0.0} ;
+  //GraphVertex e (i,0,p) ;
+  // use constructor to initialize default values 
+  GraphVertex e (i) ;
   assert (_vertexSet.find (e) != _vertexSet.end ()) ;
   return (*_vertexSet.find (e)).second ;
 }
@@ -530,6 +533,3 @@ const char * LoadBalancer :: DataBase :: methodToString (method m) {
   }
   return "" ;
 }
-
-
-
