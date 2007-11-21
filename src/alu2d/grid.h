@@ -867,12 +867,13 @@ template < class A > class Hier : public A {
 
     }
 
-    void clearAllWas() {
+    void clearAllWas() 
+    {
       this->clearWas();
       if (nxt)
-  nxt->clearAllWas();
+        nxt->clearAllWas();
       if (dwn)
-  dwn->clearAllWas();
+        dwn->clearAllWas();
     }
 
     int refine(Listagency < Vertex > * a, Multivertexadapter * b,
@@ -880,7 +881,7 @@ template < class A > class Hier : public A {
          int nconfDeg,Refco::tag_t default_ref,Prolong_basic *pro_el) {
       int count =  nxt ? nxt->refine(a, b,ncv, nconfDeg,default_ref,pro_el) : 0 ;
       if(dwn) 
-  count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
+        count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
       else {
 
  // Neue Behandlung der Bl"atter:
