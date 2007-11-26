@@ -44,8 +44,6 @@ typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternM
 
 class VertexPllBaseX : public VertexPllXIF, public MyAlloc {
   protected :
-    enum { ENDOFSTREAM = ObjectStream :: ENDOFSTREAM } ;
-  protected :
     typedef Gitter :: Geometric :: VertexGeo myvertex_t ;
     inline myvertex_t & myvertex () ;
     inline const myvertex_t & myvertex () const ;
@@ -101,8 +99,6 @@ class EdgePllBaseX : public EdgePllXIF, public MyAlloc {
 } ;
 
 class EdgePllBaseXMacro : public EdgePllBaseX {
-  protected :
-    enum { ENDOFSTREAM = ObjectStream :: ENDOFSTREAM } ;
   public :
     EdgePllBaseXMacro (myhedge1_t &) ;
    ~EdgePllBaseXMacro () ;
@@ -154,7 +150,6 @@ template < class A > class FacePllBaseX : public FacePllXIF, public MyAlloc {
 
 template < class A > class FacePllBaseXMacro : public FacePllBaseX < A > 
 {
-  enum { ENDOFSTREAM = ObjectStream :: ENDOFSTREAM } ;
   public :
     typedef typename FacePllBaseX < A > :: myhface_t myhface_t ;
     inline FacePllBaseXMacro (myhface_t &) ;
@@ -179,9 +174,6 @@ template < class A > class FacePllBaseXMacro : public FacePllBaseX < A >
 
 class ElementPllBaseX : public ElementPllXIF, public MyAlloc 
 {
-  protected :
-    enum { ENDOFSTREAM = ObjectStream :: ENDOFSTREAM } ;
-    
   // Alle Methoden in dieser Klasse sind Dummies und erzeugen
   // Laufzeitfehler. Sie m"ussen von abgeleiteten Klassen 
   // mit den richtigen Inhalten "uberschrieben werden.
@@ -1151,10 +1143,10 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
       // mit einer Verfeinerungsregel identisch ist - sonst gibt's
       // nachher beim Auspacken nur garbage.
     
-      assert (! typename myhface_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      assert (! typename myhface_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
     
       this->myhface ().backup ( os );
-      os.put( ENDOFSTREAM );
+      os.put( ObjectStream :: ENDOFSTREAM );
 
       // inline internal data if has any 
       inlineData ( os ) ;
@@ -1203,7 +1195,7 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
     this->myhface ().restore ( os ) ;
 
     char c = os.get();
-    if( c != ENDOFSTREAM )
+    if( c != ObjectStream :: ENDOFSTREAM )
     {
       cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
       abort();
@@ -1218,7 +1210,7 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
     {
       char c = os.get() ; 
       // read stream until ENDOFSTREAM 
-      while ( c != ENDOFSTREAM ) 
+      while ( c != ObjectStream :: ENDOFSTREAM ) 
       {
         os.read(c) ;
       }

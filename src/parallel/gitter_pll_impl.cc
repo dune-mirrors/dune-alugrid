@@ -227,11 +227,11 @@ bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv)
       os.writeObject (myhedge1 ().myvertex (1)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhedge1_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      assert( ! myhedge1_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
 
       // pack refinement information 
       myhedge1 ().backup ( os ) ;
-      os.put( ENDOFSTREAM );
+      os.put( ObjectStream :: ENDOFSTREAM );
       
       inlineData ( os ) ;
     }
@@ -248,7 +248,7 @@ void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i)
     
     // stream should be at position ENDOFSTREAM now
     char c = os.get(); 
-    if( c != ENDOFSTREAM )
+    if( c != ObjectStream :: ENDOFSTREAM )
     {
       cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
       abort();
@@ -263,7 +263,7 @@ void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i)
     {
       char c = os.get() ; 
       // read stream until ENDOFSTREAM 
-      while ( c != ENDOFSTREAM ) 
+      while ( c != ObjectStream :: ENDOFSTREAM ) 
       {
         os.read(c) ;
       }
@@ -526,11 +526,11 @@ bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       os.writeObject (mytetra ().myvertex (3)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! mytetra_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      assert( ! mytetra_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
 
       // pack refinement information 
       mytetra ().backup ( os ) ;
-      os.put( ENDOFSTREAM );
+      os.put( ObjectStream :: ENDOFSTREAM );
       
       // inline data if has any 
       inlineData ( os ) ;
@@ -559,11 +559,11 @@ bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
       os.writeObject (mytetra ().myvertex (3)->ident ()) ;
 
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! mytetra_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      assert( ! mytetra_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
       
       // pack refinement information 
       mytetra ().backup ( os );
-      os.put( ENDOFSTREAM );
+      os.put( ObjectStream :: ENDOFSTREAM );
 
       // pack internal data if has any 
       inlineData ( os ) ;
@@ -645,7 +645,7 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
   try 
   {
     // read stream until end of stream marker 
-    for (char c = os.get() ; c != ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
+    for (char c = os.get() ; c != ObjectStream :: ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
   } 
   catch (ObjectStream :: EOFException) 
   {
@@ -659,7 +659,7 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
     //assert (!s.eof ()) ;
     
     char c = os.get(); 
-    if( c != ENDOFSTREAM )
+    if( c != ObjectStream :: ENDOFSTREAM )
     {
       cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
       abort();
@@ -685,7 +685,7 @@ void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os,
     mytetra ().restore (os) ;
 
     char c = os.get(); 
-    if( c != ENDOFSTREAM )
+    if( c != ObjectStream :: ENDOFSTREAM )
     {
       cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
       abort();
@@ -807,11 +807,11 @@ bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       os.writeObject (myperiodic3 ().myvertex (5)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic3_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      assert( ! myperiodic3_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
       
       // pack refinement information 
       myperiodic3 ().backup ( os ) ;
-      os.put( ENDOFSTREAM );
+      os.put( ObjectStream :: ENDOFSTREAM );
 
       // pack internal data if has any 
       inlineData ( os ) ;
@@ -846,7 +846,7 @@ void Periodic3PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
     myperiodic3 ().restore ( os ) ;
     
     char c = os.get();
-    if( c != ENDOFSTREAM )
+    if( c != ObjectStream :: ENDOFSTREAM )
     {
       cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
       abort();
@@ -971,11 +971,11 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv)
       os.writeObject (myperiodic4 ().myvertex (7)->ident ()) ;
 
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic4_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      assert( ! myperiodic4_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
       
       // pack refinement information 
       myperiodic4 ().backup ( os ) ;
-      os.put( ENDOFSTREAM );
+      os.put( ObjectStream :: ENDOFSTREAM );
       
       // pack internal data if has any 
       inlineData ( os ) ;
@@ -1015,7 +1015,7 @@ void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
     myperiodic4 ().restore (os) ;
     
     char c = os.get();
-    if( c != ENDOFSTREAM )
+    if( c != ObjectStream :: ENDOFSTREAM )
     {
       cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
       abort();
@@ -1163,12 +1163,12 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
       os.writeObject (myhexa ().myvertex (6)->ident ()) ;
       os.writeObject (myhexa ().myvertex (7)->ident ()) ;
       
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhexa_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      // make sure ObjectStream :: ENDOFSTREAM is not a valid refinement rule 
+      assert( ! myhexa_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
       
       // pack refinement information 
       myhexa(). backup( os );
-      os.put( ENDOFSTREAM );
+      os.put( ObjectStream :: ENDOFSTREAM );
 
       // pack internal data if has any 
       inlineData ( os ) ;
@@ -1202,11 +1202,11 @@ bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
       os.writeObject (myhexa ().myvertex (7)->ident ()) ;
 
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhexa_t :: myrule_t (ENDOFSTREAM).isValid ()) ;
+      assert( ! myhexa_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
       
       // backup refinement information 
       myhexa(). backup ( os );
-      os.put( ENDOFSTREAM );
+      os.put( ObjectStream :: ENDOFSTREAM );
       
       // pack internal data if has any 
       inlineData ( os ) ;
@@ -1288,7 +1288,7 @@ void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i)
     myhexa ().restore ( os ) ;
 
     char c = os.get();
-    if( c != ENDOFSTREAM )
+    if( c != ObjectStream :: ENDOFSTREAM )
     {
       cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
       abort();
@@ -1315,7 +1315,7 @@ void HexaPllBaseXMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType &
 
     // stream should now be at position ENDOFSTREAM 
     char c = os.get();
-    if( c != ENDOFSTREAM )
+    if( c != ObjectStream :: ENDOFSTREAM )
     {
       cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
       abort();

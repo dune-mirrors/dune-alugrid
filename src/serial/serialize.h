@@ -261,7 +261,7 @@ class ObjectStream : public ObjectStreamImpl
 public :
   // ENDOFSTREAM should be in range of char, i.e. -127 to 128 
   // and not conflict with refinement rules in gitter_sti.h 
-  enum { ENDOFSTREAM = -3 };
+  static const char ENDOFSTREAM = 127;
   
   // create empty object stream 
   inline ObjectStream () : BaseType(BufChunk) 
