@@ -259,7 +259,7 @@ class ObjectStream : public ObjectStreamImpl
   enum { BufChunk = 65536 * sizeof(double) } ;
 
 public :
-  // ENDOFSTREAM should be in range of char, i.e. -127 to 128 
+  // ENDOFSTREAM should be in range of char, i.e. 0 to 256 
   // and not conflict with refinement rules in gitter_sti.h 
   static const char ENDOFSTREAM = 127;
   
