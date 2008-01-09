@@ -11,13 +11,12 @@ major changes:
 	reserved, if possible, which leads to some performance enhancment	
 
 minor changes: 
-- boundary ids are check on read of macro grid 
+- boundary ids are checked on read of macro grid 
 - ParallelGridMover can lock and unlock MyAlloc to avoid unnecessary 
 	free of memory during load balancing.
 - Some reordering of member variables of the element classes which lead
 	to 10% memory savings
-- 
 
 bug fixes: 
 - removed little memory leak in generateRawHexaImage 
-
+- use cmath instead of math.h to compile with g++ 4.2
