@@ -131,7 +131,10 @@ Debug
 
 For debugging the code the preprocessor variable NDEBUG must not be defined
 and additionally the preprocessor variable DEBUG_ALUGRID can be defined
-for object reference counting.
+for object reference counting. In the read method of the message
+buffer for parallel computations a eof check is done on every read
+which can be disabled by passing the preprocessor variable
+NO_OBJECTSTREAM_DEBUG.
 
 
 Knowns Bugs 

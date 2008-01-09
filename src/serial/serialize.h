@@ -105,7 +105,7 @@ public :
     const size_t ap = _rb;
     _rb += sizeof(T);
     
-#ifndef NDEBUG 
+#ifndef NO_OBJECTSTREAM_DEBUG 
     assert( _rb <= _wb );
     if (_rb > _wb) throw EOFException () ;
 #endif
