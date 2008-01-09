@@ -6,5 +6,7 @@ SOURCE_DIR=../../src
 AM_CPPFLAGS = -I$(SOURCE_DIR) -I$(SOURCE_DIR)/serial -I$(SOURCE_DIR)/parallel -I$(SOURCE_DIR)/duneinterface 
 
 # headers to install 
-noinst_PROGRAMS = example
+noinst_PROGRAMS = example sizes 
 example_SOURCES = example.cc $(SOURCE_DIR)/alugrid_serial.cc 
+sizes_SOURCES = sizes.cc $(SOURCE_DIR)/alugrid_serial.cc 
+#sizes_SOURCES = sizes.cc $(SOURCE_DIR)/alugrid_serial.cc $(SOURCE_DIR)/alugrid_parallel.cc 
