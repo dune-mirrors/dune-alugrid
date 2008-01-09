@@ -137,14 +137,8 @@ for object reference counting.
 Knowns Bugs 
 -----------
 
-Intel ia64 architectures: On Intel ia64 architectures the 
-optimisation option -O3 doesn't work with the INTEL C++ Compiler. 
+METIS-4.0 bug: 
 
-METIS bug: 
-
-If you want to use the METIS library for partitioning, comment 
+If you want to use the METIS-4.0 library for partitioning, comment 
 in the metis_dir/Lib/proto.h line 462 the function declaration 
 int log2(int);
-
-This bug has been reported and hopefully will be fixed soon.
-
