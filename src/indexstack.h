@@ -319,13 +319,12 @@ compress()
 
   if( stack_ )
   {
+    // StackType is of type FiniteStack
     StackType& stack = *stack_;
     // copy all values to the priority queue
     while( ! stack.empty() )
     {
-      const int val = stack.top();
-      stack.pop();
-      tmpStack.push(val);
+      tmpStack.push( stack.pop() );
     }
     delete stack_; stack_ = 0;
   }
@@ -336,12 +335,11 @@ compress()
     fullStackList_.pop();
     if( st )
     {
+      // StackType is of type FiniteStack
       StackType& stack = *st;
       while( ! stack.empty() )
       {
-        const int val = stack.top();
-        stack.pop();
-        tmpStack.push(val);
+        tmpStack.push( stack.pop() );
       }
       delete st; 
     }
