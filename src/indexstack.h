@@ -222,7 +222,7 @@ inline void ALUGridIndexStack<T,length>::pushIndex( T index )
 {
   if((*stack_).full())
   {
-    fullStackList_.push(  stack_ );
+    fullStackList_.push( stack_ );
     if( emptyStackList_.empty() )
     {
       assert( emptyStackList_.size() <= 0 );
@@ -320,9 +320,12 @@ compress()
   if( stack_ )
   {
     StackType& stack = *stack_;
+    // copy all values to the priority queue
     while( ! stack.empty() )
     {
-      tmpStack.push(stack.pop());
+      const int val = stack.top();
+      stack.pop();
+      tmpStack.push(val);
     }
     delete stack_; stack_ = 0;
   }
@@ -336,7 +339,9 @@ compress()
       StackType& stack = *st;
       while( ! stack.empty() )
       {
-        tmpStack.push(stack.pop());
+        const int val = stack.top();
+        stack.pop();
+        tmpStack.push(val);
       }
       delete st; 
     }
