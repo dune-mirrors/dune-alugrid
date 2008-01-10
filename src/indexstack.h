@@ -345,15 +345,11 @@ compress()
     }
   }
 
-  while ( tmpStack.top() == (maxIndex_-1) )
-  {
-    --maxIndex_;
-    tmpStack.pop();
-  }
-
+  // now free all indices again, freeIndex 
+  // does remove the maxIndex in case of freed index is equal  
   stack_ = new StackType();
   assert( stack_ );
-  while( ! tmpStack.empty ())
+  while( ! tmpStack.empty () )
   {
     freeIndex( tmpStack.top() );
     tmpStack.pop();

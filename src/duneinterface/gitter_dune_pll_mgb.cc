@@ -561,10 +561,7 @@ DuneParallelGridMover :: ~DuneParallelGridMover ()
   if(!_finalized) 
   {
     // compress index manager before new elements are created 
-    for(int i=0; i<Gitter :: Geometric :: BuilderIF :: numOfIndexManager; ++i)
-    {
-      myBuilder().indexManager(i).compress();
-    }
+    myBuilder().compressIndexManagers();
 
     // finalize mover 
     finalize();

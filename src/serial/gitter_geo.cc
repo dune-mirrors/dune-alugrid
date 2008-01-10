@@ -889,3 +889,20 @@ size_t Gitter :: Geometric :: BuilderIF :: memUsage () const
 
   return mySize;
 }
+
+IndexManagerType&  Gitter :: Geometric :: BuilderIF :: indexManager(int codim)
+{
+  assert( codim >= 0 && codim < numOfIndexManager );
+  return _indexmanager[ codim ];
+}
+
+// compress all index manager 
+void Gitter :: Geometric :: BuilderIF :: compressIndexManagers()
+{
+  for(int i=0; i<numOfIndexManager; ++i)
+  {
+    _indexmanager[i].compress(); 
+  } 
+} 
+
+
