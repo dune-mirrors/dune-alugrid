@@ -1427,7 +1427,6 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
 
 template < class A > void BndsegPllBaseXClosure < A > :: writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const 
 {
-  assert( ghostLeaf () );
   gs.sendData( os , myhbnd () );
   return ;
 }
