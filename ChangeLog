@@ -20,3 +20,4 @@ minor changes:
 bug fixes: 
 - removed little memory leak in generateRawHexaImage 
 - use cmath instead of math.h to compile with g++ 4.2
+- for arbitrary hexahedral grids the volume caching was wrong 
