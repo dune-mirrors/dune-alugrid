@@ -194,10 +194,11 @@ template < class A > class HexaTop : public A {
     inneredge_t * _ed ;
     innervertex_t * _cv ;
     IndexManagerType & _indexManager; 
-    const double _volume; 
+    double _volume; 
     int _lvl ;
     myrule_t _rule, _req ;
     const signed char _nChild; 
+    bool _affine;
 
 private:    
     IndexManagerType & getEdgeIndexManager () ;
@@ -1272,16 +1273,22 @@ template < class A > inline HexaTop < A >
             int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
   , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0)
-  ,  _indexManager(im) 
-  ,  _volume (QuadraturCube3D < VolumeCalc >
-   (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
-                      this->myvertex(2)->Point(), this->myvertex(3)->Point(),
-                      this->myvertex(4)->Point(), this->myvertex(5)->Point(),
-                      this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0))
+  , _indexManager(im) 
+  , _volume (0.0) 
   , _lvl (l)
-  ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
+  , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
   , _nChild(0) 
+  , _affine(false)
 { 
+  TrilinearMapping trMap (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
+                          this->myvertex(2)->Point(), this->myvertex(3)->Point(),
+                          this->myvertex(4)->Point(), this->myvertex(5)->Point(),
+                          this->myvertex(6)->Point(), this->myvertex(7)->Point());
+  // calculate volume 
+  _volume = QuadraturCube3D < VolumeCalc > (trMap).integrate2 (0.0);
+  // check whether mapping is affine 
+  _affine = trMap.affine(); 
+  
   assert( this->level() == l );
   
   this->setIndex( _indexManager.getIndex() );   
@@ -1298,8 +1305,9 @@ template < class A > inline HexaTop < A >
   , _indexManager(_up->_indexManager)
   , _volume ( vol )
   , _lvl (l)
-  ,  _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
+  , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _nChild(nChild) 
+  , _affine(_up->_affine)
 { 
   assert( this->level() == l );
 
@@ -1307,6 +1315,21 @@ template < class A > inline HexaTop < A >
 
   // set bndid to fathers bndid now 
   this->_bndid = _up->bndId();
+
+  // if mapping is not affine recalculate volume 
+  if( ! _affine )
+  {
+    // calculate volume 
+    _volume = QuadraturCube3D < VolumeCalc >
+                (TrilinearMapping (this->myvertex(0)->Point(), 
+                                   this->myvertex(1)->Point(),
+                                   this->myvertex(2)->Point(), 
+                                   this->myvertex(3)->Point(),
+                                   this->myvertex(4)->Point(), 
+                                   this->myvertex(5)->Point(),
+                                   this->myvertex(6)->Point(), 
+                                   this->myvertex(7)->Point())).integrate2 (0.0);
+  }
 
   // make sure that given volume is the same as calulated 
   assert( fabs (
