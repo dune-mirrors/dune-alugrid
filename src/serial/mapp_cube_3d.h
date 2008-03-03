@@ -46,9 +46,10 @@ class TrilinearMapping {
         }
       }
 #endif
-  
     }
-        
+
+    // returns true if mapping is affine 
+    inline bool affine() const;
 } ;
 
 class QuadraturCube3Dbasis {
@@ -230,6 +231,22 @@ inline void TrilinearMapping :: map2world(const double x1, const double x2, cons
   map [2] = x3 ;
   map2world (map, world) ;
   return ;
+}
+
+inline bool TrilinearMapping :: affine () const 
+{
+  double sum = 0.0;
+  // summ all factor from non-linaer terms 
+  for(int i=4; i<8; ++i) 
+  {
+    for(int j=0; j<3; ++j) 
+    {
+      sum += fabs(a[i][j]);
+    }
+  }
+
+  // mapping is affine when all higher terms are zero
+  return (sum < _epsilon);
 }
 
 template < class A > inline typename QuadraturCube3D < A > :: val_t QuadraturCube3D < A > :: integrate2 (val_t base, const arg_t & x) {
