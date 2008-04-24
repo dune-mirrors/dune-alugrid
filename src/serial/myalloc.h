@@ -74,7 +74,15 @@ static MyAlloc :: Initializer allocatorInitializer ;
 #else // DONT_USE_ALUGRID_ALLOC 
 
 // dummy class 
-class MyAlloc {};
+class MyAlloc 
+{
+public:  
+  // if called, freeing objects is allowed again 
+  inline static void unlockFree(void *) {}
+
+  // if called free of objects is not allowed 
+  inline static void lockFree (void *) {} 
+};
 
 #endif // DONT_USE_ALUGRID_ALLOC
 
