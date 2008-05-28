@@ -61,6 +61,11 @@ public :
   inline void clear() { _wb = 0; _rb = 0; }
   // reset read position 
   inline void resetReadPosition() { _rb = 0; }
+  
+  // return's true if size > 0 and read position is zero
+  // i.e. a read othe stream will result some valid data  
+  inline bool validToRead () const { return (_wb > 0) && (_rb == 0); }
+
   // return size of bytes allready written to stream 
   inline int size() const { return _wb; }
 
