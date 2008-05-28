@@ -339,6 +339,7 @@ void GitterDunePll :: unpackOnMaster (
     item.reserveBuffer( nl + 1 );
     DataBufferType & data = item.commBuffer();
 
+    // only gather master data once 
     if ( dataHandle.containsItem( item ) ) 
     {
       // pack master data 
@@ -383,6 +384,18 @@ void GitterDunePll :: sendMaster (
  
   IteratorSTI < HItemType > & iter = *(a.first);
 
+  // create new link vector 
+  vector< int > newLink( nl );
+  for(int link=0; link<nl ; ++link) 
+  {
+    newLink[ link ] = link;
+  }
+
+  // if myLink == link then write master data
+  // instead of data of link 
+  // we do not send link i its own data
+  newLink[myLink] = nl;
+
   // for all master items 
   for (iter.first (); ! iter.done () ; iter.next ()) 
   {
@@ -395,9 +408,11 @@ void GitterDunePll :: sendMaster (
       for(int link = 0; link<nl; ++link)
       {
         BufferType & localBuff = dataBuff[link];
-        if( localBuff.size() > 0 ) 
+
+        // check if stream has been read, if not scatter data 
+        // this will unpack data on master only once 
+        if( localBuff.validToRead() ) 
         {
-          localBuff.resetReadPosition();
           dataHandle.recvData(localBuff, item);
         }
       }
@@ -410,12 +425,9 @@ void GitterDunePll :: sendMaster (
 
       for(int link = 0; link<nl; ++link)
       {
-        // if myLink == link then write master data
-        // instead of data of link 
-        // we do not send link i its own data
-        int l = (link == myLink) ? nl : link;
-
-        BufferType & localBuff = dataBuff[l];
+        // use new link to send master data to link we are sending for 
+        BufferType & localBuff = dataBuff[ newLink[link] ];
+        // get size 
         int s = localBuff.size();
         sendBuff.writeObject(s);
         // if buffer size > 0 write hole buffer to stream 
