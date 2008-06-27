@@ -39,7 +39,9 @@ bool MyAlloc :: _freeAllowed = true;
 
 // class to store items of same size in a stack 
 // also number of used items outside is stored 
-struct AllocEntry {
+class AllocEntry {
+
+public:
 
   // N verfolgt die Anzahl der angelegten Objekte der entsprechenden
   // Gr"osse, die in Gebrauch sind, auf dem Stack liegen die Objekte,
@@ -48,10 +50,14 @@ struct AllocEntry {
 
   long N ;
 
-  stack <void * > S ;
+  stack < void * > S ;
 
   AllocEntry () : N (0), S () {}
 
+  AllocEntry(const AllocEntry& other) 
+    : N(other.N) , S(other.S) 
+  {} 
+  
   ~AllocEntry () 
   {
     while (!S.empty ()) 
@@ -61,7 +67,7 @@ struct AllocEntry {
     }
     return ;
   }
-} ;
+};
 
 // map holding AllocEntries for sizes 
 static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
@@ -126,7 +132,7 @@ void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException)
 {
   assert(s > 0);
   {
-    AllocEntry & fs ((*freeStore) [s]) ;
+    AllocEntry & fs = ((*freeStore) [s]) ;
     ++ fs.N ;
     if (fs.S.empty ()) {
       void * p = malloc (s) ;
