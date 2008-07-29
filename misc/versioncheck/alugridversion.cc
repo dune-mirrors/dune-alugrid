@@ -1,6 +1,7 @@
 #include <config.h>
+#include <cstdlib>
 #include <iostream>
-#include <string>
+#include <cstring>
 
 int main(int argc, char ** argv)
 {
@@ -17,7 +18,7 @@ int main(int argc, char ** argv)
     {
       // check wether given version is bigger than actual 
       // package version 
-      int result = strcmp(PACKAGE_VERSION,argv[2]);
+      int result = std :: strcmp(PACKAGE_VERSION,argv[2]);
       std::cout << result << std::endl; 
       return result;
     }
