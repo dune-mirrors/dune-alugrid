@@ -1,5 +1,8 @@
 Changed from version 1.1 --> 1.11
 
+minor changes:
+- compiles with g++ 4.3.x
+
 bug fixes: 
 - bug fix in border-border communication. 
 
