@@ -1699,16 +1699,20 @@ GitterBasisPll :: MacroGitterBasisPll :: ~MacroGitterBasisPll () {
       AccessIterator < vertex_STI > :: Handle w (*this) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().detachPllXFromMacro () ;
     }
-  } catch (Parallel :: AccessPllException) {
+  } 
+  catch (Parallel :: AccessPllException) 
+  {
     cerr << "**WARNUNG (AUSNAHME IGNORIERT) in " << __FILE__ << " " << __LINE__ << endl ;
   }
   {
+
+#ifndef NDEBUG
     for (linkagePatternMap_t :: iterator p = _linkagePatterns.begin () ; p != _linkagePatterns.end () ; p ++) 
     {
-      if( (*p).second != 0 ) 
-        std::cout << (*p).second << " p sec \n";
       assert ((*p).second == 0) ;
     }
+#endif
+    
     _linkagePatterns.erase (_linkagePatterns.begin (), _linkagePatterns.end ()) ;
   }
   return ;
