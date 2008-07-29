@@ -3,10 +3,12 @@
 
 # name of compiler binaries
 COMP="gcc"
+#CXXCOMP="g++-4.3.0"
 CXXCOMP="g++"
 
 # flags set in any case
-FLAGS="-Wall"
+FLAGS="-Wall" 
+# -I/opt/openmpi/include -I/opt/openmpi/include/openmpi"
 
 # additional flags for debugging
 DEBUGFLAGS="-g"
