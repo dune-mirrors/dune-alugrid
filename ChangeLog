@@ -6,11 +6,159 @@ minor changes:
 bug fixes: 
 - bug fix in border-border communication. 
 
-
++Index: src/serial/myalloc.cc
++===================================================================
++--- src/serial/myalloc.cc	(revision 1006)
+++++ src/serial/myalloc.cc	(revision 1011)
++@@ -39,8 +39,10 @@
++ 
++ // class to store items of same size in a stack 
++ // also number of used items outside is stored 
++-struct AllocEntry {
+++class AllocEntry {
++ 
+++public:
+++
++   // N verfolgt die Anzahl der angelegten Objekte der entsprechenden
++   // Gr"osse, die in Gebrauch sind, auf dem Stack liegen die Objekte,
++   // f"ur die delete aufgerufen wurde, die aber nicht an free () zur"uck-
++@@ -48,10 +50,14 @@
++ 
++   long N ;
++ 
++-  stack <void * > S ;
+++  stack < void * > S ;
++ 
++   AllocEntry () : N (0), S () {}
++ 
+++  AllocEntry(const AllocEntry& other) 
+++    : N(other.N) , S(other.S) 
+++  {} 
+++  
++   ~AllocEntry () 
++   {
++     while (!S.empty ()) 
++@@ -61,7 +67,7 @@
++     }
++     return ;
++   }
++-} ;
+++};
++ 
++ // map holding AllocEntries for sizes 
++ static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
++@@ -126,7 +132,7 @@
++ {
++   assert(s > 0);
++   {
++-    AllocEntry & fs ((*freeStore) [s]) ;
+++    AllocEntry & fs = ((*freeStore) [s]) ;
++     ++ fs.N ;
++     if (fs.S.empty ()) {
++       void * p = malloc (s) ;
++Index: src/serial/myalloc.h
++===================================================================
++--- src/serial/myalloc.h	(revision 1006)
+++++ src/serial/myalloc.h	(revision 1011)
++@@ -74,8 +74,16 @@
++ #else // DONT_USE_ALUGRID_ALLOC 
++ 
++ // dummy class 
++-class MyAlloc {};
+++class MyAlloc 
+++{
+++public:  
+++  // if called, freeing objects is allowed again 
+++  inline static void unlockFree(void *) {}
++ 
+++  // if called free of objects is not allowed 
+++  inline static void lockFree (void *) {} 
+++};
+++
++ #endif // DONT_USE_ALUGRID_ALLOC
++ 
++ #endif // MYALLOC_H_INCLUDED
++Index: src/serial/serialize.h
++===================================================================
++--- src/serial/serialize.h	(revision 1006)
+++++ src/serial/serialize.h	(revision 1011)
++@@ -61,6 +61,11 @@
++   inline void clear() { _wb = 0; _rb = 0; }
++   // reset read position 
++   inline void resetReadPosition() { _rb = 0; }
+++  
+++  // return's true if size > 0 and read position is zero
+++  // i.e. a read othe stream will result some valid data  
+++  inline bool validToRead () const { return (_wb > 0) && (_rb == 0); }
+++
++   // return size of bytes allready written to stream 
++   inline int size() const { return _wb; }
++ 
++Index: src/duneinterface/gitter_dune_pll_impl.cc
++===================================================================
++--- src/duneinterface/gitter_dune_pll_impl.cc	(revision 1006)
+++++ src/duneinterface/gitter_dune_pll_impl.cc	(revision 1011)
++@@ -339,6 +339,7 @@
++     item.reserveBuffer( nl + 1 );
++     DataBufferType & data = item.commBuffer();
++ 
+++    // only gather master data once 
++     if ( dataHandle.containsItem( item ) ) 
++     {
++       // pack master data 
++@@ -383,6 +384,18 @@
++  
++   IteratorSTI < HItemType > & iter = *(a.first);
++ 
+++  // create new link vector 
+++  vector< int > newLink( nl );
+++  for(int link=0; link<nl ; ++link) 
+++  {
+++    newLink[ link ] = link;
+++  }
+++
+++  // if myLink == link then write master data
+++  // instead of data of link 
+++  // we do not send link i its own data
+++  newLink[myLink] = nl;
+++
++   // for all master items 
++   for (iter.first (); ! iter.done () ; iter.next ()) 
++   {
++@@ -395,9 +408,11 @@
++       for(int link = 0; link<nl; ++link)
++       {
++         BufferType & localBuff = dataBuff[link];
++-        if( localBuff.size() > 0 ) 
+++
+++        // check if stream has been read, if not scatter data 
+++        // this will unpack data on master only once 
+++        if( localBuff.validToRead() ) 
++         {
++-          localBuff.resetReadPosition();
++           dataHandle.recvData(localBuff, item);
++         }
++       }
++@@ -410,12 +425,9 @@
++ 
++       for(int link = 0; link<nl; ++link)
++       {
++-        // if myLink == link then write master data
++-        // instead of data of link 
++-        // we do not send link i its own data
++-        int l = (link == myLink) ? nl : link;
++-
++-        BufferType & localBuff = dataBuff[l];
+++        // use new link to send master data to link we are sending for 
+++        BufferType & localBuff = dataBuff[ newLink[link] ];
+++        // get size 
++         int s = localBuff.size();
++         sendBuff.writeObject(s);
++         // if buffer size > 0 write hole buffer to stream 
 Index: src/serial/myalloc.cc
 ===================================================================
 --- src/serial/myalloc.cc	(revision 1006)
-+++ src/serial/myalloc.cc	(revision 1011)
++++ src/serial/myalloc.cc	(revision 1017)
 @@ -39,8 +39,10 @@
  
  // class to store items of same size in a stack 
@@ -60,7 +208,7 @@ Index: src/serial/myalloc.cc
 Index: src/serial/myalloc.h
 ===================================================================
 --- src/serial/myalloc.h	(revision 1006)
-+++ src/serial/myalloc.h	(revision 1011)
++++ src/serial/myalloc.h	(revision 1017)
 @@ -74,8 +74,16 @@
  #else // DONT_USE_ALUGRID_ALLOC 
  
@@ -82,7 +230,7 @@ Index: src/serial/myalloc.h
 Index: src/serial/serialize.h
 ===================================================================
 --- src/serial/serialize.h	(revision 1006)
-+++ src/serial/serialize.h	(revision 1011)
++++ src/serial/serialize.h	(revision 1017)
 @@ -61,6 +61,11 @@
    inline void clear() { _wb = 0; _rb = 0; }
    // reset read position 
@@ -98,7 +246,7 @@ Index: src/serial/serialize.h
 Index: src/duneinterface/gitter_dune_pll_impl.cc
 ===================================================================
 --- src/duneinterface/gitter_dune_pll_impl.cc	(revision 1006)
-+++ src/duneinterface/gitter_dune_pll_impl.cc	(revision 1011)
++++ src/duneinterface/gitter_dune_pll_impl.cc	(revision 1017)
 @@ -339,6 +339,7 @@
      item.reserveBuffer( nl + 1 );
      DataBufferType & data = item.commBuffer();
@@ -156,18 +304,72 @@ Index: src/duneinterface/gitter_dune_pll_impl.cc
          int s = localBuff.size();
          sendBuff.writeObject(s);
          // if buffer size > 0 write hole buffer to stream 
-Index: configure.ac
+Index: src/parallel/gitter_pll_sti.h
 ===================================================================
---- configure.ac	(revision 1006)
-+++ configure.ac	(revision 1011)
-@@ -2,8 +2,8 @@
- AC_PREREQ(2.50)
+--- src/parallel/gitter_pll_sti.h	(revision 1006)
++++ src/parallel/gitter_pll_sti.h	(revision 1017)
+@@ -289,10 +289,10 @@
+     virtual void writeDynamicState (ObjectStream &, int) const = 0 ;
+     virtual void readDynamicState (ObjectStream &, int) = 0 ;
  
- # current version of ALUGrid
--AC_INIT(ALUGrid, 1.1, alugrid@mathematik.uni-freiburg.de)
--AM_INIT_AUTOMAKE(ALUGrid, 1.1, alugrid@mathematik.uni-freiburg.de)
-+AC_INIT(ALUGrid, 1.11, alugrid@mathematik.uni-freiburg.de)
-+AM_INIT_AUTOMAKE(ALUGrid, 1.11, alugrid@mathematik.uni-freiburg.de)
+-    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...\n" << flush;}
+-    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...1\n" << flush;}
+-    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...2\n" << flush;}
+-    virtual void writeElementData (ObjectStream &, GatherScatterType &) {std::cout << "ich bin die falsche...3\n" << flush;}
++    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...\n" << flush; }
++    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...1\n" << flush; }
++    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...2\n" << flush; }
++    virtual void writeElementData (ObjectStream &, GatherScatterType &) { cout << "ich bin die falsche...3\n" << flush; }
+     virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const = 0 ;
+     virtual void readDynamicState (ObjectStream &, GatherScatterType &) = 0 ;
  
- # default install path is current directory 
- AC_PREFIX_DEFAULT([`pwd`])
+Index: src/parallel/gitter_pll_impl.cc
+===================================================================
+--- src/parallel/gitter_pll_impl.cc	(revision 1006)
++++ src/parallel/gitter_pll_impl.cc	(revision 1017)
+@@ -1699,16 +1699,20 @@
+       AccessIterator < vertex_STI > :: Handle w (*this) ;
+       for (w.first () ; ! w.done () ; w.next ()) w.item ().detachPllXFromMacro () ;
+     }
+-  } catch (Parallel :: AccessPllException) {
++  } 
++  catch (Parallel :: AccessPllException) 
++  {
+     cerr << "**WARNUNG (AUSNAHME IGNORIERT) in " << __FILE__ << " " << __LINE__ << endl ;
+   }
+   {
++
++#ifndef NDEBUG
+     for (linkagePatternMap_t :: iterator p = _linkagePatterns.begin () ; p != _linkagePatterns.end () ; p ++) 
+     {
+-      if( (*p).second != 0 ) 
+-        std::cout << (*p).second << " p sec \n";
+       assert ((*p).second == 0) ;
+     }
++#endif
++    
+     _linkagePatterns.erase (_linkagePatterns.begin (), _linkagePatterns.end ()) ;
+   }
+   return ;
+Index: misc/versioncheck/alugridversion.cc
+===================================================================
+--- misc/versioncheck/alugridversion.cc	(revision 1006)
++++ misc/versioncheck/alugridversion.cc	(revision 1017)
+@@ -1,6 +1,7 @@
+ #include <config.h>
++#include <cstdlib>
+ #include <iostream>
+-#include <string>
++#include <cstring>
+ 
+ int main(int argc, char ** argv)
+ {
+@@ -17,7 +18,7 @@
+     {
+       // check wether given version is bigger than actual 
+       // package version 
+-      int result = strcmp(PACKAGE_VERSION,argv[2]);
++      int result = std :: strcmp(PACKAGE_VERSION,argv[2]);
+       std::cout << result << std::endl; 
+       return result;
+     }
