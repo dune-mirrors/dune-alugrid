@@ -109,30 +109,32 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
       for (int i = 0 ; i < np ; i ++) 
       {
         int len ;
-        osv [i].readObject (len) ;
+        ObjectStream& osv_i = osv [i];
+
+        osv_i.readObject (len) ;
         assert (len >= 0) ;
         {
           for (int j = 0 ; j < len ; ++j) 
           {
             GraphVertex x ;
-            osv [i].readObject (x) ;
+            osv_i.readObject (x) ;
             * nodes ++ = pair < const GraphVertex, int > (x,i) ;
           } 
         }
-        osv [i].readObject (len) ;
+        osv_i.readObject (len) ;
         assert (len >= 0) ;
         {
           for (int j = 0 ; j < len ; ++j) 
           {
             GraphEdge x ;
-            osv [i].readObject (x) ;
+            osv_i.readObject (x) ;
             * edges ++ = x ;
             * edges ++ = - x ;
           }
         }
 
         // free memory of osv[i]
-        osv[i].reset();
+        osv_i.reset();
       }
     }
   } 
@@ -248,18 +250,25 @@ static bool collectInsulatedNodes (const int nel, const float * const vertex_w, 
 #endif
   assert (edge_p [0] == 0) ;
   bool change = false ;
-  for (int i = 0 ; i < nel ; i++ ) {
+  for (int i = 0 ; i < nel ; ++i ) 
+  {
     int j = 0, max = 0 ;
-    for (j = max = edge_p [i]; j < edge_p [i+1] ; j++ ) {
+    for (j = max = edge_p [i]; j < edge_p [i+1] ; ++j ) 
+    {
       assert (j < ned) ;
       if (neu [i] == neu [edge [j]]) break ;
       else max = edge_w [j] > edge_w [max] ? j : max ;
     }
-    if (j == edge_p [i+1]) {
-      if (edge_p [i] == edge_p [i+1]) {
+
+    if (j == edge_p [i+1]) 
+    {
+      if (edge_p [i] == edge_p [i+1]) 
+      {
         cerr << "**WARNUNG (FEHLER IGNORIERT) Vollst\"andig isolierter Knoten im Grobgittergraph." ;
         cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
-      } else {
+      } 
+      else 
+      {
 //        cerr << "!!! Pass mal auf, ich weise dem Knoten " << i << " jetzt das Gebiet " << neu[edge [max]] << " zu." << endl ;
         neu [i] = neu [edge [max]] ;    
         change = true ;
@@ -269,7 +278,8 @@ static bool collectInsulatedNodes (const int nel, const float * const vertex_w, 
   return change ;
 }
 
-bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) {
+bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
+{
   const int start = clock (), np = mpa.psize (), me = mpa.myrank () ;
   bool change (false) ;
   
@@ -307,9 +317,17 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
     }
 
     // allocate edge memory for graph partitioners 
-    int    * const edge_p      = new int [nel + 1] ;
-    int    * const edge        = new int [ned] ;
-    int    * const edge_w      = new int [ned] ;
+    //int    * const edge_p      = new int [nel + 1] ;
+    //int    * const edge        = new int [ned] ;
+    //int    * const edge_w      = new int [ned] ;
+
+    // get memory at once 
+    int    * const edge_mem    = new int [(nel + 1) + ned + ned ];
+
+    // set pointer 
+    int    * const edge_p      = edge_mem; 
+    int    * const edge        = edge_mem + (nel +1);
+    int    * const edge_w      = edge + ned; 
 
     assert ( edge_p && edge && edge_w ) ;
     
@@ -339,8 +357,15 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
     
     // get vertex memory 
     float  * const vertex_w    = new float [nel] ;
-    int    * const vertex_wInt = new int [nel] ;
-    int    * part              = new int [nel] ;
+
+    //int    * const vertex_wInt = new int [nel] ;
+    //int    * part              = new int [nel] ;
+
+    const int sizeNeu = (np > 1) ? nel : 0;
+    int    * vertex_mem = new int [nel + nel + sizeNeu];
+
+    int    * const vertex_wInt = vertex_mem; 
+    int    * part              = vertex_mem + nel; 
     
     assert ( vertex_w && vertex_wInt && part) ;
     {
@@ -362,12 +387,19 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
       {
         cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
         cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
+        /*
         delete [] part ;
         delete [] vertex_wInt ;
         delete [] vertex_w ;
         delete [] edge_w ;
         delete [] edge ;
         delete [] edge_p ;
+        */
+
+        delete [] vertex_w ;
+        delete [] vertex_mem;
+        delete [] edge_mem;
+
         return false ;
       }
     }
@@ -378,7 +410,9 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
       // sonst Speicherallocationsfehler in den Partitionierern,
       // zumindest bei PARTY 1.1.
 
-      int * neu = new int [nel] ;
+      //int * neu = new int [nel] ;
+      int * neu = vertex_mem + (2 * nel);
+
       assert (neu) ;
       copy (part, part + nel, neu) ;
       
@@ -437,6 +471,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
           cerr << "**WARNUNG (FEHLER IGNORIERT) Ung\"ultige Methode [" << mth << "] zur\n" ;
           cerr << "  Neupartitionierung angegeben. In " << __FILE__ << " " << __LINE__ << endl ;
             
+          /*
           delete [] neu ;
           delete [] part ;
           delete [] vertex_wInt ;
@@ -444,6 +479,11 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
           delete [] edge_w ;
           delete [] edge ;
           delete [] edge_p ;
+          */
+
+          delete [] vertex_w ;
+          delete [] vertex_mem;
+          delete [] edge_mem;
           return false ;
       }
 
@@ -473,15 +513,20 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
           _connect.insert ((*i).second = neu [(*i).first.index ()]) ;
       }
       
-      delete [] neu ;
+      //delete [] neu ;
     }
 
+    delete [] vertex_w ;
+    delete [] vertex_mem;
+    delete [] edge_mem;
+    /*
     delete [] part ;
     delete [] vertex_wInt ;
     delete [] vertex_w ;
     delete [] edge_w ;
     delete [] edge ;
     delete [] edge_p ;
+    */
   }
 
 
