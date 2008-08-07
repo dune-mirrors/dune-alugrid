@@ -38,7 +38,6 @@ void LoadBalancer :: DataBase :: edgeUpdate (const GraphEdge & e)
 {
   if (e.isValid ()) 
   {
-    //_edgeSet.find (e) != _edgeSet.end() ? (_edgeSet.erase (_edgeSet.find (e)), _edgeSet.insert (e), 0) : (_edgeSet.insert (e), 0) ;
     ldb_edge_set_t :: iterator it =  _edgeSet.find (e);
     if ( it != _edgeSet.end() )
     {
@@ -151,46 +150,56 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
   return ;
 }
 
-static void optimizeCoverage (const int nparts, const int len, const int * const reference, const float * const weight, int * const proposal, const int verbose) {
-
+static void optimizeCoverage (const int nparts, 
+                              const int len, 
+                              const int * const reference, 
+                              const float * const weight, 
+                              int * const proposal, 
+                              const int verbose) 
+{
   // 'reference' ist das Referenzarray, das mit dem 'proposal'
   // Vorschlagsvektor optimal abgeglichen werden soll, indem
   // auf 'proposal' eine Indexpermutationangewendet wird.
   // cov ist das 'coverage' Array, das die "Uberdeckung von
   // alter und neuer Teilgebietszuordnung beschreiben soll.
 
-  vector < vector < int > > cov (nparts, vector < int > (nparts, 0L)) ;
-
-  { 
-    for (int k = 0 ; k < len ; k ++) cov [reference [k]][proposal[k]] += 1 + int (sqrt(weight [k])) ; 
-  }
-  
   map < int, pair < int, int >, greater_equal < int > > max ;
   set < int, less < int > > freeIndex ;
   
   {
+    vector < vector < int > > cov (nparts, vector < int > (nparts, 0L)) ;
+
+    for (int k = 0 ; k < len ; ++k) cov [reference [k]][proposal[k]] += 1 + int (sqrt(weight [k])) ; 
+  
     for (int i = 0 ; i < nparts ; ++i ) 
     {
       freeIndex.insert (i) ;
+
       vector < int > :: iterator covBegin = cov [i].begin ();
       vector < int > :: const_iterator pos = max_element (covBegin, cov [i].end ()) ;
+
       int distance = (pos - covBegin);
       pair<int, int> val (i,distance);
-      max [*pos] = val; 
+      max [ *pos ] = val; 
     } 
   }
 
   vector < int > renumber (nparts, -1L) ;
+
   {
-    for (map < int, pair < int, int >, greater_equal < int > > :: const_iterator i = max.begin () ; 
-         i != max.end () ; i ++ ) 
+    typedef map < int, pair < int, int >, greater_equal < int > > ::
+      const_iterator max_const_iterator;
+    const max_const_iterator maxEnd = max.end();
+    for (max_const_iterator i = max.begin () ; i != maxEnd; ++i ) 
     {
-      if (renumber [(*i).second.second] == -1) 
+      const pair<int, int> & item = (*i).second;
+
+      if (renumber [item.second] == -1) 
       {
-        int neue = (*i).second.first ;
+        int neue = item.first ;
         if (freeIndex.find (neue) != freeIndex.end ()) 
         {
-          renumber [(*i).second.second] = neue ;
+          renumber [item.second] = neue ;
           freeIndex.erase (neue) ;
         }
       }
@@ -208,12 +217,16 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
       } 
       else 
       {
-        renumber [j] = * freeIndex.begin () ;
-        freeIndex.erase (freeIndex.begin ()) ;
+        typedef set < int, less < int > > :: iterator  free_iterator ;
+        free_iterator freeIndexBegin = freeIndex.begin () ;
+
+        renumber [j] = * freeIndexBegin;
+        freeIndex.erase ( freeIndexBegin ) ;
       }
     }
   }
 
+  /*
   if (verbose) 
   {
     cout << "**INFO optimizeCoverage (): " << endl ;
@@ -225,16 +238,24 @@ static void optimizeCoverage (const int nparts, const int len, const int * const
       cout << "| " << i << " -> " << renumber [i] << endl ;
     }
   }
+  */
+
   { 
-    for (int i = 0 ; i < len ; i ++ ) proposal [i] = renumber [proposal [i]] ; 
+    for (int i = 0 ; i < len ; ++i ) proposal [i] = renumber [ proposal [i] ] ; 
   }
 
   freeIndex.clear();
   return ;
 }
 
-static bool collectInsulatedNodes (const int nel, const float * const vertex_w, const int * const edge_p, const int * const edge, const int * const edge_w, const int np, int * neu) {
-
+static bool collectInsulatedNodes (const int nel, 
+                                   const float * const vertex_w, 
+                                   const int * const edge_p, 
+                                   const int * const edge, 
+                                   const int * const edge_w, 
+                                   const int np, 
+                                   int * neu) 
+{
   // 'collectInsulatedNodes (.)' ist eine Behelfsl"osung, damit der MHD Code
   // mit seinen periodischen Randelementen nicht zu Bruch geht. Da es sich
   // bei den periodischen Randelementen nur um Adapter ohne eigenen Daten-
