@@ -41,9 +41,11 @@ if test ! -f "$METIS_INCLUDE_PATH/metis.h" ; then
     METIS_INCLUDE_PATH="$METISROOT/include"
     ARCH="`uname -s`-`uname -m`"
     METIS_LIB_PATH="$METISROOT/build/$ARCH"
+    ALU_METIS_VERSION="(Version 5.x)"
   else 
     # METIS 4.0 
     METIS_INCLUDE_PATH="$METISROOT/Lib"
+    ALU_METIS_VERSION="(Version 4.0)"
   fi  
 fi
 
@@ -98,7 +100,7 @@ if test x$HAVE_METIS = x1 ; then
   ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $METIS_CPPFLAGS"
 
   # set variable for summary
-  with_metis="yes"
+  with_metis="yes $ALU_METIS_VERSION"
 else
   AC_SUBST(METIS_LIBS, "")
   AC_SUBST(METIS_LDFLAGS, "")
