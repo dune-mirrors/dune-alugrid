@@ -14,6 +14,7 @@
 extern "C" {
 // METISTITLE is defined by the metis header file. 
 #undef METISTITLE 
+#undef METIS_H 
 #include <metis.h>
 // if METISTITLE is still undefined then the dummy is included 
 #include "parallel/metis.c"

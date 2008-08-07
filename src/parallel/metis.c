@@ -1,10 +1,12 @@
 // (c) --
-#ifndef METISTITLE
-
-#warning  -- Compiling parallel version without METIS !!!
+#if defined METISTITLE || defined METIS_H 
+#define METIS_C_INCLUDED 
+#endif
 
 #ifndef METIS_C_INCLUDED
 #define METIS_C_INCLUDED
+
+#warning  -- Compiling parallel version without METIS !!!
 
 #ifdef IBM_XLC
   #define _ANSI_HEADER
@@ -42,5 +44,4 @@ void METIS_PartGraphRecursive(int *,idxtype *,idxtype *,idxtype *,idxtype *,int 
   return ;
 }
 
-#endif
 #endif
