@@ -140,8 +140,6 @@ NO_OBJECTSTREAM_DEBUG.
 Knowns Bugs 
 -----------
 
-METIS-4.0 bug: 
+ALUGrid does not work with Myrinet MPI. Up to now we couldn't figure
+out what exactly the problem is. 
 
-If you want to use the METIS-4.0 library for partitioning, comment 
-in the metis_dir/Lib/proto.h line 462 the function declaration 
-int log2(int);
