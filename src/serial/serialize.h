@@ -111,9 +111,9 @@ public :
     _rb += sizeof(T);
     
 #ifndef NO_OBJECTSTREAM_DEBUG 
-    assert( _rb <= _wb );
     if (_rb > _wb) throw EOFException () ;
 #endif
+    assert( _rb <= _wb );
 
     // call assignment operator of type T 
     a = static_cast<const T &> (*((const T *) getBuff(ap) ));
