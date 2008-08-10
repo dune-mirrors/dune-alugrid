@@ -8,16 +8,8 @@
 
 #warning  -- Compiling parallel version without METIS !!!
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-#else
-  #include <iostream.h>
-#endif
+using namespace std;
+#include <iostream>
 
 static const char metmess [] = 	"**INFO Due to license reasons the library METIS is\n"
 				"       not part of the ALUGrid library distribution. \n"
