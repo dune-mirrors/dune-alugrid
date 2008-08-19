@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 #include <party_lib.h>
-#ifdef VERSION 
+#if defined VERSION && defined VW
 #define PARTY_LIB_H_INCLUDED
 #ifdef _VER_SAVE
 #undef VERSION 

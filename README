@@ -51,7 +51,7 @@ command can look as follows:
 
 For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ ,
 see also the section Known bugs, when you using METIS. 
-For PARTY Lib (version 1.1 or higher) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
+For PARTY Lib (version 1.99) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
 
 You can use
 
