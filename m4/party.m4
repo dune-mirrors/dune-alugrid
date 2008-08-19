@@ -81,7 +81,7 @@ if test x$HAVE_PARTY = x1 ; then
   ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $PARTY_CPPFLAGS"
 
   # set variable for summary
-  with_party="yes"
+  with_party="yes (Version 1.99)"
 else
   AC_SUBST(PARTY_LIBS, "")
   AC_SUBST(PARTY_LDFLAGS, "")

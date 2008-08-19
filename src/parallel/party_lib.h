@@ -39,11 +39,14 @@
   #include <iostream.h>
 #endif
 
-int global_linear (int,float *,int,float,int *);
-int global_scattered (int,float *,int,float,int *);
-int global_gain (int,float *,int *,int *,int *,int,float,int *);
-int global_farhat (int,float *,int *,int *,int *,int,float,int *);
-int local_kl (int,float *,int *,int *,int *,int,float, int *,int);
-int local_hs (int n, float *vertex_w, int *edge_p, int *edge, int *edge_w,int p, float add_bal, int *part,int Output);
+int global_lin (int,float *,int,float,int *);
+int global_sca (int,float *,int,float,int *);
+int global_ran (int,float *,int,float,int *);
+
+int global_gfc (int,float *,int *,int *,int *,int,int *);
+int global_gbf (int,float *,int *,int *,int *,int,int *);
+
+int local_kl (int,float *,int *,int *,int *,int,int *,int);
+int local_hs (int n, float *vertex_w, int *edge_p, int *edge, int *edge_w,int p, int *part,int Output);
 
 #endif

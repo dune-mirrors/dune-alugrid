@@ -427,10 +427,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
 
     if (np > 1) 
     {
-      // Abfangen, falls nur ein teilgebiet gebildet werden soll,
-      // sonst Speicherallocationsfehler in den Partitionierern,
-      // zumindest bei PARTY 1.1.
-
       //int * neu = new int [nel] ;
       int * neu = vertex_mem + (2 * nel);
 
@@ -446,15 +442,23 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
           break ;
           
         case PARTY_linear :
-          global_linear (nel, vertex_w, np, 0.0, neu) ;
+          global_lin (nel, vertex_w, np, neu) ;
           break ;
           
-        case PARTY_gain :
-          global_gain (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu) ;
+        case PARTY_random :
+          global_ran (nel, vertex_w, np, neu) ;
           break ;
           
-        case PARTY_farhat :
-          global_farhat (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu) ;
+        case PARTY_scattered :
+          global_sca (nel, vertex_w, np, neu) ;
+          break ;
+          
+        case PARTY_breathfirst :
+          global_gbf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
+          break ;
+          
+        case PARTY_cutfirst :
+          global_gcf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
           break ;
           
         case PARTY_kernighanLin :
@@ -462,15 +466,15 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
           // basiert auf Erfahrungswerten und liefert einigermassen ausiterierte
           // Partitionen.
         
-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 3.0, neu, 0) ;
-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 1.0, neu, 0) ;
-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu, 0) ;
+          local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
+          local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
+          local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
           break ;
           
         case PARTY_helpfulSet :
-                local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 2.0, neu, 0) ;
-          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 1.0, neu, 0) ;
-          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu, 0) ;
+          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
+          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
+          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
           break ;
 
         case METIS_PartGraphKway :
@@ -584,12 +588,16 @@ const char * LoadBalancer :: DataBase :: methodToString (method m) {
       return "PARTY_helpfulSet" ;
     case PARTY_kernighanLin :
       return "PARTY_kernighanLin" ;
+    case PARTY_scattered :
+      return "PARTY_scattered" ;
+    case PARTY_random :
+      return "PARTY_random" ;
     case PARTY_linear :
       return "PARTY_linear" ;
-    case PARTY_gain :
-      return "PARTY_gain" ;
-    case PARTY_farhat :
-      return "PARTY_farhat" ;
+    case PARTY_cutfirst :
+      return "PARTY_cutfirst" ;
+    case PARTY_breathfirst :
+      return "PARTY_breathfirst" ;
     case METIS_PartGraphKway :
       return "METIS_PartGraphKway" ;
     case METIS_PartGraphRecursive :
