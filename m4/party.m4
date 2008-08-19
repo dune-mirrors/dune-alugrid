@@ -55,7 +55,7 @@ LDFLAGS="$LDFLAGS -lm"
 
 # if header is found...
 if test x$HAVE_PARTY = x1 ; then
-  AC_CHECK_LIB(party,[global_linear],
+  AC_CHECK_LIB(party,[global_lin],
 	[PARTY_LIBS="-lparty"
          PARTY_LDFLAGS="-L$PARTY_LIB_PATH"
          LIBS="$LIBS $PARTY_LIBS"],
