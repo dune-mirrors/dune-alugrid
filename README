@@ -84,7 +84,7 @@ third row: Graph partitioning method, default method is 11 (METIS_PartGraphKway)
 Available methods are: 
 
 NONE = 0
-COLLECT = 1
+COLLECT = 1 (collect all elements to process 0)
 
 PARTY_helpfulSet = 3
 PARTY_kernighanLin = 4
