@@ -44,7 +44,10 @@ extern "C" {
 #undef VERSION 
 #endif
 
+extern "C" {
+// include PARTY lib header 
 #include <party_lib.h>
+}
 #if defined VERSION && defined VW
 #define PARTY_LIB_H_INCLUDED
 #ifdef _VER_SAVE

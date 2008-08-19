@@ -431,6 +431,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
       int * neu = vertex_mem + (2 * nel);
 
       assert (neu) ;
+      // copy part to neu, this is needed by some of the partitioning tools  
       copy (part, part + nel, neu) ;
       
       switch (mth) 
@@ -442,39 +443,67 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
           break ;
           
         case PARTY_linear :
-          global_lin (nel, vertex_w, np, neu) ;
+          :: global_lin (nel, vertex_w, np, neu) ;
           break ;
           
         case PARTY_random :
-          global_ran (nel, vertex_w, np, neu) ;
+          :: global_ran (nel, vertex_w, np, neu) ;
           break ;
           
         case PARTY_scattered :
-          global_sca (nel, vertex_w, np, neu) ;
+          :: global_sca (nel, vertex_w, np, neu) ;
           break ;
           
         case PARTY_breathfirst :
-          global_gbf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
+          :: global_gbf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
           break ;
           
         case PARTY_cutfirst :
-          global_gcf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
+          :: global_gcf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
           break ;
           
         case PARTY_kernighanLin :
-          // Die dreifache Anwendung der Helpful-Set bzw. Kenighan-Lin Heuristik
-          // basiert auf Erfahrungswerten und liefert einigermassen ausiterierte
-          // Partitionen.
-        
-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
+          {
+            // Die dreifache Anwendung der Helpful-Set bzw. Kenighan-Lin Heuristik
+            // basiert auf Erfahrungswerten und liefert einigermassen ausiterierte
+            // Partitionen.
+            
+            // check if partitioning exists, i.e. sum > 0
+            int sum = 0;
+            for( int k=0; k<nel; ++k) 
+            {
+              sum += neu[ k ]; 
+            }
+
+            // if not partitioned yet then call 
+            // global_linear for the first time 
+            if( sum == 0 ) 
+            {
+              :: global_lin (nel, vertex_w, np, neu) ;
+            }
+            
+            :: local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
+          }
           break ;
           
         case PARTY_helpfulSet :
-          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
-          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
-          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
+          {
+            // check if partitioning exists, i.e. sum > 0
+            int sum = 0;
+            for( int k=0; k<nel; ++k) 
+            {
+              sum += neu[ k ]; 
+            }
+
+            // if not partitioned yet then call 
+            // global_linear for the first time 
+            if( sum == 0 ) 
+            {
+              :: global_lin (nel, vertex_w, np, neu) ;
+            }
+            
+            :: local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
+          }
           break ;
 
         case METIS_PartGraphKway :
