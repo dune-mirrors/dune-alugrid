@@ -1,375 +1,815 @@
-Changed from version 1.1 --> 1.11
+Changed from version 1.11 --> 1.12
 
-minor changes:
+changes:
 - compiles with g++ 4.3.x
+- compiles and runs with METIS 5.0 
+- configures with PARTY 1.99 (methods not really tested)
 
 bug fixes: 
+- configures with METIS 4.0 without fix in METIS library
 - bug fix in border-border communication. 
 
-+Index: src/serial/myalloc.cc
-+===================================================================
-+--- src/serial/myalloc.cc	(revision 1006)
-++++ src/serial/myalloc.cc	(revision 1011)
-+@@ -39,8 +39,10 @@
-+ 
-+ // class to store items of same size in a stack 
-+ // also number of used items outside is stored 
-+-struct AllocEntry {
-++class AllocEntry {
-+ 
-++public:
-++
-+   // N verfolgt die Anzahl der angelegten Objekte der entsprechenden
-+   // Gr"osse, die in Gebrauch sind, auf dem Stack liegen die Objekte,
-+   // f"ur die delete aufgerufen wurde, die aber nicht an free () zur"uck-
-+@@ -48,10 +50,14 @@
-+ 
-+   long N ;
-+ 
-+-  stack <void * > S ;
-++  stack < void * > S ;
-+ 
-+   AllocEntry () : N (0), S () {}
-+ 
-++  AllocEntry(const AllocEntry& other) 
-++    : N(other.N) , S(other.S) 
-++  {} 
-++  
-+   ~AllocEntry () 
-+   {
-+     while (!S.empty ()) 
-+@@ -61,7 +67,7 @@
-+     }
-+     return ;
-+   }
-+-} ;
-++};
-+ 
-+ // map holding AllocEntries for sizes 
-+ static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
-+@@ -126,7 +132,7 @@
-+ {
-+   assert(s > 0);
-+   {
-+-    AllocEntry & fs ((*freeStore) [s]) ;
-++    AllocEntry & fs = ((*freeStore) [s]) ;
-+     ++ fs.N ;
-+     if (fs.S.empty ()) {
-+       void * p = malloc (s) ;
-+Index: src/serial/myalloc.h
-+===================================================================
-+--- src/serial/myalloc.h	(revision 1006)
-++++ src/serial/myalloc.h	(revision 1011)
-+@@ -74,8 +74,16 @@
-+ #else // DONT_USE_ALUGRID_ALLOC 
-+ 
-+ // dummy class 
-+-class MyAlloc {};
-++class MyAlloc 
-++{
-++public:  
-++  // if called, freeing objects is allowed again 
-++  inline static void unlockFree(void *) {}
-+ 
-++  // if called free of objects is not allowed 
-++  inline static void lockFree (void *) {} 
-++};
-++
-+ #endif // DONT_USE_ALUGRID_ALLOC
-+ 
-+ #endif // MYALLOC_H_INCLUDED
-+Index: src/serial/serialize.h
-+===================================================================
-+--- src/serial/serialize.h	(revision 1006)
-++++ src/serial/serialize.h	(revision 1011)
-+@@ -61,6 +61,11 @@
-+   inline void clear() { _wb = 0; _rb = 0; }
-+   // reset read position 
-+   inline void resetReadPosition() { _rb = 0; }
-++  
-++  // return's true if size > 0 and read position is zero
-++  // i.e. a read othe stream will result some valid data  
-++  inline bool validToRead () const { return (_wb > 0) && (_rb == 0); }
-++
-+   // return size of bytes allready written to stream 
-+   inline int size() const { return _wb; }
-+ 
-+Index: src/duneinterface/gitter_dune_pll_impl.cc
-+===================================================================
-+--- src/duneinterface/gitter_dune_pll_impl.cc	(revision 1006)
-++++ src/duneinterface/gitter_dune_pll_impl.cc	(revision 1011)
-+@@ -339,6 +339,7 @@
-+     item.reserveBuffer( nl + 1 );
-+     DataBufferType & data = item.commBuffer();
-+ 
-++    // only gather master data once 
-+     if ( dataHandle.containsItem( item ) ) 
-+     {
-+       // pack master data 
-+@@ -383,6 +384,18 @@
-+  
-+   IteratorSTI < HItemType > & iter = *(a.first);
-+ 
-++  // create new link vector 
-++  vector< int > newLink( nl );
-++  for(int link=0; link<nl ; ++link) 
-++  {
-++    newLink[ link ] = link;
-++  }
-++
-++  // if myLink == link then write master data
-++  // instead of data of link 
-++  // we do not send link i its own data
-++  newLink[myLink] = nl;
-++
-+   // for all master items 
-+   for (iter.first (); ! iter.done () ; iter.next ()) 
-+   {
-+@@ -395,9 +408,11 @@
-+       for(int link = 0; link<nl; ++link)
-+       {
-+         BufferType & localBuff = dataBuff[link];
-+-        if( localBuff.size() > 0 ) 
-++
-++        // check if stream has been read, if not scatter data 
-++        // this will unpack data on master only once 
-++        if( localBuff.validToRead() ) 
-+         {
-+-          localBuff.resetReadPosition();
-+           dataHandle.recvData(localBuff, item);
-+         }
-+       }
-+@@ -410,12 +425,9 @@
-+ 
-+       for(int link = 0; link<nl; ++link)
-+       {
-+-        // if myLink == link then write master data
-+-        // instead of data of link 
-+-        // we do not send link i its own data
-+-        int l = (link == myLink) ? nl : link;
-+-
-+-        BufferType & localBuff = dataBuff[l];
-++        // use new link to send master data to link we are sending for 
-++        BufferType & localBuff = dataBuff[ newLink[link] ];
-++        // get size 
-+         int s = localBuff.size();
-+         sendBuff.writeObject(s);
-+         // if buffer size > 0 write hole buffer to stream 
-Index: src/serial/myalloc.cc
+Index: m4/metis.m4
 ===================================================================
---- src/serial/myalloc.cc	(revision 1006)
-+++ src/serial/myalloc.cc	(revision 1017)
-@@ -39,8 +39,10 @@
+--- m4/metis.m4	(revision 1018)
++++ m4/metis.m4	(revision 1034)
+@@ -41,9 +41,11 @@
+     METIS_INCLUDE_PATH="$METISROOT/include"
+     ARCH="`uname -s`-`uname -m`"
+     METIS_LIB_PATH="$METISROOT/build/$ARCH"
++    ALU_METIS_VERSION="(Version 5.x)"
+   else 
+     # METIS 4.0 
+     METIS_INCLUDE_PATH="$METISROOT/Lib"
++    ALU_METIS_VERSION="(Version 4.0)"
+   fi  
+ fi
  
- // class to store items of same size in a stack 
- // also number of used items outside is stored 
--struct AllocEntry {
-+class AllocEntry {
+@@ -98,7 +100,7 @@
+   ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $METIS_CPPFLAGS"
  
-+public:
-+
-   // N verfolgt die Anzahl der angelegten Objekte der entsprechenden
-   // Gr"osse, die in Gebrauch sind, auf dem Stack liegen die Objekte,
-   // f"ur die delete aufgerufen wurde, die aber nicht an free () zur"uck-
-@@ -48,10 +50,14 @@
- 
-   long N ;
- 
--  stack <void * > S ;
-+  stack < void * > S ;
- 
-   AllocEntry () : N (0), S () {}
- 
-+  AllocEntry(const AllocEntry& other) 
-+    : N(other.N) , S(other.S) 
-+  {} 
-+  
-   ~AllocEntry () 
-   {
-     while (!S.empty ()) 
-@@ -61,7 +67,7 @@
-     }
-     return ;
-   }
--} ;
-+};
- 
- // map holding AllocEntries for sizes 
- static map < size_t, AllocEntry, less < size_t > > * freeStore = 0 ;
-@@ -126,7 +132,7 @@
- {
-   assert(s > 0);
-   {
--    AllocEntry & fs ((*freeStore) [s]) ;
-+    AllocEntry & fs = ((*freeStore) [s]) ;
-     ++ fs.N ;
-     if (fs.S.empty ()) {
-       void * p = malloc (s) ;
-Index: src/serial/myalloc.h
+   # set variable for summary
+-  with_metis="yes"
++  with_metis="yes $ALU_METIS_VERSION"
+ else
+   AC_SUBST(METIS_LIBS, "")
+   AC_SUBST(METIS_LDFLAGS, "")
+Index: m4/party.m4
 ===================================================================
---- src/serial/myalloc.h	(revision 1006)
-+++ src/serial/myalloc.h	(revision 1017)
-@@ -74,8 +74,16 @@
- #else // DONT_USE_ALUGRID_ALLOC 
+--- m4/party.m4	(revision 1018)
++++ m4/party.m4	(revision 1034)
+@@ -55,14 +55,34 @@
  
- // dummy class 
--class MyAlloc {};
-+class MyAlloc 
-+{
-+public:  
-+  // if called, freeing objects is allowed again 
-+  inline static void unlockFree(void *) {}
+ # if header is found...
+ if test x$HAVE_PARTY = x1 ; then
+-  AC_CHECK_LIB(party,[global_linear],
++  AC_CHECK_LIB(party,[global_lin],
+ 	[PARTY_LIBS="-lparty"
+-         PARTY_LDFLAGS="-L$PARTY_LIB_PATH"
+-         LIBS="$LIBS $PARTY_LIBS"],
++   PARTY_LDFLAGS="-L$PARTY_LIB_PATH"
++   LIBS="$LIBS $PARTY_LIBS"],
+ 	[HAVE_PARTY="0"
+ 	AC_MSG_WARN(libparty.a found!)])
+ fi
  
-+  // if called free of objects is not allowed 
-+  inline static void lockFree (void *) {} 
-+};
++if test x$HAVE_PARTY = x1 ; then
++AC_LANG_PUSH([C++]) 
++AC_TRY_COMPILE([#include <party_lib.h> 
++                #ifndef VW 
++                #error "VW is not defined!" 
++                #endif
++               template <class T> class Foo; 
++               template <> class Foo<float> {};
++      
++               /* check that VW is defined as float */
++               Foo< VW > foo; 
++               ],
++               [],
++               [HAVE_PARTY="1"],
++               [HAVE_PARTY="0"
++               AC_MSG_WARN("PARTY lib was build with VW != float -- check PARTY lib header and recompile PARTY lib!")
++              ])
++AC_LANG_POP
++fi
 +
- #endif // DONT_USE_ALUGRID_ALLOC
+ LDFLAGS=$REM_LDFLAGS
  
- #endif // MYALLOC_H_INCLUDED
+ ## end of party check (--without wasn't set)
+@@ -81,7 +101,7 @@
+   ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $PARTY_CPPFLAGS"
+ 
+   # set variable for summary
+-  with_party="yes"
++  with_party="yes (Version 1.99)"
+ else
+   AC_SUBST(PARTY_LIBS, "")
+   AC_SUBST(PARTY_LDFLAGS, "")
 Index: src/serial/serialize.h
 ===================================================================
---- src/serial/serialize.h	(revision 1006)
-+++ src/serial/serialize.h	(revision 1017)
-@@ -61,6 +61,11 @@
-   inline void clear() { _wb = 0; _rb = 0; }
-   // reset read position 
-   inline void resetReadPosition() { _rb = 0; }
-+  
-+  // return's true if size > 0 and read position is zero
-+  // i.e. a read othe stream will result some valid data  
-+  inline bool validToRead () const { return (_wb > 0) && (_rb == 0); }
-+
-   // return size of bytes allready written to stream 
-   inline int size() const { return _wb; }
+--- src/serial/serialize.h	(revision 1018)
++++ src/serial/serialize.h	(revision 1034)
+@@ -111,9 +111,9 @@
+     _rb += sizeof(T);
+     
+ #ifndef NO_OBJECTSTREAM_DEBUG 
+-    assert( _rb <= _wb );
+     if (_rb > _wb) throw EOFException () ;
+ #endif
++    assert( _rb <= _wb );
  
-Index: src/duneinterface/gitter_dune_pll_impl.cc
+     // call assignment operator of type T 
+     a = static_cast<const T &> (*((const T *) getBuff(ap) ));
+Index: src/alugrid_parallel.cc
 ===================================================================
---- src/duneinterface/gitter_dune_pll_impl.cc	(revision 1006)
-+++ src/duneinterface/gitter_dune_pll_impl.cc	(revision 1017)
-@@ -339,6 +339,7 @@
-     item.reserveBuffer( nl + 1 );
-     DataBufferType & data = item.commBuffer();
- 
-+    // only gather master data once 
-     if ( dataHandle.containsItem( item ) ) 
-     {
-       // pack master data 
-@@ -383,6 +384,18 @@
-  
-   IteratorSTI < HItemType > & iter = *(a.first);
- 
-+  // create new link vector 
-+  vector< int > newLink( nl );
-+  for(int link=0; link<nl ; ++link) 
-+  {
-+    newLink[ link ] = link;
-+  }
+--- src/alugrid_parallel.cc	(revision 1018)
++++ src/alugrid_parallel.cc	(revision 1034)
+@@ -14,7 +14,15 @@
+ extern "C" {
+ // METISTITLE is defined by the metis header file. 
+ #undef METISTITLE 
++#undef METIS_H 
 +
-+  // if myLink == link then write master data
-+  // instead of data of link 
-+  // we do not send link i its own data
-+  newLink[myLink] = nl;
++// cover metis-4.0 bug   
++#define __log2 __METIS__log2
++// include metis header   
+ #include <metis.h>
++// undef again 
++#undef __log2
 +
-   // for all master items 
-   for (iter.first (); ! iter.done () ; iter.next ()) 
+ // if METISTITLE is still undefined then the dummy is included 
+ #include "parallel/metis.c"
+ }
+@@ -36,8 +44,11 @@
+ #undef VERSION 
+ #endif
+ 
++extern "C" {
++// include PARTY lib header 
+ #include <party_lib.h>
+-#ifdef VERSION 
++}
++#if defined VERSION && defined VW
+ #define PARTY_LIB_H_INCLUDED
+ #ifdef _VER_SAVE
+ #undef VERSION 
+Index: src/parallel/metis.c
+===================================================================
+--- src/parallel/metis.c	(revision 1018)
++++ src/parallel/metis.c	(revision 1034)
+@@ -1,21 +1,15 @@
+ // (c) --
+-#ifndef METISTITLE
++#if defined METISTITLE || defined METIS_H 
++#define METIS_C_INCLUDED 
++#endif
+ 
+-#warning  -- Compiling parallel version without METIS !!!
+-
+ #ifndef METIS_C_INCLUDED
+ #define METIS_C_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
++#warning  -- Compiling parallel version without METIS !!!
+ 
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-#else
+-  #include <iostream.h>
+-#endif
++using namespace std;
++#include <iostream>
+ 
+ static const char metmess [] = 	"**INFO Due to license reasons the library METIS is\n"
+ 				"       not part of the ALUGrid library distribution. \n"
+@@ -43,4 +37,3 @@
+ }
+ 
+ #endif
+-#endif
+Index: src/parallel/party_lib.c
+===================================================================
+--- src/parallel/party_lib.c	(revision 1018)
++++ src/parallel/party_lib.c	(revision 1034)
+@@ -25,39 +25,47 @@
+         "       Exiting program, bye! \n";
+ 
+ // dummy method, when library missing        
+-int global_linear (int,float *,int,float,int *) {
+-  cerr << "**ERROR The use of global_linear is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
++int global_lin (int,float *,int,int *) {
++  cerr << "**ERROR The use of global_lin is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+   cerr << parmess << endl ;
+   exit(1);
+   return 0 ;
+ }
+ 
+ // dummy method, when library missing        
+-int global_scattered (int,float *,int,float,int *) {
+-  cerr << "**ERROR The use of global_scattered is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
++int global_sca(int,float *,int,int *) {
++  cerr << "**ERROR The use of global_sca is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+   cerr << parmess << endl ;
+   exit(1);
+   return 0 ;
+ }
+ 
+ // dummy method, when library missing        
+-int global_gain (int,float *,int *,int *,int *,int,float,int *) {
+-  cerr << "**ERROR The use of global_gain is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
++int global_ran(int,float *,int,int *) {
++  cerr << "**ERROR The use of global_ran is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+   cerr << parmess << endl ;
+   exit(1);
+   return 0 ;
+ }
+ 
+ // dummy method, when library missing        
+-int global_farhat (int,float *,int *,int *,int *,int,float,int *) {
+-  cerr << "**ERROR The use of global_farhat is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
++int global_gbf (int,float *,int *,int *,int *,int,int *) {
++  cerr << "**ERROR The use of global_gbf is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+   cerr << parmess << endl ;
+   exit(1);
+   return 0 ;
+ }
+ 
+ // dummy method, when library missing        
+-int local_kl (int,float *,int *,int *,int *,int,float, int *,int) {
++int global_gcf (int,float *,int *,int *,int *,int,int *) {
++  cerr << "**ERROR The use of global_gcf is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
++  cerr << parmess << endl ;
++  exit(1);
++  return 0 ;
++}
++
++// dummy method, when library missing        
++int local_kl (int,float *,int *,int *,int *,int, int *,int) {
+   cerr << "**ERROR The use of local_kl is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+   cerr << parmess << endl ;
+   exit(1);
+@@ -65,7 +73,7 @@
+ }
+ 
+ // dummy method, when library missing        
+-int local_hs (int n, float *vertex_w, int *edge_p, int *edge, int *edge_w,int p, float add_bal, int *part,int Output) {
++int local_hs (int n, float *vertex_w, int *edge_p, int *edge, int *edge_w,int p, int *part,int Output) {
+   cerr << "**ERROR The use of local_hs is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+   cerr << parmess << endl ;
+   exit(1);
+Index: src/parallel/metis.h
+===================================================================
+--- src/parallel/metis.h	(revision 1018)
++++ src/parallel/metis.h	(revision 1034)
+@@ -1,24 +1,17 @@
+ // (c) --
+-#ifndef METISTITLE
++#if defined METISTITLE || defined METIS_H 
++#define METIS_H_INCLUDED
++#endif
+ 
+ #ifndef METIS_H_INCLUDED
+ #define METIS_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
++using namespace std;
++#include <iostream>
+ 
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-#else
+-  #include <iostream.h>
+-#endif
+-
+ typedef int idxtype ;
+ 
+ void METIS_PartGraphKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *);
+ void METIS_PartGraphRecursive(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *);
+ 
+ #endif
+-#endif
+Index: src/parallel/gitter_pll_ldb.cc
+===================================================================
+--- src/parallel/gitter_pll_ldb.cc	(revision 1018)
++++ src/parallel/gitter_pll_ldb.cc	(revision 1034)
+@@ -38,7 +38,6 @@
+ {
+   if (e.isValid ()) 
    {
-@@ -395,9 +408,11 @@
-       for(int link = 0; link<nl; ++link)
+-    //_edgeSet.find (e) != _edgeSet.end() ? (_edgeSet.erase (_edgeSet.find (e)), _edgeSet.insert (e), 0) : (_edgeSet.insert (e), 0) ;
+     ldb_edge_set_t :: iterator it =  _edgeSet.find (e);
+     if ( it != _edgeSet.end() )
+     {
+@@ -109,30 +108,32 @@
+       for (int i = 0 ; i < np ; i ++) 
        {
-         BufferType & localBuff = dataBuff[link];
--        if( localBuff.size() > 0 ) 
+         int len ;
+-        osv [i].readObject (len) ;
++        ObjectStream& osv_i = osv [i];
 +
-+        // check if stream has been read, if not scatter data 
-+        // this will unpack data on master only once 
-+        if( localBuff.validToRead() ) 
++        osv_i.readObject (len) ;
+         assert (len >= 0) ;
          {
--          localBuff.resetReadPosition();
-           dataHandle.recvData(localBuff, item);
+           for (int j = 0 ; j < len ; ++j) 
+           {
+             GraphVertex x ;
+-            osv [i].readObject (x) ;
++            osv_i.readObject (x) ;
+             * nodes ++ = pair < const GraphVertex, int > (x,i) ;
+           } 
+         }
+-        osv [i].readObject (len) ;
++        osv_i.readObject (len) ;
+         assert (len >= 0) ;
+         {
+           for (int j = 0 ; j < len ; ++j) 
+           {
+             GraphEdge x ;
+-            osv [i].readObject (x) ;
++            osv_i.readObject (x) ;
+             * edges ++ = x ;
+             * edges ++ = - x ;
+           }
+         }
+ 
+         // free memory of osv[i]
+-        osv[i].reset();
++        osv_i.reset();
+       }
+     }
+   } 
+@@ -149,46 +150,56 @@
+   return ;
+ }
+ 
+-static void optimizeCoverage (const int nparts, const int len, const int * const reference, const float * const weight, int * const proposal, const int verbose) {
+-
++static void optimizeCoverage (const int nparts, 
++                              const int len, 
++                              const int * const reference, 
++                              const float * const weight, 
++                              int * const proposal, 
++                              const int verbose) 
++{
+   // 'reference' ist das Referenzarray, das mit dem 'proposal'
+   // Vorschlagsvektor optimal abgeglichen werden soll, indem
+   // auf 'proposal' eine Indexpermutationangewendet wird.
+   // cov ist das 'coverage' Array, das die "Uberdeckung von
+   // alter und neuer Teilgebietszuordnung beschreiben soll.
+ 
+-  vector < vector < int > > cov (nparts, vector < int > (nparts, 0L)) ;
+-
+-  { 
+-    for (int k = 0 ; k < len ; k ++) cov [reference [k]][proposal[k]] += 1 + int (sqrt(weight [k])) ; 
+-  }
+-  
+   map < int, pair < int, int >, greater_equal < int > > max ;
+   set < int, less < int > > freeIndex ;
+   
+   {
++    vector < vector < int > > cov (nparts, vector < int > (nparts, 0L)) ;
++
++    for (int k = 0 ; k < len ; ++k) cov [reference [k]][proposal[k]] += 1 + int (sqrt(weight [k])) ; 
++  
+     for (int i = 0 ; i < nparts ; ++i ) 
+     {
+       freeIndex.insert (i) ;
++
+       vector < int > :: iterator covBegin = cov [i].begin ();
+       vector < int > :: const_iterator pos = max_element (covBegin, cov [i].end ()) ;
++
+       int distance = (pos - covBegin);
+       pair<int, int> val (i,distance);
+-      max [*pos] = val; 
++      max [ *pos ] = val; 
+     } 
+   }
+ 
+   vector < int > renumber (nparts, -1L) ;
++
+   {
+-    for (map < int, pair < int, int >, greater_equal < int > > :: const_iterator i = max.begin () ; 
+-         i != max.end () ; i ++ ) 
++    typedef map < int, pair < int, int >, greater_equal < int > > ::
++      const_iterator max_const_iterator;
++    const max_const_iterator maxEnd = max.end();
++    for (max_const_iterator i = max.begin () ; i != maxEnd; ++i ) 
+     {
+-      if (renumber [(*i).second.second] == -1) 
++      const pair<int, int> & item = (*i).second;
++
++      if (renumber [item.second] == -1) 
+       {
+-        int neue = (*i).second.first ;
++        int neue = item.first ;
+         if (freeIndex.find (neue) != freeIndex.end ()) 
+         {
+-          renumber [(*i).second.second] = neue ;
++          renumber [item.second] = neue ;
+           freeIndex.erase (neue) ;
          }
        }
-@@ -410,12 +425,9 @@
- 
-       for(int link = 0; link<nl; ++link)
+@@ -206,12 +217,16 @@
+       } 
+       else 
        {
--        // if myLink == link then write master data
--        // instead of data of link 
--        // we do not send link i its own data
--        int l = (link == myLink) ? nl : link;
--
--        BufferType & localBuff = dataBuff[l];
-+        // use new link to send master data to link we are sending for 
-+        BufferType & localBuff = dataBuff[ newLink[link] ];
-+        // get size 
-         int s = localBuff.size();
-         sendBuff.writeObject(s);
-         // if buffer size > 0 write hole buffer to stream 
-Index: src/parallel/gitter_pll_sti.h
-===================================================================
---- src/parallel/gitter_pll_sti.h	(revision 1006)
-+++ src/parallel/gitter_pll_sti.h	(revision 1017)
-@@ -289,10 +289,10 @@
-     virtual void writeDynamicState (ObjectStream &, int) const = 0 ;
-     virtual void readDynamicState (ObjectStream &, int) = 0 ;
- 
--    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...\n" << flush;}
--    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...1\n" << flush;}
--    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int) {std::cout << "ich bin die falsche...2\n" << flush;}
--    virtual void writeElementData (ObjectStream &, GatherScatterType &) {std::cout << "ich bin die falsche...3\n" << flush;}
-+    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...\n" << flush; }
-+    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...1\n" << flush; }
-+    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...2\n" << flush; }
-+    virtual void writeElementData (ObjectStream &, GatherScatterType &) { cout << "ich bin die falsche...3\n" << flush; }
-     virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const = 0 ;
-     virtual void readDynamicState (ObjectStream &, GatherScatterType &) = 0 ;
- 
-Index: src/parallel/gitter_pll_impl.cc
-===================================================================
---- src/parallel/gitter_pll_impl.cc	(revision 1006)
-+++ src/parallel/gitter_pll_impl.cc	(revision 1017)
-@@ -1699,16 +1699,20 @@
-       AccessIterator < vertex_STI > :: Handle w (*this) ;
-       for (w.first () ; ! w.done () ; w.next ()) w.item ().detachPllXFromMacro () ;
-     }
--  } catch (Parallel :: AccessPllException) {
-+  } 
-+  catch (Parallel :: AccessPllException) 
-+  {
-     cerr << "**WARNUNG (AUSNAHME IGNORIERT) in " << __FILE__ << " " << __LINE__ << endl ;
-   }
-   {
+-        renumber [j] = * freeIndex.begin () ;
+-        freeIndex.erase (freeIndex.begin ()) ;
++        typedef set < int, less < int > > :: iterator  free_iterator ;
++        free_iterator freeIndexBegin = freeIndex.begin () ;
 +
-+#ifndef NDEBUG
-     for (linkagePatternMap_t :: iterator p = _linkagePatterns.begin () ; p != _linkagePatterns.end () ; p ++) 
-     {
--      if( (*p).second != 0 ) 
--        std::cout << (*p).second << " p sec \n";
-       assert ((*p).second == 0) ;
++        renumber [j] = * freeIndexBegin;
++        freeIndex.erase ( freeIndexBegin ) ;
+       }
      }
-+#endif
-+    
-     _linkagePatterns.erase (_linkagePatterns.begin (), _linkagePatterns.end ()) ;
    }
-   return ;
-Index: misc/versioncheck/alugridversion.cc
-===================================================================
---- misc/versioncheck/alugridversion.cc	(revision 1006)
-+++ misc/versioncheck/alugridversion.cc	(revision 1017)
-@@ -1,6 +1,7 @@
- #include <config.h>
-+#include <cstdlib>
- #include <iostream>
--#include <string>
-+#include <cstring>
  
- int main(int argc, char ** argv)
- {
-@@ -17,7 +18,7 @@
-     {
-       // check wether given version is bigger than actual 
-       // package version 
--      int result = strcmp(PACKAGE_VERSION,argv[2]);
-+      int result = std :: strcmp(PACKAGE_VERSION,argv[2]);
-       std::cout << result << std::endl; 
-       return result;
++  /*
+   if (verbose) 
+   {
+     cout << "**INFO optimizeCoverage (): " << endl ;
+@@ -223,16 +238,24 @@
+       cout << "| " << i << " -> " << renumber [i] << endl ;
      }
+   }
++  */
++
+   { 
+-    for (int i = 0 ; i < len ; i ++ ) proposal [i] = renumber [proposal [i]] ; 
++    for (int i = 0 ; i < len ; ++i ) proposal [i] = renumber [ proposal [i] ] ; 
+   }
+ 
+   freeIndex.clear();
+   return ;
+ }
+ 
+-static bool collectInsulatedNodes (const int nel, const float * const vertex_w, const int * const edge_p, const int * const edge, const int * const edge_w, const int np, int * neu) {
+-
++static bool collectInsulatedNodes (const int nel, 
++                                   const float * const vertex_w, 
++                                   const int * const edge_p, 
++                                   const int * const edge, 
++                                   const int * const edge_w, 
++                                   const int np, 
++                                   int * neu) 
++{
+   // 'collectInsulatedNodes (.)' ist eine Behelfsl"osung, damit der MHD Code
+   // mit seinen periodischen Randelementen nicht zu Bruch geht. Da es sich
+   // bei den periodischen Randelementen nur um Adapter ohne eigenen Daten-
+@@ -248,18 +271,25 @@
+ #endif
+   assert (edge_p [0] == 0) ;
+   bool change = false ;
+-  for (int i = 0 ; i < nel ; i++ ) {
++  for (int i = 0 ; i < nel ; ++i ) 
++  {
+     int j = 0, max = 0 ;
+-    for (j = max = edge_p [i]; j < edge_p [i+1] ; j++ ) {
++    for (j = max = edge_p [i]; j < edge_p [i+1] ; ++j ) 
++    {
+       assert (j < ned) ;
+       if (neu [i] == neu [edge [j]]) break ;
+       else max = edge_w [j] > edge_w [max] ? j : max ;
+     }
+-    if (j == edge_p [i+1]) {
+-      if (edge_p [i] == edge_p [i+1]) {
++
++    if (j == edge_p [i+1]) 
++    {
++      if (edge_p [i] == edge_p [i+1]) 
++      {
+         cerr << "**WARNUNG (FEHLER IGNORIERT) Vollst\"andig isolierter Knoten im Grobgittergraph." ;
+         cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
+-      } else {
++      } 
++      else 
++      {
+ //        cerr << "!!! Pass mal auf, ich weise dem Knoten " << i << " jetzt das Gebiet " << neu[edge [max]] << " zu." << endl ;
+         neu [i] = neu [edge [max]] ;    
+         change = true ;
+@@ -269,7 +299,8 @@
+   return change ;
+ }
+ 
+-bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) {
++bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
++{
+   const int start = clock (), np = mpa.psize (), me = mpa.myrank () ;
+   bool change (false) ;
+   
+@@ -307,10 +338,18 @@
+     }
+ 
+     // allocate edge memory for graph partitioners 
+-    int    * const edge_p      = new int [nel + 1] ;
+-    int    * const edge        = new int [ned] ;
+-    int    * const edge_w      = new int [ned] ;
++    //int    * const edge_p      = new int [nel + 1] ;
++    //int    * const edge        = new int [ned] ;
++    //int    * const edge_w      = new int [ned] ;
+ 
++    // get memory at once 
++    int    * const edge_mem    = new int [(nel + 1) + ned + ned ];
++
++    // set pointer 
++    int    * const edge_p      = edge_mem; 
++    int    * const edge        = edge_mem + (nel +1);
++    int    * const edge_w      = edge + ned; 
++
+     assert ( edge_p && edge && edge_w ) ;
+     
+     {
+@@ -339,8 +378,15 @@
+     
+     // get vertex memory 
+     float  * const vertex_w    = new float [nel] ;
+-    int    * const vertex_wInt = new int [nel] ;
+-    int    * part              = new int [nel] ;
++
++    //int    * const vertex_wInt = new int [nel] ;
++    //int    * part              = new int [nel] ;
++
++    const int sizeNeu = (np > 1) ? nel : 0;
++    int    * vertex_mem = new int [nel + nel + sizeNeu];
++
++    int    * const vertex_wInt = vertex_mem; 
++    int    * part              = vertex_mem + nel; 
+     
+     assert ( vertex_w && vertex_wInt && part) ;
+     {
+@@ -362,24 +408,30 @@
+       {
+         cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
+         cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
++        /*
+         delete [] part ;
+         delete [] vertex_wInt ;
+         delete [] vertex_w ;
+         delete [] edge_w ;
+         delete [] edge ;
+         delete [] edge_p ;
++        */
++
++        delete [] vertex_w ;
++        delete [] vertex_mem;
++        delete [] edge_mem;
++
+         return false ;
+       }
+     }
+ 
+     if (np > 1) 
+     {
+-      // Abfangen, falls nur ein teilgebiet gebildet werden soll,
+-      // sonst Speicherallocationsfehler in den Partitionierern,
+-      // zumindest bei PARTY 1.1.
++      //int * neu = new int [nel] ;
++      int * neu = vertex_mem + (2 * nel);
+ 
+-      int * neu = new int [nel] ;
+       assert (neu) ;
++      // copy part to neu, this is needed by some of the partitioning tools  
+       copy (part, part + nel, neu) ;
+       
+       switch (mth) 
+@@ -391,31 +443,67 @@
+           break ;
+           
+         case PARTY_linear :
+-          global_linear (nel, vertex_w, np, 0.0, neu) ;
++          :: global_lin (nel, vertex_w, np, neu) ;
+           break ;
+           
+-        case PARTY_gain :
+-          global_gain (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu) ;
++        case PARTY_random :
++          :: global_ran (nel, vertex_w, np, neu) ;
+           break ;
+           
+-        case PARTY_farhat :
+-          global_farhat (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu) ;
++        case PARTY_scattered :
++          :: global_sca (nel, vertex_w, np, neu) ;
+           break ;
+           
++        case PARTY_breathfirst :
++          :: global_gbf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
++          break ;
++          
++        case PARTY_cutfirst :
++          :: global_gcf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
++          break ;
++          
+         case PARTY_kernighanLin :
+-          // Die dreifache Anwendung der Helpful-Set bzw. Kenighan-Lin Heuristik
+-          // basiert auf Erfahrungswerten und liefert einigermassen ausiterierte
+-          // Partitionen.
+-        
+-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 3.0, neu, 0) ;
+-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 1.0, neu, 0) ;
+-          local_kl (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu, 0) ;
++          {
++            // Die dreifache Anwendung der Helpful-Set bzw. Kenighan-Lin Heuristik
++            // basiert auf Erfahrungswerten und liefert einigermassen ausiterierte
++            // Partitionen.
++            
++            // check if partitioning exists, i.e. sum > 0
++            int sum = 0;
++            for( int k=0; k<nel; ++k) 
++            {
++              sum += neu[ k ]; 
++            }
++
++            // if not partitioned yet then call 
++            // global_linear for the first time 
++            if( sum == 0 ) 
++            {
++              :: global_lin (nel, vertex_w, np, neu) ;
++            }
++            
++            :: local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
++          }
+           break ;
+           
+         case PARTY_helpfulSet :
+-                local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 2.0, neu, 0) ;
+-          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 1.0, neu, 0) ;
+-          local_hs (nel, vertex_w, edge_p, edge, edge_w, np, 0.0, neu, 0) ;
++          {
++            // check if partitioning exists, i.e. sum > 0
++            int sum = 0;
++            for( int k=0; k<nel; ++k) 
++            {
++              sum += neu[ k ]; 
++            }
++
++            // if not partitioned yet then call 
++            // global_linear for the first time 
++            if( sum == 0 ) 
++            {
++              :: global_lin (nel, vertex_w, np, neu) ;
++            }
++            
++            :: local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
++          }
+           break ;
+ 
+         case METIS_PartGraphKway :
+@@ -437,6 +525,7 @@
+           cerr << "**WARNUNG (FEHLER IGNORIERT) Ung\"ultige Methode [" << mth << "] zur\n" ;
+           cerr << "  Neupartitionierung angegeben. In " << __FILE__ << " " << __LINE__ << endl ;
+             
++          /*
+           delete [] neu ;
+           delete [] part ;
+           delete [] vertex_wInt ;
+@@ -444,6 +533,11 @@
+           delete [] edge_w ;
+           delete [] edge ;
+           delete [] edge_p ;
++          */
++
++          delete [] vertex_w ;
++          delete [] vertex_mem;
++          delete [] edge_mem;
+           return false ;
+       }
+ 
+@@ -473,15 +567,20 @@
+           _connect.insert ((*i).second = neu [(*i).first.index ()]) ;
+       }
+       
+-      delete [] neu ;
++      //delete [] neu ;
+     }
+ 
++    delete [] vertex_w ;
++    delete [] vertex_mem;
++    delete [] edge_mem;
++    /*
+     delete [] part ;
+     delete [] vertex_wInt ;
+     delete [] vertex_w ;
+     delete [] edge_w ;
+     delete [] edge ;
+     delete [] edge_p ;
++    */
+   }
+ 
+ 
+@@ -518,12 +617,16 @@
+       return "PARTY_helpfulSet" ;
+     case PARTY_kernighanLin :
+       return "PARTY_kernighanLin" ;
++    case PARTY_scattered :
++      return "PARTY_scattered" ;
++    case PARTY_random :
++      return "PARTY_random" ;
+     case PARTY_linear :
+       return "PARTY_linear" ;
+-    case PARTY_gain :
+-      return "PARTY_gain" ;
+-    case PARTY_farhat :
+-      return "PARTY_farhat" ;
++    case PARTY_cutfirst :
++      return "PARTY_cutfirst" ;
++    case PARTY_breathfirst :
++      return "PARTY_breathfirst" ;
+     case METIS_PartGraphKway :
+       return "METIS_PartGraphKway" ;
+     case METIS_PartGraphRecursive :
+Index: src/parallel/party_lib.h
+===================================================================
+--- src/parallel/party_lib.h	(revision 1018)
++++ src/parallel/party_lib.h	(revision 1034)
+@@ -39,11 +39,14 @@
+   #include <iostream.h>
+ #endif
+ 
+-int global_linear (int,float *,int,float,int *);
+-int global_scattered (int,float *,int,float,int *);
+-int global_gain (int,float *,int *,int *,int *,int,float,int *);
+-int global_farhat (int,float *,int *,int *,int *,int,float,int *);
+-int local_kl (int,float *,int *,int *,int *,int,float, int *,int);
+-int local_hs (int n, float *vertex_w, int *edge_p, int *edge, int *edge_w,int p, float add_bal, int *part,int Output);
++int global_lin (int,float *,int,float,int *);
++int global_sca (int,float *,int,float,int *);
++int global_ran (int,float *,int,float,int *);
+ 
++int global_gfc (int,float *,int *,int *,int *,int,int *);
++int global_gbf (int,float *,int *,int *,int *,int,int *);
++
++int local_kl (int,float *,int *,int *,int *,int,int *,int);
++int local_hs (int n, float *vertex_w, int *edge_p, int *edge, int *edge_w,int p, int *part,int Output);
++
+ #endif
+Index: src/parallel/gitter_pll_ldb.h
+===================================================================
+--- src/parallel/gitter_pll_ldb.h	(revision 1018)
++++ src/parallel/gitter_pll_ldb.h	(revision 1034)
+@@ -95,9 +95,12 @@
+           COLLECT = 1,
+           PARTY_helpfulSet = 3, 
+           PARTY_kernighanLin = 4,
++          PARTY_random = 5, 
++          PARTY_scattered = 6,
+           PARTY_linear = 7,
+-          PARTY_gain = 8,
+-          PARTY_farhat = 9,
++          PARTY_breathfirst = 8,
++          PARTY_cutfirst = 9, 
++
+           METIS_PartGraphKway = 11,
+           METIS_PartGraphRecursive = 12
+         } ;
+Index: misc/alugrid.cfg
+===================================================================
+--- misc/alugrid.cfg	(revision 1018)
++++ misc/alugrid.cfg	(revision 1034)
+@@ -11,11 +11,14 @@
+ Graph partitioning method:
+ NONE = 0
+ COLLECT = 1
++
+ PARTY_helpfulSet = 3
+ PARTY_kernighanLin = 4
++PARTY_random = 5
++PARTY_scattered = 6
+ PARTY_linear = 7
+-PARTY_gain = 8
+-PARTY_farhat = 9
++PARTY_breathfirst = 8
++PARTY_cutfirst = 9
++
+ METIS_PartGraphKway = 11
+ METIS_PartGraphRecursive = 12
+-
+Index: README
+===================================================================
+--- README	(revision 1018)
++++ README	(revision 1034)
+@@ -51,7 +51,7 @@
+ 
+ For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ ,
+ see also the section Known bugs, when you using METIS. 
+-For PARTY Lib (version 1.1 or higher) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
++For PARTY Lib (version 1.99) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
+ 
+ You can use
+ 
+@@ -84,13 +84,15 @@
+ Available methods are: 
+ 
+ NONE = 0
+-COLLECT = 1
++COLLECT = 1 (collect all elements to process 0)
+ 
+ PARTY_helpfulSet = 3
+ PARTY_kernighanLin = 4
++PARTY_random = 5
++PARTY_scattered = 6
+ PARTY_linear = 7
+-PARTY_gain = 8
+-PARTY_farhat = 9
++PARTY_breathfirst = 8
++PARTY_cutfirst = 9
+ 
+ METIS_PartGraphKway = 11
+ METIS_PartGraphRecursive = 12
+@@ -140,8 +142,6 @@
+ Knowns Bugs 
+ -----------
+ 
+-METIS-4.0 bug: 
++ALUGrid does not work with Myrinet MPI. Up to now we couldn't figure
++out what exactly the problem is. 
+ 
+-If you want to use the METIS-4.0 library for partitioning, comment 
+-in the metis_dir/Lib/proto.h line 462 the function declaration 
+-int log2(int);
