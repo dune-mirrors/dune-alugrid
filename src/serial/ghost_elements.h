@@ -183,7 +183,9 @@ public:
   MacroGhostTetra( BuilderIF & bi, 
                    MacroGhostInfoTetra * allp, 
                    const hface3_GEO * face) :
-    _mgb(bi) , _ghInfoPtr(allp) , _ghostPair(0,-1) 
+    _mgb(bi), 
+    _ghInfoPtr( allp ), 
+    _ghostPair( (GhostElement_t *)0 , -1) 
   { 
     MacroGhostBuilder & mgb = _mgb;
     MacroGhostInfoTetra& ghInfo = *_ghInfoPtr;
@@ -240,7 +242,9 @@ public:
   //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
   MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp, 
       Gitter::Geometric::tetra_GEO * orig, double (&vec)[3] , double sign) :
-    _mgb(bi) , _ghInfoPtr(allp), _ghostPair(0,-1)
+    _mgb(bi), 
+    _ghInfoPtr(allp), 
+    _ghostPair( (GhostElement_t *)0, -1)
   {
     MacroGhostInfoTetra& ghInfo = *_ghInfoPtr; 
 
@@ -318,7 +322,9 @@ class MacroGhostHexa : public MacroGhost
 public:
   // constructor 
   MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * face) :
-    _mgb(bi) , _ghInfoPtr(allp) , _ghostPair(0,-1) 
+    _mgb(bi), 
+    _ghInfoPtr(allp), 
+    _ghostPair( (GhostElement_t *)0 , -1) 
   { 
     MacroGhostBuilder & mgb = _mgb;
     MacroGhostInfoHexa& ghInfo = *_ghInfoPtr;

@@ -85,7 +85,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             // these methods are overloades just on HbndPll
             virtual const ghostpair_STI & getGhost () const
             { 
-              static ghostpair_STI p(0,-1); 
+              static ghostpair_STI p( (helement_STI *)0, -1); 
               return p;
             }
 
@@ -131,7 +131,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             // these methods are overloades just on HbndPll
             virtual const ghostpair_STI & getGhost () const 
             { 
-              static ghostpair_STI p(0,-1); 
+              static ghostpair_STI p( (helement_STI *)0, -1); 
               return p;
             }
 

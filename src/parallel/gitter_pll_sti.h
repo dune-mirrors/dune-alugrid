@@ -248,6 +248,8 @@ class ElementPllXIF : public MacroGridMoverIF {
   protected :
     typedef Gitter :: Geometric :: hasFace4 :: balrule_t balrule_t ;
     typedef Gitter :: ghostpair_STI ghostpair_STI;
+    typedef Gitter :: helement_STI  helement_STI;
+    
     virtual ~ElementPllXIF () {}
   public :
     virtual pair < ElementPllXIF_t *, int > accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int) = 0 ;
@@ -259,7 +261,7 @@ class ElementPllXIF : public MacroGridMoverIF {
     { 
       cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
       abort(); 
-      return ghostpair_STI (0,-1); 
+      return ghostpair_STI ( (helement_STI*)0 , -1); 
     }
 
     virtual int ghostLevel () const
