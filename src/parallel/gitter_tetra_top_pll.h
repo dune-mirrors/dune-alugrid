@@ -166,7 +166,7 @@ template < class A, class MX > void Hbnd3PllExternal < A, MX > :: detachPllXFrom
 
 template < class A, class X, class MX > inline Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
 HbndPll (myhface3_t * f, int t, ProjectVertex *ppv , Gitter * grd )
-  : A (f,t,ppv,grd), _ext (*this), _ghostPair(0,-1) {
+  : A (f,t,ppv,grd), _ext (*this), _ghostPair( (helement_STI *) 0, -1) {
   return ;
 }
 

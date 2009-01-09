@@ -781,7 +781,7 @@ void GitterDunePll :: sendInteriorGhostAllData (
 
   const bool containsElements = elementData.contains(3,0);
   
-  pair < ElementPllXIF_t *, int > bnd(0,-1);
+  pair < ElementPllXIF_t *, int > bnd( ( ElementPllXIF_t * ) 0 , -1);
 
   // temporary object buffer  
   for (iter->first () ; ! iter->done () ; iter->next ()) 
@@ -927,7 +927,8 @@ void GitterDunePll :: unpackInteriorGhostAllData (
       if( interiorLeaf )
       {
         pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
-        pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p (0,0);
+        pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > 
+          p ( (Gitter::helement_STI *) 0, (Gitter::hbndseg_STI *) 0);
 
         pll.first->getAttachedElement( p );
         assert( p.first );
