@@ -1,12 +1,12 @@
 Changed from version 1.12 --> 1.13
 
 changes:
-- compiles really with g++ 4.3.x
+- is conform with new C++ standard (i.e. g++-4.3.2 -std=c++0x)
 
 Index: serial/gitter_impl.h
 ===================================================================
 --- serial/gitter_impl.h	(revision 1036)
-+++ serial/gitter_impl.h	(revision 1039)
++++ serial/gitter_impl.h	(revision 1041)
 @@ -85,7 +85,7 @@
              // these methods are overloades just on HbndPll
              virtual const ghostpair_STI & getGhost () const
@@ -28,7 +28,7 @@ Index: serial/gitter_impl.h
 Index: serial/ghost_elements.h
 ===================================================================
 --- serial/ghost_elements.h	(revision 1036)
-+++ serial/ghost_elements.h	(revision 1039)
++++ serial/ghost_elements.h	(revision 1041)
 @@ -183,7 +183,9 @@
    MacroGhostTetra( BuilderIF & bi, 
                     MacroGhostInfoTetra * allp, 
@@ -62,10 +62,46 @@ Index: serial/ghost_elements.h
    { 
      MacroGhostBuilder & mgb = _mgb;
      MacroGhostInfoHexa& ghInfo = *_ghInfoPtr;
+Index: duneinterface/gitter_dune_pll_impl.cc
+===================================================================
+--- duneinterface/gitter_dune_pll_impl.cc	(revision 1036)
++++ duneinterface/gitter_dune_pll_impl.cc	(revision 1041)
+@@ -781,7 +781,7 @@
+ 
+   const bool containsElements = elementData.contains(3,0);
+   
+-  pair < ElementPllXIF_t *, int > bnd(0,-1);
++  pair < ElementPllXIF_t *, int > bnd( ( ElementPllXIF_t * ) 0 , -1);
+ 
+   // temporary object buffer  
+   for (iter->first () ; ! iter->done () ; iter->next ()) 
+@@ -927,7 +927,8 @@
+       if( interiorLeaf )
+       {
+         pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
+-        pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p (0,0);
++        pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > 
++          p ( (Gitter::helement_STI *) 0, (Gitter::hbndseg_STI *) 0);
+ 
+         pll.first->getAttachedElement( p );
+         assert( p.first );
+Index: parallel/gitter_hexa_top_pll.h
+===================================================================
+--- parallel/gitter_hexa_top_pll.h	(revision 1036)
++++ parallel/gitter_hexa_top_pll.h	(revision 1041)
+@@ -167,7 +167,7 @@
+ }
+ 
+ template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX > :: HbndPll :: 
+-HbndPll (myhface4_t * f, int t, ProjectVertex *ppv, Gitter * grd) : A (f,t,ppv,grd), _ext (*this) , _ghostPair(0,-1) {
++HbndPll (myhface4_t * f, int t, ProjectVertex *ppv, Gitter * grd) : A (f,t,ppv,grd), _ext (*this) , _ghostPair((helement_STI *) 0 ,-1) {
+   return ;
+ }
+ 
 Index: parallel/gitter_pll_sti.h
 ===================================================================
 --- parallel/gitter_pll_sti.h	(revision 1036)
-+++ parallel/gitter_pll_sti.h	(revision 1039)
++++ parallel/gitter_pll_sti.h	(revision 1041)
 @@ -248,6 +248,8 @@
    protected :
      typedef Gitter :: Geometric :: hasFace4 :: balrule_t balrule_t ;
@@ -84,3 +120,16 @@ Index: parallel/gitter_pll_sti.h
      }
  
      virtual int ghostLevel () const
+Index: parallel/gitter_tetra_top_pll.h
+===================================================================
+--- parallel/gitter_tetra_top_pll.h	(revision 1036)
++++ parallel/gitter_tetra_top_pll.h	(revision 1041)
+@@ -166,7 +166,7 @@
+ 
+ template < class A, class X, class MX > inline Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
+ HbndPll (myhface3_t * f, int t, ProjectVertex *ppv , Gitter * grd )
+-  : A (f,t,ppv,grd), _ext (*this), _ghostPair(0,-1) {
++  : A (f,t,ppv,grd), _ext (*this), _ghostPair( (helement_STI *) 0, -1) {
+   return ;
+ }
+ 
