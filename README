@@ -60,6 +60,15 @@ You can use
 if you don't want ALUGrid to be installed into the default directory
 (i.e. the path were ALUGrid was unpacked).
 
+(Remark) On Mac OS X add the following to your configure call (if you
+want to use a special compiler version, say version 4.2): 
+
+./configure LD=g++-4.2 CXX=g++-4.2 CC=gcc-4.2 F77=gfortran-4,2
+
+This will ensure that the same g++ version is used for compilation 
+and for linking. 
+
+
 After configuration
 
   make
