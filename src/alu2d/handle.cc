@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <assert.h>
-#include <malloc.h>
 
 #ifdef _ANSI_HEADER
   using namespace std;
@@ -261,66 +260,4 @@ void Hmesh::setdata(void (*f)(Element &))
   Leafwalk < Element > walk(mel) ;
   for (walk.first();walk.done();walk.next())
     f(walk.getitem());
-}
-
-void get_memory(struct mallinfo &old_info)
-{
-  old_info = mallinfo();
-}
-void get_memory_diff(struct mallinfo &old_info)
-{
-  struct mallinfo meminfo = mallinfo();
-  old_info.arena -= meminfo.arena;
-  old_info.ordblks -= meminfo.ordblks;
-  old_info.smblks -= meminfo.smblks;
-  old_info.hblks -= meminfo.hblks;
-  old_info.hblkhd -= meminfo.hblkhd;
-  old_info.usmblks -= meminfo.usmblks;
-  old_info.fsmblks -= meminfo.fsmblks;
-  old_info.uordblks -= meminfo.uordblks;
-  old_info.fordblks -= meminfo.fordblks;
-  old_info.keepcost -= meminfo.keepcost;
-}
-void write_memory(ostream &out,char *header)
-{
-  struct mallinfo meminfo = mallinfo();
-  out << "*********************************" << endl
-      << header << endl
-      << "space in small blocks in use:    " << meminfo.usmblks << endl
-      << "space in ordinary blocks in use: " << meminfo.uordblks << endl
-      << "space in free small blocks:      " << meminfo.fsmblks << endl
-      << "space in free ordinary blocks    " << meminfo.fordblks << endl
-      << "*********************************" << endl;
-}
-void write_memory(ostream &out,char *header,struct mallinfo &old_info)
-{
-  old_info = mallinfo();
-  out << "*********************************" << endl
-      << header << " (difference)" << endl
-      << "space in small blocks in use:    " << old_info.usmblks << endl
-      << "space in ordinary blocks in use: " << old_info.uordblks << endl
-      << "space in free small blocks:      " << old_info.fsmblks << endl
-      << "space in free ordinary blocks    " << old_info.fordblks << endl
-      << "*********************************" << endl;
-}
-void write_memory_diff(ostream &out,char *header,struct mallinfo &old_info)
-{
-  struct mallinfo meminfo = mallinfo();
-  old_info.arena -= meminfo.arena;
-  old_info.ordblks -= meminfo.ordblks;
-  old_info.smblks -= meminfo.smblks;
-  old_info.hblks -= meminfo.hblks;
-  old_info.hblkhd -= meminfo.hblkhd;
-  old_info.usmblks -= meminfo.usmblks;
-  old_info.fsmblks -= meminfo.fsmblks;
-  old_info.uordblks -= meminfo.uordblks;
-  old_info.fordblks -= meminfo.fordblks;
-  old_info.keepcost -= meminfo.keepcost;
-  out << "*********************************" << endl
-      << header << " (difference)" << endl
-      << "space in small blocks in use:    " << old_info.usmblks << endl
-      << "space in ordinary blocks in use: " << old_info.uordblks << endl
-      << "space in free small blocks:      " << old_info.fsmblks << endl
-      << "space in free ordinary blocks    " << old_info.fordblks << endl
-      << "*********************************" << endl;
 }

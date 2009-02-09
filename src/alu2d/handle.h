@@ -2,7 +2,6 @@
 #define __HEADER__HANDLE
 
 #include <assert.h>
-#include <malloc.h>
 
 #include "grid.h"                               
 
@@ -1014,13 +1013,6 @@ template < class A > class Listwalkptr {
     Listwalk < A > & operator [] (int ) { return * walk ; }
     const Listwalk < A > & operator [] (int ) const { return * walk ; }
 } ;
-
-void get_memory(struct mallinfo &old_info);
-void get_memory_diff(struct mallinfo &old_info);
-void write_memory(ostream &out,char *header);
-void write_memory(ostream &out,char *header,struct mallinfo &old_info);
-void write_memory_diff(ostream &out,char *header,struct mallinfo &old_info);
-
 
 //////////////////////////////////////////////////////////
 //
