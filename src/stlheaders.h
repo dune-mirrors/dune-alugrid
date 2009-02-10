@@ -7,13 +7,14 @@
 // the system header and then include the original BernhardSchuppGrid
 // sources within the namespace defined in bsinclude.hh
 
-#include <ulimit.h>
-#include <cassert>
-#include <cstdio>
 #include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cstdio>
 #include <cmath>
 #include <climits>
 #include <ctime>
+#include <ulimit.h>
 
 // headers for getrusage(2)
 #include <sys/resource.h>
