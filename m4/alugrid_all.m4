@@ -10,33 +10,37 @@ dnl check for programs
   AC_REQUIRE([AC_PROG_LN_S])
   AC_REQUIRE([AC_PROG_MAKE_SET])
   AC_REQUIRE([AC_PROG_RANLIB])
+
+
+dnl disable F77 support (only C++ and C (for METIS) is needed)
+  m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
   AC_REQUIRE([AC_PROG_LIBTOOL])
 
-dnl checks for header files.
-  AC_REQUIRE([AC_HEADER_STDC])
-
-  AC_CHECK_HEADERS([malloc.h string.h])
-
 dnl checks for typedefs, structures, and compiler characteristics.
-  AC_REQUIRE([AC_C_CONST])
-  AC_REQUIRE([AC_C_INLINE])
   AC_REQUIRE([AC_TYPE_SIZE_T])
   AC_REQUIRE([AC_STRUCT_TM])
 
+dnl C header files 
+  AC_REQUIRE([AC_HEADER_STDC])
+
 dnl check for library functions
-  AC_REQUIRE([AC_FUNC_MALLOC])
   AC_LANG_PUSH([C++])
+
+dnl checks for header files.
+  AC_CHECK_HEADERS([iostream stack map])
+
+  AC_REQUIRE([AC_FUNC_MALLOC])
   AC_CHECK_LIB([m], [pow])
   AC_CHECK_FUNCS([sqrt strchr])
-  AC_LANG_POP
+  AC_LANG_POP([C++])
 
 dnl check all components
   AC_REQUIRE([ALUGRID_SERIAL_PARALLEL])
   AC_REQUIRE([ALUGRID_PATH_METIS])
-#  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
+dnl  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
   AC_REQUIRE([ALUGRID_PATH_PARTY])
 
-  # convenience-variables if every found package should be used
+dnl convenience-variables if every found package should be used
   AC_SUBST(ALL_PKG_LIBS, "$LIBS $ALUGRID_PKG_LIBS")
   AC_SUBST(ALL_PKG_LDFLAGS, "$LDFLAGS $ALUGRID_PKG_LDFLAGS")
   AC_SUBST(ALL_PKG_CPPFLAGS, "$CPPFLAGS $ALUGRID_PKG_CPPFLAGS")

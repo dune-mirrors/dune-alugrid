@@ -1,8 +1,6 @@
 # searches for PARTY header and lib 
 
 AC_DEFUN([ALUGRID_PATH_PARTY],[
-  AC_REQUIRE([AC_PROG_CC])
-
   AC_ARG_WITH(party,
     AC_HELP_STRING([--with-party=PATH],[directory with PARTY (version >= 1.1)  inside]))
 
@@ -80,7 +78,7 @@ AC_TRY_COMPILE([#include <party_lib.h>
                [HAVE_PARTY="0"
                AC_MSG_WARN("PARTY lib was build with VW != float -- check PARTY lib header and recompile PARTY lib!")
               ])
-AC_LANG_POP([C])
+AC_LANG_POP([C++])
 fi
 
 LDFLAGS=$REM_LDFLAGS
