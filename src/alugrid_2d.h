@@ -1,14 +1,12 @@
 #ifndef __ALUGRID_2D_H_INCLUDED__
 #define __ALUGRID_2D_H_INCLUDED__
 
-#define _ANSI_HEADER
 // include all headers 
 #include "stlheaders.h"
 
 #include "indexstack.h"
 
 namespace ALUGridSpace { 
-#define _ANSI_HEADER
 
 #include "alu2d/grid.h"
 #include "alu2d/triang.h"
@@ -19,5 +17,5 @@ namespace ALUGridSpace {
 typedef AdaptRestrictProlong2d AdaptRestrictProlong2dType;
 
 }
-#undef _ANSI_HEADER
+
 #endif

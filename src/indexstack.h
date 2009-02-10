@@ -2,19 +2,14 @@
 #ifndef ALUGRIDINDEXSTACK_H_INCLUDED
 #define ALUGRIDINDEXSTACK_H_INCLUDED
 
-#include <assert.h>
-
 namespace ALUGridSpace {
+
+// use standard namespace 
+using namespace std; 
   
 // using namespace std has always to be called inside the namespace
 // ALUGridSpace 
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <stack>
-#else
-  #include <stack.h>
-#endif
-  
+
 template<class T, int length>
 class ALUGridFiniteStack
 {

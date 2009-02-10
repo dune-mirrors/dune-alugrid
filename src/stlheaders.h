@@ -9,16 +9,19 @@
 
 #include <ulimit.h>
 #include <cassert>
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
+#include <cstdio>
+#include <cstdlib>
 #include <cmath>
-#include <limits.h>
-#include <time.h>
+#include <climits>
+#include <ctime>
+
 // headers for getrusage(2)
 #include <sys/resource.h>
+#include <sys/types.h>
 
+// header for XDR 
 #include <rpc/rpc.h>
+#include <rpc/xdr.h>
 
 #include <memory>
 #include <iostream>
@@ -26,6 +29,7 @@
 #include <vector>
 #include <utility>
 #include <functional>
+#include <iterator>
 #include <algorithm>
 #include <list>
 #include <iomanip>

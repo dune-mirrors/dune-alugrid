@@ -2,12 +2,6 @@
 #ifndef GITTER_DUNE_PLL_IMPL_H_INCLUDED
 #define GITTER_DUNE_PLL_IMPL_H_INCLUDED
 
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <numeric>
-#else
-#endif
-
 #include "gitter_dune_impl.h"
  
 #include "gitter_pll_impl.h"

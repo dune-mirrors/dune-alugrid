@@ -2,25 +2,6 @@
 #ifndef GITTER_DUNE_PLL_MGB_CC_INCLUDED
 #define GITTER_DUNE_PLL_MGB_CC_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-  
-#include <assert.h>
-#include <time.h>
-#include <stdio.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <iomanip>
-  #include <algorithm>
-#else
-  #include <iostream.h>
-  #include <iomanip.h>
-  #include <algo.h>
-#endif
-
 #include "serialize.h"
 #include "gitter_mgb.h"
 

@@ -5,7 +5,6 @@
 // needs to be defined before all headers are included 
 //#define __USE_INTERNAL_FACES__
 
-
 // the message passing interface (MPI) headers 
 #include <mpi.h>
 
@@ -30,5 +29,4 @@ namespace ALUGridSpace {
 
 }
 
-#undef _ANSI_HEADER
 #endif

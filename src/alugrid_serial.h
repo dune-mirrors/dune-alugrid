@@ -1,8 +1,6 @@
 #ifndef __ALUGRID_SERIAL_H_INCLUDED__
 #define __ALUGRID_SERIAL_H_INCLUDED__
 
-#define _ANSI_HEADER
-
 // toggle ALUGRID alloc at once during refinement 
 //#define USE_MALLOC_AT_ONCE 
 
@@ -78,7 +76,6 @@ struct GatherScatter
 };
 typedef GatherScatter GatherScatterType;
 
-#include "serial/alloca.h"
 #include "serial/mapp_cube_3d.h"
 #include "serial/mapp_tetra_3d.h"
 #include "serial/gitter_hexa_top.h"
