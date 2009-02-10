@@ -7,9 +7,10 @@
 #warning -- Compiling ALUGrid code in debug mode!!! Use -DNDEBUG to get more optimized code!!!
 #endif
 
-#define _ANSI_HEADER 
-
 namespace ALUGridSpace {
+
+// the code needs this 
+using namespace std; 
 
 // bsgrid original sources 
 #include "serial/gitter_geo.cc" 
@@ -25,5 +26,4 @@ namespace ALUGridSpace {
 
 } //end namespace 
 
-#undef _ANSI_HEADER 
 #endif

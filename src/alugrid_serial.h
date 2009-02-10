@@ -19,6 +19,9 @@
 
 namespace ALUGridSpace {
 
+// the code needs this 
+using namespace std;   
+
 typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
 struct GatherScatter;
