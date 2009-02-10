@@ -2,21 +2,6 @@
 #ifndef LOCK_H_INCLUDED
 #define LOCK_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-#else
-  #include <iostream.h>
-#endif
-
 	// Einfache Klasse, die w"ahrend ihrer Lebnsdauer ein
 	// Lockfile mit einem vorgegebenen Namen (Pfad) h"alt.
 

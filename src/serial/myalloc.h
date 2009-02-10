@@ -6,19 +6,6 @@
 
 #ifndef DONT_USE_ALUGRID_ALLOC 
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <memory>      // Def. von size_t, malloc (), free ()
-  #include <cassert>
-#else
-  #include <memory.h>    // Def. von size_t, malloc (), free ()
-  #include <assert.h>
-#endif
-
 class MyAlloc {
   // max number of storable items per stack 
   static const long MAX_HOLD_ADD ;

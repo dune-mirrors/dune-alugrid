@@ -4,14 +4,6 @@
 #ifndef SERIALIZE_H_INCLUDED
 #define SERIALIZE_H_INCLUDED
 
-#include <stdio.h>
-#include <stdlib.h>
-
-using namespace std;
-#include <iomanip>
-#include <sstream>
-#include <utility>
-
   //   Die 'Serializable' Schnittstelle soll eine Objektserialisation er-
   //   m"oglichen, die etwas der in java vorgeschlagenen Situation "ahnelt,
   //   allerdings aus technischen Gr"unden erheblich primitiver ist.

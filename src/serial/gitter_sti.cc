@@ -4,25 +4,6 @@
 #ifndef GITTER_STI_CC_INCLUDED
 #define GITTER_STI_CC_INCLUDED
 
-
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <stdlib.h>
-#include <assert.h>
-#include <time.h>
-#include <math.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <fstream>
-#else
-  #include <iostream.h>
-  #include <fstream.h>
-#endif
-
 #include "lock.h"
 #include "gitter_sti.h"
 #include "walk.h"

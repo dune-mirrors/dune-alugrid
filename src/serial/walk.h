@@ -4,23 +4,6 @@
 #ifndef WALK_H_INCLUDED
 #define WALK_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <functional>
-  #include <list>
-  #include <vector>
-#else
-  #include <function.h>
-  #include <list.h>
-  #include <vector.h>
-#endif
-
 #include "myalloc.h"
 #include "gitter_sti.h"
 

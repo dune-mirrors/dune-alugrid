@@ -4,33 +4,9 @@
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
-#ifdef IBM_XLC
-#define _ANSI_HEADER
-#endif
-
-#include <cassert>
-
-#ifdef _ANSI_HEADER
-using namespace std;
-#include <utility>
-#include <iostream>
-#include <list>
-
-#include <sstream>
 // typdef these stream because this code uses a lot strstream 
 typedef stringbuf     strstreambuf_t ; 
 typedef stringstream  strstream_t;
-
-#else
-#include <pair.h>
-#include <iostream.h>
-#include <list.h>
-#include <strstream.h>
-
-// old types of streams 
-typedef strstreambuf strstreambuf_t ; 
-typedef strstream    strstream_t;
-#endif
 
 #include "myalloc.h"
 #include "parallel.h"

@@ -5,27 +5,6 @@
 #ifndef GITTER_MGB_H_INCLUDED
 #define GITTER_MGB_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <vector>
-  #include <functional>
-  #include <utility>
-  #include <map>
-  #include <algorithm>
-#else
-  #include <vector.h>
-  #include <function.h>
-  #include <pair.h>
-  #include <map.h>
-  #include <algo.h>
-#endif
-
 #include "key.h"
 #include "gitter_sti.h"
 #include "ghost_info.h"

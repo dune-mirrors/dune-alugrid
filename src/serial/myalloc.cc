@@ -1,31 +1,5 @@
 #ifndef DONT_USE_ALUGRID_ALLOC
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <ulimit.h>
-
-#include <stdio.h>
-#include <malloc.h>
-#include <stdlib.h>
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <functional>
-  #include <deque>
-  #include <stack>
-  #include <map>
-#else
-  #include <iostream.h>
-  #include <function.h>
-  #include <deque.h>
-  #include <stack.h>
-  #include <map.h>
-#endif
-
 #include "myalloc.h"
 
 const long   MyAlloc :: MAX_HOLD_ADD  = 40000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert

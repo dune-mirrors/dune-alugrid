@@ -4,8 +4,6 @@
 #ifndef GITTER_TETRATOP_H_INCLUDED
 #define GITTER_TETRATOP_H_INCLUDED
 
-#include <limits.h>
-
 #include "gitter_sti.h"
 #include "gitter_hexa_top.h"
 

@@ -1,21 +1,9 @@
 #ifndef __XDRCLASS_INCLUDED__
 #define __XDRCLASS_INCLUDED__
 
-#include <rpc/rpc.h>
-#include <rpc/xdr.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-
-#ifdef IBM_XLC
-  typedef char  xdrbuff_t;
-  typedef char  xdraddr_t;
-  typedef int   xdrsize_t;
-#else
-  typedef void  xdrbuff_t;
-  typedef void  xdraddr_t;
-  typedef u_int xdrsize_t;
-#endif
+typedef void  xdrbuff_t;
+typedef void  xdraddr_t;
+typedef u_int xdrsize_t;
 
 int read_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);
 int write_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);

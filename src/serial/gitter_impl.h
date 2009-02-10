@@ -4,21 +4,6 @@
 #ifndef GITTER_IMPL_H_INCLUDED
 #define GITTER_IMPL_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <fstream>
-  #include <vector>
-  #include <utility>
-#else
-  #include <fstream.h>
-  #include <vector.h>
-  #include <pair.h>
-#endif
-
 #include "gitter_sti.h"
 
 #include "mapp_tetra_3d.h"  

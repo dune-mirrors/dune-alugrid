@@ -1,31 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
 // modifications for Dune Interface 
 // (c) Robert Kloefkorn 2004 - 2005 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <assert.h>
-#include <time.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <sstream>
-  #include <iterator>
-  #include <vector>
-  #include <utility>
-  #include <set>
-  #include <map>
-  #include <algorithm>
-#else
-  #include <strstream.h>
-  #include <iterator.h>
-  #include <vector.h>
-  #include <pair.h>
-  #include <set.h>
-  #include <map.h>
-  #include <algo.h>
-#endif
 
 #include "gitter_sti.h"
 #include "gitter_mgb.h"
