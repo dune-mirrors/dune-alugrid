@@ -1,24 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <sstream>
-  // typdef these stream because this code uses a lot strstream
-  typedef basic_stringbuf<char>  strstreambuf_t ;
-#else 
-  #include <iostream.h>
-  #include <strstream.h>
-#endif
+// typdef these stream because this code uses a lot strstream
+typedef basic_stringbuf<char>  strstreambuf_t ;
 
 #include "grid.h"
 #include "triang.h"
 #include "handle.h"
-
-
-//static const double EPS=1e-8;
 
 bool Hmesh :: ascireadtriang(const char *filename,
            double& time, unsigned long int& nbr) 

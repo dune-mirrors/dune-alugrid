@@ -1,4 +1,3 @@
-
 #ifndef __HEADER__GRID
 #define __HEADER__GRID
 
@@ -23,23 +22,6 @@
 //   class Bndel : public Thinelement, protected Refco
 // #end(header)
 ***************************************************/
-
-#include <stdio.h>
-
-#include <stdlib.h>
-#include <assert.h>
-#include <cmath>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <vector>
-  #include <fstream>
-  #include <iostream>
-#else
-  #include <vector.h>
-  #include <fstream.h>
-  #include <iostream.h>
-#endif
 
 #include "../indexstack.h"
 

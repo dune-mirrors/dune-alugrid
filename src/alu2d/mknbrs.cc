@@ -1,24 +1,3 @@
-
-static volatile char RCSId_mknbrs_cc [] = "$Id$";
-
-#include <time.h>
-
-// ben"otigt offensichtlich die STL
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iterator>
-  #include <algorithm>
-  #include <map>
-  #include <vector>
-#else
-  #include <iterator.h>
-  #include <algo.h>
-  #include <map.h>
-  #include <multimap.h>
-  #include <vector.h>
-#endif
-
 #include "grid.h"
 #include "handle.h"
 

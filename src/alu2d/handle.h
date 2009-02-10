@@ -1,8 +1,6 @@
 #ifndef __HEADER__HANDLE
 #define __HEADER__HANDLE
 
-#include <assert.h>
-
 #include "grid.h"                               
 
 // is defined in indexstack.h 

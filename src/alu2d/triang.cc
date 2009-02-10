@@ -65,20 +65,6 @@ extern int g_argc;
 // #end(header)
 // ***************************************************
 
-#include <stdio.h>	//  sprintf()
-#include <stdlib.h>	//  NULL
-#include <assert.h>	
-#include <math.h>
-
-#ifdef _ANSI_HEADER
-using namespace std;
-#include <iostream>	//  ostream
-#include <fstream>
-#else
-#include <iostream.h>	//  ostream
-#include <fstream.h>
-#endif
-
 #include "grid.h"
 #include "triang.h"
 #include "handle.h"

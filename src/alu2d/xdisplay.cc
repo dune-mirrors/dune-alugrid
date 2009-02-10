@@ -1,6 +1,4 @@
 
-static volatile char RCSId_xdisplay_cc [] = "$Id$";
-
 // ***************************************************
 // #begin(header)
 // #filename:
@@ -14,12 +12,7 @@ static volatile char RCSId_xdisplay_cc [] = "$Id$";
 // #end(header)
 // ***************************************************
 
-#include <stdio.h>	//  sprintf()
-
 #include "grid.h"
-
-// needed for new Silicon-CC
-#include <string.h>
 
 // #include "xdisplay.h"
 

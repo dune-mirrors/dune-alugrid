@@ -1,22 +1,6 @@
 #ifndef __HEADER__VMMAP
 #define __HEADER__VMMAP
 
-static volatile char RCSId_vmmap_h [] = "$Id$";
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iterator>
-  #include <algorithm>
-  #include <map>
-  #include <vector>
-#else
-  #include <iterator.h>
-  #include <algo.h>
-  #include <map.h>
-  #include <multimap.h>
-  #include <vector.h>
-#endif
-
 class Multivertexadapter {
 
   typedef struct value {

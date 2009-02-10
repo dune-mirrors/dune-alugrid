@@ -1,19 +1,7 @@
-static volatile char RCSId_vmmap_cc [] = "$Id$";
-
 // +----------------------------------------------------------------------------+
 // |	ParGiz Software Project :: MicroGrid 3.0 ++ :: 				|
 // |	Na endlich :-) 								|
 // +----------------------------------------------------------------------------+
-
-#include <stdlib.h>
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-#else
-  #include <iostream.h>
-#endif
 
 #include "grid.h"
 #include "handle.h"

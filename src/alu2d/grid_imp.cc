@@ -1,29 +1,9 @@
 #ifndef ALU2D_GRID_IMP_CC
 #define ALU2D_GRID_IMP_CC
 
-//#include <time.h>
-//#include <stdio.h>	//  sprintf()
-//#include <stdlib.h>	//  NULL
-//#include <assert.h>	
-//#include <math.h> 
-
-//#ifdef _ANSI_HEADER
-//  using namespace std;
-//  #include <iostream>	//  ostream
-//  #include <fstream.h> 
-//#else
-//  #include <iostream.h>	//  ostream
-//  #include <fstream.h> 
-//#endif
-
-//#include "grid.h"
-//#include "triang.h"
 #include "handle.h"
-//#include "vmmap.h"
-//#include "vtx_btree.h"
 
 static const double EPS = 1e-8;
-    
 
 // ***************************************************
 // #begin(method)

@@ -1,13 +1,3 @@
-#include <stdlib.h>
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-#else
-  #include <iostream.h>
-#endif
-
 #include "grid.h"
 #include "handle.h"
 #include "triang.h"
