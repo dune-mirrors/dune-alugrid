@@ -68,7 +68,7 @@ fi
 LDFLAGS=$REM_LDFLAGS
 
 # pop default language 
-AC_LANG_POP 
+AC_LANG_POP([C])
 
 ## end of parmetis check (--without wasn't set)
 fi
