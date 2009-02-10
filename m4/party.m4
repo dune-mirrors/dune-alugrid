@@ -80,7 +80,7 @@ AC_TRY_COMPILE([#include <party_lib.h>
                [HAVE_PARTY="0"
                AC_MSG_WARN("PARTY lib was build with VW != float -- check PARTY lib header and recompile PARTY lib!")
               ])
-AC_LANG_POP
+AC_LANG_POP([C])
 fi
 
 LDFLAGS=$REM_LDFLAGS
