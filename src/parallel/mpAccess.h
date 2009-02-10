@@ -2,27 +2,6 @@
 #ifndef MPACCESS_H_INCLUDED
 #define MPACCESS_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <vector>
-  #include <functional>
-  #include <set>
-  #include <map>
-#else
-  #include <iostream.h>
-  #include <vector.h>
-  #include <function.h>
-  #include <set.h>
-  #include <map.h>
-#endif
-
 #include "serialize.h"
 
 class MpAccessGlobal {

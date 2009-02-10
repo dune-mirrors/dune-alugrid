@@ -4,34 +4,6 @@
 #ifndef _GITTER_PLL_STI_CC_
 #define _GITTER_PLL_STI_CC_
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <assert.h>
-#include <time.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <malloc.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <fstream>
-  #include <sstream>
-  #include <iterator>
-  #include <functional>
-  #include <algorithm>
-  #include <numeric>
-#else
-  #include <iostream.h>
-  #include <fstream.h>
-  #include <strstream.h>
-  #include <iterator.h>
-  #include <function.h>
-  #include <algo.h>
-#endif
-
 #include "gitter_pll_sti.h"
 #include "walk.h"
 

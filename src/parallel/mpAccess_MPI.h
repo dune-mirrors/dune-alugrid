@@ -2,24 +2,6 @@
 #ifndef MPACCESS_MPI_H_INCLUDED
 #define MPACCESS_MPI_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <assert.h>
-#include <mpi.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <vector>
-  #include <functional>
-#else
-  #include <iostream.h>
-  #include <vector.h>
-  #include <function.h>
-#endif
-
 #include "mpAccess.h"
 
 class MpAccessMPI : public MpAccessLocal 

@@ -1,16 +1,4 @@
 // (c) bernhard schupp 1997 - 1998
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <functional>
-  #include <algorithm>
-#else
-  #include <function.h>
-  #include <algo.h>
-#endif
 
 #include "mpAccess.h"
 

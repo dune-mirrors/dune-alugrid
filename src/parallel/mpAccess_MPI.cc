@@ -1,19 +1,4 @@
 // (c) bernhard schupp 1997 - 1998
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <stdio.h>
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <utility>
-  #include <algorithm>
-  #include <iterator>
-#else
-  #include <pair.h>
-  #include <algo.h>
-  #include <iterator.h>
-#endif
 
 #include "mpAccess_MPI.h"
 

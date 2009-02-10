@@ -2,21 +2,6 @@
 #ifndef GITTER_PLL_STI_H_INCLUDED
 #define GITTER_PLL_STI_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <utility>
-  #include <set>
-  #include <map>
-#else
-  #include <pair.h>
-  #include <set.h>
-  #include <map.h>
-#endif
-
 #include "mpAccess.h"
 #include "gitter_sti.h"
 #include "gitter_pll_ldb.h"

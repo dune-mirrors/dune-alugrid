@@ -6,9 +6,6 @@
 #ifndef METIS_H_INCLUDED
 #define METIS_H_INCLUDED
 
-using namespace std;
-#include <iostream>
-
 typedef int idxtype ;
 
 void METIS_PartGraphKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *);

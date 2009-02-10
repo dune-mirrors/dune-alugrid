@@ -9,7 +9,6 @@
 #warning  -- Compiling parallel version without METIS !!!
 
 using namespace std;
-#include <iostream>
 
 static const char metmess [] = 	"**INFO Due to license reasons the library METIS is\n"
 				"       not part of the ALUGrid library distribution. \n"

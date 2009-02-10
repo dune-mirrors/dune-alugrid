@@ -6,8 +6,7 @@
 #ifndef PARMETIS_C_INCLUDED
 #define PARMETIS_C_INCLUDED
 
-using namespace std;
-#include <iostream>
+using namespace std; 
 
 static const char metmess [] = 	"**INFO Due to license reasons the library METIS is\n"
 				"       not part of the ALUGrid library distribution. \n"

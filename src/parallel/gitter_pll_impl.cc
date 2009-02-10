@@ -1,28 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
 // modifications for Dune Interface 
 // (c) Robert Kloefkorn 2004 - 2005 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <malloc.h>
-#include <time.h>
-#include <stdlib.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <sstream>
-  #include <set>
-  #include <map>
-  #include <functional>
-  #include <algorithm>
-#else
-  #include <strstream.h>
-  #include <set.h>
-  #include <map.h>
-  #include <function.h>
-  #include <algo.h>
-#endif
 
 #include "mapp_cube_3d.h"
 #include "mapp_tetra_3d.h"

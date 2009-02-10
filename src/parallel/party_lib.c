@@ -4,16 +4,7 @@
 
 #warning  -- Compiling parallel version without PARTY_LIB !!! 
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-#else
-  #include <iostream.h>
-#endif
+using namespace std; 
 
 static const char parmess [] = 	"**INFO Due to license reasons the library PARTY is\n"
 				"       not part of the ALUGrid library distribution. \n"

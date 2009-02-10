@@ -1,31 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
 // modifications for Dune Interface 
 // (c) Robert Kloefkorn 2004 - 2005 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <time.h>
-#include <assert.h>
-#include <math.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <iomanip>
-  #include <utility>
-  #include <map>
-  #include <functional>
-  #include <algorithm>
-  #include <numeric>
-#else
-  #include <iostream.h>
-  #include <iomanip.h>
-  #include <pair.h>
-  #include <map.h>
-  #include <function.h>
-  #include <algo.h>
-#endif
 
 #ifdef _DUNE_NOT_USES_ALU3DGRID_
 #include "party_lib.h"

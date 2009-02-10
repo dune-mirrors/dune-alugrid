@@ -5,23 +5,6 @@
 #ifndef GITTER_PLL_IMPL_H_INCLUDED
 #define GITTER_PLL_IMPL_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <algorithm>
-  #include <vector>
-  #include <sstream>
-  #include <set>
-#else
-  #include <algo.h>
-  #include <vector.h>
-  #include <strstream.h>
-  #include <set.h>
-#endif
-
 #include "myalloc.h"
 #include "gitter_impl.h"
 #include "walk.h"

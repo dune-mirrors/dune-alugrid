@@ -28,17 +28,6 @@
 #ifndef PARTY_LIB_H_INCLUDED
 #define PARTY_LIB_H_INCLUDED
 
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-#else
-  #include <iostream.h>
-#endif
-
 int global_lin (int,float *,int,float,int *);
 int global_sca (int,float *,int,float,int *);
 int global_ran (int,float *,int,float,int *);

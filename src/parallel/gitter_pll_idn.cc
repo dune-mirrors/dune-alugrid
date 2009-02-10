@@ -1,22 +1,4 @@
 // (c) bernhard schupp 1997 - 1998
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <assert.h>
-#include <time.h>
-#include <stdio.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <iostream>
-  #include <functional>
-  #include <algorithm>
-#else
-  #include <iostream.h>
-  #include <function.h>
-  #include <algo.h>
-#endif
 
 #include "gitter_pll_sti.h"
 

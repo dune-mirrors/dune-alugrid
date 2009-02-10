@@ -2,23 +2,6 @@
 #ifndef GITTER_PLL_LDB_H_INCLUDED
 #define GITTER_PLL_LDB_H_INCLUDED
  
-#ifdef IBM_XLC
-  #define _ANSI_HEADER
-#endif
-
-#include <assert.h>
-
-#ifdef _ANSI_HEADER
-  using namespace std;
-  #include <set>
-  #include <map>
-  #include <iterator>
-#else
-  #include <set.h>
-  #include <map.h>
-  #include <iterator.h>
-#endif
-
 #include "key.h"
 #include "mpAccess.h"
 
