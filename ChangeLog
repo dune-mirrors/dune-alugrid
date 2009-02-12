@@ -1,135 +1,1692 @@
-Changed from version 1.12 --> 1.13
+Changed from version 1.13 --> 1.14
 
 changes:
-- is conform with new C++ standard (i.e. g++-4.3.2 -std=c++0x)
+- code cleanup to compile on Mac OS X 
 
+Index: serial/alloca.h
+===================================================================
+--- serial/alloca.h	(revision 1042)
++++ serial/alloca.h	(revision 1062)
+@@ -1 +0,0 @@
+-#include <malloc.h>
+Index: serial/myalloc.cc
+===================================================================
+--- serial/myalloc.cc	(revision 1042)
++++ serial/myalloc.cc	(revision 1062)
+@@ -1,31 +1,5 @@
+ #ifndef DONT_USE_ALUGRID_ALLOC
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <ulimit.h>
+-
+-#include <stdio.h>
+-#include <malloc.h>
+-#include <stdlib.h>
+-#include <assert.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <functional>
+-  #include <deque>
+-  #include <stack>
+-  #include <map>
+-#else
+-  #include <iostream.h>
+-  #include <function.h>
+-  #include <deque.h>
+-  #include <stack.h>
+-  #include <map.h>
+-#endif
+-
+ #include "myalloc.h"
+ 
+ const long   MyAlloc :: MAX_HOLD_ADD  = 40000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
+Index: serial/walk.h
+===================================================================
+--- serial/walk.h	(revision 1042)
++++ serial/walk.h	(revision 1062)
+@@ -4,23 +4,6 @@
+ #ifndef WALK_H_INCLUDED
+ #define WALK_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <assert.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <functional>
+-  #include <list>
+-  #include <vector>
+-#else
+-  #include <function.h>
+-  #include <list.h>
+-  #include <vector.h>
+-#endif
+-
+ #include "myalloc.h"
+ #include "gitter_sti.h"
+ 
+Index: serial/myalloc.h
+===================================================================
+--- serial/myalloc.h	(revision 1042)
++++ serial/myalloc.h	(revision 1062)
+@@ -6,19 +6,6 @@
+ 
+ #ifndef DONT_USE_ALUGRID_ALLOC 
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <memory>      // Def. von size_t, malloc (), free ()
+-  #include <cassert>
+-#else
+-  #include <memory.h>    // Def. von size_t, malloc (), free ()
+-  #include <assert.h>
+-#endif
+-
+ class MyAlloc {
+   // max number of storable items per stack 
+   static const long MAX_HOLD_ADD ;
+Index: serial/Makefile.am.include
+===================================================================
+--- serial/Makefile.am.include	(revision 1042)
++++ serial/Makefile.am.include	(revision 1062)
+@@ -1,5 +1,5 @@
+ serialdirec = serial
+-serialhdrs = $(serialdirec)/alloca.h $(serialdirec)/gitter_tetra_top.h $(serialdirec)/mapp_cube_3d.h $(serialdirec)/serialize.h\
++serialhdrs = $(serialdirec)/gitter_tetra_top.h $(serialdirec)/mapp_cube_3d.h $(serialdirec)/serialize.h\
+ 	$(serialdirec)/gitter_hexa_top.h $(serialdirec)/headers.h $(serialdirec)/mapp_tetra_3d_ext.h $(serialdirec)/walk.h\
+ 	$(serialdirec)/gitter_impl.h $(serialdirec)/mapp_tetra_3d.h $(serialdirec)/xdrclass.h\
+ 	$(serialdirec)/gitter_mgb.h $(serialdirec)/key.h	$(serialdirec)/myalloc.h\
+Index: serial/gitter_sti.cc
+===================================================================
+--- serial/gitter_sti.cc	(revision 1042)
++++ serial/gitter_sti.cc	(revision 1062)
+@@ -4,25 +4,6 @@
+ #ifndef GITTER_STI_CC_INCLUDED
+ #define GITTER_STI_CC_INCLUDED
+ 
+-
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <stdlib.h>
+-#include <assert.h>
+-#include <time.h>
+-#include <math.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <fstream>
+-#else
+-  #include <iostream.h>
+-  #include <fstream.h>
+-#endif
+-
+ #include "lock.h"
+ #include "gitter_sti.h"
+ #include "walk.h"
+Index: serial/gitter_sti.h
+===================================================================
+--- serial/gitter_sti.h	(revision 1042)
++++ serial/gitter_sti.h	(revision 1062)
+@@ -4,34 +4,10 @@
+ #ifndef GITTER_STI_H_INCLUDED
+ #define GITTER_STI_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-#define _ANSI_HEADER
+-#endif
+-
+-#include <cassert>
+-
+-#ifdef _ANSI_HEADER
+-using namespace std;
+-#include <utility>
+-#include <iostream>
+-#include <list>
+-
+-#include <sstream>
+ // typdef these stream because this code uses a lot strstream 
+ typedef stringbuf     strstreambuf_t ; 
+ typedef stringstream  strstream_t;
+ 
+-#else
+-#include <pair.h>
+-#include <iostream.h>
+-#include <list.h>
+-#include <strstream.h>
+-
+-// old types of streams 
+-typedef strstreambuf strstreambuf_t ; 
+-typedef strstream    strstream_t;
+-#endif
+-
+ #include "myalloc.h"
+ #include "parallel.h"
+ #include "xdrclass.h"
+Index: serial/gitter_tetra_top.h
+===================================================================
+--- serial/gitter_tetra_top.h	(revision 1042)
++++ serial/gitter_tetra_top.h	(revision 1062)
+@@ -4,8 +4,6 @@
+ #ifndef GITTER_TETRATOP_H_INCLUDED
+ #define GITTER_TETRATOP_H_INCLUDED
+ 
+-#include <limits.h>
+-
+ #include "gitter_sti.h"
+ #include "gitter_hexa_top.h"
+ 
 Index: serial/gitter_impl.h
 ===================================================================
---- serial/gitter_impl.h	(revision 1036)
-+++ serial/gitter_impl.h	(revision 1041)
-@@ -85,7 +85,7 @@
-             // these methods are overloades just on HbndPll
-             virtual const ghostpair_STI & getGhost () const
-             { 
--              static ghostpair_STI p(0,-1); 
-+              static ghostpair_STI p( (helement_STI *)0, -1); 
-               return p;
-             }
+--- serial/gitter_impl.h	(revision 1042)
++++ serial/gitter_impl.h	(revision 1062)
+@@ -4,21 +4,6 @@
+ #ifndef GITTER_IMPL_H_INCLUDED
+ #define GITTER_IMPL_H_INCLUDED
  
-@@ -131,7 +131,7 @@
-             // these methods are overloades just on HbndPll
-             virtual const ghostpair_STI & getGhost () const 
-             { 
--              static ghostpair_STI p(0,-1); 
-+              static ghostpair_STI p( (helement_STI *)0, -1); 
-               return p;
-             }
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <fstream>
+-  #include <vector>
+-  #include <utility>
+-#else
+-  #include <fstream.h>
+-  #include <vector.h>
+-  #include <pair.h>
+-#endif
+-
+ #include "gitter_sti.h"
  
-Index: serial/ghost_elements.h
+ #include "mapp_tetra_3d.h"  
+Index: serial/gitter_mgb.cc
 ===================================================================
---- serial/ghost_elements.h	(revision 1036)
-+++ serial/ghost_elements.h	(revision 1041)
-@@ -183,7 +183,9 @@
-   MacroGhostTetra( BuilderIF & bi, 
-                    MacroGhostInfoTetra * allp, 
-                    const hface3_GEO * face) :
--    _mgb(bi) , _ghInfoPtr(allp) , _ghostPair(0,-1) 
-+    _mgb(bi), 
-+    _ghInfoPtr( allp ), 
-+    _ghostPair( (GhostElement_t *)0 , -1) 
-   { 
-     MacroGhostBuilder & mgb = _mgb;
-     MacroGhostInfoTetra& ghInfo = *_ghInfoPtr;
-@@ -240,7 +242,9 @@
-   //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
-   MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp, 
-       Gitter::Geometric::tetra_GEO * orig, double (&vec)[3] , double sign) :
--    _mgb(bi) , _ghInfoPtr(allp), _ghostPair(0,-1)
-+    _mgb(bi), 
-+    _ghInfoPtr(allp), 
-+    _ghostPair( (GhostElement_t *)0, -1)
-   {
-     MacroGhostInfoTetra& ghInfo = *_ghInfoPtr; 
+--- serial/gitter_mgb.cc	(revision 1042)
++++ serial/gitter_mgb.cc	(revision 1062)
+@@ -1,32 +1,7 @@
+ // (c) bernhard schupp 1997 - 1998
+ // modifications for Dune Interface 
+ // (c) Robert Kloefkorn 2004 - 2005 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
  
-@@ -318,7 +322,9 @@
- public:
-   // constructor 
-   MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * face) :
--    _mgb(bi) , _ghInfoPtr(allp) , _ghostPair(0,-1) 
-+    _mgb(bi), 
-+    _ghInfoPtr(allp), 
-+    _ghostPair( (GhostElement_t *)0 , -1) 
-   { 
-     MacroGhostBuilder & mgb = _mgb;
-     MacroGhostInfoHexa& ghInfo = *_ghInfoPtr;
-Index: duneinterface/gitter_dune_pll_impl.cc
-===================================================================
---- duneinterface/gitter_dune_pll_impl.cc	(revision 1036)
-+++ duneinterface/gitter_dune_pll_impl.cc	(revision 1041)
-@@ -781,7 +781,7 @@
- 
-   const bool containsElements = elementData.contains(3,0);
+-#include <assert.h>
+-#include <time.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <sstream>
+-  #include <iterator>
+-  #include <vector>
+-  #include <utility>
+-  #include <set>
+-  #include <map>
+-  #include <algorithm>
+-#else
+-  #include <strstream.h>
+-  #include <iterator.h>
+-  #include <vector.h>
+-  #include <pair.h>
+-  #include <set.h>
+-  #include <map.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "gitter_sti.h"
+ #include "gitter_mgb.h"
    
--  pair < ElementPllXIF_t *, int > bnd(0,-1);
-+  pair < ElementPllXIF_t *, int > bnd( ( ElementPllXIF_t * ) 0 , -1);
- 
-   // temporary object buffer  
-   for (iter->first () ; ! iter->done () ; iter->next ()) 
-@@ -927,7 +927,8 @@
-       if( interiorLeaf )
-       {
-         pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
--        pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > p (0,0);
-+        pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > 
-+          p ( (Gitter::helement_STI *) 0, (Gitter::hbndseg_STI *) 0);
- 
-         pll.first->getAttachedElement( p );
-         assert( p.first );
-Index: parallel/gitter_hexa_top_pll.h
+Index: serial/gitter_mgb.h
 ===================================================================
---- parallel/gitter_hexa_top_pll.h	(revision 1036)
-+++ parallel/gitter_hexa_top_pll.h	(revision 1041)
-@@ -167,7 +167,7 @@
+--- serial/gitter_mgb.h	(revision 1042)
++++ serial/gitter_mgb.h	(revision 1062)
+@@ -5,27 +5,6 @@
+ #ifndef GITTER_MGB_H_INCLUDED
+ #define GITTER_MGB_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <assert.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <vector>
+-  #include <functional>
+-  #include <utility>
+-  #include <map>
+-  #include <algorithm>
+-#else
+-  #include <vector.h>
+-  #include <function.h>
+-  #include <pair.h>
+-  #include <map.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "key.h"
+ #include "gitter_sti.h"
+ #include "ghost_info.h"
+Index: serial/xdrclass.h
+===================================================================
+--- serial/xdrclass.h	(revision 1042)
++++ serial/xdrclass.h	(revision 1062)
+@@ -1,22 +1,10 @@
+ #ifndef __XDRCLASS_INCLUDED__
+ #define __XDRCLASS_INCLUDED__
+ 
+-#include <rpc/rpc.h>
+-#include <rpc/xdr.h>
+-#include <stdlib.h>
+-#include <stdio.h>
+-#include <assert.h>
++typedef void  xdrbuff_t;
++typedef void  xdraddr_t;
++typedef u_int xdrsize_t;
+ 
+-#ifdef IBM_XLC
+-  typedef char  xdrbuff_t;
+-  typedef char  xdraddr_t;
+-  typedef int   xdrsize_t;
+-#else
+-  typedef void  xdrbuff_t;
+-  typedef void  xdraddr_t;
+-  typedef u_int xdrsize_t;
+-#endif
+-
+ int read_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);
+ int write_xdr_file(void *file, xdrbuff_t *buffer, xdrsize_t size);
+ 
+Index: serial/gitter_geo.cc
+===================================================================
+--- serial/gitter_geo.cc	(revision 1042)
++++ serial/gitter_geo.cc	(revision 1062)
+@@ -1,26 +1,6 @@
+ // (c) bernhard schupp, 1997 - 1998
+ // modification for the dune interface 
+ // (c) Robert Kloefkorn 2004 -- 2005 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <stdlib.h>
+-#include <assert.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <fstream>
+-  #include <vector>
+-  #include <map>
+-#else
+-  #include <iostream.h>
+-  #include <fstream.h>
+-  #include <vector.h>
+-  #include <map.h>
+-#endif
+-
+ #include "mapp_cube_3d.h"
+ #include "mapp_tetra_3d.h"
+ #include "gitter_sti.h"
+Index: serial/serialize.h
+===================================================================
+--- serial/serialize.h	(revision 1042)
++++ serial/serialize.h	(revision 1062)
+@@ -4,14 +4,6 @@
+ #ifndef SERIALIZE_H_INCLUDED
+ #define SERIALIZE_H_INCLUDED
+ 
+-#include <stdio.h>
+-#include <stdlib.h>
+-
+-using namespace std;
+-#include <iomanip>
+-#include <sstream>
+-#include <utility>
+-
+   //   Die 'Serializable' Schnittstelle soll eine Objektserialisation er-
+   //   m"oglichen, die etwas der in java vorgeschlagenen Situation "ahnelt,
+   //   allerdings aus technischen Gr"unden erheblich primitiver ist.
+Index: serial/lock.h
+===================================================================
+--- serial/lock.h	(revision 1042)
++++ serial/lock.h	(revision 1062)
+@@ -2,21 +2,6 @@
+ #ifndef LOCK_H_INCLUDED
+ #define LOCK_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <assert.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-#else
+-  #include <iostream.h>
+-#endif
+-
+ 	// Einfache Klasse, die w"ahrend ihrer Lebnsdauer ein
+ 	// Lockfile mit einem vorgegebenen Namen (Pfad) h"alt.
+ 
+Index: alugrid_2d.cc
+===================================================================
+--- alugrid_2d.cc	(revision 1042)
++++ alugrid_2d.cc	(revision 1062)
+@@ -9,7 +9,9 @@
+ 
+ namespace ALUGridSpace {
+ 
+-#define _ANSI_HEADER 
++// this is needed since the code does not used std :: 
++using namespace std; 
++
+ #include "alu2d/handle.cc"
+ #include "alu2d/triang.cc"
+ #include "alu2d/hdlrw.cc"
+@@ -17,8 +19,6 @@
+ #include "alu2d/vmmap.cc"
+ #include "alu2d/vtx_btree.cc"
+ 
+-#undef _ANSI_HEADER 
+-  
+ } //end namespace 
+ 
+ #endif
+Index: alugrid_2d.h
+===================================================================
+--- alugrid_2d.h	(revision 1042)
++++ alugrid_2d.h	(revision 1062)
+@@ -1,14 +1,12 @@
+ #ifndef __ALUGRID_2D_H_INCLUDED__
+ #define __ALUGRID_2D_H_INCLUDED__
+ 
+-#define _ANSI_HEADER
+ // include all headers 
+ #include "stlheaders.h"
+ 
+ #include "indexstack.h"
+ 
+ namespace ALUGridSpace { 
+-#define _ANSI_HEADER
+ 
+ #include "alu2d/grid.h"
+ #include "alu2d/triang.h"
+@@ -19,5 +17,5 @@
+ typedef AdaptRestrictProlong2d AdaptRestrictProlong2dType;
+ 
+ }
+-#undef _ANSI_HEADER
++
+ #endif
+Index: indexstack.h
+===================================================================
+--- indexstack.h	(revision 1042)
++++ indexstack.h	(revision 1062)
+@@ -2,19 +2,14 @@
+ #ifndef ALUGRIDINDEXSTACK_H_INCLUDED
+ #define ALUGRIDINDEXSTACK_H_INCLUDED
+ 
+-#include <assert.h>
+-
+ namespace ALUGridSpace {
++
++// use standard namespace 
++using namespace std; 
+   
+ // using namespace std has always to be called inside the namespace
+ // ALUGridSpace 
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <stack>
+-#else
+-  #include <stack.h>
+-#endif
+-  
++
+ template<class T, int length>
+ class ALUGridFiniteStack
+ {
+Index: stlheaders.h
+===================================================================
+--- stlheaders.h	(revision 1042)
++++ stlheaders.h	(revision 1062)
+@@ -7,18 +7,22 @@
+ // the system header and then include the original BernhardSchuppGrid
+ // sources within the namespace defined in bsinclude.hh
+ 
+-#include <ulimit.h>
++#include <cstdlib>
+ #include <cassert>
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <malloc.h>
++#include <cstring>
++#include <cstdio>
+ #include <cmath>
+-#include <limits.h>
+-#include <time.h>
++#include <climits>
++#include <ctime>
++#include <ulimit.h>
++
+ // headers for getrusage(2)
+ #include <sys/resource.h>
++#include <sys/types.h>
+ 
++// header for XDR 
+ #include <rpc/rpc.h>
++#include <rpc/xdr.h>
+ 
+ #include <memory>
+ #include <iostream>
+@@ -26,6 +30,7 @@
+ #include <vector>
+ #include <utility>
+ #include <functional>
++#include <iterator>
+ #include <algorithm>
+ #include <list>
+ #include <iomanip>
+Index: alu2d/main2d.cc
+===================================================================
+--- alu2d/main2d.cc	(revision 1042)
++++ alu2d/main2d.cc	(revision 1062)
+@@ -1,169 +0,0 @@
+-
+-static volatile char RCSId_main2d_cc [] = "$Id$";
+-
+-#include <time.h>
+-#include <math.h>
+-#include <string.h>
+-#include <alloca.h>
+-#include <stdlib.h>
+-#include <malloc.h>
+-#include "../indexstack.h"
+-using namespace ALUGridSpace;
+-
+-#include "grid.h"
+-#include "triang.h"
+-#include "handle.h"
+-#include "../alugrid_2d.h"
+-#include "handle.cc"
+-#ifndef EPS
+-  #define EPS 1e-12
+-#endif
+-
+-void draw_grid(int argc, char ** argv, Hmesh &hdl) {
+-  char header[500];
+-  Listwalkptr < Hmesh_basic::helement_t > walk(hdl) ;
+-  Listwalkptr < Hmesh_basic::hbndel_t > walkb(hdl) ;
+-  Listwalkptr < Vertex > walkv(hdl) ;
+-
+-  sprintf(header,"#elements: %d, #vertices: %d, #belements: %d"
+-                ,walk->size(),walkv->size(),walkb->size());
+-  cerr << "INDEXSETS:" << endl;
+-}
+-
+-char ** g_argv;
+-int g_argc;
+-int main(int argc, char ** argv, char ** envp)
+-{
+-g_argc=argc;
+-g_argv=argv;
+-
+-{ // Main program
+- 
+-  double t;
+-  long unsigned int n;
+-  //Hmesh hdl("triang.git"); 
+-  //Hmesh hdl("triang.git",Refco::quart); 
+-  for (int k=0;k<3;k++)
+-    Hmesh hdl("triang.git",1,Refco::quart); 
+-  //cout << "Grid 0" << endl;
+-  //draw_grid(argc,argv,hdl);
+-  /* refine macrogrid */
+-
+-  Hmesh hdl("triang.git",1,Refco::quart); 
+-  // Hmesh hdl("triang.git"); 
+-  draw_grid(argc,argv,hdl);
+-for (int k=0;k<1;k++) {
+-    for (int i=0;i<2;i++) //
+-  {
+-    {
+-      Listwalkptr < Hmesh_basic::helement_t > walk(hdl);
+-      for( walk->first() ; ! walk->done() ; walk->next()) {
+-	Element & tr = walk->getitem();
+-	tr.Refco_el::mark(Refco::ref);
+-      }
+-    }
+-    hdl.refine();
+-    //draw_grid(argc,argv,hdl);
+-  }
+-  //cout << "Grid 0" << endl;
+-  //draw_grid(argc,argv,hdl);
+-  for (int i=0;i<5;i++) // 3 
+-  {
+-    {
+-      Listwalkptr < Hmesh_basic::helement_t > walk(hdl);
+-      for( walk->first() ; ! walk->done() ; walk->next()) {
+-	Element & tr = walk->getitem();
+-	double bary[3]={1./3.,1./3.,1./3.};
+-	double p[2];
+-	tr.fromlocal(bary,p);
+-	p[0]+=0.6;
+-	p[1]-=0.366667;
+-	if (p[0]*p[0]+p[1]*p[1]<0.1)
+-	  tr.Refco_el::mark(Refco::ref);
+-      }
+-    }
+-    hdl.refine();
+-    draw_grid(argc,argv,hdl);
+-  }
+-  draw_grid(argc,argv,hdl);
+-  for (int i=0;i<2;i++) // 2 
+-  {
+-    {
+-      Listwalkptr < Hmesh_basic::helement_t > walk(hdl);
+-      for( walk->first() ; ! walk->done() ; walk->next()) {
+-	Element & tr = walk->getitem();
+-	double bary[3]={1./3.,1./3.,1./3.};
+-	double p[2];
+-	tr.fromlocal(bary,p);
+-	tr.Refco_el::mark(Refco::crs);
+-      }
+-    }
+-    hdl.coarse();
+-  } 
+-  draw_grid(argc,argv,hdl);
+-
+-  for (int i=0;i<3;i++) // 3
+-  {
+-    {
+-      Listwalkptr < Hmesh_basic::helement_t > walk(hdl);
+-      for( walk->first() ; ! walk->done() ; walk->next()) {
+-	Element & tr = walk->getitem();
+-	double bary[3]={1./3.,1./3.,1./3.};
+-	double p[2];
+-	tr.fromlocal(bary,p);
+-	p[0]+=0.6;
+-	p[1]-=0.366667;
+-	if (p[0]*p[0]+p[1]*p[1]<0.1)
+-	  tr.Refco_el::mark(Refco::ref);
+-      }
+-    }
+-    hdl.refine();
+-  }
+-  draw_grid(argc,argv,hdl);
+-  hdl.storeGrid("checkpoint",0,0);
+-  Hmesh hdl2("checkpoint"); 
+-  draw_grid(argc,argv,hdl2);
+-  if (k==2) {
+-  for (int i=0;i<2;i++) 
+-  {
+-    {
+-      Listwalkptr < Hmesh_basic::helement_t > walk(hdl);
+-      for( walk->first() ; ! walk->done() ; walk->next()) {
+-	Element & tr = walk->getitem();
+-	double bary[3]={1./3.,1./3.,1./3.};
+-	double p[2];
+-	tr.fromlocal(bary,p);
+-	p[0]+=0.6;
+-	p[1]-=0.366667;
+-	if (p[0]*p[0]+p[1]*p[1]<0.1)
+-	  tr.Refco_el::mark(Refco::ref);
+-      }
+-    }
+-    hdl.refine();
+-  }
+-  draw_grid(argc,argv,hdl);
+-  }
+-  for (int i=0;i<15;i++) 
+-  {
+-    {
+-      Listwalkptr < Hmesh_basic::helement_t > walk(hdl);
+-      for( walk->first() ; ! walk->done() ; walk->next()) {
+-	Element & tr = walk->getitem();
+-	double bary[3]={1./3.,1./3./1./3.};
+-	double p[2];
+-	tr.fromlocal(bary,p);
+-	tr.Refco_el::mark(Refco::crs);
+-      }
+-    }
+-    hdl.coarse();
+-  }
+-    
+-
+-  draw_grid(argc,argv,hdl);
+-  }
+-}
+-
+-  return 0;
+-}
+-
+-
+Index: alu2d/triang.git
+===================================================================
+--- alu2d/triang.git	(revision 1042)
++++ alu2d/triang.git	(revision 1062)
+@@ -1,33 +0,0 @@
+-10
+--1.0	0.233333
+--0.6	0.233333
+--0.6	0.366667
+-0.2	0.366667
+-1.0	0.366667
+-1.0	0.9
+-0.2	0.9
+--0.6	0.9
+--1.0	0.9
+--1.0	0.366667
+-
+-8
+-0	1	2
+-0	2	9
+-9	2	8
+-8	2	7
+-2	6	7
+-2	3	6
+-3	4	6
+-6	4	5
+-
+-10
+-4	0	1
+-7	1	2
+-7	2	3
+-7	3	4
+-2	4	5
+-7	5	6
+-7	6	7
+-7	7	8
+-1	8	9
+-1	9	0
+Index: alu2d/handle.cc
+===================================================================
+--- alu2d/handle.cc	(revision 1042)
++++ alu2d/handle.cc	(revision 1062)
+@@ -1,14 +1,3 @@
+-#include <stdlib.h>
+-#include <assert.h>
+-#include <malloc.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-#else
+-  #include <iostream.h>
+-#endif
+-
+ #include "grid.h"
+ #include "handle.h"
+ #include "triang.h"
+@@ -262,65 +251,3 @@
+   for (walk.first();walk.done();walk.next())
+     f(walk.getitem());
+ }
+-
+-void get_memory(struct mallinfo &old_info)
+-{
+-  old_info = mallinfo();
+-}
+-void get_memory_diff(struct mallinfo &old_info)
+-{
+-  struct mallinfo meminfo = mallinfo();
+-  old_info.arena -= meminfo.arena;
+-  old_info.ordblks -= meminfo.ordblks;
+-  old_info.smblks -= meminfo.smblks;
+-  old_info.hblks -= meminfo.hblks;
+-  old_info.hblkhd -= meminfo.hblkhd;
+-  old_info.usmblks -= meminfo.usmblks;
+-  old_info.fsmblks -= meminfo.fsmblks;
+-  old_info.uordblks -= meminfo.uordblks;
+-  old_info.fordblks -= meminfo.fordblks;
+-  old_info.keepcost -= meminfo.keepcost;
+-}
+-void write_memory(ostream &out,char *header)
+-{
+-  struct mallinfo meminfo = mallinfo();
+-  out << "*********************************" << endl
+-      << header << endl
+-      << "space in small blocks in use:    " << meminfo.usmblks << endl
+-      << "space in ordinary blocks in use: " << meminfo.uordblks << endl
+-      << "space in free small blocks:      " << meminfo.fsmblks << endl
+-      << "space in free ordinary blocks    " << meminfo.fordblks << endl
+-      << "*********************************" << endl;
+-}
+-void write_memory(ostream &out,char *header,struct mallinfo &old_info)
+-{
+-  old_info = mallinfo();
+-  out << "*********************************" << endl
+-      << header << " (difference)" << endl
+-      << "space in small blocks in use:    " << old_info.usmblks << endl
+-      << "space in ordinary blocks in use: " << old_info.uordblks << endl
+-      << "space in free small blocks:      " << old_info.fsmblks << endl
+-      << "space in free ordinary blocks    " << old_info.fordblks << endl
+-      << "*********************************" << endl;
+-}
+-void write_memory_diff(ostream &out,char *header,struct mallinfo &old_info)
+-{
+-  struct mallinfo meminfo = mallinfo();
+-  old_info.arena -= meminfo.arena;
+-  old_info.ordblks -= meminfo.ordblks;
+-  old_info.smblks -= meminfo.smblks;
+-  old_info.hblks -= meminfo.hblks;
+-  old_info.hblkhd -= meminfo.hblkhd;
+-  old_info.usmblks -= meminfo.usmblks;
+-  old_info.fsmblks -= meminfo.fsmblks;
+-  old_info.uordblks -= meminfo.uordblks;
+-  old_info.fordblks -= meminfo.fordblks;
+-  old_info.keepcost -= meminfo.keepcost;
+-  out << "*********************************" << endl
+-      << header << " (difference)" << endl
+-      << "space in small blocks in use:    " << old_info.usmblks << endl
+-      << "space in ordinary blocks in use: " << old_info.uordblks << endl
+-      << "space in free small blocks:      " << old_info.fsmblks << endl
+-      << "space in free ordinary blocks    " << old_info.fordblks << endl
+-      << "*********************************" << endl;
+-}
+Index: alu2d/mknbrs.cc
+===================================================================
+--- alu2d/mknbrs.cc	(revision 1042)
++++ alu2d/mknbrs.cc	(revision 1062)
+@@ -1,24 +1,3 @@
+-
+-static volatile char RCSId_mknbrs_cc [] = "$Id$";
+-
+-#include <time.h>
+-
+-// ben"otigt offensichtlich die STL
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iterator>
+-  #include <algorithm>
+-  #include <map>
+-  #include <vector>
+-#else
+-  #include <iterator.h>
+-  #include <algo.h>
+-  #include <map.h>
+-  #include <multimap.h>
+-  #include <vector.h>
+-#endif
+-
+ #include "grid.h"
+ #include "handle.h"
+ 
+Index: alu2d/xdisplay.cc
+===================================================================
+--- alu2d/xdisplay.cc	(revision 1042)
++++ alu2d/xdisplay.cc	(revision 1062)
+@@ -1,6 +1,4 @@
+ 
+-static volatile char RCSId_xdisplay_cc [] = "$Id$";
+-
+ // ***************************************************
+ // #begin(header)
+ // #filename:
+@@ -14,13 +12,8 @@
+ // #end(header)
+ // ***************************************************
+ 
+-#include <stdio.h>	//  sprintf()
+-
+ #include "grid.h"
+ 
+-// needed for new Silicon-CC
+-#include <string.h>
+-
+ // #include "xdisplay.h"
+ 
+ // ***************************************************
+Index: alu2d/handle.h
+===================================================================
+--- alu2d/handle.h	(revision 1042)
++++ alu2d/handle.h	(revision 1062)
+@@ -1,9 +1,6 @@
+ #ifndef __HEADER__HANDLE
+ #define __HEADER__HANDLE
+ 
+-#include <assert.h>
+-#include <malloc.h>
+-
+ #include "grid.h"                               
+ 
+ // is defined in indexstack.h 
+@@ -1015,13 +1012,6 @@
+     const Listwalk < A > & operator [] (int ) const { return * walk ; }
+ } ;
+ 
+-void get_memory(struct mallinfo &old_info);
+-void get_memory_diff(struct mallinfo &old_info);
+-void write_memory(ostream &out,char *header);
+-void write_memory(ostream &out,char *header,struct mallinfo &old_info);
+-void write_memory_diff(ostream &out,char *header,struct mallinfo &old_info);
+-
+-
+ //////////////////////////////////////////////////////////
+ //
+ //  inline implementation 
+Index: alu2d/vmmap.cc
+===================================================================
+--- alu2d/vmmap.cc	(revision 1042)
++++ alu2d/vmmap.cc	(revision 1062)
+@@ -1,20 +1,8 @@
+-static volatile char RCSId_vmmap_cc [] = "$Id$";
+-
+ // +----------------------------------------------------------------------------+
+ // |	ParGiz Software Project :: MicroGrid 3.0 ++ :: 				|
+ // |	Na endlich :-) 								|
+ // +----------------------------------------------------------------------------+
+ 
+-#include <stdlib.h>
+-#include <assert.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-#else
+-  #include <iostream.h>
+-#endif
+-
+ #include "grid.h"
+ #include "handle.h"
+ #include "vmmap.h"
+Index: alu2d/hdlrw.cc
+===================================================================
+--- alu2d/hdlrw.cc	(revision 1042)
++++ alu2d/hdlrw.cc	(revision 1062)
+@@ -1,25 +1,10 @@
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <assert.h>
++// typdef these stream because this code uses a lot strstream
++typedef basic_stringbuf<char>  strstreambuf_t ;
+ 
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <sstream>
+-  // typdef these stream because this code uses a lot strstream
+-  typedef basic_stringbuf<char>  strstreambuf_t ;
+-#else 
+-  #include <iostream.h>
+-  #include <strstream.h>
+-#endif
+-
+ #include "grid.h"
+ #include "triang.h"
+ #include "handle.h"
+ 
+-
+-//static const double EPS=1e-8;
+-
+ bool Hmesh :: ascireadtriang(const char *filename,
+            double& time, unsigned long int& nbr) 
+ {
+Index: alu2d/vmmap.h
+===================================================================
+--- alu2d/vmmap.h	(revision 1042)
++++ alu2d/vmmap.h	(revision 1062)
+@@ -1,22 +1,6 @@
+ #ifndef __HEADER__VMMAP
+ #define __HEADER__VMMAP
+ 
+-static volatile char RCSId_vmmap_h [] = "$Id$";
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iterator>
+-  #include <algorithm>
+-  #include <map>
+-  #include <vector>
+-#else
+-  #include <iterator.h>
+-  #include <algo.h>
+-  #include <map.h>
+-  #include <multimap.h>
+-  #include <vector.h>
+-#endif
+-
+ class Multivertexadapter {
+ 
+   typedef struct value {
+Index: alu2d/triang.cc
+===================================================================
+--- alu2d/triang.cc	(revision 1042)
++++ alu2d/triang.cc	(revision 1062)
+@@ -65,20 +65,6 @@
+ // #end(header)
+ // ***************************************************
+ 
+-#include <stdio.h>	//  sprintf()
+-#include <stdlib.h>	//  NULL
+-#include <assert.h>	
+-#include <math.h>
+-
+-#ifdef _ANSI_HEADER
+-using namespace std;
+-#include <iostream>	//  ostream
+-#include <fstream>
+-#else
+-#include <iostream.h>	//  ostream
+-#include <fstream.h>
+-#endif
+-
+ #include "grid.h"
+ #include "triang.h"
+ #include "handle.h"
+Index: alu2d/Makefile.am
+===================================================================
+--- alu2d/Makefile.am	(revision 1042)
++++ alu2d/Makefile.am	(revision 1062)
+@@ -2,4 +2,4 @@
+ AUTOMAKE_OPTIONS = foreign 1.5
+ 
+ EXTRA_DIST = hdlrw.cc   mknbrs.cc  vmmap.cc      xdisplay.cc\
+-  handle.cc  main2d.cc  triang.cc  vtx_btree.cc
++  handle.cc  triang.cc  vtx_btree.cc
+Index: alu2d/grid.h
+===================================================================
+--- alu2d/grid.h	(revision 1042)
++++ alu2d/grid.h	(revision 1062)
+@@ -1,4 +1,3 @@
+-
+ #ifndef __HEADER__GRID
+ #define __HEADER__GRID
+ 
+@@ -24,23 +23,6 @@
+ // #end(header)
+ ***************************************************/
+ 
+-#include <stdio.h>
+-
+-#include <stdlib.h>
+-#include <assert.h>
+-#include <cmath>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <vector>
+-  #include <fstream>
+-  #include <iostream>
+-#else
+-  #include <vector.h>
+-  #include <fstream.h>
+-  #include <iostream.h>
+-#endif
+-
+ #include "../indexstack.h"
+ 
+ #include "xdisplay.h"
+Index: alu2d/grid_imp.cc
+===================================================================
+--- alu2d/grid_imp.cc	(revision 1042)
++++ alu2d/grid_imp.cc	(revision 1062)
+@@ -1,29 +1,9 @@
+ #ifndef ALU2D_GRID_IMP_CC
+ #define ALU2D_GRID_IMP_CC
+ 
+-//#include <time.h>
+-//#include <stdio.h>	//  sprintf()
+-//#include <stdlib.h>	//  NULL
+-//#include <assert.h>	
+-//#include <math.h> 
+-
+-//#ifdef _ANSI_HEADER
+-//  using namespace std;
+-//  #include <iostream>	//  ostream
+-//  #include <fstream.h> 
+-//#else
+-//  #include <iostream.h>	//  ostream
+-//  #include <fstream.h> 
+-//#endif
+-
+-//#include "grid.h"
+-//#include "triang.h"
+ #include "handle.h"
+-//#include "vmmap.h"
+-//#include "vtx_btree.h"
+ 
+ static const double EPS = 1e-8;
+-    
+ 
+ // ***************************************************
+ // #begin(method)
+Index: alugrid_parallel.h
+===================================================================
+--- alugrid_parallel.h	(revision 1042)
++++ alugrid_parallel.h	(revision 1062)
+@@ -5,7 +5,6 @@
+ // needs to be defined before all headers are included 
+ //#define __USE_INTERNAL_FACES__
+ 
+-
+ // the message passing interface (MPI) headers 
+ #include <mpi.h>
+ 
+@@ -30,5 +29,4 @@
+ 
  }
  
- template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX > :: HbndPll :: 
--HbndPll (myhface4_t * f, int t, ProjectVertex *ppv, Gitter * grd) : A (f,t,ppv,grd), _ext (*this) , _ghostPair(0,-1) {
-+HbndPll (myhface4_t * f, int t, ProjectVertex *ppv, Gitter * grd) : A (f,t,ppv,grd), _ext (*this) , _ghostPair((helement_STI *) 0 ,-1) {
-   return ;
- }
+-#undef _ANSI_HEADER
+ #endif
+Index: alugrid_serial.cc
+===================================================================
+--- alugrid_serial.cc	(revision 1042)
++++ alugrid_serial.cc	(revision 1062)
+@@ -7,10 +7,11 @@
+ #warning -- Compiling ALUGrid code in debug mode!!! Use -DNDEBUG to get more optimized code!!!
+ #endif
+ 
+-#define _ANSI_HEADER 
+-
+ namespace ALUGridSpace {
+ 
++// the code needs this 
++using namespace std; 
++
+ // bsgrid original sources 
+ #include "serial/gitter_geo.cc" 
+ #include "serial/mapp_cube_3d.cc"
+@@ -25,5 +26,4 @@
+ 
+ } //end namespace 
+ 
+-#undef _ANSI_HEADER 
+ #endif
+Index: alugrid_serial.h
+===================================================================
+--- alugrid_serial.h	(revision 1042)
++++ alugrid_serial.h	(revision 1062)
+@@ -1,8 +1,6 @@
+ #ifndef __ALUGRID_SERIAL_H_INCLUDED__
+ #define __ALUGRID_SERIAL_H_INCLUDED__
+ 
+-#define _ANSI_HEADER
+-
+ // toggle ALUGRID alloc at once during refinement 
+ //#define USE_MALLOC_AT_ONCE 
+ 
+@@ -21,6 +19,9 @@
+ 
+ namespace ALUGridSpace {
+ 
++// the code needs this 
++using namespace std;   
++
+ typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
+ 
+ struct GatherScatter;
+@@ -78,7 +79,6 @@
+ };
+ typedef GatherScatter GatherScatterType;
+ 
+-#include "serial/alloca.h"
+ #include "serial/mapp_cube_3d.h"
+ #include "serial/mapp_tetra_3d.h"
+ #include "serial/gitter_hexa_top.h"
+Index: duneinterface/gitter_dune_pll_impl.h
+===================================================================
+--- duneinterface/gitter_dune_pll_impl.h	(revision 1042)
++++ duneinterface/gitter_dune_pll_impl.h	(revision 1062)
+@@ -2,12 +2,6 @@
+ #ifndef GITTER_DUNE_PLL_IMPL_H_INCLUDED
+ #define GITTER_DUNE_PLL_IMPL_H_INCLUDED
+ 
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <numeric>
+-#else
+-#endif
+-
+ #include "gitter_dune_impl.h"
+  
+ #include "gitter_pll_impl.h"
+Index: duneinterface/gitter_dune_pll_mgb.cc
+===================================================================
+--- duneinterface/gitter_dune_pll_mgb.cc	(revision 1042)
++++ duneinterface/gitter_dune_pll_mgb.cc	(revision 1062)
+@@ -2,25 +2,6 @@
+ #ifndef GITTER_DUNE_PLL_MGB_CC_INCLUDED
+ #define GITTER_DUNE_PLL_MGB_CC_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-  
+-#include <assert.h>
+-#include <time.h>
+-#include <stdio.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <iomanip>
+-  #include <algorithm>
+-#else
+-  #include <iostream.h>
+-  #include <iomanip.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "serialize.h"
+ #include "gitter_mgb.h"
+ 
+Index: parallel/gitter_pll_mgb.h
+===================================================================
+--- parallel/gitter_pll_mgb.h	(revision 1042)
++++ parallel/gitter_pll_mgb.h	(revision 1062)
+@@ -1,25 +1,6 @@
+ #ifndef GITTER_PLL_MGB_H_INCLUDED
+ #define GITTER_PLL_MGB_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-	
+-#include <assert.h>
+-#include <time.h>
+-#include <stdio.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <iomanip>
+-  #include <algorithm>
+-#else
+-  #include <iostream.h>
+-  #include <iomanip.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "serialize.h"
+ #include "gitter_mgb.h"
+ 
+Index: parallel/mpAccess.cc
+===================================================================
+--- parallel/mpAccess.cc	(revision 1042)
++++ parallel/mpAccess.cc	(revision 1062)
+@@ -1,17 +1,5 @@
+ // (c) bernhard schupp 1997 - 1998
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+ 
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <functional>
+-  #include <algorithm>
+-#else
+-  #include <function.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "mpAccess.h"
+ 
+ vector < int > MpAccessLocal :: dest () const {
+Index: parallel/gitter_pll_idn.cc
+===================================================================
+--- parallel/gitter_pll_idn.cc	(revision 1042)
++++ parallel/gitter_pll_idn.cc	(revision 1062)
+@@ -1,23 +1,5 @@
+ // (c) bernhard schupp 1997 - 1998
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+ 
+-#include <assert.h>
+-#include <time.h>
+-#include <stdio.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <functional>
+-  #include <algorithm>
+-#else
+-  #include <iostream.h>
+-  #include <function.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "gitter_pll_sti.h"
+ 
+ 	// vorsicht mit optimierenden compilern bei dem untenstehnden template !
+Index: parallel/mpAccess.h
+===================================================================
+--- parallel/mpAccess.h	(revision 1042)
++++ parallel/mpAccess.h	(revision 1062)
+@@ -2,27 +2,6 @@
+ #ifndef MPACCESS_H_INCLUDED
+ #define MPACCESS_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <assert.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <vector>
+-  #include <functional>
+-  #include <set>
+-  #include <map>
+-#else
+-  #include <iostream.h>
+-  #include <vector.h>
+-  #include <function.h>
+-  #include <set.h>
+-  #include <map.h>
+-#endif
+-
+ #include "serialize.h"
+ 
+ class MpAccessGlobal {
+Index: parallel/mpAccess_MPI.cc
+===================================================================
+--- parallel/mpAccess_MPI.cc	(revision 1042)
++++ parallel/mpAccess_MPI.cc	(revision 1062)
+@@ -1,20 +1,5 @@
+ // (c) bernhard schupp 1997 - 1998
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+ 
+-#include <stdio.h>
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <utility>
+-  #include <algorithm>
+-  #include <iterator>
+-#else
+-  #include <pair.h>
+-  #include <algo.h>
+-  #include <iterator.h>
+-#endif
+-
+ #include "mpAccess_MPI.h"
+ 
+ template < class A > vector < vector < A > > 
+Index: parallel/mpAccess_MPI.h
+===================================================================
+--- parallel/mpAccess_MPI.h	(revision 1042)
++++ parallel/mpAccess_MPI.h	(revision 1062)
+@@ -2,24 +2,6 @@
+ #ifndef MPACCESS_MPI_H_INCLUDED
+ #define MPACCESS_MPI_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <assert.h>
+-#include <mpi.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <vector>
+-  #include <functional>
+-#else
+-  #include <iostream.h>
+-  #include <vector.h>
+-  #include <function.h>
+-#endif
+-
+ #include "mpAccess.h"
+ 
+ class MpAccessMPI : public MpAccessLocal 
+Index: parallel/metis.c
+===================================================================
+--- parallel/metis.c	(revision 1042)
++++ parallel/metis.c	(revision 1062)
+@@ -9,7 +9,6 @@
+ #warning  -- Compiling parallel version without METIS !!!
+ 
+ using namespace std;
+-#include <iostream>
+ 
+ static const char metmess [] = 	"**INFO Due to license reasons the library METIS is\n"
+ 				"       not part of the ALUGrid library distribution. \n"
+Index: parallel/parmetis.c
+===================================================================
+--- parallel/parmetis.c	(revision 1042)
++++ parallel/parmetis.c	(revision 1062)
+@@ -6,8 +6,7 @@
+ #ifndef PARMETIS_C_INCLUDED
+ #define PARMETIS_C_INCLUDED
+ 
+-using namespace std;
+-#include <iostream>
++using namespace std; 
+ 
+ static const char metmess [] = 	"**INFO Due to license reasons the library METIS is\n"
+ 				"       not part of the ALUGrid library distribution. \n"
+Index: parallel/party_lib.c
+===================================================================
+--- parallel/party_lib.c	(revision 1042)
++++ parallel/party_lib.c	(revision 1062)
+@@ -4,17 +4,8 @@
+ 
+ #warning  -- Compiling parallel version without PARTY_LIB !!! 
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
++using namespace std; 
+ 
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-#else
+-  #include <iostream.h>
+-#endif
+-
+ static const char parmess [] = 	"**INFO Due to license reasons the library PARTY is\n"
+ 				"       not part of the ALUGrid library distribution. \n"
+ 				"       To use this feature get a copy of the PARTY library \n"
+Index: parallel/metis.h
+===================================================================
+--- parallel/metis.h	(revision 1042)
++++ parallel/metis.h	(revision 1062)
+@@ -6,9 +6,6 @@
+ #ifndef METIS_H_INCLUDED
+ #define METIS_H_INCLUDED
+ 
+-using namespace std;
+-#include <iostream>
+-
+ typedef int idxtype ;
+ 
+ void METIS_PartGraphKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *);
+Index: parallel/gitter_pll_sti.cc
+===================================================================
+--- parallel/gitter_pll_sti.cc	(revision 1042)
++++ parallel/gitter_pll_sti.cc	(revision 1062)
+@@ -4,34 +4,6 @@
+ #ifndef _GITTER_PLL_STI_CC_
+ #define _GITTER_PLL_STI_CC_
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <assert.h>
+-#include <time.h>
+-#include <stdio.h>
+-#include <sys/types.h>
+-#include <malloc.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <fstream>
+-  #include <sstream>
+-  #include <iterator>
+-  #include <functional>
+-  #include <algorithm>
+-  #include <numeric>
+-#else
+-  #include <iostream.h>
+-  #include <fstream.h>
+-  #include <strstream.h>
+-  #include <iterator.h>
+-  #include <function.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "gitter_pll_sti.h"
+ #include "walk.h"
  
 Index: parallel/gitter_pll_sti.h
 ===================================================================
---- parallel/gitter_pll_sti.h	(revision 1036)
-+++ parallel/gitter_pll_sti.h	(revision 1041)
-@@ -248,6 +248,8 @@
-   protected :
-     typedef Gitter :: Geometric :: hasFace4 :: balrule_t balrule_t ;
-     typedef Gitter :: ghostpair_STI ghostpair_STI;
-+    typedef Gitter :: helement_STI  helement_STI;
-+    
-     virtual ~ElementPllXIF () {}
-   public :
-     virtual pair < ElementPllXIF_t *, int > accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int) = 0 ;
-@@ -259,7 +261,7 @@
-     { 
-       cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
-       abort(); 
--      return ghostpair_STI (0,-1); 
-+      return ghostpair_STI ( (helement_STI*)0 , -1); 
-     }
+--- parallel/gitter_pll_sti.h	(revision 1042)
++++ parallel/gitter_pll_sti.h	(revision 1062)
+@@ -2,21 +2,6 @@
+ #ifndef GITTER_PLL_STI_H_INCLUDED
+ #define GITTER_PLL_STI_H_INCLUDED
  
-     virtual int ghostLevel () const
-Index: parallel/gitter_tetra_top_pll.h
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <utility>
+-  #include <set>
+-  #include <map>
+-#else
+-  #include <pair.h>
+-  #include <set.h>
+-  #include <map.h>
+-#endif
+-
+ #include "mpAccess.h"
+ #include "gitter_sti.h"
+ #include "gitter_pll_ldb.h"
+Index: parallel/gitter_pll_ldb.cc
 ===================================================================
---- parallel/gitter_tetra_top_pll.h	(revision 1036)
-+++ parallel/gitter_tetra_top_pll.h	(revision 1041)
-@@ -166,7 +166,7 @@
+--- parallel/gitter_pll_ldb.cc	(revision 1042)
++++ parallel/gitter_pll_ldb.cc	(revision 1062)
+@@ -1,32 +1,7 @@
+ // (c) bernhard schupp 1997 - 1998
+ // modifications for Dune Interface 
+ // (c) Robert Kloefkorn 2004 - 2005 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
  
- template < class A, class X, class MX > inline Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
- HbndPll (myhface3_t * f, int t, ProjectVertex *ppv , Gitter * grd )
--  : A (f,t,ppv,grd), _ext (*this), _ghostPair(0,-1) {
-+  : A (f,t,ppv,grd), _ext (*this), _ghostPair( (helement_STI *) 0, -1) {
-   return ;
- }
+-#include <time.h>
+-#include <assert.h>
+-#include <math.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <iomanip>
+-  #include <utility>
+-  #include <map>
+-  #include <functional>
+-  #include <algorithm>
+-  #include <numeric>
+-#else
+-  #include <iostream.h>
+-  #include <iomanip.h>
+-  #include <pair.h>
+-  #include <map.h>
+-  #include <function.h>
+-  #include <algo.h>
+-#endif
+-
+ #ifdef _DUNE_NOT_USES_ALU3DGRID_
+ #include "party_lib.h"
+ #include "metis.h"
+Index: parallel/gitter_pll_impl.cc
+===================================================================
+--- parallel/gitter_pll_impl.cc	(revision 1042)
++++ parallel/gitter_pll_impl.cc	(revision 1062)
+@@ -1,29 +1,7 @@
+ // (c) bernhard schupp 1997 - 1998
+ // modifications for Dune Interface 
+ // (c) Robert Kloefkorn 2004 - 2005 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+ 
+-#include <malloc.h>
+-#include <time.h>
+-#include <stdlib.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <sstream>
+-  #include <set>
+-  #include <map>
+-  #include <functional>
+-  #include <algorithm>
+-#else
+-  #include <strstream.h>
+-  #include <set.h>
+-  #include <map.h>
+-  #include <function.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "mapp_cube_3d.h"
+ #include "mapp_tetra_3d.h"
+   
+Index: parallel/parmetis.h
+===================================================================
+--- parallel/parmetis.h	(revision 1042)
++++ parallel/parmetis.h	(revision 1062)
+@@ -4,17 +4,6 @@
+ #ifndef PARMETIS_H_INCLUDED
+ #define PARMETIS_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-#else
+-  #include <iostream.h>
+-#endif
+-
+ typedef int idxtype ;
+ 
+ void ParMETIS_V3_PartKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *, MPI_Comm *);
+Index: parallel/party_lib.h
+===================================================================
+--- parallel/party_lib.h	(revision 1042)
++++ parallel/party_lib.h	(revision 1062)
+@@ -28,17 +28,6 @@
+ #ifndef PARTY_LIB_H_INCLUDED
+ #define PARTY_LIB_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-#else
+-  #include <iostream.h>
+-#endif
+-
+ int global_lin (int,float *,int,float,int *);
+ int global_sca (int,float *,int,float,int *);
+ int global_ran (int,float *,int,float,int *);
+Index: parallel/gitter_pll_ldb.h
+===================================================================
+--- parallel/gitter_pll_ldb.h	(revision 1042)
++++ parallel/gitter_pll_ldb.h	(revision 1062)
+@@ -2,23 +2,6 @@
+ #ifndef GITTER_PLL_LDB_H_INCLUDED
+ #define GITTER_PLL_LDB_H_INCLUDED
+  
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#include <assert.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <set>
+-  #include <map>
+-  #include <iterator>
+-#else
+-  #include <set.h>
+-  #include <map.h>
+-  #include <iterator.h>
+-#endif
+-
+ #include "key.h"
+ #include "mpAccess.h"
+ 
+Index: parallel/gitter_pll_impl.h
+===================================================================
+--- parallel/gitter_pll_impl.h	(revision 1042)
++++ parallel/gitter_pll_impl.h	(revision 1062)
+@@ -5,23 +5,6 @@
+ #ifndef GITTER_PLL_IMPL_H_INCLUDED
+ #define GITTER_PLL_IMPL_H_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <algorithm>
+-  #include <vector>
+-  #include <sstream>
+-  #include <set>
+-#else
+-  #include <algo.h>
+-  #include <vector.h>
+-  #include <strstream.h>
+-  #include <set.h>
+-#endif
+-
+ #include "myalloc.h"
+ #include "gitter_impl.h"
+ #include "walk.h"
+Index: parallel/gitter_pll_mgb.cc
+===================================================================
+--- parallel/gitter_pll_mgb.cc	(revision 1042)
++++ parallel/gitter_pll_mgb.cc	(revision 1062)
+@@ -2,25 +2,6 @@
+ #ifndef GITTER_PLL_MGB_CC_INCLUDED
+ #define GITTER_PLL_MGB_CC_INCLUDED
+ 
+-#ifdef IBM_XLC
+-  #define _ANSI_HEADER
+-#endif
+-	
+-#include <assert.h>
+-#include <time.h>
+-#include <stdio.h>
+-
+-#ifdef _ANSI_HEADER
+-  using namespace std;
+-  #include <iostream>
+-  #include <iomanip>
+-  #include <algorithm>
+-#else
+-  #include <iostream.h>
+-  #include <iomanip.h>
+-  #include <algo.h>
+-#endif
+-
+ #include "serialize.h"
+ #include "gitter_mgb.h"
  
