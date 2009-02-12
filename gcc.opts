@@ -2,12 +2,13 @@
 # remember to run ./autogen.sh after changing these values!
 
 # name of compiler binaries
-COMP="gcc"
-#CXXCOMP="g++-4.3.0"
+COMP="gcc-4.3.2"
 CXXCOMP="g++-4.3.2"
+#CXXCOMP="g++"
 
 # flags set in any case
 FLAGS="-Wall -std=c++0x" 
+#FLAGS="-Wall" 
 # -I/opt/openmpi/include -I/opt/openmpi/include/openmpi"
 
 # additional flags for debugging
