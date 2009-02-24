@@ -34,7 +34,9 @@ Vtx_btree::insertNode(Node* node, Node* newNode)
       insertNode(node->next, newNode);
     else
       node->next = newNode;
-  } else {
+  } 
+  else 
+  {
     if( node->prev != 0 )
       insertNode(node->prev, newNode);
     else
@@ -53,7 +55,8 @@ Vtx_btree*
 Vtx_btree::left() const
 {
   Vtx_btree* left = 0;
-  if( head->prev ) {
+  if( head->prev ) 
+  {
     left = new Vtx_btree(rvtx,lnb,rnb);
     left->head = head->prev;
   }
@@ -69,7 +72,8 @@ Vtx_btree*
 Vtx_btree::right() const
 {
   Vtx_btree* right = 0;
-  if( head->next ) {
+  if( head->next ) 
+  {
     right = new Vtx_btree(head->vtx,head->lnb,head->rnb);
     right->head = head->next;
   }
