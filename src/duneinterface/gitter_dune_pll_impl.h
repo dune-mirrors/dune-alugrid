@@ -28,8 +28,12 @@ public:
   typedef GitterDuneImpl :: Objects  Objects;
 
   
-  GitterDunePll (const char * filename , MpAccessLocal &mp) 
-    : GitterBasisPll (filename,mp) , balanceGrid_ (false) 
+  GitterDunePll (const char * filename , 
+                 MpAccessLocal &mp, 
+                 ProjectVertex* ppv = 0 ) 
+    : GitterDuneBasis( ppv ) 
+    , GitterBasisPll (filename,mp) 
+    , balanceGrid_ (false) 
   {
 #ifndef NDEBUG
     __STATIC_myrank = mp.myrank(); 
