@@ -807,16 +807,16 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
         virtual VertexGeo     * insert_ghostvx (double,double,double,int) ;
        
         // insert hbnd_int without ghost hexa 
-        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t) ;
         // insert hbnd_int without ghost hexa 
         virtual hbndseg4_GEO  * insert_hbnd4_ghost (hface4_GEO *, int) ;
         // insert hbnd_int with ghost hexa 
-        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* );
+        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* );
         
         // normal insert hbnd3 version
-  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t) ;
+  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t) ;
         // version that get point and create ghost macro 
-  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int,Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
+  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
         // version that created internal boundary on ghost elements 
   virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
@@ -1414,7 +1414,8 @@ template < class A > void BndsegPllBaseXClosure < A > :: writeDynamicState (Obje
   return ;
 }
 
-template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, GatherScatterType & gs ) {
+template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, GatherScatterType & gs ) 
+{
   gs.recvData( os , myhbnd () );
   return ;
 }
