@@ -142,10 +142,9 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   } 
   else 
   {
-    ProjectVertex* ppv = NULL; 
     if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, ppv, bt) ;
+      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, _ppv, bt) ;
       _hbnd3Map [key] = hb3 ;
       return true ;
     }
@@ -166,11 +165,10 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
   } 
   else 
   {
-    ProjectVertex* ppv = NULL;
     if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
     {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, ppv, bt) ;
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, _ppv, bt) ;
       _hbnd4Map [key] = hb4 ;
       return true ;
     }
@@ -611,7 +609,9 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
 
 // default of init == true
 MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, bool init) 
- : _initialized(false) , _finalized(false) , _mgb (b) 
+ : _initialized(false) 
+ , _finalized(false) 
+ , _ppv( NULL ), _mgb (b) 
 {
   if(init) initialize();
 }
@@ -919,9 +919,10 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
   return ;
 }
 
-void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) {
+void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in, ProjectVertex* ppv) 
+{
   strstream_t raw ;
-  MacroGridBuilder mm (*this) ;
+  MacroGridBuilder mm (*this, ppv) ;
   int c = in.get () ;
   assert (!in.eof ()) ;
   in.putback (c) ;

@@ -111,7 +111,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     hbnd4intMap_t _hbnd4Int; 
     
     elementMap_t _hexaMap, _tetraMap, _periodic3Map, _periodic4Map ;
-    
+
     inline BuilderIF & myBuilder () ;
     inline const BuilderIF & myBuilder () const ;
     void removeElement (const elementKey_t &) ;
@@ -146,6 +146,10 @@ class MacroGridBuilder : protected Gitter :: Geometric {
   protected:  
     bool _initialized;
     bool _finalized;
+
+    // Vertex projection 
+    ProjectVertex* _ppv; 
+
   private :
     BuilderIF & _mgb ;
 } ;

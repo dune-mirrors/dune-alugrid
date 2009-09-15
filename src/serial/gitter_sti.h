@@ -12,10 +12,17 @@ typedef stringstream  strstream_t;
 #include "parallel.h"
 #include "xdrclass.h"
 
-class ProjectVertex {
+// interface class for projecting vertices for boundary adjustment 
+class ProjectVertex 
+{
+protected:
+  // don't allow creation of an instance  
+  ProjectVertex () {} 
 public:
+  // destructor 
   virtual ~ProjectVertex () {}
-  virtual int operator()(const double (&p)[3],double (&ret)[3]) const = 0;
+  // projection method 
+  virtual int operator()(const double (&p)[3], double (&ret)[3]) const = 0;
 };
 
 // forward declaration, see ghost_info.h 
@@ -1578,7 +1585,7 @@ public :
       // generates macro image from macro file 
       void generateRawHexaImage (istream &, ostream &) ;
       
-      virtual void macrogridBuilder (istream &) ;
+      virtual void macrogridBuilder (istream &, ProjectVertex* ) ;
       virtual VertexGeo     * insert_vertex (double, double, double, int) = 0 ;
       virtual VertexGeo     * insert_ghostvx(double, double, double, int) = 0 ;
       virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0 ;
@@ -1706,6 +1713,9 @@ public :
   // callback for Dune 
   virtual int preCoarsening ( hbndseg_STI & ) { return 0; }
   virtual int postRefinement( hbndseg_STI & ) { return 0; }
+
+  // return pointer to vertex projection (if set), default returns 0
+  virtual ProjectVertex* vertexProjection() const { return 0; };
 
   virtual void fullIntegrityCheck () ;
   virtual void printsize () ;

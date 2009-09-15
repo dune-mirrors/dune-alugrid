@@ -967,8 +967,10 @@ inline IndexManagerType & GitterBasisImpl :: indexManager (int codim)
   return _macrogitter->indexManager(codim);
 }
 
-inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid, istream & in) : _myGrid(mygrid) {
-  macrogridBuilder (in) ;
+inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid, istream & in) 
+  : _myGrid(mygrid) 
+{
+  macrogridBuilder (in, _myGrid->vertexProjection() ) ;
   return ;
 }
 
