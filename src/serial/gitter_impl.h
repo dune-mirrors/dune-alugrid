@@ -58,7 +58,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 #endif
         {
           protected :
-           inline Hbnd3Default (myhface3_t *, int, ProjectVertex * , Gitter * ) ;
+           inline Hbnd3Default (myhface3_t *, int, ProjectVertex * ) ;
            virtual ~Hbnd3Default () {}
           public :
             typedef hbndseg3_GEO :: bnd_t bnd_t;
@@ -79,8 +79,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
             // default implementation returns 0
             virtual const MacroGhostInfo* buildGhostCell(ObjectStream&, int) { return 0; }
-          protected:
-            Gitter * _myGrid; 
         };
         typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
 
@@ -104,7 +102,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 #endif
         {
           protected :
-            inline Hbnd4Default (myhface4_t *, int, ProjectVertex *, Gitter *) ;
+            inline Hbnd4Default (myhface4_t *, int, ProjectVertex * ) ;
             virtual ~Hbnd4Default () {}
           public :
             typedef hbndseg4_GEO :: bnd_t bnd_t;
@@ -124,8 +122,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             virtual const MacroGhostInfo * buildGhostCell(ObjectStream&, int) { return 0; }
             inline int preCoarsening  () ; 
             inline int postRefinement () ;
-          protected:
-            Gitter * _myGrid; 
         };
         typedef Hbnd4Top < Hbnd4Default > hbndseg4_IMPL ;
 
@@ -605,11 +601,11 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual inline hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         virtual inline hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual inline hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
-        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t) ;
         // version with point , returns insert_hbnd3 here 
-        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
-        virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
-        virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* ) ;
+        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
+        virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* ) ;
         virtual inline tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
         virtual inline periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
 
@@ -801,8 +797,9 @@ inline int GitterBasis :: Objects :: Dune_Hbnd4Default :: dimVx () const { retur
 // end of Dune_hbndDefault 
 //***************************************************************************
 
-inline GitterBasis :: Objects :: Hbnd3Default :: Hbnd3Default (myhface3_t * f, int i, ProjectVertex *ppv, Gitter * grd ) :
-  Gitter :: Geometric :: hbndseg3_GEO (f, i, ppv) , _myGrid(grd) 
+inline GitterBasis :: Objects :: Hbnd3Default :: 
+Hbnd3Default (myhface3_t * f, int i, ProjectVertex *ppv ) 
+ : Gitter :: Geometric :: hbndseg3_GEO (f, i, ppv)
 {
   return ;
 }
@@ -810,37 +807,13 @@ inline GitterBasis :: Objects :: Hbnd3Default :: Hbnd3Default (myhface3_t * f, i
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: Hbnd3Default :: preCoarsening () 
 {
-#ifdef __USE_INTERNAL_FACES__  
-  // grid pointer only exists in the case of internal bnds 
-  if(_myGrid)
-  {
-    return _myGrid->preCoarsening(*this);
-  }
-  else 
-  {
-    return 0;
-  }
-#else 
   return 0;
-#endif
 }
 
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: Hbnd3Default :: postRefinement () 
 {
-#ifdef __USE_INTERNAL_FACES__  
-  // grid pointer only exists in the case of internal bnds 
-  if(_myGrid)
-  {
-    return _myGrid->postRefinement(*this);
-  }
-  else 
-  {
-    return 0;
-  }
-#else
   return 0;
-#endif
 }
 
 inline GitterBasis :: Objects ::Hbnd3Default :: bnd_t GitterBasis :: Objects :: Hbnd3Default :: bndtype () const {
@@ -851,8 +824,8 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: ghostLevel () const {
   return level() ;
 }
 
-inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv, Gitter * grd ) : 
-  Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv) , _myGrid(grd) 
+inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv) : 
+  Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv)
 {
   return ;
 }
@@ -860,19 +833,13 @@ inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, i
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: Hbnd4Default :: preCoarsening () 
 {
-  if(_myGrid)
-    return _myGrid->preCoarsening(*this);
-  else 
-    return 0;
+  return 0;
 }
 
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: Hbnd4Default :: postRefinement () 
 {
-  if(_myGrid)
-    return _myGrid->postRefinement(*this);
-  else 
-    return 0;
+  return 0;
 }
 
 inline GitterBasis :: Objects ::Hbnd4Default :: bnd_t GitterBasis :: Objects :: Hbnd4Default :: bndtype () const {
@@ -1101,28 +1068,32 @@ insert_hexa (hface4_GEO *(&f)[6], int (&t)[6])
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) 
+insert_hbnd3 (hface3_GEO * f, int i, 
+              ProjectVertex* ppv, 
+              Gitter :: hbndseg_STI :: bnd_t b) 
 {
-  // the two last zeros are the following: 
-  // the first pointer is pointer to grid which we dont need in the serial
-  // case and the second is a pointer to ghost Element 
-  return new Objects :: hbndseg3_IMPL ( 0,f,i, NULL,NULL, b, indexManager(IM_Bnd), _myGrid) ;
+  // the NULL pointer is the pointer to the father which does not exists 
+  return new Objects :: hbndseg3_IMPL ( 0, f, i, ppv, b, indexManager(IM_Bnd) ) ;
 }
 
 inline GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd3 (hface3_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, MacroGhostInfoTetra* ) {
-  return insert_hbnd3(f,i,b); 
-}
-
-inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) 
+insert_hbnd3 (hface3_GEO * f, int i, ProjectVertex* ppv, 
+              Gitter :: hbndseg_STI :: bnd_t b, MacroGhostInfoTetra* ) 
 {
-  return new Objects :: hbndseg4_IMPL ( 0,f,i,NULL, b,indexManager(IM_Bnd) );
+  return insert_hbnd3(f,i,ppv,b); 
 }
 
 inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b, MacroGhostInfoHexa* ) {
-  return insert_hbnd4 (f,i,b); 
+insert_hbnd4 (hface4_GEO * f, int i, ProjectVertex* ppv, Gitter :: hbndseg_STI :: bnd_t b) 
+{
+  return new Objects :: hbndseg4_IMPL ( 0, f, i, ppv, b, indexManager(IM_Bnd) );
+}
+
+inline GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_hbnd4 (hface4_GEO * f, int i, ProjectVertex* ppv,
+              Gitter :: hbndseg_STI :: bnd_t b, MacroGhostInfoHexa* ) 
+{
+  return insert_hbnd4 (f,i,ppv,b); 
 }
 
 inline void GitterBasisImpl :: printMemUsage ()

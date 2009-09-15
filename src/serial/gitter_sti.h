@@ -1591,16 +1591,16 @@ public :
       
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, hbndseg_STI :: bnd_t) = 0 ;
 
       // insert ghost element 
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI:: bnd_t, 
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, hbndseg_STI:: bnd_t, 
                                             MacroGhostInfoTetra* ) = 0 ;
       
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, hbndseg_STI :: bnd_t) = 0 ;
 
       // method to insert internal boundary with ghost 
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t, 
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, hbndseg_STI :: bnd_t, 
                                             MacroGhostInfoHexa* ) = 0 ;
 
       IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
@@ -3188,7 +3188,9 @@ inline int Gitter :: Geometric :: Hexa :: originalEdgeTwist (int face, int edge)
 // #     #  #####   #    #  #####    ####   ######   ####   #####
 
 inline Gitter :: Geometric :: hbndseg3 :: 
-hbndseg3 (myhface3_t * a, int b, ProjectVertex *ppv) : _face (a), _twist (b), projection(ppv) {
+hbndseg3 (myhface3_t * a, int b, ProjectVertex *ppv) 
+  : _face (a), _twist (b), projection(ppv) 
+{
   _face->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this),0), _twist) ;
   return ;
 }
@@ -3198,8 +3200,10 @@ inline Gitter :: Geometric :: hbndseg3 :: ~hbndseg3 () {
   return ;
 }
 
-inline int Gitter :: Geometric :: hbndseg3 :: postRefinement () {
-  if (projection) {
+inline int Gitter :: Geometric :: hbndseg3 :: postRefinement () 
+{
+  if (projection) 
+  {
     myhface3(0)->projectVertex(*projection);
   }
   return 0 ;
@@ -3245,7 +3249,9 @@ inline int Gitter :: Geometric :: hbndseg3 :: nChild () const {
 // #     #  #    #  #   ##  #    #  #    #  #       #    #      #
 // #     #  #####   #    #  #####    ####   ######   ####       #
 
-inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface4_t * a, int b, ProjectVertex *ppv) : _face (a), _twist (b), projection(ppv) {
+inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface4_t * a, int b, ProjectVertex *ppv) 
+  : _face (a), _twist (b), projection(ppv) 
+{
   _face->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this),0), _twist) ;
   return ;
 }
@@ -3255,18 +3261,22 @@ inline Gitter :: Geometric :: hbndseg4 :: ~hbndseg4 () {
   return ;
 }
 
-inline int Gitter :: Geometric :: hbndseg4 :: postRefinement () {
-  if (projection) {
+inline int Gitter :: Geometric :: hbndseg4 :: postRefinement () 
+{
+  if (projection) 
+  {
     myhface4(0)->projectVertex(*projection);
   }
   return 0 ;
 }
 
-inline int Gitter :: Geometric :: hbndseg4 :: preCoarsening () {
+inline int Gitter :: Geometric :: hbndseg4 :: preCoarsening () 
+{
   return 0 ;
 }
 
-inline int Gitter :: Geometric :: hbndseg4 :: twist (int i) const {
+inline int Gitter :: Geometric :: hbndseg4 :: twist (int i) const 
+{
   assert (i == 0) ;
   return _twist ;
 }
