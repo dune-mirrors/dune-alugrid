@@ -142,9 +142,10 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   } 
   else 
   {
+    ProjectVertex* ppv = NULL; 
     if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt) ;
+      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, ppv, bt) ;
       _hbnd3Map [key] = hb3 ;
       return true ;
     }
@@ -155,16 +156,21 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
 bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI ::bnd_t bt) {
   int twst = cyclicReorder (v,v+4) ;
   faceKey_t key (v [0], v [1], v [2]) ;
-  if (bt == Gitter :: hbndseg_STI :: closure) {
+  if (bt == Gitter :: hbndseg_STI :: closure) 
+  {
     if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
       _hbnd4Int [key] = new Hbnd4IntStorage (face,twst) ;
       return true ;
     }
-  } else {
-    if (_hbnd4Map.find (key) == _hbnd4Map.end ()) {
+  } 
+  else 
+  {
+    ProjectVertex* ppv = NULL;
+    if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
+    {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt) ;
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, ppv, bt) ;
       _hbnd4Map [key] = hb4 ;
       return true ;
     }
@@ -744,7 +750,9 @@ void MacroGridBuilder :: finalize ()
     for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
     const Hbnd4IntStorage & p = * ((*i).second);
     if (p.first()->ref == 1) {
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure) ;
+      hbndseg4_GEO * hb4 = 
+        myBuilder ().insert_hbnd4 (p.first(), p.second(), NULL, 
+                                   Gitter :: hbndseg_STI :: closure) ;
       myBuilder ()._hbndseg4List.push_back (hb4) ;
     }
     delete (*i).second;
@@ -754,7 +762,8 @@ void MacroGridBuilder :: finalize ()
   {for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
     const Hbnd3IntStorage & p = * ((*i).second);
     if (p.first()->ref == 1) {
-      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (p.first(),p.second(),Gitter :: hbndseg_STI :: closure) ;    
+      hbndseg3_GEO * hb3 = 
+        myBuilder ().insert_hbnd3 (p.first(),p.second(), NULL, Gitter :: hbndseg_STI :: closure) ;    
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (*i).second;
