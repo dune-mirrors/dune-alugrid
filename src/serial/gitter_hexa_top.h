@@ -151,11 +151,9 @@ template < class A > class Hbnd4Top : public A {
     // constructor for refinement 
     inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, innerbndseg_t *, Gitter::helement_STI *, int) ;
 
-    // constructor for macro element
-    inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, const bnd_t bt , IndexManagerType & , Gitter * ) ;
-
     // constructor for macro element in the serial case 
     inline Hbnd4Top (int,myhface4_t *,int,ProjectVertex *, const bnd_t bt , IndexManagerType & ) ;
+
     virtual ~Hbnd4Top () ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
@@ -967,7 +965,7 @@ inline void Hface4Top < A > :: doRestore (InStream_t & is)
 template < class A > inline Hbnd4Top < A > :: 
 Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, 
           innerbndseg_t * up, Gitter::helement_STI * gh, int gFace ) : 
-  A (f, i,ppv,up->_myGrid), _bbb (0), _dwn (0), _up(up) , 
+  A (f, i, ppv), _bbb (0), _dwn (0), _up(up) , 
   _indexManager(_up->_indexManager) ,
   _lvl (l), _bt(_up->_bt)
 {
@@ -980,21 +978,10 @@ Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv,
 }
 
 template < class A > inline Hbnd4Top < A > :: 
-Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im , Gitter * grd )
-  : A (f, i,ppv,grd), _bbb (0), _dwn (0), _up(0) , 
+Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im)
+  : A (f, i, ppv), _bbb (0), _dwn (0), _up(0) , 
   _indexManager(im) ,
   _lvl (l) , _bt(bt)  
-{
-  this->setIndex( _indexManager.getIndex() );  
-  setBoundaryId( _bt );
-  return ;
-}
-
-template < class A > inline Hbnd4Top < A > :: 
-Hbnd4Top (int l, myhface4_t * f, int i, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im )
-  : A (f, i,ppv, 0 ), _bbb (0), _dwn (0), _up(0) , 
-  _indexManager(im) ,
-  _lvl (l) , _bt(bt) 
 {
   this->setIndex( _indexManager.getIndex() );  
   setBoundaryId( _bt );

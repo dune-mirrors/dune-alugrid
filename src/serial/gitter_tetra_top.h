@@ -105,18 +105,13 @@ template < class A > class Hbnd3Top : public A {
   public:
     // constructor for serial macro boundary elements  
     inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *,
-                     innerbndseg_t * up,const bnd_t b, 
-                     IndexManagerType & im , Gitter * ) ;
+                     const bnd_t b, IndexManagerType & im ) ;
     
     // constructor for children 
     inline Hbnd3Top (int,myhface3_t *,int, ProjectVertex *, 
                     innerbndseg_t * up, const bnd_t b, 
                     IndexManagerType & im, typename Gitter::helement_STI * gh, int gFace ) ;
-    // constructor for macro elements 
-    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *, 
-                    innerbndseg_t * up, const bnd_t b, 
-                    IndexManagerType & im, Gitter * grd, 
-                    typename Gitter::helement_STI * gh, int ) ;
+
     inline virtual ~Hbnd3Top () ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
@@ -723,9 +718,11 @@ inline void Hface3Top < A > :: doRestore (InStream_t & is)
 
 // serial macro bnd constructor 
 template < class A > inline Hbnd3Top < A > :: 
-Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
-          innerbndseg_t * up, const bnd_t bt, IndexManagerType & im , Gitter * grd ) : 
-  A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (0) , 
+Hbnd3Top (int l, myhface3_t * f, int i, 
+          ProjectVertex* ppv, 
+          const bnd_t bt, 
+          IndexManagerType & im ) :
+  A (f, i, ppv ), _bbb (0), _dwn (0), _up (0) , 
   _indexManager(im) ,
   _lvl (l), _bt (bt) 
 {
@@ -735,10 +732,12 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
 }
 
 template < class A > inline Hbnd3Top < A > :: 
-Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
-          innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
+Hbnd3Top (int l, myhface3_t * f, 
+          int i, ProjectVertex *ppv, 
+          innerbndseg_t * up, bnd_t bt, 
+          IndexManagerType & im, 
           Gitter::helement_STI * gh, int gFace ) : 
-  A (f, i, ppv , up->_myGrid ), _bbb (0), _dwn (0), _up (up) , 
+  A (f, i, ppv ), _bbb (0), _dwn (0), _up (up) , 
   _indexManager(im) ,
   _lvl (l), _bt (bt)  
 {
@@ -746,23 +745,6 @@ Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv,
   this->setGhost ( ghostpair_STI (gh , gFace) );
   this->setIndex( _indexManager.getIndex() );
   
-  setBoundaryId( _bt ); 
-  return ;
-}
-
-template < class A > inline Hbnd3Top < A > :: 
-Hbnd3Top (int l, myhface3_t * f, int i, ProjectVertex *ppv, 
-          innerbndseg_t * up, bnd_t bt, IndexManagerType & im, 
-          Gitter * grd , Gitter::helement_STI * gh, int gFace) : 
-  A (f, i, ppv , grd ), _bbb (0), _dwn (0), _up (up) , 
-  _indexManager(im) ,
-  _lvl (l), _bt (bt) 
-{
-  typedef Gitter :: ghostpair_STI ghostpair_STI;
-  this->setGhost ( ghostpair_STI (gh , gFace) );
-  this->setIndex( _indexManager.getIndex() );
-
-  // set boundary tpye to bnd id of all items 
   setBoundaryId( _bt ); 
   return ;
 }
