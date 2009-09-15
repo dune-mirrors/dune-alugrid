@@ -1,10 +1,6 @@
 #ifndef _ALUGRID_PARALLEL_h_INCLUDED_
 #define _ALUGRID_PARALLEL_h_INCLUDED_
 
-// is this is defined the internal faces are used as ghost elements 
-// needs to be defined before all headers are included 
-//#define __USE_INTERNAL_FACES__
-
 // the message passing interface (MPI) headers 
 #include <mpi.h>
 
