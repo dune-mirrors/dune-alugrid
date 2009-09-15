@@ -21,7 +21,7 @@ template < class A, class MX > class Hbnd3PllExternal : public Hbnd3Top < A > {
     typedef typename A :: myhface3_t myhface3_t ;
     typedef typename A :: bnd_t     bnd_t ;
   public :
-    inline Hbnd3PllExternal (myhface3_t *, int, ProjectVertex *, const bnd_t bt, IndexManagerType & , Gitter * ) ;
+    inline Hbnd3PllExternal (myhface3_t *, int, ProjectVertex *, const bnd_t bt, IndexManagerType & ) ;
     inline ~Hbnd3PllExternal () ;
     ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
     const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -52,7 +52,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         typedef typename A :: balrule_t balrule_t ;
         typedef typename A :: bnd_t     bnd_t ;
         
-        inline HbndPll (myhface3_t *, int, ProjectVertex * , Gitter * );
+        inline HbndPll (myhface3_t *, int, ProjectVertex * );
         ~HbndPll () {}
         virtual bool bndNotifyBalance (balrule_t,int) ;
         virtual bool lockedAgainstCoarsening () const ;
@@ -106,10 +106,10 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         virtual bool lockedAgainstCoarsening () const ;
       public :
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
-                      IndexManagerType & im, Gitter * , 
+                      IndexManagerType & im,
                       BuilderIF& , MacroGhostInfoTetra* ) ;
         HbndPllMacro (myhface3_t *,int, ProjectVertex *, const bnd_t bt , 
-                      IndexManagerType & im, Gitter * , BuilderIF& ) ;
+                      IndexManagerType & im, BuilderIF& ) ;
        ~HbndPllMacro () ;
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
         const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -136,8 +136,8 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
 //    #    #    #  ######     #    #    #  ######
 //
 template < class A, class MX > inline Hbnd3PllExternal < A, MX > :: 
-Hbnd3PllExternal (myhface3_t * f, int t, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im, Gitter * grd ) 
-    : Hbnd3Top < A > (0,f,t,ppv,this,bt,im,grd), _mxt (new MX (*this)) {
+Hbnd3PllExternal (myhface3_t * f, int t, ProjectVertex *ppv, const bnd_t bt , IndexManagerType & im ) 
+    : Hbnd3Top < A > (0,f,t,ppv,bt,im), _mxt (new MX (*this)) {
   this->restoreFollowFace () ;
   return ;
 }
@@ -165,8 +165,8 @@ template < class A, class MX > void Hbnd3PllExternal < A, MX > :: detachPllXFrom
 }
 
 template < class A, class X, class MX > inline Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
-HbndPll (myhface3_t * f, int t, ProjectVertex *ppv , Gitter * grd )
-  : A (f,t,ppv,grd), _ext (*this), _ghostPair( (helement_STI *) 0, -1) {
+HbndPll (myhface3_t * f, int t, ProjectVertex *ppv )
+  : A (f,t,ppv), _ext (*this), _ghostPair( (helement_STI *) 0, -1) {
   return ;
 }
 
@@ -336,10 +336,10 @@ setGhost ( const ghostpair_STI & gpair )
 template < class A, class X, class MX > 
 Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: 
 HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , 
-    const bnd_t bt, IndexManagerType & im , Gitter * grd, 
+    const bnd_t bt, IndexManagerType & im, 
     BuilderIF& mgb ,
     MacroGhostInfoTetra* ghInfo) 
- : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,grd) 
+ : Hbnd3Top < micro_t > (0,f,t,ppv,bt,im) 
  , _mxt(0)
  , _mgb(mgb)
  , _gm( new MacroGhostTetra( _mgb , ghInfo, f ) ) 
@@ -355,9 +355,9 @@ HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv ,
 template < class A, class X, class MX > 
 Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: 
 HbndPllMacro (myhface3_t * f, int t, ProjectVertex *ppv , 
-    const bnd_t bt, IndexManagerType & im , Gitter * grd, 
+    const bnd_t bt, IndexManagerType & im ,  
     BuilderIF& mgb ) 
- : Hbnd3Top < micro_t > (0,f,t,ppv,0,bt,im,grd) 
+ : Hbnd3Top < micro_t > (0,f,t,ppv,bt,im) 
  , _mxt ( new MX (*this) )
  , _mgb(mgb)
  , _gm( 0 ) 

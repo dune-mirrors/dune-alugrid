@@ -16,7 +16,7 @@ template < class A, class MX > class Hbnd4PllExternal : public Hbnd4Top < A > {
     typedef typename A :: bnd_t     bnd_t ;
   public :
     inline Hbnd4PllExternal (myhface4_t *, int,ProjectVertex *, 
-                  const bnd_t bt, IndexManagerType & , Gitter * ) ;
+                  const bnd_t bt, IndexManagerType &) ;
     inline ~Hbnd4PllExternal () ;
     ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
     const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -45,7 +45,7 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         typedef typename A :: balrule_t  balrule_t ;
         typedef typename A :: bnd_t     bnd_t ;
 
-        inline HbndPll (myhface4_t *, int, ProjectVertex *, Gitter *) ;
+        inline HbndPll (myhface4_t *, int, ProjectVertex *) ;
        ~HbndPll () {}
         virtual bool bndNotifyBalance (balrule_t,int) ;
         virtual bool lockedAgainstCoarsening () const ;
@@ -102,11 +102,11 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
       public :
         HbndPllMacro (myhface4_t *,int, ProjectVertex *,
                       const bnd_t bt , IndexManagerType & im, 
-                      Gitter * , BuilderIF & ,
+                      BuilderIF & ,
                       MacroGhostInfoHexa* ) ;
         HbndPllMacro (myhface4_t *,int, ProjectVertex *,
                       const bnd_t bt , IndexManagerType & im, 
-                      Gitter * , BuilderIF & );
+                      BuilderIF & );
 
        ~HbndPllMacro () ;
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
@@ -137,8 +137,8 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
 
 template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: 
 Hbnd4PllExternal (myhface4_t * f, int t, ProjectVertex *ppv, const bnd_t bt , 
-    IndexManagerType & im, Gitter * grd ) 
-  : Hbnd4Top < A > (0,f,t,ppv,bt,im,grd), _mxt (new MX (*this)) 
+    IndexManagerType & im) 
+  : Hbnd4Top < A > (0,f,t,ppv,bt,im), _mxt (new MX (*this)) 
 {
   this->restoreFollowFace () ;
   return ;
@@ -167,7 +167,7 @@ template < class A, class MX > void Hbnd4PllExternal < A, MX > :: detachPllXFrom
 }
 
 template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX > :: HbndPll :: 
-HbndPll (myhface4_t * f, int t, ProjectVertex *ppv, Gitter * grd) : A (f,t,ppv,grd), _ext (*this) , _ghostPair((helement_STI *) 0 ,-1) {
+HbndPll (myhface4_t * f, int t, ProjectVertex *ppv) : A (f,t,ppv), _ext (*this) , _ghostPair((helement_STI *) 0 ,-1) {
   return ;
 }
 
@@ -332,10 +332,10 @@ inline void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
   
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: 
 HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv,
-              const bnd_t bt, IndexManagerType & im , 
-              Gitter * grd , BuilderIF & mgb,
+              const bnd_t bt, 
+              IndexManagerType & im, BuilderIF & mgb,
               MacroGhostInfoHexa* ghInfo ) 
-: Hbnd4Top < micro_t > (0,f,t,ppv,bt,im,grd)
+: Hbnd4Top < micro_t > (0,f,t,ppv,bt,im)
 , _mxt (0) 
 , _mgb(mgb) 
 , _gm(  new MacroGhostHexa( _mgb , ghInfo, f ) )  
@@ -351,9 +351,8 @@ HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv,
 
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: 
 HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t, ProjectVertex *ppv,
-              const bnd_t bt, IndexManagerType & im , 
-              Gitter * grd , BuilderIF & mgb)
-: Hbnd4Top < micro_t > (0,f,t,ppv,bt,im,grd)
+              const bnd_t bt, IndexManagerType & im, BuilderIF & mgb)
+: Hbnd4Top < micro_t > (0,f,t,ppv,bt,im)
 , _mxt (new MX (*this))
 , _mgb(mgb) 
 , _gm(0)  
