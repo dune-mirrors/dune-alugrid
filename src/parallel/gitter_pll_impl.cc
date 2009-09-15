@@ -1650,8 +1650,10 @@ void GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: detachPllXFromMacro ()
   return ;
 }
 
-GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid , istream & in) : GitterPll :: MacroGitterPll () , GitterBasis:: MacroGitterBasis (mygrid) {
-  macrogridBuilder (in) ;
+GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid , istream & in) : GitterPll :: MacroGitterPll () , GitterBasis:: MacroGitterBasis (mygrid) 
+{
+  assert( mygrid );
+  macrogridBuilder (in, mygrid->vertexProjection() ) ;
   return ;
 }
 
