@@ -1326,16 +1326,23 @@ template < class A > inline HexaTop < A >
   // if mapping is not affine recalculate volume 
   if( ! _affine )
   {
+    TrilinearMapping triMap (this->myvertex(0)->Point(),
+                             this->myvertex(1)->Point(),
+                             this->myvertex(2)->Point(),
+                             this->myvertex(3)->Point(),
+                             this->myvertex(4)->Point(),
+                             this->myvertex(5)->Point(),
+                             this->myvertex(6)->Point(),
+                             this->myvertex(7)->Point() );
+
+#ifndef NDEBUG 
+    // make sure determinant is ok 
+    double point[3] = { 0.0, 0.0, 0.0 };
+    assert( triMap.det( point ) > 0 );
+#endif
+
     // calculate volume 
-    _volume = QuadraturCube3D < VolumeCalc >
-                (TrilinearMapping (this->myvertex(0)->Point(), 
-                                   this->myvertex(1)->Point(),
-                                   this->myvertex(2)->Point(), 
-                                   this->myvertex(3)->Point(),
-                                   this->myvertex(4)->Point(), 
-                                   this->myvertex(5)->Point(),
-                                   this->myvertex(6)->Point(), 
-                                   this->myvertex(7)->Point())).integrate2 (0.0);
+    _volume = QuadraturCube3D < VolumeCalc > (triMap).integrate2 (0.0);
   }
 
   // make sure that given volume is the same as calulated 
