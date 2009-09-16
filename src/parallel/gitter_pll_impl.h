@@ -847,7 +847,8 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     } ;
   protected :
     MpAccessLocal & _mpaccess ;
-    MacroGitterPll * _macrogitter ;
+    MacroGitterPll* _macrogitter ;
+    ProjectVertex*  _ppv;
   public :
     virtual inline Makrogitter & container () ;
     virtual inline const Makrogitter & container () const ;
@@ -860,9 +861,11 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     virtual inline MacroGitterPll & containerPll () ;
     virtual inline const MacroGitterPll & containerPll () const ;
 
-    GitterBasisPll (const char *, MpAccessLocal &) ;
+    GitterBasisPll (const char *, MpAccessLocal &, ProjectVertex* ) ;
 
     virtual ~GitterBasisPll () ;
+
+    virtual ProjectVertex* vertexProjection() const { return _ppv; }
     
     //virtual void printMemUsage();
 } ;

@@ -1912,15 +1912,16 @@ IteratorSTI < Gitter :: hbndseg_STI > * GitterBasisPll :: MacroGitterBasisPll ::
   return GitterBasis :: MacroGitterBasis :: iterator (a) ;
 }
 
-GitterBasisPll :: GitterBasisPll (MpAccessLocal & mpa) : _mpaccess (mpa), _macrogitter (0) {
+GitterBasisPll :: GitterBasisPll (MpAccessLocal & mpa) 
+  : _mpaccess (mpa), _macrogitter (0) , _ppv( 0 ) {
   _macrogitter = new MacroGitterBasisPll (this) ;
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
   return ;
 }
 
-GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa) 
-  : GitterPll(mpa.myrank() == 0) , _mpaccess (mpa), _macrogitter (0) 
+GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa, ProjectVertex* ppv ) 
+  : GitterPll(mpa.myrank() == 0) , _mpaccess (mpa), _macrogitter (0) , _ppv( ppv ) 
 {
   assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll (const char * = \"" << f << "\" ...)" << endl, 1) : 1) ;
 
@@ -1931,7 +1932,7 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa)
     sprintf (extendedName, "%s.%u", f, mpa.myrank ()) ;
     ifstream in (extendedName) ;
     if (in) {
-      _macrogitter = new MacroGitterBasisPll (this,in) ;
+      _macrogitter = new MacroGitterBasisPll (this, in) ;
     } 
     else 
     {
