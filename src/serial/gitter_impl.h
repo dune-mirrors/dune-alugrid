@@ -74,9 +74,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
               return p;
             }
 
-            inline int preCoarsening  () ;
-            inline int postRefinement () ;
-
             // default implementation returns 0
             virtual const MacroGhostInfo* buildGhostCell(ObjectStream&, int) { return 0; }
         };
@@ -120,8 +117,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
             // default implementation returns 0
             virtual const MacroGhostInfo * buildGhostCell(ObjectStream&, int) { return 0; }
-            inline int preCoarsening  () ; 
-            inline int postRefinement () ;
         };
         typedef Hbnd4Top < Hbnd4Default > hbndseg4_IMPL ;
 
@@ -626,6 +621,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
 class GitterBasisImpl : public GitterBasis {
   MacroGitterBasis * _macrogitter ;
+  ProjectVertex*     _ppv;
   public:
    //us fuer Globalmethode levelwalk
   inline Makrogitter & container () ;
@@ -634,11 +630,14 @@ class GitterBasisImpl : public GitterBasis {
     inline IndexManagerType & indexManager(int codim);
         
     inline GitterBasisImpl () ;
-    inline GitterBasisImpl (istream &) ;
-    inline GitterBasisImpl (const char *) ;
+    inline GitterBasisImpl (istream &, ProjectVertex* ) ;
+    inline GitterBasisImpl (const char *, ProjectVertex* ) ;
     inline ~GitterBasisImpl () ;
 
     virtual void printMemUsage ();
+
+    // return pointer to vertex projection 
+    virtual ProjectVertex* vertexProjection() const;
 } ;
 
 
@@ -692,7 +691,8 @@ inline GitterBasis :: Objects :: Hface3Empty :: Hface3Empty (myhedge1_t *e0, int
   return ;
 }
 
-inline void GitterBasis :: Objects :: Hface3Empty :: projectVertex(const ProjectVertex &pv) {
+inline void GitterBasis :: Objects :: Hface3Empty :: projectVertex(const ProjectVertex &pv) 
+{
   assert(!leaf());
   for (int e = 0; e < polygonlength; e++)
     myhedge1(e)->projectInnerVertex(pv);
@@ -804,18 +804,6 @@ Hbnd3Default (myhface3_t * f, int i, ProjectVertex *ppv )
   return ;
 }
 
-// calles method on grid which return 0 for default impl 
-inline int GitterBasis :: Objects :: Hbnd3Default :: preCoarsening () 
-{
-  return 0;
-}
-
-// calles method on grid which return 0 for default impl 
-inline int GitterBasis :: Objects :: Hbnd3Default :: postRefinement () 
-{
-  return 0;
-}
-
 inline GitterBasis :: Objects ::Hbnd3Default :: bnd_t GitterBasis :: Objects :: Hbnd3Default :: bndtype () const {
   return undefined ;
 }
@@ -828,18 +816,6 @@ inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, i
   Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv)
 {
   return ;
-}
-
-// calles method on grid which return 0 for default impl 
-inline int GitterBasis :: Objects :: Hbnd4Default :: preCoarsening () 
-{
-  return 0;
-}
-
-// calles method on grid which return 0 for default impl 
-inline int GitterBasis :: Objects :: Hbnd4Default :: postRefinement () 
-{
-  return 0;
 }
 
 inline GitterBasis :: Objects ::Hbnd4Default :: bnd_t GitterBasis :: Objects :: Hbnd4Default :: bndtype () const {
@@ -921,21 +897,27 @@ inline int GitterBasis::Objects::HexaEmpty::postRefinement()
 
 // Ende - Neu 29.4.05
 
-inline GitterBasisImpl :: GitterBasisImpl () : _macrogitter (0) {
+inline GitterBasisImpl :: GitterBasisImpl () : _macrogitter (0) , _ppv(0) 
+{
   _macrogitter = new MacroGitterBasis ( this ) ;
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
   return ;
 }
 
-inline GitterBasisImpl :: GitterBasisImpl (istream & in) : _macrogitter (0) {
+inline GitterBasisImpl :: GitterBasisImpl (istream & in, ProjectVertex* ppv) 
+  : _macrogitter (0) , _ppv( ppv ) 
+{
   _macrogitter = new MacroGitterBasis ( this , in) ;
   assert (_macrogitter) ;
   notifyMacroGridChanges () ;
   return ;
 }
 
-inline GitterBasisImpl :: GitterBasisImpl (const char * file) : _macrogitter (0) {
+inline GitterBasisImpl :: GitterBasisImpl (const char * file, 
+                                           ProjectVertex* ppv) 
+: _macrogitter (0), _ppv( ppv ) 
+{
   ifstream in (file) ;
   if (!in) {
     cerr << "  GitterBasisImpl :: GitterBasisImpl (const char *) FEHLER (IGNORIERT) " ;
@@ -952,6 +934,11 @@ inline GitterBasisImpl :: GitterBasisImpl (const char * file) : _macrogitter (0)
 inline GitterBasisImpl :: ~GitterBasisImpl () {
   delete _macrogitter ;
   return ;
+}
+
+inline ProjectVertex*  GitterBasisImpl :: vertexProjection() const 
+{
+  return _ppv;
 }
 
 inline Gitter :: Makrogitter & GitterBasisImpl :: container () {

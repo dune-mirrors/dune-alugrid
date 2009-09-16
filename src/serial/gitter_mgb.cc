@@ -616,6 +616,14 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, bool init)
   if(init) initialize();
 }
 
+MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, ProjectVertex* ppv) 
+ : _initialized(false) 
+ , _finalized(false) 
+ , _ppv( ppv ), _mgb (b) 
+{
+  initialize();
+}
+
 void MacroGridBuilder :: initialize () 
 {
   {

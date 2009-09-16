@@ -661,7 +661,7 @@ public :
     // the int is -1 by default, or the internal ghostFace number (
     // getGhostFaceNumber) when ghost is non-zero 
     virtual const pair < helement * ,int> & getGhost () const = 0; 
-    
+
   protected:
     // if ghost element exists, then ghost is splitted, when bnd is splitted 
     // info will be filled with the new ghost cells and local face to the
@@ -869,6 +869,9 @@ public :
       virtual bool isboundary() const = 0;    
       virtual int nbLevel() const = 0;
       virtual int nbLeaf() const = 0;
+
+      // returns true if a vertex projection is set 
+      virtual bool hasVertexProjection () const = 0;
     } ;
 
     class hasFace4 : public virtual stiExtender_t :: ElementIF {
@@ -888,6 +891,9 @@ public :
       virtual bool isboundary() const = 0;
       virtual int nbLevel() const  = 0;
       virtual int nbLeaf() const = 0; 
+
+      // returns true if a vertex projection is set 
+      virtual bool hasVertexProjection () const = 0;
     } ;
 
     // hasFace_t is hasFace3 and hasFace4 
@@ -914,6 +920,9 @@ public :
 
       // as we have not a real element or boundary here, return false 
       bool isRealObject () const { return false; }
+
+      // return false for vertex projection  
+      inline bool hasVertexProjection() const { return false; }
     private:
       hasFaceEmpty () {}
       hasFaceEmpty (const hasFaceEmpty & );
@@ -1176,6 +1185,9 @@ public :
       virtual int nbLevel() const {return level();}
       // returns leaf 
       virtual int nbLeaf() const {return leaf();}
+
+      // returns false because only bnd segments have projections 
+      virtual bool hasVertexProjection () const { return false; }
     public :
       virtual myrule_t getrule () const = 0 ;
       
@@ -1247,6 +1259,9 @@ public :
       virtual int nbLevel() const {return level();}
       // just returns leaf 
       virtual int nbLeaf() const {return leaf();}
+
+      // return false for vertex projection  
+      virtual bool hasVertexProjection() const { return false; }
     private :
       myhface3_t * f [2] ;
       signed char s [2] ;
@@ -1299,6 +1314,9 @@ public :
       virtual int nbLevel() const {return level();}
       // just returns leaf 
       virtual int nbLeaf() const {return leaf();}
+
+      // returns false because only bnd segments have projections 
+      virtual bool hasVertexProjection () const { return false; }
     private :
       myhface4_t * f [2] ;
       signed char s [2] ;
@@ -1364,6 +1382,9 @@ public :
       virtual int nbLevel() const {return level();}
       // just returns leaf 
       virtual int nbLeaf() const {return leaf();}
+
+      // returns false because only bnd segments have projections 
+      virtual bool hasVertexProjection () const { return false; }
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
@@ -1410,6 +1431,9 @@ public :
       inline int postRefinement () ;
       inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
+      inline bool hasVertexProjection() const { 
+        cout << "Called hasVertexProjection hbnd3 \n";
+        return (_projection != 0); }
     public :
       inline virtual ~hbndseg3 () ;
       inline myrule_t getrule () const ;
@@ -1453,11 +1477,12 @@ public :
           face.myvertex(i)->removeleaf();
         }
       }
+    protected :
+      ProjectVertex* _projection;
+
     private :
       myhface3_t * _face ;
       int _twist ;
-    protected :
-      ProjectVertex *projection;
     public:  
     } hbndseg3_GEO ;
   
@@ -1476,6 +1501,7 @@ public :
       inline int postRefinement () ;
       inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
+      inline bool hasVertexProjection() const { return (_projection != 0); }
     public :
       inline virtual ~hbndseg4 () ;
       inline myrule_t getrule () const ;
@@ -1516,11 +1542,11 @@ public :
           face.myvertex(i)->removeleaf();
         }
       }
+    protected :
+      ProjectVertex* _projection;
     private :
       myhface4_t * _face ;
       int _twist ;
-    protected :
-      ProjectVertex *projection;
 
     public:   
     } hbndseg4_GEO ;
@@ -1714,8 +1740,8 @@ public :
   virtual int preCoarsening ( hbndseg_STI & ) { return 0; }
   virtual int postRefinement( hbndseg_STI & ) { return 0; }
 
-  // return pointer to vertex projection (if set), default returns 0
-  virtual ProjectVertex* vertexProjection() const { return 0; };
+  // return pointer to vertex projection 
+  virtual ProjectVertex* vertexProjection() const = 0; 
 
   virtual void fullIntegrityCheck () ;
   virtual void printsize () ;
@@ -2201,11 +2227,17 @@ inline int Gitter :: Geometric :: VertexGeo :: level () const {
   return _lvl ;
 }
 
-inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv) {
-  double p[3] = {_c[0],_c[1],_c[2]};
-  if (!pv(p,_c)) {
-    cerr << "FEHLER in Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv) " 
-         << "keine Randanpassung m\"oglich!" << endl;
+inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv) 
+{
+  // copy current coordinates  
+  const double p[3] = {_c[0],_c[1],_c[2]};
+  // call projection operator 
+  const int ok = pv( p, _c );
+
+  if ( ! ok ) 
+  {
+    cerr << "ERROR in Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv) " 
+         << "no boundary projection possible!" << endl;
     _c[0] = p[0]; _c[1] = p[1]; _c[2] = p[2];
   }
 }
@@ -3199,7 +3231,7 @@ inline int Gitter :: Geometric :: Hexa :: originalEdgeTwist (int face, int edge)
 
 inline Gitter :: Geometric :: hbndseg3 :: 
 hbndseg3 (myhface3_t * a, int b, ProjectVertex *ppv) 
-  : _face (a), _twist (b), projection(ppv) 
+  : _projection(ppv), _face (a), _twist (b)
 {
   _face->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this),0), _twist) ;
   return ;
@@ -3212,14 +3244,15 @@ inline Gitter :: Geometric :: hbndseg3 :: ~hbndseg3 () {
 
 inline int Gitter :: Geometric :: hbndseg3 :: postRefinement () 
 {
-  if (projection) 
+  if (_projection) 
   {
-    myhface3(0)->projectVertex(*projection);
+    myhface3(0)->projectVertex(*_projection);
   }
   return 0 ;
 }
 
-inline int Gitter :: Geometric :: hbndseg3 :: preCoarsening () {
+inline int Gitter :: Geometric :: hbndseg3 :: preCoarsening () 
+{
   return 0 ;
 }
 
@@ -3260,7 +3293,7 @@ inline int Gitter :: Geometric :: hbndseg3 :: nChild () const {
 // #     #  #####   #    #  #####    ####   ######   ####       #
 
 inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface4_t * a, int b, ProjectVertex *ppv) 
-  : _face (a), _twist (b), projection(ppv) 
+  :  _projection(ppv), _face (a), _twist (b) 
 {
   _face->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this),0), _twist) ;
   return ;
@@ -3273,9 +3306,9 @@ inline Gitter :: Geometric :: hbndseg4 :: ~hbndseg4 () {
 
 inline int Gitter :: Geometric :: hbndseg4 :: postRefinement () 
 {
-  if (projection) 
+  if (_projection) 
   {
-    myhface4(0)->projectVertex(*projection);
+    myhface4(0)->projectVertex(*_projection);
   }
   return 0 ;
 }

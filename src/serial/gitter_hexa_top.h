@@ -832,13 +832,10 @@ template < class A > void Hface4Top < A > :: refineImmediate (myrule_t r) {
       abort () ;
       break ;
     }
-// ?? // Die nichtkonforme Nachbarschaft noch erg"anzen und auf der
-// ?? // Fl"ache die Situation nach der Verfeinerung vervollst"andigen.
-// ?? 
-// ??   {for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = nb ; }
 
     // * higher order, this is a hack
-    for (innerface_t* f = down(); f; f = f->next()) { //, ++i) {
+    for (innerface_t* f = down(); f; f = f->next()) 
+    { 
       f->_parRule = getrule();
     }
 
@@ -1081,15 +1078,15 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   void* bndMem[8] = {0,0,0,0};
   this->mallocAtOnce( sizeof(innerbndseg_t), bndMem, 4 );
 
-  innerbndseg_t * b0 = new (bndMem[0]) innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghostInfo.child(0), ghostInfo.face(0)) ;
-  innerbndseg_t * b1 = new (bndMem[1]) innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghostInfo.child(1), ghostInfo.face(1)) ;
-  innerbndseg_t * b2 = new (bndMem[2]) innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghostInfo.child(2), ghostInfo.face(2)) ;
-  innerbndseg_t * b3 = new (bndMem[3]) innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghostInfo.child(3), ghostInfo.face(3)) ;
+  innerbndseg_t * b0 = new (bndMem[0]) innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->_projection, this, ghostInfo.child(0), ghostInfo.face(0)) ;
+  innerbndseg_t * b1 = new (bndMem[1]) innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->_projection, this, ghostInfo.child(1), ghostInfo.face(1)) ;
+  innerbndseg_t * b2 = new (bndMem[2]) innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->_projection, this, ghostInfo.child(2), ghostInfo.face(2)) ;
+  innerbndseg_t * b3 = new (bndMem[3]) innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->_projection, this, ghostInfo.child(3), ghostInfo.face(3)) ;
 #else
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->projection, this, ghostInfo.child(0), ghostInfo.face(0)) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->projection, this, ghostInfo.child(1), ghostInfo.face(1)) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->projection, this, ghostInfo.child(2), ghostInfo.face(2)) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->projection, this, ghostInfo.child(3), ghostInfo.face(3)) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface4 (0,0), this->twist (0), this->_projection, this, ghostInfo.child(0), ghostInfo.face(0)) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface4 (0,1), this->twist (0), this->_projection, this, ghostInfo.child(1), ghostInfo.face(1)) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface4 (0,2), this->twist (0), this->_projection, this, ghostInfo.child(2), ghostInfo.face(2)) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface4 (0,3), this->twist (0), this->_projection, this, ghostInfo.child(3), ghostInfo.face(3)) ;
 #endif 
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
@@ -1099,8 +1096,8 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   return ;
 }
 
-template < class A > inline bool Hbnd4Top < A > :: refineBalance (balrule_t r, int b) {
-
+template < class A > inline bool Hbnd4Top < A > :: refineBalance (balrule_t r, int b) 
+{
   // Die Methode refineBalance () f"uhrt auf dem Randabschluss entweder
   // unbedingt die Verfeinerung durch, da im Verlauf der Verfeinerung keine
   // weiteren Anforerungen mehr an den Randabschluss  gerichtet werden 
@@ -1109,43 +1106,49 @@ template < class A > inline bool Hbnd4Top < A > :: refineBalance (balrule_t r, i
 
   assert (b == 0) ;
   assert (this->leaf ()) ;
-  if (! bndNotifyBalance (r,b)) {
-  
+  if (! bndNotifyBalance (r,b)) 
+  {
     // Hier kann der innere Rand [parallel] die Verfeinerung
-  // verhindern, damit z.B. das Durchverfeinern im anisotropen
-  // Fall erstmal nicht stattfindet, wenn nicht klar ist, wie die
-  // weitere Rekursion aussieht. Dazu muss auf dem Niveau der Klasse
-  // des Template-Arguments die Methode bndNotifyBalance () "uber-
-  // schrieben werden. Die Defaultmethode liefert immer 'true'.
-  
+    // verhindern, damit z.B. das Durchverfeinern im anisotropen
+    // Fall erstmal nicht stattfindet, wenn nicht klar ist, wie die
+    // weitere Rekursion aussieht. Dazu muss auf dem Niveau der Klasse
+    // des Template-Arguments die Methode bndNotifyBalance () "uber-
+    // schrieben werden. Die Defaultmethode liefert immer 'true'.
+    
     return false ;
-  } else {
-    if(r == myrule_t :: iso4) {
-    
+  } 
+  else 
+  {
+    if(r == myrule_t :: iso4) 
+    {
       // Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
-  // sich selbst, weil die Anforderung durch die Fl"ache kam, und
-  // dahinter keine Balancierung stattfinden muss.
+      // sich selbst, weil die Anforderung durch die Fl"ache kam, und
+      // dahinter keine Balancierung stattfinden muss.
     
+      // refine face 
       this->myhface4 (0)->refineImmediate (r) ;
+      // refine myself 
       splitISO4 () ;
-    } else {
+    } 
+    else 
+    {
       cerr << "**FEHLER (FATAL, weil nicht vorgesehen) beim Verfeinern am " ;
       cerr << "Randst\"uck mit der Regel [" << r << "] in " ;
       cerr << __FILE__ << " " << __LINE__ << endl ;
       abort () ;
     }
     
-      // postRefinement () gibt die M"oglichkeit auf dem Niveau des
-  // Template-Arguments eine Methode aufzurufen, um eventuelle
-  // Operationen auf dem verfeinerten Randst"uck aufzurufen.
+    // postRefinement () gibt die M"oglichkeit auf dem Niveau des
+    // Template-Arguments eine Methode aufzurufen, um eventuelle
+    // Operationen auf dem verfeinerten Randst"uck aufzurufen.
     
     this->postRefinement () ;
     return true ;
   }
 }
 
-template < class A > inline bool Hbnd4Top < A > :: refineLikeElement (balrule_t r) {
-
+template < class A > inline bool Hbnd4Top < A > :: refineLikeElement (balrule_t r) 
+{
   // Mit der Methode refineLikeElement () verh"alt sich ein Randabschluss
   // in der Verfeinerung wie ein Element: Es wird zuerst gepr"uft ob eine
   // Balancierung der Vererfeinerung durch die Fl"ache hindurch erfolgreich
@@ -1157,32 +1160,44 @@ template < class A > inline bool Hbnd4Top < A > :: refineLikeElement (balrule_t 
   // aufgel"ost ist. Erst die mehrfache Anwendung f"uhrt durch die 
   // Balancierung zu einer "Anderung am Elementgitter.
 
-  if (r == myrule_t :: nosplit) {
+  if (r == myrule_t :: nosplit) 
+  {
     cerr << "**WARNUNG (IGNORIERT) beim Versuch mit nosplit zu Verfeinern" ;
     cerr << "  in " << __FILE__ << " " << __LINE__ << endl ;
     
-      // Eine Anforderung mit nosplit zu Verfeinern nur erf"ullt,
-  // falls die zugeh"orige Fl"achenregel auch nosplit ist, sonst
-  // wird die Anforderung als nicht erf"ullt zur"uckgegeben.
+    // Eine Anforderung mit nosplit zu Verfeinern nur erf"ullt,
+    // falls die zugeh"orige Fl"achenregel auch nosplit ist, sonst
+    // wird die Anforderung als nicht erf"ullt zur"uckgegeben.
     
     return this->getrule () == balrule_t :: nosplit ? true : false ;
-  } else {
-    if (this->getrule () == r) {
-    
+  } 
+  else 
+  {
+    if (this->getrule () == r) 
+    {
       // Alles schon wie es sein soll -> true.
-    
       return true ;
-    } else {
-  
-  // Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
-  // der Fl"ache, da getrule () auf myhface4 (0)->getrule () umgeleitet
-  // ist.
-  
+    } 
+    else 
+    {
+      // Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
+      // der Fl"ache, da getrule () auf myhface4 (0)->getrule () umgeleitet
+      // ist.
+      
       assert (this->getrule () == myrule_t :: nosplit) ;
-      switch (r) {
+      switch (r) 
+      {
       case balrule_t :: iso4 :
         if (! this->myhface4 (0)->refine(balrule_t (balrule_t :: iso4).rotate (this->twist (0)), this->twist (0))) return false ;
+
+        // call refinement method 
         splitISO4 () ;
+
+        // postRefinement () gibt die M"oglichkeit auf dem Niveau des
+        // Template-Arguments eine Methode aufzurufen, um eventuelle
+        // Operationen auf dem verfeinerten Randst"uck aufzurufen.
+        this->postRefinement () ;
+
         return true ;
       default :
         cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << this->getrule () ;
@@ -1193,28 +1208,33 @@ template < class A > inline bool Hbnd4Top < A > :: refineLikeElement (balrule_t 
   }
 }
 
-template < class A > void Hbnd4Top < A > :: restoreFollowFace () {
-
+template < class A > void Hbnd4Top < A > :: restoreFollowFace () 
+{
   // retoreFollowFace () veranlasst das Randelement sich am 
   // bestehenden Fl"achenbaum wiederherzustellen durch die
   // entsprechende Verfeinerung.
   
   myhface4_t & f (*(this->myhface4 (0))) ;
-  if (!f.leaf ()) {
+  if (!f.leaf ()) 
+  {
     balrule_t r = f.getrule () ;
-    switch (r) {
+    switch (r) 
+    {
       case myrule_t :: iso4 :
         splitISO4 () ;
-  break ;
+        break ;
       default :
         cerr << "**FEHLER (FATAL, weil nicht vorgesehen) beim Verfeinern am " ;
         cerr << "Randst\"uck mit der Regel [" << r << "] in " ;
         cerr << __FILE__ << " " << __LINE__ << endl ;
         abort () ;
-  break ;
+        break ;
     }
+    // do post refinement 
     this->postRefinement () ;
-    {for (innerbndseg_t * b = down () ; b ; b = b->next ()) b->restoreFollowFace () ; }
+    {
+      for (innerbndseg_t * b = down () ; b ; b = b->next ()) b->restoreFollowFace () ; 
+    }
   }
   return ;
 }
@@ -1265,7 +1285,7 @@ template < class A > inline HexaTop < A >
   , _lvl (l)
   , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
   , _nChild(0) 
-  , _affine(false)
+  , _affine( false )
 { 
   TrilinearMapping trMap (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
                           this->myvertex(2)->Point(), this->myvertex(3)->Point(),
@@ -1275,7 +1295,7 @@ template < class A > inline HexaTop < A >
   _volume = QuadraturCube3D < VolumeCalc > (trMap).integrate2 (0.0);
   // check whether mapping is affine 
   _affine = trMap.affine(); 
-  
+
   assert( this->level() == l );
   
   this->setIndex( _indexManager.getIndex() );   
@@ -1516,6 +1536,22 @@ template < class A > void HexaTop < A > :: splitISO8 ()
 
   // calculate child volume which is volume divided by 8 
   double childVolume = 0.125 * _volume;
+
+  // only check for affine faces 
+  // for other it does not matter 
+  if( _affine ) 
+  {
+    // if vertex projection is available
+    // then set affine to false to invoke volume calculation  
+    for( int i=0; i<6; ++i) 
+    {
+      if( this->myneighbour( i ).first->hasVertexProjection() )
+      {
+        _affine = false ; 
+        break ;
+      }
+    }
+  }
 
 #ifdef USE_MALLOC_AT_ONCE
   void* hexaMem[8] = {0,0,0,0,0,0,0,0};
