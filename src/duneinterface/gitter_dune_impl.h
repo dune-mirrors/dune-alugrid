@@ -40,9 +40,6 @@ protected:
   // adaptation callback handler 
   AdaptRestrictProlongType * _arp;
 
-  // vertex projection class 
-  ProjectVertex* _ppv;
-
   // call preCoarsening and postRefinement of arp
   virtual int preCoarsening  (Gitter::helement_STI &);
   virtual int postRefinement (Gitter::helement_STI &);
@@ -50,9 +47,6 @@ protected:
   // call preCoarsening and postRefinement of arp
   virtual int preCoarsening  (Gitter::hbndseg_STI &);
   virtual int postRefinement (Gitter::hbndseg_STI &);
-
-  // return pointer to vertex projection 
-  virtual ProjectVertex* vertexProjection() const { return _ppv; }
 
   virtual void setAdaptRestrictProlongOp ( AdaptRestrictProlongType & arp );
   virtual void removeAdaptRestrictProlongOp ();
@@ -66,7 +60,7 @@ protected:
   virtual IteratorSTI < Gitter :: helement_STI > * leafIterator (const IteratorSTI < Gitter :: helement_STI > *) = 0 ;
 
 public:
-  GitterDuneBasis(ProjectVertex* ppv) : _arp(0), _ppv( ppv ), maxlevel_(0) {}
+  GitterDuneBasis() : _arp(0), maxlevel_(0) {}
   
   virtual void backupIndices  (ostream & out);
   virtual void restoreIndices (istream & in );
@@ -119,14 +113,13 @@ public:
 
   //! constructor creating grid from macro grid file 
   inline GitterDuneImpl (const char *filename, ProjectVertex* ppv = 0 ) 
-    : GitterBasisImpl (filename ) 
-    , GitterDuneBasis ( ppv )  
+    : GitterBasisImpl (filename, ppv ) 
   {}
   
   //! constructor creating empty grid 
   inline GitterDuneImpl () 
     : GitterBasisImpl () 
-    , GitterDuneBasis( (ProjectVertex *)0 ) {}
+  {}
 };
 
 

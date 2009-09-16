@@ -31,8 +31,7 @@ public:
   GitterDunePll (const char * filename , 
                  MpAccessLocal &mp, 
                  ProjectVertex* ppv = 0 ) 
-    : GitterDuneBasis( ppv ) 
-    , GitterBasisPll (filename,mp) 
+    : GitterBasisPll (filename, mp, ppv) 
     , balanceGrid_ (false) 
   {
 #ifndef NDEBUG
