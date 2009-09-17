@@ -1925,12 +1925,17 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa, ProjectVe
 {
   assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll (const char * = \"" << f << "\" ...)" << endl, 1) : 1) ;
 
+  const int myrank = mpa.myrank();
+  stringstream rank;
+  rank << "." << myrank;
+
   // if still no macrogitter, try old method 
   if(!_macrogitter) 
   {
-    char * extendedName = new char [strlen(f) + 200] ;
-    sprintf (extendedName, "%s.%u", f, mpa.myrank ()) ;
-    ifstream in (extendedName) ;
+    string extendedName ( f );
+    extendedName += rank.str();
+
+    ifstream in (extendedName.c_str()) ;
     if (in) {
       _macrogitter = new MacroGitterBasisPll (this, in) ;
     } 
@@ -1940,15 +1945,27 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa, ProjectVe
         ( cerr << "  GitterBasisPll :: GitterBasisPll () file: " << extendedName 
            << " cannot be read. Try " << f << " instead. In " << __FILE__ << " line " << __LINE__ << endl, 1) : 1);
     }
-    delete [] extendedName ;
   }
 
-  // read normal macro gitter if myrank is 0 
-  //if( (mpa.myrank () == 0) && !_macrogitter )
-  if( !_macrogitter )
+  // only check this for higher ranks 
+  // we assume that filename already contains rank info
+  // if not empty grid is created 
+  if( ! _macrogitter && myrank > 0 )
+  {
+    string filename ( f );
+    const int pos = filename.rfind( rank.str() );
+    // if not found filename not valid and empty grid is created 
+    if( pos == -1 ) 
+    {
+      _macrogitter = new MacroGitterBasisPll (this) ;
+    }
+  }
+
+  // read normal macro gitter if not created yet  
+  if( ! _macrogitter ) 
   {
     ifstream in ( f ) ;
-    if (in) _macrogitter = new MacroGitterBasisPll (this,in) ;
+    if (in) _macrogitter = new MacroGitterBasisPll (this, in) ;
   }
   
   // create empty macro gitter 

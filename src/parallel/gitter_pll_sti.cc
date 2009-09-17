@@ -107,7 +107,8 @@ void GitterPll :: printSizeTT () {
   return ;
 }
 
-void GitterPll :: printsize () {
+void GitterPll :: printsize () 
+{
   const int me = mpAccess ().myrank (), np = mpAccess ().psize (), nl = mpAccess ().nlinks () ;
   
   if (debugOption (10)) Gitter :: printsize () ;
@@ -137,9 +138,22 @@ void GitterPll :: printsize () {
   }
   n.push_back (LeafIterator < helement_STI > (*this)->size()) ;
   n.push_back (LeafIterator < hbndseg_STI > (*this)->size() - sumCutFaces) ;
+
+  {
+    cout << "\nP[" << me << "] GitterPll :: printSize () : \n\n" ;
+    cout << " - Elements ......... "  << n[3] << "\n" ;
+    cout << " - Boundaries ....... "  << n[4] << "\n" ;
+    cout << " - Faces ............ "  << n[2] << "\n" ;
+    cout << " - Edges ............ "  << n[1] << "\n" ;
+    cout << " - Vertices ......... "  << n[0] << "\n" ;
+    cout << endl ;
+  }
+
   vector < vector < int > > in = mpAccess ().gcollect (n) ;
   assert (static_cast<int> (in.size ()) == np) ;
-  if (me == 0) {
+
+  if (me == 0) 
+  {
     int nv = 0, nd = 0, nf = 0, ne = 0, nb = 0 ;
     for (int i = 0 ; i < np ; i ++ ) {
       nv += (in [i])[0] ;
@@ -148,12 +162,12 @@ void GitterPll :: printsize () {
       ne += (in [i])[3] ;
       nb += (in [i])[4] ;
     }
-    cout << "\n GitterPll :: printSize () : \n\n" ;
-    cout << " - Elements ......... "  << ne << "\n" ;
+    cout << "\nSummary -- GitterPll :: printSize () : \n\n" ;
+    cout << " - Elements ......... " << ne << "\n" ;
     cout << " - Boundaries ....... " << nb << "\n" ;
     cout << " - Faces ............ " << nf << "\n" ;
-    cout << " - Edges ............ "  << nd << "\n" ;
-    cout << " - Vertices ......... "  << nv << "\n" ;
+    cout << " - Edges ............ " << nd << "\n" ;
+    cout << " - Vertices ......... " << nv << "\n" ;
     cout << endl ;
   }
   return ;
