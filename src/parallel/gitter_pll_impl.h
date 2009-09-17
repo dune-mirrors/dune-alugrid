@@ -861,7 +861,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     virtual inline MacroGitterPll & containerPll () ;
     virtual inline const MacroGitterPll & containerPll () const ;
 
-    GitterBasisPll (const char *, MpAccessLocal &, ProjectVertex* ) ;
+    GitterBasisPll (const string, MpAccessLocal &, ProjectVertex* ) ;
 
     virtual ~GitterBasisPll () ;
 

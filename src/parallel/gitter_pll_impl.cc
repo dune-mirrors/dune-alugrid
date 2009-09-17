@@ -1920,10 +1920,11 @@ GitterBasisPll :: GitterBasisPll (MpAccessLocal & mpa)
   return ;
 }
 
-GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa, ProjectVertex* ppv ) 
+GitterBasisPll :: GitterBasisPll (const string filename, 
+                                  MpAccessLocal & mpa, ProjectVertex* ppv ) 
   : GitterPll(mpa.myrank() == 0) , _mpaccess (mpa), _macrogitter (0) , _ppv( ppv ) 
 {
-  assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll (const char * = \"" << f << "\" ...)" << endl, 1) : 1) ;
+  assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll (const char * = \"" << filename << "\" ...)" << endl, 1) : 1) ;
 
   const int myrank = mpa.myrank();
   stringstream rank;
@@ -1932,18 +1933,19 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa, ProjectVe
   // if still no macrogitter, try old method 
   if(!_macrogitter) 
   {
-    string extendedName ( f );
+    string extendedName ( filename );
     extendedName += rank.str();
 
     ifstream in (extendedName.c_str()) ;
-    if (in) {
+    if (in) 
+    {
       _macrogitter = new MacroGitterBasisPll (this, in) ;
     } 
     else 
     {
       assert (debugOption (5) ? 
         ( cerr << "  GitterBasisPll :: GitterBasisPll () file: " << extendedName 
-           << " cannot be read. Try " << f << " instead. In " << __FILE__ << " line " << __LINE__ << endl, 1) : 1);
+           << " cannot be read. Try " << filename << " instead. In " << __FILE__ << " line " << __LINE__ << endl, 1) : 1);
     }
   }
 
@@ -1952,10 +1954,10 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa, ProjectVe
   // if not empty grid is created 
   if( ! _macrogitter && myrank > 0 )
   {
-    string filename ( f );
-    const int pos = filename.rfind( rank.str() );
+    // search rank info in filename 
+    const int result = filename.rfind( rank.str() );
     // if not found filename not valid and empty grid is created 
-    if( pos == -1 ) 
+    if( result == -1 )
     {
       _macrogitter = new MacroGitterBasisPll (this) ;
     }
@@ -1964,7 +1966,7 @@ GitterBasisPll :: GitterBasisPll (const char * f, MpAccessLocal & mpa, ProjectVe
   // read normal macro gitter if not created yet  
   if( ! _macrogitter ) 
   {
-    ifstream in ( f ) ;
+    ifstream in ( filename.c_str() ) ;
     if (in) _macrogitter = new MacroGitterBasisPll (this, in) ;
   }
   
