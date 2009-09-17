@@ -313,10 +313,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
     }
 
     // allocate edge memory for graph partitioners 
-    //int    * const edge_p      = new int [nel + 1] ;
-    //int    * const edge        = new int [ned] ;
-    //int    * const edge_w      = new int [ned] ;
-
     // get memory at once 
     int    * const edge_mem    = new int [(nel + 1) + ned + ned ];
 
@@ -354,9 +350,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
     // get vertex memory 
     float  * const vertex_w    = new float [nel] ;
 
-    //int    * const vertex_wInt = new int [nel] ;
-    //int    * part              = new int [nel] ;
-
     const int sizeNeu = (np > 1) ? nel : 0;
     int    * vertex_mem = new int [nel + nel + sizeNeu];
 
@@ -383,14 +376,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
       {
         cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
         cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
-        /*
-        delete [] part ;
-        delete [] vertex_wInt ;
-        delete [] vertex_w ;
-        delete [] edge_w ;
-        delete [] edge ;
-        delete [] edge_p ;
-        */
 
         delete [] vertex_w ;
         delete [] vertex_mem;
@@ -500,16 +485,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
           cerr << "**WARNUNG (FEHLER IGNORIERT) Ung\"ultige Methode [" << mth << "] zur\n" ;
           cerr << "  Neupartitionierung angegeben. In " << __FILE__ << " " << __LINE__ << endl ;
             
-          /*
-          delete [] neu ;
-          delete [] part ;
-          delete [] vertex_wInt ;
-          delete [] vertex_w ;
-          delete [] edge_w ;
-          delete [] edge ;
-          delete [] edge_p ;
-          */
-
           delete [] vertex_w ;
           delete [] vertex_mem;
           delete [] edge_mem;
@@ -541,21 +516,11 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         for (ldb_vertex_map_t :: iterator i = _vertexSet.begin () ; i != _vertexSet.end () ; i ++)
           _connect.insert ((*i).second = neu [(*i).first.index ()]) ;
       }
-      
-      //delete [] neu ;
     }
 
     delete [] vertex_w ;
     delete [] vertex_mem;
     delete [] edge_mem;
-    /*
-    delete [] part ;
-    delete [] vertex_wInt ;
-    delete [] vertex_w ;
-    delete [] edge_w ;
-    delete [] edge ;
-    delete [] edge_p ;
-    */
   }
 
 
