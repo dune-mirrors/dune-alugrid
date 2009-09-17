@@ -1,19 +1,20 @@
 // (c) --
 #ifndef __parmetis_h__
 
-#warning  -- Compiling parallel version without PARMETIS !!!
+#warning  -- Compiling parallel version without ParMETIS !!!
 
 #ifndef PARMETIS_C_INCLUDED
 #define PARMETIS_C_INCLUDED
 
 using namespace std; 
 
-static const char metmess [] = 	"**INFO Due to license reasons the library METIS is\n"
+static const char parmetmess [] = 
+        "**INFO Due to license reasons the library ParMETIS is\n"
 				"       not part of the ALUGrid library distribution. \n"
-				"       To use this feature get a copy of the METIS library \n"
+				"       To use this feature get a copy of the ParMETIS library \n"
         "       (see http://www-users.cs.umn.edu/~karypis/metis/metis/ )\n"
         "       and re-configure the ALUGrid library with the \n"
-        "       --with-metis=PATH_TO_METIS option, \n"
+        "       --with-parmetis=PATH_TO_ParMETIS option, \n"
         "       or choose another Graph partitioning method. \n"
         "       Exiting program, bye! \n";
 
@@ -21,7 +22,7 @@ static const char metmess [] = 	"**INFO Due to license reasons the library METIS
 void ParMETIS_V3_PartKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *, MPI_Comm *) 
 {
   cerr << "**ERROR The use of ParMETIS_V3_PartKway is not supported, when the METIS library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-  cerr << metmess << endl ;
+  cerr << parmetmess << endl ;
   exit(1); 
   return ;
 }

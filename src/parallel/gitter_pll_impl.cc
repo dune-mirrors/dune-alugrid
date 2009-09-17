@@ -1952,19 +1952,22 @@ GitterBasisPll :: GitterBasisPll (const string filename,
   // only check this for higher ranks 
   // we assume that filename already contains rank info
   // if not empty grid is created 
+  bool validFilename = true ;
   if( ! _macrogitter && myrank > 0 )
   {
     // search rank info in filename 
     const int result = filename.rfind( rank.str() );
-    // if not found filename not valid and empty grid is created 
+    // if not found then filename is not valid 
+    // and empty grid should be created 
     if( result == -1 )
     {
-      _macrogitter = new MacroGitterBasisPll (this) ;
+      validFilename = false ;
     }
   }
 
-  // read normal macro gitter if not created yet  
-  if( ! _macrogitter ) 
+  // read normal macro gitter if not created yet and 
+  // filename is valid for this rank  
+  if( ! _macrogitter && validFilename ) 
   {
     ifstream in ( filename.c_str() ) ;
     if (in) _macrogitter = new MacroGitterBasisPll (this, in) ;
