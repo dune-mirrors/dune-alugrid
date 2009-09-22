@@ -41,6 +41,17 @@ public:
     rebuildGhostCells();
   }
 
+  GitterDunePll (MpAccessLocal &mp) 
+    : GitterBasisPll ("", mp, 0) 
+    , balanceGrid_ (false) 
+  {
+#ifndef NDEBUG
+    __STATIC_myrank = mp.myrank(); 
+#endif
+    // if grid is created from backup, then restore ghost cells 
+    rebuildGhostCells();
+  }
+
   ~GitterDunePll () {
   }
 
