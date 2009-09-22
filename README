@@ -31,10 +31,11 @@ your system. Run
 
 to commence those tests. See ./configure --help for detail help on options. 
 If you intend to use the parallel version of the
-grid, make sure that you have a version of MPI, and METIS (--with-metis=PATH), and 
+grid, make sure that you have a version of MPI, 
+and METIS (--with-metis=PATH), or ParMETIS (--with-parmetis=PATH), or  
 PARTY (--with-party=PATH) and supply the respective flags to the 
-configure script. Dynamic load balancing can only be used if either METIS
-or PARTY Lib or both are linked to the ALUGrid Library.
+configure script. Dynamic load balancing can only be used 
+if either METIS, ParMETIS, or PARTY Lib (or more than one) are linked to the ALUGrid Library.
 
 For parallel computation MPI is needed, common packages are 
 OpenMPI (version 1.1.x), MPICH (version 1.2.5 or higher), 
@@ -49,9 +50,10 @@ command can look as follows:
 
 ./configure CXX=mpiCC --with-metis="metis_path" --with-party="partylib_path"
 
-For METIS (version 4.0 or higher) see http://www-users.cs.umn.edu/~karypis/metis/metis/ ,
-see also the section Known bugs, when you using METIS. 
-For PARTY Lib (version 1.99) see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
+For METIS (version 4.0 or higher) and ParMETIS (version 3.1.1 or higher) 
+see http://glaros.dtc.umn.edu/gkhome/views/metis/metis/ .
+For PARTY Lib (version 1.99) see 
+http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
 
 You can use
 
@@ -96,6 +98,8 @@ PARTY_cutfirst = 9
 
 METIS_PartGraphKway = 11
 METIS_PartGraphRecursive = 12
+
+ParMETIS_V3_AdaptiveRepart = 13
 
 See the documentation of the corresponding package for detail on the
 methods. 
