@@ -27,7 +27,6 @@ extern "C" {
 #include "parallel/metis.c"
 }
 
-/*
 // partitioning libs 
 // ParMETIS if not found here then dummy version is included 
 extern "C" {
@@ -36,7 +35,6 @@ extern "C" {
 // if __parmetis_h__ is still undefined then the dummy is included 
 #include "parallel/parmetis.c"
 }
-*/
 
 // PARTY_LIB if not found here then dummy version is included 
 #ifdef VERSION 
