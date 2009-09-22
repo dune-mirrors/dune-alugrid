@@ -489,7 +489,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
       
       if( ! serialPartitioner ) 
       {
-        cout << "ParMETIS partitioner \n";
+        //cout << "ParMETIS partitioner \n";
         int numflag = 0; // C-style numbering, arrays start with 0  
         int edgecut, nparts = np ;
         int wgtflag = 3; // means weights for vertices and edges 
@@ -508,7 +508,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         // for starting partitions use PartKway
         if( usePartKway ) 
         {
-          cout << "Call PartKway \n";
+          //cout << "Call PartKway \n";
           :: ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
                                   & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
                                   ubvec, options, & edgecut, neu, & comm ) ;
@@ -527,13 +527,13 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
           copy(vertex_wInt, vertex_wInt + nel, vsize); 
 
           // adaptive repartition 
-          cout << "Call AdaptiveRepart \n";
+          //cout << "Call AdaptiveRepart \n";
           :: ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
                                         & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
                                         ubvec, &itr, options, & edgecut, neu, & comm ) ;
         }
 
-        cout << "Done ParMETIS \n";
+        //cout << "Done ParMETIS \n";
 
         // delete vtxdist and set zero (see below) 
         delete [] vtxdist; vtxdist = 0;
