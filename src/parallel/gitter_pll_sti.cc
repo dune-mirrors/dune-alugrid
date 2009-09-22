@@ -111,8 +111,7 @@ void GitterPll :: printsize ()
 {
   const int me = mpAccess ().myrank (), np = mpAccess ().psize (), nl = mpAccess ().nlinks () ;
   
-  //if (debugOption (10)) 
-    Gitter :: printsize () ;
+  if (debugOption (10)) Gitter :: printsize () ;
   vector < int > n ;
   {
     int sum = 0 ;
