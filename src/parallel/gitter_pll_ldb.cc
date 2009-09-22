@@ -376,7 +376,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
   // im CSR Format daraus erstellt werden m"ussen.
   
   const int ned = edges.size () ;
-  // for ParMETIS nodex is a local graph that could be empty 
+  // for ParMETIS nodes is a local graph that could be empty 
   const int nel = (serialPartitioner) ? nodes.size () : vtxdist[ np ];
   
   // do repartition if edges exist (for serial partitioners) or for
@@ -444,7 +444,8 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
     assert ( vertex_w && vertex_wInt && part) ;
     {
       vector < int > check (nel, 0L) ;
-      for (ldb_vertex_map_t :: const_iterator i = nodes.begin () ; i != nodes.end () ; ++i ) 
+      ldb_vertex_map_t :: const_iterator iEnd = nodes.end () ;
+      for (ldb_vertex_map_t :: const_iterator i = nodes.begin (); i != iEnd; ++i ) 
       {
         const pair< const GraphVertex , int >& item = (*i);
         const int j = item.first.index () ;
@@ -456,23 +457,24 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         vertex_w [j] = vertex_wInt [j] = item.first.weight () ;
       }
 
+      // store nodes size before clearing   
+      const int nNodes = ( serialPartitioner ) ? nel : nodes.size();
+
       // free memory, not needed anymore
       nodes.clear();
       
       // only for serial partitioners 
-      if( serialPartitioner ) 
+      if (nNodes != accumulate (check.begin (), check.end (), 0)) 
       {
-        if (nel != accumulate (check.begin (), check.end (), 0)) 
-        {
-          cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
-          cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
+        cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
+        cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
 
-          delete [] vertex_w ;
-          delete [] vertex_mem;
-          delete [] edge_mem;
+        delete [] vertex_w ;
+        delete [] vertex_mem;
+        delete [] edge_mem;
+        delete [] vtxdist ;
 
-          return false ;
-        }
+        return false ;
       }
     }
 
@@ -487,12 +489,13 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
       
       if( ! serialPartitioner ) 
       {
+        cout << "ParMETIS partitioner \n";
         int numflag = 0; // C-style numbering, arrays start with 0  
         int edgecut, nparts = np ;
         int wgtflag = 3; // means weights for vertices and edges 
         int ncon = 1; // number of constraints per vertex, here only one 
-        float ubvec[1] = {1.05};
-        int options[3] = {0, 0, 15}; // these are the default values 
+        float ubvec[1] = {1.2}; // array of length ncon 
+        int options[4] = {0, 1, 15, 1}; // these are the default values 
         float *tpwgts = new float[ nparts ]; // ncon * npart, but ncon = 1 
         const float value = 1.0/ ((float) nparts);
 
@@ -505,6 +508,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         // for starting partitions use PartKway
         if( usePartKway ) 
         {
+          cout << "Call PartKway \n";
           :: ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
                                   & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
                                   ubvec, options, & edgecut, neu, & comm ) ;
@@ -523,10 +527,13 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
           copy(vertex_wInt, vertex_wInt + nel, vsize); 
 
           // adaptive repartition 
+          cout << "Call AdaptiveRepart \n";
           :: ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
                                         & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
                                         ubvec, &itr, options, & edgecut, neu, & comm ) ;
         }
+
+        cout << "Done ParMETIS \n";
 
         // delete vtxdist and set zero (see below) 
         delete [] vtxdist; vtxdist = 0;
