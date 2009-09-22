@@ -179,7 +179,8 @@ set < int, less < int > > GitterPll :: MacroGitterPll :: secondScan () {
   return s ;
 }
 
-void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & c) {
+void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & c) 
+{
   typedef map < int, AccessIterator < vertex_STI > :: Handle, less < int > > map_t ;
   map_t map ;
   const int np = c.psize (), me = c.myrank () ;

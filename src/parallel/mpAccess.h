@@ -30,6 +30,9 @@ class MpAccessGlobal {
     virtual vector < vector < int > > gcollect (const vector < int > &) const = 0 ;
     virtual vector < vector < double > > gcollect (const vector < double > &) const = 0 ;
     virtual vector < ObjectStream > gcollect (const ObjectStream &) const = 0 ;
+
+    //! return address of communicator (not optimal but avoid explicit MPI types here)
+    virtual void* communicator() = 0;
 } ;
 
 class MpAccessLocal : public MpAccessGlobal {

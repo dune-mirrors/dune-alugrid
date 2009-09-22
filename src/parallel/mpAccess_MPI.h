@@ -48,6 +48,8 @@ class MpAccessMPI : public MpAccessLocal
       void exchange (const vector < ObjectStream > & in,
                      vector< ObjectStream > & out) const;
         
+      // return address of MPI communicator (dirty hack, but what can we do)
+      void* communicator() { return ((void *) &_mpiComm); }
 } ;
 
 

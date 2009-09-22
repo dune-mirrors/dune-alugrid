@@ -51,7 +51,8 @@ class LoadBalancer {
     class DataBase {
       public :
         typedef map < GraphVertex, int, less < GraphVertex > >  ldb_vertex_map_t ;
-        typedef set < GraphEdge, less < GraphEdge > >     ldb_edge_set_t ;
+        typedef set < GraphEdge, less < GraphEdge > >           ldb_edge_set_t ;
+        typedef vector< int >                                   ldb_vector_t ;
       public :
         class AccVertexLoad {
           public :
@@ -69,9 +70,6 @@ class LoadBalancer {
         set < int, less < int > > _connect ;
         ldb_edge_set_t   _edgeSet ;
         ldb_vertex_map_t _vertexSet ;
-      private :
-        void graphCollect (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,
-                           insert_iterator < ldb_edge_set_t >) const ;
       public :
         enum method { 
           NONE = 0,
@@ -85,8 +83,15 @@ class LoadBalancer {
           PARTY_cutfirst = 9, 
 
           METIS_PartGraphKway = 11,
-          METIS_PartGraphRecursive = 12
+          METIS_PartGraphRecursive = 12,
+
+          ParMETIS_V3_AdaptiveRepart = 13   
         } ;
+      private :
+        void graphCollect (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,
+                           insert_iterator < ldb_edge_set_t >,
+                           int * , const bool ) const ;
+      public :
         static const char * methodToString (method) ;
         inline DataBase () ;
         inline DataBase (const DataBase &) ;

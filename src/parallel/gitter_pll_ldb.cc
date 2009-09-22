@@ -47,27 +47,79 @@ void LoadBalancer :: DataBase :: printLoad () const {
   return ;
 } 
 
-void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa, 
-  insert_iterator < ldb_vertex_map_t > nodes, insert_iterator < ldb_edge_set_t > edges) const {
-  
+void LoadBalancer :: DataBase :: 
+graphCollect (const MpAccessGlobal & mpa, 
+              insert_iterator < ldb_vertex_map_t > nodes, 
+              insert_iterator < ldb_edge_set_t > edges,
+              int* vtxdist, const bool serialPartitioner ) const 
+{
+  // for parallel partitioner return local vertices and edges 
+  // for serial partitioner these have to be communicates to all
+  // processes 
+   
+  if( ! serialPartitioner )
+  {
+    const int myrank = mpa.myrank();
+    {
+      ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
+      for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
+         i != iEnd; ++i ) 
+      {
+        {
+          const GraphVertex& x = (*i).first;
+          * nodes ++ = pair < const GraphVertex, int > ( x , myrank) ;
+        } 
+      }
+    }
+
+    {
+      ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
+      for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; 
+           e != eEnd; ++e) 
+      {
+        const GraphEdge& x = (*e) ;
+        // edges exists twice ( u , v ) and ( v , u )
+        // with both orientations 
+        * edges ++ = x ;
+        * edges ++ = - x ;
+      }
+    }
+
+    // make sure vtxdist exists 
+    assert( vtxdist );
+
+    // vtxdist always starts with 0 
+    // so initialize here 
+    vtxdist[ 0 ] = 0 ;
+  }
+
   const int np = mpa.psize () ;
   ObjectStream os ;
 
   {
+    // write number of elements  
     int len = _vertexSet.size () ;
     os.writeObject (len) ;
+
+    if( serialPartitioner )
     {
+      // write vertices 
       ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
-      for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
-        i != iEnd; os.writeObject ((*i++).first)) ;
-    }
-    
-    len = _edgeSet.size () ;
-    os.writeObject (len) ;
-    {
-      ldb_edge_set_t :: const_iterator iEnd = _edgeSet.end () ;
-      for (ldb_edge_set_t :: const_iterator i = _edgeSet.begin () ; 
-        i != iEnd; os.writeObject (*i++)) ;
+      for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; i != iEnd; ++i ) 
+      {
+        os.writeObject ((*i).first) ;
+      }
+
+      // write number of edges 
+      len = _edgeSet.size () ;
+      os.writeObject (len) ;
+
+      // write edges 
+      ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
+      for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; e != eEnd; ++e )
+      {
+        os.writeObject (*e);
+      }
     }
   }
 
@@ -80,13 +132,16 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
     os.reset ();
 
     {
-      for (int i = 0 ; i < np ; i ++) 
+      for (int i = 0 ; i < np ; ++i) 
       {
         int len ;
         ObjectStream& osv_i = osv [i];
 
         osv_i.readObject (len) ;
         assert (len >= 0) ;
+
+        // read graph for serial partitioner 
+        if( serialPartitioner ) 
         {
           for (int j = 0 ; j < len ; ++j) 
           {
@@ -94,10 +149,10 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
             osv_i.readObject (x) ;
             * nodes ++ = pair < const GraphVertex, int > (x,i) ;
           } 
-        }
-        osv_i.readObject (len) ;
-        assert (len >= 0) ;
-        {
+
+          osv_i.readObject (len) ;
+          assert (len >= 0) ;
+
           for (int j = 0 ; j < len ; ++j) 
           {
             GraphEdge x ;
@@ -105,6 +160,12 @@ void LoadBalancer :: DataBase :: graphCollect (const MpAccessGlobal & mpa,
             * edges ++ = x ;
             * edges ++ = - x ;
           }
+        }
+        else 
+        {
+          // see above vtxdist [ 0 ] = 0
+          // sum up number of vertices for processor i 
+          vtxdist[ i + 1 ] = vtxdist[ i ] + len ;
         }
 
         // free memory of osv[i]
@@ -181,7 +242,7 @@ static void optimizeCoverage (const int nparts,
     } 
   }
   
-  for (int j = 0; j != nparts ; ++j) 
+  for (int j = 0; j < nparts ; ++j) 
   {
     if (renumber [j] == -1) 
     {
@@ -276,22 +337,36 @@ static bool collectInsulatedNodes (const int nel,
 
 bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
 {
+  if (debugOption (3)) printLoad () ;
+  
+  // if method for load balancing is none, do nothing 
+  if (mth == NONE) return false ;
+
   const int start = clock (), np = mpa.psize (), me = mpa.myrank () ;
   bool change (false) ;
   
-  if (debugOption (3)) printLoad () ;
-  
-  if (mth == NONE) return false ;
-  
-  // create maps for edges and vertices 
-  ldb_edge_set_t   edges ;
-  ldb_vertex_map_t nodes ; 
+  // flag to indicate whether we use a serial or a parallel partitioner 
+  const bool serialPartitioner = ( mth != ParMETIS_V3_AdaptiveRepart ); 
 
+  // create maps for edges and vertices 
+  ldb_edge_set_t    edges ;
+  ldb_vertex_map_t  nodes ; 
+
+  // vector of vertex distribution (only for ParMETIS)
+  int * vtxdist = ( serialPartitioner ) ?  0 : new int [np + 1];
+
+  // collect graph from all processors 
+  // needs a all-to-all (allgather) communication 
   graphCollect (mpa,
                 insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
-                insert_iterator < ldb_edge_set_t > (edges,edges.begin ())
+                insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
+                vtxdist,
+                serialPartitioner 
                ) ;
-  
+
+  // only use ParMETIS_V3_GraphKway for the initial partitioning 
+  const bool usePartKway = ( ! serialPartitioner ) ? vtxdist[0] == vtxdist[ np ] : true ;
+
   // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
   // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
   // durch Zusammenführen der einzelnen Container aus den Teilgrobgittern.
@@ -301,15 +376,21 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
   // im CSR Format daraus erstellt werden m"ussen.
   
   const int ned = edges.size () ;
-  const int nel = nodes.size () ;
+  // for ParMETIS nodex is a local graph that could be empty 
+  const int nel = (serialPartitioner) ? nodes.size () : vtxdist[ np ];
   
-  if (edges.size ()) 
+  // do repartition if edges exist (for serial partitioners) or for
+  // parallel partitioners anyway  
+  if ( ! serialPartitioner || (edges.size() > 0) ) 
   {
-    if (!((*edges.rbegin ()).leftNode () < nel)) 
+    if( serialPartitioner ) 
     {
-      cerr << "**WARNUNG (FEHLER IGNORIERT) Die Indexmenge ist nicht volls\"andig\n" ;
-      cerr << "  \"uberdeckt zur Neupartitionierung. In " << __FILE__ << " " << __LINE__ << endl ;
-      return false ;
+      if (!((*edges.rbegin ()).leftNode () < nel)) 
+      {
+        cerr << "**WARNUNG (FEHLER IGNORIERT) Die Indexmenge ist nicht volls\"andig\n" ;
+        cerr << "  \"uberdeckt zur Neupartitionierung. In " << __FILE__ << " " << __LINE__ << endl ;
+        return false ;
+      }
     }
 
     // allocate edge memory for graph partitioners 
@@ -327,21 +408,25 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
       int * edge_pPos = edge_p ;
       int count = 0, index = -1 ;
       
-      for (ldb_edge_set_t :: const_iterator i = edges.begin () ; 
-           i != edges.end () ; i ++) 
+      ldb_edge_set_t :: const_iterator iEnd = edges.end();
+      for (ldb_edge_set_t :: const_iterator i = edges.begin () ; i != iEnd ; ++i) 
       {
-        if ((*i).leftNode () != index) 
+        const GraphEdge& e = (*i);
+        if (e.leftNode () != index) 
         {
-          assert ((*i).leftNode () < nel) ;
+          assert ( e.leftNode () < nel) ;
           * edge_pPos ++ = count ;
-          index = (*i).leftNode () ;
+          index = e.leftNode () ;
         }
-        assert ((*i).rightNode () < nel) ;
-        edge [count] = (*i).rightNode () ;
-        edge_w [count ++] = (*i).weight () ;
+        assert ( e.rightNode () < nel) ;
+        edge [ count ] = e.rightNode () ;
+        edge_w [count ++] = e.weight () ;
       }
+
+
       * edge_pPos = count ;
-      assert (edge_p [0] == 0 && edge_p [nel] == ned) ;
+      assert( edge_p [0] == 0 );
+      assert( ( serialPartitioner ) ? edge_p [nel] == ned : true ) ;
 
       // free memory, not needed anymore 
       edges.clear();
@@ -351,37 +436,43 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
     float  * const vertex_w    = new float [nel] ;
 
     const int sizeNeu = (np > 1) ? nel : 0;
-    int    * vertex_mem = new int [nel + nel + sizeNeu];
-
+    const int memFactor = ( usePartKway ) ? 2 : 3; // need extra memory for adaptive repartitioning
+    int    * vertex_mem = new int [ (memFactor * nel)  + sizeNeu];
     int    * const vertex_wInt = vertex_mem; 
     int    * part              = vertex_mem + nel; 
     
     assert ( vertex_w && vertex_wInt && part) ;
     {
       vector < int > check (nel, 0L) ;
-      for (ldb_vertex_map_t :: const_iterator i = nodes.begin () ; i != nodes.end () ; i ++ ) 
+      for (ldb_vertex_map_t :: const_iterator i = nodes.begin () ; i != nodes.end () ; ++i ) 
       {
-        int j = (*i).first.index () ;
+        const pair< const GraphVertex , int >& item = (*i);
+        const int j = item.first.index () ;
+
         assert (0 <= j && j < nel) ;
-        assert (0 <= (*i).second && (*i).second < np) ;
-        part [j] = (*i).second ;
+        assert (0 <= item.second && item.second < np) ;
+        part [j] = item.second ;
         check [j] = 1 ;
-        vertex_w [j] = vertex_wInt [j] = (*i).first.weight () ;
+        vertex_w [j] = vertex_wInt [j] = item.first.weight () ;
       }
 
       // free memory, not needed anymore
       nodes.clear();
       
-      if (nel != accumulate (check.begin (), check.end (), 0)) 
+      // only for serial partitioners 
+      if( serialPartitioner ) 
       {
-        cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
-        cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
+        if (nel != accumulate (check.begin (), check.end (), 0)) 
+        {
+          cerr << "**WARNUNG (IGNORIERT) Keine Neupartitionierung wegen fehlgeschlagenem Konsistenzcheck." ;
+          cerr << " In Datei: " << __FILE__ << " Zeile: " << __LINE__ << endl ;
 
-        delete [] vertex_w ;
-        delete [] vertex_mem;
-        delete [] edge_mem;
+          delete [] vertex_w ;
+          delete [] vertex_mem;
+          delete [] edge_mem;
 
-        return false ;
+          return false ;
+        }
       }
     }
 
@@ -389,19 +480,86 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
     {
       //int * neu = new int [nel] ;
       int * neu = vertex_mem + (2 * nel);
-
       assert (neu) ;
+
       // copy part to neu, this is needed by some of the partitioning tools  
       copy (part, part + nel, neu) ;
       
-      switch (mth) 
+      if( ! serialPartitioner ) 
       {
-        // Die Methode 'collect' sammelt alle Elemente in einer Partition ein.
+        int numflag = 0; // C-style numbering, arrays start with 0  
+        int edgecut, nparts = np ;
+        int wgtflag = 3; // means weights for vertices and edges 
+        int ncon = 1; // number of constraints per vertex, here only one 
+        float ubvec[1] = {1.05};
+        int options[3] = {0, 0, 15}; // these are the default values 
+        float *tpwgts = new float[ nparts ]; // ncon * npart, but ncon = 1 
+        const float value = 1.0/ ((float) nparts);
 
+        // get communincator 
+        MPI_Comm comm = * ( (MPI_Comm *) mpa.communicator()) ;
+
+        // set weights (uniform distribution, to be adjusted)
+        for(int l=0; l<nparts; ++l) tpwgts[l] = value;
+
+        // for starting partitions use PartKway
+        if( usePartKway ) 
+        {
+          :: ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
+                                  & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
+                                  ubvec, options, & edgecut, neu, & comm ) ;
+        }
+        else // otherwise do an adaptive repartition 
+        {
+          // recommmended by ParMETIS docu 
+          float itr = 1000.0;
+          //float itr = 10.0; // like dennis does 
+          
+          // vsize stores the size of the vertex with respect to
+          // redistribution costs (we use the same as vertex_wInt)
+          int* vsize = neu + nel; 
+          assert ( vsize );
+          // for the moment use vertex weights 
+          copy(vertex_wInt, vertex_wInt + nel, vsize); 
+
+          // adaptive repartition 
+          :: ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
+                                        & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
+                                        ubvec, &itr, options, & edgecut, neu, & comm ) ;
+        }
+
+        // delete vtxdist and set zero (see below) 
+        delete [] vtxdist; vtxdist = 0;
+        delete [] tpwgts;
+      }
+      else 
+      {
+        // serial partitioning methods 
+        switch (mth) 
+        {
+
+        // METIS methods 
+        case METIS_PartGraphKway :
+          {
+            int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
+            :: METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
+                    & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
+          }
+          break ;
+        case METIS_PartGraphRecursive :
+          {
+            int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
+            :: METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
+                    & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
+          }
+          break ;
+
+        // the method 'collect' moves all elements to rank 0 
         case COLLECT :
           fill (neu, neu + nel, 0L) ;
           break ;
-          
+
+        // PARTY methods    
         case PARTY_linear :
           :: global_lin (nel, vertex_w, np, neu) ;
           break ;
@@ -466,21 +624,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
           }
           break ;
 
-        case METIS_PartGraphKway :
-          {
-            int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            :: METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
-                    & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
-          }
-          break ;
-        case METIS_PartGraphRecursive :
-          {
-            int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            :: METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
-                    & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
-          }
-          break ;
-
         default :
           cerr << "**WARNUNG (FEHLER IGNORIERT) Ung\"ultige Methode [" << mth << "] zur\n" ;
           cerr << "  Neupartitionierung angegeben. In " << __FILE__ << " " << __LINE__ << endl ;
@@ -489,38 +632,51 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
           delete [] vertex_mem;
           delete [] edge_mem;
           return false ;
+        }
       }
 
       // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
       // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
       // zusammen.
 
-      collectInsulatedNodes (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
+      if( serialPartitioner ) 
+      {
+        collectInsulatedNodes (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
+      }
 
       // optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
       // Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
       // abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
       // in Aktion tritt.
 
-      optimizeCoverage (np, nel, part, vertex_w, neu, me == 0 ? debugOption (4) : 0) ;
+      if( serialPartitioner ) 
+      {
+        optimizeCoverage (np, nel, part, vertex_w, neu, me == 0 ? debugOption (4) : 0) ;
+      }
 
       // Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
+      change = ( serialPartitioner ) ? ( ! equal (neu, neu + nel, part) ) : true; 
 
-      change = ! equal (neu, neu + nel, part) ;
-
+      // apply partitioning be reassigning a new processor number 
+      // to the vertices (elements of the macro mesh) of the graph 
       if (change) 
       {
         // Hier die neue Zuordnung auf den eigenen Lastvertex-Container schreiben.
         // Dadurch werden die Grobgitterelemente an das neue Teilgebiet zugewiesen. 
 
-        for (ldb_vertex_map_t :: iterator i = _vertexSet.begin () ; i != _vertexSet.end () ; i ++)
-          _connect.insert ((*i).second = neu [(*i).first.index ()]) ;
+        ldb_vertex_map_t :: iterator iEnd =  _vertexSet.end () ;
+        for (ldb_vertex_map_t :: iterator i = _vertexSet.begin () ; i != iEnd ; ++i)
+        {
+          // insert and also set partition number new 
+          _connect.insert( (*i).second = neu [ (*i).first.index () ]) ;
+        }
       }
     }
 
     delete [] vertex_w ;
     delete [] vertex_mem;
     delete [] edge_mem;
+    delete [] vtxdist ;
   }
 
 
@@ -535,8 +691,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
 
 int LoadBalancer :: DataBase :: getDestination (int i) const 
 {
-  //const double p [3] = {0.0,0.0,0.0} ;
-  //GraphVertex e (i,0,p) ;
   // use constructor to initialize default values 
   GraphVertex e (i) ;
   assert (_vertexSet.find (e) != _vertexSet.end ()) ;
@@ -547,10 +701,11 @@ set < int, less < int > > LoadBalancer :: DataBase :: scan () const {
   return _connect ;
 }
 
-const char * LoadBalancer :: DataBase :: methodToString (method m) {
+const char * LoadBalancer :: DataBase :: methodToString (method m) 
+{
   switch (m) {
     case NONE :
-      return "keine dynamische Lastverteilung" ;
+      return "no dynamic load balancing" ;
     case COLLECT :
       return "COLLECT" ;
     case PARTY_helpfulSet :
@@ -571,8 +726,10 @@ const char * LoadBalancer :: DataBase :: methodToString (method m) {
       return "METIS_PartGraphKway" ;
     case METIS_PartGraphRecursive :
       return "METIS_PartGraphRecursive" ;
+    case ParMETIS_V3_AdaptiveRepart :
+      return "ParMETIS_V3_PartKway / ParMETIS_V3_AdaptiveRepart" ;
     default :
-      return "unbekannte Methode" ;
+      return "unknown method" ;
   }
   return "" ;
 }
