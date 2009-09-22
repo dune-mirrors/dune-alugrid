@@ -72,8 +72,13 @@ class LoadBalancer {
         ldb_vertex_map_t _vertexSet ;
       public :
         enum method { 
+          // no load balancing 
           NONE = 0,
+
+          // collect all to rank 0 
           COLLECT = 1,
+
+          // PARTY methods 
           PARTY_helpfulSet = 3, 
           PARTY_kernighanLin = 4,
           PARTY_random = 5, 
@@ -82,9 +87,11 @@ class LoadBalancer {
           PARTY_breathfirst = 8,
           PARTY_cutfirst = 9, 
 
+          // METIS method for graph partitioning 
           METIS_PartGraphKway = 11,
           METIS_PartGraphRecursive = 12,
 
+          // ParMETIS method for adaptive repartition 
           ParMETIS_V3_AdaptiveRepart = 13   
         } ;
       private :
