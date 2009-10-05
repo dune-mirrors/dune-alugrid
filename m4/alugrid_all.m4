@@ -37,7 +37,7 @@ dnl checks for header files.
 dnl check all components
   AC_REQUIRE([ALUGRID_SERIAL_PARALLEL])
   AC_REQUIRE([ALUGRID_PATH_METIS])
-dnl  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
+  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
   AC_REQUIRE([ALUGRID_PATH_PARTY])
 
 dnl convenience-variables if every found package should be used
@@ -59,14 +59,14 @@ fi
 if test x$with_parallel = xparallel ; then
   echo
   echo The following components where found: 
-  echo "------------------------------------"
+  echo "-------------------------------------"
   echo  
   echo "METIS............: $with_metis"
-#  echo "ParMETIS.........: $with_parmetis"
+  echo "ParMETIS.........: $with_parmetis"
   echo "PARTY............: $with_party"
   echo "MPI..............: $with_mpi"
   echo
-  echo "------------------------------------"
+  echo "-------------------------------------"
 fi
   echo
   echo "See ./configure --help and config.log for reasons why a component wasn't found"

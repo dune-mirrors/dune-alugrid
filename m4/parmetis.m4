@@ -86,7 +86,7 @@ if test x$HAVE_PARMETIS = x1 ; then
   ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $PARMETIS_CPPFLAGS"
 
   # set variable for summary
-  with_parmetis="yes"
+  with_parmetis="yes (Todo: Version)"
 else
   AC_SUBST(PARMETIS_LIBS, "")
   AC_SUBST(PARMETIS_LDFLAGS, "")
