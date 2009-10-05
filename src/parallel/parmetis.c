@@ -18,13 +18,32 @@ static const char parmetmess [] =
         "       or choose another Graph partitioning method. \n"
         "       Exiting program, bye! \n";
 
-// dummy ParMETIS_PartGraphKway, when ParMETIS library is missing 
-void ParMETIS_V3_PartKway(int *,idxtype *,idxtype *,idxtype *,idxtype *,int *,int *,int *,int *,int *,idxtype *, MPI_Comm *) 
+void parMetisErroMSG() 
 {
-  cerr << "**ERROR The use of ParMETIS_V3_PartKway is not supported, when the METIS library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  cerr << "**ERROR The use of ParMETIS is not supported, when the ParMETIS library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
   cerr << parmetmess << endl ;
   exit(1); 
   return ;
+}
+
+// dummy ParMETIS_V3_PartKway, when ParMETIS library is missing 
+void ParMETIS_V3_PartKway(
+             idxtype *vtxdist, idxtype *xadj, idxtype *adjncy, idxtype *vwgt,
+             idxtype *adjwgt, int *wgtflag, int *numflag, int *ncon, int *nparts,
+             float *tpwgts, float *ubvec, int *options, int *edgecut, idxtype *part,
+             MPI_Comm *comm)
+{
+  parMetisErroMSG();
+}
+
+// dummy ParMETIS_V3_AdaptiveRepart, when ParMETIS library is missing 
+void ParMETIS_V3_AdaptiveRepart(
+       idxtype *vtxdist, idxtype *xadj, idxtype *adjncy, idxtype *vwgt,
+       idxtype *vsize, idxtype *adjwgt, int *wgtflag, int *numflag, int *ncon,
+       int *nparts, float *tpwgts, float *ubvec, float *ipc2redist,
+       int *options, int *edgecut, idxtype *part, MPI_Comm *comm)
+{
+  parMetisErroMSG();
 }
 
 #endif
