@@ -28,9 +28,9 @@ inline void CALL_ParMETIS_V3_PartKway(
              MPI_Comm *comm)
 {
 #if HAVE_PARMETIS
-   :: ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w,
+   :: ParMETIS_V3_PartKway(vtxdist, xadj, adjncy, vwgt, adjwgt,
                            wgtflag, numflag, ncon, nparts, tpwgts,
-                           ubvec, options, edgecut, neu, comm ) ;
+                           ubvec, options, edgecut, part, comm ) ;
 #else 
   std::cerr << "**ERROR The use of ParMETIS is not supported, when the ParMETIS library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
   std::cerr << parmetmess << std::endl ;
@@ -46,9 +46,9 @@ inline void CALL_ParMETIS_V3_AdaptiveRepart(
        int *options, int *edgecut, idxtype *part, MPI_Comm *comm)
 {
 #if HAVE_PARMETIS
-  :: ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w,
+  :: ParMETIS_V3_AdaptiveRepart(vtxdist, xadj, adjncy, vwgt, vsize, adjwgt,
                                 wgtflag, numflag, ncon, nparts, tpwgts,
-                                ubvec, itr, options, edgecut, neu, comm ) ;
+                                ubvec, ipc2redist, options, edgecut, part, comm ) ;
 #else 
   std::cerr << "**ERROR The use of ParMETIS is not supported, when the ParMETIS library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
   std::cerr << parmetmess << std::endl ;

@@ -1,6 +1,8 @@
 #ifndef __ALUGRID_PARALLEL_CC_INCLUDED__
 #define __ALUGRID_PARALLEL_CC_INCLUDED__
 
+#include <config.h>
+
 #include "alugrid_parallel.h"
 
 #ifndef NDEBUG
@@ -9,52 +11,14 @@
 
 #define _ANSI_HEADER 
 
-// partitioning libs 
-// METIS if not found here then dummy version is included 
-extern "C" {
-// METISTITLE is defined by the metis header file. 
-#undef METISTITLE 
-#undef METIS_H 
+// ParMETIS stuff 
+#include "parallel/aluparmetis.hh"
 
-// cover metis-4.0 bug   
-#define __log2 __METIS__log2
-// include metis header   
-#include <metis.h>
-// undef again 
-#undef __log2
+// METIS stuff 
+#include "parallel/alumetis.hh"
 
-// if METISTITLE is still undefined then the dummy is included 
-#include "parallel/metis.c"
-}
-
-// partitioning libs 
-// ParMETIS if not found here then dummy version is included 
-extern "C" {
-//  __parmetis_h__ is defined by the parmetis header file. 
-#include <parmetis.h>
-// if __parmetis_h__ is still undefined then the dummy is included 
-#include "parallel/parmetis.c"
-}
-
-// PARTY_LIB if not found here then dummy version is included 
-#ifdef VERSION 
-#define _VER_SAVE VERSION 
-#undef VERSION 
-#endif
-
-extern "C" {
-// include PARTY lib header 
-#include <party_lib.h>
-}
-#if defined VERSION && defined VW
-#define PARTY_LIB_H_INCLUDED
-#ifdef _VER_SAVE
-#undef VERSION 
-#define VERSION _VER_SAVE
-#endif // end _VER_SAVE 
-#else 
-#include "parallel/party_lib.c"
-#endif
+// PARTY Lib stuff 
+#include "parallel/aluparty_lib.hh"
 
 namespace ALUGridSpace {
 
