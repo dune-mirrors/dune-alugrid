@@ -549,14 +549,14 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         case METIS_PartGraphKway :
           {
             int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            :: METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
+            CALL_METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
                     & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
           }
           break ;
         case METIS_PartGraphRecursive :
           {
             int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            :: METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
+            CALL_METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
                     & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
           }
           break ;
@@ -568,23 +568,23 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
 
         // PARTY methods    
         case PARTY_linear :
-          :: global_lin (nel, vertex_w, np, neu) ;
+          CALL_global_lin (nel, vertex_w, np, neu) ;
           break ;
           
         case PARTY_random :
-          :: global_ran (nel, vertex_w, np, neu) ;
+          CALL_global_ran (nel, vertex_w, np, neu) ;
           break ;
           
         case PARTY_scattered :
-          :: global_sca (nel, vertex_w, np, neu) ;
+          CALL_global_sca (nel, vertex_w, np, neu) ;
           break ;
           
         case PARTY_breathfirst :
-          :: global_gbf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
+          CALL_global_gbf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
           break ;
           
         case PARTY_cutfirst :
-          :: global_gcf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
+          CALL_global_gcf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
           break ;
           
         case PARTY_kernighanLin :
@@ -604,10 +604,10 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
             // global_linear for the first time 
             if( sum == 0 ) 
             {
-              :: global_lin (nel, vertex_w, np, neu) ;
+              CALL_global_lin (nel, vertex_w, np, neu) ;
             }
             
-            :: local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
+            CALL_local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
           }
           break ;
           
@@ -624,10 +624,10 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
             // global_linear for the first time 
             if( sum == 0 ) 
             {
-              :: global_lin (nel, vertex_w, np, neu) ;
+              CALL_global_lin (nel, vertex_w, np, neu) ;
             }
             
-            :: local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
+            CALL_local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
           }
           break ;
 
