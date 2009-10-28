@@ -13,12 +13,12 @@ ac_save_CPPFLAGS="$CPPFLAGS"
 ac_save_LIBS="$LIBS"
 LIBS=""
 
-if test x$with_metis != xyes ; then
-  AC_MSG_ERROR([ParMETIS only works with METIS!])
-fi
-
 ## do nothing if no --with-parmetis was supplied
 if test x$with_parmetis != x && test x$with_parmetis != xno ; then
+
+  if test x$with_metis != xyes ; then
+    AC_MSG_WARN([ParMETIS only works with METIS!])
+  fi
 
   if test x$with_parmetis == xyes ; then
     AC_MSG_ERROR([You have to provide a directory --with-parmetis=PATH])
