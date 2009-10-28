@@ -509,9 +509,9 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         if( usePartKway ) 
         {
           //cout << "Call PartKway \n";
-          :: ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
-                                  & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
-                                  ubvec, options, & edgecut, neu, & comm ) ;
+          CALL_ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
+                                    & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
+                                    ubvec, options, & edgecut, neu, & comm ) ;
         }
         else // otherwise do an adaptive repartition 
         {
@@ -528,9 +528,9 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
 
           // adaptive repartition 
           //cout << "Call AdaptiveRepart \n";
-          :: ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
-                                        & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
-                                        ubvec, &itr, options, & edgecut, neu, & comm ) ;
+          CALL_ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
+                                          & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
+                                          ubvec, &itr, options, & edgecut, neu, & comm ) ;
         }
 
         //cout << "Done ParMETIS \n";

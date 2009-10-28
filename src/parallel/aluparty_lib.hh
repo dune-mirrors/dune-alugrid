@@ -49,8 +49,8 @@ inline int CALL_global_lin (int nel, float *vertex_w, int np, int *neu)
 #if HAVE_PARTY 
   return :: global_lin (nel, vertex_w, np, neu) ;
 #else
-  cerr << "**ERROR The use of global_lin is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-  cerr << parmess << endl ;
+  std::cerr << "**ERROR The use of global_lin is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  std::cerr << parmess << std::endl ;
   exit(1); 
   return 0 ;
 #endif
@@ -61,8 +61,8 @@ inline int CALL_global_sca (int nel, float *vertex_w, int np, int *neu)
 #if HAVE_PARTY 
   return :: global_sca (nel, vertex_w, np, neu) ;
 #else
-  cerr << "**ERROR The use of global_sca is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-  cerr << parmess << endl ;
+  std::cerr << "**ERROR The use of global_sca is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  std::cerr << parmess << std::endl ;
   exit(1); 
   return 0 ;
 #endif
@@ -73,8 +73,8 @@ inline int CALL_global_ran (int nel, float *vertex_w, int np, int *neu)
 #if HAVE_PARTY 
   return :: global_ran (nel, vertex_w, np, neu) ;
 #else
-  cerr << "**ERROR The use of global_ran is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-  cerr << parmess << endl ;
+  std::cerr << "**ERROR The use of global_ran is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  std::cerr << parmess << std::endl ;
   exit(1); 
   return 0 ;
 #endif
@@ -86,8 +86,8 @@ inline int CALL_global_gbf (int nel, float *vertex_w, int *edge_p,
 #if HAVE_PARTY 
   return :: global_gbf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
 #else
-  cerr << "**ERROR The use of global_gbf is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-  cerr << parmess << endl ;
+  std::cerr << "**ERROR The use of global_gbf is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  std::cerr << parmess << std::endl ;
   exit(1); 
   return 0 ;
 #endif
@@ -99,8 +99,8 @@ inline int CALL_global_gcf (int nel, float *vertex_w, int *edge_p,
 #if HAVE_PARTY 
   return :: global_gcf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
 #else
-  cerr << "**ERROR The use of global_gcf is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-  cerr << parmess << endl ;
+  std::cerr << "**ERROR The use of global_gcf is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  std::cerr << parmess << std::endl ;
   exit(1); 
   return 0 ;
 #endif
@@ -112,8 +112,8 @@ inline int CALL_local_kl (int nel, float *vertex_w, int *edge_p,
 #if HAVE_PARTY 
   return :: local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, output) ;
 #else
-  cerr << "**ERROR The use of local_kl is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-  cerr << parmess << endl ;
+  std::cerr << "**ERROR The use of local_kl is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  std::cerr << parmess << std::endl ;
   exit(1); 
   return 0 ;
 #endif
@@ -125,8 +125,8 @@ inline int CALL_local_hs (int nel, float *vertex_w, int *edge_p,
 #if HAVE_PARTY 
   return :: local_hs (nel, vertex_w, edge_p, edge, edge_w, np,  neu, output) ;
 #else
-  cerr << "**ERROR The use of local_hs is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-  cerr << parmess << endl ;
+  std::cerr << "**ERROR The use of local_hs is not supported, when the PARTY library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  std::cerr << parmess << std::endl ;
   exit(1); 
   return 0 ;
 #endif
