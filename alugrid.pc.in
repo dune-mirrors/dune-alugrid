@@ -4,11 +4,12 @@ libdir=@libdir@
 includedir=@includedir@
 CXX=@CXX@
 CC=@CC@
+DEPENDENCIES=
 
 Name: @PACKAGE_NAME@
 Version: @VERSION@
 Description: The ALUGrid Library (Adaptiv, Load-balanced, and Unstructured Grid Library) 
 URL: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/
-Requires: @REQUIRES@
+Requires: ${DEPENDENCIES}
 Libs:
 Cflags: -I${includedir}
