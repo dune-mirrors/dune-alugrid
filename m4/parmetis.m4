@@ -16,7 +16,7 @@ LIBS=""
 ## do nothing if no --with-parmetis was supplied
 if test x$with_parmetis != x && test x$with_parmetis != xno ; then
 
-  if test x$with_metis != xyes ; then
+  if test "x$with_metis" = "xno" ; then
     AC_MSG_WARN([ParMETIS only works with METIS!])
   fi
 
