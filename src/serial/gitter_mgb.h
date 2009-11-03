@@ -134,7 +134,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     static void generateRawHexaImage (istream &, ostream &) ;
     static void generateRawTetraImage (istream &, ostream &) ;
     static void cubeHexaGrid (int, ostream &) ;
-    MacroGridBuilder (BuilderIF &, bool init = true) ;
+    MacroGridBuilder (BuilderIF &, const bool init = true) ;
     MacroGridBuilder (BuilderIF &, ProjectVertex* );
     virtual ~MacroGridBuilder () ;
     void inflateMacroGrid (istream &) ;

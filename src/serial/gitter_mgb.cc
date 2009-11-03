@@ -608,7 +608,7 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
 }
 
 // default of init == true
-MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, bool init) 
+MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, const bool init) 
  : _initialized(false) 
  , _finalized(false) 
  , _ppv( NULL ), _mgb (b) 

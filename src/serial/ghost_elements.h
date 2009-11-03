@@ -31,7 +31,7 @@ class MacroGhostBuilder : public MacroGridBuilder
   MacroGhostBuilder(const MacroGhostBuilder& );
 public:  
   // constructor 
-  MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi,false) 
+  MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi,(bool) false) 
   {
     // create Builder with empty lists 
     this->_initialized = true;
