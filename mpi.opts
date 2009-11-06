@@ -16,8 +16,5 @@ DEBUGFLAGS="-g"
 OPTIMFLAGS="-O3 -DNDEBUG \
   -funroll-loops -finline-functions \
   -fomit-frame-pointer \
-  -msse3 -mfpmath=sse -march=opteron \
-  --param max-inline-insns-single=6000 \
-  --param large-function-growth=6500 \
-  --param inline-unit-growth=6000"
+  -msse3 -mfpmath=sse -march=k8"
 
