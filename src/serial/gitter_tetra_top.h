@@ -95,6 +95,7 @@ template < class A > class Hbnd3Top : public A {
 
     int _lvl ;
     const bnd_t _bt; // type of boundary 
+    int _segmentIndex; // segment index of macro face 
 
     void split_e01 () ;
     void split_e12 () ;
@@ -117,6 +118,7 @@ template < class A > class Hbnd3Top : public A {
     bool bndNotifyCoarsen () ;
     void restoreFollowFace () ;
     inline int level () const ;
+    inline int segmentIndex () const ;
     inline innerbndseg_t * next () ;
     inline innerbndseg_t * down () ;
     inline const innerbndseg_t * next () const ;
@@ -728,6 +730,8 @@ Hbnd3Top (int l, myhface3_t * f, int i,
   _lvl (l), _bt (bt) 
 {
   this->setIndex( _indexManager.getIndex() );
+  // for macro bnd faces store current index as segment index 
+  _segmentIndex = this->getIndex();
   setBoundaryId( _bt ); 
   return ;
 }
@@ -740,12 +744,16 @@ Hbnd3Top (int l, myhface3_t * f,
           Gitter::helement_STI * gh, int gFace ) : 
   A (f, i, ppv ), _bbb (0), _dwn (0), _up (up) , 
   _indexManager(im) ,
-  _lvl (l), _bt (bt)  
+  _lvl (l), 
+  _bt (bt) 
 {
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
   this->setIndex( _indexManager.getIndex() );
-  
+
+  // get segment index from father if existent 
+  _segmentIndex = (_up) ? _up->_segmentIndex : this->getIndex() ;
+ 
   setBoundaryId( _bt ); 
   return ;
 }
@@ -770,6 +778,10 @@ setBoundaryId (const int id )
     face.myvertex(i)->setBndId( id );
     face.myhedge1(i)->setBndId( id );
   }
+}
+
+template < class A > inline int Hbnd3Top < A > :: segmentIndex () const {
+  return _segmentIndex;
 }
 
 template < class A > inline int Hbnd3Top < A > :: level () const {

@@ -1441,7 +1441,6 @@ public :
       inline bool hasVertexProjection() const { return (_projection != 0); }
     public :
       inline virtual ~hbndseg3 () ;
-      virtual int segmentIndex() const ;
       inline myrule_t getrule () const ;
       virtual bool refineLikeElement (balrule_t) = 0 ;
       inline myvertex_t * myvertex (int,int) const ;
@@ -1510,7 +1509,6 @@ public :
       inline bool hasVertexProjection() const { return (_projection != 0); }
     public :
       inline virtual ~hbndseg4 () ;
-      virtual int segmentIndex() const ;
       inline myrule_t getrule () const ;
       virtual bool refineLikeElement (balrule_t) = 0 ;
       inline myvertex_t * myvertex (int,int) const ;
@@ -3250,12 +3248,6 @@ inline Gitter :: Geometric :: hbndseg3 :: ~hbndseg3 () {
   return ;
 }
 
-inline int Gitter :: Geometric :: hbndseg3 :: segmentIndex() const 
-{
-  // to be revised when segment indices are available 
-  return bndtype();
-}
-
 inline int Gitter :: Geometric :: hbndseg3 :: postRefinement () 
 {
   if (_projection) 
@@ -3317,12 +3309,6 @@ inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface4_t * a, int b, Proje
 inline Gitter :: Geometric :: hbndseg4 :: ~hbndseg4 () {
   _face->detachElement (_twist) ;
   return ;
-}
-
-inline int Gitter :: Geometric :: hbndseg4 :: segmentIndex() const 
-{
-  // to be revised when segment indices are available 
-  return bndtype();
 }
 
 inline int Gitter :: Geometric :: hbndseg4 :: postRefinement () 
