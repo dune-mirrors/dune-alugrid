@@ -143,7 +143,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   else 
   {
     if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
-      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
+      hface3_GEO * face  = InsertUniqueHface3 (v).first ;
       hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, _ppv, bt) ;
       _hbnd3Map [key] = hb3 ;
       return true ;
