@@ -124,9 +124,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           protected :
             typedef VertexEmpty innervertex_t ;
             inline Hedge1Empty (myvertex_t *,myvertex_t *) ;
-     ~Hedge1Empty () {}
+            ~Hedge1Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectInnerVertex(const ProjectVertex &pv) ; 
+           virtual inline void projectInnerVertex(const ProjectVertexPair &pv) ; 
         } ;
   
         typedef Hedge1Top < Hedge1Empty > hedge1_IMPL ;
@@ -136,9 +136,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef VertexEmpty   innervertex_t ;
             typedef hedge1_IMPL   inneredge_t ;
             inline Hface3Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int) ;
-     ~Hface3Empty () {}
+           ~Hface3Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectVertex(const ProjectVertex &pv) ; 
+           virtual inline void projectVertex(const ProjectVertexPair &pv) ; 
   } ;
         typedef Hface3Top < Hface3Empty > hface3_IMPL ;
         
@@ -151,7 +151,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
            inline Hface4Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int,myhedge1_t *,int) ;
            ~Hface4Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectVertex(const ProjectVertex &pv) ; 
+           virtual inline void projectVertex(const ProjectVertexPair &pv) ; 
         } ;
         typedef Hface4Top < Hface4Empty > hface4_IMPL ;
 
@@ -358,7 +358,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       typedef hface3_IMPL innerface_t ;
       typedef hedge1_IMPL inneredge_t ;
       typedef VertexEmpty innervertex_t ;
-	    typedef tetra_IMPL GhostElement_t;
+      typedef tetra_IMPL GhostElement_t;
 
       inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
       ~Periodic3Empty () {}
@@ -576,7 +576,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
           typedef hface4_IMPL innerface_t ;
           typedef hedge1_IMPL inneredge_t ;
           typedef VertexEmpty innervertex_t ;
-	        typedef hexa_IMPL GhostElement_t;
+          typedef hexa_IMPL GhostElement_t;
 
           inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
           ~Periodic4Empty () {}
@@ -596,7 +596,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual inline hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         virtual inline hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual inline hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
-        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t)       ;
         // version with point , returns insert_hbnd3 here 
         virtual inline hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
         virtual inline hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t) ;
@@ -679,7 +679,8 @@ inline GitterBasis :: Objects :: Hedge1Empty :: Hedge1Empty (myvertex_t * a, myv
   return ;
 }
 
-inline void GitterBasis :: Objects :: Hedge1Empty :: projectInnerVertex(const ProjectVertex &pv) {
+inline void GitterBasis :: Objects :: Hedge1Empty :: projectInnerVertex(const ProjectVertexPair &pv) 
+{
   if (innerVertex()) {
     assert(!leaf());
     innerVertex()->project(pv);
@@ -691,7 +692,7 @@ inline GitterBasis :: Objects :: Hface3Empty :: Hface3Empty (myhedge1_t *e0, int
   return ;
 }
 
-inline void GitterBasis :: Objects :: Hface3Empty :: projectVertex(const ProjectVertex &pv) 
+inline void GitterBasis :: Objects :: Hface3Empty :: projectVertex(const ProjectVertexPair &pv) 
 {
   assert(!leaf());
   for (int e = 0; e < polygonlength; e++)
@@ -706,7 +707,7 @@ inline GitterBasis :: Objects :: Hface4Empty :: Hface4Empty (myhedge1_t *e0, int
   return ;
 }
 
-inline void GitterBasis :: Objects :: Hface4Empty :: projectVertex(const ProjectVertex &pv) {
+inline void GitterBasis :: Objects :: Hface4Empty :: projectVertex(const ProjectVertexPair &pv) {
   for (int e = 0; e < polygonlength; e++)
     myhedge1(e)->projectInnerVertex(pv);
   if (innerVertex())

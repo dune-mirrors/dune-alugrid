@@ -22,8 +22,12 @@ public:
   // destructor 
   virtual ~ProjectVertex () {}
   // projection method 
-  virtual int operator()(const double (&p)[3], double (&ret)[3]) const = 0;
+  virtual int operator()(const double (&p)[3], 
+                         const int segmentIndex,
+                         double (&ret)[3]) const = 0;
 };
+// pair of projection and bnd segment index 
+typedef pair<const ProjectVertex* , const int > ProjectVertexPair;
 
 // forward declaration, see ghost_info.h 
 class MacroGhostInfoHexa;
@@ -377,7 +381,7 @@ public :
     virtual int level () const = 0 ;
 
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-    virtual void project(const ProjectVertex &pv) = 0; 
+    virtual void project(const ProjectVertexPair &pv) = 0; 
   
     // Extrainteger, damit die Element zu Vertex Zuordnug klappt,
     // wenn die Daten zur Visualisierung mit GRAPE rausgeschrieben
@@ -416,7 +420,7 @@ public :
     //virtual void backup (XDRstream_out &) const {};
     //virtual void restore (XDRstream_in &) {};
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-    virtual void projectInnerVertex(const ProjectVertex &pv) = 0; 
+    virtual void projectInnerVertex(const ProjectVertexPair &pv) = 0; 
 
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
@@ -449,7 +453,7 @@ public :
     virtual void restore (ObjectStream &) = 0 ;
         
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-    virtual void projectVertex(const ProjectVertex &pv) = 0;
+    virtual void projectVertex(const ProjectVertexPair &pv) = 0;
 
     // returns true if element conected to face is leaf 
     virtual bool isInteriorLeaf() const = 0;
@@ -640,6 +644,9 @@ public :
     }
     
     virtual bnd_t bndtype () const = 0 ;
+
+    // return index of boundary segment 
+    virtual int   segmentIndex () const = 0 ;
         
     // for dune 
     virtual hbndseg * up () = 0 ;
@@ -948,7 +955,7 @@ public :
       // return level of vertex 
       inline int level () const ;
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-      virtual inline void project(const ProjectVertex &pv) ; 
+      virtual inline void project(const ProjectVertexPair &pv) ; 
             
       // overload backupIndex and restoreIndex here
       inline void backupIndex  (ostream & os ) const;
@@ -1431,11 +1438,10 @@ public :
       inline int postRefinement () ;
       inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
-      inline bool hasVertexProjection() const { 
-        cout << "Called hasVertexProjection hbnd3 \n";
-        return (_projection != 0); }
+      inline bool hasVertexProjection() const { return (_projection != 0); }
     public :
       inline virtual ~hbndseg3 () ;
+      virtual int segmentIndex() const ;
       inline myrule_t getrule () const ;
       virtual bool refineLikeElement (balrule_t) = 0 ;
       inline myvertex_t * myvertex (int,int) const ;
@@ -1504,6 +1510,7 @@ public :
       inline bool hasVertexProjection() const { return (_projection != 0); }
     public :
       inline virtual ~hbndseg4 () ;
+      virtual int segmentIndex() const ;
       inline myrule_t getrule () const ;
       virtual bool refineLikeElement (balrule_t) = 0 ;
       inline myvertex_t * myvertex (int,int) const ;
@@ -2227,16 +2234,17 @@ inline int Gitter :: Geometric :: VertexGeo :: level () const {
   return _lvl ;
 }
 
-inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv) 
+inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertexPair &pv) 
 {
   // copy current coordinates  
   const double p[3] = {_c[0],_c[1],_c[2]};
   // call projection operator 
-  const int ok = pv( p, _c );
+  assert( pv.first );
+  const int ok = (*pv.first)( p, pv.second, _c );
 
   if ( ! ok ) 
   {
-    cerr << "ERROR in Gitter :: Geometric :: VertexGeo :: project(const ProjectVertex &pv) " 
+    cerr << "ERROR in Gitter :: Geometric :: VertexGeo :: project(const ProjectVertexPair &pv) " 
          << "no boundary projection possible!" << endl;
     _c[0] = p[0]; _c[1] = p[1]; _c[2] = p[2];
   }
@@ -3242,11 +3250,18 @@ inline Gitter :: Geometric :: hbndseg3 :: ~hbndseg3 () {
   return ;
 }
 
+inline int Gitter :: Geometric :: hbndseg3 :: segmentIndex() const 
+{
+  // to be revised when segment indices are available 
+  return bndtype();
+}
+
 inline int Gitter :: Geometric :: hbndseg3 :: postRefinement () 
 {
   if (_projection) 
   {
-    myhface3(0)->projectVertex(*_projection);
+    ProjectVertexPair pv( _projection, segmentIndex() );
+    myhface3(0)->projectVertex( pv );
   }
   return 0 ;
 }
@@ -3304,11 +3319,18 @@ inline Gitter :: Geometric :: hbndseg4 :: ~hbndseg4 () {
   return ;
 }
 
+inline int Gitter :: Geometric :: hbndseg4 :: segmentIndex() const 
+{
+  // to be revised when segment indices are available 
+  return bndtype();
+}
+
 inline int Gitter :: Geometric :: hbndseg4 :: postRefinement () 
 {
   if (_projection) 
   {
-    myhface4(0)->projectVertex(*_projection);
+    ProjectVertexPair pv( _projection, segmentIndex() );
+    myhface4(0)->projectVertex( pv );
   }
   return 0 ;
 }
