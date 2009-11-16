@@ -3,6 +3,7 @@
 AC_DEFUN([ALUGRID_PATH_PARMETIS],[
   AC_REQUIRE([AC_PROG_CC])
   AC_REQUIRE([ALUGRID_PATH_METIS])
+  AC_REQUIRE([CHECK_MPI])
 
   AC_ARG_WITH(parmetis,
     AC_HELP_STRING([--with-parmetis=PATH],[directory with ParMETIS (version >= 3.1)  inside]))
@@ -42,6 +43,8 @@ CPPFLAGS="$CPPFLAGS $PARMETISDEF -I$PARMETIS_INCLUDE_PATH"
 
 # check for header
   AC_LANG_PUSH([C])
+  REM_CC="$CC"
+  CC="$MPICC"
   AC_CHECK_HEADER([parmetis.h], 
    [PARMETIS_CPPFLAGS="$PARMETISDEF -I$PARMETIS_INCLUDE_PATH"
 	HAVE_PARMETIS="1"],
@@ -72,6 +75,8 @@ AC_LANG_POP([C])
 
 ## end of parmetis check (--without wasn't set)
 fi
+
+CC="$REM_CC"
 
 # survived all tests?
 if test x$HAVE_PARMETIS = x1 ; then
