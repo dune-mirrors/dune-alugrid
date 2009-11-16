@@ -33,20 +33,6 @@ else
   AC_MSG_RESULT(yes)
 fi 
 
-if test x = x"$MPI_LIBS"; then
-        AC_CHECK_LIB(mpi, MPI_Finalize, [MPI_LIBS="-lmpi"])
-fi
-if test x = x"$MPI_LIBS"; then
-        AC_CHECK_LIB(mpich, MPI_Finalize, [MPI_LIBS="-lmpich"])
-fi
-
-if test x != x"$MPI_LIBS"; then
-        AC_MSG_CHECKING([for mpi.h])
-        AC_TRY_COMPILE([#include <mpi.h>],[],[AC_MSG_RESULT(yes)], 
-                       [MPI_LIBS="`$MPICC -showme:link`"
-                        AC_MSG_RESULT(no)])
-fi
-
 LDFLAGS="$REM_LDFLAGS"
 
 # reset previous compiler 
