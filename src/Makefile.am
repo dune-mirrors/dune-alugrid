@@ -37,5 +37,3 @@ include_HEADERS = serial/alugrid_defineparallel.h
 dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_2d.cc
 
 endif
-
-EXTRA_DIST=timer.hh
