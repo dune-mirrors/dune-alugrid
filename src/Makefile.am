@@ -18,25 +18,24 @@ lib_LTLIBRARIES = libalugrid.la
 # headers to install 
 nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h alugrid_2d.h alugrid_2d.cc stlheaders.h indexstack.h $(serialhdrs) $(parallelhdrs) $(duneinterfacehdrs) $(alu2dhdrs)
 
+# add all package flags 
+AM_CPPFLAGS = $(ALUGRID_CPPFLAGS)
+LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
+
 if MPI 
 # if MPI was found the parallel version is build 
 include_HEADERS = parallel/alugrid_defineparallel.h
 
-# add mpi path to cpplags 
-AM_CPPFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS)
-LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
-
 # build lib with parallel support 
 dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_parallel.cc alugrid_2d.cc
-libalugrid_la_LIBADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS)
 
 else 
 # if no mpi build only serial lib 
 include_HEADERS = serial/alugrid_defineparallel.h
 
-LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
-AM_CPPFLAGS = $(ALUGRID_CPPFLAGS)
 # build only serial grid lib
 dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_2d.cc
 
 endif
+
+EXTRA_DIST=timer.hh
