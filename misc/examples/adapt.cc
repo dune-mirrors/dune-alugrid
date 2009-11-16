@@ -5,11 +5,11 @@
 #include <string>
 
 #include "../src/alugrid_2d.h"
-#include "timer.hh"
 
 using namespace ALUGridSpace ;
 
 typedef Hmesh GridType;
+
 
 void globalRefine(GridType& grid, int refCount ) 
 {
@@ -68,6 +68,7 @@ int size(GridType& grid)
   return count ;
 }
 
+
 int main (int argc, char ** argv )
 {
   // The grid dimension
@@ -75,11 +76,29 @@ int main (int argc, char ** argv )
 
   std::string filename ("square.triangle");
 
-  // create non-conform mesh with hanging nodes = 1 
-  Hmesh grid( filename.c_str() , 1,   Refco::quart );
+  Hmesh* gridptr = 0;
+  int ref = 1;
+  if( argc > 2 ) 
+  {
+    // create conforming grid 
+    gridptr = new Hmesh( filename.c_str() ); 
+    ref = 2 ;
+    cout << "Create conforming grid " << endl; 
+  }
+  else 
+  {
+    // create non-conforming grid 
+    gridptr = new Hmesh( filename.c_str() , 1,   Refco::quart );
+    cout << "Create non-conforming grid " << endl; 
+  }
+
+  Hmesh& grid = *gridptr ;
   
   const int gRefine = 6;
-  const int N = (argc > 1) ? atoi( argv[1] ) : 5 ;
+  const int Nstep = (argc > 1) ? atoi( argv[1] ) : 5 ;
+  const int N = (ref == 2) ? (ref * Nstep + 1) : Nstep;
+
+  cout << "Refine step = " << N << endl ;
 
   std::vector<double> refTimes( N, 0.0);
   std::vector<double> crsTimes( N, 0.0);
@@ -89,7 +108,7 @@ int main (int argc, char ** argv )
   {
     int oldSize = size(grid);
     Timer timerGlobalRefine;
-    globalRefine( grid , 1 );
+    globalRefine( grid , ref );
     std::cout << "Globalrefine " << oldSize << " -> " << size(grid) << ": " << timerGlobalRefine.elapsed() << " seconds." << std::endl;
   }
 
