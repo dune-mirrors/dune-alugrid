@@ -29,13 +29,14 @@ AC_TRY_COMPILE([#include <mpi.h>],
 if test x = x"$MPI_LIBS"; then
   AC_MSG_RESULT(no)
 else 
+  # get MPI CFLAGS from compiler 
   MPI_CPPFLAGS="`$MPICC -showme:compile`"
   AC_MSG_RESULT(yes)
 fi 
 
-LDFLAGS="$REM_LDFLAGS"
 
 # reset previous compiler 
+LDFLAGS="$REM_LDFLAGS"
 CC="$REM_CC"
 AC_SUBST(MPI_LIBS)
 AC_LANG_POP
