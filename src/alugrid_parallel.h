@@ -1,9 +1,6 @@
 #ifndef _ALUGRID_PARALLEL_h_INCLUDED_
 #define _ALUGRID_PARALLEL_h_INCLUDED_
 
-// the message passing interface (MPI) headers 
-#include <mpi.h>
-
 #include "alugrid_serial.h"
 
 #define _ANSI_HEADER 
@@ -24,5 +21,4 @@ namespace ALUGridSpace {
 #include "duneinterface/gitter_dune_pll_impl.h"
 
 }
-
 #endif
