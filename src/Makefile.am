@@ -20,7 +20,8 @@ nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h alugrid_2d.h alugri
 
 # add all package flags 
 AM_CPPFLAGS = $(ALUGRID_CPPFLAGS)
-libalugrid_la_LIBADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
+libalugrid_la_CPPFLAGS = $(ALUGRID_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
+libalugrid_la_LIBADD = $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS) $(MPI_LDFLAGS) $(MPI_LIBS) 
 
 if MPI 
 # if MPI was found the parallel version is build 
