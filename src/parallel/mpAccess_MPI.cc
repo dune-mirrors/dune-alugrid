@@ -2,6 +2,74 @@
 
 #include "mpAccess_MPI.h"
 
+#ifndef NDEBUG
+#define MY_INT_TEST int test =
+#else
+#define MY_INT_TEST
+#endif
+
+MPI_Comm mpiComm(void * mpiCommPtr) 
+{
+  typedef MpAccessMPI :: Comm< MPI_Comm > MyComm;
+  MyComm& comm = (*((MyComm *) mpiCommPtr));
+  return comm;
+}
+
+template <>
+MpAccessMPI :: Comm< MPI_Comm > :: Comm( MPI_Comm mpicomm ) 
+{
+  // duplicate mpi communicator 
+  MY_INT_TEST MPI_Comm_dup ( mpicomm, & _mpiComm ) ;
+  assert (test == MPI_SUCCESS) ;
+}
+
+// workarround for old member variable 
+#define _mpiComm (mpiComm(_mpiCommPtr))
+
+void MpAccessMPI :: initialize()
+{
+  {
+    MY_INT_TEST MPI_Comm_size ( _mpiComm, & _psize );
+    assert (test == MPI_SUCCESS) ;
+  }
+  {
+    MY_INT_TEST MPI_Comm_rank ( _mpiComm, & _myrank );
+    assert (test == MPI_SUCCESS) ;
+  }
+}
+
+MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a)
+: _mpiCommPtr((void *) new Comm<MPI_Comm> (mpiComm(a._mpiCommPtr))),
+  _psize( 0 ) , _myrank( -1 )
+{
+  initialize();
+}
+
+MpAccessMPI :: ~MpAccessMPI ()
+{
+  typedef Comm<MPI_Comm> MyComm;
+  MyComm* comm = (MyComm *) _mpiCommPtr;
+  delete comm;
+  _mpiCommPtr = 0;
+  return ;
+}
+
+int MpAccessMPI :: barrier () const {
+    return MPI_SUCCESS == MPI_Barrier (_mpiComm) ? psize () : 0 ;
+}
+
+int MpAccessMPI :: mpi_allgather (int * i, int si, int * o, int so) const {
+    return MPI_Allgather (i, si, MPI_INT, o, so, MPI_INT, _mpiComm) ;
+}
+
+int MpAccessMPI :: mpi_allgather (char * i, int si, char * o, int so) const {
+    return MPI_Allgather (i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm) ;
+}
+
+int MpAccessMPI :: mpi_allgather (double * i, int si, double * o, int so) const {
+    return MPI_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm) ;
+}
+
 template < class A > vector < vector < A > > 
 doGcollectV (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm) 
 {
@@ -522,3 +590,4 @@ exchange (const vector < ObjectStream > & in,
   }
   return ;
 }
+#undef _mpiComm

@@ -6,126 +6,98 @@
 
 class MpAccessMPI : public MpAccessLocal 
 {
-    MPI_Comm _mpiComm ;
-    
-    inline int mpi_allgather (int *, int , int *, int) const ;
-    inline int mpi_allgather (char *, int, char *, int) const ;
-    inline int mpi_allgather (double *, int, double *, int ) const ;
-    public :
-      inline  MpAccessMPI (MPI_Comm) ;
-      inline  MpAccessMPI (const MpAccessMPI &) ;
-      inline ~MpAccessMPI () ;
-      inline int psize () const ;
-      inline int myrank () const ;
-      inline int barrier () const ;
-      int gmax (int) const ;
-      int gmin (int) const ;
-      int gsum (int) const ;
-      long gmax (long) const ;
-      long gmin (long) const ;
-      long gsum (long) const ;
-      double gmax (double) const ;
-      double gmin (double) const ;
-      double gsum (double) const ;
-      void gmax (double*,int,double*) const ;
-      void gmin (double*,int,double*) const ;
-      void gsum (double*,int,double*) const ;
-      pair<double,double> gmax (pair<double,double>) const ;
-      pair<double,double> gmin (pair<double,double>) const ;
-      pair<double,double> gsum (pair<double,double>) const ;
-      vector < int > gcollect (int) const ;
-      vector < double > gcollect (double) const ;
-      vector < vector < int > > gcollect (const vector < int > &) const ;
-      vector < vector < double > > gcollect (const vector < double > &) const ;
-      vector < ObjectStream > gcollect (const ObjectStream &) const ;
-      vector < vector < int > > exchange (const vector < vector < int > > &) const ;
-      vector < vector < double > > exchange (const vector < vector < double > > &) const ;
-      vector < vector < char > > exchange (const vector < vector < char > > &) const ;
-      
-      vector < ObjectStream > exchange (const vector < ObjectStream > &) const ;
+public:
+  template <class MPICommunicator>
+  class Comm 
+  {
+    // no copying or assigning
+    Comm( const Comm& );
+    Comm& operator= (const Comm& );
+  public:  
+    // we don't want MPI types here to avoid include of mpi.h 
+    mutable MPICommunicator _mpiComm;
+    Comm( MPICommunicator );
+    operator MPICommunicator () const { return _mpiComm; }
+  };
 
-      // symectric exchange with same buffer size 
-      void exchange (const vector < ObjectStream > & in,
-                     vector< ObjectStream > & out) const;
-        
-      // return address of MPI communicator (dirty hack, but what can we do)
-      void* communicator() { return ((void *) &_mpiComm); }
+protected:  
+  void * _mpiCommPtr;
+  int _psize; 
+  int _myrank;
+
+  int mpi_allgather (int *, int , int *, int) const ;
+  int mpi_allgather (char *, int, char *, int) const ;
+  int mpi_allgather (double *, int, double *, int ) const ;
+public :
+  template <class MPICommunicator>  
+  inline MpAccessMPI (MPICommunicator i) 
+    : _mpiCommPtr( (void *) new Comm<MPICommunicator> ( i ) ), 
+      _psize( 0 ), _myrank( -1 )
+  {
+    initialize(); 
+  }
+
+  MpAccessMPI (const MpAccessMPI &) ;
+  ~MpAccessMPI () ;
+protected:  
+  void initialize () ;
+public:  
+  inline int psize () const ;
+  inline int myrank () const ;
+  int barrier () const ;
+  int gmax (int) const ;
+  int gmin (int) const ;
+  int gsum (int) const ;
+  long gmax (long) const ;
+  long gmin (long) const ;
+  long gsum (long) const ;
+  double gmax (double) const ;
+  double gmin (double) const ;
+  double gsum (double) const ;
+  void gmax (double*,int,double*) const ;
+  void gmin (double*,int,double*) const ;
+  void gsum (double*,int,double*) const ;
+  pair<double,double> gmax (pair<double,double>) const ;
+  pair<double,double> gmin (pair<double,double>) const ;
+  pair<double,double> gsum (pair<double,double>) const ;
+  vector < int > gcollect (int) const ;
+  vector < double > gcollect (double) const ;
+  vector < vector < int > > gcollect (const vector < int > &) const ;
+  vector < vector < double > > gcollect (const vector < double > &) const ;
+  vector < ObjectStream > gcollect (const ObjectStream &) const ;
+  vector < vector < int > > exchange (const vector < vector < int > > &) const ;
+  vector < vector < double > > exchange (const vector < vector < double > > &) const ;
+  vector < vector < char > > exchange (const vector < vector < char > > &) const ;
+  
+  vector < ObjectStream > exchange (const vector < ObjectStream > &) const ;
+
+  // symectric exchange with same buffer size 
+  void exchange (const vector < ObjectStream > & in,
+                 vector< ObjectStream > & out) const;
+    
+  // return address of MPI communicator (dirty hack, but what can we do)
+  void* communicator() { return _mpiCommPtr; }
 } ;
 
 
-	//
-	//    #    #    #  #          #    #    #  ######
-	//    #    ##   #  #          #    ##   #  #
-	//    #    # #  #  #          #    # #  #  #####
-	//    #    #  # #  #          #    #  # #  #
-	//    #    #   ##  #          #    #   ##  #
-	//    #    #    #  ######     #    #    #  ######
-	//
-#ifndef NDEBUG
-#define MY_INT_TEST int test =
-#else
-#define MY_INT_TEST
-#endif
-
-#define USE_MPI_COMM_DUP
-
-inline MpAccessMPI :: MpAccessMPI (MPI_Comm i) {
-#ifdef USE_MPI_COMM_DUP
-  MY_INT_TEST MPI_Comm_dup (i, &_mpiComm) ;
-  assert (test == MPI_SUCCESS) ;
-#else 
-  _mpiComm = i;
-#endif
-  return ;
+//
+//    #    #    #  #          #    #    #  ######
+//    #    ##   #  #          #    ##   #  #
+//    #    # #  #  #          #    # #  #  #####
+//    #    #  # #  #          #    #  # #  #
+//    #    #   ##  #          #    #   ##  #
+//    #    #    #  ######     #    #    #  ######
+//
+inline int MpAccessMPI :: psize () const 
+{
+  assert( _psize > 0 );
+  //return _psize;
+  return _psize;
 }
 
-inline MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a) {
-#ifdef USE_MPI_COMM_DUP
-  MY_INT_TEST MPI_Comm_dup (a._mpiComm, &_mpiComm) ;
-  assert (test == MPI_SUCCESS) ;
-#else 
-  _mpiComm = a._mpiComm;
-#endif
-  return ;
+inline int MpAccessMPI :: myrank () const 
+{
+  assert( _myrank != -1 );
+  return _myrank;
 }
-
-inline MpAccessMPI :: ~MpAccessMPI () {
-#ifdef USE_MPI_COMM_DUP
-  MY_INT_TEST MPI_Comm_free (&_mpiComm) ;
-  assert (test == MPI_SUCCESS) ;
-#endif
-  return ;
-}
-
-inline int MpAccessMPI :: psize () const {
-  int i ;
-  MY_INT_TEST MPI_Comm_size (_mpiComm, & i) ;
-  assert (test == MPI_SUCCESS) ;
-  return i ;
-}
-
-inline int MpAccessMPI :: myrank () const {
-  int i ;
-  MY_INT_TEST MPI_Comm_rank (_mpiComm, & i) ;
-  assert (test == MPI_SUCCESS) ;
-  return i ;
-}
-
-inline int MpAccessMPI :: barrier () const {
-  return MPI_SUCCESS == MPI_Barrier (_mpiComm) ? psize () : 0 ;
-}
-
-inline int MpAccessMPI :: mpi_allgather (int * i, int si, int * o, int so) const {
-  return MPI_Allgather (i, si, MPI_INT, o, so, MPI_INT, _mpiComm) ;
-}
-
-inline int MpAccessMPI :: mpi_allgather (char * i, int si, char * o, int so) const {
-  return MPI_Allgather (i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm) ;
-}
-
-inline int MpAccessMPI :: mpi_allgather (double * i, int si, double * o, int so) const {
-  return MPI_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm) ;
-}
-
-#undef USE_MPI_COMM_DUP
 #endif
