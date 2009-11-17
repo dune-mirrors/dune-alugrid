@@ -32,12 +32,16 @@ AC_DEFUN([ALUGRID_SERIAL_PARALLEL],[
 
  if test x$with_serial != xno ; then 
   with_parallel="serial"
+    if test "x$with_mpi" = "xyes"; then 
     AC_CHECK_HEADER([alugrid_parallel.h],[with_parallel="parallel"],
       AC_MSG_WARN([alugrid_parallel.h could not be found or compiled! 
       Maybe you should rerun configure with the parameter CXX=$MPICXX 
       instead the choosen way! See the README file for more 
       information on compilers!]) 
     )
+    else 
+      AC_MSG_WARN([MPI not found, not checking alugrid_parallel.h!]) 
+    fi
  fi
     
   AC_MSG_CHECKING([for which type of run mode ALUGrid can be used])
