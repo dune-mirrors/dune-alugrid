@@ -14,7 +14,8 @@ AC_SUBST(MPICC)
 # use the mpi compiler script in the following 
 
 REM_LDFLAGS="$LDFLAGS"
-LDFLAGS=`$MPICC -showme:link`
+
+LDFLAGS=`$MPICC -showme:link 2> /dev/null`
 
 # test whether the following code compiles 
 # and if use the mpicc -showme:link libs for linking
@@ -24,16 +25,22 @@ AC_TRY_COMPILE([#include <mpi.h>],
   MPI_Finalize();
   exit(0);
 }], 
-[MPI_LIBS="`$MPICC -showme:link`"], [MPI_LIBS=""])
+[MPI_LIBS="$LDFLAGS"], [MPI_LIBS=""])
+
+if test x = x"$MPI_LIBS"; then
+  AC_CHECK_LIB(mpi, MPI_Finalize, [MPI_LIBS="-lmpi"])
+fi
+if test x = x"$MPI_LIBS"; then
+  AC_CHECK_LIB(mpich, MPI_Finalize, [MPI_LIBS="-lmpich"])
+fi
 
 if test x = x"$MPI_LIBS"; then
   AC_MSG_RESULT(no)
 else 
-  # get MPI CFLAGS from compiler 
-  MPI_CPPFLAGS="`$MPICC -showme:compile`"
+  # get MPI CFLAGS from compiler and -DMPIPP_H to avoid C++ bindings  
+  MPI_CPPFLAGS="`$MPICC -showme:compile 2> /dev/null`"
   AC_MSG_RESULT(yes)
 fi 
-
 
 # reset previous compiler 
 LDFLAGS="$REM_LDFLAGS"
@@ -45,13 +52,14 @@ AC_LANG_POP
 if test x != x"$MPI_LIBS"; then
   AC_SUBST(MPI_LIBS, $MPI_LIBS)
   AC_SUBST(MPI_LDFLAGS, $MPI_LDFLAGS)
-  AC_SUBST(MPI_CPPFLAGS, $METIS_CPPFLAGS)
+  AC_SUBST(MPI_CPPFLAGS, $MPI_CPPFLAGS)
 
   # add to global list
   ALUGRID_PKG_LDFLAGS="$ALUGRID_PKG_LDFLAGS $MPI_LDFLAGS"
   ALUGRID_PKG_LIBS="$ALUGRID_PKG_LIBS $MPI_LIBS"
   ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $MPI_CPPFLAGS"
 fi
+
 if test x != x"$MPI_LIBS"; then
   ifelse([$1],,[AC_DEFINE(HAVE_MPI,1,[Defines whether you have the MPI library or not.])],[$1])
 fi

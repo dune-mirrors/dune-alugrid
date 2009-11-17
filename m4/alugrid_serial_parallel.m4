@@ -31,7 +31,7 @@ AC_DEFUN([ALUGRID_SERIAL_PARALLEL],[
   )
 
  if test x$with_serial != xno ; then 
-  with_parallel="serial"
+    with_parallel="serial"
     if test "x$with_mpi" = "xyes"; then 
     AC_CHECK_HEADER([alugrid_parallel.h],[with_parallel="parallel"],
       AC_MSG_WARN([alugrid_parallel.h could not be found or compiled! 
