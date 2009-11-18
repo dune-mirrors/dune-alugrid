@@ -38,8 +38,8 @@ protected:
   int mpi_allgather (double *, int, double *, int ) const ;
 public :
   template <class MPICommunicator>  
-  inline MpAccessMPI (MPICommunicator i) 
-    : _mpiCommPtr( (void *) new Comm<MPICommunicator> ( i ) ), 
+  inline MpAccessMPI (MPICommunicator mpicomm ) 
+    : _mpiCommPtr( new Comm<MPICommunicator> ( mpicomm ) ), 
       _psize( getSize() ), _myrank( getRank() )
   {
   }
