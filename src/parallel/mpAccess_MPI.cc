@@ -26,24 +26,28 @@ MpAccessMPI :: Comm< MPI_Comm > :: Comm( MPI_Comm mpicomm )
 // workarround for old member variable 
 #define _mpiComm (mpiComm(_mpiCommPtr))
 
-void MpAccessMPI :: initialize()
+int MpAccessMPI :: getSize()
 {
-  // get size and rank 
-  {
-    MY_INT_TEST MPI_Comm_size ( _mpiComm, & _psize );
-    assert (test == MPI_SUCCESS) ;
-  }
-  {
-    MY_INT_TEST MPI_Comm_rank ( _mpiComm, & _myrank );
-    assert (test == MPI_SUCCESS) ;
-  }
+  // get size from MPI 
+  int size = 0; 
+  MY_INT_TEST MPI_Comm_size ( _mpiComm, & size );
+  assert (test == MPI_SUCCESS) ;
+  return size;
+}
+
+int MpAccessMPI :: getRank()
+{
+  // get rank from MPI 
+  int rank = -1;
+  MY_INT_TEST MPI_Comm_rank ( _mpiComm, & rank );
+  assert (test == MPI_SUCCESS) ;
+  return rank;
 }
 
 MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a)
 : _mpiCommPtr(new Comm<MPI_Comm> (mpiComm(a._mpiCommPtr))),
-  _psize( 0 ) , _myrank( -1 )
+  _psize( getSize() ) , _myrank( getRank() )
 {
-  initialize();
 }
 
 MpAccessMPI :: ~MpAccessMPI ()

@@ -32,9 +32,9 @@ protected:
   // class holding the MPI communicator 
   CommIF* _mpiCommPtr;
   // number of processors
-  int _psize; 
+  const int _psize; 
   // my processor number  
-  int _myrank;
+  const int _myrank;
 
   int mpi_allgather (int *, int , int *, int) const ;
   int mpi_allgather (char *, int, char *, int) const ;
@@ -43,15 +43,15 @@ public :
   template <class MPICommunicator>  
   inline MpAccessMPI (MPICommunicator i) 
     : _mpiCommPtr( (void *) new Comm<MPICommunicator> ( i ) ), 
-      _psize( 0 ), _myrank( -1 )
+      _psize( getSize() ), _myrank( getRank() )
   {
-    initialize(); 
   }
 
   MpAccessMPI (const MpAccessMPI &) ;
   ~MpAccessMPI () ;
 protected:  
-  void initialize () ;
+  int getSize () ;
+  int getRank () ;
 public:  
   inline int psize () const ;
   inline int myrank () const ;
