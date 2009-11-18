@@ -55,14 +55,15 @@ extern "C" {
 namespace ALUGridSpace {
 
 #include "parallel/gitter_pll_sti.cc"
-#include "parallel/gitter_pll_ldb.cc"
 #include "parallel/gitter_pll_impl.cc"
 #include "parallel/gitter_pll_sti.cc"
 #include "parallel/gitter_pll_mgb.cc"
-#include "parallel/gitter_pll_idn.cc"
+
 #include "parallel/mpAccess.cc"
 #include "parallel/mpAccess_MPI.cc"  
 
+#include "parallel/gitter_pll_ldb.cc"
+#include "parallel/gitter_pll_idn.cc"
 // file for duneinterface 
 #include "duneinterface/gitter_dune_pll_impl.cc"
 
