@@ -26,14 +26,6 @@ AC_TRY_COMPILE([#include <mpi.h>],
   exit(0);
 }], 
 [MPI_LIBS="$LDFLAGS"], [MPI_LIBS=""])
-
-if test x = x"$MPI_LIBS"; then
-  AC_CHECK_LIB(mpi, MPI_Finalize, [MPI_LIBS="-lmpi"])
-fi
-if test x = x"$MPI_LIBS"; then
-  AC_CHECK_LIB(mpich, MPI_Finalize, [MPI_LIBS="-lmpich"])
-fi
-
 if test x = x"$MPI_LIBS"; then
   AC_MSG_RESULT(no)
 else 
@@ -41,6 +33,13 @@ else
   MPI_CPPFLAGS="`$MPICC -showme:compile 2> /dev/null`"
   AC_MSG_RESULT(yes)
 fi 
+
+if test x = x"$MPI_LIBS"; then
+  AC_CHECK_LIB(mpi, MPI_Finalize, [MPI_LIBS="-lmpi"])
+fi
+if test x = x"$MPI_LIBS"; then
+  AC_CHECK_LIB(mpich, MPI_Finalize, [MPI_LIBS="-lmpich"])
+fi
 
 # reset previous compiler 
 LDFLAGS="$REM_LDFLAGS"
