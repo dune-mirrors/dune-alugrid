@@ -12,6 +12,7 @@ class MpAccessGlobal {
       CommIF () {}
     public:
       virtual ~CommIF() {}
+      virtual CommIF* clone () const = 0;
     };
 
     inline virtual ~MpAccessGlobal () ;

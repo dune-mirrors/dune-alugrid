@@ -52,7 +52,7 @@ int MpAccessMPI :: getRank()
 }
 
 MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a)
-: _mpiCommPtr(new Comm<MPI_Comm> (getMPICommunicator(a._mpiCommPtr))),
+: _mpiCommPtr( a._mpiCommPtr->clone() ),
   _psize( getSize() ) , _myrank( getRank() )
 {
 }

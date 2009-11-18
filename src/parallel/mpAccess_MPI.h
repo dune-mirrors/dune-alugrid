@@ -22,7 +22,11 @@ public:
     Comm( MPICommunicator );
     // destructor freeing mpi communicator 
     ~Comm();
+    // conversion operator to MPI_Comm 
     operator MPICommunicator () const { return _mpiComm; }
+
+    //! return copy of this object  
+    virtual CommIF* clone() const { return new Comm< MPICommunicator > ( _mpiComm ); }
   };
 
 protected:  
@@ -37,6 +41,8 @@ protected:
   int mpi_allgather (char *, int, char *, int) const ;
   int mpi_allgather (double *, int, double *, int ) const ;
 public :
+  // constructor taking MPI_Comm 
+  // to avoid MPI types here this is a template constructor 
   template <class MPICommunicator>  
   inline MpAccessMPI (MPICommunicator mpicomm ) 
     : _mpiCommPtr( new Comm<MPICommunicator> ( mpicomm ) ), 
@@ -44,7 +50,9 @@ public :
   {
   }
 
+  // copy constructor 
   MpAccessMPI (const MpAccessMPI &) ;
+  // destructor 
   ~MpAccessMPI () ;
 protected:  
   int getSize () ;
