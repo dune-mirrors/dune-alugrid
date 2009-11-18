@@ -7,13 +7,7 @@
 class MpAccessMPI : public MpAccessLocal 
 {
 public:
-  class CommIF 
-  {
-  protected: 
-    CommIF () {}
-  public:
-    virtual ~CommIF() {}
-  };
+  typedef MpAccessGlobal :: CommIF CommIF;
 
   template <class MPICommunicator>
   class Comm : public CommIF
@@ -24,13 +18,16 @@ public:
     // we don't want MPI types here to avoid include of mpi.h 
     mutable MPICommunicator _mpiComm;
   public:  
+    // constructor duplicating mpi communicator
     Comm( MPICommunicator );
+    // destructor freeing mpi communicator 
+    ~Comm();
     operator MPICommunicator () const { return _mpiComm; }
   };
 
 protected:  
   // class holding the MPI communicator 
-  CommIF* _mpiCommPtr;
+  const CommIF* _mpiCommPtr;
   // number of processors
   const int _psize; 
   // my processor number  
@@ -86,8 +83,8 @@ public:
   void exchange (const vector < ObjectStream > & in,
                  vector< ObjectStream > & out) const;
     
-  // return address of MPI communicator (dirty hack, but what can we do)
-  void* communicator() { return _mpiCommPtr; }
+  // return MPI communicator wrapper 
+  const CommIF* communicator() const { return _mpiCommPtr; }
 } ;
 
 

@@ -6,6 +6,14 @@
 
 class MpAccessGlobal {
   public :
+    class CommIF
+    {
+    protected:
+      CommIF () {}
+    public:
+      virtual ~CommIF() {}
+    };
+
     inline virtual ~MpAccessGlobal () ;
     virtual int psize () const = 0 ;
     virtual int myrank () const = 0 ;
@@ -32,7 +40,7 @@ class MpAccessGlobal {
     virtual vector < ObjectStream > gcollect (const ObjectStream &) const = 0 ;
 
     //! return address of communicator (not optimal but avoid explicit MPI types here)
-    virtual void* communicator() = 0;
+    virtual const CommIF* communicator() const = 0;
 } ;
 
 class MpAccessLocal : public MpAccessGlobal {

@@ -8,11 +8,15 @@
 #define MY_INT_TEST
 #endif
 
-MPI_Comm mpiComm(MpAccessMPI :: CommIF* mpiCommPtr) 
+MPI_Comm getMPICommunicator(const MpAccessMPI :: CommIF* mpiCommPtr) 
 {
   typedef MpAccessMPI :: Comm< MPI_Comm > MyComm;
-  MyComm& comm = static_cast<MyComm&> (*mpiCommPtr);
-  return comm;
+  return static_cast<const MyComm&> (*mpiCommPtr);
+}
+
+MPI_Comm getMPICommunicator(const MpAccessGlobal& mpa)
+{
+  return getMPICommunicator( mpa.communicator() );
 }
 
 template <>
@@ -23,8 +27,16 @@ MpAccessMPI :: Comm< MPI_Comm > :: Comm( MPI_Comm mpicomm )
   assert (test == MPI_SUCCESS) ;
 }
 
+template <>
+MpAccessMPI :: Comm< MPI_Comm > :: ~Comm( ) 
+{
+  // free mpi communicator 
+  MY_INT_TEST MPI_Comm_free (&_mpiComm) ;
+  assert (test == MPI_SUCCESS) ;
+}
+
 // workarround for old member variable 
-#define _mpiComm (mpiComm(_mpiCommPtr))
+#define _mpiComm (getMPICommunicator(_mpiCommPtr))
 
 int MpAccessMPI :: getSize()
 {
@@ -45,7 +57,7 @@ int MpAccessMPI :: getRank()
 }
 
 MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a)
-: _mpiCommPtr(new Comm<MPI_Comm> (mpiComm(a._mpiCommPtr))),
+: _mpiCommPtr(new Comm<MPI_Comm> (getMPICommunicator(a._mpiCommPtr))),
   _psize( getSize() ) , _myrank( getRank() )
 {
 }
