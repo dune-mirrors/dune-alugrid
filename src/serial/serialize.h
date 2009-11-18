@@ -137,7 +137,10 @@ public :
   inline void removeObject(const size_t length) throw (EOFException) 
   {
     _rb += length; 
+#ifndef NO_OBJECTSTREAM_DEBUG 
     if( _rb > _wb) throw EOFException () ;
+#endif
+    assert( _rb <= _wb );
   }
  
   //! free allocated memory 
