@@ -6,44 +6,73 @@ AC_PREREQ(2.50) dnl requires autoconf version 2.50 or higher
 AC_LANG_PUSH([C])
 AC_ARG_VAR(MPICC,[MPI C compiler command])
 AC_CHECK_PROGS(MPICC, mpicc hcc mpcc mpcc_r mpxlc cmpicc, $CC)
-acx_mpi_save_CC="$CC"
-REM_CC="$CC"
-CC="$MPICC"
 AC_SUBST(MPICC)
 
-# use the mpi compiler script in the following 
+AC_LANG_POP
+AC_LANG_PUSH([C++])
+AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
+AC_CHECK_PROGS(MPICXX, mpic++ mpicxx mpiCC mpCC hcp mpxlC mpxlC_r cmpic++, $CXX)
+AC_SUBST(MPICXX)
+
+mpi_help_string="(run again with ./configure CXX=$MPICXX .... or use '$MPICC -show' to obtain CXXFLAGS and LDFLAGS)"
 
 REM_LDFLAGS="$LDFLAGS"
-
-LDFLAGS=`$MPICC -showme:link 2> /dev/null`
+REM_CXXFLAGS="$CXXFLAGS"
+# get MPI CFLAGS from compiler  
+MPI_CPPFLAGS="`$MPICC -showme:compile 2> /dev/null`"
+LDFLAGS="$LDFLAGS `$MPICC -showme:link 2> /dev/null`"
+CXXFLAGS="$CXXFLAGS $MPI_CPPFLAGS" 
 
 # test whether the following code compiles 
 # and if use the mpicc -showme:link libs for linking
+
+# now check whether we can compile C++ with C-MPI interface
+# we need this for alugrid_parallel.cc 
 AC_MSG_CHECKING([for MPI_Finalize]) 
-AC_TRY_COMPILE([#include <mpi.h>],
+AC_TRY_COMPILE([
+  #if defined(__cplusplus) 
+  #define rem__cplusplus __cplusplus
+  #undef __cplusplus
+  #endif
+  #if defined(c_plusplus) 
+  #define remc_plusplus c_plusplus
+  #undef c_plusplus
+  #endif
+
+  extern "C" {
+    // the message passing interface (MPI) headers for C 
+    #include <mpi.h>
+  }
+
+  // restore defines 
+  #if defined(rem__cplusplus) 
+  #define __cplusplus rem__cplusplus
+  #undef rem__cplusplus
+  #endif
+
+  #if defined(c_plusplus) 
+  #define c_plusplus remc_plusplus
+  #undef remc_plusplus
+  #endif
+  
+  #include <cstdlib>
+  ],
 [{
   MPI_Finalize();
   exit(0);
 }], 
 [MPI_LIBS="$LDFLAGS"], [MPI_LIBS=""])
+
 if test x = x"$MPI_LIBS"; then
   AC_MSG_RESULT(no)
 else 
-  # get MPI CFLAGS from compiler and -DMPIPP_H to avoid C++ bindings  
-  MPI_CPPFLAGS="`$MPICC -showme:compile 2> /dev/null`"
   AC_MSG_RESULT(yes)
 fi 
 
-if test x = x"$MPI_LIBS"; then
-  AC_CHECK_LIB(mpi, MPI_Finalize, [MPI_LIBS="-lmpi"])
-fi
-if test x = x"$MPI_LIBS"; then
-  AC_CHECK_LIB(mpich, MPI_Finalize, [MPI_LIBS="-lmpich"])
-fi
-
 # reset previous compiler 
 LDFLAGS="$REM_LDFLAGS"
-CC="$REM_CC"
+CXXFLAGS="$REM_CXXFLAGS"
+
 AC_SUBST(MPI_LIBS)
 AC_LANG_POP
 

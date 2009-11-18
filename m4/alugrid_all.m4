@@ -56,20 +56,22 @@ else
   echo "ALUGrid is ready to compile for $with_parallel computations!"
 fi
 
-if test x$with_parallel = xparallel ; then
-  echo
-  echo The following components where found: 
-  echo "-------------------------------------"
-  echo  
-  echo "METIS............: $with_metis"
-  echo "ParMETIS.........: $with_parmetis"
-  echo "PARTY............: $with_party"
-  echo "MPI..............: $with_mpi"
-  echo
-  echo "-------------------------------------"
-fi
-  echo
-  echo "See ./configure --help and config.log for reasons why a component wasn't found"
-  echo
+if test "x$with_mpi" = "xno" ; then 
+  with_mpi="no $mpi_help_string"
+fi  
+
+echo
+echo The following components where found: 
+echo "-------------------------------------"
+echo  
+echo "METIS............: $with_metis"
+echo "ParMETIS.........: $with_parmetis"
+echo "PARTY............: $with_party"
+echo "MPI..............: $with_mpi"
+echo
+echo "-------------------------------------"
+echo
+echo "See ./configure --help and config.log for reasons why a component wasn't found"
+echo
 
 ])
