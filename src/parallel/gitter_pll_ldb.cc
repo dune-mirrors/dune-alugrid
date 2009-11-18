@@ -500,7 +500,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         const float value = 1.0/ ((float) nparts);
 
         // get communincator (see mpAccess_MPI.cc)
-        MPI_Comm comm = getMPICommunicator( mpa );
+        MPI_Comm comm = getMPICommunicator( mpa.communicator() );
 
         // set weights (uniform distribution, to be adjusted)
         for(int l=0; l<nparts; ++l) tpwgts[l] = value;

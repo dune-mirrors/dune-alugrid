@@ -14,11 +14,6 @@ MPI_Comm getMPICommunicator(const MpAccessMPI :: CommIF* mpiCommPtr)
   return static_cast<const MyComm&> (*mpiCommPtr);
 }
 
-MPI_Comm getMPICommunicator(const MpAccessGlobal& mpa)
-{
-  return getMPICommunicator( mpa.communicator() );
-}
-
 template <>
 MpAccessMPI :: Comm< MPI_Comm > :: Comm( MPI_Comm mpicomm ) 
 {
