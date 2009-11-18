@@ -14,7 +14,7 @@ public:
   {
     // no copying or assigning
     Comm( const Comm& );
-    Comm& operator= (const Comm& );
+    Comm& operator= ( const Comm& );
     // we don't want MPI types here to avoid include of mpi.h 
     mutable MPICommunicator _mpiComm;
   public:  
