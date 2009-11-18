@@ -7,7 +7,7 @@ CXXCOMP="g++-4.3.2"
 #CXXCOMP="g++"
 
 # flags set in any case
-FLAGS="-Wall -std=c++0x" 
+FLAGS="-Wall" 
 #FLAGS="-Wall" 
 # -I/opt/openmpi/include -I/opt/openmpi/include/openmpi"
 
@@ -18,8 +18,5 @@ DEBUGFLAGS="-g"
 #OPTIMFLAGS="-O3 -DNDEBUG -funroll-loops -finline-functions"
 OPTIMFLAGS="-O3 -DNDEBUG \
   -funroll-loops -finline-functions \
-  -fomit-frame-pointer \
-  -msse3 -mfpmath=sse -march=opteron \
-  --param max-inline-insns-single=6000 \
-  --param large-function-growth=6500 \
-  --param inline-unit-growth=6000"
+  -fomit-frame-pointer -ffast-math \
+  -msse3 -mfpmath=sse -march=k8" 
