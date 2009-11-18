@@ -37,16 +37,23 @@ PARTY (--with-party=PATH) and supply the respective flags to the
 configure script. Dynamic load balancing can only be used 
 if either METIS, ParMETIS, or PARTY Lib (or more than one) are linked to the ALUGrid Library.
 
-For parallel computation MPI is needed, common packages are 
-OpenMPI (version 1.1.x), MPICH (version 1.2.5 or higher), 
-or LAM MPI (version 7.x). To compile the parallel version of the library 
-use the MPI compiler script (i.e. mpiCC) by passing this as CXX variable 
-to the configure script (i.e. ./configure CXX=mpiCC). If not using the 
-MPI compiler scripts just make sure that all include path and library 
-paths are set the right way.
+For parallel computation the C bindings of MPI are needed, 
+common packages are OpenMPI (version 1.1.x), MPICH (version 1.2.5 or higher), 
+or LAM MPI (version 7.x). 
+To compile the parallel version of the library use the 
+$MPICC compiler script (i.e. mpicc -show or mpicc -showme)
+to obtain pre-processor flags and linker flags to add to 
+the CXXFLAGS and LDFLAGS variable. 
+Alternatively, you can use the MPI C++ compiler script to compile the code
+(i.e. ./configure CXX=mpiCC ....). In this case the libmpicxx will 
+also be linked to the libalugrid.a although not needed. 
 
 For example to compile the parallel version of ALUGrid the configure
 command can look as follows: 
+
+./configure CXX=g++ CXXFLAGS="`mpicc -showme:compile`" LDFLAGS="`mpicc -showme:link`" --with-metis="metis_path" --with-party="partylib_path"
+
+or 
 
 ./configure CXX=mpiCC --with-metis="metis_path" --with-party="partylib_path"
 
