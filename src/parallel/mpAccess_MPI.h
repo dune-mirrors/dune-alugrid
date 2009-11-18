@@ -7,22 +7,33 @@
 class MpAccessMPI : public MpAccessLocal 
 {
 public:
+  class CommIF 
+  {
+  protected: 
+    CommIF () {}
+  public:
+    virtual ~CommIF() {}
+  };
+
   template <class MPICommunicator>
-  class Comm 
+  class Comm : public CommIF
   {
     // no copying or assigning
     Comm( const Comm& );
     Comm& operator= (const Comm& );
-  public:  
     // we don't want MPI types here to avoid include of mpi.h 
     mutable MPICommunicator _mpiComm;
+  public:  
     Comm( MPICommunicator );
     operator MPICommunicator () const { return _mpiComm; }
   };
 
 protected:  
-  void * _mpiCommPtr;
+  // class holding the MPI communicator 
+  CommIF* _mpiCommPtr;
+  // number of processors
   int _psize; 
+  // my processor number  
   int _myrank;
 
   int mpi_allgather (int *, int , int *, int) const ;

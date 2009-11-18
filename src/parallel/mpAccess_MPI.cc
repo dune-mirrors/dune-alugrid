@@ -8,10 +8,10 @@
 #define MY_INT_TEST
 #endif
 
-MPI_Comm mpiComm(void * mpiCommPtr) 
+MPI_Comm mpiComm(MpAccessMPI :: CommIF* mpiCommPtr) 
 {
   typedef MpAccessMPI :: Comm< MPI_Comm > MyComm;
-  MyComm& comm = (*((MyComm *) mpiCommPtr));
+  MyComm& comm = static_cast<MyComm&> (*mpiCommPtr);
   return comm;
 }
 
@@ -28,6 +28,7 @@ MpAccessMPI :: Comm< MPI_Comm > :: Comm( MPI_Comm mpicomm )
 
 void MpAccessMPI :: initialize()
 {
+  // get size and rank 
   {
     MY_INT_TEST MPI_Comm_size ( _mpiComm, & _psize );
     assert (test == MPI_SUCCESS) ;
@@ -39,7 +40,7 @@ void MpAccessMPI :: initialize()
 }
 
 MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a)
-: _mpiCommPtr((void *) new Comm<MPI_Comm> (mpiComm(a._mpiCommPtr))),
+: _mpiCommPtr(new Comm<MPI_Comm> (mpiComm(a._mpiCommPtr))),
   _psize( 0 ) , _myrank( -1 )
 {
   initialize();
@@ -47,11 +48,8 @@ MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a)
 
 MpAccessMPI :: ~MpAccessMPI ()
 {
-  typedef Comm<MPI_Comm> MyComm;
-  MyComm* comm = (MyComm *) _mpiCommPtr;
-  delete comm;
+  delete _mpiCommPtr;
   _mpiCommPtr = 0;
-  return ;
 }
 
 int MpAccessMPI :: barrier () const {
