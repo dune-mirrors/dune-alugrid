@@ -8,7 +8,7 @@ DEPENDENCIES=
 
 Name: @PACKAGE_NAME@
 Version: @VERSION@
-Description: The ALUGrid Library (Adaptiv, Load-balanced, and Unstructured Grid Library) 
+Description: The ALUGrid Library (Adaptive, Load-balanced, and Unstructured Grid Library) 
 URL: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/
 Requires: ${DEPENDENCIES}
 Libs:
