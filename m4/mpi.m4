@@ -40,6 +40,7 @@ AC_TRY_COMPILE([
   #endif
 
   extern "C" {
+    #include <stdlib.h>
     // the message passing interface (MPI) headers for C 
     #include <mpi.h>
   }
@@ -55,7 +56,6 @@ AC_TRY_COMPILE([
   #undef remc_plusplus
   #endif
   
-  #include <cstdlib>
   ],
 [{
   MPI_Finalize();
