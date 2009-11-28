@@ -25,7 +25,7 @@ class Parallel {
           if(_buff) 
           {
             BufferType& buff = *_buff;
-            if(size > buff.size()) buff.resize(size);
+            if(size != buff.size()) buff.resize(size);
             // reset read and write counters 
             for(size_t i=0; i<size; ++i) buff[i].clear();
           }
