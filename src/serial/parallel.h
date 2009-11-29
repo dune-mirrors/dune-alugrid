@@ -20,7 +20,8 @@ class Parallel {
         CommunicationBuffer () : _buff(0) {}
         ~CommunicationBuffer () { if(_buff) delete _buff; }
       public:   
-        void reserveAndClearBuffer (const size_t size)
+        // reserve buffer and return reference 
+        BufferType& reserveBuffer (const size_t size)
         {
           if(_buff) 
           {
@@ -33,7 +34,11 @@ class Parallel {
           {
             _buff = new BufferType(size); 
           }
+          return *_buff;
         }
+        // free buffer 
+        void deleteBuffer() { delete _buff; _buff = 0; }
+
         BufferType & commBuffer () { assert(_buff); return *_buff; }
         const BufferType & commBuffer () const { assert(_buff); return *_buff; }
     };

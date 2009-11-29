@@ -336,8 +336,8 @@ void GitterDunePll :: unpackOnMaster (
     // read data marker 
     recvBuff.readObject(hasdata);
     
-    item.reserveAndClearBuffer( nl + 1 );
-    DataBufferType & data = item.commBuffer();
+    // reserve buffers of every link and myself 
+    DataBufferType & data = item.reserveBuffer( nl + 1 );
 
     // only gather master data once 
     if ( dataHandle.containsItem( item ) ) 
@@ -432,6 +432,9 @@ void GitterDunePll :: sendMaster (
         if( s > 0 ) sendBuff.writeStream( localBuff );
       }
     } 
+
+    // delete communication buffers 
+    item.deleteBuffer();
   }
   delete a.first;
   delete a.second;     
