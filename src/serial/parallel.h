@@ -12,7 +12,6 @@ class Parallel {
 
     class CommunicationBuffer 
     {
-        CommunicationBuffer ( const CommunicationBuffer& );
       protected:
         typedef vector < SmallObjectStream > BufferType; 
         BufferType * _buff; 
@@ -20,25 +19,22 @@ class Parallel {
         CommunicationBuffer () : _buff(0) {}
         ~CommunicationBuffer () { if(_buff) delete _buff; }
       public:   
-        // reserve buffer and return reference 
         BufferType& reserveBuffer (const size_t size)
         {
           if(_buff) 
           {
-            BufferType& buff = *_buff;
-            if(size != buff.size()) buff.resize(size);
-            // reset read and write counters 
-            for(size_t i=0; i<size; ++i) buff[i].clear();
+            // adjust size 
+            _buff->resize( size );
+
+            // reset all buffers 
+            for(size_t i=0; i<size; ++i)  (*_buff)[ i ].clear();
           }
           else 
           {
-            _buff = new BufferType(size); 
+            _buff = new BufferType( size ); 
           }
-          return *_buff;
+          return commBuffer();
         }
-        // free buffer 
-        void deleteBuffer() { delete _buff; _buff = 0; }
-
         BufferType & commBuffer () { assert(_buff); return *_buff; }
         const BufferType & commBuffer () const { assert(_buff); return *_buff; }
     };
