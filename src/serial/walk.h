@@ -648,8 +648,11 @@ VectorAlign < A > :: clone () const
 
 template < class A > VectorAlign < A > :: ~VectorAlign () {
   typedef typename vector < pointer_t > :: iterator iterator_t ; 
-  iterator_t pend = _it.end (); 
-  for (iterator_t p = _it.begin (); p != pend ; delete (*p ++)) ;
+  const iterator_t pend = _it.end (); 
+  for (iterator_t p = _it.begin (); p != pend ; ++p ) 
+  {
+    delete *p;
+  }
   return ;
 }
 
