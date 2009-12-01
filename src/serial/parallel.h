@@ -17,23 +17,23 @@ class Parallel {
         BufferType * _buff; 
 
         CommunicationBuffer () : _buff(0) {}
-        ~CommunicationBuffer () { if(_buff) delete _buff; }
+        ~CommunicationBuffer () 
+        { 
+          if(_buff) delete _buff; 
+          _buff = 0;  
+        }
       public:   
-        BufferType& reserveBuffer (const size_t size)
+        void reserveBuffer (const size_t size)
         {
           if(_buff) 
           {
             // adjust size 
-            _buff->resize( size );
-
-            // reset all buffers 
-            for(size_t i=0; i<size; ++i)  (*_buff)[ i ].clear();
+            if( size > _buff->size() ) _buff->resize( size );
           }
           else 
           {
             _buff = new BufferType( size ); 
           }
-          return commBuffer();
         }
         BufferType & commBuffer () { assert(_buff); return *_buff; }
         const BufferType & commBuffer () const { assert(_buff); return *_buff; }
@@ -41,7 +41,8 @@ class Parallel {
     
     class AccessPllException {} ;
   
-    class VertexIF : public CommunicationBuffer {
+    class VertexIF : public CommunicationBuffer 
+    {
       public :
         virtual ~VertexIF () {}
         typedef class Key1SLZ identifier_t ;
@@ -49,13 +50,14 @@ class Parallel {
         inline virtual const VertexPllXIF_t & accessPllX () const throw (AccessPllException) ;
         inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
-    class EdgeIF : public CommunicationBuffer {
+    class EdgeIF : public CommunicationBuffer 
+    {
       public :
         virtual ~EdgeIF () {}
         typedef class Key2SLZ identifier_t ;
         inline virtual EdgePllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const EdgePllXIF_t & accessPllX () const throw (AccessPllException) ;
-  inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+        inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
     class FaceIF {
       public :
@@ -63,7 +65,7 @@ class Parallel {
         typedef class Key3SLZ identifier_t ;
         inline virtual FacePllXIF_t & accessPllX () throw (AccessPllException) ;
         inline virtual const FacePllXIF_t & accessPllX () const throw (AccessPllException) ;
-  inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+        inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
     class ElementIF {
       public :
