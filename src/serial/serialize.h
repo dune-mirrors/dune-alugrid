@@ -61,8 +61,12 @@ public :
   // return size of bytes allready written to stream 
   inline int size() const { return _wb; }
 
-  // reserve s bytes memory 
-  inline void reserve(size_t s) { if (s > _len) reallocateBuffer(s); }
+  // make sure that s bytes memory can be wrote without reallocation 
+  inline void reserve(size_t s) 
+  { 
+    const size_t newSize = _wb + s ;
+    if (newSize > _len) reallocateBuffer( newSize); 
+  }
 
   // delete stream 
   inline ~ObjectStreamImpl () { removeObj(); }
