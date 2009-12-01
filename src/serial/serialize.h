@@ -219,7 +219,7 @@ protected:
     assert( _owner );
     if( length == 0 ) return ;
 
-    size_t newWb = _wb + length;
+    const size_t newWb = _wb + length;
     if (newWb > _len) reallocateBuffer(newWb);
     
     memcpy( getBuff(_wb) , buff , length );
