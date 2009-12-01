@@ -1,6 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
 // modifications for dune interface 
-// (c) Robet Kloefkorn 2004 - 2005 
+// (c) Robert Kloefkorn 2004 - 2005 
 #ifndef _GITTER_PLL_STI_CC_
 #define _GITTER_PLL_STI_CC_
 
@@ -35,37 +35,40 @@ pair < IteratorSTI < GitterPll :: vertex_STI > *, IteratorSTI < GitterPll :: ver
     AccessIteratorTT < hface_STI > :: OuterHandle mfo (containerPll (), l) ;
     {
       Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-  TreeIterator < hface_STI, has_int_vertex < hface_STI > > > lfi (mfi) ;
+               TreeIterator < hface_STI, has_int_vertex < hface_STI > > > lfi (mfi) ;
       Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-  TreeIterator < hface_STI, has_int_vertex < hface_STI > > > lfo (mfo) ;
+               TreeIterator < hface_STI, has_int_vertex < hface_STI > > > lfo (mfo) ;
+
       _iterators_inner.push_back (new Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
-  TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (lfi)) ;
+                      TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (lfi)) ;
       _iterators_outer.push_back (new Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-  TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (lfo)) ;
+                      TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (lfo)) ;
     }
     {
       Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > > lfi (mfi) ;
+               TreeIterator < hface_STI, has_int_edge < hface_STI > > > lfi (mfi) ;
       Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > > lfo (mfo) ;
+               TreeIterator < hface_STI, has_int_edge < hface_STI > > > lfo (mfo) ;
       Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dlfi (lfi) ;
+                TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dlfi (lfi) ;
       Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dlfo (lfo) ;
+                TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dlfo (lfo) ;
       Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > vdlfi (dlfi) ;
+               TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+      TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > vdlfi (dlfi) ;
       Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > vdlfo (dlfo) ;
+               TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+               TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > vdlfo (dlfo) ;
+
       _iterators_inner.push_back (new Wrapper < Insert < Wrapper < 
-  Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (vdlfi)) ;
+                Insert < AccessIteratorTT < hface_STI > :: InnerHandle, 
+                TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+                TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (vdlfi)) ;
+
       _iterators_outer.push_back (new Wrapper < 
-  Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
-  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (vdlfo)) ;
+        Insert < Wrapper < Insert < AccessIteratorTT < hface_STI > :: OuterHandle,
+        TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
+        TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (vdlfo)) ;
     }
   }
   return pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > 
