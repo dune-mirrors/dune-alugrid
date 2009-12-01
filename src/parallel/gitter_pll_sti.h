@@ -106,7 +106,10 @@ template < class A > class listSmartpointer__to__iteratorSTI : public IteratorST
   // list to iterate 
   list < typename AccessIterator < A > :: Handle > & _l ;
   // current item 
-  typename list < typename AccessIterator < A > :: Handle > :: iterator _curr ;
+  typedef typename list < typename AccessIterator < A > :: Handle > :: iterator listiterator_t ;
+  
+  const listiterator_t _end  ;
+  listiterator_t _curr ;
 
   public :
     listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handle > &) ;
@@ -619,12 +622,14 @@ clone () const
 
 
 template < class A > listSmartpointer__to__iteratorSTI < A > :: 
-listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handle > & a) : _l (a) {
+listSmartpointer__to__iteratorSTI (list < typename AccessIterator < A > :: Handle > & a) 
+ : _l (a),  _end( _l.end() ), _curr( _end )
+{
 }
 
 template < class A > listSmartpointer__to__iteratorSTI < A > :: 
 listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > & a) 
-  : _l (a._l) , _curr(a._curr) {}
+  : _l (a._l), _end( _l.end() ), _curr(a._curr) {}
 
 template < class A > listSmartpointer__to__iteratorSTI < A > :: ~listSmartpointer__to__iteratorSTI () {
 }
@@ -639,7 +644,7 @@ template < class A > void listSmartpointer__to__iteratorSTI < A > :: next ()
 }
 
 template < class A > int listSmartpointer__to__iteratorSTI < A > :: done () const {
-  return _curr == _l.end () ? 1 : 0 ;
+  return (_curr == _end) ? 1 : 0 ;
 }
 
 template < class A > int listSmartpointer__to__iteratorSTI < A > :: size () {
@@ -794,7 +799,8 @@ template < class A > inline LeafIteratorTT < A > :: LeafIteratorTT (const LeafIt
 {
 }
 
-template < class A > inline LeafIteratorTT < A > :: ~LeafIteratorTT () {
+template < class A > inline LeafIteratorTT < A > :: ~LeafIteratorTT () 
+{
   delete _p.first ;
   delete _p.second ;
 }
