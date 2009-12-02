@@ -170,11 +170,11 @@ public :
     return buffer;
   }
   
-  // static free for use in mpAccess_MPI 
+  // static free for use with all buffers here  
   inline static void freeBuffer(char * buffer)
   {
-    assert( buffer );
-    free ( buffer );
+    // free buffer if not zero 
+    if( buffer ) free( buffer );
   }
 protected:
   inline char * getBuff (const size_t ap) { return (_buf + ap); }
@@ -196,7 +196,7 @@ protected:
   // delete buffer 
   inline void removeObj() 
   {
-    if( _buf && _owner ) free (_buf) ;
+    if( _owner ) freeBuffer( _buf );
     _buf = 0; _len = 0; _wb = 0; _rb = 0; _owner = true;
     return ;
   }
