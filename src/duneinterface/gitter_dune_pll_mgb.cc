@@ -557,51 +557,60 @@ void DuneParallelGridMover :: finalize ()
   {
     const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
     for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; _hexaMap.erase (i++))
-    myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
+      myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
   }
   {
     const elementMap_t :: iterator _tetraMapend = _tetraMap.end ();
     for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMapend ; _tetraMap.erase (i++))
-    myBuilder ()._tetraList.push_back ((tetra_GEO *)(*i).second) ;
+      myBuilder ()._tetraList.push_back ((tetra_GEO *)(*i).second) ;
   }
   {
     const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; _periodic3Map.erase (i++))
-    myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
+      myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
   }
   
   {
     const elementMap_t :: iterator _periodic4Mapend =  _periodic4Map.end ();
     for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; _periodic4Map.erase (i++))
-    myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
+      myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
   }
 
   {
     const faceMap_t :: iterator _hbnd4Mapend = _hbnd4Map.end ();
     for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Map.end () ; )
-    if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
     {
-      delete (hbndseg4_GEO *)(*i).second ;
-      _hbnd4Map.erase (i++) ;
-    } else {
-      myBuilder ()._hbndseg4List.push_back ((hbndseg4_GEO *)(*i ++).second) ;
+      if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
+      {
+        delete (hbndseg4_GEO *)(*i).second ;
+        _hbnd4Map.erase (i++) ;
+      } 
+      else 
+      {
+        myBuilder ()._hbndseg4List.push_back ((hbndseg4_GEO *)(*i ++).second) ;
+      }
     }
   }
   {
     const faceMap_t :: iterator _hbnd3Mapend = _hbnd3Map.end ();
     for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != _hbnd3Map.end () ; )
-    if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) {
-      delete (hbndseg3_GEO *)(*i).second ;
-      _hbnd3Map.erase (i++) ;
-    } else {
-      myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
+    {
+      if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) 
+      {
+        delete (hbndseg3_GEO *)(*i).second ;
+        _hbnd3Map.erase (i++) ;
+      } 
+      else 
+      {
+        myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
+      }
     }
   }
   {
     const hbnd4intMap_t :: iterator _hbnd4Intend = _hbnd4Int.end ();
     for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Intend ; ++i) 
     {
-      Hbnd4IntStorage* p = ((*i).second) ;
+      Hbnd4IntStorage* p = (*i).second;
       if (p->first()->ref == 1) 
       {
         // get ghost info from storage and release pointer 
@@ -612,10 +621,8 @@ void DuneParallelGridMover :: finalize ()
                   Gitter :: hbndseg_STI :: closure, ghInfo );
         myBuilder ()._hbndseg4List.push_back (hb4) ;
       }
-      _hbnd4Int.erase( i );
       delete p; 
     } 
-    assert( _hbnd4Int.size() == 0 );
   }
 
   // here the internal boundary elements are created 
@@ -623,7 +630,7 @@ void DuneParallelGridMover :: finalize ()
     const hbnd3intMap_t :: iterator _hbnd3Intend = _hbnd3Int.end ();
     for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Intend ; ++i ) 
     {
-      Hbnd3IntStorage* p = ((*i).second);
+      Hbnd3IntStorage* p = (*i).second;
       if (p->first()->ref == 1) 
       {
         // get ghost info from storage and release pointer 
@@ -633,20 +640,23 @@ void DuneParallelGridMover :: finalize ()
                           Gitter :: hbndseg_STI :: closure , ghInfo );
         myBuilder ()._hbndseg3List.push_back (hb3) ;
       }
-      _hbnd3Int.erase( i );
       delete p; 
     }
-    assert( _hbnd3Int.size() == 0 );
   }
   {
     const faceMap_t :: iterator _face4Mapend = _face4Map.end ();
     for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Mapend ; )
-    if (!((hface4_GEO *)(*i).second)->ref) {
-      delete (hface4_GEO *)(*i).second ;
-      _face4Map.erase (i++) ;
-    } else {
-      //assert (((hface4_GEO *)(*i).second)->ref == 2) ;
-      myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
+    {
+      if (!((hface4_GEO *)(*i).second)->ref) 
+      {
+        delete (hface4_GEO *)(*i).second ;
+        _face4Map.erase (i++) ;
+      } 
+      else 
+      {
+        //assert (((hface4_GEO *)(*i).second)->ref == 2) ;
+        myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
+      }
     }
   }
   {
@@ -668,12 +678,16 @@ void DuneParallelGridMover :: finalize ()
   {
     const edgeMap_t :: iterator _edgeMapend = _edgeMap.end ();
     for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != _edgeMapend ; )
-    if (!(*i).second->ref) {
-      delete (*i).second ;
-      _edgeMap.erase (i++) ;
-    } else {
-      assert ((*i).second->ref >= 1) ;
-      myBuilder ()._hedge1List.push_back ((*i ++).second) ;
+    {
+      if (!(*i).second->ref) {
+        delete (*i).second ;
+        _edgeMap.erase (i++) ;
+      } 
+      else 
+      {
+        assert ((*i).second->ref >= 1) ;
+        myBuilder ()._hedge1List.push_back ((*i ++).second) ;
+      }
     }
   }
   {
