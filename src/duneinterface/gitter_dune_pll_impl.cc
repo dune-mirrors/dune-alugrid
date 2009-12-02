@@ -283,12 +283,14 @@ void GitterDunePll :: sendSlaves (
   for (iter.first (); ! iter.done () ; iter.next ()) 
   {
     HItemType & item = iter.item();
+
     // gather all data on slaves 
     if ( dataHandle.containsItem(item) ) 
     {
       // write marker that show data is transmitted 
       sendBuff.writeObject( transmittedData );
 
+      // reset read and write position
       osTmp.clear();
       // write data to fake buff to determine size of data package
       dataHandle.sendData(osTmp,item);
@@ -305,6 +307,7 @@ void GitterDunePll :: sendSlaves (
       sendBuff.writeObject( noData );
     }
   }
+
   delete a.first;
   delete a.second;      
 
@@ -337,13 +340,18 @@ void GitterDunePll :: unpackOnMaster (
     recvBuff.readObject(hasdata);
     
     // reserve and get comm buffers 
-    DataBufferType & data = item.reserveBuffer( nl + 1 );
+    item.reserveBuffer( nl + 1 );
+
+    // get comm buffers 
+    DataBufferType & data = item.commBuffer();
 
     // only gather master data once 
     if ( dataHandle.containsItem( item ) ) 
     {
       // pack master data 
-      BufferType & mData = data[nl]; 
+      BufferType & mData = data[ nl ]; 
+      // reset read and write position
+      mData.clear();
         
       // write master data to fake buffer 
       dataHandle.sendData(mData,item);
@@ -354,12 +362,16 @@ void GitterDunePll :: unpackOnMaster (
     {
       // pack slave data to tmnp buffer 
       BufferType & slaveBuff = data[link]; 
+      // reset read and write position
+      slaveBuff.clear();
 
       int dataSize; 
       recvBuff.readObject(dataSize);
+      // read dataSize bytes from recvBuff and write to slaveStream 
       recvBuff.readStream(slaveBuff, dataSize);
     }
   }
+
   delete a.first;
   delete a.second;
 
@@ -398,6 +410,7 @@ void GitterDunePll :: sendMaster (
   for (iter.first (); ! iter.done () ; iter.next ()) 
   {
     HItemType & item = iter.item();
+    // get comm buffer 
     DataBufferType & dataBuff = item.commBuffer();
     
     // scatter on master 
@@ -433,6 +446,7 @@ void GitterDunePll :: sendMaster (
       }
     } 
   }
+
   delete a.first;
   delete a.second;     
 
@@ -693,6 +707,7 @@ void GitterDunePll :: doBorderBorderComm(
         unpackOnSlaves(recvBuff,determType, edgeData, nOtherlinks, link );
       }
     }
+
   } // end second loop over vertices and edges 
 
   return ;
