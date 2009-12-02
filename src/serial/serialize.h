@@ -154,10 +154,13 @@ public :
   }
  
   // static alloc of char buffer for use in mpAccess_MPI 
-  inline static char * allocateBuffer(size_t newSize) throw (OutOfMemoryException)
+  inline static char * allocateBuffer(const size_t newSize) throw (OutOfMemoryException)
   {
-    // make sure that char has size of 1, otherwise check doExchange in
-    // mpAccess_MPI.cc 
+    // do nothing for size = 0
+    if( newSize == 0 ) return 0;
+
+    // make sure that char has size of 1, 
+    // otherwise check doExchange in mpAccess_MPI.cc 
     char * buffer = (char *) malloc (newSize * sizeof(char)) ;
     if ( ! buffer ) 
     {
