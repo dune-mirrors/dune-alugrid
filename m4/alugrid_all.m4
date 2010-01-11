@@ -37,7 +37,7 @@ dnl checks for header files.
 dnl check all components
   AC_REQUIRE([ALUGRID_SERIAL_PARALLEL])
   AC_REQUIRE([ALUGRID_PATH_METIS])
-  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
+dnl  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
   AC_REQUIRE([ALUGRID_PATH_PARTY])
 
 dnl convenience-variables if every found package should be used
@@ -65,7 +65,7 @@ echo The following components where found:
 echo "-------------------------------------"
 echo  
 echo "METIS............: $with_metis"
-echo "ParMETIS.........: $with_parmetis"
+dnl echo "ParMETIS.........: $with_parmetis"
 echo "PARTY............: $with_party"
 echo "MPI..............: $with_mpi"
 echo
