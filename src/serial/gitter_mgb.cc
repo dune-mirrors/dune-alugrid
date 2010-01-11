@@ -930,6 +930,11 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
 void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in, ProjectVertex* ppv) 
 {
   strstream_t raw ;
+  
+  // set scientific mode and high precision 
+  raw << scientific ;
+  raw.precision( 16 );
+
   MacroGridBuilder mm (*this, ppv) ;
   int c = in.get () ;
   assert (!in.eof ()) ;
@@ -973,7 +978,9 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in, Project
       return ;
     }
     delete [] str ;
-  } else {
+  } 
+  else 
+  {
     cerr << "**WARNING (IGNORED) No identifier for file format found!\n" ;
     cerr << "  -> Try to read as hexa mesh." << endl ;
     MacroGridBuilder :: generateRawHexaImage (in,raw) ;
