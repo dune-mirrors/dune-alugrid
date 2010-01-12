@@ -214,24 +214,28 @@ inline int Bndel::get_splitpoint(double (&ppoint) [2])
   const int lmax_iter = 1000;
   const double ltol   = 1e-12;
 
-  double ldiv,lx,ly,lcx,lcy,lvx=0.0,lvy=0.0,lt=0.0;
+  double ldiv,lx,ly,lvx=0.0,lvy=0.0,lt=0.0;
   int li=0,lret=0;
 
-  lcx = 0.5*(connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
-  lcy = 0.5*(connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
+  ppoint[0] = 0.5*(connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
+  ppoint[1] = 0.5*(connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
 
-  if (0 && lf && lDf)
+  //const double lcx = 0.5*(connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
+  //const double lcy = 0.5*(connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
+
+#if 1
+  if (lf && lDf)
   {
     assert(fabs(  lf(connect.vtx[0]->coord()[0])
                 - connect.vtx[0]->coord()[1]) <= 2.0 * ltol);
     assert(fabs(  lf(connect.vtx[1]->coord()[0])
-		- connect.vtx[1]->coord()[1]) <= 2.0 * ltol);
+    - connect.vtx[1]->coord()[1]) <= 2.0 * ltol);
 
     lvx = connect.vtx[0]->coord()[1] - connect.vtx[1]->coord()[1];
     lvy = connect.vtx[1]->coord()[0] - connect.vtx[0]->coord()[0];
 
-    lx  = lcx;
-    ly  = lcy;
+    lx  = ppoint[0];
+    ly  = ppoint[1];
 
     do
     {
@@ -240,8 +244,8 @@ inline int Bndel::get_splitpoint(double (&ppoint) [2])
       {
         lt -= (lf(lx) - ly) / ldiv;
 
-        lx = lcx + lt * lvx;
-        ly = lcy + lt * lvy;
+        lx = ppoint[0] + lt * lvx;
+        ly = ppoint[1] + lt * lvy;
       }
       else
       {
@@ -259,10 +263,11 @@ inline int Bndel::get_splitpoint(double (&ppoint) [2])
     {
       lret = 1;
     }
-  }
 
-  ppoint[0] = lcx + lt * lvx;
-  ppoint[1] = lcy + lt * lvy;
+    ppoint[0] += lt * lvx;
+    ppoint[1] += lt * lvy;
+  }
+#endif
 
   return 0;
 }
@@ -308,7 +313,7 @@ inline Element::~Element()
     {
       connect.edge[i]->detach();
       if (connect.edge[i]->isfree())
-	    delete connect.edge[i];
+      delete connect.edge[i];
     }
   }
   assert(hdl);
@@ -1027,9 +1032,9 @@ inline int Element::setorientation()
   o=(v1[0]-v0[0])*(v2[1]-v1[1])-(v1[1]-v0[1])*(v2[0]-v1[0]);
   if (fabs(o)<1e-10) {
     cerr << o << " " 
-	 << v0[0] << "," << v0[1] << " "
-	 << v1[0] << "," << v1[1] << " "
-	 << v2[0] << "," << v2[1] << endl;
+   << v0[0] << "," << v0[1] << " "
+   << v1[0] << "," << v1[1] << " "
+   << v2[0] << "," << v2[1] << endl;
   }
   assert(o);  // Entartet!
   if (o<0)    // Orientierung im Uhrzeigersinn!
