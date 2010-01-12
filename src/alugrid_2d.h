@@ -6,6 +6,8 @@
 
 #include "indexstack.h"
 
+#include "projectvertex.h"
+
 namespace ALUGridSpace { 
 
 #include "alu2d/grid.h"

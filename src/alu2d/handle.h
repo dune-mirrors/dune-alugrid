@@ -824,6 +824,8 @@ class Hmesh_basic {
     Listagency < macroelement_t > mel ;
 
     Listagency < macrobndel_t >  mbl;
+
+    const ProjectVertex_t  *_projectVertex; 
     
     Listwalk < helement_t > * walk( helement_t *) { return new Leafwalk < Element > (mel) ; }
 
@@ -852,7 +854,15 @@ class Hmesh_basic {
    Hmesh_basic() : 
       vl(this), 
       mel(this), 
-      mbl(this) 
+      mbl(this),
+      _projectVertex( 0 )
+   {}
+
+   Hmesh_basic(const ProjectVertex_t* pv) : 
+      vl(this), 
+      mel(this), 
+      mbl(this),
+      _projectVertex( pv )
    {}
 
    virtual ~Hmesh_basic() {}     
@@ -868,6 +878,24 @@ class Hmesh_basic {
      assert( indextype >= 0 && indextype < numOfIndexManager2d );
      indexmanager[indextype].freeIndex(index);
    }
+
+   // project vertex for given boundary segment 
+   void projectVertex(const int segmentIndex, double (&point) [2]) const 
+   {
+     if( _projectVertex ) 
+     {
+       // copy point 
+       const double oldp[2] = { point[0], point[1] };
+       // call projection operator 
+       (*_projectVertex)( oldp, segmentIndex, point );
+     }
+   }
+
+   // set vertex projection pointer 
+   void setVertexProjection(const ProjectVertex_t* ppv)
+   {
+     _projectVertex = ppv ;
+   }
    
    // return current size of used indices 
    int indexManagerSize (int cd) const 
@@ -877,19 +905,19 @@ class Hmesh_basic {
      return indexmanager[cd].getMaxIndex();
    }
    
-    void makeneighbours() ;
+   void makeneighbours() ;
            
-    virtual void refresh() { }
+   virtual void refresh() { }
        
-  friend class Listwalkptr < helement_t > ;
+   friend class Listwalkptr < helement_t > ;
  
-  friend class Listwalkptr < Vertex > ;
+   friend class Listwalkptr < Vertex > ;
   
-  friend class Listwalkptr < hbndel_t > ;
+   friend class Listwalkptr < hbndel_t > ;
 
-  friend class Listwalkptr < macroelement_t > ;
+   friend class Listwalkptr < macroelement_t > ;
 
-} ;
+};
 
 class Hmesh : public Hmesh_basic {
 
@@ -905,6 +933,8 @@ class Hmesh : public Hmesh_basic {
 
   Prolong_basic *_pro_el;
   Restrict_basic *_rest_el;
+
+
   nconf_vtx_t *ncv;
 
   void setup_grid(const char *);

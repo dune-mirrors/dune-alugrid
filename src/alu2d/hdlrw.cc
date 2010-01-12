@@ -162,9 +162,8 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
     x_axis = new axis_struct[nb];
     y_axis = new axis_struct[nb];
 
-    for( int i = 0 ; i <  nb ; i ++ ) 
+    for( int i = 0 ; i <  nb ; ++i ) 
     {
-
       int lt;
       
       lt=in.peek();
@@ -177,17 +176,17 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 
       switch (t)
       {
-  case Bndel::periodic:
-          b=new Bndel_periodic();
-    break;
-  case Bndel::general_periodic:
-    t=Bndel::periodic;
-          b=new Bndel_periodic();
-    generalperbnd=1;
-    break;
+        case Bndel::periodic:
+          b=new Bndel_periodic( i );
+          break;
+        case Bndel::general_periodic:
+          t=Bndel::periodic;
+          b=new Bndel_periodic( i );
+          generalperbnd=1;
+          break;
         default:
-          b=new Bndel_triang(t);
-    break;
+          b=new Bndel_triang(i, t);
+          break;
       }
 
       b->read(in, v, nv) ;
@@ -196,23 +195,23 @@ void Hmesh_basic :: ascireadtriang(ifstream &in) {
 
       if (t==Bndel::periodic)
       {
-  if (generalperbnd) {
-    int pernb;
-    in >> pernb;
-          if (pernb<i) {
-      assert(perbnd_list[pernb].pernb==i);
-      ((Bndel_periodic*)b)->set_pnb(perbnd_list[pernb].b);
-      ((Bndel_periodic*)perbnd_list[pernb].b)->set_pnb(b);
-      perbnd_ok++;
-    }
-    else {
-      perbnd_list[i].b=b;
-      perbnd_list[i].pernb=pernb;
-      perbnd_card++;
-    }
-  }
+        if (generalperbnd) {
+          int pernb;
+          in >> pernb;
+                if (pernb<i) {
+            assert(perbnd_list[pernb].pernb==i);
+            ((Bndel_periodic*)b)->set_pnb(perbnd_list[pernb].b);
+            ((Bndel_periodic*)perbnd_list[pernb].b)->set_pnb(b);
+            perbnd_ok++;
+          }
+          else {
+            perbnd_list[i].b=b;
+            perbnd_list[i].pernb=pernb;
+            perbnd_card++;
+          }
+        }
         else if (fabs(b->vertex(0)->coord()[0]-b->vertex(1)->coord()[0])<EPS)
-  {
+        {
 
           double y0,y1;
           if (b->vertex(0)->coord()[1]<b->vertex(1)->coord()[1])

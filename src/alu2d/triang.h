@@ -79,7 +79,13 @@ class Bndel_triang : public Hier < Bndel > {
 
   public :
 
-    Bndel_triang(Bndel::bnd_t t) : time(0.0) {typ=t;}
+    Bndel_triang(const int segmentIndex, 
+                 Bndel::bnd_t t) 
+      : time(0.0) 
+    {
+      typ = t ;
+      this->copySegmentIndex( segmentIndex );
+    }
 
     // Bndel_triang() : time(0.0) {typ=-111;}
 
@@ -117,7 +123,11 @@ class Bndel_periodic : public Bndel_triang
     Bndel_periodic *periodic_nb;
 
     Bndel_periodic()
-      : Bndel_triang(periodic),periodic_nb(0)
+      : Bndel_triang(-1,periodic), periodic_nb(0)
+      { }
+
+    Bndel_periodic(const int segmentIndex)
+      : Bndel_triang(segmentIndex, periodic), periodic_nb(0)
       { }
 
     Bndel_periodic(Vertex *v1 , Vertex *v2)

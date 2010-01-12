@@ -23,10 +23,17 @@
 // #end(header)
 ***************************************************/
 
-#include "../indexstack.h"
-
 #include "xdisplay.h"
 #include "vtx_btree.h"
+
+//****************************************************************
+//
+// Vertex Projection 
+//
+//****************************************************************
+typedef VertexProjection<2> ProjectVertex_t;
+
+//****************************************************************
 
 class Hmesh_basic;
 class Hmesh;
@@ -406,6 +413,7 @@ class Thinelement : public Basic {
 
     virtual void nbconnect(int , Thinelement *, int ) = 0 ;
 
+    virtual int segmentIndex() const = 0;
 
     virtual void write(ofstream &) const = 0 ;
 
@@ -558,6 +566,8 @@ class Element : public Thinelement, public Refco_el {
       
     void edge_vtx(int e, Vertex * (& ) [2] ) const ;
 
+    // this is not a boundary segment and thus return negtive value 
+    int segmentIndex() const { return -1; }
 
     Vertex * vertex(int ) const ;
 
@@ -904,12 +914,10 @@ class Bndel : public Thinelement, public Refco {
     enum {nf=1,nv=2};
 
     Vertex * vtx[max_points] ;
-
     Thinelement * nb ;
+    Edge *edge;
 
     short int bck ;
-
-    Edge *edge;
 
     c() ;
 
@@ -941,13 +949,16 @@ class Bndel : public Thinelement, public Refco {
  
   protected :
 
-    Bndel(bnd_t t = none) : typ(t) { }
+    Bndel(bnd_t t = none) : typ(t) , _segmentIndex( -1 ) { }
 
     bnd_t typ ;
 
+#ifdef ALU2D_OLD_BND_PROJECTION
     double (*lf)(double);
-
     double (*lDf)(double);
+#else 
+    int _segmentIndex;
+#endif
  
   public :
 
@@ -962,7 +973,6 @@ class Bndel : public Thinelement, public Refco {
     int facevertex(int , int ) const ;
 
     int numfacevertices(int ) const { return connect.nv ; }
-
  
     void edge_vtx(int e, Vertex * (& ) [2] ) const ;
 
@@ -970,6 +980,12 @@ class Bndel : public Thinelement, public Refco {
     Vertex * vertex(int ) const ;
  
     Vertex * vertex(int , int j) const { return vertex(j) ; }
+
+    int segmentIndex() const 
+    { 
+      assert( _segmentIndex >= 0 );
+      return _segmentIndex; 
+    }
 
 
     Thinelement * neighbour(int ) const { return connect.nb ; }
@@ -985,11 +1001,18 @@ class Bndel : public Thinelement, public Refco {
     void nbconnect(int , Thinelement * , int ) ;
     void edgeconnect(int , Edge *) ;
 
+#ifdef ALU2D_OLD_BND_PROJECTION
     void set_bndfunctions(double (*pf)(double), double (*pDf)(double))
     {
       lf  = pf;
       lDf = pDf;
     }
+#else 
+    void copySegmentIndex(const int segmentIndex)
+    {
+      _segmentIndex = segmentIndex;
+    }
+#endif
 
     int get_splitpoint(double (& ) [2]) ;
 

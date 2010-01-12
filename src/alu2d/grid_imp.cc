@@ -210,19 +210,23 @@ inline double Bndel::area() const
 
 inline int Bndel::get_splitpoint(double (&ppoint) [2])
 {
-  const double EPS = 1e-8;
-  const int lmax_iter = 1000;
-  const double ltol   = 1e-12;
+  const double (&c0)[2] = connect.vtx[0]->coord();
+  const double (&c1)[2] = connect.vtx[1]->coord();
 
-  double ldiv,lx,ly,lvx=0.0,lvy=0.0,lt=0.0;
-  int li=0,lret=0;
+  ppoint[0] = 0.5 * ( c0[0] + c1[0] );//connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
+  ppoint[1] = 0.5 * ( c0[1] + c1[1] );//connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
 
-  ppoint[0] = 0.5*(connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
-  ppoint[1] = 0.5*(connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
-
-#if 0
+  // old method, new method below 
+#ifdef ALU2D_OLD_BND_PROJECTION
   if (lf && lDf)
   {
+    const double EPS = 1e-8;
+    const int lmax_iter = 1000;
+    const double ltol   = 1e-12;
+
+    int li=0,lret=0;
+
+    double ldiv,lx,ly,lvx=0.0,lvy=0.0,lt=0.0;
     assert(fabs(  lf(connect.vtx[0]->coord()[0])
                 - connect.vtx[0]->coord()[1]) <= 2.0 * ltol);
     assert(fabs(  lf(connect.vtx[1]->coord()[0])
@@ -264,6 +268,11 @@ inline int Bndel::get_splitpoint(double (&ppoint) [2])
     ppoint[0] += lt * lvx;
     ppoint[1] += lt * lvy;
   }
+#else // use new method 
+
+  // apply vertex projection, if existent 
+  this->hdl->projectVertex( _segmentIndex, ppoint );
+
 #endif
 
   return 0;

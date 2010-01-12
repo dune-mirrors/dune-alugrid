@@ -293,31 +293,31 @@ bool Triang::confLevelExceeded(int nconfDeg) const
   if( nconfDeg >= 0 ) {
     for( int i=0 ; i<connect.nf ; i++ )
       {
-	Bndel_triang *nb = nbbnd(i);
+  Bndel_triang *nb = nbbnd(i);
 
-	if (nb)
-	  {
-	    if (nb->type()==Bndel::periodic)
-	      {
-		Triang* tr = ((Bndel_periodic*)nb)->periodic_nb->nbel(0);
-		int dl = (tr->hashvtx(i) ? tr->connect.hvtx[i]->deepestLevel() : 0);
-		if( dl > nconfDeg )
-		  // if (((Bndel_periodic*)nb)->periodic_nb->deepestLevel() > nconfDeg)
-		  {
-		    result = true;
-		    break;
-		  }
-	      }
-	  }
-	else
-	  {
-	    int dl = (hashvtx(i) ? connect.hvtx[i]->deepestLevel() : 0);
-	    if( dl > nconfDeg )
-	      {
-		result = true;
-		break;
-	      }
-	  }
+  if (nb)
+    {
+      if (nb->type()==Bndel::periodic)
+        {
+    Triang* tr = ((Bndel_periodic*)nb)->periodic_nb->nbel(0);
+    int dl = (tr->hashvtx(i) ? tr->connect.hvtx[i]->deepestLevel() : 0);
+    if( dl > nconfDeg )
+      // if (((Bndel_periodic*)nb)->periodic_nb->deepestLevel() > nconfDeg)
+      {
+        result = true;
+        break;
+      }
+        }
+    }
+  else
+    {
+      int dl = (hashvtx(i) ? connect.hvtx[i]->deepestLevel() : 0);
+      if( dl > nconfDeg )
+        {
+    result = true;
+    break;
+        }
+    }
       }
   }
   return result;
@@ -1085,10 +1085,10 @@ extern Hmesh *mesh;
 
 int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
                   Multivertexadapter & mva, 
-		  nconf_vtx_t *ncv,
-		  splitrule_t sr,
-		  int nconfDeg,Refco::tag_t default_ref,
-		  Prolong_basic *pro_el)
+      nconf_vtx_t *ncv,
+      splitrule_t sr,
+      int nconfDeg,Refco::tag_t default_ref,
+      Prolong_basic *pro_el)
 {
   int ret = 0;
 
@@ -1100,8 +1100,8 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
       {
         Triang* t1;
         Triang* t2;
-	Edge *newedge[3];
-	newedge[2]=new Edge(hdl);
+        Edge *newedge[3];
+        newedge[2]=new Edge(hdl);
 
         mysplit = triang_conf2;
 
@@ -1115,24 +1115,25 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
           agnc->insert(nv = new Fullvertex(p,level()));
           t1 = new Triang(nv, connect.vtx[0], connect.vtx[1]);
           t2 = new Triang(nv, connect.vtx[2], connect.vtx[0]);
-	  t1->sethdl(hdl);
-	  t2->sethdl(hdl);
+          t1->sethdl(hdl);
+          t2->sethdl(hdl);
           t1->connect.hvtx[0] = connect.hvtx[2];
           t2->connect.hvtx[0] = connect.hvtx[1];
           connect.hvtx[1] = connect.hvtx[2] = NULL;
-	  newedge[0]=new Edge(hdl);
-	  newedge[1]=new Edge(hdl);
-	  
+          newedge[0]=new Edge(hdl);
+          newedge[1]=new Edge(hdl);
+    
           // Nachbarschaftsinfo der Nachbarn "uber die Kanten
-	  // 1 und 2 neu setzen (aber nur, falls die Nachbarn nicht
+          // 1 und 2 neu setzen (aber nur, falls die Nachbarn nicht
           // gr"ober sind als Empfaengerelement)
           if( neighbour(1)->thinis(element_like) ) {
             if( !(((Element*)neighbour(1))->hashvtx(opposite(1))) )
               ((Triang*)neighbour(1))->newNeighbour(t2, opposite(1), 0,
                                                     triang_conf2);
-	    else
-	      nbel(1)->connect.hvtx[opposite(1)]->head->rnb = t2;
-          } else {
+            else
+              nbel(1)->connect.hvtx[opposite(1)]->head->rnb = t2;
+          } 
+          else {
             neighbour(1)->nbconnect(0, t2, 0);
           }
 
@@ -1140,12 +1141,13 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
             if( !(((Element*)neighbour(2))->hashvtx(opposite(2))) )
               ((Triang*)neighbour(2))->newNeighbour(t1, opposite(2),
                                                     0, triang_conf2);
-	    else
-	      nbel(2)->connect.hvtx[opposite(2)]->head->rnb = t1;
-          } else {
+            else
+              nbel(2)->connect.hvtx[opposite(2)]->head->rnb = t1;
+          } 
+          else {
             neighbour(2)->nbconnect(0, t1, 0);
           }
-	
+  
           // Nachbarschaft der neu entstandenen Elemente t1 und t2 regeln
           t1->nbconnect(0, connect.nb[2], connect.bck[2]);
           t1->nbconnect(2, t2, 1);
@@ -1159,18 +1161,19 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
           t2->setnormdir(0, connect.normdir[1]);
           t2->setnormdir(1, -1);
           t2->setnormdir(2, connect.normdir[0]);
-	  t1->edgeconnect(0,connect.edge[2]);
-	  t1->edgeconnect(1,newedge[0]);
-	  t1->edgeconnect(2,newedge[2]);
-	  t2->edgeconnect(0,connect.edge[1]);
-	  t2->edgeconnect(1,newedge[2]);
-	  t2->edgeconnect(2,newedge[1]);
+          t1->edgeconnect(0,connect.edge[2]);
+          t1->edgeconnect(1,newedge[0]);
+          t1->edgeconnect(2,newedge[2]);
+          t2->edgeconnect(0,connect.edge[1]);
+          t2->edgeconnect(1,newedge[2]);
+          t2->edgeconnect(2,newedge[1]);
 
           // Nachbarelement (=Randelement) verfeinern
           ncv = new nconf_vtx_t(nv, t1, t2);
           Hier<Bndel>* n = (Hier<Bndel>*)connect.nb[0];
           n->refine_leaf(agnc, &mva,ncv,nconfDeg,default_ref,pro_el);
-        } else {
+        } 
+        else {
           // Verfeinerungsnachbar ist "normales" Element
           Vertex* nv;
           double b[3],p[2];
@@ -1182,23 +1185,24 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
           if( connect.hvtx[0] ) {
             nv = connect.hvtx[0]->getHead();
             usehvtx = true;
-	    Hier<Element> *tr;
-	    tr = ((Hier<Element>*)neighbour(0))->down()->next();
-	    if (tr->leaf()) 
-	      newedge[0]=connect.hvtx[0]->getrnb()->edge(2);
-	    else
-	      newedge[0]=connect.hvtx[0]->getrnb()->edge(0);
-	    tr = ((Hier<Element>*)neighbour(0))->down();
-	    if (tr->leaf()) 
-	      newedge[1]=connect.hvtx[0]->getlnb()->edge(1);	  
-	    else
-	      newedge[1]=connect.hvtx[0]->getlnb()->edge(0);
-          } else {
+            Hier<Element> *tr;
+            tr = ((Hier<Element>*)neighbour(0))->down()->next();
+            if (tr->leaf()) 
+              newedge[0]=connect.hvtx[0]->getrnb()->edge(2);
+            else
+              newedge[0]=connect.hvtx[0]->getrnb()->edge(0);
+            tr = ((Hier<Element>*)neighbour(0))->down();
+            if (tr->leaf()) 
+              newedge[1]=connect.hvtx[0]->getlnb()->edge(1);    
+            else
+              newedge[1]=connect.hvtx[0]->getlnb()->edge(0);
+          } 
+          else {
             midpoint(0, b);
             fromlocal(b,p);
             agnc->insert(nv = new Fullvertex(p,level()));
-	    newedge[0]=new Edge(hdl);
-	    newedge[1]=new Edge(hdl);
+            newedge[0]=new Edge(hdl);
+            newedge[1]=new Edge(hdl);
           }
 
           // Neue Elemente erzeugen
@@ -1211,11 +1215,11 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
             tr = (Triang*)(tr->down()->next());
             if( tr->leaf() ) {
               t1->nbconnect(1, tr, 2);
-	      assert(connect.hvtx[0]->getrnb()==tr);
+        assert(connect.hvtx[0]->getrnb()==tr);
             } else {
               tr = (Triang*)(tr->down());
               t1->nbconnect(1, tr, 0);
-	      assert(connect.hvtx[0]->getrnb()==tr);
+        assert(connect.hvtx[0]->getrnb()==tr);
             }
           } else {
             t1->nbconnect(1, neighbour(0), opposite(0));
@@ -1230,11 +1234,11 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
             tr = (Triang*)(tr->down());
             if( tr->leaf() ) {
               t2->nbconnect(2, tr, 1);
-	      assert(connect.hvtx[0]->getlnb()==tr);
+        assert(connect.hvtx[0]->getlnb()==tr);
             } else {
               tr = (Triang*)(tr->down()->next());
               t2->nbconnect(2, tr, 0);
-	      assert(connect.hvtx[0]->getlnb()==tr);
+        assert(connect.hvtx[0]->getlnb()==tr);
             }
           } else {
             t2->nbconnect(2, neighbour(0), opposite(0));
@@ -1270,8 +1274,8 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
               ((Triang*)neighbour(1))->newNeighbour(t2, opposite(1), 0,
                                                     triang_conf2);
             } else {
-	      nbel(1)->connect.hvtx[opposite(1)]->head->lnb = t2;
-	    }
+        nbel(1)->connect.hvtx[opposite(1)]->head->lnb = t2;
+      }
           } else {
             neighbour(1)->nbconnect(0, t2, 0);
           }
@@ -1280,9 +1284,9 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
             if( !(((Triang*)neighbour(2))->hashvtx(opposite(2))) ) {
               ((Triang*)neighbour(2))->newNeighbour(t1, opposite(2), 0,
                                                     triang_conf2);
-	    } else {
-	      nbel(2)->connect.hvtx[opposite(2)]->head->rnb = t1;
-	    }
+      } else {
+        nbel(2)->connect.hvtx[opposite(2)]->head->rnb = t1;
+      }
           } else {
             neighbour(2)->nbconnect(0, t1, 0);
           }
@@ -1301,266 +1305,265 @@ int Triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
           }
           t1->setnormdir(0, normaldir(2));
           t2->setnormdir(0, normaldir(1));
-	  t1->sethdl(hdl);
-	  t2->sethdl(hdl);
-	  t1->edgeconnect(0,connect.edge[2]);
-	  t1->edgeconnect(1,newedge[0]);
-	  t1->edgeconnect(2,newedge[2]);
-	  t2->edgeconnect(0,connect.edge[1]);
-	  t2->edgeconnect(1,newedge[2]);
-	  t2->edgeconnect(2,newedge[1]);
+    t1->sethdl(hdl);
+    t2->sethdl(hdl);
+    t1->edgeconnect(0,connect.edge[2]);
+    t1->edgeconnect(1,newedge[0]);
+    t1->edgeconnect(2,newedge[2]);
+    t2->edgeconnect(0,connect.edge[1]);
+    t2->edgeconnect(1,newedge[2]);
+    t2->edgeconnect(2,newedge[1]);
         }
-	if (this->is(Refco::ref_2)) {
-	  t1->mark(Refco::ref_1);
-	  t2->mark(Refco::ref_1);
-	}
+  if (this->is(Refco::ref_2)) {
+    t1->mark(Refco::ref_1);
+    t2->mark(Refco::ref_1);
+  }
         e[0] = t1;
         e[1] = t2;
-	/*
-	  if (pro_el)
-	  pro_el->operator()(this, (Element**)e, 2);
-	*/
+  /*
+    if (pro_el)
+    pro_el->operator()(this, (Element**)e, 2);
+  */
         ret = 2;
       }
       break;
     case triang_quarter:
       {
-	// Every triangle is split into four triangles #0, #1, #2,
-	// and #3. Three new vertices (0), (1), and (2) are created.
-	// If the edge 1->2 is the longest edge and the orientation
-	// is correct, then the same holds for the four children.
-	// Thus no additional calls to setrefine() or setorientation()
-	// are required. Note that this splitrule is only intended for
-	// the global refinements performed at the beginning of a
-	// simulation. Coarsening of triangles created using
-	// ``triang_quarter'' is not possible and thus prohibited by
-	// Triang::canCoarsen() below!
-	//
-	//                 1*                        1* 
-	//                 /|                        /| 
-	//                / |                       /1| 
-	//               /  |                      /  | 
-	//              /   |                     /   | 
-	//             /    |                    / #1 |
-	//            /     |                   /     | 
-	//           /      |                  /2    0| 
-	//          /       |              (0)*-------*(2)
-	//         /        |     ==>        /|0    2/| 
-	//        /         |               /1|     /1| 
-	//       /          |              /  | #3 /  | 
-	//      /           |             /   |   /   | 
-	//     /            |            / #2 |  / #0 | 
-	//    /             |           /     |1/     | 
-	//   /              |          /2    0|/2    0| 
-	// 2*---------------*0       2*-------*-------*0
+  // Every triangle is split into four triangles #0, #1, #2,
+  // and #3. Three new vertices (0), (1), and (2) are created.
+  // If the edge 1->2 is the longest edge and the orientation
+  // is correct, then the same holds for the four children.
+  // Thus no additional calls to setrefine() or setorientation()
+  // are required. Note that this splitrule is only intended for
+  // the global refinements performed at the beginning of a
+  // simulation. Coarsening of triangles created using
+  // ``triang_quarter'' is not possible and thus prohibited by
+  // Triang::canCoarsen() below!
+  //
+  //                 1*                        1* 
+  //                 /|                        /| 
+  //                / |                       /1| 
+  //               /  |                      /  | 
+  //              /   |                     /   | 
+  //             /    |                    / #1 |
+  //            /     |                   /     | 
+  //           /      |                  /2    0| 
+  //          /       |              (0)*-------*(2)
+  //         /        |     ==>        /|0    2/| 
+  //        /         |               /1|     /1| 
+  //       /          |              /  | #3 /  | 
+  //      /           |             /   |   /   | 
+  //     /            |            / #2 |  / #0 | 
+  //    /             |           /     |1/     | 
+  //   /              |          /2    0|/2    0| 
+  // 2*---------------*0       2*-------*-------*0
         //                                   (1)
 
-	if (0) {
-	  //Xdisplay disp(g_argc,g_argv,"a","Grid",
-	  //		      350.,450.,450.);
-	  double p1[2],p2[2];
-	  double bary[3]={1./3.,1./3.,1./3.};
+  if (0) {
+    //Xdisplay disp(g_argc,g_argv,"a","Grid",
+    //          350.,450.,450.);
+    double p1[2],p2[2];
+    double bary[3]={1./3.,1./3.,1./3.};
 #ifdef USE_ALUGRID_XDISPLAY
-	  mesh->draw(disp);
+    mesh->draw(disp);
 #endif
-	  {
-	    this->fromlocal(bary,p1);
-	    this->fromlocal(bary,p2);
-	    p1[0]-=0.05;
-	    p1[1]-=0.05;
-	    p2[0]+=0.05;
-	    p2[1]+=0.05;
-	    Fullvertex pp1(p1,-1);
-	    Fullvertex pp2(p2,-1);
-	    //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
-	  }
-	  {
-	    this->fromlocal(bary,p1);
-	    this->fromlocal(bary,p2);
-	    p1[0]-=0.05;
-	    p1[1]+=0.05;
-	    p2[0]+=0.05;
-	    p2[1]-=0.05;
-	    Fullvertex pp1(p1,-1);
-	    Fullvertex pp2(p2,-1);
-	    //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
-	  }
-	}
-        Triang *newtr[4];
-        Vertex *newvtx[3];
-	Edge *newedge[9];
-        bool usehvtx[3];
-        int i;
+    {
+      this->fromlocal(bary,p1);
+      this->fromlocal(bary,p2);
+      p1[0]-=0.05;
+      p1[1]-=0.05;
+      p2[0]+=0.05;
+      p2[1]+=0.05;
+      Fullvertex pp1(p1,-1);
+      Fullvertex pp2(p2,-1);
+      //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
+    }
+    {
+      this->fromlocal(bary,p1);
+      this->fromlocal(bary,p2);
+      p1[0]-=0.05;
+      p1[1]+=0.05;
+      p2[0]+=0.05;
+      p2[1]-=0.05;
+      Fullvertex pp1(p1,-1);
+      Fullvertex pp2(p2,-1);
+      //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
+    }
+  }
+    Triang *newtr[4];
+    Vertex *newvtx[3];
+    Edge *newedge[9];
+    bool usehvtx[3];
+    int i;
 
-        mysplit = triang_quarter;
+    mysplit = triang_quarter;
 
-        // create new vertices
-        for (i=0;i<3;i++)
-	  {
-	    double b[3],p[2];
+    // create new vertices
+    for (i=0;i<3;i++)
+    {
+      double b[3],p[2];
 
-	    usehvtx[i] = false;
-	    if (connect.nb[i]->thinis(bndel_like))
-	      {
-		assert(!connect.hvtx[i]);
-		((Bndel*)connect.nb[i])->get_splitpoint(p);
-		newvtx[i] = new Fullvertex(p,level());
-		agnc->insert(newvtx[i]);
-		newedge[2*i]=new Edge(hdl);
-		newedge[2*i+1]=new Edge(hdl);
-	      }
-	    else
-	      {
-		// Use hanging node if it exists. Otherwise create
-		// new vertex and insert it as hanging node in the
-		// corresponding neighbour.
+      usehvtx[i] = false;
+      if (connect.nb[i]->thinis(bndel_like))
+      {
+        assert(!connect.hvtx[i]);
+        ((Bndel*)connect.nb[i])->get_splitpoint(p);
+        newvtx[i] = new Fullvertex(p,level());
+        agnc->insert(newvtx[i]);
+        newedge[2*i]=new Edge(hdl);
+        newedge[2*i+1]=new Edge(hdl);
+      }
+      else
+      {
+        // Use hanging node if it exists. Otherwise create
+        // new vertex and insert it as hanging node in the
+        // corresponding neighbour.
 
-		if(connect.hvtx[i])
-		  {
-		    usehvtx[i] = true;
-		    newvtx[i]  = connect.hvtx[i]->getHead();
-		    newedge[2*i]=connect.hvtx[i]->getrnb()->edge(opposite(i));
-		    newedge[2*i+1]=connect.hvtx[i]->getlnb()->edge(opposite(i));
-		  }
-		else
-		  {
-		    midpoint(i,b);
-		    fromlocal(b,p);
-		    newvtx[i] = new Fullvertex(p,level());
-		    agnc->insert(newvtx[i]);
-		    newedge[2*i]=new Edge(hdl);
-		    newedge[2*i+1]=new Edge(hdl);
-		  }
-	      }
-	    newedge[6+i]=new Edge(hdl);
-	  }
+        if(connect.hvtx[i])
+        {
+          usehvtx[i] = true;
+          newvtx[i]  = connect.hvtx[i]->getHead();
+          newedge[2*i]=connect.hvtx[i]->getrnb()->edge(opposite(i));
+          newedge[2*i+1]=connect.hvtx[i]->getlnb()->edge(opposite(i));
+        }
+        else
+        {
+          midpoint(i,b);
+          fromlocal(b,p);
+          newvtx[i] = new Fullvertex(p,level());
+          agnc->insert(newvtx[i]);
+          newedge[2*i]=new Edge(hdl);
+          newedge[2*i+1]=new Edge(hdl);
+        }
+      }
+      newedge[6+i]=new Edge(hdl);
+    }
 
-        // create new elements
-
-        newtr[0] = new Triang(connect.vtx[0],newvtx[2],newvtx[1]);
-        newtr[1] = new Triang(newvtx[2],connect.vtx[1],newvtx[0]);
-        newtr[2] = new Triang(newvtx[1],newvtx[0],connect.vtx[2]);
-        newtr[3] = new Triang(newvtx[0],newvtx[1],newvtx[2]);
-        for (i=0;i<4;i++) {
-	  newtr[i]->sethdl(hdl);
-	  e[i] = newtr[i];
-	}
-	for (i=0;i<3;i++) {
-	  newtr[i]->edgeconnect(i,newedge[6+i]);
-	  newtr[i]->edgeconnect(i+1,newedge[2*((i+1)%3)+1]);
-	  newtr[i]->edgeconnect(i+2,newedge[2*((i+2)%3)]);
-	  newtr[3]->edgeconnect(i,newedge[6+i]);
-	}
+    // create new elements
+    newtr[0] = new Triang(connect.vtx[0],newvtx[2],newvtx[1]);
+    newtr[1] = new Triang(newvtx[2],connect.vtx[1],newvtx[0]);
+    newtr[2] = new Triang(newvtx[1],newvtx[0],connect.vtx[2]);
+    newtr[3] = new Triang(newvtx[0],newvtx[1],newvtx[2]);
+    for (i=0;i<4;i++) {
+      newtr[i]->sethdl(hdl);
+      e[i] = newtr[i];
+    }
+    for (i=0;i<3;i++) {
+      newtr[i]->edgeconnect(i,newedge[6+i]);
+      newtr[i]->edgeconnect(i+1,newedge[2*((i+1)%3)+1]);
+      newtr[i]->edgeconnect(i+2,newedge[2*((i+2)%3)]);
+      newtr[3]->edgeconnect(i,newedge[6+i]);
+    }
 
         // distribute hanging nodes
 
-        for (i=0;i<3;i++)
-	  {
-	    if (usehvtx[i] == true)
-	      {
-		connect.hvtx[i]->splitTree(newtr[(i+1)%3]->connect.hvtx[i],
-					   newtr[(i+2)%3]->connect.hvtx[i]);
-		delete connect.hvtx[i];
-		connect.hvtx[i] = 0;
-	      } else if (!connect.nb[i]->thinis(bndel_like)) {
-	      ((Element*)connect.nb[i])->addhvtx(newvtx[i],newtr[(i+1)%3],newtr[(i+2)%3],connect.bck[i]);
-	    }
-	  }
+    for (i=0;i<3;i++)
+    {
+      if (usehvtx[i] == true)
+        {
+    connect.hvtx[i]->splitTree(newtr[(i+1)%3]->connect.hvtx[i],
+             newtr[(i+2)%3]->connect.hvtx[i]);
+    delete connect.hvtx[i];
+    connect.hvtx[i] = 0;
+        } else if (!connect.nb[i]->thinis(bndel_like)) {
+        ((Element*)connect.nb[i])->addhvtx(newvtx[i],newtr[(i+1)%3],newtr[(i+2)%3],connect.bck[i]);
+      }
+    }
 
-	// set connectivity for element #3 and normal directions
-
-        for (i=0;i<3;i++)
-	  {
-	    newtr[3]->nbconnect(i,newtr[i],i);
-	    newtr[i]->nbconnect(i,newtr[3],i);
-
-	    newtr[3]->setnormdir(i, 1);
-	    newtr[i]->setnormdir(i,-1);
-	    newtr[i]->setnormdir((i+1)%3,connect.normdir[(i+1)%3]);
-	    newtr[i]->setnormdir((i+2)%3,connect.normdir[(i+2)%3]);
-	  }
-
-	// set connectivity across outer boundaries
+  // set connectivity for element #3 and normal directions
 
         for (i=0;i<3;i++)
-	  {
-	    if (connect.nb[i]->thinis(bndel_like))
-	      {
-		// refine neighbouring boundary element
+    {
+      newtr[3]->nbconnect(i,newtr[i],i);
+      newtr[i]->nbconnect(i,newtr[3],i);
 
-		ncv = new nconf_vtx_t(newvtx[i], newtr[(i+1)%3], newtr[(i+2)%3]);
-		Hier<Bndel>* hbel = (Hier<Bndel>*)connect.nb[i];
-		hbel->refine_leaf(agnc, &mva,ncv,nconfDeg,default_ref,pro_el);
-	      }
-	    else
-	      {
-		// set connectivity if neighbour is already refined
+      newtr[3]->setnormdir(i, 1);
+      newtr[i]->setnormdir(i,-1);
+      newtr[i]->setnormdir((i+1)%3,connect.normdir[(i+1)%3]);
+      newtr[i]->setnormdir((i+2)%3,connect.normdir[(i+2)%3]);
+    }
 
-		if (neighbour(i)->splitrule() == triang_quarter)
-		  {
-		    Triang *trnb0 = (Triang *)neighbour(i);
-		    Triang *trnb1 = (Triang *)(trnb0->down());
-		    Triang *trnb2 = trnb1;
+  // set connectivity across outer boundaries
 
-		    if (trnb0->is(Refco::quart))
-		      {
-			// This case should only occur if periodic boundaries
-			// are used and the macrogrid is too coarse, i.e., if
-			// there are two elements which are direct and periodic
-			// neighbours at the same time.
+        for (i=0;i<3;i++)
+    {
+      if (connect.nb[i]->thinis(bndel_like))
+        {
+    // refine neighbouring boundary element
 
-			cerr << "ERROR (Triang::split()): "
-			     << "refinement of neighbour not yet finished!" << endl
-			     << "                         "
-			     << "Please try a finer macrogrid!" << endl;
-			abort();
-		      }
+    ncv = new nconf_vtx_t(newvtx[i], newtr[(i+1)%3], newtr[(i+2)%3]);
+    Hier<Bndel>* hbel = (Hier<Bndel>*)connect.nb[i];
+    hbel->refine_leaf(agnc, &mva,ncv,nconfDeg,default_ref,pro_el);
+        }
+      else
+        {
+    // set connectivity if neighbour is already refined
 
-		    assert(trnb1);
-		    assert(trnb2);
+    if (neighbour(i)->splitrule() == triang_quarter)
+      {
+        Triang *trnb0 = (Triang *)neighbour(i);
+        Triang *trnb1 = (Triang *)(trnb0->down());
+        Triang *trnb2 = trnb1;
 
-		    switch (opposite(i))
-		      {
-		      case 0:
-			trnb2 = (Triang *)(trnb2->next());
-			trnb1 = (Triang *)(trnb2->next());
-			break;
-		      case 1:
-			trnb2 = (Triang *)(trnb2->next());
-			trnb2 = (Triang *)(trnb2->next());
-			break;
-		      case 2:
-			trnb1 = (Triang *)(trnb1->next());
-			break;
-		      default:
-			abort();
-		      }
+        if (trnb0->is(Refco::quart))
+          {
+      // This case should only occur if periodic boundaries
+      // are used and the macrogrid is too coarse, i.e., if
+      // there are two elements which are direct and periodic
+      // neighbours at the same time.
 
-		    assert(trnb1->connect.vtx[(opposite(i)+1)%3] == newvtx[i]);
-		    assert(trnb2->connect.vtx[(opposite(i)+2)%3] == newvtx[i]);
+      cerr << "ERROR (Triang::split()): "
+           << "refinement of neighbour not yet finished!" << endl
+           << "                         "
+           << "Please try a finer macrogrid!" << endl;
+      abort();
+          }
 
-		    newtr[(i+1)%3]->nbconnect(i,trnb1,opposite(i));
-		    newtr[(i+2)%3]->nbconnect(i,trnb2,opposite(i));
-		    trnb1->nbconnect(opposite(i),newtr[(i+1)%3],i);
-		    trnb2->nbconnect(opposite(i),newtr[(i+2)%3],i);
+        assert(trnb1);
+        assert(trnb2);
 
-		    if (newtr[(i+1)%3]->connect.hvtx[i])
-		      newtr[(i+1)%3]->connect.hvtx[i]->nbconnect(opposite(i),newtr[(i+1)%3],i);
-		    if (newtr[(i+2)%3]->connect.hvtx[i])
-		      newtr[(i+2)%3]->connect.hvtx[i]->nbconnect(opposite(i),newtr[(i+2)%3],i);
-		  }
-		else {
-		  assert(neighbour(i)->splitrule() == unsplit);
-		  newtr[(i+1)%3]->nbconnect(i,neighbour(i),opposite(i));
-		  newtr[(i+2)%3]->nbconnect(i,neighbour(i),opposite(i));
-		}
-	      }
-	  }
+        switch (opposite(i))
+          {
+          case 0:
+      trnb2 = (Triang *)(trnb2->next());
+      trnb1 = (Triang *)(trnb2->next());
+      break;
+          case 1:
+      trnb2 = (Triang *)(trnb2->next());
+      trnb2 = (Triang *)(trnb2->next());
+      break;
+          case 2:
+      trnb1 = (Triang *)(trnb1->next());
+      break;
+          default:
+      abort();
+          }
 
-	/*
-	  if (pro_el)
-	  pro_el->operator()(this, (Element**)newtr, 4);
-	*/
+        assert(trnb1->connect.vtx[(opposite(i)+1)%3] == newvtx[i]);
+        assert(trnb2->connect.vtx[(opposite(i)+2)%3] == newvtx[i]);
+
+        newtr[(i+1)%3]->nbconnect(i,trnb1,opposite(i));
+        newtr[(i+2)%3]->nbconnect(i,trnb2,opposite(i));
+        trnb1->nbconnect(opposite(i),newtr[(i+1)%3],i);
+        trnb2->nbconnect(opposite(i),newtr[(i+2)%3],i);
+
+        if (newtr[(i+1)%3]->connect.hvtx[i])
+          newtr[(i+1)%3]->connect.hvtx[i]->nbconnect(opposite(i),newtr[(i+1)%3],i);
+        if (newtr[(i+2)%3]->connect.hvtx[i])
+          newtr[(i+2)%3]->connect.hvtx[i]->nbconnect(opposite(i),newtr[(i+2)%3],i);
+      }
+    else {
+      assert(neighbour(i)->splitrule() == unsplit);
+      newtr[(i+1)%3]->nbconnect(i,neighbour(i),opposite(i));
+      newtr[(i+2)%3]->nbconnect(i,neighbour(i),opposite(i));
+    }
+        }
+    }
+
+  /*
+    if (pro_el)
+    pro_el->operator()(this, (Element**)newtr, 4);
+  */
         ret = 4;
       }
       break;
@@ -1577,17 +1580,17 @@ bool Triang::canCoarsen(int nconfDeg) const
   bool ret;
 
   ret = ( (   (splitrule() == triang_quarter)
-	      || (neighbour(0)->splitrule() == triang_quarter)) 
-	  ? false : true);
+        || (neighbour(0)->splitrule() == triang_quarter)) 
+    ? false : true);
 
   if (ret && nbel(0))
     ret = (nbel(0)->deepestLevel() <= nconfDeg); /* &&
-						    (down()->next()->neighbour(0)->thinis(element_like) ?
-						    !(((Element*)(down()->next()->neighbour(0)))->
-						    hashvtx(down()->next()->opposite(0))) : true) &&
-						    (down()->neighbour(0)->thinis(element_like) ?
-						    !(((Element*)(down()->neighbour(0)))->hashvtx(down()->opposite(0)))
-						    : true); */
+                (down()->next()->neighbour(0)->thinis(element_like) ?
+                !(((Element*)(down()->next()->neighbour(0)))->
+                hashvtx(down()->next()->opposite(0))) : true) &&
+                (down()->neighbour(0)->thinis(element_like) ?
+                !(((Element*)(down()->neighbour(0)))->hashvtx(down()->opposite(0)))
+                : true); */
 
   ret = ret && !(down()->hashvtx(0)) && !(down()->next()->hashvtx(0));
 
@@ -1605,111 +1608,111 @@ bool Triang::canCoarsen(int nconfDeg) const
 // #end(method)
 // ***************************************************
 int Triang::docoarsen(nconf_vtx_t *ncv,
-		      int nconfDeg,Restrict_basic *rest_el)
+          int nconfDeg,Restrict_basic *rest_el)
 {
   int result = 0;
   if( nconfDeg == 0 && mysplit == triang_conf2) {
     int lcancoarsen=0;
     if ( connect.nb[0]->thinis(bndel_like) )
       {
-	if ( ((Hier<Bndel>*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el) )
-	  {
-	    Hier<Element> *child=down();
-	    child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-	    nbconnect(2,child->neighbour(0),child->opposite(0));
-	    child=child->next();
-	    child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-	    nbconnect(1,child->neighbour(0),child->opposite(0));
-	    if( neighbour(1)->thinis(element_like) ) {
-	      ((Element*)neighbour(1))->setnormdir(opposite(1), 1);
-	      setnormdir(1, -1);
-	    } else
-	      setnormdir(1, 1);
-	    if( neighbour(2)->thinis(element_like) ) {
-	      ((Element*)neighbour(2))->setnormdir(opposite(2), 1);
-	      setnormdir(2, -1);
-	    } else
-	      setnormdir(2, 1);
-	    lcancoarsen=1;
-	  }
+  if ( ((Hier<Bndel>*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el) )
+    {
+      Hier<Element> *child=down();
+      child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+      nbconnect(2,child->neighbour(0),child->opposite(0));
+      child=child->next();
+      child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+      nbconnect(1,child->neighbour(0),child->opposite(0));
+      if( neighbour(1)->thinis(element_like) ) {
+        ((Element*)neighbour(1))->setnormdir(opposite(1), 1);
+        setnormdir(1, -1);
+      } else
+        setnormdir(1, 1);
+      if( neighbour(2)->thinis(element_like) ) {
+        ((Element*)neighbour(2))->setnormdir(opposite(2), 1);
+        setnormdir(2, -1);
+      } else
+        setnormdir(2, 1);
+      lcancoarsen=1;
+    }
       }
     else if ( connect.bck[0] == 0 )
       {
-	Hier<Element> *neigh=(Hier<Element>*)connect.nb[0];
-	if ( !ncv )
-	  {
-	    int cancoarsen=1;
-	    neigh=neigh->down();
-	    do
-	      {
-	      } while (   (cancoarsen=(neigh->is(Refco::crs)))
-			  && (neigh=neigh->next()) );
-	    if (cancoarsen)
-	      {
-		Hier<Element> *child=down();
-		ncv = new nconf_vtx(child->vertex(0),child,child->next());
-		assert( ncv );
-		child->neighbour(1)->nbconnect(2,this,-1);
-		child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-		nbconnect(2,child->neighbour(0),child->opposite(0));
-		if( child->neighbour(0)->thinis(element_like) ) {
-		  ((Element*)neighbour(2))->setnormdir(opposite(2), 1);
-		  setnormdir(2, -1);
-		} else
-		  setnormdir(2, 1);
+  Hier<Element> *neigh=(Hier<Element>*)connect.nb[0];
+  if ( !ncv )
+    {
+      int cancoarsen=1;
+      neigh=neigh->down();
+      do
+        {
+        } while (   (cancoarsen=(neigh->is(Refco::crs)))
+        && (neigh=neigh->next()) );
+      if (cancoarsen)
+        {
+    Hier<Element> *child=down();
+    ncv = new nconf_vtx(child->vertex(0),child,child->next());
+    assert( ncv );
+    child->neighbour(1)->nbconnect(2,this,-1);
+    child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+    nbconnect(2,child->neighbour(0),child->opposite(0));
+    if( child->neighbour(0)->thinis(element_like) ) {
+      ((Element*)neighbour(2))->setnormdir(opposite(2), 1);
+      setnormdir(2, -1);
+    } else
+      setnormdir(2, 1);
 
-		child=child->next();
-		child->neighbour(2)->nbconnect(1,this,-1);
-		child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-		nbconnect(1,child->neighbour(0),child->opposite(0));
-		if( child->neighbour(0)->thinis(element_like) ) {
-		  ((Element*)neighbour(1))->setnormdir(opposite(1), 1);
-		  setnormdir(1, -1);
-		} else
-		  setnormdir(1, 1);
-		setnormdir(0, -1);
+    child=child->next();
+    child->neighbour(2)->nbconnect(1,this,-1);
+    child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+    nbconnect(1,child->neighbour(0),child->opposite(0));
+    if( child->neighbour(0)->thinis(element_like) ) {
+      ((Element*)neighbour(1))->setnormdir(opposite(1), 1);
+      setnormdir(1, -1);
+    } else
+      setnormdir(1, 1);
+    setnormdir(0, -1);
           
 #ifndef NDEBUG
-		// only used in assert 
-		bool didcoarse = 
+    // only used in assert 
+    bool didcoarse = 
 #endif
-		  // do coarsen 
-		  ((Hier<Element>*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
-		assert( didcoarse );
-		lcancoarsen=1;
-	      }
-	  }
-	else
-	  {
-	    Hier<Element> *child=down();
-	    child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-	    nbconnect(2,child->neighbour(0),child->opposite(0));
-	    if( child->neighbour(0)->thinis(element_like) ) {
-	      ((Element*)neighbour(2))->setnormdir(opposite(2), 1);
-	      setnormdir(2, -1);
-	    } else
-	      setnormdir(2, 1);
+      // do coarsen 
+      ((Hier<Element>*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
+    assert( didcoarse );
+    lcancoarsen=1;
+        }
+    }
+  else
+    {
+      Hier<Element> *child=down();
+      child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+      nbconnect(2,child->neighbour(0),child->opposite(0));
+      if( child->neighbour(0)->thinis(element_like) ) {
+        ((Element*)neighbour(2))->setnormdir(opposite(2), 1);
+        setnormdir(2, -1);
+      } else
+        setnormdir(2, 1);
 
-	    child=child->next();
-	    child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-	    nbconnect(1,child->neighbour(0),child->opposite(0));
-	    if( child->neighbour(0)->thinis(element_like) ) {
-	      ((Element*)neighbour(1))->setnormdir(opposite(1), 1);
-	      setnormdir(1, -1);
-	    } else
-	      setnormdir(1, 1);
-	    setnormdir(0, 1);
+      child=child->next();
+      child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+      nbconnect(1,child->neighbour(0),child->opposite(0));
+      if( child->neighbour(0)->thinis(element_like) ) {
+        ((Element*)neighbour(1))->setnormdir(opposite(1), 1);
+        setnormdir(1, -1);
+      } else
+        setnormdir(1, 1);
+      setnormdir(0, 1);
 
-	    delete ncv;
-	    ncv=0;
-	    Element *e[2];
-	    e[0]=down();
-	    e[1]=down()->next();
-	    // rest_el->operator()(this,e,2);
-	    if (rest_el) 
-	      rest_el->operator()(this);
-	    lcancoarsen=2;
-	  }
+      delete ncv;
+      ncv=0;
+      Element *e[2];
+      e[0]=down();
+      e[1]=down()->next();
+      // rest_el->operator()(this,e,2);
+      if (rest_el) 
+        rest_el->operator()(this);
+      lcancoarsen=2;
+    }
       }
     if( lcancoarsen != 0 && rest_el) {
       Element *e[2];
@@ -1717,7 +1720,7 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
       e[1]=down()->next();
       //rest_el->operator()(this,e,2);
       if (rest_el)
-	rest_el->operator()(this);
+  rest_el->operator()(this);
     }
     if (lcancoarsen==2) {
       deletesubtree();
@@ -1729,74 +1732,74 @@ int Triang::docoarsen(nconf_vtx_t *ncv,
     Element *child[3]={down(),down()->next(),down()->next()->next()};
     for (int i=0;i<3;i++) {
       if (nbel(i)) {
-	if (!(nbel(i)->leaf()) && child[(i+1)%3]->hashvtx(i)) {
-	  if (((Triang*)child[(i+1)%3])->connect.hvtx[i]->count()+1>nconfDeg)
-	    lcancoarsen=0;
-	}
-	if (!(nbel(i)->leaf()) && child[(i+2)%3]->hashvtx(i)) {
-	  if (((Triang*)child[(i+2)%3])->connect.hvtx[i]->count()+1>nconfDeg)
-	    lcancoarsen=0;
-	}
+  if (!(nbel(i)->leaf()) && child[(i+1)%3]->hashvtx(i)) {
+    if (((Triang*)child[(i+1)%3])->connect.hvtx[i]->count()+1>nconfDeg)
+      lcancoarsen=0;
+  }
+  if (!(nbel(i)->leaf()) && child[(i+2)%3]->hashvtx(i)) {
+    if (((Triang*)child[(i+2)%3])->connect.hvtx[i]->count()+1>nconfDeg)
+      lcancoarsen=0;
+  }
       } 
     }
     if (lcancoarsen) {
       if (rest_el) 
-	rest_el->operator()(this);
+  rest_el->operator()(this);
       if (0) {
-	//Xdisplay disp(g_argc,g_argv,"a","Grid",
-	//	      350.,450.,450.);
-	double p1[2],p2[2];
-	double bary[3]={1./3.,1./3.,1./3.};
+  //Xdisplay disp(g_argc,g_argv,"a","Grid",
+  //        350.,450.,450.);
+  double p1[2],p2[2];
+  double bary[3]={1./3.,1./3.,1./3.};
 #ifdef USE_ALUGRID_XDISPLAY
-	mesh->draw(disp);
+  mesh->draw(disp);
 #endif
-	{
-	  this->fromlocal(bary,p1);
-	  this->fromlocal(bary,p2);
-	  p1[0]-=0.05;
-	  p1[1]-=0.05;
-	  p2[0]+=0.05;
-	  p2[1]+=0.05;
-	  Fullvertex pp1(p1,-1);
-	  Fullvertex pp2(p2,-1);
-	  //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
-	}
-	{
-	  this->fromlocal(bary,p1);
-	  this->fromlocal(bary,p2);
-	  p1[0]-=0.05;
-	  p1[1]+=0.05;
-	  p2[0]+=0.05;
-	  p2[1]-=0.05;
-	  Fullvertex pp1(p1,-1);
-	  Fullvertex pp2(p2,-1);
-	  //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
-	}
+  {
+    this->fromlocal(bary,p1);
+    this->fromlocal(bary,p2);
+    p1[0]-=0.05;
+    p1[1]-=0.05;
+    p2[0]+=0.05;
+    p2[1]+=0.05;
+    Fullvertex pp1(p1,-1);
+    Fullvertex pp2(p2,-1);
+    //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
+  }
+  {
+    this->fromlocal(bary,p1);
+    this->fromlocal(bary,p2);
+    p1[0]-=0.05;
+    p1[1]+=0.05;
+    p2[0]+=0.05;
+    p2[1]-=0.05;
+    Fullvertex pp1(p1,-1);
+    Fullvertex pp2(p2,-1);
+    //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
+  }
       }
       // Nachbarschaften stimmen (hoffe ich)
       // Haengende Knoten verwalten
       for (int i=0;i<3;i++) {
-	assert(!hashvtx(i));
-	if (nbel(i)) {
-	  if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
-	    addhvtx(child[(i+1)%3]->vertex((i+2)%3), 
-		    child[(i+2)%3]->nbel(i),child[(i+1)%3]->nbel(i), i);
-	    connect.hvtx[i]->merge(((Triang*)child[(i+1)%3])->connect.hvtx[i],
-	    			   ((Triang*)child[(i+2)%3])->connect.hvtx[i]);
-	    connect.hvtx[i]->nbconnect(opposite(i),this,i);
-	  } else { // Haengenden Knoten im Nachbarn entfernen 
-	    assert(nbel(i)->hashvtx(opposite(i)));
-	    nbel(i)->removehvtx(opposite(i),child[(i+1)%3]->vertex((i+2)%3));
-	  }
-	}
+  assert(!hashvtx(i));
+  if (nbel(i)) {
+    if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
+      addhvtx(child[(i+1)%3]->vertex((i+2)%3), 
+        child[(i+2)%3]->nbel(i),child[(i+1)%3]->nbel(i), i);
+      connect.hvtx[i]->merge(((Triang*)child[(i+1)%3])->connect.hvtx[i],
+               ((Triang*)child[(i+2)%3])->connect.hvtx[i]);
+      connect.hvtx[i]->nbconnect(opposite(i),this,i);
+    } else { // Haengenden Knoten im Nachbarn entfernen 
+      assert(nbel(i)->hashvtx(opposite(i)));
+      nbel(i)->removehvtx(opposite(i),child[(i+1)%3]->vertex((i+2)%3));
+    }
+  }
       }
       for (int i=0;i<3;i++) {
-	if (nbbnd(i)) {
-	  if( !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
-	    lcancoarsen=0;
-	    assert(0);
-	  }
-	}
+  if (nbbnd(i)) {
+    if( !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
+      lcancoarsen=0;
+      assert(0);
+    }
+  }
       }
     } 
     result = lcancoarsen;
@@ -1825,14 +1828,14 @@ int Element::c::check()
   for (int i=0;i<nf;i++)
     {
       if (nb[i]->thinis(element_like))
-	{
-	  assert( 0<=bck[i] && bck[i]<=nf );
-	}
+  {
+    assert( 0<=bck[i] && bck[i]<=nf );
+  }
       else
-	{
-	  assert( bck[i] == 0 );
-	  assert( normdir[i] == 1 );
-	}
+  {
+    assert( bck[i] == 0 );
+    assert( normdir[i] == 1 );
+  }
       assert( normdir[i]==1 || normdir[i]==-1 );
       assert(edge[i]);
       assert(edge[i]->getIndex()>=0);
@@ -1862,29 +1865,29 @@ int Element::check()
   for (int i=0;i<3;i++)
     {
       if(  connect.nb[i]->thinis(element_like) )
-	{
-	  if(  !connect.hvtx[i] &&
-	       !(((Triang*)neighbour(i))->hashvtx(opposite(i))) ) { // Konform
-	    assert( connect.nb[i]->opposite(connect.bck[i])==i );
-	    assert( connect.nb[i]->neighbour(connect.bck[i])==this );
-	    assert( connect.nb[i]->edge(connect.bck[i])==connect.edge[i]);
-	    assert( connect.nb[i]->vertex(connect.bck[i]+1)==vertex(i+2) );
-	    assert( connect.nb[i]->vertex(connect.bck[i]+2)==vertex(i+1) );
-	  } else if (connect.hvtx[i]) {
-	    assert(!(((Triang*)neighbour(i))->hashvtx(opposite(i))));
-	    assert( connect.hvtx[i]->getlnb()->neighbour(opposite(i))==this);
-	    assert( connect.hvtx[i]->getrnb()->neighbour(opposite(i))==this);
-	  }
-	  assert(((Element*)neighbour(i))->normaldir(opposite(i)) == -normaldir(i));
-	}
+  {
+    if(  !connect.hvtx[i] &&
+         !(((Triang*)neighbour(i))->hashvtx(opposite(i))) ) { // Konform
+      assert( connect.nb[i]->opposite(connect.bck[i])==i );
+      assert( connect.nb[i]->neighbour(connect.bck[i])==this );
+      assert( connect.nb[i]->edge(connect.bck[i])==connect.edge[i]);
+      assert( connect.nb[i]->vertex(connect.bck[i]+1)==vertex(i+2) );
+      assert( connect.nb[i]->vertex(connect.bck[i]+2)==vertex(i+1) );
+    } else if (connect.hvtx[i]) {
+      assert(!(((Triang*)neighbour(i))->hashvtx(opposite(i))));
+      assert( connect.hvtx[i]->getlnb()->neighbour(opposite(i))==this);
+      assert( connect.hvtx[i]->getrnb()->neighbour(opposite(i))==this);
+    }
+    assert(((Element*)neighbour(i))->normaldir(opposite(i)) == -normaldir(i));
+  }
       else
-	{
-	  assert( connect.nb[i]->neighbour(0)==this );
-	  assert( connect.nb[i]->vertex(0)==vertex(i+1) );
-	  assert( connect.nb[i]->vertex(1)==vertex(i+2) );
-	  assert( connect.nb[i]->opposite(0)==i );
-	  assert( connect.nb[i]->edge(connect.bck[i])==connect.edge[i]);
-	}
+  {
+    assert( connect.nb[i]->neighbour(0)==this );
+    assert( connect.nb[i]->vertex(0)==vertex(i+1) );
+    assert( connect.nb[i]->vertex(1)==vertex(i+2) );
+    assert( connect.nb[i]->opposite(0)==i );
+    assert( connect.nb[i]->edge(connect.bck[i])==connect.edge[i]);
+  }
     }
   if ( ((Hier<Element>*)this)->leaf()) {
   }
@@ -2031,7 +2034,7 @@ void Bndel::c::read(ifstream & in, Vertex ** v, const int l) {
 void Bndel_triang::restrictLocal(Bndel **pbel, int pnr)
 {
   assert(   ((Bndel_triang*)(pbel[0]))->time
-	    == ((Bndel_triang*)(pbel[1]))->time);
+      == ((Bndel_triang*)(pbel[1]))->time);
 
   time = ((Bndel_triang*)(pbel[0]))->time; 
 }
@@ -2044,10 +2047,10 @@ void Bndel_triang::prolongLocal(Bndel **pbel, int pnr) const
 
 int Bndel_triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
                         Multivertexadapter & mva, 
-			nconf_vtx_t *ncv,
-			splitrule_t sr,
-			int nconfDeg,Refco::tag_t default_ref,
-			Prolong_basic *pro_el)
+      nconf_vtx_t *ncv,
+      splitrule_t sr,
+      int nconfDeg,Refco::tag_t default_ref,
+      Prolong_basic *pro_el)
 {
   int idx[2];
   //  nconf_vtx_t *ncv;
@@ -2076,7 +2079,7 @@ int Bndel_triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
       break;
     default:
       cerr << "ERROR (Bndel_triang::split()): "
-	   << "illegal splitrule!" << endl;
+     << "illegal splitrule!" << endl;
       abort();
     }
 
@@ -2088,13 +2091,20 @@ int Bndel_triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
   ((Element*)ncv->el[1])->setnormdir(idx[1],1);
   t1->nbconnect(0,ncv->el[0],idx[0]);
   t2->nbconnect(0,ncv->el[1],idx[1]);
+
+#ifdef ALU2D_OLD_BND_PROJECTION  
   t1->set_bndfunctions(lf,lDf);
   t2->set_bndfunctions(lf,lDf);
+#else 
+  t1->copySegmentIndex( _segmentIndex );
+  t2->copySegmentIndex( _segmentIndex );
+#endif
   //      mva.delete(connect.vtx[1],connect.vtx[2]);    
   
   // Daten auf dem Rand prolongieren
-  t1->sethdl(hdl);
-  t2->sethdl(hdl);
+  t1->sethdl( hdl );
+  t2->sethdl( hdl );
+
   t1->edgeconnect(0,ncv->el[0]->edge(idx[0]));
   t2->edgeconnect(0,ncv->el[1]->edge(idx[1]));
   e[0]=t1;
@@ -2108,7 +2118,7 @@ int Bndel_triang::split(void * (&e)[nparts], Listagency < Vertex > * agnc,
 }
 
 int Bndel_triang::docoarsen(nconf_vtx_t *ncv,
-			    int nconfDeg,Restrict_basic *rest_el)
+          int nconfDeg,Restrict_basic *rest_el)
 {
   assert(splitrule() == triang_bnd);
 
@@ -2126,10 +2136,10 @@ int periodic_flag=0;
 
 int Bndel_periodic::split(void * (&el)[nparts], Listagency < Vertex > * agnc,
                           Multivertexadapter & mva, 
-			  nconf_vtx_t *ncv,
-			  splitrule_t sr,
-			  int nconfDeg,Refco::tag_t default_ref,
-			  Prolong_basic *pro_el)
+        nconf_vtx_t *ncv,
+        splitrule_t sr,
+        int nconfDeg,Refco::tag_t default_ref,
+        Prolong_basic *pro_el)
 {
   assert(sr == triang_bnd);
   assert(splitrule() == unsplit);
@@ -2141,20 +2151,20 @@ int Bndel_periodic::split(void * (&el)[nparts], Listagency < Vertex > * agnc,
     periodic_flag=1;
     while (periodic_nb->leaf())
       {
-	switch (nbel(0)->splitrule())
-	  {
-	  case Thinelement::triang_conf2:
-	    periodic_nb->nbel(0)->Refco_el::mark(Refco::ref_1) ;
-	    break;
-	  case Thinelement::triang_quarter:
-	    periodic_nb->nbel(0)->Refco_el::mark(Refco::quart) ;
-	    break;
-	  default:
-	    cerr << "ERROR (Bndel_periodic::split()): "
-		 << "illegal splitrule!" << endl;
-	    abort();
-	  }
-	periodic_nb->nbel(0)->refine_leaf(agnc,&mva,ncv,nconfDeg,default_ref,pro_el);
+  switch (nbel(0)->splitrule())
+    {
+    case Thinelement::triang_conf2:
+      periodic_nb->nbel(0)->Refco_el::mark(Refco::ref_1) ;
+      break;
+    case Thinelement::triang_quarter:
+      periodic_nb->nbel(0)->Refco_el::mark(Refco::quart) ;
+      break;
+    default:
+      cerr << "ERROR (Bndel_periodic::split()): "
+     << "illegal splitrule!" << endl;
+      abort();
+    }
+  periodic_nb->nbel(0)->refine_leaf(agnc,&mva,ncv,nconfDeg,default_ref,pro_el);
       }
     periodic_flag=0;
     ((Bndel_periodic*)(el[0]))
@@ -2183,13 +2193,13 @@ int Bndel_periodic::split(void * (&el)[nparts], Listagency < Vertex > * agnc,
       ((Bndel_periodic*)el[1])->set_pnb(periodic_nb);
     } else {
       ((Bndel_periodic*)el[0])
-	->set_pnb((Bndel_periodic*)(periodic_nb->down()->next()));
+  ->set_pnb((Bndel_periodic*)(periodic_nb->down()->next()));
       ((Bndel_periodic*)(periodic_nb->down()->next()))
-	->set_pnb((Bndel_periodic*)el[0]);
+  ->set_pnb((Bndel_periodic*)el[0]);
       ((Bndel_periodic*)el[1])
-	->set_pnb((Bndel_periodic*)(periodic_nb->down()));
+  ->set_pnb((Bndel_periodic*)(periodic_nb->down()));
       ((Bndel_periodic*)(periodic_nb->down()))
-	->set_pnb((Bndel_periodic*)el[1]);
+  ->set_pnb((Bndel_periodic*)el[1]);
     }
 
   }
@@ -2198,7 +2208,7 @@ int Bndel_periodic::split(void * (&el)[nparts], Listagency < Vertex > * agnc,
 }
 
 int Bndel_periodic::docoarsen(nconf_vtx_t *ncv,
-			      int nconfDeg,Restrict_basic *rest_el)
+            int nconfDeg,Restrict_basic *rest_el)
 {
   if(nconfDeg == 0 ) {
     if (periodic_nb->leaf())
@@ -2212,9 +2222,9 @@ int Bndel_periodic::docoarsen(nconf_vtx_t *ncv,
 
     while (h)
       {
-	if (!h->is(Refco::crs))
-	  break;
-	h=h->next();
+  if (!h->is(Refco::crs))
+    break;
+  h=h->next();
       }
     if (h)
       return 0;

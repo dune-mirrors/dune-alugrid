@@ -13,6 +13,9 @@ typedef stringstream  strstream_t;
 #include "xdrclass.h"
 
 // interface class for projecting vertices for boundary adjustment 
+typedef VertexProjection<3> ProjectVertex;
+// see ../projectvertex.h 
+/*
 class ProjectVertex 
 {
 protected:
@@ -26,6 +29,8 @@ public:
                          const int segmentIndex,
                          double (&ret)[3]) const = 0;
 };
+*/
+
 // pair of projection and bnd segment index 
 typedef pair<const ProjectVertex* , const int > ProjectVertexPair;
 

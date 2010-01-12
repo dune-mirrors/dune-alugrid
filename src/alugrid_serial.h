@@ -19,6 +19,9 @@
 // defines IndexManagerType
 #include "indexstack.h"
 
+// defines VertexProjection Interface 
+#include "projectvertex.h"
+
 namespace ALUGridSpace {
 
 // the code needs this 
