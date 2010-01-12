@@ -220,10 +220,7 @@ inline int Bndel::get_splitpoint(double (&ppoint) [2])
   ppoint[0] = 0.5*(connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
   ppoint[1] = 0.5*(connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
 
-  //const double lcx = 0.5*(connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
-  //const double lcy = 0.5*(connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
-
-#if 1
+#if 0
   if (lf && lDf)
   {
     assert(fabs(  lf(connect.vtx[0]->coord()[0])
