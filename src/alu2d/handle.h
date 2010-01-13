@@ -879,11 +879,18 @@ class Hmesh_basic {
      indexmanager[indextype].freeIndex(index);
    }
 
+   // return number of macro boundary segments 
+   size_t numMacroBndSegments() const 
+   {
+     return mbl.size();
+   }
+
    // project vertex for given boundary segment 
    void projectVertex(const int segmentIndex, double (&point) [2]) const 
    {
      if( _projectVertex ) 
      {
+       assert( segmentIndex >= 0 );
        // copy point 
        const double oldp[2] = { point[0], point[1] };
        // call projection operator 

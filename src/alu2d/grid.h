@@ -391,10 +391,6 @@ class Thinelement : public Basic {
 
     int numvertices() const { return nvertices ; }
 
-    //virtual double area() const = 0;
-
-    //virtual void edge_vtx(int , Vertex * (&) [2]) const = 0 ;
-
     virtual int numfacevertices(int ) const = 0 ;
     
     virtual int facevertex(int , int ) const = 0 ;
@@ -406,8 +402,6 @@ class Thinelement : public Basic {
     virtual Thinelement * neighbour(int ) const = 0 ;
 
     virtual int opposite(int fce) const = 0 ;
-
-    //virtual int edge_idx(int fce) const = 0 ;
 
     virtual Edge *edge(int fce) const = 0 ;
 
