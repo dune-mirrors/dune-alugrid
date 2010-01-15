@@ -117,6 +117,12 @@ public:
     return containerPll().indexManager(codim);
   }
 
+  // return indexmanger 
+  size_t numMacroBndSegments () const 
+  {
+    return containerPll().numMacroBndSegments();
+  }
+
   // restore parallel grid from before
   virtual void duneRestore (const char*) ;
   // backup current grid status 

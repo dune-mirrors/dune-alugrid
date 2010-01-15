@@ -628,6 +628,7 @@ class GitterBasisImpl : public GitterBasis {
   inline const Makrogitter & container () const ;
   public :
     inline IndexManagerType & indexManager(int codim);
+    inline size_t numMacroBndSegments() const;
         
     inline GitterBasisImpl () ;
     inline GitterBasisImpl (istream &, ProjectVertex* ) ;
@@ -953,6 +954,11 @@ inline const Gitter :: Makrogitter & GitterBasisImpl :: container () const {
 inline IndexManagerType & GitterBasisImpl :: indexManager (int codim) 
 { 
   return _macrogitter->indexManager(codim);
+}
+
+inline size_t GitterBasisImpl :: numMacroBndSegments() const
+{ 
+  return _macrogitter->numMacroBndSegments();
 }
 
 inline GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid, istream & in) 

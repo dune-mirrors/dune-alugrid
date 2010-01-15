@@ -876,6 +876,14 @@ IndexManagerType&  Gitter :: Geometric :: BuilderIF :: indexManager(int codim)
   return _indexmanager[ codim ];
 }
 
+size_t Gitter :: Geometric :: BuilderIF :: numMacroBndSegments() const 
+{
+  return _hbndseg3List.size() + 
+         _hbndseg4List.size() + 
+         _periodic3List.size() +
+         _periodic4List.size();
+}
+
 // compress all index manager 
 void Gitter :: Geometric :: BuilderIF :: compressIndexManagers()
 {

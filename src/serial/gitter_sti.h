@@ -15,21 +15,6 @@ typedef stringstream  strstream_t;
 // interface class for projecting vertices for boundary adjustment 
 typedef VertexProjection<3> ProjectVertex;
 // see ../projectvertex.h 
-/*
-class ProjectVertex 
-{
-protected:
-  // don't allow creation of an instance  
-  ProjectVertex () {} 
-public:
-  // destructor 
-  virtual ~ProjectVertex () {}
-  // projection method 
-  virtual int operator()(const double (&p)[3], 
-                         const int segmentIndex,
-                         double (&ret)[3]) const = 0;
-};
-*/
 
 // pair of projection and bnd segment index 
 typedef pair<const ProjectVertex* , const int > ProjectVertexPair;
@@ -1690,6 +1675,9 @@ public :
       // return reference to indexManager 
       virtual IndexManagerType& indexManager(int codim);
 
+      // return number of macro boundary segments 
+      virtual size_t numMacroBndSegments() const;
+
       // compress all index manager 
       virtual void compressIndexManagers();
       
@@ -1774,6 +1762,8 @@ public :
   // new xdr backup and restore method
   virtual void backup (XDRstream_out &) ;
   virtual void restore (XDRstream_in &) ;
+
+  virtual size_t numMacroBndSegments() const = 0;
 
   // return index manager of macro grid 
   virtual IndexManagerType & indexManager (int codim) = 0;
