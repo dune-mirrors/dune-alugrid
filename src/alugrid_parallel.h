@@ -5,6 +5,8 @@
 
 #define _ANSI_HEADER 
 
+#define ALUGRID_EXPORT_MACROGRID_CHANGES
+
 namespace ALUGridSpace {
 
 // the parallel stuff 
