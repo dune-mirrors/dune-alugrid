@@ -20,7 +20,6 @@ leafIterator (const IteratorSTI < helement_STI > * p)
        TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > *) p) ;
 }
 
-
 bool GitterDunePll :: duneNotifyNewGrid ()
 {
   assert (debugOption (20) ? (cout << "**GitterDunePll :: duneNotifyNewGrid () " << endl, 1) : 1) ;
@@ -50,6 +49,11 @@ bool GitterDunePll :: duneNotifyNewGrid ()
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
   }
   return neu;
+}
+
+void GitterDunePll :: duneNotifyMacroGridChanges ()
+{
+  GitterPll :: notifyMacroGridChanges ();
 }
 
 void GitterDunePll :: duneNotifyGridChanges ()

@@ -77,6 +77,9 @@ public:
   void duneRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType & gs) ;
   void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
  
+  // notifyMacroGridChanges for dune
+  void duneNotifyMacroGridChanges (); 
+  
   // notifyGridChanges for dune
   void duneNotifyGridChanges (); 
   
