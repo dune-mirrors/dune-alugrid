@@ -71,9 +71,9 @@ class Basic {
     int isfree() const { return refcount == 0 ; }
 
 
-    virtual void write(ofstream &) const = 0 ;
+    virtual void write(ostream &) const = 0 ;
 
-    virtual void read(ifstream &) = 0 ;
+    virtual void read(istream &) = 0 ;
 
 
     friend class Hmesh;
@@ -211,10 +211,10 @@ class Vertex : public Listagent < Vertex >, public Basic {
     virtual const double (& coord() const )[ncoord] = 0 ;
 
 
-    virtual void write(ofstream &) const = 0 ;
+    virtual void write(ostream &) const = 0 ;
 
 
-    virtual void read(ifstream &) = 0 ;
+    virtual void read(istream &) = 0 ;
  
 
     int get_nr_of_per_nbs()
@@ -294,9 +294,9 @@ class Fullvertex : public Vertex {
     const double (& coordTest() const )[ncoord] { return vcoord ; }
     const double (& coord() const )[ncoord] { return vcoord ; }
 
-    void write(ofstream &) const ;
+    void write(ostream &) const ;
 
-    void read(ifstream &) ;
+    void read(istream &) ;
 
     friend ostream& operator<<(ostream& os, const Fullvertex& fv) {
       return os << "(" << fv.vcoord[0] << "," << fv.vcoord[1] << ")";
@@ -311,8 +311,8 @@ class Edge : public Basic {
       sethdl(phdl);
     }
     ~Edge();
-    void write(ofstream &) const ;
-    void read(ifstream &) ;
+    void write(ostream &) const ;
+    void read(istream &) ;
 };
 class Triang ;
 class Bndel_triang ;
@@ -409,9 +409,9 @@ class Thinelement : public Basic {
 
     virtual int segmentIndex() const = 0;
 
-    virtual void write(ofstream &) const = 0 ;
+    virtual void write(ostream &) const = 0 ;
 
-    virtual void read(ifstream &, Vertex **, const int ) = 0 ;
+    virtual void read(istream &, Vertex **, const int ) = 0 ;
 
     virtual int split(void * (&) [nparts], Listagency < Vertex > *,
                       Multivertexadapter &,nconf_vtx_t *,splitrule_t,
@@ -523,9 +523,9 @@ class Element : public Thinelement, public Refco_el {
 
       void unset(int i) { vtx[i]->detach() ; vtx[i] = 0 ; }
 
-      void write(ofstream &) const ;
+      void write(ostream &) const ;
 
-      void read(ifstream &, Vertex ** , const int ) ;
+      void read(istream &, Vertex ** , const int ) ;
 
       int check();
 
@@ -886,9 +886,9 @@ template < class A > class Hier : public A {
     }
 
 
-    void write(ofstream & ) const { }
+    void write(ostream & ) const { }
 
-    void read(ifstream & ) { }
+    void read(istream & ) { }
 
 } ;
 // #end(class)
@@ -921,9 +921,9 @@ class Bndel : public Thinelement, public Refco {
 
     void unset(int i) { vtx[i]->detach() ; vtx[i] = 0 ; }
 
-    void write(ofstream &) const ;
+    void write(ostream &) const ;
 
-    void read(ifstream &, Vertex ** , const int ) ;
+    void read(istream &, Vertex ** , const int ) ;
 
   } connect ;
 

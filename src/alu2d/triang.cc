@@ -244,13 +244,13 @@ Triang::Triang(Vertex * v0,Vertex * v1, Vertex * v2) {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Element::write(ofstream & out) const
+//   void Element::write(ostream & out) const
 // #parameters:
 // #description:
 //   Rausschreiben des Dreicks (unvollst"andig)
 // #end(method)
 // ***************************************************
-void Triang::write(ofstream & out) const {
+void Triang::write(ostream & out) const {
   connect.write(out) ;
   //  data.write(out) ;
   out << endl ;
@@ -259,9 +259,9 @@ void Triang::write(ofstream & out) const {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Element::read(ifstream & in, Vertex ** look, const int len)
+//   void Element::read(istream & in, Vertex ** look, const int len)
 // #parameters:
-//   \ ifstream& | io    | Eingabestrom
+//   \ istream& | io    | Eingabestrom
 //   \ Vertex**  | look  | Liste von Vertexpointern
 //   \ const int | len   | Gr"o"se der Liste look
 // #description:
@@ -270,7 +270,7 @@ void Triang::write(ofstream & out) const {
 //   des Dreiecks gew"ahlt.
 // #end(method)
 // ***************************************************
-void Triang::read(ifstream & in, Vertex ** look, const int len) {
+void Triang::read(istream & in, Vertex ** look, const int len) {
   Hier < Element > :: read(in) ;
   connect.read(in, look, len) ;
   init() ;
@@ -1215,7 +1215,7 @@ Vertex * Bndel::vertex(int i) const {
   
 }
 
-void Bndel_triang::write(ofstream & out) const {
+void Bndel_triang::write(ostream & out) const {
 
   out << (int) type() << "  " ;
 
@@ -1225,7 +1225,7 @@ void Bndel_triang::write(ofstream & out) const {
   
 }
 
-void Bndel_triang::read(ifstream & in, Vertex ** v, const int nv) {
+void Bndel_triang::read(istream & in, Vertex ** v, const int nv) {
 
   int c ;
 
@@ -1278,7 +1278,7 @@ Bndel::c::~c() {
 
 }
 
-void Bndel::c::write(ofstream &out) const {
+void Bndel::c::write(ostream &out) const {
 
   // out << nv << "  " ;
 
@@ -1288,7 +1288,7 @@ void Bndel::c::write(ofstream &out) const {
     
 }
 
-void Bndel::c::read(ifstream & in, Vertex ** v, const int l) {
+void Bndel::c::read(istream & in, Vertex ** v, const int l) {
 
   int c ;
 

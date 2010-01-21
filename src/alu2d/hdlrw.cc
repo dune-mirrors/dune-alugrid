@@ -5,8 +5,11 @@ typedef basic_stringbuf<char>  strstreambuf_t ;
 #include "triang.h"
 #include "handle.h"
 
-bool Hmesh :: ascireadtriang(const char *filename,
-           double& time, unsigned long int& nbr) 
+/*
+bool Hmesh :: 
+ascireadtriang(const char *filename,
+               double& time, 
+               unsigned long int& nbr) 
 {
 #ifndef NDEBUG 
   cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
@@ -26,9 +29,12 @@ bool Hmesh :: ascireadtriang(const char *filename,
   assert(in) ;
   return ascireadtriang(in,time,nbr);
 }
-bool Hmesh :: ascireadtriang(ifstream &in,
-           double& time, unsigned long int& nbr)
+*/
 
+bool Hmesh :: 
+ascireadtriang(istream &in,
+               double& time, 
+               unsigned long int& nbr)
 {
   bool isbackup=false;
   // Wiederaufsetzen?
@@ -75,7 +81,7 @@ bool Hmesh :: ascireadtriang(ifstream &in,
   return isbackup;
 }
  
-void Hmesh_basic :: ascireadtriang(ifstream &in) {
+void Hmesh_basic :: ascireadtriang(istream &in) {
 
   Vertex ** v = 0 ;
 
@@ -343,7 +349,7 @@ void Hmesh::asciwritetriang(const char *filename,
   Hmesh_basic::asciwritetriang(out);
 }
  
-void Hmesh_basic::asciwritetriang(ofstream &out) {
+void Hmesh_basic::asciwritetriang(ostream &out) {
   {
  
     Listwalk_impl < Vertex > walk(vl) ;
@@ -561,56 +567,57 @@ Hmesh::recoverGrid(const char* recoverFile,
   // in >> time;
   // in >> nbr;
   // Gitter wiederherstellen
-  for( int level = 0 ;; level++ ) {
+  for( int level = 0 ;; level++ ) 
+  {
     {
       Levelwalk<Element> walk(mel, level);
       if( !walk.size() )
         break;
-      for( walk.first() ; !walk.done() ; walk.next() ) {
+      for( walk.first() ; !walk.done() ; walk.next() ) 
+      {
         char flag;
         in.get(flag);
-        switch (flag) {
-	case Thinelement::unsplit:
-	  break;
-	case Thinelement::triang_bnd:
-	  cerr << "ERROR (Hmesh::recoverGrid()): "
-	       << "splitrule \"triang_bnd\" is not allowed for elements!"
-	       << endl;
-	  abort();
-	  break;
-	case Thinelement::triang_conf2:
-	  walk.getitem().mark(Refco::ref_1);
-	  break;
-	case Thinelement::triang_quarter:          
-	  walk.getitem().mark(Refco::quart);
-	  break;
-	case Thinelement::compatibility:
-	  if (!compwarn)
-	    {
-              cerr << "WARNING (Hmesh::recoverGrid()): "
-		   << "using compatibility mode for obsolete file format!"
-		   << endl;
-              compwarn = 1;
-	    }
-	  walk.getitem().mark(Refco::ref_1);
-	  break;
-	default:
-	  cerr << "ERROR (Hmesh::recoverGrid()): "
-	       << "unknown splitrule!"
-	       << endl;
-	  abort();
-	}
+        switch (flag) 
+        {
+          case Thinelement::unsplit:
+            break;
+          case Thinelement::triang_bnd:
+            cerr << "ERROR (Hmesh::recoverGrid()): "
+                 << "splitrule \"triang_bnd\" is not allowed for elements!"
+                 << endl;
+            abort();
+            break;
+          case Thinelement::triang_conf2:
+            walk.getitem().mark(Refco::ref_1);
+            break;
+          case Thinelement::triang_quarter:          
+            walk.getitem().mark(Refco::quart);
+            break;
+          case Thinelement::compatibility:
+            if (!compwarn)
+            {
+                    cerr << "WARNING (Hmesh::recoverGrid()): "
+             << "using compatibility mode for obsolete file format!"
+             << endl;
+                    compwarn = 1;
+            }
+            walk.getitem().mark(Refco::ref_1);
+            break;
+          default:
+            cerr << "ERROR (Hmesh::recoverGrid()): "
+                 << "unknown splitrule!"
+                 << endl;
+            abort();
+         }
+        }
       }
-    }
     refine();
   }
-
 
   // read indices 
   recoverIndicies(in);
  
   cout << " done." << endl;
-
   return true;
 }
 

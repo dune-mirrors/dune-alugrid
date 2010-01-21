@@ -31,9 +31,9 @@ class Triang : public Hier < Element > {
    ~Triang() { }
 
 
-    void write(ofstream & ) const ;
+    void write(ostream & ) const ;
 
-    void read(ifstream &, Vertex ** , const int ) ;
+    void read(istream &, Vertex ** , const int ) ;
 
 
   private:
@@ -98,9 +98,9 @@ class Bndel_triang : public Hier < Bndel > {
       return new Bndel_triang(v1,v2,ptyp);
     }
 
-    void write(ofstream &) const ;
+    void write(ostream &) const ;
 
-    void read(ifstream &, Vertex ** , const int ) ;
+    void read(istream &, Vertex ** , const int ) ;
 
     int split(void *(&)[nparts], Listagency < Vertex > *,
               Multivertexadapter &, nconf_vtx_t *ncv,splitrule_t,

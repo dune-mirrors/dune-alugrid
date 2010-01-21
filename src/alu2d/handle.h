@@ -846,9 +846,9 @@ class Hmesh_basic {
     Hmesh_basic & operator = (const Hmesh_basic &) ;
 
  protected:
-    void asciwritetriang(ofstream &) ;
+    void asciwritetriang(ostream &) ;
     
-    void ascireadtriang(ifstream &) ;
+    void ascireadtriang(istream &) ;
 
   public :
    Hmesh_basic() : 
@@ -945,10 +945,11 @@ class Hmesh : public Hmesh_basic {
   nconf_vtx_t *ncv;
 
   void setup_grid(const char *);
+  bool setup_grid( istream& , double& , unsigned long int& );
 
-  bool ascireadtriang(const char *,double&, unsigned long int&) ;
+  //bool ascireadtriang(const char *,double&, unsigned long int&) ;
 
-  bool ascireadtriang(ifstream &,double&, unsigned long int&) ;
+  bool ascireadtriang(istream &,double&, unsigned long int&) ;
 
   void asciwritetriang(const char *,double , unsigned long int) ;
 
@@ -962,38 +963,42 @@ class Hmesh : public Hmesh_basic {
 
   Hmesh();
 
-  Hmesh(const char *,int,Refco::tag_t pref_rule) ;
+  Hmesh(const char *,int, Refco::tag_t pref_rule) ;
+
+  // constructor taking istream with macro triang
+  // number of hanging nodes and refinement rule 
+  Hmesh(istream&, int, Refco::tag_t pref_rule) ;
 
   Hmesh(const char *, Refco::tag_t pref_rule = Refco::ref_1 ) ;
 
   Hmesh(const char *,int) ;
 
-    virtual ~Hmesh() ;
+  virtual ~Hmesh() ;
 
-    void storeGrid(const char*,
-       double , unsigned long int);
+  void storeGrid(const char*,
+     double , unsigned long int);
 
-    bool recoverGrid(const char*,
-                     double&, unsigned long int&);
+  bool recoverGrid(const char*,
+                   double&, unsigned long int&);
 
-    void storeIndicies(ostream& out);
-    void recoverIndicies(istream& in);
+  void storeIndicies(ostream& out);
+  void recoverIndicies(istream& in);
 
-    void refine() ;
+  void refine() ;
 
-    // done call notify and loadBalancer
-    bool duneAdapt (AdaptRestrictProlong2dType & arp);
+  // done call notify and loadBalancer
+  bool duneAdapt (AdaptRestrictProlong2dType & arp);
 
-    bool checkConf();
+  bool checkConf();
 
-    void coarse() ;
+  void coarse() ;
 
-    void refresh() ;
+  void refresh() ;
 
-    void setdata(void (*)(Element &)) ;
+  void setdata(void (*)(Element &)) ;
 
 #if USE_ALUGRID_XDISPLAY
-    void draw(Xdisplay & ) ; 
+  void draw(Xdisplay & ) ; 
 #endif
 
 } ;

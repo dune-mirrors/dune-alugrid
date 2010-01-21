@@ -11,24 +11,85 @@ Hmesh::Hmesh(const char *macroname,int pnconfDeg,Refco::tag_t pref_rule) :
   _nconfDeg(pnconfDeg), refinement_rule(pref_rule) {
   setup_grid(macroname);      
 }
-Hmesh::Hmesh(const char *macroname,int pnconfDeg) :
-  _nconfDeg(pnconfDeg), refinement_rule(Refco::quart) {
-  setup_grid(macroname);    
+
+Hmesh::Hmesh(istream& macrofile, int pnconfDeg, Refco::tag_t pref_rule) :
+  _nconfDeg(pnconfDeg), refinement_rule(pref_rule) 
+{
+  double time;
+  long unsigned int nbr;
+#ifndef NDEBUG 
+  cerr << "\n  Hmesh::Hmesh reads istream: " << endl ;
+#endif
+
+  bool restart = setup_grid(macrofile, time, nbr);
+  if( restart ) 
+  { 
+    cerr << "ERROR: Hmesh constructor with invalid istream called!";
+    abort();
+  }
 }
-Hmesh::Hmesh(const char *macroname, Refco::tag_t  pref_rule) :
-  _nconfDeg(0), refinement_rule(pref_rule) {
+
+Hmesh::Hmesh(const char *macroname,int pnconfDeg) :
+  _nconfDeg(pnconfDeg), refinement_rule(Refco::quart) 
+{
   setup_grid(macroname);    
 }
 
-void Hmesh::setup_grid(const char *macroname) {
+Hmesh::Hmesh(const char *macroname, Refco::tag_t  pref_rule) :
+  _nconfDeg(0), refinement_rule(pref_rule) 
+{
+  setup_grid(macroname);    
+}
+
+void Hmesh::setup_grid(const char* filename) 
+{
+#ifndef NDEBUG 
+  cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
+  cerr << filename << "\n" << endl ;
+#endif
+
+  ifstream in;
+  in.open(filename, ios::in) ;
+
+  if (!in.good()) {
+    in.clear();
+    string macro(filename);
+    macro+=".macro";
+    cerr << "Warning: file " << filename << " not found, trying " << macro << endl;
+    in.open(macro.c_str(), ios::in) ;
+  }
+  assert(in) ;
+
+  double time;
+  long unsigned int nbr;
+
+  // call setup with istream 
+  bool restart = setup_grid(in, time, nbr);
+
+  /* END: set periodic neighbours of vertices */
+  if (restart) {
+    double time2 = time;
+    long unsigned int nbr2 = nbr;
+    assert( false );
+    recoverGrid(filename,time2,nbr2);
+    if (fabs(time2-time) + 
+        fabs((double (nbr2-nbr)))> 1e-5) {
+      cerr << "ERROR in Hmesh::setup_grid: "
+           << "backup-file and macro-grid file not compatible" << endl;
+      abort();
+    }
+  }
+}
+
+bool Hmesh::setup_grid(istream& macrofile, double& time, long unsigned int& nbr) 
+{
   ncv=NULL;
   adp = new Multivertexadapter;
   _pro_el=0;  // new Prolong_basic;
   _rest_el=0; // new Restrict_basic;
 
-  double time;
-  long unsigned int nbr;
-  bool restart=ascireadtriang (macroname,time,nbr);
+  bool restart = ascireadtriang (macrofile,time,nbr);
+
   /* set periodic neighbours of vertices */
   {
     Listwalkptr < Hmesh_basic::hbndel_t > walkb(*this);
@@ -54,27 +115,17 @@ void Hmesh::setup_grid(const char *macroname) {
       {
         int i,j;
         for (i=0;i<2;i++)
-  {
+        {
           Vertex *pnv = v->get_pernb(i);
           for (j=0;j<pnv->get_nr_of_per_nbs();j++)
             v->set_pernb(pnv->get_pernb(j));
-  }
+        }
         assert(v->get_nr_of_per_nbs() == 3);
       }
     }
   }
-  /* END: set periodic neighbours of vertices */
-  if (restart) {
-    double time2 = time;
-    long unsigned int nbr2 = nbr;
-    recoverGrid(macroname,time2,nbr2);
-    if (fabs(time2-time) + 
-        fabs((double (nbr2-nbr)))> 1e-5) {
-      cerr << "ERROR in Hmesh::setup_grid: "
-           << "backup-file and macro-grid file not compatible" << endl;
-      abort();
-    }
-  }
+
+  return restart;
 }
 
 Hmesh::~Hmesh() {

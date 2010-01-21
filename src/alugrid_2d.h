@@ -1,6 +1,8 @@
 #ifndef __ALUGRID_2D_H_INCLUDED__
 #define __ALUGRID_2D_H_INCLUDED__
 
+#define ALUGRID_NOTEMPFILE_2D
+
 // include all headers 
 #include "stlheaders.h"
 

@@ -50,15 +50,15 @@ inline Fullvertex::Fullvertex(double (&p)[ncoord],int level) {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Fullvertex::write(ofstream & out) const
+//   void Fullvertex::write(ostream & out) const
 // #parameters:
-//   \ ofstream | &out | output--stream
+//   \ ostream | &out | output--stream
 // #description:
 //   Ausgabe der Punktkoordinaten
 // #end(method)
 // ***************************************************
 
-inline void Fullvertex::write(ofstream & out) const {
+inline void Fullvertex::write(ostream & out) const {
 
   for(int i = 0 ; i < ncoord ; i ++ ) out << vcoord[i] << "  " ;
    
@@ -68,15 +68,15 @@ inline void Fullvertex::write(ofstream & out) const {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Fullvertex::read(ifstream & in)
+//   void Fullvertex::read(istream & in)
 // #parameters:
-//   \ ifstream | &in | input--stream
+//   \ istream | &in | input--stream
 // #description:
 //   Einlesen der Punktkoordinaten
 // #end(method)
 // ***************************************************
 
-inline void Fullvertex::read(ifstream & in) {
+inline void Fullvertex::read(istream & in) {
 
   for(int i = 0 ; i < ncoord ; i ++) 
 
@@ -86,15 +86,15 @@ inline void Fullvertex::read(ifstream & in) {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Edge::write(ofstream & out) const
+//   void Edge::write(ostream & out) const
 // #parameters:
-//   \ ofstream | &out | output--stream
+//   \ ostream | &out | output--stream
 // #description:
 //   Ausgabe der Punktkoordinaten
 // #end(method)
 // ***************************************************
 
-inline void Edge::write(ofstream & out) const {
+inline void Edge::write(ostream & out) const {
 
   out << getIndex();
   out << endl ;
@@ -103,15 +103,15 @@ inline void Edge::write(ofstream & out) const {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Edge::read(ifstream & in)
+//   void Edge::read(istream & in)
 // #parameters:
-//   \ ifstream | &in | input--stream
+//   \ istream | &in | input--stream
 // #description:
 //   Einlesen der Punktkoordinaten
 // #end(method)
 // ***************************************************
 
-inline void Edge::read(ifstream & in) {
+inline void Edge::read(istream & in) {
 
   in >> setIndex();
 
@@ -545,13 +545,13 @@ inline Element::c::~c() {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Element::c::write(ofstream &out) const
+//   void Element::c::write(ostream &out) const
 // #parameters:
 // #description:
 //   Ausschreiben der connect-Daten (privat)
 // #end(method)
 // ***************************************************
-inline void Element::c::write(ofstream &out) const {
+inline void Element::c::write(ostream &out) const {
   for(int i = 0 ; i < nv ; i ++ ) 
   {
     out << (vtx[i] ? vtx[i]->Listagent < Vertex > :: number() : -1 ) << "  " ;
@@ -564,13 +564,13 @@ inline void Element::c::write(ofstream &out) const {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Element::c::read(ifstream & in, Vertex ** v, const int l) 
+//   void Element::c::read(istream & in, Vertex ** v, const int l) 
 // #parameters:
 //   Einlesen der connect-Daten (privat)
 // #description:
 // #end(method)
 // ***************************************************
-inline void Element::c::read(ifstream & in, Vertex ** v, const int l) {
+inline void Element::c::read(istream & in, Vertex ** v, const int l) {
   int c ;
   for(int i = 0 ; i < nv ; i ++ ) {
     in >> c ;
