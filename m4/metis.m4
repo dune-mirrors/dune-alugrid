@@ -37,17 +37,23 @@ METIS_LIB_PATH="$METISROOT"
 METIS_INCLUDE_PATH="$METISROOT/METISLib"
 
 # if not ParMETIS is used, then check for old METIS Version
-if test ! -f "$METIS_INCLUDE_PATH/metis.h" ; then
-  if test ! -f "$METISROOT/Lib/metis.h" ; then
+if  test ! -f "$METIS_INCLUDE_PATH/metis.h" ; then
+  if test -f "$METISROOT/Lib/metis.h" ; then
+    # METIS 4.0 
+    METIS_INCLUDE_PATH="$METISROOT/Lib"
+    ALU_METIS_VERSION="(Version 4.0)"
+  elif test -f $METISROOT/include/metis.h ; then 
     # METIS 5.0
     METIS_INCLUDE_PATH="$METISROOT/include"
     ARCH="`uname -s`-`uname -m`"
     METIS_LIB_PATH="$METISROOT/build/$ARCH"
     ALU_METIS_VERSION="(Version 5.x)"
+  elif test -f $METISROOT/include/metis/metis.h ; then
+    # check for Debian's libparmetis-dev 
+    METIS_LIB_PATH="$METISROOT/lib"
+    METIS_INCLUDE_PATH="$METISROOT/include/metis"
   else 
-    # METIS 4.0 
-    METIS_INCLUDE_PATH="$METISROOT/Lib"
-    ALU_METIS_VERSION="(Version 4.0)"
+    AC_MSG_ERROR([Could not find METIS header file!])
   fi  
 fi
 
