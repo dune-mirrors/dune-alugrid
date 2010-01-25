@@ -13,8 +13,9 @@ ac_save_LIBS="$LIBS"
 LIBS=""
 
 ## do nothing if no --with-metis was supplied
-if test x$with_metis == x && test x$with_parmetis != x ; then
+if test x$with_parmetis != x ; then
   with_metis=$with_parmetis
+  AC_MSG_WARN([Using METIS version of ParMETIS!])
   ALU_METIS_VERSION="(ParMETIS)"
 fi 
 
