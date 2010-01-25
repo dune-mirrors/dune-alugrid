@@ -90,8 +90,14 @@ if test x$HAVE_PARMETIS = x1 ; then
   ALUGRID_PKG_LIBS="$ALUGRID_PKG_LIBS $PARMETIS_LIBS"
   ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $PARMETIS_CPPFLAGS"
 
+  ALU_PARMETIS_VFILE=$PARMETISROOT/VERSION
+  ALU_PARMETIS_VERSION="(unknown)"
+  if test -f $PARMETISROOT/VERSION ; then 
+    ALU_PARMETIS_VERSION="(Version `cat $ALU_PARMETIS_VFILE | head -1 | cut -d " " -f 3`)"
+  fi  
+
   # set variable for summary
-  with_parmetis="yes (Todo: Version)"
+  with_parmetis="yes $ALU_PARMETIS_VERSION"
 else
   AC_SUBST(PARMETIS_LIBS, "")
   AC_SUBST(PARMETIS_LDFLAGS, "")

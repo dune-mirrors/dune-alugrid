@@ -15,6 +15,7 @@ LIBS=""
 ## do nothing if no --with-metis was supplied
 if test x$with_metis == x && test x$with_parmetis != x ; then
   with_metis=$with_parmetis
+  ALU_METIS_VERSION="(ParMETIS)"
 fi 
 
 ## do nothing if no --with-metis was supplied
