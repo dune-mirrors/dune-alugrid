@@ -2,8 +2,8 @@
 AC_PREREQ(2.50)
 
 # current version of ALUGrid
-AC_INIT(ALUGrid, 1.22, alugrid@mathematik.uni-freiburg.de)
-AM_INIT_AUTOMAKE(ALUGrid, 1.22, alugrid@mathematik.uni-freiburg.de)
+AC_INIT(ALUGrid, 1.23, alugrid@mathematik.uni-freiburg.de)
+AM_INIT_AUTOMAKE(ALUGrid, 1.23, alugrid@mathematik.uni-freiburg.de)
 
 # default install path is current directory 
 AC_PREFIX_DEFAULT([`pwd`])

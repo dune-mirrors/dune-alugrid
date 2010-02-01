@@ -11,5 +11,5 @@ Version: @VERSION@
 Description: The ALUGrid Library (Adaptive, Load-balanced, and Unstructured Grid Library) 
 URL: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/
 Requires: ${DEPENDENCIES}
-Libs:
+Libs: -L${libdir} -lalugrid
 Cflags: -I${includedir}
