@@ -20,20 +20,66 @@
 // #description:
 //   2D--Dreieckselemente
 // #definition:
-class Triang : public Hier < Element > {
+template < int N, int NV >
+class Triang : public Hier < Element < N,NV > > {
 
   public:
 
+    enum { ncoord = N };
+
+    typedef Vertex < ncoord > vertex_t;
+    typedef Fullvertex < ncoord > fullvertex_t;
+    typedef Multivertexadapter < ncoord, NV > multivertexadapter_t;
+    typedef nconf_vtx < ncoord, NV > nconf_vtx_t;
+
+    typedef Thinelement < ncoord, NV > thinelement_t;
+    typedef typename thinelement_t::splitrule_t splitrule_t;
+
+    typedef Element < ncoord,NV > element_t;
+    typedef Bndel < ncoord, NV > bndel_t;
+
+    typedef Hier < element_t > helement_t;
+    typedef Hier < bndel_t > hbndel_t;
+
+    typedef Bndel_triang < ncoord, NV > bndel_triang_t;
+    typedef Bndel_periodic < ncoord, NV > bndel_periodic_t;
+
+    typedef Prolong_basic < ncoord, NV > prolong_basic_t;
+    typedef Restrict_basic < ncoord, NV > restrict_basic_t;
+
+  protected:
+    
+    using helement_t::connect;
+    using helement_t::hdl;
+    using helement_t::level;
+    using helement_t::mysplit;
+
+  public:
+
+    using helement_t::deletesubtree;
+    using helement_t::down;
+    using helement_t::hashvtx;
+    using helement_t::init;
+    using helement_t::leaf;
+    using helement_t::midpoint;
+    using helement_t::nbbnd;
+    using helement_t::nbel;
+    using helement_t::neighbour;
+    using helement_t::normaldir;
+    using helement_t::opposite;
+    using helement_t::setnormdir;
+    using helement_t::splitrule;
+
     Triang();
 
-    Triang(Vertex *v1, Vertex *v2, Vertex *v3 );
+    Triang(vertex_t *v1, vertex_t *v2, vertex_t *v3 );
 
    ~Triang() { }
 
 
     void write(ostream & ) const ;
 
-    void read(istream &, Vertex ** , const int ) ;
+    void read(istream &, vertex_t ** , const int ) ;
 
 
   private:
@@ -44,17 +90,17 @@ class Triang : public Hier < Element > {
 
   protected:
 
-    void newNeighbour(Triang*, int, int, splitrule_t, bool = false);
+    void newNeighbour(Triang *, int, int, splitrule_t, bool = false);
 
     bool canCoarsen(int) const;
 
   public:
 
-    int split(void *(&)[nparts], Listagency < Vertex > *,
-              Multivertexadapter &, nconf_vtx_t *ncv,splitrule_t,
-	      int,Refco::tag_t,Prolong_basic *pro_el);
+    int split(void *(&)[Basic::nparts], Listagency < vertex_t > *,
+              multivertexadapter_t &, nconf_vtx_t *ncv,splitrule_t,
+	      int,Refco::tag_t,prolong_basic_t *pro_el);
      
-    int docoarsen(nconf_vtx_t *ncv,int,Restrict_basic *rest_el);
+    int docoarsen(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
 
     bool confLevelExceeded(int) const;
 
@@ -67,46 +113,77 @@ class Triang : public Hier < Element > {
 // #description:
 //   Randelemente f"ur 2D--Triangulierung
 // #definition:
-class Bndel_triang : public Hier < Bndel > {
+template < int N, int NV >
+class Bndel_triang : public Hier < Bndel < N, NV > > {
+
+  public:
+
+    typedef Vertex < N > vertex_t;
+    typedef nconf_vtx < N, NV > nconf_vtx_t;
+    typedef Multivertexadapter < N, NV > multivertexadapter_t;
+
+    typedef Thinelement < N, NV > thinelement_t;
+    typedef typename thinelement_t::splitrule_t splitrule_t; 
+
+    typedef Element < N,NV > element_t;
+
+    typedef Bndel < N,NV > bndel_t;
+    typedef typename bndel_t::bnd_t bnd_t;
+
+    typedef Hier < element_t > helement_t;
+    typedef Hier < bndel_t > hbndel_t;
+
+    typedef Prolong_basic < N,NV > prolong_basic_t;
+    typedef Restrict_basic < N,NV > restrict_basic_t;
 
   protected:
+    using hbndel_t::connect;
+    using hbndel_t::hdl;
+    using hbndel_t::mysplit;
+    using hbndel_t::_segmentIndex;
 
     double time;
 
-    virtual void restrictLocal(Bndel **, int);
+    virtual void restrictLocal(bndel_t **, int);
 
-    virtual void prolongLocal(Bndel **, int) const;
+    virtual void prolongLocal(bndel_t **, int) const;
 
   public :
 
-    Bndel_triang(const int segmentIndex, 
-                 Bndel::bnd_t t) 
-      : time(0.0) 
+    using hbndel_t::deletesubtree;
+    using hbndel_t::down;
+    using hbndel_t::nbel;
+    using hbndel_t::opposite;
+    using hbndel_t::splitrule;
+    using hbndel_t::type;
+
+    Bndel_triang(const int segmentIndex, bnd_t t)
+    : time(0.0) 
     {
-      typ = t ;
+      bndel_t::typ = t;
       this->copySegmentIndex( segmentIndex );
     }
 
     // Bndel_triang() : time(0.0) {typ=-111;}
 
-    Bndel_triang(Vertex * ,Vertex * , bnd_t ) ;
+    Bndel_triang(vertex_t *, vertex_t *, bnd_t ) ;
 
    ~Bndel_triang() { }
 
-   virtual Bndel *create(Vertex *v1 , Vertex *v2, int ptyp) const
+   virtual bndel_t *create(vertex_t *v1 , vertex_t *v2, int ptyp) const
     {
       return new Bndel_triang(v1,v2,ptyp);
     }
 
     void write(ostream &) const ;
 
-    void read(istream &, Vertex ** , const int ) ;
+    void read(istream &, vertex_t ** , const int ) ;
 
-    int split(void *(&)[nparts], Listagency < Vertex > *,
-              Multivertexadapter &, nconf_vtx_t *ncv,splitrule_t,
-	      int,Refco::tag_t,Prolong_basic *pro_el);
+    int split(void *(&)[Basic::nparts], Listagency < vertex_t > *,
+              multivertexadapter_t &, nconf_vtx_t *ncv,splitrule_t,
+	      int,Refco::tag_t,prolong_basic_t *pro_el);
 
-    int  docoarsen(nconf_vtx_t *ncv,int,Restrict_basic *rest_el);
+    int  docoarsen(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
 
 } ;
 // #end(class)
@@ -116,22 +193,47 @@ class Bndel_triang : public Hier < Bndel > {
 // #description:
 //   Randelelemente f"ur periodischen Rand
 // #definition:
-class Bndel_periodic : public Bndel_triang
+template < int N, int NV >
+class Bndel_periodic : public Bndel_triang < N,NV >
 {
   public:
+
+    typedef Vertex < N > vertex_t;
+    typedef Multivertexadapter < N, NV > multivertexadapter_t;
+    typedef nconf_vtx < N,NV > nconf_vtx_t;
+
+    typedef Thinelement < N,NV > thinelement_t;
+    typedef typename thinelement_t::splitrule_t splitrule_t;
+
+    typedef Element < N,NV > element_t;
+    typedef Bndel < N,NV > bndel_t;
+    typedef Bndel_triang < N,NV > bndel_triang_t;
+
+    typedef Hier < element_t > helement_t;
+
+    typedef Prolong_basic < N,NV > prolong_basic_t;
+    typedef Restrict_basic < N,NV > restrict_basic_t;
+
+    using bndel_triang_t::deletesubtree;
+    using bndel_triang_t::down;
+    using bndel_triang_t::leaf;
+    using bndel_triang_t::nbel;
+    using bndel_triang_t::opposite;
+    using bndel_triang_t::splitrule;
+    using bndel_triang_t::type;
 
     Bndel_periodic *periodic_nb;
 
     Bndel_periodic()
-      : Bndel_triang(-1,periodic), periodic_nb(0)
+      : bndel_triang_t(-1,bndel_t::periodic), periodic_nb(0)
       { }
 
     Bndel_periodic(const int segmentIndex)
-      : Bndel_triang(segmentIndex, periodic), periodic_nb(0)
+      : bndel_triang_t(segmentIndex, bndel_t::periodic), periodic_nb(0)
       { }
 
-    Bndel_periodic(Vertex *v1 , Vertex *v2)
-      : Bndel_triang(v1,v2,periodic),periodic_nb(0)
+    Bndel_periodic(vertex_t *v1 , vertex_t *v2)
+      : bndel_triang_t(v1,v2,bndel_t::periodic),periodic_nb(0)
       { }
     
     virtual double area() const {
@@ -139,14 +241,14 @@ class Bndel_periodic : public Bndel_triang
       return periodic_nb->nbel(0)->area();
     }
 
-    virtual Bndel *create(Vertex *v1 , Vertex *v2, int) const
+    virtual bndel_t *create(vertex_t *v1 , vertex_t *v2, int) const
     {
       return new Bndel_periodic(v1,v2);
     }
 
-    void set_pnb(Bndel *pnb)
+    void set_pnb(bndel_t *pnb)
     {
-      assert(pnb->type()==periodic);
+      assert(pnb->type()==bndel_t::periodic);
       periodic_nb=(Bndel_periodic*)pnb;
 
       if( !leaf() ) {
@@ -155,11 +257,11 @@ class Bndel_periodic : public Bndel_triang
       }
     }
 
-    virtual int split(void * (&el)[nparts], Listagency < Vertex > * agnc,
-                      Multivertexadapter & mva, nconf_vtx_t *ncv,splitrule_t,
-		      int,Refco::tag_t,Prolong_basic *pro_el);
+    virtual int split(void * (&el)[Basic::nparts], Listagency < vertex_t > * agnc,
+                      multivertexadapter_t & mva, nconf_vtx_t *ncv,splitrule_t,
+		      int,Refco::tag_t,prolong_basic_t *pro_el);
 
-    virtual int docoarsen(nconf_vtx_t *ncv,int,Restrict_basic *rest_el);
+    virtual int docoarsen(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
  
 };
 // #end(class)

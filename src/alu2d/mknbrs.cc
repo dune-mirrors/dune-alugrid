@@ -3,9 +3,10 @@
 
 // workaround for new Silicon-CC
 
- struct k {
+  template < int N, int NV >
+  struct k {
 
-    Thinelement * a ;
+    Thinelement < N,NV > * a ;
 
     int b ;
 
@@ -13,39 +14,41 @@
 
     k() { }
 
-    k(Thinelement * x, int y) : a(x), b(y) { }
+    k(Thinelement < N,NV > * x, int y) : a(x), b(y) { }
 
   };
 
-
-void Hmesh_basic::makeneighbours() {
+template <int N,int NV>
+void Hmesh_basic<N,NV>::makeneighbours() {
 /*
 #ifndef NDEBUG
   int start = clock() ;
 #endif
 */
 
+  typedef k < ncoord, nvtx > k_t;
+
   int count = 0 ;
 
-  map < vector < Vertex * > , struct k , less < vector < Vertex * > > > m ;
+  map < vector < vertex_t * > , k_t , less < vector < vertex_t * > > > m ;
 
   {
 
-    Levelwalk < Element > lwe (mel,0) ;
+    Levelwalk < element_t > lwe (mel,0) ;
 
-    Levelwalk < Bndel > lwb (mbl,0) ;
+    Levelwalk < bndel_t > lwb (mbl,0) ;
 
-    Alignwalk < helement_t, hbndel_t, Thinelement > walk (lwe, lwb) ;
+    Alignwalk < helement_t, hbndel_t, thinelement_t > walk (lwe, lwb) ;
 
     for(walk.first() ; !walk.done() ; walk.next()) {
 
-      Thinelement & e = walk.getitem() ;
+      thinelement_t & e = walk.getitem() ;
 
       for(int fce = 0 ; fce < e.numfaces() ; fce ++ ) {
 
         int npv = e.numfacevertices(fce) ;
 
-        vector < Vertex * > v ;
+        vector < vertex_t * > v ;
 
         for(int j = 0 ; j < npv ; j ++ )
 
@@ -53,9 +56,9 @@ void Hmesh_basic::makeneighbours() {
 
         sort(v.begin(), v.end()) ;
 
-        map < vector < Vertex * > , struct k , less < vector < Vertex * > > > :: iterator hit = m.find(v) ;
+        typename map < vector < vertex_t * > , k_t , less < vector < vertex_t * > > > :: iterator hit = m.find(v) ;
 
-        if(hit == m.end()) m [v] = k( & e, fce) ;
+        if(hit == m.end()) m [v] = k_t ( & e, fce) ;
 
         else {
 

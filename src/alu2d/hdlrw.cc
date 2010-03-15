@@ -5,33 +5,8 @@ typedef basic_stringbuf<char>  strstreambuf_t ;
 #include "triang.h"
 #include "handle.h"
 
-/*
-bool Hmesh :: 
-ascireadtriang(const char *filename,
-               double& time, 
-               unsigned long int& nbr) 
-{
-#ifndef NDEBUG 
-  cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
-  cerr << filename << "\n" << endl ;
-#endif
-  
-  ifstream in;
-  in.open(filename, ios::in) ;
-
-  if (!in.good()) {
-    in.clear();
-    string macro(filename);
-    macro+=".macro";
-    cerr << "Warning: file " << filename << " not found, trying " << macro << endl;
-    in.open(macro.c_str(), ios::in) ;
-  }
-  assert(in) ;
-  return ascireadtriang(in,time,nbr);
-}
-*/
-
-bool Hmesh :: 
+template <int N,int NV>
+bool Hmesh<N,NV> :: 
 ascireadtriang(istream &in,
                double& time, 
                unsigned long int& nbr)
@@ -77,13 +52,14 @@ ascireadtriang(istream &in,
     }
     delete [] str;
   }
-  Hmesh_basic::ascireadtriang(in);
+  hmesh_basic_t::ascireadtriang(in);
   return isbackup;
 }
  
-void Hmesh_basic :: ascireadtriang(istream &in) {
+template <int N,int NV>
+void Hmesh_basic<N,NV> :: ascireadtriang(istream &in) {
 
-  Vertex ** v = 0 ;
+  vertex_t ** v = 0 ;
 
   int nv = 0 ;
 
@@ -94,13 +70,13 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
     cerr << "    Number of Vertices:           " << nv << endl ;
 #endif
     
-    v = new Vertex *[nv] ;
+    v = new vertex_t *[nv] ;
 
     assert(v) ;
     
     for(int i = 0; i < nv ; i ++) {
          
-      Vertex * n = new Fullvertex() ;
+      vertex_t * n = new fullvertex_t() ;
     
       n->read(in) ;
 
@@ -125,7 +101,7 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
  
     for(int i = 0; i < ne ; i ++) {
     
-      Triang & tr = * new Triang() ;
+      triang_t &tr = * new triang_t() ;
 
       tr.read(in, v, nv) ;
 
@@ -148,7 +124,7 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
     typedef struct
       {
         int pernb;
-        Bndel *b;
+        bndel_t *b;
       } perbnd_struct;
     perbnd_struct *perbnd_list;
     int perbnd_card=0,perbnd_ok=0;
@@ -158,7 +134,7 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
     typedef struct
       {
         double p0,p1;
-        Bndel *b;
+        bndel_t *b;
       } axis_struct;
     axis_struct *x_axis,*y_axis;
     int y_card=0,x_card=0,x_ok=0,y_ok=0;
@@ -174,24 +150,26 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
       
       lt=in.peek();
 
-      Bndel::bnd_t t=(Bndel::bnd_t)lt;
+      typename bndel_t::bnd_t t=(typename bndel_t::bnd_t)lt;
 
-      Bndel_triang * b;
+      bndel_triang_t * b;
 
       int generalperbnd=0;
 
       switch (t)
       {
-        case Bndel::periodic:
-          b=new Bndel_periodic( i );
+        case bndel_t::periodic:
+          assert(ncoord == 2);
+          b=new bndel_periodic_t( i );
           break;
-        case Bndel::general_periodic:
-          t=Bndel::periodic;
-          b=new Bndel_periodic( i );
+        case bndel_t::general_periodic:
+          assert(ncoord == 2);
+          t=bndel_t::periodic;
+          b=new bndel_periodic_t( i );
           generalperbnd=1;
           break;
         default:
-          b=new Bndel_triang(i, t);
+          b=new bndel_triang_t(i, t);
           break;
       }
 
@@ -199,15 +177,15 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
 
       mbl.insert( new macrobndel_t (*b) ) ;
 
-      if (t==Bndel::periodic)
+      if (t==bndel_t::periodic)
       {
         if (generalperbnd) {
           int pernb;
           in >> pernb;
                 if (pernb<i) {
             assert(perbnd_list[pernb].pernb==i);
-            ((Bndel_periodic*)b)->set_pnb(perbnd_list[pernb].b);
-            ((Bndel_periodic*)perbnd_list[pernb].b)->set_pnb(b);
+            ((bndel_periodic_t *)b)->set_pnb(perbnd_list[pernb].b);
+            ((bndel_periodic_t *)perbnd_list[pernb].b)->set_pnb(b);
             perbnd_ok++;
           }
           else {
@@ -228,8 +206,8 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
           for (y=0;y<y_card;y++)
             if (fabs(y_axis[y].p0-y0)+fabs(y_axis[y].p1-y1)<EPS)
       {
-              ((Bndel_periodic*)b)->set_pnb(y_axis[y].b);
-              ((Bndel_periodic*)y_axis[y].b)->set_pnb(b);
+              ((bndel_periodic_t *)b)->set_pnb(y_axis[y].b);
+              ((bndel_periodic_t *)y_axis[y].b)->set_pnb(b);
               y_ok++;
               break;
             }
@@ -254,8 +232,8 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
           for (x=0;x<x_card;x++)
             if (fabs(x_axis[x].p0-x0)+fabs(x_axis[x].p1-x1)<EPS)
       {
-              ((Bndel_periodic*)b)->set_pnb(x_axis[x].b);
-              ((Bndel_periodic*)x_axis[x].b)->set_pnb(b);
+              ((bndel_periodic_t *)b)->set_pnb(x_axis[x].b);
+              ((bndel_periodic_t *)x_axis[x].b)->set_pnb(b);
               x_ok++;
               break;
             }
@@ -296,20 +274,20 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
     Listwalk_impl < macroelement_t > walk(mel) ;
     for (walk.first() ; !walk.done() ; walk.next() )
     {
-      Triang& tr=( (Triang&)(*walk.getitem()) );
-      for (int l=0;l<3;l++) {
+      triang_t &tr=( (triang_t &)(*walk.getitem()) );
+      for (int l=0;l<tr.connect.nf;l++) {
         if (!tr.normaldir(l)) 
         {
           tr.setnormdir(l,1);
-          if (tr.neighbour(l)->thinis(Thinelement::element_like))
+          if (tr.neighbour(l)->thinis(thinelement_t::element_like))
             tr.nbel(l)->setnormdir(tr.opposite(l),-1); 
         }
-  if (tr.neighbour(l)->edge(tr.opposite(l))) {
-    tr.edgeconnect(l,tr.neighbour(l)->edge(tr.opposite(l)));
-  } else {
-    Edge *e=new Edge(this);
-    tr.edgeconnect(l,e);
-  }
+        if (tr.neighbour(l)->edge(tr.opposite(l))) {
+          tr.edgeconnect(l,tr.neighbour(l)->edge(tr.opposite(l)));
+        } else {
+          Edge *e=new Edge(this);
+          tr.edgeconnect(l,e);
+        }
       }
     }
     for (walk.first() ; !walk.done() ; walk.next() )
@@ -327,8 +305,9 @@ void Hmesh_basic :: ascireadtriang(istream &in) {
   }
 }
 
-void Hmesh::asciwritetriang(const char *filename,
-          double time, unsigned long int nbr) {
+template <int N,int NV>
+void Hmesh<N,NV>::asciwritetriang(const char *filename,
+                                  double time, unsigned long int nbr) {
 
 #ifndef NDEBUG
   cerr << "\n  Hmesh_basic::asciwritetriang(?) opens: " ;
@@ -346,13 +325,14 @@ void Hmesh::asciwritetriang(const char *filename,
   out << "!Backup ";
   out << time << " " << nbr << " ";
   out << _nconfDeg << " " << refinement_rule << endl;
-  Hmesh_basic::asciwritetriang(out);
+  hmesh_basic_t::asciwritetriang(out);
 }
  
-void Hmesh_basic::asciwritetriang(ostream &out) {
+template <int N,int NV>
+void Hmesh_basic<N,NV>::asciwritetriang(ostream &out) {
   {
  
-    Listwalk_impl < Vertex > walk(vl) ;
+    Listwalk_impl < vertex_t > walk(vl) ;
   
 #ifndef NDEBUG
     cerr << "    Number of Vertices:       " << walk.size() << endl ;
@@ -362,7 +342,7 @@ void Hmesh_basic::asciwritetriang(ostream &out) {
     
     for( walk.first() ; ! walk.done() ; walk.next() ) {
     
-      Vertex & v = walk.getitem() ;
+      vertex_t & v = walk.getitem() ;
 
       if (v.level()==-1) ++nr;
               
@@ -372,7 +352,7 @@ void Hmesh_basic::asciwritetriang(ostream &out) {
 
     for( walk.first() ; ! walk.done() ; walk.next() ) {
     
-      Vertex & v = walk.getitem() ;
+      vertex_t & v = walk.getitem() ;
 
       if (v.level()==-1) 
         v.write(out) ;
@@ -439,8 +419,9 @@ void Hmesh_basic::asciwritetriang(ostream &out) {
  
 }
 
+template <int N,int NV>
 void
-Hmesh::storeGrid(const char* fbase,
+Hmesh<N,NV>::storeGrid(const char* fbase,
      double time, unsigned long int nbr)
 {
   char *filename;
@@ -471,7 +452,7 @@ Hmesh::storeGrid(const char* fbase,
   */
   // Status des Gitters sichern
   for( int level = 0 ;; level++ ) {
-    Levelwalk<Element> walk(mel, level);
+    Levelwalk < element_t > walk(mel, level);
     if( !walk.size() ) 
     {
       break;
@@ -500,8 +481,9 @@ Hmesh::storeGrid(const char* fbase,
   cout << " done." << endl;
 #endif
 }
+template <int N,int NV>
 void
-Hmesh::storeIndicies(ostream& out) 
+Hmesh<N,NV>::storeIndicies(ostream& out) 
 {
   // backup index managers 
   for (int i=0;i<numOfIndexManager2d; ++i) 
@@ -511,7 +493,7 @@ Hmesh::storeIndicies(ostream& out)
 
   // backup vertex indices 
   {
-    Listwalk_impl < Vertex > walk(vl) ;
+    Listwalk_impl < vertex_t > walk(vl) ;
     for( walk.first() ; ! walk.done() ; walk.next() ) 
     {
       int idx=walk.getitem().getIndex();
@@ -521,10 +503,10 @@ Hmesh::storeIndicies(ostream& out)
   
   // backup element and edge indices 
   {
-    Levelwalk<Element> walk(mel, 0);
+    Levelwalk < element_t > walk(mel, 0);
     for( walk.first() ; !walk.done() ; walk.next() ) 
     {
-      SubtreeIterator<Element> hier(&(walk.getitem()));
+      SubtreeIterator < element_t > hier(&(walk.getitem()));
       for (hier.first() ; !hier.done() ; hier.next() ) 
       {
         // element 
@@ -544,8 +526,9 @@ Hmesh::storeIndicies(ostream& out)
   }
 }
 
+template <int N,int NV>
 bool
-Hmesh::recoverGrid(const char* recoverFile,
+Hmesh<N,NV>::recoverGrid(const char* recoverFile,
                    double& time, unsigned long int &nbr)
 {
   int compwarn = 0;
@@ -570,7 +553,7 @@ Hmesh::recoverGrid(const char* recoverFile,
   for( int level = 0 ;; level++ ) 
   {
     {
-      Levelwalk<Element> walk(mel, level);
+      Levelwalk < element_t > walk(mel, level);
       if( !walk.size() )
         break;
       for( walk.first() ; !walk.done() ; walk.next() ) 
@@ -579,21 +562,21 @@ Hmesh::recoverGrid(const char* recoverFile,
         in.get(flag);
         switch (flag) 
         {
-          case Thinelement::unsplit:
+          case thinelement_t::unsplit:
             break;
-          case Thinelement::triang_bnd:
+          case thinelement_t::triang_bnd:
             cerr << "ERROR (Hmesh::recoverGrid()): "
                  << "splitrule \"triang_bnd\" is not allowed for elements!"
                  << endl;
             abort();
             break;
-          case Thinelement::triang_conf2:
+          case thinelement_t::triang_conf2:
             walk.getitem().mark(Refco::ref_1);
             break;
-          case Thinelement::triang_quarter:          
+          case thinelement_t::triang_quarter:          
             walk.getitem().mark(Refco::quart);
             break;
-          case Thinelement::compatibility:
+          case thinelement_t::compatibility:
             if (!compwarn)
             {
                     cerr << "WARNING (Hmesh::recoverGrid()): "
@@ -621,8 +604,9 @@ Hmesh::recoverGrid(const char* recoverFile,
   return true;
 }
 
+template <int N,int NV>
 void
-Hmesh::recoverIndicies(istream& in) 
+Hmesh<N,NV>::recoverIndicies(istream& in) 
 {
   // reads maxIndex of Index Manager 
   for (int i=0;i<numOfIndexManager2d; ++i) 
@@ -634,15 +618,15 @@ Hmesh::recoverIndicies(istream& in)
   //  read vertices 
   //////////////////////////////////////////
   {
-    IndexManager2dType& vertexManager = indexmanager[IM_Vertices];
+    IndexManager2dType& vertexManager = indexmanager[IndexProvider::IM_Vertices];
     const int idxSize = vertexManager.getMaxIndex();
     // create vector, all entries are marked true 
     vector<bool> isHole (idxSize, true );
 
-    Listwalk_impl < Vertex > walk(vl) ;
+    Listwalk_impl < vertex_t > walk(vl) ;
     for( walk.first() ; ! walk.done() ; walk.next() ) 
     {
-      Vertex& vx = walk.getitem();
+      vertex_t& vx = walk.getitem();
       in.read ( ((char *) &(vx.setIndex())), sizeof(int) );
       assert( vx.getIndex() < idxSize );
       isHole[vx.getIndex()] = false;  
@@ -656,22 +640,22 @@ Hmesh::recoverIndicies(istream& in)
   //  read elements and edges 
   //////////////////////////////////////////
   {
-    IndexManager2dType& elementManager = indexmanager[IM_Elements];
+    IndexManager2dType& elementManager = indexmanager[IndexProvider::IM_Elements];
     const int elSize = elementManager.getMaxIndex();
     
-    IndexManager2dType& edgeManager = indexmanager[IM_Edges];
+    IndexManager2dType& edgeManager = indexmanager[IndexProvider::IM_Edges];
     const int edgeSize = edgeManager.getMaxIndex();
     // create vector, all entries are marked true
     vector<bool> elementIsHole (elSize, true );
     vector<bool> edgeIsHole  (edgeSize, true );
     
-    Levelwalk<Element> walk(mel, 0);
+    Levelwalk < element_t > walk(mel, 0);
     for( walk.first() ; !walk.done() ; walk.next() ) 
     {
-      SubtreeIterator<Element> hier(&(walk.getitem()));
+      SubtreeIterator < element_t > hier(&(walk.getitem()));
       for (hier.first() ; !hier.done() ; hier.next() ) 
       {
-        Element& elem = hier.getitem();
+        element_t &elem = hier.getitem();
 
         // read element index 
       	in.read ( ((char *) &(elem.setIndex())), sizeof(int) );

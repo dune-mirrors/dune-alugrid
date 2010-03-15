@@ -8,28 +8,6 @@ static const double EPS = 1e-8;
 // ***************************************************
 // #begin(method)
 // #method:
-//   Fullvertex::Fullvertex(double x, double y)
-// #parameters:
-//   \ double | x | x--Koordinate
-//   \ double | y | y--Koordinate
-// #description:
-//   2D--Konstruktor
-// #end(method)
-// ***************************************************
-
-inline Fullvertex::Fullvertex(double x, double y, int level) {
-
-  vcoord[0] = x;
- 
-  vcoord[1] = y;
-
-  _level = level;
-}
-
-
-// ***************************************************
-// #begin(method)
-// #method:
 //   Fullvertex::Fullvertex(double (&p)[ncoord])
 // #parameters:
 //   \ double | (&p)[ncoord] | Koordinaten des Punktes
@@ -39,12 +17,10 @@ inline Fullvertex::Fullvertex(double x, double y, int level) {
 // #end(method)
 // ***************************************************
 
-inline Fullvertex::Fullvertex(double (&p)[ncoord],int level) {
-
+template < int N >
+inline Fullvertex < N >::Fullvertex(double (&p)[ncoord],int level) : Vertex < N >( level ) {
   for(int i = 0 ; i < ncoord ; i ++) 
-
     vcoord[i] = p[i] ;
-  _level = level;
 }
 
 // ***************************************************
@@ -58,7 +34,8 @@ inline Fullvertex::Fullvertex(double (&p)[ncoord],int level) {
 // #end(method)
 // ***************************************************
 
-inline void Fullvertex::write(ostream & out) const {
+template < int N >
+inline void Fullvertex < N >::write(ostream & out) const {
 
   for(int i = 0 ; i < ncoord ; i ++ ) out << vcoord[i] << "  " ;
    
@@ -76,7 +53,8 @@ inline void Fullvertex::write(ostream & out) const {
 // #end(method)
 // ***************************************************
 
-inline void Fullvertex::read(istream & in) {
+template < int N >
+inline void Fullvertex < N >::read(istream & in) {
 
   for(int i = 0 ; i < ncoord ; i ++) 
 
@@ -120,78 +98,16 @@ inline void Edge::read(istream & in) {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Bndel::mirror_opposite(double (&pret)[2]) const
-// #parameters:
-//   \ double (& )[2] | pret | return value
-// #description:
-//   Spiegelt den ``Punkt'' opposite(0) an sich
-// #end(method)
-// ***************************************************
-inline void Bndel::mirror_opposite(double (&pret)[2]) const
-{
-  // mirrors the ``point'' opposite(0) at ``this'' 
-  Element* el = (Element*)nbel(0);
-  mirror(el->vertex(opposite(0))->coord(),pret);
-}
-
-// ***************************************************
-// #begin(method)
-// #method:
-//   void Bndel::mirror(const double (&ppoint)[2], double (&pret)[2]) const
-// #parameters:
-//   \ const double (& )[2] | ppoint | point to be mirrored
-//   \ double (& )[2]       | pret   | return value
-// #description:
-//   Spiegelt den ``Punkt'' ppoint an sich
-// #end(method)
-// ***************************************************
-inline void Bndel::mirror(const double (&ppoint)[2],
-                   double (&pret)[2]) const
-{
-  // If (a,b) is the vector from vertex(0) to vertex(1), then
-  // (a,b) and (-b,a) define a local orthogonal coordinate
-  // system with origin vertex(0). Let (c,d) denote the vector
-  // from vertex(0) to ppoint. Then the local coordinates (l,m)
-  // of the point ppoint mirrored at the line through vertex(0)
-  // and vertex(1) are given by:
-  // 
-  // ( l )       1     ( a  b ) ( c )
-  // (   ) = --------- (      ) (   )
-  // ( m )   a^2 + b^2 (-b  a ) ( d )
-  //
-  // Thus the point ppoint mirrored at pel has the cartesian
-  // coordinates (x,y) with 
-  //
-  // ( x )                 ( a )     (-b )
-  // (   ) = vertex(0) + l (   ) - m (   )
-  // ( y )                 ( b )     ( a ).
-
-  double a = vertex(1)->coord()[0] - vertex(0)->coord()[0];
-  double b = vertex(1)->coord()[1] - vertex(0)->coord()[1];
-  double c = ppoint[0] - vertex(0)->coord()[0];
-  double d = ppoint[1] - vertex(0)->coord()[1];
-  double mult = 1.0 / (a * a + b * b);
-  double l,m;
-
-  l = mult * (  a * c + b * d);
-  m = mult * ((-b)* c + a * d);
-
-  pret[0] = vertex(0)->coord()[0] + l * a + m * b;
-  pret[1] = vertex(0)->coord()[1] + l * b - m * a;
-}
-
-// ***************************************************
-// #begin(method)
-// #method:
 //   double Bndel::area()
 // #parameters:
 // #description:
 //   Gibt den Fl"acheninhalt der Geisterzelle wieder
 // #end(method)
 // ***************************************************
-inline double Bndel::area() const 
+template < int N, int NV >
+inline double Bndel < N,NV >::area() const 
 {
-  Element *tr = (Element*)(nbel(0));
+  element_t *tr = (element_t *)(nbel(0));
   assert(tr);
   return tr->area();
 }
@@ -207,14 +123,16 @@ inline double Bndel::area() const
 //   Newton's scheme
 // #end(method)
 // ***************************************************
+template < int N, int NV >
+inline int Bndel < N, NV >::get_splitpoint(double (&ppoint) [ncoord])
+{ 
+  const double (&c0)[ncoord] = connect.vtx[0]->coord();
+  const double (&c1)[ncoord] = connect.vtx[1]->coord();
 
-inline int Bndel::get_splitpoint(double (&ppoint) [2])
-{
-  const double (&c0)[2] = connect.vtx[0]->coord();
-  const double (&c1)[2] = connect.vtx[1]->coord();
-
-  ppoint[0] = 0.5 * ( c0[0] + c1[0] );//connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
-  ppoint[1] = 0.5 * ( c0[1] + c1[1] );//connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
+  for (int i=0;i<ncoord;++i)
+    ppoint[i] = 0.5*(c0[i]+c1[i]);
+  // ppoint[0] = 0.5 * ( c0[0] + c1[0] );//connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
+  // ppoint[1] = 0.5 * ( c0[1] + c1[1] );//connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
 
   // old method, new method below 
 #ifdef ALU2D_OLD_BND_PROJECTION
@@ -271,49 +189,53 @@ inline int Bndel::get_splitpoint(double (&ppoint) [2])
 #else // use new method 
 
   // apply vertex projection, if existent 
-  this->hdl->projectVertex( _segmentIndex, ppoint );
+  dynamic_cast< Hmesh<N,NV>* >(hdl)->projectVertex( _segmentIndex, ppoint );
 
 #endif
 
   return 0;
 }
 
-
-inline void Fullvertex::sethdl(Hmesh_basic *phdl) {
+template < int N >
+inline void Fullvertex < N >::sethdl(IndexProvider *phdl) {
   hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(Hmesh::IM_Vertices);
+  _idx=hdl->getIndex(IndexProvider::IM_Vertices);
 }
-inline void Edge::sethdl(Hmesh_basic *phdl) {
+inline void Edge::sethdl(IndexProvider *phdl) {
   hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(Hmesh::IM_Edges);
+  _idx=hdl->getIndex(IndexProvider::IM_Edges);
 }
 inline Edge::~Edge() {
   assert(isfree());
-  hdl->freeIndex(Hmesh::IM_Edges,_idx);
+  hdl->freeIndex(IndexProvider::IM_Edges,_idx);
 }
-inline void Element::sethdl(Hmesh_basic *phdl) 
+template < int N, int NV >
+inline void Element < N, NV >::sethdl(IndexProvider *phdl) 
 {
   hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(Hmesh::IM_Elements);
+  _idx=hdl->getIndex(IndexProvider::IM_Elements);
 }
-inline void Bndel::sethdl(Hmesh_basic *phdl) 
+template < int N, int NV >
+inline void Bndel < N, NV >::sethdl(IndexProvider *phdl) 
 {
   hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(Hmesh::IM_Bnd);
+  _idx=hdl->getIndex(IndexProvider::IM_Bnd);
 }
-inline Vertex::~Vertex() {
+template < int N >
+inline Vertex < N >::~Vertex() {
   if (hdl) {
     assert(_idx>=0);
-    hdl->freeIndex(Hmesh::IM_Vertices,_idx);
+    hdl->freeIndex(IndexProvider::IM_Vertices,_idx);
   }
 }
-inline Element::~Element() 
+template < int N, int NV >
+inline Element < N, NV >::~Element() 
 {
-  for (int i=0;i<3;++i) 
+  for (int i=0;i<connect.nf;++i) 
   {
     if (connect.edge[i]) 
     {
@@ -325,10 +247,11 @@ inline Element::~Element()
   assert(hdl);
   if (hdl) {
     assert(_idx>=0);
-    hdl->freeIndex(Hmesh::IM_Elements,_idx);
+    hdl->freeIndex(IndexProvider::IM_Elements,_idx);
   }
 }
-inline Bndel::~Bndel() {
+template < int N, int NV >
+inline Bndel < N, NV >::~Bndel() {
   if (connect.edge) {
     connect.edge->detach();
     if (connect.edge->isfree())
@@ -336,7 +259,7 @@ inline Bndel::~Bndel() {
   }
   if (hdl) {
     assert(_idx>=0);
-    hdl->freeIndex(Hmesh::IM_Bnd,_idx);
+    hdl->freeIndex(IndexProvider::IM_Bnd,_idx);
   }
 }
 
@@ -351,7 +274,8 @@ inline Bndel::~Bndel() {
 //   Liefert die Punkte auf der eten Kante modulo 3
 // #end(method)
 // ***************************************************
-inline void Element::edge_vtx(int e, Vertex *(&v) [2]) const {
+template < int N, int NV >
+inline void Element < N, NV >::edge_vtx(int e, vertex_t *(&v) [2]) const {
   assert(0 <= e) ;
   v[0] = connect.vtx[(e+1)%connect.nv] ;
   v[1] = connect.vtx[(e+2)%connect.nv] ;
@@ -367,12 +291,16 @@ inline void Element::edge_vtx(int e, Vertex *(&v) [2]) const {
 //   Liefert iten Punkt zur"uck modulo 3
 // #end(method)
 // ***************************************************
-inline Fullvertex * Element::getVertex(int i) const {
+template < int N, int NV >
+inline typename Element < N, NV >::fullvertex_t *
+Element < N,NV >::getVertex(int i) const {
   assert(0 <= i) ;
-  return (Fullvertex*)(connect.vtx[i%connect.nv]) ; 
+  return (fullvertex_t *)(connect.vtx[i%connect.nv]) ; 
 }
 
-inline Vertex * Element::vertex(int i) const {
+template < int N, int NV >
+inline typename Element < N, NV >::vertex_t *
+Element < N, NV >::vertex(int i) const {
   assert(0 <= i) ;
   return connect.vtx[i%connect.nv] ; 
 }
@@ -387,7 +315,9 @@ inline Vertex * Element::vertex(int i) const {
 //   Liefert Nachbaren gegen"uber der Kante mit Nr. fce modulo 3
 // #end(method)
 // ***************************************************
-inline Thinelement * Element::neighbour(int fce) const {
+template < int N, int NV >
+inline typename Element < N, NV >::thinelement_t *
+Element < N, NV >::neighbour(int fce) const {
   assert(0 <= fce) ;
   return connect.nb[fce%connect.nf] ;
 }
@@ -403,16 +333,18 @@ inline Thinelement * Element::neighbour(int fce) const {
 //   mit this gemeinsamm hat (wird auch modulo 3 gerechnet)
 // #end(method)
 // ***************************************************
-
-inline int Element::opposite(int fce) const {
+template < int N, int NV >
+inline int Element < N, NV >::opposite(int fce) const {
   assert(0 <= fce) ;
   return connect.bck [fce%connect.nf] ;
 }
-inline int Element::edge_idx(int fce) const {
+template < int N, int NV >
+inline int Element < N, NV >::edge_idx(int fce) const {
   assert(0 <= fce) ;
   return connect.edge[fce%connect.nf]->getIndex() ;
 }
-inline Edge *Element::edge(int fce) const {
+template < int N, int NV >
+inline Edge *Element < N, NV >::edge(int fce) const {
   assert(0 <= fce) ;
   return connect.edge[fce];
 }
@@ -430,7 +362,8 @@ inline Edge *Element::edge(int fce) const {
 //   lokalen Nr. fce
 // #end(method)
 // ***************************************************
-inline int Element::facevertex(int fce, int loc) const { 
+template < int N, int NV >
+inline int Element < N, NV >::facevertex(int fce, int loc) const { 
   assert(0 <= fce) ;
   assert(0 <= loc) ;
   fce %= connect.nf ;
@@ -459,7 +392,8 @@ inline int Element::facevertex(int fce, int loc) const {
 //   die eine 1 als R"uckgabewert haben.
 // #end(method)
 // ***************************************************
-inline int Element::normaldir(int fce) const
+template < int N, int NV >
+inline int Element < N, NV >::normaldir(int fce) const
 {
   assert(0 <= fce) ;
   fce%=connect.nf;
@@ -479,14 +413,16 @@ inline int Element::normaldir(int fce) const
 //   an.
 // #end(method)
 // ***************************************************
-inline void Element::nbconnect(int fce, Thinelement * n, int b) { 
+template < int N, int NV >
+inline void Element < N, NV >::nbconnect(int fce, thinelement_t * n, int b) { 
   assert(0 <= fce) ;
   fce %= connect.nf ;
 
   connect.nb[fce] = n ; 
   connect.bck[fce] = b ;
   }
-inline void Element::edgeconnect(int fce, Edge * n) { 
+template < int N, int NV >
+inline void Element < N, NV >::edgeconnect(int fce, Edge * n) { 
   assert(0 <= fce) ;
   fce %= connect.nf ;
 
@@ -505,7 +441,8 @@ inline void Element::edgeconnect(int fce, Edge * n) {
 //   Legt die Richtung der gerichteten Normalen an der Kante mit der Nr. fce fest
 // #end(method)
 // ***************************************************
-inline void Element::setnormdir(int fce, int dir) {
+template < int N, int NV >
+inline void Element < N, NV >::setnormdir(int fce, int dir) {
   assert( 0 <= fce );
   fce %= connect.nf ;
   assert( dir == 1 || dir == -1);
@@ -521,9 +458,10 @@ inline void Element::setnormdir(int fce, int dir) {
 //   Konstruktor f"ur connect Daten (privat)
 // #end(method)
 // ***************************************************
-inline Element::c::c() {
-  for( int i = 0 ; i < nv ; i ++ ) { vtx[i] = 0; hvtx[i] = 0; }
-  for( int j = 0 ; j < nf ; j ++ ) { nb[j] = 0 ; bck[j] = -1 ; normdir[j]=0 ; edge[j] = 0;}  
+template < int N, int NV >
+inline Element < N, NV >::c::c() : nv(NV), nf(NV) { // TRIANG
+  for( int i = 0 ; i < NV ; i ++ ) vtx[i] = 0; 
+  for( int j = 0 ; j < NV ; j ++ ) { hvtx[j] = 0 ; nb[j] = 0 ; bck[j] = -1 ; normdir[j]=0 ; edge[j] = 0;}  
 }
 
 // ***************************************************
@@ -535,11 +473,13 @@ inline Element::c::c() {
 //   Destruktor f"ur connect Daten (privat)
 // #end(method)
 // ***************************************************
-inline Element::c::~c() {
-  for(int i = 0 ; i < nv ; i ++ ) {
+template < int N, int NV >
+inline Element < N, NV >::c::~c() {
+  for(int i = 0 ; i < NV ; i ++ ) 
     if(vtx[i]) vtx[i]->detach() ;
-    if(hvtx[i]) delete hvtx[i];
-  }
+  for(int i = 0 ; i < NV ; i ++ ) 
+    if(hvtx[i]) delete hvtx[i];  
+  // edges are detached in the Element destructor
 }
 
 // ***************************************************
@@ -551,10 +491,11 @@ inline Element::c::~c() {
 //   Ausschreiben der connect-Daten (privat)
 // #end(method)
 // ***************************************************
-inline void Element::c::write(ostream &out) const {
+template < int N, int NV >
+inline void Element < N, NV >::c::write(ostream &out) const {
   for(int i = 0 ; i < nv ; i ++ ) 
   {
-    out << (vtx[i] ? vtx[i]->Listagent < Vertex > :: number() : -1 ) << "  " ;
+    out << (vtx[i] ? vtx[i]->Listagent < vertex_t > :: number() : -1 ) << "  " ;
 //    out << bck[i] << "  " ;
 //    out << nb[i] << "  :  ";
 //    vtx[i]-> write(out);
@@ -570,12 +511,13 @@ inline void Element::c::write(ostream &out) const {
 // #description:
 // #end(method)
 // ***************************************************
-inline void Element::c::read(istream & in, Vertex ** v, const int l) {
+template < int N, int NV >
+inline void Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
   int c ;
   for(int i = 0 ; i < nv ; i ++ ) {
     in >> c ;
     assert(-1 <= c && c < l) ;
-    if(c != -1) set((Vertex *)v[c], i) ;
+    if(c != -1) set((vertex_t *)v[c], i) ;
   }
 }
 
@@ -590,10 +532,11 @@ inline void Element::c::read(istream & in, Vertex ** v, const int l) {
 //   Liefert unskalierte "au"sere Normale in n zur"uck
 // #end(method)
 // ***************************************************
-inline void Element::outernormal(int fce,double (&n)[ncoord]) const
+template < int N, int NV >
+inline void Element < N, NV >::outernormal(int fce,double (&n)[ncoord]) const
 {
-  n[0]= _outernormal[fce%connect.nf][0];
-  n[1]= _outernormal[fce%connect.nf][1];
+  for (int i=0;i<ncoord;++i)
+    n[i]= _outernormal[fce%connect.nf][i];
 }
 
 // ***************************************************
@@ -607,61 +550,12 @@ inline void Element::outernormal(int fce,double (&n)[ncoord]) const
 //   Liefert unskalierte gerichtete Normale in n zur"uck
 // #end(method)
 // ***************************************************
-inline void Element::dirnormal(int fce,double (&n)[ncoord]) const
+template < int N, int NV >
+inline void Element < N, NV >::dirnormal(int fce,double (&n)[ncoord]) const
 {
   outernormal(fce,n);
   for (int i=0;i<ncoord;i++)
     n[i]*=normaldir(fce);
-}
-
-// ***************************************************
-// #begin(method)
-// #method:
-//   void Element::tolocal(const double (&v)[ncoord], double (&bary)[3]) const
-// #parameters:
-//   \ double (&)[ncoord]  | v    | globale Koordinaten
-//   \ double (&)[3]       | bary | baryzentrische Koordinaten
-// #description:
-//   Rechnet globale (x,y)-Koordinaten in baryzentrische
-//   Koordinaten bez"uglich des Dreiecks um. Bezeichnen
-//   v0,v1 und v2 die Koordinaten der Eckpunkte, so
-//   gilt wegen l0 + l1 + l2 = 1:
-//
-//           l0 v0 + l1 v1 + l2 v2 = v
-//
-//     <==>  l0 (v0-v0) + l1 (v1-v0) + l2 (v2-v0) = v-v0
-//
-//     <==>  l1 (v1-v0) + l2 (v2-v0) = v-v0
-//
-//             (a  b) (l1)   (e)
-//     <==>:   (    ) (  ) = ( )
-//             (c  d) (l2)   (f)
-//
-//
-//             (l1)     1   ( d  -b) (e)
-//     <==>    (  ) = ----- (      ) ( )
-//             (l2)   ad-bc (-c   a) (f)
-// #end(method)
-// ***************************************************
-inline void Element::tolocal(const double (&v)[ncoord], double (&bary)[3]) const
-{
-  const double (&v0)[ncoord]=connect.vtx[0]->coord();
-  const double (&v1)[ncoord]=connect.vtx[1]->coord();
-  const double (&v2)[ncoord]=connect.vtx[2]->coord();
-  double a   = v1[0] - v0[0];
-  double b   = v2[0] - v0[0];
-  double c   = v1[1] - v0[1];
-  double d   = v2[1] - v0[1];
-  double e   =  v[0] - v0[0];
-  double f   =  v[1] - v0[1];
-  double det = a * d - b * c;
-
-  assert(ncoord == 2);
-  assert(fabs(det) > EPS);
-
-  bary[1] = (d * e - b * f) / det;
-  bary[2] = (a * f - c * e) / det;
-  bary[0] = 1.0 - bary[1] - bary[2];
 }
 
 // ***************************************************
@@ -676,7 +570,8 @@ inline void Element::tolocal(const double (&v)[ncoord], double (&bary)[3]) const
 //   in globale (x,y)-Koordinaten um
 // #end(method)
 // ***************************************************
-inline void Element::fromlocal(const double (&bary)[3],double (&v)[ncoord]) const
+template < int N, int NV >
+inline void Element < N, NV >::fromlocal(const double (&bary)[3],double (&v)[ncoord]) const
 {
   const double (&v0)[ncoord]=connect.vtx[0]->coord();
   const double (&v1)[ncoord]=connect.vtx[1]->coord();
@@ -700,7 +595,8 @@ inline void Element::fromlocal(const double (&bary)[3],double (&v)[ncoord]) cons
 //   in baryzentrischen Koordinaten
 // #end(method)
 // ***************************************************
-inline void Element::midpoint(int fce, double (&bary)[3]) const
+template < int N, int NV >
+inline void Element < N, NV >::midpoint(int fce, double (&bary)[3]) const
 {
   for (int i=0;i<3;i++)
     bary[i]=((i==fce%3) ? 0.0 : 0.5);
@@ -719,7 +615,8 @@ inline void Element::midpoint(int fce, double (&bary)[3]) const
 //   gilt bary = P0 + pos * (P1 - P0).
 // #end(method)
 // ***************************************************
-inline void Element::facepoint(int fce, double pos, double (&bary)[3]) const
+template < int N, int NV >
+inline void Element < N, NV >::facepoint(int fce, double pos, double (&bary)[3]) const
 {
   bary[fce%3] = 0.0;
 
@@ -738,172 +635,6 @@ inline void Element::facepoint(int fce, double pos, double (&bary)[3]) const
 // ***************************************************
 // #begin(method)
 // #method:
-//   int Element::isecpoint(int fce, const double (&p)[ncoord],
-//                          double (&bary)[3]) const
-// #parameters:
-//   \ int                     | fce  | Nummer der Kante
-//   \ const double(&)[ncoord] | p    | Punktkoordinaten
-//   \ double (&)[3]           | bary | baryzentrische Koordinaten
-//                                      des Schnittpunktes
-// #description:
-//   Berechnet den Schnittpunkt der Verbindungsgeraden
-//   des Elementschwerpunktes mit dem Punkt p
-//   und der Kante fce. Existiert ein Schnittpunkt,
-//   so wird 1 zur"uckgegeben, ansonsten 0. 
-// #end(method)
-// ***************************************************
-inline int Element::isecpoint(int fce, const double (&pa)[ncoord],
-                       double (&bary)[3]) const
-{
-  int ret = 1;
-  double bary_cog[3] = {1.0/3.0, 1.0/3.0, 1.0/3.0};
-  double v[ncoord],cog[2],pb[2],pc[2],pd[2],det,s;
-
-  assert(ncoord == 2);
-
-  fromlocal(bary_cog,cog);
-  pb[0] = cog[0] - pa[0];
-  pb[1] = cog[1] - pa[1];
-  pc[0] = vertex(fce+1)->coord()[0];
-  pc[1] = vertex(fce+1)->coord()[1];
-  pd[0] = vertex(fce+2)->coord()[0] - pc[0];
-  pd[1] = vertex(fce+2)->coord()[1] - pc[1];
-
-  det = pb[1] * pd[0] - pb[0] * pd[1];
-
-  if (fabs(det) <= EPS)
-  {
-    ret = 0;
-  }
-  else
-  {
-    s = (pd[0] * (pc[1] - pa[1]) - pd[1] * (pc[0] - pa[0])) / det;
-
-    v[0] = pa[0] + s * pb[0];
-    v[1] = pa[1] + s * pb[1];
-    tolocal(v,bary);
-  }
-
-  return ret;
-}
-
-// ***************************************************
-// #begin(method)
-// #method:
-//   int Element::isecpoint(int fce, const double (&p)[ncoord],
-//                          double (&bary)[3]) const
-// #parameters:
-//   \ int                     | fce  | Nummer der Kante
-//   \ const double(&)[ncoord] | p    | Punktkoordinaten
-//   \ double (&)[ncoord]      | pret | Koordinaten
-//                                      des Schnittpunktes
-// #description:
-//   Berechnet den Schnittpunkt der Verbindungsgeraden
-//   des Elementschwerpunktes mit dem Punkt p
-//   und der Kante fce. Existiert ein Schnittpunkt,
-//   so wird 1 zur"uckgegeben, ansonsten 0. 
-// #end(method)
-// ***************************************************
-inline int Element::isecpoint(int fce, const double (&pa)[ncoord],
-                       double (&pret)[ncoord]) const
-{
-  int ret = 1;
-  double bary_cog[3] = {1.0/3.0, 1.0/3.0, 1.0/3.0};
-  double cog[2],pb[2],pc[2],pd[2],det,s;
-
-  assert(ncoord == 2);
-
-  fromlocal(bary_cog,cog);
-  pb[0] = cog[0] - pa[0];
-  pb[1] = cog[1] - pa[1];
-  pc[0] = vertex(fce+1)->coord()[0];
-  pc[1] = vertex(fce+1)->coord()[1];
-  pd[0] = vertex(fce+2)->coord()[0] - pc[0];
-  pd[1] = vertex(fce+2)->coord()[1] - pc[1];
-
-  det = pb[1] * pd[0] - pb[0] * pd[1];
-
-  if (fabs(det) <= EPS)
-  {
-    ret = 0;
-  }
-  else
-  {
-    s = (pd[0] * (pc[1] - pa[1]) - pd[1] * (pc[0] - pa[0])) / det;
-
-    pret[0] = pa[0] + s * pb[0];
-    pret[1] = pa[1] + s * pb[1];
-  }
-
-  return ret;
-}
-
-// ***************************************************
-// #begin(method)
-// #method:
-//   int Element::inside(Vertex &v) const
-// #parameters:
-// #description:
-//   Liefert 0 zur"uck falls v au"serhalb des Dreiecks,
-//   1 falls innerhalb und -1 falls v auf einer Kante liegt
-// #end(method)
-// ***************************************************
-inline int Element::inside(Vertex &v) const
-{
-  double n[ncoord];
-  double wert,test=0.0;
-  int ret=1;
-  for (int i=0;i<connect.nf;i++)
-  {
-    outernormal(i,n);
-    wert=   n[0]*(v.coord()[0]-vertex(i+1)->coord()[0])
-          + n[1]*(v.coord()[1]-vertex(i+1)->coord()[1]);
-    if (wert==0.0)
-    {
-      ret=-1;
-      continue;
-    }
-    if (test==0.0)
-      test=wert;
-    else
-      if (wert*test<0)
-      {
-        ret=0;
-        break;
-      }
-  }
-  return ret;  
-}
-
-
-// ***************************************************
-// #begin(method)
-// #method:
-//   int Element::inside(const double (&)[2]) const
-// #parameters:
-//   \ const double (&)[2] | point | Punktkoordinaten
-// #description:
-//   Liefert 1 zur"uck, falls point innerhalb des
-//   Dreiecks liegt, 0 sonst.
-// #end(method)
-// ***************************************************
-inline int Element::inside(const double (&point)[2]) const
-{
-  int i,ret = 1;
-  double bary[3];
-
-  tolocal(point,bary);
-
-  for (i=0;i<3;i++)
-    if ((bary[i] < -EPS) || (bary[i] > 1.0 + EPS))
-      ret = 0;
-
-  return ret;
-}
-
-// ***************************************************
-// #begin(method)
-// #method:
 //   void Element::setrefine(int fce) 
 // #parameters:
 //   \ int | fce | Lokale Kantennr.
@@ -911,19 +642,25 @@ inline int Element::inside(const double (&point)[2]) const
 //   Macht die Kante mit der lokalen Nr. fce zur Verfeinerungskante
 // #end(method)
 // ***************************************************
-inline void Element::setrefine(int fce) 
+template < int N, int NV >
+inline void Element < N, NV >::setrefine(int fce) 
 {
+  assert( connect.nf == 3 && connect.nv == 3 );
   assert( 0<=fce );
   fce%=connect.nv;
-  Vertex *tmp_v[3]={connect.vtx[0],connect.vtx[1],connect.vtx[2]};
-  Thinelement *tmp_n[3]={connect.nb[0],connect.nb[1],connect.nb[2]};
+  vertex_t *tmp_v[3]={connect.vtx[0],connect.vtx[1],connect.vtx[2]};
+  thinelement_t *tmp_n[3]={connect.nb[0],connect.nb[1],connect.nb[2]};
   Edge *tmp_e[3]={connect.edge[0],connect.edge[1],connect.edge[2]};
-  Vtx_btree* tmp_btree[3] = {connect.hvtx[0], connect.hvtx[1], connect.hvtx[2] };
+  vtx_btree_t* tmp_btree[3] = {connect.hvtx[0], connect.hvtx[1], connect.hvtx[2] };
   short int tmp_b[3]={connect.bck[0],connect.bck[1],connect.bck[2]};
   short int tmp_no[3]={connect.normdir[0],connect.normdir[1],connect.normdir[2]};
   double tmp_sln[3]={_sidelength[0],_sidelength[1],_sidelength[2]};
-  double tmp_onx[3]={_outernormal[0][0],_outernormal[1][0],_outernormal[2][0]};
-  double tmp_ony[3]={_outernormal[0][1],_outernormal[1][1],_outernormal[2][1]};
+  double tmp_on[3][ncoord];
+  for (int i=0;i<3;++i)
+    for (int j=0;j<ncoord;++j)
+      tmp_on[i][j] = _outernormal[i][j];
+  // double tmp_onx[3]={_outernormal[0][0],_outernormal[1][0],_outernormal[2][0]};
+  // double tmp_ony[3]={_outernormal[0][1],_outernormal[1][1],_outernormal[2][1]};
   for (int j=0;j<connect.nv;j++)
   {  
     connect.vtx[j]=tmp_v[(fce+j)%connect.nv];  
@@ -935,8 +672,10 @@ inline void Element::setrefine(int fce)
     connect.hvtx[j] = tmp_btree[(fce+j)%connect.nv];
 
     _sidelength[j]     = tmp_sln[(fce+j)%connect.nv];
-    _outernormal[j][0] = tmp_onx[(fce+j)%connect.nv];
-    _outernormal[j][1] = tmp_ony[(fce+j)%connect.nv];
+    for (int k=0;k<ncoord;++k)
+      _outernormal[j][k] = tmp_on[(fce+j)%connect.nv][k];
+    // _outernormal[j][0] = tmp_onx[(fce+j)%connect.nv];
+    // _outernormal[j][1] = tmp_ony[(fce+j)%connect.nv];
   }
 }
 
@@ -949,42 +688,81 @@ inline void Element::setrefine(int fce)
 //   Initialisierung der Instanzvariablen
 // #end(method)
 // ***************************************************
-inline void Element::init()
-{
+template < int N, int NV >
+inline void Element < N, NV >::init()
+{ 
   /* calculate area */
+  // assert( connect.nf == 3 && connect.nv == 3 ); // TRIANG
 
   const double (&vc0)[ncoord]=connect.vtx[0]->coord();
   const double (&vc1)[ncoord]=connect.vtx[1]->coord();
   const double (&vc2)[ncoord]=connect.vtx[2]->coord();
 
-  _area =  fabs(0.5 * (  (vc0[0]-vc1[0])*(vc0[1]+vc1[1])
-                       + (vc1[0]-vc2[0])*(vc1[1]+vc2[1])
-                       + (vc2[0]-vc0[0])*(vc2[1]+vc0[1])) );
+  if (ncoord == 2)
+  {
+    /* calculate outer normal and sidelength */
+    for (int i=0;i<connect.nf;i++)
+    {
+      _outernormal[i][0]= (vertex(i+2)->coord()[1]-vertex(i+1)->coord()[1]);
+      _outernormal[i][1]=-(vertex(i+2)->coord()[0]-vertex(i+1)->coord()[0]);
+
+      _sidelength[i] = 0;
+      for (int k=0;k<ncoord;++k)
+        _sidelength[i] += _outernormal[i][k]*_outernormal[i][k];
+      _sidelength[i] = sqrt( _sidelength[i] );
+    }
+    _area =  fabs(0.5 * (  (vc0[0]-vc1[0])*(vc0[1]+vc1[1])
+                         + (vc1[0]-vc2[0])*(vc1[1]+vc2[1])
+                         + (vc2[0]-vc0[0])*(vc2[1]+vc0[1])) );
+  }
+  else
+  {
+    double sides[NV][ncoord];
+    /* calculate outer normal and sidelength^2 */
+    for (int i=0;i<connect.nf;i++)
+    {
+      _sidelength[i] = 0;
+      for (int k=0;k<ncoord;++k)
+      {
+        sides[i][k]= (vertex(i+2)->coord()[k]-vertex(i+1)->coord()[k]);
+        _sidelength[i] += sides[i][k]*sides[i][k];
+      }
+    }
+    _area = 0;
+    for (int i=0;i<connect.nf;i++)
+    {
+      double scp_ds = 0;
+      for (int k=0;k<ncoord;++k)
+      {
+        _outernormal[i][k] = sides[(i+2)%connect.nf][k] - sides[(i+1)%connect.nf][k];
+        scp_ds += _outernormal[i][k] * sides[i][k];
+      }
+      double norm_n = 0;
+      for (int k=0;k<ncoord;++k)
+      {
+        _outernormal[i][k] = _sidelength[i]*_outernormal[i][k] - scp_ds*sides[i][k];
+        norm_n += _outernormal[i][k] * _outernormal[i][k];
+      }
+      norm_n = sqrt( norm_n );
+      _sidelength[i] = sqrt( _sidelength[i] );
+      double fac = _sidelength[i]/norm_n;
+      for (int k=0;k<ncoord;++k)
+        _outernormal[i][k] *= fac;
+      _area += 1./(4.*fac);
+    }
+    _area /= connect.nf;
+  }
 
   assert(_area > 0.0);
-
-  /* calculate outer normal and sidelength */
-
-  int i;
-
-  for (i=0;i<3;i++)
-  {
-    _outernormal[i][0]= (vertex(i+2)->coord()[1]-vertex(i+1)->coord()[1]);
-    _outernormal[i][1]=-(vertex(i+2)->coord()[0]-vertex(i+1)->coord()[0]);
-
-    _sidelength[i] = sqrt(  _outernormal[i][0]*_outernormal[i][0]
-                          + _outernormal[i][1]*_outernormal[i][1]);
-  }
 
   /* calculate minheight */
 
   double maxlen = _sidelength[0];
-  for (i=1;i<3;i++)
+  for (int i=1;i<3;i++)
     maxlen = ((_sidelength[i] > maxlen) ? _sidelength[i] : maxlen);
   assert(maxlen > 0.0);
 
   _minheight = 2.0 * _area / maxlen;
-
 }
 
 // ***************************************************
@@ -998,7 +776,8 @@ inline void Element::init()
 //   1 sonst
 // #end(method)
 // ***************************************************
-inline int Element::setrefine()
+template < int N, int NV >
+inline int Element < N, NV >::setrefine()
 {
   double maxkantenlen=-1.0,kantenlen;
   int maxkante=-1;
@@ -1029,8 +808,12 @@ inline int Element::setrefine()
 //   n"otig war. L"a"st die Verfeinerungskante umber"uhrt 
 // #end(method)
 ***************************************************/
-inline int Element::setorientation()
+template < int N, int NV >
+inline int Element < N, NV >::setorientation()
 {
+  // required ??
+  if (ncoord>2) return 1;
+  assert( connect.nf == 3 && connect.nv == 3 );
   double o;
   const double (&v0)[ncoord]=connect.vtx[0]->coord();
   const double (&v1)[ncoord]=connect.vtx[1]->coord();
@@ -1046,8 +829,8 @@ inline int Element::setorientation()
   if (o<0)    // Orientierung im Uhrzeigersinn!
   {
     cerr << "Orienting" << endl;
-    Vertex *tmpv=connect.vtx[1];
-    Thinelement *tmpn=connect.nb[1];
+    vertex_t *tmpv=connect.vtx[1];
+    thinelement_t *tmpn=connect.nb[1];
     Edge *tmpe=connect.edge[1];
     short int tmpb=connect.bck[1];
     short int tmpd=connect.normdir[1];
@@ -1090,13 +873,14 @@ inline int Element::setorientation()
 //   in das Empfaengerelement auf der Seite fce ein.
 // #end(method)
 ***************************************************/
-inline void Element::addhvtx(Vertex* invtx, Thinelement *lnb,Thinelement *rnb,int fce)
+template < int N, int NV >
+inline void Element < N, NV >::addhvtx(vertex_t *invtx, thinelement_t *lnb, thinelement_t *rnb,int fce)
 {
   if( invtx ) {
     assert(rnb);
     assert(lnb);
     if( !connect.hvtx[fce] )
-      connect.hvtx[fce] = new Vtx_btree(connect.vtx[(fce+1)%connect.nf],lnb,rnb);
+      connect.hvtx[fce] = new vtx_btree_t(connect.vtx[(fce+1)%connect.nf],lnb,rnb);
     connect.hvtx[fce]->insert(invtx,lnb,rnb);
   } else {
     assert(!connect.hvtx[fce]); 

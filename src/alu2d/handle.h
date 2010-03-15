@@ -10,8 +10,6 @@ typedef IndexManagerType IndexManager2dType;
 enum { numOfIndexManager2d = 4 };
 // see specific codes in class Hmesh below 
 
-class Hmesh_basic;
-
 template < class A > class Listwalkptr ;
 
 template < class A > class Listagent ;
@@ -26,7 +24,7 @@ template < class A > class Macro ;
 
 template < class A > class Listagency {
 
-  Hmesh_basic *hdl;
+  IndexProvider *hdl;
 
   A * first_list ;
 
@@ -69,7 +67,7 @@ template < class A > class Listagency {
 
   public :
 
-  Listagency(Hmesh_basic *phdl) : hdl(phdl),
+  Listagency(IndexProvider *phdl) : hdl(phdl),
   first_list(0), last_list(0), number_list(0), nlistwalks(0) { }
 
    ~Listagency() { 
@@ -367,7 +365,7 @@ template < class A > class Macro : public Listagent < Macro < A > > {
     
   public :
 
-    void sethdl(Hmesh_basic *phdl) {el.sethdl(phdl);}
+    void sethdl(IndexProvider *phdl) {el.sethdl(phdl);}
     
     Macro(hier_t & e) : el(e) { } ;
      
@@ -800,26 +798,76 @@ public:
 // |          sicher, dass der Refcount runtergez"ahlt war. Sonst knirsch ... |
 // +----------------------------------------------------------------------------+
 
+struct IndexProvider
+{
+   enum { IM_Elements = 0, // index manager id for elements 
+          IM_Edges = 1,    // index manager id for edges  
+          IM_Vertices = 2, // index manager id for vertices  
+          IM_Bnd = 3       // index manager id for bnd 
+   };
 
-class Hmesh;
+   int getIndex(int indextype) 
+   {
+     assert( indextype >= 0 && indextype < numOfIndexManager2d );
+     return indexmanager[indextype].getIndex();
+   }
 
-class Hmesh_basic {
+   void freeIndex(int indextype, int index) 
+   {
+     assert( indextype >= 0 && indextype < numOfIndexManager2d );
+     indexmanager[indextype].freeIndex(index);
+   }
 
-  public :
+   // return current size of used indices 
+   int indexManagerSize (int cd) const 
+   {
+     // only for elements, edges, and vertices 
+     assert(cd<3 && cd>=0);
+     return indexmanager[cd].getMaxIndex();
+   }
+   
+   virtual ~IndexProvider() {}
+  protected:
+   IndexManager2dType indexmanager[numOfIndexManager2d];
+};
 
-    typedef Hier < Element > helement_t ;
+template < int N, int NV > class Bndel_periodic;
 
-    typedef Hier < Bndel > hbndel_t ;
-
-    typedef Macro < Element > macroelement_t ;
-
-    typedef Macro < Bndel > macrobndel_t ;
+template < int N, int NV >
+class Hmesh_basic : public IndexProvider {
 
   protected :
 
-    IndexManager2dType indexmanager[numOfIndexManager2d];
+    enum { ncoord = N, nvtx = NV };
 
-    Listagency < Vertex > vl;
+  public :
+    typedef Thinelement < ncoord,nvtx > thinelement_t;
+
+    typedef Element < ncoord,nvtx > element_t;
+    typedef Bndel < ncoord,nvtx > bndel_t;
+
+    typedef Hier < element_t > helement_t ;
+    typedef Hier < bndel_t > hbndel_t ;
+
+    typedef Macro < element_t > macroelement_t ;
+    typedef Macro < bndel_t > macrobndel_t ;
+
+    typedef Triang < ncoord, nvtx > triang_t;
+    typedef Bndel_triang < ncoord, nvtx > bndel_triang_t;
+    typedef Bndel_periodic < ncoord, nvtx > bndel_periodic_t;
+
+    typedef Vertex < ncoord > vertex_t;
+    typedef Fullvertex < ncoord > fullvertex_t;
+
+    typedef nconf_vtx < ncoord, nvtx > nconf_vtx_t;
+
+    typedef VertexProjection < ncoord > ProjectVertex_t;
+
+  protected :
+
+    using IndexProvider::indexmanager;
+
+    Listagency < vertex_t > vl;
 
     Listagency < macroelement_t > mel ;
 
@@ -827,19 +875,19 @@ class Hmesh_basic {
 
     const ProjectVertex_t  *_projectVertex; 
     
-    Listwalk < helement_t > * walk( helement_t *) { return new Leafwalk < Element > (mel) ; }
+    Listwalk < helement_t > * walk( helement_t *) { return new Leafwalk < element_t > (mel) ; }
 
     // von mir dazugeschrieben...
-    Listwalk < helement_t > * walk( helement_t *, int level) { return new Levelwalk < Element > (mel, level) ; }
+    Listwalk < helement_t > * walk( helement_t *, int level) { return new Levelwalk < element_t > (mel, level) ; }
     
-    Listwalk < Vertex > * walk(Vertex *) { return new Listwalk_impl < Vertex > (vl) ; }
+    Listwalk < vertex_t > * walk(vertex_t *) { return new Listwalk_impl < vertex_t > (vl) ; } 
 
     Listwalk < macroelement_t > * walk(macroelement_t *) { return new Listwalk_impl < macroelement_t > (mel) ; }
     
-    Listwalk < hbndel_t > * walk( hbndel_t *) { return new Leafwalk < Bndel > (mbl) ; }
+    Listwalk < hbndel_t > * walk( hbndel_t *) { return new Leafwalk < bndel_t > (mbl) ; }
     
     // von mir dazugeschrieben... (von wem?)
-    Listwalk < hbndel_t > * walk( hbndel_t *, int level) { return new Levelwalk < Bndel > (mbl, level) ; }
+    Listwalk < hbndel_t > * walk( hbndel_t *, int level) { return new Levelwalk < bndel_t > (mbl, level) ; }
 
     Hmesh_basic(const Hmesh_basic &) ;
     
@@ -849,7 +897,6 @@ class Hmesh_basic {
     void asciwritetriang(ostream &) ;
     
     void ascireadtriang(istream &) ;
-
   public :
    Hmesh_basic() : 
       vl(this), 
@@ -867,18 +914,6 @@ class Hmesh_basic {
 
    virtual ~Hmesh_basic() {}     
 
-   int getIndex(int indextype) 
-   {
-     assert( indextype >= 0 && indextype < numOfIndexManager2d );
-     return indexmanager[indextype].getIndex();
-   }
-
-   void freeIndex(int indextype, int index) 
-   {
-     assert( indextype >= 0 && indextype < numOfIndexManager2d );
-     indexmanager[indextype].freeIndex(index);
-   }
-
    // return number of macro boundary segments 
    size_t numMacroBndSegments() const 
    {
@@ -886,13 +921,15 @@ class Hmesh_basic {
    }
 
    // project vertex for given boundary segment 
-   void projectVertex(const int segmentIndex, double (&point) [2]) const 
+   void projectVertex(const int segmentIndex, double (&point) [ncoord]) const 
    {
      if( _projectVertex ) 
      {
        assert( segmentIndex >= 0 );
        // copy point 
-       const double oldp[2] = { point[0], point[1] };
+       double oldp[ncoord];
+       for (int i=0;i<ncoord;++i)
+         oldp[i] = point[i];
        // call projection operator 
        (*_projectVertex)( oldp, segmentIndex, point );
      }
@@ -904,21 +941,13 @@ class Hmesh_basic {
      _projectVertex = ppv ;
    }
    
-   // return current size of used indices 
-   int indexManagerSize (int cd) const 
-   {
-     // only for elements, edges, and vertices 
-     assert(cd<3 && cd>=0);
-     return indexmanager[cd].getMaxIndex();
-   }
-   
    void makeneighbours() ;
            
    virtual void refresh() { }
        
    friend class Listwalkptr < helement_t > ;
  
-   friend class Listwalkptr < Vertex > ;
+   friend class Listwalkptr < vertex_t > ;
   
    friend class Listwalkptr < hbndel_t > ;
 
@@ -926,20 +955,71 @@ class Hmesh_basic {
 
 };
 
-class Hmesh : public Hmesh_basic {
+template < int N, int NV >
+class Hmesh : public Hmesh_basic<N,NV> {
 
   Hmesh & operator=(const Hmesh &) ;
 
   Hmesh(const Hmesh &) ;
 
-  Multivertexadapter * adp ;
+  typedef Hmesh_basic<N,NV> hmesh_basic_t;
+
+  protected :
+
+  enum { ncoord = N, nvtx = NV };
+
+  public:
+
+  typedef Thinelement < ncoord,nvtx > thinelement_t;
+
+  typedef Element < ncoord,nvtx > element_t;
+  typedef Bndel < ncoord,nvtx > bndel_t;
+
+  typedef Hier < element_t > helement_t ;
+  typedef Hier < bndel_t > hbndel_t ;
+
+  typedef Macro < element_t > macroelement_t ;
+  typedef Macro < bndel_t > macrobndel_t ;
+
+  typedef Triang < ncoord, nvtx > triang_t;
+  typedef Bndel_triang < ncoord, nvtx > bndel_triang_t;
+  typedef Bndel_periodic < ncoord, nvtx > bndel_periodic_t;
+
+  typedef Multivertexadapter < ncoord, nvtx > multivertexadapter_t;
+  typedef Vertex < ncoord > vertex_t;
+  typedef Fullvertex < ncoord > fullvertex_t;
+
+  typedef nconf_vtx < ncoord, nvtx > nconf_vtx_t;
+
+  typedef VertexProjection < ncoord > ProjectVertex_t;
+
+  typedef Prolong_basic < ncoord, nvtx > prolong_basic_t;
+  typedef Restrict_basic < ncoord, nvtx > restrict_basic_t;
+
+  typedef AdaptRestrictProlong2d < ncoord, nvtx > AdaptRestrictProlong2dType;
+
+  protected :
+
+  using hmesh_basic_t::indexmanager;
+
+  using hmesh_basic_t::vl;
+
+  using hmesh_basic_t::mel ;
+
+  using hmesh_basic_t::mbl;
+
+  const ProjectVertex_t  *_projectVertex; 
+
+  private:
+
+  multivertexadapter_t * adp ;
 
   int _nconfDeg;
 
   Refco::tag_t refinement_rule;
 
-  Prolong_basic *_pro_el;
-  Restrict_basic *_rest_el;
+  prolong_basic_t *_pro_el;
+  restrict_basic_t *_rest_el;
 
 
   nconf_vtx_t *ncv;
@@ -953,13 +1033,7 @@ class Hmesh : public Hmesh_basic {
 
   void asciwritetriang(const char *,double , unsigned long int) ;
 
-  public :
-   enum { IM_Elements = 0, // index manager id for elements 
-          IM_Edges = 1,    // index manager id for edges  
-          IM_Vertices = 2, // index manager id for vertices  
-          IM_Bnd = 3       // index manager id for bnd 
-   };
-
+  public:
 
   Hmesh();
 
@@ -995,7 +1069,7 @@ class Hmesh : public Hmesh_basic {
 
   void refresh() ;
 
-  void setdata(void (*)(Element &)) ;
+  void setdata(void (*)(element_t &)) ;
 
 #if USE_ALUGRID_XDISPLAY
   void draw(Xdisplay & ) ; 
@@ -1007,7 +1081,7 @@ template < class A > class Listwalkptr {
 
   Listwalk < A > * walk ;
 
-  Hmesh_basic * hdl ;
+  IndexProvider * hdl ;
   
   A * a ;
 
@@ -1023,9 +1097,11 @@ template < class A > class Listwalkptr {
       : walk ( new Listwalk_empty < A > () ) , hdl(0) , a(0) 
     {}
     
-    Listwalkptr(Hmesh_basic &h) : hdl(&h) , a(0) { walk = h.walk(a) ; }
+    template <int N,int NV>
+    Listwalkptr(Hmesh_basic<N,NV> &h) : hdl(&h) , a(0) { walk = h.walk(a) ; }
 
-    Listwalkptr(Hmesh_basic &h, int level) : hdl(&h) , a(0) { walk = h.walk(a, level) ; }
+    template <int N,int NV>
+    Listwalkptr(Hmesh_basic<N,NV> &h, int level) : hdl(&h) , a(0) { walk = h.walk(a, level) ; }
     
     Listwalkptr(const Listwalkptr & p) : hdl(p.hdl) , a(0)
     { 

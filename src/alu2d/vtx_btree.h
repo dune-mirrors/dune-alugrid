@@ -3,9 +3,9 @@
 
 #include "xdisplay.h"
 
-class Vertex;
-class Thinelement;
-class Element;
+template < int N > class Vertex;
+template < int N, int NV > class Thinelement;
+template < int N, int NV > class Element;
 
 // ============================================================
 // Klasse Vtx_btree: Binaerer Baum von Vertex-Instanzen.
@@ -17,18 +17,23 @@ class Element;
 void nb_draw(Xdisplay &xd,Element *el1,Element *el2);
 #endif
 
-class Vtx_btree {
+template < int N, int NV > class Vtx_btree {
  public:
+
+    typedef Vertex < N > vertex_t;
+    typedef Thinelement < N, NV > thinelement_t;
+    typedef Element < N, NV > element_t;
+
     // Implementation eines Knotens des binaeren Baumes
     struct Node {
-      Vertex* vtx;
-      Thinelement *lnb;
-      Thinelement *rnb;
+      vertex_t *vtx;
+      thinelement_t *lnb;
+      thinelement_t *rnb;
       Node* next;
       Node* prev;
       int _lidx,_ridx;
-      Node(Vertex* invtx,Thinelement *plnb,Thinelement *prnb)
-  : vtx(invtx), lnb(plnb), rnb(prnb), next(0), prev(0)
+      Node(vertex_t *invtx, thinelement_t *plnb, thinelement_t *prnb)
+      : vtx(invtx), lnb(plnb), rnb(prnb), next(0), prev(0)
       {assert(invtx);}
 
       ~Node() {
@@ -42,13 +47,13 @@ class Vtx_btree {
       Node* rightNode() {
         return next;
       }
-      Thinelement* leftElement() {
+      thinelement_t *leftElement() {
         return lnb;
       }
-      Thinelement* rightElement() {
+      thinelement_t *rightElement() {
         return rnb;
       }
-      Vertex* vertex() {
+      vertex_t *vertex() {
         return vtx;
       }
 
@@ -64,9 +69,9 @@ class Vtx_btree {
         return 1 + (next ? next->count() : 0) + (prev ? prev->count() : 0);
       }
 
-      int remove(Vertex *pvtx);
+      int remove(vertex_t *pvtx);
 
-      void nbconnect(int , Thinelement * , int ) ;
+      void nbconnect(int, thinelement_t *, int ) ;
 
 #if USE_ALUGRID_XDISPLAY 
       void draw(Xdisplay &xd,Element *el);
@@ -74,13 +79,13 @@ class Vtx_btree {
 
     }* head;
  public:
-    Vertex* rvtx;
-    Thinelement *lnb;
-    Thinelement *rnb;
+    vertex_t *rvtx;
+    thinelement_t *lnb;
+    thinelement_t *rnb;
 
     void insertNode(Node* node, Node* newNode);
 
-    double dist(Vertex* invtx);
+    double dist(Vertex < N > *invtx);
 
     Vtx_btree* left() const;
 
@@ -88,7 +93,7 @@ class Vtx_btree {
 
   public:
 
-    Vtx_btree(Vertex* invtx,Thinelement *plnb,Thinelement *prnb)
+    Vtx_btree(vertex_t *invtx, thinelement_t *plnb, thinelement_t *prnb)
       : head(0), rvtx(invtx), lnb(plnb), rnb(prnb) {
       assert(rvtx);
       assert(plnb);
@@ -99,21 +104,21 @@ class Vtx_btree {
       if( head ) delete head;
     }
 
-    Vertex* getHead() { return head->vtx; }
+    vertex_t *getHead() { return head->vtx; }
 
-    Thinelement *getlnb() { return head->lnb; }
-    Thinelement *getrnb() { return head->rnb; }
+    thinelement_t *getlnb() { return head->lnb; }
+    thinelement_t *getrnb() { return head->rnb; }
 
-    void insert(Vertex* invtx,Thinelement *plnb,Thinelement *prnb);
+    void insert(vertex_t *invtx, thinelement_t *plnb, thinelement_t *prnb);
     
     void splitTree(Vtx_btree*& inleft, Vtx_btree*& inright);
     
     void merge(Vtx_btree* inleft, Vtx_btree* inright);
 
-    void nbconnect(int , Thinelement * , int ) ;
+    void nbconnect(int, thinelement_t *, int ) ;
 
 #if USE_ALUGRID_XDISPLAY 
-    void draw(Xdisplay &xd,Element *el);
+    void draw(Xdisplay &xd, element_t *el);
 #endif
 
     int deepestLevel() {
@@ -124,7 +129,7 @@ class Vtx_btree {
       return head->count();
     }
     
-    bool remove(Vertex *vtx) {
+    bool remove(Vertex < N > *vtx) {
       assert(head->prev || head->next);
       return (head->remove(vtx)==1);
     }

@@ -3,16 +3,19 @@
 #include "triang.h"
 #include "vmmap.h"
 
-Hmesh::Hmesh() : _nconfDeg(-1), refinement_rule(Refco::none),
+template < int N, int NV >
+Hmesh<N,NV>::Hmesh() : _nconfDeg(-1), refinement_rule(Refco::none),
      _pro_el(0), _rest_el(0) {
 }
 
-Hmesh::Hmesh(const char *macroname,int pnconfDeg,Refco::tag_t pref_rule) :
+template < int N, int NV >
+Hmesh<N,NV>::Hmesh(const char *macroname,int pnconfDeg,Refco::tag_t pref_rule) :
   _nconfDeg(pnconfDeg), refinement_rule(pref_rule) {
   setup_grid(macroname);      
 }
 
-Hmesh::Hmesh(istream& macrofile, int pnconfDeg, Refco::tag_t pref_rule) :
+template < int N, int NV >
+Hmesh<N,NV>::Hmesh(istream& macrofile, int pnconfDeg, Refco::tag_t pref_rule) :
   _nconfDeg(pnconfDeg), refinement_rule(pref_rule) 
 {
   double time;
@@ -29,19 +32,22 @@ Hmesh::Hmesh(istream& macrofile, int pnconfDeg, Refco::tag_t pref_rule) :
   }
 }
 
-Hmesh::Hmesh(const char *macroname,int pnconfDeg) :
+template < int N, int NV >
+Hmesh<N,NV>::Hmesh(const char *macroname,int pnconfDeg) :
   _nconfDeg(pnconfDeg), refinement_rule(Refco::quart) 
 {
   setup_grid(macroname);    
 }
 
-Hmesh::Hmesh(const char *macroname, Refco::tag_t  pref_rule) :
+template < int N, int NV >
+Hmesh<N,NV>::Hmesh(const char *macroname, Refco::tag_t  pref_rule) :
   _nconfDeg(0), refinement_rule(pref_rule) 
 {
   setup_grid(macroname);    
 }
 
-void Hmesh::setup_grid(const char* filename) 
+template < int N, int NV >
+void Hmesh<N,NV>::setup_grid(const char* filename) 
 {
 #ifndef NDEBUG 
   cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
@@ -81,10 +87,11 @@ void Hmesh::setup_grid(const char* filename)
   }
 }
 
-bool Hmesh::setup_grid(istream& macrofile, double& time, long unsigned int& nbr) 
+template < int N, int NV >
+bool Hmesh<N,NV>::setup_grid(istream& macrofile, double& time, long unsigned int& nbr) 
 {
   ncv=NULL;
-  adp = new Multivertexadapter;
+  adp = new multivertexadapter_t;
   _pro_el=0;  // new Prolong_basic;
   _rest_el=0; // new Restrict_basic;
 
@@ -92,13 +99,14 @@ bool Hmesh::setup_grid(istream& macrofile, double& time, long unsigned int& nbr)
 
   /* set periodic neighbours of vertices */
   {
-    Listwalkptr < Hmesh_basic::hbndel_t > walkb(*this);
+    Listwalkptr < hbndel_t > walkb(*this);
     for (walkb->first();!walkb->done();walkb->next())
     {
-      Bndel_triang *bel = (Bndel_triang *)&(walkb->getitem());
-      if (bel->type() == Bndel::periodic)
+      bndel_triang_t *bel = (bndel_triang_t *)&(walkb->getitem());
+      if (bel->type() == bndel_t::periodic)
       {
-        Bndel_triang *nbbel = ((Bndel_periodic *)bel)->periodic_nb;
+        assert(vertex_t::ncoord == 2);
+        bndel_triang_t *nbbel = ((bndel_periodic_t *)bel)->periodic_nb;
         assert(nbbel);
         bel->vertex(0)->set_pernb(nbbel->vertex(1));
         bel->vertex(1)->set_pernb(nbbel->vertex(0));
@@ -107,16 +115,16 @@ bool Hmesh::setup_grid(istream& macrofile, double& time, long unsigned int& nbr)
   }
   // consider periodic vertices along diagonal
   {
-    Listwalkptr < Vertex > walkv(*this);
+    Listwalkptr < vertex_t > walkv(*this);
     for (walkv->first();!walkv->done();walkv->next())
     {
-      Vertex *v = (Vertex *)&walkv->getitem();
+      vertex_t *v = (vertex_t *)&walkv->getitem();
       if (v->get_nr_of_per_nbs() == 2)
       {
         int i,j;
         for (i=0;i<2;i++)
         {
-          Vertex *pnv = v->get_pernb(i);
+          vertex_t *pnv = v->get_pernb(i);
           for (j=0;j<pnv->get_nr_of_per_nbs();j++)
             v->set_pernb(pnv->get_pernb(j));
         }
@@ -128,7 +136,8 @@ bool Hmesh::setup_grid(istream& macrofile, double& time, long unsigned int& nbr)
   return restart;
 }
 
-Hmesh::~Hmesh() {
+template < int N, int NV >
+Hmesh<N,NV>::~Hmesh() {
 
   delete _pro_el;
   delete _rest_el;
@@ -138,25 +147,26 @@ Hmesh::~Hmesh() {
 
 }
 
-void Hmesh::refresh() { 
+template < int N, int NV >
+void Hmesh<N,NV>::refresh() { 
 
-  Listwalk_impl < Macro < Element > > walk (mel) ;
+  Listwalk_impl < macroelement_t > walk (mel) ;
 
   adp->refresh(walk) ;
 
 } 
 
-bool Hmesh::checkConf()
+template < int N, int NV >
+bool Hmesh<N,NV>::checkConf()
 {
   bool elem_marked = false;
-  Listwalkptr<Hmesh_basic::helement_t> walk(*this); // Leafwalk
+  Listwalkptr< helement_t > walk(*this); // Leafwalk
   for( walk->first() ; !walk->done() ; walk->next() ) {
-    if( ((Triang*)&walk->getitem())->confLevelExceeded(_nconfDeg) ) {
-      walk->getitem().mark(refinement_rule);
+    triang_t *item = (triang_t *)&walk->getitem();
+    if( item->confLevelExceeded(_nconfDeg) ) {
+      item->mark(refinement_rule);
     }
-    if (((Triang*)&walk->getitem())->is(Refco::quart) ||
-  ((Triang*)&walk->getitem())->is(Refco::ref_1) ||
-  ((Triang*)&walk->getitem())->is(Refco::ref_2) ) {
+    if (item->is(Refco::quart) || item->is(Refco::ref_1) || item->is(Refco::ref_2) ) {
       elem_marked = true;
     }
   }
@@ -168,37 +178,46 @@ bool Hmesh::checkConf()
 Hmesh *mesh;
 #endif
 
-class RestrictDune : public Restrict_basic
+template < int N, int NV >
+class RestrictDune : public Restrict_basic < N, NV >
 {
-  AdaptRestrictProlong2dType & restop;
-  public: 
-  RestrictDune(AdaptRestrictProlong2dType & arp) : restop(arp) {}
+  AdaptRestrictProlong2d < N, NV > &restop;
+  public:
+  typedef Hier < Element < N, NV > > helement_t;
+  typedef Hier < Bndel < N, NV > > hbndel_t;
+
+  RestrictDune(AdaptRestrictProlong2d < N, NV > &arp) : restop(arp) {}
   virtual ~RestrictDune() {}
-  virtual void operator ()(Hier<Element> *parent) {
+  virtual void operator ()(helement_t *parent) {
     restop.preCoarsening(*parent);
   }
-  virtual void operator ()(Hier<Bndel> *parent) {
+  virtual void operator ()(hbndel_t *parent) {
   }
 };
 
-class ProlongDune : public Prolong_basic
+template < int N, int NV >
+class ProlongDune : public Prolong_basic < N,NV >
 {
-  AdaptRestrictProlong2dType & restop;
+  AdaptRestrictProlong2d < N, NV > &restop;
   public:
-  ProlongDune(AdaptRestrictProlong2dType & arp) : restop(arp) {}
+  typedef Hier < Element < N, NV > > helement_t;
+  typedef Hier < Bndel < N, NV > > hbndel_t;
+
+  ProlongDune(AdaptRestrictProlong2d < N,NV > &arp) : restop(arp) {}
   virtual ~ProlongDune () {}
-  virtual void operator ()(Hier<Element> *parent) {
+  virtual void operator ()(helement_t *parent) {
     restop.postRefinement(*parent);
   }
-  virtual void operator ()(Hier<Bndel> *parent) {
+  virtual void operator ()(hbndel_t *parent) {
   }
 };
 
-bool Hmesh::duneAdapt(AdaptRestrictProlong2dType & arp) {
-  ProlongDune produne(arp);
-  RestrictDune restdune(arp);
-  Prolong_basic *pro_el_old = _pro_el;
-  Restrict_basic *rest_el_old = _rest_el;
+template < int N, int NV >
+bool Hmesh<N,NV>::duneAdapt(AdaptRestrictProlong2dType & arp) {
+  ProlongDune < ncoord,nvtx > produne(arp);
+  RestrictDune < ncoord,nvtx > restdune(arp);
+  prolong_basic_t *pro_el_old = _pro_el;
+  restrict_basic_t *rest_el_old = _rest_el;
   _pro_el=&produne;
   _rest_el=&restdune;
   this->refine ();
@@ -208,7 +227,8 @@ bool Hmesh::duneAdapt(AdaptRestrictProlong2dType & arp) {
   return true;
 }
 
-void Hmesh::refine() {
+template < int N, int NV >
+void Hmesh<N,NV>::refine() {
 #ifdef USE_ALUGRID_XDISPLAY
   mesh=this;
 #endif
@@ -242,11 +262,12 @@ void Hmesh::refine() {
 
   //cerr << Leafwalk < Element > (mel).size() << "  " ;
 
-  //cerr << Listwalk_impl < Vertex > (vl).size() << endl ;
+  //cerr << Listwalk_impl < vertex_t > (vl).size() << endl ;
 
 }
 
-void Hmesh::coarse() {
+template < int N, int NV >
+void Hmesh<N,NV>::coarse() {
 #ifdef USE_ALUGRID_XDISPLAY
   mesh=this;
 #endif
@@ -269,13 +290,13 @@ void Hmesh::coarse() {
 
   { // sch.... konstruktion 
 
-    Listwalk_impl < Vertex > walk (vl) ;
+    Listwalk_impl < vertex_t > walk (vl) ;
 
     walk.first() ; 
 
     while(! walk.done()) {
 
-      Vertex * curr = & walk.getitem() ;
+      vertex_t * curr = & walk.getitem() ;
 
       if(curr->Basic::isfree()) {
 
@@ -296,9 +317,19 @@ void Hmesh::coarse() {
   vl.renumber() ;
 }
 
-void Hmesh::setdata(void (*f)(Element &)) 
+template < int N, int NV >
+void Hmesh<N,NV>::setdata(void (*f)(element_t &)) 
 {
-  Leafwalk < Element > walk(mel) ;
+  Leafwalk < element_t > walk(mel) ;
   for (walk.first();walk.done();walk.next())
     f(walk.getitem());
 }
+
+// ------------------------------------------------------------
+// Template Instantiation
+// ------------------------------------------------------------
+template class Hmesh_basic < 2,3 >;
+template class Hmesh < 2,3 >;
+template class Hmesh_basic < 3,3 >;
+template class Hmesh < 3,3 >;
+

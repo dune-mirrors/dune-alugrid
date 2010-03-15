@@ -8,8 +8,9 @@
 // "Verpackt" den uebergebenen Vertex in einer Instanz der
 // privaten Klasse Node und fuegt jene in den Baum ein.
 
+template < int N, int NV >
 void
-Vtx_btree::insert(Vertex* invtx,Thinelement *plnb,Thinelement *prnb)
+Vtx_btree < N,NV >::insert(vertex_t *invtx, thinelement_t *plnb, thinelement_t *prnb)
 {
   Node* newNode = new Node(invtx,plnb,prnb);
   if( head == 0 )
@@ -24,8 +25,9 @@ Vtx_btree::insert(Vertex* invtx,Thinelement *plnb,Thinelement *prnb)
 // Fuegt neue Instanz der Klasse Node 'newNode' in den Baum
 // nach 'node' ein.
 
+template < int N, int NV >
 void
-Vtx_btree::insertNode(Node* node, Node* newNode)
+Vtx_btree < N,NV >::insertNode(Node* node, Node* newNode)
 {
   assert(node->vtx);
   assert(newNode->vtx);
@@ -51,8 +53,9 @@ Vtx_btree::insertNode(Node* node, Node* newNode)
 // Dabei ist zu beachten, dass nur die Referenzen und nicht
 // die Node-Instanzen kopiert werden.
 
-Vtx_btree*
-Vtx_btree::left() const
+template < int N, int NV >
+Vtx_btree < N,NV > *
+Vtx_btree < N,NV >::left() const
 {
   Vtx_btree* left = 0;
   if( head->prev ) 
@@ -68,8 +71,9 @@ Vtx_btree::left() const
 // ------------------------------------------------------------
 // Siehe 'left'
 
-Vtx_btree*
-Vtx_btree::right() const
+template < int N, int NV >
+Vtx_btree < N,NV >*
+Vtx_btree < N,NV >::right() const
 {
   Vtx_btree* right = 0;
   if( head->next ) 
@@ -88,8 +92,9 @@ Vtx_btree::right() const
 // und gibt jene zurueck. Hiernach besteht der Empfaenger nur
 // noch aus einem Element, dem Kopf der Baumes.
 
+template < int N, int NV >
 void
-Vtx_btree::splitTree(Vtx_btree*& ioleft, Vtx_btree*& ioright)
+Vtx_btree < N,NV >::splitTree(Vtx_btree < N,NV > *&ioleft, Vtx_btree < N,NV > *&ioright)
 {
   ioleft = left();
   ioright = right();
@@ -104,8 +109,9 @@ Vtx_btree::splitTree(Vtx_btree*& ioleft, Vtx_btree*& ioright)
 // Umkehrung von 'split'. Dabei ist zu beachten, dass die
 // uebergebenen Baeume danach leer sind.
 
+template < int N, int NV >
 void
-Vtx_btree::merge(Vtx_btree* inleft, Vtx_btree* inright)
+Vtx_btree < N,NV >::merge(Vtx_btree < N,NV > *inleft, Vtx_btree < N,NV > *inright)
 {
   assert(count() == 1);
   head->prev = (inleft != NULL ? inleft->head : NULL);
@@ -122,22 +128,30 @@ Vtx_btree::merge(Vtx_btree* inleft, Vtx_btree* inright)
 // Gibt die Distanz zwischen dem uebergebenen und dem
 // Referenzvertex zurueck
 
+template < int N, int NV >
 double
-Vtx_btree::dist(Vertex* invtx)
+Vtx_btree < N,NV >::dist(vertex_t *invtx)
 {
   assert(rvtx);
-  return   pow(invtx->coord()[0] - rvtx->coord()[0],2)
-         + pow(invtx->coord()[1] - rvtx->coord()[1],2);
+  double ret=0;
+  for (int i=0;i<vertex_t::ncoord;++i)
+  {
+    const double d = (invtx->coord()[i] - rvtx->coord()[i]);
+    ret += d*d;
+  }
+  return ret;
 }
 
-void 
-Vtx_btree::nbconnect(int opp, Thinelement *el , int i) {
+template < int N, int NV >
+void
+Vtx_btree < N,NV >::nbconnect(int opp, thinelement_t *el , int i) {
   if (head)
     head->nbconnect(opp,el,i);
 }
 
+template < int N, int NV >
 void 
-Vtx_btree::Node::nbconnect(int opp, Thinelement *el , int i) {
+Vtx_btree < N,NV >::Node::nbconnect(int opp, thinelement_t *el , int i) {
   if (lnb)
     lnb->nbconnect(opp,el,i);
   if (rnb)
@@ -148,7 +162,8 @@ Vtx_btree::Node::nbconnect(int opp, Thinelement *el , int i) {
     next->nbconnect(opp,el,i);  
 }
 
-int Vtx_btree::Node::remove(Vertex *pvtx) {
+template < int N, int NV >
+int Vtx_btree < N,NV >::Node::remove(vertex_t *pvtx) {
   if (vtx==pvtx) {
     assert(!prev && !next);
     return -1;
@@ -168,3 +183,9 @@ int Vtx_btree::Node::remove(Vertex *pvtx) {
   return right+left;
 }
 
+
+// ------------------------------------------------------------
+// Template Instantiation
+// ------------------------------------------------------------
+template class Vtx_btree < 2,3 >;
+template class Vtx_btree < 3,3 >;

@@ -2,6 +2,7 @@
 #define __ALUGRID_2D_H_INCLUDED__
 
 #define ALUGRID_NOTEMPFILE_2D
+#define ALUGRID_SURFACE_2D
 
 // include all headers 
 #include "stlheaders.h"
@@ -18,7 +19,6 @@ namespace ALUGridSpace {
 #include "alu2d/vtx_btree.h"
 #include "alu2d/vmmap.h"
 #include "alu2d/xdisplay_imp.hh"
-typedef AdaptRestrictProlong2d AdaptRestrictProlong2dType;
 
 }
 

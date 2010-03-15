@@ -7,7 +7,8 @@
 #include "handle.h"
 #include "vmmap.h"
 
-Multivertexadapter::Multivertexadapter() {
+template < int N, int NV >
+Multivertexadapter < N, NV >::Multivertexadapter() {
 
   edmaps.reserve(30) ;
 
@@ -19,7 +20,8 @@ Multivertexadapter::Multivertexadapter() {
 
 }
 
-void Multivertexadapter::refresh( Listwalk < Macro < Element > > & walk) {
+template < int N, int NV >
+void Multivertexadapter < N, NV >::refresh( Listwalk < macroelement_t > & walk) {
 
   while(edmaps.size() > 0) edmaps.pop_back() ;
 
@@ -34,11 +36,11 @@ void Multivertexadapter::refresh( Listwalk < Macro < Element > > & walk) {
 
     for(int e = 0 ; e < walk.getitem()->numedges() ; e ++) {
 
-      Vertex * edg [2] ;
+      vertex_t * edg [2] ;
 
       walk.getitem()->edge_vtx(e, edg) ;
 
-      vector < Vertex * > v ;
+      vector < vertex_t * > v ;
 
       v.push_back(edg[0]) ;
 
@@ -54,9 +56,11 @@ void Multivertexadapter::refresh( Listwalk < Macro < Element > > & walk) {
 
 }
 
-Vertex * Multivertexadapter::find( Vertex * a, Vertex * b, int l) {
+template < int N, int NV >
+typename Multivertexadapter < N, NV >::vertex_t *
+Multivertexadapter < N, NV >::find( vertex_t * a, vertex_t * b, int l) {
 
-  vector < Vertex * > e ;
+  vector < vertex_t * > e ;
 
   e.push_back(a) ;
 
@@ -68,17 +72,17 @@ Vertex * Multivertexadapter::find( Vertex * a, Vertex * b, int l) {
 
   map_t & map = edmaps[l] ;
 
-  map_t::iterator edge = map.find(e) ;
+  typename map_t::iterator edge = map.find(e) ;
 
-  return edge == map.end() ? 0 : (Vertex *) (*edge).second.a ;
+  return edge == map.end() ? 0 : (vertex_t *) (*edge).second.a ;
 
 }
 
-Vertex * Multivertexadapter::find(Vertex * a, Vertex * b, 
+template < int N, int NV >
+typename Multivertexadapter < N, NV >::vertex_t *
+Multivertexadapter < N, NV >::find(vertex_t *a, vertex_t *b, vertex_t *c, vertex_t *d, int l) {
 
-	Vertex * c, Vertex * d, int l) {
-
-  vector < Vertex * > v ;
+  vector < vertex_t * > v ;
 
   v.push_back(a) ; 
 
@@ -94,13 +98,13 @@ Vertex * Multivertexadapter::find(Vertex * a, Vertex * b,
 
   map_t & map = f4maps[l] ;
 
-  map_t::iterator face = map.find(v) ;
+  typename map_t::iterator face = map.find(v) ;
 
   if(face == map.end()) return 0 ;
 
   else {
 
-    Vertex * hit = (Vertex *) (*face).second.a ;
+    vertex_t * hit = (vertex_t *) (*face).second.a ;
 
     map.erase(face) ;
 
@@ -110,11 +114,12 @@ Vertex * Multivertexadapter::find(Vertex * a, Vertex * b,
 
 }
 
-void Multivertexadapter::insert( Vertex * a, Vertex * b, 
+template < int N, int NV >
+void Multivertexadapter < N, NV >::insert( vertex_t * a, vertex_t * b, 
 
-	Vertex * ev, int l) {
+	vertex_t * ev, int l) {
 
-  vector < Vertex * > e ;
+  vector < vertex_t * > e ;
 
   e.push_back(a) ;
 
@@ -126,11 +131,12 @@ void Multivertexadapter::insert( Vertex * a, Vertex * b,
 
 }
 
-void Multivertexadapter::insert(Vertex * a, Vertex * b,
+template < int N, int NV >
+void Multivertexadapter < N, NV >::insert(vertex_t * a, vertex_t * b,
 
-	Vertex * c, Vertex * d, Vertex * cv, int l) {
+	vertex_t * c, vertex_t * d, vertex_t * cv, int l) {
 
-  vector < Vertex * > v ;
+  vector < vertex_t * > v ;
 
   v.push_back(a) ;
 
@@ -145,3 +151,9 @@ void Multivertexadapter::insert(Vertex * a, Vertex * b,
   f4maps[l][v] = val_t(cv,0) ;
 
 }
+
+// ------------------------------------------------------------
+// Template Instantiation
+// ------------------------------------------------------------
+template class Multivertexadapter < 2,3 >;
+template class Multivertexadapter < 3,3 >;
