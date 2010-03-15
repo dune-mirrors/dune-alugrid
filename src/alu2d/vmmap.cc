@@ -157,3 +157,5 @@ void Multivertexadapter < N, NV >::insert(vertex_t * a, vertex_t * b,
 // ------------------------------------------------------------
 template class Multivertexadapter < 2,3 >;
 template class Multivertexadapter < 3,3 >;
+template class Multivertexadapter < 2,4 >;
+template class Multivertexadapter < 3,4 >;

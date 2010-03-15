@@ -189,3 +189,6 @@ int Vtx_btree < N,NV >::Node::remove(vertex_t *pvtx) {
 // ------------------------------------------------------------
 template class Vtx_btree < 2,3 >;
 template class Vtx_btree < 3,3 >;
+
+template class Vtx_btree < 2,4 >;
+template class Vtx_btree < 3,4 >;

@@ -1421,3 +1421,15 @@ template class Triang < 3,3 >;
 template class Bndel < 3,3 >;
 template class Bndel_triang < 3,3 >;
 template class Bndel_periodic < 3,3 >;
+
+template class Element < 2,4 >;
+template class Triang < 2,4 >;
+template class Bndel < 2,4 >;
+template class Bndel_triang < 2,4 >;
+template class Bndel_periodic < 2,4 >;
+
+template class Element < 3,4 >;
+template class Triang < 3,4 >;
+template class Bndel < 3,4 >;
+template class Bndel_triang < 3,4 >;
+template class Bndel_periodic < 3,4 >;

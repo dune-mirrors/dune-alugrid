@@ -333,3 +333,8 @@ template class Hmesh < 2,3 >;
 template class Hmesh_basic < 3,3 >;
 template class Hmesh < 3,3 >;
 
+template class Hmesh_basic < 2,4 >;
+template class Hmesh < 2,4 >;
+template class Hmesh_basic < 3,4 >;
+template class Hmesh < 3,4 >;
+

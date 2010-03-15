@@ -459,7 +459,7 @@ inline void Element < N, NV >::setnormdir(int fce, int dir) {
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-inline Element < N, NV >::c::c() : nv(NV), nf(NV) { // TRIANG
+inline Element < N, NV >::c::c() : nv(3), nf(3) { // TRIANG
   for( int i = 0 ; i < NV ; i ++ ) vtx[i] = 0; 
   for( int j = 0 ; j < NV ; j ++ ) { hvtx[j] = 0 ; nb[j] = 0 ; bck[j] = -1 ; normdir[j]=0 ; edge[j] = 0;}  
 }
