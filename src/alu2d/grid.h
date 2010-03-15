@@ -398,7 +398,7 @@ template < int N, int NV > class Thinelement : public Basic {
     Thinelement() : mysplit(unsplit), nfaces(0), nedges(0), nvertices(0) { }
     
     virtual ~Thinelement() { }
-   
+
   public :
     
     virtual int thinis(thintype_t ) const = 0 ;
@@ -532,7 +532,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     struct c {  //  die vertex und (thin-)element verbindungen
 
       enum {pv=2};
-      int nv,nf;
+      // int nv,nf;
 
       vertex_t * vtx [NV] ;
 
@@ -562,6 +562,14 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
     } connect ;
 
+    int mod(int i) const
+    {
+      assert( numvertices() == numfaces() );
+      if (NV == 3) return i%3;
+      else return i%numvertices();
+    }
+   
+
     using Basic::hdl;
     using Basic::_idx;
 
@@ -571,13 +579,15 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     double _sidelength[NV];
 
   public :
+    using thinelement_t::numvertices;
+    using thinelement_t::numfaces;
     using thinelement_t::getIndex;
    
     Element() : _area(-1.0), _minheight(-1.0)
     {
       int i,j;
 
-      for (i=0;i<connect.nf;i++)
+      for (i=0;i<NV;i++)
       {
         for (j=0;j<ncoord;++j)
           _outernormal[i][j] =  0.0;
@@ -627,7 +637,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     int setorientation();
 
 
-    double sidelength(int pfce) const { return _sidelength[pfce%connect.nf]; }
+    double sidelength(int pfce) const { return _sidelength[mod(pfce)]; }
 
     double minheight() const { return _minheight; }
 

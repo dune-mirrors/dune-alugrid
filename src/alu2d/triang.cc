@@ -88,8 +88,8 @@ extern int g_argc;
 template < int N, int NV >
 Triang < N,NV >::Triang() {
   thinelement_t::nedges = -1 ;
-  thinelement_t::nfaces = connect.nf ;
-  thinelement_t::nvertices = 3; // connect.nv ;
+  thinelement_t::nfaces = -1 ;
+  thinelement_t::nvertices = -1;
 }
 
 // ***************************************************
@@ -107,8 +107,8 @@ Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2) {
   connect.set( v1, 1) ;
   connect.set( v2, 2) ;
   thinelement_t::nedges = -1 ;
-  thinelement_t::nfaces = connect.nf ;
-  thinelement_t::nvertices = 3; // connect.nv ;
+  thinelement_t::nfaces = 3 ;
+  thinelement_t::nvertices = 3 ;
 
   init();
 }
@@ -147,6 +147,16 @@ template < int N, int NV >
 void Triang < N,NV >::read(istream & in, vertex_t ** look, const int len) {
   helement_t::read(in) ;
   connect.read(in, look, len) ;
+  if (NV == 3)
+  {
+    thinelement_t::nfaces = 3 ;
+    thinelement_t::nvertices = 3 ;
+  } 
+  else
+  {
+    thinelement_t::nfaces = 3 ;
+    thinelement_t::nvertices = 3 ;
+  } 
   init() ;
 }
 
@@ -166,7 +176,7 @@ bool Triang < N,NV >::confLevelExceeded(int nconfDeg) const
   bool result = false;
 
   if( nconfDeg >= 0 ) {
-    for( int i=0 ; i<connect.nf ; i++ )
+    for( int i=0 ; i<numfaces() ; i++ )
       {
   bndel_triang_t *nb = nbbnd(i);
 
@@ -224,8 +234,8 @@ void Triang < N,NV >::newNeighbour(Triang* nb, int fce, int nbfce,
   assert(sr == thinelement_t::triang_conf2);
   assert(fce >= 0);
   assert(nbfce >= 0);
-  fce %= connect.nf;
-  nbfce %= connect.nf;
+  fce = mod(fce);
+  nbfce = mod(nbfce);
 
   nbconnect(fce, nb, nbfce);
   if( setnormal )
@@ -970,13 +980,13 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
 template < int N, int NV >
 int Element < N,NV >::c::check()
 {
-  for (int i=0;i<nv;i++)
+  for (int i=0;i<3;i++)
     assert( vtx[i] );
-  for (int i=0;i<nf;i++)
+  for (int i=0;i<3;i++)
     {
       if (nb[i]->thinis(thinelement_t::element_like))
   {
-    assert( 0<=bck[i] && bck[i]<=nf );
+    assert( 0<=bck[i] && bck[i]<=NV );
   }
       else
   {

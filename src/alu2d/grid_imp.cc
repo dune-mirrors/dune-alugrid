@@ -2,6 +2,7 @@
 #define ALU2D_GRID_IMP_CC
 
 #include "handle.h"
+#include <sstream>
 
 static const double EPS = 1e-8;
 
@@ -235,7 +236,7 @@ inline Vertex < N >::~Vertex() {
 template < int N, int NV >
 inline Element < N, NV >::~Element() 
 {
-  for (int i=0;i<connect.nf;++i) 
+  for (int i=0;i<NV;++i) 
   {
     if (connect.edge[i]) 
     {
@@ -277,8 +278,8 @@ inline Bndel < N, NV >::~Bndel() {
 template < int N, int NV >
 inline void Element < N, NV >::edge_vtx(int e, vertex_t *(&v) [2]) const {
   assert(0 <= e) ;
-  v[0] = connect.vtx[(e+1)%connect.nv] ;
-  v[1] = connect.vtx[(e+2)%connect.nv] ;
+  v[0] = connect.vtx[mod(e+1)] ;
+  v[1] = connect.vtx[mod(e+2)] ;
 }
 
 // ***************************************************
@@ -295,14 +296,14 @@ template < int N, int NV >
 inline typename Element < N, NV >::fullvertex_t *
 Element < N,NV >::getVertex(int i) const {
   assert(0 <= i) ;
-  return (fullvertex_t *)(connect.vtx[i%connect.nv]) ; 
+  return (fullvertex_t *)(connect.vtx[mod(i)]) ; 
 }
 
 template < int N, int NV >
 inline typename Element < N, NV >::vertex_t *
 Element < N, NV >::vertex(int i) const {
   assert(0 <= i) ;
-  return connect.vtx[i%connect.nv] ; 
+  return connect.vtx[mod(i)] ; 
 }
 
 // ***************************************************
@@ -319,7 +320,7 @@ template < int N, int NV >
 inline typename Element < N, NV >::thinelement_t *
 Element < N, NV >::neighbour(int fce) const {
   assert(0 <= fce) ;
-  return connect.nb[fce%connect.nf] ;
+  return connect.nb[mod(fce)] ;
 }
 
 // ***************************************************
@@ -336,12 +337,12 @@ Element < N, NV >::neighbour(int fce) const {
 template < int N, int NV >
 inline int Element < N, NV >::opposite(int fce) const {
   assert(0 <= fce) ;
-  return connect.bck [fce%connect.nf] ;
+  return connect.bck [mod(fce)] ;
 }
 template < int N, int NV >
 inline int Element < N, NV >::edge_idx(int fce) const {
   assert(0 <= fce) ;
-  return connect.edge[fce%connect.nf]->getIndex() ;
+  return connect.edge[mod(fce)]->getIndex() ;
 }
 template < int N, int NV >
 inline Edge *Element < N, NV >::edge(int fce) const {
@@ -366,9 +367,9 @@ template < int N, int NV >
 inline int Element < N, NV >::facevertex(int fce, int loc) const { 
   assert(0 <= fce) ;
   assert(0 <= loc) ;
-  fce %= connect.nf ;
+  fce = mod(fce); 
   loc %= connect.pv ;
-  return (fce+loc+1)%connect.nv ; 
+  return mod(fce+loc+1); 
 }
 
 // ***************************************************
@@ -396,7 +397,7 @@ template < int N, int NV >
 inline int Element < N, NV >::normaldir(int fce) const
 {
   assert(0 <= fce) ;
-  fce%=connect.nf;
+  fce=mod(fce);
   return connect.normdir[fce] ;
 }
 
@@ -416,7 +417,7 @@ inline int Element < N, NV >::normaldir(int fce) const
 template < int N, int NV >
 inline void Element < N, NV >::nbconnect(int fce, thinelement_t * n, int b) { 
   assert(0 <= fce) ;
-  fce %= connect.nf ;
+  fce = mod(fce) ;
 
   connect.nb[fce] = n ; 
   connect.bck[fce] = b ;
@@ -424,7 +425,7 @@ inline void Element < N, NV >::nbconnect(int fce, thinelement_t * n, int b) {
 template < int N, int NV >
 inline void Element < N, NV >::edgeconnect(int fce, Edge * n) { 
   assert(0 <= fce) ;
-  fce %= connect.nf ;
+  fce = mod(fce) ;
 
   connect.edge[fce] = n ; 
   n->attach();
@@ -444,7 +445,7 @@ inline void Element < N, NV >::edgeconnect(int fce, Edge * n) {
 template < int N, int NV >
 inline void Element < N, NV >::setnormdir(int fce, int dir) {
   assert( 0 <= fce );
-  fce %= connect.nf ;
+  fce = mod(fce) ;
   assert( dir == 1 || dir == -1);
   connect.normdir[fce] = dir;
 }
@@ -459,7 +460,7 @@ inline void Element < N, NV >::setnormdir(int fce, int dir) {
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-inline Element < N, NV >::c::c() : nv(3), nf(3) { // TRIANG
+inline Element < N, NV >::c::c() { 
   for( int i = 0 ; i < NV ; i ++ ) vtx[i] = 0; 
   for( int j = 0 ; j < NV ; j ++ ) { hvtx[j] = 0 ; nb[j] = 0 ; bck[j] = -1 ; normdir[j]=0 ; edge[j] = 0;}  
 }
@@ -493,7 +494,7 @@ inline Element < N, NV >::c::~c() {
 // ***************************************************
 template < int N, int NV >
 inline void Element < N, NV >::c::write(ostream &out) const {
-  for(int i = 0 ; i < nv ; i ++ ) 
+  for(int i = 0 ; i < NV ; i ++ ) 
   {
     out << (vtx[i] ? vtx[i]->Listagent < vertex_t > :: number() : -1 ) << "  " ;
 //    out << bck[i] << "  " ;
@@ -514,10 +515,32 @@ inline void Element < N, NV >::c::write(ostream &out) const {
 template < int N, int NV >
 inline void Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
   int c ;
-  for(int i = 0 ; i < nv ; i ++ ) {
-    in >> c ;
-    assert(-1 <= c && c < l) ;
-    if(c != -1) set((vertex_t *)v[c], i) ;
+  string line;
+  while (in && line == "")
+    getline( in, line );
+  istringstream linein( line );
+  int i;
+  for (int i = 0; ; ++i)
+  {
+    linein >> c ;
+    if ( !linein ) 
+    {
+      if ( i >= 3 )
+        break;
+      cerr << "Too few element vertices read from file" << endl;
+      abort();
+    }
+    if ( i >= NV )
+    {
+      cerr << "Too many element vertices read from file" << endl;
+      abort();
+    }
+    if ( 0 > c || c >= l) 
+    {
+      cerr << "Wrong vertex number for element read from file" << endl;
+      abort();
+    }
+    set((vertex_t *)v[c], i) ;
   }
 }
 
@@ -536,7 +559,7 @@ template < int N, int NV >
 inline void Element < N, NV >::outernormal(int fce,double (&n)[ncoord]) const
 {
   for (int i=0;i<ncoord;++i)
-    n[i]= _outernormal[fce%connect.nf][i];
+    n[i]= _outernormal[mod(fce)][i];
 }
 
 // ***************************************************
@@ -645,9 +668,9 @@ inline void Element < N, NV >::facepoint(int fce, double pos, double (&bary)[3])
 template < int N, int NV >
 inline void Element < N, NV >::setrefine(int fce) 
 {
-  assert( connect.nf == 3 && connect.nv == 3 );
+  assert( numfaces() == 3 && numvertices() == 3 );
   assert( 0<=fce );
-  fce%=connect.nv;
+  fce=mod(fce);
   vertex_t *tmp_v[3]={connect.vtx[0],connect.vtx[1],connect.vtx[2]};
   thinelement_t *tmp_n[3]={connect.nb[0],connect.nb[1],connect.nb[2]};
   Edge *tmp_e[3]={connect.edge[0],connect.edge[1],connect.edge[2]};
@@ -661,21 +684,19 @@ inline void Element < N, NV >::setrefine(int fce)
       tmp_on[i][j] = _outernormal[i][j];
   // double tmp_onx[3]={_outernormal[0][0],_outernormal[1][0],_outernormal[2][0]};
   // double tmp_ony[3]={_outernormal[0][1],_outernormal[1][1],_outernormal[2][1]};
-  for (int j=0;j<connect.nv;j++)
+  for (int j=0;j<numvertices();j++)
   {  
-    connect.vtx[j]=tmp_v[(fce+j)%connect.nv];  
-    connect.bck[j]=tmp_b[(fce+j)%connect.nv];  
-    connect.nb[j]=tmp_n[(fce+j)%connect.nv];  
-    connect.edge[j]=tmp_e[(fce+j)%connect.nv];  
-    connect.normdir[j]=tmp_no[(fce+j)%connect.nv];  
+    connect.vtx[j]=tmp_v[mod(fce+j)];  
+    connect.bck[j]=tmp_b[mod(fce+j)];  
+    connect.nb[j]=tmp_n[mod(fce+j)];  
+    connect.edge[j]=tmp_e[mod(fce+j)];  
+    connect.normdir[j]=tmp_no[mod(fce+j)];  
     connect.nb[j]->nbconnect(connect.bck[j],this,j);
-    connect.hvtx[j] = tmp_btree[(fce+j)%connect.nv];
+    connect.hvtx[j] = tmp_btree[mod(fce+j)];
 
-    _sidelength[j]     = tmp_sln[(fce+j)%connect.nv];
+    _sidelength[j]     = tmp_sln[mod(fce+j)];
     for (int k=0;k<ncoord;++k)
-      _outernormal[j][k] = tmp_on[(fce+j)%connect.nv][k];
-    // _outernormal[j][0] = tmp_onx[(fce+j)%connect.nv];
-    // _outernormal[j][1] = tmp_ony[(fce+j)%connect.nv];
+      _outernormal[j][k] = tmp_on[mod(fce+j)][k];
   }
 }
 
@@ -692,7 +713,7 @@ template < int N, int NV >
 inline void Element < N, NV >::init()
 { 
   /* calculate area */
-  // assert( connect.nf == 3 && connect.nv == 3 ); // TRIANG
+  assert( numfaces() == 3 && numvertices() == 3 ); // TRIANG
 
   const double (&vc0)[ncoord]=connect.vtx[0]->coord();
   const double (&vc1)[ncoord]=connect.vtx[1]->coord();
@@ -701,7 +722,7 @@ inline void Element < N, NV >::init()
   if (ncoord == 2)
   {
     /* calculate outer normal and sidelength */
-    for (int i=0;i<connect.nf;i++)
+    for (int i=0;i<numfaces();i++)
     {
       _outernormal[i][0]= (vertex(i+2)->coord()[1]-vertex(i+1)->coord()[1]);
       _outernormal[i][1]=-(vertex(i+2)->coord()[0]-vertex(i+1)->coord()[0]);
@@ -719,7 +740,7 @@ inline void Element < N, NV >::init()
   {
     double sides[NV][ncoord];
     /* calculate outer normal and sidelength^2 */
-    for (int i=0;i<connect.nf;i++)
+    for (int i=0;i<numfaces();i++)
     {
       _sidelength[i] = 0;
       for (int k=0;k<ncoord;++k)
@@ -729,12 +750,12 @@ inline void Element < N, NV >::init()
       }
     }
     _area = 0;
-    for (int i=0;i<connect.nf;i++)
+    for (int i=0;i<numfaces();i++)
     {
       double scp_ds = 0;
       for (int k=0;k<ncoord;++k)
       {
-        _outernormal[i][k] = sides[(i+2)%connect.nf][k] - sides[(i+1)%connect.nf][k];
+        _outernormal[i][k] = sides[mod(i+2)][k] - sides[mod(i+1)][k];
         scp_ds += _outernormal[i][k] * sides[i][k];
       }
       double norm_n = 0;
@@ -750,7 +771,7 @@ inline void Element < N, NV >::init()
         _outernormal[i][k] *= fac;
       _area += 1./(4.*fac);
     }
-    _area /= connect.nf;
+    _area /= numfaces();
   }
 
   assert(_area > 0.0);
@@ -782,7 +803,7 @@ inline int Element < N, NV >::setrefine()
   double maxkantenlen=-1.0,kantenlen;
   int maxkante=-1;
   
-  for (int i=0;i<connect.nf;i++)
+  for (int i=0;i<numfaces();i++)
   {
     kantenlen=sidelength(i);
     if (kantenlen > maxkantenlen)
@@ -813,7 +834,7 @@ inline int Element < N, NV >::setorientation()
 {
   // required ??
   if (ncoord>2) return 1;
-  assert( connect.nf == 3 && connect.nv == 3 );
+  assert( numfaces() == 3 && numvertices() == 3 ); // TRIANG
   double o;
   const double (&v0)[ncoord]=connect.vtx[0]->coord();
   const double (&v1)[ncoord]=connect.vtx[1]->coord();
@@ -880,7 +901,7 @@ inline void Element < N, NV >::addhvtx(vertex_t *invtx, thinelement_t *lnb, thin
     assert(rnb);
     assert(lnb);
     if( !connect.hvtx[fce] )
-      connect.hvtx[fce] = new vtx_btree_t(connect.vtx[(fce+1)%connect.nf],lnb,rnb);
+      connect.hvtx[fce] = new vtx_btree_t(connect.vtx[mod(fce+1)],lnb,rnb);
     connect.hvtx[fce]->insert(invtx,lnb,rnb);
   } else {
     assert(!connect.hvtx[fce]); 

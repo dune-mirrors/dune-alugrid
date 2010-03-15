@@ -49,6 +49,10 @@ class Triang : public Hier < Element < N,NV > > {
 
   protected:
     
+    using element_t::numvertices;
+    using element_t::numfaces;
+    using element_t::mod;
+
     using helement_t::connect;
     using helement_t::hdl;
     using helement_t::level;
