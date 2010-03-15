@@ -519,7 +519,6 @@ inline void Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l)
   while (in && line == "")
     getline( in, line );
   istringstream linein( line );
-  int i;
   for (int i = 0; ; ++i)
   {
     linein >> c ;
@@ -771,7 +770,7 @@ inline void Element < N, NV >::init()
         _outernormal[i][k] *= fac;
       _area += 1./(4.*fac);
     }
-    _area /= numfaces();
+    _area /= (numvertices()==3)?double(numfaces()):double(numfaces()/2.);
   }
 
   assert(_area > 0.0);
