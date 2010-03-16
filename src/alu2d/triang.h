@@ -48,9 +48,6 @@ class Triang : public Hier < Element < N,NV > > {
     typedef Restrict_basic < ncoord, NV > restrict_basic_t;
 
   protected:
-    
-    using element_t::numvertices;
-    using element_t::numfaces;
     using element_t::mod;
 
     using helement_t::connect;
@@ -59,6 +56,8 @@ class Triang : public Hier < Element < N,NV > > {
     using helement_t::mysplit;
 
   public:
+    using element_t::numvertices;
+    using element_t::numfaces;
 
     using helement_t::deletesubtree;
     using helement_t::down;
