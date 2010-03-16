@@ -741,7 +741,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
         }
 
         Triang *trnb1 = (Triang *)( trnb2->next() ? trnb2->next():trnb0->down() );
-        if (NV==3 && opposite(i)==1) trnb1=(Triang*)trnb0->down();
+        if (numvertices()==3 && opposite(i)==1) trnb1=(Triang*)trnb0->down();
 
         assert(trnb1->connect.vtx[mod(opposite(i)+1)] == newvtx[i]);
         assert(trnb2->connect.vtx[mod(opposite(i)+2)] == newvtx[i]);
