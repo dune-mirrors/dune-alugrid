@@ -925,21 +925,16 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
   } 
   // QUATERING
   else if (mysplit==thinelement_t::triang_quarter) {
-    if (NV == 4) 
-    {
-      cerr << "COARSEN NOT IMPLEMENTED FOR QUADS!" << endl;
-      abort();
-    }
     int lcancoarsen=1;
     element_t *child[3]={down(),down()->next(),down()->next()->next()};
     for (int i=0;i<numfaces();i++) {
       if (nbel(i)) {
-        if (!(nbel(i)->leaf()) && child[(i+1)%3]->hashvtx(i)) {
-          if (((Triang*)child[(i+1)%3])->connect.hvtx[i]->count()+1>nconfDeg)
+        if (!(nbel(i)->leaf()) && child[mod(i+1)]->hashvtx(i)) {
+          if (((Triang*)child[mod(i+1)])->connect.hvtx[i]->count()+1>nconfDeg)
             lcancoarsen=0;
         }
-        if (!(nbel(i)->leaf()) && child[(i+2)%3]->hashvtx(i)) {
-          if (((Triang*)child[(i+2)%3])->connect.hvtx[i]->count()+1>nconfDeg)
+        if (!(nbel(i)->leaf()) && child[mod(i+2)]->hashvtx(i)) {
+          if (((Triang*)child[mod(i+2)])->connect.hvtx[i]->count()+1>nconfDeg)
             lcancoarsen=0;
         }
       } 
@@ -953,14 +948,14 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
         assert(!hashvtx(i));
         if (nbel(i)) {
           if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
-            addhvtx(child[(i+1)%3]->vertex((i+2)%3), 
-                    child[(i+2)%3]->nbel(i),child[(i+1)%3]->nbel(i), i);
-            connect.hvtx[i]->merge(((Triang*)child[(i+1)%3])->connect.hvtx[i],
-                     ((Triang*)child[(i+2)%3])->connect.hvtx[i]);
+            addhvtx(child[mod(i+1)]->vertex((i+2)), 
+                    child[mod(i+2)]->nbel(i),child[mod(i+1)]->nbel(i), i);
+            connect.hvtx[i]->merge(((Triang*)child[mod(i+1)])->connect.hvtx[i],
+                     ((Triang*)child[mod(i+2)])->connect.hvtx[i]);
             connect.hvtx[i]->nbconnect(opposite(i),this,i);
           } else { // Haengenden Knoten im Nachbarn entfernen 
             assert(nbel(i)->hashvtx(opposite(i)));
-            nbel(i)->removehvtx(opposite(i),child[(i+1)%3]->vertex((i+2)%3));
+            nbel(i)->removehvtx(opposite(i),child[mod(i+1)]->vertex((i+2)));
           }
         }
       }
@@ -968,7 +963,8 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
         if (nbbnd(i)) {
           if( !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
             lcancoarsen=0;
-            assert(0);
+            cout << "Error in coarsening!" << endl;
+            abort();
           }
         }
       }
