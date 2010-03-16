@@ -64,7 +64,6 @@ class Triang : public Hier < Element < N,NV > > {
     using helement_t::hashvtx;
     using helement_t::init;
     using helement_t::leaf;
-    using helement_t::midpoint;
     using helement_t::nbbnd;
     using helement_t::nbel;
     using helement_t::neighbour;
@@ -76,6 +75,8 @@ class Triang : public Hier < Element < N,NV > > {
     Triang();
 
     Triang(vertex_t *v1, vertex_t *v2, vertex_t *v3 );
+
+    Triang(vertex_t *v1, vertex_t *v2, vertex_t *v3, vertex_t *v4 );
 
    ~Triang() { }
 
@@ -97,11 +98,17 @@ class Triang : public Hier < Element < N,NV > > {
 
     bool canCoarsen(int) const;
 
+    int split2tr(void *(&)[Basic::nparts], Listagency < vertex_t > *,
+                 multivertexadapter_t &, nconf_vtx_t *ncv,
+	               int,Refco::tag_t,prolong_basic_t *pro_el);
+    int split4(void *(&)[Basic::nparts], Listagency < vertex_t > *,
+               multivertexadapter_t &, nconf_vtx_t *ncv,
+	             int,Refco::tag_t,prolong_basic_t *pro_el);
   public:
 
     int split(void *(&)[Basic::nparts], Listagency < vertex_t > *,
               multivertexadapter_t &, nconf_vtx_t *ncv,splitrule_t,
-	      int,Refco::tag_t,prolong_basic_t *pro_el);
+	            int,Refco::tag_t,prolong_basic_t *pro_el);
      
     int docoarsen(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
 

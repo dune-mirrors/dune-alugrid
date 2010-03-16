@@ -292,8 +292,11 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in) {
     }
     for (walk.first() ; !walk.done() ; walk.next() )
     {
-      walk.getitem()->setorientation();
-      walk.getitem()->setrefine();
+      if (walk.getitem()->numvertices() == 3)
+      {
+        walk.getitem()->setorientation();
+        walk.getitem()->setrefine();
+      }
     }
   }
   {
@@ -516,7 +519,7 @@ Hmesh<N,NV>::storeIndicies(ostream& out)
         }
 
         // edges 
-	      for (int e=0;e<3; ++e) 
+	      for (int e=0;e<hier.getitem().numfaces(); ++e) 
         {
 	        int idx=hier.getitem().edge(e)->getIndex();
 	        out.write( ((const char *) &idx ), sizeof(int) ) ;
@@ -663,7 +666,7 @@ Hmesh<N,NV>::recoverIndicies(istream& in)
         elementIsHole[elem.getIndex()] = false;
         
         // read edges 
-       	for (int e=0; e<3; ++e) 
+       	for (int e=0; e<elem.numfaces(); ++e) 
         {
           int edgeNum = -1; 
 	        in.read ( ((char *) &(edgeNum)), sizeof(int) );

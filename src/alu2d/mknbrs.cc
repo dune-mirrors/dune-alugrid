@@ -44,7 +44,9 @@ void Hmesh_basic<N,NV>::makeneighbours() {
 
       thinelement_t & e = walk.getitem() ;
 
-      for(int fce = 0 ; fce < e.numfaces() ; fce ++ ) {
+      int numfce = (e.thinis(thinelement_t::element_like))?dynamic_cast<element_t&>(e).numfaces():2;
+
+      for(int fce = 0 ; fce < numfce ; fce ++ ) {
 
         int npv = e.numfacevertices(fce) ;
 

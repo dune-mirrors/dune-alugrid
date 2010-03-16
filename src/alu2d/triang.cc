@@ -112,6 +112,21 @@ Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2) {
 
   init();
 }
+template < int N, int NV >
+Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2, vertex_t * v3) {
+  assert( NV == 4);
+  if (NV == 4) 
+  {
+    connect.set( v0, 0) ;
+    connect.set( v1, 1) ;
+    connect.set( v2, 2) ;
+    connect.set( v3, 3) ;
+    thinelement_t::nedges = -1 ;
+    thinelement_t::nfaces = 4 ;
+    thinelement_t::nvertices = 4 ;
+  }
+  init();
+}
 
 // ***************************************************
 // #begin(method)
@@ -146,17 +161,8 @@ void Triang < N,NV >::write(ostream & out) const {
 template < int N, int NV >
 void Triang < N,NV >::read(istream & in, vertex_t ** look, const int len) {
   helement_t::read(in) ;
-  connect.read(in, look, len) ;
-  if (NV == 3)
-  {
-    thinelement_t::nfaces = 3 ;
-    thinelement_t::nvertices = 3 ;
-  } 
-  else
-  {
-    thinelement_t::nfaces = 3 ;
-    thinelement_t::nvertices = 3 ;
-  } 
+  thinelement_t::nfaces = connect.read(in, look, len) ;
+  thinelement_t::nvertices = thinelement_t::nfaces;
   init() ;
 }
 
@@ -231,6 +237,7 @@ template < int N, int NV >
 void Triang < N,NV >::newNeighbour(Triang* nb, int fce, int nbfce,
                           splitrule_t sr, bool setnormal)
 {
+  // TWIST
   assert(sr == thinelement_t::triang_conf2);
   assert(fce >= 0);
   assert(nbfce >= 0);
@@ -290,213 +297,233 @@ int Triang < N,NV >::split(void * (&e)[Basic::nparts], Listagency < vertex_t > *
   switch (sr)
   {
     case thinelement_t::triang_conf2:
-      {
-        Triang* t1;
-        Triang* t2;
-        Edge *newedge[3];
-        newedge[2]=new Edge(hdl);
+      ret=split2tr(e,agnc,mva,ncv,nconfDeg,default_ref,pro_el);
+      break;
+    case thinelement_t::triang_quarter:
+      ret=split4(e,agnc,mva,ncv,nconfDeg,default_ref,pro_el);
+      break;
+    default:                                                                         
+      cerr << "ERROR (Triang::split()): unknown splitrule!" << endl;                 
+      abort();                                                                       
+  }
+  return ret;
+}
+template < int N, int NV >
+int Triang < N,NV >::split2tr(void * (&e)[Basic::nparts], Listagency < vertex_t > * agnc,
+                              multivertexadapter_t & mva, 
+                              nconf_vtx_t *ncv,
+                              int nconfDeg,
+                              Refco::tag_t default_ref,
+                              prolong_basic_t *pro_el)
+{
+  assert( NV == 3);
+  Triang* t1;
+  Triang* t2;
+  Edge *newedge[3];
+  newedge[2]=new Edge(hdl);
 
-        mysplit = thinelement_t::triang_conf2;
+  mysplit = thinelement_t::triang_conf2;
 
-        if( connect.nb[0]->thinis(thinelement_t::bndel_like) ) {
-          // Verfeinerungsnachbar ist Randelement
-          vertex_t* nvtx;
-          double p[vertex_t::ncoord];
+  if( connect.nb[0]->thinis(thinelement_t::bndel_like) ) 
+  {
+    // Verfeinerungsnachbar ist Randelement
+    vertex_t* nvtx;
+    double p[vertex_t::ncoord];
 
-          // Erzeugen des neuen Knotens und der neuen Elemente
-          ((bndel_t*)connect.nb[0])->get_splitpoint(p);
-          agnc->insert(nvtx = new fullvertex_t(p,level()));
-          t1 = new Triang(nvtx, connect.vtx[0], connect.vtx[1]);
-          t2 = new Triang(nvtx, connect.vtx[2], connect.vtx[0]);
-          t1->sethdl(hdl);
-          t2->sethdl(hdl);
-          t1->connect.hvtx[0] = connect.hvtx[2];
-          t2->connect.hvtx[0] = connect.hvtx[1];
-          connect.hvtx[1] = connect.hvtx[2] = NULL;
-          newedge[0]=new Edge(hdl);
-          newedge[1]=new Edge(hdl);
-    
-          // Nachbarschaftsinfo der Nachbarn "uber die Kanten
-          // 1 und 2 neu setzen (aber nur, falls die Nachbarn nicht
-          // gr"ober sind als Empfaengerelement)
-          if( neighbour(1)->thinis(thinelement_t::element_like) ) {
-            if( !(((element_t*)neighbour(1))->hashvtx(opposite(1))) )
-              ((Triang*)neighbour(1))->newNeighbour(t2, opposite(1), 0,
-                                                    thinelement_t::triang_conf2);
-            else
-              nbel(1)->connect.hvtx[opposite(1)]->head->rnb = t2;
-          } 
-          else {
-            neighbour(1)->nbconnect(0, t2, 0);
-          }
+    // Erzeugen des neuen Knotens und der neuen Elemente
+    ((bndel_t*)connect.nb[0])->get_splitpoint(p);
+    agnc->insert(nvtx = new fullvertex_t(p,level()));
+    t1 = new Triang(nvtx, connect.vtx[0], connect.vtx[1]);
+    t2 = new Triang(nvtx, connect.vtx[2], connect.vtx[0]);
+    t1->sethdl(hdl);
+    t2->sethdl(hdl);
+    t1->connect.hvtx[0] = connect.hvtx[2];
+    t2->connect.hvtx[0] = connect.hvtx[1];
+    connect.hvtx[1] = connect.hvtx[2] = NULL;
+    newedge[0]=new Edge(hdl);
+    newedge[1]=new Edge(hdl);
 
-          if( neighbour(2)->thinis(thinelement_t::element_like) ) {
-            if( !(((element_t*)neighbour(2))->hashvtx(opposite(2))) )
-              ((Triang*)neighbour(2))->newNeighbour(t1, opposite(2),
-                                                    0, thinelement_t::triang_conf2);
-            else
-              nbel(2)->connect.hvtx[opposite(2)]->head->rnb = t1;
-          } 
-          else {
-            neighbour(2)->nbconnect(0, t1, 0);
-          }
-  
-          // Nachbarschaft der neu entstandenen Elemente t1 und t2 regeln
-          t1->nbconnect(0, connect.nb[2], connect.bck[2]);
-          t1->nbconnect(2, t2, 1);
-          t2->nbconnect(0, connect.nb[1], connect.bck[1]);
-          t2->nbconnect(1, t1, 2);
+    // Nachbarschaftsinfo der Nachbarn "uber die Kanten
+    // 1 und 2 neu setzen (aber nur, falls die Nachbarn nicht
+    // gr"ober sind als Empfaengerelement)
+    if( neighbour(1)->thinis(thinelement_t::element_like) ) {
+      if( !(((element_t*)neighbour(1))->hashvtx(opposite(1))) )
+        ((Triang*)neighbour(1))->newNeighbour(t2, opposite(1), 0,
+                                              thinelement_t::triang_conf2);
+      else
+        nbel(1)->connect.hvtx[opposite(1)]->head->rnb = t2;
+    } 
+    else {
+      neighbour(1)->nbconnect(0, t2, 0);
+    }
 
-          // Richtung der Normalen
-          t1->setnormdir(0, connect.normdir[2]);
-          t1->setnormdir(1, connect.normdir[0]);
-          t1->setnormdir(2, 1);
-          t2->setnormdir(0, connect.normdir[1]);
-          t2->setnormdir(1, -1);
-          t2->setnormdir(2, connect.normdir[0]);
-          t1->edgeconnect(0,connect.edge[2]);
-          t1->edgeconnect(1,newedge[0]);
-          t1->edgeconnect(2,newedge[2]);
-          t2->edgeconnect(0,connect.edge[1]);
-          t2->edgeconnect(1,newedge[2]);
-          t2->edgeconnect(2,newedge[1]);
+    if( neighbour(2)->thinis(thinelement_t::element_like) ) {
+      if( !(((element_t*)neighbour(2))->hashvtx(opposite(2))) )
+        ((Triang*)neighbour(2))->newNeighbour(t1, opposite(2),
+                                              0, thinelement_t::triang_conf2);
+      else
+        nbel(2)->connect.hvtx[opposite(2)]->head->rnb = t1;
+    } 
+    else {
+      neighbour(2)->nbconnect(0, t1, 0);
+    }
 
-          // Nachbarelement (=Randelement) verfeinern
-          ncv = new nconf_vtx_t(nvtx, t1, t2);
-          hbndel_t *n = (hbndel_t *)connect.nb[0];
-          n->refine_leaf(agnc, &mva,ncv,nconfDeg,default_ref,pro_el);
-        } 
-        else {
-          // Verfeinerungsnachbar ist "normales" Element
-          vertex_t* nvtx;
-          double b[3],p[ncoord];
-          bool usehvtx = false;
+    // Nachbarschaft der neu entstandenen Elemente t1 und t2 regeln
+    t1->nbconnect(0, connect.nb[2], connect.bck[2]);
+    t1->nbconnect(2, t2, 1);
+    t2->nbconnect(0, connect.nb[1], connect.bck[1]);
+    t2->nbconnect(1, t1, 2);
 
-          // Falls ein haengender Knoten existiert, jenen benutzen;
-          // falls nicht, neuen Knoten erzeugen und jenen als haengenden in
-          // entsprechenden Nachbarn einfuegen.
-          if( connect.hvtx[0] ) {
-            nvtx = connect.hvtx[0]->getHead();
-            usehvtx = true;
-            helement_t *tr = ((helement_t *)neighbour(0))->down()->next();
-            if (tr->leaf()) 
-              newedge[0]=connect.hvtx[0]->getrnb()->edge(2);
-            else
-              newedge[0]=connect.hvtx[0]->getrnb()->edge(0);
-            tr = ((helement_t *)neighbour(0))->down();
-            if (tr->leaf()) 
-              newedge[1]=connect.hvtx[0]->getlnb()->edge(1);    
-            else
-              newedge[1]=connect.hvtx[0]->getlnb()->edge(0);
-          } 
-          else {
-            midpoint(0, b);
-            fromlocal(b,p);
-            agnc->insert(nvtx = new fullvertex_t(p,level()));
-            newedge[0]=new Edge(hdl);
-            newedge[1]=new Edge(hdl);
-          }
+    // Richtung der Normalen
+    t1->setnormdir(0, connect.normdir[2]);
+    t1->setnormdir(1, connect.normdir[0]);
+    t1->setnormdir(2, 1);
+    t2->setnormdir(0, connect.normdir[1]);
+    t2->setnormdir(1, -1);
+    t2->setnormdir(2, connect.normdir[0]);
+    t1->edgeconnect(0,connect.edge[2]);
+    t1->edgeconnect(1,newedge[0]);
+    t1->edgeconnect(2,newedge[2]);
+    t2->edgeconnect(0,connect.edge[1]);
+    t2->edgeconnect(1,newedge[2]);
+    t2->edgeconnect(2,newedge[1]);
 
-          // Neue Elemente erzeugen
-          t1 = new Triang(nvtx, connect.vtx[0], connect.vtx[1]);
-          t2 = new Triang(nvtx, connect.vtx[2], connect.vtx[0]);
-          // Nachbarschaft von t1...
-          t1->nbconnect(0, neighbour(2), opposite(2));
-          if( usehvtx ) {
-            Triang* tr = (Triang*)neighbour(0);
-            tr = (Triang*)(tr->down()->next());
-            if( tr->leaf() ) {
-              t1->nbconnect(1, tr, 2);
+    // Nachbarelement (=Randelement) verfeinern
+    ncv = new nconf_vtx_t(nvtx, t1, t2);
+    hbndel_t *n = (hbndel_t *)connect.nb[0];
+    n->refine_leaf(agnc, &mva,ncv,nconfDeg,default_ref,pro_el);
+  } 
+  else 
+  {
+    // Verfeinerungsnachbar ist "normales" Element
+    vertex_t* nvtx;
+    double p[ncoord];
+    bool usehvtx = false;
+
+    // Falls ein haengender Knoten existiert, jenen benutzen;
+    // falls nicht, neuen Knoten erzeugen und jenen als haengenden in
+    // entsprechenden Nachbarn einfuegen.
+    if( connect.hvtx[0] ) {
+      nvtx = connect.hvtx[0]->getHead();
+      usehvtx = true;
+      helement_t *tr = ((helement_t *)neighbour(0))->down()->next();
+      if (tr->leaf()) 
+        newedge[0]=connect.hvtx[0]->getrnb()->edge(2);
+      else
+        newedge[0]=connect.hvtx[0]->getrnb()->edge(0);
+      tr = ((helement_t *)neighbour(0))->down();
+      if (tr->leaf()) 
+        newedge[1]=connect.hvtx[0]->getlnb()->edge(1);    
+      else
+        newedge[1]=connect.hvtx[0]->getlnb()->edge(0);
+    } 
+    else {
+      facepoint(0,0.5,p);
+      agnc->insert(nvtx = new fullvertex_t(p,level()));
+      newedge[0]=new Edge(hdl);
+      newedge[1]=new Edge(hdl);
+    }
+
+    // Neue Elemente erzeugen
+    t1 = new Triang(nvtx, connect.vtx[0], connect.vtx[1]);
+    t2 = new Triang(nvtx, connect.vtx[2], connect.vtx[0]);
+    // Nachbarschaft von t1...
+    t1->nbconnect(0, neighbour(2), opposite(2));
+    if( usehvtx ) {
+      Triang* tr = (Triang*)neighbour(0);
+      tr = (Triang*)(tr->down()->next());
+      if( tr->leaf() ) {
+        t1->nbconnect(1, tr, 2);
         assert(connect.hvtx[0]->getrnb()==tr);
-            } else {
-              tr = (Triang*)(tr->down());
-              t1->nbconnect(1, tr, 0);
+      } else {
+        tr = (Triang*)(tr->down());
+        t1->nbconnect(1, tr, 0);
         assert(connect.hvtx[0]->getrnb()==tr);
-            }
-          } else {
-            t1->nbconnect(1, neighbour(0), opposite(0));
-          }
-          t1->nbconnect(2, t2, 1);
+      }
+    } else {
+      t1->nbconnect(1, neighbour(0), opposite(0));
+    }
+    t1->nbconnect(2, t2, 1);
 
-          // ... und t2 setzen
-          t2->nbconnect(0, neighbour(1), opposite(1));
-          t2->nbconnect(1, t1, 2);
-          if( usehvtx ) {
-            Triang* tr = (Triang*)neighbour(0);
-            tr = (Triang*)(tr->down());
-            if( tr->leaf() ) {
-              t2->nbconnect(2, tr, 1);
+    // ... und t2 setzen
+    t2->nbconnect(0, neighbour(1), opposite(1));
+    t2->nbconnect(1, t1, 2);
+    if( usehvtx ) {
+      Triang* tr = (Triang*)neighbour(0);
+      tr = (Triang*)(tr->down());
+      if( tr->leaf() ) {
+        t2->nbconnect(2, tr, 1);
         assert(connect.hvtx[0]->getlnb()==tr);
-            } else {
-              tr = (Triang*)(tr->down()->next());
-              t2->nbconnect(2, tr, 0);
+      } else {
+        tr = (Triang*)(tr->down()->next());
+        t2->nbconnect(2, tr, 0);
         assert(connect.hvtx[0]->getlnb()==tr);
-            }
-          } else {
-            t2->nbconnect(2, neighbour(0), opposite(0));
-          }
-          if( usehvtx == true ) {
-            connect.hvtx[0]->splitTree(t1->connect.hvtx[1],
-                                       t2->connect.hvtx[2]);
-          }
-          else {
-            ((element_t *)connect.nb[0])->addhvtx(nvtx, t1,t2, connect.bck[0]);
-          }
-          if (connect.hvtx[0]) {
-            delete connect.hvtx[0];
-            connect.hvtx[0] = 0;
-          }
-          t1->connect.hvtx[0] = connect.hvtx[2];
-          t2->connect.hvtx[0] = connect.hvtx[1];
-          connect.hvtx[0] = connect.hvtx[1] = connect.hvtx[2] = 0;
+      }
+    } else {
+      t2->nbconnect(2, neighbour(0), opposite(0));
+    }
+    if( usehvtx == true ) {
+      connect.hvtx[0]->splitTree(t1->connect.hvtx[1],
+                                 t2->connect.hvtx[2]);
+    }
+    else {
+      ((element_t *)connect.nb[0])->addhvtx(nvtx, t1,t2, connect.bck[0]);
+    }
+    if (connect.hvtx[0]) {
+      delete connect.hvtx[0];
+      connect.hvtx[0] = 0;
+    }
+    t1->connect.hvtx[0] = connect.hvtx[2];
+    t2->connect.hvtx[0] = connect.hvtx[1];
+    connect.hvtx[0] = connect.hvtx[1] = connect.hvtx[2] = 0;
 
-
-          // Nachbarschaft der Nachbarn (neu) setzen
-          // -- Nachbarschaft ueber Kante 0
-          if( usehvtx ) {
-            Triang* tr = (Triang*)neighbour(0);
-            tr = (Triang*)(tr->down());
-            tr->newNeighbour(t2, 1, 2, thinelement_t::triang_conf2);
-            tr = (Triang*)(tr->next());
-            tr->newNeighbour(t1, 2, 1, thinelement_t::triang_conf2);
-          }
-          // -- Nachbarschaft ueber Kante 1
-          if( neighbour(1)->thinis(thinelement_t::element_like) ) {
-            if( !(((Triang*)neighbour(1))->hashvtx(opposite(1))) ) {
-              ((Triang*)neighbour(1))->newNeighbour(t2, opposite(1), 0,
-                                                    thinelement_t::triang_conf2);
-            } else {
+    // Nachbarschaft der Nachbarn (neu) setzen
+    // -- Nachbarschaft ueber Kante 0
+    if( usehvtx ) {
+      Triang* tr = (Triang*)neighbour(0);
+      tr = (Triang*)(tr->down());
+      tr->newNeighbour(t2, 1, 2, thinelement_t::triang_conf2);
+      tr = (Triang*)(tr->next());
+      tr->newNeighbour(t1, 2, 1, thinelement_t::triang_conf2);
+    }
+    // -- Nachbarschaft ueber Kante 1
+    if( neighbour(1)->thinis(thinelement_t::element_like) ) {
+      if( !(((Triang*)neighbour(1))->hashvtx(opposite(1))) ) {
+        ((Triang*)neighbour(1))->newNeighbour(t2, opposite(1), 0,
+                                              thinelement_t::triang_conf2);
+      } 
+      else {
         nbel(1)->connect.hvtx[opposite(1)]->head->lnb = t2;
       }
-          } else {
-            neighbour(1)->nbconnect(0, t2, 0);
-          }
-          // -- Nachbarschaft ueber Kante 2
-          if( neighbour(2)->thinis(thinelement_t::element_like) ) {
-            if( !(((Triang*)neighbour(2))->hashvtx(opposite(2))) ) {
-              ((Triang*)neighbour(2))->newNeighbour(t1, opposite(2), 0,
-                                                    thinelement_t::triang_conf2);
+    } else {
+      neighbour(1)->nbconnect(0, t2, 0);
+    }
+    // -- Nachbarschaft ueber Kante 2
+    if( neighbour(2)->thinis(thinelement_t::element_like) ) {
+      if( !(((Triang*)neighbour(2))->hashvtx(opposite(2))) ) {
+        ((Triang*)neighbour(2))->newNeighbour(t1, opposite(2), 0,
+                                              thinelement_t::triang_conf2);
       } else {
         nbel(2)->connect.hvtx[opposite(2)]->head->rnb = t1;
       }
-          } else {
-            neighbour(2)->nbconnect(0, t1, 0);
-          }
+    } else {
+      neighbour(2)->nbconnect(0, t1, 0);
+    }
 
-          // Normalenrichtung
-          t1->setnormdir(2, 1);
-          t2->setnormdir(1, -1);
-          if( usehvtx ) {
-            t1->setnormdir(1, -1);
-            t2->setnormdir(2, -1);
-          } else {
-            t1->setnormdir(1, 1);
-            t2->setnormdir(2, 1);
-            ((element_t *)neighbour(0))->setnormdir(opposite(0), -1);
-            ((element_t *)this)->setnormdir(0, 1);
-          }
-          t1->setnormdir(0, normaldir(2));
-          t2->setnormdir(0, normaldir(1));
+    // Normalenrichtung
+    t1->setnormdir(2, 1);
+    t2->setnormdir(1, -1);
+    if( usehvtx ) {
+      t1->setnormdir(1, -1);
+      t2->setnormdir(2, -1);
+    } else {
+      t1->setnormdir(1, 1);
+      t2->setnormdir(2, 1);
+      ((element_t *)neighbour(0))->setnormdir(opposite(0), -1);
+      ((element_t *)this)->setnormdir(0, 1);
+    }
+    t1->setnormdir(0, normaldir(2));
+    t2->setnormdir(0, normaldir(1));
     t1->sethdl(hdl);
     t2->sethdl(hdl);
     t1->edgeconnect(0,connect.edge[2]);
@@ -505,21 +532,26 @@ int Triang < N,NV >::split(void * (&e)[Basic::nparts], Listagency < vertex_t > *
     t2->edgeconnect(0,connect.edge[1]);
     t2->edgeconnect(1,newedge[2]);
     t2->edgeconnect(2,newedge[1]);
-        }
+  }
 
-        if (this->is(Refco::ref_2)) 
-        {
-          t1->mark(Refco::ref_1);
-          t2->mark(Refco::ref_1);
-        }
+  if (this->is(Refco::ref_2)) 
+  {
+    t1->mark(Refco::ref_1);
+    t2->mark(Refco::ref_1);
+  }
 
-        e[0] = t1;
-        e[1] = t2;
-        ret = 2;
-      }
-      break;
-    case thinelement_t::triang_quarter:
-    {
+  e[0] = t1;
+  e[1] = t2;
+  return 2;
+}
+template < int N, int NV >
+int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > * agnc,
+                            multivertexadapter_t & mva, 
+                            nconf_vtx_t *ncv,
+                            int nconfDeg,
+                            Refco::tag_t default_ref,
+                            prolong_basic_t *pro_el)
+{
   // Every triangle is split into four triangles #0, #1, #2,
   // and #3. Three new vertices (0), (1), and (2) are created.
   // If the edge 1->2 is the longest edge and the orientation
@@ -550,185 +582,189 @@ int Triang < N,NV >::split(void * (&e)[Basic::nparts], Listagency < vertex_t > *
   // 2*---------------*0       2*-------*-------*0
         //                                   (1)
 
-      Triang *newtr[4];
-      vertex_t *newvtx[3];
-      Edge *newedge[9];
-      bool usehvtx[3];
-      int i;
+  Triang *newtr[4];
+  vertex_t *newvtx[NV];
+  Edge *newedge[2*NV+NV];
+  bool usehvtx[NV];
+  int i;
+  double p[ncoord];
 
-      mysplit = thinelement_t::triang_quarter;
+  mysplit = thinelement_t::triang_quarter;
 
-      // create new vertices
-      for (i=0;i<3;i++)
-      {
-        double b[3],p[ncoord];
-
-        usehvtx[i] = false;
-        if (connect.nb[i]->thinis(thinelement_t::bndel_like))
-        {
-          assert(!connect.hvtx[i]);
-          ((bndel_t*)connect.nb[i])->get_splitpoint(p);
-          newvtx[i] = new fullvertex_t(p,level());
-          agnc->insert(newvtx[i]);
-          newedge[2*i]=new Edge(hdl);
-          newedge[2*i+1]=new Edge(hdl);
-        }
-        else
-        {
-          // Use hanging node if it exists. Otherwise create
-          // new vertex and insert it as hanging node in the
-          // corresponding neighbour.
-
-          if(connect.hvtx[i])
-          {
-            usehvtx[i] = true;
-            newvtx[i]  = connect.hvtx[i]->getHead();
-            newedge[2*i]=connect.hvtx[i]->getrnb()->edge(opposite(i));
-            newedge[2*i+1]=connect.hvtx[i]->getlnb()->edge(opposite(i));
-          }
-          else
-          {
-            midpoint(i,b);
-            fromlocal(b,p);
-            newvtx[i] = new fullvertex_t(p,level());
-            agnc->insert(newvtx[i]);
-            newedge[2*i]=new Edge(hdl);
-            newedge[2*i+1]=new Edge(hdl);
-          }
-        }
-        newedge[6+i]=new Edge(hdl);
-      }
-
-      // create new elements
-      newtr[0] = new Triang(connect.vtx[0],newvtx[2],newvtx[1]);
-      newtr[1] = new Triang(newvtx[2],connect.vtx[1],newvtx[0]);
-      newtr[2] = new Triang(newvtx[1],newvtx[0],connect.vtx[2]);
-      newtr[3] = new Triang(newvtx[0],newvtx[1],newvtx[2]);
-      for (i=0;i<4;i++) {
-        newtr[i]->sethdl(hdl);
-        e[i] = newtr[i];
-      }
-      for (i=0;i<3;i++) {
-        newtr[i]->edgeconnect(i,newedge[6+i]);
-        newtr[i]->edgeconnect(i+1,newedge[2*((i+1)%3)+1]);
-        newtr[i]->edgeconnect(i+2,newedge[2*((i+2)%3)]);
-        newtr[3]->edgeconnect(i,newedge[6+i]);
-      }
-
-          // distribute hanging nodes
-
-      for (i=0;i<3;i++)
-      {
-        if (usehvtx[i] == true)
-          {
-      connect.hvtx[i]->splitTree(newtr[(i+1)%3]->connect.hvtx[i],
-               newtr[(i+2)%3]->connect.hvtx[i]);
-      delete connect.hvtx[i];
-      connect.hvtx[i] = 0;
-          } else if (!connect.nb[i]->thinis(thinelement_t::bndel_like)) {
-          ((element_t*)connect.nb[i])->addhvtx(newvtx[i],newtr[(i+1)%3],newtr[(i+2)%3],connect.bck[i]);
-        }
-      }
-
-    // set connectivity for element #3 and normal directions
-
-      for (i=0;i<3;i++)
-      {
-        newtr[3]->nbconnect(i,newtr[i],i);
-        newtr[i]->nbconnect(i,newtr[3],i);
-
-        newtr[3]->setnormdir(i, 1);
-        newtr[i]->setnormdir(i,-1);
-        newtr[i]->setnormdir((i+1)%3,connect.normdir[(i+1)%3]);
-        newtr[i]->setnormdir((i+2)%3,connect.normdir[(i+2)%3]);
-      }
-
-    // set connectivity across outer boundaries
-
-      for (i=0;i<3;i++)
-      {
-        if (connect.nb[i]->thinis(thinelement_t::bndel_like))
-        {
-          // refine neighbouring boundary element
-
-          ncv = new nconf_vtx_t(newvtx[i], newtr[(i+1)%3], newtr[(i+2)%3]);
-          hbndel_t *hbel = (hbndel_t *)connect.nb[i];
-          hbel->refine_leaf(agnc, &mva,ncv,nconfDeg,default_ref,pro_el);
-        }
-        else
-        {
-          // set connectivity if neighbour is already refined
-
-          if (neighbour(i)->splitrule() == thinelement_t::triang_quarter)
-          {
-            Triang *trnb0 = (Triang *)neighbour(i);
-            Triang *trnb1 = (Triang *)(trnb0->down());
-            Triang *trnb2 = trnb1;
-
-            if (trnb0->is(Refco::quart))
-            {
-              // This case should only occur if periodic boundaries
-              // are used and the macrogrid is too coarse, i.e., if
-              // there are two elements which are direct and periodic
-              // neighbours at the same time.
-
-              cerr << "ERROR (Triang::split()): "
-                   << "refinement of neighbour not yet finished!" << endl
-                   << "                         "
-                   << "Please try a finer macrogrid!" << endl;
-              abort();
-            }
-
-            assert(trnb1);
-            assert(trnb2);
-
-            switch (opposite(i))
-            {
-            case 0:
-              trnb2 = (Triang *)(trnb2->next());
-              trnb1 = (Triang *)(trnb2->next());
-              break;
-            case 1:
-              trnb2 = (Triang *)(trnb2->next());
-              trnb2 = (Triang *)(trnb2->next());
-              break;
-            case 2:
-              trnb1 = (Triang *)(trnb1->next());
-              break;
-            default:
-              abort();
-            }
-
-            assert(trnb1->connect.vtx[(opposite(i)+1)%3] == newvtx[i]);
-            assert(trnb2->connect.vtx[(opposite(i)+2)%3] == newvtx[i]);
-
-            newtr[(i+1)%3]->nbconnect(i,trnb1,opposite(i));
-            newtr[(i+2)%3]->nbconnect(i,trnb2,opposite(i));
-            trnb1->nbconnect(opposite(i),newtr[(i+1)%3],i);
-            trnb2->nbconnect(opposite(i),newtr[(i+2)%3],i);
-
-            if (newtr[(i+1)%3]->connect.hvtx[i])
-              newtr[(i+1)%3]->connect.hvtx[i]->nbconnect(opposite(i),newtr[(i+1)%3],i);
-            if (newtr[(i+2)%3]->connect.hvtx[i])
-              newtr[(i+2)%3]->connect.hvtx[i]->nbconnect(opposite(i),newtr[(i+2)%3],i);
-          }
-          else 
-          {
-            assert(neighbour(i)->splitrule() == thinelement_t::unsplit);
-            newtr[(i+1)%3]->nbconnect(i,neighbour(i),opposite(i));
-            newtr[(i+2)%3]->nbconnect(i,neighbour(i),opposite(i));
-          }
-        }
-      }
-      ret = 4;
+  // create new vertices and edges
+  for (i=0;i<numfaces();i++)
+  {
+    usehvtx[i] = connect.hvtx[i];
+    if (connect.nb[i]->thinis(thinelement_t::bndel_like))
+    {
+      assert(!usehvtx[i]);
+      ((bndel_t*)connect.nb[i])->get_splitpoint(p);
+      newvtx[i] = new fullvertex_t(p,level());
+      agnc->insert(newvtx[i]);
+      newedge[2*i]=new Edge(hdl);
+      newedge[2*i+1]=new Edge(hdl);
     }
-    break;
-  default:
-    cerr << "ERROR (Triang::split()): unknown splitrule!" << endl;
-    abort();
+    else
+    {
+      // Use hanging node if it exists. Otherwise create
+      // new vertex and insert it as hanging node in the
+      // corresponding neighbour.
+
+      if(usehvtx[i])
+      {
+        newvtx[i]  = connect.hvtx[i]->getHead();
+        // TWIST
+        newedge[2*i]=connect.hvtx[i]->getrnb()->edge(opposite(i));
+        newedge[2*i+1]=connect.hvtx[i]->getlnb()->edge(opposite(i));
+      }
+      else
+      {
+        facepoint(i,0.5,p);
+        newvtx[i] = new fullvertex_t(p,level());
+        agnc->insert(newvtx[i]);
+        newedge[2*i]=new Edge(hdl);
+        newedge[2*i+1]=new Edge(hdl);
+      }
+    }
+    newedge[2*numfaces()+i]=new Edge(hdl);
   }
 
-  return ret;
+  // create new elements
+  if (numfaces() == 3)
+  {
+    newtr[0] = new Triang(connect.vtx[0],newvtx[2],newvtx[1]);
+    newtr[1] = new Triang(newvtx[2],connect.vtx[1],newvtx[0]);
+    newtr[2] = new Triang(newvtx[1],newvtx[0],connect.vtx[2]);
+    newtr[3] = new Triang(newvtx[0],newvtx[1],newvtx[2]);
+    for (i=0;i<3;i++) {
+      newtr[i]->edgeconnect(i,newedge[6+i]);
+      newtr[i]->edgeconnect(i+1,newedge[2*((i+1)%3)+1]);
+      newtr[i]->edgeconnect(i+2,newedge[2*((i+2)%3)]);
+      newtr[3]->edgeconnect(i,newedge[6+i]);
+
+      newtr[i]->setnormdir(i,-1);
+      newtr[i]->setnormdir((i+1)%3,connect.normdir[(i+1)%3]);
+      newtr[i]->setnormdir((i+2)%3,connect.normdir[(i+2)%3]);
+      newtr[3]->setnormdir(i, 1);
+
+      newtr[3]->nbconnect(i,newtr[i],i);
+      newtr[i]->nbconnect(i,newtr[3],i);
+    }
+  }
+  else 
+  {
+    for (int k=0;k<ncoord;++k)
+    {
+      p[k] = connect.vtx[0]->coord()[k];
+      for (int l=1;l<4;++l)
+        p[k] += connect.vtx[l]->coord()[k];
+      p[k] /= 4.;
+    }
+    vertex_t* midvtx = new fullvertex_t(p,level());
+    agnc->insert(midvtx);
+    newtr[0] = new Triang(connect.vtx[0],newvtx[3],midvtx,newvtx[2]);
+    newtr[1] = new Triang(newvtx[3],connect.vtx[1],newvtx[0],midvtx);
+    newtr[2] = new Triang(midvtx,newvtx[0],connect.vtx[2],newvtx[1]);
+    newtr[3] = new Triang(newvtx[2],midvtx,newvtx[1],connect.vtx[3]);
+    for (i=0;i<4;i++) {
+      newtr[i]->edgeconnect(i,newedge[8+i]);
+      newtr[i]->edgeconnect(i+1,newedge[8+(i+3)%4]);
+      newtr[i]->edgeconnect(i+2,newedge[2*((i+2)%4)+1]);
+      newtr[i]->edgeconnect(i+3,newedge[2*((i+3)%4)]);
+
+      newtr[i]->setnormdir(i,1);
+      newtr[i]->setnormdir(i+1,-1);
+      newtr[i]->setnormdir(i+2,connect.normdir[(i+2)%4]);
+      newtr[i]->setnormdir(i+3,connect.normdir[(i+3)%4]);
+
+      newtr[i]->nbconnect(i,newtr[(i+1)%4],(i+2)%4);
+      newtr[i]->nbconnect(i+1,newtr[(i+3)%4],(i+3)%4);
+    }
+  }
+  for (i=0;i<4;i++) {
+    newtr[i]->sethdl(hdl);
+    e[i] = newtr[i];
+  }
+
+  // distribute hanging nodes
+
+  for (i=0;i<numfaces();i++)
+  {
+    if (usehvtx[i] == true)
+    {
+      connect.hvtx[i]->splitTree(newtr[mod(i+1)]->connect.hvtx[i],
+                                 newtr[mod(i+2)]->connect.hvtx[i]);
+      delete connect.hvtx[i];
+      connect.hvtx[i] = 0;
+    } else if (!connect.nb[i]->thinis(thinelement_t::bndel_like)) { // TWIST
+      ((element_t*)connect.nb[i])->addhvtx(newvtx[i],newtr[mod(i+1)],newtr[mod(i+2)],connect.bck[i]);
+    }
+  }
+
+  // set connectivity across outer boundaries
+  for (i=0;i<numfaces();i++)
+  {
+    if (connect.nb[i]->thinis(thinelement_t::bndel_like))
+    {
+      // refine neighbouring boundary element
+      ncv = new nconf_vtx_t(newvtx[i], newtr[mod(i+1)], newtr[mod(i+2)]);
+      hbndel_t *hbel = (hbndel_t *)connect.nb[i];
+      hbel->refine_leaf(agnc, &mva,ncv,nconfDeg,default_ref,pro_el);
+    }
+    else
+    {
+      // set connectivity if neighbour is already refined
+      if (neighbour(i)->splitrule() == thinelement_t::triang_quarter)
+      {
+        Triang *trnb0 = (Triang *)neighbour(i);
+        if (trnb0->is(Refco::quart))
+        {
+          // This case should only occur if periodic boundaries
+          // are used and the macrogrid is too coarse, i.e., if
+          // there are two elements which are direct and periodic
+          // neighbours at the same time.
+
+          cerr << "ERROR (Triang::split()): "
+               << "refinement of neighbour not yet finished!" << endl
+               << "                         "
+               << "Please try a finer macrogrid!" << endl;
+          abort();
+        }
+
+        // TWIST
+        Triang *trnb2 = (Triang *)(trnb0->down());
+        assert(trnb2);
+        for (int k=0;k<mod(opposite(i)+1);++k)
+        {
+          trnb2 = (Triang *)(trnb2->next());
+          assert(trnb2);
+        }
+
+        Triang *trnb1 = (Triang *)( trnb2->next() ? trnb2->next():trnb0->down() );
+        if (NV==3 && opposite(i)==1) trnb1=(Triang*)trnb0->down();
+
+        assert(trnb1->connect.vtx[mod(opposite(i)+1)] == newvtx[i]);
+        assert(trnb2->connect.vtx[mod(opposite(i)+2)] == newvtx[i]);
+
+        newtr[mod(i+1)]->nbconnect(i,trnb1,opposite(i));
+        newtr[mod(i+2)]->nbconnect(i,trnb2,opposite(i));
+        trnb1->nbconnect(opposite(i),newtr[mod(i+1)],i);
+        trnb2->nbconnect(opposite(i),newtr[mod(i+2)],i);
+
+        if (newtr[mod(i+1)]->connect.hvtx[i])
+          newtr[mod(i+1)]->connect.hvtx[i]->nbconnect(opposite(i),newtr[mod(i+1)],i);
+        if (newtr[mod(i+2)]->connect.hvtx[i])
+          newtr[mod(i+2)]->connect.hvtx[i]->nbconnect(opposite(i),newtr[mod(i+2)],i);
+      }
+      else 
+      {
+        assert(neighbour(i)->splitrule() == thinelement_t::unsplit);
+        newtr[mod(i+1)]->nbconnect(i,neighbour(i),opposite(i));
+        newtr[mod(i+2)]->nbconnect(i,neighbour(i),opposite(i));
+      }
+    }
+  }
+  return 4;
 }
 
 template < int N, int NV >
@@ -769,193 +805,172 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
                                int nconfDeg,restrict_basic_t *rest_el)
 {
   int result = 0;
-  if( nconfDeg == 0 && mysplit == thinelement_t::triang_conf2) {
+  if( nconfDeg == 0 && mysplit == thinelement_t::triang_conf2) 
+  {
     int lcancoarsen=0;
     if ( connect.nb[0]->thinis(thinelement_t::bndel_like) )
-      {
-  if ( ((hbndel_t*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el) )
     {
-      helement_t *child=down();
-      child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-      nbconnect(2,child->neighbour(0),child->opposite(0));
-      child=child->next();
-      child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-      nbconnect(1,child->neighbour(0),child->opposite(0));
-      if( neighbour(1)->thinis(thinelement_t::element_like) ) {
-        ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
-        setnormdir(1, -1);
-      } else
-        setnormdir(1, 1);
-      if( neighbour(2)->thinis(thinelement_t::element_like) ) {
-        ((element_t*)neighbour(2))->setnormdir(opposite(2), 1);
-        setnormdir(2, -1);
-      } else
-        setnormdir(2, 1);
-      lcancoarsen=1;
-    }
+      if ( ((hbndel_t*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el) )
+      {
+        helement_t *child=down();
+        child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+        nbconnect(2,child->neighbour(0),child->opposite(0));
+        child=child->next();
+        child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+        nbconnect(1,child->neighbour(0),child->opposite(0));
+        if( neighbour(1)->thinis(thinelement_t::element_like) ) {
+          ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
+          setnormdir(1, -1);
+        } else
+          setnormdir(1, 1);
+        if( neighbour(2)->thinis(thinelement_t::element_like) ) {
+          ((element_t*)neighbour(2))->setnormdir(opposite(2), 1);
+          setnormdir(2, -1);
+        } else
+          setnormdir(2, 1);
+        lcancoarsen=1;
       }
+    }
     else if ( connect.bck[0] == 0 )
+    {
+      helement_t *neigh=(helement_t *)connect.nb[0];
+      if ( !ncv )
       {
-  helement_t *neigh=(helement_t *)connect.nb[0];
-  if ( !ncv )
-    {
-      int cancoarsen=1;
-      neigh=neigh->down();
+        int cancoarsen=1;
+        neigh=neigh->down();
       do
-        {
-        } while (   (cancoarsen=(neigh->is(Refco::crs)))
-        && (neigh=neigh->next()) );
+      {
+      } while (   (cancoarsen=(neigh->is(Refco::crs)))
+                  && (neigh=neigh->next()) );
       if (cancoarsen)
-        {
-    helement_t *child=down();
-    ncv = new nconf_vtx_t(child->vertex(0),child,child->next());
-    assert( ncv );
-    child->neighbour(1)->nbconnect(2,this,-1);
-    child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-    nbconnect(2,child->neighbour(0),child->opposite(0));
-    if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
-      ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
-      setnormdir(2, -1);
-    } else
-      setnormdir(2, 1);
+      {
+        helement_t *child=down();
+        ncv = new nconf_vtx_t(child->vertex(0),child,child->next());
+        assert( ncv );
+        child->neighbour(1)->nbconnect(2,this,-1);
+        child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+        nbconnect(2,child->neighbour(0),child->opposite(0));
+        if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
+          ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
+          setnormdir(2, -1);
+        } else
+          setnormdir(2, 1);
 
-    child=child->next();
-    child->neighbour(2)->nbconnect(1,this,-1);
-    child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-    nbconnect(1,child->neighbour(0),child->opposite(0));
-    if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
-      ((element_t *)neighbour(1))->setnormdir(opposite(1), 1);
-      setnormdir(1, -1);
-    } else
-      setnormdir(1, 1);
-    setnormdir(0, -1);
-          
+        child=child->next();
+        child->neighbour(2)->nbconnect(1,this,-1);
+        child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+        nbconnect(1,child->neighbour(0),child->opposite(0));
+        if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
+          ((element_t *)neighbour(1))->setnormdir(opposite(1), 1);
+          setnormdir(1, -1);
+        } else
+          setnormdir(1, 1);
+        setnormdir(0, -1);
+              
 #ifndef NDEBUG
-    // only used in assert 
-    bool didcoarse = 
+        // only used in assert 
+        bool didcoarse = 
 #endif
-      // do coarsen 
-      ((helement_t *)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
-    assert( didcoarse );
-    lcancoarsen=1;
+          // do coarsen 
+          ((helement_t *)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
+        assert( didcoarse );
+        lcancoarsen=1;
         }
-    }
-  else
-    {
-      helement_t *child=down();
-      child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-      nbconnect(2,child->neighbour(0),child->opposite(0));
-      if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
-        ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
-        setnormdir(2, -1);
-      } else
-        setnormdir(2, 1);
-
-      child=child->next();
-      child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-      nbconnect(1,child->neighbour(0),child->opposite(0));
-      if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
-        ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
-        setnormdir(1, -1);
-      } else
-        setnormdir(1, 1);
-      setnormdir(0, 1);
-
-      delete ncv;
-      ncv=0;
-      element_t *e[2];
-      e[0]=down();
-      e[1]=down()->next();
-      // rest_el->operator()(this,e,2);
-      if (rest_el) 
-        rest_el->operator()(this);
-      lcancoarsen=2;
-    }
       }
+      else
+      {
+        helement_t *child=down();
+        child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+        nbconnect(2,child->neighbour(0),child->opposite(0));
+        if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
+          ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
+          setnormdir(2, -1);
+        } else
+          setnormdir(2, 1);
+
+        child=child->next();
+        child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+        nbconnect(1,child->neighbour(0),child->opposite(0));
+        if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
+          ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
+          setnormdir(1, -1);
+        } else
+          setnormdir(1, 1);
+        setnormdir(0, 1);
+
+        delete ncv;
+        ncv=0;
+        element_t *e[2];
+        e[0]=down();
+        e[1]=down()->next();
+        // rest_el->operator()(this,e,2);
+        if (rest_el) 
+          rest_el->operator()(this);
+        lcancoarsen=2;
+      }
+    }
     if( lcancoarsen != 0 && rest_el) {
       element_t *e[2];
       e[0]=down();
       e[1]=down()->next();
       //rest_el->operator()(this,e,2);
       if (rest_el)
-  rest_el->operator()(this);
+        rest_el->operator()(this);
     }
     if (lcancoarsen==2) {
       deletesubtree();
       mysplit = thinelement_t::unsplit;
     }
     result = lcancoarsen;
-  } else if (mysplit==thinelement_t::triang_quarter) {
+  } 
+  // QUATERING
+  else if (mysplit==thinelement_t::triang_quarter) {
+    if (NV == 4) 
+    {
+      cerr << "COARSEN NOT IMPLEMENTED FOR QUADS!" << endl;
+      abort();
+    }
     int lcancoarsen=1;
     element_t *child[3]={down(),down()->next(),down()->next()->next()};
-    for (int i=0;i<3;i++) {
+    for (int i=0;i<numfaces();i++) {
       if (nbel(i)) {
-  if (!(nbel(i)->leaf()) && child[(i+1)%3]->hashvtx(i)) {
-    if (((Triang*)child[(i+1)%3])->connect.hvtx[i]->count()+1>nconfDeg)
-      lcancoarsen=0;
-  }
-  if (!(nbel(i)->leaf()) && child[(i+2)%3]->hashvtx(i)) {
-    if (((Triang*)child[(i+2)%3])->connect.hvtx[i]->count()+1>nconfDeg)
-      lcancoarsen=0;
-  }
+        if (!(nbel(i)->leaf()) && child[(i+1)%3]->hashvtx(i)) {
+          if (((Triang*)child[(i+1)%3])->connect.hvtx[i]->count()+1>nconfDeg)
+            lcancoarsen=0;
+        }
+        if (!(nbel(i)->leaf()) && child[(i+2)%3]->hashvtx(i)) {
+          if (((Triang*)child[(i+2)%3])->connect.hvtx[i]->count()+1>nconfDeg)
+            lcancoarsen=0;
+        }
       } 
     }
     if (lcancoarsen) {
       if (rest_el) 
-  rest_el->operator()(this);
-#ifdef USE_ALUGRID_XDISPLAY
-  //Xdisplay disp(g_argc,g_argv,"a","Grid",
-  //        350.,450.,450.);
-  double p1[2],p2[2];
-  double bary[3]={1./3.,1./3.,1./3.};
-  mesh->draw(disp);
-  {
-    this->fromlocal(bary,p1);
-    this->fromlocal(bary,p2);
-    p1[0]-=0.05;
-    p1[1]-=0.05;
-    p2[0]+=0.05;
-    p2[1]+=0.05;
-    Fullvertex pp1(p1,-1);
-    Fullvertex pp2(p2,-1);
-    //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
-  }
-  {
-    this->fromlocal(bary,p1);
-    this->fromlocal(bary,p2);
-    p1[0]-=0.05;
-    p1[1]+=0.05;
-    p2[0]+=0.05;
-    p2[1]-=0.05;
-    Fullvertex pp1(p1,-1);
-    Fullvertex pp2(p2,-1);
-    //disp.linedraw(&pp1,&pp2,disp.bcol[17]);
-  }
-#endif
+        rest_el->operator()(this);
       // Nachbarschaften stimmen (hoffe ich)
       // Haengende Knoten verwalten
-      for (int i=0;i<3;i++) {
-  assert(!hashvtx(i));
-  if (nbel(i)) {
-    if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
-      addhvtx(child[(i+1)%3]->vertex((i+2)%3), 
-        child[(i+2)%3]->nbel(i),child[(i+1)%3]->nbel(i), i);
-      connect.hvtx[i]->merge(((Triang*)child[(i+1)%3])->connect.hvtx[i],
-               ((Triang*)child[(i+2)%3])->connect.hvtx[i]);
-      connect.hvtx[i]->nbconnect(opposite(i),this,i);
-    } else { // Haengenden Knoten im Nachbarn entfernen 
-      assert(nbel(i)->hashvtx(opposite(i)));
-      nbel(i)->removehvtx(opposite(i),child[(i+1)%3]->vertex((i+2)%3));
-    }
-  }
+      for (int i=0;i<numfaces();i++) {
+        assert(!hashvtx(i));
+        if (nbel(i)) {
+          if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
+            addhvtx(child[(i+1)%3]->vertex((i+2)%3), 
+                    child[(i+2)%3]->nbel(i),child[(i+1)%3]->nbel(i), i);
+            connect.hvtx[i]->merge(((Triang*)child[(i+1)%3])->connect.hvtx[i],
+                     ((Triang*)child[(i+2)%3])->connect.hvtx[i]);
+            connect.hvtx[i]->nbconnect(opposite(i),this,i);
+          } else { // Haengenden Knoten im Nachbarn entfernen 
+            assert(nbel(i)->hashvtx(opposite(i)));
+            nbel(i)->removehvtx(opposite(i),child[(i+1)%3]->vertex((i+2)%3));
+          }
+        }
       }
-      for (int i=0;i<3;i++) {
-  if (nbbnd(i)) {
-    if( !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
-      lcancoarsen=0;
-      assert(0);
-    }
-  }
+      for (int i=0;i<numfaces();i++) {
+        if (nbbnd(i)) {
+          if( !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
+            lcancoarsen=0;
+            assert(0);
+          }
+        }
       }
     } 
     result = lcancoarsen;
@@ -967,6 +982,7 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
   return result;
 }
 
+#if 0
 // ***************************************************
 // #begin(method)
 // #method:
@@ -999,7 +1015,9 @@ int Element < N,NV >::c::check()
     }
   return 1;
 }
+#endif
 
+#if 0
 // ***************************************************
 // #begin(method)
 // #method:
@@ -1051,6 +1069,7 @@ int Element < N,NV >::check()
   }
   return (connectFailure ? 0 : 1);
 }
+#endif
 
 // **************************************************************
 
@@ -1130,7 +1149,7 @@ void Bndel_triang < N,NV >::read(istream & in, vertex_t ** v, const int nv) {
 
   thinelement_t::nfaces = connect.nf ;
 
-  thinelement_t::nvertices = 3; // connect.nv ;
+  thinelement_t::nvertices = connect.nv ;
 
 }
 

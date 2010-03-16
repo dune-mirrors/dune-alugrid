@@ -513,13 +513,14 @@ inline void Element < N, NV >::c::write(ostream &out) const {
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-inline void Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
+inline int Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
   int c ;
   string line;
   while (in && line == "")
     getline( in, line );
   istringstream linein( line );
-  for (int i = 0; ; ++i)
+  int i;
+  for (i = 0; ; ++i)
   {
     linein >> c ;
     if ( !linein ) 
@@ -541,6 +542,7 @@ inline void Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l)
     }
     set((vertex_t *)v[c], i) ;
   }
+  return i;
 }
 
 // ***************************************************
@@ -580,6 +582,7 @@ inline void Element < N, NV >::dirnormal(int fce,double (&n)[ncoord]) const
     n[i]*=normaldir(fce);
 }
 
+#if 0
 // ***************************************************
 // #begin(method)
 // #method:
@@ -653,6 +656,30 @@ inline void Element < N, NV >::facepoint(int fce, double pos, double (&bary)[3])
     bary[(fce+2)%3] = 1.0 - pos;
   }
 }
+#endif
+
+// ***************************************************
+// #begin(method)
+// #method:
+//   void Element::facepoint(int fce, double pos, double (&bary)[3]) const
+// #parameters:
+//   \ int           | fce  | Nummer der Kante
+//   \ double        | pos  | Position auf der Kante
+//   \ double (&)[3] | bary | baryzentrische Koordinaten
+// #description:
+//   Verl"auft die Seite fce von P0 nach P1, so
+//   gilt bary = P0 + pos * (P1 - P0).
+// #end(method)
+// ***************************************************
+template < int N, int NV >
+inline void Element < N, NV >::facepoint(int fce, double pos, double (&p)[ncoord]) const
+{
+  const double (&vc0)[ncoord]=vertex(fce+1)->coord();
+  const double (&vc1)[ncoord]=vertex(fce+2)->coord();
+  double lam = (normaldir(fce)==1)?pos:1.-pos;
+  for (int i=0;i<ncoord;++i)
+    p[i] = (1.-lam)*vc0[i]+lam*vc1[i];
+}
 
 // ***************************************************
 // #begin(method)
@@ -712,14 +739,12 @@ template < int N, int NV >
 inline void Element < N, NV >::init()
 { 
   /* calculate area */
-  assert( numfaces() == 3 && numvertices() == 3 ); // TRIANG
-
-  const double (&vc0)[ncoord]=connect.vtx[0]->coord();
-  const double (&vc1)[ncoord]=connect.vtx[1]->coord();
-  const double (&vc2)[ncoord]=connect.vtx[2]->coord();
-
-  if (ncoord == 2)
+  if ( ncoord == 2 && NV == 3 )
   {
+    const double (&vc0)[ncoord]=connect.vtx[0]->coord();
+    const double (&vc1)[ncoord]=connect.vtx[1]->coord();
+    const double (&vc2)[ncoord]=connect.vtx[2]->coord();
+
     /* calculate outer normal and sidelength */
     for (int i=0;i<numfaces();i++)
     {
@@ -778,7 +803,7 @@ inline void Element < N, NV >::init()
   /* calculate minheight */
 
   double maxlen = _sidelength[0];
-  for (int i=1;i<3;i++)
+  for (int i=1;i<numfaces();i++)
     maxlen = ((_sidelength[i] > maxlen) ? _sidelength[i] : maxlen);
   assert(maxlen > 0.0);
 

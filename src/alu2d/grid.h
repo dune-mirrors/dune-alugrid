@@ -405,11 +405,13 @@ template < int N, int NV > class Thinelement : public Basic {
 
     splitrule_t splitrule() const { return mysplit ; }
      
-    int numfaces() const { return nfaces ; }
+    /*
+    int numfaces() const { return (NV==3)?3:nfaces ; }
 
-    int numedges() const { return nedges ; }
+    int numedges() const { return (NV==3)?3:nedges ; }
 
-    int numvertices() const { return nvertices ; }
+    int numvertices() const { return (NV==3)?3:nvertices ; }
+    */
 
     virtual int numfacevertices(int ) const = 0 ;
     
@@ -556,7 +558,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
       void write(ostream &) const ;
 
-      void read(istream &, vertex_t ** , const int ) ;
+      int read(istream &, vertex_t ** , const int ) ;
 
       int check();
 
@@ -579,8 +581,14 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     double _sidelength[NV];
 
   public :
-    using thinelement_t::numvertices;
-    using thinelement_t::numfaces;
+    int numfaces() const { return (NV==3)?3:thinelement_t::nfaces ; }
+
+    int numedges() const { return (NV==3)?3:thinelement_t::nedges ; }
+
+    int numvertices() const { return (NV==3)?3:thinelement_t::nvertices ; }
+
+    // using thinelement_t::numvertices;
+    // using thinelement_t::numfaces;
     using thinelement_t::getIndex;
    
     Element() : _area(-1.0), _minheight(-1.0)
@@ -647,11 +655,15 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
     void dirnormal(int ,double (& )[ncoord]) const;
 
+    /*
     void fromlocal(const double (& )[3],double (& )[ncoord]) const; // Fullvertex nehmen
 
     void midpoint(int ,double (& )[3]) const;
 
     void facepoint(int ,double ,double (& )[3]) const;
+    */
+
+    void facepoint(int ,double ,double (& )[ncoord]) const;
 
     void addhvtx(vertex_t *inv, thinelement_t *lnb, thinelement_t *rnb,int fce);
 
