@@ -34,7 +34,7 @@ void Multivertexadapter < N, NV >::refresh( Listwalk < macroelement_t > & walk) 
   
   for( walk.first() ; ! walk.done() ; walk.next()) {
 
-    for(int e = 0 ; e < walk.getitem()->numedges() ; e ++) {
+    for(int e = 0 ; e < walk.getitem()->numfaces() ; e ++) {
 
       vertex_t * edg [2] ;
 

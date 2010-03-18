@@ -276,6 +276,7 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in) {
     {
       triang_t &tr=( (triang_t &)(*walk.getitem()) );
       for (int l=0;l<tr.numfaces();l++) {
+        assert( tr.neighbour(l) );
         if (!tr.normaldir(l)) 
         {
           tr.setnormdir(l,1);

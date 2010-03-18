@@ -393,9 +393,7 @@ template < int N, int NV > class Thinelement : public Basic {
   protected :
     splitrule_t mysplit ;
 
-    int nfaces, nedges, nvertices ;
-  
-    Thinelement() : mysplit(unsplit), nfaces(0), nedges(0), nvertices(0) { }
+    Thinelement() : mysplit(unsplit) { }
     
     virtual ~Thinelement() { }
 
@@ -405,15 +403,7 @@ template < int N, int NV > class Thinelement : public Basic {
 
     splitrule_t splitrule() const { return mysplit ; }
      
-    /*
-    int numfaces() const { return (NV==3)?3:nfaces ; }
-
-    int numedges() const { return (NV==3)?3:nedges ; }
-
-    int numvertices() const { return (NV==3)?3:nvertices ; }
-    */
-
-    virtual int numfacevertices(int ) const = 0 ;
+    int numfacevertices(int ) const { return 2; }
     
     virtual int facevertex(int , int ) const = 0 ;
 
@@ -534,7 +524,6 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     struct c {  //  die vertex und (thin-)element verbindungen
 
       enum {pv=2};
-      // int nv,nf;
 
       vertex_t * vtx [NV] ;
 
@@ -564,13 +553,15 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
     } connect ;
 
+    int nvertices ;
+
     int mod(int i) const
     {
-      assert( numvertices() == numfaces() );
       if (NV == 3) return i%3;
-      else return i%numvertices();
+      else return i%nvertices;
     }
-   
+
+    int nv() const { return (NV==3)?3:nvertices ; }
 
     using Basic::hdl;
     using Basic::_idx;
@@ -581,11 +572,9 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     double _sidelength[NV];
 
   public :
-    int numfaces() const { return (NV==3)?3:thinelement_t::nfaces ; }
+    int numfaces() const { return nv(); }
 
-    int numedges() const { return (NV==3)?3:thinelement_t::nedges ; }
-
-    int numvertices() const { return (NV==3)?3:thinelement_t::nvertices ; }
+    int numvertices() const { return nv(); }
 
     // using thinelement_t::numvertices;
     // using thinelement_t::numfaces;
@@ -605,7 +594,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
     virtual ~Element();
 
-    int numfacevertices(int ) const { return connect.pv ; }
+    // int numfacevertices(int ) const { return connect.pv ; }
     
     int facevertex(int , int ) const ;
       
@@ -1036,7 +1025,7 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV >, public Ref
 
     int facevertex(int , int ) const ;
 
-    int numfacevertices(int ) const { return connect.nv ; }
+    // int numfacevertices(int ) const { return connect.nv ; }
  
     void edge_vtx(int e, vertex_t * (& ) [c::nv] ) const ;
 

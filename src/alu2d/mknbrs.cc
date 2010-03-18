@@ -26,11 +26,13 @@ void Hmesh_basic<N,NV>::makeneighbours() {
 #endif
 */
 
-  typedef k < ncoord, nvtx > k_t;
+  typedef k < ncoord, nvtx > value_t;
+  typedef vector < vertex_t * > key_t;
+  typedef map < key_t , value_t , less < key_t > > map_t ;
 
   int count = 0 ;
 
-  map < vector < vertex_t * > , k_t , less < vector < vertex_t * > > > m ;
+  map_t m ;
 
   {
 
@@ -44,38 +46,37 @@ void Hmesh_basic<N,NV>::makeneighbours() {
 
       thinelement_t & e = walk.getitem() ;
 
-      int numfce = (e.thinis(thinelement_t::element_like))?dynamic_cast<element_t&>(e).numfaces():2;
+      int numfce = (e.thinis(thinelement_t::element_like))?((element_t&)e).numfaces():1;
 
       for(int fce = 0 ; fce < numfce ; fce ++ ) {
 
         int npv = e.numfacevertices(fce) ;
-
-        vector < vertex_t * > v ;
-
+        key_t v(npv) ;
         for(int j = 0 ; j < npv ; j ++ )
-
-          v.push_back(e.vertex(fce, j)) ;
-
+          v[j] = e.vertex(fce, j) ;
         sort(v.begin(), v.end()) ;
 
-        typename map < vector < vertex_t * > , k_t , less < vector < vertex_t * > > > :: iterator hit = m.find(v) ;
-
-        if(hit == m.end()) m [v] = k_t ( & e, fce) ;
-
+        typename map_t :: iterator hit = m.find(v) ;
+        if(hit == m.end()) m [v] = value_t ( & e, fce) ;
         else {
-
           count ++ ;
-
           e.nbconnect(fce, (*hit).second.a,(*hit).second.b) ;
-
           (*hit).second.a->nbconnect((*hit).second.b, & e, fce) ;
-
           m.erase(hit) ;
-
         }
-
       }
+    }
 
+    if ( !m.empty() )
+    {
+      cerr << "Wrong connectivity:" << endl;
+      typename map_t :: iterator end = m.end() ;
+      for ( typename map_t :: iterator it = m.begin() ; it != end ; ++it )
+      {
+        cerr << "key:" << it->first[0]->getIndex() 
+             << " " << it->first[1]->getIndex() << endl;
+      }
+      abort();
     }
 
   /*

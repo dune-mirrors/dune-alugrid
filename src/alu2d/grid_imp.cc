@@ -795,7 +795,7 @@ inline void Element < N, NV >::init()
         _outernormal[i][k] *= fac;
       _area += 1./(4.*fac);
     }
-    _area /= (numvertices()==3)?double(numfaces()):double(numfaces()/2.);
+    _area /= ( numvertices()==3 ? 3.:2. );
   }
 
   assert(_area > 0.0);
