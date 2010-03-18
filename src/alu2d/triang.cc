@@ -87,9 +87,7 @@ extern int g_argc;
 // ***************************************************
 template < int N, int NV >
 Triang < N,NV >::Triang() {
-  thinelement_t::nedges = -1 ;
-  thinelement_t::nfaces = -1 ;
-  thinelement_t::nvertices = -1;
+  element_t::nvertices = -1;
 }
 
 // ***************************************************
@@ -106,9 +104,7 @@ Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2) {
   connect.set( v0, 0) ;
   connect.set( v1, 1) ;
   connect.set( v2, 2) ;
-  thinelement_t::nedges = -1 ;
-  thinelement_t::nfaces = 3 ;
-  thinelement_t::nvertices = 3 ;
+  element_t::nvertices = 3 ;
 
   init();
 }
@@ -121,9 +117,7 @@ Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2, vertex_t * v
     connect.set( v1, 1) ;
     connect.set( v2, 2) ;
     connect.set( v3, 3) ;
-    thinelement_t::nedges = -1 ;
-    thinelement_t::nfaces = 4 ;
-    thinelement_t::nvertices = 4 ;
+    element_t::nvertices = 4 ;
   }
   init();
 }
@@ -161,8 +155,7 @@ void Triang < N,NV >::write(ostream & out) const {
 template < int N, int NV >
 void Triang < N,NV >::read(istream & in, vertex_t ** look, const int len) {
   helement_t::read(in) ;
-  thinelement_t::nfaces = connect.read(in, look, len) ;
-  thinelement_t::nvertices = thinelement_t::nfaces;
+  element_t::nvertices = connect.read(in, look, len) ;
   init() ;
 }
 
@@ -740,8 +733,9 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
           assert(trnb2);
         }
 
-        Triang *trnb1 = (Triang *)( trnb2->next() ? trnb2->next():trnb0->down() );
-        if (numvertices()==3 && opposite(i)==1) trnb1=(Triang*)trnb0->down();
+        Triang *trnb1 = (Triang *)( opposite(i)!=numfaces()-2 ? 
+                        trnb2->next():trnb0->down() );
+        assert( trnb1 );
 
         assert(trnb1->connect.vtx[mod(opposite(i)+1)] == newvtx[i]);
         assert(trnb2->connect.vtx[mod(opposite(i)+2)] == newvtx[i]);
@@ -873,8 +867,8 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
 #endif
           // do coarsen 
           ((helement_t *)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
-        assert( didcoarse );
-        lcancoarsen=1;
+          assert( didcoarse );
+          lcancoarsen=1;
         }
       }
       else
@@ -948,14 +942,14 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
         assert(!hashvtx(i));
         if (nbel(i)) {
           if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
-            addhvtx(child[mod(i+1)]->vertex((i+2)), 
+            addhvtx(child[mod(i+1)]->vertex(i+2), 
                     child[mod(i+2)]->nbel(i),child[mod(i+1)]->nbel(i), i);
             connect.hvtx[i]->merge(((Triang*)child[mod(i+1)])->connect.hvtx[i],
                      ((Triang*)child[mod(i+2)])->connect.hvtx[i]);
             connect.hvtx[i]->nbconnect(opposite(i),this,i);
           } else { // Haengenden Knoten im Nachbarn entfernen 
             assert(nbel(i)->hashvtx(opposite(i)));
-            nbel(i)->removehvtx(opposite(i),child[mod(i+1)]->vertex((i+2)));
+            nbel(i)->removehvtx(opposite(i),child[mod(i+1)]->vertex(i+2));
           }
         }
       }
@@ -1078,12 +1072,6 @@ Bndel_triang < N,NV >::Bndel_triang(vertex_t * v0, vertex_t * v1, bnd_t type) : 
 
   bndel_t::typ = type ;
 
-  thinelement_t::nedges = connect.nv ;
-
-  thinelement_t::nfaces = connect.nf ;
-
-  thinelement_t::nvertices = connect.nv ;
-  
 }
 
 template < int N, int NV >
@@ -1140,12 +1128,6 @@ void Bndel_triang < N,NV >::read(istream & in, vertex_t ** v, const int nv) {
   bndel_t::typ = (typename bndel_t::bnd_t) c ;
 
   connect.read(in, v, nv) ;
-
-  thinelement_t::nedges = connect.nv ;
-
-  thinelement_t::nfaces = connect.nf ;
-
-  thinelement_t::nvertices = connect.nv ;
 
 }
 
