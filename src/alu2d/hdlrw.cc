@@ -13,9 +13,10 @@ ascireadtriang(istream &in,
 {
   bool isbackup=false;
   // Wiederaufsetzen?
-  int c = in.get () ;
-  assert (!in.eof ()) ;
-  in.putback (c) ;
+  int c = in.peek();
+  //int c = in.get () ;
+  //assert (!in.eof ()) ;
+  //in.putback (c) ;
   assert (in.good ()) ;
   if (c == int ('!')) {
     // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
@@ -69,7 +70,7 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
     
 #ifndef NDEBUG
     if( verbose ) 
-      cerr << "    Number of Vertices:           " << nv << endl ;
+      cerr << "    Number of Vertices:             " << nv << endl ;
 #endif
     
     v = new vertex_t *[nv] ;
@@ -98,7 +99,7 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
   
 #ifndef NDEBUG
     if( verbose ) 
-      cerr << "    Number of MacroElements:      " << ne << endl ;
+      cerr << "    Number of MacroElements:        " << ne << endl ;
 #endif
     
  
@@ -116,13 +117,19 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
 
   {
 
-    int nb = 0 ;
+    string line;
+    while( in && line.empty() )
+      getline( in, line );
+    istringstream linein( line );
 
-    in >> nb ;
+    int nb = 0 ;
+    linein >> nb ;
+
+    int npb = 0;
 
 #ifndef NDEBUG 
     if( verbose )
-      cerr << "    Number of BoundarySegments:   " << nb << endl ;
+      cerr << "    Number of BoundarySegments:     " << nb << endl ;
 #endif
 
     typedef struct
@@ -150,57 +157,59 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
 
     for( int i = 0 ; i <  nb ; ++i ) 
     {
+      getline( in, line );
+      istringstream linein( line );
+
       int lt;
-      
-      lt=in.peek();
+      linein >> lt;
+      linein.seekg( 0 );
 
       typename bndel_t::bnd_t t=(typename bndel_t::bnd_t)lt;
 
       bndel_triang_t * b;
-
-      int generalperbnd=0;
 
       switch (t)
       {
         case bndel_t::periodic:
           assert(ncoord == 2);
           b=new bndel_periodic_t( i );
+          ++npb;
           break;
+
         case bndel_t::general_periodic:
-          assert(ncoord == 2);
-          t=bndel_t::periodic;
           b=new bndel_periodic_t( i );
-          generalperbnd=1;
+          ++npb;
           break;
+
         default:
           b=new bndel_triang_t(i, t);
           break;
       }
 
-      b->read(in, v, nv) ;
+      assert( b );
+      b->read(linein, v, nv) ;
 
       mbl.insert( new macrobndel_t (*b) ) ;
 
-      if (t==bndel_t::periodic)
-      {
-        if (generalperbnd) {
-          int pernb;
-          in >> pernb;
-                if (pernb<i) {
-            assert(perbnd_list[pernb].pernb==i);
-            ((bndel_periodic_t *)b)->set_pnb(perbnd_list[pernb].b);
-            ((bndel_periodic_t *)perbnd_list[pernb].b)->set_pnb(b);
-            perbnd_ok++;
-          }
-          else {
-            perbnd_list[i].b=b;
-            perbnd_list[i].pernb=pernb;
-            perbnd_card++;
-          }
+      if (t==bndel_t::general_periodic) {
+        int pernb;
+        linein >> pernb;
+        if (pernb<i) {
+          assert(perbnd_list[pernb].pernb==i);
+          ((bndel_periodic_t *)b)->set_pnb(perbnd_list[pernb].b);
+          ((bndel_periodic_t *)perbnd_list[pernb].b)->set_pnb(b);
+          perbnd_ok++;
         }
-        else if (fabs(b->vertex(0)->coord()[0]-b->vertex(1)->coord()[0])<EPS)
+        else {
+          perbnd_list[i].b=b;
+          perbnd_list[i].pernb=pernb;
+          perbnd_card++;
+        }
+      }
+      else if (t==bndel_t::periodic)
+      {
+        if (fabs(b->vertex(0)->coord()[0]-b->vertex(1)->coord()[0])<EPS)
         {
-
           double y0,y1;
           if (b->vertex(0)->coord()[1]<b->vertex(1)->coord()[1])
       { y0=b->vertex(0)->coord()[1];y1=b->vertex(1)->coord()[1]; }
@@ -208,23 +217,21 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
       { y0=b->vertex(1)->coord()[1];y1=b->vertex(0)->coord()[1]; }
           int y;
           for (y=0;y<y_card;y++)
-            if (fabs(y_axis[y].p0-y0)+fabs(y_axis[y].p1-y1)<EPS)
-      {
+            if (fabs(y_axis[y].p0-y0)+fabs(y_axis[y].p1-y1)<EPS) {
               ((bndel_periodic_t *)b)->set_pnb(y_axis[y].b);
               ((bndel_periodic_t *)y_axis[y].b)->set_pnb(b);
               y_ok++;
               break;
             }
-          if (y==y_card)
-    {
+          if (y==y_card) {
             y_axis[y_card].p0=y0;
             y_axis[y_card].p1=y1;
             y_axis[y_card].b=b;
             y_card++;
-    }
+          }
         }
         else 
-  {
+        {
           assert(fabs(b->vertex(0)->coord()[1]-b->vertex(1)->coord()[1])<EPS);
 
           double x0,x1;
@@ -234,23 +241,20 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
       { x0=b->vertex(1)->coord()[0];x1=b->vertex(0)->coord()[0]; }
           int x;
           for (x=0;x<x_card;x++)
-            if (fabs(x_axis[x].p0-x0)+fabs(x_axis[x].p1-x1)<EPS)
-      {
+            if (fabs(x_axis[x].p0-x0)+fabs(x_axis[x].p1-x1)<EPS) {
               ((bndel_periodic_t *)b)->set_pnb(x_axis[x].b);
               ((bndel_periodic_t *)x_axis[x].b)->set_pnb(b);
               x_ok++;
               break;
             }
-          if (x==x_card)
-    {
+          if (x==x_card) {
             x_axis[x_card].p0=x0;
             x_axis[x_card].p1=x1;
             x_axis[x_card].b=b;
             x_card++;
-    }
+          }
         }
       }
-
     }
 
     delete [] y_axis;
@@ -262,10 +266,15 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
     assert(y_ok==y_card);
     assert(x_ok==x_card);
 
+#ifndef NDEBUG
+    if( verbose )
+      cerr << "    Number of periodic boundaries:  " << npb << endl ;
+#endif
+  
   }       
 
   delete[] v ;
-  
+
 #ifndef NDEBUG
   if( verbose )
     cerr << "\n  -------------------------- closed.\n" <<endl ;
@@ -375,12 +384,14 @@ void Hmesh_basic<N,NV>::asciwritetriang(ostream &out) {
     Listwalk_impl < macroelement_t > walk(mel) ;
 
     int count = 0 ;
-    
+
+    const int numMacroElements = walk.size();
+
 #ifndef NDEBUG
-    cerr << "    Number of macro Elements:  " << walk.size() << endl ;
+    cerr << "    Number of macro Elements:  " << numMacroElements << endl ;
 #endif
     
-    out << walk.size() << endl;
+    out << numMacroElements << endl;
     
     for( walk.first() ; ! walk.done() ; walk.next() ) {
     
@@ -397,29 +408,33 @@ void Hmesh_basic<N,NV>::asciwritetriang(ostream &out) {
   }
   
   {
-
     Listwalk_impl < macrobndel_t > walk(mbl) ;
+    const int numMacroBoundaryElements = walk.size();
 
-   int count = 0 ;
-    
 #ifndef NDEBUG
-    cerr << "    Number of macro boundary Elements:   " << walk.size() << endl ;
+    cerr << "    Number of macro boundary Elements:   " << numMacroBoundaryElements << endl ;
 #endif
-    
-    out << walk.size() << endl ;
-    
-    for( walk.first() ; ! walk.done() ; walk.next() ) {
-    
+
+    out << numMacroBoundaryElements << endl;
+
+    int index = 0, count = 0;
+    for( walk.first() ; ! walk.done() ; walk.next() )
+    {
+      // make sure we can use the segment index to write out periodic neighbors
+      if( index != walk.getitem()->segmentIndex() )
+      {
+        cerr << "Error: Index in macro boundary element list does not coincide with segment index." << endl;
+        abort();
+      }
+
       walk.getitem()->write(out) ;
 
       count += walk.getitem()->count() ;
-
     }
 
 #ifndef NDEBUG
     cerr << "    Number of boundary Elements:       " << count << endl ;
 #endif
-
   }
   
 #ifndef NDEBUG

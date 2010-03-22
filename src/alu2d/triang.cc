@@ -573,7 +573,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
   //    /             |           /     |1/     | 
   //   /              |          /2    0|/2    0| 
   // 2*---------------*0       2*-------*-------*0
-        //                                   (1)
+  //                                   (1)
 
   Triang *newtr[4];
   vertex_t *newvtx[NV];
@@ -1305,6 +1305,35 @@ int Bndel_triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
 
 int periodic_flag=0;
 
+
+template < int N, int NV >
+void Bndel_periodic < N,NV >::write(ostream &out) const
+{
+  assert( periodic_nb );
+  out << bndel_t::general_periodic << "  ";
+  connect.write(out);
+
+  // write out index of periodic neighbor
+  // (boundary segments are written in the order of their segment indices)
+  out << "  " << periodic_nb->segmentIndex();
+  out << endl;
+}
+
+
+template < int N, int NV >
+void Bndel_periodic < N,NV >::read(istream &in, vertex_t ** v, const int nv)
+{
+  int typ;
+  in >> typ;
+  if( (typ != bndel_t::periodic) && (typ != bndel_t::general_periodic) )
+  {
+    cerr << "Error: Trying to read non-periodic boundary into a periodic one." << endl;
+    abort();
+  }
+  connect.read(in, v, nv);
+}
+
+
 template < int N, int NV >
 int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts], Listagency < vertex_t > * agnc,
                                    multivertexadapter_t & mva, 
@@ -1321,23 +1350,22 @@ int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts], Listagency < ver
     if (periodic_flag)
       return 2;
     periodic_flag=1;
-    while (periodic_nb->leaf())
+    while (periodic_nb->leaf()) {
+      switch (nbel(0)->splitrule())
       {
-  switch (nbel(0)->splitrule())
-    {
-    case thinelement_t::triang_conf2:
-      periodic_nb->nbel(0)->Refco_el::mark(Refco::ref_1) ;
-      break;
-    case thinelement_t::triang_quarter:
-      periodic_nb->nbel(0)->Refco_el::mark(Refco::quart) ;
-      break;
-    default:
-      cerr << "ERROR (Bndel_periodic::split()): "
-     << "illegal splitrule!" << endl;
-      abort();
-    }
-  periodic_nb->nbel(0)->refine_leaf(agnc,&mva,ncv,nconfDeg,default_ref,pro_el);
+        case thinelement_t::triang_conf2:
+          periodic_nb->nbel(0)->Refco_el::mark(Refco::ref_1) ;
+          break;
+        case thinelement_t::triang_quarter:
+          periodic_nb->nbel(0)->Refco_el::mark(Refco::quart) ;
+          break;
+        default:
+          cerr << "ERROR (Bndel_periodic::split()): "
+         << "illegal splitrule!" << endl;
+          abort();
       }
+      periodic_nb->nbel(0)->refine_leaf(agnc,&mva,ncv,nconfDeg,default_ref,pro_el);
+    }
     periodic_flag=0;
     ((Bndel_periodic*)(el[0]))
       ->set_pnb((Bndel_periodic*)(periodic_nb->down()->next()));

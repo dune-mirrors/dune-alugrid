@@ -224,6 +224,10 @@ class Bndel_periodic : public Bndel_triang < N,NV >
     typedef Prolong_basic < N,NV > prolong_basic_t;
     typedef Restrict_basic < N,NV > restrict_basic_t;
 
+  protected:
+    using bndel_t::connect;
+
+  public:
     using bndel_triang_t::deletesubtree;
     using bndel_triang_t::down;
     using bndel_triang_t::leaf;
@@ -266,6 +270,9 @@ class Bndel_periodic : public Bndel_triang < N,NV >
         ((Bndel_periodic*)(down()->next()))->set_pnb(pnb);
       }
     }
+
+    void write(ostream &) const;
+    void read(istream &, vertex_t ** , const int);
 
     virtual int split(void * (&el)[Basic::nparts], Listagency < vertex_t > * agnc,
                       multivertexadapter_t & mva, nconf_vtx_t *ncv,splitrule_t,
