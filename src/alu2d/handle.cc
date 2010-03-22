@@ -20,9 +20,9 @@ Hmesh<N,NV>::Hmesh(istream& macrofile, int pnconfDeg, Refco::tag_t pref_rule) :
 {
   double time;
   long unsigned int nbr;
-#ifndef NDEBUG 
-  cerr << "\n  Hmesh::Hmesh reads istream: " << endl ;
-#endif
+//#ifndef NDEBUG 
+//  cerr << "\n  Hmesh::Hmesh reads istream: " << endl ;
+//#endif
 
   bool restart = setup_grid(macrofile, time, nbr);
   if( restart ) 

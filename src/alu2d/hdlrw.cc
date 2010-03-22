@@ -52,12 +52,13 @@ ascireadtriang(istream &in,
     }
     delete [] str;
   }
-  hmesh_basic_t::ascireadtriang(in);
+  hmesh_basic_t::ascireadtriang(in, isbackup);
   return isbackup;
 }
  
 template <int N,int NV>
-void Hmesh_basic<N,NV> :: ascireadtriang(istream &in) {
+void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose) 
+{
 
   vertex_t ** v = 0 ;
 
@@ -67,7 +68,8 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in) {
     in >> nv ;
     
 #ifndef NDEBUG
-    cerr << "    Number of Vertices:           " << nv << endl ;
+    if( verbose ) 
+      cerr << "    Number of Vertices:           " << nv << endl ;
 #endif
     
     v = new vertex_t *[nv] ;
@@ -95,7 +97,8 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in) {
     in >> ne ;
   
 #ifndef NDEBUG
-    cerr << "    Number of MacroElements:      " << ne << endl ;
+    if( verbose ) 
+      cerr << "    Number of MacroElements:      " << ne << endl ;
 #endif
     
  
@@ -118,7 +121,8 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in) {
     in >> nb ;
 
 #ifndef NDEBUG 
-    cerr << "    Number of BoundarySegments:   " << nb << endl ;
+    if( verbose )
+      cerr << "    Number of BoundarySegments:   " << nb << endl ;
 #endif
 
     typedef struct
@@ -263,7 +267,8 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in) {
   delete[] v ;
   
 #ifndef NDEBUG
-  cerr << "\n  -------------------------- closed.\n" <<endl ;
+  if( verbose )
+    cerr << "\n  -------------------------- closed.\n" <<endl ;
 #endif
 
   vl.renumber() ;

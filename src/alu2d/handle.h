@@ -896,7 +896,7 @@ class Hmesh_basic : public IndexProvider {
  protected:
     void asciwritetriang(ostream &) ;
     
-    void ascireadtriang(istream &) ;
+    void ascireadtriang(istream &, const bool = true ) ;
   public :
    Hmesh_basic() : 
       vl(this), 
