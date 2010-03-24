@@ -12,6 +12,7 @@ namespace ALUGridSpace {
 // this is needed since the code does not used std :: 
 using namespace std; 
 
+#include "alu2d/grid.cc"
 #include "alu2d/handle.cc"
 #include "alu2d/triang.cc"
 #include "alu2d/hdlrw.cc"

@@ -221,39 +221,13 @@ template < int N > class Vertex : public Listagent < Vertex < N > >, public Basi
       return nr_of_pernbs;
     }
 
-    void set_pernb(Vertex *pv) 
-    {
-      int li, lnew = 1;
-
-      for (li=0;li<nr_of_pernbs;li++)
-      {
-        if (pv == pernb[li]) lnew = 0;
-      }
-
-      if (pv == this) lnew = 0;
-
-      if (lnew)
-      {
-        assert(nr_of_pernbs < 3);
-
-        pernb[nr_of_pernbs] = pv;
-        nr_of_pernbs++;
-      }
-    }
+    void set_pernb(Vertex *pv);
 
     int no_pernbs() {
       return nr_of_pernbs;
     }
 
-    Vertex *get_pernb(int pidx)
-    {
-      Vertex *lret;
-
-      if (pidx < nr_of_pernbs) lret = pernb[pidx];
-      else lret = (Vertex *)0;
-
-      return lret; 
-    } 
+    Vertex *get_pernb(int pidx);
     
     int level() {
       return _level;
@@ -579,19 +553,8 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     // using thinelement_t::numvertices;
     // using thinelement_t::numfaces;
     using thinelement_t::getIndex;
-   
-    Element() : _area(-1.0), _minheight(-1.0)
-    {
-      int i,j;
-
-      for (i=0;i<NV;i++)
-      {
-        for (j=0;j<ncoord;++j)
-          _outernormal[i][j] =  0.0;
-        _sidelength[i]       = -1.0;
-      }
-    }
-
+ 
+    Element();
     virtual ~Element();
 
     // int numfacevertices(int ) const { return connect.pv ; }
@@ -647,14 +610,6 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
     void dirnormal(int ,double (& )[ncoord]) const;
 
-    /*
-    void fromlocal(const double (& )[3],double (& )[ncoord]) const; // Fullvertex nehmen
-
-    void midpoint(int ,double (& )[3]) const;
-
-    void facepoint(int ,double ,double (& )[3]) const;
-    */
-
     void facepoint(int ,double ,double (& )[ncoord]) const;
 
     void addhvtx(vertex_t *inv, thinelement_t *lnb, thinelement_t *rnb,int fce);
@@ -682,24 +637,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     void getAllNb(typename vtx_btree_t::Node* node, stack<thinelement_t *> vec) ;
    
   public:
-    void removehvtx(int fce,vertex_t *vtx) 
-    {
-      if (connect.hvtx[fce]->count()==1) 
-      {
-        assert(connect.hvtx[fce]->getHead()==vtx);
-        delete connect.hvtx[fce];
-        connect.hvtx[fce] = 0;
-      } 
-      else 
-      {
-#ifndef NDEBUG
-        // only used in assert 
-        bool found=
-#endif
-          connect.hvtx[fce]->remove(vtx);
-        assert(found);
-      }
-    }
+    void removehvtx(int fce,vertex_t *vtx);
 
     int check() ;
 
@@ -763,13 +701,7 @@ template < class A > class Hier : public A {
 
   public :
 
-    virtual ~Hier() {
-
-      if(dwn) delete dwn ;
-
-      if(nxt) delete nxt ;
-
-    }
+    virtual ~Hier();
 
     Hier * down() const { return dwn ; }
 
@@ -799,106 +731,14 @@ template < class A > class Hier : public A {
       return SubtreeIterator<A>(this);
     }
 
-    int deepestLevel() {
-      SubtreeIterator<A> iter = stIterator();
-      int currLevel = iter->level();
-      int result = currLevel;
-      while( ++iter ) {
-        if( iter->level() > result )
-        result = iter->level();
-      }
-      return result - currLevel;
-    }
+    int deepestLevel();
 
-    int coarse(nconf_vtx_t *ncv,int nconfDeg, restrict_basic_t *rest_el) {
-
-      if(dwn ? dwn->coarse(ncv,nconfDeg,rest_el) == numchild : 0 )
-
-      if ( this->docoarsen(ncv,nconfDeg,rest_el) )
-      {
-          this->deletesubtree();
-          this->mysplit = this->unsplit;
-      }
-
-      int i = (nxt ? nxt->coarse(ncv,nconfDeg,rest_el) : 0 ) + (this->is(Refco::crs) ? 1 : 0 ) ;
-
-      this->clear(Refco::crs) ;
-
-      return i ;
-
-    }
+    int coarse(nconf_vtx_t *ncv,int nconfDeg, restrict_basic_t *rest_el);
 
     int refine_leaf(Listagency < vertex_t > * a, 
         multivertexadapter_t * b ,nconf_vtx_t *ncv,
         int nconfDeg,Refco::tag_t default_ref,
-        prolong_basic_t *pro_el)  {
-
-      int count = 0;
-
-      assert( leaf() );
-
-      if (this->is(Refco::ref))
-        this->mark(default_ref);
-
-      if(this->is(Refco::quart) || 
-         this->is(Refco::ref_1) || this->is(Refco::ref_2) || 
-         this->thinis(this->bndel_like)) {
-          
-        void * els [this->nparts] ;
-
-        if (this->is(Refco::quart))
-        {
-          numchild = this->split(els, a, *b, ncv, this->triang_quarter,nconfDeg,default_ref,pro_el);
-          this->clear(Refco::quart);
-        }
-        else if (this->is(Refco::ref_1))
-        {
-          numchild = this->split(els, a, *b, ncv, this->triang_conf2,nconfDeg,default_ref,pro_el);
-          this->clear(Refco::ref_1);
-        }
-        else if (this->is(Refco::ref_2))
-        {
-          numchild = this->split(els, a, *b, ncv, this->triang_conf2,nconfDeg,default_ref,pro_el);
-          this->clear(Refco::ref_2);
-        }
-        else
-        {
-          assert(this->thinis(this->bndel_like));
-          this->numchild = this->split(els, a, *b, ncv, this->triang_bnd,nconfDeg,default_ref,pro_el);
-        }
-
-        dwn = (Hier *)els[0] ;
-
-        dwn->lvl = lvl + 1 ;
-
-        dwn->up = this;
-        dwn->writeToWas();
-        dwn->childNr_ = 0;
-
-        for(int i = 1 ; i < numchild ; i ++ ) {
-
-          ((Hier *)els[i])->lvl = lvl + 1 ;
-
-          ((Hier *)els[i])->up = this ;
-          ((Hier *)els[i])->writeToWas();
-          ((Hier *)els[i])->childNr_ = i;
-
-          ((Hier *)els[i-1])->nxt = (Hier *)els[i] ;
-
-        }
-
-        if (pro_el)
-          pro_el->operator()(this);
-  
-        //this->check();
-
-        count = numchild;
-
-      }
-
-      return count;
-
-    }
+        prolong_basic_t *pro_el);
 
     void clearAllWas() 
     {
@@ -911,27 +751,7 @@ template < class A > class Hier : public A {
 
     int refine(Listagency < vertex_t > * a, multivertexadapter_t * b,
          nconf_vtx_t *ncv,
-         int nconfDeg,Refco::tag_t default_ref,prolong_basic_t *pro_el) {
-      int count =  nxt ? nxt->refine(a, b,ncv, nconfDeg,default_ref,pro_el) : 0 ;
-      if(dwn) 
-        count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
-      else {
-
- // Neue Behandlung der Bl"atter:
- // Wegen rek. Aufbau der Dreiecksverf. ist eine Funktion n"otig, die Verf.
- // aber nicht u"ber den Baum l"auft. 
- // Weitere "Anderung: count+= statt count=, falls n"amlich von der nxt-Rek.
- // etwas in count steht.
- // Bei Rekursivem Verf. stimmt R"uckgabe sowieso nicht
-
-        count += refine_leaf(a,b,ncv,nconfDeg,default_ref,pro_el) ; 
-
-      }
-
-      return count ;
-
-    }
-
+         int nconfDeg,Refco::tag_t default_ref,prolong_basic_t *pro_el);
 
     void write(ostream & ) const { }
 
@@ -1043,7 +863,6 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV >, public Ref
       return _segmentIndex; 
     }
 
-
     thinelement_t * neighbour(int ) const { return connect.nb ; }
 
     int neighbours(int ) const { return 1; }
@@ -1076,17 +895,7 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV >, public Ref
 
     virtual Bndel *create(vertex_t * , vertex_t *,bnd_t) const = 0;
 
-    int setorientation()
-    {
-      int ret = (connect.vtx[0] != connect.nb->vertex(connect.bck+1));
-      if(ret)
-      {
-        vertex_t *tmpv=connect.vtx[0];
-        connect.vtx[0]=connect.vtx[1];
-        connect.vtx[1]=tmpv;
-      }
-      return ret;
-    }
+    int setorientation();
  
 #if USE_ALUGRID_XDISPLAY 
     void draw(Xdisplay & ) ; 
@@ -1286,5 +1095,3 @@ inline void Bndel::draw(Xdisplay &xd)
 #include "grid_imp.cc"
 
 #endif
-
-

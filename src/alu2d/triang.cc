@@ -1,6 +1,3 @@
-extern char ** g_argv;
-extern int g_argc;
-
 // ***************************************************
 // #begin(header)
 // #filename:
@@ -972,95 +969,6 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
   return result;
 }
 
-#if 0
-// ***************************************************
-// #begin(method)
-// #method:
-//   int Element::c::check()
-// #parameters:
-// #description:
-//   F"uhrt einen check der connect-Info durch (privat).
-//   Steigt mit einem assert aus falls nicht alles stimmt!
-// #end(method)
-// ***************************************************
-template < int N, int NV >
-int Element < N,NV >::c::check()
-{
-  for (int i=0;i<3;i++)
-    assert( vtx[i] );
-  for (int i=0;i<3;i++)
-    {
-      if (nb[i]->thinis(thinelement_t::element_like))
-  {
-    assert( 0<=bck[i] && bck[i]<=NV );
-  }
-      else
-  {
-    assert( bck[i] == 0 );
-    assert( normdir[i] == 1 );
-  }
-      assert( normdir[i]==1 || normdir[i]==-1 );
-      assert(edge[i]);
-      assert(edge[i]->getIndex()>=0);
-    }
-  return 1;
-}
-#endif
-
-#if 0
-// ***************************************************
-// #begin(method)
-// #method:
-//   int Element::check()
-// #parameters:
-// #description:
-//   Checkt alle Dreieksinfos. Steigt aus falls es eine Unstimmigkeit findet!
-// #end(method)
-// ***************************************************
-template < int N, int NV >
-int Element < N,NV >::check()
-{
-  assert(getIndex()>=0);
-  // char* whichCheck = 0;
-  // std::string whichCheck = "reason: ";
-  bool connectFailure = false;
-  // 1. Bin ich ein richtiges Dreieck
-  assert( connect.check() );
-  assert( setorientation() );
-  // 2. Meine Nachbarschaft stimmt
-  for (int i=0;i<3;i++)
-    {
-      if(  connect.nb[i]->thinis(thinelement_t::element_like) )
-  {
-    if(  !connect.hvtx[i] &&
-         !(((triang_t *)neighbour(i))->hashvtx(opposite(i))) ) { // Konform
-      assert( connect.nb[i]->opposite(connect.bck[i])==i );
-      assert( connect.nb[i]->neighbour(connect.bck[i])==this );
-      assert( connect.nb[i]->edge(connect.bck[i])==connect.edge[i]);
-      assert( connect.nb[i]->vertex(connect.bck[i]+1)==vertex(i+2) );
-      assert( connect.nb[i]->vertex(connect.bck[i]+2)==vertex(i+1) );
-    } else if (connect.hvtx[i]) {
-      assert(!(((triang_t *)neighbour(i))->hashvtx(opposite(i))));
-      assert( connect.hvtx[i]->getlnb()->neighbour(opposite(i))==this);
-      assert( connect.hvtx[i]->getrnb()->neighbour(opposite(i))==this);
-    }
-    assert(((Element *)neighbour(i))->normaldir(opposite(i)) == -normaldir(i));
-  }
-      else
-  {
-    assert( connect.nb[i]->neighbour(0)==this );
-    assert( connect.nb[i]->vertex(0)==vertex(i+1) );
-    assert( connect.nb[i]->vertex(1)==vertex(i+2) );
-    assert( connect.nb[i]->opposite(0)==i );
-    assert( connect.nb[i]->edge(connect.bck[i])==connect.edge[i]);
-  }
-    }
-  if ( ((Hier<Element>*)this)->leaf()) {
-  }
-  return (connectFailure ? 0 : 1);
-}
-#endif
-
 // **************************************************************
 
 template < int N, int NV >
@@ -1072,39 +980,6 @@ Bndel_triang < N,NV >::Bndel_triang(vertex_t * v0, vertex_t * v1, bnd_t type) : 
 
   bndel_t::typ = type ;
 
-}
-
-template < int N, int NV >
-int Bndel < N,NV >::facevertex(int , int j) const {
- 
-  assert(0 <= j) ;
-  
-  assert(j < connect.nv) ;
-  
-  return j ;
-  
-}
-
-template < int N, int NV >
-void Bndel < N,NV >::edge_vtx(int e, vertex_t * (&v) [c::nv]) const {
-
-  assert(e < connect.nv) ;
-
-  v[0] = connect.vtx[e ++ ] ;
-
-  v[1] = connect.vtx[e == connect.nv ? 0 : e] ;
-
-}
-
-template < int N, int NV >
-typename Bndel < N,NV >::vertex_t * Bndel < N,NV >::vertex(int i) const {
-
-  assert(0 <= i);
-
-  i%=connect.nv;
- 
-  return connect.vtx[i] ;
-  
 }
 
 template < int N, int NV >
@@ -1128,73 +1003,6 @@ void Bndel_triang < N,NV >::read(istream & in, vertex_t ** v, const int nv) {
   bndel_t::typ = (typename bndel_t::bnd_t) c ;
 
   connect.read(in, v, nv) ;
-
-}
-
-template < int N, int NV >
-void Bndel < N,NV >::nbconnect(int fce, thinelement_t * n, int b) {
-
-  assert(!fce) ;
- 
-  connect.nb = n ; 
-
-  connect.bck = b ; 
-
-}
-template < int N, int NV >
-void Bndel < N,NV >::edgeconnect(int fce, Edge * n) { 
-  assert(0 <= fce) ;
-  connect.edge = n ; 
-  n->attach();
-}
-
-template < int N, int NV >
-Bndel < N,NV >::c::c()  {
-
-  for(int i = 0 ; i < Basic::max_points ; i ++ ) vtx[i] = 0 ;
-
-  nb = 0 ;
-
-  bck = -1 ;
-
-  edge = 0;
-
-}
-
-template < int N, int NV >
-Bndel < N,NV >::c::~c() {
-
-  for(int i = 0 ; i < nv ; i ++ ) 
-
-    if(vtx[i]) vtx[i]->detach() ;
-
-}
-
-template < int N, int NV >
-void Bndel < N,NV >::c::write(ostream &out) const {
-
-  // out << nv << "  " ;
-
-  for( int i = 0 ; i < nv ; i ++ )
-
-    out << vtx[i]->Listagent < vertex_t > :: number() << "  " ;
-    
-}
-
-template < int  N, int NV >
-void Bndel < N,NV >::c::read(istream & in, vertex_t ** v, const int l) {
-
-  int c ;
-
-  for(int i = 0 ; i < nv ; i ++) {
-
-    in >> c ;
-
-    assert(-1 <= c && c < l) ;
-
-    if(c != -1) set((vertex_t *)v[c], i) ;
- 
-  }
 
 }
 
@@ -1445,26 +1253,18 @@ int Bndel_periodic < N,NV >::docoarsen(nconf_vtx_t *ncv,
 // ------------------------------------------------------------
 // Template Instantiation
 // ------------------------------------------------------------
-template class Element < 2,3 >;
 template class Triang < 2,3 >;
-template class Bndel < 2,3 >;
 template class Bndel_triang < 2,3 >;
 template class Bndel_periodic < 2,3 >;
 
-template class Element < 3,3 >;
 template class Triang < 3,3 >;
-template class Bndel < 3,3 >;
 template class Bndel_triang < 3,3 >;
 template class Bndel_periodic < 3,3 >;
 
-template class Element < 2,4 >;
 template class Triang < 2,4 >;
-template class Bndel < 2,4 >;
 template class Bndel_triang < 2,4 >;
 template class Bndel_periodic < 2,4 >;
 
-template class Element < 3,4 >;
 template class Triang < 3,4 >;
-template class Bndel < 3,4 >;
 template class Bndel_triang < 3,4 >;
 template class Bndel_periodic < 3,4 >;

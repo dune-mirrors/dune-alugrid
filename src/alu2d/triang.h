@@ -285,5 +285,3 @@ class Bndel_periodic : public Bndel_triang < N,NV >
 // ***************************************************
 
 #endif
-
-
