@@ -631,7 +631,10 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
     int setrefine() ;
 
-    int setorientation();
+    template <class O>
+    void setorientation(vector<O> &str);
+    void setorientation();
+    void switchorientation(int a,int b);
 
 
     double sidelength(int pfce) const { return _sidelength[mod(pfce)]; }

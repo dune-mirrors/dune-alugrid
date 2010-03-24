@@ -745,20 +745,21 @@ inline void Element < N, NV >::init()
     const double (&vc1)[ncoord]=connect.vtx[1]->coord();
     const double (&vc2)[ncoord]=connect.vtx[2]->coord();
 
+    _area =  0.5 * (  (vc0[0]-vc1[0])*(vc0[1]+vc1[1])
+                    + (vc1[0]-vc2[0])*(vc1[1]+vc2[1])
+                    + (vc2[0]-vc0[0])*(vc2[1]+vc0[1])) ;
+    const double alpha = (_area < 0)?-1:1;
+    _area *= alpha;
     /* calculate outer normal and sidelength */
     for (int i=0;i<numfaces();i++)
     {
-      _outernormal[i][0]= (vertex(i+2)->coord()[1]-vertex(i+1)->coord()[1]);
-      _outernormal[i][1]=-(vertex(i+2)->coord()[0]-vertex(i+1)->coord()[0]);
-
+      _outernormal[i][0]= alpha*(vertex(i+2)->coord()[1]-vertex(i+1)->coord()[1]);
+      _outernormal[i][1]=-alpha*(vertex(i+2)->coord()[0]-vertex(i+1)->coord()[0]);
       _sidelength[i] = 0;
       for (int k=0;k<ncoord;++k)
         _sidelength[i] += _outernormal[i][k]*_outernormal[i][k];
       _sidelength[i] = sqrt( _sidelength[i] );
     }
-    _area =  fabs(0.5 * (  (vc0[0]-vc1[0])*(vc0[1]+vc1[1])
-                         + (vc1[0]-vc2[0])*(vc1[1]+vc2[1])
-                         + (vc2[0]-vc0[0])*(vc2[1]+vc0[1])) );
   }
   else
   {
@@ -779,7 +780,10 @@ inline void Element < N, NV >::init()
       double scp_ds = 0;
       for (int k=0;k<ncoord;++k)
       {
-        _outernormal[i][k] = sides[mod(i+2)][k] - sides[mod(i+1)][k];
+        if ( numvertices() == 3)
+          _outernormal[i][k] = sides[mod(i+2)][k] - sides[mod(i+1)][k];
+        else
+          _outernormal[i][k] = sides[mod(i+3)][k] - sides[mod(i+2)][k] - sides[mod(i+1)][k];
         scp_ds += _outernormal[i][k] * sides[i][k];
       }
       double norm_n = 0;
@@ -841,6 +845,42 @@ inline int Element < N, NV >::setrefine()
   return maxkante==0;
 }
 
+template < int N, int NV >
+template <class O>
+void Element < N, NV >::setorientation(vector<O> &str)
+{
+  assert( N == 3 );
+  const int nf = numfaces();
+  const double (&v0)[ncoord]=connect.vtx[0]->coord();
+  const double (&v1)[ncoord]=connect.vtx[1]->coord();
+  const double (&v2)[ncoord]=connect.vtx[nf-1]->coord();
+  double e0[3];
+  double e1[3];
+  for (int i=0;i<3;++i)
+  {
+    e0[i] = v1[i]-v0[i];
+    e1[i] = v2[i]-v0[i];
+  }
+  O add;
+  add.el = this;
+  add.nextNb = 0;
+  add.n[0] = e0[1]*e1[2]-e1[1]*e0[2];
+  add.n[1] = e0[2]*e1[0]-e1[2]*e0[0];
+  add.n[2] = e0[0]*e1[1]-e1[0]*e0[1];
+  if ( ! str.empty() )
+  { // have comparison normal...
+    O &old = str.back();
+    if ( add.n[0]*old.n[0]+add.n[1]*old.n[1]+add.n[2]*old.n[2] < 0 )
+    {
+      switchorientation(1,nf-1);
+      add.n[0] *= -1.;
+      add.n[1] *= -1.;
+      add.n[2] *= -1.;
+    }
+  }
+  str.push_back(add);
+}
+
 /****************************************************
 // #begin(method)
 // #method:
@@ -854,56 +894,52 @@ inline int Element < N, NV >::setrefine()
 // #end(method)
 ***************************************************/
 template < int N, int NV >
-inline int Element < N, NV >::setorientation()
+inline void Element < N, NV >::setorientation()
 {
-  // required ??
-  if (ncoord>2) return 1;
-  assert( numfaces() == 3 && numvertices() == 3 ); // TRIANG
   double o;
-  const double (&v0)[ncoord]=connect.vtx[0]->coord();
-  const double (&v1)[ncoord]=connect.vtx[1]->coord();
-  const double (&v2)[ncoord]=connect.vtx[2]->coord();
-  o=(v1[0]-v0[0])*(v2[1]-v1[1])-(v1[1]-v0[1])*(v2[0]-v1[0]);
-  if (fabs(o)<1e-10) {
-    cerr << o << " " 
-   << v0[0] << "," << v0[1] << " "
-   << v1[0] << "," << v1[1] << " "
-   << v2[0] << "," << v2[1] << endl;
-  }
-  assert(o);  // Entartet!
-  if (o<0)    // Orientierung im Uhrzeigersinn!
+  if (ncoord==2) 
   {
-    cerr << "Orienting" << endl;
-    vertex_t *tmpv=connect.vtx[1];
-    thinelement_t *tmpn=connect.nb[1];
-    Edge *tmpe=connect.edge[1];
-    short int tmpb=connect.bck[1];
-    short int tmpd=connect.normdir[1];
-    double tmponx=_outernormal[1][0];
-    double tmpony=_outernormal[1][1];
-    double tmpsln=_sidelength[1];
-
-    connect.vtx[1]=connect.vtx[2];
-    connect.nb[1]=connect.nb[2];
-    connect.edge[1]=connect.edge[2];
-    connect.bck[1]=connect.bck[2];
-    connect.normdir[1]=connect.normdir[2];
-    connect.nb[1]->nbconnect(connect.bck[1],this,1);
-    connect.vtx[2]=tmpv;
-    connect.nb[2]=tmpn;
-    connect.edge[2]=tmpe;
-    connect.bck[2]=tmpb;
-    connect.normdir[2]=tmpd;
-    connect.nb[2]->nbconnect(connect.bck[2],this,2);
-
-    _outernormal[1][0] = _outernormal[2][0];
-    _outernormal[1][1] = _outernormal[2][1];
-    _sidelength[1]     = _sidelength[2];
-    _outernormal[2][0] = tmponx;
-    _outernormal[2][1] = tmpony;
-    _sidelength[2]     = tmpsln;
+    const int nf = numfaces();
+    const double (&v0)[ncoord]=connect.vtx[0]->coord();
+    const double (&v1)[ncoord]=connect.vtx[1]->coord();
+    const double (&v2)[ncoord]=connect.vtx[2]->coord();
+    o=(v1[0]-v0[0])*(v2[1]-v1[1])-(v1[1]-v0[1])*(v2[0]-v1[0]);
+    if (fabs(o)<1e-10) {
+      cerr << o << " " 
+           << v0[0] << "," << v0[1] << " "
+           << v1[0] << "," << v1[1] << " "
+           << v2[0] << "," << v2[1] << endl;
+    }
+    assert(o);  // Entartet!
+    if (o<0)
+    {
+      switchorientation(1,nf-1);
+    }
   }
-  return (o>0);
+}
+template < int N, int NV >
+inline void Element < N, NV >::switchorientation(int a,int b)
+{
+  swap(connect.vtx[a],connect.vtx[b]);
+  swap(connect.nb[a],connect.nb[b]);
+  swap(connect.edge[a],connect.edge[b]);
+  swap(connect.bck[a],connect.bck[b]);
+  swap(connect.normdir[a],connect.normdir[b]);
+  swap(_sidelength[a],_sidelength[b]);
+  for (int i=0;i<ncoord;++i)
+    swap(_outernormal[a][i],_outernormal[b][i]);
+
+  connect.nb[a]->nbconnect(connect.bck[a],this,a);
+  connect.nb[b]->nbconnect(connect.bck[b],this,b);
+
+  if (numvertices() == 4)
+  {
+    vertex_t *tmpv=connect.vtx[0];
+    connect.vtx[0]=connect.vtx[1];
+    connect.vtx[1]=connect.vtx[2];
+    connect.vtx[2]=connect.vtx[3];
+    connect.vtx[3]=tmpv;
+  }
 }
 
 /***************************************************

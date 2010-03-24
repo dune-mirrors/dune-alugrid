@@ -863,6 +863,13 @@ class Hmesh_basic : public IndexProvider {
 
     typedef VertexProjection < ncoord > ProjectVertex_t;
 
+    struct OrientStr
+    {
+      element_t *el;
+      int nextNb;
+      double n[3];
+    };
+
   protected :
 
     using IndexProvider::indexmanager;
@@ -897,6 +904,9 @@ class Hmesh_basic : public IndexProvider {
     void asciwritetriang(ostream &) ;
     
     void ascireadtriang(istream &, const bool = true ) ;
+
+    void setorientation();
+
   public :
    Hmesh_basic() : 
       vl(this), 

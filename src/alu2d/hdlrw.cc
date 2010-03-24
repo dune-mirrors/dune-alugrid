@@ -305,21 +305,55 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
         }
       }
     }
-    for (walk.first() ; !walk.done() ; walk.next() )
+  }
+  setorientation();
+}
+
+template <int N,int NV>
+void Hmesh_basic<N,NV> :: setorientation() 
+{
+  Listwalk_impl < macroelement_t > walkel(mel) ;
+  if (N == 2)
+  {
+    for (walkel.first() ; !walkel.done() ; walkel.next() )
     {
-      if (walk.getitem()->numvertices() == 3)
+      walkel.getitem()->setorientation();
+      if (walkel.getitem()->numvertices() == 3)
+        walkel.getitem()->setrefine();
+    }
+  }
+  else
+  {
+    vector<OrientStr> orientStack;
+    vector<bool> visited(walkel.size(),false);
+    for (walkel.first() ; !walkel.done() ; walkel.next() )
+    {
+      if ( visited[ walkel.getitem()->getIndex() ] ) continue;
+      walkel.getitem()->setorientation(orientStack);
+      visited[ walkel.getitem()->getIndex() ] = true;
+      while ( !(orientStack.empty()) )
       {
-        walk.getitem()->setorientation();
-        walk.getitem()->setrefine();
+        OrientStr &str = orientStack.back();
+        if ( str.nextNb < str.el->numfaces() )
+        {
+          element_t* nb = str.el->nbel(str.nextNb);
+          ++(str.nextNb);
+          if ( nb )
+            if ( !visited[ nb->getIndex() ] )
+            {
+              nb->setorientation(orientStack);
+              visited[ nb->getIndex() ] = true;
+            }
+        }
+        else
+          orientStack.pop_back();
       }
     }
   }
-  {
-    Listwalk_impl < macrobndel_t > walk(mbl) ;
-    for (walk.first() ; !walk.done() ; walk.next() ) {
-      walk.getitem()->setorientation();
-      walk.getitem()->edgeconnect(0,walk.getitem()->neighbour(0)->edge(walk.getitem()->opposite(0)));
-    }
+  Listwalk_impl < macrobndel_t > walkbnd(mbl) ;
+  for (walkbnd.first() ; !walkbnd.done() ; walkbnd.next() ) {
+    walkbnd.getitem()->setorientation();
+    walkbnd.getitem()->edgeconnect(0,walkbnd.getitem()->neighbour(0)->edge(walkbnd.getitem()->opposite(0)));
   }
 }
 
