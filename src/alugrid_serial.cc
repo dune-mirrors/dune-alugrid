@@ -22,6 +22,8 @@ using namespace std;
 #include "serial/gitter_sti.cc"
 #include "serial/gitter_sti.cc"
 #include "serial/ghost_elements.cc"
+#include "serial/gitter_tetra_top.cc"
+#include "serial/gitter_hexa_top.cc"
 
 // file for duneinterface 
 #include "duneinterface/gitter_dune_impl.cc"

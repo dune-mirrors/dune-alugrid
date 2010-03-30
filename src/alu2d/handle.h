@@ -1060,7 +1060,7 @@ class Hmesh : public Hmesh_basic<N,NV> {
   virtual ~Hmesh() ;
 
   void storeGrid(const char*,
-     double , unsigned long int);
+                 double , unsigned long int);
 
   bool recoverGrid(const char*,
                    double&, unsigned long int&);
