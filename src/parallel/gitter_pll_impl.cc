@@ -2173,7 +2173,9 @@ insert_hbnd4 (hface4_GEO * f, int t, ProjectVertex* ppv, Gitter :: hbndseg_STI :
     typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
     return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, NULL, b, indexManager(IM_Internal), *this ) ;
-  } else {
+  } 
+  else 
+  {
     return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
         BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, ppv, b, indexManager(IM_Bnd) ) ;
   }
