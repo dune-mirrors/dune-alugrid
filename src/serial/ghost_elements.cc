@@ -272,8 +272,13 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
   // which acts as empty boundary. 
 }
 
-// instantiation 
+MacroGhostHexa ::~MacroGhostHexa () 
+{
+  assert( _ghInfoPtr );
+  delete _ghInfoPtr;
+}
 
+// instantiation 
 class MacroGhostBuilder ;
 class MacroGhostTetra ;
 class MacroGhostHexa ;
