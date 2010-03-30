@@ -2,7 +2,6 @@
 
 #include "gitter_impl.h"
 
-
 /////////////////////////////////////////
 //  read of data 
 /////////////////////////////////////////
@@ -409,7 +408,7 @@ GitterBasisImpl :: GitterBasisImpl (istream & in, ProjectVertex* ppv)
 }
 
 GitterBasisImpl :: GitterBasisImpl (const char * file, 
-                                           ProjectVertex* ppv) 
+                                    ProjectVertex* ppv) 
 : _macrogitter (0), _ppv( ppv ) 
 {
   ifstream in (file) ;
@@ -646,3 +645,8 @@ void GitterBasisImpl :: printMemUsage ()
     cout << "\n" ;
   }
 }
+
+// instantiation 
+
+class GitterBasis ;
+class GitterBasisImpl ;

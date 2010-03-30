@@ -791,6 +791,102 @@ template < class A > inline void Hbnd4Top < A > :: append (innerbndseg_t * b) {
 // #     #  #        #  #   #    #    #     #    #  #
 // #     #  ######  #    #  #    #    #      ####   #
 
+// constructor for macro elements  
+template < class A > inline HexaTop < A > 
+:: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
+            myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
+            int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, mygrid)
+  , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0)
+  , _indexManager(im) 
+  , _volume (0.0) 
+  , _lvl (l)
+  , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
+  , _nChild(0) 
+  , _affine( false )
+{ 
+  TrilinearMapping trMap (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
+                          this->myvertex(2)->Point(), this->myvertex(3)->Point(),
+                          this->myvertex(4)->Point(), this->myvertex(5)->Point(),
+                          this->myvertex(6)->Point(), this->myvertex(7)->Point());
+  // calculate volume 
+  _volume = QuadraturCube3D < VolumeCalc > (trMap).integrate2 (0.0);
+  // check whether mapping is affine 
+  _affine = trMap.affine(); 
+
+  assert( this->level() == l );
+  
+  this->setIndex( _indexManager.getIndex() );   
+  return ;
+}
+
+// constructor for refinement 
+template < class A > inline HexaTop < A > 
+:: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
+            myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
+            int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild , double vol ) 
+  : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5, up->_myGrid)
+  , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0)
+  , _indexManager(_up->_indexManager)
+  , _volume ( vol )
+  , _lvl (l)
+  , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
+  , _nChild(nChild) 
+  , _affine(_up->_affine)
+{ 
+  assert( this->level() == l );
+
+  this->setIndex( _indexManager.getIndex() );   
+
+  // set bndid to fathers bndid now 
+  this->_bndid = _up->bndId();
+
+  // if mapping is not affine recalculate volume 
+  if( ! _affine )
+  {
+    TrilinearMapping triMap (this->myvertex(0)->Point(),
+                             this->myvertex(1)->Point(),
+                             this->myvertex(2)->Point(),
+                             this->myvertex(3)->Point(),
+                             this->myvertex(4)->Point(),
+                             this->myvertex(5)->Point(),
+                             this->myvertex(6)->Point(),
+                             this->myvertex(7)->Point() );
+
+#ifndef NDEBUG 
+    // make sure determinant is ok 
+    double point[3] = { 0.0, 0.0, 0.0 };
+    assert( triMap.det( point ) > 0 );
+#endif
+
+    // calculate volume 
+    _volume = QuadraturCube3D < VolumeCalc > (triMap).integrate2 (0.0);
+  }
+
+  // make sure that given volume is the same as calulated 
+  assert( fabs (
+      QuadraturCube3D < VolumeCalc >
+       (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
+                          this->myvertex(2)->Point(), this->myvertex(3)->Point(),
+                          this->myvertex(4)->Point(), this->myvertex(5)->Point(),
+                          this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0) - _volume) < 1e-10 );
+  return ;
+}
+
+template < class A > inline HexaTop < A > :: ~HexaTop () 
+{
+  this->freeIndex( this->_indexManager );
+    
+  if (!_dwn) this->detachleafs();
+  else assert(!this->isLeafEntity());
+  if (_bbb) delete _bbb ;
+  if (_dwn) delete _dwn ;
+  if (_fc) delete _fc ;
+  if (_ed) delete _ed ;
+  if (_cv) delete _cv ;
+  return ;
+}
+
 template < class A > inline typename HexaTop < A > :: innerhexa_t * HexaTop < A > :: up () {
   return _up ;
 } 
