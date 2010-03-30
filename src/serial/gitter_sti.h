@@ -1446,32 +1446,10 @@ public :
       virtual int nbLeaf() const { return leaf(); }
       
       // mark edges and vertices as leaf 
-      virtual void attachleafs() 
-      {
-        this->addleaf();
-        
-        myhface3_t & face = *(myhface3(0));
-        face.addleaf();
-        for (int i=0; i<3; ++i) 
-        {
-          face.myhedge1(i)->addleaf();
-          face.myvertex(i)->addleaf();
-        }
-      }
+      virtual void attachleafs() ;
 
       // unmark edges and vertices as leaf 
-      virtual void detachleafs() 
-      {
-        this->removeleaf();
-
-        myhface3_t & face = *(myhface3(0));
-        face.removeleaf();
-        for (int i=0; i<3; ++i) 
-        {
-          face.myhedge1(i)->removeleaf();
-          face.myvertex(i)->removeleaf();
-        }
-      }
+      virtual void detachleafs() ;
     protected :
       ProjectVertex* _projection;
 
@@ -1510,33 +1488,9 @@ public :
       virtual int nChild () const;
       virtual int nbLevel() const {return level();}
       virtual int nbLeaf() const {return leaf();}
-      virtual void attachleafs() 
-      {
-        assert(this->leafRefCount()==0);
-        this->addleaf();
-        
-        hface4_GEO & face = *(myhface4(0));
-        face.addleaf();
-        for (int i=0; i<4; ++i) 
-        {
-          face.myhedge1(i)->addleaf();
-          face.myvertex(i)->addleaf();
-        }
-      }
+      virtual void attachleafs() ;
       
-      virtual void detachleafs() 
-      {
-        assert(this->leafRefCount()==1);
-        this->removeleaf();
-
-        hface4_GEO & face = *(myhface4(0));
-        face.removeleaf();
-        for (int i=0; i<4; ++i) 
-        {
-          face.myhedge1(i)->removeleaf();
-          face.myvertex(i)->removeleaf();
-        }
-      }
+      virtual void detachleafs() ;
     protected :
       ProjectVertex* _projection;
     private :
@@ -3243,6 +3197,32 @@ inline Gitter :: Geometric :: hbndseg3 :: ~hbndseg3 () {
   return ;
 }
 
+inline void Gitter :: Geometric :: hbndseg3 :: attachleafs () 
+{
+  this->addleaf();
+  
+  myhface3_t & face = *(myhface3(0));
+  face.addleaf();
+  for (int i=0; i<3; ++i) 
+  {
+    face.myhedge1(i)->addleaf();
+    face.myvertex(i)->addleaf();
+  }
+}
+
+inline void Gitter :: Geometric :: hbndseg3 :: detachleafs () 
+{
+  this->removeleaf();
+
+  myhface3_t & face = *(myhface3(0));
+  face.removeleaf();
+  for (int i=0; i<3; ++i) 
+  {
+    face.myhedge1(i)->removeleaf();
+    face.myvertex(i)->removeleaf();
+  }
+}
+
 inline int Gitter :: Geometric :: hbndseg3 :: postRefinement () 
 {
   if (_projection) 
@@ -3304,6 +3284,34 @@ inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface4_t * a, int b, Proje
 inline Gitter :: Geometric :: hbndseg4 :: ~hbndseg4 () {
   _face->detachElement (_twist) ;
   return ;
+}
+
+inline void Gitter :: Geometric :: hbndseg4 :: attachleafs () 
+{
+  assert(this->leafRefCount()==0);
+  this->addleaf();
+  
+  hface4_GEO & face = *(myhface4(0));
+  face.addleaf();
+  for (int i=0; i<4; ++i) 
+  {
+    face.myhedge1(i)->addleaf();
+    face.myvertex(i)->addleaf();
+  }
+}
+
+inline void Gitter :: Geometric :: hbndseg4 :: detachleafs () 
+{
+  assert(this->leafRefCount()==1);
+  this->removeleaf();
+
+  hface4_GEO & face = *(myhface4(0));
+  face.removeleaf();
+  for (int i=0; i<4; ++i) 
+  {
+    face.myhedge1(i)->removeleaf();
+    face.myvertex(i)->removeleaf();
+  }
 }
 
 inline int Gitter :: Geometric :: hbndseg4 :: postRefinement () 
