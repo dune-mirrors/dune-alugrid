@@ -106,7 +106,7 @@ template < class A > bool Hedge1Top < A > :: coarse () {
 // #     #  #       #    #   ####   ######      #     #      ####   #
 
 
-template < class A > inline void Hface4Top < A > :: splitISO4 () {
+template < class A >  void Hface4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
   assert (_cv == 0 && _ed == 0 && _dwn == 0) ;
 
@@ -286,7 +286,7 @@ template < class A > bool Hface4Top < A > :: coarse () {
 // #     #  #####   #    #  #####       #     #      ####   #
 
 
-template < class A > inline void Hbnd4Top < A > :: 
+template < class A >  void Hbnd4Top < A > :: 
 setBoundaryId( const int id ) 
 {
   myhface4_t & face = *(this->myhface4(0));
@@ -319,11 +319,11 @@ template < class A > bool Hbnd4Top < A > :: coarse () {
   return x ;
 }
 
-template < class A > inline bool Hbnd4Top < A > :: bndNotifyCoarsen () {
+template < class A >  bool Hbnd4Top < A > :: bndNotifyCoarsen () {
   return coarse () ;
 }
 
-template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
+template < class A >  void Hbnd4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
   assert (_dwn == 0) ;
 
@@ -355,7 +355,7 @@ template < class A > inline void Hbnd4Top < A > :: splitISO4 () {
   return ;
 }
 
-template < class A > inline bool Hbnd4Top < A > :: refineBalance (balrule_t r, int b) 
+template < class A >  bool Hbnd4Top < A > :: refineBalance (balrule_t r, int b) 
 {
   // Die Methode refineBalance () f"uhrt auf dem Randabschluss entweder
   // unbedingt die Verfeinerung durch, da im Verlauf der Verfeinerung keine
@@ -406,7 +406,7 @@ template < class A > inline bool Hbnd4Top < A > :: refineBalance (balrule_t r, i
   }
 }
 
-template < class A > inline bool Hbnd4Top < A > :: refineLikeElement (balrule_t r) 
+template < class A >  bool Hbnd4Top < A > :: refineLikeElement (balrule_t r) 
 {
   // Mit der Methode refineLikeElement () verh"alt sich ein Randabschluss
   // in der Verfeinerung wie ein Element: Es wird zuerst gepr"uft ob eine
@@ -506,34 +506,34 @@ template < class A > void Hbnd4Top < A > :: restoreFollowFace ()
 // #     #  #        #  #   #    #    #     #    #  #
 // #     #  ######  #    #  #    #    #      ####   #
 
-template < class A > inline typename HexaTop < A > :: myhedge1_t * HexaTop < A > :: subedge1 (int i, int j) {
+template < class A >  typename HexaTop < A > :: myhedge1_t * HexaTop < A > :: subedge1 (int i, int j) {
   return (j < 4) ? ((this->twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + this->twist (i)) % 4) : 
     this->myhface4 (i)->myhedge1 ((j + this->twist (i)) % 4)) : 
     ((this->twist (i) < 0) ? this->myhface4 (i)->subedge1 ((12 - j + this->twist (i)) % 4) : 
     this->myhface4 (i)->subedge1 ((j + this->twist (i)) % 4)) ;
 }
     
-template < class A > inline const typename HexaTop < A > :: myhedge1_t * HexaTop < A > :: subedge1 (int i, int j) const {
+template < class A >  const typename HexaTop < A > :: myhedge1_t * HexaTop < A > :: subedge1 (int i, int j) const {
   return (j < 4) ? ((this->twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + this->twist (i)) % 4) : 
       this->myhface4 (i)->myhedge1 ((j + this->twist (i)) % 4)) : 
   ((this->twist (i) < 0) ? this->myhface4 (i)->subedge1 ((12 - j + this->twist (i)) % 4) : 
   this->myhface4 (i)->subedge1 ((j + this->twist (i)) % 4)) ;
 }
     
-template < class A > inline typename HexaTop < A > :: myhface4_t * HexaTop < A > :: subface4 (int i, int j) {
+template < class A >  typename HexaTop < A > :: myhface4_t * HexaTop < A > :: subface4 (int i, int j) {
   return (this->myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
   this->myhface4(i)->subface4(this->twist(i) < 0 ? (9 - j + this->twist(i)) % 4 : (j + this->twist(i)) % 4) :
   (abort (), (myhface4_t *)0) ;
 }
     
-template < class A > inline const typename HexaTop < A > :: myhface4_t * HexaTop < A > :: subface4 (int i, int j) const {
+template < class A >  const typename HexaTop < A > :: myhface4_t * HexaTop < A > :: subface4 (int i, int j) const {
   return (this->myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
     this->myhface4(i)->subface4(this->twist(i) < 0 ? (9 - j + this->twist(i)) % 4 : (j + this->twist(i)) % 4) :
     (abort (), (const myhface4_t *)0) ;
 }
 
 // constructor for macro elements  
-template < class A > inline HexaTop < A > 
+template < class A >  HexaTop < A > 
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
             int t4, myhface4_t * f5, int t5, IndexManagerType & im, Gitter* mygrid ) 
@@ -562,7 +562,7 @@ template < class A > inline HexaTop < A >
 }
 
 // constructor for refinement 
-template < class A > inline HexaTop < A > 
+template < class A >  HexaTop < A > 
 :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
             int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild , double vol ) 
@@ -614,7 +614,7 @@ template < class A > inline HexaTop < A >
   return ;
 }
 
-template < class A > inline HexaTop < A > :: ~HexaTop () 
+template < class A >  HexaTop < A > :: ~HexaTop () 
 {
   this->freeIndex( this->_indexManager );
     
@@ -917,7 +917,7 @@ template < class A > bool HexaTop < A > :: bndNotifyCoarsen () {
 // #        ######  #    #     #     ####   #####      #     ####       #     #
 
    
-template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, int t0,
+template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, int t0,
   myhface4_t * f1, int t1) 
   : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(0)
@@ -926,7 +926,7 @@ template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_
   return ;
 }
 
-template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, 
+template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, 
     int t0, myhface4_t * f1, int t1, innerperiodic4_t * up, int nChild )
 : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
@@ -935,7 +935,7 @@ template < class A > inline Periodic4Top < A > :: Periodic4Top (int l, myhface4_
   return ;
 }
 
-template < class A > inline Periodic4Top < A > :: ~Periodic4Top () {  
+template < class A >  Periodic4Top < A > :: ~Periodic4Top () {  
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
