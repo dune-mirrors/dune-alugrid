@@ -1090,6 +1090,19 @@ Periodic3Top < A > :: getGhost ( int nr ) const
   return _ghostPair[nr];
 }
 
+template < class A > inline void Periodic3Top < A > :: backupCMode (ostream & os) const {
+
+  // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
+  // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
+  // noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
+  // zu k"onnen.
+  
+  os << getrule () << " " ;
+  return ;
+}
+
+
+
 template < class A > inline void Periodic3Top < A > :: backup (ostream & os) const 
 {
   doBackup( os );

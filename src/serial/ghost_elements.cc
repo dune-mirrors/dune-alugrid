@@ -271,3 +271,9 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
   // here. This is ok because of the hasFaceEmpty class (gitter_sti.h) 
   // which acts as empty boundary. 
 }
+
+// instantiation 
+
+class MacroGhostBuilder ;
+class MacroGhostTetra ;
+class MacroGhostHexa ;

@@ -1,6 +1,4 @@
 // (c) Robert Kloefkorn 2010 
-#ifndef GITTER_IMPL_H_INCLUDED
-#define GITTER_IMPL_H_INCLUDED
 
 #include "gitter_impl.h"
 
@@ -648,4 +646,3 @@ void GitterBasisImpl :: printMemUsage ()
     cout << "\n" ;
   }
 }
-#endif  //  GITTER_IMPL_H_INCLUDED

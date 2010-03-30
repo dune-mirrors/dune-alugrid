@@ -206,10 +206,10 @@ private:
 
     void splitISO8 () ;
 protected:
-    inline myhedge1_t * subedge1 (int,int) ;
-    inline const myhedge1_t * subedge1 (int,int) const ;
-    inline myhface4_t * subface4 (int,int) ;
-    inline const myhface4_t * subface4 (int,int) const ;
+    myhedge1_t * subedge1 (int,int) ;
+    const myhedge1_t * subedge1 (int,int) const ;
+    myhface4_t * subface4 (int,int) ;
+    const myhface4_t * subface4 (int,int) const ;
     
   public:
     // Constructor for macro elements 
