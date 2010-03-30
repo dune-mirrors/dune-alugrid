@@ -16,6 +16,7 @@ using namespace std;
 #include "serial/gitter_geo.cc" 
 #include "serial/mapp_cube_3d.cc"
 #include "serial/myalloc.cc"
+#include "serial/gitter_impl.cc"
 #include "serial/gitter_mgb.cc"
 #include "serial/mapp_tetra_3d.cc"
 #include "serial/gitter_sti.cc"

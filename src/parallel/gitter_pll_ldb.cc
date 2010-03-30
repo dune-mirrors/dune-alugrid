@@ -565,22 +565,19 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         }
       }
 
-      // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
-      // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
-      // zusammen.
-
       if( serialPartitioner ) 
       {
+        // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
+        // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
+        // zusammen.
+
         collectInsulatedNodes (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
-      }
 
-      // optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
-      // Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
-      // abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
-      // in Aktion tritt.
+        // optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
+        // Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
+        // abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
+        // in Aktion tritt.
 
-      if( serialPartitioner ) 
-      {
         optimizeCoverage (np, nel, part, vertex_w, neu, me == 0 ? debugOption (4) : 0) ;
       }
 
