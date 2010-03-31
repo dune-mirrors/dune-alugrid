@@ -2,7 +2,7 @@
 #include "gitter_tetra_top_pll.h"
 
 // avoid linker errors by quadratures 
-#define MAPP_CUBE_3D_H_INCLUDED
+//#define MAPP_CUBE_3D_H_INCLUDED
 #include "../serial/gitter_tetra_top.cc"
 
 template < class A, class X, class MX > 

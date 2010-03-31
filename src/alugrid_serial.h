@@ -84,8 +84,8 @@ struct GatherScatter
 };
 typedef GatherScatter GatherScatterType;
 
-#include "serial/mapp_cube_3d.h"
-#include "serial/mapp_tetra_3d.h"
+//#include "serial/mapp_cube_3d.h"
+//#include "serial/mapp_tetra_3d.h"
 #include "serial/gitter_hexa_top.h"
 #include "serial/mapp_tetra_3d_ext.h"
 #include "serial/gitter_tetra_top.h"

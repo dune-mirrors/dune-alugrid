@@ -21,6 +21,7 @@ using namespace std;
 #include "serial/mapp_tetra_3d.cc"
 #include "serial/gitter_sti.cc"
 #include "serial/gitter_sti.cc"
+#include "serial/ghost_info.cc"
 #include "serial/ghost_elements.cc"
 #include "serial/gitter_tetra_top.cc"
 #include "serial/gitter_hexa_top.cc"
