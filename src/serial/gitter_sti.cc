@@ -499,6 +499,8 @@ void Gitter :: backup (ostream & out)
   return ;
 }
 
+// only when xdrclass header was included 
+#ifdef __XDRCLASS_INCLUDED__
 void Gitter :: backup (XDRstream_out & out) {
   assert(false);
   abort();
@@ -513,6 +515,25 @@ void Gitter :: backup (XDRstream_out & out) {
 */
   return ;
 }
+
+void Gitter ::restore (XDRstream_in & in) {
+  assert(false);
+  abort();
+  //assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
+/*
+  {AccessIterator < hedge_STI > :: Handle ew (container ());
+    for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ; }
+  {AccessIterator < hface_STI >:: Handle fw(container());
+    for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); }
+  {AccessIterator < helement_STI >:: Handle ew(container());
+    for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); }
+  {AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
+    for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; }
+  notifyGridChanges () ;
+*/
+  return ;
+}
+#endif
 
 void Gitter ::restore (istream & in) {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
@@ -534,24 +555,6 @@ void Gitter ::restore (istream & in) {
     for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; 
   }
   notifyGridChanges () ;
-  return ;
-}
-
-void Gitter ::restore (XDRstream_in & in) {
-  assert(false);
-  abort();
-  //assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
-/*
-  {AccessIterator < hedge_STI > :: Handle ew (container ());
-    for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ; }
-  {AccessIterator < hface_STI >:: Handle fw(container());
-    for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); }
-  {AccessIterator < helement_STI >:: Handle ew(container());
-    for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); }
-  {AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
-    for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; }
-  notifyGridChanges () ;
-*/
   return ;
 }
 

@@ -407,8 +407,6 @@ public :
     virtual void restore (ObjectStream &) = 0 ;
 
     // new xdr methods 
-    //virtual void backup (XDRstream_out &) const {};
-    //virtual void restore (XDRstream_in &) {};
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void projectInnerVertex(const ProjectVertexPair &pv) = 0; 
 
@@ -1713,9 +1711,12 @@ public :
   virtual void restore (istream &) ;
   virtual void restore (const char*,const char *) ;
 
+// only when xdrclass header was included  
+#ifdef __XDRCLASS_INCLUDED__
   // new xdr backup and restore method
   virtual void backup (XDRstream_out &) ;
   virtual void restore (XDRstream_in &) ;
+#endif
 
   virtual size_t numMacroBndSegments() const = 0;
 

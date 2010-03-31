@@ -35,6 +35,7 @@ typedef GatherScatter GatherScatterType;
 #include "serial/key.h"
 #include "serial/serialize.h"
 #include "serial/parallel.h" // only tpyedefs mainly 
+//#include "serial/xdrclass.h"
 #include "serial/gitter_sti.h"
 
 typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
@@ -84,14 +85,11 @@ struct GatherScatter
 };
 typedef GatherScatter GatherScatterType;
 
-//#include "serial/mapp_cube_3d.h"
-//#include "serial/mapp_tetra_3d.h"
 #include "serial/gitter_hexa_top.h"
 #include "serial/mapp_tetra_3d_ext.h"
 #include "serial/gitter_tetra_top.h"
 #include "serial/walk.h"
 #include "serial/gitter_impl.h"
-#include "serial/xdrclass.h"
 #include "serial/gitter_mgb.h"
 #include "serial/key.h"
 #include "serial/lock.h"
