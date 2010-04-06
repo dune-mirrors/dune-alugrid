@@ -2,6 +2,8 @@
 #ifndef ALUGRIDVERTEXPROJECTION_H_INCLUDED
 #define ALUGRIDVERTEXPROJECTION_H_INCLUDED
 
+#define ALUGRID_VERTEX_PROJECTION
+
 namespace ALUGridSpace {
 
 // use standard namespace 

@@ -11,8 +11,6 @@
 // if DUNE_NOT_USES_ALUGRID is defined, then index management is deactivated
 //#define _DUNE_NOT_USES_ALU3DGRID_
 
-#define ALUGRID_VERTEX_PROJECTION
-
 // include all headers 
 #include "stlheaders.h"
 
