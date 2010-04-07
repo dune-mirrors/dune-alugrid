@@ -117,7 +117,14 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
 
   {
 
+    {
+      string tmp; 
+      // read end of line 
+      getline( in, tmp );
+    }
+
     string line;
+    // read line and skip empty lines 
     while( in && line.empty() )
       getline( in, line );
     istringstream linein( line );
@@ -372,7 +379,8 @@ void Hmesh<N,NV>::asciwritetriang(const char *filename,
   
   out.setf(ios::fixed, ios::floatfield) ;
   
-  out.precision(14) ;
+  out << scientific ;
+  out.precision(16) ;
 
   out << "!Backup ";
   out << time << " " << nbr << " ";
