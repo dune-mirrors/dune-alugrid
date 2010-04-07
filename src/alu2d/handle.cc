@@ -76,7 +76,6 @@ void Hmesh<N,NV>::setup_grid(const char* filename)
   if (restart) {
     double time2 = time;
     long unsigned int nbr2 = nbr;
-    assert( false );
     recoverGrid(filename,time2,nbr2);
     if (fabs(time2-time) + 
         fabs((double (nbr2-nbr)))> 1e-5) {
