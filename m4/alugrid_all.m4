@@ -39,6 +39,7 @@ dnl check all components
   AC_REQUIRE([ALUGRID_PATH_METIS])
   AC_REQUIRE([ALUGRID_PATH_PARMETIS])
   AC_REQUIRE([ALUGRID_PATH_PARTY])
+  AC_REQUIRE([ALUGRID_PATH_STARMPI])
 
 dnl convenience-variables if every found package should be used
   AC_SUBST(ALL_PKG_LIBS, "$LIBS $ALUGRID_PKG_LIBS")
@@ -68,6 +69,7 @@ echo "METIS............: $with_metis"
 echo "ParMETIS.........: $with_parmetis"
 echo "PARTY............: $with_party"
 echo "MPI..............: $with_mpi"
+echo "STAR-MPI.........: $with_starmpi"
 echo
 echo "-------------------------------------"
 echo
