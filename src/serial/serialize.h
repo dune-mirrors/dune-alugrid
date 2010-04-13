@@ -326,6 +326,7 @@ protected:
   }
   
   friend class MpAccessMPI ;
+  friend class MpAccessSTAR_MPI ;
 } ;
 
 // bufchunk 4 doubles 

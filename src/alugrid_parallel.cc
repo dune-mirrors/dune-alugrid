@@ -64,6 +64,7 @@ namespace ALUGridSpace {
 
 #include "parallel/mpAccess.cc"
 #include "parallel/mpAccess_MPI.cc"  
+#include "parallel/mpAccess_STAR.cc"  
 
 #include "parallel/gitter_pll_ldb.cc"
 #include "parallel/gitter_pll_idn.cc"
