@@ -26,15 +26,15 @@ extern "C" {
 #define _mpiComm (getMPICommunicator(_mpiCommPtr))
 
 int MpAccessSTAR_MPI :: star_allgather (int * i, int si, int * o, int so) const {
-    return STAR_Allgather ((void *) i, si, MPI_INT, o, so, MPI_INT, _mpiComm, 0) ;
+    return STAR_Allgather (i, si, MPI_INT, o, so, MPI_INT, _mpiComm, 0) ;
 }
 
 int MpAccessSTAR_MPI :: star_allgather (char * i, int si, char * o, int so) const {
-    return STAR_Allgather ((void *) i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm, 0) ;
+    return STAR_Allgather (i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm, 0) ;
 }
 
 int MpAccessSTAR_MPI :: star_allgather (double * i, int si, double * o, int so) const {
-    return STAR_Allgather ((void * )i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm, 0) ;
+    return STAR_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm, 0) ;
 }
 
 template < class A > vector < vector < A > > 
