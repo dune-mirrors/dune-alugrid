@@ -22,24 +22,42 @@ extern "C" {
 #define MY_INT_TEST
 #endif
 
+static int getNextCallSiteId() 
+{
+  static int STAR_nextCallSiteID = 0;
+  return STAR_nextCallSiteID++;
+}
+
+struct CallSiteId 
+{
+
+};
+
 // workarround for old member variable 
 #define _mpiComm (getMPICommunicator(_mpiCommPtr))
 
+// the last parameter is the `call_site_id`. Each call has to have its own unique
+// call_site_id 
+
 int MpAccessSTAR_MPI :: star_allgather (int * i, int si, int * o, int so) const {
-    return STAR_Allgather (i, si, MPI_INT, o, so, MPI_INT, _mpiComm, 0) ;
+    static const int call_site_id = getNextCallSiteId();
+    return STAR_Allgather (i, si, MPI_INT, o, so, MPI_INT, _mpiComm, call_site_id) ;
 }
 
 int MpAccessSTAR_MPI :: star_allgather (char * i, int si, char * o, int so) const {
-    return STAR_Allgather (i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm, 0) ;
+    static const int call_site_id = getNextCallSiteId();
+    return STAR_Allgather (i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm, call_site_id) ;
 }
 
 int MpAccessSTAR_MPI :: star_allgather (double * i, int si, double * o, int so) const {
-    return STAR_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm, 0) ;
+    static const int call_site_id = getNextCallSiteId();
+    return STAR_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm, call_site_id) ;
 }
 
 template < class A > vector < vector < A > > 
 doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm) 
 {
+  static const int call_site_id = getNextCallSiteId();
   int np, me, test ;
   test = MPI_Comm_rank (comm, & me) ;       
   assert (test == MPI_SUCCESS) ;
@@ -51,7 +69,7 @@ doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm)
   vector < vector < A > > res (np) ;
   {
     int ln = in.size () ;
-    MY_INT_TEST STAR_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm, 0) ;
+    MY_INT_TEST STAR_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm, call_site_id) ;
     assert (test == MPI_SUCCESS) ;
     displ [0] = 0 ;
     {for (int j = 1 ; j < np ; j ++) {
@@ -62,7 +80,7 @@ doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm)
     A * y = new A [ln] ;
     assert (x && y) ;
     copy (in.begin(), in.end(), y) ;
-    test = STAR_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm, 0) ;
+    test = STAR_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm, call_site_id) ;
     delete [] y ;
     y = 0 ;
     assert (test == MPI_SUCCESS) ;
@@ -78,103 +96,118 @@ doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm)
 }
 
 int MpAccessSTAR_MPI :: gmax (int i) const {
+  static const int call_site_id = getNextCallSiteId();
   int j ;
-  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 int MpAccessSTAR_MPI :: gmin (int i) const {
+  static const int call_site_id = getNextCallSiteId();
   int j ;
-  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_MIN, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_MIN, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 int MpAccessSTAR_MPI :: gsum (int i) const {
+  static const int call_site_id = getNextCallSiteId();
   int j ;
-  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_SUM, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_SUM, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 long MpAccessSTAR_MPI :: gmax (long i) const {
+  static const int call_site_id = getNextCallSiteId();
   long j ;
-  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_MAX, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_MAX, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 long MpAccessSTAR_MPI :: gmin (long i) const {
+  static const int call_site_id = getNextCallSiteId();
   long j ;
-  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_MIN, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_MIN, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 long MpAccessSTAR_MPI :: gsum (long i) const {
+  static const int call_site_id = getNextCallSiteId();
   long j ;
-  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_SUM, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_SUM, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
 double MpAccessSTAR_MPI :: gmax (double a) const {
+  static const int call_site_id = getNextCallSiteId();
   double x ;
-  MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MAX, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MAX, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
 double MpAccessSTAR_MPI :: gmin (double a) const {
+  static const int call_site_id = getNextCallSiteId();
   double x ;
-  MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MIN, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MIN, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
 double MpAccessSTAR_MPI :: gsum (double a) const {
+  static const int call_site_id = getNextCallSiteId();
   double x ;
-  MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_SUM, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_SUM, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
 void MpAccessSTAR_MPI :: gmax (double* a,int size,double *x) const {
-  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_MAX, _mpiComm, 0) ;
+  static const int call_site_id = getNextCallSiteId();
+  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_MAX, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessSTAR_MPI :: gmin (double* a,int size,double *x) const {
-  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_MIN, _mpiComm, 0) ;
+  static const int call_site_id = getNextCallSiteId();
+  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_MIN, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessSTAR_MPI :: gsum (double* a,int size,double *x) const {
-  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_SUM, _mpiComm, 0) ;
+  static const int call_site_id = getNextCallSiteId();
+  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_SUM, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
 }
 
 pair<double,double> MpAccessSTAR_MPI :: gmax (pair<double,double> p) const {
+  static const int call_site_id = getNextCallSiteId();
   double x[2] ;
   double a[2]={p.first,p.second};
-  MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MAX, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MAX, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
 
 pair<double,double> MpAccessSTAR_MPI :: gmin (pair<double,double> p) const {
+  static const int call_site_id = getNextCallSiteId();
   double x[2] ;
   double a[2]={p.first,p.second};
-  MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MIN, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MIN, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
 
 pair<double,double> MpAccessSTAR_MPI :: gsum (pair<double,double> p) const {
+  static const int call_site_id = getNextCallSiteId();
   double x[2] ;
   double a[2]={p.first,p.second};
-  MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_SUM, _mpiComm, 0) ;
+  MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_SUM, _mpiComm, call_site_id) ;
   assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
@@ -208,6 +241,7 @@ vector < vector < double > > MpAccessSTAR_MPI :: gcollect (const vector < double
 
 vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in) const 
 {
+  static const int call_site_id = getNextCallSiteId();
   // number of processes 
   const int np = psize (); 
   
@@ -241,7 +275,7 @@ vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in) c
     assert (y) ;
     
     // gather all data 
-    MY_INT_TEST STAR_Allgatherv (in._buf + in._rb, snum, MPI_BYTE, y, rcounts, displ, MPI_BYTE, _mpiComm, 0) ;
+    MY_INT_TEST STAR_Allgatherv (in._buf + in._rb, snum, MPI_BYTE, y, rcounts, displ, MPI_BYTE, _mpiComm, call_site_id) ;
     assert (test == MPI_SUCCESS) ;
     // copy data to object streams 
     for (int i = 0 ; i < np ; ++ i ) 
