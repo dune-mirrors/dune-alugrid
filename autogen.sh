@@ -101,13 +101,13 @@ autoconf
 
 #### start configure with special environment
 
-export CC=$COMP
-export CXX=$CXXCOMP
-export CPP="$COMP -E"
+if [ $# -gt 0 ] ; then 
+  export CC=$COMP
+  export CXX=$CXXCOMP
+  export CPP="$COMP -E"
 
-export CFLAGS="$COMPFLAGS"
-export CXXFLAGS="$COMPFLAGS"
+  export CFLAGS="$COMPFLAGS"
+  export CXXFLAGS="$COMPFLAGS"
 
-if [ "$1" != "" ] ; then 
-./configure $DEFAULTCONFOPT $CONFOPT
+  ./configure $DEFAULTCONFOPT $CONFOPT
 fi
