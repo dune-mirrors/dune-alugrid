@@ -30,7 +30,7 @@ STARMPI_INCLUDE_PATH="$STARMPIROOT"
 
 # if not ParSTARMPI is used, then check for old STARMPI Version
 if  test ! -f "$STARMPI_INCLUDE_PATH/star-mpi.h" ; then
-  AC_MSG_ERROR([Could not find STAR-MPI header file!])
+  AC_MSG_WARN([Could not find STAR-MPI header file!])
 fi
 
 # set variables so that tests can use them
