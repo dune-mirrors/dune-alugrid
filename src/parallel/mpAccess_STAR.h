@@ -15,6 +15,8 @@ protected:
   int star_allgather (int *, int , int *, int) const ;
   int star_allgather (char *, int, char *, int) const ;
   int star_allgather (double *, int, double *, int ) const ;
+
+  void initStarMPI();
 public :
   // constructor taking MPI_Comm 
   // to avoid MPI types here this is a template constructor 
@@ -22,7 +24,11 @@ public :
   inline MpAccessSTAR_MPI (MPICommunicator mpicomm ) 
     : BaseType( mpicomm )
   {
+    initStarMPI();
   }
+
+  // destructor 
+  ~MpAccessSTAR_MPI();
 
   // copy constructor 
   inline MpAccessSTAR_MPI (const MpAccessSTAR_MPI &a ) 

@@ -14,6 +14,9 @@ extern "C" {
          STAR_Allgatherv(void * send_buff, int send_count, MPI_Datatype send_type,
                          void * recv_buff, int * recv_counts, int * disps,
                          MPI_Datatype recv_type, MPI_Comm comm, int call_site_id);
+
+  extern void InitializeStarMPI();
+  extern void FinalizeStarMPI();
 }
 
 #ifndef NDEBUG
@@ -31,6 +34,16 @@ static int getNextCallSiteId()
 
 // workarround for old member variable 
 #define _mpiComm (getMPICommunicator(_mpiCommPtr))
+
+void MpAccessSTAR_MPI :: initStarMPI() 
+{
+  InitializeStarMPI();
+}
+
+MpAccessSTAR_MPI :: ~MpAccessSTAR_MPI () 
+{
+  FinalizeStarMPI();
+}
 
 // the last parameter is the `call_site_id`. Each call has to have its own unique
 // call_site_id 
