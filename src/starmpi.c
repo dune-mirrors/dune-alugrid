@@ -1,5 +1,6 @@
+#include <config.h>
+
 #if HAVE_STARMPI
-#error
 // compile STAR-MPI object file
 #if defined(__cplusplus)
 extern "C" {
