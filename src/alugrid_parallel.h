@@ -17,6 +17,7 @@ namespace ALUGridSpace {
 #include "parallel/gitter_hexa_top_pll.h"
 #include "parallel/mpAccess.h"
 #include "parallel/mpAccess_MPI.h"
+#include "parallel/mpAccess_STAR.h"
 #include "parallel/gitter_pll_mgb.h"
 
 // the duneinterface stuff 
