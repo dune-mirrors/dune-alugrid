@@ -71,12 +71,11 @@ fi
 LDFLAGS=$REM_LDFLAGS
 
 # pop default language 
+CC="$REM_CC"
 AC_LANG_POP([C])
 
 ## end of parmetis check (--without wasn't set)
 fi
-
-CC="$REM_CC"
 
 # survived all tests?
 if test x$HAVE_PARMETIS = x1 ; then
