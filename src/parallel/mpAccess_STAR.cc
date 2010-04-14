@@ -242,7 +242,6 @@ vector < vector < double > > MpAccessSTAR_MPI :: gcollect (const vector < double
 
 vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in) const 
 {
-  static const int call_site_id = getNextCallSiteId();
   // number of processes 
   const int np = psize (); 
   
@@ -275,6 +274,7 @@ vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in) c
     char * y = ObjectStream :: allocateBuffer(bufSize);
     assert (y) ;
     
+    static const int call_site_id = getNextCallSiteId();
     // gather all data 
     MY_INT_TEST STAR_Allgatherv (in._buf + in._rb, snum, MPI_BYTE, y, rcounts, displ, MPI_BYTE, _mpiComm, call_site_id) ;
     assert (test == MPI_SUCCESS) ;
