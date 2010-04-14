@@ -108,5 +108,6 @@ export CPP="$COMP -E"
 export CFLAGS="$COMPFLAGS"
 export CXXFLAGS="$COMPFLAGS"
 
+if [ "$1" != "" ] ; then 
 ./configure $DEFAULTCONFOPT $CONFOPT
-
+fi
