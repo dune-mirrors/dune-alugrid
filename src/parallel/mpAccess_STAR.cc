@@ -22,16 +22,12 @@ extern "C" {
 #define MY_INT_TEST
 #endif
 
+// return unique identifier for calls of STAR routines 
 static int getNextCallSiteId() 
 {
   static int STAR_nextCallSiteID = 0;
   return STAR_nextCallSiteID++;
 }
-
-struct CallSiteId 
-{
-
-};
 
 // workarround for old member variable 
 #define _mpiComm (getMPICommunicator(_mpiCommPtr))
@@ -57,7 +53,6 @@ int MpAccessSTAR_MPI :: star_allgather (double * i, int si, double * o, int so) 
 template < class A > vector < vector < A > > 
 doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm) 
 {
-  static const int call_site_id = getNextCallSiteId();
   int np, me, test ;
   test = MPI_Comm_rank (comm, & me) ;       
   assert (test == MPI_SUCCESS) ;
@@ -69,8 +64,11 @@ doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm)
   vector < vector < A > > res (np) ;
   {
     int ln = in.size () ;
-    MY_INT_TEST STAR_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm, call_site_id) ;
-    assert (test == MPI_SUCCESS) ;
+    {
+      static const int call_site_id = getNextCallSiteId();
+      test = STAR_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm, call_site_id) ;
+      assert (test == MPI_SUCCESS) ;
+    }
     displ [0] = 0 ;
     {for (int j = 1 ; j < np ; j ++) {
       displ [j] = displ [j-1] + rcounts [j-1];
@@ -80,10 +78,13 @@ doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm)
     A * y = new A [ln] ;
     assert (x && y) ;
     copy (in.begin(), in.end(), y) ;
-    test = STAR_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm, call_site_id) ;
+    {
+      static const int call_site_id = getNextCallSiteId();
+      test = STAR_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm, call_site_id) ;
+      assert (test == MPI_SUCCESS) ;
+    }
     delete [] y ;
     y = 0 ;
-    assert (test == MPI_SUCCESS) ;
     {for (int i = 0 ; i < np ; i ++ ) {
       res [i].reserve (rcounts [i]) ;
       copy (x + displ [i], x + displ [i] + rcounts [i], back_inserter(res [i])) ;
