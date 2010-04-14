@@ -13,6 +13,7 @@ AC_DISABLE_SHARED
 
 # check if we're in the right directory
 AC_CONFIG_SRCDIR([src/serial/gitter_sti.h])
+AC_CONFIG_MACRO_DIR([m4])
 # which header-file is created
 AM_CONFIG_HEADER(config.h)
 
