@@ -117,16 +117,13 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
 
   {
 
-    {
-      string tmp; 
-      // read end of line 
-      getline( in, tmp );
-    }
-
     string line;
     // read line and skip empty lines 
     while( in && line.empty() )
+    {
       getline( in, line );
+      line.erase( 0, line.find_first_not_of( ' ' ) );
+    }
     istringstream linein( line );
 
     int nb = 0 ;
