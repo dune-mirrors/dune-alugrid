@@ -469,6 +469,7 @@ void Hmesh_basic<N,NV>::asciwritetriang(ostream &out) {
       walk.getitem()->write(out) ;
 
       count += walk.getitem()->count() ;
+      ++index;
     }
 
 #ifndef NDEBUG
