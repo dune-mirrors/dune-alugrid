@@ -16,7 +16,7 @@ ALUGRID_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -I./serial -I./parallel -I./duneinterface
 lib_LTLIBRARIES = libalugrid.la
 
 # headers to install 
-nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h alugrid_2d.h alugrid_2d.cc stlheaders.h indexstack.h projectvertex.h $(serialhdrs) $(parallelhdrs) $(duneinterfacehdrs) $(alu2dhdrs)
+nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h alugrid_2d.h stlheaders.h indexstack.h projectvertex.h $(serialhdrs) $(parallelhdrs) $(duneinterfacehdrs) $(alu2dhdrs)
 
 # add all package flags 
 AM_CPPFLAGS = $(ALUGRID_CPPFLAGS)
