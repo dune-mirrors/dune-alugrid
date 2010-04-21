@@ -3,11 +3,11 @@
 
 # name of compiler binaries
 COMP="gcc-4.3.4"
-CXXCOMP="g++-4.3.4"
+CXXCOMP="g++-4.3.4 -std=c++0x"
 #CXXCOMP="g++"
 
 # flags set in any case
-FLAGS="-Wall -std=c++0x" 
+FLAGS="-Wall" 
 #FLAGS="-Wall" 
 # -I/opt/openmpi/include -I/opt/openmpi/include/openmpi"
 
