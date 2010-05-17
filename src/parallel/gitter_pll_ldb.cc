@@ -59,8 +59,38 @@ graphCollect (const MpAccessGlobal & mpa,
    
   if( ! serialPartitioner )
   {
-    std::cerr << "ParMETIS support not yet implemented! file: " << __FILE__ << " line: " << __LINE__ << std::endl;
-    abort();
+    const int myrank = mpa.myrank();
+    {
+      ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
+      for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
+         i != iEnd; ++i ) 
+      {
+        {
+          const GraphVertex& x = (*i).first;
+          * nodes ++ = pair < const GraphVertex, int > ( x , myrank) ;
+        } 
+      }
+    }
+
+    {
+      ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
+      for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; 
+           e != eEnd; ++e) 
+      {
+        const GraphEdge& x = (*e) ;
+        // edges exists twice ( u , v ) and ( v , u )
+        // with both orientations 
+        * edges ++ = x ;
+        * edges ++ = - x ;
+      }
+    }
+
+    // make sure vtxdist exists 
+    assert( vtxdist );
+
+    // vtxdist always starts with 0 
+    // so initialize here 
+    vtxdist[ 0 ] = 0 ;
   }
 
   const int np = mpa.psize () ;
@@ -459,8 +489,55 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
       
       if( ! serialPartitioner ) 
       {
-        std::cerr << "ParMETIS support not yet implemented! file: " << __FILE__ << " line: " << __LINE__ << std::endl;
-        abort();
+        //cout << "ParMETIS partitioner \n";
+        int numflag = 0; // C-style numbering, arrays start with 0  
+        int edgecut, nparts = np ;
+        int wgtflag = 3; // means weights for vertices and edges 
+        int ncon = 1; // number of constraints per vertex, here only one 
+        float ubvec[1] = {1.2}; // array of length ncon 
+        int options[4] = {0, 1, 15, 1}; // these are the default values 
+        float *tpwgts = new float[ nparts ]; // ncon * npart, but ncon = 1 
+        const float value = 1.0/ ((float) nparts);
+
+        // get communincator (see mpAccess_MPI.cc)
+        MPI_Comm comm = getMPICommunicator( mpa.communicator() );
+
+        // set weights (uniform distribution, to be adjusted)
+        for(int l=0; l<nparts; ++l) tpwgts[l] = value;
+
+        // for starting partitions use PartKway
+        if( usePartKway ) 
+        {
+          //cout << "Call PartKway \n";
+          CALL_ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
+                                    & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
+                                    ubvec, options, & edgecut, neu, & comm ) ;
+        }
+        else // otherwise do an adaptive repartition 
+        {
+          // recommmended by ParMETIS docu 
+          float itr = 1000.0;
+          //float itr = 10.0; // like dennis does 
+          
+          // vsize stores the size of the vertex with respect to
+          // redistribution costs (we use the same as vertex_wInt)
+          int* vsize = neu + nel; 
+          assert ( vsize );
+          // for the moment use vertex weights 
+          copy(vertex_wInt, vertex_wInt + nel, vsize); 
+
+          // adaptive repartition 
+          //cout << "Call AdaptiveRepart \n";
+          CALL_ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
+                                          & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
+                                          ubvec, &itr, options, & edgecut, neu, & comm ) ;
+        }
+
+        //cout << "Done ParMETIS \n";
+
+        // delete vtxdist and set zero (see below) 
+        delete [] vtxdist; vtxdist = 0;
+        delete [] tpwgts;
       }
       else 
       {
@@ -570,14 +647,14 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
         // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
         // zusammen.
-
+         
         collectInsulatedNodes (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
 
         // optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
         // Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
         // abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
         // in Aktion tritt.
-
+         
         optimizeCoverage (np, nel, part, vertex_w, neu, me == 0 ? debugOption (4) : 0) ;
       }
 
