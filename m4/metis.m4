@@ -33,8 +33,15 @@ if test x$with_metis != x && test x$with_metis != xno ; then
     AC_MSG_ERROR([Path $with_metis supplied for --with-metis does not exist!])
   fi
 
-METIS_LIB_PATH="$METISROOT"
-METIS_INCLUDE_PATH="$METISROOT/METISLib"
+METIS_LIB_PATH="$METISROOT/lib"
+if ! test -d $METIS_LIB_PATH ; then 
+  METIS_LIB_PATH=$METISROOT
+fi  
+
+METIS_INCLUDE_PATH="$METISROOT/include/METISLib"
+if ! test -d $METIS_INCLUDE_PATH ; then 
+  METIS_INCLUDE_PATH="$METISROOT/METISLib"
+fi
 
 # if not ParMETIS is used, then check for old METIS Version
 if  test ! -f "$METIS_INCLUDE_PATH/metis.h" ; then

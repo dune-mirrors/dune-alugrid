@@ -32,8 +32,15 @@ if test x$with_parmetis != x && test x$with_parmetis != xno ; then
     AC_MSG_ERROR([Path $with_parmetis supplied for --with-parmetis does not exist!])
   fi
 
-PARMETIS_LIB_PATH="$PARMETISROOT"
-PARMETIS_INCLUDE_PATH="$PARMETISROOT"
+PARMETIS_LIB_PATH="$PARMETISROOT/lib"
+PARMETIS_INCLUDE_PATH="$PARMETISROOT/include"
+
+if ! test -d $PARMETIS_LIB_PATH ; then 
+  PARMETIS_LIB_PATH="$PARMETISROOT"
+fi 
+if ! test -d $PARMETIS_INCLUDE_PATH ; then 
+  PARMETIS_INCLUDE_PATH="$PARMETISROOT"
+fi 
 
 # set variables so that tests can use them
 REM_CPPFLAGS=$CPPFLAGS

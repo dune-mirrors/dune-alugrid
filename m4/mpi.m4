@@ -39,11 +39,15 @@ AC_TRY_COMPILE([
   #undef c_plusplus
   #endif
 
+  #if defined(rem__cplusplus) || defined(c_plusplus)
   extern "C" {
+  #endif
     #include <stdlib.h>
     // the message passing interface (MPI) headers for C 
     #include <mpi.h>
+  #if defined(rem__cplusplus) || defined(c_plusplus)
   }
+  #endif
 
   // restore defines 
   #if defined(rem__cplusplus) 
