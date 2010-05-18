@@ -188,28 +188,69 @@ int Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
   return i;
 }
 
-// ***************************************************
-// #begin(method)
-// #method:
-//   void Element::facepoint(int fce, double pos, double (&bary)[3]) const
-// #parameters:
-//   \ int           | fce  | Nummer der Kante
-//   \ double        | pos  | Position auf der Kante
-//   \ double (&)[3] | bary | baryzentrische Koordinaten
-// #description:
-//   Verl"auft die Seite fce von P0 nach P1, so
-//   gilt bary = P0 + pos * (P1 - P0).
-// #end(method)
-// ***************************************************
+
 template < int N, int NV >
-void Element < N, NV >::facepoint(int fce, double pos, double (&p)[ncoord]) const
+int Element < N, NV >::get_splitpoint(int fce, double pos, double (&ppoint) [ncoord]) const
 {
-  const double (&vc0)[ncoord]=vertex(fce+1)->coord();
-  const double (&vc1)[ncoord]=vertex(fce+2)->coord();
-  double lam = (normaldir(fce)==1)?pos:1.-pos;
+  const double (&c0)[ncoord] = vertex(fce+1)->coord();
+  const double (&c1)[ncoord] = vertex(fce+2)->coord();
+  double npos = (normaldir(fce) == 1 ? pos : 1.-pos);
   for (int i=0;i<ncoord;++i)
-    p[i] = (1.-lam)*vc0[i]+lam*vc1[i];
+    ppoint[i] = (1.-npos)*c0[i] + npos*c1[i];
+
+#ifndef ALU2D_OLD_BND_PROJECTION
+
+  double lpos[2];
+  static double rcs3[][2] = {{0.,0.}, {1.,0.}, {0.,1.}};
+  static double rcs4[][2] = {{0.,0.}, {1.,0.}, {1.,1.}, {0.,1.}};
+  const double (&rc0)[2] = (nv() == 3 ? rcs3[(fce+1)%3] : rcs4[(fce+1)%4]);
+  const double (&rc1)[2] = (nv() == 3 ? rcs3[(fce+2)%3] : rcs4[(fce+2)%4]);
+  for (int i=0;i<2;++i)
+    lpos[i] = (1.-npos)*rc0[i] + npos*rc1[i];
+
+  // apply vertex projection, if existent 
+  dynamic_cast< Hmesh<N,NV>* >(hdl)->projectVertex( this, lpos, ppoint );
+
+#endif
+
+  return 0;
 }
+
+
+template < int N, int NV >
+int Element < N, NV >::get_splitpoint(const double (&pos) [2], double (&ppoint) [ncoord]) const
+{
+  assert( face == 0 );
+
+  const double (&c0)[ncoord] = vertex(0)->coord();
+  const double (&c1)[ncoord] = vertex(1)->coord();
+  const double (&c2)[ncoord] = vertex(2)->coord();
+  if( nv() == 3 )
+  {
+    for (int i=0;i<ncoord;++i)
+      ppoint[i] = (1.-pos[0]-pos[1])*c0[i] + pos[0]*c1[i] + pos[1]*c2[i];
+  }
+  else
+  {
+    const double (&c3)[ncoord] = vertex(3)->coord();
+    for (int i=0;i<ncoord;++i)
+    {
+      const double x0 = (1.-pos[0])*c0[i] + pos[0]*c1[i];
+      const double x1 = (1.-pos[0])*c3[i] + pos[0]*c2[i];
+      ppoint[i] = (1.-pos[1])*x0 + pos[1]*x1;
+    }
+  }
+
+#ifndef ALU2D_OLD_BND_PROJECTION
+
+  // apply vertex projection, if existent 
+  dynamic_cast< Hmesh<N,NV>* >(hdl)->projectVertex( this, pos, ppoint );
+
+#endif
+
+  return 0;
+}
+
 
 // ***************************************************
 // #begin(method)
@@ -608,15 +649,15 @@ void Bndel < N,NV >::c::read(istream & in, vertex_t ** v, const int l) {
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-int Bndel < N, NV >::get_splitpoint(double (&ppoint) [ncoord])
-{ 
+int Bndel < N, NV >::get_splitpoint(int fce, double pos, double (&ppoint) [ncoord]) const
+{
+  assert( fce == 0 );
+
   const double (&c0)[ncoord] = connect.vtx[0]->coord();
   const double (&c1)[ncoord] = connect.vtx[1]->coord();
 
   for (int i=0;i<ncoord;++i)
-    ppoint[i] = 0.5*(c0[i]+c1[i]);
-  // ppoint[0] = 0.5 * ( c0[0] + c1[0] );//connect.vtx[0]->coord()[0]+connect.vtx[1]->coord()[0]);
-  // ppoint[1] = 0.5 * ( c0[1] + c1[1] );//connect.vtx[0]->coord()[1]+connect.vtx[1]->coord()[1]);
+    ppoint[i] = (1.-pos)*c0[i] + pos*c1[i];
 
   // old method, new method below 
 #ifdef ALU2D_OLD_BND_PROJECTION
@@ -673,7 +714,7 @@ int Bndel < N, NV >::get_splitpoint(double (&ppoint) [ncoord])
 #else // use new method 
 
   // apply vertex projection, if existent 
-  dynamic_cast< Hmesh<N,NV>* >(hdl)->projectVertex( _segmentIndex, ppoint );
+  dynamic_cast< Hmesh<N,NV>* >(hdl)->projectVertex( this, pos, ppoint );
 
 #endif
 

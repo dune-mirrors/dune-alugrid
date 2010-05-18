@@ -25,7 +25,7 @@
 //   Element::tolocal
 //   Element::fromlocal
 //   Element::midpoint
-//   Element::facepoint
+//   Element::get_splitpoint
 //   Element::isecpoint
 //   Element::isecpoint
 //   Element::inside
@@ -321,7 +321,7 @@ int Triang < N,NV >::split2tr(void * (&e)[Basic::nparts], Listagency < vertex_t 
     double p[vertex_t::ncoord];
 
     // Erzeugen des neuen Knotens und der neuen Elemente
-    ((bndel_t*)connect.nb[0])->get_splitpoint(p);
+    connect.nb[0]->get_splitpoint(connect.bck[0], 0.5, p);
     agnc->insert(nvtx = new fullvertex_t(p,level()));
     t1 = new Triang(nvtx, connect.vtx[0], connect.vtx[1]);
     t2 = new Triang(nvtx, connect.vtx[2], connect.vtx[0]);
@@ -407,8 +407,10 @@ int Triang < N,NV >::split2tr(void * (&e)[Basic::nparts], Listagency < vertex_t 
       else
         newedge[1]=connect.hvtx[0]->getlnb()->edge(0);
     } 
-    else {
-      facepoint(0,0.5,p);
+    else
+    {
+      get_splitpoint(0, 0.5, p);
+      //connect.nb[0]->get_splitpoint(connect.bck[0], 0.5, p);
       agnc->insert(nvtx = new fullvertex_t(p,level()));
       newedge[0]=new Edge(hdl);
       newedge[1]=new Edge(hdl);
@@ -588,7 +590,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
     if (connect.nb[i]->thinis(thinelement_t::bndel_like))
     {
       assert(!usehvtx[i]);
-      ((bndel_t*)connect.nb[i])->get_splitpoint(p);
+      connect.nb[i]->get_splitpoint(connect.bck[i], 0.5, p);
       newvtx[i] = new fullvertex_t(p,level());
       agnc->insert(newvtx[i]);
       newedge[2*i]=new Edge(hdl);
@@ -609,7 +611,8 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
       }
       else
       {
-        facepoint(i,0.5,p);
+        get_splitpoint(i, 0.5, p);
+        // connect.nb[i]->get_splitpoint(connect.bck[i], 0.5, p);
         newvtx[i] = new fullvertex_t(p,level());
         agnc->insert(newvtx[i]);
         newedge[2*i]=new Edge(hdl);
@@ -643,6 +646,9 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
   }
   else 
   {
+    const double l[2] = {0.5, 0.5};
+    get_splitpoint( l, p );
+#if 0
     for (int k=0;k<ncoord;++k)
     {
       p[k] = connect.vtx[0]->coord()[k];
@@ -650,6 +656,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
         p[k] += connect.vtx[l]->coord()[k];
       p[k] /= 4.;
     }
+#endif
     vertex_t* midvtx = new fullvertex_t(p,level());
     agnc->insert(midvtx);
     newtr[0] = new Triang(connect.vtx[0],newvtx[3],midvtx,newvtx[2]);

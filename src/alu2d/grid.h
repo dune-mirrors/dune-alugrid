@@ -358,6 +358,8 @@ template < int N, int NV > class Thinelement : public Basic {
     typedef Triang < N, NV > triang_t;
     typedef Bndel_triang < N, NV > bndel_triang_t;
 
+    enum { ncoord = vertex_t::ncoord };
+
   private :
   
     Thinelement(const Thinelement & ) ;
@@ -398,6 +400,8 @@ template < int N, int NV > class Thinelement : public Basic {
     virtual void write(ostream &) const = 0 ;
 
     virtual void read(istream &, vertex_t **, const int ) = 0 ;
+
+    virtual int get_splitpoint(int, double, double (&) [ncoord]) const = 0;
 
     virtual int split(void * (&) [nparts], Listagency < vertex_t > *,
                       multivertexadapter_t &,nconf_vtx_t *,splitrule_t,
@@ -610,7 +614,8 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
     void dirnormal(int ,double (& )[ncoord]) const;
 
-    void facepoint(int ,double ,double (& )[ncoord]) const;
+    int get_splitpoint(int, double, double (&) [ncoord]) const;
+    int get_splitpoint(const double (&)[2], double (&) [ncoord]) const;
 
     void addhvtx(vertex_t *inv, thinelement_t *lnb, thinelement_t *rnb,int fce);
 
@@ -889,7 +894,7 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV >, public Ref
     }
 #endif
 
-    int get_splitpoint(double (& ) [ncoord]) ;
+    int get_splitpoint(int, double, double (&) [ncoord]) const;
 
     double area() const ;
 

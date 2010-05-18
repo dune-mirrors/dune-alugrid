@@ -1,6 +1,7 @@
 #ifndef __HEADER__HANDLE
 #define __HEADER__HANDLE
 
+#include "vtxprojection.h"
 #include "grid.h"                               
 
 // is defined in indexstack.h 
@@ -861,7 +862,7 @@ class Hmesh_basic : public IndexProvider {
 
     typedef nconf_vtx < ncoord, nvtx > nconf_vtx_t;
 
-    typedef VertexProjection < ncoord > ProjectVertex_t;
+    typedef VtxProjection < ncoord, nvtx > ProjectVertex_t;
 
     struct OrientStr
     {
@@ -930,19 +931,18 @@ class Hmesh_basic : public IndexProvider {
      return mbl.size();
    }
 
-   // project vertex for given boundary segment 
-   void projectVertex(const int segmentIndex, double (&point) [ncoord]) const 
+   void projectVertex ( const bndel_t *bndel, const double local, double (&global) [ncoord] ) const
    {
-     if( _projectVertex ) 
-     {
-       assert( segmentIndex >= 0 );
-       // copy point 
-       double oldp[ncoord];
-       for (int i=0;i<ncoord;++i)
-         oldp[i] = point[i];
-       // call projection operator 
-       (*_projectVertex)( oldp, segmentIndex, point );
-     }
+     assert( bndel );
+     if( _projectVertex )
+       (*_projectVertex)( static_cast< const hbndel_t * >( bndel ), local, global );
+   }
+
+   void projectVertex ( const element_t *element, const double (&local) [2], double (&global) [ncoord] ) const
+   {
+     assert( element );
+     if( _projectVertex )
+       (*_projectVertex)( static_cast< const helement_t * >( element ), local, global );
    }
 
    // set vertex projection pointer 
@@ -1001,7 +1001,7 @@ class Hmesh : public Hmesh_basic<N,NV> {
 
   typedef nconf_vtx < ncoord, nvtx > nconf_vtx_t;
 
-  typedef VertexProjection < ncoord > ProjectVertex_t;
+  typedef VtxProjection < ncoord, nvtx > ProjectVertex_t;
 
   typedef Prolong_basic < ncoord, nvtx > prolong_basic_t;
   typedef Restrict_basic < ncoord, nvtx > restrict_basic_t;
