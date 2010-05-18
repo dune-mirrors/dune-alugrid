@@ -45,7 +45,7 @@ fi
 # set variables so that tests can use them
 REM_CPPFLAGS=$CPPFLAGS
 
-LDFLAGS="$LDFLAGS -L$PARMETIS_LIB_PATH"
+LDFLAGS="$LDFLAGS -L$PARMETIS_LIB_PATH -lm"
 CPPFLAGS="$CPPFLAGS $PARMETISDEF -I$PARMETIS_INCLUDE_PATH"
 
 # check for header
@@ -62,8 +62,8 @@ REM_CPPFLAGS=
 
 REM_LDFLAGS=$LDFLAGS
 # add math library 
-LDFLAGS="$LDFLAGS -lm"
-LIBS="-lmetis"
+LDFLAGS="$LDFLAGS"
+LIBS="-lmetis -lm"
 
 # if header is found...
 if test x$HAVE_PARMETIS = x1 ; then

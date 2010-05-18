@@ -67,7 +67,7 @@ fi
 # set variables so that tests can use them
 REM_CPPFLAGS=$CPPFLAGS
 
-LDFLAGS="$LDFLAGS -L$METIS_LIB_PATH"
+LDFLAGS="$LDFLAGS -L$METIS_LIB_PATH -lm"
 CPPFLAGS="$CPPFLAGS $METISDEF -I$METIS_INCLUDE_PATH"
 
 # check for header
@@ -79,10 +79,10 @@ CPPFLAGS="$CPPFLAGS $METISDEF -I$METIS_INCLUDE_PATH"
 
 CPPFLAGS="$REM_CPPFLAGS $METISDEF -I$METIS_INCLUDE_PATH"
 REM_CPPFLAGS=
-
 REM_LDFLAGS=$LDFLAGS
+REM_LIBS=$LIBS
 # add math library 
-LDFLAGS="$LDFLAGS -lm"
+LIBS="$LIBS -lm"
 
 # if header is found...
 if test x$HAVE_METIS = x1 ; then
@@ -95,6 +95,7 @@ if test x$HAVE_METIS = x1 ; then
 fi
 
 LDFLAGS=$REM_LDFLAGS
+LIBS=$REM_LIBS
 
 # pop default language 
 AC_LANG_POP([C])
