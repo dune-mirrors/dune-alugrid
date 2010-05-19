@@ -648,15 +648,6 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
   {
     const double l[2] = {0.5, 0.5};
     get_splitpoint( l, p );
-#if 0
-    for (int k=0;k<ncoord;++k)
-    {
-      p[k] = connect.vtx[0]->coord()[k];
-      for (int l=1;l<4;++l)
-        p[k] += connect.vtx[l]->coord()[k];
-      p[k] /= 4.;
-    }
-#endif
     vertex_t* midvtx = new fullvertex_t(p,level());
     agnc->insert(midvtx);
     newtr[0] = new Triang(connect.vtx[0],newvtx[3],midvtx,newvtx[2]);
