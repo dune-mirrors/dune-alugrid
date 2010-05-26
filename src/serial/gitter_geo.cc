@@ -720,12 +720,18 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
   // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
   // Hexaedernetz vorliegt. Gemischte Netze sind bez"uglich ihres
   // Dateiformats noch nicht spezifiziert.
+  const size_t tetraListSize = _tetraList.size ();
+  const size_t hexaListSize  = _hexaList.size (); 
   
-  if (_tetraList.size () == 0) {
-    os << "!Hexahedra" << endl ;
-  } else if (_hexaList.size () == 0 && _tetraList.size () != 0) {
-    os << "!Tetrahedra" << endl ;
-  } else {
+  if ( tetraListSize == 0) 
+  {
+    os << "!Hexahedra   |   Elements = " << hexaListSize << endl ;
+  } 
+  else if ( hexaListSize == 0 && tetraListSize != 0) 
+  {
+    os << "!Tetrahedra  |   Elements = " << tetraListSize << endl ;
+  } 
+  else {
     cerr << "**WARNUNG (IGNORIERT) Gitter :: Geometric :: BuilderIF :: backupCMode (ostream &)" ;
     cerr << "  schreibt nur entweder reine Hexaedernetze oder reine Tetraedernetze." ;
     cerr << " In " << __FILE__ << " " << __LINE__ << endl ;
@@ -741,9 +747,10 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
       vm [*i] = index ++ ;
     }
   }
-  if (_tetraList.size () == 0) {
+  if (tetraListSize == 0) 
+  {
     assert (_hbndseg3List.size () == 0) ;
-    os << _hexaList.size () << endl ;
+    os << hexaListSize << endl ;
     {
       for (hexalist_t :: const_iterator i = _hexaList.begin () ; i != _hexaList.end () ; i ++ ) {
         for (int j = 0 ; j < 8 ; os << vm [(*i)->myvertex (j ++)] << "  ") ;
@@ -766,9 +773,9 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
       }
     }
   } 
-  else if (_hexaList.size () == 0 && _tetraList.size () != 0) 
+  else if ( hexaListSize == 0 && tetraListSize != 0) 
   {
-    os << _tetraList.size () << endl ;
+    os << tetraListSize << endl ;
     {
       for (tetralist_t :: const_iterator i = _tetraList.begin () ; i != _tetraList.end () ; i ++ ) {
         for (int j = 0 ; j < 4 ; os << vm [(*i)->myvertex (j ++)] << "  ") ;
