@@ -27,7 +27,8 @@ void Hmesh_basic<N,NV>::makeneighbours() {
 */
 
   typedef k < ncoord, nvtx > value_t;
-  typedef vector < vertex_t * > key_t;
+  //typedef vector < vertex_t * > key_t;
+  typedef pair < vertex_t *, vertex_t * > key_t;
   typedef map < key_t , value_t , less < key_t > > map_t ;
 
   int count = 0 ;
@@ -42,39 +43,50 @@ void Hmesh_basic<N,NV>::makeneighbours() {
 
     Alignwalk < helement_t, hbndel_t, thinelement_t > walk (lwe, lwb) ;
 
-    for(walk.first() ; !walk.done() ; walk.next()) {
-
-      thinelement_t & e = walk.getitem() ;
-
+    for(walk.first(); !walk.done(); walk.next())
+    {
+      thinelement_t &e = walk.getitem();
       int numfce = (e.thinis(thinelement_t::element_like))?((element_t&)e).numfaces():1;
 
-      for(int fce = 0 ; fce < numfce ; fce ++ ) {
+      for(int fce = 0; fce < numfce; ++fce)
+      {
+        assert( e.numfacevertices(fce) == 2 );
+        key_t key(e.vertex(fce, 0), e.vertex(fce, 1));
+        if( key.first < key.second )
+          swap( key.first, key.second );
 
-        int npv = e.numfacevertices(fce) ;
-        key_t v(npv) ;
-        for(int j = 0 ; j < npv ; j ++ )
-          v[j] = e.vertex(fce, j) ;
-        sort(v.begin(), v.end()) ;
+        /*
+        int npv = e.numfacevertices(fce);
+        key_t key(npv);
+        for(int j = 0; j < npv; ++j )
+          key[j] = e.vertex(fce, j);
+        sort(key.begin(), key.end());
+        */
 
-        typename map_t :: iterator hit = m.find(v) ;
-        if(hit == m.end()) m [v] = value_t ( & e, fce) ;
-        else {
-          count ++ ;
-          e.nbconnect(fce, (*hit).second.a,(*hit).second.b) ;
-          (*hit).second.a->nbconnect((*hit).second.b, & e, fce) ;
-          m.erase(hit) ;
+        typename map_t::iterator hit = m.find(key);
+        if(hit != m.end())
+        {
+          thinelement_t &nb = *hit->second.a;
+          int bck = hit->second.b;
+          e.nbconnect(fce, &nb, bck);
+          nb.nbconnect(bck, &e, fce);
+          m.erase(hit);
+          ++count;
         }
+        else
+          m[key] = value_t(&e, fce);
       }
     }
 
-    if ( !m.empty() )
+    if(!m.empty())
     {
       cerr << "Wrong connectivity:" << endl;
-      typename map_t :: iterator end = m.end() ;
-      for ( typename map_t :: iterator it = m.begin() ; it != end ; ++it )
+      typename map_t::iterator end = m.end() ;
+      for(typename map_t::iterator it = m.begin(); it != end; ++it)
       {
-        cerr << "key:" << it->first[0]->getIndex() 
-             << " " << it->first[1]->getIndex() << endl;
+        const key_t &key = it->first;
+        cerr << "key:" << key.first->getIndex() 
+             << " " << key.second->getIndex() << endl;
       }
       abort();
     }
