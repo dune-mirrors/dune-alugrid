@@ -220,8 +220,6 @@ int Element < N, NV >::get_splitpoint(int fce, double pos, double (&ppoint) [nco
 template < int N, int NV >
 int Element < N, NV >::get_splitpoint(const double (&pos) [2], double (&ppoint) [ncoord]) const
 {
-  assert( face == 0 );
-
   const double (&c0)[ncoord] = vertex(0)->coord();
   const double (&c1)[ncoord] = vertex(1)->coord();
   const double (&c2)[ncoord] = vertex(2)->coord();
