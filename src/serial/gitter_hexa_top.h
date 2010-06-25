@@ -17,9 +17,9 @@ template < class A > class Hedge1Top : public A {
     innervertex_t * _cv ;
     IndexManagerType & _indexManager;
 
-    myrule_t _rule ;  
-    int _lvl ;       
+    unsigned char _lvl ;       
     const signed char _nChild;  
+    myrule_t _rule ;  
     
   public :
     // need for refinement 
@@ -73,9 +73,9 @@ template < class A > class Hface4Top : public A {
     inneredge_t   * _ed ;
     IndexManagerType & _indexManager;
 
-    int _lvl ;
-    myrule_t _rule ;
+    unsigned char _lvl ;
     const signed char _nChild;
+    myrule_t _rule ;
     
   private:
     inline myhedge1_t * subedge1 (int,int) ;
@@ -194,9 +194,9 @@ template < class A > class HexaTop : public A {
     innervertex_t * _cv ;
     IndexManagerType & _indexManager; 
     double _volume; 
-    int _lvl ;
-    myrule_t _rule, _req ;
+    unsigned char _lvl ;
     const signed char _nChild; 
+    myrule_t _rule, _req ;
     bool _affine;
 
 private:    
@@ -282,9 +282,9 @@ template < class A > class Periodic4Top : public A {
     
   private :
     innerperiodic4_t * _dwn, * _bbb, * _up ; 
-    int _lvl ;
-    myrule_t _rule ;
+    unsigned char _lvl ;
     const signed char _nChild; 
+    myrule_t _rule ;
   private :
     void splitISO4 () ;
   protected :
@@ -367,9 +367,10 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
   : A (a,b), 
   _dwn (0), _bbb (0), _cv (0), 
   _indexManager (im) , 
-  _rule (myrule_t :: nosplit) , 
   _lvl (l), 
-  _nChild(0) {
+  _nChild(0),
+  _rule (myrule_t :: nosplit)
+{
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -378,9 +379,10 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
   : A (a,b), 
   _dwn (0), _bbb (0), _cv (0), 
   _indexManager (im) ,
-  _rule (myrule_t :: nosplit) , 
   _lvl (l), 
-  _nChild(nChild) {
+  _nChild(nChild),
+  _rule (myrule_t :: nosplit)
+{
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -594,8 +596,9 @@ template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0
   _dwn (0), _bbb (0), _cv (0), _ed (0), 
   _indexManager(im) ,
   _lvl (l), 
+  _nChild(0),
   _rule (myrule_t :: nosplit)  
-  , _nChild(0) {
+{
   this->setIndex( _indexManager.getIndex() );  
   return ;
 }
@@ -607,8 +610,8 @@ template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0
   _dwn (0), _bbb (0), _cv (0), _ed (0), 
   _indexManager(im) ,
   _lvl (l), 
-  _rule (myrule_t :: nosplit) ,
-  _nChild(nChild)
+  _nChild(nChild),
+  _rule (myrule_t :: nosplit)
 {
   this->setIndex( _indexManager.getIndex() );  
   return ;

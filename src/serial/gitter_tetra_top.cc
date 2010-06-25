@@ -547,8 +547,8 @@ template < class A > TetraTop < A >
                                 this->myvertex(3)->Point())).integrate1 (0.0) 
             : vol )
   , _lvl (l) 
-  , _rule (myrule_t :: nosplit)
   , _nChild(nChild) 
+  , _rule (myrule_t :: nosplit)
 {
   // set level 
   assert( this->level() == l );
@@ -583,8 +583,8 @@ TetraTop (int l, myhface3_t * f0, int t0,
     (LinearMapping ( this->myvertex(0)->Point(), this->myvertex(1)->Point(),
                      this->myvertex(2)->Point(), this->myvertex(3)->Point())).integrate1 (0.0) )
   , _lvl (l) 
-  , _rule (myrule_t :: nosplit) 
   , _nChild(0)  // we are macro ==> nChild 0 
+  , _rule (myrule_t :: nosplit) 
 { 
   assert( this->level() == l );
 

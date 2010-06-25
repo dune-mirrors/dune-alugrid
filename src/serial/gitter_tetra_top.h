@@ -20,9 +20,9 @@ template < class A > class Hface3Top : public A {
     inneredge_t * _ed ;
     IndexManagerType & _indexManager;
 
-    int _lvl ;
-    myrule_t _rule ;
+    unsigned char _lvl ;
     const signed char _nChild;
+    myrule_t _rule ;
 
   private:
     inline myhedge1_t * subedge1 (int,int) ;
@@ -154,9 +154,9 @@ template < class A > class TetraTop : public A {
     IndexManagerType & _indexManager;
     const double _volume;
 
-    int _lvl ;
-    myrule_t _req, _rule ;
+    unsigned char _lvl ;
     const signed char _nChild;
+    myrule_t _req, _rule ;
     
   private :
     inline IndexManagerType & getFaceIndexManager ();
@@ -245,9 +245,9 @@ template < class A > class Periodic3Top : public A {
     
   private :
     innerperiodic3_t * _dwn, * _bbb, * _up ; 
-    int _lvl ;
-    myrule_t _rule ;
+    unsigned char _lvl ;
     const signed char _nChild; 
+    myrule_t _rule ;
   private :
     void split_e01 () ;
     void split_e12 () ;
@@ -444,8 +444,9 @@ template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0
   A (e0, t0, e1, t1, e2, t2), 
   _dwn (0), _bbb (0), _ed (0) ,
   _indexManager (im) ,
-  _lvl (l), _rule (myrule_t :: nosplit) ,
-  _nChild (nChild) 
+  _lvl (l),
+  _nChild (nChild),
+  _rule (myrule_t :: nosplit)
 {
   this->setIndex( _indexManager.getIndex() );
   return ;
@@ -458,8 +459,9 @@ template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0
   A (e0, t0, e1, t1, e2, t2), 
   _dwn (0), _bbb (0), _ed (0), 
   _indexManager (im) ,
-  _lvl (l), _rule (myrule_t :: nosplit) ,
-  _nChild (0) 
+  _lvl (l),
+  _nChild (0),
+  _rule (myrule_t :: nosplit)
 {
   this->setIndex( _indexManager.getIndex() );
   return ;
@@ -680,7 +682,9 @@ template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_
  : A (f0, t0, f1, t1)
  , _dwn (0), _bbb (0), _up(0)
  , _lvl (l) 
- , _rule (myrule_t :: nosplit), _nChild(0) { 
+ , _nChild(0)
+ , _rule (myrule_t :: nosplit)
+{ 
  return ;
 }
 
@@ -689,7 +693,8 @@ template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_
   : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
   , _lvl (l) 
-  , _rule (myrule_t :: nosplit) , _nChild (nChild) 
+  , _nChild (nChild) 
+  , _rule (myrule_t :: nosplit)
 {
   return ;
 }

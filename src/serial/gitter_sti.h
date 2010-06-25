@@ -999,10 +999,16 @@ public :
       typedef hasFace3  myconnect_t ;
       enum { polygonlength = 3 } ;
       class face3Neighbour {
-        pair < hasFace3 *, int > _v, _h ;
+        myconnect_t *_faceFront;
+        myconnect_t *_faceRear;
+        signed char _numFront;
+        signed char _numRear;
+
       public :
         static const pair < myconnect_t *, int > null ;
         inline face3Neighbour () ;
+        void setFront ( const pair< myconnect_t *, int > &p );
+        void setRear ( const pair< myconnect_t *, int > &p );
         inline void operator = (const face3Neighbour &) ;
         inline int complete (const face3Neighbour &) ;
         inline pair < myconnect_t *, int > front () ;
@@ -1064,9 +1070,15 @@ public :
       typedef hasFace4  myconnect_t ;
       enum { polygonlength = 4 } ;
       class face4Neighbour {
-        pair < myconnect_t *, int > _v, _h ;
+        myconnect_t *_faceFront;
+        myconnect_t *_faceRear;
+        signed char _numFront;
+        signed char _numRear;
+
       public :
         static const pair < myconnect_t *, int > null ;
+        void setFront ( const pair< myconnect_t *, int > &p );
+        void setRear ( const pair< myconnect_t *, int > &p );
         inline face4Neighbour () ;
         inline void operator = (const face4Neighbour &) ;
         inline int complete (const face4Neighbour &) ;
@@ -2407,38 +2419,86 @@ inline Gitter :: Geometric :: Hface4Rule Gitter :: Geometric :: Hface4Rule :: ro
 // #    #  #       #    #   ####   ######  #####
 //
   
-inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour () : _v (null), _h (null) {
+inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
+{
+  setFront( null );
+  setRear( null );
   return ;
 }
 
-inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const face3Neighbour & n) {
-  _v = n._v ;
-  _h = n._h ;
+inline void
+Gitter :: Geometric :: hface3 :: face3Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
+{
+  _faceFront = p.first;
+  _numFront = p.second;
+}
+
+inline void
+Gitter :: Geometric :: hface3 :: face3Neighbour :: setRear ( const pair < myconnect_t *, int > &p )
+{
+  _faceRear = p.first;
+  _numRear = p.second;
+}
+
+inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const face3Neighbour & n)
+{
+  _faceFront = n._faceFront;
+  _faceRear = n._faceRear;
+  _numFront = n._numFront;
+  _numRear = n._numRear;
   return ;
 }
 
-inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const face3Neighbour & n) {
-  return (_v == null ? (_v = n._v, 1) : 0 ) + (_h == null ? (_h = n._h, 1) : 0 ) ;
+inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const face3Neighbour & n)
+{
+  int ret = 0;
+
+  if( front() == null )
+  {
+    setFront( pair< hasFace3 *, int >( n._faceFront, n._numFront ) );
+    ++ret;
+  }
+
+  if( rear() == null )
+  {
+    setRear( pair< hasFace3 *, int >( n._faceRear, n._numRear ) );
+    ++ret;
+  }
+
+  return ret;
+  // return (_v == null ? (_v = n._v, 1) : 0 ) + (_h == null ? (_h = n._h, 1) : 0 ) ;
 }
 
-inline pair < Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: front () {
+inline pair < Gitter :: Geometric :: hface3 :: myconnect_t *, int >
+Gitter :: Geometric :: hface3 :: face3Neighbour :: front ()
+{
+  return pair< myconnect_t *, int >( _faceFront, _numFront );
   //assert (!(_v == null)) ;
-  return _v ;
+  //return _v ;
 }
 
-inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: front () const {
+inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int >
+Gitter :: Geometric :: hface3 :: face3Neighbour :: front () const
+{
+  return pair< const myconnect_t *, int >( _faceFront, _numFront );
   //assert (!(_v == null)) ;
-  return pair < const hasFace3 *, int > (_v.first,_v.second) ;
+  //return pair < const hasFace3 *, int > (_v.first,_v.second) ;
 }
 
-inline pair < Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () {
+inline pair < Gitter :: Geometric :: hface3 :: myconnect_t *, int >
+Gitter :: Geometric :: hface3 :: face3Neighbour :: rear ()
+{
+  return pair< myconnect_t *, int >( _faceRear, _numRear );
   //assert (!(_h == null)) ;
-  return _h ;
+  //return _h ;
 }
 
-inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () const {
+inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int >
+Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () const
+{
+  return pair< const myconnect_t *, int >( _faceRear, _numRear );
   //assert (!(_h == null)) ;
-  return pair < const hasFace3 *, int > (_h.first,_h.second) ; ;
+  //return pair < const hasFace3 *, int > (_h.first,_h.second) ; ;
 }
 
 inline Gitter :: Geometric :: hface3 :: 
@@ -2460,14 +2520,22 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
   return ;
 }
 
-inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t) {
-  t < 0 ? nb._h = p : nb._v = p ;
+inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t)
+{
+  if( t < 0 )
+    nb.setRear( p );
+  else
+    nb.setFront( p );
   ref ++ ;
   return ;
 }
 
-inline void Gitter :: Geometric :: hface3 :: detachElement (int t) {
-  t < 0 ? nb._h = nb.null : nb._v = nb.null;
+inline void Gitter :: Geometric :: hface3 :: detachElement (int t)
+{
+  if( t < 0 )
+    nb.setRear( nb.null );
+  else
+    nb.setFront( nb.null );
   ref -- ;
   return ;
 }
@@ -2538,38 +2606,86 @@ isInteriorLeaf() const
 // #    #  #       #    #  #    #  #           #
 // #    #  #       #    #   ####   ######      #
 
-inline Gitter :: Geometric :: hface4 :: face4Neighbour :: face4Neighbour () : _v (null), _h (null) {
+inline Gitter :: Geometric :: hface4 :: face4Neighbour :: face4Neighbour ()
+{
+  setFront( null );
+  setRear( null );
   return ;
 }
 
-inline void Gitter :: Geometric :: hface4 :: face4Neighbour :: operator = (const face4Neighbour & n) {
-  _v = n._v ;
-  _h = n._h ;
+inline void
+Gitter :: Geometric :: hface4 :: face4Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
+{
+  _faceFront = p.first;
+  _numFront = p.second;
+}
+
+inline void
+Gitter :: Geometric :: hface4 :: face4Neighbour :: setRear ( const pair < myconnect_t *, int > &p )
+{
+  _faceRear = p.first;
+  _numRear = p.second;
+}
+
+inline void Gitter :: Geometric :: hface4 :: face4Neighbour :: operator = (const face4Neighbour & n)
+{
+  _faceFront = n._faceFront;
+  _faceRear = n._faceRear;
+  _numFront = n._numFront;
+  _numRear = n._numRear;
   return ;
 }
 
-inline int Gitter :: Geometric :: hface4 :: face4Neighbour :: complete (const face4Neighbour & n) {
-  return (_v == null ? (_v = n._v, 1) : 0 ) + (_h == null ? (_h = n._h, 1) : 0 ) ;
+inline int Gitter :: Geometric :: hface4 :: face4Neighbour :: complete (const face4Neighbour & n)
+{
+  int ret = 0;
+
+  if( front() == null )
+  {
+    setFront( pair< myconnect_t *, int >( n._faceFront, n._numFront ) );
+    ++ret;
+  }
+
+  if( rear() == null )
+  {
+    setRear( pair< myconnect_t *, int >( n._faceRear, n._numRear ) );
+    ++ret;
+  }
+
+  return ret;
+  // return (_v == null ? (_v = n._v, 1) : 0 ) + (_h == null ? (_h = n._h, 1) : 0 ) ;
 }
 
-inline pair < Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: front () {
+inline pair < Gitter :: Geometric :: hface4 :: myconnect_t *, int >
+Gitter :: Geometric :: hface4 :: face4Neighbour :: front ()
+{
+  return pair< myconnect_t *, int >( _faceFront, _numFront );
   //assert (!(_v == null)) ;
-  return _v ;
+  //return _v ;
 }
 
-inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: front () const {
+inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int >
+Gitter :: Geometric :: hface4 :: face4Neighbour :: front () const
+{
+  return pair< const hasFace4 *, int >( _faceFront, _numFront );
   //assert (!(_v == null)) ;
-  return pair < const myconnect_t *, int > (_v.first,_v.second) ;
+  //return pair < const hasFace4 *, int > (_v.first,_v.second) ;
 }
 
-inline pair < Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () {
+inline pair < Gitter :: Geometric :: hface4 :: myconnect_t *, int >
+Gitter :: Geometric :: hface4 :: face4Neighbour :: rear ()
+{
+  return pair< myconnect_t *, int >( _faceRear, _numRear );
   //assert (!(_h == null)) ;
-  return _h ;
+  //return _h ;
 }
 
-inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () const {
+inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int >
+Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () const
+{
+  return pair< const myconnect_t *, int >( _faceRear, _numRear );
   //assert (!(_h == null)) ;
-  return pair < const myconnect_t *, int > (_h.first,_h.second) ; ;
+  //return pair < const hasFace4 *, int > (_h.first,_h.second) ; ;
 }
 
 inline Gitter :: Geometric :: hface4 :: 
@@ -2595,13 +2711,20 @@ inline Gitter :: Geometric :: hface4 :: ~hface4 () {
 
 inline void Gitter :: Geometric :: hface4 :: attachElement (const pair < myconnect_t *, int > & p, int t) 
 {
-  t < 0 ? nb._h = p : nb._v = p ;
+  if( t < 0 )
+    nb.setRear( p );
+  else
+    nb.setFront( p );
   ref ++ ;
   return ;
 }
 
-inline void Gitter :: Geometric :: hface4 :: detachElement (int t) {
-  t < 0 ? nb._h = nb.null : nb._v = nb.null ;
+inline void Gitter :: Geometric :: hface4 :: detachElement (int t)
+{
+  if( t < 0 )
+    nb.setRear( nb.null );
+  else
+    nb.setFront( nb.null );
   ref -- ;
   return ;
 }

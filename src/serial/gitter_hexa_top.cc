@@ -518,8 +518,8 @@ template < class A > HexaTop < A >
   , _indexManager(im) 
   , _volume (0.0) 
   , _lvl (l)
-  , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
   , _nChild(0) 
+  , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
   , _affine( false )
 { 
   TrilinearMapping trMap (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
@@ -547,8 +547,8 @@ template < class A > HexaTop < A >
   , _indexManager(_up->_indexManager)
   , _volume ( vol )
   , _lvl (l)
-  , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _nChild(nChild) 
+  , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
   , _affine(_up->_affine)
 { 
   assert( this->level() == l );
@@ -1030,7 +1030,9 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
   : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(0)
   , _lvl (l) 
-  , _rule (myrule_t :: nosplit) , _nChild (0) { 
+  , _nChild (0)
+  , _rule (myrule_t :: nosplit)
+{
   return ;
 }
 
@@ -1039,7 +1041,9 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
 : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
   , _lvl (l)
-  , _rule (myrule_t :: nosplit) , _nChild (nChild) { 
+  , _nChild (nChild) 
+  , _rule (myrule_t :: nosplit)
+{ 
   return ;
 }
 
