@@ -7,22 +7,27 @@
 #include "gitter_sti.h"
 #include "gitter_hexa_top.h"
 
-template < class A > class Hface3Top : public A {
+template < class A > class Hface3Top : public A 
+{
   protected :
-    typedef Hface3Top < A >     innerface_t ;
+    typedef Hface3Top < A >             innerface_t ;
     typedef typename A :: inneredge_t   inneredge_t;
     typedef typename A :: innervertex_t innervertex_t;
-    typedef typename A :: myhedge1_t  myhedge1_t ;
+    typedef typename A :: myhedge1_t    myhedge1_t ;
     typedef typename A :: myvertex_t    myvertex_t ;
     typedef typename A :: myrule_t      myrule_t ;
   private :
     innerface_t * _dwn, * _bbb ;
     inneredge_t * _ed ;
-    IndexManagerType & _indexManager;
 
     unsigned char _lvl ;
     const signed char _nChild;
     myrule_t _rule ;
+
+  protected:  
+    // we need this because TetraTop needs access to this indexManager 
+    inline IndexManagerType & indexManager () { 
+      return  this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Faces ); }    
 
   private:
     inline myhedge1_t * subedge1 (int,int) ;
@@ -33,9 +38,9 @@ template < class A > class Hface3Top : public A {
     void split_iso4 () ;
   public :
     // constructor for macro elements 
-    inline Hface3Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int , IndexManagerType & im ) ;
+    inline Hface3Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int ) ;
     // constructor for refined elements 
-    inline Hface3Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int , IndexManagerType & im , int nChild ) ;
+    inline Hface3Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, int nChild ) ;
     virtual inline ~Hface3Top () ;
     innervertex_t * subvertex (int) ;
     const innervertex_t * subvertex (int) const ;
@@ -60,11 +65,6 @@ template < class A > class Hface3Top : public A {
     virtual void refineImmediate (myrule_t) ;
     virtual bool coarse () ;
   public :
-    // we need this because TetraTop needs access to this indexManager 
-    inline IndexManagerType & getIndexManager () { return _indexManager; }
-    
-    inline IndexManagerType & getEdgeIndexManager () ;
-
     virtual void backup (ostream &) const ;
     virtual void restore (istream &) ;
     
@@ -105,13 +105,16 @@ template < class A > class Hbnd3Top : public A {
    
   public:
     // constructor for serial macro boundary elements  
-    inline Hbnd3Top (int,myhface3_t *,int,ProjectVertex *,
-                     const bnd_t b, IndexManagerType & im ) ;
+    inline Hbnd3Top (int,myhface3_t *,
+                     int,ProjectVertex *,
+                     const bnd_t b ,
+                     IndexManagerType& );
     
     // constructor for children 
-    inline Hbnd3Top (int,myhface3_t *,int, ProjectVertex *, 
-                    innerbndseg_t * up, const bnd_t b, 
-                    IndexManagerType & im, typename Gitter::helement_STI * gh, int gFace ) ;
+    inline Hbnd3Top (int, myhface3_t *,int, ProjectVertex *, 
+                     innerbndseg_t * up, const bnd_t b, 
+                     IndexManagerType& ,
+                     typename Gitter::helement_STI * gh, int gFace ) ;
 
     inline virtual ~Hbnd3Top () ;
     bool refineBalance (balrule_t,int) ;
@@ -151,7 +154,6 @@ template < class A > class TetraTop : public A {
     innertetra_t * _dwn, * _bbb, * _up ; 
     innerface_t * _fc ;
     inneredge_t * _ed ;
-    IndexManagerType & _indexManager;
     const double _volume;
 
     unsigned char _lvl ;
@@ -159,8 +161,8 @@ template < class A > class TetraTop : public A {
     myrule_t _req, _rule ;
     
   private :
-    inline IndexManagerType & getFaceIndexManager ();
-    inline IndexManagerType & getEdgeIndexManager ();
+    inline IndexManagerType & indexManager() { 
+      return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Elements ); }
     double calculateChildVolume(const double) const;
     
     void split_e01 () ;
@@ -181,7 +183,7 @@ template < class A > class TetraTop : public A {
                      myhface3_t *,int,innertetra_t *up, int nChild, double vol) ;
     // constructor for macro elements 
     inline TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                     myhface3_t *,int, IndexManagerType & , Gitter * mygrid ) ;
+                     myhface3_t *, int ) ;
     virtual inline ~TetraTop () ;
     inline innertetra_t * up () ;
     inline const innertetra_t * up () const;
@@ -433,42 +435,38 @@ template < class A > inline typename Hface3Top < A > :: myrule_t Hface3Top < A >
   return myrule_t (_rule) ;
 }
 
-template < class A > inline IndexManagerType & Hface3Top < A > :: getEdgeIndexManager () {
-  return static_cast<inneredge_t &> (*(this->myhedge1(0))).getIndexManager();
-}
-
 // constructor called during refinement 
-template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0, 
+template < class A > inline Hface3Top < A > :: 
+Hface3Top (int l, myhedge1_t * e0, 
   int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2,
-  IndexManagerType & im , int nChild ) : 
+  int nChild ) : 
   A (e0, t0, e1, t1, e2, t2), 
   _dwn (0), _bbb (0), _ed (0) ,
-  _indexManager (im) ,
   _lvl (l),
   _nChild (nChild),
   _rule (myrule_t :: nosplit)
 {
-  this->setIndex( _indexManager.getIndex() );
+  this->setIndex( indexManager().getIndex() );
   return ;
 }
 
 // constructor called while creating macro face 
-template < class A > inline Hface3Top < A > :: Hface3Top (int l, myhedge1_t * e0, 
-  int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2,
-  IndexManagerType & im ) : 
+template < class A > inline Hface3Top < A > :: 
+Hface3Top (int l, myhedge1_t * e0, 
+  int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2) : 
   A (e0, t0, e1, t1, e2, t2), 
   _dwn (0), _bbb (0), _ed (0), 
-  _indexManager (im) ,
   _lvl (l),
   _nChild (0),
   _rule (myrule_t :: nosplit)
 {
-  this->setIndex( _indexManager.getIndex() );
+  this->setIndex( indexManager().getIndex() );
   return ;
 }
 
-template < class A > inline Hface3Top < A > :: ~Hface3Top () {
-  this->freeIndex( this->_indexManager );
+template < class A > inline Hface3Top < A > :: ~Hface3Top () 
+{
+  this->freeIndex( indexManager() );
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_ed) delete _ed ;
@@ -581,7 +579,7 @@ template < class A > inline double TetraTop < A > :: calculateChildVolume (const
 {
   // if vertex projection is available on a neighbor 
   // volume has to be recalculated 
-  return ( this->_myGrid->vertexProjection() ) ? -1.0 : childVolume; 
+  return ( this->myGrid()->vertexProjection() ) ? -1.0 : childVolume; 
 }
 
 template < class A > inline int TetraTop < A > :: level () const {

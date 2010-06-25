@@ -6,16 +6,16 @@
 #define GITTER_HEXA_TOP_H_INCLUDED
 
 
-template < class A > class Hedge1Top : public A {
+template < class A > class Hedge1Top : public A 
+{
   protected :
     typedef Hedge1Top < A >       inneredge_t ;
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: myvertex_t  myvertex_t ;
     typedef typename A :: myrule_t  myrule_t ;
-  private :
+  protected :
     inneredge_t * _dwn, * _bbb ;
     innervertex_t * _cv ;
-    IndexManagerType & _indexManager;
 
     unsigned char _lvl ;       
     const signed char _nChild;  
@@ -23,10 +23,11 @@ template < class A > class Hedge1Top : public A {
     
   public :
     // need for refinement 
-    IndexManagerType & getIndexManager() { return _indexManager; }
+    IndexManagerType & indexManager() 
+    { return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Edges ); }
     
-    inline Hedge1Top (int,myvertex_t *,myvertex_t *, IndexManagerType & im) ;
-    inline Hedge1Top (int,myvertex_t *,myvertex_t *, IndexManagerType & im, int nChild ) ;
+    inline Hedge1Top (int,myvertex_t *,myvertex_t *) ;
+    inline Hedge1Top (int,myvertex_t *,myvertex_t *, int nChild ) ;
     virtual ~Hedge1Top () ;
     inneredge_t * subedge1 (int) ;
     const inneredge_t * subedge1 (int) const ;
@@ -71,7 +72,6 @@ template < class A > class Hface4Top : public A {
     innerface_t * _dwn, * _bbb ;
     innervertex_t * _cv ;
     inneredge_t   * _ed ;
-    IndexManagerType & _indexManager;
 
     unsigned char _lvl ;
     const signed char _nChild;
@@ -81,15 +81,15 @@ template < class A > class Hface4Top : public A {
     inline myhedge1_t * subedge1 (int,int) ;
     inline const myhedge1_t * subedge1 (int,int) const ;
     void splitISO4 () ;
-    IndexManagerType & getEdgeIndexManager () ;
   public:
-    // for HexaTop, when refinement is done 
-    IndexManagerType & getIndexManager() { return _indexManager; }
+    // for index get/free, when refinement is done 
+    IndexManagerType & indexManager() { 
+      return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Faces ); }
     
     // constructor for macro faces 
-    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im) ;
+    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
     // constructor for refined faces 
-    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im, int nChild ) ;
+    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, int nChild ) ;
     virtual ~Hface4Top () ;
     innervertex_t * subvertex (int) ;
     const innervertex_t * subvertex (int) const ;
@@ -192,19 +192,18 @@ template < class A > class HexaTop : public A {
     innerface_t * _fc ;
     inneredge_t * _ed ;
     innervertex_t * _cv ;
-    IndexManagerType & _indexManager; 
     double _volume; 
     unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule, _req ;
     bool _affine;
 
-private:    
-    IndexManagerType & getEdgeIndexManager () ;
-    IndexManagerType & getFaceIndexManager () ;
-
     void splitISO8 () ;
-protected:
+  protected:
+    // for HexaTop, when refinement is done 
+    IndexManagerType & indexManager() { 
+      return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Elements ); }
+    
     myhedge1_t * subedge1 (int,int) ;
     const myhedge1_t * subedge1 (int,int) const ;
     myhface4_t * subface4 (int,int) ;
@@ -213,8 +212,7 @@ protected:
   public:
     // Constructor for macro elements 
     HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-             myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-             IndexManagerType & im, Gitter* mygrid) ;
+             myhface4_t *,int,myhface4_t *,int,myhface4_t *,int);
     
     // constructor for refinement 
     HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
@@ -363,32 +361,32 @@ template < class A > class Periodic4Top : public A {
 // #     #  ######  #####    ####   ######  #####     #      ####   #
 
 
-template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b, IndexManagerType & im ) 
+template < class A > inline Hedge1Top < A > :: 
+  Hedge1Top (int l, myvertex_t * a, myvertex_t * b ) 
   : A (a,b), 
   _dwn (0), _bbb (0), _cv (0), 
-  _indexManager (im) , 
   _lvl (l), 
   _nChild(0),
   _rule (myrule_t :: nosplit)
 {
-  this->setIndex( _indexManager.getIndex() );  
+  this->setIndex( indexManager().getIndex() );  
   return ;
 }
 
-template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b, IndexManagerType & im, int nChild ) 
+template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a, myvertex_t * b, int nChild ) 
   : A (a,b), 
   _dwn (0), _bbb (0), _cv (0), 
-  _indexManager (im) ,
   _lvl (l), 
   _nChild(nChild),
   _rule (myrule_t :: nosplit)
 {
-  this->setIndex( _indexManager.getIndex() );  
+  this->setIndex( indexManager().getIndex() );  
   return ;
 }
 
-template < class A > Hedge1Top < A > :: ~Hedge1Top () {
-  this->freeIndex( this->_indexManager );
+template < class A > Hedge1Top < A > :: ~Hedge1Top () 
+{
+  this->freeIndex( indexManager() );
   if(_bbb) delete _bbb;
   if(_dwn) delete _dwn;
   if(_cv)  delete _cv;
@@ -590,35 +588,34 @@ Hface4Top < A > :: subface4 (int n) const {
   return f ;
 }
 
-template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1, 
-  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3, IndexManagerType & im) 
+template < class A > inline Hface4Top < A > :: 
+Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1, 
+  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3 ) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
   _dwn (0), _bbb (0), _cv (0), _ed (0), 
-  _indexManager(im) ,
   _lvl (l), 
   _nChild(0),
   _rule (myrule_t :: nosplit)  
 {
-  this->setIndex( _indexManager.getIndex() );  
+  this->setIndex( indexManager().getIndex() );  
   return ;
 }
 
 template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1, 
-  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3, IndexManagerType & im,
-  int nChild ) 
+  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3,int nChild ) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
   _dwn (0), _bbb (0), _cv (0), _ed (0), 
-  _indexManager(im) ,
   _lvl (l), 
   _nChild(nChild),
   _rule (myrule_t :: nosplit)
 {
-  this->setIndex( _indexManager.getIndex() );  
+  this->setIndex( indexManager().getIndex() );  
   return ;
 }
 
-template < class A > Hface4Top < A > :: ~Hface4Top () {
-  this->freeIndex( this->_indexManager );
+template < class A > Hface4Top < A > :: ~Hface4Top () 
+{
+  this->freeIndex( indexManager() );
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   if (_ed) delete _ed ;
@@ -655,10 +652,6 @@ template < class A > inline void Hface4Top < A > :: append (innerface_t * f) {
 template < class A > inline typename Hface4Top < A > :: myrule_t 
 Hface4Top < A > :: getrule () const {
   return myrule_t (_rule) ;
-}
-
-template < class A > inline IndexManagerType & Hface4Top < A > :: getEdgeIndexManager () {
-  return static_cast<inneredge_t &> (*(this->myhedge1(0))).getIndexManager();
 }
 
 template < class A > inline void Hface4Top < A > :: backup (ostream & os) const 
@@ -858,14 +851,6 @@ template < class A > inline double HexaTop < A > :: volume () const {
 template < class A > inline int HexaTop < A > :: nChild () const {
   assert( _nChild >= 0 && _nChild < 8 );
   return _nChild ;
-}
-
-template < class A > inline IndexManagerType & HexaTop < A > :: getEdgeIndexManager () {
-  return static_cast<inneredge_t &> (*(this->subedge1(0,0))).getIndexManager();
-}
-
-template < class A > inline IndexManagerType & HexaTop < A > :: getFaceIndexManager () {
-  return static_cast<innerface_t &> (*(this->subface4(0,0))).getIndexManager();
 }
 
 template < class A > typename HexaTop < A > :: myrule_t HexaTop < A > :: getrule () const {

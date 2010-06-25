@@ -23,7 +23,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         class VertexEmpty : public VertexGeo 
         {
           public :
-            inline VertexEmpty (int, double, double, double,IndexManagerType &im) ;
+            inline VertexEmpty (int, double, double, double,IndexManagerStorageType &ims) ;
             inline VertexEmpty (int, double, double, double,VertexGeo & ) ;
            ~VertexEmpty () {}
             virtual inline int ident () const ;
@@ -31,7 +31,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
         class VertexEmptyMacro : public VertexEmpty {
           public :
-            inline VertexEmptyMacro (double, double, double, int,IndexManagerType &im) ;
+            inline VertexEmptyMacro (double, double, double, int,IndexManagerStorageType &ims) ;
             ~VertexEmptyMacro () {}
             virtual inline int ident () const ;
           private :
@@ -162,7 +162,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         typedef hface3_IMPL innerface_t ;
         typedef hedge1_IMPL inneredge_t ;
         typedef VertexEmpty innervertex_t ;
-        inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
+        inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
 
         ////////////////////////////////////////////////
         // read of data 
@@ -195,7 +195,9 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         int preCoarsening  () ; 
         int postRefinement () ;
 
-        Gitter * _myGrid;
+        //! return pointer to grid 
+        Gitter * myGrid() { return myvertex(0)->myGrid(); }
+        const Gitter * myGrid() const { return myvertex(0)->myGrid(); }
       public: 
         //ghost tetra gets indices of grid, to which it belongs actually
         virtual void setIndicesAndBndId (const hface_STI & f, int face_nr);
@@ -232,13 +234,17 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         typedef hface4_IMPL innerface_t ;
         typedef hedge1_IMPL inneredge_t ;
         typedef VertexEmpty innervertex_t ;
-        inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int, Gitter*) ;
+        inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int) ;
         ~HexaEmpty () {}
       
         // Neu: burriad 29.4.05
         int preCoarsening(); 
         int postRefinement();
 
+        //! return pointer to grid 
+        Gitter * myGrid() { return myvertex(0)->myGrid(); }
+
+      public: 
         ////////////////////////////////////////////////
         // read of data 
         ////////////////////////////////////////////////
@@ -262,7 +268,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         // check that all indices are within range of index manager
         virtual void resetGhostIndices();
         
-        Gitter * _myGrid;
         friend class HexaTop<HexaEmpty>;
       public:
         //ghost hexa gets indices of grid, to which it belongs actually
@@ -332,6 +337,8 @@ class GitterBasisImpl : public GitterBasis {
   inline const Makrogitter & container () const ;
   public :
     inline IndexManagerType & indexManager(int codim);
+    inline IndexManagerStorageType& indexManagerStorage();
+
     inline size_t numMacroBndSegments() const;
         
     GitterBasisImpl () ;
@@ -355,8 +362,8 @@ class GitterBasisImpl : public GitterBasis {
   //    #    #    #  ######     #    #    #  ######
   //
 
-inline GitterBasis :: Objects :: VertexEmpty :: VertexEmpty (int l, double x, double y, double z, IndexManagerType & im)
-  : GitterBasis :: VertexGeo (l,x,y,z,im) {
+inline GitterBasis :: Objects :: VertexEmpty :: VertexEmpty (int l, double x, double y, double z, IndexManagerStorageType & ims)
+  : GitterBasis :: VertexGeo (l,x,y,z,ims) {
   return ;
 }
 
@@ -370,8 +377,8 @@ inline int GitterBasis :: Objects :: VertexEmpty :: ident () const {
   return (abort (), -1) ;
 }
 
-inline GitterBasis :: Objects :: VertexEmptyMacro :: VertexEmptyMacro (double x,double y,double z,int i, IndexManagerType &im) 
-  : GitterBasis :: Objects :: VertexEmpty (0,x,y,z,im), _idn (i) {
+inline GitterBasis :: Objects :: VertexEmptyMacro :: VertexEmptyMacro (double x,double y,double z,int i, IndexManagerStorageType &ims) 
+  : GitterBasis :: Objects :: VertexEmpty (0,x,y,z,ims), _idn (i) {
   return ;
 }
 
@@ -513,10 +520,8 @@ inline int GitterBasis :: Objects :: Hbnd4Default :: ghostLevel () const {
 
 inline GitterBasis :: Objects :: TetraEmpty :: 
 TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
-            myhface3_t * f2, int t2, myhface3_t * f3, int t3,
-            Gitter * mygrid) : 
-  Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) , 
-  _myGrid(mygrid) 
+            myhface3_t * f2, int t2, myhface3_t * f3, int t3) :
+  Gitter :: Geometric :: Tetra (f0, t0, f1, t1, f2, t2, f3, t3) 
 {
   attachleafs();
   return ;
@@ -525,9 +530,8 @@ TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
 // calles method on grid which return 0 for default impl 
 inline int GitterBasis :: Objects :: TetraEmpty :: preCoarsening () 
 {
-  assert( _myGrid );
   // only call preCoarsening on non ghost elements 
-  return ((this->isGhost()) ? 0 : _myGrid->preCoarsening(*this));
+  return ((this->isGhost()) ? 0 : myGrid()->preCoarsening(*this));
 }
 
 // calles method on grid which return 0 for default impl 
@@ -536,9 +540,8 @@ inline int GitterBasis :: Objects :: TetraEmpty :: postRefinement ()
   // reset refined tag of this element because no leaf anymore 
   this->resetRefinedTag();
 
-  assert( _myGrid );
   // only call postRefinement on non ghost elements 
-  return ((this->isGhost()) ? 0 : _myGrid->postRefinement(*this));
+  return ((this->isGhost()) ? 0 : myGrid()->postRefinement(*this));
 }
 
 inline GitterBasis :: Objects :: Periodic3Empty :: Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
@@ -555,19 +558,17 @@ inline GitterBasis :: Objects :: Periodic4Empty :: Periodic4Empty (myhface4_t * 
 inline GitterBasis :: Objects :: HexaEmpty :: 
 HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
            myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
-           myhface4_t * f4, int t4, myhface4_t * f5, int t5,
-           Gitter* mygrid) : 
-  Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5),
-  _myGrid(mygrid) 
+           myhface4_t * f4, int t4, myhface4_t * f5, int t5) :
+  Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
 {
   attachleafs();
   return ;
 }
 
-inline int GitterBasis::Objects::HexaEmpty::preCoarsening() {
-  assert(_myGrid);
+inline int GitterBasis::Objects::HexaEmpty::preCoarsening() 
+{
   // only call preCoarsening on non ghost elements 
-  return ((this->isGhost()) ? 0 : _myGrid->preCoarsening(*this));
+  return ((this->isGhost()) ? 0 : myGrid()->preCoarsening(*this));
 }
 
 inline int GitterBasis::Objects::HexaEmpty::postRefinement() 
@@ -575,9 +576,8 @@ inline int GitterBasis::Objects::HexaEmpty::postRefinement()
   // reset refined tag of this element because no leaf anymore 
   this->resetRefinedTag();
   
-  assert(_myGrid);
   // only call postRefinement on non ghost elements 
-  return ((this->isGhost()) ? 0 : _myGrid->postRefinement(*this));
+  return ((this->isGhost()) ? 0 : myGrid()->postRefinement(*this));
 }
 
 ////////////////////////////////////////////////////////////////
@@ -601,6 +601,11 @@ inline const Gitter :: Makrogitter & GitterBasisImpl :: container () const {
 inline IndexManagerType & GitterBasisImpl :: indexManager (int codim) 
 { 
   return _macrogitter->indexManager(codim);
+}
+
+inline IndexManagerStorageType&  GitterBasisImpl :: indexManagerStorage() 
+{
+  return _macrogitter->indexManagerStorage();
 }
 
 inline size_t GitterBasisImpl :: numMacroBndSegments() const

@@ -852,7 +852,7 @@ void Gitter :: Geometric :: BuilderIF :: backup (const char * filePath, const ch
   return ;
 }
 
-size_t Gitter :: Geometric :: BuilderIF :: memUsage () const 
+size_t Gitter :: Geometric :: BuilderIF :: memUsage ()
 {
   size_t mySize = 0;
   mySize += _vertexList.size()*sizeof(VertexGeo *);
@@ -872,7 +872,7 @@ size_t Gitter :: Geometric :: BuilderIF :: memUsage () const
 
   for(int i=0; i<numOfIndexManager; ++i)
   {
-    mySize += _indexmanager[i].memUsage();
+    mySize += indexManager(i).memUsage();
   }
 
   return mySize;
@@ -881,7 +881,12 @@ size_t Gitter :: Geometric :: BuilderIF :: memUsage () const
 IndexManagerType&  Gitter :: Geometric :: BuilderIF :: indexManager(int codim)
 {
   assert( codim >= 0 && codim < numOfIndexManager );
-  return _indexmanager[ codim ];
+  return _indexManagerStorage.get( codim );
+}
+
+IndexManagerStorageType&  Gitter :: Geometric :: BuilderIF :: indexManagerStorage()
+{
+  return _indexManagerStorage;
 }
 
 size_t Gitter :: Geometric :: BuilderIF :: numMacroBndSegments() const 
@@ -895,10 +900,7 @@ size_t Gitter :: Geometric :: BuilderIF :: numMacroBndSegments() const
 // compress all index manager 
 void Gitter :: Geometric :: BuilderIF :: compressIndexManagers()
 {
-  for(int i=0; i<numOfIndexManager; ++i)
-  {
-    _indexmanager[i].compress(); 
-  } 
+  _indexManagerStorage.compress(); 
 } 
 
 

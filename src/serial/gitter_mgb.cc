@@ -611,21 +611,26 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
 MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, const bool init) 
  : _initialized(false) 
  , _finalized(false) 
- , _ppv( NULL ), _mgb (b) 
+ , _myGrid( NULL )
+ , _ppv( NULL )
+ , _mgb (b) 
 {
   if(init) initialize();
 }
 
-MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, ProjectVertex* ppv) 
+MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, Gitter* myGrid) 
  : _initialized(false) 
  , _finalized(false) 
- , _ppv( ppv ), _mgb (b) 
+ , _myGrid( myGrid )  
+ , _ppv( _myGrid->vertexProjection() )
+ , _mgb (b) 
 {
   initialize();
 }
 
 void MacroGridBuilder :: initialize () 
 {
+  myBuilder().indexManagerStorage().setGrid( _myGrid );
   {
     for ( BuilderIF :: vertexlist_t :: iterator i = myBuilder ()._vertexList.begin () ;
       i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
@@ -927,7 +932,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
   return ;
 }
 
-void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in, ProjectVertex* ppv) 
+void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in, Gitter* myGrid) 
 {
   strstream_t raw ;
   
@@ -935,7 +940,7 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in, Project
   raw << scientific ;
   raw.precision( 16 );
 
-  MacroGridBuilder mm (*this, ppv) ;
+  MacroGridBuilder mm (*this, myGrid) ;
   int c = in.get () ;
   assert (!in.eof ()) ;
   in.putback (c) ;

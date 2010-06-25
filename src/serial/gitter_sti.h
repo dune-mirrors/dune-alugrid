@@ -23,6 +23,72 @@ typedef pair<const ProjectVertex* , const int > ProjectVertexPair;
 class MacroGhostInfoHexa;
 class MacroGhostInfoTetra;
 
+//! type of coordinate storage 
+typedef double alucoord_t ;
+
+// forward declaration 
+class Gitter;
+
+class IndexManagerStorage
+{
+public:  
+  // number of different index manager that exists 
+  enum { numOfIndexManager = 6 };
+
+  enum { IM_Elements = 0, // 0 == elements 
+         IM_Faces = 1,    // 1 == faces 
+         IM_Edges = 2,    // 2 == edges 
+         IM_Vertices = 3, // 3 == vertices
+         IM_Bnd = 4,      // 4 == boundary elements 
+         IM_Internal = 5  // 5 == internal bnds, parallel only 
+  };
+
+  IndexManagerStorage() : _myGrid( 0 ) 
+  {}
+  void setGrid( Gitter * grid ) { _myGrid = grid ; }
+
+  explicit IndexManagerStorage(Gitter * gitter) : _myGrid( gitter ) 
+  {}
+
+  Gitter* myGrid() 
+  { 
+    assert( _myGrid );
+    return _myGrid; 
+  }
+  const Gitter* myGrid() const 
+  { 
+    assert( _myGrid );
+    return _myGrid; 
+  }
+  IndexManagerType& get(const int codim) 
+  {
+    assert( codim >= 0 );
+    assert( codim < numOfIndexManager );
+    return _indexmanager[ codim ];
+  }
+  int getIndex( const int codim ) { return get( codim ).getIndex(); }
+
+  void compress() 
+  {
+    for(int i=0; i<numOfIndexManager; ++i)
+    {
+      _indexmanager[i].compress();
+    }
+  }
+private:
+  IndexManagerStorage( const IndexManagerStorage& );
+
+protected:
+  Gitter* _myGrid;
+
+  // this variable is located here, because all the elements in
+  // this lists use this objects to get  thier numbers 
+  // index provider, for every codim one , 4 is for boundary
+  IndexManagerType _indexmanager[ numOfIndexManager ];
+};
+
+typedef IndexManagerStorage IndexManagerStorageType;
+
 // Einfacher Referenzenz"ahler mit cast-around-const
 // feature, der zum Z"ahlen der Referenzen auf Fl"achen
 // Kanten und Knoten verwendet wird. Vorteil: Objekte,
@@ -741,7 +807,7 @@ public :
   
     // return size of used memory of macro gitter 
     // (size of lists storing the pointers )
-    virtual size_t memUsage () const = 0;
+    virtual size_t memUsage () = 0;
   } ;
 public :
   class Geometric {
@@ -935,7 +1001,7 @@ public :
     public:  
       // VertexGeo is provided for the vertices on lower levels 
       inline VertexGeo (int,double,double,double, VertexGeo & ) ;
-      inline VertexGeo (int,double,double,double, IndexManagerType & im ) ;
+      inline VertexGeo (int,double,double,double, IndexManagerStorageType & im ) ;
       inline virtual ~VertexGeo () ;
 
       // return coordinates of vertex  
@@ -955,15 +1021,23 @@ public :
 
       int nChild () const { return 0 ; }
 
+      // return pointer to grid 
+      Gitter* myGrid() { return _indexManagerStorage.myGrid(); }
+      const Gitter* myGrid() const { return _indexManagerStorage.myGrid(); }
+      IndexManagerStorageType& indexManagerStorage () { return _indexManagerStorage; }
     private :
       // the coordinates of this vertex 
-      double _c [3] ;
+      alucoord_t _c [3] ;
     protected:
       // index manager
-      IndexManagerType & _indexmanager;
+      IndexManagerStorageType & _indexManagerStorage;
+
+      IndexManagerType& indexManager() { 
+        return _indexManagerStorage.get( IndexManagerStorageType :: IM_Vertices ); }
+
     private:   
       // the level of creation 
-      int _lvl ;
+      unsigned char _lvl ;
     public :
       // reference counter 
       Refcount ref ;
@@ -1565,12 +1639,12 @@ public :
       virtual ~BuilderIF () ;
 
       // return size of used memory in bytes 
-      virtual size_t memUsage () const;
+      virtual size_t memUsage ();
       
       // generates macro image from macro file 
       void generateRawHexaImage (istream &, ostream &) ;
       
-      virtual void macrogridBuilder (istream &, ProjectVertex* ) ;
+      virtual void macrogridBuilder (istream &, Gitter* ) ;
       virtual VertexGeo     * insert_vertex (double, double, double, int) = 0 ;
       virtual VertexGeo     * insert_ghostvx(double, double, double, int) = 0 ;
       virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0 ;
@@ -1606,21 +1680,22 @@ public :
       IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
       IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
     public:  
-      // number of different index manager that exists 
-      enum { numOfIndexManager = 6 };
+      enum { numOfIndexManager = IndexManagerStorageType :: numOfIndexManager };
 
-      enum { IM_Elements = 0, // 0 == elements 
-             IM_Faces = 1,    // 1 == faces 
-             IM_Edges = 2,    // 2 == edges 
-             IM_Vertices = 3, // 3 == vertices
-             IM_Bnd = 4,      // 4 == boundary elements 
-             IM_Internal = 5  // 5 == internal bnds, parallel only 
+      // number of different index manager that exists 
+      enum { IM_Elements = IndexManagerStorageType :: IM_Elements, // 0 == elements 
+             IM_Faces    = IndexManagerStorageType :: IM_Faces,    // 1 == faces 
+             IM_Edges    = IndexManagerStorageType :: IM_Edges,    // 2 == edges 
+             IM_Vertices = IndexManagerStorageType :: IM_Vertices, // 3 == vertices
+             IM_Bnd      = IndexManagerStorageType :: IM_Bnd,      // 4 == boundary elements 
+             IM_Internal = IndexManagerStorageType :: IM_Internal  // 5 == internal bnds, parallel only 
       };
+
     protected:
       // this variable is located here, because all the elements in
       // this lists use this objects to get  thier numbers 
       // index provider, for every codim one , 4 is for boundary
-      IndexManagerType _indexmanager[ numOfIndexManager ];
+      IndexManagerStorageType _indexManagerStorage;
 
       // default implementations just use the iterator method  
       IteratorSTI < vertex_STI > * pureElementIterator (const vertex_STI * a) const { return iterator(a); }
@@ -1638,6 +1713,8 @@ public :
     public :
       // return reference to indexManager 
       virtual IndexManagerType& indexManager(int codim);
+      // return reference to indexManagerStorage
+      virtual IndexManagerStorageType& indexManagerStorage();
 
       // return number of macro boundary segments 
       virtual size_t numMacroBndSegments() const;
@@ -1734,6 +1811,9 @@ public :
 
   // return index manager of macro grid 
   virtual IndexManagerType & indexManager (int codim) = 0;
+
+  // return reference to indexManagerStorage
+  virtual IndexManagerStorageType& indexManagerStorage() = 0;
 
 protected:
   // these classes are friend because the must call the method iterator on grid 
@@ -2162,26 +2242,27 @@ inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) 
 //   # #    #       #   #      #    #        #  #  #     #  #       #    #
 //    #     ######  #    #     #    ######  #    #  #####   ######   ####
 
-inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, IndexManagerType & im) 
-  : _indexmanager (im) 
+inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, IndexManagerStorageType & ims) 
+  : _indexManagerStorage (ims) 
   , _lvl (l) 
 {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
-  this->setIndex( _indexmanager.getIndex() );
+  this->setIndex( indexManager().getIndex() );
   return ;
 }
 
 inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y, double z, VertexGeo & vx) 
-  : _indexmanager ( vx._indexmanager ) 
+  : _indexManagerStorage ( vx._indexManagerStorage ) 
   , _lvl (l)  
 {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
-  this->setIndex( _indexmanager.getIndex() );
+  this->setIndex( indexManager().getIndex() );
   return ;
 }
 
-inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () {
-  this->freeIndex( this->_indexmanager );
+inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo () 
+{
+  this->freeIndex( indexManager() );
   assert (ref ? (cerr << "**WARNING VertexGeo::refcount was " << ref << endl, 1) : 1) ;
   return ;
 }
