@@ -121,15 +121,11 @@ int main (int argc, char ** argv, const char ** envp)
    printSizes();
    grid.printMemUsage();
    
-   /*
    globalRefine(&grid, mxl);
-   levelwalk(&grid, mxl);
-   globalCoarsening(&grid, mxl);
-   */
-     while (1) 
-     {
-
-     }
+   //levelwalk(&grid, mxl);
+   //globalCoarsening(&grid, mxl);
+   grid.printMemUsage();
+   while (1); 
    }
 
    //MPI_Finalize();
