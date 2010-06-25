@@ -105,13 +105,12 @@ template < class A > class Hbnd3Top : public A {
    
   public:
     // constructor for serial macro boundary elements  
-    inline Hbnd3Top (int,myhface3_t *,
-                     int,ProjectVertex *,
+    inline Hbnd3Top (int,myhface3_t *,int,
                      const bnd_t b ,
                      IndexManagerType& );
     
     // constructor for children 
-    inline Hbnd3Top (int, myhface3_t *,int, ProjectVertex *, 
+    inline Hbnd3Top (int, myhface3_t *,int, 
                      innerbndseg_t * up, const bnd_t b, 
                      IndexManagerType& ,
                      typename Gitter::helement_STI * gh, int gFace ) ;
@@ -484,10 +483,9 @@ template < class A > inline Hface3Top < A > :: ~Hface3Top ()
 // serial macro bnd constructor 
 template < class A > inline Hbnd3Top < A > :: 
 Hbnd3Top (int l, myhface3_t * f, int i, 
-          ProjectVertex* ppv, 
           const bnd_t bt, 
           IndexManagerType & im ) :
-  A (f, i, ppv ), _bbb (0), _dwn (0), _up (0) , 
+  A (f, i ), _bbb (0), _dwn (0), _up (0) , 
   _indexManager(im) ,
   _lvl (l), _bt (bt) 
 {
@@ -500,11 +498,11 @@ Hbnd3Top (int l, myhface3_t * f, int i,
 
 template < class A > inline Hbnd3Top < A > :: 
 Hbnd3Top (int l, myhface3_t * f, 
-          int i, ProjectVertex *ppv, 
+          int i,  
           innerbndseg_t * up, bnd_t bt, 
           IndexManagerType & im, 
           Gitter::helement_STI * gh, int gFace ) : 
-  A (f, i, ppv ), _bbb (0), _dwn (0), _up (up) , 
+  A (f, i ), _bbb (0), _dwn (0), _up (up) , 
   _indexManager(im) ,
   _lvl (l), 
   _bt (bt) 

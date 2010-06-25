@@ -62,9 +62,8 @@ bool DuneParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
   {
     if (_hbnd3Map.find (key) == _hbnd3Map.end ()) 
     {
-      ProjectVertex* ppv = NULL;
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, ppv, bt) ;
+      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, bt) ;
       _hbnd3Map [key] = hb3 ;
       return true ;
     }
@@ -93,9 +92,8 @@ bool DuneParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],
   {
     if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
     {
-      ProjectVertex* ppv = NULL;
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, ppv, bt) ;
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, bt) ;
       _hbnd4Map [key] = hb4 ;
       return true ;
     }
@@ -648,7 +646,7 @@ void DuneParallelGridMover :: finalize ()
         MacroGhostInfoHexa* ghInfo = p->release();
 
         hbndseg4_GEO * hb4 = myBuilder ().
-              insert_hbnd4 (p->first(), p->second(), NULL, // no projection  
+              insert_hbnd4 (p->first(), p->second(), 
                   Gitter :: hbndseg_STI :: closure, ghInfo );
         myBuilder ()._hbndseg4List.push_back (hb4) ;
       }
@@ -667,7 +665,7 @@ void DuneParallelGridMover :: finalize ()
         // get ghost info from storage and release pointer 
         MacroGhostInfoTetra* ghInfo = p->release();
 
-        hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p->first(), p->second(), NULL, // no projection 
+        hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p->first(), p->second(),
                           Gitter :: hbndseg_STI :: closure , ghInfo );
         myBuilder ()._hbndseg3List.push_back (hb3) ;
       }

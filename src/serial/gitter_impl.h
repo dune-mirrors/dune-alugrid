@@ -58,7 +58,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 #endif
         {
           protected :
-           inline Hbnd3Default (myhface3_t *, int, ProjectVertex * ) ;
+           inline Hbnd3Default (myhface3_t *, int) ;
            virtual ~Hbnd3Default () {}
           public :
             typedef hbndseg3_GEO :: bnd_t bnd_t;
@@ -99,7 +99,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 #endif
         {
           protected :
-            inline Hbnd4Default (myhface4_t *, int, ProjectVertex * ) ;
+            inline Hbnd4Default (myhface4_t *, int) ;
             virtual ~Hbnd4Default () {}
           public :
             typedef hbndseg4_GEO :: bnd_t bnd_t;
@@ -305,11 +305,11 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t)       ;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t)       ;
         // version with point , returns insert_hbnd3 here 
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
-        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t) ;
-        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* ) ;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
+        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* ) ;
         virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
         virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
 
@@ -321,10 +321,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         MacroGitterBasis (Gitter * ) ;
         
         virtual ~MacroGitterBasis () {}
-
-      protected: 
-        // reference to our grid, for insert_tetra mainly 
-        Gitter * _myGrid; 
     } ;
 } ;
 
@@ -490,8 +486,8 @@ inline int GitterBasis :: Objects :: Dune_Hbnd4Default :: dimVx () const { retur
 //***************************************************************************
 
 inline GitterBasis :: Objects :: Hbnd3Default :: 
-Hbnd3Default (myhface3_t * f, int i, ProjectVertex *ppv ) 
- : Gitter :: Geometric :: hbndseg3_GEO (f, i, ppv)
+Hbnd3Default (myhface3_t * f, int i ) 
+ : Gitter :: Geometric :: hbndseg3_GEO (f, i)
 {
   return ;
 }
@@ -504,8 +500,8 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: ghostLevel () const {
   return level() ;
 }
 
-inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i, ProjectVertex *ppv) : 
-  Gitter :: Geometric :: hbndseg4_GEO (f, i,ppv)
+inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i) : 
+  Gitter :: Geometric :: hbndseg4_GEO (f, i)
 {
   return ;
 }

@@ -1508,11 +1508,11 @@ public :
       
       typedef hbndseg_STI :: bnd_t bnd_t;
     protected :
-      inline hbndseg3 (myhface3_t *,int,ProjectVertex *) ;
+      inline hbndseg3 (myhface3_t *,int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
-      inline bool hasVertexProjection() const { return (_projection != 0); }
+      inline bool hasVertexProjection() const { return (projection() != 0); }
     public :
       inline virtual ~hbndseg3 () ;
       inline myrule_t getrule () const ;
@@ -1535,9 +1535,11 @@ public :
       // unmark edges and vertices as leaf 
       virtual void detachleafs() ;
     protected :
-      ProjectVertex* _projection;
+      // no projection for ghost faces 
+      const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+      ProjectVertex* projection() { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
 
-    private :
+    private:
       myhface3_t * _face ;
       int _twist ;
     public:  
@@ -1554,11 +1556,11 @@ public :
 
       typedef hbndseg_STI :: bnd_t bnd_t;
     protected :
-      inline hbndseg4 (myhface4_t *,int,ProjectVertex *) ;
+      inline hbndseg4 (myhface4_t *,int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
-      inline bool hasVertexProjection() const { return (_projection != 0); }
+      inline bool hasVertexProjection() const { return (projection() != 0); }
     public :
       inline virtual ~hbndseg4 () ;
       inline myrule_t getrule () const ;
@@ -1576,8 +1578,11 @@ public :
       
       virtual void detachleafs() ;
     protected :
-      ProjectVertex* _projection;
-    private :
+      // no projection for ghost faces 
+      const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+      ProjectVertex* projection() { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+
+    private:
       myhface4_t * _face ;
       int _twist ;
 
@@ -1636,15 +1641,16 @@ public :
 
     protected :
       BuilderIF () : _modified (true) {}
+
       virtual ~BuilderIF () ;
 
       // return size of used memory in bytes 
       virtual size_t memUsage ();
-      
+
       // generates macro image from macro file 
       void generateRawHexaImage (istream &, ostream &) ;
       
-      virtual void macrogridBuilder (istream &, Gitter* ) ;
+      virtual void macrogridBuilder (istream &) ;
       virtual VertexGeo     * insert_vertex (double, double, double, int) = 0 ;
       virtual VertexGeo     * insert_ghostvx(double, double, double, int) = 0 ;
       virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0 ;
@@ -1657,16 +1663,16 @@ public :
       
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, hbndseg_STI :: bnd_t) = 0 ;
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
       // insert ghost element 
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, ProjectVertex*, hbndseg_STI:: bnd_t, 
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI:: bnd_t, 
                                             MacroGhostInfoTetra* ) = 0 ;
       
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, hbndseg_STI :: bnd_t) = 0 ;
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t) = 0 ;
 
       // method to insert internal boundary with ghost 
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, ProjectVertex*, hbndseg_STI :: bnd_t, 
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI :: bnd_t, 
                                             MacroGhostInfoHexa* ) = 0 ;
 
       IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
@@ -3390,8 +3396,9 @@ inline int Gitter :: Geometric :: Hexa :: originalEdgeTwist (int face, int edge)
 // #     #  #####   #    #  #####    ####   ######   ####   #####
 
 inline Gitter :: Geometric :: hbndseg3 :: 
-hbndseg3 (myhface3_t * a, int b, ProjectVertex *ppv) 
-  : _projection(ppv), _face (a), _twist (b)
+hbndseg3 (myhface3_t * a, int b) 
+  : _face( a ), 
+    _twist (b)
 {
   _face->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this),0), _twist) ;
   return ;
@@ -3430,9 +3437,9 @@ inline void Gitter :: Geometric :: hbndseg3 :: detachleafs ()
 
 inline int Gitter :: Geometric :: hbndseg3 :: postRefinement () 
 {
-  if (_projection) 
+  ProjectVertexPair pv( projection(), segmentIndex() );
+  if ( pv.first ) 
   {
-    ProjectVertexPair pv( _projection, segmentIndex() );
     myhface3(0)->projectVertex( pv );
   }
   return 0 ;
@@ -3479,8 +3486,9 @@ inline int Gitter :: Geometric :: hbndseg3 :: nChild () const {
 // #     #  #    #  #   ##  #    #  #    #  #       #    #      #
 // #     #  #####   #    #  #####    ####   ######   ####       #
 
-inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface4_t * a, int b, ProjectVertex *ppv) 
-  :  _projection(ppv), _face (a), _twist (b) 
+inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface4_t * a, int b) 
+  : _face( a ),
+    _twist (b) 
 {
   _face->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this),0), _twist) ;
   return ;
@@ -3521,9 +3529,9 @@ inline void Gitter :: Geometric :: hbndseg4 :: detachleafs ()
 
 inline int Gitter :: Geometric :: hbndseg4 :: postRefinement () 
 {
-  if (_projection) 
+  ProjectVertexPair pv( projection(), segmentIndex() );
+  if( pv.first )
   {
-    ProjectVertexPair pv( _projection, segmentIndex() );
     myhface4(0)->projectVertex( pv );
   }
   return 0 ;

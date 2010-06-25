@@ -437,15 +437,15 @@ GitterBasisImpl :: ~GitterBasisImpl () {
 }
 
 GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid, istream & in) 
-  : _myGrid(mygrid) 
 {
-  macrogridBuilder (in, _myGrid ) ;
+  this->indexManagerStorage().setGrid( mygrid );
+  macrogridBuilder (in) ;
   return ;
 }
 
 GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid) 
-  : _myGrid(mygrid) 
 {
+  this->indexManagerStorage().setGrid( mygrid );
   return ;
 }
 
@@ -541,31 +541,30 @@ insert_hexa (hface4_GEO *(&f)[6], int (&t)[6])
 
 GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
 insert_hbnd3 (hface3_GEO * f, int i, 
-              ProjectVertex* ppv, 
               Gitter :: hbndseg_STI :: bnd_t b) 
 {
   // the NULL pointer is the pointer to the father which does not exists 
-  return new Objects :: hbndseg3_IMPL ( 0, f, i, ppv, b, indexManager(IM_Bnd) ) ;
+  return new Objects :: hbndseg3_IMPL ( 0, f, i, b, indexManager(IM_Bnd) ) ;
 }
 
 GitterBasis :: hbndseg3_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd3 (hface3_GEO * f, int i, ProjectVertex* ppv, 
+insert_hbnd3 (hface3_GEO * f, int i,  
               Gitter :: hbndseg_STI :: bnd_t b, MacroGhostInfoTetra* ) 
 {
-  return insert_hbnd3(f,i,ppv,b); 
+  return insert_hbnd3(f,i,b); 
 }
 
 GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd4 (hface4_GEO * f, int i, ProjectVertex* ppv, Gitter :: hbndseg_STI :: bnd_t b) 
+insert_hbnd4 (hface4_GEO * f, int i, Gitter :: hbndseg_STI :: bnd_t b) 
 {
-  return new Objects :: hbndseg4_IMPL ( 0, f, i, ppv, b, indexManager(IM_Bnd) );
+  return new Objects :: hbndseg4_IMPL ( 0, f, i, b, indexManager(IM_Bnd) );
 }
 
 GitterBasis :: hbndseg4_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_hbnd4 (hface4_GEO * f, int i, ProjectVertex* ppv,
+insert_hbnd4 (hface4_GEO * f, int i, 
               Gitter :: hbndseg_STI :: bnd_t b, MacroGhostInfoHexa* ) 
 {
-  return insert_hbnd4 (f,i,ppv,b); 
+  return insert_hbnd4 (f,i,b); 
 }
 
 void GitterBasisImpl :: printMemUsage ()

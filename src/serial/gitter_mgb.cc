@@ -144,7 +144,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   {
     if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
       hface3_GEO * face  = InsertUniqueHface3 (v).first ;
-      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, _ppv, bt) ;
+      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt) ;
       _hbnd3Map [key] = hb3 ;
       return true ;
     }
@@ -168,7 +168,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
     if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
     {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, _ppv, bt) ;
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt) ;
       _hbnd4Map [key] = hb4 ;
       return true ;
     }
@@ -611,18 +611,15 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
 MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, const bool init) 
  : _initialized(false) 
  , _finalized(false) 
- , _myGrid( NULL )
- , _ppv( NULL )
  , _mgb (b) 
 {
   if(init) initialize();
 }
 
-MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, Gitter* myGrid) 
+// deprecated constructor, project vertex has been removed 
+MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, ProjectVertex* ) 
  : _initialized(false) 
  , _finalized(false) 
- , _myGrid( myGrid )  
- , _ppv( _myGrid->vertexProjection() )
  , _mgb (b) 
 {
   initialize();
@@ -630,7 +627,6 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, Gitter* myGrid)
 
 void MacroGridBuilder :: initialize () 
 {
-  myBuilder().indexManagerStorage().setGrid( _myGrid );
   {
     for ( BuilderIF :: vertexlist_t :: iterator i = myBuilder ()._vertexList.begin () ;
       i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
@@ -764,7 +760,7 @@ void MacroGridBuilder :: finalize ()
     const Hbnd4IntStorage & p = * ((*i).second);
     if (p.first()->ref == 1) {
       hbndseg4_GEO * hb4 = 
-        myBuilder ().insert_hbnd4 (p.first(), p.second(), NULL, 
+        myBuilder ().insert_hbnd4 (p.first(), p.second(), 
                                    Gitter :: hbndseg_STI :: closure) ;
       myBuilder ()._hbndseg4List.push_back (hb4) ;
     }
@@ -776,7 +772,7 @@ void MacroGridBuilder :: finalize ()
     const Hbnd3IntStorage & p = * ((*i).second);
     if (p.first()->ref == 1) {
       hbndseg3_GEO * hb3 = 
-        myBuilder ().insert_hbnd3 (p.first(),p.second(), NULL, Gitter :: hbndseg_STI :: closure) ;    
+        myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter :: hbndseg_STI :: closure) ;    
       myBuilder ()._hbndseg3List.push_back (hb3) ;
     }
     delete (*i).second;
@@ -932,7 +928,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
   return ;
 }
 
-void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in, Gitter* myGrid) 
+void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) 
 {
   strstream_t raw ;
   
@@ -940,7 +936,7 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in, Gitter*
   raw << scientific ;
   raw.precision( 16 );
 
-  MacroGridBuilder mm (*this, myGrid) ;
+  MacroGridBuilder mm (*this) ;
   int c = in.get () ;
   assert (!in.eof ()) ;
   in.putback (c) ;

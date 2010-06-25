@@ -280,8 +280,8 @@ template < class A >  void Hbnd3Top < A > :: split_e01 ()
 {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->_projection, this , _bt, _indexManager, 0 , gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->_projection, this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this , _bt, _indexManager, 0 , gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -291,8 +291,8 @@ template < class A >  void Hbnd3Top < A > :: split_e01 ()
 template < class A >  void Hbnd3Top < A > :: split_e12 () {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->_projection, this , _bt, _indexManager, 0 , gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->_projection, this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this , _bt, _indexManager, 0 , gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -303,8 +303,8 @@ template < class A >  void Hbnd3Top < A > :: split_e20 ()
 {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->_projection, this , _bt, _indexManager, 0, gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->_projection, this , _bt, _indexManager, 0, gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this , _bt, _indexManager, 0, gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this , _bt, _indexManager, 0, gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -320,10 +320,10 @@ template < class A >  void Hbnd3Top < A > :: split_iso4 ()
   // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
   this->splitGhost( ghostInfo );
 
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this->_projection, this , _bt, _indexManager, ghostInfo.child(0), ghostInfo.face(0)) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this->_projection, this , _bt, _indexManager, ghostInfo.child(1), ghostInfo.face(1)) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this->_projection, this , _bt, _indexManager, ghostInfo.child(2), ghostInfo.face(2)) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this->_projection, this , _bt, _indexManager, ghostInfo.child(3), ghostInfo.face(3)) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this , _bt, _indexManager, ghostInfo.child(0), ghostInfo.face(0)) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this , _bt, _indexManager, ghostInfo.child(1), ghostInfo.face(1)) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this , _bt, _indexManager, ghostInfo.child(2), ghostInfo.face(2)) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this , _bt, _indexManager, ghostInfo.child(3), ghostInfo.face(3)) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
