@@ -1,5 +1,4 @@
 // (c) Robert Kloefkorn 2010 
-
 #include "gitter_impl.h"
 
 /////////////////////////////////////////
@@ -637,6 +636,45 @@ void GitterBasisImpl :: printMemUsage ()
       cout << "Macro vertices : size = " << size/1024/1024 << " MB \n";
       totalSize += size;
     }
+
+    int allSize = 0;
+    {
+      LeafIterator< helement_STI > it( *this );
+      const int size = it->size() * (simplex ? sizeof( tetra_IMPL ) : sizeof( hexa_IMPL ));
+      cout << "Elements : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      LeafIterator< hbndseg_STI > it( *this );
+      const int size = it->size() * (simplex ? sizeof( hbndseg3_IMPL ) : sizeof( hbndseg4_IMPL ));
+      cout << "Boundaries : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      LeafIterator< hface_STI > it( *this );
+      const int size = it->size() * (simplex ? sizeof( hface3_IMPL ) : sizeof( hface4_IMPL ));
+      cout << "Faces : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      LeafIterator< hedge_STI > it( *this );
+      const int size = it->size() * sizeof( hedge1_IMPL );
+      cout << "Edges : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      LeafIterator< vertex_STI > it( *this );
+      const int size = it->size() * sizeof( VertexEmpty );
+      cout << "Vertices : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    cout << "All leaf size : " << allSize << " MB" << endl;
+    cout << "Estimated all size : " << (9*long(allSize) / 8) << " MB" << endl;
 
     size_t build = container().memUsage();
     cout << "BuilderIF size = " << build/1024/1024 << " MB \n";
