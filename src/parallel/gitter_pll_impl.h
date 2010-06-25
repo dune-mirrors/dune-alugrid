@@ -531,8 +531,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     public :
       typedef VertexPllBaseX mypllx_t ;
     public :
-      VertexPllImplMacro (double,double,double,int,
-                          linkagePatternMap_t &, IndexManagerType &im) ;
+      VertexPllImplMacro (double,double,double,int,IndexManagerStorageType&, linkagePatternMap_t &) ;
      ~VertexPllImplMacro () ;
       virtual VertexPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const VertexPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -563,7 +562,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
   {
     public :
       typedef EdgePllBaseXMacro mypllx_t ;
-      inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *, IndexManagerType & im) ;
+      inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *) ;
      ~Hedge1EmptyPllMacro () ;
       virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -594,7 +593,7 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
   {
     public :
       typedef FacePllBaseXMacro < hface3_GEO > mypllx_t ;
-      Hface3EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im) ;
+      Hface3EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
      ~Hface3EmptyPllMacro () ;
       virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -625,7 +624,7 @@ public :
     public :
       typedef FacePllBaseXMacro < hface4_GEO > mypllx_t ;
       Hface4EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,
-          myhedge1_t *,int,myhedge1_t *,int, IndexManagerType & im) ;
+          myhedge1_t *,int,myhedge1_t *,int) ;
      ~Hface4EmptyPllMacro () ;
       virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -643,7 +642,7 @@ public :
       typedef hface3_IMPL innerface_t ;
     public :
       typedef TetraPllXBase mypllx_t ;
-      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int, Gitter *) ;
+      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
       ~TetraEmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -659,7 +658,7 @@ public :
     public :
       typedef TetraPllXBaseMacro mypllx_t ;
       TetraEmptyPllMacro (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-            myhface3_t *,int, IndexManagerType &, Gitter * ) ;
+                          myhface3_t *,int) ;
      ~TetraEmptyPllMacro () ;
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -751,8 +750,7 @@ public :
       typedef HexaPllBaseX mypllx_t ;
       inline HexaEmptyPll (myhface4_t *,int,myhface4_t *,int,
                            myhface4_t *,int,myhface4_t *,int,
-                           myhface4_t *,int,myhface4_t *,int,
-                           Gitter* gitter) ;
+                           myhface4_t *,int,myhface4_t *,int);
             inline ~HexaEmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -767,7 +765,7 @@ public :
     public :
       typedef HexaPllBaseXMacro mypllx_t ;
       HexaEmptyPllMacro (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-              myhface4_t *,int, IndexManagerType & im, Gitter * gitter ) ;
+              myhface4_t *,int) ;
      ~HexaEmptyPllMacro () ;
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -1218,9 +1216,8 @@ inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll ::
 TetraEmptyPll (myhface3_t * f0, int t0, 
                myhface3_t * f1, int t1, 
                myhface3_t * f2, int t2, 
-               myhface3_t * f3, int t3, 
-               Gitter * mygrid)
-  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3,mygrid), _pllx (*this) {
+               myhface3_t * f3, int t3 ) 
+  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3), _pllx (*this) {
   return ;
 }
 
@@ -1247,9 +1244,8 @@ Periodic4EmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1)
 inline GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: 
 HexaEmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
               myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
-              myhface4_t * f4, int t4, myhface4_t * f5, int t5,
-              Gitter* gitter) :
-  GitterBasis::Objects::HexaEmpty(f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5,gitter),
+              myhface4_t * f4, int t4, myhface4_t * f5, int t5) :
+  GitterBasis::Objects::HexaEmpty(f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5),
   _pllx (*this) {
   return ;
 }

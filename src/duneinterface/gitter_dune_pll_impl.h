@@ -120,6 +120,11 @@ public:
     return containerPll().indexManager(codim);
   }
 
+  IndexManagerStorageType& indexManagerStorage() 
+  {
+    return containerPll().indexManagerStorage();
+  }
+
   // return indexmanger 
   size_t numMacroBndSegments () const 
   {
