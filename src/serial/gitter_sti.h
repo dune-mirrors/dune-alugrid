@@ -836,70 +836,75 @@ public :
     // mit dem Twist der Fl"ache mitdrehen, damit der "Ubergang der
     // Verfeinerung stimmt.
       
-    class Hedge1Rule {
-    public :
-      typedef enum { nosplit = false , iso2 = true } rule_t ;
-    private :
-      bool _r ;
-    public :
-      inline Hedge1Rule (int) ;
-      inline Hedge1Rule (rule_t = nosplit) ;
-      inline bool operator == (rule_t) const ;
-      inline operator int () const ;
+    struct Hedge1Rule
+    {
+      enum rule_enum { nosplit=1, iso2 };
+      typedef signed char rule_t;
+
+      explicit Hedge1Rule ( const rule_t & );
+      Hedge1Rule ( const rule_enum & = nosplit );
+      operator rule_t () const;
       inline bool isValid () const ;
       inline Hedge1Rule rotate (int) const ;
+      
+    private:
+      rule_t _r ;
     } ;
       
-    class Hface3Rule {
-    public :
-      typedef enum { nosplit=1, e01, e12, e20, iso4 , undefined = -2 } rule_t ;
-    public :
-      inline Hface3Rule (int) ;
-      inline Hface3Rule (rule_t = nosplit) ;
-      inline operator int () const ;
-      inline bool operator == (rule_t) const ;
+    struct Hface3Rule
+    {
+      enum rule_enum { nosplit=1, e01, e12, e20, iso4, undefined=-2 };
+      typedef signed char rule_t;
+
+      explicit Hface3Rule ( const rule_t & );
+      Hface3Rule ( const rule_enum & = nosplit );
+      operator rule_t () const;
       inline bool isValid () const ;
       inline Hface3Rule rotate (int) const ;
+
     private :
       rule_t _r ;
     } ;
       
-    class Hface4Rule {
-    public :
-      typedef enum { nosplit=1, iso4, ni02, ni13 , undefined = -2 } rule_t ;
-    public :
-      inline Hface4Rule (int) ;
-      inline Hface4Rule (rule_t = nosplit) ;
-      inline operator int () const ;
-      inline bool operator == (rule_t) const ;
+    struct Hface4Rule
+    {
+      enum rule_enum { nosplit=1, iso4, ni02, ni13, undefined=-2 };
+      typedef signed char rule_t;
+
+      explicit Hface4Rule ( const rule_t & );
+      Hface4Rule ( const rule_enum & = nosplit) ;
+      operator rule_t () const;
       inline bool isValid () const ;
       inline Hface4Rule rotate (int) const ;
+
     private :
       rule_t _r ;
     } ;
       
-    class TetraRule {
-    public :
-      typedef enum { crs = -1, nosplit = 1, e01, e12, e20, e23, e30, e31, iso8 } rule_t ;
-    public :
-      inline TetraRule (int) ;
-      inline TetraRule (rule_t = nosplit) ;
-      inline operator int () const ;
-      inline bool operator == (rule_t) const ;
+    struct TetraRule
+    {
+      enum rule_enum { crs=-1, nosplit=1, e01, e12, e20, e23, e30, e31, iso8 };
+      typedef signed char rule_t;
+
+      explicit TetraRule ( const rule_t & );
+      TetraRule ( const rule_enum & = nosplit) ;
+      operator rule_t () const;
       inline bool isValid () const ;
+
     private :
       rule_t _r ;
     } ;
       
-    class HexaRule {
-    public :
-      typedef enum { crs = -1, nosplit = 1, iso8 } rule_t ;
-    public :
-      inline HexaRule (int) ;
-      inline HexaRule (rule_t = nosplit) ;
-      inline operator int () const ;
-      inline bool operator == (rule_t) const ;
+    struct HexaRule
+    {
+      enum rule_enum { crs = -1, nosplit = 1, iso8 };
+      typedef signed char rule_t;
+
+      explicit HexaRule ( const rule_t & );
+      HexaRule ( const rule_enum & = nosplit);
+      operator rule_t () const;
       inline bool isValid () const ;
+
     private :
       rule_t _r ;
     } ;
@@ -2325,22 +2330,19 @@ inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is, vec
 // #     #  ######  #####    ####   ######  #####  #     #   ####   ######  ######
 
 
-inline Gitter :: Geometric :: Hedge1Rule :: Hedge1Rule (int i) : _r ( (rule_t) i ) 
+inline Gitter :: Geometric :: Hedge1Rule :: Hedge1Rule ( const rule_t &r )
+: _r ( r )
 {
-  assert( i == 0 || i == 1 );
-  return ;
+  assert( r == 0 || r == 1 );
 }
 
-inline Gitter :: Geometric :: Hedge1Rule :: Hedge1Rule (rule_t r) : _r (r) {
-  return ;
-}
+inline Gitter :: Geometric :: Hedge1Rule :: Hedge1Rule ( const rule_enum &r )
+: _r( r )
+{}
 
-inline bool Gitter :: Geometric :: Hedge1Rule :: operator == (rule_t r) const {
-  return _r == r ;
-}
-
-inline Gitter :: Geometric :: Hedge1Rule :: operator int () const {
-  return (int) _r ;
+inline Gitter :: Geometric :: Hedge1Rule :: operator rule_t () const
+{
+  return int( _r );
 }
 
 inline bool Gitter :: Geometric :: Hedge1Rule :: isValid () const {
@@ -2362,6 +2364,23 @@ inline Gitter :: Geometric :: Hedge1Rule Gitter :: Geometric :: Hedge1Rule :: ro
     return Hedge1Rule (nosplit) ;
   }
 }
+
+
+#if 0
+inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hedge1Rule &rule )
+{
+  switch( rule )
+  {
+    case Gitter :: Geometric :: Hedge1Rule :: nosplit:
+      return out << "nosplit";
+    case Gitter :: Geometric :: Hedge1Rule :: iso2:
+      return out << "iso2";
+    default:
+      return out << "!!! unknown !!!";
+  }
+}
+#endif
+
 
 // #     #                                    #
 // #     #  ######  #####    ####   ######   ##
@@ -2414,20 +2433,17 @@ inline const Gitter :: Geometric :: hedge1 :: myvertex_t * Gitter :: Geometric :
 // #     #  #       #    #  #    #  #      #     # #    #   #    #  #       #
 // #     #  #       #    #   ####   ######  #####  #     #   ####   ######  ######
 
-inline Gitter :: Geometric :: Hface3Rule :: Hface3Rule (int x) : _r ((rule_t)x) {
-  return ;
-}
+inline Gitter :: Geometric :: Hface3Rule :: Hface3Rule ( const rule_t &r )
+: _r( r )
+{}
 
-inline Gitter :: Geometric :: Hface3Rule :: Hface3Rule (rule_t r) : _r (r) {
-  return ;
-}
+inline Gitter :: Geometric :: Hface3Rule :: Hface3Rule ( const rule_enum &r )
+: _r( r )
+{}
 
-inline Gitter :: Geometric :: Hface3Rule :: operator int () const {
-  return (int) _r ;
-}
-
-inline bool Gitter :: Geometric :: Hface3Rule :: operator == (rule_t r) const {
-  return r == _r ;
+inline Gitter :: Geometric :: Hface3Rule :: operator rule_t () const
+{
+  return int( _r );
 }
 
 inline bool Gitter :: Geometric :: Hface3Rule :: isValid () const {
@@ -2460,6 +2476,29 @@ inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: ro
   }
 }
 
+#if 0
+inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface3Rule &rule )
+{
+  switch( rule )
+  {
+    case Gitter :: Geometric :: Hface3Rule :: nosplit:
+      return out << "nosplit";
+    case Gitter :: Geometric :: Hface3Rule :: e01:
+      return out << "e01";
+    case Gitter :: Geometric :: Hface3Rule :: e12:
+      return out << "e12";
+    case Gitter :: Geometric :: Hface3Rule :: e20:
+      return out << "e20";
+    case Gitter :: Geometric :: Hface3Rule :: iso4:
+      return out << "iso4";
+    case Gitter :: Geometric :: Hface3Rule :: undefined:
+      return out << "undefined";
+    default:
+      return out << "!!! unknown !!!";
+  }
+}
+#endif
+
 // #     #                                 #       ######
 // #     #  ######    ##     ####   ###### #    #  #     #  #    #  #       ######
 // #     #  #        #  #   #    #  #      #    #  #     #  #    #  #       #
@@ -2468,20 +2507,17 @@ inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: ro
 // #     #  #       #    #  #    #  #           #  #    #   #    #  #       #
 // #     #  #       #    #   ####   ######      #  #     #   ####   ######  ######
 
-inline Gitter :: Geometric :: Hface4Rule :: Hface4Rule (int x) : _r ((rule_t)x) {
-  return ;
-}
+inline Gitter :: Geometric :: Hface4Rule :: Hface4Rule ( const rule_t &r )
+: _r( r )
+{}
 
-inline Gitter :: Geometric :: Hface4Rule :: Hface4Rule (rule_t r) : _r (r) {
-  return ;
-}
+inline Gitter :: Geometric :: Hface4Rule :: Hface4Rule ( const rule_enum &r )
+: _r( r )
+{}
 
-inline Gitter :: Geometric :: Hface4Rule :: operator int () const {
-  return (int) _r ;
-}
-
-inline bool Gitter :: Geometric :: Hface4Rule :: operator == (rule_t r) const {
-  return r == _r ;
+inline Gitter :: Geometric :: Hface4Rule :: operator rule_t () const
+{
+  return int( _r );
 }
 
 inline bool Gitter :: Geometric :: Hface4Rule :: isValid () const {
@@ -2500,6 +2536,27 @@ inline Gitter :: Geometric :: Hface4Rule Gitter :: Geometric :: Hface4Rule :: ro
     return Hface4Rule (nosplit) ;
   }
 }
+
+#if 0
+inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface4Rule &rule )
+{
+  switch( rule )
+  {
+    case Gitter :: Geometric :: Hface4Rule :: nosplit:
+      return out << "nosplit";
+    case Gitter :: Geometric :: Hface4Rule :: iso4:
+      return out << "iso4";
+    case Gitter :: Geometric :: Hface4Rule :: ni02:
+      return out << "ni02";
+    case Gitter :: Geometric :: Hface4Rule :: ni13:
+      return out << "ni13";
+    case Gitter :: Geometric :: Hface4Rule :: undefined:
+      return out << "undefined";
+    default:
+      return out << "!!! unknown !!!";
+  }
+}
+#endif
  
 //                                         #####
 // #    #  ######    ##     ####   ###### #     #
@@ -2889,26 +2946,52 @@ Gitter::Geometric::hface4::isInteriorLeaf() const
 //    #     #          #    #   #   #    # #    #   #    #  #       #
 //    #     ######     #    #    #  #    # #     #   ####   ######  ######
 
-inline Gitter :: Geometric :: TetraRule :: TetraRule (int x) : _r ((rule_t)x) {
-  return ;
-}
+inline Gitter :: Geometric :: TetraRule :: TetraRule ( const rule_t &r )
+: _r( r )
+{}
 
-inline Gitter :: Geometric :: TetraRule :: TetraRule (rule_t r) : _r (r) {
-  return ;
-}
+inline Gitter :: Geometric :: TetraRule :: TetraRule ( const rule_enum &r )
+: _r( r )
+{}
 
-inline Gitter :: Geometric :: TetraRule :: operator int () const {
-  return (int) _r ;
-}
-
-inline bool Gitter :: Geometric :: TetraRule :: operator == (rule_t r) const {
-  return r == _r ;
+inline Gitter :: Geometric :: TetraRule :: operator rule_t () const
+{
+  return int( _r );
 }
 
 inline bool Gitter :: Geometric :: TetraRule :: isValid () const {
   return _r == crs || _r == nosplit || _r == iso8 || _r == e01 
     || _r == e12 || _r == e20 || _r == e23 || _r == e30 || _r == e31;
 }
+
+#if 0
+inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: TetraRule &rule )
+{
+  switch( rule )
+  {
+    case Gitter :: Geometric :: TetraRule :: crs:
+      return out << "coarsen";
+    case Gitter :: Geometric :: TetraRule :: nosplit:
+      return out << "nosplit";
+    case Gitter :: Geometric :: TetraRule :: e01:
+      return out << "e01";
+    case Gitter :: Geometric :: TetraRule :: e12:
+      return out << "e12";
+    case Gitter :: Geometric :: TetraRule :: e20:
+      return out << "e20";
+    case Gitter :: Geometric :: TetraRule :: e23:
+      return out << "e23";
+    case Gitter :: Geometric :: TetraRule :: e30:
+      return out << "e30";
+    case Gitter :: Geometric :: TetraRule :: e31:
+      return out << "e31";
+    case Gitter :: Geometric :: TetraRule :: iso8:
+      return out << "iso8";
+    default:
+      return out << "!!! unknown !!!";
+  }
+}
+#endif
 
 
 // #######
@@ -3224,26 +3307,39 @@ inline int Gitter :: Geometric :: Periodic4 :: preCoarsening () {
 // #     #  #        #  #   #    # #    #   #    #  #       #
 // #     #  ######  #    #  #    # #     #   ####   ######  ######
 
+inline Gitter :: Geometric :: HexaRule :: HexaRule ( const rule_t &r )
+: _r( r )
+{}
 
-inline Gitter :: Geometric :: HexaRule :: HexaRule (int x) : _r ((rule_t)x) {
-  return ;
-}
+inline Gitter :: Geometric :: HexaRule :: HexaRule ( const rule_enum &r )
+: _r( r )
+{}
 
-inline Gitter :: Geometric :: HexaRule :: HexaRule (rule_t r) : _r (r) {
-  return ;
-}
-
-inline Gitter :: Geometric :: HexaRule :: operator int () const {
-  return (int) _r ;
-}
-
-inline bool Gitter :: Geometric :: HexaRule :: operator == (rule_t r) const {
-  return r == _r ;
+inline Gitter :: Geometric :: HexaRule :: operator rule_t () const
+{
+  return int( _r );
 }
 
 inline bool Gitter :: Geometric :: HexaRule :: isValid () const {
   return _r == crs || _r == nosplit || _r == iso8 ;
 }
+
+#if 0
+inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: HexaRule &rule )
+{
+  switch( rule )
+  {
+    case Gitter :: Geometric :: HexaRule :: crs:
+      return out << "coarsen";
+    case Gitter :: Geometric :: HexaRule :: nosplit:
+      return out << "nosplit";
+    case Gitter :: Geometric :: HexaRule :: iso8:
+      return out << "iso8";
+    default:
+      return out << "!!! unknown !!!";
+  }
+}
+#endif
 
 // #     #
 // #     #  ######  #    #    ##
