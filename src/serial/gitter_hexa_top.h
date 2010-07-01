@@ -18,8 +18,8 @@ template < class A > class Hedge1Top : public A
     innervertex_t * _cv ;
 
     unsigned char _lvl ;       
-    const signed char _nChild;  
     myrule_t _rule ;  
+    const bool _firstChild;  
     
   public :
     // need for refinement 
@@ -366,8 +366,8 @@ template < class A > inline Hedge1Top < A > ::
   : A (a,b), 
   _dwn (0), _bbb (0), _cv (0), 
   _lvl (l), 
-  _nChild(0),
-  _rule (myrule_t :: nosplit)
+  _rule (myrule_t :: nosplit),
+  _firstChild( true )
 {
   this->setIndex( indexManager().getIndex() );  
   return ;
@@ -377,8 +377,8 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
   : A (a,b), 
   _dwn (0), _bbb (0), _cv (0), 
   _lvl (l), 
-  _nChild(nChild),
-  _rule (myrule_t :: nosplit)
+  _rule (myrule_t :: nosplit),
+  _firstChild( nChild == 0 ? true : false )
 {
   this->setIndex( indexManager().getIndex() );  
   return ;
@@ -398,8 +398,8 @@ template < class A > inline int Hedge1Top < A > :: level () const {
 }
 
 template < class A > inline int Hedge1Top < A > :: nChild () const {
-  assert( _nChild >= 0 && _nChild < 2 );
-  return _nChild ;
+  //assert( _nChild >= 0 && _nChild < 2 );
+  return _firstChild ? 0 : 1; 
 }
 
 template < class A > Hedge1Top < A > * Hedge1Top < A > :: down () {

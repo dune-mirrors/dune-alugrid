@@ -838,9 +838,9 @@ public :
       
     class Hedge1Rule {
     public :
-      typedef enum { invalid=0, nosplit=1, iso2 } rule_t ;
+      typedef enum { nosplit = false , iso2 = true } rule_t ;
     private :
-      rule_t _r ;
+      bool _r ;
     public :
       inline Hedge1Rule (int) ;
       inline Hedge1Rule (rule_t = nosplit) ;
@@ -1090,7 +1090,7 @@ public :
         inline pair < myconnect_t *, int > rear () ;
         inline pair < const myconnect_t *, int > rear () const ;
         friend class hface3 ;
-      } nb ;
+      } nb ; // 24 bytes 
     protected :
       typedef VertexGeo   myvertex_t ;
       typedef hedge1_GEO  myhedge1_t ;
@@ -1131,10 +1131,10 @@ public :
       virtual bool isInteriorLeaf() const ;
 
     protected :
-      myhedge1_t * e [polygonlength] ;
-      signed char s [polygonlength] ;
+      myhedge1_t * e [polygonlength] ; // 24 bytes 
+      signed char s [polygonlength] ;  // 12 bytes 
 
-      myrule_t _parRule;
+      myrule_t _parRule;  // 4 bytes 
     public:  
       Refcount ref ;
     } hface3_GEO ;
@@ -2325,7 +2325,9 @@ inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is, vec
 // #     #  ######  #####    ####   ######  #####  #     #   ####   ######  ######
 
 
-inline Gitter :: Geometric :: Hedge1Rule :: Hedge1Rule (int i) : _r ( (rule_t) i ) {
+inline Gitter :: Geometric :: Hedge1Rule :: Hedge1Rule (int i) : _r ( (rule_t) i ) 
+{
+  assert( i == 0 || i == 1 );
   return ;
 }
 
@@ -2345,9 +2347,11 @@ inline bool Gitter :: Geometric :: Hedge1Rule :: isValid () const {
   return _r == nosplit || _r == iso2 ;
 }
 
-inline Gitter :: Geometric :: Hedge1Rule Gitter :: Geometric :: Hedge1Rule :: rotate (int i) const {
+inline Gitter :: Geometric :: Hedge1Rule Gitter :: Geometric :: Hedge1Rule :: rotate (int i) const 
+{
   assert (i == 0 || i == 1) ;
-  switch (_r) {
+  switch (_r) 
+  {
   case nosplit :
     return Hedge1Rule (nosplit) ;
   case iso2 :

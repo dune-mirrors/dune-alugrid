@@ -588,12 +588,16 @@ void GitterBasisImpl :: printMemUsage ()
   cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
   cout << "Hface4 = " << sizeof(hface4_IMPL) << endl;
   cout << "Hface3 = " << sizeof(hface3_IMPL) << endl;
-  cout << "Hface1 = " << sizeof(hedge1_IMPL) << endl;
+  cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
+  cout << "Hface3_GEO = " << sizeof( Gitter :: Geometric :: hface3_GEO ) << endl;
+  cout << "HEdge1_IMPL = " << sizeof(hedge1_IMPL) << endl;
+  cout << "HEdge1_GEO = " << sizeof(Gitter :: Geometric ::hedge1_GEO) << endl;
   cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
   cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
   cout << "Vertex = " << sizeof(VertexEmpty) << endl;
   cout << "Hbnd3  = " << sizeof(hbndseg3_IMPL) << endl;
   cout << "Hbnd4  = " << sizeof(hbndseg4_IMPL) << endl;
+  cout << "bool   = " << sizeof(bool) << endl;
 
   {
     int totalSize = 0; 
