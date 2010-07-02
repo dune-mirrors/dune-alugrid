@@ -203,7 +203,7 @@ template < class A > void Hface4Top < A > :: refineImmediate (myrule_t r) {
     // * higher order, this is a hack
     for (innerface_t* f = down(); f; f = f->next()) 
     { 
-      f->_parRule = getrule();
+      f->nb._parRule = getrule();
     }
 
     this->postRefinement () ;

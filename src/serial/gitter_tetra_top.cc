@@ -125,7 +125,7 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
       myrule_t myRule = getrule();
       for (innerface_t * f = down () ; f ; f = f->next ()) 
       {
-        f->_parRule = myRule;
+        f->nb._parRule = myRule;
       }
     }
     this->postRefinement () ;

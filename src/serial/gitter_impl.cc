@@ -582,7 +582,8 @@ void GitterBasisImpl :: printMemUsage ()
   typedef Gitter :: Geometric :: VertexGeo VertexGeo; 
   cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
   cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n";
-  cout << "HedgeRule = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
+  cout << "HedgeRule  = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
+  cout << "Hface4Rule = " << sizeof(Gitter :: Geometric :: Hface4Rule) <<"\n";
   
   cout << "Tetrasize = " << sizeof(tetra_IMPL) << endl;
   cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
@@ -598,6 +599,8 @@ void GitterBasisImpl :: printMemUsage ()
   cout << "Hbnd3  = " << sizeof(hbndseg3_IMPL) << endl;
   cout << "Hbnd4  = " << sizeof(hbndseg4_IMPL) << endl;
   cout << "bool   = " << sizeof(bool) << endl;
+  cout << "char   = " << sizeof(unsigned char) << endl;
+  cout << "signed char   = " << sizeof(signed char) << endl;
 
   {
     int totalSize = 0; 

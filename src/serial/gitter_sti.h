@@ -121,7 +121,7 @@ class Refcount {
 #endif 
   // end NDEBUG
 
-  int _c ;
+  signed char _c ;
 public :
   inline Refcount () ;
   inline ~Refcount () ;
@@ -1068,7 +1068,7 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
     private :
-      myvertex_t * v0, * v1 ;
+      myvertex_t * v0, * v1 ; // 16 bytes + 24 from above = 40 
     public:  
       Refcount ref ;
     } hedge1_GEO ;
@@ -1076,13 +1076,17 @@ public :
     typedef class hface3 : public hface_STI, public MyAlloc {
     public :
       typedef hasFace3  myconnect_t ;
+      typedef Hface3Rule myrule_t ;
       enum { polygonlength = 3 } ;
       class face3Neighbour {
         myconnect_t *_faceFront;
         myconnect_t *_faceRear;
         signed char _numFront;
         signed char _numRear;
+        signed char s [polygonlength] ;  // 12 bytes 
 
+      public:  
+        myrule_t _parRule;  // 1 bytes 
       public :
         static const pair < myconnect_t *, int > null ;
         inline face3Neighbour () ;
@@ -1099,8 +1103,6 @@ public :
     protected :
       typedef VertexGeo   myvertex_t ;
       typedef hedge1_GEO  myhedge1_t ;
-    public :
-      typedef Hface3Rule myrule_t ;
     protected :
       inline hface3 (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
       inline int postRefinement () ;
@@ -1137,9 +1139,6 @@ public :
 
     protected :
       myhedge1_t * e [polygonlength] ; // 24 bytes 
-      signed char s [polygonlength] ;  // 12 bytes 
-
-      myrule_t _parRule;  // 4 bytes 
     public:  
       Refcount ref ;
     } hface3_GEO ;
@@ -1147,12 +1146,16 @@ public :
     typedef class hface4 : public hface_STI, public MyAlloc {
     public :
       typedef hasFace4  myconnect_t ;
+      typedef Hface4Rule myrule_t ;
       enum { polygonlength = 4 } ;
       class face4Neighbour {
         myconnect_t *_faceFront;
         myconnect_t *_faceRear;
         signed char _numFront;
         signed char _numRear;
+        signed char s [polygonlength] ;
+      public:  
+        myrule_t _parRule;
 
       public :
         static const pair < myconnect_t *, int > null ;
@@ -1171,7 +1174,6 @@ public :
       typedef VertexGeo  myvertex_t ;
       typedef hedge1_GEO  myhedge1_t ;
     public :
-      typedef Hface4Rule myrule_t ;
     protected :
       inline hface4 (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
       inline int postRefinement () ;
@@ -1209,10 +1211,10 @@ public :
       myrule_t parentRule() const;
     private :
       myhedge1_t * e [polygonlength] ;
-      signed char s [polygonlength] ;
+      //signed char s [polygonlength] ;
 
     protected:
-      myrule_t _parRule;
+      //myrule_t _parRule;
 
     } hface4_GEO ;
   
@@ -2650,13 +2652,14 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () const
 }
 
 inline Gitter :: Geometric :: hface3 :: 
-hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
-  _parRule (Hface3Rule::undefined)
+hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
+  //: _parRule (Hface3Rule::undefined)
 {
+  nb._parRule = (Hface3Rule::undefined);
   assert(e0 && e1 && e2) ;
-  (e [0] = e0)->ref ++ ; s [0] = s0 ;
-  (e [1] = e1)->ref ++ ; s [1] = s1 ;
-  (e [2] = e2)->ref ++ ; s [2] = s2 ;
+  (e [0] = e0)->ref ++ ; nb.s [0] = s0 ;
+  (e [1] = e1)->ref ++ ; nb.s [1] = s1 ;
+  (e [2] = e2)->ref ++ ; nb.s [2] = s2 ;
   return ;
 }
 
@@ -2698,7 +2701,7 @@ inline int Gitter :: Geometric :: hface3 :: preCoarsening () {
 
 inline int Gitter :: Geometric :: hface3 :: twist (int i) const {
   assert (i < 3) ;
-  return s [i] ;
+  return nb.s [i] ;
 }
 
 inline Gitter :: Geometric :: hface3 :: myhedge1_t * Gitter :: Geometric :: hface3 :: myhedge1 (int i) {
@@ -2713,17 +2716,17 @@ inline const Gitter :: Geometric :: hface3 :: myhedge1_t * Gitter :: Geometric :
 
 inline Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :: hface3 :: myvertex (int i) {
   assert(0<=i && i < 3) ;
-  return myhedge1 (i)->myvertex (s[i]) ;
+  return myhedge1 (i)->myvertex (nb.s[i]) ;
 }
 
 inline const Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :: hface3 :: myvertex (int i) const {
   assert(0<=i && i < 3) ;
-  return myhedge1 (i)->myvertex (s[i]) ;
+  return myhedge1 (i)->myvertex (nb.s[i]) ;
 }
 
 inline Gitter::Geometric::hface3::myrule_t 
 Gitter::Geometric::hface3::parentRule() const {
-  return (myrule_t) _parRule;
+  return (myrule_t) nb._parRule;
 }
 
 inline bool Gitter :: Geometric :: hface3 :: 
@@ -2837,14 +2840,15 @@ Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () const
 }
 
 inline Gitter :: Geometric :: hface4 :: 
-hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
-  _parRule(Hface4Rule::undefined)
+hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) 
+   //:  _parRule(Hface4Rule::undefined)
 {
   assert(e0 && e1 && e2 && e3) ;
-  (e [0] = e0)->ref ++ ; s [0] = s0 ;
-  (e [1] = e1)->ref ++ ; s [1] = s1 ;
-  (e [2] = e2)->ref ++ ; s [2] = s2 ;
-  (e [3] = e3)->ref ++ ; s [3] = s3 ;
+  (e [0] = e0)->ref ++ ; nb.s [0] = s0 ;
+  (e [1] = e1)->ref ++ ; nb.s [1] = s1 ;
+  (e [2] = e2)->ref ++ ; nb.s [2] = s2 ;
+  (e [3] = e3)->ref ++ ; nb.s [3] = s3 ;
+  nb._parRule = (Hface4Rule::undefined);
   return ;
 }
 
@@ -2887,7 +2891,7 @@ inline int Gitter :: Geometric :: hface4 :: preCoarsening () {
 
 inline int Gitter :: Geometric :: hface4 :: twist (int i) const {
   assert (i < 4) ;
-  return s [i] ;
+  return nb.s [i] ;
 }
 
 inline Gitter :: Geometric :: hface4 :: myhedge1_t * Gitter :: Geometric :: hface4 :: myhedge1 (int i) {
@@ -2902,17 +2906,17 @@ inline const Gitter :: Geometric :: hface4 :: myhedge1_t * Gitter :: Geometric :
 
 inline Gitter :: Geometric :: hface4 :: myvertex_t * Gitter :: Geometric :: hface4 :: myvertex (int i) {
   assert(0<=i && i < 4) ;
-  return myhedge1 (i)->myvertex (s[i]) ;
+  return myhedge1 (i)->myvertex (nb.s[i]) ;
 }
 
 inline const Gitter :: Geometric :: hface4 :: myvertex_t * Gitter :: Geometric :: hface4 :: myvertex (int i) const {
   assert(0<=i && i < 4) ;
-  return myhedge1 (i)->myvertex (s[i]) ;
+  return myhedge1 (i)->myvertex (nb.s[i]) ;
 }
 
 inline Gitter::Geometric::hface4::myrule_t
 Gitter::Geometric::hface4::parentRule() const {
-  return _parRule;
+  return nb._parRule;
 }
 
 inline bool 
