@@ -13,14 +13,15 @@
 // #     #  ######  #####    ####   ######  #####     #      ####   #
 
 
-template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) {
+template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) 
+{
   if (r != getrule ()) {
     assert (getrule () == myrule_t :: nosplit) ;
     switch (r) {
       case myrule_t :: iso2 :
         {
           int l = 1 + level () ;
-          assert (_cv == 0 && _dwn == 0) ;
+          assert ( _inner == 0 ) ;
          
           innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex(0));
           innervertex_t* v1 = static_cast<innervertex_t *> (this->myvertex(1));
@@ -29,26 +30,27 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r) {
           const double (&p1)[3] = v1->Point();
           
           // the last myvertex(0) is submitted for the indexmanager reference, rk
-          _cv = new innervertex_t (l, 
-                                   0.5 * (p0[0] + p1[0]),
-                                   0.5 * (p0[1] + p1[1]),  
-                                   0.5 * (p0[2] + p1[2]), 
-                                   *v0 ) ;
-          assert (_cv) ;
+          _inner = new inner_t (l, 
+                                0.5 * (p0[0] + p1[0]),
+                                0.5 * (p0[1] + p1[1]),  
+                                0.5 * (p0[2] + p1[2]), 
+                                *v0 ) ;
+          assert (_inner) ;
 
 #ifdef USE_MALLOC_AT_ONCE
           void* edgeMem[2] = {0,0};
           this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 2 );
 
-          inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, v0 , _cv, 0 ) ;
-          inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, _cv, v1, 1 ) ;
+          inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, v0 , inVx(), 0 ) ;
+          inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, inVx(), v1, 1 ) ;
 #else
-          inneredge_t * e0 = new inneredge_t (l, v0 , _cv, 0 ) ;
-          inneredge_t * e1 = new inneredge_t (l, _cv, v1, 1 ) ;
+          inneredge_t * e0 = new inneredge_t (l, v0 , inVx(), 0 ) ;
+          inneredge_t * e1 = new inneredge_t (l, inVx(), v1, 1 ) ;
 #endif
 
           assert (e0 && e1) ;
-          (_dwn = e0)->append (e1) ;
+          e0->append (e1) ;
+          _inner->store( e0 );
           _rule = myrule_t :: iso2 ;
           break ;
         }
@@ -88,11 +90,10 @@ template < class A > bool Hedge1Top < A > :: coarse () {
   // soll die Operation des Vergr"oberns nicht sofort ausgef"uhrt
   // sondern (pending) zur"uckgestellt werden.
 
-    if (!this->lockedAgainstCoarsening ()) {
-      delete _dwn ; 
-      _dwn = 0 ;
-      delete _cv ;
-      _cv = 0 ;
+    if (!this->lockedAgainstCoarsening ()) 
+    {
+      delete _inner ;  
+      _inner = 0 ;
       _rule = myrule_t :: nosplit ;
     }
   }
@@ -110,7 +111,7 @@ template < class A > bool Hedge1Top < A > :: coarse () {
 
 template < class A >  void Hface4Top < A > :: splitISO4 () {
   int l = 1 + level () ;
-  assert (_cv == 0 && _ed == 0 && _dwn == 0) ;
+  assert ( _inner == 0 ) ;
 
   {
     // calculate barycenter of face 
@@ -124,8 +125,8 @@ template < class A >  void Hface4Top < A > :: splitISO4 () {
           p ) ;
 
     // myvertex(0) is submitted for the indexmanager reference 
-    _cv = new innervertex_t (l, p[0], p[1], p[2], *v0 ) ;
-    assert (_cv) ;
+    _inner = new inner_t (l, p[0], p[1], p[2], *v0 ) ;
+    assert (_inner) ;
   }
   
   myvertex_t * ev0 = this->myhedge1(0)->subvertex (0) ;
@@ -138,15 +139,15 @@ template < class A >  void Hface4Top < A > :: splitISO4 () {
   void* edgeMem[4] = {0,0,0,0};
   this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 4 );
 
-  inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, ev0, _cv) ;
-  inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, ev1, _cv) ;
-  inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, ev2, _cv) ;
-  inneredge_t * e3 = new (edgeMem[3]) inneredge_t (l, ev3, _cv) ;
+  inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, ev0, inVx()) ;
+  inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, ev1, inVx()) ;
+  inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, ev2, inVx()) ;
+  inneredge_t * e3 = new (edgeMem[3]) inneredge_t (l, ev3, inVx()) ;
 #else
-  inneredge_t * e0 = new inneredge_t (l, ev0, _cv) ;
-  inneredge_t * e1 = new inneredge_t (l, ev1, _cv) ;
-  inneredge_t * e2 = new inneredge_t (l, ev2, _cv) ;
-  inneredge_t * e3 = new inneredge_t (l, ev3, _cv) ;
+  inneredge_t * e0 = new inneredge_t (l, ev0, inVx()) ;
+  inneredge_t * e1 = new inneredge_t (l, ev1, inVx()) ;
+  inneredge_t * e2 = new inneredge_t (l, ev2, inVx()) ;
+  inneredge_t * e3 = new inneredge_t (l, ev3, inVx()) ;
 #endif
   assert( e0 && e1 && e2 && e3) ;
   e0->append(e1) ;
@@ -172,8 +173,10 @@ template < class A >  void Hface4Top < A > :: splitISO4 () {
   f0->append(f1) ;
   f1->append(f2) ;
   f2->append(f3) ;
-  _ed  = e0 ;
-  _dwn = f0 ;
+  // inner edge 
+  _inner->store( e0 );
+  // down pointer 
+  _inner->store( f0 );
   _rule = myrule_t :: iso4 ;
   return ;
 }
@@ -266,12 +269,9 @@ template < class A > bool Hface4Top < A > :: coarse () {
   // werden beseitigt, und das Bezugsobjekt wird zum neuen
   // Blatt im Baum.
     
-    delete _dwn ; 
-    _dwn = 0 ;
-    delete _ed ;
-    _ed = 0 ;
-    delete _cv ;
-    _cv = 0 ;
+    delete _inner; 
+    _inner = 0;
+
     _rule = myrule_t :: nosplit ;
     {for (int i = 0 ; i < 4 ; i ++ ) this->myhedge1 (i)->coarse () ; }
   }
@@ -513,7 +513,8 @@ template < class A > HexaTop < A >
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
             int t4, myhface4_t * f5, int t5) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5 )
-  , _bbb (0), _dwn (0), _up(0), _fc (0), _ed (0), _cv (0)
+  , _bbb (0), _up(0)
+  , _inner( 0 )
   , _volume (0.0) 
   , _lvl (l)
   , _nChild(0) 
@@ -541,7 +542,8 @@ template < class A > HexaTop < A >
             myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4, 
             int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild , double vol ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5 )
-  , _bbb (0), _dwn (0), _up(up), _fc (0), _ed (0), _cv (0)
+  , _bbb (0), _up(up)
+  , _inner( 0 )
   , _volume ( vol )
   , _lvl (l)
   , _nChild(nChild) 
@@ -591,13 +593,10 @@ template < class A > HexaTop < A > :: ~HexaTop ()
 {
   this->freeIndex( indexManager() );
     
-  if (!_dwn) this->detachleafs();
+  if (! dwnPtr() ) this->detachleafs();
   else assert(!this->isLeafEntity());
   if (_bbb) delete _bbb ;
-  if (_dwn) delete _dwn ;
-  if (_fc) delete _fc ;
-  if (_ed) delete _ed ;
-  if (_cv) delete _cv ;
+  if (_inner) delete _inner;
   return ;
 }
 
@@ -631,7 +630,7 @@ template < class A > void HexaTop < A > :: splitISO8 ()
 {
   int l = 1 + this->level () ;
 
-  assert (_dwn == 0 && _fc == 0 && _ed == 0 && _cv == 0) ;  
+  assert (_inner == 0 ) ;  
   {
     double p[3] ;
     // calculate barycenter 
@@ -641,8 +640,9 @@ template < class A > void HexaTop < A > :: splitISO8 ()
         this->myvertex(5)->Point(), this->myvertex(6)->Point(), this->myvertex(7)->Point(), 
         p) ;
     
-    _cv = new innervertex_t (l, p[0], p[1], p[2], *(this->myvertex(0)) ) ;
-    assert (_cv) ;
+    innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex (0));
+    _inner = new inner_t (l, p[0], p[1], p[2], *v0 ) ;
+    assert (_inner) ;
   }
 
   myvertex_t * fv0 = this->myhface4 (0)->subvertex (0) ;
@@ -657,19 +657,19 @@ template < class A > void HexaTop < A > :: splitISO8 ()
   void* edgeMem[6] = {0,0,0,0,0,0};
   // allocate 6 * sizeof innerege_t 
   this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 6 );
-  inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, fv0, _cv) ;
-  inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, fv1, _cv) ;
-  inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, fv2, _cv) ;
-  inneredge_t * e3 = new (edgeMem[3]) inneredge_t (l, fv3, _cv) ;
-  inneredge_t * e4 = new (edgeMem[4]) inneredge_t (l, fv4, _cv) ;
-  inneredge_t * e5 = new (edgeMem[5]) inneredge_t (l, fv5, _cv) ;
+  inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, fv0, inVx()) ;
+  inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, fv1, inVx()) ;
+  inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, fv2, inVx()) ;
+  inneredge_t * e3 = new (edgeMem[3]) inneredge_t (l, fv3, inVx()) ;
+  inneredge_t * e4 = new (edgeMem[4]) inneredge_t (l, fv4, inVx()) ;
+  inneredge_t * e5 = new (edgeMem[5]) inneredge_t (l, fv5, inVx()) ;
 #else 
-  inneredge_t * e0 = new inneredge_t (l, fv0, _cv) ;
-  inneredge_t * e1 = new inneredge_t (l, fv1, _cv) ;
-  inneredge_t * e2 = new inneredge_t (l, fv2, _cv) ;
-  inneredge_t * e3 = new inneredge_t (l, fv3, _cv) ;
-  inneredge_t * e4 = new inneredge_t (l, fv4, _cv) ;
-  inneredge_t * e5 = new inneredge_t (l, fv5, _cv) ;
+  inneredge_t * e0 = new inneredge_t (l, fv0, inVx()) ;
+  inneredge_t * e1 = new inneredge_t (l, fv1, inVx()) ;
+  inneredge_t * e2 = new inneredge_t (l, fv2, inVx()) ;
+  inneredge_t * e3 = new inneredge_t (l, fv3, inVx()) ;
+  inneredge_t * e4 = new inneredge_t (l, fv4, inVx()) ;
+  inneredge_t * e5 = new inneredge_t (l, fv5, inVx()) ;
 #endif
 
   assert(e0 && e1 && e2 && e3 && e4 && e5) ;
@@ -772,9 +772,13 @@ template < class A > void HexaTop < A > :: splitISO8 ()
   h4->append(h5) ;
   h5->append(h6) ;
   h6->append(h7) ;
-  _ed = e0 ;
-  _fc = f0 ;
-  _dwn = h0 ;
+
+  // inner edge 
+  _inner->store( e0 );
+  // inne face 
+  _inner->store( f0 );
+  // down ptr 
+  _inner->store( h0 );
   _rule = myrule_t :: iso8 ;
   this->detachleafs();
   return ;
@@ -879,14 +883,9 @@ template < class A > bool HexaTop < A > :: coarse () {
     {
       this->preCoarsening () ;
       this->attachleafs();
-      delete _dwn ; 
-      _dwn = 0 ;
-      delete _fc ;
-      _fc = 0 ;
-      delete _ed ;
-      _ed = 0 ;
-      delete _cv ; 
-      _cv = 0 ;
+      delete _inner ; 
+      _inner = 0 ;
+
       _rule = myrule_t :: nosplit ;
       {
         for (int i = 0 ; i < 6 ; ++i) 

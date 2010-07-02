@@ -686,6 +686,14 @@ void GitterBasisImpl :: printMemUsage ()
       allSize += size;
     }
 
+    {
+      size_t indexMem = 0;
+      for(int i=0; i<4; ++i) 
+        indexMem += indexManager( i ).getMaxIndex() * sizeof( int );
+      cout << "Indices : size = " << indexMem/1024/1024 << " MB" << endl;
+      allSize += indexMem;
+    }
+
     cout << "All leaf size : " << allSize << " MB" << endl;
     cout << "Estimated all size : " << (9*long(allSize) / 8) << " MB" << endl;
 
