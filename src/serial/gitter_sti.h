@@ -882,7 +882,7 @@ public :
       enum rule_enum { crs=-1, nosplit=1, e01, e12, e20, e23, e30, e31, iso8 };
       typedef signed char rule_t;
 
-      explicit TetraRule ( const rule_t & );
+      TetraRule ( const rule_t & );
       TetraRule ( const rule_enum & = nosplit) ;
       operator rule_t () const;
       inline bool isValid () const ;
@@ -896,7 +896,7 @@ public :
       enum rule_enum { crs = -1, nosplit = 1, iso8 };
       typedef signed char rule_t;
 
-      explicit HexaRule ( const rule_t & );
+      HexaRule ( const rule_t & );
       HexaRule ( const rule_enum & = nosplit);
       operator rule_t () const;
       inline bool isValid () const ;
