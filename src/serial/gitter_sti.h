@@ -121,8 +121,10 @@ class Refcount {
 #endif 
   // end NDEBUG
 
-  signed char _c ;
+  unsigned char _c ;
 public :
+  inline void reset () { _c = 0 ; }
+  inline bool positive () const { return _c > 0 ; }
   inline Refcount () ;
   inline ~Refcount () ;
   inline int operator ++ (int) const ;
@@ -279,6 +281,9 @@ public :
     
     // true if index is copy from outside and should noit freeded
     bool _isCopy;
+
+    // store refcount here to fill up the 8 byte of mem 
+    Refcount ref ;
 
     // constructor 
     DuneIndexProvider () : 
@@ -450,7 +455,9 @@ public :
 
   } ;
    
-  class hedge : public stiExtender_t :: EdgeIF, public DuneIndexProvider  {
+  class hedge : public stiExtender_t :: EdgeIF, 
+                public DuneIndexProvider 
+  {
   protected :
     hedge () {}
     virtual ~hedge () {}
@@ -524,8 +531,13 @@ public :
   {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_
   protected: 
-    bool _refinedTag; // true if element was refined 
-    Dune_helement () : DuneIndexProvider(), _refinedTag (true) {}
+    // abuse ref to refined tag 
+    using DuneIndexProvider :: ref ;
+    Dune_helement () 
+    {
+      // mark as new element 
+      ++ ref ;
+    }
 #endif
   public:
     // reset the _refinedTag to false 
@@ -650,23 +662,7 @@ public :
       }
   };
 
-  // organizes the indices for boundary faces and 
-  // the opposite vertices for ghost cells 
-  class Dune_hbndDefault : public DuneIndexProvider 
-  {
-    protected:
-      bool _refinedTag; // true if element was refined 
-
-    public:
-      inline Dune_hbndDefault () : DuneIndexProvider(), _refinedTag(false) {} 
-
-      // reset the _refinedTag to false 
-      void resetRefinedTag() { _refinedTag = false; }
-      // true if element was refined this adaptation step 
-      bool hasBeenRefined () const { return _refinedTag; }
-  };
-
-  class hbndseg  : public Dune_hbndDefault
+  class hbndseg  : public DuneIndexProvider 
   {
   protected :
     hbndseg () {}
@@ -1045,10 +1041,11 @@ public :
       unsigned char _lvl ;
     public :
       // reference counter 
-      Refcount ref ;
+      using DuneIndexProvider :: ref ;
     } vertex_GEO ;
   
-    typedef class hedge1 : public hedge_STI, public MyAlloc {
+    typedef class hedge1 : public hedge_STI , public MyAlloc 
+    {
     protected :
       typedef VertexGeo myvertex_t ;
       inline hedge1 (myvertex_t *,myvertex_t *) ;
@@ -1068,9 +1065,10 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
     private :
-      myvertex_t * v0, * v1 ; // 16 bytes + 24 from above = 40 
+      myvertex_t * v0, * v1 ; // 16 bytes + 16 (24 with comm buffer) 32 (40) 
     public:  
-      Refcount ref ;
+      // reference counter 
+      using DuneIndexProvider :: ref ;
     } hedge1_GEO ;
   
     typedef class hface3 : public hface_STI, public MyAlloc {
@@ -1140,7 +1138,8 @@ public :
     protected :
       myhedge1_t * e [polygonlength] ; // 24 bytes 
     public:  
-      Refcount ref ;
+      // reference counter 
+      using DuneIndexProvider :: ref ;
     } hface3_GEO ;
 
     typedef class hface4 : public hface_STI, public MyAlloc {
@@ -1153,8 +1152,10 @@ public :
         myconnect_t *_faceRear;
         signed char _numFront;
         signed char _numRear;
+        // put here to save memory because of padding 
         signed char s [polygonlength] ;
       public:  
+        // put here to save memory because of padding 
         myrule_t _parRule;
 
       public :
@@ -1169,7 +1170,7 @@ public :
         inline pair < myconnect_t *, int > rear () ;
         inline pair < const myconnect_t *, int > rear () const ;
         friend class hface4 ;
-      } nb ;
+      } nb ; // 24 byte 
     protected :
       typedef VertexGeo  myvertex_t ;
       typedef hedge1_GEO  myhedge1_t ;
@@ -1180,7 +1181,6 @@ public :
       inline int preCoarsening () ;
     public :
       inline virtual ~hface4 () ;
-      Refcount ref ;
       inline void attachElement (const pair < hasFace4 *, int > &,int) ;
       inline void detachElement (int) ;
     public :
@@ -1210,13 +1210,12 @@ public :
     public :
       myrule_t parentRule() const;
     private :
-      myhedge1_t * e [polygonlength] ;
-      //signed char s [polygonlength] ;
+      myhedge1_t * e [polygonlength] ; // polygonlength * 8 = 32 
 
-    protected:
-      //myrule_t _parRule;
-
-    } hface4_GEO ;
+    public:  
+      // reference counter 
+      using DuneIndexProvider :: ref ;
+    } hface4_GEO ; // 56 + 16 = 72 
   
     // Geometriesockelklasse des Tetraeders: Vorsicht der Prototyp der dem
     // Tetraeder zugrunde liegt, hat eine nach links (gegen Uhrzeigersinn)
@@ -2220,13 +2219,13 @@ inline int Gitter :: helement :: leaf () const {
 // Dune extensions 
 inline void Gitter :: Dune_helement :: resetRefinedTag () {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
-  _refinedTag = false; 
+  ref.reset ();
 #endif
 }
 
 inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
 #ifndef _DUNE_NOT_USES_ALU3DGRID_ 
-  return _refinedTag;
+  return ref.positive();
 #else 
   return false;
 #endif
