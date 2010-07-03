@@ -14,6 +14,7 @@
 
 template < class A > void Hface3Top < A > :: split_e01 () 
 {
+  assert( _inner == 0 );
   int l = 1 + level () ;
   myvertex_t * ev0 = this->myhedge1(1)->subvertex (2) ;
   assert(ev0) ;
@@ -23,14 +24,14 @@ template < class A > void Hface3Top < A > :: split_e01 ()
   innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(0,1), this->twist(0), this->myhedge1(1),  this->twist(1), 1) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
-  _ed  = e0 ;
-  _dwn = f0 ;
+  _inner = new inner_t( f0 , e0 );
   _rule = myrule_t :: e01 ;
   return ;
 }
 
 template < class A >  void Hface3Top < A > :: split_e12 () 
 {
+  assert( _inner == 0 );
   int l = 1 + level () ;
   myvertex_t * ev0 = this->myhedge1(1)->subvertex (0) ;
   assert(ev0) ;
@@ -40,14 +41,14 @@ template < class A >  void Hface3Top < A > :: split_e12 ()
   innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(1,1), this->twist(1), this->myhedge1(2),  this->twist(2), 1 ) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
-  _ed  = e0 ;
-  _dwn = f0 ;
+  _inner = new inner_t( f0 , e0 );
   _rule = myrule_t :: e12 ;
   return ;
 }
 
 template < class A >  void Hface3Top < A > :: split_e20 () 
 {
+  assert( _inner == 0 );
   int l = 1 + level () ;
   myvertex_t * ev0 = this->myhedge1(1)->subvertex (1) ;
   assert(ev0) ;
@@ -57,14 +58,14 @@ template < class A >  void Hface3Top < A > :: split_e20 ()
   innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(2,1), this->twist(2), this->myhedge1(0),  this->twist(0), 1 ) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
-  _ed  = e0 ;
-  _dwn = f0 ;
+  _inner = new inner_t( f0 , e0 );
   _rule = myrule_t :: e20 ;
   return ;
 }
 
 template < class A >  void Hface3Top < A > :: split_iso4 () 
 {
+  assert( _inner == 0 );
   int l = 1 + level () ;
   myvertex_t * ev0 = this->myhedge1(0)->subvertex (0) ;
   myvertex_t * ev1 = this->myhedge1(1)->subvertex (0) ;
@@ -84,8 +85,7 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
   f0->append(f1) ;
   f1->append(f2) ;
   f2->append(f3) ;
-  _ed  = e0 ;
-  _dwn = f0 ;
+  _inner = new inner_t( f0 , e0 );
   _rule = myrule_t :: iso4 ;
   return ;
 }
@@ -98,16 +98,16 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
       typedef typename myhedge1_t :: myrule_t myhedge1rule_t;
       case myrule_t :: e01 :
         this->myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (0))) ;
-  split_e01 () ;
-  break ;
+        split_e01 () ;
+        break ;
       case myrule_t :: e12 :
         this->myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (0))) ;
-  split_e12 () ;
-  break ;
+        split_e12 () ;
+        break ;
       case myrule_t :: e20 :
         this->myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (0))) ;
-  split_e20 () ;
-  break ;
+        split_e20 () ;
+        break ;
       case myrule_t :: iso4 :
         this->myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (0))) ;
         this->myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (1))) ;
@@ -206,10 +206,9 @@ template < class A > bool Hface3Top < A > :: coarse ()
   // werden beseitigt, und das Bezugsobjekt wird zum neuen
   // Blatt im Baum.
     
-    delete _dwn ; 
-    _dwn = 0 ;
-    delete _ed ;
-    _ed = 0 ;
+    delete _inner; 
+    _inner = 0 ;
+
     _rule = myrule_t :: nosplit ;
     {for (int i = 0 ; i < 3 ; i ++ ) this->myhedge1 (i)->coarse () ; }
   }
@@ -536,7 +535,9 @@ template < class A > TetraTop < A >
 :: TetraTop (int l, myhface3_t * f0, int t0,
              myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
              myhface3_t * f3, int t3, innertetra_t *up, int nChild, double vol) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3), _dwn (0), _bbb (0), _up(up), _fc (0), _ed (0)
+  : A (f0, t0, f1, t1, f2, t2, f3, t3), 
+    _bbb (0), _up(up)
+  , _inner( 0 )  
   , _volume( (vol < 0.0) ?  
             quadraturTetra3D < VolumeCalc > (
                 LinearMapping ( this->myvertex(0)->Point(), 
@@ -574,8 +575,9 @@ template < class A > TetraTop < A > ::
 TetraTop (int l, myhface3_t * f0, int t0,
           myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
           myhface3_t * f3, int t3) 
-  : A (f0, t0, f1, t1, f2, t2, f3, t3),
-    _dwn (0), _bbb (0), _up(0), _fc (0),_ed (0)
+  : A (f0, t0, f1, t1, f2, t2, f3, t3)
+  , _bbb (0), _up(0)
+  , _inner( 0 )  
   , _volume( quadraturTetra3D < VolumeCalc > 
     (LinearMapping ( this->myvertex(0)->Point(), this->myvertex(1)->Point(),
                      this->myvertex(2)->Point(), this->myvertex(3)->Point())).integrate1 (0.0) )
@@ -595,11 +597,9 @@ template < class A > TetraTop < A > :: ~TetraTop ()
   this->freeIndex( indexManager() );
   // attachleafs is called in constructor of TetraEmpty
   // if delete is called on macro we only call this method on leaf
-  if (!_dwn ) this->detachleafs();
+  if (! _inner ) this->detachleafs();
   if (_bbb) delete _bbb ;
-  if (_dwn) delete _dwn ;
-  if (_fc) delete _fc ;
-  if (_ed) delete _ed ;
+  if (_inner) delete _inner ;
   return ;
 }
 
@@ -677,8 +677,10 @@ template < class A >  const typename TetraTop < A > ::  myhface3_t * TetraTop < 
   return ((TetraTop < A > *)this)->subface3 (i,j) ;
 }
 
-template < class A >  void TetraTop < A > :: split_e01 () {
-  int l = 1 + this->level () ;
+template < class A >  void TetraTop < A > :: split_e01 () 
+{
+  assert( _inner == 0 );
+  const int l = 1 + this->level () ;
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0 ) ;
   assert(f0) ;
@@ -690,14 +692,16 @@ template < class A >  void TetraTop < A > :: split_e01 () {
   innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
-  _fc = f0 ;
-  _dwn = h0 ;
-  h0->_up = h1->_up = this; 
+  _inner = new inner_t( h0, f0 ); 
+  assert( _inner );
+  this->detachleafs();
   return ;
 }
 
-template < class A >  void TetraTop < A > :: split_e12 () {
-  int l = 1 + this->level () ;
+template < class A >  void TetraTop < A > :: split_e12 () 
+{
+  assert( _inner == 0 );
+  const int l = 1 + this->level () ;
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0 ) ;
   assert(f0 ) ;
@@ -709,14 +713,17 @@ template < class A >  void TetraTop < A > :: split_e12 () {
   innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
-  _fc = f0 ;
-  _dwn = h0 ;
+  _inner = new inner_t( h0, f0 ); 
+  assert( _inner );
   _rule = myrule_t :: e12 ;
+  this->detachleafs();
   return ;
 }
 
-template < class A >  void TetraTop < A > :: split_e20 () {
-  int l = 1 + this->level () ;
+template < class A >  void TetraTop < A > :: split_e20 () 
+{
+  assert( _inner == 0 );
+  const int l = 1 + this->level () ;
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0 ) ;
   assert(f0) ;
@@ -728,14 +735,17 @@ template < class A >  void TetraTop < A > :: split_e20 () {
   innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
-  _fc = f0 ;
-  _dwn = h0 ;
+  _inner = new inner_t( h0, f0 ); 
+  assert( _inner );
   _rule = myrule_t :: e20 ;
+  this->detachleafs();
   return ;
 }
 
-template < class A >  void TetraTop < A > :: split_e23 () {
-  int l = 1 + this->level () ;
+template < class A >  void TetraTop < A > :: split_e23 () 
+{
+  assert( _inner == 0 );
+  const int l = 1 + this->level () ;
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0 ) ;
   assert(f0) ;
@@ -747,14 +757,17 @@ template < class A >  void TetraTop < A > :: split_e23 () {
   innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
-  _fc = f0 ;
-  _dwn = h0 ;
+  _inner = new inner_t( h0, f0 ); 
+  assert( _inner );
   _rule = myrule_t :: e23 ;
+  this->detachleafs();
   return ;
 }
 
-template < class A >  void TetraTop < A > :: split_e30 () {
-  int l = 1 + this->level () ;
+template < class A >  void TetraTop < A > :: split_e30 () 
+{
+  assert( _inner == 0 );
+  const int l = 1 + this->level () ;
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0 ) ;
   assert(f0) ;
@@ -763,15 +776,17 @@ template < class A >  void TetraTop < A > :: split_e30 () {
   innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
-  _fc = f0 ;
-  _dwn = h0 ;
+  _inner = new inner_t( h0, f0 ); 
+  assert( _inner );
   _rule = myrule_t :: e30 ;
+  this->detachleafs();
   return ;
 }
 
 template < class A >  void TetraTop < A > :: split_e31 () 
 {
-  int l = 1 + this->level () ;
+  assert( _inner == 0 );
+  const int l = 1 + this->level () ;
   
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0) ;
   assert(f0) ;
@@ -783,18 +798,20 @@ template < class A >  void TetraTop < A > :: split_e31 ()
   innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
-  _fc = f0 ;
-  _dwn = h0 ;
+  _inner = new inner_t( h0, f0 ); 
+  assert( _inner );
   _rule = myrule_t :: e31 ;
+  this->detachleafs();
   return ;
 }
 
 template < class A >  void TetraTop < A > :: 
 splitISO8 () 
 {
+  assert( _inner == 0 );
   typedef typename A :: myvertex_t  myvertex_t;
   typedef typename A :: inneredge_t inneredge_t;
-  int l = 1 + this->level () ; 
+  const int l = 1 + this->level () ; 
 
   myvertex_t * e31 = this->myhface3 (0)->myhedge1 ((this->twist(0) < 0) ? ((9+this->twist(0))%3) : (this->twist(0)%3))->subvertex (0) ;
   myvertex_t * e20 = this->myhface3 (1)->myhedge1 ((this->twist(1) < 0) ? ((9+this->twist(1))%3) : (this->twist(1)%3))->subvertex (0) ;
@@ -838,9 +855,8 @@ splitISO8 ()
   h4->append(h5) ;
   h5->append(h6) ;
   h6->append(h7) ;
-  _ed = e0 ;
-  _fc = f0 ;
-  _dwn = h0 ;
+  _inner = new inner_t( h0, f0, e0 ); 
+  assert( _inner );
   _rule = myrule_t :: iso8 ;
   
   this->detachleafs();
@@ -1027,12 +1043,10 @@ template < class A >  bool TetraTop < A > :: coarse ()
     {
       this->preCoarsening () ;
       this->attachleafs();
-      delete _dwn ; 
-      _dwn = 0 ;
-      delete _fc ;
-      _fc = 0 ;
-      delete _ed ;
-      _ed = 0 ;
+
+      delete _inner ; 
+      _inner = 0 ;
+
       _rule = myrule_t :: nosplit ;
       {
         for (int i = 0 ; i < 4 ; ++i ) 
