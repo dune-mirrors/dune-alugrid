@@ -580,28 +580,36 @@ void GitterBasisImpl :: printMemUsage ()
   typedef GitterBasis :: Objects :: VertexEmptyMacro VertexEmptyMacro; 
   typedef GitterBasis :: Objects :: VertexEmpty VertexEmpty; 
   typedef Gitter :: Geometric :: VertexGeo VertexGeo; 
+  cout << "bool   = " << sizeof(bool) << endl;
+  cout << "char   = " << sizeof(unsigned char) << endl;
+  cout << "signed char   = " << sizeof(signed char) << endl;
   cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
-  cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n";
+  cout << "Refcount = " << sizeof(Refcount) << "\n";
   cout << "HedgeRule  = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
+  cout << "Hface3Rule = " << sizeof(Gitter :: Geometric :: Hface3Rule) <<"\n";
   cout << "Hface4Rule = " << sizeof(Gitter :: Geometric :: Hface4Rule) <<"\n";
+  cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n\n";
   
+  cout << "******** TETRA *************************8\n";
   cout << "Tetrasize = " << sizeof(tetra_IMPL) << endl;
-  cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
-  cout << "Hface4 = " << sizeof(hface4_IMPL) << endl;
-  cout << "Hface3 = " << sizeof(hface3_IMPL) << endl;
-  cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
+  cout << "Hface3_IMPL = " << sizeof(hface3_IMPL) << endl;
   cout << "Hface3_GEO = " << sizeof( Gitter :: Geometric :: hface3_GEO ) << endl;
+  cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
   cout << "HEdge1_IMPL = " << sizeof(hedge1_IMPL) << endl;
   cout << "HEdge1_GEO = " << sizeof(Gitter :: Geometric ::hedge1_GEO) << endl;
   cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
   cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
   cout << "Vertex = " << sizeof(VertexEmpty) << endl;
-  cout << "Hbnd3  = " << sizeof(hbndseg3_IMPL) << endl;
-  cout << "Hbnd4  = " << sizeof(hbndseg4_IMPL) << endl;
-  cout << "bool   = " << sizeof(bool) << endl;
-  cout << "char   = " << sizeof(unsigned char) << endl;
-  cout << "signed char   = " << sizeof(signed char) << endl;
+  cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl << endl;
 
+  cout << "******** HEXA *************************8\n";
+  cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
+  cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
+  cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
+  cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
+  cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl << endl;
+
+  cout << "******** Number of Elements ************************8\n";
   {
     int totalSize = 0; 
     bool simplex = false;
