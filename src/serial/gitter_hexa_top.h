@@ -36,6 +36,7 @@ protected:
   typedef typename base_t :: down_t  down_t ;
   typedef typename Impl :: innervertex_t innervertex_t ;
   innervertex_t _cv;
+  using base_t :: _dwn;
 public:  
   InnerVertexStorage( int level, 
                       double x, double y, 
@@ -44,6 +45,8 @@ public:
   {}
 
   InnerVertexStorage( down_t * dwn ) : base_t( dwn ) {}
+
+  ~InnerVertexStorage () { delete _dwn; _dwn = 0; }
 
   // vertex methods 
   innervertex_t* cv() { return &_cv ;}
@@ -81,8 +84,10 @@ protected:
   typedef typename base_t :: innervertex_t innervertex_t;
   typedef typename Impl :: inneredge_t  inneredge_t ;
   inneredge_t * _ed ;
-  using base_t :: store ;
+  using base_t :: _dwn;
 public:  
+  using base_t :: store ;
+
   InnerEdgeStorage( int level, 
                     double x, double y, 
                     double z, innervertex_t& vx )
@@ -96,7 +101,7 @@ public:
   void store( inneredge_t* ed )  {  _ed = ed ;  }
 
   // destructor 
-  ~InnerEdgeStorage() { delete _ed ; _ed = 0;  }
+  ~InnerEdgeStorage() { delete _dwn ; _dwn = 0; delete _ed ; _ed = 0; }
   // edge methods 
   inneredge_t* ed() { return _ed ;}
   const inneredge_t* ed() const { return _ed ;}
@@ -112,8 +117,10 @@ protected:
   typedef typename base_t :: down_t        down_t;
   typedef typename Impl :: innerface_t     innerface_t ;
   innerface_t * _fce ;
-  using base_t :: store ;
+  using base_t :: _dwn;
 public:  
+  using base_t :: store ;
+
   InnerFaceStorage( int level, 
                     double x, double y, 
                     double z, innervertex_t& vx )
@@ -131,7 +138,7 @@ public:
     : base_t( dwn , ed ), _fce ( fce ) {}
 
   // destructor 
-  ~InnerFaceStorage() { delete _fce ; _fce = 0;  }
+  ~InnerFaceStorage() { delete _dwn ; _dwn = 0; delete _fce ; _fce = 0; }
   // face methods 
   innerface_t* fce() { return _fce ;}
   const innerface_t* fce() const { return _fce ;}
