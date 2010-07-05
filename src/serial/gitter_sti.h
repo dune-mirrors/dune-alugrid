@@ -882,7 +882,8 @@ public :
       enum rule_enum { crs=-1, nosplit=1, e01, e12, e20, e23, e30, e31, iso8 };
       typedef signed char rule_t;
 
-      TetraRule ( const rule_t & );
+      explicit TetraRule ( const rule_t & );
+      TetraRule ( const int );
       TetraRule ( const rule_enum & = nosplit) ;
       operator rule_t () const;
       inline bool isValid () const ;
@@ -896,7 +897,8 @@ public :
       enum rule_enum { crs = -1, nosplit = 1, iso8 };
       typedef signed char rule_t;
 
-      HexaRule ( const rule_t & );
+      explicit HexaRule ( const rule_t & );
+      HexaRule ( const int );
       HexaRule ( const rule_enum & = nosplit);
       operator rule_t () const;
       inline bool isValid () const ;
@@ -2951,11 +2953,21 @@ Gitter::Geometric::hface4::isInteriorLeaf() const
 
 inline Gitter :: Geometric :: TetraRule :: TetraRule ( const rule_t &r )
 : _r( r )
-{}
+{
+  assert( isValid() );
+}
+
+inline Gitter :: Geometric :: TetraRule :: TetraRule ( const int r )
+: _r( (rule_t) r )
+{
+  assert( isValid() );
+}
 
 inline Gitter :: Geometric :: TetraRule :: TetraRule ( const rule_enum &r )
 : _r( r )
-{}
+{
+  assert( isValid() );
+}
 
 inline Gitter :: Geometric :: TetraRule :: operator rule_t () const
 {
@@ -3312,11 +3324,21 @@ inline int Gitter :: Geometric :: Periodic4 :: preCoarsening () {
 
 inline Gitter :: Geometric :: HexaRule :: HexaRule ( const rule_t &r )
 : _r( r )
-{}
+{
+  assert( isValid() );
+}
+
+inline Gitter :: Geometric :: HexaRule :: HexaRule ( const int r )
+: _r( (rule_t) r )
+{
+  assert( isValid() );
+}
 
 inline Gitter :: Geometric :: HexaRule :: HexaRule ( const rule_enum &r )
 : _r( r )
-{}
+{
+  assert( isValid() );
+}
 
 inline Gitter :: Geometric :: HexaRule :: operator rule_t () const
 {
