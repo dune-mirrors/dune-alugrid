@@ -521,9 +521,10 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     const MacroGhostInfo_STI * _ghInfo; 
 } ;
 
-class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
-  public :  
-  class ObjectsPll : public GitterBasis :: Objects 
+class GitterBasisPll : public Gitter :: Geometric, public GitterPll
+{
+public :
+  class ObjectsPll : public GitterBasis :: Objects
   {
   public :
     class VertexPllImplMacro : public VertexEmptyMacro 
@@ -540,7 +541,6 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       mypllx_t * _pllx ;
       friend class VertexPllBaseX;
     } ;
-    public :
 
     class Hedge1EmptyPll : public Hedge1Empty 
     {
@@ -554,12 +554,11 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     private :
       mypllx_t _pllx ;
       friend class EdgePllBaseX;
-  } ;
-  typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
+    } ;
+    typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
 
-  public :
-  class Hedge1EmptyPllMacro : public hedge1_IMPL 
-  {
+    class Hedge1EmptyPllMacro : public hedge1_IMPL 
+    {
     public :
       typedef EdgePllBaseXMacro mypllx_t ;
       inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *) ;
@@ -571,10 +570,10 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
       mypllx_t * _pllx ;
       
       friend class EdgePllBaseXMacro;
-  } ;
+    } ;
 
-      public :
-        class Hface3EmptyPll : public Hface3Empty {
+    class Hface3EmptyPll : public Hface3Empty
+    {
     protected :
       typedef hedge1_IMPL inneredge_t ;
     public :
@@ -585,12 +584,12 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     private :
       mypllx_t _pllx ;
       friend class FacePllBaseX < hface3_GEO >;
-  } ;
-  typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
+    } ;
+    typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
 
   
-  class Hface3EmptyPllMacro : public hface3_IMPL 
-  {
+    class Hface3EmptyPllMacro : public hface3_IMPL 
+    {
     public :
       typedef FacePllBaseXMacro < hface3_GEO > mypllx_t ;
       Hface3EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
@@ -601,11 +600,10 @@ class GitterBasisPll : public Gitter :: Geometric, public GitterPll {
     private :
       mypllx_t * _pllx ;
       friend class FacePllBaseXMacro < hface3_GEO >;
-  } ;
+    } ;
 
-public :
-  class Hface4EmptyPll : public Hface4Empty 
-  {
+    class Hface4EmptyPll : public Hface4Empty 
+    {
     protected :
       typedef hedge1_IMPL inneredge_t ;
     public :
@@ -616,11 +614,11 @@ public :
     private:
       mypllx_t _pllx ;
       friend class FacePllBaseX < hface4_GEO >;
-  } ;
-  typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
+    } ;
+    typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
   
-  class Hface4EmptyPllMacro : public hface4_IMPL 
-  {
+    class Hface4EmptyPllMacro : public hface4_IMPL 
+    {
     public :
       typedef FacePllBaseXMacro < hface4_GEO > mypllx_t ;
       Hface4EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,
@@ -632,11 +630,10 @@ public :
     private :
       mypllx_t * _pllx ;
       friend class FacePllBaseXMacro < hface4_GEO >;
-  } ;
+    } ;
 
-public :
-  class TetraEmptyPll : public TetraEmpty 
-  {
+    class TetraEmptyPll : public TetraEmpty 
+    {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface3_IMPL innerface_t ;
@@ -650,11 +647,11 @@ public :
     private :
       mypllx_t _pllx ;
       friend class TetraTop < TetraEmptyPll >;
-  } ;
-  typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
+    } ;
+    typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
 
-  class TetraEmptyPllMacro : public tetra_IMPL 
-  {
+    class TetraEmptyPllMacro : public tetra_IMPL 
+    {
     public :
       typedef TetraPllXBaseMacro mypllx_t ;
       TetraEmptyPllMacro (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
@@ -666,13 +663,13 @@ public :
     private :
       mypllx_t * _pllx ;
       friend class TetraPllXBaseMacro;
-  } ;
+    } ;
 
    /////////////////////////////////
    // Periodic 3 
    /////////////////////////////////
-    public :
-        class Periodic3EmptyPll : public Periodic3Empty {
+    class Periodic3EmptyPll : public Periodic3Empty
+    {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface3_IMPL innerface_t ;
@@ -685,10 +682,11 @@ public :
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
           private :
       mypllx_t _pllx ;
-  } ;
-  typedef Periodic3Top < Periodic3EmptyPll > periodic3_IMPL ;
+    } ;
+    typedef Periodic3Top < Periodic3EmptyPll > periodic3_IMPL ;
   
-  class Periodic3EmptyPllMacro : public periodic3_IMPL {
+    class Periodic3EmptyPllMacro : public periodic3_IMPL
+    {
     public :
       typedef Periodic3PllXBaseMacro mypllx_t ;
       Periodic3EmptyPllMacro (myhface3_t *,int,myhface3_t *,int) ;
@@ -698,10 +696,10 @@ public :
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
     private :
       mypllx_t * _pllx ;
-    // friend mypllx_t ;
-    // ### Goettingen ###
-    friend class Periodic3PllXBaseMacro;
-  } ;
+      // friend mypllx_t ;
+      // ### Goettingen ###
+      friend class Periodic3PllXBaseMacro;
+    } ;
 
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #
@@ -711,8 +709,8 @@ public :
 // #        #       #   #      #    #    #  #    #     #    #    #      #
 // #        ######  #    #     #     ####   #####      #     ####       #
 
-      public :
-        class Periodic4EmptyPll : public Periodic4Empty {
+    class Periodic4EmptyPll : public Periodic4Empty
+    {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface4_IMPL innerface_t ;
@@ -725,10 +723,11 @@ public :
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
           private :
       mypllx_t _pllx ;
-  } ;
-  typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL ;
+    } ;
+    typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL ;
   
-  class Periodic4EmptyPllMacro : public periodic4_IMPL {
+    class Periodic4EmptyPllMacro : public periodic4_IMPL
+    {
     public :
       typedef Periodic4PllXBaseMacro mypllx_t ;
       Periodic4EmptyPllMacro (myhface4_t *,int,myhface4_t *,int) ;
@@ -739,10 +738,10 @@ public :
     private :
       mypllx_t * _pllx ;
       friend class Periodic4PllXBaseMacro;
-  } ;
+    } ;
 
-    public :
-        class HexaEmptyPll : public HexaEmpty {
+    class HexaEmptyPll : public HexaEmpty
+    {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface4_IMPL innerface_t ;
@@ -756,12 +755,12 @@ public :
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
     private :
-    private :
       mypllx_t _pllx ;
-  } ;
-  typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
+    } ;
+    typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
 
-        class HexaEmptyPllMacro : public hexa_IMPL {
+    class HexaEmptyPllMacro : public hexa_IMPL
+    {
     public :
       typedef HexaPllBaseXMacro mypllx_t ;
       HexaEmptyPllMacro (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
@@ -771,22 +770,21 @@ public :
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
   
-  // Hier, und auch beim Tetraeder besteht die M"oglichkeit das refine
-  // auf dem Grobgitterelement zu "uberschreiben, um gegebenenfalls noch
-  // andere Funktionen mit aufzuklemmen:  
-  // virtual int refine () ;
+      // Hier, und auch beim Tetraeder besteht die M"oglichkeit das refine
+      // auf dem Grobgitterelement zu "uberschreiben, um gegebenenfalls noch
+      // andere Funktionen mit aufzuklemmen:  
+      // virtual int refine () ;
     
     private :
       mypllx_t * _pllx ;
       friend class HexaPllBaseXMacro;
-  } ;
-  
-  // Die Randelemente des verteilten Gitters werden aus Templates 
-  // in 'gitter_hexa_top_pll.h' und 'gitter_tetra_top_pll.h' erzeugt
-  // indem diese die Randelementklassen des sequentiellen Verfahrens
-  // "ubernehmen und mit passenden Extendern anreichern.
-  
     } ;
+  
+    // Die Randelemente des verteilten Gitters werden aus Templates 
+    // in 'gitter_hexa_top_pll.h' und 'gitter_tetra_top_pll.h' erzeugt
+    // indem diese die Randelementklassen des sequentiellen Verfahrens
+    // "ubernehmen und mit passenden Extendern anreichern.
+  } ;
 
   public :
     class MacroGitterBasisPll : public MacroGitterPll, public GitterBasis :: MacroGitterBasis {
