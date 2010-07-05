@@ -1,0 +1,169 @@
+
+-----------------------------------------------
+read macro grid from < ../macrogrids/cube.tetra > !
+-----------------------------------------------
+Grid generated! 
+
+ Gitter :: printSize () : 
+
+ - Elements ............ 6
+ - Boundaries .......... 12
+ - Faces  .............. 18
+ - Edges ............... 19
+ - Vertices ............ 8
+
+---------------------------------------------
+bool   = 1
+char   = 1
+signed char   = 1
+MyAlloc = 1
+Refcount = 4
+HedgeRule  = 4
+Hface3Rule = 4
+Hface4Rule = 4
+DuneIndexProvider = 8
+
+******** TETRA *************************8
+Tetrasize = 144
+Hface3_IMPL = 136
+Hface3_GEO = 88
+Hface3::nb = 32
+HEdge1_IMPL = 96
+HEdge1_GEO = 48
+VertexMacro = 72
+VertexGeo   = 64
+Vertex = 64
+Hbnd3_IMPL  = 96
+
+******** HEXA *************************8
+Hexasize = 168
+Hface4_IMPL = 152
+Hface4_GEO = 96
+Hface4::nb = 32
+Hbnd4_IMPL  = 96
+
+******** Number of Elements ************************8
+Macro elements: size = 0 MB 
+Macro boundary : size = 0 MB 
+Macro faces : size = 0 MB 
+Macro edges : size = 0 MB 
+Macro vertices : size = 0 MB 
+Elements : size = 0 MB
+Boundaries : size = 0 MB
+Faces : size = 0 MB
+Edges : size = 0 MB
+Vertices : size = 0 MB
+Indices : size = 0 MB
+All leaf size : 7004 MB
+bytes per Element: 1167
+Estimated all size : 7879 MB
+BuilderIF size = 6 MB 
+Overall size = 6 MB 
+
+Refine global: run 0
+
+ Gitter :: printSize () : 
+
+ - Elements ............ 48
+ - Boundaries .......... 48
+ - Faces  .............. 120
+ - Edges ............... 98
+ - Vertices ............ 27
+
+Refine global: run 1
+
+ Gitter :: printSize () : 
+
+ - Elements ............ 384
+ - Boundaries .......... 192
+ - Faces  .............. 864
+ - Edges ............... 604
+ - Vertices ............ 125
+
+Refine global: run 2
+
+ Gitter :: printSize () : 
+
+ - Elements ............ 3072
+ - Boundaries .......... 768
+ - Faces  .............. 6528
+ - Edges ............... 4184
+ - Vertices ............ 729
+
+Refine global: run 3
+
+ Gitter :: printSize () : 
+
+ - Elements ............ 24576
+ - Boundaries .......... 3072
+ - Faces  .............. 50688
+ - Edges ............... 31024
+ - Vertices ............ 4913
+
+Refine global: run 4
+
+ Gitter :: printSize () : 
+
+ - Elements ............ 196608
+ - Boundaries .......... 12288
+ - Faces  .............. 399360
+ - Edges ............... 238688
+ - Vertices ............ 35937
+
+Refine global: run 5
+
+ Gitter :: printSize () : 
+
+ - Elements ............ 1572864
+ - Boundaries .......... 49152
+ - Faces  .............. 3170304
+ - Edges ............... 1872064
+ - Vertices ............ 274625
+
+bool   = 1
+char   = 1
+signed char   = 1
+MyAlloc = 1
+Refcount = 4
+HedgeRule  = 4
+Hface3Rule = 4
+Hface4Rule = 4
+DuneIndexProvider = 8
+
+******** TETRA *************************8
+Tetrasize = 144
+Hface3_IMPL = 136
+Hface3_GEO = 88
+Hface3::nb = 32
+HEdge1_IMPL = 96
+HEdge1_GEO = 48
+VertexMacro = 72
+VertexGeo   = 64
+Vertex = 64
+Hbnd3_IMPL  = 96
+
+******** HEXA *************************8
+Hexasize = 168
+Hface4_IMPL = 152
+Hface4_GEO = 96
+Hface4::nb = 32
+Hbnd4_IMPL  = 96
+
+******** Number of Elements ************************8
+Macro elements: size = 0 MB 
+Macro boundary : size = 0 MB 
+Macro faces : size = 0 MB 
+Macro edges : size = 0 MB 
+Macro vertices : size = 0 MB 
+Elements : size = 216 MB
+Boundaries : size = 4 MB
+Faces : size = 411 MB
+Edges : size = 171 MB
+Vertices : size = 16 MB
+Indices : size = 29 MB
+All leaf size : 891053480 MB
+bytes per Element: 566
+Estimated all size : 1002435165 MB
+BuilderIF size = 6 MB 
+Overall size = 6 MB 
+

@@ -17,11 +17,6 @@ using namespace std;
 //#include <alugrid_parallel.h>
 using namespace ALUGridSpace;
 
-void printSizes()
-{
-  cout << "Hexa : " << sizeof(GitterDuneImpl :: Objects :: hexa_IMPL) << endl; 
-}
-
 // refine grid globally, i.e. mark all elements and then call adapt 
 void globalRefine(GitterBasisImpl* grid, int refcount) {
     
@@ -118,7 +113,6 @@ int main (int argc, char ** argv, const char ** envp)
    grid.printsize(); 
    cout << "---------------------------------------------\n";
   
-   printSizes();
    grid.printMemUsage();
    
    globalRefine(&grid, mxl);
