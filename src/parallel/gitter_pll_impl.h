@@ -860,7 +860,7 @@ public :
 
     virtual ProjectVertex* vertexProjection() const { return _ppv; }
     
-    //virtual void printMemUsage();
+    virtual void printMemUsage();
 } ;
 
 

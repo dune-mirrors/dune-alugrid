@@ -1785,6 +1785,9 @@ public :
   virtual void restore (istream &) ;
   virtual void restore (const char*,const char *) ;
 
+  // print memory consumption of grid 
+  virtual void printMemUsage () = 0 ;
+
 // only when xdrclass header was included  
 #ifdef __XDRCLASS_INCLUDED__
   // new xdr backup and restore method

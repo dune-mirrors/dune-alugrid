@@ -2378,19 +2378,16 @@ GitterBasisPll :: ~GitterBasisPll () {
   return ;
 }
 
-#if 0
 void GitterBasisPll :: printMemUsage ()
 {
-  typedef GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro tetra_IMPL ; 
-  typedef GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro  hexa_IMPL ; 
+  //typedef GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro tetra_IMPL ; 
+  //typedef GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro  hexa_IMPL ; 
   typedef GitterBasisPll :: ObjectsPll :: hbndseg3_IMPL hbndseg3_IMPL ; 
   typedef GitterBasisPll :: ObjectsPll :: hbndseg4_IMPL hbndseg4_IMPL ; 
-  typedef GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro hface3_IMPL ; 
-  typedef GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro hface4_IMPL ; 
-  typedef GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro hedge1_IMPL ; 
+  //typedef GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro hface3_IMPL ; 
+  //typedef GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro hface4_IMPL ; 
+  //typedef GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro hedge1_IMPL ; 
   //typedef GitterBasisPll :: ObjectsPll :: VertexPllImplMacro VertexMacro; 
-  typedef VertexPllBaseX VertexMacro; 
-  /*
   typedef GitterBasisPll :: ObjectsPll :: tetra_IMPL tetra_IMPL ; 
   typedef GitterBasisPll :: ObjectsPll :: hexa_IMPL  hexa_IMPL ; 
   typedef GitterBasisPll :: ObjectsPll :: hbndseg3_IMPL hbndseg3_IMPL ; 
@@ -2399,20 +2396,42 @@ void GitterBasisPll :: printMemUsage ()
   typedef GitterBasisPll :: ObjectsPll :: hface4_IMPL hface4_IMPL ; 
   typedef GitterBasisPll :: ObjectsPll :: hedge1_IMPL hedge1_IMPL ; 
   typedef GitterBasisPll :: ObjectsPll :: VertexPllImplMacro VertexMacro; 
-  */
+  typedef GitterBasis :: DuneIndexProvider DuneIndexProvider; 
+  typedef GitterBasis :: Objects :: VertexEmptyMacro VertexEmptyMacro; 
+  typedef GitterBasis :: Objects :: VertexEmpty VertexEmpty; 
+  typedef Gitter :: Geometric :: VertexGeo VertexGeo; 
+  cout << "bool   = " << sizeof(bool) << endl;
+  cout << "char   = " << sizeof(unsigned char) << endl;
+  cout << "signed char   = " << sizeof(signed char) << endl;
   cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
+  cout << "Refcount = " << sizeof(Refcount) << "\n";
+  cout << "HedgeRule  = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
+  cout << "Hface3Rule = " << sizeof(Gitter :: Geometric :: Hface3Rule) <<"\n";
+  cout << "Hface4Rule = " << sizeof(Gitter :: Geometric :: Hface4Rule) <<"\n";
+  cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n\n";
   
+  cout << "******** TETRA *************************8\n";
   cout << "Tetrasize = " << sizeof(tetra_IMPL) << endl;
-  cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
-  cout << "Hface4 = " << sizeof(hface4_IMPL) << endl;
-  cout << "Hface3 = " << sizeof(hface3_IMPL) << endl;
-  cout << "Hface1 = " << sizeof(hedge1_IMPL) << endl;
-  cout << "VertexMacro = " << sizeof(VertexMacro) << endl;
-  cout << "Hbnd3  = " << sizeof(hbndseg3_IMPL) << endl;
-  cout << "Hbnd4  = " << sizeof(hbndseg4_IMPL) << endl;
+  cout << "Hface3_IMPL = " << sizeof(hface3_IMPL) << endl;
+  cout << "Hface3_GEO = " << sizeof( Gitter :: Geometric :: hface3_GEO ) << endl;
+  cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
+  cout << "HEdge1_IMPL = " << sizeof(hedge1_IMPL) << endl;
+  cout << "HEdge1_GEO = " << sizeof(Gitter :: Geometric ::hedge1_GEO) << endl;
+  cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
+  cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
+  cout << "Vertex = " << sizeof(VertexEmpty) << endl;
+  cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl << endl;
 
+  cout << "******** HEXA *************************8\n";
+  cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
+  cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
+  cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
+  cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
+  cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl << endl;
+
+  cout << "******** Number of Elements ************************8\n";
   {
-    int totalSize = 0; 
+    size_t totalSize = 0; 
     bool simplex = false;
     {
       AccessIterator < helement_STI > :: Handle iter (container ());
@@ -2457,10 +2476,61 @@ void GitterBasisPll :: printMemUsage ()
 
     {
       int size = AccessIterator < vertex_STI > :: Handle (container ()).size();
-      size *= sizeof(VertexMacro);
+      size *= sizeof(VertexEmptyMacro);
       cout << "Macro vertices : size = " << size/1024/1024 << " MB \n";
       totalSize += size;
     }
+
+    size_t allSize = 0;
+    size_t numElements = 0;
+    {
+      LeafIterator< helement_STI > it( *this );
+      int size = it->size();
+      numElements = size;
+      size *= (simplex ? sizeof( tetra_IMPL ) : sizeof( hexa_IMPL ));
+      cout << "Elements : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      LeafIterator< hbndseg_STI > it( *this );
+      const int size = it->size() * (simplex ? sizeof( hbndseg3_IMPL ) : sizeof( hbndseg4_IMPL ));
+      cout << "Boundaries : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      LeafIterator< hface_STI > it( *this );
+      const int size = it->size() * (simplex ? sizeof( hface3_IMPL ) : sizeof( hface4_IMPL ));
+      cout << "Faces : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      LeafIterator< hedge_STI > it( *this );
+      const int size = it->size() * sizeof( hedge1_IMPL );
+      cout << "Edges : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      LeafIterator< vertex_STI > it( *this );
+      const int size = it->size() * sizeof( VertexEmpty );
+      cout << "Vertices : size = " << size/1024/1024 << " MB" << endl;
+      allSize += size;
+    }
+
+    {
+      size_t indexMem = 0;
+      for(int i=0; i<4; ++i) 
+        indexMem += indexManager( i ).getMaxIndex() * sizeof( int );
+      cout << "Indices : size = " << indexMem/1024/1024 << " MB" << endl;
+      allSize += indexMem;
+    }
+
+    cout << "All leaf size : " << allSize << " MB" << endl;
+    cout << "bytes per Element: " << allSize/numElements << endl; 
+    cout << "Estimated all size : " << (9*long(allSize) / 8) << " MB" << endl;
 
     size_t build = container().memUsage();
     cout << "BuilderIF size = " << build/1024/1024 << " MB \n";
@@ -2469,5 +2539,4 @@ void GitterBasisPll :: printMemUsage ()
     cout << "\n" ;
   }
 }
-#endif
 
