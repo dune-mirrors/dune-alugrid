@@ -121,7 +121,7 @@ class Refcount {
 #endif 
   // end NDEBUG
 
-  unsigned char _c ;
+  mutable unsigned char _c;
 public :
   inline void reset () { _c = 0 ; }
   inline bool positive () const { return _c > 0 ; }
@@ -1959,23 +1959,23 @@ inline Refcount :: ~Refcount () {  return ;}
 #endif
 
 inline int Refcount :: operator ++ (int) const {
-  return ((int &)_c) ++ ;
+  return _c++;
 }
 
 inline int Refcount ::operator ++ () const {
-  return ++ (int &) _c ;
+  return ++_c;
 }
         
 inline int Refcount :: operator -- (int) const {
-  return ((int &)_c) -- ;
+  return _c--;
 }
         
 inline int Refcount :: operator -- () const {
-  return -- (int &) _c ;
+  return --_c;
 }
 
 inline bool Refcount :: operator ! () const {
-  return _c ? false : true ;
+  return !_c;
 }
         
 inline Refcount :: operator int () const {
