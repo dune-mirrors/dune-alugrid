@@ -19,7 +19,7 @@ lib_LTLIBRARIES = libalugrid.la
 nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h alugrid_2d.h stlheaders.h indexstack.h projectvertex.h $(serialhdrs) $(parallelhdrs) $(duneinterfacehdrs) $(alu2dhdrs)
 
 # add all package flags 
-AM_CPPFLAGS = $(ALUGRID_CPPFLAGS)
+AM_CPPFLAGS = -Wfatal-errors $(ALUGRID_CPPFLAGS)
 libalugrid_la_CPPFLAGS = $(ALUGRID_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
 libalugrid_la_LIBADD = $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS) $(MPI_LDFLAGS) $(MPI_LIBS)
 

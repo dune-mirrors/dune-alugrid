@@ -8,9 +8,6 @@
 // use withc care 
 //#define DONT_USE_ALUGRID_ALLOC 
 
-// if DUNE_NOT_USES_ALUGRID is defined, then index management is deactivated
-//#define _DUNE_NOT_USES_ALU3DGRID_
-
 // include all headers 
 #include "stlheaders.h"
 

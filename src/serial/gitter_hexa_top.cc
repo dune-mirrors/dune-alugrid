@@ -76,7 +76,7 @@ template < class A > bool Hedge1Top < A > :: coarse () {
   // Vorsicht: Im parallelen Gitter bleiben auch Kanten ohne
   // Refcount stehen, um konsistente "Uberg"ange zu erhalten.
 
-  for (inneredge_t * f = this->down () ; f ; f = f->next ()) {
+  for (inneredge_t * f = dwnPtr() ; f ; f = f->next ()) {
     if (f->leaf ()) {
       x &= ! f->ref ;
     } else {
@@ -226,7 +226,7 @@ template < class A > bool Hface4Top < A > :: refine (myrule_t r, int twist) {
   if (a) {  
     if (getrule () == myrule_t :: nosplit) {
       refineImmediate (r) ;
-      {for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = this->nb ; }
+      {for (innerface_t * f = dwnPtr() ; f ; f = f->next ()) f->nb = this->nb ; }
     } else {
       assert (getrule () == myrule_t :: iso4) ;
     }
@@ -877,7 +877,7 @@ template < class A > bool HexaTop < A > :: coarse () {
     assert (_req == myrule_t :: nosplit) ;
     bool x = true ;
     {
-      for (innerhexa_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; 
+      for (innerhexa_t * h = dwnPtr() ; h ; h = h->next ()) x &= h->coarse () ; 
     }
     if (x) 
     {
@@ -916,12 +916,10 @@ template < class A > void HexaTop < A > :: backupCMode (ostream & os) const {
 }
 
 template < class A > void HexaTop < A > :: backupIndex (ostream & os) const {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
   os.write(((const char *) & this->_idx ), sizeof(int));
   for (const innerhexa_t* c = down(); c; c = c->next()) {
     c->backupIndex(os);
   }
-#endif
   return;
 }
 
@@ -940,14 +938,13 @@ void HexaTop < A > :: doBackup (OutStream_t& os) const
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
   {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
-  {for (const innerhexa_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
+  {for (const innerhexa_t * c = dwnPtr() ; c ; c = c->next ()) c->backup (os) ; }
   return ;
 }
 
 template < class A > void HexaTop < A > :: 
 restoreIndex (istream & is, vector<bool> (&isHole) [4]) 
 {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
   // free index from constructor
   // indexManager is cleared from outside 
   is.read ( ((char *) &(this->_idx) ), sizeof(int) );
@@ -960,8 +957,7 @@ restoreIndex (istream & is, vector<bool> (&isHole) [4])
   // set entry to false, because this is not a hole 
   isHole[BuilderIF :: IM_Elements][this->getIndex()] = false;
   
-  {for (innerhexa_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is, isHole ) ; }
-#endif
+  {for (innerhexa_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, isHole ) ; }
   return;
 }
 
@@ -1006,7 +1002,7 @@ void HexaTop < A > :: doRestore (InStream_t & is)
     assert (getrule() == r) ;
     {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
     {for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
-    {for (innerhexa_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
+    {for (innerhexa_t * c = dwnPtr () ; c ; c = c->next ()) c->restore (is) ; }
   }
   return ;
 }

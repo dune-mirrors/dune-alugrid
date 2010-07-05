@@ -263,8 +263,7 @@ public :
   {
   public:
     enum { interior = 0 , border = 111 , ghost = 222 };
-    // das wird hier ja langsam zur eierlegenden Wollmilchsau
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
+
   protected:
     // internal index of item 
     int _idx;
@@ -292,24 +291,19 @@ public :
       _leafref(0) , 
       _isCopy(false) 
     {}
-#endif
+
   public:
     // backupIndexErr message 
     void backupIndexErr () const {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
       abort();
-#endif
     }
     // restoreIndexErr message 
     void restoreIndexErr () const {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       cerr << "DuneIndexProvider :: restoreIndex : Implemenation should be in inherited class " << __FILE__  << __LINE__ << "\n";
       abort();
-#endif
     }
 
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
     // return index of item 
     inline int getIndex () const 
     { 
@@ -409,30 +403,11 @@ public :
     {
       return (bndId() == border);
     }
-#else 
-    // empty methods when not using with Dune 
-    inline int getIndex () const { return -1; }
-    void setIndex ( const int index ) {}
-    inline void freeIndex ( IndexManagerType & im ) {} 
-    inline void setIndex ( IndexManagerType & im, const int index ) {}
-    inline void addleaf() {}
-    inline void removeleaf() {}
-    inline bool isLeafEntity() const {return false;}
-    inline int leafRefCount() const { return 0; }
-    inline int bndId() const { return 0; }
-    inline void setBndId (const int id) {}
-    inline void setGhostBndId (const int id) {}
-    bool isGhost () const { return false; } 
-    bool isBorder () const { return false; } 
-    bool isInterior () const { return true; }
-#endif
   };
     
 public :
   class vertex : public stiExtender_t :: VertexIF  
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
                , public DuneIndexProvider 
-#endif
   {
   protected :
     vertex () {}
@@ -529,16 +504,14 @@ public :
   // class with all extensions for helement 
   class Dune_helement : public DuneIndexProvider 
   {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
   protected: 
     // abuse ref to refined tag 
     using DuneIndexProvider :: ref ;
     Dune_helement () 
     {
-      // mark as new element 
+      // mark as new element by increasing reference counter 
       ++ ref ;
     }
-#endif
   public:
     // reset the _refinedTag to false 
     void resetRefinedTag(); 
@@ -1742,9 +1715,7 @@ public :
       virtual void backupCMode (const char*,const char *) const ;
       friend class MacroGridBuilder ;
       friend class MacroGhostBuilder;
-#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
       friend class DuneParallelGridMover;
-#endif
     } ;
   } ;
 private :
@@ -2220,17 +2191,11 @@ inline int Gitter :: helement :: leaf () const {
 
 // Dune extensions 
 inline void Gitter :: Dune_helement :: resetRefinedTag () {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
   ref.reset ();
-#endif
 }
 
 inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
   return ref.positive();
-#else 
-  return false;
-#endif
 }
 
 inline int Gitter :: hbndseg :: leaf () const {
@@ -2306,14 +2271,11 @@ inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertexPair 
 }
 
 inline void Gitter :: Geometric :: VertexGeo :: backupIndex ( ostream & os ) const {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
   os.write( ((const char *) &_idx ), sizeof(int) ) ;
-#endif
 }
 
 inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is, vector<bool>(&isHole)[4] ) 
 {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_ 
   is.read ( ((char *) &_idx), sizeof(int) ); 
 
   // mark vertex entry as not a hole 
@@ -2321,7 +2283,6 @@ inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is, vec
   // make sure sizes match 
   assert( _idx < (int) isHole[BuilderIF :: IM_Vertices].size() );
   isHole[BuilderIF :: IM_Vertices][_idx] = false;
-#endif
 }
 
 // #     #                                    #    ######

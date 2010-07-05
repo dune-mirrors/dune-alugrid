@@ -123,7 +123,7 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
     // set parent rule 
     {
       myrule_t myRule = getrule();
-      for (innerface_t * f = down () ; f ; f = f->next ()) 
+      for (innerface_t * f = dwnPtr() ; f ; f = f->next ()) 
       {
         f->nb._parRule = myRule;
       }
@@ -153,7 +153,7 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
           if (getrule () == myrule_t :: nosplit) {
             refineImmediate (r) ;
             { 
-              for (innerface_t * f = down () ; f ; f = f->next ()) f->nb = this->nb ; 
+              for (innerface_t * f = dwnPtr() ; f ; f = f->next ()) f->nb = this->nb ; 
             }
           } 
           else 
@@ -182,7 +182,7 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
 
 template < class A > bool Hface3Top < A > :: coarse () 
 {
-  innerface_t * f = down () ;
+  innerface_t * f = dwnPtr() ;
   if (!f) return false ;
   bool x = true ;
   do {
@@ -231,7 +231,7 @@ void Hface3Top < A > :: doBackup (OutStream_t & os) const
 {
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
-  {for (const innerface_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
+  {for (const innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->backup (os) ; }
   return ;
 }
 
@@ -250,7 +250,7 @@ void Hface3Top < A > :: doRestore (InStream_t & is)
 {
   refineImmediate (myrule_t ((char) is.get ())) ;
   {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
-  {for (innerface_t * c = down () ; c ; c = c->next ()) c->restore (is) ; }
+  {for (innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->restore (is) ; }
   return ;
 }
 
@@ -1034,7 +1034,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
     assert (_req == myrule_t :: nosplit) ;
     bool x = true ;
     {
-      for (innertetra_t * h = down () ; h ; h = h->next ()) x &= h->coarse () ; 
+      for (innertetra_t * h = dwnPtr() ; h ; h = h->next ()) x &= h->coarse () ; 
     }
 
     // if x is true, then all children are marked for coarsening and have
@@ -1075,7 +1075,6 @@ template < class A > void TetraTop < A > :: backupCMode (ostream & os) const {
 // buckupTetra 
 template < class A > void TetraTop < A > :: backupIndex (ostream & os) const 
 {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write my index 
   os.write( ((const char *) & this->_idx ), sizeof(int) ) ;
 
@@ -1099,9 +1098,8 @@ template < class A > void TetraTop < A > :: backupIndex (ostream & os) const
 
   // write children 
   {
-    for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backupIndex (os) ; 
+    for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ; 
   }
-#endif
   return;
 }
 
@@ -1121,7 +1119,7 @@ void TetraTop < A > :: doBackup (OutStream_t & os) const
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
   {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
-  {for (const innertetra_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
+  {for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backup (os) ; }
   
   return ;
 }
@@ -1130,7 +1128,6 @@ void TetraTop < A > :: doBackup (OutStream_t & os) const
 template < class A > void TetraTop < A > :: 
 restoreIndex (istream & is, vector<bool> (& isHole) [4] ) 
 {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
   // free index from constructor
   is.read ( ((char *) &(this->_idx) ), sizeof(int) );
 
@@ -1164,9 +1161,8 @@ restoreIndex (istream & is, vector<bool> (& isHole) [4] )
   */
 
   {
-    for (innertetra_t * c = down () ; c ; c = c->next ()) c->restoreIndex (is, isHole ) ; 
+    for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, isHole ) ; 
   }
-#endif
   return;
 }
 
@@ -1242,7 +1238,7 @@ void TetraTop < A > :: doRestore (InStream_t & is)
     
     // call restore on children 
     { 
-      for (innertetra_t * c = down () ; c ; c = c->next ()) c->restore (is) ; 
+      for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restore (is) ; 
     }
   }
   

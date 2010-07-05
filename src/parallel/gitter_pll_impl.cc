@@ -650,7 +650,6 @@ readDynamicState (ObjectStream & os, int)
   try 
   {
 
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
     // read the real level of ghost 
     assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
     const bool wasLeaf = this->ghostLeaf() ;
@@ -675,7 +674,6 @@ readDynamicState (ObjectStream & os, int)
     assert( myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1 );
     assert( (!nowLeaf) ? (! myhbnd().isLeafEntity()) : 1);
     assert( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
-#endif
     
   } 
   catch (ObjectStream :: EOFException) 
@@ -759,11 +757,9 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & 
 
 void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const 
 {
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write level to know the level of ghost on the other side
   os.writeObject( mytetra().level() );
   os.writeObject( mytetra().leaf()  );
-#endif
   return ;
 }
 
@@ -1419,11 +1415,9 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const
 {
   // siehe writeDynamicState von Tetra 
 
-#ifndef _DUNE_NOT_USES_ALU3DGRID_
   // write level to know the level of ghost on the other side
   os.writeObject( myhexa().level() );
   os.writeObject( myhexa().leaf()  );
-#endif
 
   return ;
 }
