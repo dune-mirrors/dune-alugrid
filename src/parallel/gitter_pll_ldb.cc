@@ -2,11 +2,6 @@
 // modifications for Dune Interface 
 // (c) Robert Kloefkorn 2004 - 2005 
 
-#ifdef _DUNE_NOT_USES_ALU3DGRID_
-#include "party_lib.h"
-#include "metis.h"
-#endif
-  
 #include "gitter_pll_ldb.h" 
 
 void LoadBalancer :: DataBase :: edgeUpdate (const GraphEdge & e) 
