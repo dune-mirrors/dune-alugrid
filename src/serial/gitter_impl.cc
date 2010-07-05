@@ -567,6 +567,7 @@ insert_hbnd4 (hface4_GEO * f, int i,
   return insert_hbnd4 (f,i,b); 
 }
 
+
 void GitterBasisImpl :: printMemUsage ()
 {
   typedef GitterBasis :: DuneIndexProvider DuneIndexProvider; 
@@ -611,7 +612,7 @@ void GitterBasisImpl :: printMemUsage ()
 
   cout << "******** Number of Elements ************************8\n";
   {
-    int totalSize = 0; 
+    size_t totalSize = 0; 
     bool simplex = false;
     {
       AccessIterator < helement_STI > :: Handle iter (container ());
@@ -661,10 +662,13 @@ void GitterBasisImpl :: printMemUsage ()
       totalSize += size;
     }
 
-    int allSize = 0;
+    size_t allSize = 0;
+    size_t numElements = 0;
     {
       LeafIterator< helement_STI > it( *this );
-      const int size = it->size() * (simplex ? sizeof( tetra_IMPL ) : sizeof( hexa_IMPL ));
+      int size = it->size();
+      numElements = size;
+      size *= (simplex ? sizeof( tetra_IMPL ) : sizeof( hexa_IMPL ));
       cout << "Elements : size = " << size/1024/1024 << " MB" << endl;
       allSize += size;
     }
@@ -706,6 +710,7 @@ void GitterBasisImpl :: printMemUsage ()
     }
 
     cout << "All leaf size : " << allSize << " MB" << endl;
+    cout << "bytes per Element: " << allSize/numElements << endl; 
     cout << "Estimated all size : " << (9*long(allSize) / 8) << " MB" << endl;
 
     size_t build = container().memUsage();
