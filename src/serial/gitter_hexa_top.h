@@ -5,38 +5,16 @@
 #ifndef GITTER_HEXA_TOP_H_INCLUDED
 #define GITTER_HEXA_TOP_H_INCLUDED
 
-template < class Impl > 
-class DownPtrStorage : public MyAlloc 
-{
-  DownPtrStorage( const DownPtrStorage& );
-protected:
-  typedef Impl                           down_t ;
-  down_t      *_dwn ;
-public:  
-  DownPtrStorage() : _dwn ( 0 ) {} 
-  DownPtrStorage(down_t * dwn ) : _dwn ( dwn ) {} 
-
-  // store down pointer 
-  void store( down_t* dwn )  {  _dwn = dwn ;  }
-
-  // destructor 
-  ~DownPtrStorage() { delete _dwn ; _dwn = 0;  }
-  // down methods 
-  down_t* dwn() { return _dwn ;}
-  const down_t* dwn() const { return _dwn ;}
-};
-
-
 template < class Impl , bool hasVertex > 
-class InnerVertexStorage : public DownPtrStorage< Impl > 
+class InnerVertexStorage : public MyAlloc 
 {
   InnerVertexStorage( const InnerVertexStorage& );
 protected:
-  typedef DownPtrStorage< Impl > base_t ;
-  typedef typename base_t :: down_t  down_t ;
+  typedef Impl                           down_t ;
   typedef typename Impl :: innervertex_t innervertex_t ;
+  typedef void* inneredge_t ;
+  typedef void* innerface_t ;
   innervertex_t _cv;
-  using base_t :: _dwn;
 public:  
   InnerVertexStorage( int level, 
                       double x, double y, 
@@ -44,23 +22,21 @@ public:
     : _cv( level, x, y, z, vx ) 
   {}
 
-  InnerVertexStorage( down_t * dwn ) : base_t( dwn ) {}
-
-  ~InnerVertexStorage () { delete _dwn; _dwn = 0; }
-
   // vertex methods 
   innervertex_t* cv() { return &_cv ;}
   const innervertex_t* cv() const { return &_cv ;}
+
+  // do nothing here  
+  void store()  {}
 };
 
 
 template < class Impl > 
-class InnerVertexStorage< Impl , false > : public DownPtrStorage< Impl > 
+class InnerVertexStorage< Impl , false > : public MyAlloc 
 {
   InnerVertexStorage( const InnerVertexStorage& );
 protected:
-  typedef DownPtrStorage< Impl > base_t ;
-  typedef typename base_t :: down_t down_t ;
+  typedef Impl                           down_t ;
   typedef typename Impl :: innervertex_t innervertex_t ;
 public:  
   InnerVertexStorage( int level, 
@@ -68,7 +44,10 @@ public:
                       double z, innervertex_t& vx )
   {}
 
-  InnerVertexStorage( down_t * down ) : base_t ( down ) {} 
+  InnerVertexStorage( ) {} 
+
+  // do nothing here  
+  void store()  {}
 
   // vertex methods 
   innervertex_t* cv() { return 0 ;}
@@ -80,11 +59,10 @@ class InnerEdgeStorage : public InnerVertexStorage< Impl, hasVertex >
 {
 protected:
   typedef InnerVertexStorage< Impl, hasVertex >    base_t ;
-  typedef typename base_t :: down_t  down_t ;
   typedef typename base_t :: innervertex_t innervertex_t;
   typedef typename Impl :: inneredge_t  inneredge_t ;
+  typedef void* innerface_t ;
   inneredge_t * _ed ;
-  using base_t :: _dwn;
 public:  
   using base_t :: store ;
 
@@ -94,14 +72,14 @@ public:
     : base_t( level, x, y, z, vx ) , _ed ( 0 )
   {  }
 
-  InnerEdgeStorage ( down_t* dwn, inneredge_t* ed ) 
-    : base_t( dwn ), _ed ( ed ) {}
+  InnerEdgeStorage ( inneredge_t* ed ) 
+    : _ed ( ed ) {}
 
   // store edge pointer 
   void store( inneredge_t* ed )  {  _ed = ed ;  }
 
   // destructor 
-  ~InnerEdgeStorage() { delete _dwn ; _dwn = 0; delete _ed ; _ed = 0; }
+  ~InnerEdgeStorage() { delete _ed ; _ed = 0; }
   // edge methods 
   inneredge_t* ed() { return _ed ;}
   const inneredge_t* ed() const { return _ed ;}
@@ -114,10 +92,8 @@ protected:
   typedef InnerEdgeStorage< Impl , hasVertex >      base_t ;
   typedef typename base_t :: innervertex_t innervertex_t;
   typedef typename base_t :: inneredge_t   inneredge_t;
-  typedef typename base_t :: down_t        down_t;
-  typedef typename Impl :: innerface_t     innerface_t ;
+  typedef typename Impl   :: innerface_t   innerface_t ;
   innerface_t * _fce ;
-  using base_t :: _dwn;
 public:  
   using base_t :: store ;
 
@@ -132,17 +108,63 @@ public:
   // store face pointer 
   void store( innerface_t* fce )  {  _fce = fce ;  }
 
-  InnerFaceStorage ( down_t* dwn, 
-                     innerface_t* fce, 
+  InnerFaceStorage ( innerface_t* fce, 
                      inneredge_t* ed = 0 )
-    : base_t( dwn , ed ), _fce ( fce ) {}
+    : base_t( ed ), _fce ( fce ) {}
 
   // destructor 
-  ~InnerFaceStorage() { delete _dwn ; _dwn = 0; delete _fce ; _fce = 0; }
+  ~InnerFaceStorage() { delete _fce ; _fce = 0; }
   // face methods 
   innerface_t* fce() { return _fce ;}
   const innerface_t* fce() const { return _fce ;}
 };
+
+template < class ImplStorage > 
+class InnerStorage : public ImplStorage  
+{
+  InnerStorage( const InnerStorage& );
+protected:
+  typedef ImplStorage  base_t ;
+  typedef typename base_t :: innervertex_t  innervertex_t;
+  typedef typename base_t :: inneredge_t    inneredge_t;
+  typedef typename base_t :: innerface_t    innerface_t;
+  typedef typename base_t :: down_t  down_t ;
+  down_t      *_dwn ;
+public:  
+  using base_t :: store ;
+
+  InnerStorage( int level, 
+                  double x, double y, 
+                  double z, innervertex_t& vx )
+    : base_t( level, x, y, z, vx ) , _dwn( 0 )
+  {  }
+
+  InnerStorage() : _dwn ( 0 ) { } 
+  // constructor taking down pointer 
+  InnerStorage( down_t * dwn ) : _dwn ( dwn ) {} 
+
+  // constructor taking down and edge 
+  InnerStorage ( down_t * dwn, 
+                 inneredge_t* ed )
+    : base_t( ed ), _dwn( dwn ) {}
+
+  // constructor taking down, face and edge 
+  InnerStorage ( down_t * dwn, 
+                 innerface_t* fce, 
+                 inneredge_t* ed = 0 )
+    : base_t( fce, ed ), _dwn( dwn ) {}
+
+  // store down pointer 
+  void store( down_t* dwn )  {  _dwn = dwn ;  }
+
+  // destructor 
+  ~InnerStorage() { delete _dwn ; _dwn = 0;  }
+
+  // down methods 
+  down_t* dwn() { return _dwn ;}
+  const down_t* dwn() const { return _dwn ;}
+};
+
 
 
 template < class A > class Hedge1Top : public A 
@@ -152,7 +174,7 @@ template < class A > class Hedge1Top : public A
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: myvertex_t    myvertex_t ;
     typedef typename A :: myrule_t      myrule_t ;
-    typedef InnerVertexStorage < inneredge_t , true > inner_t ;
+    typedef InnerStorage < InnerVertexStorage< inneredge_t , true > > inner_t ;
   protected :
     inneredge_t * _bbb ;  // 8 
     inner_t * _inner ;    // 8 
@@ -215,7 +237,7 @@ template < class A > class Hface4Top : public A
     typedef typename A :: myhedge1_t         myhedge1_t ;
     typedef typename A :: myvertex_t         myvertex_t ;
     typedef typename A :: myrule_t           myrule_t ;
-    typedef InnerEdgeStorage< innerface_t , true  >  inner_t ;
+    typedef InnerStorage < InnerEdgeStorage< innerface_t , true > > inner_t ;
 
   private :
     innerface_t * _bbb ; // 8 
@@ -341,7 +363,7 @@ template < class A > class HexaTop : public A {
     typedef typename A :: myvertex_t  myvertex_t ;
     typedef typename A :: myrule_t  myrule_t ;
     typedef typename A :: balrule_t   balrule_t ;
-    typedef InnerFaceStorage< innerhexa_t , true > inner_t ;
+    typedef InnerStorage < InnerFaceStorage< innerhexa_t , true > > inner_t ;
   protected:  
     inline void refineImmediate (myrule_t) ;
     inline void append (innerhexa_t * h) ;

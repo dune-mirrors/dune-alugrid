@@ -16,7 +16,7 @@ template < class A > class Hface3Top : public A
     typedef typename A :: myhedge1_t    myhedge1_t ;
     typedef typename A :: myvertex_t    myvertex_t ;
     typedef typename A :: myrule_t      myrule_t ;
-    typedef InnerEdgeStorage< innerface_t , false >  inner_t ;
+    typedef InnerStorage< InnerEdgeStorage< innerface_t , false > > inner_t ;
 
   private :
     innerface_t * _bbb ;
@@ -155,7 +155,7 @@ template < class A > class TetraTop : public A {
     typedef typename A :: myhface3_t  myhface3_t ;
     typedef typename A :: myrule_t  myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
-    typedef InnerFaceStorage< innertetra_t , false > inner_t ; 
+    typedef InnerStorage< InnerFaceStorage< innertetra_t , false > > inner_t ;
 
   protected:  
     void refineImmediate (myrule_t) ;
