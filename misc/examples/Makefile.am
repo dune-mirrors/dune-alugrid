@@ -10,11 +10,12 @@ CXX=mpiCC
 # work arround for automake versions < 1.8 
 SOURCE_DIR=../../src
 AM_CPPFLAGS = $(ALL_PKG_CPPFLAGS) $(MPI_CPPFLAGS)  -I$(SOURCE_DIR) -I$(SOURCE_DIR)/serial -I$(SOURCE_DIR)/parallel -I$(SOURCE_DIR)/duneinterface 
+LDADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS) 
 
 # headers to install 
 noinst_PROGRAMS = loadlb sizes # example sizes # adapt
 #example_SOURCES = example.cc $(SOURCE_DIR)/alugrid_serial.cc 
-sizes_SOURCES = sizes.cc $(SOURCE_DIR)/alugrid_serial.cc  
+sizes_SOURCES = sizes.cc $(SOURCE_DIR)/alugrid_serial.cc $(SOURCE_DIR)/alugrid_parallel.cc
 #adapt_SOURCES = adapt.cc $(SOURCE_DIR)/alugrid_2d.cc $(SOURCE_DIR)/alugrid_serial.cc
 loadlb_SOURCES = loadlb.cc  $(SOURCE_DIR)/alugrid_serial.cc $(SOURCE_DIR)/alugrid_parallel.cc
 loadlb_LDADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS) 

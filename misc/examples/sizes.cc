@@ -8,17 +8,20 @@
 //
 //***********************************************************************
 #include <iostream>
+#include <mpi.h>
+
 using namespace std;
 
 //#define DONT_USE_ALUGRID_ALLOC
 
 // include serial part of ALUGrid 
-#include <alugrid_serial.h>
-//#include <alugrid_parallel.h>
+//#include <alugrid_serial.h>
+#include <alugrid_parallel.h>
 using namespace ALUGridSpace;
 
 // refine grid globally, i.e. mark all elements and then call adapt 
-void globalRefine(GitterBasisImpl* grid, int refcount) {
+template <class GitterType>
+void globalRefine(GitterType* grid, int refcount) {
     
    for (int count=refcount ; count > 0; count--) {
    cout << "Refine global: run " << refcount-count << endl;
@@ -84,7 +87,7 @@ void levelwalk(GitterBasisImpl* grid, int level) {
 // exmaple on read grid, refine global and print again 
 int main (int argc, char ** argv, const char ** envp) 
 {
-  //MPI_Init(&argc,&argv);
+  MPI_Init(&argc,&argv);
 
    int mxl = 0; 
    if (argc < 2) 
@@ -105,9 +108,9 @@ int main (int argc, char ** argv, const char ** envp)
    cout << "-----------------------------------------------\n";
 
    {
-   //MpAccessMPI a (MPI_COMM_WORLD);
-   //GitterDunePll grid(macroname.c_str(),a);
-   GitterDuneImpl grid(macroname.c_str());
+   MpAccessMPI a (MPI_COMM_WORLD);
+   GitterDunePll grid(macroname.c_str(),a);
+   //GitterDuneImpl grid(macroname.c_str());
    
    cout << "Grid generated! \n";
    grid.printsize(); 
@@ -122,7 +125,7 @@ int main (int argc, char ** argv, const char ** envp)
    cin.get();
    }
 
-   //MPI_Finalize();
+   MPI_Finalize();
    return 0;
 }
 
