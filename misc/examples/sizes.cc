@@ -125,7 +125,7 @@ int main (int argc, char ** argv, const char ** envp)
    //levelwalk(&grid, mxl);
    //globalCoarsening(&grid, mxl);
    grid.printMemUsage();
-   while (1); 
+   cin.get();
    }
 
    //MPI_Finalize();
