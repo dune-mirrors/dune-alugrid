@@ -151,9 +151,9 @@ template < class A > class TetraTop : public A {
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: inneredge_t   inneredge_t ;
     typedef typename A :: innerface_t   innerface_t ;
-    typedef typename A :: myhedge1_t  myhedge1_t ;
-    typedef typename A :: myhface3_t  myhface3_t ;
-    typedef typename A :: myrule_t  myrule_t ;
+    typedef typename A :: myhedge1_t    myhedge1_t ;
+    typedef typename A :: myhface3_t    myhface3_t ;
+    typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
     typedef InnerStorage< InnerFaceStorage< innertetra_t , false > > inner_t ;
 
