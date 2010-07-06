@@ -152,7 +152,7 @@ bool EdgePllBaseX :: unlockAndResume (bool r)
   return x ;
 }
 
-EdgePllBaseXMacro :: EdgePllBaseXMacro (myhedge1_t & e) : EdgePllBaseX (e), _moveTo (), _ref () {
+EdgePllBaseXMacro :: EdgePllBaseXMacro (myhedge1_t & e) : _edge(e), _moveTo (), _ref () {
   return ;
 }
 
@@ -266,7 +266,7 @@ void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i)
 // #        #     # #       #    
 // #        #     #  #####  ######
 
-template < class A > FacePllBaseXMacro < A > :: FacePllBaseXMacro (myhface_t & f) : FacePllBaseX < A > (f), _moveTo (), _ref () {
+template < class A > FacePllBaseXMacro < A > :: FacePllBaseXMacro (myhface_t & f) : _face (f), _moveTo (), _ref () {
   return ;
 }
 
@@ -798,7 +798,7 @@ void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int 
 }
 
 TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : 
-  TetraPllXBase (t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) 
+  TetraPllXBase (t), _tetra(t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) 
 {
   LinearMapping :: barycenter(
       mytetra ().myvertex (0)->Point (), 
@@ -1425,7 +1425,11 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const
   return ;
 }
 
-HexaPllBaseXMacro :: HexaPllBaseXMacro (myhexa_t & h) : HexaPllBaseX (h), _ldbVertexIndex (-1), _moveTo (), _erasable (false) 
+HexaPllBaseXMacro :: HexaPllBaseXMacro (myhexa_t & h) 
+: _hexa(h)
+, _moveTo ()
+, _ldbVertexIndex (-1)
+, _erasable (false) 
 {
   // calculate bary center 
   TrilinearMapping :: barycenter (
@@ -1750,11 +1754,13 @@ void GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: detachPllXFromMacro (
 }
 
 EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this ;
 }
 
 const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this ;
 }
 
 GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: Hedge1EmptyPllMacro (myvertex_t * a, myvertex_t * b) :
@@ -1787,11 +1793,13 @@ void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: detachPllXFromMacro 
 }
 
 FacePllXIF_t & GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this ;
 }
 
 const FacePllXIF_t & GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this ;
 }
 
 GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2)
@@ -1822,11 +1830,13 @@ void GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: detachPllXFromMacro 
 }
 
 FacePllXIF_t & GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this ;
 }
 
 const FacePllXIF_t & GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this ;
 }
 
 GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: Hface4EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3)
@@ -1857,11 +1867,13 @@ void GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: detachPllXFromMacro 
 }
 
 ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this;
 }
 
 const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this;
 }
 
 void GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
@@ -1999,11 +2011,13 @@ void GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: detachPllXFromMac
 
 
 ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this;
 }
 
 const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  return _pllx ;
+  //return _pllx ;
+  return *this;
 }
 
 void GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {

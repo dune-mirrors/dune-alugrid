@@ -58,8 +58,9 @@ class VertexPllBaseX : public VertexPllXIF, public MyAlloc {
 class EdgePllBaseX : public EdgePllXIF, public MyAlloc {
   protected :
     typedef Gitter :: Geometric :: hedge1_GEO myhedge1_t ;
-    inline myhedge1_t & myhedge1 () ;
-    inline const myhedge1_t & myhedge1 () const ;
+    virtual myhedge1_t & myhedge1 () = 0;
+    virtual const myhedge1_t & myhedge1 () const = 0;
+    inline EdgePllBaseX () {} 
   public :
     inline EdgePllBaseX (myhedge1_t &) ;
     inline ~EdgePllBaseX () ;
@@ -76,8 +77,8 @@ class EdgePllBaseX : public EdgePllXIF, public MyAlloc {
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-  private :
-    myhedge1_t & _edge ;
+  //private :
+  //  myhedge1_t & _edge ;
 } ;
 
 class EdgePllBaseXMacro : public EdgePllBaseX {
@@ -87,6 +88,8 @@ class EdgePllBaseXMacro : public EdgePllBaseX {
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
 
+    inline myhedge1_t & myhedge1 () { return _edge; }
+    inline const myhedge1_t & myhedge1 () const { return _edge; }
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -97,6 +100,7 @@ class EdgePllBaseXMacro : public EdgePllBaseX {
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
   private :
+    myhedge1_t & _edge ;
     map < int, int, less < int > > _moveTo ;
     Refcount _ref ;
 } ;
@@ -104,10 +108,13 @@ class EdgePllBaseXMacro : public EdgePllBaseX {
 template < class A > class FacePllBaseX : public FacePllXIF, public MyAlloc {
   protected :
     typedef A myhface_t ;
-    inline myhface_t & myhface () ;
-    inline const myhface_t & myhface () const ;
+    virtual myhface_t & myhface () = 0;
+    virtual const myhface_t & myhface () const = 0;
+    inline FacePllBaseX () {} 
+
   public :
     inline FacePllBaseX (myhface_t &) ;
+
     inline ~FacePllBaseX () {}
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
@@ -126,8 +133,8 @@ template < class A > class FacePllBaseX : public FacePllXIF, public MyAlloc {
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-  private :
-    myhface_t & _face ;
+  //private :
+  //  myhface_t & _face ;
 } ;
 
 template < class A > class FacePllBaseXMacro : public FacePllBaseX < A > 
@@ -139,6 +146,8 @@ template < class A > class FacePllBaseXMacro : public FacePllBaseX < A >
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
 
+    inline myhface_t & myhface () { return _face; }
+    inline const myhface_t & myhface () const { return _face; }
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -150,6 +159,7 @@ template < class A > class FacePllBaseXMacro : public FacePllBaseX < A >
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
   private :
+    myhface_t & _face ;
     map < int, int, less < int > > _moveTo ;
     Refcount _ref ;
 } ;
@@ -198,8 +208,10 @@ class ElementPllBaseX : public ElementPllXIF, public MyAlloc
 class TetraPllXBase : public ElementPllBaseX {
   public :
     typedef Gitter :: Geometric :: tetra_GEO mytetra_t ;
-    inline mytetra_t & mytetra () ;
-    inline const mytetra_t & mytetra () const ;
+    virtual mytetra_t & mytetra () = 0 ;
+    virtual const mytetra_t & mytetra () const = 0;
+  protected:  
+    inline TetraPllXBase () {}
   public :
     inline TetraPllXBase (mytetra_t &) ;
     inline ~TetraPllXBase () {}
@@ -214,13 +226,15 @@ class TetraPllXBase : public ElementPllBaseX {
     virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) ;
     virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) ; 
   private:
-    mytetra_t & _tetra ;
+    //mytetra_t & _tetra ;
 } ;
 
 class TetraPllXBaseMacro : public TetraPllXBase {
   public :
     TetraPllXBaseMacro (mytetra_t &) ;
    ~TetraPllXBaseMacro () ;
+    virtual mytetra_t & mytetra () { return _tetra; }
+    virtual const mytetra_t & mytetra () const { return _tetra; }
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -247,10 +261,11 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     void packAsBndNow (int, ObjectStream &) const;
     
   private :
+    mytetra_t& _tetra;
+    double _center [3] ;
     int _ldbVertexIndex ;
     map < int, int, less < int > > _moveTo ;
     bool _erasable ;
-    double _center [3] ;
 } ;
 
 // ######                                                           #####
@@ -366,8 +381,10 @@ class Periodic4PllXBaseMacro : public Periodic4PllXBase {
 class HexaPllBaseX : public ElementPllBaseX {
   protected :
     typedef Gitter :: Geometric :: hexa_GEO myhexa_t ;
-    inline myhexa_t & myhexa () ;
-    inline const myhexa_t & myhexa () const ;
+    virtual myhexa_t & myhexa () = 0 ;
+    virtual const myhexa_t & myhexa () const = 0 ;
+    inline HexaPllBaseX () {}
+
   public :
     inline HexaPllBaseX (myhexa_t &) ;
     inline ~HexaPllBaseX () {}
@@ -380,8 +397,8 @@ class HexaPllBaseX : public ElementPllBaseX {
     // method to get internal hexa located behind this parallel interface 
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 
-  private :
-    myhexa_t & _hexa ;
+  //private :
+  //  myhexa_t & _hexa ;
 } ;
 
 class HexaPllBaseXMacro : public HexaPllBaseX {
@@ -390,6 +407,9 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
    ~HexaPllBaseXMacro () ;
     virtual void writeStaticState (ObjectStream &, int) const ;
   public :
+    virtual myhexa_t & myhexa () { return _hexa; }
+    virtual const myhexa_t & myhexa () const { return _hexa; }
+
     virtual int ldbVertexIndex () const ;
     virtual int & ldbVertexIndex () ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
@@ -417,10 +437,11 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
 
     void packAsBndNow (int, ObjectStream &) const;
   private :
-    int _ldbVertexIndex ;
-    map < int, int, less < int > > _moveTo ;
-    bool _erasable ;
+    myhexa_t & _hexa ;
     double _center [3] ;
+    map < int, int, less < int > > _moveTo ;
+    int _ldbVertexIndex ;
+    bool _erasable ;
 } ;
 
 class BndsegPllBaseX : public ElementPllBaseX {
@@ -540,17 +561,21 @@ public :
       friend class VertexPllBaseX;
     } ;
 
-    class Hedge1EmptyPll : public Hedge1Empty 
+    class Hedge1EmptyPll : public Hedge1Empty
+                         , public EdgePllBaseX
     {
     protected :
       inline bool lockedAgainstCoarsening () const ;
     public :
+      inline myhedge1_t & myhedge1 () { return *this; }
+      inline const myhedge1_t & myhedge1 () const { return *this; }
+
       typedef EdgePllBaseX mypllx_t ;
       inline Hedge1EmptyPll (myvertex_t *,myvertex_t *) ;
       virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-    private :
-      mypllx_t _pllx ;
+    //private :
+     // mypllx_t _pllx ;
       friend class EdgePllBaseX;
     } ;
     typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
@@ -571,16 +596,21 @@ public :
     } ;
 
     class Hface3EmptyPll : public Hface3Empty
+                         , public FacePllBaseX< hface3_GEO >
     {
     protected :
       typedef hedge1_IMPL inneredge_t ;
     public :
       typedef FacePllBaseX < hface3_GEO > mypllx_t ;
+
+      inline myhface_t & myhface () { return *this; };
+      inline const myhface_t & myhface () const { return *this; }
+
       inline Hface3EmptyPll (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
       virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-    private :
-      mypllx_t _pllx ;
+    //private :
+      //mypllx_t _pllx ;
       friend class FacePllBaseX < hface3_GEO >;
     } ;
     typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
@@ -600,17 +630,21 @@ public :
       friend class FacePllBaseXMacro < hface3_GEO >;
     } ;
 
-    class Hface4EmptyPll : public Hface4Empty 
+    class Hface4EmptyPll : public Hface4Empty
+                         , public FacePllBaseX< hface4_GEO >
     {
     protected :
       typedef hedge1_IMPL inneredge_t ;
     public :
+      inline myhface_t & myhface () { return *this; };
+      inline const myhface_t & myhface () const { return *this; }
+
       typedef FacePllBaseX < hface4_GEO > mypllx_t ;
       inline Hface4EmptyPll (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
       virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-    private:
-      mypllx_t _pllx ;
+    //private:
+      //mypllx_t _pllx ;
       friend class FacePllBaseX < hface4_GEO >;
     } ;
     typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
@@ -630,20 +664,28 @@ public :
       friend class FacePllBaseXMacro < hface4_GEO >;
     } ;
 
-    class TetraEmptyPll : public TetraEmpty 
-    {
+public :
+  class TetraEmptyPll : public TetraEmpty 
+                      , public TetraPllXBase 
+  {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface3_IMPL innerface_t ;
+      typedef TetraEmpty :: balrule_t balrule_t;
     public :
+      typedef Gitter :: Geometric :: tetra_GEO mytetra_t ;
+      inline mytetra_t & mytetra () { return *this; }
+      inline const mytetra_t & mytetra () const { return *this ; }
+
       typedef TetraPllXBase mypllx_t ;
       inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
       ~TetraEmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+
     private :
-      mypllx_t _pllx ;
+      //mypllx_t _pllx ;
       friend class TetraTop < TetraEmptyPll >;
     } ;
     typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
@@ -739,21 +781,26 @@ public :
     } ;
 
     class HexaEmptyPll : public HexaEmpty
+                       , public HexaPllBaseX  
     {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface4_IMPL innerface_t ;
+      typedef HexaEmpty :: balrule_t balrule_t;
     public :
+      inline myhexa_t & myhexa () { return *this; }
+      inline const myhexa_t & myhexa () const { return *this; }
+
       typedef HexaPllBaseX mypllx_t ;
       inline HexaEmptyPll (myhface4_t *,int,myhface4_t *,int,
                            myhface4_t *,int,myhface4_t *,int,
                            myhface4_t *,int,myhface4_t *,int);
-            inline ~HexaEmptyPll () {}
+      inline ~HexaEmptyPll () {}
       virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-    private :
-      mypllx_t _pllx ;
+    //private :
+    //  mypllx_t _pllx ;
     } ;
     typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
 
@@ -878,10 +925,11 @@ inline const VertexPllBaseX :: myvertex_t & VertexPllBaseX :: myvertex () const 
 }
 
 inline EdgePllBaseX :: EdgePllBaseX (myhedge1_t & e)
-: _edge (e)
+//: _edge (e)
 {}
 
-inline EdgePllBaseX :: ~EdgePllBaseX () {
+inline EdgePllBaseX :: ~EdgePllBaseX () 
+{
 #ifndef NDEBUG
   // Falls die nachfolgende Situation eintritt, ist massiv was faul im
   // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
@@ -889,34 +937,37 @@ inline EdgePllBaseX :: ~EdgePllBaseX () {
   // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
   // gehoben wird.
 
-  if( myhedge1().isSet( myhedge1_t::flagLock ) )
-  {
-    cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
-    abort () ;
-  }
+  //if( myhedge1().isSet( myhedge1_t::flagLock ) )
+  //{
+  // cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
+  //  abort () ;
+  //}
 #endif
   return ;
 }
 
-inline EdgePllBaseX :: myhedge1_t & EdgePllBaseX :: myhedge1 () {
-  return _edge ;
-}
+//inline EdgePllBaseX :: myhedge1_t & EdgePllBaseX :: myhedge1 () {
+//  return _edge ;
+//}
 
-inline const EdgePllBaseX :: myhedge1_t & EdgePllBaseX :: myhedge1 () const {
-  return _edge ;
-}
+//inline const EdgePllBaseX :: myhedge1_t & EdgePllBaseX :: myhedge1 () const {
+//  return _edge ;
+//}
 
-template < class A > inline FacePllBaseX < A > :: FacePllBaseX (myhface_t & f) : _face (f) {
+template < class A > inline FacePllBaseX < A > :: FacePllBaseX (myhface_t & f) 
+  //: _face (f) 
+{
   return ;
 }
 
-template < class A > inline typename FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () {
-  return _face ;
-}
+//template < class A > inline typename FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () {
+//  return _face ;
+//}
 
-template < class A > inline const typename FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () const {
-  return _face ;
-}
+//template < class A > inline const typename FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () const {
+//  return _face ;
+//}
+
 template < class A > vector < int > FacePllBaseX < A > :: estimateLinkage () const {
   return (abort (), vector < int > ()) ;
 }
@@ -995,17 +1046,19 @@ template < class A > void FacePllBaseX < A > :: unpackSelf (ObjectStream &, bool
 //
 ///////////////////////////////////////////////////////////////////
 
-inline TetraPllXBase :: TetraPllXBase (mytetra_t & t) : _tetra (t) {
+inline TetraPllXBase :: TetraPllXBase (mytetra_t & t) 
+  //: _tetra (t) 
+{
   return ;
 }
 
-inline TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () {
-  return _tetra ;
-}
+//inline TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () {
+//  return _tetra ;
+//}
 
-inline const TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () const {
-  return _tetra ;
-}
+//inline const TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () const {
+//  return _tetra ;
+//}
 
 inline void TetraPllXBase :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
@@ -1059,17 +1112,18 @@ inline const Periodic4PllXBase :: myperiodic4_t & Periodic4PllXBase :: myperiodi
   return _periodic4 ;
 }
 
-inline HexaPllBaseX :: HexaPllBaseX (myhexa_t & h) : _hexa (h) {
+inline HexaPllBaseX :: HexaPllBaseX (myhexa_t & h) // : _hexa (h) 
+{
   return ;
 }
 
-inline HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () {
-  return _hexa ;
-}
+//inline HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () {
+//  return _hexa ;
+//}
 
-inline const HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () const {
-  return _hexa ;
-}
+//inline const HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () const {
+//  return _hexa ;
+//}
 
 inline void HexaPllBaseX :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
 {
@@ -1193,7 +1247,8 @@ template < class A > inline int & BndsegPllBaseXMacroClosure < A > :: ldbVertexI
 }
 
 inline GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: Hedge1EmptyPll (VertexGeo * a, VertexGeo * b) :
-  GitterBasis :: Objects :: Hedge1Empty (a,b), _pllx (*this) {
+  GitterBasis :: Objects :: Hedge1Empty (a,b) // , _pllx (*this) 
+{
   return ;
 }
 
@@ -1202,13 +1257,15 @@ inline bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: lockedAgainstCoars
 }
 
 inline GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: Hface3EmptyPll (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
-  GitterBasis :: Objects :: Hface3Empty (e0,s0,e1,s1,e2,s2), _pllx (*this) {
+  GitterBasis :: Objects :: Hface3Empty (e0,s0,e1,s1,e2,s2)//, _pllx (*this) 
+{
   return ;
 }
 
 inline GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: Hface4EmptyPll 
   (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
-  GitterBasis :: Objects :: Hface4Empty (e0,s0,e1,s1,e2,s2,e3,s3), _pllx (*this) {
+  GitterBasis :: Objects :: Hface4Empty (e0,s0,e1,s1,e2,s2,e3,s3) //, _pllx (*this) 
+{
   return ;
 }
 
@@ -1217,7 +1274,9 @@ TetraEmptyPll (myhface3_t * f0, int t0,
                myhface3_t * f1, int t1, 
                myhface3_t * f2, int t2, 
                myhface3_t * f3, int t3 ) 
-  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3), _pllx (*this) {
+  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3)
+//  , _pllx (*this) 
+{
   return ;
 }
 
@@ -1245,8 +1304,9 @@ inline GitterBasisPll :: ObjectsPll :: HexaEmptyPll ::
 HexaEmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
               myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
               myhface4_t * f4, int t4, myhface4_t * f5, int t5) :
-  GitterBasis::Objects::HexaEmpty(f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5),
-  _pllx (*this) {
+  GitterBasis::Objects::HexaEmpty(f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5)
+//  ,_pllx (*this) 
+{
   return ;
 }
 
