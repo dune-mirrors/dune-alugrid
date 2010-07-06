@@ -605,6 +605,7 @@ void GitterDunePll :: doBorderBorderComm(
   assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsEdges)=true " << endl, 1) : 1) ;
   assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsFaces)=true " << endl, 1) : 1) ;
    
+  // buffers for vertex and edge master-slave communication
   map< vertex_STI*, DataBufferType > vertexCommMap;
   map< hedge_STI* , DataBufferType > edgeCommMap;
 
@@ -706,6 +707,10 @@ void GitterDunePll :: doBorderBorderComm(
         sendMaster(sendBuff,edgeCommMap,determType,edgeData,nl, link );
       }
     }
+
+    // clear buffers to save memory 
+    vertexCommMap.clear();
+    edgeCommMap.clear();
    
     ///////////////////////////////////////////////////
     // exchange all gathered data 
