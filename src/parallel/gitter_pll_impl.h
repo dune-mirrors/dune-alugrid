@@ -1253,7 +1253,10 @@ inline GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: Hedge1EmptyPll (VertexG
 }
 
 inline bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: lockedAgainstCoarsening () const {
- return accessPllX ().lockedAgainstCoarsening () ;
+ // lockedAgainstCoarsening from base class, otherwise cycle 
+ // because accessPllX () returns *this 
+ return EdgePllBaseX :: lockedAgainstCoarsening () ;;
+ //return accessPllX ().lockedAgainstCoarsening () ;
 }
 
 inline GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: Hface3EmptyPll (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
