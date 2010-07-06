@@ -486,7 +486,6 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
   private :
     myhbnd_t & _hbnd ;
     balrule_t _rul ;
-    bool _lockCRS ;
 
     int _ghostLevel;
     int _ghostLeaf;
@@ -1132,7 +1131,7 @@ getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p 
 }
 
 template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) 
-  : _hbnd (b), _lockCRS (false) , _ghostLevel (-1), _ghostLeaf(0) 
+  : _hbnd (b), _ghostLevel (-1), _ghostLeaf(0) 
 {
   return ;
 }
@@ -1150,17 +1149,20 @@ template < class A > inline void BndsegPllBaseXClosure < A > :: notifyBalance (b
   return ;
 }
 
-template < class A > inline bool BndsegPllBaseXClosure < A > :: lockAndTry () {
-  _lockCRS = true ;
-  return myhbnd ().bndNotifyCoarsen () ;
+template < class A > inline bool BndsegPllBaseXClosure < A > :: lockAndTry ()
+{
+  myhbnd().set( myhbnd_t::flagLock );
+  return myhbnd().bndNotifyCoarsen();
 }
 
-template < class A > inline bool BndsegPllBaseXClosure < A > :: lockedAgainstCoarsening () const {
-  return _lockCRS ;
+template < class A > inline bool BndsegPllBaseXClosure < A > :: lockedAgainstCoarsening () const
+{
+  return myhbnd().isSet( myhbnd_t::flagLock );
 }
 
-template < class A > inline bool BndsegPllBaseXClosure < A > :: unlockAndResume (bool r) {
-  _lockCRS = false ;
+template < class A > inline bool BndsegPllBaseXClosure < A > :: unlockAndResume (bool r)
+{
+  myhbnd().unset( myhbnd_t::flagLock );
   bool x ;
   if (r) {
     x = myhbnd ().bndNotifyCoarsen () ;
