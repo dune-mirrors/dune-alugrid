@@ -123,6 +123,25 @@ template < class A > class listSmartpointer__to__iteratorSTI : public IteratorST
     IteratorSTI< A > * clone () const ;
 } ;
 
+  // Das 'MacroGridMoverIF' mu"s von den Parallelerweiterungen der 
+  // Knoten, Kanten, Fl"achen und Elemente des Grobgitters implementiert
+  // werden, damit der Lastverteiler diese Objekte zuweisen, einpacken
+  // und rekonstruieren kann.
+
+class MacroGridMoverIF {
+  protected :
+    MacroGridMoverIF () {}
+    virtual ~MacroGridMoverIF () {}
+  public :
+    enum { VERTEX = 1, EDGE1, FACE3, FACE4, HEXA, TETRA, PERIODIC3, PERIODIC4=-65, HBND3EXT, HBND4EXT, HBND3INT, HBND4INT = -22 , ENDMARKER , NO_POINT = -777, POINTTRANSMITTED=-888 } ;
+    virtual void attach2 (int) = 0 ;
+    virtual void unattach2 (int) = 0 ;
+    virtual bool packAll (vector < ObjectStream > &) = 0 ;
+    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) { return false; }
+    virtual void unpackSelf (ObjectStream &,bool) = 0 ;
+    virtual void duneUnpackSelf (ObjectStream &,GatherScatterType &,bool) {};
+} ;
+
   // LinkedObjekt ist die Schnittstelle, die im parallelen Gitter zur
   // Identifikation ben"otigt wird. Das Identifikationsmodul wendet
   // sich an diese Schnittstelle, um die Schl"ussel f"ur die Objekte
@@ -131,7 +150,12 @@ template < class A > class listSmartpointer__to__iteratorSTI : public IteratorST
   // sein, d.h. der Vektor enth"alt alle Gebietsnummern, dann wird aber
   // die Effizienz des Identifikationsmoduls schlecht.
 
-class LinkedObject {
+  // Note: The derivation from MacroGridMoverIF is artificial. Since all
+  //       implementations of LinkedObject also derive from MacroGridMoverIf,
+  //       this saves the additional pointer to the vtbl of MacroGridMoverIf.
+
+class LinkedObject : public MacroGridMoverIF
+{
   public :
   
   // Der Identifier wird f"ur alle Gitterobjekte einheitlich verwendet.
@@ -170,7 +194,12 @@ class LinkedObject {
   // getestet werden. Die Schnittstelle wird von den Parallelerweiterungen
   // der Kanten und der Fl"achen implementiert.
 
-class RefineableObject {
+  // Note: The derivation from LinkedObject is artificial. Since all
+  //       implementations of RefineableObject also derive from LinkedObject,
+  //       this saves the additional pointer to the vtbl of LinkedObject.
+
+class RefineableObject : public LinkedObject
+{
   protected :
     RefineableObject () {}
     virtual ~RefineableObject () {}
@@ -179,33 +208,19 @@ class RefineableObject {
     virtual bool setRefinementRequest (ObjectStream &) = 0 ;
 } ;
 
-  // Das 'MacroGridMoverIF' mu"s von den Parallelerweiterungen der 
-  // Knoten, Kanten, Fl"achen und Elemente des Grobgitters implementiert
-  // werden, damit der Lastverteiler diese Objekte zuweisen, einpacken
-  // und rekonstruieren kann.
 
-class MacroGridMoverIF {
-  protected :
-    MacroGridMoverIF () {}
-    virtual ~MacroGridMoverIF () {}
-  public :
-    enum { VERTEX = 1, EDGE1, FACE3, FACE4, HEXA, TETRA, PERIODIC3, PERIODIC4=-65, HBND3EXT, HBND4EXT, HBND3INT, HBND4INT = -22 , ENDMARKER , NO_POINT = -777, POINTTRANSMITTED=-888 } ;
-    virtual void attach2 (int) = 0 ;
-    virtual void unattach2 (int) = 0 ;
-    virtual bool packAll (vector < ObjectStream > &) = 0 ;
-    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) { return false; }
-    virtual void unpackSelf (ObjectStream &,bool) = 0 ;
-    virtual void duneUnpackSelf (ObjectStream &,GatherScatterType &,bool) {};
-} ;
 
-class VertexPllXIF : public LinkedObject, public MacroGridMoverIF {
+
+class VertexPllXIF : public LinkedObject //, public MacroGridMoverIF
+{
   protected :
     virtual ~VertexPllXIF () {}
   public :
     virtual bool setLinkage (vector < int >) = 0 ;
 } ;
 
-class EdgePllXIF : public LinkedObject, public RefineableObject, public MacroGridMoverIF {
+class EdgePllXIF : public RefineableObject //, public LinkedObject, public MacroGridMoverIF
+{
   protected :
     virtual ~EdgePllXIF () {}
   public :
@@ -214,7 +229,8 @@ class EdgePllXIF : public LinkedObject, public RefineableObject, public MacroGri
     virtual bool lockedAgainstCoarsening () const = 0 ;
 } ;
 
-class FacePllXIF : public LinkedObject, public MacroGridMoverIF {
+class FacePllXIF : public LinkedObject //, public MacroGridMoverIF
+{
   protected :
     virtual ~FacePllXIF () {}
   public :
@@ -232,7 +248,8 @@ class FacePllXIF : public LinkedObject, public MacroGridMoverIF {
 } ;
 
 // tpye of ElementPllXIF_t is ElementPllXIF, see parallel.h
-class ElementPllXIF : public MacroGridMoverIF {
+class ElementPllXIF : public MacroGridMoverIF
+{
   protected :
     typedef Gitter :: Geometric :: hasFace4 :: balrule_t balrule_t ;
     typedef Gitter :: ghostpair_STI ghostpair_STI;
