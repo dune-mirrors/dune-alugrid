@@ -264,6 +264,14 @@ public :
   public:
     enum { interior = 0 , border = 111 , ghost = 222 };
 
+    enum Flag
+    {
+      // set if index is copy from outside and should not be freed
+      flagCopy = 0,
+      // set if object is locked against coarsening
+      flagLock = 1
+    };
+
   protected:
     // internal index of item 
     int _idx;
@@ -277,9 +285,8 @@ public :
     // reference counter of leaf elements holding pointer to this item 
     typedef unsigned char leafref_t;
     leafref_t _leafref;
-    
-    // true if index is copy from outside and should noit freeded
-    bool _isCopy;
+
+    unsigned char _flags;
 
     // store refcount here to fill up the 8 byte of mem 
     Refcount ref ;
@@ -288,11 +295,26 @@ public :
     DuneIndexProvider () : 
       _idx(-1), 
       _bndid(interior),
-      _leafref(0) , 
-      _isCopy(false) 
+      _leafref(0),
+      _flags( 0 )
     {}
 
   public:
+    void set ( const Flag &flag )
+    {
+      _flags |= (1 << flag);
+    }
+
+    void unset ( const Flag &flag )
+    {
+      _flags &= ~(1 << flag);
+    }
+
+    bool isSet ( const Flag &flag ) const
+    {
+      return (_flags & (1 << flag));
+    }
+
     // backupIndexErr message 
     void backupIndexErr () const {
       cerr << "DuneIndexProvider :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
@@ -319,7 +341,7 @@ public :
     
     inline void freeIndex ( IndexManagerType & im ) 
     {
-      if (!_isCopy) 
+      if( !isSet( flagCopy ) )
       {
         assert( _idx >= 0 );
         im.freeIndex(_idx); 
@@ -334,14 +356,14 @@ public :
       // set given index 
       setIndex(index); 
       // now it's a copy 
-      _isCopy = true;
+      set( flagCopy );
     }
 
     //for the ghost helements, set index from outside 
     inline void resetGhostIndex( IndexManagerType & im )
     {
       // if already copy then do nothing
-      if( ! _isCopy && this->isGhost() )
+      if( !isSet( flagCopy ) && isGhost() )
       {
         // only call this method on ghosts 
         // set new index 
@@ -361,6 +383,7 @@ public :
     {
       --_leafref;
     }
+
     // returns true, if item is leaf item 
     inline bool isLeafEntity() const {
       return ( _leafref > 0 );

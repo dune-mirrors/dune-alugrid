@@ -128,17 +128,20 @@ void EdgePllBaseX :: unpackSelf (ObjectStream &,bool) {
   return ;
 }
 
-bool EdgePllBaseX :: lockAndTry () {
-  _lockCRS = true ;
+bool EdgePllBaseX :: lockAndTry ()
+{
+  myhedge1().set( myhedge1_t::flagLock );
   return myhedge1().coarse () ;
 }
 
-bool EdgePllBaseX :: lockedAgainstCoarsening () const {
-  return _lockCRS ;
+bool EdgePllBaseX :: lockedAgainstCoarsening () const
+{
+  return myhedge1().isSet( myhedge1_t::flagLock );
 }
 
-bool EdgePllBaseX :: unlockAndResume (bool r) {
-  _lockCRS = false ;
+bool EdgePllBaseX :: unlockAndResume (bool r)
+{
+  myhedge1().unset( myhedge1_t::flagLock );
   bool x ;
   if (r) {
     x = myhedge1().coarse () ;

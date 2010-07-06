@@ -78,7 +78,6 @@ class EdgePllBaseX : public EdgePllXIF, public MyAlloc {
     virtual void unpackSelf (ObjectStream &, bool) ;
   private :
     myhedge1_t & _edge ;
-    bool _lockCRS ;
 } ;
 
 class EdgePllBaseXMacro : public EdgePllBaseX {
@@ -879,9 +878,9 @@ inline const VertexPllBaseX :: myvertex_t & VertexPllBaseX :: myvertex () const 
   return _v ;
 }
 
-inline EdgePllBaseX :: EdgePllBaseX (myhedge1_t & e) : _edge (e), _lockCRS (false) {
-  return ;
-}
+inline EdgePllBaseX :: EdgePllBaseX (myhedge1_t & e)
+: _edge (e)
+{}
 
 inline EdgePllBaseX :: ~EdgePllBaseX () {
 #ifndef NDEBUG
@@ -891,7 +890,8 @@ inline EdgePllBaseX :: ~EdgePllBaseX () {
   // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
   // gehoben wird.
 
-  if (_lockCRS) {
+  if( myhedge1().isSet( myhedge1_t::flagLock ) )
+  {
     cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
     abort () ;
   }
