@@ -23,6 +23,10 @@ protected:
                  Interior_Ghost_Comm , 
                  Ghost_Interior_Comm , 
                  All_All_Comm  } CommunicationType ; 
+
+  typedef SmallObjectStream BufferType;
+  typedef vector< BufferType > DataBufferType;
+
 public:
   typedef Gitter :: Geometric Geometric;
   typedef GitterDuneImpl :: Objects  Objects;
@@ -165,14 +169,16 @@ private:
       HItemType * determType,
       GatherScatterType & dataHandle , const int link ) ; 
     
-  template <class ObjectStreamType, class HItemType>
+  template <class ObjectStreamType, class HItemType, class CommBuffMapType>
   void unpackOnMaster(ObjectStreamType & recvBuff,
+      CommBuffMapType& commBufMap,
       HItemType * determType,
       GatherScatterType & dataHandle , 
       const int nl, const int link) ; 
     
-  template <class ObjectStreamType, class HItemType>
+  template <class ObjectStreamType, class HItemType, class CommBuffMapType>
   void sendMaster(ObjectStreamType & sendBuff,
+      CommBuffMapType& commBufMap,
       HItemType * determType,
       GatherScatterType & dataHandle , 
       const int nl, const int myLink) ; 
@@ -234,6 +240,10 @@ private:
     GatherScatterType & faceData,
     GatherScatterType & elementData ,
     const CommunicationType commType );
+
+  template <class HItemType, class CommMapType> 
+  DataBufferType& 
+  getCommunicationBuffer( HItemType&, CommMapType&, const int ); 
 
 public:
   pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int) ;

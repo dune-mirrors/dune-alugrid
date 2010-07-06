@@ -41,7 +41,10 @@ class Parallel {
     
     class AccessPllException {} ;
   
-    class VertexIF : public CommunicationBuffer 
+    class VertexIF 
+#ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
+      : public CommunicationBuffer 
+#endif
     {
       public :
         virtual ~VertexIF () {}
@@ -50,7 +53,10 @@ class Parallel {
         inline virtual const VertexPllXIF_t & accessPllX () const throw (AccessPllException) ;
         inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
-    class EdgeIF : public CommunicationBuffer 
+    class EdgeIF 
+#ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
+      : public CommunicationBuffer 
+#endif
     {
       public :
         virtual ~EdgeIF () {}

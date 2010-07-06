@@ -318,9 +318,27 @@ void GitterDunePll :: sendSlaves (
   return ;
 }
 
-template <class ObjectStreamType, class HItemType> 
+template <class HItemType, class CommMapType>
+GitterDunePll :: DataBufferType& 
+GitterDunePll :: 
+getCommunicationBuffer( HItemType& item, CommMapType& commMap, const int nCommBuff )
+{
+#ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
+  // reserve and get comm buffers 
+  item.reserveBuffer( nCommBuff );
+  return item.commBuffer();
+#else 
+  DataBufferType& commBuff = commMap[ &item ];
+  if( (int) commBuff.size() != nCommBuff ) 
+    commBuff.resize( nCommBuff );
+  return commBuff;
+#endif
+}
+
+template <class ObjectStreamType, class HItemType, class CommBuffMapType> 
 void GitterDunePll :: unpackOnMaster (
     ObjectStreamType & recvBuff, 
+    CommBuffMapType& commBuffMap,
     HItemType * determType,
     GatherScatterType & dataHandle ,
     const int nl, const int link )
@@ -343,11 +361,8 @@ void GitterDunePll :: unpackOnMaster (
     // read data marker 
     recvBuff.readObject(hasdata);
     
-    // reserve and get comm buffers 
-    item.reserveBuffer( nl + 1 );
-
     // get comm buffers 
-    DataBufferType & data = item.commBuffer();
+    DataBufferType & data = getCommunicationBuffer( item, commBuffMap, nl + 1 );
 
     // only gather master data once 
     if ( dataHandle.containsItem( item ) ) 
@@ -382,9 +397,10 @@ void GitterDunePll :: unpackOnMaster (
   return ;
 }
 
-template <class ObjectStreamType, class HItemType> 
+template <class ObjectStreamType, class HItemType, class CommBuffMapType > 
 void GitterDunePll :: sendMaster (
     ObjectStreamType & sendBuff, 
+    CommBuffMapType& commBuffMap,
     HItemType * determType,
     GatherScatterType & dataHandle ,
     const int nl , 
@@ -414,8 +430,10 @@ void GitterDunePll :: sendMaster (
   for (iter.first (); ! iter.done () ; iter.next ()) 
   {
     HItemType & item = iter.item();
+
     // get comm buffer 
-    DataBufferType & dataBuff = item.commBuffer();
+    //DataBufferType & dataBuff = item.commBuffer();
+    DataBufferType & dataBuff = getCommunicationBuffer( item, commBuffMap, nl + 1);
     
     // scatter on master 
     if ( dataHandle.containsItem( item ) ) 
@@ -587,6 +605,9 @@ void GitterDunePll :: doBorderBorderComm(
   assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsEdges)=true " << endl, 1) : 1) ;
   assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsFaces)=true " << endl, 1) : 1) ;
    
+  map< vertex_STI*, DataBufferType > vertexCommMap;
+  map< hedge_STI* , DataBufferType > edgeCommMap;
+
   {
     // gather all data from slaves 
     for (int link = 0; link < nl ; ++link )  
@@ -635,13 +656,13 @@ void GitterDunePll :: doBorderBorderComm(
       if (containsVertices) 
       {
         vertex_STI * determType = 0;
-        unpackOnMaster(recvBuff,determType,vertexData,nl,link);
+        unpackOnMaster(recvBuff,vertexCommMap,determType,vertexData,nl,link);
       }
 
       if (containsEdges) 
       {
         hedge_STI * determType = 0;
-        unpackOnMaster(recvBuff,determType,edgeData,nl,link);
+        unpackOnMaster(recvBuff,edgeCommMap,determType,edgeData,nl,link);
       }
 
       if (containsFaces) 
@@ -676,13 +697,13 @@ void GitterDunePll :: doBorderBorderComm(
       if (containsVertices) 
       {
         vertex_STI * determType = 0;
-        sendMaster(sendBuff,determType,vertexData,nl, link );
+        sendMaster(sendBuff,vertexCommMap,determType,vertexData,nl, link );
       }
       
       if (containsEdges) 
       {
         hedge_STI * determType = 0;
-        sendMaster(sendBuff,determType,edgeData,nl, link );
+        sendMaster(sendBuff,edgeCommMap,determType,edgeData,nl, link );
       }
     }
    
