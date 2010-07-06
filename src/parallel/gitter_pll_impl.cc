@@ -797,8 +797,12 @@ void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int 
   myhexa().FaceData2os(os,gs,borderFace);
 }
 
-TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) : 
-  TetraPllXBase (t), _tetra(t), _ldbVertexIndex (-1), _moveTo (), _erasable (false) 
+TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) 
+  : TetraPllXBase (t)
+  , _tetra(t)
+  , _moveTo ()
+  , _ldbVertexIndex (-1)
+  , _erasable (false) 
 {
   LinearMapping :: barycenter(
       mytetra ().myvertex (0)->Point (), 

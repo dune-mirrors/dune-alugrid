@@ -263,8 +263,8 @@ class TetraPllXBaseMacro : public TetraPllXBase {
   private :
     mytetra_t& _tetra;
     double _center [3] ;
-    int _ldbVertexIndex ;
     map < int, int, less < int > > _moveTo ;
+    int _ldbVertexIndex ;
     bool _erasable ;
 } ;
 

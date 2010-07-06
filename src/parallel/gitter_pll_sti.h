@@ -167,20 +167,22 @@ class LinkedObject : public MacroGridMoverIF
   // Die Schnittstelle wird von den Parallelerweiterungen der Knoten
   // Kanten, Fl"achen und (sp"ater auch) Elemente implementiert.
   
-    class Identifier : public Serializable {
+    class Identifier : public Serializable 
+    {
       int _i1, _i2, _i3, _i4 ;
-      public :
-        inline Identifier (int = -1, int = -1, int = -1, int = -1) ;
-        inline Identifier (const Identifier &) ;
-        inline const Identifier & operator = (const Identifier &) ;
-        inline bool operator < (const Identifier &) const ;
-        inline bool operator == (const Identifier &) const ;
-  inline void read (vector < int > :: const_iterator &, const vector < int > :: const_iterator &) ;
-  inline void write (vector < int > &) const ;
-  inline bool readObject (ObjectStream &) ;
-  inline void writeObject (ObjectStream &) const ;
-  inline bool isValid () const ;
+    public :
+      inline Identifier (int = -1, int = -1, int = -1, int = -1) ;
+      inline Identifier (const Identifier &) ;
+      inline const Identifier & operator = (const Identifier &) ;
+      inline bool operator < (const Identifier &) const ;
+      inline bool operator == (const Identifier &) const ;
+      inline void read (vector < int > :: const_iterator &, const vector < int > :: const_iterator &) ;
+      inline void write (vector < int > &) const ;
+      inline bool readObject (ObjectStream &) ;
+      inline void writeObject (ObjectStream &) const ;
+      inline bool isValid () const ;
     } ;
+
   public :
     virtual ~LinkedObject () {}
     virtual Identifier getIdentifier () const = 0 ;
