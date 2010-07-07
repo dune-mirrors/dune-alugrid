@@ -292,6 +292,8 @@ public:
   
   inline void writeObject (double a)  { this->write(a); }
   inline void readObject (double & a) { this->read(a);  }
+  inline void writeObject (float a)  { this->write(a); }
+  inline void readObject (float & a) { this->read(a);  }
   inline void writeObject (int a)     { this->write(a); } 
   inline void readObject (int & a)    { this->read(a);  }
 
@@ -350,6 +352,8 @@ public:
 
   inline void writeObject (double a)  { this->write(a); }
   inline void readObject (double & a) { this->read(a);  }
+  inline void writeObject (float a)  { this->write(a); }
+  inline void readObject (float & a) { this->read(a);  }
   inline void writeObject (int a)     { this->write(a); } 
   inline void readObject (int & a)    { this->read(a);  }
 };

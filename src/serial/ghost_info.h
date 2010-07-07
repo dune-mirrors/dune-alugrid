@@ -11,7 +11,7 @@ class MacroGhostInfo : public MyAlloc
   public:
     virtual ~MacroGhostInfo () {}
 
-    virtual const double (& getPoint (int i) const )[3] = 0;
+    virtual const alucoord_t (& getPoint (int i) const )[3] = 0;
     virtual int nop () const = 0;
     virtual void inlineGhostElement(ObjectStream & os) const = 0; 
 };
@@ -31,7 +31,7 @@ public:
   
 protected:
   // coordiante of all non-internal points 
-  double _p[points][3]; 
+  alucoord_t _p[points][3]; 
 
   // vertex idents of all vertices of element 
   int _vx[noVx];
@@ -51,7 +51,7 @@ public:
   virtual ~MacroGhostInfoStorage () {}
 
   // return reference to _p
-  const double (& getPoints () const )[points][3] 
+  const alucoord_t (& getPoints () const )[points][3] 
   { 
     assert( _fce >= 0 );
     return _p; 
@@ -81,7 +81,7 @@ public:
   /////////////////////////////////////
   // interface of MacroGhostInfo_STI 
   ///////////////////////////////////// 
-  virtual const double (& getPoint (int i) const )[3] 
+  virtual const alucoord_t (& getPoint (int i) const )[3] 
   {
     assert( _fce >=0 );
     assert( i>= 0 && i < points );

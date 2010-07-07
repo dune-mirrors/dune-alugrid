@@ -405,7 +405,7 @@ int Gitter :: Geometric :: Hexa :: resetRefinementRequest () {
   return (request (myrule_t :: nosplit), 1) ;
 }
 
-static inline bool insideBall (const double (&p)[3], const double (&c)[3], double r) {
+static inline bool insideBall (const alucoord_t (&p)[3], const alucoord_t (&c)[3], double r) {
   bool inside=false;
   double q[3];
   int x,y,z;
@@ -425,10 +425,10 @@ static inline bool insideBall (const double (&p)[3], const double (&c)[3], doubl
   //     + (p [2] - c [2]) * (p [2] - c [2])) < (r * r)) ? true : false ;
 }
 
-int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const double (&center)[3], double radius, int limit) {
+int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const alucoord_t (&center)[3], double radius, int limit) {
   bool hit = false ;
   for (int i = 0 ; i < 8 ; i ++) {
-    const double (&p)[3] = myvertex (i)->Point () ;
+    const alucoord_t (&p)[3] = myvertex (i)->Point () ;
     if (insideBall (p,center,radius)) { hit = true ; break ; }
   }
   if (!hit) {
@@ -436,7 +436,7 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const double (&center)[
     TrilinearMapping map (myvertex(0)->Point(), myvertex(1)->Point(),
         myvertex(2)->Point(), myvertex(3)->Point(), myvertex(4)->Point(),
         myvertex(5)->Point(), myvertex(6)->Point(), myvertex(7)->Point()) ;
-    double p [3] ;
+    alucoord_t p [3] ;
     for (int i = 0 ; i < resolution ; i ++ ) {
       map.map2world (2.0 * drand48 () - 1.0, 2.0 * drand48 () - 1.0, 2.0 * drand48 () - 1.0, p) ;
       if (insideBall (p,center,radius)) { hit = true ; break ; }
@@ -499,17 +499,17 @@ int Gitter :: Geometric :: Tetra :: resetRefinementRequest () {
   return (request (myrule_t :: nosplit), 1) ;
 }
 
-int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const double (&center)[3], double radius, int limit) {
+int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const alucoord_t (&center)[3], double radius, int limit) {
   bool hit = false ;
   for (int i = 0 ; i < 4 ; i ++) {
-    const double (&p)[3] = myvertex (i)->Point () ;
+    const alucoord_t (&p)[3] = myvertex (i)->Point () ;
     if (insideBall (p,center,radius)) { hit = true ; break ; }
   }
   if (!hit) {
     const int resolution = 50 ;
     LinearMapping map (myvertex(0)->Point(), myvertex(1)->Point(),
             myvertex(2)->Point(), myvertex(3)->Point()) ;
-    double p [3] ;
+    alucoord_t p [3] ;
     for (int i = 0 ; i < resolution ; i ++ ) {
       double b1 = drand48 () ;
       double b2 = (1.0 - b1) * drand48 () ;
@@ -568,7 +568,7 @@ int Gitter :: Geometric :: Periodic3 :: resetRefinementRequest () {
   return 0 ;
 }
 
-int Gitter :: Geometric :: Periodic3 :: tagForBallRefinement (const double (&center)[3], double radius, int limit) {
+int Gitter :: Geometric :: Periodic3 :: tagForBallRefinement (const alucoord_t (&center)[3], double radius, int limit) {
   return 0 ;
 }
 
@@ -597,7 +597,7 @@ int Gitter :: Geometric :: Periodic4 :: resetRefinementRequest () {
   return 0 ;
 }
 
-int Gitter :: Geometric :: Periodic4 :: tagForBallRefinement (const double (&center)[3], double radius, int limit) {
+int Gitter :: Geometric :: Periodic4 :: tagForBallRefinement (const alucoord_t (&center)[3], double radius, int limit) {
   return 0 ;
 }
 

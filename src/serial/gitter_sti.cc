@@ -673,7 +673,7 @@ void Gitter :: refineRandom (double p) {
   return ;
 }
 
-void Gitter :: refineBall (const double (&center)[3], double radius, int limit) {
+void Gitter :: refineBall (const alucoord_t (&center)[3], double radius, int limit) {
   if (radius < .0) {
     cerr << "**WARNUNG (IGNORIERT) Gitter :: refineBall (center = ?, radius = " 
    << radius << ") Radius darf nicht negativ sein" << endl ;

@@ -9,7 +9,7 @@
 //#define DONT_USE_ALUGRID_ALLOC 
 
 // 
-#define ALUGRID_USE_COMM_BUFFER_IN_ITEM
+//#define ALUGRID_USE_COMM_BUFFER_IN_ITEM
 
 // include all headers 
 #include "stlheaders.h"

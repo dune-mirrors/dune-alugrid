@@ -975,7 +975,7 @@ void TetraPllXBaseMacro :: packAsBndNow (int fce, ObjectStream & os) const
     os.writeObject ( vertex->ident ()) ;
 
     // store the missing point to form a tetra 
-    const double (&p)[3] = vertex->Point();
+    const alucoord_t (&p)[3] = vertex->Point();
     os.writeObject ( p[0] ) ;
     os.writeObject ( p[1] ) ;
     os.writeObject ( p[2] ) ;
@@ -1091,7 +1091,7 @@ void Periodic3PllXBase :: writeDynamicState (ObjectStream & os, int) const {
   // auf die Mitte der linken Fl"ache gelegt. Per Definition.
 
   static const double x = 1./3. ;
-  double p [3] ;
+  alucoord_t p [3] ;
   LinearSurfaceMapping (myperiodic3 ().myvertex (0,0)->Point (), myperiodic3 ().myvertex (0,1)->Point (),
     myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,p) ;
   os.writeObject (p [0]) ;
@@ -1250,7 +1250,7 @@ void Periodic4PllXBase :: writeDynamicState (ObjectStream & os, int) const {
   // auf die Mitte der linken Fl"ache gelegt. Per Definition.
 
   static const double x = .0 ;
-  double p [3] ;
+  alucoord_t p [3] ;
   BilinearSurfaceMapping (myperiodic4 ().myvertex (0,0)->Point (), myperiodic4 ().myvertex (0,1)->Point (),
     myperiodic4 ().myvertex (0,2)->Point (),myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,p) ;
   os.writeObject (p [0]) ;
@@ -1620,7 +1620,7 @@ void HexaPllBaseXMacro :: packAsBndNow(int fce, ObjectStream & os) const
   {
     const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
     os.writeObject( vertex->ident() );
-    const double (&p)[3] = vertex->Point();
+    const alucoord_t (&p)[3] = vertex->Point();
     os.writeObject ( p[0] ) ;
     os.writeObject ( p[1] ) ;
     os.writeObject ( p[2] ) ;

@@ -139,7 +139,7 @@ MacroGhostTetra( BuilderIF & bi,
   typedef Gitter :: Geometric :: VertexGeo VertexGeo;
   typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
 
-  const double (&p)[1][3]  = ghInfo.getPoints();
+  const alucoord_t (&p)[1][3]  = ghInfo.getPoints();
   const int (&oppVerts)[1] = ghInfo.getOuterVertices();
 
   // here all entities have to be created new, because otherwise 
@@ -154,7 +154,7 @@ MacroGhostTetra( BuilderIF & bi,
       if(ghInfo.vertices()[j] == idx) found = true;
     assert( found );
 #endif
-    const double (&point)[3] = vx->Point();
+    const alucoord_t (&point)[3] = vx->Point();
     mgb.InsertNewUniqueVertex(point[0],point[1],point[2],vx->ident());
   }
 
@@ -165,7 +165,7 @@ MacroGhostTetra( BuilderIF & bi,
     if( ghInfo.vertices()[j] == idx) found = true;
   assert( found );
 #endif
-  const double (&px)[3] = p[0];
+  const alucoord_t (&px)[3] = p[0];
   mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
 
   // InsertUniqueHexa gets the global vertex numbers 
@@ -188,7 +188,7 @@ MacroGhostTetra( BuilderIF & bi,
 //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
 MacroGhostTetra :: 
 MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp, 
-    Gitter::Geometric::tetra_GEO * orig, double (&vec)[3] , double sign) :
+    Gitter::Geometric::tetra_GEO * orig, alucoord_t (&vec)[3] , double sign) :
   _mgb(bi), 
   _ghInfoPtr(allp), 
   _ghostPair( (GhostElement_t *)0, -1)
@@ -239,7 +239,7 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
   
   typedef Gitter :: Geometric :: VertexGeo VertexGeo;
 
-  const double (&p)[4][3]  = ghInfo.getPoints();
+  const alucoord_t (&p)[4][3]  = ghInfo.getPoints();
   const int (&oppVerts)[4] = ghInfo.getOuterVertices();
 
   // here all entities have to be created new, because otherwise 
@@ -247,7 +247,7 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
   for(int i=0; i<4; ++i)
   {
     const VertexGeo * vx = face->myvertex(i);
-    const double (&p)[3] = vx->Point();
+    const alucoord_t (&p)[3] = vx->Point();
     mgb.InsertNewUniqueVertex(p[0],p[1],p[2],vx->ident());
   }
 
@@ -255,7 +255,7 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
   // numbers for the face (Lagrange Elements)
   for(int i=0; i<4; ++i)
   {
-    const double (&px)[3] = p[i];
+    const alucoord_t (&px)[3] = p[i];
     mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
   }
 

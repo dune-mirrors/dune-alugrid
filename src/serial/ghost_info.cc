@@ -39,7 +39,7 @@ readData(ObjectStream & os )
   for(int i=0; i<noFaceVx; ++i)
   {
     os.readObject ( _vxface[i] );
-    double (&pr) [3] = _p[i];
+    alucoord_t (&pr) [3] = _p[i];
 
     os.readObject (pr[0]) ;
     os.readObject (pr[1]) ;
@@ -59,7 +59,7 @@ MacroGhostInfoHexa(const Gitter :: Geometric :: hexa_GEO * hexa,
   {
     const Gitter :: Geometric :: VertexGeo * vertex = hexa->myvertex(oppFace,vx);
     this->_vxface[vx] = vertex->ident();
-    const double (&p) [3] = vertex->Point();
+    const alucoord_t (&p) [3] = vertex->Point();
     this->_p[vx][0] = p[0];
     this->_p[vx][1] = p[1];
     this->_p[vx][2] = p[2];
@@ -82,7 +82,7 @@ MacroGhostInfoTetra(const Gitter :: Geometric :: tetra_GEO * tetra,
   for(int vx=0; vx<points; ++vx)
   {
     this->_vxface[vx] = vertex->ident();
-    const double (&p) [3] = vertex->Point();
+    const alucoord_t (&p) [3] = vertex->Point();
     this->_p[vx][0] = p[0];
     this->_p[vx][1] = p[1];
     this->_p[vx][2] = p[2];

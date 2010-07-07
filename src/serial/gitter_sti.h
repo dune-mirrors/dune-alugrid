@@ -12,8 +12,11 @@ typedef stringstream  strstream_t;
 #include "parallel.h"
 #include "xdrclass.h"
 
+//! type of coordinate storage 
+typedef double alucoord_t ;
+
 // interface class for projecting vertices for boundary adjustment 
-typedef VertexProjection<3> ProjectVertex;
+typedef VertexProjection<3, alucoord_t > ProjectVertex;
 // see ../projectvertex.h 
 
 // pair of projection and bnd segment index 
@@ -22,9 +25,6 @@ typedef pair<const ProjectVertex* , const int > ProjectVertexPair;
 // forward declaration, see ghost_info.h 
 class MacroGhostInfoHexa;
 class MacroGhostInfoTetra;
-
-//! type of coordinate storage 
-typedef double alucoord_t ;
 
 // forward declaration 
 class Gitter;
@@ -597,7 +597,7 @@ public :
     virtual int tagForGlobalCoarsening () = 0 ;
     // set marker of element to nosplit 
     virtual int resetRefinementRequest () = 0 ;
-    virtual int tagForBallRefinement (const double (&)[3],double,int) = 0 ;
+    virtual int tagForBallRefinement (const alucoord_t (&)[3],double,int) = 0 ;
     virtual int test () const = 0 ;
     inline  int leaf () const ;
 
@@ -1004,7 +1004,7 @@ public :
       inline virtual ~VertexGeo () ;
 
       // return coordinates of vertex  
-      inline const double (& Point () const) [3] ;
+      inline const alucoord_t (& Point () const) [3] ;
       // return level of vertex 
       inline int level () const ;
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
@@ -1283,7 +1283,7 @@ public :
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
-      int tagForBallRefinement (const double (&)[3],double,int) ;
+      int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
 
       virtual bool isboundary() const { return false; }
       virtual grid_t type() const { return tetra; }
@@ -1336,7 +1336,7 @@ public :
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
-      int tagForBallRefinement (const double (&)[3],double,int) ;
+      int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
       virtual bool isboundary() const { return true; }
       virtual grid_t type() const { return tetra_periodic; }
 
@@ -1394,7 +1394,7 @@ public :
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
-      int tagForBallRefinement (const double (&)[3],double,int) ;
+      int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
       // just returns level 
       virtual int nbLevel() const {return level();}
       // just returns leaf 
@@ -1477,7 +1477,7 @@ public :
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
-      int tagForBallRefinement (const double (&)[3],double,int) ;
+      int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
 
       virtual bool isboundary() const { return false; }
       virtual grid_t type() const { return hexa; }
@@ -1798,7 +1798,7 @@ public :
   // adaptation with callback functionality 
   virtual bool duneAdapt ( AdaptRestrictProlongType & arp ) ;
   virtual void refineGlobal () ;
-  virtual void refineBall (const double (&)[3],double,int) ;
+  virtual void refineBall (const alucoord_t (&)[3],double,int) ;
   virtual void refineRandom (double) ;
   virtual void backupCMode (ostream &) ;
   virtual void backupCMode (const char*,const char *) ;
@@ -2272,7 +2272,7 @@ inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo ()
   return ;
 }
 
-inline const double (& Gitter :: Geometric :: VertexGeo :: Point () const) [3] {
+inline const alucoord_t (& Gitter :: Geometric :: VertexGeo :: Point () const) [3] {
   return _c ;
 }
 
@@ -2283,7 +2283,7 @@ inline int Gitter :: Geometric :: VertexGeo :: level () const {
 inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertexPair &pv) 
 {
   // copy current coordinates  
-  const double p[3] = {_c[0],_c[1],_c[2]};
+  const alucoord_t p[3] = {_c[0],_c[1],_c[2]};
   // call projection operator 
   assert( pv.first );
   const int ok = (*pv.first)( p, pv.second, _c );

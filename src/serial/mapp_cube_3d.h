@@ -8,28 +8,28 @@
 class LinearMapping ;	// in mapp_tetra_3d.h
 
 class TrilinearMapping {
-  static const double _epsilon ;
-  const double (&p0)[3], (&p1)[3], (&p2)[3], (&p3)[3] ;
-  const double (&p4)[3], (&p5)[3], (&p6)[3], (&p7)[3] ;
-  double a [8][3] ;
-  double Df [3][3] ;
-  double Dfi [3][3] ;
-  double DetDf ;
-  void linear (const double (&)[3]) ;
-  void inverse (const double (&)[3]) ;
+  static const alucoord_t _epsilon ;
+  const alucoord_t (&p0)[3], (&p1)[3], (&p2)[3], (&p3)[3] ;
+  const alucoord_t (&p4)[3], (&p5)[3], (&p6)[3], (&p7)[3] ;
+  alucoord_t a [8][3] ;
+  alucoord_t Df [3][3] ;
+  alucoord_t Dfi [3][3] ;
+  alucoord_t DetDf ;
+  void linear (const alucoord_t (&)[3]) ;
+  void inverse (const alucoord_t (&)[3]) ;
   public :
-    inline TrilinearMapping (const double (&)[3], const double (&)[3], const double (&)[3], const double (&)[3],
-                             const double (&)[3], const double (&)[3], const double (&)[3], const double (&)[3]) ;
+    inline TrilinearMapping (const alucoord_t (&)[3], const alucoord_t (&)[3], const alucoord_t (&)[3], const alucoord_t (&)[3],
+                             const alucoord_t (&)[3], const alucoord_t (&)[3], const alucoord_t (&)[3], const alucoord_t (&)[3]) ;
     inline TrilinearMapping (const TrilinearMapping &) ;
    ~TrilinearMapping () {}
-    double det (const double (&)[3]) ;
-    inline void map2world (const double (&)[3], double (&)[3]) const ;
-    inline void map2world (const double , const double , const double , double (&)[3]) const ;
-    void world2map (const double (&)[3], double (&)[3]) ;
+    alucoord_t det (const alucoord_t (&)[3]) ;
+    inline void map2world (const alucoord_t (&)[3], alucoord_t (&)[3]) const ;
+    inline void map2world (const alucoord_t , const alucoord_t , const alucoord_t , alucoord_t (&)[3]) const ;
+    void world2map (const alucoord_t (&)[3], alucoord_t (&)[3]) ;
 
-    static inline void barycenter(const double (&p0)[3], const double (&p1)[3], const double (&p2)[3], const double (&p3)[3],
-                                  const double (&p4)[3], const double (&p5)[3], const double (&p6)[3], const double (&p7)[3],
-                                  double (&barycenter)[3])
+    static inline void barycenter(const alucoord_t (&p0)[3], const alucoord_t (&p1)[3], const alucoord_t (&p2)[3], const alucoord_t (&p3)[3],
+                                  const alucoord_t (&p4)[3], const alucoord_t (&p5)[3], const alucoord_t (&p6)[3], const alucoord_t (&p7)[3],
+                                  alucoord_t (&barycenter)[3])
     {
       barycenter[0] = 0.125 * (p0[0] + p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0]);
       barycenter[1] = 0.125 * (p0[1] + p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1]);
@@ -38,7 +38,7 @@ class TrilinearMapping {
 #ifndef NDEBUG 
       {
         TrilinearMapping map(p0,p1,p2,p3,p4,p5,p6,p7);
-        double p[3] ;
+        alucoord_t p[3] ;
         map.map2world(.0, .0, .0, p) ;
         for(int j=0; j<3; ++j)
         {
@@ -54,24 +54,24 @@ class TrilinearMapping {
 
 class QuadraturCube3Dbasis {
   protected :
-    static const double _p2 [4][3] ;
-    static const double _p3 [8][3] ;
+    static const alucoord_t _p2 [4][3] ;
+    static const alucoord_t _p3 [8][3] ;
 } ;
 
 class VolumeCalc {
   public :
-    typedef double val_t ;
+    typedef alucoord_t val_t ;
     typedef int arg_t ;
-    inline val_t operator () (const double (&)[3], const arg_t & ) ;
-    inline val_t operator () (const double (&)[4], const LinearMapping &, const arg_t &) ;
+    inline val_t operator () (const alucoord_t (&)[3], const arg_t & ) ;
+    inline val_t operator () (const alucoord_t (&)[4], const LinearMapping &, const arg_t &) ;
 } ;
 
 class SurfaceCalc {
   public :
-    typedef double val_t ;
+    typedef alucoord_t val_t ;
     typedef int arg_t ;
-    inline val_t operator () (const double (&)[2], const double (&)[3], const arg_t &) ;
-    inline val_t operator () (const double (&)[3], const double (&)[3], const arg_t &) ;
+    inline val_t operator () (const alucoord_t (&)[2], const alucoord_t (&)[3], const arg_t &) ;
+    inline val_t operator () (const alucoord_t (&)[3], const alucoord_t (&)[3], const arg_t &) ;
 } ;
 
 template < class A > class QuadraturCube3D : private QuadraturCube3Dbasis {
@@ -99,19 +99,19 @@ template < class A > class QuadraturCube3D_1 : private QuadraturCube3Dbasis {
 } ;
 
 class BilinearSurfaceMapping {
-  const double (&_p0)[3], (&_p1)[3], (&_p2)[3], (&_p3)[3] ;
-  double _b [4][3] ;
-  double _n [3][3] ;
+  const alucoord_t (&_p0)[3], (&_p1)[3], (&_p2)[3], (&_p3)[3] ;
+  alucoord_t _b [4][3] ;
+  alucoord_t _n [3][3] ;
   public :
-    inline BilinearSurfaceMapping (const double (&)[3], const double (&)[3], const double (&)[3], const double (&)[3]) ;
+    inline BilinearSurfaceMapping (const alucoord_t (&)[3], const alucoord_t (&)[3], const alucoord_t (&)[3], const alucoord_t (&)[3]) ;
     inline BilinearSurfaceMapping (const BilinearSurfaceMapping &) ;
    ~BilinearSurfaceMapping () {}
-    inline void map2world(const double (&)[2], double (&)[3]) const ;
-    inline void map2world(double x, double y, double (&w)[3]) const ;
-    inline void normal(const double (&)[2], double (&)[3]) const ;
+    inline void map2world(const alucoord_t (&)[2], alucoord_t (&)[3]) const ;
+    inline void map2world(alucoord_t x, alucoord_t y, alucoord_t (&w)[3]) const ;
+    inline void normal(const alucoord_t (&)[2], alucoord_t (&)[3]) const ;
     
-    static inline void barycenter(const double (&p0)[3], const double (&p1)[3], const double (&p2)[3], const double (&p3)[3],
-                                  double (&barycenter)[3])
+    static inline void barycenter(const alucoord_t (&p0)[3], const alucoord_t (&p1)[3], const alucoord_t (&p2)[3], const alucoord_t (&p3)[3],
+                                  alucoord_t (&barycenter)[3])
     {
       barycenter[0] = 0.25 * (p0[0] + p1[0] + p2[0] + p3[0]);
       barycenter[1] = 0.25 * (p0[1] + p1[1] + p2[1] + p3[1]);
@@ -120,7 +120,7 @@ class BilinearSurfaceMapping {
 #ifndef NDEBUG 
       {
         BilinearSurfaceMapping map(p0,p1,p2,p3); 
-        double p[3] ;
+        alucoord_t p[3] ;
         map.map2world(.0, .0, p) ;
         for(int j=0; j<3; ++j)
         {
@@ -133,8 +133,8 @@ class BilinearSurfaceMapping {
 
 class QuadraturCube2Dbasis {
   protected :
-    static const double _p1 [2] ;
-    static const double _p3 [4][2] ;
+    static const alucoord_t _p1 [2] ;
+    static const alucoord_t _p3 [4][2] ;
 } ;
 
 template < class A > class QuadraturCube2D : private QuadraturCube2Dbasis {
@@ -171,9 +171,9 @@ template < class A > class QuadraturCube2D_1 : private QuadraturCube2Dbasis {
 	//
 
 
-inline TrilinearMapping :: TrilinearMapping (const double (&x0)[3], const double (&x1)[3],
-                      const double (&x2)[3], const double (&x3)[3], const double (&x4)[3], 
-                      const double (&x5)[3], const double (&x6)[3], const double (&x7)[3]) 
+inline TrilinearMapping :: TrilinearMapping (const alucoord_t (&x0)[3], const alucoord_t (&x1)[3],
+                      const alucoord_t (&x2)[3], const alucoord_t (&x3)[3], const alucoord_t (&x4)[3], 
+                      const alucoord_t (&x5)[3], const alucoord_t (&x6)[3], const alucoord_t (&x7)[3]) 
   : p0(x0), p1(x1), p2(x2), p3(x3), p4(x4), p5(x5), p6(x6), p7(x7) {
   a [0][0] = p3 [0] ;
   a [0][1] = p3 [1] ;
@@ -210,22 +210,22 @@ inline TrilinearMapping :: TrilinearMapping (const TrilinearMapping & map)
   return ;
 }
 
-inline void TrilinearMapping :: map2world(const double (&p)[3], double (&world)[3]) const {
-  double x = .5 * (p [0] + 1.) ;
-  double y = .5 * (p [1] + 1.) ;
-  double z = .5 * (p [2] + 1.) ;
-  double t3 = y * z ;
-  double t8 = x * z ;
-  double t13 = x * y ;
-  double t123 = x * t3 ;
+inline void TrilinearMapping :: map2world(const alucoord_t (&p)[3], alucoord_t (&world)[3]) const {
+  alucoord_t x = .5 * (p [0] + 1.) ;
+  alucoord_t y = .5 * (p [1] + 1.) ;
+  alucoord_t z = .5 * (p [2] + 1.) ;
+  alucoord_t t3 = y * z ;
+  alucoord_t t8 = x * z ;
+  alucoord_t t13 = x * y ;
+  alucoord_t t123 = x * t3 ;
   world [0] = a [0][0] + a [1][0] * x + a [2][0] * y + a [3][0] * z + a [4][0] * t13 + a [5][0] * t3 + a [6][0] * t8 + a [7][0] * t123 ;
   world [1] = a [0][1] + a [1][1] * x + a [2][1] * y + a [3][1] * z + a [4][1] * t13 + a [5][1] * t3 + a [6][1] * t8 + a [7][1] * t123 ;
   world [2] = a [0][2] + a [1][2] * x + a [2][2] * y + a [3][2] * z + a [4][2] * t13 + a [5][2] * t3 + a [6][2] * t8 + a [7][2] * t123 ;
   return ;
 }
 
-inline void TrilinearMapping :: map2world(const double x1, const double x2, const double x3, double (&world)[3]) const {
-  double map [3] ;
+inline void TrilinearMapping :: map2world(const alucoord_t x1, const alucoord_t x2, const alucoord_t x3, alucoord_t (&world)[3]) const {
+  alucoord_t map [3] ;
   map [0] = x1 ;
   map [1] = x2 ;
   map [2] = x3 ;
@@ -235,7 +235,7 @@ inline void TrilinearMapping :: map2world(const double x1, const double x2, cons
 
 inline bool TrilinearMapping :: affine () const 
 {
-  double sum = 0.0;
+  alucoord_t sum = 0.0;
   // summ all factor from non-linaer terms 
   for(int i=4; i<8; ++i) 
   {
@@ -295,15 +295,15 @@ template < class A > inline typename QuadraturCube3D_1 < A > :: val_t QuadraturC
   return base ;
 }
 
-inline VolumeCalc :: val_t VolumeCalc :: operator () (const double (&)[3], const arg_t &) {
+inline VolumeCalc :: val_t VolumeCalc :: operator () (const alucoord_t (&)[3], const arg_t &) {
   return 1.0 ;
 }
 
-inline VolumeCalc :: val_t VolumeCalc :: operator () (const double (&)[4], const LinearMapping &, const arg_t &) {
+inline VolumeCalc :: val_t VolumeCalc :: operator () (const alucoord_t (&)[4], const LinearMapping &, const arg_t &) {
   return 1.0 ;
 }
 
-inline BilinearSurfaceMapping :: BilinearSurfaceMapping (const double (&x0)[3], const double (&x1)[3], const double (&x2)[3], const double (&x3)[3]) 
+inline BilinearSurfaceMapping :: BilinearSurfaceMapping (const alucoord_t (&x0)[3], const alucoord_t (&x1)[3], const alucoord_t (&x2)[3], const alucoord_t (&x3)[3]) 
   : _p0 (x0), _p1 (x1), _p2 (x2), _p3 (x3) {
   _b [0][0] = _p0 [0] ;
   _b [0][1] = _p0 [1] ;
@@ -342,27 +342,27 @@ inline BilinearSurfaceMapping :: BilinearSurfaceMapping (const BilinearSurfaceMa
   return ;
 }
 
-inline void BilinearSurfaceMapping :: map2world (const double (&map)[2], double (&wld)[3]) const {
-  double x = .5 * (map [0] + 1.0) ;
-  double y = .5 * (map [1] + 1.0) ;
-  double xy = x * y ;
+inline void BilinearSurfaceMapping :: map2world (const alucoord_t (&map)[2], alucoord_t (&wld)[3]) const {
+  alucoord_t x = .5 * (map [0] + 1.0) ;
+  alucoord_t y = .5 * (map [1] + 1.0) ;
+  alucoord_t xy = x * y ;
   wld[0] = _b [0][0] + x * _b [1][0] + y * _b [2][0] + xy * _b [3][0] ;
   wld[1] = _b [0][1] + x * _b [1][1] + y * _b [2][1] + xy * _b [3][1] ;
   wld[2] = _b [0][2] + x * _b [1][2] + y * _b [2][2] + xy * _b [3][2] ;
   return ;
 }
 
-inline void BilinearSurfaceMapping :: map2world (double x, double y, double (&w)[3]) const {
-  double p [2] ;
+inline void BilinearSurfaceMapping :: map2world (alucoord_t x, alucoord_t y, alucoord_t (&w)[3]) const {
+  alucoord_t p [2] ;
   p [0] = x ;
   p [1] = y ;
   map2world (p,w) ;
   return ;
 }
 
-inline void BilinearSurfaceMapping :: normal (const double (&map)[2], double (&normal)[3]) const {
-  double x = .5 * (map [0] + 1.0) ;
-  double y = .5 * (map [1] + 1.0) ;
+inline void BilinearSurfaceMapping :: normal (const alucoord_t (&map)[2], alucoord_t (&normal)[3]) const {
+  alucoord_t x = .5 * (map [0] + 1.0) ;
+  alucoord_t y = .5 * (map [1] + 1.0) ;
   normal [0] = -( _n [0][0] + _n [1][0] * x + _n [2][0] * y) ;
   normal [1] = -( _n [0][1] + _n [1][1] * x + _n [2][1] * y) ;
   normal [2] = -( _n [0][2] + _n [1][2] * x + _n [2][2] * y) ;
@@ -370,16 +370,16 @@ inline void BilinearSurfaceMapping :: normal (const double (&map)[2], double (&n
 }
 
 template < class A > typename QuadraturCube2D < A > :: val_t QuadraturCube2D < A > :: integrate1 (val_t base, const arg_t & x) {
-  double n [3] ;
+  alucoord_t n [3] ;
   _map.normal (_p1,n) ;
   return base + A () (_p1,n,x) ;
 }
 
 template < class A > typename QuadraturCube2D < A > :: val_t QuadraturCube2D < A > :: integrate3 (val_t base, const arg_t & x) {
-  const double quarter = 1.0/4.0 ;
+  const alucoord_t quarter = 1.0/4.0 ;
   val_t res ;
   for(int i = 0 ; i < 4 ; i ++) {
-    double n [3] ;
+    alucoord_t n [3] ;
     _map.normal (_p3 [i],n) ;
     val_t tmp = A () ( _p3 [i],n,x) ;
     base += (tmp *= quarter) ;
@@ -388,14 +388,14 @@ template < class A > typename QuadraturCube2D < A > :: val_t QuadraturCube2D < A
 }
 
 template < class A > typename QuadraturCube2D < A > :: val_t QuadraturCube2D < A > :: integrate(val_t base, const arg_t & x, int resolution) {
-  double w = 1.0/double (resolution * resolution) ;
-  double delta = 2.0/double (resolution) ;
+  alucoord_t w = 1.0/alucoord_t (resolution * resolution) ;
+  alucoord_t delta = 2.0/alucoord_t (resolution) ;
   for(int i = 0; i < resolution; i ++) {
-    double p [2] ;
-    p [0] = delta * (double (i) + .5) - 1.0 ;
+    alucoord_t p [2] ;
+    p [0] = delta * (alucoord_t (i) + .5) - 1.0 ;
     for(int j = 0; j < resolution ; j ++) {
-      double n [3] ;
-      p [1] = delta * (double (j) + .5) - 1.0 ;
+      alucoord_t n [3] ;
+      p [1] = delta * (alucoord_t (j) + .5) - 1.0 ;
       _map.normal (p,n) ;
       val_t tmp = A () (p,n,x) ;
       tmp *= w ;     
@@ -410,7 +410,7 @@ template < class A > typename QuadraturCube2D_1 < A > :: val_t QuadraturCube2D_1
 }
 
 template < class A > typename QuadraturCube2D_1 < A > :: val_t QuadraturCube2D_1 < A > :: integrate3 (val_t base, const arg_t & x) {
-  const double quarter = 1.0/4.0 ;
+  const alucoord_t quarter = 1.0/4.0 ;
   val_t res ;
   for(int i = 0 ; i < 4 ; i ++) {
     val_t tmp = A () ( _p3 [i],_map,x) ;
@@ -420,13 +420,13 @@ template < class A > typename QuadraturCube2D_1 < A > :: val_t QuadraturCube2D_1
 }
 
 template < class A > typename QuadraturCube2D_1 < A > :: val_t QuadraturCube2D_1 < A > :: integrate(val_t base, const arg_t & x, int resolution) {
-  double w = 1.0/double (resolution * resolution) ;
-  double delta = 2.0/double (resolution) ;
+  alucoord_t w = 1.0/alucoord_t (resolution * resolution) ;
+  alucoord_t delta = 2.0/alucoord_t (resolution) ;
   for(int i = 0; i < resolution; i ++) {
-    double p [2] ;
-    p [0] = delta * (double (i) + .5) - 1.0 ;
+    alucoord_t p [2] ;
+    p [0] = delta * (alucoord_t (i) + .5) - 1.0 ;
     for(int j = 0; j < resolution ; j ++) {
-      p [1] = delta * (double (j) + .5) - 1.0 ;
+      p [1] = delta * (alucoord_t (j) + .5) - 1.0 ;
       val_t tmp = A () (p,_map,x) ;
       tmp *= w ;     
       base += tmp ;
@@ -435,10 +435,10 @@ template < class A > typename QuadraturCube2D_1 < A > :: val_t QuadraturCube2D_1
   return base ;
 }
 
-inline SurfaceCalc :: val_t SurfaceCalc :: operator()(const double (&)[2], const double (&n)[3], const arg_t &) {
+inline SurfaceCalc :: val_t SurfaceCalc :: operator()(const alucoord_t (&)[2], const alucoord_t (&n)[3], const arg_t &) {
   return sqrt (n [0] * n [0] + n [1] * n [1] + n [2] * n [2]) ;
 }
-inline SurfaceCalc :: val_t SurfaceCalc :: operator()(const double (&)[3], const double (&n)[3], const arg_t &) {
+inline SurfaceCalc :: val_t SurfaceCalc :: operator()(const alucoord_t (&)[3], const alucoord_t (&n)[3], const arg_t &) {
   return sqrt (n [0] * n [0] + n [1] * n [1] + n [2] * n [2]) ;
 }
 

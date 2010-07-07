@@ -84,7 +84,7 @@ public:
   //sign = +/- 1  und ist dafuer da, um den Vektor 
   //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
   MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp, 
-      Gitter::Geometric::tetra_GEO * orig, double (&vec)[3] , double sign) ;
+      Gitter::Geometric::tetra_GEO * orig, alucoord_t (&vec)[3] , double sign) ;
 
   // desctructor deleting _ghInforPtr
   virtual ~MacroGhostTetra () ;
@@ -135,7 +135,8 @@ class MacroGhostHexa : public MacroGhost
   MacroGhostHexa (const MacroGhostHexa& ); 
 public:
   // constructor 
-  MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * face); 
+  MacroGhostHexa( BuilderIF & bi, 
+                  MacroGhostInfoHexa* allp, const hface4_GEO * face); 
 
   // desctructor deleting _ghInforPtr
   virtual ~MacroGhostHexa () ;

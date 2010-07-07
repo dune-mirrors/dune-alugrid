@@ -483,7 +483,7 @@ GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_periodi
 
   Objects :: periodic3_IMPL * per3 = new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
       
-  double v[3]; //Verschiebungsvektor (von SW(myhface3(0) zu SW(myhface3(1))
+  alucoord_t v[3]; //Verschiebungsvektor (von SW(myhface3(0) zu SW(myhface3(1))
   for (int i = 0; i < 3; i++) {
     v[i] = 0.3333333333*(f[1]->myvertex(0)->Point()[i] +
                          f[1]->myvertex(1)->Point()[i] +
@@ -509,7 +509,7 @@ GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_periodi
 
 GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) {
   Objects :: periodic4_IMPL * per4 = new Objects :: periodic4_IMPL (0, f [0], t[0], f [1], t[1]) ;
-  double v [3]; //Verschiebung von Schwerpunkt(myhface4(0)) zu Schwerpunkt(myhface4(1))
+  alucoord_t v [3]; //Verschiebung von Schwerpunkt(myhface4(0)) zu Schwerpunkt(myhface4(1))
   for (int i = 0; i < 4; i++) {
     v[i] = 0.25*(f[1]->myvertex(0)->Point()[i] +
                  f[1]->myvertex(1)->Point()[i] +

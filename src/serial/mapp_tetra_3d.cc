@@ -8,19 +8,19 @@
 
 #include "mapp_tetra_3d.h"
 
-const double quadraturTetra3Dbasis :: _p1 [4] =  {0.25, 0.25, 0.25, 0.25} ;
+const alucoord_t quadraturTetra3Dbasis :: _p1 [4] =  {0.25, 0.25, 0.25, 0.25} ;
 
-const double quadraturTetra3Dbasis :: _w2 [4] = {.0416666666,
+const alucoord_t quadraturTetra3Dbasis :: _w2 [4] = {.0416666666,
                                                  .0416666666,
                                                  .0416666666,
                                                  .0416666666} ;
 
-const double quadraturTetra3Dbasis :: _p2 [4][4] = {{.1381966, .1381966, .1381966, .5854102},
+const alucoord_t quadraturTetra3Dbasis :: _p2 [4][4] = {{.1381966, .1381966, .1381966, .5854102},
                                                     {.1381966, .1381966, .5854102, .1381966},
                                                     {.1381966, .5854102, .1381966, .1381966},
                                                     {.5854102, .1381966, .1381966, .1381966}};
   
-const double quadraturTetra3Dbasis :: _w7 [64] = {0.0026134590, 
+const alucoord_t quadraturTetra3Dbasis :: _w7 [64] = {0.0026134590, 
                                                   0.0048996145,
                                                   0.0048996145,
                                                   0.0026134590,
@@ -85,7 +85,7 @@ const double quadraturTetra3Dbasis :: _w7 [64] = {0.0026134590,
                                                   0.0001052539,
                                                   0.0000561425} ;
 
-const double quadraturTetra3Dbasis :: _p7 [64][4] = {{0.0485005494,0.0543346112,0.0622918076,0.8348730318},
+const alucoord_t quadraturTetra3Dbasis :: _p7 [64][4] = {{0.0485005494,0.0543346112,0.0622918076,0.8348730318},
                                                     {0.0485005494,0.0543346112,0.2960729005,0.6010919389},
                                                     {0.0485005494,0.0543346112,0.6010919389,0.2960729005},
                                                     {0.0485005494,0.0543346112,0.8348730300,0.0622918093},
@@ -150,9 +150,9 @@ const double quadraturTetra3Dbasis :: _p7 [64][4] = {{0.0485005494,0.0543346112,
                                                     {0.7958514179,0.1756168040,0.0191160209,0.0094157572},
                                                     {0.7958514179,0.1756168040,0.0265507642,0.0019810140}};
 
-const double quadraturTriang2Dbasis :: _p1 [3] = { 1.0/3.0, 1.0/3.0, 1.0/3.0 } ;
+const alucoord_t quadraturTriang2Dbasis :: _p1 [3] = { 1.0/3.0, 1.0/3.0, 1.0/3.0 } ;
 
-const double quadraturTriang2Dbasis :: _w3 [7] = {0.025,
+const alucoord_t quadraturTriang2Dbasis :: _w3 [7] = {0.025,
                                                   0.025,
 						  0.025,
                                                   0.066666666,
@@ -160,7 +160,7 @@ const double quadraturTriang2Dbasis :: _w3 [7] = {0.025,
 						  0.066666666,
                                                   0.225} ;
 
-const double quadraturTriang2Dbasis :: _p3 [7][3] = {{ .0, .0, 1.},
+const alucoord_t quadraturTriang2Dbasis :: _p3 [7][3] = {{ .0, .0, 1.},
                                                      { .0, 1., .0},
 						     { 1., .0, .0},
                                                      {.0, .5, .5 },
@@ -168,7 +168,7 @@ const double quadraturTriang2Dbasis :: _p3 [7][3] = {{ .0, .0, 1.},
 						     { .5, .5, .0},
                                                      {.333333333, .333333333, .333333333}} ;
 
-const double quadraturTriang2Dbasis :: _w5 [7] = {.11250000,
+const alucoord_t quadraturTriang2Dbasis :: _w5 [7] = {.11250000,
                                                   .06296959,
 						  .06296959,
 						  .06296959,
@@ -176,7 +176,7 @@ const double quadraturTriang2Dbasis :: _w5 [7] = {.11250000,
 						  .06619708,
 						  .06619708} ;
 
-const double quadraturTriang2Dbasis :: _p5 [7][3] = {{.333333333, .333333333, .333333333},
+const alucoord_t quadraturTriang2Dbasis :: _p5 [7][3] = {{.333333333, .333333333, .333333333},
                                			     {.101286507, .101286507, .797426985},
                                                      {.101286507, .797426985, .101286507},
                                                      {.797426985, .101286507, .101286507},
@@ -184,7 +184,7 @@ const double quadraturTriang2Dbasis :: _p5 [7][3] = {{.333333333, .333333333, .3
                                                      {.470142064, .059715871, .470142064},
                                                      {.059715871, .470142064, .470142064}} ;
 
-const double quadraturTriang2Dbasis :: _w7 [16] = {.023568368192,
+const alucoord_t quadraturTriang2Dbasis :: _w7 [16] = {.023568368192,
                                                    .044185088508,
 						   .044185088508,
 						   .023568368192,
@@ -201,7 +201,7 @@ const double quadraturTriang2Dbasis :: _w7 [16] = {.023568368192,
 						   .010167259547,
 						   .005423225903} ;
 						     
-const double quadraturTriang2Dbasis :: _p7 [16][3] = {{.057104196, .065466992, .877428812},
+const alucoord_t quadraturTriang2Dbasis :: _p7 [16][3] = {{.057104196, .065466992, .877428812},
                                                       {.057104196, .311164552, .631731251},
                                                       {.057104196, .631731250, .311164553},
                                                       {.057104196, .877428808, .065466995},
@@ -221,7 +221,7 @@ const double quadraturTriang2Dbasis :: _p7 [16][3] = {{.057104196, .065466992, .
 
 void LinearMapping :: inverse() {
 	//  Kramer - Regel
-  double val = 1.0 / det () ;
+  alucoord_t val = 1.0 / det () ;
   Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[1][2] * Df[2][1] ) * val ;
   Dfi[0][1] = ( Df[0][2] * Df[2][1] - Df[0][1] * Df[2][2] ) * val ;
   Dfi[0][2] = ( Df[0][1] * Df[1][2] - Df[0][2] * Df[1][1] ) * val ;
@@ -234,17 +234,17 @@ void LinearMapping :: inverse() {
   return ;
 }
 
-void LinearMapping :: world2map (const double (&wld)[3], double (&map)[4]) {
+void LinearMapping :: world2map (const alucoord_t (&wld)[3], alucoord_t (&map)[4]) {
   map [0] = map [1] = map [2] = map [3] = .0 ;
-  double upd [3] ;
+  alucoord_t upd [3] ;
   map2world (map, upd) ;
   inverse () ;
-  double u0 = wld [0] - upd [0] ;
-  double u1 = wld [1] - upd [1] ;
-  double u2 = wld [2] - upd [2] ;
-  double c0 = Dfi [0][0] * u0 + Dfi [0][1] * u1 + Dfi [0][2] * u2 ;
-  double c1 = Dfi [1][0] * u0 + Dfi [1][1] * u1 + Dfi [1][2] * u2 ;
-  double c2 = Dfi [2][0] * u0 + Dfi [2][1] * u1 + Dfi [2][2] * u2 ;
+  alucoord_t u0 = wld [0] - upd [0] ;
+  alucoord_t u1 = wld [1] - upd [1] ;
+  alucoord_t u2 = wld [2] - upd [2] ;
+  alucoord_t c0 = Dfi [0][0] * u0 + Dfi [0][1] * u1 + Dfi [0][2] * u2 ;
+  alucoord_t c1 = Dfi [1][0] * u0 + Dfi [1][1] * u1 + Dfi [1][2] * u2 ;
+  alucoord_t c2 = Dfi [2][0] * u0 + Dfi [2][1] * u1 + Dfi [2][2] * u2 ;
   map [0] = c0 ;
   map [1] = c1 ;
   map [2] = c2 ;

@@ -29,17 +29,17 @@ class LoadBalancer {
 
     class GraphVertex : public Serializable 
     {
-      double _center [3] ;  // Schwerpunktskoordinaten
+      alucoord_t  _center [3] ;  // Schwerpunktskoordinaten
       int _index, _weight ; // globale Nummer, Gewicht
       public :
         inline GraphVertex () ;
-        inline GraphVertex (int,int,const double (&)[3]) ;
+        inline GraphVertex (int,int,const alucoord_t (&)[3]) ;
         // constructor without center is initializing center and weight to zero 
         inline GraphVertex (int) ;
         inline virtual ~GraphVertex () ;
         inline int index () const ;
         inline int weight () const ;
-        inline const double (&center () const)[3] ;
+        inline const alucoord_t (&center () const)[3] ;
         inline bool operator < (const GraphVertex &) const ;
         inline bool operator == (const GraphVertex &) const ;
         inline bool isValid () const ;
@@ -191,7 +191,8 @@ inline LoadBalancer :: GraphVertex :: GraphVertex ()
   return ;
 }
 
-inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w, const double (&p)[3]) : _index (i), _weight (w) {
+inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w, const alucoord_t (&p)[3]) 
+: _index (i), _weight (w) {
   _center [0] = p [0] ;
   _center [1] = p [1] ;
   _center [2] = p [2] ;
@@ -213,7 +214,7 @@ inline int LoadBalancer :: GraphVertex :: weight () const {
   return _weight ;
 }
 
-inline const double (& LoadBalancer :: GraphVertex :: center () const)[3] {
+inline const alucoord_t (& LoadBalancer :: GraphVertex :: center () const)[3] {
   return _center ;
 }
 

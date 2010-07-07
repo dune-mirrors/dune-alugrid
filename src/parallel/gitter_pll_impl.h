@@ -262,7 +262,7 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     
   private :
     mytetra_t& _tetra;
-    double _center [3] ;
+    alucoord_t _center [3] ;
     map < int, int, less < int > > _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
@@ -315,7 +315,7 @@ class Periodic3PllXBaseMacro : public Periodic3PllXBase {
     int _ldbVertexIndex ;
     map < int, int, less < int > > _moveTo ;
     bool _erasable ;
-    double _center [3] ;
+    alucoord_t _center [3] ;
 } ;
 
 // ######                                                          #
@@ -367,7 +367,7 @@ class Periodic4PllXBaseMacro : public Periodic4PllXBase {
     int _ldbVertexIndex ;
     map < int, int, less < int > > _moveTo ;
     bool _erasable ;
-    double _center [3] ;
+    alucoord_t _center [3] ;
 } ;
 
 // #     #
@@ -438,7 +438,7 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
     void packAsBndNow (int, ObjectStream &) const;
   private :
     myhexa_t & _hexa ;
-    double _center [3] ;
+    alucoord_t _center [3] ;
     map < int, int, less < int > > _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;

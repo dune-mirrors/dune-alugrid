@@ -26,8 +26,8 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r)
           innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex(0));
           innervertex_t* v1 = static_cast<innervertex_t *> (this->myvertex(1));
           // get the vertex coordinates   
-          const double (&p0)[3] = v0->Point();
-          const double (&p1)[3] = v1->Point();
+          const alucoord_t (&p0)[3] = v0->Point();
+          const alucoord_t (&p1)[3] = v1->Point();
           
           // the last myvertex(0) is submitted for the indexmanager reference, rk
           _inner = new inner_t (l, 
@@ -116,7 +116,7 @@ template < class A >  void Hface4Top < A > :: splitISO4 () {
   {
     // calculate barycenter of face 
     innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex (0));
-    double p [3] ;
+    alucoord_t p [3] ;
     BilinearSurfaceMapping :: barycenter(
           v0->Point(),
           this->myvertex (1)->Point(), 
@@ -571,7 +571,7 @@ template < class A > HexaTop < A >
 
 #ifndef NDEBUG 
     // make sure determinant is ok 
-    double point[3] = { 0.0, 0.0, 0.0 };
+    alucoord_t point[3] = { 0.0, 0.0, 0.0 };
     assert( triMap.det( point ) > 0 );
 #endif
 
@@ -632,7 +632,7 @@ template < class A > void HexaTop < A > :: splitISO8 ()
 
   assert (_inner == 0 ) ;  
   {
-    double p[3] ;
+    alucoord_t p[3] ;
     // calculate barycenter 
     TrilinearMapping::barycenter(
         this->myvertex(0)->Point(), this->myvertex(1)->Point(),

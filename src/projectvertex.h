@@ -10,7 +10,7 @@ namespace ALUGridSpace {
 using namespace std;
 
 // interface class for projecting vertices for boundary adjustment 
-template <int dim> 
+template <int dim, class coord_t = double > 
 class VertexProjection
 {
 protected:
@@ -20,9 +20,9 @@ public:
   // destructor 
   virtual ~VertexProjection() {}
   // projection method 
-  virtual int operator()(const double (&p)[dim],
+  virtual int operator()(const coord_t (&p)[dim],
                          const int segmentIndex,
-                         double (&ret)[dim]) const = 0;
+                         coord_t (&ret)[dim]) const = 0;
 };
 
 } // end namespace 
