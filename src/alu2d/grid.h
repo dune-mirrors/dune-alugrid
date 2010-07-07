@@ -188,14 +188,14 @@ template < int N > class Vertex : public Listagent < Vertex < N > >, public Basi
 
  protected :
 
-    int nr_of_pernbs;
-
     Vertex *pernb[3];
 
+    int nr_of_pernbs;
     int _level;
 
   protected :
-    explicit Vertex( int level = -1 ) : _level( level ) {
+    explicit Vertex( int level = -1 ) : _level( level ) 
+    {
       nr_of_pernbs = 0;
       pernb[0] = (Vertex *)0;
       pernb[1] = (Vertex *)0;
@@ -531,7 +531,6 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
 
     } connect ;
 
-    int nvertices ;
 
     int mod(int i) const
     {
@@ -548,6 +547,8 @@ template < int N, int NV > class Element : public Thinelement < N, NV >, public 
     double _minheight;
     double _outernormal[NV][ncoord];
     double _sidelength[NV];
+
+    int nvertices ;
 
   public :
     int numfaces() const { return nv(); }
@@ -690,19 +691,19 @@ template < class A > class Hier : public A {
   
   Hier * up;
 
-  int lvl ;
+  unsigned char lvl ;
 
-  int childNr_;
+  unsigned char childNr_;
 
   protected :
 
-    int numchild ;
+  unsigned char numchild ;
 
-    Hier() : dwn(0), nxt(0), up(0), lvl(0) , childNr_(0) , numchild (0) {}
+  Hier() : dwn(0), nxt(0), up(0), lvl(0) , childNr_(0) , numchild (0) {}
 
-    void deletesubtree() { delete dwn ; dwn = 0; 
-      //  this->check();
-    };  // Wird f"ur konf. Dreiecke gebraucht
+  void deletesubtree() { delete dwn ; dwn = 0; 
+    //  this->check();
+  };  // Wird f"ur konf. Dreiecke gebraucht
 
   public :
 
