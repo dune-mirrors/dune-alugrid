@@ -22,7 +22,7 @@ template < class A > class Hface3Top : public A
     innerface_t * _bbb ;
     inner_t  * _inner ;
 
-    unsigned char _lvl ;
+    const unsigned char _lvl ;
     const signed char _nChild;
     myrule_t _rule ;
 
@@ -165,7 +165,7 @@ template < class A > class TetraTop : public A {
     inner_t * _inner ;
     const double _volume;
 
-    unsigned char _lvl ;
+    const unsigned char _lvl ;
     const signed char _nChild;
     myrule_t _req, _rule ;
     

@@ -179,7 +179,7 @@ template < class A > class Hedge1Top : public A
     inneredge_t * _bbb ;  // 8 
     inner_t * _inner ;    // 8 
 
-    unsigned char _lvl ;       
+    const unsigned char _lvl ;       
     myrule_t _rule ;  
     const bool _firstChild;  // 8 = 24 
     
@@ -243,7 +243,7 @@ template < class A > class Hface4Top : public A
     innerface_t * _bbb ; // 8 
     inner_t *_inner ;    // 8 
 
-    unsigned char _lvl ; 
+    const unsigned char _lvl ; 
     const signed char _nChild;
     myrule_t _rule ;    // 8  = 24 byte
     
@@ -371,7 +371,7 @@ template < class A > class HexaTop : public A {
     innerhexa_t * _bbb, * _up ;
     inner_t * _inner ;
     double _volume; 
-    unsigned char _lvl ;
+    const unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule, _req ;
     bool _affine;
