@@ -222,7 +222,7 @@ template < class A, class B > class TreeIterator : public IteratorSTI < A >, pub
   private :
     // maximal depth of a grid hierarchy, not possible an a 64bit system yet.
     // this is a secure upper bound 
-    enum { maxStackDepth = 64 } ;
+    enum { maxStackDepth = 16 } ;
 
     A * _seed ;
     A * _stack [ maxStackDepth ] ;
