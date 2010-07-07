@@ -55,56 +55,6 @@ class VertexPllBaseX : public VertexPllXIF, public MyAlloc {
     Refcount _ref ;
 } ;
 
-class EdgePllBaseX : public EdgePllXIF, public MyAlloc {
-  protected :
-    typedef Gitter :: Geometric :: hedge1_GEO myhedge1_t ;
-    virtual myhedge1_t & myhedge1 () = 0;
-    virtual const myhedge1_t & myhedge1 () const = 0;
-    inline EdgePllBaseX () {} 
-  public :
-    inline EdgePllBaseX (myhedge1_t &) ;
-    inline ~EdgePllBaseX () ;
-    virtual vector < int > estimateLinkage () const ;
-    virtual LinkedObject :: Identifier getIdentifier () const ;
-    virtual void getRefinementRequest (ObjectStream &) const ;
-    virtual bool setRefinementRequest (ObjectStream &) ;
-  public :
-    virtual bool lockAndTry () ;
-    virtual bool unlockAndResume (bool) ;
-    virtual bool lockedAgainstCoarsening () const ;
-  public :
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
-  //private :
-  //  myhedge1_t & _edge ;
-} ;
-
-class EdgePllBaseXMacro : public EdgePllBaseX {
-  public :
-    EdgePllBaseXMacro (myhedge1_t &) ;
-   ~EdgePllBaseXMacro () ;
-    virtual vector < int > estimateLinkage () const ;
-    virtual LinkedObject :: Identifier getIdentifier () const ;
-
-    inline myhedge1_t & myhedge1 () { return _edge; }
-    inline const myhedge1_t & myhedge1 () const { return _edge; }
-  protected :
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-
-  public :
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
-  private :
-    myhedge1_t & _edge ;
-    map < int, int, less < int > > _moveTo ;
-    Refcount _ref ;
-} ;
-
 template < class A > class FacePllBaseX : public FacePllXIF, public MyAlloc {
   protected :
     typedef A myhface_t ;
@@ -562,37 +512,59 @@ public :
     } ;
 
     class Hedge1EmptyPll : public Hedge1Empty
-                         , public EdgePllBaseX
     {
     protected :
-      inline bool lockedAgainstCoarsening () const ;
+      typedef Gitter :: Geometric :: hedge1_GEO myhedge1_t ;
     public :
+      virtual vector < int > estimateLinkage () const ;
+      virtual LinkedObject :: Identifier getIdentifier () const ;
+      virtual void getRefinementRequest (ObjectStream &) const ;
+      virtual bool setRefinementRequest (ObjectStream &) ;
+    public :
+      inline  bool lockAndTry () ;
+      inline  bool unlockAndResume (bool) ;
+      inline  bool lockedAgainstCoarsening () const ;
+    public :
+      inline  void attach2 (int) ;
+      inline  void unattach2 (int) ;
+      inline  bool packAll (vector < ObjectStream > &) ;
+      inline  void unpackSelf (ObjectStream &, bool) ;
+
+    public :
+      // return reference to self 
       inline myhedge1_t & myhedge1 () { return *this; }
       inline const myhedge1_t & myhedge1 () const { return *this; }
 
-      typedef EdgePllBaseX mypllx_t ;
       inline Hedge1EmptyPll (myvertex_t *,myvertex_t *) ;
+      inline ~Hedge1EmptyPll(); 
+
       virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-    //private :
-     // mypllx_t _pllx ;
-      friend class EdgePllBaseX;
     } ;
     typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
 
     class Hedge1EmptyPllMacro : public hedge1_IMPL 
     {
     public :
-      typedef EdgePllBaseXMacro mypllx_t ;
+      virtual vector < int > estimateLinkage () const ;
+      virtual LinkedObject :: Identifier getIdentifier () const ;
+
+    protected :
+      virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+      virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+
+    public :
+      virtual void attach2 (int) ;
+      virtual void unattach2 (int) ;
+      virtual bool packAll (vector < ObjectStream > &) ;
+      virtual void unpackSelf (ObjectStream &, bool) ;
+    private :
+      map < int, int, less < int > > _moveTo ;
+      Refcount _ref ; //// ????? 
+    public :
       inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *) ;
-     ~Hedge1EmptyPllMacro () ;
-      virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
     private :
-      mypllx_t * _pllx ;
-      
-      friend class EdgePllBaseXMacro;
     } ;
 
     class Hface3EmptyPll : public Hface3Empty
@@ -924,36 +896,6 @@ inline const VertexPllBaseX :: myvertex_t & VertexPllBaseX :: myvertex () const 
   return _v ;
 }
 
-inline EdgePllBaseX :: EdgePllBaseX (myhedge1_t & e)
-//: _edge (e)
-{}
-
-inline EdgePllBaseX :: ~EdgePllBaseX () 
-{
-#ifndef NDEBUG
-  // Falls die nachfolgende Situation eintritt, ist massiv was faul im
-  // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
-  // gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
-  // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
-  // gehoben wird.
-
-  //if( myhedge1().isSet( myhedge1_t::flagLock ) )
-  //{
-  // cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
-  //  abort () ;
-  //}
-#endif
-  return ;
-}
-
-//inline EdgePllBaseX :: myhedge1_t & EdgePllBaseX :: myhedge1 () {
-//  return _edge ;
-//}
-
-//inline const EdgePllBaseX :: myhedge1_t & EdgePllBaseX :: myhedge1 () const {
-//  return _edge ;
-//}
-
 template < class A > inline FacePllBaseX < A > :: FacePllBaseX (myhface_t & f) 
   //: _face (f) 
 {
@@ -1247,16 +1189,31 @@ template < class A > inline int & BndsegPllBaseXMacroClosure < A > :: ldbVertexI
 }
 
 inline GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: Hedge1EmptyPll (VertexGeo * a, VertexGeo * b) :
-  GitterBasis :: Objects :: Hedge1Empty (a,b) // , _pllx (*this) 
+  GitterBasis :: Objects :: Hedge1Empty (a,b) 
 {
   return ;
 }
 
-inline bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: lockedAgainstCoarsening () const {
- // lockedAgainstCoarsening from base class, otherwise cycle 
- // because accessPllX () returns *this 
- return EdgePllBaseX :: lockedAgainstCoarsening () ;;
- //return accessPllX ().lockedAgainstCoarsening () ;
+inline GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: ~Hedge1EmptyPll ()
+{
+#ifndef NDEBUG
+  // Falls die nachfolgende Situation eintritt, ist massiv was faul im
+  // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
+  // gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
+  // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
+  // gehoben wird.
+
+  if( myhedge1().isSet( myhedge1_t::flagLock ) )
+  {
+   cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
+    abort () ;
+  }
+#endif
+}
+
+inline bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: lockedAgainstCoarsening () const 
+{
+ return myhedge1().isSet( myhedge1_t::flagLock );
 }
 
 inline GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: Hface3EmptyPll (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :

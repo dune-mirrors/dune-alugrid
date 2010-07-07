@@ -84,20 +84,20 @@ void VertexPllBaseX :: unpackSelf (ObjectStream & os, bool i) {
   return ;
 }
 
-vector < int > EdgePllBaseX :: estimateLinkage () const {
+vector < int > GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: estimateLinkage () const {
   return (abort (), vector < int > ()) ;
 }
 
-LinkedObject :: Identifier EdgePllBaseX :: getIdentifier () const {
+LinkedObject :: Identifier GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: getIdentifier () const {
   return (abort (), LinkedObject :: Identifier  ()) ;
 }
 
-void EdgePllBaseX :: getRefinementRequest (ObjectStream & os) const {
+void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: getRefinementRequest (ObjectStream & os) const {
   os.writeObject (int(myhedge1 ().getrule ())) ;
   return ;
 }
 
-bool EdgePllBaseX :: setRefinementRequest (ObjectStream & os) {
+bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: setRefinementRequest (ObjectStream & os) {
   int i ;
   try {
     os.readObject (i) ;
@@ -109,37 +109,32 @@ bool EdgePllBaseX :: setRefinementRequest (ObjectStream & os) {
     false : (myhedge1 ().refineImmediate (myhedge1_t :: myrule_t (i)), true) ;
 }
 
-void EdgePllBaseX :: unattach2 (int) {
+void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unattach2 (int) {
   abort () ;
   return ;
 }
 
-void EdgePllBaseX :: attach2 (int) {
+void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: attach2 (int) {
   abort () ;
   return ;
 }
 
-bool EdgePllBaseX :: packAll (vector < ObjectStream > &) {
+bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: packAll (vector < ObjectStream > &) {
   return (abort (), false) ;
 }
 
-void EdgePllBaseX :: unpackSelf (ObjectStream &,bool) {
+void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unpackSelf (ObjectStream &,bool) {
   abort () ;
   return ;
 }
 
-bool EdgePllBaseX :: lockAndTry ()
+bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: lockAndTry ()
 {
   myhedge1().set( myhedge1_t::flagLock );
   return myhedge1().coarse () ;
 }
 
-bool EdgePllBaseX :: lockedAgainstCoarsening () const
-{
-  return myhedge1().isSet( myhedge1_t::flagLock );
-}
-
-bool EdgePllBaseX :: unlockAndResume (bool r)
+bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unlockAndResume (bool r)
 {
   myhedge1().unset( myhedge1_t::flagLock );
   bool x ;
@@ -152,16 +147,25 @@ bool EdgePllBaseX :: unlockAndResume (bool r)
   return x ;
 }
 
-EdgePllBaseXMacro :: EdgePllBaseXMacro (myhedge1_t & e) : _edge(e), _moveTo (), _ref () {
+EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
+  return *this ;
+}
+
+const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
+  return *this ;
+}
+
+GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: Hedge1EmptyPllMacro (myvertex_t * a, myvertex_t * b) :
+  GitterBasisPll :: ObjectsPll :: hedge1_IMPL (0, a, b), _moveTo(), _ref()
+{
   return ;
 }
 
-EdgePllBaseXMacro :: ~EdgePllBaseXMacro () {
-  assert (0 == _moveTo.size ()) ;
+void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
   return ;
 }
 
-vector < int > EdgePllBaseXMacro :: estimateLinkage () const {
+vector < int > GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: estimateLinkage () const {
   vector < int > est ;
   vector < int > l0 = myhedge1 ().myvertex(0)->accessPllX ().estimateLinkage () ;
   vector < int > l1 = myhedge1 ().myvertex(1)->accessPllX ().estimateLinkage () ;
@@ -169,11 +173,11 @@ vector < int > EdgePllBaseXMacro :: estimateLinkage () const {
   return est ;
 }
 
-LinkedObject :: Identifier EdgePllBaseXMacro :: getIdentifier () const {
+LinkedObject :: Identifier GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: getIdentifier () const {
   return Identifier (myhedge1 ().myvertex (0)->ident (), myhedge1 ().myvertex (1)->ident ()) ;
 }
 
-void EdgePllBaseXMacro :: unattach2 (int i) {
+void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
   myhedge1 ().myvertex (0)->accessPllX ().unattach2 (i) ;
@@ -181,7 +185,7 @@ void EdgePllBaseXMacro :: unattach2 (int i) {
   return ;
 }
 
-void EdgePllBaseXMacro :: attach2 (int i) {
+void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: attach2 (int i) {
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) {
     _moveTo.insert (pair < const int, int > (i,1)) ;
@@ -193,7 +197,7 @@ void EdgePllBaseXMacro :: attach2 (int i) {
   return ;
 }
 
-bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv) 
+bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: packAll (vector < ObjectStream > & osv) 
 {
   bool action (false) ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
@@ -221,7 +225,7 @@ bool EdgePllBaseXMacro :: packAll (vector < ObjectStream > & osv)
   return action ;
 }
 
-void EdgePllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) 
+void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: unpackSelf (ObjectStream & os, bool i) 
 {
   if (i) 
   {
@@ -1752,45 +1756,6 @@ const VertexPllXIF_t & GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: acc
 }
 
 void GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
-EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  //return _pllx ;
-  return *this ;
-}
-
-const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  //return _pllx ;
-  return *this ;
-}
-
-GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: Hedge1EmptyPllMacro (myvertex_t * a, myvertex_t * b) :
-  GitterBasisPll :: ObjectsPll :: hedge1_IMPL (0, a, b)
-    , _pllx (new mypllx_t (*this)) 
-{
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: ~Hedge1EmptyPllMacro () {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
-EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: accessPllX () throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
   delete _pllx ;
   _pllx = 0 ;
   return ;
