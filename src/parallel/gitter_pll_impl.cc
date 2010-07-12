@@ -212,7 +212,7 @@ bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: packAll (vector < Ob
       os.writeObject (myhedge1 ().myvertex (1)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhedge1_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
+      assert( ! myhedge1_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
 
       // pack refinement information 
       myhedge1 ().backup ( os ) ;
@@ -397,7 +397,7 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
       // mit einer Verfeinerungsregel identisch ist - sonst gibt's
       // nachher beim Auspacken nur garbage.
     
-      assert (! typename myhface_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
+      assert (! myhface_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
     
       this->myhface ().backup ( os );
       os.put( ObjectStream :: ENDOFSTREAM );
@@ -898,7 +898,7 @@ bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       os.writeObject (mytetra ().myvertex (3)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! mytetra_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
+      assert( ! mytetra_t :: myrule_t ::isValid (ObjectStream :: ENDOFSTREAM) ) ;
 
       // pack refinement information 
       mytetra ().backup ( os ) ;
@@ -931,7 +931,7 @@ bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
       os.writeObject (mytetra ().myvertex (3)->ident ()) ;
 
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! mytetra_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
+      assert( ! mytetra_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
       
       // pack refinement information 
       mytetra ().backup ( os );
@@ -1179,7 +1179,7 @@ bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
       os.writeObject (myperiodic3 ().myvertex (5)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic3_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
+      assert( ! myperiodic3_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
       
       // pack refinement information 
       myperiodic3 ().backup ( os ) ;
@@ -1343,7 +1343,7 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv)
       os.writeObject (myperiodic4 ().myvertex (7)->ident ()) ;
 
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic4_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
+      assert( ! myperiodic4_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
       
       // pack refinement information 
       myperiodic4 ().backup ( os ) ;
@@ -1538,7 +1538,7 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
       os.writeObject (myhexa ().myvertex (7)->ident ()) ;
       
       // make sure ObjectStream :: ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhexa_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
+      assert( ! myhexa_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
       
       // pack refinement information 
       myhexa(). backup( os );
@@ -1576,7 +1576,7 @@ bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
       os.writeObject (myhexa ().myvertex (7)->ident ()) ;
 
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhexa_t :: myrule_t (ObjectStream :: ENDOFSTREAM).isValid ()) ;
+      assert( ! myhexa_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
       
       // backup refinement information 
       myhexa(). backup ( os );

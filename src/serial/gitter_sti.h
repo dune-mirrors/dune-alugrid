@@ -837,6 +837,7 @@ public :
       Hedge1Rule ( const rule_enum & = nosplit );
       operator rule_t () const;
       inline bool isValid () const ;
+      static inline bool isValid (const rule_t &);
       inline Hedge1Rule rotate (int) const ;
       
     private:
@@ -852,6 +853,7 @@ public :
       Hface3Rule ( const rule_enum & = nosplit );
       operator rule_t () const;
       inline bool isValid () const ;
+      static inline bool isValid (const rule_t &) ;
       inline Hface3Rule rotate (int) const ;
 
     private :
@@ -860,13 +862,16 @@ public :
       
     struct Hface4Rule
     {
-      enum rule_enum { nosplit=1, iso4, ni02, ni13, undefined=-2 };
+      enum rule_enum { nosplit=1, iso4,  undefined=-2
+                       // ni02, ni13
+                     };
       typedef signed char rule_t;
 
       explicit Hface4Rule ( const rule_t & );
       Hface4Rule ( const rule_enum & = nosplit) ;
       operator rule_t () const;
       inline bool isValid () const ;
+      static inline bool isValid (const rule_t &) ;
       inline Hface4Rule rotate (int) const ;
 
     private :
@@ -883,6 +888,7 @@ public :
       TetraRule ( const rule_enum & = nosplit) ;
       operator rule_t () const;
       inline bool isValid () const ;
+      static inline bool isValid (const rule_t &) ;
 
     private :
       rule_t _r ;
@@ -898,6 +904,7 @@ public :
       HexaRule ( const rule_enum & = nosplit);
       operator rule_t () const;
       inline bool isValid () const ;
+      static inline bool isValid (const rule_t &) ;
 
     private :
       rule_t _r ;
@@ -2323,20 +2330,27 @@ inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is, vec
 inline Gitter :: Geometric :: Hedge1Rule :: Hedge1Rule ( const rule_t &r )
 : _r ( r )
 {
-  assert( r == 0 || r == 1 );
+  assert( isValid() );
 }
 
 inline Gitter :: Geometric :: Hedge1Rule :: Hedge1Rule ( const rule_enum &r )
 : _r( r )
-{}
+{
+  assert( isValid() );
+}
 
 inline Gitter :: Geometric :: Hedge1Rule :: operator rule_t () const
 {
   return int( _r );
 }
 
+inline bool Gitter :: Geometric :: Hedge1Rule :: isValid (const rule_t &r)
+{
+  return r == nosplit || r == iso2 ;
+}
+
 inline bool Gitter :: Geometric :: Hedge1Rule :: isValid () const {
-  return _r == nosplit || _r == iso2 ;
+  return isValid( _r );
 }
 
 inline Gitter :: Geometric :: Hedge1Rule Gitter :: Geometric :: Hedge1Rule :: rotate (int i) const 
@@ -2425,19 +2439,27 @@ inline const Gitter :: Geometric :: hedge1 :: myvertex_t * Gitter :: Geometric :
 
 inline Gitter :: Geometric :: Hface3Rule :: Hface3Rule ( const rule_t &r )
 : _r( r )
-{}
+{
+  assert( _r == undefined || isValid() );
+}
 
 inline Gitter :: Geometric :: Hface3Rule :: Hface3Rule ( const rule_enum &r )
 : _r( r )
-{}
+{
+  assert( _r == undefined || isValid() );
+}
 
 inline Gitter :: Geometric :: Hface3Rule :: operator rule_t () const
 {
   return int( _r );
 }
 
+inline bool Gitter :: Geometric :: Hface3Rule :: isValid (const rule_t& r) {
+  return r == nosplit || r == iso4 || r == e01 || r == e12 || r == e20 ;
+}
+
 inline bool Gitter :: Geometric :: Hface3Rule :: isValid () const {
-  return _r == nosplit || _r == iso4 || _r == e01 || _r == e12 || _r == e20 ;
+  return isValid( _r );
 }
 
 inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: rotate (int t) const {
@@ -2499,19 +2521,27 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface3Ru
 
 inline Gitter :: Geometric :: Hface4Rule :: Hface4Rule ( const rule_t &r )
 : _r( r )
-{}
+{
+  assert( _r == undefined || isValid() );
+}
 
 inline Gitter :: Geometric :: Hface4Rule :: Hface4Rule ( const rule_enum &r )
 : _r( r )
-{}
+{
+  assert( _r == undefined || isValid() );
+}
 
 inline Gitter :: Geometric :: Hface4Rule :: operator rule_t () const
 {
   return int( _r );
 }
 
+inline bool Gitter :: Geometric :: Hface4Rule :: isValid (const rule_t& r) {
+  return r == nosplit || r == iso4 /* || _r == ni02 || _r == ni13 */ ;
+}
+
 inline bool Gitter :: Geometric :: Hface4Rule :: isValid () const {
-  return _r == nosplit || _r == iso4 /* || _r == ni02 || _r == ni13 */ ;
+  return isValid( _r );
 }
 
 inline Gitter :: Geometric :: Hface4Rule Gitter :: Geometric :: Hface4Rule :: rotate (int t) const {
@@ -2961,9 +2991,13 @@ inline Gitter :: Geometric :: TetraRule :: operator rule_t () const
   return int( _r );
 }
 
+inline bool Gitter :: Geometric :: TetraRule :: isValid (const rule_t& r) {
+  return r == crs || r == nosplit || r == iso8 || r == e01 
+    || r == e12 || r == e20 || r == e23 || r == e30 || r == e31;
+}
+
 inline bool Gitter :: Geometric :: TetraRule :: isValid () const {
-  return _r == crs || _r == nosplit || _r == iso8 || _r == e01 
-    || _r == e12 || _r == e20 || _r == e23 || _r == e30 || _r == e31;
+  return isValid( _r );
 }
 
 #if 0
@@ -3332,8 +3366,12 @@ inline Gitter :: Geometric :: HexaRule :: operator rule_t () const
   return int( _r );
 }
 
+inline bool Gitter :: Geometric :: HexaRule :: isValid (const rule_t& r) {
+  return r == crs || r == nosplit || r == iso8 ;
+}
+
 inline bool Gitter :: Geometric :: HexaRule :: isValid () const {
-  return _r == crs || _r == nosplit || _r == iso8 ;
+  return isValid( _r );
 }
 
 #if 0
