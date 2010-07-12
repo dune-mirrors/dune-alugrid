@@ -112,9 +112,18 @@ class LoadBalancer {
         int accEdgeLoad () const ;
         inline int maxVertexLoad () const ;
       public :
-        bool repartition (MpAccessGlobal &, method) ;
         int getDestination (int) const ;
         set < int, less < int > > scan () const ;
+        // original repartition method for ALUGrid 
+        bool repartition (MpAccessGlobal &, method) ;
+        // repartition to be called from outside (communicator ALU2d)
+        vector< int > repartition (MpAccessGlobal &, 
+                                   method,
+                                   const int ) ;
+      protected:  
+        // implementation of repartition 
+        bool repartition (MpAccessGlobal &, method,
+                          vector< int >& , const int ) ;
     } ;
 } ;
 

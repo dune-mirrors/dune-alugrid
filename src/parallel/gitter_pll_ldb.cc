@@ -330,15 +330,36 @@ static bool collectInsulatedNodes (const int nel,
   return change ;
 }
 
-bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth) 
+bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, 
+                                              method mth )
+{
+  vector< int > partition;
+  return repartition( mpa, mth, partition, mpa.psize() );
+}
+
+vector< int > LoadBalancer :: DataBase :: 
+repartition (MpAccessGlobal & mpa, 
+             method mth,
+             const int np ) 
+{
+  vector< int > partition( 1 );
+  repartition( mpa, mth, partition, np );
+  return partition;
+}
+
+bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, 
+                                              method mth,
+                                              std::vector< int >& partition,
+                                              const int np ) 
 {
   if (debugOption (3)) printLoad () ;
   
   // if method for load balancing is none, do nothing 
   if (mth == NONE) return false ;
 
-  const int start = clock (), np = mpa.psize (), me = mpa.myrank () ;
-  bool change (false) ;
+  const int start = clock (), me = mpa.myrank () ;
+  // intitial value for change 
+  bool change = partition.size() > 0 ;
   
   // flag to indicate whether we use a serial or a parallel partitioner 
   const bool serialPartitioner = ( mth != ParMETIS_V3_AdaptiveRepart ); 
@@ -668,6 +689,13 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, method mth)
         {
           // insert and also set partition number new 
           _connect.insert( (*i).second = neu [ (*i).first.index () ]) ;
+        }
+
+        if( partition.size() > 0 ) 
+        { 
+          partition.resize( nel );
+          for(int k=0; k<nel; ++k)
+            partition[ k ] = neu [ k ] ;
         }
       }
     }
