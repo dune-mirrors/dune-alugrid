@@ -576,6 +576,9 @@ public :
     class Hface3EmptyPll : public FacePllBaseX< Hface3Empty >
     {
     public :
+      // we need to change this typedef here 
+      typedef hedge1_IMPL inneredge_t ;
+
       // constructor 
       inline Hface3EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, myhedge1_t *e2, int s2)
         : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
@@ -596,6 +599,9 @@ public :
     class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
     {
     public :
+      // we need to change this typedef here 
+      typedef hedge1_IMPL inneredge_t ;
+
       // constructor 
       inline Hface4EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
                              myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
