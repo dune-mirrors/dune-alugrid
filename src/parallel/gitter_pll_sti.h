@@ -123,25 +123,6 @@ template < class A > class listSmartpointer__to__iteratorSTI : public IteratorST
     IteratorSTI< A > * clone () const ;
 } ;
 
-
-class FacePllXIF : public LinkedObject //, public MacroGridMoverIF
-{
-  protected :
-    virtual ~FacePllXIF () {}
-  public :
-    virtual vector < int > checkParallelConnectivity () const = 0 ;
-    virtual pair < ElementPllXIF_t *, int > accessOuterPllX () = 0 ;
-    virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const = 0 ;
-    virtual pair < ElementPllXIF_t *, int > accessInnerPllX () = 0 ;
-    virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const = 0 ;
-
-  public :
-    virtual void writeStaticState (ObjectStream &) const = 0 ;
-    virtual void readStaticState (ObjectStream &) = 0 ;
-  public :
-    virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) = 0 ;
-} ;
-
 // tpye of ElementPllXIF_t is ElementPllXIF, see parallel.h
 class ElementPllXIF : public MacroGridMoverIF
 {

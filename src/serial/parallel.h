@@ -146,6 +146,15 @@ class VertexPllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
     virtual bool setLinkage (vector < int >) = 0 ;
 } ;
 
+class VertexPllXDefault : public VertexPllXIF
+{
+  protected :
+    virtual ~VertexPllXDefault () {}
+  public :
+    virtual bool setLinkage (vector < int >) { assert(false);abort(); return false ; } 
+} ;
+
+
 class EdgePllXIF : public RefineableObjectDefault //, public LinkedObject, public MacroGridMoverIF
 {
   protected :
@@ -161,14 +170,47 @@ class EdgePllXDefault : public EdgePllXIF
 {
   protected :
     virtual ~EdgePllXDefault () {}
-  public :
+  private:  
     virtual bool lockAndTry () { assert(false);abort(); return false ; }
     virtual bool unlockAndResume (bool) { assert(false);abort(); return false ; }
     virtual bool lockedAgainstCoarsening () const { assert(false);abort(); return false ; }
 } ;
 
 
+class FacePllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
+{
+  protected :
+    virtual ~FacePllXIF () {}
+  public :
+    virtual vector < int > checkParallelConnectivity () const = 0 ;
+    virtual pair < ElementPllXIF_t *, int > accessOuterPllX () = 0 ;
+    virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const = 0 ;
+    virtual pair < ElementPllXIF_t *, int > accessInnerPllX () = 0 ;
+    virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const = 0 ;
 
+  public :
+    virtual void writeStaticState (ObjectStream &) const = 0 ;
+    virtual void readStaticState (ObjectStream &) = 0 ;
+  public :
+    virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) = 0 ;
+} ;
+
+// default implementation (should not be called) 
+class FacePllXDefault : public FacePllXIF 
+{
+  protected :
+    virtual ~FacePllXDefault () {}
+  private:
+    virtual vector < int > checkParallelConnectivity () const { assert( false ); abort(); return vector<int> (); }
+    virtual pair < ElementPllXIF_t *, int > accessOuterPllX () { assert( false ); abort(); return pair< ElementPllXIF_t *, int > (NULL, -1); }
+    virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const  { assert( false); abort(); return pair< ElementPllXIF_t *, int > (NULL, -1); }
+    virtual pair < ElementPllXIF_t *, int > accessInnerPllX ()  { assert( false); abort(); return pair< ElementPllXIF_t *, int > (NULL, -1); }
+    virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const { assert( false); abort(); return pair< ElementPllXIF_t *, int > (NULL, -1); }
+
+    virtual void writeStaticState (ObjectStream &) const { assert(false);abort(); }
+    virtual void readStaticState (ObjectStream &) { assert(false);abort(); }
+    virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) { assert(false);abort(); return false ; }
+};
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -210,7 +252,7 @@ class Parallel {
     
     class AccessPllException {} ;
   
-    class VertexIF 
+    class VertexIF : public VertexPllXDefault
 #ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
       : public CommunicationBuffer 
 #endif
@@ -235,7 +277,7 @@ class Parallel {
         inline virtual const EdgePllXIF_t & accessPllX () const throw (AccessPllException) ;
         inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
     } ;
-    class FaceIF {
+    class FaceIF : public FacePllXDefault {
       public :
         virtual ~FaceIF () {}
         typedef class Key3SLZ identifier_t ;

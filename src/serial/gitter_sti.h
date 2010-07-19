@@ -12,9 +12,6 @@ typedef stringstream  strstream_t;
 #include "parallel.h"
 #include "xdrclass.h"
 
-//! type of coordinate storage 
-typedef double alucoord_t ;
-
 // interface class for projecting vertices for boundary adjustment 
 typedef VertexProjection<3, alucoord_t > ProjectVertex;
 // see ../projectvertex.h 

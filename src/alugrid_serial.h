@@ -25,6 +25,9 @@ namespace ALUGridSpace {
 // the code needs this 
 using namespace std;   
 
+//! type of coordinate storage 
+typedef double alucoord_t ;
+
 typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
 struct GatherScatter;
@@ -32,8 +35,11 @@ typedef GatherScatter GatherScatterType;
 
 #include "serial/key.h"
 #include "serial/serialize.h"
+
+#include "parallel/mpAccess.h" // for def of MPAccessGlobal needed by LoadBalancer 
+#include "parallel/gitter_pll_ldb.h" // for def of LoadBalancer needed in parallel.h
+
 #include "serial/parallel.h" // only tpyedefs mainly 
-//#include "serial/xdrclass.h"
 #include "serial/gitter_sti.h"
 
 typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;

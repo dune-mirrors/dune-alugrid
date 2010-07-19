@@ -55,49 +55,57 @@ class VertexPllBaseX : public VertexPllXIF, public MyAlloc {
     Refcount _ref ;
 } ;
 
-template < class A > class FacePllBaseX : public FacePllXIF, public MyAlloc {
+template < class A > class FacePllBaseX : public A 
+{
   protected :
     typedef A myhface_t ;
-    virtual myhface_t & myhface () = 0;
-    virtual const myhface_t & myhface () const = 0;
-    inline FacePllBaseX () {} 
-
+    typedef typename A :: myhedge1_t myhedge1_t;
+      
   public :
-    inline FacePllBaseX (myhface_t &) ;
-
+    inline FacePllBaseX(myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+    inline FacePllBaseX(myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t*,int) ;
     inline ~FacePllBaseX () {}
+
+    inline myhface_t & myhface () { return *this; }
+    inline const myhface_t & myhface () const { return *this; }
+
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
     virtual vector < int > checkParallelConnectivity () const ;
-  public :
     virtual pair < ElementPllXIF_t *, int > accessOuterPllX () ;
     virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const ;
     virtual pair < ElementPllXIF_t *, int > accessInnerPllX () ;
     virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const ;
-  public :
     virtual void writeStaticState (ObjectStream &) const ;
     virtual void readStaticState (ObjectStream &) ;
-  public :
     virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) ;
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-  //private :
-  //  myhface_t & _face ;
 } ;
 
-template < class A > class FacePllBaseXMacro : public FacePllBaseX < A > 
+template < class A > class FacePllBaseXMacro : public A 
 {
   public :
-    typedef typename FacePllBaseX < A > :: myhface_t myhface_t ;
-    inline FacePllBaseXMacro (myhface_t &) ;
-    inline ~FacePllBaseXMacro () ;
+    // some typedefs 
+    typedef typename A :: myhface_t  myhface_t;
+    typedef typename A :: myhedge1_t myhedge1_t;
+
+    // constructor for hface3 
+    inline FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
+                                    myhedge1_t * e2, int s2) 
+      : A(l, e0, s0, e1, s1, e2, s2), _moveTo(), _ref() {} 
+    // constructor for hface4 
+    inline FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
+                                    myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) 
+      : A(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo(), _ref() {} 
+    // destructor only checking move-to
+    inline ~FacePllBaseXMacro () { assert (0 == _moveTo.size ()); } 
+
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
 
-    inline myhface_t & myhface () { return _face; }
-    inline const myhface_t & myhface () const { return _face; }
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -109,7 +117,6 @@ template < class A > class FacePllBaseXMacro : public FacePllBaseX < A >
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
   private :
-    myhface_t & _face ;
     map < int, int, less < int > > _moveTo ;
     Refcount _ref ;
 } ;
@@ -567,73 +574,42 @@ public :
     private :
     } ;
 
-    class Hface3EmptyPll : public Hface3Empty
-                         , public FacePllBaseX< hface3_GEO >
+    class Hface3EmptyPll : public FacePllBaseX< Hface3Empty >
     {
-    protected :
-      typedef hedge1_IMPL inneredge_t ;
     public :
-      typedef FacePllBaseX < hface3_GEO > mypllx_t ;
-
-      inline myhface_t & myhface () { return *this; };
-      inline const myhface_t & myhface () const { return *this; }
-
-      inline Hface3EmptyPll (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-    //private :
-      //mypllx_t _pllx ;
-      friend class FacePllBaseX < hface3_GEO >;
+      inline Hface3EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, myhedge1_t *e2, int s2)
+        : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
+      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
+      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
     typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
 
-  
-    class Hface3EmptyPllMacro : public hface3_IMPL 
+    class Hface3EmptyPllMacro : public FacePllBaseXMacro< hface3_IMPL >
     {
     public :
-      typedef FacePllBaseXMacro < hface3_GEO > mypllx_t ;
-      Hface3EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-     ~Hface3EmptyPllMacro () ;
-      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-    private :
-      mypllx_t * _pllx ;
-      friend class FacePllBaseXMacro < hface3_GEO >;
-    } ;
+      Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) 
+        : FacePllBaseXMacro< hface3_IMPL > (0, e0, s0, e1, s1, e2, s2 ) {} // 0 == level  0 
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) {}
+    };
 
-    class Hface4EmptyPll : public Hface4Empty
-                         , public FacePllBaseX< hface4_GEO >
+    class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
     {
-    protected :
-      typedef hedge1_IMPL inneredge_t ;
     public :
-      inline myhface_t & myhface () { return *this; };
-      inline const myhface_t & myhface () const { return *this; }
-
-      typedef FacePllBaseX < hface4_GEO > mypllx_t ;
-      inline Hface4EmptyPll (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-    //private:
-      //mypllx_t _pllx ;
-      friend class FacePllBaseX < hface4_GEO >;
+      inline Hface4EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
+                             myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
+        : FacePllBaseX< Hface4Empty >(e0,s0,e1,s1,e2,s2,e3,s3) {} 
+      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
+      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
     typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
   
-    class Hface4EmptyPllMacro : public hface4_IMPL 
+    class Hface4EmptyPllMacro : public FacePllBaseXMacro< hface4_IMPL >
     {
     public :
-      typedef FacePllBaseXMacro < hface4_GEO > mypllx_t ;
-      Hface4EmptyPllMacro (myhedge1_t *,int,myhedge1_t *,int,
-          myhedge1_t *,int,myhedge1_t *,int) ;
-     ~Hface4EmptyPllMacro () ;
-      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-    private :
-      mypllx_t * _pllx ;
-      friend class FacePllBaseXMacro < hface4_GEO >;
+      Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1,
+                           myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
+       : FacePllBaseXMacro< hface4_IMPL >(0,e0,s0,e1,s1,e2,s2,e3,s3) {}
+      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) {} 
     } ;
 
 public :
@@ -896,19 +872,20 @@ inline const VertexPllBaseX :: myvertex_t & VertexPllBaseX :: myvertex () const 
   return _v ;
 }
 
-template < class A > inline FacePllBaseX < A > :: FacePllBaseX (myhface_t & f) 
-  //: _face (f) 
+template < class A > inline FacePllBaseX < A > :: FacePllBaseX 
+    (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
+  : A( e0, s0, e1, s1, e2, s2 )
 {
   return ;
 }
 
-//template < class A > inline typename FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () {
-//  return _face ;
-//}
-
-//template < class A > inline const typename FacePllBaseX < A > :: myhface_t & FacePllBaseX < A > :: myhface () const {
-//  return _face ;
-//}
+template < class A > inline FacePllBaseX < A > :: 
+FacePllBaseX (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, 
+              myhedge1_t * e2, int s2, myhedge1_t * e3, int s3 ) 
+  : A( e0, s0, e1, s1, e2, s2, e3, s3 )
+{
+  return ;
+}
 
 template < class A > vector < int > FacePllBaseX < A > :: estimateLinkage () const {
   return (abort (), vector < int > ()) ;
@@ -1216,26 +1193,12 @@ inline bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: lockedAgainstCoars
  return myhedge1().isSet( myhedge1_t::flagLock );
 }
 
-inline GitterBasisPll :: ObjectsPll :: Hface3EmptyPll :: Hface3EmptyPll (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) :
-  GitterBasis :: Objects :: Hface3Empty (e0,s0,e1,s1,e2,s2)//, _pllx (*this) 
-{
-  return ;
-}
-
-inline GitterBasisPll :: ObjectsPll :: Hface4EmptyPll :: Hface4EmptyPll 
-  (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) :
-  GitterBasis :: Objects :: Hface4Empty (e0,s0,e1,s1,e2,s2,e3,s3) //, _pllx (*this) 
-{
-  return ;
-}
-
 inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: 
 TetraEmptyPll (myhface3_t * f0, int t0, 
                myhface3_t * f1, int t1, 
                myhface3_t * f2, int t2, 
                myhface3_t * f3, int t3 ) 
   : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3)
-//  , _pllx (*this) 
 {
   return ;
 }
