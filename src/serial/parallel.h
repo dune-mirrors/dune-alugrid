@@ -202,10 +202,10 @@ class FacePllXDefault : public FacePllXIF
     virtual ~FacePllXDefault () {}
   private:
     virtual vector < int > checkParallelConnectivity () const { assert( false ); abort(); return vector<int> (); }
-    virtual pair < ElementPllXIF_t *, int > accessOuterPllX () { assert( false ); abort(); return pair< ElementPllXIF_t *, int > (NULL, -1); }
-    virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const  { assert( false); abort(); return pair< ElementPllXIF_t *, int > (NULL, -1); }
-    virtual pair < ElementPllXIF_t *, int > accessInnerPllX ()  { assert( false); abort(); return pair< ElementPllXIF_t *, int > (NULL, -1); }
-    virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const { assert( false); abort(); return pair< ElementPllXIF_t *, int > (NULL, -1); }
+    virtual pair < ElementPllXIF_t *, int > accessOuterPllX () { assert( false ); abort(); return pair< ElementPllXIF_t *, int > ( (ElementPllXIF_t *) 0, -1); }
+    virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const  { assert( false); abort(); return pair< ElementPllXIF_t *, int > ( (ElementPllXIF_t *) 0, -1); }
+    virtual pair < ElementPllXIF_t *, int > accessInnerPllX ()  { assert( false); abort(); return pair< ElementPllXIF_t *, int > ( (ElementPllXIF_t *) 0, -1); }
+    virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const { assert( false); abort(); return pair< ElementPllXIF_t *, int > ( (ElementPllXIF_t *) 0, -1); }
 
     virtual void writeStaticState (ObjectStream &) const { assert(false);abort(); }
     virtual void readStaticState (ObjectStream &) { assert(false);abort(); }
