@@ -273,17 +273,17 @@ class Parallel {
       public :
         virtual ~EdgeIF () {}
         typedef class Key2SLZ identifier_t ;
-        inline virtual EdgePllXIF_t & accessPllX () throw (AccessPllException) ;
-        inline virtual const EdgePllXIF_t & accessPllX () const throw (AccessPllException) ;
-        inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+        inline EdgePllXIF_t & accessPllX () { return *this; }
+        inline const EdgePllXIF_t & accessPllX () const { return *this; }
+        inline void detachPllXFromMacro () {} 
     } ;
     class FaceIF : public FacePllXDefault {
       public :
         virtual ~FaceIF () {}
         typedef class Key3SLZ identifier_t ;
-        inline virtual FacePllXIF_t & accessPllX () throw (AccessPllException) ;
-        inline virtual const FacePllXIF_t & accessPllX () const throw (AccessPllException) ;
-        inline virtual void detachPllXFromMacro () throw (AccessPllException) ;
+        inline FacePllXIF_t & accessPllX () { return *this; }
+        inline const FacePllXIF_t & accessPllX () const { return *this; }
+        inline void detachPllXFromMacro () {}
     } ;
     class ElementIF {
       public :
@@ -391,36 +391,6 @@ inline const VertexPllXIF_t & Parallel :: VertexIF :: accessPllX () const throw 
 }
 
 inline void Parallel :: VertexIF :: detachPllXFromMacro () throw (AccessPllException) {
-  assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-  throw AccessPllException () ;
-}
-
-inline EdgePllXIF_t & Parallel :: EdgeIF :: accessPllX () throw (AccessPllException) {
-  assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-  throw AccessPllException () ;
-}
-
-inline const EdgePllXIF_t & Parallel :: EdgeIF :: accessPllX () const throw (AccessPllException) {
-  assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-  throw AccessPllException () ; 
-}
-
-inline void Parallel :: EdgeIF :: detachPllXFromMacro () throw (AccessPllException) {
-  assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-  throw AccessPllException () ;
-}
-
-inline FacePllXIF_t &  Parallel :: FaceIF :: accessPllX () throw (AccessPllException) {
-  assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-  throw AccessPllException () ;
-}
-
-inline const FacePllXIF_t & Parallel :: FaceIF :: accessPllX () const throw (AccessPllException) {
-  assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-  throw AccessPllException () ;
-}
-
-inline void Parallel :: FaceIF :: detachPllXFromMacro () throw (AccessPllException) {
   assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
   throw AccessPllException () ;
 }

@@ -147,23 +147,9 @@ bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unlockAndResume (bool r)
   return x ;
 }
 
-EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) 
-{
-  return *this ;
-}
-
-const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) 
-{
-  return *this ;
-}
-
 GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: Hedge1EmptyPllMacro (myvertex_t * a, myvertex_t * b) :
   GitterBasisPll :: ObjectsPll :: hedge1_IMPL (0, a, b), _moveTo(), _ref()
 {
-  return ;
-}
-
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
   return ;
 }
 

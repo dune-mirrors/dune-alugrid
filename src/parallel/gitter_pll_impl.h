@@ -543,9 +543,6 @@ public :
 
       inline Hedge1EmptyPll (myvertex_t *,myvertex_t *) ;
       inline ~Hedge1EmptyPll(); 
-
-      virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ; 
-      virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
     } ;
     typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
 
@@ -569,8 +566,6 @@ public :
       Refcount _ref ; //// ????? 
     public :
       inline Hedge1EmptyPllMacro (myvertex_t *,myvertex_t *) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-    private :
     } ;
 
     class Hface3EmptyPll : public FacePllBaseX< Hface3Empty >
@@ -582,9 +577,6 @@ public :
       // constructor 
       inline Hface3EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, myhedge1_t *e2, int s2)
         : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
-
-      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
     typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
 
@@ -593,7 +585,6 @@ public :
       typedef FacePllBaseXMacro< hface3_IMPL > Base_t ;
     public :
       Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) {}
     };
 
     class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
@@ -606,9 +597,6 @@ public :
       inline Hface4EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
                              myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
         : FacePllBaseX< Hface4Empty >(e0,s0, e1,s1, e2,s2, e3,s3) {} 
-
-      virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
     typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
   
@@ -618,7 +606,6 @@ public :
     public :
       Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1,
                            myhedge1_t *e2, int s2, myhedge1_t *e3, int s3) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) {} 
     } ;
 
 public :
