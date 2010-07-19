@@ -181,8 +181,6 @@ class TetraPllXBase : public ElementPllBaseX {
     virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) ;
     virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) ;
     virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) ; 
-  private:
-    //mytetra_t & _tetra ;
 } ;
 
 class TetraPllXBaseMacro : public TetraPllXBase {
@@ -352,9 +350,6 @@ class HexaPllBaseX : public ElementPllBaseX {
     virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) ;
     // method to get internal hexa located behind this parallel interface 
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
-
-  //private :
-  //  myhexa_t & _hexa ;
 } ;
 
 class HexaPllBaseXMacro : public HexaPllBaseX {
