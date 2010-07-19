@@ -94,14 +94,12 @@ template < class A > class FacePllBaseXMacro : public A
 
     // constructor for hface3 
     inline FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                                    myhedge1_t * e2, int s2) 
-      : A(l, e0, s0, e1, s1, e2, s2), _moveTo(), _ref() {} 
+                                    myhedge1_t * e2, int s2) ;
     // constructor for hface4 
     inline FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                                    myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) 
-      : A(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo(), _ref() {} 
+                                    myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) ; 
     // destructor only checking move-to
-    inline ~FacePllBaseXMacro () { assert (0 == _moveTo.size ()); } 
+    inline ~FacePllBaseXMacro () ; 
 
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
@@ -120,6 +118,7 @@ template < class A > class FacePllBaseXMacro : public A
     map < int, int, less < int > > _moveTo ;
     Refcount _ref ;
 } ;
+
 
 class ElementPllBaseX : public ElementPllXIF, public MyAlloc 
 {
@@ -545,7 +544,7 @@ public :
       inline Hedge1EmptyPll (myvertex_t *,myvertex_t *) ;
       inline ~Hedge1EmptyPll(); 
 
-      virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
+      virtual EdgePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ; 
       virtual const EdgePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
     } ;
     typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
@@ -577,8 +576,10 @@ public :
     class Hface3EmptyPll : public FacePllBaseX< Hface3Empty >
     {
     public :
+      // constructor 
       inline Hface3EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, myhedge1_t *e2, int s2)
         : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
+
       virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
       virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
@@ -586,18 +587,20 @@ public :
 
     class Hface3EmptyPllMacro : public FacePllBaseXMacro< hface3_IMPL >
     {
+      typedef FacePllBaseXMacro< hface3_IMPL > Base_t ;
     public :
-      Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) 
-        : FacePllBaseXMacro< hface3_IMPL > (0, e0, s0, e1, s1, e2, s2 ) {} // 0 == level  0 
+      Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) {}
     };
 
     class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
     {
     public :
+      // constructor 
       inline Hface4EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
                              myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
-        : FacePllBaseX< Hface4Empty >(e0,s0,e1,s1,e2,s2,e3,s3) {} 
+        : FacePllBaseX< Hface4Empty >(e0,s0, e1,s1, e2,s2, e3,s3) {} 
+
       virtual FacePllXIF_t & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
       virtual const FacePllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
@@ -605,10 +608,10 @@ public :
   
     class Hface4EmptyPllMacro : public FacePllBaseXMacro< hface4_IMPL >
     {
+      typedef  FacePllBaseXMacro< hface4_IMPL > Base_t ;
     public :
       Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1,
-                           myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
-       : FacePllBaseXMacro< hface4_IMPL >(0,e0,s0,e1,s1,e2,s2,e3,s3) {}
+                           myhedge1_t *e2, int s2, myhedge1_t *e3, int s3) ;
       virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) {} 
     } ;
 

@@ -147,11 +147,13 @@ bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unlockAndResume (bool r)
   return x ;
 }
 
-EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
+EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) 
+{
   return *this ;
 }
 
-const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
+const EdgePllXIF_t & GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) 
+{
   return *this ;
 }
 
@@ -269,6 +271,29 @@ void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: unpackSelf (ObjectSt
 // #        #     # #       #  
 // #        #     # #       #    
 // #        #     #  #####  ######
+
+// constructor for hface3 
+template <> FacePllBaseXMacro<GitterBasisPll :: ObjectsPll :: hface3_IMPL> :: 
+FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
+                  myhedge1_t * e2, int s2)
+ : GitterBasisPll :: ObjectsPll :: hface3_IMPL(l, e0, s0, e1, s1, e2, s2), _moveTo(), _ref() 
+{
+}
+
+// constructor for hface4
+template <> FacePllBaseXMacro<GitterBasisPll :: ObjectsPll :: hface4_IMPL> :: 
+FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
+                  myhedge1_t * e2, int s2, myhedge1_t * e3, int s3)
+ : GitterBasisPll :: ObjectsPll :: hface4_IMPL(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo(), _ref() 
+{
+}
+
+// destructor 
+template < class A > FacePllBaseXMacro < A > :: ~FacePllBaseXMacro() 
+{
+  assert (0 == _moveTo.size ()); 
+}
+
 template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage () const {
 
   // Diese Methode sch"atzt den Verbindungsstern der Grobgitterfl"ache,
@@ -469,6 +494,10 @@ template < class A > void FacePllBaseXMacro < A > :: unpackSelf (ObjectStream & 
 
   return ;
 }
+
+// Template Instantiation 
+template class FacePllBaseXMacro < GitterBasisPll :: ObjectsPll :: hface3_IMPL > ;
+template class FacePllBaseXMacro < GitterBasisPll :: ObjectsPll :: hface4_IMPL > ;
 
 ////////////////////////////////////////////////////////////
 
@@ -1746,6 +1775,19 @@ void GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: detachPllXFromMacro (
   _pllx = 0 ;
   return ;
 }
+
+GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: 
+Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) 
+  : Base_t(0, e0, s0, e1, s1, e2, s2) // 0 == level 0
+{
+} 
+
+GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: 
+Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
+                     myhedge1_t *e2, int s2, myhedge1_t *e3, int s3) 
+  : Base_t(0, e0, s0, e1, s1, e2, s2, e3, s3) // 0 == level 0
+{
+} 
 
 ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
   return *this;
