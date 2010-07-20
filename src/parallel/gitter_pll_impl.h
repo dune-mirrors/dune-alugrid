@@ -171,8 +171,9 @@ template < class A > class FacePllBaseXMacro : public A
     Refcount _ref ;
 } ;
 
-
-class ElementPllBaseX : public ElementPllXIF_t , public MyAlloc 
+/*
+template < class A >
+class ElementPllBaseX : public A 
 {
   // Alle Methoden in dieser Klasse sind Dummies und erzeugen
   // Laufzeitfehler. Sie m"ussen von abgeleiteten Klassen 
@@ -212,16 +213,21 @@ class ElementPllBaseX : public ElementPllXIF_t , public MyAlloc
     bool lockAndTry () ;
     bool unlockAndResume (bool) ;
 } ;
+*/
 
-class TetraPllXBase : public ElementPllBaseX {
+template < class A >
+class TetraPllXBase : public A {
   public :
-    typedef Gitter :: Geometric :: tetra_GEO mytetra_t ;
-    virtual mytetra_t & mytetra () = 0 ;
-    virtual const mytetra_t & mytetra () const = 0;
+    typedef A mytetra_t ;
+    typedef typename A :: myhface3_t myhface3_t;
   protected:  
-    inline TetraPllXBase () {}
+    inline TetraPllXBase(myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
+                         myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
+        : A(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
+
+    inline mytetra_t& mytetra() { return *this; }
+    inline const mytetra_t& mytetra() const { return *this; }
   public :
-    inline TetraPllXBase (mytetra_t &) ;
     inline ~TetraPllXBase () {}
 
     // method to get internal tetra located behind this parallel interface 
@@ -235,13 +241,22 @@ class TetraPllXBase : public ElementPllBaseX {
     virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) ; 
 } ;
 
-class TetraPllXBaseMacro : public TetraPllXBase {
+template < class A >
+class TetraPllXBaseMacro : public A 
+{
   public :
-    TetraPllXBaseMacro (mytetra_t &) ;
    ~TetraPllXBaseMacro () ;
-    virtual mytetra_t & mytetra () { return _tetra; }
-    virtual const mytetra_t & mytetra () const { return _tetra; }
   protected :
+    using A :: TETRA ;
+    using A :: HBND3INT ;
+    typedef A mytetra_t ;
+    inline mytetra_t& mytetra() { return *this; }
+    inline const mytetra_t& mytetra() const { return *this; }
+
+    typedef typename A :: myhface3_t myhface3_t;
+    TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
+                       myhface3_t *f2, int s2, myhface3_t *f3, int s3);
+
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
@@ -262,12 +277,11 @@ class TetraPllXBaseMacro : public TetraPllXBase {
     virtual bool erasable () const ;
     
     // method to get internal tetra located behind this parallel interface 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
+    //virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
   protected:
     void packAsBndNow (int, ObjectStream &) const;
     
   private :
-    mytetra_t& _tetra;
     alucoord_t _center [3] ;
     map < int, int, less < int > > _moveTo ;
     int _ldbVertexIndex ;
@@ -282,7 +296,7 @@ class TetraPllXBaseMacro : public TetraPllXBase {
 // #        #       #   #      #    #    #  #    #     #    #    # #     #
 // #        ######  #    #     #     ####   #####      #     ####   #####
 
-class Periodic3PllXBase : public ElementPllBaseX {
+class Periodic3PllXBase : public ElementPllXIF_t {
   public :
     typedef Gitter :: Geometric :: periodic3_GEO myperiodic3_t ;
     inline myperiodic3_t & myperiodic3 () ;
@@ -318,10 +332,10 @@ class Periodic3PllXBaseMacro : public Periodic3PllXBase {
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
   private :
-    int _ldbVertexIndex ;
-    map < int, int, less < int > > _moveTo ;
-    bool _erasable ;
     alucoord_t _center [3] ;
+    map < int, int, less < int > > _moveTo ;
+    int _ldbVertexIndex ;
+    bool _erasable ;
 } ;
 
 // ######                                                          #
@@ -332,7 +346,7 @@ class Periodic3PllXBaseMacro : public Periodic3PllXBase {
 // #        #       #   #      #    #    #  #    #     #    #    #      #
 // #        ######  #    #     #     ####   #####      #     ####       #
 
-class Periodic4PllXBase : public ElementPllBaseX {
+class Periodic4PllXBase : public ElementPllXIF_t {
   public :
     typedef Gitter :: Geometric :: periodic4_GEO myperiodic4_t ;
     inline myperiodic4_t & myperiodic4 () ;
@@ -341,9 +355,6 @@ class Periodic4PllXBase : public ElementPllBaseX {
     inline Periodic4PllXBase (myperiodic4_t &) ;
     inline ~Periodic4PllXBase () {}
   public :
-//    virtual void VertexData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P4 wVD";}
-//    virtual void EdgeData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P4 wED";}
-//    virtual void FaceData2os(ObjectStream &, GatherScatterType &) { std::cerr << "P4 wFD";} 
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
   private :
@@ -370,10 +381,10 @@ class Periodic4PllXBaseMacro : public Periodic4PllXBase {
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
   private :
-    int _ldbVertexIndex ;
-    map < int, int, less < int > > _moveTo ;
-    bool _erasable ;
     alucoord_t _center [3] ;
+    map < int, int, less < int > > _moveTo ;
+    int _ldbVertexIndex ;
+    bool _erasable ;
 } ;
 
 // #     #
@@ -384,16 +395,20 @@ class Periodic4PllXBaseMacro : public Periodic4PllXBase {
 // #     #  #        #  #   #    #
 // #     #  ######  #    #  #    #
 
-class HexaPllBaseX : public ElementPllBaseX {
+template < class A > 
+class HexaPllBaseX : public A 
+{
   protected :
-    typedef Gitter :: Geometric :: hexa_GEO myhexa_t ;
-    virtual myhexa_t & myhexa () = 0 ;
-    virtual const myhexa_t & myhexa () const = 0 ;
-    inline HexaPllBaseX () {}
+    typedef typename A :: myhface4_t myhface4_t;
+    typedef A  myhexa_t ;
+    inline myhexa_t & myhexa () { return *this; }
+    inline const myhexa_t & myhexa () const { return *this; }
 
+    inline HexaPllBaseX(myhface4_t *f0, int s0, myhface4_t *f1, int s1,
+                        myhface4_t *f2, int s2, myhface4_t *f3, int s3,
+                        myhface4_t *f4, int s4, myhface4_t *f5, int s5)
+        : A(f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
   public :
-    inline HexaPllBaseX (myhexa_t &) ;
-    inline ~HexaPllBaseX () {}
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
  
@@ -404,19 +419,27 @@ class HexaPllBaseX : public ElementPllBaseX {
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 } ;
 
-class HexaPllBaseXMacro : public HexaPllBaseX {
+template < class A > 
+class HexaPllBaseXMacro : public A 
+{
+  protected:
+    using A :: HEXA ;
+    using A :: HBND4INT ;
+
+    typedef A  myhexa_t ;
+    inline myhexa_t & myhexa () { return *this; }
+    inline const myhexa_t & myhexa () const { return *this; }
+
+    typedef typename A :: myhface4_t myhface4_t;
+    HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
+                             myhface4_t *f2, int s2, myhface4_t *f3, int s3,
+                             myhface4_t *f4, int s4, myhface4_t *f5, int s5) ;
   public :
-    HexaPllBaseXMacro (myhexa_t &) ;
    ~HexaPllBaseXMacro () ;
     virtual void writeStaticState (ObjectStream &, int) const ;
-  public :
-    virtual myhexa_t & myhexa () { return _hexa; }
-    virtual const myhexa_t & myhexa () const { return _hexa; }
-
     virtual int ldbVertexIndex () const ;
     virtual int & ldbVertexIndex () ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
-  public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     
@@ -432,22 +455,21 @@ class HexaPllBaseXMacro : public HexaPllBaseX {
     virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
     
     // method to get internal hexa located behind this parallel interface 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
+    //virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
 
     void packAsBndNow (int, ObjectStream &) const;
-  private :
-    myhexa_t & _hexa ;
+  protected:
     alucoord_t _center [3] ;
     map < int, int, less < int > > _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
 } ;
 
-class BndsegPllBaseX : public ElementPllBaseX {
+class BndsegPllBaseX : public ElementPllXIF_t {
   public :
     void writeDynamicState (ObjectStream &, int) const { abort () ; }
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
@@ -629,44 +651,28 @@ public :
     } ;
 
 public :
-  class TetraEmptyPll : public TetraEmpty 
-                      , public TetraPllXBase 
-  {
+    ///////////////////////////////////////////////////////////////
+    // --TetraImpl
+    ///////////////////////////////////////////////////////////////
+    class TetraEmptyPll : public TetraPllXBase< TetraEmpty >
+    {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface3_IMPL innerface_t ;
       typedef TetraEmpty :: balrule_t balrule_t;
     public :
-      typedef Gitter :: Geometric :: tetra_GEO mytetra_t ;
-      inline mytetra_t & mytetra () { return *this; }
-      inline const mytetra_t & mytetra () const { return *this ; }
-
-      typedef TetraPllXBase mypllx_t ;
-      inline TetraEmptyPll (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
-      ~TetraEmptyPll () {}
-      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-
-    private :
-      //mypllx_t _pllx ;
-      friend class TetraTop < TetraEmptyPll >;
+      inline TetraEmptyPll (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
+                            myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
+        : TetraPllXBase< TetraEmpty >(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
     } ;
     typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
 
-    class TetraEmptyPllMacro : public tetra_IMPL 
+    class TetraEmptyPllMacro : public TetraPllXBaseMacro< tetra_IMPL >
     {
     public :
-      typedef TetraPllXBaseMacro mypllx_t ;
-      TetraEmptyPllMacro (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                          myhface3_t *,int) ;
-     ~TetraEmptyPllMacro () ;
-      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-    private :
-      mypllx_t * _pllx ;
-      friend class TetraPllXBaseMacro;
+      inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
+                                 myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
+        : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3 ) {} // 0 == level 0
     } ;
 
    /////////////////////////////////
@@ -744,49 +750,27 @@ public :
       friend class Periodic4PllXBaseMacro;
     } ;
 
-    class HexaEmptyPll : public HexaEmpty
-                       , public HexaPllBaseX  
+    class HexaEmptyPll : public HexaPllBaseX< HexaEmpty >
     {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface4_IMPL innerface_t ;
       typedef HexaEmpty :: balrule_t balrule_t;
     public :
-      inline myhexa_t & myhexa () { return *this; }
-      inline const myhexa_t & myhexa () const { return *this; }
-
-      typedef HexaPllBaseX mypllx_t ;
-      inline HexaEmptyPll (myhface4_t *,int,myhface4_t *,int,
-                           myhface4_t *,int,myhface4_t *,int,
-                           myhface4_t *,int,myhface4_t *,int);
-      inline ~HexaEmptyPll () {}
-      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-    //private :
-    //  mypllx_t _pllx ;
+      inline HexaEmptyPll (myhface4_t *f0, int s0, myhface4_t *f1, int s1,
+                           myhface4_t *f2, int s2, myhface4_t *f3, int s3,
+                           myhface4_t *f4, int s4, myhface4_t *f5, int s5)
+        : HexaPllBaseX< HexaEmpty >(f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
     } ;
     typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
 
-    class HexaEmptyPllMacro : public hexa_IMPL
+    class HexaEmptyPllMacro : public HexaPllBaseXMacro< hexa_IMPL >
     {
     public :
-      typedef HexaPllBaseXMacro mypllx_t ;
-      HexaEmptyPllMacro (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-              myhface4_t *,int) ;
-     ~HexaEmptyPllMacro () ;
-      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-  
-      // Hier, und auch beim Tetraeder besteht die M"oglichkeit das refine
-      // auf dem Grobgitterelement zu "uberschreiben, um gegebenenfalls noch
-      // andere Funktionen mit aufzuklemmen:  
-      // virtual int refine () ;
-    
-    private :
-      mypllx_t * _pllx ;
-      friend class HexaPllBaseXMacro;
+      inline HexaEmptyPllMacro(myhface4_t *f0, int s0, myhface4_t *f1, int s1,
+                               myhface4_t *f2, int s2, myhface4_t *f3, int s3,
+                               myhface4_t *f4, int s4, myhface4_t *f5, int s5)
+        : HexaPllBaseXMacro< hexa_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
     } ;
   
     // Die Randelemente des verteilten Gitters werden aus Templates 
@@ -1103,27 +1087,8 @@ template < class A > void FacePllBaseX < A > :: unpackSelf (ObjectStream &, bool
 //
 ///////////////////////////////////////////////////////////////////
 
-inline TetraPllXBase :: TetraPllXBase (mytetra_t & t) 
-  //: _tetra (t) 
-{
-  return ;
-}
-
-//inline TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () {
-//  return _tetra ;
-//}
-
-//inline const TetraPllXBase :: mytetra_t & TetraPllXBase :: mytetra () const {
-//  return _tetra ;
-//}
-
-inline void TetraPllXBase :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
-{
-  p.first  = & mytetra();
-  p.second = 0;
-}
-
-inline void TetraPllXBaseMacro :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+template < class A >
+inline void TetraPllXBase< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
   p.first  = & mytetra();
   p.second = 0;
@@ -1169,26 +1134,8 @@ inline const Periodic4PllXBase :: myperiodic4_t & Periodic4PllXBase :: myperiodi
   return _periodic4 ;
 }
 
-inline HexaPllBaseX :: HexaPllBaseX (myhexa_t & h) // : _hexa (h) 
-{
-  return ;
-}
-
-//inline HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () {
-//  return _hexa ;
-//}
-
-//inline const HexaPllBaseX :: myhexa_t & HexaPllBaseX :: myhexa () const {
-//  return _hexa ;
-//}
-
-inline void HexaPllBaseX :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
-{
-  p.first  = & myhexa();
-  p.second = 0;
-}
-
-inline void HexaPllBaseXMacro :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
+template < class A >
+inline void HexaPllBaseX< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
 {
   p.first  = & myhexa();
   p.second = 0;
@@ -1303,16 +1250,6 @@ template < class A > inline int & BndsegPllBaseXMacroClosure < A > :: ldbVertexI
   return _extGraphVertexIndex ;
 }
 
-inline GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: 
-TetraEmptyPll (myhface3_t * f0, int t0, 
-               myhface3_t * f1, int t1, 
-               myhface3_t * f2, int t2, 
-               myhface3_t * f3, int t3 ) 
-  : GitterBasis :: Objects :: TetraEmpty (f0,t0,f1,t1,f2,t2,f3,t3)
-{
-  return ;
-}
-
 inline GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: 
 Periodic3EmptyPll (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
   : GitterBasis :: Objects :: Periodic3Empty (f0,t0,f1,t1), _pllx (*this) {
@@ -1330,16 +1267,6 @@ Periodic3EmptyPll (myhface3_t * f0, int t0, myhface3_t * f1, int t1)
 inline GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: 
 Periodic4EmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
   : GitterBasis :: Objects :: Periodic4Empty (f0,t0,f1,t1), _pllx (*this) {
-  return ;
-}
-
-inline GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: 
-HexaEmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1, 
-              myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
-              myhface4_t * f4, int t4, myhface4_t * f5, int t5) :
-  GitterBasis::Objects::HexaEmpty(f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5)
-//  ,_pllx (*this) 
-{
   return ;
 }
 

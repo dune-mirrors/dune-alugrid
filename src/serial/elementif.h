@@ -49,7 +49,8 @@ class EdgePllXDefault : public EdgePllXIF
 } ;
 
 
-// tpye of ElementPllXIF_t is ElementPllXIF, see parallel.h
+/*
+// type of ElementPllXIF_t is ElementPllXIF, see parallel.h
 class ElementPllXIF : public MacroGridMoverDefault 
 {
   protected :
@@ -60,6 +61,59 @@ class ElementPllXIF : public MacroGridMoverDefault
     virtual pair < const ElementPllXIF *, int > accessOuterPllX (const pair < const ElementPllXIF *, int > &, int) const = 0 ;
     virtual pair < ElementPllXIF *, int > accessInnerPllX (const pair < ElementPllXIF *, int > &, int) = 0 ;
     virtual pair < const ElementPllXIF *, int > accessInnerPllX (const pair < const ElementPllXIF *, int > &, int) const = 0 ;
+
+    virtual ghostpair_t getGhost () = 0 ;
+    virtual int ghostLevel () const = 0 ;
+    virtual bool ghostLeaf () const = 0 ;
+    virtual void getAttachedElement ( pair < helement* , hbndseg * > & p) = 0 ;
+
+    virtual void writeStaticState (ObjectStream &, int) const = 0 ;
+    virtual void readStaticState (ObjectStream &, int) = 0 ;
+    virtual void writeDynamicState (ObjectStream &, int) const = 0 ;
+    virtual void readDynamicState (ObjectStream &, int) = 0 ;
+
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) = 0;
+    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int) = 0 ;
+    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int) = 0 ;
+    virtual void writeElementData (ObjectStream &, GatherScatterType &) = 0;
+    virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const = 0 ;
+    virtual void readDynamicState (ObjectStream &, GatherScatterType &) = 0 ;
+
+    // pack as ghost, default does nothing but macro elements are pack as
+    // ghosts 
+    virtual void packAsGhost(ObjectStream &,int) const = 0 ;
+
+    // unpack as ghost data and insert ghost cell, default does nothing
+    virtual void insertGhostCell(ObjectStream &,int) = 0 ;
+    
+    virtual int ldbVertexIndex () const = 0 ;
+    virtual int & ldbVertexIndex () = 0 ;
+    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) = 0 ;
+    virtual void packAsBnd (int,int,ObjectStream &) const = 0 ;
+    virtual bool erasable () const = 0 ;
+    virtual void getRefinementRequest (ObjectStream &) = 0 ;
+    virtual bool setRefinementRequest (ObjectStream &) = 0 ;
+    virtual bool lockAndTry () = 0 ;
+    virtual bool unlockAndResume (bool) = 0 ;
+} ;
+*/
+
+// type of ElementPllXIF_t is ElementPllXIF, see parallel.h
+class ElementPllXIF : public MacroGridMoverDefault 
+  //public ElementPllXIF
+{
+  protected :
+    typedef pair<helement*, int> ghostpair_t ;
+    virtual ~ElementPllXIF () {}
+  public :
+    virtual pair < ElementPllXIF *, int > accessOuterPllX (const pair < ElementPllXIF *, int > &, int) 
+    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+    virtual pair < const ElementPllXIF *, int > accessOuterPllX (const pair < const ElementPllXIF *, int > &, int) const
+    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+    virtual pair < ElementPllXIF *, int > accessInnerPllX (const pair < ElementPllXIF *, int > &, int) 
+    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+    virtual pair < const ElementPllXIF *, int > accessInnerPllX (const pair < const ElementPllXIF *, int > &, int) const
+    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
   public :
     virtual ghostpair_t getGhost () 
     { 
@@ -90,39 +144,57 @@ class ElementPllXIF : public MacroGridMoverDefault
       p.second = 0;
     }
 
-    virtual void writeStaticState (ObjectStream &, int) const = 0 ;
-    virtual void readStaticState (ObjectStream &, int) = 0 ;
-    virtual void writeDynamicState (ObjectStream &, int) const = 0 ;
-    virtual void readDynamicState (ObjectStream &, int) = 0 ;
+    virtual void writeStaticState (ObjectStream &, int) const 
+    { assert(false);abort(); }
+    virtual void readStaticState (ObjectStream &, int)
+    { assert(false);abort(); }
+    virtual void writeDynamicState (ObjectStream &, int) const
+    { assert(false);abort(); }
+    virtual void readDynamicState (ObjectStream &, int)
+    { assert(false);abort(); }
 
-    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...\n" << flush; }
-    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...1\n" << flush; }
-    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int) { cout << "ich bin die falsche...2\n" << flush; }
-    virtual void writeElementData (ObjectStream &, GatherScatterType &) { cout << "ich bin die falsche...3\n" << flush; }
-    virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const = 0 ;
-    virtual void readDynamicState (ObjectStream &, GatherScatterType &) = 0 ;
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) 
+    { assert(false);abort(); }
+    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int)
+    { assert(false);abort(); }
+    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int)
+    { assert(false);abort(); }
+    virtual void writeElementData (ObjectStream &, GatherScatterType &)
+    { assert(false);abort(); }
+    virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const
+    { assert(false);abort(); }
+    virtual void readDynamicState (ObjectStream &, GatherScatterType &)
+    { assert(false);abort(); }
 
     // pack as ghost, default does nothing but macro elements are pack as
     // ghosts 
     virtual void packAsGhost(ObjectStream &,int) const {}
 
     // unpack as ghost data and insert ghost cell, default does nothing
-    virtual void insertGhostCell(ObjectStream &,int) {
-    }
+    virtual void insertGhostCell(ObjectStream &,int) {}
     
   public :
-    virtual int ldbVertexIndex () const = 0 ;
-    virtual int & ldbVertexIndex () = 0 ;
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) = 0 ;
+    virtual int ldbVertexIndex () const
+    { assert(false);abort(); return -1;  }
+    virtual int & ldbVertexIndex ()
+    { assert(false);abort(); return *(new int ());  }
+    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &)
+    { assert(false);abort(); return false;  }
   public :
-    virtual void packAsBnd (int,int,ObjectStream &) const = 0 ;
-    virtual bool erasable () const = 0 ;
+    virtual void packAsBnd (int,int,ObjectStream &) const
+    { assert(false);abort(); }
+    virtual bool erasable () const
+    { assert(false);abort(); return false;  }
   public :
-    virtual void getRefinementRequest (ObjectStream &) = 0 ;
-    virtual bool setRefinementRequest (ObjectStream &) = 0 ;
+    virtual void getRefinementRequest (ObjectStream &)
+    { assert(false);abort(); }
+    virtual bool setRefinementRequest (ObjectStream &)
+    { assert(false);abort(); return false;  }
   public :
-    virtual bool lockAndTry () = 0 ;
-    virtual bool unlockAndResume (bool) = 0 ;
+    virtual bool lockAndTry ()
+    { assert(false);abort(); return false;  }
+    virtual bool unlockAndResume (bool)
+    { assert(false);abort(); return false;  }
 } ;
 
 class FacePllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
@@ -245,24 +317,12 @@ class Parallel {
         inline const FacePllXIF & accessPllX () const { return *this; }
         inline void detachPllXFromMacro () {}
     } ;
-    class ElementIF {
+    class ElementIF : public ElementPllXIF {
       public :
         virtual ~ElementIF () {}
-        inline virtual ElementPllXIF & accessPllX () throw (AccessPllException) 
-        {
-          assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-          throw AccessPllException () ;
-        }
-        inline virtual const ElementPllXIF & accessPllX () const throw (AccessPllException)
-        {
-          assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-          throw AccessPllException () ;
-        }
-        inline virtual void detachPllXFromMacro () throw (AccessPllException) 
-        {
-          assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-          throw AccessPllException () ;
-        }
+        inline ElementPllXIF & accessPllX () { return *this; }
+        inline const ElementPllXIF & accessPllX () const { return *this; }
+        inline virtual void detachPllXFromMacro () {}
     } ;
 } ;
 #endif

@@ -436,6 +436,7 @@ template class FacePllBaseXMacro < GitterBasisPll :: ObjectsPll :: hface4_IMPL >
 // #        #       #       #    #  #       #   ##     #
 // #######  ######  ######  #    #  ######  #    #     #
 
+/*
 pair < ElementPllXIF_t *, int > ElementPllBaseX :: accessOuterPllX (const pair < ElementPllXIF_t *, int > & x, int) {
   return x ;
 }
@@ -529,6 +530,7 @@ bool ElementPllBaseX :: lockAndTry () {
 bool ElementPllBaseX :: unlockAndResume (bool) {
   return (abort (), false) ;
 }
+*/
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -698,13 +700,15 @@ template class BndsegPllBaseXMacroClosure< GitterBasis :: Objects :: Hbnd3Defaul
 //    #     #          #    #####   ######
 //    #     #          #    #   #   #    #
 //    #     ######     #    #    #  #    #
-void TetraPllXBase :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
+template < class A >
+void TetraPllXBase< A > :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
 {
   gs.sendData( os , mytetra () );
   return ;
 }
 
-void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const 
+template < class A >
+void TetraPllXBase< A > :: writeDynamicState (ObjectStream & os, int face) const 
 {
   // write level to know the level of ghost on the other side
   os.writeObject( mytetra().level() );
@@ -712,40 +716,30 @@ void TetraPllXBase :: writeDynamicState (ObjectStream & os, int face) const
   return ;
 }
 
-void TetraPllXBase :: 
+template < class A >
+void TetraPllXBase< A > :: 
 VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
 {
   mytetra().VertexData2os(os,gs,borderFace);
 }
 
-void TetraPllXBase :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+template < class A >
+void TetraPllXBase< A > :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
   mytetra().EdgeData2os(os,gs,borderFace);
 }
 
-void TetraPllXBase :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+template < class A >
+void TetraPllXBase< A > :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
   mytetra().FaceData2os(os,gs,borderFace);
 } 
 
-void HexaPllBaseX :: VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
-{
-  myhexa().VertexData2os(os,gs,borderFace);
-}
-
-void HexaPllBaseX :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
-{
-  myhexa().EdgeData2os(os,gs,borderFace);
-}
-
-void HexaPllBaseX :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
-{
-  myhexa().FaceData2os(os,gs,borderFace);
-}
-
-TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t) 
-  : TetraPllXBase (t)
-  , _tetra(t)
+template < class A >
+TetraPllXBaseMacro< A > :: 
+TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
+                           myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
+  : A(l, f0, s0, f1, s1, f2, s2, f3, s3 )
   , _moveTo ()
   , _ldbVertexIndex (-1)
   , _erasable (false) 
@@ -759,7 +753,8 @@ TetraPllXBaseMacro :: TetraPllXBaseMacro (mytetra_t & t)
   return ;
 }
 
-TetraPllXBaseMacro :: ~TetraPllXBaseMacro () {
+template < class A >
+TetraPllXBaseMacro< A > :: ~TetraPllXBaseMacro () {
   vector < int > v ;
   {
     // reserve memory 
@@ -775,15 +770,18 @@ TetraPllXBaseMacro :: ~TetraPllXBaseMacro () {
   return ;
 }
 
-int TetraPllXBaseMacro :: ldbVertexIndex () const {
+template < class A >
+int TetraPllXBaseMacro< A > :: ldbVertexIndex () const {
   return _ldbVertexIndex ;
 }
 
-int & TetraPllXBaseMacro :: ldbVertexIndex () {
+template < class A >
+int & TetraPllXBaseMacro< A > :: ldbVertexIndex () {
   return _ldbVertexIndex ;
 }
 
-bool TetraPllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
+template < class A >
+bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   // parameter are: 
   // - macro vertex index
   // - number of elementes below macro element 
@@ -793,12 +791,14 @@ bool TetraPllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
   return true ;
 }
 
-void TetraPllXBaseMacro :: writeStaticState (ObjectStream & os, int) const {
+template < class A >
+void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
   os.writeObject (ldbVertexIndex ()) ;
   return ;
 }
 
-void TetraPllXBaseMacro :: unattach2 (int i) {
+template < class A >
+void TetraPllXBaseMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
   mytetra ().myhface3 (0)->accessPllX ().unattach2 (i) ;
@@ -808,7 +808,8 @@ void TetraPllXBaseMacro :: unattach2 (int i) {
   return ;
 }
 
-void TetraPllXBaseMacro :: attach2 (int i) {
+template < class A >
+void TetraPllXBaseMacro< A > :: attach2 (int i) {
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) {
     _moveTo.insert (pair < const int, int > (i,1)) ;
@@ -825,7 +826,8 @@ void TetraPllXBaseMacro :: attach2 (int i) {
   return ;
 }
 
-bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
+template < class A >
+bool TetraPllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) {
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
   {
     int j = (*i).first ;
@@ -855,7 +857,8 @@ bool TetraPllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
   return false ;
 }
 
-bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
+template < class A >
+bool TetraPllXBaseMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
                                         GatherScatterType & gs) 
 {
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
@@ -891,7 +894,8 @@ bool TetraPllXBaseMacro :: dunePackAll (vector < ObjectStream > & osv,
   return false ;
 }
 
-void TetraPllXBaseMacro :: packAsBndNow (int fce, ObjectStream & os) const 
+template < class A >
+void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os) const 
 {
   os.writeObject (HBND3INT) ;
   os.writeObject (Gitter :: hbndseg :: closure) ;
@@ -929,7 +933,8 @@ void TetraPllXBaseMacro :: packAsBndNow (int fce, ObjectStream & os) const
 }
 
 // packs macro element as internal bnd for other proc 
-void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const {
+template < class A >
+void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
   bool hit = _moveTo.size () == 0 ? true : false ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
        i != _moveTo.end () ; i ++ )
@@ -946,12 +951,14 @@ void TetraPllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
 }
 
 // packs macro element as internal bnd for other proc 
-void TetraPllXBaseMacro :: packAsGhost(ObjectStream & os, int fce) const 
+template < class A >
+void TetraPllXBaseMacro< A > :: packAsGhost(ObjectStream & os, int fce) const 
 {
   packAsBndNow(fce,os);
 }
 
-void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) 
+template < class A >
+void TetraPllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
 {
   assert (i) ;
   /*
@@ -989,7 +996,8 @@ void TetraPllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
   return ;
 }
 
-void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os, 
+template < class A >
+void TetraPllXBaseMacro< A > :: duneUnpackSelf (ObjectStream & os, 
     GatherScatterType & gs , bool i) 
 {
   assert (i) ;
@@ -1019,9 +1027,14 @@ void TetraPllXBaseMacro :: duneUnpackSelf (ObjectStream & os,
   return ;
 }
 
-bool TetraPllXBaseMacro :: erasable () const {
+template < class A >
+bool TetraPllXBaseMacro< A > :: erasable () const {
   return _erasable ;
 }
+
+// template instatiation 
+template class TetraPllXBase< GitterBasisPll :: ObjectsPll :: TetraEmpty > ;
+template class TetraPllXBaseMacro< GitterBasisPll :: ObjectsPll :: tetra_IMPL > ;
 
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
@@ -1046,7 +1059,12 @@ void Periodic3PllXBase :: writeDynamicState (ObjectStream & os, int) const {
   return ;
 }
 
-Periodic3PllXBaseMacro :: Periodic3PllXBaseMacro (myperiodic3_t & p) : Periodic3PllXBase (p), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
+Periodic3PllXBaseMacro :: Periodic3PllXBaseMacro (myperiodic3_t & p) 
+  : Periodic3PllXBase (p)
+  , _moveTo ()
+  , _ldbVertexIndex (-1)
+  , _erasable (false) 
+{
   static const double x = 1./3. ;
   LinearSurfaceMapping (myperiodic3 ().myvertex (0,0)->Point (), myperiodic3 ().myvertex (0,1)->Point (),
          myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,_center) ;
@@ -1205,7 +1223,12 @@ void Periodic4PllXBase :: writeDynamicState (ObjectStream & os, int) const {
   return ;
 }
 
-Periodic4PllXBaseMacro :: Periodic4PllXBaseMacro (myperiodic4_t & p) : Periodic4PllXBase (p), _ldbVertexIndex (-1), _moveTo (), _erasable (false) {
+Periodic4PllXBaseMacro :: Periodic4PllXBaseMacro (myperiodic4_t & p) 
+  : Periodic4PllXBase (p)
+  , _moveTo ()
+  , _ldbVertexIndex (-1)
+  , _erasable (false) 
+{
   static const double x = .0 ;
   BilinearSurfaceMapping (myperiodic4 ().myvertex (0,0)->Point (), myperiodic4 ().myvertex (0,1)->Point (),
          myperiodic4 ().myvertex (0,2)->Point (), myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,_center) ;
@@ -1358,13 +1381,33 @@ bool Periodic4PllXBaseMacro :: erasable () const {
   // #     #  #        #  #   #    #
   // #     #  ######  #    #  #    #
 
-void HexaPllBaseX  :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
+template < class A >
+void HexaPllBaseX< A > :: VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  myhexa().VertexData2os(os,gs,borderFace);
+}
+
+template < class A >
+void HexaPllBaseX< A > :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  myhexa().EdgeData2os(os,gs,borderFace);
+}
+
+template < class A >
+void HexaPllBaseX< A > :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  myhexa().FaceData2os(os,gs,borderFace);
+}
+
+template < class A >
+void HexaPllBaseX< A >  :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
 {
   gs.sendData( os , myhexa () );
   return ;
 }
 
-void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const 
+template < class A >
+void HexaPllBaseX< A > :: writeDynamicState (ObjectStream & os, int face) const 
 {
   // siehe writeDynamicState von Tetra 
 
@@ -1375,8 +1418,12 @@ void HexaPllBaseX :: writeDynamicState (ObjectStream & os, int face) const
   return ;
 }
 
-HexaPllBaseXMacro :: HexaPllBaseXMacro (myhexa_t & h) 
-: _hexa(h)
+template < class A >
+HexaPllBaseXMacro< A > :: 
+HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
+                         myhface4_t *f2, int s2, myhface4_t *f3, int s3,
+                         myhface4_t *f4, int s4, myhface4_t *f5, int s5)
+: A(l, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5)
 , _moveTo ()
 , _ldbVertexIndex (-1)
 , _erasable (false) 
@@ -1395,7 +1442,8 @@ HexaPllBaseXMacro :: HexaPllBaseXMacro (myhexa_t & h)
   return ;
 }
 
-HexaPllBaseXMacro :: ~HexaPllBaseXMacro () {
+template < class A >
+HexaPllBaseXMacro< A > :: ~HexaPllBaseXMacro () {
   vector < int > v ;
   {
     // reserve memory 
@@ -1412,26 +1460,31 @@ HexaPllBaseXMacro :: ~HexaPllBaseXMacro () {
   return ;
 }
 
-int HexaPllBaseXMacro :: ldbVertexIndex () const {
+template < class A >
+int HexaPllBaseXMacro< A > :: ldbVertexIndex () const {
   return _ldbVertexIndex ;
 }
 
-int & HexaPllBaseXMacro :: ldbVertexIndex () {
+template < class A >
+int & HexaPllBaseXMacro< A > :: ldbVertexIndex () {
   return _ldbVertexIndex ;
 }
 
-bool HexaPllBaseXMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
+template < class A >
+bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
       TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size (), _center)) ;
   return true ;
 }
 
-void HexaPllBaseXMacro :: writeStaticState (ObjectStream & os, int) const {
+template < class A >
+void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int) const {
   os.writeObject (ldbVertexIndex ()) ;
   return ;
 }
 
-void HexaPllBaseXMacro :: unattach2 (int i) {
+template < class A >
+void HexaPllBaseXMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
   myhexa ().myhface4 (0)->accessPllX ().unattach2 (i) ;
@@ -1443,7 +1496,8 @@ void HexaPllBaseXMacro :: unattach2 (int i) {
   return ;
 }
 
-void HexaPllBaseXMacro :: attach2 (int i) {
+template < class A >
+void HexaPllBaseXMacro< A > :: attach2 (int i) {
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) {
     _moveTo.insert (pair < const int, int > (i,1)) ;
@@ -1462,7 +1516,8 @@ void HexaPllBaseXMacro :: attach2 (int i) {
   return ;
 }
 
-bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
+template < class A >
+bool HexaPllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv) {
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
@@ -1496,7 +1551,8 @@ bool HexaPllBaseXMacro :: packAll (vector < ObjectStream > & osv) {
 }
 
 // pack all function for dune 
-bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
+template < class A >
+bool HexaPllBaseXMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
                                        GatherScatterType & gs) 
 {
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
@@ -1537,7 +1593,8 @@ bool HexaPllBaseXMacro :: dunePackAll (vector < ObjectStream > & osv,
 }
 
 
-void HexaPllBaseXMacro :: packAsBndNow(int fce, ObjectStream & os) const 
+template < class A >
+void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os) const 
 {
   os.writeObject (HBND4INT) ;
   os.writeObject (Gitter :: hbndseg :: closure) ;
@@ -1573,13 +1630,15 @@ void HexaPllBaseXMacro :: packAsBndNow(int fce, ObjectStream & os) const
   }
 }
 
-void HexaPllBaseXMacro :: packAsGhost(ObjectStream & os, int fce) const 
+template < class A >
+void HexaPllBaseXMacro< A > :: packAsGhost(ObjectStream & os, int fce) const 
 {
   packAsBndNow(fce, os);
 }
 
 // packs macro element as internal bnd for other proc 
-void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
+template < class A >
+void HexaPllBaseXMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
 {
   bool hit = _moveTo.size () == 0 ? true : false ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
@@ -1595,7 +1654,8 @@ void HexaPllBaseXMacro :: packAsBnd (int fce, int who, ObjectStream & os) const
   return ;
 }
 
-void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i) 
+template < class A >
+void HexaPllBaseXMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
 {
   assert (i) ;
   if (i) 
@@ -1621,7 +1681,8 @@ void HexaPllBaseXMacro :: unpackSelf (ObjectStream & os, bool i)
   return ;
 }
 
-void HexaPllBaseXMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType & gs , bool i) 
+template < class A >
+void HexaPllBaseXMacro< A > :: duneUnpackSelf (ObjectStream & os, GatherScatterType & gs , bool i) 
 {
   assert (i) ;
   if (i) 
@@ -1650,9 +1711,20 @@ void HexaPllBaseXMacro :: duneUnpackSelf (ObjectStream & os, GatherScatterType &
   return ;
 }
 
-bool HexaPllBaseXMacro :: erasable () const {
+template < class A >
+bool HexaPllBaseXMacro< A > :: erasable () const {
   return _erasable ;
 }
+
+// template instatiation 
+template class HexaPllBaseX< GitterBasisPll :: ObjectsPll :: HexaEmpty > ;
+template class HexaPllBaseXMacro< GitterBasisPll :: ObjectsPll :: hexa_IMPL > ;
+
+///////////////////////////////////////////////////////////
+//
+//  --BndsegPllBaseX
+//
+///////////////////////////////////////////////////////////
 
 pair < ElementPllXIF_t *, int > BndsegPllBaseX :: accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int f) {
   assert (!f) ;  
@@ -1715,51 +1787,6 @@ Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1,
   : Base_t(0, e0, s0, e1, s1, e2, s2, e3, s3) // 0 == level 0
 {
 } 
-
-ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return *this;
-}
-
-const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  //return _pllx ;
-  return *this;
-}
-
-void GitterBasisPll :: ObjectsPll :: TetraEmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  abort () ;  // Auf dem feinen Element ist die Aktion nicht zul"assig.
-  return ;
-}
-  
-GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: 
-TetraEmptyPllMacro (myhface3_t * f0, int t0, myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
-                    myhface3_t * f3, int t3)
-  : GitterBasisPll :: ObjectsPll :: tetra_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3),
-    _pllx (new mypllx_t (*this)) {
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: ~TetraEmptyPllMacro () {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
-ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: accessPllX () throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-void GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
 
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
@@ -1858,52 +1885,9 @@ void GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: detachPllXFromMac
   return ;
 }
 
-
-ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  //return _pllx ;
-  return *this;
-}
-
-const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  //return _pllx ;
-  return *this;
-}
-
-void GitterBasisPll :: ObjectsPll :: HexaEmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  abort () ;
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: HexaEmptyPllMacro 
-  (myhface4_t * f0, int t0, myhface4_t * f1, int t1, myhface4_t * f2, int t2, 
-   myhface4_t * f3, int t3, myhface4_t * f4, int t4, myhface4_t * f5, int t5)
-  : GitterBasisPll :: ObjectsPll :: hexa_IMPL (0,f0,t0,f1,t1,f2,t2,f3,t3,f4,t4,f5,t5), 
-    _pllx (new mypllx_t (*this)) {
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: ~HexaEmptyPllMacro () {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
-ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: accessPllX () throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-void GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
+////////////////////////////////////////////////////////////////
+//  --MacroGitterBasisPll
+////////////////////////////////////////////////////////////////
 GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid , istream & in) : GitterPll :: MacroGitterPll () , GitterBasis:: MacroGitterBasis (mygrid) 
 {
   macrogridBuilder (in ) ;
