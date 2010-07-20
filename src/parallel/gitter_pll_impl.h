@@ -1054,7 +1054,6 @@ template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > ::
   return front.first->accessPllX ().accessInnerPllX (
             pair < const ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
             front.second) ;
-  //return myhface ().nb.front ().first->accessPllX ().accessInnerPllX (pair < const ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
 }
 
 ///////////////////////////////////////////////////////////////////
