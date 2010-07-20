@@ -409,7 +409,7 @@ void DuneParallelGridMover :: initialize ()
         typedef Gitter :: ghostpair_STI ghostpair_STI;
         typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
 
-        ghostpair_STI gpair ; //= (*i)->getGhost();
+        ghostpair_STI gpair = (*i)->getGhost();
         hexa_GEO * gh = dynamic_cast<hexa_GEO *> (gpair.first);
         if( gh )
         {
@@ -442,7 +442,7 @@ void DuneParallelGridMover :: initialize ()
       {
         // check for ghost element 
         typedef Gitter :: ghostpair_STI ghostpair_STI;
-        ghostpair_STI gpair ; //= (*i)->getGhost();
+        ghostpair_STI gpair = (*i)->getGhost();
 
         typedef Gitter :: Geometric :: tetra_GEO  tetra_GEO;
         tetra_GEO * gh = dynamic_cast<tetra_GEO *> (gpair.first);
