@@ -84,20 +84,48 @@ void VertexPllBaseX :: unpackSelf (ObjectStream & os, bool i) {
   return ;
 }
 
-vector < int > GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: estimateLinkage () const {
+template < class A >
+EdgePllBaseX< A > :: ~EdgePllBaseX()
+{
+#ifndef NDEBUG
+  // Falls die nachfolgende Situation eintritt, ist massiv was faul im
+  // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
+  // gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
+  // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
+  // gehoben wird.
+
+  if( myhedge1().isSet( myhedge1_t::flagLock ) )
+  {
+   cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
+    abort () ;
+  }
+#endif
+}
+
+template < class A > 
+bool EdgePllBaseX< A > :: lockedAgainstCoarsening () const
+{
+  return myhedge1().isSet( myhedge1_t::flagLock );
+}
+
+template < class A >
+vector < int > EdgePllBaseX< A > :: estimateLinkage () const {
   return (abort (), vector < int > ()) ;
 }
 
-LinkedObject :: Identifier GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: getIdentifier () const {
+template < class A >
+LinkedObject :: Identifier EdgePllBaseX< A > :: getIdentifier () const {
   return (abort (), LinkedObject :: Identifier  ()) ;
 }
 
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: getRefinementRequest (ObjectStream & os) const {
+template < class A >
+void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const {
   os.writeObject (int(myhedge1 ().getrule ())) ;
   return ;
 }
 
-bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: setRefinementRequest (ObjectStream & os) {
+template < class A >
+bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
   int i ;
   try {
     os.readObject (i) ;
@@ -105,36 +133,43 @@ bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: setRefinementRequest (Obj
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  return myhedge1_t :: myrule_t (i) == myhedge1_t :: myrule_t :: nosplit ? 
-    false : (myhedge1 ().refineImmediate (myhedge1_t :: myrule_t (i)), true) ;
+  typedef typename myhedge1_t :: myrule_t  myrule_t;
+  return myrule_t (i) == myrule_t :: nosplit ? 
+    false : (myhedge1 ().refineImmediate (myrule_t (i)), true) ;
 }
 
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unattach2 (int) {
+template < class A >
+void EdgePllBaseX< A > :: unattach2 (int) {
   abort () ;
   return ;
 }
 
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: attach2 (int) {
+template < class A >
+void EdgePllBaseX< A > :: attach2 (int) {
   abort () ;
   return ;
 }
 
-bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: packAll (vector < ObjectStream > &) {
+template < class A >
+bool EdgePllBaseX< A > :: packAll (vector < ObjectStream > &) {
   return (abort (), false) ;
 }
 
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unpackSelf (ObjectStream &,bool) {
+template < class A >
+void EdgePllBaseX< A > :: unpackSelf (ObjectStream &,bool) {
   abort () ;
   return ;
 }
 
-bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: lockAndTry ()
+template < class A >
+bool EdgePllBaseX< A > :: lockAndTry ()
 {
   myhedge1().set( myhedge1_t::flagLock );
   return myhedge1().coarse () ;
 }
 
-bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unlockAndResume (bool r)
+template < class A >
+bool EdgePllBaseX< A > :: unlockAndResume (bool r)
 {
   myhedge1().unset( myhedge1_t::flagLock );
   bool x ;
@@ -147,13 +182,20 @@ bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll :: unlockAndResume (bool r)
   return x ;
 }
 
-GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: Hedge1EmptyPllMacro (myvertex_t * a, myvertex_t * b) :
-  GitterBasisPll :: ObjectsPll :: hedge1_IMPL (0, a, b), _moveTo(), _ref()
+template < class A >
+EdgePllBaseXMacro< A > :: EdgePllBaseXMacro(myvertex_t * a, myvertex_t * b) :
+  A(0, a, b), _moveTo(), _ref()
 {
-  return ;
 }
 
-vector < int > GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: estimateLinkage () const {
+template < class A >
+EdgePllBaseXMacro< A > :: ~EdgePllBaseXMacro()
+{
+  assert (0 == _moveTo.size ()) ;
+}
+
+template < class A >
+vector < int > EdgePllBaseXMacro< A > :: estimateLinkage () const {
   vector < int > est ;
   vector < int > l0 = myhedge1 ().myvertex(0)->accessPllX ().estimateLinkage () ;
   vector < int > l1 = myhedge1 ().myvertex(1)->accessPllX ().estimateLinkage () ;
@@ -161,11 +203,13 @@ vector < int > GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: estimateLi
   return est ;
 }
 
-LinkedObject :: Identifier GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: getIdentifier () const {
-  return Identifier (myhedge1 ().myvertex (0)->ident (), myhedge1 ().myvertex (1)->ident ()) ;
+template < class A >
+LinkedObject :: Identifier EdgePllBaseXMacro< A > :: getIdentifier () const {
+  return LinkedObject :: Identifier (myhedge1 ().myvertex (0)->ident (), myhedge1 ().myvertex (1)->ident ()) ;
 }
 
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: unattach2 (int i) {
+template < class A >
+void EdgePllBaseXMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
   myhedge1 ().myvertex (0)->accessPllX ().unattach2 (i) ;
@@ -173,7 +217,9 @@ void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: unattach2 (int i) {
   return ;
 }
 
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: attach2 (int i) {
+template < class A >
+void EdgePllBaseXMacro< A > :: attach2 (int i) 
+{
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) {
     _moveTo.insert (pair < const int, int > (i,1)) ;
@@ -185,7 +231,8 @@ void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: attach2 (int i) {
   return ;
 }
 
-bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: packAll (vector < ObjectStream > & osv) 
+template < class A >
+bool EdgePllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
   bool action (false) ;
   for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
@@ -213,7 +260,8 @@ bool GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: packAll (vector < Ob
   return action ;
 }
 
-void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: unpackSelf (ObjectStream & os, bool i) 
+template < class A >
+void EdgePllBaseXMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
 {
   if (i) 
   {
@@ -249,6 +297,10 @@ void GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro :: unpackSelf (ObjectSt
   }
   return ;
 }
+
+// Template Instantiation 
+template class EdgePllBaseX< GitterBasisPll :: ObjectsPll :: Hedge1Empty > ;
+template class EdgePllBaseXMacro< GitterBasisPll :: ObjectsPll :: hedge1_IMPL > ;
 
 // #######   
 // #         #####   #####  ###### 
