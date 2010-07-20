@@ -23,23 +23,23 @@ void ParallelGridMover ::initialize ()
   assert(_initialized);
   vector < elementKey_t > toDelete ;
   {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).accessPllX ().erasable ()) {
+    if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).erasable ()) {
       toDelete.push_back ((*i).first) ;
     } 
   }
   {for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMap.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).accessPllX ().erasable ()) {
+    if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).erasable ()) {
       toDelete.push_back ((*i).first) ;
     }
   }
   {for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).accessPllX ().erasable ()) {
+    if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) {
       toDelete.push_back ((*i).first) ;
     }
   }
 
   {for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).accessPllX ().erasable ()) {
+    if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) {
       toDelete.push_back ((*i).first) ;
     }
   }
@@ -314,9 +314,9 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     {
       AccessIterator < helement > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) {
-      int to = db.getDestination (w.item ().accessPllX ().ldbVertexIndex ()) ;
+      int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
         if (me != to)
-          w.item ().accessPllX ().attach2 (mpAccess ().link (to)) ;
+          w.item ().attach2 (mpAccess ().link (to)) ;
       }
     }
     lap1 = clock () ;
@@ -335,7 +335,7 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     }
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 

@@ -31,7 +31,7 @@ bool GitterDunePll :: duneNotifyNewGrid ()
   }
   {
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphVertex (db) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db) ;
   }
   bool neu = false ;
   {
@@ -119,7 +119,7 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProl
   }
   {
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphVertex (db) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db) ;
   }
   bool neu = false ;
   {

@@ -843,7 +843,7 @@ void GitterPll :: loadBalancerGridChangesNotify () {
   }
   {
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphVertex (db) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db) ;
   }
   bool neu = false ;
   {
@@ -881,7 +881,7 @@ void GitterPll :: loadBalancerMacroGridChangesNotify () {
   AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
   vector < int > sizes = mpAccess ().gcollect (w.size ()) ;
   for (int i = 0 ; i < mpAccess ().myrank () ; cnt += sizes [i++]) ;
-  for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbVertexIndex () = cnt ++ ;
+  for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbVertexIndex () = cnt ++ ;
   return ;
 }
 

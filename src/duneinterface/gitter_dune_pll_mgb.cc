@@ -519,7 +519,7 @@ void DuneParallelGridMover :: initialize ()
     const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
     for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; ++i)
     {
-      if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).accessPllX ().erasable ()) 
+      if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).erasable ()) 
       {
         toDelete.push_back ((*i).first) ;
       }
@@ -529,7 +529,7 @@ void DuneParallelGridMover :: initialize ()
     const elementMap_t :: iterator _tetraMapend = _tetraMap.end ();
     for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMapend ; ++i)
     {
-      if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).accessPllX ().erasable ()) 
+      if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).erasable ()) 
       {
         toDelete.push_back ((*i).first) ;
       }
@@ -539,7 +539,7 @@ void DuneParallelGridMover :: initialize ()
     const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; ++i)
     {
-      if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).accessPllX ().erasable ()) 
+      if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) 
       {
         toDelete.push_back ((*i).first) ;
       }
@@ -549,7 +549,7 @@ void DuneParallelGridMover :: initialize ()
     const elementMap_t :: iterator _periodic4Mapend = _periodic4Map.end ();
     for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; ++i)
     {
-      if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).accessPllX ().erasable ()) 
+      if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) 
       {
         toDelete.push_back ((*i).first) ;
       }
@@ -756,9 +756,9 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db)
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) {
-      int to = db.getDestination (w.item ().accessPllX ().ldbVertexIndex ()) ;
+      int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
         if (me != to)
-          w.item ().accessPllX ().attach2 (mpAccess ().link (to)) ;
+          w.item ().attach2 (mpAccess ().link (to)) ;
       }
     }
     lap1 = clock () ;
@@ -781,7 +781,7 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db)
     }
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
@@ -828,10 +828,10 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
       AccessIterator < helement > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) 
       {
-        int to = db.getDestination (w.item ().accessPllX ().ldbVertexIndex ()) ;
+        int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
         if (me != to)
         {
-          w.item ().accessPllX ().attach2 (mpAccess ().link (to)) ;
+          w.item ().attach2 (mpAccess ().link (to)) ;
         }
       }
     }
@@ -860,7 +860,7 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) 
       {
-        w.item ().accessPllX ().dunePackAll (osv,gs) ;
+        w.item ().dunePackAll (osv,gs) ;
       }
     }
     

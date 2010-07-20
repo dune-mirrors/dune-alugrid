@@ -97,104 +97,7 @@ class ElementPllXIF : public MacroGridMoverDefault
     virtual bool unlockAndResume (bool) = 0 ;
 } ;
 */
-
-// type of ElementPllXIF_t is ElementPllXIF, see parallel.h
-class ElementPllXIF : public MacroGridMoverDefault 
-{
-  protected :
-    virtual ~ElementPllXIF () {}
-  public :
-    virtual pair < ElementPllXIF *, int > accessOuterPllX (const pair < ElementPllXIF *, int > &, int) 
-    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-    virtual pair < const ElementPllXIF *, int > accessOuterPllX (const pair < const ElementPllXIF *, int > &, int) const
-    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-    virtual pair < ElementPllXIF *, int > accessInnerPllX (const pair < ElementPllXIF *, int > &, int) 
-    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-    virtual pair < const ElementPllXIF *, int > accessInnerPllX (const pair < const ElementPllXIF *, int > &, int) const
-    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-  public :
-    typedef pair<helement*, int> ghostpair_t ;
-    virtual ghostpair_t getGhost () 
-    { 
-      cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
-      abort(); 
-      return ghostpair_t( (helement*)0 , -1); 
-    }
-
-    virtual int ghostLevel () const
-    { 
-      cerr << "ERROR: method ghostLevel of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
-      abort(); 
-      return 0; 
-    }
-
-    virtual bool ghostLeaf () const
-    { 
-      cerr << "ERROR: method ghostLeaf of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
-      abort(); 
-      return 0; 
-    }
-
-    virtual void getAttachedElement ( pair < helement* , hbndseg * > & p)
-    {
-      cerr << "Overload method in the classes file:" << __FILE__ << " line:" << __LINE__ << "\n";
-      abort();
-      p.first  = 0;
-      p.second = 0;
-    }
-
-    virtual void writeStaticState (ObjectStream &, int) const 
-    { assert(false);abort(); }
-    virtual void readStaticState (ObjectStream &, int)
-    { assert(false);abort(); }
-    virtual void writeDynamicState (ObjectStream &, int) const
-    { assert(false);abort(); }
-    virtual void readDynamicState (ObjectStream &, int)
-    { assert(false);abort(); }
-
-    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) 
-    { assert(false);abort(); }
-    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int)
-    { assert(false);abort(); }
-    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int)
-    { assert(false);abort(); }
-    virtual void writeElementData (ObjectStream &, GatherScatterType &)
-    { assert(false);abort(); }
-    virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const
-    { assert(false);abort(); }
-    virtual void readDynamicState (ObjectStream &, GatherScatterType &)
-    { assert(false);abort(); }
-
-    // pack as ghost, default does nothing but macro elements are pack as
-    // ghosts 
-    virtual void packAsGhost(ObjectStream &,int) const {}
-
-    // unpack as ghost data and insert ghost cell, default does nothing
-    virtual void insertGhostCell(ObjectStream &,int) {}
-    
-  public :
-    virtual int ldbVertexIndex () const
-    { assert(false);abort(); return -1;  }
-    virtual int & ldbVertexIndex ()
-    { assert(false);abort(); return *(new int ());  }
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &)
-    { assert(false);abort(); return false;  }
-  public :
-    virtual void packAsBnd (int,int,ObjectStream &) const
-    { assert(false);abort(); }
-    virtual bool erasable () const
-    { assert(false);abort(); return false;  }
-  public :
-    virtual void getRefinementRequest (ObjectStream &)
-    { assert(false);abort(); }
-    virtual bool setRefinementRequest (ObjectStream &)
-    { assert(false);abort(); return false;  }
-  public :
-    virtual bool lockAndTry ()
-    { assert(false);abort(); return false;  }
-    virtual bool unlockAndResume (bool)
-    { assert(false);abort(); return false;  }
-} ;
+class ElementPllXIF ;
 
 class FacePllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
 {
@@ -316,12 +219,120 @@ class Parallel {
         inline const FacePllXIF & accessPllX () const { return *this; }
         inline void detachPllXFromMacro () {}
     } ;
-    class ElementIF : public ElementPllXIF {
+    class ElementIF {
       public :
         virtual ~ElementIF () {}
-        inline ElementPllXIF & accessPllX () { return *this; }
-        inline const ElementPllXIF & accessPllX () const { return *this; }
-        inline virtual void detachPllXFromMacro () {}
+        inline virtual ElementPllXIF & accessPllX () throw (AccessPllException)
+        {
+          assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
+          throw AccessPllException () ;
+        }
+        inline virtual const ElementPllXIF & accessPllX () const throw (AccessPllException) 
+        {
+          assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
+          throw AccessPllException () ;
+        }
+        inline virtual void detachPllXFromMacro () {} 
     } ;
 } ;
+
+// type of ElementPllXIF_t is ElementPllXIF, see parallel.h
+class ElementPllXIF : public MacroGridMoverDefault 
+{
+  protected :
+    virtual ~ElementPllXIF () {}
+  public :
+    virtual void detachPllXFromMacro () {} 
+    virtual pair < ElementPllXIF *, int > accessOuterPllX (const pair < ElementPllXIF *, int > &, int) 
+    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+    virtual pair < const ElementPllXIF *, int > accessOuterPllX (const pair < const ElementPllXIF *, int > &, int) const
+    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+    virtual pair < ElementPllXIF *, int > accessInnerPllX (const pair < ElementPllXIF *, int > &, int) 
+    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+    virtual pair < const ElementPllXIF *, int > accessInnerPllX (const pair < const ElementPllXIF *, int > &, int) const
+    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+  public :
+    typedef pair<helement*, int> ghostpair_t ;
+    virtual ghostpair_t getGhost () 
+    { 
+      cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      abort(); 
+      return ghostpair_t( (helement*)0 , -1); 
+    }
+
+    virtual int ghostLevel () const
+    { 
+      cerr << "ERROR: method ghostLevel of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      abort(); 
+      return 0; 
+    }
+
+    virtual bool ghostLeaf () const
+    { 
+      cerr << "ERROR: method ghostLeaf of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      abort(); 
+      return 0; 
+    }
+
+    virtual void getAttachedElement ( pair < helement* , hbndseg * > & p)
+    {
+      cerr << "Overload method in the classes file:" << __FILE__ << " line:" << __LINE__ << "\n";
+      abort();
+      p.first  = 0;
+      p.second = 0;
+    }
+
+    virtual void writeStaticState (ObjectStream &, int) const 
+    { assert(false);abort(); }
+    virtual void readStaticState (ObjectStream &, int)
+    { assert(false);abort(); }
+    virtual void writeDynamicState (ObjectStream &, int) const
+    { assert(false);abort(); }
+    virtual void readDynamicState (ObjectStream &, int)
+    { assert(false);abort(); }
+
+    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) 
+    { assert(false);abort(); }
+    virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int)
+    { assert(false);abort(); }
+    virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int)
+    { assert(false);abort(); }
+    virtual void writeElementData (ObjectStream &, GatherScatterType &)
+    { assert(false);abort(); }
+    virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const
+    { assert(false);abort(); }
+    virtual void readDynamicState (ObjectStream &, GatherScatterType &)
+    { assert(false);abort(); }
+
+    // pack as ghost, default does nothing but macro elements are pack as
+    // ghosts 
+    virtual void packAsGhost(ObjectStream &,int) const {}
+
+    // unpack as ghost data and insert ghost cell, default does nothing
+    virtual void insertGhostCell(ObjectStream &,int) {}
+    
+  public :
+    virtual int ldbVertexIndex () const
+    { assert(false);abort(); return -1;  }
+    virtual int & ldbVertexIndex ()
+    { assert(false);abort(); return *(new int ());  }
+    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &)
+    { assert(false);abort(); return false;  }
+  public :
+    virtual void packAsBnd (int,int,ObjectStream &) const
+    { assert(false);abort(); }
+    virtual bool erasable () const
+    { assert(false);abort(); return false;  }
+  public :
+    virtual void getRefinementRequest (ObjectStream &)
+    { assert(false);abort(); }
+    virtual bool setRefinementRequest (ObjectStream &)
+    { assert(false);abort(); return false;  }
+  public :
+    virtual bool lockAndTry ()
+    { assert(false);abort(); return false;  }
+    virtual bool unlockAndResume (bool)
+    { assert(false);abort(); return false;  }
+} ;
+
 #endif

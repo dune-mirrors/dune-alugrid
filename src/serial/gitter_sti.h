@@ -562,7 +562,8 @@ public :
   };
   typedef AdaptRestrictProlong AdaptRestrictProlongType;
 
-  class helement : public virtual stiExtender_t :: ElementIF 
+  // --helement 
+  class helement : public ElementPllXIF
                  , public Dune_helement 
   {
   protected :
@@ -1242,6 +1243,7 @@ public :
   
     typedef class Tetra : public helement_STI, public hasFace3, public MyAlloc {
     protected :
+
       typedef VertexGeo  myvertex_t ;
       typedef hedge1_GEO myhedge1_t ;
       typedef hface3_GEO myhface3_t ;
@@ -1251,6 +1253,7 @@ public :
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
+      using hasFace3     :: accessPllX ;
       static const int prototype [4][3] ;
       static const int edgeMap [6][2] ;
 
@@ -1330,6 +1333,7 @@ public :
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
+      using hasFace3     :: accessPllX ;
       static const int prototype [2][3] ;
       inline virtual ~Periodic3 () ;
       inline hface3_GEO * myhface3 (int) ;
@@ -1384,6 +1388,7 @@ public :
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
+      using hasFace4     :: accessPllX ;
       static const int prototype [2][4] ;
       inline virtual ~Periodic4 () ;
       inline hface4_GEO * myhface4 (int) ;
@@ -1444,6 +1449,7 @@ public :
       inline int preCoarsening () ;
 
     public :
+      using hasFace4     :: accessPllX ;
       static const int prototype [6][4] ;
       static const int oppositeFace [6] ;
       static const int edgeMap [12][2];
@@ -1556,10 +1562,6 @@ public :
       // unmark edges and vertices as leaf 
       virtual void detachleafs() ;
 
-      // import both getGhost methods 
-      using hbndseg_STI :: getGhost ; 
-      using hasFace3 :: getGhost ;
-
     protected :
       // no projection for ghost faces 
       const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
@@ -1603,10 +1605,6 @@ public :
       virtual void attachleafs() ;
       
       virtual void detachleafs() ;
-
-      // import both getGhost methods 
-      using hbndseg_STI :: getGhost ; 
-      using hasFace4 :: getGhost ;
 
     protected :
       // no projection for ghost faces 

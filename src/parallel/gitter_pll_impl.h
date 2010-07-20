@@ -652,6 +652,8 @@ public :
       inline TetraEmptyPll (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                             myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
         : TetraPllXBase< TetraEmpty >(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
+      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
     typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
 
@@ -661,6 +663,8 @@ public :
       inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                                  myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
         : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3 ) {} // 0 == level 0
+      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
 
    /////////////////////////////////
@@ -752,6 +756,8 @@ public :
                            myhface4_t *f2, int s2, myhface4_t *f3, int s3,
                            myhface4_t *f4, int s4, myhface4_t *f5, int s5)
         : HexaPllBaseX< HexaEmpty >(f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
+      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
     typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
 
@@ -762,6 +768,8 @@ public :
                                myhface4_t *f2, int s2, myhface4_t *f3, int s3,
                                myhface4_t *f4, int s4, myhface4_t *f5, int s5)
         : HexaPllBaseXMacro< hexa_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
+      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
   
     // Die Randelemente des verteilten Gitters werden aus Templates 
@@ -1026,8 +1034,11 @@ template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > ::
 
 template < class A > pair < ElementPllXIF_t *, int > FacePllBaseX < A > :: accessInnerPllX () {
 
-  assert(myhface ().nb.front().first );
-  assert(myhface ().nb.rear ().first );
+  assert( myhface ().nb.front().first );
+  assert( myhface ().nb.rear ().first );
+  cout << myhface ().nb.front().first->isboundary() << endl; 
+  cout << myhface ().nb.rear ().first->isboundary() << endl; 
+  ElementPllXIF_t * p = & myhface ().nb.rear ().first->accessPllX ();
   return myhface ().nb.front ().
     first->accessPllX ().accessInnerPllX (
         pair < ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), 
