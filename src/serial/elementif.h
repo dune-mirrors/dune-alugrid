@@ -99,39 +99,7 @@ class ElementPllXIF : public MacroGridMoverDefault
 */
 
 // type of ElementPllXIF_t is ElementPllXIF, see parallel.h
-class GhostElementIF : public MacroGridMoverDefault 
-{
-  protected :
-    typedef pair<helement*, int> ghostpair_t ;
-    virtual ~GhostElementIF () {}
-  public :
-    virtual ghostpair_t getGhost () 
-    { 
-      cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
-      abort(); 
-      return ghostpair_t( (helement*)0 , -1); 
-    }
-
-    virtual int ghostLevel () const
-    { 
-      cerr << "ERROR: method ghostLevel of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
-      abort(); 
-      return 0; 
-    }
-
-    virtual bool ghostLeaf () const
-    { 
-      cerr << "ERROR: method ghostLeaf of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
-      abort(); 
-      return 0; 
-    }
-};
-
-
-// type of ElementPllXIF_t is ElementPllXIF, see parallel.h
-class ElementPllXIF : public GhostElementIF 
-//: public MacroGridMoverDefault 
-  //public ElementPllXIF
+class ElementPllXIF : public MacroGridMoverDefault 
 {
   protected :
     virtual ~ElementPllXIF () {}
@@ -145,7 +113,6 @@ class ElementPllXIF : public GhostElementIF
     virtual pair < const ElementPllXIF *, int > accessInnerPllX (const pair < const ElementPllXIF *, int > &, int) const
     { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
   public :
-    /*
     typedef pair<helement*, int> ghostpair_t ;
     virtual ghostpair_t getGhost () 
     { 
@@ -167,7 +134,6 @@ class ElementPllXIF : public GhostElementIF
       abort(); 
       return 0; 
     }
-    */
 
     virtual void getAttachedElement ( pair < helement* , hbndseg * > & p)
     {

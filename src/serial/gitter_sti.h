@@ -665,8 +665,8 @@ public :
       }
   };
 
-  class hbndseg  : public DuneIndexProvider,
-                   public virtual GhostElementIF 
+  // --hbndseg 
+  class hbndseg  : public DuneIndexProvider
   {
   protected :
     hbndseg () {}
@@ -714,7 +714,6 @@ public :
     virtual int nChild () const = 0 ;
     inline  int leaf () const ;
 
-    /*
     // for dune 
     virtual int ghostLevel () const = 0 ;
     virtual bool ghostLeaf () const = 0 ;
@@ -723,8 +722,8 @@ public :
     // bndseg is external bnd seg, 
     // the int is -1 by default, or the internal ghostFace number (
     // getGhostFaceNumber) when ghost is non-zero 
-    virtual const pair < helement * ,int> & getGhost () const = 0; 
-*/
+    virtual const pair < helement * ,int> & getGhost () const = 0 ;
+
   protected:
     // if ghost element exists, then ghost is splitted, when bnd is splitted 
     // info will be filled with the new ghost cells and local face to the
@@ -928,7 +927,8 @@ public :
     // m"ussen, wie z.B. Navigation zur Fl"ache, zu den Kanten und Knoten,
     // aber auch Anforderungen an den Nachbarn.
 
-    class hasFace3 : public virtual stiExtender_t :: ElementIF {
+    class hasFace3 : public virtual stiExtender_t :: ElementIF 
+    {
     public :
       typedef Hface3Rule balrule_t ;
       virtual bool refineBalance (balrule_t,int) = 0 ;
@@ -1555,6 +1555,11 @@ public :
 
       // unmark edges and vertices as leaf 
       virtual void detachleafs() ;
+
+      // import both getGhost methods 
+      using hbndseg_STI :: getGhost ; 
+      using hasFace3 :: getGhost ;
+
     protected :
       // no projection for ghost faces 
       const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
@@ -1598,6 +1603,11 @@ public :
       virtual void attachleafs() ;
       
       virtual void detachleafs() ;
+
+      // import both getGhost methods 
+      using hbndseg_STI :: getGhost ; 
+      using hasFace4 :: getGhost ;
+
     protected :
       // no projection for ghost faces 
       const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
