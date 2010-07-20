@@ -247,8 +247,20 @@ template < class A > class LeafIterator ;
 // the Level Iterators 
 template < class A > class LevelIterator ;
 
+
+// --Gitter 
 class Gitter {
 public :
+
+  class helement ;
+  class hbndseg ;
+///////////////////////////////////////////////////
+//  parallel element interfaces 
+///////////////////////////////////////////////////
+#include "elementif.h"
+
+///////////////////////////////////////////////////
+
   Refcount ref ;
   static inline bool debugOption (int = 0) ;
 
@@ -1843,7 +1855,15 @@ protected:
   friend class LevelIterator < hbndseg_STI > ;
   friend class LevelIterator < hedge_STI > ;
   friend class LevelIterator < hface_STI > ;
-} ;
+} ; 
+// --endGitter
+
+// --parallel types 
+typedef Gitter :: Parallel Parallel ;
+typedef Gitter :: VertexPllXIF  VertexPllXIF_t ;
+typedef Gitter :: EdgePllXIF    EdgePllXIF_t ;
+typedef Gitter :: FacePllXIF    FacePllXIF_t ;
+typedef Gitter :: ElementPllXIF ElementPllXIF_t ;
 
 // "Ausseres Iteratorproxy oder auch einfach ein Smartpointer
 // um von aussen vom Gitter Iterationsobjekte zu bekommen und

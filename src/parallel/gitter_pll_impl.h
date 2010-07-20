@@ -25,7 +25,7 @@
 typedef vector < int > linkagePattern_t ;
 typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternMap_t ;
 
-class VertexPllBaseX : public VertexPllXIF, public MyAlloc {
+class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
   protected :
     typedef Gitter :: Geometric :: VertexGeo myvertex_t ;
     inline myvertex_t & myvertex () ;
@@ -172,7 +172,7 @@ template < class A > class FacePllBaseXMacro : public A
 } ;
 
 
-class ElementPllBaseX : public ElementPllXIF, public MyAlloc 
+class ElementPllBaseX : public ElementPllXIF_t , public MyAlloc 
 {
   // Alle Methoden in dieser Klasse sind Dummies und erzeugen
   // Laufzeitfehler. Sie m"ussen von abgeleiteten Klassen 

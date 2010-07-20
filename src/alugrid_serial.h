@@ -39,7 +39,7 @@ typedef GatherScatter GatherScatterType;
 #include "parallel/mpAccess.h" // for def of MPAccessGlobal needed by LoadBalancer 
 #include "parallel/gitter_pll_ldb.h" // for def of LoadBalancer needed in parallel.h
 
-#include "serial/parallel.h" // only tpyedefs mainly 
+//#include "serial/parallel.h" // only tpyedefs mainly 
 #include "serial/gitter_sti.h"
 
 typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
