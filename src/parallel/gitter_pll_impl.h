@@ -111,6 +111,7 @@ template < class A > class FacePllBaseX : public A
 {
   protected :
     typedef A myhface_t ;
+    typedef typename A :: myconnect_t myconnect_t ;
     typedef typename A :: myhedge1_t myhedge1_t;
       
   public :
@@ -1032,21 +1033,28 @@ template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > ::
   return myhface ().nb.front ().first->accessPllX ().accessOuterPllX (pair < const ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
 }
 
-template < class A > pair < ElementPllXIF_t *, int > FacePllBaseX < A > :: accessInnerPllX () {
-
-  assert( myhface ().nb.front().first );
-  assert( myhface ().nb.rear ().first );
-  cout << myhface ().nb.front().first->isboundary() << endl; 
-  cout << myhface ().nb.rear ().first->isboundary() << endl; 
-  ElementPllXIF_t * p = & myhface ().nb.rear ().first->accessPllX ();
-  return myhface ().nb.front ().
-    first->accessPllX ().accessInnerPllX (
-        pair < ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), 
-          myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
+template < class A > pair < ElementPllXIF_t *, int > FacePllBaseX < A > :: accessInnerPllX () 
+{
+  typedef pair < myconnect_t * ,int > myconnectpair_t;
+  myconnectpair_t front = myhface ().nb.front ();
+  assert( front.first );
+  myconnectpair_t rear  = myhface ().nb.rear  ();
+  assert( rear.first );
+  return front.first->accessPllX ().accessInnerPllX (
+            pair < ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
+            front.second) ;
 }
 
 template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > :: accessInnerPllX () const {
-  return myhface ().nb.front ().first->accessPllX ().accessInnerPllX (pair < const ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
+  typedef pair < const myconnect_t * ,int > constmyconnectpair_t;
+  constmyconnectpair_t front = myhface ().nb.front ();
+  assert( front.first );
+  constmyconnectpair_t rear  = myhface ().nb.rear  ();
+  assert( rear.first );
+  return front.first->accessPllX ().accessInnerPllX (
+            pair < const ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
+            front.second) ;
+  //return myhface ().nb.front ().first->accessPllX ().accessInnerPllX (pair < const ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
 }
 
 ///////////////////////////////////////////////////////////////////

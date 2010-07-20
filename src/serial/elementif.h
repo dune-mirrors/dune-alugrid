@@ -242,15 +242,15 @@ class ElementPllXIF : public MacroGridMoverDefault
   protected :
     virtual ~ElementPllXIF () {}
   public :
+    typedef pair < ElementPllXIF *, int > accesspair_t; 
+    typedef pair < const ElementPllXIF *, int > constaccesspair_t; 
     virtual void detachPllXFromMacro () {} 
-    virtual pair < ElementPllXIF *, int > accessOuterPllX (const pair < ElementPllXIF *, int > &, int) 
-    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-    virtual pair < const ElementPllXIF *, int > accessOuterPllX (const pair < const ElementPllXIF *, int > &, int) const
-    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-    virtual pair < ElementPllXIF *, int > accessInnerPllX (const pair < ElementPllXIF *, int > &, int) 
-    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-    virtual pair < const ElementPllXIF *, int > accessInnerPllX (const pair < const ElementPllXIF *, int > &, int) const
-    { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+
+    // default implementation for accessInnerPllX and accessOuterPllX
+    virtual accesspair_t accessOuterPllX (const accesspair_t &x, int) { return x ; }
+    virtual constaccesspair_t accessOuterPllX (const constaccesspair_t &x, int) const { return x ;}
+    virtual accesspair_t accessInnerPllX (const accesspair_t&, int f) { return accesspair_t( this , f ); }
+    virtual constaccesspair_t accessInnerPllX (const constaccesspair_t &, int f) const { return constaccesspair_t( this , f ); }
   public :
     typedef pair<helement*, int> ghostpair_t ;
     virtual ghostpair_t getGhost () 
