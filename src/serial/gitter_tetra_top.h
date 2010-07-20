@@ -188,12 +188,12 @@ template < class A > class TetraTop : public A {
     const myhface3_t * subface3 (int i, int j) const ;
   public:
     // constructor for refined elements 
-    inline TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                     myhface3_t *,int,innertetra_t *up, int nChild, double vol) ;
+    TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
+                  myhface3_t *,int,innertetra_t *up, int nChild, double vol) ;
     // constructor for macro elements 
-    inline TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                     myhface3_t *, int ) ;
-    virtual inline ~TetraTop () ;
+    TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
+                  myhface3_t *, int ) ;
+    virtual ~TetraTop () ;
     inline innertetra_t * up () ;
     inline const innertetra_t * up () const;
     inline innertetra_t * down () ;
