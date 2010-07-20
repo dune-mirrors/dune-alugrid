@@ -66,7 +66,7 @@ class EdgePllBaseX : public A
   public :
     typedef typename A :: myvertex_t myvertex_t;
 
-    inline EdgePllBaseX (myvertex_t * a, myvertex_t * b) : A(a,b) {}
+    inline EdgePllBaseX (myvertex_t * a, myvertex_t * b) ;
     ~EdgePllBaseX () ;
     virtual vector < int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
@@ -888,6 +888,128 @@ inline const VertexPllBaseX :: myvertex_t & VertexPllBaseX :: myvertex () const 
   return _v ;
 }
 
+/////////////////////////////////////////////////////
+//  --EdgePllBaseX
+/////////////////////////////////////////////////////
+template < class A >
+inline EdgePllBaseX< A > :: EdgePllBaseX( myvertex_t* a, myvertex_t *b )
+  : A( a, b ) 
+{
+}
+
+template < class A >
+inline EdgePllBaseX< A > :: ~EdgePllBaseX()
+{
+#ifndef NDEBUG
+  // Falls die nachfolgende Situation eintritt, ist massiv was faul im
+  // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
+  // gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
+  // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
+  // gehoben wird.
+
+  if( myhedge1().isSet( myhedge1_t::flagLock ) )
+  {
+   cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
+    abort () ;
+  }
+#endif
+}
+
+template < class A > 
+inline bool EdgePllBaseX< A > :: lockedAgainstCoarsening () const
+{
+  return myhedge1().isSet( myhedge1_t::flagLock );
+}
+
+template < class A >
+inline vector < int > EdgePllBaseX< A > :: estimateLinkage () const {
+  return (abort (), vector < int > ()) ;
+}
+
+template < class A >
+inline LinkedObject :: Identifier EdgePllBaseX< A > :: getIdentifier () const {
+  return (abort (), LinkedObject :: Identifier  ()) ;
+}
+
+template < class A >
+inline void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const {
+  os.writeObject (int(myhedge1 ().getrule ())) ;
+  return ;
+}
+
+template < class A >
+inline bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
+  int i ;
+  try {
+    os.readObject (i) ;
+  } catch (ObjectStream :: EOFException) {
+    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+  }
+  typedef typename myhedge1_t :: myrule_t  myrule_t;
+  return myrule_t (i) == myrule_t :: nosplit ? 
+    false : (myhedge1 ().refineImmediate (myrule_t (i)), true) ;
+}
+
+template < class A >
+inline void EdgePllBaseX< A > :: unattach2 (int) {
+  abort () ;
+  return ;
+}
+
+template < class A >
+inline void EdgePllBaseX< A > :: attach2 (int) {
+  abort () ;
+  return ;
+}
+
+template < class A >
+bool EdgePllBaseX< A > :: packAll (vector < ObjectStream > &) {
+  return (abort (), false) ;
+}
+
+template < class A >
+inline void EdgePllBaseX< A > :: unpackSelf (ObjectStream &,bool) {
+  abort () ;
+  return ;
+}
+
+template < class A >
+bool EdgePllBaseX< A > :: lockAndTry ()
+{
+  myhedge1().set( myhedge1_t::flagLock );
+  return myhedge1().coarse () ;
+}
+
+template < class A >
+inline bool EdgePllBaseX< A > :: unlockAndResume (bool r)
+{
+  myhedge1().unset( myhedge1_t::flagLock );
+  bool x ;
+  if (r) {
+    x = myhedge1().coarse () ;
+  }
+  else {
+    x = false ;
+  }
+  return x ;
+}
+
+template < class A >
+inline EdgePllBaseXMacro< A > :: EdgePllBaseXMacro(myvertex_t * a, myvertex_t * b) :
+  A(0, a, b), _moveTo(), _ref()
+{
+}
+
+template < class A >
+inline EdgePllBaseXMacro< A > :: ~EdgePllBaseXMacro()
+{
+  assert (0 == _moveTo.size ()) ;
+}
+
+//////////////////////////////////////////////////////////
+//  --FacePllBaseX
+//////////////////////////////////////////////////////////
 template < class A > inline FacePllBaseX < A > :: FacePllBaseX 
     (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
   : A( e0, s0, e1, s1, e2, s2 )

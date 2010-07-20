@@ -85,116 +85,6 @@ void VertexPllBaseX :: unpackSelf (ObjectStream & os, bool i) {
 }
 
 template < class A >
-EdgePllBaseX< A > :: ~EdgePllBaseX()
-{
-#ifndef NDEBUG
-  // Falls die nachfolgende Situation eintritt, ist massiv was faul im
-  // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
-  // gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
-  // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
-  // gehoben wird.
-
-  if( myhedge1().isSet( myhedge1_t::flagLock ) )
-  {
-   cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
-    abort () ;
-  }
-#endif
-}
-
-template < class A > 
-bool EdgePllBaseX< A > :: lockedAgainstCoarsening () const
-{
-  return myhedge1().isSet( myhedge1_t::flagLock );
-}
-
-template < class A >
-vector < int > EdgePllBaseX< A > :: estimateLinkage () const {
-  return (abort (), vector < int > ()) ;
-}
-
-template < class A >
-LinkedObject :: Identifier EdgePllBaseX< A > :: getIdentifier () const {
-  return (abort (), LinkedObject :: Identifier  ()) ;
-}
-
-template < class A >
-void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const {
-  os.writeObject (int(myhedge1 ().getrule ())) ;
-  return ;
-}
-
-template < class A >
-bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
-  int i ;
-  try {
-    os.readObject (i) ;
-  } catch (ObjectStream :: EOFException) {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
-  typedef typename myhedge1_t :: myrule_t  myrule_t;
-  return myrule_t (i) == myrule_t :: nosplit ? 
-    false : (myhedge1 ().refineImmediate (myrule_t (i)), true) ;
-}
-
-template < class A >
-void EdgePllBaseX< A > :: unattach2 (int) {
-  abort () ;
-  return ;
-}
-
-template < class A >
-void EdgePllBaseX< A > :: attach2 (int) {
-  abort () ;
-  return ;
-}
-
-template < class A >
-bool EdgePllBaseX< A > :: packAll (vector < ObjectStream > &) {
-  return (abort (), false) ;
-}
-
-template < class A >
-void EdgePllBaseX< A > :: unpackSelf (ObjectStream &,bool) {
-  abort () ;
-  return ;
-}
-
-template < class A >
-bool EdgePllBaseX< A > :: lockAndTry ()
-{
-  myhedge1().set( myhedge1_t::flagLock );
-  return myhedge1().coarse () ;
-}
-
-template < class A >
-bool EdgePllBaseX< A > :: unlockAndResume (bool r)
-{
-  myhedge1().unset( myhedge1_t::flagLock );
-  bool x ;
-  if (r) {
-    x = myhedge1().coarse () ;
-  }
-  else {
-    x = false ;
-  }
-  return x ;
-}
-
-template < class A >
-EdgePllBaseXMacro< A > :: EdgePllBaseXMacro(myvertex_t * a, myvertex_t * b) :
-  A(0, a, b), _moveTo(), _ref()
-{
-}
-
-template < class A >
-EdgePllBaseXMacro< A > :: ~EdgePllBaseXMacro()
-{
-  assert (0 == _moveTo.size ()) ;
-}
-
-template < class A >
 vector < int > EdgePllBaseXMacro< A > :: estimateLinkage () const {
   vector < int > est ;
   vector < int > l0 = myhedge1 ().myvertex(0)->accessPllX ().estimateLinkage () ;
@@ -299,7 +189,6 @@ void EdgePllBaseXMacro< A > :: unpackSelf (ObjectStream & os, bool i)
 }
 
 // Template Instantiation 
-template class EdgePllBaseX< GitterBasisPll :: ObjectsPll :: Hedge1Empty > ;
 template class EdgePllBaseXMacro< GitterBasisPll :: ObjectsPll :: hedge1_IMPL > ;
 
 // #######   
