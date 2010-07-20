@@ -552,8 +552,6 @@ public :
   };
 
 
-  class helement;
-  class hbndseg;
   struct AdaptRestrictProlong
   {
     virtual ~AdaptRestrictProlong () {}
@@ -667,7 +665,8 @@ public :
       }
   };
 
-  class hbndseg  : public DuneIndexProvider 
+  class hbndseg  : public DuneIndexProvider,
+                   public virtual GhostElementIF 
   {
   protected :
     hbndseg () {}
@@ -714,6 +713,8 @@ public :
     virtual int level () const = 0 ;
     virtual int nChild () const = 0 ;
     inline  int leaf () const ;
+
+    /*
     // for dune 
     virtual int ghostLevel () const = 0 ;
     virtual bool ghostLeaf () const = 0 ;
@@ -723,7 +724,7 @@ public :
     // the int is -1 by default, or the internal ghostFace number (
     // getGhostFaceNumber) when ghost is non-zero 
     virtual const pair < helement * ,int> & getGhost () const = 0; 
-
+*/
   protected:
     // if ghost element exists, then ghost is splitted, when bnd is splitted 
     // info will be filled with the new ghost cells and local face to the

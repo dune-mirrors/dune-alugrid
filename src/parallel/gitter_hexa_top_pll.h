@@ -76,7 +76,7 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         void setGhost (const ghostpair_STI & gpair);
       public:
         // return ghost pointer 
-        const ghostpair_STI & getGhost () const;
+        ghostpair_STI & getGhost () const;
 
       public:
         // for dune 
@@ -208,7 +208,7 @@ template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX >
 }
 
 template < class A, class X, class MX >
-inline const Gitter :: ghostpair_STI & 
+inline Gitter :: ghostpair_STI & 
 Hbnd4PllInternal < A, X, MX > :: HbndPll :: getGhost () const
 {
   // assert is not needed here when we dont use ghost cells 

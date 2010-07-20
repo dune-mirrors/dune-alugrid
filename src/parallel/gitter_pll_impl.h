@@ -128,13 +128,6 @@ template < class A > class FacePllBaseX : public A
     virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const ;
     virtual pair < ElementPllXIF_t *, int > accessInnerPllX () ;
     virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const ;
-    virtual void writeStaticState (ObjectStream &) const ;
-    virtual void readStaticState (ObjectStream &) ;
-    virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) ;
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
 } ;
 
 template < class A > class FacePllBaseXMacro : public A 
@@ -236,9 +229,6 @@ class TetraPllXBase : public A {
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
-    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) ;
-    virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) ;
-    virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) ; 
 } ;
 
 template < class A >
@@ -412,9 +402,6 @@ class HexaPllBaseX : public A
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
  
-    virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) ;
-    virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) ;
-    virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) ;
     // method to get internal hexa located behind this parallel interface 
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 } ;
@@ -469,7 +456,8 @@ class HexaPllBaseXMacro : public A
     bool _erasable ;
 } ;
 
-class BndsegPllBaseX : public ElementPllXIF_t {
+class BndsegPllBaseX : public ElementPllXIF_t 
+{
   public :
     void writeDynamicState (ObjectStream &, int) const { abort () ; }
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
@@ -477,7 +465,6 @@ class BndsegPllBaseX : public ElementPllXIF_t {
     pair < const ElementPllXIF_t *, int > accessOuterPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
     pair < ElementPllXIF_t *, int > accessInnerPllX (const pair < ElementPllXIF_t *, int > &, int) ;
     pair < const ElementPllXIF_t *, int > accessInnerPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
-
 } ;
 
 template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
@@ -531,10 +518,10 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     
   private :
     myhbnd_t & _hbnd ;
-    balrule_t _rul ;
-
     int _ghostLevel;
     int _ghostLeaf;
+    balrule_t _rul ;
+
   public:
     inline int ghostLevel () const { return _ghostLevel; }
     inline bool ghostLeaf () const { return (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1); }
@@ -542,6 +529,7 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
     typedef Gitter :: ghostpair_STI ghostpair_STI;
     // to be revised (works for the moment )
     virtual ghostpair_STI getGhost () { return myhbnd().getGhost(); }
+    virtual const ghostpair_STI getGhost () const { return myhbnd().getGhost(); }
 } ;
 
 template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClosure < A > {
@@ -561,8 +549,8 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     virtual void insertGhostCell(ObjectStream &,int);
 
   private :
-    int _extGraphVertexIndex ;
     const MacroGhostInfo_STI * _ghInfo; 
+    int _extGraphVertexIndex ;
 } ;
 
 class GitterBasisPll : public Gitter :: Geometric, public GitterPll
@@ -750,6 +738,9 @@ public :
       friend class Periodic4PllXBaseMacro;
     } ;
 
+    ///////////////////////////////////////////////////////////////
+    // --HexaImpl
+    ///////////////////////////////////////////////////////////////
     class HexaEmptyPll : public HexaPllBaseX< HexaEmpty >
     {
     protected :
@@ -798,22 +789,21 @@ public :
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* );
         
         // normal insert hbnd3 version
-  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
         // version that get point and create ghost macro 
-  virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
         // version that created internal boundary on ghost elements 
-  virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
+        virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int ) ;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
-  virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
+        virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
-  virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
+        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
 
-  virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
-// Anfang - Neu am 23.5.02 (BS)
-  virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
-// Ende - Neu am 23.5.02 (BS)
+        virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
+        virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
+
         IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
         IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
         IteratorSTI < hedge_STI > * iterator (const hedge_STI *) const ;
@@ -1048,39 +1038,6 @@ template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > ::
   return myhface ().nb.front ().first->accessPllX ().accessInnerPllX (pair < const ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
 }
 
-template < class A > void FacePllBaseX < A > :: writeStaticState (ObjectStream &) const {
-  abort () ;
-  return;
-}
-
-template < class A > void FacePllBaseX < A > :: readStaticState (ObjectStream &) {
-  abort () ;
-  return ;
-}
-
-template < class A > bool FacePllBaseX < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & db) {
-  return (abort (), false) ;
-}
-
-template < class A > void FacePllBaseX < A > :: unattach2 (int) {
-  abort () ;
-  return ;
-}
-
-template < class A > void FacePllBaseX < A > :: attach2 (int) {
-  abort () ;
-  return ;
-}
-
-template < class A > bool FacePllBaseX < A > :: packAll (vector < ObjectStream > &) {
-  return (abort (), false) ;
-}
-
-template < class A > void FacePllBaseX < A > :: unpackSelf (ObjectStream &, bool ) {
-  abort () ;
-  return ;
-}
-
 ///////////////////////////////////////////////////////////////////
 //
 //  --TetraPllXBase
@@ -1102,8 +1059,8 @@ inline void TetraPllXBase< A > :: getAttachedElement ( pair < Gitter::helement_S
 // #        #       #   #      #    #    #  #    #     #    #    # #     #
 // #        ######  #    #     #     ####   #####      #     ####   #####
 
-inline Periodic3PllXBase :: Periodic3PllXBase (myperiodic3_t & p) : _periodic3 (p) {
-  return ;
+inline Periodic3PllXBase :: Periodic3PllXBase (myperiodic3_t & p) : _periodic3 (p) 
+{
 }
 
 inline Periodic3PllXBase :: myperiodic3_t & Periodic3PllXBase :: myperiodic3 () {
@@ -1142,8 +1099,8 @@ inline void HexaPllBaseX< A > :: getAttachedElement ( pair < Gitter::helement_ST
 }
 
 template < class A > inline BndsegPllBaseXMacro < A > :: 
-BndsegPllBaseXMacro (myhbnd_t & b) : _hbnd (b) {
-  return ;
+BndsegPllBaseXMacro (myhbnd_t & b) : _hbnd (b) 
+{
 }
 
 template < class A > inline typename BndsegPllBaseXMacro < A > :: myhbnd_t & BndsegPllBaseXMacro < A > :: myhbnd () {
@@ -1232,13 +1189,19 @@ template < class A > inline bool BndsegPllBaseXClosure < A > :: unlockAndResume 
 }
 
 template < class A > inline BndsegPllBaseXMacroClosure < A > :: BndsegPllBaseXMacroClosure (myhbnd_t & b)
-  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) , _ghInfo (0) {
+  : BndsegPllBaseXClosure < A > (b)
+  , _ghInfo (0) 
+  , _extGraphVertexIndex (-1)
+{
   return ;
 }
 
 template < class A > inline BndsegPllBaseXMacroClosure < A > :: 
 BndsegPllBaseXMacroClosure (myhbnd_t & b, const MacroGhostInfo_STI* ghinfo)
-  : BndsegPllBaseXClosure < A > (b), _extGraphVertexIndex (-1) , _ghInfo (ghinfo) {
+  : BndsegPllBaseXClosure < A > (b)
+  , _ghInfo (ghinfo) 
+  , _extGraphVertexIndex (-1)
+{
   return ;
 }
 

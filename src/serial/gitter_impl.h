@@ -164,6 +164,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         typedef VertexEmpty innervertex_t ;
         inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int) ;
 
+      public:  
         ////////////////////////////////////////////////
         // read of data 
         ////////////////////////////////////////////////
@@ -179,7 +180,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
 
         /////////////////////////////////////////
-
+      protected:  
         // declare this element and all parts leaf  
         virtual void attachleafs();
         
@@ -262,6 +263,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
         virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
 
+      protected:  
         virtual void attachleafs();
         virtual void detachleafs();
 

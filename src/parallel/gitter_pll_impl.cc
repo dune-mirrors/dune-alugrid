@@ -717,25 +717,6 @@ void TetraPllXBase< A > :: writeDynamicState (ObjectStream & os, int face) const
 }
 
 template < class A >
-void TetraPllXBase< A > :: 
-VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
-{
-  mytetra().VertexData2os(os,gs,borderFace);
-}
-
-template < class A >
-void TetraPllXBase< A > :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
-{
-  mytetra().EdgeData2os(os,gs,borderFace);
-}
-
-template < class A >
-void TetraPllXBase< A > :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
-{
-  mytetra().FaceData2os(os,gs,borderFace);
-} 
-
-template < class A >
 TetraPllXBaseMacro< A > :: 
 TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
                            myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
@@ -1382,24 +1363,6 @@ bool Periodic4PllXBaseMacro :: erasable () const {
   // #     #  ######  #    #  #    #
 
 template < class A >
-void HexaPllBaseX< A > :: VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
-{
-  myhexa().VertexData2os(os,gs,borderFace);
-}
-
-template < class A >
-void HexaPllBaseX< A > :: EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
-{
-  myhexa().EdgeData2os(os,gs,borderFace);
-}
-
-template < class A >
-void HexaPllBaseX< A > :: FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
-{
-  myhexa().FaceData2os(os,gs,borderFace);
-}
-
-template < class A >
 void HexaPllBaseX< A >  :: writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
 {
   gs.sendData( os , myhexa () );
@@ -2019,17 +1982,16 @@ insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2])
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b) 
 {
+  typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
   if (b == Gitter :: hbndseg_STI :: closure) 
   {
     // internal face always get dummy index manager      
-    typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
     return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: macro_t (f,t, b, indexManager(IM_Internal), *this ) ;
   } 
   else 
   {
-    return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
-        BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b, indexManager(IM_Bnd) ) ;
+    return new Hbnd4PllExternal < Hbnd4DefaultType, BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b, indexManager(IM_Bnd) ) ;
   }
 }
 
