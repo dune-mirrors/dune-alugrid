@@ -64,7 +64,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef hbndseg3_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ; 
-            virtual bool ghostLeaf () const {return leaf();}
+            virtual bool ghostLeaf () const ; 
             
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -105,7 +105,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             typedef hbndseg4_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ;  
-            virtual bool ghostLeaf () const {return leaf();}
+            virtual bool ghostLeaf () const ;
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -502,6 +502,10 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: ghostLevel () const {
   return level() ;
 }
 
+inline bool GitterBasis :: Objects :: Hbnd3Default :: ghostLeaf () const {
+  return leaf() ;
+}
+
 inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i) : 
   Gitter :: Geometric :: hbndseg4_GEO (f, i)
 {
@@ -514,6 +518,10 @@ inline GitterBasis :: Objects ::Hbnd4Default :: bnd_t GitterBasis :: Objects :: 
 
 inline int GitterBasis :: Objects :: Hbnd4Default :: ghostLevel () const {
   return level() ;
+}
+
+inline bool GitterBasis :: Objects :: Hbnd4Default :: ghostLeaf () const {
+  return leaf() ;
 }
 
 inline GitterBasis :: Objects :: TetraEmpty :: 
