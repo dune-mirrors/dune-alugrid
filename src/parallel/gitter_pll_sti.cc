@@ -834,7 +834,7 @@ void GitterPll :: coarse ()
 #ifndef NDEBUG
               bool b = 
 #endif
-                (*i)->accessPllX ().unlockAndResume (bool (*j)) ;
+                (*i)->unlockAndResume (bool (*j)) ;
               assert (b == bool (*j)) ;
             }
           }
@@ -885,7 +885,7 @@ void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
     {for (int l = 0 ; l < nl ; l ++) {
       AccessIteratorTT < hface_STI > :: InnerHandle w (*this,l) ;
       for ( w.first () ; ! w.done () ; w.next ()) {
-        vector < int > i = w.item ().accessPllX ().checkParallelConnectivity () ;
+        vector < int > i = w.item ().checkParallelConnectivity () ;
         copy (i.begin (), i.end (), back_inserter (inout [l])) ;
       }
     }}
@@ -894,7 +894,7 @@ void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
       vector < int > :: const_iterator pos = inout [l].begin () ;
       AccessIteratorTT < hface_STI > :: OuterHandle w (*this,l) ;
       for (w.first () ; ! w.done () ; w.next ()) {
-        vector < int > t1 = w.item ().accessPllX ().checkParallelConnectivity () ;
+        vector < int > t1 = w.item ().checkParallelConnectivity () ;
         vector < int > t2 (t1.size (), 0) ;
         copy (pos, pos + t1.size (), t2.begin ()) ;
         pos += t1.size () ;
@@ -950,11 +950,11 @@ void GitterPll :: exchangeDynamicState () {
     {for (int l = 0 ; l < nl ; l ++) {
       LeafIteratorTT < hface_STI > w (*this,l) ;
       for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) {
-        pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessPllX ().accessInnerPllX () ;
+        pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessInnerPllX () ;
         p.first->writeDynamicState (osv [l], p.second) ;
       }
       for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) {
-        pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessPllX ().accessInnerPllX () ;
+        pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessInnerPllX () ;
         p.first->writeDynamicState (osv [l], p.second) ;
       }
     }}
@@ -962,11 +962,11 @@ void GitterPll :: exchangeDynamicState () {
     {for (int l = 0 ; l < nl ; l ++ ) {
       LeafIteratorTT < hface_STI > w (*this,l) ;
       for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) {
-        pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessPllX ().accessOuterPllX () ;
+        pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessOuterPllX () ;
         p.first->readDynamicState (osv [l], p.second) ;
       }
       for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) {
-        pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessPllX ().accessOuterPllX () ;
+        pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessOuterPllX () ;
         p.first->readDynamicState (osv [l], p.second) ;
       }
     }}
@@ -1004,11 +1004,11 @@ void GitterPll :: exchangeStaticState () {
       AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
       AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
       for (wi.first () ; ! wi.done () ; wi.next ()) {
-        pair < ElementPllXIF_t *, int > p = wi.item ().accessPllX ().accessInnerPllX () ;
+        pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
         p.first->writeStaticState (osv [l], p.second) ;
       }
       for (wo.first () ; ! wo.done () ; wo.next ()) {
-        pair < ElementPllXIF_t *, int > p = wo.item ().accessPllX ().accessInnerPllX () ;
+        pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
         p.first->writeStaticState (osv [l], p.second) ;
       }
     }}
@@ -1017,11 +1017,11 @@ void GitterPll :: exchangeStaticState () {
       AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
       AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
       for (wo.first () ; ! wo.done () ; wo.next ()) {
-        pair < ElementPllXIF_t *, int > p = wo.item ().accessPllX ().accessOuterPllX () ;
+        pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
         p.first->readStaticState (osv [l], p.second) ;
       }
       for (wi.first () ; ! wi.done () ; wi.next ()) {
-        pair < ElementPllXIF_t *, int > p = wi.item ().accessPllX ().accessOuterPllX () ;
+        pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
         p.first->readStaticState (osv [l], p.second) ;
       }
     }}
@@ -1039,7 +1039,7 @@ void GitterPll :: loadBalancerGridChangesNotify () {
   LoadBalancer :: DataBase db ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphEdge (db) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
   }
   {
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;

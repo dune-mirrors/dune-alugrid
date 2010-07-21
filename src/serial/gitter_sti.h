@@ -462,7 +462,7 @@ public :
 
   } ;
    
-  class hedge : public stiExtender_t :: EdgeIF, 
+  class hedge : public EdgePllXDefault , 
                 public DuneIndexProvider 
   {
   protected :
@@ -496,7 +496,9 @@ public :
     virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
   } ;
     
-  class hface : public stiExtender_t :: FaceIF , public DuneIndexProvider {
+  class hface : public FacePllXDefault, 
+                public DuneIndexProvider 
+  {
   protected :
     hface () {}
     virtual ~hface () {}
@@ -928,7 +930,7 @@ public :
     // m"ussen, wie z.B. Navigation zur Fl"ache, zu den Kanten und Knoten,
     // aber auch Anforderungen an den Nachbarn.
 
-    class hasFace3 : public virtual stiExtender_t :: ElementIF 
+    class hasFace3 : public virtual stiExtender_t :: hasFacePllXIF 
     {
     public :
       typedef Hface3Rule balrule_t ;
@@ -952,7 +954,7 @@ public :
       virtual bool hasVertexProjection () const = 0;
     } ;
 
-    class hasFace4 : public virtual stiExtender_t :: ElementIF {
+    class hasFace4 : public virtual stiExtender_t :: hasFacePllXIF {
     public :
       typedef Hface4Rule balrule_t ;
       virtual bool refineBalance (balrule_t,int) = 0 ;

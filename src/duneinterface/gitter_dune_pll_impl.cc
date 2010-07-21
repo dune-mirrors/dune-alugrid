@@ -27,7 +27,7 @@ bool GitterDunePll :: duneNotifyNewGrid ()
   LoadBalancer :: DataBase db ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphEdge (db) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
   }
   {
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
@@ -45,7 +45,8 @@ bool GitterDunePll :: duneNotifyNewGrid ()
     vector < double > v (mpAccess ().gcollect (load)) ;
     double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
 
-    for (vector < double > :: iterator i = v.begin () ; i != v.end () ; i ++)
+    const vector < double > :: iterator iEnd =  v.end () ;
+    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
   }
   return neu;
@@ -115,7 +116,7 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProl
   LoadBalancer :: DataBase db ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().ldbUpdateGraphEdge (db) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
   }
   {
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
@@ -133,7 +134,8 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProl
     vector < double > v (mpAccess ().gcollect (load)) ;
     double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
 
-    for (vector < double > :: iterator i = v.begin () ; i != v.end () ; i ++)
+    const vector < double > :: iterator iEnd = v.end () ;
+    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i )
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false));
   }
 
@@ -185,14 +187,14 @@ void GitterDunePll :: duneExchangeDynamicState ()
           InnerIteratorType wi (mif);
           for (wi.first () ; ! wi.done () ; wi.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = wi.item ().accessPllX ().accessInnerPllX () ;
+            pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
             p.first->writeDynamicState (osv [l], p.second) ;
           }
       
           OuterIteratorType wo (mof);
           for (wo.first () ; ! wo.done () ; wo.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = wo.item ().accessPllX ().accessInnerPllX () ;
+            pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
             p.first->writeDynamicState (osv [l], p.second) ;
           }
         }  
@@ -210,14 +212,14 @@ void GitterDunePll :: duneExchangeDynamicState ()
           OuterIteratorType wo (mof) ;
           for (wo.first () ; ! wo.done () ; wo.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = wo.item ().accessPllX ().accessOuterPllX () ;
+            pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
             p.first->readDynamicState (osv [l], p.second) ;
           }
       
           InnerIteratorType wi (mif);
           for (wi.first () ; ! wi.done () ; wi.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = wi.item ().accessPllX ().accessOuterPllX () ;
+            pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
             p.first->readDynamicState (osv [l], p.second) ;
           }
         }
@@ -760,7 +762,7 @@ void GitterDunePll :: sendInteriorGhostElementData (
     hface_STI & face = iter->item(); 
     
     // check ghost leaf 
-    pair < ElementPllXIF_t *, int > inner = face.accessPllX ().accessInnerPllX () ;
+    pair < ElementPllXIF_t *, int > inner = face.accessInnerPllX () ;
 
     if ( elementData.containsInterior(face, *(inner.first) ) ) 
     { 
@@ -796,7 +798,7 @@ void GitterDunePll :: unpackInteriorGhostElementData (
 
     if( hasdata ) 
     {
-      pair < ElementPllXIF_t *, int > p = iter->item ().accessPllX ().accessOuterPllX () ;
+      pair < ElementPllXIF_t *, int > p = iter->item ().accessOuterPllX () ;
       p.first->readDynamicState ( recvBuff , elementData);
     }
   }
@@ -832,7 +834,7 @@ void GitterDunePll :: sendInteriorGhostAllData (
     hface_STI & face = iter->item(); 
     
     // check ghost leaf 
-    pair < ElementPllXIF_t *, int > inner = face.accessPllX ().accessInnerPllX () ;
+    pair < ElementPllXIF_t *, int > inner = face.accessInnerPllX () ;
 
     int interiorLeaf = 0;
     int ghostLeaf = 0;
@@ -844,7 +846,7 @@ void GitterDunePll :: sendInteriorGhostAllData (
 
     if(packGhosts)
     {
-      bnd = face.accessPllX ().accessOuterPllX () ;
+      bnd = face.accessOuterPllX () ;
       ghostLeaf = (elementData.containsGhost(face , *(bnd.first))) ? 2 : 0;
     }
 
@@ -946,7 +948,7 @@ void GitterDunePll :: unpackInteriorGhostAllData (
       // first unpack ghosts 
       if( ghostLeaf ) 
       {
-        pair < ElementPllXIF_t *, int > p = face.accessPllX ().accessOuterPllX () ;
+        pair < ElementPllXIF_t *, int > p = face.accessOuterPllX () ;
 
         // get pair < ghost, local face num > 
         Gitter :: ghostpair_STI gpair = p.first->getGhost();
@@ -969,7 +971,7 @@ void GitterDunePll :: unpackInteriorGhostAllData (
       // then unpack interior 
       if( interiorLeaf )
       {
-        pair < ElementPllXIF_t *, int > pll = face.accessPllX ().accessInnerPllX () ;
+        pair < ElementPllXIF_t *, int > pll = face.accessInnerPllX () ;
         pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > 
           p ( (Gitter::helement_STI *) 0, (Gitter::hbndseg_STI *) 0);
 
@@ -1253,7 +1255,7 @@ void GitterDunePll :: rebuildGhostCells()
         
           for ( inner.first () ; ! inner.done () ; inner.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = inner.item ().accessPllX ().accessInnerPllX () ;
+            pair < ElementPllXIF_t *, int > p = inner.item ().accessInnerPllX () ;
             p.first->packAsGhost(os, p.second) ;
           }
         }
@@ -1262,7 +1264,7 @@ void GitterDunePll :: rebuildGhostCells()
           IteratorSTI < hface_STI > & outer = *w.second;
           for (outer.first () ; ! outer.done () ; outer.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = outer.item ().accessPllX ().accessInnerPllX () ;
+            pair < ElementPllXIF_t *, int > p = outer.item ().accessInnerPllX () ;
             p.first->packAsGhost(os, p.second) ;
           }
         }
@@ -1289,7 +1291,7 @@ void GitterDunePll :: rebuildGhostCells()
           IteratorSTI < hface_STI > & outer = *w.second;
           for (outer.first () ; ! outer.done () ; outer.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = outer.item ().accessPllX ().accessOuterPllX () ;
+            pair < ElementPllXIF_t *, int > p = outer.item ().accessOuterPllX () ;
             p.first->insertGhostCell(os, p.second) ;
           }
         }
@@ -1297,7 +1299,7 @@ void GitterDunePll :: rebuildGhostCells()
           IteratorSTI < hface_STI > & inner = *w.first;
           for (inner.first () ; ! inner.done () ; inner.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = inner.item ().accessPllX ().accessOuterPllX () ;
+            pair < ElementPllXIF_t *, int > p = inner.item ().accessOuterPllX () ;
             p.first->insertGhostCell(os, p.second) ;
           }
         }
@@ -1332,7 +1334,7 @@ void GitterDunePll :: checkGhostIndices()
         IteratorSTI < hface_STI > & outer = *w.second;
         for (outer.first () ; ! outer.done () ; outer.next ()) 
         {
-          pair < ElementPllXIF_t *, int > p = outer.item ().accessPllX ().accessOuterPllX () ;
+          pair < ElementPllXIF_t *, int > p = outer.item ().accessOuterPllX () ;
 
           // get pair < ghost, local face num > 
           Gitter :: ghostpair_STI gpair = p.first->getGhost();
@@ -1346,7 +1348,7 @@ void GitterDunePll :: checkGhostIndices()
         IteratorSTI < hface_STI > & inner = *w.first;
         for (inner.first () ; ! inner.done () ; inner.next ()) 
         {
-          pair < ElementPllXIF_t *, int > p = inner.item ().accessPllX ().accessOuterPllX () ;
+          pair < ElementPllXIF_t *, int > p = inner.item ().accessOuterPllX () ;
 
           // get pair < ghost, local face num > 
           Gitter :: ghostpair_STI gpair = p.first->getGhost();

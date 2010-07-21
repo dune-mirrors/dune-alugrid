@@ -77,7 +77,7 @@ inline void ParallelGridMover :: unpackHedge1 (ObjectStream & os) {
   os.readObject (left) ;
   os.readObject (right) ;
   pair < hedge1_GEO *, bool > p = InsertUniqueHedge1 (left,right) ;
-  p.first->accessPllX ().unpackSelf (os,p.second) ;
+  p.first->unpackSelf (os,p.second) ;
   return ;
 }
 
@@ -87,7 +87,7 @@ inline void ParallelGridMover :: unpackHface3 (ObjectStream & os) {
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
   pair < hface3_GEO *, bool > p = InsertUniqueHface3 (v) ;
-  p.first->accessPllX ().unpackSelf (os,p.second) ;
+  p.first->unpackSelf (os,p.second) ;
   return ;
 }
 
@@ -98,7 +98,7 @@ inline void ParallelGridMover :: unpackHface4 (ObjectStream & os) {
   os.readObject (v[2]) ;
   os.readObject (v[3]) ;
   pair < hface4_GEO *, bool > p = InsertUniqueHface4 (v) ;
-  p.first->accessPllX ().unpackSelf (os,p.second) ;
+  p.first->unpackSelf (os,p.second) ;
   return ;
 }
 
@@ -327,11 +327,11 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     }
     {
       AccessIterator < hedge_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     {
       AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;

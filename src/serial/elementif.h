@@ -32,9 +32,16 @@ class EdgePllXIF : public RefineableObjectDefault //, public LinkedObject, publi
   protected :
     virtual ~EdgePllXIF () {}
   public :
+    // my identifier class 
+    typedef class Key2SLZ identifier_t ;
+
     virtual bool lockAndTry () = 0 ;
     virtual bool unlockAndResume (bool) = 0 ;
     virtual bool lockedAgainstCoarsening () const = 0 ;
+
+    // only for compatibility for Dune release 2.0 (to be removed later)
+    inline EdgePllXIF& accessPllX () { return *this; }
+    inline const EdgePllXIF& accessPllX () const { return *this; }
 } ;
 
 // default implementation 
@@ -42,7 +49,7 @@ class EdgePllXDefault : public EdgePllXIF
 {
   protected :
     virtual ~EdgePllXDefault () {}
-  private:  
+  public :
     virtual bool lockAndTry () { assert(false);abort(); return false ; }
     virtual bool unlockAndResume (bool) { assert(false);abort(); return false ; }
     virtual bool lockedAgainstCoarsening () const { assert(false);abort(); return false ; }
@@ -153,6 +160,9 @@ class FacePllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
   protected :
     virtual ~FacePllXIF () {}
   public :
+    // my identifier class 
+    typedef class Key3SLZ identifier_t ;
+
     virtual vector < int > checkParallelConnectivity () const = 0 ;
     virtual pair < ElementPllXIF *, int > accessOuterPllX () = 0 ;
     virtual pair < const ElementPllXIF *, int > accessOuterPllX () const = 0 ;
@@ -162,8 +172,11 @@ class FacePllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
   public :
     virtual void writeStaticState (ObjectStream &) const = 0 ;
     virtual void readStaticState (ObjectStream &) = 0 ;
-  public :
     virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) = 0 ;
+
+    // only for compatibility for Dune release 2.0 (to be removed later)
+    inline FacePllXIF & accessPllX () { return *this; }
+    inline const FacePllXIF & accessPllX () const { return *this; }
 } ;
 
 // default implementation (should not be called) 
@@ -171,7 +184,7 @@ class FacePllXDefault : public FacePllXIF
 {
   protected :
     virtual ~FacePllXDefault () {}
-  private:
+  public :
     virtual vector < int > checkParallelConnectivity () const { assert( false ); abort(); return vector<int> (); }
     virtual pair < ElementPllXIF *, int > accessOuterPllX () { assert( false ); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
     virtual pair < const ElementPllXIF *, int > accessOuterPllX () const  { assert( false); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
@@ -231,57 +244,36 @@ class Parallel {
       public :
         virtual ~VertexIF () {}
         typedef class Key1SLZ identifier_t ;
-        inline virtual VertexPllXIF & accessPllX () throw (AccessPllException) 
+        virtual VertexPllXIF & accessPllX () throw (AccessPllException) 
         {
           assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
           throw AccessPllException () ;
         }
-        inline virtual const VertexPllXIF & accessPllX () const throw (AccessPllException)
+        virtual const VertexPllXIF & accessPllX () const throw (AccessPllException)
         {
           assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
           throw AccessPllException () ;
         }
-        inline virtual void detachPllXFromMacro () throw (AccessPllException)
+        virtual void detachPllXFromMacro () throw (AccessPllException)
         {
           assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
           throw AccessPllException () ;
         }
     } ;
 
-    class EdgeIF : public EdgePllXDefault 
-#ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
-      : public CommunicationBuffer 
-#endif
-    {
+    class hasFacePllXIF {
       public :
-        virtual ~EdgeIF () {}
-        typedef class Key2SLZ identifier_t ;
-        inline EdgePllXIF & accessPllX () { return *this; }
-        inline const EdgePllXIF & accessPllX () const { return *this; }
-        inline void detachPllXFromMacro () {} 
-    } ;
-    class FaceIF : public FacePllXDefault {
-      public :
-        virtual ~FaceIF () {}
-        typedef class Key3SLZ identifier_t ;
-        inline FacePllXIF & accessPllX () { return *this; }
-        inline const FacePllXIF & accessPllX () const { return *this; }
-        inline void detachPllXFromMacro () {}
-    } ;
-    class ElementIF {
-      public :
-        virtual ~ElementIF () {}
-        inline virtual ElementPllXIF & accessPllX () throw (AccessPllException)
+        virtual ~hasFacePllXIF () {}
+        virtual ElementPllXIF& accessPllX () throw (AccessPllException)
         {
           assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
           throw AccessPllException () ;
         }
-        inline virtual const ElementPllXIF & accessPllX () const throw (AccessPllException) 
+        virtual const ElementPllXIF& accessPllX () const throw (AccessPllException) 
         {
           assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
           throw AccessPllException () ;
         }
-        inline virtual void detachPllXFromMacro () {} 
     } ;
 } ;
 #endif

@@ -231,10 +231,10 @@ template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage (
   // Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
 
   vector < int > t1, t2, est ;
-  vector < int > l0 = this->myhface ().myhedge1 (0)->accessPllX ().estimateLinkage () ;
-  vector < int > l1 = this->myhface ().myhedge1 (1)->accessPllX ().estimateLinkage () ;
-  vector < int > l2 = this->myhface ().myhedge1 (2)->accessPllX ().estimateLinkage () ;
-  vector < int > l3 = this->myhface ().myhedge1 (A :: polygonlength == 3 ? 2 : 3)->accessPllX ().estimateLinkage () ;
+  vector < int > l0 = this->myhface ().myhedge1 (0)->estimateLinkage () ;
+  vector < int > l1 = this->myhface ().myhedge1 (1)->estimateLinkage () ;
+  vector < int > l2 = this->myhface ().myhedge1 (2)->estimateLinkage () ;
+  vector < int > l3 = this->myhface ().myhedge1 (A :: polygonlength == 3 ? 2 : 3)->estimateLinkage () ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (t1), less < int > ()) ;
   set_intersection (l2.begin (), l2.end (), l3.begin (), l3.end (), back_inserter (t2), less < int > ()) ;
   set_intersection (t1.begin (), t1.end (), t2.begin (), t2.end (), back_inserter (est), less < int > ()) ;
@@ -281,7 +281,7 @@ template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
   {for (int j = 0 ; j < A :: polygonlength ; j ++) 
-    this->myhface ().myhedge1 (j)->accessPllX ().unattach2 (i) ;}
+    this->myhface ().myhedge1 (j)->unattach2 (i) ;}
   return ;
 }
 
@@ -293,7 +293,7 @@ template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) {
     (*pos).second ++ ;
   }
   {for (int j = 0 ; j < A :: polygonlength ; j ++) 
-    this->myhface ().myhedge1 (j)->accessPllX ().attach2 (i) ;}
+    this->myhface ().myhedge1 (j)->attach2 (i) ;}
   return ;  
 }
 
@@ -676,10 +676,10 @@ template < class A >
 void TetraPllXBaseMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  mytetra ().myhface3 (0)->accessPllX ().unattach2 (i) ;
-  mytetra ().myhface3 (1)->accessPllX ().unattach2 (i) ;
-  mytetra ().myhface3 (2)->accessPllX ().unattach2 (i) ;
-  mytetra ().myhface3 (3)->accessPllX ().unattach2 (i) ;
+  mytetra ().myhface3 (0)->unattach2 (i) ;
+  mytetra ().myhface3 (1)->unattach2 (i) ;
+  mytetra ().myhface3 (2)->unattach2 (i) ;
+  mytetra ().myhface3 (3)->unattach2 (i) ;
   return ;
 }
 
@@ -694,10 +694,10 @@ void TetraPllXBaseMacro< A > :: attach2 (int i) {
       return ;
     }
   }
-  mytetra ().myhface3 (0)->accessPllX ().attach2 (i) ;
-  mytetra ().myhface3 (1)->accessPllX ().attach2 (i) ;
-  mytetra ().myhface3 (2)->accessPllX ().attach2 (i) ;
-  mytetra ().myhface3 (3)->accessPllX ().attach2 (i) ;
+  mytetra ().myhface3 (0)->attach2 (i) ;
+  mytetra ().myhface3 (1)->attach2 (i) ;
+  mytetra ().myhface3 (2)->attach2 (i) ;
+  mytetra ().myhface3 (3)->attach2 (i) ;
   return ;
 }
 
@@ -978,8 +978,8 @@ void Periodic3PllXBaseMacro :: writeStaticState (ObjectStream & os, int) const {
 void Periodic3PllXBaseMacro :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  myperiodic3 ().myhface3 (0)->accessPllX ().unattach2 (i) ;
-  myperiodic3 ().myhface3 (1)->accessPllX ().unattach2 (i) ;
+  myperiodic3 ().myhface3 (0)->unattach2 (i) ;
+  myperiodic3 ().myhface3 (1)->unattach2 (i) ;
   return ;
 }
 
@@ -993,8 +993,8 @@ void Periodic3PllXBaseMacro :: attach2 (int i) {
       return ;
     }
   }
-  myperiodic3 ().myhface3 (0)->accessPllX ().attach2 (i) ;
-  myperiodic3 ().myhface3 (1)->accessPllX ().attach2 (i) ;
+  myperiodic3 ().myhface3 (0)->attach2 (i) ;
+  myperiodic3 ().myhface3 (1)->attach2 (i) ;
   return ;
 }
 
@@ -1142,8 +1142,8 @@ void Periodic4PllXBaseMacro :: writeStaticState (ObjectStream & os, int) const {
 void Periodic4PllXBaseMacro :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  myperiodic4 ().myhface4 (0)->accessPllX ().unattach2 (i) ;
-  myperiodic4 ().myhface4 (1)->accessPllX ().unattach2 (i) ;
+  myperiodic4 ().myhface4 (0)->unattach2 (i) ;
+  myperiodic4 ().myhface4 (1)->unattach2 (i) ;
   return ;
 }
 
@@ -1157,8 +1157,8 @@ void Periodic4PllXBaseMacro :: attach2 (int i) {
       return ;
     }
   }
-  myperiodic4 ().myhface4 (0)->accessPllX ().attach2 (i) ;
-  myperiodic4 ().myhface4 (1)->accessPllX ().attach2 (i) ;
+  myperiodic4 ().myhface4 (0)->attach2 (i) ;
+  myperiodic4 ().myhface4 (1)->attach2 (i) ;
   return ;
 }
 
@@ -1344,12 +1344,12 @@ template < class A >
 void HexaPllBaseXMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  myhexa ().myhface4 (0)->accessPllX ().unattach2 (i) ;
-  myhexa ().myhface4 (1)->accessPllX ().unattach2 (i) ;
-  myhexa ().myhface4 (2)->accessPllX ().unattach2 (i) ;
-  myhexa ().myhface4 (3)->accessPllX ().unattach2 (i) ;
-  myhexa ().myhface4 (4)->accessPllX ().unattach2 (i) ;
-  myhexa ().myhface4 (5)->accessPllX ().unattach2 (i) ;
+  myhexa ().myhface4 (0)->unattach2 (i) ;
+  myhexa ().myhface4 (1)->unattach2 (i) ;
+  myhexa ().myhface4 (2)->unattach2 (i) ;
+  myhexa ().myhface4 (3)->unattach2 (i) ;
+  myhexa ().myhface4 (4)->unattach2 (i) ;
+  myhexa ().myhface4 (5)->unattach2 (i) ;
   return ;
 }
 
@@ -1364,12 +1364,12 @@ void HexaPllBaseXMacro< A > :: attach2 (int i) {
       return ;
     }
   }
-  myhexa ().myhface4 (0)->accessPllX ().attach2 (i) ;
-  myhexa ().myhface4 (1)->accessPllX ().attach2 (i) ;
-  myhexa ().myhface4 (2)->accessPllX ().attach2 (i) ;
-  myhexa ().myhface4 (3)->accessPllX ().attach2 (i) ;
-  myhexa ().myhface4 (4)->accessPllX ().attach2 (i) ;
-  myhexa ().myhface4 (5)->accessPllX ().attach2 (i) ;
+  myhexa ().myhface4 (0)->attach2 (i) ;
+  myhexa ().myhface4 (1)->attach2 (i) ;
+  myhexa ().myhface4 (2)->attach2 (i) ;
+  myhexa ().myhface4 (3)->attach2 (i) ;
+  myhexa ().myhface4 (4)->attach2 (i) ;
+  myhexa ().myhface4 (5)->attach2 (i) ;
   return ;
 }
 
@@ -1762,14 +1762,6 @@ GitterBasisPll :: MacroGitterBasisPll :: ~MacroGitterBasisPll () {
   try {
     {
       AccessIterator < helement_STI > :: Handle w (*this) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().detachPllXFromMacro () ;
-    }
-    {
-      AccessIterator < hface_STI > :: Handle w (*this) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().detachPllXFromMacro () ;
-    }
-    {
-      AccessIterator < hedge_STI > :: Handle w (*this) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().detachPllXFromMacro () ;
     }
     {

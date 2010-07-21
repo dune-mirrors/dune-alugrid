@@ -773,11 +773,11 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db)
     }
     {
       AccessIterator < hedge_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     {
       AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
@@ -848,12 +848,12 @@ duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs)
     // pack edges 
     {
       AccessIterator < hedge_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     // pack faces 
     {
       AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     // pack elements
     {
