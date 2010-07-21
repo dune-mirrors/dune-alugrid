@@ -61,7 +61,10 @@ void VertexPllBaseX :: attach2 (int i) {
 
 bool VertexPllBaseX :: packAll (vector < ObjectStream > & osv) {
   bool action (false) ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+  typedef map < int, int, less < int > > :: const_iterator  const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ; 
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     osv [j].writeObject (VERTEX) ;
@@ -125,7 +128,9 @@ template < class A >
 bool EdgePllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
   bool action (false) ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
   {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
@@ -305,7 +310,9 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
   // "uber.
 
   bool action = false ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
   {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
@@ -636,8 +643,9 @@ TetraPllXBaseMacro< A > :: ~TetraPllXBaseMacro () {
   {
     // reserve memory 
     v.reserve( _moveTo.size() );
-    map < int, int, less < int > > :: const_iterator iEnd = _moveTo.end() ;
-    for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
+    typedef map < int, int, less < int > > :: const_iterator const_iterator;
+    const const_iterator iEnd =  _moveTo.end () ;
+    for (const_iterator i = _moveTo.begin () ; 
          i != iEnd; v.push_back ((*i++).first)) ;
   }
   {
@@ -708,8 +716,11 @@ void TetraPllXBaseMacro< A > :: attach2 (int i) {
 }
 
 template < class A >
-bool TetraPllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+bool TetraPllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) 
+{
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
   {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
@@ -740,9 +751,11 @@ bool TetraPllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) {
 
 template < class A >
 bool TetraPllXBaseMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
-                                        GatherScatterType & gs) 
+                                             GatherScatterType & gs) 
 {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
   {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
@@ -817,8 +830,9 @@ void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os) const
 template < class A >
 void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
   bool hit = _moveTo.size () == 0 ? true : false ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
-       i != _moveTo.end () ; i ++ )
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i )
   {
     if ((*i).first != who) hit = true ;
   }
@@ -958,9 +972,14 @@ Periodic3PllXBaseMacro :: ~Periodic3PllXBaseMacro () {
   vector < int > v ;
   {
     v.reserve( _moveTo.size() );
-    for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; v.push_back ((*i++).first)) ;
+    typedef map < int, int, less < int > > :: const_iterator const_iterator;
+    const const_iterator iEnd =  _moveTo.end () ;
+    for (const_iterator i = _moveTo.begin () ; i != iEnd ; v.push_back ((*i++).first)) ;
   }
-  {for (vector < int > :: const_iterator i = v.begin () ; i != v.end () ; unattach2 (*i++)) ;}
+  {
+    const vector < int > :: const_iterator iEnd = v.end () ;
+    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd ; unattach2 (*i++)) ;
+  }
   return ;
 }
 
@@ -1010,8 +1029,12 @@ void Periodic3PllXBaseMacro :: attach2 (int i) {
   return ;
 }
 
-bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) 
+{
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
@@ -1043,9 +1066,13 @@ bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) {
 
 void Periodic3PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const {
   bool hit = _moveTo.size () == 0 ? true : false ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++ )
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i)
     if ((*i).first != who) hit = true ;
-  if (hit) {
+
+  if (hit) 
+  {
     os.writeObject (HBND3INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
     os.writeObject (myperiodic3 ().myvertex (fce,0)->ident ()) ;
@@ -1128,9 +1155,13 @@ Periodic4PllXBaseMacro :: ~Periodic4PllXBaseMacro () {
   vector < int > v ;
   {
     v.reserve( _moveTo.size() ); 
-    for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; v.push_back ((*i++).first)) ;
+    typedef map < int, int, less < int > > :: const_iterator const_iterator;
+    const const_iterator iEnd =  _moveTo.end () ;
+    for (const_iterator i = _moveTo.begin () ; i != iEnd ; v.push_back ((*i++).first)) ;
   }
-  {for (vector < int > :: const_iterator i = v.begin () ; i != v.end () ; unattach2 (*i++)) ;}
+  {
+    const vector < int > :: const_iterator iEnd = v.end () ;
+    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd ; unattach2 (*i++)) ;}
   return ;
 }
 
@@ -1182,7 +1213,9 @@ void Periodic4PllXBaseMacro :: attach2 (int i) {
 
 bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) 
 {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
   {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
@@ -1219,7 +1252,9 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv)
 void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
 {
   bool hit = _moveTo.size () == 0 ? true : false ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++ )
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i )
   {
     if ((*i).first != who) hit = true ;
   }
@@ -1325,9 +1360,9 @@ HexaPllBaseXMacro< A > :: ~HexaPllBaseXMacro () {
   {
     // reserve memory 
     v.reserve( _moveTo.size() );
-    map < int, int, less < int > > :: const_iterator iEnd = _moveTo.end() ;
-    for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
-      i != iEnd; v.push_back ((*i++).first)) ;
+    typedef map < int, int, less < int > > :: const_iterator const_iterator;
+    const const_iterator iEnd =  _moveTo.end () ;
+    for (const_iterator i = _moveTo.begin () ; i != iEnd; v.push_back ((*i++).first)) ;
   }
   {
     vector < int > :: const_iterator iEnd = v.end () ; 
@@ -1398,8 +1433,12 @@ void HexaPllBaseXMacro< A > :: attach2 (int i) {
 }
 
 template < class A >
-bool HexaPllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv) {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) {
+bool HexaPllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv) 
+{
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
@@ -1436,7 +1475,9 @@ template < class A >
 bool HexaPllBaseXMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
                                        GatherScatterType & gs) 
 {
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; i != _moveTo.end () ; i ++) 
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
   {
     int j = (*i).first ;
     assert ((osv.begin () + j) < osv.end ()) ;
@@ -1522,8 +1563,9 @@ template < class A >
 void HexaPllBaseXMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
 {
   bool hit = _moveTo.size () == 0 ? true : false ;
-  for (map < int, int, less < int > > :: const_iterator i = _moveTo.begin () ; 
-       i != _moveTo.end () ; i ++ )
+  typedef map < int, int, less < int > > :: const_iterator const_iterator;
+  const const_iterator iEnd =  _moveTo.end () ;
+  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i )
   {
     if ((*i).first != who) hit = true ;
   }
@@ -2125,6 +2167,7 @@ void GitterBasisPll :: printMemUsage ()
   cout << "bool   = " << sizeof(bool) << endl;
   cout << "char   = " << sizeof(unsigned char) << endl;
   cout << "signed char   = " << sizeof(signed char) << endl;
+  cout << "moveto = " << sizeof( map < int, int, less < int > > ) << endl;
   cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
   cout << "Refcount = " << sizeof(Refcount) << "\n";
   cout << "HedgeRule  = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
