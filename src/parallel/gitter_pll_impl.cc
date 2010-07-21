@@ -641,16 +641,18 @@ template < class A >
 TetraPllXBaseMacro< A > :: ~TetraPllXBaseMacro () {
   vector < int > v ;
   {
+    // copy to vector because unattach2 is changing _moveTo 
     // reserve memory 
     v.reserve( _moveTo.size() );
     typedef map < int, int, less < int > > :: const_iterator const_iterator;
     const const_iterator iEnd =  _moveTo.end () ;
-    for (const_iterator i = _moveTo.begin () ; 
-         i != iEnd; v.push_back ((*i++).first)) ;
+    for (const_iterator i = _moveTo.begin () ; i != iEnd; ++i ) 
+      v.push_back ( (*i).first ) ;
   }
   {
-    vector < int > :: const_iterator iEnd = v.end () ;
-    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd ; unattach2 (*i++)) ;
+    const vector < int > :: const_iterator iEnd = v.end () ;
+    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd ; ++i ) 
+      unattach2 ( *i ) ;
   }
   return ;
 }
@@ -1358,16 +1360,18 @@ template < class A >
 HexaPllBaseXMacro< A > :: ~HexaPllBaseXMacro () {
   vector < int > v ;
   {
+    // copy to vector because unattach2 is changing _moveTo 
     // reserve memory 
     v.reserve( _moveTo.size() );
     typedef map < int, int, less < int > > :: const_iterator const_iterator;
     const const_iterator iEnd =  _moveTo.end () ;
-    for (const_iterator i = _moveTo.begin () ; i != iEnd; v.push_back ((*i++).first)) ;
+    for( const_iterator i = _moveTo.begin () ; i != iEnd; ++i )
+      v.push_back ( (*i).first ) ;
   }
   {
-    vector < int > :: const_iterator iEnd = v.end () ; 
-    for (vector < int > :: const_iterator i = v.begin () ; 
-        i != iEnd; unattach2 (*i++)) ;
+    const vector < int > :: const_iterator iEnd = v.end () ; 
+    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd; ++i ) 
+      unattach2 ( *i ) ;
   }
   return ;
 }
