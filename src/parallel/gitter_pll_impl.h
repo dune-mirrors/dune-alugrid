@@ -165,50 +165,6 @@ template < class A > class FacePllBaseXMacro : public A
     Refcount _ref ;
 } ;
 
-/*
-template < class A >
-class ElementPllBaseX : public A 
-{
-  // Alle Methoden in dieser Klasse sind Dummies und erzeugen
-  // Laufzeitfehler. Sie m"ussen von abgeleiteten Klassen 
-  // mit den richtigen Inhalten "uberschrieben werden.
-
-  public :
-    pair < ElementPllXIF_t *, int > accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int) ;
-    pair < const ElementPllXIF_t *, int > accessOuterPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
-    pair < ElementPllXIF_t *, int > accessInnerPllX (const pair < ElementPllXIF_t *, int > &, int) ;
-    pair < const ElementPllXIF_t *, int > accessInnerPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
-  public :
-    void writeStaticState (ObjectStream &, int) const ;
-    void readStaticState (ObjectStream &, int) ;
-    virtual void writeDynamicState (ObjectStream &, int) const  = 0 ;
-    void readDynamicState (ObjectStream &, int) ;
-
-    virtual void writeDynamicState (ObjectStream &, GatherScatterType &) const {} ;
-    void readDynamicState (ObjectStream &, GatherScatterType &) {}
-  public :
-    int ldbVertexIndex () const ;
-    int & ldbVertexIndex () ;
-    bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
-  protected :
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-  public :
-    void attach2 (int) ;
-    void unattach2 (int) ;
-    bool packAll (vector < ObjectStream > &) ;
-    void packAsBnd (int,int,ObjectStream &) const ;
-    void unpackSelf (ObjectStream &,bool) ;
-    bool erasable () const ;
-  public :
-    void getRefinementRequest (ObjectStream &) ;
-    bool setRefinementRequest (ObjectStream &) ;
-  public :
-    bool lockAndTry () ;
-    bool unlockAndResume (bool) ;
-} ;
-*/
-
 template < class A >
 class TetraPllXBase : public A {
   public :
