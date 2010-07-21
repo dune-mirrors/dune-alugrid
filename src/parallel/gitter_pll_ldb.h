@@ -29,17 +29,25 @@ class LoadBalancer {
 
     class GraphVertex : public Serializable 
     {
+#ifdef GRAPHVERTEX_WITH_CENTER
       alucoord_t  _center [3] ;  // Schwerpunktskoordinaten
+#endif
       int _index, _weight ; // globale Nummer, Gewicht
       public :
         inline GraphVertex () ;
+#ifdef GRAPHVERTEX_WITH_CENTER
         inline GraphVertex (int,int,const alucoord_t (&)[3]) ;
+#else 
+        inline GraphVertex (int,int) ;
+#endif
         // constructor without center is initializing center and weight to zero 
         inline GraphVertex (int) ;
         inline virtual ~GraphVertex () ;
         inline int index () const ;
         inline int weight () const ;
+#ifdef GRAPHVERTEX_WITH_CENTER
         inline const alucoord_t (&center () const)[3] ;
+#endif
         inline bool operator < (const GraphVertex &) const ;
         inline bool operator == (const GraphVertex &) const ;
         inline bool isValid () const ;
@@ -196,22 +204,32 @@ inline LoadBalancer :: GraphVertex :: ~GraphVertex () {
 
 inline LoadBalancer :: GraphVertex :: GraphVertex () 
   : _index (-1) , _weight (0) {
+#ifdef GRAPHVERTEX_WITH_CENTER
   _center [0] = _center [1] = _center [2] = 0.0 ;
+#endif
   return ;
 }
 
-inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w, const alucoord_t (&p)[3]) 
+inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w
+#ifdef GRAPHVERTEX_WITH_CENTER
+    , const alucoord_t (&p)[3]
+#endif
+    ) 
 : _index (i), _weight (w) {
+#ifdef GRAPHVERTEX_WITH_CENTER
   _center [0] = p [0] ;
   _center [1] = p [1] ;
   _center [2] = p [2] ;
+#endif
   return ;
 }
 
 inline LoadBalancer :: GraphVertex :: GraphVertex (int i) 
   : _index (i), _weight (0) 
 {
+#ifdef GRAPHVERTEX_WITH_CENTER
   _center [0] = _center [1] = _center [2] = 0.0 ;
+#endif
   return ;
 }
 
@@ -223,9 +241,11 @@ inline int LoadBalancer :: GraphVertex :: weight () const {
   return _weight ;
 }
 
+#ifdef GRAPHVERTEX_WITH_CENTER
 inline const alucoord_t (& LoadBalancer :: GraphVertex :: center () const)[3] {
   return _center ;
 }
+#endif
 
 inline bool LoadBalancer :: GraphVertex :: isValid () const {
   return !(_index < 0 || _weight <= 0) ;
@@ -242,18 +262,23 @@ inline bool LoadBalancer :: GraphVertex :: operator == (const GraphVertex & x) c
 inline bool LoadBalancer :: GraphVertex :: readObject (ObjectStream & os) {
   os.readObject (_index) ;
   os.readObject (_weight) ;
+#ifdef GRAPHVERTEX_WITH_CENTER
   os.readObject (_center [0]) ;
   os.readObject (_center [1]) ;
   os.readObject (_center [2]) ;
+#endif
   return true ;
 }
 
-inline void LoadBalancer :: GraphVertex :: writeObject (ObjectStream & os) const {
+inline void LoadBalancer :: GraphVertex :: writeObject (ObjectStream & os) const 
+{
   os.writeObject (_index) ;
   os.writeObject (_weight) ;
+#ifdef GRAPHVERTEX_WITH_CENTER
   os.writeObject (_center [0]) ;
   os.writeObject (_center [1]) ;
   os.writeObject (_center [2]) ;
+#endif
   return ;
 }
 

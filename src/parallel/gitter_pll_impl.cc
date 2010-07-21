@@ -619,12 +619,14 @@ TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
   , _ldbVertexIndex (-1)
   , _erasable (false) 
 {
+#ifdef GRAPHVERTEX_WITH_CENTER
   LinearMapping :: barycenter(
       mytetra ().myvertex (0)->Point (), 
       mytetra ().myvertex (1)->Point (),
       mytetra ().myvertex (2)->Point (),
       mytetra ().myvertex (3)->Point (),
       _center);
+#endif
   return ;
 }
 
@@ -662,7 +664,11 @@ bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase &
   // - number of elementes below macro element 
   // - bary center 
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size (), _center) ) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size ()
+#ifdef GRAPHVERTEX_WITH_CENTER
+      , _center
+#endif
+      ) ) ;
   return true ;
 }
 
@@ -940,9 +946,11 @@ Periodic3PllXBaseMacro :: Periodic3PllXBaseMacro (myperiodic3_t & p)
   , _ldbVertexIndex (-1)
   , _erasable (false) 
 {
+#ifdef GRAPHVERTEX_WITH_CENTER
   static const double x = 1./3. ;
   LinearSurfaceMapping (myperiodic3 ().myvertex (0,0)->Point (), myperiodic3 ().myvertex (0,1)->Point (),
          myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,_center) ;
+#endif
   return ;
 }
 
@@ -966,7 +974,11 @@ int & Periodic3PllXBaseMacro :: ldbVertexIndex () {
 
 bool Periodic3PllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic3 ()).size (), _center)) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic3 ()).size ()
+#ifdef GRAPHVERTEX_WITH_CENTER
+      , _center
+#endif
+      )) ;
   return true ;
 }
 
@@ -1104,9 +1116,11 @@ Periodic4PllXBaseMacro :: Periodic4PllXBaseMacro (myperiodic4_t & p)
   , _ldbVertexIndex (-1)
   , _erasable (false) 
 {
+#ifdef GRAPHVERTEX_WITH_CENTER
   static const double x = .0 ;
   BilinearSurfaceMapping (myperiodic4 ().myvertex (0,0)->Point (), myperiodic4 ().myvertex (0,1)->Point (),
          myperiodic4 ().myvertex (0,2)->Point (), myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,_center) ;
+#endif
   return ;
 }
 
@@ -1130,7 +1144,11 @@ int & Periodic4PllXBaseMacro :: ldbVertexIndex () {
 
 bool Periodic4PllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic4 ()).size (), _center)) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic4 ()).size ()
+#ifdef GRAPHVERTEX_WITH_CENTER
+      , _center
+#endif
+      )) ;
   return true ;
 }
 
@@ -1285,6 +1303,7 @@ HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
 , _ldbVertexIndex (-1)
 , _erasable (false) 
 {
+#ifdef GRAPHVERTEX_WITH_CENTER
   // calculate bary center 
   TrilinearMapping :: barycenter (
       myhexa ().myvertex (0)->Point (), 
@@ -1296,6 +1315,7 @@ HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
       myhexa ().myvertex (6)->Point (), 
       myhexa ().myvertex (7)->Point (),
       _center );
+#endif
   return ;
 }
 
@@ -1330,7 +1350,11 @@ int & HexaPllBaseXMacro< A > :: ldbVertexIndex () {
 template < class A >
 bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size (), _center)) ;
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size ()
+#ifdef GRAPHVERTEX_WITH_CENTER
+      , _center
+#endif
+      )) ;
   return true ;
 }
 
@@ -2078,8 +2102,8 @@ GitterBasisPll :: ~GitterBasisPll () {
 
 void GitterBasisPll :: printMemUsage ()
 {
-  //typedef GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro tetra_IMPL ; 
-  //typedef GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro  hexa_IMPL ; 
+  typedef GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro tetra_MACRO ; 
+  typedef GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro  hexa_MACRO ; 
   typedef GitterBasisPll :: ObjectsPll :: hbndseg3_IMPL hbndseg3_IMPL ; 
   typedef GitterBasisPll :: ObjectsPll :: hbndseg4_IMPL hbndseg4_IMPL ; 
   //typedef GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro hface3_IMPL ; 
@@ -2109,7 +2133,8 @@ void GitterBasisPll :: printMemUsage ()
   cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n\n";
   
   cout << "******** TETRA *************************8\n";
-  cout << "Tetrasize = " << sizeof(tetra_IMPL) << endl;
+  cout << "Tetrasize  = " << sizeof(tetra_IMPL) << endl;
+  cout << "TetraMacro = " << sizeof(tetra_MACRO) << endl;
   cout << "Hface3_IMPL = " << sizeof(hface3_IMPL) << endl;
   cout << "Hface3_GEO = " << sizeof( Gitter :: Geometric :: hface3_GEO ) << endl;
   cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
@@ -2121,7 +2146,8 @@ void GitterBasisPll :: printMemUsage ()
   cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl << endl;
 
   cout << "******** HEXA *************************8\n";
-  cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
+  cout << "Hexasize  = " << sizeof(hexa_IMPL) << endl;
+  cout << "HexaMacro = " << sizeof(hexa_MACRO) << endl;
   cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
   cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
   cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;

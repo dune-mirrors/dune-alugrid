@@ -229,7 +229,9 @@ class TetraPllXBaseMacro : public A
     void packAsBndNow (int, ObjectStream &) const;
     
   private :
+#ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
+#endif
     map < int, int, less < int > > _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
@@ -279,7 +281,9 @@ class Periodic3PllXBaseMacro : public Periodic3PllXBase {
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
   private :
+#ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
+#endif
     map < int, int, less < int > > _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
@@ -328,7 +332,9 @@ class Periodic4PllXBaseMacro : public Periodic4PllXBase {
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
   private :
+#ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
+#endif
     map < int, int, less < int > > _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
@@ -407,7 +413,9 @@ class HexaPllBaseXMacro : public A
 
     void packAsBndNow (int, ObjectStream &) const;
   protected:
+#ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
+#endif
     map < int, int, less < int > > _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
