@@ -1,0 +1,257 @@
+
+-----------------------------------------------
+read macro grid from < ../macrogrids/cube.hexa > !
+-----------------------------------------------
+Grid generated! 
+
+P[0] GitterPll :: printSize () : 
+
+ - Elements ......... 1
+ - Boundaries ....... 6
+ - Faces ............ 6
+ - Edges ............ 12
+ - Vertices ......... 8
+
+
+Summary -- GitterPll :: printSize () : 
+
+ - Elements ......... 1
+ - Boundaries ....... 6
+ - Faces ............ 6
+ - Edges ............ 12
+ - Vertices ......... 8
+
+---------------------------------------------
+bool   = 1
+char   = 1
+signed char   = 1
+moveto = 48
+MyAlloc = 1
+Refcount = 4
+HedgeRule  = 4
+Hface3Rule = 4
+Hface4Rule = 4
+DuneIndexProvider = 8
+
+******** TETRA *************************8
+Tetrasize  = 160
+TetraMacro = 168
+Hface3_IMPL = 160
+Hface3_GEO = 88
+Hface3::nb = 32
+HEdge1_IMPL = 136
+HEdge1_GEO = 48
+VertexMacro = 72
+VertexGeo   = 64
+Vertex = 64
+Hbnd3_IMPL  = 96
+
+******** HEXA *************************8
+Hexasize  = 184
+HexaMacro = 192
+Hface4_IMPL = 176
+Hface4_GEO = 96
+Hface4::nb = 32
+Hbnd4_IMPL  = 96
+
+******** Number of Elements ************************8
+Macro elements: size = 0 MB 
+Macro boundary : size = 0 MB 
+Macro faces : size = 0 MB 
+Macro edges : size = 0 MB 
+Macro vertices : size = 0 MB 
+Elements : size = 0 MB
+Boundaries : size = 0 MB
+Faces : size = 0 MB
+Edges : size = 0 MB
+Vertices : size = 0 MB
+Indices : size = 0 MB
+All leaf size : 4068 MB
+bytes per Element: 4068
+Estimated all size : 4576 MB
+BuilderIF size = 6 MB 
+Overall size = 6 MB 
+
+Refine global: run 0
+
+P[0] GitterPll :: printSize () : 
+
+ - Elements ......... 8
+ - Boundaries ....... 24
+ - Faces ............ 36
+ - Edges ............ 54
+ - Vertices ......... 27
+
+
+Summary -- GitterPll :: printSize () : 
+
+ - Elements ......... 8
+ - Boundaries ....... 24
+ - Faces ............ 36
+ - Edges ............ 54
+ - Vertices ......... 27
+
+Refine global: run 1
+
+P[0] GitterPll :: printSize () : 
+
+ - Elements ......... 64
+ - Boundaries ....... 96
+ - Faces ............ 240
+ - Edges ............ 300
+ - Vertices ......... 125
+
+
+Summary -- GitterPll :: printSize () : 
+
+ - Elements ......... 64
+ - Boundaries ....... 96
+ - Faces ............ 240
+ - Edges ............ 300
+ - Vertices ......... 125
+
+Refine global: run 2
+
+P[0] GitterPll :: printSize () : 
+
+ - Elements ......... 512
+ - Boundaries ....... 384
+ - Faces ............ 1728
+ - Edges ............ 1944
+ - Vertices ......... 729
+
+
+Summary -- GitterPll :: printSize () : 
+
+ - Elements ......... 512
+ - Boundaries ....... 384
+ - Faces ............ 1728
+ - Edges ............ 1944
+ - Vertices ......... 729
+
+Refine global: run 3
+
+P[0] GitterPll :: printSize () : 
+
+ - Elements ......... 4096
+ - Boundaries ....... 1536
+ - Faces ............ 13056
+ - Edges ............ 13872
+ - Vertices ......... 4913
+
+
+Summary -- GitterPll :: printSize () : 
+
+ - Elements ......... 4096
+ - Boundaries ....... 1536
+ - Faces ............ 13056
+ - Edges ............ 13872
+ - Vertices ......... 4913
+
+Refine global: run 4
+
+P[0] GitterPll :: printSize () : 
+
+ - Elements ......... 32768
+ - Boundaries ....... 6144
+ - Faces ............ 101376
+ - Edges ............ 104544
+ - Vertices ......... 35937
+
+
+Summary -- GitterPll :: printSize () : 
+
+ - Elements ......... 32768
+ - Boundaries ....... 6144
+ - Faces ............ 101376
+ - Edges ............ 104544
+ - Vertices ......... 35937
+
+Refine global: run 5
+
+P[0] GitterPll :: printSize () : 
+
+ - Elements ......... 262144
+ - Boundaries ....... 24576
+ - Faces ............ 798720
+ - Edges ............ 811200
+ - Vertices ......... 274625
+
+
+Summary -- GitterPll :: printSize () : 
+
+ - Elements ......... 262144
+ - Boundaries ....... 24576
+ - Faces ............ 798720
+ - Edges ............ 811200
+ - Vertices ......... 274625
+
+Refine global: run 6
+
+P[0] GitterPll :: printSize () : 
+
+ - Elements ......... 2097152
+ - Boundaries ....... 98304
+ - Faces ............ 6340608
+ - Edges ............ 6390144
+ - Vertices ......... 2146689
+
+
+Summary -- GitterPll :: printSize () : 
+
+ - Elements ......... 2097152
+ - Boundaries ....... 98304
+ - Faces ............ 6340608
+ - Edges ............ 6390144
+ - Vertices ......... 2146689
+
+bool   = 1
+char   = 1
+signed char   = 1
+moveto = 48
+MyAlloc = 1
+Refcount = 4
+HedgeRule  = 4
+Hface3Rule = 4
+Hface4Rule = 4
+DuneIndexProvider = 8
+
+******** TETRA *************************8
+Tetrasize  = 160
+TetraMacro = 168
+Hface3_IMPL = 160
+Hface3_GEO = 88
+Hface3::nb = 32
+HEdge1_IMPL = 136
+HEdge1_GEO = 48
+VertexMacro = 72
+VertexGeo   = 64
+Vertex = 64
+Hbnd3_IMPL  = 96
+
+******** HEXA *************************8
+Hexasize  = 184
+HexaMacro = 192
+Hface4_IMPL = 176
+Hface4_GEO = 96
+Hface4::nb = 32
+Hbnd4_IMPL  = 96
+
+******** Number of Elements ************************8
+Macro elements: size = 0 MB 
+Macro boundary : size = 0 MB 
+Macro faces : size = 0 MB 
+Macro edges : size = 0 MB 
+Macro vertices : size = 0 MB 
+Elements : size = 368 MB
+Boundaries : size = 9 MB
+Faces : size = 1064 MB
+Edges : size = 828 MB
+Vertices : size = 131 MB
+Indices : size = 72 MB
+All leaf size : 2594192936 MB
+bytes per Element: 1237
+Estimated all size : 2918467053 MB
+BuilderIF size = 6 MB 
+Overall size = 6 MB 
+
