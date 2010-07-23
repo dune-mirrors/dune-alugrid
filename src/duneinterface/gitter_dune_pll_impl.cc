@@ -22,9 +22,13 @@ leafIterator (const IteratorSTI < helement_STI > * p)
 
 bool GitterDunePll :: duneNotifyNewGrid ()
 {
-  assert (debugOption (20) ? (cout << "**GitterDunePll :: duneNotifyNewGrid () " << endl, 1) : 1) ;
-  const int np = mpAccess ().psize () ;
   LoadBalancer :: DataBase db ;
+  return duneNotifyNewGrid( db );
+}
+
+bool GitterDunePll :: duneNotifyNewGrid ( LoadBalancer :: DataBase& db )
+{
+  assert (debugOption (20) ? (cout << "**GitterDunePll :: duneNotifyNewGrid () " << endl, 1) : 1) ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
     for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
@@ -33,6 +37,8 @@ bool GitterDunePll :: duneNotifyNewGrid ()
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
     for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db) ;
   }
+
+  const int np = mpAccess ().psize () ;
   bool neu = false ;
   {
     // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
@@ -43,9 +49,21 @@ bool GitterDunePll :: duneNotifyNewGrid ()
 
     double load = db.accVertexLoad () ;
     vector < double > v (mpAccess ().gcollect (load)) ;
-    double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
-
     const vector < double > :: iterator iEnd =  v.end () ;
+    double mean = 
+#ifndef COUNT_ALUGRID_FLOPS
+      accumulate (v.begin (), v.end (), 0.0) / double (np) ;
+#else
+    // for flop counter accumulate does not compile, did not find correct 
+    // method signature (put to double.h)
+      0.0;
+    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
+    {
+      mean += (*i);
+    }
+    mean /= double (np) ;
+#endif
+
     for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
   }
@@ -112,32 +130,9 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProl
   
   this->setAdaptRestrictProlongOp(arp);
   assert (debugOption (20) ? (cout << "**GitterDunePll :: duneLoadBalance () " << endl, 1) : 1) ;
-  const int np = mpAccess ().psize () ;
-  LoadBalancer :: DataBase db ;
-  {
-    AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
-  }
-  {
-    AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db) ;
-  }
-  bool neu = false ;
-  {
-    // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
-    // 
-    // load  - eigene ElementLast
-    // mean  - mittlere ElementLast
-    // nload - Lastverh"altnis
-  
-    double load = db.accVertexLoad () ;
-    vector < double > v (mpAccess ().gcollect (load)) ;
-    double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
 
-    const vector < double > :: iterator iEnd = v.end () ;
-    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i )
-      neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false));
-  }
+  LoadBalancer :: DataBase db;
+  const bool neu = duneNotifyNewGrid( db );
 
   if (neu) 
   {

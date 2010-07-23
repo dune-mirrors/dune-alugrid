@@ -5,12 +5,13 @@
 
 #include "alugrid_parallel.h"
 
+#ifdef COUNT_ALUGRID_FLOPS
+#undef double 
+#endif
+
 #ifndef NDEBUG
 #warning -- Compiling ALUGrid code in debug mode!!! Use -DNDEBUG to get more optimized code!!!
 #endif
-
-#define _ANSI_HEADER 
-
 
 // avoid C++ bindings of MPI (-DMPIPP_H is not common enough)
 // this is the only thing all MPI implementations have in common
@@ -51,6 +52,10 @@ extern "C" {
 // PARTY Lib stuff 
 #include "parallel/aluparty_lib.hh"
 
+#ifdef COUNT_ALUGRID_FLOPS
+#define double Double
+#endif
+
 
 namespace ALUGridSpace {
 
@@ -73,5 +78,4 @@ namespace ALUGridSpace {
 
 } //end namespace 
 
-#undef _ANSI_HEADER 
 #endif

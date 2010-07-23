@@ -14,11 +14,20 @@
 // include all headers 
 #include "stlheaders.h"
 
+#define COUNT_ALUGRID_FLOPS
+
+#ifdef COUNT_ALUGRID_FLOPS
+#include "double.h"
+// overload original double 
+#define double Double 
+#endif
+
 // defines IndexManagerType
 #include "indexstack.h"
 
 // defines VertexProjection Interface 
 #include "projectvertex.h"
+
 
 namespace ALUGridSpace {
 
@@ -102,5 +111,4 @@ typedef GatherScatter GatherScatterType;
 #include "duneinterface/gitter_dune_impl.h"
 }
 
-#undef _ANSI_HEADER 
 #endif

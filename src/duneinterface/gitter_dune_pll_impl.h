@@ -74,6 +74,7 @@ public:
 
   // return true if grid has to be balanced again 
   bool duneNotifyNewGrid ();
+  bool duneNotifyNewGrid ( LoadBalancer::DataBase& );
 
   bool duneLoadBalance () ; // call loadBalancer 
   bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ) ; // call loadBalancer a

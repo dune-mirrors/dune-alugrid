@@ -1056,9 +1056,21 @@ void GitterPll :: loadBalancerGridChangesNotify () {
   
     double load = db.accVertexLoad () ;
     vector < double > v (mpAccess ().gcollect (load)) ;
-    double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
-
     const vector < double > :: iterator iEnd = v.end () ;
+    double mean = 
+#ifndef COUNT_ALUGRID_FLOPS
+      accumulate (v.begin (), v.end (), 0.0) / double (np) ;
+#else
+    // for flop counter accumulate does not compile, did not find correct 
+    // method signature (put to double.h)
+      0.0;
+    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
+    {
+      mean += (*i);
+    }
+    mean /= double (np) ;
+#endif
+
     for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
   }
