@@ -546,7 +546,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
     double _area;
     double _outernormal[NV][ncoord]; // NV * ncoord * 8 = ( z.B. 48 )
-    double _sidelength[NV];
+    //double _sidelength[NV];
 
     unsigned char nvertices ;
 
@@ -607,16 +607,12 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
     double sidelength(int pfce) const 
     {
-      /*
       double length  = 0;
-      for (int k=0;k<ncoord;++k)
-        length += _outernormal[pfce][k]*_outernormal[pfce][k];
+      for (int k=0; k<ncoord; ++k)
+        length += _outernormal[mod(pfce)][k] * _outernormal[mod(pfce)][k];
       return std::sqrt( length );
-      */
-      return _sidelength[mod(pfce)]; 
+      //return _sidelength[mod(pfce)]; 
     }
-
-    //double minheight() const { return _minheight; }
 
     double area() const { return _area; }
 

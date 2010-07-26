@@ -82,7 +82,6 @@ Element < N, NV >::Element()
   {
     for (j=0;j<ncoord;++j)
       _outernormal[i][j] =  0.0;
-    _sidelength[i]       = -1.0;
   }
 }
 
@@ -251,7 +250,6 @@ void Element < N, NV >::setrefine(int fce)
   vtx_btree_t* tmp_btree[3] = {connect.hvtx[0], connect.hvtx[1], connect.hvtx[2] };
   short int tmp_b[3]={connect.bck[0],connect.bck[1],connect.bck[2]};
   short int tmp_no[3]={connect.normdir[0],connect.normdir[1],connect.normdir[2]};
-  double tmp_sln[3]={_sidelength[0],_sidelength[1],_sidelength[2]};
   double tmp_on[3][ncoord];
   for (int i=0;i<3;++i)
     for (int j=0;j<ncoord;++j)
@@ -268,7 +266,6 @@ void Element < N, NV >::setrefine(int fce)
     connect.nb[j]->nbconnect(connect.bck[j],this,j);
     connect.hvtx[j] = tmp_btree[mod(fce+j)];
 
-    _sidelength[j]     = tmp_sln[mod(fce+j)];
     for (int k=0;k<ncoord;++k)
       _outernormal[j][k] = tmp_on[mod(fce+j)][k];
   }
@@ -303,23 +300,20 @@ void Element < N, NV >::init()
     {
       _outernormal[i][0]= alpha*(vertex(i+2)->coord()[1]-vertex(i+1)->coord()[1]);
       _outernormal[i][1]=-alpha*(vertex(i+2)->coord()[0]-vertex(i+1)->coord()[0]);
-      _sidelength[i] = 0;
-      for (int k=0;k<ncoord;++k)
-        _sidelength[i] += _outernormal[i][k]*_outernormal[i][k];
-      _sidelength[i] = sqrt( _sidelength[i] );
     }
   }
   else
   {
     double sides[NV][ncoord];
+    double sidelen[ NV ];
     /* calculate outer normal and sidelength^2 */
     for (int i=0;i<numfaces();i++)
     {
-      _sidelength[i] = 0;
+      sidelen[i] = 0;
       for (int k=0;k<ncoord;++k)
       {
         sides[i][k]= (vertex(i+2)->coord()[k]-vertex(i+1)->coord()[k]);
-        _sidelength[i] += sides[i][k]*sides[i][k];
+        sidelen[i] += sides[i][k]*sides[i][k];
       }
     }
     _area = 0;
@@ -337,12 +331,12 @@ void Element < N, NV >::init()
       double norm_n = 0;
       for (int k=0;k<ncoord;++k)
       {
-        _outernormal[i][k] = _sidelength[i]*_outernormal[i][k] - scp_ds*sides[i][k];
+        _outernormal[i][k] = sidelen[i]*_outernormal[i][k] - scp_ds*sides[i][k];
         norm_n += _outernormal[i][k] * _outernormal[i][k];
       }
       norm_n = sqrt( norm_n );
-      _sidelength[i] = sqrt( _sidelength[i] );
-      double fac = _sidelength[i]/norm_n;
+      sidelen[i] = sqrt( sidelen[i] );
+      double fac = sidelen[i]/norm_n;
       for (int k=0;k<ncoord;++k)
         _outernormal[i][k] *= fac;
       _area += 1./(4.*fac);
@@ -429,7 +423,6 @@ void Element < N, NV >::switchorientation(int a,int b)
   swap(connect.edge[a],connect.edge[b]);
   swap(connect.bck[a],connect.bck[b]);
   swap(connect.normdir[a],connect.normdir[b]);
-  swap(_sidelength[a],_sidelength[b]);
   for (int i=0;i<ncoord;++i)
     swap(_outernormal[a][i],_outernormal[b][i]);
 
