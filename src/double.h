@@ -7,8 +7,6 @@
 #include <limits>
 #include <vector>
 
-#include "timer.h"
-
 //- Dune includes 
 namespace Dune {
 
@@ -84,15 +82,12 @@ namespace ALUGridSpace
   protected:
     unsigned long count_;
     bool initialized_;
-    Timer timer_;
     double time_;
 
   protected:
     inline FlOpCounter ()
     : count_( 0 ),
       initialized_( false ),
-      timer_(),
-      time_(0.0)
     {
       std::cout << "Create FLOP counter " << std::endl;
     }
@@ -103,7 +98,6 @@ namespace ALUGridSpace
       std :: cout << "ALUGridSpace: Number of floating point operations for "
                   << FloatType :: typeName() << ": "
                   << count_ << std :: endl;
-      std::cout << "Time spend in pow,sqrt,... = " << time_ << std::endl;
     }
 
     inline void add (const int c )
@@ -152,12 +146,9 @@ namespace ALUGridSpace
   private:
     typedef FlOpCounter< FloatType > ThisType;
 
-    Timer timer_;
-    double time_;
   protected:
-    inline FlOpCounter () : timer_() , time_(0.0)
+    inline FlOpCounter ()
     {
-      std::cout << "Time spend in pow,sqrt,... = " << time_ << std::endl;
     }
 
   public:
