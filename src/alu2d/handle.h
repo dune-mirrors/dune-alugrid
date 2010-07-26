@@ -83,7 +83,7 @@ class Hmesh_basic : public IndexProvider {
     typedef nconf_vtx < ncoord, nvtx > nconf_vtx_t;
 
     typedef VtxProjection < ncoord, nvtx > ProjectVertex_t;
-    typedef ALUGridSpace :: VertexProjection < N > CompatibilityProjectVertex_t;
+    typedef ALUGridSpace :: VertexProjection < N , double > CompatibilityProjectVertex_t;
 
     struct OrientStr
     {
@@ -307,6 +307,20 @@ class Hmesh : public Hmesh_basic<N,NV> {
   Hmesh();
 
   Hmesh(const char *,int, Refco::tag_t pref_rule) ;
+
+  void printMemSize () 
+  {
+    cout << "Basic        = " << sizeof( Basic  ) << endl;
+    cout << "Element      = " << sizeof( element_t ) << endl;
+    cout << "BndEl        = " << sizeof( bndel_t ) << endl;
+    cout << "Triangle     = " << sizeof( triang_t ) << endl;
+    cout << "NonConf Vx   = " << sizeof( nconf_vtx_t ) << endl;
+    cout << "FullVertex   = " << sizeof( fullvertex_t ) << endl;
+    cout << "Vertex       = " << sizeof( Vertex < 3 > ) << endl;
+    cout << "Listagent    = " << sizeof( Listagent < Vertex < 3 > >) << endl;
+    cout << "Multi Vx Adp = " << sizeof( multivertexadapter_t ) << endl;
+    cout << "HElement     = " << sizeof( helement_t ) << endl;
+  }
 
   // constructor taking istream with macro triang
   // number of hanging nodes and refinement rule 
