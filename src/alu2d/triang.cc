@@ -84,7 +84,7 @@
 // ***************************************************
 template < int N, int NV >
 Triang < N,NV >::Triang() {
-  element_t::nvertices = -1;
+  element_t::nvertices() = 0;
 }
 
 // ***************************************************
@@ -101,7 +101,7 @@ Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2) {
   connect.set( v0, 0) ;
   connect.set( v1, 1) ;
   connect.set( v2, 2) ;
-  element_t::nvertices = 3 ;
+  element_t::nvertices() = 3 ;
 
   init();
 }
@@ -114,7 +114,7 @@ Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2, vertex_t * v
     connect.set( v1, 1) ;
     connect.set( v2, 2) ;
     connect.set( v3, 3) ;
-    element_t::nvertices = 4 ;
+    element_t::nvertices() = 4 ;
   }
   init();
 }
@@ -152,7 +152,7 @@ void Triang < N,NV >::write(ostream & out) const {
 template < int N, int NV >
 void Triang < N,NV >::read(istream & in, vertex_t ** look, const int len) {
   helement_t::read(in) ;
-  element_t::nvertices = connect.read(in, look, len) ;
+  element_t::nvertices() = connect.read(in, look, len) ;
   init() ;
 }
 

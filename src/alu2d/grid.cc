@@ -101,6 +101,8 @@ Element < N, NV >::~Element()
     }
   }
 
+  // reset refcount, otherwise assertion in Basic 
+  nvertices() = 0;
 }
 
 // ***************************************************
@@ -772,15 +774,17 @@ int Hier < A >::refine_leaf(Listagency < vertex_t > * a,
 
     dwn = (Hier *)els[0] ;
 
-    dwn->lvl = lvl + 1 ;
+    const unsigned char newLevel = level() + 1 ;
+    dwn->lvl() = newLevel ;
 
     dwn->up = this;
     dwn->writeToWas();
     dwn->childNr_ = 0;
 
-    for(int i = 1 ; i < numchild ; i ++ ) {
+    for(int i = 1 ; i < numchild ; i ++ ) 
+    {
 
-      ((Hier *)els[i])->lvl = lvl + 1 ;
+      ((Hier *)els[i])->lvl() = newLevel ;
 
       ((Hier *)els[i])->up = this ;
       ((Hier *)els[i])->writeToWas();

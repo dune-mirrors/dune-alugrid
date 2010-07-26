@@ -49,15 +49,17 @@ class Basic {
 
   protected :
 
-    Basic() : _idx(-1), refcount(0) {}
+    Basic() : _idx(-1), refcount(0), _level(0), childNr_(0), numchild(0) {}
     virtual ~Basic() { assert(!refcount) ; }
 
     int _idx;
     unsigned char refcount ; // 16 byte + 8 vtable 
     unsigned char _level; 
+    unsigned char childNr_;
+    unsigned char numchild ;
 
     int &setIndex () { return _idx ; }
-public:
+  public:
 
     virtual void sethdl(IndexProvider *phdl) = 0 ; 
 
@@ -65,12 +67,14 @@ public:
 
     enum { nparts = 4, max_points = 4 } ;
 
+  protected:  
     void attach() { refcount ++ ; }
 
     void detach() { refcount -- ; }
 
     int isfree() const { return refcount == 0 ; }
 
+  public:  
     virtual void write(ostream &) const 
     { 
       std::cerr << "ERROR: method Basic::write( ostream& ) not overloaded! " << std::endl;
@@ -103,7 +107,7 @@ template < class A > class Listagent : public Basic {
   
   A * prev_list ;
 
-  int number_list ;  // 32 byte 
+  int number_list ;  // 24 byte 
   
   Listagent(const Listagent &) { }
 
@@ -186,11 +190,14 @@ template < int N, int NV > struct nconf_vtx
 // #definition:
 template < int N > class Vertex : public Listagent < Vertex < N > > // , public Basic 
 {
-  //using Listagent < Vertex < N > > ::hdl;
   using Listagent < Vertex < N > > ::_idx;
   using Listagent < Vertex < N > > ::_level;
   public:
     enum { ncoord = N };
+
+    using Basic :: attach ;
+    using Basic :: detach ; 
+    using Basic :: isfree ;
 
   private :
 
@@ -256,11 +263,9 @@ template < int N >
 class Fullvertex : public Vertex < N > {
 
   public:
-
     enum { ncoord = Vertex< N >::ncoord };
 
   protected:
-    //using Basic::hdl;
     using Basic::_idx;
 
   private:
@@ -297,10 +302,15 @@ class Fullvertex : public Vertex < N > {
 
 // #end(class)
 // ***************************************************
-class Edge : public Basic {
+class Edge : public Basic 
+{
   virtual void sethdl(IndexProvider *phdl);
   IndexProvider* hdl;
  public:
+    using Basic :: attach ;
+    using Basic :: detach ; 
+    using Basic :: isfree ;
+
     Edge(IndexProvider *phdl) {
       sethdl(phdl);
     }
@@ -520,6 +530,8 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
       
       signed char normdir [NV] ;
 
+
+
       c() ;
 
      ~c() ;
@@ -536,39 +548,33 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
     } connect ;
 
+    // use refcount for storage of nvertices (saves 8 bytes) 
+    unsigned char& nvertices () { return refcount; }
+    const unsigned char nvertices () const { return refcount; }
 
-    int mod(int i) const
-    {
-      if (NV == 3) return i%3;
-      else return i%nvertices;
-    }
+    int mod(int i) const { return i % nv(); }
+    int nv() const { return (NV==3) ? 3 : nvertices() ; }
 
-    int nv() const { return (NV==3)?3:nvertices ; }
-
-    //using Basic::hdl;
     using Basic::_idx;
+    using Basic::refcount ; // used as nvertices 
 
     double _area;
     double _outernormal[NV][ncoord]; // NV * ncoord * 8 = ( z.B. 48 )
     //double _sidelength[NV];
 
-    unsigned char nvertices ;
-
   public :
+    typedef c connect_t ;
+
     int numfaces() const { return nv(); }
 
     int numvertices() const { return nv(); }
 
-    // using thinelement_t::numvertices;
-    // using thinelement_t::numfaces;
     using thinelement_t::getIndex;
     using thinelement_t::splitrule;
  
     Element();
     virtual ~Element();
 
-    // int numfacevertices(int ) const { return connect.pv ; }
-    
     int facevertex(int , int ) const ;
       
     void edge_vtx(int e, vertex_t * (& ) [2] ) const ;
@@ -701,14 +707,15 @@ template < class A > class Hier : public A {
   
   Hier * up;
 
-  unsigned char lvl ;
-  unsigned char childNr_;
+  using A :: _level ;
+  using A :: childNr_ ; 
+  using A :: numchild ;
 
   protected :
 
-  unsigned char numchild ;
-
-  Hier() : dwn(0), nxt(0), up(0), lvl(0) , childNr_(0) , numchild (0) {}
+  Hier() : dwn(0), nxt(0), up(0) 
+  {
+  }
 
   void deletesubtree() { delete dwn ; dwn = 0; 
     //  this->check();
@@ -726,7 +733,10 @@ template < class A > class Hier : public A {
 
     int leaf() const { return ! dwn ; }
 
-    int level() const { return lvl ; }
+    // use level for Basic 
+    int level() const { return _level ; }
+    // for assigment of level 
+    unsigned char& lvl() { return _level; }
 
     int childNr() const { return childNr_; }
 
@@ -738,7 +748,7 @@ template < class A > class Hier : public A {
 
       return (nxt ? nxt->count(i) : 0) + 
 
-             (lvl == i ? 1 : (dwn ? dwn->count(i) : 0) );
+             (level() == i ? 1 : (dwn ? dwn->count(i) : 0) );
 
     }
 
