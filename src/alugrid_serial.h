@@ -14,12 +14,12 @@
 // include all headers 
 #include "stlheaders.h"
 
-#define COUNT_ALUGRID_FLOPS
+//#define COUNT_ALUGRID_FLOPS
 
 #ifdef COUNT_ALUGRID_FLOPS
 #include "double.h"
 // overload original double 
-#define double Double 
+//#define double Double 
 #endif
 
 // defines IndexManagerType
@@ -30,6 +30,11 @@
 
 
 namespace ALUGridSpace {
+
+#ifdef COUNT_ALUGRID_FLOPS
+// overload original double 
+#define double Double 
+#endif
 
 // the code needs this 
 using namespace std;   

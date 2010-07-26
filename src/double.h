@@ -7,12 +7,21 @@
 #include <limits>
 #include <vector>
 
+#include "timer.h"
+
 //- Dune includes 
+namespace Dune {
+
+template <class> class OutStreamInterface;
+template <class> class InStreamInterface;
+
+}
 
 namespace ALUGridSpace
 {
 
 #ifdef COUNT_ALUGRID_FLOPS
+#warning "FLOP Counter enabled" 
 
   template< class FloatImp >
   class FlOpCounter;
@@ -32,6 +41,7 @@ namespace ALUGridSpace
     inline FlOpCounter ()
     : count_( 0 )
     {
+      std::cout << "Create void FLOP counter " << std::endl;
     }
 
   public:
@@ -46,6 +56,11 @@ namespace ALUGridSpace
     {
       ++count_;
       return *this;
+    }
+
+    inline void add (const int c )
+    {
+      count_ += c;
     }
 
     inline static ThisType &instance ()
@@ -68,11 +83,18 @@ namespace ALUGridSpace
 
   protected:
     unsigned long count_;
+    bool initialized_;
+    Timer timer_;
+    double time_;
 
   protected:
     inline FlOpCounter ()
-    : count_( 0 )
+    : count_( 0 ),
+      initialized_( false ),
+      timer_(),
+      time_(0.0)
     {
+      std::cout << "Create FLOP counter " << std::endl;
     }
 
   public:
@@ -81,14 +103,36 @@ namespace ALUGridSpace
       std :: cout << "ALUGridSpace: Number of floating point operations for "
                   << FloatType :: typeName() << ": "
                   << count_ << std :: endl;
+      std::cout << "Time spend in pow,sqrt,... = " << time_ << std::endl;
+    }
+
+    inline void add (const int c )
+    {
+      count_ += c;
     }
 
     inline ThisType &operator++ ()
     {
+      if( initialized_ && count_ == 0 ) 
+      {
+        std::cerr << "ERROR counter overflow " << std::endl;
+      }
       ++count_;
       ++(FlOpCounter< void > :: instance());
+      initialized_ = true ;
       return *this;
     }
+
+    inline void start() 
+    {
+      //timer_.reset();
+    }
+
+    inline void meassure() 
+    {
+      //time_ += timer_.elapsed();
+    }
+
 
     inline static ThisType &instance ()
     {
@@ -108,15 +152,31 @@ namespace ALUGridSpace
   private:
     typedef FlOpCounter< FloatType > ThisType;
 
+    Timer timer_;
+    double time_;
   protected:
-    inline FlOpCounter ()
+    inline FlOpCounter () : timer_() , time_(0.0)
     {
+      std::cout << "Time spend in pow,sqrt,... = " << time_ << std::endl;
     }
 
   public:
     inline ThisType &operator++ ()
     {
       return *this;
+    }
+
+    inline void add (const int c )
+    {}
+
+    inline void start() 
+    {
+     // timer_.reset();
+    }
+
+    inline void meassure() 
+    {
+      //time_ += timer_.elapsed();
     }
 
     inline static ThisType &instance ()
@@ -134,14 +194,14 @@ namespace ALUGridSpace
   static double pow (const Double& v, const double p);
   // wrap of std log 
   static double log (const Double& v);
+  // wrap of std exp 
+  static double exp(const Double& v);
   // wrap of std sqrt 
   static double sqrt(const Double& v);
   // wrap of std sin 
   static double cos (const Double& v);
   // wrap of std cos 
   static double sin(const Double& v);
-  // wrap of std power 
-  static double pow (const Double& v, const double p);
 
   // wrap of std min  
   static inline double min (const Double& v, const double p);
@@ -151,7 +211,10 @@ namespace ALUGridSpace
   static inline double max (const Double& v, const double p);
   // wrap of std max
   static inline double max (const double v, const Double& p);
-
+  // wrap of std power 
+  static double pow (const double v, const Double& p);
+  // wrap of std power 
+  static double pow (const Double&v, const Double& p);
 
   // numeric limits
   // --------------
@@ -243,9 +306,18 @@ namespace ALUGridSpace
 
     friend std :: ostream &operator<< ( std :: ostream&, const Double& );
     friend std :: istream &operator>> ( std :: istream&, Double& );
-    
+
+    template< class Traits >
+    friend Dune::OutStreamInterface< Traits > &
+      operator<< ( Dune::OutStreamInterface< Traits > &, const Double );
+    template< class Traits >
+    friend Dune::InStreamInterface< Traits > &
+      operator>> ( Dune::InStreamInterface< Traits > &, Double & );
+
     friend double pow (const Double& v, const double p);
+    friend double pow (const Double& v, const Double& p);
     friend double log (const Double& v);
+    friend double exp (const Double& v);
     friend double sqrt(const Double& v);
     friend double sin(const Double& v);
     friend double cos(const Double& v);
@@ -255,6 +327,7 @@ namespace ALUGridSpace
     friend double min(const double,  const Double&);
     friend double max(const Double&, const double);
     friend double max(const double,  const Double&);
+    friend double pow (const double, const Double&);
 
     friend double accumulate( 
       std::vector< Double > :: iterator it,
@@ -294,6 +367,7 @@ namespace ALUGridSpace
 
     inline ThisType &operator= ( const ThisType other )
     {
+      flOpA();
       value_ = other.value_;
       return *this;
     }
@@ -342,6 +416,18 @@ namespace ALUGridSpace
     {
       ++(FlOpCounterType :: instance());
     }
+    static inline void flOpA ()
+    {
+      //++(FlOpCounterType :: instance());
+    }
+    static inline void start ()
+    {
+      FlOpCounterType :: instance().start();
+    }
+    static inline void meassure ()
+    {
+      FlOpCounterType :: instance().meassure();
+    }
   };
 
   // min/max
@@ -350,24 +436,28 @@ namespace ALUGridSpace
   // wrap of std min  
   static inline double min (const Double& v, const double p)
   {
+    Double :: flOpA();
     return (v.value_ > p) ? p : v.value_;   
   }
 
   // wrap of std min  
   static inline double min (const double v, const Double& p)
   {
+    Double :: flOpA();
     return (v > p.value_) ? p.value_ : v;   
   }
 
   // wrap of std max
   static inline double max (const Double& v, const double p) 
   {
+    Double :: flOpA();
     return (v.value_ < p) ? p : v.value_;   
   }
 
   // wrap of std max
   static inline double max (const double v, const Double& p) 
   {
+    Double :: flOpA();
     return (v < p.value_) ? p.value_ : v;   
   }
 
@@ -564,36 +654,43 @@ namespace ALUGridSpace
   
   inline bool operator== ( const Double &a, const Double &b )
   {
+    Double :: flOpA();
     return (a.value_ == b.value_);
   }
   
   inline bool operator== ( const double a, const Double &b )
   {
+    Double :: flOpA();
     return (a == b.value_);
   }
    
   inline bool operator== ( const Double &a, const double b )
   {
+    Double :: flOpA();
     return (a.value_ == b);
   }
   
   inline bool operator== ( const int a, const Double &b )
   {
+    Double :: flOpA();
     return (a == b.value_);
   }
    
   inline bool operator== ( const Double &a, const int b )
   {
+    Double :: flOpA();
     return (a.value_ == b);
   }
 
   inline bool operator== ( const unsigned int a, const Double &b )
   {
+    Double :: flOpA();
     return (a == b.value_);
   }
    
   inline bool operator== ( const Double &a, const unsigned int b )
   {
+    Double :: flOpA();
     return (a.value_ == b);
   }
 
@@ -604,36 +701,43 @@ namespace ALUGridSpace
   
   inline bool operator!= ( const Double &a, const Double &b )
   {
+    Double :: flOpA();
     return (a.value_ != b.value_);
   }
   
   inline bool operator!= ( const double a, const Double &b )
   {
+    Double :: flOpA();
     return (a != b.value_);
   }
    
   inline bool operator!= ( const Double &a, const double b )
   {
+    Double :: flOpA();
     return (a.value_ != b);
   }
   
   inline bool operator!= ( const int a, const Double &b )
   {
+    Double :: flOpA();
     return (a != b.value_);
   }
    
   inline bool operator!= ( const Double &a, const int b )
   {
+    Double :: flOpA();
     return (a.value_ != b);
   }
 
   inline bool operator!= ( const unsigned int a, const Double &b )
   {
+    Double :: flOpA();
     return (a != b.value_);
   }
    
   inline bool operator!= ( const Double &a, const unsigned int b )
   {
+    Double :: flOpA();
     return (a.value_ != b);
   }
 
@@ -644,36 +748,43 @@ namespace ALUGridSpace
   
   inline bool operator< ( const Double &a, const Double &b )
   {
+    Double :: flOpA();
     return (a.value_ < b.value_);
   }
   
   inline bool operator< ( const double a, const Double &b )
   {
+    Double :: flOpA();
     return (a < b.value_);
   }
    
   inline bool operator< ( const Double &a, const double b )
   {
+    Double :: flOpA();
     return (a.value_ < b);
   }
   
   inline bool operator< ( const int a, const Double &b )
   {
+    Double :: flOpA();
     return (a < b.value_);
   }
    
   inline bool operator< ( const Double &a, const int b )
   {
+    Double :: flOpA();
     return (a.value_ < b);
   }
 
   inline bool operator< ( const unsigned int a, const Double &b )
   {
+    Double :: flOpA();
     return (a < b.value_);
   }
    
   inline bool operator< ( const Double &a, const unsigned int b )
   {
+    Double :: flOpA();
     return (a.value_ < b);
   }
 
@@ -684,36 +795,43 @@ namespace ALUGridSpace
   
   inline bool operator<= ( const Double &a, const Double &b )
   {
+    Double :: flOpA();
     return (a.value_ <= b.value_);
   }
   
   inline bool operator<= ( const double a, const Double &b )
   {
+    Double :: flOpA();
     return (a <= b.value_);
   }
    
   inline bool operator<= ( const Double &a, const double b )
   {
+    Double :: flOpA();
     return (a.value_ <= b);
   }
   
   inline bool operator<= ( const int a, const Double &b )
   {
+    Double :: flOpA();
     return (a <= b.value_);
   }
    
   inline bool operator<= ( const Double &a, const int b )
   {
+    Double :: flOpA();
     return (a.value_ <= b);
   }
 
   inline bool operator<= ( const unsigned int a, const Double &b )
   {
+    Double :: flOpA();
     return (a <= b.value_);
   }
    
   inline bool operator<= ( const Double &a, const unsigned int b )
   {
+    Double :: flOpA();
     return (a.value_ <= b);
   }
 
@@ -724,36 +842,43 @@ namespace ALUGridSpace
   
   inline bool operator> ( const Double &a, const Double &b )
   {
+    Double :: flOpA();
     return (a.value_ > b.value_);
   }
   
   inline bool operator> ( const double a, const Double &b )
   {
+    Double :: flOpA();
     return (a > b.value_);
   }
    
   inline bool operator> ( const Double &a, const double b )
   {
+    Double :: flOpA();
     return (a.value_ > b);
   }
   
   inline bool operator> ( const int a, const Double &b )
   {
+    Double :: flOpA();
     return (a > b.value_);
   }
    
   inline bool operator> ( const Double &a, const int b )
   {
+    Double :: flOpA();
     return (a.value_ > b);
   }
 
   inline bool operator> ( const unsigned int a, const Double &b )
   {
+    Double :: flOpA();
     return (a > b.value_);
   }
    
   inline bool operator> ( const Double &a, const unsigned int b )
   {
+    Double :: flOpA();
     return (a.value_ > b);
   }
 
@@ -764,36 +889,43 @@ namespace ALUGridSpace
   
   inline bool operator>= ( const Double &a, const Double &b )
   {
+    Double :: flOpA();
     return (a.value_ >= b.value_);
   }
   
   inline bool operator>= ( const double a, const Double &b )
   {
+    Double :: flOpA();
     return (a >= b.value_);
   }
    
   inline bool operator>= ( const Double &a, const double b )
   {
+    Double :: flOpA();
     return (a.value_ >= b);
   }
   
   inline bool operator>= ( const int a, const Double &b )
   {
+    Double :: flOpA();
     return (a >= b.value_);
   }
    
   inline bool operator>= ( const Double &a, const int b )
   {
+    Double :: flOpA();
     return (a.value_ >= b);
   }
 
   inline bool operator>= ( const unsigned int a, const Double &b )
   {
+    Double :: flOpA();
     return (a >= b.value_);
   }
    
   inline bool operator>= ( const Double &a, const unsigned int b )
   {
+    Double :: flOpA();
     return (a.value_ >= b);
   }
   
@@ -822,17 +954,77 @@ namespace ALUGridSpace
 
   static inline double pow (const Double& v, const double p)
   {
-    return std::pow(v.value_,p);
+    Double :: start();
+    double ret = std::pow(v.value_,p);
+    Double :: meassure ();
+    return ret ;
   }
+
+  static inline double pow (const Double& v, const Double& p)
+  {
+    Double :: start();
+    double ret = std::pow(v.value_,p.value_);
+    Double :: meassure ();
+    return ret ;
+  }
+
+  // wrap of std min  
+  static inline double pow(const double v, const Double& p)
+  {
+    Double :: start();
+    double ret = std::pow(v,p.value_);
+    Double :: meassure ();
+    return ret ;
+  }
+
 
   static inline double log (const Double& v)
   {
-    return std::log(v.value_);
+    Double :: start();
+    double ret = std::log(v.value_);
+    Double :: meassure ();
+    return ret ;
   }
 
-  static inline double sqrt(const Double& v)
+  static inline double exp (const Double& v)
   {
-    return std::sqrt(v.value_);
+    return std::exp(v.value_);
+  }
+
+  static inline double sqrt(const Double& y)
+  {
+#if 0
+    Double x, z, tempf;
+    unsigned long *tfptr = ((unsigned long *)&tempf) + 1;
+
+    tempf = y;
+    *tfptr = (0xbfcdd90a - *tfptr)>>1; /* estimate of 1/sqrt(y) */
+    x =  tempf;
+    z =  y*0.5;                        /* hoist out the “/2”    */
+    x = (1.5*x) - (x*x)*(x*z);         /* iteration formula     */
+    x = (1.5*x) – (x*x)*(x*z);
+    x = (1.5*x) – (x*x)*(x*z);
+    x = (1.5*x) – (x*x)*(x*z);
+    x = (1.5*x) – (x*x)*(x*z);
+    Double result = x*y;
+    return result.value_;
+#endif
+    Double :: start();
+    double ret = std::sqrt(y.value_);
+    Double :: meassure ();
+    return ret ;
+
+
+    // Newton Verfahren 
+    {
+      Double w = y;
+      const double realsqrt = std::sqrt(y.value_);
+      while ( std::abs( w.value_ - realsqrt ) > 1e14 ) 
+      {
+        w = 0.5 * (w + y / w);
+      }
+      return w.value_;
+    }
   }
 
   static inline double sin (const Double& v)
@@ -886,6 +1078,11 @@ namespace ALUGridSpace
 namespace std
 {
 
+  inline double sqrt( const ALUGridSpace::Double &a )
+  {
+    return ALUGridSpace::sqrt( a );
+  }
+
   inline ALUGridSpace::Double abs ( const ALUGridSpace::Double &a )
   {
     return ALUGridSpace::abs( a );
@@ -894,6 +1091,29 @@ namespace std
   inline ALUGridSpace::Double fabs ( const ALUGridSpace::Double &a )
   {
     return ALUGridSpace::abs( a );
+  }
+
+  inline double exp( const ALUGridSpace::Double &a )
+  {
+    return ALUGridSpace::exp( a );
+  }
+
+  // wrap of std power 
+  inline double pow (const ALUGridSpace::Double& v, const double p)
+  {
+    return ALUGridSpace::pow(v,p);
+  }
+
+  // wrap of std power 
+  inline double pow (const ALUGridSpace::Double& v, const ALUGridSpace::Double& p)
+  {
+    return ALUGridSpace::pow(v,p);
+  }
+
+  // wrap of std power 
+  inline double pow(const double v, const ALUGridSpace::Double& p)
+  {
+    return ALUGridSpace::pow(v,p);
   }
 
   // wrap of std power 
@@ -998,4 +1218,22 @@ namespace std
   };
 }
 
+namespace Dune {
+
+  template< class Traits >
+  inline Dune::OutStreamInterface< Traits > &
+    operator<< ( Dune::OutStreamInterface< Traits > &out,
+                 const ALUGridSpace::Double a )
+  {
+    return out << a.value_;
+  }
+
+  template< class Traits >
+  inline Dune::InStreamInterface< Traits > &
+    operator>> ( Dune::InStreamInterface< Traits > &in,
+                 ALUGridSpace::Double &a )
+  {
+    return in >> a.value_;
+  }
+}
 #endif

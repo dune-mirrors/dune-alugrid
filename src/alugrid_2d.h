@@ -9,16 +9,32 @@
 #define ALU2DGRID_COMPATIBILITY_LEVEL 1
 #endif
 
-
 // include all headers 
 #include "stlheaders.h"
 
+//#define COUNT_ALUGRID_FLOPS
+
+#ifdef COUNT_ALUGRID_FLOPS
+#include "double.h"
+// overload original double 
+//#define double Double 
+#endif
+
 #include "indexstack.h"
+
+#ifdef COUNT_ALUGRID_FLOPS
+// overload original double 
+#define double Double 
+#endif
 
 #include "projectvertex.h"
 
 namespace ALU2DGrid
 {
+
+#ifdef COUNT_ALUGRID_FLOPS
+  typedef ALUGridSpace :: Double Double ;
+#endif
 
   using namespace std;
 
@@ -52,7 +68,7 @@ namespace ALUGridSpace
   using ALU2DGrid :: Refco;
 
   typedef ALU2DGrid :: AdaptRestrictProlong2d < 2, 3 > AdaptRestrictProlong2dType;
-  typedef VertexProjection < 2 > ProjectVertex_t;
+  typedef VertexProjection < 2 , double > ProjectVertex_t;
 
 }
 #endif // #if (ALU2DGRID_COMPATIBILITY_LEVEL < 2)
