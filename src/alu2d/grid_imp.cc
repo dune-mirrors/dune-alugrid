@@ -80,7 +80,7 @@ inline double Bndel < N,NV >::area() const
 }
 
 template < int N >
-inline void Fullvertex < N >::sethdl(IndexProvider *phdl) {
+inline void Vertex < N >::sethdl(IndexProvider *phdl) {
   hdl=phdl;
   assert(_idx==-1);
   _idx=hdl->getIndex(IndexProvider::IM_Vertices);
@@ -97,16 +97,14 @@ inline Edge::~Edge() {
 template < int N, int NV >
 inline void Element < N, NV >::sethdl(IndexProvider *phdl) 
 {
-  hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(IndexProvider::IM_Elements);
+  _idx = phdl->getIndex(IndexProvider::IM_Elements);
 }
 template < int N, int NV >
 inline void Bndel < N, NV >::sethdl(IndexProvider *phdl) 
 {
-  hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(IndexProvider::IM_Bnd);
+  _idx=phdl->getIndex(IndexProvider::IM_Bnd);
 }
 template < int N >
 inline Vertex < N >::~Vertex() {

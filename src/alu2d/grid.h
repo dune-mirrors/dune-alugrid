@@ -49,10 +49,9 @@ class Basic {
 
   protected :
 
-    Basic() : hdl(0), _idx(-1), refcount(0) {}
+    Basic() : _idx(-1), refcount(0) {}
     virtual ~Basic() { assert(!refcount) ; }
 
-    IndexProvider *hdl;
     int _idx;
     unsigned char refcount ; // 16 byte + 8 vtable 
     unsigned char _level; 
@@ -60,7 +59,8 @@ class Basic {
     int &setIndex () { return _idx ; }
 public:
 
-    virtual void sethdl(IndexProvider *phdl) = 0 ; // {hdl=phdl;}
+    virtual void sethdl(IndexProvider *phdl) = 0 ; 
+
     inline int getIndex () const { return _idx; }
 
     enum { nparts = 4, max_points = 4 } ;
@@ -186,7 +186,7 @@ template < int N, int NV > struct nconf_vtx
 // #definition:
 template < int N > class Vertex : public Listagent < Vertex < N > > // , public Basic 
 {
-  using Listagent < Vertex < N > > ::hdl;
+  //using Listagent < Vertex < N > > ::hdl;
   using Listagent < Vertex < N > > ::_idx;
   using Listagent < Vertex < N > > ::_level;
   public:
@@ -199,6 +199,7 @@ template < int N > class Vertex : public Listagent < Vertex < N > > // , public 
     Vertex(const Vertex &) ;
 
  protected :
+    IndexProvider* hdl ;
 
 #ifdef PERIODIC_VERTICES 
     Vertex *pernb[3];
@@ -218,6 +219,8 @@ template < int N > class Vertex : public Listagent < Vertex < N > > // , public 
     }
 
   public :
+    virtual void sethdl(IndexProvider *phdl);
+    IndexProvider* gethdl() { assert( hdl ); return hdl; }
 
     virtual ~Vertex(); 
 
@@ -257,7 +260,7 @@ class Fullvertex : public Vertex < N > {
     enum { ncoord = Vertex< N >::ncoord };
 
   protected:
-    using Basic::hdl;
+    //using Basic::hdl;
     using Basic::_idx;
 
   private:
@@ -269,7 +272,6 @@ class Fullvertex : public Vertex < N > {
 
   public :
 
-    virtual void sethdl(IndexProvider *phdl);
 
     Fullvertex() {}
 
@@ -297,6 +299,7 @@ class Fullvertex : public Vertex < N > {
 // ***************************************************
 class Edge : public Basic {
   virtual void sethdl(IndexProvider *phdl);
+  IndexProvider* hdl;
  public:
     Edge(IndexProvider *phdl) {
       sethdl(phdl);
@@ -483,7 +486,6 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
     Element & operator = (const Element &) ;
 
   public :
-    using Basic :: hdl;
     typedef Vertex < N > vertex_t;
     typedef Fullvertex < N > fullvertex_t;
     typedef Vtx_btree < N, NV > vtx_btree_t;
@@ -496,6 +498,8 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
     enum { ncoord = vertex_t::ncoord };
 
     virtual void sethdl(IndexProvider *phdl);
+    IndexProvider* gethdl() const { return vertex(0)->gethdl(); }
+
     int thinis(thintype_t t) const { return t == thinelement_t::element_like ; }
 
   protected:
@@ -541,7 +545,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
     int nv() const { return (NV==3)?3:nvertices ; }
 
-    using Basic::hdl;
+    //using Basic::hdl;
     using Basic::_idx;
 
     double _area;
@@ -678,7 +682,7 @@ class SubtreeIterator;
 // #definition:
 template < class A > class Hier : public A {
 
-  using A :: hdl;
+  //using A :: hdl;
   public :
 
   typedef typename A::vertex_t vertex_t;
@@ -790,7 +794,6 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
 
   protected :
 
-    using Basic :: hdl;
   struct c {
 
     enum {nf=1,nv=2};
@@ -823,6 +826,7 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
     // typedef int bnd_part_t[max_bndnr+offset_bndnr+1];
 
     virtual void sethdl(IndexProvider *phdl);
+    IndexProvider* gethdl() const { return vertex(0)->gethdl(); }
 
     using thinelement_t::nbel;
 
@@ -838,7 +842,7 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
 
     Bndel(bnd_t t = none) : typ(t) , _segmentIndex( -1 ) { }
 
-    using Basic::hdl;
+    //using Basic::hdl;
     using Basic::_idx;
 
     bnd_t typ ;

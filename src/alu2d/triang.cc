@@ -310,7 +310,8 @@ int Triang < N,NV >::split2tr(void * (&e)[Basic::nparts], Listagency < vertex_t 
   Triang* t1;
   Triang* t2;
   Edge *newedge[3];
-  newedge[2]=new Edge(hdl);
+  IndexProvider* hdl = this->gethdl();
+  newedge[2]=new Edge( hdl );
 
   mysplit = thinelement_t::triang_conf2;
 
@@ -580,6 +581,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
   bool usehvtx[NV];
   int i;
   double p[ncoord];
+  IndexProvider* hdl = this->gethdl();
 
   mysplit = thinelement_t::triang_quarter;
 
@@ -1030,6 +1032,7 @@ int Bndel_triang < N,NV >::split(void * (&e)[Basic::nparts], Listagency < vertex
 {
   int idx[2];
   //  nconf_vtx_t *ncv;
+  IndexProvider* hdl = this->gethdl();
 
   assert(sr == thinelement_t::triang_bnd);
   assert(splitrule() == thinelement_t::unsplit);

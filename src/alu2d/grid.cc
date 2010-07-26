@@ -88,6 +88,9 @@ Element < N, NV >::Element()
 template < int N, int NV >
 Element < N, NV >::~Element() 
 {
+  assert(_idx>=0);
+  gethdl()->freeIndex(IndexProvider::IM_Elements,_idx);
+
   for (int i=0;i<NV;++i) 
   {
     if (connect.edge[i]) 
@@ -97,11 +100,7 @@ Element < N, NV >::~Element()
       delete connect.edge[i];
     }
   }
-  assert(hdl);
-  if (hdl) {
-    assert(_idx>=0);
-    hdl->freeIndex(IndexProvider::IM_Elements,_idx);
-  }
+
 }
 
 // ***************************************************
@@ -187,7 +186,7 @@ int Element < N, NV >::get_splitpoint(int fce, double pos, double (&ppoint) [nco
     lpos[i] = (1.-npos)*rc0[i] + npos*rc1[i];
 
   // apply vertex projection, if existent 
-  dynamic_cast< Hmesh<N,NV>* >(hdl)->projectVertex( this, lpos, ppoint );
+  dynamic_cast< Hmesh<N,NV>* >(gethdl())->projectVertex( this, lpos, ppoint );
 
 #endif
 
@@ -220,7 +219,7 @@ int Element < N, NV >::get_splitpoint(const double (&pos) [2], double (&ppoint) 
 #ifndef ALU2D_OLD_BND_PROJECTION
 
   // apply vertex projection, if existent 
-  dynamic_cast< Hmesh<N,NV>* >(hdl)->projectVertex( this, pos, ppoint );
+  dynamic_cast< Hmesh<N,NV>* >(gethdl())->projectVertex( this, pos, ppoint );
 
 #endif
 
@@ -486,16 +485,17 @@ void Element < N, NV >::removehvtx(int fce,vertex_t *vtx)
 }
 
 template < int N, int NV >
-Bndel < N, NV >::~Bndel() {
-  if (connect.edge) {
+Bndel < N, NV >::~Bndel() 
+{
+  if (connect.edge) 
+  {
     connect.edge->detach();
     if (connect.edge->isfree())
       delete connect.edge;
   }
-  if (hdl) {
-    assert(_idx>=0);
-    hdl->freeIndex(IndexProvider::IM_Bnd,_idx);
-  }
+
+  assert(_idx>=0);
+  gethdl()->freeIndex(IndexProvider::IM_Bnd,_idx);
 }
 
 template < int N, int NV >
@@ -675,7 +675,7 @@ int Bndel < N, NV >::get_splitpoint(int fce, double pos, double (&ppoint) [ncoor
 #else // use new method 
 
   // apply vertex projection, if existent 
-  dynamic_cast< Hmesh<N,NV>* >(hdl)->projectVertex( this, pos, ppoint );
+  dynamic_cast< Hmesh<N,NV>* >(gethdl())->projectVertex( this, pos, ppoint );
 
 #endif
 

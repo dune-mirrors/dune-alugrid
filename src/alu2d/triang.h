@@ -51,7 +51,7 @@ class Triang : public Hier < Element < N,NV > > {
     using element_t::mod;
 
     using helement_t::connect;
-    using helement_t::hdl;
+    //using helement_t::hdl;
     using helement_t::level;
     using helement_t::mysplit;
 
@@ -148,7 +148,6 @@ class Bndel_triang : public Hier < Bndel < N, NV > > {
 
   protected:
     using hbndel_t::connect;
-    using hbndel_t::hdl;
     using hbndel_t::mysplit;
     using hbndel_t::_segmentIndex;
 
