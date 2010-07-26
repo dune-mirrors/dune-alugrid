@@ -86,14 +86,16 @@ inline void Vertex < N >::sethdl(IndexProvider *phdl) {
   _idx=hdl->getIndex(IndexProvider::IM_Vertices);
 }
 inline void Edge::sethdl(IndexProvider *phdl) {
-  hdl=phdl;
   assert(_idx==-1);
-  _idx=hdl->getIndex(IndexProvider::IM_Edges);
+  _idx=phdl->getIndex(IndexProvider::IM_Edges);
 }
-inline Edge::~Edge() {
+
+inline void Edge::freeIndex(IndexProvider* phdl)  
+{
   assert(isfree());
-  hdl->freeIndex(IndexProvider::IM_Edges,_idx);
+  phdl->freeIndex(IndexProvider::IM_Edges,_idx);
 }
+
 template < int N, int NV >
 inline void Element < N, NV >::sethdl(IndexProvider *phdl) 
 {

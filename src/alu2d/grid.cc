@@ -89,7 +89,8 @@ template < int N, int NV >
 Element < N, NV >::~Element() 
 {
   assert(_idx>=0);
-  gethdl()->freeIndex(IndexProvider::IM_Elements,_idx);
+  IndexProvider* hdl = gethdl();
+  hdl->freeIndex(IndexProvider::IM_Elements,_idx);
 
   for (int i=0;i<NV;++i) 
   {
@@ -97,7 +98,10 @@ Element < N, NV >::~Element()
     {
       connect.edge[i]->detach();
       if (connect.edge[i]->isfree())
-      delete connect.edge[i];
+      {
+        connect.edge[i]->freeIndex( hdl );
+        delete connect.edge[i];
+      }
     }
   }
 
@@ -489,15 +493,19 @@ void Element < N, NV >::removehvtx(int fce,vertex_t *vtx)
 template < int N, int NV >
 Bndel < N, NV >::~Bndel() 
 {
+  IndexProvider* hdl = gethdl();
+  assert(_idx>=0);
+  hdl->freeIndex(IndexProvider::IM_Bnd,_idx);
+
   if (connect.edge) 
   {
     connect.edge->detach();
     if (connect.edge->isfree())
+    {
+      connect.edge->freeIndex( hdl );
       delete connect.edge;
+    }
   }
-
-  assert(_idx>=0);
-  gethdl()->freeIndex(IndexProvider::IM_Bnd,_idx);
 }
 
 template < int N, int NV >

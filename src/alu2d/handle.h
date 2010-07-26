@@ -312,6 +312,7 @@ class Hmesh : public Hmesh_basic<N,NV> {
   {
     cout << "short int    = " << sizeof(short int) << endl ;
     cout << "Basic        = " << sizeof( Basic  ) << endl;
+    cout << "Edge         = " << sizeof( Edge   ) << endl;
     cout << "Element      = " << sizeof( element_t ) << endl;
     cout << "connect      = " << sizeof( typename element_t :: connect_t  ) << endl;
     cout << "BndEl        = " << sizeof( bndel_t ) << endl;

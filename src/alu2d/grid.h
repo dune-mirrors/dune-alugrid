@@ -304,17 +304,14 @@ class Fullvertex : public Vertex < N > {
 // ***************************************************
 class Edge : public Basic 
 {
-  virtual void sethdl(IndexProvider *phdl);
-  IndexProvider* hdl;
+    virtual void sethdl(IndexProvider *phdl);
  public:
     using Basic :: attach ;
     using Basic :: detach ; 
     using Basic :: isfree ;
 
-    Edge(IndexProvider *phdl) {
-      sethdl(phdl);
-    }
-    ~Edge();
+    explicit Edge(IndexProvider *phdl) { sethdl(phdl); }
+    void freeIndex(IndexProvider* phdl) ;
     void write(ostream &) const ;
     void read(istream &) ;
 };
@@ -530,8 +527,6 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
       
       signed char normdir [NV] ;
 
-
-
       c() ;
 
      ~c() ;
@@ -552,8 +547,8 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
     unsigned char& nvertices () { return refcount; }
     const unsigned char nvertices () const { return refcount; }
 
-    int mod(int i) const { return i % nv(); }
     int nv() const { return (NV==3) ? 3 : nvertices() ; }
+    int mod(const int i) const { return i % nv(); }
 
     using Basic::_idx;
     using Basic::refcount ; // used as nvertices 
