@@ -178,7 +178,7 @@ class Bndel_triang : public Hier < Bndel < N, NV > > {
 
     Bndel_triang(vertex_t *, vertex_t *, bnd_t ) ;
 
-   ~Bndel_triang() { }
+   virtual ~Bndel_triang() { }
 
    virtual bndel_t *create(vertex_t *v1 , vertex_t *v2, int ptyp) const
     {
@@ -209,6 +209,7 @@ class Bndel_periodic : public Bndel_triang < N,NV >
   public:
 
     typedef Vertex < N > vertex_t;
+
     typedef Multivertexadapter < N, NV > multivertexadapter_t;
     typedef nconf_vtx < N,NV > nconf_vtx_t;
 
@@ -239,15 +240,18 @@ class Bndel_periodic : public Bndel_triang < N,NV >
     Bndel_periodic *periodic_nb;
 
     Bndel_periodic()
-      : bndel_triang_t(-1,bndel_t::periodic), periodic_nb(0)
+      : bndel_triang_t(-1,bndel_t::periodic), 
+        periodic_nb(0)
       { }
 
     Bndel_periodic(const int segmentIndex)
-      : bndel_triang_t(segmentIndex, bndel_t::periodic), periodic_nb(0)
+      : bndel_triang_t(segmentIndex, bndel_t::periodic), 
+        periodic_nb(0)
       { }
 
     Bndel_periodic(vertex_t *v1 , vertex_t *v2)
-      : bndel_triang_t(v1,v2,bndel_t::periodic),periodic_nb(0)
+      : bndel_triang_t(v1,v2,bndel_t::periodic),
+        periodic_nb(0)
       { }
     
     virtual double area() const {
@@ -276,7 +280,7 @@ class Bndel_periodic : public Bndel_triang < N,NV >
 
     virtual int split(void * (&el)[Basic::nparts], Listagency < vertex_t > * agnc,
                       multivertexadapter_t & mva, nconf_vtx_t *ncv,splitrule_t,
-		      int,Refco::tag_t,prolong_basic_t *pro_el);
+		                  int,Refco::tag_t,prolong_basic_t *pro_el);
 
     virtual int docoarsen(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
  

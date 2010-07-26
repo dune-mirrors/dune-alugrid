@@ -97,6 +97,7 @@ bool Hmesh<N,NV>::setup_grid(istream& macrofile, double& time, long unsigned int
   bool restart = ascireadtriang (macrofile,time,nbr);
 
   /* set periodic neighbours of vertices */
+#ifdef PERIODIC_VERTICES
   {
     Listwalkptr < hbndel_t > walkb(*this);
     for (walkb->first();!walkb->done();walkb->next())
@@ -112,25 +113,26 @@ bool Hmesh<N,NV>::setup_grid(istream& macrofile, double& time, long unsigned int
       }
     }
   }
+
   // consider periodic vertices along diagonal
   {
     Listwalkptr < vertex_t > walkv(*this);
-    for (walkv->first();!walkv->done();walkv->next())
+    for (walkv->first(); !walkv->done(); walkv->next())
     {
       vertex_t *v = (vertex_t *)&walkv->getitem();
       if (v->get_nr_of_per_nbs() == 2)
       {
-        int i,j;
-        for (i=0;i<2;i++)
+        for (int i = 0; i<2; ++i)
         {
           vertex_t *pnv = v->get_pernb(i);
-          for (j=0;j<pnv->get_nr_of_per_nbs();j++)
+          for (int j=0; j < pnv->get_nr_of_per_nbs(); ++j)
             v->set_pernb(pnv->get_pernb(j));
         }
         assert(v->get_nr_of_per_nbs() == 3);
       }
     }
   }
+#endif
 
   return restart;
 }

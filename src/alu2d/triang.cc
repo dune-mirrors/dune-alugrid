@@ -1182,10 +1182,13 @@ int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts], Listagency < ver
     ((Bndel_periodic*)(periodic_nb->down()))
       ->set_pnb((Bndel_periodic*)(el[1]));
 
+#ifdef PERIODIC_VERTICES
     ((Bndel_periodic*)(el[0]))->vertex(1)
       ->set_pernb(((Bndel_periodic*)(periodic_nb->down()))->vertex(1));
+
     ((Bndel_periodic*)(periodic_nb->down()))->vertex(1)
       ->set_pernb(((Bndel_periodic*)(el[0]))->vertex(1));
+#endif
   } else {
 
     // split

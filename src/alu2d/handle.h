@@ -310,6 +310,7 @@ class Hmesh : public Hmesh_basic<N,NV> {
 
   void printMemSize () 
   {
+    cout << "short int    = " << sizeof(short int) << endl ;
     cout << "Basic        = " << sizeof( Basic  ) << endl;
     cout << "Element      = " << sizeof( element_t ) << endl;
     cout << "BndEl        = " << sizeof( bndel_t ) << endl;

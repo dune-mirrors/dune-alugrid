@@ -6,16 +6,41 @@
 
 static const double EPS = 1e-8;
 
+#ifdef PERIODIC_VERTICES
 template < int N >
-inline Vertex < N > *Vertex < N >::get_pernb(int pidx)
+inline Vertex < N >*  Vertex < N >::get_pernb(int pidx)
 {
-  Vertex *lret;
+  Vertex < N > *lret;
 
-  if (pidx < nr_of_pernbs) lret = pernb[pidx];
-  else lret = (Vertex *)0;
+  if (pidx < nr_of_pernbs) 
+    lret = pernb[pidx];
+  else 
+    lret = (Vertex < N > *)0;
 
   return lret; 
 } 
+
+template < int N >
+inline void Vertex < N >::set_pernb(Vertex< N > *pv)
+{
+  int li, lnew = 1;
+
+  for (li=0;li<nr_of_pernbs;li++)
+  {
+    if (pv == pernb[li]) lnew = 0;
+  }
+
+  if (pv == this) lnew = 0;
+
+  if (lnew)
+  {
+    assert(nr_of_pernbs < 3);
+
+    pernb[nr_of_pernbs] = pv;
+    nr_of_pernbs++;
+  }
+}
+#endif
 
 // ***************************************************
 // #begin(method)
@@ -30,7 +55,9 @@ inline Vertex < N > *Vertex < N >::get_pernb(int pidx)
 // ***************************************************
 
 template < int N >
-inline Fullvertex < N >::Fullvertex(double (&p)[ncoord],int level) : Vertex < N >( level ) {
+inline Fullvertex < N >::Fullvertex(double (&p)[ncoord],int level) 
+  : Vertex < N >( level ) 
+{
   for(int i = 0 ; i < ncoord ; i ++) 
     vcoord[i] = p[i] ;
 }

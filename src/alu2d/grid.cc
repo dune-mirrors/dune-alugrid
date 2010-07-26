@@ -1,26 +1,5 @@
 #include "grid.h"
 
-template < int N >
-void Vertex < N >::set_pernb(Vertex *pv)
-{
-  int li, lnew = 1;
-
-  for (li=0;li<nr_of_pernbs;li++)
-  {
-    if (pv == pernb[li]) lnew = 0;
-  }
-
-  if (pv == this) lnew = 0;
-
-  if (lnew)
-  {
-    assert(nr_of_pernbs < 3);
-
-    pernb[nr_of_pernbs] = pv;
-    nr_of_pernbs++;
-  }
-}
-
 // ***************************************************
 // #begin(method)
 // #method:
@@ -95,7 +74,7 @@ void Edge::read(istream & in) {
 
 template < int N, int NV >
 Element < N, NV >::Element()
-: _area(-1.0), _minheight(-1.0)
+: _area(-1.0)
 {
   int i,j;
 
@@ -372,15 +351,6 @@ void Element < N, NV >::init()
   }
 
   assert(_area > 0.0);
-
-  /* calculate minheight */
-
-  double maxlen = _sidelength[0];
-  for (int i=1;i<numfaces();i++)
-    maxlen = ((_sidelength[i] > maxlen) ? _sidelength[i] : maxlen);
-  assert(maxlen > 0.0);
-
-  _minheight = 2.0 * _area / maxlen;
 }
 
 // ***************************************************
