@@ -555,7 +555,6 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
     double _area;
     double _outernormal[NV][ncoord]; // NV * ncoord * 8 = ( z.B. 48 )
-    //double _sidelength[NV];
 
   public :
     typedef c connect_t ;
@@ -612,11 +611,12 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
     double sidelength(int pfce) const 
     {
+      double normal[ ncoord ];
+      outernormal( pfce , normal );
       double length  = 0;
       for (int k=0; k<ncoord; ++k)
-        length += _outernormal[mod(pfce)][k] * _outernormal[mod(pfce)][k];
+        length += normal[k] * normal[k];
       return std::sqrt( length );
-      //return _sidelength[mod(pfce)]; 
     }
 
     double area() const { return _area; }

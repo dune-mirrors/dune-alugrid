@@ -347,10 +347,10 @@ inline Element < N, NV >::c::~c() {
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-inline void Element < N, NV >::outernormal(int fce,double (&n)[ncoord]) const
+inline void Element < N, NV >::outernormal(int fce, double (&n)[ncoord]) const
 {
-  for (int i=0;i<ncoord;++i)
-    n[i]= _outernormal[mod(fce)][i];
+  for (int i=0; i<ncoord; ++i)
+    n[i] = _outernormal[mod(fce)][i];
 }
 
 // ***************************************************
