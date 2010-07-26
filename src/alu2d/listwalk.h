@@ -138,7 +138,7 @@ template < class A > class Listwalk {
     virtual void next() = 0;
    
     // set iterator to previous element  
-    //virtual void prev() = 0;
+    virtual void prev() = 0;
    
     // return done 
     virtual int done() const = 0;
@@ -177,7 +177,7 @@ template < class A > class Listwalk_empty : public Listwalk< A >
     
     virtual void next() { }
     
-    //virtual void prev() { }
+    virtual void prev() { }
     
     virtual int done() const { return 1 ; }
 
@@ -258,13 +258,11 @@ template < class A, class B, class C > class Alignwalk : public Listwalk < C > {
 
     }
 
-    /*
     void prev() {
 
       curr ? (walk2.prev(), (walk2.done() ? (walk1.last(), curr = 0) : 0)) : (walk1.prev(), 0) ;
 
     }
-    */
 
     int size() {
 
@@ -325,7 +323,7 @@ template < class A > class Listwalk_impl : public Listwalk < A > {
 
     void next()  { if(curr) curr = curr->Listagent < A > :: next() ; }
 
-    //void prev()  { if(curr) curr = curr->Listagent < A > :: prev() ; }
+    void prev()  { if(curr) curr = curr->Listagent < A > :: prev() ; }
 
     int done() const { return (curr == 0) ? 1 : 0 ; }
 
@@ -476,7 +474,6 @@ template < class A > class Leafwalk : public Listwalk < Hier < A > >
         stack[ ++ pos] = (e = e->down()) ;
     }
     
-    /*
     void prev() {
 
       for( ; pos > 0 ; pos -- )
@@ -505,7 +502,6 @@ template < class A > class Leafwalk : public Listwalk < Hier < A > >
       }
 
     }
-    */
   
     int size() 
     {
@@ -655,13 +651,11 @@ template < class A > class Levelwalk : public Listwalk < Hier < A > > {
 
     }
 
-    /*
     void prev() 
     {
       cerr << "Levelwalk < . > .prev() geht nicht" << endl ;
       abort();
     }
-    */
 
     int size() 
     {
