@@ -59,8 +59,8 @@ class Basic {
     unsigned char numchild ;
 
     int &setIndex () { return _idx ; }
-  public:
 
+  public:
     virtual void sethdl(IndexProvider *phdl) = 0 ; 
 
     inline int getIndex () const { return _idx; }
@@ -265,9 +265,6 @@ class Fullvertex : public Vertex < N > {
   public:
     enum { ncoord = Vertex< N >::ncoord };
 
-  protected:
-    using Basic::_idx;
-
   private:
     double vcoord[ncoord] ;
   
@@ -317,6 +314,8 @@ class Edge : public Basic
 };
 template < int N, int NV > class Triang ;
 template < int N, int NV > class Bndel_triang ;
+
+
 // ***************************************************
 // #begin(class)
 // #description:
@@ -352,7 +351,7 @@ class Refco : public Basic {
 // #description:
 //   Verfeinerungsinformation
 // #definition:
-class Refco_el : protected Refco 
+class Refco_el : public Refco
 {
 
   private :

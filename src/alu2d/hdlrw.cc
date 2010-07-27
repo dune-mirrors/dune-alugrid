@@ -721,8 +721,9 @@ Hmesh<N,NV>::recoverIndicies(istream& in)
       {
         element_t &elem = hier.getitem();
 
-        // read element index 
-      	in.read ( ((char *) &(elem.setIndex())), sizeof(int) );
+        // read element index
+        int &index = elem.setIndex();
+      	in.read ( ((char *)&index), sizeof(int) );
         assert( elem.getIndex() < elSize );
         elementIsHole[elem.getIndex()] = false;
         
