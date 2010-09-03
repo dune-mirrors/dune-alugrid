@@ -6,52 +6,51 @@ typedef basic_stringbuf<char>  strstreambuf_t ;
 #include "handle.h"
 
 template <int N,int NV>
-bool Hmesh<N,NV> :: 
-ascireadtriang(istream &in,
-               double& time, 
-               unsigned long int& nbr)
+bool
+Hmesh<N,NV> :: ascireadtriang(istream &in, double &time, unsigned long int &nbr)
 {
-  bool isbackup=false;
-  // Wiederaufsetzen?
+  bool isbackup = false; // Wiederaufsetzen?
   int c = in.peek();
-  //int c = in.get () ;
-  //assert (!in.eof ()) ;
-  //in.putback (c) ;
-  assert (in.good ()) ;
-  if (c == int ('!')) {
-    // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
-    // und auf 'Backup' untersuchen.
-    strstreambuf_t buf ;
-    in.get () ;         // Das Kommentarzeichen wird entfernt.
-    in.get (buf) ;
-    int len = in.gcount () ;
-    // in.get () ;         // Der folgende Zeilenumbruch wird auch entfernt.
-    istream is (& buf) ;
-    char * str = new char [len + 1] ;
-    assert (str) ;
-    is >> str ;         // Das erste Wort nach dem Kommentar steht jetzt in str.
-    // Alle weiteren k"onnen noch aus is gelesen werden, das
-    // array str ist so lang, wie die gesamte Zeile in 'buf'.
-    
-    if (0 == strcmp (str, "Backup")) {
+  assert(in.good());
+  // Beginnt die erste Zeile mit einem Kommentarzeichen?
+  if( c == int('!') )
+  {
+    in.get(); // Kommentarzeichen entfernen
+
+    // Erste Zeile in einen strstreambuf lesen und auf 'Backup' untersuchen.
+    strstreambuf_t buf;
+    in.get(buf);
+    istream is(& buf);
+    std::string str;
+    is >> str;
+    if( str == std::string( "Backup" ) )
+    {
+      isbackup = true;
       cerr << "Backup-file found" << endl;
-      // cerr << "STIRNG: " << buf << endl;
-      int rrule;
       is >> time >> nbr;
-      is >> _nconfDeg >> rrule; 
-      refinement_rule=(Refco::tag_t)rrule;
-      assert(_nconfDeg>=0);
-      assert(_nconfDeg==0 || refinement_rule==Refco::quart);
-      isbackup=true;
+      int rrule;
+      is >> _nconfDeg >> rrule;
+      refinement_rule = (Refco::tag_t)rrule;
+      if( _nconfDeg < 0 )
+      {
+        cerr << "Error in Hmesh :: ascireadtriang: "
+             << "Negative degree of nonconformity encountered." << endl;
+        abort();
+      }
+      if( (_nconfDeg > 0) && (refinement_rule != Refco::quart) )
+      {
+        cerr << "Error in Hmesh :: asciireadtriang: "
+             << "Nonconform grids must use quartering as refinement rule." << endl;
+        abort();
+      }
     } 
-    else if (0 != strcmp (str, "Triangles")) 
+    else if( str != std::string( "Triangles" ) )
     {
       cerr << "Error in Hmesh :: ascireadtriang: "
            << "Wrong macrogrid format: " << endl;
       cerr << "file with !-line but command not recognized" << endl;
       abort();
     }
-    delete [] str;
   }
   hmesh_basic_t::ascireadtriang(in, isbackup);
   return isbackup;
