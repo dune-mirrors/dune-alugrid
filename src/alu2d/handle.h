@@ -293,20 +293,17 @@ class Hmesh : public Hmesh_basic<N,NV> {
 
   nconf_vtx_t *ncv;
 
-  void setup_grid(const char *);
-  bool setup_grid( istream& , double& , unsigned long int& );
+  void setup_grid(const std::string &);
+  bool setup_grid(istream &, double &, unsigned long int & );
 
-  //bool ascireadtriang(const char *,double&, unsigned long int&) ;
-
-  bool ascireadtriang(istream &,double&, unsigned long int&) ;
-
-  void asciwritetriang(const char *,double , unsigned long int) ;
+  bool ascireadtriang(istream &, double &, unsigned long int & );
+  void asciwritetriang(const std::string &, double, unsigned long int);
 
   public:
 
   Hmesh();
 
-  Hmesh(const char *,int, Refco::tag_t pref_rule) ;
+  Hmesh(const std::string &, int, Refco::tag_t pref_rule);
 
   void printMemSize () 
   {
@@ -327,19 +324,17 @@ class Hmesh : public Hmesh_basic<N,NV> {
 
   // constructor taking istream with macro triang
   // number of hanging nodes and refinement rule 
-  Hmesh(istream&, int, Refco::tag_t pref_rule) ;
+  Hmesh(istream&, int, Refco::tag_t pref_rule);
 
-  Hmesh(const char *, Refco::tag_t pref_rule = Refco::ref_1 ) ;
+  Hmesh(const std::string &, Refco::tag_t pref_rule = Refco::ref_1);
 
-  Hmesh(const char *,int) ;
+  Hmesh(const std::string &, int);
 
   virtual ~Hmesh() ;
 
-  void storeGrid(const char*,
-                 double , unsigned long int);
+  void storeGrid(const std::string &, double, unsigned long int);
 
-  bool recoverGrid(const char*,
-                   double&, unsigned long int&);
+  bool recoverGrid(const std::string &, double&, unsigned long int&);
 
   void storeIndicies(ostream& out);
   void recoverIndicies(istream& in);

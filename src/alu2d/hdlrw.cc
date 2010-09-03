@@ -362,9 +362,10 @@ void Hmesh_basic<N,NV> :: setorientation()
 }
 
 template <int N,int NV>
-void Hmesh<N,NV>::asciwritetriang(const char *filename,
-                                  double time, unsigned long int nbr) {
-
+void
+Hmesh<N,NV>::asciwritetriang(const std::string &filename,
+                             double time, unsigned long int nbr)
+{
 #ifndef NDEBUG
   cerr << "\n  Hmesh_basic::asciwritetriang(?) opens: " ;
   cerr << filename << "\n" << endl ;
@@ -372,7 +373,7 @@ void Hmesh<N,NV>::asciwritetriang(const char *filename,
 
   vl.renumber() ;
   
-  ofstream out(filename, ios::out|ios::trunc) ;
+  ofstream out(filename.c_str(), ios::out|ios::trunc) ;
   
   out.setf(ios::fixed, ios::floatfield) ;
   
@@ -386,7 +387,9 @@ void Hmesh<N,NV>::asciwritetriang(const char *filename,
 }
  
 template <int N,int NV>
-void Hmesh_basic<N,NV>::asciwritetriang(ostream &out) {
+void
+Hmesh_basic<N,NV>::asciwritetriang(ostream &out)
+{
   {
  
     Listwalk_impl < vertex_t > walk(vl) ;
@@ -485,25 +488,18 @@ void Hmesh_basic<N,NV>::asciwritetriang(ostream &out) {
 
 template <int N,int NV>
 void
-Hmesh<N,NV>::storeGrid(const char* fbase,
-     double time, unsigned long int nbr)
+Hmesh<N,NV>::storeGrid(const std::string &fbase,
+                       double time, unsigned long int nbr)
 {
-  char *filename;
+  asciwritetriang(fbase,time,nbr);
 
-  filename=new char[strlen(fbase)+15];
-  // filename=(char*)alloca(strlen(fbase)+15);
-  sprintf(filename,"%s",fbase);
-
-  asciwritetriang (filename,time,nbr);
-
-  sprintf(filename,"%s.refine",fbase);
-
+  const std::string refineFile = fbase + ".refine";
 #ifndef NDEBUG
   cerr << "Hmesh::writeRecoverFile(): writing file \""
-       << filename << "\" ...";
+       << refineFile << "\" ...";
 #endif
 
-  ofstream out(filename, ios::out|ios::trunc);
+  ofstream out(refineFile.c_str(), ios::out|ios::trunc);
   assert(out);
 
   // out.setf(ios::scientific, ios::floatfield);
@@ -540,7 +536,6 @@ Hmesh<N,NV>::storeGrid(const char* fbase,
   */
   storeIndicies(out);
 
-  delete [] filename;
 #ifndef NDEBUG
   cout << " done." << endl;
 #endif
@@ -592,18 +587,16 @@ Hmesh<N,NV>::storeIndicies(ostream& out)
 
 template <int N,int NV>
 bool
-Hmesh<N,NV>::recoverGrid(const char* recoverFile,
-                   double& time, unsigned long int &nbr)
+Hmesh<N,NV>::recoverGrid(const std::string &recoverFile,
+                         double& time, unsigned long int &nbr)
 {
   int compwarn = 0;
 
   cout << "Hmesh::recoverGrid(): trying to read file \""
        << recoverFile << "\" ...";
 
-  char filename[1000];
-  sprintf(filename,"%s.refine",recoverFile);
-
-  ifstream in(filename);
+  const std::string refineFile = recoverFile + ".refine";
+  ifstream in(refineFile.c_str());
   if( !in )
   {
     cout << " FAILED." << endl;

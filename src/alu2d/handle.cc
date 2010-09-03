@@ -9,8 +9,9 @@ Hmesh<N,NV>::Hmesh() : _nconfDeg(-1), refinement_rule(Refco::none),
 }
 
 template < int N, int NV >
-Hmesh<N,NV>::Hmesh(const char *macroname,int pnconfDeg,Refco::tag_t pref_rule) :
-  _nconfDeg(pnconfDeg), refinement_rule(pref_rule) {
+Hmesh<N,NV>::Hmesh(const std::string &macroname, int pnconfDeg, Refco::tag_t pref_rule) :
+  _nconfDeg(pnconfDeg), refinement_rule(pref_rule)
+{
   setup_grid(macroname);      
 }
 
@@ -33,21 +34,21 @@ Hmesh<N,NV>::Hmesh(istream& macrofile, int pnconfDeg, Refco::tag_t pref_rule) :
 }
 
 template < int N, int NV >
-Hmesh<N,NV>::Hmesh(const char *macroname,int pnconfDeg) :
+Hmesh<N,NV>::Hmesh(const std::string &macroname,int pnconfDeg) :
   _nconfDeg(pnconfDeg), refinement_rule(Refco::quart) 
 {
   setup_grid(macroname);    
 }
 
 template < int N, int NV >
-Hmesh<N,NV>::Hmesh(const char *macroname, Refco::tag_t  pref_rule) :
+Hmesh<N,NV>::Hmesh(const std::string &macroname, Refco::tag_t  pref_rule) :
   _nconfDeg(0), refinement_rule(pref_rule) 
 {
   setup_grid(macroname);    
 }
 
 template < int N, int NV >
-void Hmesh<N,NV>::setup_grid(const char* filename) 
+void Hmesh<N,NV>::setup_grid(const std::string &filename) 
 {
 #ifndef NDEBUG 
   cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
@@ -55,30 +56,31 @@ void Hmesh<N,NV>::setup_grid(const char* filename)
 #endif
 
   ifstream in;
-  in.open(filename, ios::in) ;
-
-  if (!in.good()) {
+  in.open(filename.c_str(), ios::in);
+  if( !in.good() )
+  {
     in.clear();
-    string macro(filename);
-    macro+=".macro";
-    cerr << "Warning: file " << filename << " not found, trying " << macro << endl;
-    in.open(macro.c_str(), ios::in) ;
+    string macro = filename + ".macro";
+    cerr << "Warning: file \"" << filename << "\" not found, trying \"" << macro
+         << "\"." << endl;
+    in.open(macro.c_str(), ios::in);
   }
-  assert(in) ;
+  assert(in);
 
   double time;
   long unsigned int nbr;
 
   // call setup with istream 
-  bool restart = setup_grid(in, time, nbr);
+  const bool restart = setup_grid(in, time, nbr);
 
   /* END: set periodic neighbours of vertices */
-  if (restart) {
+  if( restart )
+  {
     double time2 = time;
     long unsigned int nbr2 = nbr;
     recoverGrid(filename,time2,nbr2);
-    if (fabs(time2-time) + 
-        fabs((double (nbr2-nbr)))> 1e-5) {
+    if( (fabs(time2 - time) > 1e-5) || (nbr2 != nbr) )
+    {
       cerr << "ERROR in Hmesh::setup_grid: "
            << "backup-file and macro-grid file not compatible" << endl;
       abort();
@@ -87,7 +89,7 @@ void Hmesh<N,NV>::setup_grid(const char* filename)
 }
 
 template < int N, int NV >
-bool Hmesh<N,NV>::setup_grid(istream& macrofile, double& time, long unsigned int& nbr) 
+bool Hmesh<N,NV>::setup_grid(istream &macrofile, double &time, long unsigned int &nbr) 
 {
   ncv=NULL;
   adp = new multivertexadapter_t;
