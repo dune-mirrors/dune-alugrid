@@ -1,6 +1,8 @@
 // typdef these stream because this code uses a lot strstream
 typedef basic_stringbuf<char>  strstreambuf_t ;
 
+#include <vector>
+
 #include "grid.h"
 #include "triang.h"
 #include "handle.h"
@@ -59,158 +61,150 @@ Hmesh<N,NV> :: ascireadtriang(istream &in, double &time, unsigned long int &nbr)
 template <int N,int NV>
 void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose) 
 {
-
-  vertex_t ** v = 0 ;
-
-  int nv = 0 ;
-
-  {
-    in >> nv ;
+  // read vertices
+  int nv = 0;
+  in >> nv;
     
 #ifndef NDEBUG
-    if( verbose ) 
-      cerr << "    Number of Vertices:             " << nv << endl ;
+  if( verbose ) 
+    cerr << "    Number of Vertices:             " << nv << endl;
 #endif
-    
-    v = new vertex_t *[nv] ;
 
-    assert(v) ;
-    
-    for(int i = 0; i < nv ; i ++) {
-         
-      vertex_t * n = new fullvertex_t() ;
-    
-      n->read(in) ;
-
-      v[i] = n ;
-
-      vl.insert(n) ;
-      
-    }
-
+  std::vector< vertex_t * > v( nv );
+  for(int i = 0; i < nv; ++i)
+  {
+    vertex_t *n = new fullvertex_t();
+    n->read(in);
+    v[i] = n;
+    vl.insert(n);
   }
 
-  {
+  // read elements
+  int ne = 0;
+  in >> ne;
 
-    int ne = 0 ;
-    
-    in >> ne ;
-  
 #ifndef NDEBUG
-    if( verbose ) 
-      cerr << "    Number of MacroElements:        " << ne << endl ;
+  if( verbose ) 
+    cerr << "    Number of MacroElements:        " << ne << endl ;
 #endif
-    
- 
-    for(int i = 0; i < ne ; i ++) {
-    
-      triang_t &tr = * new triang_t() ;
 
-      tr.read(in, v, nv) ;
-
-      mel.insert( new macroelement_t (tr) ) ;
-    
-    }
-
+  for(int i = 0; i < ne; ++i)
+  {
+    triang_t *tr = new triang_t();
+    tr->read(in, &(v[0]), nv);
+    mel.insert(new macroelement_t(*tr));
   }
 
+  // read boundaries
   {
-
     string line;
     // read line and skip empty lines 
     while( in && line.empty() )
     {
-      getline( in, line );
-      line.erase( 0, line.find_first_not_of( ' ' ) );
+      getline(in, line);
+      line.erase(0, line.find_first_not_of( ' ' ));
     }
     istringstream linein( line );
 
-    int nb = 0 ;
-    linein >> nb ;
-
-    int npb = 0;
+    // read number of boundary segments
+    int nb = 0;
+    linein >> nb;
 
 #ifndef NDEBUG 
     if( verbose )
-      cerr << "    Number of BoundarySegments:     " << nb << endl ;
+      cerr << "    Number of BoundarySegments:     " << nb << endl;
 #endif
 
-    typedef struct
-      {
-        int pernb;
-        bndel_t *b;
-      } perbnd_struct;
-    perbnd_struct *perbnd_list;
-    int perbnd_card=0,perbnd_ok=0;
-    //perbnd_list = (perbnd_struct *)malloc(sizeof(perbnd_struct)*nb);
-    perbnd_list = new  perbnd_struct[nb];
+    // some variables for periodic boundary treatment
+    int npb = 0;
 
-    typedef struct
-      {
-        double p0,p1;
-        bndel_t *b;
-      } axis_struct;
-    axis_struct *x_axis,*y_axis;
-    int y_card=0,x_card=0,x_ok=0,y_ok=0;
+    std::vector< std::pair< bndel_triang_t *, int > > bnd_list( nb );
+    int perbnd_invalid = 0;
 
-    //x_axis = (axis_struct *)malloc(sizeof(axis_struct)*nb);
-    //y_axis = (axis_struct *)malloc(sizeof(axis_struct)*nb);
-    x_axis = new axis_struct[nb];
-    y_axis = new axis_struct[nb];
+    struct axis_struct { double p0, p1; bndel_t *b; };
+    axis_struct *x_axis = new axis_struct[nb];
+    axis_struct *y_axis = new axis_struct[nb];
+    int y_card = 0, x_card = 0, x_ok = 0, y_ok = 0;
 
-    for( int i = 0 ; i <  nb ; ++i ) 
+    for( int i = 0; i < nb; ++i ) 
     {
       getline( in, line );
       istringstream linein( line );
 
+      // peek boundary element type
       int lt;
       linein >> lt;
       linein.seekg( 0 );
+      typename bndel_t::bnd_t t = (typename bndel_t::bnd_t)lt;
 
-      typename bndel_t::bnd_t t=(typename bndel_t::bnd_t)lt;
-
-      bndel_triang_t * b;
-
-      switch (t)
+      // create boundary element, depending on its type
+      switch( t )
       {
-        case bndel_t::periodic:
-          assert(ncoord == 2);
-          b=new bndel_periodic_t( i );
-          ++npb;
-          break;
-
-        case bndel_t::general_periodic:
-          b=new bndel_periodic_t( i );
-          ++npb;
-          break;
-
-        default:
-          b=new bndel_triang_t(i, t);
-          break;
-      }
-
-      assert( b );
-      b->read(linein, v, nv) ;
-
-      mbl.insert( new macrobndel_t (*b) ) ;
-
-      if (t==bndel_t::general_periodic) {
-        int pernb;
-        linein >> pernb;
-        if (pernb<i) {
-          assert(perbnd_list[pernb].pernb==i);
-          ((bndel_periodic_t *)b)->set_pnb(perbnd_list[pernb].b);
-          ((bndel_periodic_t *)perbnd_list[pernb].b)->set_pnb(b);
-          perbnd_ok++;
+      case bndel_t::periodic:
+        if( ncoord != 2 )
+        {
+          cerr << "Error in Hmesh :: ascireadtriang: "
+               << "Boundary type " << bndel_t::periodic
+               << " is only supported for flat grids." << endl;
+          abort();
         }
-        else {
-          perbnd_list[i].b=b;
-          perbnd_list[i].pernb=pernb;
-          perbnd_card++;
-        }
+        bnd_list[i].first = new bndel_periodic_t(i);
+        ++npb;
+        break;
+
+     case bndel_t::general_periodic:
+        bnd_list[i].first = new bndel_periodic_t(i);
+        ++npb;
+        break;
+
+      default:
+        bnd_list[i].first = new bndel_triang_t(i, t);
+        break;
       }
-      else if (t==bndel_t::periodic)
+      assert( bnd_list[i].first );
+      bnd_list[i].second = -1;
+
+      bnd_list[i].first->read(linein, &(v[0]), nv);
+      mbl.insert(new macrobndel_t(*bnd_list[i].first));
+
+      if( t == bndel_t::general_periodic )
       {
+        linein >> bnd_list[i].second;
+        if( bnd_list[i].second < 0 )
+        {
+          cerr << "Error in Hmesh :: ascireadtriang: "
+               << "Periodic neighbor boundary has negative index." << endl;
+          abort();
+        }
+
+        if( bnd_list[i].second < i )
+        {
+          const int j = bnd_list[i].second;
+          if( bnd_list[j].second < 0 )
+          {
+            cerr << "Error in Hmesh :: ascireadtriang: "
+                 << "Neighbor of periodic boundary is non-periodic. "
+                 << "(" << i << " -> " << j << ")" << endl;
+            abort();
+          }
+          if( bnd_list[j].second != i )
+          {
+            cerr << "Error in Hmesh :: ascireadtriang: "
+                 << "Periodic boundaries not linked symmetrically "
+                 << "(" << i << " -> " << j << ", but "
+                 << j << " -> " << bnd_list[j].second << ")." << endl;
+            abort();
+          }
+          ((bndel_periodic_t *)bnd_list[i].first)->set_pnb(bnd_list[j].first);
+          ((bndel_periodic_t *)bnd_list[j].first)->set_pnb(bnd_list[i].first);
+          --perbnd_invalid;
+        }
+        else
+          ++perbnd_invalid;
+      }
+      else if( t == bndel_t::periodic )
+      {
+        bndel_t *b = bnd_list[i].first;
         if (fabs(b->vertex(0)->coord()[0]-b->vertex(1)->coord()[0])<EPS)
         {
           double y0,y1;
@@ -260,14 +254,18 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
       }
     }
 
-    delete [] y_axis;
-    delete [] x_axis;
-    delete [] perbnd_list;
-    //free(y_axis);
-    //free(x_axis);
+    if( perbnd_invalid != 0 )
+    {
+      cerr << "Error in Hmesh :: ascireadtriang: "
+           << "Periodic boundaries don't match." << endl;
+      abort();
+    }
 
-    assert(y_ok==y_card);
-    assert(x_ok==x_card);
+    delete[]( y_axis );
+    delete[]( x_axis );
+
+    assert(y_ok == y_card);
+    assert(x_ok == x_card);
 
 #ifndef NDEBUG
     if( verbose )
@@ -275,8 +273,6 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
 #endif
   
   }       
-
-  delete[] v ;
 
 #ifndef NDEBUG
   if( verbose )
