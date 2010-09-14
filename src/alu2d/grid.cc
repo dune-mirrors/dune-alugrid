@@ -399,9 +399,9 @@ template < int N, int NV >
 void Element < N, NV >::setorientation()
 {
   double o;
+  const int nf = numfaces();
   if (ncoord==2) 
   {
-    const int nf = numfaces();
     const double (&v0)[ncoord]=connect.vtx[0]->coord();
     const double (&v1)[ncoord]=connect.vtx[1]->coord();
     const double (&v2)[ncoord]=connect.vtx[2]->coord();
@@ -411,6 +411,32 @@ void Element < N, NV >::setorientation()
            << v0[0] << "," << v0[1] << " "
            << v1[0] << "," << v1[1] << " "
            << v2[0] << "," << v2[1] << endl;
+    }
+    if (NV == 4) 
+    { // test that element is convex
+      // note: for a convex cube all four value of o will have the same
+      //       sign, for a non convex cube one value will have a different
+      //       sign from the others
+      for (int i=1;i<4;++i)
+      {
+        const double (&v0)[ncoord]=connect.vtx[(i+0)%nf]->coord();
+        const double (&v1)[ncoord]=connect.vtx[(i+1)%nf]->coord();
+        const double (&v2)[ncoord]=connect.vtx[(i+2)%nf]->coord();
+        double oi=(v1[0]-v0[0])*(v2[1]-v1[1])-(v1[1]-v0[1])*(v2[0]-v1[0]);
+        if (oi*o<=1e-10)
+        {
+          // one of the 4 o values had the wrong sign -> not convex
+          std::cout << "Error: one the cubes used to generate ALUGrid is not convex - Aborting."
+                    << std::endl;
+          std::cout << "The verticies of the offending element are:" << std::endl;
+          for (int i=0;i<4;++i)
+            std::cout << "p_" << i << " = ( " 
+                      << connect.vtx[i]->coord()[0] << " "
+                      << connect.vtx[i]->coord()[1] 
+                      << std::endl;
+          abort();
+        }
+      }
     }
     assert(o);  // Entartet!
     if (o<0)
