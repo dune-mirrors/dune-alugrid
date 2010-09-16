@@ -1094,7 +1094,8 @@ public :
       typedef hasFace3  myconnect_t ;
       typedef Hface3Rule myrule_t ;
       enum { polygonlength = 3 } ;
-      class face3Neighbour {
+      class face3Neighbour 
+      {
         myconnect_t *_faceFront;
         myconnect_t *_faceRear;
         signed char _numFront;
@@ -2662,44 +2663,34 @@ inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const fa
   }
 
   return ret;
-  // return (_v == null ? (_v = n._v, 1) : 0 ) + (_h == null ? (_h = n._h, 1) : 0 ) ;
 }
 
 inline pair < Gitter :: Geometric :: hface3 :: myconnect_t *, int >
 Gitter :: Geometric :: hface3 :: face3Neighbour :: front ()
 {
   return pair< myconnect_t *, int >( _faceFront, _numFront );
-  //assert (!(_v == null)) ;
-  //return _v ;
 }
 
 inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int >
 Gitter :: Geometric :: hface3 :: face3Neighbour :: front () const
 {
   return pair< const myconnect_t *, int >( _faceFront, _numFront );
-  //assert (!(_v == null)) ;
-  //return pair < const hasFace3 *, int > (_v.first,_v.second) ;
 }
 
 inline pair < Gitter :: Geometric :: hface3 :: myconnect_t *, int >
 Gitter :: Geometric :: hface3 :: face3Neighbour :: rear ()
 {
   return pair< myconnect_t *, int >( _faceRear, _numRear );
-  //assert (!(_h == null)) ;
-  //return _h ;
 }
 
 inline pair < const Gitter :: Geometric :: hface3 :: myconnect_t *, int >
 Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () const
 {
   return pair< const myconnect_t *, int >( _faceRear, _numRear );
-  //assert (!(_h == null)) ;
-  //return pair < const hasFace3 *, int > (_h.first,_h.second) ; ;
 }
 
 inline Gitter :: Geometric :: hface3 :: 
 hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
-  //: _parRule (Hface3Rule::undefined)
 {
   nb._parRule = (Hface3Rule::undefined);
   assert(e0 && e1 && e2) ;
