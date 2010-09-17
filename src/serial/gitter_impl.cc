@@ -479,58 +479,14 @@ insert_tetra (hface3_GEO *(&f)[4], int (&t)[4])
 // inlcudes implementation of MacroGhostTetra and MacroGhostHexa 
 #include "ghost_elements.h"
 
-GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) {
-
-  Objects :: periodic3_IMPL * per3 = new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
-      
-  alucoord_t v[3]; //Verschiebungsvektor (von SW(myhface3(0) zu SW(myhface3(1))
-  for (int i = 0; i < 3; i++) {
-    v[i] = 0.3333333333*(f[1]->myvertex(0)->Point()[i] +
-                         f[1]->myvertex(1)->Point()[i] +
-                         f[1]->myvertex(2)->Point()[i] -
-                         f[0]->myvertex(0)->Point()[i] -
-                         f[0]->myvertex(1)->Point()[i] -
-                         f[0]->myvertex(2)->Point()[i]); 
-  }
-
-  tetra_GEO * mytetra0 = static_cast<tetra_GEO * > (per3->myneighbour(0).first), //Tetra an Fl 0 (an dieser liegt Ghost0 an)
-            * mytetra1 = static_cast<tetra_GEO * > (per3->myneighbour(1).first); //Tetra an Fl 1 ( - " -               1   )
-
-  MacroGhostInfoTetra* allp0 = new MacroGhostInfoTetra(mytetra0, per3->myneighbour(0).second);
-  MacroGhostInfoTetra* allp1 = new MacroGhostInfoTetra(mytetra1, per3->myneighbour(1).second);
-
-  MacroGhostTetra * ghost0 = new MacroGhostTetra(*this, allp1, &(*mytetra1), v, -1.0);
-  MacroGhostTetra * ghost1 = new MacroGhostTetra(*this, allp0, &(*mytetra0), v,  1.0);
-  per3->setGhost(ghost0->getGhost(), 0);
-  per3->setGhost(ghost1->getGhost(), 1);
-  return per3;    
-  //ohne Geister: return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
+GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) 
+{
+  return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
 }
 
-GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) {
-  Objects :: periodic4_IMPL * per4 = new Objects :: periodic4_IMPL (0, f [0], t[0], f [1], t[1]) ;
-  alucoord_t v [3]; //Verschiebung von Schwerpunkt(myhface4(0)) zu Schwerpunkt(myhface4(1))
-  for (int i = 0; i < 4; i++) {
-    v[i] = 0.25*(f[1]->myvertex(0)->Point()[i] +
-                 f[1]->myvertex(1)->Point()[i] +
-                 f[1]->myvertex(2)->Point()[i] -
-                 f[0]->myvertex(0)->Point()[i] -
-                 f[0]->myvertex(1)->Point()[i] -
-                 f[0]->myvertex(2)->Point()[i]);
-  }
-
-  /*
-  hexa_GEO * myhexa0 = static_cast<hexa_GEO * > (per4->myneighbour(0).first), //Hexa an Fl 0 (an dieser liegt Ghost0 an)
-           * myhexa1 = static_cast<hexa_GEO * > (per4->myneighbour(1).first); //Hexa an Fl 1 ( - " -               1   )
-
-  const Hbnd4IntStoragePoints  allp0 (myhexa0, per4->myneighbour(0).second);
-  const Hbnd4IntStoragePoints  allp1 (myhexa1, per4->myneighbour(1).second);
-  MacroGhostHexa * ghost0 = new MacroGhostHexa(*this, allp1, &(*myhexa1), v, -1.0);
-  MacroGhostHexa * ghost1 = new MacroGhostHexa(*this, allp0, &(*myhexa0), v,  1.0);
-  per4->setGhost(ghost0->getGhost(), 0);
-  per4->setGhost(ghost1->getGhost(), 1);  
-  */
-  return per4;   //  return new ObjectsPll :: Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1]) ;  
+GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) 
+{
+  return new Objects :: periodic4_IMPL (0, f [0], t[0], f [1], t[1]) ;
 }
 
 GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: 

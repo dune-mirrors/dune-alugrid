@@ -1023,7 +1023,11 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
   , _nChild (0)
   , _rule (myrule_t :: nosplit)
 {
-  return ;
+  // get index 
+  this->setIndex( indexManager().getIndex() );
+
+  // take macro index as segment index 
+  _segmentIndex = this->getIndex() ;
 }
 
 template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, 
@@ -1032,39 +1036,26 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
   , _dwn (0), _bbb (0), _up(up)
   , _lvl (l)
   , _nChild (nChild) 
-  , _rule (myrule_t :: nosplit)
 { 
-  return ;
+  // get index 
+  this->setIndex( indexManager().getIndex() );
+
+  // get segment index from father if existent 
+  _segmentIndex = (_up) ? _up->_segmentIndex : this->getIndex() ;
 }
 
-template < class A >  Periodic4Top < A > :: ~Periodic4Top () {  
+template < class A > inline int Periodic4Top < A > :: segmentIndex () const {
+  return _segmentIndex ;
+}
+
+template < class A >  Periodic4Top < A > :: ~Periodic4Top () 
+{  
+  // free index 
+  this->freeIndex( indexManager() );
+
+  // delete down and next 
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
-  return ;
-}
-
-template < class A > void Periodic4Top < A > :: splitGhosts () {
-  for (int g = 0; g < 2; ++g) {
-    ghostpair_STI ghostpair = _ghostPair[g]; 
-    if (ghostpair.first) {
-      GhostElement_t & ghost = static_cast<GhostElement_t &> (*ghostpair.first);
-      ghost.request( Gitter::Geometric::HexaRule::iso8 );
-      assert( Gitter::Geometric::HexaRule::iso8 == ghost.requestrule ());
-      ghost.refine();
-    }
-  }
-}
-
-template < class A > void Periodic4Top < A > :: coarseGhosts () {
-  for (int g = 0; g < 2; ++g) {
-    if(_ghostPair[g].first) {
-      GhostElement_t & ghost = static_cast<GhostElement_t &> (*(_ghostPair[g].first));
-      ghost.request( Gitter::Geometric::HexaRule::crs );
-      assert( Gitter::Geometric::HexaRule::crs == ghost.requestrule ());
-      ghost.coarse();
-      assert( ghost.leaf() );
-    }
-  }
 }
 
 template < class A > typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) {  
@@ -1199,18 +1190,16 @@ template < class A > bool Periodic4Top < A > :: bndNotifyCoarsen () {
     if (p->myhface4 (1)->ref > 1) (x = false) ;
 
   } while ( (p = p->next ()) ) ;
-  if (x) {
-  
-  // Falls keine Fl"achen anliegen, die auf Kinder oder Kindes- 
-  // mit mehr als einer Referenz f"uhren, ist sicher, dass das
-  // Bezugsrandelement zwischen zwei 'relativ groben' Elementen
-  // liegt. Somit kann es vergr"obert werden.
+  if (x) 
+  {
+    
+    // Falls keine Fl"achen anliegen, die auf Kinder oder Kindes- 
+    // mit mehr als einer Referenz f"uhren, ist sicher, dass das
+    // Bezugsrandelement zwischen zwei 'relativ groben' Elementen
+    // liegt. Somit kann es vergr"obert werden.
   
     this->preCoarsening () ;
     
-    // coarse ghost elements 
-    this->coarseGhosts() ;
-
     delete _dwn ;
     _dwn = 0 ;
     _rule = myrule_t :: nosplit ;

@@ -483,12 +483,9 @@ template < class A > class Periodic4Top : public A {
     void refineImmediate (myrule_t) ;
     inline void append (innerperiodic4_t * h) ;
     
-    //us
-    typedef typename A :: GhostElement_t GhostElement_t;
-    typedef Gitter :: ghostpair_STI ghostpair_STI;
-    
   private :
     innerperiodic4_t * _dwn, * _bbb, * _up ; 
+    int _segmentIndex ;
     unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule ;
@@ -499,6 +496,12 @@ template < class A > class Periodic4Top : public A {
     const myhedge1_t * subedge1 (int,int) const ;
     myhface4_t * subface4 (int,int) ;
     const myhface4_t * subface4 (int i, int j) const ;
+
+    // we need this for the boundary segment index 
+    inline IndexManagerType & indexManager () {
+      return  this->myhface4(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd );
+    }
+
   public:
     Periodic4Top (int,myhface4_t *,int,myhface4_t *,int) ;
     Periodic4Top (int,myhface4_t *,int,myhface4_t *,int,
@@ -520,6 +523,7 @@ template < class A > class Periodic4Top : public A {
     inline const innerface_t * innerHface () const ;
     inline int level () const ;
     inline int nChild () const ;
+    inline int segmentIndex () const ;
   public :
     myrule_t getrule () const ;
     bool refine () ;
@@ -527,17 +531,7 @@ template < class A > class Periodic4Top : public A {
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;
-    //Per4-Geister: (us)
-    const ghostpair_STI & getGhost (int) const ;
-    virtual inline void setGhost ( const pair< Gitter :: helement * , int > & pair, int nr);
-  private:
-    mutable ghostpair_STI _ghostPair [2];
-    //_ghostPair[0] liegt an myhface4[0] und ist das affine Bild vom Hexa an myhface4(1)
- 
-    // refine ghost if face is refined and ghost is not zero
-    void splitGhosts () ;
-    // coarse ghost if face is coarsened
-    void coarseGhosts () ;
+
   public:  
     void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
@@ -1225,15 +1219,6 @@ template < class A > inline typename Periodic4Top < A > :: innerface_t * Periodi
 
 template < class A > inline const typename Periodic4Top < A > :: innerface_t * Periodic4Top < A > :: innerHface () const { 
   return 0 ;
-}
-
-template < class A > const typename Gitter :: ghostpair_STI & Periodic4Top < A > :: getGhost (int g) const {
-  assert (g == 0 || g == 1);
-  return _ghostPair[g];
-}
-
-template < class A > inline void Periodic4Top < A > :: setGhost ( const pair< Gitter:: helement * , int > & pair, int nr) {
-  _ghostPair[nr] = pair;
 }
 
 template < class A > inline void Periodic4Top < A > :: append (Periodic4Top < A > * h) { 

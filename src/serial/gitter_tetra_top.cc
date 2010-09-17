@@ -1469,9 +1469,6 @@ template < class A > bool Periodic3Top < A > :: bndNotifyCoarsen () {
   
     this->preCoarsening () ;
     
-    //mit Geistern (us)
-    this->coarseGhosts();
-    
     delete _dwn ;
     _dwn = 0 ;
     _rule = myrule_t :: nosplit ;

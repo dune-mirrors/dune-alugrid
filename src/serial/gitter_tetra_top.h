@@ -273,15 +273,13 @@ template < class A > class Periodic3Top : public A {
     void refineImmediate (myrule_t) ;
     inline void append (innerperiodic3_t * h) ;
     
-    //us
-    typedef typename A :: GhostElement_t GhostElement_t;
-    typedef Gitter :: ghostpair_STI ghostpair_STI;
-    
   private :
     innerperiodic3_t * _dwn, * _bbb, * _up ; 
+    int _segmentIndex;
     unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule ;
+
   private :
     void split_e01 () ;
     void split_e12 () ;
@@ -292,6 +290,11 @@ template < class A > class Periodic3Top : public A {
     const myhedge1_t * subedge1 (int,int) const ;
     myhface3_t * subface3 (int,int) ;
     const myhface3_t * subface3 (int i, int j) const ;
+
+    // we need this for the boundary segment index 
+    inline IndexManagerType & indexManager () { 
+      return  this->myhface3(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
+    }    
   public:
     // constructor for macro elements 
     inline Periodic3Top (int,myhface3_t *,int,myhface3_t *,int) ;
@@ -312,6 +315,7 @@ template < class A > class Periodic3Top : public A {
     inline const innerface_t * innerHface () const ;
     inline int level () const ;
     inline int nChild () const ;
+    inline int segmentIndex () const ;
   public :
     myrule_t getrule () const ;
     bool refine () ;
@@ -332,22 +336,6 @@ template < class A > class Periodic3Top : public A {
     
     template <class InStream_t> 
     void doRestore(InStream_t &);
-    
-  public:   
-    // get ghost pair 
-    inline const ghostpair_STI & getGhost (int) const ;
-    // set ghost pair, nr should be 0 or 1, I guess 
-    inline void setGhost ( const pair< Gitter :: helement * , int > & pair, int nr);
-
-  private:
-    mutable ghostpair_STI _ghostPair [2];
-    //_ghostPair[0] liegt an myhface3[0] und ist das affine Bild vom Tetra an myhface3(1)
-    
-    // refine ghost if face is refined and ghost is not zero
-    void splitGhosts () {} ; 
-    // coarse ghost if face is coarsened
-    void coarseGhosts () {};
-
 };
   //
   //    #    #    #  #          #    #    #  ######
@@ -752,7 +740,11 @@ template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_
  , _nChild(0)
  , _rule (myrule_t :: nosplit)
 { 
- return ;
+  // get index 
+  this->setIndex( indexManager().getIndex() );
+  
+  // take macro index as segment index 
+  _segmentIndex = this->getIndex() ;
 }
 
 template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
@@ -763,17 +755,29 @@ template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_
   , _nChild (nChild) 
   , _rule (myrule_t :: nosplit)
 {
-  return ;
+  // get index 
+  this->setIndex( indexManager().getIndex() );
+  
+  // get segment index from father if existent 
+  _segmentIndex = (_up) ? _up->_segmentIndex : this->getIndex() ;
 }
 
-template < class A > inline Periodic3Top < A > :: ~Periodic3Top () {
+template < class A > inline Periodic3Top < A > :: ~Periodic3Top () 
+{
+  // free index 
+  this->freeIndex( indexManager() );
+
+  // delete down and next 
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
-  return ;
 }
 
 template < class A > inline int Periodic3Top < A > :: level () const {
   return _lvl ;
+}
+
+template < class A > inline int Periodic3Top < A > :: segmentIndex () const {
+  return _segmentIndex ;
 }
 
 template < class A > inline int Periodic3Top < A > :: nChild () const {
@@ -845,20 +849,4 @@ template < class A > inline void Periodic3Top < A > :: request (myrule_t) {
 
   return ;
 }
-
-template < class A > 
-inline void  Periodic3Top < A > :: setGhost ( const pair< Gitter :: helement * , int > & pair, int nr)
-{
-  assert( (nr >= 0) && (nr < 2));  
-  _ghostPair[nr] = pair;
-}
-
-template < class A > 
-inline const Gitter :: ghostpair_STI & 
-Periodic3Top < A > :: getGhost ( int nr ) const 
-{
-  assert( (nr >= 0) && (nr < 2));  
-  return _ghostPair[nr];
-}
-
 #endif  //  GITTER_TetraTop_H_INCLUDED
