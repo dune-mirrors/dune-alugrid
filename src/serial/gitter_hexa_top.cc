@@ -23,8 +23,8 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r)
           int l = 1 + level () ;
           assert ( _inner == 0 ) ;
          
-          innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex(0));
-          innervertex_t* v1 = static_cast<innervertex_t *> (this->myvertex(1));
+          innervertex_t* v0 = static_cast<innervertex_t *> (myvertex(0));
+          innervertex_t* v1 = static_cast<innervertex_t *> (myvertex(1));
           // get the vertex coordinates   
           const alucoord_t (&p0)[3] = v0->Point();
           const alucoord_t (&p1)[3] = v1->Point();
@@ -115,13 +115,13 @@ template < class A >  void Hface4Top < A > :: splitISO4 () {
 
   {
     // calculate barycenter of face 
-    innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex (0));
+    innervertex_t* v0 = static_cast<innervertex_t *> (myvertex (0));
     alucoord_t p [3] ;
     BilinearSurfaceMapping :: barycenter(
           v0->Point(),
-          this->myvertex (1)->Point(), 
-          this->myvertex (2)->Point(), 
-          this->myvertex (3)->Point(),
+          myvertex (1)->Point(), 
+          myvertex (2)->Point(), 
+          myvertex (3)->Point(),
           p ) ;
 
     // myvertex(0) is submitted for the indexmanager reference 
@@ -129,10 +129,10 @@ template < class A >  void Hface4Top < A > :: splitISO4 () {
     assert (_inner) ;
   }
   
-  myvertex_t * ev0 = this->myhedge1(0)->subvertex (0) ;
-  myvertex_t * ev1 = this->myhedge1(1)->subvertex (0) ;
-  myvertex_t * ev2 = this->myhedge1(2)->subvertex (0) ;
-  myvertex_t * ev3 = this->myhedge1(3)->subvertex (0) ;
+  myvertex_t * ev0 = myhedge1(0)->subvertex (0) ;
+  myvertex_t * ev1 = myhedge1(1)->subvertex (0) ;
+  myvertex_t * ev2 = myhedge1(2)->subvertex (0) ;
+  myvertex_t * ev3 = myhedge1(3)->subvertex (0) ;
   assert(ev0 && ev1 && ev2 && ev3) ;
 
 #ifdef USE_MALLOC_AT_ONCE
@@ -187,10 +187,10 @@ template < class A > void Hface4Top < A > :: refineImmediate (myrule_t r) {
     switch(r) {
       typedef typename myhedge1_t :: myrule_t myhedge1rule_t;
       case myrule_t :: iso4 :
-      this->myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
-      this->myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (1))) ;
-      this->myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (2))) ;
-      this->myhedge1 (3)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (3))) ;
+      myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
+      myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (1))) ;
+      myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (2))) ;
+      myhedge1 (3)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (3))) ;
       splitISO4 () ;
       break ;
     default :
@@ -273,7 +273,7 @@ template < class A > bool Hface4Top < A > :: coarse () {
     _inner = 0;
 
     _rule = myrule_t :: nosplit ;
-    {for (int i = 0 ; i < 4 ; i ++ ) this->myhedge1 (i)->coarse () ; }
+    {for (int i = 0 ; i < 4 ; i ++ ) myhedge1 (i)->coarse () ; }
   }
   return x ;
 }
@@ -290,7 +290,7 @@ template < class A > bool Hface4Top < A > :: coarse () {
 template < class A >  void Hbnd4Top < A > :: 
 setBoundaryId( const int id ) 
 {
-  myhface4_t & face = *(this->myhface4(0));
+  myhface4_t & face = *(myhface4(0));
   face.setBndId( id );
   // 4 fertices and edges  
   for(int i=0; i<4; ++i)
@@ -314,7 +314,7 @@ template < class A > bool Hbnd4Top < A > :: coarse () {
       this->coarseGhost();
       
       delete _dwn ; _dwn = 0 ;
-      this->myhface4 (0)->coarse () ;
+      myhface4 (0)->coarse () ;
     }
   }
   return x ;
@@ -386,7 +386,7 @@ template < class A >  bool Hbnd4Top < A > :: refineBalance (balrule_t r, int b)
       // dahinter keine Balancierung stattfinden muss.
     
       // refine face 
-      this->myhface4 (0)->refineImmediate (r) ;
+      myhface4 (0)->refineImmediate (r) ;
       // refine myself 
       splitISO4 () ;
     } 
@@ -448,7 +448,7 @@ template < class A >  bool Hbnd4Top < A > :: refineLikeElement (balrule_t r)
       switch (r) 
       {
       case balrule_t :: iso4 :
-        if (! this->myhface4 (0)->refine(balrule_t (balrule_t :: iso4).rotate (twist (0)), twist (0))) return false ;
+        if (! myhface4 (0)->refine(balrule_t (balrule_t :: iso4).rotate (twist (0)), twist (0))) return false ;
 
         // call refinement method 
         splitISO4 () ;
@@ -474,7 +474,7 @@ template < class A > void Hbnd4Top < A > :: restoreFollowFace ()
   // bestehenden Fl"achenbaum wiederherzustellen durch die
   // entsprechende Verfeinerung.
   
-  myhface4_t & f (*(this->myhface4 (0))) ;
+  myhface4_t & f (*(myhface4 (0))) ;
   if (!f.leaf ()) 
   {
     balrule_t r = f.getrule () ;
@@ -521,10 +521,10 @@ template < class A > HexaTop < A >
   , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
   , _affine( false )
 { 
-  TrilinearMapping trMap (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
-                          this->myvertex(2)->Point(), this->myvertex(3)->Point(),
-                          this->myvertex(4)->Point(), this->myvertex(5)->Point(),
-                          this->myvertex(6)->Point(), this->myvertex(7)->Point());
+  TrilinearMapping trMap (myvertex(0)->Point(), myvertex(1)->Point(),
+                          myvertex(2)->Point(), myvertex(3)->Point(),
+                          myvertex(4)->Point(), myvertex(5)->Point(),
+                          myvertex(6)->Point(), myvertex(7)->Point());
   // calculate volume 
   _volume = QuadraturCube3D < VolumeCalc > (trMap).integrate2 (0.0);
   // check whether mapping is affine 
@@ -560,14 +560,14 @@ template < class A > HexaTop < A >
   // if mapping is not affine recalculate volume 
   if( ! _affine )
   {
-    TrilinearMapping triMap (this->myvertex(0)->Point(),
-                             this->myvertex(1)->Point(),
-                             this->myvertex(2)->Point(),
-                             this->myvertex(3)->Point(),
-                             this->myvertex(4)->Point(),
-                             this->myvertex(5)->Point(),
-                             this->myvertex(6)->Point(),
-                             this->myvertex(7)->Point() );
+    TrilinearMapping triMap (myvertex(0)->Point(),
+                             myvertex(1)->Point(),
+                             myvertex(2)->Point(),
+                             myvertex(3)->Point(),
+                             myvertex(4)->Point(),
+                             myvertex(5)->Point(),
+                             myvertex(6)->Point(),
+                             myvertex(7)->Point() );
 
 #ifndef NDEBUG 
     // make sure determinant is ok 
@@ -582,10 +582,10 @@ template < class A > HexaTop < A >
   // make sure that given volume is the same as calulated 
   assert( fabs (
       QuadraturCube3D < VolumeCalc >
-       (TrilinearMapping (this->myvertex(0)->Point(), this->myvertex(1)->Point(),
-                          this->myvertex(2)->Point(), this->myvertex(3)->Point(),
-                          this->myvertex(4)->Point(), this->myvertex(5)->Point(),
-                          this->myvertex(6)->Point(), this->myvertex(7)->Point())).integrate2 (0.0) - _volume) < 1e-10 );
+       (TrilinearMapping (myvertex(0)->Point(), myvertex(1)->Point(),
+                          myvertex(2)->Point(), myvertex(3)->Point(),
+                          myvertex(4)->Point(), myvertex(5)->Point(),
+                          myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0) - _volume) < 1e-10 );
   return ;
 }
 
@@ -601,28 +601,28 @@ template < class A > HexaTop < A > :: ~HexaTop ()
 }
 
 template < class A >  typename HexaTop < A > :: myhedge1_t * HexaTop < A > :: subedge1 (int i, int j) {
-  return (j < 4) ? ((twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + twist (i)) % 4) : 
-    this->myhface4 (i)->myhedge1 ((j + twist (i)) % 4)) : 
-    ((twist (i) < 0) ? this->myhface4 (i)->subedge1 ((12 - j + twist (i)) % 4) : 
-    this->myhface4 (i)->subedge1 ((j + twist (i)) % 4)) ;
+  return (j < 4) ? ((twist (i) < 0) ? myhface4 (i)->myhedge1 ((8 - j + twist (i)) % 4) : 
+    myhface4 (i)->myhedge1 ((j + twist (i)) % 4)) : 
+    ((twist (i) < 0) ? myhface4 (i)->subedge1 ((12 - j + twist (i)) % 4) : 
+    myhface4 (i)->subedge1 ((j + twist (i)) % 4)) ;
 }
     
 template < class A >  const typename HexaTop < A > :: myhedge1_t * HexaTop < A > :: subedge1 (int i, int j) const {
-  return (j < 4) ? ((twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + twist (i)) % 4) : 
-      this->myhface4 (i)->myhedge1 ((j + twist (i)) % 4)) : 
-  ((twist (i) < 0) ? this->myhface4 (i)->subedge1 ((12 - j + twist (i)) % 4) : 
-  this->myhface4 (i)->subedge1 ((j + twist (i)) % 4)) ;
+  return (j < 4) ? ((twist (i) < 0) ? myhface4 (i)->myhedge1 ((8 - j + twist (i)) % 4) : 
+      myhface4 (i)->myhedge1 ((j + twist (i)) % 4)) : 
+  ((twist (i) < 0) ? myhface4 (i)->subedge1 ((12 - j + twist (i)) % 4) : 
+  myhface4 (i)->subedge1 ((j + twist (i)) % 4)) ;
 }
     
 template < class A >  typename HexaTop < A > :: myhface4_t * HexaTop < A > :: subface4 (int i, int j) {
-  return (this->myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
-  this->myhface4(i)->subface4(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
+  return (myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
+  myhface4(i)->subface4(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
   (abort (), (myhface4_t *)0) ;
 }
     
 template < class A >  const typename HexaTop < A > :: myhface4_t * HexaTop < A > :: subface4 (int i, int j) const {
-  return (this->myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
-    this->myhface4(i)->subface4(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
+  return (myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
+    myhface4(i)->subface4(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
     (abort (), (const myhface4_t *)0) ;
 }
 
@@ -635,22 +635,22 @@ template < class A > void HexaTop < A > :: splitISO8 ()
     alucoord_t p[3] ;
     // calculate barycenter 
     TrilinearMapping::barycenter(
-        this->myvertex(0)->Point(), this->myvertex(1)->Point(),
-        this->myvertex(2)->Point(), this->myvertex(3)->Point(), this->myvertex(4)->Point(),
-        this->myvertex(5)->Point(), this->myvertex(6)->Point(), this->myvertex(7)->Point(), 
+        myvertex(0)->Point(), myvertex(1)->Point(),
+        myvertex(2)->Point(), myvertex(3)->Point(), myvertex(4)->Point(),
+        myvertex(5)->Point(), myvertex(6)->Point(), myvertex(7)->Point(), 
         p) ;
     
-    innervertex_t* v0 = static_cast<innervertex_t *> (this->myvertex (0));
+    innervertex_t* v0 = static_cast<innervertex_t *> (myvertex (0));
     _inner = new inner_t (l, p[0], p[1], p[2], *v0 ) ;
     assert (_inner) ;
   }
 
-  myvertex_t * fv0 = this->myhface4 (0)->subvertex (0) ;
-  myvertex_t * fv1 = this->myhface4 (1)->subvertex (0) ;
-  myvertex_t * fv2 = this->myhface4 (2)->subvertex (0) ;
-  myvertex_t * fv3 = this->myhface4 (3)->subvertex (0) ;
-  myvertex_t * fv4 = this->myhface4 (4)->subvertex (0) ;
-  myvertex_t * fv5 = this->myhface4 (5)->subvertex (0) ;
+  myvertex_t * fv0 = myhface4 (0)->subvertex (0) ;
+  myvertex_t * fv1 = myhface4 (1)->subvertex (0) ;
+  myvertex_t * fv2 = myhface4 (2)->subvertex (0) ;
+  myvertex_t * fv3 = myhface4 (3)->subvertex (0) ;
+  myvertex_t * fv4 = myhface4 (4)->subvertex (0) ;
+  myvertex_t * fv5 = myhface4 (5)->subvertex (0) ;
   assert(fv0 && fv1 && fv2 && fv3 && fv4 && fv5) ;
 
 #ifdef USE_MALLOC_AT_ONCE
@@ -799,7 +799,7 @@ template < class A > void HexaTop < A > :: refineImmediate (myrule_t r)
       {
         typedef typename myhface4_t :: myrule_t myhface4rule_t;
         for (int i = 0 ; i < 6 ; i ++)
-        this->myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t :: myrule_t :: iso4).rotate (twist (i))) ; }
+        myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t :: myrule_t :: iso4).rotate (twist (i))) ; }
       splitISO8 () ;
       break ;
     default :
@@ -826,7 +826,7 @@ template < class A > bool HexaTop < A > :: refine () {
     {
       typedef typename myhface4_t :: myrule_t myhface4rule_t;
       for (int i = 0 ; i < 6 ; i ++ )
-            if (!this->myhface4 (i)->refine (myhface4rule_t (myhface4_t :: myrule_t :: iso4)
+            if (!myhface4 (i)->refine (myhface4rule_t (myhface4_t :: myrule_t :: iso4)
               .rotate (twist (i)), twist (i))) return false ;
           }
           refineImmediate (r) ;
@@ -844,10 +844,10 @@ template < class A > bool HexaTop < A > :: refine () {
 template < class A > bool HexaTop < A > :: refineBalance (balrule_t r, int fce) {
   assert (r == balrule_t :: iso4) ;
   if (getrule () == myrule_t :: nosplit) {
-    if (! this->myhface4 (fce)->leaf ()) {
+    if (! myhface4 (fce)->leaf ()) {
       for (int i = 0 ; i < 6 ; i ++)
         if (i != fce)
-          if (!this->myhface4 (i)->refine (balrule_t (balrule_t :: iso4).rotate (twist (i)), twist (i))) 
+          if (!myhface4 (i)->refine (balrule_t (balrule_t :: iso4).rotate (twist (i)), twist (i))) 
       return false ;
       _req = myrule_t :: nosplit ;
       refineImmediate (myrule_t :: iso8) ;
@@ -868,7 +868,7 @@ template < class A > bool HexaTop < A > :: coarse () {
     }
     for (int i = 0 ; i < 6 ; ++i) 
     {
-      if (!this->myhface4 (i)->leaf ()) return false ;
+      if (!myhface4 (i)->leaf ()) return false ;
     }
     return true ;
   } 
@@ -891,7 +891,7 @@ template < class A > bool HexaTop < A > :: coarse () {
         for (int i = 0 ; i < 6 ; ++i) 
         {
           this->myneighbour (i).first->bndNotifyCoarsen () ;
-          this->myhface4 (i)->coarse () ;
+          myhface4 (i)->coarse () ;
         }
       }
       return false ;
@@ -989,7 +989,7 @@ void HexaTop < A > :: doRestore (InStream_t & is)
   // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
   
     for (int i = 0 ; i < 6 ; i ++) {
-      myhface4_t & f (*(this->myhface4 (i))) ;
+      myhface4_t & f (*(myhface4 (i))) ;
       if (!f.leaf ()) {
         for (int j = 0 ; j < 4 ; j ++) f.subface4 (j)->nb.complete (f.nb) ;
       }
@@ -1069,10 +1069,10 @@ template < class A > void Periodic4Top < A > :: coarseGhosts () {
 
 template < class A > typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) {  
   assert (getrule () == myrule_t :: iso4) ;
-  return (j < 4) ? ((twist (i) < 0) ? this->myhface4 (i)->myhedge1 ((8 - j + twist (i)) % 4) :  // aus dem Hexaeder
-    this->myhface4 (i)->myhedge1 ((j + twist (i)) % 4)) : 
-    ((twist (i) < 0) ? this->myhface4 (i)->subedge1 ((12 - j + twist (i)) % 4) : 
-    this->myhface4 (i)->subedge1 ((j + twist (i)) % 4)) ;
+  return (j < 4) ? ((twist (i) < 0) ? myhface4 (i)->myhedge1 ((8 - j + twist (i)) % 4) :  // aus dem Hexaeder
+    myhface4 (i)->myhedge1 ((j + twist (i)) % 4)) : 
+    ((twist (i) < 0) ? myhface4 (i)->subedge1 ((12 - j + twist (i)) % 4) : 
+    myhface4 (i)->subedge1 ((j + twist (i)) % 4)) ;
 }
 
 template < class A > const typename Periodic4Top < A > :: myhedge1_t * Periodic4Top < A > :: subedge1 (int i, int j) const { 
@@ -1080,8 +1080,8 @@ template < class A > const typename Periodic4Top < A > :: myhedge1_t * Periodic4
 }
 
 template < class A > typename Periodic4Top < A > ::  myhface4_t * Periodic4Top < A > :: subface4 (int i, int j) { 
-  return (this->myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
-  this->myhface4(i)->subface4(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) : // Zeile aus dem Hexaeder
+  return (myhface4(i)->getrule() == myhface4_t :: myrule_t :: iso4) ? 
+  myhface4(i)->subface4(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) : // Zeile aus dem Hexaeder
   (abort (), (myhface4_t *)0) ;
 }
 
@@ -1124,8 +1124,8 @@ template < class A > void Periodic4Top < A > :: refineImmediate (myrule_t r) {
   // erzwingen m"ussen und d"urfen.
     
       typedef typename myhface4_t :: myrule_t myhface4rule_t;
-      this->myhface4 (0)->refineImmediate (myhface4rule_t (r).rotate (twist (0))) ;
-      this->myhface4 (1)->refineImmediate (myhface4rule_t (r).rotate (twist (1))) ;
+      myhface4 (0)->refineImmediate (myhface4rule_t (r).rotate (twist (0))) ;
+      myhface4 (1)->refineImmediate (myhface4rule_t (r).rotate (twist (1))) ;
       splitISO4 () ;
       break ;
     default :
@@ -1158,7 +1158,7 @@ template < class A > bool Periodic4Top < A > :: refineBalance (balrule_t r, int 
   
     typedef typename myhface4_t :: myrule_t myhface4rule_t;
     int opp = fce == 0 ? 1 : 0 ;
-    if (this->myhface4 (opp)->refine (myhface4rule_t (r).rotate (twist (opp)), twist (opp))) {
+    if (myhface4 (opp)->refine (myhface4rule_t (r).rotate (twist (opp)), twist (opp))) {
       refineImmediate (r) ;
       return true ;
     } else {
@@ -1214,8 +1214,8 @@ template < class A > bool Periodic4Top < A > :: bndNotifyCoarsen () {
     delete _dwn ;
     _dwn = 0 ;
     _rule = myrule_t :: nosplit ;
-    this->myhface4 (0)->coarse () ;
-    this->myhface4 (1)->coarse () ;
+    myhface4 (0)->coarse () ;
+    myhface4 (1)->coarse () ;
   }
   return x ;
 }
@@ -1264,7 +1264,7 @@ void Periodic4Top < A > :: doRestore (InStream_t& is)
   assert(getrule () == myrule_t :: nosplit) ; // Testen auf unverfeinerten Zustand
   if (r == myrule_t :: nosplit) {
     for (int i = 0 ; i < 2 ; i ++) {
-      myhface4_t & f (*(this->myhface4 (i))) ;
+      myhface4_t & f (*(myhface4 (i))) ;
       if (!f.leaf ()) {
         switch (f.getrule ()) {
     case balrule_t :: iso4 :

@@ -170,6 +170,8 @@ public:
 template < class A > class Hedge1Top : public A 
 {
   public :
+    using A :: myvertex ;
+
     typedef Hedge1Top < A >             inneredge_t ;
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: myvertex_t    myvertex_t ;
@@ -232,6 +234,7 @@ template < class A > class Hface4Top : public A
 {
   public :
     using A :: twist ;
+    using A :: myvertex ;
     using A :: myhedge1 ;
 
     typedef Hface4Top < A >                  innerface_t ;
@@ -364,6 +367,8 @@ template < class A > class Hbnd4Top : public A
 template < class A > class HexaTop : public A {
   public :
     using A :: twist ;
+    using A :: myvertex ;
+    using A :: myhedge1 ;
     using A :: myhface4 ;
 
     typedef HexaTop < A >           innerhexa_t ;
