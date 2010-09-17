@@ -11,6 +11,7 @@ template < class A > class Hface3Top : public A
 {
   public :
     using A :: twist ;
+    using A :: myhedge1 ;
 
     typedef Hface3Top < A >             innerface_t ;
     typedef typename A :: inneredge_t   inneredge_t;
@@ -435,12 +436,12 @@ template < class A > inline const typename Hface3Top < A > :: innervertex_t * Hf
 
 template < class A > inline typename Hface3Top < A > :: myhedge1_t * Hface3Top < A > :: subedge1 (int i,int j) {
   assert(j == 0 || j == 1) ;
-  return this->myhedge1 (i)->subedge1 (j ? 1 - this->twist(i) : this->twist(i)) ;
+  return myhedge1 (i)->subedge1 (j ? 1 - twist(i) : twist(i)) ;
 }
 
 template < class A > inline const typename Hface3Top < A > :: myhedge1_t * Hface3Top < A > :: subedge1 (int i,int j) const {
   assert(j == 0 || j == 1) ;
-  return this->myhedge1 (i)->subedge1 (j ? 1 - this->twist(i) : this->twist(i)) ;
+  return myhedge1 (i)->subedge1 (j ? 1 - twist(i) : twist(i)) ;
 }
 
 template < class A > inline typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) {
