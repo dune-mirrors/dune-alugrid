@@ -19,7 +19,7 @@ template < class A > class is_def_true {
 template < class A > class is_leaf {
   public :
     typedef A val_t ;
-    int operator () (const A * x) const { return x->leaf() ; }
+    int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return x.leaf () ; }
 } ;
 
@@ -27,7 +27,7 @@ template < class A > class is_leaf {
 template < class A > class is_not_leaf {
   public :
     typedef A val_t ;
-    int operator () (const A * x) const { return ! x->leaf () ; }
+    int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return ! x.leaf () ; }
 } ;
 
@@ -39,31 +39,44 @@ template < class A > class any_has_level {
     typedef A val_t ;
     any_has_level (int i = 0) : lvl (i) { }
     any_has_level ( const any_has_level & org ) : lvl (org.lvl) { }
-    int operator () (const A * x) const { return x->level () == lvl ? 1 : 0 ; }
+    int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return x.level () == lvl ? 1 : 0 ; }
 
     // return given level 
     int level () const { return lvl; }
 } ;
 
+// returns true if given element has the level 
+template < class A > class any_has_level_periodic {
+  int lvl ;
+  public :
+    typedef A val_t ;
+    any_has_level_periodic (int i = 0) : lvl (i) { }
+    any_has_level_periodic ( const any_has_level_periodic & org ) : lvl (org.lvl) { }
+
+    int operator () (const A * x) const { return (*this)( *x ); }
+    int operator () (const A & x) const { return (x.level () == lvl) && ( ! x.leaf()  || x.isLeafEntity() ); }
+    // return given level 
+    int level () const { return lvl; }
+} ;
 template < class A > class leaf_has_level {
   int lvl ;
   public :
     typedef A val_t ;
     leaf_has_level (int i = 0) : lvl (i) { }
-    int operator () (const A * x) const { return x->level () == lvl ? x->leaf () : 0 ; }
+    int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return x.level () == lvl ? x.leaf () : 0 ; }
 } ;
 
 template < class A > class has_int_vertex {
   public :
-    int operator () (const A * x) const { return x->innerVertex () ? 1 : 0 ; }
+    int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return x.innerVertex () ? 1 : 0 ; }
 } ;
 
 template < class A > class has_int_edge {
   public :
-    int operator () (const A * x) const { return x->innerHedge () ? 1 : 0 ; }
+    int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return x.innerHedge () ? 1 : 0 ; }
 } ;
 
