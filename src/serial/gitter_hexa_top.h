@@ -231,6 +231,9 @@ template < class A > class Hedge1Top : public A
 template < class A > class Hface4Top : public A 
 {
   public :
+    using A :: twist ;
+    using A :: myhedge1 ;
+
     typedef Hface4Top < A >                  innerface_t ;
     typedef typename A :: inneredge_t        inneredge_t ;
     typedef typename A :: innervertex_t      innervertex_t ;
@@ -306,7 +309,13 @@ template < class A > class Hface4Top : public A
     void doRestore(InStream_t &) ;  
 } ;
 
-template < class A > class Hbnd4Top : public A {
+template < class A > class Hbnd4Top : public A 
+{
+  public:
+    using A :: twist ;
+    using A :: myhface4 ;
+    using A :: subface4 ;
+
   protected :
     typedef Hbnd4Top < A >              innerbndseg_t ;
     typedef typename A :: myhface4_t    myhface4_t ;
@@ -354,6 +363,9 @@ template < class A > class Hbnd4Top : public A {
 
 template < class A > class HexaTop : public A {
   public :
+    using A :: twist ;
+    using A :: myhface4 ;
+
     typedef HexaTop < A >           innerhexa_t ;
     typedef typename A :: innerface_t innerface_t ;
     typedef typename A :: inneredge_t inneredge_t ;
@@ -450,6 +462,10 @@ template < class A > class HexaTop : public A {
 } ;
 
 template < class A > class Periodic4Top : public A {
+  public: 
+    using A :: twist ;
+    using A :: myhface4 ;
+
   protected :
     typedef Periodic4Top < A >    innerperiodic4_t  ;
     typedef typename A :: innervertex_t innervertex_t ;

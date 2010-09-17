@@ -10,6 +10,8 @@
 template < class A > class Hface3Top : public A 
 {
   public :
+    using A :: twist ;
+
     typedef Hface3Top < A >             innerface_t ;
     typedef typename A :: inneredge_t   inneredge_t;
     typedef typename A :: innervertex_t innervertex_t;
@@ -89,6 +91,11 @@ template < class A > class Hface3Top : public A
 
 
 template < class A > class Hbnd3Top : public A {
+  public:
+    using A :: twist ;
+    using A :: subface3 ;
+    using A :: myhface3 ;
+
   protected :
     typedef Hbnd3Top < A >    innerbndseg_t ;
     typedef typename A :: myhface3_t  myhface3_t ;
@@ -147,6 +154,9 @@ template < class A > class Hbnd3Top : public A {
 
 template < class A > class TetraTop : public A {
   public :
+    using A :: twist ;
+    using A :: myhface3 ;
+
     typedef TetraTop < A >    innertetra_t  ;
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: inneredge_t   inneredge_t ;
@@ -246,6 +256,10 @@ template < class A > class TetraTop : public A {
 };
 
 template < class A > class Periodic3Top : public A {
+  public:
+    using A :: twist ;
+    using A :: myhface3 ;
+
   protected :
     typedef Periodic3Top < A >    innerperiodic3_t  ;
     typedef typename A :: innervertex_t innervertex_t ;

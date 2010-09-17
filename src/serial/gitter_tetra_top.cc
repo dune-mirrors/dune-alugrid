@@ -20,8 +20,8 @@ template < class A > void Hface3Top < A > :: split_e01 ()
   assert(ev0) ;
   inneredge_t * e0 = new inneredge_t (l, ev0, this->myvertex (2) ) ;
   assert( e0 ) ;
-  innerface_t * f0 = new innerface_t (l, this->myhedge1(2), this->twist(2), this->subedge1(0,0), this->twist(0) , e0, 0, 0) ;
-  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(0,1), this->twist(0), this->myhedge1(1),  this->twist(1), 1) ;
+  innerface_t * f0 = new innerface_t (l, this->myhedge1(2), twist(2), this->subedge1(0,0), twist(0) , e0, 0, 0) ;
+  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(0,1), twist(0), this->myhedge1(1),  twist(1), 1) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
   _inner = new inner_t( f0 , e0 );
@@ -37,8 +37,8 @@ template < class A >  void Hface3Top < A > :: split_e12 ()
   assert(ev0) ;
   inneredge_t * e0 = new inneredge_t (l, ev0, this->myvertex (0)) ;
   assert( e0 ) ;
-  innerface_t * f0 = new innerface_t (l, this->myhedge1(0), this->twist(0), this->subedge1(1,0), this->twist(1) , e0, 0, 0 ) ;
-  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(1,1), this->twist(1), this->myhedge1(2),  this->twist(2), 1 ) ;
+  innerface_t * f0 = new innerface_t (l, this->myhedge1(0), twist(0), this->subedge1(1,0), twist(1) , e0, 0, 0 ) ;
+  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(1,1), twist(1), this->myhedge1(2),  twist(2), 1 ) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
   _inner = new inner_t( f0 , e0 );
@@ -54,8 +54,8 @@ template < class A >  void Hface3Top < A > :: split_e20 ()
   assert(ev0) ;
   inneredge_t * e0 = new inneredge_t (l, ev0, this->myvertex(1)) ;
   assert( e0 ) ;
-  innerface_t * f0 = new innerface_t (l, this->myhedge1(1), this->twist(1), this->subedge1(2,0), this->twist(2) , e0, 0, 0 ) ;
-  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(2,1), this->twist(2), this->myhedge1(0),  this->twist(0), 1 ) ;
+  innerface_t * f0 = new innerface_t (l, this->myhedge1(1), twist(1), this->subedge1(2,0), twist(2) , e0, 0, 0 ) ;
+  innerface_t * f1 = new innerface_t (l, e0, 1, this->subedge1(2,1), twist(2), this->myhedge1(0),  twist(0), 1 ) ;
   assert (f0 && f1 ) ;
   f0->append(f1) ;
   _inner = new inner_t( f0 , e0 );
@@ -77,9 +77,9 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
   assert( e0 && e1 && e2 ) ;
   e0->append(e1) ;
   e1->append(e2) ;
-  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), this->twist(0), e2, 1, this->subedge1(2,1), this->twist(2), 0) ;
-  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), this->twist(0), this->subedge1(1,0), this->twist(1), e0, 1, 1) ;
-  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), this->twist(1), this->subedge1(2,0), this->twist(2), 2) ;
+  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), twist(0), e2, 1, this->subedge1(2,1), twist(2), 0) ;
+  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), twist(0), this->subedge1(1,0), twist(1), e0, 1, 1) ;
+  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), twist(1), this->subedge1(2,0), twist(2), 2) ;
   innerface_t * f3 = new innerface_t (l, e0, 0, e1, 0, e2, 0, 3 ) ;
   assert (f0 && f1 && f2 && f3) ;
   f0->append(f1) ;
@@ -97,21 +97,21 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
     switch(r) {
       typedef typename myhedge1_t :: myrule_t myhedge1rule_t;
       case myrule_t :: e01 :
-        this->myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (0))) ;
+        this->myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
         split_e01 () ;
         break ;
       case myrule_t :: e12 :
-        this->myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (0))) ;
+        this->myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
         split_e12 () ;
         break ;
       case myrule_t :: e20 :
-        this->myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (0))) ;
+        this->myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
         split_e20 () ;
         break ;
       case myrule_t :: iso4 :
-        this->myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (0))) ;
-        this->myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (1))) ;
-        this->myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (this->twist (2))) ;
+        this->myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
+        this->myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (1))) ;
+        this->myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (2))) ;
         split_iso4 () ;
         break ;
       default :
@@ -135,7 +135,8 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
 
 template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist) 
 {
-  if (r != getrule ()) {
+  if (r != getrule ()) 
+  {
     assert (getrule () == myrule_t :: nosplit ? 1 : 
       (cerr << "**FEHLER beim Verfeinern mit Regel " << r << " auf " << getrule () << endl, 0)) ;
     switch(r) {
@@ -265,7 +266,7 @@ void Hface3Top < A > :: doRestore (InStream_t & is)
 template < class A >  void Hbnd3Top < A > :: 
 setBoundaryId (const int id ) 
 {
-  myhface3_t & face = *(this->myhface3(0));
+  myhface3_t & face = *(myhface3(0));
   face.setBndId( id );
   // 3 vertices and edges 
   for(int i=0; i<3; ++i) 
@@ -279,8 +280,8 @@ template < class A >  void Hbnd3Top < A > :: split_e01 ()
 {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this , _bt, _indexManager, 0 , gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), this , _bt, _indexManager, 0 , gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -290,8 +291,8 @@ template < class A >  void Hbnd3Top < A > :: split_e01 ()
 template < class A >  void Hbnd3Top < A > :: split_e12 () {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this , _bt, _indexManager, 0 , gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), this , _bt, _indexManager, 0 , gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), this , _bt, _indexManager, 0 , gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -302,8 +303,8 @@ template < class A >  void Hbnd3Top < A > :: split_e20 ()
 {
   int l = 1 + level () ;
   int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this , _bt, _indexManager, 0, gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this , _bt, _indexManager, 0, gFace) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), this , _bt, _indexManager, 0, gFace) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), this , _bt, _indexManager, 0, gFace) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -319,10 +320,10 @@ template < class A >  void Hbnd3Top < A > :: split_iso4 ()
   // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
   this->splitGhost( ghostInfo );
 
-  innerbndseg_t * b0 = new innerbndseg_t (l, this->subface3 (0,0), this->twist (0), this , _bt, _indexManager, ghostInfo.child(0), ghostInfo.face(0)) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, this->subface3 (0,1), this->twist (0), this , _bt, _indexManager, ghostInfo.child(1), ghostInfo.face(1)) ;
-  innerbndseg_t * b2 = new innerbndseg_t (l, this->subface3 (0,2), this->twist (0), this , _bt, _indexManager, ghostInfo.child(2), ghostInfo.face(2)) ;
-  innerbndseg_t * b3 = new innerbndseg_t (l, this->subface3 (0,3), this->twist (0), this , _bt, _indexManager, ghostInfo.child(3), ghostInfo.face(3)) ;
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface3 (0,0), twist (0), this , _bt, _indexManager, ghostInfo.child(0), ghostInfo.face(0)) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface3 (0,1), twist (0), this , _bt, _indexManager, ghostInfo.child(1), ghostInfo.face(1)) ;
+  innerbndseg_t * b2 = new innerbndseg_t (l, subface3 (0,2), twist (0), this , _bt, _indexManager, ghostInfo.child(2), ghostInfo.face(2)) ;
+  innerbndseg_t * b3 = new innerbndseg_t (l, subface3 (0,3), twist (0), this , _bt, _indexManager, ghostInfo.child(3), ghostInfo.face(3)) ;
   assert (b0 && b1 && b2 && b3) ;
   b0->append(b1) ;
   b1->append(b2) ;
@@ -347,7 +348,7 @@ template < class A >  bool Hbnd3Top < A > :: coarse ()
       this->preCoarsening () ;
       
       delete _dwn ; _dwn = 0 ;
-      this->myhface3 (0)->coarse () ;
+      myhface3 (0)->coarse () ;
 
       this->coarseGhost();
     }
@@ -389,19 +390,19 @@ template < class A >  bool Hbnd3Top < A > :: refineBalance (balrule_t r, int b)
       // sich selbst, weil die Anforderung durch die Fl"ache kam, und
       // dahinter keine Balancierung stattfinden muss.
     
-      this->myhface3 (0)->refineImmediate (r) ;
+      myhface3 (0)->refineImmediate (r) ;
       split_iso4 () ;
     } 
     else if (r == myrule_t :: e01) {
-      this->myhface3 (0)->refineImmediate (r) ;
+      myhface3 (0)->refineImmediate (r) ;
       split_e01 () ;
     } 
     else if (r == myrule_t :: e12) {
-      this->myhface3 (0)->refineImmediate (r) ;
+      myhface3 (0)->refineImmediate (r) ;
       split_e12 () ;
     } 
     else if (r == myrule_t :: e20) {
-      this->myhface3 (0)->refineImmediate (r) ;
+      myhface3 (0)->refineImmediate (r) ;
       split_e20 () ;
     } 
     else {
@@ -460,19 +461,19 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
       assert (this->getrule () == myrule_t :: nosplit) ;
       switch (r) {
       case balrule_t :: e01 :
-        if (!this->myhface3 (0)->refine (balrule_t (balrule_t :: e01).rotate (this->twist (0)), this->twist (0))) return false ;
+        if (!myhface3 (0)->refine (balrule_t (balrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
         split_e01 () ;
         break;
       case balrule_t :: e12 :
-        if (!this->myhface3 (0)->refine (balrule_t (balrule_t :: e12).rotate (this->twist (0)), this->twist (0))) return false ;
+        if (!myhface3 (0)->refine (balrule_t (balrule_t :: e12).rotate (twist (0)), twist (0))) return false ;
         split_e12 () ;
         break;
       case balrule_t :: e20 :
-        if (!this->myhface3 (0)->refine (balrule_t (balrule_t :: e20).rotate (this->twist (0)), this->twist (0))) return false ;
+        if (!myhface3 (0)->refine (balrule_t (balrule_t :: e20).rotate (twist (0)), twist (0))) return false ;
         split_e20 () ;
         break;
       case balrule_t :: iso4 :
-        if (!this->myhface3 (0)->refine (balrule_t (balrule_t :: iso4).rotate (this->twist (0)), this->twist (0))) return false ;
+        if (!myhface3 (0)->refine (balrule_t (balrule_t :: iso4).rotate (twist (0)), twist (0))) return false ;
         split_iso4 () ;
         break;
       default :
@@ -496,7 +497,7 @@ template < class A >  void Hbnd3Top < A > :: restoreFollowFace ()
   // bestehenden Fl"achenbaum wiederherzustellen durch die
   // entsprechende Verfeinerung.
   
-  myhface3_t & f (*(this->myhface3 (0))) ;
+  myhface3_t & f (*(myhface3 (0))) ;
   if (!f.leaf ()) {
     balrule_t r = f.getrule () ;
     switch (r) {
@@ -604,19 +605,19 @@ template < class A > TetraTop < A > :: ~TetraTop ()
 }
 
 template < class A >  typename TetraTop < A > :: myhedge1_t * TetraTop < A > :: subedge1 (int i, int j) {
-  switch (this->myhface3(i)->getrule()) {
+  switch (myhface3(i)->getrule()) {
   case myhface3_t :: myrule_t :: e01 :
     assert( j == 0 );
-    return this->myhface3 (i)->subedge1 (0) ;
+    return myhface3 (i)->subedge1 (0) ;
   case myhface3_t :: myrule_t :: e12 :
     assert( j == 0 );
-    return this->myhface3 (i)->subedge1 (0) ;
+    return myhface3 (i)->subedge1 (0) ;
   case myhface3_t :: myrule_t :: e20 :
     assert( j == 0 );
-    return this->myhface3 (i)->subedge1 (0) ;
+    return myhface3 (i)->subedge1 (0) ;
   case myhface3_t :: myrule_t :: iso4 :
     assert( j < 3 );
-    return ((this->twist (i) < 0) ? this->myhface3 (i)->subedge1 ((8 - j + this->twist (i)) % 3) : this->myhface3 (i)->subedge1 ((j + this->twist (i)) % 3)) ;
+    return ((twist (i) < 0) ? myhface3 (i)->subedge1 ((8 - j + twist (i)) % 3) : myhface3 (i)->subedge1 ((j + twist (i)) % 3)) ;
   case myhface3_t :: myrule_t :: nosplit :
     cerr << "**FEHLER (FATAL): subedge1 () auf nicht in verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
@@ -631,43 +632,43 @@ template < class A >  const typename TetraTop < A > :: myhedge1_t * TetraTop < A
 
 
 template < class A >  typename TetraTop < A > ::  myhface3_t * TetraTop < A > :: subface3 (int i, int j) {
-  switch (this->myhface3(i)->getrule()) {
+  switch (myhface3(i)->getrule()) {
   case myhface3_t :: myrule_t :: e01 :
     assert( j < 2 );
-    if ( this->twist(i) == 0 ||  this->twist(i) == 1 ||  this->twist(i) == -1 )
-      return this->myhface3(i)->subface3(j) ;
-    if ( this->twist(i) == 2 ||  this->twist(i) == -2 || this->twist(i) == -3 )
-      return this->myhface3(i)->subface3(!j) ;
+    if ( twist(i) == 0 ||  twist(i) == 1 ||  twist(i) == -1 )
+      return myhface3(i)->subface3(j) ;
+    if ( twist(i) == 2 ||  twist(i) == -2 || twist(i) == -3 )
+      return myhface3(i)->subface3(!j) ;
       cerr << __FILE__ << " " << __LINE__ << "myhface3(i)->subface3()" << endl;
       return 0;
   case myhface3_t :: myrule_t :: e12 :
     assert( j < 2 );
-    if ( this->twist(i) == 0 ||  this->twist(i) == 2 ||  this->twist(i) == -3 )
-      return this->myhface3(i)->subface3(j) ;
-    if ( this->twist(i) == -1 || this->twist(i) == 1 ||  this->twist(i) == -2 )
-      return this->myhface3(i)->subface3(!j) ;
+    if ( twist(i) == 0 ||  twist(i) == 2 ||  twist(i) == -3 )
+      return myhface3(i)->subface3(j) ;
+    if ( twist(i) == -1 || twist(i) == 1 ||  twist(i) == -2 )
+      return myhface3(i)->subface3(!j) ;
     cerr << __FILE__ << " " << __LINE__ << "myhface3(i)->subface3()" << endl;
     return 0;
   case myhface3_t :: myrule_t :: e20 :
     assert( j < 2 );
-    if ( this->twist(i) == 1 ||  this->twist(i) == 2 ||  this->twist(i) == -2 )
-      return this->myhface3(i)->subface3(j) ;
-    if ( this->twist(i) == 0 ||  this->twist(i) == -1 || this->twist(i) == -3 )
-      return this->myhface3(i)->subface3(!j) ;
+    if ( twist(i) == 1 ||  twist(i) == 2 ||  twist(i) == -2 )
+      return myhface3(i)->subface3(j) ;
+    if ( twist(i) == 0 ||  twist(i) == -1 || twist(i) == -3 )
+      return myhface3(i)->subface3(!j) ;
     cerr << __FILE__ << " " << __LINE__ << "myhface3(i)->subface3()" << endl;
     return 0;
   case myhface3_t :: myrule_t :: iso4 :
     assert( j < 4 );
     if ( j == 3 )
-      return this->myhface3(i)->subface3(3);
+      return myhface3(i)->subface3(3);
     if ( j < 3 )
-      return this->myhface3(i)->subface3(this->twist(i) < 0 ? (7 - j + this->twist(i)) % 3 : (j + this->twist(i)) % 3) ;
+      return myhface3(i)->subface3(twist(i) < 0 ? (7 - j + twist(i)) % 3 : (j + twist(i)) % 3) ;
   case myhface3_t :: myrule_t :: nosplit :
     cerr << "**FEHLER (FATAL): subface3 () auf nicht verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
     return 0 ;
   default:
-    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << this->myhface3(i)->getrule() << "] in "__FILE__ << " " << __LINE__ << endl ;
+    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface3(i)->getrule() << "] in "__FILE__ << " " << __LINE__ << endl ;
     abort() ;
   } 
   return 0 ;
@@ -688,8 +689,8 @@ template < class A >  void TetraTop < A > :: split_e01 ()
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
   
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
+  innertetra_t * h0 = new innertetra_t (l, subface3(0, 0), twist (0), f0, 0, myhface3(2), twist (2), subface3(3, 0), twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, subface3(0, 1), twist (0), myhface3(1), twist (1), f0, 1, subface3(3, 1), twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _inner = new inner_t( h0, f0 ); 
@@ -709,8 +710,8 @@ template < class A >  void TetraTop < A > :: split_e12 ()
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
   
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
+  innertetra_t * h0 = new innertetra_t (l, subface3(0, 0), twist (0), f0, 0, myhface3(2), twist (2), subface3(3, 0), twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, subface3(0, 1), twist (0), myhface3(1), twist (1), f0, 1, subface3(3, 1), twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _inner = new inner_t( h0, f0 ); 
@@ -731,8 +732,8 @@ template < class A >  void TetraTop < A > :: split_e20 ()
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
   
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
+  innertetra_t * h0 = new innertetra_t (l, subface3(0, 0), twist (0), f0, 0, myhface3(2), twist (2), subface3(3, 0), twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, subface3(0, 1), twist (0), myhface3(1), twist (1), f0, 1, subface3(3, 1), twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _inner = new inner_t( h0, f0 ); 
@@ -753,8 +754,8 @@ template < class A >  void TetraTop < A > :: split_e23 ()
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
   
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
+  innertetra_t * h0 = new innertetra_t (l, subface3(0, 0), twist (0), f0, 0, myhface3(2), twist (2), subface3(3, 0), twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, subface3(0, 1), twist (0), myhface3(1), twist (1), f0, 1, subface3(3, 1), twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _inner = new inner_t( h0, f0 ); 
@@ -772,8 +773,8 @@ template < class A >  void TetraTop < A > :: split_e30 ()
   innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 3), 1, this->subedge1 (0, 3), 0, this->subedge1 (2, 2), 0 ) ;
   assert(f0) ;
   double childVolume = 0.5 * _volume;
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
+  innertetra_t * h0 = new innertetra_t (l, subface3(0, 0), twist (0), f0, 0, myhface3(2), twist (2), subface3(3, 0), twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, subface3(0, 1), twist (0), myhface3(1), twist (1), f0, 1, subface3(3, 1), twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _inner = new inner_t( h0, f0 ); 
@@ -794,8 +795,8 @@ template < class A >  void TetraTop < A > :: split_e31 ()
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
   
-  innertetra_t * h0 = new innertetra_t (l, this->subface3(0, 0), this->twist (0), f0, 0, this->myhface3(2), this->twist (2), this->subface3(3, 0), this->twist (3), this, 0, childVolume) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 1), this->twist (0), this->myhface3(1), this->twist (1), f0, 1, this->subface3(3, 1), this->twist (3), this, 1, childVolume) ;
+  innertetra_t * h0 = new innertetra_t (l, subface3(0, 0), twist (0), f0, 0, myhface3(2), twist (2), subface3(3, 0), twist (3), this, 0, childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, subface3(0, 1), twist (0), myhface3(1), twist (1), f0, 1, subface3(3, 1), twist (3), this, 1, childVolume) ;
   assert(h0 && h1) ;
   h0->append(h1) ;
   _inner = new inner_t( h0, f0 ); 
@@ -813,19 +814,19 @@ splitISO8 ()
   typedef typename A :: inneredge_t inneredge_t;
   const int l = 1 + this->level () ; 
 
-  myvertex_t * e31 = this->myhface3 (0)->myhedge1 ((this->twist(0) < 0) ? ((9+this->twist(0))%3) : (this->twist(0)%3))->subvertex (0) ;
-  myvertex_t * e20 = this->myhface3 (1)->myhedge1 ((this->twist(1) < 0) ? ((9+this->twist(1))%3) : (this->twist(1)%3))->subvertex (0) ;
+  myvertex_t * e31 = myhface3 (0)->myhedge1 ((twist(0) < 0) ? ((9+twist(0))%3) : (twist(0)%3))->subvertex (0) ;
+  myvertex_t * e20 = myhface3 (1)->myhedge1 ((twist(1) < 0) ? ((9+twist(1))%3) : (twist(1)%3))->subvertex (0) ;
   assert(e31 && e20);
   inneredge_t * e0 = new inneredge_t (l, e31, e20) ;
   assert(e0) ;
-  innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 2), ((this->twist(3)>=0)?1:0), this->subedge1 (1, 2), ((this->twist(1)>=0)?1:0), this->subedge1 (2, 2), ((this->twist(2)>=0)?1:0)) ;
-  innerface_t * f1 = new innerface_t (l, this->subedge1 (3, 0), ((this->twist(3)>=0)?1:0), this->subedge1 (2, 1), ((this->twist(2)>=0)?1:0), this->subedge1 (0, 2), ((this->twist(0)>=0)?1:0)) ;
-  innerface_t * f2 = new innerface_t (l, this->subedge1 (3, 1), ((this->twist(3)>=0)?1:0), this->subedge1 (0, 1), ((this->twist(0)>=0)?1:0), this->subedge1 (1, 0), ((this->twist(1)>=0)?1:0)) ;
-  innerface_t * f3 = new innerface_t (l, this->subedge1 (2, 0), ((this->twist(2)>=0)?0:1), this->subedge1 (0, 0), ((this->twist(0)>=0)?0:1), this->subedge1 (1, 1), ((this->twist(1)>=0)?0:1)) ;
-  innerface_t * f4 = new innerface_t (l, e0, 0, this->subedge1 (3, 2), ((this->twist(3)>=0)?0:1), this->subedge1 (2, 1), ((this->twist(2)>=0)?1:0)) ;
-  innerface_t * f5 = new innerface_t (l, e0, 0, this->subedge1 (3, 1), ((this->twist(3)>=0)?1:0), this->subedge1 (0, 2), ((this->twist(0)>=0)?0:1)) ; 
-  innerface_t * f6 = new innerface_t (l, e0, 0, this->subedge1 (1, 0), ((this->twist(1)>=0)?0:1), this->subedge1 (0, 0), ((this->twist(0)>=0)?1:0)) ;
-  innerface_t * f7 = new innerface_t (l, e0, 0, this->subedge1 (1, 2), ((this->twist(1)>=0)?1:0), this->subedge1 (2, 0), ((this->twist(2)>=0)?0:1)) ;
+  innerface_t * f0 = new innerface_t (l, this->subedge1 (3, 2), ((twist(3)>=0)?1:0), this->subedge1 (1, 2), ((twist(1)>=0)?1:0), this->subedge1 (2, 2), ((twist(2)>=0)?1:0)) ;
+  innerface_t * f1 = new innerface_t (l, this->subedge1 (3, 0), ((twist(3)>=0)?1:0), this->subedge1 (2, 1), ((twist(2)>=0)?1:0), this->subedge1 (0, 2), ((twist(0)>=0)?1:0)) ;
+  innerface_t * f2 = new innerface_t (l, this->subedge1 (3, 1), ((twist(3)>=0)?1:0), this->subedge1 (0, 1), ((twist(0)>=0)?1:0), this->subedge1 (1, 0), ((twist(1)>=0)?1:0)) ;
+  innerface_t * f3 = new innerface_t (l, this->subedge1 (2, 0), ((twist(2)>=0)?0:1), this->subedge1 (0, 0), ((twist(0)>=0)?0:1), this->subedge1 (1, 1), ((twist(1)>=0)?0:1)) ;
+  innerface_t * f4 = new innerface_t (l, e0, 0, this->subedge1 (3, 2), ((twist(3)>=0)?0:1), this->subedge1 (2, 1), ((twist(2)>=0)?1:0)) ;
+  innerface_t * f5 = new innerface_t (l, e0, 0, this->subedge1 (3, 1), ((twist(3)>=0)?1:0), this->subedge1 (0, 2), ((twist(0)>=0)?0:1)) ; 
+  innerface_t * f6 = new innerface_t (l, e0, 0, this->subedge1 (1, 0), ((twist(1)>=0)?0:1), this->subedge1 (0, 0), ((twist(0)>=0)?1:0)) ;
+  innerface_t * f7 = new innerface_t (l, e0, 0, this->subedge1 (1, 2), ((twist(1)>=0)?1:0), this->subedge1 (2, 0), ((twist(2)>=0)?0:1)) ;
   assert(f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7) ;
   f0->append(f1) ;
   f1->append(f2) ;
@@ -839,14 +840,14 @@ splitISO8 ()
   const double childVolume = calculateChildVolume( 0.125 * _volume );
   
   // pointer `this' is the pointer to the father element 
-  innertetra_t * h0 = new innertetra_t (l, f0, -1, this->subface3(1, 0), this->twist(1), this->subface3(2, 0), this->twist(2), this->subface3(3, 0), this->twist(3), this, 0 , childVolume) ;
-  innertetra_t * h1 = new innertetra_t (l, this->subface3(0, 0), this->twist(0), f1, -3, this->subface3(2, 2), this->twist(2), this->subface3(3, 1), this->twist(3), this, 1 , childVolume) ;
-  innertetra_t * h2 = new innertetra_t (l, this->subface3(0, 2), this->twist(0), this->subface3(1, 1), this->twist(1), f2, -1, this->subface3(3, 2), this->twist(3), this, 2 , childVolume) ;
-  innertetra_t * h3 = new innertetra_t (l, this->subface3(0, 1), this->twist(0), this->subface3(1, 2), this->twist(1), this->subface3(2, 1), this->twist(2), f3, 0,  this, 3 , childVolume) ;
-  innertetra_t * h4 = new innertetra_t (l, f7, -3, this->subface3(2, 3), ((this->twist(2)>=0) ? ((this->twist(2)+2)%3) : this->twist(2)) , f4, 2, f0, 0, this, 4 , childVolume) ;  
-  innertetra_t * h5 = new innertetra_t (l, f4, -3, f1, 0, f5, 2, this->subface3(3, 3), ((this->twist(3)>=0) ? (this->twist(3)+1)%3 : (this->twist(3)-1)%3-1), this, 5 , childVolume) ;
-  innertetra_t * h6 = new innertetra_t (l, f3, -1, f6, -3, this->subface3(1, 3), ((this->twist(1)>=0) ? this->twist(1) : this->twist(1)%3-1), f7, 1, this, 6 , childVolume) ;
-  innertetra_t * h7 = new innertetra_t (l, this->subface3(0, 3), ((this->twist(0)>=0) ? (this->twist(0)+1)%3 : (this->twist(0)-1)%3-1), f5, -3, f2, 0, f6, 1, this, 7 , childVolume) ;
+  innertetra_t * h0 = new innertetra_t (l, f0, -1, subface3(1, 0), twist(1), subface3(2, 0), twist(2), subface3(3, 0), twist(3), this, 0 , childVolume) ;
+  innertetra_t * h1 = new innertetra_t (l, subface3(0, 0), twist(0), f1, -3, subface3(2, 2), twist(2), subface3(3, 1), twist(3), this, 1 , childVolume) ;
+  innertetra_t * h2 = new innertetra_t (l, subface3(0, 2), twist(0), subface3(1, 1), twist(1), f2, -1, subface3(3, 2), twist(3), this, 2 , childVolume) ;
+  innertetra_t * h3 = new innertetra_t (l, subface3(0, 1), twist(0), subface3(1, 2), twist(1), subface3(2, 1), twist(2), f3, 0,  this, 3 , childVolume) ;
+  innertetra_t * h4 = new innertetra_t (l, f7, -3, subface3(2, 3), ((twist(2)>=0) ? ((twist(2)+2)%3) : twist(2)) , f4, 2, f0, 0, this, 4 , childVolume) ;  
+  innertetra_t * h5 = new innertetra_t (l, f4, -3, f1, 0, f5, 2, subface3(3, 3), ((twist(3)>=0) ? (twist(3)+1)%3 : (twist(3)-1)%3-1), this, 5 , childVolume) ;
+  innertetra_t * h6 = new innertetra_t (l, f3, -1, f6, -3, subface3(1, 3), ((twist(1)>=0) ? twist(1) : twist(1)%3-1), f7, 1, this, 6 , childVolume) ;
+  innertetra_t * h7 = new innertetra_t (l, subface3(0, 3), ((twist(0)>=0) ? (twist(0)+1)%3 : (twist(0)-1)%3-1), f5, -3, f2, 0, f6, 1, this, 7 , childVolume) ;
   assert(h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
   h0->append(h1) ;
   h1->append(h2) ;
@@ -880,38 +881,38 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
         
       {
         for (int i = 0 ; i < 4 ; i ++)
-          this->myhface3 (i)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: iso4).rotate (this->twist (i))) ; 
+          myhface3 (i)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: iso4).rotate (twist (i))) ; 
       }
       splitISO8 () ;
       break ;
     case myrule_t :: e01 :
-      this->myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (2))) ;
-      this->myhface3 (3)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (3))) ;
+      myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2))) ;
+      myhface3 (3)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (3))) ;
       split_e01 () ;
       break ;
     case myrule_t :: e12 :
-      this->myhface3 (0)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (0))) ;
-      this->myhface3 (3)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (3))) ;
+      myhface3 (0)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (0))) ;
+      myhface3 (3)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (3))) ;
       split_e12 () ;
       break ;
     case myrule_t :: e20 :
-      this->myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (1))) ;
-      this->myhface3 (3)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (3))) ;
+      myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (1))) ;
+      myhface3 (3)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (3))) ;
       split_e20 () ;
       break ;
     case myrule_t :: e23 :
-      this->myhface3 (0)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (0))) ;
-      this->myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (1))) ;
+      myhface3 (0)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (0))) ;
+      myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (1))) ;
       split_e23 () ;
       break ;
     case myrule_t :: e30 :
-      this->myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (1))) ;
-      this->myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (2))) ;
+      myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (1))) ;
+      myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2))) ;
       split_e30 () ;
       break ;
     case myrule_t :: e31 :
-      this->myhface3 (0)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (0))) ;
-      this->myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (2))) ;
+      myhface3 (0)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (0))) ;
+      myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2))) ;
       split_e31 () ;
       break ;
     default :
@@ -940,32 +941,32 @@ template < class A >  bool TetraTop < A > :: refine ()
         case myrule_t :: nosplit :
           return true ;
         case myrule_t :: e01 :
-          if (!this->myhface3 (2)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (2)), this->twist (2))) return false ;
-          if (!this->myhface3 (3)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (3)), this->twist (3))) return false ;
+          if (!myhface3 (2)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2)), twist (2))) return false ;
+          if (!myhface3 (3)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (3)), twist (3))) return false ;
           break ;
   case myrule_t :: e12 :
-          if (!this->myhface3 (0)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (0)), this->twist (0))) return false ;
-          if (!this->myhface3 (3)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (3)), this->twist (3))) return false ;
+          if (!myhface3 (0)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
+          if (!myhface3 (3)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (3)), twist (3))) return false ;
           break ;
   case myrule_t :: e20 :
-          if (!this->myhface3 (1)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (1)), this->twist (1))) return false ;
-          if (!this->myhface3 (3)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (3)), this->twist (3))) return false ;
+          if (!myhface3 (1)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (1)), twist (1))) return false ;
+          if (!myhface3 (3)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (3)), twist (3))) return false ;
           break ;
   case myrule_t :: e23 :
-          if (!this->myhface3 (0)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (0)), this->twist (0))) return false ;
-          if (!this->myhface3 (1)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (1)), this->twist (1))) return false ;
+          if (!myhface3 (0)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
+          if (!myhface3 (1)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (1)), twist (1))) return false ;
           break ;
   case myrule_t :: e30 :
-          if (!this->myhface3 (1)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (1)), this->twist (1))) return false ;
-          if (!this->myhface3 (2)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (2)), this->twist (2))) return false ;
+          if (!myhface3 (1)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (1)), twist (1))) return false ;
+          if (!myhface3 (2)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2)), twist (2))) return false ;
           break ;
   case myrule_t :: e31 :
-          if (!this->myhface3 (0)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (0)), this->twist (0))) return false ;
-          if (!this->myhface3 (2)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (this->twist (2)), this->twist (2))) return false ;      
+          if (!myhface3 (0)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
+          if (!myhface3 (2)->refine (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2)), twist (2))) return false ;      
           break ;
   case myrule_t :: iso8 :
     {for (int i = 0 ; i < 4 ; ++i )
-            if (!this->myhface3 (i)->refine (myhface3rule_t (myhface3_t :: myrule_t :: iso4).rotate (this->twist (i)), this->twist (i))) return false ; }
+            if (!myhface3 (i)->refine (myhface3rule_t (myhface3_t :: myrule_t :: iso4).rotate (twist (i)), twist (i))) return false ; }
           break ;
         default :
           cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << getrule () ;
@@ -996,10 +997,10 @@ template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce
     return false ;
   }
   if (getrule () == myrule_t :: nosplit) {
-    if (! this->myhface3 (fce)->leaf ()) {
+    if (! myhface3 (fce)->leaf ()) {
       for (int i = 0 ; i < 4 ; i ++)
         if (i != fce)
-          if (!this->myhface3 (i)->refine (balrule_t (balrule_t :: iso4).rotate (this->twist (i)), this->twist (i))) 
+          if (!myhface3 (i)->refine (balrule_t (balrule_t :: iso4).rotate (twist (i)), twist (i))) 
       return false ;
       _req = myrule_t :: nosplit ;
       refineImmediate (myrule_t :: iso8) ;
@@ -1024,7 +1025,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
     // if I have faces that are not leaf, we cannot coarsen 
     for (int i = 0 ; i < 4 ; ++i) 
     {
-      if ( ! this->myhface3 (i)->leaf ()) return false ;
+      if ( ! myhface3 (i)->leaf ()) return false ;
     }
     // else coarsen 
     return true ;
@@ -1052,7 +1053,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
         for (int i = 0 ; i < 4 ; ++i ) 
         {
           this->myneighbour (i).first->bndNotifyCoarsen () ;
-          this->myhface3 (i)->coarse () ;
+          myhface3 (i)->coarse () ;
         }
       }
       return false ;
@@ -1200,7 +1201,7 @@ void TetraTop < A > :: doRestore (InStream_t & is)
   
     for (int i = 0 ; i < 4 ; ++i) 
     {
-      myhface3_t & f (*(this->myhface3 (i))) ;
+      myhface3_t & f (*(myhface3 (i))) ;
       if (!f.leaf ()) 
       {
         switch (f.getrule ()) 
@@ -1254,15 +1255,15 @@ void TetraTop < A > :: doRestore (InStream_t & is)
 // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
    
 template < class A > typename Periodic3Top < A > :: myhedge1_t * Periodic3Top < A > :: subedge1 (int i, int j) {
-  switch (this->myhface3(i)->getrule()) {
+  switch (myhface3(i)->getrule()) {
     case myhface3_t :: myrule_t :: e01 :
     case myhface3_t :: myrule_t :: e12 :
     case myhface3_t :: myrule_t :: e20 :
       assert( j == 0 );
-      return this->myhface3 (i)->subedge1 (0) ;
+      return myhface3 (i)->subedge1 (0) ;
     case myhface3_t :: myrule_t :: iso4 :
       assert( j < 3 );
-      return ((this->twist (i) < 0) ? this->myhface3 (i)->subedge1 ((8 - j + this->twist (i)) % 3) : this->myhface3 (i)->subedge1 ((j + this->twist (i)) % 3)) ;
+      return ((twist (i) < 0) ? myhface3 (i)->subedge1 ((8 - j + twist (i)) % 3) : myhface3 (i)->subedge1 ((j + twist (i)) % 3)) ;
     case myhface3_t :: myrule_t :: nosplit :
       cerr << "**FEHLER (FATAL): subedge1 () auf nicht in verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << endl ;
       abort () ;
@@ -1276,43 +1277,43 @@ template < class A > const typename Periodic3Top < A > :: myhedge1_t * Periodic3
 }
 
 template < class A > typename Periodic3Top < A > ::  myhface3_t * Periodic3Top < A > :: subface3 (int i, int j) {
-  switch (this->myhface3 (i)->getrule ()) {
+  switch (myhface3 (i)->getrule ()) {
   case myhface3_t :: myrule_t :: e01 :
     assert( j < 2 );
-    if ( this->twist(i) == 0 ||  this->twist(i) == 1  ||  this->twist(i) == -1 )
-      return this->myhface3(i)->subface3(j) ;
-    if ( this->twist(i) == 2 ||  this->twist(i) == -2 ||  this->twist(i) == -3 )
-      return this->myhface3(i)->subface3(!j) ;
+    if ( twist(i) == 0 ||  twist(i) == 1  ||  twist(i) == -1 )
+      return myhface3(i)->subface3(j) ;
+    if ( twist(i) == 2 ||  twist(i) == -2 ||  twist(i) == -3 )
+      return myhface3(i)->subface3(!j) ;
       cerr << __FILE__ << " " << __LINE__ << "myhface3(i)->subface3()" << endl;
       return 0;
   case myhface3_t :: myrule_t :: e12 :
     assert( j < 2 );
-    if ( this->twist(i) == 0  ||  this->twist(i) == 2 ||  this->twist(i) == -3 )
-      return this->myhface3(i)->subface3(j) ;
-    if ( this->twist(i) == -1 ||  this->twist(i) == 1 ||  this->twist(i) == -2 )
-      return this->myhface3(i)->subface3(!j) ;
+    if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )
+      return myhface3(i)->subface3(j) ;
+    if ( twist(i) == -1 ||  twist(i) == 1 ||  twist(i) == -2 )
+      return myhface3(i)->subface3(!j) ;
     cerr << __FILE__ << " " << __LINE__ << "myhface3(i)->subface3()" << endl;
     return 0;
   case myhface3_t :: myrule_t :: e20 :
     assert( j < 2 );
-    if ( this->twist(i) == 1 ||  this->twist(i) == 2 ||  this->twist(i) == -2 )
-      return this->myhface3(i)->subface3(j) ;
-    if ( this->twist(i) == 0 ||  this->twist(i) == -1 || this->twist(i) == -3 )
-      return this->myhface3(i)->subface3(!j) ;
+    if ( twist(i) == 1 ||  twist(i) == 2 ||  twist(i) == -2 )
+      return myhface3(i)->subface3(j) ;
+    if ( twist(i) == 0 ||  twist(i) == -1 || twist(i) == -3 )
+      return myhface3(i)->subface3(!j) ;
     cerr << __FILE__ << " " << __LINE__ << "myhface3(i)->subface3()" << endl;
     return 0;
   case myhface3_t :: myrule_t :: iso4 :
     assert( j < 4 );
     if ( j == 3 )
-      return this->myhface3(i)->subface3 (3) ;
+      return myhface3(i)->subface3 (3) ;
     if ( j < 3 )
-      return this->myhface3 (i)->subface3 (this->twist(i) < 0 ? (7 - j + this->twist(i)) % 3 : (j + this->twist(i)) % 3) ;
+      return myhface3 (i)->subface3 (twist(i) < 0 ? (7 - j + twist(i)) % 3 : (j + twist(i)) % 3) ;
   case myhface3_t :: myrule_t :: nosplit :
     cerr << "**FEHLER (FATAL): subface3 () auf nicht verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
     return 0 ;
   default:
-    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << this->myhface3(i)->getrule() << "] in "__FILE__ << " " << __LINE__ << endl ;
+    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface3(i)->getrule() << "] in "__FILE__ << " " << __LINE__ << endl ;
     abort() ;
   } 
   return 0 ;
@@ -1324,69 +1325,16 @@ template < class A > const typename Periodic3Top < A > ::  myhface3_t * Periodic
 
 template < class A > void Periodic3Top < A > :: split_iso4 () 
 {
-  //von Hbnd kopiert ...
-  this->splitGhosts();
-
-  // get the childs 
-  typedef typename Gitter :: ghostpair_STI ghostpair_STI;
-  typedef typename Gitter :: Geometric :: tetra_GEO tetra_GEO;
-  typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
-  for (int g = 0; g < 2; ++g) 
-  {
-    ghostpair_STI ghostpair = this->getGhost(g);
-    tetra_GEO * gh = static_cast<tetra_GEO *> (ghostpair.first); 
-
-    // I hate this piece of code, R.K. 
-    tetra_GEO *(ghchild)[4] = {0,0,0,0};
-    int gFace[4] = {-1,-1,-1,-1};
-    if(gh)
-    {
-      hface3_GEO * face = gh->myhface3( ghostpair.second ); 
-      face = face->down();
-      for( int i=0; i<4; i++)
-      {
-        assert(face);
-        typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
-        neigh_t neighbour = face->nb.front();
-        tetra_GEO * ghch = static_cast<tetra_GEO *> (neighbour.first);
-        if(ghch)
-        { 
-          if(ghch->up() != gh) 
-          {
-            neighbour = face->nb.rear();
-            ghch = static_cast<tetra_GEO *> (neighbour.first);
-          }
- 
-        }
-        else 
-        { 
-          neighbour = face->nb.rear();
-          ghch = static_cast<tetra_GEO *> (neighbour.first);
-        }
-      
-        // gFace might be differnent from ghostFaceNumber, unfortuneately 
-        gFace[i] = neighbour.second; 
-       
-        assert(ghch);
-        assert(ghch->up() == gh);
-
-        ghchild[i] = ghch;
-        face = face->next();
-      }
-    }
-  }
-  //soweit von Hbnd
-  
-  int l = 1 + this->level () ;
-  innerperiodic3_t * p0 = new innerperiodic3_t (l, this->subface3 (0,0), this->twist (0), this->subface3 (1,0), this->twist (1), this , 0) ;
-  innerperiodic3_t * p1 = new innerperiodic3_t (l, this->subface3 (0,1), this->twist (0), this->subface3 (1,2), this->twist (1), this , 1) ;
-  innerperiodic3_t * p2 = new innerperiodic3_t (l, this->subface3 (0,2), this->twist (0), this->subface3 (1,1), this->twist (1), this , 2) ;
+  const int l = 1 + this->level () ;
+  innerperiodic3_t * p0 = new innerperiodic3_t (l, subface3 (0,0), twist (0), subface3 (1,0), twist (1), this , 0) ;
+  innerperiodic3_t * p1 = new innerperiodic3_t (l, subface3 (0,1), twist (0), subface3 (1,2), twist (1), this , 1) ;
+  innerperiodic3_t * p2 = new innerperiodic3_t (l, subface3 (0,2), twist (0), subface3 (1,1), twist (1), this , 2) ;
   
   // Mir ist nicht ganz klar, warum der Twist auf diese seltsame Art umzurechnen ist,
   // die Zeile (bzw. die Formel) habe ich aus Mario's Tetradeder Split Iso-8 "uber-
   // nommen, ohne im einzelnen nachzupr"ufen, ob die Regel richtig ist. (BS)
   
-  innerperiodic3_t * p3 = new innerperiodic3_t (l, this->subface3 (0,3), (this->twist(0) >= 0 ? (this->twist(0)+1)%3 : (this->twist(0)-1)%3-1), this->subface3 (1,3), (this->twist(1)>=0 ? (this->twist(1)+1)%3 : (this->twist(1)-1)%3-1) , this , 3) ;
+  innerperiodic3_t * p3 = new innerperiodic3_t (l, subface3 (0,3), (twist(0) >= 0 ? (twist(0)+1)%3 : (twist(0)-1)%3-1), subface3 (1,3), (twist(1)>=0 ? (twist(1)+1)%3 : (twist(1)-1)%3-1) , this , 3) ;
   assert (p0 && p1 && p2 && p3) ;
   p0->append(p1) ;
   p1->append(p2) ;
@@ -1405,6 +1353,20 @@ template < class A > void Periodic3Top < A > :: refineImmediate (myrule_t r) {
 
   assert (this->leaf()) ;
   switch(r) {
+    case myrule_t :: iso4 :
+    
+      // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3 :: refine (..)
+      // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
+      // "uberall hface3 :: refine (..) true geliefert hat, wohl aber z.B. von
+      // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
+      // erzwingen m"ussen und d"urfen.
+   
+      typedef typename myhface3_t :: myrule_t myhface3rule_t;
+      myhface3 (0)->refineImmediate (myhface3rule_t (r).rotate (twist (0))) ;
+      myhface3 (1)->refineImmediate (myhface3rule_t (r).rotate (twist (1))) ;
+      split_iso4 () ;
+      break ;
+
     case myrule_t :: e01 :
     case myrule_t :: e12 :
     case myrule_t :: e20 :
@@ -1412,19 +1374,6 @@ template < class A > void Periodic3Top < A > :: refineImmediate (myrule_t r) {
       // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
     
       abort () ;
-    case myrule_t :: iso4 :
-    
-  // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3 :: refine (..)
-  // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
-  // "uberall hface3 :: refine (..) true geliefert hat, wohl aber z.B. von
-  // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
-  // erzwingen m"ussen und d"urfen.
-   
-      typedef typename myhface3_t :: myrule_t myhface3rule_t;
-      this->myhface3 (0)->refineImmediate (myhface3rule_t (r).rotate (this->twist (0))) ;
-      this->myhface3 (1)->refineImmediate (myhface3rule_t (r).rotate (this->twist (1))) ;
-      split_iso4 () ;
-      break ;
     default :
       cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
       cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << endl ;
@@ -1444,8 +1393,10 @@ template < class A > bool Periodic3Top < A > :: refine () {
   return true ;
 }
 
-template < class A > bool Periodic3Top < A > :: refineBalance (balrule_t r, int fce) {
-  if (r != balrule_t :: iso4) {
+template < class A > bool Periodic3Top < A > :: refineBalance (balrule_t r, int fce) 
+{
+  if (r != balrule_t :: iso4) 
+  {
     cerr << "**WARNUNG (IGNORIERT) in Periodic3Top < A > :: refineBalance (..) nachschauen, Datei " 
        << __FILE__ << " Zeile " << __LINE__ << endl ;
    
@@ -1455,18 +1406,23 @@ template < class A > bool Periodic3Top < A > :: refineBalance (balrule_t r, int 
   // Elements f"allt flach.
   
     return false ;
-  } else {
-  
-  // Der nachfolgende Aufruf nutzt aus, dass die Regel der periodischen R"ander
-  // sich direkt auf die Balancierungsregel des entsprechenden Polygonverbinders
-  // projezieren l"asst (n"amlich 1:1). Deshalb unterscheidet der Aufruf nicht nach
-  // der angeforderten Regel in einer 'case' Anweisung.
-  
-    int opp = fce == 0 ? 1 : 0 ;
-    if (this->myhface3 (opp)->refine (typename myhface3_t :: myrule_t (r).rotate (this->twist (opp)), this->twist (opp))) {
+  } 
+  else 
+  {
+    // Der nachfolgende Aufruf nutzt aus, dass die Regel der periodischen R"ander
+    // sich direkt auf die Balancierungsregel des entsprechenden Polygonverbinders
+    // projezieren l"asst (n"amlich 1:1). Deshalb unterscheidet der Aufruf nicht nach
+    // der angeforderten Regel in einer 'case' Anweisung.
+    
+    // take opposite face 
+    const int opp = 1 - fce ;
+    if (myhface3 (opp)->refine (typename myhface3_t :: myrule_t (r).rotate (twist (opp)), twist (opp))) 
+    {
       refineImmediate (r) ;
       return true ;
-    } else {
+    } 
+    else 
+    {
       return false ;
     }
   }
@@ -1519,8 +1475,8 @@ template < class A > bool Periodic3Top < A > :: bndNotifyCoarsen () {
     delete _dwn ;
     _dwn = 0 ;
     _rule = myrule_t :: nosplit ;
-    this->myhface3 (0)->coarse () ;
-    this->myhface3 (1)->coarse () ;
+    myhface3 (0)->coarse () ;
+    myhface3 (1)->coarse () ;
   }
   return x ;
 }
@@ -1569,7 +1525,7 @@ void Periodic3Top < A > :: doRestore (InStream_t & is)
   assert(getrule () == myrule_t :: nosplit) ; // Testen auf unverfeinerten Zustand
   if (r == myrule_t :: nosplit) {
     for (int i = 0 ; i < 2 ; i ++) {
-      myhface3_t & f (*(this->myhface3 (i))) ;
+      myhface3_t & f (*(myhface3 (i))) ;
       if (!f.leaf ()) {
         switch (f.getrule ()) {
     case balrule_t :: iso4 :
