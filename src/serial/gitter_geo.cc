@@ -658,12 +658,15 @@ IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: Geometric :: BuilderIF :: iter
             (*(const AlignIterator < ListIterator < hbndseg4_GEO >, ListIterator < hbndseg3_GEO >, hbndseg_STI > *)w) ;;
 }
 
-IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const helement_STI *) const {
+IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const helement_STI *a ) const {
 
-    // Vorsicht ! Falls diese Methode ver"andert wird, muss die selbe "Anderung
-    // in der Kopiermethode (nachfolgend) vorgenommen werden. Sonst f"uhrt die 
-    // statische Typkonversion zu einem schwer nachvollziehbaren Fehler.
-// Anfang - Neu am 23.5.02 (BS)
+  // Vorsicht ! Falls diese Methode ver"andert wird, muss die selbe "Anderung
+  // in der Kopiermethode (nachfolgend) vorgenommen werden. Sonst f"uhrt die 
+  // statische Typkonversion zu einem schwer nachvollziehbaren Fehler.
+
+  // don't include periodic elements here 
+  return pureElementIterator( a );
+ /*
 
   ListIterator < hexa_GEO > w1 (_hexaList) ;
   ListIterator < tetra_GEO > w2 (_tetraList) ;
@@ -675,23 +678,26 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: ite
 
   return new AlignIterator < AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI >,
     AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI > (aw12,aw34) ;
-// Ende - Neu am 23.5.02 (BS)
+ */
 }
 
 IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: iterator (const IteratorSTI < helement_STI > * w) const {
+  return pureElementIterator( w );
+  /*
   return new AlignIterator < AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI >,
     AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI >
     (*(const AlignIterator < AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI >,
     AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, helement_STI >, helement_STI > *) w) ;
+    */
 }
   // *** Neu: Iterator der nur die "echten" Elemente (ohne period. R"ander)
   //     iteriert.
   
 IteratorSTI < Gitter :: helement_STI > * Gitter :: Geometric :: BuilderIF :: pureElementIterator (const helement_STI *) const {
 
-    // Vorsicht ! Falls diese Methode ver"andert wird, muss die selbe "Anderung
-    // in der Kopiermethode (nachfolgend) vorgenommen werden. Sonst f"uhrt die 
-    // statische Typkonversion zu einem schwer nachvollziehbaren Fehler.
+  // Vorsicht ! Falls diese Methode ver"andert wird, muss die selbe "Anderung
+  // in der Kopiermethode (nachfolgend) vorgenommen werden. Sonst f"uhrt die 
+  // statische Typkonversion zu einem schwer nachvollziehbaren Fehler.
 
   ListIterator < hexa_GEO > w1 (_hexaList) ;
   ListIterator < tetra_GEO > w2 (_tetraList) ;
