@@ -286,45 +286,6 @@ IteratorSTI < Gitter :: hedge_STI > * Gitter :: levelIterator (const hedge_STI *
 {
   any_has_level<hedge_STI> rule(ahl);
   return this->createIterator(e,rule);
-  /*
-  typedef Insert < AccessIterator < hedge_STI > :: Handle, 
-    TreeIterator < hedge_STI, any_has_level < hedge_STI > > >  
-                                  level_edge__macro_edge__iterator ;
-
-  vector < IteratorSTI < hedge_STI > * > _iterators ; 
-  
-  _iterators.push_back ( new level_edge__macro_edge__iterator (container (),ahl)) ;
-  Insert < AccessIterator < hface_STI > :: Handle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > > nf (container ()) ;
-  Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_edge < helement_STI > > > ne (container ()) ;
-  Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > ef (nf) ;
-  Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge > ee (ne) ;
-  
-  _iterators.push_back ( new  Insert < Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
-  TreeIterator < hedge_STI, any_has_level < hedge_STI > > > (ef,ahl)) ;
-  _iterators.push_back ( new Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
-  TreeIterator < hedge_STI, any_has_level < hedge_STI > > > (ee,ahl)) ;
-  Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > > nef (container ()) ;
-  Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fnef (nef) ;
-  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > > fie (fnef) ;
-  Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > efie (fie) ;
-  _iterators.push_back (new Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
-  TreeIterator < hedge_STI, any_has_level < hedge_STI > > > (efie,ahl)) ;
-  return new VectorAlign < hedge_STI > (_iterators) ;
-  */
 }
 
 
@@ -334,24 +295,6 @@ levelIterator (const hface_STI * f , const any_has_level<hface_STI> & ahl )
 {
   any_has_level< hface_STI > rule(ahl);
   return this->createIterator(f, rule);
-  /*
-  typedef Insert < AccessIterator < hface_STI > :: Handle, 
-    TreeIterator < hface_STI, any_has_level < hface_STI > > > 
-                                      level_face__macro_face__iterator ;
-
-  level_face__macro_face__iterator w1 (container (),ahl) ;
-  Insert < AccessIterator < helement_STI > :: Handle,
-  TreeIterator < helement_STI, has_int_face < helement_STI > > > nw (container ()) ;
-  Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > ww (nw) ;
-  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
-  TreeIterator < hface_STI, any_has_level < hface_STI > > > www (nw,ahl) ;
-  return new AlignIterator < level_face__macro_face__iterator, 
-  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
-  TreeIterator < hface_STI, any_has_level < hface_STI > > >, hface_STI > (w1, www) ;
-  */
 }
 
 // create level element iterator 
@@ -359,25 +302,12 @@ IteratorSTI < Gitter :: helement_STI > * Gitter :: levelIterator (const helement
 {
   any_has_level <helement_STI> rule(ahl);
   return this->createIterator(el, rule);
-  /*
-  typedef Insert < AccessIterator < Gitter :: helement_STI > :: Handle, 
-    TreeIterator < Gitter :: helement_STI, any_has_level < Gitter :: helement_STI> > > 
-      level_element__macro_element__iterator ;
-
-  return new level_element__macro_element__iterator (container (),ahl) ;
-  */
 }
 
 IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: levelIterator (const hbndseg_STI * bnd, const any_has_level<hbndseg_STI> & ahl) 
 {
   any_has_level<hbndseg_STI> rule(ahl);
   return this->createIterator(bnd, rule);
-  /*
-  typedef Insert < AccessIterator < hbndseg_STI > :: Handle, 
-    TreeIterator < hbndseg_STI, any_has_level < hbndseg_STI> > >  
-          level_bnd__macro_bnd__iterator ;
-  return new level_bnd__macro_bnd__iterator (container (),ahl) ;
-  */
 }
 
 //*******************************************
