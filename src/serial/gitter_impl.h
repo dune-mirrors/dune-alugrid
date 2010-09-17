@@ -213,21 +213,20 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
     typedef TetraTop < TetraEmpty > tetra_IMPL ;
 
   
-  
-  class Periodic3Empty : public periodic3_GEO {
-    protected :
-      typedef hface3_IMPL innerface_t ;
-      typedef hedge1_IMPL inneredge_t ;
-      typedef VertexEmpty innervertex_t ;
-      typedef tetra_IMPL GhostElement_t;
+    class Periodic3Empty : public periodic3_GEO {
+      protected :
+        typedef hface3_IMPL innerface_t ;
+        typedef hedge1_IMPL inneredge_t ;
+        typedef VertexEmpty innervertex_t ;
+        typedef tetra_IMPL GhostElement_t;
 
-      inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
-      ~Periodic3Empty () {}
-      // do nothing here 
-      virtual void resetGhostIndices() {}
-    public:
-  } ;
-  typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
+        inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
+        ~Periodic3Empty () {}
+        // do nothing here 
+        virtual void resetGhostIndices() {}
+      public:
+    } ;
+    typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
 
 
       class HexaEmpty : public hexa_GEO {
