@@ -123,76 +123,24 @@ IteratorSTI < Gitter :: hedge_STI > * Gitter :: iterator (const hedge_STI * e)
 {
   is_leaf< hedge_STI > rule; 
   return this->createIterator(e, rule);
-  /*
-  vector < IteratorSTI < hedge_STI > * > _iterators ; 
-  _iterators.push_back ( new leaf_edge__macro_edge__iterator (container ())) ;
-  Insert < AccessIterator < hface_STI > :: Handle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > > nf (container ()) ;
-  Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_edge < helement_STI > > > ne (container ()) ;
-  Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > ef (nf) ;
-  Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge > ee (ne) ;
-  _iterators.push_back ( new  Insert < Wrapper < Insert < AccessIterator < hface_STI > :: Handle, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
-  TreeIterator < hedge_STI, is_leaf < hedge_STI > > > (ef)) ;
-  _iterators.push_back ( new Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
-  TreeIterator < hedge_STI, is_leaf < hedge_STI > > > (ee)) ;
-  Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > > nef (container ()) ;
-  Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fnef (nef) ;
-  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > > fie (fnef) ;
-  Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > efie (fie) ;
-  _iterators.push_back (new Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle, 
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
-  TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
-  TreeIterator < hedge_STI, is_leaf < hedge_STI > > > (efie)) ;
-  return new VectorAlign < hedge_STI > (_iterators) ;
-  */
 }
 
 IteratorSTI < Gitter :: hface_STI > * Gitter :: iterator (const hface_STI * f) 
 {
   is_leaf< hface_STI > rule; 
   return this->createIterator(f, rule);
-  /*
-  leaf_face__macro_face__iterator w1 (container ()) ;
-  Insert < AccessIterator < helement_STI > :: Handle,
-  TreeIterator < helement_STI, has_int_face < helement_STI > > > nw (container ()) ;
-  Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > ww (nw) ;
-  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
-  TreeIterator < hface_STI, is_leaf < hface_STI > > > www (nw) ;
-  return new AlignIterator < leaf_face__macro_face__iterator, 
-  Insert < Wrapper < Insert < AccessIterator < helement_STI > :: Handle,
-  TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
-  TreeIterator < hface_STI, is_leaf < hface_STI > > >, hface_STI > (w1, www) ;
-  */
 }
 
 IteratorSTI < Gitter :: hbndseg_STI > * Gitter :: iterator (const hbndseg_STI * bnd) 
 {
   is_leaf <hbndseg_STI> rule;
   return this->createIterator(bnd, rule);
-  /*
-  return new leaf_bnd__macro_bnd__iterator (container ()) ;
-  */
 }
 
-IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const helement_STI *el) {
+IteratorSTI < Gitter :: helement_STI > * Gitter :: iterator (const helement_STI *el) 
+{
   is_leaf <helement_STI> rule;
   return this->createIterator(el, rule);
-  /*
-  return new leaf_element__macro_element__iterator (container ()) ;
-  */
 }
 
 //**************************************************************************
