@@ -540,8 +540,8 @@ Hbnd3Top (int l, myhface3_t * f,
           innerbndseg_t * up, bnd_t bt, 
           Gitter::helement_STI * gh, int gFace ) : 
   A (f, i ), _bbb (0), _dwn (0), _up (up) , 
-  _lvl (l), 
-  _bt (bt) 
+  _bt (bt),
+  _lvl (l) 
 {
   // store ghost element 
   typedef Gitter :: ghostpair_STI ghostpair_STI;
