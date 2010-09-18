@@ -15,8 +15,7 @@ template < class A, class MX > class Hbnd4PllExternal : public Hbnd4Top < A > {
     typedef typename A :: myhface4_t myhface4_t ;
     typedef typename A :: bnd_t     bnd_t ;
   public :
-    inline Hbnd4PllExternal (myhface4_t *, int, 
-                  const bnd_t bt, IndexManagerType &) ;
+    inline Hbnd4PllExternal (myhface4_t *, int, const bnd_t bt) ;
     inline ~Hbnd4PllExternal () ;
     ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
     const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -101,11 +100,11 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         virtual bool lockedAgainstCoarsening () const ;
       public :
         HbndPllMacro (myhface4_t *,int,
-                      const bnd_t bt , IndexManagerType & im, 
+                      const bnd_t bt,
                       BuilderIF & ,
                       MacroGhostInfoHexa* ) ;
         HbndPllMacro (myhface4_t *,int,
-                      const bnd_t bt , IndexManagerType & im, 
+                      const bnd_t bt,
                       BuilderIF & );
 
        ~HbndPllMacro () ;
@@ -136,9 +135,8 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
   //
 
 template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: 
-Hbnd4PllExternal (myhface4_t * f, int t, const bnd_t bt , 
-    IndexManagerType & im) 
-  : Hbnd4Top < A > (0,f,t,bt,im), _mxt (new MX (*this)) 
+Hbnd4PllExternal (myhface4_t * f, int t, const bnd_t bt) 
+  : Hbnd4Top < A > (0,f,t,bt), _mxt (new MX (*this)) 
 {
   this->restoreFollowFace () ;
   return ;
@@ -218,9 +216,9 @@ Hbnd4PllInternal < A, X, MX > :: HbndPll :: getGhost () const
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: 
 HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t,
               const bnd_t bt, 
-              IndexManagerType & im, BuilderIF & mgb,
+              BuilderIF & mgb,
               MacroGhostInfoHexa* ghInfo ) 
-: Hbnd4Top < micro_t > (0,f,t,bt,im)
+: Hbnd4Top < micro_t > (0,f,t,bt)
 , _mxt (0) 
 , _mgb(mgb) 
 , _gm(  new MacroGhostHexa( _mgb , ghInfo, f ) )  
@@ -236,8 +234,9 @@ HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t,
 
 template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: 
 HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t,
-              const bnd_t bt, IndexManagerType & im, BuilderIF & mgb)
-: Hbnd4Top < micro_t > (0,f,t,bt,im)
+                              const bnd_t bt,
+                              BuilderIF & mgb)
+: Hbnd4Top < micro_t > (0,f,t,bt)
 , _mxt (new MX (*this))
 , _mgb(mgb) 
 , _gm(0)  

@@ -105,13 +105,18 @@ template < class A > class Hbnd3Top : public A {
     typedef typename A :: bnd_t bnd_t;
     bool refineLikeElement (balrule_t) ;
     inline void append (innerbndseg_t *) ;
+
+    // we need access to the indexManager 
+    inline IndexManagerType & indexManager () { 
+      return  myhface3(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
+    }    
+
   private :
     innerbndseg_t * _bbb, * _dwn , * _up ;
-    IndexManagerType & _indexManager;
 
-    int _lvl ;
-    const bnd_t _bt; // type of boundary 
     int _segmentIndex; // segment index of macro face 
+    const bnd_t _bt; // type of boundary 
+    unsigned char _lvl ;
 
     void split_e01 () ;
     void split_e12 () ;
@@ -121,14 +126,10 @@ template < class A > class Hbnd3Top : public A {
    
   public:
     // constructor for serial macro boundary elements  
-    inline Hbnd3Top (int,myhface3_t *,int,
-                     const bnd_t b ,
-                     IndexManagerType& );
-    
+    inline Hbnd3Top (int,myhface3_t *,int, const bnd_t b ) ;
     // constructor for children 
     inline Hbnd3Top (int, myhface3_t *,int, 
                      innerbndseg_t * up, const bnd_t b, 
-                     IndexManagerType& ,
                      typename Gitter::helement_STI * gh, int gFace ) ;
 
     inline virtual ~Hbnd3Top () ;
@@ -517,16 +518,18 @@ template < class A > inline Hface3Top < A > :: ~Hface3Top ()
 
 // serial macro bnd constructor 
 template < class A > inline Hbnd3Top < A > :: 
-Hbnd3Top (int l, myhface3_t * f, int i, 
-          const bnd_t bt, 
-          IndexManagerType & im ) :
-  A (f, i ), _bbb (0), _dwn (0), _up (0) , 
-  _indexManager(im) ,
-  _lvl (l), _bt (bt) 
+Hbnd3Top (int l, myhface3_t * f, int i, const bnd_t bt) :
+  A (f, i ), 
+  _bbb (0), _dwn (0), _up (0) , 
+  _bt( bt ),
+  _lvl (l)
 {
-  this->setIndex( _indexManager.getIndex() );
+  // set index of boundary segment 
+  this->setIndex( indexManager().getIndex() );
+
   // for macro bnd faces store current index as segment index 
   _segmentIndex = this->getIndex();
+  // set boundary id 
   setBoundaryId( _bt ); 
   return ;
 }
@@ -535,16 +538,17 @@ template < class A > inline Hbnd3Top < A > ::
 Hbnd3Top (int l, myhface3_t * f, 
           int i,  
           innerbndseg_t * up, bnd_t bt, 
-          IndexManagerType & im, 
           Gitter::helement_STI * gh, int gFace ) : 
   A (f, i ), _bbb (0), _dwn (0), _up (up) , 
-  _indexManager(im) ,
   _lvl (l), 
   _bt (bt) 
 {
+  // store ghost element 
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
-  this->setIndex( _indexManager.getIndex() );
+
+  // set index of boundary segment 
+  this->setIndex( indexManager().getIndex() );
 
   // get segment index from father if existent 
   _segmentIndex = (_up) ? _up->_segmentIndex : this->getIndex() ;
@@ -555,8 +559,11 @@ Hbnd3Top (int l, myhface3_t * f,
 
 template < class A > inline Hbnd3Top < A > :: ~Hbnd3Top () 
 {
-  this->freeIndex( this->_indexManager );
+  // free index 
+  indexManager().freeIndex( this->getIndex() );
+  // detach leaf entities 
   if (this->isLeafEntity()) this->detachleafs();
+  // delete down and next 
   if (_bbb) delete _bbb ; 
   if (_dwn) delete _dwn ;
   return ; 

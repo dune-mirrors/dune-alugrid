@@ -328,12 +328,16 @@ template < class A > class Hbnd4Top : public A
     
     void splitISO4 () ;
     bool refineLikeElement (balrule_t) ;
+
+    // need for indices
+    IndexManagerType& indexManager() { 
+      return myhface4(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
+    }
   private :
     innerbndseg_t * _bbb, * _dwn, * _up ;
-    IndexManagerType & _indexManager;
-    int _lvl ;
     const bnd_t _bt; // type of boundary 
     int _segmentIndex; // index of macro boundary segment 
+    unsigned char _lvl ;
     
     inline bool coarse () ;
     inline void append (innerbndseg_t *) ;
@@ -342,7 +346,7 @@ template < class A > class Hbnd4Top : public A
     inline Hbnd4Top (int,myhface4_t *,int, innerbndseg_t *, Gitter::helement_STI *, int) ;
 
     // constructor for macro element in the serial case 
-    inline Hbnd4Top (int,myhface4_t *,int, const bnd_t bt , IndexManagerType & ) ;
+    inline Hbnd4Top (int,myhface4_t *,int, const bnd_t bt ) ;
 
     virtual ~Hbnd4Top () ;
     bool refineBalance (balrule_t,int) ;
@@ -958,38 +962,49 @@ template < class A > inline Hbnd4Top < A > ::
 Hbnd4Top (int l, myhface4_t * f, int i, 
           innerbndseg_t * up, Gitter::helement_STI * gh, int gFace ) : 
   A (f, i), _bbb (0), _dwn (0), _up(up) , 
-  _indexManager(_up->_indexManager) ,
-  _lvl (l), 
   _bt(_up->_bt),
-  _segmentIndex( _up->_segmentIndex ) // get segment index from father 
+  _lvl (l) 
 {
+  // store ghost element 
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   ghostpair_STI p ( gh, gFace );
   this->setGhost ( p );
-  this->setIndex( _indexManager.getIndex() );  
 
+  // get index from manager 
+  this->setIndex( indexManager().getIndex() );  
+
+  // store segment index 
+  _segmentIndex = ( _up ) ? ( _up->_segmentIndex ) : this->getIndex() ; // get segment index from father 
+  // store boundary id 
   setBoundaryId( _bt );
   return ;
 }
 
 template < class A > inline Hbnd4Top < A > :: 
-Hbnd4Top (int l, myhface4_t * f, int i, const bnd_t bt , IndexManagerType & im)
-  : A (f, i), _bbb (0), _dwn (0), _up(0) , 
-  _indexManager(im) ,
-  _lvl (l) , _bt(bt)  
+Hbnd4Top (int l, myhface4_t * f, int i, const bnd_t bt )
+  : A (f, i),
+    _bbb (0), _dwn (0), _up(0) , 
+    _bt(bt),
+    _lvl (l)
 {
-  this->setIndex( _indexManager.getIndex() );  
+  // get index from manager 
+  this->setIndex( indexManager().getIndex() );  
 
   // store segment by using index 
   _segmentIndex = this->getIndex() ;
 
+  // store boundary id 
   setBoundaryId( _bt );
   return ;
 }
 
-template < class A > Hbnd4Top < A > :: ~Hbnd4Top () {
-  this->freeIndex( this->_indexManager );
+template < class A > Hbnd4Top < A > :: ~Hbnd4Top () 
+{
+  // free index 
+  indexManager().freeIndex( this->getIndex() );
+  // detach leaf entities 
   if (this->isLeafEntity()) this->detachleafs();
+  // delete down and next 
   if (_bbb) delete _bbb ;
   if (_dwn) delete _dwn ;
   return ;
