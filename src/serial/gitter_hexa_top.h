@@ -337,7 +337,7 @@ template < class A > class Hbnd4Top : public A
     innerbndseg_t * _bbb, * _dwn, * _up ;
     const bnd_t _bt; // type of boundary 
     int _segmentIndex; // index of macro boundary segment 
-    unsigned char _lvl ;
+    const unsigned char _lvl ;
     
     inline bool coarse () ;
     inline void append (innerbndseg_t *) ;
@@ -489,7 +489,9 @@ template < class A > class Periodic4Top : public A {
     
   private :
     innerperiodic4_t * _dwn, * _bbb, * _up ; 
-    int _segmentIndex ;
+    // we need two indices since this pointer 
+    // is available on the two periodic sides 
+    int _segmentIndex[ 2 ];
     unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule ;
@@ -527,7 +529,7 @@ template < class A > class Periodic4Top : public A {
     inline const innerface_t * innerHface () const ;
     inline int level () const ;
     inline int nChild () const ;
-    inline int segmentIndex () const ;
+    inline int segmentIndex (const int) const ;
   public :
     myrule_t getrule () const ;
     bool refine () ;

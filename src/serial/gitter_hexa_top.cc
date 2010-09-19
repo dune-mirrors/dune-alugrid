@@ -1023,11 +1023,14 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
   , _nChild (0)
   , _rule (myrule_t :: nosplit)
 {
+  IndexManagerType& im = indexManager();
   // get index 
-  this->setIndex( indexManager().getIndex() );
+  this->setIndex( im.getIndex() );
 
   // take macro index as segment index 
-  _segmentIndex = this->getIndex() ;
+  _segmentIndex[ 0 ] = this->getIndex() ;
+  // get additional segment index 
+  _segmentIndex[ 1 ] = im.getIndex(); 
 }
 
 template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, 
@@ -1040,18 +1043,24 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
   // get index 
   this->setIndex( indexManager().getIndex() );
 
-  // get segment index from father if existent 
-  _segmentIndex = (_up) ? _up->_segmentIndex : this->getIndex() ;
+  assert( _up );
+  // get segment index from father 
+  _segmentIndex[ 0 ] = _up->_segmentIndex[ 0 ];
+  _segmentIndex[ 1 ] = _up->_segmentIndex[ 1 ];
 }
 
-template < class A > inline int Periodic4Top < A > :: segmentIndex () const {
-  return _segmentIndex ;
+template < class A > inline int Periodic4Top < A > :: segmentIndex (const int fce) const {
+  assert( fce == 0 || fce == 1 );
+  return _segmentIndex[ fce ] ;
 }
 
 template < class A >  Periodic4Top < A > :: ~Periodic4Top () 
 {  
+  IndexManagerType& im = indexManager();
+
   // free index 
-  this->freeIndex( indexManager() );
+  im.freeIndex( this->getIndex() );
+  if( level() == 0 ) im.freeIndex( _segmentIndex[ 1 ] );
 
   // delete down and next 
   if (_bbb) delete _bbb ;

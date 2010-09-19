@@ -276,8 +276,10 @@ template < class A > class Periodic3Top : public A {
     
   private :
     innerperiodic3_t * _dwn, * _bbb, * _up ; 
-    int _segmentIndex;
-    unsigned char _lvl ;
+    // we need two indices since this pointer 
+    // is available on the two periodic sides 
+    int _segmentIndex[ 2 ]; 
+    const unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule ;
 
@@ -316,7 +318,7 @@ template < class A > class Periodic3Top : public A {
     inline const innerface_t * innerHface () const ;
     inline int level () const ;
     inline int nChild () const ;
-    inline int segmentIndex () const ;
+    inline int segmentIndex (const int) const ;
   public :
     myrule_t getrule () const ;
     bool refine () ;
@@ -529,6 +531,7 @@ Hbnd3Top (int l, myhface3_t * f, int i, const bnd_t bt) :
 
   // for macro bnd faces store current index as segment index 
   _segmentIndex = this->getIndex();
+
   // set boundary id 
   setBoundaryId( _bt ); 
   return ;
@@ -559,8 +562,9 @@ Hbnd3Top (int l, myhface3_t * f,
 
 template < class A > inline Hbnd3Top < A > :: ~Hbnd3Top () 
 {
-  // free index 
+  // free index  
   indexManager().freeIndex( this->getIndex() );
+
   // detach leaf entities 
   if (this->isLeafEntity()) this->detachleafs();
   // delete down and next 
@@ -747,11 +751,13 @@ template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_
  , _nChild(0)
  , _rule (myrule_t :: nosplit)
 { 
+  IndexManagerType& im = indexManager();
   // get index 
-  this->setIndex( indexManager().getIndex() );
+  this->setIndex( im.getIndex() );
   
   // take macro index as segment index 
-  _segmentIndex = this->getIndex() ;
+  _segmentIndex[ 0 ] = this->getIndex() ;
+  _segmentIndex[ 1 ] = im.getIndex();
 }
 
 template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
@@ -765,14 +771,20 @@ template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_
   // get index 
   this->setIndex( indexManager().getIndex() );
   
-  // get segment index from father if existent 
-  _segmentIndex = (_up) ? _up->_segmentIndex : this->getIndex() ;
+  // get segment index from father
+  assert( _up );
+  _segmentIndex[ 0 ] = _up->_segmentIndex[ 0 ];
+  _segmentIndex[ 1 ] = _up->_segmentIndex[ 1 ];
 }
 
 template < class A > inline Periodic3Top < A > :: ~Periodic3Top () 
 {
   // free index 
-  this->freeIndex( indexManager() );
+  IndexManagerType& im = indexManager();
+  // free indices 
+  im.freeIndex( this->getIndex() );
+  // only on macro boundary free segment index 
+  if( level() == 0 ) im.freeIndex( _segmentIndex[ 1 ] );
 
   // delete down and next 
   if (_bbb) delete _bbb ;
@@ -783,8 +795,9 @@ template < class A > inline int Periodic3Top < A > :: level () const {
   return _lvl ;
 }
 
-template < class A > inline int Periodic3Top < A > :: segmentIndex () const {
-  return _segmentIndex ;
+template < class A > inline int Periodic3Top < A > :: segmentIndex (const int fce) const {
+  assert( fce == 0  || fce == 1 );
+  return _segmentIndex[ fce ];
 }
 
 template < class A > inline int Periodic3Top < A > :: nChild () const {

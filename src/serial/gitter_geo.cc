@@ -897,10 +897,12 @@ IndexManagerStorageType&  Gitter :: Geometric :: BuilderIF :: indexManagerStorag
 
 size_t Gitter :: Geometric :: BuilderIF :: numMacroBndSegments() const 
 {
+  //cout << _hbndseg3List.size() << "  " <<  _hbndseg4List.size() << " " 
+  //     << _periodic3List.size() << "  " << _periodic4List.size() <<  endl;
   return _hbndseg3List.size() + 
          _hbndseg4List.size() + 
-         _periodic3List.size() +
-         _periodic4List.size();
+         (2 * _periodic3List.size()) +
+         (2 * _periodic4List.size());
 }
 
 // compress all index manager 

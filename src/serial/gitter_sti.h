@@ -602,7 +602,7 @@ public :
     virtual int nEdges() const = 0;
     
     // return index of boundary segment 
-    virtual int segmentIndex () const { return -1; }
+    virtual int segmentIndex (const int) const { return -1; }
         
     // mark element for using iso8 rule 
     virtual int tagForGlobalRefinement () = 0 ;
