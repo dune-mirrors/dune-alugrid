@@ -897,8 +897,7 @@ IndexManagerStorageType&  Gitter :: Geometric :: BuilderIF :: indexManagerStorag
 
 size_t Gitter :: Geometric :: BuilderIF :: numMacroBndSegments() const 
 {
-  //cout << _hbndseg3List.size() << "  " <<  _hbndseg4List.size() << " " 
-  //     << _periodic3List.size() << "  " << _periodic4List.size() <<  endl;
+  // count periodic boundaries twice 
   return _hbndseg3List.size() + 
          _hbndseg4List.size() + 
          (2 * _periodic3List.size()) +
