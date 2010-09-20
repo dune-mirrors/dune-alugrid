@@ -10,6 +10,7 @@
 
 // 
 //#define ALUGRID_USE_COMM_BUFFER_IN_ITEM
+#define ALUGRID_PERIODIC_BOUNDARY
 
 // include all headers 
 #include "stlheaders.h"
