@@ -695,12 +695,16 @@ public :
       undefined = 255 } bnd_t ;
 
     // returns true if bnd id is in range 
-    static bool bndRangeCheck (const int bt) 
+    static bool bndRangeCheck (const int pbt) 
     {
-      if( (bt < -254) || (bt >= 0) ) 
-        return false;
-      else 
-        return true;
+      const size_t bt = std::abs( pbt );
+      return ( bt >= 0 && bt < 254 );
+    }
+
+    // returns ranges of boundary type as string 
+    static std::string validRanges() 
+    {
+      return "+-[0,...,253]";
     }
     
     virtual bnd_t bndtype () const = 0 ;

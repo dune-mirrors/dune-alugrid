@@ -452,7 +452,7 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
       } 
       else if (n == 8) 
       {
-        if( identification != Gitter :: hbndseg_STI :: periodic ) 
+        if( std::abs(identification) != Gitter :: hbndseg_STI :: periodic ) 
           cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
 
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >> pervec [nper][3]
@@ -558,7 +558,7 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
       } 
       else if (n == 6) 
       {
-        if( identification != Gitter :: hbndseg_STI :: periodic ) 
+        if( std::abs(identification) != Gitter :: hbndseg_STI :: periodic ) 
           cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
 
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >>
@@ -908,7 +908,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
         rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> bt ;
         if( ! ( Gitter :: hbndseg_STI :: bndRangeCheck(bt) ) )
         {
-          cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: [-254,...,-1]" << endl ;
+          cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
           exit(1);
         }
         InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt))) ;
@@ -919,7 +919,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
         rawInput >> v [0] >> v [1] >> v [2] >> bt ;
         if( ! ( Gitter :: hbndseg_STI :: bndRangeCheck(bt) ) )
         {
-          cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: [-254,...,-1]" << endl ;
+          cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
           exit(1);
         }
         InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt))) ;
