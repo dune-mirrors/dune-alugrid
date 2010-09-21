@@ -689,9 +689,9 @@ public :
       sym_yz = 7, 
       reflect = 8, 
       fluxtube3d = 9, 
-      periodic = 20,
       closure = DuneIndexProvider :: border,  // also the value of border items 
       ghost_closure = DuneIndexProvider :: ghost , // also the value of ghost items 
+      periodic = 254, // periodic boundaries 
       undefined = 255 } bnd_t ;
 
     // returns true if bnd id is in range 

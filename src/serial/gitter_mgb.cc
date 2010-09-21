@@ -439,16 +439,22 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
     pervec = new int [temp_nb][8] ;
     assert (bvec);
     assert (pervec);
-    for (int i = 0 ; i < temp_nb ; i ++) {
+    for (int i = 0 ; i < temp_nb ; i ++) 
+    {
       int n ;
       int identification ;
       in >> identification >> n;
-      if (n == 4) {
+      if (n == 4) 
+      {
         in >> bvec [nb][0] >> bvec [nb][1] >> bvec [nb][2] >> bvec [nb][3] ;
         bvec [nb][4] = identification ;
         nb++; 
       } 
-      else if (n == 8 && identification == -20) {
+      else if (n == 8) 
+      {
+        if( identification != Gitter :: hbndseg_STI :: periodic ) 
+          cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
+
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >> pervec [nper][3]
            >> pervec [nper][4] >> pervec [nper][5] >> pervec [nper][6] >> pervec [nper][7] ;
         nper++;
@@ -540,7 +546,8 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
     pervec = new int [temp_nb][6] ;
     assert (bvec);
     assert (pervec);
-    for (int i = 0 ; i < temp_nb ; i ++) {
+    for (int i = 0 ; i < temp_nb ; i ++) 
+    {
       int n ;
       int identification ;
       in >> identification >> n;
@@ -549,7 +556,11 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
         bvec [nb][3] = identification ;
         nb++; 
       } 
-      else if (n == 6 && identification == -20) {
+      else if (n == 6) 
+      {
+        if( identification != Gitter :: hbndseg_STI :: periodic ) 
+          cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
+
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >>
         pervec [nper][3] >> pervec [nper][4] >> pervec [nper][5];
         nper++;
@@ -900,7 +911,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: [-254,...,-1]" << endl ;
           exit(1);
         }
-        InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(-bt)) ;
+        InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt))) ;
       } 
       else if (polygonLen == 3) 
       {
@@ -911,7 +922,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: [-254,...,-1]" << endl ;
           exit(1);
         }
-        InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(-bt)) ;
+        InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt))) ;
       } 
       else 
       {
