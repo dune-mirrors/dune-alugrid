@@ -35,11 +35,8 @@ class LoadBalancer {
       int _index, _weight ; // globale Nummer, Gewicht
       public :
         inline GraphVertex () ;
-#ifdef GRAPHVERTEX_WITH_CENTER
         inline GraphVertex (int,int,const alucoord_t (&)[3]) ;
-#else 
         inline GraphVertex (int,int) ;
-#endif
         // constructor without center is initializing center and weight to zero 
         inline GraphVertex (int) ;
         inline virtual ~GraphVertex () ;
@@ -210,16 +207,22 @@ inline LoadBalancer :: GraphVertex :: GraphVertex ()
   return ;
 }
 
-inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w
-#ifdef GRAPHVERTEX_WITH_CENTER
-    , const alucoord_t (&p)[3]
-#endif
-    ) 
-: _index (i), _weight (w) {
+inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w, const alucoord_t (&p)[3]) 
+: _index (i), _weight (w) 
+{
 #ifdef GRAPHVERTEX_WITH_CENTER
   _center [0] = p [0] ;
   _center [1] = p [1] ;
   _center [2] = p [2] ;
+#endif
+  return ;
+}
+
+inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w)
+: _index (i), _weight (w) 
+{
+#ifdef GRAPHVERTEX_WITH_CENTER
+  _center [0] = _center [1] = _center [2] = 0.0 ;
 #endif
   return ;
 }
