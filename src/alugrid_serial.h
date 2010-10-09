@@ -8,7 +8,11 @@
 // use withc care 
 //#define DONT_USE_ALUGRID_ALLOC 
 
-// 
+//#ifdef _OPENMP 
+//#define ITERATORS_WITHOUT_MYALLOC 
+//#endif
+
+ 
 //#define ALUGRID_USE_COMM_BUFFER_IN_ITEM
 #define ALUGRID_PERIODIC_BOUNDARY
 

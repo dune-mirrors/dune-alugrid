@@ -132,6 +132,24 @@ public :
   inline operator int () const ;
 } ;
 
+class IteratorRefcount 
+#ifndef ITERATORS_WITHOUT_MYALLOC
+: public Refcount 
+#endif
+{
+public :
+#ifdef ITERATORS_WITHOUT_MYALLOC
+  inline void reset () { }
+  inline bool positive () const { return false ; }
+  inline int operator ++ (int) const { return 0 ; }
+  inline int operator ++ () const { return 0; }
+  inline int operator -- (int) const { return 0; }
+  inline int operator -- () const { return 0; }  
+  inline bool operator ! () const { return false ; }
+  inline operator int () const { return 0; }
+#endif
+};
+
 ////////////////////////////////////////////////////////////////////
 //
 // Schnittstelle des Iterationsobjekts vgl. Gamma, Helm, Johnson &
@@ -261,7 +279,7 @@ public :
 
 ///////////////////////////////////////////////////
 
-  Refcount ref ;
+  IteratorRefcount ref ;
   static inline bool debugOption (int = 0) ;
 
   typedef Parallel stiExtender_t ;  // parallel.h
@@ -1888,7 +1906,11 @@ typedef Gitter :: ElementPllXIF ElementPllXIF_t ;
 // um von aussen vom Gitter Iterationsobjekte zu bekommen und
 // zu verwalten.
 
-template < class A > class LeafIterator : public MyAlloc {
+template < class A > class LeafIterator 
+#ifndef ITERATORS_WITHOUT_MYALLOC
+ : public MyAlloc 
+#endif
+{
   Gitter * _grd ;
   IteratorSTI < A > * _w ;
   const A * _a ;
@@ -1908,7 +1930,11 @@ private:
   inline void assign(const LeafIterator < A > & );
 } ;
 
-template < class A, class StopRule_t > class GridIterator : public MyAlloc {
+template < class A, class StopRule_t > class GridIterator
+#ifndef ITERATORS_WITHOUT_MYALLOC
+ : public MyAlloc 
+#endif
+{
   Gitter * _grd ;
   IteratorSTI < A > * _w ;
   const A * _a ;
@@ -1930,7 +1956,11 @@ private:
 
 // LevelIterator is the same construct as LeafIterator, but the iterator
 // rule differs, here we use any_has_level, see walk.h 
-template < class A > class LevelIterator : public MyAlloc {
+template < class A > class LevelIterator
+#ifndef ITERATORS_WITHOUT_MYALLOC
+ : public MyAlloc 
+#endif
+{
   Gitter * _grd ;
   const any_has_level < A > _ahl;
   IteratorSTI   < A > * _w ;
@@ -3760,7 +3790,8 @@ template < class A > inline LeafIterator < A > :: LeafIterator () : _grd (0), _w
 }
 
 template < class A > inline LeafIterator < A > :: LeafIterator (Gitter & g) 
-  : _grd (&g), _w (0) , _a(0) {
+  : _grd (&g), _w (0) , _a(0) 
+{
   _grd->ref ++ ;
   _w = _grd->iterator (_a) ;
   return ;
@@ -3787,8 +3818,11 @@ template < class A > inline LeafIterator < A > :: ~LeafIterator () {
 
 template < class A > inline void LeafIterator < A > :: removeObj () 
 {
-  if (_grd) _grd->ref -- ;
-  _grd = 0;
+  if (_grd) 
+  { 
+    _grd->ref -- ;
+    _grd = 0;
+  }
   if(_w) delete _w ;
   _w = 0;
 }

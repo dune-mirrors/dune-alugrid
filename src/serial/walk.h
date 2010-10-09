@@ -197,7 +197,10 @@ template < class A > class is_interior_leaf_entity
 //**********************************************************************************
 //**********************************************************************************
 
-template < class A > class ListIterator : public IteratorSTI < A >, public MyAlloc 
+template < class A > class ListIterator : public IteratorSTI < A >
+#ifndef ITERATORS_WITHOUT_MYALLOC
+     , public MyAlloc 
+#endif
 {
   typedef list < A * > ListType;
   ListType& _list ;
@@ -217,7 +220,11 @@ template < class A > class ListIterator : public IteratorSTI < A >, public MyAll
     inline virtual IteratorSTI < A > * clone () const;
 } ;
 
-template < class A, class B > class TreeIterator : public IteratorSTI < A >, public MyAlloc {
+template < class A, class B > class TreeIterator : public IteratorSTI < A >
+#ifndef ITERATORS_WITHOUT_MYALLOC
+     , public MyAlloc 
+#endif
+{
   public :
     typedef B comp_t ;
     typedef A val_t ;
@@ -249,7 +256,11 @@ template < class A, class B > class TreeIterator : public IteratorSTI < A >, pub
     inline void assignIterator (const TreeIterator < A, B > &) ;
 } ;
 
-template < class A, class B > class Wrapper : public IteratorSTI < typename B :: val_t >, public MyAlloc {
+template < class A, class B > class Wrapper : public IteratorSTI < typename B :: val_t >
+#ifndef ITERATORS_WITHOUT_MYALLOC
+     , public MyAlloc 
+#endif
+{
   A _walk ;
   public :
     typedef typename B :: val_t val_t ;
@@ -264,7 +275,11 @@ template < class A, class B > class Wrapper : public IteratorSTI < typename B ::
     inline virtual IteratorSTI < val_t > * clone () const ;
 } ;
 
-template < class A, class B, class C > class AlignIterator : public IteratorSTI < C >, public MyAlloc {
+template < class A, class B, class C > class AlignIterator : public IteratorSTI < C >
+#ifndef ITERATORS_WITHOUT_MYALLOC
+     , public MyAlloc 
+#endif
+{
   A _walk1 ;
   B _walk2 ;
   int _curr, _cnt ;
@@ -281,7 +296,11 @@ template < class A, class B, class C > class AlignIterator : public IteratorSTI 
   private:  
 } ;
 
-template < class A > class VectorAlign : public IteratorSTI < A >, public MyAlloc {
+template < class A > class VectorAlign : public IteratorSTI < A >
+#ifndef ITERATORS_WITHOUT_MYALLOC
+     , public MyAlloc 
+#endif
+{
   typedef IteratorSTI < A > * pointer_t ;
   vector < pointer_t > _it ;
   typename vector < pointer_t > :: const_iterator _curr, _ahead ;
@@ -298,7 +317,11 @@ template < class A > class VectorAlign : public IteratorSTI < A >, public MyAllo
     inline virtual IteratorSTI < A > * clone () const;
 } ;
 
-template < class  A, class B > class Insert : public IteratorSTI < typename B :: val_t >, public MyAlloc {
+template < class  A, class B > class Insert : public IteratorSTI < typename B :: val_t >
+#ifndef ITERATORS_WITHOUT_MYALLOC
+     , public MyAlloc 
+#endif
+{
   public :
     typedef typename B :: comp_t comp_t ;
     typedef typename B :: val_t  val_t ;
