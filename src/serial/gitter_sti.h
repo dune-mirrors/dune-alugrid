@@ -200,7 +200,7 @@ template < class A > class any_has_level;
 
 template < class A > class AccessIterator {
 public :
-  Refcount ref ; 
+  IteratorRefcount ref ; 
 
   // creates leaf iterators 
   virtual IteratorSTI < A > * iterator (const A *) const = 0 ;
