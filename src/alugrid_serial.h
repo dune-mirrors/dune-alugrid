@@ -9,7 +9,7 @@
 //#define DONT_USE_ALUGRID_ALLOC 
 
 //#ifdef _OPENMP 
-#define ITERATORS_WITHOUT_MYALLOC 
+//#define ITERATORS_WITHOUT_MYALLOC 
 //#endif
 
  
