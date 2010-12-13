@@ -5,11 +5,11 @@
 //#define USE_MALLOC_AT_ONCE 
 
 // toggle ALUGRID alloc for grid objects like elements 
-// use withc care 
+// use with care 
 //#define DONT_USE_ALUGRID_ALLOC 
 
 //#ifdef _OPENMP 
-//#define ITERATORS_WITHOUT_MYALLOC 
+#define ITERATORS_WITHOUT_MYALLOC 
 //#endif
 
  

@@ -403,7 +403,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     {
       if (!((*edges.rbegin ()).leftNode () < nel)) 
       {
-        cerr << "**WARNUNG (FEHLER IGNORIERT) Die Indexmenge ist nicht volls\"andig\n" ;
+        cerr << "**WARNUNG (FEHLER IGNORIERT) Die Indexmenge ist nicht vollst\"andig\n" ;
         cerr << "  \"uberdeckt zur Neupartitionierung. In " << __FILE__ << " " << __LINE__ << endl ;
         return false ;
       }
