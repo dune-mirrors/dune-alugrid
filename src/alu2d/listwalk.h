@@ -20,11 +20,11 @@ template < class A > class Listagency {
 
   int number_list ;
   
-  int nlistwalks ;
+  //int nlistwalks ;
   
-  void listwalkattach() { nlistwalks ++ ; } 
+  void listwalkattach() {} //nlistwalks ++ ; } 
     
-  void listwalkdetach() { nlistwalks -- ; }
+  void listwalkdetach() {} // nlistwalks -- ; }
 
   int operator == (const Listagency & a) { return (void *)this == (void *) & a ; }
 
