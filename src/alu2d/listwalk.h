@@ -54,7 +54,8 @@ template < class A > class Listagency {
   public :
 
   Listagency(IndexProvider *phdl) : hdl(phdl),
-  first_list(0), last_list(0), number_list(0), nlistwalks(0) { }
+  first_list(0), last_list(0), number_list(0) //, nlistwalks(0)
+  {}
 
    ~Listagency() { 
       assert(! busy()) ;
