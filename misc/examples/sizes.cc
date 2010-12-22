@@ -12,11 +12,19 @@
 
 using namespace std;
 
+#define PARALLEL
+
+#define COUNT_FLOPS
+
 //#define DONT_USE_ALUGRID_ALLOC
 
 // include serial part of ALUGrid 
-//#include <alugrid_serial.h>
-#include <alugrid_parallel.h>
+#ifdef PARALLEL
+  #include <alugrid_parallel.h>
+#else
+  #include <alugrid_serial.h>
+#endif
+
 using namespace ALUGridSpace;
 
 // refine grid globally, i.e. mark all elements and then call adapt 
@@ -89,43 +97,46 @@ int main (int argc, char ** argv, const char ** envp)
 {
   MPI_Init(&argc,&argv);
 
-   int mxl = 0; 
-   if (argc < 2) 
-   {
-      cout << "usage: "<< argv[0] << " <macro grid> <opt: level> \n";
-      abort();
-   }
+  int mxl = 0; 
+  if (argc < 2) 
+  {
+    cout << "usage: "<< argv[0] << " <macro grid> <opt: level> \n";
+    abort();
+  }
 
-   if (argc < 3)
-     cout << "Default level = "<< mxl << " choosen! \n";
-   else 
-     mxl = atoi(argv[2]);
+  if (argc < 3)
+    cout << "Default level = "<< mxl << " choosen! \n";
+  else 
+    mxl = atoi(argv[2]);
 
-   std::string macroname( argv[1] );
+  std::string macroname( argv[1] );
 
-   cout << "\n-----------------------------------------------\n";
-   cout << "read macro grid from < " << macroname << " > !" << endl;
-   cout << "-----------------------------------------------\n";
+  cout << "\n-----------------------------------------------\n";
+  cout << "read macro grid from < " << macroname << " > !" << endl;
+  cout << "-----------------------------------------------\n";
 
-   {
-   MpAccessMPI a (MPI_COMM_WORLD);
-   GitterDunePll grid(macroname.c_str(),a);
-   //GitterDuneImpl grid(macroname.c_str());
+  {
+#ifdef PARALLEL
+    MpAccessMPI a (MPI_COMM_WORLD);
+    GitterDunePll grid(macroname.c_str(),a);
+#else 
+    GitterDuneImpl grid(macroname.c_str());
+#endif
    
-   cout << "Grid generated! \n";
-   grid.printsize(); 
-   cout << "---------------------------------------------\n";
+    cout << "Grid generated! \n";
+    grid.printsize(); 
+    cout << "---------------------------------------------\n";
   
-   grid.printMemUsage();
+    grid.printMemUsage();
    
-   globalRefine(&grid, mxl);
-   //levelwalk(&grid, mxl);
-   //globalCoarsening(&grid, mxl);
-   grid.printMemUsage();
-   cin.get();
-   }
+    globalRefine(&grid, mxl);
+    //levelwalk(&grid, mxl);
+    //globalCoarsening(&grid, mxl);
+    grid.printMemUsage();
+    cin.get();
+  }
 
-   MPI_Finalize();
-   return 0;
+  MPI_Finalize();
+  return 0;
 }
 
