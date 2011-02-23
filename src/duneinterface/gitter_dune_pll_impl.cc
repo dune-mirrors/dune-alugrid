@@ -73,6 +73,7 @@ bool GitterDunePll :: duneNotifyNewGrid ( LoadBalancer :: DataBase& db )
 void GitterDunePll :: duneNotifyMacroGridChanges ()
 {
   GitterPll :: notifyMacroGridChanges ();
+  rebuildGhostCells ();
 }
 
 void GitterDunePll :: duneNotifyGridChanges ()
