@@ -53,8 +53,10 @@ class Basic {
     virtual ~Basic() { assert(!refcount) ; }
 
     int _idx;
-    unsigned char refcount ; // 16 byte + 8 vtable 
-    unsigned char _level; 
+    unsigned char refcount ; // 16 byte + 8 vtable
+    // The macro level is -1, because new vertices always get the level of the
+    // edge they split.
+    signed char _level; 
     unsigned char childNr_;
     unsigned char numchild ;
 
@@ -732,7 +734,7 @@ template < class A > class Hier : public A {
     // use level for Basic 
     int level() const { return _level ; }
     // for assigment of level 
-    unsigned char& lvl() { return _level; }
+    signed char& lvl() { return _level; }
 
     int childNr() const { return childNr_; }
 
