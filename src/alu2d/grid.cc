@@ -140,7 +140,6 @@ void Element < N, NV >::c::write(ostream &out) const {
 // ***************************************************
 template < int N, int NV >
 int Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
-  int c ;
   string line;
   while (in && line == "")
     getline( in, line );
@@ -148,9 +147,11 @@ int Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
   int i;
   for (i = 0; ; ++i)
   {
-    linein >> c ;
+    int vtxNumber = 0 ;
+    linein >> vtxNumber ;
     if ( !linein ) 
     {
+      // we want at least 3 vertices (also for NV = 4)
       if ( i >= 3 )
         break;
       cerr << "Too few element vertices read from file" << endl;
@@ -161,12 +162,12 @@ int Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
       cerr << "Too many element vertices read from file" << endl;
       abort();
     }
-    if ( 0 > c || c >= l) 
+    if ( (vtxNumber < 0) || (vtxNumber >= l) )
     {
       cerr << "Wrong vertex number for element read from file" << endl;
       abort();
     }
-    set((vertex_t *)v[c], i) ;
+    set((vertex_t *)v[vtxNumber], i) ;
   }
   return i;
 }
