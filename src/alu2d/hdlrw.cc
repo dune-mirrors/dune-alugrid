@@ -399,7 +399,7 @@ Hmesh_basic<N,NV>::asciwritetriang(ostream &out)
     
       vertex_t & v = walk.getitem() ;
 
-      if (v.level()==-1) ++nr;
+      if (v.isMacro()) ++nr ;
               
     }
 
@@ -409,7 +409,7 @@ Hmesh_basic<N,NV>::asciwritetriang(ostream &out)
     
       vertex_t & v = walk.getitem() ;
 
-      if (v.level()==-1) 
+      if (v.isMacro())
         v.write(out) ;
     
     }

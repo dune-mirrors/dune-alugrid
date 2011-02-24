@@ -249,6 +249,8 @@ template < int N > class Vertex : public Listagent < Vertex < N > > // , public 
     virtual void read(istream &) = 0 ;
  
     int level() const {  return _level;  }
+
+    bool isMacro () const { return level() == -1; }
 } ;
 // #end(class)
 // ***************************************************
