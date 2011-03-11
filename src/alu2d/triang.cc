@@ -915,9 +915,18 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
     result = lcancoarsen;
   } 
   // QUATERING
-  else if (mysplit==thinelement_t::triang_quarter) {
+  else if (mysplit==thinelement_t::triang_quarter) 
+  {
     int lcancoarsen=1;
-    element_t *child[3]={down(),down()->next(),down()->next()->next()};
+    element_t* child[ NV ];
+    child[ 0 ] = down();
+    for(int nv=1; nv <numfaces(); ++nv )
+    {
+      assert( child[ nv - 1 ] );
+      child[ nv ] = ((helement_t *) child[ nv - 1 ])->next();
+      assert( child[ nv ] );
+    }
+
     for (int i=0;i<numfaces();i++) {
       if (nbel(i)) {
         if (!(nbel(i)->leaf()) && child[mod(i+1)]->hashvtx(i)) {
