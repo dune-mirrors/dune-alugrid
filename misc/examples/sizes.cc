@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define PARALLEL
+//#define PARALLEL
 
 #define COUNT_FLOPS
 
@@ -127,12 +127,12 @@ int main (int argc, char ** argv, const char ** envp)
     grid.printsize(); 
     cout << "---------------------------------------------\n";
   
-    grid.printMemUsage();
+    //grid.printMemUsage();
    
     globalRefine(&grid, mxl);
     //levelwalk(&grid, mxl);
     //globalCoarsening(&grid, mxl);
-    grid.printMemUsage();
+    //grid.printMemUsage();
     cin.get();
   }
 
