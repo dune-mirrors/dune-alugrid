@@ -218,6 +218,18 @@ template < class A > class Hedge1Top : public A
     virtual void backup (ObjectStream&) const ;
     virtual void restore (ObjectStream&) ;
   protected:
+    bool isRealLine() const 
+    {
+      double sum = 0;
+      for(int j=0; j<3 ; ++j) 
+      {
+        double diff = myvertex(0)->Point()[j] - myvertex(1)->Point()[j];
+        sum += (diff * diff );
+      }
+      std::cout << sum << " sum " << endl;
+      return sqrt( sum ) > 1e-8 ;
+    }
+
     // non-virtual methods of down and innerVertex 
     inneredge_t* dwnPtr() ;
     const inneredge_t* dwnPtr() const ;
@@ -579,6 +591,7 @@ template < class A > inline Hedge1Top < A > ::
   _rule (myrule_t :: nosplit),
   _firstChild( true )
 {
+  assert( isRealLine() );
   this->setIndex( indexManager().getIndex() );  
   return ;
 }
@@ -591,6 +604,7 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
   _rule (myrule_t :: nosplit),
   _firstChild( nChild == 0 ? true : false )
 {
+  assert( isRealLine() );
   this->setIndex( indexManager().getIndex() );  
   return ;
 }
