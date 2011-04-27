@@ -5,6 +5,7 @@
 #ifndef GITTER_HEXA_TOP_H_INCLUDED
 #define GITTER_HEXA_TOP_H_INCLUDED
 
+
 template < class Impl , bool hasVertex > 
 class InnerVertexStorage : public MyAlloc 
 {
@@ -226,8 +227,9 @@ template < class A > class Hedge1Top : public A
         double diff = myvertex(0)->Point()[j] - myvertex(1)->Point()[j];
         sum += (diff * diff );
       }
-      std::cout << sum << " sum " << endl;
-      return sqrt( sum ) > 1e-8 ;
+      sum = std::sqrt( sum );
+      //std::cout << sum << " sum " << endl;
+      return sum > 1e-8 ;
     }
 
     // non-virtual methods of down and innerVertex 
@@ -602,7 +604,7 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
   _inner (0), 
   _lvl (l), 
   _rule (myrule_t :: nosplit),
-  _firstChild( nChild == 0 ? true : false )
+  _firstChild( nChild == 0 )
 {
   assert( isRealLine() );
   this->setIndex( indexManager().getIndex() );  
@@ -640,8 +642,7 @@ template < class A > inline int Hedge1Top < A > :: level () const {
 }
 
 template < class A > inline int Hedge1Top < A > :: nChild () const {
-  //assert( _nChild >= 0 && _nChild < 2 );
-  return _firstChild ? 0 : 1; 
+  return int( _firstChild );
 }
 
 template < class A > Hedge1Top < A > * Hedge1Top < A > :: down () {
