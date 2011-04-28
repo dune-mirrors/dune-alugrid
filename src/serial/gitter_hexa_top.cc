@@ -519,7 +519,6 @@ template < class A > HexaTop < A >
   , _lvl (l)
   , _nChild(0) 
   , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit) 
-  , _affine( false )
 { 
   TrilinearMapping trMap (myvertex(0)->Point(), myvertex(1)->Point(),
                           myvertex(2)->Point(), myvertex(3)->Point(),
@@ -527,8 +526,10 @@ template < class A > HexaTop < A >
                           myvertex(6)->Point(), myvertex(7)->Point());
   // calculate volume 
   _volume = QuadraturCube3D < VolumeCalc > (trMap).integrate2 (0.0);
+
   // check whether mapping is affine 
-  _affine = trMap.affine(); 
+  if( ! trMap.affine() ) 
+    this->setNonAffineGeometry(); 
 
   assert( this->level() == l );
   
@@ -548,7 +549,6 @@ template < class A > HexaTop < A >
   , _lvl (l)
   , _nChild(nChild) 
   , _rule (myrule_t :: nosplit), _req (myrule_t :: nosplit)
-  , _affine(_up->_affine)
 { 
   assert( this->level() == l );
 
@@ -558,7 +558,7 @@ template < class A > HexaTop < A >
   this->_bndid = _up->bndId();
 
   // if mapping is not affine recalculate volume 
-  if( ! _affine )
+  if( ! _up->affineGeometry() )
   {
     TrilinearMapping triMap (myvertex(0)->Point(),
                              myvertex(1)->Point(),
@@ -577,6 +577,8 @@ template < class A > HexaTop < A >
 
     // calculate volume 
     _volume = QuadraturCube3D < VolumeCalc > (triMap).integrate2 (0.0);
+    // make as non-affine geometry
+    this->setNonAffineGeometry();
   }
 
   // make sure that given volume is the same as calulated 
@@ -727,7 +729,7 @@ template < class A > void HexaTop < A > :: splitISO8 ()
 
   // only check for affine faces 
   // for other it does not matter 
-  if( _affine ) 
+  if( this->affineGeometry() ) 
   {
     // if vertex projection is available
     // then set affine to false to invoke volume calculation  
@@ -735,7 +737,7 @@ template < class A > void HexaTop < A > :: splitISO8 ()
     {
       if( this->myneighbour( i ).first->hasVertexProjection() )
       {
-        _affine = false ; 
+        this->setNonAffineGeometry();
         break ;
       }
     }

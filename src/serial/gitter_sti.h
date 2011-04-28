@@ -296,7 +296,9 @@ public :
       // set if index is copy from outside and should not be freed
       flagCopy = 0,
       // set if object is locked against coarsening
-      flagLock = 1
+      flagLock = 1,
+      // non-affine geometry mapping 
+      flagNonAffine = 2  
     };
 
   protected:
@@ -452,6 +454,18 @@ public :
     bool isBorder () const 
     {
       return (bndId() == border);
+    }
+
+    void setNonAffineGeometry() 
+    {
+      // now it's a non-affine goemetry 
+      set( flagNonAffine );
+    }
+
+    // return true if geometry mapping is affine 
+    bool affineGeometry() const 
+    {
+      return ! isSet( flagNonAffine );
     }
   };
     

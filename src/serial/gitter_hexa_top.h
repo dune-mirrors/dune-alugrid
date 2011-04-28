@@ -5,7 +5,6 @@
 #ifndef GITTER_HEXA_TOP_H_INCLUDED
 #define GITTER_HEXA_TOP_H_INCLUDED
 
-
 template < class Impl , bool hasVertex > 
 class InnerVertexStorage : public MyAlloc 
 {
@@ -182,9 +181,9 @@ template < class A > class Hedge1Top : public A
     inneredge_t * _bbb ;  // 8 
     inner_t * _inner ;    // 8 
 
-    const unsigned char _lvl ;       
     myrule_t _rule ;  
-    const bool _firstChild;  // 8 = 24 
+    const unsigned char _lvl ;       
+    const unsigned char _child;  // 8 = 24 
     
   public :
     // need for refinement 
@@ -227,9 +226,8 @@ template < class A > class Hedge1Top : public A
         double diff = myvertex(0)->Point()[j] - myvertex(1)->Point()[j];
         sum += (diff * diff );
       }
-      sum = std::sqrt( sum );
-      //std::cout << sum << " sum " << endl;
-      return sum > 1e-8 ;
+      std::cout << sum << " sum " << endl;
+      return sqrt( sum ) > 1e-8 ;
     }
 
     // non-virtual methods of down and innerVertex 
@@ -263,9 +261,9 @@ template < class A > class Hface4Top : public A
     innerface_t * _bbb ; // 8 
     inner_t *_inner ;    // 8 
 
+    myrule_t _rule ;    // 8  = 24 byte
     const unsigned char _lvl ; 
     const signed char _nChild;
-    myrule_t _rule ;    // 8  = 24 byte
     
   private:
     inline myhedge1_t * subedge1 (int,int) ;
@@ -409,7 +407,6 @@ template < class A > class HexaTop : public A {
     const unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule, _req ;
-    bool _affine;
 
     void splitISO8 () ;
   protected:
@@ -589,9 +586,9 @@ template < class A > inline Hedge1Top < A > ::
   : A (a,b),
   _bbb ( 0 ),
   _inner (0),
-  _lvl (l), 
   _rule (myrule_t :: nosplit),
-  _firstChild( true )
+  _lvl (l), 
+  _child( 0 )
 {
   assert( isRealLine() );
   this->setIndex( indexManager().getIndex() );  
@@ -602,10 +599,11 @@ template < class A > inline Hedge1Top < A > :: Hedge1Top (int l, myvertex_t * a,
   : A (a,b), 
   _bbb (0),
   _inner (0), 
-  _lvl (l), 
   _rule (myrule_t :: nosplit),
-  _firstChild( nChild == 0 )
+  _lvl (l), 
+  _child( nChild )
 {
+  assert( _child == 0 || _child == 1 );
   assert( isRealLine() );
   this->setIndex( indexManager().getIndex() );  
   return ;
@@ -642,7 +640,8 @@ template < class A > inline int Hedge1Top < A > :: level () const {
 }
 
 template < class A > inline int Hedge1Top < A > :: nChild () const {
-  return int( _firstChild );
+  assert( _child == 0 || _child == 1 );
+  return _child; 
 }
 
 template < class A > Hedge1Top < A > * Hedge1Top < A > :: down () {
@@ -836,9 +835,9 @@ Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1,
   myhedge1_t * e2, int t2, myhedge1_t * e3, int t3 ) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
   _bbb (0), _inner (0), 
+  _rule (myrule_t :: nosplit),
   _lvl (l), 
-  _nChild(0),
-  _rule (myrule_t :: nosplit)  
+  _nChild(0)
 {
   this->setIndex( indexManager().getIndex() );  
   return ;
@@ -848,9 +847,9 @@ template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0
   myhedge1_t * e2, int t2, myhedge1_t * e3, int t3,int nChild ) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
   _bbb (0), _inner (0), 
+  _rule (myrule_t :: nosplit),
   _lvl (l), 
-  _nChild(nChild),
-  _rule (myrule_t :: nosplit)
+  _nChild(nChild)
 {
   this->setIndex( indexManager().getIndex() );  
   return ;
