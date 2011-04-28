@@ -218,18 +218,7 @@ template < class A > class Hedge1Top : public A
     virtual void backup (ObjectStream&) const ;
     virtual void restore (ObjectStream&) ;
   protected:
-    bool isRealLine() const 
-    {
-      double sum = 0;
-      for(int j=0; j<3 ; ++j) 
-      {
-        double diff = myvertex(0)->Point()[j] - myvertex(1)->Point()[j];
-        sum += (diff * diff );
-      }
-      std::cout << sum << " sum " << endl;
-      return sqrt( sum ) > 1e-8 ;
-    }
-
+    bool isRealLine() const ;
     // non-virtual methods of down and innerVertex 
     inneredge_t* dwnPtr() ;
     const inneredge_t* dwnPtr() const ;
@@ -615,6 +604,22 @@ template < class A > Hedge1Top < A > :: ~Hedge1Top ()
   if(_bbb) delete _bbb;
   if(_inner) delete _inner;
   return ;
+}
+
+template < class A > inline bool Hedge1Top < A > ::isRealLine () const
+{
+  double sum = 0;
+  const alucoord_t (&p0)[ 3 ] = myvertex(0)->Point();
+  const alucoord_t (&p1)[ 3 ] = myvertex(1)->Point();
+
+  for(int j=0; j<3 ; ++j) 
+  {
+    double diff = p0[j] - p1[j];
+    sum += (diff * diff );
+  }
+  sum = std::sqrt( sum );
+  //std::cout << sum << " sum " << endl;
+  return  sum > 1e-8 ;
 }
 
 template < class A > inline Hedge1Top < A > * Hedge1Top < A > :: dwnPtr () {
