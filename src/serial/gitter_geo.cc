@@ -460,15 +460,15 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const alucoord_t (&cent
 //           |\      .|     faces opposite to vertices
 //           | \    . | 
 //           |  \  .  | 
-//           |   \.   |   
+//           |   \.   |     positive orientation from INSIDE 
 //           |   .\   |    
 //           |  .  \  |     
 //           | .    \ |      
 //           |.      \|1 
 //         0 ------------ x 
 //                              
-// face 0 = { 1, 3, 2 }   all faces are oriented such that when one looks from
-// face 1 = { 0, 2, 3 }   the inside, they are oriented math. postitve
+// face 0 = { 1, 3, 2 }   NOTE: all faces are oriented such that when one looks from
+// face 1 = { 0, 2, 3 }         the inside, they are oriented math. postitve
 // face 2 = { 0, 3, 1 }
 // face 3 = { 0, 1, 2 } 
 //
@@ -479,6 +479,27 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const alucoord_t (&cent
 // edge 4 = {1,3}
 // edge 5 = {2,3}
 //
+//
+//   edgeMap[6][2] = {{3, 0},  (face ,edge)
+//                    {3, 2}, 
+//                    {1, 2},
+//                    {0, 2},
+//                    {0, 0},
+//                    {0, 1}};
+//
+//
+//  Edge numbering in the triangle 
+//
+//    2
+//    |\
+//    | \
+//    |  \
+//  2 |   \ 1
+//    |    \
+//    |     \
+//    |      \
+//  0 -------- 1
+//        0 
 //
 */
 

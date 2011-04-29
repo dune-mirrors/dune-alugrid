@@ -23,6 +23,7 @@ typedef pair<const ProjectVertex* , const int > ProjectVertexPair;
 class MacroGhostInfoHexa;
 class MacroGhostInfoTetra;
 
+
 // forward declaration 
 class Gitter;
 
@@ -2004,6 +2005,8 @@ private:
 //    #    #   ##  #          #    #   ##  #
 //    #    #    #  ######     #    #    #  ######
 //
+// start of implementation part 
+// --inline 
 
 inline pair < int, int > operator += (pair < int, int> & a, const pair < int, int > & b) {
   return pair < int, int > (a.first += b.first, a.second += b.second) ;
@@ -2323,6 +2326,20 @@ inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) 
   return true ;
 }
 
+inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: VertexGeo* v )
+{
+  if( v ) 
+  {
+    s << "vx ( " << v->getIndex() << " : ";
+    for (int i=0; i<3; ++i)
+      s << ((i>0) ? " " : "") << v->Point()[i];
+    s << " ) ";
+  }
+  else 
+    s << "nullptr"; 
+  return s;
+}
+
 
 
 
@@ -2340,6 +2357,7 @@ inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y,
 {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   this->setIndex( indexManager().getIndex() );
+  //cout << "Create " << this << endl;
   return ;
 }
 
@@ -2349,6 +2367,7 @@ inline Gitter :: Geometric :: VertexGeo :: VertexGeo (int l, double x, double y,
 {
   _c [0] = x ; _c [1] = y ; _c [2] = z ;
   this->setIndex( indexManager().getIndex() );
+  //cout << "Create " << this << endl;
   return ;
 }
 
@@ -2436,17 +2455,8 @@ inline bool Gitter :: Geometric :: Hedge1Rule :: isValid () const {
 inline Gitter :: Geometric :: Hedge1Rule Gitter :: Geometric :: Hedge1Rule :: rotate (int i) const 
 {
   assert (i == 0 || i == 1) ;
-  switch (_r) 
-  {
-  case nosplit :
-    return Hedge1Rule (nosplit) ;
-  case iso2 :
-    return Hedge1Rule (iso2) ;
-  default :
-    cerr << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-    return Hedge1Rule (nosplit) ;
-  }
+  assert ( _r == nosplit || _r == iso2 );  
+  return Hedge1Rule( _r );
 }
 
 
@@ -2542,30 +2552,60 @@ inline bool Gitter :: Geometric :: Hface3Rule :: isValid () const {
   return isValid( _r );
 }
 
-inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: rotate (int t) const {
+inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: rotate (int t) const 
+{
   assert ((-4 < t) && (t < 3)) ;
+  //cout << "Hface3Rule: " << t << " " << int(_r) << " --> " ;
+  rule_t newr = _r ;
+  //assert( t != 0 );
   switch (_r) {
   case nosplit :
-    return Hface3Rule (nosplit) ;
-  case e01 :
-  case e12 :
-  case e20 :
-    if (t == 0 || t == -3) {    // twist 0 bzw. -2 : e01 bleibt und e12 <-> e20 event. swappen
-      return Hface3Rule (_r == e01 ? e01 : (_r == e12 ? (t == 0 ? e12 : e20) : (t == 0 ? e20 : e12))) ;
-    } else if (t == 1 || t == -1) { // twist 1 bzw. -1 : e20 -> e01 (beidesmal)
-      return Hface3Rule (_r == e20 ? e01 : (_r == e12 ? (t == 1 ? e20 : e12) : (t == 1 ? e12 : e20))) ;
-    } else if (t == 2 || t == -2) { // twist 2 bzw. -3 : e12 -> e01 (beidesmal)
-      return Hface3Rule (_r == e12 ? e01 : (_r == e01 ? (t == 2 ? e20 : e12) : (t == 2 ? e12 : e20))) ;
-    } else {
-      abort () ;
-    }
   case iso4 :
-    return Hface3Rule (iso4) ;
+    //return Hface3Rule (nosplit) ;
+    //newr = iso4 ;
+    break ;
+    //return Hface3Rule (iso4) ;
+  case e01 :
+    {
+      static rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; 
+      newr = retRule[ t + 3 ];
+      break ;
+    }
+  case e12 :
+    {
+      static rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; 
+      newr = retRule[ t + 3 ];
+      break ;
+    }
+  case e20 :
+    {
+      static rule_t retRule [ 6 ] = { e12, e20, e01, e20, e12, e01 }; 
+      newr = retRule[ t + 3 ];
+      break ;
+    }
   default :
     cerr << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
     return Hface3Rule (nosplit) ;
   }
+    /*
+  { 
+    rule_t newr = nosplit;
+    if (t == 0 || t == -3) {    // twist 0 bzw. -2 : e01 bleibt und e12 <-> e20 event. swappen
+      newr = (_r == e01 ? e01 : (_r == e12 ? (t == 0 ? e12 : e20) : (t == 0 ? e20 : e12))) ;
+    } 
+    else if (t == 1 || t == -1) { // twist 1 bzw. -1 : e20 -> e01 (beidesmal)
+      newr = (_r == e20 ? e01 : (_r == e12 ? (t == 1 ? e20 : e12) : (t == 1 ? e12 : e20))) ;
+    } 
+    else if (t == 2 || t == -2) { // twist 2 bzw. -3 : e12 -> e01 (beidesmal)
+      newr = (_r == e12 ? e01 : (_r == e01 ? (t == 2 ? e20 : e12) : (t == 2 ? e12 : e20))) ;
+    } 
+    else {
+      abort () ;
+    }
+    */
+  //cout << int( newr ) << endl;
+  return Hface3Rule( newr );
 }
 
 #if 0
@@ -3143,6 +3183,8 @@ inline const Gitter :: Geometric :: Tetra :: myhface3_t * Gitter :: Geometric ::
 }
 
 inline int Gitter::Geometric::Tetra::originalVertexTwist(int face, int vertex) const {
+  // twist ==  0  -->  identity 
+  // twist == -1  -->  flip vertex 1 and 2, keep 0 
   return (twist(face) < 0 ? 
           (7 - vertex + twist(face)) % 3 : 
           (vertex + twist(face)) % 3);
@@ -3159,6 +3201,7 @@ inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const
 
 inline int Gitter::Geometric::Tetra::originalEdgeTwist(int face, int vertex) const 
 {
+  // twist == 0  --> identity 
   return (twist(face) < 0 ? 
           (6 - vertex + twist(face)) % 3 : 
           (vertex + twist(face)) % 3);

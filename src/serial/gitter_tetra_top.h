@@ -77,6 +77,7 @@ template < class A > class Hface3Top : public A
     virtual void restore (ObjectStream &) ;
 
   protected:
+    void print() const ;
     // non-virtual methods of down and innerVertex 
     innerface_t* dwnPtr() ;
     const innerface_t* dwnPtr() const ;
@@ -154,7 +155,8 @@ template < class A > class Hbnd3Top : public A {
     void setBoundaryId( const int id ); 
 } ;
 
-template < class A > class TetraTop : public A {
+template < class A > class TetraTop : public A 
+{
   public :
     using A :: twist ;
     using A :: myhface3 ;
@@ -242,6 +244,15 @@ template < class A > class TetraTop : public A {
     void backupIndex (ostream &) const ;
     void restoreIndex (istream &, vector<bool>(&)[4] ) ;
   protected:  
+    void print() const 
+    {
+      cout << "Create Tetra: " << endl;
+      for(int i=0; i<4; ++ i) 
+      {
+        cout << this->myvertex( i ) << endl;
+      }
+    }
+
     // non-virtual methods of down and innerVertex 
     innertetra_t* dwnPtr() ;
     const innertetra_t* dwnPtr() const ;
@@ -485,6 +496,7 @@ Hface3Top (int l, myhedge1_t * e0,
   _rule (myrule_t :: nosplit)
 {
   this->setIndex( indexManager().getIndex() );
+  //print();
   return ;
 }
 
@@ -499,9 +511,21 @@ Hface3Top (int l, myhedge1_t * e0,
   _rule (myrule_t :: nosplit)
 {
   this->setIndex( indexManager().getIndex() );
+  // print();
   return ;
 }
 
+
+template < class A > inline void Hface3Top < A > :: print () const
+{
+  cout << "Create face " << endl;
+  for( int i=0; i<3; ++i) 
+    cout << this->myvertex( i ) << endl;
+  for( int i=0; i<3; ++i)
+  {
+    cout << "edge " << i << " " << this->myhedge1(i)->myvertex( 0 ) << " " << this->myhedge1(i)->myvertex( 1 ) << endl;
+  }
+}
 template < class A > inline Hface3Top < A > :: ~Hface3Top () 
 {
   this->freeIndex( indexManager() );
