@@ -596,16 +596,16 @@ template < class A > TetraTop < A >
   // we need boundary id now, for elements is the same as fathers 
   this->_bndid = _up->bndId();
 
-  //print();
-
-  // check that volume is calculated correctly 
-  assert( 
-      fabs( 
+#ifndef NDEBUG 
+  // check that _volume has the correct value 
+  const double calculatedVolume = 
     quadraturTetra3D < VolumeCalc > (
       LinearMapping ( this->myvertex(0)->Point(), 
                       this->myvertex(1)->Point(),
                       this->myvertex(2)->Point(), 
-                      this->myvertex(3)->Point())).integrate1 (0.0)  - _volume ) < 1e-10 );
+                      this->myvertex(3)->Point())).integrate1 (0.0);
+  assert( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 ); 
+#endif
 
   return ;
 }

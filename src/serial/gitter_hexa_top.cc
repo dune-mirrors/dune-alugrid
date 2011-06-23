@@ -582,12 +582,16 @@ template < class A > HexaTop < A >
   }
 
   // make sure that given volume is the same as calulated 
-  assert( fabs (
+#ifndef NDEBUG 
+  const double calculatedVolume = 
       QuadraturCube3D < VolumeCalc >
        (TrilinearMapping (myvertex(0)->Point(), myvertex(1)->Point(),
                           myvertex(2)->Point(), myvertex(3)->Point(),
                           myvertex(4)->Point(), myvertex(5)->Point(),
-                          myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0) - _volume) < 1e-10 );
+                          myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
+  assert( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
+#endif
+
   return ;
 }
 
