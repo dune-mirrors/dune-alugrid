@@ -192,14 +192,15 @@ template < int N, int NV > struct nconf_vtx
 // #definition:
 template < int N > class Vertex : public Listagent < Vertex < N > > // , public Basic 
 {
+  typedef Listagent < Vertex < N > >  BaseType ;
   using Listagent < Vertex < N > > ::_idx;
   using Listagent < Vertex < N > > ::_level;
   public:
     enum { ncoord = N };
 
-    using Basic :: attach ;
-    using Basic :: detach ; 
-    using Basic :: isfree ;
+    using BaseType :: attach ;
+    using BaseType :: detach ; 
+    using BaseType :: isfree ;
 
   private :
 
@@ -553,8 +554,8 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
     int nv() const { return (NV==3) ? 3 : nvertices() ; }
     int mod(const int i) const { return i % nv(); }
 
-    using Basic::_idx;
-    using Basic::refcount ; // used as nvertices 
+    using thinelement_t::_idx;
+    using thinelement_t::refcount ; // used as nvertices 
 
     double _area;
     double _outernormal[NV][ncoord]; // NV * ncoord * 8 = ( z.B. 48 )
@@ -686,7 +687,6 @@ class SubtreeIterator;
 // #definition:
 template < class A > class Hier : public A {
 
-  //using A :: hdl;
   public :
 
   typedef typename A::vertex_t vertex_t;
@@ -846,12 +846,11 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
  
   protected :
 
-    using Refco::none;
+    using thinelement_t::none;
 
     Bndel(bnd_t t = none) : typ(t) , _segmentIndex( -1 ) { }
 
-    //using Basic::hdl;
-    using Basic::_idx;
+    using thinelement_t::_idx;
 
     bnd_t typ ;
 
