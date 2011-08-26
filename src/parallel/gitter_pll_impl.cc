@@ -858,19 +858,6 @@ template < class A >
 void TetraPllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
 {
   assert (i) ;
-  /*
-  ObjectStream s ;
-  try 
-  {
-    // read stream until end of stream marker 
-    for (char c = os.get() ; c != ObjectStream :: ENDOFSTREAM ; os.read(c) ) s.put( c ) ;
-  } 
-  catch (ObjectStream :: EOFException) 
-  {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
-  */
   if (i) 
   {
     mytetra ().restore (os) ;
@@ -941,7 +928,8 @@ template class TetraPllXBaseMacro< GitterBasisPll :: ObjectsPll :: tetra_IMPL > 
 // #        #       #   #      #    #    #  #    #     #    #    # #     #
 // #        ######  #    #     #     ####   #####      #     ####   #####
 
-void Periodic3PllXBase :: writeDynamicState (ObjectStream & os, int) const {
+template < class A > 
+void Periodic3PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const {
 
   // Der Schwerpunkt des "flachen" periodischen Randelements wird
   // auf die Mitte der linken Fl"ache gelegt. Per Definition.
@@ -956,11 +944,13 @@ void Periodic3PllXBase :: writeDynamicState (ObjectStream & os, int) const {
   return ;
 }
 
-Periodic3PllXBaseMacro :: Periodic3PllXBaseMacro (myperiodic3_t & p) 
-  : Periodic3PllXBase (p)
-  , _moveTo ()
-  , _ldbVertexIndex (-1)
-  , _erasable (false) 
+template < class A >
+Periodic3PllXBaseMacro< A > :: 
+Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1 )
+: A(level, f0, s0, f1, s1 )
+, _moveTo ()
+, _ldbVertexIndex (-1)
+, _erasable (false) 
 {
 #ifdef GRAPHVERTEX_WITH_CENTER
   static const double x = 1./3. ;
@@ -970,7 +960,8 @@ Periodic3PllXBaseMacro :: Periodic3PllXBaseMacro (myperiodic3_t & p)
   return ;
 }
 
-Periodic3PllXBaseMacro :: ~Periodic3PllXBaseMacro () {
+template < class A > 
+Periodic3PllXBaseMacro< A > :: ~Periodic3PllXBaseMacro () {
   vector < int > v ;
   {
     v.reserve( _moveTo.size() );
@@ -985,30 +976,28 @@ Periodic3PllXBaseMacro :: ~Periodic3PllXBaseMacro () {
   return ;
 }
 
-int Periodic3PllXBaseMacro :: ldbVertexIndex () const {
-  return _ldbVertexIndex ;
-}
-
-int & Periodic3PllXBaseMacro :: ldbVertexIndex () {
-  return _ldbVertexIndex ;
-}
-
-bool Periodic3PllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
+template <class A>
+bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
+{
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
       TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic3 ()).size ()
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _center
 #endif
       )) ;
+  std::cout << "periodic update vertex " << std::endl;
+
   return true ;
 }
 
-void Periodic3PllXBaseMacro :: writeStaticState (ObjectStream & os, int) const {
+template < class A >
+void Periodic3PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
   os.writeObject (ldbVertexIndex ()) ;
   return ;
 }
 
-void Periodic3PllXBaseMacro :: unattach2 (int i) {
+template < class A >
+void Periodic3PllXBaseMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
   myperiodic3 ().myhface3 (0)->unattach2 (i) ;
@@ -1016,7 +1005,8 @@ void Periodic3PllXBaseMacro :: unattach2 (int i) {
   return ;
 }
 
-void Periodic3PllXBaseMacro :: attach2 (int i) {
+template < class A >
+void Periodic3PllXBaseMacro< A > :: attach2 (int i) {
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) {
     _moveTo.insert (pair < const int, int > (i,1)) ;
@@ -1031,13 +1021,15 @@ void Periodic3PllXBaseMacro :: attach2 (int i) {
   return ;
 }
 
-bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv) 
+template < class A >
+bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
   typedef map < int, int, less < int > > :: const_iterator const_iterator;
   const const_iterator iEnd =  _moveTo.end () ;
   for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
   {
     int j = (*i).first ;
+    std::cout << "pack periodic bnd to move to " << j << std::endl;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
     {
@@ -1066,7 +1058,8 @@ bool Periodic3PllXBaseMacro :: packAll (vector < ObjectStream > & osv)
   return false ;
 }
 
-void Periodic3PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const {
+template < class A >
+void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
   bool hit = _moveTo.size () == 0 ? true : false ;
   typedef map < int, int, less < int > > :: const_iterator const_iterator;
   const const_iterator iEnd =  _moveTo.end () ;
@@ -1085,7 +1078,8 @@ void Periodic3PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
   return ;
 }
 
-void Periodic3PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) 
+template < class A >
+void Periodic3PllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
 {
   assert (i) ;
 
@@ -1109,10 +1103,6 @@ void Periodic3PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
     abort();
   }
   return ;
-}
-
-bool Periodic3PllXBaseMacro :: erasable () const {
-  return _erasable ;
 }
 
 
@@ -1714,55 +1704,6 @@ Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1,
   : Base_t(0, e0, s0, e1, s1, e2, s2, e3, s3) // 0 == level 0
 {
 } 
-
-// ######                                                           #####
-// #     #  ######  #####      #     ####   #####      #     ####  #     #
-// #     #  #       #    #     #    #    #  #    #     #    #    #       #
-// ######   #####   #    #     #    #    #  #    #     #    #       #####
-// #        #       #####      #    #    #  #    #     #    #            #
-// #        #       #   #      #    #    #  #    #     #    #    # #     #
-// #        ######  #    #     #     ####   #####      #     ####   #####
-
-ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return _pllx ;
-}
-
-const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  return _pllx ;
-}
-
-void GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  abort () ;  // Auf dem feinen Element ist die Aktion nicht zul"assig.
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: Periodic3EmptyPllMacro :: Periodic3EmptyPllMacro (myhface3_t * f0, int t0, myhface3_t * f1, int t1)
-  : GitterBasisPll :: ObjectsPll :: periodic3_IMPL (0,f0,t0,f1,t1), _pllx (new mypllx_t (*this)) {
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: Periodic3EmptyPllMacro :: ~Periodic3EmptyPllMacro () {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
-ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic3EmptyPllMacro :: accessPllX () throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic3EmptyPllMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-void GitterBasisPll :: ObjectsPll :: Periodic3EmptyPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
 
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #

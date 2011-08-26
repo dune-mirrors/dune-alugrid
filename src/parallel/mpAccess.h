@@ -57,7 +57,9 @@ class MpAccessLocal : public MpAccessGlobal {
     virtual vector < vector < int > > exchange (const vector < vector < int > > &) const = 0 ;
     virtual vector < vector < double > > exchange (const vector < vector < double > > &) const = 0 ;
     virtual vector < vector < char > > exchange (const vector < vector < char > > &) const = 0 ;
+    // exchange data and return new vector of object streams 
     virtual vector < ObjectStream > exchange (const vector < ObjectStream > &) const = 0 ;
+    // exchange data with given send and receive buffers 
     virtual void exchange (const vector < ObjectStream > &, vector < ObjectStream > &) const = 0 ;
 } ;
 
