@@ -700,7 +700,8 @@ void TetraPllXBaseMacro< A > :: unattach2 (int i) {
 }
 
 template < class A >
-void TetraPllXBaseMacro< A > :: attach2 (int i) {
+void TetraPllXBaseMacro< A > :: attach2 (int i) 
+{
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) {
     _moveTo.insert (pair < const int, int > (i,1)) ;
@@ -985,7 +986,6 @@ bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBa
       , _center
 #endif
       )) ;
-  std::cout << "periodic update vertex " << std::endl;
 
   return true ;
 }
@@ -1029,7 +1029,6 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
   for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
   {
     int j = (*i).first ;
-    std::cout << "pack periodic bnd to move to " << j << std::endl;
     assert ((osv.begin () + j) < osv.end ()) ;
     assert (_moveTo.size () == 1) ;
     {
@@ -1073,7 +1072,30 @@ void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & 
     os.writeObject (myperiodic3 ().myvertex (fce,0)->ident ()) ;
     os.writeObject (myperiodic3 ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myperiodic3 ().myvertex (fce,2)->ident ()) ;
-    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // 0 == no point transmitted 
+
+    os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); // 1 == points are transmitted 
+    cout << "Write periodic with poijnt " << std::endl;
+
+    typedef Gitter :: Geometric :: Tetra Tetra ;
+    typedef Gitter :: Geometric :: hasFace3 hasFace3 ;
+
+    // know which face is the internal bnd 
+    os.writeObject (fce);
+   
+    const pair < const hasFace3 *, int > nb = myperiodic3().myneighbour( fce );
+    const Tetra* tetra = (Tetra *) nb.first ;
+    for(int k=0; k<4; ++k) 
+    {
+      int vx = tetra->myvertex (k)->ident ();
+      os.writeObject ( vx ) ;
+    }
+
+    const Gitter :: Geometric :: VertexGeo * vertex = tetra->myvertex( nb.second );
+    os.writeObject( vertex->ident() );
+    const alucoord_t (&p)[3] = vertex->Point();
+    os.writeObject ( p[0] ) ;
+    os.writeObject ( p[1] ) ;
+    os.writeObject ( p[2] ) ;
   }
   return ;
 }

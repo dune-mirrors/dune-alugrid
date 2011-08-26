@@ -1003,7 +1003,8 @@ void GitterPll :: exchangeStaticState () {
     {for (int l = 0 ; l < nl ; l ++ ) {
       AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
       AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
-      for (wi.first () ; ! wi.done () ; wi.next ()) {
+      for (wi.first () ; ! wi.done () ; wi.next ()) 
+      {
         pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
         p.first->writeStaticState (osv [l], p.second) ;
       }
