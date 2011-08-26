@@ -119,7 +119,7 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
     // read ghost data from stream 
-    ghInfo = new MacroGhostInfoTetra(os); 
+    ghInfo = new MacroGhostInfoTetra( os ); 
   }
 
   // if internal boundary, create internal bnd face 
@@ -507,13 +507,12 @@ void DuneParallelGridMover :: initialize ()
   }
 
   // from constructor ParallelGridMover 
-  const size_t vecSize = _hexaMap.size() + _tetraMap.size() +
-                         _periodic3Map.size() + _periodic4Map.size(); 
-  
   vector < elementKey_t > toDelete ;
+  vector < elementKey_t > toDeletePeriodic ;
 
   // reserve memory 
-  toDelete.reserve( vecSize );
+  toDelete.reserve( _hexaMap.size() + _tetraMap.size() );
+  toDeletePeriodic.reserve( _periodic3Map.size() + _periodic4Map.size() );
   
   {
     const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
@@ -541,7 +540,7 @@ void DuneParallelGridMover :: initialize ()
     {
       if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) 
       {
-        toDelete.push_back ((*i).first) ;
+        toDeletePeriodic.push_back ((*i).first) ;
       }
     }
   }
@@ -551,9 +550,16 @@ void DuneParallelGridMover :: initialize ()
     {
       if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) 
       {
-        toDelete.push_back ((*i).first) ;
+        toDeletePeriodic.push_back ((*i).first) ;
       }
     }
+  }
+
+  // delete all periodic elements first (needed for ghost info)
+  {
+    const vector < elementKey_t > :: iterator toDeleteend = toDeletePeriodic.end (); 
+    for (vector < elementKey_t > :: iterator i = toDeletePeriodic.begin () ; i != toDeleteend ; ++i )
+      removeElement (*i) ;
   }
 
   // delete all elements 
@@ -755,10 +761,13 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db)
     const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) {
-      int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) 
+      {
+        int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
         if (me != to)
+        {
           w.item ().attach2 (mpAccess ().link (to)) ;
+        }
       }
     }
     lap1 = clock () ;
