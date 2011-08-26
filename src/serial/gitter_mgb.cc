@@ -279,9 +279,17 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k)
   hit = _periodic3Map.find (k) ;
   if (hit != _periodic3Map.end ()) {
     periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 2 ; i ++) {
-      _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), p3->myhface3 (i)->myvertex (1)->ident (), 
-      p3->myhface3 (i)->myvertex (2)->ident ())] = new Hbnd3IntStorage (p3->myhface3 (i), p3->twist (i)) ;
+    for (int i = 0 ; i < 2 ; i ++) 
+    {
+      pair< hasFace3*, int > nb = p3->myneighbour( i );
+      assert( p3->myneighbour( i ).second >= 0 );
+      tetra_GEO *tetra = (tetra_GEO *) nb.first;
+      assert( tetra );
+      assert( nb.second >= 0 );
+      _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), 
+                            p3->myhface3 (i)->myvertex (1)->ident (), 
+                            p3->myhface3 (i)->myvertex (2)->ident ())
+                ] = new Hbnd3IntStorage ( p3->myhface3 (i), p3->twist (i), tetra, nb.second ) ;
     }
     delete p3 ;
     _periodic3Map.erase (hit) ;
