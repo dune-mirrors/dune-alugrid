@@ -224,7 +224,10 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         ~Periodic3Empty () {}
         // do nothing here 
         virtual void resetGhostIndices() {}
+
       public:
+        virtual int ghostLevel () const { return level() ; }
+        virtual bool ghostLeaf () const { return leaf(); }
     } ;
     typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
 
@@ -281,19 +284,22 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
       typedef HexaTop < HexaEmpty > hexa_IMPL ;
 
 
-      class Periodic4Empty : public periodic4_GEO {
-        protected :
-          typedef hface4_IMPL innerface_t ;
-          typedef hedge1_IMPL inneredge_t ;
-          typedef VertexEmpty innervertex_t ;
-          typedef hexa_IMPL GhostElement_t;
+      class Periodic4Empty : public periodic4_GEO 
+      {
+      protected :
+        typedef hface4_IMPL innerface_t ;
+        typedef hedge1_IMPL inneredge_t ;
+        typedef VertexEmpty innervertex_t ;
+        typedef hexa_IMPL GhostElement_t;
 
-          inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
-          ~Periodic4Empty () {}
-         
-          // so nothing here 
-          virtual void resetGhostIndices() {}
-        public:
+        inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int) ;
+        ~Periodic4Empty () {}
+       
+        // so nothing here 
+        virtual void resetGhostIndices() {}
+      public:
+        virtual int ghostLevel () const { return level() ; }
+        virtual bool ghostLeaf () const { return leaf(); }
       } ;
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
  
