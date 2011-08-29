@@ -209,12 +209,6 @@ public :
   // creates level iterators 
   virtual IteratorSTI < A > * levelIterator (const A * a, const any_has_level < A  > & ) const {  return iterator(a); } 
 
-  // this methods are needed because for the PureElementAccessIterator we
-  // want to call overloaded method that only insert lists with elements 
-  // but for edges,faces,vertices this method is the same, therefor default
-  // implementation 
-  virtual IteratorSTI < A > * pureElementIterator (const A * a) const { return iterator(a); }
-
 public :
   
   // Handle ist ein einfaches Iteratorproxy, das ein abstraktes
@@ -669,6 +663,18 @@ public :
     virtual grid_t type() const = 0;
   } ;
 
+  // tag element for periodic elements which is basically the i
+  // same as helement (for historical resons) 
+  class hperiodic : public helement
+  {
+  public:
+    // return the ldbVertexIndex of the first element (inside)
+    virtual int insideLdbVertexIndex() const = 0;
+  protected :
+    hperiodic () {}
+    virtual ~hperiodic () {}
+  };
+
   // this little helper class stored information for the splitGhost 
   // method but is only needed for the parallel case 
   class GhostChildrenInfo 
@@ -785,6 +791,7 @@ public :
 public :
   typedef hbndseg hbndseg_STI ;
   typedef helement  helement_STI ;
+  typedef hperiodic hperiodic_STI ;
   typedef hface hface_STI ;
   typedef hedge hedge_STI ;
   typedef vertex  vertex_STI ;
@@ -838,7 +845,8 @@ public :
   
   class Makrogitter : public AccessIterator < vertex_STI >, public AccessIterator < hedge_STI >,
                       public AccessIterator < hface_STI >, public AccessIterator < hbndseg_STI >, 
-                      public AccessIterator < helement_STI > {
+                      public AccessIterator < helement_STI >, public AccessIterator < hperiodic_STI > 
+  {
   protected :
     Makrogitter () {}
     virtual ~Makrogitter () ;
@@ -1336,6 +1344,9 @@ public :
 
       // returns false because only bnd segments have projections 
       virtual bool hasVertexProjection () const { return false; }
+
+      // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here 
+      virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
     public :
       virtual myrule_t getrule () const = 0 ;
       
@@ -1366,7 +1377,10 @@ public :
     // Geometriesockelklasse des periodischen Randelements mit zwei
     // 3-Punkt-Fl"achen.
   
-    typedef class Periodic3 : public helement_STI, public hasFace3, public MyAlloc {
+    typedef class Periodic3 : public hperiodic_STI, 
+                              public hasFace3, 
+                              public MyAlloc 
+    {
     protected :
       typedef VertexGeo  myvertex_t ;
       typedef hedge1_GEO myhedge1_t ;
@@ -1375,6 +1389,17 @@ public :
       inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
+
+      // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
+      inline int insideLdbVertexIndex() const 
+      {
+        const int ldbVx = myneighbour( 0 ).first->firstLdbVertexIndex();
+        if( ldbVx < 0 ) 
+          return myneighbour( 1 ).first->firstLdbVertexIndex();
+        else 
+          return ldbVx;
+      }
+
     public :
       using hasFace3     :: accessPllX ;
       static const int prototype [2][3] ;
@@ -1391,7 +1416,7 @@ public :
       virtual int nEdges() const { 
         cerr << "Periodic3 :: nEdges not implemented! \n"; abort(); return 6; 
       }
-    
+
       inline int twist (int) const ;
       int test () const ;
     public :
@@ -1421,7 +1446,10 @@ public :
     // Geometriesockelklasse des periodischen Randelements mit zwei
     // 4-Punkt-Fl"achen.
   
-    typedef class Periodic4 : public helement_STI, public hasFace4, public MyAlloc {
+    typedef class Periodic4 : public hperiodic_STI, 
+                              public hasFace4, 
+                              public MyAlloc 
+    {
     protected :
       typedef VertexGeo  myvertex_t ;
       typedef hedge1_GEO myhedge1_t ;
@@ -1430,6 +1458,17 @@ public :
       inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
+
+      // return the first element's ldbVertexIndex (used in Periodic4PllXBaseMacro)
+      inline int insideLdbVertexIndex() const 
+      {
+        const int ldbVx = myneighbour( 0 ).first->firstLdbVertexIndex();
+        if( ldbVx < 0 ) 
+          return myneighbour( 1 ).first->firstLdbVertexIndex();
+        else 
+          return ldbVx;
+      }
+
     public :
       using hasFace4     :: accessPllX ;
       static const int prototype [2][4] ;
@@ -1536,6 +1575,9 @@ public :
 
       // returns false because only bnd segments have projections 
       virtual bool hasVertexProjection () const { return false; }
+
+      // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here 
+      virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
@@ -1755,6 +1797,8 @@ public :
       IteratorSTI < hface_STI >  * iterator (const IteratorSTI < hface_STI > *) const ;
       IteratorSTI < helement_STI > * iterator (const helement_STI *) const ;
       IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) const ;
+      IteratorSTI < hperiodic_STI > * iterator (const hperiodic_STI *) const ;
+      IteratorSTI < hperiodic_STI > * iterator (const IteratorSTI < hperiodic_STI > *) const ;
       IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
       IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
     public:  
@@ -1775,19 +1819,6 @@ public :
       // index provider, for every codim one , 4 is for boundary
       IndexManagerStorageType _indexManagerStorage;
 
-      // default implementations just use the iterator method  
-      IteratorSTI < vertex_STI > * pureElementIterator (const vertex_STI * a) const { return iterator(a); }
-      IteratorSTI < vertex_STI > * pureElementIterator (const IteratorSTI < vertex_STI > * a) const { return iterator(a); }
-      IteratorSTI < hedge_STI > * pureElementIterator (const hedge_STI * a) const { return iterator(a); }
-      IteratorSTI < hedge_STI > * pureElementIterator (const IteratorSTI < hedge_STI > * a) const { return iterator(a); }
-      IteratorSTI < hface_STI > * pureElementIterator (const hface_STI * a) const { return iterator(a); }
-      IteratorSTI < hface_STI > *   pureElementIterator (const IteratorSTI < hface_STI > * a) const { return iterator(a); }
-      IteratorSTI < hbndseg_STI > * pureElementIterator (const hbndseg_STI * a) const { return iterator(a); }
-      IteratorSTI < hbndseg_STI > *   pureElementIterator (const IteratorSTI < hbndseg_STI > * a) const { return iterator(a); }
-
-      // different implementation for elements 
-      IteratorSTI < helement_STI > * pureElementIterator (const helement_STI *) const ;
-      IteratorSTI < helement_STI > * pureElementIterator (const IteratorSTI < helement_STI > *) const ;
     public :
       // return reference to indexManager 
       virtual IndexManagerType& indexManager(int codim);

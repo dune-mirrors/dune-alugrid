@@ -133,8 +133,8 @@ class ElementPllXIF : public MacroGridMoverDefault
   public :
     virtual int ldbVertexIndex () const
     { assert(false);abort(); return -1;  }
-    virtual int & ldbVertexIndex ()
-    { assert(false);abort(); return *(new int ());  }
+    virtual void setLoadBalanceVertexIndex( const int ) 
+    { assert(false);abort(); } 
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &)
     { assert(false);abort(); return false;  }
   public :
@@ -274,6 +274,9 @@ class Parallel {
           assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
           throw AccessPllException () ;
         }
+
+        // return ldbVertexIndex (default is -1), overloaded in Tetra and Hexa
+        virtual int firstLdbVertexIndex() const { return -1; } 
     } ;
 } ;
 #endif

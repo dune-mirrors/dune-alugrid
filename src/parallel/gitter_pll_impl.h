@@ -209,7 +209,7 @@ class TetraPllXBaseMacro : public A
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
-    virtual int & ldbVertexIndex () ;
+    virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
   public :
     virtual void attach2 (int) ;
@@ -274,6 +274,7 @@ class Periodic3PllXBaseMacro : public A
 
     using A :: PERIODIC3 ;
     using A :: HBND3INT ;
+    using A :: insideLdbVertexIndex ;
 
     Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1) ;
    ~Periodic3PllXBaseMacro () ;
@@ -287,7 +288,9 @@ class Periodic3PllXBaseMacro : public A
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const { return _ldbVertexIndex ; }
-    virtual int & ldbVertexIndex () { return _ldbVertexIndex ; }
+    //virtual int & ldbVertexIndex () { return _ldbVertexIndex ; }
+    virtual void setLoadBalanceVertexIndex ( const int ldbVx ) { _ldbVertexIndex = ldbVx ; }
+
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
   public :
     virtual void attach2 (int) ;
@@ -338,7 +341,7 @@ class Periodic4PllXBaseMacro : public Periodic4PllXBase {
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
-    virtual int & ldbVertexIndex () ;
+    virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
   public :
     virtual void attach2 (int) ;
@@ -404,7 +407,7 @@ class HexaPllBaseXMacro : public A
    ~HexaPllBaseXMacro () ;
     virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
-    virtual int & ldbVertexIndex () ;
+    virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
@@ -459,7 +462,7 @@ template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
     inline BndsegPllBaseXMacro (myhbnd_t &) ;
   public :
     virtual int ldbVertexIndex () const ;
-    virtual int & ldbVertexIndex () ;
+    virtual void setLoadBalanceVertexIndex ( const int ) ;
   public :
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     
@@ -522,7 +525,7 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     virtual void readStaticState (ObjectStream &, int) ;
   public :
     virtual int   ldbVertexIndex () const ;
-    virtual int & ldbVertexIndex () ;
+    virtual void setLoadBalanceVertexIndex ( const int ) ;
   public :
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     
@@ -1082,8 +1085,7 @@ template < class A > int BndsegPllBaseXMacro < A > ::ldbVertexIndex () const {
   return -1 ;
 }
 
-template < class  A > int & BndsegPllBaseXMacro < A > :: ldbVertexIndex () {
-  return (abort (), *(int *)0) ;
+template < class  A > void  BndsegPllBaseXMacro < A > :: setLoadBalanceVertexIndex ( const int ) {
 }
 
 template < class A > void BndsegPllBaseXMacro < A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
@@ -1176,8 +1178,8 @@ template < class A > inline int BndsegPllBaseXMacroClosure < A > :: ldbVertexInd
   return _extGraphVertexIndex ;
 }
 
-template < class A > inline int & BndsegPllBaseXMacroClosure < A > :: ldbVertexIndex () {
-  return _extGraphVertexIndex ;
+template < class A > inline void BndsegPllBaseXMacroClosure < A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
+  _extGraphVertexIndex = ldbVx ;
 }
 
 // ######                                                          #

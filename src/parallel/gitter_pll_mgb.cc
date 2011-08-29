@@ -312,13 +312,30 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     mpAccess ().insertRequestSymetric (db.scan ()) ;
     const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
     {
-      AccessIterator < helement > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) {
-      int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
-        if (me != to)
-          w.item ().attach2 (mpAccess ().link (to)) ;
+      {
+        AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
+        for (w.first () ; ! w.done () ; w.next ()) 
+        {
+          const int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
+          if (me != to)
+            w.item ().attach2 (mpAccess ().link (to)) ;
+        }
+      }
+
+      {
+        // iterate over all periodic elements and set 'to' of first neighbour
+        AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
+        for (w.first () ; ! w.done () ; w.next ()) 
+        {
+          // TODO: get destination of first neighbor and set this destination 
+          const int to = db.getDestination ( w.item().insideLdbVertexIndex() );
+           
+          if (me != to)
+            w.item ().attach2 (mpAccess ().link( to )) ;
+        }
       }
     }
+
     lap1 = clock () ;
     vector < ObjectStream > osv (nl) ;
     {
@@ -338,9 +355,14 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
       for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
     {
+      AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
+    }
+    {
       for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
       	(*i++).writeObject (MacroGridMoverIF :: ENDMARKER)) ;
     }
+
     lap2 = clock () ;
     osv = mpAccess ().exchange (osv) ;
     lap3 = clock () ;

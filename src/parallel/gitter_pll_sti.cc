@@ -362,15 +362,11 @@ bool GitterPll :: refine ()
           {
             {
               const hface_iterator iEnd = outerFaces[l].end () ;
-              //for (hface_iterator i = outerFaces [l].begin () ;
-              //     i != iEnd; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; 
               for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i ) 
                 (*i)->accessOuterPllX ().first->getRefinementRequest (osv [l]) ; 
             }
             {
               const hface_iterator iEnd = innerFaces[l].end () ;
-              //for (hface_iterator i = innerFaces [l].begin () ;
-              //     i != iEnd; (*i ++)->accessPllX ().accessOuterPllX ().first->getRefinementRequest (osv [l])) ; 
               for (hface_iterator i = innerFaces [l].begin () ; i != iEnd ; ++i )
                 (*i)->accessOuterPllX ().first->getRefinementRequest (osv [l]) ; 
             }
@@ -390,15 +386,11 @@ bool GitterPll :: refine ()
           {
             {
               const hface_iterator iEnd = innerFaces[l].end () ;
-              //for (hface_iterator i = innerFaces [l].begin () ;
-              //  i != iEnd; repeat |= (*i ++)->accessPllX ().accessOuterPllX ().first->setRefinementRequest (osv [l])) ; 
               for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i ) 
                 repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest (osv [l]) ; 
             }
             {
               const hface_iterator iEnd = outerFaces[l].end () ; 
-              //for (hface_iterator i = outerFaces [l].begin () ;
-              //  i != iEnd; repeat |= (*i ++)->accessPllX ().accessOuterPllX ().first->setRefinementRequest (osv [l])) ; 
               for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i )
                 repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest (osv [l]) ; 
             }
@@ -429,8 +421,6 @@ bool GitterPll :: refine ()
         for (int l = 0 ; l < nl ; ++l) 
         {
           const hedge_iterator iEnd = outerEdges[l].end () ;
-          //for (hedge_iterator i = outerEdges [l].begin () ;
-          //  i != iEnd; (*i ++)->accessPllX ().getRefinementRequest (osv [l])) ;
           for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i )
             (*i)->getRefinementRequest (osv [l]) ;
         }
@@ -443,8 +433,6 @@ bool GitterPll :: refine ()
         for (int l = 0 ; l < nl ; ++l)
         {
           const hedge_iterator iEnd = innerEdges[l].end () ;
-          //for (hedge_iterator i = innerEdges [l].begin () ;
-          //  i != iEnd; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
           for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i )
             (*i)->setRefinementRequest (osv [l]) ;
         }
@@ -457,8 +445,6 @@ bool GitterPll :: refine ()
         for (int l = 0 ; l < nl ; ++l)
         {
           const hedge_iterator iEnd = innerEdges[l].end () ;
-          //for (hedge_iterator i = innerEdges [l].begin () ;
-          //  i != iEnd; (*i ++)->accessPllX ().getRefinementRequest (osv [l])) ;
           for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i ) 
             (*i)->getRefinementRequest (osv [l]) ;
         }
@@ -471,8 +457,6 @@ bool GitterPll :: refine ()
         for (int l = 0 ; l < nl ; ++l)
         {
           const hedge_iterator iEnd = outerEdges [l].end () ;
-          //for (hedge_iterator i = outerEdges [l].begin () ;
-          //  i != iEnd; (*i ++)->accessPllX ().setRefinementRequest (osv [l])) ;
           for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i ) 
             (*i)->setRefinementRequest (osv [l]) ;
         }
@@ -584,25 +568,21 @@ void GitterPll :: coarse ()
       {
         {
           const hedge_iterator iEnd = outerEdges [l].end () ;
-          //for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; (*i ++)->lockAndTry ()) ; 
           for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i )
             (*i)->lockAndTry () ; 
         }
         {
           const hedge_iterator iEnd = innerEdges [l].end () ;
-          //for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; (*i ++)->accessPllX ().lockAndTry ()) ; 
           for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i )
                (*i)->lockAndTry () ; 
         }
         {
           const hface_iterator iEnd = outerFaces [l].end () ;
-          //for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; (*i ++)->accessOuterPllX ().first->lockAndTry ()) ; 
           for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i )
             (*i)->accessOuterPllX ().first->lockAndTry () ; 
         }
         {
           const hface_iterator iEnd = innerFaces [l].end () ;
-          //for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; (*i ++)->accessOuterPllX ().first->lockAndTry ()) ; 
           for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i )
             (*i)->accessOuterPllX ().first->lockAndTry () ; 
         }
@@ -1093,9 +1073,17 @@ void GitterPll :: loadBalancerMacroGridChangesNotify () {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: loadBalancerMacroGridChangesNotify () " << endl, 1) : 1) ;
   int cnt = 0 ;
   AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
+  // get sizes 
   vector < int > sizes = mpAccess ().gcollect (w.size ()) ;
+
+  // count sizes for all processors 
   for (int i = 0 ; i < mpAccess ().myrank () ; cnt += sizes [i++]) ;
-  for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbVertexIndex () = cnt ++ ;
+
+  // set ldb vertex indices to all elements 
+  for (w.first () ; ! w.done () ; w.next (), ++ cnt ) 
+  {
+    w.item ().setLoadBalanceVertexIndex ( cnt ) ;
+  }
   return ;
 }
 

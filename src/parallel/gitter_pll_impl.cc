@@ -544,7 +544,7 @@ template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (O
     cerr << "**FEHLER EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  assert (_extGraphVertexIndex >= 0) ;
+  //assert (_extGraphVertexIndex >= 0) ;
   return ;
 }
 
@@ -663,8 +663,8 @@ int TetraPllXBaseMacro< A > :: ldbVertexIndex () const {
 }
 
 template < class A >
-int & TetraPllXBaseMacro< A > :: ldbVertexIndex () {
-  return _ldbVertexIndex ;
+void TetraPllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
+  _ldbVertexIndex = ldbVx ;
 }
 
 template < class A >
@@ -950,7 +950,7 @@ Periodic3PllXBaseMacro< A > ::
 Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1 )
 : A(level, f0, s0, f1, s1 )
 , _moveTo ()
-, _ldbVertexIndex (-1)
+, _ldbVertexIndex ( insideLdbVertexIndex() )
 , _erasable (false) 
 {
 #ifdef GRAPHVERTEX_WITH_CENTER
@@ -962,7 +962,8 @@ Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1
 }
 
 template < class A > 
-Periodic3PllXBaseMacro< A > :: ~Periodic3PllXBaseMacro () {
+Periodic3PllXBaseMacro< A > :: ~Periodic3PllXBaseMacro () 
+{
   vector < int > v ;
   {
     v.reserve( _moveTo.size() );
@@ -980,12 +981,14 @@ Periodic3PllXBaseMacro< A > :: ~Periodic3PllXBaseMacro () {
 template <class A>
 bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
 {
+  /*
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
       TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic3 ()).size ()
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _center
 #endif
       )) ;
+  */
 
   return true ;
 }
@@ -1183,8 +1186,8 @@ int Periodic4PllXBaseMacro :: ldbVertexIndex () const {
   return _ldbVertexIndex ;
 }
 
-int & Periodic4PllXBaseMacro :: ldbVertexIndex () {
-  return _ldbVertexIndex ;
+void Periodic4PllXBaseMacro :: setLoadBalanceVertexIndex ( const int ldbVx ) {
+  _ldbVertexIndex = ldbVx ;
 }
 
 bool Periodic4PllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
@@ -1394,8 +1397,8 @@ int HexaPllBaseXMacro< A > :: ldbVertexIndex () const {
 }
 
 template < class A >
-int & HexaPllBaseXMacro< A > :: ldbVertexIndex () {
-  return _ldbVertexIndex ;
+void HexaPllBaseXMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
+  _ldbVertexIndex = ldbVx  ;
 }
 
 template < class A >
