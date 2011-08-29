@@ -271,7 +271,9 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
   for(int i=0; i<4; ++i)
   {
     const alucoord_t (&px)[3] = p[i];
-    mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
+    bool wasNewlyInserted = 
+      mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
+    assert( wasNewlyInserted );
   }
 
   // InsertUniqueHexa gets the global vertex numbers 
