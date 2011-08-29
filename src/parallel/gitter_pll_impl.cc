@@ -1077,7 +1077,7 @@ void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & 
     os.writeObject (myperiodic3 ().myvertex (fce,2)->ident ()) ;
 
     os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); // 1 == points are transmitted 
-    cout << "Write periodic with poijnt " << std::endl;
+    //cout << "Write periodic with poijnt " << std::endl;
 
     typedef Gitter :: Geometric :: Tetra Tetra ;
     typedef Gitter :: Geometric :: hasFace3 hasFace3 ;
@@ -1139,36 +1139,40 @@ void Periodic3PllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i)
 // #        #       #   #      #    #    #  #    #     #    #    #      #
 // #        ######  #    #     #     ####   #####      #     ####       #
 
-void Periodic4PllXBase :: writeDynamicState (ObjectStream & os, int) const {
+template < class A > 
+void Periodic4PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const {
 
   // Der Schwerpunkt des "flachen" periodischen Randelements wird
   // auf die Mitte der linken Fl"ache gelegt. Per Definition.
 
   static const double x = .0 ;
   alucoord_t p [3] ;
-  BilinearSurfaceMapping (myperiodic4 ().myvertex (0,0)->Point (), myperiodic4 ().myvertex (0,1)->Point (),
-    myperiodic4 ().myvertex (0,2)->Point (),myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,p) ;
+  BilinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
+    myperiodic ().myvertex (0,2)->Point (),myperiodic ().myvertex (0,3)->Point ()).map2world (x,x,p) ;
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
   return ;
 }
 
-Periodic4PllXBaseMacro :: Periodic4PllXBaseMacro (myperiodic4_t & p) 
-  : Periodic4PllXBase (p)
+template < class A > 
+Periodic4PllXBaseMacro< A > :: 
+Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1) 
+  : A(level, f0, s0, f1, s1 )
   , _moveTo ()
   , _ldbVertexIndex (-1)
   , _erasable (false) 
 {
 #ifdef GRAPHVERTEX_WITH_CENTER
   static const double x = .0 ;
-  BilinearSurfaceMapping (myperiodic4 ().myvertex (0,0)->Point (), myperiodic4 ().myvertex (0,1)->Point (),
-         myperiodic4 ().myvertex (0,2)->Point (), myperiodic4 ().myvertex (0,3)->Point ()).map2world (x,x,_center) ;
+  BilinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
+         myperiodic ().myvertex (0,2)->Point (), myperiodic ().myvertex (0,3)->Point ()).map2world (x,x,_center) ;
 #endif
   return ;
 }
 
-Periodic4PllXBaseMacro :: ~Periodic4PllXBaseMacro () {
+template < class A > 
+Periodic4PllXBaseMacro< A > :: ~Periodic4PllXBaseMacro () {
   vector < int > v ;
   {
     v.reserve( _moveTo.size() ); 
@@ -1182,38 +1186,46 @@ Periodic4PllXBaseMacro :: ~Periodic4PllXBaseMacro () {
   return ;
 }
 
-int Periodic4PllXBaseMacro :: ldbVertexIndex () const {
+template < class A > 
+int Periodic4PllXBaseMacro< A > :: ldbVertexIndex () const {
   return _ldbVertexIndex ;
 }
 
-void Periodic4PllXBaseMacro :: setLoadBalanceVertexIndex ( const int ldbVx ) {
+template < class A > 
+void Periodic4PllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
   _ldbVertexIndex = ldbVx ;
 }
 
-bool Periodic4PllXBaseMacro :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
+template < class A > 
+bool Periodic4PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
+  /*
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic4 ()).size ()
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic ()).size ()
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _center
 #endif
       )) ;
+      */
   return true ;
 }
 
-void Periodic4PllXBaseMacro :: writeStaticState (ObjectStream & os, int) const {
+template < class A > 
+void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
   os.writeObject (ldbVertexIndex ()) ;
   return ;
 }
 
-void Periodic4PllXBaseMacro :: unattach2 (int i) {
+template < class A > 
+void Periodic4PllXBaseMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  myperiodic4 ().myhface4 (0)->unattach2 (i) ;
-  myperiodic4 ().myhface4 (1)->unattach2 (i) ;
+  myperiodic ().myhface4 (0)->unattach2 (i) ;
+  myperiodic ().myhface4 (1)->unattach2 (i) ;
   return ;
 }
 
-void Periodic4PllXBaseMacro :: attach2 (int i) {
+template < class A > 
+void Periodic4PllXBaseMacro< A > :: attach2 (int i) {
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) {
     _moveTo.insert (pair < const int, int > (i,1)) ;
@@ -1223,12 +1235,13 @@ void Periodic4PllXBaseMacro :: attach2 (int i) {
       return ;
     }
   }
-  myperiodic4 ().myhface4 (0)->attach2 (i) ;
-  myperiodic4 ().myhface4 (1)->attach2 (i) ;
+  myperiodic ().myhface4 (0)->attach2 (i) ;
+  myperiodic ().myhface4 (1)->attach2 (i) ;
   return ;
 }
 
-bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv) 
+template < class A > 
+bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
   typedef map < int, int, less < int > > :: const_iterator const_iterator;
   const const_iterator iEnd =  _moveTo.end () ;
@@ -1241,20 +1254,20 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv)
       ObjectStream& os = osv[j];
       
       os.writeObject (PERIODIC4) ;
-      os.writeObject (myperiodic4 ().myvertex (0)->ident ()) ;
-      os.writeObject (myperiodic4 ().myvertex (1)->ident ()) ;
-      os.writeObject (myperiodic4 ().myvertex (2)->ident ()) ;
-      os.writeObject (myperiodic4 ().myvertex (3)->ident ()) ;
-      os.writeObject (myperiodic4 ().myvertex (4)->ident ()) ;
-      os.writeObject (myperiodic4 ().myvertex (5)->ident ()) ;
-      os.writeObject (myperiodic4 ().myvertex (6)->ident ()) ;
-      os.writeObject (myperiodic4 ().myvertex (7)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (3)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (4)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (5)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (6)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (7)->ident ()) ;
 
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic4_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+      assert( ! myperiodic_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
       
       // pack refinement information 
-      myperiodic4 ().backup ( os ) ;
+      myperiodic ().backup ( os ) ;
       os.put( ObjectStream :: ENDOFSTREAM );
       
       // pack internal data if has any 
@@ -1266,7 +1279,8 @@ bool Periodic4PllXBaseMacro :: packAll (vector < ObjectStream > & osv)
   return false ;
 }
 
-void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) const 
+template < class A > 
+void Periodic4PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
 {
   bool hit = _moveTo.size () == 0 ? true : false ;
   typedef map < int, int, less < int > > :: const_iterator const_iterator;
@@ -1280,21 +1294,22 @@ void Periodic4PllXBaseMacro :: packAsBnd (int fce, int who, ObjectStream & os) c
   {
     os.writeObject (HBND4INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
-    os.writeObject (myperiodic4 ().myvertex (fce,0)->ident ()) ;
-    os.writeObject (myperiodic4 ().myvertex (fce,1)->ident ()) ;
-    os.writeObject (myperiodic4 ().myvertex (fce,2)->ident ()) ;
-    os.writeObject (myperiodic4 ().myvertex (fce,3)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (fce,0)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (fce,1)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (fce,2)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (fce,3)->ident ()) ;
     os.writeObject ( MacroGridMoverIF :: NO_POINT ); // 0 == no point transmitted 
   }
   return ;
 }
 
-void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i) 
+template < class A > 
+void Periodic4PllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
 {
   assert (i) ;
   if (i) 
   {
-    myperiodic4 ().restore (os) ;
+    myperiodic ().restore (os) ;
     
     char c = os.get();
     if( c != ObjectStream :: ENDOFSTREAM )
@@ -1314,7 +1329,8 @@ void Periodic4PllXBaseMacro :: unpackSelf (ObjectStream & os, bool i)
   return ;
 }
 
-bool Periodic4PllXBaseMacro :: erasable () const {
+template < class A > 
+bool Periodic4PllXBaseMacro< A > :: erasable () const {
   return _erasable ;
 }
 
@@ -1729,54 +1745,6 @@ Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1,
   : Base_t(0, e0, s0, e1, s1, e2, s2, e3, s3) // 0 == level 0
 {
 } 
-
-// ######                                                          #
-// #     #  ######  #####      #     ####   #####      #     ####  #    #
-// #     #  #       #    #     #    #    #  #    #     #    #    # #    #
-// ######   #####   #    #     #    #    #  #    #     #    #      #    #
-// #        #       #####      #    #    #  #    #     #    #      #######
-// #        #       #   #      #    #    #  #    #     #    #    #      #
-// #        ######  #    #     #     ####   #####      #     ####       #
-
-ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return _pllx ;
-}
-
-const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  return _pllx ;
-}
-
-void GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  abort () ;  // Auf dem feinen Element ist die Aktion nicht zul"assig.
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: Periodic4EmptyPllMacro (myhface4_t * f0, int t0, myhface4_t * f1, int t1)
-  : GitterBasisPll :: ObjectsPll :: periodic4_IMPL (0,f0,t0,f1,t1), _pllx (new mypllx_t (*this)) {
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: ~Periodic4EmptyPllMacro () {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
-ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: accessPllX () throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-const ElementPllXIF_t & GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-void GitterBasisPll :: ObjectsPll :: Periodic4EmptyPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
 
 ////////////////////////////////////////////////////////////////
 //  --MacroGitterBasisPll

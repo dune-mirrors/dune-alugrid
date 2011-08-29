@@ -288,7 +288,6 @@ class Periodic3PllXBaseMacro : public A
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const { return _ldbVertexIndex ; }
-    //virtual int & ldbVertexIndex () { return _ldbVertexIndex ; }
     virtual void setLoadBalanceVertexIndex ( const int ldbVx ) { _ldbVertexIndex = ldbVx ; }
 
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
@@ -316,26 +315,46 @@ class Periodic3PllXBaseMacro : public A
 // #        #       #   #      #    #    #  #    #     #    #    #      #
 // #        ######  #    #     #     ####   #####      #     ####       #
 
-class Periodic4PllXBase : public ElementPllXIF_t {
+template < class A > 
+class Periodic4PllXBase : public A {
   public :
-    typedef Gitter :: Geometric :: periodic4_GEO myperiodic4_t ;
-    inline myperiodic4_t & myperiodic4 () ;
-    inline const myperiodic4_t & myperiodic4 () const ;
+    typedef typename A :: myhface4_t myhface4_t;
+    typedef A myperiodic_t ;
+
+    using A :: PERIODIC4 ;
+    using A :: HBND4INT ;
+
+    Periodic4PllXBase( myhface4_t* f0, int s0, myhface4_t *f1, int s1) 
+      : A( f0, s0, f1, s1 ) {}
+
+  protected:  
+    inline myperiodic_t & myperiodic () { return *this ; }
+    inline const myperiodic_t & myperiodic () const { return *this; }
   public :
-    inline Periodic4PllXBase (myperiodic4_t &) ;
     inline ~Periodic4PllXBase () {}
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
-  private :
-    myperiodic4_t & _periodic4 ;
 } ;
 
-class Periodic4PllXBaseMacro : public Periodic4PllXBase {
+template < class A >
+class Periodic4PllXBaseMacro : public A  
+{
   public :
-    Periodic4PllXBaseMacro (myperiodic4_t &) ;
+    typedef typename A :: myhface4_t myhface4_t;
+    typedef A myperiodic_t ;
+
+    Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1) ;
    ~Periodic4PllXBaseMacro () ;
-  protected:
+
+    using A :: PERIODIC4 ;
+    using A :: HBND4INT ;
+    using A :: insideLdbVertexIndex ;
+
+  protected:  
+    inline myperiodic_t & myperiodic () { return *this ; }
+    inline const myperiodic_t & myperiodic () const { return *this; }
+
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
@@ -684,36 +703,29 @@ public :
 // #        #       #   #      #    #    #  #    #     #    #    #      #
 // #        ######  #    #     #     ####   #####      #     ####       #
 
-    class Periodic4EmptyPll : public Periodic4Empty
+    class Periodic4EmptyPll : public Periodic4PllXBase< Periodic4Empty >
     {
     protected :
       typedef hedge1_IMPL inneredge_t ;
       typedef hface4_IMPL innerface_t ;
     public :
-      typedef Periodic4PllXBase mypllx_t ;
-      inline Periodic4EmptyPll (myhface4_t *,int,myhface4_t *,int) ;
-     ~Periodic4EmptyPll () {}
-      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const ElementPllXIF_t &accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-          private :
-      mypllx_t _pllx ;
-    } ;
+      inline Periodic4EmptyPll (myhface4_t* f0, int s0, myhface4_t* f1, int s1) 
+        : Periodic4PllXBase< Periodic4Empty >( f0, s0, f1, s1 ) {}
+
+      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
+    };
     typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL ;
   
-    class Periodic4EmptyPllMacro : public periodic4_IMPL
+    class Periodic4EmptyPllMacro : public Periodic4PllXBaseMacro< periodic4_IMPL >
     {
     public :
-      typedef Periodic4PllXBaseMacro mypllx_t ;
-      Periodic4EmptyPllMacro (myhface4_t *,int,myhface4_t *,int) ;
-     ~Periodic4EmptyPllMacro () ;
-      virtual ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-    private :
-      mypllx_t * _pllx ;
-      friend class Periodic4PllXBaseMacro;
-    } ;
+      Periodic4EmptyPllMacro (myhface4_t* f0, int s0, myhface4_t* f1, int s1)
+        : Periodic4PllXBaseMacro< periodic4_IMPL >( 0, f0, s0, f1, s1 ) {}
+
+      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
+    };
 
     ///////////////////////////////////////////////////////////////
     // --HexaImpl
@@ -1041,25 +1053,11 @@ inline void TetraPllXBase< A > :: getAttachedElement ( pair < Gitter::helement_S
   p.second = 0;
 }
 
-// ######                                                          #
-// #     #  ######  #####      #     ####   #####      #     ####  #    #
-// #     #  #       #    #     #    #    #  #    #     #    #    # #    #
-// ######   #####   #    #     #    #    #  #    #     #    #      #    #
-// #        #       #####      #    #    #  #    #     #    #      #######
-// #        #       #   #      #    #    #  #    #     #    #    #      #
-// #        ######  #    #     #     ####   #####      #     ####       #
-
-inline Periodic4PllXBase :: Periodic4PllXBase (myperiodic4_t & p) : _periodic4 (p) {
-  return ;
-}
-
-inline Periodic4PllXBase :: myperiodic4_t & Periodic4PllXBase :: myperiodic4 () {
-  return _periodic4 ;
-}
-
-inline const Periodic4PllXBase :: myperiodic4_t & Periodic4PllXBase :: myperiodic4 () const {
-  return _periodic4 ;
-}
+///////////////////////////////////////////////////////////////////
+//
+//  --HexaPllXBase
+//
+///////////////////////////////////////////////////////////////////
 
 template < class A >
 inline void HexaPllBaseX< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
@@ -1180,20 +1178,6 @@ template < class A > inline int BndsegPllBaseXMacroClosure < A > :: ldbVertexInd
 
 template < class A > inline void BndsegPllBaseXMacroClosure < A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
   _extGraphVertexIndex = ldbVx ;
-}
-
-// ######                                                          #
-// #     #  ######  #####      #     ####   #####      #     ####  #    #
-// #     #  #       #    #     #    #    #  #    #     #    #    # #    #
-// ######   #####   #    #     #    #    #  #    #     #    #      #    #
-// #        #       #####      #    #    #  #    #     #    #      #######
-// #        #       #   #      #    #    #  #    #     #    #    #      #
-// #        ######  #    #     #     ####   #####      #     ####       #
-
-inline GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll :: 
-Periodic4EmptyPll (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
-  : GitterBasis :: Objects :: Periodic4Empty (f0,t0,f1,t1), _pllx (*this) {
-  return ;
 }
 
 inline int GitterBasisPll :: MacroGitterBasisPll :: iterators_attached () const {
