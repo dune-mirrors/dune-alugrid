@@ -749,8 +749,11 @@ void DuneParallelGridMover :: finalize ()
 //*************************************************************************
 //  repartition method of class GitterDunePll 
 //*************************************************************************
+
 // method was overloaded because here we use our DuneParallelGridMover 
-void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) 
+void GitterDunePll :: 
+doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
+                        GatherScatterType* gatherScatter ) 
 {
   if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
   {
@@ -760,15 +763,31 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db)
     mpAccess ().insertRequestSymetric (db.scan ()) ;
     const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
     {
-      AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) 
-      {
-        int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
-        if (me != to)
+      { 
+        AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
+        for (w.first () ; ! w.done () ; w.next ()) 
         {
-          w.item ().attach2 (mpAccess ().link (to)) ;
+          const int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
+          if (me != to)
+          {
+            w.item ().attach2 (mpAccess ().link (to)) ;
+          }
         }
       }
+
+      {
+        // iterate over all periodic elements and set 'to' of first neighbour
+        AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
+        for (w.first () ; ! w.done () ; w.next ())
+        {
+          // TODO: get destination of first neighbor and set this destination 
+          const int to = db.getDestination ( w.item().insideLdbVertexIndex() );
+
+          if (me != to)
+            w.item ().attach2 (mpAccess ().link( to )) ;
+        }
+      }
+
     }
     lap1 = clock () ;
     
@@ -790,11 +809,32 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db)
     }
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
+      if( gatherScatter ) 
+      {
+        // use dunePackAll method 
+        for (w.first () ; ! w.done () ; w.next ()) 
+        {
+          w.item ().dunePackAll (osv, *gatherScatter) ;
+        }
+      }
+      else 
+      {
+        // use old method 
+        for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
+      }
     }
     {
-      for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
-        (*i++).writeObject (MacroGridMoverIF :: ENDMARKER)) ;
+      AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
+    }
+
+    {
+      typedef vector < ObjectStream > :: iterator iterator;
+      const iterator endit = osv.end () ;
+      for ( iterator i = osv.begin () ; i != endit ; ++ i ) 
+      {
+        (*i).writeObject (MacroGridMoverIF :: ENDMARKER) ;
+      }
     }
 
     lap2 = clock () ;
@@ -806,13 +846,20 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db)
     // delete and unpack  
     {
       DuneParallelGridMover pgm (containerPll ()) ;
-      pgm.unpackAll (osv) ;
+      if( gatherScatter ) 
+      {
+        pgm.duneUnpackAll (osv, *gatherScatter ) ;
+      }
+      else 
+      {
+        pgm.unpackAll (osv) ;
+      }
     }
 
     // result 
     lap4 = clock () ;
     if (MacroGridBuilder :: debugOption (20)) {
-      cout << "**INFO GitterDunePll["<<me<<"] :: repartitionMacroGrid () [ass|pck|exc|upk|all] " ;
+      cout << "**INFO GitterDunePll["<<me<<"] :: doRepartitionMacroGrid () [ass|pck|exc|upk|all] " ;
       cout << setw (5) << (float)(lap1 - start)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC) << " " ;
@@ -822,89 +869,21 @@ void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db)
   }
   return ;
 }
+
+
+// method was overloaded because here we use our DuneParallelGridMover 
+void GitterDunePll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) 
+{
+  // call reparition implementation 
+  doRepartitionMacroGrid( db, ( GatherScatterType * ) 0 );
+}
+
+// dune  version 
 void GitterDunePll :: 
 duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs) 
 {
-  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
-  {
-    const clock_t start = clock () ;
-    clock_t lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
-    
-    mpAccess ().removeLinkage () ;
-    mpAccess ().insertRequestSymetric (db.scan ()) ;
-    const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
-    {
-      AccessIterator < helement > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) 
-      {
-        int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
-        if (me != to)
-        {
-          w.item ().attach2 (mpAccess ().link (to)) ;
-        }
-      }
-    }
-    lap1 = clock () ;
-    
-    // create object stream with size 
-    vector < ObjectStream > osv (nl) ;
-
-    // pack vertices 
-    {
-      AccessIterator < vertex_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
-    }
-    // pack edges 
-    {
-      AccessIterator < hedge_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
-    }
-    // pack faces 
-    {
-      AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
-    }
-    // pack elements
-    {
-      AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) 
-      {
-        w.item ().dunePackAll (osv,gs) ;
-      }
-    }
-    
-    // write end marker 
-    {
-      for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
-        (*i++).writeObject (MacroGridMoverIF :: ENDMARKER)) ;
-    }
-
-    lap2 = clock () ;
-
-    // exchange gathered data 
-    osv = mpAccess ().exchange (osv) ;
-    
-    lap3 = clock () ;
-
-    // unpack all data 
-    {
-      DuneParallelGridMover pgm (containerPll ()) ;
-      pgm.duneUnpackAll (osv,gs) ;
-    }
-    
-    lap4 = clock () ;
-    if (MacroGridBuilder :: debugOption (20)) 
-    {
-      cout << "**INFO GitterDunePll["<<me<<"] :: duneRepartitionMacroGrid () [ass|pck|exc|upk|all] " ;
-      cout << setw (5) << (float)(lap1 - start)/(float)(CLOCKS_PER_SEC) << " " ;
-      cout << setw (5) << (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) << " " ;
-      cout << setw (5) << (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC) << " " ;
-      cout << setw (5) << (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC) << " " ;
-      cout << setw (5) << (float)(lap4 - start)/(float)(CLOCKS_PER_SEC) << " "; 
-      cout << " sec." << endl ;
-    }
-  }
-  return ;
+  // call reparition implementation 
+  doRepartitionMacroGrid( db, &gs );
 }
 
 #endif

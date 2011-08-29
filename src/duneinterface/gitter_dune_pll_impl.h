@@ -79,6 +79,9 @@ public:
   bool duneLoadBalance () ; // call loadBalancer 
   bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ) ; // call loadBalancer a
 
+protected:  
+  void doRepartitionMacroGrid(LoadBalancer :: DataBase &, GatherScatterType* );
+public:  
   void duneRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType & gs) ;
   void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
  

@@ -160,7 +160,7 @@ Handle (AccessIterator < A > & f)
   assert( this->_w == 0 );
   // this is the difference to the normal AccessIterator, we insert
   // pureElementIterator, all other things are the same   
-  this->_w = this->_fac->pureElementIterator(this->_a) ;
+  this->_w = this->_fac->iterator(this->_a) ;
   return ;
 } 
 
