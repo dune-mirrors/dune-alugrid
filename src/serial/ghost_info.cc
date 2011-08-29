@@ -35,6 +35,17 @@ readData(ObjectStream & os )
     os.readObject ( _vx[i] );
   }
 
+#ifndef NDEBUG 
+  for( int i=0; i<noVx; ++i )
+  {
+    for( int j=0; j<noVx; ++j)
+    {
+      if( j == i ) continue ;
+      assert( _vx[ i ] != _vx[ j ] );
+    }
+  }
+#endif
+
   // read vertices of face an coordinates 
   for(int i=0; i<noFaceVx; ++i)
   {
@@ -77,7 +88,7 @@ MacroGhostInfoTetra(const Gitter :: Geometric :: tetra_GEO * tetra,
                     const int fce)
 {
   assert( points == this->nop() );
-  const Gitter :: Geometric :: VertexGeo * vertex = tetra->myvertex(fce);
+  const Gitter :: Geometric :: VertexGeo * vertex = tetra->myvertex( fce );
   assert( vertex );
   for(int vx=0; vx<points; ++vx)
   {

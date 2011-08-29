@@ -2361,7 +2361,7 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: VertexGeo* 
 {
   if( v ) 
   {
-    s << "vx ( " << v->getIndex() << " : ";
+    s << "vx ( " << v->getIndex() << ", " << v->ident() << " : ";
     for (int i=0; i<3; ++i)
       s << ((i>0) ? " " : "") << v->Point()[i];
     s << " ) ";

@@ -37,7 +37,7 @@ public:
   ~MacroGhostBuilder ();
 
   // insert new Vertex without linkagePattern 
-  void InsertNewUniqueVertex (double x, double y, double z, int i) ;
+  bool InsertNewUniqueVertex (double x, double y, double z, int i) ;
 
   // delete all elementes and stuff 
   void finalize () ;

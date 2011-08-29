@@ -36,7 +36,7 @@ MacroGhostBuilder ::  ~MacroGhostBuilder ()
 }
 
 // insert new Vertex without linkagePattern 
-void MacroGhostBuilder :: 
+bool MacroGhostBuilder :: 
 InsertNewUniqueVertex (double x, double y, double z, int i) 
 {
   typedef GitterBasis :: MacroGitterBasis SerialMacroGridBuilder_t;
@@ -45,7 +45,9 @@ InsertNewUniqueVertex (double x, double y, double z, int i)
   {
     VertexGeo * v = myBuilder ().insert_ghostvx (x,y,z,i) ;
     this->_vertexMap [i] = v ;
+    return true ;
   }
+  return false ;
 }
 
 // delete all elementes and stuff 
@@ -166,7 +168,20 @@ MacroGhostTetra( BuilderIF & bi,
   assert( found );
 #endif
   const alucoord_t (&px)[3] = p[0];
-  mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
+  //cout << "Insert new point " << oppVerts[0] << endl;
+  bool wasNewlyInserted = 
+    mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
+
+  assert( wasNewlyInserted );
+
+  /*
+  cout << "\nInsert new vertices " << endl;
+  for(int j=0; j<4; ++j) 
+  {
+    cout << ghInfo.vertices()[j] << "  " ;
+  }
+  cout << endl;
+  */
 
   // InsertUniqueHexa gets the global vertex numbers 
   GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices() ).first ;
