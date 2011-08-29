@@ -120,6 +120,7 @@ inline void DuneParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   {
     // read ghost data from stream 
     ghInfo = new MacroGhostInfoTetra( os ); 
+    //cout << "Got transmitted point \n";
   }
 
   // if internal boundary, create internal bnd face 
@@ -391,6 +392,30 @@ void DuneParallelGridMover :: initialize ()
          i != _hface4Listend ; _hface4List.erase (i ++)) 
       _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i) ;
   }
+
+  // all periodic elements (need to be removed before hbndseg and elements) 
+  {
+    BuilderIF :: periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 
+    const BuilderIF :: periodic3list_t :: iterator _periodic3Listend = _periodic3List.end ();
+    for (BuilderIF :: periodic3list_t :: iterator i = _periodic3List.begin () ; 
+         i != _periodic3Listend ; _periodic3List.erase (i++)) 
+    {
+      _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+           (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
+    }
+  }
+  {
+    BuilderIF :: periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
+    const BuilderIF :: periodic4list_t :: iterator _periodic4Listend = _periodic4List.end () ;
+    for (BuilderIF :: periodic4list_t :: iterator i = _periodic4List.begin () ; 
+         i != _periodic4Listend ; _periodic4List.erase (i++)) 
+    {
+      _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+           (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
+    }
+  }
+
+  // all boundary segments 
   { 
     BuilderIF :: hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List;
     const BuilderIF :: hbndseg4list_t :: iterator _hbndseg4Listend = _hbndseg4List.end ();
@@ -427,8 +452,12 @@ void DuneParallelGridMover :: initialize ()
     }
   }
   
+  //typedef vector< hbndseg3_GEO * > hbnd3vector_t ;
+  //hbnd3vector_t  toDeleteHbnd3 ;
   {
     BuilderIF :: hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List; 
+    //toDeleteHbnd3.reserve( _hbndseg3List.size() );
+
     const BuilderIF :: hbndseg3list_t :: iterator _hbndseg3Listend = _hbndseg3List.end ();
     for (BuilderIF :: hbndseg3list_t :: iterator i = _hbndseg3List.begin () ; 
          i != _hbndseg3Listend ; _hbndseg3List.erase (i++)) 
@@ -456,7 +485,8 @@ void DuneParallelGridMover :: initialize ()
         else 
           _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0)) ;
         
-        delete (*i) ;
+        delete (*i);
+        //toDeleteHbnd3.push_back( (*i) );
       } 
       else 
       {
@@ -465,6 +495,7 @@ void DuneParallelGridMover :: initialize ()
     }
   }
 
+  // all elements 
   {
     BuilderIF :: tetralist_t& _tetraList = myBuilder ()._tetraList; 
     const BuilderIF :: tetralist_t :: iterator _tetraListend = _tetraList.end ();
@@ -476,26 +507,6 @@ void DuneParallelGridMover :: initialize ()
     } 
   }
   {
-    BuilderIF :: periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 
-    const BuilderIF :: periodic3list_t :: iterator _periodic3Listend = _periodic3List.end ();
-    for (BuilderIF :: periodic3list_t :: iterator i = _periodic3List.begin () ; 
-         i != _periodic3Listend ; _periodic3List.erase (i++)) 
-    {
-      _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-           (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
-    }
-  }
-  {
-    BuilderIF :: periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
-    const BuilderIF :: periodic4list_t :: iterator _periodic4Listend = _periodic4List.end () ;
-    for (BuilderIF :: periodic4list_t :: iterator i = _periodic4List.begin () ; 
-         i != _periodic4Listend ; _periodic4List.erase (i++)) 
-    {
-      _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-           (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
-    }
-  }
-  {
     BuilderIF :: hexalist_t& _hexaList = myBuilder()._hexaList;
     const BuilderIF :: hexalist_t :: iterator _hexaListend = _hexaList.end ();
     for (BuilderIF :: hexalist_t :: iterator i = _hexaList.begin () ; 
@@ -505,6 +516,8 @@ void DuneParallelGridMover :: initialize ()
                 (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
     }
   }
+
+  /////////////////////////////////////////
 
   // from constructor ParallelGridMover 
   vector < elementKey_t > toDelete ;
@@ -554,13 +567,21 @@ void DuneParallelGridMover :: initialize ()
       }
     }
   }
-
   // delete all periodic elements first (needed for ghost info)
   {
     const vector < elementKey_t > :: iterator toDeleteend = toDeletePeriodic.end (); 
     for (vector < elementKey_t > :: iterator i = toDeletePeriodic.begin () ; i != toDeleteend ; ++i )
       removeElement (*i) ;
   }
+
+  /*
+  { 
+    typedef hbnd3vector_t :: iterator  iterator; 
+    const iterator endi = toDeleteHbnd3.end();
+    for( iterator i = toDeleteHbnd3.begin(); i != endi ; ++i ) 
+      delete (*i);
+  }
+  */
 
   // delete all elements 
   {
@@ -672,7 +693,7 @@ void DuneParallelGridMover :: finalize ()
         MacroGhostInfoTetra* ghInfo = p->release();
 
         hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p->first(), p->second(),
-                          Gitter :: hbndseg_STI :: closure , ghInfo );
+                       Gitter :: hbndseg_STI :: closure , ghInfo );
         myBuilder ()._hbndseg3List.push_back (hb3) ;
       }
       delete p; 
@@ -811,10 +832,11 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
       if( gatherScatter ) 
       {
+        GatherScatterType& gs = *gatherScatter;
         // use dunePackAll method 
         for (w.first () ; ! w.done () ; w.next ()) 
         {
-          w.item ().dunePackAll (osv, *gatherScatter) ;
+          w.item ().dunePackAll (osv, gs) ;
         }
       }
       else 
