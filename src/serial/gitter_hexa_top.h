@@ -1284,4 +1284,12 @@ template < class A > bool Periodic4Top < A > :: refine () {
   return true ;
 }
 
+template < class A > inline int Periodic4Top < A > :: segmentIndex (const int fce) const
+{
+  assert( fce == 0 || fce == 1 );
+  return _segmentIndex[ fce ] ;
+}
+
+
+
 #endif  //  GITTER_HEXA_TOP_H_INCLUDED

@@ -1055,11 +1055,6 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
   _segmentIndex[ 1 ] = _up->_segmentIndex[ 1 ];
 }
 
-template < class A > inline int Periodic4Top < A > :: segmentIndex (const int fce) const {
-  assert( fce == 0 || fce == 1 );
-  return _segmentIndex[ fce ] ;
-}
-
 template < class A >  Periodic4Top < A > :: ~Periodic4Top () 
 {  
   IndexManagerType& im = indexManager();
