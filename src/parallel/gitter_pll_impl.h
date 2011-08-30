@@ -212,6 +212,7 @@ class TetraPllXBaseMacro : public A
     virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
   public :
+    virtual bool erasable () const ;
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
@@ -220,12 +221,9 @@ class TetraPllXBaseMacro : public A
     virtual void packAsGhost(ObjectStream &,int) const ;
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-    virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
-    virtual bool erasable () const ;
-    
-    // method to get internal tetra located behind this parallel interface 
-    //virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
+    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
   protected:
+    void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
     void packAsBndNow (int, ObjectStream &) const;
     
   private :
@@ -440,12 +438,9 @@ class HexaPllBaseXMacro : public A
 
     // pack and unpack funtions for dune 
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
-    virtual void duneUnpackSelf (ObjectStream &, GatherScatterType &, bool) ;
-    
-    // method to get internal hexa located behind this parallel interface 
-    //virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
-
+    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
   protected :
+    void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
 

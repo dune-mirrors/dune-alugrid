@@ -856,34 +856,22 @@ void TetraPllXBaseMacro< A > :: packAsGhost(ObjectStream & os, int fce) const
 }
 
 template < class A >
-void TetraPllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
+void TetraPllXBaseMacro< A > :: 
+unpackSelf (ObjectStream & os, bool i )
 {
-  assert (i) ;
-  if (i) 
-  {
-    mytetra ().restore (os) ;
-    //assert (!s.eof ()) ;
-    
-    char c = os.get(); 
-    if( c != ObjectStream :: ENDOFSTREAM )
-    {
-      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
-      abort();
-    }
-    
-    xtractData (os) ;
-  }
-  else 
-  {
-    cerr << "**FEHLER (FATAL) i=false, should be true! in " << __FILE__ << " " << __LINE__ << endl;
-    abort();
-  }
-  return ;
+  duneUnpackSelf( os, i , ( GatherScatterType * ) 0 );
 }
 
 template < class A >
-void TetraPllXBaseMacro< A > :: duneUnpackSelf (ObjectStream & os, 
-    GatherScatterType & gs , bool i) 
+void TetraPllXBaseMacro< A > :: 
+duneUnpackSelf (ObjectStream & os, const bool i, GatherScatterType* gatherScatter )
+{
+  doUnpackSelf( os, i, gatherScatter );
+}
+
+template < class A >
+void TetraPllXBaseMacro< A > :: 
+doUnpackSelf (ObjectStream & os, const bool i, GatherScatterType* gatherScatter )
 {
   assert (i) ;
   if (i) 
@@ -901,8 +889,12 @@ void TetraPllXBaseMacro< A > :: duneUnpackSelf (ObjectStream & os,
     // restore internal data if have any 
     xtractData (os) ;
     
-    // unpack Dune data 
-    gs.xtractData( os , mytetra() );
+    // unpack dune data if present, pointer can be zero 
+    if( gatherScatter ) 
+    {
+      // unpack Dune data 
+      gatherScatter->xtractData( os , mytetra() );
+    }
   }
   else 
   {
@@ -1613,34 +1605,27 @@ void HexaPllBaseXMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) c
 }
 
 template < class A >
-void HexaPllBaseXMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
+void HexaPllBaseXMacro< A > :: 
+unpackSelf (ObjectStream & os, 
+            const bool i ) 
 {
-  assert (i) ;
-  if (i) 
-  {
-    // restore refinement tree 
-    myhexa ().restore ( os ) ;
-
-    char c = os.get();
-    if( c != ObjectStream :: ENDOFSTREAM )
-    {
-      cerr << "**FEHLER (FATAL) c != ENDOFSTREAM ! in " << __FILE__ << " " << __LINE__ << endl;
-      abort();
-    }
-    
-    // restore internal data if have any 
-    xtractData (os) ;
-  }
-  else 
-  {
-    cerr << "**FEHLER (FATAL) i=false, should be true! in " << __FILE__ << " " << __LINE__ << endl;
-    abort();
-  }
-  return ;
+  doUnpackSelf( os, i , ( GatherScatterType * ) 0 );
 }
 
 template < class A >
-void HexaPllBaseXMacro< A > :: duneUnpackSelf (ObjectStream & os, GatherScatterType & gs , bool i) 
+void HexaPllBaseXMacro< A > :: 
+duneUnpackSelf (ObjectStream & os, 
+                const bool i, 
+                GatherScatterType* gatherScatter ) 
+{
+  doUnpackSelf( os, i, gatherScatter );
+}
+
+template < class A >
+void HexaPllBaseXMacro< A > :: 
+doUnpackSelf (ObjectStream & os, 
+              const bool i, 
+              GatherScatterType* gatherScatter ) 
 {
   assert (i) ;
   if (i) 
@@ -1658,8 +1643,12 @@ void HexaPllBaseXMacro< A > :: duneUnpackSelf (ObjectStream & os, GatherScatterT
     
     // unpack internal data if has any 
     xtractData (os) ;
-    // unpack dune data 
-    gs.xtractData( os , myhexa() );
+
+    // unpack dune data if present, pointer can be zero 
+    if( gatherScatter ) 
+    {
+      gatherScatter->xtractData( os , myhexa() );
+    }
   }
   else 
   {

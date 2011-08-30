@@ -9,50 +9,426 @@
 #include "gitter_pll_mgb.h"
   
 
-ParallelGridMover :: ParallelGridMover (BuilderIF & b, bool init) : MacroGridBuilder (b,init) 
+ParallelGridMover :: ParallelGridMover (BuilderIF & b) : MacroGridBuilder (b, false) 
 {
   // lock MyAlloc so that objects are not freed  
   // because we want to reuse them  
   MyAlloc :: lockFree ((void *) this) ;
 
-  if(init) initialize();
+  // initialize all lists 
+  initialize();
 }
 
-void ParallelGridMover ::initialize ()
+// overloaded, because here we use the new insertInternal method 
+void ParallelGridMover :: initialize ()
 {
-  assert(_initialized);
-  vector < elementKey_t > toDelete ;
-  {for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).erasable ()) {
-      toDelete.push_back ((*i).first) ;
-    } 
+  {
+    BuilderIF :: vertexlist_t& _vertexList = myBuilder ()._vertexList;
+    const BuilderIF :: vertexlist_t :: iterator _vertexListend  = _vertexList.end ();
+    for (BuilderIF :: vertexlist_t :: iterator i = _vertexList.begin () ;
+      i != _vertexListend ; _vertexList.erase (i ++)) 
+        _vertexMap [(*i)->ident ()] = (*i) ;
   }
-  {for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMap.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).erasable ()) {
-      toDelete.push_back ((*i).first) ;
+  {
+    BuilderIF :: hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
+    const BuilderIF :: hedge1list_t :: iterator _hedge1Listend = _hedge1List.end ();
+    for (BuilderIF :: hedge1list_t :: iterator i = _hedge1List.begin () ;
+         i != _hedge1Listend ; _hedge1List.erase (i ++)) 
+    {
+      long k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident () ;
+      _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i) ;
     }
   }
-  {for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) {
-      toDelete.push_back ((*i).first) ;
+  {
+    BuilderIF :: hface3list_t& _hface3List = myBuilder ()._hface3List;
+    const BuilderIF :: hface3list_t :: iterator _hface3Listend = _hface3List.end ();
+    for (BuilderIF :: hface3list_t :: iterator i = _hface3List.begin () ; 
+         i != _hface3Listend ; _hface3List.erase (i ++)) 
+    {
+      _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i) ;
+    }
+  }
+  {
+    BuilderIF :: hface4list_t& _hface4List = myBuilder ()._hface4List;
+    const BuilderIF :: hface4list_t :: iterator _hface4Listend = _hface4List.end ();
+    for (BuilderIF :: hface4list_t :: iterator i = _hface4List.begin () ; 
+         i != _hface4Listend ; _hface4List.erase (i ++)) 
+      _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i) ;
+  }
+
+  // all periodic elements (need to be removed before hbndseg and elements) 
+  {
+    BuilderIF :: periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 
+    const BuilderIF :: periodic3list_t :: iterator _periodic3Listend = _periodic3List.end ();
+    for (BuilderIF :: periodic3list_t :: iterator i = _periodic3List.begin () ; 
+         i != _periodic3Listend ; _periodic3List.erase (i++)) 
+    {
+      _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+           (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
+    }
+  }
+  {
+    BuilderIF :: periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
+    const BuilderIF :: periodic4list_t :: iterator _periodic4Listend = _periodic4List.end () ;
+    for (BuilderIF :: periodic4list_t :: iterator i = _periodic4List.begin () ; 
+         i != _periodic4Listend ; _periodic4List.erase (i++)) 
+    {
+      _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+           (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
     }
   }
 
-  {for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; i ++)
-    if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) {
-      toDelete.push_back ((*i).first) ;
+  // all boundary segments 
+  { 
+    BuilderIF :: hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List;
+    const BuilderIF :: hbndseg4list_t :: iterator _hbndseg4Listend = _hbndseg4List.end ();
+    for (BuilderIF :: hbndseg4list_t :: iterator i = _hbndseg4List.begin () ; 
+         i != _hbndseg4Listend ; _hbndseg4List.erase (i++)) 
+    {
+      typedef Gitter :: Geometric :: hface4_GEO hface4_GEO;
+      hface4_GEO * face = (*i)->myhface4 (0);
+      assert( face );
+      faceKey_t key (face->myvertex (0)->ident (), 
+                     face->myvertex (1)->ident (), 
+                     face->myvertex (2)->ident ()) ;
+      // if internal face 
+      if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
+      {
+        typedef Gitter :: ghostpair_STI ghostpair_STI;
+        typedef Gitter :: Geometric :: hexa_GEO  hexa_GEO;
+
+        ghostpair_STI gpair = (*i)->getGhost();
+        hexa_GEO * gh = dynamic_cast<hexa_GEO *> (gpair.first);
+        if( gh )
+        {
+          _hbnd4Int [key] = new Hbnd4IntStorage (face , (*i)->twist (0), 
+                                                 gh, gpair.second ) ;
+        }
+        else 
+          _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->twist (0)) ;
+        delete (*i) ;
+      } 
+      else 
+      {
+        _hbnd4Map [key] = (*i) ;
+      }
     }
   }
   
-  {for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDelete.end () ; i ++ )
-    removeElement (*i) ;
+  //typedef vector< hbndseg3_GEO * > hbnd3vector_t ;
+  //hbnd3vector_t  toDeleteHbnd3 ;
+  {
+    BuilderIF :: hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List; 
+    //toDeleteHbnd3.reserve( _hbndseg3List.size() );
+
+    const BuilderIF :: hbndseg3list_t :: iterator _hbndseg3Listend = _hbndseg3List.end ();
+    for (BuilderIF :: hbndseg3list_t :: iterator i = _hbndseg3List.begin () ; 
+         i != _hbndseg3Listend ; _hbndseg3List.erase (i++)) 
+    {
+      typedef Gitter :: Geometric :: hface3_GEO hface3_GEO;
+      hface3_GEO * face = (*i)->myhface3 (0);
+      assert( face );
+      faceKey_t key ( face->myvertex (0)->ident (), face->myvertex (1)->ident (), face->myvertex (2)->ident ()) ;
+      // if internal face 
+      if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
+      {
+        // check for ghost element 
+        typedef Gitter :: ghostpair_STI ghostpair_STI;
+        ghostpair_STI gpair = (*i)->getGhost();
+
+        typedef Gitter :: Geometric :: tetra_GEO  tetra_GEO;
+        tetra_GEO * gh = dynamic_cast<tetra_GEO *> (gpair.first);
+        if( gh )
+        {
+          // insert new internal storage 
+          _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0), 
+                                                  gh , gpair.second ) ;
+        }
+        // until here
+        else 
+          _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0)) ;
+        
+        delete (*i);
+        //toDeleteHbnd3.push_back( (*i) );
+      } 
+      else 
+      {
+        _hbnd3Map [key] = (*i) ;
+      }
+    }
   }
 
+  // all elements 
+  {
+    BuilderIF :: tetralist_t& _tetraList = myBuilder ()._tetraList; 
+    const BuilderIF :: tetralist_t :: iterator _tetraListend = _tetraList.end ();
+    for (BuilderIF :: tetralist_t :: iterator i = _tetraList.begin () ; 
+         i != _tetraListend ; _tetraList.erase (i++)) 
+    {
+      _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+           (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i) ;
+    } 
+  }
+  {
+    BuilderIF :: hexalist_t& _hexaList = myBuilder()._hexaList;
+    const BuilderIF :: hexalist_t :: iterator _hexaListend = _hexaList.end ();
+    for (BuilderIF :: hexalist_t :: iterator i = _hexaList.begin () ; 
+         i != _hexaListend ; _hexaList.erase (i++)) 
+    {
+      _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+                (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
+    }
+  }
+
+  /////////////////////////////////////////
+
+  // from constructor ParallelGridMover 
+  vector < elementKey_t > toDelete ;
+  vector < elementKey_t > toDeletePeriodic ;
+
+  // reserve memory 
+  toDelete.reserve( _hexaMap.size() + _tetraMap.size() );
+  toDeletePeriodic.reserve( _periodic3Map.size() + _periodic4Map.size() );
+  
+  {
+    const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
+    for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; ++i)
+    {
+      if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).erasable ()) 
+      {
+        toDelete.push_back ((*i).first) ;
+      }
+    }
+  }
+  {
+    const elementMap_t :: iterator _tetraMapend = _tetraMap.end ();
+    for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMapend ; ++i)
+    {
+      if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).erasable ()) 
+      {
+        toDelete.push_back ((*i).first) ;
+      }
+    }
+  }
+  {
+    const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
+    for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; ++i)
+    {
+      if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) 
+      {
+        toDeletePeriodic.push_back ((*i).first) ;
+      }
+    }
+  }
+  {
+    const elementMap_t :: iterator _periodic4Mapend = _periodic4Map.end ();
+    for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; ++i)
+    {
+      if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) 
+      {
+        toDeletePeriodic.push_back ((*i).first) ;
+      }
+    }
+  }
+  // delete all periodic elements first (needed for ghost info)
+  {
+    const vector < elementKey_t > :: iterator toDeleteend = toDeletePeriodic.end (); 
+    for (vector < elementKey_t > :: iterator i = toDeletePeriodic.begin () ; i != toDeleteend ; ++i )
+      removeElement (*i) ;
+  }
+
+  /*
+  { 
+    typedef hbnd3vector_t :: iterator  iterator; 
+    const iterator endi = toDeleteHbnd3.end();
+    for( iterator i = toDeleteHbnd3.begin(); i != endi ; ++i ) 
+      delete (*i);
+  }
+  */
+
+  // delete all elements 
+  {
+    const vector < elementKey_t > :: iterator toDeleteend = toDelete.end (); 
+    for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDeleteend ; ++i )
+      removeElement (*i) ;
+  }
+
+  this->_initialized = true;
+  return ; 
+}
+
+// overloaded, because here we use the new insertInternal method 
+void ParallelGridMover :: finalize ()
+{
+  {
+    const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
+    for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; _hexaMap.erase (i++))
+      myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
+  }
+  {
+    const elementMap_t :: iterator _tetraMapend = _tetraMap.end ();
+    for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMapend ; _tetraMap.erase (i++))
+      myBuilder ()._tetraList.push_back ((tetra_GEO *)(*i).second) ;
+  }
+  {
+    const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
+    for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; _periodic3Map.erase (i++))
+      myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
+  }
+  
+  {
+    const elementMap_t :: iterator _periodic4Mapend =  _periodic4Map.end ();
+    for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; _periodic4Map.erase (i++))
+      myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
+  }
+
+  {
+    const faceMap_t :: iterator _hbnd4Mapend = _hbnd4Map.end ();
+    for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Map.end () ; )
+    {
+      if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
+      {
+        delete (hbndseg4_GEO *)(*i).second ;
+        _hbnd4Map.erase (i++) ;
+      } 
+      else 
+      {
+        myBuilder ()._hbndseg4List.push_back ((hbndseg4_GEO *)(*i ++).second) ;
+      }
+    }
+  }
+  {
+    const faceMap_t :: iterator _hbnd3Mapend = _hbnd3Map.end ();
+    for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != _hbnd3Map.end () ; )
+    {
+      if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) 
+      {
+        delete (hbndseg3_GEO *)(*i).second ;
+        _hbnd3Map.erase (i++) ;
+      } 
+      else 
+      {
+        myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
+      }
+    }
+  }
+  {
+    const hbnd4intMap_t :: iterator _hbnd4Intend = _hbnd4Int.end ();
+    for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Intend ; ++i) 
+    {
+      Hbnd4IntStorage* p = (*i).second;
+      if (p->first()->ref == 1) 
+      {
+        // get ghost info from storage and release pointer 
+        MacroGhostInfoHexa* ghInfo = p->release();
+
+        hbndseg4_GEO * hb4 = myBuilder ().
+              insert_hbnd4 (p->first(), p->second(), 
+                  Gitter :: hbndseg_STI :: closure, ghInfo );
+        myBuilder ()._hbndseg4List.push_back (hb4) ;
+      }
+      delete p; 
+    } 
+  }
+
+  // here the internal boundary elements are created 
+  {
+    const hbnd3intMap_t :: iterator _hbnd3Intend = _hbnd3Int.end ();
+    for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Intend ; ++i ) 
+    {
+      Hbnd3IntStorage* p = (*i).second;
+      if (p->first()->ref == 1) 
+      {
+        // get ghost info from storage and release pointer 
+        MacroGhostInfoTetra* ghInfo = p->release();
+
+        hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p->first(), p->second(),
+                       Gitter :: hbndseg_STI :: closure , ghInfo );
+        myBuilder ()._hbndseg3List.push_back (hb3) ;
+      }
+      delete p; 
+    }
+  }
+  {
+    const faceMap_t :: iterator _face4Mapend = _face4Map.end ();
+    for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Mapend ; )
+    {
+      if (!((hface4_GEO *)(*i).second)->ref) 
+      {
+        delete (hface4_GEO *)(*i).second ;
+        _face4Map.erase (i++) ;
+      } 
+      else 
+      {
+        //assert (((hface4_GEO *)(*i).second)->ref == 2) ;
+        myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
+      }
+    }
+  }
+  {
+    const faceMap_t :: iterator _face3Mapend = _face3Map.end () ;
+    for (faceMap_t :: iterator i = _face3Map.begin () ; i != _face3Mapend ; ) 
+    {
+      if (!((hface3_GEO *)(*i).second)->ref) 
+      {
+        delete (hface3_GEO *)(*i).second ;
+        _face3Map.erase (i++) ;
+      } 
+      else 
+      {
+        //assert (((hface3_GEO *)(*i).second)->ref == 2) ;
+        myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
+      }
+    }
+  }
+  {
+    const edgeMap_t :: iterator _edgeMapend = _edgeMap.end ();
+    for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != _edgeMapend ; )
+    {
+      if (!(*i).second->ref) {
+        delete (*i).second ;
+        _edgeMap.erase (i++) ;
+      } 
+      else 
+      {
+        assert ((*i).second->ref >= 1) ;
+        myBuilder ()._hedge1List.push_back ((*i ++).second) ;
+      }
+    }
+  }
+  {
+    const vertexMap_t :: iterator _vertexMapend = _vertexMap.end ();
+    for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != _vertexMapend ; )
+    {
+      if (!(*i).second->ref) 
+      {
+        delete (*i).second ;
+        _vertexMap.erase (i++) ;
+      } 
+      else 
+      {
+        assert ((*i).second->ref >= 2) ;
+        myBuilder ()._vertexList.push_back ((*i ++).second) ;
+      }
+    }
+  }
+  myBuilder ()._modified = true ; // wichtig !
+  this->_finalized = true;
   return ;
 }
 
-inline ParallelGridMover :: ~ParallelGridMover () {
+ParallelGridMover :: ~ParallelGridMover () 
+{
   assert(_initialized);
+
+  if(!_finalized)
+  {   
+    // compress index manager before new elements are created 
+    myBuilder().compressIndexManagers();
+    
+    // finalize mover 
+    finalize();
+  }     
 
   // unlock MyAlloc so that objects can be freed again 
   MyAlloc :: unlockFree ((void *) this) ;
@@ -60,7 +436,8 @@ inline ParallelGridMover :: ~ParallelGridMover () {
   return ;
 }
 
-inline void ParallelGridMover :: unpackVertex (ObjectStream & os) {
+void ParallelGridMover :: unpackVertex (ObjectStream & os) 
+{
   int id ;
   double x, y, z ;
   os.readObject (id) ;
@@ -72,7 +449,7 @@ inline void ParallelGridMover :: unpackVertex (ObjectStream & os) {
   return ;
 }
 
-inline void ParallelGridMover :: unpackHedge1 (ObjectStream & os) {
+void ParallelGridMover :: unpackHedge1 (ObjectStream & os) {
   int left, right ;
   os.readObject (left) ;
   os.readObject (right) ;
@@ -81,7 +458,8 @@ inline void ParallelGridMover :: unpackHedge1 (ObjectStream & os) {
   return ;
 }
 
-inline void ParallelGridMover :: unpackHface3 (ObjectStream & os) {
+void ParallelGridMover :: unpackHface3 (ObjectStream & os) 
+{
   int v [3] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -91,7 +469,8 @@ inline void ParallelGridMover :: unpackHface3 (ObjectStream & os) {
   return ;
 }
 
-inline void ParallelGridMover :: unpackHface4 (ObjectStream & os) {
+void ParallelGridMover :: unpackHface4 (ObjectStream & os) 
+{
   int v [4] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -102,19 +481,20 @@ inline void ParallelGridMover :: unpackHface4 (ObjectStream & os) {
   return ;
 }
 
-inline void ParallelGridMover :: unpackTetra (ObjectStream & os) {
+void ParallelGridMover :: unpackTetra (ObjectStream & os, GatherScatterType* gs ) 
+{
   int v [4] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
   os.readObject (v[3]) ;
   pair < tetra_GEO *, bool > p = InsertUniqueTetra (v) ;
-  p.first->accessPllX ().unpackSelf (os,p.second) ;
+  p.first->accessPllX ().duneUnpackSelf (os, p.second, gs) ;
   return ;
 }
 
-	// Neu >
-inline void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os) {
+void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os) 
+{
   int v [6] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -125,11 +505,10 @@ inline void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os) {
   pair < periodic3_GEO *, bool > p = InsertUniquePeriodic3 (v) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
-}	// < Neu
+}	
 
-// Anfang - Neu am 23.5.02 (BS)
-
-inline void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os) {
+void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os) 
+{
   int v [8] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -144,9 +523,8 @@ inline void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os) {
   return ;
 }
 
-// Ende - Neu am 23.5.02 (BS)
-
-inline void ParallelGridMover :: unpackHexa (ObjectStream & os) {
+void ParallelGridMover :: unpackHexa (ObjectStream & os, GatherScatterType* gs) 
+{
   int v [8] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -157,37 +535,156 @@ inline void ParallelGridMover :: unpackHexa (ObjectStream & os) {
   os.readObject (v[6]) ;
   os.readObject (v[7]) ;
   pair < hexa_GEO *, bool > p = InsertUniqueHexa (v) ;
-  p.first->accessPllX ().unpackSelf (os,p.second) ;
+  p.first->accessPllX ().duneUnpackSelf (os, p.second, gs ) ;
   return ;
 }
 
-inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os) {
+// new method that gets coord of ghost point 
+bool ParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],         
+      Gitter :: hbndseg_STI ::bnd_t bt, MacroGhostInfoTetra * ghInfo) 
+{
+  int twst = cyclicReorder (v,v+3) ;
+  faceKey_t key (v [0], v [1], v [2]) ;
+  if (bt == Gitter :: hbndseg_STI :: closure) 
+  {
+    if (_hbnd3Int.find (key) == _hbnd3Int.end ()) 
+    {
+      assert( ghInfo );
+      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
+      // here the point is stored 
+      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,ghInfo) ;
+      return true ;
+    }
+  } 
+  else 
+  {
+    if (_hbnd3Map.find (key) == _hbnd3Map.end ()) 
+    {
+      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
+      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, bt) ;
+      _hbnd3Map [key] = hb3 ;
+      return true ;
+    }
+  }
+  return false ;
+}
 
-  int b, v [3] ;
-  os.readObject (b) ;
+// new method that gets coord of ghost point 
+bool ParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],         
+      Gitter :: hbndseg_STI ::bnd_t bt, 
+      MacroGhostInfoHexa* ghInfo) 
+{
+  int twst = cyclicReorder (v,v+4) ;
+  faceKey_t key (v [0], v [1], v [2]) ;
+  if (bt == Gitter :: hbndseg_STI :: closure) 
+  {
+    if (_hbnd4Int.find (key) == _hbnd4Int.end ()) 
+    {
+      assert( ghInfo );
+      hface4_GEO * face =  InsertUniqueHface4 (v).first ;
+      _hbnd4Int [key] = new Hbnd4IntStorage (face,twst,ghInfo) ;
+      return true ;
+    }
+  } 
+  else 
+  {
+    if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
+    {
+      hface4_GEO * face =  InsertUniqueHface4 (v).first ;
+      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, bt) ;
+      _hbnd4Map [key] = hb4 ;
+      return true ;
+    }
+  }
+  return false ;
+}
+
+// overloaded method because here we call insertion with point 
+inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os) 
+{
+  int bfake, v [3] ;
+  os.readObject (bfake) ;
+  Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
+  
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
 
-  // read vertex coord , is neccessary because we dont want to overload the
-  // Tetra packAsBnd method, so we read vertex here but do the same as
-  // before 
-  int fake = 0;
-  os.readObject( fake );
+  int readPoint = 0; 
+  os.readObject( readPoint ); 
 
-  if(fake) 
+  MacroGhostInfoTetra * ghInfo = 0;
+  if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
-    double p [3];
-    os.readObject (p[0]) ;
-    os.readObject (p[1]) ;
-    os.readObject (p[2]) ;
+    // read ghost data from stream 
+    ghInfo = new MacroGhostInfoTetra( os ); 
+    //cout << "Got transmitted point \n";
   }
 
-  InsertUniqueHbnd3 (v, Gitter :: hbndseg :: bnd_t (b)) ;
+  // if internal boundary, create internal bnd face 
+  if(b == Gitter :: hbndseg :: closure)
+  {
+    assert( ghInfo );
+    InsertUniqueHbnd3_withPoint (v, b, ghInfo ) ;
+  }
+  else
+  {
+    // delete ghost info not needed any longer 
+    if( ghInfo ) delete ghInfo;
+
+    // create normal bnd face, and make sure that no Point was send
+    assert(readPoint == MacroGridMoverIF :: NO_POINT );
+    // old method defined in base class 
+    InsertUniqueHbnd3 (v, b ) ;
+  }
+
   return ;
 }
 
-inline void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os) {
+// overloaded method because here we call insertion with point 
+inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os) 
+{
+  int bfake, v [4] = {-1,-1,-1,-1};
+
+  os.readObject (bfake) ;
+  Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
+
+  os.readObject (v[0]) ;
+  os.readObject (v[1]) ;
+  os.readObject (v[2]) ;
+  os.readObject (v[3]) ;
+
+  int readPoint = 0; 
+  os.readObject( readPoint ); 
+  
+  MacroGhostInfoHexa* ghInfo = 0;
+  if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
+  {
+    // read ghost data from stream 
+    ghInfo = new MacroGhostInfoHexa(os); 
+  }
+
+  // if internal boundary, create internal bnd face 
+  if(b == Gitter :: hbndseg :: closure)
+  {
+    assert( ghInfo );
+    InsertUniqueHbnd4_withPoint (v, b, ghInfo ) ;
+  }
+  else
+  {
+    // delete ghost info not needed any longer 
+    if( ghInfo ) delete ghInfo;
+
+    // create normal bnd face, and make sure that no Point was send
+    assert(readPoint == MacroGridMoverIF :: NO_POINT );
+    // old method defined in base class 
+    InsertUniqueHbnd4 (v, b ) ;
+  }
+  return ;
+}
+
+void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os) 
+{
   int b, v [3] ;
   os.readObject (b) ;
   os.readObject (v[0]) ;
@@ -197,104 +694,92 @@ inline void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os) {
   return ;
 }
 	
-inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os) 
+void ParallelGridMover :: unpackHbnd4Ext (ObjectStream & os) {
+  int b, v [4] ;
+  os.readObject (b) ;
+  os.readObject (v[0]) ;
+  os.readObject (v[1]) ;
+  os.readObject (v[2]) ;
+  os.readObject (v[3]) ;
+  InsertUniqueHbnd4 (v, Gitter :: hbndseg :: bnd_t (b)) ;
+  return ;
+}
+
+void ParallelGridMover :: 
+unpackAll (vector < ObjectStream > & osv, GatherScatterType* gs) 
 {
-  int b, v [4] ;
-  os.readObject (b) ;
-
-#ifndef NDEBUG
-  int idx = -1; 
-  os.readObject ( idx );
-#endif
-  
-  os.readObject (v[0]) ;
-  os.readObject (v[1]) ;
-  os.readObject (v[2]) ;
-  os.readObject (v[3]) ;
-
-  int fake = 0;
-  os.readObject( fake );
-  
-  if(fake == MacroGridMoverIF :: POINTTRANSMITTED ) 
+  for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; ++j) 
   {
-    os.readObject( fake );
-    
-    for(int i=0; i<8; i++)
-      os.readObject( fake );
-    
-    for(int i=0; i<4; i++)
-      os.readObject( fake );
-    
-    for(int i=0; i<4; i++)
-    {
-      double p [3];
-      os.readObject (p[0]) ;
-      os.readObject (p[1]) ;
-      os.readObject (p[2]) ;
-    }
-  }
-
-  InsertUniqueHbnd4 (v, Gitter :: hbndseg :: bnd_t (b)) ;
-  return ;
-}
-
-inline void ParallelGridMover :: unpackHbnd4Ext (ObjectStream & os) {
-  int b, v [4] ;
-  os.readObject (b) ;
-  os.readObject (v[0]) ;
-  os.readObject (v[1]) ;
-  os.readObject (v[2]) ;
-  os.readObject (v[3]) ;
-  InsertUniqueHbnd4 (v, Gitter :: hbndseg :: bnd_t (b)) ;
-  return ;
-}
-
-void ParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
-  for (vector < ObjectStream > :: iterator j = osv.begin () ; j != osv.end () ; j ++) {
     ObjectStream & os (*j) ;
     int code = MacroGridMoverIF :: ENDMARKER ;
-    for (os.readObject (code) ; code != MacroGridMoverIF :: ENDMARKER ; os.readObject (code)) {
+    for (os.readObject (code) ; code != MacroGridMoverIF :: ENDMARKER ; os.readObject (code)) 
+    {
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
-	      unpackVertex (os) ;
-	      break ;
+        {
+          unpackVertex (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: EDGE1 :
-        unpackHedge1 (os) ;
-	      break ;
+        {
+          unpackHedge1 (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: FACE3 :
-        unpackHface3 (os) ;
-	      break ;
+        {
+          unpackHface3 (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: FACE4 :
-	      unpackHface4 (os) ;
-	      break ;
+        {
+          unpackHface4 (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: TETRA :
-        unpackTetra (os) ;
-        break ;
+        {
+          unpackTetra (os, gs) ;
+          break ;
+        }
       case MacroGridMoverIF :: HEXA :
-      	unpackHexa (os) ;
-        break ;
+        {
+          unpackHexa (os, gs) ;
+          break ;
+        }
       case MacroGridMoverIF :: PERIODIC3 :
-        unpackPeriodic3 (os) ;
-        break ;
+        {
+          unpackPeriodic3 (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: PERIODIC4 :
-        unpackPeriodic4 (os) ;
-        break ;
+        {
+          unpackPeriodic4 (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: HBND3INT :
-        unpackHbnd3Int (os) ;
-      	break ;
+        {
+          unpackHbnd3Int (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: HBND3EXT :
-        unpackHbnd3Ext (os) ;
-      	break ;
+        {
+          unpackHbnd3Ext (os) ;
+          break ;
+        }
       case MacroGridMoverIF :: HBND4INT :
-        unpackHbnd4Int (os) ;
-        break; 
+        {
+          unpackHbnd4Int (os) ;
+          break; 
+        }
       case MacroGridMoverIF :: HBND4EXT :
-      	unpackHbnd4Ext (os) ;
-        break ;
+        {
+          unpackHbnd4Ext (os) ;
+          break ;
+        }
       default :
-	cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "]\n" ;
-	cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << endl ;
-	abort () ;
+        cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n" ;
+        cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << endl ;
+        assert(false);
+        abort () ;
         break ;
       }
     }
@@ -302,8 +787,11 @@ void ParallelGridMover :: unpackAll (vector < ObjectStream > & osv) {
   return ;
 }
 
-void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
-  assert(false);
+// method was overloaded because here we use our DuneParallelGridMover 
+void GitterPll :: 
+doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
+                        GatherScatterType* gatherScatter ) 
+{
   if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
   {
     const long start = clock () ;
@@ -312,32 +800,38 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     mpAccess ().insertRequestSymetric (db.scan ()) ;
     const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
     {
-      {
+      { 
         AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
         for (w.first () ; ! w.done () ; w.next ()) 
         {
           const int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
           if (me != to)
+          {
             w.item ().attach2 (mpAccess ().link (to)) ;
+          }
         }
       }
 
       {
         // iterate over all periodic elements and set 'to' of first neighbour
         AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
-        for (w.first () ; ! w.done () ; w.next ()) 
+        for (w.first () ; ! w.done () ; w.next ())
         {
           // TODO: get destination of first neighbor and set this destination 
           const int to = db.getDestination ( w.item().insideLdbVertexIndex() );
-           
+
           if (me != to)
             w.item ().attach2 (mpAccess ().link( to )) ;
         }
       }
-    }
 
+    }
     lap1 = clock () ;
+    
+    // create vector of object streams 
     vector < ObjectStream > osv (nl) ;
+
+    // pack all stuff 
     {
       AccessIterator < vertex_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().accessPllX ().packAll (osv) ;
@@ -352,27 +846,52 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     }
     {
       AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
+      if( gatherScatter ) 
+      {
+        GatherScatterType& gs = *gatherScatter;
+        // use dunePackAll method 
+        for (w.first () ; ! w.done () ; w.next ()) 
+        {
+          w.item ().dunePackAll (osv, gs) ;
+        }
+      }
+      else 
+      {
+        // use old method 
+        for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
+      }
     }
     {
       AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().packAll (osv) ;
     }
+
     {
-      for (vector < ObjectStream > :: iterator i = osv.begin () ; i != osv.end () ; 
-      	(*i++).writeObject (MacroGridMoverIF :: ENDMARKER)) ;
+      typedef vector < ObjectStream > :: iterator iterator;
+      const iterator endit = osv.end () ;
+      for ( iterator i = osv.begin () ; i != endit ; ++ i ) 
+      {
+        (*i).writeObject (MacroGridMoverIF :: ENDMARKER) ;
+      }
     }
 
     lap2 = clock () ;
+    
+    // exchange stuff 
     osv = mpAccess ().exchange (osv) ;
     lap3 = clock () ;
+    
+    // delete and unpack  
     {
       ParallelGridMover pgm (containerPll ()) ;
-      pgm.unpackAll (osv) ;
+      // unpack all data  
+      pgm.unpackAll (osv, gatherScatter ) ;
     }
+
+    // result 
     lap4 = clock () ;
     if (MacroGridBuilder :: debugOption (20)) {
-      cout << "**INFO GitterPll :: repartitionMacroGrid () [ass|pck|exc|upk|all] " ;
+      cout << "**INFO GitterPll["<<me<<"] :: doRepartitionMacroGrid () [ass|pck|exc|upk|all] " ;
       cout << setw (5) << (float)(lap1 - start)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC) << " " ;
       cout << setw (5) << (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC) << " " ;
@@ -381,6 +900,20 @@ void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) {
     }
   }
   return ;
+}
+
+void GitterPll :: repartitionMacroGrid (LoadBalancer :: DataBase & db) 
+{
+  // call repartition of macro grid without gather-scatter object 
+  doRepartitionMacroGrid( db, (GatherScatterType *) 0 );
+}
+
+// dune  version 
+void GitterPll :: 
+duneRepartitionMacroGrid (LoadBalancer :: DataBase & db, GatherScatterType & gs) 
+{
+  // call reparition implementation 
+  doRepartitionMacroGrid( db, &gs );
 }
 
 #endif

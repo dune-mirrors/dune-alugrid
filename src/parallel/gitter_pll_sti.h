@@ -212,7 +212,11 @@ class GitterPll : public virtual Gitter {
     
     virtual void exchangeStaticState () ;
     virtual void exchangeDynamicState () ;
+  protected:   
+    void doRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType* ) ;
+  public:  
     virtual void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
+    virtual void duneRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType& ) ;
     
     virtual void loadBalancerGridChangesNotify () ;
     virtual void loadBalancerMacroGridChangesNotify () ;

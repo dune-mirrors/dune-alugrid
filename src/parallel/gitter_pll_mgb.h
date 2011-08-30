@@ -12,19 +12,34 @@ class ParallelGridMover : public MacroGridBuilder {
     void unpackHedge1 (ObjectStream &) ;
     void unpackHface3 (ObjectStream &) ;
     void unpackHface4 (ObjectStream &) ;
-    void unpackHexa (ObjectStream &) ;
-    void unpackTetra (ObjectStream &) ;
+    void unpackHexa (ObjectStream &, GatherScatterType* ) ;
+    void unpackTetra (ObjectStream &, GatherScatterType* ) ;
     void unpackPeriodic3 (ObjectStream &) ;
     void unpackPeriodic4 (ObjectStream &) ;
     void unpackHbnd3Int (ObjectStream &) ;
     void unpackHbnd3Ext (ObjectStream &) ;
     void unpackHbnd4Int (ObjectStream &) ;
     void unpackHbnd4Ext (ObjectStream &) ;
-  public :
-    ParallelGridMover (BuilderIF &, bool init = true) ;
+
+    // creates Hbnd3IntStorage with ghost info if needed 
+    bool InsertUniqueHbnd3_withPoint (int (&)[3],
+                              Gitter :: hbndseg :: bnd_t,
+                              MacroGhostInfoTetra* ) ;
+  
+    // creates Hbnd4IntStorage with ghost info if needed 
+    bool InsertUniqueHbnd4_withPoint (int (&)[4], Gitter :: hbndseg ::
+            bnd_t, MacroGhostInfoHexa* );
+
+
     // former constructor 
     void initialize ();
+    void finalize (); 
+
+  public :
+    ParallelGridMover (BuilderIF &) ;
+    // unpack all elements from the stream 
+    void unpackAll (vector < ObjectStream > &, GatherScatterType* ) ;
+
     ~ParallelGridMover () ;
-    void unpackAll (vector < ObjectStream > &) ;
 };
 #endif
