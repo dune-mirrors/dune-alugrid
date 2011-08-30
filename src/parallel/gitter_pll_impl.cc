@@ -2105,6 +2105,7 @@ void GitterBasisPll :: printMemUsage ()
   cout << "******** TETRA *************************8\n";
   cout << "Tetrasize  = " << sizeof(tetra_IMPL) << endl;
   cout << "TetraMacro = " << sizeof(tetra_MACRO) << endl;
+  cout << "MacroGhostTetra = " << sizeof(MacroGhostTetra) << endl;
   cout << "Hface3_IMPL = " << sizeof(hface3_IMPL) << endl;
   cout << "Hface3_GEO = " << sizeof( Gitter :: Geometric :: hface3_GEO ) << endl;
   cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
@@ -2118,6 +2119,7 @@ void GitterBasisPll :: printMemUsage ()
   cout << "******** HEXA *************************8\n";
   cout << "Hexasize  = " << sizeof(hexa_IMPL) << endl;
   cout << "HexaMacro = " << sizeof(hexa_MACRO) << endl;
+  cout << "MacroGhostHexa = " << sizeof(MacroGhostHexa) << endl;
   cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
   cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
   cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
