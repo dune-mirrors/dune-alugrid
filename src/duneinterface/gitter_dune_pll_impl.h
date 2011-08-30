@@ -82,8 +82,8 @@ public:
 protected:  
   void doRepartitionMacroGrid(LoadBalancer :: DataBase &, GatherScatterType* );
 public:  
-  void duneRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType & gs) ;
-  void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
+  using GitterPll :: duneRepartitionMacroGrid;
+  using GitterPll :: repartitionMacroGrid ;
  
   // notifyMacroGridChanges for dune
   void duneNotifyMacroGridChanges (); 
