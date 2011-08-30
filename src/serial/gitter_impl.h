@@ -224,10 +224,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         ~Periodic3Empty () {}
         // do nothing here 
         virtual void resetGhostIndices() {}
-
-      public:
-        virtual int ghostLevel () const { return level() ; }
-        virtual bool ghostLeaf () const { return leaf(); }
     } ;
     typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
 
@@ -297,9 +293,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
        
         // so nothing here 
         virtual void resetGhostIndices() {}
-      public:
-        virtual int ghostLevel () const { return level() ; }
-        virtual bool ghostLeaf () const { return leaf(); }
       } ;
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
  

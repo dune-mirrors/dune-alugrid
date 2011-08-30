@@ -28,7 +28,7 @@ class MacroGridMoverIF {
     virtual bool packAll (vector < ObjectStream > &) = 0 ;
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) { return false; }
     virtual void unpackSelf (ObjectStream &,bool) = 0 ;
-    virtual void duneUnpackSelf (ObjectStream &,GatherScatterType &,bool) {};
+    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) {};
 } ;
 
 class MacroGridMoverDefault : public MacroGridMoverIF {
@@ -41,7 +41,7 @@ class MacroGridMoverDefault : public MacroGridMoverIF {
     virtual bool packAll (vector < ObjectStream > &) { assert(false);abort(); }
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) { return false; }
     virtual void unpackSelf (ObjectStream &,bool) { assert(false);abort(); }
-    virtual void duneUnpackSelf (ObjectStream &,GatherScatterType &,bool) {};
+    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType *) {};
 } ;
 
   // LinkedObjekt ist die Schnittstelle, die im parallelen Gitter zur

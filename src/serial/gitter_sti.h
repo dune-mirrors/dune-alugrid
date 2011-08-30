@@ -1837,7 +1837,7 @@ public :
       virtual void backupCMode (const char*,const char *) const ;
       friend class MacroGridBuilder ;
       friend class MacroGhostBuilder;
-      friend class DuneParallelGridMover;
+      friend class ParallelGridMover;
     } ;
   } ;
 private :

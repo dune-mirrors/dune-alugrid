@@ -169,7 +169,9 @@ MacroGhostTetra( BuilderIF & bi,
 #endif
   const alucoord_t (&px)[3] = p[0];
   //cout << "Insert new point " << oppVerts[0] << endl;
+#ifndef NDEBUG
   bool wasNewlyInserted = 
+#endif
     mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
 
   assert( wasNewlyInserted );
@@ -271,7 +273,9 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
   for(int i=0; i<4; ++i)
   {
     const alucoord_t (&px)[3] = p[i];
+#ifndef NDEBUG
     bool wasNewlyInserted = 
+#endif
       mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
     assert( wasNewlyInserted );
   }
