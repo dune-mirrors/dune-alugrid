@@ -193,34 +193,13 @@ setGhostBoundaryIds()
 // --Periodic3Empty
 ////////////////////////////////////////////////////
 
-GitterBasis :: Objects :: Periodic3Empty :: myneighbour_t 
-GitterBasis :: Objects :: Periodic3Empty ::
-getElementNeighbour()
-{
-  myneighbour_t nb0 = myneighbour( 0 );
-  myneighbour_t nb1 = myneighbour( 1 );
-  
-  // one of the neighbour must no be a boundary 
-  if( nb0.first->isboundary() )
-  {
-    assert( ! nb1.first->isboundary() );    
-    return nb1;
-  }
-  else 
-  {
-    assert( nb1.first->isboundary() );
-    return nb0;
-  }
-}
-
-
 /////////////////////////////////////////
 //  read of data 
 /////////////////////////////////////////
 void GitterBasis :: Objects :: Periodic3Empty :: 
 os2VertexData(ObjectStream & os, GatherScatterType & gs , int borderFace )
 {
-  myneighbour_t nb = getElementNeighbour();
+  myneighbour_t nb = myneighbour( borderFace );
   assert( ! nb.first->isboundary() );    
   ((tetra_IMPL *) nb.first)->os2VertexData( os, gs, nb.second );
 }
@@ -228,7 +207,7 @@ os2VertexData(ObjectStream & os, GatherScatterType & gs , int borderFace )
 void GitterBasis :: Objects :: Periodic3Empty ::
 os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
-  myneighbour_t nb = getElementNeighbour();
+  myneighbour_t nb = myneighbour( borderFace );
   assert( ! nb.first->isboundary() );    
   ((tetra_IMPL *) nb.first)->os2EdgeData( os, gs, nb.second );
 }
@@ -236,7 +215,7 @@ os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace )
 void GitterBasis :: Objects :: Periodic3Empty ::
 os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
 {
-  myneighbour_t nb = getElementNeighbour();
+  myneighbour_t nb = myneighbour( borderFace );
   assert( ! nb.first->isboundary() );    
   ((tetra_IMPL *) nb.first)->os2FaceData( os, gs, nb.second );
 }
@@ -247,7 +226,7 @@ os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace )
 void GitterBasis :: Objects :: Periodic3Empty ::
 VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace )
 {
-  myneighbour_t nb = getElementNeighbour();
+  myneighbour_t nb = myneighbour( borderFace );
   assert( ! nb.first->isboundary() );    
   ((tetra_IMPL *) nb.first)->VertexData2os( os, gs, nb.second );
 }
@@ -255,7 +234,7 @@ VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace )
 void GitterBasis :: Objects :: Periodic3Empty ::
 EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace)
 {
-  myneighbour_t nb = getElementNeighbour();
+  myneighbour_t nb = myneighbour( borderFace );
   assert( ! nb.first->isboundary() );    
   ((tetra_IMPL *) nb.first)->EdgeData2os( os, gs, nb.second );
 }
@@ -263,7 +242,7 @@ EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace)
 void GitterBasis :: Objects :: Periodic3Empty ::
 FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
 {
-  myneighbour_t nb = getElementNeighbour();
+  myneighbour_t nb = myneighbour( borderFace );
   assert( ! nb.first->isboundary() );    
   ((tetra_IMPL *) nb.first)->FaceData2os( os, gs, nb.second );
 }
