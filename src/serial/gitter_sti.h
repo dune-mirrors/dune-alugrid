@@ -1386,6 +1386,7 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface3_GEO myhface3_t ;
       typedef Hface3Rule myrule_t ;
+      typedef pair < hasFace3 *, int > myneighbour_t ;
       inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;

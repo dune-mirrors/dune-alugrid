@@ -219,11 +219,29 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         typedef hedge1_IMPL inneredge_t ;
         typedef VertexEmpty innervertex_t ;
         typedef tetra_IMPL GhostElement_t;
+        typedef periodic3_GEO :: myneighbour_t myneighbour_t ;
 
         inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int) ;
         ~Periodic3Empty () {}
         // do nothing here 
         virtual void resetGhostIndices() {}
+
+        myneighbour_t getElementNeighbour() ;
+
+      public:  
+        ////////////////////////////////////////////////
+        // read of data 
+        ////////////////////////////////////////////////
+        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs , int borderFace );
+        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace );
+        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace );
+
+        /////////////////////////////////////////
+        //  writing of data 
+        /////////////////////////////////////////
+        virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace );
+        virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
+        virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
     } ;
     typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
 
