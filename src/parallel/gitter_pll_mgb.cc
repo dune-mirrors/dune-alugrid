@@ -79,8 +79,12 @@ void ParallelGridMover :: initialize ()
   }
 
   // all boundary segments 
+  typedef vector< Gitter :: hbndseg_STI * > hbndvector_t ;
+  hbndvector_t  toDeleteHbnd ;
   { 
     BuilderIF :: hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List;
+    toDeleteHbnd.reserve( _hbndseg4List.size() ) ;
+
     const BuilderIF :: hbndseg4list_t :: iterator _hbndseg4Listend = _hbndseg4List.end ();
     for (BuilderIF :: hbndseg4list_t :: iterator i = _hbndseg4List.begin () ; 
          i != _hbndseg4Listend ; _hbndseg4List.erase (i++)) 
@@ -106,7 +110,9 @@ void ParallelGridMover :: initialize ()
         }
         else 
           _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->twist (0)) ;
-        delete (*i) ;
+
+        //delete (*i) ;
+        toDeleteHbnd.push_back( (*i ) );
       } 
       else 
       {
@@ -115,11 +121,9 @@ void ParallelGridMover :: initialize ()
     }
   }
   
-  //typedef vector< hbndseg3_GEO * > hbnd3vector_t ;
-  //hbnd3vector_t  toDeleteHbnd3 ;
   {
     BuilderIF :: hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List; 
-    //toDeleteHbnd3.reserve( _hbndseg3List.size() );
+    toDeleteHbnd.reserve( toDeleteHbnd.size() + _hbndseg3List.size() ) ;
 
     const BuilderIF :: hbndseg3list_t :: iterator _hbndseg3Listend = _hbndseg3List.end ();
     for (BuilderIF :: hbndseg3list_t :: iterator i = _hbndseg3List.begin () ; 
@@ -148,8 +152,8 @@ void ParallelGridMover :: initialize ()
         else 
           _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0)) ;
         
-        delete (*i);
-        //toDeleteHbnd3.push_back( (*i) );
+        //delete (*i);
+        toDeleteHbnd.push_back( (*i) );
       } 
       else 
       {
@@ -210,6 +214,7 @@ void ParallelGridMover :: initialize ()
       }
     }
   }
+
   {
     const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; ++i)
@@ -230,6 +235,7 @@ void ParallelGridMover :: initialize ()
       }
     }
   }
+
   // delete all periodic elements first (needed for ghost info)
   {
     const vector < elementKey_t > :: iterator toDeleteend = toDeletePeriodic.end (); 
@@ -237,16 +243,15 @@ void ParallelGridMover :: initialize ()
       removeElement (*i) ;
   }
 
-  /*
+  // delete all internal boundaries 
   { 
-    typedef hbnd3vector_t :: iterator  iterator; 
-    const iterator endi = toDeleteHbnd3.end();
-    for( iterator i = toDeleteHbnd3.begin(); i != endi ; ++i ) 
+    typedef hbndvector_t :: iterator  iterator; 
+    const iterator endi = toDeleteHbnd.end();
+    for( iterator i = toDeleteHbnd.begin(); i != endi ; ++i ) 
       delete (*i);
   }
-  */
 
-  // delete all elements 
+  // delete all elements at last
   {
     const vector < elementKey_t > :: iterator toDeleteend = toDelete.end (); 
     for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDeleteend ; ++i )
@@ -313,6 +318,7 @@ void ParallelGridMover :: finalize ()
     }
   }
   {
+    BuilderIF :: hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List; 
     const hbnd4intMap_t :: iterator _hbnd4Intend = _hbnd4Int.end ();
     for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Intend ; ++i) 
     {
@@ -325,7 +331,7 @@ void ParallelGridMover :: finalize ()
         hbndseg4_GEO * hb4 = myBuilder ().
               insert_hbnd4 (p->first(), p->second(), 
                   Gitter :: hbndseg_STI :: closure, ghInfo );
-        myBuilder ()._hbndseg4List.push_back (hb4) ;
+        _hbndseg4List.push_back (hb4) ;
       }
       delete p; 
     } 
@@ -333,6 +339,7 @@ void ParallelGridMover :: finalize ()
 
   // here the internal boundary elements are created 
   {
+    BuilderIF :: hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List; 
     const hbnd3intMap_t :: iterator _hbnd3Intend = _hbnd3Int.end ();
     for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Intend ; ++i ) 
     {
@@ -344,7 +351,9 @@ void ParallelGridMover :: finalize ()
 
         hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p->first(), p->second(),
                        Gitter :: hbndseg_STI :: closure , ghInfo );
-        myBuilder ()._hbndseg3List.push_back (hb3) ;
+
+        // insert to list 
+        _hbndseg3List.push_back (hb3) ;
       }
       delete p; 
     }

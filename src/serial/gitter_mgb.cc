@@ -252,7 +252,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k)
   if (hit != _tetraMap.end ()) 
   {
     tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 4 ; i ++) 
+    for (int i = 0 ; i < 4 ; ++i) 
     {
       _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
         tr->myhface3 (i)->myvertex (2)->ident ())] = 
@@ -266,7 +266,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k)
   if (hit != _hexaMap.end ()) 
   {
     hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 6 ; i ++) {
+    for (int i = 0 ; i < 6 ; ++i) {
       _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), 
                             hx->myhface4 (i)->myvertex (1)->ident (), 
                             hx->myhface4 (i)->myvertex (2)->ident ())
@@ -276,40 +276,52 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k)
     _hexaMap.erase (hit) ;
     return ;
   }
+
   hit = _periodic3Map.find (k) ;
-  if (hit != _periodic3Map.end ()) {
+  if (hit != _periodic3Map.end ()) 
+  {
     periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 2 ; i ++) 
+    for (int i = 0 ; i < 2 ; ++i) 
     {
-      pair< hasFace3*, int > nb = p3->myneighbour( i );
-      assert( p3->myneighbour( i ).second >= 0 );
-      tetra_GEO *tetra = (tetra_GEO *) nb.first;
-      assert( tetra );
+      typedef periodic3_GEO :: myelementneighbour_t myelementneighbour_t;
+      myelementneighbour_t nb = p3->myelementneighbour( i );
+      assert( nb.first );
       assert( nb.second >= 0 );
+
       _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), 
                             p3->myhface3 (i)->myvertex (1)->ident (), 
                             p3->myhface3 (i)->myvertex (2)->ident ())
-                ] = new Hbnd3IntStorage ( p3->myhface3 (i), p3->twist (i), tetra, nb.second ) ;
+                ] = new Hbnd3IntStorage ( p3->myhface3 (i), p3->twist (i), nb.first, nb.second ) ;
     }
+
     delete p3 ;
     _periodic3Map.erase (hit) ;
     return ;
   }
-// Anfang - Neu am 23.5.02 (BS)
+
   hit = _periodic4Map.find (k) ;
-  if (hit != _periodic4Map.end ()) {
+  if (hit != _periodic4Map.end ()) 
+  {
     periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 2 ; i ++) {
-      _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), p4->myhface4 (i)->myvertex (1)->ident (), 
-      p4->myhface4 (i)->myvertex (2)->ident ())] = 
-        new Hbnd4IntStorage (p4->myhface4 (i), p4->twist (i));
-        //new pair < hface4_GEO *, int > (p4->myhface4 (i), p4->twist (i)) ;
+    for (int i = 0 ; i < 2 ; ++i) 
+    {
+      typedef periodic4_GEO :: myelementneighbour_t myelementneighbour_t;
+      myelementneighbour_t nb = p4->myelementneighbour( i );
+      assert( nb.first );
+      assert( nb.second >= 0 );
+
+      _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), 
+                            p4->myhface4 (i)->myvertex (1)->ident (), 
+                            p4->myhface4 (i)->myvertex (2)->ident ())
+                ] = new Hbnd4IntStorage (p4->myhface4 (i), p4->twist (i), nb.first, nb.second );
     }
+
     delete p4 ;
     _periodic4Map.erase (hit) ;
+
     return ;
   }
-// Ende - Neu am 23.5.02 (BS)
+
   abort () ;
   return ;
 }

@@ -929,8 +929,8 @@ void Periodic3PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const 
 
   static const double x = 1./3. ;
   alucoord_t p [3] ;
-  LinearSurfaceMapping (myperiodic3 ().myvertex (0,0)->Point (), myperiodic3 ().myvertex (0,1)->Point (),
-    myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,p) ;
+  LinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
+    myperiodic ().myvertex (0,2)->Point ()).map2world (x,x,x,p) ;
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
@@ -947,8 +947,8 @@ Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1
 {
 #ifdef GRAPHVERTEX_WITH_CENTER
   static const double x = 1./3. ;
-  LinearSurfaceMapping (myperiodic3 ().myvertex (0,0)->Point (), myperiodic3 ().myvertex (0,1)->Point (),
-         myperiodic3 ().myvertex (0,2)->Point ()).map2world (x,x,x,_center) ;
+  LinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
+         myperiodic ().myvertex (0,2)->Point ()).map2world (x,x,x,_center) ;
 #endif
   return ;
 }
@@ -975,7 +975,7 @@ bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBa
 {
   /*
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic3 ()).size ()
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic ()).size ()
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _center
 #endif
@@ -995,8 +995,8 @@ template < class A >
 void Periodic3PllXBaseMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  myperiodic3 ().myhface3 (0)->unattach2 (i) ;
-  myperiodic3 ().myhface3 (1)->unattach2 (i) ;
+  myperiodic ().myhface3 (0)->unattach2 (i) ;
+  myperiodic ().myhface3 (1)->unattach2 (i) ;
   return ;
 }
 
@@ -1011,8 +1011,8 @@ void Periodic3PllXBaseMacro< A > :: attach2 (int i) {
       return ;
     }
   }
-  myperiodic3 ().myhface3 (0)->attach2 (i) ;
-  myperiodic3 ().myhface3 (1)->attach2 (i) ;
+  myperiodic ().myhface3 (0)->attach2 (i) ;
+  myperiodic ().myhface3 (1)->attach2 (i) ;
   return ;
 }
 
@@ -1029,18 +1029,18 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     {
       ObjectStream& os = osv[j];
       os.writeObject (PERIODIC3) ;
-      os.writeObject (myperiodic3 ().myvertex (0)->ident ()) ;
-      os.writeObject (myperiodic3 ().myvertex (1)->ident ()) ;
-      os.writeObject (myperiodic3 ().myvertex (2)->ident ()) ;
-      os.writeObject (myperiodic3 ().myvertex (3)->ident ()) ;
-      os.writeObject (myperiodic3 ().myvertex (4)->ident ()) ;
-      os.writeObject (myperiodic3 ().myvertex (5)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (3)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (4)->ident ()) ;
+      os.writeObject (myperiodic ().myvertex (5)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic3_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+      assert( ! myperiodic_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
       
       // pack refinement information 
-      myperiodic3 ().backup ( os ) ;
+      myperiodic ().backup ( os ) ;
       os.put( ObjectStream :: ENDOFSTREAM );
 
       // pack internal data if has any 
@@ -1064,21 +1064,22 @@ void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & 
   {
     os.writeObject (HBND3INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
-    os.writeObject (myperiodic3 ().myvertex (fce,0)->ident ()) ;
-    os.writeObject (myperiodic3 ().myvertex (fce,1)->ident ()) ;
-    os.writeObject (myperiodic3 ().myvertex (fce,2)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (fce,0)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (fce,1)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (fce,2)->ident ()) ;
 
     os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); // 1 == points are transmitted 
     //cout << "Write periodic with poijnt " << std::endl;
 
-    typedef Gitter :: Geometric :: Tetra Tetra ;
-    typedef Gitter :: Geometric :: hasFace3 hasFace3 ;
+    typedef Gitter :: Geometric :: tetra_GEO tetra_GEO ;
+    typedef Gitter :: Geometric :: hasFace3  hasFace3 ;
 
-    // know which face is the internal bnd 
-    os.writeObject (fce);
+    const const_myneighbour_t nb = myperiodic().myneighbour( fce );
+    const tetra_GEO* tetra = (tetra_GEO *) nb.first ;
+
+    // know which face of the tetra is the internal bnd 
+    os.writeObject ( nb.second );
    
-    const pair < const hasFace3 *, int > nb = myperiodic3().myneighbour( fce );
-    const Tetra* tetra = (Tetra *) nb.first ;
     for(int k=0; k<4; ++k) 
     {
       int vx = tetra->myvertex (k)->ident ();
@@ -1102,7 +1103,7 @@ void Periodic3PllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i)
 
   if (i) 
   {
-    myperiodic3 ().restore ( os ) ;
+    myperiodic ().restore ( os ) ;
     
     char c = os.get();
     if( c != ObjectStream :: ENDOFSTREAM )
@@ -1290,7 +1291,37 @@ void Periodic4PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & 
     os.writeObject (myperiodic ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (fce,2)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (fce,3)->ident ()) ;
-    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // 0 == no point transmitted 
+
+    // see method unpackHbnd4Int 
+    os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); // 1 == points are transmitted 
+
+    typedef Gitter :: Geometric :: hexa_GEO hexa_GEO ;
+    typedef Gitter :: Geometric :: hasFace4 hasFace ;
+
+    const const_myneighbour_t nb = myperiodic().myneighbour( fce );
+    const hexa_GEO* hexa = (hexa_GEO *) nb.first ;
+
+    // know which face of the hexa is the internal bnd 
+    os.writeObject ( nb.second );
+   
+    // write the vertex identifiers 
+    for(int k=0; k<8; ++k) 
+    {
+      int vx = hexa->myvertex ( k )->ident ();
+      os.writeObject ( vx ) ;
+    }
+
+    // write vertex id and coordinates of the face connected to the boundary
+    const int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[ nb.second ];
+    for(int vx=0; vx<4; ++vx)
+    {
+      const Gitter :: Geometric :: VertexGeo * vertex = hexa->myvertex(oppFace, vx); 
+      os.writeObject( vertex->ident() );
+      const alucoord_t (&p)[3] = vertex->Point();
+      os.writeObject ( p[0] ) ;
+      os.writeObject ( p[1] ) ;
+      os.writeObject ( p[2] ) ;
+    }
   }
   return ;
 }

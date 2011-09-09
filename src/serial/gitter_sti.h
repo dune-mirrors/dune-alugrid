@@ -715,8 +715,9 @@ public :
   {
   protected :
     hbndseg () {}
-    virtual ~hbndseg () {}
   public :
+    virtual ~hbndseg () {}
+
     typedef enum { 
       none = DuneIndexProvider :: interior, // also the value of interior items 
       inflow = 1, 
@@ -1386,7 +1387,11 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface3_GEO myhface3_t ;
       typedef Hface3Rule myrule_t ;
+    public:  
       typedef pair < hasFace3 *, int > myneighbour_t ;
+      typedef pair < const hasFace3 *, int > const_myneighbour_t;
+      typedef pair < tetra_GEO*, int > myelementneighbour_t ;
+    protected:  
       inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
@@ -1402,6 +1407,8 @@ public :
       }
 
     public :
+      inline myelementneighbour_t myelementneighbour( const int i ) ;
+
       using hasFace3     :: accessPllX ;
       static const int prototype [2][3] ;
       inline virtual ~Periodic3 () ;
@@ -1411,8 +1418,10 @@ public :
       inline const VertexGeo * myvertex (int) const ;
       inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
-      inline pair < hasFace3 *, int > myneighbour (int) ;
-      inline pair < const hasFace3 *, int > myneighbour (int) const ;
+
+      inline myneighbour_t       myneighbour (int) ;
+      inline const_myneighbour_t myneighbour (int) const ;
+
       virtual int nFaces() const { return 2; }
       virtual int nEdges() const { 
         cerr << "Periodic3 :: nEdges not implemented! \n"; abort(); return 6; 
@@ -1443,76 +1452,6 @@ public :
     } periodic3_GEO ;
 
     // Anfang - Neu am 23.5.02 (BS)
-
-    // Geometriesockelklasse des periodischen Randelements mit zwei
-    // 4-Punkt-Fl"achen.
-  
-    typedef class Periodic4 : public hperiodic_STI, 
-                              public hasFace4, 
-                              public MyAlloc 
-    {
-    protected :
-      typedef VertexGeo  myvertex_t ;
-      typedef hedge1_GEO myhedge1_t ;
-      typedef hface4_GEO myhface4_t ;
-      typedef Hface4Rule myrule_t ;
-      inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
-      inline int postRefinement () ;
-      inline int preCoarsening () ;
-
-      // return the first element's ldbVertexIndex (used in Periodic4PllXBaseMacro)
-      inline int insideLdbVertexIndex() const 
-      {
-        const int ldbVx = myneighbour( 0 ).first->firstLdbVertexIndex();
-        if( ldbVx < 0 ) 
-          return myneighbour( 1 ).first->firstLdbVertexIndex();
-        else 
-          return ldbVx;
-      }
-
-    public :
-      using hasFace4     :: accessPllX ;
-      static const int prototype [2][4] ;
-      inline virtual ~Periodic4 () ;
-      inline hface4_GEO * myhface4 (int) ;
-      inline const hface4_GEO * myhface4 (int) const ;
-      inline VertexGeo * myvertex (int) ;
-      inline const VertexGeo * myvertex (int) const ;
-      inline VertexGeo * myvertex (int,int) ;
-      inline const VertexGeo * myvertex (int,int) const ;
-      inline pair < hasFace4 *, int > myneighbour (int) ;
-      inline pair < const hasFace4 *, int > myneighbour (int) const ;
-
-      virtual int nFaces() const { return 2; }
-      virtual int nEdges() const { 
-        cerr << "Periodic4 :: nEdges not implemented! \n"; abort(); return 8; 
-      }
-      inline int twist (int) const ;
-      int test () const ;
-
-      virtual bool isboundary() const { return true; }
-      virtual grid_t type() const { return hexa_periodic; }
-
-    public :
-      virtual myrule_t getrule () const = 0 ;
-      virtual void request (myrule_t) = 0 ;
-      int tagForGlobalRefinement () ;
-      int tagForGlobalCoarsening () ;
-      int resetRefinementRequest () ;
-      int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
-      // just returns level 
-      virtual int nbLevel() const {return level();}
-      // just returns leaf 
-      virtual int nbLeaf() const {return leaf();}
-
-      // returns false because only bnd segments have projections 
-      virtual bool hasVertexProjection () const { return false; }
-    private :
-      myhface4_t * f [2] ;
-      signed char s [2] ;
-    } periodic4_GEO ;
-
-    // Ende - Neu am 23.5.02 (BS)
 
     // Der Prototyp f"ur das Hexaederelement bedingt eine im Uhrzeigersinn
     // umlaufende Numerierung der lokalen Knoten einer Aussenfl"ache, falls
@@ -1606,6 +1545,83 @@ public :
       signed char s [6] ;
     } hexa_GEO ;
   
+    // Geometriesockelklasse des periodischen Randelements mit zwei
+    // 4-Punkt-Fl"achen.
+  
+    typedef class Periodic4 : public hperiodic_STI, 
+                              public hasFace4, 
+                              public MyAlloc 
+    {
+    protected :
+      typedef VertexGeo  myvertex_t ;
+      typedef hedge1_GEO myhedge1_t ;
+      typedef hface4_GEO myhface4_t ;
+      typedef Hface4Rule myrule_t ;
+    public:  
+      typedef pair < hasFace4 *, int > myneighbour_t ;
+      typedef pair < const hasFace4 *, int > const_myneighbour_t;
+      typedef pair < hexa_GEO*, int >  myelementneighbour_t ;
+    protected:  
+      inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
+      inline int postRefinement () ;
+      inline int preCoarsening () ;
+
+      // return the first element's ldbVertexIndex (used in Periodic4PllXBaseMacro)
+      inline int insideLdbVertexIndex() const 
+      {
+        const int ldbVx = myneighbour( 0 ).first->firstLdbVertexIndex();
+        if( ldbVx < 0 ) 
+          return myneighbour( 1 ).first->firstLdbVertexIndex();
+        else 
+          return ldbVx;
+      }
+
+    public :
+      inline myelementneighbour_t myelementneighbour( const int i ) ;
+
+      using hasFace4     :: accessPllX ;
+      static const int prototype [2][4] ;
+      inline virtual ~Periodic4 () ;
+      inline hface4_GEO * myhface4 (int) ;
+      inline const hface4_GEO * myhface4 (int) const ;
+      inline VertexGeo * myvertex (int) ;
+      inline const VertexGeo * myvertex (int) const ;
+      inline VertexGeo * myvertex (int,int) ;
+      inline const VertexGeo * myvertex (int,int) const ;
+
+      inline myneighbour_t       myneighbour (int) ;
+      inline const_myneighbour_t myneighbour (int) const ;
+
+      virtual int nFaces() const { return 2; }
+      virtual int nEdges() const { 
+        cerr << "Periodic4 :: nEdges not implemented! \n"; abort(); return 8; 
+      }
+      inline int twist (int) const ;
+      int test () const ;
+
+      virtual bool isboundary() const { return true; }
+      virtual grid_t type() const { return hexa_periodic; }
+
+    public :
+      virtual myrule_t getrule () const = 0 ;
+      virtual void request (myrule_t) = 0 ;
+      int tagForGlobalRefinement () ;
+      int tagForGlobalCoarsening () ;
+      int resetRefinementRequest () ;
+      int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
+      // just returns level 
+      virtual int nbLevel() const {return level();}
+      // just returns leaf 
+      virtual int nbLeaf() const {return leaf();}
+
+      // returns false because only bnd segments have projections 
+      virtual bool hasVertexProjection () const { return false; }
+    private :
+      myhface4_t * f [2] ;
+      signed char s [2] ;
+    } periodic4_GEO ;
+
+
     // Auch hier ist Vorsicht geboten: Der Protoyp des Dreiecksrandelement
     // numeriert seine Knoten gegen den Uhrzeigersinn, wenn aus dem Randelement
     // auf die Randfl"ache geschaut wird. Das Vierecksrandelement hat die
@@ -3392,6 +3408,26 @@ inline pair < const Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric
     : pair < const hasFace3 *, int > (myhface3 (i)->nb.rear ().first, myhface3 (i)->nb.rear ().second) ;
 }
 
+inline Gitter :: Geometric :: Periodic3 :: myelementneighbour_t 
+Gitter :: Geometric :: Periodic3 :: myelementneighbour( const int i ) 
+{
+  // get neighbour 
+  myneighbour_t nb = myneighbour( i );
+  // this is the case for internal boundaries 
+  if( nb.first->isboundary() ) 
+  {
+    // check for ghost element 
+    ghostpair_STI gpair = (( hbndseg3_GEO * ) nb.first )->getGhost();
+
+    return myelementneighbour_t( ((tetra_GEO * ) gpair.first), gpair.second );
+  }
+  else 
+  {
+    // return element,face 
+    return myelementneighbour_t( ( (tetra_GEO * ) nb.first ), nb.second );
+  }
+}
+
 inline int Gitter :: Geometric :: Periodic3 :: postRefinement () {
   return 0 ;
 }
@@ -3468,6 +3504,26 @@ inline pair < const Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric
   assert (0 <= i && i < 2) ;
   return twist (i) < 0 ? pair < const hasFace4 *, int > (myhface4 (i)->nb.front ().first, myhface4 (i)->nb.front ().second)
     : pair < const hasFace4 *, int > (myhface4 (i)->nb.rear ().first, myhface4 (i)->nb.rear ().second) ;
+}
+
+inline Gitter :: Geometric :: Periodic4 :: myelementneighbour_t
+Gitter :: Geometric :: Periodic4 :: myelementneighbour( const int i ) 
+{
+  // get neighbour 
+  myneighbour_t nb = myneighbour( i );
+  // this is the case for internal boundaries 
+  if( nb.first->isboundary() ) 
+  {
+    // check for ghost element 
+    ghostpair_STI gpair = (( hbndseg4_GEO * ) nb.first )->getGhost();
+
+    return myelementneighbour_t( ((hexa_GEO * ) gpair.first), gpair.second );
+  }
+  else 
+  {
+    // return element,face 
+    return myelementneighbour_t( ( (hexa_GEO * ) nb.first ), nb.second );
+  }
 }
 
 inline int Gitter :: Geometric :: Periodic4 :: postRefinement () {

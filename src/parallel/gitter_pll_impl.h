@@ -248,7 +248,7 @@ class Periodic3PllXBase : public A
 {
   public :
     typedef typename A :: myhface3_t myhface3_t;
-    typedef A myperiodic3_t ;
+    typedef A myperiodic_t ;
 
     using A :: PERIODIC3 ;
     using A :: HBND3INT ;
@@ -256,8 +256,8 @@ class Periodic3PllXBase : public A
     Periodic3PllXBase( myhface3_t* f0,int s0, myhface3_t *f1,int s1) 
       : A( f0, s0, f1, s1 ) {}
 
-    inline myperiodic3_t & myperiodic3 () { return *this ; }
-    inline const myperiodic3_t & myperiodic3 () const { return *this; }
+    inline myperiodic_t & myperiodic () { return *this ; }
+    inline const myperiodic_t & myperiodic () const { return *this; }
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
@@ -268,7 +268,8 @@ class Periodic3PllXBaseMacro : public A
 {
   public :
     typedef typename A :: myhface3_t myhface3_t;
-    typedef A myperiodic3_t ;
+    typedef typename A :: const_myneighbour_t const_myneighbour_t;
+    typedef A myperiodic_t ;
 
     using A :: PERIODIC3 ;
     using A :: HBND3INT ;
@@ -278,8 +279,8 @@ class Periodic3PllXBaseMacro : public A
    ~Periodic3PllXBaseMacro () ;
 
   protected:
-    inline myperiodic3_t & myperiodic3 () { return *this ; }
-    inline const myperiodic3_t & myperiodic3 () const { return *this; }
+    inline myperiodic_t & myperiodic () { return *this ; }
+    inline const myperiodic_t & myperiodic () const { return *this; }
 
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -339,7 +340,8 @@ template < class A >
 class Periodic4PllXBaseMacro : public A  
 {
   public :
-    typedef typename A :: myhface4_t myhface4_t;
+    typedef typename A :: myhface4_t    myhface4_t;
+    typedef typename A :: const_myneighbour_t const_myneighbour_t;
     typedef A myperiodic_t ;
 
     Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1) ;
