@@ -451,6 +451,65 @@ setGhostBoundaryIds()
 }
 
 
+/////////////////////////////////////////////////////
+// --Periodic4Empty
+////////////////////////////////////////////////////
+
+/////////////////////////////////////////
+//  read of data 
+/////////////////////////////////////////
+void GitterBasis :: Objects :: Periodic4Empty :: 
+os2VertexData(ObjectStream & os, GatherScatterType & gs , int borderFace )
+{
+  myneighbour_t nb = myneighbour( borderFace );
+  assert( ! nb.first->isboundary() );    
+  ((hexa_IMPL *) nb.first)->os2VertexData( os, gs, nb.second );
+}
+
+void GitterBasis :: Objects :: Periodic4Empty ::
+os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  myneighbour_t nb = myneighbour( borderFace );
+  assert( ! nb.first->isboundary() );    
+  ((hexa_IMPL *) nb.first)->os2EdgeData( os, gs, nb.second );
+}
+
+void GitterBasis :: Objects :: Periodic4Empty ::
+os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace ) 
+{
+  myneighbour_t nb = myneighbour( borderFace );
+  assert( ! nb.first->isboundary() );    
+  ((hexa_IMPL *) nb.first)->os2FaceData( os, gs, nb.second );
+}
+
+/////////////////////////////////////////
+//  writing of data 
+/////////////////////////////////////////
+void GitterBasis :: Objects :: Periodic4Empty ::
+VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace )
+{
+  myneighbour_t nb = myneighbour( borderFace );
+  assert( ! nb.first->isboundary() );    
+  ((hexa_IMPL *) nb.first)->VertexData2os( os, gs, nb.second );
+}
+
+void GitterBasis :: Objects :: Periodic4Empty ::
+EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace)
+{
+  myneighbour_t nb = myneighbour( borderFace );
+  assert( ! nb.first->isboundary() );    
+  ((hexa_IMPL *) nb.first)->EdgeData2os( os, gs, nb.second );
+}
+
+void GitterBasis :: Objects :: Periodic4Empty ::
+FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace) 
+{
+  myneighbour_t nb = myneighbour( borderFace );
+  assert( ! nb.first->isboundary() );    
+  ((hexa_IMPL *) nb.first)->FaceData2os( os, gs, nb.second );
+}
+
+
 //////////////////////////////////////////////////////////////////
 //
 //  --GitterBasisImpl

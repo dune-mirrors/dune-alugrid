@@ -309,6 +309,24 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
        
         // so nothing here 
         virtual void resetGhostIndices() {}
+
+      public:  
+        ////////////////////////////////////////////////
+        // read of data 
+        ////////////////////////////////////////////////
+        // scatter only on ghosts 
+        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs, int borderFace );
+        // scatter data on ghost edges  
+        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace );
+        // scatter data on ghost faces 
+        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace );
+
+        //////////////////////////////////////////
+        //  writing of data 
+        //////////////////////////////////////////
+        virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace );
+        virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
+        virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
       } ;
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
  
