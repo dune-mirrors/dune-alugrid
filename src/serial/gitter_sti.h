@@ -972,57 +972,57 @@ public :
      
   public :
 
-    // Die Geometriesockelklassen sind die Grundlage zur Implementierung
-    // numerischer Verfahren auf den bestimmten Elementtypen, und erlauben
-    // alle Man"over, die "uber die geometrische Information verf"ugen
-    // m"ussen, wie z.B. Navigation zur Fl"ache, zu den Kanten und Knoten,
-    // aber auch Anforderungen an den Nachbarn.
-
-    class hasFace3 : public virtual stiExtender_t :: hasFacePllXIF 
+    template <class balrule>
+    class hasFace 
     {
     public :
-      typedef Hface3Rule balrule_t ;
-      virtual bool refineBalance (balrule_t,int) = 0 ;
+      typedef balrule balrule_t ;
+      virtual bool refineBalance (balrule_t, int) = 0 ;
       virtual bool bndNotifyCoarsen () = 0 ;
 
       // returns true, if underlying object is real 
       virtual bool isRealObject () const { return true; }
+
     protected :
-      hasFace3 () {}
-      virtual ~hasFace3 () {}
-      inline bool bndNotifyBalance (balrule_t,int) ;
+      hasFace () {}
+      virtual ~hasFace () {}
+      inline bool bndNotifyBalance (balrule_t, int) { return true ; }
 
     public:
-      virtual int calcSortnr (int,int) {return (abort(),0);}   
       virtual bool isboundary() const = 0;    
       virtual int nbLevel() const = 0;
       virtual int nbLeaf() const = 0;
 
       // returns true if a vertex projection is set 
       virtual bool hasVertexProjection () const = 0;
+      virtual ElementPllXIF& accessPllX () throw (stiExtender_t :: AccessPllException)
+      {
+        assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
+        throw stiExtender_t :: AccessPllException () ;
+      }
+      virtual const ElementPllXIF& accessPllX () const throw (stiExtender_t :: AccessPllException)
+      {
+        assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
+        throw stiExtender_t :: AccessPllException () ;
+      }
+
+      // return ldbVertexIndex (default is -1), overloaded in Tetra and Hexa
+      virtual int firstLdbVertexIndex() const { return -1; }
     } ;
 
-    class hasFace4 : public virtual stiExtender_t :: hasFacePllXIF {
-    public :
-      typedef Hface4Rule balrule_t ;
-      virtual bool refineBalance (balrule_t,int) = 0 ;
-      virtual bool bndNotifyCoarsen () = 0 ;
+    // Die Geometriesockelklassen sind die Grundlage zur Implementierung
+    // numerischer Verfahren auf den bestimmten Elementtypen, und erlauben
+    // alle Man"over, die "uber die geometrische Information verf"ugen
+    // m"ussen, wie z.B. Navigation zur Fl"ache, zu den Kanten und Knoten,
+    // aber auch Anforderungen an den Nachbarn.
 
-      // returns true, if underlying object is real 
-      virtual bool isRealObject () const { return true; }
-    protected :
-      hasFace4 () {}
-      virtual ~hasFace4 () {}
-      inline bool bndNotifyBalance (balrule_t,int) ;
+    class hasFace3 : public hasFace< Hface3Rule >
+    {
+    };
 
-    public :
-      virtual bool isboundary() const = 0;
-      virtual int nbLevel() const  = 0;
-      virtual int nbLeaf() const = 0; 
-
-      // returns true if a vertex projection is set 
-      virtual bool hasVertexProjection () const = 0;
-    } ;
+    class hasFace4 : public hasFace< Hface4Rule > 
+    {
+    };
 
     // hasFace_t is hasFace3 and hasFace4 
     // this class is used as default value for the face neighbour
@@ -1056,7 +1056,6 @@ public :
       hasFaceEmpty (const hasFaceEmpty & );
 
     public:
-      int calcSortnr (int,int) {return (abort(),0);}   
       // this is counted as boundary to seperate from elements 
       bool isboundary() const { return true; }    
       int nbLevel() const { return (assert(false),abort(),-1); }
@@ -2356,14 +2355,6 @@ inline bool Gitter :: Dune_helement :: hasBeenRefined () const {
 
 inline int Gitter :: hbndseg :: leaf () const {
   return ! down () ;
-}
-
-inline bool Gitter :: Geometric :: hasFace3 :: bndNotifyBalance (balrule_t,int) {
-  return true ;
-}
-
-inline bool Gitter :: Geometric :: hasFace4 :: bndNotifyBalance (balrule_t,int) {
-  return true ;
 }
 
 inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: VertexGeo* v )

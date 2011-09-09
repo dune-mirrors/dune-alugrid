@@ -260,23 +260,5 @@ class Parallel {
           throw AccessPllException () ;
         }
     } ;
-
-    class hasFacePllXIF {
-      public :
-        virtual ~hasFacePllXIF () {}
-        virtual ElementPllXIF& accessPllX () throw (AccessPllException)
-        {
-          assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-          throw AccessPllException () ;
-        }
-        virtual const ElementPllXIF& accessPllX () const throw (AccessPllException) 
-        {
-          assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
-          throw AccessPllException () ;
-        }
-
-        // return ldbVertexIndex (default is -1), overloaded in Tetra and Hexa
-        virtual int firstLdbVertexIndex() const { return -1; } 
-    } ;
 } ;
 #endif
