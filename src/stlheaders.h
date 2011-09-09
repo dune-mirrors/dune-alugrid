@@ -36,7 +36,7 @@
 #include <iomanip>
 #include <sstream>
 #include <deque>
-#include <bits/stl_queue.h>
+#include <queue>
 #include <stack>
 #include <map>
 #include <numeric>
