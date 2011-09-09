@@ -227,6 +227,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual void resetGhostIndices() {}
 
       public:  
+        myneighbour_t getElementNeighbour() ;
+
         ////////////////////////////////////////////////
         // read of data 
         ////////////////////////////////////////////////
