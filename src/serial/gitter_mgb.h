@@ -197,7 +197,13 @@ Hbnd3IntStorage( hface3_GEO * f, int tw )
 
 inline MacroGridBuilder :: Hbnd3IntStorage :: ~Hbnd3IntStorage () 
 {
-  if( _ptr ) delete _ptr;
+  if( _ptr ) 
+  {
+    delete _ptr;
+#ifndef NDEBUG 
+    _ptr = 0;
+#endif
+  }
 }
 
 inline MacroGhostInfoTetra* MacroGridBuilder :: Hbnd3IntStorage :: release ()
@@ -229,8 +235,15 @@ Hbnd4IntStorage( hface4_GEO * f, int tw )
 
 inline MacroGridBuilder :: Hbnd4IntStorage :: ~Hbnd4IntStorage () 
 {
-  if( _ptr ) delete _ptr;
+  if( _ptr ) 
+  {
+    delete _ptr;
+#ifndef NDEBUG 
+    _ptr = 0;
+#endif
+  }
 }
+
 inline MacroGhostInfoHexa* MacroGridBuilder :: Hbnd4IntStorage :: release() 
 { 
   assert( _ptr );
