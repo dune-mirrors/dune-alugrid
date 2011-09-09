@@ -186,10 +186,6 @@ class GitterPll : public virtual Gitter {
     virtual bool adapt () ;
     virtual void printSizeTT () ;
     
-    // new xdr backup and restore methods 
-    virtual void backup (XDRstream_out &) ;
-    virtual void restore (XDRstream_in &) ;
-
   protected :
     virtual Makrogitter & container () = 0 ;
     virtual const Makrogitter & container () const = 0 ;

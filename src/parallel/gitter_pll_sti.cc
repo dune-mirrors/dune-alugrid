@@ -220,12 +220,6 @@ void GitterPll :: backup (ostream & out) {
   return ;
 }
 
-void GitterPll :: backup (XDRstream_out & out) {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: backup (ostream &)" << endl, 1) : 1) ;
-  Gitter :: backup (out) ;
-  return ;
-}
-
 void GitterPll :: restore (const char * path, const char * file) {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: restore (const char * = \""
                  << path << ", const char * = \""
@@ -238,12 +232,6 @@ void GitterPll :: restore (const char * path, const char * file) {
 }
 
 void GitterPll :: restore (istream & in) {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: restore (istream &)" << endl, 1) : 1) ;
-  Gitter :: restore (in) ;
-  return ;
-}
-
-void GitterPll :: restore (XDRstream_in & in) {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: restore (istream &)" << endl, 1) : 1) ;
   Gitter :: restore (in) ;
   return ;

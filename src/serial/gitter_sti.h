@@ -10,7 +10,6 @@ typedef stringstream  strstream_t;
 
 #include "myalloc.h"
 #include "parallel.h"
-#include "xdrclass.h"
 
 // interface class for projecting vertices for boundary adjustment 
 typedef VertexProjection<3, alucoord_t > ProjectVertex;
@@ -1926,13 +1925,6 @@ public :
 
   // print memory consumption of grid 
   virtual void printMemUsage () = 0 ;
-
-// only when xdrclass header was included  
-#ifdef __XDRCLASS_INCLUDED__
-  // new xdr backup and restore method
-  virtual void backup (XDRstream_out &) ;
-  virtual void restore (XDRstream_in &) ;
-#endif
 
   virtual size_t numMacroBndSegments() const = 0;
 
