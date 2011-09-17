@@ -258,6 +258,9 @@ class Periodic3PllXBase : public A
 
     inline myperiodic_t & myperiodic () { return *this ; }
     inline const myperiodic_t & myperiodic () const { return *this; }
+
+    // method to get internal periodic located behind this parallel interface 
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
   public :
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
@@ -332,8 +335,14 @@ class Periodic4PllXBase : public A {
   public :
     inline ~Periodic4PllXBase () {}
   public :
+    // method to get internal periodic located behind this parallel interface 
+    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
+
     void writeDynamicState (ObjectStream &, int) const ;
-    void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
+    void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
+    { 
+      assert(false); abort(); 
+    }
 } ;
 
 template < class A >
@@ -1050,6 +1059,13 @@ inline void TetraPllXBase< A > :: getAttachedElement ( pair < Gitter::helement_S
   p.second = 0;
 }
 
+template < class A >
+inline void Periodic3PllXBase< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+{
+  p.first  = & myperiodic();
+  p.second = 0;
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //  --HexaPllXBase
@@ -1060,6 +1076,13 @@ template < class A >
 inline void HexaPllBaseX< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
 {
   p.first  = & myhexa();
+  p.second = 0;
+}
+
+template < class A >
+inline void Periodic4PllXBase< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+{
+  p.first  = & myperiodic();
   p.second = 0;
 }
 
