@@ -98,18 +98,22 @@ int main (int argc, char ** argv, const char ** envp)
   MPI_Init(&argc,&argv);
 
   int mxl = 0; 
+  const char* filename = 0 ;
   if (argc < 2) 
   {
+    filename = "../macrogrids/reference.tetra";
+    mxl = 1;
     cout << "usage: "<< argv[0] << " <macro grid> <opt: level> \n";
-    abort();
   }
+  else 
+    filename = argv[ 1 ];
 
   if (argc < 3)
     cout << "Default level = "<< mxl << " choosen! \n";
   else 
     mxl = atoi(argv[2]);
 
-  std::string macroname( argv[1] );
+  std::string macroname( filename );
 
   cout << "\n-----------------------------------------------\n";
   cout << "read macro grid from < " << macroname << " > !" << endl;
@@ -127,12 +131,12 @@ int main (int argc, char ** argv, const char ** envp)
     grid.printsize(); 
     cout << "---------------------------------------------\n";
   
-    //grid.printMemUsage();
+    grid.printMemUsage();
    
     globalRefine(&grid, mxl);
     //levelwalk(&grid, mxl);
     //globalCoarsening(&grid, mxl);
-    //grid.printMemUsage();
+    grid.printMemUsage();
     cin.get();
   }
 
