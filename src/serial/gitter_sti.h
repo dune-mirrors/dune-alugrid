@@ -940,7 +940,10 @@ public :
       
     struct TetraRule
     {
-      enum rule_enum { crs=-1, nosplit=1, e01, e12, e20, e23, e30, e31, iso8 };
+      enum rule_enum { crs=-1, nosplit=1, 
+                       e01, e12, e20, e23, e30, e31, 
+                       bisect, iso8 
+                     };
       typedef signed char rule_t;
 
       explicit TetraRule ( const rule_t & );
@@ -2361,10 +2364,54 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: VertexGeo* 
 {
   if( v ) 
   {
-    s << "vx ( " << v->getIndex() << ", " << v->ident() << " : ";
+    s << "vx ( " << v->getIndex() 
+      //<< ", " << v->ident() 
+      << " : ";
     for (int i=0; i<3; ++i)
       s << ((i>0) ? " " : "") << v->Point()[i];
     s << " ) ";
+  }
+  else 
+    s << "nullptr"; 
+  return s;
+}
+
+
+inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: Tetra* tetra )
+{
+  if( tetra ) 
+  {
+    s << "Tetra " << tetra->getIndex() << " ";
+    for(int i=0; i<4; ++i)
+    {
+      s << tetra->myvertex( i ) << " " ;
+    }
+    s << endl;
+    for(int i=0; i<4; ++i)
+    {
+      s << "T-Face " << i << " ";
+      for(int j=0; j<3; ++j)
+        s << tetra->myvertex( i, j ) << " " ;
+      s << endl;
+    }
+    s << endl;
+  }
+  else 
+    s << "nullptr"; 
+  return s;
+}
+
+
+inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface3* face )
+{
+  if( face ) 
+  {
+    s << "face ( " << face->getIndex() 
+      //<< ", " << v->ident() 
+      << " : ";
+    for (int i=0; i<3; ++i)
+      s << face->myvertex( i ) << " ";
+    s << endl;
   }
   else 
     s << "nullptr"; 
@@ -3133,7 +3180,7 @@ inline Gitter :: Geometric :: TetraRule :: operator rule_t () const
 }
 
 inline bool Gitter :: Geometric :: TetraRule :: isValid (const rule_t& r) {
-  return r == crs || r == nosplit || r == iso8 || r == e01 
+  return r == crs || r == nosplit || r == iso8 || r == bisect || r == e01 
     || r == e12 || r == e20 || r == e23 || r == e30 || r == e31;
 }
 

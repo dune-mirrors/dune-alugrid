@@ -99,11 +99,12 @@ template < class A > class Hbnd3Top : public A {
     using A :: myhface3 ;
 
   protected :
-    typedef Hbnd3Top < A >    innerbndseg_t ;
-    typedef typename A :: myhface3_t  myhface3_t ;
-    typedef typename A :: balrule_t balrule_t ;
+    typedef Hbnd3Top < A >              innerbndseg_t ;
+    typedef typename A :: myhface3_t    myhface3_t ;
+    typedef typename A :: balrule_t     balrule_t ;
     typedef typename A :: myrule_t      myrule_t ;
-    typedef typename A :: bnd_t bnd_t;
+    typedef typename A :: bnd_t         bnd_t;
+
     bool refineLikeElement (balrule_t) ;
     inline void append (innerbndseg_t *) ;
 
@@ -194,6 +195,8 @@ template < class A > class TetraTop : public A
     void split_e23 () ;
     void split_e30 () ;
     void split_e31 () ;
+
+    void bisect () ;
     void splitISO8 () ;
   protected :
     myhedge1_t * subedge1 (int,int) ;
@@ -448,14 +451,14 @@ template < class A > inline const typename Hface3Top < A > :: myhedge1_t * Hface
 
 template < class A > inline typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) {
   inneredge_t * e = inEd() ;
-  for (int i = 0 ; i < n ; i ++ ) e = e ? e->next () : 0 ;
+  for (int i = 0 ; i < n ; ++i ) e = e ? e->next () : 0 ;
   assert (e) ;
   return e ;
 }
 
 template < class A > inline const typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) const {
   const inneredge_t * e = inEd();
-  for (int i = 0 ; i < n ; i ++ ) e = e ? e->next () : 0 ;
+  for (int i = 0 ; i < n ; ++i ) e = e ? e->next () : 0 ;
   assert (e) ;
   return e ;
 }
