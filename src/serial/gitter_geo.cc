@@ -460,7 +460,7 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const alucoord_t (&cent
 //           |\      .|     faces opposite to vertices
 //           | \    . | 
 //           |  \  .  | 
-//           |   \.   |     positive orientation from INSIDE 
+//           |   \.   |     math. positive orientation from INSIDE 
 //           |   .\   |    
 //           |  .  \  |     
 //           | .    \ |      
@@ -468,7 +468,7 @@ int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const alucoord_t (&cent
 //         0 ------------ x 
 //                              
 // face 0 = { 1, 3, 2 }   NOTE: all faces are oriented such that when one looks from
-// face 1 = { 0, 2, 3 }         the inside, they are oriented math. postitve
+// face 1 = { 0, 2, 3 }         the inside, they are oriented math. positive
 // face 2 = { 0, 3, 1 }
 // face 3 = { 0, 1, 2 } 
 //
@@ -510,7 +510,7 @@ int Gitter :: Geometric :: Tetra :: test () const {
 
 int Gitter :: Geometric :: Tetra :: tagForGlobalRefinement () {
   return (request (myrule_t :: iso8), 1) ;
-  //return (request (myrule_t :: e01), 1) ;
+  //return (request (myrule_t :: bisect), 1) ;
 }
 
 int Gitter :: Geometric :: Tetra :: tagForGlobalCoarsening () {
