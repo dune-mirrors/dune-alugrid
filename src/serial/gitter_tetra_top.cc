@@ -630,6 +630,7 @@ template < class A > TetraTop < A >
   , _lvl (l) 
   , _nChild(nChild)
   , _rule (myrule_t :: nosplit)
+  , _type( ( _up->_type + 1 )%3 )
 {
   // set level 
   assert( this->level() == l );
@@ -669,6 +670,7 @@ TetraTop (int l, myhface3_t * f0, int t0,
   , _lvl (l) 
   , _nChild(0)  // we are macro ==> nChild 0 
   , _rule (myrule_t :: nosplit) 
+  , _type( 0 ) 
 { 
   assert( this->level() == l );
 
@@ -943,13 +945,33 @@ template < class A >  void TetraTop < A > :: bisect ()
                                         subface3(2, 0), twist (2), // face 3 and twist
                                         this, 0, childVolume) ; // father, childNo, volume
 
-
   innertetra_t * h1 = new innertetra_t (newLevel, f0, -1, // face 0, twist is -1 
                                         myhface3( 0 ) , twist( 0 ) , // face 1
                                         subface3(2, 1), twist( 2 ),  // face 2
                                         subface3(1, 1), twist( 1 ),  // face 3
                                         this, 1, childVolume) ; // father, childNo, volume
 
+  // check vertices 
+  // v0 of first child is always v0 of father 
+  assert( h0->myvertex( 0 )->getIndex() == this->myvertex( 0 )->getIndex() );
+  // v0 of second child is always v3 of father 
+  assert( h1->myvertex( 3 )->getIndex() == this->myvertex( 0 )->getIndex() );
+  
+  // v1 of first child is also v1 of second child 
+  assert( h0->myvertex( 1 )->getIndex() == h1->myvertex( 1 )->getIndex() );
+
+  // v2 of first child is always v1 of father 
+  assert( h0->myvertex( 2 )->getIndex() == this->myvertex( 1 )->getIndex() );
+  // v3 of first child is always v2 of father 
+  assert( h0->myvertex( 3 )->getIndex() == this->myvertex( 2 )->getIndex() );
+  
+  const int offset = ( _type == 0 ) ? 0 : 1;
+
+  // v2 of second child is always v1 of father 
+  assert( h0->myvertex( 2 )->getIndex() == this->myvertex( 2-offset )->getIndex() );
+  // v3 of second child is always v2 of father 
+  assert( h0->myvertex( 3 )->getIndex() == this->myvertex( 1+offset )->getIndex() );
+  
   //cout << "New tetra " << h0 << endl;
   //cout << "New tetra " << h1 << endl;
 
