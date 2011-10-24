@@ -968,9 +968,9 @@ template < class A >  void TetraTop < A > :: bisect ()
   const int offset = ( _type == 0 ) ? 0 : 1;
 
   // v2 of second child is always v1 of father 
-  assert( h0->myvertex( 2 )->getIndex() == this->myvertex( 2-offset )->getIndex() );
+  assert( h1->myvertex( 2 )->getIndex() == this->myvertex( 2-offset )->getIndex() );
   // v3 of second child is always v2 of father 
-  assert( h0->myvertex( 3 )->getIndex() == this->myvertex( 1+offset )->getIndex() );
+  assert( h1->myvertex( 3 )->getIndex() == this->myvertex( 1+offset )->getIndex() );
   
   //cout << "New tetra " << h0 << endl;
   //cout << "New tetra " << h1 << endl;

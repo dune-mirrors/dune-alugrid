@@ -183,6 +183,7 @@ template < class A > class TetraTop : public A
     const unsigned char _lvl ;
     const signed char _nChild;
     myrule_t _req, _rule ;
+    char _type ;
     
   private :
     inline IndexManagerType & indexManager() { 
