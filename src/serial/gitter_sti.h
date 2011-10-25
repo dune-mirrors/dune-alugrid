@@ -2902,15 +2902,10 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
 inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t)
 {
   if( t < 0 )
-  {
-    cout << this << " Attatch rear " << endl;
     nb.setRear( p );
-  }
   else
-  {
-    cout << this << " Attatch front " << endl;
     nb.setFront( p );
-  }
+
   ref ++ ;
   return ;
 }
