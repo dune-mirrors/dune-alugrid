@@ -906,7 +906,7 @@ public :
       
     struct Hface3Rule
     {
-      enum rule_enum { nosplit=1, e01, e12, e20, iso4, undefined=-2 };
+      enum rule_enum { nosplit=1, e01=2, e12=3, e20=4, iso4=5, undefined=-2 };
       typedef signed char rule_t;
 
       explicit Hface3Rule ( const rule_t & );
@@ -2381,7 +2381,7 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: Tetra* tetr
 {
   if( tetra ) 
   {
-    s << "Tetra " << tetra->getIndex() << " ";
+    s << "Tetra[" << tetra->getIndex() << "] : ";
     for(int i=0; i<4; ++i)
     {
       s << tetra->myvertex( i ) << " " ;
@@ -2411,6 +2411,23 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface3* fac
       << " : ";
     for (int i=0; i<3; ++i)
       s << face->myvertex( i ) << " ";
+    s << endl;
+  }
+  else 
+    s << "nullptr"; 
+  return s;
+}
+
+
+inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hedge1* edge )
+{
+  if( edge ) 
+  {
+    s << "edge ( " << edge->getIndex() 
+      //<< ", " << v->ident() 
+      << " : ";
+    for (int i=0; i<2; ++i)
+      s << edge->myvertex( i ) << " ";
     s << endl;
   }
   else 
@@ -2645,19 +2662,24 @@ inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: ro
     //return Hface3Rule (iso4) ;
   case e01 :
     {
-      static rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; 
+      //cout << "e01: my twist is " << t << endl;
+      static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; 
+      //static rule_t retRule [ 6 ] = { e12, e01, e20, e01, e12, e20 }; 
       newr = retRule[ t + 3 ];
       break ;
     }
   case e12 :
     {
-      static rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; 
+      //cout << "e12: my twist is " << t << endl;
+      static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; 
       newr = retRule[ t + 3 ];
       break ;
     }
   case e20 :
     {
-      static rule_t retRule [ 6 ] = { e12, e20, e01, e20, e12, e01 }; 
+      //cout << "e20: my twist is " << t << endl;
+      //static rule_t retRule [ 6 ] = { e12, e20, e01, e20, e12, e01 }; 
+      static const rule_t retRule [ 6 ] = { e12, e20, e01, e20, e01, e12 }; 
       newr = retRule[ t + 3 ];
       break ;
     }
@@ -2880,9 +2902,15 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
 inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t)
 {
   if( t < 0 )
+  {
+    cout << this << " Attatch rear " << endl;
     nb.setRear( p );
+  }
   else
+  {
+    cout << this << " Attatch front " << endl;
     nb.setFront( p );
+  }
   ref ++ ;
   return ;
 }
@@ -2973,6 +3001,7 @@ inline Gitter :: Geometric :: hface4 :: face4Neighbour :: face4Neighbour ()
 inline void
 Gitter :: Geometric :: hface4 :: face4Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
+  assert( _faceFront == null.first );
   _faceFront = p.first;
   _numFront = p.second;
 }
@@ -2980,6 +3009,7 @@ Gitter :: Geometric :: hface4 :: face4Neighbour :: setFront ( const pair < mycon
 inline void
 Gitter :: Geometric :: hface4 :: face4Neighbour :: setRear ( const pair < myconnect_t *, int > &p )
 {
+  assert( _faceRear == null.first );
   _faceRear = p.first;
   _numRear = p.second;
 }
@@ -3230,6 +3260,7 @@ inline Gitter :: Geometric :: Tetra ::
 Tetra (myhface3_t * f0, int t0, myhface3_t * f1, int t1, 
        myhface3_t * f2, int t2, myhface3_t * f3, int t3) 
 {
+  cout << "Create new tetra " << endl;
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
   (f [2] = f2)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 2),(s [2] = t2)) ;
@@ -3324,6 +3355,7 @@ inline const Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric ::
   return myhface3(i)->myvertex(evalVertexTwist(i, j));
 }
 
+//- --tetramyvertex
 inline Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i) {
   assert (0 <= i && i < 4) ;
   return (i < 3) ? myvertex (3,i) : myvertex (2,1) ;

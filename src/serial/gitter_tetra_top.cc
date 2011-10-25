@@ -15,6 +15,8 @@
 template < class A > void Hface3Top < A > :: split_e01 () 
 {
   // NOTE: edge numbering is not opposite vertex !!!
+  // see gitter_geo.cc 
+  // the new edge needs to be in the middle (meaning edge 1 out of {0,1,2})
  
   assert( _inner == 0 );
   const int newLevel = 1 + level () ;
@@ -27,14 +29,14 @@ template < class A > void Hface3Top < A > :: split_e01 ()
   inneredge_t * e0 = new inneredge_t (newLevel, ev0, this->myvertex (2) ) ;
   assert( e0 ) ;
   innerface_t * f0 = new innerface_t (newLevel, 
+                                      this->subedge1(0,0), twist(0), 
                                       e0, 0, 
                                       myhedge1(2), twist(2), 
-                                      this->subedge1(0,0), twist(0), 
                                       0) ; // child number 
   innerface_t * f1 = new innerface_t (newLevel, 
-                                      this->subedge1(0,1), twist(0), 
                                       myhedge1(1), twist(1), 
                                       e0, 1, 
+                                      this->subedge1(0,1), twist(0), 
                                       1) ; // child number 
 
   //std::cout << "split_e01 " << ev0 << endl;
@@ -51,21 +53,54 @@ template < class A > void Hface3Top < A > :: split_e01 ()
 template < class A >  void Hface3Top < A > :: split_e12 () 
 {
   // NOTE: edge numbering is not opposite vertex !!!
-  assert( false ); // not checked yet 
+  // see gitter_geo.cc 
+  // the new edge needs to be in the middle (meaning edge 1 out of {0,1,2})
+  /* 
+    3 (in tetra)
+    |\
+    |1\       face 1 in tetra ref element, split edge is 2--3 
+    |  \
+    |   \ (1) edge in father face
+    |2  0\
+    |     \
+    |      \
+    |2  1  0\
+   4|........\ 2 (in tetra)
+    |2  1  1 / 
+ (2)|       /
+    |      /
+    |2   0/ (0), edge in father face
+    |    / 
+    |   /
+    |  /
+    |0/
+    |/
+    0 (in tetra)
+  */
   
   assert( _inner == 0 );
-  int l = 1 + level () ;
+  const int newLevel= 1 + level () ;
   myvertex_t * ev0 = myhedge1(1)->subvertex (0) ;
-  std::cout << "Vx in split = " << ev0 << endl;
+
+  //std::cout << "Vx in split = " << ev0 << endl;
   //myvertex_t * ev1 = myhedge1(1)->subvertex (0) ;
   //myvertex_t * ev2 = myhedge1(2)->subvertex (0) ;
   //std::cout << "split_e12 " << ev0 << " " << ev1 << " "  << ev2 << endl;
   assert(ev0) ;
-  inneredge_t * e0 = new inneredge_t (l, ev0, this->myvertex (0) ) ;
+  // create new inner edge 
+  inneredge_t * e0 = new inneredge_t (newLevel, ev0, this->myvertex(0) ) ;
   assert( e0 ) ;
-  this->subedge1(0,0);
-  innerface_t * f0 = new innerface_t (l, e0, 0, myhedge1(0), twist(0), this->subedge1(1,0), twist(1), 0 ) ;
-  innerface_t * f1 = new innerface_t (l, this->subedge1(1,1), twist(1), myhedge1(2), twist(2), e0, 1, 1 ) ;
+  innerface_t * f0 = new innerface_t (newLevel, // level 
+                                      this->subedge1(1,0), twist(1), // edge 0, twist 
+                                      e0, 0,                         // edge 1, twist 
+                                      myhedge1(0), twist(0),         // edge 2, twist 
+                                      0 ) ; // child number 
+
+  innerface_t * f1 = new innerface_t (newLevel, // level 
+                                      myhedge1(2), twist(2),         // edge 0, twist
+                                      e0, 1,                         // edge 1, twist 
+                                      this->subedge1(1,1), twist(1), // edge 2, twist 
+                                      1 ) ; // child number 
   assert (f0 && f1 ) ;
   f0->append(f1) ;
   _inner = new inner_t( f0 , e0 );
@@ -77,6 +112,7 @@ template < class A >  void Hface3Top < A > :: split_e20 ()
 {
   // NOTE: edge numbering is not opposite vertex !!!
   // see gitter_geo.cc 
+  // the new edge needs to be in the middle (meaning edge 1 out of {0,1,2})
 
   assert( _inner == 0 );
   const int newLevel= 1 + level () ;
@@ -217,6 +253,7 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
       case myrule_t :: e20 :
       case myrule_t :: iso4 :
       {
+        cout << "Got rule = " << int(r) << endl;
         bool a = (twist < 0) 
                ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
                : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
@@ -539,17 +576,17 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
       assert (this->getrule () == myrule_t :: nosplit) ;
       switch (r) {
       case balrule_t :: e01 :
-        cout << "refLikeEl: e01 " << endl;
+        //cout << "refLikeEl: e01 " << endl;
         if (!myhface3 (0)->refine (balrule_t (balrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
         split_e01 () ;
         break;
       case balrule_t :: e12 :
-        cout << "refLikeEl: e12 " << endl;
+        //cout << "refLikeEl: e12 " << endl;
         if (!myhface3 (0)->refine (balrule_t (balrule_t :: e12).rotate (twist (0)), twist (0))) return false ;
         split_e12 () ;
         break;
       case balrule_t :: e20 :
-        cout << "refLikeEl: e20 " << endl;
+        //cout << "refLikeEl: e20 " << endl;
         if (!myhface3 (0)->refine (balrule_t (balrule_t :: e20).rotate (twist (0)), twist (0))) return false ;
         split_e20 () ;
         break;
@@ -630,7 +667,7 @@ template < class A > TetraTop < A >
   , _lvl (l) 
   , _nChild(nChild)
   , _rule (myrule_t :: nosplit)
-  , _type( ( _up->_type + 1 )%3 )
+  , _type( (_up->_type + 1) % 3 ) // my type is (t+1)%d where t is the fathers type 
 {
   // set level 
   assert( this->level() == l );
@@ -644,12 +681,14 @@ template < class A > TetraTop < A >
 #ifndef NDEBUG 
   // check that _volume has the correct value 
   const double calculatedVolume = 
-    quadraturTetra3D < VolumeCalc > (
+    std::abs( quadraturTetra3D < VolumeCalc > (
       LinearMapping ( this->myvertex(0)->Point(), 
                       this->myvertex(1)->Point(),
                       this->myvertex(2)->Point(), 
-                      this->myvertex(3)->Point())).integrate1 (0.0);
-  //assert( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 ); 
+                      this->myvertex(3)->Point())).integrate1 (0.0) );
+  //if( std::abs( calculatedVolume - _volume ) >1e-10 ) 
+  //  cout << "Determinant of Tetra[" << this->getIndex() << "] is wrong" << endl;
+  assert( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 ); 
 #endif
 
   return ;
@@ -670,7 +709,7 @@ TetraTop (int l, myhface3_t * f0, int t0,
   , _lvl (l) 
   , _nChild(0)  // we are macro ==> nChild 0 
   , _rule (myrule_t :: nosplit) 
-  , _type( 0 ) 
+  , _type( 0 ) // type of macro elements should be zero 
 { 
   assert( this->level() == l );
 
@@ -914,48 +953,216 @@ template < class A >  void TetraTop < A > :: split_e31 ()
   return ;
 }
 
+template < class A >  int 
+TetraTop < A > :: vertexTwist( const int twst, const int vx ) const 
+{
+  return twst < 0 ? (7-vx+twst)%3 : (vx+twst)%3;
+}
+
+template < class A > int 
+TetraTop < A > :: calculateFace2Twist( const int vxIndex, const myhface3_t* subFace ) const 
+{
+  const int faceIndices[ 3 ] = { subFace->myvertex( 0 )->getIndex(),
+                                 subFace->myvertex( 1 )->getIndex(),
+                                 subFace->myvertex( 2 )->getIndex() };
+
+  for(int twst = -3; twst<3; ++twst ) 
+  {
+    // search for vx 1 
+    if( vxIndex == faceIndices[ vertexTwist(twst, 1) ] )
+    {
+      return twst;
+    }
+  }
+
+  // we should not get here 
+  assert( false );
+  abort();
+  return -5;
+}
+
+template < class A > int 
+TetraTop < A > :: calculateFace3Twist( const int (&vx)[2], const myhface3_t* subFace ) const 
+{
+  const int faceIndices[ 3 ] = { subFace->myvertex( 0 )->getIndex(),
+                                 subFace->myvertex( 1 )->getIndex(),
+                                 subFace->myvertex( 2 )->getIndex() };
+
+  for(int twst = -3; twst<3; ++twst ) 
+  {
+    // if vx0 and vx1 match we are done 
+    if( vx[ 0 ] == faceIndices[ vertexTwist(twst, 0) ] && 
+        vx[ 1 ] == faceIndices[ vertexTwist(twst, 1) ] )
+    {
+      return twst;
+    }
+  }
+
+  cout << "Valid twist not found!!!" << endl;
+  return 0;
+
+  // we should not get here 
+  assert( false );
+  abort();
+  return -5;
+}
+
+template < class A > bool 
+TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) const 
+{
+  // make sure face twists are ok 
+  bool twistOk = true ;
+  for(int fce=0; fce<4; ++fce ) 
+  {
+    cout << "Check face " << fce << " of tetra " << tetra->getIndex() << " , type = " << int(tetra->_type) << " with twist " << tetra->twist( fce ) << endl;
+    for(int i=0; i<3; ++i ) 
+    {
+      const bool type2ch1 = ( nChild == 1 ) && (tetra->_type == 2);
+      const int mapVx[4]  = { 0, 1, (type2ch1) ? 3:2 , (type2ch1) ? 2:3 };
+
+      // use proto type to check face twists 
+      if( tetra->myvertex( mapVx[ Gitter :: Geometric :: Tetra :: prototype[ fce ][ i ] ] )->getIndex() != 
+              tetra->myvertex( fce, i )->getIndex() )
+      {
+        const int vx0 = mapVx[ Gitter :: Geometric :: Tetra :: prototype[ fce ][ 0 ] ] ;
+        const int vx1 = mapVx[ Gitter :: Geometric :: Tetra :: prototype[ fce ][ 1 ] ] ;
+
+        const int vx[2] = { tetra->myvertex( vx0 )->getIndex(),
+                            tetra->myvertex( vx1 )->getIndex() 
+                          };
+
+        int twst = calculateFace3Twist( vx, tetra->myhface3( fce ) ); 
+        cout << "Twist is wrong, it should be " << twst << endl;
+        twistOk = false ;
+        continue ;
+      }
+    }
+
+    if( ! tetra->myneighbour( fce ).first->isRealObject()  ) 
+    {
+      cout << "Neighbour " << fce << " of Tetra " << tetra->getIndex()  << " is wrong " << endl;
+      cout << "Check face " << tetra->myhface3( fce )->getIndex() << endl;
+    }
+    // make sure neighbor is something meaningful 
+    //assert( tetra->myneighbour( fce ).first->isRealObject() );
+  }
+  //cout << endl;
+  return twistOk;
+}
+
 // --bisect
 template < class A >  void TetraTop < A > :: bisect () 
 {
-  // this bisection follows the bisection of Stevenson, 2008 
+  // this refinement follows Stevenson, 2008 
   // and Nochetto, Siebert, Veser, 2009 
 
   assert( _inner == 0 );
-  const int newLevel = 1 + this->level () ;
+  const int lvl = this->level () ;
+  const int newLevel = 1 + lvl;
 
-  //cout << "sub 2 " << this->subedge1 (2, 0)->myvertex( 0 ) << " " << this->subedge1 (2, 0)->myvertex( 1 ) << endl;
+  // type of element, we assume that on level all elements have type 0 
+  const unsigned char elType = lvl % 3 ;
+  assert( elType == _type );
+
   //cout << "sub 1 " << this->subedge1 (1, 0)->myvertex( 0 ) << " " << this->subedge1 (1, 0)->myvertex( 1 ) << endl;
+  //cout << "sub 2 " << this->subedge1 (2, 0)->myvertex( 0 ) << " " << this->subedge1 (2, 0)->myvertex( 1 ) << endl;
 
+  myhedge1_t* subEdge = this->subedge1 (1, 0);
+  myhedge1_t* orgEdge = this->myhedge1( 3 ) ;
+  //(_type == 1 ) && (_nChild == 1) ? 4 : 3 );
+
+  //cout << "org " << orgEdge << endl;
+  // calculate twist of last edge 
+ 
+  const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
   // new inner face 
   innerface_t * f0 = 
     new innerface_t (newLevel, 
-                     this->subedge1 (2, 0), 1, // from face 2 get subedge 0  
-                     this->subedge1 (1, 0), 0, // from face 1 get subedge 0
-                     this->myhedge1(3), 1 ) ;
+                     subEdge, 0, // from face 1 get subedge 0
+                     orgEdge, edgeTwst, 
+                     this->subedge1 (2, 0), 1 // from face 2 get subedge 0  
+                    ) ;
   assert(f0) ;
 
-  //cout << "New face is " << f0 << endl;
+  //cout << "New inner face is " << f0 << endl;
 
-  // for bisection the volume is also bisected ;-) 
   const double childVolume = 0.5 * _volume;
+
+
+  const int offset = ( elType == 0 ) ? 0 : 1;
+
+  const int fce2 = 2-offset;
+  const int fce3 = 1+offset;
+
+  //cout << "Check sub face " << subface3(1, 1) << " with vertex " << this->myvertex( 1+offset )->getIndex() << endl;
+  myhface3_t* subFace20 = subface3(1, 0); 
+  const int twst20 = (elType == 1) && (_nChild == 1) ? 
+                          calculateFace2Twist( this->myvertex( 1+offset )->getIndex(), subFace20 ) : 
+                          twist(1);
+
   innertetra_t * h0 = new innertetra_t (newLevel, 
                                         f0, 0,  // face 0 and twist
                                         myhface3(3), twist (3),    // face 2 and twist
-                                        subface3(1, 0), twist (1), // face 1 and twist  
-                                        subface3(2, 0), twist (2), // face 3 and twist
-                                        this, 0, childVolume) ; // father, childNo, volume
+                                        subFace20, twst20,         // face 1 and twist  
+                                        subface3(2,0), twist (2),  // face 3 and twist
+                                        this, 0, childVolume) ;    // father, childNo, volume
 
-  innertetra_t * h1 = new innertetra_t (newLevel, f0, -1, // face 0, twist is -1 
-                                        myhface3( 0 ) , twist( 0 ) , // face 1
-                                        subface3(2, 1), twist( 2 ),  // face 2
-                                        subface3(1, 1), twist( 1 ),  // face 3
-                                        this, 1, childVolume) ; // father, childNo, volume
+  myhface3_t* subFace21 = subface3(fce2, 1); 
+  //cout << "Check sub face " << subFace21 << " with vertex " << this->myvertex( 1+offset )->getIndex() << endl;
+
+  const int vx21[2] = { this->myvertex( 3 )->getIndex(), 
+                        this->myvertex( 1+offset )->getIndex() };
+
+  const int twst21 = calculateFace3Twist( vx21, subFace21 );
+
+
+  const int vx31[2] = { this->myvertex( 3 )->getIndex(), 
+                        h0->myvertex( 1 )->getIndex() };
+
+  myhface3_t* subFace31 = subface3(fce3, 1);
+  const int twst31 = calculateFace3Twist( vx31, subFace31 );
+
+
+  int twst11 = twist( 0 );
+  if( elType == 0 ) 
+  {
+    // vx3 becomes vx0 of first child 
+    // vx2 becomes vx2 of first child 
+    // according to the ref elem face 1 has vertices { 0,2,3 }
+    // therefore vx3 is vx0 and vx2 is vx2 
+    const int vx11[2] = { this->myvertex( 3 )->getIndex(), 
+                          this->myvertex( 2 )->getIndex() };
+    twst11 = calculateFace3Twist( vx11, myhface3( 0 ) );
+  }
+  else
+  {
+    // vx3 becomes vx0 of first child 
+    // vx1 becomes vx2 of first child 
+    // according to the ref elem face 1 has vertices { 0,2,3 }
+    // therefore vx3 is vx0 and vx 2 is vx1 
+    const int vx11[2] = { this->myvertex( 3 )->getIndex(), 
+                          this->myvertex( 1 )->getIndex() };
+    twst11 = calculateFace3Twist( vx11, myhface3( 0 ) );
+  }
+
+  innertetra_t * h1 = new innertetra_t (newLevel, f0, -1, //twst[ elType ], // face 0, twist is -1 or 0
+                                        myhface3( 0 ) , twst11 , // face 1
+                                        subFace21, twst21,       // face 2
+                                        subFace31, twst31,       // face 3
+                                        this, 1, childVolume) ;  // father, childNo, volume
+
+  cout << "New tetra " << h0 << endl;
+  cout << "New tetra " << h1 << endl;
+
+  // do dheckTetra here, otherwise check for neighbors fails 
+  assert( checkTetra( h0, 0 ) );
+  assert( checkTetra( h1, 1 ) );
 
   // check vertices 
   // v0 of first child is always v0 of father 
   assert( h0->myvertex( 0 )->getIndex() == this->myvertex( 0 )->getIndex() );
   // v0 of second child is always v3 of father 
-  assert( h1->myvertex( 3 )->getIndex() == this->myvertex( 0 )->getIndex() );
+  assert( h1->myvertex( 0 )->getIndex() == this->myvertex( 3 )->getIndex() );
   
   // v1 of first child is also v1 of second child 
   assert( h0->myvertex( 1 )->getIndex() == h1->myvertex( 1 )->getIndex() );
@@ -965,15 +1172,11 @@ template < class A >  void TetraTop < A > :: bisect ()
   // v3 of first child is always v2 of father 
   assert( h0->myvertex( 3 )->getIndex() == this->myvertex( 2 )->getIndex() );
   
-  const int offset = ( _type == 0 ) ? 0 : 1;
 
   // v2 of second child is always v1 of father 
   assert( h1->myvertex( 2 )->getIndex() == this->myvertex( 2-offset )->getIndex() );
   // v3 of second child is always v2 of father 
   assert( h1->myvertex( 3 )->getIndex() == this->myvertex( 1+offset )->getIndex() );
-  
-  //cout << "New tetra " << h0 << endl;
-  //cout << "New tetra " << h1 << endl;
 
   assert(h0 && h1) ;
   h0->append(h1) ;
@@ -1068,11 +1271,19 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
 
     // conforming bisection   
     case myrule_t :: bisect :
-      // refine faces first 
-      myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e20).rotate (twist (1))) ;
-      myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2))) ;
-      bisect() ;
-      break ;
+      {
+        // refine faces first 
+        //int childNr = (int) _nChild;
+        //assert( (_lvl == 0) ? childNr == 0 : true );
+        //std::cout << "Refine child " << childNr << endl;
+        //std::cout << "Split face " << myhface3 (1) << endl;
+        myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e20).rotate (twist (1))) ;
+        //std::cout << "Split face " << myhface3 (2) << endl;
+        myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2))) ;
+
+        bisect() ;
+        break ;
+      }
     case myrule_t :: e01 :
       myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e20).rotate (twist (2))) ;
       myhface3 (3)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (3))) ;
@@ -1089,13 +1300,11 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
       split_e20 () ;
       break ;
     case myrule_t :: e23 :
-      cout << "Split faces e23 " << endl;
       myhface3 (0)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (0))) ;
       myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (1))) ;
       split_e23 () ;
       break ;
     case myrule_t :: e30 :
-      cout << "Split faces e30 " << endl;
       // refine faces first 
       myhface3 (1)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (1))) ;
       myhface3 (2)->refineImmediate (myhface3rule_t (myhface3_t :: myrule_t :: e01).rotate (twist (2))) ;
@@ -1184,7 +1393,8 @@ template < class A >  bool TetraTop < A > :: refine ()
 
 template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce) 
 {
-  if ( r != balrule_t :: iso4 ) 
+  /*
+  if ( r != balrule_t :: iso4 || r != balrule_t :: bisect ) 
   {
     //cerr << "**WARNUNG (IGNORIERT) in TetraTop < A > :: refineBalance (..) nachschauen, Datei " 
     //   << __FILE__ << " Zeile " << __LINE__ << endl ;
@@ -1195,6 +1405,7 @@ template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce
   // Elements f"allt flach.
     return false ;
   }
+  */
   /*
   if ( r != balrule_t :: iso4 || r!= balrule_t :: e01 )
   {
@@ -1212,17 +1423,35 @@ template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce
   // if status is still non-refined 
   if (getrule () == myrule_t :: nosplit) 
   {
-    // if face is a leaf face 
-    if (! myhface3 (fce)->leaf ()) 
+    if( r == balrule_t :: iso4 )
     {
-      for (int i = 0 ; i < 4 ; ++i)
-      {  
-        if (i != fce)
-          if ( ! myhface3 (i)->refine (balrule_t ( balrule_t :: iso4 ).rotate (twist (i)), twist (i)) ) 
-            return false ;
+      // if face is a leaf face 
+      if (! myhface3 (fce)->leaf ()) 
+      {
+        for (int i = 0 ; i < 4 ; ++i)
+        {  
+          if (i != fce)
+            if ( ! myhface3 (i)->refine (balrule_t ( balrule_t :: iso4 ).rotate (twist (i)), twist (i)) ) 
+              return false ;
+        }
+        _req = myrule_t :: nosplit ;
+        refineImmediate (myrule_t :: iso8) ;
       }
-      _req = myrule_t :: nosplit ;
-      refineImmediate (myrule_t :: iso8) ;
+    }
+    else 
+    {
+      // if face is a leaf face 
+      if (! myhface3 (fce)->leaf ()) 
+      {
+        for (int i = 0 ; i < 4 ; ++i)
+        {  
+          if (i != fce)
+            if ( ! myhface3 (i)->refine (balrule_t ( r ).rotate (twist (i)), twist (i)) ) 
+              return false ;
+        }
+        _req = myrule_t :: nosplit ;
+        refineImmediate ( myrule_t :: bisect ) ;
+      }
     }
   }
   return true ;

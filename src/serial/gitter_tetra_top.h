@@ -175,6 +175,11 @@ template < class A > class TetraTop : public A
   protected:  
     void refineImmediate (myrule_t) ;
     inline void append (innertetra_t * h) ;
+
+    bool checkTetra( const innertetra_t* tetra, const int  ) const ;
+    int vertexTwist( const int, const int ) const ;
+    int calculateFace2Twist( const int vx, const myhface3_t* ) const;
+    int calculateFace3Twist( const int (&vx)[2], const myhface3_t* ) const;
   private :
     innertetra_t * _bbb, * _up ; 
     inner_t * _inner ;
@@ -183,7 +188,7 @@ template < class A > class TetraTop : public A
     const unsigned char _lvl ;
     const signed char _nChild;
     myrule_t _req, _rule ;
-    char _type ;
+    const unsigned char _type ; 
     
   private :
     inline IndexManagerType & indexManager() { 
