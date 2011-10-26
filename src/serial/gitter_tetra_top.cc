@@ -1046,7 +1046,6 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
     //assert( tetra->myneighbour( fce ).first->isRealObject() );
   }
   
-  return true;
   //cout << endl;
   return twistOk;
 }
@@ -1105,7 +1104,7 @@ template < class A >  void TetraTop < A > :: bisect ()
 
   myhface3_t* subFace10 = myhface3( 3-face2 );
   const int twst10 = ( face2 ) ?  
-                         calculateFace3Twist( vx10, subFace10, 2) :  
+                         calculateFace3Twist( vx10, subFace10, 1) :  
                          twist( 3-face2 );
 
   const int twst20 = (elType == 1) && (_nChild == 1) ? 
