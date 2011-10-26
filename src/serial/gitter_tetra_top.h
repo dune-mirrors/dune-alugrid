@@ -179,7 +179,10 @@ template < class A > class TetraTop : public A
     bool checkTetra( const innertetra_t* tetra, const int  ) const ;
     int vertexTwist( const int, const int ) const ;
     int calculateFace2Twist( const int vx, const myhface3_t* ) const;
-    int calculateFace3Twist( const int (&vx)[2], const myhface3_t* ) const;
+    int calculateFace3Twist( const int (&vx)[2], const myhface3_t*, const int ) const;
+    // the element type is obtained from the level of the element 
+    // under the assumption that on level 0 all elements have type 0
+    unsigned char elementType () const { return (_lvl % 3); }
   private :
     innertetra_t * _bbb, * _up ; 
     inner_t * _inner ;
