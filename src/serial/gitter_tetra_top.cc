@@ -913,6 +913,26 @@ template < class A >  void TetraTop < A > :: split_e30 ()
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
 
+  /* 
+    
+    3               2
+       ___________
+      |3        *2|     new inner face ( 1, 4 , 2 )
+      | \     * . |     
+      |  \  *  .  |     child 0 is the child which contains node 0 
+      |   \  .    |     child 0 is the child which contains node 3 
+      |0*  \.     |
+    4 *    .\     |
+      |*   . \    |     4 becomes node 3 in child 0
+      |3 *.   \   |     4 becomes node 0 in child 1
+      | .  *   \  |
+      |.     *  \ |
+      |0       * 1|
+      -------------
+    0               1
+
+  */
+
   myhedge1_t* subEdge2 = this->subedge1 (2, 0);
   //cout << "split_e30 tetra " << this->getIndex() << " with type " << " and chNr " << int(_nChild) << endl;
   //cout << "sub 1 " << this->subedge1 (1, 0)->myvertex( 0 ) << " " << this->subedge1 (1, 0)->myvertex( 1 ) << endl;
