@@ -2381,7 +2381,11 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: Tetra* tetr
 {
   if( tetra ) 
   {
-    s << "Tetra[" << tetra->getIndex() << "] : ";
+    const Gitter :: helement_STI* father = tetra->up();
+    s << "Tetra[" << tetra->getIndex() << "] ";
+    if ( father ) 
+      s << " (father " << father->getIndex() << ")";
+    s << " : ";
     for(int i=0; i<4; ++i)
     {
       s << tetra->myvertex( i ) << " " ;
@@ -2663,7 +2667,7 @@ inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: ro
   case e01 :
     {
       //cout << "e01: my twist is " << t << endl;
-      static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; 
+      static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e12, e20 }; 
       //static rule_t retRule [ 6 ] = { e12, e01, e20, e01, e12, e20 }; 
       newr = retRule[ t + 3 ];
       break ;
