@@ -170,6 +170,8 @@ template < class A > class TetraTop : public A
     typedef typename A :: myhface3_t    myhface3_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
+    typedef pair< myhface3_t *, myhface3_t * > facepair_t;
+
     typedef InnerStorage< InnerFaceStorage< innertetra_t , false > > inner_t ;
 
   protected:  
@@ -210,6 +212,7 @@ template < class A > class TetraTop : public A
   protected :
     myhedge1_t * subedge1 (int,int) ;
     const myhedge1_t * subedge1 (int,int) const ;
+    facepair_t subFaces( const int );
     myhface3_t * subface3 (int,int) ;
     const myhface3_t * subface3 (int i, int j) const ;
   public:
