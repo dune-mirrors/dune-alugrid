@@ -1908,36 +1908,39 @@ splitISO8 ()
 }
 
 template < class A > TetraTop < A > :: 
-BisectionInfo :: BisectionInfo ( myrule_t r ) 
+BisectionInfo :: BisectionInfo ( myrule_t r ) : _caller( 0 )
 {
-  //static RefineInfo refInfo[ 6 ] = { RefineInfo( myrule_t :: e01 ),
-  //                                   RefineInfo( myrule_t :: e12 ) };
-                                     
   switch(r) 
   {
     case myrule_t :: e01 :
       _faces[ 0 ] = 2;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e01;
+      _caller = new CallSplit_e01();
       break ;
     case myrule_t :: e12 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e12;
+      _caller = new CallSplit_e12();
       break ;
     case myrule_t :: e20 :
       _faces[ 0 ] = 1;   _faceRules[ 0 ] = face3rule_t :: e01;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e20;
+      _caller = new CallSplit_e20();
       break ;
     case myrule_t :: e23 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e12;
       _faces[ 1 ] = 1;   _faceRules[ 1 ] = face3rule_t :: e12;
+      _caller = new CallSplit_e23();
       break ;
     case myrule_t :: e30 :
       _faces[ 0 ] = 1;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 2;   _faceRules[ 1 ] = face3rule_t :: e01;
+      _caller = new CallSplit_e30();
       break ;
     case myrule_t :: e31 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e01;
       _faces[ 1 ] = 2;   _faceRules[ 1 ] = face3rule_t :: e12;
+      _caller = new CallSplit_e31();
       break ;
     default :
       cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
@@ -1969,41 +1972,18 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
   }
   else 
   {
-    // create appropriate refinement info (which faces and which rules)
-    BisectionInfo info( r );
+    // call appropriate refinement of faces 
+    BisectionInfo :: splitEdge( this, r );
 
-    for( int i=0; i<2; ++i ) 
-    {
-      const int face = info._faces[ i ] ;
-      myhface3 ( face )->refineImmediate ( face3rule_t ( info._faceRules[ i ] ).rotate (twist ( face )) );
-    }
-
-    switch( r ) 
-    {
-    case myrule_t :: e01 :
-      split_e01 () ;
-      break ;
-    case myrule_t :: e12 :
-      split_e12 () ;
-      break ;
-    case myrule_t :: e20 :
-      split_e20 () ;
-      break ;
-    case myrule_t :: e23 :
-      split_e23 () ;
-      break ;
-    case myrule_t :: e30 :
-      split_e30 () ;
-      break ;
-    case myrule_t :: e31 :
-      split_e31 () ;
-      break ;
-    default :
+    /*
+#ifndef NDEBUG 
+    if( r != 
       cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
       cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << endl ;
       abort () ;
       break ;
-    }
+#endif
+*/
   }
 
   this->postRefinement () ;
@@ -2037,16 +2017,7 @@ template < class A >  bool TetraTop < A > :: refine ()
         case myrule_t :: e23 :
         case myrule_t :: e30 :
         case myrule_t :: e31 :
-          {
-            BisectionInfo info( r );
-            for( int i=0; i<2; ++i ) 
-            {
-              const int face = info._faces[ i ];
-
-              // check refinement of faces 
-              if (! myhface3( face )->refine( face3rule_t( info._faceRules[ i ] ).rotate( twist( face ) ), twist ( face ) ) ) return false ;
-            }
-          }
+          if( ! BisectionInfo :: refineFaces( this, r ) ) return false ;
           break ;
         default :
           cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << getrule () ;

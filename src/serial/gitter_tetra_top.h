@@ -181,10 +181,98 @@ template < class A > class TetraTop : public A
 
     struct BisectionInfo 
     {
+      struct CallSplitIF 
+      {
+        virtual void splitEdge( innertetra_t* tetra ) const = 0;
+      };
+
+      struct CallSplit_e01 : public CallSplitIF 
+      {
+        virtual ~CallSplit_e01 () {}
+        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e01(); }
+      };
+
+      struct CallSplit_e12 : public CallSplitIF 
+      {
+        virtual ~CallSplit_e12 () {}
+        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e12(); }
+      };
+
+      struct CallSplit_e20 : public CallSplitIF 
+      {
+        virtual ~CallSplit_e20 () {}
+        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e20(); }
+      };
+
+      struct CallSplit_e23 : public CallSplitIF 
+      {
+        virtual ~CallSplit_e23 () {}
+        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e23(); }
+      };
+
+      struct CallSplit_e30 : public CallSplitIF 
+      {
+        virtual ~CallSplit_e30 () {}
+        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e30(); }
+      };
+
+      struct CallSplit_e31 : public CallSplitIF 
+      {
+        virtual ~CallSplit_e31 () {}
+        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e31(); }
+      };
+
+      const CallSplitIF* _caller;
       unsigned char _faces[ 2 ];
       face3rule_t _faceRules[ 2 ];
 
+    private:
+      // constructor 
       BisectionInfo( myrule_t rule ) ;
+
+    public:
+      ~BisectionInfo() { delete _caller; }
+
+      static BisectionInfo& instance( const myrule_t& rule ) 
+      { 
+        static BisectionInfo bisectionInfo[ 6 ] = { 
+            BisectionInfo( myrule_t :: e01 ),
+            BisectionInfo( myrule_t :: e12 ),
+            BisectionInfo( myrule_t :: e20 ),
+            BisectionInfo( myrule_t :: e23 ),
+            BisectionInfo( myrule_t :: e30 ),
+            BisectionInfo( myrule_t :: e31 ) };
+        return bisectionInfo[ int(rule) - 2 ];
+      }
+
+      static bool refineFaces( innertetra_t* tetra, const myrule_t& rule )
+      {
+        BisectionInfo& info = instance( rule );
+        for( int i=0; i<2; ++i )
+        {
+          const int face = info._faces[ i ];
+
+          // check refinement of faces 
+          if (! tetra->myhface3( face )->refine( face3rule_t( info._faceRules[ i ] ).rotate( tetra->twist( face ) ), tetra->twist ( face ) ) ) return false ;
+        }
+        return true ;
+      }
+
+      static void splitEdge( innertetra_t* tetra, const myrule_t& rule )
+      {
+        BisectionInfo& info = instance( rule );
+
+        for( int i=0; i<2; ++i )
+        {
+          const int face = info._faces[ i ] ;
+          tetra->myhface3 ( face )->refineImmediate ( face3rule_t ( info._faceRules[ i ] ).rotate ( tetra->twist ( face )) );
+        }
+  
+        // call correct split edge 
+        info.caller().splitEdge( tetra );
+      }
+
+      const CallSplitIF& caller() const { assert( _caller ); return *_caller; }
     };
 
     void refineImmediate (myrule_t) ;
