@@ -12,6 +12,7 @@ template < class A > class Hface3Top : public A
   public :
     using A :: twist ;
     using A :: myhedge1 ;
+    using A :: myvertex ;
 
     typedef Hface3Top < A >             innerface_t ;
     typedef typename A :: inneredge_t   inneredge_t;
@@ -161,6 +162,7 @@ template < class A > class TetraTop : public A
   public :
     using A :: twist ;
     using A :: myhface3 ;
+    using A :: myvertex ;
 
     typedef TetraTop < A >    innertetra_t  ;
     typedef typename A :: innervertex_t innervertex_t ;
