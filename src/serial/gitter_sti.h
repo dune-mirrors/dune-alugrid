@@ -941,7 +941,7 @@ public :
     struct TetraRule
     {
       enum rule_enum { crs=-1, nosplit=1, 
-                       e01, e12, e20, e23, e30, e31, 
+                       e01=2, e12=3, e20=4, e23=5, e30=6, e31=7, 
                        bisect, iso8 
                      };
       typedef signed char rule_t;
@@ -3259,7 +3259,6 @@ inline Gitter :: Geometric :: Tetra ::
 Tetra (myhface3_t * f0, int t0, myhface3_t * f1, int t1, 
        myhface3_t * f2, int t2, myhface3_t * f3, int t3) 
 {
-  cout << "Create new tetra " << endl;
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
   (f [2] = f2)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 2),(s [2] = t2)) ;

@@ -175,8 +175,18 @@ template < class A > class TetraTop : public A
     typedef pair< myhface3_t *, myhface3_t * > facepair_t;
 
     typedef InnerStorage< InnerFaceStorage< innertetra_t , false > > inner_t ;
+    typedef typename myhface3_t :: myrule_t face3rule_t;
 
   protected:  
+
+    struct BisectionInfo 
+    {
+      unsigned char _faces[ 2 ];
+      face3rule_t _faceRules[ 2 ];
+
+      BisectionInfo( myrule_t rule ) ;
+    };
+
     void refineImmediate (myrule_t) ;
     inline void append (innertetra_t * h) ;
 
