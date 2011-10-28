@@ -235,6 +235,13 @@ template < class A > class TetraTop : public A
 
       static BisectionInfo& instance( const myrule_t& rule ) 
       { 
+        assert( rule == myrule_t :: e01 ||
+                rule == myrule_t :: e12 || 
+                rule == myrule_t :: e20 || 
+                rule == myrule_t :: e23 || 
+                rule == myrule_t :: e30 || 
+                rule == myrule_t :: e31  );
+
         static BisectionInfo bisectionInfo[ 6 ] = { 
             BisectionInfo( myrule_t :: e01 ),
             BisectionInfo( myrule_t :: e12 ),
