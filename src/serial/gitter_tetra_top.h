@@ -229,11 +229,13 @@ template < class A > class TetraTop : public A
     private:
       // constructor 
       BisectionInfo( myrule_t rule ) ;
+      // no copying 
+      BisectionInfo( const BisectionInfo& );
 
     public:
       ~BisectionInfo() { delete _caller; }
 
-      static BisectionInfo& instance( const myrule_t& rule ) 
+      static const BisectionInfo& instance( const myrule_t& rule ) 
       { 
         assert( rule == myrule_t :: e01 ||
                 rule == myrule_t :: e12 || 
@@ -242,7 +244,7 @@ template < class A > class TetraTop : public A
                 rule == myrule_t :: e30 || 
                 rule == myrule_t :: e31  );
 
-        static BisectionInfo bisectionInfo[ 6 ] = { 
+        static const BisectionInfo bisectionInfo[ 6 ] = { 
             BisectionInfo( myrule_t :: e01 ),
             BisectionInfo( myrule_t :: e12 ),
             BisectionInfo( myrule_t :: e20 ),
@@ -254,7 +256,7 @@ template < class A > class TetraTop : public A
 
       static bool refineFaces( innertetra_t* tetra, const myrule_t& rule )
       {
-        BisectionInfo& info = instance( rule );
+        const BisectionInfo& info = instance( rule );
         for( int i=0; i<2; ++i )
         {
           const int face = info._faces[ i ];
@@ -267,7 +269,7 @@ template < class A > class TetraTop : public A
 
       static void splitEdge( innertetra_t* tetra, const myrule_t& rule )
       {
-        BisectionInfo& info = instance( rule );
+        const BisectionInfo& info = instance( rule );
 
         for( int i=0; i<2; ++i )
         {
@@ -870,10 +872,42 @@ template < class A > inline typename TetraTop < A > :: myrule_t TetraTop < A > :
   return myrule_t (_req) ;
 }
 
+// --request 
 template < class A > inline void TetraTop < A > :: request (myrule_t r) 
 {
   assert (r.isValid ()) ;
-  _req = r ;
+
+  if( r == myrule_t :: bisect )
+  {
+    innertetra_t* father = (innertetra_t * )this->up();
+    // check edges here
+    if( father ) 
+    {
+      myrule_t fatherRule = father->getrule();
+      static const myrule_t rules [ 2 ][ 6 ] = 
+        // rules for child 0
+        { { myrule_t :: e30, myrule_t :: e31,
+            myrule_t :: e01, myrule_t :: e12,
+            myrule_t :: e20, myrule_t :: e12 /* ok */ },
+        // rules for child 1
+          { myrule_t :: e23, myrule_t :: e20,
+            myrule_t :: e12, myrule_t :: e30,
+            myrule_t :: e31, myrule_t :: e23 /* ok */ } };
+      _req = rules[ _nChild ][ int(fatherRule) - 2 ];
+    }
+    else 
+    {
+      // macro elements are split on edge 30 
+      assert( this->level() == 0 );
+      _req = myrule_t :: e30 ;
+    }
+  }
+  else 
+  {
+    // all other cases 
+    _req = r ;
+  }
+
   return ;
 }
 
