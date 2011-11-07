@@ -240,7 +240,7 @@ pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: Insert
 }
 // Ende - Neu am 23.5.02 (BS)
 
-void MacroGridBuilder :: removeElement (const elementKey_t & k) 
+void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realElement ) 
 {
   // Der Schl"ussel sollte nur in genau einer Map vorliegen.
 
@@ -249,79 +249,74 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k)
         + (_periodic3Map.find (k) == _periodic3Map.end () ? 0 : 1)
         + (_periodic4Map.find (k) == _periodic4Map.end () ? 0 : 1) == 1) ;
 
-  elementMap_t :: iterator hit = _tetraMap.find (k) ;
-  if (hit != _tetraMap.end ()) 
+  if( realElement ) 
   {
-    tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 4 ; ++i) 
+    elementMap_t :: iterator hit = _tetraMap.find (k) ;
+    if (hit != _tetraMap.end ()) 
     {
-      _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
-        tr->myhface3 (i)->myvertex (2)->ident ())] = 
-        new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr , i ) ;
+      tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
+      for (int i = 0 ; i < 4 ; ++i) 
+      {
+        _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
+          tr->myhface3 (i)->myvertex (2)->ident ())] = 
+          new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr , i ) ;
+      }
+      delete tr ;
+      _tetraMap.erase (hit) ;
+      return ;
     }
-    delete tr ;
-    _tetraMap.erase (hit) ;
-    return ;
-  }
-  hit = _hexaMap.find (k) ;
-  if (hit != _hexaMap.end ()) 
-  {
-    hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 6 ; ++i) {
-      _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), 
-                            hx->myhface4 (i)->myvertex (1)->ident (), 
-                            hx->myhface4 (i)->myvertex (2)->ident ())
-                ] = new Hbnd4IntStorage (hx->myhface4 (i), hx->twist (i), hx, i );
-    }
-    delete hx ;
-    _hexaMap.erase (hit) ;
-    return ;
-  }
 
-  hit = _periodic3Map.find (k) ;
-  if (hit != _periodic3Map.end ()) 
-  {
-    periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 2 ; ++i) 
+    hit = _hexaMap.find (k) ;
+    if (hit != _hexaMap.end ()) 
     {
-      typedef periodic3_GEO :: myelementneighbour_t myelementneighbour_t;
-      myelementneighbour_t nb = p3->myelementneighbour( i );
-      assert( nb.first );
-      assert( nb.second >= 0 );
-
-      _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), 
-                            p3->myhface3 (i)->myvertex (1)->ident (), 
-                            p3->myhface3 (i)->myvertex (2)->ident ())
-                ] = new Hbnd3IntStorage ( p3->myhface3 (i), p3->twist (i), nb.first, nb.second ) ;
+      hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
+      for (int i = 0 ; i < 6 ; ++i) {
+        _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), 
+                              hx->myhface4 (i)->myvertex (1)->ident (), 
+                              hx->myhface4 (i)->myvertex (2)->ident ())
+                  ] = new Hbnd4IntStorage (hx->myhface4 (i), hx->twist (i), hx, i );
+      }
+      delete hx ;
+      _hexaMap.erase (hit) ;
+      return ;
     }
-
-    delete p3 ;
-    _periodic3Map.erase (hit) ;
-    return ;
   }
-
-  hit = _periodic4Map.find (k) ;
-  if (hit != _periodic4Map.end ()) 
+  else 
   {
-    periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second ;
-    for (int i = 0 ; i < 2 ; ++i) 
+    elementMap_t :: iterator hit = _periodic3Map.find (k) ;
+    if (hit != _periodic3Map.end ()) 
     {
-      typedef periodic4_GEO :: myelementneighbour_t myelementneighbour_t;
-      myelementneighbour_t nb = p4->myelementneighbour( i );
-      assert( nb.first );
-      assert( nb.second >= 0 );
+      periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
+      for (int i = 0 ; i < 2 ; ++i) 
+      {
+        _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), 
+                              p3->myhface3 (i)->myvertex (1)->ident (), 
+                              p3->myhface3 (i)->myvertex (2)->ident ())
+                  ] = new Hbnd3IntStorage ( p3->myhface3 (i), p3->twist (i)) ;
+      }
 
-      cout << "Create periodic ghost info " << endl;
-      _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), 
-                            p4->myhface4 (i)->myvertex (1)->ident (), 
-                            p4->myhface4 (i)->myvertex (2)->ident ())
-                ] = new Hbnd4IntStorage (p4->myhface4 (i), p4->twist (i), nb.first, nb.second );
+      delete p3 ;
+      _periodic3Map.erase (hit) ;
+      return ;
     }
 
-    delete p4 ;
-    _periodic4Map.erase (hit) ;
+    hit = _periodic4Map.find (k) ;
+    if (hit != _periodic4Map.end ()) 
+    {
+      periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second ;
+      for (int i = 0 ; i < 2 ; ++i) 
+      {
+        _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), 
+                              p4->myhface4 (i)->myvertex (1)->ident (), 
+                              p4->myhface4 (i)->myvertex (2)->ident ())
+                  ] = new Hbnd4IntStorage (p4->myhface4 (i), p4->twist (i));
+      }
 
-    return ;
+      delete p4 ;
+      _periodic4Map.erase (hit) ;
+
+      return ;
+    }
   }
 
   abort () ;

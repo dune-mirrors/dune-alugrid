@@ -114,7 +114,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
 
     inline BuilderIF & myBuilder () ;
     inline const BuilderIF & myBuilder () const ;
-    void removeElement (const elementKey_t &) ;
+    void removeElement (const elementKey_t &, const bool ) ;
   public :
     virtual pair < VertexGeo *, bool >     InsertUniqueVertex (double, double, double, int) ;
     virtual pair < hedge1_GEO *, bool >    InsertUniqueHedge1 (int,int) ;
