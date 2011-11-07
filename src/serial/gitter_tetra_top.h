@@ -186,40 +186,30 @@ template < class A > class TetraTop : public A
         virtual void splitEdge( innertetra_t* tetra ) const = 0;
       };
 
-      struct CallSplit_e01 : public CallSplitIF 
+      template < typename myrule_t :: rule_enum rule > 
+      struct CallSplitImpl : public CallSplitIF 
       {
-        virtual ~CallSplit_e01 () {}
-        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e01(); }
-      };
-
-      struct CallSplit_e12 : public CallSplitIF 
-      {
-        virtual ~CallSplit_e12 () {}
-        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e12(); }
-      };
-
-      struct CallSplit_e20 : public CallSplitIF 
-      {
-        virtual ~CallSplit_e20 () {}
-        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e20(); }
-      };
-
-      struct CallSplit_e23 : public CallSplitIF 
-      {
-        virtual ~CallSplit_e23 () {}
-        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e23(); }
-      };
-
-      struct CallSplit_e30 : public CallSplitIF 
-      {
-        virtual ~CallSplit_e30 () {}
-        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e30(); }
-      };
-
-      struct CallSplit_e31 : public CallSplitIF 
-      {
-        virtual ~CallSplit_e31 () {}
-        virtual void splitEdge( innertetra_t* tetra ) const { tetra->split_e31(); }
+        virtual ~CallSplitImpl () {}
+        virtual void splitEdge( innertetra_t* tetra ) const 
+        { 
+          if( rule == myrule_t :: e01 ) 
+            tetra->split_e01(); 
+          else if ( rule == myrule_t :: e12 ) 
+            tetra->split_e12(); 
+          else if ( rule == myrule_t :: e20 ) 
+            tetra->split_e20(); 
+          else if ( rule == myrule_t :: e23 ) 
+            tetra->split_e23(); 
+          else if ( rule == myrule_t :: e30 ) 
+            tetra->split_e30(); 
+          else if ( rule == myrule_t :: e31 ) 
+            tetra->split_e31(); 
+          else 
+          {
+            cerr << "**ERROR (FATAL): wrong refinement rule! In " << __FILE__ << " " << __LINE__ << endl ;
+            abort();
+          }
+        }
       };
 
       const CallSplitIF* _caller;

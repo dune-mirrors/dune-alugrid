@@ -1510,7 +1510,7 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
   bool twistOk = true ;
   for(int fce=0; fce<4; ++fce ) 
   {
-    cout << "Check face " << fce << " of tetra " << tetra->getIndex() << " , type = " << int(tetra->_type) << " with twist " << tetra->twist( fce ) << " and chNr " << int(tetra->_nChild) << endl;
+    //cout << "Check face " << fce << " of tetra " << tetra->getIndex() << " , type = " << int(tetra->_type) << " with twist " << tetra->twist( fce ) << " and chNr " << int(tetra->_nChild) << endl;
     for(int i=0; i<3; ++i ) 
     {
       //const bool type2ch1 = ( nChild == 1 ) && (tetra->_type == 2);
@@ -1543,8 +1543,6 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
     //assert( tetra->myneighbour( fce ).first->isRealObject() );
   }
   
-  return true;
-  //cout << endl;
   return twistOk;
 }
 
@@ -1899,32 +1897,32 @@ BisectionInfo :: BisectionInfo ( myrule_t r ) : _caller( 0 )
     case myrule_t :: e01 :
       _faces[ 0 ] = 2;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e01;
-      _caller = new CallSplit_e01();
+      _caller = new CallSplitImpl< myrule_t :: e01 > ();
       break ;
     case myrule_t :: e12 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e12;
-      _caller = new CallSplit_e12();
+      _caller = new CallSplitImpl< myrule_t :: e12 > ();
       break ;
     case myrule_t :: e20 :
       _faces[ 0 ] = 1;   _faceRules[ 0 ] = face3rule_t :: e01;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e20;
-      _caller = new CallSplit_e20();
+      _caller = new CallSplitImpl< myrule_t :: e20 > ();
       break ;
     case myrule_t :: e23 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e12;
       _faces[ 1 ] = 1;   _faceRules[ 1 ] = face3rule_t :: e12;
-      _caller = new CallSplit_e23();
+      _caller = new CallSplitImpl< myrule_t :: e23 > ();
       break ;
     case myrule_t :: e30 :
       _faces[ 0 ] = 1;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 2;   _faceRules[ 1 ] = face3rule_t :: e01;
-      _caller = new CallSplit_e30();
+      _caller = new CallSplitImpl< myrule_t :: e30 > ();
       break ;
     case myrule_t :: e31 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e01;
       _faces[ 1 ] = 2;   _faceRules[ 1 ] = face3rule_t :: e12;
-      _caller = new CallSplit_e31();
+      _caller = new CallSplitImpl< myrule_t :: e31 > ();
       break ;
     default :
       cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
