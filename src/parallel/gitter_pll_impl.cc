@@ -263,16 +263,55 @@ template < class A > bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBal
   // Diese Methode erzeugt eine Kante im Graphen f"ur die Berechnung
   // der Neupartitionierung, der sie das Gewicht der Anzahl aller feinsten
   // Fl"achen "uber der verwalteten Grobgitterfl"ache gibt.
+  typedef typename myhface_t :: myconnect_t myconnect_t;
   
-  const typename myhface_t :: myconnect_t * mycon1 = this->myhface().nb.front().first;
-  const typename myhface_t :: myconnect_t * mycon2 = this->myhface().nb.rear ().first;
+  const myconnect_t * mycon1 = this->myhface().nb.front().first;
+  const myconnect_t * mycon2 = this->myhface().nb.rear ().first;
 
   if(mycon1 && mycon2)
   {
-    db.edgeUpdate ( LoadBalancer :: GraphEdge 
-      (((const typename myhface_t :: myconnect_t *)this->myhface ().nb.front ().first)->accessPllX ().ldbVertexIndex (),
-       ((const typename myhface_t :: myconnect_t *)this->myhface ().nb.rear ().first)->accessPllX ().ldbVertexIndex (),
-      TreeIterator < typename Gitter :: hface_STI, is_leaf < Gitter :: hface_STI > > (this->myhface ()).size ())) ;
+    // if one of them is periodic, increase factor
+    // this should reduce cutting of edges between 
+    // periodic and normal elements 
+    
+    int ldbVx1 = -1 ;
+    int ldbVx2 = -1 ; 
+
+    if( mycon1->isperiodic() ) 
+    {
+      assert( ! mycon2->isperiodic() ); 
+      ldbVx1 = mycon1->otherLdbVertexIndex( this->myhface() );
+      ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
+    }
+
+    if( mycon2->isperiodic() ) 
+    {
+      assert( ! mycon1->isperiodic() ); 
+      ldbVx1 = mycon1->accessPllX ().ldbVertexIndex ();
+      ldbVx2 = mycon2->otherLdbVertexIndex( myhface() );
+    }
+    
+    // count leaf faces for this macro face 
+    const int weight =  TreeIterator < typename Gitter :: hface_STI, 
+                                       is_leaf < Gitter :: hface_STI > > (this->myhface ()).size ();
+
+    // if we have a periodic situation 
+    if( ldbVx1 < ldbVx2 ) 
+    {
+      assert( mycon1->isperiodic() || mycon2->isperiodic() );
+      assert( ldbVx1 >= 0 && ldbVx2 >= 0 );
+      // increase the edge weight for periodic connections 
+      db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight*4 ) );
+    }
+    else if( ldbVx1 == ldbVx2 ) 
+    {
+      // the default graph edge 
+      db.edgeUpdate ( LoadBalancer :: GraphEdge 
+        ( mycon1->accessPllX ().ldbVertexIndex (),
+          mycon2->accessPllX ().ldbVertexIndex (),
+          weight ) );
+    
+    }
   }
   return true ;
 }
@@ -283,22 +322,30 @@ template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i) {
   // Teilgitter ab. D.h. der Eintrag in der Zuweisungsliste wird gel"oscht,
   // und dann wird die M"oglichkeit an die anliegenden Kanten weitervermittelt.
 
-  assert (_moveTo.find (i) != _moveTo.end ()) ;
+  //assert (_moveTo.find (i) != _moveTo.end ()) ;
+  if( _moveTo.find (i) ==  _moveTo.end () ) 
+    return ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  {for (int j = 0 ; j < A :: polygonlength ; j ++) 
+  {for (int j = 0 ; j < A :: polygonlength ; ++j ) 
     this->myhface ().myhedge1 (j)->unattach2 (i) ;}
   return ;
 }
 
 template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) {
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) {
+  if (pos == _moveTo.end ()) 
+  {
     _moveTo.insert (pair < const int, int > (i,1)) ;
-  } else {
+  } 
+  else 
+  {
     (*pos).second ++ ;
   }
-  {for (int j = 0 ; j < A :: polygonlength ; j ++) 
-    this->myhface ().myhedge1 (j)->attach2 (i) ;}
+
+  {
+    for (int j = 0 ; j < A :: polygonlength ; ++j ) 
+      this->myhface ().myhedge1 (j)->attach2 (i) ;
+  }
   return ;  
 }
 
@@ -368,7 +415,9 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
     
       this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os ) ;
       this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os ) ;
-    } catch (Parallel :: AccessPllException) {
+    } 
+    catch (Parallel :: AccessPllException) 
+    {
       cerr << "**FEHLER (FATAL) AccessPllException aufgetreten in " << __FILE__ << " " << __LINE__ << ". Ende." << endl ;
       abort () ;
     }
@@ -622,7 +671,7 @@ TetraPllXBaseMacro< A > ::
 TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
                            myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
   : A(l, f0, s0, f1, s1, f2, s2, f3, s3 )
-  , _moveTo ()
+  , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
   , _erasable (false) 
 {
@@ -638,23 +687,12 @@ TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
 }
 
 template < class A >
-TetraPllXBaseMacro< A > :: ~TetraPllXBaseMacro () {
-  vector < int > v ;
+TetraPllXBaseMacro< A > :: ~TetraPllXBaseMacro () 
+{
+  if( _moveTo >= 0 ) 
   {
-    // copy to vector because unattach2 is changing _moveTo 
-    // reserve memory 
-    v.reserve( _moveTo.size() );
-    typedef map < int, int, less < int > > :: const_iterator const_iterator;
-    const const_iterator iEnd =  _moveTo.end () ;
-    for (const_iterator i = _moveTo.begin () ; i != iEnd; ++i ) 
-      v.push_back ( (*i).first ) ;
+    unattach2 ( _moveTo ) ;
   }
-  {
-    const vector < int > :: const_iterator iEnd = v.end () ;
-    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd ; ++i ) 
-      unattach2 ( *i ) ;
-  }
-  return ;
 }
 
 template < class A >
@@ -668,13 +706,16 @@ void TetraPllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
 }
 
 template < class A >
-bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
+bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
+{
   // parameter are: 
   // - macro vertex index
   // - number of elementes below macro element 
   // - bary center 
+  const int factor = this->numberOfPeriodicBoundaries( mytetra() ) + 1 ;
+   
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size ()
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size () * factor 
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _center
 #endif
@@ -689,63 +730,76 @@ void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const 
 }
 
 template < class A >
-void TetraPllXBaseMacro< A > :: unattach2 (int i) {
-  assert (_moveTo.find (i) != _moveTo.end ()) ;
-  if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
+void TetraPllXBaseMacro< A > :: unattach2 (int i) 
+{
+  assert( i >= 0 );
   mytetra ().myhface3 (0)->unattach2 (i) ;
   mytetra ().myhface3 (1)->unattach2 (i) ;
   mytetra ().myhface3 (2)->unattach2 (i) ;
   mytetra ().myhface3 (3)->unattach2 (i) ;
+
+  // reset move to 
+  _moveTo = -1;
+
   return ;
 }
 
 template < class A >
 void TetraPllXBaseMacro< A > :: attach2 (int i) 
 {
-  map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) {
-    _moveTo.insert (pair < const int, int > (i,1)) ;
-  } else {
-    if ((*pos).first == i) {
-      cerr << "  TetraPllXBaseMacro :: attach2 () WARNUNG versuchte mehrfache Zuweisung ignoriert " << endl ;
-      return ;
-    }
+  // don't attach elements twice 
+  if( _moveTo == -1 ) 
+  {
+    // set my destination 
+    _moveTo = i ;
+    
+    // also move all faces to the same process 
+    mytetra ().myhface3 (0)->attach2 (i) ;
+    mytetra ().myhface3 (1)->attach2 (i) ;
+    mytetra ().myhface3 (2)->attach2 (i) ;
+    mytetra ().myhface3 (3)->attach2 (i) ;
   }
-  mytetra ().myhface3 (0)->attach2 (i) ;
-  mytetra ().myhface3 (1)->attach2 (i) ;
-  mytetra ().myhface3 (2)->attach2 (i) ;
-  mytetra ().myhface3 (3)->attach2 (i) ;
   return ;
 }
 
 template < class A >
 bool TetraPllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
-  {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-    assert (_moveTo.size () == 1) ;
-    {
-      ObjectStream & os = osv[j];
-      os.writeObject (TETRA) ;
-      os.writeObject (mytetra ().myvertex (0)->ident ()) ;
-      os.writeObject (mytetra ().myvertex (1)->ident ()) ;
-      os.writeObject (mytetra ().myvertex (2)->ident ()) ;
-      os.writeObject (mytetra ().myvertex (3)->ident ()) ;
-      
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! mytetra_t :: myrule_t ::isValid (ObjectStream :: ENDOFSTREAM) ) ;
+  return doPackAll( osv, (GatherScatterType * ) 0 );
+}
 
-      // pack refinement information 
-      mytetra ().backup ( os ) ;
-      os.put( ObjectStream :: ENDOFSTREAM );
-      
-      // inline data if has any 
-      inlineData ( os ) ;
+template < class A >
+bool TetraPllXBaseMacro< A > :: doPackAll (vector < ObjectStream > & osv,
+                                           GatherScatterType* gs) 
+{
+  if( _moveTo >= 0 ) 
+  {
+    assert ((osv.begin () + _moveTo) < osv.end ()) ;
+      ObjectStream& os = osv[ _moveTo ];
+
+    os.writeObject (TETRA) ;
+    os.writeObject (mytetra ().myvertex (0)->ident ()) ;
+    os.writeObject (mytetra ().myvertex (1)->ident ()) ;
+    os.writeObject (mytetra ().myvertex (2)->ident ()) ;
+    os.writeObject (mytetra ().myvertex (3)->ident ()) ;
+
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! mytetra_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+    
+    // pack refinement information 
+    mytetra ().backup ( os );
+    os.put( ObjectStream :: ENDOFSTREAM );
+
+    // pack internal data if has any 
+    inlineData ( os ) ;
+    
+    // if gather scatter was passed 
+    if( gs ) 
+    {
+      // pack Dune data 
+      gs->inlineData( os , mytetra() );
     }
+
     _erasable = true ;
     return true ;
   }
@@ -756,39 +810,7 @@ template < class A >
 bool TetraPllXBaseMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
                                              GatherScatterType & gs) 
 {
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
-  {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-    assert (_moveTo.size () == 1) ;
-    {
-      ObjectStream& os = osv[j];
-
-      os.writeObject (TETRA) ;
-      os.writeObject (mytetra ().myvertex (0)->ident ()) ;
-      os.writeObject (mytetra ().myvertex (1)->ident ()) ;
-      os.writeObject (mytetra ().myvertex (2)->ident ()) ;
-      os.writeObject (mytetra ().myvertex (3)->ident ()) ;
-
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! mytetra_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
-      
-      // pack refinement information 
-      mytetra ().backup ( os );
-      os.put( ObjectStream :: ENDOFSTREAM );
-
-      // pack internal data if has any 
-      inlineData ( os ) ;
-      
-      // pack Dune data 
-      gs.inlineData( os , mytetra() );
-    }
-    _erasable = true ;
-    return true ;
-  }
-  return false ;
+  return doPackAll( osv, &gs );
 }
 
 template < class A >
@@ -831,16 +853,9 @@ void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os) const
 
 // packs macro element as internal bnd for other proc 
 template < class A >
-void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
-  bool hit = _moveTo.size () == 0 ? true : false ;
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i )
-  {
-    if ((*i).first != who) hit = true ;
-  }
-  
-  if (hit) 
+void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+{
+  if( _moveTo != who ) 
   {
     // write data to stream 
     packAsBndNow(fce,os); 
@@ -909,7 +924,7 @@ bool TetraPllXBaseMacro< A > :: erasable () const {
   return _erasable ;
 }
 
-// template instatiation 
+// template instantiation 
 template class TetraPllXBase< GitterBasisPll :: ObjectsPll :: TetraEmpty > ;
 template class TetraPllXBaseMacro< GitterBasisPll :: ObjectsPll :: tetra_IMPL > ;
 
@@ -942,7 +957,7 @@ Periodic3PllXBaseMacro< A > ::
 Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1 )
 : A(level, f0, s0, f1, s1 )
 , _moveTo ()
-, _ldbVertexIndex ( insideLdbVertexIndex() )
+, _ldbVertexIndex ( -1 )
 , _erasable (false) 
 {
 #ifdef GRAPHVERTEX_WITH_CENTER
@@ -956,18 +971,10 @@ Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1
 template < class A > 
 Periodic3PllXBaseMacro< A > :: ~Periodic3PllXBaseMacro () 
 {
-  vector < int > v ;
+  if( _moveTo >= 0 ) 
   {
-    v.reserve( _moveTo.size() );
-    typedef map < int, int, less < int > > :: const_iterator const_iterator;
-    const const_iterator iEnd =  _moveTo.end () ;
-    for (const_iterator i = _moveTo.begin () ; i != iEnd ; v.push_back ((*i++).first)) ;
+    unattach2 ( _moveTo );
   }
-  {
-    const vector < int > :: const_iterator iEnd = v.end () ;
-    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd ; unattach2 (*i++)) ;
-  }
-  return ;
 }
 
 template <class A>
@@ -992,60 +999,57 @@ void Periodic3PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) co
 }
 
 template < class A >
-void Periodic3PllXBaseMacro< A > :: unattach2 (int i) {
-  assert (_moveTo.find (i) != _moveTo.end ()) ;
-  if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
+void Periodic3PllXBaseMacro< A > :: unattach2 (int i) 
+{
+  assert ( i>= 0 );
   myperiodic ().myhface3 (0)->unattach2 (i) ;
   myperiodic ().myhface3 (1)->unattach2 (i) ;
+  _moveTo = -1;
   return ;
 }
 
 template < class A >
-void Periodic3PllXBaseMacro< A > :: attach2 (int i) {
-  map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) {
-    _moveTo.insert (pair < const int, int > (i,1)) ;
-  } else {
-    if ((*pos).first == i) {
-      cerr << "  Periodic3PllXBaseMacro :: attach2 () WARNUNG versuchte mehrfache Zuweisung ignoriert " << endl ;
-      return ;
-    }
+void Periodic3PllXBaseMacro< A > :: attach2 (int i) 
+{
+  if( _moveTo == -1 ) 
+  {
+    // store new destination 
+    _moveTo = i; 
+
+    // attach other elements 
+    myperiodic ().myhface3 (0)->attach2 (i) ;
+    myperiodic ().myhface3 (1)->attach2 (i) ;
   }
-  myperiodic ().myhface3 (0)->attach2 (i) ;
-  myperiodic ().myhface3 (1)->attach2 (i) ;
+
   return ;
 }
 
 template < class A >
 bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  if( _moveTo >= 0 ) 
   {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-    assert (_moveTo.size () == 1) ;
-    {
-      ObjectStream& os = osv[j];
-      os.writeObject (PERIODIC3) ;
-      os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (3)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (4)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (5)->ident ()) ;
-      
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
-      
-      // pack refinement information 
-      myperiodic ().backup ( os ) ;
-      os.put( ObjectStream :: ENDOFSTREAM );
+    assert ((osv.begin () + _moveTo) < osv.end ()) ;
+    ObjectStream& os = osv[ _moveTo ];
 
-      // pack internal data if has any 
-      inlineData ( os ) ;
-    }
+    os.writeObject (PERIODIC3) ;
+    os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (3)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (4)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (5)->ident ()) ;
+    
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! myperiodic_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+    
+    // pack refinement information 
+    myperiodic ().backup ( os ) ;
+    os.put( ObjectStream :: ENDOFSTREAM );
+
+    // pack internal data if has any 
+    inlineData ( os ) ;
+
     _erasable = true ;
     return true ;
   }
@@ -1053,14 +1057,9 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 }
 
 template < class A >
-void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
-  bool hit = _moveTo.size () == 0 ? true : false ;
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i)
-    if ((*i).first != who) hit = true ;
-
-  if (hit) 
+void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+{
+  if( _moveTo != who ) 
   {
     os.writeObject (HBND3INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
@@ -1068,8 +1067,8 @@ void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & 
     os.writeObject (myperiodic ().myvertex (fce,1)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (fce,2)->ident ()) ;
 
+    // see method unpackHbnd4Int 
     os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); // 1 == points are transmitted 
-    //cout << "Write periodic with poijnt " << std::endl;
 
     typedef Gitter :: Geometric :: tetra_GEO tetra_GEO ;
     typedef Gitter :: Geometric :: hasFace3  hasFace3 ;
@@ -1218,18 +1217,53 @@ void Periodic4PllXBaseMacro< A > :: unattach2 (int i) {
 }
 
 template < class A > 
-void Periodic4PllXBaseMacro< A > :: attach2 (int i) {
+void Periodic4PllXBaseMacro< A > :: attach2 (int i) 
+{
+  cout << "Periodic attach2 " << this << "  " <<  i << endl;
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) {
+  if (pos == _moveTo.end ()) 
+  {
     _moveTo.insert (pair < const int, int > (i,1)) ;
-  } else {
-    if ((*pos).first == i) {
+  } 
+  else 
+  {
+    // should only be attached once 
+    assert( false );
+    if ((*pos).first == i) 
+    {
       cerr << "  Periodic4PllXBaseMacro :: attach2 () WARNUNG versuchte mehrfache Zuweisung ignoriert " << endl ;
       return ;
     }
   }
-  myperiodic ().myhface4 (0)->attach2 (i) ;
-  myperiodic ().myhface4 (1)->attach2 (i) ;
+
+  // attach both neighbours to the same process 
+  for(int n=0; n<2; ++n ) 
+  {
+    this->myneighbour( n ).first->attachElement2( i );
+  }
+
+  /*
+    hexa_IMPL* hexa = ((hexa_IMPL *) nb.first);
+    hexa->attach2( i );
+    for( int j=0; j<6; ++j ) 
+    {
+      // skip the face connected to this periodic bnd 
+      if( j == nb.second ) continue ;
+
+      // check neighboring element 
+      myneighbour_t faceNb = hexa->myneighbour( j );
+      if( nb.first->isperiodic() )
+      {
+        
+      }
+    }
+  }
+  */
+
+  //attachElementNeighbours();
+
+  //myperiodic ().myhface4 (0)->attach2 (i) ;
+  //myperiodic ().myhface4 (1)->attach2 (i) ;
   return ;
 }
 
@@ -1275,16 +1309,45 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
 {
+
+}
+#if 0
   bool hit = _moveTo.size () == 0 ? true : false ;
   typedef map < int, int, less < int > > :: const_iterator const_iterator;
   const const_iterator iEnd =  _moveTo.end () ;
   for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i )
   {
+    cout << "check periodic packAsBnd " << (*i).first << " " << who << endl;
     if ((*i).first != who) hit = true ;
   }
 
   if (hit) 
   {
+    cout << "pack periodic4 as Bnd with faces" << (myperiodic ().myhface4(0)) 
+         << (myperiodic ().myhface4(1))  << endl;
+
+    // pack myself to other stream, since periodic boundaries 
+    // can exsist twice 
+    // this way a periodic boundary is pack anyway although not attached to any process 
+    os.writeObject (PERIODIC4) ;
+    os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (3)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (4)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (5)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (6)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (7)->ident ()) ;
+#if 0
+    /*
+    typedef typename  A :: myneighbour_t myneighbour_t;
+    myneighbour_t mynb = this->myneighbour( 0 );
+    if( mynb.first->firstLdbVertexIndex() >= 0 ) 
+      mynb = this->myneighbour( 1 );
+
+    mynb.first->packAsBnd( fce, who, os );
+    */
+
     os.writeObject (HBND4INT) ;
     os.writeObject (Gitter :: hbndseg :: closure) ;
     os.writeObject (myperiodic ().myvertex (fce,0)->ident ()) ;
@@ -1322,9 +1385,11 @@ void Periodic4PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & 
       os.writeObject ( p[1] ) ;
       os.writeObject ( p[2] ) ;
     }
+#endif
   }
   return ;
 }
+#endif
 
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i) 
@@ -1390,7 +1455,7 @@ HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
                          myhface4_t *f2, int s2, myhface4_t *f3, int s3,
                          myhface4_t *f4, int s4, myhface4_t *f5, int s5)
 : A(l, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5)
-, _moveTo ()
+, _moveTo ( -1 )
 , _ldbVertexIndex (-1)
 , _erasable (false) 
 {
@@ -1411,23 +1476,12 @@ HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
 }
 
 template < class A >
-HexaPllBaseXMacro< A > :: ~HexaPllBaseXMacro () {
-  vector < int > v ;
+HexaPllBaseXMacro< A > :: ~HexaPllBaseXMacro () 
+{
+  if( _moveTo >= 0 ) 
   {
-    // copy to vector because unattach2 is changing _moveTo 
-    // reserve memory 
-    v.reserve( _moveTo.size() );
-    typedef map < int, int, less < int > > :: const_iterator const_iterator;
-    const const_iterator iEnd =  _moveTo.end () ;
-    for( const_iterator i = _moveTo.begin () ; i != iEnd; ++i )
-      v.push_back ( (*i).first ) ;
+    unattach2( _moveTo );
   }
-  {
-    const vector < int > :: const_iterator iEnd = v.end () ; 
-    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd; ++i ) 
-      unattach2 ( *i ) ;
-  }
-  return ;
 }
 
 template < class A >
@@ -1441,9 +1495,13 @@ void HexaPllBaseXMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
 }
 
 template < class A >
-bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
+bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
+{
+  // element with periodic boundaries get higher weight 
+  const int factor = this->numberOfPeriodicBoundaries( myhexa() ) + 1 ;
+
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size ()
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size () * factor 
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _center
 #endif
@@ -1452,126 +1510,104 @@ bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & 
 }
 
 template < class A >
-void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int) const {
+void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int) const 
+{
   os.writeObject (ldbVertexIndex ()) ;
   return ;
 }
 
 template < class A >
-void HexaPllBaseXMacro< A > :: unattach2 (int i) {
-  assert (_moveTo.find (i) != _moveTo.end ()) ;
-  if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
+void HexaPllBaseXMacro< A > :: unattach2 (int i) 
+{
+  assert( i >= 0 );
   myhexa ().myhface4 (0)->unattach2 (i) ;
   myhexa ().myhface4 (1)->unattach2 (i) ;
   myhexa ().myhface4 (2)->unattach2 (i) ;
   myhexa ().myhface4 (3)->unattach2 (i) ;
   myhexa ().myhface4 (4)->unattach2 (i) ;
   myhexa ().myhface4 (5)->unattach2 (i) ;
+
+  // reset moveTo 
+  _moveTo = -1;
   return ;
 }
 
 template < class A >
-void HexaPllBaseXMacro< A > :: attach2 (int i) {
-  map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) {
-    _moveTo.insert (pair < const int, int > (i,1)) ;
-  } else {
-    if ((*pos).first == i) {
-      cerr << "  HexaPllBaseXMacro :: attach2 () WARNUNG versuchte mehrfache Zuweisung ignoriert " << endl ;
-      return ;
-    }
-  }
-  myhexa ().myhface4 (0)->attach2 (i) ;
-  myhexa ().myhface4 (1)->attach2 (i) ;
-  myhexa ().myhface4 (2)->attach2 (i) ;
-  myhexa ().myhface4 (3)->attach2 (i) ;
-  myhexa ().myhface4 (4)->attach2 (i) ;
-  myhexa ().myhface4 (5)->attach2 (i) ;
-  return ;
-}
-
-template < class A >
-bool HexaPllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv) 
+void HexaPllBaseXMacro< A > :: attach2 (int i) 
 {
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  // don't attach elements twice 
+  if( _moveTo == -1 ) 
   {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-    assert (_moveTo.size () == 1) ;
-    {
-      ObjectStream& os = osv[j];
-      os.writeObject (HEXA) ;
-      os.writeObject (myhexa ().myvertex (0)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (1)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (2)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (3)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (4)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (5)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (6)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (7)->ident ()) ;
-      
-      // make sure ObjectStream :: ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhexa_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
-      
-      // pack refinement information 
-      myhexa(). backup( os );
-      os.put( ObjectStream :: ENDOFSTREAM );
+    // store new destination 
+    _moveTo = i ;
 
-      // pack internal data if has any 
-      inlineData ( os ) ;
+    // also attach all my faces 
+    myhexa ().myhface4 (0)->attach2 (i) ;
+    myhexa ().myhface4 (1)->attach2 (i) ;
+    myhexa ().myhface4 (2)->attach2 (i) ;
+    myhexa ().myhface4 (3)->attach2 (i) ;
+    myhexa ().myhface4 (4)->attach2 (i) ;
+    myhexa ().myhface4 (5)->attach2 (i) ;
+  }
+  return ;
+}
+// pack all function for dune 
+template < class A >
+bool HexaPllBaseXMacro< A > :: doPackAll (vector < ObjectStream > & osv,
+                                          GatherScatterType* gs) 
+{
+  if( _moveTo >= 0 ) 
+  {
+    assert ((osv.begin () + _moveTo) < osv.end ()) ;
+    ObjectStream& os = osv[ _moveTo ];
+    
+    os.writeObject (HEXA) ;
+    os.writeObject (myhexa ().myvertex (0)->ident ()) ;
+    os.writeObject (myhexa ().myvertex (1)->ident ()) ;
+    os.writeObject (myhexa ().myvertex (2)->ident ()) ;
+    os.writeObject (myhexa ().myvertex (3)->ident ()) ;
+    os.writeObject (myhexa ().myvertex (4)->ident ()) ;
+    os.writeObject (myhexa ().myvertex (5)->ident ()) ;
+    os.writeObject (myhexa ().myvertex (6)->ident ()) ;
+    os.writeObject (myhexa ().myvertex (7)->ident ()) ;
+
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! myhexa_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+    
+    // backup refinement information 
+    myhexa(). backup ( os );
+    os.put( ObjectStream :: ENDOFSTREAM );
+    
+    // pack internal data if has any 
+    inlineData ( os ) ;
+
+    if( gs ) 
+    {
+      // pack Dune data 
+      gs->inlineData( os , myhexa() );
     }
+
     _erasable = true ;
     return true ;
   }
   return false ;
+}
+
+
+// packall without gather scatter 
+template < class A >
+bool HexaPllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv) 
+{
+  return doPackAll( osv, ( GatherScatterType* ) 0 );
 }
 
 // pack all function for dune 
 template < class A >
 bool HexaPllBaseXMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
-                                       GatherScatterType & gs) 
+                                            GatherScatterType & gs) 
 {
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
-  {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-    assert (_moveTo.size () == 1) ;
-    {
-      ObjectStream& os = osv[j];
-      
-      os.writeObject (HEXA) ;
-      os.writeObject (myhexa ().myvertex (0)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (1)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (2)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (3)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (4)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (5)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (6)->ident ()) ;
-      os.writeObject (myhexa ().myvertex (7)->ident ()) ;
-
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhexa_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
-      
-      // backup refinement information 
-      myhexa(). backup ( os );
-      os.put( ObjectStream :: ENDOFSTREAM );
-      
-      // pack internal data if has any 
-      inlineData ( os ) ;
-
-      // pack Dune data 
-      gs.inlineData( os , myhexa() );
-    }
-    _erasable = true ;
-    return true ;
-  }
-  return false ;
+  return doPackAll( osv, &gs );
 }
-
 
 template < class A >
 void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os) const 
@@ -1592,14 +1628,14 @@ void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os) const
   // know which face is the internal bnd 
   os.writeObject (fce);
  
-  for(int k=0; k<8; k++) 
+  for(int k=0; k<8; ++k) 
   {
     int vx = myhexa ().myvertex (k)->ident ();
     os.writeObject ( vx ) ;
   }
 
   int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
-  for(int vx=0; vx<4; vx++)
+  for(int vx=0; vx<4; ++vx)
   {
     const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
     os.writeObject( vertex->ident() );
@@ -1620,15 +1656,7 @@ void HexaPllBaseXMacro< A > :: packAsGhost(ObjectStream & os, int fce) const
 template < class A >
 void HexaPllBaseXMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
 {
-  bool hit = _moveTo.size () == 0 ? true : false ;
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i )
-  {
-    if ((*i).first != who) hit = true ;
-  }
-
-  if (hit) 
+  if ( _moveTo != who ) 
   {
     packAsBndNow( fce, os );
   }

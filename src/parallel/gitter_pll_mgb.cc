@@ -63,6 +63,7 @@ void ParallelGridMover :: initialize ()
     for (BuilderIF :: periodic3list_t :: iterator i = _periodic3List.begin () ; 
          i != _periodic3Listend ; _periodic3List.erase (i++)) 
     {
+      // note: the last vertex is flipped because of confusion with tetra keys
       _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
     }
@@ -73,6 +74,7 @@ void ParallelGridMover :: initialize ()
     for (BuilderIF :: periodic4list_t :: iterator i = _periodic4List.begin () ; 
          i != _periodic4Listend ; _periodic4List.erase (i++)) 
     {
+      // note: the last vertex is flipped because of confusion with hexa keys
       _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
     }
@@ -225,23 +227,27 @@ void ParallelGridMover :: initialize ()
       }
     }
   }
+
   {
     const elementMap_t :: iterator _periodic4Mapend = _periodic4Map.end ();
     for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; ++i)
     {
       if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) 
       {
-        toDeletePeriodic.push_back ((*i).first) ;
+        //toDeletePeriodic.push_back ((*i).first) ;
+        removeElement ((*i).first) ;
       }
     }
   }
 
   // delete all periodic elements first (needed for ghost info)
+  /*
   {
     const vector < elementKey_t > :: iterator toDeleteend = toDeletePeriodic.end (); 
     for (vector < elementKey_t > :: iterator i = toDeletePeriodic.begin () ; i != toDeleteend ; ++i )
       removeElement (*i) ;
   }
+  */
 
   // delete all internal boundaries 
   { 
@@ -330,7 +336,7 @@ void ParallelGridMover :: finalize ()
 
         hbndseg4_GEO * hb4 = myBuilder ().
               insert_hbnd4 (p->first(), p->second(), 
-                  Gitter :: hbndseg_STI :: closure, ghInfo );
+                            Gitter :: hbndseg_STI :: closure, ghInfo );
         _hbndseg4List.push_back (hb4) ;
       }
       delete p; 
@@ -511,6 +517,7 @@ void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os)
   os.readObject (v[3]) ;
   os.readObject (v[4]) ;
   os.readObject (v[5]) ;
+
   pair < periodic3_GEO *, bool > p = InsertUniquePeriodic3 (v) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
@@ -518,6 +525,7 @@ void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os)
 
 void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os) 
 {
+  cout << "Unpack periodic4 " << endl;
   int v [8] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -809,6 +817,36 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
     mpAccess ().insertRequestSymetric (db.scan ()) ;
     const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
     {
+      {
+        // iterate over all periodic elements and set 'to' of first neighbour
+        AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
+        for (w.first () ; ! w.done () ; w.next ())
+        {
+          pair< int, int > ldbVx = w.item().insideLdbVertexIndex() ;
+
+          int moveTo = -1;
+          if( ldbVx.first >= 0 ) 
+          {
+            const int to = db.getDestination ( ldbVx.first );
+            if( to != me ) 
+              moveTo = to;
+          }
+
+          if( ldbVx.second >= 0 ) 
+          {
+            const int to = db.getDestination ( ldbVx.second );
+            if( to != me ) 
+              moveTo = to;
+          }
+
+          if( moveTo != me ) 
+          {
+            w.item ().attach2 ( mpAccess ().link( moveTo ) ) ;
+          }
+        }
+      }
+
+      // attach all elements to thier new destinations 
       { 
         AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
         for (w.first () ; ! w.done () ; w.next ()) 
@@ -820,20 +858,6 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
           }
         }
       }
-
-      {
-        // iterate over all periodic elements and set 'to' of first neighbour
-        AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
-        for (w.first () ; ! w.done () ; w.next ())
-        {
-          // TODO: get destination of first neighbor and set this destination 
-          const int to = db.getDestination ( w.item().insideLdbVertexIndex() );
-
-          if (me != to)
-            w.item ().attach2 (mpAccess ().link( to )) ;
-        }
-      }
-
     }
     lap1 = clock () ;
     

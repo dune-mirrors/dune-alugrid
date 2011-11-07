@@ -151,6 +151,8 @@ template < class A > class FacePllBaseXMacro : public A
     virtual LinkedObject :: Identifier getIdentifier () const ;
 
   protected :
+    using A :: myhface ; 
+
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
 
@@ -223,6 +225,7 @@ class TetraPllXBaseMacro : public A
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
   protected:
+    bool doPackAll (vector < ObjectStream > &, GatherScatterType * ) ;
     void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
     void packAsBndNow (int, ObjectStream &) const;
     
@@ -230,7 +233,7 @@ class TetraPllXBaseMacro : public A
 #ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
 #endif
-    map < int, int, less < int > > _moveTo ;
+    int _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
 } ;
@@ -263,7 +266,12 @@ class Periodic3PllXBase : public A
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
   public :
     void writeDynamicState (ObjectStream &, int) const ;
-    void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
+
+    // access interior element and write data 
+    void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
+    { 
+      this->ElementData2os( os, gs );
+    }
 } ;
 
 template < class A > 
@@ -304,7 +312,8 @@ class Periodic3PllXBaseMacro : public A
 #ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
 #endif
-    map < int, int, less < int > > _moveTo ;
+    //map < int, int, less < int > > _moveTo ;
+    int _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
 } ;
@@ -341,7 +350,7 @@ class Periodic4PllXBase : public A {
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
     { 
-      assert(false); abort(); 
+      this->ElementData2os( os, gs );
     }
 } ;
 
@@ -451,6 +460,7 @@ class HexaPllBaseXMacro : public A
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
   protected :
+    bool doPackAll( vector < ObjectStream > &, GatherScatterType * );
     void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -460,7 +470,7 @@ class HexaPllBaseXMacro : public A
 #ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
 #endif
-    map < int, int, less < int > > _moveTo ;
+    int _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
 } ;
