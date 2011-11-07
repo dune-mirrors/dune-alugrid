@@ -745,6 +745,24 @@ void TetraPllXBaseMacro< A > :: unattach2 (int i)
 }
 
 template < class A >
+void TetraPllXBaseMacro< A > :: attachElement2 (const int destination, const int face) 
+{
+  attach2( destination );
+  // check all neighbours 
+  // face is the face this method was called from 
+  for( int f=0; f<4; ++f )
+  {
+    if( face == f ) continue ;
+
+    myneighbour_t nb = myneighbour( f );
+    if( nb.first->isperiodic() )
+    {
+      nb.first->attachPeriodic( destination );
+    }
+  }
+}
+
+template < class A >
 void TetraPllXBaseMacro< A > :: attach2 (int i) 
 {
   // don't attach elements twice 
@@ -1008,6 +1026,29 @@ void Periodic3PllXBaseMacro< A > :: unattach2 (int i)
   return ;
 }
 
+// return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
+template < class A >
+pair<int,int> Periodic3PllXBaseMacro< A > :: insideLdbVertexIndex() const
+{
+  return pair<int,int>  ( myneighbour( 0 ).first->firstLdbVertexIndex(),
+                          myneighbour( 1 ).first->firstLdbVertexIndex() );
+}
+
+template < class A >
+int Periodic3PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) const
+{
+  if( myhface3( 0 ) == &face )
+    return myneighbour( 1 ).first->firstLdbVertexIndex() ;
+  else
+    return myneighbour( 0 ).first->firstLdbVertexIndex() ;
+}
+
+template < class A >
+void Periodic3PllXBaseMacro< A > :: attachPeriodic(const int destination)
+{
+  attach2( destination );
+}
+
 template < class A >
 void Periodic3PllXBaseMacro< A > :: attach2 (int i) 
 {
@@ -1185,6 +1226,29 @@ void Periodic4PllXBaseMacro< A > :: unattach2 (int i) {
   return ;
 }
 
+// return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
+template < class A >
+pair<int,int> Periodic4PllXBaseMacro< A > :: insideLdbVertexIndex() const
+{
+  return pair<int,int>  ( myneighbour( 0 ).first->firstLdbVertexIndex(),
+                          myneighbour( 1 ).first->firstLdbVertexIndex() );
+}
+
+template < class A >
+int Periodic4PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) const
+{
+  if( myhface4( 0 ) == &face )
+    return myneighbour( 1 ).first->firstLdbVertexIndex() ;
+  else
+    return myneighbour( 0 ).first->firstLdbVertexIndex() ;
+}
+
+template < class A >
+void Periodic4PllXBaseMacro< A > :: attachPeriodic(const int destination)
+{
+  attach2( destination );
+}
+
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: attach2 (int i) 
 {
@@ -1196,7 +1260,6 @@ void Periodic4PllXBaseMacro< A > :: attach2 (int i)
   else 
   {
     // should only be attached once 
-    assert( false );
     if ((*pos).first == i) 
     {
       cerr << "  Periodic4PllXBaseMacro :: attach2 () WARNUNG versuchte mehrfache Zuweisung ignoriert " << endl ;
@@ -1207,7 +1270,8 @@ void Periodic4PllXBaseMacro< A > :: attach2 (int i)
   // attach both neighbours to the same process 
   for(int n=0; n<2; ++n ) 
   {
-    this->myneighbour( n ).first->attachElement2( i );
+    typename A :: myneighbour_t nb = this->myneighbour( n );
+    nb.first->attachElement2( i, nb.second );
   }
 
   /*
@@ -1421,6 +1485,24 @@ void HexaPllBaseXMacro< A > :: unattach2 (int i)
   // reset moveTo 
   _moveTo = -1;
   return ;
+}
+
+template < class A >
+void HexaPllBaseXMacro< A > :: attachElement2 (const int destination, const int face) 
+{
+  attach2( destination );
+  // check all neighbours 
+  // face is the face this method was called from 
+  for( int f=0; f<6; ++f )
+  {
+    if( face == f ) continue ;
+
+    myneighbour_t nb = myneighbour( f );
+    if( nb.first->isperiodic() )
+    {
+      nb.first->attachPeriodic( destination );
+    }
+  }
 }
 
 template < class A >

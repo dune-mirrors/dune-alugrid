@@ -221,6 +221,7 @@ void ParallelGridMover :: initialize ()
     {
       if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) 
       {
+        // false means no real element 
         removeElement ((*i).first, false ) ;
       }
     }
@@ -232,6 +233,7 @@ void ParallelGridMover :: initialize ()
     {
       if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) 
       {
+        // false means no real element 
         removeElement ((*i).first, false ) ;
       }
     }
@@ -249,7 +251,10 @@ void ParallelGridMover :: initialize ()
   {
     const vector < elementKey_t > :: iterator toDeleteend = toDelete.end (); 
     for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDeleteend ; ++i )
+    {
+      // true means we have a real element 
       removeElement (*i, true) ;
+    }
   }
 
   this->_initialized = true;
@@ -809,9 +814,12 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
         AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
         for (w.first () ; ! w.done () ; w.next ())
         {
+          // get both ldbVertices from the element of a periodic closure 
           pair< int, int > ldbVx = w.item().insideLdbVertexIndex() ;
 
           int moveTo = -1;
+          // check destinations of both elements 
+          // of a periodic element 
           if( ldbVx.first >= 0 ) 
           {
             const int to = db.getDestination ( ldbVx.first );

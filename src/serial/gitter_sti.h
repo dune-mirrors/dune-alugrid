@@ -668,7 +668,11 @@ public :
   {
   public:
     // return the ldbVertexIndex of the first element (inside)
-    virtual pair<int,int> insideLdbVertexIndex() const = 0;
+    virtual pair<int,int> insideLdbVertexIndex() const 
+    { 
+      abort();
+      return pair<int,int> (-1,-1);
+    }
   protected :
     hperiodic () {}
     virtual ~hperiodic () {}
@@ -1011,11 +1015,12 @@ public :
         throw stiExtender_t :: AccessPllException () ;
       }
 
-      virtual void attachElement2( int i ) { abort(); }
+      virtual void attachElement2( const int destination, const int face ) { abort(); }
+      virtual void attachPeriodic( const int destination ) { abort(); }
 
       // return ldbVertexIndex (default is -1), overloaded in Tetra and Hexa
       virtual int firstLdbVertexIndex() const { return -1; }
-      // return ldbVertexIndex, overloaded in Periodic3 and Periodic4 
+      // return ldbVertexIndex, overloaded in TetraPllMacro and HexaPllMacro 
       virtual int otherLdbVertexIndex( const hface& face ) const { return firstLdbVertexIndex(); }
 
   protected:  
@@ -1323,6 +1328,9 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface3_GEO myhface3_t ;
       typedef TetraRule  myrule_t ;
+
+      typedef pair < hasFace3 *, int > myneighbour_t ;
+
       inline Tetra (myhface3_t *, int, myhface3_t *, int, 
                     myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
@@ -1369,13 +1377,6 @@ public :
       // returns false because only bnd segments have projections 
       virtual bool hasVertexProjection () const { return false; }
 
-      // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here 
-      virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
-
-      virtual void attachElement2( int i ) 
-      { 
-        attach2( i ); 
-      }
     public :
       virtual myrule_t getrule () const = 0 ;
       
@@ -1424,30 +1425,6 @@ public :
       inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
-
-      // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
-      inline pair<int,int> insideLdbVertexIndex() const 
-      {
-        pair<int,int> p ( myneighbour( 0 ).first->firstLdbVertexIndex(),
-                          myneighbour( 1 ).first->firstLdbVertexIndex() );
-        return p;
-        /*
-        const int ldbVx = myneighbour( 0 ).first->firstLdbVertexIndex();
-        if( ldbVx < 0 ) 
-          return myneighbour( 1 ).first->firstLdbVertexIndex();
-        else 
-          return ldbVx;
-          */
-      }
-
-      // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
-      inline int otherLdbVertexIndex( const hface_STI& face ) const 
-      {
-        if( myhface3( 0 ) == &face ) 
-          return myneighbour( 1 ).first->firstLdbVertexIndex() ;
-        else 
-          return myneighbour( 0 ).first->firstLdbVertexIndex() ;
-      }
 
     public :
       inline myelementneighbour_t myelementneighbour( const int i ) ;
@@ -1508,6 +1485,8 @@ public :
       typedef hedge1_GEO myhedge1_t ;
       typedef hface4_GEO myhface4_t ;
       typedef HexaRule  myrule_t ;
+      typedef pair < hasFace4 *, int > myneighbour_t ;
+
       inline Hexa (myhface4_t *, int, myhface4_t *, int,
                    myhface4_t *, int, myhface4_t *, int, 
                    myhface4_t *, int, myhface4_t *, int) ;
@@ -1559,10 +1538,6 @@ public :
 
       // returns false because only bnd segments have projections 
       virtual bool hasVertexProjection () const { return false; }
-
-      // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here 
-      virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
-      virtual void attachElement2( int i ) { attach2( i ); }
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
@@ -1611,30 +1586,6 @@ public :
       inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
-
-      // return the first element's ldbVertexIndex (used in Periodic4PllXBaseMacro)
-      inline pair<int,int> insideLdbVertexIndex() const 
-      {
-        pair<int,int> p ( myneighbour( 0 ).first->firstLdbVertexIndex(),
-                          myneighbour( 1 ).first->firstLdbVertexIndex() );
-        return p;
-        /*
-        const int ldbVx = myneighbour( 0 ).first->firstLdbVertexIndex();
-        if( ldbVx < 0 ) 
-          return myneighbour( 1 ).first->firstLdbVertexIndex();
-        else 
-          return ldbVx;
-          */
-      }
-
-      // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
-      inline int otherLdbVertexIndex( const hface_STI& face ) const 
-      {
-        if( myhface4( 0 ) == &face ) 
-          return myneighbour( 1 ).first->firstLdbVertexIndex() ;
-        else 
-          return myneighbour( 0 ).first->firstLdbVertexIndex() ;
-      }
 
     public :
       inline myelementneighbour_t myelementneighbour( const int i ) ;

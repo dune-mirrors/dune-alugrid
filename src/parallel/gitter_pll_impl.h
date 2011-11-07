@@ -198,11 +198,14 @@ class TetraPllXBaseMacro : public A
   protected :
     using A :: TETRA ;
     using A :: HBND3INT ;
+    using A :: myneighbour ;
     typedef A mytetra_t ;
     inline mytetra_t& mytetra() { return *this; }
     inline const mytetra_t& mytetra() const { return *this; }
 
     typedef typename A :: myhface3_t myhface3_t;
+    typedef typename A :: myneighbour_t myneighbour_t;
+
     TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                        myhface3_t *f2, int s2, myhface3_t *f3, int s3);
 
@@ -211,10 +214,13 @@ class TetraPllXBaseMacro : public A
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
+    // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
+    virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
     virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
   public :
     virtual bool erasable () const ;
+    virtual void attachElement2 ( const int, const int );
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
@@ -281,10 +287,12 @@ class Periodic3PllXBaseMacro : public A
     typedef typename A :: myhface3_t myhface3_t;
     typedef typename A :: const_myneighbour_t const_myneighbour_t;
     typedef A myperiodic_t ;
+    typedef Gitter :: hface_STI hface_STI ;
 
     using A :: PERIODIC3 ;
     using A :: HBND3INT ;
-    using A :: insideLdbVertexIndex ;
+    using A :: myneighbour ;
+    using A :: myhface3 ;
 
     Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1) ;
    ~Periodic3PllXBaseMacro () ;
@@ -301,6 +309,10 @@ class Periodic3PllXBaseMacro : public A
     virtual void setLoadBalanceVertexIndex ( const int ldbVx ) { _ldbVertexIndex = ldbVx ; }
 
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
+
+    virtual void attachPeriodic( const int destination ) ;
+    virtual pair<int,int> insideLdbVertexIndex() const ;
+    virtual int otherLdbVertexIndex( const hface_STI& face ) const ;
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
@@ -361,13 +373,15 @@ class Periodic4PllXBaseMacro : public A
     typedef typename A :: myhface4_t    myhface4_t;
     typedef typename A :: const_myneighbour_t const_myneighbour_t;
     typedef A myperiodic_t ;
+    typedef Gitter :: hface_STI hface_STI ;
 
     Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1) ;
    ~Periodic4PllXBaseMacro () ;
 
     using A :: PERIODIC4 ;
     using A :: HBND4INT ;
-    using A :: insideLdbVertexIndex ;
+    using A :: myneighbour ;
+    using A :: myhface4 ;
 
   protected:  
     inline myperiodic_t & myperiodic () { return *this ; }
@@ -380,6 +394,10 @@ class Periodic4PllXBaseMacro : public A
     virtual int ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
+
+    virtual void attachPeriodic( const int destination ) ;
+    virtual pair<int,int> insideLdbVertexIndex() const ;
+    virtual int otherLdbVertexIndex( const hface_STI& face ) const ;
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
@@ -431,12 +449,15 @@ class HexaPllBaseXMacro : public A
   protected:
     using A :: HEXA ;
     using A :: HBND4INT ;
+    using A :: myneighbour ;
 
     typedef A  myhexa_t ;
     inline myhexa_t & myhexa () { return *this; }
     inline const myhexa_t & myhexa () const { return *this; }
 
     typedef typename A :: myhface4_t myhface4_t;
+    typedef typename A :: myneighbour_t  myneighbour_t;
+
     HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
                              myhface4_t *f2, int s2, myhface4_t *f3, int s3,
                              myhface4_t *f4, int s4, myhface4_t *f5, int s5) ;
@@ -444,8 +465,11 @@ class HexaPllBaseXMacro : public A
    ~HexaPllBaseXMacro () ;
     virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
+    // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
+    virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
     virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
+    virtual void attachElement2 ( const int, const int );
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     
