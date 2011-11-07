@@ -283,7 +283,7 @@ public :
   class DuneIndexProvider 
   {
   public:
-    enum { interior = 0 , border = 111 , ghost = 222 };
+    enum { interior = 0 , border = 211 , ghost = 222, ghostperiodic = 233 };
 
     enum Flag
     {
@@ -435,13 +435,13 @@ public :
     bool isInterior () const 
     { 
       // interior is also external boundary which is not 0
-      return ((bndId() != ghost) && (bndId() != border)); 
+      return ( ! isGhost()  &&  ! isBorder() ); 
     }
    
     // returns true if item is ghost item 
     bool isGhost () const 
     {
-      return (bndId() == ghost);
+      return (bndId() == ghost) || (bndId() == ghostperiodic) ;
     }
     
     // returns trus, if item is border item 
@@ -668,7 +668,7 @@ public :
   {
   public:
     // return the ldbVertexIndex of the first element (inside)
-    virtual int insideLdbVertexIndex() const = 0;
+    virtual pair<int,int> insideLdbVertexIndex() const = 0;
   protected :
     hperiodic () {}
     virtual ~hperiodic () {}
@@ -730,6 +730,7 @@ public :
       fluxtube3d = 9, 
       closure = DuneIndexProvider :: border,  // also the value of border items 
       ghost_closure = DuneIndexProvider :: ghost , // also the value of ghost items 
+      ghost_closure_periodic = DuneIndexProvider :: ghostperiodic, 
       periodic = 254, // periodic boundaries 
       undefined = 255 } bnd_t ;
 
@@ -743,7 +744,7 @@ public :
     // returns ranges of boundary type as string 
     static std::string validRanges() 
     {
-      return "+-[0,...,253]";
+      return "+-[0,...,200], [201,...,253] for internal use only!";
     }
     
     virtual bnd_t bndtype () const = 0 ;
@@ -993,6 +994,7 @@ public :
 
     public:
       virtual bool isboundary() const = 0;    
+      virtual bool isperiodic() const = 0;    
       virtual int nbLevel() const = 0;
       virtual int nbLeaf() const = 0;
 
@@ -1009,8 +1011,26 @@ public :
         throw stiExtender_t :: AccessPllException () ;
       }
 
+      virtual void attachElement2( int i ) { abort(); }
+
       // return ldbVertexIndex (default is -1), overloaded in Tetra and Hexa
       virtual int firstLdbVertexIndex() const { return -1; }
+      // return ldbVertexIndex, overloaded in Periodic3 and Periodic4 
+      virtual int otherLdbVertexIndex( const hface& face ) const { return firstLdbVertexIndex(); }
+
+  protected:  
+      template <class elem_t> 
+      int numberOfPeriodicBoundaries( const elem_t& elem ) const 
+      {
+        const int nFaces = elem.nFaces();
+        int periodicNbs = 0;
+        for( int i=0; i<nFaces; ++i ) 
+        {
+          if( elem.myneighbour( i ).first->isperiodic() ) ++ periodicNbs ;
+        }
+        return periodicNbs ;
+      }
+
     } ;
 
     // Die Geometriesockelklassen sind die Grundlage zur Implementierung
@@ -1051,6 +1071,7 @@ public :
 
       // as we have not a real element or boundary here, return false 
       bool isRealObject () const { return false; }
+      bool isperiodic() const { return false; }
 
       // return false for vertex projection  
       inline bool hasVertexProjection() const { return false; }
@@ -1061,6 +1082,7 @@ public :
     public:
       // this is counted as boundary to seperate from elements 
       bool isboundary() const { return true; }    
+
       int nbLevel() const { return (assert(false),abort(),-1); }
       int nbLeaf() const { return (assert(false),abort(),-1);}
     } ;
@@ -1349,6 +1371,11 @@ public :
 
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here 
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
+
+      virtual void attachElement2( int i ) 
+      { 
+        attach2( i ); 
+      }
     public :
       virtual myrule_t getrule () const = 0 ;
       
@@ -1362,6 +1389,7 @@ public :
       int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
 
       virtual bool isboundary() const { return false; }
+      virtual bool isperiodic() const { return false; }
       virtual grid_t type() const { return tetra; }
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
@@ -1398,13 +1426,27 @@ public :
       inline int preCoarsening () ;
 
       // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
-      inline int insideLdbVertexIndex() const 
+      inline pair<int,int> insideLdbVertexIndex() const 
       {
+        pair<int,int> p ( myneighbour( 0 ).first->firstLdbVertexIndex(),
+                          myneighbour( 1 ).first->firstLdbVertexIndex() );
+        return p;
+        /*
         const int ldbVx = myneighbour( 0 ).first->firstLdbVertexIndex();
         if( ldbVx < 0 ) 
           return myneighbour( 1 ).first->firstLdbVertexIndex();
         else 
           return ldbVx;
+          */
+      }
+
+      // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
+      inline int otherLdbVertexIndex( const hface_STI& face ) const 
+      {
+        if( myhface3( 0 ) == &face ) 
+          return myneighbour( 1 ).first->firstLdbVertexIndex() ;
+        else 
+          return myneighbour( 0 ).first->firstLdbVertexIndex() ;
       }
 
     public :
@@ -1438,6 +1480,7 @@ public :
       int resetRefinementRequest () ;
       int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
       virtual bool isboundary() const { return true; }
+      virtual bool isperiodic() const { return true; }
       virtual grid_t type() const { return tetra_periodic; }
 
       // just returns level 
@@ -1519,6 +1562,7 @@ public :
 
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here 
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
+      virtual void attachElement2( int i ) { attach2( i ); }
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
@@ -1529,6 +1573,7 @@ public :
       int tagForBallRefinement (const alucoord_t (&)[3],double,int) ;
 
       virtual bool isboundary() const { return false; }
+      virtual bool isperiodic() const { return false; }
       virtual grid_t type() const { return hexa; }
 
       virtual void attachleafs() { abort(); }
@@ -1568,13 +1613,27 @@ public :
       inline int preCoarsening () ;
 
       // return the first element's ldbVertexIndex (used in Periodic4PllXBaseMacro)
-      inline int insideLdbVertexIndex() const 
+      inline pair<int,int> insideLdbVertexIndex() const 
       {
+        pair<int,int> p ( myneighbour( 0 ).first->firstLdbVertexIndex(),
+                          myneighbour( 1 ).first->firstLdbVertexIndex() );
+        return p;
+        /*
         const int ldbVx = myneighbour( 0 ).first->firstLdbVertexIndex();
         if( ldbVx < 0 ) 
           return myneighbour( 1 ).first->firstLdbVertexIndex();
         else 
           return ldbVx;
+          */
+      }
+
+      // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
+      inline int otherLdbVertexIndex( const hface_STI& face ) const 
+      {
+        if( myhface4( 0 ) == &face ) 
+          return myneighbour( 1 ).first->firstLdbVertexIndex() ;
+        else 
+          return myneighbour( 0 ).first->firstLdbVertexIndex() ;
       }
 
     public :
@@ -1601,6 +1660,7 @@ public :
       int test () const ;
 
       virtual bool isboundary() const { return true; }
+      virtual bool isperiodic() const { return true; }
       virtual grid_t type() const { return hexa_periodic; }
 
     public :
@@ -1653,6 +1713,8 @@ public :
       inline hface3_GEO * subface3 (int,int) const ;
       
       virtual bool isboundary() const { return true; }
+      virtual bool isperiodic() const { return false; }
+
       virtual int nChild () const;
       // just returns level 
       virtual int nbLevel() const { return level(); }
@@ -1702,6 +1764,7 @@ public :
       inline hface4_GEO * subface4 (int,int) const ;
       
       virtual bool isboundary() const { return true; }
+      virtual bool isperiodic() const { return false; }
       virtual int nChild () const;
       virtual int nbLevel() const {return level();}
       virtual int nbLeaf() const {return leaf();}
@@ -2406,6 +2469,37 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: Tetra* tetr
 }
 
 
+inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: Hexa* hexa )
+{
+  if( hexa ) 
+  {
+    const Gitter :: helement_STI* father = hexa->up();
+    s << "Hexa[" << hexa->getIndex() << "] ";
+    if ( father ) 
+      s << " (father " << father->getIndex() << ")";
+    s << " : ";
+    for(int i=0; i<8; ++i)
+    {
+      s << hexa->myvertex( i ) << " " ;
+    }
+    s << endl;
+    /*
+    for(int i=0; i<6; ++i)
+    {
+      s << "T-Face " << i << " ";
+      for(int j=0; j<3; ++j)
+        s << tetra->myvertex( i, j ) << " " ;
+      s << endl;
+    }
+    s << endl;
+    */
+  }
+  else 
+    s << "nullptr"; 
+  return s;
+}
+
+
 inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface3* face )
 {
   if( face ) 
@@ -2414,6 +2508,22 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface3* fac
       //<< ", " << v->ident() 
       << " : ";
     for (int i=0; i<3; ++i)
+      s << face->myvertex( i ) << " ";
+    s << endl;
+  }
+  else 
+    s << "nullptr"; 
+  return s;
+}
+
+inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface4* face )
+{
+  if( face ) 
+  {
+    s << "face ( " << face->getIndex() 
+      //<< ", " << v->ident() 
+      << " : ";
+    for (int i=0; i<4; ++i)
       s << face->myvertex( i ) << " ";
     s << endl;
   }
@@ -3000,7 +3110,7 @@ inline Gitter :: Geometric :: hface4 :: face4Neighbour :: face4Neighbour ()
 inline void
 Gitter :: Geometric :: hface4 :: face4Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
-  assert( _faceFront == null.first );
+  //assert( _faceFront == null.first );
   _faceFront = p.first;
   _numFront = p.second;
 }
@@ -3008,7 +3118,7 @@ Gitter :: Geometric :: hface4 :: face4Neighbour :: setFront ( const pair < mycon
 inline void
 Gitter :: Geometric :: hface4 :: face4Neighbour :: setRear ( const pair < myconnect_t *, int > &p )
 {
-  assert( _faceRear == null.first );
+  //assert( _faceRear == null.first );
   _faceRear = p.first;
   _numRear = p.second;
 }
