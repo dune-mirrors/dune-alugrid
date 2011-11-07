@@ -968,33 +968,46 @@ void GitterPll :: exchangeStaticState () {
   try {
     const int nl = mpAccess ().nlinks () ;
     vector < ObjectStream > osv (nl) ;
-    {for (int l = 0 ; l < nl ; l ++ ) {
-      AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
-      AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
-      for (wi.first () ; ! wi.done () ; wi.next ()) 
+    {
+      for (int l = 0 ; l < nl ; ++l) 
       {
-        pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
-        p.first->writeStaticState (osv [l], p.second) ;
+        AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
+        AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
+        for (wi.first () ; ! wi.done () ; wi.next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
+          p.first->writeStaticState (osv [l], p.second) ;
+        }
+        for (wo.first () ; ! wo.done () ; wo.next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
+          p.first->writeStaticState (osv [l], p.second) ;
+        }
       }
-      for (wo.first () ; ! wo.done () ; wo.next ()) {
-        pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
-        p.first->writeStaticState (osv [l], p.second) ;
-      }
-    }}
+    }
+
     osv = mpAccess ().exchange (osv) ;
-    {for (int l = 0 ; l < nl ; l ++) {
-      AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
-      AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
-      for (wo.first () ; ! wo.done () ; wo.next ()) {
-        pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
-        p.first->readStaticState (osv [l], p.second) ;
-      }
-      for (wi.first () ; ! wi.done () ; wi.next ()) {
-        pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
-        p.first->readStaticState (osv [l], p.second) ;
-      }
-    }}
-  } catch (Parallel ::  AccessPllException) {
+
+    {
+      for (int l = 0 ; l < nl ; ++l) 
+      {
+        AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
+        AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
+        for (wo.first () ; ! wo.done () ; wo.next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
+          p.first->readStaticState (osv [l], p.second) ;
+        }
+        for (wi.first () ; ! wi.done () ; wi.next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
+          p.first->readStaticState (osv [l], p.second) ;
+        }
+      } 
+    }
+  } 
+  catch (Parallel ::  AccessPllException) 
+  {
     cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
   }
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: exchangeStaticState () used " 

@@ -754,11 +754,9 @@ void TetraPllXBaseMacro< A > :: attachElement2 (const int destination, const int
   {
     if( face == f ) continue ;
 
-    myneighbour_t nb = myneighbour( f );
-    if( nb.first->isperiodic() )
-    {
-      nb.first->attachPeriodic( destination );
-    }
+    // attach also periodic neighbours
+    // this method only affects periodic neighbours 
+    myneighbour( f ).first->attachPeriodic( destination );
   }
 }
 
@@ -974,7 +972,7 @@ template < class A >
 Periodic3PllXBaseMacro< A > :: 
 Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1 )
 : A(level, f0, s0, f1, s1 )
-, _moveTo ()
+, _moveTo ( -1 )
 , _ldbVertexIndex ( -1 )
 , _erasable (false) 
 {
@@ -1057,12 +1055,13 @@ void Periodic3PllXBaseMacro< A > :: attach2 (int i)
     // store new destination 
     _moveTo = i; 
 
-    // attach other elements 
-    myperiodic ().myhface3 (0)->attach2 (i) ;
-    myperiodic ().myhface3 (1)->attach2 (i) ;
+    // attach both neighbours to the same process 
+    for(int n=0; n<2; ++n ) 
+    {
+      typename A :: myneighbour_t nb = this->myneighbour( n );
+      nb.first->attachElement2( i, nb.second );
+    }
   }
-
-  return ;
 }
 
 template < class A >
@@ -1102,6 +1101,8 @@ void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & 
 {
   // we require that periodic element are never packed as boundary 
   // since they are on the same process as their faces 
+  if( _moveTo != who ) 
+    cout << "move to wrong " << _moveTo << " " << who << endl;
   assert( _moveTo == who );
 }
 
@@ -1161,7 +1162,7 @@ template < class A >
 Periodic4PllXBaseMacro< A > :: 
 Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1) 
   : A(level, f0, s0, f1, s1 )
-  , _moveTo ()
+  , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
   , _erasable (false) 
 {
@@ -1174,18 +1175,12 @@ Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1
 }
 
 template < class A > 
-Periodic4PllXBaseMacro< A > :: ~Periodic4PllXBaseMacro () {
-  vector < int > v ;
+Periodic4PllXBaseMacro< A > :: ~Periodic4PllXBaseMacro () 
+{
+  if ( _moveTo >= 0 ) 
   {
-    v.reserve( _moveTo.size() ); 
-    typedef map < int, int, less < int > > :: const_iterator const_iterator;
-    const const_iterator iEnd =  _moveTo.end () ;
-    for (const_iterator i = _moveTo.begin () ; i != iEnd ; v.push_back ((*i++).first)) ;
+    unattach2( _moveTo );
   }
-  {
-    const vector < int > :: const_iterator iEnd = v.end () ;
-    for (vector < int > :: const_iterator i = v.begin () ; i != iEnd ; unattach2 (*i++)) ;}
-  return ;
 }
 
 template < class A > 
@@ -1218,12 +1213,12 @@ void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) co
 }
 
 template < class A > 
-void Periodic4PllXBaseMacro< A > :: unattach2 (int i) {
-  assert (_moveTo.find (i) != _moveTo.end ()) ;
-  if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
+void Periodic4PllXBaseMacro< A > :: unattach2 (int i) 
+{
+  assert (i >= 0 );
   myperiodic ().myhface4 (0)->unattach2 (i) ;
   myperiodic ().myhface4 (1)->unattach2 (i) ;
-  return ;
+  _moveTo = -1;
 }
 
 // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
@@ -1252,86 +1247,48 @@ void Periodic4PllXBaseMacro< A > :: attachPeriodic(const int destination)
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: attach2 (int i) 
 {
-  map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) 
+  if( _moveTo == -1 ) 
   {
-    _moveTo.insert (pair < const int, int > (i,1)) ;
-  } 
-  else 
-  {
-    // should only be attached once 
-    if ((*pos).first == i) 
+    // store my destination 
+    _moveTo = i ;
+
+    // attach both neighbours to the same process 
+    for(int n=0; n<2; ++n ) 
     {
-      cerr << "  Periodic4PllXBaseMacro :: attach2 () WARNUNG versuchte mehrfache Zuweisung ignoriert " << endl ;
-      return ;
+      typename A :: myneighbour_t nb = this->myneighbour( n );
+      nb.first->attachElement2( i, nb.second );
     }
   }
-
-  // attach both neighbours to the same process 
-  for(int n=0; n<2; ++n ) 
-  {
-    typename A :: myneighbour_t nb = this->myneighbour( n );
-    nb.first->attachElement2( i, nb.second );
-  }
-
-  /*
-    hexa_IMPL* hexa = ((hexa_IMPL *) nb.first);
-    hexa->attach2( i );
-    for( int j=0; j<6; ++j ) 
-    {
-      // skip the face connected to this periodic bnd 
-      if( j == nb.second ) continue ;
-
-      // check neighboring element 
-      myneighbour_t faceNb = hexa->myneighbour( j );
-      if( nb.first->isperiodic() )
-      {
-        
-      }
-    }
-  }
-  */
-
-  //attachElementNeighbours();
-
-  //myperiodic ().myhface4 (0)->attach2 (i) ;
-  //myperiodic ().myhface4 (1)->attach2 (i) ;
-  return ;
 }
 
 template < class A > 
 bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  if( _moveTo >= 0 ) 
   {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-    assert (_moveTo.size () == 1) ;
-    {
-      ObjectStream& os = osv[j];
-      
-      os.writeObject (PERIODIC4) ;
-      os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (3)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (4)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (5)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (6)->ident ()) ;
-      os.writeObject (myperiodic ().myvertex (7)->ident ()) ;
+    assert ((osv.begin () + _moveTo) < osv.end ()) ;
+    ObjectStream& os = osv[ _moveTo ];
+    
+    os.writeObject (PERIODIC4) ;
+    os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (3)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (4)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (5)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (6)->ident ()) ;
+    os.writeObject (myperiodic ().myvertex (7)->ident ()) ;
 
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
-      
-      // pack refinement information 
-      myperiodic ().backup ( os ) ;
-      os.put( ObjectStream :: ENDOFSTREAM );
-      
-      // pack internal data if has any 
-      inlineData ( os ) ;
-    }
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! myperiodic_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+    
+    // pack refinement information 
+    myperiodic ().backup ( os ) ;
+    os.put( ObjectStream :: ENDOFSTREAM );
+    
+    // pack internal data if has any 
+    inlineData ( os ) ;
+
     _erasable = true ;
     return true ;
   }
@@ -1497,11 +1454,9 @@ void HexaPllBaseXMacro< A > :: attachElement2 (const int destination, const int 
   {
     if( face == f ) continue ;
 
-    myneighbour_t nb = myneighbour( f );
-    if( nb.first->isperiodic() )
-    {
-      nb.first->attachPeriodic( destination );
-    }
+    // attach also periodic neighbours
+    // this method only affects periodic neighbours 
+    myneighbour( f ).first->attachPeriodic( destination );
   }
 }
 

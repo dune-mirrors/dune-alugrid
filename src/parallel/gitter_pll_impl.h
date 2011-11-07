@@ -324,7 +324,6 @@ class Periodic3PllXBaseMacro : public A
 #ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
 #endif
-    //map < int, int, less < int > > _moveTo ;
     int _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
@@ -409,7 +408,7 @@ class Periodic4PllXBaseMacro : public A
 #ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
 #endif
-    map < int, int, less < int > > _moveTo ;
+    int _moveTo ;
     int _ldbVertexIndex ;
     bool _erasable ;
 } ;

@@ -814,10 +814,10 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
         AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
         for (w.first () ; ! w.done () ; w.next ())
         {
-          // get both ldbVertices from the element of a periodic closure 
+          // get both ldbVertices from the elements of a periodic closure 
           pair< int, int > ldbVx = w.item().insideLdbVertexIndex() ;
 
-          int moveTo = -1;
+          int moveTo = me;
           // check destinations of both elements 
           // of a periodic element 
           if( ldbVx.first >= 0 ) 
