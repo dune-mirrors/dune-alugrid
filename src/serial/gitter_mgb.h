@@ -231,7 +231,9 @@ Hbnd4IntStorage( hface4_GEO * f, int tw, MacroGhostInfoHexa* p)
     
 inline MacroGridBuilder :: Hbnd4IntStorage :: 
 Hbnd4IntStorage( hface4_GEO * f, int tw )
- : _ptr(0) , _first(f) , _second(tw) {}
+ : _ptr(0) , _first(f) , _second(tw) 
+{
+}
 
 inline MacroGridBuilder :: Hbnd4IntStorage :: ~Hbnd4IntStorage () 
 {

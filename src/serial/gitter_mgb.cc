@@ -218,7 +218,8 @@ pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: Insert
   if (hit == _periodic4Map.end ()) {
     hface4_GEO * face [2] ;
     int twst [2] ;
-    for (int fce = 0 ; fce < 2 ; fce ++ ) {
+    for (int fce = 0 ; fce < 2 ; fce ++ ) 
+    {
       int x [4] ;
       x [0] = v [Periodic4 :: prototype [fce][0]] ;
       x [1] = v [Periodic4 :: prototype [fce][1]] ;
@@ -231,7 +232,9 @@ pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: Insert
     assert (t) ;
     _periodic4Map [key] = t ;
     return pair < periodic4_GEO *, bool > (t,true) ;
-  } else {
+  } 
+  else 
+  {
     return pair < periodic4_GEO *, bool > ((periodic4_GEO *)(*hit).second,false) ;
   }
 }
@@ -241,12 +244,10 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k)
 {
   // Der Schl"ussel sollte nur in genau einer Map vorliegen.
 
-// Anfang - Neu am 23.5.02 (BS)
   assert ((_hexaMap.find (k) == _hexaMap.end () ? 0 : 1)
         + (_tetraMap.find(k) == _tetraMap.end () ? 0 : 1)
         + (_periodic3Map.find (k) == _periodic3Map.end () ? 0 : 1)
-  + (_periodic4Map.find (k) == _periodic4Map.end () ? 0 : 1) == 1) ;
-// Ende - Neu am 23.5.02 (BS)
+        + (_periodic4Map.find (k) == _periodic4Map.end () ? 0 : 1) == 1) ;
 
   elementMap_t :: iterator hit = _tetraMap.find (k) ;
   if (hit != _tetraMap.end ()) 
@@ -310,6 +311,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k)
       assert( nb.first );
       assert( nb.second >= 0 );
 
+      cout << "Create periodic ghost info " << endl;
       _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), 
                             p4->myhface4 (i)->myvertex (1)->ident (), 
                             p4->myhface4 (i)->myvertex (2)->ident ())
