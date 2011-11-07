@@ -1059,40 +1059,9 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 template < class A >
 void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
 {
-  if( _moveTo != who ) 
-  {
-    os.writeObject (HBND3INT) ;
-    os.writeObject (Gitter :: hbndseg :: closure) ;
-    os.writeObject (myperiodic ().myvertex (fce,0)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (fce,1)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (fce,2)->ident ()) ;
-
-    // see method unpackHbnd4Int 
-    os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); // 1 == points are transmitted 
-
-    typedef Gitter :: Geometric :: tetra_GEO tetra_GEO ;
-    typedef Gitter :: Geometric :: hasFace3  hasFace3 ;
-
-    const const_myneighbour_t nb = myperiodic().myneighbour( fce );
-    const tetra_GEO* tetra = (tetra_GEO *) nb.first ;
-
-    // know which face of the tetra is the internal bnd 
-    os.writeObject ( nb.second );
-   
-    for(int k=0; k<4; ++k) 
-    {
-      int vx = tetra->myvertex (k)->ident ();
-      os.writeObject ( vx ) ;
-    }
-
-    const Gitter :: Geometric :: VertexGeo * vertex = tetra->myvertex( nb.second );
-    os.writeObject( vertex->ident() );
-    const alucoord_t (&p)[3] = vertex->Point();
-    os.writeObject ( p[0] ) ;
-    os.writeObject ( p[1] ) ;
-    os.writeObject ( p[2] ) ;
-  }
-  return ;
+  // we require that periodic element are never packed as boundary 
+  // since they are on the same process as their faces 
+  assert( _moveTo == who );
 }
 
 template < class A >
@@ -1219,7 +1188,6 @@ void Periodic4PllXBaseMacro< A > :: unattach2 (int i) {
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: attach2 (int i) 
 {
-  cout << "Periodic attach2 " << this << "  " <<  i << endl;
   map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) 
   {
@@ -1309,87 +1277,10 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
 {
-
+  // we require that periodic element are never packed as boundary 
+  // since they are on the same process as their faces 
+  // assert( _moveTo[ 0 ].first == who );
 }
-#if 0
-  bool hit = _moveTo.size () == 0 ? true : false ;
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i )
-  {
-    cout << "check periodic packAsBnd " << (*i).first << " " << who << endl;
-    if ((*i).first != who) hit = true ;
-  }
-
-  if (hit) 
-  {
-    cout << "pack periodic4 as Bnd with faces" << (myperiodic ().myhface4(0)) 
-         << (myperiodic ().myhface4(1))  << endl;
-
-    // pack myself to other stream, since periodic boundaries 
-    // can exsist twice 
-    // this way a periodic boundary is pack anyway although not attached to any process 
-    os.writeObject (PERIODIC4) ;
-    os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (3)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (4)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (5)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (6)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (7)->ident ()) ;
-#if 0
-    /*
-    typedef typename  A :: myneighbour_t myneighbour_t;
-    myneighbour_t mynb = this->myneighbour( 0 );
-    if( mynb.first->firstLdbVertexIndex() >= 0 ) 
-      mynb = this->myneighbour( 1 );
-
-    mynb.first->packAsBnd( fce, who, os );
-    */
-
-    os.writeObject (HBND4INT) ;
-    os.writeObject (Gitter :: hbndseg :: closure) ;
-    os.writeObject (myperiodic ().myvertex (fce,0)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (fce,1)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (fce,2)->ident ()) ;
-    os.writeObject (myperiodic ().myvertex (fce,3)->ident ()) ;
-
-    // see method unpackHbnd4Int 
-    os.writeObject ( MacroGridMoverIF :: POINTTRANSMITTED ); // 1 == points are transmitted 
-
-    typedef Gitter :: Geometric :: hexa_GEO hexa_GEO ;
-    typedef Gitter :: Geometric :: hasFace4 hasFace ;
-
-    const const_myneighbour_t nb = myperiodic().myneighbour( fce );
-    const hexa_GEO* hexa = (hexa_GEO *) nb.first ;
-
-    // know which face of the hexa is the internal bnd 
-    os.writeObject ( nb.second );
-   
-    // write the vertex identifiers 
-    for(int k=0; k<8; ++k) 
-    {
-      int vx = hexa->myvertex ( k )->ident ();
-      os.writeObject ( vx ) ;
-    }
-
-    // write vertex id and coordinates of the face connected to the boundary
-    const int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[ nb.second ];
-    for(int vx=0; vx<4; ++vx)
-    {
-      const Gitter :: Geometric :: VertexGeo * vertex = hexa->myvertex(oppFace, vx); 
-      os.writeObject( vertex->ident() );
-      const alucoord_t (&p)[3] = vertex->Point();
-      os.writeObject ( p[0] ) ;
-      os.writeObject ( p[1] ) ;
-      os.writeObject ( p[2] ) ;
-    }
-#endif
-  }
-  return ;
-}
-#endif
 
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i) 

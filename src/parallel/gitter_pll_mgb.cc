@@ -190,11 +190,9 @@ void ParallelGridMover :: initialize ()
 
   // from constructor ParallelGridMover 
   vector < elementKey_t > toDelete ;
-  vector < elementKey_t > toDeletePeriodic ;
 
   // reserve memory 
   toDelete.reserve( _hexaMap.size() + _tetraMap.size() );
-  toDeletePeriodic.reserve( _periodic3Map.size() + _periodic4Map.size() );
   
   {
     const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
@@ -223,7 +221,7 @@ void ParallelGridMover :: initialize ()
     {
       if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) 
       {
-        toDeletePeriodic.push_back ((*i).first) ;
+        removeElement ((*i).first, false ) ;
       }
     }
   }
@@ -234,20 +232,10 @@ void ParallelGridMover :: initialize ()
     {
       if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) 
       {
-        //toDeletePeriodic.push_back ((*i).first) ;
-        removeElement ((*i).first) ;
+        removeElement ((*i).first, false ) ;
       }
     }
   }
-
-  // delete all periodic elements first (needed for ghost info)
-  /*
-  {
-    const vector < elementKey_t > :: iterator toDeleteend = toDeletePeriodic.end (); 
-    for (vector < elementKey_t > :: iterator i = toDeletePeriodic.begin () ; i != toDeleteend ; ++i )
-      removeElement (*i) ;
-  }
-  */
 
   // delete all internal boundaries 
   { 
@@ -261,7 +249,7 @@ void ParallelGridMover :: initialize ()
   {
     const vector < elementKey_t > :: iterator toDeleteend = toDelete.end (); 
     for (vector < elementKey_t > :: iterator i = toDelete.begin () ; i != toDeleteend ; ++i )
-      removeElement (*i) ;
+      removeElement (*i, true) ;
   }
 
   this->_initialized = true;
@@ -525,7 +513,6 @@ void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os)
 
 void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os) 
 {
-  cout << "Unpack periodic4 " << endl;
   int v [8] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
