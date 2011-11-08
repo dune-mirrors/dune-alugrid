@@ -680,9 +680,10 @@ template < class A > TetraTop < A >
   , _lvl (l) 
   , _nChild(nChild)
   , _rule (myrule_t :: nosplit)
-  , _suggest( myrule_t :: nosplit)
   , _type( (_up->_type + 1) % 3 ) // my type is (t+1)%d where t is the fathers type 
 {
+  _vxMap[ 0 ] = _vxMap[ 1 ] = _vxMap[ 2 ] = _vxMap[ 3 ] = -1;
+
   // set level 
   assert( this->level() == l );
   
@@ -723,15 +724,19 @@ TetraTop (int l, myhface3_t * f0, int t0,
   , _lvl (l) 
   , _nChild(0)  // we are macro ==> nChild 0 
   , _rule (myrule_t :: nosplit)
-  , _suggest( myrule_t :: nosplit)
   , _type( 0 ) // type of macro elements should be zero 
 { 
+  // initial mapping is identity  
+  _vxMap[ 0 ] = 0; 
+  _vxMap[ 1 ] = 1;
+  _vxMap[ 2 ] = 2;
+  _vxMap[ 3 ] = 3;
+
   assert( this->level() == l );
 
   // _up wird im Constructor uebergeben
   this->setIndex( indexManager().getIndex() );
 
-  //print();
   return ;
 }
 
@@ -973,6 +978,9 @@ template < class A >  void TetraTop < A > :: split_e01 ()
   assert( _inner );
   _rule = myrule_t( myrule_t :: e01 );
   this->detachleafs();
+
+  // remap vertices of children 
+  setNewMapping( h0, h1, 1, 0);
   return ;
 }
 
@@ -1029,19 +1037,19 @@ template < class A >  void TetraTop < A > :: split_e12 ()
 
   */
 
-  innertetra_t * h0 = new innertetra_t (newLevel, 
+  innertetra_t * h1 = new innertetra_t (newLevel, 
                                         subFace0.first, twist( 0 ),
                                         newFace, 0, 
                                         myhface3( 2 ),  twist( 2 ),
                                         subFace3.first, twist( 3 ), 
-                                        this, 0, childVolume) ;
+                                        this, 1, childVolume) ;
 
-  innertetra_t * h1 = new innertetra_t (newLevel, 
+  innertetra_t * h0 = new innertetra_t (newLevel, 
                                         subFace0.second, twist( 0 ),
                                         myhface3( 1 ), twist( 1 ),
                                         newFace, -1,
                                         subFace3.second, twist( 3 ),
-                                        this, 1, childVolume) ;
+                                        this, 0, childVolume) ;
 
   assert(h0 && h1) ;
 
@@ -1053,23 +1061,26 @@ template < class A >  void TetraTop < A > :: split_e12 ()
 
   // the new vertices are the ones that are missing
   // i.e. 3 in child 0  and  0 in child 1 
-  assert( h0->myvertex( 0 ) == myvertex( 0 ) );
-  assert( h0->myvertex( 1 ) == myvertex( 1 ) );
-  assert( h0->myvertex( 3 ) == myvertex( 3 ) );
-
   assert( h1->myvertex( 0 ) == myvertex( 0 ) );
-  assert( h1->myvertex( 2 ) == myvertex( 2 ) );
+  assert( h1->myvertex( 1 ) == myvertex( 1 ) );
   assert( h1->myvertex( 3 ) == myvertex( 3 ) );
+
+  assert( h0->myvertex( 0 ) == myvertex( 0 ) );
+  assert( h0->myvertex( 2 ) == myvertex( 2 ) );
+  assert( h0->myvertex( 3 ) == myvertex( 3 ) );
 
   // this is always the edge combo, i.e. if we 
   // split e30 then 3 is new in child 0 and 0 is new in child 1 
-  assert( h0->myvertex( 2 ) == h1->myvertex( 1 ) );
+  assert( h0->myvertex( 1 ) == h1->myvertex( 2 ) );
 
   h0->append(h1) ;
   _inner = new inner_t( h0, newFace ); 
   assert( _inner );
   _rule = myrule_t( myrule_t :: e12 );
   this->detachleafs();
+
+  // remap vertices of children 
+  setNewMapping( h0, h1, 1, 2 );
   return ;
 }
 
@@ -1166,6 +1177,9 @@ template < class A >  void TetraTop < A > :: split_e20 ()
   assert( _inner );
   _rule = myrule_t ( myrule_t :: e20 );
   this->detachleafs();
+
+  // remap vertices of children 
+  setNewMapping( h0, h1, 2, 0 );
   return ;
 }
 
@@ -1222,19 +1236,19 @@ template < class A >  void TetraTop < A > :: split_e23 ()
 
   */
 
-  innertetra_t * h0 = new innertetra_t (newLevel, 
+  innertetra_t * h1 = new innertetra_t (newLevel, 
                                         subFace0.first, twist( 0 ), 
                                         subFace1.first, twist( 1 ),
                                         newFace, 0, 
                                         myhface3( 3 ),  twist( 3 ),
-                                        this, 0, childVolume) ;
+                                        this, 1, childVolume) ;
 
-  innertetra_t * h1 = new innertetra_t (newLevel, 
+  innertetra_t * h0 = new innertetra_t (newLevel, 
                                         subFace0.second, twist( 0 ),
                                         subFace1.second, twist( 1 ),
                                         myhface3( 2 ),  twist( 2 ),
                                         newFace, -1,
-                                        this, 1, childVolume) ;
+                                        this, 0, childVolume) ;
 
   assert(h0 && h1) ;
 
@@ -1248,21 +1262,24 @@ template < class A >  void TetraTop < A > :: split_e23 ()
   // i.e. 3 in child 0  and  0 in child 1 
   assert( h0->myvertex( 0 ) == myvertex( 0 ) );
   assert( h0->myvertex( 1 ) == myvertex( 1 ) );
-  assert( h0->myvertex( 2 ) == myvertex( 2 ) );
+  assert( h0->myvertex( 3 ) == myvertex( 3 ) );
 
   assert( h1->myvertex( 0 ) == myvertex( 0 ) );
   assert( h1->myvertex( 1 ) == myvertex( 1 ) );
-  assert( h1->myvertex( 3 ) == myvertex( 3 ) );
+  assert( h1->myvertex( 2 ) == myvertex( 2 ) );
 
   // this is always the edge combo, i.e. if we 
   // split e30 then 3 is new in child 0 and 0 is new in child 1 
-  assert( h0->myvertex( 3 ) == h1->myvertex( 2 ) );
+  assert( h0->myvertex( 2 ) == h1->myvertex( 3 ) );
   
   h0->append(h1) ;
   _inner = new inner_t( h0, newFace ); 
   assert( _inner );
   _rule = myrule_t ( myrule_t :: e23 );
   this->detachleafs();
+
+  // remap vertices of children 
+  setNewMapping( h0, h1, 2, 3 );
   return ;
 }
 
@@ -1357,18 +1374,10 @@ template < class A >  void TetraTop < A > :: split_e30 ()
   h0->append(h1) ;
   _inner = new inner_t( h0, f0 ); 
   assert( _inner );
-  _rule = myrule_t ( myrule_t :: e30 );
+  _rule = myrule_t :: e30;
 
-  const myvertex_t* newVertex = h0->myvertex( 3 );
-  for( int i=0; i<3; ++ i) 
-  {
- //   if( newVertex == subFace2.
-  }
-
-  // suggest new rules for children following Stevenson, etc. 
-  h0->_suggest = suggestRule( h0, this->myvertex( 0 ), this->myvertex( 2 ) );
-  h1->_suggest = suggestRule( h1, this->myvertex( 3 ), this->myvertex( elementType () == 0 ? 1 : 2 ) );
-
+  // remap vertices of children 
+  setNewMapping( h0, h1, 3, 0 );
   this->detachleafs();
   return ;
 }
@@ -1465,58 +1474,60 @@ template < class A >  void TetraTop < A > :: split_e31 ()
 
   _inner = new inner_t( h0, newFace ); 
   assert( _inner );
-  _rule = myrule_t ( myrule_t :: e31 );
+  _rule = myrule_t :: e31;
   this->detachleafs();
 
-  // suggest new rules for children following Stevenson, etc. 
-  h0->_suggest = suggestRule( h0, this->myvertex( 0 ), this->myvertex( 2 ) );
-  h1->_suggest = suggestRule( h1, this->myvertex( 3 ), this->myvertex( elementType () == 0 ? 1 : 2 ) );
-
+  // remap vertices of children 
+  setNewMapping( h0, h1, 3, 1 );
   return ;
 }
 
 // --suggestRule 
-template < class A >  typename TetraTop < A > :: myrule_t 
-TetraTop < A > :: suggestRule( const innertetra_t* tetra, const myvertex_t* vx0, const myvertex_t* vx1 ) const
+template < class A >  void 
+TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1, 
+                                 const int newVx0, const int newVx1 ) const 
 {
-  int vx[ 2 ] = { -1, -1 };
+  // set vertex mapping 
+  h0->_vxMap[ 0 ] = _vxMap[ 0 ]; 
+  //h0->_vxMap[ 1 ] = newVx0;
+  h0->_vxMap[ 1 ] = _vxMap[ 3 ];
+  h0->_vxMap[ 2 ] = _vxMap[ 2 ];
+  h0->_vxMap[ 3 ] = _vxMap[ 1 ];
+
+  // set vertex mapping 
+  h1->_vxMap[ 0 ] = _vxMap[ 3 ]; 
+  h1->_vxMap[ 1 ] = _vxMap[ 0 ];
+  const char face3 = ( elementType () == 2 ) ? 1 : 0;
+  h1->_vxMap[ 2 ] = _vxMap[ 1 + face3 ]; // for type 0   2 else 1 
+  h1->_vxMap[ 3 ] = _vxMap[ 2 - face3 ]; // for type 0   1 else 2 
+
+#ifndef NDEBUG
+  cout << "Map = ( " ;
+  for( int i=0; i<4 ; ++ i )
+  {
+    cout << int(h0->_vxMap[i]) << " " ;
+  }
+  cout << endl;
+  cout << "Map = ( " ;
+  for( int i=0; i<4 ; ++ i )
+  {
+    cout << int(h1->_vxMap[i]) << " " ;
+  }
+  cout << endl;
+
   for(int i=0; i<4; ++i ) 
   {
-    if( tetra->myvertex( i ) == vx0 ) 
+    for(int j=i+1; j<4; ++ j) 
     {
-      vx[ 0 ] = i;
-      break; 
+      if( i != j ) 
+      {
+        assert( h0->_vxMap[ i ] != h0->_vxMap[ j ] );
+        assert( h1->_vxMap[ i ] != h1->_vxMap[ j ] );
+      }
     }
   }
+#endif
 
-  for(int i=0; i<4; ++i ) 
-  {
-    if( tetra->myvertex( i ) == vx1 ) 
-    {
-      vx[ 1 ] = i;
-      break; 
-    }
-  }
-
-  if( vx[ 1 ] > vx[ 0 ] ) 
-  {
-    int swp = vx[ 0 ];
-    vx[ 0 ] = vx[ 1 ];
-    vx[ 1 ] = swp;
-  }
-
-  const myrule_t rules [ 4 ][ 4 ] = { 
-    { myrule_t :: crs, myrule_t :: e01 , myrule_t :: e20, myrule_t :: e30 }, 
-    { myrule_t :: e01 , myrule_t :: crs, myrule_t :: e12, myrule_t :: e31 }, 
-
-    { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 }, 
-
-    { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs } 
-  }; 
-
-  cout << "Found edge (" << vx[ 0 ] << "," << vx[ 1 ] << ")" <<endl;
-  
-  return rules[ vx[ 0 ] ][ vx[ 1 ]];
 }
 
 

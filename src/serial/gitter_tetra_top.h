@@ -78,7 +78,6 @@ template < class A > class Hface3Top : public A
     virtual void restore (ObjectStream &) ;
 
   protected:
-    void print() const ;
     // non-virtual methods of down and innerVertex 
     innerface_t* dwnPtr() ;
     const innerface_t* dwnPtr() const ;
@@ -286,7 +285,7 @@ template < class A > class TetraTop : public A
     // under the assumption that on level 0 all elements have type 0
     unsigned char elementType () const { return (_lvl % 3); }
 
-    myrule_t suggestRule( const innertetra_t*, const myvertex_t* , const myvertex_t* ) const;
+    void setNewMapping( innertetra_t*, innertetra_t*, const int, const int ) const ;
 
   private :
     innertetra_t * _bbb, * _up ; 
@@ -295,13 +294,14 @@ template < class A > class TetraTop : public A
 
     const unsigned char _lvl ;
     const signed char _nChild;
-    myrule_t _req, _rule , _suggest ;
+    unsigned char _vxMap[ 4 ] ;
+    myrule_t _req, _rule ;
     const unsigned char _type ; 
     
   private :
     void splitInfo() const 
     {
-      cout << "Split tetra (" << this->getIndex() << "," << int( _nChild) << ") ";
+      cout << endl << "Split tetra (" << this->getIndex() << "," << int( _nChild) << ") with rule " << int(_req)-2 << " ";
       if( _up ) 
         cout << "father (" << _up->getIndex() << "," << int( _up->_nChild) << ") rule = " << int( _up->_rule )-2 << endl;
       cout << endl;
@@ -370,15 +370,6 @@ template < class A > class TetraTop : public A
     void backupIndex (ostream &) const ;
     void restoreIndex (istream &, vector<bool>(&)[4] ) ;
   protected:  
-    void print() const 
-    {
-      cout << "Create Tetra: " << endl;
-      for(int i=0; i<4; ++ i) 
-      {
-        cout << this->myvertex( i ) << endl;
-      }
-    }
-
     // non-virtual methods of down and innerVertex 
     innertetra_t* dwnPtr() ;
     const innertetra_t* dwnPtr() const ;
@@ -627,7 +618,6 @@ Hface3Top (int l, myhedge1_t * e0,
   _rule (myrule_t :: nosplit)
 {
   this->setIndex( indexManager().getIndex() );
-  //print();
   return ;
 }
 
@@ -642,21 +632,9 @@ Hface3Top (int l, myhedge1_t * e0,
   _rule (myrule_t :: nosplit)
 {
   this->setIndex( indexManager().getIndex() );
-  // print();
   return ;
 }
 
-
-template < class A > inline void Hface3Top < A > :: print () const
-{
-  cout << "Create face " << endl;
-  for( int i=0; i<3; ++i) 
-    cout << this->myvertex( i ) << endl;
-  for( int i=0; i<3; ++i)
-  {
-    cout << "edge " << i << " " << this->myhedge1(i)->myvertex( 0 ) << " " << this->myhedge1(i)->myvertex( 1 ) << endl;
-  }
-}
 template < class A > inline Hface3Top < A > :: ~Hface3Top () 
 {
   this->freeIndex( indexManager() );
@@ -886,11 +864,31 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
 
   if( r == myrule_t :: bisect )
   {
+    const myrule_t rules [ 4 ][ 4 ] = {
+      { myrule_t :: crs, myrule_t :: e01 , myrule_t :: e20, myrule_t :: e30 },
+      { myrule_t :: e01 , myrule_t :: crs, myrule_t :: e12, myrule_t :: e31 },
+
+      { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 },
+
+      { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs }
+    };
+
+
+    cout << "Map = ( " ;
+    for( int i=0; i<4 ; ++ i ) 
+    {
+      cout << int(_vxMap[i]) << " " ;
+    }
+    cout << endl;
+    // we always split edge 0 and 3 
+    // we just have to apply our vertex mapping 
+    _req = rules[ _vxMap[ 0 ] ][ _vxMap[ 3 ] ];
+    cout << "Request rule " << int( _req ) - 2 << " for tetra " << this << endl;
+#if 0
     // check edges here
     if( _up ) 
     {
       myrule_t fatherRule = _up->_rule ;
-
       cout << "Fatherrule is of element " << _up->getIndex() << " is " << int( fatherRule )-2 << endl;
       const myrule_t rules [ 2 ][ 6 ] = 
         // rules for child 0
@@ -923,6 +921,7 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
       assert( this->level() == 0 );
       _req = myrule_t :: e30 ;
     }
+#endif 
   }
   else 
   {
