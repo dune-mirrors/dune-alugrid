@@ -503,6 +503,12 @@ void ParallelGridMover :: unpackTetra (ObjectStream & os, GatherScatterType* gs 
 
 void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os) 
 {
+  // read boundary id 
+  int bnd ;
+  os.readObject (bnd) ;
+  Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bnd;
+
+  // read vertex ids 
   int v [6] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -511,13 +517,19 @@ void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os)
   os.readObject (v[4]) ;
   os.readObject (v[5]) ;
 
-  pair < periodic3_GEO *, bool > p = InsertUniquePeriodic3 (v) ;
+  pair < periodic3_GEO *, bool > p = InsertUniquePeriodic3 (v, b) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
 }	
 
 void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os) 
 {
+  // read boundary id 
+  int bnd ;
+  os.readObject (bnd) ;
+  Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bnd;
+
+  // read vertex ids 
   int v [8] ;
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -527,7 +539,7 @@ void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os)
   os.readObject (v[5]) ;
   os.readObject (v[6]) ;
   os.readObject (v[7]) ;
-  pair < periodic4_GEO *, bool > p = InsertUniquePeriodic4 (v) ;
+  pair < periodic4_GEO *, bool > p = InsertUniquePeriodic4 (v, b) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
 }

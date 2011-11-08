@@ -1015,7 +1015,8 @@ void GitterPll :: exchangeStaticState () {
   return ;
 }
 
-void GitterPll :: loadBalancerGridChangesNotify () {
+void GitterPll :: loadBalancerGridChangesNotify () 
+{
   assert (debugOption (20) ? (cout << "**GitterPll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
   const int np = mpAccess ().psize () ;
   LoadBalancer :: DataBase db ;
@@ -1029,13 +1030,12 @@ void GitterPll :: loadBalancerGridChangesNotify () {
   }
   bool neu = false ;
   {
-  // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
-  // 
-  // load  - eigene ElementLast
-  // mean  - mittlere ElementLast
-  // nload - Lastverh"altnis
+    // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
+    // 
+    // load  - eigene ElementLast
+    // mean  - mittlere ElementLast
+    // nload - Lastverh"altnis
 
-  
     double load = db.accVertexLoad () ;
     vector < double > v (mpAccess ().gcollect (load)) ;
     const vector < double > :: iterator iEnd = v.end () ;
@@ -1056,8 +1056,10 @@ void GitterPll :: loadBalancerGridChangesNotify () {
     for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
   }
-  if (neu) {
-    if (mpAccess ().gmax (_ldbMethod)) {
+  if (neu) 
+  {
+    if (mpAccess ().gmax (_ldbMethod)) 
+    {
       repartitionMacroGrid (db) ;
       notifyMacroGridChanges () ;
     }
@@ -1065,20 +1067,24 @@ void GitterPll :: loadBalancerGridChangesNotify () {
   return ;
 }
 
-void GitterPll :: loadBalancerMacroGridChangesNotify () {
-
+void GitterPll :: loadBalancerMacroGridChangesNotify () 
+{
   // Diese Methode beschreibt die Reaktion des Lastverteilers bzw.
   // seiner Datengrundlage auf "Anderungen des Grobgitters, d.h.
   // auf "Anderungen in der Grobgitterverteilung, Gr"osse usw.
 
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: loadBalancerMacroGridChangesNotify () " << endl, 1) : 1) ;
   int cnt = 0 ;
-  AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-  // get sizes 
-  vector < int > sizes = mpAccess ().gcollect (w.size ()) ;
+  AccessIterator < helement_STI > :: Handle w ( containerPll () ) ;
 
-  // count sizes for all processors 
-  for (int i = 0 ; i < mpAccess ().myrank () ; cnt += sizes [i++]) ;
+  // get number of macro elements 
+  const int macroElements = w.size () ;
+
+  // get sizes from all processes 
+  vector < int > sizes = mpAccess ().gcollect ( macroElements ) ;
+
+  // count sizes for all processors with a rank lower than mine 
+  for (int i = 0 ; i < mpAccess ().myrank () ; cnt += sizes [ i++ ]) ;
 
   // set ldb vertex indices to all elements 
   for (w.first () ; ! w.done () ; w.next (), ++ cnt ) 

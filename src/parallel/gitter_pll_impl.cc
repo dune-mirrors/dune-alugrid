@@ -258,7 +258,9 @@ template < class A > LinkedObject :: Identifier FacePllBaseXMacro < A > :: getId
       this->myhface ().myvertex (1)->ident (), this->myhface ().myvertex (2)->ident ()) ;
 }
 
-template < class A > bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & db) {
+template < class A > 
+bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & db) 
+{
   
   // Diese Methode erzeugt eine Kante im Graphen f"ur die Berechnung
   // der Neupartitionierung, der sie das Gewicht der Anzahl aller feinsten
@@ -280,7 +282,7 @@ template < class A > bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBal
     if( mycon1->isperiodic() ) 
     {
       assert( ! mycon2->isperiodic() ); 
-      ldbVx1 = mycon1->otherLdbVertexIndex( this->myhface() );
+      ldbVx1 = mycon1->otherLdbVertexIndex( myhface() );
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
     }
 
@@ -293,7 +295,7 @@ template < class A > bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBal
     
     // count leaf faces for this macro face 
     const int weight =  TreeIterator < typename Gitter :: hface_STI, 
-                                       is_leaf < Gitter :: hface_STI > > (this->myhface ()).size ();
+                                       is_leaf < Gitter :: hface_STI > > ( myhface () ).size ();
 
     // if we have a periodic situation 
     if( ldbVx1 < ldbVx2 ) 
@@ -305,12 +307,18 @@ template < class A > bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBal
     }
     else if( ldbVx1 == ldbVx2 ) 
     {
+      ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
+      ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
+
+      assert( ldbVx1 != ldbVx2 );
+      if( ldbVx1 < 0 || ldbVx2 < 0 ) 
+      {
+        cout << "ldbVx " << ldbVx1 << "  " << ldbVx2 << endl;
+        return false ;
+      }
+      assert( ldbVx1 >= 0 && ldbVx2 >= 0 );
       // the default graph edge 
-      db.edgeUpdate ( LoadBalancer :: GraphEdge 
-        ( mycon1->accessPllX ().ldbVertexIndex (),
-          mycon2->accessPllX ().ldbVertexIndex (),
-          weight ) );
-    
+      db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight ) );
     }
   }
   return true ;
@@ -702,6 +710,7 @@ int TetraPllXBaseMacro< A > :: ldbVertexIndex () const {
 
 template < class A >
 void TetraPllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
+  cout << "Set ldbVertex " << ldbVx << endl;
   _ldbVertexIndex = ldbVx ;
 }
 
@@ -958,6 +967,7 @@ void Periodic3PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const 
   // Der Schwerpunkt des "flachen" periodischen Randelements wird
   // auf die Mitte der linken Fl"ache gelegt. Per Definition.
 
+  /*
   static const double x = 1./3. ;
   alucoord_t p [3] ;
   LinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
@@ -965,13 +975,14 @@ void Periodic3PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const 
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
+  */
   return ;
 }
 
 template < class A >
 Periodic3PllXBaseMacro< A > :: 
-Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1 )
-: A(level, f0, s0, f1, s1 )
+Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1, Gitter :: hbndseg_STI :: bnd_t bt )
+: A(level, f0, s0, f1, s1, bt )
 , _moveTo ( -1 )
 , _ldbVertexIndex ( -1 )
 , _erasable (false) 
@@ -996,21 +1007,12 @@ Periodic3PllXBaseMacro< A > :: ~Periodic3PllXBaseMacro ()
 template <class A>
 bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
 {
-  /*
-  db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic ()).size ()
-#ifdef GRAPHVERTEX_WITH_CENTER
-      , _center
-#endif
-      )) ;
-  */
-
   return true ;
 }
 
 template < class A >
 void Periodic3PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
-  os.writeObject (ldbVertexIndex ()) ;
+  //os.writeObject (ldbVertexIndex ()) ;
   return ;
 }
 
@@ -1038,7 +1040,10 @@ int Periodic3PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) 
   if( myhface3( 0 ) == &face )
     return myneighbour( 1 ).first->firstLdbVertexIndex() ;
   else
+  {
+    assert(  myhface3( 1 ) == &face );
     return myneighbour( 0 ).first->firstLdbVertexIndex() ;
+  }
 }
 
 template < class A >
@@ -1073,6 +1078,11 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     ObjectStream& os = osv[ _moveTo ];
 
     os.writeObject (PERIODIC3) ;
+
+    // write boundary id 
+    int bnd = this->bndtype();
+    os.writeObject ( bnd );
+
     os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
@@ -1101,8 +1111,6 @@ void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & 
 {
   // we require that periodic element are never packed as boundary 
   // since they are on the same process as their faces 
-  if( _moveTo != who ) 
-    cout << "move to wrong " << _moveTo << " " << who << endl;
   assert( _moveTo == who );
 }
 
@@ -1148,6 +1156,7 @@ void Periodic4PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const 
   // Der Schwerpunkt des "flachen" periodischen Randelements wird
   // auf die Mitte der linken Fl"ache gelegt. Per Definition.
 
+  /*
   static const double x = .0 ;
   alucoord_t p [3] ;
   BilinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
@@ -1155,13 +1164,14 @@ void Periodic4PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const 
   os.writeObject (p [0]) ;
   os.writeObject (p [1]) ;
   os.writeObject (p [2]) ;
+  */
   return ;
 }
 
 template < class A > 
 Periodic4PllXBaseMacro< A > :: 
-Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1) 
-  : A(level, f0, s0, f1, s1 )
+Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1, Gitter :: hbndseg_STI :: bnd_t bt ) 
+  : A(level, f0, s0, f1, s1, bt )
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
   , _erasable (false) 
@@ -1185,6 +1195,7 @@ Periodic4PllXBaseMacro< A > :: ~Periodic4PllXBaseMacro ()
 
 template < class A > 
 int Periodic4PllXBaseMacro< A > :: ldbVertexIndex () const {
+  assert( _ldbVertexIndex >= 0 );
   return _ldbVertexIndex ;
 }
 
@@ -1194,21 +1205,14 @@ void Periodic4PllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx 
 }
 
 template < class A > 
-bool Periodic4PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) {
-  /*
-  db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myperiodic ()).size ()
-#ifdef GRAPHVERTEX_WITH_CENTER
-      , _center
-#endif
-      )) ;
-      */
+bool Periodic4PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
+{
   return true ;
 }
 
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
-  os.writeObject (ldbVertexIndex ()) ;
+  //os.writeObject (ldbVertexIndex ()) ;
   return ;
 }
 
@@ -1235,7 +1239,10 @@ int Periodic4PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) 
   if( myhface4( 0 ) == &face )
     return myneighbour( 1 ).first->firstLdbVertexIndex() ;
   else
+  {
+    assert(  myhface4( 1 ) == &face );
     return myneighbour( 0 ).first->firstLdbVertexIndex() ;
+  }
 }
 
 template < class A >
@@ -1249,8 +1256,12 @@ void Periodic4PllXBaseMacro< A > :: attach2 (int i)
 {
   if( _moveTo == -1 ) 
   {
+    //cout << "Attach periodic element to " << i << endl;
     // store my destination 
     _moveTo = i ;
+
+    myperiodic ().myhface4 (0)->attach2 (i) ;
+    myperiodic ().myhface4 (1)->attach2 (i) ;
 
     // attach both neighbours to the same process 
     for(int n=0; n<2; ++n ) 
@@ -1259,6 +1270,8 @@ void Periodic4PllXBaseMacro< A > :: attach2 (int i)
       nb.first->attachElement2( i, nb.second );
     }
   }
+
+  //cout << "Don't attach periodic element to " << i << " " << _moveTo <<endl;
 }
 
 template < class A > 
@@ -1270,6 +1283,11 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     ObjectStream& os = osv[ _moveTo ];
     
     os.writeObject (PERIODIC4) ;
+
+    // write boundary id 
+    int bnd = this->bndtype();
+    os.writeObject ( bnd );
+
     os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (2)->ident ()) ;
@@ -1398,11 +1416,13 @@ HexaPllBaseXMacro< A > :: ~HexaPllBaseXMacro ()
 
 template < class A >
 int HexaPllBaseXMacro< A > :: ldbVertexIndex () const {
+  assert( _ldbVertexIndex >= 0 );
   return _ldbVertexIndex ;
 }
 
 template < class A >
 void HexaPllBaseXMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
+  // cout << "Set ldbVertex " << ldbVx << endl;
   _ldbVertexIndex = ldbVx  ;
 }
 
@@ -1441,7 +1461,6 @@ void HexaPllBaseXMacro< A > :: unattach2 (int i)
 
   // reset moveTo 
   _moveTo = -1;
-  return ;
 }
 
 template < class A >
@@ -1454,6 +1473,7 @@ void HexaPllBaseXMacro< A > :: attachElement2 (const int destination, const int 
   {
     if( face == f ) continue ;
 
+    //cout << "Attach hexa neighbor to " << destination << "  " << _moveTo << endl;
     // attach also periodic neighbours
     // this method only affects periodic neighbours 
     myneighbour( f ).first->attachPeriodic( destination );
@@ -1466,6 +1486,7 @@ void HexaPllBaseXMacro< A > :: attach2 (int i)
   // don't attach elements twice 
   if( _moveTo == -1 ) 
   {
+    //cout << "Attach hexa to " << i << endl;
     // store new destination 
     _moveTo = i ;
 
@@ -1477,7 +1498,8 @@ void HexaPllBaseXMacro< A > :: attach2 (int i)
     myhexa ().myhface4 (4)->attach2 (i) ;
     myhexa ().myhface4 (5)->attach2 (i) ;
   }
-  return ;
+
+  //cout << "Don't attach hexa to " << i << " " << _moveTo << endl;
 }
 // pack all function for dune 
 template < class A >
@@ -1834,15 +1856,15 @@ insert_tetra (hface3_GEO *(&f)[4], int (&t)[4])
 }
 
 Gitter :: Geometric :: periodic3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) 
+insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2], Gitter :: hbndseg_STI :: bnd_t bt ) 
 {
-  return new ObjectsPll :: Periodic3EmptyPllMacro (f [0], t[0], f [1], t[1]) ;
+  return new ObjectsPll :: Periodic3EmptyPllMacro (f [0], t[0], f [1], t[1], bt) ;
 } 
 
 Gitter :: Geometric :: periodic4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) 
+insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2], Gitter :: hbndseg_STI :: bnd_t bt) 
 {
-  return new ObjectsPll :: Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1]) ;
+  return new ObjectsPll :: Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1], bt ) ;
 }
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 

@@ -276,7 +276,8 @@ class Periodic3PllXBase : public A
     // access interior element and write data 
     void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
     { 
-      this->ElementData2os( os, gs );
+      assert( false );
+      abort(); 
     }
 } ;
 
@@ -294,7 +295,7 @@ class Periodic3PllXBaseMacro : public A
     using A :: myneighbour ;
     using A :: myhface3 ;
 
-    Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1) ;
+    Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1, Gitter :: hbndseg_STI :: bnd_t bt ) ;
    ~Periodic3PllXBaseMacro () ;
 
   protected:
@@ -305,6 +306,7 @@ class Periodic3PllXBaseMacro : public A
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
+    virtual void readStaticState(ObjectStream &, int) const {};
     virtual int ldbVertexIndex () const { return _ldbVertexIndex ; }
     virtual void setLoadBalanceVertexIndex ( const int ldbVx ) { _ldbVertexIndex = ldbVx ; }
 
@@ -374,8 +376,8 @@ class Periodic4PllXBaseMacro : public A
     typedef A myperiodic_t ;
     typedef Gitter :: hface_STI hface_STI ;
 
-    Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1) ;
-   ~Periodic4PllXBaseMacro () ;
+    Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1, Gitter :: hbndseg_STI :: bnd_t bt ) ;
+    ~Periodic4PllXBaseMacro () ;
 
     using A :: PERIODIC4 ;
     using A :: HBND4INT ;
@@ -390,6 +392,7 @@ class Periodic4PllXBaseMacro : public A
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
+    virtual void readStaticState(ObjectStream &, int) const {};
     virtual int ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
@@ -728,8 +731,8 @@ public :
     class Periodic3EmptyPllMacro : public Periodic3PllXBaseMacro< periodic3_IMPL >
     {
     public :
-      Periodic3EmptyPllMacro (myhface3_t* f0,int s0, myhface3_t *f1,int s1) 
-        : Periodic3PllXBaseMacro< periodic3_IMPL >( 0, f0, s0, f1, s1 ) {}
+      Periodic3EmptyPllMacro (myhface3_t* f0, int s0, myhface3_t* f1, int s1, Gitter:: hbndseg_STI :: bnd_t bt ) 
+        : Periodic3PllXBaseMacro< periodic3_IMPL >( 0, f0, s0, f1, s1, bt ) {}
       virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
       virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
@@ -759,8 +762,8 @@ public :
     class Periodic4EmptyPllMacro : public Periodic4PllXBaseMacro< periodic4_IMPL >
     {
     public :
-      Periodic4EmptyPllMacro (myhface4_t* f0, int s0, myhface4_t* f1, int s1)
-        : Periodic4PllXBaseMacro< periodic4_IMPL >( 0, f0, s0, f1, s1 ) {}
+      Periodic4EmptyPllMacro (myhface4_t* f0, int s0, myhface4_t* f1, int s1, Gitter:: hbndseg_STI :: bnd_t bt ) 
+        : Periodic4PllXBaseMacro< periodic4_IMPL >( 0, f0, s0, f1, s1, bt ) {}
 
       virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
       virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
@@ -833,8 +836,8 @@ public :
         virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
         virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
 
-        virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) ;
-        virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) ;
+        virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], Gitter :: hbndseg_STI :: bnd_t) ;
 
         IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
         IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
