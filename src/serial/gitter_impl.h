@@ -227,25 +227,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual void resetGhostIndices() {}
 
       public:  
-        myneighbour_t getElementNeighbour();
-
-        ////////////////////////////////////////////////
-        // read of data 
-        ////////////////////////////////////////////////
-        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs , int borderFace );
-        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace );
-        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace );
-        virtual void os2ElementData(ObjectStream & os, GatherScatterType & gs );
-
-        /////////////////////////////////////////
-        //  writing of data 
-        /////////////////////////////////////////
-        virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace );
-        virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
-        virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
-        
-        // needed in writeDynamicState of PeriodicClosure 
-        void ElementData2os(ObjectStream & os, GatherScatterType & gs) const;
     } ;
     typedef Periodic3Top < Periodic3Empty > periodic3_IMPL ;
 
@@ -317,26 +298,6 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual void resetGhostIndices() {}
 
       public:  
-        myneighbour_t getElementNeighbour() ;
-        ////////////////////////////////////////////////
-        // read of data 
-        ////////////////////////////////////////////////
-        // scatter only on ghosts 
-        virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs, int borderFace );
-        // scatter data on ghost edges  
-        virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace );
-        // scatter data on ghost faces 
-        virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace );
-
-        //////////////////////////////////////////
-        //  writing of data 
-        //////////////////////////////////////////
-        virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace );
-        virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
-        virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
-
-        // needed in writeDynamicState of PeriodicClosure 
-        void ElementData2os(ObjectStream & os, GatherScatterType & gs) const;
       } ;
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL ;
  
