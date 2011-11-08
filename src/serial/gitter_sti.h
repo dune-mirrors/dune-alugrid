@@ -719,14 +719,14 @@ public :
       closure = DuneIndexProvider :: border,  // also the value of border items 
       ghost_closure = DuneIndexProvider :: ghost , // also the value of ghost items 
       ghost_closure_periodic = DuneIndexProvider :: ghostperiodic, 
-      periodic = 254, // periodic boundaries 
+      periodic = 254, // periodic boundaries (deprecated)
       undefined = 255 } bnd_t ;
 
     // returns true if bnd id is in range 
     static bool bndRangeCheck (const int pbt) 
     {
       const size_t bt = std::abs( pbt );
-      return ( bt >= 0 && bt < 254 );
+      return ( bt >= 0 && bt < 255 );
     }
 
     // returns ranges of boundary type as string 
@@ -997,6 +997,7 @@ public :
       // returns true, if underlying object is real 
       virtual bool isRealObject () const { return true; }
 
+      virtual int moveTo () const { abort(); return -1; }
     protected :
       hasFace () {}
       virtual ~hasFace () {}
@@ -1429,15 +1430,12 @@ public :
     public:  
       typedef pair < hasFace3 *, int > myneighbour_t ;
       typedef pair < const hasFace3 *, int > const_myneighbour_t;
-      typedef pair < tetra_GEO*, int > myelementneighbour_t ;
     protected:  
       inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
 
     public :
-      inline myelementneighbour_t myelementneighbour( const int i ) ;
-
       using hasFace3     :: accessPllX ;
       static const int prototype [2][3] ;
       inline virtual ~Periodic3 () ;
@@ -1590,15 +1588,12 @@ public :
     public:  
       typedef pair < hasFace4 *, int > myneighbour_t ;
       typedef pair < const hasFace4 *, int > const_myneighbour_t;
-      typedef pair < hexa_GEO*, int >  myelementneighbour_t ;
     protected:  
       inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
 
     public :
-      inline myelementneighbour_t myelementneighbour( const int i ) ;
-
       using hasFace4     :: accessPllX ;
       static const int prototype [2][4] ;
       inline virtual ~Periodic4 () ;
@@ -3538,26 +3533,6 @@ inline pair < const Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric
     : pair < const hasFace3 *, int > (myhface3 (i)->nb.rear ().first, myhface3 (i)->nb.rear ().second) ;
 }
 
-inline Gitter :: Geometric :: Periodic3 :: myelementneighbour_t 
-Gitter :: Geometric :: Periodic3 :: myelementneighbour( const int i ) 
-{
-  // get neighbour 
-  myneighbour_t nb = myneighbour( i );
-  // this is the case for internal boundaries 
-  if( nb.first->isboundary() ) 
-  {
-    // check for ghost element 
-    ghostpair_STI gpair = (( hbndseg3_GEO * ) nb.first )->getGhost();
-
-    return myelementneighbour_t( ((tetra_GEO * ) gpair.first), gpair.second );
-  }
-  else 
-  {
-    // return element,face 
-    return myelementneighbour_t( ( (tetra_GEO * ) nb.first ), nb.second );
-  }
-}
-
 inline int Gitter :: Geometric :: Periodic3 :: postRefinement () {
   return 0 ;
 }
@@ -3634,26 +3609,6 @@ inline pair < const Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric
   assert (0 <= i && i < 2) ;
   return twist (i) < 0 ? pair < const hasFace4 *, int > (myhface4 (i)->nb.front ().first, myhface4 (i)->nb.front ().second)
     : pair < const hasFace4 *, int > (myhface4 (i)->nb.rear ().first, myhface4 (i)->nb.rear ().second) ;
-}
-
-inline Gitter :: Geometric :: Periodic4 :: myelementneighbour_t
-Gitter :: Geometric :: Periodic4 :: myelementneighbour( const int i ) 
-{
-  // get neighbour 
-  myneighbour_t nb = myneighbour( i );
-  // this is the case for internal boundaries 
-  if( nb.first->isboundary() ) 
-  {
-    // check for ghost element 
-    ghostpair_STI gpair = (( hbndseg4_GEO * ) nb.first )->getGhost();
-
-    return myelementneighbour_t( ((hexa_GEO * ) gpair.first), gpair.second );
-  }
-  else 
-  {
-    // return element,face 
-    return myelementneighbour_t( ( (hexa_GEO * ) nb.first ), nb.second );
-  }
 }
 
 inline int Gitter :: Geometric :: Periodic4 :: postRefinement () {
