@@ -168,6 +168,7 @@ template < class A > class TetraTop : public A
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: inneredge_t   inneredge_t ;
     typedef typename A :: innerface_t   innerface_t ;
+    typedef Gitter :: Geometric :: VertexGeo  myvertex_t ;
     typedef typename A :: myhedge1_t    myhedge1_t ;
     typedef typename A :: myhface3_t    myhface3_t ;
     typedef typename A :: myrule_t      myrule_t ;
@@ -284,6 +285,9 @@ template < class A > class TetraTop : public A
     // the element type is obtained from the level of the element 
     // under the assumption that on level 0 all elements have type 0
     unsigned char elementType () const { return (_lvl % 3); }
+
+    myrule_t suggestRule( const innertetra_t*, const myvertex_t* , const myvertex_t* ) const;
+
   private :
     innertetra_t * _bbb, * _up ; 
     inner_t * _inner ;
@@ -291,7 +295,7 @@ template < class A > class TetraTop : public A
 
     const unsigned char _lvl ;
     const signed char _nChild;
-    myrule_t _req, _rule ;
+    myrule_t _req, _rule , _suggest ;
     const unsigned char _type ; 
     
   private :
@@ -891,6 +895,7 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
       const myrule_t rules [ 2 ][ 6 ] = 
         // rules for child 0
         { { myrule_t :: e31, 
+            //myrule_t :: e20,
             elementType() == 0 ? myrule_t :: e12 : myrule_t :: e20, 
             myrule_t :: e01, // ok ok 
             myrule_t :: e30, // ok 
@@ -899,14 +904,17 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
           },
         // rules for child 1
           { myrule_t :: e31, // ok 
+            //myrule_t :: e20 ,
             elementType() == 0 ? myrule_t :: e12 : myrule_t :: e20, 
             myrule_t :: e12, // ok ok 
             myrule_t :: e30,
-            myrule_t :: e31, // ok ok
+            myrule_t :: e31, 
+            //elementType() == 1 ? myrule_t :: e31 : myrule_t :: e01 , // ok ok
             myrule_t :: e23  // ok ok
            } 
         };
       _req = rules[ _nChild ][ int(fatherRule) - 2 ];
+      cout << "Suggested was " << int( _suggest ) -2 << endl;
       cout << "Set rule " << int( _req ) - 2 << " for element " << this->getIndex() << endl;
     }
     else 
