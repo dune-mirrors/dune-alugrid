@@ -878,6 +878,8 @@ template < class A >  void TetraTop < A > :: split_e01 ()
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
 
+  splitInfo();
+
   myhedge1_t* subEdge = this->subedge1 (2, 0);
   myhedge1_t* subEdge2 = this->subedge1 (3, 0);
   myhedge1_t* orgEdge = this->myhedge1( 5 ) ;
@@ -963,6 +965,7 @@ template < class A >  void TetraTop < A > :: split_e01 ()
   h0->append(h1) ;
   _inner = new inner_t( h0, newFace ); 
   assert( _inner );
+  _rule = myrule_t( myrule_t :: e01 );
   this->detachleafs();
   return ;
 }
@@ -972,6 +975,7 @@ template < class A >  void TetraTop < A > :: split_e12 ()
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
+  splitInfo();
 
   myhedge1_t* subEdge = this->subedge1 (3, 0);
   myhedge1_t* subEdge2 = this->subedge1 (0, 0);
@@ -1058,7 +1062,7 @@ template < class A >  void TetraTop < A > :: split_e12 ()
   h0->append(h1) ;
   _inner = new inner_t( h0, newFace ); 
   assert( _inner );
-  _rule = myrule_t :: e12 ;
+  _rule = myrule_t( myrule_t :: e12 );
   this->detachleafs();
   return ;
 }
@@ -1067,6 +1071,7 @@ template < class A >  void TetraTop < A > :: split_e20 ()
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
+  splitInfo();
 
   myhedge1_t* subEdge2 = this->subedge1 (1, 0);
   myhedge1_t* subEdge = this->subedge1 (3, 0);
@@ -1153,7 +1158,7 @@ template < class A >  void TetraTop < A > :: split_e20 ()
   h0->append(h1) ;
   _inner = new inner_t( h0, newFace ); 
   assert( _inner );
-  _rule = myrule_t :: e20 ;
+  _rule = myrule_t ( myrule_t :: e20 );
   this->detachleafs();
   return ;
 }
@@ -1162,6 +1167,8 @@ template < class A >  void TetraTop < A > :: split_e23 ()
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
+
+  splitInfo();
 
   myhedge1_t* subEdge2 = this->subedge1 (1, 0);
   myhedge1_t* subEdge = this->subedge1 (0, 0);
@@ -1248,7 +1255,7 @@ template < class A >  void TetraTop < A > :: split_e23 ()
   h0->append(h1) ;
   _inner = new inner_t( h0, newFace ); 
   assert( _inner );
-  _rule = myrule_t :: e23 ;
+  _rule = myrule_t ( myrule_t :: e23 );
   this->detachleafs();
   return ;
 }
@@ -1258,6 +1265,7 @@ template < class A >  void TetraTop < A > :: split_e30 ()
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
 
+  splitInfo();
   /* 
     
     3               2
@@ -1343,7 +1351,7 @@ template < class A >  void TetraTop < A > :: split_e30 ()
   h0->append(h1) ;
   _inner = new inner_t( h0, f0 ); 
   assert( _inner );
-  _rule = myrule_t :: e30 ;
+  _rule = myrule_t ( myrule_t :: e30 );
   this->detachleafs();
   return ;
 }
@@ -1352,6 +1360,8 @@ template < class A >  void TetraTop < A > :: split_e31 ()
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level () ;
+
+  splitInfo();
 
   myhedge1_t* subEdge2 = this->subedge1 (2, 0);
   myhedge1_t* subEdge = this->subedge1 (0, 0);
@@ -1438,7 +1448,7 @@ template < class A >  void TetraTop < A > :: split_e31 ()
 
   _inner = new inner_t( h0, newFace ); 
   assert( _inner );
-  _rule = myrule_t :: e31 ;
+  _rule = myrule_t ( myrule_t :: e31 );
   this->detachleafs();
   return ;
 }
@@ -1508,14 +1518,20 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
 {
   // make sure face twists are ok 
   bool twistOk = true ;
+
+  set< int > verticesFound ;
+
   for(int fce=0; fce<4; ++fce ) 
   {
+    for(int i=0; i<3; ++i ) 
+    {
+      verticesFound.insert( tetra->myvertex( fce, i )->getIndex() ); 
+    }
+
     //cout << "Check face " << fce << " of tetra " << tetra->getIndex() << " , type = " << int(tetra->_type) << " with twist " << tetra->twist( fce ) << " and chNr " << int(tetra->_nChild) << endl;
     for(int i=0; i<3; ++i ) 
     {
-      //const bool type2ch1 = ( nChild == 1 ) && (tetra->_type == 2);
-      //const int mapVx[4]  = { 0, 1, 2 , 3} ;//(type2ch1) ? 3:2 , (type2ch1) ? 2:3 };
-
+      verticesFound.insert( tetra->myvertex( fce, i )->getIndex() ); 
       // use proto type to check face twists 
       if( tetra->myvertex( Gitter :: Geometric :: Tetra :: prototype[ fce ][ i ] ) != 
               tetra->myvertex( fce, i ) )
@@ -1543,6 +1559,9 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
     //assert( tetra->myneighbour( fce ).first->isRealObject() );
   }
   
+  // make sure we have only 4 different vertices 
+  assert( verticesFound.size() == 4 );
+
   return twistOk;
 }
 
@@ -1983,7 +2002,8 @@ template < class A >  bool TetraTop < A > :: refine ()
     {
       assert (getrule () == myrule_t :: nosplit) ;
       _req = myrule_t :: nosplit ;
-      switch (r) {
+      switch (r) 
+      {
         case myrule_t :: crs :
         case myrule_t :: nosplit :
           return true ;
@@ -2004,6 +2024,7 @@ template < class A >  bool TetraTop < A > :: refine ()
         default :
           cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << int(getrule ()) ;
           cerr << "] (ignoriert) in " << __FILE__ << " " << __LINE__ << endl ;
+          assert( false );
           return false ;
       }
       

@@ -295,6 +295,14 @@ template < class A > class TetraTop : public A
     const unsigned char _type ; 
     
   private :
+    void splitInfo() const 
+    {
+      cout << "Split tetra (" << this->getIndex() << "," << int( _nChild) << ") ";
+      if( _up ) 
+        cout << "father (" << _up->getIndex() << "," << int( _up->_nChild) << ") rule = " << int( _up->_rule )-2 << endl;
+      cout << endl;
+    }
+
     inline IndexManagerType & indexManager() { 
       return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Elements ); }
     double calculateChildVolume(const double) const;
@@ -874,21 +882,32 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
 
   if( r == myrule_t :: bisect )
   {
-    innertetra_t* father = (innertetra_t * )this->up();
     // check edges here
-    if( father ) 
+    if( _up ) 
     {
-      myrule_t fatherRule = father->getrule();
-      static const myrule_t rules [ 2 ][ 6 ] = 
+      myrule_t fatherRule = _up->_rule ;
+
+      cout << "Fatherrule is of element " << _up->getIndex() << " is " << int( fatherRule )-2 << endl;
+      const myrule_t rules [ 2 ][ 6 ] = 
         // rules for child 0
-        { { myrule_t :: e30, myrule_t :: e31,
-            myrule_t :: e01, myrule_t :: e12,
-            myrule_t :: e20, myrule_t :: e12 /* ok */ },
+        { { myrule_t :: e31, 
+            elementType() == 0 ? myrule_t :: e12 : myrule_t :: e20, 
+            myrule_t :: e01, // ok ok 
+            myrule_t :: e30, // ok 
+            myrule_t :: e20, // ok ok
+            myrule_t :: e12  // ok ok
+          },
         // rules for child 1
-          { myrule_t :: e23, myrule_t :: e20,
-            myrule_t :: e12, myrule_t :: e30,
-            myrule_t :: e31, myrule_t :: e23 /* ok */ } };
+          { myrule_t :: e31, // ok 
+            elementType() == 0 ? myrule_t :: e12 : myrule_t :: e20, 
+            myrule_t :: e12, // ok ok 
+            myrule_t :: e30,
+            myrule_t :: e31, // ok ok
+            myrule_t :: e23  // ok ok
+           } 
+        };
       _req = rules[ _nChild ][ int(fatherRule) - 2 ];
+      cout << "Set rule " << int( _req ) - 2 << " for element " << this->getIndex() << endl;
     }
     else 
     {
