@@ -22,7 +22,7 @@ class MacroGridMoverIF {
     enum { VERTEX = 1, EDGE1, FACE3, FACE4, 
            HEXA, TETRA, PERIODIC3, PERIODIC4=-65, 
            HBND3EXT, HBND4EXT, HBND3INT, HBND4INT = -22 ,
-           ENDMARKER , NO_POINT = -777, POINTTRANSMITTED=-888 } ;
+           ENDMARKER , ENDSTREAM,  NO_POINT = -777, POINTTRANSMITTED=-888 } ;
     virtual void attach2 (int) = 0 ;
     virtual void unattach2 (int) = 0 ;
     virtual bool packAll (vector < ObjectStream > &) = 0 ;
