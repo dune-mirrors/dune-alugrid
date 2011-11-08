@@ -684,14 +684,15 @@ insert_tetra (hface3_GEO *(&f)[4], int (&t)[4])
 // inlcudes implementation of MacroGhostTetra and MacroGhostHexa 
 #include "ghost_elements.h"
 
-GitterBasis :: periodic3_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2]) 
+GitterBasis :: periodic3_GEO * 
+GitterBasis :: MacroGitterBasis :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2], Gitter:: hbndseg_STI :: bnd_t bnd ) 
 {
-  return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1]) ;
+  return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1], bnd) ;
 }
 
-GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2]) 
+GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2], Gitter:: hbndseg_STI :: bnd_t bnd ) 
 {
-  return new Objects :: periodic4_IMPL (0, f [0], t[0], f [1], t[1]) ;
+  return new Objects :: periodic4_IMPL (0, f [0], t[0], f [1], t[1], bnd ) ;
 }
 
 GitterBasis :: hexa_GEO * GitterBasis :: MacroGitterBasis :: 

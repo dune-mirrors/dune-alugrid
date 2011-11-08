@@ -120,11 +120,12 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     virtual pair < hedge1_GEO *, bool >    InsertUniqueHedge1 (int,int) ;
     virtual pair < hface3_GEO *, bool >    InsertUniqueHface3 (int (&)[3]) ;
     virtual pair < hface4_GEO *, bool >    InsertUniqueHface4 (int (&)[4]) ;
-    virtual pair < tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4]) ;
-    virtual pair < periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&)[6]) ;
 
-    virtual pair < periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&)[8]) ;
+    virtual pair < tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4]) ;
     virtual pair < hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8]) ;
+
+    virtual pair < periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&)[6], Gitter :: hbndseg :: bnd_t ) ;
+    virtual pair < periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&)[8], Gitter :: hbndseg :: bnd_t ) ;
     
     virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter :: hbndseg :: bnd_t) ;
     virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter :: hbndseg :: bnd_t) ;

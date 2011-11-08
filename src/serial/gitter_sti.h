@@ -662,22 +662,6 @@ public :
     virtual grid_t type() const = 0;
   } ;
 
-  // tag element for periodic elements which is basically the i
-  // same as helement (for historical resons) 
-  class hperiodic : public helement
-  {
-  public:
-    // return the ldbVertexIndex of the first element (inside)
-    virtual pair<int,int> insideLdbVertexIndex() const 
-    { 
-      abort();
-      return pair<int,int> (-1,-1);
-    }
-  protected :
-    hperiodic () {}
-    virtual ~hperiodic () {}
-  };
-
   // this little helper class stored information for the splitGhost 
   // method but is only needed for the parallel case 
   class GhostChildrenInfo 
@@ -793,6 +777,28 @@ public :
     virtual void attachleafs() { abort(); }
     virtual void detachleafs() { abort(); }
   } ;
+
+
+  // tag element for periodic elements which is basically the i
+  // same as helement (for historical resons) 
+  class hperiodic : public helement
+  {
+  public:
+    typedef hbndseg :: bnd_t  bnd_t ;
+
+    // return the ldbVertexIndex of the first element (inside)
+    virtual pair<int,int> insideLdbVertexIndex() const 
+    { 
+      abort();
+      return pair<int,int> (-1,-1);
+    }
+
+    virtual bnd_t bndtype () const = 0 ;
+  protected :
+    hperiodic () {}
+    virtual ~hperiodic () {}
+  };
+
 public :
   typedef hbndseg hbndseg_STI ;
   typedef helement  helement_STI ;
@@ -1016,7 +1022,10 @@ public :
       }
 
       virtual void attachElement2( const int destination, const int face ) { abort(); }
-      virtual void attachPeriodic( const int destination ) { abort(); }
+
+      // default implementation does nothing 
+      // this method is overloaded for parallel periodic macro elements 
+      virtual void attachPeriodic( const int destination ) {}
 
       // return ldbVertexIndex (default is -1), overloaded in Tetra and Hexa
       virtual int firstLdbVertexIndex() const { return -1; }
@@ -1804,8 +1813,8 @@ public :
       virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) = 0 ;
       virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) = 0 ;
       
-      virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2]) = 0 ;
-      virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2]) = 0 ;
+      virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], hbndseg_STI :: bnd_t) = 0 ;
+      virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], hbndseg_STI :: bnd_t) = 0 ;
       
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       

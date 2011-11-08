@@ -480,10 +480,12 @@ template < class A > class Periodic4Top : public A {
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: inneredge_t   inneredge_t ;
     typedef typename A :: innerface_t   innerface_t ;
-    typedef typename A :: myhedge1_t  myhedge1_t ;
-    typedef typename A :: myhface4_t  myhface4_t ;
-    typedef typename A :: myrule_t  myrule_t ;
+    typedef typename A :: myhedge1_t    myhedge1_t ;
+    typedef typename A :: myhface4_t    myhface4_t ;
+    typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
+    typedef typename A :: bnd_t         bnd_t;
+
     void refineImmediate (myrule_t) ;
     inline void append (innerperiodic4_t * h) ;
     
@@ -492,6 +494,7 @@ template < class A > class Periodic4Top : public A {
     // we need two indices since this pointer 
     // is available on the two periodic sides 
     int _segmentIndex[ 2 ];
+    const bnd_t _bt;
     unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule ;
@@ -509,7 +512,9 @@ template < class A > class Periodic4Top : public A {
     }
 
   public:
-    Periodic4Top (int,myhface4_t *,int,myhface4_t *,int) ;
+    inline bnd_t bndtype () const { return _bt; }
+
+    Periodic4Top (int,myhface4_t *,int,myhface4_t *,int, const bnd_t bt ) ;
     Periodic4Top (int,myhface4_t *,int,myhface4_t *,int,
                   innerperiodic4_t * up, int nChild ) ;
     virtual ~Periodic4Top () ;

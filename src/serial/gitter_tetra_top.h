@@ -388,14 +388,16 @@ template < class A > class Periodic3Top : public A {
     using A :: myhface3 ;
 
   protected :
-    typedef Periodic3Top < A >    innerperiodic3_t  ;
+    typedef Periodic3Top < A >          innerperiodic3_t  ;
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: inneredge_t   inneredge_t ;
     typedef typename A :: innerface_t   innerface_t ;
-    typedef typename A :: myhedge1_t  myhedge1_t ;
-    typedef typename A :: myhface3_t  myhface3_t ;
-    typedef typename A :: myrule_t  myrule_t ;
+    typedef typename A :: myhedge1_t    myhedge1_t ;
+    typedef typename A :: myhface3_t    myhface3_t ;
+    typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
+    typedef typename A :: bnd_t         bnd_t; 
+
     void refineImmediate (myrule_t) ;
     inline void append (innerperiodic3_t * h) ;
     
@@ -404,6 +406,7 @@ template < class A > class Periodic3Top : public A {
     // we need two indices since this pointer 
     // is available on the two periodic sides 
     int _segmentIndex[ 2 ]; 
+    const bnd_t _bt;
     const unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule ;
@@ -424,10 +427,12 @@ template < class A > class Periodic3Top : public A {
       return  this->myhface3(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
     }    
   public:
+    inline bnd_t bndtype () const { return _bt; } 
+
     // constructor for macro elements 
-    inline Periodic3Top (int,myhface3_t *,int,myhface3_t *,int) ;
+    inline Periodic3Top (int,myhface3_t *,int,myhface3_t *,int, const bnd_t bnd ) ;
     // construtor for refined elements 
-    inline Periodic3Top (int,myhface3_t *,int,myhface3_t *,int,innerperiodic3_t * up, int nChild ) ;
+    inline Periodic3Top (int,myhface3_t *,int,myhface3_t *,int, innerperiodic3_t * up, int nChild ) ;
     virtual inline ~Periodic3Top () ;
     inline innerperiodic3_t * up () ;
     inline const innerperiodic3_t * up () const;
@@ -913,10 +918,12 @@ template < class A > inline bool TetraTop < A > :: bndNotifyCoarsen () {
 // #        #       #   #      #    #    #  #    #     #    #    # #     #   #     #    #  #
 // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
    
-template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
-  myhface3_t * f1, int t1) 
+template < class A > inline Periodic3Top < A > :: 
+Periodic3Top (int l, myhface3_t * f0, int t0,
+  myhface3_t * f1, int t1, const bnd_t bt ) 
  : A (f0, t0, f1, t1)
  , _dwn (0), _bbb (0), _up(0)
+ , _bt( bt )  
  , _lvl (l) 
  , _nChild(0)
  , _rule (myrule_t :: nosplit)
@@ -930,10 +937,11 @@ template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_
   _segmentIndex[ 1 ] = im.getIndex();
 }
 
-template < class A > inline Periodic3Top < A > :: Periodic3Top (int l, myhface3_t * f0, int t0,
-  myhface3_t * f1, int t1, innerperiodic3_t * up, int nChild ) 
+template < class A > inline Periodic3Top < A > :: 
+Periodic3Top (int l, myhface3_t * f0, int t0, myhface3_t * f1, int t1, innerperiodic3_t * up, int nChild ) 
   : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
+  , _bt( up->_bt ) // get boundary id from father 
   , _lvl (l) 
   , _nChild (nChild) 
   , _rule (myrule_t :: nosplit)

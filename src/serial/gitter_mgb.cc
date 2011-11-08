@@ -176,7 +176,9 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
   return false ;
 }
 
-pair < Gitter :: Geometric :: periodic3_GEO *, bool > MacroGridBuilder :: InsertUniquePeriodic3 (int (&v)[6]) {
+pair < Gitter :: Geometric :: periodic3_GEO *, bool > MacroGridBuilder :: 
+InsertUniquePeriodic3 (int (&v)[6], Gitter :: hbndseg_STI ::bnd_t bt)  
+{
 
   // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
   // dummerweise mit dem eines Hexaeders verwechselt, falls nicht
@@ -196,7 +198,7 @@ pair < Gitter :: Geometric :: periodic3_GEO *, bool > MacroGridBuilder :: Insert
       twst [fce] = cyclicReorder (x,x+3) ;
       face [fce] = InsertUniqueHface3 (x).first ;
     }
-    periodic3_GEO * t = myBuilder ().insert_periodic3 (face,twst) ;
+    periodic3_GEO * t = myBuilder ().insert_periodic3 (face,twst,bt) ;
     assert (t) ;
     _periodic3Map [key] = t ;
     return pair < periodic3_GEO *, bool > (t,true) ;
@@ -205,8 +207,9 @@ pair < Gitter :: Geometric :: periodic3_GEO *, bool > MacroGridBuilder :: Insert
   }
 }
 
-// Anfang - Neu am 23.5.02 (BS)
-pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: InsertUniquePeriodic4 (int (&v)[8]) {
+pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: 
+InsertUniquePeriodic4 (int (&v)[8], Gitter :: hbndseg_STI ::bnd_t bt ) 
+{
 
   // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
   // dummerweise mit dem eines Hexaeders verwechselt, falls nicht
@@ -228,7 +231,7 @@ pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: Insert
       twst [fce] = cyclicReorder (x,x+4) ;
       face [fce] = InsertUniqueHface4 (x).first ;
     }
-    periodic4_GEO * t = myBuilder ().insert_periodic4 (face,twst) ;
+    periodic4_GEO * t = myBuilder ().insert_periodic4 (face,twst,bt) ;
     assert (t) ;
     _periodic4Map [key] = t ;
     return pair < periodic4_GEO *, bool > (t,true) ;
@@ -433,7 +436,7 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
   
   const int start = clock () ;
   int nv = 0, ne = 0, nb = 0, nper = 0 ;
-  int (* vnum)[8] = 0, (* bvec)[5] = 0, (* pervec)[8] = 0, * pident = 0 ;
+  int (* vnum)[8] = 0, (* bvec)[5] = 0, (* pervec)[9] = 0, * pident = 0 ;
   double (* coord)[3] = 0 ;
   {
     in >> nv ;
@@ -453,7 +456,7 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
     int temp_nb;
     in >> temp_nb ;
     bvec = new int [temp_nb][5] ;
-    pervec = new int [temp_nb][8] ;
+    pervec = new int [temp_nb][9] ;
     assert (bvec);
     assert (pervec);
     for (int i = 0 ; i < temp_nb ; i ++) 
@@ -469,11 +472,14 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
       } 
       else if (n == 8) 
       {
-        if( std::abs(identification) != Gitter :: hbndseg_STI :: periodic ) 
-          cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
+        //if( std::abs(identification) != Gitter :: hbndseg_STI :: periodic ) 
+        //  cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
 
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >> pervec [nper][3]
            >> pervec [nper][4] >> pervec [nper][5] >> pervec [nper][6] >> pervec [nper][7] ;
+
+        // keep boundary information 
+        pervec [nper][8] = identification ;
         nper++;
       }
       else {
@@ -508,23 +514,23 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
     os << (ne + nper) << endl ;
     for (int i = 0 ; i < ne ; i ++)
       os << HEXA_RAW << " " << pident [vnum [i][0]] << " " << pident [vnum [i][1]] << " "
-   << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << " " << pident [vnum [i][4]] << " " 
-   << pident [vnum [i][5]] << " " << pident [vnum [i][6]] << " " << pident [vnum [i][7]] << endl ;
+         << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << " " << pident [vnum [i][4]] << " " 
+         << pident [vnum [i][5]] << " " << pident [vnum [i][6]] << " " << pident [vnum [i][7]] << endl ;
   }
   {
     for (int i = 0 ; i < nper ; i ++)
     {
       os << PERIODIC4_RAW << " " << pident [pervec [i][0]] << " " << pident [pervec [i][1]] << " "
-      << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
-      << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << " " 
-      << pident [pervec [i][6]] << " " << pident [pervec [i][7]] << endl ;
+         << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
+         << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << " " 
+         << pident [pervec [i][6]] << " " << pident [pervec [i][7]] << " " << pervec [i][8] << endl ;
     }
   }
   {
     os << nb << endl ;
     for (int i = 0 ; i < nb ; i ++)
       os << 4 << " " << pident [bvec [i][0]] << " " << pident [bvec [i][1]] << " "
-   << pident [bvec [i][2]] << " " << pident [bvec [i][3]] << " " << bvec [i][4] << endl ;
+         << pident [bvec [i][2]] << " " << pident [bvec [i][3]] << " " << bvec [i][4] << endl ;
   }
   delete [] vnum ;
   delete [] coord ;
@@ -540,7 +546,7 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
 void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
   const int start = clock () ;
   int nv = 0, ne = 0, nb = 0, nper = 0;
-  int (* vnum)[4] = 0, (* bvec)[4] = 0, (* pervec)[6] = 0 ,
+  int (* vnum)[4] = 0, (* bvec)[4] = 0, (* pervec)[7] = 0 ,
       * pident = 0 ;
   double (* coord)[3] = 0 ;
   {
@@ -560,7 +566,7 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
     int temp_nb;
     in >> temp_nb ;
     bvec = new int [temp_nb][4] ;
-    pervec = new int [temp_nb][6] ;
+    pervec = new int [temp_nb][7] ;
     assert (bvec);
     assert (pervec);
     for (int i = 0 ; i < temp_nb ; i ++) 
@@ -579,7 +585,9 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
           cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
 
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >>
-        pervec [nper][3] >> pervec [nper][4] >> pervec [nper][5];
+              pervec [nper][3] >> pervec [nper][4] >> pervec [nper][5];
+
+        pervec [nper][6] = identification ;
         nper++;
       }
       else 
@@ -613,17 +621,17 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
     os << ne+nper << endl ;
     for (i = 0 ; i < ne ; i ++)
       os << TETRA_RAW << " " << pident [vnum [i][0]] << " " << pident [vnum [i][1]] << " "
-      << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << endl ;
+         << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << endl ;
     for (i = 0 ; i < nper ; i ++)
       os << PERIODIC3_RAW << " " << pident [pervec [i][0]] << " " << pident [pervec [i][1]] << " "
-      << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
-      << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << endl ;
+         << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
+         << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << " " << pervec [i][6] << endl ;
   }
   {
     os << nb << endl ;
     for (int i = 0 ; i < nb ; i ++)
       os << 3 << " " << pident [bvec [i][0]] << " " << pident [bvec [i][1]] << " "
-   << pident [bvec [i][2]] << " " << " " << bvec [i][3] << endl ;
+         << pident [bvec [i][2]] << " " << " " << bvec [i][3] << endl ;
   }
   delete [] vnum ;
   delete [] coord ;
@@ -893,15 +901,27 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
       case PERIODIC3_RAW :
         {
           int v [6] ;
-          rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] ;
-          InsertUniquePeriodic3 (v) ;
+          int bt ;
+          rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> bt ;
+          if( ! ( Gitter :: hbndseg_STI :: bndRangeCheck(bt) ) )
+          {
+            cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
+            exit(1);
+          }
+          InsertUniquePeriodic3 (v, (Gitter :: hbndseg :: bnd_t)(std::abs(bt)) ) ;
         }
         break ;
       case PERIODIC4_RAW :
         {
           int v [8] ;
-          rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] ;
-          InsertUniquePeriodic4 (v) ;
+          int bt ;
+          rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] >> bt ;
+          if( ! ( Gitter :: hbndseg_STI :: bndRangeCheck(bt) ) )
+          {
+            cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
+            exit(1);
+          }
+          InsertUniquePeriodic4 (v, (Gitter :: hbndseg :: bnd_t)(std::abs(bt)) ) ;
         }
         break ;
       default :

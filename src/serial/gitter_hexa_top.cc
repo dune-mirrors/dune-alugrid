@@ -1021,10 +1021,11 @@ void HexaTop < A > :: doRestore (InStream_t & is)
 // #        ######  #    #     #     ####   #####      #     ####       #     #
 
    
-template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, int t0,
-  myhface4_t * f1, int t1) 
+template < class A >  Periodic4Top < A > :: 
+Periodic4Top (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, const bnd_t bt ) 
   : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(0)
+  , _bt( bt )
   , _lvl (l) 
   , _nChild (0)
   , _rule (myrule_t :: nosplit)
@@ -1043,6 +1044,7 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
     int t0, myhface4_t * f1, int t1, innerperiodic4_t * up, int nChild )
 : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
+  , _bt( up->_bt )
   , _lvl (l)
   , _nChild (nChild) 
 { 
