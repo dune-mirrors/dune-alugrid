@@ -260,12 +260,16 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
       tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
       for (int i = 0 ; i < 4 ; ++i) 
       {
-        _hbnd3Int [faceKey_t (tr->myhface3 (i)->myvertex (0)->ident (), tr->myhface3 (i)->myvertex (1)->ident (), 
-          tr->myhface3 (i)->myvertex (2)->ident ())] = 
-          new Hbnd3IntStorage (tr->myhface3 (i), tr->twist (i), tr , i ) ;
+        hface3_GEO* face = tr->myhface3 (i) ;
+        _hbnd3Int [faceKey_t (face->myvertex (0)->ident (), 
+                              face->myvertex (1)->ident (), 
+                              face->myvertex (2)->ident ())] 
+          = new Hbnd3IntStorage (face, tr->twist (i), tr , i ) ;
       }
+
       delete tr ;
       _tetraMap.erase (hit) ;
+
       return ;
     }
 
@@ -273,14 +277,18 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
     if (hit != _hexaMap.end ()) 
     {
       hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
-      for (int i = 0 ; i < 6 ; ++i) {
-        _hbnd4Int [faceKey_t (hx->myhface4 (i)->myvertex (0)->ident (), 
-                              hx->myhface4 (i)->myvertex (1)->ident (), 
-                              hx->myhface4 (i)->myvertex (2)->ident ())
-                  ] = new Hbnd4IntStorage (hx->myhface4 (i), hx->twist (i), hx, i );
+      for (int i = 0 ; i < 6 ; ++i) 
+      {
+        hface4_GEO* face = hx->myhface4 (i);
+        _hbnd4Int [faceKey_t (face->myvertex (0)->ident (), 
+                              face->myvertex (1)->ident (), 
+                              face->myvertex (2)->ident ())
+                  ] = new Hbnd4IntStorage ( face, hx->twist (i), hx, i );
       }
+
       delete hx ;
       _hexaMap.erase (hit) ;
+
       return ;
     }
   }
@@ -292,10 +300,11 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
       periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
       for (int i = 0 ; i < 2 ; ++i) 
       {
-        _hbnd3Int [faceKey_t (p3->myhface3 (i)->myvertex (0)->ident (), 
-                              p3->myhface3 (i)->myvertex (1)->ident (), 
-                              p3->myhface3 (i)->myvertex (2)->ident ())
-                  ] = new Hbnd3IntStorage ( p3->myhface3 (i), p3->twist (i)) ;
+        hface3_GEO* face = p3->myhface3 (i);
+        _hbnd3Int [faceKey_t ( face->myvertex (0)->ident (), 
+                               face->myvertex (1)->ident (), 
+                               face->myvertex (2)->ident ())
+                  ] = new Hbnd3IntStorage ( face, p3->twist (i)) ;
       }
 
       delete p3 ;
@@ -309,10 +318,11 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
       periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second ;
       for (int i = 0 ; i < 2 ; ++i) 
       {
-        _hbnd4Int [faceKey_t (p4->myhface4 (i)->myvertex (0)->ident (), 
-                              p4->myhface4 (i)->myvertex (1)->ident (), 
-                              p4->myhface4 (i)->myvertex (2)->ident ())
-                  ] = new Hbnd4IntStorage (p4->myhface4 (i), p4->twist (i));
+        hface4_GEO* face = p4->myhface4 (i);
+        _hbnd4Int [faceKey_t ( face->myvertex (0)->ident (), 
+                               face->myvertex (1)->ident (), 
+                               face->myvertex (2)->ident ())
+                  ] = new Hbnd4IntStorage ( face, p4->twist (i));
       }
 
       delete p4 ;
