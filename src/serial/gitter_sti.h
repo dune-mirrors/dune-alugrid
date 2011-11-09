@@ -2411,9 +2411,9 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: Tetra* tetr
     s << endl;
     for(int i=0; i<4; ++i)
     {
-      s << "T-Face " << i << " ";
+      s << "T-Face " << i << " (tw = " << tetra->twist( i ) << ") ";
       for(int j=0; j<3; ++j)
-        s << tetra->myvertex( i, j ) << " " ;
+        s << tetra->myhface3( i )->myvertex( j ) << " " ;
       s << endl;
     }
     s << endl;
@@ -2719,36 +2719,29 @@ inline bool Gitter :: Geometric :: Hface3Rule :: isValid () const {
 inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: rotate (int t) const 
 {
   assert ((-4 < t) && (t < 3)) ;
-  //cout << "Hface3Rule: " << t << " " << int(_r) << " --> " ;
   rule_t newr = _r ;
-  //assert( t != 0 );
   switch (_r) {
   case nosplit :
   case iso4 :
-    //return Hface3Rule (nosplit) ;
-    //newr = iso4 ;
     break ;
-    //return Hface3Rule (iso4) ;
   case e01 :
     {
       //cout << "e01: my twist is " << t << endl;
-      static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e12, e20 }; 
-      //static rule_t retRule [ 6 ] = { e12, e01, e20, e01, e12, e20 }; 
+      static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; // double checked 
       newr = retRule[ t + 3 ];
       break ;
     }
   case e12 :
     {
       //cout << "e12: my twist is " << t << endl;
-      static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; 
+      static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // double checked 
       newr = retRule[ t + 3 ];
       break ;
     }
   case e20 :
     {
       //cout << "e20: my twist is " << t << endl;
-      //static rule_t retRule [ 6 ] = { e12, e20, e01, e20, e12, e01 }; 
-      static const rule_t retRule [ 6 ] = { e12, e20, e01, e20, e01, e12 }; 
+      static const rule_t retRule [ 6 ] = { e12, e20, e01, e20, e12, e01 }; // double checked
       newr = retRule[ t + 3 ];
       break ;
     }
@@ -2757,23 +2750,7 @@ inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: ro
     abort () ;
     return Hface3Rule (nosplit) ;
   }
-    /*
-  { 
-    rule_t newr = nosplit;
-    if (t == 0 || t == -3) {    // twist 0 bzw. -2 : e01 bleibt und e12 <-> e20 event. swappen
-      newr = (_r == e01 ? e01 : (_r == e12 ? (t == 0 ? e12 : e20) : (t == 0 ? e20 : e12))) ;
-    } 
-    else if (t == 1 || t == -1) { // twist 1 bzw. -1 : e20 -> e01 (beidesmal)
-      newr = (_r == e20 ? e01 : (_r == e12 ? (t == 1 ? e20 : e12) : (t == 1 ? e12 : e20))) ;
-    } 
-    else if (t == 2 || t == -2) { // twist 2 bzw. -3 : e12 -> e01 (beidesmal)
-      newr = (_r == e12 ? e01 : (_r == e01 ? (t == 2 ? e20 : e12) : (t == 2 ? e12 : e20))) ;
-    } 
-    else {
-      abort () ;
-    }
-    */
-  //cout << int( newr ) << endl;
+  // iso4 is not rotated 
   return Hface3Rule( newr );
 }
 
@@ -3282,7 +3259,6 @@ inline bool Gitter :: Geometric :: TetraRule :: isValid () const {
   return isValid( _r );
 }
 
-#if 0
 inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: TetraRule &rule )
 {
   switch( rule )
@@ -3309,7 +3285,6 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: TetraRul
       return out << "!!! unknown !!!";
   }
 }
-#endif
 
 
 // #######
@@ -3660,7 +3635,6 @@ inline bool Gitter :: Geometric :: HexaRule :: isValid () const {
   return isValid( _r );
 }
 
-#if 0
 inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: HexaRule &rule )
 {
   switch( rule )
@@ -3675,7 +3649,6 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: HexaRule
       return out << "!!! unknown !!!";
   }
 }
-#endif
 
 // #     #
 // #     #  ######  #    #    ##
