@@ -409,14 +409,17 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
       }
     }
 
+    typedef ALUGridMETIS :: realtype real_t ;
+    typedef ALUGridMETIS :: idxtype  idx_t ;
+
     // allocate edge memory for graph partitioners 
     // get memory at once 
-    int    * const edge_mem    = new int [(nel + 1) + ned + ned ];
+    idx_t  * const edge_mem    = new idx_t [(nel + 1) + ned + ned ];
 
     // set pointer 
-    int    * const edge_p      = edge_mem; 
-    int    * const edge        = edge_mem + (nel +1);
-    int    * const edge_w      = edge + ned; 
+    idx_t  * const edge_p      = edge_mem; 
+    idx_t  * const edge        = edge_mem + (nel +1);
+    idx_t  * const edge_w      = edge + ned; 
 
     assert ( edge_p && edge && edge_w ) ;
     
@@ -449,14 +452,23 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     }
     
     // get vertex memory 
-    float  * const vertex_w    = new float [nel] ;
+    real_t * const vertex_w    = new real_t [nel] ;
 
     const int sizeNeu = (np > 1) ? nel : 0;
     const int memFactor = ( usePartKway ) ? 2 : 3; // need extra memory for adaptive repartitioning
-    int    * vertex_mem = new int [ (memFactor * nel)  + sizeNeu];
-    int    * const vertex_wInt = vertex_mem; 
-    int    * part              = vertex_mem + nel; 
+    idx_t  * vertex_mem = new idx_t [ (memFactor * nel)  + sizeNeu];
+    idx_t  * const vertex_wInt = vertex_mem; 
+    idx_t  * part              = vertex_mem + nel; 
+
+
+    real_t  ubvec[1] = {1.2}; // array of length ncon 
+    //int options[4] = {0, 1, 15, 1}; // these are the default values 
+    real_t* tpwgts = new real_t [ np ]; // ncon * npart, but ncon = 1 
     
+    const real_t value = 1.0/ ((real_t) np);
+    // set weights (uniform distribution, to be adjusted)
+    for(int l=0; l<np; ++l) tpwgts[l] = value;
+
     assert ( vertex_w && vertex_wInt && part) ;
     {
       vector < int > check (nel, 0L) ;
@@ -497,7 +509,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     if (np > 1) 
     {
       //int * neu = new int [nel] ;
-      int * neu = vertex_mem + (2 * nel);
+      idx_t* neu = vertex_mem + (2 * nel);
       assert (neu) ;
 
       // copy part to neu, this is needed by some of the partitioning tools  
@@ -506,45 +518,40 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
       if( ! serialPartitioner ) 
       {
         //cout << "ParMETIS partitioner \n";
-        int numflag = 0; // C-style numbering, arrays start with 0  
-        int edgecut, nparts = np ;
-        int wgtflag = 3; // means weights for vertices and edges 
-        int ncon = 1; // number of constraints per vertex, here only one 
-        float ubvec[1] = {1.2}; // array of length ncon 
-        int options[4] = {0, 1, 15, 1}; // these are the default values 
-        float *tpwgts = new float[ nparts ]; // ncon * npart, but ncon = 1 
-        const float value = 1.0/ ((float) nparts);
+        idx_t numflag = 0; // C-style numbering, arrays start with 0  
+        idx_t edgecut ;
+        idx_t wgtflag = 3; // means weights for vertices and edges 
+        idx_t ncon = 1; // number of constraints per vertex, here only one 
+        idx_t options[4] = {0, 1, 15, 1}; // these are the default values 
+        idx_t nparts = np ;
 
         // get communincator (see mpAccess_MPI.cc)
         MPI_Comm comm = getMPICommunicator( mpa.communicator() );
-
-        // set weights (uniform distribution, to be adjusted)
-        for(int l=0; l<nparts; ++l) tpwgts[l] = value;
 
         // for starting partitions use PartKway
         if( usePartKway ) 
         {
           //cout << "Call PartKway \n";
-          CALL_ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
+          ALUGridParMETIS :: CALL_ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
                                     & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
                                     ubvec, options, & edgecut, neu, & comm ) ;
         }
         else // otherwise do an adaptive repartition 
         {
           // recommmended by ParMETIS docu 
-          float itr = 1000.0;
+          real_t itr = 1000.0;
           //float itr = 10.0; // like dennis does 
           
           // vsize stores the size of the vertex with respect to
           // redistribution costs (we use the same as vertex_wInt)
-          int* vsize = neu + nel; 
+          idx_t* vsize = neu + nel; 
           assert ( vsize );
           // for the moment use vertex weights 
           copy(vertex_wInt, vertex_wInt + nel, vsize); 
 
           // adaptive repartition 
           //cout << "Call AdaptiveRepart \n";
-          CALL_ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
+          ALUGridParMETIS :: CALL_ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
                                           & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
                                           ubvec, &itr, options, & edgecut, neu, & comm ) ;
         }
@@ -553,7 +560,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
         // delete vtxdist and set zero (see below) 
         delete [] vtxdist; vtxdist = 0;
-        delete [] tpwgts;
       }
       else 
       {
@@ -564,16 +570,16 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         // METIS methods 
         case METIS_PartGraphKway :
           {
-            int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            CALL_METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
-                    & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
+            idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
+            ALUGridMETIS :: CALL_METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
+                          & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu) ;
           }
           break ;
         case METIS_PartGraphRecursive :
           {
-            int wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            CALL_METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
-                    & wgtflag, & numflag, & npart, & options, & edgecut, neu) ;
+            idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
+            ALUGridMETIS :: CALL_METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
+                          & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu) ;
           }
           break ;
 
@@ -654,6 +660,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           delete [] vertex_w ;
           delete [] vertex_mem;
           delete [] edge_mem;
+          delete [] tpwgts;
           return false ;
         }
       }

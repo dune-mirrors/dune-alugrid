@@ -43,11 +43,11 @@ extern "C" {
 #endif
 
 
-// ParMETIS stuff 
-#include "parallel/aluparmetis.hh"
-
 // METIS stuff 
 #include "parallel/alumetis.hh"
+
+// ParMETIS stuff 
+#include "parallel/aluparmetis.hh"
 
 // PARTY Lib stuff 
 #include "parallel/aluparty_lib.hh"

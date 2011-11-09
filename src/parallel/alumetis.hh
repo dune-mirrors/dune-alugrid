@@ -18,18 +18,32 @@ static const char metmess [] =  "**INFO Due to license reasons the library METIS
         "       Exiting program, bye! \n";
 #endif
 
-typedef int idxtype ;
+namespace ALUGridMETIS
+{
 
-inline void CALL_METIS_PartGraphKway(int *n, idxtype *edge_p, idxtype *edge,
-                idxtype * vertex_wInt, idxtype *edge_w,
-                int *wgtflag, int *numflag, int *npart,
-                int *options, int *edgecut, idxtype *neu)
+#ifndef HAVE_METIS_VERSION_4
+typedef idx_t  idxtype ;
+typedef real_t realtype ;
+#else 
+typedef int   idxtype ;
+typedef float realtype ;
+#endif 
+
+inline void 
+CALL_METIS_PartGraphKway(idxtype *n, idxtype *edge_p, idxtype *edge,
+                         idxtype *vertex_wInt, idxtype *edge_w,
+                         idxtype *wgtflag, idxtype *numflag, idxtype *npart,
+                         realtype* tpwgts, realtype *ubvec, idxtype* options, 
+                         idxtype* edgecut, idxtype *neu)
 {
 #if HAVE_METIS  
   // call metis function 
   :: METIS_PartGraphKway (n, edge_p, edge, 
                           vertex_wInt, edge_w,
                           wgtflag,  numflag, npart, 
+#ifndef HAVE_METIS_VERSION_4
+                          tpwgts, ubvec, 
+#endif
                           options, edgecut, neu) ;
 #else 
   std::cerr << "**ERROR The use of METIS_PartGraphKway is not supported, when the METIS library is missing!  in: " << __FILE__ << " line: " << __LINE__ << "\n";
@@ -39,16 +53,21 @@ inline void CALL_METIS_PartGraphKway(int *n, idxtype *edge_p, idxtype *edge,
   return ;
 }
 
-inline void CALL_METIS_PartGraphRecursive(int *n, idxtype *edge_p, idxtype *edge,
-                idxtype * vertex_wInt, idxtype *edge_w,
-                int *wgtflag, int *numflag, int *npart,
-                int *options, int *edgecut, idxtype *neu)
+inline void 
+CALL_METIS_PartGraphRecursive(idxtype *n, idxtype *edge_p, idxtype *edge,
+                              idxtype *vertex_wInt, idxtype *edge_w,
+                              idxtype *wgtflag, idxtype *numflag, idxtype *npart,
+                              realtype* tpwgts, realtype *ubvec, idxtype* options, 
+                              idxtype* edgecut, idxtype *neu)
 {
 #if HAVE_METIS  
   // call metis function 
   :: METIS_PartGraphRecursive(n, edge_p, edge, 
                           vertex_wInt, edge_w,
                           wgtflag,  numflag, npart, 
+#ifndef HAVE_METIS_VERSION_4
+                          tpwgts, ubvec, 
+#endif
                           options, edgecut, neu) ;
 #else 
   std::cerr << "**ERROR The use of METIS_PartGraphRecursive is not supported, when the METIS library is missing!  in: " << __FILE__ << " line: " << __LINE__ << "\n";
@@ -56,5 +75,7 @@ inline void CALL_METIS_PartGraphRecursive(int *n, idxtype *edge_p, idxtype *edge
   exit(1);
 #endif
   return ;
+}
+
 }
 #endif
