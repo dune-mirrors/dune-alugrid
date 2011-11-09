@@ -29,50 +29,89 @@ using namespace ALUGridSpace;
 
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
-void globalRefine(GitterType* grid, int refcount) {
-    
-   for (int count=refcount ; count > 0; count--) {
-   cout << "Refine global: run " << refcount-count << endl;
-       {
-          // get LeafIterator which iterates over all leaf elements of the grid 
-          LeafIterator < Gitter::helement_STI > w (*grid) ;
-          
-          for (w->first () ; ! w->done () ; w->next ())
-          {
-            // mark element for refinement 
-            w->item ().tagForGlobalRefinement ();
-          }
-       }
-       // adapt grid 
-       grid->adapt ();
+void checkRefinements( GitterType& grid ) 
+{
+  typedef Gitter ::Geometric :: TetraRule  TetraRule ;
+  const Gitter ::Geometric :: TetraRule rules[ 6 ] = 
+  { TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
+    TetraRule :: e23, TetraRule :: e30, TetraRule :: e31 };
 
-       // print size of grid 
-       grid->printsize () ;
+  for (int i=0; i<6; ++i ) 
+  {
+    cout << "*********************************************" <<endl;
+    cout << "Refinement rule " << rules[ i ] << endl;
+    cout << "*********************************************" <<endl;
+
+    {
+      // get LeafIterator which iterates over all leaf elements of the grid 
+      LeafIterator < Gitter::helement_STI > w (grid) ;
+       
+      for (w->first () ; ! w->done () ; w->next ())
+      {
+        typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
+        // mark element for refinement 
+        tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+        item->request ( rules[ i ] );
+      }
+    }
+
+    // adapt grid 
+    grid.adapt ();
+
+    // print size of grid 
+    grid.printsize () ;
+
+    globalCoarsening( grid , 1 );
+  }
+}
+
+// refine grid globally, i.e. mark all elements and then call adapt 
+template <class GitterType>
+void globalRefine(GitterType& grid, int refcount) 
+{
+   for (int count=refcount ; count > 0; count--) 
+   {
+     cout << "Refine global: run " << refcount-count << endl;
+     {
+        // get LeafIterator which iterates over all leaf elements of the grid 
+        LeafIterator < Gitter::helement_STI > w (grid) ;
+        
+        for (w->first () ; ! w->done () ; w->next ())
+        {
+          // mark element for refinement 
+          w->item ().tagForGlobalRefinement ();
+        }
+     }
+
+     // adapt grid 
+     grid.adapt ();
+
+     // print size of grid 
+     grid.printsize () ;
    }
 }
 
 // coarse grid globally, i.e. mark all elements for coarsening 
 // and then call adapt 
-void globalCoarsening(GitterBasisImpl* grid, int refcount) {
+template <class GitterType> 
+void globalCoarsening(GitterType& grid, int refcount) {
     
-   for (int count=refcount ; count > 0; count--) {
-   cout << "Global Coarsening: run " << refcount-count << endl;
+  for (int count=refcount ; count > 0; count--) 
+  {
+    cout << "Global Coarsening: run " << refcount-count << endl;
+    {
+       // get LeafIterator which iterates over all leaf elements of the grid 
+       LeafIterator < Gitter::helement_STI > w (grid) ;
+       
+       for (w->first () ; ! w->done () ; w->next ())
        {
-          // get LeafIterator which iterates over all leaf elements of the grid 
-          LeafIterator < Gitter::helement_STI > w (*grid) ;
-          
-          for (w->first () ; ! w->done () ; w->next ())
-          {
-            // mark elements for coarsening  
-            w->item ().resetRefinementRequest () ;
-          }
+         // mark elements for coarsening  
+         w->item ().tagForGlobalCoarsening() ;
        }
-       // adapt grid 
-       grid->adapt ();
-
-       // print size of grid 
-       grid->printsize () ;
-   }
+    }
+    // adapt grid 
+    grid.adapt ();
+  }
 }
 
 // perform walk over elements of a certain level  
@@ -131,12 +170,14 @@ int main (int argc, char ** argv, const char ** envp)
     grid.printsize(); 
     cout << "---------------------------------------------\n";
   
-    grid.printMemUsage();
+    //grid.printMemUsage();
    
-    globalRefine(&grid, mxl);
+    checkRefinements( grid );
+
+    globalRefine(grid, mxl);
     //levelwalk(&grid, mxl);
     //globalCoarsening(&grid, mxl);
-    grid.printMemUsage();
+    //grid.printMemUsage();
     cin.get();
   }
 
