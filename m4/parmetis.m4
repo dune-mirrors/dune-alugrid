@@ -100,6 +100,12 @@ if test x$HAVE_PARMETIS = x1 ; then
   ALU_PARMETIS_VERSION="(unknown)"
   if test -f $PARMETISROOT/VERSION ; then 
     ALU_PARMETIS_VERSION="(Version `cat $ALU_PARMETIS_VFILE | head -1 | cut -d " " -f 3`)"
+  elif test -f $PARMETIS_INCLUDE_PATH/parmetis.h ; then 
+    PARMETIS_HEADER=$PARMETIS_INCLUDE_PATH/parmetis.h
+    VERSION_MAJOR=`grep "PARMETIS_MAJOR_VERSION" $PARMETIS_HEADER | awk '{ print [$]3 }'`
+    VERSION_MINOR=`grep "PARMETIS_MINOR_VERSION" $PARMETIS_HEADER | awk '{ print [$]3 }'`
+    VERSION_SUBMINOR=`grep "PARMETIS_SUBMINOR_VERSION" $PARMETIS_HEADER | awk '{ print [$]3 }'`
+    ALU_PARMETIS_VERSION="($VERSION_MAJOR.$VERSION_MINOR.$VERSION_SUBMINOR)"
   fi  
 
   # set variable for summary
