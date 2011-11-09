@@ -285,7 +285,7 @@ template < class A > class TetraTop : public A
     // under the assumption that on level 0 all elements have type 0
     unsigned char elementType () const { return (_lvl % 3); }
 
-    void setNewMapping( innertetra_t*, innertetra_t*, const int, const int ) const ;
+    void setNewMapping( innertetra_t*, innertetra_t*, innerface_t*, const int, const int ) ;
 
   private :
     innertetra_t * _bbb, * _up ; 
@@ -293,18 +293,78 @@ template < class A > class TetraTop : public A
     const double _volume;
 
     const unsigned char _lvl ;
-    const signed char _nChild;
+    signed char _nChild;
     unsigned char _vxMap[ 4 ] ;
     myrule_t _req, _rule ;
     const unsigned char _type ; 
     
   private :
-    void splitInfo() const 
+    bool checkRule( const myrule_t rule ) const
     {
-      cout << endl << "Split tetra (" << this->getIndex() << "," << int( _nChild) << ") with rule " << int(_req)-2 << " ";
+      static const myrule_t possibleRules0[ 6 ][ 2 ] = { 
+          { myrule_t :: e20, myrule_t :: e30 }, // possible rules for e01 in child 0 
+          { myrule_t :: e01, myrule_t :: e31 }, // possible rules for e12 in child 0 
+          { myrule_t :: e30, myrule_t :: e01 }, // possible rules for e20 in child 0 
+          { myrule_t :: e30, myrule_t :: e31 }, // possible rules for e23 in child 0 
+          { myrule_t :: e20, myrule_t :: e01 }, // possible rules for e30 in child 0 
+          { myrule_t :: e01, myrule_t :: e12 } // possible rules for e31 in child 0 
+        };
+      static const myrule_t possibleRules1[ 6 ][ 2 ] = { 
+          { myrule_t :: e31, myrule_t :: e12 }, // possible rules for e01 in child 1 
+          { myrule_t :: e23, myrule_t :: e20 }, // possible rules for e12 in child 1 
+          { myrule_t :: e12, myrule_t :: e23 }, // possible rules for e12 in child 1 
+          { myrule_t :: e12, myrule_t :: e20 }, // possible rules for e23 in child 1 
+          { myrule_t :: e31, myrule_t :: e23 }, // possible rules for e30 in child 1 
+          { myrule_t :: e23, myrule_t :: e30 } // possible rules for e31 in child 0 
+        };
+
       if( _up ) 
-        cout << "father (" << _up->getIndex() << "," << int( _up->_nChild) << ") rule = " << int( _up->_rule )-2 << endl;
+      {
+        if( _nChild == 0 ) 
+        {
+          return ( rule == possibleRules0[ int( _up->_rule )-2 ][ 0 ] ) || 
+                 ( rule == possibleRules0[ int( _up->_rule )-2 ][ 1 ] ) ;
+        }
+        else 
+        {
+          return ( rule == possibleRules1[ int( _up->_rule )-2 ][ 0 ] ) || 
+                 ( rule == possibleRules1[ int( _up->_rule )-2 ][ 1 ] ) ;
+        }
+      }
+      else 
+        return true ;
+    }
+
+    void splitInfo( const myrule_t rule ) const 
+    {
+
+      cout << endl << "Split tetra " << this<< endl; 
+      cout << " ( " << this->getIndex() << ", ch" << int( _nChild) << ") with rule " << rule << "  ";
+      if( _up ) 
+        cout << "father (" << _up->getIndex() << ", ch" << int( _up->_nChild) << ") rule = " << int( _up->_rule )-2 << endl;
       cout << endl;
+      const bool chRule = checkRule( rule );
+      if( ! chRule ) 
+      {
+        cout << "Map = ( " ;
+        for(int i=0; i<4; ++i ) 
+          cout << int(_vxMap[ i ]) << " " ;
+        cout << " ) " << endl;
+
+        cout << rule << " not valid " << endl;
+        //assert( false );
+      }
+    }
+
+    myrule_t suggestRule () const 
+    {
+      static const myrule_t rules [ 4 ][ 4 ] = {
+        { myrule_t :: crs, myrule_t :: e01 , myrule_t :: e20, myrule_t :: e30 },
+        { myrule_t :: e01 , myrule_t :: crs, myrule_t :: e12, myrule_t :: e31 },
+        { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 },
+        { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs }
+      };
+      return rules[ int(_vxMap[ 0 ]) ][ int(_vxMap[ 3 ]) ]; 
     }
 
     inline IndexManagerType & indexManager() { 
@@ -864,26 +924,9 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
 
   if( r == myrule_t :: bisect )
   {
-    const myrule_t rules [ 4 ][ 4 ] = {
-      { myrule_t :: crs, myrule_t :: e01 , myrule_t :: e20, myrule_t :: e30 },
-      { myrule_t :: e01 , myrule_t :: crs, myrule_t :: e12, myrule_t :: e31 },
-
-      { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 },
-
-      { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs }
-    };
-
-
-    cout << "Map = ( " ;
-    for( int i=0; i<4 ; ++ i ) 
-    {
-      cout << int(_vxMap[i]) << " " ;
-    }
-    cout << endl;
     // we always split edge 0 and 3 
     // we just have to apply our vertex mapping 
-    _req = rules[ _vxMap[ 0 ] ][ _vxMap[ 3 ] ];
-    cout << "Request rule " << int( _req ) - 2 << " for tetra " << this << endl;
+    _req = suggestRule();
 #if 0
     // check edges here
     if( _up ) 
@@ -929,6 +972,7 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
     _req = r ;
   }
 
+  cout << "Request rule " <<  _req << " for tetra " << this << endl;
   return ;
 }
 
