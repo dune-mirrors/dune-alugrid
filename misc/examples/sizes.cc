@@ -58,9 +58,7 @@ void checkRefinements( GitterType& grid )
     // adapt grid 
     grid.adapt ();
 
-    // print size of grid 
-    grid.printsize () ;
-
+    // coarsen again 
     globalCoarsening( grid , 1 );
   }
 }
@@ -177,7 +175,7 @@ int main (int argc, char ** argv, const char ** envp)
     globalRefine(grid, mxl);
     //levelwalk(&grid, mxl);
     //globalCoarsening(&grid, mxl);
-    //grid.printMemUsage();
+    grid.printMemUsage();
     cin.get();
   }
 
