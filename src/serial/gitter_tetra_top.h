@@ -388,11 +388,10 @@ template < class A > class TetraTop : public A
     inner_t * _inner ;
     const double _volume;
 
-    const unsigned char _lvl ;
-    signed char _nChild;
-    unsigned char _vxMap[ 4 ] ;
-    myrule_t _req, _rule ;
-    const unsigned char _type ; 
+    const unsigned char _lvl ;  // 1 byte 
+    signed char _nChild;        // 1 byte 
+    unsigned char _vxMap[ 4 ] ; // 4 byte 
+    myrule_t _req, _rule ;      // 2 byte   = 8 byte 
     
   private :
     bool checkRule( const myrule_t rule ) const

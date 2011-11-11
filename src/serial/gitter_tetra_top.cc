@@ -779,7 +779,6 @@ template < class A > TetraTop < A >
   , _lvl (l) 
   , _nChild(nChild)
   , _rule (myrule_t :: nosplit)
-  , _type( (_up->_type + 1) % 3 ) // my type is (t+1)%d where t is the fathers type 
 {
   _vxMap[ 0 ] = _vxMap[ 1 ] = _vxMap[ 2 ] = _vxMap[ 3 ] = -1;
 
@@ -823,7 +822,6 @@ TetraTop (int l, myhface3_t * f0, int t0,
   , _lvl (l) 
   , _nChild(0)  // we are macro ==> nChild 0 
   , _rule (myrule_t :: nosplit)
-  , _type( 0 ) // type of macro elements should be zero 
 { 
   // initial mapping is identity  
   _vxMap[ 0 ] = 0; 
@@ -1753,7 +1751,6 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
       verticesFound.insert( tetra->myvertex( fce, i )->getIndex() ); 
     }
 
-    //cout << "Check face " << fce << " of tetra " << tetra->getIndex() << " , type = " << int(tetra->_type) << " with twist " << tetra->twist( fce ) << " and chNr " << int(tetra->_nChild) << endl;
     for(int i=0; i<3; ++i ) 
     {
       verticesFound.insert( tetra->myvertex( fce, i )->getIndex() ); 
