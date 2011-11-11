@@ -2731,21 +2731,21 @@ inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: ro
     break ;
   case e01 :
     {
-      cout << "e01: my twist is " << t << endl;
+      //cout << "e01: my twist is " << t << endl;
       static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; // double checked 
       newr = retRule[ t + 3 ];
       break ;
     }
   case e12 :
     {
-      cout << "e12: my twist is " << t << endl;
+      //cout << "e12: my twist is " << t << endl;
       static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // double checked 
       newr = retRule[ t + 3 ];
       break ;
     }
   case e20 :
     {
-      cout << "e20: my twist is " << t << endl;
+      //cout << "e20: my twist is " << t << endl;
       static const rule_t retRule [ 6 ] = { e12, e20, e01, e20, e12, e01 }; // double checked
       newr = retRule[ t + 3 ];
       break ;

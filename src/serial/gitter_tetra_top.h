@@ -55,7 +55,6 @@ inline bool checkFace ( const A* fce, const int child )
       }
     }
   }
-  return true ;
   return found;
 }
 
@@ -309,13 +308,10 @@ template < class A > class TetraTop : public A
       {
         static const face3rule_t rules[ 3 ] = { face3rule_t :: e01, face3rule_t :: e12, face3rule_t :: e20 };
 
-        cout << "Check rule for " << face << endl;
-        checkFace( face, face->nChild() );
+        assert( checkFace( face, face->nChild() ) );
 
-        int edge = -1;
         for(int j=0; j<3; ++j ) 
         {
-          cout << "Check edge " << face->myhedge1( j ) << endl;
           for( int twist=0; twist<2; ++twist )
           {
             //cout << "Check edge " << face->myhedge1( j )->myvertex( twist ) << " " 
@@ -323,15 +319,14 @@ template < class A > class TetraTop : public A
             if( face->myhedge1( j )->myvertex( twist ) == vx0  && 
                 face->myhedge1( j )->myvertex( 1-twist ) == vx1  ) 
             {
-              edge = j;
+              return rules[ j ];
             }
           }
         }
 
-        //assert( false );
-        //abort();
-        assert( edge >= 0 );
-        return rules[ edge ];
+        assert( false );
+        abort();
+        return rules[ 0 ];
       }
 
       static bool refineFaces( innertetra_t* tetra, const myrule_t& rule )
@@ -341,13 +336,13 @@ template < class A > class TetraTop : public A
         {
           myhface3_t* face = tetra->myhface3( info._faces[ i ] );
 
-          cout << "Check rule for " << face << endl;
-          cout << "vx0 " << int(info._vertices[ 0 ]) << " " << tetra->myvertex( info._vertices[ 0 ] ) << endl;
-          cout << "vx1 " << int(info._vertices[ 1 ]) << " " << tetra->myvertex( info._vertices[ 1 ] ) << endl;
+          //cout << "Check rule for " << face << endl;
+          //cout << "vx0 " << int(info._vertices[ 0 ]) << " " << tetra->myvertex( info._vertices[ 0 ] ) << endl;
+          //cout << "vx1 " << int(info._vertices[ 1 ]) << " " << tetra->myvertex( info._vertices[ 1 ] ) << endl;
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
 
-          cout << "Got rule " << faceRule << endl;
+          //cout << "Got rule " << faceRule << endl;
           // check refinement of faces 
           if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false ;
         }
@@ -439,7 +434,7 @@ template < class A > class TetraTop : public A
 
     void splitInfo( const myrule_t rule ) const 
     {
-
+#if 0
       cout << endl << "Split tetra " << this<< endl; 
       cout << " ( " << this->getIndex() << ", ch" << int( _nChild) << ") with rule " << rule << "  ";
       if( _up ) 
@@ -456,6 +451,7 @@ template < class A > class TetraTop : public A
         cout << rule << " not valid " << endl;
         //assert( false );
       }
+#endif
     }
 
     myrule_t suggestRule () const 
@@ -788,11 +784,11 @@ Hface3Top (int l, myhedge1_t * e0,
                         myvertex( 1 )->Point(),
                         myvertex( 2 )->Point() ).normal( n );
 
-  if( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) < 1e-8 ) 
-  {
-    cout << "Determinant of " << this << " is wrong" <<endl;
-  }
-  //assert( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) >= 1e-8 );
+  //if( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) < 1e-8 ) 
+  //{
+  //  cout << "Determinant of " << this << " is wrong" <<endl;
+  //}
+  assert( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) >= 1e-8 );
 #endif
   assert( checkFace( this, nChild ) );
   return ;
@@ -1041,47 +1037,11 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
 
   if( r == myrule_t :: bisect )
   {
-    // we always split edge 0 and 3 
-    // we just have to apply our vertex mapping 
+    // we always split edge 0 and 3 following 
+    // the idea of Stevenson, Nochetto, Veser, Siebert 
+    // suggestRule returns the correct splitting edge 
+    // according to ALUGrid's rules 
     _req = suggestRule();
-#if 0
-    // check edges here
-    if( _up ) 
-    {
-      myrule_t fatherRule = _up->_rule ;
-      cout << "Fatherrule is of element " << _up->getIndex() << " is " << int( fatherRule )-2 << endl;
-      const myrule_t rules [ 2 ][ 6 ] = 
-        // rules for child 0
-        { { myrule_t :: e31, 
-            //myrule_t :: e20,
-            elementType() == 0 ? myrule_t :: e12 : myrule_t :: e20, 
-            myrule_t :: e01, // ok ok 
-            myrule_t :: e30, // ok 
-            myrule_t :: e20, // ok ok
-            myrule_t :: e12  // ok ok
-          },
-        // rules for child 1
-          { myrule_t :: e31, // ok 
-            //myrule_t :: e20 ,
-            elementType() == 0 ? myrule_t :: e12 : myrule_t :: e20, 
-            myrule_t :: e12, // ok ok 
-            myrule_t :: e30,
-            myrule_t :: e31, 
-            //elementType() == 1 ? myrule_t :: e31 : myrule_t :: e01 , // ok ok
-            myrule_t :: e23  // ok ok
-           } 
-        };
-      _req = rules[ _nChild ][ int(fatherRule) - 2 ];
-      cout << "Suggested was " << int( _suggest ) -2 << endl;
-      cout << "Set rule " << int( _req ) - 2 << " for element " << this->getIndex() << endl;
-    }
-    else 
-    {
-      // macro elements are split on edge 30 
-      assert( this->level() == 0 );
-      _req = myrule_t :: e30 ;
-    }
-#endif 
   }
   else 
   {
@@ -1089,7 +1049,7 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
     _req = r ;
   }
 
-  cout << "Request rule " <<  _req << " for tetra " << this << endl;
+  //cout << "Request rule " <<  _req << " for tetra " << this << endl;
   return ;
 }
 
