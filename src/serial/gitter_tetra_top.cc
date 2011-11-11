@@ -11,6 +11,75 @@
 // #     #  #       #    #  #    #  #      #     #    #     #    #  #
 // #     #  #       #    #   ####   ######  #####     #      ####   #
 
+template < class A > 
+typename Hface3Top < A > :: myvertex_t* 
+Hface3Top < A > :: vertexNotOnSplitEdge( const int splitEdge )
+{
+  const myhedge1_t* edge = myhedge1( splitEdge );
+  const myvertex_t* edgeVx[ 2 ] = { edge->myvertex( 0 ), edge->myvertex( 1 ) };
+  int iVx = (splitEdge + 2) % 3;
+  myvertex_t* vx = myvertex( iVx );
+  while ( vx == edgeVx[ 0 ] || vx == edgeVx[ 1 ] )
+  {
+    iVx = ( iVx + 1 ) % 3;
+    vx = myvertex( iVx );
+    assert( iVx != (splitEdge+2)%3 );
+  }
+
+  return vx ;
+}
+
+template < class A > typename Hface3Top < A > :: edgepair_t 
+Hface3Top < A > :: subEdges( myhedge1_t* edge, const myvertex_t* vx0, const myvertex_t* vx1 )  
+{
+  assert( vx0 );
+  assert( vx1 );
+
+  // get sub faces 
+  myhedge1_t* subEdge[ 2 ] = { edge->subedge1( 0 ), edge->subedge1( 1 ) };
+
+  // check face order with vertex0
+  int sub0 = 1 ;
+  for( int i=0; i<2; ++i ) 
+  {
+    if( subEdge[ 0 ]->myvertex( i ) == vx0 ) 
+    {
+      sub0 = 0;
+      break;
+    }
+  }
+
+#ifndef NDEBUG 
+  // make sure the vertex is on the other face 
+  bool found0 = false ;
+  bool found1 = false ;
+  // check face order with vertex0
+  for( int i=0; i<2; ++i ) 
+  {
+    if( subEdge[ sub0 ]->myvertex( i ) == vx0 ) 
+    {
+      found0 = true ;
+    }
+    if( subEdge[ ! sub0 ]->myvertex( i ) == vx1 ) 
+    {
+      found1 = true ;
+    }
+  }
+  if( ! found0 || ! found1 ) 
+  {
+    cout << "Problem: " << edge << endl;
+    cout << " vx0 " << vx0 << endl;
+    cout << " vx1 " << vx1 << endl;
+    cout << "sub0 " << subEdge[ sub0 ] << endl;
+    cout << "sub1 " << subEdge[ ! sub0 ] << endl;
+  }
+  assert( found0 );
+  assert( found1 );
+
+#endif
+  return edgepair_t( subEdge[ sub0 ], subEdge[ ! sub0 ] );
+}
+
 
 template < class A > void Hface3Top < A > :: split_e01 () 
 {
@@ -38,30 +107,36 @@ template < class A > void Hface3Top < A > :: split_e01 ()
 
   assert( _inner == 0 );
   const int newLevel = 1 + level () ;
-  myvertex_t * ev0 = myhedge1(0)->subvertex (0) ;
+  myhedge1_t* splitEdge = myhedge1(0);
 
+  myvertex_t * ev0 = splitEdge->subvertex (0) ;
+  myvertex_t * vx2 = vertexNotOnSplitEdge( 0 );
+
+  edgepair_t subEdge = subEdges( splitEdge, myvertex(0), myvertex(1) ); 
+  //myvertex_t * vx2 = myvertex( 2 );
   assert(ev0) ;
-  inneredge_t * e0 = new inneredge_t (newLevel, ev0, myvertex (2) ) ;
+  inneredge_t * e0 = new inneredge_t (newLevel, ev0, vx2 ) ;
   assert( e0 ) ;
   innerface_t * f0 = new innerface_t (newLevel, 
-                                      this->subedge1(0,0), twist(0), 
+                                      subEdge.first, twist(0), 
                                       e0, 0, 
                                       myhedge1(2), twist(2), 
                                       0) ; // child number 
 
   innerface_t * f1 = new innerface_t (newLevel, 
-                                      this->subedge1(0,1), twist(0), 
+                                      subEdge.second, twist(0), 
                                       myhedge1(1), twist(1), 
                                       e0, 1, 
                                       1) ; // child number 
 
   std::cout << "split_e01 " << ev0 << endl;
-  //cout << "Split face " << this << " into " << endl;
-  //cout << "New subface 0" << f0 << endl;
-  //cout << "New subface 1" << f1 << endl;
+  cout << "Split face " << this << " into " << endl;
+  cout << "New subface 0" << f0 << endl;
+  cout << "New subface 1" << f1 << endl;
 
   assert (f0 && f1 ) ;
   f0->append(f1) ;
+
   _inner = new inner_t( f0 , e0 );
   _rule = myrule_t :: e01 ;
   return ;
@@ -94,34 +169,44 @@ template < class A >  void Hface3Top < A > :: split_e12 ()
     */
   assert( _inner == 0 );
   const int newLevel= 1 + level () ;
-  myvertex_t * ev0 = myhedge1(1)->subvertex (0) ;
+  myhedge1_t* splitEdge = myhedge1(1);
+
+  myvertex_t * ev0 = splitEdge->subvertex (0) ;
   assert(ev0) ;
 
+  myvertex_t * vxOld = vertexNotOnSplitEdge( 1 );
+  //myvertex_t * vxOld = myvertex(0);
+
+  edgepair_t subEdge = subEdges( splitEdge, myvertex(1), myvertex(2) ); 
+
   // create new inner edge 
-  inneredge_t * e0 = new inneredge_t (newLevel, ev0, myvertex(0) ) ;
+  inneredge_t * e0 = new inneredge_t (newLevel, ev0, vxOld ) ;
   assert( e0 ) ;
 
+  std::cout << "split_e12 " << ev0 << endl;
+  cout << "new inner edge " << e0 << endl;
   innerface_t * f0 = new innerface_t (newLevel, // level 
                                       myhedge1(0), twist(0),         // edge 0, twist 
-                                      this->subedge1(1,0), twist(1), // edge 0, twist 
+                                      subEdge.first, twist(1), // edge 0, twist 
                                       e0, 0,                         // edge 1, twist 
                                       0 ) ; // child number 
 
   innerface_t * f1 = new innerface_t (newLevel, // level 
                                       e0, 1,                         // edge 1, twist 
-                                      this->subedge1(1,1), twist(1), // edge 2, twist 
+                                      subEdge.second, twist(1), // edge 2, twist 
                                       myhedge1(2), twist(2),         // edge 0, twist
                                       1 ) ; // child number 
   assert (f0 && f1 ) ;
   f0->append(f1) ;
 
-  std::cout << "split_e12 " << ev0 << endl;
-  //cout << "Split face " << this << " into " << endl;
-  //cout << "New subface 0" << f0 << endl;
-  //cout << "New subface 1" << f1 << endl;
+  cout << "Split face " << this << " into " << endl;
+  cout << "New subface 0" << f0 << endl;
+  cout << "New subface 1" << f1 << endl;
 
   _inner = new inner_t( f0 , e0 );
   _rule = myrule_t :: e12 ;
+
+
   return ;
 }
 
@@ -133,9 +218,6 @@ template < class A >  void Hface3Top < A > :: split_e20 ()
 
   assert( _inner == 0 );
   const int newLevel= 1 + level () ;
-  myvertex_t * ev0 = myhedge1(2)->subvertex (0) ;
-
-  
   /*                  2 
                     
                      / \
@@ -156,28 +238,38 @@ template < class A >  void Hface3Top < A > :: split_e20 ()
       0              0                 1 
     */
 
+  myhedge1_t* splitEdge = myhedge1( 2 );
+
+  myvertex_t * ev0 = splitEdge->subvertex (0) ;
+
+  myvertex_t * vxOld = vertexNotOnSplitEdge( 2 );
+
+  edgepair_t subEdge = subEdges( splitEdge, myvertex(0), myvertex(2) ); 
+  //myvertex_t * vxOld = myvertex( 1 );
+  
   assert(ev0) ;
-  inneredge_t * e0 = new inneredge_t (newLevel, ev0, myvertex(1) ) ;
+  inneredge_t * e0 = new inneredge_t (newLevel, ev0, vxOld ) ;
   assert( e0 ) ;
 
   innerface_t * f0 = new innerface_t (newLevel, // level 
-                                      myhedge1(0), twist(0),         // edge 0, twist
-                                      e0, 1,                         // edge 1, twist 
-                                      this->subedge1(2,1), twist(2), // edge 2, twist 
-                                      1 ) ; // child number 
-
-  innerface_t * f1 = new innerface_t (newLevel, // level 
                                       e0, 0,                         // edge 0, twist 
                                       myhedge1(1), twist(1),         // edge 1, twist 
-                                      this->subedge1(2,0), twist(2), // edge 2, twist 
+                                      subEdge.second, twist(2), // edge 2, twist 
                                       0 ) ; // child number 
+
+  innerface_t * f1 = new innerface_t (newLevel, // level 
+                                      myhedge1(0), twist(0),         // edge 0, twist
+                                      e0, 1,                         // edge 1, twist 
+                                      subEdge.first, twist(2), // edge 2, twist 
+                                      1 ) ; // child number 
 
   assert (f0 && f1 ) ;
 
+
   std::cout << "split_e20 " << ev0 << endl;
-  //cout << "Split face " << this << " into " << endl;
-  //cout << "New subface 0" << f0 << endl;
-  //cout << "New subface 1" << f1 << endl;
+  cout << "Split face " << this << " into " << endl;
+  cout << "New subface 0" << f0 << endl;
+  cout << "New subface 1" << f1 << endl;
 
   f0->append(f1) ;
   _inner = new inner_t( f0 , e0 );
@@ -216,8 +308,13 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
 {
   if (r != getrule ()) {
     assert (getrule () == myrule_t :: nosplit) ;
-    switch(r) {
+    switch(r) 
+    {
       typedef typename myhedge1_t :: myrule_t myhedge1rule_t;
+
+      // rotate of hedge rule does nothing, 
+      // so its actually useless 
+
       case myrule_t :: e01 :
         myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
         split_e01 () ;
@@ -824,13 +921,72 @@ TetraTop < A > :: subFaces ( const int i )
   // sub face 0 and 1 
   unsigned int sub0 = subFace[ ruleId ][ twist( i ) + 3 ];
 
-
+  /*
   if( elementType () == 0 && ruleId == 2 && twist( i ) == 0 ) 
   {
     sub0 = 0;
   }
+  */
   // return sub face 0 and 1 of face i
   return facepair_t ( face->subface3( sub0 ), face->subface3( ! sub0 ) );
+}
+
+// --subFaces
+template < class A >  
+typename TetraTop < A > :: facepair_t
+TetraTop < A > :: subFaces ( const int i, 
+                             const myvertex_t* vx0, 
+                             const myvertex_t* vx1 ) 
+{
+  assert( vx0 );
+  assert( vx1 );
+
+  // get face that we want sub faces from 
+  myhface3_t* face = myhface3( i );
+
+  // get sub faces 
+  myhface3_t* subFce[ 2 ] = { face->subface3( 0 ), face->subface3( 1 ) };
+
+  // check face order with vertex0
+  int sub0 = 1 ;
+  for( int i=0; i<3; ++i ) 
+  {
+    if( subFce[ 0 ]->myvertex( i ) == vx0 ) 
+    {
+      sub0 = 0;
+      break;
+    }
+  }
+
+#ifndef NDEBUG 
+  // make sure the vertex is on the other face 
+  bool found0 = false ;
+  bool found1 = false ;
+  // check face order with vertex0
+  for( int i=0; i<3; ++i ) 
+  {
+    if( subFce[ sub0 ]->myvertex( i ) == vx0 ) 
+    {
+      found0 = true ;
+    }
+    if( subFce[ ! sub0 ]->myvertex( i ) == vx1 ) 
+    {
+      found1 = true ;
+    }
+  }
+  if( ! found0 || ! found1 ) 
+  {
+    cout << "Problem: " << face << endl;
+    cout << " vx0 " << vx0 << endl;
+    cout << " vx1 " << vx1 << endl;
+    cout << "sub0 " << subFce[ sub0 ] << endl;
+    cout << "sub1 " << subFce[ ! sub0 ] << endl;
+  }
+  assert( found0 );
+  assert( found1 );
+
+#endif
+  return facepair_t( subFce[ sub0 ], subFce[ ! sub0 ] );
 }
 
 // --subface3
@@ -908,8 +1064,11 @@ template < class A >  void TetraTop < A > :: split_e01 ()
 
   cout << "New inner " << newFace << endl;
 
-  facepair_t subFace2 = subFaces( 2 ); // get sub face 0 and 1 of face 2
-  facepair_t subFace3 = subFaces( 3 ); // get sub face 0 and 1 of face 3
+  //facepair_t subFace2 = subFaces( 2 ); // get sub face 0 and 1 of face 2
+  //facepair_t subFace3 = subFaces( 3 ); // get sub face 0 and 1 of face 3
+
+  facepair_t subFace2 = subFaces( 2, myvertex( 0 ), myvertex( 1 ) ); // get sub face 0 and 1 of face 2
+  facepair_t subFace3 = subFaces( 3, myvertex( 0 ), myvertex( 1 ) ); // get sub face 0 and 1 of face 3
 
   cout << "Sub face 2 : " << endl << subFace2.first << subFace2.second << endl;
   cout << "Sub face 3 : " << endl << subFace3.first << subFace3.second << endl;
@@ -1000,8 +1159,8 @@ template < class A >  void TetraTop < A > :: split_e12 ()
 
   cout << "New inner " << newFace << endl;
 
-  facepair_t subFace0 = subFaces( 0 ); // get sub face 0 and 1 of face 0
-  facepair_t subFace3 = subFaces( 3 ); // get sub face 0 and 1 of face 3
+  facepair_t subFace0 = subFaces( 0, myvertex( 1 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 0
+  facepair_t subFace3 = subFaces( 3, myvertex( 1 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 3
 
   cout << "Sub face 1 : " << endl << subFace0.first << subFace0.second << endl;
   cout << "Sub face 3 : " << endl << subFace3.first << subFace3.second << endl;
@@ -1090,8 +1249,11 @@ template < class A >  void TetraTop < A > :: split_e20 ()
 
   cout << "New inner face " << newFace << endl;
 
-  facepair_t subFace1 = subFaces( 1 ); // get sub face 0 and 1 of face 1
-  facepair_t subFace3 = subFaces( 3 ); // get sub face 0 and 1 of face 3
+  //facepair_t subFace1 = subFaces( 1 ); // get sub face 0 and 1 of face 1
+  //facepair_t subFace3 = subFaces( 3 ); // get sub face 0 and 1 of face 3
+
+  facepair_t subFace1 = subFaces( 1, myvertex( 0 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 0
+  facepair_t subFace3 = subFaces( 3, myvertex( 0 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 1
 
   cout << "Sub face 1 : " << endl << subFace1.first << subFace1.second << endl;
   cout << "Sub face 3 : " << endl << subFace3.first << subFace3.second << endl;
@@ -1180,11 +1342,11 @@ template < class A >  void TetraTop < A > :: split_e23 ()
 
   cout << "New inner " << newFace << endl;
 
-  facepair_t subFace0 = subFaces( 0 ); // get sub face 0 and 1 of face 0
-  facepair_t subFace1 = subFaces( 1 ); // get sub face 0 and 1 of face 1
+  facepair_t subFace0 = subFaces( 0, myvertex( 2 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 0
+  facepair_t subFace1 = subFaces( 1, myvertex( 2 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
 
   cout << "Sub face 0 : " << endl << subFace0.first << subFace0.second << endl;
-  cout << "Sub face 0 : " << endl << subFace1.first << subFace1.second << endl;
+  cout << "Sub face 1 : " << endl << subFace1.first << subFace1.second << endl;
 
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1288,8 +1450,8 @@ template < class A >  void TetraTop < A > :: split_e30 ()
   cout << "New inner face " << newFace << endl;
   assert( newFace ) ;
 
-  facepair_t subFace1 = subFaces( 1 ); // get sub face 0 and 1 of face 1
-  facepair_t subFace2 = subFaces( 2 ); // get sub face 0 and 1 of face 2
+  facepair_t subFace1 = subFaces( 1, myvertex( 0 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
+  facepair_t subFace2 = subFaces( 2, myvertex( 0 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 2
 
   cout << "Sub face 1 : " << endl << subFace1.first << subFace1.second << endl;
   cout << "Sub face 2 : " << endl << subFace2.first << subFace2.second << endl;
@@ -1345,14 +1507,14 @@ template < class A >  void TetraTop < A > :: split_e31 ()
   myhedge1_t* subEdge = this->subedge1 (0, 0);
   myhedge1_t* orgEdge = this->myhedge1( 1 ) ;
  
-  const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
+  const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 1 : 0;
 
   // new inner face 
   innerface_t * newFace = 
     new innerface_t (newLevel, 
-                     subEdge2, 1, // from face 2 get subedge 0  
                      orgEdge, edgeTwst,
-                     subEdge, 0 // from face 1 get subedge 0
+                     subEdge, 1,  // from face 1 get subedge 0
+                     subEdge2, 0  // from face 2 get subedge 0  
                     ) ;
 
   assert( newFace ) ;
@@ -1380,8 +1542,11 @@ template < class A >  void TetraTop < A > :: split_e31 ()
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
   
-  facepair_t subFace0 = subFaces( 0 ); // get sub face 0 and 1 of face 0
-  facepair_t subFace2 = subFaces( 2 ); // get sub face 0 and 1 of face 2
+  //facepair_t subFace0 = subFaces( 0 ); // get sub face 0 and 1 of face 0
+  //facepair_t subFace2 = subFaces( 2 ); // get sub face 0 and 1 of face 2
+  facepair_t subFace0 = subFaces( 0, myvertex( 1 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 0
+  facepair_t subFace2 = subFaces( 2, myvertex( 1 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
+
 
   cout << "Sub face 0 : " << endl << subFace0.first << subFace0.second << endl;
   cout << "Sub face 2 : " << endl << subFace2.first << subFace2.second << endl;
@@ -1442,29 +1607,22 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
   }
 
   // if vx0 was not found in child 0 we have to swap the children 
-  if( ! found ) 
-  {
-    innertetra_t* swp = h0; 
-    h0 = h1; h1 = swp;
-
-    // set children numbering correct 
-    h0->_nChild = 0;
-    h1->_nChild = 1;
-  }
+  innertetra_t* t0 = ( found ) ? h0 : h1;
+  innertetra_t* t1 = ( found ) ? h1 : h0;
 
   // set vertex mapping 
-  h0->_vxMap[ 0 ] = _vxMap[ 0 ]; 
+  t0->_vxMap[ 0 ] = _vxMap[ 0 ]; 
   //h0->_vxMap[ 1 ] = newVx0;
-  h0->_vxMap[ 1 ] = _vxMap[ 3 ];
-  h0->_vxMap[ 2 ] = _vxMap[ 1 ];
-  h0->_vxMap[ 3 ] = _vxMap[ 2 ];
+  t0->_vxMap[ 1 ] = _vxMap[ 3 ];
+  t0->_vxMap[ 2 ] = _vxMap[ 1 ];
+  t0->_vxMap[ 3 ] = _vxMap[ 2 ];
 
   // set vertex mapping 
-  h1->_vxMap[ 0 ] = _vxMap[ 3 ]; 
-  h1->_vxMap[ 1 ] = _vxMap[ 0 ];
+  t1->_vxMap[ 0 ] = _vxMap[ 3 ]; 
+  t1->_vxMap[ 1 ] = _vxMap[ 0 ];
   const char face3 = ( elementType () == 0 ) ? 1 : 0;
-  h1->_vxMap[ 2 ] = _vxMap[ 1 + face3 ]; // for type 0   2 else 1 
-  h1->_vxMap[ 3 ] = _vxMap[ 2 - face3 ]; // for type 0   1 else 2 
+  t1->_vxMap[ 2 ] = _vxMap[ 1 + face3 ]; // for type 0   2 else 1 
+  t1->_vxMap[ 3 ] = _vxMap[ 2 - face3 ]; // for type 0   1 else 2 
 
 #ifndef NDEBUG
   cout << "Map0 = ( " ;
@@ -1699,31 +1857,37 @@ BisectionInfo :: BisectionInfo ( myrule_t r ) : _caller( 0 )
     case myrule_t :: e01 :
       _faces[ 0 ] = 2;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e01;
+      _vertices[ 0 ] = 0; _vertices[ 1 ] = 1;
       _caller = new CallSplitImpl< myrule_t :: e01 > ();
       break ;
     case myrule_t :: e12 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e12;
+      _vertices[ 0 ] = 1; _vertices[ 1 ] = 2;
       _caller = new CallSplitImpl< myrule_t :: e12 > ();
       break ;
     case myrule_t :: e20 :
       _faces[ 0 ] = 1;   _faceRules[ 0 ] = face3rule_t :: e01;
       _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e20;
+      _vertices[ 0 ] = 0; _vertices[ 1 ] = 2;
       _caller = new CallSplitImpl< myrule_t :: e20 > ();
       break ;
     case myrule_t :: e23 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e12;
       _faces[ 1 ] = 1;   _faceRules[ 1 ] = face3rule_t :: e12;
+      _vertices[ 0 ] = 2; _vertices[ 1 ] = 3;
       _caller = new CallSplitImpl< myrule_t :: e23 > ();
       break ;
     case myrule_t :: e30 :
       _faces[ 0 ] = 1;   _faceRules[ 0 ] = face3rule_t :: e20;
       _faces[ 1 ] = 2;   _faceRules[ 1 ] = face3rule_t :: e01;
+      _vertices[ 0 ] = 3; _vertices[ 1 ] = 0;
       _caller = new CallSplitImpl< myrule_t :: e30 > ();
       break ;
     case myrule_t :: e31 :
       _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e01;
       _faces[ 1 ] = 2;   _faceRules[ 1 ] = face3rule_t :: e12;
+      _vertices[ 0 ] = 3; _vertices[ 1 ] = 1;
       _caller = new CallSplitImpl< myrule_t :: e31 > ();
       break ;
     default :

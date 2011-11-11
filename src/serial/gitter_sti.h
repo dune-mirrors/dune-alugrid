@@ -2455,6 +2455,23 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: Hexa* hexa 
 }
 
 
+
+inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hedge1* edge )
+{
+  if( edge ) 
+  {
+    s << "edge ( " << edge->getIndex() 
+      //<< ", " << v->ident() 
+      << " : ";
+    for (int i=0; i<2; ++i)
+      s << edge->myvertex( i ) << " ";
+    s << endl;
+  }
+  else 
+    s << "nullptr"; 
+  return s;
+}
+
 inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface3* face )
 {
   if( face ) 
@@ -2464,6 +2481,11 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface3* fac
       << " : ";
     for (int i=0; i<3; ++i)
       s << face->myvertex( i ) << " ";
+    for (int i=0; i<3; ++i) 
+    {
+      s << face->myhedge1( i ) << " ";
+    }
+
     s << endl;
   }
   else 
@@ -2480,23 +2502,6 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface4* fac
       << " : ";
     for (int i=0; i<4; ++i)
       s << face->myvertex( i ) << " ";
-    s << endl;
-  }
-  else 
-    s << "nullptr"; 
-  return s;
-}
-
-
-inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hedge1* edge )
-{
-  if( edge ) 
-  {
-    s << "edge ( " << edge->getIndex() 
-      //<< ", " << v->ident() 
-      << " : ";
-    for (int i=0; i<2; ++i)
-      s << edge->myvertex( i ) << " ";
     s << endl;
   }
   else 
@@ -2726,21 +2731,21 @@ inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: ro
     break ;
   case e01 :
     {
-      //cout << "e01: my twist is " << t << endl;
+      cout << "e01: my twist is " << t << endl;
       static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; // double checked 
       newr = retRule[ t + 3 ];
       break ;
     }
   case e12 :
     {
-      //cout << "e12: my twist is " << t << endl;
+      cout << "e12: my twist is " << t << endl;
       static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // double checked 
       newr = retRule[ t + 3 ];
       break ;
     }
   case e20 :
     {
-      //cout << "e20: my twist is " << t << endl;
+      cout << "e20: my twist is " << t << endl;
       static const rule_t retRule [ 6 ] = { e12, e20, e01, e20, e12, e01 }; // double checked
       newr = retRule[ t + 3 ];
       break ;
@@ -2754,7 +2759,6 @@ inline Gitter :: Geometric :: Hface3Rule Gitter :: Geometric :: Hface3Rule :: ro
   return Hface3Rule( newr );
 }
 
-#if 0
 inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface3Rule &rule )
 {
   switch( rule )
@@ -2775,7 +2779,6 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface3Ru
       return out << "!!! unknown !!!";
   }
 }
-#endif
 
 // #     #                                 #       ######
 // #     #  ######    ##     ####   ###### #    #  #     #  #    #  #       ######
@@ -2991,7 +2994,7 @@ inline const Gitter :: Geometric :: hface3 :: myhedge1_t * Gitter :: Geometric :
 
 inline Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :: hface3 :: myvertex (int i) {
   assert(0<=i && i < 3) ;
-  return myhedge1 (i)->myvertex (nb.s[i]) ;
+  return myhedge1 (i)->myvertex ( nb.s[i] ) ;
 }
 
 inline const Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :: hface3 :: myvertex (int i) const {

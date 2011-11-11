@@ -6,6 +6,58 @@
 
 #include "gitter_sti.h"
 #include "gitter_hexa_top.h"
+#include "mapp_tetra_3d.h"
+
+
+// --checkFace
+template < class A > 
+inline bool checkFace ( const A* fce, const int child )            
+{
+  A* face = const_cast< A* > (fce);
+  const int vxs[ 3 ][ 2 ] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
+  bool found = true ;
+  for( int i=0; i<3; ++i )
+  {
+    const int twst = face->twist( i );
+    // check vertices of the face 
+    for( int j=0; j<2; ++j ) 
+    {
+      bool foundVx = false ;
+      for( int e=0; e<2; ++e ) 
+      {
+        if( face->myvertex( vxs[ i ][ j ] ) == face->myhedge1( i )->myvertex( e ) ) 
+          foundVx = true ;
+      }
+      if( ! foundVx ) 
+      {
+        cout << "Edge inconsistency: " << face << endl;
+        for( int e=0; e<3; ++e ) 
+        {
+          cout << "edge " << face->myhedge1( e )->myvertex( 0 ) << " " <<
+            face->myhedge1( e )->myvertex( 1 ) << endl;
+        }
+        assert( false );
+      }
+    }
+
+    if( ! ( face->myvertex( i ) == face->myhedge1( i )->myvertex( twst ) &&
+            face->myvertex( (i+1)%3 ) == face->myhedge1( i )->myvertex( 1-twst ) ) )
+      found = false;
+
+    for( int j=1; j<3; ++j )
+    {
+      int f = (i+j)%3 ;
+      if( face->myhedge1( i )->getIndex() == face->myhedge1( f )->getIndex() ) 
+      {
+        cout << "Edge " << i << "  " << face->myhedge1( i ) << endl;
+        cout << "Edge " << f << "  " << face->myhedge1( f ) << endl;
+        assert( false );
+      }
+    }
+  }
+  return true ;
+  return found;
+}
 
 template < class A > class Hface3Top : public A 
 {
@@ -21,6 +73,8 @@ template < class A > class Hface3Top : public A
     typedef typename A :: myvertex_t    myvertex_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef InnerStorage< InnerEdgeStorage< innerface_t , false > > inner_t ;
+
+    typedef pair< myhedge1_t*, myhedge1_t* > edgepair_t ;
 
   private :
     innerface_t * _bbb ;
@@ -42,6 +96,7 @@ template < class A > class Hface3Top : public A
     void split_e12 () ;
     void split_e20 () ;
     void split_iso4 () ;
+
   public :
     // constructor for macro elements 
     inline Hface3Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int ) ;
@@ -78,6 +133,9 @@ template < class A > class Hface3Top : public A
     virtual void restore (ObjectStream &) ;
 
   protected:
+    myvertex_t* vertexNotOnSplitEdge( const int );
+    edgepair_t subEdges( myhedge1_t* , const myvertex_t* , const myvertex_t*  ) ;
+
     // non-virtual methods of down and innerVertex 
     innerface_t* dwnPtr() ;
     const innerface_t* dwnPtr() const ;
@@ -214,6 +272,7 @@ template < class A > class TetraTop : public A
 
       const CallSplitIF* _caller;
       unsigned char _faces[ 2 ];
+      unsigned char _vertices[ 2 ];
       face3rule_t _faceRules[ 2 ];
 
     private:
@@ -244,15 +303,53 @@ template < class A > class TetraTop : public A
         return bisectionInfo[ int(rule) - 2 ];
       }
 
+      static face3rule_t calculateRule( const myhface3_t* face, 
+                                        const myvertex_t* vx0,
+                                        const myvertex_t* vx1 )
+      {
+        static const face3rule_t rules[ 3 ] = { face3rule_t :: e01, face3rule_t :: e12, face3rule_t :: e20 };
+
+        cout << "Check rule for " << face << endl;
+        checkFace( face, face->nChild() );
+
+        int edge = -1;
+        for(int j=0; j<3; ++j ) 
+        {
+          cout << "Check edge " << face->myhedge1( j ) << endl;
+          for( int twist=0; twist<2; ++twist )
+          {
+            //cout << "Check edge " << face->myhedge1( j )->myvertex( twist ) << " " 
+            //     << face->myhedge1( j )->myvertex( 1-twist ) << endl;
+            if( face->myhedge1( j )->myvertex( twist ) == vx0  && 
+                face->myhedge1( j )->myvertex( 1-twist ) == vx1  ) 
+            {
+              edge = j;
+            }
+          }
+        }
+
+        //assert( false );
+        //abort();
+        assert( edge >= 0 );
+        return rules[ edge ];
+      }
+
       static bool refineFaces( innertetra_t* tetra, const myrule_t& rule )
       {
         const BisectionInfo& info = instance( rule );
         for( int i=0; i<2; ++i )
         {
-          const int face = info._faces[ i ];
+          myhface3_t* face = tetra->myhface3( info._faces[ i ] );
 
+          cout << "Check rule for " << face << endl;
+          cout << "vx0 " << int(info._vertices[ 0 ]) << " " << tetra->myvertex( info._vertices[ 0 ] ) << endl;
+          cout << "vx1 " << int(info._vertices[ 1 ]) << " " << tetra->myvertex( info._vertices[ 1 ] ) << endl;
+          const face3rule_t faceRule = calculateRule( face, 
+              tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
+
+          cout << "Got rule " << faceRule << endl;
           // check refinement of faces 
-          if (! tetra->myhface3( face )->refine( face3rule_t( info._faceRules[ i ] ).rotate( tetra->twist( face ) ), tetra->twist ( face ) ) ) return false ;
+          if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false ;
         }
         return true ;
       }
@@ -263,8 +360,12 @@ template < class A > class TetraTop : public A
 
         for( int i=0; i<2; ++i )
         {
-          const int face = info._faces[ i ] ;
-          tetra->myhface3 ( face )->refineImmediate ( face3rule_t ( info._faceRules[ i ] ).rotate ( tetra->twist ( face )) );
+          myhface3_t* face = tetra->myhface3( info._faces[ i ] );
+
+          const face3rule_t faceRule = calculateRule( face, 
+              tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
+
+          face->refineImmediate ( faceRule );
         }
   
         // call correct split edge 
@@ -301,6 +402,7 @@ template < class A > class TetraTop : public A
   private :
     bool checkRule( const myrule_t rule ) const
     {
+      // this does not work, when children are fliped, see setNewMapping 
       static const myrule_t possibleRules0[ 6 ][ 2 ] = { 
           { myrule_t :: e20, myrule_t :: e30 }, // possible rules for e01 in child 0 
           { myrule_t :: e01, myrule_t :: e31 }, // possible rules for e12 in child 0 
@@ -341,7 +443,7 @@ template < class A > class TetraTop : public A
       cout << endl << "Split tetra " << this<< endl; 
       cout << " ( " << this->getIndex() << ", ch" << int( _nChild) << ") with rule " << rule << "  ";
       if( _up ) 
-        cout << "father (" << _up->getIndex() << ", ch" << int( _up->_nChild) << ") rule = " << int( _up->_rule )-2 << endl;
+        cout << "father (" << _up->getIndex() << ", ch" << int( _up->_nChild) << ") rule = " << _up->_rule << endl;
       cout << endl;
       const bool chRule = checkRule( rule );
       if( ! chRule ) 
@@ -384,6 +486,7 @@ template < class A > class TetraTop : public A
     myhedge1_t * subedge1 (int,int) ;
     const myhedge1_t * subedge1 (int,int) const ;
     facepair_t subFaces( const int );
+    facepair_t subFaces( const int, const myvertex_t*, const myvertex_t* );
     myhface3_t * subface3 (int,int) ;
     const myhface3_t * subface3 (int i, int j) const ;
   public:
@@ -678,6 +781,20 @@ Hface3Top (int l, myhedge1_t * e0,
   _rule (myrule_t :: nosplit)
 {
   this->setIndex( indexManager().getIndex() );
+
+#ifndef NDEBUG 
+  double n[ 3 ];
+  LinearSurfaceMapping( myvertex( 0 )->Point(), 
+                        myvertex( 1 )->Point(),
+                        myvertex( 2 )->Point() ).normal( n );
+
+  if( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) < 1e-8 ) 
+  {
+    cout << "Determinant of " << this << " is wrong" <<endl;
+  }
+  //assert( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) >= 1e-8 );
+#endif
+  assert( checkFace( this, nChild ) );
   return ;
 }
 
@@ -692,7 +809,7 @@ Hface3Top (int l, myhedge1_t * e0,
   _rule (myrule_t :: nosplit)
 {
   this->setIndex( indexManager().getIndex() );
-  return ;
+  assert( checkFace( this, nChild() ) );
 }
 
 template < class A > inline Hface3Top < A > :: ~Hface3Top () 
