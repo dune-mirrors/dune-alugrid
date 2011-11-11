@@ -5,8 +5,9 @@
 	// vorsicht mit optimierenden compilern bei dem untenstehnden template !
 
 template < class A > void identify (typename AccessIterator < A > :: Handle mi, 
-  vector < pair < list < typename AccessIterator < A > :: Handle >, 
-  list < typename AccessIterator < A > :: Handle > > > & tt, const MpAccessLocal & c) 
+                                    vector < pair < list < typename AccessIterator < A > :: Handle >, 
+                                                    list < typename AccessIterator < A > :: Handle > > > & tt, 
+                                    const MpAccessLocal & c) 
 {
   typedef set < vector < int >, less < vector < int > > > lp_map_t ;
 
@@ -124,7 +125,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
     
     {
       for (typename lmap_t :: const_iterator pos = look.begin () ; 
-        pos != look.end () ; pos ++) 
+           pos != look.end () ; pos ++) 
       {
         const vector < int > & lk (*(*pos).second.second) ;
         if (* lk.begin () == me) 
@@ -188,7 +189,8 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & c)
   {
     AccessIterator < vertex_STI > :: Handle w (*this) ;
     os.writeObject (w.size ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) {
+    for (w.first () ; ! w.done () ; w.next ()) 
+    {
       int id = w.item ().ident () ;
       os.writeObject (id) ;
       map [id] = w ;
@@ -199,13 +201,13 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & c)
   vector < ObjectStream > osv = c.gcollect (os) ;
 
   {
-    for (int i = 0 ; i < np ; i ++ ) 
+    for (int i = 0 ; i < np ; ++i ) 
     {
       if (i != me) 
       {
         int num ;
         osv [i].readObject (num) ;
-        for (int j = 0 ; j < num ; j ++ ) 
+        for (int j = 0 ; j < num ; ++j ) 
         {
       	  int id ;
       	  osv [i].readObject (id) ;
@@ -232,6 +234,7 @@ void GitterPll :: MacroGitterPll :: identification (MpAccessLocal & c)
   _vertexTT.clear(); 
   _hedgeTT.clear();
   _hfaceTT.clear();
+
   c.removeLinkage () ;
   
   int lap1 = clock () ;
