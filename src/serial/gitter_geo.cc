@@ -509,8 +509,8 @@ int Gitter :: Geometric :: Tetra :: test () const {
 }
 
 int Gitter :: Geometric :: Tetra :: tagForGlobalRefinement () {
-  //return (request (myrule_t :: iso8), 1) ;
-  return (request (myrule_t :: bisect), 1) ;
+  return (request (myrule_t :: iso8), 1) ;
+  //return (request (myrule_t :: bisect), 1) ;
 }
 
 int Gitter :: Geometric :: Tetra :: tagForGlobalCoarsening () {
