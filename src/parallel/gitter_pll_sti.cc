@@ -21,14 +21,15 @@ pair < IteratorSTI < GitterPll :: vertex_STI > *, IteratorSTI < GitterPll :: ver
   {
     AccessIteratorTT < hedge_STI > :: InnerHandle mie (containerPll (), l) ;
     AccessIteratorTT < hedge_STI > :: OuterHandle moe (containerPll (), l) ;
+
     Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, 
-  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > lie (mie) ;
+             TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > lie (mie) ;
     Insert < AccessIteratorTT < hedge_STI > :: OuterHandle, 
-  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > loe (moe) ;
+             TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > loe (moe) ;
     _iterators_inner.push_back (new Wrapper < Insert < AccessIteratorTT < hedge_STI > :: InnerHandle, 
-  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (lie)) ;
+                                              TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (lie)) ;
     _iterators_outer.push_back (new Wrapper < Insert < AccessIteratorTT < hedge_STI > :: OuterHandle,
-  TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (loe)) ;
+                                              TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (loe)) ;
   }
   {
     AccessIteratorTT < hface_STI > :: InnerHandle mfi (containerPll (), l) ;
@@ -904,10 +905,6 @@ void GitterPll :: exchangeDynamicState () {
   // Regel hier eingeschleift werden.
   
 {
-  //struct mallinfo minfo = mallinfo();
-  //cerr << "Anfang exchangeDynamicState(): Blocks allocated: " << (mallocedsize=(minfo.usmblks + minfo.uordblks)) << endl;
-}
-{
   const int nl = mpAccess ().nlinks () ;
 
 #ifndef NDEBUG
@@ -915,30 +912,60 @@ void GitterPll :: exchangeDynamicState () {
 #endif
   try {
     vector < ObjectStream > osv (nl) ;
-    {for (int l = 0 ; l < nl ; l ++) {
-      LeafIteratorTT < hface_STI > w (*this,l) ;
-      for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) {
-        pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessInnerPllX () ;
-        p.first->writeDynamicState (osv [l], p.second) ;
-      }
-      for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) {
-        pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessInnerPllX () ;
-        p.first->writeDynamicState (osv [l], p.second) ;
-      }
-    }}
+    {
+      for (int l = 0 ; l < nl ; l ++) 
+      {
+        LeafIteratorTT < hface_STI > w (*this,l) ;
+        for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessInnerPllX () ;
+          p.first->writeDynamicState (osv [l], p.second) ;
+        }
+        for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessInnerPllX () ;
+          p.first->writeDynamicState (osv [l], p.second) ;
+        }
+
+        // mark end of stream 
+        osv [l].writeObject( MacroGridMoverIF :: ENDSTREAM ); 
+      } 
+    }
+
+    // exchange information 
     osv = mpAccess ().exchange (osv) ;
-    {for (int l = 0 ; l < nl ; l ++ ) {
-      LeafIteratorTT < hface_STI > w (*this,l) ;
-      for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) {
-        pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessOuterPllX () ;
-        p.first->readDynamicState (osv [l], p.second) ;
+
+    {
+      for (int l = 0 ; l < nl ; l ++ ) 
+      {
+        LeafIteratorTT < hface_STI > w (*this,l) ;
+        for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessOuterPllX () ;
+          p.first->readDynamicState (osv [l], p.second) ;
+        }
+        for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) 
+        {
+          pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessOuterPllX () ;
+          p.first->readDynamicState (osv [l], p.second) ;
+        }
+
+        /*
+        // check consistency of stream 
+        int endStream ; 
+        osv [l].readObject( endStream );
+        if( endStream != MacroGridMoverIF :: ENDSTREAM )
+        {
+          cerr << "**ERROR: writeStaticState: inconsistent stream " << endl;
+          assert( false );
+          abort();
+        } 
+        */
       }
-      for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) {
-        pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessOuterPllX () ;
-        p.first->readDynamicState (osv [l], p.second) ;
-      }
-    }}
-  } catch (Parallel ::  AccessPllException) {
+    }
+  } 
+  catch (Parallel ::  AccessPllException) 
+  {
     cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
   }
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: exchangeDynamicState () used " 
@@ -968,6 +995,7 @@ void GitterPll :: exchangeStaticState () {
   try {
     const int nl = mpAccess ().nlinks () ;
     vector < ObjectStream > osv (nl) ;
+
     {
       for (int l = 0 ; l < nl ; ++l) 
       {
@@ -983,6 +1011,9 @@ void GitterPll :: exchangeStaticState () {
           pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
           p.first->writeStaticState (osv [l], p.second) ;
         }
+
+        // mark end of stream 
+        osv [l].writeObject( MacroGridMoverIF :: ENDSTREAM ); 
       }
     }
 
@@ -1003,6 +1034,19 @@ void GitterPll :: exchangeStaticState () {
           pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
           p.first->readStaticState (osv [l], p.second) ;
         }
+        // check consistency of stream 
+        int endStream ; 
+        osv [l].readObject( endStream );
+        if( endStream != MacroGridMoverIF :: ENDSTREAM )
+        {
+          osv [l].readObject( endStream );
+          if( endStream != MacroGridMoverIF :: ENDSTREAM )
+          {
+            cerr << "**ERROR: writeStaticState: inconsistent stream, got " << endStream << endl;
+            assert( false );
+            abort();
+          }
+        } 
       } 
     }
   } 
@@ -1105,7 +1149,13 @@ void GitterPll :: notifyMacroGridChanges () {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: notifyMacroGridChanges () " << endl, 1) : 1 ) ;
   Gitter :: notifyMacroGridChanges () ;
   Gitter :: notifyGridChanges () ;
+
+  //cout << "Notify done " << endl;
   containerPll ().identification (mpAccess ()) ;
+  //cout << "Ident done " << endl;
+  //printsize();
+  //printSizeTT ();
+
   loadBalancerMacroGridChangesNotify () ;
   exchangeStaticState () ;
   exchangeDynamicState () ;

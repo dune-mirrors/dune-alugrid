@@ -230,6 +230,7 @@ class TetraPllXBaseMacro : public A
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
+    virtual int moveTo () const { return _moveTo ; }
   protected:
     bool doPackAll (vector < ObjectStream > &, GatherScatterType * ) ;
     void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
@@ -306,7 +307,8 @@ class Periodic3PllXBaseMacro : public A
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
-    virtual void readStaticState(ObjectStream &, int) const {};
+    virtual void readStaticState(ObjectStream & os, int) {
+    };
     virtual int ldbVertexIndex () const { return _ldbVertexIndex ; }
     virtual void setLoadBalanceVertexIndex ( const int ldbVx ) { _ldbVertexIndex = ldbVx ; }
 
@@ -363,7 +365,7 @@ class Periodic4PllXBase : public A {
     void writeDynamicState (ObjectStream &, int) const ;
     void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
     { 
-      this->ElementData2os( os, gs );
+      assert( false ); abort();
     }
 } ;
 
@@ -392,7 +394,8 @@ class Periodic4PllXBaseMacro : public A
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
     virtual void writeStaticState (ObjectStream &, int) const ;
-    virtual void readStaticState(ObjectStream &, int) const {};
+    virtual void readStaticState(ObjectStream & os, int)  {
+    };
     virtual int ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
@@ -485,6 +488,7 @@ class HexaPllBaseXMacro : public A
     // pack and unpack funtions for dune 
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
+    virtual int moveTo () const { return _moveTo ; }
   protected :
     bool doPackAll( vector < ObjectStream > &, GatherScatterType * );
     void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;

@@ -515,13 +515,13 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
       // copy part to neu, this is needed by some of the partitioning tools  
       copy (part, part + nel, neu) ;
       
+      idx_t ncon = 1; // number of constraints per vertex, here only one 
       if( ! serialPartitioner ) 
       {
         //cout << "ParMETIS partitioner \n";
         idx_t numflag = 0; // C-style numbering, arrays start with 0  
         idx_t edgecut ;
         idx_t wgtflag = 3; // means weights for vertices and edges 
-        idx_t ncon = 1; // number of constraints per vertex, here only one 
         idx_t options[4] = {0, 1, 15, 1}; // these are the default values 
         idx_t nparts = np ;
 
@@ -571,14 +571,14 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         case METIS_PartGraphKway :
           {
             idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            ALUGridMETIS :: CALL_METIS_PartGraphKway (&n, edge_p, edge, vertex_wInt, edge_w, 
+            ALUGridMETIS :: CALL_METIS_PartGraphKway (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
                           & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu) ;
           }
           break ;
         case METIS_PartGraphRecursive :
           {
             idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            ALUGridMETIS :: CALL_METIS_PartGraphRecursive (&n, edge_p, edge, vertex_wInt, edge_w, 
+            ALUGridMETIS :: CALL_METIS_PartGraphRecursive (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
                           & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu) ;
           }
           break ;

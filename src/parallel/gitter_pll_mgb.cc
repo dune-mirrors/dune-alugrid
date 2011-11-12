@@ -113,7 +113,6 @@ void ParallelGridMover :: initialize ()
         else 
           _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->twist (0)) ;
 
-        //delete (*i) ;
         toDeleteHbnd.push_back( (*i ) );
       } 
       else 
@@ -154,7 +153,6 @@ void ParallelGridMover :: initialize ()
         else 
           _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0)) ;
         
-        //delete (*i);
         toDeleteHbnd.push_back( (*i) );
       } 
       else 
@@ -368,7 +366,7 @@ void ParallelGridMover :: finalize ()
       } 
       else 
       {
-        //assert (((hface4_GEO *)(*i).second)->ref == 2) ;
+        assert (((hface4_GEO *)(*i).second)->ref == 2) ;
         myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
       }
     }
@@ -384,7 +382,7 @@ void ParallelGridMover :: finalize ()
       } 
       else 
       {
-        //assert (((hface3_GEO *)(*i).second)->ref == 2) ;
+        assert (((hface3_GEO *)(*i).second)->ref == 2) ;
         myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
       }
     }

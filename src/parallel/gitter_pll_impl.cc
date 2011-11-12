@@ -310,13 +310,6 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
       ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
 
-      assert( ldbVx1 != ldbVx2 );
-      if( ldbVx1 < 0 || ldbVx2 < 0 ) 
-      {
-        cout << "ldbVx " << ldbVx1 << "  " << ldbVx2 << endl;
-        return false ;
-      }
-      assert( ldbVx1 >= 0 && ldbVx2 >= 0 );
       // the default graph edge 
       db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight ) );
     }
@@ -541,13 +534,15 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
   return (abort (), false) ;
 }
 
-template < class A > void BndsegPllBaseXClosure < A > :: writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const 
+template < class A > void BndsegPllBaseXClosure < A > :: 
+writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const 
 {
   gs.sendData( os , myhbnd () );
   return ;
 }
 
-template < class A > void BndsegPllBaseXClosure < A > :: readDynamicState (ObjectStream & os, GatherScatterType & gs ) 
+template < class A > void BndsegPllBaseXClosure < A > :: 
+readDynamicState (ObjectStream & os, GatherScatterType & gs ) 
 {
   gs.recvData( os , myhbnd () );
   return ;
@@ -587,6 +582,7 @@ readDynamicState (ObjectStream & os, int)
   } 
   catch (ObjectStream :: EOFException) 
   {
+    return ;
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
@@ -597,7 +593,9 @@ readDynamicState (ObjectStream & os, int)
 template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (ObjectStream & os, int) {
   try {
     os.readObject (_extGraphVertexIndex) ;
-  } catch (ObjectStream :: EOFException) {
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
@@ -618,6 +616,7 @@ packAsBnd (int fce, int who, ObjectStream & os) const
     cerr << "BndsegPllBaseXMacroClosure :: packAsBnd: Wrong face type!in: "<<__FILE__ << " line: " <<__LINE__ << endl; 
     abort () ;
   }
+
   os.writeObject (this->myhbnd ().bndtype ()) ;
   
   {
@@ -669,6 +668,9 @@ template < class A >
 void TetraPllXBase< A > :: writeDynamicState (ObjectStream & os, int face) const 
 {
   // write level to know the level of ghost on the other side
+  // write level and leaf for the ghost element 
+  // to determine leafEntity or not 
+
   os.writeObject( mytetra().level() );
   os.writeObject( mytetra().leaf()  );
   return ;
@@ -710,7 +712,7 @@ int TetraPllXBaseMacro< A > :: ldbVertexIndex () const {
 
 template < class A >
 void TetraPllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
-  cout << "Set ldbVertex " << ldbVx << endl;
+  //cout << "Set ldbVertex " << ldbVx << endl;
   _ldbVertexIndex = ldbVx ;
 }
 
@@ -733,9 +735,9 @@ bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase &
 }
 
 template < class A >
-void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
+void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
+{
   os.writeObject (ldbVertexIndex ()) ;
-  return ;
 }
 
 template < class A >
@@ -1012,7 +1014,7 @@ bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBa
 
 template < class A >
 void Periodic3PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
-  //os.writeObject (ldbVertexIndex ()) ;
+  abort();
   return ;
 }
 
@@ -1060,6 +1062,9 @@ void Periodic3PllXBaseMacro< A > :: attach2 (int i)
     // store new destination 
     _moveTo = i; 
 
+    //myperiodic ().myhface3 (0)->attach2 (i) ;
+    //myperiodic ().myhface3 (1)->attach2 (i) ;
+
     // attach both neighbours to the same process 
     for(int n=0; n<2; ++n ) 
     {
@@ -1074,6 +1079,9 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 {
   if( _moveTo >= 0 ) 
   {
+    assert( myneighbour( 0 ).first->moveTo() == _moveTo );
+    assert( myneighbour( 1 ).first->moveTo() == _moveTo );
+
     assert ((osv.begin () + _moveTo) < osv.end ()) ;
     ObjectStream& os = osv[ _moveTo ];
 
@@ -1195,24 +1203,31 @@ Periodic4PllXBaseMacro< A > :: ~Periodic4PllXBaseMacro ()
 
 template < class A > 
 int Periodic4PllXBaseMacro< A > :: ldbVertexIndex () const {
-  assert( _ldbVertexIndex >= 0 );
+  //assert( _ldbVertexIndex >= 0 );
   return _ldbVertexIndex ;
 }
 
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
+  abort();
   _ldbVertexIndex = ldbVx ;
 }
 
 template < class A > 
 bool Periodic4PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
 {
+  abort();
   return true ;
 }
 
 template < class A > 
-void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
-  //os.writeObject (ldbVertexIndex ()) ;
+void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const 
+{
+  // this method should not be called since we require periodic element 
+  // to be not located at a process boundary 
+
+  assert( false );
+  abort();
   return ;
 }
 
@@ -1220,9 +1235,10 @@ template < class A >
 void Periodic4PllXBaseMacro< A > :: unattach2 (int i) 
 {
   assert (i >= 0 );
+  _moveTo = -1;
+
   myperiodic ().myhface4 (0)->unattach2 (i) ;
   myperiodic ().myhface4 (1)->unattach2 (i) ;
-  _moveTo = -1;
 }
 
 // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
@@ -1279,6 +1295,10 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 {
   if( _moveTo >= 0 ) 
   {
+    // make sure the connected elements are moved to the same proc  
+    assert( myneighbour( 0 ).first->moveTo() == _moveTo );
+    assert( myneighbour( 1 ).first->moveTo() == _moveTo );
+
     assert ((osv.begin () + _moveTo) < osv.end ()) ;
     ObjectStream& os = osv[ _moveTo ];
     
@@ -1349,6 +1369,7 @@ void Periodic4PllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i)
 
 template < class A > 
 bool Periodic4PllXBaseMacro< A > :: erasable () const {
+  //cout << "return erasable = " << _erasable << endl; 
   return _erasable ;
 }
 
@@ -1370,7 +1391,8 @@ void HexaPllBaseX< A >  :: writeDynamicState (ObjectStream & os, GatherScatterTy
 template < class A >
 void HexaPllBaseX< A > :: writeDynamicState (ObjectStream & os, int face) const 
 {
-  // siehe writeDynamicState von Tetra 
+  // write level and leaf for the ghost element 
+  // to determine leafEntity or not 
 
   // write level to know the level of ghost on the other side
   os.writeObject( myhexa().level() );
@@ -1442,10 +1464,9 @@ bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & 
 }
 
 template < class A >
-void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int) const 
+void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
 {
   os.writeObject (ldbVertexIndex ()) ;
-  return ;
 }
 
 template < class A >

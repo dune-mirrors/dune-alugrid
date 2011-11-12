@@ -128,7 +128,10 @@ class GitterPll : public virtual Gitter {
     static inline bool debugOption (int = 0) ;
   public :
     class MacroGitterPll : public virtual Gitter :: Geometric :: BuilderIF,
-  public AccessIteratorTT < vertex_STI >, public AccessIteratorTT < hedge_STI >, public AccessIteratorTT < hface_STI > {
+      public AccessIteratorTT < vertex_STI >, 
+      public AccessIteratorTT < hedge_STI >, 
+      public AccessIteratorTT < hface_STI > 
+  {
       protected :
       
   // Die nachfolgenden Vektoren von Listenpaaren sind die Identifikationsabbildung auf dem Grobgitter:
@@ -527,8 +530,8 @@ inline pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll 
   AccessIteratorTT < hface_STI > :: InnerHandle mif (containerPll () , l) ;
   AccessIteratorTT < hface_STI > :: OuterHandle mof (containerPll () , l) ;
   return pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * >
-  (new Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, StopRule_t > > (mif,rule),
-   new Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, StopRule_t > > (mof,rule)) ;
+    (new Insert < AccessIteratorTT < hface_STI > :: InnerHandle, TreeIterator < hface_STI, StopRule_t > > (mif,rule),
+     new Insert < AccessIteratorTT < hface_STI > :: OuterHandle, TreeIterator < hface_STI, StopRule_t > > (mof,rule)) ;
 }
 
 

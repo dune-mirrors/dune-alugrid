@@ -30,7 +30,8 @@ typedef float realtype ;
 #endif 
 
 inline void 
-CALL_METIS_PartGraphKway(idxtype *n, idxtype *edge_p, idxtype *edge,
+CALL_METIS_PartGraphKway(idxtype *n, idxtype* ncon, 
+                         idxtype *edge_p, idxtype *edge,
                          idxtype *vertex_wInt, idxtype *edge_w,
                          idxtype *wgtflag, idxtype *numflag, idxtype *npart,
                          realtype* tpwgts, realtype *ubvec, idxtype* options, 
@@ -38,9 +39,21 @@ CALL_METIS_PartGraphKway(idxtype *n, idxtype *edge_p, idxtype *edge,
 {
 #if HAVE_METIS  
   // call metis function 
-  :: METIS_PartGraphKway (n, edge_p, edge, 
-                          vertex_wInt, edge_w,
-                          wgtflag,  numflag, npart, 
+  :: METIS_PartGraphKway (n, 
+#ifndef HAVE_METIS_VERSION_4
+                          ncon,
+#endif
+                          edge_p, edge, 
+                          vertex_wInt, 
+#ifndef HAVE_METIS_VERSION_4
+                          NULL,
+#endif
+                          edge_w,
+#ifdef HAVE_METIS_VERSION_4
+                          wgtflag,
+                          numflag,
+#endif
+                          npart, 
 #ifndef HAVE_METIS_VERSION_4
                           tpwgts, ubvec, NULL, // options 
 #else               
@@ -56,7 +69,7 @@ CALL_METIS_PartGraphKway(idxtype *n, idxtype *edge_p, idxtype *edge,
 }
 
 inline void 
-CALL_METIS_PartGraphRecursive(idxtype *n, idxtype *edge_p, idxtype *edge,
+CALL_METIS_PartGraphRecursive(idxtype *n, idxtype* ncon, idxtype *edge_p, idxtype *edge,
                               idxtype *vertex_wInt, idxtype *edge_w,
                               idxtype *wgtflag, idxtype *numflag, idxtype *npart,
                               realtype* tpwgts, realtype *ubvec, idxtype* options, 
@@ -64,9 +77,21 @@ CALL_METIS_PartGraphRecursive(idxtype *n, idxtype *edge_p, idxtype *edge,
 {
 #if HAVE_METIS  
   // call metis function 
-  :: METIS_PartGraphRecursive(n, edge_p, edge, 
-                          vertex_wInt, edge_w,
-                          wgtflag,  numflag, npart, 
+  :: METIS_PartGraphRecursive(n,
+#ifndef HAVE_METIS_VERSION_4
+                          ncon,
+#endif
+                          edge_p, edge, 
+                          vertex_wInt, 
+#ifndef HAVE_METIS_VERSION_4
+                          NULL,
+#endif
+                          edge_w,
+#ifdef HAVE_METIS_VERSION_4
+                          wgtflag,
+                          numflag,
+#endif
+                          npart, 
 #ifndef HAVE_METIS_VERSION_4
                           tpwgts, ubvec, NULL, // options 
 #else               
