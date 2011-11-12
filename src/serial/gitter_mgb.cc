@@ -591,8 +591,8 @@ void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
       } 
       else if (n == 6) 
       {
-        if( std::abs(identification) != Gitter :: hbndseg_STI :: periodic ) 
-          cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
+        //if( std::abs(identification) != Gitter :: hbndseg_STI :: periodic ) 
+        //  cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
 
         in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >>
               pervec [nper][3] >> pervec [nper][4] >> pervec [nper][5];
