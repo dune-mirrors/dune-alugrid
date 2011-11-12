@@ -42,9 +42,11 @@ CALL_METIS_PartGraphKway(idxtype *n, idxtype *edge_p, idxtype *edge,
                           vertex_wInt, edge_w,
                           wgtflag,  numflag, npart, 
 #ifndef HAVE_METIS_VERSION_4
-                          tpwgts, ubvec, 
+                          tpwgts, ubvec, NULL, // options 
+#else               
+                          options,
 #endif
-                          options, edgecut, neu) ;
+                          edgecut, neu) ;
 #else 
   std::cerr << "**ERROR The use of METIS_PartGraphKway is not supported, when the METIS library is missing!  in: " << __FILE__ << " line: " << __LINE__ << "\n";
   std::cerr << metmess << std::endl ;
@@ -66,9 +68,11 @@ CALL_METIS_PartGraphRecursive(idxtype *n, idxtype *edge_p, idxtype *edge,
                           vertex_wInt, edge_w,
                           wgtflag,  numflag, npart, 
 #ifndef HAVE_METIS_VERSION_4
-                          tpwgts, ubvec, 
+                          tpwgts, ubvec, NULL, // options 
+#else               
+                          options,
 #endif
-                          options, edgecut, neu) ;
+                          edgecut, neu) ;
 #else 
   std::cerr << "**ERROR The use of METIS_PartGraphRecursive is not supported, when the METIS library is missing!  in: " << __FILE__ << " line: " << __LINE__ << "\n";
   std::cerr << metmess << std::endl ;
