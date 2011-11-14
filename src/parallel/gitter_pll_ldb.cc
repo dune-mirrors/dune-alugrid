@@ -362,7 +362,8 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   bool change = partition.size() > 0 ;
   
   // flag to indicate whether we use a serial or a parallel partitioner 
-  const bool serialPartitioner = ( mth != ParMETIS_V3_AdaptiveRepart ); 
+  bool serialPartitioner = ( mth != ParMETIS_V3_AdaptiveRepart ); 
+  const bool usePartKway = false ;
 
   // create maps for edges and vertices 
   ldb_edge_set_t    edges ;
@@ -381,7 +382,30 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
                ) ;
 
   // only use ParMETIS_V3_GraphKway for the initial partitioning 
-  const bool usePartKway = ( ! serialPartitioner ) ? vtxdist[0] == vtxdist[ np ] : true ;
+  // this is when all vertices are on proc 0 
+  const bool nonDistributedMesh = ( ! serialPartitioner ) ? 
+    vtxdist[ 1 ] == vtxdist[ np ] : false ;
+
+  if( nonDistributedMesh && ! serialPartitioner ) 
+  {
+    serialPartitioner = true ;
+
+    nodes.clear();
+    edges.clear();
+    delete [] vtxdist; 
+    vtxdist = 0;
+
+    // use METIS_PartGraphKway for initial distribution of the mesh 
+    mth = METIS_PartGraphKway ;
+    
+    // redo the graph collect in the case that the mesh is not distributed 
+    graphCollect (mpa,
+                  insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
+                  insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
+                  vtxdist,
+                  serialPartitioner 
+                 ) ;
+  }
 
   // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
   // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
@@ -531,7 +555,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         // for starting partitions use PartKway
         if( usePartKway ) 
         {
-          //cout << "Call PartKway \n";
+          abort();
           ALUGridParMETIS :: CALL_ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
                                     & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
                                     ubvec, options, & edgecut, neu, & comm ) ;
@@ -586,71 +610,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         // the method 'collect' moves all elements to rank 0 
         case COLLECT :
           fill (neu, neu + nel, 0L) ;
-          break ;
-
-        // PARTY methods    
-        case PARTY_linear :
-          CALL_global_lin (nel, vertex_w, np, neu) ;
-          break ;
-          
-        case PARTY_random :
-          CALL_global_ran (nel, vertex_w, np, neu) ;
-          break ;
-          
-        case PARTY_scattered :
-          CALL_global_sca (nel, vertex_w, np, neu) ;
-          break ;
-          
-        case PARTY_breathfirst :
-          CALL_global_gbf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
-          break ;
-          
-        case PARTY_cutfirst :
-          CALL_global_gcf (nel, vertex_w, edge_p, edge, edge_w, np, neu) ;
-          break ;
-          
-        case PARTY_kernighanLin :
-          {
-            // Die dreifache Anwendung der Helpful-Set bzw. Kenighan-Lin Heuristik
-            // basiert auf Erfahrungswerten und liefert einigermassen ausiterierte
-            // Partitionen.
-            
-            // check if partitioning exists, i.e. sum > 0
-            int sum = 0;
-            for( int k=0; k<nel; ++k) 
-            {
-              sum += neu[ k ]; 
-            }
-
-            // if not partitioned yet then call 
-            // global_linear for the first time 
-            if( sum == 0 ) 
-            {
-              CALL_global_lin (nel, vertex_w, np, neu) ;
-            }
-            
-            CALL_local_kl (nel, vertex_w, edge_p, edge, edge_w, np,  neu, 0) ;
-          }
-          break ;
-          
-        case PARTY_helpfulSet :
-          {
-            // check if partitioning exists, i.e. sum > 0
-            int sum = 0;
-            for( int k=0; k<nel; ++k) 
-            {
-              sum += neu[ k ]; 
-            }
-
-            // if not partitioned yet then call 
-            // global_linear for the first time 
-            if( sum == 0 ) 
-            {
-              CALL_global_lin (nel, vertex_w, np, neu) ;
-            }
-            
-            CALL_local_hs (nel, vertex_w, edge_p, edge, edge_w, np, neu, 0) ;
-          }
           break ;
 
         default :
