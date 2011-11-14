@@ -701,26 +701,12 @@ const char * LoadBalancer :: DataBase :: methodToString (method m)
       return "no dynamic load balancing" ;
     case COLLECT :
       return "COLLECT" ;
-    case PARTY_helpfulSet :
-      return "PARTY_helpfulSet" ;
-    case PARTY_kernighanLin :
-      return "PARTY_kernighanLin" ;
-    case PARTY_scattered :
-      return "PARTY_scattered" ;
-    case PARTY_random :
-      return "PARTY_random" ;
-    case PARTY_linear :
-      return "PARTY_linear" ;
-    case PARTY_cutfirst :
-      return "PARTY_cutfirst" ;
-    case PARTY_breathfirst :
-      return "PARTY_breathfirst" ;
     case METIS_PartGraphKway :
       return "METIS_PartGraphKway" ;
     case METIS_PartGraphRecursive :
       return "METIS_PartGraphRecursive" ;
     case ParMETIS_V3_AdaptiveRepart :
-      return "ParMETIS_V3_PartKway / ParMETIS_V3_AdaptiveRepart" ;
+      return "ParMETIS_V3_AdaptiveRepart" ;
     default :
       return "unknown method" ;
   }
