@@ -49,9 +49,6 @@ extern "C" {
 // ParMETIS stuff 
 #include "parallel/aluparmetis.hh"
 
-// PARTY Lib stuff 
-#include "parallel/aluparty_lib.hh"
-
 #ifdef COUNT_ALUGRID_FLOPS
 #define double Double
 #endif

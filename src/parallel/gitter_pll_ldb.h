@@ -83,15 +83,6 @@ class LoadBalancer {
           // collect all to rank 0 
           COLLECT = 1,
 
-          // PARTY methods 
-          PARTY_helpfulSet = 3, 
-          PARTY_kernighanLin = 4,
-          PARTY_random = 5, 
-          PARTY_scattered = 6,
-          PARTY_linear = 7,
-          PARTY_breathfirst = 8,
-          PARTY_cutfirst = 9, 
-
           // METIS method for graph partitioning 
           METIS_PartGraphKway = 11,
           METIS_PartGraphRecursive = 12,
