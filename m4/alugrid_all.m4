@@ -66,7 +66,6 @@ echo "-------------------------------------"
 echo  
 echo "METIS............: $with_metis"
 echo "ParMETIS.........: $with_parmetis"
-echo "PARTY............: $with_party"
 echo "MPI..............: $with_mpi"
 echo "STAR-MPI.........: $with_starmpi"
 echo
