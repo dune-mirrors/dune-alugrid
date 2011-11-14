@@ -38,7 +38,6 @@ dnl check all components
   AC_REQUIRE([ALUGRID_SERIAL_PARALLEL])
   AC_REQUIRE([ALUGRID_PATH_METIS])
   AC_REQUIRE([ALUGRID_PATH_PARMETIS])
-  AC_REQUIRE([ALUGRID_PATH_PARTY])
   AC_REQUIRE([ALUGRID_PATH_STARMPI])
 
 dnl convenience-variables if every found package should be used
