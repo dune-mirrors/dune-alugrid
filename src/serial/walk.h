@@ -240,9 +240,10 @@ template < class A, class B > class TreeIterator : public IteratorSTI < A >
     inline val_t & item () const ;
     inline virtual IteratorSTI < A > * clone () const;
   private :
-    // maximal depth of a grid hierarchy, not possible an a 64bit system yet.
-    // this is a secure upper bound 
-    enum { maxStackDepth = 16 } ;
+    // maximal depth of a grid hierarchy, 
+    // for iso8 refinement 16 should be enough 
+    // for bisection we need more 
+    enum { maxStackDepth = 32 } ;
 
     A * _seed ;
     A * _stack [ maxStackDepth ] ;
@@ -425,6 +426,7 @@ template < class A > inline A & ListIterator < A > :: item () const {
 
 template < class A, class B > inline int TreeIterator < A, B > :: pushdown () {
   A * e = _stack [_pos] ;
+  assert( _pos+1 < maxStackDepth );
   for( ; e ? ! _cmp (e) : 0 ; _stack [ ++ _pos] = (e = e->down ())) ;
   return e ? 1 : (-- _pos, 0) ;
 }
