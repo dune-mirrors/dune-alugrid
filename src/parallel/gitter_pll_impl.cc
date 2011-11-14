@@ -298,14 +298,15 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
                                        is_leaf < Gitter :: hface_STI > > ( myhface () ).size ();
 
     // if we have a periodic situation 
-    if( ldbVx1 < ldbVx2 ) 
+    if( ldbVx1 != ldbVx2 ) 
     {
       assert( mycon1->isperiodic() || mycon2->isperiodic() );
       assert( ldbVx1 >= 0 && ldbVx2 >= 0 );
       // increase the edge weight for periodic connections 
+      // TODO: make weight factor (here 4) dynamically adjustable 
       db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight*4 ) );
     }
-    else if( ldbVx1 == ldbVx2 ) 
+    else 
     {
       ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
@@ -1228,6 +1229,7 @@ void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) co
 
   assert( false );
   abort();
+
   return ;
 }
 
