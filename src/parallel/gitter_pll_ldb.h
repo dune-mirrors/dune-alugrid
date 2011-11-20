@@ -87,8 +87,11 @@ class LoadBalancer {
           METIS_PartGraphKway = 11,
           METIS_PartGraphRecursive = 12,
 
+          // parallel partkway
+          ParMETIS_V3_PartKway = 13,
+
           // ParMETIS method for adaptive repartition 
-          ParMETIS_V3_AdaptiveRepart = 13   
+          ParMETIS_V3_AdaptiveRepart = 14   
         } ;
       private :
         void graphCollect (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,

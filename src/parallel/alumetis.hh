@@ -21,7 +21,7 @@ static const char metmess [] =  "**INFO Due to license reasons the library METIS
 namespace ALUGridMETIS
 {
 
-#ifndef HAVE_METIS_VERSION_4
+#if HAVE_METIS && not defined HAVE_METIS_VERSION_4
 typedef idx_t  idxtype ;
 typedef real_t realtype ;
 #else 

@@ -362,8 +362,8 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   bool change = partition.size() > 0 ;
   
   // flag to indicate whether we use a serial or a parallel partitioner 
-  bool serialPartitioner = ( mth != ParMETIS_V3_AdaptiveRepart ); 
-  const bool usePartKway = false ;
+  bool serialPartitioner = ( mth <= METIS_PartGraphRecursive ); 
+  const bool usePartKway = ( mth == ParMETIS_V3_PartKway );
 
   // create maps for edges and vertices 
   ldb_edge_set_t    edges ;
@@ -555,7 +555,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         // for starting partitions use PartKway
         if( usePartKway ) 
         {
-          abort();
           ALUGridParMETIS :: CALL_ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
                                     & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
                                     ubvec, options, & edgecut, neu, & comm ) ;
