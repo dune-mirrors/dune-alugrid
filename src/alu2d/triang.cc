@@ -234,7 +234,7 @@ void Triang < N,NV >::newNeighbour(Triang* nb, int fce, int nbfce,
   fce = mod(fce);
   nbfce = mod(nbfce);
 
-  nbconnect(fce, nb, nbfce);
+  this->nbconnect(fce, nb, nbfce);
   if( setnormal )
     setnormdir(fce, 1);
   if( !leaf() ) {
@@ -410,7 +410,7 @@ int Triang < N,NV >::split2tr(void * (&e)[Basic::nparts], Listagency < vertex_t 
     } 
     else
     {
-      get_splitpoint(0, 0.5, p);
+      this->get_splitpoint(0, 0.5, p);
       //connect.nb[0]->get_splitpoint(connect.bck[0], 0.5, p);
       agnc->insert(nvtx = new fullvertex_t(p,level()));
       newedge[0]=new Edge(hdl);
@@ -613,7 +613,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
       }
       else
       {
-        get_splitpoint(i, 0.5, p);
+        this->get_splitpoint(i, 0.5, p);
         // connect.nb[i]->get_splitpoint(connect.bck[i], 0.5, p);
         newvtx[i] = new fullvertex_t(p,level());
         agnc->insert(newvtx[i]);
@@ -649,7 +649,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
   else 
   {
     const double l[2] = {0.5, 0.5};
-    get_splitpoint( l, p );
+    this->get_splitpoint( l, p );
     vertex_t* midvtx = new fullvertex_t(p,level());
     agnc->insert(midvtx);
     newtr[0] = new Triang(connect.vtx[0],newvtx[3],midvtx,newvtx[2]);
@@ -805,10 +805,10 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
       {
         helement_t *child=down();
         child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-        nbconnect(2,child->neighbour(0),child->opposite(0));
+        this->nbconnect(2,child->neighbour(0),child->opposite(0));
         child=child->next();
         child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-        nbconnect(1,child->neighbour(0),child->opposite(0));
+        this->nbconnect(1,child->neighbour(0),child->opposite(0));
         if( neighbour(1)->thinis(thinelement_t::element_like) ) {
           ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
           setnormdir(1, -1);
@@ -840,7 +840,7 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
         assert( ncv );
         child->neighbour(1)->nbconnect(2,this,-1);
         child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-        nbconnect(2,child->neighbour(0),child->opposite(0));
+        this->nbconnect(2,child->neighbour(0),child->opposite(0));
         if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
           ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
           setnormdir(2, -1);
@@ -850,7 +850,7 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
         child=child->next();
         child->neighbour(2)->nbconnect(1,this,-1);
         child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-        nbconnect(1,child->neighbour(0),child->opposite(0));
+        this->nbconnect(1,child->neighbour(0),child->opposite(0));
         if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
           ((element_t *)neighbour(1))->setnormdir(opposite(1), 1);
           setnormdir(1, -1);
@@ -872,7 +872,7 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
       {
         helement_t *child=down();
         child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-        nbconnect(2,child->neighbour(0),child->opposite(0));
+        this->nbconnect(2,child->neighbour(0),child->opposite(0));
         if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
           ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
           setnormdir(2, -1);
@@ -881,7 +881,7 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
 
         child=child->next();
         child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-        nbconnect(1,child->neighbour(0),child->opposite(0));
+        this->nbconnect(1,child->neighbour(0),child->opposite(0));
         if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
           ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
           setnormdir(1, -1);
@@ -948,7 +948,7 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
         assert(!hashvtx(i));
         if (nbel(i)) {
           if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
-            addhvtx(child[mod(i+1)]->vertex(i+2), 
+            this->addhvtx(child[mod(i+1)]->vertex(i+2), 
                     child[mod(i+2)]->nbel(i),child[mod(i+1)]->nbel(i), i);
             connect.hvtx[i]->merge(((Triang*)child[mod(i+1)])->connect.hvtx[i],
                      ((Triang*)child[mod(i+2)])->connect.hvtx[i]);

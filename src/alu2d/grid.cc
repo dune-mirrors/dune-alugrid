@@ -784,7 +784,7 @@ int Hier < A >::refine_leaf(Listagency < vertex_t > * a,
      this->is(Refco::ref_1) || this->is(Refco::ref_2) || 
      this->thinis(this->bndel_like)) {
       
-    void * els [this->nparts] ;
+    void * els [A::nparts] ;
 
     if (this->is(Refco::quart))
     {
