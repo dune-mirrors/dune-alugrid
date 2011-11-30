@@ -1022,10 +1022,9 @@ void HexaTop < A > :: doRestore (InStream_t & is)
 
    
 template < class A >  Periodic4Top < A > :: 
-Periodic4Top (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, const bnd_t bt ) 
+Periodic4Top (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, const bnd_t (&bt)[2] ) 
   : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(0)
-  , _bt( bt )
   , _lvl (l) 
   , _nChild (0)
   , _rule (myrule_t :: nosplit)
@@ -1038,13 +1037,16 @@ Periodic4Top (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, const bnd
   _segmentIndex[ 0 ] = this->getIndex() ;
   // get additional segment index 
   _segmentIndex[ 1 ] = im.getIndex(); 
+
+  // store bnd id 
+  _bt[ 0 ] = bt[ 0 ];
+  _bt[ 1 ] = bt[ 1 ];
 }
 
 template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0, 
     int t0, myhface4_t * f1, int t1, innerperiodic4_t * up, int nChild )
 : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
-  , _bt( up->_bt )
   , _lvl (l)
   , _nChild (nChild) 
 { 
@@ -1055,6 +1057,10 @@ template < class A >  Periodic4Top < A > :: Periodic4Top (int l, myhface4_t * f0
   // get segment index from father 
   _segmentIndex[ 0 ] = _up->_segmentIndex[ 0 ];
   _segmentIndex[ 1 ] = _up->_segmentIndex[ 1 ];
+
+  // copy bnd ids from father 
+  _bt[ 0 ] = _up->_bt[ 0 ];
+  _bt[ 1 ] = _up->_bt[ 1 ];
 }
 
 template < class A >  Periodic4Top < A > :: ~Periodic4Top () 

@@ -480,12 +480,16 @@ insert_tetra (hface3_GEO *(&f)[4], int (&t)[4])
 #include "ghost_elements.h"
 
 GitterBasis :: periodic3_GEO * 
-GitterBasis :: MacroGitterBasis :: insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2], Gitter:: hbndseg_STI :: bnd_t bnd ) 
+GitterBasis :: MacroGitterBasis :: 
+insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2], 
+                  const Gitter:: hbndseg_STI :: bnd_t (&bnd)[2] ) 
 {
   return new Objects :: periodic3_IMPL (0,f[0],t[0],f[1],t[1], bnd) ;
 }
 
-GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2], Gitter:: hbndseg_STI :: bnd_t bnd ) 
+GitterBasis :: periodic4_GEO * GitterBasis :: MacroGitterBasis :: 
+insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2], 
+                  const Gitter:: hbndseg_STI :: bnd_t (&bnd)[2] ) 
 {
   return new Objects :: periodic4_IMPL (0, f [0], t[0], f [1], t[1], bnd ) ;
 }

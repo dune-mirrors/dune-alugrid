@@ -793,7 +793,7 @@ public :
       return pair<int,int> (-1,-1);
     }
 
-    virtual bnd_t bndtype () const = 0 ;
+    virtual bnd_t bndtype ( const int ) const = 0 ;
   protected :
     hperiodic () {}
     virtual ~hperiodic () {}
@@ -1808,8 +1808,8 @@ public :
       virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) = 0 ;
       virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) = 0 ;
       
-      virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], hbndseg_STI :: bnd_t) = 0 ;
-      virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], hbndseg_STI :: bnd_t) = 0 ;
+      virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const hbndseg_STI :: bnd_t (&)[2] ) = 0 ;
+      virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const hbndseg_STI :: bnd_t (&)[2] ) = 0 ;
       
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0 ;
       

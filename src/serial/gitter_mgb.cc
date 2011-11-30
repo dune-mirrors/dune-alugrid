@@ -177,7 +177,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
 }
 
 pair < Gitter :: Geometric :: periodic3_GEO *, bool > MacroGridBuilder :: 
-InsertUniquePeriodic3 (int (&v)[6], Gitter :: hbndseg_STI ::bnd_t bt)  
+InsertUniquePeriodic3 (int (&v)[6], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2] )  
 {
 
   // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
@@ -208,7 +208,7 @@ InsertUniquePeriodic3 (int (&v)[6], Gitter :: hbndseg_STI ::bnd_t bt)
 }
 
 pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: 
-InsertUniquePeriodic4 (int (&v)[8], Gitter :: hbndseg_STI ::bnd_t bt ) 
+InsertUniquePeriodic4 (int (&v)[8], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2] ) 
 {
 
   // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
@@ -918,7 +918,9 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
             cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
             exit(1);
           }
-          InsertUniquePeriodic3 (v, (Gitter :: hbndseg :: bnd_t)(std::abs(bt)) ) ;
+          Gitter :: hbndseg :: bnd_t btAbs = (Gitter :: hbndseg :: bnd_t)(std::abs(bt));
+          Gitter :: hbndseg :: bnd_t bndId[ 2 ] = { btAbs, btAbs };
+          InsertUniquePeriodic3 (v, bndId ) ;
         }
         break ;
       case PERIODIC4_RAW :
@@ -931,7 +933,9 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
             cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
             exit(1);
           }
-          InsertUniquePeriodic4 (v, (Gitter :: hbndseg :: bnd_t)(std::abs(bt)) ) ;
+          Gitter :: hbndseg :: bnd_t btAbs = (Gitter :: hbndseg :: bnd_t)(std::abs(bt));
+          Gitter :: hbndseg :: bnd_t bndId[ 2 ] = { btAbs, btAbs };
+          InsertUniquePeriodic4 (v, bndId ) ;
         }
         break ;
       default :

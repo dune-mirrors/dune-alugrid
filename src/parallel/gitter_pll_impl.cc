@@ -984,7 +984,7 @@ void Periodic3PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const 
 
 template < class A >
 Periodic3PllXBaseMacro< A > :: 
-Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1, Gitter :: hbndseg_STI :: bnd_t bt )
+Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1, const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] )
 : A(level, f0, s0, f1, s1, bt )
 , _moveTo ( -1 )
 , _ldbVertexIndex ( -1 )
@@ -1089,8 +1089,9 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     os.writeObject (PERIODIC3) ;
 
     // write boundary id 
-    int bnd = this->bndtype();
-    os.writeObject ( bnd );
+    const int bnd[ 2 ] = { this->bndtype( 0 ), this->bndtype( 1 ) };
+    os.writeObject ( bnd[ 0 ] );
+    os.writeObject ( bnd[ 1 ] );
 
     os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
@@ -1179,7 +1180,7 @@ void Periodic4PllXBase< A > :: writeDynamicState (ObjectStream & os, int) const 
 
 template < class A > 
 Periodic4PllXBaseMacro< A > :: 
-Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1, Gitter :: hbndseg_STI :: bnd_t bt ) 
+Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1, const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] ) 
   : A(level, f0, s0, f1, s1, bt )
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
@@ -1307,8 +1308,9 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     os.writeObject (PERIODIC4) ;
 
     // write boundary id 
-    int bnd = this->bndtype();
-    os.writeObject ( bnd );
+    const int bnd[ 2 ] = { this->bndtype( 0 ), this->bndtype( 1 ) };
+    os.writeObject ( bnd[ 0 ] );
+    os.writeObject ( bnd[ 1 ] );
 
     os.writeObject (myperiodic ().myvertex (0)->ident ()) ;
     os.writeObject (myperiodic ().myvertex (1)->ident ()) ;
@@ -1879,13 +1881,15 @@ insert_tetra (hface3_GEO *(&f)[4], int (&t)[4])
 }
 
 Gitter :: Geometric :: periodic3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2], Gitter :: hbndseg_STI :: bnd_t bt ) 
+insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2], 
+                  const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] ) 
 {
   return new ObjectsPll :: Periodic3EmptyPllMacro (f [0], t[0], f [1], t[1], bt) ;
 } 
 
 Gitter :: Geometric :: periodic4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2], Gitter :: hbndseg_STI :: bnd_t bt) 
+insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2], 
+                  const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] ) 
 {
   return new ObjectsPll :: Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1], bt ) ;
 }

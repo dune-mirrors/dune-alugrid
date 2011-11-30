@@ -501,10 +501,13 @@ void ParallelGridMover :: unpackTetra (ObjectStream & os, GatherScatterType* gs 
 
 void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os) 
 {
-  // read boundary id 
-  int bnd ;
-  os.readObject (bnd) ;
-  Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bnd;
+  // read boundary ids 
+  int bnd[ 2 ];
+  os.readObject (bnd[ 0 ]) ;
+  os.readObject (bnd[ 1 ]) ;
+  Gitter :: hbndseg :: bnd_t b[ 2 ] = { 
+    (Gitter :: hbndseg :: bnd_t) bnd[ 0 ],
+    (Gitter :: hbndseg :: bnd_t) bnd[ 1 ] };
 
   // read vertex ids 
   int v [6] ;
@@ -522,10 +525,13 @@ void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os)
 
 void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os) 
 {
-  // read boundary id 
-  int bnd ;
-  os.readObject (bnd) ;
-  Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bnd;
+  // read boundary ids 
+  int bnd[ 2 ];
+  os.readObject (bnd[ 0 ]) ;
+  os.readObject (bnd[ 1 ]) ;
+  Gitter :: hbndseg :: bnd_t b[ 2 ] = { 
+    (Gitter :: hbndseg :: bnd_t) bnd[ 0 ],
+    (Gitter :: hbndseg :: bnd_t) bnd[ 1 ] };
 
   // read vertex ids 
   int v [8] ;

@@ -494,7 +494,7 @@ template < class A > class Periodic4Top : public A {
     // we need two indices since this pointer 
     // is available on the two periodic sides 
     int _segmentIndex[ 2 ];
-    const bnd_t _bt;
+    bnd_t _bt[ 2 ];
     unsigned char _lvl ;
     const signed char _nChild; 
     myrule_t _rule ;
@@ -512,9 +512,8 @@ template < class A > class Periodic4Top : public A {
     }
 
   public:
-    inline bnd_t bndtype () const { return _bt; }
 
-    Periodic4Top (int,myhface4_t *,int,myhface4_t *,int, const bnd_t bt ) ;
+    Periodic4Top (int,myhface4_t *,int,myhface4_t *,int, const bnd_t (&bt)[ 2 ] ) ;
     Periodic4Top (int,myhface4_t *,int,myhface4_t *,int,
                   innerperiodic4_t * up, int nChild ) ;
     virtual ~Periodic4Top () ;
@@ -535,6 +534,11 @@ template < class A > class Periodic4Top : public A {
     inline int level () const ;
     inline int nChild () const ;
     inline int segmentIndex (const int) const ;
+    inline bnd_t bndtype (const int i) const 
+    { 
+      assert( i==0 || i == 1 );
+      return _bt[ i ]; 
+    }
   public :
     myrule_t getrule () const ;
     bool refine () ;
