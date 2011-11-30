@@ -12,12 +12,11 @@ in the file COPYING and via http://www.gnu.org/licenses/gpl.html .
 Compiler 
 --------
 
-The ALUGrid code in known to compile with the GNU Compiler version 3.4.x or higher. 
-Also with the INTEL C++ Compiler version 8.1 or higher the code compiles.
-Furthermore the code compiles with the IBM xlC compiler version 6 or higher. 
+The ALUGrid code is known to compile with the GNU Compiler version 4.1.x or higher. 
+The code also compiles with the INTEL C++ Compiler (tested version 11.1 and 12.0).
 
-The compiler can be chosen by editing the fields COMP and CXXCOMP in the
-*.opts files. For parallel computations the MPI compiler, like mpiCC should
+The compiler can be chosen by setting the variable CXX correctly, i.e. 
+CXX=g++ or CXX=icpc. For parallel computations the MPI compiler, like mpiCC or mpicxx should
 be used or the include path and lib path adapted. 
 
 
@@ -33,13 +32,13 @@ to commence those tests. See ./configure --help for detail help on options.
 If you intend to use the parallel version of the
 grid, make sure that you have a version of MPI, 
 and METIS (--with-metis=PATH) or  
-PARTY (--with-party=PATH) and supply the respective flags to the 
+ParMETIS (--with-parmetis=PATH) and supply the respective flags to the 
 configure script. Dynamic load balancing can only be used 
-if either METIS, or PARTY Lib (or more than one) are linked to the ALUGrid Library.
+if either METIS, or ParMETIS (or more than one) are linked to the ALUGrid Library.
 
 For parallel computation the C bindings of MPI are needed, 
-common packages are OpenMPI (version 1.1.x), MPICH (version 1.2.5 or higher), 
-or LAM MPI (version 7.x). 
+common packages are OpenMPI or MPICH, but also other MPI implementations should work 
+with this code. 
 To compile the parallel version of the library use the 
 $MPICC compiler script (i.e. mpicc -show or mpicc -showme)
 to obtain pre-processor flags and linker flags to add to 
@@ -57,10 +56,8 @@ or
 
 ./configure CXX=mpiCC --with-metis="metis_path" --with-party="partylib_path"
 
-For METIS (version 4.0 or higher)  
-see http://glaros.dtc.umn.edu/gkhome/views/metis/metis/ .
-For PARTY Lib (version 1.99) see 
-http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html .
+For METIS and ParMETIS (version 4.0 or higher) see 
+see http://glaros.dtc.umn.edu/gkhome/views/metis
 
 You can use
 
@@ -95,17 +92,11 @@ Available methods are:
 NONE = 0
 COLLECT = 1 (collect all elements to process 0)
 
-PARTY_helpfulSet = 3
-PARTY_kernighanLin = 4
-PARTY_random = 5
-PARTY_scattered = 6
-PARTY_linear = 7
-PARTY_breathfirst = 8
-PARTY_cutfirst = 9
-
 METIS_PartGraphKway = 11
 METIS_PartGraphRecursive = 12
 
+ParMETIS_V3_PartKway = 13
+ParMETIS_V3_AdaptiveRepart = 14
 
 See the documentation of the corresponding package for detail on the
 methods. 
