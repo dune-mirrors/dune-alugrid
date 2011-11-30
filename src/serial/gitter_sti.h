@@ -283,7 +283,7 @@ public :
   class DuneIndexProvider 
   {
   public:
-    enum { interior = 0 , border = 211 , ghost = 222, ghostperiodic = 233 };
+    enum { interior = 0 , border = 211 , ghost = 222 };
 
     enum Flag
     {
@@ -441,7 +441,7 @@ public :
     // returns true if item is ghost item 
     bool isGhost () const 
     {
-      return (bndId() == ghost) || (bndId() == ghostperiodic) ;
+      return (bndId() == ghost);
     }
     
     // returns trus, if item is border item 
@@ -707,18 +707,8 @@ public :
 
     typedef enum { 
       none = DuneIndexProvider :: interior, // also the value of interior items 
-      inflow = 1, 
-      outflow = 2, 
-      noslip = 3, 
-      slip = 4, 
-      sym_xy = 5,
-      sym_xz = 6, 
-      sym_yz = 7, 
-      reflect = 8, 
-      fluxtube3d = 9, 
       closure = DuneIndexProvider :: border,  // also the value of border items 
       ghost_closure = DuneIndexProvider :: ghost , // also the value of ghost items 
-      ghost_closure_periodic = DuneIndexProvider :: ghostperiodic, 
       periodic = 254, // periodic boundaries (deprecated)
       undefined = 255 } bnd_t ;
 
