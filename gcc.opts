@@ -2,8 +2,8 @@
 # remember to run ./autogen.sh after changing these values!
 
 # name of compiler binaries
-COMP="gcc-4.3.4"
-CXXCOMP="g++-4.3.4 -std=c++0x"
+COMP="gcc"
+CXXCOMP="g++ -std=c++0x"
 #CXXCOMP="g++"
 
 # flags set in any case
@@ -19,4 +19,4 @@ DEBUGFLAGS="-g"
 OPTIMFLAGS="-O3 -DNDEBUG \
   -funroll-loops -finline-functions \
   -fomit-frame-pointer -ffast-math \
-  -msse3 -mfpmath=sse -march=k8" 
+  -msse3 -mfpmath=sse" 
