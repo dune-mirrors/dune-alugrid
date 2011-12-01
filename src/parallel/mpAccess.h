@@ -1,4 +1,3 @@
-// (c) bernhard schupp 1997 - 1998
 #ifndef MPACCESS_H_INCLUDED
 #define MPACCESS_H_INCLUDED
 
@@ -44,23 +43,37 @@ class MpAccessGlobal {
     virtual const CommIF* communicator() const = 0;
 } ;
 
-class MpAccessLocal : public MpAccessGlobal {
+class MpAccessLocal : public MpAccessGlobal 
+{
   map < int, int, less < int > > _linkage ;
+  vector< int > _dest ;
   public :
+    class NonBlockingExchange 
+    {
+    protected:
+      NonBlockingExchange () {}
+    public:  
+      virtual ~NonBlockingExchange () {}
+      virtual void send( const vector< ObjectStream >& ) = 0;  
+      virtual vector < ObjectStream > receive() = 0;  
+      virtual void receive( vector < ObjectStream >& ) = 0;
+    };
+
     inline virtual ~MpAccessLocal () ;
     void printLinkage (ostream &) const ;
     inline void removeLinkage () ;
     inline int nlinks () const ;
     inline int link (int) const ;
-    vector < int > dest () const ;
+    const vector < int >& dest () const{ return _dest ; }
     int insertRequestSymetric (set < int, less < int > >) ;
     virtual vector < vector < int > > exchange (const vector < vector < int > > &) const = 0 ;
     virtual vector < vector < double > > exchange (const vector < vector < double > > &) const = 0 ;
     virtual vector < vector < char > > exchange (const vector < vector < char > > &) const = 0 ;
     // exchange data and return new vector of object streams 
     virtual vector < ObjectStream > exchange (const vector < ObjectStream > &) const = 0 ;
-    // exchange data with given send and receive buffers 
-    virtual void exchange (const vector < ObjectStream > &, vector < ObjectStream > &) const = 0 ;
+
+    // return handle for non-blocking exchange 
+    virtual NonBlockingExchange* nonBlockingExchange ( const vector < ObjectStream > & ) const = 0;
 } ;
 
 
@@ -91,7 +104,7 @@ inline int MpAccessLocal :: nlinks () const {
 inline void MpAccessLocal :: removeLinkage () 
 {
   _linkage.clear();
-  //_linkage.erase (_linkage.begin (), _linkage.end ()) ;
+  _dest.clear();
   return ;
 }
 

@@ -1,4 +1,3 @@
-// (c) bernhard schupp 1997 - 1998
 #ifndef MPACCESS_MPI_H_INCLUDED
 #define MPACCESS_MPI_H_INCLUDED
 
@@ -28,6 +27,8 @@ public:
     //! return copy of this object  
     virtual CommIF* clone() const { return new Comm< MPICommunicator > ( _mpiComm ); }
   };
+
+  typedef MpAccessLocal :: NonBlockingExchange  NonBlockingExchange;
 
 protected:  
   // class holding the MPI communicator 
@@ -87,12 +88,11 @@ public:
   
   vector < ObjectStream > exchange (const vector < ObjectStream > &) const ;
 
-  // symectric exchange with same buffer size 
-  void exchange (const vector < ObjectStream > & in,
-                 vector< ObjectStream > & out) const;
-    
   // return MPI communicator wrapper 
   const CommIF* communicator() const { return _mpiCommPtr; }
+
+  // return handle for non-blocking exchange 
+  NonBlockingExchange* nonBlockingExchange( const vector < ObjectStream > & ) const ;
 } ;
 
 
@@ -107,7 +107,6 @@ public:
 inline int MpAccessMPI :: psize () const 
 {
   assert( _psize > 0 );
-  //return _psize;
   return _psize;
 }
 

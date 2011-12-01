@@ -1,13 +1,4 @@
-// (c) bernhard schupp 1997 - 1998
-
 #include "mpAccess.h"
-
-vector < int > MpAccessLocal :: dest () const {
-  vector < int > d (_linkage.size ()) ;
-  for (map < int, int, less < int > > :: const_iterator i = _linkage.begin () ; 
-  	i != _linkage.end () ; i ++) d [(*i).second] = (*i).first ;
-  return d ;
-}
 
 void MpAccessLocal :: printLinkage (ostream & out) const {
   out << "  MpAccessLocal :: printLinkage () " << myrank () << " -> " ;
@@ -17,7 +8,8 @@ void MpAccessLocal :: printLinkage (ostream & out) const {
   return ;
 }
 
-int MpAccessLocal :: insertRequestSymetric (set < int, less < int > > req) {
+int MpAccessLocal :: insertRequestSymetric (set < int, less < int > > req) 
+{
   const int me = myrank () ;
   req.erase (me) ;
   vector < int > out ;
@@ -41,5 +33,13 @@ int MpAccessLocal :: insertRequestSymetric (set < int, less < int > > req) {
       }
     }
   }
+
+  // setup dest vector 
+  {
+    _dest.resize( _linkage.size () ) ;
+    for (map < int, int, less < int > > :: const_iterator i = _linkage.begin () ; 
+  	  i != _linkage.end () ; i ++) _dest[(*i).second] = (*i).first ;
+  }
+
   return cnt ;
 }

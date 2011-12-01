@@ -327,6 +327,7 @@ protected:
     return *this;
   }
   
+  friend class NonBlockingExchangeMPI ;
   friend class MpAccessMPI ;
   friend class MpAccessSTAR_MPI ;
 } ;
