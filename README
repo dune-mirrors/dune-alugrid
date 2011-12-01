@@ -34,7 +34,7 @@ grid, make sure that you have a version of MPI,
 and METIS (--with-metis=PATH) or  
 ParMETIS (--with-parmetis=PATH) and supply the respective flags to the 
 configure script. Dynamic load balancing can only be used 
-if either METIS, or ParMETIS (or more than one) are linked to the ALUGrid Library.
+if either METIS, or ParMETIS, or both are linked to the ALUGrid Library.
 
 For parallel computation the C bindings of MPI are needed, 
 common packages are OpenMPI or MPICH, but also other MPI implementations should work 
@@ -124,10 +124,6 @@ The ALUGrid code is highly riddled with assert statements.
 Therefore it is recommended to compile the library and the application code
 with the CPP variable NDEBUG set (i.e. -DNDEBUG) to avoid all asserts
 statement tests. 
-
-Known bugs: On Intel ia64 architectures the optimisation option -O3 doesn't
-work with the INTEL C++ Compiler. 
-
 
 Debug
 -----

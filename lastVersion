@@ -2,10 +2,12 @@ version 0.3: 2006 Jun 23 19:16
 version 0.4: 2006 Mon Oct 9 16
 version 0.41: 2006 Fri Dec 15 16:30 CET
 version 1.0:  2007 Mon May  7 13:04:22 CEST
-version 1.1: Mon Mar  3 17:00:00 CET 2008 (svn update -r1006)
+version 1.1:  Mon Mar  3 17:00:00 CET 2008 (svn update -r1006)
 version 1.11: Tue Jul 29 16:00:00 CEST 2008 (svn update -r1018)
 version 1.12: Thu Sep  4 12:03:20 CEST 2008 (svn update -r1036)
 version 1.13: Fri Jan  9 13:55:00 CET 2009 (svn update -r1042)
 version 1.14: Thu Feb 12 09:00:00 CET 2009 (svn update -r1064)
 version 1.20: Fri Jan 15 14:15:00 CET 2010 (svn update -r1176) 
 version 1.22: Mon Jan 25 13:00:00 CET 2010 (svn update -r1182) 
+version 1.23: Fri Sep 24 10:06:14 CET 2010 (svn update -r1371)
+version 1.50: Thu Dec  1 13:37:25 CET 2011 (release svn update -r1516)
