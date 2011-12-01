@@ -49,7 +49,6 @@ if  test ! -f "$METIS_INCLUDE_PATH/metis.h" ; then
     # METIS 4.0 
     METIS_INCLUDE_PATH="$METISROOT/Lib"
     ALU_METIS_VERSION="(Version 4.0)"
-    DEFINE_METIS_VERS_4=1
   elif test -f $METISROOT/include/metis.h ; then 
     # METIS 5.0
     METIS_INCLUDE_PATH="$METISROOT/include"
@@ -109,9 +108,6 @@ if test x$HAVE_METIS = x1 ; then
   AC_SUBST(METIS_LIBS, $METIS_LIBS)
   AC_SUBST(METIS_LDFLAGS, $METIS_LDFLAGS)
   AC_SUBST(METIS_CPPFLAGS, $METIS_CPPFLAGS)
-  if test "x$DEFINE_METIS_VERS_4" == "x1" ; then 
-    AC_DEFINE(HAVE_METIS_VERSION_4, 1, [Define to that METIS version 4.x is used])
-  fi  
   AC_DEFINE(HAVE_METIS, 1, [Define to 1 if metis-library is found])
 
   # add to global list

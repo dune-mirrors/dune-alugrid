@@ -2,11 +2,18 @@
 #define METIS_H_INCLUDED
 
 #if HAVE_METIS 
+
 // cover metis-4.0 bug   
 #define __log2 __METIS__log2
 extern "C" {
   #include <metis.h>
 }
+
+#undef HAVE_METIS_VERSION_4
+#if not defined IDXTYPEWIDTH && not defined REALTYPEWIDTH 
+#define HAVE_METIS_VERSION_4
+#endif
+
 #else 
 static const char metmess [] =  "**INFO Due to license reasons the library METIS is\n"
         "       not part of the ALUGrid library distribution. \n"
@@ -21,12 +28,12 @@ static const char metmess [] =  "**INFO Due to license reasons the library METIS
 namespace ALUGridMETIS
 {
 
-#if HAVE_METIS && not defined HAVE_METIS_VERSION_4
-typedef idx_t  idxtype ;
-typedef real_t realtype ;
-#else 
+#if HAVE_METIS && defined HAVE_METIS_VERSION_4
 typedef int   idxtype ;
 typedef float realtype ;
+#else 
+typedef idx_t  idxtype ;
+typedef real_t realtype ;
 #endif 
 
 inline void 
@@ -38,28 +45,38 @@ CALL_METIS_PartGraphKway(idxtype *n, idxtype* ncon,
                          idxtype* edgecut, idxtype *neu)
 {
 #if HAVE_METIS  
+
+#ifdef HAVE_METIS_VERSION_4 
+
+  // METIS Version 4.0
   // call metis function 
-  :: METIS_PartGraphKway (n, 
-#ifndef HAVE_METIS_VERSION_4
-                          ncon,
+  :: METIS_PartGraphKway(n,
+                         edge_p, edge, 
+                         vertex_wInt, 
+                         edge_w,
+                         wgtflag,
+                         numflag,
+                         npart, 
+                         options,
+                         edgecut, neu) ;
+
+#else 
+
+  // METIS Version 5.x
+  // call metis function 
+  :: METIS_PartGraphKway(n,
+                         ncon,
+                         edge_p, edge, 
+                         vertex_wInt, 
+                         (idx_t *) 0,
+                         edge_w,
+                         npart, 
+                         tpwgts, ubvec, 
+                         (idx_t *) 0, // options 
+                         edgecut, neu) ;
+
 #endif
-                          edge_p, edge, 
-                          vertex_wInt, 
-#ifndef HAVE_METIS_VERSION_4
-                          NULL,
-#endif
-                          edge_w,
-#ifdef HAVE_METIS_VERSION_4
-                          wgtflag,
-                          numflag,
-#endif
-                          npart, 
-#ifndef HAVE_METIS_VERSION_4
-                          tpwgts, ubvec, NULL, // options 
-#else               
-                          options,
-#endif
-                          edgecut, neu) ;
+
 #else 
   std::cerr << "**ERROR The use of METIS_PartGraphKway is not supported, when the METIS library is missing!  in: " << __FILE__ << " line: " << __LINE__ << "\n";
   std::cerr << metmess << std::endl ;
@@ -69,35 +86,46 @@ CALL_METIS_PartGraphKway(idxtype *n, idxtype* ncon,
 }
 
 inline void 
-CALL_METIS_PartGraphRecursive(idxtype *n, idxtype* ncon, idxtype *edge_p, idxtype *edge,
+CALL_METIS_PartGraphRecursive(idxtype *n, idxtype* ncon, 
+                              idxtype *edge_p, idxtype *edge,
                               idxtype *vertex_wInt, idxtype *edge_w,
                               idxtype *wgtflag, idxtype *numflag, idxtype *npart,
                               realtype* tpwgts, realtype *ubvec, idxtype* options, 
                               idxtype* edgecut, idxtype *neu)
 {
 #if HAVE_METIS  
+
+#ifdef HAVE_METIS_VERSION_4 
+
+  // METIS Version 4.0
   // call metis function 
   :: METIS_PartGraphRecursive(n,
-#ifndef HAVE_METIS_VERSION_4
-                          ncon,
-#endif
-                          edge_p, edge, 
-                          vertex_wInt, 
-#ifndef HAVE_METIS_VERSION_4
-                          NULL,
-#endif
-                          edge_w,
-#ifdef HAVE_METIS_VERSION_4
-                          wgtflag,
-                          numflag,
-#endif
-                          npart, 
-#ifndef HAVE_METIS_VERSION_4
-                          tpwgts, ubvec, NULL, // options 
-#else               
-                          options,
-#endif
-                          edgecut, neu) ;
+                              edge_p, edge, 
+                              vertex_wInt, 
+                              edge_w,
+                              wgtflag,
+                              numflag,
+                              npart, 
+                              options,
+                              edgecut, neu) ;
+
+#else 
+
+  // METIS Version 5.x
+  // call metis function 
+  :: METIS_PartGraphRecursive(n,
+                              ncon,
+                              edge_p, edge, 
+                              vertex_wInt, 
+                              (idx_t *) 0,
+                              edge_w,
+                              npart, 
+                              tpwgts, ubvec, 
+                              (idx_t *) 0, // options 
+                              edgecut, neu) ;
+
+#endif // end HAVE_METIS_VERSION_4
+
 #else 
   std::cerr << "**ERROR The use of METIS_PartGraphRecursive is not supported, when the METIS library is missing!  in: " << __FILE__ << " line: " << __LINE__ << "\n";
   std::cerr << metmess << std::endl ;
