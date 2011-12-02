@@ -387,24 +387,53 @@ vector < vector < char > > MpAccessMPI :: exchange (const vector < vector < char
   return doExchange (in, MPI_BYTE, _mpiComm, dest ()) ;
 }
 
+//////////////////////////////////////////////////////////////////////////
 // non-blocking communication object 
+// this class is defined here since it contains MPI information 
+//////////////////////////////////////////////////////////////////////////
 class NonBlockingExchangeMPI : public MpAccessLocal :: NonBlockingExchange
 {
   const MpAccessMPI :: CommIF* _mpiCommPtr;
   const vector< int >& _dest;
 
   const int _nLinks; 
-  int _tag;
+  const int _tag;
 
   MPI_Request* _request;
+
+  // create an unique tag for the communication 
+  static int getTag() 
+  {
+    static int tagCounter = 0;
+    ++ tagCounter;
+    int tag = tagCounter ;
+
+    // avoid overflow 
+    if( tag < 0 ) 
+    {
+      tag = 0;
+      tagCounter = 0;
+    }
+    return tag;
+  }
 public:
-  explicit NonBlockingExchangeMPI( const MpAccessMPI :: CommIF* comm,
-                                   const vector< int >& dest,
-                                   const vector< ObjectStream > & in ) 
+  NonBlockingExchangeMPI( const MpAccessMPI :: CommIF* comm,
+                          const vector< int >& dest )
     : _mpiCommPtr( comm ),
       _dest( dest ),
       _nLinks( _dest.size() ),
-      _tag( 123 ),
+      _tag( getTag() ),
+      _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
+  {
+  }
+
+  NonBlockingExchangeMPI( const MpAccessMPI :: CommIF* comm,
+                          const vector< int >& dest,
+                          const vector< ObjectStream > & in ) 
+    : _mpiCommPtr( comm ),
+      _dest( dest ),
+      _nLinks( _dest.size() ),
+      _tag( getTag() ),
       _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
   {
     assert( _nLinks == int( in.size() ) );
@@ -428,6 +457,8 @@ public:
   void receive( vector< ObjectStream > & out ) { receiveImpl( out ); }  
   vector< ObjectStream > receive() { return receiveImpl(); }
 
+  //////////////////////////////////////////
+  // implementation 
   //////////////////////////////////////////
 
   // send data implementation 
@@ -466,31 +497,35 @@ public:
     for (int link = 0 ; link < _nLinks ; ++link ) 
     {
       MPI_Status s ;
-      int cnt ;
+
+      pair< char*, int > buff( (char *) 0, -1 );
+
       {
         MY_INT_TEST MPI_Probe ( _dest[link], _tag, comm, & s) ; 
         assert (test == MPI_SUCCESS) ;
       }
       {
-        MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & cnt ) ;
+        MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & buff.second ) ;
         assert (test == MPI_SUCCESS) ;
       }
+
+      assert( buff.second >= 0 );
 
       // use alloc from objects stream because this is the 
       // buffer of the object stream
-      char * lne = ObjectStream :: allocateBuffer( cnt );
+      buff.first = ObjectStream :: allocateBuffer( buff.second );
       
       {
-        MY_INT_TEST MPI_Recv (lne, cnt, MPI_BYTE, _dest[ link ], _tag, comm, & s) ;
+        MY_INT_TEST MPI_Recv ( buff.first, buff.second, MPI_BYTE, _dest[ link ], _tag, comm, & s) ;
         assert (test == MPI_SUCCESS) ;
       }
 
-      pair< char*, int > buff( lne, cnt );
       // copy buffer and count to object stream 
       // this will only set the pointer in ObjectStream 
       out[ link ] = buff ;
     }
     
+    // wait until all processes are done with receiving
     {
       MPI_Status * sta = new MPI_Status [ _nLinks ] ;
       assert (sta) ;
