@@ -64,44 +64,6 @@ void MyAlloc :: unlockFree (void * addr)
   }
 }
 
-#ifdef USE_MALLOC_AT_ONCE
-#warning "MyAlloc :: mallocAtOnce() enabled! "
-void  MyAlloc :: mallocAtOnce(size_t s, void* vec[], size_t vecSize) throw (OutOfMemoryException) 
-{
-  assert(s > 0);
-  {
-    AllocEntry & fs ((*freeStore) [s]) ;
-    for(size_t i=0; i<vecSize; ++i)
-    {
-      ++ fs.N ;
-      if (fs.S.empty ()) 
-      {
-        vec[i] = malloc (s) ;
-        if (vec[i] == NULL) 
-        {
-          perror ("**FEHLER (FATAL) in MyAlloc :: operator new ()") ;
-          cerr << "**INFO MyAlloc :: operator new (" << s << "): Der gesamte belegte Speicherbereich war " 
-#ifdef IBM_XLC
-             << (mallinfo ().arena /1024)
-#else
-             << "[FEHLER: mallinfo() nicht verfuegbar] "
-#endif
-             << "kb als das Programm out-of-memory lief." << endl ;
-          throw OutOfMemoryException () ;
-        }
-      } 
-      else 
-      {
-        // get pointer from stack 
-        vec[i] = fs.S.top () ;
-        fs.S.pop () ;
-      }
-    }
-  }
-  return ;
-}
-#endif
-
 void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) 
 {
   assert(s > 0);
@@ -111,14 +73,8 @@ void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException)
     if (fs.S.empty ()) {
       void * p = malloc (s) ;
       if (p == NULL) {
-        perror ("**FEHLER (FATAL) in MyAlloc :: operator new ()") ;
-        cerr << "**INFO MyAlloc :: operator new (" << s << "): Der gesamte belegte Speicherbereich war " 
-#ifdef IBM_XLC
-             << (mallinfo ().arena /1024)
-#else
-             << "[FEHLER: mallinfo() nicht verfuegbar] "
-#endif
-             << "kb als das Programm out-of-memory lief." << endl ;
+        perror ("**ERROR (FATAL) in MyAlloc :: operator new ()") ;
+        cerr << "**INFO MyAlloc :: operator new (" << s << "): No more memory available " << endl; 
         throw OutOfMemoryException () ;
       }
       return p ;
@@ -164,23 +120,6 @@ MyAlloc :: Initializer :: Initializer ()
 {
   if ( ! MyAlloc :: _initialized ) 
   {
-#ifdef IBM_XLC
-    {
-      // Auf der SP sollte immer das eingestellte Limit von 143 MB umgangen werden.
-      // Der Knoten hat 512 MB, und wird exklusiv benutzt - warum also sparsam sein.
-      // Die Programme m"ussen aber auch mit -bmaxdata:#bytes gelinkt werden, um den
-      // Platz adressieren zu k"onnen.
-    
-      long test = ulimit(UL_GETMAXBRK) ;
-      if (test == -1) {
-        cerr << "**WARNUNG (IGNORIERT) Hochsetzen des Limits f\"ur den Breakvalue hat nicht geklappt. In " << __FILE__ " Zeile " << __LINE__ << endl ;
-      } else {
-        unsigned long limit = ulimit (GET_DATALIM) ;
-        limit /= 0x00100000 ;
-        cout << "**INFO MyAlloc :: Initializer :: Initializer () Neues Limit f\"ur den Breakvalue : " << limit << " MBytes." << endl ;
-      }
-    }
-#endif
     freeStore = new map < size_t, AllocEntry, less < size_t > > ;
     assert (freeStore) ;
 

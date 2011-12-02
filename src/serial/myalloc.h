@@ -41,14 +41,6 @@ class MyAlloc {
     MyAlloc () {}
    ~MyAlloc () {}
 
-  protected: 
-#ifdef USE_MALLOC_AT_ONCE
-    // malloc same size of memory at once 
-    void mallocAtOnce(size_t , void* v[] , size_t ) throw (OutOfMemoryException) ; 
-    // operator new that gets memory from outside 
-    void * operator new (size_t, void * p ) { assert(p); return p; }
-#endif
-
   public :
     // new version of operator new 
     void * operator new (size_t) throw (OutOfMemoryException) ;
