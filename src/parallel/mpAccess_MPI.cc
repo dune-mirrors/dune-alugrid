@@ -457,7 +457,12 @@ public:
 
   // virtual methods 
   void send( const vector< ObjectStream > & in ) { sendImpl( in ); }
-  void receive( vector< ObjectStream > & out ) { receiveImpl( out ); }  
+  void receive( vector< ObjectStream > & out ) { 
+    assert( false );
+    cerr << "ERROR: NonBlockingExchange::receive( vector< ObjectStream >& ) not working correctly, use other receive method" << endl;
+    abort();
+    receiveImpl( out ); 
+  }  
   vector< ObjectStream > receive() { return receiveImpl(); }
 
   //////////////////////////////////////////

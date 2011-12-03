@@ -1,4 +1,3 @@
-// (c) bernhard schupp 1997 - 1998
 #if HAVE_STARMPI
 #include "mpAccess_STAR.h"
 

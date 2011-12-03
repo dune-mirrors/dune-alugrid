@@ -72,11 +72,12 @@ public :
   inline ~ObjectStreamImpl () { removeObj(); }
 
   //! assign buffer from os the local buffer, os ownership is false afterwards
-  inline const ObjectStreamImpl & operator = (const ObjectStreamImpl & os)
+  //inline const ObjectStreamImpl & operator = (const ObjectStreamImpl & os)
+  inline ObjectStreamImpl & operator = (const ObjectStreamImpl & os)
   {
     removeObj();
     assign(os);
-    return os;
+    return *this;
   }
 
   // write value to stream 
@@ -281,10 +282,10 @@ public :
 public:  
   // assigment of streams, owner ship of buffer is 
   // passed from os to this stream to avoid copy of large memory areas 
-  inline const ObjectStream & operator = (const ObjectStream & os) 
+  inline ObjectStream & operator = (const ObjectStream & os) 
   {
     BaseType::operator =(os); 
-    return os;
+    return *this;
   }
   
   inline void writeObject (const Serializable &) throw (OutOfMemoryException);
@@ -345,10 +346,10 @@ public:
   inline SmallObjectStream (const SmallObjectStream & os) : BaseType(os) {} 
   
   // assignment , ownership changes 
-  inline const SmallObjectStream & operator = (const SmallObjectStream & os) 
+  inline SmallObjectStream & operator = (const SmallObjectStream & os) 
   {
     BaseType::operator =(os); 
-    return os;
+    return *this; 
   }
 
   inline void writeObject (double a)  { this->write(a); }
