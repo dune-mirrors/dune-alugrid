@@ -123,6 +123,7 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
                                     MPI_Comm comm, 
                                     const vector < int > & d) 
 {
+  const int messagetag = MpAccessMPI :: messagetag ;
   assert (in.size() == d.size()) ;
   int nl = d.size () ;
   vector < vector < A > > out (nl) ;
@@ -139,7 +140,7 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
         assert (lne) ;
         copy (in [link].begin (), in [link].end (), lne) ;
         buf [link] = lne ;
-        MY_INT_TEST MPI_Issend (lne, size, mpiType, d [link], 123, comm, & req [link]) ;
+        MY_INT_TEST MPI_Issend (lne, size, mpiType, d [link], messagetag, comm, & req [link]) ;
         assert (test == MPI_SUCCESS) ;
       } 
     }
@@ -150,7 +151,7 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
         MPI_Status s ;
         int cnt ;
         {
-          MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ;
+          MY_INT_TEST MPI_Probe (d [link], messagetag, comm, & s) ;
           assert (test == MPI_SUCCESS) ;
         }
         
@@ -162,7 +163,7 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
         A * lne = new A [cnt] ;
         assert (lne) ;
         {
-          MY_INT_TEST MPI_Recv (lne, cnt, mpiType, d [link], 123, comm, & s) ;
+          MY_INT_TEST MPI_Recv (lne, cnt, mpiType, d [link], messagetag, comm, & s) ;
           assert (test == MPI_SUCCESS) ;
         }
         copy (lne, lne + cnt, back_inserter (out[link])) ;
@@ -418,22 +419,24 @@ class NonBlockingExchangeMPI : public MpAccessLocal :: NonBlockingExchange
   }
 public:
   NonBlockingExchangeMPI( const MpAccessMPI :: CommIF* comm,
-                          const vector< int >& dest )
+                          const vector< int >& dest,
+                          const int tag )
     : _mpiCommPtr( comm ),
       _dest( dest ),
       _nLinks( _dest.size() ),
-      _tag( getTag() ),
+      _tag( tag ),
       _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
   {
   }
 
   NonBlockingExchangeMPI( const MpAccessMPI :: CommIF* comm,
                           const vector< int >& dest,
+                          const int tag,
                           const vector< ObjectStream > & in ) 
     : _mpiCommPtr( comm ),
       _dest( dest ),
       _nLinks( _dest.size() ),
-      _tag( getTag() ),
+      _tag( tag ),
       _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
   {
     assert( _nLinks == int( in.size() ) );
@@ -537,15 +540,23 @@ public:
 };
 
 MpAccessMPI :: NonBlockingExchange*
-MpAccessMPI :: nonBlockingExchange( const vector < ObjectStream > & in ) const 
+MpAccessMPI :: nonBlockingExchange( const int tag, const vector < ObjectStream > & in ) const 
 {
-  return new NonBlockingExchangeMPI( _mpiCommPtr, dest(), in );
+  assert( tag > messagetag+1 );
+  return new NonBlockingExchangeMPI( _mpiCommPtr, dest(), tag, in );
+}
+
+MpAccessMPI :: NonBlockingExchange*
+MpAccessMPI :: nonBlockingExchange( const int tag ) const 
+{
+  assert( tag > messagetag+1 );
+  return new NonBlockingExchangeMPI( _mpiCommPtr, dest(), tag );
 }
 
 // --exchange
 vector < ObjectStream > MpAccessMPI :: exchange (const vector < ObjectStream > & in) const 
 {
-  NonBlockingExchangeMPI nonBlockingExchange( _mpiCommPtr, dest(), in );
+  NonBlockingExchangeMPI nonBlockingExchange( _mpiCommPtr, dest(), messagetag+1, in );
   return nonBlockingExchange.receiveImpl();
 }
 

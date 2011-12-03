@@ -30,6 +30,9 @@ public:
 
   typedef MpAccessLocal :: NonBlockingExchange  NonBlockingExchange;
 
+  // MPI communication tag  
+  enum { messagetag = 123 };
+
 protected:  
   // class holding the MPI communicator 
   const CommIF* _mpiCommPtr;
@@ -91,8 +94,10 @@ public:
   // return MPI communicator wrapper 
   const CommIF* communicator() const { return _mpiCommPtr; }
 
-  // return handle for non-blocking exchange 
-  NonBlockingExchange* nonBlockingExchange( const vector < ObjectStream > & ) const ;
+  // return handle for non-blocking exchange and already do send operation
+  NonBlockingExchange* nonBlockingExchange( const int tag, const vector < ObjectStream > & ) const ;
+  // return handle for non-blocking exchange
+  NonBlockingExchange* nonBlockingExchange( const int tag ) const ;
 } ;
 
 

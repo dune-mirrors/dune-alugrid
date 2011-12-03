@@ -72,8 +72,12 @@ class MpAccessLocal : public MpAccessGlobal
     // exchange data and return new vector of object streams 
     virtual vector < ObjectStream > exchange (const vector < ObjectStream > &) const = 0 ;
 
+    // return handle for non-blocking exchange and already do send operation
+    virtual NonBlockingExchange* nonBlockingExchange ( const int tag, 
+                                                       const vector < ObjectStream > & ) const = 0;
+
     // return handle for non-blocking exchange 
-    virtual NonBlockingExchange* nonBlockingExchange ( const vector < ObjectStream > & ) const = 0;
+    virtual NonBlockingExchange* nonBlockingExchange ( const int tag ) const = 0;
 } ;
 
 
