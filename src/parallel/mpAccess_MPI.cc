@@ -457,12 +457,6 @@ public:
 
   // virtual methods 
   void send( const vector< ObjectStream > & in ) { sendImpl( in ); }
-  void receive( vector< ObjectStream > & out ) { 
-    assert( false );
-    cerr << "ERROR: NonBlockingExchange::receive( vector< ObjectStream >& ) not working correctly, use other receive method" << endl;
-    abort();
-    receiveImpl( out ); 
-  }  
   vector< ObjectStream > receive() { return receiveImpl(); }
 
   //////////////////////////////////////////
@@ -482,7 +476,7 @@ public:
       // get number of bytes to send 
       int   cnt  = osv[ link ]._wb  - osv[ link ]._rb ; 
 
-      MY_INT_TEST MPI_Issend ( buff, cnt, MPI_BYTE, _dest[link], _tag, comm, & _request[ link ] ) ;
+      MY_INT_TEST MPI_Isend ( buff, cnt, MPI_BYTE, _dest[link], _tag, comm, & _request[ link ] ) ;
       assert (test == MPI_SUCCESS) ;
     }
   }

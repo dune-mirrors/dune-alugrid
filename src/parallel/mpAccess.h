@@ -56,7 +56,6 @@ class MpAccessLocal : public MpAccessGlobal
       virtual ~NonBlockingExchange () {}
       virtual void send( const vector< ObjectStream >& ) = 0;  
       virtual vector < ObjectStream > receive() = 0;  
-      virtual void receive( vector < ObjectStream >& ) = 0;
     };
 
     inline virtual ~MpAccessLocal () ;
