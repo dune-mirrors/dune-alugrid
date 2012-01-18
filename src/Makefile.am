@@ -10,7 +10,7 @@ include duneinterface/Makefile.am.include
 include alu2d/Makefile.am.include
 
 # work arround for automake versions < 1.8 
-ALUGRID_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -I./serial -I./parallel -I./duneinterface -I./alu2d
+ALUGRID_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -I$(srcdir)/serial -I$(srcdir)/parallel -I$(srcdir)/duneinterface -I$(srcdir)/alu2d
 
 # build libALU3dGrid 
 lib_LTLIBRARIES = libalugrid.la
