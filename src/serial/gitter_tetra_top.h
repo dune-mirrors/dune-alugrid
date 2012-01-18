@@ -240,6 +240,7 @@ template < class A > class TetraTop : public A
     {
       struct CallSplitIF 
       {
+        virtual ~CallSplitIF () {}
         virtual void splitEdge( innertetra_t* tetra ) const = 0;
       };
 
