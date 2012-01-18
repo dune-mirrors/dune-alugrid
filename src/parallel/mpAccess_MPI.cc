@@ -81,10 +81,21 @@ template < class A > vector < vector < A > >
 doGcollectV (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm) 
 {
   int np, me, test ;
-  test = MPI_Comm_rank (comm, & me) ;       
-  assert (test == MPI_SUCCESS) ;
-  test = MPI_Comm_size (comm, & np) ;       
-  assert (test == MPI_SUCCESS) ;
+
+  test = MPI_Comm_rank (comm, & me) ;
+  if (test != MPI_SUCCESS)
+  {
+    cerr << "Unable to obtain rank in MPI communicator." << endl;
+    abort();
+  }
+
+  test = MPI_Comm_size (comm, & np) ;
+  if (test != MPI_SUCCESS)
+  {
+    cerr << "Unable to obtain size of MPI communicator." << endl;
+    abort();
+  }
+
   int * rcounts = new int [np] ;
   int * displ = new int [np] ;
   assert (rcounts) ;
