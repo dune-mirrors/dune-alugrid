@@ -1595,7 +1595,7 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
                                  innerface_t* newFace,  
                                  const int newVx0, const int newVx1 ) 
 {
-  // this vertex can only be in child 0 
+  // vertex 0 is always containd in child 0, and not in child 1
   myvertex_t* vx0 = this->myvertex( _vxMap[ 0 ] );
   bool found = false ;
   for( int i=0; i<4; ++i ) 
@@ -1611,19 +1611,44 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
   innertetra_t* t0 = ( found ) ? h0 : h1;
   innertetra_t* t1 = ( found ) ? h1 : h0;
 
-  // set vertex mapping 
-  t0->_vxMap[ 0 ] = _vxMap[ 0 ]; 
-  //h0->_vxMap[ 1 ] = newVx0;
-  t0->_vxMap[ 1 ] = _vxMap[ 3 ];
-  t0->_vxMap[ 2 ] = _vxMap[ 1 ];
-  t0->_vxMap[ 3 ] = _vxMap[ 2 ];
+  if( stevensonRefinement_ ) 
+  {
+    ///////////////////////////////////////////////////
+    //  Stevenson refinement, always refine edge 0--3
+    ///////////////////////////////////////////////////
 
-  // set vertex mapping 
-  t1->_vxMap[ 0 ] = _vxMap[ 3 ]; 
-  t1->_vxMap[ 1 ] = _vxMap[ 0 ];
-  const char face3 = ( elementType () == 0 ) ? 1 : 0;
-  t1->_vxMap[ 2 ] = _vxMap[ 1 + face3 ]; // for type 0   2 else 1 
-  t1->_vxMap[ 3 ] = _vxMap[ 2 - face3 ]; // for type 0   1 else 2 
+    // set vertex mapping (child 0)
+    t0->_vxMap[ 0 ] = _vxMap[ 0 ]; 
+    t0->_vxMap[ 1 ] = _vxMap[ 3 ];
+    t0->_vxMap[ 2 ] = _vxMap[ 1 ];
+    t0->_vxMap[ 3 ] = _vxMap[ 2 ];
+
+    // set vertex mapping (child 1)
+    t1->_vxMap[ 0 ] = _vxMap[ 3 ]; 
+    t1->_vxMap[ 1 ] = _vxMap[ 0 ];
+    const char face3 = ( elementType () == 0 ) ? 1 : 0;
+    t1->_vxMap[ 2 ] = _vxMap[ 1 + face3 ]; // for type 0   2 else 1 
+    t1->_vxMap[ 3 ] = _vxMap[ 2 - face3 ]; // for type 0   1 else 2 
+  }
+  else 
+  {
+    ///////////////////////////////////////////////////
+    //  ALBERTA refinement, always refine edge 0--1
+    ///////////////////////////////////////////////////
+
+    // set vertex mapping (child 0)
+    t0->_vxMap[ 0 ] = _vxMap[ 0 ]; 
+    t0->_vxMap[ 1 ] = _vxMap[ 2 ];
+    t0->_vxMap[ 2 ] = _vxMap[ 3 ];
+    t0->_vxMap[ 3 ] = _vxMap[ 1 ];
+
+    // set vertex mapping (child 1)
+    t1->_vxMap[ 0 ] = _vxMap[ 1 ]; 
+    t1->_vxMap[ 3 ] = _vxMap[ 0 ];
+    const char face3 = ( elementType () == 0 ) ? 1 : 0;
+    t1->_vxMap[ 1 ] = _vxMap[ 2 + face3 ]; // for type 0   2 else 1 
+    t1->_vxMap[ 2 ] = _vxMap[ 3 - face3 ]; // for type 0   1 else 2 
+  }
 
 #ifndef NDEBUG
   /*

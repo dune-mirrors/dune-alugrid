@@ -393,6 +393,8 @@ template < class A > class TetraTop : public A
     signed char _nChild;        // 1 byte 
     unsigned char _vxMap[ 4 ] ; // 4 byte 
     myrule_t _req, _rule ;      // 2 byte   = 8 byte 
+
+    enum { stevensonRefinement_ = false };
     
   private :
     bool checkRule( const myrule_t rule ) const
@@ -456,13 +458,17 @@ template < class A > class TetraTop : public A
 
     myrule_t suggestRule () const 
     {
+      // Stevenson refinement: edge 0--3
+      // ALBERTA refinement:   edge 0--1
+      enum { vxSecond = stevensonRefinement_ ? 3 : 1 };
       static const myrule_t rules [ 4 ][ 4 ] = {
         { myrule_t :: crs, myrule_t :: e01 , myrule_t :: e20, myrule_t :: e30 },
         { myrule_t :: e01 , myrule_t :: crs, myrule_t :: e12, myrule_t :: e31 },
         { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 },
         { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs }
       };
-      return rules[ int(_vxMap[ 0 ]) ][ int(_vxMap[ 3 ]) ]; 
+      assert( int(_vxMap[ 0 ]) != int(_vxMap[ vxSecond ]) );
+      return rules[ int(_vxMap[ 0 ]) ][ int(_vxMap[ vxSecond ]) ]; 
     }
 
     inline IndexManagerType & indexManager() { 
