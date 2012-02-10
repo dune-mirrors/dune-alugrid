@@ -34,7 +34,11 @@ void checkRefinements( GitterType& grid )
   {
     // get LeafIterator which iterates over all leaf elements of the grid 
     LeafIterator < Gitter::helement_STI > w (grid) ;
-    if( w->size() > 1 ) return ;
+    w->first(); 
+    if( ! w->done() ) 
+    {
+      if( w->size() > 1 || w->item ().type() != tetra ) return ;
+    }
   }
        
   typedef Gitter ::Geometric :: TetraRule  TetraRule ;
@@ -54,10 +58,13 @@ void checkRefinements( GitterType& grid )
        
       for (w->first () ; ! w->done () ; w->next ())
       {
-        typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
-        // mark element for refinement 
-        tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-        item->request ( rules[ i ] );
+        if( w->item ().type() == tetra ) 
+        {
+          typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
+          // mark element for refinement 
+          tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+          item->request ( rules[ i ] );
+        }
       }
     }
 
