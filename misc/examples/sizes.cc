@@ -31,6 +31,12 @@ using namespace ALUGridSpace;
 template <class GitterType>
 void checkRefinements( GitterType& grid ) 
 {
+  {
+    // get LeafIterator which iterates over all leaf elements of the grid 
+    LeafIterator < Gitter::helement_STI > w (grid) ;
+    if( w->size() > 1 ) return ;
+  }
+       
   typedef Gitter ::Geometric :: TetraRule  TetraRule ;
   const Gitter ::Geometric :: TetraRule rules[ 6 ] = 
   { TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
@@ -61,6 +67,10 @@ void checkRefinements( GitterType& grid )
     // coarsen again 
     globalCoarsening( grid , 1 );
   }
+
+  cout << "*********************************************" <<endl;
+  cout << " Check of rules done " << endl;
+  cout << "*********************************************" <<endl;
 }
 
 // refine grid globally, i.e. mark all elements and then call adapt 
@@ -175,7 +185,7 @@ int main (int argc, char ** argv, const char ** envp)
     globalRefine(grid, mxl);
     //levelwalk(&grid, mxl);
     //globalCoarsening(&grid, mxl);
-    grid.printMemUsage();
+    //grid.printMemUsage();
     cin.get();
   }
 
