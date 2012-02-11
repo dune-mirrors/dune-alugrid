@@ -483,11 +483,11 @@ public:
     for (int link = 0 ; link < _nLinks ; ++link) 
     {
       // get send buffer from object stream 
-      char* buff = osv[ link ]._buf + osv[ link ]._rb ;
+      char* buffer     = osv[ link ]._buf + osv[ link ]._rb ;
       // get number of bytes to send 
-      int   cnt  = osv[ link ]._wb  - osv[ link ]._rb ; 
+      int   bufferSize = osv[ link ]._wb  - osv[ link ]._rb ; 
 
-      MY_INT_TEST MPI_Isend ( buff, cnt, MPI_BYTE, _dest[link], _tag, comm, & _request[ link ] ) ;
+      MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, _dest[link], _tag, comm, & _request[ link ] ) ;
       assert (test == MPI_SUCCESS) ;
     }
   }
@@ -501,42 +501,67 @@ public:
     return out ; 
   }
 
+
   // receive data implementation with given buffers 
   void receiveImpl ( vector< ObjectStream >& out ) 
   {
     MPI_Comm comm = _mpiComm ;
 
+#if 1
+    std::set< int > notReceived ;
+    typedef std::set< int > :: iterator iterator ;
+
+    // initialize not received set 
+    for (int link = 0 ; link < _nLinks ; ++link ) 
+    {
+      notReceived.insert( link );
+    }
+
+    // until not all messages are received, 
+    // do loop and probe for messages 
+    while ( notReceived.size() > 0 ) 
+    {
+      const iterator end = notReceived.end();
+      for( iterator it = notReceived.begin(); it != end; ++ it ) 
+      {
+        // get link number 
+        const int link = *it ;
+
+        // corresponding MPI status 
+        MPI_Status s ;
+        int received = 0; // if true, message has been received 
+        // check for message (non-blocking)
+        MPI_Iprobe( _dest[link], _tag, comm, &received, &s) ; 
+
+        // if message was received, copy to buffer  
+        if( received ) 
+        {
+          // receive message for link 
+          bufferpair_t buff = receiveLink( link, comm, s ) ;
+          out[ link ] = buff ;
+
+          // remove link for list 
+          notReceived.erase( it ); 
+        }
+      }
+    }
+#else 
     // receive  data 
     for (int link = 0 ; link < _nLinks ; ++link ) 
     {
       MPI_Status s ;
 
-      pair< char*, int > buff( (char *) 0, -1 );
-
       {
+        // check for message (blocking)
         MY_INT_TEST MPI_Probe ( _dest[link], _tag, comm, & s) ; 
         assert (test == MPI_SUCCESS) ;
       }
-      {
-        MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & buff.second ) ;
-        assert (test == MPI_SUCCESS) ;
-      }
 
-      assert( buff.second >= 0 );
-
-      // use alloc from objects stream because this is the 
-      // buffer of the object stream
-      buff.first = ObjectStream :: allocateBuffer( buff.second );
-      
-      {
-        MY_INT_TEST MPI_Recv ( buff.first, buff.second, MPI_BYTE, _dest[ link ], _tag, comm, & s) ;
-        assert (test == MPI_SUCCESS) ;
-      }
-
-      // copy buffer and count to object stream 
-      // this will only set the pointer in ObjectStream 
-      out[ link ] = buff ;
+      bufferpair_t buff = receiveLink( link, comm, s );
+      // receive message, returns pair( buff, cnt );
+      out[ link ] = buff;
     }
+#endif
     
     // wait until all processes are done with receiving
     {
@@ -547,6 +572,41 @@ public:
       delete [] sta ;
     }
   }
+protected:  
+  typedef std::pair< char*, int > bufferpair_t;
+  // does receive operation for one link 
+  bufferpair_t  receiveLink( const int link, 
+                             MPI_Comm& comm, 
+                             MPI_Status& status ) 
+  {
+    //MPI_Comm comm = _mpiComm ;
+
+    // length of message 
+    int bufferSize = -1;
+
+    // get length of message 
+    {
+      MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bufferSize ) ;
+      assert (test == MPI_SUCCESS) ;
+    }
+
+    assert( bufferSize >= 0 );
+
+    // use alloc from objects stream because this is the 
+    // buffer of the object stream
+    char* buffer = ObjectStream :: allocateBuffer( bufferSize );
+    
+    // MPI receive 
+    {
+      MY_INT_TEST MPI_Recv ( buffer, bufferSize, MPI_BYTE, _dest[ link ], _tag, comm, & status) ;
+      assert (test == MPI_SUCCESS) ;
+    }
+
+    // copy buffer and count to object stream 
+    // this will only set the pointer in ObjectStream 
+    return bufferpair_t( buffer, bufferSize );
+  }
+
 };
 
 MpAccessMPI :: NonBlockingExchange*
