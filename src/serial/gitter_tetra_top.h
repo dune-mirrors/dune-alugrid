@@ -406,7 +406,7 @@ template < class A > class TetraTop : public A
           { myrule_t :: e30, myrule_t :: e01 }, // possible rules for e20 in child 0 
           { myrule_t :: e30, myrule_t :: e31 }, // possible rules for e23 in child 0 
           { myrule_t :: e20, myrule_t :: e01 }, // possible rules for e30 in child 0 
-          { myrule_t :: e01, myrule_t :: e12 } // possible rules for e31 in child 0 
+          { myrule_t :: e01, myrule_t :: e12 }  // possible rules for e31 in child 0 
         };
       static const myrule_t possibleRules1[ 6 ][ 2 ] = { 
           { myrule_t :: e31, myrule_t :: e12 }, // possible rules for e01 in child 1 
@@ -414,7 +414,7 @@ template < class A > class TetraTop : public A
           { myrule_t :: e12, myrule_t :: e23 }, // possible rules for e12 in child 1 
           { myrule_t :: e12, myrule_t :: e20 }, // possible rules for e23 in child 1 
           { myrule_t :: e31, myrule_t :: e23 }, // possible rules for e30 in child 1 
-          { myrule_t :: e23, myrule_t :: e30 } // possible rules for e31 in child 0 
+          { myrule_t :: e23, myrule_t :: e30 }  // possible rules for e31 in child 0 
         };
 
       if( _up ) 
@@ -462,7 +462,7 @@ template < class A > class TetraTop : public A
       // ALBERTA refinement:   edge 0--1
       enum { vxSecond = stevensonRefinement_ ? 3 : 1 };
       static const myrule_t rules [ 4 ][ 4 ] = {
-        { myrule_t :: crs, myrule_t :: e01 , myrule_t :: e20, myrule_t :: e30 },
+        { myrule_t :: crs , myrule_t :: e01, myrule_t :: e20, myrule_t :: e30 },
         { myrule_t :: e01 , myrule_t :: crs, myrule_t :: e12, myrule_t :: e31 },
         { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 },
         { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs }
