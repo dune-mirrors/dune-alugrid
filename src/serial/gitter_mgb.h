@@ -127,6 +127,22 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     virtual pair < periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&)[6], const Gitter :: hbndseg :: bnd_t (&)[2]) ;
     virtual pair < periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&)[8], const Gitter :: hbndseg :: bnd_t (&)[2]) ;
     
+    // old version setting default boundary ids 
+    pair < periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&v)[6] ) 
+    {
+      Gitter :: hbndseg :: bnd_t bnd[ 2 ] = 
+        { Gitter :: hbndseg :: periodic, Gitter :: hbndseg :: periodic };
+      return InsertUniquePeriodic3( v, bnd );
+    }
+
+    // old version setting default boundary ids 
+    pair < periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&v)[8] )
+    {
+      Gitter :: hbndseg :: bnd_t bnd[ 2 ] = 
+        { Gitter :: hbndseg :: periodic, Gitter :: hbndseg :: periodic };
+      return InsertUniquePeriodic4( v, bnd );
+    }
+    
     virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter :: hbndseg :: bnd_t) ;
     virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter :: hbndseg :: bnd_t) ;
 
