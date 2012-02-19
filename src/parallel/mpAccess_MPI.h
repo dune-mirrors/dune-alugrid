@@ -33,7 +33,11 @@ public:
   // MPI communication tag  
   enum { messagetag = 123 };
 
+  // return pointer to class holding the MPI communicator 
+  const CommIF* mpiCommPtr() const { return _mpiCommPtr; }
+
 protected:  
+
   // class holding the MPI communicator 
   const CommIF* _mpiCommPtr;
   // number of processors

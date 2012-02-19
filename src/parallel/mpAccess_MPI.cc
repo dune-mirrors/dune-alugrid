@@ -405,48 +405,29 @@ vector < vector < char > > MpAccessMPI :: exchange (const vector < vector < char
 //////////////////////////////////////////////////////////////////////////
 class NonBlockingExchangeMPI : public MpAccessLocal :: NonBlockingExchange
 {
-  const MpAccessMPI :: CommIF* _mpiCommPtr;
-  const vector< int >& _dest;
+  const MpAccessMPI& _mpAccess;
 
+  const MpAccessMPI :: CommIF* _mpiCommPtr;
   const int _nLinks; 
   const int _tag;
 
   MPI_Request* _request;
 
-  // create an unique tag for the communication 
-  static int getTag() 
-  {
-    static int tagCounter = 0;
-    ++ tagCounter;
-    int tag = tagCounter ;
-
-    // avoid overflow 
-    if( tag < 0 ) 
-    {
-      tag = 0;
-      tagCounter = 0;
-    }
-    return tag;
-  }
 public:
-  NonBlockingExchangeMPI( const MpAccessMPI :: CommIF* comm,
-                          const vector< int >& dest,
+  NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
                           const int tag )
-    : _mpiCommPtr( comm ),
-      _dest( dest ),
-      _nLinks( _dest.size() ),
+    : _mpAccess( mpAccess ),
+      _nLinks( _mpAccess.nlinks() ),
       _tag( tag ),
       _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
   {
   }
 
-  NonBlockingExchangeMPI( const MpAccessMPI :: CommIF* comm,
-                          const vector< int >& dest,
+  NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
                           const int tag,
                           const vector< ObjectStream > & in ) 
-    : _mpiCommPtr( comm ),
-      _dest( dest ),
-      _nLinks( _dest.size() ),
+    : _mpAccess( mpAccess ),
+      _nLinks( _mpAccess.nlinks() ),
       _tag( tag ),
       _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
   {
@@ -477,7 +458,12 @@ public:
   // send data implementation 
   void sendImpl( const vector< ObjectStream > & osv ) 
   {
+    const MpAccessMPI :: CommIF* _mpiCommPtr = _mpAccess.mpiCommPtr();
+    // get mpi communicator (use define, see above)
     MPI_Comm comm = _mpiComm ;
+
+    // get vector with destinations 
+    const vector< int >& dest = _mpAccess.dest();
 
     // send data 
     for (int link = 0 ; link < _nLinks ; ++link) 
@@ -487,7 +473,7 @@ public:
       // get number of bytes to send 
       int   bufferSize = osv[ link ]._wb  - osv[ link ]._rb ; 
 
-      MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, _dest[link], _tag, comm, & _request[ link ] ) ;
+      MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest[ link ], _tag, comm, & _request[ link ] ) ;
       assert (test == MPI_SUCCESS) ;
     }
   }
@@ -505,49 +491,27 @@ public:
   // receive data implementation with given buffers 
   void receiveImpl ( vector< ObjectStream >& out ) 
   {
+    const MpAccessMPI :: CommIF* _mpiCommPtr = _mpAccess.mpiCommPtr();
+    // get mpi communicator (use define, see above)
     MPI_Comm comm = _mpiComm ;
 
 #if 1
-    // create vector with received status 
-    vector< bool > notReceived( _nLinks, true );
-
-    // until not all messages are received, 
-    // do loop and probe for messages 
-    bool notAllReceived = true ;
-    while ( notAllReceived ) 
+    // check for all links messages 
+    for (int link = 0 ; link < _nLinks ; ++link ) 
     {
-      // reset flag first, if set again, we make another loop 
-      notAllReceived = false ;
+      // corresponding MPI status 
+      MPI_Status status ;
+      // check for any message with tag (blocking)
+      MPI_Probe( MPI_ANY_SOURCE, _tag, comm, &status ) ; 
 
-      // check for all links 
-      for (int link = 0 ; link < _nLinks ; ++link ) 
-      {
-        // if not received yet 
-        if( notReceived[ link ] ) 
-        {   
-          // corresponding MPI status 
-          MPI_Status s ;
-          int received = 0; // if true, message has been received 
-          // check for message (non-blocking)
-          MPI_Iprobe( _dest[link], _tag, comm, &received, &s) ; 
+      // get link number for process number from which message was received 
+      const int recvLink = _mpAccess.link( status.MPI_SOURCE );
 
-          // if message was received, copy to buffer  
-          if( received ) 
-          {
-            // receive message for link 
-            bufferpair_t buff = receiveLink( link, comm, s ) ;
-            out[ link ] = buff ;
+      // receive message for link 
+      bufferpair_t buff = receiveLink( comm, status ) ;
 
-            // remove link from list  
-            notReceived[ link ] = false ;
-          }
-          else 
-          {
-            // we have to make another loop 
-            notAllReceived = true ;
-          }
-        }
-      }
+      // copy to buffers 
+      out[ recvLink ] = buff ;
     }
 #else 
     // receive  data 
@@ -561,7 +525,7 @@ public:
         assert (test == MPI_SUCCESS) ;
       }
 
-      bufferpair_t buff = receiveLink( link, comm, s );
+      bufferpair_t buff = receiveLink( comm, s );
       // receive message, returns pair( buff, cnt );
       out[ link ] = buff;
     }
@@ -579,12 +543,9 @@ public:
 protected:  
   typedef std::pair< char*, int > bufferpair_t;
   // does receive operation for one link 
-  bufferpair_t  receiveLink( const int link, 
-                             MPI_Comm& comm, 
+  bufferpair_t  receiveLink( MPI_Comm& comm, 
                              MPI_Status& status ) 
   {
-    //MPI_Comm comm = _mpiComm ;
-
     // length of message 
     int bufferSize = -1;
 
@@ -602,7 +563,7 @@ protected:
     
     // MPI receive 
     {
-      MY_INT_TEST MPI_Recv ( buffer, bufferSize, MPI_BYTE, _dest[ link ], _tag, comm, & status) ;
+      MY_INT_TEST MPI_Recv ( buffer, bufferSize, MPI_BYTE, status.MPI_SOURCE, _tag, comm, & status) ;
       assert (test == MPI_SUCCESS) ;
     }
 
@@ -617,20 +578,20 @@ MpAccessMPI :: NonBlockingExchange*
 MpAccessMPI :: nonBlockingExchange( const int tag, const vector < ObjectStream > & in ) const 
 {
   assert( tag > messagetag+1 );
-  return new NonBlockingExchangeMPI( _mpiCommPtr, dest(), tag, in );
+  return new NonBlockingExchangeMPI( *this, tag, in );
 }
 
 MpAccessMPI :: NonBlockingExchange*
 MpAccessMPI :: nonBlockingExchange( const int tag ) const 
 {
   assert( tag > messagetag+1 );
-  return new NonBlockingExchangeMPI( _mpiCommPtr, dest(), tag );
+  return new NonBlockingExchangeMPI( *this, tag );
 }
 
 // --exchange
 vector < ObjectStream > MpAccessMPI :: exchange (const vector < ObjectStream > & in) const 
 {
-  NonBlockingExchangeMPI nonBlockingExchange( _mpiCommPtr, dest(), messagetag+1, in );
+  NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
   return nonBlockingExchange.receiveImpl();
 }
 
