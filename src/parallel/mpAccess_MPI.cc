@@ -407,7 +407,6 @@ class NonBlockingExchangeMPI : public MpAccessLocal :: NonBlockingExchange
 {
   const MpAccessMPI& _mpAccess;
 
-  const MpAccessMPI :: CommIF* _mpiCommPtr;
   const int _nLinks; 
   const int _tag;
 
