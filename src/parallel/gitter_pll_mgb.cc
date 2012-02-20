@@ -286,7 +286,7 @@ void ParallelGridMover :: finalize ()
 
   {
     const faceMap_t :: iterator _hbnd4Mapend = _hbnd4Map.end ();
-    for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Map.end () ; )
+    for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Mapend ; )
     {
       if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
       {
@@ -301,7 +301,7 @@ void ParallelGridMover :: finalize ()
   }
   {
     const faceMap_t :: iterator _hbnd3Mapend = _hbnd3Map.end ();
-    for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != _hbnd3Map.end () ; )
+    for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != _hbnd3Mapend ; )
     {
       if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) 
       {
