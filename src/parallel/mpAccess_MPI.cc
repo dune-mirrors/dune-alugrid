@@ -495,6 +495,7 @@ public:
     MPI_Comm comm = _mpiComm ;
 
 #if 1
+#if 0
     // check for all links messages 
     for (int link = 0 ; link < _nLinks ; ++link ) 
     {
@@ -502,6 +503,9 @@ public:
       MPI_Status status ;
       // check for any message with tag (blocking)
       MPI_Probe( MPI_ANY_SOURCE, _tag, comm, &status ) ; 
+
+      assert( 0 <= status.MPI_SOURCE );
+      assert( status.MPI_SOURCE < _mpAccess.psize() );
 
       // get link number for process number from which message was received 
       const int recvLink = _mpAccess.link( status.MPI_SOURCE );
@@ -511,6 +515,61 @@ public:
 
       // copy to buffers 
       out[ recvLink ] = buff ;
+    }
+#endif
+    // get vector with destinations 
+    const vector< int >& dest = _mpAccess.dest();
+
+#ifndef NDEBUG
+    // check for all links messages 
+    for (int link = 0 ; link < _nLinks ; ++link ) 
+    {
+      // contains no written data
+      assert( out[ link ].notReceived() ); 
+    }
+#endif
+
+    int numReceived = 0;
+    while( numReceived < _nLinks ) 
+    {
+      // check for all links messages 
+      for (int link = 0 ; link < _nLinks ; ++link ) 
+      {
+        ObjectStream& objStream = out[ link ];
+        if( objStream.notReceived() ) 
+        {
+          // corresponding MPI status 
+          MPI_Status status ;
+
+          // received, 0 or 1 
+          int received = 0 ;
+
+          // check for any message with tag (nonblocking)
+          MPI_Iprobe( dest[ link ], _tag, comm, &received, &status ) ; 
+
+          // receive message of received flag is true 
+          if( received ) 
+          {
+            // this should be the same, otherwise we got an error
+            assert( dest[ link ] == status.MPI_SOURCE );
+
+            // receive message for link 
+            bufferpair_t buff = receiveLink( comm, status ) ;
+
+#ifndef NDEBUG
+            const int length = buff.second ;
+#endif
+            // copy to buffers (buff is reset to (0,0))
+            objStream = buff ;
+
+            // make sure buffer match 
+            assert( length == objStream.size() );
+
+            // increase number of received messages 
+            ++ numReceived ;
+          }
+        }
+      }
     }
 #else 
     // receive  data 
@@ -587,11 +646,109 @@ MpAccessMPI :: nonBlockingExchange( const int tag ) const
   return new NonBlockingExchangeMPI( *this, tag );
 }
 
+// exchange of char buffers 
+static vector < pair < char *, int > > 
+doExchange (const vector < pair < char *, int > > & in, MPI_Comm comm, const vector < int > & d) 
+{
+  assert (in.size() == d.size()) ;
+  // get number of links 
+  const int nl = d.size () ;
+
+  // create ouput vector
+  vector < pair < char *, int > > out (nl) ;
+  
+  {
+    MPI_Request * req = new MPI_Request [nl] ; 
+    assert (req) ;
+
+    // send data 
+    {
+      for (int link = 0 ; link < nl ; ++link) 
+      {
+        MY_INT_TEST MPI_Issend (in [link].first, in [link].second, MPI_BYTE, d [link], 123, comm, & req [link]) ;
+        assert (test == MPI_SUCCESS) ;
+      }
+    }
+
+    // receive  data 
+    {
+      for (int link = 0 ; link < nl ; ++link ) 
+      {
+        MPI_Status s ;
+        int cnt ;
+        {
+          MY_INT_TEST MPI_Probe (d [link], 123, comm, & s) ; 
+          assert (test == MPI_SUCCESS) ;
+        }
+        {
+          MY_INT_TEST MPI_Get_count ( & s, MPI_BYTE, & cnt ) ;
+          assert (test == MPI_SUCCESS) ;
+        }
+
+        // use alloc from objects stream because this is the 
+        // buffer of the object stream
+        char * lne = ObjectStream :: allocateBuffer( cnt );
+        
+        {
+          MY_INT_TEST MPI_Recv (lne, cnt, MPI_BYTE, d [link], 123, comm, & s) ;
+          assert (test == MPI_SUCCESS) ;
+        }
+
+        // set pointers 
+        out [link].first = lne ;
+        out [link].second = cnt ;
+      }
+    }
+    
+    {
+      MPI_Status * sta = new MPI_Status [nl] ;
+      assert (sta) ;
+      MY_INT_TEST MPI_Waitall (nl, req, sta) ;
+      assert (test == MPI_SUCCESS) ;
+      delete [] sta ;
+    }
+    delete [] req ;
+  }
+  return out ;
+}
+
 // --exchange
 vector < ObjectStream > MpAccessMPI :: exchange (const vector < ObjectStream > & in) const 
 {
+#if 0
+  // get number of links 
+  const int nl = nlinks () ;
+
+  assert (static_cast<int> (in.size ()) == nlinks()) ;
+  
+  // create vector with pair buffer,size 
+  vector < pair < char *, int > > v (nl) ;
+
+  // set pointers 
+  for (int l = 0 ; l < nl ; ++l ) 
+  {
+    v [l].first  = in [l]._buf + in [l]._rb ;
+    v [l].second = in [l]._wb  - in [l]._rb ;
+  } 
+  
+  // exchange data 
+  v = doExchange (v, _mpiComm, dest ()) ;
+  
+  // create vector of empty streams 
+  vector < ObjectStream > out (nl) ;
+
+  // v contains the newly created recv buffers 
+  // which are re-used as objects streams 
+  for (int l = 0 ; l < nl ; ++l ) 
+  {
+    // set pointer as the streams buffer 
+    // v is not valid after that 
+    out [l] = v [l] ; 
+  }
+  return out ;
+#else
   NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
   return nonBlockingExchange.receiveImpl();
+#endif
 }
-
 #undef _mpiComm
