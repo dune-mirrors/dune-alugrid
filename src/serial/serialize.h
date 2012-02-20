@@ -266,18 +266,26 @@ class ObjectStream : public ObjectStreamImpl
   //enum { BufChunk = 0x40000 } ;
   enum { BufChunk = 65536 * sizeof(double) } ;
 
+  // true if object stream was not set 
+  bool notReceived_ ;
+
 public :
   // ENDOFSTREAM should be in range of char, i.e. 0 to 256 
   // and not conflict with refinement rules in gitter_sti.h 
   static const char ENDOFSTREAM = 127;
   
   // create empty object stream 
-  inline ObjectStream () : BaseType(BufChunk) 
+  inline ObjectStream () 
+    : BaseType(BufChunk),
+      notReceived_( true )
   {
   } 
   
   // copy constructor 
-  inline ObjectStream (const ObjectStream & os) : BaseType(os) {} 
+  inline ObjectStream (const ObjectStream & os) 
+    : BaseType(os),
+      notReceived_( true )
+  {} 
  
 public:  
   // assigment of streams, owner ship of buffer is 
@@ -285,6 +293,7 @@ public:
   inline ObjectStream & operator = (const ObjectStream & os) 
   {
     BaseType::operator =(os); 
+    notReceived_ = os.notReceived_ ;
     return *this;
   }
   
@@ -313,6 +322,9 @@ public:
   // eof function 
   bool eof () const { return (this->_rb > this->_wb); }
   /////////////////////////////////////
+
+  // return true if object stream was not set yet 
+  bool notReceived () const { return notReceived_; } 
     
 protected:  
   // assign pair of char buffer and size to this object stream 
@@ -325,6 +337,7 @@ protected:
     // reset osvec
     osvec.first = 0;
     osvec.second = 0;
+    notReceived_ = false ;
     return *this;
   }
   
