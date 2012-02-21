@@ -529,6 +529,7 @@ public:
     }
 #endif
 
+    // count noumber of received messages 
     int numReceived = 0;
     while( numReceived < _nLinks ) 
     {
@@ -560,6 +561,7 @@ public:
             const int length = buff.second ;
 #endif
             // copy to buffers (buff is reset to (0,0))
+            // also sets objStream.notReceived() to false 
             objStream = buff ;
 
             // make sure buffer match 
