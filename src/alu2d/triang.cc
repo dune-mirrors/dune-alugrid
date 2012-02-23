@@ -891,26 +891,11 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
 
         delete ncv;
         ncv=0;
-#if 0
-        element_t *e[2];
-        e[0]=down();
-        e[1]=down()->next();
-        rest_el->operator()(this,e,2);
-#endif
-        if (rest_el) 
-          rest_el->operator()(this);
         lcancoarsen=2;
       }
     }
     if( lcancoarsen != 0 && rest_el) {
-#if 0
-      element_t *e[2];
-      e[0]=down();
-      e[1]=down()->next();
-      rest_el->operator()(this,e,2);
-#endif
-      if (rest_el)
-        rest_el->operator()(this);
+      rest_el->operator()(this);
     }
     if (lcancoarsen==2) {
       deletesubtree();
