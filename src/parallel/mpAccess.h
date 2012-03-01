@@ -18,6 +18,7 @@ class MpAccessGlobal {
     virtual int psize () const = 0 ;
     virtual int myrank () const = 0 ;
     virtual int barrier () const = 0 ;
+    virtual bool gmax (bool) const = 0 ;
     virtual int gmax (int) const = 0 ;
     virtual int gmin (int) const = 0 ;
     virtual int gsum (int) const = 0 ;

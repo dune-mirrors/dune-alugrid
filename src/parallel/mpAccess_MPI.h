@@ -69,6 +69,7 @@ public:
   inline int psize () const ;
   inline int myrank () const ;
   int barrier () const ;
+  bool gmax (bool) const ;
   int gmax (int) const ;
   int gmin (int) const ;
   int gsum (int) const ;

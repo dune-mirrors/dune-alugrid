@@ -198,6 +198,14 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
   return out ;
 }
 
+bool MpAccessMPI :: gmax (bool i) const 
+{
+  int j = int( i );
+  // call int method 
+  const int ret = gmax( j );
+  return (ret == 1) ? true : false ;
+}
+
 int MpAccessMPI :: gmax (int i) const {
   int j ;
   MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm) ;
@@ -648,6 +656,7 @@ MpAccessMPI :: nonBlockingExchange( const int tag ) const
   return new NonBlockingExchangeMPI( *this, tag );
 }
 
+#if 0
 // exchange of char buffers 
 static vector < pair < char *, int > > 
 doExchange (const vector < pair < char *, int > > & in, MPI_Comm comm, const vector < int > & d) 
@@ -713,6 +722,7 @@ doExchange (const vector < pair < char *, int > > & in, MPI_Comm comm, const vec
   }
   return out ;
 }
+#endif
 
 // --exchange
 vector < ObjectStream > MpAccessMPI :: exchange (const vector < ObjectStream > & in) const 
