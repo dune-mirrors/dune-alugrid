@@ -22,51 +22,7 @@ leafIterator (const IteratorSTI < helement_STI > * p)
 bool GitterDunePll :: duneNotifyNewGrid ()
 {
   LoadBalancer :: DataBase db ;
-  return duneNotifyNewGrid( db );
-}
-
-bool GitterDunePll :: duneNotifyNewGrid ( LoadBalancer :: DataBase& db )
-{
-  assert (debugOption (20) ? (cout << "**GitterDunePll :: duneNotifyNewGrid () " << endl, 1) : 1) ;
-  {
-    AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
-  }
-  {
-    AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db) ;
-  }
-
-  const int np = mpAccess ().psize () ;
-  bool neu = false ;
-  {
-    // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
-    // 
-    // load  - eigene ElementLast
-    // mean  - mittlere ElementLast
-    // nload - Lastverh"altnis
-
-    double load = db.accVertexLoad () ;
-    vector < double > v (mpAccess ().gcollect (load)) ;
-    const vector < double > :: iterator iEnd =  v.end () ;
-    double mean = 
-#ifndef COUNT_ALUGRID_FLOPS
-      accumulate (v.begin (), v.end (), 0.0) / double (np) ;
-#else
-    // for flop counter accumulate does not compile, did not find correct 
-    // method signature (put to double.h)
-      0.0;
-    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
-    {
-      mean += (*i);
-    }
-    mean /= double (np) ;
-#endif
-
-    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
-      neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
-  }
-  return neu;
+  return checkPartitioning( db );
 }
 
 void GitterDunePll :: duneNotifyMacroGridChanges ()
@@ -92,7 +48,7 @@ bool GitterDunePll :: adaptWithoutLoadBalancing ()
   assert (! iterators_attached ()) ;
 
   int start = clock () ;
-  bool refined = this->refine() ;
+  const bool refined = this->refine() ;
   int lap = clock () ;
   this->coarse ();
   
@@ -105,6 +61,12 @@ bool GitterDunePll :: adaptWithoutLoadBalancing ()
     cout << "**INFO GitterDunePll["<< __STATIC_myrank << "] :: adaptWithoutLB () [ref (loops)|cse|all] " << u1 << " ("
        << _refineLoops << ") " << u2 << " " << u3 << endl ;
   }
+
+#ifndef NDEBUG
+  // make sure every process returns the same value 
+  const bool checkRefined = mpAccess().gmax( refined );
+  assert( refined == checkRefined );
+#endif
 
   duneNotifyGridChanges () ;
   return refined;
@@ -132,7 +94,7 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProl
   assert (debugOption (20) ? (cout << "**GitterDunePll :: duneLoadBalance () " << endl, 1) : 1) ;
 
   LoadBalancer :: DataBase db;
-  const bool neu = duneNotifyNewGrid( db );
+  const bool neu = checkPartitioning( db );
 
   if (neu) 
   {

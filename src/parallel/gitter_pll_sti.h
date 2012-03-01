@@ -217,6 +217,7 @@ class GitterPll : public virtual Gitter {
     virtual void repartitionMacroGrid (LoadBalancer :: DataBase &) ;
     virtual void duneRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType& ) ;
     
+    virtual bool checkPartitioning(LoadBalancer :: DataBase &) ;
     virtual void loadBalancerGridChangesNotify () ;
     virtual void loadBalancerMacroGridChangesNotify () ;
     virtual void notifyGridChanges () ;

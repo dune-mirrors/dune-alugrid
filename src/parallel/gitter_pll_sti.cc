@@ -1059,11 +1059,9 @@ void GitterPll :: exchangeStaticState () {
   return ;
 }
 
-void GitterPll :: loadBalancerGridChangesNotify () 
+bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db ) 
 {
-  assert (debugOption (20) ? (cout << "**GitterPll :: loadBalancerGridChangesNotify () " << endl, 1) : 1) ;
-  const int np = mpAccess ().psize () ;
-  LoadBalancer :: DataBase db ;
+  assert (debugOption (20) ? (cout << "**GitterPll :: checkPartitioning ( db ) " << endl, 1) : 1) ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
     for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
@@ -1072,6 +1070,8 @@ void GitterPll :: loadBalancerGridChangesNotify ()
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
     for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db) ;
   }
+
+  const int np = mpAccess ().psize () ;
   bool neu = false ;
   {
     // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
@@ -1080,29 +1080,46 @@ void GitterPll :: loadBalancerGridChangesNotify ()
     // mean  - mittlere ElementLast
     // nload - Lastverh"altnis
 
-    double load = db.accVertexLoad () ;
+    const double load = db.accVertexLoad () ;
+
     vector < double > v (mpAccess ().gcollect (load)) ;
-    const vector < double > :: iterator iEnd = v.end () ;
-    double mean = 
-#ifndef COUNT_ALUGRID_FLOPS
-      accumulate (v.begin (), v.end (), 0.0) / double (np) ;
-#else
-    // for flop counter accumulate does not compile, did not find correct 
-    // method signature (put to double.h)
-      0.0;
-    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
-    {
-      mean += (*i);
-    }
-    mean /= double (np) ;
-#endif
+    const vector < double > :: iterator iEnd =  v.end () ;
+
+    // sum up values and devide by number of cores 
+    const double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
 
     for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
   }
+
+#ifndef NDEBUG
+  // make sure every process has the same value of neu
+  const bool checkNeu = mpAccess().gmax( neu );
+  assert( neu == checkNeu );
+#endif
+
+  return neu;
+}
+
+void GitterPll :: loadBalancerGridChangesNotify () 
+{
+  // create load balancer data base 
+  LoadBalancer :: DataBase db ;
+
+  // check whether we have to repartition 
+  const bool neu = checkPartitioning( db );
+
+  // if repartioning necessary, do it 
   if (neu) 
   {
-    if (mpAccess ().gmax (_ldbMethod)) 
+    const int ldbMth = int( _ldbMethod );
+#ifndef NDEBUG
+    // make sure every process has the same ldb method 
+    int checkMth = mpAccess ().gmax( ldbMth );
+    assert( checkMth == ldbMth ); 
+#endif
+
+    if( ldbMth ) 
     {
       repartitionMacroGrid (db) ;
       notifyMacroGridChanges () ;
