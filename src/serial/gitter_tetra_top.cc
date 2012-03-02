@@ -488,6 +488,8 @@ void Hface3Top < A > :: doRestore (InStream_t & is)
 template < class A >  void Hbnd3Top < A > :: 
 setBoundaryId (const int id ) 
 {
+  // set my id to the same as bnd 
+  this->setBndId( id );
   myhface3_t & face = *(myhface3(0));
   face.setBndId( id );
   // 3 vertices and edges 
@@ -803,8 +805,6 @@ template < class A > TetraTop < A >
   //  cout << "Determinant of Tetra[" << this->getIndex() << "] is wrong" << endl;
   assert( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 ); 
 #endif
-
-  return ;
 }
 
 // constrcutor mit IndexManager uebergabe
@@ -823,18 +823,17 @@ TetraTop (int l, myhface3_t * f0, int t0,
   , _nChild(0)  // we are macro ==> nChild 0 
   , _rule (myrule_t :: nosplit)
 { 
-  // initial mapping is identity  
-  _vxMap[ 0 ] = 0; 
-  _vxMap[ 1 ] = 1;
-  _vxMap[ 2 ] = 2;
-  _vxMap[ 3 ] = 3;
-
   assert( this->level() == l );
 
   // _up wird im Constructor uebergeben
   this->setIndex( indexManager().getIndex() );
 
-  return ;
+  const int mod = 1 - ( this->getIndex() % 2 );
+  // initial mapping is identity  
+  _vxMap[ 0 ] = 0; 
+  _vxMap[ 1 ] = 1;
+  _vxMap[ 2 ] = 2 + mod ;
+  _vxMap[ 3 ] = 3 - mod ;
 }
 
 template < class A > TetraTop < A > :: ~TetraTop () 
@@ -845,7 +844,6 @@ template < class A > TetraTop < A > :: ~TetraTop ()
   if (! _inner ) this->detachleafs();
   if (_bbb) delete _bbb ;
   if (_inner) delete _inner ;
-  return ;
 }
 
 //- --subedge1

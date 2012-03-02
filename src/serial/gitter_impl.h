@@ -38,34 +38,23 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             int _idn ;
         } ;
 
-      class Dune_Hbnd3Default 
-      {
-        protected:
-          enum { _dimvx = 1 }; 
-          double _oppVx[3];
-
-        public:
-          inline Dune_Hbnd3Default ();
-          inline void setOppPoint (int i, const double (&p)[3]);
-          inline const double (& oppositeVertex (int i) const) [3];
-
-          inline int dimVx () const; 
-      };
-
         class Hbnd3Default : public hbndseg3_GEO 
-#ifdef _DUNE_USES_ALU3DGRID_
-           , public Dune_Hbnd3Default
-#endif
         {
           protected :
            inline Hbnd3Default (myhface3_t *, int) ;
            virtual ~Hbnd3Default () {}
+           //! return pointer to grid 
+           Gitter * myGrid() { return myhface3(0)->myvertex(0)->myGrid(); }
+           const Gitter * myGrid() const { return myhface3(0)->myvertex(0)->myGrid(); }
           public :
             typedef hbndseg3_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ; 
             virtual bool ghostLeaf () const ; 
-            
+
+            virtual int preCoarsening ();
+            virtual int postRefinement ();
+
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
             virtual const ghostpair_STI & getGhost () const
@@ -79,33 +68,22 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         };
         typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL ;
 
-      class Dune_Hbnd4Default //: public Dune_hbndDefault
-      {
-        protected:
-          enum { _dimvx = 4 }; 
-          double _oppVx[_dimvx][3];
-
-        public:
-          inline Dune_Hbnd4Default ();
-          inline void setOppPoint (int i, const double (&p)[3]);
-          inline const double (& oppositeVertex (int i) const) [3];
-
-          inline int dimVx () const; 
-      };
-
         class Hbnd4Default : public hbndseg4_GEO 
-#ifdef _DUNE_USES_ALU3DGRID_
-           , public Dune_Hbnd4Default
-#endif
         {
           protected :
             inline Hbnd4Default (myhface4_t *, int) ;
             virtual ~Hbnd4Default () {}
+            //! return pointer to grid 
+            Gitter * myGrid() { return myhface4(0)->myvertex(0)->myGrid(); }
+            const Gitter * myGrid() const { return myhface4(0)->myvertex(0)->myGrid(); }
           public :
             typedef hbndseg4_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
             virtual int ghostLevel () const ;  
             virtual bool ghostLeaf () const ;
+
+            virtual int preCoarsening ();
+            virtual int postRefinement();
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -427,69 +405,6 @@ inline void GitterBasis :: Objects :: Hface4Empty :: projectVertex(const Project
     innerVertex()->project(pv);
 }
 
-inline GitterBasis :: Objects :: Dune_Hbnd3Default ::Dune_Hbnd3Default () 
-{
-  for(int j=0; j<3; j++) _oppVx[j] = 0.0;
-}
-
-inline void GitterBasis :: Objects :: Dune_Hbnd3Default 
-:: setOppPoint (int i, const double (&p)[3]) 
-{ 
-  assert((i >= 0) && (i < _dimvx));
-  _oppVx[0] = p[0];
-  _oppVx[1] = p[1];
-  _oppVx[2] = p[2];
-  return;
-}
-           
-inline const double (& GitterBasis :: Objects :: Dune_Hbnd3Default ::oppositeVertex (int i) const) [3] 
-{
-#ifdef __USE_INTERNAL_FACES__  
-  assert((i >= 0) && (i < _dimvx));
-  return _oppVx;
-#else 
-  cerr << "Dune_Hbnd3Default ::oppositeVertex is not supported when compiled without the '__USE_INTERNAL_FACES__' cpp variable! in: "<<__FILE__<<" line: " <<__LINE__<<endl; 
-  abort();
-  return _oppVx;
-#endif
-}
-
-inline int GitterBasis :: Objects :: Dune_Hbnd3Default :: dimVx () const { return _dimvx; }
-
-inline GitterBasis :: Objects :: Dune_Hbnd4Default ::Dune_Hbnd4Default () 
-{
-  for(int i=0; i<_dimvx; i++)
-    for(int j=0; j<3; j++) _oppVx[i][j] = 0.0;
-}
-
-// for hexa internal boundaries 
-inline void GitterBasis :: Objects :: Dune_Hbnd4Default 
-:: setOppPoint (int i, const double (&p)[3]) 
-{ 
-  assert((i >= 0) && (i < _dimvx));
-  _oppVx[i][0] = p[0];
-  _oppVx[i][1] = p[1];
-  _oppVx[i][2] = p[2];
-  return;
-}
-           
-inline const double (& GitterBasis :: Objects :: Dune_Hbnd4Default ::oppositeVertex (int i) const) [3] 
-{
-#ifdef __USE_INTERNAL_FACES__  
-  assert((i >= 0) && (i < _dimvx));
-  return _oppVx[i];
-#else 
-  cerr << "Dune_Hbnd4Default ::oppositeVertex is not supported when compiled without the '__USE_INTERNAL_FACES__' cpp variable! in: "<<__FILE__<<" line: " <<__LINE__<<endl; 
-  abort();
-  return _oppVx[i];
-#endif
-}
-
-inline int GitterBasis :: Objects :: Dune_Hbnd4Default :: dimVx () const { return _dimvx; }
-//*************************************************************************
-// end of Dune_hbndDefault 
-//***************************************************************************
-
 inline GitterBasis :: Objects :: Hbnd3Default :: 
 Hbnd3Default (myhface3_t * f, int i ) 
  : Gitter :: Geometric :: hbndseg3_GEO (f, i)
@@ -509,6 +424,18 @@ inline bool GitterBasis :: Objects :: Hbnd3Default :: ghostLeaf () const {
   return leaf() ;
 }
 
+inline int GitterBasis :: Objects :: Hbnd3Default :: preCoarsening () 
+{
+  // call preCoarsening on parallel closure elements only 
+  return ( isBorder() ) ? myGrid()->preCoarsening( *this ) : 0; 
+}
+
+inline int GitterBasis :: Objects :: Hbnd3Default :: postRefinement () 
+{
+  // call postRefinement on parallel closure elements 
+  return ( isBorder() ) ? myGrid()->postRefinement( *this ) : 0; 
+}
+
 inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i) : 
   Gitter :: Geometric :: hbndseg4_GEO (f, i)
 {
@@ -525,6 +452,18 @@ inline int GitterBasis :: Objects :: Hbnd4Default :: ghostLevel () const {
 
 inline bool GitterBasis :: Objects :: Hbnd4Default :: ghostLeaf () const {
   return leaf() ;
+}
+
+inline int GitterBasis :: Objects :: Hbnd4Default :: preCoarsening () 
+{
+  // call preCoarsening on parallel closure elements only 
+  return ( isBorder() ) ? myGrid()->preCoarsening( *this ) : 0; 
+}
+
+inline int GitterBasis :: Objects :: Hbnd4Default :: postRefinement () 
+{
+  // call postRefinement on parallel closure elements 
+  return ( isBorder() ) ? myGrid()->postRefinement( *this ) : 0; 
 }
 
 inline GitterBasis :: Objects :: TetraEmpty :: 

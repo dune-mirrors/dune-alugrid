@@ -300,8 +300,7 @@ public :
     int _idx;
 
     // boundary id, zero for internal items, 
-    // otherwise > 0 (but always positive )
-    // negative id are for internal usage only 
+    // otherwise > 0 (but always positive)
     typedef unsigned char bndid_t ;
     bndid_t _bndid;
     

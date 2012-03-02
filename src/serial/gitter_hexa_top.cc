@@ -290,6 +290,8 @@ template < class A > bool Hface4Top < A > :: coarse () {
 template < class A >  void Hbnd4Top < A > :: 
 setBoundaryId( const int id ) 
 {
+  // set my id to the same as bnd 
+  this->setBndId( id );
   myhface4_t & face = *(myhface4(0));
   face.setBndId( id );
   // 4 fertices and edges  
