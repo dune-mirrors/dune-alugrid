@@ -52,8 +52,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             virtual int ghostLevel () const ; 
             virtual bool ghostLeaf () const ; 
 
-            virtual int preCoarsening ();
-            virtual int postRefinement ();
+            //virtual int preCoarsening ();
+            //virtual int postRefinement ();
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -82,8 +82,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             virtual int ghostLevel () const ;  
             virtual bool ghostLeaf () const ;
 
-            virtual int preCoarsening ();
-            virtual int postRefinement();
+            //virtual int preCoarsening ();
+            //virtual int postRefinement();
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -424,6 +424,7 @@ inline bool GitterBasis :: Objects :: Hbnd3Default :: ghostLeaf () const {
   return leaf() ;
 }
 
+/*
 inline int GitterBasis :: Objects :: Hbnd3Default :: preCoarsening () 
 {
   // call preCoarsening on parallel closure elements only 
@@ -435,6 +436,7 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: postRefinement ()
   // call postRefinement on parallel closure elements 
   return ( isBorder() ) ? myGrid()->postRefinement( *this ) : 0; 
 }
+*/
 
 inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i) : 
   Gitter :: Geometric :: hbndseg4_GEO (f, i)
@@ -454,6 +456,7 @@ inline bool GitterBasis :: Objects :: Hbnd4Default :: ghostLeaf () const {
   return leaf() ;
 }
 
+/*
 inline int GitterBasis :: Objects :: Hbnd4Default :: preCoarsening () 
 {
   // call preCoarsening on parallel closure elements only 
@@ -465,6 +468,7 @@ inline int GitterBasis :: Objects :: Hbnd4Default :: postRefinement ()
   // call postRefinement on parallel closure elements 
   return ( isBorder() ) ? myGrid()->postRefinement( *this ) : 0; 
 }
+*/
 
 inline GitterBasis :: Objects :: TetraEmpty :: 
 TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
