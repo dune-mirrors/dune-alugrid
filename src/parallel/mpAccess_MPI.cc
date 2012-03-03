@@ -144,20 +144,20 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
     MPI_Request * req = new MPI_Request [nl] ;
     assert (req) ;
     {
-      for (int link = 0 ; link < nl ; link ++) 
+      for (int link = 0 ; link < nl ; ++ link) 
       {
         int size = in [link].size() ;
         A * lne = new A [size] ;
         assert (lne) ;
         copy (in [link].begin (), in [link].end (), lne) ;
         buf [link] = lne ;
-        MY_INT_TEST MPI_Issend (lne, size, mpiType, d [link], messagetag, comm, & req [link]) ;
+        MY_INT_TEST MPI_Isend (lne, size, mpiType, d [link], messagetag, comm, & req [link]) ;
         assert (test == MPI_SUCCESS) ;
       } 
     }
     
     {
-      for (int link = 0 ; link < nl ; link ++ ) 
+      for (int link = 0 ; link < nl ; ++ link) 
       {
         MPI_Status s ;
         int cnt ;
@@ -190,7 +190,7 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
       delete [] sta ;
     }
     {
-      for (int i = 0 ; i < nl ; i ++) delete [] buf [i] ; 
+      for (int i = 0 ; i < nl ; ++i) delete [] buf [i] ; 
     }
     delete [] buf ;
     delete [] req ;

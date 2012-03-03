@@ -1053,7 +1053,7 @@ template < class A > typename LinkedObject :: Identifier FacePllBaseX < A > :: g
 template < class A > vector < int >  FacePllBaseX < A > :: checkParallelConnectivity () const {
   vector < int > v (A :: polygonlength + 1) ;
   int i ;
-  for (i = 0 ; i < A :: polygonlength ; i ++)
+  for (i = 0 ; i < A :: polygonlength ; ++i )
     v [i] = myhface ().myvertex (0)->ident () ;
   v [i] = myhface ().level () ;
   return v ;
