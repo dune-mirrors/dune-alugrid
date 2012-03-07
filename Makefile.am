@@ -7,9 +7,10 @@ SUBDIRS = src misc
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = alugrid.pc
 
+SOURCEFILE_MASK = -name \*.h -o -name \*.hh -o -name \*.c -o -name \*.cc
+
 # add library name, authors list, and license to progam files
 dist-hook:
-	find $(distdir) -name "*.h" -exec ./addauthors.sh ./AUTHORS {} \;
-	find $(distdir) -name "*.hh" -exec ./addauthors.sh ./AUTHORS {} \;
-	find $(distdir) -name "*.c" -exec ./addauthors.sh ./AUTHORS {} \;
-	find $(distdir) -name "*.cc" -exec ./addauthors.sh ./AUTHORS {} \;
+	if test -f ./addauthors.sh ; then \
+		find $(distdir) \( $(SOURCEFILE_MASK) \) -exec ./addauthors.sh ./AUTHORS {} \; ; \
+	fi
