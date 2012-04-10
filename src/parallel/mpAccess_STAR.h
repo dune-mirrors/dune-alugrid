@@ -48,6 +48,9 @@ public:
   void gmax (double*,int,double*) const ;
   void gmin (double*,int,double*) const ;
   void gsum (double*,int,double*) const ;
+  void gmax (int*,int,int*) const ;
+  void gmin (int*,int,int*) const ;
+  void gsum (int*,int,int*) const ;
   pair<double,double> gmax (pair<double,double>) const ;
   pair<double,double> gmin (pair<double,double>) const ;
   pair<double,double> gsum (pair<double,double>) const ;

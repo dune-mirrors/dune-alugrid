@@ -284,6 +284,21 @@ void MpAccessMPI :: gsum (double* a,int size,double *x) const {
   assert (test == MPI_SUCCESS) ;
 }
 
+void MpAccessMPI :: gmax (int* a,int size,int *x) const {
+  MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_MAX, _mpiComm) ;
+  assert (test == MPI_SUCCESS) ;
+}
+
+void MpAccessMPI :: gmin (int* a,int size,int *x) const {
+  MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_MIN, _mpiComm) ;
+  assert (test == MPI_SUCCESS) ;
+}
+
+void MpAccessMPI :: gsum (int* a,int size,int *x) const {
+  MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_SUM, _mpiComm) ;
+  assert (test == MPI_SUCCESS) ;
+}
+
 pair<double,double> MpAccessMPI :: gmax (pair<double,double> p) const {
   double x[2] ;
   double a[2]={p.first,p.second};

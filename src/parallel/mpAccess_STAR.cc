@@ -198,6 +198,24 @@ void MpAccessSTAR_MPI :: gsum (double* a,int size,double *x) const {
   assert (test == MPI_SUCCESS) ;
 }
 
+void MpAccessSTAR_MPI :: gmax (int* a,int size,int *x) const {
+  static const int call_site_id = getNextCallSiteId();
+  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_INT, MPI_MAX, _mpiComm, call_site_id) ;
+  assert (test == MPI_SUCCESS) ;
+}
+
+void MpAccessSTAR_MPI :: gmin (int* a,int size,int *x) const {
+  static const int call_site_id = getNextCallSiteId();
+  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_INT, MPI_MIN, _mpiComm, call_site_id) ;
+  assert (test == MPI_SUCCESS) ;
+}
+
+void MpAccessSTAR_MPI :: gsum (int* a,int size,int *x) const {
+  static const int call_site_id = getNextCallSiteId();
+  MY_INT_TEST STAR_Allreduce (a, x, size, MPI_INT, MPI_SUM, _mpiComm, call_site_id) ;
+  assert (test == MPI_SUCCESS) ;
+}
+
 pair<double,double> MpAccessSTAR_MPI :: gmax (pair<double,double> p) const {
   static const int call_site_id = getNextCallSiteId();
   double x[2] ;
