@@ -1023,20 +1023,6 @@ public :
       virtual int firstLdbVertexIndex() const { return -1; }
       // return ldbVertexIndex, overloaded in TetraPllMacro and HexaPllMacro 
       virtual int otherLdbVertexIndex( const hface& face ) const { return firstLdbVertexIndex(); }
-
-  protected:  
-      template <class elem_t> 
-      int numberOfPeriodicBoundaries( const elem_t& elem ) const 
-      {
-        const int nFaces = elem.nFaces();
-        int periodicNbs = 0;
-        for( int i=0; i<nFaces; ++i ) 
-        {
-          if( elem.myneighbour( i ).first->isperiodic() ) ++ periodicNbs ;
-        }
-        return periodicNbs ;
-      }
-
     } ;
 
     // Die Geometriesockelklassen sind die Grundlage zur Implementierung

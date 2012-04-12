@@ -309,8 +309,7 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
 template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) 
 {
   if ( r != getrule () ) {
-    cout << r << " req | got " << getrule() << endl;
-    //assert (getrule () == myrule_t :: nosplit) ;
+    assert (getrule () == myrule_t :: nosplit) ;
     switch(r) 
     {
       typedef typename myhedge1_t :: myrule_t myhedge1rule_t;
