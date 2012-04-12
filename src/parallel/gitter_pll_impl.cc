@@ -752,6 +752,7 @@ void TetraPllXBaseMacro< A > :: unattach2 (int i)
 
   // reset move to 
   _moveTo = -1;
+  _erasable = false ;
 
   return ;
 }
@@ -759,7 +760,14 @@ void TetraPllXBaseMacro< A > :: unattach2 (int i)
 template < class A >
 void TetraPllXBaseMacro< A > :: attachElement2 (const int destination, const int face) 
 {
+  assert( destination >= 0 );
+
+  // attach the element 
   attach2( destination );
+
+  // make sure we to correct destination 
+  assert( _moveTo == destination );
+
   // check all neighbours 
   // face is the face this method was called from 
   for( int f=0; f<4; ++f )
@@ -787,7 +795,6 @@ void TetraPllXBaseMacro< A > :: attach2 (int i)
     mytetra ().myhface3 (2)->attach2 (i) ;
     mytetra ().myhface3 (3)->attach2 (i) ;
   }
-  return ;
 }
 
 template < class A >
@@ -803,7 +810,17 @@ bool TetraPllXBaseMacro< A > :: doPackAll (vector < ObjectStream > & osv,
   if( _moveTo >= 0 ) 
   {
     assert ((osv.begin () + _moveTo) < osv.end ()) ;
-      ObjectStream& os = osv[ _moveTo ];
+    ObjectStream& os = osv[ _moveTo ];
+
+#ifdef NDEBUG 
+    for( int i=0; i<4; ++i ) 
+    {
+      if( this->myneighbour( i ).first->isboundary() ) 
+      {
+        assert( this->myneighbour( i ).first->moveTo() == _moveTo );
+      }
+    }
+#endif
 
     os.writeObject (TETRA) ;
     os.writeObject (mytetra ().myvertex (0)->ident ()) ;
@@ -1015,6 +1032,7 @@ bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBa
 
 template < class A >
 void Periodic3PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
+  assert( false );
   abort();
   return ;
 }
@@ -1026,6 +1044,7 @@ void Periodic3PllXBaseMacro< A > :: unattach2 (int i)
   myperiodic ().myhface3 (0)->unattach2 (i) ;
   myperiodic ().myhface3 (1)->unattach2 (i) ;
   _moveTo = -1;
+  _erasable = false ;
   return ;
 }
 
@@ -1052,7 +1071,9 @@ int Periodic3PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) 
 template < class A >
 void Periodic3PllXBaseMacro< A > :: attachPeriodic(const int destination)
 {
+  //std::cout << "Attach periodic element" << std::endl;
   attach2( destination );
+  assert( _moveTo == destination );
 }
 
 template < class A >
@@ -1063,8 +1084,8 @@ void Periodic3PllXBaseMacro< A > :: attach2 (int i)
     // store new destination 
     _moveTo = i; 
 
-    //myperiodic ().myhface3 (0)->attach2 (i) ;
-    //myperiodic ().myhface3 (1)->attach2 (i) ;
+    myperiodic ().myhface3 (0)->attach2 (i) ;
+    myperiodic ().myhface3 (1)->attach2 (i) ;
 
     // attach both neighbours to the same process 
     for(int n=0; n<2; ++n ) 
@@ -1079,7 +1100,7 @@ template < class A >
 bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
   if( _moveTo >= 0 ) 
-  {
+  { 
     assert( myneighbour( 0 ).first->moveTo() == _moveTo );
     assert( myneighbour( 1 ).first->moveTo() == _moveTo );
 

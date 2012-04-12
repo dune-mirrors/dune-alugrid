@@ -67,7 +67,10 @@ void ParallelGridMover :: initialize ()
       _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
     }
+    assert( _periodic3List.size() == 0 );
   }
+
+
   {
     BuilderIF :: periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
     const BuilderIF :: periodic4list_t :: iterator _periodic4Listend = _periodic4List.end () ;
@@ -78,7 +81,9 @@ void ParallelGridMover :: initialize ()
       _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
     }
+    assert( _periodic4List.size() == 0 );
   }
+
 
   // all boundary segments 
   typedef vector< Gitter :: hbndseg_STI * > hbndvector_t ;
@@ -213,13 +218,21 @@ void ParallelGridMover :: initialize ()
     }
   }
 
+  // delete all internal boundaries 
+  { 
+    typedef hbndvector_t :: iterator  iterator; 
+    const iterator endi = toDeleteHbnd.end();
+    for( iterator i = toDeleteHbnd.begin(); i != endi ; ++i ) 
+      delete (*i);
+  }
+
   {
     const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; ++i)
     {
       if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) 
       {
-        // false means no real element 
+        // false means periodic element 
         removeElement ((*i).first, false ) ;
       }
     }
@@ -231,18 +244,10 @@ void ParallelGridMover :: initialize ()
     {
       if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) 
       {
-        // false means no real element 
+        // false means periodic element 
         removeElement ((*i).first, false ) ;
       }
     }
-  }
-
-  // delete all internal boundaries 
-  { 
-    typedef hbndvector_t :: iterator  iterator; 
-    const iterator endi = toDeleteHbnd.end();
-    for( iterator i = toDeleteHbnd.begin(); i != endi ; ++i ) 
-      delete (*i);
   }
 
   // delete all elements at last
@@ -263,57 +268,97 @@ void ParallelGridMover :: initialize ()
 void ParallelGridMover :: finalize ()
 {
   {
+    BuilderIF :: hexalist_t& _hexaList = myBuilder()._hexaList;
     const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
     for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; _hexaMap.erase (i++))
-      myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
+      _hexaList.push_back ((hexa_GEO *)(*i).second) ;
   }
   {
+    BuilderIF :: tetralist_t& _tetraList = myBuilder ()._tetraList; 
     const elementMap_t :: iterator _tetraMapend = _tetraMap.end ();
     for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMapend ; _tetraMap.erase (i++))
-      myBuilder ()._tetraList.push_back ((tetra_GEO *)(*i).second) ;
+      _tetraList.push_back ((tetra_GEO *)(*i).second) ;
   }
   {
+    BuilderIF :: periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 
     const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; _periodic3Map.erase (i++))
-      myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
+    {
+      // if the periodic element is only there without connections 
+      // then delete it (check why this can happen)
+      periodic3_GEO * periodic = (periodic3_GEO *) (*i).second;
+      if( periodic->myhface3( 0 )->ref == 1 && periodic->myhface3( 1 )->ref == 1 ) 
+      {
+        delete periodic ;
+      }
+      else 
+      {
+        assert( periodic->myhface3( 0 )->ref == 2 );
+        assert( periodic->myhface3( 1 )->ref == 2 );
+        _periodic3List.push_back ( periodic );
+      }
+    }
   }
   
   {
+    BuilderIF :: periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
     const elementMap_t :: iterator _periodic4Mapend =  _periodic4Map.end ();
     for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; _periodic4Map.erase (i++))
-      myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
+    {
+      // if the periodic element is only there without connections 
+      // then delete it (check why this can happen)
+      periodic4_GEO * periodic = (periodic4_GEO *) (*i).second;
+      if( periodic->myhface4( 0 )->ref == 1 && periodic->myhface4( 1 )->ref == 1 ) 
+      {
+        delete periodic ;
+      }
+      else 
+      {
+        assert( periodic->myhface4( 0 )->ref == 2 );
+        assert( periodic->myhface4( 1 )->ref == 2 );
+        _periodic4List.push_back ( periodic );
+      }
+    }
   }
 
   {
+    BuilderIF :: hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List;
     const faceMap_t :: iterator _hbnd4Mapend = _hbnd4Map.end ();
     for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Mapend ; )
     {
-      if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
+      hbndseg4_GEO * hbnd = (hbndseg4_GEO *)(*i).second ;
+      if ( hbnd->myhface4 (0)->ref == 1 ) 
       {
-        delete (hbndseg4_GEO *)(*i).second ;
+        delete hbnd ;
         _hbnd4Map.erase (i++) ;
       } 
       else 
       {
-        myBuilder ()._hbndseg4List.push_back ((hbndseg4_GEO *)(*i ++).second) ;
+        _hbndseg4List.push_back ( hbnd );
+        ++ i;
       }
     }
   }
+
   {
+    BuilderIF :: hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List;
     const faceMap_t :: iterator _hbnd3Mapend = _hbnd3Map.end ();
     for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != _hbnd3Mapend ; )
     {
-      if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) 
+      hbndseg3_GEO * hbnd = (hbndseg3_GEO *)(*i).second ;
+      if ( hbnd->myhface3 (0)->ref == 1) 
       {
-        delete (hbndseg3_GEO *)(*i).second ;
+        delete hbnd;
         _hbnd3Map.erase (i++) ;
       } 
       else 
       {
-        myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second) ;
+        _hbndseg3List.push_back ( hbnd );
+        ++ i;
       }
     }
   }
+
   {
     BuilderIF :: hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List; 
     const hbnd4intMap_t :: iterator _hbnd4Intend = _hbnd4Int.end ();
@@ -356,65 +401,82 @@ void ParallelGridMover :: finalize ()
     }
   }
   {
+    BuilderIF :: hface4list_t& _hface4List = myBuilder ()._hface4List;
     const faceMap_t :: iterator _face4Mapend = _face4Map.end ();
     for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Mapend ; )
     {
-      if (!((hface4_GEO *)(*i).second)->ref) 
+      hface4_GEO * face = (hface4_GEO * ) (*i).second;
+      if (! face->ref ) 
       {
-        delete (hface4_GEO *)(*i).second ;
-        _face4Map.erase (i++) ;
+        delete face;
+        _face4Map.erase ( i++ ) ;
       } 
       else 
       {
-        assert (((hface4_GEO *)(*i).second)->ref == 2) ;
-        myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
+        if( ((hface4_GEO *)(*i).second)->ref == 1 ) 
+        {
+          
+        }
+        assert ( face->ref == 2 ) ;
+        _hface4List.push_back ( face );
+        ++ i;
       }
     }
   }
   {
+    BuilderIF :: hface3list_t& _hface3List = myBuilder ()._hface3List;
     const faceMap_t :: iterator _face3Mapend = _face3Map.end () ;
     for (faceMap_t :: iterator i = _face3Map.begin () ; i != _face3Mapend ; ) 
     {
-      if (!((hface3_GEO *)(*i).second)->ref) 
+      hface3_GEO * face = (hface3_GEO *) (*i).second;
+      if (! face->ref ) 
       {
-        delete (hface3_GEO *)(*i).second ;
+        delete face;
         _face3Map.erase (i++) ;
       } 
       else 
       {
-        assert (((hface3_GEO *)(*i).second)->ref == 2) ;
-        myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
+        assert ( face->ref == 2 ) ;
+        _hface3List.push_back ( face );
+        ++ i;
       }
     }
   }
   {
+    BuilderIF :: hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
     const edgeMap_t :: iterator _edgeMapend = _edgeMap.end ();
     for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != _edgeMapend ; )
     {
-      if (!(*i).second->ref) {
-        delete (*i).second ;
+      hedge1_GEO* edge = (hedge1_GEO *) (*i).second;
+      if (! edge->ref )
+      {
+        delete edge;
         _edgeMap.erase (i++) ;
       } 
       else 
       {
-        assert ((*i).second->ref >= 1) ;
-        myBuilder ()._hedge1List.push_back ((*i ++).second) ;
+        assert ( edge->ref >= 1 ) ;
+        _hedge1List.push_back ( edge );
+        ++ i;
       }
     }
   }
   {
+    BuilderIF :: vertexlist_t& _vertexList = myBuilder ()._vertexList;
     const vertexMap_t :: iterator _vertexMapend = _vertexMap.end ();
     for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != _vertexMapend ; )
     {
-      if (!(*i).second->ref) 
+      vertex_GEO* vertex = (vertex_GEO *) (*i).second;
+      if ( ! vertex->ref ) 
       {
-        delete (*i).second ;
+        delete vertex;
         _vertexMap.erase (i++) ;
       } 
       else 
       {
-        assert ((*i).second->ref >= 2) ;
-        myBuilder ()._vertexList.push_back ((*i ++).second) ;
+        assert ( vertex->ref >= 2) ;
+        _vertexList.push_back ( vertex );
+        ++i;
       }
     }
   }
@@ -843,7 +905,7 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
               moveTo = to;
           }
 
-          if( ldbVx.second >= 0 ) 
+          if( ldbVx.second >= 0 && moveTo == me ) 
           {
             const int to = db.getDestination ( ldbVx.second );
             if( to != me ) 
@@ -857,15 +919,20 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
         }
       }
 
-      // attach all elements to thier new destinations 
+      // attach all elements to their new destinations 
       { 
         AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
         for (w.first () ; ! w.done () ; w.next ()) 
         {
-          const int to = db.getDestination (w.item ().ldbVertexIndex ()) ;
-          if (me != to)
-          {
-            w.item ().attach2 (mpAccess ().link (to)) ;
+          helement_STI& item = w.item();
+          // moveTo < 0 means the element has not been assigned yet
+          if( item.moveTo() < 0 ) 
+          { 
+            const int to = db.getDestination ( item.ldbVertexIndex () ) ;
+            if (me != to)
+            {
+              item.attach2 ( mpAccess ().link (to) ) ;
+            }
           }
         }
       }
@@ -922,7 +989,7 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
     lap2 = clock () ;
     
     // exchange stuff 
-    osv = mpAccess ().exchange (osv) ;
+    osv = mpAccess ().exchange ( osv ) ;
     lap3 = clock () ;
     
     // delete and unpack  

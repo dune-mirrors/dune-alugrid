@@ -324,7 +324,11 @@ class Periodic3PllXBaseMacro : public A
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void packAsBnd (int,int,ObjectStream &) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-    virtual bool erasable () const { return _erasable ; }
+    virtual bool erasable () const 
+    { 
+      assert( _erasable == ( _moveTo >= 0 ) );
+      return _erasable ; 
+    }
   private :
 #ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
