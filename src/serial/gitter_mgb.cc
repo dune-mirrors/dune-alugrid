@@ -258,8 +258,13 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
     if (hit != _tetraMap.end ()) 
     {
       tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
+
       for (int i = 0 ; i < 4 ; ++i) 
       {
+        // for periodic neighbours we do not create internal storages 
+        if( tr->myneighbour( i ).first->isperiodic() ) 
+          continue ;
+
         hface3_GEO* face = tr->myhface3 (i) ;
         _hbnd3Int [faceKey_t (face->myvertex (0)->ident (), 
                               face->myvertex (1)->ident (), 
@@ -279,6 +284,10 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
       hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
       for (int i = 0 ; i < 6 ; ++i) 
       {
+        // for periodic neighbours we do not create internal storages 
+        if( hx->myneighbour( i ).first->isperiodic() ) 
+          continue ;
+
         hface4_GEO* face = hx->myhface4 (i);
         _hbnd4Int [faceKey_t (face->myvertex (0)->ident (), 
                               face->myvertex (1)->ident (), 
@@ -298,17 +307,10 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
     if (hit != _periodic3Map.end ()) 
     {
       periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second ;
-      for (int i = 0 ; i < 2 ; ++i) 
-      {
-        hface3_GEO* face = p3->myhface3 (i);
-        _hbnd3Int [faceKey_t ( face->myvertex (0)->ident (), 
-                               face->myvertex (1)->ident (), 
-                               face->myvertex (2)->ident ())
-                  ] = new Hbnd3IntStorage ( face, p3->twist (i)) ;
-      }
 
       delete p3 ;
       _periodic3Map.erase (hit) ;
+
       return ;
     }
 
@@ -316,14 +318,6 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
     if (hit != _periodic4Map.end ()) 
     {
       periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second ;
-      for (int i = 0 ; i < 2 ; ++i) 
-      {
-        hface4_GEO* face = p4->myhface4 (i);
-        _hbnd4Int [faceKey_t ( face->myvertex (0)->ident (), 
-                               face->myvertex (1)->ident (), 
-                               face->myvertex (2)->ident ())
-                  ] = new Hbnd4IntStorage ( face, p4->twist (i));
-      }
 
       delete p4 ;
       _periodic4Map.erase (hit) ;
