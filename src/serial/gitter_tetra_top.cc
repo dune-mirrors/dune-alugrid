@@ -308,8 +308,9 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
 
 template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) 
 {
-  if (r != getrule ()) {
-    assert (getrule () == myrule_t :: nosplit) ;
+  if ( r != getrule () ) {
+    cout << r << " req | got " << getrule() << endl;
+    //assert (getrule () == myrule_t :: nosplit) ;
     switch(r) 
     {
       typedef typename myhedge1_t :: myrule_t myhedge1rule_t;
@@ -828,8 +829,10 @@ TetraTop (int l, myhface3_t * f0, int t0,
   // _up wird im Constructor uebergeben
   this->setIndex( indexManager().getIndex() );
 
+  // initial mapping is has to be adjusted according 
+  // to the make-6 algorithm 
+  // NOTE: the _vxMap numbers only affect the bisection refinement
   const int mod = 1 - ( this->getIndex() % 2 );
-  // initial mapping is identity  
   _vxMap[ 0 ] = 0; 
   _vxMap[ 1 ] = 1;
   _vxMap[ 2 ] = 2 + mod ;
@@ -1943,22 +1946,20 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
     }
     splitISO8 () ;
   }
+  else if( r == myrule_t :: bisect )
+  {
+    // call refinement with appropriate rule 
+    // given by suggestRule 
+    BisectionInfo :: splitEdge( this, suggestRule() );
+  }
   else 
   {
-    // call appropriate refinement of faces 
+    // it is assured that r is one out of e01 ... e32 
+    // call refinement directly 
     BisectionInfo :: splitEdge( this, r );
-
-    /*
-#ifndef NDEBUG 
-    if( r != 
-      cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
-      cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << endl ;
-      abort () ;
-      break ;
-#endif
-*/
   }
 
+  // call post refinement procedure 
   this->postRefinement () ;
   return ;
 }
@@ -2115,6 +2116,28 @@ template < class A >  bool TetraTop < A > :: coarse ()
       delete _inner ; 
       _inner = 0 ;
 
+      // for bisection refinement we have to again 
+      // set the face neighbours, since they have been overwritten   
+      // by the refined element  
+      if( _rule != myrule_t :: iso8 )
+      {
+        for (int i = 0 ; i < 4 ; ++i )
+        {
+          // if face number is negative, it's not a real object 
+          // in this case we have to set the neighbour again
+          if( this->myneighbour( i ).second < 0 ) 
+          {
+            typedef pair < Gitter :: Geometric :: hface3 :: myconnect_t*, int > myconnectpair_t;
+            assert( ! this->myneighbour( i ).first->isRealObject() );
+            myhface3( i )->attachElementAgain( 
+                  myconnectpair_t( Gitter :: Geometric :: InternalHasFace3()(this), i ),   
+                  twist( i ) 
+                );
+          }
+        }
+      }
+
+      // reset refinement rule 
       _rule = myrule_t :: nosplit ;
       {
         for (int i = 0 ; i < 4 ; ++i ) 

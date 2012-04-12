@@ -657,6 +657,8 @@ public :
     virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
     virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
 
+    virtual int moveTo () const { return -1; }
+
   public: 
     virtual grid_t type() const = 0;
   } ;
@@ -1203,6 +1205,7 @@ public :
     public :
       inline virtual ~hface3 () ;
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
+      inline void attachElementAgain (const pair < hasFace3 *, int >&, int) ;
       inline void detachElement (int) ;
     public :
       inline int twist (int) const ;
@@ -2939,13 +2942,21 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
 
 inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t)
 {
+  // this will not increase the reference
+  attachElementAgain( p, t );
+
+  // increase reference counter
+  ref ++ ;
+  return ;
+}
+
+inline void Gitter :: Geometric :: hface3 :: 
+attachElementAgain (const pair < myconnect_t *, int > & p, int t)
+{
   if( t < 0 )
     nb.setRear( p );
   else
     nb.setFront( p );
-
-  ref ++ ;
-  return ;
 }
 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t)
