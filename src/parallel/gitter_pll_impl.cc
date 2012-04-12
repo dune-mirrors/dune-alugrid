@@ -724,10 +724,9 @@ bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase &
   // - macro vertex index
   // - number of elementes below macro element 
   // - bary center 
-  const int factor = this->numberOfPeriodicBoundaries( mytetra() ) + 1 ;
    
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size () * factor 
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size () 
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _center
 #endif
@@ -1476,11 +1475,8 @@ void HexaPllBaseXMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
 template < class A >
 bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
 {
-  // element with periodic boundaries get higher weight 
-  const int factor = this->numberOfPeriodicBoundaries( myhexa() ) + 1 ;
-
   db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size () * factor 
+      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size () 
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _center
 #endif

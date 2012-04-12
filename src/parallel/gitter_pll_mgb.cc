@@ -226,6 +226,7 @@ void ParallelGridMover :: initialize ()
       delete (*i);
   }
 
+  // delete all periodic boundaries 
   {
     const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; ++i)
@@ -236,9 +237,7 @@ void ParallelGridMover :: initialize ()
         removeElement ((*i).first, false ) ;
       }
     }
-  }
 
-  {
     const elementMap_t :: iterator _periodic4Mapend = _periodic4Map.end ();
     for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; ++i)
     {
@@ -285,7 +284,7 @@ void ParallelGridMover :: finalize ()
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; _periodic3Map.erase (i++))
     {
       // if the periodic element is only there without connections 
-      // then delete it (check why this can happen)
+      // to real elements then delete it (check why this can happen)
       periodic3_GEO * periodic = (periodic3_GEO *) (*i).second;
       if( periodic->myhface3( 0 )->ref == 1 && periodic->myhface3( 1 )->ref == 1 ) 
       {
@@ -306,7 +305,7 @@ void ParallelGridMover :: finalize ()
     for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; _periodic4Map.erase (i++))
     {
       // if the periodic element is only there without connections 
-      // then delete it (check why this can happen)
+      // to real elements then delete it (check why this can happen)
       periodic4_GEO * periodic = (periodic4_GEO *) (*i).second;
       if( periodic->myhface4( 0 )->ref == 1 && periodic->myhface4( 1 )->ref == 1 ) 
       {
@@ -413,10 +412,6 @@ void ParallelGridMover :: finalize ()
       } 
       else 
       {
-        if( ((hface4_GEO *)(*i).second)->ref == 1 ) 
-        {
-          
-        }
         assert ( face->ref == 2 ) ;
         _hface4List.push_back ( face );
         ++ i;
@@ -480,6 +475,7 @@ void ParallelGridMover :: finalize ()
       }
     }
   }
+
   myBuilder ()._modified = true ; // wichtig !
   this->_finalized = true;
   return ;
@@ -912,6 +908,8 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
               moveTo = to;
           }
 
+          // if moveTo is not me than attach periodic element 
+          // and all connected real elements 
           if( moveTo != me ) 
           {
             w.item ().attach2 ( mpAccess ().link( moveTo ) ) ;
