@@ -201,7 +201,7 @@ void ParallelGridMover :: initialize ()
     const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
     for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; ++i)
     {
-      if (Gitter :: InternalElement ()(*((hexa_GEO *)(*i).second)).erasable ()) 
+      if( ((hexa_GEO *) (*i).second)->erasable () ) 
       {
         toDelete.push_back ((*i).first) ;
       }
@@ -211,7 +211,7 @@ void ParallelGridMover :: initialize ()
     const elementMap_t :: iterator _tetraMapend = _tetraMap.end ();
     for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMapend ; ++i)
     {
-      if (Gitter :: InternalElement ()(*((tetra_GEO *)(*i).second)).erasable ()) 
+      if ( ((tetra_GEO *)(*i).second)->erasable () ) 
       {
         toDelete.push_back ((*i).first) ;
       }
@@ -231,7 +231,7 @@ void ParallelGridMover :: initialize ()
     const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Mapend ; ++i)
     {
-      if (Gitter :: InternalElement ()(*((periodic3_GEO *)(*i).second)).erasable ()) 
+      if ( ((periodic3_GEO *)(*i).second)->erasable () ) 
       {
         // false means periodic element 
         removeElement ((*i).first, false ) ;
@@ -241,7 +241,7 @@ void ParallelGridMover :: initialize ()
     const elementMap_t :: iterator _periodic4Mapend = _periodic4Map.end ();
     for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Mapend ; ++i)
     {
-      if (Gitter :: InternalElement ()(*((periodic4_GEO *)(*i).second)).erasable ()) 
+      if ( ((periodic4_GEO *)(*i).second)->erasable ()) 
       {
         // false means periodic element 
         removeElement ((*i).first, false ) ;

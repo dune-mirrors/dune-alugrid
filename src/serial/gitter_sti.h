@@ -826,16 +826,6 @@ public :
     val_t & operator () (helement_STI & e) const { return * e.innerHface () ; }
     val_t & operator () (hface_STI & f) const { return f ; }
   } ;
-  class InternalBndseg {
-  public :
-    typedef hbndseg_STI val_t ;
-    val_t & operator () (hbndseg_STI & b) const { return b ; }
-  } ;
-  class InternalElement {
-  public :
-    typedef helement_STI val_t ;
-    val_t & operator () (helement_STI & e) const { return e ; }
-  } ;
 
 public :
   
