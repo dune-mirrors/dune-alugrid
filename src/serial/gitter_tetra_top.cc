@@ -1030,7 +1030,7 @@ template < class A >  typename TetraTop < A > ::  myhface3_t * TetraTop < A > ::
     abort () ;
     return 0 ;
   default:
-    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface3(i)->getrule() << "] in "__FILE__ << " " << __LINE__ << endl ;
+    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface3(i)->getrule() << "] in " << __FILE__ << " " << __LINE__ << endl ;
     abort() ;
   } 
   return 0 ;
@@ -2402,7 +2402,7 @@ template < class A > typename Periodic3Top < A > ::  myhface3_t * Periodic3Top <
     abort () ;
     return 0 ;
   default:
-    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface3(i)->getrule() << "] in "__FILE__ << " " << __LINE__ << endl ;
+    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface3(i)->getrule() << "] in " << __FILE__ << " " << __LINE__ << endl ;
     abort() ;
   } 
   return 0 ;
