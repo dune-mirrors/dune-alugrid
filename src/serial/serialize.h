@@ -407,4 +407,21 @@ inline void ObjectStream :: writeObject (const Serializable & oi) throw (OutOfMe
   oi.writeObject (*this) ;
   return ;
 }
+
+// streaming operators for ObjectStream 
+template <class T>
+inline ObjectStream& operator << ( ObjectStream& os, const T& value ) 
+{
+  os.write( value );
+  return os;
+}
+
+// streaming operators for ObjectStream 
+template <class T>
+inline ObjectStream& operator >> ( ObjectStream& os, T& value )
+{
+  os.read( value );
+  return os;
+}
+
 #endif  // SERIALIZE_H_INCLUDED
