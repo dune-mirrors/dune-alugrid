@@ -314,7 +314,7 @@ vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in) c
       // write data to stream 
       if( rcounts [i] )
       {
-        o [i]. write2Stream( y + displ [i], rcounts [i] );
+        o [i].write( y + displ [i], rcounts [i] );
       }
     }
 

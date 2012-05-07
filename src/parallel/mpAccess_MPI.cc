@@ -393,7 +393,7 @@ vector < ObjectStream > MpAccessMPI :: gcollect (const ObjectStream & in) const
       // write data to stream 
       if( rcounts [i] )
       {
-        o [i]. write2Stream( y + displ [i], rcounts [i] );
+        o [i].write( y + displ [i], rcounts [i] );
       }
     }
 

@@ -128,14 +128,14 @@ public :
   {
     if( length == 0 ) return ;
     // actual read position 
-    os.write2Stream( getBuff(_rb) ,length);
+    os.write( getBuff(_rb) ,length);
     removeObject(length);
   }
 
   // writes hole stream of os to this stream
   inline void writeStream (const ObjectStreamImpl & os) 
   {
-    write2Stream(os._buf,os._wb);
+    write(os._buf,os._wb);
   }
   
   // increments the read position without actualy read data
@@ -177,6 +177,35 @@ public :
     // free buffer if not zero 
     if( buffer ) free( buffer );
   }
+
+  // compatibility with ostream 
+  inline void write(const char* buff, const size_t length )
+  {
+    assert( _owner );
+    if( length == 0 ) return ;
+
+    const size_t newWb = _wb + length;
+    if (newWb > _len) reallocateBuffer(newWb);
+    
+    memcpy( getBuff(_wb) , buff , length );
+    _wb = newWb;
+  }
+  
+  // compatibility with istream 
+  inline void read(char* buff, const size_t length )
+  {
+    if( length == 0 ) return ;
+
+    const size_t newRb = _rb + length;
+#ifndef NO_OBJECTSTREAM_DEBUG 
+    if (newRb > _wb) throw EOFException () ;
+#endif
+    assert( newRb <= _wb );
+    
+    memcpy( buff, getBuff(_rb), length );
+    _rb = newRb;
+  }
+  
 protected:
   inline char * getBuff (const size_t ap) { return (_buf + ap); }
   inline const char * getBuff (const size_t ap) const { return (_buf + ap); }
@@ -219,19 +248,6 @@ protected:
       // we are owner now 
       _owner = true;
     }
-    return ;
-  }
-  
-  inline void write2Stream(const char * buff, const size_t length )
-  {
-    assert( _owner );
-    if( length == 0 ) return ;
-
-    const size_t newWb = _wb + length;
-    if (newWb > _len) reallocateBuffer(newWb);
-    
-    memcpy( getBuff(_wb) , buff , length );
-    _wb = newWb;
     return ;
   }
   
