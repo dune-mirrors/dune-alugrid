@@ -189,6 +189,22 @@ int main (int argc, char ** argv, const char ** envp)
    
     checkRefinements( grid );
 
+    std::ofstream file( "file.out" );
+    grid.duneBackup( file );
+
+    {
+      ObjectStream os ;
+      grid.duneBackup( os );
+      double value = 5;
+      os << value ;
+      char* buffer = ObjectStream ::allocateBuffer( os.size() );
+      os.read( buffer, os.size() );
+      
+      std::ofstream obj( "obj.out" );
+      obj.write( buffer, os.size() );
+      ObjectStream :: freeBuffer( buffer );
+    }
+
     globalRefine(grid, mxl);
     //levelwalk(&grid, mxl);
     //globalCoarsening(&grid, mxl);
