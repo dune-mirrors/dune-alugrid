@@ -386,6 +386,7 @@ template < class A > class HexaTop : public A {
     typedef typename A :: myrule_t  myrule_t ;
     typedef typename A :: balrule_t   balrule_t ;
     typedef InnerStorage < InnerFaceStorage< innerhexa_t , true > > inner_t ;
+
   protected:  
     inline void refineImmediate (myrule_t) ;
     inline void append (innerhexa_t * h) ;
@@ -442,14 +443,18 @@ template < class A > class HexaTop : public A {
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;
-    void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
     void restore (istream &) ;
 
     // backup and restore index 
     void backupIndex (ostream &) const ;
     // set entry of element to false when index is read 
-    void restoreIndex (istream &, vector<bool>(&) [4]) ;
+    void restoreIndex (istream &, RestoreInfo& ) ;
+
+    // backup and restore index 
+    void backupIndex (ObjectStream &) const ;
+    // set entry of element to false when index is read 
+    void restoreIndex (ObjectStream &, RestoreInfo& ) ;
 
     void backup (ObjectStream&) const ;
     void restore (ObjectStream&) ;
@@ -468,6 +473,8 @@ template < class A > class HexaTop : public A {
     void doBackup(OutStream_t &) const ;  
     template <class InStream_t> 
     void doRestore(InStream_t &) ;  
+    template <class istream_t> 
+    void restoreIndexImpl( istream_t &, RestoreInfo& ) ;  
 } ;
 
 template < class A > class Periodic4Top : public A {
@@ -548,7 +555,6 @@ template < class A > class Periodic4Top : public A {
     bool bndNotifyCoarsen () ;
 
   public:  
-    void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
     void restore (istream &) ;
 

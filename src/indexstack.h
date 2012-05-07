@@ -6,6 +6,61 @@ namespace ALUGridSpace {
 
 // use standard namespace 
 using namespace std; 
+
+class RestoreInfo
+{
+public:
+  static char systemByteOrder ()
+  {
+#if __BYTE_ORDER == __LITTLE_ENDIAN 
+    return 0 ;
+#else
+    return 1 ;
+#endif
+  }
+
+protected:
+  enum{ nCodims = 4 };
+
+  vector< bool > isHole_[ nCodims ];
+  const bool toggleByteOrder_;
+  vector< char > buffer_ ;
+
+public:
+  RestoreInfo( const char byteOrder )
+    : toggleByteOrder_( systemByteOrder() != byteOrder )
+  {
+    for( int i=0; i<nCodims; ++i )
+      isHole_[ i ].clear();
+  }
+
+  size_t size() const { return nCodims; }
+
+  vector< bool >& operator() ( const size_t codim )
+  {
+    assert( codim < size() );
+    return isHole_[ codim ];
+  }
+
+  // returns true if the byte order needs a change 
+  bool toggleByteOrder () const { return toggleByteOrder_; }
+
+  //! change byte order of buff 
+  void changeByteOrder( char* buff, const size_t size )
+  {
+    if( buffer_.size() < size )
+      buffer_.resize( size );
+
+    // copy char buffer 
+    for( size_t i=0; i<size; ++i )
+      buffer_[ i ] = buff[ i ];
+
+    // change byte order 
+    for( size_t i=0; i<size; ++i )
+      buff[ i ] = buffer_[ size - i - 1 ];
+  }
+};
+
   
 // using namespace std has always to be called inside the namespace
 // ALUGridSpace 
@@ -120,10 +175,12 @@ public:
   void test ();
 
   // backup set to out stream 
-  void backupIndexSet ( ostream & os ); 
+  template <class ostream_t> 
+  void backupIndexSet ( ostream_t & os ); 
 
   // restore from in stream 
-  void restoreIndexSet ( istream & is );
+  template <class istream_t>  
+  void restoreIndexSet ( istream_t & is, RestoreInfo& restoreInfo );
 
   // all entries in vector with value true 
   // are inserted as holes 
@@ -251,7 +308,8 @@ inline void ALUGridIndexStack<T,length>::test ()
 }
 
 template <class T, int length>
-inline void ALUGridIndexStack<T,length>::backupIndexSet ( ostream & os ) 
+template <class ostream_t> 
+inline void ALUGridIndexStack<T,length>::backupIndexSet ( ostream_t & os ) 
 {
   // holes are not stored at the moment 
   // they are reconstructed when gitter is 
@@ -262,10 +320,16 @@ inline void ALUGridIndexStack<T,length>::backupIndexSet ( ostream & os )
 }
 
 template <class T, int length>
-inline void ALUGridIndexStack<T,length>::restoreIndexSet ( istream & is )
+template <class istream_t>  
+inline void ALUGridIndexStack<T,length>::
+restoreIndexSet ( istream_t & is, RestoreInfo& restoreInfo)
 {
   // read maxIndex from stream 
   is.read ( ((char *) &maxIndex_), sizeof(int) );
+
+  // adjust byte order if necessary 
+  if( restoreInfo.toggleByteOrder() ) 
+    restoreInfo.changeByteOrder( ((char *) &maxIndex_), sizeof(int) );
 
   // clear stack fro reconstruction of holes 
   clearStack ();

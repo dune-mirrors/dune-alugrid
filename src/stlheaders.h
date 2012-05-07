@@ -23,6 +23,7 @@
 // header for XDR 
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
+#include <endian.h>
 
 #include <memory>
 #include <iostream>

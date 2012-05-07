@@ -912,20 +912,21 @@ template < class A > bool HexaTop < A > :: bndNotifyCoarsen () {
   return true ;
 }
 
-template < class A > void HexaTop < A > :: backupCMode (ostream & os) const {
-
-  // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
-  // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
-  // noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
-  // zu k"onnen.
-
-  os << getrule () << " " ;
-  return ;
+template < class A > void HexaTop < A > :: backupIndex (ostream & os) const 
+{
+  this->doBackupIndex( os );
+  for (const innerhexa_t* c = down(); c; c = c->next()) 
+  {
+    c->backupIndex(os);
+  }
+  return;
 }
 
-template < class A > void HexaTop < A > :: backupIndex (ostream & os) const {
-  os.write(((const char *) & this->_idx ), sizeof(int));
-  for (const innerhexa_t* c = down(); c; c = c->next()) {
+template < class A > void HexaTop < A > :: backupIndex (ObjectStream& os) const 
+{
+  this->doBackupIndex( os );
+  for (const innerhexa_t* c = down(); c; c = c->next()) 
+  {
     c->backupIndex(os);
   }
   return;
@@ -950,23 +951,34 @@ void HexaTop < A > :: doBackup (OutStream_t& os) const
   return ;
 }
 
-template < class A > void HexaTop < A > :: 
-restoreIndex (istream & is, vector<bool> (&isHole) [4]) 
+template < class A > 
+template < class istream_t >
+void HexaTop < A > :: 
+restoreIndexImpl (istream_t & is, RestoreInfo& restoreInfo) 
 {
   // free index from constructor
   // indexManager is cleared from outside 
-  is.read ( ((char *) &(this->_idx) ), sizeof(int) );
-
   // mark this element a non hole 
   typedef typename Gitter :: Geometric :: BuilderIF BuilderIF;
 
-  // make sure sizes match 
-  assert( this->getIndex() < (int) isHole[BuilderIF::IM_Elements].size() );
-  // set entry to false, because this is not a hole 
-  isHole[BuilderIF :: IM_Elements][this->getIndex()] = false;
-  
-  {for (innerhexa_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, isHole ) ; }
-  return;
+  this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Elements );
+
+  for (innerhexa_t * c = dwnPtr() ; c ; c = c->next ()) 
+  {
+    c->restoreIndex (is, restoreInfo ) ; 
+  }
+}
+
+template < class A > void HexaTop < A > :: 
+restoreIndex (istream& is, RestoreInfo& restoreInfo)
+{
+  restoreIndexImpl( is, restoreInfo );
+}
+
+template < class A > void HexaTop < A > :: 
+restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo)
+{
+  restoreIndexImpl( is, restoreInfo );
 }
 
 template < class A > void HexaTop < A > :: restore (istream & is) 
@@ -1227,17 +1239,6 @@ template < class A > bool Periodic4Top < A > :: bndNotifyCoarsen () {
     myhface4 (1)->coarse () ;
   }
   return x ;
-}
-
-template < class A > void Periodic4Top < A > :: backupCMode (ostream & os) const {
-
-  // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
-  // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
-  // noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
-  // zu k"onnen.
-  
-  os << getrule () << " " ;
-  return ;
 }
 
 template < class A > void Periodic4Top < A > :: backup (ostream & os) const 

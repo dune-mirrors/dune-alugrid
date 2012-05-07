@@ -337,6 +337,33 @@ public :
       return (_flags & (1 << flag));
     }
 
+    // write index to stream (i.e. ostream or ObjectStream)
+    template <class ostream_t> 
+    void doBackupIndex( ostream_t& os ) const
+    {
+      // write my index 
+      os.write( ((const char *) & _idx ), sizeof(int) ) ;
+    }
+
+    // read index from stream (i.e. istream or ObjectStream)
+    template <class istream_t> 
+    void doRestoreIndex( istream_t& is, 
+                         RestoreInfo& restoreInfo,
+                         const int codim )
+    {
+      // read my index 
+      is.read( ((char *) & _idx ), sizeof(int) ) ;
+
+      // change the byte order if necessary 
+      if( restoreInfo.toggleByteOrder() ) 
+        restoreInfo.changeByteOrder( (char *) & _idx, sizeof(int) );
+
+      // make sure sizes match 
+      assert( _idx < (int) restoreInfo( codim ).size() );
+      // make index to be not a hole 
+      restoreInfo( codim )[_idx] = false;
+    }
+
     // backupIndexErr message 
     void backupIndexErr () const {
       cerr << "DuneIndexProvider :: backupIndex : Implemenation should be in inherited class " << __FILE__  << " " << __LINE__ << "\n";
@@ -483,7 +510,11 @@ public :
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
+    virtual void restoreIndex (istream & is , RestoreInfo& ) { restoreIndexErr(); }
+
+    // same methods for ObjectStream 
+    virtual void backupIndex  ( ObjectStream& os ) const { backupIndexErr(); }
+    virtual void restoreIndex ( ObjectStream& is, RestoreInfo& ) { restoreIndexErr(); }
 
   } ;
    
@@ -518,7 +549,10 @@ public :
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
+    virtual void restoreIndex (istream & is, RestoreInfo& ) { restoreIndexErr(); }
+
+    virtual void backupIndex  (ObjectStream& os ) const { backupIndexErr(); }
+    virtual void restoreIndex (ObjectStream& is, RestoreInfo& ) { restoreIndexErr(); }
   } ;
     
   class hface : public FacePllXDefault, 
@@ -556,7 +590,10 @@ public :
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
+    virtual void restoreIndex (istream & is, RestoreInfo& ) { restoreIndexErr(); }
+
+    virtual void backupIndex  (ObjectStream& os ) const { backupIndexErr(); }
+    virtual void restoreIndex (ObjectStream& is, RestoreInfo& ) { restoreIndexErr(); }
 
   };
 
@@ -645,7 +682,7 @@ public :
   public :
     virtual bool refine () = 0 ;
     virtual bool coarse () = 0 ;
-    virtual void backupCMode (ostream &) const = 0 ;
+
     virtual void backup (ostream &) const = 0 ;
     virtual void restore (istream &) = 0 ;
     
@@ -655,7 +692,10 @@ public :
     // backup and restore index of vertices, should be overloaded in
     // derived classes, because some need to go down the hierarchiy
     virtual void backupIndex  (ostream & os ) const { backupIndexErr(); }
-    virtual void restoreIndex (istream & is , vector<bool>(&)[4] ) { restoreIndexErr(); }
+    virtual void restoreIndex (istream & is, RestoreInfo& ) { restoreIndexErr(); }
+
+    virtual void backupIndex  (ObjectStream & os ) const { backupIndexErr(); }
+    virtual void restoreIndex (ObjectStream &, RestoreInfo& ) { restoreIndexErr(); }
 
     virtual int moveTo () const { return -1; }
 
@@ -845,6 +885,7 @@ public :
   public :
     virtual int iterators_attached () const ;
     virtual void backup (ostream &) const = 0 ;
+    virtual void backup (ObjectStream&) const = 0 ;
     virtual void backup (const char*,const char *) const = 0 ;
     virtual void backupCMode (ostream &) const = 0 ;
     virtual void backupCMode (const char *,const char *) const = 0 ;
@@ -1078,19 +1119,38 @@ public :
       inline virtual ~VertexGeo () ;
 
       // return coordinates of vertex  
-      inline const alucoord_t (& Point () const) [3] ;
+      inline const alucoord_t (& Point () const) [3] { return _c; }
       // return level of vertex 
-      inline int level () const ;
+      inline int level () const { return _lvl ; }
+
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
       virtual inline void project(const ProjectVertexPair &pv) ; 
             
-      // overload backupIndex and restoreIndex here
+      // overload backupIndex and restoreIndex for std::streams
       inline void backupIndex  (ostream & os ) const;
-      inline void restoreIndex (istream & is , vector<bool>(&)[4] );
+      inline void restoreIndex (istream & is, RestoreInfo& );
+
+      // overload backupIndex and restoreIndex for ObjectStream 
+      inline void backupIndex  (ObjectStream & os ) const;
+      inline void restoreIndex (ObjectStream & is, RestoreInfo& );
 
       // backup does nothing 
-      inline void backup (ostream & os ) const {}
-      inline void restore (istream & is ) {}
+      inline void backup (ostream & os ) const 
+      {
+        /*
+        abort();
+        os << _c[ 0 ] << " " << _c[ 1 ] << " " << _c[ 2 ] << std::endl;
+        */
+      }
+
+      inline void restore (istream & is ) 
+      {
+        /*
+        is >> _c[ 0 ];
+        is >> _c[ 1 ];
+        is >> _c[ 2 ];
+        */
+      }
 
       int nChild () const { return 0 ; }
 
@@ -1836,6 +1896,7 @@ public :
       virtual void compressIndexManagers();
       
       virtual void backup (ostream &) const ;
+      virtual void backup (ObjectStream&) const {};
       virtual void backup (const char*,const char *) const ;
       virtual void backupCMode (ostream &) const ;
       virtual void backupCMode (const char*,const char *) const ;
@@ -1906,9 +1967,11 @@ public :
   virtual void backupCMode (ostream &) ;
   virtual void backupCMode (const char*,const char *) ;
   virtual void backup (ostream &) ;
-
+  virtual void backup (ObjectStream& ) ;
   virtual void backup (const char*,const char *) ;
+
   virtual void restore (istream &) ;
+  virtual void restore (ObjectStream&) ;
   virtual void restore (const char*,const char *) ;
 
   // print memory consumption of grid 
@@ -1923,6 +1986,12 @@ public :
   virtual IndexManagerStorageType& indexManagerStorage() = 0;
 
 protected:
+  template <class ostream_t>
+  void backupImpl( ostream_t& );
+
+  template <class istream_t>
+  void restoreImpl( istream_t& );
+
   // these classes are friend because the must call the method iterator on grid 
   friend class LeafIterator < helement_STI > ;
   friend class LeafIterator < vertex_STI > ;
@@ -2515,14 +2584,6 @@ inline Gitter :: Geometric :: VertexGeo :: ~VertexGeo ()
   return ;
 }
 
-inline const alucoord_t (& Gitter :: Geometric :: VertexGeo :: Point () const) [3] {
-  return _c ;
-}
-
-inline int Gitter :: Geometric :: VertexGeo :: level () const {
-  return _lvl ;
-}
-
 inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertexPair &pv) 
 {
   // copy current coordinates  
@@ -2539,19 +2600,30 @@ inline void Gitter :: Geometric :: VertexGeo :: project(const ProjectVertexPair 
   }
 }
 
-inline void Gitter :: Geometric :: VertexGeo :: backupIndex ( ostream & os ) const {
-  os.write( ((const char *) &_idx ), sizeof(int) ) ;
+inline void Gitter :: Geometric :: VertexGeo :: backupIndex ( ostream& os ) const 
+{
+  // backup index 
+  doBackupIndex( os );
 }
 
-inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is, vector<bool>(&isHole)[4] ) 
+inline void Gitter :: Geometric :: VertexGeo :: backupIndex ( ObjectStream& os ) const 
 {
-  is.read ( ((char *) &_idx), sizeof(int) ); 
+  // backup index 
+  doBackupIndex( os );
+}
 
-  // mark vertex entry as not a hole 
+inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( istream & is, RestoreInfo& restoreInfo ) 
+{
   typedef Gitter :: Geometric :: BuilderIF BuilderIF;
-  // make sure sizes match 
-  assert( _idx < (int) isHole[BuilderIF :: IM_Vertices].size() );
-  isHole[BuilderIF :: IM_Vertices][_idx] = false;
+  // restore index 
+  doRestoreIndex( is, restoreInfo, BuilderIF :: IM_Vertices );
+}
+
+inline void Gitter :: Geometric :: VertexGeo :: restoreIndex ( ObjectStream& is, RestoreInfo& restoreInfo ) 
+{
+  typedef Gitter :: Geometric :: BuilderIF BuilderIF;
+  // restore index 
+  doRestoreIndex( is, restoreInfo, BuilderIF :: IM_Vertices );
 }
 
 // #     #                                    #    ######

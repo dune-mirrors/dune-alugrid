@@ -62,11 +62,18 @@ protected:
 public:
   GitterDuneBasis() : _arp(0), maxlevel_(0) {}
   
-  virtual void backupIndices  (ostream & out);
-  virtual void restoreIndices (istream & in );
+  template <class ostream_t>
+  void backupIndices  (ostream_t & out);
+
+  template <class istream_t>
+  void restoreIndices (istream_t & in );
 
   // write status of grid  
-  virtual void duneBackup  (const char*) ; 
+  virtual void duneBackup (const char*) ; 
+
+  // write status of grid  
+  template <class ostream_t>
+  void duneBackup ( ostream_t& out );
 
   // read status of grid 
   virtual void duneRestore (const char*) ;
@@ -148,8 +155,131 @@ template < class A > class PureElementLeafIterator : public MyAlloc {
 //    #    #    #  ######     #    #    #  ######
 //
 
-template < class A > inline PureElementAccessIterator < A > :: Handle :: 
-Handle (AccessIterator < A > & f) 
+template <class ostream_t> 
+inline void GitterDuneBasis :: backupIndices (ostream_t & out)
+{
+  // get byte order of stream 
+  out.put( RestoreInfo :: systemByteOrder() );
+
+  // backup indices, our index type is hierarchic_index 
+  unsigned char indices = hierarchic_index;
+  out.put( indices );
+
+  enum { numOfIndexManager = Gitter :: Geometric :: BuilderIF ::  numOfIndexManager };
+  // store max indices 
+  for(int i=0; i< numOfIndexManager ; ++i)
+    this->indexManager(i).backupIndexSet(out);
+
+  { // backup index of elements 
+    AccessIterator <helement_STI> :: Handle ew (container ()) ;
+    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backupIndex (out) ;
+  }
+
+  // TODO: backup face and edge indices 
+  
+  {
+    // backup index of vertices 
+    LeafIterator < vertex_STI > w ( *this );
+    for( w->first(); ! w->done() ; w->next () ) w->item().backupIndex(out);
+  }
+
+  return ;
+}
+
+template <class istream_t>
+inline void GitterDuneBasis ::restoreIndices (istream_t & in) 
+{
+  // get byte order of stream 
+  char byteOrder = in.get();  
+
+  unsigned char indices = no_index;
+  indices = in.get();
+
+  // set VERBOSE to 20 and you have the indices value printed 
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: restoreIndices: index flag = " << (int)indices << " file: "
+                       << __FILE__ << " line: " << __LINE__ <<") " << endl, 1) : 1) ;
+
+  typedef Gitter :: Geometric :: BuilderIF  BuilderIF;
+  enum { numOfIndexManager = BuilderIF :: numOfIndexManager };
+  
+  // restore dune indices (see backUpIndices method)
+  if(indices == hierarchic_index) 
+  {
+    // create vector, default all internal types for 
+    // elements to vertices 
+    RestoreInfo restoreInfo( byteOrder );
+    
+    for(int i=0; i< numOfIndexManager ; ++i)
+      this->indexManager(i).restoreIndexSet( in, restoreInfo );
+
+    // will fail if numbering was changed 
+    // and one forgot to apply changes here 
+    assert( BuilderIF ::IM_Vertices+1 == 4 );
+
+    // resize and reset 
+    for(size_t i=0; i<restoreInfo.size(); ++i)
+    {
+      restoreInfo( i ).resize( this->indexManager(i).getMaxIndex(), true );
+    }
+
+    // restore index of elements 
+    // mark all visited items as not a hole 
+    {
+      AccessIterator < helement_STI >:: Handle ew(container());
+      for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
+    }
+    // restore index of vertices
+    // mark all visited items as not a hole 
+    {
+      LeafIterator < vertex_STI > w ( *this );
+      for( w->first(); ! w->done() ; w->next () ) w->item().restoreIndex(in, restoreInfo );
+    }
+    
+    // reconstruct holes 
+    {
+      IndexManagerType& elementManager = this->indexManager(BuilderIF :: IM_Elements);
+      elementManager.generateHoles( restoreInfo( BuilderIF :: IM_Elements ) );
+    }
+    
+    // TODO indices for faces and edges 
+    
+    {
+      IndexManagerType& vertexManager = this->indexManager(BuilderIF :: IM_Vertices);
+      vertexManager.generateHoles( restoreInfo( BuilderIF ::IM_Vertices ) );
+    }
+    return ;
+  }
+
+  if(indices == leaf_index) // convert indices to leafindices 
+  {
+    int idx = 0;
+    PureElementLeafIterator < helement_STI > ew(*this);
+    for ( ew->first(); !ew->done(); ew->next()) 
+    {
+      ew->item().setIndex( idx );
+      ++idx;
+    }
+    this->indexManager(0).setMaxIndex ( idx );
+    assert (debugOption (20) ? (cout << endl << "**INFO GitterDuneBasis :: restoreIndices: create new leaf indices with size = " << idx << " ! file: "<< __FILE__ << ", line: " << __LINE__ << endl, 1) : 1) ;
+    return ;
+  }
+
+  cerr<< "**WARNING: GitterDuneBasis :: restoreIndices: indices (id = " << indices << ") not read! file: "<< __FILE__ << ", line: " << __LINE__ << "\n";
+  return ;
+}
+
+// wird von Dune verwendet 
+template <class ostream_t>
+inline void GitterDuneBasis :: duneBackup ( ostream_t& out )
+{
+  //container ().backupCMode (macro) ;
+  Gitter :: backup ( out ) ;
+  backupIndices ( out ) ;
+  return ;
+}
+
+template < class A > inline PureElementAccessIterator < A > :: 
+Handle :: Handle (AccessIterator < A > & f) 
  : AccessIterator < A > :: Handle () 
 {
   this->removeObj();

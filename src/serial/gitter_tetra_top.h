@@ -523,7 +523,6 @@ template < class A > class TetraTop : public A
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;
-    void backupCMode (ostream &) const ;
     
     void backup (ostream &) const ;
     void restore (istream &) ;
@@ -533,7 +532,11 @@ template < class A > class TetraTop : public A
     
     // backup and restore index 
     void backupIndex (ostream &) const ;
-    void restoreIndex (istream &, vector<bool>(&)[4] ) ;
+    void restoreIndex (istream &, RestoreInfo& restoreInfo ) ;
+
+    // backup and restore index 
+    void backupIndex ( ObjectStream& ) const ;
+    void restoreIndex (ObjectStream&, RestoreInfo& restoreInfo ) ;
   protected:  
     // non-virtual methods of down and innerVertex 
     innertetra_t* dwnPtr() ;
@@ -548,6 +551,9 @@ template < class A > class TetraTop : public A
     
     template <class InStream_t> 
     void doRestore(InStream_t &);
+
+    template <class istream_t>
+    void restoreIndexImpl (istream_t &, RestoreInfo& restoreInfo ) ;
 };
 
 template < class A > class Periodic3Top : public A {
@@ -628,7 +634,6 @@ template < class A > class Periodic3Top : public A {
     bool coarse () ;
     bool bndNotifyCoarsen () ;
   public:
-    void backupCMode (ostream &) const ;
     void backup (ostream &) const ;
     void restore (istream &) ;
     

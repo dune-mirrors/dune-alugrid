@@ -351,15 +351,18 @@ void Gitter :: backupCMode (ostream & out) {
     Insert < AccessIterator < helement_STI > :: Handle, 
         TreeIterator < helement_STI, any_has_level < helement_STI > > > w (container (),i ++) ;
     if (! w.size()) break ;
-    for(w.first() ; ! w.done() ; w.next()) w.item ().backupCMode (out) ;
+    for(w.first() ; ! w.done() ; w.next()) w.item ().backup(out) ;
     out << endl ;
   }
   return ;
 }
 
-void Gitter :: backup (ostream & out) 
+template <class ostream_t>
+void Gitter :: backupImpl (ostream_t & out) 
 {
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: backup (ostream & = " << out << ") " << endl, 1) : 1) ;
+  // backup the macro grid first 
+  // container().backup( out );
+
   {
     AccessIterator <hedge_STI> :: Handle fw (container ()) ;
     for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out) ; 
@@ -375,8 +378,25 @@ void Gitter :: backup (ostream & out)
   return ;
 }
 
-void Gitter ::restore (istream & in) {
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
+// backup taking std::ostream 
+void Gitter :: backup (ostream & out) 
+{
+  assert (debugOption (20) ? (cout << "**INFO Gitter :: backup (ostream & = " << out << ") " << endl, 1) : 1) ;
+  backupImpl( out );
+}
+
+// backup taking ObjectStream 
+void Gitter :: backup (ObjectStream& out) 
+{
+  backupImpl( out );
+}
+
+template <class istream_t>
+void Gitter ::restoreImpl (istream_t & in) 
+{
+  // restore the macro grid first 
+  // container().restore( in );
+
   {
     AccessIterator < hedge_STI > :: Handle ew (container ());
     for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ; 
@@ -395,7 +415,19 @@ void Gitter ::restore (istream & in) {
     for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; 
   }
   notifyGridChanges () ;
-  return ;
+}
+
+// restore taking std::istream 
+void Gitter :: restore (istream & in) 
+{
+  assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (istream & = " << in << ") " << endl, 1) : 1) ;  
+  restoreImpl ( in );
+}
+
+// restore taking ObjectStream 
+void Gitter :: restore (ObjectStream& in) 
+{
+  restoreImpl ( in );
 }
 
 void Gitter :: backup (const char * filePath, const char * fileName) {

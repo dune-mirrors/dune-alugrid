@@ -2151,40 +2151,22 @@ template < class A >  bool TetraTop < A > :: coarse ()
   return false ;
 }
 
-template < class A > void TetraTop < A > :: backupCMode (ostream & os) const {
-
-  // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
-  // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
-  // noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
-  // zu k"onnen.
-
-  os << getrule () << " " ;
-  return ;
-}
-
-// buckupTetra 
+// buckupIndex of tetra  
 template < class A > void TetraTop < A > :: backupIndex (ostream & os) const 
 {
-  // write my index 
-  os.write( ((const char *) & this->_idx ), sizeof(int) ) ;
+  this->doBackupIndex( os );
 
-  /*
-  // write interior indices 
+  // write children 
   {
-    const vertex_STI * vx = this->innerVertex(); 
-    if( vx ) vx->backupIndex( os );
-
-    for(const hedge_STI * e = this->innerHedge () ; e ; e = e->next ())
-    {
-      e->backupIndex( os ); 
-    }
-
-    for(const hface_STI * f = this->innerHface () ; f ; f = f->next ())
-    {
-      f->backupIndex( os ); 
-    }
+    for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ; 
   }
-  */
+  return;
+}
+
+// buckupIndex of tetra  
+template < class A > void TetraTop < A > :: backupIndex (ObjectStream& os) const 
+{
+  this->doBackupIndex( os );
 
   // write children 
   {
@@ -2215,45 +2197,38 @@ void TetraTop < A > :: doBackup (OutStream_t & os) const
 }
 
 // overloaded restoreIndex Method 
-template < class A > void TetraTop < A > :: 
-restoreIndex (istream & is, vector<bool> (& isHole) [4] ) 
+template < class A > 
+template < class istream_t>
+void TetraTop < A > :: 
+restoreIndexImpl (istream_t & is, RestoreInfo& restoreInfo ) 
 {
-  // free index from constructor
-  is.read ( ((char *) &(this->_idx) ), sizeof(int) );
-
   // mark this element a non hole 
   typedef typename Gitter :: Geometric :: BuilderIF BuilderIF; 
 
-  // make sure sizes match 
-  assert( this->getIndex() < (int) isHole[BuilderIF::IM_Elements].size() );
-  // set entry to false, because this is not a hole  
-  isHole[BuilderIF :: IM_Elements][this->getIndex()] = false;
+  // restore index 
+  this->doRestoreIndex( is, restoreInfo, BuilderIF :: IM_Elements );
 
   // TODO 
   // restore other indices 
   
-  /*
-  // write interior indices 
   {
-    const vertex_STI * vx = this->innerVertex(); 
-    if( vx ) vx->restoreIndex( is );
-
-    for(const hedge_STI * e = this->innerHedge () ; e ; e = e->next ())
-    {
-      e->restoreIndex( is ); 
-    }
-
-    for(const hface_STI * f = this->innerHface () ; f ; f = f->next ())
-    {
-      f->restoreIndex( is ); 
-    }
-  }
-  */
-
-  {
-    for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, isHole ) ; 
+    for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, restoreInfo ) ; 
   }
   return;
+}
+
+// overloaded restoreIndex Method 
+template < class A > void TetraTop < A > :: 
+restoreIndex (istream & is, RestoreInfo& restoreInfo ) 
+{
+  restoreIndexImpl( is, restoreInfo );
+}
+
+// overloaded restoreIndex Method 
+template < class A > void TetraTop < A > :: 
+restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) 
+{
+  restoreIndexImpl( is, restoreInfo );
 }
 
 // restoreTetra
@@ -2565,17 +2540,6 @@ template < class A > bool Periodic3Top < A > :: bndNotifyCoarsen () {
     myhface3 (1)->coarse () ;
   }
   return x ;
-}
-
-template < class A > void Periodic3Top < A > :: backupCMode (ostream & os) const {
-
-  // Das backup im alten Stil, d.h. levelweise die Verfeinerungsregeln
-  // vom Gitter runterschreiben. Diese Technik wird nur f"ur das backup
-  // noch unterst"utzt, um die Daten mit "alteren Konstruktionen visual.
-  // zu k"onnen.
-  
-  os << getrule () << " " ;
-  return ;
 }
 
 template < class A > void Periodic3Top < A > :: backup (ostream & os) const 

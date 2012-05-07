@@ -660,10 +660,12 @@ template <int N,int NV>
 void
 Hmesh<N,NV>::recoverIndicies(istream& in) 
 {
+  RestoreInfo restoreInfo ( RestoreInfo :: systemByteOrder () );
+
   // reads maxIndex of Index Manager 
   for (int i=0;i<numOfIndexManager2d; ++i) 
   {
-    indexmanager[i].restoreIndexSet(in);
+    indexmanager[i].restoreIndexSet(in, restoreInfo);
   }
   
   //////////////////////////////////////////

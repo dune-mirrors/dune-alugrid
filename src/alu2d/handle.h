@@ -8,6 +8,9 @@
 // is defined in indexstack.h 
 typedef ALUGridSpace::IndexManagerType IndexManager2dType;
 
+// is defined in indexstack.h 
+typedef ALUGridSpace::RestoreInfo  RestoreInfo;
+
 // number of different index manager that exists
 enum { numOfIndexManager2d = 4 };
 // see specific codes in class Hmesh below 
