@@ -945,6 +945,17 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
 
 void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in) 
 {
+  macrogridBuilderImpl( in );
+}
+
+void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (ObjectStream & in) 
+{
+  macrogridBuilderImpl( in );
+}
+
+template <class istream_t> 
+void Gitter :: Geometric :: BuilderIF :: macrogridBuilderImpl (istream_t & in) 
+{
   strstream_t raw ;
   
   // set scientific mode and high precision 
@@ -952,36 +963,49 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in)
   raw.precision( 16 );
 
   MacroGridBuilder mm (*this) ;
-  int c = in.get () ;
+  char c = in.get () ;
   assert (!in.eof ()) ;
-  in.putback (c) ;
   assert (in.good ()) ;
-  if (c == int ('!')) 
+  if (c == char('!')) 
   {
     // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
     // und auf 'Tetraeder' oder 'Hexaeder' untersuchen.
 
-    strstreambuf_t buf ;
-    in.get () ;   // Das Kommentarzeichen wird entfernt.
-    in.get (buf) ;
-    int len = in.gcount () ;
-    in.get () ;   // Der folgende Zeilenumbruchwird auch entfernt.
-    istream is (& buf) ;
-    char * str = new char [len + 1] ;
-    assert (str) ;
-    is >> str ;   // Das erste Wort nach dem Kommentar steht jetzt in str.
-          // Alle weiteren k"onnen noch aus is gelesen werden, das
-      // array str ist so lang, wie die gesamte Zeile in 'buf'.
+    // get next character 
+    c = in.get();
+    // read key word 
+    strstream_t tmpstr; 
+    while( c != char(' ') )
+    {
+      tmpstr << c ;
+      c = in.get () ;  
+    }
 
-    if ((0 == strcmp (str, "Tetraeder")) ||
-        (0 == strcmp (str, "Tetrahedra")))
+    // remove last of the comment line 
+    // this should be done with a terminating character 
+    while ( c != char(')') ) 
+    {
+      c = in.get();
+    }
+
+    // copy to string 
+    std::string str ( tmpstr.str() ); 
+
+    //std::cout << str << " comment found " << endl;
+
+    // Das erste Wort nach dem Kommentar steht jetzt in str.
+    // Alle weiteren k"onnen noch aus is gelesen werden, das
+    // array str ist so lang, wie die gesamte Zeile in 'buf'.
+
+    if ((0 == strcmp (str.c_str(), "Tetraeder")) ||
+        (0 == strcmp (str.c_str(), "Tetrahedra")))
     {
       // Versuchen wir's mal mit Tetraedern
       MacroGridBuilder :: generateRawTetraImage (in,raw) ;
     } 
     else if 
-      ((0 == strcmp (str, "Hexaeder")) || 
-       (0 == strcmp (str, "Hexahedra")))
+      ((0 == strcmp (str.c_str(), "Hexaeder")) || 
+       (0 == strcmp (str.c_str(), "Hexahedra")))
     {
       // oder andernfalls mit Hexaedern.
       MacroGridBuilder :: generateRawHexaImage (in,raw) ;
@@ -990,10 +1014,8 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in)
     {
       cerr << "**WARNING (IGNORED) Unknown comment to file format: " << str ;
       cerr << " In : " << __FILE__ << " " << __LINE__ << endl ;
-      delete [] str ;
       return ;
     }
-    delete [] str ;
   } 
   else 
   {

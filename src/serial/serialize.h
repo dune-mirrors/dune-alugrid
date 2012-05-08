@@ -422,6 +422,13 @@ inline ObjectStream& operator << ( ObjectStream& os, const T& value )
 }
 
 // streaming operators for ObjectStream 
+inline ObjectStream& operator << ( ObjectStream& os, const string& s ) 
+{
+  os.write( s.c_str(), s.size() ); 
+  return os;
+}
+
+// streaming operators for ObjectStream 
 template <class T>
 inline ObjectStream& operator >> ( ObjectStream& os, T& value )
 {

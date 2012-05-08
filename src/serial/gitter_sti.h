@@ -1134,23 +1134,22 @@ public :
       inline void backupIndex  (ObjectStream & os ) const;
       inline void restoreIndex (ObjectStream & is, RestoreInfo& );
 
+      /*
       // backup does nothing 
       inline void backup (ostream & os ) const 
       {
-        /*
-        abort();
         os << _c[ 0 ] << " " << _c[ 1 ] << " " << _c[ 2 ] << std::endl;
-        */
       }
+      */
 
+      /*
       inline void restore (istream & is ) 
       {
-        /*
         is >> _c[ 0 ];
         is >> _c[ 1 ];
         is >> _c[ 2 ];
-        */
       }
+      */
 
       int nChild () const { return 0 ; }
 
@@ -1829,6 +1828,11 @@ public :
       void generateRawHexaImage (istream &, ostream &) ;
       
       virtual void macrogridBuilder (istream &) ;
+      virtual void macrogridBuilder (ObjectStream &) ;
+
+      template <class istream_t> 
+      void macrogridBuilderImpl( istream_t& ) ;
+
       virtual VertexGeo     * insert_vertex (double, double, double, int) = 0 ;
       virtual VertexGeo     * insert_ghostvx(double, double, double, int) = 0 ;
       virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0 ;

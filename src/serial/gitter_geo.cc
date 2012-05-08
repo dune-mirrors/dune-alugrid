@@ -722,16 +722,18 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
   // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
   // Hexaedernetz vorliegt. Gemischte Netze sind bez"uglich ihres
   // Dateiformats noch nicht spezifiziert.
-  const size_t tetraListSize = _tetraList.size ();
-  const size_t hexaListSize  = _hexaList.size (); 
+  const size_t vertexListSize = _vertexList.size ();
+  const size_t tetraListSize  = _tetraList.size ();
+  const size_t hexaListSize   = _hexaList.size (); 
   
+  //   ( noVertices = 3375 | noElements = 2744 )
   if ( tetraListSize == 0) 
   {
-    os << "!Hexahedra   |   Elements = " << hexaListSize << endl ;
+    os << "!Hexahedra  ( noVertices = " << vertexListSize << " | noElements = " << hexaListSize << " )" << endl;
   } 
   else if ( hexaListSize == 0 && tetraListSize != 0) 
   {
-    os << "!Tetrahedra  |   Elements = " << tetraListSize << endl ;
+    os << "!Tetrahedra ( noVertices = " << vertexListSize << " | noElements = " << tetraListSize << " )" << endl ;
   } 
   else {
     cerr << "**WARNUNG (IGNORIERT) Gitter :: Geometric :: BuilderIF :: backupCMode (ostream &)" ;
@@ -741,7 +743,7 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
   
   // In jedem Fall die Vertexkoordinaten rausschreiben.
   
-  os << _vertexList.size () << endl ;
+  os << vertexListSize << endl ;
   {
     size_t index (0) ;
     for (vertexlist_t :: const_iterator i = _vertexList.begin () ; i != _vertexList.end () ; ++i) 
@@ -803,7 +805,7 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
   }
   {
     // Die Vertexidentifierliste hinten anh"angen, damit ein verteiltes
-  // Grobgitter wieder zusammengefunden wird.
+    // Grobgitter wieder zusammengefunden wird.
   
     for (vertexlist_t :: const_iterator i = _vertexList.begin () ; i != _vertexList.end () ; ++i)
       os << (*i)->ident () << " " << -1 << endl ;
