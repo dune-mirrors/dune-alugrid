@@ -707,6 +707,10 @@ IteratorSTI < Gitter :: hperiodic_STI > * Gitter :: Geometric :: BuilderIF :: it
   return new Iterator( (*(const Iterator *) w ) );
 }
 
+void Gitter :: Geometric :: BuilderIF :: backupCMode (ObjectStream & os) const {
+
+}
+
 void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
 
   // Das Compatibility Mode Backup sichert das Makrogitter genau
@@ -726,14 +730,13 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
   const size_t tetraListSize  = _tetraList.size ();
   const size_t hexaListSize   = _hexaList.size (); 
   
-  //   ( noVertices = 3375 | noElements = 2744 )
   if ( tetraListSize == 0) 
   {
     os << "!Hexahedra  ( noVertices = " << vertexListSize << " | noElements = " << hexaListSize << " )" << endl;
   } 
   else if ( hexaListSize == 0 && tetraListSize != 0) 
   {
-    os << "!Tetrahedra ( noVertices = " << vertexListSize << " | noElements = " << tetraListSize << " )" << endl ;
+    os << "!Tetrahedra  ( noVertices = " << vertexListSize << " | noElements = " << tetraListSize << " )" << endl ;
   } 
   else {
     cerr << "**WARNUNG (IGNORIERT) Gitter :: Geometric :: BuilderIF :: backupCMode (ostream &)" ;

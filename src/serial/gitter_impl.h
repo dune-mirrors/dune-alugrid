@@ -300,20 +300,24 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
       public :
         // Gitter is a reference to our grid 
+        // constructors creating macro grids from streams 
+        MacroGitterBasis (Gitter * , ObjectStream &) ;
         MacroGitterBasis (Gitter * , istream &) ;
+
+        // constructor creating an empty macro grid 
         MacroGitterBasis (Gitter * ) ;
         
         virtual ~MacroGitterBasis () {}
     } ;
 } ;
 
-class GitterBasisImpl : public GitterBasis {
-  MacroGitterBasis * _macrogitter ;
-  ProjectVertex*     _ppv;
+class GitterBasisImpl : public GitterBasis 
+{
+    MacroGitterBasis*  _macrogitter ;
+    ProjectVertex*     _ppv;
   public:
-   //us fuer Globalmethode levelwalk
-  inline Makrogitter & container () ;
-  inline const Makrogitter & container () const ;
+    inline Makrogitter & container () ;
+    inline const Makrogitter & container () const ;
   public :
     inline IndexManagerType & indexManager(int codim);
     inline IndexManagerStorageType& indexManagerStorage();
@@ -321,6 +325,7 @@ class GitterBasisImpl : public GitterBasis {
     inline size_t numMacroBndSegments() const;
         
     GitterBasisImpl () ;
+    GitterBasisImpl (ObjectStream&, ProjectVertex* ) ;
     GitterBasisImpl (istream &, ProjectVertex* ) ;
     GitterBasisImpl (const char *, ProjectVertex* ) ;
     ~GitterBasisImpl () ;

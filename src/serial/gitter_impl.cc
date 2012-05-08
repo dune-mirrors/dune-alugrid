@@ -405,6 +405,15 @@ GitterBasisImpl :: GitterBasisImpl () : _macrogitter (0) , _ppv(0)
   return ;
 }
 
+GitterBasisImpl :: GitterBasisImpl (ObjectStream& in, ProjectVertex* ppv) 
+  : _macrogitter (0) , _ppv( ppv ) 
+{
+  _macrogitter = new MacroGitterBasis ( this , in) ;
+  assert (_macrogitter) ;
+  notifyMacroGridChanges () ;
+  return ;
+}
+
 GitterBasisImpl :: GitterBasisImpl (istream & in, ProjectVertex* ppv) 
   : _macrogitter (0) , _ppv( ppv ) 
 {
@@ -423,7 +432,8 @@ GitterBasisImpl :: GitterBasisImpl (const char * file,
     cerr << "  GitterBasisImpl :: GitterBasisImpl (const char *) FEHLER (IGNORIERT) " ;
     cerr << "beim \"Offnen der Datei " << (file ? file : "\"null\"" ) << endl ;
     _macrogitter = new MacroGitterBasis ( this ) ;
-  } else {
+  } 
+  else {
     _macrogitter = new MacroGitterBasis ( this, in) ;
   }
   assert (_macrogitter) ;
@@ -433,6 +443,13 @@ GitterBasisImpl :: GitterBasisImpl (const char * file,
 
 GitterBasisImpl :: ~GitterBasisImpl () {
   delete _macrogitter ;
+  return ;
+}
+
+GitterBasis :: MacroGitterBasis :: MacroGitterBasis (Gitter * mygrid, ObjectStream & in) 
+{
+  this->indexManagerStorage().setGrid( mygrid );
+  macrogridBuilder (in) ;
   return ;
 }
 

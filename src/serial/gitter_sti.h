@@ -887,6 +887,8 @@ public :
     virtual void backup (ostream &) const = 0 ;
     virtual void backup (ObjectStream&) const = 0 ;
     virtual void backup (const char*,const char *) const = 0 ;
+
+    virtual void backupCMode (ObjectStream &) const = 0 ;
     virtual void backupCMode (ostream &) const = 0 ;
     virtual void backupCMode (const char *,const char *) const = 0 ;
   
@@ -1902,6 +1904,7 @@ public :
       virtual void backup (ostream &) const ;
       virtual void backup (ObjectStream&) const {};
       virtual void backup (const char*,const char *) const ;
+      virtual void backupCMode (ObjectStream &) const ;
       virtual void backupCMode (ostream &) const ;
       virtual void backupCMode (const char*,const char *) const ;
       friend class MacroGridBuilder ;
