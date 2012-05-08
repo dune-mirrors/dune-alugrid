@@ -883,6 +883,7 @@ public :
     virtual inline const MacroGitterPll & containerPll () const ;
 
     GitterBasisPll (const string, MpAccessLocal &, ProjectVertex* ) ;
+    GitterBasisPll (istream& in, MpAccessLocal &, ProjectVertex* ) ;
 
     virtual ~GitterBasisPll () ;
 

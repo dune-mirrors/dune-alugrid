@@ -2117,6 +2117,21 @@ GitterBasisPll :: GitterBasisPll (const string filename,
   return ;
 }
 
+GitterBasisPll :: GitterBasisPll (istream& in, 
+                                  MpAccessLocal & mpa, 
+                                  ProjectVertex* ppv ) 
+  : GitterPll(mpa.myrank() == 0) , _mpaccess (mpa), 
+    _macrogitter( 0 ),
+    _ppv( ppv ) 
+{
+  assert (debugOption (20) ? (cout << "GitterBasisPll :: GitterBasisPll ( istream& = \"" << in << "\" ...)" << endl, 1) : 1) ;
+
+  _macrogitter = new MacroGitterBasisPll (this, in);
+  assert( _macrogitter );
+  notifyMacroGridChanges () ;
+  return ;
+}
+
 GitterBasisPll :: ~GitterBasisPll () {
   delete _macrogitter ;
   return ;
