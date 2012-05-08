@@ -328,6 +328,7 @@ public:
   ////////////////////////////////////
   // put char 
   inline void put (const char a)  { this->write(a); }
+
   // get char 
   inline char get () 
   { 
@@ -335,8 +336,12 @@ public:
     this->read(a);  
     return a;
   }
+
   // eof function 
   bool eof () const { return (this->_rb > this->_wb); }
+
+  // good function 
+  bool good () const { return (this->_rb <= this->_wb); }
   /////////////////////////////////////
 
   // return true if object stream was not set yet 

@@ -414,8 +414,31 @@ void MacroGridBuilder :: cubeHexaGrid (int n, ostream & out) {
   return ;
 }
 
-void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
+void MacroGridBuilder :: generateRawHexaImage (istream& in, ostream & os) 
+{
+  generateRawImage( in, os, HEXA_RAW, PERIODIC4_RAW );
+}
 
+void MacroGridBuilder :: generateRawHexaImage (ObjectStream& in, ostream & os) 
+{
+  generateRawImage( in, os, HEXA_RAW, PERIODIC4_RAW );
+}
+
+void MacroGridBuilder :: generateRawTetraImage (istream& in, ostream & os) 
+{
+  generateRawImage( in, os, TETRA_RAW, PERIODIC3_RAW );
+}
+
+void MacroGridBuilder :: generateRawTetraImage (ObjectStream& in, ostream & os) 
+{
+  generateRawImage( in, os, TETRA_RAW, PERIODIC3_RAW );
+}
+
+template <class istream_t>
+void MacroGridBuilder :: 
+generateRawImage (istream_t & in, ostream & os, 
+                  const ElementRawID elementId, const ElementRawID periodicId) 
+{
   // generateRawHexaImage () ist im nur ein Adapter, der aus den 
   // bisherigen Hexaederdateiformaten ein entsprechendes 'rohes'
   // Dateiformat f"ur den Macrogridinflator erzeugt. Damit bleibt
@@ -442,18 +465,30 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
   int nv = 0, ne = 0, nb = 0, nper = 0 ;
   int (* vnum)[8] = 0, (* bvec)[5] = 0, (* pervec)[9] = 0, * pident = 0 ;
   double (* coord)[3] = 0 ;
+
+  const int elementVertices = elementId ;
+  const int faceVertices = (elementId == TETRA_RAW) ? 3 : 4;
+  const int periodicVertices = (elementId == TETRA_RAW) ? 6 : 8;
+  assert( faceVertices == 4 ? elementId == HEXA_RAW : true );
+  assert( periodicVertices == 8 ? elementId == HEXA_RAW : true );
   {
     in >> nv ;
     coord = new double [nv][3] ;
     assert (coord) ;
-    for (int i = 0 ; i < nv ; i ++) in >> coord [i][0] >> coord [i][1] >> coord [i][2] ;
+    for (int i = 0 ; i < nv ; ++i) in >> coord [i][0] >> coord [i][1] >> coord [i][2] ;
   }
+
   {
     in >> ne ;
     vnum = new int [ne][8] ;
     assert (vnum) ;
-    for (int i = 0 ; i < ne ; i ++ )
-      in >> vnum [i][0] >> vnum [i][1] >> vnum [i][2] >> vnum [i][3] >> vnum [i][4] >> vnum [i][5] >> vnum [i][6] >> vnum [i][7] ;
+    for (int i = 0 ; i < ne ; ++i)
+    {
+      for( int vx = 0; vx < elementVertices; ++ vx ) 
+      {
+        in >> vnum [i][vx] ;
+      }
+    }
   }
   
   {
@@ -463,27 +498,34 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
     pervec = new int [temp_nb][9] ;
     assert (bvec);
     assert (pervec);
-    for (int i = 0 ; i < temp_nb ; i ++) 
+
+    for (int i = 0 ; i < temp_nb ; ++i) 
     {
       int n ;
       int identification ;
       in >> identification >> n;
-      if (n == 4) 
+      // hexa or tetra element boundary
+      if ( n == faceVertices ) 
       {
-        in >> bvec [nb][0] >> bvec [nb][1] >> bvec [nb][2] >> bvec [nb][3] ;
-        bvec [nb][4] = identification ;
+        for( int vx=0; vx<n; ++ vx) 
+        {
+          in >> bvec [nb][vx];
+        }
+        // use last component for storage of identification 
+        bvec [nb][n] = identification ;
         nb++; 
       } 
-      else if (n == 8) 
+      // periodic boundary 
+      else if ( n == periodicVertices ) 
       {
-        //if( std::abs(identification) != Gitter :: hbndseg_STI :: periodic ) 
-        //  cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
-
-        in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >> pervec [nper][3]
-           >> pervec [nper][4] >> pervec [nper][5] >> pervec [nper][6] >> pervec [nper][7] ;
+        for( int vx=0; vx<n; ++ vx) 
+        {
+          in >> pervec [nper][vx];
+        }
 
         // keep boundary information 
-        pervec [nper][8] = identification ;
+        // use last component for storage of identification 
+        pervec [nper][n] = identification ;
         nper++;
       }
       else {
@@ -504,38 +546,55 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
     for (int i = 0 ; i < nv ; i ++ ) in >> pident [i] >> dummy ; 
   }
   if (!in.good()) {
-    cerr << "**WARNUNG (IGNORIERT) MacroGridBuilder :: generateRawHexaImage () " ;
+    cerr << "**WARNUNG (IGNORIERT) MacroGridBuilder :: generateRawImage () " ;
     cerr << "Identifierliste unvollst\"andig oder nicht vorhanden. Daher keine parallele " ;
     cerr << "Identifikation falls aus mehreren Gittern geladen wurde." << endl ;
     for (int i = 0 ; i < nv ; i ++ ) pident [i] = i ;
   }
+
+  // write vertices 
+  os << nv << endl ;
+  for (int i = 0 ; i < nv ; ++i )
+    os << pident [i] << " " << coord [i][0] << " " << coord [i][1] << " " << coord [i][2] << endl ;
+
+  // write elements 
+  os << (ne + nper) << endl ;
+  for (int i = 0 ; i < ne ; ++i)
   {
-    os << nv << endl ;
-    for (int i = 0 ; i < nv ; i ++ )
-      os << pident [i] << " " << coord [i][0] << " " << coord [i][1] << " " << coord [i][2] << endl ;
-  }
-  {
-    os << (ne + nper) << endl ;
-    for (int i = 0 ; i < ne ; i ++)
-      os << HEXA_RAW << " " << pident [vnum [i][0]] << " " << pident [vnum [i][1]] << " "
-         << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << " " << pident [vnum [i][4]] << " " 
-         << pident [vnum [i][5]] << " " << pident [vnum [i][6]] << " " << pident [vnum [i][7]] << endl ;
-  }
-  {
-    for (int i = 0 ; i < nper ; i ++)
+    os << elementId << " ";
+    for( int vx = 0; vx < elementVertices; ++ vx ) 
     {
-      os << PERIODIC4_RAW << " " << pident [pervec [i][0]] << " " << pident [pervec [i][1]] << " "
-         << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
-         << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << " " 
-         << pident [pervec [i][6]] << " " << pident [pervec [i][7]] << " " << pervec [i][8] << endl ;
+      os << pident[ vnum [i][vx] ] << " ";
     }
+    os << endl;
   }
+
+  // write periodic elements 
+  for (int i = 0 ; i < nper ; ++i)
   {
-    os << nb << endl ;
-    for (int i = 0 ; i < nb ; i ++)
-      os << 4 << " " << pident [bvec [i][0]] << " " << pident [bvec [i][1]] << " "
-         << pident [bvec [i][2]] << " " << pident [bvec [i][3]] << " " << bvec [i][4] << endl ;
+    os << periodicId << " ";
+    for( int vx = 0; vx < periodicVertices; ++vx ) 
+    {
+      os << pident[ pervec[i][vx] ] << " ";
+    }
+    // write the identification 
+    os << pervec [i][ periodicVertices ] << endl;
   }
+
+  // write boundaries 
+  os << nb << endl ;
+  for (int i = 0 ; i < nb ; ++i)
+  {
+    os << faceVertices << " ";
+    for( int vx = 0; vx < faceVertices; ++vx ) 
+    {
+      os << pident[ bvec[i][vx] ] << " ";
+    }
+    // write the identification 
+    os << bvec[i][ faceVertices ] << endl;
+  }
+
+  // delete temporary memory 
   delete [] vnum ;
   delete [] coord ;
   delete [] pervec ;
@@ -544,106 +603,6 @@ void MacroGridBuilder :: generateRawHexaImage (istream & in, ostream & os) {
   if (debugOption (4))
     cout << "**INFO MacroGridBuilder :: generateRawHexaImage () used: " 
          << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec." << endl ;
-  return ;
-}
-
-void MacroGridBuilder :: generateRawTetraImage (istream & in, ostream & os) {
-  const int start = clock () ;
-  int nv = 0, ne = 0, nb = 0, nper = 0;
-  int (* vnum)[4] = 0, (* bvec)[4] = 0, (* pervec)[7] = 0 ,
-      * pident = 0 ;
-  double (* coord)[3] = 0 ;
-  {
-    in >> nv ;
-    coord = new double [nv][3] ;
-    assert (coord) ;
-    for (int i = 0 ; i < nv ; i ++) in >> coord [i][0] >> coord [i][1] >> coord [i][2] ;
-  }
-  {
-    in >> ne ;
-    vnum = new int [ne][4] ;
-    assert (vnum) ;
-    for (int i = 0 ; i < ne ; i ++ )
-      in >> vnum [i][0] >> vnum [i][1] >> vnum [i][2] >> vnum [i][3] ;
-  }
-  {
-    int temp_nb;
-    in >> temp_nb ;
-    bvec = new int [temp_nb][4] ;
-    pervec = new int [temp_nb][7] ;
-    assert (bvec);
-    assert (pervec);
-    for (int i = 0 ; i < temp_nb ; i ++) 
-    {
-      int n ;
-      int identification ;
-      in >> identification >> n;
-      if (n==3) {
-        in >> bvec [nb][0] >> bvec [nb][1] >> bvec [nb][2] ;
-        bvec [nb][3] = identification ;
-        nb++; 
-      } 
-      else if (n == 6) 
-      {
-        //if( std::abs(identification) != Gitter :: hbndseg_STI :: periodic ) 
-        //  cerr << "WARNING: ignoring boundary id " << identification << " for periodic boundaries!" << endl;
-
-        in >> pervec [nper][0] >> pervec [nper][1] >> pervec [nper][2] >>
-              pervec [nper][3] >> pervec [nper][4] >> pervec [nper][5];
-
-        pervec [nper][6] = identification ;
-        nper++;
-      }
-      else 
-        abort();
-    }
-  }
-  if (! in.good ()) {
-    cerr << "**FEHLER (FATAL): Dateiende zu fr\"uh erreicht (inkonsistente Datei). " 
-         << __FILE__ << " " << __LINE__ << " ... Exiting." << endl ;
-    exit (1) ;
-  }
-  pident = new int [nv] ;
-  assert(pident);
-  {
-    int dummy ;
-    for (int i = 0 ; i < nv ; i ++ ) in >> pident [i] >> dummy ; 
-  }
-  if (!in.good()) {
-    cerr << "**WARNING (ignored) MacroGridBuilder :: generateRawTetraImage () -- " ;
-    cerr << "identifier list incomplete or not available. Therefore no parallel " ;
-    cerr << "identification possible if macro grid restored from more than one Grid." << endl ;
-    for (int i = 0 ; i < nv ; i ++ ) pident [i] = i ;
-  }
-  {
-    os << nv << endl ;
-    for (int i = 0 ; i < nv ; i ++ )
-      os << pident [i] << " " << coord [i][0] << " " << coord [i][1] << " " << coord [i][2] << endl ;
-  }
-  {
-    int i;
-    os << ne+nper << endl ;
-    for (i = 0 ; i < ne ; i ++)
-      os << TETRA_RAW << " " << pident [vnum [i][0]] << " " << pident [vnum [i][1]] << " "
-         << pident [vnum [i][2]] << " " << pident [vnum [i][3]] << endl ;
-    for (i = 0 ; i < nper ; i ++)
-      os << PERIODIC3_RAW << " " << pident [pervec [i][0]] << " " << pident [pervec [i][1]] << " "
-         << pident [pervec [i][2]] << " " << pident [pervec [i][3]] << " "
-         << pident [pervec [i][4]] << " " << pident [pervec [i][5]] << " " << pervec [i][6] << endl ;
-  }
-  {
-    os << nb << endl ;
-    for (int i = 0 ; i < nb ; i ++)
-      os << 3 << " " << pident [bvec [i][0]] << " " << pident [bvec [i][1]] << " "
-         << pident [bvec [i][2]] << " " << " " << bvec [i][3] << endl ;
-  }
-  delete [] vnum ;
-  delete [] coord ;
-  delete [] bvec ;
-  delete [] pervec ;
-  delete [] pident ;
-  if (debugOption (4))
-    cout << "**INFO MacroGridBuilder :: generateRawTetraImage () used: " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec." << endl ;
   return ;
 }
 

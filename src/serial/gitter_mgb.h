@@ -148,8 +148,13 @@ class MacroGridBuilder : protected Gitter :: Geometric {
 
   public :
     static bool debugOption (int) ;
+
     static void generateRawHexaImage (istream &, ostream &) ;
+    static void generateRawHexaImage (ObjectStream&, ostream &) ;
+
     static void generateRawTetraImage (istream &, ostream &) ;
+    static void generateRawTetraImage (ObjectStream&, ostream &) ;
+
     static void cubeHexaGrid (int, ostream &) ;
     MacroGridBuilder (BuilderIF &, const bool init = true) ;
     // deprecated 
@@ -166,6 +171,9 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     bool _initialized;
     bool _finalized;
 
+    template <class istream_t> 
+    static void generateRawImage (istream_t &, ostream &, 
+                                  const ElementRawID, const ElementRawID ) ;
   private :
     BuilderIF & _mgb ;
 } ;
