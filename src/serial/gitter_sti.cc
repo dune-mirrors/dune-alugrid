@@ -342,21 +342,6 @@ bool Gitter :: duneAdapt (AdaptRestrictProlongType & arp)
   return adapt();
 }
 
-void Gitter :: backupCMode (ostream & out) {
-
-  // das Kompatibilit"ats - Backup f"ur backups im alten Modus.
-
-  int i = 0 ;
-  while(1) {
-    Insert < AccessIterator < helement_STI > :: Handle, 
-        TreeIterator < helement_STI, any_has_level < helement_STI > > > w (container (),i ++) ;
-    if (! w.size()) break ;
-    for(w.first() ; ! w.done() ; w.next()) w.item ().backup(out) ;
-    out << endl ;
-  }
-  return ;
-}
-
 template <class ostream_t>
 void Gitter :: backupImpl (ostream_t & out) 
 {
@@ -425,91 +410,6 @@ void Gitter :: restore (ObjectStream& in)
 
   cerr << "Gitter :: restore not implemented for ObjectStream: " << __FILE__ << " " << __LINE__ << endl ;
   abort();
-}
-
-void Gitter :: backup (const char * filePath, const char * fileName) 
-{
-
-  // Die Konstruktion des Backup und Restore ist folgendermassen gedacht:
-  // Jede "uberschreibende Methode mit Signatur (const char *) modifiziert
-  // lediglich den Dateinamen und delegiert dann an Gitter :: backup / restore.
-  // Gitter :: backup erzeugt dann event. Lockfiles usw. und in jedem Fall die
-  // Datenstr"ome, mit denen dann die Methoden mit der Signatur (.stream &)
-  // aufgerufen werden. Diese wiederum sollen polymorph reimplementiert
-  // werden, falls ein erweitertes backup / restore erforderlich ist. Dabei
-  // mu"s immer als erstes die backup / restore Methode der direkten Basisklasse
-  // aufgerufen werden. Auf diese Art kommt es zu einem strukturierten Konzept
-  // f"ur die Sicherung und Wiederherstellung, bei dem auch die objektorientierte
-  // Struktur der Gitterklassen ber"ucksichtigt wird.
-  
-
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: backup (const char * = \""
-                 << filePath << ", const char * =\""
-                       << fileName << "\") " << endl, 1) : 1) ;
-
-  char *fullName = new char[strlen(filePath)+strlen(fileName)+1];
-  sprintf(fullName,"%s%s",filePath,fileName);
-
-  ofstream out (fullName) ;
-  if (!out) {
-    cerr << "**WARNUNG (IGNORIERT) Gitter :: backup (const char *, const char *) Fehler beim Anlegen von < " 
-         << (fullName ? fullName : "null") << " >" << endl ;
-  } else {
-    FSLock lock (fullName) ;
-    backup (out) ;
-    container ().backup (filePath, fileName) ;
-  }
-
-  delete [] fullName;
-
-  return ;
-}
-
-
-void Gitter :: backupCMode (const char * filePath, const char * fileName) {
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: backupCMode (const char * = \""
-                                   << filePath << ", const char * = \""
-                 << fileName << "\") " << endl, 1) : 1) ;  
-
-  char *fullName = new char[strlen(filePath)+strlen(fileName)+1];
-  sprintf(fullName,"%s%s",filePath,fileName);
-
-  ofstream out (fullName) ;
-  if (!out) {
-    cerr << "**WARNUNG (IGNORIERT) Gitter :: backupCMode (const char *) Fehler beim Anlegen von < " 
-         << (fullName ? fullName : "null") << " >" << endl ;
-  } else {
-    backupCMode (out) ;
-    container ().backupCMode (filePath, fileName) ;
-  }
-
-  delete [] fullName;
-
-  return ;
-}
-
-void Gitter :: restore (const char * filePath, const char * fileName) {
-
-  // Erkl"arung siehe Gitter :: backup (const char *, const char *) in gitter_sti.cc ;
-
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: restore (const char * = \""
-                                   << filePath << ", const char * = \""
-                 << fileName << "\") " << endl, 1) : 1) ;
-
-  char *fullName = new char[strlen(filePath)+strlen(fileName)+1];
-  sprintf(fullName,"%s%s",filePath,fileName);
-
-  ifstream in (fullName) ;
-  if (!in) {
-    cerr << "**WARNUNG (IGNORIERT) Gitter :: restore (const char *, const char*) Fehler beim \"Offnen von < " 
-         << (fullName ? fullName : "null") << " > " << endl ;
-  } else {
-    restore (in) ;
-  }
-
-  delete [] fullName;
-
-  return ;
 }
 
 void Gitter :: refineGlobal () {

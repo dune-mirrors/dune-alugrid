@@ -187,57 +187,6 @@ void GitterPll :: fullIntegrityCheck () {
   return ;
 }
 
-void GitterPll :: backupCMode (const char * path, const char * file) {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: backupCMode (const char * = \""
-            << (path ? path : "null") << ",  const char * = \""
-            << (file ? file : "null") << "\")" << endl, 1) : 1) ;
-  char * extendedName = new char [strlen (file) + 20] ;
-  sprintf (extendedName, "%s.%d", file, mpAccess ().myrank ()) ;
-  Gitter :: backupCMode (path, extendedName) ;
-  delete [] extendedName ;
-  return ;
-}
-
-void GitterPll :: backupCMode (ostream & out) {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: backupCMode (ostream &)" << endl, 1) : 1) ;
-  Gitter :: backupCMode (out) ;
-  return ;
-}
-
-void GitterPll :: backup (const char * path, const char * file) {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: backup (const char * = \"" 
-                   << (path ? path : "null") << ", const char * = \""
-                 << (file ? file : "null") << "\")" << endl, 1) : 1) ;
-  char * extendedName = new char [strlen (file) + 20] ;
-  sprintf (extendedName, "%s.%d", file, mpAccess ().myrank ()) ;
-  Gitter :: backup (path, extendedName) ;
-  delete [] extendedName ;
-  return ;
-}
-
-void GitterPll :: backup (ostream & out) {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: backup (ostream &)" << endl, 1) : 1) ;
-  Gitter :: backup (out) ;
-  return ;
-}
-
-void GitterPll :: restore (const char * path, const char * file) {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: restore (const char * = \""
-                 << path << ", const char * = \""
-                 << file << "\")" << endl, 1) : 1) ;
-  char * extendedName = new char [strlen (file) + 20] ;
-  sprintf (extendedName, "%s.%d", file, mpAccess ().myrank ()) ;
-  Gitter :: restore (path, extendedName) ;
-  delete [] extendedName ;
-  return ;
-}
-
-void GitterPll :: restore (istream & in) {
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: restore (istream &)" << endl, 1) : 1) ;
-  Gitter :: restore (in) ;
-  return ;
-}
-
 pair < IteratorSTI < Gitter :: vertex_STI > *, IteratorSTI < Gitter :: vertex_STI > * >
   GitterPll :: MacroGitterPll :: iteratorTT (const vertex_STI *, int i) {
   assert (i < static_cast<int> (_vertexTT.size ()) ) ;

@@ -178,12 +178,7 @@ class GitterPll : public virtual Gitter {
   
     virtual void printsize () ;
     virtual void fullIntegrityCheck () ;
-    virtual void backupCMode (const char*,const char *) ;
-    virtual void backupCMode (ostream &) ;
-    virtual void backup (const char *,const char*) ;
-    virtual void backup (ostream &) ;
-    virtual void restore (const char *,const char *) ;
-    virtual void restore (istream &) ;
+
     virtual bool refine () ;
     virtual void coarse () ;
     virtual bool adapt () ;

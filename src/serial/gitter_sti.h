@@ -1975,15 +1975,12 @@ public :
   virtual void refineGlobal () ;
   virtual void refineBall (const alucoord_t (&)[3],double,int) ;
   virtual void refineRandom (double) ;
-  virtual void backupCMode (ostream &) ;
-  virtual void backupCMode (const char*,const char *) ;
+
   virtual void backup (ostream &) ;
   virtual void backup (ObjectStream& ) ;
-  virtual void backup (const char*,const char *) ;
 
   virtual void restore (istream &) ;
   virtual void restore (ObjectStream&) ;
-  virtual void restore (const char*,const char *) ;
 
   // print memory consumption of grid 
   virtual void printMemUsage () = 0 ;
