@@ -422,18 +422,48 @@ inline ObjectStream& operator << ( ObjectStream& os, const T& value )
 }
 
 // streaming operators for ObjectStream 
+template <int length>
+inline ObjectStream& operator << ( ObjectStream& os, const char (&s)[length] ) 
+{
+  os.write( &s[0], length );
+  return os;
+}
+
+/*
+typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
+typedef CoutType& (*StandardEndLine)(CoutType&);
+
+inline ObjectStream& operator << ( ObjectStream& os, StandardEndLine manip)
+{ 
+  return os; 
+}
+*/
+
+// streaming operators for ObjectStream 
 inline ObjectStream& operator << ( ObjectStream& os, const string& s ) 
 {
-  os.write( s.c_str(), s.size() ); 
+  const size_t size = s.size();
+  os.write( size ); 
+  os.write( s.c_str(), size ); 
   return os;
 }
 
 // streaming operators for ObjectStream 
 template <class T>
-inline ObjectStream& operator >> ( ObjectStream& os, T& value )
+inline ObjectStream& operator >> ( ObjectStream& is, T& value )
 {
-  os.read( value );
-  return os;
+  is.read( value );
+  return is;
+}
+
+// streaming operators for ObjectStream 
+inline ObjectStream& operator >> ( ObjectStream& is, string& s ) 
+{
+  size_t size ;
+  is.read( size ); 
+  s.resize( size );
+  is.read( (char *) s.c_str(), size ); 
+  return is;
 }
 
 #endif  // SERIALIZE_H_INCLUDED

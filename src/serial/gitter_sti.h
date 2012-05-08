@@ -1910,6 +1910,10 @@ public :
       friend class MacroGridBuilder ;
       friend class MacroGhostBuilder;
       friend class ParallelGridMover;
+
+    protected:
+      template <class ostream_t>
+      void backupCModeImpl (ostream_t &) const ;
     } ;
   } ;
 private :

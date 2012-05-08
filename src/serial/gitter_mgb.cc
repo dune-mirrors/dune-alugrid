@@ -950,7 +950,9 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (istream & in)
 
 void Gitter :: Geometric :: BuilderIF :: macrogridBuilder (ObjectStream & in) 
 {
-  macrogridBuilderImpl( in );
+  // macrogridBuilderImpl( in );
+  cerr << "BuilderIF :: macrogridBuilder not implemented for ObjectStream: " << __FILE__ << " " << __LINE__ << endl ;
+  abort();
 }
 
 template <class istream_t> 
@@ -963,56 +965,32 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilderImpl (istream_t & in)
   raw.precision( 16 );
 
   MacroGridBuilder mm (*this) ;
-  char c = in.get () ;
-  assert (!in.eof ()) ;
-  assert (in.good ()) ;
-  if (c == char('!')) 
+
+  string firstline ;
+  getline( in, firstline ); 
+
+  // check first character 
+  if ( firstline[ 0 ] == char('!')) 
   {
-    // Kommentar gefunden: Die erste Zeile in den strstreambuf buf lesen
-    // und auf 'Tetraeder' oder 'Hexaeder' untersuchen.
-
-    // get next character 
-    c = in.get();
-    // read key word 
-    strstream_t tmpstr; 
-    while( c != char(' ') )
-    {
-      tmpstr << c ;
-      c = in.get () ;  
-    }
-
-    // remove last of the comment line 
-    // this should be done with a terminating character 
-    while ( c != char(')') ) 
-    {
-      c = in.get();
-    }
-
-    // copy to string 
-    std::string str ( tmpstr.str() ); 
-
-    //std::cout << str << " comment found " << endl;
-
     // Das erste Wort nach dem Kommentar steht jetzt in str.
     // Alle weiteren k"onnen noch aus is gelesen werden, das
     // array str ist so lang, wie die gesamte Zeile in 'buf'.
-
-    if ((0 == strcmp (str.c_str(), "Tetraeder")) ||
-        (0 == strcmp (str.c_str(), "Tetrahedra")))
+    if ( firstline.find( "Tetrahedra" ) != string :: npos ||
+         firstline.find( "Tetraeder"  ) != string :: npos )
     {
       // Versuchen wir's mal mit Tetraedern
       MacroGridBuilder :: generateRawTetraImage (in,raw) ;
     } 
     else if 
-      ((0 == strcmp (str.c_str(), "Hexaeder")) || 
-       (0 == strcmp (str.c_str(), "Hexahedra")))
+      ( firstline.find( "Hexahedra" ) != string :: npos ||
+        firstline.find( "Hexaeder"  ) != string :: npos )
     {
       // oder andernfalls mit Hexaedern.
       MacroGridBuilder :: generateRawHexaImage (in,raw) ;
     } 
     else 
     {
-      cerr << "**WARNING (IGNORED) Unknown comment to file format: " << str ;
+      cerr << "**WARNING (IGNORED) Unknown comment to file format: " << firstline ;
       cerr << " In : " << __FILE__ << " " << __LINE__ << endl ;
       return ;
     }

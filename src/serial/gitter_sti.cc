@@ -360,9 +360,6 @@ void Gitter :: backupCMode (ostream & out) {
 template <class ostream_t>
 void Gitter :: backupImpl (ostream_t & out) 
 {
-  // backup the macro grid first 
-  // container().backup( out );
-
   {
     AccessIterator <hedge_STI> :: Handle fw (container ()) ;
     for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out) ; 
@@ -394,9 +391,6 @@ void Gitter :: backup (ObjectStream& out)
 template <class istream_t>
 void Gitter ::restoreImpl (istream_t & in) 
 {
-  // restore the macro grid first 
-  // container().restore( in );
-
   {
     AccessIterator < hedge_STI > :: Handle ew (container ());
     for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ; 
@@ -427,10 +421,14 @@ void Gitter :: restore (istream & in)
 // restore taking ObjectStream 
 void Gitter :: restore (ObjectStream& in) 
 {
-  restoreImpl ( in );
+  // restoreImpl ( in );
+
+  cerr << "Gitter :: restore not implemented for ObjectStream: " << __FILE__ << " " << __LINE__ << endl ;
+  abort();
 }
 
-void Gitter :: backup (const char * filePath, const char * fileName) {
+void Gitter :: backup (const char * filePath, const char * fileName) 
+{
 
   // Die Konstruktion des Backup und Restore ist folgendermassen gedacht:
   // Jede "uberschreibende Methode mit Signatur (const char *) modifiziert

@@ -707,21 +707,35 @@ IteratorSTI < Gitter :: hperiodic_STI > * Gitter :: Geometric :: BuilderIF :: it
   return new Iterator( (*(const Iterator *) w ) );
 }
 
-void Gitter :: Geometric :: BuilderIF :: backupCMode (ObjectStream & os) const {
-
+void Gitter :: Geometric :: BuilderIF :: backupCMode (ObjectStream & os) const 
+{
+  // not precision needed here 
+  // not working correctly yet
+  // backupCModeImpl( os );
+   
+  cerr << "BuilderIF :: backupCMode not implemented for ObjectStream: " << __FILE__ << " " << __LINE__ << endl ;
+  abort();
 }
 
-void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
+void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const 
+{
+  // set precision for ostreams (different for each stream)
+  os.setf (ios::fixed, ios::floatfield) ;
+  os.precision (16) ;
+  os << scientific ;
+  
+  backupCModeImpl( os );
+}
 
+template <class ostream_t>
+void Gitter :: Geometric :: BuilderIF :: backupCModeImpl (ostream_t & os) const 
+{
   // Das Compatibility Mode Backup sichert das Makrogitter genau
   // dann, wenn es zwischenzeitlich ge"andert wurde, was beim
   // Neuanlegen und bei der Lastverteilung der Fall ist.
 
   map < VertexGeo *, int, less < VertexGeo * > > vm ;
-  os.setf (ios::fixed, ios::floatfield) ;
-  //os.precision (16) ;
-  os << scientific ;
-  
+
   // Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
   // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
   // Hexaedernetz vorliegt. Gemischte Netze sind bez"uglich ihres
@@ -730,22 +744,33 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const {
   const size_t tetraListSize  = _tetraList.size ();
   const size_t hexaListSize   = _hexaList.size (); 
   
+  string str ; 
   if ( tetraListSize == 0) 
   {
-    os << "!Hexahedra  ( noVertices = " << vertexListSize << " | noElements = " << hexaListSize << " )" << endl;
-  } 
+    strstream_t strstr ; 
+    strstr << "!Hexahedra  ( noVertices = " << vertexListSize << " | noElements = " << hexaListSize << " )" << endl;
+    str = strstr.str();
+  }
   else if ( hexaListSize == 0 && tetraListSize != 0) 
   {
-    os << "!Tetrahedra  ( noVertices = " << vertexListSize << " | noElements = " << tetraListSize << " )" << endl ;
+    strstream_t strstr ; 
+    strstr << "!Tetrahedra  ( noVertices = " << vertexListSize << " | noElements = " << tetraListSize << " )" << endl ;
+    str = strstr.str();
   } 
   else {
     cerr << "**WARNUNG (IGNORIERT) Gitter :: Geometric :: BuilderIF :: backupCMode (ostream &)" ;
     cerr << "  schreibt nur entweder reine Hexaedernetze oder reine Tetraedernetze." ;
     cerr << " In " << __FILE__ << " " << __LINE__ << endl ;
+    abort();
   }
   
-  // In jedem Fall die Vertexkoordinaten rausschreiben.
-  
+  // write header line as vector of characters 
+  const size_t ssize = str.size(); 
+  for( size_t i=0; i<ssize; ++i ) 
+  {
+    os << str[ i ];
+  }
+
   os << vertexListSize << endl ;
   {
     size_t index (0) ;
