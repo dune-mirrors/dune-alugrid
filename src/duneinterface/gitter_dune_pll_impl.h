@@ -45,6 +45,19 @@ public:
     rebuildGhostCells();
   }
 
+  GitterDunePll (istream& in,
+                 MpAccessLocal &mp, 
+                 ProjectVertex* ppv = 0 ) 
+    : GitterBasisPll (in, mp, ppv) 
+    , balanceGrid_ (false) 
+  {
+#ifndef NDEBUG
+    __STATIC_myrank = mp.myrank(); 
+#endif
+    // if grid is created from backup, then restore ghost cells 
+    rebuildGhostCells();
+  }
+
   GitterDunePll (MpAccessLocal &mp) 
     : GitterBasisPll ("", mp, 0) 
     , balanceGrid_ (false) 
@@ -141,7 +154,14 @@ public:
   // restore parallel grid from before
   virtual void duneRestore (const char*) ;
   // backup current grid status 
-  virtual void duneBackup (const char*) ;
+  void duneBackup (const char*) ;
+
+  // backup current grid status 
+  template <class ostream_t> 
+  void duneBackup ( ostream_t& os ) 
+  {
+    GitterDuneBasis::duneBackup( os );
+  }
 
 private:
   // restore grid from istream, needed to be overloaded 

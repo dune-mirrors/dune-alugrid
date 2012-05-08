@@ -77,7 +77,6 @@ public:
 
   // read status of grid 
   virtual void duneRestore (const char*) ;
-  // Constructor getting macro file name 
  
   // refine all leaf elements 
   bool refine ();
@@ -87,26 +86,6 @@ public:
 
   // done call notify and loadBalancer  
   bool duneAdapt (AdaptRestrictProlongType & arp);
-  
-private:  
-  /*
-  // communication of data
-  void ALUcomm (
-    GatherScatterType & vertexData ,
-    GatherScatterType & edgeData,
-    GatherScatterType & faceData ,
-    GatherScatterType & elementData ,
-    const CommunicationType commType);
-
-  // communication of interior data
-  void doInteriorGhostComm(
-    vector< ObjectStream > & osvec ,
-    GatherScatterType & vertexData ,
-    GatherScatterType & edgeData,
-    GatherScatterType & faceData,
-    GatherScatterType & elementData ,
-    const CommunicationType commType );
-    */
 };
 
 class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis 
@@ -118,6 +97,16 @@ class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis
   friend class PureElementLeafIterator < Gitter :: helement_STI > ;
 public:
 
+  //! constructor creating grid from std::istream 
+  inline GitterDuneImpl ( istream& in, ProjectVertex* ppv = 0 ) 
+    : GitterBasisImpl ( in, ppv ) 
+  {}
+  
+  //! constructor creating grid from ObjectStream 
+  inline GitterDuneImpl ( ObjectStream& in, ProjectVertex* ppv = 0 ) 
+    : GitterBasisImpl ( in, ppv ) 
+  {}
+  
   //! constructor creating grid from macro grid file 
   inline GitterDuneImpl (const char *filename, ProjectVertex* ppv = 0 ) 
     : GitterBasisImpl (filename, ppv ) 
@@ -272,7 +261,7 @@ inline void GitterDuneBasis ::restoreIndices (istream_t & in)
 template <class ostream_t>
 inline void GitterDuneBasis :: duneBackup ( ostream_t& out )
 {
-  //container ().backupCMode (macro) ;
+  container ().backupCMode ( out ) ;
   Gitter :: backup ( out ) ;
   backupIndices ( out ) ;
   return ;
