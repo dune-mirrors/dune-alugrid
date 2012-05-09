@@ -925,7 +925,7 @@ public :
       
     struct Hedge1Rule
     {
-      enum rule_enum { nosplit=1, iso2 };
+      enum rule_enum { nosplit=1, iso2=2 };
       typedef signed char rule_t;
 
       explicit Hedge1Rule ( const rule_t & );
@@ -957,9 +957,7 @@ public :
       
     struct Hface4Rule
     {
-      enum rule_enum { nosplit=1, iso4,  undefined=-2
-                       // ni02, ni13
-                     };
+      enum rule_enum { nosplit=1, iso4=5,  undefined=-2 };
       typedef signed char rule_t;
 
       explicit Hface4Rule ( const rule_t & );
@@ -977,7 +975,7 @@ public :
     {
       enum rule_enum { crs=-1, nosplit=1, 
                        e01=2, e12=3, e20=4, e23=5, e30=6, e31=7, 
-                       bisect, iso8 
+                       iso8=8, bisect=9
                      };
       typedef signed char rule_t;
 
@@ -994,7 +992,7 @@ public :
       
     struct HexaRule
     {
-      enum rule_enum { crs = -1, nosplit = 1, iso8 };
+      enum rule_enum { crs = -1, nosplit = 1, iso8=8 };
       typedef signed char rule_t;
 
       explicit HexaRule ( const rule_t & );

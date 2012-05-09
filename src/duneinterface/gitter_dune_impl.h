@@ -72,15 +72,13 @@ public:
   void duneBackup (const char*) ; 
 
   // write status of grid  
-  template <class ostream_t>
-  void duneBackup ( ostream_t& out );
+  void duneBackup ( ostream& out );
 
   // read status of grid 
   void duneRestore (const char*) ;
  
   // read status of grid 
-  template <class istream_t>
-  void duneRestore ( istream_t& in ) ;
+  void duneRestore ( istream& in ) ;
  
   // refine all leaf elements 
   bool refine ();
@@ -262,18 +260,20 @@ inline void GitterDuneBasis ::restoreIndices (istream_t & in)
 }
 
 // wird von Dune verwendet 
-template <class ostream_t>
-inline void GitterDuneBasis :: duneBackup ( ostream_t& out )
+inline void GitterDuneBasis :: duneBackup ( ostream& out )
 {
+  // backup macro grid 
   container ().backupCMode ( out ) ;
+  // backup hierarchy 
   Gitter :: backup ( out ) ;
+  // backup indices 
   backupIndices ( out ) ;
 }
 
 // wird von Dune verwendet 
-template <class istream_t>
-inline void GitterDuneBasis :: duneRestore ( istream_t& in )
+inline void GitterDuneBasis :: duneRestore ( istream& in )
 {
+  // macro grid is created during grid creation
   // restore hierarchy 
   Gitter :: restore (in) ;
   // restore indices 

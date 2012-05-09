@@ -694,7 +694,9 @@ template < class A > template <class OutStream_t>
 inline void Hedge1Top < A > :: doBackup (OutStream_t& os) const 
 {
   os.put ((char) getrule ()) ;
-  {for (const inneredge_t * d = dwnPtr() ; d ; d = d->next ()) d->backup (os) ; }
+  {
+    for (const inneredge_t * d = dwnPtr() ; d ; d = d->next ()) d->backup (os) ; 
+  }
   return ;
 }
 
@@ -712,7 +714,9 @@ inline void Hedge1Top < A > :: doRestore (InStream_t & is)
 {
   char r = (char) is.get () ;
   refineImmediate (myrule_t (r)) ;
-  {for (inneredge_t * d = dwnPtr() ; d ; d = d->next ()) d->restore (is) ; }
+  {
+    for (inneredge_t * d = dwnPtr() ; d ; d = d->next ()) d->restore (is) ; 
+  }
   return ;
 }
 
