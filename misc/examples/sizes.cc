@@ -12,11 +12,11 @@
 
 using namespace std;
 
-//#define PARALLEL
+#define PARALLEL
 
 #define COUNT_FLOPS
 
-//#define DONT_USE_ALUGRID_ALLOC
+#define DONT_USE_ALUGRID_ALLOC
 
 // include serial part of ALUGrid 
 #ifdef PARALLEL
@@ -94,7 +94,18 @@ void globalRefine(GitterType& grid, int refcount)
         for (w->first () ; ! w->done () ; w->next ())
         {
           // mark element for refinement 
-          w->item ().tagForGlobalRefinement ();
+          // w->item ().tagForGlobalRefinement ();
+
+          typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
+          // mark element for refinement 
+          tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+
+          //item->checkTetra( item, item->nChild(), true );
+
+          typedef Gitter ::Geometric :: TetraRule  TetraRule ;
+          item->request ( TetraRule :: bisect );
+
+          break ;
         }
      }
 
@@ -104,6 +115,7 @@ void globalRefine(GitterType& grid, int refcount)
      // print size of grid 
      grid.printsize () ;
    }
+
 }
 
 // coarse grid globally, i.e. mark all elements for coarsening 
@@ -124,8 +136,13 @@ void globalCoarsening(GitterType& grid, int refcount) {
          w->item ().tagForGlobalCoarsening() ;
        }
     }
+
     // adapt grid 
     grid.adapt ();
+
+    // print size of grid 
+    grid.printsize () ;
+
   }
 }
 
@@ -185,31 +202,67 @@ int main (int argc, char ** argv, const char ** envp)
     grid.printsize(); 
     cout << "---------------------------------------------\n";
   
-    //grid.printMemUsage();
+    grid.printMemUsage();
    
     checkRefinements( grid );
 
     std::ofstream file( "file.out" );
     grid.duneBackup( file );
+    file.close();
 
+    /*
     {
       ObjectStream os ;
       grid.duneBackup( os );
-      double value = 5;
-      os << value ;
+
       char* buffer = ObjectStream ::allocateBuffer( os.size() );
       os.read( buffer, os.size() );
       
       std::ofstream obj( "obj.out" );
-      obj.write( buffer, os.size() );
+      const size_t size = os.size();
+      obj.write( (const char *) &size, sizeof( size_t ) ); 
+      obj.write( buffer, size );
       ObjectStream :: freeBuffer( buffer );
     }
 
     globalRefine(grid, mxl);
-    //levelwalk(&grid, mxl);
-    //globalCoarsening(&grid, mxl);
+
+    {
+      size_t size = 0;
+
+      std::ifstream obj( "obj.out" );
+      obj.read( (char *) &size, sizeof( size_t ) ); 
+      char * buffer = ObjectStream ::allocateBuffer( size );
+      obj.read( buffer, size );
+      //ObjectStream :: freeBuffer( buffer );
+
+      ObjectStream is;
+      is.clear();
+      is.write( buffer, size );
+
+      {
+        ObjectStream copy( is );
+        std::ofstream obj( "check.out" );
+        const size_t size = copy.size();
+        obj.write( buffer, size );
+        //ObjectStream :: freeBuffer( buffer );
+      }
+      }*/
+
+    {
+      std::ifstream file( "file.out" );
+#ifdef PARALLEL
+      MpAccessMPI a (MPI_COMM_WORLD);
+      GitterDunePll grid2( file, a);
+#else 
+      GitterDuneImpl grid2( file );
+#endif
+      grid2.printsize();
+    }
+    //levelwalk(grid, mxl);
+    // globalCoarsening(grid, mxl);
     //grid.printMemUsage();
-    cin.get();
+    //cin.get();
   }
 
   MPI_Finalize();
