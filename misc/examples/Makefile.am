@@ -15,9 +15,10 @@ LDADD = $(PARTY_LDFLAGS) $(PARTY_LIBS) $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(ME
 
 # headers to install 
 #noinst_PROGRAMS = loadlb sizes triang adapt # example sizes # adapt
-noinst_PROGRAMS = sizes periodic loadlb # example sizes # adapt
+noinst_PROGRAMS = sizes periodic backuprestore loadlb # example sizes # adapt
 #example_SOURCES = example.cc $(SOURCE_DIR)/alugrid_serial.cc 
 sizes_SOURCES = sizes.cc $(SOURCE_DIR)/alugrid_serial.cc $(SOURCE_DIR)/alugrid_parallel.cc
+backuprestore_SOURCES = backuprestore.cc $(SOURCE_DIR)/alugrid_serial.cc $(SOURCE_DIR)/alugrid_parallel.cc
 periodic_SOURCES = periodic.cc $(SOURCE_DIR)/alugrid_serial.cc $(SOURCE_DIR)/alugrid_parallel.cc
 #$(SOURCE_DIR)/alugrid_parallel.cc
 triang_SOURCES = triang.cc $(SOURCE_DIR)/alugrid_2d.cc 
