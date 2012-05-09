@@ -69,14 +69,18 @@ public:
   void restoreIndices (istream_t & in );
 
   // write status of grid  
-  virtual void duneBackup (const char*) ; 
+  void duneBackup (const char*) ; 
 
   // write status of grid  
   template <class ostream_t>
   void duneBackup ( ostream_t& out );
 
   // read status of grid 
-  virtual void duneRestore (const char*) ;
+  void duneRestore (const char*) ;
+ 
+  // read status of grid 
+  template <class istream_t>
+  void duneRestore ( istream_t& in ) ;
  
   // refine all leaf elements 
   bool refine ();
@@ -264,8 +268,18 @@ inline void GitterDuneBasis :: duneBackup ( ostream_t& out )
   container ().backupCMode ( out ) ;
   Gitter :: backup ( out ) ;
   backupIndices ( out ) ;
-  return ;
 }
+
+// wird von Dune verwendet 
+template <class istream_t>
+inline void GitterDuneBasis :: duneRestore ( istream_t& in )
+{
+  // restore hierarchy 
+  Gitter :: restore (in) ;
+  // restore indices 
+  restoreIndices (in);
+}
+
 
 template < class A > inline PureElementAccessIterator < A > :: 
 Handle :: Handle (AccessIterator < A > & f) 

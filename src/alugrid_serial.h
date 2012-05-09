@@ -16,6 +16,7 @@
 //#define ALUGRID_USE_COMM_BUFFER_IN_ITEM
 #define ALUGRID_PERIODIC_BOUNDARY
 #define ALUGRID_PERIODIC_BOUNDARY_PARALLEL
+#define ALUGRID_CONSTRUCTION_WITH_STREAMS
 
 // include all headers 
 #include "stlheaders.h"

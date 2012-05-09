@@ -152,7 +152,8 @@ public:
   }
 
   // restore parallel grid from before
-  virtual void duneRestore (const char*) ;
+  void duneRestore (const char*) ;
+
   // backup current grid status 
   void duneBackup (const char*) ;
 
@@ -161,6 +162,13 @@ public:
   void duneBackup ( ostream_t& os ) 
   {
     GitterDuneBasis::duneBackup( os );
+  }
+
+  // restore parallel grid from before
+  template <class istream_t> 
+  void duneRestore( istream_t& is ) 
+  {
+    GitterDuneBasis::duneRestore( is );
   }
 
 private:
