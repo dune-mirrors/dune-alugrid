@@ -16,20 +16,16 @@ Hmesh<N,NV>::Hmesh(const std::string &macroname, int pnconfDeg, Refco::tag_t pre
 }
 
 template < int N, int NV >
-Hmesh<N,NV>::Hmesh(istream& macrofile, int pnconfDeg, Refco::tag_t pref_rule) :
-  _nconfDeg(pnconfDeg), refinement_rule(pref_rule) 
+Hmesh<N,NV>::Hmesh(istream& gridfile, int pnconfDeg, Refco::tag_t pref_rule) 
+  : _nconfDeg(pnconfDeg), refinement_rule(pref_rule) 
 {
   double time;
   long unsigned int nbr;
-//#ifndef NDEBUG 
-//  cerr << "\n  Hmesh::Hmesh reads istream: " << endl ;
-//#endif
 
-  bool restart = setup_grid(macrofile, time, nbr);
+  bool restart = setup_grid( gridfile, time, nbr);
   if( restart ) 
   { 
-    cerr << "ERROR: Hmesh constructor with invalid istream called!";
-    abort();
+    recoverGrid( gridfile );
   }
 }
 
@@ -57,7 +53,7 @@ void Hmesh<N,NV>::setup_grid(const std::string &filename)
 
   ifstream in;
   in.open(filename.c_str(), ios::in);
-  if( !in.good() )
+  if( ! in.good() )
   {
     in.clear();
     string macro = filename + ".macro";
@@ -73,18 +69,10 @@ void Hmesh<N,NV>::setup_grid(const std::string &filename)
   // call setup with istream 
   const bool restart = setup_grid(in, time, nbr);
 
-  /* END: set periodic neighbours of vertices */
+  // if restart we have to read the hierarchy 
   if( restart )
   {
-    double time2 = time;
-    long unsigned int nbr2 = nbr;
-    recoverGrid(filename,time2,nbr2);
-    if( (fabs(time2 - time) > 1e-5) || (nbr2 != nbr) )
-    {
-      cerr << "ERROR in Hmesh::setup_grid: "
-           << "backup-file and macro-grid file not compatible" << endl;
-      abort();
-    }
+    recoverGrid( in );
   }
 }
 

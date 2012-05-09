@@ -28,7 +28,6 @@ Hmesh<N,NV> :: ascireadtriang(istream &in, double &time, unsigned long int &nbr)
     if( str == std::string( "Backup" ) )
     {
       isbackup = true;
-      cerr << "Backup-file found" << endl;
       is >> time >> nbr;
       int rrule;
       is >> _nconfDeg >> rrule;
@@ -366,10 +365,21 @@ Hmesh<N,NV>::asciwritetriang(const std::string &filename,
   cerr << filename << "\n" << endl ;
 #endif
 
-  vl.renumber() ;
-  
+  // create stream 
   ofstream out(filename.c_str(), ios::out|ios::trunc) ;
-  
+
+  // call write triang with stream 
+  hmesh_basic_t::asciwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
+}
+ 
+template <int N,int NV>
+void
+Hmesh_basic<N,NV>::
+asciwritetriang(ostream &out, double time, unsigned long int nbr,
+                int nconfDeg, Refco::tag_t refinement_rule )
+{
+  vl.renumber() ;
+
   out.setf(ios::fixed, ios::floatfield) ;
   
   out << scientific ;
@@ -377,14 +387,8 @@ Hmesh<N,NV>::asciwritetriang(const std::string &filename,
 
   out << "!Backup ";
   out << time << " " << nbr << " ";
-  out << _nconfDeg << " " << refinement_rule << endl;
-  hmesh_basic_t::asciwritetriang(out);
-}
- 
-template <int N,int NV>
-void
-Hmesh_basic<N,NV>::asciwritetriang(ostream &out)
-{
+  out << nconfDeg << " " << refinement_rule << endl;
+
   {
  
     Listwalk_impl < vertex_t > walk(vl) ;
@@ -482,33 +486,34 @@ Hmesh_basic<N,NV>::asciwritetriang(ostream &out)
 }
 
 template <int N,int NV>
-void
-Hmesh<N,NV>::storeGrid(const std::string &fbase,
-                       double time, unsigned long int nbr)
+void Hmesh<N,NV>::
+storeGrid(const std::string &filename, double time, unsigned long int nbr)
 {
-  asciwritetriang(fbase,time,nbr);
+  // create outstream 
+  ofstream out( filename.c_str(), ios::out|ios::trunc);
 
-  const std::string refineFile = fbase + ".refine";
-#ifndef NDEBUG
-  cerr << "Hmesh::writeRecoverFile(): writing file \""
-       << refineFile << "\" ...";
-#endif
+  if( ! out ) 
+  {
+    cerr << "ERROR: could not open file " << filename << endl << endl;
+    return ;
+  }
 
-  ofstream out(refineFile.c_str(), ios::out|ios::trunc);
-  assert(out);
+  // call stream version of store grid 
+  storeGrid( out, time, nbr );
+}
 
-  // out.setf(ios::scientific, ios::floatfield);
-  // out.precision(16);
+template <int N,int NV>
+void Hmesh<N,NV>::
+storeGrid( std::ostream& out, double time, unsigned long int nbr)
+{
+  // write macro triangulation 
+  hmesh_basic_t::asciwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
 
-  // Zeit und Nummer des Zeitschritts schreiben
-  /*
-  out << time << " ";
-  out << nbr << endl;
-  */
   // Status des Gitters sichern
-  for( int level = 0 ;; level++ ) {
+  for( int level = 0 ;; level++ ) 
+  {
     Levelwalk < element_t > walk(mel, level);
-    if( !walk.size() ) 
+    if( ! walk.size() ) 
     {
       break;
     } 
@@ -516,25 +521,13 @@ Hmesh<N,NV>::storeGrid(const std::string &fbase,
     {
       for( walk.first() ; !walk.done() ; walk.next() )
       	out.put(walk.getitem().splitrule());
-      // out << walk.getitem().splitrule() << " ";
     }
-    // out << endl;
   }
-  // out << endl;
 
-  /*
-  // Daten sichern
-  Leafwalk<Element> walk(mel);
-  for( walk.first() ; !walk.done() ; walk.next() ) {
-    out << walk.getitem();
-  }
-  */
+  // write indices 
   storeIndicies(out);
-
-#ifndef NDEBUG
-  cout << " done." << endl;
-#endif
 }
+
 template <int N,int NV>
 void
 Hmesh<N,NV>::storeIndicies(ostream& out) 
@@ -582,25 +575,10 @@ Hmesh<N,NV>::storeIndicies(ostream& out)
 
 template <int N,int NV>
 bool
-Hmesh<N,NV>::recoverGrid(const std::string &recoverFile,
-                         double& time, unsigned long int &nbr)
+Hmesh<N,NV>::recoverGrid(std::istream& in)
 {
   int compwarn = 0;
 
-  cout << "Hmesh::recoverGrid(): trying to read file \""
-       << recoverFile << "\" ...";
-
-  const std::string refineFile = recoverFile + ".refine";
-  ifstream in(refineFile.c_str());
-  if( !in )
-  {
-    cout << " FAILED." << endl;
-    return false;
-  }
-
-  // Zeit und Nummer des Zeitschritts lesen
-  // in >> time;
-  // in >> nbr;
   // Gitter wiederherstellen
   for( int level = 0 ;; level++ ) 
   {
@@ -652,7 +630,6 @@ Hmesh<N,NV>::recoverGrid(const std::string &recoverFile,
   // read indices 
   recoverIndicies(in);
  
-  cout << " done." << endl;
   return true;
 }
 
@@ -660,6 +637,7 @@ template <int N,int NV>
 void
 Hmesh<N,NV>::recoverIndicies(istream& in) 
 {
+  // use the systems byte order (otherwise store byte order in storeIndices)
   RestoreInfo restoreInfo ( RestoreInfo :: systemByteOrder () );
 
   // reads maxIndex of Index Manager 
@@ -674,6 +652,7 @@ Hmesh<N,NV>::recoverIndicies(istream& in)
   {
     IndexManager2dType& vertexManager = indexmanager[IndexProvider::IM_Vertices];
     const int idxSize = vertexManager.getMaxIndex();
+
     // create vector, all entries are marked true 
     vector<bool> isHole (idxSize, true );
 

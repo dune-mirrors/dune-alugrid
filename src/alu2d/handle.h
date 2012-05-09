@@ -159,7 +159,8 @@ class Hmesh_basic : public IndexProvider {
     Hmesh_basic & operator = (const Hmesh_basic &) ;
 
  protected:
-    void asciwritetriang(ostream &) ;
+    void asciwritetriang(ostream &, double, unsigned long int nbr, 
+                         int nconfDeg, Refco::tag_t ref_rule ) ;
     
     void ascireadtriang(istream &, const bool = true ) ;
 
@@ -335,9 +336,10 @@ class Hmesh : public Hmesh_basic<N,NV> {
 
   virtual ~Hmesh() ;
 
-  void storeGrid(const std::string &, double, unsigned long int);
+  void storeGrid(const std::string &, double time = 0, unsigned long int nbr = 0);
+  void storeGrid( std::ostream& , double time = 0, unsigned long int nbr = 0);
 
-  bool recoverGrid(const std::string &, double&, unsigned long int&);
+  bool recoverGrid( std::istream& );
 
   void storeIndicies(ostream& out);
   void recoverIndicies(istream& in);
