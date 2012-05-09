@@ -543,7 +543,7 @@ generateRawImage (istream_t & in, ostream & os,
   pident = new int [nv] ;
   {
     int dummy ;
-    for (int i = 0 ; i < nv ; i ++ ) in >> pident [i] >> dummy ; 
+    for (int i = 0 ; i < nv ; ++ i ) in >> pident [i] >> dummy ; 
   }
 
   if (! in.good() ) 
@@ -551,11 +551,11 @@ generateRawImage (istream_t & in, ostream & os,
     cerr << "**WARNUNG (IGNORIERT) MacroGridBuilder :: generateRawImage () " ;
     cerr << "Identifierliste unvollst\"andig oder nicht vorhanden. Daher keine parallele " ;
     cerr << "Identifikation falls aus mehreren Gittern geladen wurde." << endl ;
-    for (int i = 0 ; i < nv ; i ++ ) pident [i] = i ;
+    for (int i = 0 ; i < nv ; ++ i ) pident [i] = i ;
   }
 
   // get last endl character (from backup to make stream consistent)
-  if( in.good() )
+  if( ! in.eof() )
     in.get();
 
   // write vertices 
