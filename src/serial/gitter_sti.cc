@@ -345,16 +345,24 @@ bool Gitter :: duneAdapt (AdaptRestrictProlongType & arp)
 template <class ostream_t>
 void Gitter :: backupImpl (ostream_t & out) 
 {
+  // backup edges 
   {
     AccessIterator <hedge_STI> :: Handle fw (container ()) ;
     for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out) ; 
   }
+  // backup faces 
   {
     AccessIterator <hface_STI>::Handle fw (container ()) ;
     for (fw.first () ; ! fw.done () ; fw.next ()) fw.item().backup(out) ; 
   }
+  // backup elements 
   {
     AccessIterator <helement_STI> :: Handle ew (container ()) ;
+    for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backup (out) ; 
+  }
+  // backup periodic elements 
+  {
+    AccessIterator <hperiodic_STI> :: Handle ew (container ()) ;
     for (ew.first () ; ! ew.done () ; ew.next ()) ew.item ().backup (out) ; 
   }
   return ;
@@ -376,23 +384,35 @@ void Gitter :: backup (ObjectStream& out)
 template <class istream_t>
 void Gitter ::restoreImpl (istream_t & in) 
 {
+  // restore edges 
   {
     AccessIterator < hedge_STI > :: Handle ew (container ());
     for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ; 
   }
+  // restore faces 
   {
     AccessIterator < hface_STI >:: Handle fw(container());
     for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); 
   }
+  // restore elements 
   {
     AccessIterator < helement_STI >:: Handle ew(container());
     for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
   }
+  // restore periodic elements 
+  {
+    AccessIterator < hperiodic_STI >:: Handle ew(container());
+    for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
+  }
     
+  // since the faces have been refined before the elements
+  // the boundary faces might not habe benn refined at all
   {
     AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
     for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; 
   }
+
+  // make parallel grid consistent
   notifyGridChanges () ;
 }
 
