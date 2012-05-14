@@ -142,6 +142,7 @@ int main (int argc, char ** argv, const char ** envp)
 
   std::stringstream backupname ; 
   backupname << "file." << rank ;
+  std::stringstream databuf;
   {
 //#ifdef PARALLEL
 //    MpAccessMPI a (MPI_COMM_WORLD);
@@ -179,8 +180,34 @@ int main (int argc, char ** argv, const char ** envp)
 #endif
     grid.printsize();
 
+    grid.duneRestore( file );
+    file.close();
+    //globalRefine(grid, mxl);
+    // adapt grid 
+
+    grid.duneBackup( databuf );
+
+    cout << "Grid restored!" << std::endl;
+    grid.printsize();
+    cout << "---------------------------------------------\n";
+
+    globalCoarsening(grid, mxl);
+  }
+
+  {
+    cout << "Try to read stringbuf:" << std::endl;
+    cout << "Data Buffer size: " << databuf.str().size() << std::endl;
+    // read grid from file 
+#ifdef PARALLEL
+    MpAccessMPI a (MPI_COMM_WORLD);
+    GitterDunePll grid( databuf, a);
+#else 
+    GitterDuneImpl grid( databuf );
+#endif
+    grid.printsize();
+    grid.duneRestore( databuf );
+
     //grid.duneRestore( file );
-    globalRefine(grid, mxl);
     // adapt grid 
 
     cout << "Grid restored!" << std::endl;
