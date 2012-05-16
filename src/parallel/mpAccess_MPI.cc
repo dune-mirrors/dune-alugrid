@@ -323,7 +323,12 @@ pair<double,double> MpAccessMPI :: gsum (pair<double,double> p) const {
   return pair<double,double>(x[0],x[1]) ;
 }
 
-void MpAccessMPI :: bcast (double * buff, int length, int root ) const 
+void MpAccessMPI :: bcast (int* buff, int length, int root ) const 
+{
+  MPI_Bcast(buff, length, MPI_INT, root, _mpiComm) ;
+}
+
+void MpAccessMPI :: bcast (double* buff, int length, int root ) const 
 {
   MPI_Bcast(buff, length, MPI_DOUBLE, root, _mpiComm) ;
 }
