@@ -323,6 +323,11 @@ pair<double,double> MpAccessMPI :: gsum (pair<double,double> p) const {
   return pair<double,double>(x[0],x[1]) ;
 }
 
+void MpAccessMPI :: bcast (double * buff, int length, int root ) const 
+{
+  MPI_Bcast(buff, length, MPI_DOUBLE, root, _mpiComm) ;
+}
+
 vector < int > MpAccessMPI :: gcollect (int i) const {
   vector < int > r (psize (), 0L) ;
   int * v = new int [psize ()] ;

@@ -37,6 +37,7 @@ class MpAccessGlobal {
     virtual pair<double,double> gmax (pair<double,double>) const = 0 ;
     virtual pair<double,double> gmin (pair<double,double>) const = 0 ;
     virtual pair<double,double> gsum (pair<double,double>) const = 0 ;
+    virtual void bcast(double*,int, int) const = 0 ;
     virtual vector < int > gcollect (int) const = 0 ;
     virtual vector < double > gcollect (double) const = 0 ;
     virtual vector < vector < int > > gcollect (const vector < int > &) const = 0 ;

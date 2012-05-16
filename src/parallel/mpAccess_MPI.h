@@ -88,6 +88,7 @@ public:
   pair<double,double> gmax (pair<double,double>) const ;
   pair<double,double> gmin (pair<double,double>) const ;
   pair<double,double> gsum (pair<double,double>) const ;
+  void bcast(double*, int, int ) const; 
   vector < int > gcollect (int) const ;
   vector < double > gcollect (double) const ;
   vector < vector < int > > gcollect (const vector < int > &) const ;

@@ -234,8 +234,8 @@ class GitterPll : public virtual Gitter {
     pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *> iteratorTT (const hedge_STI *, int) ;
     pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> iteratorTT (const hface_STI *, int) ;
 
-    // constructor, if verbose = true, output is given 
-    GitterPll (bool verbose = false) ;
+    // constructor, take communicator for parameter communication 
+    explicit GitterPll ( MpAccessLocal & mpa ) ;
    ~GitterPll () {}
   friend class LeafIteratorTT < vertex_STI > ;
   friend class LeafIteratorTT < hedge_STI > ;

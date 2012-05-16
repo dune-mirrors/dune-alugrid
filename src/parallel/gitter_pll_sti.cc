@@ -1128,33 +1128,25 @@ void GitterPll :: notifyMacroGridChanges () {
   return ;
 }
 
-GitterPll :: GitterPll (bool verbose) : _ldbOver (1.2), _ldbUnder (0.0), _ldbMethod (LoadBalancer :: DataBase :: METIS_PartGraphKway) 
+GitterPll :: GitterPll ( MpAccessLocal & mpa ) 
+  : _ldbOver (0.0), _ldbUnder (0.0), _ldbMethod (LoadBalancer :: DataBase :: NONE) 
 {
-  ifstream in ("alugrid.cfg") ;
-  if (in) 
+  if( mpa.myrank() == 0 ) 
   {
-    int i ;
-    in >> _ldbUnder ;
-    in >> _ldbOver ;
-    in >> i;
-    _ldbMethod = (LoadBalancer :: DataBase :: method) i ;
-  } 
-  else 
-  {
-    ifstream in2 ("lastverteilung.cfg") ;
-    if (in2) 
+    // set default values 
+    _ldbOver = 1.2;
+    _ldbMethod = LoadBalancer :: DataBase :: METIS_PartGraphKway ;
+
+    ifstream in ("alugrid.cfg") ;
+    if (in) 
     {
-      if(verbose) 
-      {
-        cerr << endl << "**WARNING (ignored) < lastverteilung.cfg > is deprecated! Change filename to < alugrid.cfg > !" << endl << endl;
-      }
       int i ;
-      in2 >> _ldbUnder ;
-      in2 >> _ldbOver ;
-      in2 >> i;
+      in >> _ldbUnder ;
+      in >> _ldbOver ;
+      in >> i;
       _ldbMethod = (LoadBalancer :: DataBase :: method) i ;
-    }
-    else if(verbose) 
+    } 
+    else 
     {
       cerr << endl << "**WARNING (ignored) could'nt open file "
            << "< alugrid.cfg > . "
@@ -1164,8 +1156,25 @@ GitterPll :: GitterPll (bool verbose) : _ldbOver (1.2), _ldbUnder (0.0), _ldbMet
            << LoadBalancer :: DataBase :: methodToString (_ldbMethod) 
            << "\"" << endl << endl;
     }
-  }
-  return;
+  } // got values on rank 0 
+
+  // now communicate them 
+  double buff[ 3 ]  = { _ldbOver, _ldbUnder, double(_ldbMethod) };
+
+  // take global maximum on all procs 
+  // (much better then to read file on all procs)
+  const int root = 0 ;
+  mpa.bcast( &buff[ 0 ], 3, root);
+
+  // store values 
+  _ldbOver   = buff[ 0 ];
+  _ldbUnder  = buff[ 1 ];
+  _ldbMethod = (LoadBalancer :: DataBase :: method ) buff[ 2 ];
+
+  // wait for all to finish 
+#ifndef NDEBUG
+  mpa.barrier();
+#endif
 }
 
 #endif
