@@ -1161,7 +1161,7 @@ GitterPll :: GitterPll ( MpAccessLocal & mpa )
   // now communicate them 
   double buff[ 3 ]  = { _ldbOver, _ldbUnder, double(_ldbMethod) };
 
-  // take global maximum on all procs 
+  // broadcast values from rank 0 to all others 
   // (much better then to read file on all procs)
   const int root = 0 ;
   mpa.bcast( &buff[ 0 ], 3, root);
