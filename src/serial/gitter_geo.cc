@@ -835,7 +835,7 @@ void Gitter :: Geometric :: BuilderIF :: backupCModeImpl (ostream_t & os) const
         for (int j = 0 ; j < 4 ; ++ j ) 
         {
           os << vm [(*i)->myvertex (j)];
-          if( j < 3 ) os << "  " ;
+          if( j < 3 ) os << " " ;
         }
         os << endl ;
       }
@@ -873,7 +873,7 @@ void Gitter :: Geometric :: BuilderIF :: backupCModeImpl (ostream_t & os) const
     // add vertex identifier list at the end 
     const vertexlist_t :: const_iterator end = _vertexList.end () ;
     for (vertexlist_t :: const_iterator i = _vertexList.begin () ; i != end ; ++i)
-      os << (*i)->ident () << "  " << -1 << endl ;
+      os << (*i)->ident () << " " << -1 << endl ;
   }
   return ;
 }
