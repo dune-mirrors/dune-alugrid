@@ -4,6 +4,17 @@
 #ifndef SERIALIZE_H_INCLUDED
 #define SERIALIZE_H_INCLUDED
 
+// default stream precision, can be changed from outside 
+struct ALUGridStreamPrecision
+{
+  // return precision to be used in standard ostreams 
+  static size_t& precision() 
+  {
+    static size_t streamPrecision = 16 ;
+    return streamPrecision;
+  }
+};
+
   //   Die 'Serializable' Schnittstelle soll eine Objektserialisation er-
   //   m"oglichen, die etwas der in java vorgeschlagenen Situation "ahnelt,
   //   allerdings aus technischen Gr"unden erheblich primitiver ist.

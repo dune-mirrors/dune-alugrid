@@ -721,7 +721,7 @@ void Gitter :: Geometric :: BuilderIF :: backupCMode (ostream & os) const
 {
   // set precision for ostreams (different for each stream)
   os.setf (ios::fixed, ios::floatfield) ;
-  os.precision (16) ;
+  os.precision ( ALUGridStreamPrecision :: precision() ) ;
   os << scientific ;
   
   backupCModeImpl( os );
