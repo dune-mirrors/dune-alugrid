@@ -288,10 +288,8 @@ class ObjectStream : public ObjectStreamImpl
 {
   typedef ObjectStreamImpl BaseType;
   
-  // 1/4 Megabyte als Chunksize, und 16 MegaByte als oberes Limit,
-  // wobei dieses noch nicht getestet wird.
-  //enum { BufChunk = 0x40000 } ;
-  enum { BufChunk = 65536 * sizeof(double) } ;
+  // default chunk size increase 
+  enum { BufChunk = 4096 * sizeof(double) } ;
 
   // true if object stream was not set 
   bool notReceived_ ;
@@ -304,6 +302,13 @@ public :
   // create empty object stream 
   inline ObjectStream () 
     : BaseType(BufChunk),
+      notReceived_( true )
+  {
+  } 
+  
+  // create empty object stream with given chunk size 
+  explicit ObjectStream ( const size_t chunkSize ) 
+    : BaseType( chunkSize ),
       notReceived_( true )
   {
   } 
