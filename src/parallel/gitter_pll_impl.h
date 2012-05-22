@@ -1012,14 +1012,7 @@ template < class A >
 inline bool EdgePllBaseX< A > :: unlockAndResume (bool r)
 {
   myhedge1().unset( myhedge1_t::flagLock );
-  bool x ;
-  if (r) {
-    x = myhedge1().coarse () ;
-  }
-  else {
-    x = false ;
-  }
-  return x ;
+  return ( r ) ? myhedge1().coarse () : false ;
 }
 
 template < class A >
