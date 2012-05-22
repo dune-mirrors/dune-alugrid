@@ -95,12 +95,25 @@ public :
   template <class T> 
   inline void write (const T & a)
   {
+    writeT( a, true );
+  }
+
+  template <class T> 
+  inline void writeUnchecked( const T& a )
+  {
+    writeT( a, false );
+  }
+
+protected:  
+  template <class T>
+  inline void writeT (const T & a, const bool checkLength )  
+  {
     assert( _owner );
     const size_t ap = _wb;
     _wb += sizeof(T) ;
 
     // if buffer is to small, reallocate 
-    if (_wb > _len) 
+    if (checkLength && _wb > _len) 
     {
       reallocateBuffer(_wb);
     }
@@ -110,7 +123,8 @@ public :
     static_cast<T &> (*((T *) getBuff(ap) )) = a;
     return ;
   }
- 
+
+public:
   // read value from stream 
   template <class T> 
   inline void read (T & a) throw (EOFException) 
@@ -344,6 +358,9 @@ public:
   ////////////////////////////////////
   // put char 
   inline void put (const char a)  { this->write(a); }
+
+  // put char with checking buffer size (reserve size before usage)
+  inline void putNoChk (const char a)  { this->writeUnchecked(a); }
 
   // get char 
   inline char get () 

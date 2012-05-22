@@ -362,9 +362,10 @@ bool GitterPll :: refine ()
       {
         for (int l = 0 ; l < nl ; ++l) 
         {
+          ObjectStream& os = osv[ l ];
           const hedge_iterator iEnd = outerEdges[l].end () ;
           for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i )
-            (*i)->getRefinementRequest (osv [l]) ;
+            (*i)->getRefinementRequest ( os ) ;
         }
       }
       
@@ -374,9 +375,10 @@ bool GitterPll :: refine ()
       {
         for (int l = 0 ; l < nl ; ++l)
         {
+          ObjectStream& os = osv[ l ];
           const hedge_iterator iEnd = innerEdges[l].end () ;
           for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i )
-            (*i)->setRefinementRequest (osv [l]) ;
+            (*i)->setRefinementRequest ( os ) ;
         }
       }
     } // ~vector < ObjectStream > ... 
@@ -564,19 +566,28 @@ void GitterPll :: coarse ()
   
       __STATIC_phase = 5 ;
     
-      vector < vector < int > > clean (nl) ;
+      typedef vector< int > cleanvector_t ;
+      vector < cleanvector_t > clean (nl) ;
       {
-        vector < vector < int > > inout (nl) ;
+        //vector < vector < int > > inout (nl) ;
+        vector < ObjectStream > inout( nl );
         {
           for (int l = 0 ; l < nl ; ++l)
           {
+            ObjectStream& os = inout[ l ];
+            // reserve memory 
+            os.reserve( outerFaces [l].size() * sizeof(char) );
+
             // reserve memory first 
-            inout[l].reserve( outerFaces [l].size() );
+            //inout[l].reserve( outerFaces [l].size() );
+
             // get end iterator 
             const hface_iterator iEnd = outerFaces [l].end () ;
             for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i)
             {
-              inout [l].push_back ((*i)->accessOuterPllX ().first->lockAndTry ()) ;
+              char lockAndTry = (*i)->accessOuterPllX ().first->lockAndTry ();
+              os.putNoChk( lockAndTry );
+              //inout [l].push_back ((*i)->accessOuterPllX ().first->lockAndTry ()) ;
             }
           }
         }
@@ -587,32 +598,49 @@ void GitterPll :: coarse ()
         {
           for (int l = 0 ; l < nl ; ++l) 
           {
-            clean [l] = vector < int > (innerFaces [l].size (), long (true)) ;
-            vector < int > :: iterator j = clean [l].begin (), k = inout [l].begin () ;
+            ObjectStream& os = inout[ l ];
+            cleanvector_t& cl = clean[ l ];
+
+            // reset clean vector 
+            cl = cleanvector_t( innerFaces [l].size (), int(true) ) ;
+
+            cleanvector_t :: iterator j = cl.begin ();//, k = inout [l].begin () ;
+
             const hface_iterator iEnd = innerFaces [l].end () ;
-            for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i, ++j, ++k) 
+            for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i, ++j )//, ++k) 
             {
-              assert (j != clean [l].end ()) ; assert (k != inout [l].end ()) ;
-              (*j) &= (*k) && (*i)->accessOuterPllX ().first->lockAndTry () ;
+              // get lockAndTry info 
+              const bool locked = bool( os.get() );
+
+              assert (j != cl.end ()) ; 
+              //assert (k != inout [l].end ()) ;
+              //(*j) &= (*k) && (*i)->accessOuterPllX ().first->lockAndTry () ;
+              (*j) &= locked && (*i)->accessOuterPllX ().first->lockAndTry () ;
             }
           } 
         }
       }
       
       {
-        vector < vector < int > > inout (nl) ;
+        //vector < vector < int > > inout (nl) ;
+        vector < ObjectStream > inout (nl) ;
         {
           for (int l = 0 ; l < nl ; ++l) 
           {
-            // reserve memory first 
-            inout[l].reserve( innerFaces [l].size() );
+            ObjectStream& os = inout[ l ];
+            // reserve memory  
+            os.reserve( innerFaces [l].size() * sizeof(char) );
 
-            vector < int > :: iterator j = clean [l].begin () ;
+            //inout[l].reserve( innerFaces [l].size() );
+
+            cleanvector_t :: iterator j = clean [l].begin () ;
             const hface_iterator iEnd = innerFaces [l].end () ;
             for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i, ++j) 
             {
-              inout [l].push_back (*j) ;
-              (*i)->accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
+              const bool unlock = *j;
+              os.putNoChk( char(unlock) );
+              //inout [l].push_back (*j) ;
+              (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
             }
           }     
         }
@@ -623,12 +651,14 @@ void GitterPll :: coarse ()
         {
           for (int l = 0 ; l < nl ; ++l) 
           {
-            vector < int > :: iterator j = inout [l].begin () ;
+            ObjectStream& os = inout[ l ];
+            //vector < int > :: iterator j = inout [l].begin () ;
             const hface_iterator iEnd = outerFaces [l].end () ;
-            for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i, ++j) 
+            for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i ) //, ++j) 
             {
-              assert (j != inout [l].end ()) ;
-              (*i)->accessOuterPllX ().first->unlockAndResume (bool (*j)) ;
+              const bool unlock = bool( os.get() );
+              //assert (j != inout [l].end ()) ;
+              (*i)->accessOuterPllX ().first->unlockAndResume ( unlock ) ;
             }
           }     
         }
@@ -657,34 +687,48 @@ void GitterPll :: coarse ()
       // kommt noch ein zweiter 'bool' Wert, der anzeigt ob die Kante schon ab-
       // schliessend vergr"obert wurde oder nicht. 
     
-      map < hedge_STI *, pair < bool, bool >, less < hedge_STI * > > clean ;
+      typedef pair < bool, bool >  clean_t ;
+      typedef map < hedge_STI *, clean_t, less < hedge_STI * > > cleanmap_t ;
+      typedef cleanmap_t :: iterator cleanmapiterator_t ;
+      cleanmap_t clean ;
       
+      const cleanmapiterator_t cleanEnd = clean.end();
       {
         for (int l = 0 ; l < nl ; l ++)
         {
           const hedge_iterator iEnd = innerEdges [l].end () ;
           for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i)
           {
-            if (clean.find (*i) == clean.end ()) 
+            hedge_STI* edge = (*i);
+            cleanmapiterator_t cit = clean.find ( edge );
+            if (cit == cleanEnd ) 
             {
-              clean [*i] = pair < bool, bool > ((*i)->lockAndTry (), true) ;
+              clean_t& cp = clean[ edge ];
+              cp.first  = edge->lockAndTry () ;
+              cp.second = true ;
             }
           }
         }
       }
       
       {
-        vector < vector < int > > inout (nl) ;
+        //vector < vector < int > > inout (nl) ;
+        vector < ObjectStream > inout( nl );
         {
           for (int l = 0 ; l < nl ; ++l)
           {
+            ObjectStream& os = inout[ l ];
             // reserve memory first 
-            inout[l].reserve( outerEdges [l].size() );
+            os.reserve( outerEdges [l].size() * sizeof(char) );
+
+            //inout[l].reserve( outerEdges [l].size() );
             // get end iterator 
             const hedge_iterator iEnd = outerEdges [l].end () ;
             for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i)
             {
-              inout [l].push_back ((*i)->lockAndTry ()) ;
+              char lockAndTry = (*i)->lockAndTry ();
+              os.putNoChk( lockAndTry );
+              // inout [l].push_back ((*i)->lockAndTry ()) ;
             }
           }
         }
@@ -695,33 +739,48 @@ void GitterPll :: coarse ()
         {
           for (int l = 0 ; l < nl ; ++l) 
           {
-            vector < int > :: const_iterator j = inout [l].begin () ;
+            ObjectStream& os = inout[ l ];
+
+            //vector < int > :: const_iterator j = inout [l].begin () ;
             // get end iterator 
             const hedge_iterator iEnd = innerEdges [l].end () ;
-            for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i, ++j) 
+            for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i) //, ++j) 
             {
-              assert (j != inout [l].end ()) ;
-              assert (clean.find (*i) != clean.end ()) ;
-              if (*j == false) clean [*i] = pair < bool, bool > (false, clean[*i].second) ; 
+              //assert (j != inout [l].end ()) ;
+              const bool locked = bool( os.get() );
+              if( locked == false ) 
+              {
+                assert (clean.find (*i) != cleanEnd ) ;
+                clean[ *i ].first = false ;
+              }
             }
           }
         }
       }
       
       {
-        vector < vector < int > > inout (nl) ;
+        //vector < vector < int > > inout (nl) ;
+        vector < ObjectStream > inout( nl );
         {
           for (int l = 0 ; l < nl ; ++l) 
           {
+            ObjectStream& os = inout[ l ];
             // reserve memory first 
-            inout[l].reserve( innerEdges [l].size() );
+            os.reserve( innerEdges [l].size() * sizeof(char) );
+
+            //inout[l].reserve( innerEdges [l].size() );
+
             // get end iterator 
             const hedge_iterator iEnd = innerEdges [l].end () ;
             for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i) 
             {
-              assert (clean.find (*i) != clean.end ()) ;
-              pair < bool, bool > & a = clean [*i] ;
-              inout [l].push_back (a.first) ;
+              hedge_STI* edge = (*i);
+              assert (clean.find ( edge ) != clean.end ()) ;
+
+              clean_t& a = clean [ edge ] ;
+              os.putNoChk( char( a.first) );
+
+              //inout [l].push_back (a.first) ;
               if (a.second) 
               {
                 // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
@@ -734,7 +793,7 @@ void GitterPll :: coarse ()
 #ifndef NDEBUG
                 bool b = 
 #endif
-                  (*i)->unlockAndResume (a.first) ;
+                  edge->unlockAndResume (a.first) ;
                 assert (b == a.first) ;
               }
             }
@@ -745,24 +804,26 @@ void GitterPll :: coarse ()
         inout = mpAccess ().exchange (inout) ;
         
         {
-          for (int l = 0 ; l < nl ; l ++) 
+          for (int l = 0 ; l < nl ; ++l ) 
           {
-            vector < int > :: iterator j = inout [l].begin () ;
+            ObjectStream& os = inout[ l ] ;
+            //vector < int > :: iterator j = inout [l].begin () ;
             // get end iterator 
             const hedge_iterator iEnd = outerEdges [l].end () ;
-            for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i, ++j) 
+            for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i )//, ++j) 
             {
-              assert (j != inout [l].end ()) ;
+              //assert (j != inout [l].end ()) ;
       
               // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
               // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
               // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
             
+              const bool unlock = bool( os.get() );
 #ifndef NDEBUG
               bool b = 
 #endif
-                (*i)->unlockAndResume (bool (*j)) ;
-              assert (b == bool (*j)) ;
+                (*i)->unlockAndResume ( unlock ) ;
+              assert (b == unlock) ;
             }
           }
         }
