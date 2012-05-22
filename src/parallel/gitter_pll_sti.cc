@@ -298,15 +298,18 @@ bool GitterPll :: refine ()
         try {
           for (int l = 0 ; l < nl ; ++l) 
           {
+            ObjectStream& os = osv[ l ];
+            // reserve memory for object stream 
+            os.reserve( (outerFaces[l].size() + innerFaces[l].size() ) * sizeof(char) );
             {
               const hface_iterator iEnd = outerFaces[l].end () ;
               for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i ) 
-                (*i)->accessOuterPllX ().first->getRefinementRequest (osv [l]) ; 
+                (*i)->accessOuterPllX ().first->getRefinementRequest ( os ) ; 
             }
             {
               const hface_iterator iEnd = innerFaces[l].end () ;
               for (hface_iterator i = innerFaces [l].begin () ; i != iEnd ; ++i )
-                (*i)->accessOuterPllX ().first->getRefinementRequest (osv [l]) ; 
+                (*i)->accessOuterPllX ().first->getRefinementRequest ( os ) ; 
             }
           }
         } 
@@ -322,15 +325,16 @@ bool GitterPll :: refine ()
         {
           for (int l = 0 ; l < nl ; ++l) 
           {
+            ObjectStream& os = osv [l];
             {
               const hface_iterator iEnd = innerFaces[l].end () ;
               for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i ) 
-                repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest (osv [l]) ; 
+                repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ) ; 
             }
             {
               const hface_iterator iEnd = outerFaces[l].end () ; 
               for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i )
-                repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest (osv [l]) ; 
+                repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ) ; 
             }
           }
         } 

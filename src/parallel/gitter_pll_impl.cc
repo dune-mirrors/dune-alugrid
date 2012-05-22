@@ -490,7 +490,8 @@ template class FacePllBaseXMacro < GitterBasisPll :: ObjectsPll :: hface4_IMPL >
 //
 //////////////////////////////////////////////////////////////////////
 template < class A > void BndsegPllBaseXClosure < A > :: getRefinementRequest (ObjectStream & os) {
-  os.writeObject (int (_rul)) ;
+  //os.writeObject (int (_rul)) ;
+  os.put( char(_rul) );
   _rul = balrule_t :: nosplit ;
   return ;
 }
@@ -502,26 +503,37 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
   // sich das eigene Gitter g"andert hat -> f"uhrt zu einer weiteren
   // Iteration des parallelen refine ().
 
-  int i ;
-  try {
-    os.readObject (i) ;
-  } catch (ObjectStream :: EOFException) {
+  char i ;
+  try 
+  {
+    i = os.get() ;
+    //os.readObject (i) ;
+  } 
+  catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) BndsegPllBaseXClosure :: setRefinementRequest (..)\n" ;
     cerr << "  EOF gelesen. In " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
   balrule_t r (i)  ;
-  if (r == balrule_t :: nosplit) {
+  if (r == balrule_t :: nosplit) 
+  {
     return false ;
-  } else {
-    if (myhbnd ().getrule () == r) {
+  } 
+  else 
+  {
+    if (myhbnd ().getrule () == r) 
+    {
       return false ;
-    } else {
-      if (myhbnd ().refineLikeElement (r)) {
+    } 
+    else 
+    {
+      if (myhbnd ().refineLikeElement (r)) 
+      {
         // Verfeinerung erfolgreich
         return true ;
-      } else {
-      
+      } 
+      else 
+      {
         // Verfeinerung verhindert irgendwo im Gitter. Dies ist ein Vorbehalt
         // f"ur den parallelen anisotropen Verfeinerungsalgorithmus. Daher
         // sollte die Situation im isotropen Fall nicht auftreten.
