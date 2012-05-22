@@ -386,9 +386,13 @@ bool GitterPll :: refine ()
       {
         for (int l = 0 ; l < nl ; ++l)
         {
+          ObjectStream& os = osv[ l ];
+          // reserve memory 
+          os.reserve( innerEdges[l].size() * sizeof(char) );
+
           const hedge_iterator iEnd = innerEdges[l].end () ;
           for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i ) 
-            (*i)->getRefinementRequest (osv [l]) ;
+            (*i)->getRefinementRequest ( os ) ;
         }
       }
       
@@ -398,9 +402,10 @@ bool GitterPll :: refine ()
       {
         for (int l = 0 ; l < nl ; ++l)
         {
+          ObjectStream& os = osv[ l ];
           const hedge_iterator iEnd = outerEdges [l].end () ;
           for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i ) 
-            (*i)->setRefinementRequest (osv [l]) ;
+            (*i)->setRefinementRequest ( os ) ;
         }
       }
     }   // ~vector < ObjectStream > ... 

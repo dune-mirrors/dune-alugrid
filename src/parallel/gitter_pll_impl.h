@@ -954,17 +954,22 @@ inline LinkedObject :: Identifier EdgePllBaseX< A > :: getIdentifier () const {
 }
 
 template < class A >
-inline void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const {
-  os.writeObject (int(myhedge1 ().getrule ())) ;
+inline void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const 
+{
+  //os.writeObject (int(myhedge1 ().getrule ())) ;
+  os.put( char(myhedge1 ().getrule ()) ) ;
   return ;
 }
 
 template < class A >
 inline bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
-  int i ;
+  char i ;
   try {
-    os.readObject (i) ;
-  } catch (ObjectStream :: EOFException) {
+    //os.readObject (i) ;
+    i = os.get();
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
