@@ -491,7 +491,8 @@ template class FacePllBaseXMacro < GitterBasisPll :: ObjectsPll :: hface4_IMPL >
 //////////////////////////////////////////////////////////////////////
 template < class A > void BndsegPllBaseXClosure < A > :: getRefinementRequest (ObjectStream & os) {
   //os.writeObject (int (_rul)) ;
-  os.put( char(_rul) );
+  typename balrule_t :: rule_t rule = _rul ;
+  os.put( char(rule) );
   _rul = balrule_t :: nosplit ;
   return ;
 }
@@ -503,10 +504,10 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
   // sich das eigene Gitter g"andert hat -> f"uhrt zu einer weiteren
   // Iteration des parallelen refine ().
 
-  char i ;
+  signed char ru ;
   try 
   {
-    i = os.get() ;
+    ru = os.get() ;
     //os.readObject (i) ;
   } 
   catch (ObjectStream :: EOFException) {
@@ -514,20 +515,20 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
     cerr << "  EOF gelesen. In " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  balrule_t r (i)  ;
-  if (r == balrule_t :: nosplit) 
+  balrule_t rule ( ru )  ;
+  if (rule == balrule_t :: nosplit) 
   {
     return false ;
   } 
   else 
   {
-    if (myhbnd ().getrule () == r) 
+    if (myhbnd ().getrule () == rule ) 
     {
       return false ;
     } 
     else 
     {
-      if (myhbnd ().refineLikeElement (r)) 
+      if (myhbnd ().refineLikeElement ( rule )) 
       {
         // Verfeinerung erfolgreich
         return true ;
