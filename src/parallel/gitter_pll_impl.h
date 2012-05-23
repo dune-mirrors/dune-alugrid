@@ -28,13 +28,14 @@ typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternM
 class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
   protected :
     typedef Gitter :: Geometric :: VertexGeo myvertex_t ;
+
     inline myvertex_t & myvertex () ;
     inline const myvertex_t & myvertex () const ;
   public :
     VertexPllBaseX (myvertex_t &,linkagePatternMap_t &) ;
    ~VertexPllBaseX () ;
-    virtual vector < int > estimateLinkage () const ;
-    virtual bool setLinkage (vector < int >) ;
+    virtual vector< int > estimateLinkage () const ;
+    virtual bool setLinkage ( vector < int > ) ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
     
   protected :
@@ -68,8 +69,6 @@ class EdgePllBaseX : public A
 
     inline EdgePllBaseX (myvertex_t * a, myvertex_t * b) ;
     ~EdgePllBaseX () ;
-    virtual vector < int > estimateLinkage () const ;
-    virtual LinkedObject :: Identifier getIdentifier () const ;
     virtual void getRefinementRequest (ObjectStream &) const ;
     virtual bool setRefinementRequest (ObjectStream &) ;
     virtual bool lockAndTry () ;
@@ -87,9 +86,10 @@ class EdgePllBaseXMacro : public A
   public :
     typedef typename A :: myhedge1_t  myhedge1_t;
     typedef typename A :: myvertex_t myvertex_t;
+
     inline EdgePllBaseXMacro(myvertex_t *,myvertex_t *) ;
    ~EdgePllBaseXMacro () ;
-    virtual vector < int > estimateLinkage () const ;
+    virtual vector< int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
   protected :
     using A :: myhedge1;
@@ -122,8 +122,6 @@ template < class A > class FacePllBaseX : public A
     inline myhface_t & myhface () { return *this; }
     inline const myhface_t & myhface () const { return *this; }
 
-    virtual vector < int > estimateLinkage () const ;
-    virtual LinkedObject :: Identifier getIdentifier () const ;
     virtual vector < int > checkParallelConnectivity () const ;
     virtual pair < ElementPllXIF_t *, int > accessOuterPllX () ;
     virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const ;
@@ -147,7 +145,7 @@ template < class A > class FacePllBaseXMacro : public A
     // destructor only checking move-to
     inline ~FacePllBaseXMacro () ; 
 
-    virtual vector < int > estimateLinkage () const ;
+    virtual vector< int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
 
   protected :
@@ -944,16 +942,6 @@ inline bool EdgePllBaseX< A > :: lockedAgainstCoarsening () const
 }
 
 template < class A >
-inline vector < int > EdgePllBaseX< A > :: estimateLinkage () const {
-  return (abort (), vector < int > ()) ;
-}
-
-template < class A >
-inline LinkedObject :: Identifier EdgePllBaseX< A > :: getIdentifier () const {
-  return (abort (), LinkedObject :: Identifier  ()) ;
-}
-
-template < class A >
 inline void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const 
 {
   //os.writeObject (int(myhedge1 ().getrule ())) ;
@@ -1043,14 +1031,6 @@ FacePllBaseX (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
   : A( e0, s0, e1, s1, e2, s2, e3, s3 )
 {
   return ;
-}
-
-template < class A > vector < int > FacePllBaseX < A > :: estimateLinkage () const {
-  return (abort (), vector < int > ()) ;
-}
-
-template < class A > typename LinkedObject :: Identifier FacePllBaseX < A > :: getIdentifier () const {
-  return (abort (), LinkedObject :: Identifier ()) ;
 }
 
 template < class A > vector < int >  FacePllBaseX < A > :: checkParallelConnectivity () const {
