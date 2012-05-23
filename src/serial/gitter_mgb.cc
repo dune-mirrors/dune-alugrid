@@ -342,7 +342,7 @@ void MacroGridBuilder :: cubeHexaGrid (int n, ostream & out) {
 
   const int bndtype = -1 ;
   out.setf(ios::fixed, ios::floatfield) ;
-  out.precision ( ALUGridStreamPrecision :: precision() ) ;
+  out.precision ( ALUGridExternalParameters :: precision() ) ;
   n = n < 0 ? 0 : n ;
   int npe = n + 1 ;
   out << (npe * npe * npe) << endl ;
@@ -968,7 +968,7 @@ void Gitter :: Geometric :: BuilderIF :: macrogridBuilderImpl (istream_t & in)
   
   // set scientific mode and high precision 
   raw << scientific ;
-  raw.precision( ALUGridStreamPrecision :: precision() );
+  raw.precision( ALUGridExternalParameters :: precision() );
 
   MacroGridBuilder mm (*this) ;
 

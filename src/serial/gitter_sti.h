@@ -23,6 +23,26 @@ class MacroGhostInfoHexa;
 class MacroGhostInfoTetra;
 
 
+// enternal parameter for to be used 
+// in ALUGrid and that can be changed from outside
+struct ALUGridExternalParameters
+{
+  // return precision to be used in standard ostreams 
+  static size_t& precision()
+  {
+    static size_t streamPrecision = 16 ;
+    return streamPrecision;
+  }
+
+  // return limit of number of ranks to be used 
+  // with the method MPI_Allgather 
+  static int& vertexEstimateRankLimit() 
+  {
+    static int rankLimit = 512 ;
+    return rankLimit;
+  }
+};
+
 // forward declaration 
 class Gitter;
 

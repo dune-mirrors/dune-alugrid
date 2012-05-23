@@ -338,7 +338,7 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & mpAcc
   // for small processor numbers use gcollect version 
   // this method should be faster (log p), 
   // but is more memory consuming O( p ) 
-  if( mpAccess.psize () < 512 ) 
+  if( mpAccess.psize () < ALUGridExternalParameters :: vertexEstimateRankLimit() ) 
     vertexLinkageEstimateGCollect ( mpAccess );
   else 
     // for larger processor numbers use bcast version 
