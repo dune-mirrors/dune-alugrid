@@ -26,12 +26,12 @@ VertexPllBaseX :: ~VertexPllBaseX () {
   return ;
 }
 
-vector < int > VertexPllBaseX :: estimateLinkage () const {
-  return vector < int > ((*_lpn).first) ;
-}
-
 LinkedObject :: Identifier VertexPllBaseX :: getIdentifier () const {
   return Identifier (myvertex().ident ()) ;
+}
+
+vector < int > VertexPllBaseX :: estimateLinkage () const {
+  return vector < int > ((*_lpn).first) ;
 }
 
 bool VertexPllBaseX :: setLinkage (vector < int > lp) {

@@ -168,64 +168,183 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
   return ;
 }
 
-set < int, less < int > > GitterPll :: MacroGitterPll :: secondScan () {
+set < int, less < int > > GitterPll :: MacroGitterPll :: secondScan () 
+{
   set < int, less < int > > s ;
   {
     AccessIterator < vertex_STI > :: Handle w (*this) ;
-    for ( w.first () ; ! w.done () ; w.next ()) {
-      vector < int > l = w.item ().accessPllX ().estimateLinkage () ;
-      for (vector < int > :: const_iterator i = l.begin () ; i != l.end () ; s.insert (* i ++)) ;
+    for ( w.first () ; ! w.done () ; w.next ()) 
+    {
+      vertex_STI& vertex = w.item();
+      // only border vertices can have linkage 
+      if( vertex.isBorder() ) 
+      {
+        const vector < int > l = w.item ().accessPllX ().estimateLinkage () ;
+        const vector < int > :: const_iterator iEnd = l.end ();
+        for (vector < int > :: const_iterator i = l.begin () ; i != iEnd; ++i ) 
+        {
+          s.insert ( *i ) ;
+        }
+      }
     }
   }
   return s ;
 }
 
-void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & c) 
+void GitterPll :: MacroGitterPll :: vertexLinkageEstimateGCollect (MpAccessLocal & mpAccess) 
 {
   typedef map < int, AccessIterator < vertex_STI > :: Handle, less < int > > map_t ;
-  map_t map ;
-  const int np = c.psize (), me = c.myrank () ;
+  map_t vxmap ;
+  const int np = mpAccess.psize (), me = mpAccess.myrank () ;
+
   ObjectStream os ;
   {
+    ObjectStream ostmp ;
     AccessIterator < vertex_STI > :: Handle w (*this) ;
-    os.writeObject (w.size ()) ;
+
+    const int estimate = 0.25 * w.size() + 1 ;
+    // reserve memory 
+    ostmp.reserve( estimate * sizeof(int) );
+    int size = 0;
     for (w.first () ; ! w.done () ; w.next ()) 
     {
-      int id = w.item ().ident () ;
-      os.writeObject (id) ;
-      map [id] = w ;
+      vertex_STI& vertex = w.item();
+
+      // only insert border vertices 
+      if( vertex.isBorder() )
+      {
+        ++size ;
+        int id = vertex.ident () ;
+        ostmp.writeObject( id );
+        vxmap[ id ] = w ;
+      }
     }
+    os.writeObject( size ) ;
+    os.writeStream( ostmp );
   }
 
   // exchange data 
-  vector < ObjectStream > osv = c.gcollect (os) ;
+  vector < ObjectStream > osv = mpAccess.gcollect( os );
+
+  // free memory 
+  os.reset();
 
   {
+    map_t :: const_iterator vxmapEnd = vxmap.end();
     for (int i = 0 ; i < np ; ++i ) 
     {
       if (i != me) 
       {
-        int num ;
-        osv [i].readObject (num) ;
-        for (int j = 0 ; j < num ; ++j ) 
+        ObjectStream& osv_i = osv[ i ]; 
+
+        int size ;
+        osv_i.readObject ( size ) ;
+        for (int j = 0 ; j < size; ++j ) 
         {
       	  int id ;
-      	  osv [i].readObject (id) ;
-          map_t :: const_iterator hit = map.find (id) ;
-      	  if (hit != map.end ()) 
+      	  osv_i.readObject( id ) ;
+          map_t :: const_iterator hit = vxmap.find (id) ;
+      	  if( hit != vxmapEnd ) 
           {
       	    vector < int > s = (*hit).second.item ().accessPllX ().estimateLinkage () ;
 	          if (find (s.begin (), s.end (), i) == s.end ()) 
             {
-      	      s.push_back (i) ;
+      	      s.push_back( i );
 	            (*hit).second.item ().accessPllX ().setLinkage (s) ;
 	          }
 	        }
       	}
+        // free memory 
+        osv_i.reset();
       }
     }
   }
   return ;
+}
+
+void GitterPll :: MacroGitterPll :: vertexLinkageEstimateBcast (MpAccessLocal & mpAccess) 
+{
+  typedef map < int, vertex_STI* > map_t ;
+  map_t vxmap ;
+  const int np = mpAccess.psize ();
+  const int me = mpAccess.myrank () ;
+
+  // exchange data 
+  {
+    AccessIterator < vertex_STI > :: Handle w (*this) ;
+    for (w.first () ; ! w.done () ; w.next ()) 
+    {
+      vertex_STI& vertex = w.item();
+
+      // only insert border vertices 
+      if( vertex.isBorder() )
+      {
+        vxmap[ vertex.ident() ] = &vertex ;
+      }
+    }
+  }
+
+  // get sizes for all ranks needed in later bcast cycle 
+  int mysize = vxmap.size();
+  vector< int > sizes = mpAccess.gcollect( mysize ); 
+
+  vector< int > borderIds; 
+  for (int rank = 0 ; rank < np ; ++rank ) 
+  {
+    const int idSize = sizes[ rank ] ;
+    // resize buffer 
+    borderIds.resize( idSize );
+
+    const map_t :: const_iterator vxmapEnd = vxmap.end();
+
+    // fill buffer  
+    if( rank == me ) 
+    {
+      int count = 0;
+      for(map_t :: const_iterator vx = vxmap.begin(); vx != vxmapEnd; ++vx, ++count )
+      {
+        borderIds[ count ] = (*vx).first ;
+      }
+      assert( int(borderIds.size()) == idSize ); 
+    }
+
+    // send border vertex list to all others 
+    mpAccess.bcast( &borderIds[ 0 ], idSize, rank );
+
+    // check connectivy for receives vertex ids 
+    if( rank != me ) 
+    {
+      for (int j = 0 ; j < idSize; ++j ) 
+      {
+        const int id = borderIds[ j ];
+        map_t :: const_iterator hit = vxmap.find (id) ;
+        if( hit != vxmapEnd ) 
+        {
+          vector < int > s = (*hit).second->accessPllX ().estimateLinkage () ;
+          if (find (s.begin (), s.end (), rank) == s.end ()) 
+          {
+            s.push_back( rank );
+            (*hit).second->accessPllX ().setLinkage (s) ;
+          }
+        }
+      }
+    }
+  }
+  return ;
+}
+
+void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & mpAccess) 
+{
+  // for small processor numbers use gcollect version 
+  // this method should be faster (log p), 
+  // but is more memory consuming O( p ) 
+  if( mpAccess.psize () < 512 ) 
+    vertexLinkageEstimateGCollect ( mpAccess );
+  else 
+    // for larger processor numbers use bcast version 
+    // this method is more time consuming (p log p)
+    // but is the memory consumption is only O( 1 )
+    vertexLinkageEstimateBcast ( mpAccess );
 }
 
 void GitterPll :: MacroGitterPll :: identification (MpAccessLocal & c) 

@@ -148,6 +148,12 @@ class GitterPll : public virtual Gitter {
         vector < pair < list < AccessIterator < hface_STI > :: Handle >, list < AccessIterator < hface_STI > :: Handle > > > _hfaceTT ;
         virtual set < int, less < int > > secondScan () ;
         virtual void vertexLinkageEstimate (MpAccessLocal &) ;
+        // vertexLinkageEstimation with gcollect( MPI_Allgather, memory consuming )
+        // time = log p, memory = O(p)
+        void vertexLinkageEstimateGCollect (MpAccessLocal &) ;
+        // vertexLinkageEstimation with bcast( MPI_Bcast, memory O(1), more time consuming )
+        // time = p log p, memory = O(1)
+        void vertexLinkageEstimateBcast (MpAccessLocal &) ;
       public :
         MacroGitterPll () {}
         virtual ~MacroGitterPll () {}
