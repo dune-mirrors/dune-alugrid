@@ -243,9 +243,10 @@ class GitterPll : public virtual Gitter {
     // constructor, take communicator for parameter communication 
     explicit GitterPll ( MpAccessLocal & mpa ) ;
    ~GitterPll () {}
-  friend class LeafIteratorTT < vertex_STI > ;
-  friend class LeafIteratorTT < hedge_STI > ;
-  friend class LeafIteratorTT < hface_STI > ;
+
+    friend class LeafIteratorTT < vertex_STI > ;
+    friend class LeafIteratorTT < hedge_STI > ;
+    friend class LeafIteratorTT < hface_STI > ;
   protected :
     template <class StopRule_t> 
     inline pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *> 
