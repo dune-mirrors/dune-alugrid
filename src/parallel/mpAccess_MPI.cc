@@ -333,6 +333,20 @@ void MpAccessMPI :: bcast (double* buff, int length, int root ) const
   MPI_Bcast(buff, length, MPI_DOUBLE, root, _mpiComm) ;
 }
 
+int MpAccessMPI :: exscan( int myvalue ) const 
+{
+  int sum = myvalue ;
+  MPI_Exscan(&myvalue, &sum, 1, MPI_INT, MPI_SUM, _mpiComm) ;
+  return sum;
+}
+
+int MpAccessMPI :: scan( int myvalue ) const 
+{
+  int sum = myvalue ;
+  MPI_Scan(&myvalue, &sum, 1, MPI_INT, MPI_SUM, _mpiComm) ;
+  return sum;
+}
+
 vector < int > MpAccessMPI :: gcollect (int i) const {
   vector < int > r (psize (), 0L) ;
   int * v = new int [psize ()] ;

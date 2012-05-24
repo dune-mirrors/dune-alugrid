@@ -1160,11 +1160,23 @@ void GitterPll :: loadBalancerMacroGridChangesNotify ()
   // get number of macro elements 
   const int macroElements = w.size () ;
 
-  // get sizes from all processes 
-  vector < int > sizes = mpAccess ().gcollect ( macroElements ) ;
+  // sum up for each process and and substract macroElements again 
+  cnt = mpAccess ().scan( macroElements ) - macroElements ;
 
-  // count sizes for all processors with a rank lower than mine 
-  for (int i = 0 ; i < mpAccess ().myrank () ; cnt += sizes [ i++ ]) ;
+#ifndef NDEBUG 
+  // make sure that we get the same value as before 
+  //std::cout << "P[ " << mpAccess().myrank() << " ] cnt = " << cnt << std::endl;
+  { 
+    int oldcnt = 0;
+    // get sizes from all processes 
+    vector < int > sizes = mpAccess ().gcollect ( macroElements ) ;
+
+    // count sizes for all processors with a rank lower than mine 
+    for (int i = 0 ; i < mpAccess ().myrank () ; oldcnt += sizes [ i++ ]) ;
+    assert( oldcnt == cnt );
+  }
+#endif
+
 
   // set ldb vertex indices to all elements 
   for (w.first () ; ! w.done () ; w.next (), ++ cnt ) 

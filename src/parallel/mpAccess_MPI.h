@@ -90,6 +90,8 @@ public:
   pair<double,double> gsum (pair<double,double>) const ;
   void bcast(int*, int, int ) const; 
   void bcast(double*, int, int ) const; 
+  int exscan ( int ) const ;
+  int scan ( int ) const ;
   vector < int > gcollect (int) const ;
   vector < double > gcollect (double) const ;
   vector < vector < int > > gcollect (const vector < int > &) const ;
