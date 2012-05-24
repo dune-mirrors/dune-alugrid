@@ -94,9 +94,10 @@ class LoadBalancer {
           ParMETIS_V3_AdaptiveRepart = 14   
         } ;
       private :
+        template <class idx_t>
         void graphCollect (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,
                            insert_iterator < ldb_edge_set_t >,
-                           int * , const bool ) const ;
+                           idx_t* , const bool ) const ;
       public :
         static const char * methodToString (method) ;
         inline DataBase () ;

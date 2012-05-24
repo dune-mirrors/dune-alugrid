@@ -42,11 +42,12 @@ void LoadBalancer :: DataBase :: printLoad () const {
   return ;
 } 
 
+template <class idx_t>
 void LoadBalancer :: DataBase :: 
 graphCollect (const MpAccessGlobal & mpa, 
               insert_iterator < ldb_vertex_map_t > nodes, 
               insert_iterator < ldb_edge_set_t > edges,
-              int* vtxdist, const bool serialPartitioner ) const 
+              idx_t* vtxdist, const bool serialPartitioner ) const 
 {
   // for parallel partitioner return local vertices and edges 
   // for serial partitioner these have to be communicates to all
@@ -181,11 +182,12 @@ graphCollect (const MpAccessGlobal & mpa,
   return ;
 }
 
+template <class real_t, class idx_t>
 static void optimizeCoverage (const int nparts, 
                               const int len, 
-                              const int * const reference, 
-                              const float * const weight, 
-                              int * const proposal, 
+                              const idx_t* const reference, 
+                              const real_t* const weight, 
+                              idx_t* const proposal, 
                               const int verbose) 
 {
   // 'reference' ist das Referenzarray, das mit dem 'proposal'
@@ -279,13 +281,14 @@ static void optimizeCoverage (const int nparts,
   return ;
 }
 
+template <class real_t, class idx_t>
 static bool collectInsulatedNodes (const int nel, 
-                                   const float * const vertex_w, 
-                                   const int * const edge_p, 
-                                   const int * const edge, 
-                                   const int * const edge_w, 
+                                   const real_t* const vertex_w, 
+                                   const idx_t* const edge_p, 
+                                   const idx_t* const edge, 
+                                   const idx_t* const edge_w, 
                                    const int np, 
-                                   int * neu) 
+                                   idx_t* neu) 
 {
   // 'collectInsulatedNodes (.)' ist eine Behelfsl"osung, damit der MHD Code
   // mit seinen periodischen Randelementen nicht zu Bruch geht. Da es sich
@@ -369,8 +372,11 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   ldb_edge_set_t    edges ;
   ldb_vertex_map_t  nodes ; 
 
+  typedef ALUGridMETIS :: realtype real_t ;
+  typedef ALUGridMETIS :: idxtype  idx_t ;
+
   // vector of vertex distribution (only for ParMETIS)
-  int * vtxdist = ( serialPartitioner ) ?  0 : new int [np + 1];
+  idx_t* vtxdist = ( serialPartitioner ) ?  0 : new idx_t [np + 1];
 
   // collect graph from all processors 
   // needs a all-to-all (allgather) communication 
@@ -433,9 +439,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
       }
     }
 
-    typedef ALUGridMETIS :: realtype real_t ;
-    typedef ALUGridMETIS :: idxtype  idx_t ;
-
     // allocate edge memory for graph partitioners 
     // get memory at once 
     idx_t  * const edge_mem    = new idx_t [(nel + 1) + ned + ned ];
@@ -448,7 +451,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     assert ( edge_p && edge && edge_w ) ;
     
     {
-      int * edge_pPos = edge_p ;
+      idx_t* edge_pPos = edge_p ;
       int count = 0, index = -1 ;
       
       ldb_edge_set_t :: const_iterator iEnd = edges.end();
@@ -636,7 +639,8 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         // abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
         // in Aktion tritt.
          
-        optimizeCoverage (np, nel, part, vertex_w, neu, me == 0 ? debugOption (4) : 0) ;
+        const int verbose = me == 0 ? debugOption (4) : 0;
+        optimizeCoverage (np, nel, part, vertex_w, neu, verbose ) ;
       }
 
       // Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
