@@ -51,12 +51,15 @@ int MpAccessMPI :: getRank()
 
 MpAccessMPI :: MpAccessMPI (const MpAccessMPI & a)
 : _mpiCommPtr( a._mpiCommPtr->clone() ),
+  _minmaxsum( 0 ),
   _psize( getSize() ) , _myrank( getRank() )
 {
+  initMinMaxSum();
 }
 
 MpAccessMPI :: ~MpAccessMPI ()
 {
+  delete _minmaxsum;
   delete _mpiCommPtr;
   _mpiCommPtr = 0;
 }
@@ -297,6 +300,72 @@ void MpAccessMPI :: gmin (int* a,int size,int *x) const {
 void MpAccessMPI :: gsum (int* a,int size,int *x) const {
   MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_SUM, _mpiComm) ;
   assert (test == MPI_SUCCESS) ;
+}
+
+struct MinMaxSumOp : public MpAccessMPI :: MinMaxSumIF 
+{
+  MinMaxSumOp ( const MpAccessMPI& mpAccess ) 
+    : _mpAccess( mpAccess )
+  {
+    MPI_Type_contiguous (3, MPI_DOUBLE, &_minmaxsum_t);
+    MPI_Type_commit (&_minmaxsum_t);
+    MPI_Op_create((MPI_User_function *)&min_max_sum, TRUE, &_op);
+  }
+
+  ~MinMaxSumOp() 
+  {
+    MPI_Op_free (&_op);
+  }
+
+  const MpAccessMPI& _mpAccess ;
+
+  MPI_Op _op; 
+  MPI_Datatype _minmaxsum_t;
+
+  mutable double recvbuf[ 3 ];
+
+  static void 
+  min_max_sum( double* in, double* inout, 
+               int* len, MPI_Datatype* datatype ) 
+  {
+    const int size = *len ;
+    for( int i = 0; i < size; i += 3 )
+    {
+      inout[ i   ] = std::min( in[ i   ], inout[ i   ] ); 
+      inout[ i+1 ] = std::max( in[ i+1 ], inout[ i+1 ] ); 
+      inout[ i+2 ] = inout[ i+2 ] + in[ i+2 ] ;
+    }
+  } 
+
+  const double (& minmaxsum( double value ) const)[3] 
+  {
+    const MpAccessMPI :: CommIF* _mpiCommPtr = _mpAccess.mpiCommPtr();
+    // get mpi communicator (use define, see above)
+    MPI_Comm comm = _mpiComm ;
+
+    double sendbuf[ 3 ] = { value, value, value };
+    MPI_Allreduce( &sendbuf[ 0 ], &recvbuf[ 0 ], 3, _minmaxsum_t, _op, comm );
+    return recvbuf ;
+  }
+};
+
+void MpAccessMPI :: initMinMaxSum() 
+{
+  if( ! _minmaxsum ) 
+    _minmaxsum = new MinMaxSumOp( *this );
+}
+
+const double (& MpAccessMPI :: minmaxsum( double value ) const )[3]
+{
+  static double recvbuf[ 3 ];
+  recvbuf[ 0 ] = gmin( value );
+  recvbuf[ 1 ] = gmax( value );
+  recvbuf[ 2 ] = gsum( value );
+
+  // does not work yet due to some double free corruption 
+  //assert( _minmaxsum );
+  //return _minmaxsum->minmaxsum( value );
+  return recvbuf;
 }
 
 pair<double,double> MpAccessMPI :: gmax (pair<double,double> p) const {

@@ -34,6 +34,7 @@ class MpAccessGlobal {
     virtual void gmax (int*,int,int*) const = 0 ;
     virtual void gmin (int*,int,int*) const = 0 ;
     virtual void gsum (int*,int,int*) const = 0 ;
+    virtual const double (& minmaxsum( double ) const)[3] = 0;
     virtual pair<double,double> gmax (pair<double,double>) const = 0 ;
     virtual pair<double,double> gmin (pair<double,double>) const = 0 ;
     virtual pair<double,double> gsum (pair<double,double>) const = 0 ;

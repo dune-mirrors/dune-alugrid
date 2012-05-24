@@ -6,6 +6,15 @@
 class MpAccessMPI : public MpAccessLocal 
 {
 public:
+  class MinMaxSumIF 
+  {
+  protected:  
+      MinMaxSumIF () {}
+  public:  
+    virtual ~MinMaxSumIF() {}
+    virtual const double (& minmaxsum( double ) const )[3] = 0;
+  };
+
   typedef MpAccessGlobal :: CommIF CommIF;
 
   template <class MPICommunicator>
@@ -37,9 +46,10 @@ public:
   const CommIF* mpiCommPtr() const { return _mpiCommPtr; }
 
 protected:  
-
   // class holding the MPI communicator 
   const CommIF* _mpiCommPtr;
+  // pointer to minmaxsum communication 
+  const MinMaxSumIF* _minmaxsum;
   // number of processors
   const int _psize; 
   // my processor number  
@@ -48,14 +58,18 @@ protected:
   int mpi_allgather (int *, int , int *, int) const ;
   int mpi_allgather (char *, int, char *, int) const ;
   int mpi_allgather (double *, int, double *, int ) const ;
+
+  void initMinMaxSum() ;
 public :
   // constructor taking MPI_Comm 
   // to avoid MPI types here this is a template constructor 
   template <class MPICommunicator>  
   inline MpAccessMPI (MPICommunicator mpicomm ) 
     : _mpiCommPtr( new Comm<MPICommunicator> ( mpicomm ) ), 
+      _minmaxsum( 0 ),
       _psize( getSize() ), _myrank( getRank() )
   {
+    initMinMaxSum();
   }
 
   // copy constructor 
@@ -85,6 +99,7 @@ public:
   void gmax (int*,int,int*) const ;
   void gmin (int*,int,int*) const ;
   void gsum (int*,int,int*) const ;
+  const double (& minmaxsum( double ) const)[3] ;
   pair<double,double> gmax (pair<double,double>) const ;
   pair<double,double> gmin (pair<double,double>) const ;
   pair<double,double> gsum (pair<double,double>) const ;

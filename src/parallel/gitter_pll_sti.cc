@@ -153,6 +153,7 @@ void GitterPll :: printsize ()
     cout << endl ;
   }
 
+  // could better use MPI_gather here 
   vector < vector < int > > in = mpAccess ().gcollect (n) ;
   assert (static_cast<int> (in.size ()) == np) ;
 
@@ -1099,16 +1100,34 @@ bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db )
     // mean  - mittlere ElementLast
     // nload - Lastverh"altnis
 
+    // number of leaf elements 
     const double load = db.accVertexLoad () ;
 
+    // get:  min(load), max(load), sum(load)
+    const double (&minmaxsum)[3] = mpAccess ().minmaxsum( load ); 
+
+    // get mean value of leaf elements 
+    const double mean = minmaxsum[ 2 ] / double( np );
+
+    const double minload = minmaxsum[ 0 ];
+    const double maxload = minmaxsum[ 1 ];
+
+    /*
+    // old version using Allgather 
     vector < double > v (mpAccess ().gcollect (load)) ;
     const vector < double > :: iterator iEnd =  v.end () ;
 
     // sum up values and devide by number of cores 
     const double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
+    std::cout << mean << " mean value " << std::endl;
 
     for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
+    */
+    std::cout << mean << " mean value " << minload << "  minload  " << maxload << std::endl;
+
+    if( maxload > (_ldbOver * mean) || minload < (_ldbUnder * mean) ) 
+      neu = true ;
   }
 
 #ifndef NDEBUG
