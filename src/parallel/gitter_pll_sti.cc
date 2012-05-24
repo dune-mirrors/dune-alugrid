@@ -1096,15 +1096,17 @@ bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db )
   {
     // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
     // 
-    // load  - eigene ElementLast
-    // mean  - mittlere ElementLast
-    // nload - Lastverh"altnis
+    // load    - own load 
+    // mean    - mean load of elements 
+    // minload - minmal load 
+    // maxload - maximal load 
 
     // number of leaf elements 
     const double load = db.accVertexLoad () ;
 
     // get:  min(load), max(load), sum(load)
-    const double (&minmaxsum)[3] = mpAccess ().minmaxsum( load ); 
+    vector< double > minmaxsum = mpAccess ().minmaxsum( load ); 
+    assert( minmaxsum.size() == 3 );
 
     // get mean value of leaf elements 
     const double mean = minmaxsum[ 2 ] / double( np );
@@ -1124,7 +1126,7 @@ bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db )
     for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
       neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
     */
-    std::cout << mean << " mean value " << minload << "  minload  " << maxload << std::endl;
+    //std::cout << mean << " mean value " << minload << "  minload  " << maxload << std::endl;
 
     if( maxload > (_ldbOver * mean) || minload < (_ldbUnder * mean) ) 
       neu = true ;

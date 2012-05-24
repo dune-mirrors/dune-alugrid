@@ -12,7 +12,7 @@ public:
       MinMaxSumIF () {}
   public:  
     virtual ~MinMaxSumIF() {}
-    virtual const double (& minmaxsum( double ) const )[3] = 0;
+    virtual vector< double > minmaxsum( double ) const = 0;
   };
 
   typedef MpAccessGlobal :: CommIF CommIF;
@@ -99,7 +99,7 @@ public:
   void gmax (int*,int,int*) const ;
   void gmin (int*,int,int*) const ;
   void gsum (int*,int,int*) const ;
-  const double (& minmaxsum( double ) const)[3] ;
+  vector< double > minmaxsum( double ) const ;
   pair<double,double> gmax (pair<double,double>) const ;
   pair<double,double> gmin (pair<double,double>) const ;
   pair<double,double> gsum (pair<double,double>) const ;
