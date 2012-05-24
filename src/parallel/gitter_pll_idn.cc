@@ -284,37 +284,39 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimateBcast (MpAccessLocal & 
     }
   }
 
-  // get sizes for all ranks needed in later bcast cycle 
-  int mysize = vxmap.size();
-  vector< int > sizes = mpAccess.gcollect( mysize ); 
+  // get max size for all ranks needed in later bcast cycle 
+  const int mysize  = vxmap.size();
+  const int maxSize = mpAccess.gmax( mysize ) + 1; // +1 for the size 
 
-  vector< int > borderIds; 
+  // create buffer 
+  vector< int > borderIds( maxSize, 0 ); 
+
+  // loop over all ranks 
   for (int rank = 0 ; rank < np ; ++rank ) 
   {
-    const int idSize = sizes[ rank ] ;
-    // resize buffer 
-    borderIds.resize( idSize );
-
     const map_t :: const_iterator vxmapEnd = vxmap.end();
-
     // fill buffer  
     if( rank == me ) 
     {
-      int count = 0;
+      // store the size on first position 
+      borderIds[ 0 ] = mysize ;
+      int count = 1;
       for(map_t :: const_iterator vx = vxmap.begin(); vx != vxmapEnd; ++vx, ++count )
       {
         borderIds[ count ] = (*vx).first ;
       }
-      assert( int(borderIds.size()) == idSize ); 
     }
 
     // send border vertex list to all others 
-    mpAccess.bcast( &borderIds[ 0 ], idSize, rank );
+    mpAccess.bcast( &borderIds[ 0 ], maxSize, rank );
 
     // check connectivy for receives vertex ids 
     if( rank != me ) 
     {
-      for (int j = 0 ; j < idSize; ++j ) 
+      // get size which is the first entry 
+      const int idSize = borderIds[ 0 ];
+      // loop over all sended vertex ids 
+      for (int j = 1 ; j <= idSize; ++j ) 
       {
         const int id = borderIds[ j ];
         map_t :: const_iterator hit = vxmap.find (id) ;
@@ -330,7 +332,6 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimateBcast (MpAccessLocal & 
       }
     }
   }
-  return ;
 }
 
 void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & mpAccess) 
