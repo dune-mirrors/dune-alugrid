@@ -362,10 +362,11 @@ vertex2Face [8][2] = {
   {1,3} // vx = 7
 };
                                                                     
-int Gitter :: Geometric :: Hexa :: test () const {
-  static const int v0[8][2] = {{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3}} ;
-  static const int v1[8][2] = {{2,0},{4,1},{3,1},{2,1},{2,3},{2,2},{3,2},{4,2}} ;
-  static const int v2[8][2] = {{5,0},{5,3},{4,0},{3,0},{5,1},{3,3},{4,3},{5,2}} ;
+int Gitter :: Geometric :: Hexa :: test () const 
+{
+  const int v0[8][2] = {{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3}} ;
+  const int v1[8][2] = {{2,0},{4,1},{3,1},{2,1},{2,3},{2,2},{3,2},{4,2}} ;
+  const int v2[8][2] = {{5,0},{5,3},{4,0},{3,0},{5,1},{3,3},{4,3},{5,2}} ;
   int nfaults = 0 ;
   {
     for(int i = 0 ; i < 8 ; i ++ ) {
@@ -374,19 +375,19 @@ int Gitter :: Geometric :: Hexa :: test () const {
       int i2 = v2[i][0], j2 = v2[i][1] ;
       if(myvertex (i0, j0) != myvertex (i1, j1)) {
         cerr << "**FEHLER auf level: " << level () << " " ;
-  cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i1 << "," << j1 << ")";
-  cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0) ;
-  cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1) << " " << twist (i1) ;
-  cerr << endl ; 
-  nfaults ++ ;
+        cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i1 << "," << j1 << ")";
+        cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0) ;
+        cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1) << " " << twist (i1) ;
+        cerr << endl ; 
+        nfaults ++ ;
       }
       if(myvertex (i0, j0) != myvertex (i2, j2)) {
         cerr << "**FEHLER auf level: " << level () << " " ;
-  cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i2 << "," << j2 << ")" ;
-  cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0) ;
-  cerr << "\t(" << i2 << "," << j2 << ") =" << myvertex(i2,j2) << " " << twist (i1) ;
-  cerr << endl;
-  nfaults ++ ;
+        cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i2 << "," << j2 << ")" ;
+        cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0) ;
+        cerr << "\t(" << i2 << "," << j2 << ") =" << myvertex(i2,j2) << " " << twist (i1) ;
+        cerr << endl;
+        nfaults ++ ;
       }
     }
   }
