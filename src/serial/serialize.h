@@ -54,9 +54,15 @@ public :
   // reset read position 
   inline void resetReadPosition() { _rb = 0; }
   
+  //! set position of write counter 
+  void seekp( const size_t pos ) { _wb = pos ; }
+
   // return's true if size > 0 and read position is zero
   // i.e. a read othe stream will result some valid data  
   inline bool validToRead () const { return (_wb > 0) && (_rb == 0); }
+
+  // return size of bytes allready written to stream 
+  inline int capacity() const { return _len; }
 
   // return size of bytes allready written to stream 
   inline int size() const { return _wb; }
@@ -220,10 +226,10 @@ public:
     _rb = newRb;
   }
   
-protected:
   inline char * getBuff (const size_t ap) { return (_buf + ap); }
   inline const char * getBuff (const size_t ap) const { return (_buf + ap); }
 
+protected:
   // reallocated the buffer if necessary 
   inline void reallocateBuffer(size_t newSize) throw (OutOfMemoryException)
   {

@@ -121,6 +121,7 @@ graphCollect (const MpAccessGlobal & mpa,
 
   try 
   {
+
     // exchange data 
     vector < ObjectStream > osv = mpa.gcollect (os) ;
 
@@ -166,6 +167,171 @@ graphCollect (const MpAccessGlobal & mpa,
 
         // free memory of osv[i]
         osv_i.reset();
+      }
+    }
+  } 
+  catch (ObjectStream :: EOFException) 
+  {
+    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+  } 
+  catch (ObjectStream :: OutOfMemoryException) 
+  {
+    cerr << "**FEHLER (FATAL) Out Of Memory in " << __FILE__ << " " << __LINE__ << endl ;
+    abort () ;
+  }
+  return ;
+}
+
+template <class idx_t>
+void LoadBalancer :: DataBase :: 
+graphCollectBcast (const MpAccessGlobal & mpa, 
+                   insert_iterator < ldb_vertex_map_t > nodes, 
+                   insert_iterator < ldb_edge_set_t > edges,
+                   idx_t* vtxdist, const bool serialPartitioner ) const 
+{
+  // for parallel partitioner return local vertices and edges 
+  // for serial partitioner these have to be communicates to all
+  // processes 
+   
+  // my rank number 
+  const int me = mpa.myrank();
+  // get number of processes 
+  const int np = mpa.psize () ;
+
+  // my data stream 
+  ObjectStream os;
+   
+  if( ! serialPartitioner )
+  {
+    {
+      ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
+      for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
+         i != iEnd; ++i ) 
+      {
+        {
+          const GraphVertex& x = (*i).first;
+          * nodes ++ = pair < const GraphVertex, int > ( x , me ) ;
+        } 
+      }
+    }
+
+    {
+      ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
+      for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; 
+           e != eEnd; ++e) 
+      {
+        const GraphEdge& x = (*e) ;
+        // edges exists twice ( u , v ) and ( v , u )
+        // with both orientations 
+        * edges ++ = x ;
+        * edges ++ = - x ;
+      }
+    }
+
+    // make sure vtxdist exists 
+    assert( vtxdist );
+
+    // vtxdist always starts with 0 
+    // so initialize here 
+    vtxdist[ 0 ] = 0 ;
+  }
+
+  {
+    // write number of elements  
+    const int vertexSize = _vertexSet.size () ;
+    os.writeObject ( vertexSize ) ;
+
+    if( serialPartitioner )
+    {
+
+      // write vertices 
+      ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
+      for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; i != iEnd; ++i ) 
+      {
+        os.writeObject ((*i).first) ;
+      }
+
+      // write number of edges 
+      const int edgeSize = _edgeSet.size () ;
+      os.writeObject ( edgeSize ) ;
+
+      // write edges 
+      ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
+      for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; e != eEnd; ++e )
+      {
+        os.writeObject (*e);
+      }
+    }
+  }
+
+  try 
+  {
+    // get max buffer size (only for serial partitioner we need to communicate)
+    const int maxSize = serialPartitioner ? mpa.gmax( os.size() ) : os.size();
+
+    // create bcast buffer  
+    ObjectStream sendrecv ;
+    sendrecv.reserve( maxSize * sizeof(char) );
+
+    for( int rank = 0; rank < np; ++ rank ) 
+    {
+      // reset read/write positions 
+      sendrecv.clear();
+
+      // write my data 
+      if( rank == me ) 
+      {
+        // write my stream 
+        sendrecv.writeStream( os );
+        // clear data 
+        os.reset();
+      }
+
+      // make sure size is still ok 
+      assert( sendrecv.capacity() == maxSize );
+
+      // exchange data 
+      mpa.bcast( sendrecv.getBuff(0), maxSize, rank );
+
+      // insert data into graph map 
+      {
+        // reset read posistion 
+        sendrecv.resetReadPosition();
+        // adjust write count to max length to avoid eof errors 
+        sendrecv.seekp( maxSize );
+
+        int len ;
+        sendrecv.readObject ( len ) ;
+        assert (len >= 0) ;
+
+        // read graph for serial partitioner 
+        if( serialPartitioner ) 
+        {
+          for (int j = 0 ; j < len ; ++j) 
+          {
+            GraphVertex x ;
+            sendrecv.readObject (x) ;
+            * nodes ++ = pair < const GraphVertex, int > (x, rank) ;
+          } 
+
+          sendrecv.readObject (len) ;
+          assert (len >= 0) ;
+
+          for (int j = 0 ; j < len ; ++j) 
+          {
+            GraphEdge x ;
+            sendrecv.readObject (x) ;
+            * edges ++ = x ;
+            * edges ++ = - x ;
+          }
+        }
+        else 
+        {
+          // see above vtxdist [ 0 ] = 0
+          // sum up number of vertices for processor rank 
+          vtxdist[ rank + 1 ] = vtxdist[ rank ] + len ;
+        }
       }
     }
   } 
@@ -380,7 +546,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
   // collect graph from all processors 
   // needs a all-to-all (allgather) communication 
-  graphCollect (mpa,
+  graphCollectBcast (mpa,
                 insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
                 insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
                 vtxdist,
@@ -405,7 +571,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     mth = METIS_PartGraphKway ;
     
     // redo the graph collect in the case that the mesh is not distributed 
-    graphCollect (mpa,
+    graphCollectBcast (mpa,
                   insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
                   insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
                   vtxdist,

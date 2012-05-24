@@ -104,6 +104,7 @@ public:
   pair<double,double> gmin (pair<double,double>) const ;
   pair<double,double> gsum (pair<double,double>) const ;
   void bcast(int*, int, int ) const; 
+  void bcast(char*, int, int ) const; 
   void bcast(double*, int, int ) const; 
   int exscan ( int ) const ;
   int scan ( int ) const ;

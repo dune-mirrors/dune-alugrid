@@ -39,6 +39,7 @@ class MpAccessGlobal {
     virtual pair<double,double> gmin (pair<double,double>) const = 0 ;
     virtual pair<double,double> gsum (pair<double,double>) const = 0 ;
     virtual void bcast(int*,int, int) const = 0 ;
+    virtual void bcast(char*,int, int) const = 0 ;
     virtual void bcast(double*,int, int) const = 0 ;
     virtual int exscan( int ) const = 0; 
     virtual int scan( int ) const = 0; 

@@ -397,6 +397,11 @@ void MpAccessMPI :: bcast (int* buff, int length, int root ) const
   MPI_Bcast(buff, length, MPI_INT, root, _mpiComm) ;
 }
 
+void MpAccessMPI :: bcast (char* buff, int length, int root ) const 
+{
+  MPI_Bcast(buff, length, MPI_BYTE, root, _mpiComm) ;
+}
+
 void MpAccessMPI :: bcast (double* buff, int length, int root ) const 
 {
   MPI_Bcast(buff, length, MPI_DOUBLE, root, _mpiComm) ;
