@@ -304,54 +304,56 @@ void MpAccessMPI :: gsum (int* a,int size,int *x) const {
 
 struct MinMaxSumOp : public MpAccessMPI :: MinMaxSumIF 
 {
+  typedef MpAccessMPI :: minmaxsum_t  minmaxsum_t;
+
   MinMaxSumOp ( const MpAccessMPI& mpAccess ) 
     : _mpAccess( mpAccess )
   {
-    MPI_Type_contiguous (3, MPI_DOUBLE, &_double3_t);
-    MPI_Type_commit (&_double3_t);
+    MPI_Type_contiguous (3, MPI_DOUBLE, &_mpi_minmaxsum_t);
+    MPI_Type_commit (&_mpi_minmaxsum_t);
     MPI_Op_create((MPI_User_function *)&min_max_sum, 0, &_op);
   }
 
   ~MinMaxSumOp() 
   {
     MPI_Op_free (&_op);
-    MPI_Type_free(&_double3_t);
+    MPI_Type_free(&_mpi_minmaxsum_t);
   }
 
   const MpAccessMPI& _mpAccess ;
 
   MPI_Op _op; 
-  MPI_Datatype _double3_t;
-
-  mutable double recvbuf[ 3 ];
+  MPI_Datatype _mpi_minmaxsum_t;
 
   static void 
-  min_max_sum( void* inbuf, void* inoutbuf, 
+  min_max_sum( minmaxsum_t* in, minmaxsum_t* inout, 
                int* len, MPI_Datatype* datatype ) 
   {
-    double* in    = (double *) inbuf;
-    double* inout = (double *) inoutbuf;
     const int size = *len ;
-    for( int i = 0; i < size; i += 3 )
+    for( int i = 0; i < size; ++i )
     {
       // min 
-      inout[ i ] = (in[ i ] < inout[ i ]) ? in[i] : inout[i];
+      inout[ i ].min = std::min( in[ i ].min, inout[ i ].min );
       // max 
-      inout[i+1] = (in[i+1] > inout[i+1]) ? in[i+1] : inout[i+1];
+      inout[ i ].max = std::max( in[ i ].max, inout[ i ].max );
       // sum 
-      inout[i+2] =  in[i+2] + inout[i+2];
+      inout[ i ].sum += in[ i ].sum;
     }
   } 
 
-  vector< double > minmaxsum( double value ) const 
+  minmaxsum_t minmaxsum( double value ) const 
   {
     const MpAccessMPI :: CommIF* _mpiCommPtr = _mpAccess.mpiCommPtr();
     // get mpi communicator (use define, see above)
     MPI_Comm comm = _mpiComm ;
 
-    double sendbuf[ 3 ] = { value, value, value };
-    vector< double > result(3, value );
-    MPI_Allreduce( &sendbuf[ 0 ], &result[ 0 ], 1, _double3_t, _op, comm );
+    // create send buf 
+    minmaxsum_t sendbuf( value ) ; 
+
+    // create recv buf 
+    minmaxsum_t result( value ); 
+
+    MPI_Allreduce( &sendbuf, &result, 1, _mpi_minmaxsum_t, _op, comm );
     return result;
   }
 };
@@ -362,7 +364,7 @@ void MpAccessMPI :: initMinMaxSum()
     _minmaxsum = new MinMaxSumOp( *this );
 }
 
-vector< double > MpAccessMPI :: minmaxsum( double value ) const
+MpAccessMPI :: minmaxsum_t  MpAccessMPI :: minmaxsum( double value ) const
 {
   assert( _minmaxsum );
   return _minmaxsum->minmaxsum( value );

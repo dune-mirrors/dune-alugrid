@@ -1102,17 +1102,13 @@ bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db )
     // maxload - maximal load 
 
     // number of leaf elements 
-    const double load = db.accVertexLoad () ;
+    const double myload = db.accVertexLoad () ;
 
-    // get:  min(load), max(load), sum(load)
-    vector< double > minmaxsum = mpAccess ().minmaxsum( load ); 
-    assert( minmaxsum.size() == 3 );
+    // get:  min(myload), max(myload), sum(myload)
+    MpAccessLocal :: minmaxsum_t load = mpAccess ().minmaxsum( myload ); 
 
     // get mean value of leaf elements 
-    const double mean = minmaxsum[ 2 ] / double( np );
-
-    const double minload = minmaxsum[ 0 ];
-    const double maxload = minmaxsum[ 1 ];
+    const double mean = load.sum / double( np );
 
     /*
     // old version using Allgather 
@@ -1128,7 +1124,7 @@ bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db )
     */
     //std::cout << mean << " mean value " << minload << "  minload  " << maxload << std::endl;
 
-    if( maxload > (_ldbOver * mean) || minload < (_ldbUnder * mean) ) 
+    if( load.max > (_ldbOver * mean) || load.min < (_ldbUnder * mean) ) 
       neu = true ;
   }
 

@@ -14,6 +14,25 @@ class MpAccessGlobal {
       virtual CommIF* clone () const = 0;
     };
 
+    struct MinMaxSum 
+    {
+      MinMaxSum() 
+        : min( numeric_limits< double > :: min() ),
+          max( numeric_limits< double > :: max() ),
+          sum( 0 )
+      {}
+
+      explicit MinMaxSum( const double value ) 
+        : min( value ), max( value ), sum( value )
+      {}
+
+      double min ; 
+      double max ;
+      double sum ;
+    };
+
+    typedef MinMaxSum  minmaxsum_t ;
+
     inline virtual ~MpAccessGlobal () ;
     virtual int psize () const = 0 ;
     virtual int myrank () const = 0 ;
@@ -34,7 +53,7 @@ class MpAccessGlobal {
     virtual void gmax (int*,int,int*) const = 0 ;
     virtual void gmin (int*,int,int*) const = 0 ;
     virtual void gsum (int*,int,int*) const = 0 ;
-    virtual vector< double > minmaxsum( double ) const = 0;
+    virtual minmaxsum_t minmaxsum( double ) const = 0;
     virtual pair<double,double> gmax (pair<double,double>) const = 0 ;
     virtual pair<double,double> gmin (pair<double,double>) const = 0 ;
     virtual pair<double,double> gsum (pair<double,double>) const = 0 ;

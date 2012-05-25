@@ -6,13 +6,15 @@
 class MpAccessMPI : public MpAccessLocal 
 {
 public:
+  typedef MpAccessLocal :: minmaxsum_t  minmaxsum_t;
+
   class MinMaxSumIF 
   {
   protected:  
       MinMaxSumIF () {}
   public:  
     virtual ~MinMaxSumIF() {}
-    virtual vector< double > minmaxsum( double ) const = 0;
+    virtual minmaxsum_t  minmaxsum( double ) const = 0;
   };
 
   typedef MpAccessGlobal :: CommIF CommIF;
@@ -99,7 +101,7 @@ public:
   void gmax (int*,int,int*) const ;
   void gmin (int*,int,int*) const ;
   void gsum (int*,int,int*) const ;
-  vector< double > minmaxsum( double ) const ;
+  minmaxsum_t minmaxsum( double ) const ;
   pair<double,double> gmax (pair<double,double>) const ;
   pair<double,double> gmin (pair<double,double>) const ;
   pair<double,double> gsum (pair<double,double>) const ;
