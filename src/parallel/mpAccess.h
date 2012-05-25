@@ -17,8 +17,8 @@ class MpAccessGlobal {
     struct MinMaxSum 
     {
       MinMaxSum() 
-        : min( numeric_limits< double > :: min() ),
-          max( numeric_limits< double > :: max() ),
+        : min( numeric_limits< double > :: max() ),
+          max( numeric_limits< double > :: min() ),
           sum( 0 )
       {}
 
