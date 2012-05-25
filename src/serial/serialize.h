@@ -55,7 +55,11 @@ public :
   inline void resetReadPosition() { _rb = 0; }
   
   //! set position of write counter 
-  void seekp( const size_t pos ) { _wb = pos ; }
+  void seekp( const size_t pos ) 
+  { 
+    _wb = pos ; 
+    assert( _wb <= _len );
+  }
 
   // return's true if size > 0 and read position is zero
   // i.e. a read othe stream will result some valid data  
