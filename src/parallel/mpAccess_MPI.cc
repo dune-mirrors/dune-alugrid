@@ -425,20 +425,14 @@ int MpAccessMPI :: scan( int myvalue ) const
 
 vector < int > MpAccessMPI :: gcollect (int i) const {
   vector < int > r (psize (), 0L) ;
-  int * v = new int [psize ()] ;
-  mpi_allgather (&i, 1, v, 1) ;
-  copy (v, v + psize (), r.begin ()) ;
-  delete [] v ;
+  mpi_allgather (&i, 1, &r[ 0], 1) ;
   return r ;
 }
 
 vector < double > MpAccessMPI :: gcollect (double a) const 
 {
   vector < double > r (psize (),0.0) ;
-  double * v = new double [psize ()] ;
-  mpi_allgather (& a, 1, v, 1) ;
-  copy (v, v + psize (), r.begin ()) ;
-  delete [] v;
+  mpi_allgather (& a, 1, &r[ 0 ], 1) ;
   return r ;
 }
 
