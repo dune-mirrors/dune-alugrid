@@ -336,16 +336,23 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimateBcast (MpAccessLocal & 
 
 void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & mpAccess) 
 {
-  // for small processor numbers use gcollect version 
+  const int allGatherMaxSize = ALUGridExternalParameters :: allGatherMaxSize();
+  assert( allGatherMaxSize == mpAccess.gmax( allGatherMaxSize ) );
+
+  // for small processor numbers use gcollect( MPI_Allgather ) version 
   // this method should be faster (log p), 
   // but is more memory consuming O( p ) 
-  //if( mpAccess.psize () < ALUGridExternalParameters :: vertexEstimateRankLimit() ) 
-  //  vertexLinkageEstimateGCollect ( mpAccess );
-  //else 
-    // for larger processor numbers use bcast version 
+  if( mpAccess.psize () < allGatherMaxSize )
+  {
+    vertexLinkageEstimateGCollect ( mpAccess );
+  }
+  else 
+  {
+    // for larger processor numbers use bcast ( MPI_Bcast ) version 
     // this method is more time consuming (p log p)
     // but is the memory consumption is only O( 1 )
     vertexLinkageEstimateBcast ( mpAccess );
+  }
 }
 
 void GitterPll :: MacroGitterPll :: identification (MpAccessLocal & c) 

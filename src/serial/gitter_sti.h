@@ -36,9 +36,9 @@ struct ALUGridExternalParameters
 
   // return limit of number of ranks to be used 
   // with the method MPI_Allgather 
-  static int& vertexEstimateRankLimit() 
+  static int& allGatherMaxSize() 
   {
-    static int rankLimit = 512 ;
+    static int rankLimit = 1 ;
     return rankLimit;
   }
 };

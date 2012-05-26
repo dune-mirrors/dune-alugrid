@@ -49,6 +49,32 @@ graphCollect (const MpAccessGlobal & mpa,
               insert_iterator < ldb_edge_set_t > edges,
               idx_t* vtxdist, const bool serialPartitioner ) const 
 {
+  const int allGatherMaxSize = ALUGridExternalParameters :: allGatherMaxSize();
+  assert( allGatherMaxSize == mpa.gmax( allGatherMaxSize ) );
+
+  // if the number of ranks is small, then use old allgather method 
+  if( mpa.psize() < allGatherMaxSize )
+  {
+    // old method has O(p log p) time complexity 
+    // and O(p) memory consumption which is critical 
+    // for higher number of cores 
+    graphCollectAllgather( mpa, nodes, edges, vtxdist, serialPartitioner );
+  }
+  else 
+  {
+    // otherwise use method with O(p log p) time complexity 
+    // and O(1) memory consumption
+    graphCollectBcast( mpa, nodes, edges, vtxdist, serialPartitioner );
+  }
+}
+
+template <class idx_t>
+void LoadBalancer :: DataBase :: 
+graphCollectAllgather (const MpAccessGlobal & mpa, 
+                       insert_iterator < ldb_vertex_map_t > nodes, 
+                       insert_iterator < ldb_edge_set_t > edges,
+                       idx_t* vtxdist, const bool serialPartitioner ) const 
+{
   // for parallel partitioner return local vertices and edges 
   // for serial partitioner these have to be communicates to all
   // processes 
@@ -546,12 +572,12 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
   // collect graph from all processors 
   // needs a all-to-all (allgather) communication 
-  graphCollectBcast (mpa,
+  graphCollect( mpa,
                 insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
                 insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
                 vtxdist,
                 serialPartitioner 
-               ) ;
+              ) ;
 
   // only use ParMETIS_V3_GraphKway for the initial partitioning 
   // this is when all vertices are on proc 0 
@@ -571,7 +597,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     mth = METIS_PartGraphKway ;
     
     // redo the graph collect in the case that the mesh is not distributed 
-    graphCollectBcast (mpa,
+    graphCollect( mpa,
                   insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
                   insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
                   vtxdist,
