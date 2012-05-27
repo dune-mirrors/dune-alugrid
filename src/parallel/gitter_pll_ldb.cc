@@ -45,6 +45,7 @@ void LoadBalancer :: DataBase :: printLoad () const {
 template <class idx_t>
 void LoadBalancer :: DataBase :: 
 graphCollect (const MpAccessGlobal & mpa, 
+              const int np,
               insert_iterator < ldb_vertex_map_t > nodes, 
               insert_iterator < ldb_edge_set_t > edges,
               idx_t* vtxdist, const bool serialPartitioner ) const 
@@ -53,24 +54,25 @@ graphCollect (const MpAccessGlobal & mpa,
   assert( allGatherMaxSize == mpa.gmax( allGatherMaxSize ) );
 
   // if the number of ranks is small, then use old allgather method 
-  if( mpa.psize() < allGatherMaxSize )
+  if( np < allGatherMaxSize )
   {
     // old method has O(p log p) time complexity 
     // and O(p) memory consumption which is critical 
     // for higher number of cores 
-    graphCollectAllgather( mpa, nodes, edges, vtxdist, serialPartitioner );
+    graphCollectAllgather( mpa, np, nodes, edges, vtxdist, serialPartitioner );
   }
   else 
   {
     // otherwise use method with O(p log p) time complexity 
     // and O(1) memory consumption
-    graphCollectBcast( mpa, nodes, edges, vtxdist, serialPartitioner );
+    graphCollectBcast( mpa, np, nodes, edges, vtxdist, serialPartitioner );
   }
 }
 
 template <class idx_t>
 void LoadBalancer :: DataBase :: 
 graphCollectAllgather (const MpAccessGlobal & mpa, 
+                       const int np,
                        insert_iterator < ldb_vertex_map_t > nodes, 
                        insert_iterator < ldb_edge_set_t > edges,
                        idx_t* vtxdist, const bool serialPartitioner ) const 
@@ -79,7 +81,7 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
   // for serial partitioner these have to be communicates to all
   // processes 
    
-  if( ! serialPartitioner )
+  if( ! serialPartitioner || np == 1 )
   {
     const int myrank = mpa.myrank();
     {
@@ -115,7 +117,9 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
     vtxdist[ 0 ] = 0 ;
   }
 
-  const int np = mpa.psize () ;
+  // for serial calls we are done here 
+  if( np == 1 ) return ;
+
   ObjectStream os ;
 
   {
@@ -148,7 +152,7 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
   try 
   {
 
-    // exchange data 
+    // exchange data  
     vector < ObjectStream > osv = mpa.gcollect (os) ;
 
     // free memory 
@@ -212,6 +216,7 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
 template <class idx_t>
 void LoadBalancer :: DataBase :: 
 graphCollectBcast (const MpAccessGlobal & mpa, 
+                   const int np,
                    insert_iterator < ldb_vertex_map_t > nodes, 
                    insert_iterator < ldb_edge_set_t > edges,
                    idx_t* vtxdist, const bool serialPartitioner ) const 
@@ -222,13 +227,8 @@ graphCollectBcast (const MpAccessGlobal & mpa,
    
   // my rank number 
   const int me = mpa.myrank();
-  // get number of processes 
-  const int np = mpa.psize () ;
 
-  // my data stream 
-  ObjectStream os;
-   
-  if( ! serialPartitioner )
+  if( ! serialPartitioner || np == 1 )
   {
     {
       ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
@@ -263,6 +263,12 @@ graphCollectBcast (const MpAccessGlobal & mpa,
     vtxdist[ 0 ] = 0 ;
   }
 
+  // for serial calls we are done here 
+  if( np == 1 ) return ;
+
+  // my data stream 
+  ObjectStream os;
+   
   {
     // write number of elements  
     const int vertexSize = _vertexSet.size () ;
@@ -572,7 +578,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
   // collect graph from all processors 
   // needs a all-to-all (allgather) communication 
-  graphCollect( mpa,
+  graphCollect( mpa, np,
                 insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
                 insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
                 vtxdist,
@@ -597,7 +603,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     mth = METIS_PartGraphKway ;
     
     // redo the graph collect in the case that the mesh is not distributed 
-    graphCollect( mpa,
+    graphCollect( mpa, np, 
                   insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
                   insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
                   vtxdist,

@@ -95,17 +95,23 @@ class LoadBalancer {
         } ;
       private :
         template <class idx_t>
-        void graphCollect (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,
+        void graphCollect (const MpAccessGlobal &,
+                           const int,
+                           insert_iterator < ldb_vertex_map_t >,
                            insert_iterator < ldb_edge_set_t >,
                            idx_t* , const bool ) const ;
 
         template <class idx_t>
-        void graphCollectAllgather (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,
+        void graphCollectAllgather (const MpAccessGlobal &,
+                                    const int,
+                                    insert_iterator < ldb_vertex_map_t >,
                                     insert_iterator < ldb_edge_set_t >,
                                     idx_t* , const bool ) const ;
 
         template <class idx_t>
-        void graphCollectBcast (const MpAccessGlobal &,insert_iterator < ldb_vertex_map_t >,
+        void graphCollectBcast (const MpAccessGlobal &,
+                                const int,
+                                insert_iterator < ldb_vertex_map_t >,
                                 insert_iterator < ldb_edge_set_t >,
                                 idx_t* , const bool ) const ;
       public :
