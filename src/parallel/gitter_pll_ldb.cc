@@ -45,7 +45,6 @@ void LoadBalancer :: DataBase :: printLoad () const {
 template <class idx_t>
 void LoadBalancer :: DataBase :: 
 graphCollect (const MpAccessGlobal & mpa, 
-              const int np,
               insert_iterator < ldb_vertex_map_t > nodes, 
               insert_iterator < ldb_edge_set_t > edges,
               idx_t* vtxdist, const bool serialPartitioner ) const 
@@ -54,25 +53,24 @@ graphCollect (const MpAccessGlobal & mpa,
   assert( allGatherMaxSize == mpa.gmax( allGatherMaxSize ) );
 
   // if the number of ranks is small, then use old allgather method 
-  if( np < allGatherMaxSize )
+  if( mpa.psize() < allGatherMaxSize )
   {
     // old method has O(p log p) time complexity 
     // and O(p) memory consumption which is critical 
     // for higher number of cores 
-    graphCollectAllgather( mpa, np, nodes, edges, vtxdist, serialPartitioner );
+    graphCollectAllgather( mpa, nodes, edges, vtxdist, serialPartitioner );
   }
   else 
   {
     // otherwise use method with O(p log p) time complexity 
     // and O(1) memory consumption
-    graphCollectBcast( mpa, np, nodes, edges, vtxdist, serialPartitioner );
+    graphCollectBcast( mpa, nodes, edges, vtxdist, serialPartitioner );
   }
 }
 
 template <class idx_t>
 void LoadBalancer :: DataBase :: 
 graphCollectAllgather (const MpAccessGlobal & mpa, 
-                       const int np,
                        insert_iterator < ldb_vertex_map_t > nodes, 
                        insert_iterator < ldb_edge_set_t > edges,
                        idx_t* vtxdist, const bool serialPartitioner ) const 
@@ -81,6 +79,9 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
   // for serial partitioner these have to be communicates to all
   // processes 
    
+  // number of processes 
+  const int np = mpa.psize();
+
   if( ! serialPartitioner || np == 1 )
   {
     const int myrank = mpa.myrank();
@@ -109,12 +110,13 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
       }
     }
 
-    // make sure vtxdist exists 
-    assert( vtxdist );
-
-    // vtxdist always starts with 0 
-    // so initialize here 
-    vtxdist[ 0 ] = 0 ;
+    // if vtxdist is given, we set it up here
+    if( vtxdist ) 
+    {
+      // vtxdist always starts with 0 
+      // so initialize here 
+      vtxdist[ 0 ] = 0 ;
+    }
   }
 
   // for serial calls we are done here 
@@ -216,7 +218,6 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
 template <class idx_t>
 void LoadBalancer :: DataBase :: 
 graphCollectBcast (const MpAccessGlobal & mpa, 
-                   const int np,
                    insert_iterator < ldb_vertex_map_t > nodes, 
                    insert_iterator < ldb_edge_set_t > edges,
                    idx_t* vtxdist, const bool serialPartitioner ) const 
@@ -227,6 +228,9 @@ graphCollectBcast (const MpAccessGlobal & mpa,
    
   // my rank number 
   const int me = mpa.myrank();
+
+  // number of processes 
+  const int np = mpa.psize();
 
   if( ! serialPartitioner || np == 1 )
   {
@@ -255,12 +259,13 @@ graphCollectBcast (const MpAccessGlobal & mpa,
       }
     }
 
-    // make sure vtxdist exists 
-    assert( vtxdist );
-
-    // vtxdist always starts with 0 
-    // so initialize here 
-    vtxdist[ 0 ] = 0 ;
+    // if vtxdist is given, we set it up here
+    if( vtxdist ) 
+    {
+      // vtxdist always starts with 0 
+      // so initialize here 
+      vtxdist[ 0 ] = 0 ;
+    }
   }
 
   // for serial calls we are done here 
@@ -551,7 +556,9 @@ repartition (MpAccessGlobal & mpa,
 bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa, 
                                               method mth,
                                               std::vector< int >& partition,
-                                              const int np ) 
+                                              // number of partitions to be created 
+                                              // this is not neccesarily equal to mpa.psize()
+                                              const int np )
 {
   if (debugOption (3)) printLoad () ;
   
@@ -578,7 +585,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
   // collect graph from all processors 
   // needs a all-to-all (allgather) communication 
-  graphCollect( mpa, np,
+  graphCollect( mpa,
                 insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
                 insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
                 vtxdist,
@@ -603,7 +610,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     mth = METIS_PartGraphKway ;
     
     // redo the graph collect in the case that the mesh is not distributed 
-    graphCollect( mpa, np, 
+    graphCollect( mpa,
                   insert_iterator < ldb_vertex_map_t > (nodes,nodes.begin ()),
                   insert_iterator < ldb_edge_set_t > (edges,edges.begin ()), 
                   vtxdist,
