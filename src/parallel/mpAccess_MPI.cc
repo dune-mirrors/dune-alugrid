@@ -611,29 +611,6 @@ public:
     // get mpi communicator (use define, see above)
     MPI_Comm comm = _mpiComm ;
 
-#if 1
-#if 0
-    // check for all links messages 
-    for (int link = 0 ; link < _nLinks ; ++link ) 
-    {
-      // corresponding MPI status 
-      MPI_Status status ;
-      // check for any message with tag (blocking)
-      MPI_Probe( MPI_ANY_SOURCE, _tag, comm, &status ) ; 
-
-      assert( 0 <= status.MPI_SOURCE );
-      assert( status.MPI_SOURCE < _mpAccess.psize() );
-
-      // get link number for process number from which message was received 
-      const int recvLink = _mpAccess.link( status.MPI_SOURCE );
-
-      // receive message for link 
-      bufferpair_t buff = receiveLink( comm, status ) ;
-
-      // copy to buffers 
-      out[ recvLink ] = buff ;
-    }
-#endif
     // get vector with destinations 
     const vector< int >& dest = _mpAccess.dest();
 
@@ -690,23 +667,6 @@ public:
         }
       }
     }
-#else 
-    // receive  data 
-    for (int link = 0 ; link < _nLinks ; ++link ) 
-    {
-      MPI_Status s ;
-
-      {
-        // check for message (blocking)
-        MY_INT_TEST MPI_Probe ( _dest[link], _tag, comm, & s) ; 
-        assert (test == MPI_SUCCESS) ;
-      }
-
-      bufferpair_t buff = receiveLink( comm, s );
-      // receive message, returns pair( buff, cnt );
-      out[ link ] = buff;
-    }
-#endif
     
     // wait until all processes are done with receiving
     {
