@@ -326,7 +326,7 @@ graphCollectBcast (const MpAccessGlobal & mpa,
       }
 
       // make sure size is still ok 
-      assert( sendrecv.capacity() == maxSize );
+      assert( sendrecv.capacity() >= maxSize );
 
       // exchange data 
       mpa.bcast( sendrecv.getBuff(0), maxSize, rank );
@@ -630,6 +630,10 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   const int ned = edges.size () ;
   // for ParMETIS nodes is a local graph that could be empty 
   const int nel = (serialPartitioner) ? nodes.size () : vtxdist[ np ];
+
+  // make sure every process got the same numbers 
+  assert( nel == mpa.gmax( nel ) );
+  assert( ned == mpa.gmax( ned ) );
   
   //std::cout << "Got " << nel << " number of nodes " << std::endl;
   //std::cout << "Got " << ned << " number of edges " << std::endl;
@@ -798,44 +802,60 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
       }
       else 
       {
-        // serial partitioning methods 
-        switch (mth) 
+        // if the number of graph vertices is larger 
+        // then the number of partitions 
+        if( nel <= np ) 
         {
-
-        // METIS methods 
-        case METIS_PartGraphKway :
+          std::cout << "Use simple partitioning " << std::endl;
+          // set easy partitioning 
+          for( int p=0; p<nel; ++ p ) 
           {
-            idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            ALUGridMETIS :: CALL_METIS_PartGraphKway (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
-                          & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu) ;
+            neu[ p ] = p;
           }
-          break ;
-        case METIS_PartGraphRecursive :
+        }
+        else 
+        {
+          // serial partitioning methods 
+          switch (mth) 
           {
-            idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
-            ALUGridMETIS :: CALL_METIS_PartGraphRecursive (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
-                          & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu) ;
+
+          // METIS methods 
+          case METIS_PartGraphKway :
+            {
+              idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
+              ALUGridMETIS :: CALL_METIS_PartGraphKway (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
+                            & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu) ;
+            }
+            break ;
+          case METIS_PartGraphRecursive :
+            {
+              idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np ;
+              ALUGridMETIS :: CALL_METIS_PartGraphRecursive (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
+                            & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu) ;
+            }
+            break ;
+
+          // the method 'collect' moves all elements to rank 0 
+          case COLLECT :
+            fill (neu, neu + nel, 0L) ;
+            break ;
+
+          default :
+            cerr << "**WARNUNG (FEHLER IGNORIERT) Ung\"ultige Methode [" << mth << "] zur\n" ;
+            cerr << "  Neupartitionierung angegeben. In " << __FILE__ << " " << __LINE__ << endl ;
+              
+            delete [] vertex_w ;
+            delete [] vertex_mem;
+            delete [] edge_mem;
+            delete [] tpwgts;
+            return false ;
           }
-          break ;
-
-        // the method 'collect' moves all elements to rank 0 
-        case COLLECT :
-          fill (neu, neu + nel, 0L) ;
-          break ;
-
-        default :
-          cerr << "**WARNUNG (FEHLER IGNORIERT) Ung\"ultige Methode [" << mth << "] zur\n" ;
-          cerr << "  Neupartitionierung angegeben. In " << __FILE__ << " " << __LINE__ << endl ;
-            
-          delete [] vertex_w ;
-          delete [] vertex_mem;
-          delete [] edge_mem;
-          delete [] tpwgts;
-          return false ;
         }
       }
 
-      if( serialPartitioner ) 
+      // only do the following for serialPartitioners and 
+      // if we really have a graph much larger then partition number 
+      if( serialPartitioner && ( nel > 3*np ) ) 
       {
         // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
         // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
