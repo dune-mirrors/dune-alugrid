@@ -592,6 +592,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
                 serialPartitioner 
               ) ;
 
+
   // only use ParMETIS_V3_GraphKway for the initial partitioning 
   // this is when all vertices are on proc 0 
   const bool nonDistributedMesh = ( ! serialPartitioner ) ? 
@@ -630,9 +631,12 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   // for ParMETIS nodes is a local graph that could be empty 
   const int nel = (serialPartitioner) ? nodes.size () : vtxdist[ np ];
   
+  //std::cout << "Got " << nel << " number of nodes " << std::endl;
+  //std::cout << "Got " << ned << " number of edges " << std::endl;
+
   // do repartition if edges exist (for serial partitioners) or for
   // parallel partitioners anyway  
-  if ( ! serialPartitioner || (edges.size() > 0) ) 
+  if ( ! serialPartitioner || (ned > 0) ) 
   {
     if( serialPartitioner ) 
     {
@@ -851,6 +855,13 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
       // Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
       change = ( serialPartitioner ) ? ( ! equal (neu, neu + nel, part) ) : true; 
 
+      // if partition vector is given fill it with the calculated partitioning 
+      if( partition.size() > 0 ) 
+      { 
+        partition.resize( nel );
+        copy( neu, neu + nel, partition.begin() );
+      }
+
       // apply partitioning be reassigning a new processor number 
       // to the vertices (elements of the macro mesh) of the graph 
       if (change) 
@@ -865,12 +876,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           _connect.insert( (*i).second = neu [ (*i).first.index () ]) ;
         }
 
-        if( partition.size() > 0 ) 
-        { 
-          partition.resize( nel );
-          for(int k=0; k<nel; ++k)
-            partition[ k ] = neu [ k ] ;
-        }
       }
     }
 
