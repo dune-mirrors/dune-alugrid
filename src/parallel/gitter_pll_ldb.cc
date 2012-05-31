@@ -806,7 +806,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         // then the number of partitions 
         if( nel <= np ) 
         {
-          std::cout << "Use simple partitioning " << std::endl;
           // set easy partitioning 
           for( int p=0; p<nel; ++ p ) 
           {
