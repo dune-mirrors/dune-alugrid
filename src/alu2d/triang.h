@@ -158,6 +158,8 @@ class Bndel_triang : public Hier < Bndel < N, NV > > {
 
   public :
 
+    using hbndel_t::read;
+
     using hbndel_t::deletesubtree;
     using hbndel_t::down;
     using hbndel_t::nbel;

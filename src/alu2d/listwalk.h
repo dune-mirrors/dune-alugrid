@@ -361,7 +361,7 @@ template < class A > class Macro : public Listagent < Macro < A > > {
 
     void sethdl(IndexProvider *phdl) {el.sethdl(phdl);}
     
-    Macro(hier_t & e) : el(e) { } ;
+    Macro(hier_t & e) : el(e) { } 
      
    ~Macro() { delete & el ; }
 

@@ -513,7 +513,7 @@ class BndsegPllBaseX : public ElementPllXIF_t
 {
   public :
     void writeDynamicState (ObjectStream &, int) const { abort () ; }
-    void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); };
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); }
     pair < ElementPllXIF_t *, int > accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int) ;
     pair < const ElementPllXIF_t *, int > accessOuterPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
     pair < ElementPllXIF_t *, int > accessInnerPllX (const pair < ElementPllXIF_t *, int > &, int) ;

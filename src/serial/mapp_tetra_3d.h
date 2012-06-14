@@ -68,10 +68,10 @@ template < class A > class quadraturTetra3D : private quadraturTetra3Dbasis {
 class FunctionWrapper {
   public :
     struct arg {
-	alucoord_t (*f)(const alucoord_t (&)[4], LinearMapping &, void *) ;
-	void *user ;
-	arg () { abort() ; } ;
-	arg ( alucoord_t (*p)(const alucoord_t (&)[4], LinearMapping &, void * ), void *a ) : f(p), user(a) {} ;
+      alucoord_t (*f)(const alucoord_t (&)[4], LinearMapping &, void *) ;
+      void *user ;
+      arg () { abort() ; } 
+      arg ( alucoord_t (*p)(const alucoord_t (&)[4], LinearMapping &, void * ), void *a ) : f(p), user(a) {} 
     };
     typedef alucoord_t val_t ;
     typedef arg arg_t ;

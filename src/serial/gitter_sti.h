@@ -776,8 +776,8 @@ public :
     // returns true if bnd id is in range 
     static bool bndRangeCheck (const int pbt) 
     {
-      const size_t bt = std::abs( pbt );
-      return ( bt >= 0 && bt < 255 );
+      const unsigned int bt = std::abs( pbt );
+      return ( bt < 255 );
     }
 
     // returns ranges of boundary type as string 

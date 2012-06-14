@@ -343,10 +343,10 @@ class Refco : public Basic {
 
     void mark(Refco::tag_t t) {  }
 
-    virtual void clearWas() {};    
+    virtual void clearWas() {}    
     
   protected:
-    virtual void writeToWas() {};
+    virtual void writeToWas() {}
 } ;
 // #end(class)
 // ***************************************************
@@ -423,6 +423,7 @@ template < int N, int NV > class Thinelement : public Refco_el {
     virtual ~Thinelement() { }
 
   public :
+    using Refco_el :: read ;
     
     virtual int thinis(thintype_t ) const = 0 ;
 
@@ -456,10 +457,10 @@ template < int N, int NV > class Thinelement : public Refco_el {
                       multivertexadapter_t &,nconf_vtx_t *,splitrule_t,
           int,Refco::tag_t, prolong_basic_t *pro_el) = 0 ;
 
-    virtual int docoarsen(nconf_vtx_t*,int, restrict_basic_t *rest_el) { return 1; };
+    virtual int docoarsen(nconf_vtx_t*,int, restrict_basic_t *rest_el) { return 1; }
 
 #if USE_ALUGRID_XDISPLAY 
-    virtual void draw(Xdisplay & ) {};
+    virtual void draw(Xdisplay & ) {}
 #endif
 
     triang_t * nbel(const int l) const
@@ -717,7 +718,7 @@ template < class A > class Hier : public A {
 
   void deletesubtree() { delete dwn ; dwn = 0; 
     //  this->check();
-  };  // Wird f"ur konf. Dreiecke gebraucht
+  }  // Wird f"ur konf. Dreiecke gebraucht
 
   public :
 
