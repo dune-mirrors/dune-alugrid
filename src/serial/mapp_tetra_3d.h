@@ -301,13 +301,11 @@ quadraturTriang2D < A > :: integrate7 (val_t base, const arg_t & x) {
 
 template < class A > inline typename quadraturTriang2D_1 < A > :: val_t 
 quadraturTriang2D_1 < A > :: integrate1 (val_t base, const arg_t & x) {
-  alucoord_t n [3] ;
   return base + A ()(_p1, _map, x)  ;
 }
 
 template < class A > inline typename quadraturTriang2D_1 < A > :: val_t 
 quadraturTriang2D_1 < A > :: integrate3 (val_t base, const arg_t & x) {
-  alucoord_t n [3] ;
   for (int i = 0 ; i < 7 ; i++) {
     val_t t = A ()(_p3 [i], _map, x) ;
     base += (t *= _w3 [i]) ;
@@ -317,7 +315,6 @@ quadraturTriang2D_1 < A > :: integrate3 (val_t base, const arg_t & x) {
 
 template < class A > inline typename quadraturTriang2D_1 < A > :: val_t 
 quadraturTriang2D_1 < A > :: integrate5 (val_t base, const arg_t & x) {
-  alucoord_t n [3] ;
   for (int i = 0 ; i < 7 ; i++) {
     val_t t = A ()(_p5 [i], _map, x) ;
     base += (t *= _w5 [i]) ;
@@ -327,7 +324,6 @@ quadraturTriang2D_1 < A > :: integrate5 (val_t base, const arg_t & x) {
 
 template < class A > inline typename quadraturTriang2D_1 < A > :: val_t 
 quadraturTriang2D_1 < A > :: integrate7 (val_t base, const arg_t & x) {
-  alucoord_t n [3] ;
   for (int i = 0 ; i < 16 ; i++) {
     val_t t = A ()(_p7 [i], _map, x) ;
     base += (t *= _w7 [i]) ;
