@@ -1,7 +1,7 @@
 #ifndef __MAPP_TETRA_3D_EXT_HH__
 #define __MAPP_TETRA_3D_EXT_HH__
 
-// BSGridVecType is defined in BSGrid interface to dune or in gitter_sti.hh 
+// BSGridALUVecType is defined in BSGrid interface to dune or in gitter_sti.hh 
 class BSGridLinearSurfaceMapping
 {
 protected:
@@ -15,8 +15,8 @@ public:
   inline void normal(double * normal) const;
   
   // same as method normal of LinearSurfaceMapping, just for Dune Vecs 
-  template <class VecType> 
-  inline void normal(VecType & normal) const;
+  template <class aluvec_t> 
+  inline void normal(aluvec_t & normal) const;
 };
 
 class BSGridBilinearSurfaceMapping {
@@ -33,8 +33,8 @@ public:
 
   inline void normal(const double* local, double* normal) const;
 
-  template <class VecType>
-  inline void normal(const VecType& local, VecType& normal) const;
+  template <class aluvec_t>
+  inline void normal(const aluvec_t& local, aluvec_t& normal) const;
 };
 
 inline BSGridLinearSurfaceMapping :: 
@@ -57,8 +57,8 @@ inline void BSGridLinearSurfaceMapping :: normal (double * normal) const
   return ;
 }
 
-template <class VecType>
-inline void BSGridLinearSurfaceMapping :: normal (VecType & normal) const
+template <class aluvec_t>
+inline void BSGridLinearSurfaceMapping :: normal (aluvec_t & normal) const
 {
   normal[0] = this->_n[0];
   normal[1] = this->_n[1];
@@ -104,8 +104,8 @@ BSGridBilinearSurfaceMapping::normal(const double* local, double* normal) const 
   return ;
 }
 
-template <class VecType>
-inline void BSGridBilinearSurfaceMapping::normal(const VecType& local, VecType& normal) const {
+template <class aluvec_t>
+inline void BSGridBilinearSurfaceMapping::normal(const aluvec_t& local, aluvec_t& normal) const {
   double x = local [0];
   double y = local [1];
   normal [0] = -( _n [0][0] + _n [1][0] * x + _n [2][0] * y) ;
