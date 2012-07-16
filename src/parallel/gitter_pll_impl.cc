@@ -1122,7 +1122,7 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     os.writeObject (PERIODIC3) ;
 
     // write boundary id 
-    const int bnd[ 2 ] = { this->bndtype( 0 ), this->bndtype( 1 ) };
+    const int bnd[ 2 ] = { int( this->bndtype( 0 ) ), int( this->bndtype( 1 ) ) };
     os.writeObject ( bnd[ 0 ] );
     os.writeObject ( bnd[ 1 ] );
 
@@ -1341,7 +1341,7 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     os.writeObject (PERIODIC4) ;
 
     // write boundary id 
-    const int bnd[ 2 ] = { this->bndtype( 0 ), this->bndtype( 1 ) };
+    const int bnd[ 2 ] = { int( this->bndtype( 0 ) ), int( this->bndtype( 1 ) ) };
     os.writeObject ( bnd[ 0 ] );
     os.writeObject ( bnd[ 1 ] );
 

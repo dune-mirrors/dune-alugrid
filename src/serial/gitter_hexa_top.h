@@ -330,6 +330,8 @@ template < class A > class Hbnd4Top : public A
     void splitISO4 () ;
     bool refineLikeElement (balrule_t) ;
 
+    using A :: bndNotifyBalance;
+
     // need for indices
     IndexManagerType& indexManager() { 
       return myhface4(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
