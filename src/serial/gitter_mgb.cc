@@ -529,7 +529,7 @@ generateRawImage (istream_t & in, ostream & os,
         nper++;
       }
       else {
-        cerr << "**FEHLER (FATAL):  "__FILE__ << " " << __LINE__ << " ... Exiting." << endl ;
+        cerr << "**FEHLER (FATAL):  " << __FILE__ << " " << __LINE__ << " ... Exiting." << endl ;
         abort();
       }
     }
@@ -899,7 +899,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
         break ;
       default :
         cerr << "**ERROR (FATAL): unknown ElementID in Rawformat File [" 
-             << elementType << "] in "__FILE__ << " " << __LINE__ << " ... Exiting. " << endl ;
+             << elementType << "] in " << __FILE__ << " " << __LINE__ << " ... Exiting. " << endl ;
              exit (1) ;
         break ;
       }
