@@ -179,30 +179,46 @@ int main (int argc, char ** argv, const char ** envp)
   else 
     filename = argv[ 1 ];
 
+  int rank = 0;
+#ifdef PARALLEL
+  MpAccessMPI mpa (MPI_COMM_WORLD);
+  rank = mpa.myrank();
+#endif
+
   if (argc < 3)
-    cout << "Default level = "<< mxl << " choosen! \n";
+  {
+    if( rank == 0 ) 
+      cout << "Default level = "<< mxl << " choosen! \n";
+  }
   else 
     mxl = atoi(argv[2]);
 
   std::string macroname( filename );
 
-  cout << "\n-----------------------------------------------\n";
-  cout << "read macro grid from < " << macroname << " > !" << endl;
-  cout << "-----------------------------------------------\n";
+  if( rank == 0 ) 
+  {
+    cout << "\n-----------------------------------------------\n";
+    cout << "read macro grid from < " << macroname << " > !" << endl;
+    cout << "-----------------------------------------------\n";
+  }
 
   {
 #ifdef PARALLEL
-    MpAccessMPI a (MPI_COMM_WORLD);
-    GitterDunePll grid(macroname.c_str(),a);
+    GitterDunePll grid(macroname.c_str(),mpa);
 #else 
     GitterDuneImpl grid(macroname.c_str());
 #endif
+
+    grid.duneLoadBalance();
    
-    cout << "Grid generated! \n";
+    //cout << "P[ " << rank << " ] : Grid generated! \n";
     grid.printsize(); 
     cout << "---------------------------------------------\n";
   
     grid.printMemUsage();
+    int bla; 
+    cin >> bla;
+    return 0;
    
     checkRefinements( grid );
 
