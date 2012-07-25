@@ -1221,25 +1221,26 @@ template < int N, int NV >
 int Bndel_periodic < N,NV >::docoarsen(nconf_vtx_t *ncv,
                                        int nconfDeg,restrict_basic_t *rest_el)
 {
-  if(nconfDeg == 0 ) {
+  if (nconfDeg == 0) {
     if (periodic_nb->leaf())
       return bndel_triang_t::docoarsen(ncv,nconfDeg,rest_el);
-    // Kann anderer Rand auch vergr"obert werden?  
+
+    // can we coarsen the "opposite" boundary?
     if (periodic_nb->opposite(0)!=0)
       return 0;
     assert(periodic_nb->nbel(0));
-    assert(!(periodic_nb->nbel(0)->leaf()));    
-    helement_t *h=periodic_nb->nbel(0)->down();
+    assert(!(periodic_nb->nbel(0)->leaf()));
 
-    while (h)
-      {
-  if (!h->is(Refco::crs))
-    break;
-  h=h->next();
-      }
+    helement_t *h=periodic_nb->nbel(0)->down();
+    while (h) {
+      if (!h->is(Refco::crs))
+        break;
+      h=h->next();
+    }
     if (h)
       return 0;
-    // es kann verfeinert werden! 
+
+    // we can coarsen!
     bndel_triang_t::docoarsen(ncv,nconfDeg,rest_el);  
     periodic_nb->nbel(0)->coarse(ncv,nconfDeg,rest_el);
     assert(periodic_nb->nbel(0)->leaf());
