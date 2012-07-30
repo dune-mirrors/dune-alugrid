@@ -1187,17 +1187,17 @@ int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts],Listagency < vert
   } else {
     // update connectivity
     if( periodic_nb->leaf() ) {
-      ((Bndel_periodic*)el[0])->set_pnb(periodic_nb);
-      ((Bndel_periodic*)el[1])->set_pnb(periodic_nb);
+      ((Bndel_periodic*)el[0])->set_pnb(periodic_nb) ;
+      ((Bndel_periodic*)el[1])->set_pnb(periodic_nb) ;
     } else {
-      ((Bndel_periodic*)el[0])
-  ->set_pnb((Bndel_periodic*)(periodic_nb->down()->next()));
-      ((Bndel_periodic*)(periodic_nb->down()->next()))
-  ->set_pnb((Bndel_periodic*)el[0]);
-      ((Bndel_periodic*)el[1])
-  ->set_pnb((Bndel_periodic*)(periodic_nb->down()));
-      ((Bndel_periodic*)(periodic_nb->down()))
-  ->set_pnb((Bndel_periodic*)el[1]);
+      Bndel_periodic *nb[2] ;
+      nb[0] = (Bndel_periodic *)(periodic_nb->down()) ;
+      nb[1] = (Bndel_periodic *)(periodic_nb->down()->next()) ;
+
+      ((Bndel_periodic *)el[0])->set_pnb(nb[1]) ;
+      nb[1]->set_pnb((Bndel_periodic *)el[0]) ;
+      ((Bndel_periodic *)el[1])->set_pnb(nb[0]) ;
+      nb[0]->set_pnb((Bndel_periodic *)el[1]) ;
     }
   }
 
