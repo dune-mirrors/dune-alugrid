@@ -635,10 +635,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
     void addhvtx(vertex_t *inv, thinelement_t *lnb, thinelement_t *rnb,int fce);
 
-    int hashvtx(const int fce) const 
-    {
-      return (connect.hvtx[fce] != 0);
-    }
+    bool hashvtx(const int fce) const { return connect.hvtx[fce]; }
 
     // return whether hanging node for given face exsits 
     bool hasHangingNode(const int fce) const 

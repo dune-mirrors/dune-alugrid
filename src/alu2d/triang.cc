@@ -105,6 +105,7 @@ Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2) {
 
   init();
 }
+
 template < int N, int NV >
 Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2, vertex_t * v3) {
   assert( NV == 4);
@@ -169,39 +170,24 @@ void Triang < N,NV >::read(istream & in, vertex_t ** look, const int len) {
 template < int N, int NV >
 bool Triang < N,NV >::confLevelExceeded(int nconfDeg) const
 {
-  bool result = false;
-
   if( nconfDeg >= 0 ) {
-    for( int i=0 ; i<numfaces() ; i++ )
-      {
-  bndel_triang_t *nb = nbbnd(i);
+    for (int i=0 ; i<numfaces() ; ++i) {
+      bndel_triang_t * nb = nbbnd(i) ;
 
-  if (nb)
-    {
-      if (nb->type()==bndel_t::periodic)
+      if (nb) {
+        if (nb->type()==bndel_t::periodic)
         {
-    Triang* tr = ((bndel_periodic_t*)nb)->periodic_nb->nbel(0);
-    int dl = (tr->hashvtx(i) ? tr->connect.hvtx[i]->deepestLevel() : 0);
-    if( dl > nconfDeg )
-      // if (((Bndel_periodic*)nb)->periodic_nb->deepestLevel() > nconfDeg)
-      {
-        result = true;
-        break;
-      }
+          Triang * tr = ((bndel_periodic_t *)nb)->periodic_nb->nbel(0) ;
+          if (tr->connect.hvtx[i] && (tr->connect.hvtx[i]->deepestLevel() > nconfDeg))
+            return true ;
         }
-    }
-  else
-    {
-      int dl = (hashvtx(i) ? connect.hvtx[i]->deepestLevel() : 0);
-      if( dl > nconfDeg )
-        {
-    result = true;
-    break;
-        }
-    }
+      } else {
+        if (connect.hvtx[i] && (connect.hvtx[i]->deepestLevel() > nconfDeg))
+          return true ;
       }
+    }
   }
-  return result;
+  return false ;
 }
 
 /***************************************************
@@ -578,14 +564,13 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
   vertex_t *newvtx[NV];
   Edge *newedge[2*NV+NV];
   bool usehvtx[NV];
-  int i;
   double p[ncoord];
   IndexProvider* hdl = this->gethdl();
 
   mysplit = thinelement_t::triang_quarter;
 
   // create new vertices and edges
-  for (i=0;i<numfaces();i++)
+  for (int i=0 ; i<numfaces() ; ++i)
   {
     usehvtx[i] = connect.hvtx[i];
     if (connect.nb[i]->thinis(thinelement_t::bndel_like))
@@ -609,9 +594,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
         // TWIST
         newedge[2*i]=connect.hvtx[i]->getrnb()->edge(opposite(i));
         newedge[2*i+1]=connect.hvtx[i]->getlnb()->edge(opposite(i));
-      }
-      else
-      {
+      } else {
         this->get_splitpoint(i, 0.5, p);
         // connect.nb[i]->get_splitpoint(connect.bck[i], 0.5, p);
         newvtx[i] = new fullvertex_t(p,level());
@@ -630,7 +613,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
     newtr[1] = new Triang(newvtx[2],connect.vtx[1],newvtx[0]);
     newtr[2] = new Triang(newvtx[1],newvtx[0],connect.vtx[2]);
     newtr[3] = new Triang(newvtx[0],newvtx[1],newvtx[2]);
-    for (i=0;i<3;i++) {
+    for (int i=0 ; i<3 ; ++i) {
       newtr[i]->edgeconnect(i,newedge[6+i]);
       newtr[i]->edgeconnect(i+1,newedge[2*((i+1)%3)+1]);
       newtr[i]->edgeconnect(i+2,newedge[2*((i+2)%3)]);
@@ -655,7 +638,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
     newtr[1] = new Triang(newvtx[3],connect.vtx[1],newvtx[0],midvtx);
     newtr[2] = new Triang(midvtx,newvtx[0],connect.vtx[2],newvtx[1]);
     newtr[3] = new Triang(newvtx[2],midvtx,newvtx[1],connect.vtx[3]);
-    for (i=0;i<4;i++) {
+    for (int i=0 ; i<4 ; ++i) {
       newtr[i]->edgeconnect(i,newedge[8+i]);
       newtr[i]->edgeconnect(i+1,newedge[8+(i+3)%4]);
       newtr[i]->edgeconnect(i+2,newedge[2*((i+2)%4)+1]);
@@ -670,17 +653,15 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
       newtr[i]->nbconnect(i+1,newtr[(i+3)%4],(i+3)%4);
     }
   }
-  for (i=0;i<4;i++) {
+  for (int i=0 ; i<4 ; ++i) {
     newtr[i]->sethdl(hdl);
     e[i] = newtr[i];
   }
 
   // distribute hanging nodes
 
-  for (i=0;i<numfaces();i++)
-  {
-    if (usehvtx[i] == true)
-    {
+  for (int i=0 ; i<numfaces() ; ++i) {
+    if (usehvtx[i]) {
       connect.hvtx[i]->splitTree(newtr[mod(i+1)]->connect.hvtx[i],
                                  newtr[mod(i+2)]->connect.hvtx[i]);
       delete connect.hvtx[i];
@@ -691,66 +672,56 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
   }
 
   // set connectivity across outer boundaries
-  for (i=0;i<numfaces();i++)
-  {
-    if (connect.nb[i]->thinis(thinelement_t::bndel_like))
-    {
+  for (int i=0 ; i<numfaces() ; ++i) {
+    if (connect.nb[i]->thinis(thinelement_t::bndel_like)) {
       // refine neighbouring boundary element
       ncv = new nconf_vtx_t(newvtx[i], newtr[mod(i+1)], newtr[mod(i+2)]);
       hbndel_t *hbel = (hbndel_t *)connect.nb[i];
       hbel->refine_leaf(agnc, &mva,ncv,nconfDeg,default_ref,pro_el);
-    }
-    else
-    {
+    } else {
       // set connectivity if neighbour is already refined
-      if (neighbour(i)->splitrule() == thinelement_t::triang_quarter)
-      {
-        Triang *trnb0 = (Triang *)neighbour(i);
-        if (trnb0->is(Refco::quart))
-        {
+      if (neighbour(i)->splitrule() == thinelement_t::triang_quarter) {
+        Triang *trnb0 = (Triang *)neighbour(i) ;
+        if (trnb0->is(Refco::quart)) {
           // This case should only occur if periodic boundaries
           // are used and the macrogrid is too coarse, i.e., if
           // there are two elements which are direct and periodic
           // neighbours at the same time.
 
-          cerr << "ERROR (Triang::split()): "
-               << "refinement of neighbour not yet finished!" << endl
-               << "                         "
-               << "Please try a finer macrogrid!" << endl;
+          std::cerr << "ERROR (Triang::split4()): "
+                    << "refinement of neighbour not yet finished!" << std::endl;
+          std::cerr << "                          "
+                    << "Please try a finer macrogrid!" << std::endl;
           abort();
         }
 
         // TWIST
-        Triang *trnb2 = (Triang *)(trnb0->down());
-        assert(trnb2);
-        for (int k=0;k<mod(opposite(i)+1);++k)
-        {
-          trnb2 = (Triang *)(trnb2->next());
-          assert(trnb2);
+        Triang *trnb2 = (Triang *)(trnb0->down()) ;
+        assert(trnb2) ;
+        for (int k=0 ; k<mod(opposite(i)+1) ; ++k) {
+          trnb2 = (Triang *)(trnb2->next()) ;
+          assert(trnb2) ;
         }
 
-        Triang *trnb1 = (Triang *)( opposite(i)!=numfaces()-2 ? 
-                        trnb2->next():trnb0->down() );
-        assert( trnb1 );
+        Triang *trnb1 = (Triang *)(opposite(i)!=numfaces()-2 ? trnb2->next() : trnb0->down()) ;
+        assert( trnb1 ) ;
 
         assert(trnb1->connect.vtx[mod(opposite(i)+1)] == newvtx[i]);
         assert(trnb2->connect.vtx[mod(opposite(i)+2)] == newvtx[i]);
 
-        newtr[mod(i+1)]->nbconnect(i,trnb1,opposite(i));
-        newtr[mod(i+2)]->nbconnect(i,trnb2,opposite(i));
-        trnb1->nbconnect(opposite(i),newtr[mod(i+1)],i);
-        trnb2->nbconnect(opposite(i),newtr[mod(i+2)],i);
+        newtr[mod(i+1)]->nbconnect(i,trnb1,opposite(i)) ;
+        newtr[mod(i+2)]->nbconnect(i,trnb2,opposite(i)) ;
+        trnb1->nbconnect(opposite(i),newtr[mod(i+1)],i) ;
+        trnb2->nbconnect(opposite(i),newtr[mod(i+2)],i) ;
 
         if (newtr[mod(i+1)]->connect.hvtx[i])
-          newtr[mod(i+1)]->connect.hvtx[i]->nbconnect(opposite(i),newtr[mod(i+1)],i);
+          newtr[mod(i+1)]->connect.hvtx[i]->nbconnect(opposite(i),newtr[mod(i+1)],i) ;
         if (newtr[mod(i+2)]->connect.hvtx[i])
-          newtr[mod(i+2)]->connect.hvtx[i]->nbconnect(opposite(i),newtr[mod(i+2)],i);
-      }
-      else 
-      {
-        assert(neighbour(i)->splitrule() == thinelement_t::unsplit);
-        newtr[mod(i+1)]->nbconnect(i,neighbour(i),opposite(i));
-        newtr[mod(i+2)]->nbconnect(i,neighbour(i),opposite(i));
+          newtr[mod(i+2)]->connect.hvtx[i]->nbconnect(opposite(i),newtr[mod(i+2)],i) ;
+      } else {
+        assert(neighbour(i)->splitrule() == thinelement_t::unsplit) ;
+        newtr[mod(i+1)]->nbconnect(i,neighbour(i),opposite(i)) ;
+        newtr[mod(i+2)]->nbconnect(i,neighbour(i),opposite(i)) ;
       }
     }
   }
