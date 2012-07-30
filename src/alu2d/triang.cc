@@ -928,55 +928,61 @@ int Triang < N,NV >::docoarsen2tr(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t
 template < int N, int NV >
 int Triang < N,NV >::docoarsen4(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
 {
-  int lcancoarsen=1;
-  element_t* child[ NV ];
-  child[ 0 ] = down();
-  for(int nv=1; nv <numfaces(); ++nv )
+  int lcancoarsen=1 ;
+
+  // fetch children associated with the vertices (always the first ones)
+  element_t* child[ NV ] ;
+  child[ 0 ] = down() ;
+  for(int nv=1 ; nv<numvertices(); ++nv )
   {
-    assert( child[ nv - 1 ] );
-    child[ nv ] = ((helement_t *) child[ nv - 1 ])->next();
-    assert( child[ nv ] );
+    assert( child[ nv - 1 ] ) ;
+    child[ nv ] = ((helement_t *) child[ nv - 1 ])->next() ;
+    assert( child[ nv ] ) ;
   }
 
-  for (int i=0;i<numfaces();i++) {
+  // check whether coarsening this element would violate conformity rules?
+  for (int i=0 ; i<numfaces() ; ++i) {
     if (nbel(i)) {
       if (!(nbel(i)->leaf()) && child[mod(i+1)]->hashvtx(i)) {
         if (((Triang*)child[mod(i+1)])->connect.hvtx[i]->count()+1>nconfDeg)
-          lcancoarsen=0;
+          lcancoarsen=0 ;
       }
       if (!(nbel(i)->leaf()) && child[mod(i+2)]->hashvtx(i)) {
         if (((Triang*)child[mod(i+2)])->connect.hvtx[i]->count()+1>nconfDeg)
-          lcancoarsen=0;
+          lcancoarsen=0 ;
       }
-    } 
+    }
   }
+
   if (lcancoarsen) {
+    // use callback to notify user of the restriction
     if (rest_el) 
-      rest_el->operator()(this);
-    // Nachbarschaften stimmen (hoffe ich)
-    // Haengende Knoten verwalten
-    for (int i=0;i<numfaces();i++) {
-      assert(!hashvtx(i));
+      rest_el->operator()(this) ;
+
+    // administration of hanging nodes
+    for (int i=0 ; i<numfaces() ; ++i) {
+      assert(!hashvtx(i)) ;
       if (nbel(i)) {
-        if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
+        if (!(nbel(i)->leaf())) {
+          // neighbor is not leaf, so create a hanging node
           this->addhvtx(child[mod(i+1)]->vertex(i+2), 
-                  child[mod(i+2)]->nbel(i),child[mod(i+1)]->nbel(i), i);
+                        child[mod(i+2)]->nbel(i),child[mod(i+1)]->nbel(i),i) ;
           connect.hvtx[i]->merge(((Triang*)child[mod(i+1)])->connect.hvtx[i],
-                   ((Triang*)child[mod(i+2)])->connect.hvtx[i]);
-          connect.hvtx[i]->nbconnect(opposite(i),this,i);
-        } else { // Haengenden Knoten im Nachbarn entfernen 
-          assert(nbel(i)->hashvtx(opposite(i)));
-          nbel(i)->removehvtx(opposite(i),child[mod(i+1)]->vertex(i+2));
+                                 ((Triang*)child[mod(i+2)])->connect.hvtx[i]) ;
+          connect.hvtx[i]->nbconnect(opposite(i),this,i) ;
+        } else {
+          // neighbor is leaf, so remove the hanging node
+          assert(nbel(i)->hashvtx(opposite(i))) ;
+          nbel(i)->removehvtx(opposite(i),child[mod(i+1)]->vertex(i+2)) ;
         }
       }
     }
-    for (int i=0;i<numfaces();i++) {
-      if (nbbnd(i)) {
-        if( !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
-          lcancoarsen=0;
-          cout << "Error in coarsening!" << endl;
-          abort();
-        }
+
+    // coarsen any adjacent boundary segments
+    for (int i=0 ; i<numfaces() ; ++i) {
+      if (nbbnd(i) && !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
+        std::cerr << "ERROR (Triang::docoarsen4): internal inconsistency." << std::endl;
+        abort();
       }
     }
   } 
