@@ -99,16 +99,20 @@ class Triang : public Hier < Element < N,NV > > {
 
     int split2tr(void *(&)[Basic::nparts], Listagency < vertex_t > *,
                  multivertexadapter_t &, nconf_vtx_t *ncv,
-	               int,Refco::tag_t,prolong_basic_t *pro_el);
+                 int,Refco::tag_t,prolong_basic_t *pro_el);
     int split4(void *(&)[Basic::nparts], Listagency < vertex_t > *,
                multivertexadapter_t &, nconf_vtx_t *ncv,
-	             int,Refco::tag_t,prolong_basic_t *pro_el);
+               int,Refco::tag_t,prolong_basic_t *pro_el);
+
+    int docoarsen2tr(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
+    int docoarsen4(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
+
   public:
 
     int split(void *(&)[Basic::nparts], Listagency < vertex_t > *,
               multivertexadapter_t &, nconf_vtx_t *ncv,splitrule_t,
-	            int,Refco::tag_t,prolong_basic_t *pro_el);
-     
+              int,Refco::tag_t,prolong_basic_t *pro_el);
+
     int docoarsen(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
 
     bool confLevelExceeded(int) const;

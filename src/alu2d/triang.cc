@@ -280,24 +280,22 @@ int Triang < N,NV >::split(void * (&e)[Basic::nparts], Listagency < vertex_t > *
                            Refco::tag_t default_ref,
                            prolong_basic_t *pro_el)
 {
-  int ret = 0;
-
   assert(splitrule() == thinelement_t::unsplit);
 
   switch (sr)
   {
     case thinelement_t::triang_conf2:
-      ret=split2tr(e,agnc,mva,ncv,nconfDeg,default_ref,pro_el);
-      break;
+      return split2tr(e,agnc,mva,ncv,nconfDeg,default_ref,pro_el);
+
     case thinelement_t::triang_quarter:
-      ret=split4(e,agnc,mva,ncv,nconfDeg,default_ref,pro_el);
-      break;
+      return split4(e,agnc,mva,ncv,nconfDeg,default_ref,pro_el);
+
     default:                                                                         
-      cerr << "ERROR (Triang::split()): unknown splitrule!" << endl;                 
+      std::cerr << "ERROR (Triang::split()): unknown splitrule!" << std::endl;
       abort();                                                                       
   }
-  return ret;
 }
+
 template < int N, int NV >
 int Triang < N,NV >::split2tr(void * (&e)[Basic::nparts], Listagency < vertex_t > * agnc,
                               multivertexadapter_t & mva, 
@@ -792,181 +790,195 @@ bool Triang < N,NV >::canCoarsen(int nconfDeg) const
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
-                               int nconfDeg,restrict_basic_t *rest_el)
+int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
 {
-  int result = 0;
-  if( nconfDeg == 0 && mysplit == thinelement_t::triang_conf2) 
+  assert(splitrule() != thinelement_t::unsplit);
+
+  switch (splitrule())
   {
-    int lcancoarsen=0;
-    if ( connect.nb[0]->thinis(thinelement_t::bndel_like) )
-    {
-      if ( ((hbndel_t*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el) )
-      {
-        helement_t *child=down();
-        child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-        this->nbconnect(2,child->neighbour(0),child->opposite(0));
-        child=child->next();
-        child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-        this->nbconnect(1,child->neighbour(0),child->opposite(0));
-        if( neighbour(1)->thinis(thinelement_t::element_like) ) {
-          ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
-          setnormdir(1, -1);
-        } else
-          setnormdir(1, 1);
-        if( neighbour(2)->thinis(thinelement_t::element_like) ) {
-          ((element_t*)neighbour(2))->setnormdir(opposite(2), 1);
-          setnormdir(2, -1);
-        } else
-          setnormdir(2, 1);
-        lcancoarsen=1;
-      }
-    }
-    else if ( connect.bck[0] == 0 )
-    {
-      helement_t *neigh=(helement_t *)connect.nb[0];
-      if ( !ncv )
-      {
-        int cancoarsen=1;
-        neigh=neigh->down();
-      do
-      {
-      } while (   (cancoarsen=(neigh->is(Refco::crs)))
-                  && (neigh=neigh->next()) );
-      if (cancoarsen)
-      {
-        helement_t *child=down();
-        ncv = new nconf_vtx_t(child->vertex(0),child,child->next());
-        assert( ncv );
-        child->neighbour(1)->nbconnect(2,this,-1);
-        child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-        this->nbconnect(2,child->neighbour(0),child->opposite(0));
-        if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
-          ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
-          setnormdir(2, -1);
-        } else
-          setnormdir(2, 1);
+    case thinelement_t::triang_conf2:
+      return docoarsen2tr(ncv,nconfDeg,rest_el);
 
-        child=child->next();
-        child->neighbour(2)->nbconnect(1,this,-1);
-        child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-        this->nbconnect(1,child->neighbour(0),child->opposite(0));
-        if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
-          ((element_t *)neighbour(1))->setnormdir(opposite(1), 1);
-          setnormdir(1, -1);
-        } else
-          setnormdir(1, 1);
-        setnormdir(0, -1);
-              
-#ifndef NDEBUG
-        // only used in assert 
-        bool didcoarse = 
-#endif
-          // do coarsen 
-          ((helement_t *)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
-          assert( didcoarse );
-          lcancoarsen=1;
-        }
-      }
-      else
-      {
-        helement_t *child=down();
-        child->neighbour(0)->nbconnect(child->opposite(0),this,2);
-        this->nbconnect(2,child->neighbour(0),child->opposite(0));
-        if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
-          ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
-          setnormdir(2, -1);
-        } else
-          setnormdir(2, 1);
+    case thinelement_t::triang_quarter:
+      return docoarsen4(ncv,nconfDeg,rest_el);
 
-        child=child->next();
-        child->neighbour(0)->nbconnect(child->opposite(0),this,1);
-        this->nbconnect(1,child->neighbour(0),child->opposite(0));
-        if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
-          ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
-          setnormdir(1, -1);
-        } else
-          setnormdir(1, 1);
-        setnormdir(0, 1);
+    default:                                                                         
+      std::cerr << "ERROR (Triang::docoarsen()): unknown splitrule!" << std::endl;
+      abort();                                                                       
+  }
+}
 
-        delete ncv;
-        ncv=0;
-        lcancoarsen=2;
-      }
-    }
-    if( lcancoarsen != 0 && rest_el) {
-      rest_el->operator()(this);
-    }
-    if (lcancoarsen==2) {
-      deletesubtree();
-      mysplit = thinelement_t::unsplit;
-    }
-    result = lcancoarsen;
-  } 
-  // QUATERING
-  else if (mysplit==thinelement_t::triang_quarter) 
-  {
-    int lcancoarsen=1;
-    element_t* child[ NV ];
-    child[ 0 ] = down();
-    for(int nv=1; nv <numfaces(); ++nv )
-    {
-      assert( child[ nv - 1 ] );
-      child[ nv ] = ((helement_t *) child[ nv - 1 ])->next();
-      assert( child[ nv ] );
-    }
-
-    for (int i=0;i<numfaces();i++) {
-      if (nbel(i)) {
-        if (!(nbel(i)->leaf()) && child[mod(i+1)]->hashvtx(i)) {
-          if (((Triang*)child[mod(i+1)])->connect.hvtx[i]->count()+1>nconfDeg)
-            lcancoarsen=0;
-        }
-        if (!(nbel(i)->leaf()) && child[mod(i+2)]->hashvtx(i)) {
-          if (((Triang*)child[mod(i+2)])->connect.hvtx[i]->count()+1>nconfDeg)
-            lcancoarsen=0;
-        }
-      } 
-    }
-    if (lcancoarsen) {
-      if (rest_el) 
-        rest_el->operator()(this);
-      // Nachbarschaften stimmen (hoffe ich)
-      // Haengende Knoten verwalten
-      for (int i=0;i<numfaces();i++) {
-        assert(!hashvtx(i));
-        if (nbel(i)) {
-          if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
-            this->addhvtx(child[mod(i+1)]->vertex(i+2), 
-                    child[mod(i+2)]->nbel(i),child[mod(i+1)]->nbel(i), i);
-            connect.hvtx[i]->merge(((Triang*)child[mod(i+1)])->connect.hvtx[i],
-                     ((Triang*)child[mod(i+2)])->connect.hvtx[i]);
-            connect.hvtx[i]->nbconnect(opposite(i),this,i);
-          } else { // Haengenden Knoten im Nachbarn entfernen 
-            assert(nbel(i)->hashvtx(opposite(i)));
-            nbel(i)->removehvtx(opposite(i),child[mod(i+1)]->vertex(i+2));
-          }
-        }
-      }
-      for (int i=0;i<numfaces();i++) {
-        if (nbbnd(i)) {
-          if( !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
-            lcancoarsen=0;
-            cout << "Error in coarsening!" << endl;
-            abort();
-          }
-        }
-      }
-    } 
-    result = lcancoarsen;
-  } else {
-    cerr << "COARSENING: not implemented for non-conform refinemnet and bisectionm" << endl;
+template < int N, int NV >
+int Triang < N,NV >::docoarsen2tr(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
+{
+  if (nconfDeg != 0) {
+    std::cerr << "COARSENING: not implemented for non-conforming bisection refinement." << std::endl;
     abort();
   }
 
-  return result;
-}
+  int lcancoarsen=0;
+  if ( connect.nb[0]->thinis(thinelement_t::bndel_like) )
+  {
+    if ( ((hbndel_t*)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el) )
+    {
+      helement_t *child=down();
+      child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+      this->nbconnect(2,child->neighbour(0),child->opposite(0));
+      child=child->next();
+      child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+      this->nbconnect(1,child->neighbour(0),child->opposite(0));
+      if( neighbour(1)->thinis(thinelement_t::element_like) ) {
+        ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
+        setnormdir(1, -1);
+      } else
+        setnormdir(1, 1);
+      if( neighbour(2)->thinis(thinelement_t::element_like) ) {
+        ((element_t*)neighbour(2))->setnormdir(opposite(2), 1);
+        setnormdir(2, -1);
+      } else
+        setnormdir(2, 1);
+      lcancoarsen=1;
+    }
+  }
+  else if ( connect.bck[0] == 0 )
+  {
+    helement_t *neigh=(helement_t *)connect.nb[0];
+    if ( !ncv )
+    {
+      int cancoarsen=1;
+      neigh=neigh->down();
+    do
+    {
+    } while (   (cancoarsen=(neigh->is(Refco::crs)))
+                && (neigh=neigh->next()) );
+    if (cancoarsen)
+    {
+      helement_t *child=down();
+      ncv = new nconf_vtx_t(child->vertex(0),child,child->next());
+      assert( ncv );
+      child->neighbour(1)->nbconnect(2,this,-1);
+      child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+      this->nbconnect(2,child->neighbour(0),child->opposite(0));
+      if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
+        ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
+        setnormdir(2, -1);
+      } else
+        setnormdir(2, 1);
 
+      child=child->next();
+      child->neighbour(2)->nbconnect(1,this,-1);
+      child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+      this->nbconnect(1,child->neighbour(0),child->opposite(0));
+      if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
+        ((element_t *)neighbour(1))->setnormdir(opposite(1), 1);
+        setnormdir(1, -1);
+      } else
+        setnormdir(1, 1);
+      setnormdir(0, -1);
+            
+#ifndef NDEBUG
+      // only used in assert 
+      bool didcoarse = 
+#endif
+        // do coarsen 
+        ((helement_t *)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
+        assert( didcoarse );
+        lcancoarsen=1;
+      }
+    }
+    else
+    {
+      helement_t *child=down();
+      child->neighbour(0)->nbconnect(child->opposite(0),this,2);
+      this->nbconnect(2,child->neighbour(0),child->opposite(0));
+      if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
+        ((element_t *)neighbour(2))->setnormdir(opposite(2), 1);
+        setnormdir(2, -1);
+      } else
+        setnormdir(2, 1);
+
+      child=child->next();
+      child->neighbour(0)->nbconnect(child->opposite(0),this,1);
+      this->nbconnect(1,child->neighbour(0),child->opposite(0));
+      if( child->neighbour(0)->thinis(thinelement_t::element_like) ) {
+        ((element_t*)neighbour(1))->setnormdir(opposite(1), 1);
+        setnormdir(1, -1);
+      } else
+        setnormdir(1, 1);
+      setnormdir(0, 1);
+
+      delete ncv;
+      ncv=0;
+      lcancoarsen=2;
+    }
+  }
+  if( lcancoarsen != 0 && rest_el) {
+    rest_el->operator()(this);
+  }
+  if (lcancoarsen==2) {
+    deletesubtree();
+    mysplit = thinelement_t::unsplit;
+  }
+  return lcancoarsen;
+} 
+
+template < int N, int NV >
+int Triang < N,NV >::docoarsen4(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
+{
+  int lcancoarsen=1;
+  element_t* child[ NV ];
+  child[ 0 ] = down();
+  for(int nv=1; nv <numfaces(); ++nv )
+  {
+    assert( child[ nv - 1 ] );
+    child[ nv ] = ((helement_t *) child[ nv - 1 ])->next();
+    assert( child[ nv ] );
+  }
+
+  for (int i=0;i<numfaces();i++) {
+    if (nbel(i)) {
+      if (!(nbel(i)->leaf()) && child[mod(i+1)]->hashvtx(i)) {
+        if (((Triang*)child[mod(i+1)])->connect.hvtx[i]->count()+1>nconfDeg)
+          lcancoarsen=0;
+      }
+      if (!(nbel(i)->leaf()) && child[mod(i+2)]->hashvtx(i)) {
+        if (((Triang*)child[mod(i+2)])->connect.hvtx[i]->count()+1>nconfDeg)
+          lcancoarsen=0;
+      }
+    } 
+  }
+  if (lcancoarsen) {
+    if (rest_el) 
+      rest_el->operator()(this);
+    // Nachbarschaften stimmen (hoffe ich)
+    // Haengende Knoten verwalten
+    for (int i=0;i<numfaces();i++) {
+      assert(!hashvtx(i));
+      if (nbel(i)) {
+        if (!(nbel(i)->leaf())) { // Haengenden Knoten erzeugen 
+          this->addhvtx(child[mod(i+1)]->vertex(i+2), 
+                  child[mod(i+2)]->nbel(i),child[mod(i+1)]->nbel(i), i);
+          connect.hvtx[i]->merge(((Triang*)child[mod(i+1)])->connect.hvtx[i],
+                   ((Triang*)child[mod(i+2)])->connect.hvtx[i]);
+          connect.hvtx[i]->nbconnect(opposite(i),this,i);
+        } else { // Haengenden Knoten im Nachbarn entfernen 
+          assert(nbel(i)->hashvtx(opposite(i)));
+          nbel(i)->removehvtx(opposite(i),child[mod(i+1)]->vertex(i+2));
+        }
+      }
+    }
+    for (int i=0;i<numfaces();i++) {
+      if (nbbnd(i)) {
+        if( !(nbbnd(i)->docoarsen(ncv,nconfDeg,rest_el)) ) {
+          lcancoarsen=0;
+          cout << "Error in coarsening!" << endl;
+          abort();
+        }
+      }
+    }
+  } 
+  return lcancoarsen;
+}
 // **************************************************************
 
 template < int N, int NV >
