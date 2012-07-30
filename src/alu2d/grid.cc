@@ -761,9 +761,9 @@ int Hier < A >::coarse(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
     if (this->docoarsen(ncv,nconfDeg,rest_el)) {
       this->deletesubtree();
       this->mysplit = this->unsplit;
-      count=1 ;
     }
   }
+  count=(this->is(Refco::crs) ? 1 : 0) ;
   this->clear(Refco::crs) ;
 
   if (nxt)

@@ -337,11 +337,11 @@ class Refco : public Basic {
       
     virtual ~Refco () {} 
    
-    void clear(tag_t ) { }
+    void clear(tag_t) {}
       
-    int is(tag_t ) const { return 0 ; }  // ist nie irgendein tag
+    int is(tag_t) const { return 0 ; }  // ist nie irgendein tag
 
-    void mark(Refco::tag_t t) {  }
+    void mark(Refco::tag_t t) {}
 
     virtual void clearWas() {}    
     
@@ -364,7 +364,7 @@ class Refco_el : public Refco
 
     Refco_el() : tag(none), tag_last(none) {}
 
-    void clear(Refco::tag_t t = none) { tag = (t == tag) ? none : tag ; }
+    void clear(Refco::tag_t t = none) { tag = (t == tag ? none : tag) ; }
       
     void mark(Refco::tag_t t) { tag = t ; }
       
