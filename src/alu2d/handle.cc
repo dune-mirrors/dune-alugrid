@@ -263,48 +263,37 @@ void Hmesh<N,NV>::coarse() {
   mesh=this;
 #endif
 
-  assert( ! mel.busy()) ;
+  assert(! mel.busy()) ;
 
-  assert( ! mbl.busy()) ;
+  assert(! mbl.busy()) ;
 
-  assert( ! vl.busy()) ;
+  assert(! vl.busy()) ;
 
+  // walk over all macro elements and call hierarchic coarseining procedure
   {
-
     Listwalk_impl < macroelement_t > walk(mel) ;
 
-    for(walk.first(); ! walk.done() ; walk.next()) {
+    for(walk.first() ; ! walk.done() ; walk.next()) {
       walk.getitem()->coarse(ncv,_nconfDeg,_rest_el) ;
     }
-      
   }
 
-  { // sch.... konstruktion 
-
+  // remove all unused vertices
+  {
     Listwalk_impl < vertex_t > walk (vl) ;
 
-    walk.first() ; 
+    for(walk.first() ; ! walk.done() ; ) {
+      vertex_t * v = & walk.getitem() ;
+      walk.next() ;
 
-    while(! walk.done()) {
-
-      vertex_t * curr = & walk.getitem() ;
-
-      if(curr->Basic::isfree()) {
-
-        walk.next() ;
-
-        vl.detach(curr) ;
-
-        delete curr ;
-
+      if (v->Basic::isfree()) {
+        vl.detach(v) ;
+        delete v ;
       }
-
-      else walk.next() ;
-
     }
-
   }
 
+  // renumber vertices
   vl.renumber() ;
 }
 
