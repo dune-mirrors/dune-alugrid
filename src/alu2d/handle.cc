@@ -225,9 +225,7 @@ void Hmesh<N,NV>::refine() {
 #endif
 
   assert( ! mel.busy()) ;
-
   assert( ! mbl.busy()) ;
-
   assert( ! vl.busy()) ;
 
   int count = 0 ;
@@ -239,22 +237,16 @@ void Hmesh<N,NV>::refine() {
   do {
     int lcount = 0;
     Listwalk_impl <macroelement_t> walk(mel);
-    for( walk.first() ; !walk.done() ; walk.next() )
-      lcount += walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el);
-    count += lcount;
-    for( walk.first() ; !walk.done() ; walk.next() )
-      lcount += walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el);
-    count += lcount;
-   } while( checkConf() );
+    for (walk.first() ; !walk.done() ; walk.next())
+      lcount += walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el) ;
+    count += lcount ;
+    for (walk.first() ; !walk.done() ; walk.next())
+      lcount += walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el) ;
+    count += lcount ;
+   } while( checkConf() ) ;
 
+  // renumber vertices
   vl.renumber() ;
-  
-  //cerr << "  refine() Anzahl der Elemente / Vertices : " ;
-
-  //cerr << Leafwalk < Element > (mel).size() << "  " ;
-
-  //cerr << Listwalk_impl < vertex_t > (vl).size() << endl ;
-
 }
 
 template < int N, int NV >
@@ -263,17 +255,15 @@ void Hmesh<N,NV>::coarse() {
   mesh=this;
 #endif
 
-  assert(! mel.busy()) ;
-
-  assert(! mbl.busy()) ;
-
-  assert(! vl.busy()) ;
+  assert(!mel.busy()) ;
+  assert(!mbl.busy()) ;
+  assert(!vl.busy()) ;
 
   // walk over all macro elements and call hierarchic coarseining procedure
   {
     Listwalk_impl < macroelement_t > walk(mel) ;
 
-    for(walk.first() ; ! walk.done() ; walk.next()) {
+    for(walk.first() ; !walk.done() ; walk.next()) {
       walk.getitem()->coarse(ncv,_nconfDeg,_rest_el) ;
     }
   }
@@ -282,7 +272,7 @@ void Hmesh<N,NV>::coarse() {
   {
     Listwalk_impl < vertex_t > walk (vl) ;
 
-    for(walk.first() ; ! walk.done() ; ) {
+    for(walk.first() ; !walk.done() ; ) {
       vertex_t * v = & walk.getitem() ;
       walk.next() ;
 

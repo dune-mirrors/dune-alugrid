@@ -358,14 +358,11 @@ class Refco : public Basic {
 // #definition:
 class Refco_el : public Refco
 {
-
-  private :
-
-    Refco::tag_t tag, tag_last ;   
+    Refco::tag_t tag, tag_last ;
     
   public :
 
-    Refco_el() : tag(none), tag_last(none) { }
+    Refco_el() : tag(none), tag_last(none) {}
 
     void clear(Refco::tag_t t = none) { tag = (t == tag) ? none : tag ; }
       
@@ -375,7 +372,7 @@ class Refco_el : public Refco
 
     int wasRefined() const { return tag_last == ref ? 1 : 0 ; }    
 
-    void clearWas() { tag_last = none;}    
+    void clearWas() { tag_last = none ; }
     
   protected:
     void writeToWas() { tag_last = ref; }

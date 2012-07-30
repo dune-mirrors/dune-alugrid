@@ -522,6 +522,7 @@ int Triang < N,NV >::split2tr(void * (&e)[Basic::nparts], Listagency < vertex_t 
   e[1] = t2;
   return 2;
 }
+
 template < int N, int NV >
 int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > * agnc,
                             multivertexadapter_t & mva, 

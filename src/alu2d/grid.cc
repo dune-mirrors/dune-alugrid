@@ -768,43 +768,37 @@ int Hier < A >::coarse(nconf_vtx_t *ncv,int nconfDeg, restrict_basic_t *rest_el)
 }
 
 template < class A >
-int Hier < A >::refine_leaf(Listagency < vertex_t > * a, 
-                            multivertexadapter_t * b ,nconf_vtx_t *ncv,
-                            int nconfDeg,Refco::tag_t default_ref,
+int Hier < A >::refine_leaf(Listagency < vertex_t > * a,multivertexadapter_t * b ,
+                            nconf_vtx_t *ncv,int nconfDeg,Refco::tag_t default_ref,
                             prolong_basic_t *pro_el)
 {
-  int count = 0;
-
-  assert( leaf() );
+  assert(leaf());
 
   if (this->is(Refco::ref))
     this->mark(default_ref);
 
-  if(this->is(Refco::quart) || 
-     this->is(Refco::ref_1) || this->is(Refco::ref_2) || 
-     this->thinis(this->bndel_like)) {
-      
-    void * els [A::nparts] ;
+  if(this->is(Refco::quart) || this->is(Refco::ref_1) || this->is(Refco::ref_2) || this->thinis(this->bndel_like)) {
+    void * els[A::nparts] ;
 
     if (this->is(Refco::quart))
     {
-      numchild = this->split(els, a, *b, ncv, this->triang_quarter,nconfDeg,default_ref,pro_el);
+      numchild = this->split(els,a,*b,ncv,this->triang_quarter,nconfDeg,default_ref,pro_el);
       this->clear(Refco::quart);
     }
     else if (this->is(Refco::ref_1))
     {
-      numchild = this->split(els, a, *b, ncv, this->triang_conf2,nconfDeg,default_ref,pro_el);
+      numchild = this->split(els,a,*b,ncv,this->triang_conf2,nconfDeg,default_ref,pro_el);
       this->clear(Refco::ref_1);
     }
     else if (this->is(Refco::ref_2))
     {
-      numchild = this->split(els, a, *b, ncv, this->triang_conf2,nconfDeg,default_ref,pro_el);
+      numchild = this->split(els,a,*b,ncv,this->triang_conf2,nconfDeg,default_ref,pro_el);
       this->clear(Refco::ref_2);
     }
     else
     {
       assert(this->thinis(this->bndel_like));
-      this->numchild = this->split(els, a, *b, ncv, this->triang_bnd,nconfDeg,default_ref,pro_el);
+      numchild = this->split(els,a,*b,ncv,this->triang_bnd,nconfDeg,default_ref,pro_el);
     }
 
     dwn = (Hier *)els[0] ;
@@ -816,9 +810,7 @@ int Hier < A >::refine_leaf(Listagency < vertex_t > * a,
     dwn->writeToWas();
     dwn->childNr_ = 0;
 
-    for(int i = 1 ; i < numchild ; i ++ ) 
-    {
-
+    for (int i=1 ; i<numchild ; ++i) {
       ((Hier *)els[i])->lvl() = newLevel ;
 
       ((Hier *)els[i])->up = this ;
@@ -826,7 +818,6 @@ int Hier < A >::refine_leaf(Listagency < vertex_t > * a,
       ((Hier *)els[i])->childNr_ = i;
 
       ((Hier *)els[i-1])->nxt = (Hier *)els[i] ;
-
     }
 
     if (pro_el)
@@ -834,34 +825,32 @@ int Hier < A >::refine_leaf(Listagency < vertex_t > * a,
 
     //this->check();
 
-    count = numchild;
-
-  }
-
-  return count;
+    return numchild;
+  } else
+    return 0;
 }
 
 template < class A >
-int Hier < A >::refine(Listagency < vertex_t > * a, multivertexadapter_t * b,
-                       nconf_vtx_t *ncv,
-                       int nconfDeg,Refco::tag_t default_ref,prolong_basic_t *pro_el)
+int Hier < A >::refine(Listagency < vertex_t > * a,multivertexadapter_t * b,
+                       nconf_vtx_t *ncv,int nconfDeg,Refco::tag_t default_ref,
+                       prolong_basic_t * pro_el)
 {
-  int count =  nxt ? nxt->refine(a, b,ncv, nconfDeg,default_ref,pro_el) : 0 ;
-  if(dwn) 
-    count += dwn->refine(a, b,ncv,nconfDeg,default_ref,pro_el) ;
+  int count = 0 ;
+
+  if (nxt)
+    count += nxt->refine(a,b,ncv,nconfDeg,default_ref,pro_el) ;
+
+  if (dwn)
+    count += dwn->refine(a,b,ncv,nconfDeg,default_ref,pro_el) ;
   else {
-    // Neue Behandlung der Bl"atter:
     // Wegen rek. Aufbau der Dreiecksverf. ist eine Funktion n"otig, die Verf.
     // aber nicht u"ber den Baum l"auft. 
-    // Weitere "Anderung: count+= statt count=, falls n"amlich von der nxt-Rek.
-    // etwas in count steht.
     // Bei Rekursivem Verf. stimmt R"uckgabe sowieso nicht
 
     count += refine_leaf(a,b,ncv,nconfDeg,default_ref,pro_el) ; 
   }
 
   return count ;
-
 }
 
 
