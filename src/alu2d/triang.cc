@@ -1213,10 +1213,8 @@ int Bndel_periodic < N,NV >::docoarsen(nconf_vtx_t *ncv,
     periodic_nb->nbel(0)->coarse(ncv,nconfDeg,rest_el);
     assert(periodic_nb->nbel(0)->leaf());
     assert(periodic_nb->leaf());  
-  } else {
-    cout << "nicht-konformes Vergroebern noch nicht implementiert!" << endl;
-    abort();
-  }
+  } else
+    bndel_triang_t::docoarsen(ncv,nconfDeg,rest_el);
   
   return 1;  
 }
