@@ -80,9 +80,9 @@ class Triang : public Hier < Element < N,NV > > {
    ~Triang() { }
 
 
-    void write(ostream & ) const ;
+    void write(std::ostream & ) const ;
 
-    void read(istream &, vertex_t ** , const int ) ;
+    void read(std::istream &, vertex_t ** , const int ) ;
 
 
   private:
@@ -189,9 +189,9 @@ class Bndel_triang : public Hier < Bndel < N, NV > > {
       return new Bndel_triang(v1,v2,ptyp);
     }
 
-    void write(ostream &) const ;
+    void write(std::ostream &) const ;
 
-    void read(istream &, vertex_t ** , const int ) ;
+    void read(std::istream &, vertex_t ** , const int ) ;
 
     int split(void *(&)[Basic::nparts], Listagency < vertex_t > *,
               multivertexadapter_t &, nconf_vtx_t *ncv,splitrule_t,
@@ -279,8 +279,8 @@ class Bndel_periodic : public Bndel_triang < N,NV >
       }
     }
 
-    void write(ostream &) const;
-    void read(istream &, vertex_t ** , const int);
+    void write(std::ostream &) const;
+    void read(std::istream &, vertex_t ** , const int);
 
     virtual int split(void * (&el)[Basic::nparts], Listagency < vertex_t > * agnc,
                       multivertexadapter_t & mva, nconf_vtx_t *ncv,splitrule_t,

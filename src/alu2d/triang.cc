@@ -123,14 +123,14 @@ Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2, vertex_t * v
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Element::write(ostream & out) const
+//   void Element::write(std::ostream & out) const
 // #parameters:
 // #description:
 //   Rausschreiben des Dreicks (unvollst"andig)
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-void Triang < N,NV >::write(ostream & out) const {
+void Triang < N,NV >::write(std::ostream & out) const {
   element_t::connect.write(out) ;
   //  data.write(out) ;
   out << endl ;
@@ -139,9 +139,9 @@ void Triang < N,NV >::write(ostream & out) const {
 // ***************************************************
 // #begin(method)
 // #method:
-//   void Element::read(istream & in, vertex_t ** look, const int len)
+//   void Element::read(std::istream & in, vertex_t ** look, const int len)
 // #parameters:
-//   \ istream& | io    | Eingabestrom
+//   \ std::istream& | io    | Eingabestrom
 //   \ vertex_t**  | look  | Liste von vertex_tpointern
 //   \ const int | len   | Gr"o"se der Liste look
 // #description:
@@ -151,7 +151,7 @@ void Triang < N,NV >::write(ostream & out) const {
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-void Triang < N,NV >::read(istream & in, vertex_t ** look, const int len) {
+void Triang < N,NV >::read(std::istream & in, vertex_t ** look, const int len) {
   helement_t::read(in) ;
   element_t::nvertices() = connect.read(in, look, len) ;
   init() ;
@@ -974,7 +974,7 @@ Bndel_triang < N,NV >::Bndel_triang(vertex_t * v0, vertex_t * v1, bnd_t type) : 
 }
 
 template < int N, int NV >
-void Bndel_triang < N,NV >::write(ostream & out) const {
+void Bndel_triang < N,NV >::write(std::ostream & out) const {
 
   out << (int) type() << "  " ;
 
@@ -985,7 +985,7 @@ void Bndel_triang < N,NV >::write(ostream & out) const {
 }
 
 template < int N, int NV >
-void Bndel_triang < N,NV >::read(istream & in, vertex_t ** v, const int nv) {
+void Bndel_triang < N,NV >::read(std::istream & in, vertex_t ** v, const int nv) {
 
   int c ;
 
@@ -1107,7 +1107,7 @@ int periodic_flag=0;
 
 
 template < int N, int NV >
-void Bndel_periodic < N,NV >::write(ostream &out) const
+void Bndel_periodic < N,NV >::write(std::ostream &out) const
 {
   assert( periodic_nb );
   out << bndel_t::general_periodic << "  ";
@@ -1121,7 +1121,7 @@ void Bndel_periodic < N,NV >::write(ostream &out) const
 
 
 template < int N, int NV >
-void Bndel_periodic < N,NV >::read(istream &in, vertex_t ** v, const int nv)
+void Bndel_periodic < N,NV >::read(std::istream &in, vertex_t ** v, const int nv)
 {
   int typ;
   in >> typ;
