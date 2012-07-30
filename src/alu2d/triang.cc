@@ -1021,46 +1021,41 @@ int Bndel_triang < N,NV >::split(void * (&e)[Basic::nparts], Listagency < vertex
                                  int nconfDeg,Refco::tag_t default_ref,
                                  prolong_basic_t *pro_el)
 {
-  int idx[2];
-  //  nconf_vtx_t *ncv;
-  IndexProvider* hdl = this->gethdl();
+  int idx[2] ;
+  IndexProvider * hdl = this->gethdl() ;
 
-  assert(sr == thinelement_t::triang_bnd);
-  assert(splitrule() == thinelement_t::unsplit);
-  mysplit = thinelement_t::triang_bnd;
+  assert(sr == thinelement_t::triang_bnd) ;
+  assert(splitrule() == thinelement_t::unsplit) ;
+  mysplit = thinelement_t::triang_bnd ;
 
   // create new elements
-  
-  assert(ncv);
-  bndel_t *t1=create(connect.vtx[0],ncv->vtx,bndel_t::typ);
-  bndel_t *t2=create(ncv->vtx,connect.vtx[1],bndel_t::typ);
+  assert(ncv) ;
+  bndel_t *t1=create(connect.vtx[0],ncv->vtx,bndel_t::typ) ;
+  bndel_t *t2=create(ncv->vtx,connect.vtx[1],bndel_t::typ) ;
 
   // determine opposite vertices
 
-  switch (nbel(0)->splitrule())
-    {
+  switch (nbel(0)->splitrule()) {
     case thinelement_t::triang_conf2:
-      idx[0] = 1;
-      idx[1] = 2;
+      idx[0] = 1 ;
+      idx[1] = 2 ; 
       break;
     case thinelement_t::triang_quarter:
-      idx[0] = opposite(0);
-      idx[1] = opposite(0);
+      idx[0] = opposite(0) ;
+      idx[1] = opposite(0) ;
       break;
     default:
-      cerr << "ERROR (Bndel_triang::split()): "
-     << "illegal splitrule!" << endl;
+      std::cerr << "ERROR (Bndel_triang::split()): illegal splitrule!" << std::endl;
       abort();
-    }
+  }
 
   // set connectivity
-
-  ncv->el[0]->nbconnect(idx[0],t1,0);
-  ncv->el[1]->nbconnect(idx[1],t2,0); 
-  ((element_t *)ncv->el[0])->setnormdir(idx[0],1);
-  ((element_t *)ncv->el[1])->setnormdir(idx[1],1);
-  t1->nbconnect(0,ncv->el[0],idx[0]);
-  t2->nbconnect(0,ncv->el[1],idx[1]);
+  ncv->el[0]->nbconnect(idx[0],t1,0) ;
+  ncv->el[1]->nbconnect(idx[1],t2,0) ; 
+  ((element_t *)ncv->el[0])->setnormdir(idx[0],1) ;
+  ((element_t *)ncv->el[1])->setnormdir(idx[1],1) ;
+  t1->nbconnect(0,ncv->el[0],idx[0]) ;
+  t2->nbconnect(0,ncv->el[1],idx[1]) ;
 
 #ifdef ALU2D_OLD_BND_PROJECTION  
   t1->set_bndfunctions(lf,lDf);
@@ -1072,17 +1067,17 @@ int Bndel_triang < N,NV >::split(void * (&e)[Basic::nparts], Listagency < vertex
   //      mva.delete(connect.vtx[1],connect.vtx[2]);    
   
   // Daten auf dem Rand prolongieren
-  t1->sethdl( hdl );
-  t2->sethdl( hdl );
+  t1->sethdl(hdl) ;
+  t2->sethdl(hdl) ;
 
-  t1->edgeconnect(0,ncv->el[0]->edge(idx[0]));
-  t2->edgeconnect(0,ncv->el[1]->edge(idx[1]));
-  e[0]=t1;
-  e[1]=t2;
-  prolongLocal((bndel_t **)e,2);
+  t1->edgeconnect(0,ncv->el[0]->edge(idx[0])) ;
+  t2->edgeconnect(0,ncv->el[1]->edge(idx[1])) ;
+  e[0]=t1 ;
+  e[1]=t2 ;
+  prolongLocal((bndel_t **)e,2) ;
 
   delete ncv;
-  ncv=NULL;
+  //ncv=NULL;
 
   return 2;
 }
@@ -1135,20 +1130,25 @@ void Bndel_periodic < N,NV >::read(std::istream &in, vertex_t ** v, const int nv
 
 
 template < int N, int NV >
-int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts], Listagency < vertex_t > * agnc,
-                                   multivertexadapter_t & mva, 
-                                   nconf_vtx_t *ncv, 
+int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts],Listagency < vertex_t > * agnc,
+                                   multivertexadapter_t & mva,
+                                   nconf_vtx_t *ncv,
                                    splitrule_t sr,
-                                   int nconfDeg,Refco::tag_t default_ref,
+                                   int nconfDeg,
+                                   Refco::tag_t default_ref,
                                    prolong_basic_t *pro_el)
 {
-  assert(sr == thinelement_t::triang_bnd);
-  assert(splitrule() == thinelement_t::unsplit);
+  assert(sr == thinelement_t::triang_bnd) ;
+  assert(splitrule() == thinelement_t::unsplit) ;
 
-  if( nconfDeg == 0 ) {
-    bndel_triang_t::split(el,agnc,mva,ncv,thinelement_t::triang_bnd,nconfDeg,default_ref,pro_el); 
+  // split
+  bndel_triang_t::split(el,agnc,mva,ncv,thinelement_t::triang_bnd,nconfDeg,default_ref,pro_el);
+
+  if (nconfDeg == 0) {
     if (periodic_flag)
       return 2;
+
+    // also refine periodic counterpart
     periodic_flag=1;
     while (periodic_nb->leaf()) {
       switch (nbel(0)->splitrule())
@@ -1160,13 +1160,14 @@ int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts], Listagency < ver
           periodic_nb->nbel(0)->Refco_el::mark(Refco::quart) ;
           break;
         default:
-          cerr << "ERROR (Bndel_periodic::split()): "
-         << "illegal splitrule!" << endl;
+          std::cerr << "ERROR (Bndel_periodic::split()): illegal splitrule!" << std::endl;
           abort();
       }
       periodic_nb->nbel(0)->refine_leaf(agnc,&mva,ncv,nconfDeg,default_ref,pro_el);
     }
     periodic_flag=0;
+
+    // update connectivity
     ((Bndel_periodic*)(el[0]))
       ->set_pnb((Bndel_periodic*)(periodic_nb->down()->next()));
     ((Bndel_periodic*)(periodic_nb->down()->next()))
@@ -1184,13 +1185,7 @@ int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts], Listagency < ver
       ->set_pernb(((Bndel_periodic*)(el[0]))->vertex(1));
 #endif
   } else {
-
-    // split
-
-    bndel_triang_t::split(el,agnc,mva,ncv,thinelement_t::triang_bnd,nconfDeg,default_ref,pro_el);
-
     // update connectivity
-
     if( periodic_nb->leaf() ) {
       ((Bndel_periodic*)el[0])->set_pnb(periodic_nb);
       ((Bndel_periodic*)el[1])->set_pnb(periodic_nb);
@@ -1204,7 +1199,6 @@ int Bndel_periodic < N,NV >::split(void * (&el)[Basic::nparts], Listagency < ver
       ((Bndel_periodic*)(periodic_nb->down()))
   ->set_pnb((Bndel_periodic*)el[1]);
     }
-
   }
 
   return 2;
