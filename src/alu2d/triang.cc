@@ -815,7 +815,7 @@ int Triang < N,NV >::docoarsen2tr(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t
   assert(NV==3) ;
 
   if (nconfDeg != 0) {
-    std::cerr << "COARSENING: not implemented for non-conforming bisection refinement." << std::endl;
+    std::cerr << "ERROR (Triang::docoarsen2tr): not implemented for non-conforming refinement." << std::endl;
     abort();
   }
 
