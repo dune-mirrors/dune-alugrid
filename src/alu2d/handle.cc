@@ -150,16 +150,14 @@ void Hmesh<N,NV>::refresh() {
 template < int N, int NV >
 bool Hmesh<N,NV>::checkConf()
 {
-  bool elem_marked = false;
+  bool elem_marked = false ;
   Listwalkptr< helement_t > walk(*this); // Leafwalk
   for( walk->first() ; !walk->done() ; walk->next() ) {
-    triang_t *item = (triang_t *)&walk->getitem();
-    if( item->confLevelExceeded(_nconfDeg) ) {
-      item->mark(refinement_rule);
-    }
-    if (item->is(Refco::quart) || item->is(Refco::ref_1) || item->is(Refco::ref_2) ) {
-      elem_marked = true;
-    }
+    triang_t *item = (triang_t *)&walk->getitem() ;
+    if (item->confLevelExceeded(_nconfDeg))
+      item->mark(refinement_rule) ;
+    if (item->is(Refco::quart) || item->is(Refco::ref_1) || item->is(Refco::ref_2) )
+      elem_marked = true ;
   }
   return elem_marked;
 }
@@ -228,21 +226,18 @@ void Hmesh<N,NV>::refine() {
   assert( ! mbl.busy()) ;
   assert( ! vl.busy()) ;
 
-  int count = 0 ;
-
   //Listwalk_impl <macroelement_t> walk(mel);
   //for( walk.first() ; !walk.done() ; walk.next() )
   //  walk.getitem()->clearAllWas();  
   
   do {
-    int lcount = 0;
     Listwalk_impl <macroelement_t> walk(mel);
     for (walk.first() ; !walk.done() ; walk.next())
-      lcount += walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el) ;
-    count += lcount ;
+      walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el) ;
+#if 0
     for (walk.first() ; !walk.done() ; walk.next())
-      lcount += walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el) ;
-    count += lcount ;
+      walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el) ;
+#endif
    } while( checkConf() ) ;
 
   // renumber vertices

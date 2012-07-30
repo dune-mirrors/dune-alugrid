@@ -889,14 +889,13 @@ int Triang < N,NV >::docoarsen4(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *
 
   // check whether coarsening this element would violate conformity rules?
   for (int i=0 ; i<numfaces() ; ++i) {
-    if (nbel(i)) {
-      if (!(nbel(i)->leaf()) && child[mod(i+1)]->hashvtx(i)) {
-        if (((Triang*)child[mod(i+1)])->connect.hvtx[i]->count()+1>nconfDeg)
-          lcancoarsen=0 ;
-      }
-      if (!(nbel(i)->leaf()) && child[mod(i+2)]->hashvtx(i)) {
-        if (((Triang*)child[mod(i+2)])->connect.hvtx[i]->count()+1>nconfDeg)
-          lcancoarsen=0 ;
+    if (nbel(i) && !nbel(i)->leaf()) {
+      for (int k=0 ; k<2 ; ++k ) {
+        Triang *t = (Triang *)child[mod(i+k+1)];
+        if (t->connect.hvtx[i]) {
+          if (t->connect.hvtx[i]->deepestLevel()+1>nconfDeg)
+            lcancoarsen=0 ;
+        }
       }
     }
   }

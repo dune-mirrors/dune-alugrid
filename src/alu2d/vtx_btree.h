@@ -57,21 +57,21 @@ template < int N, int NV > class Vtx_btree {
         return vtx;
       }
 
-      // Gibt die Anzahl von Knoten des laengsten "Zweiges" des Baumes zurueck
+      // return depth of this tree
       int deepestLevel(int prevLvl = 0) const {
-        int left  = (prev ? prev->deepestLevel(prevLvl+1) : prevLvl+1);
-        int right = (next ? next->deepestLevel(prevLvl+1) : prevLvl+1);
-        return std::max(left,right) ;
+        const int left  = (prev ? prev->deepestLevel() : 0) ;
+        const int right = (next ? next->deepestLevel() : 0) ;
+        return std::max(left,right) + prevLvl + 1 ;
       }
 
-      // Gibt die Anzahl von Knoten unterhalb des Empfaengerknotens zurueck
+      // return number of hanging nodes in this tree
       int count() const {
-        return 1 + (next ? next->count() : 0) + (prev ? prev->count() : 0);
+        return 1 + (next ? next->count() : 0) + (prev ? prev->count() : 0) ;
       }
 
       int remove(vertex_t *pvtx);
 
-      void nbconnect(int, thinelement_t *, int ) ;
+      void nbconnect(int,thinelement_t *,int) ;
 
 #if USE_ALUGRID_XDISPLAY 
       void draw(Xdisplay &xd,Element *el);

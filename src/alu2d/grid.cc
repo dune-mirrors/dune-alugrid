@@ -754,17 +754,22 @@ int Hier < A >::deepestLevel()
 }
 
 template < class A >
-int Hier < A >::coarse(nconf_vtx_t *ncv,int nconfDeg, restrict_basic_t *rest_el)
+int Hier < A >::coarse(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
 {
-  if(dwn ? dwn->coarse(ncv,nconfDeg,rest_el) == numchild : 0 )
-  if ( this->docoarsen(ncv,nconfDeg,rest_el) )
-  {
+  int count=0 ;
+  if (dwn && (dwn->coarse(ncv,nconfDeg,rest_el) == numchild)) {
+    if (this->docoarsen(ncv,nconfDeg,rest_el)) {
       this->deletesubtree();
       this->mysplit = this->unsplit;
+      count=1 ;
+    }
   }
-  int i = (nxt ? nxt->coarse(ncv,nconfDeg,rest_el) : 0 ) + (this->is(Refco::crs) ? 1 : 0 ) ;
   this->clear(Refco::crs) ;
-  return i ;
+
+  if (nxt)
+    count+=nxt->coarse(ncv,nconfDeg,rest_el) ;
+
+  return count ;
 }
 
 template < class A >
