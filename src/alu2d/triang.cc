@@ -304,7 +304,8 @@ int Triang < N,NV >::split2tr(void * (&e)[Basic::nparts], Listagency < vertex_t 
                               Refco::tag_t default_ref,
                               prolong_basic_t *pro_el)
 {
-  assert( NV == 3);
+  assert(NV==3) ;
+
   Triang* t1;
   Triang* t2;
   Edge *newedge[3];
@@ -792,7 +793,7 @@ bool Triang < N,NV >::canCoarsen(int nconfDeg) const
 template < int N, int NV >
 int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
 {
-  assert(splitrule() != thinelement_t::unsplit);
+  assert(splitrule() != thinelement_t::unsplit) ;
 
   switch (splitrule())
   {
@@ -811,6 +812,8 @@ int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *r
 template < int N, int NV >
 int Triang < N,NV >::docoarsen2tr(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
 {
+  assert(NV==3) ;
+
   if (nconfDeg != 0) {
     std::cerr << "COARSENING: not implemented for non-conforming bisection refinement." << std::endl;
     abort();
