@@ -538,9 +538,7 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
   // Thus no additional calls to setrefine() or setorientation()
   // are required. Note that this splitrule is only intended for
   // the global refinements performed at the beginning of a
-  // simulation. Coarsening of triangles created using
-  // ``triang_quarter'' is not possible and thus prohibited by
-  // Triang::canCoarsen() below!
+  // simulation.
   //
   //                 1*                        1* 
   //                 /|                        /| 
@@ -727,29 +725,6 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
     }
   }
   return 4;
-}
-
-template < int N, int NV >
-bool Triang < N,NV >::canCoarsen(int nconfDeg) const
-{
-  bool ret;
-
-  ret = ( (   (splitrule() == thinelement_t::triang_quarter)
-        || (neighbour(0)->splitrule() == thinelement_t::triang_quarter)) 
-    ? false : true);
-
-  if (ret && nbel(0))
-    ret = (nbel(0)->deepestLevel() <= nconfDeg); /* &&
-                (down()->next()->neighbour(0)->thinis(element_like) ?
-                !(((Element*)(down()->next()->neighbour(0)))->
-                hashvtx(down()->next()->opposite(0))) : true) &&
-                (down()->neighbour(0)->thinis(element_like) ?
-                !(((Element*)(down()->neighbour(0)))->hashvtx(down()->opposite(0)))
-                : true); */
-
-  ret = ret && !(down()->hashvtx(0)) && !(down()->next()->hashvtx(0));
-
-  return ret;
 }
 
 // ***************************************************

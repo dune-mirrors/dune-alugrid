@@ -61,7 +61,7 @@ template < int N, int NV > class Vtx_btree {
       int deepestLevel(int prevLvl = 0) const {
         int left  = (prev ? prev->deepestLevel(prevLvl+1) : prevLvl+1);
         int right = (next ? next->deepestLevel(prevLvl+1) : prevLvl+1);
-        return left > right ? left : right;
+        return std::max(left,right) ;
       }
 
       // Gibt die Anzahl von Knoten unterhalb des Empfaengerknotens zurueck

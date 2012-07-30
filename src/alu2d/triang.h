@@ -95,8 +95,6 @@ class Triang : public Hier < Element < N,NV > > {
 
     void newNeighbour(Triang *, int, int, splitrule_t, bool = false);
 
-    bool canCoarsen(int) const;
-
     int split2tr(void *(&)[Basic::nparts], Listagency < vertex_t > *,
                  multivertexadapter_t &, nconf_vtx_t *ncv,
                  int,Refco::tag_t,prolong_basic_t *pro_el);
@@ -274,17 +272,27 @@ class Bndel_periodic : public Bndel_triang < N,NV >
       periodic_nb=(Bndel_periodic*)pnb;
 
       if( !leaf() ) {
-        ((Bndel_periodic*)down())->set_pnb(pnb);
-        ((Bndel_periodic*)(down()->next()))->set_pnb(pnb);
+        ((Bndel_periodic *)down())->set_pnb(pnb);
+        ((Bndel_periodic *)(down()->next()))->set_pnb(pnb);
       }
     }
 
+    int depth() const {
+      if (down()) {
+        assert(down()->next() && !down()->next()->next()) ;
+        const int left = ((Bndel_periodic *)down())->depth();
+        const int right = ((Bndel_periodic *)down()->next())->depth();
+        return std::max(left,right)+1 ;
+      } else
+        return 0 ;
+    }
+
     void write(std::ostream &) const;
-    void read(std::istream &, vertex_t ** , const int);
+    void read(std::istream &,vertex_t **,const int);
 
     virtual int split(void * (&el)[Basic::nparts], Listagency < vertex_t > * agnc,
                       multivertexadapter_t & mva, nconf_vtx_t *ncv,splitrule_t,
-		                  int,Refco::tag_t,prolong_basic_t *pro_el);
+                      int,Refco::tag_t,prolong_basic_t *pro_el);
 
     virtual int docoarsen(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
  
