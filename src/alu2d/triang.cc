@@ -898,6 +898,11 @@ int Triang < N,NV >::docoarsen4(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *
         }
       }
     }
+    bndel_triang_t * nb = nbbnd(i) ;
+    if (nb && (nb->type()==bndel_t::periodic)) {
+      if (((bndel_periodic_t *)nb)->periodic_nb->depth()>nconfDeg)
+        lcancoarsen=0 ;
+    }
   }
 
   if (lcancoarsen) {
@@ -907,7 +912,9 @@ int Triang < N,NV >::docoarsen4(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *
 
     // administration of hanging nodes
     for (int i=0 ; i<numfaces() ; ++i) {
+      // we have children, so we may not have a hanging nodes
       assert(!hashvtx(i)) ;
+
       if (nbel(i)) {
         if (!(nbel(i)->leaf())) {
           // neighbor is not leaf, so create a hanging node
