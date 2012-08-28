@@ -29,9 +29,7 @@ dnl check for library functions
 dnl checks for header files.
   AC_CHECK_HEADERS([iostream stack map])
 
-dnl  this does not work on juqueen 
-dnl   AC_REQUIRE([AC_FUNC_MALLOC])
-
+  AC_REQUIRE([AC_FUNC_MALLOC])
   AC_CHECK_LIB([m], [pow])
   AC_CHECK_FUNCS([sqrt strchr])
   AC_LANG_POP([C++])
