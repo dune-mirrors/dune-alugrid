@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define PARALLEL
+// #define PARALLEL
 
 #define COUNT_FLOPS
 
@@ -127,7 +127,7 @@ void globalCoarsening(GitterType& grid, int refcount) {
   {
     cout << "Global Coarsening: run " << refcount-count << endl;
     {
-       // get LeafIterator which iterates over all leaf elements of the grid 
+       // get leafiterator which iterates over all leaf elements of the grid 
        LeafIterator < Gitter::helement_STI > w (grid) ;
        
        for (w->first () ; ! w->done () ; w->next ())
@@ -143,6 +143,26 @@ void globalCoarsening(GitterType& grid, int refcount) {
     // print size of grid 
     grid.printsize () ;
 
+  }
+}
+template <class GitterType> 
+void tovtk(GitterType& grid) {
+  // get leafiterator which iterates over all leaf elements of the grid 
+  typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
+  LeafIterator < Gitter::helement_STI > w (grid) ;
+  for (w->first () ; ! w->done () ; w->next ())
+  {
+    tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+    // mark elements for coarsening  
+    std::cout << item->getIndex() << "*****" << std::endl;
+    for (int i=0;i<4;++i)
+    {
+      std::cout << item->myvertex(i)->getIndex() << "    ";
+      std::cout << item->myvertex(i)->Point()[0] << " ";
+      std::cout << item->myvertex(i)->Point()[1] << " ";
+      std::cout << item->myvertex(i)->Point()[2] << " ";
+      std::cout << std::endl;
+    }
   }
 }
 
@@ -205,11 +225,11 @@ int main (int argc, char ** argv, const char ** envp)
   {
 #ifdef PARALLEL
     GitterDunePll grid(macroname.c_str(),mpa);
+    grid.duneLoadBalance();
 #else 
     GitterDuneImpl grid(macroname.c_str());
 #endif
 
-    grid.duneLoadBalance();
    
     //cout << "P[ " << rank << " ] : Grid generated! \n";
     grid.printsize(); 
@@ -217,7 +237,9 @@ int main (int argc, char ** argv, const char ** envp)
   
     grid.printMemUsage();
     int bla; 
-    cin >> bla;
+    // cin >> bla;
+    globalRefine(grid, mxl);
+    tovtk(grid);
     return 0;
    
     checkRefinements( grid );
