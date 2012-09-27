@@ -686,6 +686,7 @@ public :
     // return index of boundary segment 
     virtual int segmentIndex (const int) const { return -1; }
         
+    virtual bool markNonConform () = 0;
     // mark element for using iso8 rule 
     virtual int tagForGlobalRefinement () = 0 ;
     // mark element for coarsening 
@@ -1506,6 +1507,7 @@ public :
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
+      virtual bool markNonConform () { return true; }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
@@ -1596,6 +1598,7 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
       virtual void request (myrule_t) = 0 ;
+      virtual bool markNonConform () { return true; }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
@@ -1668,6 +1671,7 @@ public :
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
+      virtual bool markNonConform () { return true; }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
@@ -1717,6 +1721,7 @@ public :
       virtual bool isboundary() const { return true; }
       virtual bool isperiodic() const { return false; }
 
+      virtual bool markNonConform () { return true; }
       virtual int nChild () const;
       // just returns level 
       virtual int nbLevel() const { return level(); }
@@ -1765,6 +1770,7 @@ public :
       inline int twist (int) const ;
       inline hface4_GEO * subface4 (int,int) const ;
       
+      virtual bool markNonConform () { return true; }
       virtual bool isboundary() const { return true; }
       virtual bool isperiodic() const { return false; }
       virtual int nChild () const;
