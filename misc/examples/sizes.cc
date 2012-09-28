@@ -105,7 +105,7 @@ void globalRefine(GitterType& grid, int refcount)
           typedef Gitter ::Geometric :: TetraRule  TetraRule ;
           item->request ( TetraRule :: bisect );
 
-          break ;
+	  break ;
         }
      }
 
@@ -145,12 +145,12 @@ void globalCoarsening(GitterType& grid, int refcount) {
 
   }
 }
-template <class GitterType> 
-void tovtk(GitterType& grid) {
+template <class GitterType>
+void tovtk(GitterType& grid, const char *fn) {
 
   // openfile
   std::ofstream vtkFile;
-  vtkFile.open( "out.vtk" );
+  vtkFile.open( fn );
     
   // header info
   vtkFile << "# vtk DataFile Version 2.0" << std::endl;
@@ -226,8 +226,24 @@ void tovtk(GitterType& grid) {
       }
   }
 
+  // cell data
+  {
+    vtkFile << "CELL_DATA " << nCells << std::endl;
+    vtkFile << "SCALARS cell-id double 1" << std::endl;
+    vtkFile << "LOOKUP_TABLE default" << std::endl;
+
+    typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
+    LeafIterator < Gitter::helement_STI > w (grid) ;
+    for (w->first () ; ! w->done () ; w->next ())
+      {
+      	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+
+	vtkFile << item->getIndex() << std::endl;
+      }
+  }
+
   vtkFile.close();
-  std::cout << "data written to out.vtk" << std::endl;
+  std::cout << "data written to " << fn << std::endl;
 }
 
 // perform walk over elements of a certain level  
@@ -302,8 +318,14 @@ int main (int argc, char ** argv, const char ** envp)
     grid.printMemUsage();
     //int bla; 
     // cin >> bla;
-    globalRefine(grid, mxl);
-    tovtk(grid);
+    for( int i = 0; i <= mxl; ++i )
+      {
+	std::ostringstream ss;
+	ss << "out-" << i << ".vtk";
+	tovtk( grid, ss.str().c_str() );
+
+	globalRefine(grid, 1);
+      }
     return 0;
    
     checkRefinements( grid );
