@@ -129,6 +129,7 @@ void GitterDuneBasis :: removeAdaptRestrictProlongOp()
 }
 
 int nr = 0;
+int adaptstep = 0;
 bool GitterDuneBasis :: refine () {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
   bool x = true ;
@@ -144,13 +145,15 @@ bool GitterDuneBasis :: refine () {
     x = true ;
     for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
 	  std::ostringstream ss;
-	  ss << "ref-" << nr << ".vtk";
+    int filenr = adaptstep*100+nr;
+	  ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
     tovtk(  ss.str().c_str() );
     ++nr;
-    break;
+    // break;
     if (x) break;
   }
   while (1);  // need something here on required conformity
+  ++adaptstep;
   return  x;
 }
 

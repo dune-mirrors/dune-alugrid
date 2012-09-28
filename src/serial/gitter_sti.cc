@@ -329,7 +329,6 @@ bool Gitter :: adapt ()
     cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
     cerr << "  diese Option ist eigentlich dem parallelen Verfeinerer vorbehalten.\n" ;
     cerr << "  Der Fehler trat auf in " << __FILE__ << " " << __LINE__ << endl ;
-    adapt();
   }
   int lap = clock () ;
   coarse () ;

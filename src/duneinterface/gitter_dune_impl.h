@@ -336,4 +336,14 @@ template < class A > inline IteratorSTI < A > * PureElementLeafIterator < A > ::
 template < class A > inline IteratorSTI < A > & PureElementLeafIterator < A > :: operator * () const {
   return * _w ;
 }
+
+namespace {
+std::string ZeroPadNumber(int num)
+{
+    std::ostringstream ss;
+    ss << std::setw( 7 ) << std::setfill( '0' ) << num;
+    return ss.str();
+}
+}
+
 #endif
