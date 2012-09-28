@@ -21,3 +21,6 @@
 /alugrid.pc
 /*.swp
 /ltmain.sh
+*.vtu
+*.vtk
+*.o
