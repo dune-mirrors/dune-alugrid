@@ -128,6 +128,7 @@ void GitterDuneBasis :: removeAdaptRestrictProlongOp()
   _arp = 0;
 }
 
+int nr = 0;
 bool GitterDuneBasis :: refine () {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
   bool x = true ;
@@ -142,6 +143,10 @@ bool GitterDuneBasis :: refine () {
     std::cout << "check non conform refinement" << std::endl;
     x = true ;
     for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
+	  std::ostringstream ss;
+	  ss << "ref-" << nr << ".vtk";
+    tovtk(  ss.str().c_str() );
+    ++nr;
     break;
     if (x) break;
   }
@@ -188,6 +193,106 @@ bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp)
   removeAdaptRestrictProlongOp ();
 
   return refined;
+}
+
+void GitterDuneBasis :: tovtk( const char *fn) 
+{
+  // openfile
+  std::ofstream vtkFile;
+  vtkFile.open( fn );
+    
+  // header info
+  vtkFile << "# vtk DataFile Version 2.0" << std::endl;
+  vtkFile << "Unstructured Grid" << std::endl;
+  vtkFile << "ASCII" << std::endl;
+  vtkFile << "DATASET UNSTRUCTURED_GRID" << std::endl;
+
+  // vertex list
+  typedef std::vector< double > Vertex;
+  std::map< int, Vertex > vertexList;
+
+  int nCells = 0;
+
+  // loop to find vertexList and count cells
+  {
+    typedef Objects :: tetra_IMPL tetra_IMPL ;
+    LeafIterator < Gitter::helement_STI > w (*this) ;
+    for (w->first () ; ! w->done () ; w->next ())
+      {
+      
+	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+
+	for (int i=0;i<4;++i)
+	  {
+	    Vertex v ( item->myvertex(i)->Point(), item->myvertex(i)->Point() + sizeof( item->myvertex(i)->Point() ) / sizeof( double ) );
+	    vertexList[ item->myvertex(i)->getIndex() ]
+	      = v;
+	  }
+
+	++nCells;
+      }
+  }
+
+  // points info
+  {
+    vtkFile << "POINTS " << vertexList.size() << " double" << std::endl;
+    for( unsigned int i = 0; i < vertexList.size(); ++i )
+      {
+	vtkFile << vertexList[ i ][ 0 ]
+		<< " " << vertexList[ i ][ 1 ]
+		<< " " << vertexList[ i ][ 2 ] << std::endl;
+      }
+  }
+
+  // cell info
+  {
+    vtkFile << "CELLS " << nCells << " " << 5*nCells << std::endl;
+
+    typedef Objects :: tetra_IMPL tetra_IMPL ;
+    LeafIterator < Gitter::helement_STI > w (*this) ;
+    for (w->first () ; ! w->done () ; w->next ())
+      {
+      	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+
+	vtkFile << 4;
+
+	for (int i=0;i<4;++i)
+	  {
+	    vtkFile << " " << item->myvertex(i)->getIndex();
+	  }
+
+	vtkFile << std::endl;
+      }
+  }
+
+  // cell type info
+  {
+    vtkFile << "CELL_TYPES " << nCells << std::endl;
+
+    for( int i = 0; i < nCells; ++i )
+      {
+	vtkFile << 10 << std::endl; // 10 for a tetrahedron
+      }
+  }
+
+  // cell data
+  {
+    vtkFile << "CELL_DATA " << nCells << std::endl;
+    vtkFile << "SCALARS cell-id double 1" << std::endl;
+    vtkFile << "LOOKUP_TABLE default" << std::endl;
+
+    typedef Objects :: tetra_IMPL tetra_IMPL ;
+    LeafIterator < Gitter::helement_STI > w (*this) ;
+    for (w->first () ; ! w->done () ; w->next ())
+      {
+      	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+
+	vtkFile << item->getIndex() << std::endl;
+      }
+  }
+
+  vtkFile.close();
+  std::cout << "data written to " << fn << std::endl;
 }
 
 #if 0

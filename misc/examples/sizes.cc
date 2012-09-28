@@ -319,14 +319,14 @@ int main (int argc, char ** argv, const char ** envp)
     //int bla; 
     // cin >> bla;
     for( int i = 0; i <= mxl; ++i )
-      {
-	std::ostringstream ss;
-	ss << "out-" << i << ".vtk";
-	tovtk( grid, ss.str().c_str() );
-
-	if( i < mxl )
-	  globalRefine(grid, 1);
-      }
+    {
+	    std::ostringstream ss;
+	    ss << "out-" << i << ".vtk";
+      grid.tovtk(  ss.str().c_str() );
+	    // tovtk( grid, ss.str().c_str() );
+	    if( i < mxl )
+	      globalRefine(grid, 1);
+    }
     return 0;
    
     checkRefinements( grid );
