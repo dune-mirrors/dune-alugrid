@@ -296,16 +296,7 @@ bool Gitter :: refine () {
   bool x = true ;
   {
     leaf_element__macro_element__iterator i (container ()) ;
-    do
-    {
-      // refine marked elements
-      for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
-      // check for conformity
-      // if noconform break;
-      std::cout << "check non conform refinement" << std::endl;
-      for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; i.item ().markNonConform () ; }
-    }
-    while (1);  // need something here on required conformity
+    for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
   }
   return x ;
 }
@@ -329,7 +320,6 @@ bool Gitter :: adapt ()
     cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
     cerr << "  diese Option ist eigentlich dem parallelen Verfeinerer vorbehalten.\n" ;
     cerr << "  Der Fehler trat auf in " << __FILE__ << " " << __LINE__ << endl ;
-    adapt();
   }
   int lap = clock () ;
   coarse () ;

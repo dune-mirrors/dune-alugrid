@@ -131,22 +131,14 @@ void GitterDuneBasis :: removeAdaptRestrictProlongOp()
 bool GitterDuneBasis :: refine () {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
   bool x = true ;
-  leaf_element__macro_element__iterator i (container ()) ;
-  do
   {
-    x = true ;
-    // refine marked elements
-    for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
-    // check for conformity
-    // if noconform break;
-    std::cout << "check non conform refinement" << std::endl;
-    x = true ;
-    for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
-    break;
-    if (x) break;
+    leaf_element__macro_element__iterator i (container ()) ;
+    for( i.first(); ! i.done() ; i.next()) 
+    {
+      x &= i.item ().refine () ;
+    }
   }
-  while (1);  // need something here on required conformity
-  return  x;
+  return x ;
 }
 
 void GitterDuneBasis :: coarse() {
