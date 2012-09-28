@@ -324,7 +324,8 @@ int main (int argc, char ** argv, const char ** envp)
 	ss << "out-" << i << ".vtk";
 	tovtk( grid, ss.str().c_str() );
 
-	globalRefine(grid, 1);
+	if( i < mxl )
+	  globalRefine(grid, 1);
       }
     return 0;
    

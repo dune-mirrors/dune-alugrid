@@ -309,7 +309,17 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
 template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) 
 {
   if ( r != getrule () ) {
-    assert (getrule () == myrule_t :: nosplit) ;
+    
+    {
+      if( getrule() != myrule_t :: nosplit )
+	{
+	  std::cout << " getrule(): " << getrule() << " ";
+	  std::cout << " r:         " << r << std::endl;
+	}
+
+      assert (getrule () == myrule_t :: nosplit) ;
+    }
+
     switch(r) 
     {
       typedef typename myhedge1_t :: myrule_t myhedge1rule_t;
@@ -1949,6 +1959,10 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
   {
     // call refinement with appropriate rule 
     // given by suggestRule 
+    std::cout << "--- refineimmediately ---" << std::endl;
+    for( int qq = 0; qq < 4; ++qq )
+      std::cout << myvertex(qq) << std::endl;
+
     BisectionInfo :: splitEdge( this, suggestRule() );
   }
   else 

@@ -361,6 +361,16 @@ template < class A > class TetraTop : public A
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
 
+	  std::cout << "-- splitEdge: --" << std::endl;
+	  std::cout << "refine face" << std::endl;
+	  std::cout << tetra->myhface3( info._faces[ i ] );
+
+	  std::cout << "refine edge" << std::endl;
+	  for( int j = 0; j < 2; ++j )
+	    {
+	      std::cout << tetra->myvertex( info._vertices[ j ] ) << std::endl;
+	    }
+
           face->refineImmediate ( faceRule );
         }
   
