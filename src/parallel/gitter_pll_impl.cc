@@ -306,7 +306,7 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
       // TODO: make weight factor (here 4) dynamically adjustable 
       db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight*4 ) );
     }
-    else if (mycon1->nbLevel() == 0 && mycon2->nbLevel() == 0)  // this is not correct!!!!!!!!!!!!1
+    else // if (mycon1->nbLevel() == 0 && mycon2->nbLevel() == 0)  // this is not correct!!!!!!!!!!!!1
     {
       ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
