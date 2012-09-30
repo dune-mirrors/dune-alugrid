@@ -12,7 +12,7 @@
 
 using namespace std;
 
-// #define PARALLEL
+#define PARALLEL
 
 #define COUNT_FLOPS
 
@@ -171,27 +171,30 @@ void tovtk(GitterType& grid) {
     for (w->first () ; ! w->done () ; w->next ())
       {
       
-	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+        tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
 
-	for (int i=0;i<4;++i)
-	  {
-	    Vertex v ( item->myvertex(i)->Point(), item->myvertex(i)->Point() + sizeof( item->myvertex(i)->Point() ) / sizeof( double ) );
-	    vertexList[ item->myvertex(i)->getIndex() ]
-	      = v;
-	  }
+        for (int i=0;i<4;++i)
+          {
+            Vertex v ( item->myvertex(i)->Point(), item->myvertex(i)->Point() + sizeof( item->myvertex(i)->Point() ) / sizeof( double ) );
+            vertexList[ item->myvertex(i)->getIndex() ]
+              = v;
+          }
 
-	++nCells;
+        ++nCells;
       }
   }
 
   // points info
   {
     vtkFile << "POINTS " << vertexList.size() << " double" << std::endl;
-    for( unsigned int i = 0; i < vertexList.size(); ++i )
+    typedef std::map< int, Vertex > :: iterator iterator ;
+    iterator end = vertexList.end();
+    for( iterator it = vertexList.begin(); it != end; ++ it ) 
       {
-	vtkFile << vertexList[ i ][ 0 ]
-		<< " " << vertexList[ i ][ 1 ]
-		<< " " << vertexList[ i ][ 2 ] << std::endl;
+        Vertex& vx = (*it).second ;
+        vtkFile << vx[ 0 ]
+                << " " << vx[ 1 ]
+                << " " << vx[ 2 ] << std::endl;
       }
   }
 
@@ -203,16 +206,16 @@ void tovtk(GitterType& grid) {
     LeafIterator < Gitter::helement_STI > w (grid) ;
     for (w->first () ; ! w->done () ; w->next ())
       {
-      	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+        tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
 
-	vtkFile << 4;
+        vtkFile << 4;
 
-	for (int i=0;i<4;++i)
-	  {
-	    vtkFile << " " << item->myvertex(i)->getIndex();
-	  }
+        for (int i=0;i<4;++i)
+          {
+            vtkFile << " " << item->myvertex(i)->getIndex();
+          }
 
-	vtkFile << std::endl;
+        vtkFile << std::endl;
       }
   }
 
@@ -222,7 +225,7 @@ void tovtk(GitterType& grid) {
 
     for( int i = 0; i < nCells; ++i )
       {
-	vtkFile << 10 << std::endl; // 10 for a tetrahedron
+        vtkFile << 10 << std::endl; // 10 for a tetrahedron
       }
   }
 
