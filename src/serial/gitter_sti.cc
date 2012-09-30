@@ -342,6 +342,7 @@ bool Gitter :: adapt ()
     float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
     cout << "**INFO Gitter :: adapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
   }
+  ++adaptstep;
   return refined;
 }
 

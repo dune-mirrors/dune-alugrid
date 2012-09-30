@@ -843,6 +843,7 @@ void GitterPll :: coarse ()
   return ;
 }
 
+extern int adaptstep;
 bool GitterPll :: adapt () {
   __STATIC_myrank = mpAccess ().myrank () ;
   __STATIC_turn ++ ;
@@ -864,6 +865,7 @@ bool GitterPll :: adapt () {
   loadBalancerGridChangesNotify () ;
   // bool x = markNonConform();
   // if (!x) refined |= adapt();
+  ++adaptstep;
   return refined;
 }
 
