@@ -705,6 +705,26 @@ public :
       assert( up() != 0 );
       return up()->ldbVertexIndex() ; 
     }
+    virtual void writeStaticState (ObjectStream &os, int i) const 
+    { 
+      assert( up() != 0 );
+      up()->writeStaticState(os,i);
+    }
+    virtual void readStaticState (ObjectStream &os, int i)
+    { 
+      assert( up() != 0 );
+      up()->readStaticState(os,i);
+    }
+    virtual void writeDynamicState (ObjectStream &os, int i) const
+    { 
+      assert( up() != 0 );
+      up()->writeDynamicState(os,i);
+    }
+    virtual void readDynamicState (ObjectStream &os, int i)
+    { 
+      assert( up() != 0 );
+      up()->readDynamicState(os,i);
+    }
 
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
     virtual void setIndicesAndBndId (const hface & , int ) { assert(false); abort(); }
