@@ -862,6 +862,8 @@ bool GitterPll :: adapt () {
   }
   notifyGridChanges () ;
   loadBalancerGridChangesNotify () ;
+  // bool x = markNonConform();
+  // if (!x) refined |= adapt();
   return refined;
 }
 

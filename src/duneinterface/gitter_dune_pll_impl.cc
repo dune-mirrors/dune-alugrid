@@ -1393,11 +1393,15 @@ void GitterDunePll :: duneRestore(const char *fileName)
 
   return ;
 }
-void GitterDunePll :: tovtk( const char *fn) 
+void GitterDunePll :: tovtk( const std::string &fn) 
 {
+  int myrank = mpAccess ().myrank () ;
+	std::ostringstream ss;
+	ss << "p-" << myrank << fn;
+
   // openfile
   std::ofstream vtkFile;
-  vtkFile.open( fn );
+  vtkFile.open( ss.str().c_str() );
     
   // header info
   vtkFile << "# vtk DataFile Version 2.0" << std::endl;
@@ -1407,7 +1411,8 @@ void GitterDunePll :: tovtk( const char *fn)
 
   // vertex list
   typedef std::vector< double > Vertex;
-  std::map< int, Vertex > vertexList;
+  typedef std::map< int, std::pair<int,Vertex> > VertexList;
+  VertexList vertexList;
 
   int nCells = 0;
 
@@ -1416,61 +1421,55 @@ void GitterDunePll :: tovtk( const char *fn)
     typedef Objects :: tetra_IMPL tetra_IMPL ;
     LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
-      {
-      
-	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-	for (int i=0;i<4;++i)
-	  {
-	    Vertex v ( item->myvertex(i)->Point(), item->myvertex(i)->Point() + sizeof( item->myvertex(i)->Point() ) / sizeof( double ) );
-	    vertexList[ item->myvertex(i)->getIndex() ]
-	      = v;
-	  }
-
-	++nCells;
-      }
+    {
+	    tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	    for (int i=0;i<4;++i)
+	    {
+        Vertex v(3);
+        for (int k=0;k<3;++k) v[k] = item->myvertex(i)->Point()[k];
+	      // Vertex v ( item->myvertex(i)->Point(), item->myvertex(i)->Point() + sizeof( item->myvertex(i)->Point() ) / sizeof( double ) );
+	      vertexList[ item->myvertex(i)->getIndex() ] = make_pair(-1,v);
+	    }
+	    ++nCells;
+    }
   }
 
   // points info
   {
     vtkFile << "POINTS " << vertexList.size() << " double" << std::endl;
-    for( unsigned int i = 0; i < vertexList.size(); ++i )
-      {
-	vtkFile << vertexList[ i ][ 0 ]
-		<< " " << vertexList[ i ][ 1 ]
-		<< " " << vertexList[ i ][ 2 ] << std::endl;
-      }
+    const VertexList::iterator end = vertexList.end();
+    int nr=0;
+    for( VertexList::iterator i = vertexList.begin(); i != end; ++i, ++nr )
+    {
+	    vtkFile << (*i).second.second[ 0 ] << " " << (*i).second.second[ 1 ] << " " << (*i).second.second[ 2 ] << std::endl;
+      (*i).second.first = nr;
+    }
   }
 
   // cell info
   {
     vtkFile << "CELLS " << nCells << " " << 5*nCells << std::endl;
-
     typedef Objects :: tetra_IMPL tetra_IMPL ;
     LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
-      {
-      	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-	vtkFile << 4;
-
-	for (int i=0;i<4;++i)
-	  {
-	    vtkFile << " " << item->myvertex(i)->getIndex();
-	  }
-
-	vtkFile << std::endl;
-      }
+    {
+      tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	    vtkFile << 4;
+	    for (int i=0;i<4;++i)
+	    {
+	      vtkFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
+	    }
+	    vtkFile << std::endl;
+    }
   }
 
   // cell type info
   {
     vtkFile << "CELL_TYPES " << nCells << std::endl;
-
     for( int i = 0; i < nCells; ++i )
-      {
-	vtkFile << 10 << std::endl; // 10 for a tetrahedron
-      }
+    {
+	    vtkFile << 10 << std::endl; // 10 for a tetrahedron
+    }
   }
 
   // cell data
@@ -1482,11 +1481,10 @@ void GitterDunePll :: tovtk( const char *fn)
     typedef Objects :: tetra_IMPL tetra_IMPL ;
     LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
-      {
-      	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-	vtkFile << item->getIndex() << std::endl;
-      }
+    {
+      tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	    vtkFile << item->getIndex() << std::endl;
+    }
   }
 
   vtkFile.close();

@@ -85,7 +85,7 @@ public:
 
   // coarse all leaf elements if possible 
   void coarse ();
-  void tovtk( const char *fn);
+  void tovtk( const string &fn);
 
   // done call notify and loadBalancer  
   bool duneAdapt (AdaptRestrictProlongType & arp);

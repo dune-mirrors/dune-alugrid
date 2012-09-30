@@ -1968,6 +1968,7 @@ public:
   
 protected :
   virtual bool refine () ;
+  virtual bool markNonConform () ;
   virtual void coarse () ;
   virtual Makrogitter & container () = 0 ;
   virtual const Makrogitter & container () const = 0 ;
@@ -2017,7 +2018,7 @@ public :
   // return reference to indexManagerStorage
   virtual IndexManagerStorageType& indexManagerStorage() = 0;
 
-  virtual void tovtk( const char *fn) = 0;
+  virtual void tovtk( const std::string &fn) = 0;
 protected:
   template <class ostream_t>
   void backupImpl( ostream_t& );

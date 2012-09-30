@@ -302,17 +302,18 @@ bool Gitter :: refine () {
     x = true ;
     // refine marked elements
     for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+	  std::ostringstream ss;
+    int filenr = adaptstep*100+nr;
+	  ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
+    tovtk(  ss.str() );
+    ++nr;
+    break;
     // check for conformity
     // if noconform break;
     std::cout << "check non conform refinement" << std::endl;
     x = true ;
     for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
-	  std::ostringstream ss;
-    int filenr = adaptstep*100+nr;
-	  ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
-    tovtk(  ss.str().c_str() );
-    ++nr;
-    // break;
+    break;
     if (x) break;
   }
   while (1);  // need something here on required conformity
@@ -337,7 +338,14 @@ bool Gitter :: refine () {
   return x ;
 #endif
 }
-
+bool Gitter :: markNonConform()
+{
+  bool x = true ;
+  leaf_element__macro_element__iterator i (container ()) ;
+  std::cout << "check non conform refinement" << std::endl;
+  for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
+  return x;
+}
 void Gitter :: coarse() {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: coarse ()" << endl, 1) : 1) ;
   {

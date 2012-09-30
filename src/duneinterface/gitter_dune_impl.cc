@@ -147,7 +147,7 @@ bool GitterDuneBasis :: refine () {
 	  std::ostringstream ss;
     int filenr = adaptstep*100+nr;
 	  ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
-    tovtk(  ss.str().c_str() );
+    tovtk(  ss.str() );
     ++nr;
     // break;
     if (x) break;
@@ -198,11 +198,11 @@ bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp)
   return refined;
 }
 
-void GitterDuneBasis :: tovtk( const char *fn) 
+void GitterDuneBasis :: tovtk( const std::string &fn) 
 {
   // openfile
   std::ofstream vtkFile;
-  vtkFile.open( fn );
+  vtkFile.open( fn.c_str() );
     
   // header info
   vtkFile << "# vtk DataFile Version 2.0" << std::endl;
