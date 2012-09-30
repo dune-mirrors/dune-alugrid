@@ -2017,6 +2017,7 @@ public :
   // return reference to indexManagerStorage
   virtual IndexManagerStorageType& indexManagerStorage() = 0;
 
+  virtual void tovtk( const char *fn) = 0;
 protected:
   template <class ostream_t>
   void backupImpl( ostream_t& );

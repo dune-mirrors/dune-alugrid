@@ -128,8 +128,8 @@ void GitterDuneBasis :: removeAdaptRestrictProlongOp()
   _arp = 0;
 }
 
-int nr = 0;
-int adaptstep = 0;
+//int nr = 0;
+//int adaptstep = 0;
 bool GitterDuneBasis :: refine () {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
   bool x = true ;

@@ -170,6 +170,7 @@ public:
   {
     GitterDuneBasis::duneRestore( is );
   }
+  void tovtk( const char *fn);
 
 private:
   // restore grid from istream, needed to be overloaded 

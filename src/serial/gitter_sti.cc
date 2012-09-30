@@ -291,7 +291,34 @@ void Gitter :: printsize () {
   return ;
 }
 
+int nr = 0;
+int adaptstep = 0;
 bool Gitter :: refine () {
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
+  bool x = true ;
+  leaf_element__macro_element__iterator i (container ()) ;
+  do
+  {
+    x = true ;
+    // refine marked elements
+    for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+    // check for conformity
+    // if noconform break;
+    std::cout << "check non conform refinement" << std::endl;
+    x = true ;
+    for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
+	  std::ostringstream ss;
+    int filenr = adaptstep*100+nr;
+	  ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
+    tovtk(  ss.str().c_str() );
+    ++nr;
+    // break;
+    if (x) break;
+  }
+  while (1);  // need something here on required conformity
+  ++adaptstep;
+  return  x;
+#if 0
   assert (debugOption (20) ? (cout << "**INFO Gitter :: refine ()" << endl, 1) : 1) ;
   bool x = true ;
   {
@@ -308,6 +335,7 @@ bool Gitter :: refine () {
     while (1);  // need something here on required conformity
   }
   return x ;
+#endif
 }
 
 void Gitter :: coarse() {
@@ -518,5 +546,6 @@ Gitter :: Makrogitter :: ~Makrogitter () {
     cerr << "**WARNING: (IGNORED) There are still iterators attached to the grid, remove them before removal of the grid to avoid errors! in " << __FILE__ << " " << __LINE__ << endl ;
   return ;
 }
+
 
 #endif
