@@ -298,6 +298,11 @@ bool Gitter :: refine () {
   bool x = true ;
   leaf_element__macro_element__iterator i (container ()) ;
   for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+	std::ostringstream ss;
+  int filenr = adaptstep*100+nr;
+	ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
+  tovtk(  ss.str() );
+  ++nr;
   return  x;
 }
 bool Gitter :: markNonConform()
