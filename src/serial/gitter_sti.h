@@ -696,6 +696,15 @@ public :
     virtual int test () const = 0 ;
     inline  int leaf () const ;
 
+    //! default implementation of ldbVertexIndex calls this method on father
+    //! the assumtion here is, that this method is overloaded approporiately 
+    //! on the corresponding parallel macro elements 
+    virtual int ldbVertexIndex () const 
+    { 
+      assert( up() != 0 );
+      return up()->ldbVertexIndex() ; 
+    }
+
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
     virtual void setIndicesAndBndId (const hface & , int ) { assert(false); abort(); }
     virtual void resetGhostIndices() = 0;
@@ -806,6 +815,7 @@ public :
     // for dune 
     virtual int ghostLevel () const = 0 ;
     virtual bool ghostLeaf () const = 0 ;
+
     
     // getGhost returns pointer to ghost, which might be 0 in case that
     // bndseg is external bnd seg, 
