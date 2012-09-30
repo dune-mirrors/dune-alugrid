@@ -297,46 +297,8 @@ bool Gitter :: refine () {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
   bool x = true ;
   leaf_element__macro_element__iterator i (container ()) ;
-  do
-  {
-    x = true ;
-    // refine marked elements
-    for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
-	  std::ostringstream ss;
-    int filenr = adaptstep*100+nr;
-	  ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
-    tovtk(  ss.str() );
-    ++nr;
-    break;
-    // check for conformity
-    // if noconform break;
-    std::cout << "check non conform refinement" << std::endl;
-    x = true ;
-    for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
-    break;
-    if (x) break;
-  }
-  while (1);  // need something here on required conformity
-  ++adaptstep;
+  for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
   return  x;
-#if 0
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: refine ()" << endl, 1) : 1) ;
-  bool x = true ;
-  {
-    leaf_element__macro_element__iterator i (container ()) ;
-    do
-    {
-      // refine marked elements
-      for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
-      // check for conformity
-      // if noconform break;
-      std::cout << "check non conform refinement" << std::endl;
-      for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; i.item ().markNonConform () ; }
-    }
-    while (1);  // need something here on required conformity
-  }
-  return x ;
-#endif
 }
 bool Gitter :: markNonConform()
 {
