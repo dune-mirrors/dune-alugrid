@@ -220,7 +220,7 @@ int main (int argc, char ** argv, const char ** envp)
     for( int i = 0; i <= mxl; ++i )
     {
 	    std::ostringstream ss;
-	    ss << "out-" << ZeroPadNumber(i) << ".vtk";
+	    ss << "out-" << ZeroPadNumber(i) << ".vtu";
       grid.tovtk(  ss.str().c_str() );
 	    if( i < mxl )
 	      globalRefine(grid, 1);

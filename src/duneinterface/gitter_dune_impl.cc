@@ -146,7 +146,7 @@ bool GitterDuneBasis :: refine () {
     for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
     std::ostringstream ss;
     int filenr = adaptstep*100+nr;
-    ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
+    ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
     tovtk(  ss.str() );
     ++nr;
     // break;
@@ -201,18 +201,18 @@ bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp)
 void GitterDuneBasis :: tovtk( const std::string &fn) 
 {
   // openfile
-  std::ofstream vtkFile;
-  vtkFile.open( fn.c_str() );
+  std::ofstream vtuFile;
+  vtuFile.open( fn.c_str() );
     
   // header info
-  vtkFile << "# vtk DataFile Version 2.0" << std::endl;
-  vtkFile << "Unstructured Grid" << std::endl;
-  vtkFile << "ASCII" << std::endl;
-  vtkFile << "DATASET UNSTRUCTURED_GRID" << std::endl;
+  vtuFile << "<?xml version=\"1.0\"?>" << std::endl;
+  vtuFile << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+  vtuFile << "  <UnstructuredGrid>" << std::endl;
 
   // vertex list
   typedef std::vector< double > Vertex;
-  std::map< int, Vertex > vertexList;
+  typedef std::map< int, std::pair<int,Vertex> > VertexList;
+  VertexList vertexList;
 
   int nCells = 0;
 
@@ -222,79 +222,108 @@ void GitterDuneBasis :: tovtk( const std::string &fn)
     LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
       {
-      
-  tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-  for (int i=0;i<4;++i)
-    {
-      Vertex v ( item->myvertex(i)->Point(), item->myvertex(i)->Point() + sizeof( item->myvertex(i)->Point() ) / sizeof( double ) );
-      vertexList[ item->myvertex(i)->getIndex() ]
-        = v;
-    }
-
-  ++nCells;
+	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	for (int i=0;i<4;++i)
+	  {
+	    Vertex v(3);
+	    for (int k=0;k<3;++k) 
+	      v[k] = item->myvertex(i)->Point()[k];
+	    vertexList[ item->myvertex(i)->getIndex() ] = make_pair(-1,v);
+	  }
+	++nCells;
       }
+  }
+
+  vtuFile << "    <Piece NumberOfPoints=\"" << vertexList.size() << "\" "
+	  << "NumberOfCells=\"" << nCells << "\">" << std::endl;
+
+  // cell data
+  {
+    vtuFile << "      <CellData Scalars=\"cell-id\">" << std::endl;
+    vtuFile << "        <DataArray type=\"Float32\" Name=\"cell-id\" NumberOfComponents=\"1\">" << std::endl;
+    vtuFile << "          ";
+
+    typedef Objects :: tetra_IMPL tetra_IMPL ;
+    LeafIterator < Gitter::helement_STI > w (*this) ;
+    for (w->first () ; ! w->done () ; w->next ())
+      {
+	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	vtuFile << item->getIndex() << " ";
+      }
+
+    vtuFile << std::endl;
+    vtuFile << "        </DataArray>" << std::endl;
+    vtuFile << "      </CellData>" << std::endl;
   }
 
   // points info
   {
-    vtkFile << "POINTS " << vertexList.size() << " double" << std::endl;
-    for( unsigned int i = 0; i < vertexList.size(); ++i )
+    vtuFile << "      <Points>" << std::endl;
+    vtuFile << "        <DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+
+    const VertexList::iterator end = vertexList.end();
+    int nr=0;
+    for( VertexList::iterator i = vertexList.begin(); i != end; ++i, ++nr )
       {
-        vtkFile << vertexList[ i ][ 0 ]
-                << " " << vertexList[ i ][ 1 ]
-                << " " << vertexList[ i ][ 2 ] << std::endl;
+	vtuFile << "          " << (*i).second.second[ 0 ] << " " << (*i).second.second[ 1 ] << " " << (*i).second.second[ 2 ] << std::endl;
+	(*i).second.first = nr;
       }
+
+    vtuFile << "        </DataArray>" << std::endl;
+    vtuFile << "      </Points>" << std::endl;
   }
 
   // cell info
   {
-    vtkFile << "CELLS " << nCells << " " << 5*nCells << std::endl;
+    vtuFile << "      <Cells>" << std::endl;
+    // connectivity
+    vtuFile << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << std::endl;
+    vtuFile << "         ";
 
     typedef Objects :: tetra_IMPL tetra_IMPL ;
     LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
-    {
-      tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-      vtkFile << 4;
-
-      for (int i=0;i<4;++i)
       {
-        vtkFile << " " << item->myvertex(i)->getIndex();
+	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	for (int i=0;i<4;++i)
+	  {
+	    vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
+	  }
       }
+    vtuFile << std::endl;
+    vtuFile << "        </DataArray>" << std::endl;
 
-      vtkFile << std::endl;
-    }
-  }
-
-  // cell type info
-  {
-    vtkFile << "CELL_TYPES " << nCells << std::endl;
+    // offsets
+    vtuFile << "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << std::endl;
+    vtuFile << "         ";
 
     for( int i = 0; i < nCells; ++i )
-    {
-      vtkFile << 10 << std::endl; // 10 for a tetrahedron
-    }
+      {
+	vtuFile << " " << (i+1)*4;
+      }
+    vtuFile << std::endl;
+
+    vtuFile << "        </DataArray>" << std::endl;
+
+    // cell type
+    vtuFile << "        <DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">" << std::endl;
+    vtuFile << "         ";
+
+    for( int i = 0; i < nCells; ++i )
+      {
+	vtuFile << " " << 10; // 10 for tetrahedra
+      }
+    vtuFile << std::endl;
+
+    vtuFile << "        </DataArray>" << std::endl;
   }
 
-  // cell data
-  {
-    vtkFile << "CELL_DATA " << nCells << std::endl;
-    vtkFile << "SCALARS cell-id double 1" << std::endl;
-    vtkFile << "LOOKUP_TABLE default" << std::endl;
+  vtuFile << "      </Cells>" << std::endl;
+  vtuFile << "    </Piece>" << std::endl;
+  vtuFile << "  </UnstructuredGrid>" << std::endl;
+  vtuFile << "</VTKFile>" << std::endl;
 
-    typedef Objects :: tetra_IMPL tetra_IMPL ;
-    LeafIterator < Gitter::helement_STI > w (*this) ;
-    for (w->first () ; ! w->done () ; w->next ())
-    {
-      tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-      vtkFile << item->getIndex() << std::endl;
-    }
-  }
-
-  vtkFile.close();
+  vtuFile.close();
   std::cout << "data written to " << fn << std::endl;
 }
 

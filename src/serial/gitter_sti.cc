@@ -300,7 +300,7 @@ bool Gitter :: refine () {
   for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
 	std::ostringstream ss;
   int filenr = adaptstep*100+nr;
-	ss << "ref-" << ZeroPadNumber(filenr) << ".vtk";
+	ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
   tovtk(  ss.str() );
   ++nr;
   return  x;
