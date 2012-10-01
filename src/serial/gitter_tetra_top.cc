@@ -701,21 +701,25 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
       switch (r) {
       case balrule_t :: e01 :
         //cout << "refLikeEl: e01 " << endl;
-        if (!myhface3 (0)->refine (balrule_t (balrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
+        // if (!myhface3 (0)->refine (balrule_t (balrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
+        if (!myhface3 (0)->refine (r, twist (0))) return false ;
         split_e01 () ;
         break;
       case balrule_t :: e12 :
         //cout << "refLikeEl: e12 " << endl;
-        if (!myhface3 (0)->refine (balrule_t (balrule_t :: e12).rotate (twist (0)), twist (0))) return false ;
+        //if (!myhface3 (0)->refine (balrule_t (balrule_t :: e12).rotate (twist (0)), twist (0))) return false ;
+        if (!myhface3 (0)->refine (r, twist (0))) return false ;
         split_e12 () ;
         break;
       case balrule_t :: e20 :
-        //cout << "refLikeEl: e20 " << endl;
-        if (!myhface3 (0)->refine (balrule_t (balrule_t :: e20).rotate (twist (0)), twist (0))) return false ;
+        // cout << "refLikeEl: e20 " << " " << balrule_t (balrule_t :: e20).rotate (twist (0)) << endl;
+        //if (!myhface3 (0)->refine (balrule_t (balrule_t :: e20).rotate (twist (0)), twist (0))) return false ;
+        if (!myhface3 (0)->refine (r, twist (0))) return false ;
         split_e20 () ;
         break;
       case balrule_t :: iso4 :
-        if (!myhface3 (0)->refine (balrule_t (balrule_t :: iso4).rotate (twist (0)), twist (0))) return false ;
+        //if (!myhface3 (0)->refine (balrule_t (balrule_t :: iso4).rotate (twist (0)), twist (0))) return false ;
+        if (!myhface3 (0)->refine (r, twist (0))) return false ;
         split_iso4 () ;
         break;
       default :

@@ -332,6 +332,13 @@ template < class A > class TetraTop : public A
 
       static bool refineFaces( innertetra_t* tetra, const myrule_t& rule )
       {
+        std::cout << "refineFaces: " << std::endl;
+	      for( int j = 0; j < 4; ++j )
+	      {
+	        std::cout << tetra->myvertex(j) << " ";
+        }
+        std::cout << rule << std::endl;
+        std::cout << "     ";
         const BisectionInfo& info = instance( rule );
         for( int i=0; i<2; ++i )
         {
@@ -342,16 +349,24 @@ template < class A > class TetraTop : public A
           //cout << "vx1 " << int(info._vertices[ 1 ]) << " " << tetra->myvertex( info._vertices[ 1 ] ) << endl;
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
-
+          std::cout << faceRule << " ";
           //cout << "Got rule " << faceRule << endl;
           // check refinement of faces 
           if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false ;
         }
+        std::cout << std::endl;
         return true ;
       }
 
       static void splitEdge( innertetra_t* tetra, const myrule_t& rule )
       {
+        std::cout << "refineEdge: " << std::endl;
+	      for( int j = 0; j < 4; ++j )
+	      {
+	        std::cout << tetra->myvertex(j) << " ";
+        }
+        std::cout << rule << std::endl;
+
         const BisectionInfo& info = instance( rule );
 
         for( int i=0; i<2; ++i )
@@ -361,6 +376,7 @@ template < class A > class TetraTop : public A
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
 
+#if 0
 	  std::cout << "-- splitEdge: --" << std::endl;
 	  std::cout << "refine face" << std::endl;
 	  std::cout << tetra->myhface3( info._faces[ i ] );
@@ -370,6 +386,7 @@ template < class A > class TetraTop : public A
 	    {
 	      std::cout << tetra->myvertex( info._vertices[ j ] ) << std::endl;
 	    }
+#endif
 
           face->refineImmediate ( faceRule );
         }
