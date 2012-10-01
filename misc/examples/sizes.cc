@@ -178,115 +178,117 @@ int main (int argc, char ** argv, const char ** envp)
   else 
     filename = argv[ 1 ];
 
-  int rank = 0;
+  {
+    int rank = 0;
 #ifdef PARALLEL
-  MpAccessMPI mpa (MPI_COMM_WORLD);
-  rank = mpa.myrank();
+    MpAccessMPI mpa (MPI_COMM_WORLD);
+    rank = mpa.myrank();
 #endif
 
-  if (argc < 3)
-  {
+    if (argc < 3)
+    {
+      if( rank == 0 ) 
+        cout << "Default level = "<< mxl << " choosen! \n";
+    }
+    else 
+      mxl = atoi(argv[2]);
+
+    std::string macroname( filename );
+
     if( rank == 0 ) 
-      cout << "Default level = "<< mxl << " choosen! \n";
-  }
-  else 
-    mxl = atoi(argv[2]);
+    {
+      cout << "\n-----------------------------------------------\n";
+      cout << "read macro grid from < " << macroname << " > !" << endl;
+      cout << "-----------------------------------------------\n";
+    }
 
-  std::string macroname( filename );
-
-  if( rank == 0 ) 
-  {
-    cout << "\n-----------------------------------------------\n";
-    cout << "read macro grid from < " << macroname << " > !" << endl;
-    cout << "-----------------------------------------------\n";
-  }
-
-  {
+    {
 #ifdef PARALLEL
-    GitterDunePll grid(macroname.c_str(),mpa);
-    grid.duneLoadBalance();
+      GitterDunePll grid(macroname.c_str(),mpa);
+      grid.duneLoadBalance();
 #else 
-    GitterDuneImpl grid(macroname.c_str());
+      GitterDuneImpl grid(macroname.c_str());
 #endif
 
-   
-    //cout << "P[ " << rank << " ] : Grid generated! \n";
-    grid.printsize(); 
-    cout << "---------------------------------------------\n";
-  
-    grid.printMemUsage();
-    //int bla; 
-    // cin >> bla;
-    for( int i = 0; i <= mxl; ++i )
-    {
-	    std::ostringstream ss;
-	    ss << "out-" << ZeroPadNumber(i) << ".vtu";
-      grid.tovtk(  ss.str().c_str() );
-	    if( i < mxl )
-	      globalRefine(grid, 1);
-    }
-   
+     
+      //cout << "P[ " << rank << " ] : Grid generated! \n";
+      grid.printsize(); 
+      cout << "---------------------------------------------\n";
+    
+      grid.printMemUsage();
+      //int bla; 
+      // cin >> bla;
+      for( int i = 0; i <= mxl; ++i )
+      {
+        std::ostringstream ss;
+        ss << "out-" << ZeroPadNumber(i) << ".vtu";
+        grid.tovtk(  ss.str().c_str() );
+        if( i < mxl )
+          globalRefine(grid, 1);
+      }
+     
 #if 0
-    checkRefinements( grid );
+      checkRefinements( grid );
 
-    std::ofstream file( "file.out" );
-    grid.duneBackup( file );
-    file.close();
+      std::ofstream file( "file.out" );
+      grid.duneBackup( file );
+      file.close();
 
-    /*
-    {
-      ObjectStream os ;
-      grid.duneBackup( os );
+      /*
+      {
+        ObjectStream os ;
+        grid.duneBackup( os );
 
-      char* buffer = ObjectStream ::allocateBuffer( os.size() );
-      os.read( buffer, os.size() );
-      
-      std::ofstream obj( "obj.out" );
-      const size_t size = os.size();
-      obj.write( (const char *) &size, sizeof( size_t ) ); 
-      obj.write( buffer, size );
-      ObjectStream :: freeBuffer( buffer );
-    }
+        char* buffer = ObjectStream ::allocateBuffer( os.size() );
+        os.read( buffer, os.size() );
+        
+        std::ofstream obj( "obj.out" );
+        const size_t size = os.size();
+        obj.write( (const char *) &size, sizeof( size_t ) ); 
+        obj.write( buffer, size );
+        ObjectStream :: freeBuffer( buffer );
+      }
 
-    globalRefine(grid, mxl);
-
-    {
-      size_t size = 0;
-
-      std::ifstream obj( "obj.out" );
-      obj.read( (char *) &size, sizeof( size_t ) ); 
-      char * buffer = ObjectStream ::allocateBuffer( size );
-      obj.read( buffer, size );
-      //ObjectStream :: freeBuffer( buffer );
-
-      ObjectStream is;
-      is.clear();
-      is.write( buffer, size );
+      globalRefine(grid, mxl);
 
       {
-        ObjectStream copy( is );
-        std::ofstream obj( "check.out" );
-        const size_t size = copy.size();
-        obj.write( buffer, size );
-        //ObjectStream :: freeBuffer( buffer );
-      }
-      }*/
+        size_t size = 0;
 
-    {
-      std::ifstream file( "file.out" );
+        std::ifstream obj( "obj.out" );
+        obj.read( (char *) &size, sizeof( size_t ) ); 
+        char * buffer = ObjectStream ::allocateBuffer( size );
+        obj.read( buffer, size );
+        //ObjectStream :: freeBuffer( buffer );
+
+        ObjectStream is;
+        is.clear();
+        is.write( buffer, size );
+
+        {
+          ObjectStream copy( is );
+          std::ofstream obj( "check.out" );
+          const size_t size = copy.size();
+          obj.write( buffer, size );
+          //ObjectStream :: freeBuffer( buffer );
+        }
+        }*/
+
+      {
+        std::ifstream file( "file.out" );
 #ifdef PARALLEL
-      MpAccessMPI a (MPI_COMM_WORLD);
-      GitterDunePll grid2( file, a);
+        MpAccessMPI a (MPI_COMM_WORLD);
+        GitterDunePll grid2( file, a);
 #else 
-      GitterDuneImpl grid2( file );
+        GitterDuneImpl grid2( file );
 #endif
-      grid2.printsize();
+        grid2.printsize();
+      }
+      //levelwalk(grid, mxl);
+      // globalCoarsening(grid, mxl);
+      //grid.printMemUsage();
+      //cin.get();
+#endif
     }
-    //levelwalk(grid, mxl);
-    // globalCoarsening(grid, mxl);
-    //grid.printMemUsage();
-    //cin.get();
-#endif
   }
 
   MPI_Finalize();
