@@ -407,6 +407,7 @@ int Gitter :: Geometric :: Hexa :: resetRefinementRequest () {
 }
 
 static inline bool insideBall (const alucoord_t (&p)[3], const alucoord_t (&c)[3], double r) {
+  /*
   bool inside=false;
   double q[3];
   int x,y,z;
@@ -421,9 +422,10 @@ static inline bool insideBall (const alucoord_t (&p)[3], const alucoord_t (&c)[3
     q[0]+=2.0;
   }
   return inside;
-  //return 
-  //     (((p [0] - c [0]) * (p [0] - c [0]) + (p [1] - c [1]) * (p [1] - c [1])
-  //     + (p [2] - c [2]) * (p [2] - c [2])) < (r * r)) ? true : false ;
+  */
+  return 
+       (((p [0] - c [0]) * (p [0] - c [0]) + (p [1] - c [1]) * (p [1] - c [1])
+       + (p [2] - c [2]) * (p [2] - c [2])) < (r * r)) ? true : false ;
 }
 
 int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const alucoord_t (&center)[3], double radius, int limit) {
@@ -528,6 +530,7 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const alucoord_t (&cen
     const alucoord_t (&p)[3] = myvertex (i)->Point () ;
     if (insideBall (p,center,radius)) { hit = true ; break ; }
   }
+#if 0
   if (!hit) {
     const int resolution = 50 ;
     LinearMapping map (myvertex(0)->Point(), myvertex(1)->Point(),
@@ -539,14 +542,16 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const alucoord_t (&cen
       double b3 = (1.0 - b1 - b2) * drand48 () ;
       double b4 = 1.0 - b1 - b2 - b3 ;
       
-  // Sind das "uberhaupt Zufallspunkte ? Nein. Leider nicht.
+      // Sind das "uberhaupt Zufallspunkte ? Nein. Leider nicht.
   
       map.map2world (b1, b2, b3, b4, p) ;
       if (insideBall (p,center,radius)) { hit = true ; break ; }
     }
   }
-  return hit ? (level () < limit ? (request (myrule_t :: iso8), 1) 
-         : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
+#endif
+  return hit ?  (request (myrule_t :: bisect), 1) : (request (myrule_t :: nosplit), 0);
+  //  (level () < limit ? (request (myrule_t :: iso8), 1) 
+  //       : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
 }
 
 // ######                                                           #####

@@ -308,17 +308,14 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
 
 template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) 
 {
-  if ( r != getrule () ) {
-    
+  if ( r != getrule () ) 
+  {
+    if( getrule() != myrule_t :: nosplit )
     {
-      if( getrule() != myrule_t :: nosplit )
-	{
-	  std::cout << " getrule(): " << getrule() << " ";
-	  std::cout << " r:         " << r << std::endl;
-	}
-
-      assert (getrule () == myrule_t :: nosplit) ;
+      std::cout << " getrule(): " << getrule() << " ";
+     std::cout << " r:         " << r << std::endl;
     }
+    assert (getrule () == myrule_t :: nosplit) ;
 
     switch(r) 
     {
@@ -379,7 +376,6 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
         bool a = (twist < 0) 
                ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
                : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
-
         if (a) 
         {  
           if (getrule () == myrule_t :: nosplit) 
@@ -2085,13 +2081,16 @@ template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce
       // if face is a leaf face 
       if (! myhface3 (fce)->leaf ()) 
       {
+        /*
         for (int i = 0 ; i < 4 ; ++i)
         {  
           if (i != fce)
             if ( ! myhface3 (i)->refine (balrule_t ( r ).rotate (twist (i)), twist (i)) ) 
               return false ;
         }
+        */
         _req = myrule_t :: nosplit ;
+        if (! BisectionInfo :: refineFaces( this, suggestRule() ) ) return false ;
         refineImmediate ( myrule_t :: bisect ) ;
       }
     }

@@ -63,6 +63,7 @@ void checkRefinements( GitterType& grid )
           typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
           // mark element for refinement 
           tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+
           item->request ( rules[ i ] );
         }
       }
@@ -87,6 +88,7 @@ void globalRefine(GitterType& grid, int refcount)
    for (int count=refcount ; count > 0; count--) 
    {
      cout << "Refine global: run " << refcount-count << endl;
+#if 0
      {
         // get LeafIterator which iterates over all leaf elements of the grid 
         LeafIterator < Gitter::helement_STI > w (grid) ;
@@ -108,9 +110,13 @@ void globalRefine(GitterType& grid, int refcount)
 	        // break ;
         }
      }
-
      // adapt grid 
      grid.adapt ();
+
+#endif
+     double center[3] = {0.2,0.2,0.2};
+     double rad=0.4;
+     grid.refineBall(center,rad,10);
 
      // print size of grid 
      grid.printsize () ;
