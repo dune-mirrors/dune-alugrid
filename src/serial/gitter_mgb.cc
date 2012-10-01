@@ -80,7 +80,7 @@ pair < Gitter :: Geometric :: hface4_GEO *, bool > MacroGridBuilder :: InsertUni
 }
 
 pair < Gitter :: Geometric :: tetra_GEO *, bool > MacroGridBuilder :: 
-InsertUniqueTetra (int (&v)[4]) 
+InsertUniqueTetra (int (&v)[4], int orientation) 
 {
   elementKey_t key (v [0], v [1], v [2], v [3]) ;
   elementMap_t :: const_iterator hit = _tetraMap.find (key) ;
@@ -95,7 +95,7 @@ InsertUniqueTetra (int (&v)[4])
       twst [fce] = cyclicReorder (x,x+3) ;
       face [fce] =  InsertUniqueHface3 (x).first ;
     }
-    tetra_GEO * t = myBuilder ().insert_tetra (face,twst) ;
+    tetra_GEO * t = myBuilder ().insert_tetra (face,twst,orientation) ;
     assert (t) ;
     _tetraMap [key] = t ;
     return pair < tetra_GEO *, bool > (t,true) ;
@@ -864,7 +864,9 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
         {
           int v [4] ;
           rawInput >> v [0] >> v [1] >> v [2] >> v [3] ;
-          InsertUniqueTetra (v) ;
+          int orientation = i%2 ;
+          cout << "Got orientation = " << orientation << endl;
+          InsertUniqueTetra (v, orientation ) ;
         }
         break ;
       case PERIODIC3_RAW :

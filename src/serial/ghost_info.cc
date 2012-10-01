@@ -57,7 +57,7 @@ readData(ObjectStream & os )
     os.readObject (pr[2]) ;
   }
 
-  assert( _fce >= 0 );
+  assert( _fce != invalidFace );
 }
 
 MacroGhostInfoHexa :: 
@@ -104,7 +104,7 @@ MacroGhostInfoTetra(const Gitter :: Geometric :: tetra_GEO * tetra,
     this->_vx[i] = tetra->myvertex(i)->ident();
   }
 
-  this->_fce = fce;
+  this->_fce = tetra->orientation() ? -fce-1 : fce;
 }
 
 // template instantiation 

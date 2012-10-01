@@ -405,6 +405,7 @@ template < class A > class TetraTop : public A
     // under the assumption that on level 0 all elements have type 0
     unsigned char elementType () const { return (_lvl % 3); }
 
+    // sets the new _vxMap for this tetra 
     void setNewMapping( innertetra_t*, innertetra_t*, innerface_t*, const int, const int ) ;
 
   private :
@@ -519,8 +520,9 @@ template < class A > class TetraTop : public A
     TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
                   myhface3_t *,int,innertetra_t *up, int nChild, double vol) ;
     // constructor for macro elements 
-    TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                  myhface3_t *, int ) ;
+    TetraTop (int,myhface3_t *,int,myhface3_t *,int,
+                  myhface3_t *,int,myhface3_t *,int,
+              int ) ;
     virtual ~TetraTop () ;
     inline innertetra_t * up () ;
     inline const innertetra_t * up () const;
@@ -538,6 +540,8 @@ template < class A > class TetraTop : public A
     inline int level () const ;
     inline int nChild () const ;
     inline double volume () const ;
+
+    int orientation () const { return ( _vxMap[ 2 ] == 3 ) ? 0 : 1; }
   public :
     myrule_t getrule () const ;
     myrule_t requestrule () const ;

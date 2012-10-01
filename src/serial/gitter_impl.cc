@@ -488,9 +488,9 @@ GitterBasis :: hface4_GEO * GitterBasis :: MacroGitterBasis :: insert_hface4 (he
 }
 
 GitterBasis :: tetra_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) 
+insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], int orientation ) 
 {
-  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3]);
+  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], orientation);
 }
 
 // inlcudes implementation of MacroGhostTetra and MacroGhostHexa 

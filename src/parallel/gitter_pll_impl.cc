@@ -693,8 +693,9 @@ void TetraPllXBase< A > :: writeDynamicState (ObjectStream & os, int face) const
 template < class A >
 TetraPllXBaseMacro< A > :: 
 TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                           myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
-  : A(l, f0, s0, f1, s1, f2, s2, f3, s3 )
+                           myhface3_t *f2, int s2, myhface3_t *f3, int s3,
+                    int orientation ) 
+  : A(l, f0, s0, f1, s1, f2, s2, f3, s3, orientation )
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
   , _erasable (false) 
@@ -839,6 +840,9 @@ bool TetraPllXBaseMacro< A > :: doPackAll (vector < ObjectStream > & osv,
     os.writeObject (mytetra ().myvertex (1)->ident ()) ;
     os.writeObject (mytetra ().myvertex (2)->ident ()) ;
     os.writeObject (mytetra ().myvertex (3)->ident ()) ;
+    int orientation = mytetra ().orientation();
+    cout << "Send orientation " << orientation << std::endl;
+    os.writeObject ( orientation );
 
     // make sure ENDOFSTREAM is not a valid refinement rule 
     assert( ! mytetra_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
@@ -1905,9 +1909,9 @@ insert_hexa (hface4_GEO *(&f)[6], int (&t)[6])
 }
 
 Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) 
+insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], int orientation ) 
 {
-  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3]); 
+  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], orientation ); 
 }
 
 Gitter :: Geometric :: periodic3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 

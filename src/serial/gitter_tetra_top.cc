@@ -697,7 +697,7 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
   // der Fl"ache, da getrule () auf myhface3 (0)->getrule () umgeleitet
   // ist.
   
-      assert (this->getrule () == myrule_t :: nosplit) ;
+      // assert (this->getrule () == myrule_t :: nosplit) ;
       switch (r) {
       case balrule_t :: e01 :
         //cout << "refLikeEl: e01 " << endl;
@@ -792,6 +792,7 @@ template < class A > TetraTop < A >
   , _nChild(nChild)
   , _rule (myrule_t :: nosplit)
 {
+  // vxMap is set by the setNewMapping routine 
   _vxMap[ 0 ] = _vxMap[ 1 ] = _vxMap[ 2 ] = _vxMap[ 3 ] = -1;
 
   // set level 
@@ -820,9 +821,12 @@ template < class A > TetraTop < A >
 // constrcutor mit IndexManager uebergabe
 // this is the macro element constructor 
 template < class A > TetraTop < A > :: 
-TetraTop (int l, myhface3_t * f0, int t0,
-          myhface3_t * f1, int t1, myhface3_t * f2, int t2, 
-          myhface3_t * f3, int t3) 
+TetraTop (int l,  // level 
+          myhface3_t * f0, int t0, // face, twist 
+          myhface3_t * f1, int t1, // face, twist
+          myhface3_t * f2, int t2, // face, twist
+          myhface3_t * f3, int t3, // face, twist
+          int orientation ) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3)
   , _bbb (0), _up(0)
   , _inner( 0 )  
@@ -841,7 +845,8 @@ TetraTop (int l, myhface3_t * f0, int t0,
   // initial mapping is has to be adjusted according 
   // to the make-6 algorithm 
   // NOTE: the _vxMap numbers only affect the bisection refinement
-  const int mod = 1 - ( this->getIndex() % 2 );
+  std::cout << "Create Tetra with orientation " << orientation << endl;
+  const int mod = 1 - orientation ;
   _vxMap[ 0 ] = 0; 
   _vxMap[ 1 ] = 1;
   _vxMap[ 2 ] = 2 + mod ;

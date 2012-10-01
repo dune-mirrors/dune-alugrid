@@ -697,6 +697,8 @@ public :
     virtual int test () const = 0 ;
     inline  int leaf () const ;
 
+    virtual int orientation () const { return 0; }
+
     //! default implementation of ldbVertexIndex calls this method on father
     //! the assumtion here is, that this method is overloaded approporiately 
     //! on the corresponding parallel macro elements 
@@ -1893,7 +1895,7 @@ public :
       virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0 ;
       virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) = 0 ;
       virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) = 0 ;
-      virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) = 0 ;
+      virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int) = 0 ;
       
       virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const hbndseg_STI :: bnd_t (&)[2] ) = 0 ;
       virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const hbndseg_STI :: bnd_t (&)[2] ) = 0 ;

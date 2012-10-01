@@ -552,7 +552,9 @@ void ParallelGridMover :: unpackTetra (ObjectStream & os, GatherScatterType* gs 
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
   os.readObject (v[3]) ;
-  pair < tetra_GEO *, bool > p = InsertUniqueTetra (v) ;
+  int orientation = 0;
+  os.readObject( orientation ); 
+  pair < tetra_GEO *, bool > p = InsertUniqueTetra (v, orientation) ;
   p.first->accessPllX ().duneUnpackSelf (os, p.second, gs) ;
   return ;
 }

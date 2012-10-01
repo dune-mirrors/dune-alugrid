@@ -186,7 +186,7 @@ MacroGhostTetra( BuilderIF & bi,
   */
 
   // InsertUniqueHexa gets the global vertex numbers 
-  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices() ).first ;
+  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first ;
 
   // set ghost and number 
   _ghostPair.first = ghost;
@@ -220,7 +220,9 @@ MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp,
                               orig->myvertex(i)->ident()   );
   }
 
-  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices() ).first ;
+  int orientation = orig->orientation();
+
+  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orientation ).first ;
   _ghostPair.first = ghost;
   assert( _ghostPair.first );
   _ghostPair.second = ghInfo.internalFace(); 

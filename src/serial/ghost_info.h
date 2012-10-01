@@ -14,6 +14,7 @@ class MacroGhostInfo : public MyAlloc
     virtual const alucoord_t (& getPoint (int i) const )[3] = 0;
     virtual int nop () const = 0;
     virtual void inlineGhostElement(ObjectStream & os) const = 0; 
+    virtual int orientation () const = 0;
 };
 
 typedef MacroGhostInfo MacroGhostInfo_STI;
@@ -28,6 +29,8 @@ public:
   enum { noVx     = (points == 4) ? 8 : 4 };
   // number of all non-internal points 
   enum { noFaceVx = (points == 4) ? 4 : 1 };  
+
+  static const int invalidFace = -11;
   
 protected:
   // coordiante of all non-internal points 
@@ -45,7 +48,7 @@ protected:
   // do not allow copying
   MacroGhostInfoStorage(const MacroGhostInfoStorage & );
 
-  MacroGhostInfoStorage() : _fce(-1) {}
+  MacroGhostInfoStorage() : _fce( invalidFace ) {}
 public:  
   // destructor 
   virtual ~MacroGhostInfoStorage () {}
@@ -53,37 +56,39 @@ public:
   // return reference to _p
   const alucoord_t (& getPoints () const )[points][3] 
   { 
-    assert( _fce >= 0 );
+    assert( _fce != invalidFace );
     return _p; 
   }
   
   // return idents of ghost element  
   int (& vertices () )[noVx]
   {
-    assert( _fce >= 0 );
+    assert( _fce != invalidFace );
     return _vx; 
   }
   
   // return reference to vector with non-internal vertex idents 
   const int (& getOuterVertices () const )[noFaceVx]
   {
-    assert( _fce >= 0 );
+    assert( _fce != invalidFace );
     return _vxface;
   }
 
   // return local number of internal face 
   int internalFace () const 
   {
-    assert( _fce >=0 );
-    return _fce; 
+    assert( _fce != invalidFace );
+    return _fce < 0 ? (-_fce) - 1 : _fce;
   }
+
+  int orientation () const { return _fce < 0 ? 1 : 0; } 
 
   /////////////////////////////////////
   // interface of MacroGhostInfo_STI 
   ///////////////////////////////////// 
   virtual const alucoord_t (& getPoint (int i) const )[3] 
   {
-    assert( _fce >=0 );
+    assert( _fce != invalidFace );
     assert( i>= 0 && i < points );
     return _p[i];
   }
