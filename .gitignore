@@ -23,4 +23,5 @@
 /ltmain.sh
 *.vtu
 *.vtk
+*.pvtu
 *.o
