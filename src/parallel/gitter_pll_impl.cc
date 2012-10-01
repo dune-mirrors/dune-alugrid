@@ -516,7 +516,7 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
     abort () ;
   }
   balrule_t rule ( ru )  ;
-  std::cout << "setRefinementRequest: " << rule << std::endl;
+  // std::cout << "setRefinementRequest: " << rule << std::endl;
   if (rule == balrule_t :: nosplit) 
   {
     return false ;

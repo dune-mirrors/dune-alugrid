@@ -83,12 +83,10 @@ void checkRefinements( GitterType& grid )
 
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
-void globalRefine(GitterType& grid, int refcount) 
+void globalRefine(GitterType& grid, bool global) 
 {
-   for (int count=refcount ; count > 0; count--) 
    {
-     cout << "Refine global: run " << refcount-count << endl;
-#if 0
+     if (global)
      {
         // get LeafIterator which iterates over all leaf elements of the grid 
         LeafIterator < Gitter::helement_STI > w (grid) ;
@@ -109,15 +107,15 @@ void globalRefine(GitterType& grid, int refcount)
 
 	        // break ;
         }
+       // adapt grid 
+       grid.adapt ();
      }
-     // adapt grid 
-     grid.adapt ();
-
-#endif
-     double center[3] = {0.2,0.2,0.2};
-     double rad=0.4;
-     grid.refineBall(center,rad,10);
-
+     else
+     {
+       double center[3] = {0.2,0.2,0.2};
+       double rad=0.4;
+       grid.refineBall(center,rad,10);
+     }
      // print size of grid 
      grid.printsize () ;
    }
@@ -222,6 +220,9 @@ int main (int argc, char ** argv, const char ** envp)
       cout << "---------------------------------------------\n";
     
       grid.printMemUsage();
+      for (int i = 0; i < 6; ++i)
+        globalRefine(grid, true);
+ 
       //int bla; 
       // cin >> bla;
       for( int i = 0; i <= mxl; ++i )
@@ -230,7 +231,7 @@ int main (int argc, char ** argv, const char ** envp)
         ss << "out-" << ZeroPadNumber(i) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
         if( i < mxl )
-          globalRefine(grid, 1);
+          globalRefine(grid, false);
       }
      
 #if 0

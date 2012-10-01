@@ -1964,9 +1964,9 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
   {
     // call refinement with appropriate rule 
     // given by suggestRule 
-    std::cout << "--- refineimmediately ---" << std::endl;
-    for( int qq = 0; qq < 4; ++qq )
-      std::cout << myvertex(qq) << std::endl;
+    // std::cout << "--- refineimmediately ---" << std::endl;
+    // for( int qq = 0; qq < 4; ++qq )
+    //   std::cout << myvertex(qq) << std::endl;
 
     BisectionInfo :: splitEdge( this, suggestRule() );
   }

@@ -332,13 +332,13 @@ template < class A > class TetraTop : public A
 
       static bool refineFaces( innertetra_t* tetra, const myrule_t& rule )
       {
-        std::cout << "refineFaces: " << std::endl;
-	      for( int j = 0; j < 4; ++j )
-	      {
-	        std::cout << tetra->myvertex(j) << " ";
-        }
-        std::cout << rule << std::endl;
-        std::cout << "     ";
+        // std::cout << "refineFaces: " << std::endl;
+	      // for( int j = 0; j < 4; ++j )
+	      // {
+	      //   std::cout << tetra->myvertex(j) << " ";
+        // }
+        // std::cout << rule << std::endl;
+        // std::cout << "     ";
         const BisectionInfo& info = instance( rule );
         for( int i=0; i<2; ++i )
         {
@@ -349,23 +349,23 @@ template < class A > class TetraTop : public A
           //cout << "vx1 " << int(info._vertices[ 1 ]) << " " << tetra->myvertex( info._vertices[ 1 ] ) << endl;
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
-          std::cout << faceRule << " ";
+          // std::cout << faceRule << " ";
           //cout << "Got rule " << faceRule << endl;
           // check refinement of faces 
           if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false ;
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
         return true ;
       }
 
       static void splitEdge( innertetra_t* tetra, const myrule_t& rule )
       {
-        std::cout << "refineEdge: " << std::endl;
-	      for( int j = 0; j < 4; ++j )
-	      {
-	        std::cout << tetra->myvertex(j) << " ";
-        }
-        std::cout << rule << std::endl;
+        // std::cout << "refineEdge: " << std::endl;
+	      // for( int j = 0; j < 4; ++j )
+	      // {
+	      //   std::cout << tetra->myvertex(j) << " ";
+        // }
+        // std::cout << rule << std::endl;
 
         const BisectionInfo& info = instance( rule );
 
@@ -401,7 +401,7 @@ template < class A > class TetraTop : public A
     {
       for (int e=0;e<this->nEdges();++e)
       {
-        std::cout << this->myhedge1(e) << std::endl;
+        // std::cout << this->myhedge1(e) << std::endl;
         if (this->myhedge1(e)->down())
         {
           this->request ( Gitter :: Geometric :: TetraRule :: bisect );
@@ -836,16 +836,17 @@ Hface3Top (int l, myhedge1_t * e0,
 {
   this->setIndex( indexManager().getIndex() );
 
-#ifndef NDEBUG 
+#if 0 // NDEBUG 
   double n[ 3 ];
   LinearSurfaceMapping( myvertex( 0 )->Point(), 
                         myvertex( 1 )->Point(),
                         myvertex( 2 )->Point() ).normal( n );
 
-  //if( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) < 1e-8 ) 
-  //{
-  //  cout << "Determinant of " << this << " is wrong" <<endl;
-  //}
+  if( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) < 1e-8 ) 
+  {
+    cout << "Determinant of " << this << " is wrong" <<endl;
+    cout << "normal: " << n[0] << "," << n[1] << "," << n[2] << endl;
+  }
   assert( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) >= 1e-8 );
 #endif
   assert( checkFace( this, nChild ) );

@@ -299,7 +299,7 @@ bool Gitter :: refine () {
   leaf_element__macro_element__iterator i (container ()) ;
   for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
 	std::ostringstream ss;
-  int filenr = adaptstep*100+nr;
+  int filenr = adaptstep*1000+nr;
 	ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
   tovtk(  ss.str() );
   ++nr;
@@ -309,8 +309,8 @@ bool Gitter :: markNonConform()
 {
   bool x = true ;
   leaf_element__macro_element__iterator i (container ()) ;
-  std::cout << "check non conform refinement" << std::endl;
-  for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
+  // std::cout << "check non conform refinement" << std::endl;
+  for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
   return x;
 }
 void Gitter :: coarse() {
