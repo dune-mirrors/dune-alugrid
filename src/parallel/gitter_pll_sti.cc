@@ -847,31 +847,30 @@ extern int adaptstep;
 extern int nr;
 bool GitterPll :: adapt () {
   nr = 0;
-  bool refined;
+  bool refined = false;
   bool conformClosure;
-  __STATIC_myrank = mpAccess ().myrank () ;
-  __STATIC_turn ++ ;
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: adapt ()" << endl, 1) : 1) ;
-  assert (! iterators_attached ()) ;
-  int start = clock () ;
   do 
   {
-    refined = refine () ;
+    __STATIC_myrank = mpAccess ().myrank () ;
+    __STATIC_turn ++ ;
+    assert (debugOption (20) ? (cout << "**INFO GitterPll :: adapt ()" << endl, 1) : 1) ;
+    assert (! iterators_attached ()) ;
+    int start = clock () ;
+    refined |= refine () ;
+    int lap = clock () ;
+    coarse () ;
+    int end = clock () ;
+    if (debugOption (1)) {
+      float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
+      float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
+      float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
+      cout << "**INFO GitterPll :: adapt () [ref (loops)|cse|all] " << u1 << " ("
+           << _refineLoops << ") " << u2 << " " << u3 << endl ;
+    }
+    notifyGridChanges () ;
+    // loadBalancerGridChangesNotify () ;
     conformClosure = mpAccess().gmax( !markNonConform() );
   } while (conformClosure);
-
-  int lap = clock () ;
-  coarse () ;
-  int end = clock () ;
-  if (debugOption (1)) {
-    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
-    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
-    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
-    cout << "**INFO GitterPll :: adapt () [ref (loops)|cse|all] " << u1 << " ("
-         << _refineLoops << ") " << u2 << " " << u3 << endl ;
-  }
-  notifyGridChanges () ;
-  loadBalancerGridChangesNotify () ;
   ++adaptstep;
   return refined;
 }
