@@ -3407,6 +3407,8 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: TetraRul
       return out << "e31";
     case Gitter :: Geometric :: TetraRule :: iso8:
       return out << "iso8";
+    case Gitter :: Geometric :: TetraRule :: bisection:
+      return out << "bisection";
     default:
       return out << "!!! unknown !!!";
   }
