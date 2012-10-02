@@ -143,7 +143,7 @@ bool GitterDuneBasis :: refine () {
     // if noconform break;
     std::cout << "check non conform refinement" << std::endl;
     x = true ;
-    for( i.first(); ! i.done() ; i.next()) { std::cout << "***" << std::endl; x &= i.item ().markNonConform () ; }
+    for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
     std::ostringstream ss;
     int filenr = adaptstep*100+nr;
     ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
