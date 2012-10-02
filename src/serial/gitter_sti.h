@@ -727,6 +727,16 @@ public :
       assert( up() != 0 );
       up()->readDynamicState(os,i);
     }
+    virtual void packAsBnd (int a,int b,ObjectStream &os) const
+    { 
+      assert( up() != 0 );
+      up()->packAsBnd(a,b,os);
+    }
+    virtual bool erasable () const
+    { 
+      assert( up() != 0 );
+      return up()->erasable();
+    }
 
     virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
     virtual void setIndicesAndBndId (const hface & , int ) { assert(false); abort(); }
