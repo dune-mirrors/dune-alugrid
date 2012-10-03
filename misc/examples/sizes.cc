@@ -113,7 +113,7 @@ void globalRefine(GitterType& grid, bool global)
      else
      {
        double center[3] = {0.2,0.2,0.2};
-       double rad=0.4;
+       double rad=0.6;
        grid.refineBall(center,rad,10);
      }
      // print size of grid 
@@ -218,10 +218,11 @@ int main (int argc, char ** argv, const char ** envp)
       //cout << "P[ " << rank << " ] : Grid generated! \n";
       grid.printsize(); 
       cout << "---------------------------------------------\n";
-    
+    /*
       grid.printMemUsage();
       for (int i = 0; i < 6; ++i)
         globalRefine(grid, true);
+     */
  
       //int bla; 
       // cin >> bla;
