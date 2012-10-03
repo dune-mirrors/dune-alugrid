@@ -2019,9 +2019,13 @@ public:
   IteratorSTI < hbndseg_STI >  * createIterator(const hbndseg_STI * , const StopRule_t rule);
   
 protected :
+  // methods for refining and coarsening
   virtual bool refine () ;
+  virtual bool refineConforming () ;
+  bool doRefine( const bool conformingClosure ) ;
   virtual bool markNonConform () ;
   virtual void coarse () ;
+
   virtual Makrogitter & container () = 0 ;
   virtual const Makrogitter & container () const = 0 ;
   virtual inline int iterators_attached () const ;

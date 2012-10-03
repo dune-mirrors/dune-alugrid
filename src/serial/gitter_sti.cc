@@ -293,7 +293,7 @@ void Gitter :: printsize () {
 
 int nr = 0;
 int adaptstep = 0;
-bool Gitter :: refine () 
+bool Gitter :: doRefine ( const bool conformingClosure ) 
 {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
   bool x = true ;
@@ -303,16 +303,20 @@ bool Gitter :: refine ()
     x = true ;
     // refine marked elements
     for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
-    // check for conformity
-    // if noconform break;
-    std::cout << "check non conform refinement" << std::endl;
-    x = true ;
-    for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
-    std::ostringstream ss;
-    int filenr = adaptstep*100+nr;
-    ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
-    tovtk(  ss.str() );
-    ++nr;
+
+    if( conformingClosure ) 
+    {
+      // check for conformity
+      // if noconform break;
+      std::cout << "check non conform refinement" << std::endl;
+      x = true ;
+      for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
+      std::ostringstream ss;
+      int filenr = adaptstep*100+nr;
+      ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
+      tovtk(  ss.str() );
+      ++nr;
+    }
     // break;
     if (x) break;
   }
@@ -321,26 +325,17 @@ bool Gitter :: refine ()
   return  x;
 }
 
-/*
-int nr = 0;
-int adaptstep = 0;
+// refine without conforming closure 
 bool Gitter :: refine () 
 {
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
-  bool x = true ;
-  leaf_element__macro_element__iterator i (container ()) ;
-  for( i.first(); ! i.done() ; i.next() ) 
-  {
-    x &= i.item ().refine () ;
-  }
-	std::ostringstream ss;
-  int filenr = adaptstep*1000+nr;
-	ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
-  tovtk(  ss.str() );
-  ++nr;
-  return  x;
+  return doRefine( false );
 }
-*/
+
+// refine including iterations for conforming closure 
+bool Gitter :: refineConforming ()
+{
+  return doRefine( true );
+}
 
 bool Gitter :: markNonConform()
 {
@@ -496,7 +491,7 @@ bool Gitter :: adapt ()
   assert (! iterators_attached ()) ;
   const int start = clock () ;
 
-  bool refined = refine ();
+  bool refined = refineConforming ();
   if (!refined) {
     cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
     cerr << "  diese Option ist eigentlich dem parallelen Verfeinerer vorbehalten.\n" ;
