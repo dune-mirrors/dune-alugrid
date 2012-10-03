@@ -1416,27 +1416,40 @@ void GitterDunePll :: tovtk( const std::string &fn )
   VertexList vertexList;
 
   int nCells = 0;
-
+  int nBnd = 0;
+#if 0
+  typedef LeafIterator < Gitter::helement_STI > Iterator;
+  Iterator w (*this) ;
+  typedef LeafIterator < Gitter::hbndseg_STI > BndIterator;
+  BndIterator wbnd (*this) ;
+#else
+  typedef LevelIterator < Gitter::helement_STI > Iterator;
+  Iterator w (*this,0) ;
+  typedef LevelIterator < Gitter::hbndseg_STI > BndIterator;
+  // typedef LevelIterator < Gitter::hface_STI > BndIterator;
+  BndIterator wbnd (*this,0) ;
+#endif
   // loop to find vertexList and count cells
   {
     typedef Objects :: tetra_IMPL tetra_IMPL ;
-    LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
-      {
-	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-	for (int i=0;i<4;++i)
-	  {
-	    Vertex v(3);
-	    for (int k=0;k<3;++k) 
-	      v[k] = item->myvertex(i)->Point()[k];
-	    vertexList[ item->myvertex(i)->getIndex() ] = make_pair(-1,v);
-	  }
-	++nCells;
-      }
+    {
+	    tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	    for (int i=0;i<4;++i)
+	    {
+	      Vertex v(3);
+	      for (int k=0;k<3;++k) 
+	        v[k] = item->myvertex(i)->Point()[k];
+	      vertexList[ item->myvertex(i)->getIndex() ] = make_pair(-1,v);
+	    }
+	    ++nCells;
+    }
+    for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
+      ++nBnd;
   }
 
   vtuFile << "    <Piece NumberOfPoints=\"" << vertexList.size() << "\" "
-	  << "NumberOfCells=\"" << nCells << "\">" << std::endl;
+	        << "NumberOfCells=\"" << nCells+nBnd << "\">" << std::endl;
 
   // cell data
   {
@@ -1445,12 +1458,22 @@ void GitterDunePll :: tovtk( const std::string &fn )
     vtuFile << "          ";
 
     typedef Objects :: tetra_IMPL tetra_IMPL ;
-    LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
-      {
-	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-	vtuFile << item->getIndex() << " ";
-      }
+    {
+	    tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	    // vtuFile << item->getIndex() << " ";
+      bool ok = true;
+      for (int k=0;k<4;++k)
+        ok &= item->myneighbour( k ).first->isRealObject();
+      vtuFile << ((ok)?1:2) << " ";
+    }
+
+    vtuFile << std::endl;
+    for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
+    {
+      vtuFile << -1 << " ";
+    }
+
 
     vtuFile << std::endl;
     vtuFile << "        </DataArray>" << std::endl;
@@ -1482,15 +1505,23 @@ void GitterDunePll :: tovtk( const std::string &fn )
     vtuFile << "         ";
 
     typedef Objects :: tetra_IMPL tetra_IMPL ;
-    LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
-      {
-	tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-	for (int i=0;i<4;++i)
-	  {
-	    vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
-	  }
-      }
+    {
+	    tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+	    for (int i=0;i<4;++i)
+	    {
+	      vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
+	    }
+    }
+    for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
+    {
+	    hbndseg3_GEO* item = ((hbndseg3_GEO *) &wbnd->item ());
+	    // hface3_GEO* item = ((hface3_GEO *) &wbnd->item ());
+	    for (int i=0;i<3;++i)
+	    {
+	      vtuFile << " " << vertexList[item->myvertex(0,i)->getIndex()].first;
+	    }
+    }
     vtuFile << std::endl;
     vtuFile << "        </DataArray>" << std::endl;
 
@@ -1499,9 +1530,13 @@ void GitterDunePll :: tovtk( const std::string &fn )
     vtuFile << "         ";
 
     for( int i = 0; i < nCells; ++i )
-      {
-	vtuFile << " " << (i+1)*4;
-      }
+    {
+	    vtuFile << " " << (i+1)*4;
+    }
+    for( int i = 0; i < nBnd; ++i )
+    {
+	    vtuFile << " " << nCells*4 + (i+1)*3;
+    }
     vtuFile << std::endl;
 
     vtuFile << "        </DataArray>" << std::endl;
@@ -1511,9 +1546,13 @@ void GitterDunePll :: tovtk( const std::string &fn )
     vtuFile << "         ";
 
     for( int i = 0; i < nCells; ++i )
-      {
-	vtuFile << " " << 10; // 10 for tetrahedra
-      }
+    {
+	    vtuFile << " " << 10; // 10 for tetrahedra
+    }
+    for( int i = 0; i < nBnd; ++i )
+    {
+	    vtuFile << " " << 5; // 5 for triangle
+    }
     vtuFile << std::endl;
 
     vtuFile << "        </DataArray>" << std::endl;
@@ -1527,38 +1566,37 @@ void GitterDunePll :: tovtk( const std::string &fn )
   vtuFile.close();
 
   if( myrank == 0 )
-    {
-      std::ostringstream pllss;
-
-      if( fn.substr(fn.find_last_of(".") + 1) == "vtu" )
-	{
-	  pllss << fn.substr(0,fn.find_last_of(".") + 1) << "pvtu";
-	}
-      else
-	{
-	  pllss << fn << ".pvtu";
-	}
-      std::ofstream pvtuFile;
-      pvtuFile.open( pllss.str().c_str() );
+  {
+    std::ostringstream pllss;
+    if( fn.substr(fn.find_last_of(".") + 1) == "vtu" )
+	  {
+	    pllss << fn.substr(0,fn.find_last_of(".") + 1) << "pvtu";
+	  }
+    else
+	  {
+	    pllss << fn << ".pvtu";
+	  }
+    std::ofstream pvtuFile;
+    pvtuFile.open( pllss.str().c_str() );
   
-      pvtuFile << "<?xml version=\"1.0\"?>" << std::endl;
-      pvtuFile << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
-      pvtuFile << "  <PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
-      pvtuFile << "    <PCellData Scalars=\"cell-id\">" << std::endl;
-      pvtuFile << "      <PDataArray type=\"Float32\" Name=\"cell-id\" />" << std::endl;
-      pvtuFile << "    </PCellData>" << std::endl;
-      pvtuFile << "    <PPoints>" << std::endl;
-      pvtuFile << "      <PDataArray type=\"Float32\" NumberOfComponents=\"3\" />" << std::endl;
-      pvtuFile << "    </PPoints>" << std::endl;
-      for( int p = 0; p < nProc; ++p )
-	pvtuFile << "    <Piece Source=\"p" << p << "-" << fn << "\" />" << std::endl;
-      pvtuFile << "  </PUnstructuredGrid>" << std::endl;
-      pvtuFile << "</VTKFile>" << std::endl;
+    pvtuFile << "<?xml version=\"1.0\"?>" << std::endl;
+    pvtuFile << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+    pvtuFile << "  <PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
+    pvtuFile << "    <PCellData Scalars=\"cell-id\">" << std::endl;
+    pvtuFile << "      <PDataArray type=\"Float32\" Name=\"cell-id\" />" << std::endl;
+    pvtuFile << "    </PCellData>" << std::endl;
+    pvtuFile << "    <PPoints>" << std::endl;
+    pvtuFile << "      <PDataArray type=\"Float32\" NumberOfComponents=\"3\" />" << std::endl;
+    pvtuFile << "    </PPoints>" << std::endl;
+    for( int p = 0; p < nProc; ++p )
+	    pvtuFile << "    <Piece Source=\"p" << p << "-" << fn << "\" />" << std::endl;
+    pvtuFile << "  </PUnstructuredGrid>" << std::endl;
+    pvtuFile << "</VTKFile>" << std::endl;
 
-      pvtuFile.close();
+    pvtuFile.close();
 
-      std::cout << "data written to " << pllss.str() << std::endl;
-    }
+    std::cout << "data written to " << pllss.str() << std::endl;
+  }
 }
 
 

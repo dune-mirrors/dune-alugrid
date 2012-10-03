@@ -868,7 +868,7 @@ bool GitterPll :: adapt () {
            << _refineLoops << ") " << u2 << " " << u3 << endl ;
     }
     notifyGridChanges () ;
-    // loadBalancerGridChangesNotify () ;
+    loadBalancerGridChangesNotify () ;
     conformClosure = mpAccess().gmax( !markNonConform() );
   } while (conformClosure);
   ++adaptstep;
@@ -1167,7 +1167,9 @@ void GitterPll :: loadBalancerGridChangesNotify ()
 
     if( ldbMth ) 
     {
+      tovtk("pre.vtu");
       repartitionMacroGrid (db) ;
+      tovtk("post.vtu");
       notifyMacroGridChanges () ;
     }
   }

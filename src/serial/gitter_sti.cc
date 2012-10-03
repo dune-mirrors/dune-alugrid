@@ -293,49 +293,41 @@ void Gitter :: printsize () {
 
 int nr = 0;
 int adaptstep = 0;
-bool Gitter :: doRefine ( const bool conformingClosure ) 
+bool Gitter :: refine () 
 {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
   bool x = true ;
   leaf_element__macro_element__iterator i (container ()) ;
-  do
-  {
-    x = true ;
-    // refine marked elements
-    for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
-
-    if( conformingClosure ) 
-    {
-      // check for conformity
-      // if noconform break;
-      std::cout << "check non conform refinement" << std::endl;
-      x = true ;
-      for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
-      std::ostringstream ss;
-      int filenr = adaptstep*100+nr;
-      ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
-      tovtk(  ss.str() );
-      ++nr;
-    }
-    // break;
-    if (x) break;
-  }
-  while (1);  // need something here on required conformity
-  ++adaptstep;
+  // refine marked elements
+  for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+  std::ostringstream ss;
+  int filenr = adaptstep*100+nr;
+  ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
+  tovtk(  ss.str() );
+  ++nr;
   return  x;
 }
 
-// refine without conforming closure 
+/*
+int nr = 0;
+int adaptstep = 0;
 bool Gitter :: refine () 
 {
-  return doRefine( false );
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
+  bool x = true ;
+  leaf_element__macro_element__iterator i (container ()) ;
+  for( i.first(); ! i.done() ; i.next() ) 
+  {
+    x &= i.item ().refine () ;
+  }
+	std::ostringstream ss;
+  int filenr = adaptstep*1000+nr;
+	ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
+  tovtk(  ss.str() );
+  ++nr;
+  return  x;
 }
-
-// refine including iterations for conforming closure 
-bool Gitter :: refineConforming ()
-{
-  return doRefine( true );
-}
+*/
 
 bool Gitter :: markNonConform()
 {
@@ -377,10 +369,12 @@ void Gitter :: tovtk( const std::string &fn )
   int nCells = 0;
 
   typedef Gitter :: Geometric :: tetra_GEO tetra_GEO ;
+  // typedef LeafIterator < Gitter::helement_STI > Iterator;
+  typedef LevelIterator < Gitter::helement_STI > Iterator;
+  Iterator w (*this,0) ;
 
   // loop to find vertexList and count cells
   {
-    LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
     {
       tetra_GEO* item = ((tetra_GEO *) &w->item ());
@@ -404,7 +398,6 @@ void Gitter :: tovtk( const std::string &fn )
     vtuFile << "        <DataArray type=\"Float32\" Name=\"cell-id\" NumberOfComponents=\"1\">" << std::endl;
     vtuFile << "          ";
 
-    LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
     {
       vtuFile << w->item ().getIndex() << " ";
@@ -439,7 +432,6 @@ void Gitter :: tovtk( const std::string &fn )
     vtuFile << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << std::endl;
     vtuFile << "         ";
 
-    LeafIterator < Gitter::helement_STI > w (*this) ;
     for (w->first () ; ! w->done () ; w->next ())
     {
       tetra_GEO* item = ((tetra_GEO *) &w->item ());
@@ -491,7 +483,18 @@ bool Gitter :: adapt ()
   assert (! iterators_attached ()) ;
   const int start = clock () ;
 
-  bool refined = refineConforming ();
+  bool x;
+  bool refined = true;
+  do {
+    refined &= refine ();
+    // check for conformity
+    // if noconform break;
+    std::cout << "check non conform refinement" << std::endl;
+    x = markNonConform();
+  }
+  while (!x);  // need something here on required conformity
+  ++adaptstep;
+
   if (!refined) {
     cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
     cerr << "  diese Option ist eigentlich dem parallelen Verfeinerer vorbehalten.\n" ;

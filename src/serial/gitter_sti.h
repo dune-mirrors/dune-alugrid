@@ -2021,8 +2021,6 @@ public:
 protected :
   // methods for refining and coarsening
   virtual bool refine () ;
-  virtual bool refineConforming () ;
-  bool doRefine( const bool conformingClosure ) ;
   virtual bool markNonConform () ;
   virtual void coarse () ;
 
