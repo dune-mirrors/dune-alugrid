@@ -1154,6 +1154,17 @@ public :
         return singleton;
       }
 
+      virtual ElementPllXIF& accessPllX () throw (stiExtender_t :: AccessPllException)
+      {
+        assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
+        throw stiExtender_t :: AccessPllException () ;
+      }
+      virtual const ElementPllXIF& accessPllX () const throw (stiExtender_t :: AccessPllException)
+      {
+        assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
+        throw stiExtender_t :: AccessPllException () ;
+      }
+
       // as we have not a real element or boundary here, return false 
       bool isRealObject () const { return false; }
       bool isperiodic() const { return false; }
