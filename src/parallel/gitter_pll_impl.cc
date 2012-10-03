@@ -842,7 +842,6 @@ bool TetraPllXBaseMacro< A > :: doPackAll (vector < ObjectStream > & osv,
     os.writeObject (mytetra ().myvertex (2)->ident ()) ;
     os.writeObject (mytetra ().myvertex (3)->ident ()) ;
     int orientation = mytetra ().orientation();
-    cout << "Send orientation " << orientation << std::endl;
     os.writeObject ( orientation );
 
     // make sure ENDOFSTREAM is not a valid refinement rule 
