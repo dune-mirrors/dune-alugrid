@@ -350,11 +350,16 @@ bool Gitter :: markNonConform()
   for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
   return x;
 }
-void Gitter :: coarse() {
+
+void Gitter :: coarse() 
+{
   assert (debugOption (20) ? (cout << "**INFO Gitter :: coarse ()" << endl, 1) : 1) ;
   {
     AccessIterator < helement_STI > :: Handle i (container ()) ;
-      for( i.first(); ! i.done() ; i.next()) i.item ().coarse () ; 
+    for( i.first(); ! i.done() ; i.next() ) 
+    {
+      i.item ().coarse () ; 
+    }
   }
 }
 
