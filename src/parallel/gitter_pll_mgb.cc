@@ -998,6 +998,14 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
       ParallelGridMover pgm (containerPll ()) ;
       // unpack all data  
       pgm.unpackAll (osv, gatherScatter ) ;
+
+#ifndef NDEBUG
+      // check that all leaf elements are in conforming status 
+      bool x = true ;
+      LeafIterator< helement_STI > i( *this );
+      for( i->first(); ! i->done() ; i->next()) { x &= i->item ().markNonConform () ; }
+      assert( x == true );
+#endif
     }
 
     // result 
