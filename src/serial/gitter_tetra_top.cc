@@ -1784,6 +1784,7 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
   set< int > verticesFound ;
   assert( tetra->nChild() == nChild );
 
+  const bool isGhost = tetra->isGhost();
   for(int fce=0; fce<4; ++fce ) 
   {
     for(int i=0; i<3; ++i ) 
@@ -1812,9 +1813,9 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
       }
     }
 
-    if( ! tetra->myneighbour( fce ).first->isRealObject()  ) 
+    if( ! isGhost && ! tetra->myneighbour( fce ).first->isRealObject()  ) 
     {
-      cout << "Neighbour " << fce << " of Tetra " << tetra->getIndex()  << " is wrong " << endl;
+      cout << "Neighbour(type="<<tetra->isInterior() << ") " << fce << " of Tetra " << tetra->getIndex()  << " is wrong " << endl;
       cout << "Check face " << tetra->myhface3( fce )->getIndex() << endl;
     }
     // make sure neighbor is something meaningful 
