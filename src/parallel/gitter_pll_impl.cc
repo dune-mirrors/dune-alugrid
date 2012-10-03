@@ -2211,7 +2211,8 @@ void GitterBasisPll :: printMemUsage ()
     cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
     cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
     cout << "Vertex = " << sizeof(VertexEmpty) << endl;
-    cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl << endl;
+    cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl;
+    cout << "MacroGhostInfoTetra = " << sizeof(MacroGhostInfoTetra) << endl << endl;
 
     cout << "******** HEXA *************************8\n";
     cout << "Hexasize  = " << sizeof(hexa_IMPL) << endl;
@@ -2220,7 +2221,8 @@ void GitterBasisPll :: printMemUsage ()
     cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
     cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
     cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
-    cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl << endl;
+    cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl;
+    cout << "MacroGhostInfoHexa = " << sizeof(MacroGhostInfoHexa) << endl << endl;
 
     cout << "******** Number of Elements ************************8\n";
     {

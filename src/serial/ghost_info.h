@@ -34,16 +34,16 @@ public:
   
 protected:
   // coordiante of all non-internal points 
-  alucoord_t _p[points][3]; 
+  alucoord_t _p[points][3];  // 24 or 96 bytes
 
   // vertex idents of all vertices of element 
-  int _vx[noVx];
+  int _vx[noVx]; // 16 or 32 bytes 
 
   // vertex idents of all not internal vertices  
-  int _vxface[noFaceVx];
+  int _vxface[noFaceVx]; // 4 or 16 bytes 
 
   // face number of internal face 
-  int _fce;
+  int _fce; // 4 bytes 
 
   // do not allow copying
   MacroGhostInfoStorage(const MacroGhostInfoStorage & );
