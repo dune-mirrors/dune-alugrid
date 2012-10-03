@@ -980,7 +980,6 @@ void GitterPll :: exchangeDynamicState () {
           p.first->readDynamicState (osv [l], p.second) ;
         }
 
-        /*
         // check consistency of stream 
         int endStream ; 
         osv [l].readObject( endStream );
@@ -990,7 +989,6 @@ void GitterPll :: exchangeDynamicState () {
           assert( false );
           abort();
         } 
-        */
       }
     }
   } 
@@ -1029,21 +1027,22 @@ void GitterPll :: exchangeStaticState () {
     {
       for (int l = 0 ; l < nl ; ++l) 
       {
+        ObjectStream& os = osv[ l ];
         AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
         AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
         for (wi.first () ; ! wi.done () ; wi.next ()) 
         {
           pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
-          p.first->writeStaticState (osv [l], p.second) ;
+          p.first->writeStaticState (os, p.second) ;
         }
         for (wo.first () ; ! wo.done () ; wo.next ()) 
         {
           pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
-          p.first->writeStaticState (osv [l], p.second) ;
+          p.first->writeStaticState (os, p.second) ;
         }
 
         // mark end of stream 
-        osv [l].writeObject( MacroGridMoverIF :: ENDSTREAM ); 
+        os.writeObject( MacroGridMoverIF :: ENDSTREAM ); 
       }
     }
 
@@ -1052,24 +1051,25 @@ void GitterPll :: exchangeStaticState () {
     {
       for (int l = 0 ; l < nl ; ++l) 
       {
+        ObjectStream& os = osv[ l ];
         AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
         AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
         for (wo.first () ; ! wo.done () ; wo.next ()) 
         {
           pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
-          p.first->readStaticState (osv [l], p.second) ;
+          p.first->readStaticState (os, p.second) ;
         }
         for (wi.first () ; ! wi.done () ; wi.next ()) 
         {
           pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
-          p.first->readStaticState (osv [l], p.second) ;
+          p.first->readStaticState (os, p.second) ;
         }
         // check consistency of stream 
         int endStream ; 
-        osv [l].readObject( endStream );
+        os.readObject( endStream );
         if( endStream != MacroGridMoverIF :: ENDSTREAM )
         {
-          osv [l].readObject( endStream );
+          os.readObject( endStream );
           if( endStream != MacroGridMoverIF :: ENDSTREAM )
           {
             cerr << "**ERROR: writeStaticState: inconsistent stream, got " << endStream << endl;
