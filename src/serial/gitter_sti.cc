@@ -293,11 +293,46 @@ void Gitter :: printsize () {
 
 int nr = 0;
 int adaptstep = 0;
-bool Gitter :: refine () {
+bool Gitter :: refine () 
+{
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
   bool x = true ;
   leaf_element__macro_element__iterator i (container ()) ;
-  for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+  do
+  {
+    x = true ;
+    // refine marked elements
+    for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+    // check for conformity
+    // if noconform break;
+    std::cout << "check non conform refinement" << std::endl;
+    x = true ;
+    for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
+    std::ostringstream ss;
+    int filenr = adaptstep*100+nr;
+    ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
+    tovtk(  ss.str() );
+    ++nr;
+    // break;
+    if (x) break;
+  }
+  while (1);  // need something here on required conformity
+  ++adaptstep;
+  return  x;
+}
+
+/*
+int nr = 0;
+int adaptstep = 0;
+bool Gitter :: refine () 
+{
+  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
+  bool x = true ;
+  leaf_element__macro_element__iterator i (container ()) ;
+  for( i.first(); ! i.done() ; i.next() ) 
+  {
+    x &= i.item ().refine () ;
+  }
 	std::ostringstream ss;
   int filenr = adaptstep*1000+nr;
 	ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
@@ -305,6 +340,8 @@ bool Gitter :: refine () {
   ++nr;
   return  x;
 }
+*/
+
 bool Gitter :: markNonConform()
 {
   bool x = true ;
@@ -319,6 +356,133 @@ void Gitter :: coarse() {
     AccessIterator < helement_STI > :: Handle i (container ()) ;
       for( i.first(); ! i.done() ; i.next()) i.item ().coarse () ; 
   }
+}
+
+void Gitter :: tovtk( const std::string &fn ) 
+{
+  // openfile
+  std::ofstream vtuFile;
+  vtuFile.open( fn.c_str() );
+    
+  // header info
+  vtuFile << "<?xml version=\"1.0\"?>" << std::endl;
+  vtuFile << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+  vtuFile << "  <UnstructuredGrid>" << std::endl;
+
+  // vertex list
+  typedef std::vector< double > Vertex;
+  typedef std::map< int, std::pair<int,Vertex> > VertexList;
+  VertexList vertexList;
+
+  int nCells = 0;
+
+  typedef Gitter :: Geometric :: tetra_GEO tetra_GEO ;
+
+  // loop to find vertexList and count cells
+  {
+    LeafIterator < Gitter::helement_STI > w (*this) ;
+    for (w->first () ; ! w->done () ; w->next ())
+    {
+      tetra_GEO* item = ((tetra_GEO *) &w->item ());
+      for (int i=0;i<4;++i)
+      {
+        Vertex v(3);
+        for (int k=0;k<3;++k) 
+          v[k] = item->myvertex(i)->Point()[k];
+        vertexList[ item->myvertex(i)->getIndex() ] = make_pair(-1,v);
+      }
+      ++nCells;
+    }
+  }
+
+  vtuFile << "    <Piece NumberOfPoints=\"" << vertexList.size() << "\" "
+          << "NumberOfCells=\"" << nCells << "\">" << std::endl;
+
+  // cell data
+  {
+    vtuFile << "      <CellData Scalars=\"cell-id\">" << std::endl;
+    vtuFile << "        <DataArray type=\"Float32\" Name=\"cell-id\" NumberOfComponents=\"1\">" << std::endl;
+    vtuFile << "          ";
+
+    LeafIterator < Gitter::helement_STI > w (*this) ;
+    for (w->first () ; ! w->done () ; w->next ())
+    {
+      vtuFile << w->item ().getIndex() << " ";
+    }
+
+    vtuFile << std::endl;
+    vtuFile << "        </DataArray>" << std::endl;
+    vtuFile << "      </CellData>" << std::endl;
+  }
+
+  // points info
+  {
+    vtuFile << "      <Points>" << std::endl;
+    vtuFile << "        <DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+
+    const VertexList::iterator end = vertexList.end();
+    int nr=0;
+    for( VertexList::iterator i = vertexList.begin(); i != end; ++i, ++nr )
+    {
+      vtuFile << "          " << (*i).second.second[ 0 ] << " " << (*i).second.second[ 1 ] << " " << (*i).second.second[ 2 ] << std::endl;
+      (*i).second.first = nr;
+    }
+
+    vtuFile << "        </DataArray>" << std::endl;
+    vtuFile << "      </Points>" << std::endl;
+  }
+
+  // cell info
+  {
+    vtuFile << "      <Cells>" << std::endl;
+    // connectivity
+    vtuFile << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << std::endl;
+    vtuFile << "         ";
+
+    LeafIterator < Gitter::helement_STI > w (*this) ;
+    for (w->first () ; ! w->done () ; w->next ())
+    {
+      tetra_GEO* item = ((tetra_GEO *) &w->item ());
+      for (int i=0;i<4;++i)
+      {
+        vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
+      }
+    }
+    vtuFile << std::endl;
+    vtuFile << "        </DataArray>" << std::endl;
+
+    // offsets
+    vtuFile << "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << std::endl;
+    vtuFile << "         ";
+
+    for( int i = 0; i < nCells; ++i )
+    {
+      vtuFile << " " << (i+1)*4;
+    }
+    vtuFile << std::endl;
+
+    vtuFile << "        </DataArray>" << std::endl;
+
+    // cell type
+    vtuFile << "        <DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">" << std::endl;
+    vtuFile << "         ";
+
+    for( int i = 0; i < nCells; ++i )
+    {
+      vtuFile << " " << 10; // 10 for tetrahedra
+    }
+    vtuFile << std::endl;
+
+    vtuFile << "        </DataArray>" << std::endl;
+  }
+
+  vtuFile << "      </Cells>" << std::endl;
+  vtuFile << "    </Piece>" << std::endl;
+  vtuFile << "  </UnstructuredGrid>" << std::endl;
+  vtuFile << "</VTKFile>" << std::endl;
+
+  vtuFile.close();
+  std::cout << "data written to " << fn << std::endl;
 }
 
 bool Gitter :: adapt () 

@@ -80,13 +80,6 @@ public:
   // read status of grid 
   void duneRestore ( istream& in ) ;
  
-  // refine all leaf elements 
-  bool refine ();
-
-  // coarse all leaf elements if possible 
-  void coarse ();
-  void tovtk( const string &fn);
-
   // done call notify and loadBalancer  
   bool duneAdapt (AdaptRestrictProlongType & arp);
 };

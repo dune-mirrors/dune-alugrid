@@ -2059,7 +2059,7 @@ public :
   // return reference to indexManagerStorage
   virtual IndexManagerStorageType& indexManagerStorage() = 0;
 
-  virtual void tovtk( const std::string &fn) = 0;
+  virtual void tovtk( const std::string &fn) ;
 protected:
   template <class ostream_t>
   void backupImpl( ostream_t& );
