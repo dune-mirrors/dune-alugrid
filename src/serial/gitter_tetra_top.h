@@ -397,14 +397,16 @@ template < class A > class TetraTop : public A
 
       const CallSplitIF& caller() const { assert( _caller ); return *_caller; }
     };
+
     virtual bool markNonConform () 
     {
-      for (int e=0;e<this->nEdges();++e)
+      assert( this->nEdges() == 6 );
+      for (int e=0; e < 6; ++e)
       {
         // std::cout << this->myhedge1(e) << std::endl;
-        if (this->myhedge1(e)->down())
+        if( this->myhedge1(e)->down() )
         {
-          this->request ( Gitter :: Geometric :: TetraRule :: bisect );
+          this->request ( myrule_t :: bisect );
           return false;
         }
       }
