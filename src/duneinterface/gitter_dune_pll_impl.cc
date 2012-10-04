@@ -1395,6 +1395,8 @@ void GitterDunePll :: duneRestore(const char *fileName)
 }
 void GitterDunePll :: tovtk( const std::string &fn ) 
 {
+  const bool showbnd = false;
+  const bool showface = true;
   const int myrank = mpAccess ().myrank () ;
   const int nProc = mpAccess ().psize () ;
 
@@ -1417,17 +1419,21 @@ void GitterDunePll :: tovtk( const std::string &fn )
 
   int nCells = 0;
   int nBnd = 0;
-#if 0
+  int nFaces = 0;
+#if 1
   typedef LeafIterator < Gitter::helement_STI > Iterator;
   Iterator w (*this) ;
   typedef LeafIterator < Gitter::hbndseg_STI > BndIterator;
   BndIterator wbnd (*this) ;
+  typedef LeafIterator < Gitter::hface_STI > FaceIterator;
+  FaceIterator wface (*this) ;
 #else
   typedef LevelIterator < Gitter::helement_STI > Iterator;
   Iterator w (*this,0) ;
   typedef LevelIterator < Gitter::hbndseg_STI > BndIterator;
-  // typedef LevelIterator < Gitter::hface_STI > BndIterator;
   BndIterator wbnd (*this,0) ;
+  typedef LevelIterator < Gitter::hface_STI > FaceIterator;
+  FaceIterator wface (*this,0) ;
 #endif
   // loop to find vertexList and count cells
   {
@@ -1444,12 +1450,20 @@ void GitterDunePll :: tovtk( const std::string &fn )
 	    }
 	    ++nCells;
     }
-    for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
-      ++nBnd;
+    if (showbnd)
+    {
+      for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
+        ++nBnd;
+    }
+    if (showface)
+    {
+      for (wface->first () ; ! wface->done () ; wface->next ())
+        ++nFaces;
+    }
   }
 
   vtuFile << "    <Piece NumberOfPoints=\"" << vertexList.size() << "\" "
-	        << "NumberOfCells=\"" << nCells+nBnd << "\">" << std::endl;
+	        << "NumberOfCells=\"" << nCells+nBnd+nFaces << "\">" << std::endl;
 
   // cell data
   {
@@ -1465,15 +1479,62 @@ void GitterDunePll :: tovtk( const std::string &fn )
       bool ok = true;
       for (int k=0;k<4;++k)
         ok &= item->myneighbour( k ).first->isRealObject();
-      vtuFile << ((ok)?1:2) << " ";
+      if (!ok)
+      {
+        std::cout << "Problem: " << item << std::endl;
+        for (int k=0;k<4;++k)
+          if (!item->myneighbour( k ).first->isRealObject())
+          {
+            std::cout << item->myhface3(k) << std::endl;
+            if ( item->myhface3(k)->nb.front().first->isRealObject() )
+            {
+              std::cout << item->myhface3(k)->nb.front().first << std::endl;
+              std::cout << ((hbndseg3_GEO *) item->myhface3(k)->nb.front().first)->myhface3(0) << std::endl;
+            }
+            if ( item->myhface3(k)->nb.rear().first->isRealObject() )
+            {
+              std::cout << item->myhface3(k)->nb.rear().first << std::endl;
+              std::cout << ((hbndseg3_GEO *) item->myhface3(k)->nb.rear().first)->myhface3(0) << std::endl;
+            }
+            std::cout << std::endl;
+          }
+        std::cout << std::endl;
+      }
+
+      vtuFile << ((ok)?1:-1) << " ";
     }
 
     vtuFile << std::endl;
-    for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
-    {
-      vtuFile << -1 << " ";
-    }
-
+    if (showbnd)
+      for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
+      {
+	      hbndseg3_GEO* item = ((hbndseg3_GEO *) &wbnd->item ());
+        bool ok = true;
+        ok &= item->myhface3(0)->nb.front().first->isRealObject();
+        ok &= item->myhface3(0)->nb.rear().first->isRealObject();
+        if (!ok)
+        {
+          if ( item->myhface3(0)->nb.front().first->isRealObject() )
+            assert( item->myhface3(0)->nb.front().first == item );
+          if ( item->myhface3(0)->nb.rear().first->isRealObject() )
+            assert( item->myhface3(0)->nb.rear().first == item );
+          std::cout << "Problem: " << item << std::endl;
+          std::cout << item->myhface3(0) << std::endl;
+          std::cout << item->myhface3(0)->nb.front().first << std::endl;
+          std::cout << item->myhface3(0)->nb.rear().first << std::endl;
+          std::cout << std::endl;
+        }
+        vtuFile << ((ok)?1:-1)*item->myhface3(0)->ref << " ";
+      }
+    if (showface)
+      for (wface->first () ; ! wface->done () ; wface->next ())
+      {
+	      hface3_GEO* item = ((hface3_GEO *) &wface->item ());
+        bool ok = true;
+        ok &= item->nb.front().first->isRealObject();
+        ok &= item->nb.rear().first->isRealObject();
+        vtuFile << ((ok)?1:-1)*item->ref << " ";
+      }
 
     vtuFile << std::endl;
     vtuFile << "        </DataArray>" << std::endl;
@@ -1513,15 +1574,24 @@ void GitterDunePll :: tovtk( const std::string &fn )
 	      vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
 	    }
     }
-    for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
-    {
-	    hbndseg3_GEO* item = ((hbndseg3_GEO *) &wbnd->item ());
-	    // hface3_GEO* item = ((hface3_GEO *) &wbnd->item ());
-	    for (int i=0;i<3;++i)
-	    {
-	      vtuFile << " " << vertexList[item->myvertex(0,i)->getIndex()].first;
-	    }
-    }
+    if (showbnd)
+      for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
+      {
+	      hbndseg3_GEO* item = ((hbndseg3_GEO *) &wbnd->item ());
+	      for (int i=0;i<3;++i)
+	      {
+	        vtuFile << " " << vertexList[item->myvertex(0,i)->getIndex()].first;
+	      }
+      }
+    if (showface)
+      for (wface->first () ; ! wface->done () ; wface->next ())
+      {
+	      hface3_GEO* item = ((hface3_GEO *) &wface->item ());
+	      for (int i=0;i<3;++i)
+	      {
+	        vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
+	      }
+      }
     vtuFile << std::endl;
     vtuFile << "        </DataArray>" << std::endl;
 
@@ -1536,6 +1606,10 @@ void GitterDunePll :: tovtk( const std::string &fn )
     for( int i = 0; i < nBnd; ++i )
     {
 	    vtuFile << " " << nCells*4 + (i+1)*3;
+    }
+    for( int i = 0; i < nFaces; ++i )
+    {
+	    vtuFile << " " << nCells*4 + nBnd*3 + (i+1)*3;
     }
     vtuFile << std::endl;
 
@@ -1552,6 +1626,10 @@ void GitterDunePll :: tovtk( const std::string &fn )
     for( int i = 0; i < nBnd; ++i )
     {
 	    vtuFile << " " << 5; // 5 for triangle
+    }
+    for( int i = 0; i < nFaces; ++i )
+    {
+	    vtuFile << " " << 5; // 5 for trianglea
     }
     vtuFile << std::endl;
 

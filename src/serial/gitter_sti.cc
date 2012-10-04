@@ -308,27 +308,6 @@ bool Gitter :: refine ()
   return  x;
 }
 
-/*
-int nr = 0;
-int adaptstep = 0;
-bool Gitter :: refine () 
-{
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
-  bool x = true ;
-  leaf_element__macro_element__iterator i (container ()) ;
-  for( i.first(); ! i.done() ; i.next() ) 
-  {
-    x &= i.item ().refine () ;
-  }
-	std::ostringstream ss;
-  int filenr = adaptstep*1000+nr;
-	ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
-  tovtk(  ss.str() );
-  ++nr;
-  return  x;
-}
-*/
-
 bool Gitter :: markNonConform()
 {
   bool x = true ;
@@ -369,9 +348,9 @@ void Gitter :: tovtk( const std::string &fn )
   int nCells = 0;
 
   typedef Gitter :: Geometric :: tetra_GEO tetra_GEO ;
-  // typedef LeafIterator < Gitter::helement_STI > Iterator;
-  typedef LevelIterator < Gitter::helement_STI > Iterator;
-  Iterator w (*this,0) ;
+  typedef LeafIterator < Gitter::helement_STI > Iterator;
+  // typedef LevelIterator < Gitter::helement_STI > Iterator;
+  Iterator w (*this) ;
 
   // loop to find vertexList and count cells
   {
@@ -493,7 +472,6 @@ bool Gitter :: adapt ()
     x = markNonConform();
   }
   while (!x);  // need something here on required conformity
-  ++adaptstep;
 
   if (!refined) {
     cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
