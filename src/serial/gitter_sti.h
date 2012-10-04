@@ -1287,6 +1287,8 @@ public :
         signed char _numFront;
         signed char _numRear;
         signed char s [polygonlength] ;  // 12 bytes 
+        std::vector< std::pair<myconnect_t*,signed char> > frontList_;
+        std::vector< std::pair<myconnect_t*,signed char> > rearList_;
 
       public:  
         myrule_t _parRule;  // 1 bytes 
@@ -1295,6 +1297,8 @@ public :
         inline face3Neighbour () ;
         void setFront ( const pair< myconnect_t *, int > &p );
         void setRear ( const pair< myconnect_t *, int > &p );
+        void setPrevFront ( );
+        void setPrevRear ( );
         inline void operator = (const face3Neighbour &) ;
         inline int complete (const face3Neighbour &) ;
         inline pair < myconnect_t *, int > front () ;
@@ -2985,28 +2989,50 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface4Ru
 //
   
 inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
+: frontList_(0), rearList_(0)
 {
-  setFront( null );
-  setRear( null );
+  _faceFront = null.first;
+  _numFront = null.second;
+  _faceRear = null.first;
+  _numRear = null.second;
   return ;
 }
 
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
+  frontList_.push_back(make_pair(_faceFront,_numFront));
   _faceFront = p.first;
   _numFront = p.second;
+}
+inline void
+Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevFront ( )
+{
+  assert( frontList_.size()>0);
+  _faceFront = frontList_.back().first;
+  _numFront = frontList_.back().second;
+  frontList_.pop_back();
 }
 
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setRear ( const pair < myconnect_t *, int > &p )
 {
+  rearList_.push_back(make_pair(_faceRear,_numRear));
   _faceRear = p.first;
   _numRear = p.second;
+}
+inline void
+Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevRear ( )
+{
+  _faceRear = rearList_.back().first;
+  _numRear = rearList_.back().second;
+  rearList_.pop_back();
 }
 
 inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const face3Neighbour & n)
 {
+  frontList_ = n.frontList_;
+  rearList_ = n.rearList_;
   _faceFront = n._faceFront;
   _faceRear = n._faceRear;
   _numFront = n._numFront;
@@ -3078,17 +3104,23 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
 
 inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t)
 {
-  // this will not increase the reference
-  attachElementAgain( p, t );
-
   // increase reference counter
-  ref ++ ;
+  if (t<0 && nb.rearList_.size()==0)
+    ref ++ ;
+  if (t>=0 && nb.frontList_.size()==0)
+    ref ++ ;
+
+  if( t < 0 )
+    nb.setRear( p );
+  else
+    nb.setFront( p );
   return ;
 }
 
 inline void Gitter :: Geometric :: hface3 :: 
 attachElementAgain (const pair < myconnect_t *, int > & p, int t)
 {
+  assert(0);
   if( t < 0 )
     nb.setRear( p );
   else
@@ -3098,10 +3130,13 @@ attachElementAgain (const pair < myconnect_t *, int > & p, int t)
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t)
 {
   if( t < 0 )
-    nb.setRear( nb.null );
+    nb.setPrevRear( );
   else
-    nb.setFront( nb.null );
-  ref -- ;
+    nb.setPrevFront( );
+  if (t<0 && nb.rearList_.size()==0)
+    ref -- ;
+  if (t>=0 && nb.frontList_.size()==0)
+    ref -- ;
   return ;
 }
 

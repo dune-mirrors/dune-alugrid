@@ -431,8 +431,7 @@ void ParallelGridMover :: finalize ()
       } 
       else 
       {
-         assert ( face->ref >= 2 ) ; // in the non-conforming case there might be more
-                                     // than two element referencing a face
+         assert ( face->ref == 2 ) ; 
         _hface3List.push_back ( face );
         ++ i;
       }

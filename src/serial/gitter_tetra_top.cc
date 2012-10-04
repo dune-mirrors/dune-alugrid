@@ -1695,10 +1695,10 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
 #endif
 
   //cout << "New tetra " << h0 << endl;
-  assert( checkTetra( h0, 0 ) );
+  // assert( checkTetra( h0, 0 ) );
 
   //cout << "New tetra " << h1 << endl;
-  assert( checkTetra( h1, 1 ) );
+  // assert( checkTetra( h1, 1 ) );
 
   //cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << endl;
   //cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << endl;
