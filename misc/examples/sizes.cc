@@ -12,7 +12,7 @@
 
 using namespace std;
 
-// #define PARALLEL
+#define PARALLEL
 
 #define COUNT_FLOPS
 

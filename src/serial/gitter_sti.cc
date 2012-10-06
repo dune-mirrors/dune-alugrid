@@ -479,7 +479,7 @@ void Gitter :: tovtk( const std::string &fn )
         bool ok = true;
         ok &= item->nb.front().first->isRealObject();
         ok &= item->nb.rear().first->isRealObject();
-        assert(item->ref>0);
+        // assert(item->ref>0);
         vtuFile << ((ok)?1:-1)*item->ref << " ";
       }
 
