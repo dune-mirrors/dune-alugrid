@@ -845,12 +845,12 @@ TetraTop (int l,  // level
   // initial mapping is has to be adjusted according 
   // to the make-6 algorithm 
   // NOTE: the _vxMap numbers only affect the bisection refinement
-  std::cout << "Create Tetra with orientation " << orientation << endl;
   const int mod = 1 - orientation ;
   _vxMap[ 0 ] = 0; 
   _vxMap[ 1 ] = 1;
   _vxMap[ 2 ] = 2 + mod ;
   _vxMap[ 3 ] = 3 - mod ;
+  // std::cout << "Create Tetra with orientation " << orientation << endl;
 }
 
 template < class A > TetraTop < A > :: ~TetraTop () 
