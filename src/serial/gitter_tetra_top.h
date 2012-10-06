@@ -403,7 +403,6 @@ template < class A > class TetraTop : public A
       assert( this->nEdges() == 6 );
       for (int e=0; e < 6; ++e)
       {
-        // std::cout << this->myhedge1(e) << std::endl;
         if( this->myhedge1(e)->down() )
         {
           this->request ( myrule_t :: bisect );
@@ -411,6 +410,24 @@ template < class A > class TetraTop : public A
         }
       }
       return true;
+    }
+    virtual void markEdgeCoarsening () 
+    { 
+      assert( this->nEdges() == 6 );
+      if (!this->up()) return;
+      for (int e=0; e<6; ++e)
+      {
+        myhedge1_t *edge = this->up()->myhedge1(e);
+        // if (e == (int)(this->up()->getrule())-2) // does not seem to // work...
+        if (_req == myrule_t :: crs && edge->down()) // the father of a leaf element can only have one non leaf edge
+        { // we leave thing as they are
+        }
+        else
+        {  
+          int idx = edge->getIndex();
+          this->myGrid()->edgeCoarseningFlags_[ idx ] = false;
+        }
+      }
     }
 
     void refineImmediate (myrule_t) ;

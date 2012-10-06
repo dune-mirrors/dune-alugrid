@@ -422,7 +422,6 @@ template < class A > bool Hface3Top < A > :: coarse ()
   // vollst"andigt, die eventuell durch Elementvergr"oberung
   // durcheinander gekommen war. Die Vergr"oberung geht dann
   // auf das n"achste Level "uber.
-  
     if (f->ref) {
       if (f->ref == 1) f->nb.complete (this->nb) ;
       f->coarse () ;
@@ -2103,6 +2102,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
 {
   if (this->leaf ()) 
   {
+    if (!up()) return false;
     assert (_req == myrule_t :: nosplit || _req == myrule_t :: crs) ;
     myrule_t w = _req ;
     _req = myrule_t :: nosplit ;
@@ -2132,12 +2132,34 @@ template < class A >  bool TetraTop < A > :: coarse ()
     // not faces that are not leaf 
     if (x) 
     {
+      // test marking on refinement edge 
+      assert( this->nEdges() == 6 );
+      // int e = getrule()-2;  // did not work....
+      for (int e=0;e<6;++e)
+      {
+        myhedge1_t *edge = this->myhedge1(e);
+        if ( edge->down() )
+        {
+          int idx = edge->getIndex();
+          if ( !this->myGrid()->edgeCoarseningFlags_[ idx ] ) 
+            return false;
+          // we need to make sure that none of the children of this
+          // refinement edge should not be removed
+          // (we could not go up on edges during marking so we go down here)
+          if (! edge->down()->canCoarsen( this->myGrid()->edgeCoarseningFlags_ ) ) 
+          {
+            return false;
+          }
+        }
+      }
+
       this->preCoarsening () ;
       this->attachleafs();
 
       delete _inner ; 
       _inner = 0 ;
 
+#if 0
       // for bisection refinement we have to again 
       // set the face neighbours, since they have been overwritten   
       // by the refined element  
@@ -2158,6 +2180,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
           }
         }
       }
+#endif
 
       // reset refinement rule 
       _rule = myrule_t :: nosplit ;

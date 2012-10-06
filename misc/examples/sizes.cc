@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define PARALLEL
+// #define PARALLEL
 
 #define COUNT_FLOPS
 
@@ -83,7 +83,7 @@ void checkRefinements( GitterType& grid )
 
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
-void globalRefine(GitterType& grid, bool global) 
+void globalRefine(GitterType& grid, bool global,int step) 
 {
    {
      if (global)
@@ -109,10 +109,16 @@ void globalRefine(GitterType& grid, bool global)
         }
        // adapt grid 
        grid.adapt ();
+       grid.printsize () ;
      }
      else
      {
+       double t = double(step)/10.;
        double center[3] = {0.2,0.2,0.2};
+       double dir[3]    = {1.0,0.0,0.0};
+       center[0] += dir[0]*t;
+       center[1] += dir[1]*t;
+       center[2] += dir[2]*t;
        double rad=0.6;
        grid.refineBall(center,rad,10);
      }
@@ -171,16 +177,19 @@ int main (int argc, char ** argv, const char ** envp)
 {
   MPI_Init(&argc,&argv);
 
-  int mxl = 0; 
+  int mxl = 0, glb = 0; 
   const char* filename = 0 ;
   if (argc < 2) 
   {
     filename = "../macrogrids/reference.tetra";
     mxl = 1;
-    cout << "usage: "<< argv[0] << " <macro grid> <opt: level> \n";
+    glb = 1;
+    cout << "usage: "<< argv[0] << " <macro grid> <opt: level global> \n";
   }
   else 
+  {
     filename = argv[ 1 ];
+  }
 
   {
     int rank = 0;
@@ -196,6 +205,13 @@ int main (int argc, char ** argv, const char ** envp)
     }
     else 
       mxl = atoi(argv[2]);
+    if (argc < 4)
+    {
+      if( rank == 0 ) 
+        cout << "Default global refinement = "<< glb << " choosen! \n";
+    }
+    else 
+      glb = atoi(argv[3]);
 
     std::string macroname( filename );
 
@@ -218,84 +234,31 @@ int main (int argc, char ** argv, const char ** envp)
       //cout << "P[ " << rank << " ] : Grid generated! \n";
       grid.printsize(); 
       cout << "---------------------------------------------\n";
-    /*
+    
       grid.printMemUsage();
-      for (int i = 0; i < 6; ++i)
-        globalRefine(grid, true);
-     */
- 
-      //int bla; 
-      // cin >> bla;
-      for( int i = 0; i <= mxl; ++i )
+      for (int i = 0; i < glb; ++i)
+        globalRefine(grid, true,-1);
+      for (int i = 0; i < glb; ++i)
+        globalRefine(grid, false,0);
+      for( int i = 0; i < mxl; ++i )
       {
         std::ostringstream ss;
         ss << "out-" << ZeroPadNumber(i) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
-        if( i < mxl )
-          globalRefine(grid, false);
+        globalRefine(grid, false,i);
       }
-     
-#if 0
-      checkRefinements( grid );
-
-      std::ofstream file( "file.out" );
-      grid.duneBackup( file );
-      file.close();
-
-      /*
       {
-        ObjectStream os ;
-        grid.duneBackup( os );
-
-        char* buffer = ObjectStream ::allocateBuffer( os.size() );
-        os.read( buffer, os.size() );
-        
-        std::ofstream obj( "obj.out" );
-        const size_t size = os.size();
-        obj.write( (const char *) &size, sizeof( size_t ) ); 
-        obj.write( buffer, size );
-        ObjectStream :: freeBuffer( buffer );
+        std::ostringstream ss;
+        ss << "out-" << ZeroPadNumber(mxl) << ".vtu";
+        grid.tovtk(  ss.str().c_str() );
       }
-
-      globalRefine(grid, mxl);
-
+      globalCoarsening(grid,3*glb);
       {
-        size_t size = 0;
-
-        std::ifstream obj( "obj.out" );
-        obj.read( (char *) &size, sizeof( size_t ) ); 
-        char * buffer = ObjectStream ::allocateBuffer( size );
-        obj.read( buffer, size );
-        //ObjectStream :: freeBuffer( buffer );
-
-        ObjectStream is;
-        is.clear();
-        is.write( buffer, size );
-
-        {
-          ObjectStream copy( is );
-          std::ofstream obj( "check.out" );
-          const size_t size = copy.size();
-          obj.write( buffer, size );
-          //ObjectStream :: freeBuffer( buffer );
-        }
-        }*/
-
-      {
-        std::ifstream file( "file.out" );
-#ifdef PARALLEL
-        MpAccessMPI a (MPI_COMM_WORLD);
-        GitterDunePll grid2( file, a);
-#else 
-        GitterDuneImpl grid2( file );
-#endif
-        grid2.printsize();
+        std::ostringstream ss;
+        ss << "out-" << ZeroPadNumber(mxl+1) << ".vtu";
+        grid.tovtk(  ss.str().c_str() );
       }
-      //levelwalk(grid, mxl);
-      // globalCoarsening(grid, mxl);
-      //grid.printMemUsage();
-      //cin.get();
-#endif
+      return 1;
     }
   }
 

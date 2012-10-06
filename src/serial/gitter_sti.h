@@ -573,6 +573,8 @@ public :
 
     virtual void backupIndex  (ObjectStream& os ) const { backupIndexErr(); }
     virtual void restoreIndex (ObjectStream& is, RestoreInfo& ) { restoreIndexErr(); }
+
+    virtual bool canCoarsen( std::vector<bool> &edgeCoarseningFlags ) const;
   } ;
     
   class hface : public FacePllXDefault, 
@@ -687,6 +689,7 @@ public :
     virtual int segmentIndex (const int) const { return -1; }
         
     virtual bool markNonConform () = 0;
+    virtual void markEdgeCoarsening () = 0;
     // mark element for using iso8 rule 
     virtual int tagForGlobalRefinement () = 0 ;
     // mark element for coarsening 
@@ -1564,6 +1567,7 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
       virtual bool markNonConform () { return true; }
+      virtual void markEdgeCoarsening () { }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
@@ -1655,6 +1659,7 @@ public :
       virtual myrule_t requestrule () const = 0;
       virtual void request (myrule_t) = 0 ;
       virtual bool markNonConform () { return true; }
+      virtual void markEdgeCoarsening () { }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
@@ -1728,6 +1733,7 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
       virtual bool markNonConform () { return true; }
+      virtual void markEdgeCoarsening () { }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
       int resetRefinementRequest () ;
@@ -1778,6 +1784,7 @@ public :
       virtual bool isperiodic() const { return false; }
 
       virtual bool markNonConform () { return true; }
+      virtual void markEdgeCoarsening () { }
       virtual int nChild () const;
       // just returns level 
       virtual int nbLevel() const { return level(); }
@@ -1827,6 +1834,7 @@ public :
       inline hface4_GEO * subface4 (int,int) const ;
       
       virtual bool markNonConform () { return true; }
+      virtual void markEdgeCoarsening () { }
       virtual bool isboundary() const { return true; }
       virtual bool isperiodic() const { return false; }
       virtual int nChild () const;
@@ -2026,6 +2034,7 @@ protected :
   // methods for refining and coarsening
   virtual bool refine () ;
   virtual bool markNonConform () ;
+  virtual void markEdgeCoarsening () ;
   virtual void coarse () ;
 
   virtual Makrogitter & container () = 0 ;
@@ -2096,6 +2105,10 @@ protected:
   friend class LevelIterator < hbndseg_STI > ;
   friend class LevelIterator < hedge_STI > ;
   friend class LevelIterator < hface_STI > ;
+
+  public:
+  // flags to say if an edge can be coarsened during conform bisection 
+  mutable std::vector<bool> edgeCoarseningFlags_;
 } ; 
 // --endGitter
 
@@ -2820,6 +2833,18 @@ inline const Gitter :: Geometric :: hedge1 :: myvertex_t * Gitter :: Geometric :
   return i == 1 ? v1 : v0 ;
 }
 
+
+
+inline bool Gitter :: hedge :: canCoarsen( std::vector<bool> &edgeCoarseningFlags ) const
+{
+  int idx = this->getIndex();
+  if ( !edgeCoarseningFlags[ idx ] ) return false;
+  if ( this->down() ) return this->down()->canCoarsen( edgeCoarseningFlags );
+  if ( this->next() ) return this->next()->canCoarsen( edgeCoarseningFlags );
+  return true;
+}
+
+             
 // #     #                                  #####  ######
 // #     #  ######    ##     ####   ###### #     # #     #  #    #  #       ######
 // #     #  #        #  #   #    #  #            # #     #  #    #  #       #
@@ -3031,8 +3056,8 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevRear ( )
 
 inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const face3Neighbour & n)
 {
-  frontList_ = n.frontList_;
-  rearList_ = n.rearList_;
+  frontList_.clear();
+  rearList_.clear();
   _faceFront = n._faceFront;
   _faceRear = n._faceRear;
   _numFront = n._numFront;
@@ -3043,6 +3068,7 @@ inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const
 inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const face3Neighbour & n)
 {
   int ret = 0;
+  // assert(0);
 
   if( front() == null )
   {
@@ -3109,7 +3135,6 @@ inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconne
     ref ++ ;
   if (t>=0 && nb.frontList_.size()==0)
     ref ++ ;
-
   if( t < 0 )
     nb.setRear( p );
   else

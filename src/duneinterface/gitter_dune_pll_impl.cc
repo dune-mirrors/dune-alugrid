@@ -1395,8 +1395,6 @@ void GitterDunePll :: duneRestore(const char *fileName)
 }
 void GitterDunePll :: tovtk( const std::string &fn ) 
 {
-  const bool showbnd = false;
-  const bool showface = true;
   const int myrank = mpAccess ().myrank () ;
   const int nProc = mpAccess ().psize () ;
 
@@ -1405,6 +1403,8 @@ void GitterDunePll :: tovtk( const std::string &fn )
 
   // openfile
   std::ofstream vtuFile;
+  Gitter :: tovtk( ss.str() );
+#if 0
   vtuFile.open( ss.str().c_str() );
     
   // header info
@@ -1642,6 +1642,7 @@ void GitterDunePll :: tovtk( const std::string &fn )
   vtuFile << "</VTKFile>" << std::endl;
 
   vtuFile.close();
+#endif
 
   if( myrank == 0 )
   {

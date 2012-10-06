@@ -549,9 +549,9 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const alucoord_t (&cen
     }
   }
 #endif
-  return hit ?  (request (myrule_t :: bisect), 1) : (request (myrule_t :: nosplit), 0);
-  //  (level () < limit ? (request (myrule_t :: iso8), 1) 
-  //       : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
+  if (!hit) return (request (myrule_t :: crs), 1) ;
+  if (level()>limit) return (request (myrule_t :: nosplit), 0);
+  return (request (myrule_t :: bisect), 1);
 }
 
 // ######                                                           #####
