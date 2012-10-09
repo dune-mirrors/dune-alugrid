@@ -1438,9 +1438,10 @@ public :
     // und Prismen sorgf"altig bedacht werden.
     // Der Prototyp steht in 'gitter_geo.cc'.
   
-    typedef class Tetra : public helement_STI, public hasFace3, public MyAlloc {
-    protected :
-
+    typedef class Tetra 
+      : public helement_STI, public hasFace3, public MyAlloc 
+    {
+    public :
       typedef VertexGeo  myvertex_t ;
       typedef hedge1_GEO myhedge_t ;
       typedef hface3_GEO myhface_t ;
@@ -1452,6 +1453,7 @@ public :
 
       typedef pair < hasFace3 *, int > myneighbour_t ;
 
+    protected :
       inline Tetra (myhface_t *, int, myhface_t *, int, 
                     myhface_t *, int, myhface_t *, int) ;
       inline int postRefinement () ;
@@ -1537,7 +1539,7 @@ public :
                               public hasFace3, 
                               public MyAlloc 
     {
-    protected :
+    public:  
       typedef VertexGeo  myvertex_t ;
       typedef hedge1_GEO myhedge_t ;
       typedef hface3_GEO myhface_t ;
@@ -1546,7 +1548,7 @@ public :
       typedef myhface_t myhface3_t ;
 
       typedef Hface3Rule myrule_t ;
-    public:  
+
       typedef pair < hasFace3 *, int > myneighbour_t ;
       typedef pair < const hasFace3 *, int > const_myneighbour_t;
     protected:  
@@ -1612,8 +1614,10 @@ public :
     // aus dem Element herausgeschaut wird. Gegensatz zum Tetraeder.
     // Der Prototyp steht in 'gitter_geo.cc'
   
-    typedef class Hexa : public helement_STI, public hasFace4, public MyAlloc {
-    protected :
+    typedef class Hexa 
+      : public helement_STI, public hasFace4, public MyAlloc 
+    {
+    public :
       typedef VertexGeo myvertex_t ;
       typedef hedge1_GEO myhedge_t ;
       typedef hface4_GEO myhface_t ;
@@ -1624,6 +1628,7 @@ public :
       typedef HexaRule  myrule_t ;
       typedef pair < hasFace4 *, int > myneighbour_t ;
 
+    protected :
       inline Hexa (myhface_t *, int, myhface_t *, int,
                    myhface_t *, int, myhface_t *, int, 
                    myhface_t *, int, myhface_t *, int) ;
@@ -1718,7 +1723,7 @@ public :
                               public hasFace4, 
                               public MyAlloc 
     {
-    protected :
+    public:  
       typedef VertexGeo  myvertex_t ;
       typedef hedge1_GEO myhedge_t ;
       typedef hface4_GEO myhface_t ;
@@ -1727,7 +1732,7 @@ public :
       typedef myhface_t myhface4_t ;
 
       typedef Hface4Rule myrule_t ;
-    public:  
+
       typedef pair < hasFace4 *, int > myneighbour_t ;
       typedef pair < const hasFace4 *, int > const_myneighbour_t;
     protected:  
@@ -1790,7 +1795,9 @@ public :
     // auf die Randfl"ache geschaut wird. Das Vierecksrandelement hat die
     // entgegengesetzte Konvention.
   
-    typedef class hbndseg3 : public hbndseg_STI, public hasFace3, public MyAlloc {
+    typedef class hbndseg3 
+      : public hbndseg_STI, public hasFace3, public MyAlloc 
+    {
     public :
       typedef VertexGeo   myvertex_t ;
       typedef hedge1_GEO  myhedge_t ;
@@ -2127,6 +2134,10 @@ public :
 
   virtual void tovtk( const std::string &fn) ;
 protected:
+  template <class element_t, class bnd_t>
+  void tovtkImpl( const std::string &fn,
+                  const int, const element_t*, const bnd_t* ) ;
+
   template <class ostream_t>
   void backupImpl( ostream_t& );
 

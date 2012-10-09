@@ -88,25 +88,29 @@ void globalRefine(GitterType& grid, bool global,int step)
    {
      if (global)
      {
-        // get LeafIterator which iterates over all leaf elements of the grid 
-        LeafIterator < Gitter::helement_STI > w (grid) ;
+       // get LeafIterator which iterates over all leaf elements of the grid 
+       LeafIterator < Gitter::helement_STI > w (grid) ;
         
-        for (w->first () ; ! w->done () ; w->next ())
-        {
-          // mark element for refinement 
-          // w->item ().tagForGlobalRefinement ();
+       for (w->first () ; ! w->done () ; w->next ())
+       {
+         if(  w->item ().type() == tetra ) 
+         {
+           typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
+           // mark element for refinement 
+           tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
 
-          typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
-          // mark element for refinement 
-          tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+           //item->checkTetra( item, item->nChild(), true );
 
-          //item->checkTetra( item, item->nChild(), true );
-
-          typedef Gitter ::Geometric :: TetraRule  TetraRule ;
-          item->request ( TetraRule :: bisect );
-
+           typedef Gitter ::Geometric :: TetraRule  TetraRule ;
+           item->request ( TetraRule :: bisect );
+         }
+         else 
+         {
+           // mark element for refinement 
+           w->item ().tagForGlobalRefinement ();
+         }
 	        // break ;
-        }
+       }
        // adapt grid 
        grid.adapt ();
        grid.printsize () ;

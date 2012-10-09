@@ -343,10 +343,15 @@ void Gitter :: coarse()
   ++nr;
 }
 
-void Gitter :: tovtk( const std::string &fn ) 
+template <class element_t, class bndseg>
+void Gitter :: tovtkImpl( const std::string &fn,
+                          const int elementVertices,
+                          const element_t*, const bndseg* ) 
 {
   const bool showbnd = false;
   const bool showface = true;
+
+  const int nFaceVertices = ( elementVertices == 4 ) ? 3 : 4 ;
 
   // openfile
   std::ofstream vtuFile;
@@ -373,37 +378,19 @@ void Gitter :: tovtk( const std::string &fn )
   const int nBnd   = showbnd ? wbnd->size() : 0;
   const int nFaces = showface ? wface->size() : 0;
 
-  typedef Geometric :: VertexGeo VertexGeo ;
-  typedef Geometric :: tetra_GEO tetra_GEO ;
-  typedef Geometric :: hexa_GEO  hexa_GEO ;
-
-  typedef Geometric :: hbndseg3_GEO bndseg ;
-  typedef Geometric :: hface3_GEO face;
+  typedef typename element_t :: myvertex_t myvertex_t ;
+  typedef typename element_t :: myhface_t  myhface_t;
 
   // loop to find vertexList and count cells
   {
     for (w->first () ; ! w->done () ; w->next ())
     {
-      const VertexGeo* vertices[ 8 ] = {0,0,0,0,0,0,0,0};
-      int nVx = 0;
-      if( w->item().type() == tetra )
-      {
-	      tetra_GEO* item = ((tetra_GEO *) &w->item ());
-        nVx = 4;
-        for( int i=0; i< nVx; ++ i ) vertices[ i ] = item->myvertex( i );
-      }
-      else if(  w->item().type() == hexa )  
-      {
-	      hexa_GEO* item = ((hexa_GEO *) &w->item ());
-        nVx = 8;
-        for( int i=0; i< nVx; ++ i ) vertices[ i ] = item->myvertex( i );
-      }
-
+	    element_t* item = ((element_t *) &w->item ());
       // store vertices 
-      for (int i=0; i < nVx; ++i )
+      for (int i=0; i < elementVertices; ++i )
       {
         Vertex v(3);
-        const VertexGeo* vx = vertices[ i ];
+        const myvertex_t* vx = item->myvertex( i );
         assert( vx );
         const alucoord_t (&coord)[ 3 ] = vx->Point();
         // copy coordinates  
@@ -424,30 +411,34 @@ void Gitter :: tovtk( const std::string &fn )
 
     for (w->first () ; ! w->done () ; w->next ())
     {
-	    tetra_GEO* item = ((tetra_GEO *) &w->item ());
+      element_t* item = ((element_t *) &w->item ());
 	    // vtuFile << item->getIndex() << " ";
       bool ok = true;
-      for (int k=0;k<4;++k)
+      const int nFaces = item->nFaces();
+      for (int k=0; k < nFaces; ++k )
         ok &= item->myneighbour( k ).first->isRealObject();
+
       if (!ok)
       {
         std::cout << "Problem: " << item << std::endl;
-        for (int k=0;k<4;++k)
+        for (int k=0; k<nFaces; ++k)
+        {
           if (!item->myneighbour( k ).first->isRealObject())
           {
-            std::cout << item->myhface3(k) << std::endl;
-            if ( item->myhface3(k)->nb.front().first->isRealObject() )
+            std::cout << item->myhface(k) << std::endl;
+            if ( item->myhface(k)->nb.front().first->isRealObject() )
             {
-              std::cout << item->myhface3(k)->nb.front().first << std::endl;
-              std::cout << ((bndseg *) item->myhface3(k)->nb.front().first)->myhface3(0) << std::endl;
+              std::cout << item->myhface(k)->nb.front().first << std::endl;
+              std::cout << ((bndseg *) item->myhface(k)->nb.front().first)->myhface(0) << std::endl;
             }
-            if ( item->myhface3(k)->nb.rear().first->isRealObject() )
+            if ( item->myhface(k)->nb.rear().first->isRealObject() )
             {
-              std::cout << item->myhface3(k)->nb.rear().first << std::endl;
-              std::cout << ((bndseg *) item->myhface3(k)->nb.rear().first)->myhface3(0) << std::endl;
+              std::cout << item->myhface(k)->nb.rear().first << std::endl;
+              std::cout << ((bndseg *) item->myhface(k)->nb.rear().first)->myhface(0) << std::endl;
             }
             std::cout << std::endl;
           }
+        }
         std::cout << std::endl;
       }
 
@@ -461,21 +452,21 @@ void Gitter :: tovtk( const std::string &fn )
       {
 	      bndseg* item = ((bndseg *) &wbnd->item ());
         bool ok = true;
-        ok &= item->myhface3(0)->nb.front().first->isRealObject();
-        ok &= item->myhface3(0)->nb.rear().first->isRealObject();
+        ok &= item->myhface(0)->nb.front().first->isRealObject();
+        ok &= item->myhface(0)->nb.rear().first->isRealObject();
         if (!ok)
         {
-          if ( item->myhface3(0)->nb.front().first->isRealObject() )
-            assert( item->myhface3(0)->nb.front().first == item );
-          if ( item->myhface3(0)->nb.rear().first->isRealObject() )
-            assert( item->myhface3(0)->nb.rear().first == item );
+          if ( item->myhface(0)->nb.front().first->isRealObject() )
+            assert( item->myhface(0)->nb.front().first == item );
+          if ( item->myhface(0)->nb.rear().first->isRealObject() )
+            assert( item->myhface(0)->nb.rear().first == item );
           std::cout << "Problem: " << item << std::endl;
-          std::cout << item->myhface3(0) << std::endl;
-          std::cout << item->myhface3(0)->nb.front().first << std::endl;
-          std::cout << item->myhface3(0)->nb.rear().first << std::endl;
+          std::cout << item->myhface(0) << std::endl;
+          std::cout << item->myhface(0)->nb.front().first << std::endl;
+          std::cout << item->myhface(0)->nb.rear().first << std::endl;
           std::cout << std::endl;
         }
-        vtuFile << ((ok)?1:-1)*item->myhface3(0)->ref << " ";
+        vtuFile << ((ok)?1:-1)*item->myhface(0)->ref << " ";
       }
     }
 
@@ -483,7 +474,7 @@ void Gitter :: tovtk( const std::string &fn )
     {
       for (wface->first () ; ! wface->done () ; wface->next ())
       {
-	      face* item = ((face *) &wface->item ());
+	      myhface_t* item = ((myhface_t *) &wface->item ());
         bool ok = true;
         ok &= item->nb.front().first->isRealObject();
         ok &= item->nb.rear().first->isRealObject();
@@ -523,10 +514,10 @@ void Gitter :: tovtk( const std::string &fn )
 
     for (w->first () ; ! w->done () ; w->next ())
     {
-	    tetra_GEO* item = ((tetra_GEO *) &w->item ());
-	    for (int i=0;i<4;++i)
+      element_t* item = ((element_t *) &w->item ());
+	    for (int i=0; i<elementVertices; ++i)
 	    {
-	      vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
+	      vtuFile << " " << vertexList[ item->myvertex(i)->getIndex() ].first;
 	    }
     }
 
@@ -535,22 +526,24 @@ void Gitter :: tovtk( const std::string &fn )
       for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
       {
 	      bndseg* item = ((bndseg *) &wbnd->item ());
-	      for (int i=0;i<3;++i)
+	      for (int i=0; i<nFaceVertices; ++i)
 	      {
-	        vtuFile << " " << vertexList[item->myvertex(0,i)->getIndex()].first;
+	        vtuFile << " " << vertexList[ item->myvertex(0,i)->getIndex() ].first;
 	      }
       }
     }
 
     if (showface)
+    {
       for (wface->first () ; ! wface->done () ; wface->next ())
       {
-	      face* item = ((face *) &wface->item ());
-	      for (int i=0;i<3;++i)
+	      myhface_t* item = ((myhface_t *) &wface->item ());
+	      for (int i=0; i<nFaceVertices; ++i)
 	      {
-	        vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
+	        vtuFile << " " << vertexList[ item->myvertex(i)->getIndex() ].first;
 	      }
       }
+    }
     vtuFile << std::endl;
     vtuFile << "        </DataArray>" << std::endl;
 
@@ -560,15 +553,15 @@ void Gitter :: tovtk( const std::string &fn )
 
     for( int i = 0; i < nCells; ++i )
     {
-	    vtuFile << " " << (i+1)*4;
+	    vtuFile << " " << (i+1)* elementVertices;
     }
     for( int i = 0; i < nBnd; ++i )
     {
-	    vtuFile << " " << nCells*4 + (i+1)*3;
+	    vtuFile << " " << nCells* elementVertices + (i+1)* nFaceVertices;
     }
     for( int i = 0; i < nFaces; ++i )
     {
-	    vtuFile << " " << nCells*4 + nBnd*3 + (i+1)*3;
+	    vtuFile << " " << nCells*elementVertices + nBnd*nFaceVertices + (i+1)*nFaceVertices;
     }
     vtuFile << std::endl;
 
@@ -578,17 +571,21 @@ void Gitter :: tovtk( const std::string &fn )
     vtuFile << "        <DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">" << std::endl;
     vtuFile << "         ";
 
+    // 10 for tetrahedra, 12 for hexahedron  
+    const int elemId = ( elementVertices == 4 ) ? 10 : 12 ;
     for( int i = 0; i < nCells; ++i )
     {
-	    vtuFile << " " << 10; // 10 for tetrahedra
+	    vtuFile << " " << elemId ; 
     }
+    // 5 for triangle, 9 for quadrilateral 
+    const int faceId = ( nFaceVertices == 3 ) ? 5 : 9 ;
     for( int i = 0; i < nBnd; ++i )
     {
-	    vtuFile << " " << 5; // 5 for triangle
+	    vtuFile << " " << faceId; 
     }
     for( int i = 0; i < nFaces; ++i )
     {
-	    vtuFile << " " << 5; // 5 for triangle
+	    vtuFile << " " << faceId; 
     }
     vtuFile << std::endl;
 
@@ -601,6 +598,21 @@ void Gitter :: tovtk( const std::string &fn )
 
   vtuFile.close();
   std::cout << "data written to " << fn << std::endl;
+}
+
+void Gitter :: tovtk( const string& filename ) 
+{
+  typedef LeafIterator < Gitter::helement_STI > Iterator;
+  Iterator w (*this) ;
+  w->first();
+  if( ! w->done() && w->item().type() == hexa ) 
+  {
+    tovtkImpl( filename, 8, (Geometric :: hexa_GEO *) 0, (Geometric :: hbndseg4_GEO * ) 0 );
+  }
+  else 
+  {
+    tovtkImpl( filename, 4, (Geometric :: tetra_GEO *) 0, (Geometric :: tetra_GEO * ) 0 );
+  }
 }
 
 bool Gitter :: adapt () 
