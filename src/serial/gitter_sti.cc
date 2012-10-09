@@ -362,50 +362,54 @@ void Gitter :: tovtk( const std::string &fn )
   typedef std::map< int, std::pair<int,Vertex> > VertexList;
   VertexList vertexList;
 
-  int nCells = 0;
-  int nBnd = 0;
-  int nFaces = 0;
-#if 1
   typedef LeafIterator < Gitter::helement_STI > Iterator;
   Iterator w (*this) ;
   typedef LeafIterator < Gitter::hbndseg_STI > BndIterator;
   BndIterator wbnd (*this) ;
   typedef LeafIterator < Gitter::hface_STI > FaceIterator;
   FaceIterator wface (*this) ;
-#else
-  typedef LevelIterator < Gitter::helement_STI > Iterator;
-  Iterator w (*this,0) ;
-  typedef LevelIterator < Gitter::hbndseg_STI > BndIterator;
-  BndIterator wbnd (*this,0) ;
-  typedef LevelIterator < Gitter::hface_STI > FaceIterator;
-  FaceIterator wface (*this,0) ;
-#endif
-  typedef Geometric :: tetra_GEO tetra ;
+
+  const int nCells = w->size();
+  const int nBnd   = showbnd ? wbnd->size() : 0;
+  const int nFaces = showface ? wface->size() : 0;
+
+  typedef Geometric :: VertexGeo VertexGeo ;
+  typedef Geometric :: tetra_GEO tetra_GEO ;
+  typedef Geometric :: hexa_GEO  hexa_GEO ;
+
   typedef Geometric :: hbndseg3_GEO bndseg ;
   typedef Geometric :: hface3_GEO face;
+
   // loop to find vertexList and count cells
   {
     for (w->first () ; ! w->done () ; w->next ())
     {
-	    tetra* item = ((tetra *) &w->item ());
-	    for (int i=0;i<4;++i)
-	    {
-	      Vertex v(3);
-	      for (int k=0;k<3;++k) 
-	        v[k] = item->myvertex(i)->Point()[k];
-	      vertexList[ item->myvertex(i)->getIndex() ] = make_pair(-1,v);
-	    }
-	    ++nCells;
-    }
-    if (showbnd)
-    {
-      for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
-        ++nBnd;
-    }
-    if (showface)
-    {
-      for (wface->first () ; ! wface->done () ; wface->next ())
-        ++nFaces;
+      const VertexGeo* vertices[ 8 ] = {0,0,0,0,0,0,0,0};
+      int nVx = 0;
+      if( w->item().type() == tetra )
+      {
+	      tetra_GEO* item = ((tetra_GEO *) &w->item ());
+        nVx = 4;
+        for( int i=0; i< nVx; ++ i ) vertices[ i ] = item->myvertex( i );
+      }
+      else if(  w->item().type() == hexa )  
+      {
+	      hexa_GEO* item = ((hexa_GEO *) &w->item ());
+        nVx = 8;
+        for( int i=0; i< nVx; ++ i ) vertices[ i ] = item->myvertex( i );
+      }
+
+      // store vertices 
+      for (int i=0; i < nVx; ++i )
+      {
+        Vertex v(3);
+        const VertexGeo* vx = vertices[ i ];
+        assert( vx );
+        const alucoord_t (&coord)[ 3 ] = vx->Point();
+        // copy coordinates  
+        for (int k=0;k<3;++k) v[k] = coord[ k ];
+        vertexList[ vx->getIndex() ] = make_pair(-1,v);
+      }
     }
   }
 
@@ -420,7 +424,7 @@ void Gitter :: tovtk( const std::string &fn )
 
     for (w->first () ; ! w->done () ; w->next ())
     {
-	    tetra* item = ((tetra *) &w->item ());
+	    tetra_GEO* item = ((tetra_GEO *) &w->item ());
 	    // vtuFile << item->getIndex() << " ";
       bool ok = true;
       for (int k=0;k<4;++k)
@@ -452,6 +456,7 @@ void Gitter :: tovtk( const std::string &fn )
 
     vtuFile << std::endl;
     if (showbnd)
+    {
       for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
       {
 	      bndseg* item = ((bndseg *) &wbnd->item ());
@@ -472,7 +477,10 @@ void Gitter :: tovtk( const std::string &fn )
         }
         vtuFile << ((ok)?1:-1)*item->myhface3(0)->ref << " ";
       }
+    }
+
     if (showface)
+    {
       for (wface->first () ; ! wface->done () ; wface->next ())
       {
 	      face* item = ((face *) &wface->item ());
@@ -482,6 +490,7 @@ void Gitter :: tovtk( const std::string &fn )
         // assert(item->ref>0);
         vtuFile << ((ok)?1:-1)*item->ref << " ";
       }
+    }
 
     vtuFile << std::endl;
     vtuFile << "        </DataArray>" << std::endl;
@@ -514,13 +523,15 @@ void Gitter :: tovtk( const std::string &fn )
 
     for (w->first () ; ! w->done () ; w->next ())
     {
-	    tetra* item = ((tetra *) &w->item ());
+	    tetra_GEO* item = ((tetra_GEO *) &w->item ());
 	    for (int i=0;i<4;++i)
 	    {
 	      vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
 	    }
     }
+
     if (showbnd)
+    {
       for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
       {
 	      bndseg* item = ((bndseg *) &wbnd->item ());
@@ -529,6 +540,8 @@ void Gitter :: tovtk( const std::string &fn )
 	        vtuFile << " " << vertexList[item->myvertex(0,i)->getIndex()].first;
 	      }
       }
+    }
+
     if (showface)
       for (wface->first () ; ! wface->done () ; wface->next ())
       {
@@ -575,7 +588,7 @@ void Gitter :: tovtk( const std::string &fn )
     }
     for( int i = 0; i < nFaces; ++i )
     {
-	    vtuFile << " " << 5; // 5 for trianglea
+	    vtuFile << " " << 5; // 5 for triangle
     }
     vtuFile << std::endl;
 

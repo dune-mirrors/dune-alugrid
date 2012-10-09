@@ -1442,14 +1442,18 @@ public :
     protected :
 
       typedef VertexGeo  myvertex_t ;
-      typedef hedge1_GEO myhedge1_t ;
-      typedef hface3_GEO myhface3_t ;
+      typedef hedge1_GEO myhedge_t ;
+      typedef hface3_GEO myhface_t ;
+
+      typedef myhedge_t myhedge1_t ;
+      typedef myhface_t myhface3_t ;
+
       typedef TetraRule  myrule_t ;
 
       typedef pair < hasFace3 *, int > myneighbour_t ;
 
-      inline Tetra (myhface3_t *, int, myhface3_t *, int, 
-                    myhface3_t *, int, myhface3_t *, int) ;
+      inline Tetra (myhface_t *, int, myhface_t *, int, 
+                    myhface_t *, int, myhface_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
@@ -1466,12 +1470,16 @@ public :
       static const vector<int> & facesNotOnFace( const int face ) ; 
       
       inline virtual ~Tetra () ;
-      inline hface3_GEO * myhface3 (int) ;
-      inline const hface3_GEO * myhface3 (int) const ;
+      inline myhface_t* myhface (int) ;
+      inline const myhface_t* myhface (int) const ;
+
+      inline myhface_t* myhface3 ( int i ) { return myhface( i ); } // don't use these methods, use the ones without number 
+      inline const myhface_t* myhface3 ( int i ) const { return myhface( i ); } // don't use these methods, use the ones without number
+
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-      inline hedge1_GEO * myhedge1(int);
-      inline const  hedge1_GEO * myhedge1(int) const;
+      inline myhedge_t* myhedge1(int);
+      inline const  myhedge_t* myhedge1(int) const;
       inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace3 *, int > myneighbour (int) ;
@@ -1479,8 +1487,8 @@ public :
 
       // Dune extension 
       // return pair, first = pointer to face, second = twist of face
-      inline pair < hface3_GEO *, int > myintersection (int) ;
-      inline pair < const hface3_GEO *, int > myintersection (int) const;
+      inline pair < myhface_t*, int > myintersection (int) ;
+      inline pair < const myhface_t*, int > myintersection (int) const;
       
       virtual int nFaces() const { return 4; }
       virtual int nEdges() const { return 6; }
@@ -1518,7 +1526,7 @@ public :
       inline int originalVertexTwist(int, int) const;
       inline int originalEdgeTwist(int, int) const;
     private:
-      myhface3_t * f [4] ;
+      myhface_t * f [4] ;
       signed char s [4] ;
     } tetra_GEO ;
   
@@ -1531,14 +1539,18 @@ public :
     {
     protected :
       typedef VertexGeo  myvertex_t ;
-      typedef hedge1_GEO myhedge1_t ;
-      typedef hface3_GEO myhface3_t ;
+      typedef hedge1_GEO myhedge_t ;
+      typedef hface3_GEO myhface_t ;
+
+      typedef myhedge_t myhedge1_t ;
+      typedef myhface_t myhface3_t ;
+
       typedef Hface3Rule myrule_t ;
     public:  
       typedef pair < hasFace3 *, int > myneighbour_t ;
       typedef pair < const hasFace3 *, int > const_myneighbour_t;
     protected:  
-      inline Periodic3 (myhface3_t *, int, myhface3_t *, int) ;
+      inline Periodic3 (myhface_t *, int, myhface_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
 
@@ -1546,8 +1558,13 @@ public :
       using hasFace3     :: accessPllX ;
       static const int prototype [2][3] ;
       inline virtual ~Periodic3 () ;
-      inline hface3_GEO * myhface3 (int) ;
-      inline const hface3_GEO * myhface3 (int) const ;
+
+      inline myhface_t* myhface (int) ;
+      inline const myhface_t* myhface (int) const ;
+
+      inline myhface_t* myhface3 ( int i ) { return myhface( i ); } // use the ones without number 
+      inline const myhface_t* myhface3 ( int i ) const { return myhface( i ); } // use the ones without number
+
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
       inline VertexGeo * myvertex (int,int) ;
@@ -1584,7 +1601,7 @@ public :
       // return false for vertex projection  
       virtual bool hasVertexProjection() const { return false; }
     private :
-      myhface3_t * f [2] ;
+      myhface_t * f [2] ;
       signed char s [2] ;
     } periodic3_GEO ;
 
@@ -1598,14 +1615,18 @@ public :
     typedef class Hexa : public helement_STI, public hasFace4, public MyAlloc {
     protected :
       typedef VertexGeo myvertex_t ;
-      typedef hedge1_GEO myhedge1_t ;
-      typedef hface4_GEO myhface4_t ;
+      typedef hedge1_GEO myhedge_t ;
+      typedef hface4_GEO myhface_t ;
+
+      typedef myhedge_t  myhedge1_t ;
+      typedef myhface_t  myhface4_t ;
+
       typedef HexaRule  myrule_t ;
       typedef pair < hasFace4 *, int > myneighbour_t ;
 
-      inline Hexa (myhface4_t *, int, myhface4_t *, int,
-                   myhface4_t *, int, myhface4_t *, int, 
-                   myhface4_t *, int, myhface4_t *, int) ;
+      inline Hexa (myhface_t *, int, myhface_t *, int,
+                   myhface_t *, int, myhface_t *, int, 
+                   myhface_t *, int, myhface_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
 
@@ -1627,12 +1648,18 @@ public :
       static const vector<int> & facesNotOnFace( const int face ); 
 
       inline virtual ~Hexa () ;
-      inline hface4_GEO * myhface4 (int) ;
-      inline const hface4_GEO * myhface4 (int) const ;
+      inline myhface_t* myhface (int) ;
+      inline const myhface_t* myhface (int) const ;
+
+      // don't use these methods use the ones without numbers 
+      inline myhface_t* myhface4 ( int i ) { return myhface( i ); }
+      inline const myhface_t* myhface4 ( int i ) const { return myhface( i ); }
+
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-      inline hedge1_GEO * myhedge1(int);
-      inline const  hedge1_GEO * myhedge1(int) const;
+      inline myhedge_t* myhedge1(int);
+      inline const myhedge_t* myhedge1(int) const;
+
       inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace4 *, int > myneighbour (int) ;
@@ -1640,8 +1667,8 @@ public :
 
       // Dune extension
       // return pair, first = pointer to face, second = twist of face
-      inline pair < hface4_GEO *, int > myintersection (int) ;
-      inline pair < const hface4_GEO *, int > myintersection (int) const;
+      inline pair < myhface_t*, int > myintersection (int) ;
+      inline pair < const myhface_t*, int > myintersection (int) const;
       virtual int nFaces() const { return 6; }
       virtual int nEdges() const { return 12; }
 
@@ -1680,7 +1707,7 @@ public :
       inline int evalVertexTwist(int, int) const;
       inline int evalEdgeTwist(int, int) const;
     private:
-      myhface4_t * f [6] ;
+      myhface_t * f [6] ;
       signed char s [6] ;
     } hexa_GEO ;
   
@@ -1693,14 +1720,18 @@ public :
     {
     protected :
       typedef VertexGeo  myvertex_t ;
-      typedef hedge1_GEO myhedge1_t ;
-      typedef hface4_GEO myhface4_t ;
+      typedef hedge1_GEO myhedge_t ;
+      typedef hface4_GEO myhface_t ;
+
+      typedef myhedge_t myhedge1_t ;
+      typedef myhface_t myhface4_t ;
+
       typedef Hface4Rule myrule_t ;
     public:  
       typedef pair < hasFace4 *, int > myneighbour_t ;
       typedef pair < const hasFace4 *, int > const_myneighbour_t;
     protected:  
-      inline Periodic4 (myhface4_t *, int, myhface4_t *, int) ;
+      inline Periodic4 (myhface_t *, int, myhface_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
 
@@ -1708,8 +1739,11 @@ public :
       using hasFace4     :: accessPllX ;
       static const int prototype [2][4] ;
       inline virtual ~Periodic4 () ;
-      inline hface4_GEO * myhface4 (int) ;
-      inline const hface4_GEO * myhface4 (int) const ;
+      inline myhface_t* myhface (int) ;
+      inline const myhface_t* myhface (int) const ;
+      inline myhface_t* myhface4 ( int i ) { return myhface( i ); }
+      inline const myhface_t* myhface4 ( int i ) const { return myhface( i ); }
+
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
       inline VertexGeo * myvertex (int,int) ;
@@ -1746,7 +1780,7 @@ public :
       // returns false because only bnd segments have projections 
       virtual bool hasVertexProjection () const { return false; }
     private :
-      myhface4_t * f [2] ;
+      myhface_t * f [2] ;
       signed char s [2] ;
     } periodic4_GEO ;
 
@@ -1759,14 +1793,15 @@ public :
     typedef class hbndseg3 : public hbndseg_STI, public hasFace3, public MyAlloc {
     public :
       typedef VertexGeo   myvertex_t ;
-      typedef hedge1_GEO  myhedge1_t ;
-      typedef hface3_GEO  myhface3_t ;
+      typedef hedge1_GEO  myhedge_t ;
       typedef hface3_GEO  myhface_t ;
+      typedef myhedge_t   myhedge1_t ;
+      typedef myhface_t   myhface3_t ;
       typedef Hface3Rule  myrule_t ;
       
       typedef hbndseg_STI :: bnd_t bnd_t;
     protected :
-      inline hbndseg3 (myhface3_t *,int) ;
+      inline hbndseg3 (myhface_t *,int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
@@ -1776,7 +1811,8 @@ public :
       inline myrule_t getrule () const ;
       virtual bool refineLikeElement (balrule_t) = 0 ;
       inline myvertex_t * myvertex (int,int) const ;
-      inline myhface3_t * myhface3 (int) const ;
+      inline myhface_t * myhface3 ( int i ) const { return myhface( i ); } // use the method without number 
+      inline myhface_t * myhface (int) const ;
       inline int twist (int) const ;
       inline hface3_GEO * subface3 (int,int) const ;
       
@@ -1803,7 +1839,7 @@ public :
       ProjectVertex* projection() { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
 
     private:
-      myhface3_t * _face ;
+      myhface_t * _face ;
       int _twist ;
     public:  
     } hbndseg3_GEO ;
@@ -1812,14 +1848,17 @@ public :
     typedef class hbndseg4 : public hbndseg_STI, public hasFace4, public MyAlloc {
     public :
       typedef VertexGeo myvertex_t ;
-      typedef hedge1_GEO  myhedge1_t ;
-      typedef hface4_GEO  myhface4_t ;
+      typedef hedge1_GEO  myhedge_t ;
       typedef hface4_GEO  myhface_t ;
+
+      typedef myhedge_t   myhedge1_t ;
+      typedef myhface_t   myhface4_t
+        ;
       typedef Hface4Rule  myrule_t ;
 
       typedef hbndseg_STI :: bnd_t bnd_t;
     protected :
-      inline hbndseg4 (myhface4_t *,int) ;
+      inline hbndseg4 (myhface_t *,int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
       inline bool lockedAgainstCoarsening () const { return false ; }
@@ -1829,7 +1868,8 @@ public :
       inline myrule_t getrule () const ;
       virtual bool refineLikeElement (balrule_t) = 0 ;
       inline myvertex_t * myvertex (int,int) const ;
-      inline myhface4_t * myhface4 (int) const ;
+      inline myhface_t * myhface (int) const ;
+      inline myhface_t * myhface4 ( int i ) const { return myhface( i ); }
       inline int twist (int) const ;
       inline hface4_GEO * subface4 (int,int) const ;
       
@@ -1850,7 +1890,7 @@ public :
       ProjectVertex* projection() { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
 
     private:
-      myhface4_t * _face ;
+      myhface_t * _face ;
       int _twist ;
 
     public:   
@@ -2555,7 +2595,7 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: Tetra* tetr
     {
       s << "T-Face " << i << " (tw = " << tetra->twist( i ) << ") ";
       for(int j=0; j<3; ++j)
-        s << tetra->myhface3( i )->myvertex( j ) << " " ;
+        s << tetra->myhface( i )->myvertex( j ) << " " ;
       s << endl;
     }
     s << endl;
@@ -3497,8 +3537,8 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: TetraRul
 //    #     ######     #    #    #  #    #
 
 inline Gitter :: Geometric :: Tetra :: 
-Tetra (myhface3_t * f0, int t0, myhface3_t * f1, int t1, 
-       myhface3_t * f2, int t2, myhface3_t * f3, int t3) 
+Tetra (myhface_t * f0, int t0, myhface_t * f1, int t1, 
+       myhface_t * f2, int t2, myhface_t * f3, int t3) 
 {
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
@@ -3520,12 +3560,12 @@ inline int Gitter :: Geometric :: Tetra :: twist (int i) const {
   return s [i] ; 
 }
 
-inline Gitter :: Geometric :: Tetra :: myhface3_t * Gitter :: Geometric :: Tetra :: myhface3 (int i) {
+inline Gitter :: Geometric :: Tetra :: myhface_t * Gitter :: Geometric :: Tetra :: myhface (int i) {
   assert (i < 4) ;
   return f [i] ;
 }
 
-inline const Gitter :: Geometric :: Tetra :: myhface3_t * Gitter :: Geometric :: Tetra :: myhface3 (int i) const {
+inline const Gitter :: Geometric :: Tetra :: myhface_t * Gitter :: Geometric :: Tetra :: myhface (int i) const {
   assert (i < 4) ;
   return f [i] ;
 }
@@ -3571,7 +3611,7 @@ inline Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric :: Tetra
 
   typedef Gitter::Geometric::Tetra ThisType;
 
-  return myhface3(ThisType::edgeMap[edge][0])->
+  return myhface(ThisType::edgeMap[edge][0])->
     myhedge1(evalEdgeTwist(ThisType::edgeMap[edge][0],ThisType::edgeMap[edge][1]));
 }
 
@@ -3581,17 +3621,17 @@ inline const Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric ::
 
   typedef Gitter::Geometric::Tetra ThisType;
 
-  return myhface3(ThisType::edgeMap[edge][0])->
+  return myhface(ThisType::edgeMap[edge][0])->
     myhedge1(evalEdgeTwist(ThisType::edgeMap[edge][0],ThisType::edgeMap[edge][1]));
 
 }
 
 inline Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i, int j) {
-  return myhface3(i)->myvertex(evalVertexTwist(i, j));
+  return myhface(i)->myvertex(evalVertexTwist(i, j));
 }
 
 inline const Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric :: Tetra :: myvertex (int i, int j) const {
-  return myhface3(i)->myvertex(evalVertexTwist(i, j));
+  return myhface(i)->myvertex(evalVertexTwist(i, j));
 }
 
 //- --tetramyvertex
@@ -3607,24 +3647,24 @@ inline const Gitter :: Geometric :: Tetra :: myvertex_t * Gitter :: Geometric ::
 
 inline pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Tetra :: myneighbour (int i) 
 {
-  return twist (i) < 0 ? myhface3 (i)->nb.front () : myhface3 (i)->nb.rear ();
+  return twist (i) < 0 ? myhface( i )->nb.front () : myhface( i )->nb.rear ();
 }
 
 inline pair < const Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Tetra :: myneighbour (int i) const {
-  return twist (i) < 0 ? pair < const hasFace3 *, int > (myhface3 (i)->nb.front ().first, myhface3 (i)->nb.front ().second)
-    : pair < const hasFace3 *, int > (myhface3 (i)->nb.rear ().first, myhface3 (i)->nb.rear ().second) ;
+  return twist (i) < 0 ? pair < const hasFace3 *, int > (myhface( i )->nb.front ().first, myhface( i )->nb.front ().second)
+    : pair < const hasFace3 *, int > (myhface( i )->nb.rear ().first, myhface( i )->nb.rear ().second) ;
 }
 
 inline pair < Gitter :: Geometric :: hface3_GEO *, int > Gitter :: Geometric :: Tetra :: myintersection (int i) 
 {
   // return pair, first = pointer to face, second = twist of face
-  return pair< Gitter::Geometric::hface3_GEO *,int> (myhface3 (i) ,twist (i));
+  return pair< Gitter::Geometric::hface3_GEO *,int> (myhface( i ) ,twist (i));
 }
 
 inline pair < const Gitter :: Geometric :: hface3_GEO *, int > Gitter :: Geometric :: Tetra :: myintersection (int i) const
 {
   // return pair, first = pointer to face, second = twist of face
-  return  pair< const Gitter::Geometric::hface3_GEO * , int > (myhface3 (i) , twist (i) );
+  return  pair< const Gitter::Geometric::hface3_GEO * , int > (myhface( i ) , twist (i) );
 }
 
 inline int Gitter :: Geometric :: Tetra :: postRefinement () {
@@ -3644,7 +3684,7 @@ inline int Gitter :: Geometric :: Tetra :: preCoarsening () {
 // #        ######  #    #     #     ####   #####      #     ####   #####
 
 inline Gitter :: Geometric :: Periodic3 :: 
-Periodic3 (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
+Periodic3 (myhface_t * f0, int t0, myhface_t * f1, int t1) 
 {
   (f [0] = f0)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1)) ;
@@ -3662,23 +3702,23 @@ inline int Gitter :: Geometric :: Periodic3 :: twist (int i) const {
   return s [i] ; 
 }
 
-inline Gitter :: Geometric :: Periodic3 :: myhface3_t * Gitter :: Geometric :: Periodic3 :: myhface3 (int i) {
+inline Gitter :: Geometric :: Periodic3 :: myhface_t * Gitter :: Geometric :: Periodic3 :: myhface (int i) {
   assert (0 <= i && i < 2) ;
   return f [i] ;
 }
 
-inline const Gitter :: Geometric :: Periodic3 :: myhface3_t * Gitter :: Geometric :: Periodic3 :: myhface3 (int i) const {
+inline const Gitter :: Geometric :: Periodic3 :: myhface_t * Gitter :: Geometric :: Periodic3 :: myhface (int i) const {
   assert (0 <= i && i < 2) ;
   return f [i] ;
 }
 
 inline Gitter :: Geometric :: Periodic3 :: myvertex_t * Gitter :: Geometric :: Periodic3 :: myvertex (int i, int j) {
   assert (0 <= i && i < 2) ;
-  return (twist(i) < 0) ? myhface3(i)->myvertex((7 - j + twist(i)) % 3) : myhface3(i)->myvertex((j + twist(i)) % 3) ;
+  return (twist(i) < 0) ? myhface( i )->myvertex((7 - j + twist(i)) % 3) : myhface( i )->myvertex((j + twist(i)) % 3) ;
 }
 
 inline const Gitter :: Geometric :: Periodic3 :: myvertex_t * Gitter :: Geometric :: Periodic3 :: myvertex (int i, int j) const {
-  return (twist(i) < 0) ? myhface3(i)->myvertex((7 - j + twist(i)) % 3) : myhface3(i)->myvertex((j + twist(i)) % 3) ;
+  return (twist(i) < 0) ? myhface( i )->myvertex((7 - j + twist(i)) % 3) : myhface( i )->myvertex((j + twist(i)) % 3) ;
 }
 
 inline Gitter :: Geometric :: Periodic3 :: myvertex_t * Gitter :: Geometric :: Periodic3 :: myvertex (int i) {
@@ -3700,13 +3740,13 @@ inline const Gitter :: Geometric :: Periodic3 :: myvertex_t * Gitter :: Geometri
 
 inline pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Periodic3 :: myneighbour (int i) {
   assert (0 <= i && i < 2) ;
-  return twist (i) < 0 ? myhface3 (i)->nb.front () : myhface3 (i)->nb.rear () ;
+  return twist (i) < 0 ? myhface( i )->nb.front () : myhface( i )->nb.rear () ;
 }
 
 inline pair < const Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: Periodic3 :: myneighbour (int i) const {
   assert (0 <= i && i < 2) ;
-  return twist (i) < 0 ? pair < const hasFace3 *, int > (myhface3 (i)->nb.front ().first, myhface3 (i)->nb.front ().second)
-    : pair < const hasFace3 *, int > (myhface3 (i)->nb.rear ().first, myhface3 (i)->nb.rear ().second) ;
+  return twist (i) < 0 ? pair < const hasFace3 *, int > (myhface( i )->nb.front ().first, myhface( i )->nb.front ().second)
+    : pair < const hasFace3 *, int > (myhface( i )->nb.rear ().first, myhface( i )->nb.rear ().second) ;
 }
 
 inline int Gitter :: Geometric :: Periodic3 :: postRefinement () {
@@ -3728,7 +3768,7 @@ inline int Gitter :: Geometric :: Periodic3 :: preCoarsening () {
 // #        ######  #    #     #     ####   #####      #     ####       #
 
 inline Gitter :: Geometric :: Periodic4 :: 
-Periodic4 (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
+Periodic4 (myhface_t * f0, int t0, myhface_t * f1, int t1) 
 {
   (f [0] = f0)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1)) ;
@@ -3746,24 +3786,24 @@ inline int Gitter :: Geometric :: Periodic4 :: twist (int i) const {
   return s [i] ; 
 }
 
-inline Gitter :: Geometric :: Periodic4 :: myhface4_t * Gitter :: Geometric :: Periodic4 :: myhface4 (int i) {
+inline Gitter :: Geometric :: Periodic4 :: myhface_t * Gitter :: Geometric :: Periodic4 :: myhface (int i) {
   assert (0 <= i && i < 2) ;
   return f [i] ;
 }
 
-inline const Gitter :: Geometric :: Periodic4 :: myhface4_t * Gitter :: Geometric :: Periodic4 :: myhface4 (int i) const {
+inline const Gitter :: Geometric :: Periodic4 :: myhface_t * Gitter :: Geometric :: Periodic4 :: myhface (int i) const {
   assert (0 <= i && i < 2) ;
   return f [i] ;
 }
 
 inline Gitter :: Geometric :: Periodic4 :: myvertex_t * Gitter :: Geometric :: Periodic4 :: myvertex (int i, int j) {
   assert (0 <= i && i < 2) ;
-  return (twist(i) < 0) ? myhface4(i)->myvertex((9 - j + twist(i)) % 4) : myhface4(i)->myvertex((j + twist(i)) % 4) ;
+  return (twist(i) < 0) ? myhface(i)->myvertex((9 - j + twist(i)) % 4) : myhface(i)->myvertex((j + twist(i)) % 4) ;
 }
 
 inline const Gitter :: Geometric :: Periodic4 :: myvertex_t * Gitter :: Geometric :: Periodic4 :: myvertex (int i, int j) const {
   assert (0 <= i && i < 2) ;
-  return (twist(i) < 0) ? myhface4(i)->myvertex((9 - j + twist(i)) % 4) : myhface4(i)->myvertex((j + twist(i)) % 4) ;
+  return (twist(i) < 0) ? myhface(i)->myvertex((9 - j + twist(i)) % 4) : myhface(i)->myvertex((j + twist(i)) % 4) ;
 }
 
 inline Gitter :: Geometric :: Periodic4 :: myvertex_t * Gitter :: Geometric :: Periodic4 :: myvertex (int i) { // ok
@@ -3778,13 +3818,13 @@ inline const Gitter :: Geometric :: Periodic4 :: myvertex_t * Gitter :: Geometri
 
 inline pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Periodic4 :: myneighbour (int i) {
   assert (0 <= i && i < 2) ;
-  return twist (i) < 0 ? myhface4 (i)->nb.front () : myhface4 (i)->nb.rear () ;
+  return twist (i) < 0 ? myhface( i )->nb.front () : myhface( i )->nb.rear () ;
 }
 
 inline pair < const Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Periodic4 :: myneighbour (int i) const {
   assert (0 <= i && i < 2) ;
-  return twist (i) < 0 ? pair < const hasFace4 *, int > (myhface4 (i)->nb.front ().first, myhface4 (i)->nb.front ().second)
-    : pair < const hasFace4 *, int > (myhface4 (i)->nb.rear ().first, myhface4 (i)->nb.rear ().second) ;
+  return twist (i) < 0 ? pair < const hasFace4 *, int > (myhface( i )->nb.front ().first, myhface( i )->nb.front ().second)
+    : pair < const hasFace4 *, int > (myhface( i )->nb.rear ().first, myhface( i )->nb.rear ().second) ;
 }
 
 inline int Gitter :: Geometric :: Periodic4 :: postRefinement () {
@@ -3860,9 +3900,9 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: HexaRule
 // #     #  ######  #    #  #    #
 
 inline Gitter :: Geometric :: Hexa :: 
-Hexa (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
-      myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
-      myhface4_t * f4, int t4, myhface4_t * f5, int t5) 
+Hexa (myhface_t * f0, int t0, myhface_t * f1, int t1,
+      myhface_t * f2, int t2, myhface_t * f3, int t3, 
+      myhface_t * f4, int t4, myhface_t * f5, int t5) 
 {
   (f [0] = f0)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0)) ;
   (f [1] = f1)->attachElement (pair < hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1)) ;
@@ -3888,24 +3928,24 @@ inline int Gitter :: Geometric :: Hexa :: twist (int i) const {
   return s [i] ; 
 }
 
-inline Gitter :: Geometric :: Hexa :: myhface4_t * Gitter :: Geometric :: Hexa :: myhface4 (int i) {
+inline Gitter :: Geometric :: Hexa :: myhface_t * Gitter :: Geometric :: Hexa :: myhface (int i) {
   assert (i < 6) ;
   return f [i] ;
 }
 
-inline const Gitter :: Geometric :: Hexa :: myhface4_t * Gitter :: Geometric :: Hexa :: myhface4 (int i) const {
+inline const Gitter :: Geometric :: Hexa :: myhface_t * Gitter :: Geometric :: Hexa :: myhface (int i) const {
   assert (i < 6) ;
   return f [i] ;
 }
 
 inline Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: Hexa :: myvertex (int i, int j) 
 {
-  return myhface4(i)->myvertex(evalVertexTwist(i, j));
+  return myhface(i)->myvertex(evalVertexTwist(i, j));
 }
 
 inline const Gitter :: Geometric :: Hexa :: myvertex_t * Gitter :: Geometric :: Hexa :: myvertex (int i, int j) const 
 {
-  return myhface4(i)->myvertex(evalVertexTwist(i, j));
+  return myhface(i)->myvertex(evalVertexTwist(i, j));
 }
 
 inline Gitter :: Geometric :: Hexa :: myvertex_t * 
@@ -3926,7 +3966,7 @@ inline Gitter :: Geometric :: Hexa :: myhedge1_t * Gitter :: Geometric :: Hexa :
   assert (0 <= i && i < 12);
 
   typedef Gitter::Geometric::Hexa MyType;
-  return myhface4(MyType::edgeMap[i][0])->
+  return myhface(MyType::edgeMap[i][0])->
     myhedge1(evalEdgeTwist(MyType::edgeMap[i][0], MyType::edgeMap[i][1]));
 }
 
@@ -3934,27 +3974,27 @@ inline const Gitter :: Geometric :: Hexa :: myhedge1_t * Gitter :: Geometric :: 
   assert (0 <= i && i < 12);
 
   typedef Gitter::Geometric::Hexa MyType;
-  return myhface4(MyType::edgeMap[i][0])->
+  return myhface(MyType::edgeMap[i][0])->
     myhedge1(evalEdgeTwist(MyType::edgeMap[i][0], MyType::edgeMap[i][1]));
 }
 
 inline pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Hexa :: myneighbour (int i) {
-  return twist (i) < 0 ? myhface4 (i)->nb.front () : myhface4 (i)->nb.rear () ;
+  return twist (i) < 0 ? myhface( i )->nb.front () : myhface( i )->nb.rear () ;
 }
 
 inline pair < const Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Hexa :: myneighbour (int i) const {
-  return twist (i) < 0 ? pair < const hasFace4 *, int > (myhface4 (i)->nb.front ().first, myhface4 (i)->nb.front ().second)
-    : pair < const hasFace4 *, int > (myhface4 (i)->nb.rear ().first, myhface4 (i)->nb.rear ().second) ;
+  return twist (i) < 0 ? pair < const hasFace4 *, int > (myhface( i )->nb.front ().first, myhface( i )->nb.front ().second)
+    : pair < const hasFace4 *, int > (myhface( i )->nb.rear ().first, myhface( i )->nb.rear ().second) ;
 }
 
 inline pair<Gitter::Geometric::hface4_GEO*, int> 
 Gitter::Geometric::Hexa::myintersection(int i) {
-  return make_pair(myhface4(i), twist(i));
+  return make_pair(myhface(i), twist(i));
 }
 
 inline pair<const Gitter::Geometric::hface4_GEO*, int> 
 Gitter::Geometric::Hexa::myintersection(int i) const {
-  return make_pair(myhface4(i), twist(i));
+  return make_pair(myhface(i), twist(i));
 }
 
 inline int Gitter :: Geometric :: Hexa :: postRefinement () {
@@ -4006,7 +4046,7 @@ inline int Gitter :: Geometric :: Hexa :: originalEdgeTwist (int face, int edge)
 // #     #  #####   #    #  #####    ####   ######   ####   #####
 
 inline Gitter :: Geometric :: hbndseg3 :: 
-hbndseg3 (myhface3_t * a, int b) 
+hbndseg3 (myhface_t * a, int b) 
   : _face( a ), 
     _twist (b)
 {
@@ -4023,7 +4063,7 @@ inline void Gitter :: Geometric :: hbndseg3 :: attachleafs ()
 {
   this->addleaf();
   
-  myhface3_t & face = *(myhface3(0));
+  myhface_t & face = *(myhface(0));
   face.addleaf();
   for (int i=0; i<3; ++i) 
   {
@@ -4036,7 +4076,7 @@ inline void Gitter :: Geometric :: hbndseg3 :: detachleafs ()
 {
   this->removeleaf();
 
-  myhface3_t & face = *(myhface3(0));
+  myhface_t & face = *(myhface(0));
   face.removeleaf();
   for (int i=0; i<3; ++i) 
   {
@@ -4050,7 +4090,7 @@ inline int Gitter :: Geometric :: hbndseg3 :: postRefinement ()
   ProjectVertexPair pv( projection(), segmentIndex() );
   if ( pv.first ) 
   {
-    myhface3(0)->projectVertex( pv );
+    myhface(0)->projectVertex( pv );
   }
   return 0 ;
 }
@@ -4065,21 +4105,21 @@ inline int Gitter :: Geometric :: hbndseg3 :: twist (int i) const {
   return _twist ;
 }
 
-inline Gitter :: Geometric :: hbndseg3 :: myhface3_t * Gitter :: Geometric :: hbndseg3 :: myhface3 (int i) const {
+inline Gitter :: Geometric :: hbndseg3 :: myhface_t * Gitter :: Geometric :: hbndseg3 :: myhface (int i) const {
   assert (i == 0) ;
   return _face ;
 }
 
 inline Gitter :: Geometric :: hbndseg3 :: myvertex_t * Gitter :: Geometric :: hbndseg3 :: myvertex (int,int j) const {
-  return (twist (0) < 0) ? myhface3 (0)->myvertex ((7 - j + twist (0)) % 3) : myhface3 (0)->myvertex ((j + twist (0)) % 3) ;
+  return (twist (0) < 0) ? myhface(0)->myvertex ((7 - j + twist (0)) % 3) : myhface(0)->myvertex ((j + twist (0)) % 3) ;
 }
 
-inline Gitter :: Geometric :: hbndseg3 :: myhface3_t * Gitter :: Geometric :: hbndseg3 :: subface3 (int,int i) const {
-  return myhface3 (0)->subface3 (i) ;
+inline Gitter :: Geometric :: hbndseg3 :: myhface_t * Gitter :: Geometric :: hbndseg3 :: subface3 (int,int i) const {
+  return myhface(0)->subface3 (i) ;
 }
 
 inline Gitter :: Geometric :: hbndseg3 :: myrule_t Gitter :: Geometric :: hbndseg3 :: getrule () const {
-  return myhface3 (0)->getrule () ;
+  return myhface(0)->getrule () ;
 }
 
 inline int Gitter :: Geometric :: hbndseg3 :: nChild () const {
@@ -4096,7 +4136,7 @@ inline int Gitter :: Geometric :: hbndseg3 :: nChild () const {
 // #     #  #    #  #   ##  #    #  #    #  #       #    #      #
 // #     #  #####   #    #  #####    ####   ######   ####       #
 
-inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface4_t * a, int b) 
+inline Gitter :: Geometric :: hbndseg4 :: hbndseg4 (myhface_t * a, int b) 
   : _face( a ),
     _twist (b) 
 {
@@ -4114,7 +4154,7 @@ inline void Gitter :: Geometric :: hbndseg4 :: attachleafs ()
   assert(this->leafRefCount()==0);
   this->addleaf();
   
-  hface4_GEO & face = *(myhface4(0));
+  myhface_t& face = *(myhface(0));
   face.addleaf();
   for (int i=0; i<4; ++i) 
   {
@@ -4128,7 +4168,7 @@ inline void Gitter :: Geometric :: hbndseg4 :: detachleafs ()
   assert(this->leafRefCount()==1);
   this->removeleaf();
 
-  hface4_GEO & face = *(myhface4(0));
+  myhface_t& face = *(myhface(0));
   face.removeleaf();
   for (int i=0; i<4; ++i) 
   {
@@ -4142,7 +4182,7 @@ inline int Gitter :: Geometric :: hbndseg4 :: postRefinement ()
   ProjectVertexPair pv( projection(), segmentIndex() );
   if( pv.first )
   {
-    myhface4(0)->projectVertex( pv );
+    myhface(0)->projectVertex( pv );
   }
   return 0 ;
 }
@@ -4158,21 +4198,21 @@ inline int Gitter :: Geometric :: hbndseg4 :: twist (int i) const
   return _twist ;
 }
 
-inline Gitter :: Geometric :: hbndseg4 :: myhface4_t * Gitter :: Geometric :: hbndseg4 :: myhface4 (int i) const {
+inline Gitter :: Geometric :: hbndseg4 :: myhface_t * Gitter :: Geometric :: hbndseg4 :: myhface (int i) const {
   assert (i == 0) ;
   return _face ;
 }
 
 inline Gitter :: Geometric :: hbndseg4 :: myvertex_t * Gitter :: Geometric :: hbndseg4 :: myvertex (int,int j) const {
-  return (twist (0) < 0) ? myhface4 (0)->myvertex ((9 - j + twist (0)) % 4) : myhface4 (0)->myvertex ((j + twist (0)) % 4) ;
+  return (twist (0) < 0) ? myhface(0)->myvertex ((9 - j + twist (0)) % 4) : myhface(0)->myvertex ((j + twist (0)) % 4) ;
 }
 
-inline Gitter :: Geometric :: hbndseg4 :: myhface4_t * Gitter :: Geometric :: hbndseg4 :: subface4 (int,int i) const {
-  return myhface4 (0)->subface4 (i) ;
+inline Gitter :: Geometric :: hbndseg4 :: myhface_t * Gitter :: Geometric :: hbndseg4 :: subface4 (int,int i) const {
+  return myhface(0)->subface4 (i) ;
 }
 
 inline Gitter :: Geometric :: hbndseg4 :: myrule_t Gitter :: Geometric :: hbndseg4 :: getrule () const {
-  return myhface4 (0)->getrule () ;
+  return myhface(0)->getrule () ;
 }
 
 inline int Gitter :: Geometric :: hbndseg4 :: nChild () const {
