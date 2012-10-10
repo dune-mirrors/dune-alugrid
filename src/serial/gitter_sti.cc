@@ -312,13 +312,22 @@ bool Gitter :: markNonConform()
 {
   bool x = true ;
   leaf_element__macro_element__iterator i (container ()) ;
-  // std::cout << "check non conform refinement" << std::endl;
   for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
   return x;
+}
+void Gitter :: markEdgeCoarsening () 
+{
+  edgeCoarseningFlags_.assign( indexManagerStorage().get(2).getMaxIndex(), true );
+  leaf_element__macro_element__iterator i (container ()) ;
+  for( i.first(); ! i.done() ; i.next() ) 
+  {
+    i.item().markEdgeCoarsening();
+  }
 }
 
 void Gitter :: coarse() 
 {
+  markEdgeCoarsening();
   assert (debugOption (20) ? (cout << "**INFO Gitter :: coarse ()" << endl, 1) : 1) ;
   {
     AccessIterator < helement_STI > :: Handle i (container ()) ;
@@ -327,10 +336,23 @@ void Gitter :: coarse()
       i.item ().coarse () ; 
     }
   }
+  std::ostringstream ss;
+  int filenr = adaptstep*100+nr;
+  ss << "crs-" << ZeroPadNumber(filenr) << ".vtu";
+  tovtk(  ss.str() );
+  ++nr;
 }
 
-void Gitter :: tovtk( const std::string &fn ) 
+template <class element_t, class bndseg>
+void Gitter :: tovtkImpl( const std::string &fn,
+                          const int elementVertices,
+                          const element_t*, const bndseg* ) 
 {
+  const bool showbnd = false;
+  const bool showface = true;
+
+  const int nFaceVertices = ( elementVertices == 4 ) ? 3 : 4 ;
+
   // openfile
   std::ofstream vtuFile;
   vtuFile.open( fn.c_str() );
@@ -345,31 +367,41 @@ void Gitter :: tovtk( const std::string &fn )
   typedef std::map< int, std::pair<int,Vertex> > VertexList;
   VertexList vertexList;
 
-  int nCells = 0;
-
-  typedef Gitter :: Geometric :: tetra_GEO tetra_GEO ;
   typedef LeafIterator < Gitter::helement_STI > Iterator;
-  // typedef LevelIterator < Gitter::helement_STI > Iterator;
   Iterator w (*this) ;
+  typedef LeafIterator < Gitter::hbndseg_STI > BndIterator;
+  BndIterator wbnd (*this) ;
+  typedef LeafIterator < Gitter::hface_STI > FaceIterator;
+  FaceIterator wface (*this) ;
+
+  const int nCells = w->size();
+  const int nBnd   = showbnd ? wbnd->size() : 0;
+  const int nFaces = showface ? wface->size() : 0;
+
+  typedef typename element_t :: myvertex_t myvertex_t ;
+  typedef typename element_t :: myhface_t  myhface_t;
 
   // loop to find vertexList and count cells
   {
     for (w->first () ; ! w->done () ; w->next ())
     {
-      tetra_GEO* item = ((tetra_GEO *) &w->item ());
-      for (int i=0;i<4;++i)
+	    element_t* item = ((element_t *) &w->item ());
+      // store vertices 
+      for (int i=0; i < elementVertices; ++i )
       {
         Vertex v(3);
-        for (int k=0;k<3;++k) 
-          v[k] = item->myvertex(i)->Point()[k];
-        vertexList[ item->myvertex(i)->getIndex() ] = make_pair(-1,v);
+        const myvertex_t* vx = item->myvertex( i );
+        assert( vx );
+        const alucoord_t (&coord)[ 3 ] = vx->Point();
+        // copy coordinates  
+        for (int k=0;k<3;++k) v[k] = coord[ k ];
+        vertexList[ vx->getIndex() ] = make_pair(-1,v);
       }
-      ++nCells;
     }
   }
 
   vtuFile << "    <Piece NumberOfPoints=\"" << vertexList.size() << "\" "
-          << "NumberOfCells=\"" << nCells << "\">" << std::endl;
+	        << "NumberOfCells=\"" << nCells+nBnd+nFaces << "\">" << std::endl;
 
   // cell data
   {
@@ -379,7 +411,76 @@ void Gitter :: tovtk( const std::string &fn )
 
     for (w->first () ; ! w->done () ; w->next ())
     {
-      vtuFile << w->item ().getIndex() << " ";
+      element_t* item = ((element_t *) &w->item ());
+	    // vtuFile << item->getIndex() << " ";
+      bool ok = true;
+      const int nFaces = item->nFaces();
+      for (int k=0; k < nFaces; ++k )
+        ok &= item->myneighbour( k ).first->isRealObject();
+
+      if (!ok)
+      {
+        std::cout << "Problem: " << item << std::endl;
+        for (int k=0; k<nFaces; ++k)
+        {
+          if (!item->myneighbour( k ).first->isRealObject())
+          {
+            std::cout << item->myhface(k) << std::endl;
+            if ( item->myhface(k)->nb.front().first->isRealObject() )
+            {
+              std::cout << item->myhface(k)->nb.front().first << std::endl;
+              std::cout << ((bndseg *) item->myhface(k)->nb.front().first)->myhface(0) << std::endl;
+            }
+            if ( item->myhface(k)->nb.rear().first->isRealObject() )
+            {
+              std::cout << item->myhface(k)->nb.rear().first << std::endl;
+              std::cout << ((bndseg *) item->myhface(k)->nb.rear().first)->myhface(0) << std::endl;
+            }
+            std::cout << std::endl;
+          }
+        }
+        std::cout << std::endl;
+      }
+
+      vtuFile << ((ok)?1:-1) << " ";
+    }
+
+    vtuFile << std::endl;
+    if (showbnd)
+    {
+      for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
+      {
+	      bndseg* item = ((bndseg *) &wbnd->item ());
+        bool ok = true;
+        ok &= item->myhface(0)->nb.front().first->isRealObject();
+        ok &= item->myhface(0)->nb.rear().first->isRealObject();
+        if (!ok)
+        {
+          if ( item->myhface(0)->nb.front().first->isRealObject() )
+            assert( item->myhface(0)->nb.front().first == item );
+          if ( item->myhface(0)->nb.rear().first->isRealObject() )
+            assert( item->myhface(0)->nb.rear().first == item );
+          std::cout << "Problem: " << item << std::endl;
+          std::cout << item->myhface(0) << std::endl;
+          std::cout << item->myhface(0)->nb.front().first << std::endl;
+          std::cout << item->myhface(0)->nb.rear().first << std::endl;
+          std::cout << std::endl;
+        }
+        vtuFile << ((ok)?1:-1)*item->myhface(0)->ref << " ";
+      }
+    }
+
+    if (showface)
+    {
+      for (wface->first () ; ! wface->done () ; wface->next ())
+      {
+	      myhface_t* item = ((myhface_t *) &wface->item ());
+        bool ok = true;
+        ok &= item->nb.front().first->isRealObject();
+        ok &= item->nb.rear().first->isRealObject();
+        // assert(item->ref>0);
+        vtuFile << ((ok)?1:-1)*item->ref << " ";
+      }
     }
 
     vtuFile << std::endl;
@@ -413,10 +514,34 @@ void Gitter :: tovtk( const std::string &fn )
 
     for (w->first () ; ! w->done () ; w->next ())
     {
-      tetra_GEO* item = ((tetra_GEO *) &w->item ());
-      for (int i=0;i<4;++i)
+      element_t* item = ((element_t *) &w->item ());
+	    for (int i=0; i<elementVertices; ++i)
+	    {
+	      vtuFile << " " << vertexList[ item->myvertex(i)->getIndex() ].first;
+	    }
+    }
+
+    if (showbnd)
+    {
+      for (wbnd->first () ; ! wbnd->done () ; wbnd->next ())
       {
-        vtuFile << " " << vertexList[item->myvertex(i)->getIndex()].first;
+	      bndseg* item = ((bndseg *) &wbnd->item ());
+	      for (int i=0; i<nFaceVertices; ++i)
+	      {
+	        vtuFile << " " << vertexList[ item->myvertex(0,i)->getIndex() ].first;
+	      }
+      }
+    }
+
+    if (showface)
+    {
+      for (wface->first () ; ! wface->done () ; wface->next ())
+      {
+	      myhface_t* item = ((myhface_t *) &wface->item ());
+	      for (int i=0; i<nFaceVertices; ++i)
+	      {
+	        vtuFile << " " << vertexList[ item->myvertex(i)->getIndex() ].first;
+	      }
       }
     }
     vtuFile << std::endl;
@@ -428,7 +553,15 @@ void Gitter :: tovtk( const std::string &fn )
 
     for( int i = 0; i < nCells; ++i )
     {
-      vtuFile << " " << (i+1)*4;
+	    vtuFile << " " << (i+1)* elementVertices;
+    }
+    for( int i = 0; i < nBnd; ++i )
+    {
+	    vtuFile << " " << nCells* elementVertices + (i+1)* nFaceVertices;
+    }
+    for( int i = 0; i < nFaces; ++i )
+    {
+	    vtuFile << " " << nCells*elementVertices + nBnd*nFaceVertices + (i+1)*nFaceVertices;
     }
     vtuFile << std::endl;
 
@@ -438,15 +571,26 @@ void Gitter :: tovtk( const std::string &fn )
     vtuFile << "        <DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">" << std::endl;
     vtuFile << "         ";
 
+    // 10 for tetrahedra, 12 for hexahedron  
+    const int elemId = ( elementVertices == 4 ) ? 10 : 12 ;
     for( int i = 0; i < nCells; ++i )
     {
-      vtuFile << " " << 10; // 10 for tetrahedra
+	    vtuFile << " " << elemId ; 
+    }
+    // 5 for triangle, 9 for quadrilateral 
+    const int faceId = ( nFaceVertices == 3 ) ? 5 : 9 ;
+    for( int i = 0; i < nBnd; ++i )
+    {
+	    vtuFile << " " << faceId; 
+    }
+    for( int i = 0; i < nFaces; ++i )
+    {
+	    vtuFile << " " << faceId; 
     }
     vtuFile << std::endl;
 
     vtuFile << "        </DataArray>" << std::endl;
   }
-
   vtuFile << "      </Cells>" << std::endl;
   vtuFile << "    </Piece>" << std::endl;
   vtuFile << "  </UnstructuredGrid>" << std::endl;
@@ -454,6 +598,21 @@ void Gitter :: tovtk( const std::string &fn )
 
   vtuFile.close();
   std::cout << "data written to " << fn << std::endl;
+}
+
+void Gitter :: tovtk( const string& filename ) 
+{
+  typedef LeafIterator < Gitter::helement_STI > Iterator;
+  Iterator w (*this) ;
+  w->first();
+  if( ! w->done() && w->item().type() == hexa ) 
+  {
+    tovtkImpl( filename, 8, (Geometric :: hexa_GEO *) 0, (Geometric :: hbndseg4_GEO * ) 0 );
+  }
+  else 
+  {
+    tovtkImpl( filename, 4, (Geometric :: tetra_GEO *) 0, (Geometric :: tetra_GEO * ) 0 );
+  }
 }
 
 bool Gitter :: adapt () 
@@ -467,11 +626,9 @@ bool Gitter :: adapt ()
   do {
     refined &= refine ();
     // check for conformity
-    // if noconform break;
-    std::cout << "check non conform refinement" << std::endl;
     x = markNonConform();
   }
-  while (!x);  // need something here on required conformity
+  while (!x); 
 
   if (!refined) {
     cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
@@ -480,6 +637,7 @@ bool Gitter :: adapt ()
   }
   int lap = clock () ;
   coarse () ;
+  assert ( markNonConform() );
   int end = clock () ;
   if (debugOption (1)) {
     float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
