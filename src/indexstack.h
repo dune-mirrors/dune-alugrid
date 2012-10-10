@@ -10,6 +10,7 @@ using namespace std;
 class RestoreInfo
 {
 public:
+  // return byte order (0 = little endian, 1 = big endian)
   static char systemByteOrder ()
   {
 #if __BYTE_ORDER == __LITTLE_ENDIAN 
@@ -17,6 +18,14 @@ public:
 #else
     return 1 ;
 #endif
+  }
+
+  // return byte order as a string 
+  static const char* byteOrderString() 
+  {
+    static const char* bigEndian = "BigEndian";
+    static const char* littleEndian = "LittleEndian";
+    return systemByteOrder() ? bigEndian : littleEndian ;
   }
 
 protected:
