@@ -336,6 +336,7 @@ void Gitter :: markEdgeCoarsening ()
   {
     // set all edge flags to true
     _edgeCoarseningFlags.assign( indexManagerStorage().get( IndexManagerStorage::IM_Edges ).getMaxIndex(), true );
+    // now check for each tetra whether it could really be coarsened
     leaf_element__macro_element__iterator i (container ()) ;
     for( i.first(); ! i.done() ; i.next() ) 
     {

@@ -274,7 +274,6 @@ int main (int argc, char ** argv, const char ** envp)
         ss << "out-" << ZeroPadNumber(mxl+1) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
       }
-      return 1;
     }
   }
 

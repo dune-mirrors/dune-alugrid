@@ -878,7 +878,7 @@ bool GitterPll :: adapt ()
     }
     notifyGridChanges () ;
     loadBalancerGridChangesNotify () ;
-    // for bisection refinement repeat loop
+    // for bisection refinement repeat loop if non-confoming edges are still present 
     conformClosure = 
       needConformingClosure ? mpAccess().gmax( ! markForConformingClosure() ) : false ;
   } while (conformClosure);
