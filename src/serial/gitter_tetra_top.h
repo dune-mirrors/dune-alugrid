@@ -398,12 +398,14 @@ template < class A > class TetraTop : public A
       const CallSplitIF& caller() const { assert( _caller ); return *_caller; }
     };
 
-    virtual bool markNonConform () 
+    virtual bool markForConformingClosure () 
     {
+      assert( this->myGrid()->conformingClosureNeeded() );
+      // if an edge exits, that has children, we also have to refine this tetra 
       assert( this->nEdges() == 6 );
       for (int e=0; e < 6; ++e)
       {
-        if( this->myhedge1(e)->down() )
+        if( this->myhedge1( e )->down() )
         {
           this->request ( myrule_t :: bisect );
           return false;
@@ -411,21 +413,25 @@ template < class A > class TetraTop : public A
       }
       return true;
     }
+
     virtual void markEdgeCoarsening () 
     { 
+      assert( this->myGrid()->conformingClosureNeeded() );
       assert( this->nEdges() == 6 );
-      if (!this->up()) return;
+      // nothing to do for macro element 
+      if ( _lvl == 0 ) return;
+
+      // get father 
+      innertetra_t* father = (innertetra_t * ) this->up();
+
+      typedef typename Gitter :: edgecoarseningflags_t  edgecoarseningflags_t;
+      edgecoarseningflags_t& edgeCoarseningFlags = this->myGrid()->_edgeCoarseningFlags;
       for (int e=0; e<6; ++e)
       {
-        myhedge1_t *edge = this->up()->myhedge1(e);
-        // if (e == (int)(this->up()->getrule())-2) // does not seem to // work...
-        if (_req == myrule_t :: crs && edge->down()) // the father of a leaf element can only have one non leaf edge
-        { // we leave thing as they are
-        }
-        else
-        {  
-          int idx = edge->getIndex();
-          this->myGrid()->edgeCoarseningFlags_[ idx ] = false;
+        myhedge1_t *edge = father->myhedge1( e );
+        if ( ! (_req == myrule_t :: crs && edge->down() )) // the father of a leaf element can only have one non leaf edge
+        { 
+          edgeCoarseningFlags[ edge->getIndex() ] = false;
         }
       }
     }
@@ -542,7 +548,6 @@ template < class A > class TetraTop : public A
     void split_e30 () ;
     void split_e31 () ;
 
-    void bisect () ;
     void splitISO8 () ;
   protected :
     myhedge1_t * subedge1 (int,int) ;
@@ -1115,6 +1120,9 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
 
   if( r == myrule_t :: bisect )
   {
+    // this can only be used when conforming closure is enabled 
+    assert( this->myGrid()->conformingClosureNeeded() );
+
     // we always split edge 0 and 3 following 
     // the idea of Stevenson, Nochetto, Veser, Siebert 
     // suggestRule returns the correct splitting edge 
@@ -1126,8 +1134,6 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
     // all other cases 
     _req = r ;
   }
-
-  //cout << "Request rule " <<  _req << " for tetra " << this << endl;
   return ;
 }
 

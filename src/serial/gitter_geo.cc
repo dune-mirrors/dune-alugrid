@@ -511,9 +511,13 @@ int Gitter :: Geometric :: Tetra :: test () const {
   return 0 ;
 }
 
-int Gitter :: Geometric :: Tetra :: tagForGlobalRefinement () {
-  return (request (myrule_t :: iso8), 1) ;
-  //return (request (myrule_t :: bisect), 1) ;
+int Gitter :: Geometric :: Tetra :: tagForGlobalRefinement () 
+{
+  // check whether bisection should be used 
+  if( this->myvertex(0)->myGrid()->conformingClosureNeeded() ) 
+    return (request (myrule_t :: bisect), 1) ;
+  else 
+    return (request (myrule_t :: iso8), 1) ;
 }
 
 int Gitter :: Geometric :: Tetra :: tagForGlobalCoarsening () {

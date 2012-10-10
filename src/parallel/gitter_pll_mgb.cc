@@ -999,10 +999,10 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
       pgm.unpackAll (osv, gatherScatter ) ;
 
 #ifndef NDEBUG
-      // check that all leaf elements are in conforming status 
+      // check that all leaf elements are in conforming status (bisection only)
       bool x = true ;
       LeafIterator< helement_STI > i( *this );
-      for( i->first(); ! i->done() ; i->next()) { x &= i->item ().markNonConform () ; }
+      for( i->first(); ! i->done() ; i->next()) { x &= i->item().markForConformingClosure () ; }
       assert( x == true );
 #endif
     }

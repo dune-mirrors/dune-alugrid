@@ -18,6 +18,9 @@ using namespace std;
 
 #define DONT_USE_ALUGRID_ALLOC
 
+// enable vtk output 
+#define ENABLE_ALUGRID_VTK_OUTPUT
+
 // include serial part of ALUGrid 
 #ifdef PARALLEL
   #include <alugrid_parallel.h>
@@ -27,6 +30,26 @@ using namespace std;
 
 using namespace ALUGridSpace;
 
+// refine grid globally, i.e. mark all elements and then call adapt 
+template <class GitterType>
+bool needConformingClosure( GitterType& grid, bool useClosure ) 
+{
+  bool needClosure = true ;
+  {
+    // get LeafIterator which iterates over all leaf elements of the grid 
+    LeafIterator < Gitter::helement_STI > w (grid) ;
+    w->first(); 
+    if( ! w->done() ) 
+    {
+      if( w->item ().type() != tetra )
+        needClosure = false ;
+      else 
+        needClosure = useClosure ;
+    }
+  }
+  return needClosure ;
+}
+       
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
 void checkRefinements( GitterType& grid ) 
@@ -83,7 +106,7 @@ void checkRefinements( GitterType& grid )
 
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
-void globalRefine(GitterType& grid, bool global,int step) 
+void globalRefine(GitterType& grid, bool global, int step, const bool bisection = true ) 
 {
    {
      if (global)
@@ -93,23 +116,8 @@ void globalRefine(GitterType& grid, bool global,int step)
         
        for (w->first () ; ! w->done () ; w->next ())
        {
-         if(  w->item ().type() == tetra ) 
-         {
-           typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
-           // mark element for refinement 
-           tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-           //item->checkTetra( item, item->nChild(), true );
-
-           typedef Gitter ::Geometric :: TetraRule  TetraRule ;
-           item->request ( TetraRule :: bisect );
-         }
-         else 
-         {
-           // mark element for refinement 
-           w->item ().tagForGlobalRefinement ();
-         }
-	        // break ;
+         // mark element for refinement 
+         w->item ().tagForGlobalRefinement ();
        }
        // adapt grid 
        grid.adapt ();
@@ -233,8 +241,12 @@ int main (int argc, char ** argv, const char ** envp)
 #else 
       GitterDuneImpl grid(macroname.c_str());
 #endif
+      bool closure = needConformingClosure( grid, true );
+#ifdef PARALLEL
+      closure = mpa.gmax( closure );
+#endif
+      if( closure ) grid.enableConformingClosure() ;
 
-     
       //cout << "P[ " << rank << " ] : Grid generated! \n";
       grid.printsize(); 
       cout << "---------------------------------------------\n";

@@ -843,12 +843,21 @@ void GitterPll :: coarse ()
   return ;
 }
 
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
 extern int adaptstep;
-extern int nr;
-bool GitterPll :: adapt () {
-  nr = 0;
+extern int stepnumber;
+#endif
+
+bool GitterPll :: adapt () 
+{
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
+  stepnumber = 0;
+#endif
+
   bool refined = false;
-  bool conformClosure;
+  bool conformClosure = false ;
+  const bool needConformingClosure = conformingClosureNeeded();
+  assert( needConformingClosure == mpAccess().gmax( needConformingClosure ) );
   do 
   {
     __STATIC_myrank = mpAccess ().myrank () ;
@@ -869,9 +878,15 @@ bool GitterPll :: adapt () {
     }
     notifyGridChanges () ;
     loadBalancerGridChangesNotify () ;
-    conformClosure = mpAccess().gmax( !markNonConform() );
+    // for bisection refinement repeat loop
+    conformClosure = 
+      needConformingClosure ? mpAccess().gmax( ! markForConformingClosure() ) : false ;
   } while (conformClosure);
+
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
   ++adaptstep;
+#endif
+
   return refined;
 }
 
@@ -1167,9 +1182,16 @@ void GitterPll :: loadBalancerGridChangesNotify ()
 
     if( ldbMth ) 
     {
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT 
       tovtk("pre.vtu");
+#endif
+
       repartitionMacroGrid (db) ;
+
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT 
       tovtk("post.vtu");
+#endif
+
       notifyMacroGridChanges () ;
     }
   }

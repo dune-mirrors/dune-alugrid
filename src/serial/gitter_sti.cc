@@ -291,8 +291,10 @@ void Gitter :: printsize () {
   return ;
 }
 
-int nr = 0;
-int adaptstep = 0;
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
+int adaptstep = 0 ;
+int stepnumber = 0 ;
+#endif
 bool Gitter :: refine () 
 {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
@@ -300,28 +302,46 @@ bool Gitter :: refine ()
   leaf_element__macro_element__iterator i (container ()) ;
   // refine marked elements
   for( i.first(); ! i.done() ; i.next()) x &= i.item ().refine () ;
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
   std::ostringstream ss;
-  int filenr = adaptstep*100+nr;
+  int filenr = adaptstep*100+stepnumber;
   ss << "ref-" << ZeroPadNumber(filenr) << ".vtu";
   tovtk(  ss.str() );
-  ++nr;
+  ++stepnumber;
+#endif
   return  x;
 }
 
-bool Gitter :: markNonConform()
+// returns true if no non-conforming element was found
+bool Gitter :: markForConformingClosure()
 {
   bool x = true ;
-  leaf_element__macro_element__iterator i (container ()) ;
-  for( i.first(); ! i.done() ; i.next()) { x &= i.item ().markNonConform () ; }
+  if( conformingClosureNeeded() ) 
+  {
+    leaf_element__macro_element__iterator i ( container () ) ;
+    for( i.first(); ! i.done() ; i.next()) 
+    { 
+      if( i.item().type() == tetra ) 
+      {
+        x &= i.item ().markForConformingClosure() ; 
+      }
+    }
+  }
   return x;
 }
+
 void Gitter :: markEdgeCoarsening () 
 {
-  edgeCoarseningFlags_.assign( indexManagerStorage().get(2).getMaxIndex(), true );
-  leaf_element__macro_element__iterator i (container ()) ;
-  for( i.first(); ! i.done() ; i.next() ) 
+  if( conformingClosureNeeded() ) 
   {
-    i.item().markEdgeCoarsening();
+    // set all edge flags to true
+    _edgeCoarseningFlags.assign( indexManagerStorage().get( IndexManagerStorage::IM_Edges ).getMaxIndex(), true );
+    leaf_element__macro_element__iterator i (container ()) ;
+    for( i.first(); ! i.done() ; i.next() ) 
+    {
+      // mark coarsening will unset some edge flags 
+      i.item().markEdgeCoarsening();
+    }
   }
 }
 
@@ -336,11 +356,15 @@ void Gitter :: coarse()
       i.item ().coarse () ; 
     }
   }
+
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
   std::ostringstream ss;
-  int filenr = adaptstep*100+nr;
+  int filenr = adaptstep*100+stepnumber;
   ss << "crs-" << ZeroPadNumber(filenr) << ".vtu";
   tovtk(  ss.str() );
-  ++nr;
+  ++stepnumber;
+#endif
+
 }
 
 template <class element_t, class bndseg>
@@ -494,11 +518,11 @@ void Gitter :: tovtkImpl( const std::string &fn,
     vtuFile << "        <DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
 
     const VertexList::iterator end = vertexList.end();
-    int nr=0;
-    for( VertexList::iterator i = vertexList.begin(); i != end; ++i, ++nr )
+    int index = 0;
+    for( VertexList::iterator i = vertexList.begin(); i != end; ++i, ++ index )
     {
       vtuFile << "          " << (*i).second.second[ 0 ] << " " << (*i).second.second[ 1 ] << " " << (*i).second.second[ 2 ] << std::endl;
-      (*i).second.first = nr;
+      (*i).second.first = index ;
     }
 
     vtuFile << "        </DataArray>" << std::endl;
@@ -624,9 +648,10 @@ bool Gitter :: adapt ()
   bool x;
   bool refined = true;
   do {
+    // refine the grid 
     refined &= refine ();
     // check for conformity
-    x = markNonConform();
+    x = markForConformingClosure();
   }
   while (!x); 
 
@@ -637,7 +662,9 @@ bool Gitter :: adapt ()
   }
   int lap = clock () ;
   coarse () ;
-  assert ( markNonConform() );
+  // make sure that no non-conforming element are present in case of bisection 
+  assert ( markForConformingClosure() );
+
   int end = clock () ;
   if (debugOption (1)) {
     float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
@@ -645,13 +672,18 @@ bool Gitter :: adapt ()
     float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
     cout << "**INFO Gitter :: adapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
   }
+
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
   ++adaptstep;
+#endif
+
   return refined;
 }
 
 bool Gitter :: adaptWithoutLoadBalancing() {
   return adapt();
 }
+
 bool Gitter :: duneAdapt (AdaptRestrictProlongType & arp) 
 {
   cerr << "Gitter :: duneAdapt: method not overloaded! in file:"<< __FILE__ << "  line:" << __LINE__<< endl;

@@ -72,17 +72,20 @@ public:
     assert( _myGrid );
     return _myGrid; 
   }
+
   const Gitter* myGrid() const 
   { 
     assert( _myGrid );
     return _myGrid; 
   }
+
   IndexManagerType& get(const int codim) 
   {
     assert( codim >= 0 );
     assert( codim < numOfIndexManager );
     return _indexmanager[ codim ];
   }
+
   int getIndex( const int codim ) { return get( codim ).getIndex(); }
 
   void compress() 
@@ -312,7 +315,7 @@ public :
       // set if object is locked against coarsening
       flagLock = 1,
       // non-affine geometry mapping 
-      flagNonAffine = 2  
+      flagNonAffine = 2
     };
 
   protected:
@@ -339,7 +342,8 @@ public :
       _bndid(interior),
       _leafref(0),
       _flags( 0 )
-    {}
+    {
+    }
 
   public:
     void set ( const Flag &flag )
@@ -687,9 +691,11 @@ public :
     
     // return index of boundary segment 
     virtual int segmentIndex (const int) const { return -1; }
-        
-    virtual bool markNonConform () = 0;
+    
+    // methods for bisection refinement 
+    virtual bool markForConformingClosure () = 0;
     virtual void markEdgeCoarsening () = 0;
+
     // mark element for using iso8 rule 
     virtual int tagForGlobalRefinement () = 0 ;
     // mark element for coarsening 
@@ -1289,7 +1295,8 @@ public :
         myconnect_t *_faceRear;
         signed char _numFront;
         signed char _numRear;
-        signed char s [polygonlength] ;  // 12 bytes 
+        signed char s [polygonlength] ;  // 12 bytes (moved here to use padding)
+
         std::vector< std::pair<myconnect_t*,signed char> > frontList_;
         std::vector< std::pair<myconnect_t*,signed char> > rearList_;
 
@@ -1320,7 +1327,6 @@ public :
     public :
       inline virtual ~hface3 () ;
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
-      inline void attachElementAgain (const pair < hasFace3 *, int >&, int) ;
       inline void detachElement (int) ;
     public :
       inline int twist (int) const ;
@@ -1585,7 +1591,7 @@ public :
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
-      virtual bool markNonConform () { return true; }
+      virtual bool markForConformingClosure () { return true; }
       virtual void markEdgeCoarsening () { }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
@@ -1690,7 +1696,7 @@ public :
       virtual myrule_t getrule () const = 0 ;
       virtual myrule_t requestrule () const = 0;
       virtual void request (myrule_t) = 0 ;
-      virtual bool markNonConform () { return true; }
+      virtual bool markForConformingClosure () { return true; }
       virtual void markEdgeCoarsening () { }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
@@ -1771,7 +1777,7 @@ public :
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
-      virtual bool markNonConform () { return true; }
+      virtual bool markForConformingClosure () { return true; }
       virtual void markEdgeCoarsening () { }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
@@ -1826,7 +1832,7 @@ public :
       virtual bool isboundary() const { return true; }
       virtual bool isperiodic() const { return false; }
 
-      virtual bool markNonConform () { return true; }
+      virtual bool markForConformingClosure () { return true; }
       virtual void markEdgeCoarsening () { }
       virtual int nChild () const;
       // just returns level 
@@ -1880,8 +1886,9 @@ public :
       inline int twist (int) const ;
       inline hface4_GEO * subface (int,int) const ;
       
-      virtual bool markNonConform () { return true; }
+      virtual bool markForConformingClosure () { return true; }
       virtual void markEdgeCoarsening () { }
+
       virtual bool isboundary() const { return true; }
       virtual bool isperiodic() const { return false; }
       virtual int nChild () const;
@@ -2080,7 +2087,7 @@ public:
 protected :
   // methods for refining and coarsening
   virtual bool refine () ;
-  virtual bool markNonConform () ;
+  virtual bool markForConformingClosure () ;
   virtual void markEdgeCoarsening () ;
   virtual void coarse () ;
 
@@ -2090,7 +2097,7 @@ protected :
   virtual void notifyGridChanges () ;
   virtual void notifyMacroGridChanges () ;
 protected :
-  Gitter () {} 
+  Gitter () : _edgeCoarseningFlags(), bisectionRefinement_( false ) {} 
   virtual ~Gitter () ;
 
 public :
@@ -2157,9 +2164,17 @@ protected:
   friend class LevelIterator < hedge_STI > ;
   friend class LevelIterator < hface_STI > ;
 
-  public:
+public:
+  virtual bool conformingClosureNeeded() const { return bisectionRefinement_ ; }
+  virtual void enableConformingClosure() { bisectionRefinement_ = true ; }
+
+  typedef vector<bool>  edgecoarseningflags_t ;
   // flags to say if an edge can be coarsened during conform bisection 
-  mutable std::vector<bool> edgeCoarseningFlags_;
+  mutable edgecoarseningflags_t   _edgeCoarseningFlags;
+protected:
+  // true if conforming closure is needed closure 
+  bool bisectionRefinement_; 
+
 } ; 
 // --endGitter
 
@@ -2863,6 +2878,7 @@ inline Gitter :: Geometric :: hedge1 :: ~hedge1 () {
 }
 
 inline int Gitter :: Geometric :: hedge1 :: postRefinement () {
+  //lockEdgeAgainstCoarsening();
   return 0 ;
 }
 
@@ -2883,8 +2899,6 @@ inline const Gitter :: Geometric :: hedge1 :: myvertex_t * Gitter :: Geometric :
   assert (i == 0 || i == 1) ;
   return i == 1 ? v1 : v0 ;
 }
-
-
 
 inline bool Gitter :: hedge :: canCoarsen( std::vector<bool> &edgeCoarseningFlags ) const
 {
@@ -3071,20 +3085,19 @@ inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
   _numFront = null.second;
   _faceRear = null.first;
   _numRear = null.second;
-  return ;
 }
 
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
-  frontList_.push_back(make_pair(_faceFront,_numFront));
+  frontList_.push_back(make_pair( _faceFront, _numFront));
   _faceFront = p.first;
-  _numFront = p.second;
+  _numFront  = p.second;
 }
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevFront ( )
 {
-  assert( frontList_.size()>0);
+  assert( frontList_.size() > 0);
   _faceFront = frontList_.back().first;
   _numFront = frontList_.back().second;
   frontList_.pop_back();
@@ -3095,13 +3108,13 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: setRear ( const pair < myconn
 {
   rearList_.push_back(make_pair(_faceRear,_numRear));
   _faceRear = p.first;
-  _numRear = p.second;
+  _numRear  = p.second;
 }
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevRear ( )
 {
   _faceRear = rearList_.back().first;
-  _numRear = rearList_.back().second;
+  _numRear  = rearList_.back().second;
   rearList_.pop_back();
 }
 
@@ -3191,16 +3204,6 @@ inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconne
   else
     nb.setFront( p );
   return ;
-}
-
-inline void Gitter :: Geometric :: hface3 :: 
-attachElementAgain (const pair < myconnect_t *, int > & p, int t)
-{
-  assert(0);
-  if( t < 0 )
-    nb.setRear( p );
-  else
-    nb.setFront( p );
 }
 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t)
@@ -3368,7 +3371,6 @@ Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () const
 
 inline Gitter :: Geometric :: hface4 :: 
 hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) 
-   //:  _parRule(Hface4Rule::undefined)
 {
   assert(e0 && e1 && e2 && e3) ;
   (e [0] = e0)->ref ++ ; nb.s [0] = s0 ;
@@ -3376,7 +3378,6 @@ hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s
   (e [2] = e2)->ref ++ ; nb.s [2] = s2 ;
   (e [3] = e3)->ref ++ ; nb.s [3] = s3 ;
   nb._parRule = (Hface4Rule::undefined);
-  return ;
 }
 
 inline Gitter :: Geometric :: hface4 :: ~hface4 () {

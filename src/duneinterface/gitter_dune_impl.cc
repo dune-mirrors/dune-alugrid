@@ -131,29 +131,12 @@ void GitterDuneBasis :: removeAdaptRestrictProlongOp()
 bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp) 
 {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: duneAdapt ()" << endl, 1) : 1) ;
-  assert (! iterators_attached ()) ;
-  const int start = clock () ;
-
+  // set restriction-prolongation callback obj
   setAdaptRestrictProlongOp(arp); 
-  bool refined = this->refine ();
-  if (!refined) {
-    cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
-    cerr << "  diese Option ist eigentlich dem parallelen Verfeinerer vorbehalten.\n" ;
-    cerr << "  Der Fehler trat auf in " << __FILE__ << " " << __LINE__ << endl ;
-  }
-
-  int lap = clock () ;
-  this->coarse () ;
-  int end = clock () ;
-  if (debugOption (1)) {
-    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
-    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
-    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
-    cout << "**INFO GitterDuneBasis :: duneAdapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
-  }
+  // call adapt method 
+  const bool refined = this->adapt();
   // sets pointer to zero 
   removeAdaptRestrictProlongOp ();
-
   return refined;
 }
 #endif

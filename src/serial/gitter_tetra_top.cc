@@ -1827,12 +1827,6 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
   return twistOk;
 }
 
-// --bisect
-template < class A >  void TetraTop < A > :: bisect () 
-{
-  abort();
-}
-
 template < class A >  void TetraTop < A > :: 
 splitISO8 () 
 {
@@ -2102,7 +2096,12 @@ template < class A >  bool TetraTop < A > :: coarse ()
 {
   if (this->leaf ()) 
   {
-    if (!up()) return false;
+    if( _lvl == 0 ) 
+    {
+      assert( !up () );
+      return false;
+    }
+
     assert (_req == myrule_t :: nosplit || _req == myrule_t :: crs) ;
     myrule_t w = _req ;
     _req = myrule_t :: nosplit ;
@@ -2134,19 +2133,22 @@ template < class A >  bool TetraTop < A > :: coarse ()
     {
       // test marking on refinement edge 
       assert( this->nEdges() == 6 );
-      // int e = getrule()-2;  // did not work....
-      for (int e=0;e<6;++e)
+
+      typedef typename Gitter :: edgecoarseningflags_t edgecoarseningflags_t;
+      edgecoarseningflags_t& edgeCoarseningFlags = this->myGrid()->_edgeCoarseningFlags;
+
+      for (int e=0; e<6; ++e)
       {
         myhedge1_t *edge = this->myhedge1(e);
         if ( edge->down() )
         {
-          int idx = edge->getIndex();
-          if ( !this->myGrid()->edgeCoarseningFlags_[ idx ] ) 
+          if ( ! edgeCoarseningFlags[ edge->getIndex() ] ) 
             return false;
+
           // we need to make sure that none of the children of this
           // refinement edge should not be removed
           // (we could not go up on edges during marking so we go down here)
-          if (! edge->down()->canCoarsen( this->myGrid()->edgeCoarseningFlags_ ) ) 
+          if ( ! edge->down()->canCoarsen( edgeCoarseningFlags ) ) 
           {
             return false;
           }
@@ -2158,29 +2160,6 @@ template < class A >  bool TetraTop < A > :: coarse ()
 
       delete _inner ; 
       _inner = 0 ;
-
-#if 0
-      // for bisection refinement we have to again 
-      // set the face neighbours, since they have been overwritten   
-      // by the refined element  
-      if( _rule != myrule_t :: iso8 )
-      {
-        for (int i = 0 ; i < 4 ; ++i )
-        {
-          // if face number is negative, it's not a real object 
-          // in this case we have to set the neighbour again
-          if( this->myneighbour( i ).second < 0 ) 
-          {
-            typedef pair < Gitter :: Geometric :: hface3 :: myconnect_t*, int > myconnectpair_t;
-            assert( ! this->myneighbour( i ).first->isRealObject() );
-            myhface3( i )->attachElementAgain( 
-                  myconnectpair_t( Gitter :: Geometric :: InternalHasFace3()(this), i ),   
-                  twist( i ) 
-                );
-          }
-        }
-      }
-#endif
 
       // reset refinement rule 
       _rule = myrule_t :: nosplit ;
