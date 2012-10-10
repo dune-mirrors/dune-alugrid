@@ -106,8 +106,8 @@ template < class A > class Hface3Top : public A
     const innervertex_t * subvertex (int) const ;
     inneredge_t * subedge1 (int) ;
     const inneredge_t * subedge1 (int) const ;
-    innerface_t * subface3 (int) ;
-    const innerface_t * subface3 (int) const ;
+    innerface_t * subface (int) ;
+    const innerface_t * subface (int) const ;
     inline int level () const ;
     inline int nChild () const ; 
     innervertex_t * innerVertex () ;
@@ -152,7 +152,7 @@ template < class A > class Hface3Top : public A
 template < class A > class Hbnd3Top : public A {
   public:
     using A :: twist ;
-    using A :: subface3 ;
+    using A :: subface ;
     using A :: myhface3 ;
 
   protected :
@@ -549,8 +549,8 @@ template < class A > class TetraTop : public A
     const myhedge1_t * subedge1 (int,int) const ;
     facepair_t subFaces( const int );
     facepair_t subFaces( const int, const myvertex_t*, const myvertex_t* );
-    myhface3_t * subface3 (int,int) ;
-    const myhface3_t * subface3 (int i, int j) const ;
+    myhface3_t * subface (int,int) ;
+    const myhface3_t * subface (int i, int j) const ;
   public:
     // constructor for refined elements 
     TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
@@ -656,8 +656,8 @@ template < class A > class Periodic3Top : public A {
   protected :
     myhedge1_t * subedge1 (int,int) ;
     const myhedge1_t * subedge1 (int,int) const ;
-    myhface3_t * subface3 (int,int) ;
-    const myhface3_t * subface3 (int i, int j) const ;
+    myhface3_t * subface (int,int) ;
+    const myhface3_t * subface (int i, int j) const ;
 
     // we need this for the boundary segment index 
     inline IndexManagerType & indexManager () { 
@@ -818,14 +818,14 @@ template < class A > inline const typename Hface3Top < A > :: inneredge_t * Hfac
   return e ;
 }
 
-template < class A > inline typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface3 (int n) {
+template < class A > inline typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface (int n) {
   innerface_t * f = dwnPtr() ;
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;
   return f ;
 }
 
-template < class A > inline const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface3 (int n) const {
+template < class A > inline const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface (int n) const {
   const innerface_t * f = dwnPtr();
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;

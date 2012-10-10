@@ -1336,8 +1336,8 @@ public :
       virtual const myvertex_t * subvertex (int) const = 0 ;
       virtual myhedge1_t * subedge1 (int) = 0 ;
       virtual const myhedge1_t * subedge1 (int) const = 0 ;
-      virtual hface3 * subface3 (int) = 0 ;
-      virtual const hface3 * subface3 (int) const = 0 ;
+      virtual hface3 * subface (int) = 0 ;
+      virtual const hface3 * subface (int) const = 0 ;
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual bool refine (myrule_t,int) = 0 ;
@@ -1410,8 +1410,8 @@ public :
       virtual const myvertex_t * subvertex (int) const = 0 ;
       virtual myhedge1_t * subedge1 (int) = 0 ;
       virtual const myhedge1_t * subedge1 (int) const = 0 ;
-      virtual hface4 * subface4 (int) = 0 ;
-      virtual const hface4 * subface4 (int) const = 0 ;
+      virtual hface4 * subface (int) = 0 ;
+      virtual const hface4 * subface (int) const = 0 ;
 
       // returns true, if element connected to face is leaf 
       virtual bool isInteriorLeaf() const ;
@@ -1821,7 +1821,7 @@ public :
       inline myhface_t * myhface3 ( int i ) const { return myhface( i ); } // use the method without number 
       inline myhface_t * myhface (int) const ;
       inline int twist (int) const ;
-      inline hface3_GEO * subface3 (int,int) const ;
+      inline hface3_GEO * subface (int,int) const ;
       
       virtual bool isboundary() const { return true; }
       virtual bool isperiodic() const { return false; }
@@ -1878,7 +1878,7 @@ public :
       inline myhface_t * myhface (int) const ;
       inline myhface_t * myhface4 ( int i ) const { return myhface( i ); }
       inline int twist (int) const ;
-      inline hface4_GEO * subface4 (int,int) const ;
+      inline hface4_GEO * subface (int,int) const ;
       
       virtual bool markNonConform () { return true; }
       virtual void markEdgeCoarsening () { }
@@ -4125,8 +4125,8 @@ inline Gitter :: Geometric :: hbndseg3 :: myvertex_t * Gitter :: Geometric :: hb
   return (twist (0) < 0) ? myhface(0)->myvertex ((7 - j + twist (0)) % 3) : myhface(0)->myvertex ((j + twist (0)) % 3) ;
 }
 
-inline Gitter :: Geometric :: hbndseg3 :: myhface_t * Gitter :: Geometric :: hbndseg3 :: subface3 (int,int i) const {
-  return myhface(0)->subface3 (i) ;
+inline Gitter :: Geometric :: hbndseg3 :: myhface_t * Gitter :: Geometric :: hbndseg3 :: subface (int,int i) const {
+  return myhface(0)->subface (i) ;
 }
 
 inline Gitter :: Geometric :: hbndseg3 :: myrule_t Gitter :: Geometric :: hbndseg3 :: getrule () const {
@@ -4218,8 +4218,8 @@ inline Gitter :: Geometric :: hbndseg4 :: myvertex_t * Gitter :: Geometric :: hb
   return (twist (0) < 0) ? myhface(0)->myvertex ((9 - j + twist (0)) % 4) : myhface(0)->myvertex ((j + twist (0)) % 4) ;
 }
 
-inline Gitter :: Geometric :: hbndseg4 :: myhface_t * Gitter :: Geometric :: hbndseg4 :: subface4 (int,int i) const {
-  return myhface(0)->subface4 (i) ;
+inline Gitter :: Geometric :: hbndseg4 :: myhface_t * Gitter :: Geometric :: hbndseg4 :: subface (int,int i) const {
+  return myhface(0)->subface (i) ;
 }
 
 inline Gitter :: Geometric :: hbndseg4 :: myrule_t Gitter :: Geometric :: hbndseg4 :: getrule () const {

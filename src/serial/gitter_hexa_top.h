@@ -272,8 +272,8 @@ template < class A > class Hface4Top : public A
     const innervertex_t * subvertex (int) const ;
     inneredge_t * subedge1 (int) ;
     const inneredge_t * subedge1 (int) const ;
-    innerface_t * subface4 (int) ;
-    const innerface_t * subface4 (int) const ;
+    innerface_t * subface (int) ;
+    const innerface_t * subface (int) const ;
     
     inline int level () const ;
     inline int nChild () const ;
@@ -318,7 +318,7 @@ template < class A > class Hbnd4Top : public A
   public:
     using A :: twist ;
     using A :: myhface4 ;
-    using A :: subface4 ;
+    using A :: subface ;
 
   protected :
     typedef Hbnd4Top < A >              innerbndseg_t ;
@@ -408,8 +408,8 @@ template < class A > class HexaTop : public A {
     
     myhedge1_t * subedge1 (int,int) ;
     const myhedge1_t * subedge1 (int,int) const ;
-    myhface4_t * subface4 (int,int) ;
-    const myhface4_t * subface4 (int,int) const ;
+    myhface4_t * subface (int,int) ;
+    const myhface4_t * subface (int,int) const ;
     
   public:
     // Constructor for macro elements 
@@ -512,8 +512,8 @@ template < class A > class Periodic4Top : public A {
   protected :
     myhedge1_t * subedge1 (int,int) ;
     const myhedge1_t * subedge1 (int,int) const ;
-    myhface4_t * subface4 (int,int) ;
-    const myhface4_t * subface4 (int i, int j) const ;
+    myhface4_t * subface (int,int) ;
+    const myhface4_t * subface (int i, int j) const ;
 
     // we need this for the boundary segment index 
     inline IndexManagerType & indexManager () {
@@ -841,7 +841,7 @@ Hface4Top < A > :: subedge1 (int n) const {
 }
 
 template < class A > inline typename Hface4Top < A > :: innerface_t * 
-Hface4Top < A > :: subface4 (int n) {
+Hface4Top < A > :: subface (int n) {
   innerface_t * f = dwnPtr() ;
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;
@@ -849,7 +849,7 @@ Hface4Top < A > :: subface4 (int n) {
 }
 
 template < class A > inline const typename Hface4Top < A > :: innerface_t * 
-Hface4Top < A > :: subface4 (int n) const {
+Hface4Top < A > :: subface (int n) const {
   const innerface_t * f = dwnPtr();
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;

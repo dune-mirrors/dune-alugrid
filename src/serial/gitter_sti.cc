@@ -359,7 +359,7 @@ void Gitter :: tovtkImpl( const std::string &fn,
     
   // header info
   vtuFile << "<?xml version=\"1.0\"?>" << std::endl;
-  vtuFile << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+  vtuFile << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"" << RestoreInfo :: byteOrderString () << "\">" << std::endl;
   vtuFile << "  <UnstructuredGrid>" << std::endl;
 
   // vertex list
