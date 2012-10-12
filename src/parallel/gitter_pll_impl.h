@@ -60,9 +60,9 @@ template < class A >
 class EdgePllBaseX : public A 
 {
   protected :
-    typedef A myhedge1_t ;
-    inline myhedge1_t & myhedge1 () { return *this; }
-    inline const myhedge1_t & myhedge1 () const { return *this; }
+    typedef A myhedge_t ;
+    inline myhedge_t & myhedge () { return *this; }
+    inline const myhedge_t & myhedge () const { return *this; }
 
   public :
     typedef typename A :: myvertex_t myvertex_t;
@@ -84,7 +84,7 @@ template < class A >
 class EdgePllBaseXMacro : public A 
 {
   public :
-    typedef typename A :: myhedge1_t  myhedge1_t;
+    typedef typename A :: myhedge_t  myhedge_t;
     typedef typename A :: myvertex_t myvertex_t;
 
     inline EdgePllBaseXMacro(myvertex_t *,myvertex_t *) ;
@@ -92,7 +92,7 @@ class EdgePllBaseXMacro : public A
     virtual vector< int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
   protected :
-    using A :: myhedge1;
+    using A :: myhedge;
     using A :: EDGE1;
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -112,11 +112,11 @@ template < class A > class FacePllBaseX : public A
   protected :
     typedef A myhface_t ;
     typedef typename A :: myconnect_t myconnect_t ;
-    typedef typename A :: myhedge1_t myhedge1_t;
+    typedef typename A :: myhedge_t myhedge_t;
       
   public :
-    inline FacePllBaseX(myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-    inline FacePllBaseX(myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t*,int) ;
+    inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int) ;
+    inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t*,int) ;
     inline ~FacePllBaseX () {}
 
     inline myhface_t & myhface () { return *this; }
@@ -134,14 +134,14 @@ template < class A > class FacePllBaseXMacro : public A
   public :
     // some typedefs 
     typedef typename A :: myhface_t  myhface_t;
-    typedef typename A :: myhedge1_t myhedge1_t;
+    typedef typename A :: myhedge_t myhedge_t;
 
     // constructor for hface3 
-    inline FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                                    myhedge1_t * e2, int s2) ;
+    inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                                    myhedge_t * e2, int s2) ;
     // constructor for hface4 
-    inline FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                                    myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) ; 
+    inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                                    myhedge_t * e2, int s2, myhedge_t * e3, int s3) ; 
     // destructor only checking move-to
     inline ~FacePllBaseXMacro () ; 
 
@@ -658,7 +658,7 @@ public :
       typedef hedge1_IMPL inneredge_t ;
 
       // constructor 
-      inline Hface3EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, myhedge1_t *e2, int s2)
+      inline Hface3EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, myhedge_t *e2, int s2)
         : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
     } ;
     typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
@@ -667,7 +667,7 @@ public :
     {
       typedef FacePllBaseXMacro< hface3_IMPL > Base_t ;
     public :
-      Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) ;
+      Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2) ;
     };
 
     class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
@@ -677,8 +677,8 @@ public :
       typedef hedge1_IMPL inneredge_t ;
 
       // constructor 
-      inline Hface4EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
-                             myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
+      inline Hface4EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, 
+                             myhedge_t *e2, int s2, myhedge_t *e3, int s3)
         : FacePllBaseX< Hface4Empty >(e0,s0, e1,s1, e2,s2, e3,s3) {} 
     } ;
     typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
@@ -687,8 +687,8 @@ public :
     {
       typedef  FacePllBaseXMacro< hface4_IMPL > Base_t ;
     public :
-      Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1,
-                           myhedge1_t *e2, int s2, myhedge1_t *e3, int s3) ;
+      Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
+                           myhedge_t *e2, int s2, myhedge_t *e3, int s3) ;
     } ;
 
 public :
@@ -927,7 +927,7 @@ inline EdgePllBaseX< A > :: ~EdgePllBaseX()
   // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
   // gehoben wird.
 
-  if( myhedge1().isSet( myhedge1_t::flagLock ) )
+  if( myhedge().isSet( myhedge_t::flagLock ) )
   {
    cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
     abort () ;
@@ -938,14 +938,14 @@ inline EdgePllBaseX< A > :: ~EdgePllBaseX()
 template < class A > 
 inline bool EdgePllBaseX< A > :: lockedAgainstCoarsening () const
 {
-  return myhedge1().isSet( myhedge1_t::flagLock );
+  return myhedge().isSet( myhedge_t::flagLock );
 }
 
 template < class A >
 inline void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const 
 {
-  //os.writeObject (int(myhedge1 ().getrule ())) ;
-  os.put( char(myhedge1 ().getrule ()) ) ;
+  //os.writeObject (int(myhedge ().getrule ())) ;
+  os.put( char(myhedge ().getrule ()) ) ;
   return ;
 }
 
@@ -961,9 +961,9 @@ inline bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  typedef typename myhedge1_t :: myrule_t  myrule_t;
+  typedef typename myhedge_t :: myrule_t  myrule_t;
   return myrule_t (i) == myrule_t :: nosplit ? 
-    false : (myhedge1 ().refineImmediate (myrule_t (i)), true) ;
+    false : (myhedge ().refineImmediate (myrule_t (i)), true) ;
 }
 
 template < class A >
@@ -992,15 +992,15 @@ inline void EdgePllBaseX< A > :: unpackSelf (ObjectStream &,bool) {
 template < class A >
 bool EdgePllBaseX< A > :: lockAndTry ()
 {
-  myhedge1().set( myhedge1_t::flagLock );
-  return myhedge1().coarse () ;
+  myhedge().set( myhedge_t::flagLock );
+  return myhedge().coarse () ;
 }
 
 template < class A >
 inline bool EdgePllBaseX< A > :: unlockAndResume (bool r)
 {
-  myhedge1().unset( myhedge1_t::flagLock );
-  return ( r ) ? myhedge1().coarse () : false ;
+  myhedge().unset( myhedge_t::flagLock );
+  return ( r ) ? myhedge().coarse () : false ;
 }
 
 template < class A >
@@ -1019,15 +1019,15 @@ inline EdgePllBaseXMacro< A > :: ~EdgePllBaseXMacro()
 //  --FacePllBaseX
 //////////////////////////////////////////////////////////
 template < class A > inline FacePllBaseX < A > :: FacePllBaseX 
-    (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
+    (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2) 
   : A( e0, s0, e1, s1, e2, s2 )
 {
   return ;
 }
 
 template < class A > inline FacePllBaseX < A > :: 
-FacePllBaseX (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, 
-              myhedge1_t * e2, int s2, myhedge1_t * e3, int s3 ) 
+FacePllBaseX (myhedge_t * e0, int s0, myhedge_t * e1, int s1, 
+              myhedge_t * e2, int s2, myhedge_t * e3, int s3 ) 
   : A( e0, s0, e1, s1, e2, s2, e3, s3 )
 {
   return ;

@@ -90,23 +90,23 @@ void VertexPllBaseX :: unpackSelf (ObjectStream & os, bool i) {
 template < class A >
 vector < int > EdgePllBaseXMacro< A > :: estimateLinkage () const {
   vector < int > est ;
-  vector < int > l0 = myhedge1 ().myvertex(0)->accessPllX ().estimateLinkage () ;
-  vector < int > l1 = myhedge1 ().myvertex(1)->accessPllX ().estimateLinkage () ;
+  vector < int > l0 = myhedge ().myvertex(0)->accessPllX ().estimateLinkage () ;
+  vector < int > l1 = myhedge ().myvertex(1)->accessPllX ().estimateLinkage () ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (est), less < int > ()) ;
   return est ;
 }
 
 template < class A >
 LinkedObject :: Identifier EdgePllBaseXMacro< A > :: getIdentifier () const {
-  return LinkedObject :: Identifier (myhedge1 ().myvertex (0)->ident (), myhedge1 ().myvertex (1)->ident ()) ;
+  return LinkedObject :: Identifier (myhedge ().myvertex (0)->ident (), myhedge ().myvertex (1)->ident ()) ;
 }
 
 template < class A >
 void EdgePllBaseXMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  myhedge1 ().myvertex (0)->accessPllX ().unattach2 (i) ;
-  myhedge1 ().myvertex (1)->accessPllX ().unattach2 (i) ;
+  myhedge ().myvertex (0)->accessPllX ().unattach2 (i) ;
+  myhedge ().myvertex (1)->accessPllX ().unattach2 (i) ;
   return ;
 }
 
@@ -119,8 +119,8 @@ void EdgePllBaseXMacro< A > :: attach2 (int i)
   } else {
     (*pos).second ++ ;
   }
-  myhedge1 ().myvertex (0)->accessPllX ().attach2 (i) ;
-  myhedge1 ().myvertex (1)->accessPllX ().attach2 (i) ;
+  myhedge ().myvertex (0)->accessPllX ().attach2 (i) ;
+  myhedge ().myvertex (1)->accessPllX ().attach2 (i) ;
   return ;
 }
 
@@ -138,14 +138,14 @@ bool EdgePllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv)
     {
       ObjectStream & os = osv[j];
       os.writeObject (EDGE1) ;
-      os.writeObject (myhedge1 ().myvertex (0)->ident ()) ;
-      os.writeObject (myhedge1 ().myvertex (1)->ident ()) ;
+      os.writeObject (myhedge ().myvertex (0)->ident ()) ;
+      os.writeObject (myhedge ().myvertex (1)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhedge1_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+      assert( ! myhedge_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
 
       // pack refinement information 
-      myhedge1 ().backup ( os ) ;
+      myhedge ().backup ( os ) ;
       os.put( ObjectStream :: ENDOFSTREAM );
       
       inlineData ( os ) ;
@@ -160,7 +160,7 @@ void EdgePllBaseXMacro< A > :: unpackSelf (ObjectStream & os, bool i)
 {
   if (i) 
   {
-    myhedge1 ().restore ( os ) ;
+    myhedge ().restore ( os ) ;
     
     // stream should be at position ENDOFSTREAM now
     char c = os.get(); 
@@ -206,16 +206,16 @@ template class EdgePllBaseXMacro< GitterBasisPll :: ObjectsPll :: hedge1_IMPL > 
 
 // constructor for hface3 
 template <> FacePllBaseXMacro<GitterBasisPll :: ObjectsPll :: hface3_IMPL> :: 
-FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                  myhedge1_t * e2, int s2)
+FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                  myhedge_t * e2, int s2)
  : GitterBasisPll :: ObjectsPll :: hface3_IMPL(l, e0, s0, e1, s1, e2, s2), _moveTo(), _ref() 
 {
 }
 
 // constructor for hface4
 template <> FacePllBaseXMacro<GitterBasisPll :: ObjectsPll :: hface4_IMPL> :: 
-FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                  myhedge1_t * e2, int s2, myhedge1_t * e3, int s3)
+FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                  myhedge_t * e2, int s2, myhedge_t * e3, int s3)
  : GitterBasisPll :: ObjectsPll :: hface4_IMPL(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo(), _ref() 
 {
 }
@@ -236,10 +236,10 @@ template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage (
   // Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
 
   vector < int > t1, t2, est ;
-  vector < int > l0 = this->myhface ().myhedge1 (0)->estimateLinkage () ;
-  vector < int > l1 = this->myhface ().myhedge1 (1)->estimateLinkage () ;
-  vector < int > l2 = this->myhface ().myhedge1 (2)->estimateLinkage () ;
-  vector < int > l3 = this->myhface ().myhedge1 (A :: polygonlength == 3 ? 2 : 3)->estimateLinkage () ;
+  vector < int > l0 = this->myhface ().myhedge (0)->estimateLinkage () ;
+  vector < int > l1 = this->myhface ().myhedge (1)->estimateLinkage () ;
+  vector < int > l2 = this->myhface ().myhedge (2)->estimateLinkage () ;
+  vector < int > l3 = this->myhface ().myhedge (A :: polygonlength == 3 ? 2 : 3)->estimateLinkage () ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (t1), less < int > ()) ;
   set_intersection (l2.begin (), l2.end (), l3.begin (), l3.end (), back_inserter (t2), less < int > ()) ;
   set_intersection (t1.begin (), t1.end (), t2.begin (), t2.end (), back_inserter (est), less < int > ()) ;
@@ -329,7 +329,7 @@ template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i) {
     return ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
   {for (int j = 0 ; j < A :: polygonlength ; ++j ) 
-    this->myhface ().myhedge1 (j)->unattach2 (i) ;}
+    this->myhface ().myhedge (j)->unattach2 (i) ;}
   return ;
 }
 
@@ -346,7 +346,7 @@ template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) {
 
   {
     for (int j = 0 ; j < A :: polygonlength ; ++j ) 
-      this->myhface ().myhedge1 (j)->attach2 (i) ;
+      this->myhface ().myhedge (j)->attach2 (i) ;
   }
   return ;  
 }
@@ -1791,14 +1791,14 @@ void GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: detachPllXFromMacro (
 }
 
 GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: 
-Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) 
+Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2) 
   : Base_t(0, e0, s0, e1, s1, e2, s2) // 0 == level 0
 {
 } 
 
 GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: 
-Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
-                     myhedge1_t *e2, int s2, myhedge1_t *e3, int s3) 
+Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1, 
+                     myhedge_t *e2, int s2, myhedge_t *e3, int s3) 
   : Base_t(0, e0, s0, e1, s1, e2, s2, e3, s3) // 0 == level 0
 {
 } 

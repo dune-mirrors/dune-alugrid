@@ -15,7 +15,7 @@ template < class A >
 typename Hface3Top < A > :: myvertex_t* 
 Hface3Top < A > :: vertexNotOnSplitEdge( const int splitEdge )
 {
-  const myhedge1_t* edge = myhedge1( splitEdge );
+  const myhedge_t* edge = myhedge( splitEdge );
   const myvertex_t* edgeVx[ 2 ] = { edge->myvertex( 0 ), edge->myvertex( 1 ) };
   int iVx = (splitEdge + 2) % 3;
   myvertex_t* vx = myvertex( iVx );
@@ -30,13 +30,13 @@ Hface3Top < A > :: vertexNotOnSplitEdge( const int splitEdge )
 }
 
 template < class A > typename Hface3Top < A > :: edgepair_t 
-Hface3Top < A > :: subEdges( myhedge1_t* edge, const myvertex_t* vx0, const myvertex_t* vx1 )  
+Hface3Top < A > :: subEdges( myhedge_t* edge, const myvertex_t* vx0, const myvertex_t* vx1 )  
 {
   assert( vx0 );
   assert( vx1 );
 
   // get sub faces 
-  myhedge1_t* subEdge[ 2 ] = { edge->subedge1( 0 ), edge->subedge1( 1 ) };
+  myhedge_t* subEdge[ 2 ] = { edge->subedge( 0 ), edge->subedge( 1 ) };
 
   // check face order with vertex0
   int sub0 = 1 ;
@@ -107,7 +107,7 @@ template < class A > void Hface3Top < A > :: split_e01 ()
 
   assert( _inner == 0 );
   const int newLevel = 1 + level () ;
-  myhedge1_t* splitEdge = myhedge1(0);
+  myhedge_t* splitEdge = myhedge(0);
 
   myvertex_t * ev0 = splitEdge->subvertex (0) ;
   myvertex_t * vx2 = vertexNotOnSplitEdge( 0 );
@@ -120,12 +120,12 @@ template < class A > void Hface3Top < A > :: split_e01 ()
   innerface_t * f0 = new innerface_t (newLevel, 
                                       subEdge.first, twist(0), 
                                       e0, 0, 
-                                      myhedge1(2), twist(2), 
+                                      myhedge(2), twist(2), 
                                       0) ; // child number 
 
   innerface_t * f1 = new innerface_t (newLevel, 
                                       subEdge.second, twist(0), 
-                                      myhedge1(1), twist(1), 
+                                      myhedge(1), twist(1), 
                                       e0, 1, 
                                       1) ; // child number 
 
@@ -169,7 +169,7 @@ template < class A >  void Hface3Top < A > :: split_e12 ()
     */
   assert( _inner == 0 );
   const int newLevel= 1 + level () ;
-  myhedge1_t* splitEdge = myhedge1(1);
+  myhedge_t* splitEdge = myhedge(1);
 
   myvertex_t * ev0 = splitEdge->subvertex (0) ;
   assert(ev0) ;
@@ -187,7 +187,7 @@ template < class A >  void Hface3Top < A > :: split_e12 ()
   //cout << "new inner edge " << e0 << endl;
   
   innerface_t * f0 = new innerface_t (newLevel, // level 
-                                      myhedge1(0), twist(0),         // edge 0, twist 
+                                      myhedge(0), twist(0),         // edge 0, twist 
                                       subEdge.first, twist(1), // edge 0, twist 
                                       e0, 0,                         // edge 1, twist 
                                       0 ) ; // child number 
@@ -195,7 +195,7 @@ template < class A >  void Hface3Top < A > :: split_e12 ()
   innerface_t * f1 = new innerface_t (newLevel, // level 
                                       e0, 1,                         // edge 1, twist 
                                       subEdge.second, twist(1), // edge 2, twist 
-                                      myhedge1(2), twist(2),         // edge 0, twist
+                                      myhedge(2), twist(2),         // edge 0, twist
                                       1 ) ; // child number 
   assert (f0 && f1 ) ;
   f0->append(f1) ;
@@ -240,7 +240,7 @@ template < class A >  void Hface3Top < A > :: split_e20 ()
   assert( _inner == 0 );
   const int newLevel= 1 + level () ;
 
-  myhedge1_t* splitEdge = myhedge1( 2 );
+  myhedge_t* splitEdge = myhedge( 2 );
 
   // get vertices of new edge 
   myvertex_t * ev0 = splitEdge->subvertex (0) ;
@@ -255,12 +255,12 @@ template < class A >  void Hface3Top < A > :: split_e20 ()
 
   innerface_t * f0 = new innerface_t (newLevel, // level 
                                       e0, 0,                         // edge 0, twist 
-                                      myhedge1(1), twist(1),         // edge 1, twist 
+                                      myhedge(1), twist(1),         // edge 1, twist 
                                       subEdge.second, twist(2), // edge 2, twist 
                                       0 ) ; // child number 
 
   innerface_t * f1 = new innerface_t (newLevel, // level 
-                                      myhedge1(0), twist(0),         // edge 0, twist
+                                      myhedge(0), twist(0),         // edge 0, twist
                                       e0, 1,                         // edge 1, twist 
                                       subEdge.first, twist(2), // edge 2, twist 
                                       1 ) ; // child number 
@@ -283,9 +283,9 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
 {
   assert( _inner == 0 );
   int l = 1 + level () ;
-  myvertex_t * ev0 = myhedge1(0)->subvertex (0) ;
-  myvertex_t * ev1 = myhedge1(1)->subvertex (0) ;
-  myvertex_t * ev2 = myhedge1(2)->subvertex (0) ;
+  myvertex_t * ev0 = myhedge(0)->subvertex (0) ;
+  myvertex_t * ev1 = myhedge(1)->subvertex (0) ;
+  myvertex_t * ev2 = myhedge(2)->subvertex (0) ;
   assert(ev0 && ev1 && ev2 ) ;
   inneredge_t * e0 = new inneredge_t (l, ev0, ev1) ;
   inneredge_t * e1 = new inneredge_t (l, ev1, ev2) ;
@@ -293,9 +293,9 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
   assert( e0 && e1 && e2 ) ;
   e0->append(e1) ;
   e1->append(e2) ;
-  innerface_t * f0 = new innerface_t (l, this->subedge1(0,0), twist(0), e2, 1, this->subedge1(2,1), twist(2), 0) ;
-  innerface_t * f1 = new innerface_t (l, this->subedge1(0,1), twist(0), this->subedge1(1,0), twist(1), e0, 1, 1) ;
-  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge1(1,1), twist(1), this->subedge1(2,0), twist(2), 2) ;
+  innerface_t * f0 = new innerface_t (l, this->subedge(0,0), twist(0), e2, 1, this->subedge(2,1), twist(2), 0) ;
+  innerface_t * f1 = new innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), e0, 1, 1) ;
+  innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge(1,1), twist(1), this->subedge(2,0), twist(2), 2) ;
   innerface_t * f3 = new innerface_t (l, e0, 0, e1, 0, e2, 0, 3 ) ;
   assert (f0 && f1 && f2 && f3) ;
   f0->append(f1) ;
@@ -319,27 +319,27 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
 
     switch(r) 
     {
-      typedef typename myhedge1_t :: myrule_t myhedge1rule_t;
+      typedef typename myhedge_t :: myrule_t myhedgerule_t;
 
       // rotate of hedge rule does nothing, 
       // so its actually useless 
 
       case myrule_t :: e01 :
-        myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
+        myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (0))) ;
         split_e01 () ;
         break ;
       case myrule_t :: e12 :
-        myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (1))) ;
+        myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (1))) ;
         split_e12 () ;
         break ;
       case myrule_t :: e20 :
-        myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (2))) ;
+        myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (2))) ;
         split_e20 () ;
         break ;
       case myrule_t :: iso4 :
-        myhedge1 (0)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (0))) ;
-        myhedge1 (1)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (1))) ;
-        myhedge1 (2)->refineImmediate (myhedge1rule_t (myhedge1_t :: myrule_t :: iso2).rotate (twist (2))) ;
+        myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (0))) ;
+        myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (1))) ;
+        myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (2))) ;
         split_iso4 () ;
         break ;
       default :
@@ -438,7 +438,7 @@ template < class A > bool Hface3Top < A > :: coarse ()
     _inner = 0 ;
 
     _rule = myrule_t :: nosplit ;
-    {for (int i = 0 ; i < 3 ; i ++ ) myhedge1 (i)->coarse () ; }
+    {for (int i = 0 ; i < 3 ; i ++ ) myhedge (i)->coarse () ; }
   }
   return x ;
 }
@@ -501,7 +501,7 @@ setBoundaryId (const int id )
   for(int i=0; i<3; ++i) 
   {
     face.myvertex(i)->setBndId( id );
-    face.myhedge1(i)->setBndId( id );
+    face.myhedge(i)->setBndId( id );
   }
 }
 
@@ -862,33 +862,33 @@ template < class A > TetraTop < A > :: ~TetraTop ()
   if (_inner) delete _inner ;
 }
 
-//- --subedge1
-template < class A >  typename TetraTop < A > :: myhedge1_t * TetraTop < A > :: subedge1 (int face, int edge) 
+//- --subedge
+template < class A >  typename TetraTop < A > :: myhedge_t * TetraTop < A > :: subedge (int face, int edge) 
 {
   switch ( myhface3( face )->getrule() ) 
   {
   case myhface3_t :: myrule_t :: e01 :
     assert( edge == 0 );  // for bisection we only get one subEdge of a face
-    return myhface3 ( face )->subedge1 ( edge ) ;
+    return myhface3 ( face )->subedge ( edge ) ;
   case myhface3_t :: myrule_t :: e12 :
     assert( edge == 0 );  // for bisection we only get one subEdge of a face
-    return myhface3 ( face )->subedge1 ( edge ) ;
+    return myhface3 ( face )->subedge ( edge ) ;
   case myhface3_t :: myrule_t :: e20 :
     assert( edge == 0 );  // for bisection we only get one subEdge of a face
-    return myhface3 ( face )->subedge1 ( edge ) ;
+    return myhface3 ( face )->subedge ( edge ) ;
   case myhface3_t :: myrule_t :: iso4 :
     assert( edge < 3 );
-    return ((twist ( face ) < 0) ? myhface3 ( face )->subedge1 ((8 - edge + twist ( face )) % 3) : myhface3 ( face )->subedge1 ((edge + twist ( face )) % 3)) ;
+    return ((twist ( face ) < 0) ? myhface3 ( face )->subedge ((8 - edge + twist ( face )) % 3) : myhface3 ( face )->subedge ((edge + twist ( face )) % 3)) ;
   case myhface3_t :: myrule_t :: nosplit :
-    cerr << "**ERROR (FATAL): subedge1 () called on non-refined face. In " << __FILE__ << " " << __LINE__ << endl ;
+    cerr << "**ERROR (FATAL): subedge () called on non-refined face. In " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
     return 0 ;
   }
   return 0 ;
 }
 
-template < class A >  const typename TetraTop < A > :: myhedge1_t * TetraTop < A > :: subedge1 (int i, int j) const {
-  return ((TetraTop < A > *)this)->subedge1 (i,j) ;
+template < class A >  const typename TetraTop < A > :: myhedge_t * TetraTop < A > :: subedge (int i, int j) const {
+  return ((TetraTop < A > *)this)->subedge (i,j) ;
 }
 
 
@@ -1061,9 +1061,9 @@ template < class A >  void TetraTop < A > :: split_e01 ()
 
   splitInfo( myrule_t :: e01 );
 
-  myhedge1_t* subEdge = this->subedge1 (2, 0);
-  myhedge1_t* subEdge2 = this->subedge1 (3, 0);
-  myhedge1_t* orgEdge = this->myhedge1( 5 ) ;
+  myhedge_t* subEdge = this->subedge (2, 0);
+  myhedge_t* subEdge2 = this->subedge (3, 0);
+  myhedge_t* orgEdge = this->myhedge( 5 ) ;
  
   const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
 
@@ -1156,9 +1156,9 @@ template < class A >  void TetraTop < A > :: split_e12 ()
 
   splitInfo( myrule_t :: e12 );
 
-  myhedge1_t* subEdge = this->subedge1 (3, 0);
-  myhedge1_t* subEdge2 = this->subedge1 (0, 0);
-  myhedge1_t* orgEdge = this->myhedge1( 2 ) ;
+  myhedge_t* subEdge = this->subedge (3, 0);
+  myhedge_t* subEdge2 = this->subedge (0, 0);
+  myhedge_t* orgEdge = this->myhedge( 2 ) ;
  
   const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 1 : 0;
 
@@ -1246,9 +1246,9 @@ template < class A >  void TetraTop < A > :: split_e20 ()
 
   splitInfo( myrule_t :: e20 );
 
-  myhedge1_t* subEdge2 = this->subedge1 (1, 0);
-  myhedge1_t* subEdge = this->subedge1 (3, 0);
-  myhedge1_t* orgEdge = this->myhedge1( 4 ) ;
+  myhedge_t* subEdge2 = this->subedge (1, 0);
+  myhedge_t* subEdge = this->subedge (3, 0);
+  myhedge_t* orgEdge = this->myhedge( 4 ) ;
  
   const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
 
@@ -1339,9 +1339,9 @@ template < class A >  void TetraTop < A > :: split_e23 ()
 
   splitInfo( myrule_t :: e23 );
 
-  myhedge1_t* subEdge2 = this->subedge1 (1, 0);
-  myhedge1_t* subEdge = this->subedge1 (0, 0);
-  myhedge1_t* orgEdge = this->myhedge1( 0 ) ;
+  myhedge_t* subEdge2 = this->subedge (1, 0);
+  myhedge_t* subEdge = this->subedge (0, 0);
+  myhedge_t* orgEdge = this->myhedge( 0 ) ;
  
   const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
 
@@ -1447,9 +1447,9 @@ template < class A >  void TetraTop < A > :: split_e30 ()
 
   */
 
-  myhedge1_t* subEdge2 = this->subedge1 (2, 0);
-  myhedge1_t* subEdge = this->subedge1 (1, 0);
-  myhedge1_t* orgEdge = this->myhedge1( 3 ) ;
+  myhedge_t* subEdge2 = this->subedge (2, 0);
+  myhedge_t* subEdge = this->subedge (1, 0);
+  myhedge_t* orgEdge = this->myhedge( 3 ) ;
  
   const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
 
@@ -1517,9 +1517,9 @@ template < class A >  void TetraTop < A > :: split_e31 ()
 
   splitInfo( myrule_t :: e31 );
 
-  myhedge1_t* subEdge2 = this->subedge1 (2, 0);
-  myhedge1_t* subEdge = this->subedge1 (0, 0);
-  myhedge1_t* orgEdge = this->myhedge1( 1 ) ;
+  myhedge_t* subEdge2 = this->subedge (2, 0);
+  myhedge_t* subEdge = this->subedge (0, 0);
+  myhedge_t* orgEdge = this->myhedge( 1 ) ;
  
   const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 1 : 0;
 
@@ -1835,19 +1835,19 @@ splitISO8 ()
   typedef typename A :: inneredge_t inneredge_t;
   const int l = 1 + this->level () ; 
 
-  myvertex_t * e31 = myhface3 (0)->myhedge1 ((twist(0) < 0) ? ((9+twist(0))%3) : (twist(0)%3))->subvertex (0) ;
-  myvertex_t * e20 = myhface3 (1)->myhedge1 ((twist(1) < 0) ? ((9+twist(1))%3) : (twist(1)%3))->subvertex (0) ;
+  myvertex_t * e31 = myhface3 (0)->myhedge ((twist(0) < 0) ? ((9+twist(0))%3) : (twist(0)%3))->subvertex (0) ;
+  myvertex_t * e20 = myhface3 (1)->myhedge ((twist(1) < 0) ? ((9+twist(1))%3) : (twist(1)%3))->subvertex (0) ;
   assert(e31 && e20);
   inneredge_t * e0 = new inneredge_t (l, e31, e20) ;
   assert(e0) ;
-  innerface_t * f0 = new innerface_t (l, subedge1 (3, 2), ((twist(3)>=0)?1:0), subedge1 (1, 2), ((twist(1)>=0)?1:0), subedge1 (2, 2), ((twist(2)>=0)?1:0)) ;
-  innerface_t * f1 = new innerface_t (l, subedge1 (3, 0), ((twist(3)>=0)?1:0), subedge1 (2, 1), ((twist(2)>=0)?1:0), subedge1 (0, 2), ((twist(0)>=0)?1:0)) ;
-  innerface_t * f2 = new innerface_t (l, subedge1 (3, 1), ((twist(3)>=0)?1:0), subedge1 (0, 1), ((twist(0)>=0)?1:0), subedge1 (1, 0), ((twist(1)>=0)?1:0)) ;
-  innerface_t * f3 = new innerface_t (l, subedge1 (2, 0), ((twist(2)>=0)?0:1), subedge1 (0, 0), ((twist(0)>=0)?0:1), subedge1 (1, 1), ((twist(1)>=0)?0:1)) ;
-  innerface_t * f4 = new innerface_t (l, e0, 0, subedge1 (3, 2), ((twist(3)>=0)?0:1), subedge1 (2, 1), ((twist(2)>=0)?1:0)) ;
-  innerface_t * f5 = new innerface_t (l, e0, 0, subedge1 (3, 1), ((twist(3)>=0)?1:0), subedge1 (0, 2), ((twist(0)>=0)?0:1)) ; 
-  innerface_t * f6 = new innerface_t (l, e0, 0, subedge1 (1, 0), ((twist(1)>=0)?0:1), subedge1 (0, 0), ((twist(0)>=0)?1:0)) ;
-  innerface_t * f7 = new innerface_t (l, e0, 0, subedge1 (1, 2), ((twist(1)>=0)?1:0), subedge1 (2, 0), ((twist(2)>=0)?0:1)) ;
+  innerface_t * f0 = new innerface_t (l, subedge (3, 2), ((twist(3)>=0)?1:0), subedge (1, 2), ((twist(1)>=0)?1:0), subedge (2, 2), ((twist(2)>=0)?1:0)) ;
+  innerface_t * f1 = new innerface_t (l, subedge (3, 0), ((twist(3)>=0)?1:0), subedge (2, 1), ((twist(2)>=0)?1:0), subedge (0, 2), ((twist(0)>=0)?1:0)) ;
+  innerface_t * f2 = new innerface_t (l, subedge (3, 1), ((twist(3)>=0)?1:0), subedge (0, 1), ((twist(0)>=0)?1:0), subedge (1, 0), ((twist(1)>=0)?1:0)) ;
+  innerface_t * f3 = new innerface_t (l, subedge (2, 0), ((twist(2)>=0)?0:1), subedge (0, 0), ((twist(0)>=0)?0:1), subedge (1, 1), ((twist(1)>=0)?0:1)) ;
+  innerface_t * f4 = new innerface_t (l, e0, 0, subedge (3, 2), ((twist(3)>=0)?0:1), subedge (2, 1), ((twist(2)>=0)?1:0)) ;
+  innerface_t * f5 = new innerface_t (l, e0, 0, subedge (3, 1), ((twist(3)>=0)?1:0), subedge (0, 2), ((twist(0)>=0)?0:1)) ; 
+  innerface_t * f6 = new innerface_t (l, e0, 0, subedge (1, 0), ((twist(1)>=0)?0:1), subedge (0, 0), ((twist(0)>=0)?1:0)) ;
+  innerface_t * f7 = new innerface_t (l, e0, 0, subedge (1, 2), ((twist(1)>=0)?1:0), subedge (2, 0), ((twist(2)>=0)?0:1)) ;
   assert(f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7) ;
   f0->append(f1) ;
   f1->append(f2) ;
@@ -2139,7 +2139,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
 
       for (int e=0; e<6; ++e)
       {
-        myhedge1_t *edge = this->myhedge1(e);
+        myhedge_t *edge = this->myhedge(e);
         if ( edge->down() )
         {
           if ( ! edgeCoarseningFlags[ edge->getIndex() ] ) 
@@ -2343,26 +2343,26 @@ void TetraTop < A > :: doRestore (InStream_t & is)
 // #        #       #   #      #    #    #  #    #     #    #    # #     #   #     #    #  #
 // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
    
-template < class A > typename Periodic3Top < A > :: myhedge1_t * Periodic3Top < A > :: subedge1 (int i, int j) {
+template < class A > typename Periodic3Top < A > :: myhedge_t * Periodic3Top < A > :: subedge (int i, int j) {
   switch (myhface3(i)->getrule()) {
     case myhface3_t :: myrule_t :: e01 :
     case myhface3_t :: myrule_t :: e12 :
     case myhface3_t :: myrule_t :: e20 :
       assert( j == 0 );
-      return myhface3 (i)->subedge1 (0) ;
+      return myhface3 (i)->subedge (0) ;
     case myhface3_t :: myrule_t :: iso4 :
       assert( j < 3 );
-      return ((twist (i) < 0) ? myhface3 (i)->subedge1 ((8 - j + twist (i)) % 3) : myhface3 (i)->subedge1 ((j + twist (i)) % 3)) ;
+      return ((twist (i) < 0) ? myhface3 (i)->subedge ((8 - j + twist (i)) % 3) : myhface3 (i)->subedge ((j + twist (i)) % 3)) ;
     case myhface3_t :: myrule_t :: nosplit :
-      cerr << "**FEHLER (FATAL): subedge1 () auf nicht in verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << endl ;
+      cerr << "**FEHLER (FATAL): subedge () auf nicht in verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << endl ;
       abort () ;
       return 0 ;
   }
   return 0 ;
 }
 
-template < class A > const typename Periodic3Top < A > :: myhedge1_t * Periodic3Top < A > :: subedge1 (int i, int j) const {
-  return ((Periodic3Top < A > *)this)->subedge1 (i,j) ;
+template < class A > const typename Periodic3Top < A > :: myhedge_t * Periodic3Top < A > :: subedge (int i, int j) const {
+  return ((Periodic3Top < A > *)this)->subedge (i,j) ;
 }
 
 template < class A > typename Periodic3Top < A > ::  myhface3_t * Periodic3Top < A > :: subface (int i, int j) {

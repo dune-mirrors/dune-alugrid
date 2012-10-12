@@ -1272,8 +1272,8 @@ public :
       inline const myvertex_t * myvertex (int) const ;
       virtual myvertex_t * subvertex (int) = 0 ;
       virtual const myvertex_t * subvertex (int) const = 0 ;
-      virtual hedge1 * subedge1 (int) = 0 ;
-      virtual const hedge1 * subedge1 (int) const = 0 ;
+      virtual hedge1 * subedge (int) = 0 ;
+      virtual const hedge1 * subedge (int) const = 0 ;
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
@@ -1317,11 +1317,13 @@ public :
         inline pair < const myconnect_t *, int > rear () const ;
         friend class hface3 ;
       } nb ; // 24 bytes 
-    protected :
+    public:
       typedef VertexGeo   myvertex_t ;
-      typedef hedge1_GEO  myhedge1_t ;
+      typedef hedge1_GEO  myhedge_t ;
+
+      typedef myhedge_t   myhedge1_t ;
     protected :
-      inline hface3 (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+      inline hface3 (myhedge_t *,int, myhedge_t *, int, myhedge_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
@@ -1332,16 +1334,21 @@ public :
       inline int twist (int) const ;
       inline myvertex_t * myvertex (int) ;
       inline const myvertex_t * myvertex (int) const ;
-      inline myhedge1_t * myhedge1 (int) ;
-      inline const myhedge1_t * myhedge1 (int) const ;
+
+      inline myhedge_t * myhedge (int) ;
+      inline const myhedge_t * myhedge (int) const ;
+      // deprecated methods 
+      inline myhedge_t * myhedge1 ( int i ) { return myhedge( i ); }
+      inline const myhedge_t * myhedge1 ( int i ) const { return myhedge( i ); }
+
       virtual hface3 * down () = 0 ;
       virtual const hface3 * down () const = 0 ;
       virtual hface3 * next () = 0 ;
       virtual const hface3 * next () const = 0 ;
       virtual myvertex_t * subvertex (int) = 0 ;
       virtual const myvertex_t * subvertex (int) const = 0 ;
-      virtual myhedge1_t * subedge1 (int) = 0 ;
-      virtual const myhedge1_t * subedge1 (int) const = 0 ;
+      virtual myhedge1_t * subedge (int) = 0 ;
+      virtual const myhedge1_t * subedge (int) const = 0 ;
       virtual hface3 * subface (int) = 0 ;
       virtual const hface3 * subface (int) const = 0 ;
     public :
@@ -1390,12 +1397,13 @@ public :
         inline pair < const myconnect_t *, int > rear () const ;
         friend class hface4 ;
       } nb ; // 24 byte 
-    protected :
-      typedef VertexGeo  myvertex_t ;
-      typedef hedge1_GEO  myhedge1_t ;
     public :
+      typedef VertexGeo   myvertex_t ;
+      typedef hedge1_GEO  myhedge_t ;
+
+      typedef myhedge_t   myhedge1_t ;
     protected :
-      inline hface4 (myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+      inline hface4 (myhedge_t *, int, myhedge_t *, int, myhedge_t *, int, myhedge_t *, int) ;
       inline int postRefinement () ;
       inline int preCoarsening () ;
     public :
@@ -1406,16 +1414,20 @@ public :
       inline int twist (int) const ;
       inline myvertex_t * myvertex (int) ;
       inline const myvertex_t * myvertex (int) const ;
-      inline myhedge1_t * myhedge1 (int) ;
-      inline const myhedge1_t * myhedge1 (int) const ;
+      inline myhedge_t * myhedge (int) ;
+      inline const myhedge_t * myhedge (int) const ;
+
+      // deprecated methods 
+      inline myhedge_t * myhedge1 ( int i ) { return myhedge( i ); }
+      inline const myhedge_t * myhedge1 ( int i ) const { return myhedge( i ); }
       virtual hface4 * down () = 0 ;
       virtual const hface4 * down () const = 0 ;
       virtual hface4 * next () = 0 ;
       virtual const hface4 * next () const = 0 ;
       virtual myvertex_t * subvertex (int) = 0 ;
       virtual const myvertex_t * subvertex (int) const = 0 ;
-      virtual myhedge1_t * subedge1 (int) = 0 ;
-      virtual const myhedge1_t * subedge1 (int) const = 0 ;
+      virtual myhedge_t * subedge (int) = 0 ;
+      virtual const myhedge_t * subedge (int) const = 0 ;
       virtual hface4 * subface (int) = 0 ;
       virtual const hface4 * subface (int) const = 0 ;
 
@@ -1429,7 +1441,7 @@ public :
     public :
       myrule_t parentRule() const;
     private :
-      myhedge1_t * e [polygonlength] ; // polygonlength * 8 = 32 
+      myhedge_t * e [polygonlength] ; // polygonlength * 8 = 32 
 
     public:  
       // reference counter 
@@ -1486,8 +1498,11 @@ public :
 
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-      inline myhedge_t* myhedge1(int);
-      inline const  myhedge_t* myhedge1(int) const;
+      inline myhedge_t* myhedge(int);
+      inline const  myhedge_t* myhedge(int) const;
+      // deprecated methods 
+      inline myhedge_t* myhedge1( int i ) { return myhedge( i ); }
+      inline const  myhedge_t* myhedge1( int i ) const { return myhedge( i ); }
       inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
       inline pair < hasFace3 *, int > myneighbour (int) ;
@@ -1668,8 +1683,11 @@ public :
 
       inline VertexGeo * myvertex (int) ;
       inline const VertexGeo * myvertex (int) const ;
-      inline myhedge_t* myhedge1(int);
-      inline const myhedge_t* myhedge1(int) const;
+      inline myhedge_t* myhedge(int);
+      inline const myhedge_t* myhedge(int) const;
+
+      inline myhedge_t* myhedge1( int i ) { return myhedge( i ); }
+      inline const myhedge_t* myhedge1( int i ) const { return myhedge( i ); }
 
       inline VertexGeo * myvertex (int,int) ;
       inline const VertexGeo * myvertex (int,int) const ;
@@ -2691,7 +2709,7 @@ inline ostream& operator<< (ostream& s, const Gitter :: Geometric :: hface3* fac
       s << face->myvertex( i ) << " ";
     for (int i=0; i<3; ++i) 
     {
-      s << face->myhedge1( i ) << " ";
+      s << face->myhedge( i ) << " ";
     }
 
     s << endl;
@@ -3174,7 +3192,7 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () const
 }
 
 inline Gitter :: Geometric :: hface3 :: 
-hface3 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
+hface3 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2) 
 {
   nb._parRule = (Hface3Rule::undefined);
   assert(e0 && e1 && e2) ;
@@ -3232,24 +3250,24 @@ inline int Gitter :: Geometric :: hface3 :: twist (int i) const {
   return nb.s [i] ;
 }
 
-inline Gitter :: Geometric :: hface3 :: myhedge1_t * Gitter :: Geometric :: hface3 :: myhedge1 (int i) {
+inline Gitter :: Geometric :: hface3 :: myhedge_t * Gitter :: Geometric :: hface3 :: myhedge (int i) {
   assert (i < 3) ;
   return e [i] ;
 }
 
-inline const Gitter :: Geometric :: hface3 :: myhedge1_t * Gitter :: Geometric :: hface3 :: myhedge1 (int i) const {
+inline const Gitter :: Geometric :: hface3 :: myhedge_t * Gitter :: Geometric :: hface3 :: myhedge (int i) const {
   assert (i < 3) ;
   return e [i] ;
 }
 
 inline Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :: hface3 :: myvertex (int i) {
   assert(0<=i && i < 3) ;
-  return myhedge1 (i)->myvertex ( nb.s[i] ) ;
+  return myhedge (i)->myvertex ( nb.s[i] ) ;
 }
 
 inline const Gitter :: Geometric :: hface3 :: myvertex_t * Gitter :: Geometric :: hface3 :: myvertex (int i) const {
   assert(0<=i && i < 3) ;
-  return myhedge1 (i)->myvertex (nb.s[i]) ;
+  return myhedge (i)->myvertex (nb.s[i]) ;
 }
 
 inline Gitter::Geometric::hface3::myrule_t 
@@ -3370,7 +3388,7 @@ Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () const
 }
 
 inline Gitter :: Geometric :: hface4 :: 
-hface4 (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) 
+hface4 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2, myhedge_t * e3, int s3) 
 {
   assert(e0 && e1 && e2 && e3) ;
   (e [0] = e0)->ref ++ ; nb.s [0] = s0 ;
@@ -3422,24 +3440,24 @@ inline int Gitter :: Geometric :: hface4 :: twist (int i) const {
   return nb.s [i] ;
 }
 
-inline Gitter :: Geometric :: hface4 :: myhedge1_t * Gitter :: Geometric :: hface4 :: myhedge1 (int i) {
+inline Gitter :: Geometric :: hface4 :: myhedge_t * Gitter :: Geometric :: hface4 :: myhedge (int i) {
   assert (i < 4) ;
   return e [i] ;
 }
 
-inline const Gitter :: Geometric :: hface4 :: myhedge1_t * Gitter :: Geometric :: hface4 :: myhedge1 (int i) const {
+inline const Gitter :: Geometric :: hface4 :: myhedge_t * Gitter :: Geometric :: hface4 :: myhedge (int i) const {
   assert (i < 4) ;
   return e [i] ;
 }
 
 inline Gitter :: Geometric :: hface4 :: myvertex_t * Gitter :: Geometric :: hface4 :: myvertex (int i) {
   assert(0<=i && i < 4) ;
-  return myhedge1 (i)->myvertex (nb.s[i]) ;
+  return myhedge (i)->myvertex (nb.s[i]) ;
 }
 
 inline const Gitter :: Geometric :: hface4 :: myvertex_t * Gitter :: Geometric :: hface4 :: myvertex (int i) const {
   assert(0<=i && i < 4) ;
-  return myhedge1 (i)->myvertex (nb.s[i]) ;
+  return myhedge (i)->myvertex (nb.s[i]) ;
 }
 
 inline Gitter::Geometric::hface4::myrule_t
@@ -3617,24 +3635,24 @@ inline int Gitter::Geometric::Tetra::evalEdgeTwist(int face, int vertex) const
   return edgeTwist[twist(face)+3][vertex];
 }
 
-inline Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric :: Tetra :: myhedge1 (int edge) 
+inline Gitter :: Geometric :: Tetra :: myhedge_t * Gitter :: Geometric :: Tetra :: myhedge (int edge) 
 {
   assert(edge >= 0 && edge < 6);
 
   typedef Gitter::Geometric::Tetra ThisType;
 
   return myhface(ThisType::edgeMap[edge][0])->
-    myhedge1(evalEdgeTwist(ThisType::edgeMap[edge][0],ThisType::edgeMap[edge][1]));
+    myhedge(evalEdgeTwist(ThisType::edgeMap[edge][0],ThisType::edgeMap[edge][1]));
 }
 
-inline const Gitter :: Geometric :: Tetra :: myhedge1_t * Gitter :: Geometric :: Tetra :: myhedge1 (int edge) const
+inline const Gitter :: Geometric :: Tetra :: myhedge_t * Gitter :: Geometric :: Tetra :: myhedge (int edge) const
 {
   assert(edge >= 0 && edge < 6);
 
   typedef Gitter::Geometric::Tetra ThisType;
 
   return myhface(ThisType::edgeMap[edge][0])->
-    myhedge1(evalEdgeTwist(ThisType::edgeMap[edge][0],ThisType::edgeMap[edge][1]));
+    myhedge(evalEdgeTwist(ThisType::edgeMap[edge][0],ThisType::edgeMap[edge][1]));
 
 }
 
@@ -3974,20 +3992,20 @@ Gitter :: Geometric :: Hexa :: myvertex (int i) const
   return myvertex( vertex2Face[i][0] , vertex2Face[i][1] );
 }
 
-inline Gitter :: Geometric :: Hexa :: myhedge1_t * Gitter :: Geometric :: Hexa :: myhedge1(int i) {
+inline Gitter :: Geometric :: Hexa :: myhedge_t * Gitter :: Geometric :: Hexa :: myhedge(int i) {
   assert (0 <= i && i < 12);
 
   typedef Gitter::Geometric::Hexa MyType;
   return myhface(MyType::edgeMap[i][0])->
-    myhedge1(evalEdgeTwist(MyType::edgeMap[i][0], MyType::edgeMap[i][1]));
+    myhedge(evalEdgeTwist(MyType::edgeMap[i][0], MyType::edgeMap[i][1]));
 }
 
-inline const Gitter :: Geometric :: Hexa :: myhedge1_t * Gitter :: Geometric :: Hexa :: myhedge1(int i) const {
+inline const Gitter :: Geometric :: Hexa :: myhedge_t * Gitter :: Geometric :: Hexa :: myhedge(int i) const {
   assert (0 <= i && i < 12);
 
   typedef Gitter::Geometric::Hexa MyType;
   return myhface(MyType::edgeMap[i][0])->
-    myhedge1(evalEdgeTwist(MyType::edgeMap[i][0], MyType::edgeMap[i][1]));
+    myhedge(evalEdgeTwist(MyType::edgeMap[i][0], MyType::edgeMap[i][1]));
 }
 
 inline pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: Hexa :: myneighbour (int i) {
@@ -4079,7 +4097,7 @@ inline void Gitter :: Geometric :: hbndseg3 :: attachleafs ()
   face.addleaf();
   for (int i=0; i<3; ++i) 
   {
-    face.myhedge1(i)->addleaf();
+    face.myhedge(i)->addleaf();
     face.myvertex(i)->addleaf();
   }
 }
@@ -4092,7 +4110,7 @@ inline void Gitter :: Geometric :: hbndseg3 :: detachleafs ()
   face.removeleaf();
   for (int i=0; i<3; ++i) 
   {
-    face.myhedge1(i)->removeleaf();
+    face.myhedge(i)->removeleaf();
     face.myvertex(i)->removeleaf();
   }
 }
@@ -4170,7 +4188,7 @@ inline void Gitter :: Geometric :: hbndseg4 :: attachleafs ()
   face.addleaf();
   for (int i=0; i<4; ++i) 
   {
-    face.myhedge1(i)->addleaf();
+    face.myhedge(i)->addleaf();
     face.myvertex(i)->addleaf();
   }
 }
@@ -4184,7 +4202,7 @@ inline void Gitter :: Geometric :: hbndseg4 :: detachleafs ()
   face.removeleaf();
   for (int i=0; i<4; ++i) 
   {
-    face.myhedge1(i)->removeleaf();
+    face.myhedge(i)->removeleaf();
     face.myvertex(i)->removeleaf();
   }
 }
