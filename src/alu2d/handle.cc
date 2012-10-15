@@ -16,13 +16,13 @@ Hmesh<N,NV>::Hmesh(const std::string &macroname, int pnconfDeg, Refco::tag_t pre
 }
 
 template < int N, int NV >
-Hmesh<N,NV>::Hmesh(istream& gridfile, int pnconfDeg, Refco::tag_t pref_rule) 
-  : _nconfDeg(pnconfDeg), refinement_rule(pref_rule) 
+Hmesh<N,NV> :: Hmesh(std::istream &gridfile, int pnconfDeg, Refco::tag_t pref_rule) :
+  _nconfDeg(pnconfDeg), refinement_rule(pref_rule) 
 {
   double time;
   long unsigned int nbr;
 
-  bool restart = setup_grid( gridfile, time, nbr);
+  bool restart = setup_grid(gridfile, time, nbr);
   if( restart ) 
   { 
     recoverGrid( gridfile );
@@ -30,7 +30,7 @@ Hmesh<N,NV>::Hmesh(istream& gridfile, int pnconfDeg, Refco::tag_t pref_rule)
 }
 
 template < int N, int NV >
-Hmesh<N,NV>::Hmesh(const std::string &macroname,int pnconfDeg) :
+Hmesh<N,NV> :: Hmesh(const std::string &macroname,int pnconfDeg) :
   _nconfDeg(pnconfDeg), refinement_rule(Refco::quart) 
 {
   setup_grid(macroname);    
@@ -47,7 +47,7 @@ template < int N, int NV >
 void Hmesh<N,NV>::setup_grid(const std::string &filename) 
 {
 #ifndef NDEBUG 
-  cerr << "\n  Hmesh_basic::ascireadtriang(?) opens: " ;
+  cerr << "\n  Hmesh_basic::asciireadtriang(?) opens: " ;
   cerr << filename << "\n" << endl ;
 #endif
 
@@ -66,7 +66,7 @@ void Hmesh<N,NV>::setup_grid(const std::string &filename)
   double time;
   long unsigned int nbr;
 
-  // call setup with istream 
+  // call setup with std::istream 
   const bool restart = setup_grid(in, time, nbr);
 
   // if restart we have to read the hierarchy 
@@ -77,14 +77,14 @@ void Hmesh<N,NV>::setup_grid(const std::string &filename)
 }
 
 template < int N, int NV >
-bool Hmesh<N,NV>::setup_grid(istream &macrofile, double &time, long unsigned int &nbr) 
+bool Hmesh<N,NV>::setup_grid(std::istream &macrofile, double &time, long unsigned int &nbr) 
 {
   ncv=NULL;
   adp = new multivertexadapter_t;
   _pro_el=0;  // new Prolong_basic;
   _rest_el=0; // new Restrict_basic;
 
-  bool restart = ascireadtriang (macrofile,time,nbr);
+  bool restart = asciireadtriang (macrofile,time,nbr);
 
   /* set periodic neighbours of vertices */
 #ifdef PERIODIC_VERTICES

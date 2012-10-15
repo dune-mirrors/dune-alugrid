@@ -9,7 +9,7 @@ typedef basic_stringbuf<char>  strstreambuf_t ;
 
 template <int N,int NV>
 bool
-Hmesh<N,NV> :: ascireadtriang(istream &in, double &time, unsigned long int &nbr)
+Hmesh<N,NV> :: asciireadtriang(std::istream &in, double &time, unsigned long int &nbr)
 {
   bool isbackup = false; // Wiederaufsetzen?
   int c = in.peek();
@@ -22,7 +22,7 @@ Hmesh<N,NV> :: ascireadtriang(istream &in, double &time, unsigned long int &nbr)
     // Erste Zeile in einen strstreambuf lesen und auf 'Backup' untersuchen.
     strstreambuf_t buf;
     in.get(buf);
-    istream is(& buf);
+    std::istream is(& buf);
     std::string str;
     is >> str;
     if( str == std::string( "Backup" ) )
@@ -34,7 +34,7 @@ Hmesh<N,NV> :: ascireadtriang(istream &in, double &time, unsigned long int &nbr)
       refinement_rule = (Refco::tag_t)rrule;
       if( _nconfDeg < 0 )
       {
-        cerr << "Error in Hmesh :: ascireadtriang: "
+        cerr << "Error in Hmesh :: asciireadtriang: "
              << "Negative degree of nonconformity encountered." << endl;
         abort();
       }
@@ -47,18 +47,18 @@ Hmesh<N,NV> :: ascireadtriang(istream &in, double &time, unsigned long int &nbr)
     } 
     else if( str != std::string( "Triangles" ) )
     {
-      cerr << "Error in Hmesh :: ascireadtriang: "
+      cerr << "Error in Hmesh :: asciireadtriang: "
            << "Wrong macrogrid format: " << endl;
       cerr << "file with !-line but command not recognized" << endl;
       abort();
     }
   }
-  hmesh_basic_t::ascireadtriang(in, isbackup);
+  hmesh_basic_t::asciireadtriang(in, isbackup);
   return isbackup;
 }
  
 template <int N,int NV>
-void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose) 
+void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose) 
 {
   // read vertices
   int nv = 0;
@@ -142,7 +142,7 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
       case bndel_t::periodic:
         if( ncoord != 2 )
         {
-          cerr << "Error in Hmesh :: ascireadtriang: "
+          cerr << "Error in Hmesh :: asciireadtriang: "
                << "Boundary type " << bndel_t::periodic
                << " is only supported for flat grids." << endl;
           abort();
@@ -171,7 +171,7 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
         linein >> bnd_list[i].second;
         if( bnd_list[i].second < 0 )
         {
-          cerr << "Error in Hmesh :: ascireadtriang: "
+          cerr << "Error in Hmesh :: asciireadtriang: "
                << "Periodic neighbor boundary has negative index." << endl;
           abort();
         }
@@ -181,14 +181,14 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
           const int j = bnd_list[i].second;
           if( bnd_list[j].second < 0 )
           {
-            cerr << "Error in Hmesh :: ascireadtriang: "
+            cerr << "Error in Hmesh :: asciireadtriang: "
                  << "Neighbor of periodic boundary is non-periodic. "
                  << "(" << i << " -> " << j << ")" << endl;
             abort();
           }
           if( bnd_list[j].second != i )
           {
-            cerr << "Error in Hmesh :: ascireadtriang: "
+            cerr << "Error in Hmesh :: asciireadtriang: "
                  << "Periodic boundaries not linked symmetrically "
                  << "(" << i << " -> " << j << ", but "
                  << j << " -> " << bnd_list[j].second << ")." << endl;
@@ -255,7 +255,7 @@ void Hmesh_basic<N,NV> :: ascireadtriang(istream &in, const bool verbose)
 
     if( perbnd_invalid != 0 )
     {
-      cerr << "Error in Hmesh :: ascireadtriang: "
+      cerr << "Error in Hmesh :: asciireadtriang: "
            << "Periodic boundaries don't match." << endl;
       abort();
     }
@@ -357,26 +357,26 @@ void Hmesh_basic<N,NV> :: setorientation()
 
 template <int N,int NV>
 void
-Hmesh<N,NV>::asciwritetriang(const std::string &filename,
-                             double time, unsigned long int nbr)
+Hmesh<N,NV> :: asciiwritetriang(const std::string &filename,
+                                double time, unsigned long int nbr)
 {
 #ifndef NDEBUG
-  cerr << "\n  Hmesh_basic::asciwritetriang(?) opens: " ;
+  cerr << "\n  Hmesh_basic::asciiwritetriang(?) opens: " ;
   cerr << filename << "\n" << endl ;
 #endif
 
   // create stream 
-  ofstream out(filename.c_str(), ios::out|ios::trunc) ;
+  std::ofstream out(filename.c_str(), ios::out|ios::trunc);
 
   // call write triang with stream 
-  hmesh_basic_t::asciwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
+  hmesh_basic_t::asciiwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
 }
  
 template <int N,int NV>
 void
-Hmesh_basic<N,NV>::
-asciwritetriang(ostream &out, double time, unsigned long int nbr,
-                int nconfDeg, Refco::tag_t refinement_rule )
+Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
+                                      double time, unsigned long int nbr,
+                                      int nconfDeg, Refco::tag_t refinement_rule)
 {
   vl.renumber() ;
 
@@ -490,7 +490,7 @@ void Hmesh<N,NV>::
 storeGrid(const std::string &filename, double time, unsigned long int nbr)
 {
   // create outstream 
-  ofstream out( filename.c_str(), ios::out|ios::trunc);
+  std::ofstream out(filename.c_str(), ios::out|ios::trunc);
 
   if( ! out ) 
   {
@@ -504,10 +504,10 @@ storeGrid(const std::string &filename, double time, unsigned long int nbr)
 
 template <int N,int NV>
 void Hmesh<N,NV>::
-storeGrid( std::ostream& out, double time, unsigned long int nbr)
+storeGrid(std::ostream &out, double time, unsigned long int nbr)
 {
   // write macro triangulation 
-  hmesh_basic_t::asciwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
+  hmesh_basic_t::asciiwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
 
   // Status des Gitters sichern
   for( int level = 0 ;; level++ ) 
@@ -530,7 +530,7 @@ storeGrid( std::ostream& out, double time, unsigned long int nbr)
 
 template <int N,int NV>
 void
-Hmesh<N,NV>::storeIndicies(ostream& out) 
+Hmesh<N,NV>::storeIndicies(std::ostream &out) 
 {
   // backup index managers 
   for (int i=0;i<numOfIndexManager2d; ++i) 
@@ -575,7 +575,7 @@ Hmesh<N,NV>::storeIndicies(ostream& out)
 
 template <int N,int NV>
 bool
-Hmesh<N,NV>::recoverGrid(std::istream& in)
+Hmesh<N,NV>::recoverGrid(std::istream &in)
 {
   int compwarn = 0;
 
@@ -635,7 +635,7 @@ Hmesh<N,NV>::recoverGrid(std::istream& in)
 
 template <int N,int NV>
 void
-Hmesh<N,NV>::recoverIndicies(istream& in) 
+Hmesh<N,NV>::recoverIndicies(std::istream &in) 
 {
   // use the systems byte order (otherwise store byte order in storeIndices)
   RestoreInfo restoreInfo ( RestoreInfo :: systemByteOrder () );

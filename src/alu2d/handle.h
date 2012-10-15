@@ -159,10 +159,10 @@ class Hmesh_basic : public IndexProvider {
     Hmesh_basic & operator = (const Hmesh_basic &) ;
 
  protected:
-    void asciwritetriang(ostream &, double, unsigned long int nbr, 
-                         int nconfDeg, Refco::tag_t ref_rule ) ;
+    void asciiwritetriang(std::ostream &, double, unsigned long int nbr, 
+                          int nconfDeg, Refco::tag_t ref_rule);
     
-    void ascireadtriang(istream &, const bool = true ) ;
+    void asciireadtriang(istream &, const bool = true ) ;
 
     void setorientation();
 
@@ -300,8 +300,8 @@ class Hmesh : public Hmesh_basic<N,NV> {
   void setup_grid(const std::string &);
   bool setup_grid(istream &, double &, unsigned long int & );
 
-  bool ascireadtriang(istream &, double &, unsigned long int & );
-  void asciwritetriang(const std::string &, double, unsigned long int);
+  bool asciireadtriang(istream &, double &, unsigned long int & );
+  void asciiwritetriang(const std::string &, double, unsigned long int);
 
   public:
 
@@ -337,12 +337,12 @@ class Hmesh : public Hmesh_basic<N,NV> {
   virtual ~Hmesh() ;
 
   void storeGrid(const std::string &, double time = 0, unsigned long int nbr = 0);
-  void storeGrid( std::ostream& , double time = 0, unsigned long int nbr = 0);
+  void storeGrid(std::ostream &, double time = 0, unsigned long int nbr = 0);
 
-  bool recoverGrid( std::istream& );
+  bool recoverGrid(std::istream &);
 
-  void storeIndicies(ostream& out);
-  void recoverIndicies(istream& in);
+  void storeIndicies(std::ostream &out);
+  void recoverIndicies(std::istream &in);
 
   void refine() ;
 
@@ -351,7 +351,7 @@ class Hmesh : public Hmesh_basic<N,NV> {
 
   bool checkConf();
 
-  void coarse() ;
+  void coarse();
 
   void refresh() ;
 
