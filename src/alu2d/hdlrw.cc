@@ -1,6 +1,7 @@
 // typdef these stream because this code uses a lot strstream
 typedef std::basic_stringbuf<char> strstreambuf_t;
 
+#include <cassert>
 #include <vector>
 
 #include "grid.h"
