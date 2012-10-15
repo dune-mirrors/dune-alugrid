@@ -1,5 +1,5 @@
 // typdef these stream because this code uses a lot strstream
-typedef basic_stringbuf<char>  strstreambuf_t ;
+typedef std::basic_stringbuf<char> strstreambuf_t;
 
 #include <vector>
 
@@ -22,7 +22,7 @@ Hmesh<N,NV> :: asciireadtriang(std::istream &in, double &time, unsigned long int
     // Erste Zeile in einen strstreambuf lesen und auf 'Backup' untersuchen.
     strstreambuf_t buf;
     in.get(buf);
-    std::istream is(& buf);
+    std::istream is(&buf);
     std::string str;
     is >> str;
     if( str == std::string( "Backup" ) )
@@ -34,22 +34,24 @@ Hmesh<N,NV> :: asciireadtriang(std::istream &in, double &time, unsigned long int
       refinement_rule = (Refco::tag_t)rrule;
       if( _nconfDeg < 0 )
       {
-        cerr << "Error in Hmesh :: asciireadtriang: "
-             << "Negative degree of nonconformity encountered." << endl;
+        std::cerr << "Error in Hmesh :: asciireadtriang: "
+                  << "Negative degree of nonconformity encountered."
+                  << std::endl;
         abort();
       }
       if( (_nconfDeg > 0) && (refinement_rule != Refco::quart) )
       {
-        cerr << "Error in Hmesh :: asciireadtriang: "
-             << "Nonconform grids must use quartering as refinement rule." << endl;
+        std::cerr << "Error in Hmesh :: asciireadtriang: "
+                  << "Nonconform grids must use quartering as refinement rule."
+                  << std::endl;
         abort();
       }
     } 
     else if( str != std::string( "Triangles" ) )
     {
-      cerr << "Error in Hmesh :: asciireadtriang: "
-           << "Wrong macrogrid format: " << endl;
-      cerr << "file with !-line but command not recognized" << endl;
+      std::cerr << "Error in Hmesh :: asciireadtriang: "
+                << "Wrong macrogrid format: " << std::endl;
+      std::cerr << "file with !-line but command not recognized" << std::endl;
       abort();
     }
   }
@@ -66,7 +68,7 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
     
 #ifndef NDEBUG
   if( verbose ) 
-    cerr << "    Number of Vertices:             " << nv << endl;
+    std::cerr << "    Number of Vertices:             " << nv << std::endl;
 #endif
 
   std::vector< vertex_t * > v( nv );
@@ -84,7 +86,7 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
 
 #ifndef NDEBUG
   if( verbose ) 
-    cerr << "    Number of MacroElements:        " << ne << endl ;
+    std::cerr << "    Number of MacroElements:        " << ne << std::endl;
 #endif
 
   for(int i = 0; i < ne; ++i)
@@ -111,7 +113,7 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
 
 #ifndef NDEBUG 
     if( verbose )
-      cerr << "    Number of BoundarySegments:     " << nb << endl;
+      std::cerr << "    Number of BoundarySegments:     " << nb << std::endl;
 #endif
 
     // some variables for periodic boundary treatment
@@ -142,9 +144,9 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
       case bndel_t::periodic:
         if( ncoord != 2 )
         {
-          cerr << "Error in Hmesh :: asciireadtriang: "
-               << "Boundary type " << bndel_t::periodic
-               << " is only supported for flat grids." << endl;
+          std::cerr << "Error in Hmesh :: asciireadtriang: "
+                    << "Boundary type " << bndel_t::periodic
+                    << " is only supported for flat grids." << std::endl;
           abort();
         }
         bnd_list[i].first = new bndel_periodic_t(i);
@@ -171,8 +173,9 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
         linein >> bnd_list[i].second;
         if( bnd_list[i].second < 0 )
         {
-          cerr << "Error in Hmesh :: asciireadtriang: "
-               << "Periodic neighbor boundary has negative index." << endl;
+          std::cerr << "Error in Hmesh :: asciireadtriang: "
+                    << "Periodic neighbor boundary has negative index."
+                    << std::endl;
           abort();
         }
 
@@ -181,17 +184,19 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
           const int j = bnd_list[i].second;
           if( bnd_list[j].second < 0 )
           {
-            cerr << "Error in Hmesh :: asciireadtriang: "
-                 << "Neighbor of periodic boundary is non-periodic. "
-                 << "(" << i << " -> " << j << ")" << endl;
+            std::cerr << "Error in Hmesh :: asciireadtriang: "
+                      << "Neighbor of periodic boundary is non-periodic. "
+                      << "(" << i << " -> " << j << ")"
+                      << std::endl;
             abort();
           }
           if( bnd_list[j].second != i )
           {
-            cerr << "Error in Hmesh :: asciireadtriang: "
-                 << "Periodic boundaries not linked symmetrically "
-                 << "(" << i << " -> " << j << ", but "
-                 << j << " -> " << bnd_list[j].second << ")." << endl;
+            std::cerr << "Error in Hmesh :: asciireadtriang: "
+                      << "Periodic boundaries not linked symmetrically "
+                      << "(" << i << " -> " << j << ", but "
+                      << j << " -> " << bnd_list[j].second << ")."
+                      << std::endl;
             abort();
           }
           ((bndel_periodic_t *)bnd_list[i].first)->set_pnb(bnd_list[j].first);
@@ -255,8 +260,9 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
 
     if( perbnd_invalid != 0 )
     {
-      cerr << "Error in Hmesh :: asciireadtriang: "
-           << "Periodic boundaries don't match." << endl;
+      std::cerr << "Error in Hmesh :: asciireadtriang: "
+                << "Periodic boundaries don't match."
+                << std::endl;
       abort();
     }
 
@@ -268,14 +274,14 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
 
 #ifndef NDEBUG
     if( verbose )
-      cerr << "    Number of periodic boundaries:  " << npb << endl ;
+      std::cerr << "    Number of periodic boundaries:  " << npb << std::endl;
 #endif
   
   }       
 
 #ifndef NDEBUG
   if( verbose )
-    cerr << "\n  -------------------------- closed.\n" <<endl ;
+    std::cerr << "\n  -------------------------- closed.\n" << std::endl;
 #endif
 
   vl.renumber() ;
@@ -361,8 +367,8 @@ Hmesh<N,NV> :: asciiwritetriang(const std::string &filename,
                                 double time, unsigned long int nbr)
 {
 #ifndef NDEBUG
-  cerr << "\n  Hmesh_basic::asciiwritetriang(?) opens: " ;
-  cerr << filename << "\n" << endl ;
+  std::cerr << "\n  Hmesh_basic::asciiwritetriang(?) opens: " ;
+  std::cerr << filename << "\n" << std::endl;
 #endif
 
   // create stream 
@@ -387,14 +393,14 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
 
   out << "!Backup ";
   out << time << " " << nbr << " ";
-  out << nconfDeg << " " << refinement_rule << endl;
+  out << nconfDeg << " " << refinement_rule << std::endl;
 
   {
  
     Listwalk_impl < vertex_t > walk(vl) ;
   
 #ifndef NDEBUG
-    cerr << "    Number of Vertices:       " << walk.size() << endl ;
+    std::cerr << "    Number of Vertices:       " << walk.size() << std::endl;
 #endif
     
     int nr = 0;
@@ -407,7 +413,7 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
               
     }
 
-    out << nr << endl;
+    out << nr << std::endl;
 
     for( walk.first() ; ! walk.done() ; walk.next() ) {
     
@@ -429,23 +435,22 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
     const int numMacroElements = walk.size();
 
 #ifndef NDEBUG
-    cerr << "    Number of macro Elements:  " << numMacroElements << endl ;
+    std::cerr << "    Number of macro Elements:  " << numMacroElements << std::endl;
 #endif
     
-    out << numMacroElements << endl;
+    out << numMacroElements << std::endl;
     
     for( walk.first() ; ! walk.done() ; walk.next() ) {
     
-      walk.getitem()->write(out) ;
+      walk.getitem()->write(out);
 
-      count += walk.getitem()->count() ;
+      count += walk.getitem()->count();
 
     }
 
 #ifndef NDEBUG
-    cerr << "    Number of Elements:       " << count << endl ;
+    std::cerr << "    Number of Elements:       " << count << std::endl;
 #endif
-
   }
   
   {
@@ -453,10 +458,10 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
     const int numMacroBoundaryElements = walk.size();
 
 #ifndef NDEBUG
-    cerr << "    Number of macro boundary Elements:   " << numMacroBoundaryElements << endl ;
+    std::cerr << "    Number of macro boundary Elements:   " << numMacroBoundaryElements << std::endl;
 #endif
 
-    out << numMacroBoundaryElements << endl;
+    out << numMacroBoundaryElements << std::endl;
 
     int index = 0, count = 0;
     for( walk.first() ; ! walk.done() ; walk.next() )
@@ -464,7 +469,7 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
       // make sure we can use the segment index to write out periodic neighbors
       if( index != walk.getitem()->segmentIndex() )
       {
-        cerr << "Error: Index in macro boundary element list does not coincide with segment index." << endl;
+        std::cerr << "Error: Index in macro boundary element list does not coincide with segment index." << std::endl;
         abort();
       }
 
@@ -475,12 +480,12 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
     }
 
 #ifndef NDEBUG
-    cerr << "    Number of boundary Elements:       " << count << endl ;
+    std::cerr << "    Number of boundary Elements:       " << count << std::endl;
 #endif
   }
   
 #ifndef NDEBUG
-  cerr << "\n  -------------------------- closed.\n" <<endl ;
+  std::cerr << "\n  -------------------------- closed.\n" << std::endl;
 #endif
  
 }
@@ -494,7 +499,7 @@ storeGrid(const std::string &filename, double time, unsigned long int nbr)
 
   if( ! out ) 
   {
-    cerr << "ERROR: could not open file " << filename << endl << endl;
+    std::cerr << "ERROR: could not open file " << filename << std::endl << std::endl;
     return ;
   }
 
@@ -595,9 +600,9 @@ Hmesh<N,NV>::recoverGrid(std::istream &in)
           case thinelement_t::unsplit:
             break;
           case thinelement_t::triang_bnd:
-            cerr << "ERROR (Hmesh::recoverGrid()): "
-                 << "splitrule \"triang_bnd\" is not allowed for elements!"
-                 << endl;
+            std::cerr << "ERROR (Hmesh::recoverGrid()): "
+                      << "splitrule \"triang_bnd\" is not allowed for elements!"
+                      << std::endl;
             abort();
             break;
           case thinelement_t::triang_conf2:
@@ -609,17 +614,17 @@ Hmesh<N,NV>::recoverGrid(std::istream &in)
           case thinelement_t::compatibility:
             if (!compwarn)
             {
-                    cerr << "WARNING (Hmesh::recoverGrid()): "
-             << "using compatibility mode for obsolete file format!"
-             << endl;
-                    compwarn = 1;
+              std::cerr << "WARNING (Hmesh::recoverGrid()): "
+                        << "using compatibility mode for obsolete file format!"
+                        << std::endl;
+              compwarn = 1;
             }
             walk.getitem().mark(Refco::ref_1);
             break;
           default:
-            cerr << "ERROR (Hmesh::recoverGrid()): "
-                 << "unknown splitrule!"
-                 << endl;
+            std::cerr << "ERROR (Hmesh::recoverGrid()): "
+                      << "unknown splitrule!"
+                      << std::endl;
             abort();
          }
         }
