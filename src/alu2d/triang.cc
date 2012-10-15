@@ -238,9 +238,6 @@ void Triang < N,NV >::newNeighbour(Triang* nb, int fce, int nbfce,
   }
 }
 
-#ifdef USE_ALUGRID_XDISPLAY
-extern Hmesh *mesh;
-#endif
 /***************************************************
  // #begin(method)
  // #method:

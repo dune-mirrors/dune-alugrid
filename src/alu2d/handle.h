@@ -356,33 +356,6 @@ class Hmesh : public Hmesh_basic<N,NV> {
   void refresh() ;
 
   void setdata(void (*)(element_t &)) ;
-
-#if USE_ALUGRID_XDISPLAY
-  void draw(Xdisplay & ) ; 
-#endif
-
 } ;
-
-
-//////////////////////////////////////////////////////////
-//
-//  inline implementation 
-//
-//////////////////////////////////////////////////////////
-#if USE_ALUGRID_XDISPLAY
-inline void Hmesh::draw(Xdisplay &disp ) {
-  Leafwalk < Element > walk(mel) ;
-  Leafwalk < Bndel > walkb(mbl) ;
-  for( walk.first() ; ! walk.done() ; walk.next())
-  {
-    ((Triang*)&walk.getitem())->check();
-    walk.getitem().draw(disp);
-  }
-  for( walkb.first() ; ! walkb.done() ; walkb.next()) 
-  {
-    walkb.getitem().draw(disp);
-  }
-} 
-#endif
 
 #endif

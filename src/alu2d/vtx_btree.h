@@ -1,8 +1,6 @@
 #ifndef __HEADER__VTX_BTREE
 #define __HEADER__VTX_BTREE
 
-#include "xdisplay.h"
-
 template < int N > class Vertex;
 template < int N, int NV > class Thinelement;
 template < int N, int NV > class Element;
@@ -12,10 +10,6 @@ template < int N, int NV > class Element;
 // Ordnet die Knoten nach ihrem Abstand zu einem Referenzknoten,
 // der dem Konstruktor uebergeben wird.
 // ============================================================
-
-#if USE_ALUGRID_XDISPLAY 
-void nb_draw(Xdisplay &xd,Element *el1,Element *el2);
-#endif
 
 template < int N, int NV > class Vtx_btree {
  public:
@@ -72,12 +66,8 @@ template < int N, int NV > class Vtx_btree {
       int remove(vertex_t *pvtx);
 
       void nbconnect(int,thinelement_t *,int) ;
-
-#if USE_ALUGRID_XDISPLAY 
-      void draw(Xdisplay &xd,Element *el);
-#endif
-
     }* head;
+
  public:
     vertex_t *rvtx;
     thinelement_t *lnb;
@@ -116,10 +106,6 @@ template < int N, int NV > class Vtx_btree {
     void merge(Vtx_btree* inleft, Vtx_btree* inright);
 
     void nbconnect(int, thinelement_t *, int ) ;
-
-#if USE_ALUGRID_XDISPLAY 
-    void draw(Xdisplay &xd, element_t *el);
-#endif
 
     int deepestLevel() {
       return (head ? head->deepestLevel() : 0);

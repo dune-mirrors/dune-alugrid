@@ -162,11 +162,6 @@ bool Hmesh<N,NV>::checkConf()
   return elem_marked;
 }
 
-#ifdef USE_ALUGRID_XDISPLAY
-// for displaying during refinement and coarsening
-Hmesh *mesh;
-#endif
-
 template < int N, int NV >
 class RestrictDune : public Restrict_basic < N, NV >
 {
@@ -218,9 +213,6 @@ bool Hmesh<N,NV>::duneAdapt(AdaptRestrictProlong2dType & arp) {
 
 template < int N, int NV >
 void Hmesh<N,NV>::refine() {
-#ifdef USE_ALUGRID_XDISPLAY
-  mesh=this;
-#endif
 
   assert( ! mel.busy()) ;
   assert( ! mbl.busy()) ;
@@ -246,9 +238,6 @@ void Hmesh<N,NV>::refine() {
 
 template < int N, int NV >
 void Hmesh<N,NV>::coarse() {
-#ifdef USE_ALUGRID_XDISPLAY
-  mesh=this;
-#endif
 
   assert(!mel.busy()) ;
   assert(!mbl.busy()) ;

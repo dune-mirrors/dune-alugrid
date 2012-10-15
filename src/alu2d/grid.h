@@ -25,7 +25,6 @@
 // #end(header)
 ***************************************************/
 
-#include "xdisplay.h"
 #include "vtx_btree.h"
 
 
@@ -456,10 +455,6 @@ template < int N, int NV > class Thinelement : public Refco_el {
 
     virtual int docoarsen(nconf_vtx_t*,int, restrict_basic_t *rest_el) { return 1; }
 
-#if USE_ALUGRID_XDISPLAY 
-    virtual void draw(Xdisplay & ) {}
-#endif
-
     triang_t * nbel(const int l) const
     {
       Thinelement *el = neighbour(l);
@@ -655,10 +650,6 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
     void removehvtx(int fce,vertex_t *vtx);
 
     int check() ;
-
-#if USE_ALUGRID_XDISPLAY 
-    void draw(Xdisplay & ) ;
-#endif
 
     friend ostream &operator<< (ostream& out, const Element& elem) {
       return out;
@@ -916,201 +907,9 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
     virtual Bndel *create(vertex_t * , vertex_t *,bnd_t) const = 0;
 
     int setorientation();
- 
-#if USE_ALUGRID_XDISPLAY 
-    void draw(Xdisplay & ) ; 
-#endif
 } ;
 // #end(class)
 // ***************************************************
-
-
-
-
-//////////////////////////////////////////////////////////////
-//
-//  inline implmentation 
-//
-//////////////////////////////////////////////////////////////
-#if USE_ALUGRID_XDISPLAY
-inline void Element::draw(Xdisplay &xd)
-{
-/*
-  int i;
-
-  for(i=0;i<connect.nf;i++) xd.linedraw(vertex(i),vertex(i+1));
-  for (i=0;i<3;i++) {
-    if (nbel(i)) {
-      if (!connect.hvtx[i])
-  nb_draw(xd,this,nbel(i));
-      else {
-  nb_draw(xd,this,nbel(i));
-        connect.hvtx[i]->draw(xd,this);
-      }
-    }
-  }
-*/
-}
-
-inline void Bndel::draw(Xdisplay &xd)
-{
-  int i;
-  const double epsil=0.01;
-  const double delta=0.01;
-  XColor col;
-
-  assert(ncoord==2);
-
-  for(i=0;i<1;i++)
-  {
-    double x0,y0,x1,y1,n[ncoord];
-    ((Element*)neighbour(0))->outernormal(opposite(0),n);
-    double l=((Element*)neighbour(0))->sidelength(opposite(0));
-    x0=vertex(i)->coord()[0];
-    y0=vertex(i)->coord()[1];
-    x0+=epsil/l*n[0];
-    y0+=epsil/l*n[1];
-    x0+=delta/l*(-n[1]);
-    y0+=delta/l*(n[0]);
-    x1=vertex(i+1)->coord()[0];
-    y1=vertex(i+1)->coord()[1];
-    x1+=epsil/l*n[0];
-    y1+=epsil/l*n[1];
-    x1-=delta/l*(-n[1]);
-    y1-=delta/l*(n[0]);
-    Fullvertex p1(x0,y0,-1);
-    Fullvertex p2(x1,y1,-1);
-
-    // assert(xd.nrof_bndcols >= 25);
-
-    switch (typ)
-    {
-      case none:
-        sprintf(xd.bcol_text[0],"none");
-        col = xd.bcol[0];
-        break;
-      case 1:
-        sprintf(xd.bcol_text[1],"inflow");
-        col = xd.bcol[1];
-        break;
-      case 2:
-        sprintf(xd.bcol_text[2],"inflow_a");
-        col = xd.bcol[2];
-        break;
-      case 3:
-        sprintf(xd.bcol_text[3],"inflow_b");
-        col = xd.bcol[3];
-        break;
-      case 4:
-        sprintf(xd.bcol_text[4],"inflow_c");
-        col = xd.bcol[4];
-        break;
-      case 5:
-        sprintf(xd.bcol_text[5],"inflow_d");
-        col = xd.bcol[5];
-        break;
-      case 6:
-        sprintf(xd.bcol_text[5],"inflow_e");
-        col = xd.bcol[2];
-        break;
-      case 7:
-        sprintf(xd.bcol_text[5],"inflow_f");
-        col = xd.bcol[3];
-        break;
-      case 8:
-        sprintf(xd.bcol_text[5],"inflow_g");
-        col = xd.bcol[4];
-        break;
-      case 9:
-        sprintf(xd.bcol_text[5],"inflow_h");
-        col = xd.bcol[5];
-        break;
-      case 10:
-        sprintf(xd.bcol_text[6],"outflow");
-        col = xd.bcol[6];
-        break;
-      case 11:
-        sprintf(xd.bcol_text[7],"reflect");
-        col = xd.bcol[7];
-        break;
-      case 12:
-        sprintf(xd.bcol_text[8],"reflect_x");
-        col = xd.bcol[8];
-        break;
-      case 13:
-        sprintf(xd.bcol_text[9],"reflect_y");
-        col = xd.bcol[9];
-        break;
-      case 14:
-        sprintf(xd.bcol_text[10],"reflect_z");
-        col = xd.bcol[10];
-        break;
-      case 15:
-        sprintf(xd.bcol_text[11],"slip");
-        col = xd.bcol[11];
-        break;
-      case 16:
-        sprintf(xd.bcol_text[12],"dirichlet");
-        col = xd.bcol[12];
-        break;
-      case 17:
-        sprintf(xd.bcol_text[13],"dirichlet_a");
-        col = xd.bcol[13];
-        break;
-      case 18:
-        sprintf(xd.bcol_text[14],"dirichlet_b");
-        col = xd.bcol[14];
-        break;
-      case 19:
-        sprintf(xd.bcol_text[15],"dirichlet_c");
-        col = xd.bcol[15];
-        break;
-      case 20:
-        sprintf(xd.bcol_text[16],"dirichlet_d");
-        col = xd.bcol[16];
-        break;
-      case 21:
-        sprintf(xd.bcol_text[17],"neumann");
-        col = xd.bcol[17];
-        break;
-      case 22:
-        sprintf(xd.bcol_text[18],"neumann_a");
-        col = xd.bcol[18];
-        break;
-     case 23:
-        sprintf(xd.bcol_text[19],"neumann_b");
-        col = xd.bcol[19];
-        break;
-      case 24:
-        sprintf(xd.bcol_text[20],"neumann_c");
-        col = xd.bcol[20];
-        break;
-      case 25:
-        sprintf(xd.bcol_text[21],"neumann_d");
-        col = xd.bcol[21];
-        break;
-      case periodic:
-        sprintf(xd.bcol_text[22],"periodic");
-        col = xd.bcol[22];
-        break;
-      case 26:
-        sprintf(xd.bcol_text[23],"absorbing");
-        col = xd.bcol[23];
-        break;
-      case 27:
-        sprintf(xd.bcol_text[24],"ft3d");
-        col = xd.bcol[24];
-        break;
-      default:
-        fprintf(stderr,"Bndel::draw : invalid \"typ\"");
-        exit(1);
-    }
-    xd.linedraw(&p1,&p2,col);
-  }
-}
-
-
-#endif // end USE_ALUGRID_XDISPLAY 
 
 #include "grid_imp.cc"
 
