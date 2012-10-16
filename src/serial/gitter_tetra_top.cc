@@ -2137,7 +2137,8 @@ template < class A >  bool TetraTop < A > :: coarse ()
       for (int e=0; e<6; ++e)
       {
         myhedge_t *edge = this->myhedge(e);
-        if ( edge->down() )
+        myhedge_t *dwn = (myhedge_t * ) edge->down();
+        if ( dwn )
         {
           if ( edge->noCoarsen() ) 
             return false;
@@ -2145,7 +2146,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
           // we need to make sure that none of the children of this
           // refinement edge should not be removed
           // (we could not go up on edges during marking so we go down here)
-          if ( ! edge->down()->canCoarsen() ) 
+          if ( ! dwn->canCoarsen() ) 
           {
             return false;
           }
