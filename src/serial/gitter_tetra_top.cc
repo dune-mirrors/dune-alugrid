@@ -2110,11 +2110,11 @@ template < class A >  bool TetraTop < A > :: coarse ()
     {
       return false ;
     }
-   
+
     // if I have faces that are not leaf, we cannot coarsen 
     for (int i = 0 ; i < 4 ; ++i) 
     {
-      if ( ! myhface (i)->leaf ()) return false ;
+      if ( ! myhface (i)->leaf () ) return false ;
     }
     // else coarsen 
     return true ;
@@ -2134,21 +2134,18 @@ template < class A >  bool TetraTop < A > :: coarse ()
       // test marking on refinement edge 
       assert( this->nEdges() == 6 );
 
-      typedef typename Gitter :: edgecoarseningflags_t edgecoarseningflags_t;
-      edgecoarseningflags_t& edgeCoarseningFlags = this->myGrid()->_edgeCoarseningFlags;
-
       for (int e=0; e<6; ++e)
       {
         myhedge_t *edge = this->myhedge(e);
         if ( edge->down() )
         {
-          if ( ! edgeCoarseningFlags[ edge->getIndex() ] ) 
+          if ( edge->noCoarsen() ) 
             return false;
 
           // we need to make sure that none of the children of this
           // refinement edge should not be removed
           // (we could not go up on edges during marking so we go down here)
-          if ( ! edge->down()->canCoarsen( edgeCoarseningFlags ) ) 
+          if ( ! edge->down()->canCoarsen() ) 
           {
             return false;
           }

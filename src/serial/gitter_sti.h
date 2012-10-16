@@ -315,7 +315,9 @@ public :
       // set if object is locked against coarsening
       flagLock = 1,
       // non-affine geometry mapping 
-      flagNonAffine = 2
+      flagNonAffine = 2, 
+      // coarsening of edges (bisection refinement only)
+      flagNoCoarsen = 3 
     };
 
   protected:
@@ -511,6 +513,24 @@ public :
     {
       return ! isSet( flagNonAffine );
     }
+
+    // don't allow edge to be coarsened  
+    void disableEdgeCoarsen() 
+    {
+      set( flagNoCoarsen );
+    }
+
+    // reset coarsening flag 
+    void resetCoarsenFlag() 
+    {
+      unset( flagNoCoarsen );
+    }
+
+    // return true if edge should not be coarsened 
+    bool noCoarsen () const 
+    {
+      return isSet( flagNoCoarsen ) || isSet( flagLock ) ;
+    }
   };
     
 public :
@@ -578,7 +598,8 @@ public :
     virtual void backupIndex  (ObjectStream& os ) const { backupIndexErr(); }
     virtual void restoreIndex (ObjectStream& is, RestoreInfo& ) { restoreIndexErr(); }
 
-    virtual bool canCoarsen( std::vector<bool> &edgeCoarseningFlags ) const;
+    // return true if an edge can be coarsened
+    virtual bool canCoarsen() const = 0;
   } ;
     
   class hface : public FacePllXDefault, 
@@ -1277,6 +1298,8 @@ public :
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void refineImmediate (myrule_t) = 0 ;
+
+      virtual bool canCoarsen () const ;
     private :
       myvertex_t * v0, * v1 ; // 16 bytes + 16 (24 with comm buffer) 32 (40) 
     public:  
@@ -2115,7 +2138,7 @@ protected :
   virtual void notifyGridChanges () ;
   virtual void notifyMacroGridChanges () ;
 protected :
-  Gitter () : _edgeCoarseningFlags(), bisectionRefinement_( false ) {} 
+  Gitter () : bisectionRefinement_( false ) {} 
   virtual ~Gitter () ;
 
 public :
@@ -2186,9 +2209,7 @@ public:
   virtual bool conformingClosureNeeded() const { return bisectionRefinement_ ; }
   virtual void enableConformingClosure() { bisectionRefinement_ = true ; }
 
-  typedef vector<bool>  edgecoarseningflags_t ;
   // flags to say if an edge can be coarsened during conform bisection 
-  mutable edgecoarseningflags_t   _edgeCoarseningFlags;
 protected:
   // true if conforming closure is needed closure 
   bool bisectionRefinement_; 
@@ -2918,12 +2939,14 @@ inline const Gitter :: Geometric :: hedge1 :: myvertex_t * Gitter :: Geometric :
   return i == 1 ? v1 : v0 ;
 }
 
-inline bool Gitter :: hedge :: canCoarsen( std::vector<bool> &edgeCoarseningFlags ) const
+inline bool Gitter :: Geometric :: hedge1 :: canCoarsen() const
 {
-  int idx = this->getIndex();
-  if ( !edgeCoarseningFlags[ idx ] ) return false;
-  if ( this->down() ) return this->down()->canCoarsen( edgeCoarseningFlags );
-  if ( this->next() ) return this->next()->canCoarsen( edgeCoarseningFlags );
+  // noCoarsen is implemented in DuneIndexProvider
+  if( this->noCoarsen() ) return false ;
+  const hedge* dwn = this->down();
+  if( dwn ) return dwn->canCoarsen();
+  const hedge* nxt = this->next();
+  if( nxt ) return nxt->canCoarsen();
   return true;
 }
 
@@ -3591,12 +3614,16 @@ inline int Gitter :: Geometric :: Tetra :: twist (int i) const {
 }
 
 inline Gitter :: Geometric :: Tetra :: myhface_t * Gitter :: Geometric :: Tetra :: myhface (int i) {
-  assert (i < 4) ;
+  assert ( i <  4 ) ;
+  assert ( i >= 0 );
+  assert ( f [i] ); 
   return f [i] ;
 }
 
 inline const Gitter :: Geometric :: Tetra :: myhface_t * Gitter :: Geometric :: Tetra :: myhface (int i) const {
-  assert (i < 4) ;
+  assert ( i < 4 ) ;
+  assert ( i >= 0 );
+  assert ( f [i] ); 
   return f [i] ;
 }
 

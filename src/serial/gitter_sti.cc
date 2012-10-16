@@ -334,8 +334,18 @@ void Gitter :: markEdgeCoarsening ()
 {
   if( conformingClosureNeeded() ) 
   {
-    // set all edge flags to true
-    _edgeCoarseningFlags.assign( indexManagerStorage().get( IndexManagerStorage::IM_Edges ).getMaxIndex(), true );
+    // reset all edge flags 
+    {
+      // iterate over all edges in the hierarchy 
+      is_def_true< hedge_STI > stoprule; 
+      IteratorSTI < hedge_STI >* edges = createIterator( (hedge_STI *) 0 , stoprule );
+
+      // reset coarsening flag for all edges 
+      for( edges->first(); ! edges->done(); edges->next() ) 
+        edges->item().resetCoarsenFlag();
+      delete edges ;
+    }
+
     // now check for each tetra whether it could really be coarsened
     leaf_element__macro_element__iterator i (container ()) ;
     for( i.first(); ! i.done() ; i.next() ) 
@@ -357,7 +367,7 @@ void Gitter :: coarse()
       i.item ().coarse () ; 
     }
   }
-
+  
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
   std::ostringstream ss;
   int filenr = adaptstep*100+stepnumber;

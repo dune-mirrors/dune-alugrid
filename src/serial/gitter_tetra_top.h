@@ -424,14 +424,12 @@ template < class A > class TetraTop : public A
       // get father 
       innertetra_t* father = (innertetra_t * ) this->up();
 
-      typedef typename Gitter :: edgecoarseningflags_t  edgecoarseningflags_t;
-      edgecoarseningflags_t& edgeCoarseningFlags = this->myGrid()->_edgeCoarseningFlags;
       for (int e=0; e<6; ++e)
       {
         myhedge_t *edge = father->myhedge( e );
         if ( ! (_req == myrule_t :: crs && edge->down() )) // the father of a leaf element can only have one non leaf edge
         { 
-          edgeCoarseningFlags[ edge->getIndex() ] = false;
+          edge->disableEdgeCoarsen();
         }
       }
     }
