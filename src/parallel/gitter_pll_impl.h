@@ -929,7 +929,7 @@ inline EdgePllBaseX< A > :: ~EdgePllBaseX()
 
   if( myhedge().isSet( myhedge_t::flagLock ) )
   {
-   cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
+    cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
     abort () ;
   }
 #endif

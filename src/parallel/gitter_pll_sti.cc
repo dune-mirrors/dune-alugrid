@@ -347,7 +347,7 @@ bool GitterPll :: refine ()
 
       _refineLoops ++ ;
     } 
-    while (mpAccess ().gmax (repeat ? 1 : 0)) ;
+    while (mpAccess ().gmax ( repeat ) ) ;
 
     // Jetzt noch die Kantensituation richtigstellen, es gen"ugt ein Durchlauf,
     // weil die Verfeinerung einer Kante keine Fernwirkungen hat. Vorsicht: Die
