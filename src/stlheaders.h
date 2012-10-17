@@ -20,9 +20,7 @@
 #include <sys/resource.h>
 #include <sys/types.h>
 
-// header for XDR 
-#include <rpc/rpc.h>
-#include <rpc/xdr.h>
+// header for endianess  
 #include <endian.h>
 
 #include <memory>
@@ -36,8 +34,6 @@
 #include <list>
 #include <iomanip>
 #include <sstream>
-#include <deque>
-#include <queue>
 #include <stack>
 #include <map>
 #include <numeric>

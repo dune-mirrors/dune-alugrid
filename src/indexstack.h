@@ -383,16 +383,20 @@ template <class T, int length>
 inline void ALUGridIndexStack<T,length>::
 compress() 
 {
-  std::priority_queue<int> tmpStack;
+  vector<int> tmpStorage;
 
   if( stack_ )
   {
     // StackType is of type FiniteStack
     StackType& stack = *stack_;
-    // copy all values to the priority queue
+
+    // reserve memory for tmpStorage 
+    tmpStorage.reserve( stack.size() );
+
+    // copy all values to the temporary storage
     while( ! stack.empty() )
     {
-      tmpStack.push( stack.pop() );
+      tmpStorage.push_back( stack.pop() );
     }
     delete stack_; stack_ = 0;
   }
@@ -401,26 +405,39 @@ compress()
   {
     StackType * st = fullStackList_.top();
     fullStackList_.pop();
+    // if stack is available 
     if( st )
     {
       // StackType is of type FiniteStack
       StackType& stack = *st;
+
+      // reserve memory for tmpStorage 
+      tmpStorage.reserve( tmpStorage.size() + stack.size() );
+
+      // copy all values to the temporary storage
       while( ! stack.empty() )
       {
-        tmpStack.push( stack.pop() );
+        tmpStorage.push_back( stack.pop() );
       }
       delete st; 
     }
   }
 
+  // sort so that the larges values is at the end 
+  // this sort is necessary to really free indices 
+  sort( tmpStorage.begin(), tmpStorage.end() );
+
   // now free all indices again, freeIndex 
   // does remove the maxIndex in case of freed index is equal  
   stack_ = new StackType();
   assert( stack_ );
-  while( ! tmpStack.empty () )
+  // until tmpStorage is not empty, freeIndices 
+  while( ! tmpStorage.empty () )
   {
-    freeIndex( tmpStack.top() );
-    tmpStack.pop();
+    // free index 
+    freeIndex( tmpStorage.back() );
+    // remove index from tmpStorage 
+    tmpStorage.pop_back();
   }
 }
 
