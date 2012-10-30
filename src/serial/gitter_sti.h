@@ -586,7 +586,6 @@ public :
     virtual void backup (ObjectStream &) const = 0 ;
     virtual void restore (ObjectStream &) = 0 ;
 
-    // new xdr methods 
     // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
     virtual void projectInnerVertex(const ProjectVertexPair &pv) = 0; 
 
