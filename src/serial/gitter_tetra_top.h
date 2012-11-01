@@ -219,6 +219,9 @@ template < class A > class TetraTop : public A
     using A :: twist ;
     using A :: myhface ;
     using A :: myvertex ;
+    using A :: myGrid ;
+    using A :: nEdges ;
+    using A :: myhedge ;
 
     typedef TetraTop < A >    innertetra_t  ;
     typedef typename A :: innervertex_t innervertex_t ;
@@ -401,14 +404,14 @@ template < class A > class TetraTop : public A
     // return true if further refinement is needed to create conforming closure 
     virtual bool markForConformingClosure () 
     {
-      assert( this->myGrid()->conformingClosureNeeded() );
+      assert( myGrid()->conformingClosureNeeded() );
       // if an edge exits, that has children, we also have to refine this tetra 
-      assert( this->nEdges() == 6 );
+      assert( nEdges() == 6 );
       for (int e=0; e < 6; ++e)
       {
-        if( this->myhedge( e )->down() )
+        if( myhedge( e )->down() )
         {
-          this->request ( myrule_t :: bisect );
+          request ( myrule_t :: bisect );
           return true ;
         }
       }
