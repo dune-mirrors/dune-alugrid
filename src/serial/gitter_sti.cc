@@ -330,7 +330,7 @@ bool Gitter :: markForConformingClosure()
   return needConformingClosure;
 }
 
-void Gitter :: markEdgeCoarsening () 
+bool Gitter :: markEdgeCoarsening () 
 {
   if( conformingClosureNeeded() ) 
   {
@@ -355,7 +355,9 @@ void Gitter :: markEdgeCoarsening ()
       // mark coarsening will unset some edge flags 
       i.item().markEdgeCoarsening();
     }
+    return true ;
   }
+  return false ;
 }
 
 void Gitter :: resetEdgeCoarsenFlags () 
@@ -368,7 +370,10 @@ void Gitter :: resetEdgeCoarsenFlags ()
 
     // reset coarsening flag for all edges 
     for( edges->first(); ! edges->done(); edges->next() ) 
-      edges->item().resetLockFlag();
+    {
+      edges->item().resetCoarsenFlag();
+      // edges->item().resetLockFlag();
+    }
     delete edges ;
   }
 }

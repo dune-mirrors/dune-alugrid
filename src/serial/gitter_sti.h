@@ -535,7 +535,7 @@ public :
     // return true if edge should not be coarsened 
     bool noCoarsen () const 
     {
-      return isSet( flagNoCoarsen ) || isSet( flagLock ) ;
+      return isSet( flagNoCoarsen );
     }
   };
     
@@ -2138,7 +2138,7 @@ protected :
   virtual bool refine () ;
   // returns true if conforming closure is still needed
   virtual bool markForConformingClosure () ;
-  virtual void markEdgeCoarsening () ;
+  virtual bool markEdgeCoarsening () ;
   virtual void coarse () ;
   void doCoarse () ;
   void resetEdgeCoarsenFlags () ;
@@ -2922,14 +2922,17 @@ inline Gitter :: Geometric :: hedge1 :: hedge1 (myvertex_t * a, myvertex_t * b) 
 
 inline Gitter :: Geometric :: hedge1 :: ~hedge1 () {
   assert (ref ? (cerr << "**WARNING hedge1::refcount was " << ref << endl, 1) : 1) ;
-  assert ( ref == 0 );
+  if( ref != 0 ) 
+  {
+    cout << int(this->bndId()) << " bnd id " << endl;
+    assert ( ref == 0 );
+  }
   v0->ref -- ; 
   v1->ref -- ;
   return ;
 }
 
 inline int Gitter :: Geometric :: hedge1 :: postRefinement () {
-  //lockEdgeAgainstCoarsening();
   return 0 ;
 }
 
