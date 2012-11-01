@@ -944,7 +944,6 @@ inline bool EdgePllBaseX< A > :: lockedAgainstCoarsening () const
 template < class A >
 inline void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const 
 {
-  //os.writeObject (int(myhedge ().getrule ())) ;
   os.put( char(myhedge ().getrule ()) ) ;
   return ;
 }
@@ -953,7 +952,6 @@ template < class A >
 inline bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
   char i ;
   try {
-    //os.readObject (i) ;
     i = os.get();
   } 
   catch (ObjectStream :: EOFException) 
