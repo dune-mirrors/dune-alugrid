@@ -1177,15 +1177,6 @@ void GitterDunePll :: allAllCommunication (
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-bool GitterDunePll :: refine () 
-{
-  return GitterPll :: refine () ;
-}
-
-void GitterDunePll :: coarse () {
-  GitterPll :: coarse () ;
-}
-
 // rebuild ghost cells 
 void GitterDunePll :: rebuildGhostCells() 
 {

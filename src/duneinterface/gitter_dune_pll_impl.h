@@ -32,6 +32,7 @@ public:
   typedef GitterDuneImpl :: Objects  Objects;
 
   
+  // constructor taking filename containing the macro grid
   GitterDunePll (const char * filename , 
                  MpAccessLocal &mp, 
                  ProjectVertex* ppv = 0 ) 
@@ -45,6 +46,7 @@ public:
     rebuildGhostCells();
   }
 
+  // constructor taking istream containing the macro grid
   GitterDunePll (istream& in,
                  MpAccessLocal &mp, 
                  ProjectVertex* ppv = 0 ) 
@@ -58,6 +60,7 @@ public:
     rebuildGhostCells();
   }
 
+  // constructor creating empty grid
   GitterDunePll (MpAccessLocal &mp) 
     : GitterBasisPll ("", mp, 0) 
     , balanceGrid_ (false) 
@@ -69,14 +72,8 @@ public:
     rebuildGhostCells();
   }
 
-  ~GitterDunePll () {
-  }
-
-  // refine alle leaf elements 
-  bool refine (); 
-
-  // coarse all leaf elements if possible 
-  void coarse ();
+  // destructor 
+  ~GitterDunePll () {}
 
   // adapts and witout calling loadBalancer  
   bool adaptWithoutLoadBalancing ();
