@@ -398,6 +398,7 @@ template < class A > class TetraTop : public A
       const CallSplitIF& caller() const { assert( _caller ); return *_caller; }
     };
 
+    // return true if further refinement is needed to create conforming closure 
     virtual bool markForConformingClosure () 
     {
       assert( this->myGrid()->conformingClosureNeeded() );
@@ -408,10 +409,10 @@ template < class A > class TetraTop : public A
         if( this->myhedge( e )->down() )
         {
           this->request ( myrule_t :: bisect );
-          return false;
+          return true ;
         }
       }
-      return true;
+      return false ;
     }
 
     virtual void markEdgeCoarsening () 
@@ -427,7 +428,8 @@ template < class A > class TetraTop : public A
       for (int e=0; e<6; ++e)
       {
         myhedge_t *edge = father->myhedge( e );
-        if ( ! (_req == myrule_t :: crs && edge->down() )) // the father of a leaf element can only have one non leaf edge
+        // the father of a leaf element can only have one non leaf edge
+        if ( ! (_req == myrule_t :: crs && edge->down() ) ) 
         { 
           edge->disableEdgeCoarsen();
         }
