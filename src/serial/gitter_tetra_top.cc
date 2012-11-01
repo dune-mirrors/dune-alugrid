@@ -65,6 +65,7 @@ Hface3Top < A > :: subEdges( myhedge_t* edge, const myvertex_t* vx0, const myver
       found1 = true ;
     }
   }
+
   if( ! found0 || ! found1 ) 
   {
     cout << "Problem: " << edge << endl;
@@ -73,6 +74,7 @@ Hface3Top < A > :: subEdges( myhedge_t* edge, const myvertex_t* vx0, const myver
     cout << "sub0 " << subEdge[ sub0 ] << endl;
     cout << "sub1 " << subEdge[ ! sub0 ] << endl;
   }
+
   assert( found0 );
   assert( found1 );
 
@@ -412,33 +414,40 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
 template < class A > bool Hface3Top < A > :: coarse () 
 {
   innerface_t * f = dwnPtr() ;
-  if (!f) return false ;
+  if ( ! f ) return false ;
   bool x = true ;
-  do {
-
-  // Falls eine Kind-Fl"ache noch referenziert wird, kann
-  // nicht auf diesem Level vergr"obert werden.
-  // Daher wird nur die nichtkonforme Nachbarschaft ver-
-  // vollst"andigt, die eventuell durch Elementvergr"oberung
-  // durcheinander gekommen war. Die Vergr"oberung geht dann
-  // auf das n"achste Level "uber.
-    if (f->ref) {
+  do 
+  {
+    // Falls eine Kind-Fl"ache noch referenziert wird, kann
+    // nicht auf diesem Level vergr"obert werden.
+    // Daher wird nur die nichtkonforme Nachbarschaft ver-
+    // vollst"andigt, die eventuell durch Elementvergr"oberung
+    // durcheinander gekommen war. Die Vergr"oberung geht dann
+    // auf das n"achste Level "uber.
+    if (f->ref) 
+    {
       if (f->ref == 1) f->nb.complete (this->nb) ;
       f->coarse () ;
       x = false ;
     }
-  } while ( (f = f->next()) ) ;
-  if (x) {
+  } 
+  while ( (f = f->next()) ) ;
+
+  //if( inEd()->ref > 0 )
+  //  x = inEd()->noCoarsen() ? false : x ;
+
+  if ( x ) // && inEd()->ref <= 2 ) 
+  {
+    // Hier wird tats"achlich vergr"obert, d.h. alle Kinder 
+    // werden beseitigt, und das Bezugsobjekt wird zum neuen
+    // Blatt im Baum.
     
-  // Hier wird tats"achlich vergr"obert, d.h. alle Kinder 
-  // werden beseitigt, und das Bezugsobjekt wird zum neuen
-  // Blatt im Baum.
-    
+    // cout << "inner edge ref = " << inEd()->ref << endl;
     delete _inner; 
     _inner = 0 ;
 
     _rule = myrule_t :: nosplit ;
-    {for (int i = 0 ; i < 3 ; i ++ ) myhedge (i)->coarse () ; }
+    { for (int i = 0 ; i < 3 ; ++i ) myhedge (i)->coarse () ; }
   }
   return x ;
 }

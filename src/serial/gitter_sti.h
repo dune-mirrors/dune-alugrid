@@ -526,16 +526,10 @@ public :
       unset( flagNoCoarsen );
     }
 
-    // reset coarsening flag 
-    void resetLockFlag() 
-    {
-      unset( flagLock );
-    }
-
     // return true if edge should not be coarsened 
     bool noCoarsen () const 
     {
-      return isSet( flagNoCoarsen );
+      return isSet( flagNoCoarsen ) ;
     }
   };
     

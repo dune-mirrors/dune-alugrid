@@ -65,8 +65,9 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r)
   return ;
 }
 
-template < class A > bool Hedge1Top < A > :: coarse () {
-  if (this->leaf ()) return false ;
+template < class A > bool Hedge1Top < A > :: coarse () 
+{
+  if ( this->leaf () ) return false ;
   bool x = true ;
 
   // Der Wert von x bleibt 'true' falls alle Kinder der Kante
@@ -76,21 +77,26 @@ template < class A > bool Hedge1Top < A > :: coarse () {
   // Vorsicht: Im parallelen Gitter bleiben auch Kanten ohne
   // Refcount stehen, um konsistente "Uberg"ange zu erhalten.
 
-  for (inneredge_t * f = dwnPtr() ; f ; f = f->next ()) {
-    if (f->leaf ()) {
-      x &= ! f->ref ;
-    } else {
+  for (inneredge_t * edge = dwnPtr() ; edge ; edge = edge->next ()) 
+  {
+    if ( edge->leaf () ) 
+    {
+      x &= ! edge->ref ;
+    } 
+    else 
+    {
       x = false ;
-      f->coarse () ;
+      edge->coarse () ;
     }
   }
-  if (x) {
 
-  // Falls lockedAgainstCoarsening () aufgerufen 'true' liefert
-  // soll die Operation des Vergr"oberns nicht sofort ausgef"uhrt
-  // sondern (pending) zur"uckgestellt werden.
+  if (x) 
+  {
+    // Falls lockedAgainstCoarsening () aufgerufen 'true' liefert
+    // soll die Operation des Vergr"oberns nicht sofort ausgef"uhrt
+    // sondern (pending) zur"uckgestellt werden.
 
-    if (!this->lockedAgainstCoarsening ()) 
+    if ( ! this->lockedAgainstCoarsening () ) 
     {
       delete _inner ;  
       _inner = 0 ;
