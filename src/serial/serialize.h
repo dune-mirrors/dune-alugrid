@@ -103,6 +103,30 @@ public :
     writeT( a, false );
   }
 
+  ////////////////////////////////////
+  // to behave like stringstream 
+  ////////////////////////////////////
+  // put char 
+  inline void put (const char a)  { write(a); }
+
+  // put char with checking buffer size (reserve size before usage)
+  inline void putNoChk (const char a)  { writeUnchecked(a); }
+
+  // get char 
+  inline char get () 
+  { 
+    char a;
+    read(a);  
+    return a;
+  }
+
+  // eof function 
+  bool eof () const { return (this->_rb > this->_wb); }
+
+  // good function 
+  bool good () const { return (this->_rb <= this->_wb); }
+  /////////////////////////////////////
+
 protected:  
   template <class T>
   inline void writeT (const T & a, const bool checkLength )  
@@ -351,30 +375,6 @@ public:
   inline void readObject (float & a) { this->read(a);  }
   inline void writeObject (int a)     { this->write(a); } 
   inline void readObject (int & a)    { this->read(a);  }
-
-  ////////////////////////////////////
-  // to behave like stringstream 
-  ////////////////////////////////////
-  // put char 
-  inline void put (const char a)  { this->write(a); }
-
-  // put char with checking buffer size (reserve size before usage)
-  inline void putNoChk (const char a)  { this->writeUnchecked(a); }
-
-  // get char 
-  inline char get () 
-  { 
-    char a;
-    this->read(a);  
-    return a;
-  }
-
-  // eof function 
-  bool eof () const { return (this->_rb > this->_wb); }
-
-  // good function 
-  bool good () const { return (this->_rb <= this->_wb); }
-  /////////////////////////////////////
 
   // return true if object stream was not set yet 
   bool notReceived () const { return notReceived_; } 
