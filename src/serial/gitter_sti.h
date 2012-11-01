@@ -526,6 +526,12 @@ public :
       unset( flagNoCoarsen );
     }
 
+    // reset coarsening flag 
+    void resetLockFlag() 
+    {
+      unset( flagLock );
+    }
+
     // return true if edge should not be coarsened 
     bool noCoarsen () const 
     {
@@ -712,8 +718,9 @@ public :
     // return index of boundary segment 
     virtual int segmentIndex (const int) const { return -1; }
     
-    // methods for bisection refinement 
+    // return true if further refinement is needed to create conforming closure 
     virtual bool markForConformingClosure () = 0;
+    // mark edges for allow or disallow coarsening 
     virtual void markEdgeCoarsening () = 0;
 
     // mark element for using iso8 rule 
@@ -1317,11 +1324,12 @@ public :
         myconnect_t *_faceRear;
         signed char _numFront;
         signed char _numRear;
-        signed char s [polygonlength] ;  // 12 bytes (moved here to use padding)
+        signed char s [ polygonlength ] ;  // 12 bytes (moved here to use padding)
 
         std::vector< std::pair<myconnect_t*,signed char> > frontList_;
         std::vector< std::pair<myconnect_t*,signed char> > rearList_;
 
+        signed char _bisected; 
       public:  
         myrule_t _parRule;  // 1 bytes 
       public :
@@ -1395,6 +1403,7 @@ public :
       typedef hasFace4  myconnect_t ;
       typedef Hface4Rule myrule_t ;
       enum { polygonlength = 4 } ;
+
       class face4Neighbour {
         myconnect_t *_faceFront;
         myconnect_t *_faceRear;
@@ -1817,7 +1826,7 @@ public :
     public :
       virtual myrule_t getrule () const = 0 ;
       virtual void request (myrule_t) = 0 ;
-      virtual bool markForConformingClosure () { return true; }
+      virtual bool markForConformingClosure () { return false; }
       virtual void markEdgeCoarsening () { }
       int tagForGlobalRefinement () ;
       int tagForGlobalCoarsening () ;
@@ -1872,7 +1881,7 @@ public :
       virtual bool isboundary() const { return true; }
       virtual bool isperiodic() const { return false; }
 
-      virtual bool markForConformingClosure () { return true; }
+      virtual bool markForConformingClosure () { return false; }
       virtual void markEdgeCoarsening () { }
       virtual int nChild () const;
       // just returns level 
@@ -1926,7 +1935,7 @@ public :
       inline int twist (int) const ;
       inline hface4_GEO * subface (int,int) const ;
       
-      virtual bool markForConformingClosure () { return true; }
+      virtual bool markForConformingClosure () { return false; }
       virtual void markEdgeCoarsening () { }
 
       virtual bool isboundary() const { return true; }
@@ -2127,9 +2136,12 @@ public:
 protected :
   // methods for refining and coarsening
   virtual bool refine () ;
+  // returns true if conforming closure is still needed
   virtual bool markForConformingClosure () ;
   virtual void markEdgeCoarsening () ;
   virtual void coarse () ;
+  void doCoarse () ;
+  void resetEdgeCoarsenFlags () ;
 
   virtual Makrogitter & container () = 0 ;
   virtual const Makrogitter & container () const = 0 ;
@@ -2910,6 +2922,7 @@ inline Gitter :: Geometric :: hedge1 :: hedge1 (myvertex_t * a, myvertex_t * b) 
 
 inline Gitter :: Geometric :: hedge1 :: ~hedge1 () {
   assert (ref ? (cerr << "**WARNING hedge1::refcount was " << ref << endl, 1) : 1) ;
+  assert ( ref == 0 );
   v0->ref -- ; 
   v1->ref -- ;
   return ;
@@ -3119,7 +3132,7 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface4Ru
 //
   
 inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
-: frontList_(0), rearList_(0)
+: frontList_(0), rearList_(0), _bisected( 0 )
 {
   _faceFront = null.first;
   _numFront = null.second;
@@ -3130,6 +3143,11 @@ inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
+  //if( _faceFront != null.first ) 
+  //{
+  //  _bisected = 1 ;
+  //}
+
   frontList_.push_back(make_pair( _faceFront, _numFront));
   _faceFront = p.first;
   _numFront  = p.second;
@@ -3139,7 +3157,7 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevFront ( )
 {
   assert( frontList_.size() > 0);
   _faceFront = frontList_.back().first;
-  _numFront = frontList_.back().second;
+  _numFront  = frontList_.back().second;
   frontList_.pop_back();
 }
 
@@ -3150,9 +3168,11 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: setRear ( const pair < myconn
   _faceRear = p.first;
   _numRear  = p.second;
 }
+
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevRear ( )
 {
+  assert( rearList_.size() > 0 );
   _faceRear = rearList_.back().first;
   _numRear  = rearList_.back().second;
   rearList_.pop_back();

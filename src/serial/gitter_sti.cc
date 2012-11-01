@@ -315,25 +315,28 @@ bool Gitter :: refine ()
 // returns true if no non-conforming element was found
 bool Gitter :: markForConformingClosure()
 {
-  bool x = true ;
+  bool needConformingClosure = false ;
   if( conformingClosureNeeded() ) 
   {
     leaf_element__macro_element__iterator i ( container () ) ;
     for( i.first(); ! i.done() ; i.next()) 
     { 
-      if( i.item().type() == tetra ) 
-      {
-        x &= i.item ().markForConformingClosure() ; 
-      }
+      // this should only be called for tetra 
+      // (although default impl for other elements exists )
+      assert( i.item ().type() == tetra );
+      needConformingClosure &= i.item ().markForConformingClosure() ; 
     }
   }
-  return x;
+  return needConformingClosure;
 }
 
 void Gitter :: markEdgeCoarsening () 
 {
   if( conformingClosureNeeded() ) 
   {
+    // reset all edge flags 
+    // resetEdgeCoarsenFlags () ;
+
     // reset all edge flags 
     {
       // iterate over all edges in the hierarchy 
@@ -345,7 +348,6 @@ void Gitter :: markEdgeCoarsening ()
         edges->item().resetCoarsenFlag();
       delete edges ;
     }
-
     // now check for each tetra whether it could really be coarsened
     leaf_element__macro_element__iterator i (container ()) ;
     for( i.first(); ! i.done() ; i.next() ) 
@@ -356,9 +358,24 @@ void Gitter :: markEdgeCoarsening ()
   }
 }
 
-void Gitter :: coarse() 
+void Gitter :: resetEdgeCoarsenFlags () 
 {
-  markEdgeCoarsening();
+  // reset all edge flags 
+  {
+    // iterate over all edges in the hierarchy 
+    is_def_true< hedge_STI > stoprule; 
+    IteratorSTI < hedge_STI >* edges = createIterator( (hedge_STI *) 0 , stoprule );
+
+    // reset coarsening flag for all edges 
+    for( edges->first(); ! edges->done(); edges->next() ) 
+      edges->item().resetLockFlag();
+    delete edges ;
+  }
+}
+
+
+void Gitter :: doCoarse() 
+{
   assert (debugOption (20) ? (cout << "**INFO Gitter :: coarse ()" << endl, 1) : 1) ;
   {
     AccessIterator < helement_STI > :: Handle i (container ()) ;
@@ -376,6 +393,12 @@ void Gitter :: coarse()
   ++stepnumber;
 #endif
 
+}
+
+void Gitter :: coarse() 
+{
+  markEdgeCoarsening();
+  doCoarse();
 }
 
 template <class element_t, class bndseg>
@@ -656,15 +679,15 @@ bool Gitter :: adapt ()
   assert (! iterators_attached ()) ;
   const int start = clock () ;
 
-  bool x;
+  bool needConformingClosure = false ;
   bool refined = true;
   do {
     // refine the grid 
     refined &= refine ();
     // check for conformity
-    x = markForConformingClosure();
+    needConformingClosure = markForConformingClosure();
   }
-  while (!x); 
+  while ( needConformingClosure ); 
 
   if (!refined) {
     cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
@@ -673,8 +696,9 @@ bool Gitter :: adapt ()
   }
   int lap = clock () ;
   coarse () ;
+
   // make sure that no non-conforming element are present in case of bisection 
-  assert ( markForConformingClosure() );
+  assert ( ! markForConformingClosure() );
 
   int end = clock () ;
   if (debugOption (1)) {
