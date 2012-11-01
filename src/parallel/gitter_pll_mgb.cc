@@ -1003,6 +1003,7 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
       bool x = true ;
       LeafIterator< helement_STI > i( *this );
       for( i->first(); ! i->done() ; i->next()) { x &= i->item().markForConformingClosure () ; }
+
       assert( x == true );
 #endif
     }
