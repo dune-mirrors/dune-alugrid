@@ -2143,6 +2143,7 @@ protected :
   virtual void notifyGridChanges () ;
   virtual void notifyMacroGridChanges () ;
 protected :
+  // bisectionRefinement is disabled by default 
   Gitter () : bisectionRefinement_( false ) {} 
   virtual ~Gitter () ;
 

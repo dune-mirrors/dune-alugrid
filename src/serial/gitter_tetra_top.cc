@@ -312,13 +312,7 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
 {
   if ( r != getrule () ) 
   {
-    if( getrule() != myrule_t :: nosplit )
-    {
-      std::cout << " getrule(): " << getrule() << " ";
-     std::cout << " r:         " << r << std::endl;
-    }
     assert (getrule () == myrule_t :: nosplit) ;
-
     switch(r) 
     {
       typedef typename myhedge_t :: myrule_t myhedgerule_t;

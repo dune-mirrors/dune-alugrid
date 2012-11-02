@@ -316,13 +316,16 @@ bool Gitter :: refine ()
 bool Gitter :: markForConformingClosure()
 {
   bool needConformingClosure = false ;
+  // if bisection refinement was enabled we need to check 
+  // for the conforming closure 
   if( conformingClosureNeeded() ) 
   {
     leaf_element__macro_element__iterator i ( container () ) ;
     for( i.first(); ! i.done() ; i.next()) 
     { 
       // this should only be called for tetra 
-      // (although default impl for other elements exists )
+      // (although default impl for other elements exists and
+      //  returns false )
       assert( i.item ().type() == tetra );
       // stores the result if it is true 
       needConformingClosure |= i.item ().markForConformingClosure() ;

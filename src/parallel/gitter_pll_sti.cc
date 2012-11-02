@@ -930,8 +930,6 @@ bool GitterPll :: adapt ()
   assert( ! needConformingClosure );
 #endif
 
-  //if( needConformingClosure )
-  //  refine () ;
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
   ++adaptstep;
 #endif
