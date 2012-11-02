@@ -517,7 +517,7 @@ void ParallelGridMover :: unpackHedge1 (ObjectStream & os) {
   int left, right ;
   os.readObject (left) ;
   os.readObject (right) ;
-  pair < hedge1_GEO *, bool > p = InsertUniqueHedge1 (left,right) ;
+  pair < hedge1_GEO *, bool > p = InsertUniqueHedge (left,right) ;
   p.first->unpackSelf (os,p.second) ;
   return ;
 }
@@ -528,7 +528,7 @@ void ParallelGridMover :: unpackHface3 (ObjectStream & os)
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
-  pair < hface3_GEO *, bool > p = InsertUniqueHface3 (v) ;
+  pair < hface3_GEO *, bool > p = InsertUniqueHface (v) ;
   p.first->unpackSelf (os,p.second) ;
   return ;
 }
@@ -540,7 +540,7 @@ void ParallelGridMover :: unpackHface4 (ObjectStream & os)
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
   os.readObject (v[3]) ;
-  pair < hface4_GEO *, bool > p = InsertUniqueHface4 (v) ;
+  pair < hface4_GEO *, bool > p = InsertUniqueHface (v) ;
   p.first->unpackSelf (os,p.second) ;
   return ;
 }
@@ -578,7 +578,7 @@ void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os)
   os.readObject (v[4]) ;
   os.readObject (v[5]) ;
 
-  pair < periodic3_GEO *, bool > p = InsertUniquePeriodic3 (v, b) ;
+  pair < periodic3_GEO *, bool > p = InsertUniquePeriodic (v, b) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
 }	
@@ -603,7 +603,7 @@ void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os)
   os.readObject (v[5]) ;
   os.readObject (v[6]) ;
   os.readObject (v[7]) ;
-  pair < periodic4_GEO *, bool > p = InsertUniquePeriodic4 (v, b) ;
+  pair < periodic4_GEO *, bool > p = InsertUniquePeriodic (v, b) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
 }

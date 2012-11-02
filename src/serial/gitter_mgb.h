@@ -117,22 +117,30 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     void removeElement (const elementKey_t &, const bool ) ;
   public :
     virtual pair < VertexGeo *, bool >     InsertUniqueVertex (double, double, double, int) ;
-    virtual pair < hedge1_GEO *, bool >    InsertUniqueHedge1 (int,int) ;
-    virtual pair < hface3_GEO *, bool >    InsertUniqueHface3 (int (&)[3]) ;
-    virtual pair < hface4_GEO *, bool >    InsertUniqueHface4 (int (&)[4]) ;
+    virtual pair < hedge1_GEO *, bool >    InsertUniqueHedge (int,int) ;
+    virtual pair < hedge1_GEO *, bool >    InsertUniqueHedge1 (int a, int b) { return InsertUniqueHedge( a, b); }
+    virtual pair < hface3_GEO *, bool >    InsertUniqueHface3 (int (&v)[3]) { return InsertUniqueHface( v ); }
+    virtual pair < hface4_GEO *, bool >    InsertUniqueHface4 (int (&v)[4]) { return InsertUniqueHface( v ); }
+    virtual pair < hface3_GEO *, bool >    InsertUniqueHface (int (&)[3]) ;
+    virtual pair < hface4_GEO *, bool >    InsertUniqueHface (int (&)[4]) ;
 
+    virtual pair < tetra_GEO *, bool >     InsertUniqueTetra (int (&v)[4] ) { return InsertUniqueTetra( v, 0 ); } 
     virtual pair < tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4], int) ;
     virtual pair < hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8]) ;
 
-    virtual pair < periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&)[6], const Gitter :: hbndseg :: bnd_t (&)[2]) ;
-    virtual pair < periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&)[8], const Gitter :: hbndseg :: bnd_t (&)[2]) ;
+    virtual pair < periodic3_GEO *, bool > InsertUniquePeriodic (int (&)[6], const Gitter :: hbndseg :: bnd_t (&)[2]) ;
+    virtual pair < periodic4_GEO *, bool > InsertUniquePeriodic (int (&)[8], const Gitter :: hbndseg :: bnd_t (&)[2]) ;
+    virtual pair < periodic3_GEO *, bool > 
+    InsertUniquePeriodic3 (int (&v)[6], const Gitter :: hbndseg :: bnd_t (&bnd)[2]) { return InsertUniquePeriodic( v, bnd ); }
+    virtual pair < periodic4_GEO *, bool > 
+    InsertUniquePeriodic4 (int (&v)[8], const Gitter :: hbndseg :: bnd_t (&bnd)[2]) { return InsertUniquePeriodic( v, bnd ); }
     
     // old version setting default boundary ids 
     pair < periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&v)[6] ) 
     {
       Gitter :: hbndseg :: bnd_t bnd[ 2 ] = 
         { Gitter :: hbndseg :: periodic, Gitter :: hbndseg :: periodic };
-      return InsertUniquePeriodic3( v, bnd );
+      return InsertUniquePeriodic( v, bnd );
     }
 
     // old version setting default boundary ids 
@@ -140,7 +148,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     {
       Gitter :: hbndseg :: bnd_t bnd[ 2 ] = 
         { Gitter :: hbndseg :: periodic, Gitter :: hbndseg :: periodic };
-      return InsertUniquePeriodic4( v, bnd );
+      return InsertUniquePeriodic( v, bnd );
     }
     
     virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter :: hbndseg :: bnd_t) ;

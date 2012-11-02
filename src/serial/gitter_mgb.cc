@@ -17,7 +17,8 @@ InsertUniqueVertex (double x, double y, double z, int i) {
   }
 }
  
-pair < Gitter :: Geometric :: hedge1_GEO *, bool > MacroGridBuilder :: InsertUniqueHedge1 (int l, int r) {
+pair < Gitter :: Geometric :: hedge1_GEO *, bool > MacroGridBuilder :: 
+InsertUniqueHedge (int l, int r) {
   if (l > r) { 
     int i = l ; l = r ; r = i ;
   }
@@ -38,16 +39,17 @@ pair < Gitter :: Geometric :: hedge1_GEO *, bool > MacroGridBuilder :: InsertUni
   }
 }
 
-pair < Gitter :: Geometric :: hface3_GEO *, bool > MacroGridBuilder :: InsertUniqueHface3 (int (&v)[3]) {
+pair < Gitter :: Geometric :: hface3_GEO *, bool > MacroGridBuilder :: 
+InsertUniqueHface (int (&v)[3]) {
   cyclicReorder (v,v+3) ;
   faceKey_t key (v[0],v[1],v[2]) ;
   faceMap_t :: const_iterator hit = _face3Map.find (key) ;
   if (hit == _face3Map.end ()) {
     hedge1_GEO * edge [3] ;
     int dire [3] = { 0, 0, 1 } ;
-    edge [0] = InsertUniqueHedge1 (v[0],v[1]).first ;
-    edge [1] = InsertUniqueHedge1 (v[1],v[2]).first ;
-    edge [2] = InsertUniqueHedge1 (v[2],v[0]).first ;
+    edge [0] = InsertUniqueHedge (v[0],v[1]).first ;
+    edge [1] = InsertUniqueHedge (v[1],v[2]).first ;
+    edge [2] = InsertUniqueHedge (v[2],v[0]).first ;
     hface3_GEO * f3 = myBuilder ().insert_hface3 (edge,dire) ;
     _face3Map [key] = f3 ;
     return pair < hface3_GEO *, bool > (f3,true) ;
@@ -56,17 +58,17 @@ pair < Gitter :: Geometric :: hface3_GEO *, bool > MacroGridBuilder :: InsertUni
   }
 }
 
-pair < Gitter :: Geometric :: hface4_GEO *, bool > MacroGridBuilder :: InsertUniqueHface4 (int (&v)[4]) {
+pair < Gitter :: Geometric :: hface4_GEO *, bool > MacroGridBuilder :: InsertUniqueHface (int (&v)[4]) {
   cyclicReorder (v,v+4) ;
   faceKey_t key (v[0],v[1],v[2]) ;
   faceMap_t :: const_iterator hit = _face4Map.find (key) ;
   if (hit == _face4Map.end ()) {
     hedge1_GEO * edge [4] ;
     int dire [4]; 
-    edge [0] = InsertUniqueHedge1 (v[0],v[1]).first ;
-    edge [1] = InsertUniqueHedge1 (v[1],v[2]).first ;
-    edge [2] = InsertUniqueHedge1 (v[2],v[3]).first ;
-    edge [3] = InsertUniqueHedge1 (v[3],v[0]).first ;  
+    edge [0] = InsertUniqueHedge (v[0],v[1]).first ;
+    edge [1] = InsertUniqueHedge (v[1],v[2]).first ;
+    edge [2] = InsertUniqueHedge (v[2],v[3]).first ;
+    edge [3] = InsertUniqueHedge (v[3],v[0]).first ;  
     dire [0] = v[0] < v[1] ? 0 : 1 ;
     dire [1] = v[1] < v[2] ? 0 : 1 ;
     dire [2] = v[2] < v[3] ? 0 : 1 ;
@@ -93,7 +95,7 @@ InsertUniqueTetra (int (&v)[4], int orientation)
       x [1] = v [Tetra :: prototype [fce][1]] ;
       x [2] = v [Tetra :: prototype [fce][2]] ;
       twst [fce] = cyclicReorder (x,x+3) ;
-      face [fce] =  InsertUniqueHface3 (x).first ;
+      face [fce] =  InsertUniqueHface (x).first ;
     }
     tetra_GEO * t = myBuilder ().insert_tetra (face,twst,orientation) ;
     assert (t) ;
@@ -118,7 +120,7 @@ pair < Gitter :: Geometric :: hexa_GEO *, bool > MacroGridBuilder :: InsertUniqu
       x [2] = v [Hexa :: prototype [fce][2]] ;
       x [3] = v [Hexa :: prototype [fce][3]] ;
       twst [fce] = cyclicReorder (x,x+4) ;
-      face [fce] =  InsertUniqueHface4 (x).first ;
+      face [fce] =  InsertUniqueHface (x).first ;
     }
     hexa_GEO * hx = myBuilder ().insert_hexa (face,twst) ;
     _hexaMap [key] = hx ;
@@ -135,7 +137,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   if (bt == Gitter :: hbndseg_STI :: closure) 
   {
     if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
-      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
+      hface3_GEO * face =  InsertUniqueHface (v).first ;
       _hbnd3Int [key] = new Hbnd3IntStorage (face,twst) ;
       return true ;
     }
@@ -143,7 +145,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   else 
   {
     if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
-      hface3_GEO * face  = InsertUniqueHface3 (v).first ;
+      hface3_GEO * face  = InsertUniqueHface (v).first ;
       hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt) ;
       _hbnd3Map [key] = hb3 ;
       return true ;
@@ -158,7 +160,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
   if (bt == Gitter :: hbndseg_STI :: closure) 
   {
     if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
-      hface4_GEO * face =  InsertUniqueHface4 (v).first ;
+      hface4_GEO * face =  InsertUniqueHface (v).first ;
       _hbnd4Int [key] = new Hbnd4IntStorage (face,twst) ;
       return true ;
     }
@@ -167,7 +169,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
   {
     if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
     {
-      hface4_GEO * face =  InsertUniqueHface4 (v).first ;
+      hface4_GEO * face =  InsertUniqueHface (v).first ;
       hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt) ;
       _hbnd4Map [key] = hb4 ;
       return true ;
@@ -177,7 +179,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
 }
 
 pair < Gitter :: Geometric :: periodic3_GEO *, bool > MacroGridBuilder :: 
-InsertUniquePeriodic3 (int (&v)[6], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2] )  
+InsertUniquePeriodic (int (&v)[6], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2] )  
 {
 
   // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
@@ -196,7 +198,7 @@ InsertUniquePeriodic3 (int (&v)[6], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2]
       x [1] = v [Periodic3 :: prototype [fce][1]] ;
       x [2] = v [Periodic3 :: prototype [fce][2]] ;
       twst [fce] = cyclicReorder (x,x+3) ;
-      face [fce] = InsertUniqueHface3 (x).first ;
+      face [fce] = InsertUniqueHface (x).first ;
     }
     periodic3_GEO * t = myBuilder ().insert_periodic3 (face,twst,bt) ;
     assert (t) ;
@@ -208,7 +210,7 @@ InsertUniquePeriodic3 (int (&v)[6], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2]
 }
 
 pair < Gitter :: Geometric :: periodic4_GEO *, bool > MacroGridBuilder :: 
-InsertUniquePeriodic4 (int (&v)[8], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2] ) 
+InsertUniquePeriodic (int (&v)[8], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2] ) 
 {
 
   // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
@@ -229,7 +231,7 @@ InsertUniquePeriodic4 (int (&v)[8], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2]
       x [2] = v [Periodic4 :: prototype [fce][2]] ;
       x [3] = v [Periodic4 :: prototype [fce][3]] ;
       twst [fce] = cyclicReorder (x,x+4) ;
-      face [fce] = InsertUniqueHface4 (x).first ;
+      face [fce] = InsertUniqueHface (x).first ;
     }
     periodic4_GEO * t = myBuilder ().insert_periodic4 (face,twst,bt) ;
     assert (t) ;
@@ -865,7 +867,6 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           int v [4] ;
           rawInput >> v [0] >> v [1] >> v [2] >> v [3] ;
           int orientation = i%2 ;
-          cout << "Got orientation = " << orientation << endl;
           InsertUniqueTetra (v, orientation ) ;
         }
         break ;
@@ -881,7 +882,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           }
           Gitter :: hbndseg :: bnd_t btAbs = (Gitter :: hbndseg :: bnd_t)(std::abs(bt));
           Gitter :: hbndseg :: bnd_t bndId[ 2 ] = { btAbs, btAbs };
-          InsertUniquePeriodic3 (v, bndId ) ;
+          InsertUniquePeriodic (v, bndId ) ;
         }
         break ;
       case PERIODIC4_RAW :
@@ -896,7 +897,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           }
           Gitter :: hbndseg :: bnd_t btAbs = (Gitter :: hbndseg :: bnd_t)(std::abs(bt));
           Gitter :: hbndseg :: bnd_t bndId[ 2 ] = { btAbs, btAbs };
-          InsertUniquePeriodic4 (v, bndId ) ;
+          InsertUniquePeriodic (v, bndId ) ;
         }
         break ;
       default :
