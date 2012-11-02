@@ -76,7 +76,7 @@ public:
   ~GitterDunePll () {}
 
   // adapts and witout calling loadBalancer  
-  bool adaptWithoutLoadBalancing ();
+  bool adaptWithoutLoadBalancing () { return GitterPll :: adapt (); }
 
   // adapts and calls preCoarsening and
   // postRefinement, no loadBalancing done   

@@ -31,39 +31,6 @@ void GitterDunePll :: duneNotifyMacroGridChanges ()
   rebuildGhostCells ();
 }
 
-// adapt, no loadBalancing done   
-bool GitterDunePll :: adaptWithoutLoadBalancing ()   
-{
-  __STATIC_myrank = mpAccess ().myrank () ;
-  __STATIC_turn ++ ;
-  assert (debugOption (20) ? (cout << "**INFO GitterDunePll["<< __STATIC_myrank << "] :: adaptWithoutLB ()" << endl, 1) : 1) ;
-  assert (! iterators_attached ()) ;
-
-  int start = clock () ;
-  const bool refined = this->refine() ;
-  int lap = clock () ;
-  this->coarse ();
-  
-  int end = clock () ;
-  if (debugOption (1))
-  {
-    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
-    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
-    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
-    cout << "**INFO GitterDunePll["<< __STATIC_myrank << "] :: adaptWithoutLB () [ref (loops)|cse|all] " << u1 << " ("
-       << _refineLoops << ") " << u2 << " " << u3 << endl ;
-  }
-
-#ifndef NDEBUG
-  // make sure every process returns the same value 
-  const bool checkRefined = mpAccess().gmax( refined );
-  assert( refined == checkRefined );
-#endif
-
-  duneNotifyGridChanges () ;
-  return refined;
-}
-
 // done call notify and loadBalancer  
 bool GitterDunePll :: duneAdapt (AdaptRestrictProlongType & arp)   
 {

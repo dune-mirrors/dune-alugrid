@@ -918,7 +918,8 @@ bool GitterPll :: adapt ()
     needConformingClosure = 
       bisectionEnabled ? mpAccess().gmax( markForConformingClosure() ) : false ;
 
-  } while ( needConformingClosure );
+  } 
+  while ( needConformingClosure );
 
   // now perform one load balancing step
   // loadBalancerGridChangesNotify () ;

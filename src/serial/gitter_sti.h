@@ -2159,7 +2159,10 @@ public :
 
   virtual void fullIntegrityCheck () ;
   virtual void printsize () ;
+protected:  
+  // make this method protected to avoid usage 
   virtual bool adapt () ;
+public:  
   // this method just calls adapt 
   virtual bool adaptWithoutLoadBalancing() ;
   // adaptation with callback functionality 
