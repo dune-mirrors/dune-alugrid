@@ -854,18 +854,21 @@ void Gitter :: refineRandom (double p) {
   return ;
 }
 
-void Gitter :: refineBall (const alucoord_t (&center)[3], double radius, int limit) {
-  if (radius < .0) {
+void Gitter :: markForBallRefinement( const alucoord_t (&center)[3], double radius, int limit ) 
+{
+  if (radius < .0) 
+  {
     cerr << "**WARNUNG (IGNORIERT) Gitter :: refineBall (center = ?, radius = " 
-   << radius << ") Radius darf nicht negativ sein" << endl ;
-  } else {
+         << radius << ") Radius darf nicht negativ sein" << endl ;
+  } 
+  else 
+  {
     const int start = clock () ;
     {
-       leaf_element__macro_element__iterator w (container ()) ;
-       for (w.first () ; ! w.done () ; w.next ())
-         w.item (). tagForBallRefinement (center,radius,limit) ;
+      leaf_element__macro_element__iterator w (container ()) ;
+      for (w.first () ; ! w.done () ; w.next ())
+        w.item (). tagForBallRefinement ( center, radius, limit ) ;
     }
-    adapt () ;
     if (debugOption (2))
       cout << "**INFO Gitter :: refineBall () used " 
            << (double)(clock () - start)/(double)(CLOCKS_PER_SEC) << " sec." << endl ;

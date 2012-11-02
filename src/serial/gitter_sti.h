@@ -2165,7 +2165,7 @@ public :
   // adaptation with callback functionality 
   virtual bool duneAdapt ( AdaptRestrictProlongType & arp ) ;
   virtual void refineGlobal () ;
-  virtual void refineBall (const alucoord_t (&)[3],double,int) ;
+  virtual void markForBallRefinement(const alucoord_t (&)[3],double,int) ;
   virtual void refineRandom (double) ;
 
   virtual void backup (ostream &) ;
