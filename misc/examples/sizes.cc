@@ -131,7 +131,7 @@ void checkRefinements( GitterType& grid )
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
 void globalRefine(GitterType& grid, bool global, int step, int mxl,
-                  const bool loadBalance = false )
+                  const bool loadBalance = true )
 {
    {
      if (global)
@@ -302,11 +302,13 @@ int main (int argc, char ** argv, const char ** envp)
         grid.tovtk(  ss.str().c_str() );
         globalRefine(grid, false,i, mxl);
       }
+      /*
       {
         std::ostringstream ss;
         ss << "out-" << ZeroPadNumber(mxl) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
       }
+      */
       /*
       globalCoarsening(grid,3*glb);
       {
