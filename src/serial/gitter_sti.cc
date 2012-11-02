@@ -335,8 +335,9 @@ bool Gitter :: markEdgeCoarsening ()
   if( conformingClosureNeeded() ) 
   {
     // reset all edge flags 
-    // resetEdgeCoarsenFlags () ;
+    resetEdgeCoarsenFlags () ;
 
+    /*
     // reset all edge flags 
     {
       // iterate over all edges in the hierarchy 
@@ -348,6 +349,8 @@ bool Gitter :: markEdgeCoarsening ()
         edges->item().resetCoarsenFlag();
       delete edges ;
     }
+    */
+
     // now check for each tetra whether it could really be coarsened
     leaf_element__macro_element__iterator i (container ()) ;
     for( i.first(); ! i.done() ; i.next() ) 
@@ -372,8 +375,8 @@ void Gitter :: resetEdgeCoarsenFlags ()
     for( edges->first(); ! edges->done(); edges->next() ) 
     {
       edges->item().resetCoarsenFlag();
-      // edges->item().resetLockFlag();
     }
+    // delete iterator 
     delete edges ;
   }
 }

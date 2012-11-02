@@ -548,7 +548,7 @@ void GitterPll :: coarse ()
     // communicate edge flags if bisection is enabled 
     if( Gitter :: markEdgeCoarsening() ) 
     {
-      // see class implementation above 
+      // see class implementation in this file above 
       EdgeFlagExchange dataHandle ;
       // this communicates the edge no coarsen flags 
       borderBorderCommunication( dataHandle, dataHandle, dataHandle, dataHandle );
@@ -598,9 +598,9 @@ void GitterPll :: coarse ()
       
       // do real coarsening of elements 
       Gitter :: doCoarse () ;
-      // Gitter :: coarse () ;
       
-      Gitter :: resetEdgeCoarsenFlags () ;
+      // reset edge coarsen flags to avoid problems with coarsening 
+      // Gitter :: resetEdgeCoarsenFlags () ;
     } 
     catch (Parallel :: AccessPllException) 
     {
@@ -713,7 +713,7 @@ void GitterPll :: coarse ()
     
     try 
     {
-      Gitter :: resetEdgeCoarsenFlags () ;
+      // Gitter :: resetEdgeCoarsenFlags () ;
     
       // Phase des Kantenausgleichs im parallelen Vergr"oberungsalgorithmus:
   
@@ -921,7 +921,7 @@ bool GitterPll :: adapt ()
   } while ( needConformingClosure );
 
   // now perform one load balancing step
-  loadBalancerGridChangesNotify () ;
+  // loadBalancerGridChangesNotify () ;
 
 #ifndef NDEBUG
   needConformingClosure = 
