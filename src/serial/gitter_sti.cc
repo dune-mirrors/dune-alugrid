@@ -324,7 +324,8 @@ bool Gitter :: markForConformingClosure()
       // this should only be called for tetra 
       // (although default impl for other elements exists )
       assert( i.item ().type() == tetra );
-      needConformingClosure &= i.item ().markForConformingClosure() ; 
+      // stores the result if it is true 
+      needConformingClosure |= i.item ().markForConformingClosure() ;
     }
   }
   return needConformingClosure;
