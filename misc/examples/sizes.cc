@@ -30,6 +30,25 @@ using namespace std;
 
 using namespace ALUGridSpace;
 
+struct EmptyGatherScatter : public GatherScatter
+{
+  typedef GatherScatter :: ObjectStreamType  ObjectStreamType;
+
+  EmptyGatherScatter () {}
+
+  virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) {}
+  virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) {}
+};
+
+struct EmptyAdaptRestrictProlong : public Gitter :: AdaptRestrictProlong
+{
+  virtual int preCoarsening (HElemType & elem )   { return 1; } 
+  virtual int postRefinement (HElemType & elem ) { return 1; }
+  virtual int preCoarsening (HGhostType & bnd )     { return 1; }
+  virtual int postRefinement (HGhostType & bnd )    { return 1; } 
+};
+
+
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
 bool needConformingClosure( GitterType& grid, bool useClosure ) 
@@ -49,6 +68,7 @@ bool needConformingClosure( GitterType& grid, bool useClosure )
   }
   return needClosure ;
 }
+
        
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
@@ -92,8 +112,12 @@ void checkRefinements( GitterType& grid )
       }
     }
 
+    // create empty gather scatter 
+    EmptyAdaptRestrictProlong rp;
+
     // adapt grid 
-    grid.adapt ();
+    grid.duneAdapt( rp );
+
 
     // coarsen again 
     globalCoarsening( grid , 1 );
@@ -106,7 +130,8 @@ void checkRefinements( GitterType& grid )
 
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
-void globalRefine(GitterType& grid, bool global, int step, const bool bisection = true ) 
+void globalRefine(GitterType& grid, bool global, int step, int mxl,
+                  const bool loadBalance = false )
 {
    {
      if (global)
@@ -119,11 +144,8 @@ void globalRefine(GitterType& grid, bool global, int step, const bool bisection 
          // mark element for refinement 
          w->item ().tagForGlobalRefinement ();
        }
-       // adapt grid 
-       grid.adapt ();
-       grid.printsize () ;
      }
-     else
+     else 
      {
        double t = double(step)/10.;
        double center[3] = {0.2,0.2,0.2};
@@ -132,8 +154,22 @@ void globalRefine(GitterType& grid, bool global, int step, const bool bisection 
        center[1] += dir[1]*t;
        center[2] += dir[2]*t;
        double rad=0.6;
-       grid.refineBall(center,rad,10);
+
+       grid.markForBallRefinement(center,rad,mxl);
      }
+
+     // create empty gather scatter 
+     EmptyAdaptRestrictProlong rp;
+
+     // adapt grid 
+     grid.duneAdapt( rp );
+
+     if( loadBalance ) 
+     {
+       // load balance 
+       grid.duneLoadBalance();
+     }
+
      // print size of grid 
      grid.printsize () ;
    }
@@ -159,8 +195,11 @@ void globalCoarsening(GitterType& grid, int refcount) {
        }
     }
 
+    // create empty gather scatter 
+    EmptyAdaptRestrictProlong rp;
+
     // adapt grid 
-    grid.adapt ();
+    grid.duneAdapt( rp );
 
     // print size of grid 
     grid.printsize () ;
@@ -253,27 +292,29 @@ int main (int argc, char ** argv, const char ** envp)
     
       grid.printMemUsage();
       for (int i = 0; i < glb; ++i)
-        globalRefine(grid, true,-1);
+        globalRefine(grid, true, -1, mxl);
       for (int i = 0; i < glb; ++i)
-        globalRefine(grid, false,0);
-      for( int i = 0; i < mxl; ++i )
+        globalRefine(grid, false,0, mxl);
+      for( int i = 0; i < 2*mxl; ++i )
       {
         std::ostringstream ss;
         ss << "out-" << ZeroPadNumber(i) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
-        globalRefine(grid, false,i);
+        globalRefine(grid, false,i, mxl);
       }
       {
         std::ostringstream ss;
         ss << "out-" << ZeroPadNumber(mxl) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
       }
+      /*
       globalCoarsening(grid,3*glb);
       {
         std::ostringstream ss;
         ss << "out-" << ZeroPadNumber(mxl+1) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
       }
+      */
     }
   }
 
