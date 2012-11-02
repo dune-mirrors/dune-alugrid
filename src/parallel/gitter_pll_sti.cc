@@ -987,8 +987,8 @@ void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
   return ;
 }
 
-void GitterPll :: exchangeDynamicState () {
-
+void GitterPll :: exchangeDynamicState () 
+{
   // Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
   // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
   // die einer "Anderung des statischen Zustands entsprechen. Sie wird in
@@ -996,73 +996,75 @@ void GitterPll :: exchangeDynamicState () {
   // kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
   // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
   // Regel hier eingeschleift werden.
-  
-{
-  const int nl = mpAccess ().nlinks () ;
-
-#ifndef NDEBUG
-  const int start = clock () ;
-#endif
-  try {
-    vector < ObjectStream > osv (nl) ;
-    {
-      for (int l = 0 ; l < nl ; l ++) 
-      {
-        LeafIteratorTT < hface_STI > w (*this,l) ;
-        for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessInnerPllX () ;
-          p.first->writeDynamicState (osv [l], p.second) ;
-        }
-        for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessInnerPllX () ;
-          p.first->writeDynamicState (osv [l], p.second) ;
-        }
-
-        // mark end of stream 
-        osv [l].writeObject( MacroGridMoverIF :: ENDSTREAM ); 
-      } 
-    }
-
-    // exchange information 
-    osv = mpAccess ().exchange (osv) ;
-
-    {
-      for (int l = 0 ; l < nl ; l ++ ) 
-      {
-        LeafIteratorTT < hface_STI > w (*this,l) ;
-        for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessOuterPllX () ;
-          p.first->readDynamicState (osv [l], p.second) ;
-        }
-        for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessOuterPllX () ;
-          p.first->readDynamicState (osv [l], p.second) ;
-        }
-
-        // check consistency of stream 
-        int endStream ; 
-        osv [l].readObject( endStream );
-        if( endStream != MacroGridMoverIF :: ENDSTREAM )
-        {
-          cerr << "**ERROR: writeStaticState: inconsistent stream " << endl;
-          assert( false );
-          abort();
-        } 
-      }
-    }
-  } 
-  catch (Parallel ::  AccessPllException) 
   {
-    cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
-  }
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: exchangeDynamicState () used " 
-    << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
+    const int nl = mpAccess ().nlinks () ;
+  
+#ifndef NDEBUG 
+    // if debug mode, then count time 
+    const int start = clock () ;
+#endif
+  
+    try 
+    {
+      typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
+         TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
+      typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
+        TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
+                
+      vector < ObjectStream > osv (nl) ;
+      {
+        for (int l = 0 ; l < nl ; l ++) 
+        {
+          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
 
-}
+          InnerIteratorType wi (mif);
+          for (wi.first () ; ! wi.done () ; wi.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
+            p.first->writeDynamicState (osv [l], p.second) ;
+          }
+      
+          OuterIteratorType wo (mof);
+          for (wo.first () ; ! wo.done () ; wo.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
+            p.first->writeDynamicState (osv [l], p.second) ;
+          }
+        }  
+      }
+    
+      // exchange data 
+      osv = mpAccess ().exchange (osv) ;
+    
+      { 
+        for (int l = 0 ; l < nl ; l ++ ) 
+        {
+          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
+      
+          OuterIteratorType wo (mof) ;
+          for (wo.first () ; ! wo.done () ; wo.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
+            p.first->readDynamicState (osv [l], p.second) ;
+          }
+      
+          InnerIteratorType wi (mif);
+          for (wi.first () ; ! wi.done () ; wi.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
+            p.first->readDynamicState (osv [l], p.second) ;
+          }
+        }
+      }
+    } 
+    catch (Parallel ::  AccessPllException) 
+    {
+      cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
+    }
+    assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: exchangeDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
+  }
   return ;
 }
 
@@ -1279,7 +1281,8 @@ void GitterPll :: loadBalancerMacroGridChangesNotify ()
   return ;
 }
 
-void GitterPll :: notifyGridChanges () {
+void GitterPll :: notifyGridChanges () 
+{
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: notifyGridChanges () " << endl, 1) : 1 ) ;
   Gitter :: notifyGridChanges () ;
   exchangeDynamicState () ;
