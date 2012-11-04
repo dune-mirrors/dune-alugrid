@@ -820,7 +820,6 @@ template < class A > TetraTop < A >
 #endif
 }
 
-// constrcutor mit IndexManager uebergabe
 // this is the macro element constructor 
 template < class A > TetraTop < A > :: 
 TetraTop (int l,  // level 
@@ -1079,16 +1078,8 @@ template < class A >  void TetraTop < A > :: split_e01 ()
                     ) ;
   assert( newFace );
 
-  // cout << "New inner " << newFace << endl;
-
-  //facepair_t subFace2 = subFaces( 2 ); // get sub face 0 and 1 of face 2
-  //facepair_t subFace3 = subFaces( 3 ); // get sub face 0 and 1 of face 3
-
   facepair_t subFace2 = subFaces( 2, myvertex( 0 ), myvertex( 1 ) ); // get sub face 0 and 1 of face 2
   facepair_t subFace3 = subFaces( 3, myvertex( 0 ), myvertex( 1 ) ); // get sub face 0 and 1 of face 3
-
-  //cout << "Sub face 2 : " << endl << subFace2.first << subFace2.second << endl;
-  //cout << "Sub face 3 : " << endl << subFace3.first << subFace3.second << endl;
 
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1115,16 +1106,16 @@ template < class A >  void TetraTop < A > :: split_e01 ()
 
   innertetra_t * h0 = new innertetra_t (newLevel, 
                                         newFace, 0, 
-                                        myhface( 1 ),  twist( 1 ),
+                                        myhface( 1 ),   twist( 1 ),
                                         subFace2.first, twist( 2 ),
                                         subFace3.first, twist( 3 ), 
                                         this, 0, childVolume) ;
 
   innertetra_t * h1 = new innertetra_t (newLevel, 
-                                        myhface( 0 ), twist( 0 ),
+                                        myhface( 0 ),   twist( 0 ),
                                         newFace, -1,
-                                        subFace2.second, twist( 2 ),
-                                        subFace3.second, twist( 3 ),
+                                        subFace2.second,twist( 2 ),
+                                        subFace3.second,twist( 3 ),
                                         this, 1, childVolume) ;
 
   assert(h0 && h1) ;
@@ -1174,13 +1165,8 @@ template < class A >  void TetraTop < A > :: split_e12 ()
                     ) ;
   assert( newFace );
 
-  //cout << "New inner " << newFace << endl;
-
   facepair_t subFace0 = subFaces( 0, myvertex( 1 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 0
   facepair_t subFace3 = subFaces( 3, myvertex( 1 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 3
-
-  //cout << "Sub face 1 : " << endl << subFace0.first << subFace0.second << endl;
-  //cout << "Sub face 3 : " << endl << subFace3.first << subFace3.second << endl;
 
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1264,16 +1250,8 @@ template < class A >  void TetraTop < A > :: split_e20 ()
                     ) ;
   assert( newFace );
 
-  // cout << "New inner face " << newFace << endl;
-
-  //facepair_t subFace1 = subFaces( 1 ); // get sub face 0 and 1 of face 1
-  //facepair_t subFace3 = subFaces( 3 ); // get sub face 0 and 1 of face 3
-
   facepair_t subFace1 = subFaces( 1, myvertex( 0 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 0
   facepair_t subFace3 = subFaces( 3, myvertex( 0 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 1
-
-  //cout << "Sub face 1 : " << endl << subFace1.first << subFace1.second << endl;
-  //cout << "Sub face 3 : " << endl << subFace3.first << subFace3.second << endl;
 
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1357,13 +1335,8 @@ template < class A >  void TetraTop < A > :: split_e23 ()
                     ) ;
   assert( newFace );
 
-  //cout << "New inner " << newFace << endl;
-
   facepair_t subFace0 = subFaces( 0, myvertex( 2 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 0
   facepair_t subFace1 = subFaces( 1, myvertex( 2 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
-
-  //cout << "Sub face 0 : " << endl << subFace0.first << subFace0.second << endl;
-  //cout << "Sub face 1 : " << endl << subFace1.first << subFace1.second << endl;
 
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1464,14 +1437,10 @@ template < class A >  void TetraTop < A > :: split_e30 ()
                      orgEdge, edgeTwst 
                     ) ;
 
-  //cout << "New inner face " << newFace << endl;
   assert( newFace ) ;
 
   facepair_t subFace1 = subFaces( 1, myvertex( 0 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
   facepair_t subFace2 = subFaces( 2, myvertex( 0 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 2
-
-  //cout << "Sub face 1 : " << endl << subFace1.first << subFace1.second << endl;
-  //cout << "Sub face 2 : " << endl << subFace2.first << subFace2.second << endl;
 
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1536,8 +1505,6 @@ template < class A >  void TetraTop < A > :: split_e31 ()
 
   assert( newFace ) ;
 
-  //cout << "New inner face " << newFace << endl;
-
   /* 
     
     3               2
@@ -1545,7 +1512,7 @@ template < class A >  void TetraTop < A > :: split_e31 ()
       |3         2|     new inner face ( 0, 4, 2 )
       | \       .*|     
       |  \     .  |     child 0 is the child which contains node 1 
-      |   \   . * |     child 0 is the child which contains node 3 
+      |   \   . * |     child 1 is the child which contains node 3 
       |    \ .    |
       |     \  *  |
       |    . \    |      4 becomes node 1 in child 0
@@ -1560,14 +1527,9 @@ template < class A >  void TetraTop < A > :: split_e31 ()
   // we divide by 2 means we divide the volume by 2
   const double childVolume = calculateChildVolume( 0.5 * _volume );
   
-  //facepair_t subFace0 = subFaces( 0 ); // get sub face 0 and 1 of face 0
-  //facepair_t subFace2 = subFaces( 2 ); // get sub face 0 and 1 of face 2
   facepair_t subFace0 = subFaces( 0, myvertex( 1 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 0
   facepair_t subFace2 = subFaces( 2, myvertex( 1 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
 
-
-  //cout << "Sub face 0 : " << endl << subFace0.first << subFace0.second << endl;
-  //cout << "Sub face 2 : " << endl << subFace2.first << subFace2.second << endl;
 
   innertetra_t * h0 = new innertetra_t (newLevel, 
                                         subFace0.first, twist( 0 ),
@@ -1643,9 +1605,9 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
     // set vertex mapping (child 1)
     t1->_vxMap[ 0 ] = _vxMap[ 3 ]; 
     t1->_vxMap[ 1 ] = _vxMap[ 0 ];
-    const char face3 = ( elementType () == 0 ) ? 1 : 0;
-    t1->_vxMap[ 2 ] = _vxMap[ 1 + face3 ]; // for type 0   2 else 1 
-    t1->_vxMap[ 3 ] = _vxMap[ 2 - face3 ]; // for type 0   1 else 2 
+    const char fce3 = ( elementType () == 0 ) ? 1 : 0;
+    t1->_vxMap[ 2 ] = _vxMap[ 1 + fce3 ]; // for type 0   2 else 1 
+    t1->_vxMap[ 3 ] = _vxMap[ 2 - fce3 ]; // for type 0   1 else 2 
   }
   else 
   {
@@ -1662,9 +1624,9 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
     // set vertex mapping (child 1)
     t1->_vxMap[ 0 ] = _vxMap[ 1 ]; 
     t1->_vxMap[ 3 ] = _vxMap[ 0 ];
-    const char face3 = ( elementType () == 0 ) ? 1 : 0;
-    t1->_vxMap[ 1 ] = _vxMap[ 2 + face3 ]; // for type 0   2 else 1 
-    t1->_vxMap[ 2 ] = _vxMap[ 3 - face3 ]; // for type 0   1 else 2 
+    const char fce3 = ( elementType () == 0 ) ? 1 : 0;
+    t1->_vxMap[ 1 ] = _vxMap[ 2 + fce3 ]; // for type 0   2 else 1 
+    t1->_vxMap[ 2 ] = _vxMap[ 3 - fce3 ]; // for type 0   1 else 2 
   }
 
 #ifndef NDEBUG

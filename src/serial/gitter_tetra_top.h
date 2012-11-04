@@ -542,6 +542,7 @@ template < class A > class TetraTop : public A
 
     inline IndexManagerType & indexManager() { 
       return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Elements ); }
+
     double calculateChildVolume(const double) const;
     
     void split_e01 () ;
