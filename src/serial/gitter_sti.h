@@ -1,6 +1,4 @@
-// (c) bernhard schupp 1997 - 1998
-// modifications for Dune Interface 
-// (c) Robert Kloefkorn 2004 - 2007 
+// (c) Robert Kloefkorn 2004 - 2013
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
@@ -1078,6 +1076,39 @@ public :
       inline bool isValid () const ;
       static inline bool isValid (const rule_t &) ;
 
+      // return true if rule is one of the bisection rules 
+      bool bisection () const { return (_r >= e01) && (_r <= e31); }   
+
+      // vertices involved in the split given a specific rule 
+      inline const unsigned char (& vertices() const) [2] 
+      { 
+        assert( bisection() );
+        static const unsigned char vx[ 6 ][ 2 ] = { 
+          { 0, 1 }, // e01 (vertices 0 and 1)
+          { 1, 2 }, // e12 (vertices 1 and 2)
+          { 2, 0 }, // e20 (vertices 2 and 0)
+          { 2, 3 }, // e23 (vertices 2 and 3)
+          { 3, 0 }, // e30 (vertices 3 and 0)
+          { 3, 1 }  // e31 (vertices 3 and 1)
+        };
+        return vx[ int(_r) - 2 ]; 
+      }
+
+      // faces that are split using the bisection rules 
+      inline const unsigned char (& splitFaces () const) [2] 
+      { 
+        assert( bisection() );
+        static const unsigned char spFaces[ 6 ][ 2 ] = { 
+          { 2, 3 }, // e01 (faces 2 and 3 are split)
+          { 0, 3 }, // e12 (faces 0 and 3 are split)
+          { 1, 3 }, // e20 (faces 1 and 3 are split)
+          { 0, 1 }, // e23 (faces 0 and 1 are split)
+          { 1, 2 }, // e30 (faces 1 and 2 are split)
+          { 0, 2 }  // e31 (faces 0 and 2 are split)
+        };
+        return spFaces[ int(_r) - 2 ]; 
+      }
+
     private :
       rule_t _r ;
     } ;
@@ -1237,23 +1268,6 @@ public :
       inline void backupIndex  (ObjectStream & os ) const;
       inline void restoreIndex (ObjectStream & is, RestoreInfo& );
 
-      /*
-      // backup does nothing 
-      inline void backup (ostream & os ) const 
-      {
-        os << _c[ 0 ] << " " << _c[ 1 ] << " " << _c[ 2 ] << std::endl;
-      }
-      */
-
-      /*
-      inline void restore (istream & is ) 
-      {
-        is >> _c[ 0 ];
-        is >> _c[ 1 ];
-        is >> _c[ 2 ];
-      }
-      */
-
       int nChild () const { return 0 ; }
 
       // return pointer to grid 
@@ -1354,6 +1368,7 @@ public :
       inline virtual ~hface3 () ;
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
       inline void detachElement (int) ;
+      inline void detachElement (int, helement_STI* father, int) ;
     public :
       inline int twist (int) const ;
       inline myvertex_t * myvertex (int) ;
@@ -1551,6 +1566,7 @@ public :
       virtual bool hasVertexProjection () const { return false; }
 
     public :
+      // return the rule that lead to this tetra
       virtual myrule_t getrule () const = 0 ;
       
       // return rule which was set by request 
@@ -3144,11 +3160,6 @@ inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
-  //if( _faceFront != null.first ) 
-  //{
-  //  _bisected = 1 ;
-  //}
-
   frontList_.push_back(make_pair( _faceFront, _numFront));
   _faceFront = p.first;
   _numFront  = p.second;
@@ -3268,6 +3279,19 @@ inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconne
 }
 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t)
+{
+  if( t < 0 )
+    nb.setPrevRear( );
+  else
+    nb.setPrevFront( );
+  if (t<0 && nb.rearList_.size()==0)
+    ref -- ;
+  if (t>=0 && nb.frontList_.size()==0)
+    ref -- ;
+  return ;
+}
+
+inline void Gitter :: Geometric :: hface3 :: detachElement (int t, helement_STI* father, int face)
 {
   if( t < 0 )
     nb.setPrevRear( );
@@ -3620,11 +3644,46 @@ Tetra (myhface_t * f0, int t0, myhface_t * f1, int t1,
   return ;
 }
 
-inline Gitter :: Geometric :: Tetra :: ~Tetra () {
-  f [0] ->detachElement (s [0]) ;
-  f [1] ->detachElement (s [1]) ;
-  f [2] ->detachElement (s [2]) ;
-  f [3] ->detachElement (s [3]) ;
+inline Gitter :: Geometric :: Tetra :: ~Tetra () 
+{
+  // get father element 
+  // Tetra* father = (Tetra *) this->up();
+
+  // get refinement rule 
+  // const myrule_t rule = getrule();
+
+  /*
+  // if we have a father and bisection was used for refinement
+  if( rule.bisection() && father )
+  {
+    // get child number 
+    const int child = nChild();
+    switch( rule ) 
+    {
+      case e01: 
+      {
+        // face 0 for child 0 is the same 
+        pair < hasFace3 *, int > con(InternalHasFace3 ()(this), child ) ;
+        f [ child ] ->detachElement (s [ child ], con );
+      }
+    }
+    if( rule == myrule_t :: e01 ) 
+    {
+
+    }
+    f [0] ->detachElement (s [0], father, 0) ;
+    f [1] ->detachElement (s [1], father, 1) ;
+    f [2] ->detachElement (s [2], father, 2) ;
+    f [3] ->detachElement (s [3], father, 3) ;
+  }
+  else 
+  */
+  {
+    f [0] ->detachElement (s [0]) ;
+    f [1] ->detachElement (s [1]) ;
+    f [2] ->detachElement (s [2]) ;
+    f [3] ->detachElement (s [3]) ;
+  }
   return ;
 }
 

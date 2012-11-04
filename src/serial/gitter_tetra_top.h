@@ -238,7 +238,6 @@ template < class A > class TetraTop : public A
     typedef typename myhface_t :: myrule_t face3rule_t;
 
   protected:  
-
     struct BisectionInfo 
     {
       struct CallSplitIF 
@@ -318,8 +317,6 @@ template < class A > class TetraTop : public A
         {
           for( int twist=0; twist<2; ++twist )
           {
-            //cout << "Check edge " << face->myhedge( j )->myvertex( twist ) << " " 
-            //     << face->myhedge( j )->myvertex( 1-twist ) << endl;
             if( face->myhedge( j )->myvertex( twist ) == vx0  && 
                 face->myhedge( j )->myvertex( 1-twist ) == vx1  ) 
             {
@@ -335,41 +332,21 @@ template < class A > class TetraTop : public A
 
       static bool refineFaces( innertetra_t* tetra, const myrule_t& rule )
       {
-        // std::cout << "refineFaces: " << std::endl;
-	      // for( int j = 0; j < 4; ++j )
-	      // {
-	      //   std::cout << tetra->myvertex(j) << " ";
-        // }
-        // std::cout << rule << std::endl;
-        // std::cout << "     ";
         const BisectionInfo& info = instance( rule );
         for( int i=0; i<2; ++i )
         {
           myhface_t* face = tetra->myhface( info._faces[ i ] );
 
-          //cout << "Check rule for " << face << endl;
-          //cout << "vx0 " << int(info._vertices[ 0 ]) << " " << tetra->myvertex( info._vertices[ 0 ] ) << endl;
-          //cout << "vx1 " << int(info._vertices[ 1 ]) << " " << tetra->myvertex( info._vertices[ 1 ] ) << endl;
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
-          // std::cout << faceRule << " ";
-          //cout << "Got rule " << faceRule << endl;
           // check refinement of faces 
           if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false ;
         }
-        // std::cout << std::endl;
         return true ;
       }
 
       static void splitEdge( innertetra_t* tetra, const myrule_t& rule )
       {
-        // std::cout << "refineEdge: " << std::endl;
-	      // for( int j = 0; j < 4; ++j )
-	      // {
-	      //   std::cout << tetra->myvertex(j) << " ";
-        // }
-        // std::cout << rule << std::endl;
-
         const BisectionInfo& info = instance( rule );
 
         for( int i=0; i<2; ++i )
@@ -378,18 +355,6 @@ template < class A > class TetraTop : public A
 
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
-
-#if 0
-	  std::cout << "-- splitEdge: --" << std::endl;
-	  std::cout << "refine face" << std::endl;
-	  std::cout << tetra->myhface( info._faces[ i ] );
-
-	  std::cout << "refine edge" << std::endl;
-	  for( int j = 0; j < 2; ++j )
-	    {
-	      std::cout << tetra->myvertex( info._vertices[ j ] ) << std::endl;
-	    }
-#endif
 
           face->refineImmediate ( faceRule );
         }
@@ -400,6 +365,8 @@ template < class A > class TetraTop : public A
 
       const CallSplitIF& caller() const { assert( _caller ); return *_caller; }
     };
+
+    // end BisectionInfo 
 
     // return true if further refinement is needed to create conforming closure 
     virtual bool markForConformingClosure () 

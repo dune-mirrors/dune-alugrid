@@ -1853,42 +1853,66 @@ splitISO8 ()
 template < class A > TetraTop < A > :: 
 BisectionInfo :: BisectionInfo ( myrule_t r ) : _caller( 0 )
 {
+  // use information from the rule itself 
+  _faces[ 0 ] = r.splitFaces()[ 0 ];
+  _faces[ 1 ] = r.splitFaces()[ 1 ];
+  _vertices[ 0 ] = r.vertices()[ 0 ];
+  _vertices[ 1 ] = r.vertices()[ 1 ];
+
   switch(r) 
   {
     case myrule_t :: e01 :
-      _faces[ 0 ] = 2;   _faceRules[ 0 ] = face3rule_t :: e20;
-      _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e01;
-      _vertices[ 0 ] = 0; _vertices[ 1 ] = 1;
+      assert( _faces[ 0 ] == 2 );
+      assert( _faces[ 1 ] == 3 );
+      assert( _vertices[ 0 ] == 0 );
+      assert( _vertices[ 1 ] == 1 );
+      _faceRules[ 0 ] = face3rule_t :: e20;
+      _faceRules[ 1 ] = face3rule_t :: e01;
       _caller = new CallSplitImpl< myrule_t :: e01 > ();
       break ;
     case myrule_t :: e12 :
-      _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e20;
-      _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e12;
-      _vertices[ 0 ] = 1; _vertices[ 1 ] = 2;
+      assert( _faces[ 0 ] == 0 );
+      assert( _faces[ 1 ] == 3 );
+      assert( _vertices[ 0 ] == 1 );
+      assert( _vertices[ 1 ] == 2 );
+      _faceRules[ 0 ] = face3rule_t :: e20;
+      _faceRules[ 1 ] = face3rule_t :: e12;
       _caller = new CallSplitImpl< myrule_t :: e12 > ();
       break ;
     case myrule_t :: e20 :
-      _faces[ 0 ] = 1;   _faceRules[ 0 ] = face3rule_t :: e01;
-      _faces[ 1 ] = 3;   _faceRules[ 1 ] = face3rule_t :: e20;
-      _vertices[ 0 ] = 0; _vertices[ 1 ] = 2;
+      assert( _faces[ 0 ] == 1 );
+      assert( _faces[ 1 ] == 3 );
+      assert( _vertices[ 0 ] == 2 );
+      assert( _vertices[ 1 ] == 0 );
+      _faceRules[ 0 ] = face3rule_t :: e01;
+      _faceRules[ 1 ] = face3rule_t :: e20;
       _caller = new CallSplitImpl< myrule_t :: e20 > ();
       break ;
     case myrule_t :: e23 :
-      _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e12;
-      _faces[ 1 ] = 1;   _faceRules[ 1 ] = face3rule_t :: e12;
-      _vertices[ 0 ] = 2; _vertices[ 1 ] = 3;
+      assert( _faces[ 0 ] == 0 );
+      assert( _faces[ 1 ] == 1 );
+      assert( _vertices[ 0 ] == 2 );
+      assert( _vertices[ 1 ] == 3 );
+      _faceRules[ 0 ] = face3rule_t :: e12;
+      _faceRules[ 1 ] = face3rule_t :: e12;
       _caller = new CallSplitImpl< myrule_t :: e23 > ();
       break ;
     case myrule_t :: e30 :
-      _faces[ 0 ] = 1;   _faceRules[ 0 ] = face3rule_t :: e20;
-      _faces[ 1 ] = 2;   _faceRules[ 1 ] = face3rule_t :: e01;
-      _vertices[ 0 ] = 3; _vertices[ 1 ] = 0;
+      assert( _faces[ 0 ] == 1 );
+      assert( _faces[ 1 ] == 2 );
+      assert( _vertices[ 0 ] == 3 );
+      assert( _vertices[ 1 ] == 0 );
+      _faceRules[ 0 ] = face3rule_t :: e20;
+      _faceRules[ 1 ] = face3rule_t :: e01;
       _caller = new CallSplitImpl< myrule_t :: e30 > ();
       break ;
     case myrule_t :: e31 :
-      _faces[ 0 ] = 0;   _faceRules[ 0 ] = face3rule_t :: e01;
-      _faces[ 1 ] = 2;   _faceRules[ 1 ] = face3rule_t :: e12;
-      _vertices[ 0 ] = 3; _vertices[ 1 ] = 1;
+      assert( _faces[ 0 ] == 0 );
+      assert( _faces[ 1 ] == 2 );
+      assert( _vertices[ 0 ] == 3 );
+      assert( _vertices[ 1 ] == 1 );
+      _faceRules[ 0 ] = face3rule_t :: e01;
+      _faceRules[ 1 ] = face3rule_t :: e12;
       _caller = new CallSplitImpl< myrule_t :: e31 > ();
       break ;
     default :
@@ -1923,10 +1947,6 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
   {
     // call refinement with appropriate rule 
     // given by suggestRule 
-    // std::cout << "--- refineimmediately ---" << std::endl;
-    // for( int qq = 0; qq < 4; ++qq )
-    //   std::cout << myvertex(qq) << std::endl;
-
     BisectionInfo :: splitEdge( this, suggestRule() );
   }
   else 
