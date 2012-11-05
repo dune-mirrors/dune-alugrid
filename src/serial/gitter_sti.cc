@@ -689,7 +689,6 @@ bool Gitter :: adapt ()
 {
   assert (debugOption (20) ? (cout << "**INFO Gitter :: adapt ()" << endl, 1) : 1) ;
   assert (! iterators_attached ()) ;
-  const int start = clock () ;
 
   bool needConformingClosure = false ;
   bool refined = true;

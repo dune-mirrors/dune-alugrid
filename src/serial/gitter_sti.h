@@ -1320,12 +1320,14 @@ public :
         void setNextRear ( const pair< myconnect_t *, int > &p );
         void setPrevFront ( const pair< myconnect_t *, int > &p );
         void setPrevRear ( const pair< myconnect_t *, int > &p );
+      private:  
+        inline void operator = (const face3Neighbour &) ;
       public:  
         myrule_t _parRule;  // 1 byte 
       public :
         static const pair < myconnect_t *, int > null ;
         inline face3Neighbour () ;
-        inline void operator = (const face3Neighbour &) ;
+        inline void assign (const face3Neighbour &) ;
         inline int complete (const face3Neighbour &) ;
         inline pair < myconnect_t *, int > front () ;
         inline pair < const myconnect_t *, int > front () const ;
@@ -1349,7 +1351,8 @@ public :
       inline void detachElement (int) ;
       inline void detachElement (int, const pair < hasFace3 *, int > &) ;
 
-      inline bool moreAttachments( const int twst ) const { 
+      inline bool moreAttachments( const int twst ) const 
+      { 
         return twst < 0 ? nb._attachedRear > 1 : nb._attachedFront > 1 ; 
       }
     public :
@@ -1407,12 +1410,14 @@ public :
         // put here to save memory because of padding 
         myrule_t _parRule;
 
+      private:  
+        inline void operator = (const face4Neighbour &) ;
       public :
         static const pair < myconnect_t *, int > null ;
         void setFront ( const pair< myconnect_t *, int > &p );
         void setRear ( const pair< myconnect_t *, int > &p );
         inline face4Neighbour () ;
-        inline void operator = (const face4Neighbour &) ;
+        inline void assign (const face4Neighbour &) ;
         inline int complete (const face4Neighbour &) ;
         inline pair < myconnect_t *, int > front () ;
         inline pair < const myconnect_t *, int > front () const ;
@@ -3185,7 +3190,7 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevRear ( const pair < my
   -- _attachedRear ;
 }
 
-inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const face3Neighbour & n)
+inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: assign (const face3Neighbour & n)
 {
   _faceFront     = n._faceFront;
   _faceRear      = n._faceRear;
@@ -3195,7 +3200,6 @@ inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const
   // gitter_tetra_top.cc:381
   _attachedFront = 0;
   _attachedRear  = 0;
-  return ;
 }
 
 inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const face3Neighbour & n)
@@ -3411,7 +3415,7 @@ Gitter :: Geometric :: hface4 :: face4Neighbour :: setRear ( const pair < myconn
   _numRear = p.second;
 }
 
-inline void Gitter :: Geometric :: hface4 :: face4Neighbour :: operator = (const face4Neighbour & n)
+inline void Gitter :: Geometric :: hface4 :: face4Neighbour :: assign (const face4Neighbour & n)
 {
   _faceFront = n._faceFront;
   _faceRear = n._faceRear;

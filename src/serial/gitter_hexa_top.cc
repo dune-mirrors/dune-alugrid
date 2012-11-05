@@ -229,15 +229,26 @@ template < class A > bool Hface4Top < A > :: refine (myrule_t r, int twist) {
           ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
           : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
   
-  if (a) {  
-    if (getrule () == myrule_t :: nosplit) {
+  if (a) 
+  {  
+    if (getrule () == myrule_t :: nosplit) 
+    {
       refineImmediate (r) ;
-      {for (innerface_t * f = dwnPtr() ; f ; f = f->next ()) f->nb = this->nb ; }
-    } else {
+      {
+        for (innerface_t * f = dwnPtr() ; f ; f = f->next ()) 
+        {
+          // assign my neighbor info to child faces for initialization
+          f->nb.assign( this->nb ); 
+        }
+      }
+    } 
+    else 
+    {
       assert (getrule () == myrule_t :: iso4) ;
     }
     return true ;
-  } else {
+  } 
+  else {
     return false ;
   }
       }

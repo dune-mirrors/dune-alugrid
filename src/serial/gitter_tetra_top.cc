@@ -378,7 +378,11 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
           {
             refineImmediate (r) ;
             { 
-              for (innerface_t * f = dwnPtr() ; f ; f = f->next ()) f->nb = this->nb ; 
+              for (innerface_t * f = dwnPtr() ; f ; f = f->next ()) 
+              {
+                // assign neighbor info to child faces for initialization
+                f->nb.assign( this->nb ) ; 
+              }
             }
           } 
           else 
@@ -866,70 +870,45 @@ template < class A > TetraTop < A > :: ~TetraTop ()
   // get refinement rule 
   const bool bisection = _up && _up->_rule.bisection() ;
 
+  // the following is only needed for bisection refinement
   if( bisection )
   {
-    // face number storage 
-    int faces [ 4 ] = { -1, -1, -1, -1 };
-
-    pair < Gitter::Geometric::hasFace3 *, int > connect( Gitter::Geometric::InternalHasFace3 ()(_up), int(-1) ) ;
-    // make sure that one of the child faces is the face that we are looking at
-    // bool foundFace = false ;
-    for( int i=0; i<4; ++i )
-    {
-      myhface_t* upFce = _up->myhface( i );
-      for( int j=0; j<4; ++j ) 
-      {
-        if( upFce->getIndex() == this->myhface( j )->getIndex() ) 
-        {
-          // store face number in father 
-          faces[ j ] = i; 
-          break ;
-        }
-      }
-    }
-
-    // assert( foundFace );
+    // setup connector containing father element
+    pair < Gitter::Geometric::hasFace3 *, int > connect( Gitter::Geometric::InternalHasFace3 ()(_up), int( -1 ) ) ;
     for( int i=0; i<4; ++i ) 
     {
-      if( faces[ i ] < 0 ) 
-      {
-        myhface( i )->detachElement ( twist( i ) );
-      }
-      else 
-      {
-        connect.second = faces[ i ];
-        myhface( i )->detachElement ( twist( i ), connect );
-      }
-    }
-#if 0
-    // assert( foundFace );
-    for( int i=0; i<4; ++i ) 
-    {
+      // get face and twist
       myhface_t* face = myhface( i ); 
       const int twst = twist( i );
+
+      // check whether this face has unresolved previous attached elements
       if( face->moreAttachments( twst ) )
       {
         // search face in father 
-        for( int j=0; j<4; ++j ) 
+        for( int ff=0; ff<4; ++ff ) 
         {
-          myhface_t* fce = _up->myhface( j );
-          if( face->getIndex() == fce->getIndex() )
+          myhface_t* upFce = _up->myhface( ff );
+          // if faces match setup new connector
+          if( face == upFce )
           {
-            pair < Gitter::Geometric::hasFace3 *, int > connect( Gitter::Geometric::InternalHasFace3 ()(_up), int( j ) ) ;
+            // set face number of face in father 
+            connect.second = ff ;
             face->detachElement ( twst, connect );
+            // break for loop for ff 
             break ;
           }
         }
       }
       else 
       {
+        // normal detachment 
         face->detachElement ( twst );
       }
     }
-#endif
   }
   else 
   {
+    // the default normal detachment of all faces 
     for( int i=0; i<4; ++i ) 
       myhface( i )->detachElement ( twist( i ) ) ;
   }
