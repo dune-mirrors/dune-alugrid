@@ -862,6 +862,76 @@ template < class A > TetraTop < A > :: ~TetraTop ()
   if (! _inner ) this->detachleafs();
   if (_bbb) delete _bbb ;
   if (_inner) delete _inner ;
+
+  // get refinement rule 
+  const bool bisection = _up && _up->_rule.bisection() ;
+
+  if( bisection )
+  {
+    // face number storage 
+    int faces [ 4 ] = { -1, -1, -1, -1 };
+
+    pair < Gitter::Geometric::hasFace3 *, int > connect( Gitter::Geometric::InternalHasFace3 ()(_up), int(-1) ) ;
+    // make sure that one of the child faces is the face that we are looking at
+    // bool foundFace = false ;
+    for( int i=0; i<4; ++i )
+    {
+      myhface_t* upFce = _up->myhface( i );
+      for( int j=0; j<4; ++j ) 
+      {
+        if( upFce->getIndex() == this->myhface( j )->getIndex() ) 
+        {
+          // store face number in father 
+          faces[ j ] = i; 
+          break ;
+        }
+      }
+    }
+
+    // assert( foundFace );
+    for( int i=0; i<4; ++i ) 
+    {
+      if( faces[ i ] < 0 ) 
+      {
+        myhface( i )->detachElement ( twist( i ) );
+      }
+      else 
+      {
+        connect.second = faces[ i ];
+        myhface( i )->detachElement ( twist( i ), connect );
+      }
+    }
+#if 0
+    // assert( foundFace );
+    for( int i=0; i<4; ++i ) 
+    {
+      myhface_t* face = myhface( i ); 
+      if( face->moreAttachments() )
+      {
+        // search face in father 
+        for( int j=0; j<4; ++j ) 
+        {
+          myhface_t* fce = _up->myhface( j );
+          if( face->getIndex() == fce->getIndex() )
+          {
+            pair < Gitter::Geometric::hasFace3 *, int > connect( Gitter::Geometric::InternalHasFace3 ()(_up), int( j ) ) ;
+            face->detachElement ( twist( i ), connect );
+            break ;
+          }
+        }
+      }
+      else 
+      {
+        face->detachElement ( twist( i ) );
+      }
+    }
+#endif
+  }
+  else 
+  {
+    for( int i=0; i<4; ++i ) 
+      myhface( i )->detachElement ( twist( i ) ) ;
+  }
 }
 
 //- --subedge
@@ -1515,8 +1585,8 @@ template < class A >  void TetraTop < A > :: split_e31 ()
       |   \   . * |     child 1 is the child which contains node 3 
       |    \ .    |
       |     \  *  |
-      |    . \    |      4 becomes node 1 in child 0
-      |   .  1*  <--- 4  4 becomes node 3 in child 1
+      |    . \    |      4 becomes node 3 in child 0
+      |   .  1*  <--- 4  4 becomes node 1 in child 1
       |  .  * 3\  |
       | . *     \ |
       |0*       1\|
@@ -1853,64 +1923,58 @@ splitISO8 ()
 template < class A > TetraTop < A > :: 
 BisectionInfo :: BisectionInfo ( myrule_t r ) : _caller( 0 )
 {
-  // use information from the rule itself 
-  _faces[ 0 ] = r.splitFaces()[ 0 ];
-  _faces[ 1 ] = r.splitFaces()[ 1 ];
-  _vertices[ 0 ] = r.vertices()[ 0 ];
-  _vertices[ 1 ] = r.vertices()[ 1 ];
-
   switch(r) 
   {
     case myrule_t :: e01 :
-      assert( _faces[ 0 ] == 2 );
-      assert( _faces[ 1 ] == 3 );
-      assert( _vertices[ 0 ] == 0 );
-      assert( _vertices[ 1 ] == 1 );
+      _faces[ 0 ] = 2 ;
+      _faces[ 1 ] = 3 ;
+      _vertices[ 0 ] = 0 ;
+      _vertices[ 1 ] = 1 ;
       _faceRules[ 0 ] = face3rule_t :: e20;
       _faceRules[ 1 ] = face3rule_t :: e01;
       _caller = new CallSplitImpl< myrule_t :: e01 > ();
       break ;
     case myrule_t :: e12 :
-      assert( _faces[ 0 ] == 0 );
-      assert( _faces[ 1 ] == 3 );
-      assert( _vertices[ 0 ] == 1 );
-      assert( _vertices[ 1 ] == 2 );
+      _faces[ 0 ] = 0 ;
+      _faces[ 1 ] = 3 ;
+      _vertices[ 0 ] = 1 ;
+      _vertices[ 1 ] = 2 ;
       _faceRules[ 0 ] = face3rule_t :: e20;
       _faceRules[ 1 ] = face3rule_t :: e12;
       _caller = new CallSplitImpl< myrule_t :: e12 > ();
       break ;
     case myrule_t :: e20 :
-      assert( _faces[ 0 ] == 1 );
-      assert( _faces[ 1 ] == 3 );
-      assert( _vertices[ 0 ] == 2 );
-      assert( _vertices[ 1 ] == 0 );
+      _faces[ 0 ] = 1 ;
+      _faces[ 1 ] = 3 ;
+      _vertices[ 0 ] = 2 ;
+      _vertices[ 1 ] = 0 ;
       _faceRules[ 0 ] = face3rule_t :: e01;
       _faceRules[ 1 ] = face3rule_t :: e20;
       _caller = new CallSplitImpl< myrule_t :: e20 > ();
       break ;
     case myrule_t :: e23 :
-      assert( _faces[ 0 ] == 0 );
-      assert( _faces[ 1 ] == 1 );
-      assert( _vertices[ 0 ] == 2 );
-      assert( _vertices[ 1 ] == 3 );
+      _faces[ 0 ] = 0 ;
+      _faces[ 1 ] = 1 ;
+      _vertices[ 0 ] = 2 ;
+      _vertices[ 1 ] = 3 ;
       _faceRules[ 0 ] = face3rule_t :: e12;
       _faceRules[ 1 ] = face3rule_t :: e12;
       _caller = new CallSplitImpl< myrule_t :: e23 > ();
       break ;
     case myrule_t :: e30 :
-      assert( _faces[ 0 ] == 1 );
-      assert( _faces[ 1 ] == 2 );
-      assert( _vertices[ 0 ] == 3 );
-      assert( _vertices[ 1 ] == 0 );
+      _faces[ 0 ] = 1 ;
+      _faces[ 1 ] = 2 ;
+      _vertices[ 0 ] = 3 ;
+      _vertices[ 1 ] = 0 ;
       _faceRules[ 0 ] = face3rule_t :: e20;
       _faceRules[ 1 ] = face3rule_t :: e01;
       _caller = new CallSplitImpl< myrule_t :: e30 > ();
       break ;
     case myrule_t :: e31 :
-      assert( _faces[ 0 ] == 0 );
-      assert( _faces[ 1 ] == 2 );
-      assert( _vertices[ 0 ] == 3 );
-      assert( _vertices[ 1 ] == 1 );
+      _faces[ 0 ] = 0 ;
+      _faces[ 1 ] = 2 ;
+      _vertices[ 0 ] = 3 ;
+      _vertices[ 1 ] = 1 ;
       _faceRules[ 0 ] = face3rule_t :: e01;
       _faceRules[ 1 ] = face3rule_t :: e12;
       _caller = new CallSplitImpl< myrule_t :: e31 > ();

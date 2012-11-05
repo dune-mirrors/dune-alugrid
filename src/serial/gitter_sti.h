@@ -1078,37 +1078,6 @@ public :
 
       // return true if rule is one of the bisection rules 
       bool bisection () const { return (_r >= e01) && (_r <= e31); }   
-
-      // vertices involved in the split given a specific rule 
-      inline const unsigned char (& vertices() const) [2] 
-      { 
-        assert( bisection() );
-        static const unsigned char vx[ 6 ][ 2 ] = { 
-          { 0, 1 }, // e01 (vertices 0 and 1)
-          { 1, 2 }, // e12 (vertices 1 and 2)
-          { 2, 0 }, // e20 (vertices 2 and 0)
-          { 2, 3 }, // e23 (vertices 2 and 3)
-          { 3, 0 }, // e30 (vertices 3 and 0)
-          { 3, 1 }  // e31 (vertices 3 and 1)
-        };
-        return vx[ int(_r) - 2 ]; 
-      }
-
-      // faces that are split using the bisection rules 
-      inline const unsigned char (& splitFaces () const) [2] 
-      { 
-        assert( bisection() );
-        static const unsigned char spFaces[ 6 ][ 2 ] = { 
-          { 2, 3 }, // e01 (faces 2 and 3 are split)
-          { 0, 3 }, // e12 (faces 0 and 3 are split)
-          { 1, 3 }, // e20 (faces 1 and 3 are split)
-          { 0, 1 }, // e23 (faces 0 and 1 are split)
-          { 1, 2 }, // e30 (faces 1 and 2 are split)
-          { 0, 2 }  // e31 (faces 0 and 2 are split)
-        };
-        return spFaces[ int(_r) - 2 ]; 
-      }
-
     private :
       rule_t _r ;
     } ;
@@ -1334,27 +1303,27 @@ public :
         signed char _numRear;
         signed char s [ polygonlength ] ;  // 12 bytes (moved here to use padding)
 
-        std::vector< std::pair<myconnect_t*,signed char> > frontList_;
-        std::vector< std::pair<myconnect_t*,signed char> > rearList_;
-
-        signed char _bisected; 
+        // count number of attchElement calls 
+        unsigned char _attachedCounter ; // 1 byte
       public:  
-        myrule_t _parRule;  // 1 bytes 
+        myrule_t _parRule;  // 1 byte 
       public :
         static const pair < myconnect_t *, int > null ;
         inline face3Neighbour () ;
         void setFront ( const pair< myconnect_t *, int > &p );
         void setRear ( const pair< myconnect_t *, int > &p );
-        void setPrevFront ( );
-        void setPrevRear ( );
         inline void operator = (const face3Neighbour &) ;
         inline int complete (const face3Neighbour &) ;
         inline pair < myconnect_t *, int > front () ;
         inline pair < const myconnect_t *, int > front () const ;
         inline pair < myconnect_t *, int > rear () ;
         inline pair < const myconnect_t *, int > rear () const ;
+
+        bool rearNull() const  { return _faceRear  == null.first && _numRear  == null.second ; }
+        bool frontNull() const { return _faceFront == null.first && _numFront == null.second ; }
+
         friend class hface3 ;
-      } nb ; // 24 bytes 
+      } nb ; // <= 24 bytes 
     public:
       typedef VertexGeo   myvertex_t ;
       typedef hedge1_GEO  myhedge_t ;
@@ -1368,7 +1337,7 @@ public :
       inline virtual ~hface3 () ;
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
       inline void detachElement (int) ;
-      inline void detachElement (int, helement_STI* father, int) ;
+      inline void detachElement (int, const pair < hasFace3 *, int > &) ;
     public :
       inline int twist (int) const ;
       inline myvertex_t * myvertex (int) ;
@@ -3149,7 +3118,7 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface4Ru
 //
   
 inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
-: frontList_(0), rearList_(0), _bisected( 0 )
+ : _attachedCounter( 0 )
 {
   _faceFront = null.first;
   _numFront = null.second;
@@ -3160,40 +3129,19 @@ inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
-  frontList_.push_back(make_pair( _faceFront, _numFront));
   _faceFront = p.first;
   _numFront  = p.second;
-}
-inline void
-Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevFront ( )
-{
-  assert( frontList_.size() > 0);
-  _faceFront = frontList_.back().first;
-  _numFront  = frontList_.back().second;
-  frontList_.pop_back();
 }
 
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setRear ( const pair < myconnect_t *, int > &p )
 {
-  rearList_.push_back(make_pair(_faceRear,_numRear));
   _faceRear = p.first;
   _numRear  = p.second;
 }
 
-inline void
-Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevRear ( )
-{
-  assert( rearList_.size() > 0 );
-  _faceRear = rearList_.back().first;
-  _numRear  = rearList_.back().second;
-  rearList_.pop_back();
-}
-
 inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const face3Neighbour & n)
 {
-  frontList_.clear();
-  rearList_.clear();
   _faceFront = n._faceFront;
   _faceRear = n._faceRear;
   _numFront = n._numFront;
@@ -3204,7 +3152,6 @@ inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const
 inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const face3Neighbour & n)
 {
   int ret = 0;
-  // assert(0);
 
   if( front() == null )
   {
@@ -3257,6 +3204,11 @@ hface3 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2)
 }
 
 inline Gitter :: Geometric :: hface3 :: ~hface3 () {
+  if( nb._attachedCounter > 0 ) 
+  {
+    cout << "attached counter was : " << int(nb._attachedCounter) << endl;
+    assert( false );
+  }
   assert (ref ? (cerr << "**WARNING hface3::refcount was " << ref << endl, 1) : 1) ;
   e [0] -> ref -- ;
   e [1] -> ref -- ;
@@ -3266,42 +3218,44 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
 
 inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t)
 {
-  // increase reference counter
-  if (t<0 && nb.rearList_.size()==0)
-    ref ++ ;
-  if (t>=0 && nb.frontList_.size()==0)
-    ref ++ ;
-  if( t < 0 )
+  // set connect pair 
+  if ( t < 0 ) 
     nb.setRear( p );
-  else
+  else 
     nb.setFront( p );
-  return ;
+
+  // if attachElement counter is less than 2 also increase the ref counter 
+  if( nb._attachedCounter < 2 ) ref ++ ;
+
+  // counter how often attachElement has been called 
+  ++ nb._attachedCounter ;
 }
 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t)
 {
-  if( t < 0 )
-    nb.setPrevRear( );
-  else
-    nb.setPrevFront( );
-  if (t<0 && nb.rearList_.size()==0)
-    ref -- ;
-  if (t>=0 && nb.frontList_.size()==0)
-    ref -- ;
-  return ;
+  detachElement( t, nb.null );
 }
 
-inline void Gitter :: Geometric :: hface3 :: detachElement (int t, helement_STI* father, int face)
+// detachElement with a given new pair of connectors 
+inline void Gitter :: Geometric :: hface3 :: detachElement (int t, const pair < myconnect_t *, int > & p)
 {
-  if( t < 0 )
-    nb.setPrevRear( );
+  if ( t < 0 )
+    nb.setRear( p );
   else
-    nb.setPrevFront( );
-  if (t<0 && nb.rearList_.size()==0)
+    nb.setFront( p );
+
+  // we can only decrease the ref if only 2 or less attches are available 
+  if( nb._attachedCounter <= 2 )
+  {
+    assert( ref > 0 );
     ref -- ;
-  if (t>=0 && nb.frontList_.size()==0)
-    ref -- ;
-  return ;
+  }
+
+  // make sure this counter is still positive 
+  assert( nb._attachedCounter > 0 );
+
+  // decrease attachElement counter 
+  -- nb._attachedCounter ;
 }
 
 inline int Gitter :: Geometric :: hface3 :: postRefinement () {
@@ -3380,7 +3334,6 @@ inline Gitter :: Geometric :: hface4 :: face4Neighbour :: face4Neighbour ()
 inline void
 Gitter :: Geometric :: hface4 :: face4Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
-  //assert( _faceFront == null.first );
   _faceFront = p.first;
   _numFront = p.second;
 }
@@ -3388,7 +3341,6 @@ Gitter :: Geometric :: hface4 :: face4Neighbour :: setFront ( const pair < mycon
 inline void
 Gitter :: Geometric :: hface4 :: face4Neighbour :: setRear ( const pair < myconnect_t *, int > &p )
 {
-  //assert( _faceRear == null.first );
   _faceRear = p.first;
   _numRear = p.second;
 }
@@ -3419,39 +3371,30 @@ inline int Gitter :: Geometric :: hface4 :: face4Neighbour :: complete (const fa
   }
 
   return ret;
-  // return (_v == null ? (_v = n._v, 1) : 0 ) + (_h == null ? (_h = n._h, 1) : 0 ) ;
 }
 
 inline pair < Gitter :: Geometric :: hface4 :: myconnect_t *, int >
 Gitter :: Geometric :: hface4 :: face4Neighbour :: front ()
 {
   return pair< myconnect_t *, int >( _faceFront, _numFront );
-  //assert (!(_v == null)) ;
-  //return _v ;
 }
 
 inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int >
 Gitter :: Geometric :: hface4 :: face4Neighbour :: front () const
 {
   return pair< const hasFace4 *, int >( _faceFront, _numFront );
-  //assert (!(_v == null)) ;
-  //return pair < const hasFace4 *, int > (_v.first,_v.second) ;
 }
 
 inline pair < Gitter :: Geometric :: hface4 :: myconnect_t *, int >
 Gitter :: Geometric :: hface4 :: face4Neighbour :: rear ()
 {
   return pair< myconnect_t *, int >( _faceRear, _numRear );
-  //assert (!(_h == null)) ;
-  //return _h ;
 }
 
 inline pair < const Gitter :: Geometric :: hface4 :: myconnect_t *, int >
 Gitter :: Geometric :: hface4 :: face4Neighbour :: rear () const
 {
   return pair< const myconnect_t *, int >( _faceRear, _numRear );
-  //assert (!(_h == null)) ;
-  //return pair < const hasFace4 *, int > (_h.first,_h.second) ; ;
 }
 
 inline Gitter :: Geometric :: hface4 :: 
@@ -3646,38 +3589,37 @@ Tetra (myhface_t * f0, int t0, myhface_t * f1, int t1,
 
 inline Gitter :: Geometric :: Tetra :: ~Tetra () 
 {
+#if 0
   // get father element 
-  // Tetra* father = (Tetra *) this->up();
+  tetra_GEO* father = (tetra_GEO *) helement_STI :: up();
 
-  // get refinement rule 
-  // const myrule_t rule = getrule();
-
-  /*
-  // if we have a father and bisection was used for refinement
-  if( rule.bisection() && father )
+  if( father ) 
   {
-    // get child number 
-    const int child = nChild();
-    switch( rule ) 
+    // get refinement rule 
+    const myrule_t rule = father->getrule();
+
+    // if we have a father and bisection was used for refinement
+    if( rule.bisection() )
     {
-      case e01: 
+      assert( this->nChild() == 0 || this->nChild() == 1 );
+
+      // get gthe face number of the face that needs special treatment 
+      const unsigned char face = rule.vertices()[ this->nChild() ];
+
+      pair < hasFace3 *, int > connect(InternalHasFace3 ()(father), int(face) ) ;
+      f[ face ]->detachElement (s [ face ], connect);
+
+      // all other faces can be detached without check 
+      for( unsigned char i=1; i<4; ++ i)
       {
-        // face 0 for child 0 is the same 
-        pair < hasFace3 *, int > con(InternalHasFace3 ()(this), child ) ;
-        f [ child ] ->detachElement (s [ child ], con );
+        const unsigned char fce = (face + i) % 4;
+        assert( fce >=0 && fce < 4 );
+        f[ fce ]->detachElement (s [ fce ] );
       }
     }
-    if( rule == myrule_t :: e01 ) 
-    {
-
-    }
-    f [0] ->detachElement (s [0], father, 0) ;
-    f [1] ->detachElement (s [1], father, 1) ;
-    f [2] ->detachElement (s [2], father, 2) ;
-    f [3] ->detachElement (s [3], father, 3) ;
   }
-  else 
-  */
+
+  if( ! father ) 
   {
     f [0] ->detachElement (s [0]) ;
     f [1] ->detachElement (s [1]) ;
@@ -3685,6 +3627,7 @@ inline Gitter :: Geometric :: Tetra :: ~Tetra ()
     f [3] ->detachElement (s [3]) ;
   }
   return ;
+#endif
 }
 
 inline int Gitter :: Geometric :: Tetra :: twist (int i) const {
