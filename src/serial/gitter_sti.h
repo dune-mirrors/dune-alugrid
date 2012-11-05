@@ -3590,36 +3590,7 @@ Tetra (myhface_t * f0, int t0, myhface_t * f1, int t1,
 inline Gitter :: Geometric :: Tetra :: ~Tetra () 
 {
 #if 0
-  // get father element 
-  tetra_GEO* father = (tetra_GEO *) helement_STI :: up();
-
-  if( father ) 
-  {
-    // get refinement rule 
-    const myrule_t rule = father->getrule();
-
-    // if we have a father and bisection was used for refinement
-    if( rule.bisection() )
-    {
-      assert( this->nChild() == 0 || this->nChild() == 1 );
-
-      // get gthe face number of the face that needs special treatment 
-      const unsigned char face = rule.vertices()[ this->nChild() ];
-
-      pair < hasFace3 *, int > connect(InternalHasFace3 ()(father), int(face) ) ;
-      f[ face ]->detachElement (s [ face ], connect);
-
-      // all other faces can be detached without check 
-      for( unsigned char i=1; i<4; ++ i)
-      {
-        const unsigned char fce = (face + i) % 4;
-        assert( fce >=0 && fce < 4 );
-        f[ fce ]->detachElement (s [ fce ] );
-      }
-    }
-  }
-
-  if( ! father ) 
+  // this code has been moved to ~TetraTop in gitter_tetra_top.cc
   {
     f [0] ->detachElement (s [0]) ;
     f [1] ->detachElement (s [1]) ;
