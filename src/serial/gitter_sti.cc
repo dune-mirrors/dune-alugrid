@@ -696,29 +696,24 @@ bool Gitter :: adapt ()
   do {
     // refine the grid 
     refined &= refine ();
+
     // check for conformity
     needConformingClosure = markForConformingClosure();
   }
   while ( needConformingClosure ); 
 
-  if (!refined) {
+  if (!refined) 
+  {
     cerr << "**WARNUNG (IGNORIERT) Verfeinerung nicht vollst\"andig (warum auch immer)\n" ;
     cerr << "  diese Option ist eigentlich dem parallelen Verfeinerer vorbehalten.\n" ;
     cerr << "  Der Fehler trat auf in " << __FILE__ << " " << __LINE__ << endl ;
   }
-  int lap = clock () ;
+
+  // now call coarsen once 
   coarse () ;
 
   // make sure that no non-conforming element are present in case of bisection 
   assert ( ! markForConformingClosure() );
-
-  int end = clock () ;
-  if (debugOption (1)) {
-    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
-    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
-    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
-    cout << "**INFO Gitter :: adapt () [ref|cse|all] " << u1 << " " << u2 << " " << u3 << endl ;
-  }
 
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
   ++adaptstep;

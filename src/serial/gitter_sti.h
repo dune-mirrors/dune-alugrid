@@ -1186,12 +1186,14 @@ public :
 
       virtual ElementPllXIF& accessPllX () throw (stiExtender_t :: AccessPllException)
       {
-        assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
+        cerr << "ERROR: hasFaceEmpty::accessPllX called in " << __FILE__ << " " << __LINE__ << endl;
+        abort() ;
         throw stiExtender_t :: AccessPllException () ;
       }
       virtual const ElementPllXIF& accessPllX () const throw (stiExtender_t :: AccessPllException)
       {
-        assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl))) ;
+        cerr << "ERROR: hasFaceEmpty::accessPllX called in " << __FILE__ << " " << __LINE__ << endl;
+        abort() ;
         throw stiExtender_t :: AccessPllException () ;
       }
 
@@ -3087,7 +3089,6 @@ inline Gitter :: Geometric :: Hface4Rule Gitter :: Geometric :: Hface4Rule :: ro
   }
 }
 
-#if 0
 inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface4Rule &rule )
 {
   switch( rule )
@@ -3096,17 +3097,12 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface4Ru
       return out << "nosplit";
     case Gitter :: Geometric :: Hface4Rule :: iso4:
       return out << "iso4";
-    case Gitter :: Geometric :: Hface4Rule :: ni02:
-      return out << "ni02";
-    case Gitter :: Geometric :: Hface4Rule :: ni13:
-      return out << "ni13";
     case Gitter :: Geometric :: Hface4Rule :: undefined:
       return out << "undefined";
     default:
       return out << "!!! unknown !!!";
   }
 }
-#endif
  
 //                                         #####
 // #    #  ######    ##     ####   ###### #     #
@@ -3155,12 +3151,14 @@ inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const fa
 
   if( front() == null )
   {
+    assert( n._faceFront != null.first );
     setFront( pair< hasFace3 *, int >( n._faceFront, n._numFront ) );
     ++ret;
   }
 
   if( rear() == null )
   {
+    assert( n._faceRear != null.first );
     setRear( pair< hasFace3 *, int >( n._faceRear, n._numRear ) );
     ++ret;
   }
@@ -3231,6 +3229,7 @@ inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconne
   ++ nb._attachedCounter ;
 }
 
+// detachElement and set connector to null
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t)
 {
   detachElement( t, nb.null );
@@ -3245,7 +3244,7 @@ inline void Gitter :: Geometric :: hface3 :: detachElement (int t, const pair < 
     nb.setFront( p );
 
   // we can only decrease the ref if only 2 or less attches are available 
-  if( nb._attachedCounter <= 2 )
+  if( nb._attachedCounter < 3 )
   {
     assert( ref > 0 );
     ref -- ;

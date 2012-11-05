@@ -891,27 +891,17 @@ bool GitterPll :: adapt ()
   bool needConformingClosure = false ;
   const bool bisectionEnabled = conformingClosureNeeded();
   assert( bisectionEnabled == mpAccess().gmax( bisectionEnabled ) );
+
+  // loop until refinement leads to a conforming situation (conforming refinement only)
   do 
   {
     __STATIC_myrank = mpAccess ().myrank () ;
     __STATIC_turn ++ ;
     assert (debugOption (20) ? (cout << "**INFO GitterPll :: adapt ()" << endl, 1) : 1) ;
     assert (! iterators_attached ()) ;
-    int start = clock () ;
-    refined |= refine () ;
-    int lap = clock () ;
-    coarse () ;
-    int end = clock () ;
-    if (debugOption (1)) {
-      float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
-      float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
-      float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
-      cout << "**INFO GitterPll :: adapt () [ref (loops)|cse|all] " << u1 << " ("
-           << _refineLoops << ") " << u2 << " " << u3 << endl ;
-    }
 
-    // notify grid changes here
-    notifyGridChanges () ;
+    // call refine 
+    refined |= refine () ;
 
     // for bisection refinement repeat loop if non-confoming edges are still present 
     // markForConformingClosure returns true if all elements have conforming closure 
@@ -921,8 +911,11 @@ bool GitterPll :: adapt ()
   } 
   while ( needConformingClosure );
 
-  // now perform one load balancing step
-  // loadBalancerGridChangesNotify () ;
+  // now do one coarsening step 
+  coarse () ;
+
+  // notify grid changes here
+  notifyGridChanges () ;
 
 #ifndef NDEBUG
   needConformingClosure = 
