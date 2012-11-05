@@ -1334,6 +1334,11 @@ public :
         inline pair < myconnect_t *, int > rear () ;
         inline pair < const myconnect_t *, int > rear () const ;
 
+        // return true if no element is attached to rear 
+        bool emptyRear () const { return _attachedRear == 0; }
+        // return true if no element is attached to frony 
+        bool emptyFront () const { return _attachedFront == 0; }
+
         friend class hface3 ;
       } nb ; // <= 24 bytes 
     public:
@@ -1351,6 +1356,7 @@ public :
       inline void detachElement (int) ;
       inline void detachElement (int, const pair < hasFace3 *, int > &) ;
 
+      // return true if more than one attachment was made to rear/front
       inline bool moreAttachments( const int twst ) const 
       { 
         return twst < 0 ? nb._attachedRear > 1 : nb._attachedFront > 1 ; 
@@ -3250,8 +3256,8 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: rear () const
 inline Gitter :: Geometric :: hface3 :: 
 hface3 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2) 
 {
-  assert( nb._attachedFront == 0 );
-  assert( nb._attachedRear  == 0 );
+  assert( nb.emptyFront() );
+  assert( nb.emptyRear() );
   nb._parRule = (Hface3Rule::undefined);
   assert(e0 && e1 && e2) ;
   (e [0] = e0)->ref ++ ; nb.s [0] = s0 ;
@@ -3262,8 +3268,8 @@ hface3 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2)
 
 inline Gitter :: Geometric :: hface3 :: ~hface3 () 
 {
-  assert( nb._attachedFront == 0 );
-  assert( nb._attachedRear  == 0 );
+  assert( nb.emptyFront() );
+  assert( nb.emptyRear() );
   assert (ref ? (cerr << "**WARNING hface3::refcount was " << ref << endl, 1) : 1) ;
   e [0] -> ref -- ;
   e [1] -> ref -- ;
@@ -3278,10 +3284,7 @@ attachElement (const pair < myconnect_t *, int > & p, int t)
   if ( t < 0 ) 
   {
     // if nothing was attached to rear then increase ref
-    if( nb._attachedRear == 0 ) 
-    {
-      ref ++ ;
-    }
+    if( nb.emptyRear() ) ref ++ ;
 
     // set pair to rear 
     nb.setNextRear( p );
@@ -3289,10 +3292,7 @@ attachElement (const pair < myconnect_t *, int > & p, int t)
   else 
   {
     // if nothing was attached to front then increase ref
-    if( nb._attachedFront == 0 ) 
-    {
-      ref ++ ;
-    }
+    if( nb.emptyFront() ) ref ++ ;
 
     // set pair to front  
     nb.setNextFront( p );
@@ -3312,19 +3312,19 @@ inline void Gitter :: Geometric :: hface3 :: detachElement (int t, const pair < 
 {
   if ( t < 0 )
   {
+    // set replacement
     nb.setPrevRear( p );
-    if( nb._attachedRear == 0 ) 
-    {
-      ref -- ;
-    }
+
+    // decrease ref counter if rear is empty
+    if( nb.emptyRear() ) ref -- ;
   }
   else
   {
+    // set replacement 
     nb.setPrevFront( p );
-    if( nb._attachedFront == 0 ) 
-    {
-      ref -- ;
-    }
+
+    // decrease ref counter if front is empty
+    if( nb.emptyFront() ) ref -- ;
   }
 }
 
