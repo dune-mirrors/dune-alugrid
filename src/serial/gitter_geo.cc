@@ -534,28 +534,9 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const alucoord_t (&cen
     const alucoord_t (&p)[3] = myvertex (i)->Point () ;
     if (insideBall (p,center,radius)) { hit = true ; break ; }
   }
-#if 0
-  if (!hit) {
-    const int resolution = 50 ;
-    LinearMapping map (myvertex(0)->Point(), myvertex(1)->Point(),
-            myvertex(2)->Point(), myvertex(3)->Point()) ;
-    alucoord_t p [3] ;
-    for (int i = 0 ; i < resolution ; i ++ ) {
-      double b1 = drand48 () ;
-      double b2 = (1.0 - b1) * drand48 () ;
-      double b3 = (1.0 - b1 - b2) * drand48 () ;
-      double b4 = 1.0 - b1 - b2 - b3 ;
-      
-      // Sind das "uberhaupt Zufallspunkte ? Nein. Leider nicht.
-  
-      map.map2world (b1, b2, b3, b4, p) ;
-      if (insideBall (p,center,radius)) { hit = true ; break ; }
-    }
-  }
-#endif
   if (!hit) return (request (myrule_t :: crs), 1) ;
   if (level()>limit) return (request (myrule_t :: nosplit), 0);
-  return (request (myrule_t :: bisect), 1);
+  return tagForGlobalRefinement();
 }
 
 // ######                                                           #####
