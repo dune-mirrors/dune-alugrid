@@ -2324,8 +2324,9 @@ void GitterBasisPll :: printMemUsage ()
         allSize += indexMem;
       }
 
+      size_t perElement = ( numElements > 0 ) ? allSize/numElements : 0;
       cout << "All leaf size : " << allSize << " MB" << endl;
-      cout << "bytes per Element: " << allSize/numElements << endl; 
+      cout << "bytes per Element: " << perElement << endl; 
       cout << "Estimated all size : " << (9*long(allSize) / 8) << " MB" << endl;
 
       size_t build = container().memUsage();
