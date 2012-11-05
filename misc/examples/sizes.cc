@@ -74,6 +74,9 @@ bool needConformingClosure( GitterType& grid, bool useClosure )
 template <class GitterType>
 void checkRefinements( GitterType& grid ) 
 {
+  // if bisection is not enabled do nothing here
+  if( ! grid.conformingClosureNeeded() ) return ;
+
   {
     // get LeafIterator which iterates over all leaf elements of the grid 
     LeafIterator < Gitter::helement_STI > w (grid) ;
@@ -164,11 +167,13 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
      // adapt grid 
      grid.duneAdapt( rp );
 
+#ifdef PARALLEL
      if( loadBalance ) 
      {
        // load balance 
        grid.duneLoadBalance();
      }
+#endif
 
      // print size of grid 
      grid.printsize () ;
