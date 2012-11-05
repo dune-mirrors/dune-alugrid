@@ -906,7 +906,8 @@ template < class A > TetraTop < A > :: ~TetraTop ()
     for( int i=0; i<4; ++i ) 
     {
       myhface_t* face = myhface( i ); 
-      if( face->moreAttachments() )
+      const int twst = twist( i );
+      if( face->moreAttachments( twst ) )
       {
         // search face in father 
         for( int j=0; j<4; ++j ) 
@@ -915,14 +916,14 @@ template < class A > TetraTop < A > :: ~TetraTop ()
           if( face->getIndex() == fce->getIndex() )
           {
             pair < Gitter::Geometric::hasFace3 *, int > connect( Gitter::Geometric::InternalHasFace3 ()(_up), int( j ) ) ;
-            face->detachElement ( twist( i ), connect );
+            face->detachElement ( twst, connect );
             break ;
           }
         }
       }
       else 
       {
-        face->detachElement ( twist( i ) );
+        face->detachElement ( twst );
       }
     }
 #endif

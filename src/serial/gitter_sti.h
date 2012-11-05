@@ -1305,8 +1305,17 @@ public :
         signed char _numRear;
         signed char s [ polygonlength ] ;  // 12 bytes (moved here to use padding)
 
-        // count number of attchElement calls 
-        unsigned char _attachedCounter ; // 1 byte
+        // count number of attchElement calls (front and rear)
+        unsigned char _attachedFront ; // 1 byte
+        unsigned char _attachedRear  ; // 1 byte
+
+#ifdef ALUGRID_DEBUG_PARALLEL 
+        std::vector< std::pair<myconnect_t*,signed char> > frontList_;
+        std::vector< std::pair<myconnect_t*,signed char> > rearList_;
+
+        void setPrevFront ();
+        void setPrevRear ();
+#endif
       public:  
         myrule_t _parRule;  // 1 byte 
       public :
@@ -1320,9 +1329,6 @@ public :
         inline pair < const myconnect_t *, int > front () const ;
         inline pair < myconnect_t *, int > rear () ;
         inline pair < const myconnect_t *, int > rear () const ;
-
-        bool rearNull() const  { return _faceRear  == null.first && _numRear  == null.second ; }
-        bool frontNull() const { return _faceFront == null.first && _numFront == null.second ; }
 
         friend class hface3 ;
       } nb ; // <= 24 bytes 
@@ -1340,6 +1346,10 @@ public :
       inline void attachElement (const pair < hasFace3 *, int > &,int) ;
       inline void detachElement (int) ;
       inline void detachElement (int, const pair < hasFace3 *, int > &) ;
+
+      inline bool moreAttachments( const int twst ) const { 
+        return twst < 0 ? nb._attachedRear > 1 : nb._attachedFront > 1 ; 
+      }
     public :
       inline int twist (int) const ;
       inline myvertex_t * myvertex (int) ;
@@ -3069,7 +3079,7 @@ inline Gitter :: Geometric :: Hface4Rule :: operator rule_t () const
 }
 
 inline bool Gitter :: Geometric :: Hface4Rule :: isValid (const rule_t& r) {
-  return r == nosplit || r == iso4 /* || _r == ni02 || _r == ni13 */ ;
+  return r == nosplit || r == iso4 ;
 }
 
 inline bool Gitter :: Geometric :: Hface4Rule :: isValid () const {
@@ -3114,17 +3124,29 @@ inline ostream &operator<< ( ostream &out, const Gitter :: Geometric :: Hface4Ru
 //
   
 inline Gitter :: Geometric :: hface3 :: face3Neighbour :: face3Neighbour ()
- : _attachedCounter( 0 )
+ : _attachedFront( 0 ), _attachedRear( 0 )
+#ifdef ALUGRID_DEBUG_PARALLEL
+   , frontList_(),
+   , rearList_()
+#endif
 {
+#ifdef ALUGRID_DEBUG_PARALLEL
   _faceFront = null.first;
-  _numFront = null.second;
-  _faceRear = null.first;
-  _numRear = null.second;
+  _numFront  = null.second;
+  _faceRear  = null.first;
+  _numRear   = null.second;
+#else 
+  setFront( null );
+  setRear( null );
+#endif
 }
 
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setFront ( const pair < myconnect_t *, int > &p )
 {
+#ifdef ALUGRID_DEBUG_PARALLEL
+  frontList_.push_back(make_pair( _faceFront, _numFront));
+#endif
   _faceFront = p.first;
   _numFront  = p.second;
 }
@@ -3132,16 +3154,46 @@ Gitter :: Geometric :: hface3 :: face3Neighbour :: setFront ( const pair < mycon
 inline void
 Gitter :: Geometric :: hface3 :: face3Neighbour :: setRear ( const pair < myconnect_t *, int > &p )
 {
+#ifdef ALUGRID_DEBUG_PARALLEL
+  rearList_.push_back(make_pair( _faceRear, _numRear));
+#endif
   _faceRear = p.first;
   _numRear  = p.second;
 }
 
+#ifdef ALUGRID_DEBUG_PARALLEL
+inline void
+Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevFront ( )
+{
+  assert( frontList_.size() > 0);
+  _faceFront = frontList_.back().first;
+  _numFront  = frontList_.back().second;
+  frontList_.pop_back();
+}
+
+inline void
+Gitter :: Geometric :: hface3 :: face3Neighbour :: setPrevRear ( )
+{
+  assert( rearList_.size() > 0);
+  _faceRear = rearList_.back().first;
+  _numRear  = rearList_.back().second;
+  rearList_.pop_back();
+}
+#endif
+
 inline void Gitter :: Geometric :: hface3 :: face3Neighbour :: operator = (const face3Neighbour & n)
 {
-  _faceFront = n._faceFront;
-  _faceRear = n._faceRear;
-  _numFront = n._numFront;
-  _numRear = n._numRear;
+#ifdef ALUGRID_DEBUG_PARALLEL
+  rontList_.clear();
+  rearList_.clear();
+#endif
+
+  _faceFront     = n._faceFront;
+  _faceRear      = n._faceRear;
+  _numFront      = n._numFront;
+  _numRear       = n._numRear;
+  _attachedFront = n._attachedFront ;
+  _attachedRear  = n._attachedRear ;
   return ;
 }
 
@@ -3201,12 +3253,10 @@ hface3 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2)
   return ;
 }
 
-inline Gitter :: Geometric :: hface3 :: ~hface3 () {
-  if( nb._attachedCounter > 0 ) 
-  {
-    cout << "attached counter was : " << int(nb._attachedCounter) << endl;
-    assert( false );
-  }
+inline Gitter :: Geometric :: hface3 :: ~hface3 () 
+{
+  //assert( nb._attachedFront == 0 );
+  //assert( nb._attachedRear  == 0 );
   assert (ref ? (cerr << "**WARNING hface3::refcount was " << ref << endl, 1) : 1) ;
   e [0] -> ref -- ;
   e [1] -> ref -- ;
@@ -3216,45 +3266,64 @@ inline Gitter :: Geometric :: hface3 :: ~hface3 () {
 
 inline void Gitter :: Geometric :: hface3 :: attachElement (const pair < myconnect_t *, int > & p, int t)
 {
-  // set connect pair 
   if ( t < 0 ) 
+  {
+    // if nothing was attached to rear then increase ref
+    if( nb._attachedRear == 0 ) ref ++ ;
+    // counter for rear references 
+    ++ nb._attachedRear ;
+    // set pair to rear 
     nb.setRear( p );
+  }
   else 
+  {
+    // if nothing was attached to front then increase ref
+    if( nb._attachedFront == 0 ) ref ++ ;
+    // counter for front references 
+    ++ nb._attachedFront ;
+    // set pair to front  
     nb.setFront( p );
-
-  // if attachElement counter is less than 2 also increase the ref counter 
-  if( nb._attachedCounter < 2 ) ref ++ ;
-
-  // counter how often attachElement has been called 
-  ++ nb._attachedCounter ;
+  }
 }
 
 // detachElement and set connector to null
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t)
 {
+  // set null element 
   detachElement( t, nb.null );
 }
 
 // detachElement with a given new pair of connectors 
 inline void Gitter :: Geometric :: hface3 :: detachElement (int t, const pair < myconnect_t *, int > & p)
 {
-  if ( t < 0 )
-    nb.setRear( p );
-  else
-    nb.setFront( p );
-
-  // we can only decrease the ref if only 2 or less attches are available 
-  if( nb._attachedCounter < 3 )
+  if( ! ref ) 
   {
-    assert( ref > 0 );
-    ref -- ;
+    cout << this << " " << int(nb._attachedRear) << " " << int(nb._attachedFront) << endl;
+    cout << this << " " << int(nb._numRear)  << " " << int(nb._numFront) << endl;
   }
-
-  // make sure this counter is still positive 
-  assert( nb._attachedCounter > 0 );
-
-  // decrease attachElement counter 
-  -- nb._attachedCounter ;
+  // assert( ref > 0 );
+  if ( t < 0 )
+  {
+    nb.setRear( p );
+    assert( nb._attachedRear > 0 );
+    -- nb._attachedRear ;
+    if( nb._attachedRear == 0 ) 
+    {
+      cout << this << " " << " decreasing ref " << endl;
+      ref -- ;
+    }
+  }
+  else
+  {
+    nb.setFront( p );
+    assert( nb._attachedFront > 0 );
+    -- nb._attachedFront ;
+    if( nb._attachedFront == 0 ) 
+    {
+      cout << this << " " << " decreasing ref " << endl;
+      ref -- ;
+    }
+  }
 }
 
 inline int Gitter :: Geometric :: hface3 :: postRefinement () {

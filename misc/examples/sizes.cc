@@ -134,7 +134,7 @@ void checkRefinements( GitterType& grid )
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
 void globalRefine(GitterType& grid, bool global, int step, int mxl,
-                  const bool loadBalance = true )
+                  const bool loadBalance = false )
 {
    {
      if (global)
