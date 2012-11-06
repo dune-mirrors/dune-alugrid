@@ -1583,9 +1583,12 @@ public :
       
       inline int originalVertexTwist(int, int) const;
       inline int originalEdgeTwist(int, int) const;
-    private:
+    protected:
       myhface_t * f [4] ;
       signed char s [4] ;
+
+      // counter for bisection refinement if more than once
+      signed char _count ;
     } tetra_GEO ;
   
     // Geometriesockelklasse des periodischen Randelements mit zwei
@@ -3214,14 +3217,12 @@ inline int Gitter :: Geometric :: hface3 :: face3Neighbour :: complete (const fa
 
   if( front() == null )
   {
-    assert( n._faceFront != null.first );
     setFront( pair< hasFace3 *, int >( n._faceFront, n._numFront ) );
     ++ret;
   }
 
   if( rear() == null )
   {
-    assert( n._faceRear != null.first );
     setRear( pair< hasFace3 *, int >( n._faceRear, n._numRear ) );
     ++ret;
   }
