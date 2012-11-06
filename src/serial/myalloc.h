@@ -8,7 +8,7 @@
 
 class MyAlloc {
   // max number of storable items per stack 
-  static const long MAX_HOLD_ADD ;
+  static const size_t MAX_HOLD_ADD ;
   // overestimation factor 
   static const double MAX_HOLD_MULT ;
 
@@ -19,11 +19,12 @@ class MyAlloc {
   static bool _freeAllowed ;
   
   public :
-    class Initializer {
-	// initializer versucht, die statischen Objekte der Speicherverwaltung
-	// vor allem anderen zu initialisieren, damit keine Fehler auftreten,
-	// falls statische Objekte irgendwo Instanzen mit MyAlloc als Basis-
-	// klasse angelegen.
+    class Initializer 
+    {
+      // initializer versucht, die statischen Objekte der Speicherverwaltung
+      // vor allem anderen zu initialisieren, damit keine Fehler auftreten,
+      // falls statische Objekte irgendwo Instanzen mit MyAlloc als Basis-
+      // klasse angelegen.
       public :
         Initializer () ;
        ~Initializer () ;
