@@ -8,12 +8,11 @@
 
 const pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: null 
   = pair < Gitter :: Geometric :: hasFace3 *, int > (
-      & (Gitter :: Geometric :: hasFaceEmpty<Gitter :: Geometric :: hasFace3>::instance() ), -1) ;
+      & (Gitter :: Geometric :: hasFaceEmpty::instance() ), -1) ;
 
 const pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: null 
   = pair < Gitter :: Geometric :: hasFace4 *, int > ( 
-      & (Gitter :: Geometric :: hasFaceEmpty<Gitter :: Geometric :: hasFace4>::instance() ), -1) ;
-      //Gitter :: Geometric :: InternalHasFace4 () 0 , -1) ;
+      & (Gitter :: Geometric :: hasFaceEmpty::instance() ), -1) ;
 
 // prototype of Tetra type ( the faces of a tetrahedron )
 const int Gitter :: Geometric :: Tetra :: prototype [4][3] = {{1,3,2},{0,2,3},{0,3,1},{0,1,2}} ;

@@ -9,6 +9,10 @@
 //
 //
 //////////////////////////////////////////////////////////////////////////////
+struct ParallelException 
+{
+  class AccessPllException {} ;
+};
 
 class VertexPllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
 {
@@ -55,8 +59,70 @@ class EdgePllXDefault : public EdgePllXIF
     virtual bool lockedAgainstCoarsening () const { assert(false);abort(); return false ; }
 } ;
 
+//  hasFace needs to be one of the basic classes 
+//  such that hbndseg and helement can derive from it
+
+// forward declaration 
+class ElementPllXIF ;
+
+class hasFace : public MacroGridMoverDefault
+{
+public :
+  typedef RefinementRules :: Hface3Rule  Hface3Rule;
+  typedef RefinementRules :: Hface4Rule  Hface4Rule;
+
+  virtual bool refineBalance (Hface3Rule, int) { abort(); return false ; }
+  virtual bool refineBalance (Hface4Rule, int) { abort(); return false ; }
+  virtual bool bndNotifyCoarsen () { abort(); return false ; }
+
+  // returns true, if underlying object is real 
+  virtual bool isRealObject () const { return true; }
+  
+  virtual int moveTo () const { abort(); return -1; }
+protected :
+  hasFace () {}
+  virtual ~hasFace () {}
+  inline bool bndNotifyBalance (Hface3Rule, int) { return true ; }
+  inline bool bndNotifyBalance (Hface4Rule, int) { return true ; }
+
+  typedef ParallelException   stiExtender_t ;
+  
+public:
+  virtual bool isboundary() const { return false ; }
+  virtual bool isperiodic() const { return false ; }
+  virtual int nbLevel() const { abort(); return -1; }
+  virtual int nbLeaf() const  { abort(); return -1; }
+
+  // returns true if a vertex projection is set 
+  virtual bool hasVertexProjection () const { abort(); return false; }
+  virtual ElementPllXIF& accessPllX () throw (stiExtender_t :: AccessPllException)
+  {
+    cerr << "ERROR: hasFace::accessPllX not overloaded! " << __FILE__ << " " << __LINE__ << endl ;
+    abort();
+    throw stiExtender_t :: AccessPllException () ;
+  }
+  virtual const ElementPllXIF& accessPllX () const throw (stiExtender_t :: AccessPllException)
+  {
+    cerr << "ERROR: hasFace::accessPllX not overloaded! " << __FILE__ << " " << __LINE__ << endl ;
+    abort();
+    throw stiExtender_t :: AccessPllException () ;
+  }
+
+  virtual void attachElement2( const int destination, const int face ) { abort(); }
+
+  // default implementation does nothing 
+  // this method is overloaded for parallel periodic macro elements 
+  virtual void attachPeriodic( const int destination ) {}
+
+  // return ldbVertexIndex (default is -1), overloaded in Tetra and Hexa
+  virtual int firstLdbVertexIndex() const { return -1; }
+  // return ldbVertexIndex, overloaded in TetraPllMacro and HexaPllMacro 
+  virtual int otherLdbVertexIndex( const int faceIndex ) const { return firstLdbVertexIndex(); }
+} ;
+
+
 // type of ElementPllXIF_t is ElementPllXIF, see parallel.h
-class ElementPllXIF : public MacroGridMoverDefault 
+class ElementPllXIF : public hasFace 
 {
   protected :
     virtual ~ElementPllXIF () {}
@@ -234,7 +300,7 @@ class Parallel {
         const BufferType & commBuffer () const { assert(_buff); return *_buff; }
     };
     
-    class AccessPllException {} ;
+    typedef ParallelException :: AccessPllException  AccessPllException;
   
     class VertexIF : public VertexPllXDefault
 #ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM

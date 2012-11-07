@@ -615,7 +615,7 @@ template < class A >  bool Hbnd3Top < A > :: refineBalance (balrule_t r, int b)
 
   assert (b == 0) ;
   assert (this->leaf ()) ;
-  if (! this->bndNotifyBalance (r,b) ) 
+  if ( ! this->bndNotifyBalance (r,b) ) 
   {
   
     // Hier kann der innere Rand [parallel] die Verfeinerung
