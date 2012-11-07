@@ -282,7 +282,7 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
     if( mycon1->isperiodic() ) 
     {
       assert( ! mycon2->isperiodic() ); 
-      ldbVx1 = mycon1->otherLdbVertexIndex( myhface() );
+      ldbVx1 = mycon1->otherLdbVertexIndex( myhface().getIndex() );
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
     }
 
@@ -290,7 +290,7 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
     {
       assert( ! mycon1->isperiodic() ); 
       ldbVx1 = mycon1->accessPllX ().ldbVertexIndex ();
-      ldbVx2 = mycon2->otherLdbVertexIndex( myhface() );
+      ldbVx2 = mycon2->otherLdbVertexIndex( myhface().getIndex() );
     }
     
     // count leaf faces for this macro face 
@@ -1073,13 +1073,13 @@ pair<int,int> Periodic3PllXBaseMacro< A > :: insideLdbVertexIndex() const
 }
 
 template < class A >
-int Periodic3PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) const
+int Periodic3PllXBaseMacro< A > :: otherLdbVertexIndex( const int faceIndex ) const
 {
-  if( myhface3( 0 ) == &face )
+  if( myhface3( 0 )->getIndex() == faceIndex )
     return myneighbour( 1 ).first->firstLdbVertexIndex() ;
   else
   {
-    assert(  myhface3( 1 ) == &face );
+    assert(  myhface3( 1 )->getIndex() == faceIndex  );
     return myneighbour( 0 ).first->firstLdbVertexIndex() ;
   }
 }
@@ -1290,13 +1290,13 @@ pair<int,int> Periodic4PllXBaseMacro< A > :: insideLdbVertexIndex() const
 }
 
 template < class A >
-int Periodic4PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) const
+int Periodic4PllXBaseMacro< A > :: otherLdbVertexIndex( const int faceIndex ) const
 {
-  if( myhface4( 0 ) == &face )
+  if( myhface4( 0 )->getIndex() == faceIndex )
     return myneighbour( 1 ).first->firstLdbVertexIndex() ;
   else
   {
-    assert(  myhface4( 1 ) == &face );
+    assert(  myhface4( 1 )->getIndex() == faceIndex );
     return myneighbour( 0 ).first->firstLdbVertexIndex() ;
   }
 }

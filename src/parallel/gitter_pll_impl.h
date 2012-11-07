@@ -315,7 +315,7 @@ class Periodic3PllXBaseMacro : public A
 
     virtual void attachPeriodic( const int destination ) ;
     virtual pair<int,int> insideLdbVertexIndex() const ;
-    virtual int otherLdbVertexIndex( const hface_STI& face ) const ;
+    virtual int otherLdbVertexIndex( const int faceIndex ) const ;
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
@@ -406,7 +406,7 @@ class Periodic4PllXBaseMacro : public A
 
     virtual void attachPeriodic( const int destination ) ;
     virtual pair<int,int> insideLdbVertexIndex() const ;
-    virtual int otherLdbVertexIndex( const hface_STI& face ) const ;
+    virtual int otherLdbVertexIndex( const int faceIndex ) const ;
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
