@@ -1002,8 +1002,6 @@ public :
     class hedge1 ;
     class hface4 ;
     class hface3 ;
-    class hasFace3 ;
-    class hasFace4 ;
     class Tetra ;
     class Hexa ;
     class hbndseg3 ;
