@@ -68,7 +68,7 @@ template < class A > class Hface3Top : public A
     typedef Hface3Top < A >             innerface_t ;
     typedef typename A :: inneredge_t   inneredge_t;
     typedef typename A :: innervertex_t innervertex_t;
-    typedef typename A :: myhedge_t    myhedge_t ;
+    typedef typename A :: myhedge_t     myhedge_t ;
     typedef typename A :: myvertex_t    myvertex_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef InnerStorage< InnerEdgeStorage< innerface_t , false > > inner_t ;

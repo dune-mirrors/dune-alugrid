@@ -363,15 +363,22 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
   {
     assert (getrule () == myrule_t :: nosplit ? 1 : 
       (cerr << "**FEHLER beim Verfeinern mit Regel " << r << " auf " << getrule () << endl, 0)) ;
-    switch(r) {
+    switch(r) 
+    {
       case myrule_t :: e01 :
       case myrule_t :: e12 :
       case myrule_t :: e20 :
       case myrule_t :: iso4 :
       {
-        bool a = (twist < 0) 
-               ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-               : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
+        typedef typename A :: face3Neighbour :: neighbour_t neighbour_t ;
+        // get face neighbour 
+        neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
+        // check refineBalance 
+        bool a = neigh.first->refineBalance (r, neigh.second);
+
+        //bool a = (twist < 0) 
+        //       ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+        //       : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
         if (a) 
         {  
           if (getrule () == myrule_t :: nosplit) 
@@ -2042,8 +2049,8 @@ template < class A >  bool TetraTop < A > :: refine ()
           return false ;
       }
       
-  // Vorsicht: Im Fall eines konformen Verfeinerers mu"s hier die entstandene Verfeinerung
-  // untersucht werden und dann erst das Element danach verfeinert werden.
+      // Vorsicht: Im Fall eines konformen Verfeinerers mu"s hier die entstandene Verfeinerung
+      // untersucht werden und dann erst das Element danach verfeinert werden.
       
       refineImmediate (r) ;
       return true ;
@@ -2054,33 +2061,6 @@ template < class A >  bool TetraTop < A > :: refine ()
 
 template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce) 
 {
-  /*
-  if ( r != balrule_t :: iso4 || r != balrule_t :: bisect ) 
-  {
-    //cerr << "**WARNUNG (IGNORIERT) in TetraTop < A > :: refineBalance (..) nachschauen, Datei " 
-    //   << __FILE__ << " Zeile " << __LINE__ << endl ;
-   
-  // Bisher kann die Balancierung nur die isotrope Achtelung handhaben,
-  // falls mehr gew"unscht wird muss es hier eingebaut werden. Im Moment wird
-  // die Balancierung einfach verweigert, d.h. die Verfeinerung des anfordernden
-  // Elements f"allt flach.
-    return false ;
-  }
-  */
-  /*
-  if ( r != balrule_t :: iso4 || r!= balrule_t :: e01 )
-  {
-    //cerr << "**WARNUNG (IGNORIERT) in TetraTop < A > :: refineBalance (..) nachschauen, Datei " 
-    //   << __FILE__ << " Zeile " << __LINE__ << endl ;
-   
-  // Bisher kann die Balancierung nur die isotrope Achtelung handhaben,
-  // falls mehr gew"unscht wird muss es hier eingebaut werden. Im Moment wird
-  // die Balancierung einfach verweigert, d.h. die Verfeinerung des anfordernden
-  // Elements f"allt flach.
-    return false ;
-  }
-  */
-
   // if status is still non-refined 
   if (getrule () == myrule_t :: nosplit) 
   {
@@ -2104,14 +2084,6 @@ template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce
       // if face is a leaf face 
       if (! myhface (fce)->leaf ()) 
       {
-        /*
-        for (int i = 0 ; i < 4 ; ++i)
-        {  
-          if (i != fce)
-            if ( ! myhface (i)->refine (balrule_t ( r ).rotate (twist (i)), twist (i)) ) 
-              return false ;
-        }
-        */
         _req = myrule_t :: nosplit ;
         if (! BisectionInfo :: refineFaces( this, suggestRule() ) ) return false ;
         refineImmediate ( myrule_t :: bisect ) ;

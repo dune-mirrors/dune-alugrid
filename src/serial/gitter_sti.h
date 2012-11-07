@@ -1309,30 +1309,29 @@ public :
         unsigned char _attachedFront ; // 1 byte
         unsigned char _attachedRear  ; // 1 byte
 
-#ifdef ALUGRID_DEBUG_PARALLEL 
-        std::vector< std::pair<myconnect_t*,signed char> > frontList_;
-        std::vector< std::pair<myconnect_t*,signed char> > rearList_;
-#endif
+      public:
+        myrule_t _parRule;  // 1 byte 
+
+        typedef pair < myconnect_t *, int >  neighbour_t ;
+        typedef pair < const myconnect_t *, int > const_neighbour_t ;
       protected:  
-        void setFront ( const pair< myconnect_t *, int > &p );
-        void setRear ( const pair< myconnect_t *, int > &p );
-        void setNextFront ( const pair< myconnect_t *, int > &p );
-        void setNextRear ( const pair< myconnect_t *, int > &p );
-        void setPrevFront ( const pair< myconnect_t *, int > &p );
-        void setPrevRear ( const pair< myconnect_t *, int > &p );
+        void setFront ( const neighbour_t &p );
+        void setRear  ( const neighbour_t &p );
+        void setNextFront ( const neighbour_t &p );
+        void setNextRear  ( const neighbour_t &p );
+        void setPrevFront ( const neighbour_t &p );
+        void setPrevRear  ( const neighbour_t &p );
       private:  
         inline void operator = (const face3Neighbour &) ;
-      public:  
-        myrule_t _parRule;  // 1 byte 
-      public :
+      public:
         static const pair < myconnect_t *, int > null ;
         inline face3Neighbour () ;
         inline void assign (const face3Neighbour &) ;
         inline int complete (const face3Neighbour &) ;
-        inline pair < myconnect_t *, int > front () ;
-        inline pair < const myconnect_t *, int > front () const ;
-        inline pair < myconnect_t *, int > rear () ;
-        inline pair < const myconnect_t *, int > rear () const ;
+        inline neighbour_t front () ;
+        inline const_neighbour_t front () const ;
+        inline neighbour_t rear () ;
+        inline const_neighbour_t rear () const ;
 
         // return true if no element is attached to rear 
         bool emptyRear () const { return _attachedRear == 0; }
@@ -1416,6 +1415,8 @@ public :
         // put here to save memory because of padding 
         myrule_t _parRule;
 
+        typedef pair < myconnect_t *, int >  neighbour_t ;
+        typedef pair < const myconnect_t *, int > const_neighbour_t ;
       private:  
         inline void operator = (const face4Neighbour &) ;
       public :
@@ -1425,10 +1426,10 @@ public :
         inline face4Neighbour () ;
         inline void assign (const face4Neighbour &) ;
         inline int complete (const face4Neighbour &) ;
-        inline pair < myconnect_t *, int > front () ;
-        inline pair < const myconnect_t *, int > front () const ;
-        inline pair < myconnect_t *, int > rear () ;
-        inline pair < const myconnect_t *, int > rear () const ;
+        inline neighbour_t front () ;
+        inline const_neighbour_t front () const ;
+        inline neighbour_t rear () ;
+        inline const_neighbour_t rear () const ;
         friend class hface4 ;
       } nb ; // 24 byte 
     public :
@@ -3102,7 +3103,8 @@ inline bool Gitter :: Geometric :: Hface4Rule :: isValid () const {
   return isValid( _r );
 }
 
-inline Gitter :: Geometric :: Hface4Rule Gitter :: Geometric :: Hface4Rule :: rotate (int t) const {
+inline Gitter :: Geometric :: Hface4Rule Gitter :: Geometric :: Hface4Rule :: rotate (int t) const 
+{
   switch (_r) {
   case nosplit :
     return Hface4Rule (nosplit) ;
