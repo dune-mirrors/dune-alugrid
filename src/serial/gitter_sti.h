@@ -1020,10 +1020,11 @@ public :
     // m"ussen, wie z.B. Navigation zur Fl"ache, zu den Kanten und Knoten,
     // aber auch Anforderungen an den Nachbarn.
 
+    // hasFace is implemented in elementif.h because of the 
+    // inheritance chain with the virtual methods. 
     typedef hasFace  hasFace3 ;
     typedef hasFace  hasFace4 ;
 
-    // hasFace_t is hasFace3 and hasFace4 
     // this class is used as default value for the face neighbour
     // the pointer is set in gitter_geo.cc where the null neigbours are
     // initialized. This means that having no neighbour will not result in 
