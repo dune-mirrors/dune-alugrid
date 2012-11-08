@@ -1,61 +1,90 @@
 // (c) Robert Kloefkorn 2010
 #include "gitter_tetra_top_pll.h"
-
-// avoid linker errors by quadratures 
-//#define MAPP_CUBE_3D_H_INCLUDED
 #include "../serial/gitter_tetra_top.cc"
 
 template < class A, class X, class MX > 
 void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
-(GhostChildrenInfo_t & info ) 
+( GhostChildrenInfo_t & info ) 
 {
   if(_ghostPair.first)
   {
-    GhostTetra_t & ghost = static_cast<GhostTetra_t &> (*_ghostPair.first); 
-    if( ! ghost.down() )
-    {
-      ghost.tagForGlobalRefinement();
-      ghost.refine();
-    }
-
     // get the childs 
     typedef typename Gitter :: Geometric :: tetra_GEO  tetra_GEO;
     typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
 
     // ghostpair.second is the internal face number of the face 
     // connected to the interior of the process 
-    hface3_GEO * face = ghost.myhface3( _ghostPair.second ); 
-    int count = 0;
-    for(face = face->down(); face; face = face->next())
+    // in case of bisection count can be zero since the face might have not been split 
+
+    std::cout << "Splitting ghost element " << std::endl;
+    GhostTetra_t* ghost = static_cast<GhostTetra_t *> (_ghostPair.first); 
+
+    if( ! ghost->down() )
     {
-      assert(face);
+      ghost->tagForGlobalRefinement();
+      ghost->refine();
+    }
 
-      // NOTE: we need here tetra_GEO because we cannot cast from hasFace
-      // to tetra_IMPL (GhostTetra_t)
-      tetra_GEO * ghch = 0;
+    typedef typename tetra_GEO :: myrule_t  myrule_t ;
 
-      typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
-      neigh_t neighbour = face->nb.front();
-      if( ! neighbour.first->isboundary ())
+    typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
+
+    hface3_GEO * orgFace = ghost->myhface3( _ghostPair.second ); 
+    hface3_GEO * face    = orgFace->down();
+
+    cout << "orgFace  " << orgFace << endl;
+#ifndef NDEBUG
+    int breakCount = 0 ;
+#endif
+    while( ! face )
+    {
+      neigh_t neighbour = orgFace->nb.front();
+      // this is true for the boundaries of ghost elements (see null face3Neighbour)
+      if( neighbour.second < 0 )
+        neighbour = orgFace->nb.rear();
+
+      tetra_GEO* elem = static_cast<tetra_GEO *> (neighbour.first);
+      // make sure that cast worked 
+      assert( dynamic_cast<tetra_GEO *> (neighbour.first) );
+      // refine element with suitable refinement rule 
+      elem->tagForGlobalRefinement();
+      elem->refine();
+
+      face = orgFace->down();
+      assert( breakCount++ < 5 );
+    }
+
+    // find new ghost elements 
+    {
+      assert( face );
+      int count = 0;
+      for( ; face; face = face->next() )
       {
-        ghch = dynamic_cast<tetra_GEO *> (neighbour.first);
-        assert(ghch);
-        assert( ghch->up() == &ghost );
-      }
-      else 
-      {
-        neighbour = face->nb.rear();
+        cout << "ghostFace  " << face << endl;
+        assert(face);
+
+        // check neighbours 
+        neigh_t neighbour = face->nb.front();
+        // if nb is boundary take other neighbour 
+        if( neighbour.second < 0 )
+        {
+          assert( neighbour.first->isboundary() );
+          neighbour = face->nb.rear();
+        }
+
         assert( ! neighbour.first->isboundary () );
-        ghch = dynamic_cast<tetra_GEO *> (neighbour.first);
-      }
-      
-      assert(ghch);
-      assert(ghch->up() == &ghost );
-     
-      // set element pointer and local face number 
-      info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
+        tetra_GEO* ghch = static_cast<tetra_GEO *> (neighbour.first);
+        assert( dynamic_cast<tetra_GEO *> (neighbour.first) );
+        // check father only for non-conforming refinement
+        assert( ghost->getrule().bisection() ? true : ghch->up() == ghost );
+       
+        // set element pointer and local face number 
+        info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
 
-      ++count ;
+        ++count ;
+      }
+      assert( ghost->getrule().bisection() ? count == 2 : count == 4);
+      std::cout << "count was " << count << endl;
     }
   }
 }

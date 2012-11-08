@@ -906,6 +906,7 @@ Hbnd3Top (int l, myhface_t * f,
   _bt (bt),
   _lvl (l) 
 {
+  assert( _bt == A::closure ? gh != 0 : true );
   // store ghost element 
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );

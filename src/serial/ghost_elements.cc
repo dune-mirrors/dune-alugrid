@@ -144,17 +144,15 @@ MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp,
 
   MacroGhostInfoTetra& ghInfo = *_ghInfoPtr; 
 
-  // MacroGhostBuilder & mgb = _mgb;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; ++i) 
+  {
     mgb.InsertNewUniqueVertex(orig->myvertex(i)->Point()[0] + sign*vec[0],
                               orig->myvertex(i)->Point()[1] + sign*vec[1],
                               orig->myvertex(i)->Point()[2] + sign*vec[2],
                               orig->myvertex(i)->ident()   );
   }
 
-  int orientation = orig->orientation();
-
-  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orientation ).first ;
+  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->orientation() ).first ;
   _ghostPair.first = ghost;
   assert( _ghostPair.first );
   _ghostPair.second = ghInfo.internalFace(); 
