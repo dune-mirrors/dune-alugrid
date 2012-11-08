@@ -65,23 +65,29 @@ class EdgePllXDefault : public EdgePllXIF
 // forward declaration 
 class ElementPllXIF ;
 
+// hasFace interface for connections between elements and boundaries.
 class hasFace : public MacroGridMoverDefault
 {
 public :
+  // see refinements.h
   typedef RefinementRules :: Hface3Rule  Hface3Rule;
   typedef RefinementRules :: Hface4Rule  Hface4Rule;
 
+  // provide both methods, each method is only 
+  // overloaded once in the corresponding derived class 
   virtual bool refineBalance (Hface3Rule, int) { abort(); return false ; }
   virtual bool refineBalance (Hface4Rule, int) { abort(); return false ; }
   virtual bool bndNotifyCoarsen () { abort(); return false ; }
 
-  // returns true, if underlying object is real 
+  // returns true, if underlying object is real (default impl)
   virtual bool isRealObject () const { return true; }
   
   virtual int moveTo () const { abort(); return -1; }
 protected :
   hasFace () {}
   virtual ~hasFace () {}
+  // provide both methods, each method is only 
+  // overloaded once in the corresponding derived class 
   inline bool bndNotifyBalance (Hface3Rule, int) { return true ; }
   inline bool bndNotifyBalance (Hface4Rule, int) { return true ; }
 
