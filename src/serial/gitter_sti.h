@@ -736,6 +736,7 @@ public :
       assert( up() != 0 );
       return up()->ldbVertexIndex() ; 
     }
+
     virtual void writeStaticState (ObjectStream &os, int i) const 
     { 
       assert( up() != 0 );
@@ -788,6 +789,7 @@ public :
     virtual void backupIndex  (ObjectStream & os ) const { backupIndexErr(); }
     virtual void restoreIndex (ObjectStream &, RestoreInfo& ) { restoreIndexErr(); }
 
+    // also in hasFace 
     virtual int moveTo () const { return -1; }
 
   public: 

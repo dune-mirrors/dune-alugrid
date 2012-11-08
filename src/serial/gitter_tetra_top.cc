@@ -522,9 +522,14 @@ setBoundaryId (const int id )
 template < class A >  void Hbnd3Top < A > :: split_e01 () 
 {
   int l = 1 + level () ;
-  int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, 0 , gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, 0 , gFace) ;
+
+  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
+  GhostChildrenInfo ghostInfo;
+  // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
+  this->splitGhost( ghostInfo );
+
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -534,9 +539,14 @@ template < class A >  void Hbnd3Top < A > :: split_e01 ()
 template < class A >  void Hbnd3Top < A > :: split_e12 () 
 {
   int l = 1 + level () ;
-  int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, 0 , gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, 0 , gFace) ;
+
+  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
+  GhostChildrenInfo ghostInfo;
+  // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
+  this->splitGhost( ghostInfo );
+
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -546,9 +556,14 @@ template < class A >  void Hbnd3Top < A > :: split_e12 ()
 template < class A >  void Hbnd3Top < A > :: split_e20 () 
 {
   int l = 1 + level () ;
-  int gFace = this->getGhost().second ;
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, 0, gFace) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, 0, gFace) ;
+
+  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
+  GhostChildrenInfo ghostInfo;
+  // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
+  this->splitGhost( ghostInfo );
+
+  innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;
+  innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;

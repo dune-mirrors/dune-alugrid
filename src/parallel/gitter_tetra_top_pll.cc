@@ -12,14 +12,14 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
   if(_ghostPair.first)
   {
     GhostTetra_t & ghost = static_cast<GhostTetra_t &> (*_ghostPair.first); 
-    if(!ghost.down())
+    if( ! ghost.down() )
     {
       ghost.tagForGlobalRefinement();
       ghost.refine();
     }
 
     // get the childs 
-    typedef typename Gitter :: Geometric :: tetra_GEO tetra_GEO;
+    typedef typename Gitter :: Geometric :: tetra_GEO  tetra_GEO;
     typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
 
     // ghostpair.second is the internal face number of the face 
