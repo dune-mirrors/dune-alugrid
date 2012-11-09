@@ -157,7 +157,7 @@ template < class A > class Hbnd3Top : public A {
 
   protected :
     typedef Hbnd3Top < A >              innerbndseg_t ;
-    typedef typename A :: myhface_t    myhface_t ;
+    typedef typename A :: myhface_t     myhface_t ;
     typedef typename A :: balrule_t     balrule_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: bnd_t         bnd_t;
@@ -177,9 +177,7 @@ template < class A > class Hbnd3Top : public A {
     const bnd_t _bt; // type of boundary 
     unsigned char _lvl ;
 
-    void split_e01 () ;
-    void split_e12 () ;
-    void split_e20 () ;
+    void split_bisection ( myrule_t rule ) ;
     void split_iso4 () ;
     inline bool coarse () ;
    
@@ -906,7 +904,7 @@ Hbnd3Top (int l, myhface_t * f,
   _bt (bt),
   _lvl (l) 
 {
-  assert( _bt == A::closure ? gh != 0 : true );
+  assert( this->myGrid()->ghostCellsEnabled() && _bt == A::closure ? gh != 0 : true );
   // store ghost element 
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
