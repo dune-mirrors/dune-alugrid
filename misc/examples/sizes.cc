@@ -53,6 +53,7 @@ struct EmptyAdaptRestrictProlong : public Gitter :: AdaptRestrictProlong
 template <class GitterType>
 bool needConformingClosure( GitterType& grid, bool useClosure ) 
 {
+  return false ;
   bool needClosure = true ;
   {
     // get LeafIterator which iterates over all leaf elements of the grid 
@@ -60,8 +61,10 @@ bool needConformingClosure( GitterType& grid, bool useClosure )
     w->first(); 
     if( ! w->done() ) 
     {
-      if( w->item ().type() != tetra )
-        needClosure = false ;
+      if( w->item ().type() == tetra )
+      {
+        return false ;
+      }
       else 
         needClosure = useClosure ;
     }
@@ -281,6 +284,7 @@ int main (int argc, char ** argv, const char ** envp)
     {
 #ifdef PARALLEL
       GitterDunePll grid(macroname.c_str(),mpa);
+      grid.disableGhostCells();
       grid.duneLoadBalance();
 #else 
       GitterDuneImpl grid(macroname.c_str());
@@ -289,12 +293,22 @@ int main (int argc, char ** argv, const char ** envp)
 #ifdef PARALLEL
       closure = mpa.gmax( closure );
 #endif
-      if( closure ) grid.enableConformingClosure() ;
+      if( closure ) 
+      {
+        grid.enableConformingClosure() ;
+        grid.disableGhostCells();
+      }
 
       //cout << "P[ " << rank << " ] : Grid generated! \n";
       grid.printsize(); 
       cout << "---------------------------------------------\n";
     
+      {
+        std::ostringstream ss;
+        ss << "start-" << ZeroPadNumber(mxl) << ".vtu";
+        grid.tovtk(  ss.str().c_str() );
+      }
+
       grid.printMemUsage();
       for (int i = 0; i < glb; ++i)
         globalRefine(grid, true, -1, mxl);
