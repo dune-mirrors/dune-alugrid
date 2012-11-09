@@ -1016,7 +1016,8 @@ void GitterDunePll :: doCommunication (
 
   // this communication only makes sense if ghost cells are present 
   const bool ghostCellsAvailable = ghostCellsEnabled ();
-  if( commType != Border_Border_Comm && ghostCellsAvailable ) // otherwise only border border 
+
+  if( (commType != Border_Border_Comm) && ghostCellsAvailable ) // otherwise only border border 
   {
     doInteriorGhostComm( vec, vertexData, edgeData, faceData, elementData , commType ); 
   }
