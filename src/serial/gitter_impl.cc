@@ -155,26 +155,8 @@ setIndicesAndBndId (const hface_STI & f, int face_nr)
   IndexManagerType & vxIm = ims.get(BuilderIF :: IM_Vertices);
   IndexManagerType & edIm = ims.get(BuilderIF :: IM_Edges);
 
-  bool found = true ;
   for (int i = 0; i < 3; ++i) 
   {
-    if( ! std::abs(myface.myvertex(i)->Point()[0]-
-           face.myvertex(i)->Point()[0])<1e-8 )
-      found = false ;
-    if( ! std::abs(myface.myvertex(i)->Point()[1]-
-           face.myvertex(i)->Point()[1])<1e-8) found = false ;
-    if( ! std::abs(myface.myvertex(i)->Point()[2]-
-           face.myvertex(i)->Point()[2])<1e-8) found = false ;
-  }
-
-  if( ! found ) 
-  {
-    std::cout << &face << " " << &myface << std::endl;
-  }
-
-  for (int i = 0; i < 3; ++i) 
-  {
-    /*
     // make sure we got the right face 
     assert(std::abs(myface.myvertex(i)->Point()[0]-
            face.myvertex(i)->Point()[0])<1e-8);
@@ -182,7 +164,6 @@ setIndicesAndBndId (const hface_STI & f, int face_nr)
            face.myvertex(i)->Point()[1])<1e-8);
     assert(std::abs(myface.myvertex(i)->Point()[2]-
            face.myvertex(i)->Point()[2])<1e-8);
-           */
 
     vertex_GEO * vx = myface.myvertex(i); 
     vx->setIndex( vxIm , face.myvertex(i)->getIndex() );
