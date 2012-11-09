@@ -38,6 +38,8 @@ struct RefinementRules
     static inline bool isValid (const rule_t &) ;
     inline Hface3Rule rotate (int) const ;
 
+    // return true if rule is one of the bisection rules 
+    bool bisection () const { return (_r >= e01) && (_r <= e20); }   
   private :
     rule_t _r ;
   } ;

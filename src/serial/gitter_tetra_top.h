@@ -177,7 +177,7 @@ template < class A > class Hbnd3Top : public A {
     const bnd_t _bt; // type of boundary 
     unsigned char _lvl ;
 
-    void split_bisection ( myrule_t rule ) ;
+    void split_bisection () ;
     void split_iso4 () ;
     inline bool coarse () ;
    

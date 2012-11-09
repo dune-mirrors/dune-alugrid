@@ -376,9 +376,6 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
         // check refineBalance 
         bool a = neigh.first->refineBalance (r, neigh.second);
 
-        //bool a = (twist < 0) 
-        //       ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-        //       : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second) ;
         if (a) 
         {  
           if (getrule () == myrule_t :: nosplit) 
@@ -519,7 +516,7 @@ setBoundaryId (const int id )
   }
 }
 
-template < class A >  void Hbnd3Top < A > :: split_e01 () 
+template < class A >  void Hbnd3Top < A > :: split_bisection() 
 {
   int l = 1 + level () ;
 
@@ -527,43 +524,14 @@ template < class A >  void Hbnd3Top < A > :: split_e01 ()
   GhostChildrenInfo ghostInfo;
   // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
   this->splitGhost( ghostInfo );
+  
+  //int gFace = this->getGhost().second ;
 
   innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;
   innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
-  assert (b0 && b1) ;
-  b0->append(b1) ;
-  _dwn = b0 ;
-  return ;
-}
+  //innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, 0, gFace ) ;
+  //innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, 0, gFace ) ;
 
-template < class A >  void Hbnd3Top < A > :: split_e12 () 
-{
-  int l = 1 + level () ;
-
-  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
-  GhostChildrenInfo ghostInfo;
-  // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
-  this->splitGhost( ghostInfo );
-
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
-  assert (b0 && b1) ;
-  b0->append(b1) ;
-  _dwn = b0 ;
-  return ;
-}
-
-template < class A >  void Hbnd3Top < A > :: split_e20 () 
-{
-  int l = 1 + level () ;
-
-  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
-  GhostChildrenInfo ghostInfo;
-  // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
-  this->splitGhost( ghostInfo );
-
-  innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;
-  innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
   assert (b0 && b1) ;
   b0->append(b1) ;
   _dwn = b0 ;
@@ -644,31 +612,22 @@ template < class A >  bool Hbnd3Top < A > :: refineBalance (balrule_t r, int b)
   } 
   else 
   {
-    //cout << "HbndTop: refineFace (twst = " << twist( 0 ) << ") ";
-    //cout << myhface (0) << endl;
-
+    // refine face according to rule 
+    myhface (0)->refineImmediate (r) ;
     if(r == myrule_t :: iso4) 
     {
       // Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
       // sich selbst, weil die Anforderung durch die Fl"ache kam, und
       // dahinter keine Balancierung stattfinden muss.
     
-      myhface (0)->refineImmediate (r) ;
       split_iso4 () ;
     } 
-    else if (r == myrule_t :: e01) {
-      myhface (0)->refineImmediate (r) ;
-      split_e01 () ;
+    else if( r.bisection() ) 
+    {
+      split_bisection () ;
     } 
-    else if (r == myrule_t :: e12) {
-      myhface (0)->refineImmediate (r) ;
-      split_e12 () ;
-    } 
-    else if (r == myrule_t :: e20) {
-      myhface (0)->refineImmediate (r) ;
-      split_e20 () ;
-    } 
-    else {
+    else 
+    {
       cerr << "**FEHLER (FATAL, weil nicht vorgesehen) beim Verfeinern am " ;
       cerr << "Randst\"uck mit der Regel [" << r << "] in " ;
       cerr << __FILE__ << " " << __LINE__ << endl ;
@@ -709,37 +668,29 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
     
     return this->getrule () == balrule_t :: nosplit ? true : false ;
     
-  } else {
-    if (this->getrule () == r) {
+  } else 
+    {
+      if (this->getrule () == r) {
     
       // Alles schon wie es sein soll -> true.
     
       return true ;
-    } else {
+    } 
+    else {
   
-  // Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
-  // der Fl"ache, da getrule () auf myhface (0)->getrule () umgeleitet
-  // ist.
+      // Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
+      // der Fl"ache, da getrule () auf myhface (0)->getrule () umgeleitet
+      // ist.
   
       // assert (this->getrule () == myrule_t :: nosplit) ;
       switch (r) {
       case balrule_t :: e01 :
+      case balrule_t :: e12 :
+      case balrule_t :: e20 :
         //cout << "refLikeEl: e01 " << endl;
         // if (!myhface (0)->refine (balrule_t (balrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
         if (!myhface (0)->refine (r, twist (0))) return false ;
-        split_e01 () ;
-        break;
-      case balrule_t :: e12 :
-        //cout << "refLikeEl: e12 " << endl;
-        //if (!myhface (0)->refine (balrule_t (balrule_t :: e12).rotate (twist (0)), twist (0))) return false ;
-        if (!myhface (0)->refine (r, twist (0))) return false ;
-        split_e12 () ;
-        break;
-      case balrule_t :: e20 :
-        // cout << "refLikeEl: e20 " << " " << balrule_t (balrule_t :: e20).rotate (twist (0)) << endl;
-        //if (!myhface (0)->refine (balrule_t (balrule_t :: e20).rotate (twist (0)), twist (0))) return false ;
-        if (!myhface (0)->refine (r, twist (0))) return false ;
-        split_e20 () ;
+        split_bisection() ;
         break;
       case balrule_t :: iso4 :
         //if (!myhface (0)->refine (balrule_t (balrule_t :: iso4).rotate (twist (0)), twist (0))) return false ;
@@ -753,8 +704,8 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
       }
 
       // postRefinement () gibt die M"oglichkeit auf dem Niveau des
-  // Template-Arguments eine Methode aufzurufen, um eventuelle
-  // Operationen auf dem verfeinerten Randst"uck durchzuf"uhren.
+      // Template-Arguments eine Methode aufzurufen, um eventuelle
+      // Operationen auf dem verfeinerten Randst"uck durchzuf"uhren.
       this->postRefinement () ;
       return true ;
     }
@@ -772,13 +723,9 @@ template < class A >  void Hbnd3Top < A > :: restoreFollowFace ()
     balrule_t r = f.getrule () ;
     switch (r) {
       case myrule_t :: e01 :
-        split_e01 () ;
-        break ;
       case myrule_t :: e12 :
-        split_e12 () ;
-        break ;
       case myrule_t :: e20 :
-        split_e20 () ;
+        split_bisection();
         break ;
       case myrule_t :: iso4 :
         split_iso4 () ;
