@@ -2016,7 +2016,11 @@ protected :
   virtual void notifyMacroGridChanges () ;
 protected :
   // bisectionRefinement is disabled by default 
-  Gitter () : bisectionRefinement_( false ) {} 
+  Gitter () 
+    : bisectionRefinement_( false ),
+      enableGhostCells_( true )
+   {} 
+
   virtual ~Gitter () ;
 
 public :
@@ -2090,10 +2094,15 @@ public:
   virtual bool conformingClosureNeeded() const { return bisectionRefinement_ ; }
   virtual void enableConformingClosure() { bisectionRefinement_ = true ; }
 
+  virtual bool ghostCellsEnabled() const { return enableGhostCells_; }
+  virtual void disableGhostCells() { enableGhostCells_ = false ; }
+
   // flags to say if an edge can be coarsened during conform bisection 
 protected:
   // true if conforming closure is needed closure 
   bool bisectionRefinement_; 
+  // true if ghost cells are available 
+  bool enableGhostCells_; 
 
 } ; 
 // --endGitter

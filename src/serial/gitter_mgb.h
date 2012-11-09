@@ -241,7 +241,6 @@ inline MacroGridBuilder :: Hbnd3IntStorage :: ~Hbnd3IntStorage ()
 
 inline MacroGhostInfoTetra* MacroGridBuilder :: Hbnd3IntStorage :: release ()
 { 
-  assert( _ptr );
   MacroGhostInfoTetra* p = _ptr;
   _ptr = 0;
   return p;
@@ -281,7 +280,6 @@ inline MacroGridBuilder :: Hbnd4IntStorage :: ~Hbnd4IntStorage ()
 
 inline MacroGhostInfoHexa* MacroGridBuilder :: Hbnd4IntStorage :: release() 
 { 
-  assert( _ptr );
   MacroGhostInfoHexa* p = _ptr;
   _ptr = 0;
   return p;
