@@ -875,40 +875,49 @@ bool TetraPllXBaseMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
 }
 
 template < class A >
-void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os) const 
+void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os, const bool packGhost ) const 
 {
   os.writeObject (HBND3INT) ;
-  os.writeObject (Gitter :: hbndseg :: closure) ;
+  os.writeObject ( Gitter :: hbndseg :: closure ) ;
   os.writeObject ( mytetra ().myvertex (fce,0)->ident () ) ;
   os.writeObject ( mytetra ().myvertex (fce,1)->ident () ) ;
   os.writeObject ( mytetra ().myvertex (fce,2)->ident () ) ;
   
   // see method unpackHbnd3Int 
-  int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; // 1 == point is transmitted 
-  os.writeObject ( writePoint ); // 1 == points are transmitted 
-
-  // know which face is the internal bnd 
-  os.writeObject (fce);
-
-  // write the vertices of the tetra 
-  for(int k=0; k<4; ++k) 
+  if( packGhost ) 
   {
-    int vx = mytetra ().myvertex (k)->ident ();
-    os.writeObject ( vx ) ;
+    assert( this->myGrid()->ghostCellsEnabled() );
+
+    int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; // point is transmitted 
+    os.writeObject ( writePoint ); // write point info  
+
+    // know which face is the internal bnd 
+    os.writeObject (fce);
+
+    // write the vertices of the tetra 
+    for(int k=0; k<4; ++k) 
+    {
+      int vx = mytetra ().myvertex (k)->ident ();
+      os.writeObject ( vx ) ;
+    }
+
+    {
+      const Gitter :: Geometric :: VertexGeo * vertex = mytetra().myvertex(fce);
+      assert( vertex );
+
+      // know identifier of transmitted point 
+      os.writeObject ( vertex->ident ()) ;
+
+      // store the missing point to form a tetra 
+      const alucoord_t (&p)[3] = vertex->Point();
+      os.writeObject ( p[0] ) ;
+      os.writeObject ( p[1] ) ;
+      os.writeObject ( p[2] ) ;
+    }
   }
-
+  else 
   {
-    const Gitter :: Geometric :: VertexGeo * vertex = mytetra().myvertex(fce);
-    assert( vertex );
-
-    // know identifier of transmitted point 
-    os.writeObject ( vertex->ident ()) ;
-
-    // store the missing point to form a tetra 
-    const alucoord_t (&p)[3] = vertex->Point();
-    os.writeObject ( p[0] ) ;
-    os.writeObject ( p[1] ) ;
-    os.writeObject ( p[2] ) ;
+    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // no point transmitted 
   }
 }
 
@@ -919,7 +928,7 @@ void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) 
   if( _moveTo != who ) 
   {
     // write data to stream 
-    packAsBndNow(fce,os); 
+    packAsBndNow(fce,os, this->myGrid()->ghostCellsEnabled()); 
   }
   return ;
 }
@@ -928,7 +937,8 @@ void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) 
 template < class A >
 void TetraPllXBaseMacro< A > :: packAsGhost(ObjectStream & os, int fce) const 
 {
-  packAsBndNow(fce,os);
+  assert( this->myGrid()->ghostCellsEnabled() );
+  packAsBndNow(fce,os, true);
 }
 
 template < class A >
@@ -1619,7 +1629,7 @@ bool HexaPllBaseXMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
 }
 
 template < class A >
-void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os) const 
+void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os, const bool packGhost ) const 
 {
   os.writeObject (HBND4INT) ;
   os.writeObject (Gitter :: hbndseg :: closure) ;
@@ -1631,34 +1641,44 @@ void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os) const
   os.writeObject (myhexa ().myvertex (fce,3)->ident ()) ;
 
   // see method unpackHbnd4Int 
-  int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; 
-  os.writeObject ( writePoint ); // 1 == points are transmitted 
-
-  // know which face is the internal bnd 
-  os.writeObject (fce);
- 
-  for(int k=0; k<8; ++k) 
+  if( packGhost )
   {
-    int vx = myhexa ().myvertex (k)->ident ();
-    os.writeObject ( vx ) ;
+    assert( this->myGrid()->ghostCellsEnabled() );
+
+    int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; 
+    os.writeObject ( writePoint ); // 1 == points are transmitted 
+
+    // know which face is the internal bnd 
+    os.writeObject (fce);
+   
+    for(int k=0; k<8; ++k) 
+    {
+      int vx = myhexa ().myvertex (k)->ident ();
+      os.writeObject ( vx ) ;
+    }
+
+    int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
+    for(int vx=0; vx<4; ++vx)
+    {
+      const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
+      os.writeObject( vertex->ident() );
+      const alucoord_t (&p)[3] = vertex->Point();
+      os.writeObject ( p[0] ) ;
+      os.writeObject ( p[1] ) ;
+      os.writeObject ( p[2] ) ;
+    }
   }
-
-  int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
-  for(int vx=0; vx<4; ++vx)
+  else
   {
-    const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
-    os.writeObject( vertex->ident() );
-    const alucoord_t (&p)[3] = vertex->Point();
-    os.writeObject ( p[0] ) ;
-    os.writeObject ( p[1] ) ;
-    os.writeObject ( p[2] ) ;
+    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // no point transmitted 
   }
 }
 
 template < class A >
 void HexaPllBaseXMacro< A > :: packAsGhost(ObjectStream & os, int fce) const 
 {
-  packAsBndNow(fce, os);
+  assert( this->myGrid()->ghostCellsEnabled() );
+  packAsBndNow(fce, os, true );
 }
 
 // packs macro element as internal bnd for other proc 
@@ -1667,7 +1687,7 @@ void HexaPllBaseXMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) c
 {
   if ( _moveTo != who ) 
   {
-    packAsBndNow( fce, os );
+    packAsBndNow( fce, os, this->myGrid()->ghostCellsEnabled() );
   }
   return ;
 }
@@ -1944,14 +1964,6 @@ insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b)
   }
 }
 
-Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd4_ghost (hface4_GEO * f, int t) 
-{
-  Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
-  return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
-    BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b ) ;
-}
-
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_hbnd4 (hface4_GEO * f, int t,
@@ -1960,8 +1972,11 @@ insert_hbnd4 (hface4_GEO * f, int t,
 { 
   typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
   // if internal boundary create ghost 
-  if (b == Gitter :: hbndseg_STI :: closure) 
+  if (b == Gitter :: hbndseg_STI :: closure ) 
   {
+    if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() ) 
+      return insert_hbnd4( f, t, b );
+
     assert( ghInfo );
     return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: 
@@ -1983,6 +1998,9 @@ insert_hbnd3 (hface3_GEO * f, int t,
   typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
   if (b == Gitter :: hbndseg_STI :: closure) 
   {
+    if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() ) 
+      return insert_hbnd3( f, t, b );
+
     assert( ghInfo );
     // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
     return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
@@ -2013,16 +2031,6 @@ insert_hbnd3 (hface3_GEO * f, int t,
     return new Hbnd3PllExternal < Hbnd3DefaultType , 
            BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b ) ;
   }
-}
-
-Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd3_ghost (hface3_GEO * f, int t) 
-{
-  Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
-  typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
-
-  return new Hbnd3PllExternal < Hbnd3DefaultType , 
-         BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
 }
 
 IteratorSTI < Gitter :: vertex_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const vertex_STI * a) const {

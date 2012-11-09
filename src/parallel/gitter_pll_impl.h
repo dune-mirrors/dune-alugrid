@@ -232,7 +232,7 @@ class TetraPllXBaseMacro : public A
   protected:
     bool doPackAll (vector < ObjectStream > &, GatherScatterType * ) ;
     void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
-    void packAsBndNow (int, ObjectStream &) const;
+    void packAsBndNow (int, ObjectStream &, const bool ) const;
     
   private :
 #ifdef GRAPHVERTEX_WITH_CENTER
@@ -499,7 +499,7 @@ class HexaPllBaseXMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
 
-    void packAsBndNow (int, ObjectStream &) const;
+    void packAsBndNow (int, ObjectStream &, const bool ) const;
   protected:
 #ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
@@ -828,8 +828,6 @@ public :
        
         // insert hbnd_int without ghost hexa 
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
-        // insert hbnd_int without ghost hexa 
-        virtual hbndseg4_GEO  * insert_hbnd4_ghost (hface4_GEO *, int) ;
         // insert hbnd_int with ghost hexa 
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* );
         
@@ -838,7 +836,6 @@ public :
         // version that get point and create ghost macro 
         virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
         // version that created internal boundary on ghost elements 
-        virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int ) ;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
