@@ -13,8 +13,8 @@ setGhost ( const ghostpair_STI & gpair )
   {
     _ghostPair = gpair; 
     assert( _ghostPair.first );
-    // copy indices from internal boundry to myhface3(.) of ghost
-    _ghostPair.first->setIndicesAndBndId( *this->myhface4(0), _ghostPair.second );
+    // copy indices from internal boundry to myhface(.) of ghost
+    _ghostPair.first->setIndicesAndBndId( *this->myhface(0), _ghostPair.second );
   }
   else 
   {
@@ -43,7 +43,7 @@ splitGhost ( GhostChildrenInfo_t & info )
     assert( gFaceNum >= 0 );
     assert( gFaceNum < 6 );
 
-    hface4_GEO * face = ghost.myhface4( gFaceNum );
+    hface4_GEO * face = ghost.myhface( gFaceNum );
     assert( face );
 
     int count = 0; 
@@ -117,7 +117,6 @@ void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
     // remove all descendents if possible 
     removeDescendents( ghost );
   }
-
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -163,7 +162,7 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
     {
       assert( ghInfo );
 
-      myhface4_t * f = this->myhface4(0);
+      myhface4_t * f = this->myhface(0);
       assert( f );
 
       _gm = new MacroGhostHexa( _mgb , ghInfo, f );

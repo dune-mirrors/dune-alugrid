@@ -351,12 +351,14 @@ template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) {
   return ;  
 }
 
-template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStream > & osv) {
+template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStream > & osv) 
+{
 
   // Die Methode packAll () verpackt die Fl"ache auf alle Datenstr"ome,
   // die zu Teilgittern f"uhren, an die sie zugewiesen wurde mit attach2 ().
   // Ausserdem geht die Methode noch an die anliegenden Elemente (Randelemente)
   // "uber.
+  const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled() ;
 
   bool action = false ;
   typedef map < int, int, less < int > > :: const_iterator const_iterator;
@@ -415,8 +417,8 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
       // als Randelemente dorthin schreiben sollen - das tun sie
       // aber selbst.
     
-      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os ) ;
-      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os ) ;
+      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os, ghostCellsEnabled ) ;
+      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os, ghostCellsEnabled ) ;
     } 
     catch (Parallel :: AccessPllException) 
     {
@@ -619,7 +621,7 @@ template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (O
 }
 
 template < class A > void BndsegPllBaseXMacroClosure < A > :: 
-packAsBnd (int fce, int who, ObjectStream & os) const 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   assert (!fce) ; // fce should be 0, because we only have 1 face 
   assert (this->myhbnd ().bndtype () == Gitter :: hbndseg :: closure) ;
@@ -923,12 +925,12 @@ void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os, const 
 
 // packs macro element as internal bnd for other proc 
 template < class A >
-void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   if( _moveTo != who ) 
   {
     // write data to stream 
-    packAsBndNow(fce,os, this->myGrid()->ghostCellsEnabled()); 
+    packAsBndNow(fce, os, ghostCellsEnabled); 
   }
   return ;
 }
@@ -1164,7 +1166,8 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 }
 
 template < class A >
-void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+void Periodic3PllXBaseMacro< A > :: 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   // we require that periodic element are never packed as boundary 
   // since they are on the same process as their faces 
@@ -1385,7 +1388,8 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 }
 
 template < class A > 
-void Periodic4PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+void Periodic4PllXBaseMacro< A > :: 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   // we require that periodic element are never packed as boundary 
   // since they are on the same process as their faces 
@@ -1683,11 +1687,12 @@ void HexaPllBaseXMacro< A > :: packAsGhost(ObjectStream & os, int fce) const
 
 // packs macro element as internal bnd for other proc 
 template < class A >
-void HexaPllBaseXMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+void HexaPllBaseXMacro< A > :: 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   if ( _moveTo != who ) 
   {
-    packAsBndNow( fce, os, this->myGrid()->ghostCellsEnabled() );
+    packAsBndNow( fce, os, ghostCellsEnabled );
   }
   return ;
 }

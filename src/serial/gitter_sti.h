@@ -757,10 +757,10 @@ public :
       assert( up() != 0 );
       up()->readDynamicState(os,i);
     }
-    virtual void packAsBnd (int a,int b,ObjectStream &os) const
+    virtual void packAsBnd (int a,int b,ObjectStream &os, const bool ghostCellsEnabled ) const
     { 
       assert( up() != 0 );
-      up()->packAsBnd(a,b,os);
+      up()->packAsBnd(a,b,os, ghostCellsEnabled);
     }
     virtual bool erasable () const
     { 

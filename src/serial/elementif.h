@@ -210,7 +210,7 @@ class ElementPllXIF : public hasFace
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &)
     { assert(false);abort(); return false;  }
   public :
-    virtual void packAsBnd (int,int,ObjectStream &) const
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const
     { assert(false);abort(); }
     virtual bool erasable () const
     { assert(false);abort(); return false;  }

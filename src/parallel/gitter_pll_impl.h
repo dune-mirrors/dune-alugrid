@@ -225,7 +225,7 @@ class TetraPllXBaseMacro : public A
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
     // pack ghost information 
     virtual void packAsGhost(ObjectStream &,int) const ;
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
     virtual int moveTo () const { return _moveTo ; }
@@ -320,7 +320,7 @@ class Periodic3PllXBaseMacro : public A
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const 
     { 
@@ -411,7 +411,7 @@ class Periodic4PllXBaseMacro : public A
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
   private :
@@ -485,7 +485,7 @@ class HexaPllBaseXMacro : public A
     virtual bool packAll (vector < ObjectStream > &) ;
     // pack ghost information 
     virtual void packAsGhost(ObjectStream &,int) const ;
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
 
@@ -533,7 +533,7 @@ template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
     virtual int ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
   public :
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     
     // method to get internal bnd located behind this parallel interface 
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
@@ -596,7 +596,7 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     virtual int   ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
   public :
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     
     // unpack ghost information and insert ghost cell 
     virtual void insertGhostCell(ObjectStream &,int);
@@ -1128,7 +1128,9 @@ template < class A > int BndsegPllBaseXMacro < A > ::ldbVertexIndex () const {
 template < class  A > void  BndsegPllBaseXMacro < A > :: setLoadBalanceVertexIndex ( const int ) {
 }
 
-template < class A > void BndsegPllBaseXMacro < A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
+template < class A > void BndsegPllBaseXMacro < A > :: 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) const 
+{
   assert (!fce) ;
   if (myhface_t :: polygonlength == 3) os.writeObject (MacroGridMoverIF :: HBND3EXT) ;
   else if (myhface_t :: polygonlength == 4) os.writeObject (MacroGridMoverIF :: HBND4EXT) ;

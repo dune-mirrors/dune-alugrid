@@ -28,7 +28,7 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
 
     typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
 
-    hface3_GEO * orgFace = ghost->myhface3( _ghostPair.second ); 
+    hface3_GEO * orgFace = ghost->myhface( _ghostPair.second ); 
     hface3_GEO * face    = orgFace->down();
 
 #ifndef NDEBUG
@@ -136,8 +136,8 @@ setGhost ( const ghostpair_STI & gpair )
     _ghostPair = gpair; 
     assert( _ghostPair.first );
     
-    // copy indices from internal boundry to myhface3(.) of ghost
-    _ghostPair.first->setIndicesAndBndId ( *(this->myhface3(0)) , _ghostPair.second );
+    // copy indices from internal boundry to myhface(.) of ghost
+    _ghostPair.first->setIndicesAndBndId ( *(this->myhface(0)) , _ghostPair.second );
   }
   else 
   {
@@ -182,7 +182,7 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
 
     {
       assert( ghInfo );
-      myhface3_t * f = this->myhface3(0);
+      myhface3_t * f = this->myhface(0);
       assert( f );
 
       _gm = new MacroGhostTetra( _mgb , ghInfo,  f );
