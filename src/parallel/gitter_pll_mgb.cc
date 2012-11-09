@@ -701,21 +701,18 @@ inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   MacroGhostInfoTetra * ghInfo = 0;
   if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
-    // read ghost data from stream 
+    // read ghost data from stream in any case 
     ghInfo = new MacroGhostInfoTetra( os ); 
-    //cout << "Got transmitted point \n";
   }
 
   // if internal boundary, create internal bnd face 
-  if(b == Gitter :: hbndseg :: closure)
+  if( b == Gitter :: hbndseg :: closure && ghInfo )
   {
-    assert( ghInfo );
     InsertUniqueHbnd3_withPoint (v, b, ghInfo ) ;
   }
   else
   {
-    // delete ghost info not needed any longer 
-    if( ghInfo ) delete ghInfo;
+    if( ghInfo ) delete ghInfo ;
 
     // create normal bnd face, and make sure that no Point was send
     assert(readPoint == MacroGridMoverIF :: NO_POINT );
@@ -750,9 +747,8 @@ inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   }
 
   // if internal boundary, create internal bnd face 
-  if(b == Gitter :: hbndseg :: closure)
+  if(b == Gitter :: hbndseg :: closure && ghInfo )
   {
-    assert( ghInfo );
     InsertUniqueHbnd4_withPoint (v, b, ghInfo ) ;
   }
   else
@@ -1004,7 +1000,7 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
       LeafIterator< helement_STI > i( *this );
       for( i->first(); ! i->done() ; i->next()) { x &= i->item().markForConformingClosure () ; }
 
-      assert( x == true );
+      // assert( x == true );
 #endif
     }
 
