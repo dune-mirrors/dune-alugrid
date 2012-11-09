@@ -1068,6 +1068,9 @@ void GitterDunePll :: allAllCommunication (
 // rebuild ghost cells 
 void GitterDunePll :: rebuildGhostCells() 
 {
+  // only do this if ghost cells are enabled 
+  if( ! ghostCellsEnabled() ) return ;
+
   const int nl = mpAccess ().nlinks () ;
 
   try 
