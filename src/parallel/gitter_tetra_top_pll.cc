@@ -16,7 +16,6 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
     // connected to the interior of the process 
     // in case of bisection count can be zero since the face might have not been split 
 
-    std::cout << "Splitting ghost element " << std::endl;
     GhostTetra_t* ghost = static_cast<GhostTetra_t *> (_ghostPair.first); 
 
     if( ! ghost->down() )
@@ -32,7 +31,6 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
     hface3_GEO * orgFace = ghost->myhface3( _ghostPair.second ); 
     hface3_GEO * face    = orgFace->down();
 
-    cout << "orgFace  " << orgFace << endl;
 #ifndef NDEBUG
     int breakCount = 0 ;
 #endif
@@ -41,7 +39,10 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
       neigh_t neighbour = orgFace->nb.front();
       // this is true for the boundaries of ghost elements (see null face3Neighbour)
       if( neighbour.second < 0 )
+      {
+        assert( neighbour.first->isboundary() );
         neighbour = orgFace->nb.rear();
+      }
 
       tetra_GEO* elem = static_cast<tetra_GEO *> (neighbour.first);
       // make sure that cast worked 
@@ -60,7 +61,6 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
       int count = 0;
       for( ; face; face = face->next() )
       {
-        cout << "ghostFace  " << face << endl;
         assert(face);
 
         // check neighbours 
@@ -84,7 +84,6 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
         ++count ;
       }
       assert( ghost->getrule().bisection() ? count == 2 : count == 4);
-      std::cout << "count was " << count << endl;
     }
   }
 }
