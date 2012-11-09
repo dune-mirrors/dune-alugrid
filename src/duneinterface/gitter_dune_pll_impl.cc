@@ -984,7 +984,7 @@ void GitterDunePll :: doCommunication (
   const bool containsVertices = vertexData.contains(3,3);
   const bool containsEdges    = edgeData.contains(3,2);
   const bool containsFaces    = faceData.contains(3,1);
-  const bool containsElements = elementData.contains(3,0);
+  const bool containsElements = elementData.contains(3,0) ;
 
   const bool haveHigherCodimData = containsVertices || 
     containsEdges ||  
@@ -1014,7 +1014,9 @@ void GitterDunePll :: doCommunication (
     doBorderBorderComm( vec, vertexData, edgeData, faceData );
   }
 
-  if( commType != Border_Border_Comm ) // otherwise only border border 
+  // this communication only makes sense if ghost cells are present 
+  const bool ghostCellsAvailable = ghostCellsEnabled ();
+  if( commType != Border_Border_Comm && ghostCellsAvailable ) // otherwise only border border 
   {
     doInteriorGhostComm( vec, vertexData, edgeData, faceData, elementData , commType ); 
   }
@@ -1158,6 +1160,9 @@ void GitterDunePll :: rebuildGhostCells()
 
 void GitterDunePll :: checkGhostIndices() 
 {
+  // only do this if ghost cells are enabled 
+  if( ! ghostCellsEnabled() ) return ;
+
   // get number of links 
   const int nl = mpAccess ().nlinks () ;
   
