@@ -223,6 +223,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
         //! return pointer to grid 
         Gitter * myGrid() { return myvertex(0)->myGrid(); }
+        const Gitter * myGrid() const { return myvertex(0)->myGrid(); }
 
       public: 
         ////////////////////////////////////////////////
