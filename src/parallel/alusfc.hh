@@ -21,17 +21,19 @@ void CALL_spaceFillingCurve(const int myRank,  // my rank
   // calculate average load 
   meanLoad /= double(nPart);
 
-  int rank = 0;
-  double load = 0;
-  //const double meanThreshold = loadThreshold * meanLoad;
-  //const double meanThreshold = 1.01 * meanLoad;
+  // round the average load to get a threshold value 
   const double meanThreshold = round( meanLoad );
-  for( int i = 0; i < nCells; ++i )
+
+  double load = 0;
+  idxtype rank = 0;
+  const idxtype lastRank = nPart - 1 ;
+  for( idxtype i = 0; i < nCells; ++i )
   {
     double nextLoad = load + weights[ i ] ;
     if( load > 0 && ( nextLoad > meanThreshold ) )           
     {
-      if( rank < (nPart - 1) ) ++rank ;
+      // only increase rank if not already the last rank 
+      if( rank < lastRank ) ++rank ;
       load = 0;
     }
 
@@ -39,6 +41,7 @@ void CALL_spaceFillingCurve(const int myRank,  // my rank
     load += weights[ i ];
   }
 
+  /* 
   if( myRank == 0 ) 
   {
     // vector of loads 
@@ -54,6 +57,7 @@ void CALL_spaceFillingCurve(const int myRank,  // my rank
       std::cout << "P[ " << i << " ] = " << loads[ i ] << std::endl;
     }
   }
+  */
 } // end of simple sfc splitting 
 
 } // end namespace ALUGridMETIS
