@@ -83,6 +83,10 @@ class LoadBalancer {
           // collect all to rank 0 
           COLLECT = 1,
 
+          // assuming the elements to be ordered by a 
+          // space filling curve approach 
+          ALUGRID_SpaceFillingCurve = 4, 
+
           // METIS method for graph partitioning 
           METIS_PartGraphKway = 11,
           METIS_PartGraphRecursive = 12,
