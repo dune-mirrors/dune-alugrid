@@ -53,7 +53,6 @@ struct EmptyAdaptRestrictProlong : public Gitter :: AdaptRestrictProlong
 template <class GitterType>
 bool needConformingClosure( GitterType& grid, bool useClosure ) 
 {
-  return true ;
   bool needClosure = true ;
   {
     // get LeafIterator which iterates over all leaf elements of the grid 
@@ -61,7 +60,7 @@ bool needConformingClosure( GitterType& grid, bool useClosure )
     w->first(); 
     if( ! w->done() ) 
     {
-      if( w->item ().type() == tetra )
+      if( w->item ().type() != tetra )
       {
         return false ;
       }
