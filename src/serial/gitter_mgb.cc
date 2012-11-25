@@ -89,7 +89,8 @@ InsertUniqueTetra (int (&v)[4], int orientation)
   if (hit == _tetraMap.end ()) {
     hface3_GEO * face [4] ;
     int twst [4] ;
-    for (int fce = 0 ; fce < 4 ; fce ++ ) {
+    for (int fce = 0 ; fce < 4 ; ++fce ) 
+    {
       int x [3] ;
       x [0] = v [Tetra :: prototype [fce][0]] ;
       x [1] = v [Tetra :: prototype [fce][1]] ;
@@ -113,7 +114,8 @@ pair < Gitter :: Geometric :: hexa_GEO *, bool > MacroGridBuilder :: InsertUniqu
   if (hit == _hexaMap.end ()) {
     hface4_GEO * face [6] ;
     int twst [6] ;
-    for (int fce = 0 ; fce < 6 ; fce ++) {
+    for (int fce = 0 ; fce < 6 ; ++fce) 
+    {
       int x [4] ;
       x [0] = v [Hexa :: prototype [fce][0]] ;
       x [1] = v [Hexa :: prototype [fce][1]] ;
@@ -192,7 +194,8 @@ InsertUniquePeriodic (int (&v)[6], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2] 
   if (hit == _periodic3Map.end ()) {
     hface3_GEO * face [2] ;
     int twst [2] ;
-    for (int fce = 0 ; fce < 2 ; fce ++ ) {
+    for (int fce = 0 ; fce < 2 ; ++fce ) 
+    {
       int x [3] ;
       x [0] = v [Periodic3 :: prototype [fce][0]] ;
       x [1] = v [Periodic3 :: prototype [fce][1]] ;
@@ -223,7 +226,7 @@ InsertUniquePeriodic (int (&v)[8], const Gitter :: hbndseg_STI ::bnd_t (&bt)[2] 
   if (hit == _periodic4Map.end ()) {
     hface4_GEO * face [2] ;
     int twst [2] ;
-    for (int fce = 0 ; fce < 2 ; fce ++ ) 
+    for (int fce = 0 ; fce < 2 ; ++fce ) 
     {
       int x [4] ;
       x [0] = v [Periodic4 :: prototype [fce][0]] ;
@@ -635,65 +638,100 @@ MacroGridBuilder :: MacroGridBuilder (BuilderIF & b, ProjectVertex* )
 void MacroGridBuilder :: initialize () 
 {
   {
-    for ( BuilderIF :: vertexlist_t :: iterator i = myBuilder ()._vertexList.begin () ;
-      i != myBuilder ()._vertexList.end () ; myBuilder ()._vertexList.erase (i ++)) 
-        _vertexMap [(*i)->ident ()] = (*i) ;
+    typedef BuilderIF :: vertexlist_t :: iterator  iterator ;
+    const iterator vertexListEnd = myBuilder ()._vertexList.end ();
+    for ( iterator i = myBuilder ()._vertexList.begin () ; i != vertexListEnd ; myBuilder ()._vertexList.erase (i ++)) 
+      _vertexMap [(*i)->ident ()] = (*i) ;
   }
   {
-    for ( BuilderIF :: hedge1list_t :: iterator i = myBuilder ()._hedge1List.begin () ;
-      i != myBuilder ()._hedge1List.end () ; myBuilder ()._hedge1List.erase (i ++)) {
+    typedef BuilderIF :: hedge1list_t :: iterator  iterator ;
+    const iterator hedge1ListEnd = myBuilder ()._hedge1List.end () ;
+    for ( iterator i = myBuilder ()._hedge1List.begin () ; i != hedge1ListEnd ; myBuilder ()._hedge1List.erase (i ++)) 
+    {
       long k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident () ;
       _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i) ;
     }
   }
-  {for ( BuilderIF :: hface3list_t :: iterator i = myBuilder ()._hface3List.begin () ; i != myBuilder ()._hface3List.end () ;
-     myBuilder ()._hface3List.erase (i ++)) {
-      _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i) ;
-  }}
   {
-    for ( BuilderIF :: hface4list_t :: iterator i = myBuilder ()._hface4List.begin () ; i != myBuilder ()._hface4List.end () ; 
-      myBuilder ()._hface4List.erase (i ++)) _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (),
-        (*i)->myvertex (2)->ident ())] = (*i) ;
-  }
-  {for ( BuilderIF :: hbndseg4list_t :: iterator i = myBuilder ()._hbndseg4List.begin () ; i != myBuilder ()._hbndseg4List.end () ; myBuilder ()._hbndseg4List.erase (i++)) {
-    faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
-    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
-      _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
-      delete (*i) ;
-    } else {
-      _hbnd4Map [key] = (*i) ;
-    }
-  }}
-  {for ( BuilderIF :: hbndseg3list_t :: iterator i = myBuilder ()._hbndseg3List.begin () ; i != myBuilder ()._hbndseg3List.end () ;
-    myBuilder ()._hbndseg3List.erase (i++)) {
-    faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
-    if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
+    typedef BuilderIF :: hface3list_t :: iterator  iterator ;
+    const iterator  hface3ListEnd = myBuilder ()._hface3List.end () ;
+    for ( iterator i = myBuilder ()._hface3List.begin () ; i != hface3ListEnd ; myBuilder ()._hface3List.erase (i ++)) 
     {
-      _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0)) ;
-      delete (*i) ;
-    } else {
-      _hbnd3Map [key] = (*i) ;
+      _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i) ;
     }
-  }}
-  {for ( BuilderIF :: tetralist_t :: iterator i = myBuilder ()._tetraList.begin () ; i != myBuilder ()._tetraList.end () ; 
-      myBuilder ()._tetraList.erase (i++)) {
+  }
+  {
+    typedef BuilderIF :: hface4list_t :: iterator  iterator ;
+    const iterator hface4ListEnd = myBuilder ()._hface4List.end () ;
+    for ( iterator i = myBuilder ()._hface4List.begin () ; i != hface4ListEnd ; myBuilder ()._hface4List.erase (i ++)) 
+      _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i) ;
+  }
+  {
+    typedef BuilderIF :: hbndseg4list_t :: iterator  iterator;
+    const iterator hbndseg4ListEnd = myBuilder ()._hbndseg4List.end () ;
+    for ( iterator i = myBuilder ()._hbndseg4List.begin () ; i != hbndseg4ListEnd ; myBuilder ()._hbndseg4List.erase (i++)) 
+    {
+      faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
+      if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
+        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
+        delete (*i) ;
+      } 
+      else 
+      {
+        _hbnd4Map [key] = (*i) ;
+      }
+    } 
+  }
+  {
+    typedef BuilderIF :: hbndseg3list_t :: iterator iterator;
+    const iterator hbndseg3ListEnd = myBuilder ()._hbndseg3List.end () ;
+    for ( iterator i = myBuilder ()._hbndseg3List.begin () ; i != hbndseg3ListEnd ; myBuilder ()._hbndseg3List.erase (i++)) 
+    {
+      faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
+      if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
+      {
+        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0)) ;
+        delete (*i) ;
+      } 
+      else 
+      {
+        _hbnd3Map [key] = (*i) ;
+      }
+    }
+  }
+  {
+    typedef BuilderIF :: tetralist_t :: iterator  iterator ;
+    const iterator tetraListEnd = myBuilder ()._tetraList.end () ;
+    for ( iterator i = myBuilder ()._tetraList.begin () ; i != tetraListEnd ; myBuilder ()._tetraList.erase (i++)) 
+    {
       _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i) ;
-  }}
-  {for (BuilderIF :: periodic3list_t :: iterator i = myBuilder ()._periodic3List.begin () ; i != myBuilder ()._periodic3List.end () ; 
-      myBuilder ()._periodic3List.erase (i++)) {
+    }
+  }
+  {
+    typedef BuilderIF :: periodic3list_t :: iterator iterator ;
+    const iterator periodic3ListEnd = myBuilder ()._periodic3List.end () ;
+    for ( iterator i = myBuilder ()._periodic3List.begin () ; i != periodic3ListEnd ; myBuilder ()._periodic3List.erase (i++)) 
+    {
       _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
-  }}
-  {for (BuilderIF :: periodic4list_t :: iterator i = myBuilder ()._periodic4List.begin () ; i != myBuilder ()._periodic4List.end () ; 
-      myBuilder ()._periodic4List.erase (i++)) {
+    }
+  }
+  {
+    typedef BuilderIF :: periodic4list_t :: iterator  iterator;
+    const iterator periodic4ListEnd = myBuilder ()._periodic4List.end () ;
+    for ( iterator i = myBuilder ()._periodic4List.begin () ; i != periodic4ListEnd ; myBuilder ()._periodic4List.erase (i++)) 
+    {
       _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
            (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
-  }}
+    }
+  }
   {
-    for (BuilderIF :: hexalist_t :: iterator i = myBuilder ()._hexaList.begin () ; i != myBuilder ()._hexaList.end () ; 
-      myBuilder ()._hexaList.erase (i++)) _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
+    typedef BuilderIF :: hexalist_t :: iterator  iterator;
+    const iterator  hexaListEnd = myBuilder ()._hexaList.end () ;
+    for ( iterator i = myBuilder ()._hexaList.begin () ; i != hexaListEnd ;  myBuilder ()._hexaList.erase (i++)) 
+      _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+                              (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
   }
 
   _initialized = true;
@@ -712,9 +750,24 @@ void MacroGridBuilder :: finalize ()
   assert(_initialized);
   
   {
-    //myBuilder ()._hexaList.reserve(_hexaMap.size());
+    /*
+    // sort by element numbering 
+    typedef std::map< int, hexa_GEO * > hexamap_t ;
+    hexamap_t hexaMap;
     for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
-      myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
+    {
+      hexa_GEO* hexa = (hexa_GEO *)(*i).second;
+      hexaMap[ hexa->getIndex() ] = hexa;
+    }
+    */
+    {
+      //const hexamap_t :: iterator iend = hexaMap.end();
+      //for ( hexamap_t :: iterator i = hexaMap.begin () ; i != iend; ++ i )
+      for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
+      {
+        myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
+      }
+    }
   }
   {
     //myBuilder ()._tetraList.reserve(_tetraMap.size());
