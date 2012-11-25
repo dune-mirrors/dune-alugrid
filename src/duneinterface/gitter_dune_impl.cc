@@ -128,32 +128,6 @@ void GitterDuneBasis :: removeAdaptRestrictProlongOp()
   _arp = 0;
 }
 
-<<<<<<< HEAD
-bool GitterDuneBasis :: refine () {
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: refine ()" << endl, 1) : 1) ;
-  bool x = true ;
-  {
-    leaf_element__macro_element__iterator i (container ()) ;
-    for( i.first(); ! i.done() ; i.next()) 
-    {
-      x &= i.item ().refine () ;
-    }
-  }
-  return x ;
-}
-
-void GitterDuneBasis :: coarse() {
-  assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: coarse ()" << endl, 1) : 1) ;
-  {
-    AccessIterator < helement_STI > :: Handle i (container ()) ;
-    for( i.first(); ! i.done() ; i.next()) 
-    {
-      i.item ().coarse () ; 
-    }
-  }
-  return ;
-}
-
 bool GitterDuneBasis :: duneAdapt (AdaptRestrictProlongType & arp) 
 {
   assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis :: duneAdapt ()" << endl, 1) : 1) ;
