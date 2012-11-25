@@ -704,8 +704,8 @@ void MacroGridBuilder :: initialize ()
     const iterator tetraListEnd = myBuilder ()._tetraList.end () ;
     for ( iterator i = myBuilder ()._tetraList.begin () ; i != tetraListEnd ; myBuilder ()._tetraList.erase (i++)) 
     {
-      _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-           (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i) ;
+      _tetraMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+                                (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i) ;
     }
   }
   {
@@ -713,8 +713,8 @@ void MacroGridBuilder :: initialize ()
     const iterator periodic3ListEnd = myBuilder ()._periodic3List.end () ;
     for ( iterator i = myBuilder ()._periodic3List.begin () ; i != periodic3ListEnd ; myBuilder ()._periodic3List.erase (i++)) 
     {
-      _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-           (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
+      _periodic3Map [elementKey_t ( (*i)->myvertex (0)->ident (),  (*i)->myvertex (1)->ident (), 
+                                    (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i) ;
     }
   }
   {
@@ -722,16 +722,16 @@ void MacroGridBuilder :: initialize ()
     const iterator periodic4ListEnd = myBuilder ()._periodic4List.end () ;
     for ( iterator i = myBuilder ()._periodic4List.begin () ; i != periodic4ListEnd ; myBuilder ()._periodic4List.erase (i++)) 
     {
-      _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-           (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
+      _periodic4Map [elementKey_t ( (*i)->myvertex (0)->ident (),  (*i)->myvertex (1)->ident (), 
+                                    (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i) ;
     }
   }
   {
     typedef BuilderIF :: hexalist_t :: iterator  iterator;
     const iterator  hexaListEnd = myBuilder ()._hexaList.end () ;
     for ( iterator i = myBuilder ()._hexaList.begin () ; i != hexaListEnd ;  myBuilder ()._hexaList.erase (i++)) 
-      _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
-                              (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
+      _hexaMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+                               (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i) ;
   }
 
   _initialized = true;
@@ -763,32 +763,42 @@ void MacroGridBuilder :: finalize ()
     {
       //const hexamap_t :: iterator iend = hexaMap.end();
       //for ( hexamap_t :: iterator i = hexaMap.begin () ; i != iend; ++ i )
-      for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
+      typedef elementMap_t :: iterator  iterator ;
+      const iterator hexaMapEnd = _hexaMap.end () ;
+      for (elementMap_t :: iterator i = _hexaMap.begin () ; i != hexaMapEnd ; _hexaMap.erase (i++))
       {
         myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
       }
     }
   }
   {
+    typedef elementMap_t :: iterator  iterator;
+    const iterator tetraMapEnd = _tetraMap.end () ; 
     //myBuilder ()._tetraList.reserve(_tetraMap.size());
-    for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMap.end () ; _tetraMap.erase (i++))
+    for (elementMap_t :: iterator i = _tetraMap.begin () ; i != tetraMapEnd ; _tetraMap.erase (i++))
       myBuilder ()._tetraList.push_back ((tetra_GEO *)(*i).second) ;
   }
   {
+    typedef elementMap_t :: iterator  iterator ;
+    const iterator periodic3MapEnd = _periodic3Map.end () ;
     //myBuilder ()._periodic3List.reserve(_periodic3Map.size());
-    for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != _periodic3Map.end () ; _periodic3Map.erase (i++))
+    for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != periodic3MapEnd ; _periodic3Map.erase (i++))
       myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
   }
   
   {
+    typedef elementMap_t :: iterator  iterator ;
+    const iterator periodic4MapEnd = _periodic4Map.end () ;
     //myBuilder ()._periodic4List.reserve(_periodic4Map.size());
-    for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != _periodic4Map.end () ; _periodic4Map.erase (i++))
+    for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != periodic4MapEnd ; _periodic4Map.erase (i++))
       myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
   }
 
   {
+    typedef faceMap_t :: iterator iterator ;
+    const iterator hbnd4MapEnd =  _hbnd4Map.end () ;
     //myBuilder ()._hbndseg4List.reserve(_hbnd4Map.size() + _hbnd4Int.size());
-    for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != _hbnd4Map.end () ; )
+    for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != hbnd4MapEnd ; )
     {
       if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
       {
@@ -802,8 +812,10 @@ void MacroGridBuilder :: finalize ()
     }
   }
   {
+    typedef faceMap_t :: iterator iterator;
+    const iterator hbnd3MapEnd = _hbnd3Map.end () ;
     //myBuilder ()._hbndseg3List.reserve(_hbnd3Map.size() + _hbnd3Int.size());
-    for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != _hbnd3Map.end () ; )
+    for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != hbnd3MapEnd ; )
     {
       if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) {
         delete (hbndseg3_GEO *)(*i).second ;
@@ -816,70 +828,105 @@ void MacroGridBuilder :: finalize ()
     }
   }
   {
-    for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != _hbnd4Int.end () ; i ++) {
-    const Hbnd4IntStorage & p = * ((*i).second);
-    if (p.first()->ref == 1) {
-      hbndseg4_GEO * hb4 = 
-        myBuilder ().insert_hbnd4 (p.first(), p.second(), 
-                                   Gitter :: hbndseg_STI :: closure) ;
-      myBuilder ()._hbndseg4List.push_back (hb4) ;
-    }
-    delete (*i).second;
-  }}
+    typedef hbnd4intMap_t :: iterator iterator;
+    const iterator hbnd4IntEnd = _hbnd4Int.end () ;
+    for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != hbnd4IntEnd ; i ++) 
+    {
+      const Hbnd4IntStorage & p = * ((*i).second);
+      if (p.first()->ref == 1) 
+      {
+        hbndseg4_GEO * hb4 = 
+           myBuilder ().insert_hbnd4 (p.first(), p.second(), 
+                                      Gitter :: hbndseg_STI :: closure) ;
+        myBuilder ()._hbndseg4List.push_back (hb4) ;
+      }
+      delete (*i).second;
+    } 
+  }
 
   // here the internal boundary elements are created 
-  {for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != _hbnd3Int.end () ; i ++) {
-    const Hbnd3IntStorage & p = * ((*i).second);
-    if (p.first()->ref == 1) {
-      hbndseg3_GEO * hb3 = 
-        myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter :: hbndseg_STI :: closure) ;    
-      myBuilder ()._hbndseg3List.push_back (hb3) ;
-    }
-    delete (*i).second;
-  }}
   {
+    typedef hbnd3intMap_t :: iterator  iterator ;
+    const iterator hbnd3IntEnd = _hbnd3Int.end () ;
+    for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != hbnd3IntEnd ; i ++) 
+    {
+      const Hbnd3IntStorage & p = * ((*i).second);
+      if (p.first()->ref == 1) 
+      {
+        hbndseg3_GEO * hb3 = 
+          myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter :: hbndseg_STI :: closure) ;    
+        myBuilder ()._hbndseg3List.push_back (hb3) ;
+      }
+      delete (*i).second;
+    }
+  }
+  {
+    typedef faceMap_t :: iterator iterator;
+    const iterator face4MapEnd = _face4Map.end () ;
     //myBuilder ()._hface4List.reserve( _face4Map.size() );
-    for (faceMap_t :: iterator i = _face4Map.begin () ; i != _face4Map.end () ; )
-    if (!((hface4_GEO *)(*i).second)->ref) {
+    for (faceMap_t :: iterator i = _face4Map.begin () ; i != face4MapEnd ; )
+    if (!((hface4_GEO *)(*i).second)->ref) 
+    {
       delete (hface4_GEO *)(*i).second ;
       _face4Map.erase (i++) ;
-    } else {
+    } 
+    else 
+    {
       assert (((hface4_GEO *)(*i).second)->ref == 2) ;
       myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second ) ;
     }
   }
   {
+    typedef faceMap_t :: iterator iterator ;
+    const iterator face3MapEnd = _face3Map.end () ;
     //myBuilder ()._hface3List.reserve( _face3Map.size() );
-    for (faceMap_t :: iterator i = _face3Map.begin () ; i != _face3Map.end () ; ) {
-    if (!((hface3_GEO *)(*i).second)->ref) {
-      delete (hface3_GEO *)(*i).second ;
-      _face3Map.erase (i++) ;
-    } else 
+    for (faceMap_t :: iterator i = _face3Map.begin () ; i != face3MapEnd ; ) 
     {
-      assert (((hface3_GEO *)(*i).second)->ref == 2) ;
-      myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
-    }
-  }}
-  {
-    //myBuilder ()._hedge1List.reserve(_edgeMap.size());
-    for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != _edgeMap.end () ; )
-    if (!(*i).second->ref) {
-      delete (*i).second ;
-      _edgeMap.erase (i++) ;
-    } else {
-      assert ((*i).second->ref >= 1) ;
-      myBuilder ()._hedge1List.push_back ((*i ++).second) ;
+      if (!((hface3_GEO *)(*i).second)->ref) 
+      {
+        delete (hface3_GEO *)(*i).second ;
+        _face3Map.erase (i++) ;
+      } 
+      else 
+      {
+        assert (((hface3_GEO *)(*i).second)->ref == 2) ;
+        myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second ) ;
+      }
     }
   }
   {
+    typedef edgeMap_t :: iterator iterator;
+    const iterator edgeMapEnd = _edgeMap.end () ;
+    //myBuilder ()._hedge1List.reserve(_edgeMap.size());
+    for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != edgeMapEnd ; )
+    {
+      if (!(*i).second->ref) 
+      {
+        delete (*i).second ;
+        _edgeMap.erase (i++) ;
+      } 
+      else 
+      {
+        assert ((*i).second->ref >= 1) ;
+        myBuilder ()._hedge1List.push_back ((*i ++).second) ;
+      }
+    }
+  }
+  {
+    typedef vertexMap_t :: iterator  iterator;
+    const iterator vertexMapEnd = _vertexMap.end () ;
     //myBuilder ()._vertexList.reserve(_vertexMap.size());
-    for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != _vertexMap.end () ; )
-    if (!(*i).second->ref) {
-      delete (*i).second ;
-      _vertexMap.erase (i++) ;
-    } else {
-      assert ((*i).second->ref >= 2) ;
-      myBuilder ()._vertexList.push_back ((*i ++).second) ;
+    for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != vertexMapEnd ; )
+    {
+      if (!(*i).second->ref) 
+      {
+        delete (*i).second ;
+        _vertexMap.erase (i++) ;
+      } 
+      else {
+        assert ((*i).second->ref >= 2) ;
+        myBuilder ()._vertexList.push_back ((*i ++).second) ;
+      }
     }
   }
   myBuilder ()._modified = true ; // wichtig !
