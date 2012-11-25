@@ -187,15 +187,11 @@ template < class A, class X, class MX > void Hbnd3PllInternal < A, X, MX > :: Hb
   return ;
 }
 
-template < class A, class X, class MX > bool Hbnd3PllInternal < A, X, MX > :: HbndPll :: bndNotifyBalance (balrule_t r, int w) {
-  if (r == balrule_t :: iso4) {
-    _ext.notifyBalance (r,w) ;
-    return true ;
-  } else {
-    cerr << "**WARNUNG Balancierungsanforderung vom Typ " << r << " ignoriert,\n" ;
-    cerr << "  weil nicht vorgesehen. In " << __FILE__ << " " << __LINE__ << endl ;
-    return false ;
-  }
+template < class A, class X, class MX > 
+bool Hbnd3PllInternal < A, X, MX > :: HbndPll :: bndNotifyBalance (balrule_t r, int w) 
+{
+  _ext.notifyBalance (r,w) ;
+  return true ;
 }
 
 template < class A, class X, class MX > 
@@ -277,16 +273,12 @@ template < class A, class X, class MX > void Hbnd3PllInternal < A, X, MX > :: Hb
   return ;
 }
 
-template < class A, class X, class MX > bool Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: bndNotifyBalance (balrule_t r, int w) {
- if (r == balrule_t :: iso4) {
-    assert (_mxt) ;
-    _mxt->notifyBalance (r,w) ;
-    return true ;
-  } else {
-    cerr << "**WARNUNG Balancierungsanforderung vom Typ " << r << " ignoriert,\n" ;
-    cerr << "  weil nicht vorgesehen. In " << __FILE__ << " " << __LINE__ << endl ;
-    return false ;
-  }
+template < class A, class X, class MX > 
+bool Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: bndNotifyBalance (balrule_t r, int w) 
+{
+  assert (_mxt) ;
+  _mxt->notifyBalance (r,w) ;
+  return true ;
 }
 
 template < class A, class X, class MX > bool Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: lockedAgainstCoarsening () const {

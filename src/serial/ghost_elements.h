@@ -39,7 +39,7 @@ public:
   // insert new Vertex without linkagePattern 
   bool InsertNewUniqueVertex (double x, double y, double z, int i) ;
 
-  // delete all elementes and stuff 
+  // empty all lists 
   void finalize () ;
 };
 
@@ -63,16 +63,19 @@ class MacroGhostTetra : public MacroGhost
   typedef Gitter :: ghostpair_STI ghostpair_STI; 
   typedef Gitter :: Geometric :: BuilderIF BuilderIF;
 
-  typedef Gitter :: Geometric :: tetra_GEO GhostTetra_t;
+  typedef Gitter :: Geometric :: tetra_GEO  GhostTetra_t;
+  typedef Gitter :: Geometric :: tetra_GEO  tetra_GEO ;
   typedef Gitter :: Geometric :: hface3_GEO hface3_GEO;
+  typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
+  typedef Gitter :: Geometric :: VertexGeo  VertexGeo;
   
-  MacroGhostBuilder    _mgb; 
-
   // store info about ghost element as pointer 
   MacroGhostInfoTetra * _ghInfoPtr;
 
+  // ghost pair 
   ghostpair_STI _ghostPair; 
 
+  // copy constructor (prohibited)
   MacroGhostTetra(const MacroGhostTetra& );
 public:
   MacroGhostTetra( BuilderIF & bi, 
@@ -86,7 +89,7 @@ public:
   MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp, 
       Gitter::Geometric::tetra_GEO * orig, alucoord_t (&vec)[3] , double sign) ;
 
-  // desctructor deleting _ghInforPtr
+  // desctructor deleting ghost element and _ghInforPtr
   virtual ~MacroGhostTetra () ;
   
   ghostpair_STI getGhost() 
@@ -125,20 +128,20 @@ class MacroGhostHexa : public MacroGhost
   typedef Gitter :: Geometric :: BuilderIF BuilderIF;
   typedef hbndseg4_GEO hbnd_seg;
  
-  MacroGhostBuilder   _mgb; 
-
-
+  // pointer to ghost info  
   MacroGhostInfoHexa* _ghInfoPtr;
   
+  // ghost pair 
   ghostpair_STI _ghostPair; 
   
+  // copy constructor (prohibited)
   MacroGhostHexa (const MacroGhostHexa& ); 
 public:
   // constructor 
   MacroGhostHexa( BuilderIF & bi, 
                   MacroGhostInfoHexa* allp, const hface4_GEO * face); 
 
-  // desctructor deleting _ghInforPtr
+  // desctructor deleting ghost element and _ghInforPtr
   virtual ~MacroGhostHexa () ;
   
   ghostpair_STI getGhost() 

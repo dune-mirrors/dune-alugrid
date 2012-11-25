@@ -347,7 +347,7 @@ bool GitterPll :: refine ()
 
       _refineLoops ++ ;
     } 
-    while (mpAccess ().gmax (repeat ? 1 : 0)) ;
+    while (mpAccess ().gmax ( repeat ) ) ;
 
     // Jetzt noch die Kantensituation richtigstellen, es gen"ugt ein Durchlauf,
     // weil die Verfeinerung einer Kante keine Fernwirkungen hat. Vorsicht: Die
@@ -418,6 +418,41 @@ bool GitterPll :: refine ()
   
   return state ;
 }
+
+class EdgeFlagExchange : public GatherScatterType
+{
+public:
+  EdgeFlagExchange () {}
+  virtual ~EdgeFlagExchange () {}
+
+  // type of used object stream 
+  typedef GatherScatterType :: ObjectStreamType   ObjectStreamType;
+
+  // only contains edge information 
+  virtual bool contains ( int dim, int codim ) const { return codim == 2 ; }
+  // every element is contained 
+  virtual bool containsItem(const HEdgeType   & elem ) const { return true; }
+  // send does pack the no edge coarsening flag 
+  virtual void sendData ( ObjectStreamType & str , HEdgeType & edge ) 
+  {
+    str.put( char(edge.noCoarsen()) );
+  }
+
+  // receive gets flag and disabled coarsen if flag is set 
+  virtual void recvData ( ObjectStreamType & str , HEdgeType & edge ) 
+  {
+    const bool noCoarsen = bool( str.get() );
+    if( noCoarsen ) 
+      edge.disableEdgeCoarsen() ;
+  }
+
+  // this method is only needed for ghost cells 
+  virtual void setData  ( ObjectStreamType & str , HEdgeType & elem ) 
+  { 
+    cout << "ERROR: EdgeFlagExchange::setData was called in " << __FILE__ << " " << __LINE__ << endl;
+    abort();
+  }
+};
 
 void GitterPll :: coarse () 
 {
@@ -508,6 +543,17 @@ void GitterPll :: coarse ()
       for (dfi.first () ; ! dfi.done () ; dfi.next ()) innerEdges [l].push_back (& dfi.item ()) ;
     }
 
+    // first check edges that cannot be coarsened 
+    // due to bisection rule (only enabled for bisection)
+    // communicate edge flags if bisection is enabled 
+    if( Gitter :: markEdgeCoarsening() ) 
+    {
+      // see class implementation in this file above 
+      EdgeFlagExchange dataHandle ;
+      // this communicates the edge no coarsen flags 
+      borderBorderCommunication( dataHandle, dataHandle, dataHandle, dataHandle );
+    }
+
     try 
     {
       // Erstmal alles was mehrdeutig ist, gegen die drohende Vergr"oberung sichern.
@@ -519,12 +565,16 @@ void GitterPll :: coarse ()
         {
           const hedge_iterator iEnd = outerEdges [l].end () ;
           for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i )
+          {
             (*i)->lockAndTry () ; 
+          }
         }
         {
           const hedge_iterator iEnd = innerEdges [l].end () ;
           for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i )
-               (*i)->lockAndTry () ; 
+          {
+            (*i)->lockAndTry () ; 
+          }
         }
         {
           const hface_iterator iEnd = outerFaces [l].end () ;
@@ -537,7 +587,7 @@ void GitterPll :: coarse ()
             (*i)->accessOuterPllX ().first->lockAndTry () ; 
         }
       }
-      
+
       // Gitter :: coarse () ist elementorientiert, d.h. die Vergr"oberung auf Fl"achen und
       // Kanten wird nur durch Vermittlung eines sich vergr"obernden Knotens in der Element-
       // hierarchie angestossen. In allen gegen Vergr"oberung 'gelockten' Fl"achen und Kanten
@@ -547,8 +597,10 @@ void GitterPll :: coarse ()
       __STATIC_phase = 4 ;
       
       // do real coarsening of elements 
-      Gitter :: coarse () ;
+      Gitter :: doCoarse () ;
       
+      // reset edge coarsen flags to avoid problems with coarsening 
+      // Gitter :: resetEdgeCoarsenFlags () ;
     } 
     catch (Parallel :: AccessPllException) 
     {
@@ -570,7 +622,6 @@ void GitterPll :: coarse ()
       typedef vector< int > cleanvector_t ;
       vector < cleanvector_t > clean (nl) ;
       {
-        //vector < vector < int > > inout (nl) ;
         vector < ObjectStream > inout( nl );
         {
           for (int l = 0 ; l < nl ; ++l)
@@ -579,16 +630,12 @@ void GitterPll :: coarse ()
             // reserve memory 
             os.reserve( outerFaces [l].size() * sizeof(char) );
 
-            // reserve memory first 
-            //inout[l].reserve( outerFaces [l].size() );
-
             // get end iterator 
             const hface_iterator iEnd = outerFaces [l].end () ;
             for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i)
             {
               char lockAndTry = (*i)->accessOuterPllX ().first->lockAndTry ();
               os.putNoChk( lockAndTry );
-              //inout [l].push_back ((*i)->accessOuterPllX ().first->lockAndTry ()) ;
             }
           }
         }
@@ -605,17 +652,15 @@ void GitterPll :: coarse ()
             // reset clean vector 
             cl = cleanvector_t( innerFaces [l].size (), int(true) ) ;
 
-            cleanvector_t :: iterator j = cl.begin ();//, k = inout [l].begin () ;
+            cleanvector_t :: iterator j = cl.begin (); 
 
             const hface_iterator iEnd = innerFaces [l].end () ;
-            for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i, ++j )//, ++k) 
+            for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i, ++j ) 
             {
               // get lockAndTry info 
               const bool locked = bool( os.get() );
 
               assert (j != cl.end ()) ; 
-              //assert (k != inout [l].end ()) ;
-              //(*j) &= (*k) && (*i)->accessOuterPllX ().first->lockAndTry () ;
               (*j) &= locked && (*i)->accessOuterPllX ().first->lockAndTry () ;
             }
           } 
@@ -623,7 +668,6 @@ void GitterPll :: coarse ()
       }
       
       {
-        //vector < vector < int > > inout (nl) ;
         vector < ObjectStream > inout (nl) ;
         {
           for (int l = 0 ; l < nl ; ++l) 
@@ -632,15 +676,12 @@ void GitterPll :: coarse ()
             // reserve memory  
             os.reserve( innerFaces [l].size() * sizeof(char) );
 
-            //inout[l].reserve( innerFaces [l].size() );
-
             cleanvector_t :: iterator j = clean [l].begin () ;
             const hface_iterator iEnd = innerFaces [l].end () ;
             for (hface_iterator i = innerFaces [l].begin () ; i != iEnd; ++i, ++j) 
             {
               const bool unlock = *j;
               os.putNoChk( char(unlock) );
-              //inout [l].push_back (*j) ;
               (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
             }
           }     
@@ -653,12 +694,10 @@ void GitterPll :: coarse ()
           for (int l = 0 ; l < nl ; ++l) 
           {
             ObjectStream& os = inout[ l ];
-            //vector < int > :: iterator j = inout [l].begin () ;
             const hface_iterator iEnd = outerFaces [l].end () ;
-            for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i ) //, ++j) 
+            for (hface_iterator i = outerFaces [l].begin () ; i != iEnd; ++i )
             {
               const bool unlock = bool( os.get() );
-              //assert (j != inout [l].end ()) ;
               (*i)->accessOuterPllX ().first->unlockAndResume ( unlock ) ;
             }
           }     
@@ -674,6 +713,7 @@ void GitterPll :: coarse ()
     
     try 
     {
+      // Gitter :: resetEdgeCoarsenFlags () ;
     
       // Phase des Kantenausgleichs im parallelen Vergr"oberungsalgorithmus:
   
@@ -713,7 +753,6 @@ void GitterPll :: coarse ()
       }
       
       {
-        //vector < vector < int > > inout (nl) ;
         vector < ObjectStream > inout( nl );
         {
           for (int l = 0 ; l < nl ; ++l)
@@ -722,14 +761,12 @@ void GitterPll :: coarse ()
             // reserve memory first 
             os.reserve( outerEdges [l].size() * sizeof(char) );
 
-            //inout[l].reserve( outerEdges [l].size() );
             // get end iterator 
             const hedge_iterator iEnd = outerEdges [l].end () ;
             for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i)
             {
               char lockAndTry = (*i)->lockAndTry ();
               os.putNoChk( lockAndTry );
-              // inout [l].push_back ((*i)->lockAndTry ()) ;
             }
           }
         }
@@ -742,12 +779,10 @@ void GitterPll :: coarse ()
           {
             ObjectStream& os = inout[ l ];
 
-            //vector < int > :: const_iterator j = inout [l].begin () ;
             // get end iterator 
             const hedge_iterator iEnd = innerEdges [l].end () ;
-            for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i) //, ++j) 
+            for (hedge_iterator i = innerEdges [l].begin () ; i != iEnd; ++i)
             {
-              //assert (j != inout [l].end ()) ;
               const bool locked = bool( os.get() );
               if( locked == false ) 
               {
@@ -760,7 +795,6 @@ void GitterPll :: coarse ()
       }
       
       {
-        //vector < vector < int > > inout (nl) ;
         vector < ObjectStream > inout( nl );
         {
           for (int l = 0 ; l < nl ; ++l) 
@@ -768,8 +802,6 @@ void GitterPll :: coarse ()
             ObjectStream& os = inout[ l ];
             // reserve memory first 
             os.reserve( innerEdges [l].size() * sizeof(char) );
-
-            //inout[l].reserve( innerEdges [l].size() );
 
             // get end iterator 
             const hedge_iterator iEnd = innerEdges [l].end () ;
@@ -781,7 +813,6 @@ void GitterPll :: coarse ()
               clean_t& a = clean [ edge ] ;
               os.putNoChk( char( a.first) );
 
-              //inout [l].push_back (a.first) ;
               if (a.second) 
               {
                 // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
@@ -808,13 +839,10 @@ void GitterPll :: coarse ()
           for (int l = 0 ; l < nl ; ++l ) 
           {
             ObjectStream& os = inout[ l ] ;
-            //vector < int > :: iterator j = inout [l].begin () ;
             // get end iterator 
             const hedge_iterator iEnd = outerEdges [l].end () ;
-            for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i )//, ++j) 
+            for (hedge_iterator i = outerEdges [l].begin () ; i != iEnd; ++i )
             {
-              //assert (j != inout [l].end ()) ;
-      
               // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
               // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
               // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
@@ -829,6 +857,11 @@ void GitterPll :: coarse ()
           }
         }
       }
+
+      //Gitter :: resetEdgeCoarsenFlags () ;
+      // do real coarsening of elements 
+      //Gitter :: doCoarse () ;
+      // Gitter :: coarse () ;
     } 
     catch (Parallel :: AccessPllException) 
     {
@@ -843,25 +876,57 @@ void GitterPll :: coarse ()
   return ;
 }
 
-bool GitterPll :: adapt () {
-  __STATIC_myrank = mpAccess ().myrank () ;
-  __STATIC_turn ++ ;
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: adapt ()" << endl, 1) : 1) ;
-  assert (! iterators_attached ()) ;
-  int start = clock () ;
-  bool refined = refine () ;
-  int lap = clock () ;
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
+extern int adaptstep;
+extern int stepnumber;
+#endif
+
+bool GitterPll :: adapt () 
+{
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
+  stepnumber = 0;
+#endif
+
+  bool refined = false;
+  bool needConformingClosure = false ;
+  const bool bisectionEnabled = conformingClosureNeeded();
+  assert( bisectionEnabled == mpAccess().gmax( bisectionEnabled ) );
+
+  // loop until refinement leads to a conforming situation (conforming refinement only)
+  do 
+  {
+    __STATIC_myrank = mpAccess ().myrank () ;
+    __STATIC_turn ++ ;
+    assert (debugOption (20) ? (cout << "**INFO GitterPll :: adapt ()" << endl, 1) : 1) ;
+    assert (! iterators_attached ()) ;
+
+    // call refine 
+    refined |= refine () ;
+
+    // for bisection refinement repeat loop if non-confoming edges are still present 
+    // markForConformingClosure returns true if all elements have conforming closure 
+    needConformingClosure = 
+      bisectionEnabled ? mpAccess().gmax( markForConformingClosure() ) : false ;
+
+  } 
+  while ( needConformingClosure );
+
+  // now do one coarsening step 
   coarse () ;
-  int end = clock () ;
-  if (debugOption (1)) {
-    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
-    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
-    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
-    cout << "**INFO GitterPll :: adapt () [ref (loops)|cse|all] " << u1 << " ("
-         << _refineLoops << ") " << u2 << " " << u3 << endl ;
-  }
+
+  // notify grid changes here
   notifyGridChanges () ;
-  loadBalancerGridChangesNotify () ;
+
+#ifndef NDEBUG
+  needConformingClosure = 
+    bisectionEnabled ? mpAccess().gmax( markForConformingClosure() ) : false ;
+  assert( ! needConformingClosure );
+#endif
+
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
+  ++adaptstep;
+#endif
+
   return refined;
 }
 
@@ -914,8 +979,8 @@ void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
   return ;
 }
 
-void GitterPll :: exchangeDynamicState () {
-
+void GitterPll :: exchangeDynamicState () 
+{
   // Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
   // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
   // die einer "Anderung des statischen Zustands entsprechen. Sie wird in
@@ -923,81 +988,75 @@ void GitterPll :: exchangeDynamicState () {
   // kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
   // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
   // Regel hier eingeschleift werden.
-  
-{
-  const int nl = mpAccess ().nlinks () ;
-
-#ifndef NDEBUG
-  const int start = clock () ;
-#endif
-  try {
-    vector < ObjectStream > osv (nl) ;
-    {
-      for (int l = 0 ; l < nl ; l ++) 
-      {
-        LeafIteratorTT < hface_STI > w (*this,l) ;
-        for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessInnerPllX () ;
-          p.first->writeDynamicState (osv [l], p.second) ;
-        }
-        for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessInnerPllX () ;
-          p.first->writeDynamicState (osv [l], p.second) ;
-        }
-
-        // mark end of stream 
-        osv [l].writeObject( MacroGridMoverIF :: ENDSTREAM ); 
-      } 
-    }
-
-    // exchange information 
-    osv = mpAccess ().exchange (osv) ;
-
-    {
-      for (int l = 0 ; l < nl ; l ++ ) 
-      {
-        LeafIteratorTT < hface_STI > w (*this,l) ;
-        for (w.outer ().first () ; ! w.outer ().done () ; w.outer ().next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = w.outer ().item ().accessOuterPllX () ;
-          p.first->readDynamicState (osv [l], p.second) ;
-        }
-        for (w.inner ().first () ; ! w.inner ().done () ; w.inner ().next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = w.inner ().item ().accessOuterPllX () ;
-          p.first->readDynamicState (osv [l], p.second) ;
-        }
-
-        /*
-        // check consistency of stream 
-        int endStream ; 
-        osv [l].readObject( endStream );
-        if( endStream != MacroGridMoverIF :: ENDSTREAM )
-        {
-          cerr << "**ERROR: writeStaticState: inconsistent stream " << endl;
-          assert( false );
-          abort();
-        } 
-        */
-      }
-    }
-  } 
-  catch (Parallel ::  AccessPllException) 
   {
-    cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
+    const int nl = mpAccess ().nlinks () ;
+  
+#ifndef NDEBUG 
+    // if debug mode, then count time 
+    const int start = clock () ;
+#endif
+  
+    try 
+    {
+      typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
+         TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
+      typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
+        TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
+                
+      vector < ObjectStream > osv (nl) ;
+      {
+        for (int l = 0 ; l < nl ; l ++) 
+        {
+          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
+
+          InnerIteratorType wi (mif);
+          for (wi.first () ; ! wi.done () ; wi.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
+            p.first->writeDynamicState (osv [l], p.second) ;
+          }
+      
+          OuterIteratorType wo (mof);
+          for (wo.first () ; ! wo.done () ; wo.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
+            p.first->writeDynamicState (osv [l], p.second) ;
+          }
+        }  
+      }
+    
+      // exchange data 
+      osv = mpAccess ().exchange (osv) ;
+    
+      { 
+        for (int l = 0 ; l < nl ; l ++ ) 
+        {
+          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
+      
+          OuterIteratorType wo (mof) ;
+          for (wo.first () ; ! wo.done () ; wo.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
+            p.first->readDynamicState (osv [l], p.second) ;
+          }
+      
+          InnerIteratorType wi (mif);
+          for (wi.first () ; ! wi.done () ; wi.next ()) 
+          {
+            pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
+            p.first->readDynamicState (osv [l], p.second) ;
+          }
+        }
+      }
+    } 
+    catch (Parallel ::  AccessPllException) 
+    {
+      cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
+    }
+    assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: exchangeDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   }
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: exchangeDynamicState () used " 
-    << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
-
-}
-{
-  //struct mallinfo minfo = mallinfo();
-  //cerr << "Ende exchangeDynamicState(): Blocks allocated: " << minfo.usmblks + minfo.uordblks << " "  
-  //     << " Blocks used: " << minfo.usmblks + minfo.uordblks - mallocedsize << endl;
-}
-
   return ;
 }
 
@@ -1019,21 +1078,22 @@ void GitterPll :: exchangeStaticState () {
     {
       for (int l = 0 ; l < nl ; ++l) 
       {
+        ObjectStream& os = osv[ l ];
         AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
         AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
         for (wi.first () ; ! wi.done () ; wi.next ()) 
         {
           pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
-          p.first->writeStaticState (osv [l], p.second) ;
+          p.first->writeStaticState (os, p.second) ;
         }
         for (wo.first () ; ! wo.done () ; wo.next ()) 
         {
           pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
-          p.first->writeStaticState (osv [l], p.second) ;
+          p.first->writeStaticState (os, p.second) ;
         }
 
         // mark end of stream 
-        osv [l].writeObject( MacroGridMoverIF :: ENDSTREAM ); 
+        os.writeObject( MacroGridMoverIF :: ENDSTREAM ); 
       }
     }
 
@@ -1042,24 +1102,25 @@ void GitterPll :: exchangeStaticState () {
     {
       for (int l = 0 ; l < nl ; ++l) 
       {
+        ObjectStream& os = osv[ l ];
         AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
         AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
         for (wo.first () ; ! wo.done () ; wo.next ()) 
         {
           pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
-          p.first->readStaticState (osv [l], p.second) ;
+          p.first->readStaticState (os, p.second) ;
         }
         for (wi.first () ; ! wi.done () ; wi.next ()) 
         {
           pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
-          p.first->readStaticState (osv [l], p.second) ;
+          p.first->readStaticState (os, p.second) ;
         }
         // check consistency of stream 
         int endStream ; 
-        osv [l].readObject( endStream );
+        os.readObject( endStream );
         if( endStream != MacroGridMoverIF :: ENDSTREAM )
         {
-          osv [l].readObject( endStream );
+          os.readObject( endStream );
           if( endStream != MacroGridMoverIF :: ENDSTREAM )
           {
             cerr << "**ERROR: writeStaticState: inconsistent stream, got " << endStream << endl;
@@ -1157,7 +1218,16 @@ void GitterPll :: loadBalancerGridChangesNotify ()
 
     if( ldbMth ) 
     {
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT 
+      tovtk("pre.vtu");
+#endif
+
       repartitionMacroGrid (db) ;
+
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT 
+      tovtk("post.vtu");
+#endif
+
       notifyMacroGridChanges () ;
     }
   }
@@ -1203,23 +1273,21 @@ void GitterPll :: loadBalancerMacroGridChangesNotify ()
   return ;
 }
 
-void GitterPll :: notifyGridChanges () {
+void GitterPll :: notifyGridChanges () 
+{
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: notifyGridChanges () " << endl, 1) : 1 ) ;
   Gitter :: notifyGridChanges () ;
   exchangeDynamicState () ;
   return ;
 }
 
-void GitterPll :: notifyMacroGridChanges () {
+void GitterPll :: notifyMacroGridChanges () 
+{
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: notifyMacroGridChanges () " << endl, 1) : 1 ) ;
   Gitter :: notifyMacroGridChanges () ;
   Gitter :: notifyGridChanges () ;
 
-  //cout << "Notify done " << endl;
   containerPll ().identification (mpAccess ()) ;
-  //cout << "Ident done " << endl;
-  //printsize();
-  //printSizeTT ();
 
   loadBalancerMacroGridChangesNotify () ;
   exchangeStaticState () ;

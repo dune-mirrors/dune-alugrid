@@ -60,9 +60,9 @@ template < class A >
 class EdgePllBaseX : public A 
 {
   protected :
-    typedef A myhedge1_t ;
-    inline myhedge1_t & myhedge1 () { return *this; }
-    inline const myhedge1_t & myhedge1 () const { return *this; }
+    typedef A myhedge_t ;
+    inline myhedge_t & myhedge () { return *this; }
+    inline const myhedge_t & myhedge () const { return *this; }
 
   public :
     typedef typename A :: myvertex_t myvertex_t;
@@ -84,7 +84,7 @@ template < class A >
 class EdgePllBaseXMacro : public A 
 {
   public :
-    typedef typename A :: myhedge1_t  myhedge1_t;
+    typedef typename A :: myhedge_t  myhedge_t;
     typedef typename A :: myvertex_t myvertex_t;
 
     inline EdgePllBaseXMacro(myvertex_t *,myvertex_t *) ;
@@ -92,7 +92,7 @@ class EdgePllBaseXMacro : public A
     virtual vector< int > estimateLinkage () const ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
   protected :
-    using A :: myhedge1;
+    using A :: myhedge;
     using A :: EDGE1;
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -112,11 +112,11 @@ template < class A > class FacePllBaseX : public A
   protected :
     typedef A myhface_t ;
     typedef typename A :: myconnect_t myconnect_t ;
-    typedef typename A :: myhedge1_t myhedge1_t;
+    typedef typename A :: myhedge_t myhedge_t;
       
   public :
-    inline FacePllBaseX(myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
-    inline FacePllBaseX(myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t*,int) ;
+    inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int) ;
+    inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t*,int) ;
     inline ~FacePllBaseX () {}
 
     inline myhface_t & myhface () { return *this; }
@@ -134,14 +134,14 @@ template < class A > class FacePllBaseXMacro : public A
   public :
     // some typedefs 
     typedef typename A :: myhface_t  myhface_t;
-    typedef typename A :: myhedge1_t myhedge1_t;
+    typedef typename A :: myhedge_t myhedge_t;
 
     // constructor for hface3 
-    inline FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                                    myhedge1_t * e2, int s2) ;
+    inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                                    myhedge_t * e2, int s2) ;
     // constructor for hface4 
-    inline FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                                    myhedge1_t * e2, int s2, myhedge1_t * e3, int s3) ; 
+    inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                                    myhedge_t * e2, int s2, myhedge_t * e3, int s3) ; 
     // destructor only checking move-to
     inline ~FacePllBaseXMacro () ; 
 
@@ -205,7 +205,7 @@ class TetraPllXBaseMacro : public A
     typedef typename A :: myneighbour_t myneighbour_t;
 
     TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
-                       myhface3_t *f2, int s2, myhface3_t *f3, int s3);
+                       myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation);
 
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
@@ -225,14 +225,14 @@ class TetraPllXBaseMacro : public A
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
     // pack ghost information 
     virtual void packAsGhost(ObjectStream &,int) const ;
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
     virtual int moveTo () const { return _moveTo ; }
   protected:
     bool doPackAll (vector < ObjectStream > &, GatherScatterType * ) ;
     void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
-    void packAsBndNow (int, ObjectStream &) const;
+    void packAsBndNow (int, ObjectStream &, const bool ) const;
     
   private :
 #ifdef GRAPHVERTEX_WITH_CENTER
@@ -315,12 +315,12 @@ class Periodic3PllXBaseMacro : public A
 
     virtual void attachPeriodic( const int destination ) ;
     virtual pair<int,int> insideLdbVertexIndex() const ;
-    virtual int otherLdbVertexIndex( const hface_STI& face ) const ;
+    virtual int otherLdbVertexIndex( const int faceIndex ) const ;
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const 
     { 
@@ -406,12 +406,12 @@ class Periodic4PllXBaseMacro : public A
 
     virtual void attachPeriodic( const int destination ) ;
     virtual pair<int,int> insideLdbVertexIndex() const ;
-    virtual int otherLdbVertexIndex( const hface_STI& face ) const ;
+    virtual int otherLdbVertexIndex( const int faceIndex ) const ;
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
   private :
@@ -485,7 +485,7 @@ class HexaPllBaseXMacro : public A
     virtual bool packAll (vector < ObjectStream > &) ;
     // pack ghost information 
     virtual void packAsGhost(ObjectStream &,int) const ;
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const ;
 
@@ -499,7 +499,7 @@ class HexaPllBaseXMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
 
-    void packAsBndNow (int, ObjectStream &) const;
+    void packAsBndNow (int, ObjectStream &, const bool ) const;
   protected:
 #ifdef GRAPHVERTEX_WITH_CENTER
     alucoord_t _center [3] ;
@@ -533,7 +533,7 @@ template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
     virtual int ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
   public :
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     
     // method to get internal bnd located behind this parallel interface 
     virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
@@ -596,7 +596,7 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     virtual int   ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
   public :
-    virtual void packAsBnd (int,int,ObjectStream &) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     
     // unpack ghost information and insert ghost cell 
     virtual void insertGhostCell(ObjectStream &,int);
@@ -658,7 +658,7 @@ public :
       typedef hedge1_IMPL inneredge_t ;
 
       // constructor 
-      inline Hface3EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, myhedge1_t *e2, int s2)
+      inline Hface3EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, myhedge_t *e2, int s2)
         : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
     } ;
     typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
@@ -667,7 +667,7 @@ public :
     {
       typedef FacePllBaseXMacro< hface3_IMPL > Base_t ;
     public :
-      Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) ;
+      Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2) ;
     };
 
     class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
@@ -677,8 +677,8 @@ public :
       typedef hedge1_IMPL inneredge_t ;
 
       // constructor 
-      inline Hface4EmptyPll (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
-                             myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
+      inline Hface4EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, 
+                             myhedge_t *e2, int s2, myhedge_t *e3, int s3)
         : FacePllBaseX< Hface4Empty >(e0,s0, e1,s1, e2,s2, e3,s3) {} 
     } ;
     typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
@@ -687,8 +687,8 @@ public :
     {
       typedef  FacePllBaseXMacro< hface4_IMPL > Base_t ;
     public :
-      Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1,
-                           myhedge1_t *e2, int s2, myhedge1_t *e3, int s3) ;
+      Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
+                           myhedge_t *e2, int s2, myhedge_t *e3, int s3) ;
     } ;
 
 public :
@@ -714,8 +714,8 @@ public :
     {
     public :
       inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
-                                 myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
-        : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3 ) {} // 0 == level 0
+                                 myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation) 
+        : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, orientation) {} // 0 == level 0
       virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
       virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
     } ;
@@ -828,8 +828,6 @@ public :
        
         // insert hbnd_int without ghost hexa 
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
-        // insert hbnd_int without ghost hexa 
-        virtual hbndseg4_GEO  * insert_hbnd4_ghost (hface4_GEO *, int) ;
         // insert hbnd_int with ghost hexa 
         virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* );
         
@@ -838,13 +836,12 @@ public :
         // version that get point and create ghost macro 
         virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
         // version that created internal boundary on ghost elements 
-        virtual hbndseg3_GEO  * insert_hbnd3_ghost  (hface3_GEO *, int) ;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
         hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int ) ;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
         virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
         virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
-        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
+        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int) ;
 
         virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter :: hbndseg_STI :: bnd_t (&)[2] ) ;
         virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter :: hbndseg_STI :: bnd_t (&)[2] ) ;
@@ -927,9 +924,9 @@ inline EdgePllBaseX< A > :: ~EdgePllBaseX()
   // die Kinder gel"oscht werden d"urfen, aber nur falls der lock auf-
   // gehoben wird.
 
-  if( myhedge1().isSet( myhedge1_t::flagLock ) )
+  if( myhedge().isSet( myhedge_t::flagLock ) )
   {
-   cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
+    cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
     abort () ;
   }
 #endif
@@ -938,14 +935,13 @@ inline EdgePllBaseX< A > :: ~EdgePllBaseX()
 template < class A > 
 inline bool EdgePllBaseX< A > :: lockedAgainstCoarsening () const
 {
-  return myhedge1().isSet( myhedge1_t::flagLock );
+  return myhedge().isSet( myhedge_t::flagLock );
 }
 
 template < class A >
 inline void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const 
 {
-  //os.writeObject (int(myhedge1 ().getrule ())) ;
-  os.put( char(myhedge1 ().getrule ()) ) ;
+  os.put( char(myhedge ().getrule ()) ) ;
   return ;
 }
 
@@ -953,7 +949,6 @@ template < class A >
 inline bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
   char i ;
   try {
-    //os.readObject (i) ;
     i = os.get();
   } 
   catch (ObjectStream :: EOFException) 
@@ -961,9 +956,9 @@ inline bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
     cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  typedef typename myhedge1_t :: myrule_t  myrule_t;
+  typedef typename myhedge_t :: myrule_t  myrule_t;
   return myrule_t (i) == myrule_t :: nosplit ? 
-    false : (myhedge1 ().refineImmediate (myrule_t (i)), true) ;
+    false : (myhedge ().refineImmediate (myrule_t (i)), true) ;
 }
 
 template < class A >
@@ -992,15 +987,15 @@ inline void EdgePllBaseX< A > :: unpackSelf (ObjectStream &,bool) {
 template < class A >
 bool EdgePllBaseX< A > :: lockAndTry ()
 {
-  myhedge1().set( myhedge1_t::flagLock );
-  return myhedge1().coarse () ;
+  myhedge().set( myhedge_t::flagLock );
+  return myhedge().coarse () ;
 }
 
 template < class A >
 inline bool EdgePllBaseX< A > :: unlockAndResume (bool r)
 {
-  myhedge1().unset( myhedge1_t::flagLock );
-  return ( r ) ? myhedge1().coarse () : false ;
+  myhedge().unset( myhedge_t::flagLock );
+  return ( r ) ? myhedge().coarse () : false ;
 }
 
 template < class A >
@@ -1019,15 +1014,15 @@ inline EdgePllBaseXMacro< A > :: ~EdgePllBaseXMacro()
 //  --FacePllBaseX
 //////////////////////////////////////////////////////////
 template < class A > inline FacePllBaseX < A > :: FacePllBaseX 
-    (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, myhedge1_t * e2, int s2) 
+    (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2) 
   : A( e0, s0, e1, s1, e2, s2 )
 {
   return ;
 }
 
 template < class A > inline FacePllBaseX < A > :: 
-FacePllBaseX (myhedge1_t * e0, int s0, myhedge1_t * e1, int s1, 
-              myhedge1_t * e2, int s2, myhedge1_t * e3, int s3 ) 
+FacePllBaseX (myhedge_t * e0, int s0, myhedge_t * e1, int s1, 
+              myhedge_t * e2, int s2, myhedge_t * e3, int s3 ) 
   : A( e0, s0, e1, s1, e2, s2, e3, s3 )
 {
   return ;
@@ -1133,7 +1128,9 @@ template < class A > int BndsegPllBaseXMacro < A > ::ldbVertexIndex () const {
 template < class  A > void  BndsegPllBaseXMacro < A > :: setLoadBalanceVertexIndex ( const int ) {
 }
 
-template < class A > void BndsegPllBaseXMacro < A > :: packAsBnd (int fce, int who, ObjectStream & os) const {
+template < class A > void BndsegPllBaseXMacro < A > :: 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) const 
+{
   assert (!fce) ;
   if (myhface_t :: polygonlength == 3) os.writeObject (MacroGridMoverIF :: HBND3EXT) ;
   else if (myhface_t :: polygonlength == 4) os.writeObject (MacroGridMoverIF :: HBND4EXT) ;

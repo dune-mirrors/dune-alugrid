@@ -193,8 +193,8 @@ template < class A > class Hedge1Top : public A
     inline Hedge1Top (int,myvertex_t *,myvertex_t *) ;
     inline Hedge1Top (int,myvertex_t *,myvertex_t *, int nChild ) ;
     virtual ~Hedge1Top () ;
-    inneredge_t * subedge1 (int) ;
-    const inneredge_t * subedge1 (int) const ;
+    inneredge_t * subedge (int) ;
+    const inneredge_t * subedge (int) const ;
     inneredge_t * down () ;
     const inneredge_t * down () const ;
     inneredge_t * next () ;
@@ -236,12 +236,12 @@ template < class A > class Hface4Top : public A
   public :
     using A :: twist ;
     using A :: myvertex ;
-    using A :: myhedge1 ;
+    using A :: myhedge ;
 
     typedef Hface4Top < A >                  innerface_t ;
     typedef typename A :: inneredge_t        inneredge_t ;
     typedef typename A :: innervertex_t      innervertex_t ;
-    typedef typename A :: myhedge1_t         myhedge1_t ;
+    typedef typename A :: myhedge_t         myhedge_t ;
     typedef typename A :: myvertex_t         myvertex_t ;
     typedef typename A :: myrule_t           myrule_t ;
     typedef InnerStorage < InnerEdgeStorage< innerface_t , true > > inner_t ;
@@ -255,8 +255,8 @@ template < class A > class Hface4Top : public A
     const signed char _nChild;
     
   private:
-    inline myhedge1_t * subedge1 (int,int) ;
-    inline const myhedge1_t * subedge1 (int,int) const ;
+    inline myhedge_t * subedge (int,int) ;
+    inline const myhedge_t * subedge (int,int) const ;
     void splitISO4 () ;
   public:
     // for index get/free, when refinement is done 
@@ -264,16 +264,16 @@ template < class A > class Hface4Top : public A
       return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Faces ); }
     
     // constructor for macro faces 
-    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int) ;
+    inline Hface4Top (int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int) ;
     // constructor for refined faces 
-    inline Hface4Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, int nChild ) ;
+    inline Hface4Top (int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int, int nChild ) ;
     virtual ~Hface4Top () ;
     innervertex_t * subvertex (int) ;
     const innervertex_t * subvertex (int) const ;
-    inneredge_t * subedge1 (int) ;
-    const inneredge_t * subedge1 (int) const ;
-    innerface_t * subface4 (int) ;
-    const innerface_t * subface4 (int) const ;
+    inneredge_t * subedge (int) ;
+    const inneredge_t * subedge (int) const ;
+    innerface_t * subface (int) ;
+    const innerface_t * subface (int) const ;
     
     inline int level () const ;
     inline int nChild () const ;
@@ -318,7 +318,7 @@ template < class A > class Hbnd4Top : public A
   public:
     using A :: twist ;
     using A :: myhface4 ;
-    using A :: subface4 ;
+    using A :: subface ;
 
   protected :
     typedef Hbnd4Top < A >              innerbndseg_t ;
@@ -375,7 +375,7 @@ template < class A > class HexaTop : public A {
   public :
     using A :: twist ;
     using A :: myvertex ;
-    using A :: myhedge1 ;
+    using A :: myhedge ;
     using A :: myhface4 ;
 
     typedef HexaTop < A >           innerhexa_t ;
@@ -383,7 +383,7 @@ template < class A > class HexaTop : public A {
     typedef typename A :: inneredge_t inneredge_t ;
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: myhface4_t    myhface4_t ;
-    typedef typename A :: myhedge1_t  myhedge1_t ;
+    typedef typename A :: myhedge_t  myhedge_t ;
     typedef typename A :: myvertex_t  myvertex_t ;
     typedef typename A :: myrule_t  myrule_t ;
     typedef typename A :: balrule_t   balrule_t ;
@@ -406,10 +406,10 @@ template < class A > class HexaTop : public A {
     IndexManagerType & indexManager() { 
       return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Elements ); }
     
-    myhedge1_t * subedge1 (int,int) ;
-    const myhedge1_t * subedge1 (int,int) const ;
-    myhface4_t * subface4 (int,int) ;
-    const myhface4_t * subface4 (int,int) const ;
+    myhedge_t * subedge (int,int) ;
+    const myhedge_t * subedge (int,int) const ;
+    myhface4_t * subface (int,int) ;
+    const myhface4_t * subface (int,int) const ;
     
   public:
     // Constructor for macro elements 
@@ -489,7 +489,7 @@ template < class A > class Periodic4Top : public A {
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: inneredge_t   inneredge_t ;
     typedef typename A :: innerface_t   innerface_t ;
-    typedef typename A :: myhedge1_t    myhedge1_t ;
+    typedef typename A :: myhedge_t    myhedge_t ;
     typedef typename A :: myhface4_t    myhface4_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
@@ -510,10 +510,10 @@ template < class A > class Periodic4Top : public A {
   private :
     void splitISO4 () ;
   protected :
-    myhedge1_t * subedge1 (int,int) ;
-    const myhedge1_t * subedge1 (int,int) const ;
-    myhface4_t * subface4 (int,int) ;
-    const myhface4_t * subface4 (int i, int j) const ;
+    myhedge_t * subedge (int,int) ;
+    const myhedge_t * subedge (int,int) const ;
+    myhface4_t * subface (int,int) ;
+    const myhface4_t * subface (int i, int j) const ;
 
     // we need this for the boundary segment index 
     inline IndexManagerType & indexManager () {
@@ -733,13 +733,13 @@ Hedge1Top < A > :: getrule () const {
   return myrule_t (_rule) ;
 }
 
-template < class A > Hedge1Top < A > * Hedge1Top < A > :: subedge1 (int n) {
+template < class A > Hedge1Top < A > * Hedge1Top < A > :: subedge (int n) {
   assert (n == 0 || n == 1) ;
   assert (n ? this->dwnPtr()->next () : this->dwnPtr()) ;
   return n ? this->dwnPtr()->next () : this->dwnPtr() ;
 }
 
-template < class A > const Hedge1Top < A > * Hedge1Top < A > :: subedge1 (int n) const {
+template < class A > const Hedge1Top < A > * Hedge1Top < A > :: subedge (int n) const {
   assert (n == 0 || n == 1) ;
   assert (n ? this->dwnPtr()->next () : this->dwnPtr()) ;
   return n ? this->dwnPtr()->next () : this->dwnPtr() ;
@@ -800,16 +800,16 @@ template < class A > inline int Hface4Top < A > :: nChild () const {
   return _nChild ;
 }
 
-template < class A > typename Hface4Top < A > :: myhedge1_t * 
-Hface4Top < A > :: subedge1 (int i,int j) {
+template < class A > typename Hface4Top < A > :: myhedge_t * 
+Hface4Top < A > :: subedge (int i,int j) {
   assert(j == 0 || j == 1) ;
-  return this->myhedge1 (i)->subedge1 (j ? 1 - this->twist(i) : this->twist(i)) ;
+  return this->myhedge (i)->subedge (j ? 1 - this->twist(i) : this->twist(i)) ;
 }
 
-template < class A > const typename Hface4Top < A > :: myhedge1_t * 
-Hface4Top < A > :: subedge1 (int i,int j) const {
+template < class A > const typename Hface4Top < A > :: myhedge_t * 
+Hface4Top < A > :: subedge (int i,int j) const {
   assert(j == 0 || j == 1) ;
-  return this->myhedge1 (i)->subedge1 (j ? 1 - this->twist(i) : this->twist(i)) ;
+  return this->myhedge (i)->subedge (j ? 1 - this->twist(i) : this->twist(i)) ;
 }
 
 template < class A > inline typename Hface4Top < A > :: innervertex_t * 
@@ -825,7 +825,7 @@ Hface4Top < A > :: subvertex (int) const {
 }
 
 template < class A > typename Hface4Top < A > :: inneredge_t * 
-Hface4Top < A > :: subedge1 (int n) {
+Hface4Top < A > :: subedge (int n) {
   inneredge_t * e = inEd();
   for (int i = 0 ; i < n ; i ++ ) e = e ? e->next () : 0 ;
   assert (e) ;
@@ -833,7 +833,7 @@ Hface4Top < A > :: subedge1 (int n) {
 }
 
 template < class A > const typename Hface4Top < A > :: inneredge_t * 
-Hface4Top < A > :: subedge1 (int n) const {
+Hface4Top < A > :: subedge (int n) const {
   const inneredge_t * e = inEd() ;
   for (int i = 0 ; i < n ; i ++ ) e = e ? e->next () : 0 ;
   assert (e) ;
@@ -841,7 +841,7 @@ Hface4Top < A > :: subedge1 (int n) const {
 }
 
 template < class A > inline typename Hface4Top < A > :: innerface_t * 
-Hface4Top < A > :: subface4 (int n) {
+Hface4Top < A > :: subface (int n) {
   innerface_t * f = dwnPtr() ;
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;
@@ -849,7 +849,7 @@ Hface4Top < A > :: subface4 (int n) {
 }
 
 template < class A > inline const typename Hface4Top < A > :: innerface_t * 
-Hface4Top < A > :: subface4 (int n) const {
+Hface4Top < A > :: subface (int n) const {
   const innerface_t * f = dwnPtr();
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;
@@ -857,8 +857,8 @@ Hface4Top < A > :: subface4 (int n) const {
 }
 
 template < class A > inline Hface4Top < A > :: 
-Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1, 
-  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3 ) 
+Hface4Top (int l, myhedge_t * e0, int t0, myhedge_t * e1, int t1, 
+  myhedge_t * e2, int t2, myhedge_t * e3, int t3 ) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
   _bbb (0), _inner (0), 
   _rule (myrule_t :: nosplit),
@@ -869,8 +869,8 @@ Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1,
   return ;
 }
 
-template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge1_t * e0, int t0, myhedge1_t * e1, int t1, 
-  myhedge1_t * e2, int t2, myhedge1_t * e3, int t3,int nChild ) 
+template < class A > inline Hface4Top < A > :: Hface4Top (int l, myhedge_t * e0, int t0, myhedge_t * e1, int t1, 
+  myhedge_t * e2, int t2, myhedge_t * e3, int t3,int nChild ) 
   : A (e0, t0, e1, t1, e2, t2, e3, t3), 
   _bbb (0), _inner (0), 
   _rule (myrule_t :: nosplit),

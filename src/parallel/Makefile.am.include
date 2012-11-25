@@ -1,4 +1,4 @@
 paralleldir = parallel
 parallelhdrs = $(paralleldir)/gitter_pll_ldb.h $(paralleldir)/gitter_tetra_top_pll.h $(paralleldir)/mpAccess_MPI.h\
         $(paralleldir)/mpAccess_STAR.h $(paralleldir)/gitter_hexa_top_pll.h $(paralleldir)/gitter_pll_mgb.h \
-	$(paralleldir)/alumetis.hh $(paralleldir)/aluparmetis.hh $(paralleldir)/gitter_pll_impl.h $(paralleldir)/gitter_pll_sti.h  $(paralleldir)/mpAccess.h
+        $(paralleldir)/alusfc.hh $(paralleldir)/alumetis.hh $(paralleldir)/aluparmetis.hh $(paralleldir)/gitter_pll_impl.h $(paralleldir)/gitter_pll_sti.h  $(paralleldir)/mpAccess.h

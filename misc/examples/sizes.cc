@@ -18,6 +18,9 @@ using namespace std;
 
 #define DONT_USE_ALUGRID_ALLOC
 
+// enable vtk output 
+#define ENABLE_ALUGRID_VTK_OUTPUT
+
 // include serial part of ALUGrid 
 #ifdef PARALLEL
   #include <alugrid_parallel.h>
@@ -27,10 +30,56 @@ using namespace std;
 
 using namespace ALUGridSpace;
 
+struct EmptyGatherScatter : public GatherScatter
+{
+  typedef GatherScatter :: ObjectStreamType  ObjectStreamType;
+
+  EmptyGatherScatter () {}
+
+  virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) {}
+  virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) {}
+};
+
+struct EmptyAdaptRestrictProlong : public Gitter :: AdaptRestrictProlong
+{
+  virtual int preCoarsening (HElemType & elem )   { return 1; } 
+  virtual int postRefinement (HElemType & elem ) { return 1; }
+  virtual int preCoarsening (HGhostType & bnd )     { return 1; }
+  virtual int postRefinement (HGhostType & bnd )    { return 1; } 
+};
+
+
+// refine grid globally, i.e. mark all elements and then call adapt 
+template <class GitterType>
+bool needConformingClosure( GitterType& grid, bool useClosure ) 
+{
+  return false ;
+  bool needClosure = true ;
+  {
+    // get LeafIterator which iterates over all leaf elements of the grid 
+    LeafIterator < Gitter::helement_STI > w (grid) ;
+    w->first(); 
+    if( ! w->done() ) 
+    {
+      if( w->item ().type() == tetra )
+      {
+        return false ;
+      }
+      else 
+        needClosure = useClosure ;
+    }
+  }
+  return needClosure ;
+}
+
+       
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
 void checkRefinements( GitterType& grid ) 
 {
+  // if bisection is not enabled do nothing here
+  if( ! grid.conformingClosureNeeded() ) return ;
+
   {
     // get LeafIterator which iterates over all leaf elements of the grid 
     LeafIterator < Gitter::helement_STI > w (grid) ;
@@ -63,13 +112,18 @@ void checkRefinements( GitterType& grid )
           typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
           // mark element for refinement 
           tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
+
           item->request ( rules[ i ] );
         }
       }
     }
 
+    // create empty gather scatter 
+    EmptyAdaptRestrictProlong rp;
+
     // adapt grid 
-    grid.adapt ();
+    grid.duneAdapt( rp );
+
 
     // coarsen again 
     globalCoarsening( grid , 1 );
@@ -82,35 +136,47 @@ void checkRefinements( GitterType& grid )
 
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
-void globalRefine(GitterType& grid, int refcount) 
+void globalRefine(GitterType& grid, bool global, int step, int mxl,
+                  const bool loadBalance = true )
 {
-   for (int count=refcount ; count > 0; count--) 
    {
-     cout << "Refine global: run " << refcount-count << endl;
+     if (global)
      {
-        // get LeafIterator which iterates over all leaf elements of the grid 
-        LeafIterator < Gitter::helement_STI > w (grid) ;
+       // get LeafIterator which iterates over all leaf elements of the grid 
+       LeafIterator < Gitter::helement_STI > w (grid) ;
         
-        for (w->first () ; ! w->done () ; w->next ())
-        {
-          // mark element for refinement 
-          // w->item ().tagForGlobalRefinement ();
+       for (w->first () ; ! w->done () ; w->next ())
+       {
+         // mark element for refinement 
+         w->item ().tagForGlobalRefinement ();
+       }
+     }
+     else 
+     {
+       double t = double(step)/10.;
+       double center[3] = {0.2,0.2,0.2};
+       double dir[3]    = {1.0,0.0,0.0};
+       center[0] += dir[0]*t;
+       center[1] += dir[1]*t;
+       center[2] += dir[2]*t;
+       double rad=0.6;
 
-          typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
-          // mark element for refinement 
-          tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-          //item->checkTetra( item, item->nChild(), true );
-
-          typedef Gitter ::Geometric :: TetraRule  TetraRule ;
-          item->request ( TetraRule :: bisect );
-
-          break ;
-        }
+       grid.markForBallRefinement(center,rad,mxl);
      }
 
+     // create empty gather scatter 
+     EmptyAdaptRestrictProlong rp;
+
      // adapt grid 
-     grid.adapt ();
+     grid.duneAdapt( rp );
+
+#ifdef PARALLEL
+     if( loadBalance ) 
+     {
+       // load balance 
+       grid.duneLoadBalance();
+     }
+#endif
 
      // print size of grid 
      grid.printsize () ;
@@ -137,14 +203,18 @@ void globalCoarsening(GitterType& grid, int refcount) {
        }
     }
 
+    // create empty gather scatter 
+    EmptyAdaptRestrictProlong rp;
+
     // adapt grid 
-    grid.adapt ();
+    grid.duneAdapt( rp );
 
     // print size of grid 
     grid.printsize () ;
 
   }
 }
+<<<<<<< HEAD
 template <class GitterType> 
 void tovtk(GitterType& grid) {
 
@@ -233,6 +303,8 @@ void tovtk(GitterType& grid) {
   std::cout << "data written to out.vtk" << std::endl;
 }
 
+=======
+>>>>>>> 3d-conforming-refinement
 // perform walk over elements of a certain level  
 void levelwalk(GitterBasisImpl* grid, int level) {
    typedef Insert <AccessIterator <
@@ -255,119 +327,107 @@ int main (int argc, char ** argv, const char ** envp)
 {
   MPI_Init(&argc,&argv);
 
-  int mxl = 0; 
+  int mxl = 0, glb = 0; 
   const char* filename = 0 ;
   if (argc < 2) 
   {
     filename = "../macrogrids/reference.tetra";
     mxl = 1;
-    cout << "usage: "<< argv[0] << " <macro grid> <opt: level> \n";
+    glb = 1;
+    cout << "usage: "<< argv[0] << " <macro grid> <opt: level global> \n";
   }
   else 
+  {
     filename = argv[ 1 ];
+  }
 
-  int rank = 0;
+  {
+    int rank = 0;
 #ifdef PARALLEL
-  MpAccessMPI mpa (MPI_COMM_WORLD);
-  rank = mpa.myrank();
+    MpAccessMPI mpa (MPI_COMM_WORLD);
+    rank = mpa.myrank();
 #endif
 
-  if (argc < 3)
-  {
+    if (argc < 3)
+    {
+      if( rank == 0 ) 
+        cout << "Default level = "<< mxl << " choosen! \n";
+    }
+    else 
+      mxl = atoi(argv[2]);
+    if (argc < 4)
+    {
+      if( rank == 0 ) 
+        cout << "Default global refinement = "<< glb << " choosen! \n";
+    }
+    else 
+      glb = atoi(argv[3]);
+
+    std::string macroname( filename );
+
     if( rank == 0 ) 
-      cout << "Default level = "<< mxl << " choosen! \n";
-  }
-  else 
-    mxl = atoi(argv[2]);
-
-  std::string macroname( filename );
-
-  if( rank == 0 ) 
-  {
-    cout << "\n-----------------------------------------------\n";
-    cout << "read macro grid from < " << macroname << " > !" << endl;
-    cout << "-----------------------------------------------\n";
-  }
-
-  {
-#ifdef PARALLEL
-    GitterDunePll grid(macroname.c_str(),mpa);
-    grid.duneLoadBalance();
-#else 
-    GitterDuneImpl grid(macroname.c_str());
-#endif
-
-   
-    //cout << "P[ " << rank << " ] : Grid generated! \n";
-    grid.printsize(); 
-    cout << "---------------------------------------------\n";
-  
-    grid.printMemUsage();
-    //int bla; 
-    // cin >> bla;
-    globalRefine(grid, mxl);
-    tovtk(grid);
-    return 0;
-   
-    checkRefinements( grid );
-
-    std::ofstream file( "file.out" );
-    grid.duneBackup( file );
-    file.close();
-
-    /*
     {
-      ObjectStream os ;
-      grid.duneBackup( os );
-
-      char* buffer = ObjectStream ::allocateBuffer( os.size() );
-      os.read( buffer, os.size() );
-      
-      std::ofstream obj( "obj.out" );
-      const size_t size = os.size();
-      obj.write( (const char *) &size, sizeof( size_t ) ); 
-      obj.write( buffer, size );
-      ObjectStream :: freeBuffer( buffer );
+      cout << "\n-----------------------------------------------\n";
+      cout << "read macro grid from < " << macroname << " > !" << endl;
+      cout << "-----------------------------------------------\n";
     }
 
-    globalRefine(grid, mxl);
-
     {
-      size_t size = 0;
-
-      std::ifstream obj( "obj.out" );
-      obj.read( (char *) &size, sizeof( size_t ) ); 
-      char * buffer = ObjectStream ::allocateBuffer( size );
-      obj.read( buffer, size );
-      //ObjectStream :: freeBuffer( buffer );
-
-      ObjectStream is;
-      is.clear();
-      is.write( buffer, size );
-
+#ifdef PARALLEL
+      GitterDunePll grid(macroname.c_str(),mpa);
+      grid.disableGhostCells();
+      grid.duneLoadBalance();
+#else 
+      GitterDuneImpl grid(macroname.c_str());
+#endif
+      bool closure = needConformingClosure( grid, true );
+#ifdef PARALLEL
+      closure = mpa.gmax( closure );
+#endif
+      if( closure ) 
       {
-        ObjectStream copy( is );
-        std::ofstream obj( "check.out" );
-        const size_t size = copy.size();
-        obj.write( buffer, size );
-        //ObjectStream :: freeBuffer( buffer );
+        grid.enableConformingClosure() ;
+        grid.disableGhostCells();
       }
-      }*/
 
-    {
-      std::ifstream file( "file.out" );
-#ifdef PARALLEL
-      MpAccessMPI a (MPI_COMM_WORLD);
-      GitterDunePll grid2( file, a);
-#else 
-      GitterDuneImpl grid2( file );
-#endif
-      grid2.printsize();
+      //cout << "P[ " << rank << " ] : Grid generated! \n";
+      grid.printsize(); 
+      cout << "---------------------------------------------\n";
+    
+      {
+        std::ostringstream ss;
+        ss << "start-" << ZeroPadNumber(mxl) << ".vtu";
+        grid.tovtk(  ss.str().c_str() );
+      }
+
+      grid.printMemUsage();
+      for (int i = 0; i < glb; ++i)
+        globalRefine(grid, true, -1, mxl);
+      for (int i = 0; i < glb; ++i)
+        globalRefine(grid, false,0, mxl);
+      for( int i = 0; i < 2*mxl; ++i )
+      {
+        std::ostringstream ss;
+        ss << "out-" << ZeroPadNumber(i) << ".vtu";
+        grid.tovtk(  ss.str().c_str() );
+        globalRefine(grid, false,i, mxl);
+      }
+      /*
+      {
+        std::ostringstream ss;
+        ss << "out-" << ZeroPadNumber(mxl) << ".vtu";
+        grid.tovtk(  ss.str().c_str() );
+      }
+      */
+      /*
+      globalCoarsening(grid,3*glb);
+      {
+        std::ostringstream ss;
+        ss << "out-" << ZeroPadNumber(mxl+1) << ".vtu";
+        grid.tovtk(  ss.str().c_str() );
+      }
+      */
     }
-    //levelwalk(grid, mxl);
-    // globalCoarsening(grid, mxl);
-    //grid.printMemUsage();
-    //cin.get();
   }
 
   MPI_Finalize();

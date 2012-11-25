@@ -43,6 +43,9 @@ extern "C" {
 #endif
 
 
+// sfc stuff 
+#include "parallel/alusfc.hh"
+
 // METIS stuff 
 #include "parallel/alumetis.hh"
 

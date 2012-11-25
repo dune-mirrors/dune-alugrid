@@ -80,12 +80,6 @@ public:
   // read status of grid 
   void duneRestore ( istream& in ) ;
  
-  // refine all leaf elements 
-  bool refine ();
-
-  // coarse all leaf elements if possible 
-  void coarse ();
-
   // done call notify and loadBalancer  
   bool duneAdapt (AdaptRestrictProlongType & arp);
 };
@@ -335,4 +329,14 @@ template < class A > inline IteratorSTI < A > * PureElementLeafIterator < A > ::
 template < class A > inline IteratorSTI < A > & PureElementLeafIterator < A > :: operator * () const {
   return * _w ;
 }
+
+namespace {
+std::string ZeroPadNumber(int num)
+{
+    std::ostringstream ss;
+    ss << std::setw( 7 ) << std::setfill( '0' ) << num;
+    return ss.str();
+}
+}
+
 #endif

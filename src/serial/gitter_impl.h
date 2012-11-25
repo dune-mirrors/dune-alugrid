@@ -44,8 +44,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
            inline Hbnd3Default (myhface3_t *, int) ;
            virtual ~Hbnd3Default () {}
            //! return pointer to grid 
-           Gitter * myGrid() { return myhface3(0)->myvertex(0)->myGrid(); }
-           const Gitter * myGrid() const { return myhface3(0)->myvertex(0)->myGrid(); }
+           Gitter * myGrid() { return myhface(0)->myvertex(0)->myGrid(); }
+           const Gitter * myGrid() const { return myhface(0)->myvertex(0)->myGrid(); }
           public :
             typedef hbndseg3_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
@@ -74,8 +74,8 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
             inline Hbnd4Default (myhface4_t *, int) ;
             virtual ~Hbnd4Default () {}
             //! return pointer to grid 
-            Gitter * myGrid() { return myhface4(0)->myvertex(0)->myGrid(); }
-            const Gitter * myGrid() const { return myhface4(0)->myvertex(0)->myGrid(); }
+            Gitter * myGrid() { return myhface(0)->myvertex(0)->myGrid(); }
+            const Gitter * myGrid() const { return myhface(0)->myvertex(0)->myGrid(); }
           public :
             typedef hbndseg4_GEO :: bnd_t bnd_t;
             virtual inline bnd_t bndtype () const ;
@@ -117,7 +117,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
            ~Hface3Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
            virtual inline void projectVertex(const ProjectVertexPair &pv) ; 
-  } ;
+        } ;
         typedef Hface3Top < Hface3Empty > hface3_IMPL ;
         
 
@@ -223,6 +223,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
 
         //! return pointer to grid 
         Gitter * myGrid() { return myvertex(0)->myGrid(); }
+        const Gitter * myGrid() const { return myvertex(0)->myGrid(); }
 
       public: 
         ////////////////////////////////////////////////
@@ -293,7 +294,7 @@ class GitterBasis : public virtual Gitter, public Gitter :: Geometric {
         virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
         virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
         virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* ) ;
-        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4]) ;
+        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int) ;
         virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter:: hbndseg_STI :: bnd_t (&)[2]) ;
 
         virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter:: hbndseg_STI :: bnd_t (&)[2]) ;
@@ -428,20 +429,6 @@ inline int GitterBasis :: Objects :: Hbnd3Default :: ghostLevel () const {
 inline bool GitterBasis :: Objects :: Hbnd3Default :: ghostLeaf () const {
   return leaf() ;
 }
-
-/*
-inline int GitterBasis :: Objects :: Hbnd3Default :: preCoarsening () 
-{
-  // call preCoarsening on parallel closure elements only 
-  return ( isBorder() ) ? myGrid()->preCoarsening( *this ) : 0; 
-}
-
-inline int GitterBasis :: Objects :: Hbnd3Default :: postRefinement () 
-{
-  // call postRefinement on parallel closure elements 
-  return ( isBorder() ) ? myGrid()->postRefinement( *this ) : 0; 
-}
-*/
 
 inline GitterBasis :: Objects :: Hbnd4Default :: Hbnd4Default (myhface4_t * f, int i) : 
   Gitter :: Geometric :: hbndseg4_GEO (f, i)

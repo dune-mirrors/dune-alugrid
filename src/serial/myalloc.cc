@@ -2,7 +2,7 @@
 
 #include "myalloc.h"
 
-const long   MyAlloc :: MAX_HOLD_ADD  = 40000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
+const size_t MyAlloc :: MAX_HOLD_ADD  = 40000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
 const double MyAlloc :: MAX_HOLD_MULT = 0.25 ;   // max das MAX_HOLD_MULT-fache der momentan
                                                  // aktiven Objekte werden gespeichert
 // MyAlloc initialize flag                                                   
@@ -22,7 +22,7 @@ public:
   // f"ur die delete aufgerufen wurde, die aber nicht an free () zur"uck-
   // gegeben werden um Fragmentierung zu vermeiden.
 
-  long N ;
+  size_t N ;
 
   stack < void * > S ;
 
@@ -104,12 +104,12 @@ void MyAlloc :: operator delete (void *ptr, size_t s)
   {
     // check if max size is exceeded 
     const size_t stackSize = fs.S.size ();
-    if ( ( stackSize >= (unsigned) MAX_HOLD_ADD ) && 
+    if ( ( stackSize >= MAX_HOLD_ADD ) && 
          ( double (stackSize) >= MAX_HOLD_MULT * double (fs.N) )
        ) 
     {
       assert (!fs.S.empty()) ;
-      free (fs.S.top ()) ;
+      free ( fs.S.top () ) ;
       fs.S.pop() ;
     }
   }

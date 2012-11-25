@@ -31,47 +31,6 @@ void GitterDunePll :: duneNotifyMacroGridChanges ()
   rebuildGhostCells ();
 }
 
-void GitterDunePll :: duneNotifyGridChanges ()
-{
-  Gitter :: notifyGridChanges () ;
-  duneExchangeDynamicState () ;
-  return ;
-}
-
-
-// adapt, no loadBalancing done   
-bool GitterDunePll :: adaptWithoutLoadBalancing ()   
-{
-  __STATIC_myrank = mpAccess ().myrank () ;
-  __STATIC_turn ++ ;
-  assert (debugOption (20) ? (cout << "**INFO GitterDunePll["<< __STATIC_myrank << "] :: adaptWithoutLB ()" << endl, 1) : 1) ;
-  assert (! iterators_attached ()) ;
-
-  int start = clock () ;
-  const bool refined = this->refine() ;
-  int lap = clock () ;
-  this->coarse ();
-  
-  int end = clock () ;
-  if (debugOption (1))
-  {
-    float u1 = (float)(lap - start)/(float)(CLOCKS_PER_SEC) ;
-    float u2 = (float)(end - lap)/(float)(CLOCKS_PER_SEC) ;
-    float u3 = (float)(end - start)/(float)(CLOCKS_PER_SEC) ;
-    cout << "**INFO GitterDunePll["<< __STATIC_myrank << "] :: adaptWithoutLB () [ref (loops)|cse|all] " << u1 << " ("
-       << _refineLoops << ") " << u2 << " " << u3 << endl ;
-  }
-
-#ifndef NDEBUG
-  // make sure every process returns the same value 
-  const bool checkRefined = mpAccess().gmax( refined );
-  assert( refined == checkRefined );
-#endif
-
-  duneNotifyGridChanges () ;
-  return refined;
-}
-
 // done call notify and loadBalancer  
 bool GitterDunePll :: duneAdapt (AdaptRestrictProlongType & arp)   
 {
@@ -88,17 +47,25 @@ bool GitterDunePll :: duneLoadBalance ()
 }
 
 // returns true if grid was repartitioned 
-bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProlongType & arp) {
-  
+bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProlongType & arp) 
+{
+  // set restriction/prolongation operator 
   this->setAdaptRestrictProlongOp(arp);
   assert (debugOption (20) ? (cout << "**GitterDunePll :: duneLoadBalance () " << endl, 1) : 1) ;
 
   LoadBalancer :: DataBase db;
-  const bool neu = checkPartitioning( db );
+  const bool repartion = checkPartitioning( db );
 
-  if (neu) 
+  if ( repartion ) 
   {
-    if (mpAccess ().gmax (_ldbMethod)) 
+    const int ldbMth = int( _ldbMethod );
+#ifndef NDEBUG
+    // make sure every process has the same ldb method 
+    int checkMth = mpAccess ().gmax( ldbMth );
+    assert( checkMth == ldbMth );
+#endif
+
+    if ( ldbMth )
     {
       assert (debugOption (5) ? (cout << "**GitterDunePll :: repartitioning macro grid! " << endl, 1) : 1) ;
       duneRepartitionMacroGrid (db, gs) ;
@@ -106,88 +73,9 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProl
     }
   }
 
+  // remove restriction/prolongation operator 
   this->removeAdaptRestrictProlongOp ();
-  return neu;
-}
-
-void GitterDunePll :: duneExchangeDynamicState () 
-{
-  // Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
-  // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
-  // die einer "Anderung des statischen Zustands entsprechen. Sie wird in
-  // diesem Fall NACH dem Update des statischen Zustands aufgerufen, und
-  // kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
-  // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
-  // Regel hier eingeschleift werden.
-  {
-    const int nl = mpAccess ().nlinks () ;
-  
-#ifndef NDEBUG 
-    // if debug mode, then count time 
-    const int start = clock () ;
-#endif
-  
-    try 
-    {
-      typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
-         TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
-      typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
-        TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
-                
-      vector < ObjectStream > osv (nl) ;
-      {
-        for (int l = 0 ; l < nl ; l ++) 
-        {
-          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
-          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
-
-          InnerIteratorType wi (mif);
-          for (wi.first () ; ! wi.done () ; wi.next ()) 
-          {
-            pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
-            p.first->writeDynamicState (osv [l], p.second) ;
-          }
-      
-          OuterIteratorType wo (mof);
-          for (wo.first () ; ! wo.done () ; wo.next ()) 
-          {
-            pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
-            p.first->writeDynamicState (osv [l], p.second) ;
-          }
-        }  
-      }
-    
-      // exchange data 
-      osv = mpAccess ().exchange (osv) ;
-    
-      { 
-        for (int l = 0 ; l < nl ; l ++ ) 
-        {
-          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
-          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
-      
-          OuterIteratorType wo (mof) ;
-          for (wo.first () ; ! wo.done () ; wo.next ()) 
-          {
-            pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
-            p.first->readDynamicState (osv [l], p.second) ;
-          }
-      
-          InnerIteratorType wi (mif);
-          for (wi.first () ; ! wi.done () ; wi.next ()) 
-          {
-            pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
-            p.first->readDynamicState (osv [l], p.second) ;
-          }
-        }
-      }
-    } 
-    catch (Parallel ::  AccessPllException) 
-    {
-      cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
-    }
-    assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: exchangeDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
-  }
+  return repartion;
 }
 
 pair < IteratorSTI < GitterPll :: vertex_STI > *, IteratorSTI < GitterPll :: vertex_STI > *> 
@@ -1096,7 +984,7 @@ void GitterDunePll :: doCommunication (
   const bool containsVertices = vertexData.contains(3,3);
   const bool containsEdges    = edgeData.contains(3,2);
   const bool containsFaces    = faceData.contains(3,1);
-  const bool containsElements = elementData.contains(3,0);
+  const bool containsElements = elementData.contains(3,0) ;
 
   const bool haveHigherCodimData = containsVertices || 
     containsEdges ||  
@@ -1126,7 +1014,10 @@ void GitterDunePll :: doCommunication (
     doBorderBorderComm( vec, vertexData, edgeData, faceData );
   }
 
-  if( commType != Border_Border_Comm ) // otherwise only border border 
+  // this communication only makes sense if ghost cells are present 
+  const bool ghostCellsAvailable = ghostCellsEnabled ();
+
+  if( (commType != Border_Border_Comm) && ghostCellsAvailable ) // otherwise only border border 
   {
     doInteriorGhostComm( vec, vertexData, edgeData, faceData, elementData , commType ); 
   }
@@ -1177,18 +1068,12 @@ void GitterDunePll :: allAllCommunication (
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-bool GitterDunePll :: refine () 
-{
-  return GitterPll :: refine () ;
-}
-
-void GitterDunePll :: coarse () {
-  GitterPll :: coarse () ;
-}
-
 // rebuild ghost cells 
 void GitterDunePll :: rebuildGhostCells() 
 {
+  // only do this if ghost cells are enabled 
+  if( ! ghostCellsEnabled() ) return ;
+
   const int nl = mpAccess ().nlinks () ;
 
   try 
@@ -1276,6 +1161,9 @@ void GitterDunePll :: rebuildGhostCells()
 
 void GitterDunePll :: checkGhostIndices() 
 {
+  // only do this if ghost cells are enabled 
+  if( ! ghostCellsEnabled() ) return ;
+
   // get number of links 
   const int nl = mpAccess ().nlinks () ;
   
@@ -1393,5 +1281,52 @@ void GitterDunePll :: duneRestore(const char *fileName)
 
   return ;
 }
+
+void GitterDunePll :: tovtk( const std::string &fn ) 
+{
+  const int myrank = mpAccess ().myrank () ;
+  const int nProc = mpAccess ().psize () ;
+
+  std::ostringstream ss;
+  ss << "p" << myrank << "-" << fn;
+
+  // openfile
+  std::ofstream vtuFile;
+  Gitter :: tovtk( ss.str() );
+
+  if( myrank == 0 )
+  {
+    std::ostringstream pllss;
+    if( fn.substr(fn.find_last_of(".") + 1) == "vtu" )
+    {
+      pllss << fn.substr(0,fn.find_last_of(".") + 1) << "pvtu";
+    }
+    else
+    {
+      pllss << fn << ".pvtu";
+    }
+    std::ofstream pvtuFile;
+    pvtuFile.open( pllss.str().c_str() );
+  
+    pvtuFile << "<?xml version=\"1.0\"?>" << std::endl;
+    pvtuFile << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+    pvtuFile << "  <PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
+    pvtuFile << "    <PCellData Scalars=\"cell-id\">" << std::endl;
+    pvtuFile << "      <PDataArray type=\"Float32\" Name=\"cell-id\" />" << std::endl;
+    pvtuFile << "    </PCellData>" << std::endl;
+    pvtuFile << "    <PPoints>" << std::endl;
+    pvtuFile << "      <PDataArray type=\"Float32\" NumberOfComponents=\"3\" />" << std::endl;
+    pvtuFile << "    </PPoints>" << std::endl;
+    for( int p = 0; p < nProc; ++p )
+      pvtuFile << "    <Piece Source=\"p" << p << "-" << fn << "\" />" << std::endl;
+    pvtuFile << "  </PUnstructuredGrid>" << std::endl;
+    pvtuFile << "</VTKFile>" << std::endl;
+
+    pvtuFile.close();
+
+    std::cout << "data written to " << pllss.str() << std::endl;
+  }
+}
+
 
 #endif

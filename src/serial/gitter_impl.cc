@@ -154,7 +154,7 @@ setIndicesAndBndId (const hface_STI & f, int face_nr)
 
   IndexManagerType & vxIm = ims.get(BuilderIF :: IM_Vertices);
   IndexManagerType & edIm = ims.get(BuilderIF :: IM_Edges);
-  
+
   for (int i = 0; i < 3; ++i) 
   {
     // make sure we got the right face 
@@ -488,9 +488,9 @@ GitterBasis :: hface4_GEO * GitterBasis :: MacroGitterBasis :: insert_hface4 (he
 }
 
 GitterBasis :: tetra_GEO * GitterBasis :: MacroGitterBasis :: 
-insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) 
+insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], int orientation ) 
 {
-  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3]);
+  return new Objects :: tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], orientation);
 }
 
 // inlcudes implementation of MacroGhostTetra and MacroGhostHexa 
@@ -580,7 +580,8 @@ void GitterBasisImpl :: printMemUsage ()
   cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
   cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
   cout << "Vertex = " << sizeof(VertexEmpty) << endl;
-  cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl << endl;
+  cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl;
+  cout << "MacroGhostInfoTetra = " << sizeof(MacroGhostInfoTetra) << endl << endl;
 
   cout << "******** HEXA *************************8\n";
   cout << "Hexasize = " << sizeof(hexa_IMPL) << endl;
@@ -588,7 +589,8 @@ void GitterBasisImpl :: printMemUsage ()
   cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
   cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
   cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
-  cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl << endl;
+  cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl;
+  cout << "MacroGhostInfoHexa = " << sizeof(MacroGhostInfoHexa) << endl << endl;
 
   cout << "******** Number of Elements ************************8\n";
   {

@@ -32,6 +32,7 @@ public:
   typedef GitterDuneImpl :: Objects  Objects;
 
   
+  // constructor taking filename containing the macro grid
   GitterDunePll (const char * filename , 
                  MpAccessLocal &mp, 
                  ProjectVertex* ppv = 0 ) 
@@ -45,6 +46,7 @@ public:
     rebuildGhostCells();
   }
 
+  // constructor taking istream containing the macro grid
   GitterDunePll (istream& in,
                  MpAccessLocal &mp, 
                  ProjectVertex* ppv = 0 ) 
@@ -58,6 +60,7 @@ public:
     rebuildGhostCells();
   }
 
+  // constructor creating empty grid
   GitterDunePll (MpAccessLocal &mp) 
     : GitterBasisPll ("", mp, 0) 
     , balanceGrid_ (false) 
@@ -69,17 +72,11 @@ public:
     rebuildGhostCells();
   }
 
-  ~GitterDunePll () {
-  }
-
-  // refine alle leaf elements 
-  bool refine (); 
-
-  // coarse all leaf elements if possible 
-  void coarse ();
+  // destructor 
+  ~GitterDunePll () {}
 
   // adapts and witout calling loadBalancer  
-  bool adaptWithoutLoadBalancing ();
+  bool adaptWithoutLoadBalancing () { return GitterPll :: adapt (); }
 
   // adapts and calls preCoarsening and
   // postRefinement, no loadBalancing done   
@@ -100,11 +97,11 @@ public:
   // notifyMacroGridChanges for dune
   void duneNotifyMacroGridChanges (); 
   
-  // notifyGridChanges for dune
-  void duneNotifyGridChanges (); 
+  // notifyGridChanges for dune (calls GitterPll :: notifyGridChanges)
+  void duneNotifyGridChanges () { GitterPll :: notifyGridChanges(); } 
   
-  // exchange changed elements  
-  void duneExchangeDynamicState ();
+  // exchange changed elements (calls GitterPll :: exchangeDynamicState )
+  void duneExchangeDynamicState () { GitterPll :: exchangeDynamicState(); }
   
   // communication of border data 
   void borderBorderCommunication (
@@ -170,6 +167,7 @@ public:
   {
     GitterDuneBasis::duneRestore( is );
   }
+  void tovtk( const std::string &fn);
 
 private:
   // restore grid from istream, needed to be overloaded 

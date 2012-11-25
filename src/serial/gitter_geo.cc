@@ -8,12 +8,11 @@
 
 const pair < Gitter :: Geometric :: hasFace3 *, int > Gitter :: Geometric :: hface3 :: face3Neighbour :: null 
   = pair < Gitter :: Geometric :: hasFace3 *, int > (
-      & (Gitter :: Geometric :: hasFaceEmpty<Gitter :: Geometric :: hasFace3>::instance() ), -1) ;
+      & (Gitter :: Geometric :: hasFaceEmpty::instance() ), -1) ;
 
 const pair < Gitter :: Geometric :: hasFace4 *, int > Gitter :: Geometric :: hface4 :: face4Neighbour :: null 
   = pair < Gitter :: Geometric :: hasFace4 *, int > ( 
-      & (Gitter :: Geometric :: hasFaceEmpty<Gitter :: Geometric :: hasFace4>::instance() ), -1) ;
-      //Gitter :: Geometric :: InternalHasFace4 () 0 , -1) ;
+      & (Gitter :: Geometric :: hasFaceEmpty::instance() ), -1) ;
 
 // prototype of Tetra type ( the faces of a tetrahedron )
 const int Gitter :: Geometric :: Tetra :: prototype [4][3] = {{1,3,2},{0,2,3},{0,3,1},{0,1,2}} ;
@@ -407,6 +406,7 @@ int Gitter :: Geometric :: Hexa :: resetRefinementRequest () {
 }
 
 static inline bool insideBall (const alucoord_t (&p)[3], const alucoord_t (&c)[3], double r) {
+  /*
   bool inside=false;
   double q[3];
   int x,y,z;
@@ -421,9 +421,10 @@ static inline bool insideBall (const alucoord_t (&p)[3], const alucoord_t (&c)[3
     q[0]+=2.0;
   }
   return inside;
-  //return 
-  //     (((p [0] - c [0]) * (p [0] - c [0]) + (p [1] - c [1]) * (p [1] - c [1])
-  //     + (p [2] - c [2]) * (p [2] - c [2])) < (r * r)) ? true : false ;
+  */
+  return 
+       (((p [0] - c [0]) * (p [0] - c [0]) + (p [1] - c [1]) * (p [1] - c [1])
+       + (p [2] - c [2]) * (p [2] - c [2])) < (r * r)) ? true : false ;
 }
 
 int Gitter :: Geometric :: Hexa :: tagForBallRefinement (const alucoord_t (&center)[3], double radius, int limit) {
@@ -509,9 +510,13 @@ int Gitter :: Geometric :: Tetra :: test () const {
   return 0 ;
 }
 
-int Gitter :: Geometric :: Tetra :: tagForGlobalRefinement () {
-  return (request (myrule_t :: iso8), 1) ;
-  //return (request (myrule_t :: bisect), 1) ;
+int Gitter :: Geometric :: Tetra :: tagForGlobalRefinement () 
+{
+  // check whether bisection should be used 
+  if( this->myvertex(0)->myGrid()->conformingClosureNeeded() ) 
+    return (request (myrule_t :: bisect), 1) ;
+  else 
+    return (request (myrule_t :: iso8), 1) ;
 }
 
 int Gitter :: Geometric :: Tetra :: tagForGlobalCoarsening () {
@@ -528,25 +533,9 @@ int Gitter :: Geometric :: Tetra :: tagForBallRefinement (const alucoord_t (&cen
     const alucoord_t (&p)[3] = myvertex (i)->Point () ;
     if (insideBall (p,center,radius)) { hit = true ; break ; }
   }
-  if (!hit) {
-    const int resolution = 50 ;
-    LinearMapping map (myvertex(0)->Point(), myvertex(1)->Point(),
-            myvertex(2)->Point(), myvertex(3)->Point()) ;
-    alucoord_t p [3] ;
-    for (int i = 0 ; i < resolution ; i ++ ) {
-      double b1 = drand48 () ;
-      double b2 = (1.0 - b1) * drand48 () ;
-      double b3 = (1.0 - b1 - b2) * drand48 () ;
-      double b4 = 1.0 - b1 - b2 - b3 ;
-      
-  // Sind das "uberhaupt Zufallspunkte ? Nein. Leider nicht.
-  
-      map.map2world (b1, b2, b3, b4, p) ;
-      if (insideBall (p,center,radius)) { hit = true ; break ; }
-    }
-  }
-  return hit ? (level () < limit ? (request (myrule_t :: iso8), 1) 
-         : (request (myrule_t :: nosplit), 0)) : (request (myrule_t :: crs), 1) ;
+  if (!hit) return (request (myrule_t :: crs), 1) ;
+  if (level()>limit) return (request (myrule_t :: nosplit), 0);
+  return tagForGlobalRefinement();
 }
 
 // ######                                                           #####

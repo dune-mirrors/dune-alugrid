@@ -431,7 +431,7 @@ void ParallelGridMover :: finalize ()
       } 
       else 
       {
-        assert ( face->ref == 2 ) ;
+         assert ( face->ref == 2 ) ; 
         _hface3List.push_back ( face );
         ++ i;
       }
@@ -517,7 +517,7 @@ void ParallelGridMover :: unpackHedge1 (ObjectStream & os) {
   int left, right ;
   os.readObject (left) ;
   os.readObject (right) ;
-  pair < hedge1_GEO *, bool > p = InsertUniqueHedge1 (left,right) ;
+  pair < hedge1_GEO *, bool > p = InsertUniqueHedge (left,right) ;
   p.first->unpackSelf (os,p.second) ;
   return ;
 }
@@ -528,7 +528,7 @@ void ParallelGridMover :: unpackHface3 (ObjectStream & os)
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
-  pair < hface3_GEO *, bool > p = InsertUniqueHface3 (v) ;
+  pair < hface3_GEO *, bool > p = InsertUniqueHface (v) ;
   p.first->unpackSelf (os,p.second) ;
   return ;
 }
@@ -540,7 +540,7 @@ void ParallelGridMover :: unpackHface4 (ObjectStream & os)
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
   os.readObject (v[3]) ;
-  pair < hface4_GEO *, bool > p = InsertUniqueHface4 (v) ;
+  pair < hface4_GEO *, bool > p = InsertUniqueHface (v) ;
   p.first->unpackSelf (os,p.second) ;
   return ;
 }
@@ -552,7 +552,9 @@ void ParallelGridMover :: unpackTetra (ObjectStream & os, GatherScatterType* gs 
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
   os.readObject (v[3]) ;
-  pair < tetra_GEO *, bool > p = InsertUniqueTetra (v) ;
+  int orientation = 0;
+  os.readObject( orientation ); 
+  pair < tetra_GEO *, bool > p = InsertUniqueTetra (v, orientation) ;
   p.first->accessPllX ().duneUnpackSelf (os, p.second, gs) ;
   return ;
 }
@@ -576,7 +578,7 @@ void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os)
   os.readObject (v[4]) ;
   os.readObject (v[5]) ;
 
-  pair < periodic3_GEO *, bool > p = InsertUniquePeriodic3 (v, b) ;
+  pair < periodic3_GEO *, bool > p = InsertUniquePeriodic (v, b) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
 }	
@@ -601,7 +603,7 @@ void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os)
   os.readObject (v[5]) ;
   os.readObject (v[6]) ;
   os.readObject (v[7]) ;
-  pair < periodic4_GEO *, bool > p = InsertUniquePeriodic4 (v, b) ;
+  pair < periodic4_GEO *, bool > p = InsertUniquePeriodic (v, b) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
 }
@@ -699,21 +701,18 @@ inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   MacroGhostInfoTetra * ghInfo = 0;
   if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
   {
-    // read ghost data from stream 
+    // read ghost data from stream in any case 
     ghInfo = new MacroGhostInfoTetra( os ); 
-    //cout << "Got transmitted point \n";
   }
 
   // if internal boundary, create internal bnd face 
-  if(b == Gitter :: hbndseg :: closure)
+  if( b == Gitter :: hbndseg :: closure && ghInfo )
   {
-    assert( ghInfo );
     InsertUniqueHbnd3_withPoint (v, b, ghInfo ) ;
   }
   else
   {
-    // delete ghost info not needed any longer 
-    if( ghInfo ) delete ghInfo;
+    if( ghInfo ) delete ghInfo ;
 
     // create normal bnd face, and make sure that no Point was send
     assert(readPoint == MacroGridMoverIF :: NO_POINT );
@@ -748,9 +747,8 @@ inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   }
 
   // if internal boundary, create internal bnd face 
-  if(b == Gitter :: hbndseg :: closure)
+  if(b == Gitter :: hbndseg :: closure && ghInfo )
   {
-    assert( ghInfo );
     InsertUniqueHbnd4_withPoint (v, b, ghInfo ) ;
   }
   else
@@ -995,6 +993,15 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
       ParallelGridMover pgm (containerPll ()) ;
       // unpack all data  
       pgm.unpackAll (osv, gatherScatter ) ;
+
+#ifndef NDEBUG
+      // check that all leaf elements are in conforming status (bisection only)
+      bool x = true ;
+      LeafIterator< helement_STI > i( *this );
+      for( i->first(); ! i->done() ; i->next()) { x &= i->item().markForConformingClosure () ; }
+
+      // assert( x == true );
+#endif
     }
 
     // result 

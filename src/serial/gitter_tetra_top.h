@@ -25,7 +25,7 @@ inline bool checkFace ( const A* fce, const int child )
       bool foundVx = false ;
       for( int e=0; e<2; ++e ) 
       {
-        if( face->myvertex( vxs[ i ][ j ] ) == face->myhedge1( i )->myvertex( e ) ) 
+        if( face->myvertex( vxs[ i ][ j ] ) == face->myhedge( i )->myvertex( e ) ) 
           foundVx = true ;
       }
       if( ! foundVx ) 
@@ -33,24 +33,24 @@ inline bool checkFace ( const A* fce, const int child )
         cout << "Edge inconsistency: " << face << endl;
         for( int e=0; e<3; ++e ) 
         {
-          cout << "edge " << face->myhedge1( e )->myvertex( 0 ) << " " <<
-            face->myhedge1( e )->myvertex( 1 ) << endl;
+          cout << "edge " << face->myhedge( e )->myvertex( 0 ) << " " <<
+            face->myhedge( e )->myvertex( 1 ) << endl;
         }
         assert( false );
       }
     }
 
-    if( ! ( face->myvertex( i ) == face->myhedge1( i )->myvertex( twst ) &&
-            face->myvertex( (i+1)%3 ) == face->myhedge1( i )->myvertex( 1-twst ) ) )
+    if( ! ( face->myvertex( i ) == face->myhedge( i )->myvertex( twst ) &&
+            face->myvertex( (i+1)%3 ) == face->myhedge( i )->myvertex( 1-twst ) ) )
       found = false;
 
     for( int j=1; j<3; ++j )
     {
       int f = (i+j)%3 ;
-      if( face->myhedge1( i )->getIndex() == face->myhedge1( f )->getIndex() ) 
+      if( face->myhedge( i )->getIndex() == face->myhedge( f )->getIndex() ) 
       {
-        cout << "Edge " << i << "  " << face->myhedge1( i ) << endl;
-        cout << "Edge " << f << "  " << face->myhedge1( f ) << endl;
+        cout << "Edge " << i << "  " << face->myhedge( i ) << endl;
+        cout << "Edge " << f << "  " << face->myhedge( f ) << endl;
         assert( false );
       }
     }
@@ -62,18 +62,18 @@ template < class A > class Hface3Top : public A
 {
   public :
     using A :: twist ;
-    using A :: myhedge1 ;
+    using A :: myhedge ;
     using A :: myvertex ;
 
     typedef Hface3Top < A >             innerface_t ;
     typedef typename A :: inneredge_t   inneredge_t;
     typedef typename A :: innervertex_t innervertex_t;
-    typedef typename A :: myhedge1_t    myhedge1_t ;
+    typedef typename A :: myhedge_t     myhedge_t ;
     typedef typename A :: myvertex_t    myvertex_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef InnerStorage< InnerEdgeStorage< innerface_t , false > > inner_t ;
 
-    typedef pair< myhedge1_t*, myhedge1_t* > edgepair_t ;
+    typedef pair< myhedge_t*, myhedge_t* > edgepair_t ;
 
   private :
     innerface_t * _bbb ;
@@ -89,8 +89,8 @@ template < class A > class Hface3Top : public A
       return  this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Faces ); }    
 
   private:
-    inline myhedge1_t * subedge1 (int,int) ;
-    inline const myhedge1_t * subedge1 (int,int) const ;
+    inline myhedge_t * subedge (int,int) ;
+    inline const myhedge_t * subedge (int,int) const ;
     void split_e01 () ;
     void split_e12 () ;
     void split_e20 () ;
@@ -98,16 +98,16 @@ template < class A > class Hface3Top : public A
 
   public :
     // constructor for macro elements 
-    inline Hface3Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int ) ;
+    inline Hface3Top (int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int ) ;
     // constructor for refined elements 
-    inline Hface3Top (int,myhedge1_t *,int,myhedge1_t *,int,myhedge1_t *,int, int nChild ) ;
+    inline Hface3Top (int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int, int nChild ) ;
     virtual inline ~Hface3Top () ;
     innervertex_t * subvertex (int) ;
     const innervertex_t * subvertex (int) const ;
-    inneredge_t * subedge1 (int) ;
-    const inneredge_t * subedge1 (int) const ;
-    innerface_t * subface3 (int) ;
-    const innerface_t * subface3 (int) const ;
+    inneredge_t * subedge (int) ;
+    const inneredge_t * subedge (int) const ;
+    innerface_t * subface (int) ;
+    const innerface_t * subface (int) const ;
     inline int level () const ;
     inline int nChild () const ; 
     innervertex_t * innerVertex () ;
@@ -133,7 +133,7 @@ template < class A > class Hface3Top : public A
 
   protected:
     myvertex_t* vertexNotOnSplitEdge( const int );
-    edgepair_t subEdges( myhedge1_t* , const myvertex_t* , const myvertex_t*  ) ;
+    edgepair_t subEdges( myhedge_t* , const myvertex_t* , const myvertex_t*  ) ;
 
     // non-virtual methods of down and innerVertex 
     innerface_t* dwnPtr() ;
@@ -152,12 +152,12 @@ template < class A > class Hface3Top : public A
 template < class A > class Hbnd3Top : public A {
   public:
     using A :: twist ;
-    using A :: subface3 ;
-    using A :: myhface3 ;
+    using A :: subface ;
+    using A :: myhface ;
 
   protected :
     typedef Hbnd3Top < A >              innerbndseg_t ;
-    typedef typename A :: myhface3_t    myhface3_t ;
+    typedef typename A :: myhface_t     myhface_t ;
     typedef typename A :: balrule_t     balrule_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: bnd_t         bnd_t;
@@ -167,7 +167,7 @@ template < class A > class Hbnd3Top : public A {
 
     // we need access to the indexManager 
     inline IndexManagerType & indexManager () { 
-      return  myhface3(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
+      return  myhface(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
     }    
 
   private :
@@ -177,17 +177,15 @@ template < class A > class Hbnd3Top : public A {
     const bnd_t _bt; // type of boundary 
     unsigned char _lvl ;
 
-    void split_e01 () ;
-    void split_e12 () ;
-    void split_e20 () ;
+    void split_bisection () ;
     void split_iso4 () ;
     inline bool coarse () ;
    
   public:
     // constructor for serial macro boundary elements  
-    inline Hbnd3Top (int,myhface3_t *,int, const bnd_t b ) ;
+    inline Hbnd3Top (int,myhface_t *,int, const bnd_t b ) ;
     // constructor for children 
-    inline Hbnd3Top (int, myhface3_t *,int, 
+    inline Hbnd3Top (int, myhface_t *,int, 
                      innerbndseg_t * up, const bnd_t b, 
                      typename Gitter::helement_STI * gh, int gFace ) ;
 
@@ -217,25 +215,27 @@ template < class A > class TetraTop : public A
 {
   public :
     using A :: twist ;
-    using A :: myhface3 ;
+    using A :: myhface ;
     using A :: myvertex ;
+    using A :: myGrid ;
+    using A :: nEdges ;
+    using A :: myhedge ;
 
     typedef TetraTop < A >    innertetra_t  ;
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: inneredge_t   inneredge_t ;
     typedef typename A :: innerface_t   innerface_t ;
     typedef Gitter :: Geometric :: VertexGeo  myvertex_t ;
-    typedef typename A :: myhedge1_t    myhedge1_t ;
-    typedef typename A :: myhface3_t    myhface3_t ;
+    typedef typename A :: myhedge_t    myhedge_t ;
+    typedef typename A :: myhface_t    myhface_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
-    typedef pair< myhface3_t *, myhface3_t * > facepair_t;
+    typedef pair< myhface_t *, myhface_t * > facepair_t;
 
     typedef InnerStorage< InnerFaceStorage< innertetra_t , false > > inner_t ;
-    typedef typename myhface3_t :: myrule_t face3rule_t;
+    typedef typename myhface_t :: myrule_t face3rule_t;
 
   protected:  
-
     struct BisectionInfo 
     {
       struct CallSplitIF 
@@ -303,7 +303,7 @@ template < class A > class TetraTop : public A
         return bisectionInfo[ int(rule) - 2 ];
       }
 
-      static face3rule_t calculateRule( const myhface3_t* face, 
+      static face3rule_t calculateRule( const myhface_t* face, 
                                         const myvertex_t* vx0,
                                         const myvertex_t* vx1 )
       {
@@ -315,10 +315,8 @@ template < class A > class TetraTop : public A
         {
           for( int twist=0; twist<2; ++twist )
           {
-            //cout << "Check edge " << face->myhedge1( j )->myvertex( twist ) << " " 
-            //     << face->myhedge1( j )->myvertex( 1-twist ) << endl;
-            if( face->myhedge1( j )->myvertex( twist ) == vx0  && 
-                face->myhedge1( j )->myvertex( 1-twist ) == vx1  ) 
+            if( face->myhedge( j )->myvertex( twist ) == vx0  && 
+                face->myhedge( j )->myvertex( 1-twist ) == vx1  ) 
             {
               return rules[ j ];
             }
@@ -335,15 +333,10 @@ template < class A > class TetraTop : public A
         const BisectionInfo& info = instance( rule );
         for( int i=0; i<2; ++i )
         {
-          myhface3_t* face = tetra->myhface3( info._faces[ i ] );
+          myhface_t* face = tetra->myhface( info._faces[ i ] );
 
-          //cout << "Check rule for " << face << endl;
-          //cout << "vx0 " << int(info._vertices[ 0 ]) << " " << tetra->myvertex( info._vertices[ 0 ] ) << endl;
-          //cout << "vx1 " << int(info._vertices[ 1 ]) << " " << tetra->myvertex( info._vertices[ 1 ] ) << endl;
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
-
-          //cout << "Got rule " << faceRule << endl;
           // check refinement of faces 
           if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false ;
         }
@@ -356,7 +349,7 @@ template < class A > class TetraTop : public A
 
         for( int i=0; i<2; ++i )
         {
-          myhface3_t* face = tetra->myhface3( info._faces[ i ] );
+          myhface_t* face = tetra->myhface( info._faces[ i ] );
 
           const face3rule_t faceRule = calculateRule( face, 
               tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
@@ -370,18 +363,59 @@ template < class A > class TetraTop : public A
 
       const CallSplitIF& caller() const { assert( _caller ); return *_caller; }
     };
+    // end BisectionInfo 
+
+    // return true if further refinement is needed to create conforming closure 
+    virtual bool markForConformingClosure () 
+    {
+      assert( myGrid()->conformingClosureNeeded() );
+      // if an edge exits, that has children, we also have to refine this tetra 
+      assert( nEdges() == 6 );
+      for (int e=0; e < 6; ++e)
+      {
+        if( myhedge( e )->down() )
+        {
+          request ( myrule_t :: bisect );
+          return true ;
+        }
+      }
+      return false ;
+    }
+
+    // mark edges to prohibit coarsening 
+    virtual void markEdgeCoarsening () 
+    { 
+      assert( this->myGrid()->conformingClosureNeeded() );
+      assert( this->nEdges() == 6 );
+      // nothing to do for macro element 
+      if ( _lvl == 0 ) return;
+
+      // get father 
+      innertetra_t* father = (innertetra_t * ) this->up();
+
+      for (int e=0; e<6; ++e)
+      {
+        myhedge_t *edge = father->myhedge( e );
+        // the father of a leaf element can only have one non leaf edge
+        if ( ! (_req == myrule_t :: crs && edge->down() ) ) 
+        { 
+          edge->disableEdgeCoarsen();
+        }
+      }
+    }
 
     void refineImmediate (myrule_t) ;
     inline void append (innertetra_t * h) ;
 
     bool checkTetra( const innertetra_t* tetra, const int  ) const ;
     int vertexTwist( const int, const int ) const ;
-    int calculateFace2Twist( const int vx, const myhface3_t* ) const;
-    int calculateFace3Twist( const int (&vx)[2], const myhface3_t*, const int ) const;
+    int calculateFace2Twist( const int vx, const myhface_t* ) const;
+    int calculateFace3Twist( const int (&vx)[2], const myhface_t*, const int ) const;
     // the element type is obtained from the level of the element 
     // under the assumption that on level 0 all elements have type 0
     unsigned char elementType () const { return (_lvl % 3); }
 
+    // sets the new _vxMap for this tetra 
     void setNewMapping( innertetra_t*, innertetra_t*, innerface_t*, const int, const int ) ;
 
   private :
@@ -394,6 +428,7 @@ template < class A > class TetraTop : public A
     unsigned char _vxMap[ 4 ] ; // 4 byte 
     myrule_t _req, _rule ;      // 2 byte   = 8 byte 
 
+    // true if bisection after Stevenson is used, otherwise ALBERTA refinement 
     enum { stevensonRefinement_ = false };
     
   private :
@@ -473,6 +508,7 @@ template < class A > class TetraTop : public A
 
     inline IndexManagerType & indexManager() { 
       return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Elements ); }
+
     double calculateChildVolume(const double) const;
     
     void split_e01 () ;
@@ -482,22 +518,22 @@ template < class A > class TetraTop : public A
     void split_e30 () ;
     void split_e31 () ;
 
-    void bisect () ;
     void splitISO8 () ;
   protected :
-    myhedge1_t * subedge1 (int,int) ;
-    const myhedge1_t * subedge1 (int,int) const ;
+    myhedge_t * subedge (int,int) ;
+    const myhedge_t * subedge (int,int) const ;
     facepair_t subFaces( const int );
     facepair_t subFaces( const int, const myvertex_t*, const myvertex_t* );
-    myhface3_t * subface3 (int,int) ;
-    const myhface3_t * subface3 (int i, int j) const ;
+    myhface_t * subface (int,int) ;
+    const myhface_t * subface (int i, int j) const ;
   public:
     // constructor for refined elements 
-    TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                  myhface3_t *,int,innertetra_t *up, int nChild, double vol) ;
+    TetraTop (int,myhface_t *,int,myhface_t *,int,myhface_t *,int,
+                  myhface_t *,int,innertetra_t *up, int nChild, double vol) ;
     // constructor for macro elements 
-    TetraTop (int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,
-                  myhface3_t *, int ) ;
+    TetraTop (int,myhface_t *,int,myhface_t *,int,
+                  myhface_t *,int,myhface_t *,int,
+              int ) ;
     virtual ~TetraTop () ;
     inline innertetra_t * up () ;
     inline const innertetra_t * up () const;
@@ -515,6 +551,8 @@ template < class A > class TetraTop : public A
     inline int level () const ;
     inline int nChild () const ;
     inline double volume () const ;
+
+    int orientation () const { return ( _vxMap[ 2 ] == 3 ) ? 0 : 1; }
   public :
     myrule_t getrule () const ;
     myrule_t requestrule () const ;
@@ -559,15 +597,15 @@ template < class A > class TetraTop : public A
 template < class A > class Periodic3Top : public A {
   public:
     using A :: twist ;
-    using A :: myhface3 ;
+    using A :: myhface ;
 
   protected :
     typedef Periodic3Top < A >          innerperiodic3_t  ;
     typedef typename A :: innervertex_t innervertex_t ;
     typedef typename A :: inneredge_t   inneredge_t ;
     typedef typename A :: innerface_t   innerface_t ;
-    typedef typename A :: myhedge1_t    myhedge1_t ;
-    typedef typename A :: myhface3_t    myhface3_t ;
+    typedef typename A :: myhedge_t    myhedge_t ;
+    typedef typename A :: myhface_t    myhface_t ;
     typedef typename A :: myrule_t      myrule_t ;
     typedef typename A :: balrule_t     balrule_t ;
     typedef typename A :: bnd_t         bnd_t; 
@@ -591,20 +629,20 @@ template < class A > class Periodic3Top : public A {
     void split_e20 () ;
     void split_iso4 () ;
   protected :
-    myhedge1_t * subedge1 (int,int) ;
-    const myhedge1_t * subedge1 (int,int) const ;
-    myhface3_t * subface3 (int,int) ;
-    const myhface3_t * subface3 (int i, int j) const ;
+    myhedge_t * subedge (int,int) ;
+    const myhedge_t * subedge (int,int) const ;
+    myhface_t * subface (int,int) ;
+    const myhface_t * subface (int i, int j) const ;
 
     // we need this for the boundary segment index 
     inline IndexManagerType & indexManager () { 
-      return  this->myhface3(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
+      return  this->myhface(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Bnd ); 
     }    
   public:
     // constructor for macro elements 
-    inline Periodic3Top (int,myhface3_t *,int,myhface3_t *,int, const bnd_t (&bnd)[2] ) ;
+    inline Periodic3Top (int,myhface_t *,int,myhface_t *,int, const bnd_t (&bnd)[2] ) ;
     // construtor for refined elements 
-    inline Periodic3Top (int,myhface3_t *,int,myhface3_t *,int, innerperiodic3_t * up, int nChild ) ;
+    inline Periodic3Top (int,myhface_t *,int,myhface_t *,int, innerperiodic3_t * up, int nChild ) ;
     virtual inline ~Periodic3Top () ;
     inline innerperiodic3_t * up () ;
     inline const innerperiodic3_t * up () const;
@@ -731,38 +769,38 @@ template < class A > inline const typename Hface3Top < A > :: innervertex_t * Hf
   return 0 ;
 }
 
-template < class A > inline typename Hface3Top < A > :: myhedge1_t * Hface3Top < A > :: subedge1 (int i,int j) {
+template < class A > inline typename Hface3Top < A > :: myhedge_t * Hface3Top < A > :: subedge (int i,int j) {
   assert(j == 0 || j == 1) ;
-  return myhedge1 (i)->subedge1 (j ? 1 - twist(i) : twist(i)) ;
+  return myhedge (i)->subedge (j ? 1 - twist(i) : twist(i)) ;
 }
 
-template < class A > inline const typename Hface3Top < A > :: myhedge1_t * Hface3Top < A > :: subedge1 (int i,int j) const {
+template < class A > inline const typename Hface3Top < A > :: myhedge_t * Hface3Top < A > :: subedge (int i,int j) const {
   assert(j == 0 || j == 1) ;
-  return myhedge1 (i)->subedge1 (j ? 1 - twist(i) : twist(i)) ;
+  return myhedge (i)->subedge (j ? 1 - twist(i) : twist(i)) ;
 }
 
-template < class A > inline typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) {
+template < class A > inline typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge (int n) {
   inneredge_t * e = inEd() ;
   for (int i = 0 ; i < n ; ++i ) e = e ? e->next () : 0 ;
   assert (e) ;
   return e ;
 }
 
-template < class A > inline const typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge1 (int n) const {
+template < class A > inline const typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge (int n) const {
   const inneredge_t * e = inEd();
   for (int i = 0 ; i < n ; ++i ) e = e ? e->next () : 0 ;
   assert (e) ;
   return e ;
 }
 
-template < class A > inline typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface3 (int n) {
+template < class A > inline typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface (int n) {
   innerface_t * f = dwnPtr() ;
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;
   return f ;
 }
 
-template < class A > inline const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface3 (int n) const {
+template < class A > inline const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface (int n) const {
   const innerface_t * f = dwnPtr();
   for (int i = 0 ; i < n ; i++ ) f = f ? f->next () : 0 ;
   assert (f) ;
@@ -781,8 +819,8 @@ template < class A > inline typename Hface3Top < A > :: myrule_t Hface3Top < A >
 
 // constructor called during refinement 
 template < class A > inline Hface3Top < A > :: 
-Hface3Top (int l, myhedge1_t * e0, 
-  int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2,
+Hface3Top (int l, myhedge_t * e0, 
+  int t0, myhedge_t * e1, int t1, myhedge_t * e2, int t2,
   int nChild ) : 
   A (e0, t0, e1, t1, e2, t2), 
   _bbb (0), _inner(0) ,
@@ -792,16 +830,17 @@ Hface3Top (int l, myhedge1_t * e0,
 {
   this->setIndex( indexManager().getIndex() );
 
-#ifndef NDEBUG 
+#if 0 // NDEBUG 
   double n[ 3 ];
   LinearSurfaceMapping( myvertex( 0 )->Point(), 
                         myvertex( 1 )->Point(),
                         myvertex( 2 )->Point() ).normal( n );
 
-  //if( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) < 1e-8 ) 
-  //{
-  //  cout << "Determinant of " << this << " is wrong" <<endl;
-  //}
+  if( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) < 1e-8 ) 
+  {
+    cout << "Determinant of " << this << " is wrong" <<endl;
+    cout << "normal: " << n[0] << "," << n[1] << "," << n[2] << endl;
+  }
   assert( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) >= 1e-8 );
 #endif
   assert( checkFace( this, nChild ) );
@@ -810,8 +849,8 @@ Hface3Top (int l, myhedge1_t * e0,
 
 // constructor called while creating macro face 
 template < class A > inline Hface3Top < A > :: 
-Hface3Top (int l, myhedge1_t * e0, 
-  int t0, myhedge1_t * e1, int t1, myhedge1_t * e2, int t2) : 
+Hface3Top (int l, myhedge_t * e0, 
+  int t0, myhedge_t * e1, int t1, myhedge_t * e2, int t2) : 
   A (e0, t0, e1, t1, e2, t2), 
   _bbb (0), _inner (0), 
   _lvl (l),
@@ -840,7 +879,7 @@ template < class A > inline Hface3Top < A > :: ~Hface3Top ()
 
 // serial macro bnd constructor 
 template < class A > inline Hbnd3Top < A > :: 
-Hbnd3Top (int l, myhface3_t * f, int i, const bnd_t bt) :
+Hbnd3Top (int l, myhface_t * f, int i, const bnd_t bt) :
   A (f, i ), 
   _bbb (0), _dwn (0), _up (0) , 
   _bt( bt ),
@@ -858,7 +897,7 @@ Hbnd3Top (int l, myhface3_t * f, int i, const bnd_t bt) :
 }
 
 template < class A > inline Hbnd3Top < A > :: 
-Hbnd3Top (int l, myhface3_t * f, 
+Hbnd3Top (int l, myhface_t * f, 
           int i,  
           innerbndseg_t * up, bnd_t bt, 
           Gitter::helement_STI * gh, int gFace ) : 
@@ -866,6 +905,7 @@ Hbnd3Top (int l, myhface3_t * f,
   _bt (bt),
   _lvl (l) 
 {
+  assert( this->myGrid()->ghostCellsEnabled() && _bt == A::closure ? gh != 0 : true );
   // store ghost element 
   typedef Gitter :: ghostpair_STI ghostpair_STI;
   this->setGhost ( ghostpair_STI (gh , gFace) );
@@ -1051,6 +1091,9 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
 
   if( r == myrule_t :: bisect )
   {
+    // this can only be used when conforming closure is enabled 
+    assert( this->myGrid()->conformingClosureNeeded() );
+
     // we always split edge 0 and 3 following 
     // the idea of Stevenson, Nochetto, Veser, Siebert 
     // suggestRule returns the correct splitting edge 
@@ -1062,8 +1105,6 @@ template < class A > inline void TetraTop < A > :: request (myrule_t r)
     // all other cases 
     _req = r ;
   }
-
-  //cout << "Request rule " <<  _req << " for tetra " << this << endl;
   return ;
 }
 
@@ -1080,8 +1121,8 @@ template < class A > inline bool TetraTop < A > :: bndNotifyCoarsen () {
 // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
    
 template < class A > inline Periodic3Top < A > :: 
-Periodic3Top (int l, myhface3_t * f0, int t0,
-  myhface3_t * f1, int t1, const bnd_t (&bt)[2] ) 
+Periodic3Top (int l, myhface_t * f0, int t0,
+  myhface_t * f1, int t1, const bnd_t (&bt)[2] ) 
  : A (f0, t0, f1, t1)
  , _dwn (0), _bbb (0), _up(0)
  , _lvl (l) 
@@ -1102,7 +1143,7 @@ Periodic3Top (int l, myhface3_t * f0, int t0,
 }
 
 template < class A > inline Periodic3Top < A > :: 
-Periodic3Top (int l, myhface3_t * f0, int t0, myhface3_t * f1, int t1, innerperiodic3_t * up, int nChild ) 
+Periodic3Top (int l, myhface_t * f0, int t0, myhface_t * f1, int t1, innerperiodic3_t * up, int nChild ) 
   : A (f0, t0, f1, t1)
   , _dwn (0), _bbb (0), _up(up)
   , _lvl (l) 

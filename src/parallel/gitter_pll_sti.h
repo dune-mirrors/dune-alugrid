@@ -185,10 +185,23 @@ class GitterPll : public virtual Gitter {
     virtual void printsize () ;
     virtual void fullIntegrityCheck () ;
 
+  protected:  
     virtual bool refine () ;
     virtual void coarse () ;
     virtual bool adapt () ;
+  public:  
     virtual void printSizeTT () ;
+
+    // communication of border data 
+    virtual void borderBorderCommunication (
+             GatherScatterType & vertexData ,
+             GatherScatterType & edgeData,
+             GatherScatterType & faceData ,
+            GatherScatterType & elementData ) {
+      abort();
+    }
+
+
     
   protected :
     virtual Makrogitter & container () = 0 ;

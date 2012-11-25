@@ -1,7 +1,7 @@
 // (c) Robert Kloefkorn 2004 - 2005 
 #include "ghost_elements.h"
 
-MacroGhostBuilder :: MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi,(bool) false) 
+MacroGhostBuilder :: MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi, bool(false) ) 
 {
   // create Builder with empty lists 
   this->_initialized = true;
@@ -11,26 +11,8 @@ MacroGhostBuilder :: MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi,(b
 MacroGhostBuilder ::  ~MacroGhostBuilder () 
 {
   // remove all faces that already exist from the lists 
-  {  
-    typedef edgeMap_t :: iterator iterator;
-    iterator end = _existingEdge.end();
-    for (iterator i = _existingEdge.begin () ; i != end ; ++i )
-    {
-      edgeKey_t e = (*i).first;
-      this->_edgeMap.erase(e);
-    }
-  }
-  
-  // remove all faces that already exist from the lists 
-  {  
-    typedef vertexMap_t :: iterator iterator;
-    iterator end = _existingVertex.end();
-    for (iterator i = _existingVertex.begin () ; i != end ; ++i )
-    {
-      vertexKey_t v = (*i).first;
-      this->_vertexMap.erase(v);
-    }
-  }
+  _existingEdge.clear();
+  _existingVertex.clear();
 
   finalize();
 }
@@ -51,28 +33,12 @@ InsertNewUniqueVertex (double x, double y, double z, int i)
 }
 
 // delete all elementes and stuff 
-void MacroGhostBuilder :: 
-finalize ()
+void MacroGhostBuilder :: finalize ()
 {
-  { 
-    typedef elementMap_t :: iterator iterator;
-    iterator end = this->_hexaMap.end ();
-    for (iterator i = this->_hexaMap.begin () ; 
-         i != end; this->_hexaMap.erase(i++)) 
-    {  
-      delete ((hexa_GEO *)(*i).second);
-    }
-  } 
-  { 
-    typedef elementMap_t :: iterator iterator;
-    iterator end = this->_tetraMap.end ();
-    for (iterator i = this->_tetraMap.begin () ; 
-         i != end; this->_tetraMap.erase(i++)) 
-    {
-      delete ((tetra_GEO *)(*i).second);
-    }
-  } 
-  
+  // empty all maps 
+  this->_hexaMap.clear();
+  this->_tetraMap.clear();
+
   assert( this->_hbnd3Int.empty ());
   assert( this->_hbnd4Int.empty ());
 
@@ -80,44 +46,16 @@ finalize ()
   assert( this->_hbnd4Map.empty ());
 
   // faces 
-  {
-    typedef faceMap_t :: iterator iterator;
-    iterator end = this->_face4Map.end ();
-    for (iterator i = this->_face4Map.begin () ; 
-         i != end; this->_face4Map.erase(i++)) 
-    {
-      delete ((hface4_GEO *)(*i).second); 
-    }
-  } 
-  {
-    typedef faceMap_t :: iterator iterator;
-    iterator end = this->_face3Map.end ();
-    for (iterator i = this->_face3Map.begin () ; 
-         i != end; this->_face3Map.erase(i++)) 
-    {
-      delete (hface3_GEO *) (*i).second; 
-    }
-  } 
+  this->_face4Map.clear();
+  this->_face3Map.clear();
 
-  {
-    typedef edgeMap_t :: iterator iterator;
-    iterator end = this->_edgeMap.end ();
-    for (iterator i = this->_edgeMap.begin () ; 
-         i != end; this->_edgeMap.erase(i++)) 
-    {
-      delete (hedge1_GEO *) (*i).second; 
-    }
-  } 
+  // edges 
+  this->_edgeMap.clear();
 
-  {
-    typedef vertexMap_t :: iterator iterator;
-    iterator end = this->_vertexMap.end ();
-    for (iterator i = this->_vertexMap.begin () ; 
-         i != end; this->_vertexMap.erase(i++)) 
-    {
-      delete (VertexGeo *) (*i).second; 
-    }
-  } 
+  // vertices
+  this->_vertexMap.clear();
+
+  // finalized 
   this->_finalized = true;
 }
 
@@ -131,11 +69,12 @@ MacroGhostTetra ::
 MacroGhostTetra( BuilderIF & bi, 
                  MacroGhostInfoTetra * allp, 
                  const hface3_GEO * face) :
-  _mgb(bi), 
   _ghInfoPtr( allp ), 
   _ghostPair( (GhostElement_t *)0 , -1) 
 { 
-  MacroGhostBuilder & mgb = _mgb;
+  //create macro ghost builder to create ghost element
+  MacroGhostBuilder mgb( bi );
+
   MacroGhostInfoTetra& ghInfo = *_ghInfoPtr;
 
   typedef Gitter :: Geometric :: VertexGeo VertexGeo;
@@ -176,17 +115,8 @@ MacroGhostTetra( BuilderIF & bi,
 
   assert( wasNewlyInserted );
 
-  /*
-  cout << "\nInsert new vertices " << endl;
-  for(int j=0; j<4; ++j) 
-  {
-    cout << ghInfo.vertices()[j] << "  " ;
-  }
-  cout << endl;
-  */
-
   // InsertUniqueHexa gets the global vertex numbers 
-  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices() ).first ;
+  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first ;
 
   // set ghost and number 
   _ghostPair.first = ghost;
@@ -206,21 +136,23 @@ MacroGhostTetra( BuilderIF & bi,
 MacroGhostTetra :: 
 MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp, 
     Gitter::Geometric::tetra_GEO * orig, alucoord_t (&vec)[3] , double sign) :
-  _mgb(bi), 
   _ghInfoPtr(allp), 
   _ghostPair( (GhostElement_t *)0, -1)
 {
+  //create macro ghost builder to create ghost element
+  MacroGhostBuilder mgb( bi );
+
   MacroGhostInfoTetra& ghInfo = *_ghInfoPtr; 
 
-  MacroGhostBuilder & mgb = _mgb;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; ++i) 
+  {
     mgb.InsertNewUniqueVertex(orig->myvertex(i)->Point()[0] + sign*vec[0],
                               orig->myvertex(i)->Point()[1] + sign*vec[1],
                               orig->myvertex(i)->Point()[2] + sign*vec[2],
                               orig->myvertex(i)->ident()   );
   }
 
-  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices() ).first ;
+  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->orientation() ).first ;
   _ghostPair.first = ghost;
   assert( _ghostPair.first );
   _ghostPair.second = ghInfo.internalFace(); 
@@ -234,6 +166,42 @@ MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp,
 // desctructor deleting _ghInforPtr
 MacroGhostTetra :: ~MacroGhostTetra () 
 {
+  // store all sub items of the ghost element before deleting it
+  tetra_GEO* tetra = (tetra_GEO *) _ghostPair.first;
+  assert( tetra );
+
+  VertexGeo* vertices[ 4 ] = { 
+    tetra->myvertex(0), 
+    tetra->myvertex(1), 
+    tetra->myvertex(2), 
+    tetra->myvertex(3) }; 
+
+  hedge1_GEO* edges[ 6 ] = { 
+    tetra->myhedge(0), 
+    tetra->myhedge(1), 
+    tetra->myhedge(2), 
+    tetra->myhedge(3), 
+    tetra->myhedge(4), 
+    tetra->myhedge(5) 
+  }; 
+
+  hface3_GEO* faces[ 4 ] = {
+    tetra->myhface( 0 ),
+    tetra->myhface( 1 ),
+    tetra->myhface( 2 ),
+    tetra->myhface( 3 )
+  };
+
+  // delete element 
+  delete tetra;
+
+  // delete faces 
+  for( int i=0; i<4; ++i ) delete faces[ i ];
+  // delete edges  
+  for( int i=0; i<6; ++i ) delete edges[ i ];
+  // detele vertices 
+  for( int i=0; i<4; ++i ) delete vertices[ i ];
+
   assert( _ghInfoPtr );
   delete _ghInfoPtr;
 }
@@ -247,11 +215,12 @@ MacroGhostTetra :: ~MacroGhostTetra ()
 // constructor 
 MacroGhostHexa :: 
 MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * face) :
-  _mgb(bi), 
   _ghInfoPtr(allp), 
   _ghostPair( (GhostElement_t *)0 , -1) 
 { 
-  MacroGhostBuilder & mgb = _mgb;
+  //create macro ghost builder to create ghost element
+  MacroGhostBuilder mgb( bi );
+ 
   MacroGhostInfoHexa& ghInfo = *_ghInfoPtr;
   
   typedef Gitter :: Geometric :: VertexGeo VertexGeo;
@@ -295,6 +264,55 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
 
 MacroGhostHexa ::~MacroGhostHexa () 
 {
+  // store all sub items of the ghost element before deleting it
+  hexa_GEO* hexa = (hexa_GEO *) _ghostPair.first;
+  assert( hexa );
+
+  VertexGeo* vertices[ 8 ] = { 
+    hexa->myvertex(0), 
+    hexa->myvertex(1), 
+    hexa->myvertex(2), 
+    hexa->myvertex(3),
+    hexa->myvertex(4), 
+    hexa->myvertex(5), 
+    hexa->myvertex(6), 
+    hexa->myvertex(7)
+  }; 
+
+  hedge1_GEO* edges[ 12 ] = { 
+    hexa->myhedge(0), 
+    hexa->myhedge(1), 
+    hexa->myhedge(2), 
+    hexa->myhedge(3), 
+    hexa->myhedge(4), 
+    hexa->myhedge(5), 
+    hexa->myhedge(6), 
+    hexa->myhedge(7), 
+    hexa->myhedge(8), 
+    hexa->myhedge(9), 
+    hexa->myhedge(10), 
+    hexa->myhedge(11), 
+  }; 
+
+  hface4_GEO* faces[ 6 ] = {
+    hexa->myhface( 0 ),
+    hexa->myhface( 1 ),
+    hexa->myhface( 2 ),
+    hexa->myhface( 3 ),
+    hexa->myhface( 4 ),
+    hexa->myhface( 5 )
+  };
+
+  // delete element 
+  delete hexa;
+
+  // delete faces 
+  for( int i=0; i<6; ++i ) delete faces[ i ];
+  // delete edges  
+  for( int i=0; i<12; ++i ) delete edges[ i ];
+  // detele vertices 
+  for( int i=0; i<8; ++i ) delete vertices[ i ];
+
   assert( _ghInfoPtr );
   delete _ghInfoPtr;
 }

@@ -90,23 +90,23 @@ void VertexPllBaseX :: unpackSelf (ObjectStream & os, bool i) {
 template < class A >
 vector < int > EdgePllBaseXMacro< A > :: estimateLinkage () const {
   vector < int > est ;
-  vector < int > l0 = myhedge1 ().myvertex(0)->accessPllX ().estimateLinkage () ;
-  vector < int > l1 = myhedge1 ().myvertex(1)->accessPllX ().estimateLinkage () ;
+  vector < int > l0 = myhedge ().myvertex(0)->accessPllX ().estimateLinkage () ;
+  vector < int > l1 = myhedge ().myvertex(1)->accessPllX ().estimateLinkage () ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (est), less < int > ()) ;
   return est ;
 }
 
 template < class A >
 LinkedObject :: Identifier EdgePllBaseXMacro< A > :: getIdentifier () const {
-  return LinkedObject :: Identifier (myhedge1 ().myvertex (0)->ident (), myhedge1 ().myvertex (1)->ident ()) ;
+  return LinkedObject :: Identifier (myhedge ().myvertex (0)->ident (), myhedge ().myvertex (1)->ident ()) ;
 }
 
 template < class A >
 void EdgePllBaseXMacro< A > :: unattach2 (int i) {
   assert (_moveTo.find (i) != _moveTo.end ()) ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  myhedge1 ().myvertex (0)->accessPllX ().unattach2 (i) ;
-  myhedge1 ().myvertex (1)->accessPllX ().unattach2 (i) ;
+  myhedge ().myvertex (0)->accessPllX ().unattach2 (i) ;
+  myhedge ().myvertex (1)->accessPllX ().unattach2 (i) ;
   return ;
 }
 
@@ -119,8 +119,8 @@ void EdgePllBaseXMacro< A > :: attach2 (int i)
   } else {
     (*pos).second ++ ;
   }
-  myhedge1 ().myvertex (0)->accessPllX ().attach2 (i) ;
-  myhedge1 ().myvertex (1)->accessPllX ().attach2 (i) ;
+  myhedge ().myvertex (0)->accessPllX ().attach2 (i) ;
+  myhedge ().myvertex (1)->accessPllX ().attach2 (i) ;
   return ;
 }
 
@@ -138,14 +138,14 @@ bool EdgePllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv)
     {
       ObjectStream & os = osv[j];
       os.writeObject (EDGE1) ;
-      os.writeObject (myhedge1 ().myvertex (0)->ident ()) ;
-      os.writeObject (myhedge1 ().myvertex (1)->ident ()) ;
+      os.writeObject (myhedge ().myvertex (0)->ident ()) ;
+      os.writeObject (myhedge ().myvertex (1)->ident ()) ;
       
       // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhedge1_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+      assert( ! myhedge_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
 
       // pack refinement information 
-      myhedge1 ().backup ( os ) ;
+      myhedge ().backup ( os ) ;
       os.put( ObjectStream :: ENDOFSTREAM );
       
       inlineData ( os ) ;
@@ -160,7 +160,7 @@ void EdgePllBaseXMacro< A > :: unpackSelf (ObjectStream & os, bool i)
 {
   if (i) 
   {
-    myhedge1 ().restore ( os ) ;
+    myhedge ().restore ( os ) ;
     
     // stream should be at position ENDOFSTREAM now
     char c = os.get(); 
@@ -206,16 +206,16 @@ template class EdgePllBaseXMacro< GitterBasisPll :: ObjectsPll :: hedge1_IMPL > 
 
 // constructor for hface3 
 template <> FacePllBaseXMacro<GitterBasisPll :: ObjectsPll :: hface3_IMPL> :: 
-FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                  myhedge1_t * e2, int s2)
+FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                  myhedge_t * e2, int s2)
  : GitterBasisPll :: ObjectsPll :: hface3_IMPL(l, e0, s0, e1, s1, e2, s2), _moveTo(), _ref() 
 {
 }
 
 // constructor for hface4
 template <> FacePllBaseXMacro<GitterBasisPll :: ObjectsPll :: hface4_IMPL> :: 
-FacePllBaseXMacro(int l, myhedge1_t * e0, int s0, myhedge1_t * e1, int s1,
-                  myhedge1_t * e2, int s2, myhedge1_t * e3, int s3)
+FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                  myhedge_t * e2, int s2, myhedge_t * e3, int s3)
  : GitterBasisPll :: ObjectsPll :: hface4_IMPL(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo(), _ref() 
 {
 }
@@ -236,10 +236,10 @@ template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage (
   // Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
 
   vector < int > t1, t2, est ;
-  vector < int > l0 = this->myhface ().myhedge1 (0)->estimateLinkage () ;
-  vector < int > l1 = this->myhface ().myhedge1 (1)->estimateLinkage () ;
-  vector < int > l2 = this->myhface ().myhedge1 (2)->estimateLinkage () ;
-  vector < int > l3 = this->myhface ().myhedge1 (A :: polygonlength == 3 ? 2 : 3)->estimateLinkage () ;
+  vector < int > l0 = this->myhface ().myhedge (0)->estimateLinkage () ;
+  vector < int > l1 = this->myhface ().myhedge (1)->estimateLinkage () ;
+  vector < int > l2 = this->myhface ().myhedge (2)->estimateLinkage () ;
+  vector < int > l3 = this->myhface ().myhedge (A :: polygonlength == 3 ? 2 : 3)->estimateLinkage () ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (t1), less < int > ()) ;
   set_intersection (l2.begin (), l2.end (), l3.begin (), l3.end (), back_inserter (t2), less < int > ()) ;
   set_intersection (t1.begin (), t1.end (), t2.begin (), t2.end (), back_inserter (est), less < int > ()) ;
@@ -282,7 +282,7 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
     if( mycon1->isperiodic() ) 
     {
       assert( ! mycon2->isperiodic() ); 
-      ldbVx1 = mycon1->otherLdbVertexIndex( myhface() );
+      ldbVx1 = mycon1->otherLdbVertexIndex( myhface().getIndex() );
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
     }
 
@@ -290,7 +290,7 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
     {
       assert( ! mycon1->isperiodic() ); 
       ldbVx1 = mycon1->accessPllX ().ldbVertexIndex ();
-      ldbVx2 = mycon2->otherLdbVertexIndex( myhface() );
+      ldbVx2 = mycon2->otherLdbVertexIndex( myhface().getIndex() );
     }
     
     // count leaf faces for this macro face 
@@ -306,7 +306,7 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
       // TODO: make weight factor (here 4) dynamically adjustable 
       db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight*4 ) );
     }
-    else 
+    else // if (mycon1->nbLevel() == 0 && mycon2->nbLevel() == 0)  // this is not correct!!!!!!!!!!!!1
     {
       ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
@@ -329,7 +329,7 @@ template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i) {
     return ;
   if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
   {for (int j = 0 ; j < A :: polygonlength ; ++j ) 
-    this->myhface ().myhedge1 (j)->unattach2 (i) ;}
+    this->myhface ().myhedge (j)->unattach2 (i) ;}
   return ;
 }
 
@@ -346,17 +346,19 @@ template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) {
 
   {
     for (int j = 0 ; j < A :: polygonlength ; ++j ) 
-      this->myhface ().myhedge1 (j)->attach2 (i) ;
+      this->myhface ().myhedge (j)->attach2 (i) ;
   }
   return ;  
 }
 
-template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStream > & osv) {
+template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStream > & osv) 
+{
 
   // Die Methode packAll () verpackt die Fl"ache auf alle Datenstr"ome,
   // die zu Teilgittern f"uhren, an die sie zugewiesen wurde mit attach2 ().
   // Ausserdem geht die Methode noch an die anliegenden Elemente (Randelemente)
   // "uber.
+  const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled() ;
 
   bool action = false ;
   typedef map < int, int, less < int > > :: const_iterator const_iterator;
@@ -415,8 +417,8 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
       // als Randelemente dorthin schreiben sollen - das tun sie
       // aber selbst.
     
-      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os ) ;
-      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os ) ;
+      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os, ghostCellsEnabled ) ;
+      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os, ghostCellsEnabled ) ;
     } 
     catch (Parallel :: AccessPllException) 
     {
@@ -516,6 +518,7 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
     abort () ;
   }
   balrule_t rule ( ru )  ;
+  // std::cout << "setRefinementRequest: " << rule << std::endl;
   if (rule == balrule_t :: nosplit) 
   {
     return false ;
@@ -618,7 +621,7 @@ template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (O
 }
 
 template < class A > void BndsegPllBaseXMacroClosure < A > :: 
-packAsBnd (int fce, int who, ObjectStream & os) const 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   assert (!fce) ; // fce should be 0, because we only have 1 face 
   assert (this->myhbnd ().bndtype () == Gitter :: hbndseg :: closure) ;
@@ -693,8 +696,9 @@ void TetraPllXBase< A > :: writeDynamicState (ObjectStream & os, int face) const
 template < class A >
 TetraPllXBaseMacro< A > :: 
 TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                           myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
-  : A(l, f0, s0, f1, s1, f2, s2, f3, s3 )
+                           myhface3_t *f2, int s2, myhface3_t *f3, int s3,
+                    int orientation ) 
+  : A(l, f0, s0, f1, s1, f2, s2, f3, s3, orientation )
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
   , _erasable (false) 
@@ -839,6 +843,8 @@ bool TetraPllXBaseMacro< A > :: doPackAll (vector < ObjectStream > & osv,
     os.writeObject (mytetra ().myvertex (1)->ident ()) ;
     os.writeObject (mytetra ().myvertex (2)->ident ()) ;
     os.writeObject (mytetra ().myvertex (3)->ident ()) ;
+    int orientation = mytetra ().orientation();
+    os.writeObject ( orientation );
 
     // make sure ENDOFSTREAM is not a valid refinement rule 
     assert( ! mytetra_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
@@ -871,51 +877,60 @@ bool TetraPllXBaseMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
 }
 
 template < class A >
-void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os) const 
+void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os, const bool packGhost ) const 
 {
   os.writeObject (HBND3INT) ;
-  os.writeObject (Gitter :: hbndseg :: closure) ;
+  os.writeObject ( Gitter :: hbndseg :: closure ) ;
   os.writeObject ( mytetra ().myvertex (fce,0)->ident () ) ;
   os.writeObject ( mytetra ().myvertex (fce,1)->ident () ) ;
   os.writeObject ( mytetra ().myvertex (fce,2)->ident () ) ;
   
   // see method unpackHbnd3Int 
-  int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; // 1 == point is transmitted 
-  os.writeObject ( writePoint ); // 1 == points are transmitted 
-
-  // know which face is the internal bnd 
-  os.writeObject (fce);
-
-  // write the vertices of the tetra 
-  for(int k=0; k<4; ++k) 
+  if( packGhost ) 
   {
-    int vx = mytetra ().myvertex (k)->ident ();
-    os.writeObject ( vx ) ;
+    assert( this->myGrid()->ghostCellsEnabled() );
+
+    int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; // point is transmitted 
+    os.writeObject ( writePoint ); // write point info  
+
+    // know which face is the internal bnd 
+    os.writeObject (fce);
+
+    // write the vertices of the tetra 
+    for(int k=0; k<4; ++k) 
+    {
+      int vx = mytetra ().myvertex (k)->ident ();
+      os.writeObject ( vx ) ;
+    }
+
+    {
+      const Gitter :: Geometric :: VertexGeo * vertex = mytetra().myvertex(fce);
+      assert( vertex );
+
+      // know identifier of transmitted point 
+      os.writeObject ( vertex->ident ()) ;
+
+      // store the missing point to form a tetra 
+      const alucoord_t (&p)[3] = vertex->Point();
+      os.writeObject ( p[0] ) ;
+      os.writeObject ( p[1] ) ;
+      os.writeObject ( p[2] ) ;
+    }
   }
-
+  else 
   {
-    const Gitter :: Geometric :: VertexGeo * vertex = mytetra().myvertex(fce);
-    assert( vertex );
-
-    // know identifier of transmitted point 
-    os.writeObject ( vertex->ident ()) ;
-
-    // store the missing point to form a tetra 
-    const alucoord_t (&p)[3] = vertex->Point();
-    os.writeObject ( p[0] ) ;
-    os.writeObject ( p[1] ) ;
-    os.writeObject ( p[2] ) ;
+    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // no point transmitted 
   }
 }
 
 // packs macro element as internal bnd for other proc 
 template < class A >
-void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   if( _moveTo != who ) 
   {
     // write data to stream 
-    packAsBndNow(fce,os); 
+    packAsBndNow(fce, os, ghostCellsEnabled); 
   }
   return ;
 }
@@ -924,7 +939,8 @@ void TetraPllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) 
 template < class A >
 void TetraPllXBaseMacro< A > :: packAsGhost(ObjectStream & os, int fce) const 
 {
-  packAsBndNow(fce,os);
+  assert( this->myGrid()->ghostCellsEnabled() );
+  packAsBndNow(fce,os, true);
 }
 
 template < class A >
@@ -1069,13 +1085,13 @@ pair<int,int> Periodic3PllXBaseMacro< A > :: insideLdbVertexIndex() const
 }
 
 template < class A >
-int Periodic3PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) const
+int Periodic3PllXBaseMacro< A > :: otherLdbVertexIndex( const int faceIndex ) const
 {
-  if( myhface3( 0 ) == &face )
+  if( myhface3( 0 )->getIndex() == faceIndex )
     return myneighbour( 1 ).first->firstLdbVertexIndex() ;
   else
   {
-    assert(  myhface3( 1 ) == &face );
+    assert(  myhface3( 1 )->getIndex() == faceIndex  );
     return myneighbour( 0 ).first->firstLdbVertexIndex() ;
   }
 }
@@ -1150,7 +1166,8 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 }
 
 template < class A >
-void Periodic3PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+void Periodic3PllXBaseMacro< A > :: 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   // we require that periodic element are never packed as boundary 
   // since they are on the same process as their faces 
@@ -1286,13 +1303,13 @@ pair<int,int> Periodic4PllXBaseMacro< A > :: insideLdbVertexIndex() const
 }
 
 template < class A >
-int Periodic4PllXBaseMacro< A > :: otherLdbVertexIndex( const hface_STI& face ) const
+int Periodic4PllXBaseMacro< A > :: otherLdbVertexIndex( const int faceIndex ) const
 {
-  if( myhface4( 0 ) == &face )
+  if( myhface4( 0 )->getIndex() == faceIndex )
     return myneighbour( 1 ).first->firstLdbVertexIndex() ;
   else
   {
-    assert(  myhface4( 1 ) == &face );
+    assert(  myhface4( 1 )->getIndex() == faceIndex );
     return myneighbour( 0 ).first->firstLdbVertexIndex() ;
   }
 }
@@ -1371,7 +1388,8 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
 }
 
 template < class A > 
-void Periodic4PllXBaseMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+void Periodic4PllXBaseMacro< A > :: 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   // we require that periodic element are never packed as boundary 
   // since they are on the same process as their faces 
@@ -1615,7 +1633,7 @@ bool HexaPllBaseXMacro< A > :: dunePackAll (vector < ObjectStream > & osv,
 }
 
 template < class A >
-void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os) const 
+void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os, const bool packGhost ) const 
 {
   os.writeObject (HBND4INT) ;
   os.writeObject (Gitter :: hbndseg :: closure) ;
@@ -1627,43 +1645,54 @@ void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os) const
   os.writeObject (myhexa ().myvertex (fce,3)->ident ()) ;
 
   // see method unpackHbnd4Int 
-  int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; 
-  os.writeObject ( writePoint ); // 1 == points are transmitted 
-
-  // know which face is the internal bnd 
-  os.writeObject (fce);
- 
-  for(int k=0; k<8; ++k) 
+  if( packGhost )
   {
-    int vx = myhexa ().myvertex (k)->ident ();
-    os.writeObject ( vx ) ;
+    assert( this->myGrid()->ghostCellsEnabled() );
+
+    int writePoint = MacroGridMoverIF :: POINTTRANSMITTED; 
+    os.writeObject ( writePoint ); // 1 == points are transmitted 
+
+    // know which face is the internal bnd 
+    os.writeObject (fce);
+   
+    for(int k=0; k<8; ++k) 
+    {
+      int vx = myhexa ().myvertex (k)->ident ();
+      os.writeObject ( vx ) ;
+    }
+
+    int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
+    for(int vx=0; vx<4; ++vx)
+    {
+      const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
+      os.writeObject( vertex->ident() );
+      const alucoord_t (&p)[3] = vertex->Point();
+      os.writeObject ( p[0] ) ;
+      os.writeObject ( p[1] ) ;
+      os.writeObject ( p[2] ) ;
+    }
   }
-
-  int oppFace = Gitter :: Geometric :: Hexa :: oppositeFace[fce];
-  for(int vx=0; vx<4; ++vx)
+  else
   {
-    const Gitter :: Geometric :: VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
-    os.writeObject( vertex->ident() );
-    const alucoord_t (&p)[3] = vertex->Point();
-    os.writeObject ( p[0] ) ;
-    os.writeObject ( p[1] ) ;
-    os.writeObject ( p[2] ) ;
+    os.writeObject ( MacroGridMoverIF :: NO_POINT ); // no point transmitted 
   }
 }
 
 template < class A >
 void HexaPllBaseXMacro< A > :: packAsGhost(ObjectStream & os, int fce) const 
 {
-  packAsBndNow(fce, os);
+  assert( this->myGrid()->ghostCellsEnabled() );
+  packAsBndNow(fce, os, true );
 }
 
 // packs macro element as internal bnd for other proc 
 template < class A >
-void HexaPllBaseXMacro< A > :: packAsBnd (int fce, int who, ObjectStream & os) const 
+void HexaPllBaseXMacro< A > :: 
+packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
   if ( _moveTo != who ) 
   {
-    packAsBndNow( fce, os );
+    packAsBndNow( fce, os, ghostCellsEnabled );
   }
   return ;
 }
@@ -1787,14 +1816,14 @@ void GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: detachPllXFromMacro (
 }
 
 GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: 
-Hface3EmptyPllMacro (myhedge1_t * e0, int s0, myhedge1_t *e1,int s1, myhedge1_t *e2, int s2) 
+Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2) 
   : Base_t(0, e0, s0, e1, s1, e2, s2) // 0 == level 0
 {
 } 
 
 GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro :: 
-Hface4EmptyPllMacro (myhedge1_t *e0, int s0, myhedge1_t *e1, int s1, 
-                     myhedge1_t *e2, int s2, myhedge1_t *e3, int s3) 
+Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1, 
+                     myhedge_t *e2, int s2, myhedge_t *e3, int s3) 
   : Base_t(0, e0, s0, e1, s1, e2, s2, e3, s3) // 0 == level 0
 {
 } 
@@ -1905,9 +1934,9 @@ insert_hexa (hface4_GEO *(&f)[6], int (&t)[6])
 }
 
 Gitter :: Geometric :: tetra_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_tetra (hface3_GEO *(&f)[4], int (&t)[4]) 
+insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], int orientation ) 
 {
-  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3]); 
+  return new ObjectsPll :: TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], orientation ); 
 }
 
 Gitter :: Geometric :: periodic3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
@@ -1940,14 +1969,6 @@ insert_hbnd4 (hface4_GEO * f, int t, Gitter :: hbndseg_STI :: bnd_t b)
   }
 }
 
-Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd4_ghost (hface4_GEO * f, int t) 
-{
-  Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
-  return new Hbnd4PllExternal < GitterBasis :: Objects :: Hbnd4Default, 
-    BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b ) ;
-}
-
 
 Gitter :: Geometric :: hbndseg4_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_hbnd4 (hface4_GEO * f, int t,
@@ -1956,8 +1977,11 @@ insert_hbnd4 (hface4_GEO * f, int t,
 { 
   typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
   // if internal boundary create ghost 
-  if (b == Gitter :: hbndseg_STI :: closure) 
+  if (b == Gitter :: hbndseg_STI :: closure ) 
   {
+    if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() ) 
+      return insert_hbnd4( f, t, b );
+
     assert( ghInfo );
     return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
           BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > :: 
@@ -1979,6 +2003,9 @@ insert_hbnd3 (hface3_GEO * f, int t,
   typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
   if (b == Gitter :: hbndseg_STI :: closure) 
   {
+    if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() ) 
+      return insert_hbnd3( f, t, b );
+
     assert( ghInfo );
     // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
     return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
@@ -2009,16 +2036,6 @@ insert_hbnd3 (hface3_GEO * f, int t,
     return new Hbnd3PllExternal < Hbnd3DefaultType , 
            BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b ) ;
   }
-}
-
-Gitter :: Geometric :: hbndseg3_GEO * GitterBasisPll :: MacroGitterBasisPll :: 
-insert_hbnd3_ghost (hface3_GEO * f, int t) 
-{
-  Gitter :: hbndseg_STI :: bnd_t b = Gitter :: hbndseg_STI :: ghost_closure;
-  typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
-
-  return new Hbnd3PllExternal < Hbnd3DefaultType , 
-         BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
 }
 
 IteratorSTI < Gitter :: vertex_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const vertex_STI * a) const {
@@ -2207,7 +2224,8 @@ void GitterBasisPll :: printMemUsage ()
     cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
     cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
     cout << "Vertex = " << sizeof(VertexEmpty) << endl;
-    cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl << endl;
+    cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl;
+    cout << "MacroGhostInfoTetra = " << sizeof(MacroGhostInfoTetra) << endl << endl;
 
     cout << "******** HEXA *************************8\n";
     cout << "Hexasize  = " << sizeof(hexa_IMPL) << endl;
@@ -2216,7 +2234,8 @@ void GitterBasisPll :: printMemUsage ()
     cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
     cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
     cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
-    cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl << endl;
+    cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl;
+    cout << "MacroGhostInfoHexa = " << sizeof(MacroGhostInfoHexa) << endl << endl;
 
     cout << "******** Number of Elements ************************8\n";
     {
@@ -2318,8 +2337,9 @@ void GitterBasisPll :: printMemUsage ()
         allSize += indexMem;
       }
 
+      size_t perElement = ( numElements > 0 ) ? allSize/numElements : 0;
       cout << "All leaf size : " << allSize << " MB" << endl;
-      cout << "bytes per Element: " << allSize/numElements << endl; 
+      cout << "bytes per Element: " << perElement << endl; 
       cout << "Estimated all size : " << (9*long(allSize) / 8) << " MB" << endl;
 
       size_t build = container().memUsage();
