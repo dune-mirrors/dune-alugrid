@@ -303,8 +303,6 @@ void tovtk(GitterType& grid) {
   std::cout << "data written to out.vtk" << std::endl;
 }
 
-=======
->>>>>>> 3d-conforming-refinement
 // perform walk over elements of a certain level  
 void levelwalk(GitterBasisImpl* grid, int level) {
    typedef Insert <AccessIterator <
