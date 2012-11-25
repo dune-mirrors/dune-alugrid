@@ -701,8 +701,9 @@ TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
   : A(l, f0, s0, f1, s1, f2, s2, f3, s3, orientation )
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
-  , _erasable (false) 
 {
+  // don't allow erase
+  set( flagLock );
 #ifdef GRAPHVERTEX_WITH_CENTER
   LinearMapping :: barycenter(
       mytetra ().myvertex (0)->Point (), 
@@ -768,7 +769,9 @@ void TetraPllXBaseMacro< A > :: unattach2 (int i)
 
   // reset move to 
   _moveTo = -1;
-  _erasable = false ;
+
+  // unset erasable flag
+  set( flagLock );
 
   return ;
 }
@@ -863,7 +866,8 @@ bool TetraPllXBaseMacro< A > :: doPackAll (vector < ObjectStream > & osv,
       gs->inlineData( os , mytetra() );
     }
 
-    _erasable = true ;
+    // unset erasable flag
+    unset( flagLock );
     return true ;
   }
   return false ;
@@ -993,8 +997,10 @@ doUnpackSelf (ObjectStream & os, const bool i, GatherScatterType* gatherScatter 
 }
 
 template < class A >
-bool TetraPllXBaseMacro< A > :: erasable () const {
-  return _erasable ;
+bool TetraPllXBaseMacro< A > :: erasable () const 
+{
+  // return true if tetra is not locked 
+  return ! isSet( flagLock );
 }
 
 // template instantiation 
@@ -1033,8 +1039,9 @@ Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1
 : A(level, f0, s0, f1, s1, bt )
 , _moveTo ( -1 )
 , _ldbVertexIndex ( -1 )
-, _erasable (false) 
 {
+  // don't allow erase
+  set( flagLock );
 #ifdef GRAPHVERTEX_WITH_CENTER
   static const double x = 1./3. ;
   LinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
@@ -1072,7 +1079,8 @@ void Periodic3PllXBaseMacro< A > :: unattach2 (int i)
   myperiodic ().myhface3 (0)->unattach2 (i) ;
   myperiodic ().myhface3 (1)->unattach2 (i) ;
   _moveTo = -1;
-  _erasable = false ;
+  // unset erasable flag 
+  set( flagLock );
   return ;
 }
 
@@ -1159,7 +1167,8 @@ bool Periodic3PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     // pack internal data if has any 
     inlineData ( os ) ;
 
-    _erasable = true ;
+    // allow erasure 
+    unset( flagLock );
     return true ;
   }
   return false ;
@@ -1234,8 +1243,9 @@ Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1
   : A(level, f0, s0, f1, s1, bt )
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
-  , _erasable (false) 
 {
+  // don't allow erase
+  set( flagLock );
 #ifdef GRAPHVERTEX_WITH_CENTER
   static const double x = .0 ;
   BilinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
@@ -1381,7 +1391,8 @@ bool Periodic4PllXBaseMacro< A > :: packAll (vector < ObjectStream > & osv)
     // pack internal data if has any 
     inlineData ( os ) ;
 
-    _erasable = true ;
+    // allow erase
+    unset( flagLock );
     return true ;
   }
   return false ;
@@ -1424,8 +1435,8 @@ void Periodic4PllXBaseMacro< A > :: unpackSelf (ObjectStream & os, bool i)
 
 template < class A > 
 bool Periodic4PllXBaseMacro< A > :: erasable () const {
-  //cout << "return erasable = " << _erasable << endl; 
-  return _erasable ;
+  // return true if object can be erased 
+  return ! isSet( flagLock );
 }
 
   // #     #
@@ -1464,8 +1475,9 @@ HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
 : A(l, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5)
 , _moveTo ( -1 )
 , _ldbVertexIndex (-1)
-, _erasable (false) 
 {
+  // don't allow erase
+  set( flagLock );
 #ifdef GRAPHVERTEX_WITH_CENTER
   // calculate bary center 
   TrilinearMapping :: barycenter (
@@ -1610,7 +1622,8 @@ bool HexaPllBaseXMacro< A > :: doPackAll (vector < ObjectStream > & osv,
       gs->inlineData( os , myhexa() );
     }
 
-    _erasable = true ;
+    //allow erase
+    unset( flagLock );
     return true ;
   }
   return false ;
@@ -1752,8 +1765,10 @@ doUnpackSelf (ObjectStream & os,
 }
 
 template < class A >
-bool HexaPllBaseXMacro< A > :: erasable () const {
-  return _erasable ;
+bool HexaPllBaseXMacro< A > :: erasable () const 
+{
+  // return true if object can be deleted 
+  return ! isSet( flagLock );
 }
 
 // template instatiation 

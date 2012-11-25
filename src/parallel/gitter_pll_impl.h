@@ -197,6 +197,11 @@ class TetraPllXBaseMacro : public A
     using A :: TETRA ;
     using A :: HBND3INT ;
     using A :: myneighbour ;
+    using A :: flagLock ;
+    using A :: isSet ;
+    using A :: unset ;
+    using A :: set ;
+
     typedef A mytetra_t ;
     inline mytetra_t& mytetra() { return *this; }
     inline const mytetra_t& mytetra() const { return *this; }
@@ -240,7 +245,6 @@ class TetraPllXBaseMacro : public A
 #endif
     int _moveTo ;
     int _ldbVertexIndex ;
-    bool _erasable ;
 } ;
 
 // ######                                                           #####
@@ -293,6 +297,10 @@ class Periodic3PllXBaseMacro : public A
     using A :: HBND3INT ;
     using A :: myneighbour ;
     using A :: myhface3 ;
+    using A :: flagLock ;
+    using A :: isSet ;
+    using A :: unset ;
+    using A :: set ;
 
     Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1, 
                             const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] ) ;
@@ -324,8 +332,8 @@ class Periodic3PllXBaseMacro : public A
     virtual void unpackSelf (ObjectStream &, bool) ;
     virtual bool erasable () const 
     { 
-      assert( _erasable == ( _moveTo >= 0 ) );
-      return _erasable ; 
+      assert( ! isSet( flagLock ) == ( _moveTo >= 0 ) );
+      return ! isSet( flagLock );
     }
   private :
 #ifdef GRAPHVERTEX_WITH_CENTER
@@ -333,7 +341,6 @@ class Periodic3PllXBaseMacro : public A
 #endif
     int _moveTo ;
     int _ldbVertexIndex ;
-    bool _erasable ;
 } ;
 
 // ######                                                          #
@@ -389,6 +396,11 @@ class Periodic4PllXBaseMacro : public A
     using A :: HBND4INT ;
     using A :: myneighbour ;
     using A :: myhface4 ;
+    using A :: flagLock ;
+    using A :: isSet ;
+    using A :: unset ;
+    using A :: set ;
+
 
   protected:  
     inline myperiodic_t & myperiodic () { return *this ; }
@@ -420,7 +432,6 @@ class Periodic4PllXBaseMacro : public A
 #endif
     int _moveTo ;
     int _ldbVertexIndex ;
-    bool _erasable ;
 } ;
 
 // #     #
@@ -459,6 +470,10 @@ class HexaPllBaseXMacro : public A
     using A :: HEXA ;
     using A :: HBND4INT ;
     using A :: myneighbour ;
+    using A :: flagLock ;
+    using A :: isSet ;
+    using A :: unset ;
+    using A :: set ;
 
     typedef A  myhexa_t ;
     inline myhexa_t & myhexa () { return *this; }
@@ -506,7 +521,6 @@ class HexaPllBaseXMacro : public A
 #endif
     int _moveTo ;
     int _ldbVertexIndex ;
-    bool _erasable ;
 } ;
 
 class BndsegPllBaseX : public ElementPllXIF_t 
