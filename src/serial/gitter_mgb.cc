@@ -756,7 +756,7 @@ MacroGridBuilder :: ~MacroGridBuilder ()
 
 template <class elem_GEO> 
 void MacroGridBuilder :: 
-elementMapToList( elementMap_t& elementMap, list< elem_GEO* >& elemList )
+elementMapToList( elementMap_t& elementMap, list< elem_GEO* >& elemList, const bool setIndex  )
 {
   {
     // sort by element numbering which is unique for macro elements 
@@ -769,7 +769,11 @@ elementMapToList( elementMap_t& elementMap, list< elem_GEO* >& elemList )
          i != elementMapEnd ; elementMap.erase (i++) )
       {
         elem_GEO* elem = (elem_GEO *)(*i).second;
-        elem->setLoadBalanceVertexIndex( elem->getIndex() );
+        // if ldbVertexIndex still needs to be set (in case of initial read)
+        if( setIndex ) 
+        {
+          elem->setLoadBalanceVertexIndex( elem->getIndex() );
+        }
         // ldbVertexIndex provides the unique index of the element across processes 
         elemMap[ elem->ldbVertexIndex() ] = elem;
       }
@@ -783,7 +787,7 @@ elementMapToList( elementMap_t& elementMap, list< elem_GEO* >& elemList )
         elem_GEO* elem = (elem_GEO *)(*i).second;
         // make sure that the insertion order 
         // in the list is reflected by getIndex 
-        assert( elem->getIndex() == elemCount );
+        assert( setIndex ? (elem->getIndex() == elemCount) : true );
         // insert into macro element list 
         elemList.push_back ( elem );
       }
@@ -797,10 +801,10 @@ void MacroGridBuilder :: finalize ()
   assert(_initialized);
   
   // copy elements from hexa map to hexa list respecting the insertion order 
-  elementMapToList( _hexaMap, myBuilder()._hexaList );
+  elementMapToList( _hexaMap, myBuilder()._hexaList, true );
 
   // copy elements from tetra map to tetra list respecting the insertion order 
-  elementMapToList( _tetraMap, myBuilder()._tetraList );
+  elementMapToList( _tetraMap, myBuilder()._tetraList, true );
 
   {
     typedef elementMap_t :: iterator  iterator ;

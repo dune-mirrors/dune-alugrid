@@ -196,7 +196,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
 
     // insert all element from elemMap into elemList 
     template <class elem_GEO>
-    void elementMapToList( elementMap_t& elemMap, list< elem_GEO* >& elemList );
+    void elementMapToList( elementMap_t& elemMap, list< elem_GEO* >& elemList, const bool setIndex  );
   private :
     BuilderIF & _mgb ;
 } ;

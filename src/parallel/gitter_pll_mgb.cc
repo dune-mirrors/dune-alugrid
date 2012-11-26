@@ -271,35 +271,16 @@ void ParallelGridMover :: initialize ()
 // overloaded, because here we use the new insertInternal method 
 void ParallelGridMover :: finalize ()
 {
-  {
-    //BuilderIF :: hexalist_t& _hexaList = myBuilder()._hexaList;
-    //const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
-    //for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; _hexaMap.erase (i++))
-    //  _hexaList.push_back ((hexa_GEO *)(*i).second) ;
+  // copy elements from hexaMap to hexaList by 
+  // respecting the order given by ldbVertexIndex 
+  // false indicates that the vertex should not be set
+  MacroGridBuilder :: elementMapToList( _hexaMap, myBuilder ()._hexaList, false );
 
-    // sort by element numbering which is unique for macro elements 
-    typedef std::map< int, hexa_GEO * > hexamap_t ;
-    hexamap_t hexaMap;
-    const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
-    for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; _hexaMap.erase (i++))
-    {
-      hexa_GEO* hexa = (hexa_GEO *)(*i).second;
-      // ldbVertexIndex provides the unique index of the element across processes 
-      hexaMap[ hexa->ldbVertexIndex() ] = hexa;
-    }
+  // copy elements from tetraMap to tetraList by 
+  // respecting the order given by ldbVertexIndex 
+  // false indicates that the vertex should not be set
+  MacroGridBuilder :: elementMapToList( _tetraMap, myBuilder ()._tetraList, false );
 
-    const hexamap_t :: iterator iend = hexaMap.end();
-    for ( hexamap_t :: iterator i = hexaMap.begin () ; i != iend; ++ i )
-    {
-      myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
-    }
-  }
-  {
-    BuilderIF :: tetralist_t& _tetraList = myBuilder ()._tetraList; 
-    const elementMap_t :: iterator _tetraMapend = _tetraMap.end ();
-    for (elementMap_t :: iterator i = _tetraMap.begin () ; i != _tetraMapend ; _tetraMap.erase (i++))
-      _tetraList.push_back ((tetra_GEO *)(*i).second) ;
-  }
   {
     BuilderIF :: periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 
     const elementMap_t :: iterator _periodic3Mapend = _periodic3Map.end ();

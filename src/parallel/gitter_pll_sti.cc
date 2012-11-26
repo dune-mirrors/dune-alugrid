@@ -1198,6 +1198,21 @@ void GitterPll :: computeGraphVertexIndices ()
     // mark unique element indices as computed 
     _ldbVerticesComputed = true ;
   }
+#ifndef NDEBUG
+  {
+    assert (debugOption (20) ? (cout << "**INFO GitterPll :: loadBalancerMacroGridChangesNotify () " << endl, 1) : 1) ;
+    AccessIterator < helement_STI > :: Handle w ( containerPll () ) ;
+
+    int lastIndex = -1;
+    // set ldb vertex indices to all elements 
+    for (w.first () ; ! w.done () ; w.next () ) 
+    {
+      const int ldbVx = w.item ().ldbVertexIndex() ;
+      assert( lastIndex < ldbVx );
+      lastIndex = ldbVx ;
+    }
+  }
+#endif
 }
 
 void GitterPll :: notifyGridChanges () 
