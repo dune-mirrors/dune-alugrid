@@ -1060,7 +1060,12 @@ void GitterPll :: exchangeDynamicState ()
   return ;
 }
 
-void GitterPll :: exchangeStaticState () {
+void GitterPll :: exchangeStaticState () 
+{
+#if 0
+  return ;
+  std::cout << "Exchanging static state " << endl;
+
 
   // Die Methode wird jedesmal aufgerufen, wenn sich der statische
   // Zustand (d.h. der Zustand, der mit dem Makrogitter verbunden ist)
@@ -1138,6 +1143,7 @@ void GitterPll :: exchangeStaticState () {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: exchangeStaticState () used " 
     << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   return ;
+#endif
 }
 
 bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db ) 
@@ -1236,41 +1242,48 @@ void GitterPll :: loadBalancerGridChangesNotify ()
 
 void GitterPll :: loadBalancerMacroGridChangesNotify () 
 {
-  // Diese Methode beschreibt die Reaktion des Lastverteilers bzw.
-  // seiner Datengrundlage auf "Anderungen des Grobgitters, d.h.
-  // auf "Anderungen in der Grobgitterverteilung, Gr"osse usw.
+  computeGraphVertexIndices ();
+}
 
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: loadBalancerMacroGridChangesNotify () " << endl, 1) : 1) ;
-  int cnt = 0 ;
-  AccessIterator < helement_STI > :: Handle w ( containerPll () ) ;
+void GitterPll :: computeGraphVertexIndices () 
+{
+  if( ! _ldbVerticesComputed ) 
+  {
+    // this method computes the globally unique element indices 
+    // that are needed for the graph partitioning methods 
 
-  // get number of macro elements 
-  const int macroElements = w.size () ;
+    assert (debugOption (20) ? (cout << "**INFO GitterPll :: loadBalancerMacroGridChangesNotify () " << endl, 1) : 1) ;
+    AccessIterator < helement_STI > :: Handle w ( containerPll () ) ;
 
-  // sum up for each process and and substract macroElements again 
-  cnt = mpAccess ().scan( macroElements ) - macroElements ;
+    // get number of macro elements 
+    const int macroElements = w.size () ;
+
+    // sum up for each process and and substract macroElements again 
+    int cnt = mpAccess ().scan( macroElements ) - macroElements ;
 
 #ifndef NDEBUG 
-  // make sure that we get the same value as before 
-  //std::cout << "P[ " << mpAccess().myrank() << " ] cnt = " << cnt << std::endl;
-  { 
-    int oldcnt = 0;
-    // get sizes from all processes 
-    vector < int > sizes = mpAccess ().gcollect ( macroElements ) ;
+    // make sure that we get the same value as before 
+    //std::cout << "P[ " << mpAccess().myrank() << " ] cnt = " << cnt << std::endl;
+    { 
+      int oldcnt = 0;
+      // get sizes from all processes 
+      vector < int > sizes = mpAccess ().gcollect ( macroElements ) ;
 
-    // count sizes for all processors with a rank lower than mine 
-    for (int i = 0 ; i < mpAccess ().myrank () ; oldcnt += sizes [ i++ ]) ;
-    assert( oldcnt == cnt );
-  }
+      // count sizes for all processors with a rank lower than mine 
+      for (int i = 0 ; i < mpAccess ().myrank () ; oldcnt += sizes [ i++ ]) ;
+      assert( oldcnt == cnt );
+    }
 #endif
 
+    // set ldb vertex indices to all elements 
+    for (w.first () ; ! w.done () ; w.next (), ++ cnt ) 
+    {
+      w.item ().setLoadBalanceVertexIndex ( cnt ) ;
+    }
 
-  // set ldb vertex indices to all elements 
-  for (w.first () ; ! w.done () ; w.next (), ++ cnt ) 
-  {
-    w.item ().setLoadBalanceVertexIndex ( cnt ) ;
+    // mark unique element indices as computed 
+    _ldbVerticesComputed = true ;
   }
-  return ;
 }
 
 void GitterPll :: notifyGridChanges () 
@@ -1289,14 +1302,23 @@ void GitterPll :: notifyMacroGridChanges ()
 
   containerPll ().identification (mpAccess ()) ;
 
+  bool ldbState = _ldbVerticesComputed ;
   loadBalancerMacroGridChangesNotify () ;
-  exchangeStaticState () ;
+  //if( ! ldbState ) 
+  //{
+  //  exchangeStaticState () ;
+   // cout << "Called exchange static state " << endl;
+  //}
   exchangeDynamicState () ;
   return ;
 }
 
 GitterPll :: GitterPll ( MpAccessLocal & mpa ) 
-  : _ldbOver (0.0), _ldbUnder (0.0), _ldbMethod (LoadBalancer :: DataBase :: NONE) 
+  : _ldbOver (0.0), 
+    _ldbUnder (0.0), 
+    _ldbMethod (LoadBalancer :: DataBase :: NONE),
+    _refineLoops( 0 ), 
+    _ldbVerticesComputed( false )
 {
   if( mpa.myrank() == 0 ) 
   {

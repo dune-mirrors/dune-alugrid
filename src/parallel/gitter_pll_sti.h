@@ -234,6 +234,7 @@ class GitterPll : public virtual Gitter {
     virtual bool checkPartitioning(LoadBalancer :: DataBase &) ;
     virtual void loadBalancerGridChangesNotify () ;
     virtual void loadBalancerMacroGridChangesNotify () ;
+    virtual void computeGraphVertexIndices() ;
     virtual void notifyGridChanges () ;
     virtual void notifyMacroGridChanges () ;
     
@@ -280,7 +281,8 @@ class GitterPll : public virtual Gitter {
   // zwischen adapt () und refine (), damit die Zahl der
   // Iterationen am Ende ausgegeben werden kann.
  
-    int _refineLoops ;
+    int  _refineLoops ;
+    bool _ldbVerticesComputed ;
 } ;
 
 template < class A > class LeafIteratorTT : public MyAlloc 
