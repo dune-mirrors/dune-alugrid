@@ -94,6 +94,11 @@ protected :
   typedef ParallelException   stiExtender_t ;
   
 public:
+  // default implementation does nothing
+  virtual void setLoadBalanceVertexIndex( const int ) {}
+  // return unique macro graph vertex index (default returns -7)
+  virtual int ldbVertexIndex () const { return -7; }
+
   virtual bool isboundary() const { return false ; }
   virtual bool isperiodic() const { return false ; }
   virtual int nbLevel() const { abort(); return -1; }
@@ -203,10 +208,6 @@ class ElementPllXIF : public hasFace
     virtual void insertGhostCell(ObjectStream &,int) {}
     
   public :
-    virtual int ldbVertexIndex () const
-    { assert(false);abort(); return -1;  }
-    virtual void setLoadBalanceVertexIndex( const int ) 
-    { assert(false);abort(); } 
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &)
     { assert(false);abort(); return false;  }
   public :
