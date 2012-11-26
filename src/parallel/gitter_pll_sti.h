@@ -214,8 +214,6 @@ class GitterPll : public virtual Gitter {
   // Der nachfolgende Methodenblock dient dazu, das Verhalten des 
   // parallelen Gitters einigermassen unter Kontrolle zu bringen.
   // Dabei wird von einem Schichtenmodell ausgegangen:
-  // - der statische Zustand des Gitters ist die Verteilung des
-  //   Grobgitters und wird nur durch die Lastverteilung ge"andert
   // - der dynamische Zustand des Gitters ist die Verfeinerungs-
   //   situation,und "andert sich infolge der Gitterqeitenanpassung.
   // - "Anderungen in den Benutzerdaten werden nicht modelliert, das
@@ -223,7 +221,6 @@ class GitterPll : public virtual Gitter {
   // Dementsprechend werden die exchange--*-- Methoden immer
   // aufgerufen, sobald sich der zugeh"orige Zustand ge"andert hat.
     
-    virtual void exchangeStaticState () ;
     virtual void exchangeDynamicState () ;
   protected:   
     void doRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType* ) ;

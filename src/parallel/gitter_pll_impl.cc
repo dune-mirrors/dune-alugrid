@@ -606,27 +606,6 @@ readDynamicState (ObjectStream & os, int)
   return ;
 }
 
-/*
-template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (ObjectStream & os, int) 
-{
-  try {
-    int extGraphVertex = -1;
-    os.readObject ( extGraphVertex ) ;
-    //os.readObject ( _ldbVertexIndex ) ;
-    //if( extGraphVertex != _ldbVertexIndex ) 
-    //  std::cout << extGraphVertex << "  " << _ldbVertexIndex << endl;
-    assert( extGraphVertex == _ldbVertexIndex );
-  } 
-  catch (ObjectStream :: EOFException) 
-  {
-    cerr << "**FEHLER EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
-  }
-  //assert (_ldbVertexIndex >= 0) ;
-  return ;
-}
-*/
-
 template < class A > void BndsegPllBaseXMacroClosure < A > :: 
 packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
 {
@@ -763,14 +742,6 @@ bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase &
       ) ) ;
   return true ;
 }
-
-/*
-template < class A >
-void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
-{
-  os.writeObject (ldbVertexIndex ()) ;
-}
-*/
 
 template < class A >
 void TetraPllXBaseMacro< A > :: unattach2 (int i) 
@@ -1082,15 +1053,6 @@ bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBa
   return true ;
 }
 
-/*
-template < class A >
-void Periodic3PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
-  assert( false );
-  abort();
-  return ;
-}
-*/
-
 template < class A >
 void Periodic3PllXBaseMacro< A > :: unattach2 (int i) 
 {
@@ -1300,20 +1262,6 @@ bool Periodic4PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBa
   abort();
   return true ;
 }
-
-/*
-template < class A > 
-void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const 
-{
-  // this method should not be called since we require periodic element 
-  // to be not located at a process boundary 
-
-  assert( false );
-  abort();
-
-  return ;
-}
-*/
 
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: unattach2 (int i) 
@@ -1547,14 +1495,6 @@ bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & 
       )) ;
   return true ;
 }
-
-/*
-template < class A >
-void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
-{
-  os.writeObject (ldbVertexIndex ()) ;
-}
-*/
 
 template < class A >
 void HexaPllBaseXMacro< A > :: unattach2 (int i) 

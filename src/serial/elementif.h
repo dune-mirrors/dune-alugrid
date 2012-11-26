@@ -178,10 +178,6 @@ class ElementPllXIF : public hasFace
       p.second = 0;
     }
 
-    virtual void writeStaticState (ObjectStream &, int) const 
-    { assert(false);abort(); }
-    virtual void readStaticState (ObjectStream &, int)
-    { assert(false);abort(); }
     virtual void writeDynamicState (ObjectStream &, int) const
     { assert(false);abort(); }
     virtual void readDynamicState (ObjectStream &, int)
@@ -243,8 +239,6 @@ class FacePllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
     virtual pair < const ElementPllXIF *, int > accessInnerPllX () const = 0 ;
 
   public :
-    virtual void writeStaticState (ObjectStream &) const = 0 ;
-    virtual void readStaticState (ObjectStream &) = 0 ;
     virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) = 0 ;
 
     // only for compatibility for Dune release 2.0 (to be removed later)
@@ -264,8 +258,6 @@ class FacePllXDefault : public FacePllXIF
     virtual pair < ElementPllXIF *, int > accessInnerPllX ()  { assert( false); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
     virtual pair < const ElementPllXIF *, int > accessInnerPllX () const { assert( false); abort(); return pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
 
-    virtual void writeStaticState (ObjectStream &) const { assert(false);abort(); }
-    virtual void readStaticState (ObjectStream &) { assert(false);abort(); }
     virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) { assert(false);abort(); return false ; }
 };
 

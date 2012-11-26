@@ -215,7 +215,6 @@ class TetraPllXBaseMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
-    //virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
     // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
     virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
@@ -314,8 +313,6 @@ class Periodic3PllXBaseMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
-    //virtual void writeStaticState (ObjectStream &, int) const ;
-    virtual void readStaticState(ObjectStream & os, int) {}
     virtual int ldbVertexIndex () const { return _ldbVertexIndex ; }
     virtual void setLoadBalanceVertexIndex ( const int ldbVx ) { _ldbVertexIndex = ldbVx ; }
 
@@ -410,8 +407,6 @@ class Periodic4PllXBaseMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
-    //virtual void writeStaticState (ObjectStream &, int) const ;
-    virtual void readStaticState(ObjectStream & os, int)  {}
     virtual int ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
@@ -488,7 +483,6 @@ class HexaPllBaseXMacro : public A
                              myhface4_t *f4, int s4, myhface4_t *f5, int s5) ;
   public :
    ~HexaPllBaseXMacro () ;
-    //virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
     // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
     virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
@@ -603,7 +597,6 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     typedef typename A :: myhface_t myhface_t ;
     inline BndsegPllBaseXMacroClosure (myhbnd_t &) ;
     inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* ) ;
-    //virtual void readStaticState (ObjectStream &, int) ;
   public :
     virtual int  ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;

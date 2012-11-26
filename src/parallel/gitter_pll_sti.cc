@@ -1060,92 +1060,6 @@ void GitterPll :: exchangeDynamicState ()
   return ;
 }
 
-void GitterPll :: exchangeStaticState () 
-{
-#if 0
-  return ;
-  std::cout << "Exchanging static state " << endl;
-
-
-  // Die Methode wird jedesmal aufgerufen, wenn sich der statische
-  // Zustand (d.h. der Zustand, der mit dem Makrogitter verbunden ist)
-  // ge"andert hat: Makrogitteraufbau und Lastvertielung. Der statische
-  // Zustand darf durch Verfeinerung und h"ohere Methoden nicht beeinflusst
-  // sein.
-
-#ifndef NDEBUG
-  const int start = clock () ;
-#endif
-  try {
-    const int nl = mpAccess ().nlinks () ;
-    vector < ObjectStream > osv (nl) ;
-
-    {
-      for (int l = 0 ; l < nl ; ++l) 
-      {
-        ObjectStream& os = osv[ l ];
-        AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
-        AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
-        for (wi.first () ; ! wi.done () ; wi.next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
-          p.first->writeStaticState (os, p.second) ;
-        }
-        for (wo.first () ; ! wo.done () ; wo.next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
-          p.first->writeStaticState (os, p.second) ;
-        }
-
-        // mark end of stream 
-        os.writeObject( MacroGridMoverIF :: ENDSTREAM ); 
-      }
-    }
-
-    osv = mpAccess ().exchange (osv) ;
-
-    {
-      for (int l = 0 ; l < nl ; ++l) 
-      {
-        ObjectStream& os = osv[ l ];
-        AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
-        AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
-        for (wo.first () ; ! wo.done () ; wo.next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
-          p.first->readStaticState (os, p.second) ;
-        }
-        for (wi.first () ; ! wi.done () ; wi.next ()) 
-        {
-          pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
-          p.first->readStaticState (os, p.second) ;
-        }
-        // check consistency of stream 
-        int endStream ; 
-        os.readObject( endStream );
-        if( endStream != MacroGridMoverIF :: ENDSTREAM )
-        {
-          os.readObject( endStream );
-          if( endStream != MacroGridMoverIF :: ENDSTREAM )
-          {
-            cerr << "**ERROR: writeStaticState: inconsistent stream, got " << endStream << endl;
-            assert( false );
-            abort();
-          }
-        } 
-      } 
-    }
-  } 
-  catch (Parallel ::  AccessPllException) 
-  {
-    cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
-  }
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: exchangeStaticState () used " 
-    << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
-  return ;
-#endif
-}
-
 bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db ) 
 {
   assert (debugOption (20) ? (cout << "**GitterPll :: checkPartitioning ( db ) " << endl, 1) : 1) ;
@@ -1302,13 +1216,7 @@ void GitterPll :: notifyMacroGridChanges ()
 
   containerPll ().identification (mpAccess ()) ;
 
-  bool ldbState = _ldbVerticesComputed ;
   loadBalancerMacroGridChangesNotify () ;
-  //if( ! ldbState ) 
-  //{
-  //  exchangeStaticState () ;
-   // cout << "Called exchange static state " << endl;
-  //}
   exchangeDynamicState () ;
   return ;
 }

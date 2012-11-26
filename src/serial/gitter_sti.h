@@ -747,16 +747,6 @@ public :
       }
     }
 
-    virtual void writeStaticState (ObjectStream &os, int i) const 
-    { 
-      assert( up() != 0 );
-      up()->writeStaticState(os,i);
-    }
-    virtual void readStaticState (ObjectStream &os, int i)
-    { 
-      assert( up() != 0 );
-      up()->readStaticState(os,i);
-    }
     virtual void writeDynamicState (ObjectStream &os, int i) const
     { 
       assert( up() != 0 );
