@@ -1198,6 +1198,7 @@ void GitterPll :: computeGraphVertexIndices ()
     // mark unique element indices as computed 
     _ldbVerticesComputed = true ;
   }
+
 #ifndef NDEBUG
   {
     assert (debugOption (20) ? (cout << "**INFO GitterPll :: loadBalancerMacroGridChangesNotify () " << endl, 1) : 1) ;
