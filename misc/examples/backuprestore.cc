@@ -74,7 +74,7 @@ void globalRefine(GitterType& grid, int refcount)
      }
 
      // adapt grid 
-     grid.adapt ();
+     grid.adaptWithoutLoadBalancing ();
 
      // print size of grid 
      grid.printsize () ;
@@ -103,7 +103,7 @@ void globalCoarsening(GitterType& grid, int refcount) {
     }
 
     // adapt grid 
-    grid.adapt ();
+    grid.adaptWithoutLoadBalancing ();
 
     // print size of grid 
     grid.printsize () ;
