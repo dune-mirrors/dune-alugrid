@@ -733,8 +733,18 @@ public :
     //! on the corresponding parallel macro elements 
     virtual int ldbVertexIndex () const 
     { 
-      assert( up() != 0 );
-      return up()->ldbVertexIndex() ; 
+      const helement* father = up();
+      if( father ) 
+      {
+        // call method on father 
+        return father->ldbVertexIndex () ;
+      }
+      else 
+      {
+        // default implementation for serial elements is simply getIndex 
+        // since this corresponds to the insertion index also 
+        return this->getIndex();
+      }
     }
 
     virtual void writeStaticState (ObjectStream &os, int i) const 
@@ -882,12 +892,21 @@ public :
     virtual int ghostLevel () const = 0 ;
     virtual bool ghostLeaf () const = 0 ;
 
-    
     // getGhost returns pointer to ghost, which might be 0 in case that
     // bndseg is external bnd seg, 
     // the int is -1 by default, or the internal ghostFace number (
     // getGhostFaceNumber) when ghost is non-zero 
     virtual const pair < helement * ,int> & getGhost () const = 0 ;
+
+    // overload this method because this could be called on 
+    // non-macro internal boundaries in case of the bisection 
+    // refinement, in this case we direct to the father  
+    virtual int ldbVertexIndex () const 
+    { 
+      const hbndseg* father = up();
+      assert( father );
+      return father->ldbVertexIndex () ;
+    }
 
   protected:
     // if ghost element exists, then ghost is splitted, when bnd is splitted 
@@ -1055,6 +1074,9 @@ public :
 
       // return false for vertex projection  
       inline bool hasVertexProjection() const { return false; }
+
+      // default returns some negative value 
+      int ldbVertexIndex () const { return -5 ; }
     private:
       hasFaceEmpty () {}
       hasFaceEmpty (const hasFaceEmpty & );
