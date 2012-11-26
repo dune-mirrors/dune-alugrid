@@ -53,19 +53,17 @@ struct EmptyAdaptRestrictProlong : public Gitter :: AdaptRestrictProlong
 template <class GitterType>
 bool needConformingClosure( GitterType& grid, bool useClosure ) 
 {
-  bool needClosure = true ;
+  bool needClosure = false ;
   {
     // get LeafIterator which iterates over all leaf elements of the grid 
     LeafIterator < Gitter::helement_STI > w (grid) ;
     w->first(); 
     if( ! w->done() ) 
     {
-      if( w->item ().type() != tetra )
+      if( w->item ().type() == tetra )
       {
-        return false ;
-      }
-      else 
         needClosure = useClosure ;
+      }
     }
   }
   return needClosure ;
@@ -284,8 +282,7 @@ int main (int argc, char ** argv, const char ** envp)
     {
 #ifdef PARALLEL
       GitterDunePll grid(macroname.c_str(),mpa);
-      grid.disableGhostCells();
-      grid.duneLoadBalance();
+      //grid.disableGhostCells();
 #else 
       GitterDuneImpl grid(macroname.c_str());
 #endif
@@ -298,6 +295,7 @@ int main (int argc, char ** argv, const char ** envp)
         grid.enableConformingClosure() ;
         grid.disableGhostCells();
       }
+      grid.duneLoadBalance();
 
       //cout << "P[ " << rank << " ] : Grid generated! \n";
       grid.printsize(); 
@@ -309,7 +307,7 @@ int main (int argc, char ** argv, const char ** envp)
         grid.tovtk(  ss.str().c_str() );
       }
 
-      grid.printMemUsage();
+      //grid.printMemUsage();
       for (int i = 0; i < glb; ++i)
         globalRefine(grid, true, -1, mxl);
       for (int i = 0; i < glb; ++i)
