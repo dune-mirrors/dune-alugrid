@@ -102,7 +102,9 @@ InsertUniqueTetra (int (&v)[4], int orientation)
     assert (t) ;
     _tetraMap [key] = t ;
     return pair < tetra_GEO *, bool > (t,true) ;
-  } else {
+  } 
+  else 
+  {
     return pair < tetra_GEO *, bool > ((tetra_GEO *)(*hit).second,false) ;
   }
 }
@@ -132,7 +134,8 @@ pair < Gitter :: Geometric :: hexa_GEO *, bool > MacroGridBuilder :: InsertUniqu
   }
 }
 
-bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::bnd_t bt) 
+bool MacroGridBuilder :: 
+InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::bnd_t bt, int ldbVertexIndex ) 
 {
   int twst = cyclicReorder (v,v+3) ;
   faceKey_t key (v [0], v [1], v [2]) ;
@@ -140,15 +143,17 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   {
     if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
       hface3_GEO * face =  InsertUniqueHface (v).first ;
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst) ;
+      _hbnd3Int [key] = new Hbnd3IntStorage (face, twst, ldbVertexIndex) ;
       return true ;
     }
   } 
   else 
   {
-    if (_hbnd3Map.find (key) == _hbnd3Map.end ()) {
+    if (_hbnd3Map.find (key) == _hbnd3Map.end ()) 
+    {
       hface3_GEO * face  = InsertUniqueHface (v).first ;
       hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt) ;
+      hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
       _hbnd3Map [key] = hb3 ;
       return true ;
     }
@@ -156,14 +161,16 @@ bool MacroGridBuilder :: InsertUniqueHbnd3 (int (&v)[3],Gitter :: hbndseg_STI ::
   return false ;
 }
 
-bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI ::bnd_t bt) {
+bool MacroGridBuilder :: 
+InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI ::bnd_t bt, int ldbVertexIndex ) 
+{
   int twst = cyclicReorder (v,v+4) ;
   faceKey_t key (v [0], v [1], v [2]) ;
   if (bt == Gitter :: hbndseg_STI :: closure) 
   {
     if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
       hface4_GEO * face =  InsertUniqueHface (v).first ;
-      _hbnd4Int [key] = new Hbnd4IntStorage (face,twst) ;
+      _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex ) ;
       return true ;
     }
   } 
@@ -173,6 +180,7 @@ bool MacroGridBuilder :: InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg_STI :
     {
       hface4_GEO * face =  InsertUniqueHface (v).first ;
       hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt) ;
+      hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
       _hbnd4Map [key] = hb4 ;
       return true ;
     }
@@ -263,6 +271,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
     if (hit != _tetraMap.end ()) 
     {
       tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
+      int ldbVertexIndex = tr->ldbVertexIndex() ;
 
       for (int i = 0 ; i < 4 ; ++i) 
       {
@@ -274,7 +283,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
         _hbnd3Int [faceKey_t (face->myvertex (0)->ident (), 
                               face->myvertex (1)->ident (), 
                               face->myvertex (2)->ident ())] 
-          = new Hbnd3IntStorage (face, tr->twist (i), tr , i ) ;
+          = new Hbnd3IntStorage (face, tr->twist (i), ldbVertexIndex, tr , i ) ;
       }
 
       delete tr ;
@@ -287,6 +296,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
     if (hit != _hexaMap.end ()) 
     {
       hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
+      int ldbVertexIndex = hx->ldbVertexIndex();
       for (int i = 0 ; i < 6 ; ++i) 
       {
         // for periodic neighbours we do not create internal storages 
@@ -297,7 +307,7 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
         _hbnd4Int [faceKey_t (face->myvertex (0)->ident (), 
                               face->myvertex (1)->ident (), 
                               face->myvertex (2)->ident ())
-                  ] = new Hbnd4IntStorage ( face, hx->twist (i), hx, i );
+                  ] = new Hbnd4IntStorage ( face, hx->twist (i), ldbVertexIndex, hx, i );
       }
 
       delete hx ;
@@ -673,7 +683,7 @@ void MacroGridBuilder :: initialize ()
     {
       faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ()) ;
       if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) {
-        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0)) ;
+        _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0),(*i)->ldbVertexIndex()) ;
         delete (*i) ;
       } 
       else 
@@ -690,7 +700,7 @@ void MacroGridBuilder :: initialize ()
       faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ()) ;
       if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
       {
-        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0)) ;
+        _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0),(*i)->ldbVertexIndex()) ;
         delete (*i) ;
       } 
       else 
@@ -744,40 +754,54 @@ MacroGridBuilder :: ~MacroGridBuilder ()
   if(!_finalized) finalize();
 }
 
+template <class elem_GEO> 
+void MacroGridBuilder :: 
+elementMapToList( elementMap_t& elementMap, list< elem_GEO* >& elemList )
+{
+  {
+    // sort by element numbering which is unique for macro elements 
+    typedef std::map< int, elem_GEO* > elemmap_t ;
+    elemmap_t elemMap;
+    {
+      typedef typename elementMap_t :: iterator  iterator ;
+      const iterator elementMapEnd = elementMap.end();
+      for (iterator i = elementMap.begin () ; 
+         i != elementMapEnd ; elementMap.erase (i++) )
+      {
+        elem_GEO* elem = (elem_GEO *)(*i).second;
+        elem->setLoadBalanceVertexIndex( elem->getIndex() );
+        // ldbVertexIndex provides the unique index of the element across processes 
+        elemMap[ elem->ldbVertexIndex() ] = elem;
+      }
+    }
+    {
+      int elemCount = 0;
+      typedef typename elemmap_t :: iterator  iterator ;
+      const iterator iend = elemMap.end();
+      for ( iterator i = elemMap.begin () ; i != iend; ++ i, ++elemCount )
+      {
+        elem_GEO* elem = (elem_GEO *)(*i).second;
+        // make sure that the insertion order 
+        // in the list is reflected by getIndex 
+        assert( elem->getIndex() == elemCount );
+        // insert into macro element list 
+        elemList.push_back ( elem );
+      }
+    }
+  }
+}
+
 // clean the map tables 
 void MacroGridBuilder :: finalize () 
 {
   assert(_initialized);
   
-  {
-    /*
-    // sort by element numbering 
-    typedef std::map< int, hexa_GEO * > hexamap_t ;
-    hexamap_t hexaMap;
-    for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMap.end () ; _hexaMap.erase (i++))
-    {
-      hexa_GEO* hexa = (hexa_GEO *)(*i).second;
-      hexaMap[ hexa->getIndex() ] = hexa;
-    }
-    */
-    {
-      //const hexamap_t :: iterator iend = hexaMap.end();
-      //for ( hexamap_t :: iterator i = hexaMap.begin () ; i != iend; ++ i )
-      typedef elementMap_t :: iterator  iterator ;
-      const iterator hexaMapEnd = _hexaMap.end () ;
-      for (elementMap_t :: iterator i = _hexaMap.begin () ; i != hexaMapEnd ; _hexaMap.erase (i++))
-      {
-        myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
-      }
-    }
-  }
-  {
-    typedef elementMap_t :: iterator  iterator;
-    const iterator tetraMapEnd = _tetraMap.end () ; 
-    //myBuilder ()._tetraList.reserve(_tetraMap.size());
-    for (elementMap_t :: iterator i = _tetraMap.begin () ; i != tetraMapEnd ; _tetraMap.erase (i++))
-      myBuilder ()._tetraList.push_back ((tetra_GEO *)(*i).second) ;
-  }
+  // copy elements from hexa map to hexa list respecting the insertion order 
+  elementMapToList( _hexaMap, myBuilder()._hexaList );
+
+  // copy elements from tetra map to tetra list respecting the insertion order 
+  elementMapToList( _tetraMap, myBuilder()._tetraList );
+
   {
     typedef elementMap_t :: iterator  iterator ;
     const iterator periodic3MapEnd = _periodic3Map.end () ;
@@ -1009,6 +1033,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
     }
   }
   {
+    int ldbVertexIndex = -1;
     int nb = 0 ;
     rawInput >> nb ;
     for (int i = 0 ; i < nb ; i ++) 
@@ -1024,7 +1049,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
           exit(1);
         }
-        InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt))) ;
+        InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt)), ldbVertexIndex) ;
       } 
       else if (polygonLen == 3) 
       {
@@ -1035,7 +1060,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
           exit(1);
         }
-        InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt))) ;
+        InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt)), ldbVertexIndex) ;
       } 
       else 
       {
