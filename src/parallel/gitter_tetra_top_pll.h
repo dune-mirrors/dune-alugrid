@@ -61,6 +61,7 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
         const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
         void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+
       private :
         mypllx_t _ext ;
 
@@ -113,6 +114,11 @@ template < class A, class X, class MX > class Hbnd3PllInternal {
         const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
         void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
         inline int ghostLevel () const ; 
+
+        // return mxt's ldbVertexIndex, otherwise the default is returned which is wrong 
+        int ldbVertexIndex() const { assert( _mxt ); return _mxt->ldbVertexIndex(); }
+        // call mxt's setLoadBalanceVertexIndex (otherwise default impl is called which is wrong)
+        void setLoadBalanceVertexIndex ( int ldbVx ) { assert( _mxt ); _mxt->setLoadBalanceVertexIndex( ldbVx ); }
 
         virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
 

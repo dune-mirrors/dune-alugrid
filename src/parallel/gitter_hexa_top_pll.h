@@ -116,6 +116,12 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
         // for dune 
         inline int ghostLevel () const ;
+
+        // overload ldbVertexIndex, otherwise the default is return which is wrong in this case 
+        int ldbVertexIndex () const { assert( _mxt ); return _mxt->ldbVertexIndex(); }
+        // call mxt's setLoadBalanceVertexIndex (otherwise default impl is called which is wrong)
+        void setLoadBalanceVertexIndex ( int ldbVx ) { assert( _mxt ); _mxt->setLoadBalanceVertexIndex( ldbVx ); }
+
       private :
         mypllx_t * _mxt ;
         BuilderIF & _mgb;
