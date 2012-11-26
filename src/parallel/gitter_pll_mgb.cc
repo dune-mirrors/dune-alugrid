@@ -102,6 +102,7 @@ void ParallelGridMover :: initialize ()
       faceKey_t key (face->myvertex (0)->ident (), 
                      face->myvertex (1)->ident (), 
                      face->myvertex (2)->ident ()) ;
+
       // if internal face 
       if ((*i)->bndtype () == Gitter :: hbndseg_STI :: closure) 
       {
@@ -113,10 +114,12 @@ void ParallelGridMover :: initialize ()
         if( gh )
         {
           _hbnd4Int [key] = new Hbnd4IntStorage (face , (*i)->twist (0), 
+                                                 (*i)->ldbVertexIndex(),
                                                  gh, gpair.second ) ;
         }
         else 
-          _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->twist (0)) ;
+          _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->twist (0),
+                                                 (*i)->ldbVertexIndex() ) ;
 
         toDeleteHbnd.push_back( (*i ) );
       } 
@@ -152,11 +155,13 @@ void ParallelGridMover :: initialize ()
         {
           // insert new internal storage 
           _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0), 
+                                                  (*i)->ldbVertexIndex(),
                                                   gh , gpair.second ) ;
         }
         // until here
         else 
-          _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0)) ;
+          _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0),
+                                                  (*i)->ldbVertexIndex() ) ;
         
         toDeleteHbnd.push_back( (*i) );
       } 
@@ -267,10 +272,27 @@ void ParallelGridMover :: initialize ()
 void ParallelGridMover :: finalize ()
 {
   {
-    BuilderIF :: hexalist_t& _hexaList = myBuilder()._hexaList;
+    //BuilderIF :: hexalist_t& _hexaList = myBuilder()._hexaList;
+    //const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
+    //for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; _hexaMap.erase (i++))
+    //  _hexaList.push_back ((hexa_GEO *)(*i).second) ;
+
+    // sort by element numbering which is unique for macro elements 
+    typedef std::map< int, hexa_GEO * > hexamap_t ;
+    hexamap_t hexaMap;
     const elementMap_t :: iterator _hexaMapend = _hexaMap.end ();
     for (elementMap_t :: iterator i = _hexaMap.begin () ; i != _hexaMapend ; _hexaMap.erase (i++))
-      _hexaList.push_back ((hexa_GEO *)(*i).second) ;
+    {
+      hexa_GEO* hexa = (hexa_GEO *)(*i).second;
+      // ldbVertexIndex provides the unique index of the element across processes 
+      hexaMap[ hexa->ldbVertexIndex() ] = hexa;
+    }
+
+    const hexamap_t :: iterator iend = hexaMap.end();
+    for ( hexamap_t :: iterator i = hexaMap.begin () ; i != iend; ++ i )
+    {
+      myBuilder ()._hexaList.push_back ((hexa_GEO *)(*i).second) ;
+    }
   }
   {
     BuilderIF :: tetralist_t& _tetraList = myBuilder ()._tetraList; 
@@ -372,6 +394,7 @@ void ParallelGridMover :: finalize ()
         hbndseg4_GEO * hb4 = myBuilder ().
               insert_hbnd4 (p->first(), p->second(), 
                             Gitter :: hbndseg_STI :: closure, ghInfo );
+        hb4->setLoadBalanceVertexIndex( p->ldbVertexIndex() );
         _hbndseg4List.push_back (hb4) ;
       }
       delete p; 
@@ -391,7 +414,10 @@ void ParallelGridMover :: finalize ()
         MacroGhostInfoTetra* ghInfo = p->release();
 
         hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p->first(), p->second(),
-                       Gitter :: hbndseg_STI :: closure , ghInfo );
+                                                       Gitter :: hbndseg_STI :: closure, 
+                                                       ghInfo );
+        assert( p->ldbVertexIndex() >= 0 );
+        hb3->setLoadBalanceVertexIndex( p->ldbVertexIndex() );
 
         // insert to list 
         _hbndseg3List.push_back (hb3) ;
@@ -547,7 +573,9 @@ void ParallelGridMover :: unpackHface4 (ObjectStream & os)
 
 void ParallelGridMover :: unpackTetra (ObjectStream & os, GatherScatterType* gs ) 
 {
+  int ldbVertexIndex = -1;
   int v [4] ;
+  os.readObject (ldbVertexIndex); 
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
@@ -555,6 +583,8 @@ void ParallelGridMover :: unpackTetra (ObjectStream & os, GatherScatterType* gs 
   int orientation = 0;
   os.readObject( orientation ); 
   pair < tetra_GEO *, bool > p = InsertUniqueTetra (v, orientation) ;
+  // set unique element number 
+  p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
   p.first->accessPllX ().duneUnpackSelf (os, p.second, gs) ;
   return ;
 }
@@ -610,7 +640,9 @@ void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os)
 
 void ParallelGridMover :: unpackHexa (ObjectStream & os, GatherScatterType* gs) 
 {
+  int ldbVertexIndex = -1;
   int v [8] ;
+  os.readObject (ldbVertexIndex); 
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
@@ -620,13 +652,18 @@ void ParallelGridMover :: unpackHexa (ObjectStream & os, GatherScatterType* gs)
   os.readObject (v[6]) ;
   os.readObject (v[7]) ;
   pair < hexa_GEO *, bool > p = InsertUniqueHexa (v) ;
+  // set unique element number 
+  p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
   p.first->accessPllX ().duneUnpackSelf (os, p.second, gs ) ;
   return ;
 }
 
 // new method that gets coord of ghost point 
-bool ParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],         
-      Gitter :: hbndseg_STI ::bnd_t bt, MacroGhostInfoTetra * ghInfo) 
+bool ParallelGridMover :: 
+InsertUniqueHbnd3_withPoint (int (&v)[3],         
+                             Gitter :: hbndseg_STI ::bnd_t bt, 
+                             int ldbVertexIndex,
+                             MacroGhostInfoTetra * ghInfo) 
 {
   int twst = cyclicReorder (v,v+3) ;
   faceKey_t key (v [0], v [1], v [2]) ;
@@ -637,7 +674,7 @@ bool ParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
       assert( ghInfo );
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
       // here the point is stored 
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst,ghInfo) ;
+      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst, ldbVertexIndex, ghInfo) ;
       return true ;
     }
   } 
@@ -647,6 +684,7 @@ bool ParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
     {
       hface3_GEO * face =  InsertUniqueHface3 (v).first ;
       hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, bt) ;
+      hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
       _hbnd3Map [key] = hb3 ;
       return true ;
     }
@@ -655,9 +693,11 @@ bool ParallelGridMover :: InsertUniqueHbnd3_withPoint (int (&v)[3],
 }
 
 // new method that gets coord of ghost point 
-bool ParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],         
-      Gitter :: hbndseg_STI ::bnd_t bt, 
-      MacroGhostInfoHexa* ghInfo) 
+bool ParallelGridMover :: 
+InsertUniqueHbnd4_withPoint (int (&v)[4],         
+                             Gitter :: hbndseg_STI ::bnd_t bt, 
+                             int ldbVertexIndex,
+                             MacroGhostInfoHexa* ghInfo) 
 {
   int twst = cyclicReorder (v,v+4) ;
   faceKey_t key (v [0], v [1], v [2]) ;
@@ -667,7 +707,7 @@ bool ParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],
     {
       assert( ghInfo );
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      _hbnd4Int [key] = new Hbnd4IntStorage (face,twst,ghInfo) ;
+      _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, ghInfo) ;
       return true ;
     }
   } 
@@ -677,6 +717,7 @@ bool ParallelGridMover :: InsertUniqueHbnd4_withPoint (int (&v)[4],
     {
       hface4_GEO * face =  InsertUniqueHface4 (v).first ;
       hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, bt) ;
+      hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
       _hbnd4Map [key] = hb4 ;
       return true ;
     }
@@ -690,6 +731,9 @@ inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   int bfake, v [3] ;
   os.readObject (bfake) ;
   Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
+
+  int ldbVertexIndex ;
+  os.readObject( ldbVertexIndex );
   
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
@@ -708,7 +752,7 @@ inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   // if internal boundary, create internal bnd face 
   if( b == Gitter :: hbndseg :: closure && ghInfo )
   {
-    InsertUniqueHbnd3_withPoint (v, b, ghInfo ) ;
+    InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, ghInfo ) ;
   }
   else
   {
@@ -717,7 +761,7 @@ inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
     // create normal bnd face, and make sure that no Point was send
     assert(readPoint == MacroGridMoverIF :: NO_POINT );
     // old method defined in base class 
-    InsertUniqueHbnd3 (v, b ) ;
+    InsertUniqueHbnd3 (v, b, ldbVertexIndex ) ;
   }
 
   return ;
@@ -731,6 +775,9 @@ inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   os.readObject (bfake) ;
   Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
 
+  int ldbVertexIndex ;
+  os.readObject( ldbVertexIndex );
+  
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
@@ -749,7 +796,7 @@ inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   // if internal boundary, create internal bnd face 
   if(b == Gitter :: hbndseg :: closure && ghInfo )
   {
-    InsertUniqueHbnd4_withPoint (v, b, ghInfo ) ;
+    InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, ghInfo ) ;
   }
   else
   {
@@ -759,7 +806,7 @@ inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
     // create normal bnd face, and make sure that no Point was send
     assert(readPoint == MacroGridMoverIF :: NO_POINT );
     // old method defined in base class 
-    InsertUniqueHbnd4 (v, b ) ;
+    InsertUniqueHbnd4 (v, b, ldbVertexIndex ) ;
   }
   return ;
 }
@@ -771,7 +818,8 @@ void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os)
   os.readObject (v[0]) ;
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
-  InsertUniqueHbnd3 (v, Gitter :: hbndseg :: bnd_t (b)) ;
+  int ldbVertexIndex = -1;
+  InsertUniqueHbnd3 (v, Gitter :: hbndseg :: bnd_t (b), ldbVertexIndex) ;
   return ;
 }
 	
@@ -782,7 +830,8 @@ void ParallelGridMover :: unpackHbnd4Ext (ObjectStream & os) {
   os.readObject (v[1]) ;
   os.readObject (v[2]) ;
   os.readObject (v[3]) ;
-  InsertUniqueHbnd4 (v, Gitter :: hbndseg :: bnd_t (b)) ;
+  int ldbVertexIndex = -1;
+  InsertUniqueHbnd4 (v, Gitter :: hbndseg :: bnd_t (b), ldbVertexIndex) ;
   return ;
 }
 

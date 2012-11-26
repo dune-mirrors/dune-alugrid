@@ -23,12 +23,15 @@ class ParallelGridMover : public MacroGridBuilder {
 
     // creates Hbnd3IntStorage with ghost info if needed 
     bool InsertUniqueHbnd3_withPoint (int (&)[3],
-                              Gitter :: hbndseg :: bnd_t,
-                              MacroGhostInfoTetra* ) ;
+                                      Gitter :: hbndseg :: bnd_t,
+                                      int ldbVertexIndex,
+                                      MacroGhostInfoTetra* ) ;
   
     // creates Hbnd4IntStorage with ghost info if needed 
-    bool InsertUniqueHbnd4_withPoint (int (&)[4], Gitter :: hbndseg ::
-            bnd_t, MacroGhostInfoHexa* );
+    bool InsertUniqueHbnd4_withPoint (int (&)[4], 
+                                      Gitter :: hbndseg :: bnd_t, 
+                                      int ldbVertexIndex,
+                                      MacroGhostInfoHexa* );
 
 
     // former constructor 

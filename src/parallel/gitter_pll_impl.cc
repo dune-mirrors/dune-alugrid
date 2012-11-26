@@ -491,8 +491,8 @@ template class FacePllBaseXMacro < GitterBasisPll :: ObjectsPll :: hface4_IMPL >
 //  --BndsegPllBaseXMacroClosure
 //
 //////////////////////////////////////////////////////////////////////
-template < class A > void BndsegPllBaseXClosure < A > :: getRefinementRequest (ObjectStream & os) {
-  //os.writeObject (int (_rul)) ;
+template < class A > void BndsegPllBaseXClosure < A > :: getRefinementRequest (ObjectStream & os) 
+{
   typename balrule_t :: rule_t rule = _rul ;
   os.put( char(rule) );
   _rul = balrule_t :: nosplit ;
@@ -510,7 +510,6 @@ template < class A > bool BndsegPllBaseXClosure < A > :: setRefinementRequest (O
   try 
   {
     ru = os.get() ;
-    //os.readObject (i) ;
   } 
   catch (ObjectStream :: EOFException) {
     cerr << "**FEHLER (FATAL) BndsegPllBaseXClosure :: setRefinementRequest (..)\n" ;
@@ -607,18 +606,26 @@ readDynamicState (ObjectStream & os, int)
   return ;
 }
 
-template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (ObjectStream & os, int) {
+/*
+template < class A > void BndsegPllBaseXMacroClosure < A > :: readStaticState (ObjectStream & os, int) 
+{
   try {
-    os.readObject (_extGraphVertexIndex) ;
+    int extGraphVertex = -1;
+    os.readObject ( extGraphVertex ) ;
+    //os.readObject ( _ldbVertexIndex ) ;
+    //if( extGraphVertex != _ldbVertexIndex ) 
+    //  std::cout << extGraphVertex << "  " << _ldbVertexIndex << endl;
+    assert( extGraphVertex == _ldbVertexIndex );
   } 
   catch (ObjectStream :: EOFException) 
   {
     cerr << "**FEHLER EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
     abort () ;
   }
-  //assert (_extGraphVertexIndex >= 0) ;
+  //assert (_ldbVertexIndex >= 0) ;
   return ;
 }
+*/
 
 template < class A > void BndsegPllBaseXMacroClosure < A > :: 
 packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
@@ -634,7 +641,10 @@ packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) co
     abort () ;
   }
 
-  os.writeObject (this->myhbnd ().bndtype ()) ;
+  os.writeObject ( this->myhbnd ().bndtype () ) ;
+
+  // write unique graph vertex index 
+  os.writeObject ( _ldbVertexIndex );
   
   {
     for (int i = 0 ; i < myhface_t :: polygonlength ; ++i) 
@@ -725,7 +735,9 @@ TetraPllXBaseMacro< A > :: ~TetraPllXBaseMacro ()
 }
 
 template < class A >
-int TetraPllXBaseMacro< A > :: ldbVertexIndex () const {
+int TetraPllXBaseMacro< A > :: ldbVertexIndex () const 
+{
+  assert( _ldbVertexIndex >= 0 );
   return _ldbVertexIndex ;
 }
 
@@ -752,11 +764,13 @@ bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase &
   return true ;
 }
 
+/*
 template < class A >
 void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
 {
   os.writeObject (ldbVertexIndex ()) ;
 }
+*/
 
 template < class A >
 void TetraPllXBaseMacro< A > :: unattach2 (int i) 
@@ -842,6 +856,7 @@ bool TetraPllXBaseMacro< A > :: doPackAll (vector < ObjectStream > & osv,
 #endif
 
     os.writeObject (TETRA) ;
+    os.writeObject (_ldbVertexIndex) ;
     os.writeObject (mytetra ().myvertex (0)->ident ()) ;
     os.writeObject (mytetra ().myvertex (1)->ident ()) ;
     os.writeObject (mytetra ().myvertex (2)->ident ()) ;
@@ -885,6 +900,8 @@ void TetraPllXBaseMacro< A > :: packAsBndNow (int fce, ObjectStream & os, const 
 {
   os.writeObject (HBND3INT) ;
   os.writeObject ( Gitter :: hbndseg :: closure ) ;
+  assert( _ldbVertexIndex >= 0 );
+  os.writeObject (_ldbVertexIndex ); // write unique graph vertex index 
   os.writeObject ( mytetra ().myvertex (fce,0)->ident () ) ;
   os.writeObject ( mytetra ().myvertex (fce,1)->ident () ) ;
   os.writeObject ( mytetra ().myvertex (fce,2)->ident () ) ;
@@ -1065,12 +1082,14 @@ bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBa
   return true ;
 }
 
+/*
 template < class A >
 void Periodic3PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const {
   assert( false );
   abort();
   return ;
 }
+*/
 
 template < class A >
 void Periodic3PllXBaseMacro< A > :: unattach2 (int i) 
@@ -1282,6 +1301,7 @@ bool Periodic4PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBa
   return true ;
 }
 
+/*
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) const 
 {
@@ -1293,6 +1313,7 @@ void Periodic4PllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int) co
 
   return ;
 }
+*/
 
 template < class A > 
 void Periodic4PllXBaseMacro< A > :: unattach2 (int i) 
@@ -1527,11 +1548,13 @@ bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & 
   return true ;
 }
 
+/*
 template < class A >
 void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
 {
   os.writeObject (ldbVertexIndex ()) ;
 }
+*/
 
 template < class A >
 void HexaPllBaseXMacro< A > :: unattach2 (int i) 
@@ -1597,6 +1620,8 @@ bool HexaPllBaseXMacro< A > :: doPackAll (vector < ObjectStream > & osv,
     ObjectStream& os = osv[ _moveTo ];
     
     os.writeObject (HEXA) ;
+    assert( _ldbVertexIndex >= 0 );
+    os.writeObject (_ldbVertexIndex ); 
     os.writeObject (myhexa ().myvertex (0)->ident ()) ;
     os.writeObject (myhexa ().myvertex (1)->ident ()) ;
     os.writeObject (myhexa ().myvertex (2)->ident ()) ;
@@ -1650,6 +1675,8 @@ void HexaPllBaseXMacro< A > :: packAsBndNow(int fce, ObjectStream & os, const bo
 {
   os.writeObject (HBND4INT) ;
   os.writeObject (Gitter :: hbndseg :: closure) ;
+  assert( _ldbVertexIndex >= 0 );
+  os.writeObject (_ldbVertexIndex ); // write unique graph vertex index 
 
   // write the four identifiers of the hexa 
   os.writeObject (myhexa ().myvertex (fce,0)->ident ()) ;

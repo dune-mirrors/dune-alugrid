@@ -215,7 +215,7 @@ class TetraPllXBaseMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
-    virtual void writeStaticState (ObjectStream &, int) const ;
+    //virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
     // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
     virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
@@ -244,6 +244,7 @@ class TetraPllXBaseMacro : public A
     alucoord_t _center [3] ;
 #endif
     int _moveTo ;
+    // globally unique element number 
     int _ldbVertexIndex ;
 } ;
 
@@ -313,9 +314,8 @@ class Periodic3PllXBaseMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
-    virtual void writeStaticState (ObjectStream &, int) const ;
-    virtual void readStaticState(ObjectStream & os, int) {
-    };
+    //virtual void writeStaticState (ObjectStream &, int) const ;
+    virtual void readStaticState(ObjectStream & os, int) {}
     virtual int ldbVertexIndex () const { return _ldbVertexIndex ; }
     virtual void setLoadBalanceVertexIndex ( const int ldbVx ) { _ldbVertexIndex = ldbVx ; }
 
@@ -340,6 +340,7 @@ class Periodic3PllXBaseMacro : public A
     alucoord_t _center [3] ;
 #endif
     int _moveTo ;
+    // globally unique element number 
     int _ldbVertexIndex ;
 } ;
 
@@ -409,9 +410,8 @@ class Periodic4PllXBaseMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
-    virtual void writeStaticState (ObjectStream &, int) const ;
-    virtual void readStaticState(ObjectStream & os, int)  {
-    };
+    //virtual void writeStaticState (ObjectStream &, int) const ;
+    virtual void readStaticState(ObjectStream & os, int)  {}
     virtual int ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
     virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
@@ -431,6 +431,7 @@ class Periodic4PllXBaseMacro : public A
     alucoord_t _center [3] ;
 #endif
     int _moveTo ;
+    // globally unique element number 
     int _ldbVertexIndex ;
 } ;
 
@@ -487,7 +488,7 @@ class HexaPllBaseXMacro : public A
                              myhface4_t *f4, int s4, myhface4_t *f5, int s5) ;
   public :
    ~HexaPllBaseXMacro () ;
-    virtual void writeStaticState (ObjectStream &, int) const ;
+    //virtual void writeStaticState (ObjectStream &, int) const ;
     virtual int ldbVertexIndex () const ;
     // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
     virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
@@ -520,6 +521,7 @@ class HexaPllBaseXMacro : public A
     alucoord_t _center [3] ;
 #endif
     int _moveTo ;
+    // globally unique element number 
     int _ldbVertexIndex ;
 } ;
 
@@ -543,10 +545,6 @@ template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
     inline const myhbnd_t & myhbnd () const ;
   public :
     inline BndsegPllBaseXMacro (myhbnd_t &) ;
-  public :
-    virtual int ldbVertexIndex () const ;
-    virtual void setLoadBalanceVertexIndex ( const int ) ;
-  public :
     virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
     
     // method to get internal bnd located behind this parallel interface 
@@ -605,9 +603,9 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
     typedef typename A :: myhface_t myhface_t ;
     inline BndsegPllBaseXMacroClosure (myhbnd_t &) ;
     inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* ) ;
-    virtual void readStaticState (ObjectStream &, int) ;
+    //virtual void readStaticState (ObjectStream &, int) ;
   public :
-    virtual int   ldbVertexIndex () const ;
+    virtual int  ldbVertexIndex () const ;
     virtual void setLoadBalanceVertexIndex ( const int ) ;
   public :
     virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
@@ -617,7 +615,7 @@ template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClo
 
   private :
     const MacroGhostInfo_STI * _ghInfo; 
-    int _extGraphVertexIndex ;
+    int _ldbVertexIndex ;
 } ;
 
 class GitterBasisPll : public Gitter :: Geometric, public GitterPll
@@ -1135,13 +1133,6 @@ template < class A > inline const typename BndsegPllBaseXMacro < A > :: myhbnd_t
   return _hbnd ;
 }
 
-template < class A > int BndsegPllBaseXMacro < A > ::ldbVertexIndex () const {
-  return -1 ;
-}
-
-template < class  A > void  BndsegPllBaseXMacro < A > :: setLoadBalanceVertexIndex ( const int ) {
-}
-
 template < class A > void BndsegPllBaseXMacro < A > :: 
 packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) const 
 {
@@ -1150,7 +1141,10 @@ packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) c
   else if (myhface_t :: polygonlength == 4) os.writeObject (MacroGridMoverIF :: HBND4EXT) ;
   else abort () ;
   os.writeObject (myhbnd ().bndtype ()) ;
-  {for (int i = 0 ; i < myhface_t :: polygonlength ; i++) os.writeObject (myhbnd ().myvertex (fce,i)->ident ()) ; }
+  {
+    for (int i = 0 ; i < myhface_t :: polygonlength ; ++i) 
+      os.writeObject ( myhbnd ().myvertex (fce,i)->ident () ) ; 
+  }
   return ;
 }
 
@@ -1216,26 +1210,29 @@ template < class A > inline bool BndsegPllBaseXClosure < A > :: unlockAndResume 
 template < class A > inline BndsegPllBaseXMacroClosure < A > :: BndsegPllBaseXMacroClosure (myhbnd_t & b)
   : BndsegPllBaseXClosure < A > (b)
   , _ghInfo (0) 
-  , _extGraphVertexIndex (-1)
+  , _ldbVertexIndex (-2)
 {
-  return ;
 }
 
 template < class A > inline BndsegPllBaseXMacroClosure < A > :: 
 BndsegPllBaseXMacroClosure (myhbnd_t & b, const MacroGhostInfo_STI* ghinfo)
   : BndsegPllBaseXClosure < A > (b)
   , _ghInfo (ghinfo) 
-  , _extGraphVertexIndex (-1)
+  , _ldbVertexIndex (-2)
 {
-  return ;
 }
 
-template < class A > inline int BndsegPllBaseXMacroClosure < A > :: ldbVertexIndex () const {
-  return _extGraphVertexIndex ;
+template < class A > inline int BndsegPllBaseXMacroClosure < A > :: ldbVertexIndex () const 
+{
+  assert( _ldbVertexIndex != -2 );
+  assert( _ldbVertexIndex >= 0 );
+  return _ldbVertexIndex ;
 }
 
-template < class A > inline void BndsegPllBaseXMacroClosure < A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
-  _extGraphVertexIndex = ldbVx ;
+template < class A > inline void BndsegPllBaseXMacroClosure < A > :: setLoadBalanceVertexIndex ( const int ldbVx ) 
+{
+  assert( ldbVx >= 0 );
+  _ldbVertexIndex = ldbVx ;
 }
 
 inline int GitterBasisPll :: MacroGitterBasisPll :: iterators_attached () const {
