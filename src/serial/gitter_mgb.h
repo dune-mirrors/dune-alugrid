@@ -205,10 +205,17 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     static void generateRawImage (istream_t &, ostream &, 
                                   const ElementRawID, const ElementRawID ) ;
 
+    // insert all tetra from elemMap into tetraList 
+    void tetraMapToList( elementMap_t& elemMap, list< tetra_GEO* >& elemList, const bool setIndex  );
+    // insert all hexa from elemMap into hexaList 
+    void hexaMapToList( elementMap_t& elemMap, list< hexa_GEO* >& elemList, const bool setIndex  );
+
+  private :
     // insert all element from elemMap into elemList 
     template <class elem_GEO>
     void elementMapToList( elementMap_t& elemMap, list< elem_GEO* >& elemList, const bool setIndex  );
-  private :
+
+  private:  
     BuilderIF & _mgb ;
 } ;
 

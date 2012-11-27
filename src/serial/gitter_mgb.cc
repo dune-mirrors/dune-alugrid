@@ -754,6 +754,18 @@ MacroGridBuilder :: ~MacroGridBuilder ()
   if(!_finalized) finalize();
 }
 
+void MacroGridBuilder :: 
+tetraMapToList( elementMap_t& elementMap, list< tetra_GEO* >& elemList, const bool setIndex  )
+{
+  elementMapToList( elementMap, elemList, setIndex );
+}
+
+void MacroGridBuilder :: 
+hexaMapToList( elementMap_t& elementMap, list< hexa_GEO* >& elemList, const bool setIndex  )
+{
+  elementMapToList( elementMap, elemList, setIndex );
+}
+
 template <class elem_GEO> 
 void MacroGridBuilder :: 
 elementMapToList( elementMap_t& elementMap, list< elem_GEO* >& elemList, const bool setIndex  )
@@ -801,10 +813,10 @@ void MacroGridBuilder :: finalize ()
   assert(_initialized);
   
   // copy elements from hexa map to hexa list respecting the insertion order 
-  elementMapToList( _hexaMap, myBuilder()._hexaList, true );
+  hexaMapToList( _hexaMap, myBuilder()._hexaList, true );
 
   // copy elements from tetra map to tetra list respecting the insertion order 
-  elementMapToList( _tetraMap, myBuilder()._tetraList, true );
+  tetraMapToList( _tetraMap, myBuilder()._tetraList, true );
 
   {
     typedef elementMap_t :: iterator  iterator ;
