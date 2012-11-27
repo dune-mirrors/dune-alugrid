@@ -164,6 +164,17 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter :: hbndseg :: bnd_t, int) ;
     virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter :: hbndseg :: bnd_t, int) ;
 
+    virtual bool InsertUniqueHbnd3 (int (&v)[3], Gitter :: hbndseg :: bnd_t bt )
+    {
+      // ldbVertexIndex = -1
+      return InsertUniqueHbnd3( v, bt, int(-1) );
+    }
+    virtual bool InsertUniqueHbnd4 (int (&v)[4], Gitter :: hbndseg :: bnd_t bt) 
+    {
+      // ldbVertexIndex = -1
+      return InsertUniqueHbnd4( v, bt, int(-1) );
+    }
+
   public :
     static bool debugOption (int) ;
 

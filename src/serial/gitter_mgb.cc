@@ -1037,7 +1037,6 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
     }
   }
   {
-    int ldbVertexIndex = -1;
     int nb = 0 ;
     rawInput >> nb ;
     for (int i = 0 ; i < nb ; i ++) 
@@ -1053,7 +1052,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
           exit(1);
         }
-        InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt)), ldbVertexIndex) ;
+        InsertUniqueHbnd4 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt))) ;
       } 
       else if (polygonLen == 3) 
       {
@@ -1064,7 +1063,7 @@ void MacroGridBuilder :: inflateMacroGrid (istream & rawInput) {
           cerr << "**ERROR (FATAL): boundary id = " << bt << "  out of range! Valid are: " << Gitter :: hbndseg_STI :: validRanges() << endl ;
           exit(1);
         }
-        InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt)), ldbVertexIndex) ;
+        InsertUniqueHbnd3 (v,(Gitter :: hbndseg :: bnd_t)(std::abs(bt))) ;
       } 
       else 
       {
