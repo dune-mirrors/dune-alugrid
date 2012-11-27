@@ -786,9 +786,6 @@ void Gitter ::restoreImpl (istream_t & in)
     AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
     for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ; 
   }
-
-  // make parallel grid consistent
-  notifyGridChanges () ;
 }
 
 // restore taking std::istream 
@@ -857,11 +854,6 @@ void Gitter :: markForBallRefinement( const alucoord_t (&center)[3], double radi
       cout << "**INFO Gitter :: refineBall () used " 
            << (double)(clock () - start)/(double)(CLOCKS_PER_SEC) << " sec." << endl ;
   }
-  return ;
-}
-
-void Gitter :: notifyGridChanges () {
-  assert (debugOption (20) ? (cout << "**INFO Gitter :: notifyGridChanges () " << endl, 1) : 1) ;
   return ;
 }
 

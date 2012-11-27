@@ -2025,7 +2025,6 @@ protected :
   virtual Makrogitter & container () = 0 ;
   virtual const Makrogitter & container () const = 0 ;
   virtual inline int iterators_attached () const ;
-  virtual void notifyGridChanges () ;
   virtual void notifyMacroGridChanges () ;
 protected :
   // bisectionRefinement is disabled by default 

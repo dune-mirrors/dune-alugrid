@@ -713,8 +713,6 @@ void GitterPll :: coarse ()
     
     try 
     {
-      // Gitter :: resetEdgeCoarsenFlags () ;
-    
       // Phase des Kantenausgleichs im parallelen Vergr"oberungsalgorithmus:
   
       __STATIC_phase  = 6 ;
@@ -831,6 +829,9 @@ void GitterPll :: coarse ()
             }
           }
         }
+
+        // also pack dynamic state here since this is the last communication 
+        packUnpackDynamicState( inout, nl, true );
         
         // exchange data 
         inout = mpAccess ().exchange (inout) ;
@@ -856,12 +857,10 @@ void GitterPll :: coarse ()
             }
           }
         }
-      }
 
-      //Gitter :: resetEdgeCoarsenFlags () ;
-      // do real coarsening of elements 
-      //Gitter :: doCoarse () ;
-      // Gitter :: coarse () ;
+        // unpack dynamic state here since this is the last communication 
+        packUnpackDynamicState( inout, nl, false );
+      }
     } 
     catch (Parallel :: AccessPllException) 
     {
@@ -874,6 +873,67 @@ void GitterPll :: coarse ()
   __STATIC_phase = -1 ;
   
   return ;
+}
+
+void GitterPll :: 
+packUnpackDynamicState ( vector < ObjectStream >& osv, const int nl, const bool packData )
+{
+  typedef Insert < AccessIteratorTT < hface_STI > :: InnerHandle,
+     TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
+  typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
+    TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
+              
+  // if pack data is true, then write data to stream, otherwise read 
+  if( packData ) 
+  {
+    for (int l = 0 ; l < nl ; ++l) 
+    {
+      // get object stream 
+      ObjectStream& os = osv[ l ];
+
+      AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
+      AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
+
+      InnerIteratorType wi (mif);
+      for (wi.first () ; ! wi.done () ; wi.next ()) 
+      {
+        pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
+        p.first->writeDynamicState (os, p.second) ;
+      }
+  
+      OuterIteratorType wo (mof);
+      for (wo.first () ; ! wo.done () ; wo.next ()) 
+      {
+        pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
+        p.first->writeDynamicState (os, p.second) ;
+      }
+    }
+  }
+  else // unpack data 
+  { 
+    for (int l = 0 ; l < nl ; ++l) 
+    {
+      // get object stream 
+      ObjectStream& os = osv[ l ];
+
+      AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
+      AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
+  
+      OuterIteratorType wo (mof) ;
+      for (wo.first () ; ! wo.done () ; wo.next ()) 
+      {
+        pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
+        p.first->readDynamicState (os, p.second) ;
+      }
+  
+      InnerIteratorType wi (mif);
+      for (wi.first () ; ! wi.done () ; wi.next ()) 
+      {
+        pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
+        p.first->readDynamicState (os, p.second) ;
+      }
+    }
+  } 
 }
 
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
@@ -913,9 +973,6 @@ bool GitterPll :: adapt ()
 
   // now do one coarsening step 
   coarse () ;
-
-  // notify grid changes here
-  notifyGridChanges () ;
 
 #ifndef NDEBUG
   needConformingClosure = 
@@ -981,11 +1038,10 @@ void GitterPll :: MacroGitterPll :: fullIntegrityCheck (MpAccessLocal & mpa) {
 
 void GitterPll :: exchangeDynamicState () 
 {
-  // Die Methode wird jedesmal aufgerufen, wenn sich der dynamische
   // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
   // die einer "Anderung des statischen Zustands entsprechen. Sie wird in
-  // diesem Fall NACH dem Update des statischen Zustands aufgerufen, und
-  // kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
+  // diesem Fall NACH dem Update des statischen Zustands aufgerufen (nach loadBalance), 
+  // und kann demnach von einem korrekten statischen Zustand ausgehen. F"ur
   // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
   // Regel hier eingeschleift werden.
   {
@@ -1003,59 +1059,24 @@ void GitterPll :: exchangeDynamicState ()
       typedef Insert < AccessIteratorTT < hface_STI > :: OuterHandle, 
         TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
                 
+      // create message buffers 
       vector < ObjectStream > osv (nl) ;
-      {
-        for (int l = 0 ; l < nl ; l ++) 
-        {
-          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
-          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
 
-          InnerIteratorType wi (mif);
-          for (wi.first () ; ! wi.done () ; wi.next ()) 
-          {
-            pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
-            p.first->writeDynamicState (osv [l], p.second) ;
-          }
-      
-          OuterIteratorType wo (mof);
-          for (wo.first () ; ! wo.done () ; wo.next ()) 
-          {
-            pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
-            p.first->writeDynamicState (osv [l], p.second) ;
-          }
-        }  
-      }
-    
+      // pack dynamic state 
+      packUnpackDynamicState( osv, nl, true );
+        
       // exchange data 
       osv = mpAccess ().exchange (osv) ;
     
-      { 
-        for (int l = 0 ; l < nl ; l ++ ) 
-        {
-          AccessIteratorTT < hface_STI > :: OuterHandle mof (this->containerPll (),l) ;
-          AccessIteratorTT < hface_STI > :: InnerHandle mif (this->containerPll (),l) ;
-      
-          OuterIteratorType wo (mof) ;
-          for (wo.first () ; ! wo.done () ; wo.next ()) 
-          {
-            pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
-            p.first->readDynamicState (osv [l], p.second) ;
-          }
-      
-          InnerIteratorType wi (mif);
-          for (wi.first () ; ! wi.done () ; wi.next ()) 
-          {
-            pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
-            p.first->readDynamicState (osv [l], p.second) ;
-          }
-        }
-      }
+      // unpack dynamic state 
+      packUnpackDynamicState( osv, nl, false );
+        
     } 
     catch (Parallel ::  AccessPllException) 
     {
       cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
     }
-    assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: exchangeDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
+    assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: packUnpackDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << endl, 1) : 1 ) ;
   }
   return ;
 }
@@ -1118,16 +1139,16 @@ bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db )
   return neu;
 }
 
-void GitterPll :: loadBalancerGridChangesNotify () 
+bool GitterPll :: loadBalancerGridChangesNotify ( GatherScatterType* gs ) 
 {
   // create load balancer data base 
   LoadBalancer :: DataBase db ;
 
   // check whether we have to repartition 
-  const bool neu = checkPartitioning( db );
+  const bool repartition = checkPartitioning( db );
 
   // if repartioning necessary, do it 
-  if (neu) 
+  if ( repartition ) 
   {
     const int ldbMth = int( _ldbMethod );
 #ifndef NDEBUG
@@ -1136,22 +1157,20 @@ void GitterPll :: loadBalancerGridChangesNotify ()
     assert( checkMth == ldbMth ); 
 #endif
 
+    // if a method was given, perform load balancing
     if( ldbMth ) 
     {
-#ifdef ENABLE_ALUGRID_VTK_OUTPUT 
-      tovtk("pre.vtu");
-#endif
+      // check gather-scatter object and call appropriate method 
+      if( gs ) 
+        duneRepartitionMacroGrid( db, *gs );  
+      else   
+        repartitionMacroGrid (db) ;
 
-      repartitionMacroGrid (db) ;
-
-#ifdef ENABLE_ALUGRID_VTK_OUTPUT 
-      tovtk("post.vtu");
-#endif
-
+      // calls identification and exchangeDynamicState 
       notifyMacroGridChanges () ;
     }
   }
-  return ;
+  return repartition ;
 }
 
 void GitterPll :: loadBalancerMacroGridChangesNotify () 
@@ -1216,19 +1235,10 @@ void GitterPll :: computeGraphVertexIndices ()
 #endif
 }
 
-void GitterPll :: notifyGridChanges () 
-{
-  assert (debugOption (20) ? (cout << "**INFO GitterPll :: notifyGridChanges () " << endl, 1) : 1 ) ;
-  Gitter :: notifyGridChanges () ;
-  exchangeDynamicState () ;
-  return ;
-}
-
 void GitterPll :: notifyMacroGridChanges () 
 {
   assert (debugOption (20) ? (cout << "**INFO GitterPll :: notifyMacroGridChanges () " << endl, 1) : 1 ) ;
   Gitter :: notifyMacroGridChanges () ;
-  Gitter :: notifyGridChanges () ;
 
   containerPll ().identification (mpAccess ()) ;
 

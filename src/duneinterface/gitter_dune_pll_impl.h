@@ -97,11 +97,11 @@ public:
   // notifyMacroGridChanges for dune
   void duneNotifyMacroGridChanges (); 
   
-  // notifyGridChanges for dune (calls GitterPll :: notifyGridChanges)
-  void duneNotifyGridChanges () { GitterPll :: notifyGridChanges(); } 
+  // deprecated method, does nothing anymore but is needed for convenience 
+  void duneNotifyGridChanges () { } 
   
-  // exchange changed elements (calls GitterPll :: exchangeDynamicState )
-  void duneExchangeDynamicState () { GitterPll :: exchangeDynamicState(); }
+  // deprecated method, does nothing anymore but is needed for convenience 
+  void duneExchangeDynamicState () { }
   
   // communication of border data 
   void borderBorderCommunication (

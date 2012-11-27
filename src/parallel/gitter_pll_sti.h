@@ -222,6 +222,9 @@ class GitterPll : public virtual Gitter {
   // aufgerufen, sobald sich der zugeh"orige Zustand ge"andert hat.
     
     virtual void exchangeDynamicState () ;
+
+    // pack or unpack dynamic state data 
+    void packUnpackDynamicState ( vector<ObjectStream> & osv, const int nl, const bool packData ) ;
   protected:   
     void doRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType* ) ;
   public:  
@@ -229,10 +232,9 @@ class GitterPll : public virtual Gitter {
     virtual void duneRepartitionMacroGrid (LoadBalancer :: DataBase &, GatherScatterType& ) ;
     
     virtual bool checkPartitioning(LoadBalancer :: DataBase &) ;
-    virtual void loadBalancerGridChangesNotify () ;
+    virtual bool loadBalancerGridChangesNotify ( GatherScatterType* ) ;
     virtual void loadBalancerMacroGridChangesNotify () ;
     virtual void computeGraphVertexIndices() ;
-    virtual void notifyGridChanges () ;
     virtual void notifyMacroGridChanges () ;
     
   // Die Methoden iteratorTT (const . *, int)  sind der Zugang zu den

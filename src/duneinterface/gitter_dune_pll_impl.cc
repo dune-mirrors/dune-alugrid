@@ -42,8 +42,7 @@ bool GitterDunePll :: duneAdapt (AdaptRestrictProlongType & arp)
 
 bool GitterDunePll :: duneLoadBalance () 
 {
-  loadBalancerGridChangesNotify () ;
-  return true;
+  return loadBalancerGridChangesNotify ( ( GatherScatterType* ) 0 ) ;
 }
 
 // returns true if grid was repartitioned 
@@ -51,27 +50,9 @@ bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProl
 {
   // set restriction/prolongation operator 
   this->setAdaptRestrictProlongOp(arp);
-  assert (debugOption (20) ? (cout << "**GitterDunePll :: duneLoadBalance () " << endl, 1) : 1) ;
 
-  LoadBalancer :: DataBase db;
-  const bool repartion = checkPartitioning( db );
-
-  if ( repartion ) 
-  {
-    const int ldbMth = int( _ldbMethod );
-#ifndef NDEBUG
-    // make sure every process has the same ldb method 
-    int checkMth = mpAccess ().gmax( ldbMth );
-    assert( checkMth == ldbMth );
-#endif
-
-    if ( ldbMth )
-    {
-      assert (debugOption (5) ? (cout << "**GitterDunePll :: repartitioning macro grid! " << endl, 1) : 1) ;
-      duneRepartitionMacroGrid (db, gs) ;
-      notifyMacroGridChanges () ;
-    }
-  }
+  // do load balancing 
+  const bool repartion = loadBalancerGridChangesNotify ( &gs ) ;
 
   // remove restriction/prolongation operator 
   this->removeAdaptRestrictProlongOp ();
