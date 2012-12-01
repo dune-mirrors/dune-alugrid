@@ -219,7 +219,7 @@ class TetraPllXBaseMacro : public A
     // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
     virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
     virtual void setLoadBalanceVertexIndex ( const int ) ;
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
+    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &, GatherScatter* ) ;
   public :
     virtual bool erasable () const ;
     virtual void attachElement2 ( const int, const int );
@@ -313,11 +313,6 @@ class Periodic3PllXBaseMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
-    virtual int ldbVertexIndex () const { return _ldbVertexIndex ; }
-    virtual void setLoadBalanceVertexIndex ( const int ldbVx ) { _ldbVertexIndex = ldbVx ; }
-
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
-
     virtual void attachPeriodic( const int destination ) ;
     virtual pair<int,int> insideLdbVertexIndex() const ;
     virtual int otherLdbVertexIndex( const int faceIndex ) const ;
@@ -337,8 +332,6 @@ class Periodic3PllXBaseMacro : public A
     alucoord_t _center [3] ;
 #endif
     int _moveTo ;
-    // globally unique element number 
-    int _ldbVertexIndex ;
 } ;
 
 // ######                                                          #
@@ -407,10 +400,6 @@ class Periodic4PllXBaseMacro : public A
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
   public :
-    virtual int ldbVertexIndex () const ;
-    virtual void setLoadBalanceVertexIndex ( const int ) ;
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
-
     virtual void attachPeriodic( const int destination ) ;
     virtual pair<int,int> insideLdbVertexIndex() const ;
     virtual int otherLdbVertexIndex( const int faceIndex ) const ;
@@ -426,8 +415,6 @@ class Periodic4PllXBaseMacro : public A
     alucoord_t _center [3] ;
 #endif
     int _moveTo ;
-    // globally unique element number 
-    int _ldbVertexIndex ;
 } ;
 
 // #     #
@@ -487,7 +474,8 @@ class HexaPllBaseXMacro : public A
     // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
     virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
     virtual void setLoadBalanceVertexIndex ( const int ) ;
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &) ;
+    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &, GatherScatter* ) ;
+  public:  
     virtual void attachElement2 ( const int, const int );
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;

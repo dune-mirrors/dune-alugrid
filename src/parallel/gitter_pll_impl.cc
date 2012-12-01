@@ -727,19 +727,27 @@ void TetraPllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
 }
 
 template < class A >
-bool TetraPllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
+bool TetraPllXBaseMacro< A > :: 
+ldbUpdateGraphVertex (LoadBalancer :: DataBase & db, GatherScatterType* gs ) 
 {
-  // parameter are: 
+  // parameter for GraphVertex are: 
   // - macro vertex index
   // - number of elementes below macro element 
-  // - bary center 
+  // - bary center (only if GRAPHVERTEX_WITH_CENTER defined)
+  typedef TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > >  TreeIteratorType ;
+
+  // get macro element weight 
+  // if gs is not null, then use the weight provided by gs 
+  // otherwise count number of leaf elements  
+  const int weight = ( gs ) ? gs->loadWeight( mytetra() ) : 
+                              TreeIteratorType( mytetra () ).size () ;
    
-  db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (mytetra ()).size () 
+  db.vertexUpdate (
+      LoadBalancer :: GraphVertex (ldbVertexIndex (), weight
 #ifdef GRAPHVERTEX_WITH_CENTER
-      , _center
+                                  , _center
 #endif
-      ) ) ;
+                                  ) ) ;
   return true ;
 }
 
@@ -1026,7 +1034,6 @@ Periodic3PllXBaseMacro< A > ::
 Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1, const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] )
 : A(level, f0, s0, f1, s1, bt )
 , _moveTo ( -1 )
-, _ldbVertexIndex ( -1 )
 {
   // don't allow erase
   set( flagLock );
@@ -1045,12 +1052,6 @@ Periodic3PllXBaseMacro< A > :: ~Periodic3PllXBaseMacro ()
   {
     unattach2 ( _moveTo );
   }
-}
-
-template <class A>
-bool Periodic3PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
-{
-  return true ;
 }
 
 template < class A >
@@ -1223,7 +1224,6 @@ Periodic4PllXBaseMacro< A > ::
 Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1, const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] ) 
   : A(level, f0, s0, f1, s1, bt )
   , _moveTo ( -1 )
-  , _ldbVertexIndex (-1)
 {
   // don't allow erase
   set( flagLock );
@@ -1242,25 +1242,6 @@ Periodic4PllXBaseMacro< A > :: ~Periodic4PllXBaseMacro ()
   {
     unattach2( _moveTo );
   }
-}
-
-template < class A > 
-int Periodic4PllXBaseMacro< A > :: ldbVertexIndex () const {
-  //assert( _ldbVertexIndex >= 0 );
-  return _ldbVertexIndex ;
-}
-
-template < class A > 
-void Periodic4PllXBaseMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
-  abort();
-  _ldbVertexIndex = ldbVx ;
-}
-
-template < class A > 
-bool Periodic4PllXBaseMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
-{
-  abort();
-  return true ;
 }
 
 template < class A > 
@@ -1485,14 +1466,26 @@ void HexaPllBaseXMacro< A > :: setLoadBalanceVertexIndex ( const int ldbVx ) {
 }
 
 template < class A >
-bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db) 
+bool HexaPllBaseXMacro< A > :: ldbUpdateGraphVertex (LoadBalancer :: DataBase & db, GatherScatter* gs ) 
 {
-  db.vertexUpdate (LoadBalancer :: GraphVertex (ldbVertexIndex (), 
-      TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > > (myhexa ()).size () 
+  // parameter for GraphVertex are: 
+  // - macro vertex index
+  // - number of elementes below macro element 
+  // - bary center (only if GRAPHVERTEX_WITH_CENTER defined)
+  typedef TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI > >  TreeIteratorType ;
+
+  // get macro element weight 
+  // if gs is not null, then use the weight provided by gs 
+  // otherwise count number of leaf elements  
+  const int weight = ( gs ) ? gs->loadWeight( myhexa() ) : 
+                              TreeIteratorType( myhexa() ).size () ;
+   
+  db.vertexUpdate (
+      LoadBalancer :: GraphVertex (ldbVertexIndex (), weight
 #ifdef GRAPHVERTEX_WITH_CENTER
-      , _center
+                                  , _center
 #endif
-      )) ;
+                                  ) ) ;
   return true ;
 }
 
