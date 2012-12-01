@@ -592,7 +592,7 @@ void ParallelGridMover :: unpackPeriodic3 (ObjectStream & os)
   pair < periodic3_GEO *, bool > p = InsertUniquePeriodic (v, b) ;
   p.first->accessPllX ().unpackSelf (os,p.second) ;
   return ;
-}	
+} 
 
 void ParallelGridMover :: unpackPeriodic4 (ObjectStream & os) 
 {
@@ -803,7 +803,7 @@ void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os)
   InsertUniqueHbnd3 (v, Gitter :: hbndseg :: bnd_t (b), ldbVertexIndex) ;
   return ;
 }
-	
+  
 void ParallelGridMover :: unpackHbnd4Ext (ObjectStream & os) {
   int b, v [4] ;
   os.readObject (b) ;
@@ -903,14 +903,44 @@ void GitterPll ::
 doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
                         GatherScatterType* gatherScatter ) 
 {
-  if (db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod))) 
+  // in case gatherScatter is given check for overloaded partitioning 
+  const bool userDefinedPartitioning = gatherScatter && gatherScatter->userDefinedPartitioning() ;
+
+  // default partitioning method 
+  const bool doRepartition = userDefinedPartitioning ? 
+    gatherScatter->repartition() :
+    db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod)) ;
+    
+  // time meassure 
+  const long start = clock () ;
+  long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
+
+  // if partitining should be done, erase linkage and setup moveto directions 
+  if( doRepartition ) 
   {
-    const long start = clock () ;
-    long lap1 (start), lap2 (start), lap3 (start), lap4 (start) ;
+    typedef LoadBalancer :: DataBase :: ldb_connect_set_t  ldb_connect_set_t ;
+    ldb_connect_set_t connect ;
+    const ldb_connect_set_t* connectScan = &connect ;
+
+    // setup connection set in case if user defined partitioning 
+    if( userDefinedPartitioning ) 
+    {
+      // attach all elements to their new destinations 
+      AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
+      for (w.first () ; ! w.done () ; w.next ()) 
+      {
+        connect.insert( gatherScatter->destination( w.item() ) );
+      }
+    }
+    else // take connections from db in default version
+      connectScan = & db.scan() ;
+
     mpAccess ().removeLinkage () ;
-    mpAccess ().insertRequestSymetric (db.scan ()) ;
+    mpAccess ().insertRequestSymetric ( *connectScan ) ;
+
     const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks () ;
     {
+      if ( ! userDefinedPartitioning )
       {
         // iterate over all periodic elements and set 'to' of first neighbour
         AccessIterator < hperiodic_STI > :: Handle w (containerPll ()) ;
@@ -924,14 +954,14 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
           // of a periodic element 
           if( ldbVx.first >= 0 ) 
           {
-            const int to = db.getDestination ( ldbVx.first );
+            const int to = db.destination ( ldbVx.first );
             if( to != me ) 
               moveTo = to;
           }
 
           if( ldbVx.second >= 0 && moveTo == me ) 
           {
-            const int to = db.getDestination ( ldbVx.second );
+            const int to = db.destination ( ldbVx.second );
             if( to != me ) 
               moveTo = to;
           }
@@ -947,6 +977,8 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
 
       // attach all elements to their new destinations 
       { 
+        // if not userDefinedPartitioning, then pass null pointer 
+        GatherScatterType* gsDestination = userDefinedPartitioning ? gatherScatter : 0 ;
         AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
         for (w.first () ; ! w.done () ; w.next ()) 
         {
@@ -954,7 +986,7 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
           // moveTo < 0 means the element has not been assigned yet
           if( item.moveTo() < 0 ) 
           { 
-            const int to = db.getDestination ( item.ldbVertexIndex () ) ;
+            const int to = db.destination ( item, gsDestination ) ;
             if (me != to)
             {
               item.attach2 ( mpAccess ().link (to) ) ;

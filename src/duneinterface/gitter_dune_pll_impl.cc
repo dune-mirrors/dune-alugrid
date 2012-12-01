@@ -22,7 +22,7 @@ leafIterator (const IteratorSTI < helement_STI > * p)
 bool GitterDunePll :: duneNotifyNewGrid ()
 {
   LoadBalancer :: DataBase db ;
-  return checkPartitioning( db );
+  return checkPartitioning( db, (GatherScatter*) 0 );
 }
 
 void GitterDunePll :: duneNotifyMacroGridChanges ()

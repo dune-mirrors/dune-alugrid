@@ -922,16 +922,12 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   return change ;
 }
 
-int LoadBalancer :: DataBase :: getDestination (int i) const 
+int LoadBalancer :: DataBase :: destination (int i) const 
 {
   // use constructor to initialize default values 
   GraphVertex e (i) ;
   assert (_vertexSet.find (e) != _vertexSet.end ()) ;
   return (*_vertexSet.find (e)).second ;
-}
-
-set < int, less < int > > LoadBalancer :: DataBase :: scan () const {
-  return _connect ;
 }
 
 const char * LoadBalancer :: DataBase :: methodToString (method m) 

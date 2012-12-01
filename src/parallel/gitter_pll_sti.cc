@@ -1081,22 +1081,25 @@ void GitterPll :: exchangeDynamicState ()
   return ;
 }
 
-bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db ) 
+bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db, GatherScatterType* gs ) 
 {
-  assert (debugOption (20) ? (cout << "**GitterPll :: checkPartitioning ( db ) " << endl, 1) : 1) ;
+  // build macro graph, either using user defined weights or default weighs 
+  assert (debugOption (20) ? (cout << "**GitterPll :: checkPartitioning ( db, gs ) " << endl, 1) : 1) ;
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
     for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
   }
   {
+    // if gs is given and user defined weight is enabled, use these to setup graph 
+    GatherScatter* gatherScatter = gs && gs->userDefinedLoadWeights() ? gs : 0 ;
     AccessIterator < helement_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db) ;
+    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphVertex (db, gatherScatter);
   }
 
   const int np = mpAccess ().psize () ;
-  bool neu = false ;
+  bool repartition = false ;
   {
-    // Kriterium, wann eine Lastneuverteilung vorzunehmen ist:
+    // Criterion, if a repartition has to be done 
     // 
     // load    - own load 
     // mean    - mean load of elements 
@@ -1112,40 +1115,27 @@ bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db )
     // get mean value of leaf elements 
     const double mean = load.sum / double( np );
 
-    /*
-    // old version using Allgather 
-    vector < double > v (mpAccess ().gcollect (load)) ;
-    const vector < double > :: iterator iEnd =  v.end () ;
-
-    // sum up values and devide by number of cores 
-    const double mean = accumulate (v.begin (), v.end (), 0.0) / double (np) ;
-    std::cout << mean << " mean value " << std::endl;
-
-    for (vector < double > :: iterator i = v.begin () ; i != iEnd ; ++i)
-      neu |= (*i > mean ? (*i > (_ldbOver * mean) ? true : false) : (*i < (_ldbUnder * mean) ? true : false)) ;
-    */
-    //std::cout << mean << " mean value " << minload << "  minload  " << maxload << std::endl;
-
     if( load.max > (_ldbOver * mean) || load.min < (_ldbUnder * mean) ) 
-      neu = true ;
+      repartition = true ;
   }
 
 #ifndef NDEBUG
-  // make sure every process has the same value of neu
-  const bool checkNeu = mpAccess().gmax( neu );
-  assert( neu == checkNeu );
+  // make sure every process has the same value of repartition
+  const bool checkNeu = mpAccess().gmax( repartition );
+  assert( repartition == checkNeu );
 #endif
 
-  return neu;
+  return repartition;
 }
 
+// --loadBalance 
 bool GitterPll :: loadBalancerGridChangesNotify ( GatherScatterType* gs ) 
 {
   // create load balancer data base 
   LoadBalancer :: DataBase db ;
 
   // check whether we have to repartition 
-  const bool repartition = checkPartitioning( db );
+  const bool repartition = checkPartitioning( db, gs );
 
   // if repartioning necessary, do it 
   if ( repartition ) 

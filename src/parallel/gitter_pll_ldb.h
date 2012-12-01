@@ -67,14 +67,15 @@ class LoadBalancer {
           public :
             inline int operator () (int, const GraphEdge &) const ;
         } ;
+        typedef set < int, less < int > > ldb_connect_set_t ;
       private :
         int _minFaceLoad ;
         int _maxFaceLoad ;
         int _minVertexLoad ;
         int _maxVertexLoad ;
-        set < int, less < int > > _connect ;
-        ldb_edge_set_t   _edgeSet ;
-        ldb_vertex_map_t _vertexSet ;
+        ldb_connect_set_t  _connect ;
+        ldb_edge_set_t     _edgeSet ;
+        ldb_vertex_map_t   _vertexSet ;
       public :
         enum method { 
           // no load balancing 
@@ -129,8 +130,17 @@ class LoadBalancer {
         int accEdgeLoad () const ;
         inline int maxVertexLoad () const ;
       public :
-        int getDestination (int) const ;
-        set < int, less < int > > scan () const ;
+        int getDestination ( int i ) const { return destination( i ); }
+        template <class helement_t, class gatherscatter_t >
+        int destination (const helement_t& elem, gatherscatter_t* gs ) const 
+        {
+          // if gs is given use this to obtain detination 
+          return ( gs ) ? gs->destination( elem ) :
+                          destination( elem.ldbVertexIndex() ) ;
+        }
+        int destination (int) const ;
+        const ldb_connect_set_t& scan () const { return _connect ; }
+
         // original repartition method for ALUGrid 
         bool repartition (MpAccessGlobal &, method) ;
         // repartition to be called from outside (communicator ALU2d)

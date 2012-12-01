@@ -204,7 +204,7 @@ class ElementPllXIF : public hasFace
     virtual void insertGhostCell(ObjectStream &,int) {}
     
   public :
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &)
+    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &, GatherScatter* )
     { assert(false);abort(); return false;  }
   public :
     virtual void packAsBnd (int,int,ObjectStream &, const bool) const
