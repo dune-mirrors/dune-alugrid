@@ -2756,11 +2756,7 @@ inline Gitter :: Geometric :: hedge1 :: hedge1 (myvertex_t * a, myvertex_t * b) 
 
 inline Gitter :: Geometric :: hedge1 :: ~hedge1 () {
   assert (ref ? (cerr << "**WARNING hedge1::refcount was " << ref << endl, 1) : 1) ;
-  if( ref != 0 ) 
-  {
-    cout << int(this->bndId()) << " bnd id " << endl;
-    assert ( ref == 0 );
-  }
+  assert ( ref == 0 );
   v0->ref -- ; 
   v1->ref -- ;
   return ;
