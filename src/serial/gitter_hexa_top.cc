@@ -39,13 +39,13 @@ template < class A > void Hedge1Top < A > :: refineImmediate (myrule_t r)
 
 #ifdef USE_MALLOC_AT_ONCE
           void* edgeMem[2] = {0,0};
-          this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 2 );
+          MyAlloc :: allocate( sizeof(inneredge_t), edgeMem, 2 );
 
-          inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, v0 , inVx(), 0 ) ;
-          inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, inVx(), v1, 1 ) ;
+          inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, v0 ,    inVx(), 0 ) ;
+          inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, inVx(), v1,     1 ) ;
 #else
-          inneredge_t * e0 = new inneredge_t (l, v0 , inVx(), 0 ) ;
-          inneredge_t * e1 = new inneredge_t (l, inVx(), v1, 1 ) ;
+          inneredge_t * e0 = new inneredge_t (l, v0 ,    inVx(), 0 ) ;
+          inneredge_t * e1 = new inneredge_t (l, inVx(), v1,     1 ) ;
 #endif
 
           assert (e0 && e1) ;
@@ -143,7 +143,7 @@ template < class A >  void Hface4Top < A > :: splitISO4 () {
 
 #ifdef USE_MALLOC_AT_ONCE
   void* edgeMem[4] = {0,0,0,0};
-  this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 4 );
+  MyAlloc :: allocate( sizeof(inneredge_t), edgeMem, 4 );
 
   inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, ev0, inVx()) ;
   inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, ev1, inVx()) ;
@@ -162,12 +162,12 @@ template < class A >  void Hface4Top < A > :: splitISO4 () {
 
 #ifdef USE_MALLOC_AT_ONCE
   void* faceMem[4] = {0,0,0,0};
-  this->mallocAtOnce( sizeof(innerface_t), faceMem, 4 );
+  MyAlloc :: allocate( sizeof(innerface_t), faceMem, 4 );
 
-  innerface_t * f0 = new (faceMem[0]) innerface_t (l, this->subedge(0,0), twist(0), e0, 0, e3, 1, this->subedge(3,1), twist(3), 0) ;
-  innerface_t * f1 = new (faceMem[1]) innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), e1, 0, e0, 1, 1) ;
-  innerface_t * f2 = new (faceMem[2]) innerface_t (l, e1, 1, this->subedge(1,1), twist(1), this->subedge(2,0), twist(2), e2, 0, 2) ;
-  innerface_t * f3 = new (faceMem[3]) innerface_t (l, e3, 0, e2, 1, this->subedge(2,1), twist(2), this->subedge(3,0), twist(3), 3) ;
+  innerface_t * f0 = new (faceMem[ 0 ]) innerface_t (l, this->subedge(0,0), twist(0), e0, 0, e3, 1, this->subedge(3,1), twist(3), 0) ;
+  innerface_t * f1 = new (faceMem[ 1 ]) innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), e1, 0, e0, 1, 1) ;
+  innerface_t * f2 = new (faceMem[ 2 ]) innerface_t (l, e1, 1, this->subedge(1,1), twist(1), this->subedge(2,0), twist(2), e2, 0, 2) ;
+  innerface_t * f3 = new (faceMem[ 3 ]) innerface_t (l, e3, 0, e2, 1, this->subedge(2,1), twist(2), this->subedge(3,0), twist(3), 3) ;
 #else 
   innerface_t * f0 = new innerface_t (l, this->subedge(0,0), twist(0), e0, 0, e3, 1, this->subedge(3,1), twist(3), 0) ;
   innerface_t * f1 = new innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), e1, 0, e0, 1, 1) ;
@@ -354,13 +354,13 @@ template < class A >  void Hbnd4Top < A > :: splitISO4 () {
   this->splitGhost( ghostInfo );
 
 #ifdef USE_MALLOC_AT_ONCE
-  void* bndMem[8] = {0,0,0,0};
-  this->mallocAtOnce( sizeof(innerbndseg_t), bndMem, 4 );
+  void* bndMem[ 4 ] = {0,0,0,0};
+  MyAlloc :: allocate( sizeof(innerbndseg_t), bndMem, 4 );
 
-  innerbndseg_t * b0 = new (bndMem[0]) innerbndseg_t (l, subface (0,0), twist (0), this, ghostInfo.child(0), ghostInfo.face(0)) ;
-  innerbndseg_t * b1 = new (bndMem[1]) innerbndseg_t (l, subface (0,1), twist (0), this, ghostInfo.child(1), ghostInfo.face(1)) ;
-  innerbndseg_t * b2 = new (bndMem[2]) innerbndseg_t (l, subface (0,2), twist (0), this, ghostInfo.child(2), ghostInfo.face(2)) ;
-  innerbndseg_t * b3 = new (bndMem[3]) innerbndseg_t (l, subface (0,3), twist (0), this, ghostInfo.child(3), ghostInfo.face(3)) ;
+  innerbndseg_t * b0 = new (bndMem[ 0 ]) innerbndseg_t (l, subface (0,0), twist (0), this, ghostInfo.child(0), ghostInfo.face(0)) ;
+  innerbndseg_t * b1 = new (bndMem[ 1 ]) innerbndseg_t (l, subface (0,1), twist (0), this, ghostInfo.child(1), ghostInfo.face(1)) ;
+  innerbndseg_t * b2 = new (bndMem[ 2 ]) innerbndseg_t (l, subface (0,2), twist (0), this, ghostInfo.child(2), ghostInfo.face(2)) ;
+  innerbndseg_t * b3 = new (bndMem[ 3 ]) innerbndseg_t (l, subface (0,3), twist (0), this, ghostInfo.child(3), ghostInfo.face(3)) ;
 #else
   innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this, ghostInfo.child(0), ghostInfo.face(0)) ;
   innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this, ghostInfo.child(1), ghostInfo.face(1)) ;
@@ -681,7 +681,7 @@ template < class A > void HexaTop < A > :: splitISO8 ()
 #ifdef USE_MALLOC_AT_ONCE
   void* edgeMem[6] = {0,0,0,0,0,0};
   // allocate 6 * sizeof innerege_t 
-  this->mallocAtOnce( sizeof(inneredge_t), edgeMem, 6 );
+  MyAlloc :: allocate( sizeof(inneredge_t), edgeMem, 6 );
   inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, fv0, inVx()) ;
   inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, fv1, inVx()) ;
   inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, fv2, inVx()) ;
@@ -706,19 +706,19 @@ template < class A > void HexaTop < A > :: splitISO8 ()
 
 #ifdef USE_MALLOC_AT_ONCE
   void* faceMem[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-  this->mallocAtOnce( sizeof(innerface_t), faceMem, 12 );
-  innerface_t * f0 = new (faceMem[0]) innerface_t (l, this->subedge (2, 7), 0, e2, 0, e5, 1, this->subedge (5, 4), 1 ) ;
-  innerface_t * f1 = new (faceMem[1]) innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e3, 0, e2, 1 ) ;
-  innerface_t * f2 = new (faceMem[2]) innerface_t (l, e3, 1, this->subedge (3, 5), 1, this->subedge (4, 7), 0, e4, 0 ) ;
-  innerface_t * f3 = new (faceMem[3]) innerface_t (l, e5, 0, e4, 1, this->subedge (4, 5), 1, this->subedge (5, 6), 0 ) ;
-  innerface_t * f4 = new (faceMem[4]) innerface_t (l, this->subedge (0, 7), 0, e0, 0, e2, 1, this->subedge (2, 4), 1 ) ;
-  innerface_t * f5 = new (faceMem[5]) innerface_t (l, this->subedge (0, 5), 1, this->subedge (4, 4), 0, e4, 0, e0, 1 ) ; 
-  innerface_t * f6 = new (faceMem[6]) innerface_t (l, e4, 1, this->subedge (4, 6), 1, this->subedge (1, 6), 0, e1, 0 ) ;
-  innerface_t * f7 = new (faceMem[7]) innerface_t (l, e2, 0, e1, 1, this->subedge (1, 4), 1, this->subedge (2, 6), 0 ) ;
-  innerface_t * f8 = new (faceMem[8]) innerface_t (l, this->subedge (0, 4), 0, e0, 0, e5, 1, this->subedge (5, 7), 1 ) ;
-  innerface_t * f9 = new (faceMem[9]) innerface_t (l, this->subedge (0, 6), 1, this->subedge (3, 4), 0, e3, 0, e0, 1 ) ;
-  innerface_t * f10 = new (faceMem[10]) innerface_t (l, e3, 1, this->subedge (3, 6), 1, this->subedge (1, 5), 0, e1, 0 ) ;
-  innerface_t * f11 = new (faceMem[11]) innerface_t (l, e5, 0, e1, 1, this->subedge (1, 7), 1, this->subedge (5, 5), 0 ) ;
+  MyAlloc :: allocate( sizeof(innerface_t), faceMem, 12 );
+  innerface_t * f0  = new (faceMem[ 0 ]) innerface_t (l, this->subedge (2, 7), 0, e2, 0, e5, 1, this->subedge (5, 4), 1) ;
+  innerface_t * f1  = new (faceMem[ 1 ]) innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e3, 0, e2, 1) ;
+  innerface_t * f2  = new (faceMem[ 2 ]) innerface_t (l, e3, 1, this->subedge (3, 5), 1, this->subedge (4, 7), 0, e4, 0 ) ;
+  innerface_t * f3  = new (faceMem[ 3 ]) innerface_t (l, e5, 0, e4, 1, this->subedge (4, 5), 1, this->subedge (5, 6), 0 ) ;
+  innerface_t * f4  = new (faceMem[ 4 ]) innerface_t (l, this->subedge (0, 7), 0, e0, 0, e2, 1, this->subedge (2, 4), 1 ) ;
+  innerface_t * f5  = new (faceMem[ 5 ]) innerface_t (l, this->subedge (0, 5), 1, this->subedge (4, 4), 0, e4, 0, e0, 1 ) ; 
+  innerface_t * f6  = new (faceMem[ 6 ]) innerface_t (l, e4, 1, this->subedge (4, 6), 1, this->subedge (1, 6), 0, e1, 0 ) ;
+  innerface_t * f7  = new (faceMem[ 7 ]) innerface_t (l, e2, 0, e1, 1, this->subedge (1, 4), 1, this->subedge (2, 6), 0 ) ;
+  innerface_t * f8  = new (faceMem[ 8 ]) innerface_t (l, this->subedge (0, 4), 0, e0, 0, e5, 1, this->subedge (5, 7), 1 ) ;
+  innerface_t * f9  = new (faceMem[ 9 ]) innerface_t (l, this->subedge (0, 6), 1, this->subedge (3, 4), 0, e3, 0, e0, 1 ) ;
+  innerface_t * f10 = new (faceMem[ 10 ]) innerface_t (l, e3, 1, this->subedge (3, 6), 1, this->subedge (1, 5), 0, e1, 0 ) ;
+  innerface_t * f11 = new (faceMem[ 11 ]) innerface_t (l, e5, 0, e1, 1, this->subedge (1, 7), 1, this->subedge (5, 5), 0 ) ;
 #else 
   innerface_t * f0 = new innerface_t (l, this->subedge (2, 7), 0, e2, 0, e5, 1, this->subedge (5, 4), 1) ;
   innerface_t * f1 = new innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e3, 0, e2, 1) ;
@@ -768,16 +768,16 @@ template < class A > void HexaTop < A > :: splitISO8 ()
 
 #ifdef USE_MALLOC_AT_ONCE
   void* hexaMem[8] = {0,0,0,0,0,0,0,0};
-  this->mallocAtOnce( sizeof(innerhexa_t), hexaMem, 8 );
+  MyAlloc :: allocate( sizeof(innerhexa_t), hexaMem, 8 );
 
-  innerhexa_t * h0 = new (hexaMem[0]) innerhexa_t (l, subface (0, 0), twist (0), f0, 0, subface (2, 0), twist (2), f4, 0, f8, -4, subface (5, 0), twist (5) , this, 0, childVolume) ;
-  innerhexa_t * h1 = new (hexaMem[1]) innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f9, -4, f4, -1, this, 1, childVolume) ;
-  innerhexa_t * h2 = new (hexaMem[2]) innerhexa_t (l, subface (0, 2), twist (0), f2, 0,f9, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f5, -1        , this, 2, childVolume) ;
-  innerhexa_t * h3 = new (hexaMem[3]) innerhexa_t (l, subface (0, 1), twist (0), f3, 0, f8, 0, f5, 0, subface(4, 1), twist (4), subface(5, 3), twist (5)    , this, 3, childVolume) ;
-  innerhexa_t * h4 = new (hexaMem[4]) innerhexa_t (l, f0, -1, subface(1, 0), twist (1), subface(2, 3), twist (2), f7, 0, f11, -4, subface(5, 1), twist (5)  , this, 4, childVolume) ;
-  innerhexa_t * h5 = new (hexaMem[5]) innerhexa_t (l, f1, -1, subface(1, 1), twist (1), subface(2, 2), twist (2), subface(3, 3), twist (3), f10, -4, f7, -1 , this, 5, childVolume) ;
-  innerhexa_t * h6 = new (hexaMem[6]) innerhexa_t (l, f2, -1, subface(1, 2), twist (1), f10, 0, subface(3, 2), twist (3), subface(4, 3), twist (4), f6, -1  , this, 6, childVolume) ;
-  innerhexa_t * h7 = new (hexaMem[7]) innerhexa_t (l, f3, -1, subface(1, 3), twist (1), f11, 0, f6, 0, subface(4, 2), twist (4), subface(5, 2), twist (5)   , this, 7, childVolume) ;
+  innerhexa_t * h0 = new (hexaMem[ 0 ]) innerhexa_t (l, subface (0, 0), twist (0), f0, 0, subface (2, 0), twist (2), f4, 0, f8, -4, subface (5, 0), twist (5) , this, 0, childVolume) ;
+  innerhexa_t * h1 = new (hexaMem[ 1 ]) innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f9, -4, f4, -1, this, 1, childVolume) ;
+  innerhexa_t * h2 = new (hexaMem[ 2 ]) innerhexa_t (l, subface (0, 2), twist (0), f2, 0,f9, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f5, -1        , this, 2, childVolume) ;
+  innerhexa_t * h3 = new (hexaMem[ 3 ]) innerhexa_t (l, subface (0, 1), twist (0), f3, 0, f8, 0, f5, 0, subface(4, 1), twist (4), subface(5, 3), twist (5)    , this, 3, childVolume) ;
+  innerhexa_t * h4 = new (hexaMem[ 4 ]) innerhexa_t (l, f0, -1, subface(1, 0), twist (1), subface(2, 3), twist (2), f7, 0, f11, -4, subface(5, 1), twist (5)  , this, 4, childVolume) ;
+  innerhexa_t * h5 = new (hexaMem[ 5 ]) innerhexa_t (l, f1, -1, subface(1, 1), twist (1), subface(2, 2), twist (2), subface(3, 3), twist (3), f10, -4, f7, -1 , this, 5, childVolume) ;
+  innerhexa_t * h6 = new (hexaMem[ 6 ]) innerhexa_t (l, f2, -1, subface(1, 2), twist (1), f10, 0, subface(3, 2), twist (3), subface(4, 3), twist (4), f6, -1  , this, 6, childVolume) ;
+  innerhexa_t * h7 = new (hexaMem[ 7 ]) innerhexa_t (l, f3, -1, subface(1, 3), twist (1), f11, 0, f6, 0, subface(4, 2), twist (4), subface(5, 2), twist (5)   , this, 7, childVolume) ;
 #else 
   innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), twist (0), f0, 0, subface (2, 0), twist (2), f4, 0, f8, -4, subface (5, 0), twist (5) , this, 0, childVolume) ;
   innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f9, -4, f4, -1, this, 1, childVolume) ;
@@ -823,8 +823,8 @@ template < class A > void HexaTop < A > :: refineImmediate (myrule_t r)
     
       {
         typedef typename myhface4_t :: myrule_t myhface4rule_t;
-        for (int i = 0 ; i < 6 ; i ++)
-        myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t :: myrule_t :: iso4).rotate (twist (i))) ; }
+        for (int i = 0 ; i < 6 ; ++i)
+          myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t :: myrule_t :: iso4).rotate (twist (i))) ; }
       splitISO8 () ;
       break ;
     default :

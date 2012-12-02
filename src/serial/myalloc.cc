@@ -64,7 +64,48 @@ void MyAlloc :: unlockFree (void * addr)
   }
 }
 
-void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException) 
+void memAllocate( AllocEntry& fs, const size_t s, void* mem[], const size_t request)
+{
+  assert(s > 0);
+  {
+    fs.N += request ;
+    const size_t fsSize  = fs.S.size();
+    const size_t popSize = request > fsSize ? fsSize : request ;
+    const size_t newSize = request - popSize ;
+    for( size_t i = 0; i<newSize; ++i )
+    {
+      mem[ i ] = malloc ( s ) ;
+      assert( mem[ i ] );
+/*
+      if (mem[ i ] == NULL) 
+      {
+        abort();
+        //perror ("**ERROR (FATAL) in MyAlloc :: operator new ()") ;
+        //cerr << "**INFO MyAlloc :: operator new (" << s << "): No more memory available " << endl; 
+        //throw OutOfMemoryException () ;
+      }
+*/
+    }
+
+    // pop the rest from the stack
+    for( size_t i = newSize; i<popSize; ++i ) 
+    {
+      // get pointer from stack 
+      mem[ i ] = fs.S.top () ;
+      fs.S.pop () ;
+    }
+  }
+}
+
+#ifdef USE_MALLOC_AT_ONCE
+void MyAlloc :: allocate( const size_t s, void* mem[], const size_t request) throw (OutOfMemoryException) 
+{
+  AllocEntry & fs ((*freeStore) [s]) ;
+  memAllocate( fs, s, mem, request );
+}
+#endif
+
+void* MyAlloc :: operator new ( size_t s ) throw (OutOfMemoryException) 
 {
   assert(s > 0);
   {
@@ -74,12 +115,12 @@ void * MyAlloc :: operator new (size_t s) throw (OutOfMemoryException)
       void * p = malloc (s) ;
       if (p == NULL) {
         perror ("**ERROR (FATAL) in MyAlloc :: operator new ()") ;
-        cerr << "**INFO MyAlloc :: operator new (" << s << "): No more memory available " << endl; 
+        cerr << "**INFO MyAlloc :: operator new (" << s << "): No more memory available " << endl;
         throw OutOfMemoryException () ;
       }
       return p ;
-    } 
-    else 
+    }
+    else
     {
       // get pointer from stack 
       void * p = fs.S.top () ;
