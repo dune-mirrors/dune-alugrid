@@ -12,13 +12,12 @@
 
 using namespace std;
 
-#define PARALLEL
+//#define PARALLEL
 
 #define COUNT_FLOPS
 
-#define DONT_USE_ALUGRID_ALLOC
-
 // enable vtk output 
+#define PRINT_OUTPUT
 #define ENABLE_ALUGRID_VTK_OUTPUT
 
 // include serial part of ALUGrid 
@@ -175,8 +174,10 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
      }
 #endif
 
+#ifdef PRINT_OUTPUT
      // print size of grid 
      grid.printsize () ;
+#endif
    }
 
 }
@@ -295,17 +296,23 @@ int main (int argc, char ** argv, const char ** envp)
         grid.enableConformingClosure() ;
         grid.disableGhostCells();
       }
+#ifdef PARALLEL
       grid.duneLoadBalance();
+#endif
 
       //cout << "P[ " << rank << " ] : Grid generated! \n";
+#ifdef PRINT_OUTPUT
       grid.printsize(); 
       cout << "---------------------------------------------\n";
+#endif
     
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
       {
         std::ostringstream ss;
         ss << "start-" << ZeroPadNumber(mxl) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
       }
+#endif
 
       //grid.printMemUsage();
       for (int i = 0; i < glb; ++i)
@@ -314,9 +321,11 @@ int main (int argc, char ** argv, const char ** envp)
         globalRefine(grid, false,0, mxl);
       for( int i = 0; i < 2*mxl; ++i )
       {
+#ifdef ENABLE_ALUGRID_VTK_OUTPUT
         std::ostringstream ss;
         ss << "out-" << ZeroPadNumber(i) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
+#endif
         globalRefine(grid, false,i, mxl);
       }
       /*
@@ -334,6 +343,7 @@ int main (int argc, char ** argv, const char ** envp)
         grid.tovtk(  ss.str().c_str() );
       }
       */
+      grid.printsize(); 
     }
   }
 
