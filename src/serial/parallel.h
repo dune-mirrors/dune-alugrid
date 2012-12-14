@@ -69,7 +69,7 @@ class LinkedObject : public MacroGridMoverDefault
   // Die Schnittstelle wird von den Parallelerweiterungen der Knoten
   // Kanten, Fl"achen und (sp"ater auch) Elemente implementiert.
   
-    class Identifier : public Serializable 
+    class Identifier
     {
       int _i1, _i2, _i3, _i4 ;
     public :
@@ -80,8 +80,6 @@ class LinkedObject : public MacroGridMoverDefault
       inline bool operator == (const Identifier &) const ;
       inline void read (vector < int > :: const_iterator &, const vector < int > :: const_iterator &) ;
       inline void write (vector < int > &) const ;
-      inline bool readObject (ObjectStream &) ;
-      inline void writeObject (ObjectStream &) const ;
       inline bool isValid () const ;
     } ;
 
@@ -191,22 +189,6 @@ inline void LinkedObject :: Identifier :: write (vector < int > & v) const {
   v.push_back (_i2) ;
   v.push_back (_i3) ;
   v.push_back (_i4) ;
-  return ;
-}
-
-inline bool LinkedObject :: Identifier :: readObject (ObjectStream & os) {
-  os.readObject (_i1) ;
-  os.readObject (_i2) ;
-  os.readObject (_i3) ;
-  os.readObject (_i4) ;
-  return true ;
-}
-
-inline void LinkedObject :: Identifier :: writeObject (ObjectStream & os) const {
-  os.writeObject (_i1) ;
-  os.writeObject (_i2) ;
-  os.writeObject (_i3) ;
-  os.writeObject (_i4) ;
   return ;
 }
 #endif

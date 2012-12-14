@@ -4,28 +4,12 @@
 #ifndef SERIALIZE_H_INCLUDED
 #define SERIALIZE_H_INCLUDED
 
-//   Die 'Serializable' Schnittstelle soll eine Objektserialisation er-
-//   m"oglichen, die etwas der in java vorgeschlagenen Situation "ahnelt,
-//   allerdings aus technischen Gr"unden erheblich primitiver ist.
-  
 class ObjectStream;
 
-// iterface for serialization 
-class Serializable {
-  friend class ObjectStream ;
-protected:
-  Serializable () {}
-  Serializable (const Serializable  &) {}
-public:  
-  virtual ~Serializable () {}
-  virtual bool readObject (ObjectStream &) = 0 ;
-  virtual void writeObject (ObjectStream &) const = 0 ;
-} ;
-
-  //  'ObjectStream' ist bereits die volle Implementierung eines einfachen
-  //  Objektstrommodells auf der Basis der Bibliotheksfunktionen f"ur
-  //  den Stringstream (sstream). Die Implemetierung ist eher im Sinne
-  //  eines rohen Datenformats mit einigen Testm"oglichkeiten zu sehen.
+//  'ObjectStream' ist bereits die volle Implementierung eines einfachen
+//  Objektstrommodells auf der Basis der Bibliotheksfunktionen f"ur
+//  den Stringstream (sstream). Die Implemetierung ist eher im Sinne
+//  eines rohen Datenformats mit einigen Testm"oglichkeiten zu sehen.
   
 class ObjectStreamImpl 
 {
@@ -366,9 +350,6 @@ public:
     return *this;
   }
   
-  inline void writeObject (const Serializable &) throw (OutOfMemoryException);
-  inline void readObject (Serializable &) throw (EOFException) ;
-  
   inline void writeObject (double a)  { this->write(a); }
   inline void readObject (double & a) { this->read(a);  }
   inline void writeObject (float a)  { this->write(a); }
@@ -434,16 +415,6 @@ public:
   //    #    #   ##  #          #    #   ##  #
   //    #    #    #  ######     #    #    #  ######
   //
-
-inline void ObjectStream :: readObject (Serializable & oi) throw (EOFException) {
-  oi.readObject (*this) ;
-  return ; ;
-}
-
-inline void ObjectStream :: writeObject (const Serializable & oi) throw (OutOfMemoryException) {
-  oi.writeObject (*this) ;
-  return ;
-}
 
 // streaming operators for ObjectStream 
 template <class T>
