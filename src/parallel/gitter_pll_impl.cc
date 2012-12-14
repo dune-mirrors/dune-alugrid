@@ -97,7 +97,8 @@ vector < int > EdgePllBaseXMacro< A > :: estimateLinkage () const {
 }
 
 template < class A >
-LinkedObject :: Identifier EdgePllBaseXMacro< A > :: getIdentifier () const {
+LinkedObject :: Identifier EdgePllBaseXMacro< A > :: getIdentifier () const 
+{
   return LinkedObject :: Identifier (myhedge ().myvertex (0)->ident (), myhedge ().myvertex (1)->ident ()) ;
 }
 
@@ -2187,7 +2188,8 @@ void GitterBasisPll :: printMemUsage ()
     cout << "Hface4Rule = " << sizeof(Gitter :: Geometric :: Hface4Rule) <<"\n";
     cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n";
     cout << "GraphVertex = " << sizeof(LoadBalancer::GraphVertex) << std::endl;
-    cout << "GraphEdge   = " << sizeof(LoadBalancer::GraphEdge) << std::endl <<std::endl;
+    cout << "GraphEdge   = " << sizeof(LoadBalancer::GraphEdge) << std::endl;
+    cout << "Identifier  = " << sizeof(LinkedObject :: Identifier) << std::endl << std::endl;
     
     cout << "******** TETRA *************************8\n";
     cout << "Tetrasize  = " << sizeof(tetra_IMPL) << endl;

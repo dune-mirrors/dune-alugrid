@@ -12,7 +12,7 @@
 
 using namespace std;
 
-//#define PARALLEL
+#define PARALLEL
 
 #define COUNT_FLOPS
 
@@ -314,7 +314,7 @@ int main (int argc, char ** argv, const char ** envp)
       }
 #endif
 
-      //grid.printMemUsage();
+      grid.printMemUsage();
       for (int i = 0; i < glb; ++i)
         globalRefine(grid, true, -1, mxl);
       for (int i = 0; i < glb; ++i)
