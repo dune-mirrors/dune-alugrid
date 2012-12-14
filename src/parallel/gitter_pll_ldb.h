@@ -9,13 +9,14 @@ class LoadBalancer {
   public :
     static inline bool debugOption (int = 0) ;
   public :
-    class GraphEdge : public Serializable 
+    class GraphEdge 
     {
-      int _leftNode, _rightNode, _weight ;
+      int _leftNode ;
+      int _rightNode ;
+      int  _weight ;
       public :
-        inline GraphEdge () ;
+        explicit GraphEdge ( ObjectStream& os ) ;
         inline GraphEdge (int,int,int) ;
-        inline virtual ~GraphEdge () ;
         inline int leftNode () const ;
         inline int rightNode () const ;
         inline int weight () const ;
@@ -23,23 +24,23 @@ class LoadBalancer {
         inline bool operator == (const GraphEdge &) const ;
         inline GraphEdge operator - () const ;
         inline bool isValid () const ;
-        inline bool readObject (ObjectStream &) ;
-        inline void writeObject (ObjectStream &) const ;
+        inline bool readFromStream (ObjectStream &) ;
+        inline void writeToStream  (ObjectStream &) const ;
     } ;
 
-    class GraphVertex : public Serializable 
+    class GraphVertex
     {
 #ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t  _center [3] ;  // Schwerpunktskoordinaten
+      alucoord_t  _center [3] ;  // geographical coords of vertex 
 #endif
-      int _index, _weight ; // globale Nummer, Gewicht
+      int _index;   // global graph index 
+      int _weight ; // weight of vertex 
       public :
-        inline GraphVertex () ;
+        explicit GraphVertex( ObjectStream& os ) ;
         inline GraphVertex (int,int,const alucoord_t (&)[3]) ;
         inline GraphVertex (int,int) ;
         // constructor without center is initializing center and weight to zero 
         inline GraphVertex (int) ;
-        inline virtual ~GraphVertex () ;
         inline int index () const ;
         inline int weight () const ;
 #ifdef GRAPHVERTEX_WITH_CENTER
@@ -48,8 +49,8 @@ class LoadBalancer {
         inline bool operator < (const GraphVertex &) const ;
         inline bool operator == (const GraphVertex &) const ;
         inline bool isValid () const ;
-        inline bool readObject (ObjectStream &) ;
-        inline void writeObject (ObjectStream &) const ;
+        inline bool readFromStream (ObjectStream &) ;
+        inline void writeToStream  (ObjectStream &) const ;
     } ;
 
   public :
@@ -167,13 +168,14 @@ inline bool LoadBalancer :: debugOption (int level) {
   return (getenv ("VERBOSE_LDB") ? ( atoi (getenv ("VERBOSE_LDB")) > level ? true : (level == 0)) : false) ;
 }
 
-inline LoadBalancer :: GraphEdge :: GraphEdge () : _leftNode (-1), _rightNode (-1), _weight (0) {
+//inline LoadBalancer :: GraphEdge :: GraphEdge () : _leftNode (-1), _rightNode (-1), _weight (0) {}
+
+inline LoadBalancer :: GraphEdge :: GraphEdge ( ObjectStream& os ) 
+{
+  readFromStream( os );
 }
 
 inline LoadBalancer :: GraphEdge :: GraphEdge (int i, int j, int w) : _leftNode (i), _rightNode (j), _weight (w) {
-}
-
-inline LoadBalancer :: GraphEdge :: ~GraphEdge () {
 }
 
 inline int LoadBalancer :: GraphEdge :: leftNode () const {
@@ -204,30 +206,32 @@ inline LoadBalancer :: GraphEdge LoadBalancer :: GraphEdge :: operator - () cons
   return GraphEdge (_rightNode, _leftNode, _weight) ;
 } 
 
-inline bool LoadBalancer :: GraphEdge :: readObject (ObjectStream & os) {
+inline bool LoadBalancer :: GraphEdge :: readFromStream (ObjectStream & os) {
   os.readObject (_leftNode) ;
   os.readObject (_rightNode) ;
   os.readObject (_weight) ;
   return true ;
 }
 
-inline void LoadBalancer :: GraphEdge :: writeObject (ObjectStream & os) const {
+inline void LoadBalancer :: GraphEdge :: writeToStream (ObjectStream & os) const {
   os.writeObject (_leftNode) ;
   os.writeObject (_rightNode) ;
   os.writeObject (_weight) ;
   return ;
 }
 
-inline LoadBalancer :: GraphVertex :: ~GraphVertex () {
+inline LoadBalancer :: GraphVertex :: GraphVertex ( ObjectStream& os ) 
+{
+  readFromStream( os );
 }
 
-inline LoadBalancer :: GraphVertex :: GraphVertex () 
-  : _index (-1) , _weight (0) {
-#ifdef GRAPHVERTEX_WITH_CENTER
-  _center [0] = _center [1] = _center [2] = 0.0 ;
-#endif
-  return ;
-}
+//inline LoadBalancer :: GraphVertex :: GraphVertex () 
+//  : _index (-1) , _weight (0) {
+//#ifdef GRAPHVERTEX_WITH_CENTER
+//  _center [0] = _center [1] = _center [2] = 0.0 ;
+//#endif
+//  return ;
+//}
 
 inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w, const alucoord_t (&p)[3]) 
 : _index (i), _weight (w) 
@@ -284,7 +288,8 @@ inline bool LoadBalancer :: GraphVertex :: operator == (const GraphVertex & x) c
   return _index == x._index ;
 }
 
-inline bool LoadBalancer :: GraphVertex :: readObject (ObjectStream & os) {
+inline bool LoadBalancer :: GraphVertex :: readFromStream (ObjectStream & os) 
+{
   os.readObject (_index) ;
   os.readObject (_weight) ;
 #ifdef GRAPHVERTEX_WITH_CENTER
@@ -295,7 +300,7 @@ inline bool LoadBalancer :: GraphVertex :: readObject (ObjectStream & os) {
   return true ;
 }
 
-inline void LoadBalancer :: GraphVertex :: writeObject (ObjectStream & os) const 
+inline void LoadBalancer :: GraphVertex :: writeToStream (ObjectStream & os) const 
 {
   os.writeObject (_index) ;
   os.writeObject (_weight) ;

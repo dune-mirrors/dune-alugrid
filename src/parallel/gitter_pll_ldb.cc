@@ -135,7 +135,8 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
       ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
       for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; i != iEnd; ++i ) 
       {
-        os.writeObject ((*i).first) ;
+        // write graph vertex to stream 
+        (*i).first.writeToStream( os );
       }
 
       // write number of edges 
@@ -146,7 +147,8 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
       ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
       for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; e != eEnd; ++e )
       {
-        os.writeObject (*e);
+        // write graph edge to stream 
+        (*e).writeToStream( os );
       }
     }
   }
@@ -174,8 +176,8 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
         {
           for (int j = 0 ; j < len ; ++j) 
           {
-            GraphVertex x ;
-            osv_i.readObject (x) ;
+            // constructor taking stream reads values form ObjectStream 
+            GraphVertex x( osv_i );
             * nodes ++ = pair < const GraphVertex, int > (x,i) ;
           } 
 
@@ -184,8 +186,8 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
 
           for (int j = 0 ; j < len ; ++j) 
           {
-            GraphEdge x ;
-            osv_i.readObject (x) ;
+            // constructor taking stream reads values form ObjectStream 
+            GraphEdge x( osv_i );
             * edges ++ = x ;
             * edges ++ = - x ;
           }
@@ -286,7 +288,8 @@ graphCollectBcast (const MpAccessGlobal & mpa,
       ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
       for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; i != iEnd; ++i ) 
       {
-        os.writeObject ((*i).first) ;
+        // write graph vertex to stream 
+        (*i).first.writeToStream( os );
       }
 
       // write number of edges 
@@ -297,7 +300,8 @@ graphCollectBcast (const MpAccessGlobal & mpa,
       ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
       for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; e != eEnd; ++e )
       {
-        os.writeObject (*e);
+        // write graph edge to stream 
+        (*e).writeToStream( os );
       }
     }
   }
@@ -347,8 +351,8 @@ graphCollectBcast (const MpAccessGlobal & mpa,
         {
           for (int j = 0 ; j < len ; ++j) 
           {
-            GraphVertex x ;
-            sendrecv.readObject (x) ;
+            // constructor taking stream reads values form ObjectStream 
+            GraphVertex x( sendrecv ) ;
             * nodes ++ = pair < const GraphVertex, int > (x, rank) ;
           } 
 
@@ -357,8 +361,8 @@ graphCollectBcast (const MpAccessGlobal & mpa,
 
           for (int j = 0 ; j < len ; ++j) 
           {
-            GraphEdge x ;
-            sendrecv.readObject (x) ;
+            // constructor taking stream reads values form ObjectStream 
+            GraphEdge x( sendrecv ) ;
             * edges ++ = x ;
             * edges ++ = - x ;
           }
