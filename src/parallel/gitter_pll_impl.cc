@@ -2185,7 +2185,9 @@ void GitterBasisPll :: printMemUsage ()
     cout << "HedgeRule  = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
     cout << "Hface3Rule = " << sizeof(Gitter :: Geometric :: Hface3Rule) <<"\n";
     cout << "Hface4Rule = " << sizeof(Gitter :: Geometric :: Hface4Rule) <<"\n";
-    cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n\n";
+    cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n";
+    cout << "GraphVertex = " << sizeof(LoadBalancer::GraphVertex) << std::endl;
+    cout << "GraphEdge   = " << sizeof(LoadBalancer::GraphEdge) << std::endl <<std::endl;
     
     cout << "******** TETRA *************************8\n";
     cout << "Tetrasize  = " << sizeof(tetra_IMPL) << endl;
