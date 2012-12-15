@@ -472,7 +472,7 @@ vector < ObjectStream > MpAccessMPI :: gcollect (const ObjectStream & in) const
   }
   
   // overall buffer size 
-  const int bufSize = displ [np - 1] + rcounts [np - 1] ;
+  const size_t bufSize = displ [np - 1] + rcounts [np - 1] ;
   {    
     // allocate buffer 
     char * y = ObjectStream :: allocateBuffer(bufSize);
@@ -494,6 +494,7 @@ vector < ObjectStream > MpAccessMPI :: gcollect (const ObjectStream & in) const
     // delete buffer 
     ObjectStream :: freeBuffer( y );
   }
+
   // delete helper functions 
   delete [] displ ;
   delete [] rcounts ;
