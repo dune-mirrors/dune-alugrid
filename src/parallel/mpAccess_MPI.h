@@ -114,7 +114,7 @@ public:
   vector < double > gcollect (double) const ;
   vector < vector < int > > gcollect (const vector < int > &) const ;
   vector < vector < double > > gcollect (const vector < double > &) const ;
-  vector < ObjectStream > gcollect (const ObjectStream &) const ;
+  vector < ObjectStream > gcollect (const ObjectStream &, const vector<int>& ) const ;
   vector < vector < int > > exchange (const vector < vector < int > > &) const ;
   vector < vector < double > > exchange (const vector < vector < double > > &) const ;
   vector < vector < char > > exchange (const vector < vector < char > > &) const ;

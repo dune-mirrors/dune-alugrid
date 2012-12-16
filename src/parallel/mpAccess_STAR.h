@@ -58,6 +58,6 @@ public:
   vector < double > gcollect (double) const ;
   vector < vector < int > > gcollect (const vector < int > &) const ;
   vector < vector < double > > gcollect (const vector < double > &) const ;
-  vector < ObjectStream > gcollect (const ObjectStream &) const ;
+  vector < ObjectStream > gcollect (const ObjectStream &, const vector<int>& ) const ;
 } ;
 #endif

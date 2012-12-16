@@ -270,7 +270,7 @@ vector < vector < double > > MpAccessSTAR_MPI :: gcollect (const vector < double
   return doGcollectV_STAR (v, MPI_DOUBLE, _mpiComm) ;
 }
 
-vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in) const 
+vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in, const vector<int>& len ) const 
 {
   // number of processes 
   const int np = psize (); 
@@ -281,9 +281,6 @@ vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in) c
   // create empty objects streams 
   vector < ObjectStream > o (np) ;
   
-  // collect sizes for all processors 
-  vector < int > len = gcollect (snum) ;
-
   int * rcounts = new int [np] ;
   assert (rcounts) ;
   copy (len.begin (), len.end (), rcounts) ;

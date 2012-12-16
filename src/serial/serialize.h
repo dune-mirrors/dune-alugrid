@@ -376,6 +376,7 @@ protected:
   }
   
   friend class NonBlockingExchangeMPI ;
+  friend class MpAccessGlobal ;
   friend class MpAccessMPI ;
   friend class MpAccessSTAR_MPI ;
 } ;

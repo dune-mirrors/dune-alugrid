@@ -66,7 +66,20 @@ class MpAccessGlobal {
     virtual vector < double > gcollect (double) const = 0 ;
     virtual vector < vector < int > > gcollect (const vector < int > &) const = 0 ;
     virtual vector < vector < double > > gcollect (const vector < double > &) const = 0 ;
-    virtual vector < ObjectStream > gcollect (const ObjectStream &) const = 0 ;
+    virtual vector < ObjectStream > gcollect (const ObjectStream &, const vector<int>& ) const = 0 ;
+
+    // default gcollect method that first needs to communicate the sizes of the buffers 
+    // this method actually does two communications, one allgather and one allgatherv 
+    virtual vector < ObjectStream > gcollect (const ObjectStream &in) const
+    {
+      // size of buffer 
+      const int snum = in._wb - in._rb ;
+      // get length vector 
+      vector< int > length = gcollect( snum );
+
+      // return gcollect operation 
+      return gcollect( in, length ); 
+    }
 
     //! return address of communicator (not optimal but avoid explicit MPI types here)
     virtual const CommIF* communicator() const = 0;

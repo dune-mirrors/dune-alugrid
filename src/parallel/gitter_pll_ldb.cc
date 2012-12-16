@@ -155,7 +155,6 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
 
   try 
   {
-
     // exchange data  
     vector < ObjectStream > osv = mpa.gcollect (os) ;
 
