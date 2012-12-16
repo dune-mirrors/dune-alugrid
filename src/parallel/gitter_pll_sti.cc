@@ -1081,14 +1081,20 @@ void GitterPll :: exchangeDynamicState ()
   return ;
 }
 
-bool GitterPll :: checkPartitioning( LoadBalancer :: DataBase& db, GatherScatterType* gs ) 
+bool GitterPll :: 
+checkPartitioning( LoadBalancer :: DataBase& db, 
+                   GatherScatterType* gs ) 
 {
   // build macro graph, either using user defined weights or default weighs 
   assert (debugOption (20) ? (cout << "**GitterPll :: checkPartitioning ( db, gs ) " << endl, 1) : 1) ;
+  // only for the SFC approach without edges we don't need to setup these connections 
+  const bool insertGraphEdges = (_ldbMethod != LoadBalancer :: DataBase :: ALUGRID_SpaceFillingCurveNoEdges) ;
+  if( insertGraphEdges )
   {
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
     for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
   }
+
   {
     // if gs is given and user defined weight is enabled, use these to setup graph 
     GatherScatter* gatherScatter = gs && gs->userDefinedLoadWeights() ? gs : 0 ;

@@ -574,8 +574,9 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   bool change = partition.size() > 0 ;
   
   // flag to indicate whether we use a serial or a parallel partitioner 
-  bool serialPartitioner = ( mth <= METIS_PartGraphRecursive ); 
-  const bool usePartKway = ( mth == ParMETIS_V3_PartKway );
+  bool serialPartitioner    = ( mth <= METIS_PartGraphRecursive ); 
+  const bool usePartKway    = ( mth == ParMETIS_V3_PartKway );
+  const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurveNoEdges );
 
   // create maps for edges and vertices 
   ldb_edge_set_t    edges ;
@@ -586,6 +587,9 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
   // vector of vertex distribution (only for ParMETIS)
   idx_t* vtxdist = ( serialPartitioner ) ?  0 : new idx_t [np + 1];
+
+  // for the first SFC approach we don't have edges in the graph 
+  assert( noEdgesInGraph ? _edgeSet.size() == 0 : true ); 
 
   // collect graph from all processors 
   // needs a all-to-all (allgather) communication 
@@ -642,11 +646,11 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   //std::cout << "Got " << nel << " number of nodes " << std::endl;
   //std::cout << "Got " << ned << " number of edges " << std::endl;
 
-  // do repartition if edges exist (for serial partitioners) or for
+  // do repartition if edges exist (for serial partitioners) or for SFC and 
   // parallel partitioners anyway  
-  if ( ! serialPartitioner || (ned > 0) ) 
+  if ( ! serialPartitioner || noEdgesInGraph || (ned > 0) ) 
   {
-    if( serialPartitioner ) 
+    if( serialPartitioner && (ned > 0) ) 
     {
       if (!((*edges.rbegin ()).leftNode () < nel)) 
       {
@@ -689,7 +693,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
       * edge_pPos = count ;
       assert( edge_p [0] == 0 );
-      assert( ( serialPartitioner ) ? edge_p [nel] == ned : true ) ;
+      assert( ( serialPartitioner && ned > 0 ) ? edge_p [nel] == ned : true ) ;
 
       // free memory, not needed anymore 
       edges.clear();
@@ -823,6 +827,12 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           {
 
           // space filling curve approach 
+          case ALUGRID_SpaceFillingCurveNoEdges:
+            {
+              idx_t n = nel, npart = np ;
+              ALUGridMETIS :: CALL_spaceFillingCurveNoEdges( me, n, npart, vertex_wInt, neu) ;
+            }
+            break ;
           case ALUGRID_SpaceFillingCurve:
             {
               idx_t n = nel, npart = np ;
@@ -866,7 +876,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
       // only do the following for serialPartitioners and 
       // if we really have a graph much larger then partition number 
-      if( serialPartitioner && ( nel > 3*np ) && mth != ALUGRID_SpaceFillingCurve) 
+      if( serialPartitioner && ( nel > 3*np ) && ( mth > ALUGRID_SpaceFillingCurve ) ) 
       {
         // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
         // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht

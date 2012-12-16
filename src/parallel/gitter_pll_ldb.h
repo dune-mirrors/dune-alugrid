@@ -87,7 +87,12 @@ class LoadBalancer {
 
           // assuming the elements to be ordered by a 
           // space filling curve approach 
-          ALUGRID_SpaceFillingCurve = 4, 
+          // here, the edges in the graph are neglected 
+          ALUGRID_SpaceFillingCurveNoEdges = 4, 
+
+          // assuming the elements to be ordered by a 
+          // space filling curve approach 
+          ALUGRID_SpaceFillingCurve = 5, 
 
           // METIS method for graph partitioning 
           METIS_PartGraphKway = 11,
