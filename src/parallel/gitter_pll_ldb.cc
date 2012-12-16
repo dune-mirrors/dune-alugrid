@@ -756,7 +756,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
     if (np > 1) 
     {
-      //int * neu = new int [nel] ;
       idx_t* neu = vertex_mem + (2 * nel);
       assert (neu) ;
 
@@ -803,14 +802,12 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
                                           ubvec, &itr, options, & edgecut, neu, & comm ) ;
         }
 
-        //cout << "Done ParMETIS \n";
-
         // delete vtxdist and set zero (see below) 
         delete [] vtxdist; vtxdist = 0;
       }
       else 
       {
-        // if the number of graph vertices is larger 
+        // if the number of graph vertices is smaller  
         // then the number of partitions 
         if( nel <= np ) 
         {
@@ -872,7 +869,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
             return false ;
           }
         }
-      }
+      } // end serialPartitioner 
 
       // only do the following for serialPartitioners and 
       // if we really have a graph much larger then partition number 
@@ -916,7 +913,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           // insert and also set partition number new 
           _connect.insert( (*i).second = neu [ (*i).first.index () ]) ;
         }
-
       }
     }
 
