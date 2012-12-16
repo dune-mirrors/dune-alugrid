@@ -5,11 +5,11 @@ namespace ALUGridMETIS
 {
 
 template < class idxtype >
-void CALL_spaceFillingCurve(const int myRank,       // my rank 
-                            const idxtype nCells,   // number of cells 
-                            const idxtype nPart,    // number of partitions 
-                            const idxtype *weights, // vertex weights 
-                            idxtype* part )         // new partitioning 
+void CALL_spaceFillingCurveNoEdges(const int myRank,       // my rank 
+                                   const idxtype nCells,   // number of cells 
+                                   const idxtype nPart,    // number of partitions 
+                                   const idxtype *weights, // vertex weights 
+                                   idxtype* part )         // new partitioning 
 {
   // calculate mean load 
   double meanLoad = 0 ;
@@ -58,6 +58,17 @@ void CALL_spaceFillingCurve(const int myRank,       // my rank
     }
   }
   */
+} // end of simple sfc splitting without edges 
+
+template < class idxtype >
+void CALL_spaceFillingCurve(const int myRank,       // my rank 
+                            const idxtype nCells,   // number of cells 
+                            const idxtype nPart,    // number of partitions 
+                            const idxtype *weights, // vertex weights 
+                            idxtype* part )         // new partitioning 
+{
+  // TODO, also use edge info 
+  CALL_spaceFillingCurveNoEdges(myRank, nCells, nPart, weights, part ); 
 } // end of simple sfc splitting 
 
 } // end namespace ALUGridMETIS
