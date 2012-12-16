@@ -455,6 +455,27 @@ gcollect (const ObjectStream & in, const vector<int>& len ) const
   
   // create empty objects streams 
   vector < ObjectStream > o (np) ;
+
+#ifndef NDEBUG 
+  // check that given length values are correct 
+  {
+    vector< int > checkLength = gcollect( snum );
+    // check sizes 
+    assert( len.size() == checkLength.size() );
+    // make sure the list is correct 
+    assert( equal( checkLength.begin(), checkLength.end(), len.begin() ) );
+    /*
+    if( ! equal( checkLength.begin(), checkLength.end(), len.begin() ) )
+    {
+      for(size_t i=0; i<checkLength.size(); ++i ) 
+      {
+        cout << "comm " << checkLength[ i ] << "  stored " << len[ i ] << endl;
+      }
+      abort();
+    }
+    */
+  }
+#endif
   
   int * rcounts = new int [np] ;
   assert (rcounts) ;

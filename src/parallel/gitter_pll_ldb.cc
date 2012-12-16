@@ -156,7 +156,8 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
   try 
   {
     // exchange data  
-    vector < ObjectStream > osv = mpa.gcollect (os) ;
+    vector < ObjectStream > osv = ( _graphSizes.size() > 0 ) ? 
+          mpa.gcollect (os, _graphSizes) : mpa.gcollect( os ) ;
 
     // free memory 
     os.reset ();
@@ -911,6 +912,29 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         {
           // insert and also set partition number new 
           _connect.insert( (*i).second = neu [ (*i).first.index () ]) ;
+        }
+
+        // in case of the simple SFC method we are able to store the sizes 
+        // to avoid a second communication during graphCollect 
+        if( mth == ALUGRID_SpaceFillingCurveNoEdges ) 
+        {
+          // resize vector 
+          _graphSizes.resize( np );
+
+          // clear _graphSizes vector, default is sizeof for the sizes that are send 
+          // at the beginning of the object streams 
+          // (one for the vertices and one for the edges)
+          const int initSize = 2 * sizeof(int);
+          std::fill( _graphSizes.begin(), _graphSizes.end(), initSize );
+          // count number of graph vertices each process contains 
+          for( int i=0; i<nel; ++i ) 
+          {
+            _graphSizes[ neu[ i ] ] += sizeof( GraphVertex );
+          }
+        }
+        else // otherwise disable this feature be clearing the vector 
+        {
+          _graphSizes.resize( 0 );
         }
       }
     }

@@ -37,7 +37,7 @@ struct ALUGridExternalParameters
   // with the method MPI_Allgather 
   static int& allGatherMaxSize() 
   {
-    static int rankLimit = 1 ;
+    static int rankLimit = 100000 ;
     return rankLimit;
   }
 };

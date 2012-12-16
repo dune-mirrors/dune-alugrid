@@ -910,6 +910,12 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
   const bool doRepartition = userDefinedPartitioning ? 
     gatherScatter->repartition() :
     db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod)) ;
+
+  // get graph sizes from data base 
+  if( ! userDefinedPartitioning ) 
+  {
+    _graphSizes = db.graphSizes();
+  }
     
   // time meassure 
   const long start = clock () ;

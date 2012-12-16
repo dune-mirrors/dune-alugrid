@@ -77,6 +77,10 @@ class LoadBalancer {
         ldb_connect_set_t  _connect ;
         ldb_edge_set_t     _edgeSet ;
         ldb_vertex_map_t   _vertexSet ;
+
+        // contains the sizes of the partition (vertices and edges of each proc)
+        // if this is zero, then the sizes will be communicated 
+        vector<int> _graphSizes ;
       public :
         enum method { 
           // no load balancing 
@@ -123,8 +127,10 @@ class LoadBalancer {
                                 insert_iterator < ldb_edge_set_t >,
                                 idx_t* , const bool ) const ;
       public :
+        const vector<int>& graphSizes() const { return _graphSizes ; }
         static const char * methodToString (method) ;
         inline DataBase () ;
+        explicit DataBase ( const vector<int>& graphSizes ) ;
         inline DataBase (const DataBase &) ;
         inline virtual ~DataBase () ;
         inline int nEdges () const ;
@@ -172,8 +178,6 @@ class LoadBalancer {
 inline bool LoadBalancer :: debugOption (int level) {
   return (getenv ("VERBOSE_LDB") ? ( atoi (getenv ("VERBOSE_LDB")) > level ? true : (level == 0)) : false) ;
 }
-
-//inline LoadBalancer :: GraphEdge :: GraphEdge () : _leftNode (-1), _rightNode (-1), _weight (0) {}
 
 inline LoadBalancer :: GraphEdge :: GraphEdge ( ObjectStream& os ) 
 {
@@ -229,14 +233,6 @@ inline LoadBalancer :: GraphVertex :: GraphVertex ( ObjectStream& os )
 {
   readFromStream( os );
 }
-
-//inline LoadBalancer :: GraphVertex :: GraphVertex () 
-//  : _index (-1) , _weight (0) {
-//#ifdef GRAPHVERTEX_WITH_CENTER
-//  _center [0] = _center [1] = _center [2] = 0.0 ;
-//#endif
-//  return ;
-//}
 
 inline LoadBalancer :: GraphVertex :: GraphVertex (int i, int w, const alucoord_t (&p)[3]) 
 : _index (i), _weight (w) 
@@ -318,13 +314,20 @@ inline void LoadBalancer :: GraphVertex :: writeToStream (ObjectStream & os) con
 }
 
 inline LoadBalancer :: DataBase :: DataBase () : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-  _edgeSet (), _vertexSet () {
-  return ;
+  _edgeSet (), _vertexSet (), _graphSizes() 
+{
+}
+
+inline LoadBalancer :: DataBase :: DataBase ( const vector<int>& graphSizes ) : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
+  _edgeSet (), _vertexSet (), _graphSizes( graphSizes ) 
+{
 }
 
 inline LoadBalancer :: DataBase :: DataBase (const DataBase & b) : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
     _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
-    _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) {
+    _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) ,
+    _graphSizes( b._graphSizes ) 
+{
   return ;
 }
 

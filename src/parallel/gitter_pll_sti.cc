@@ -1138,7 +1138,7 @@ checkPartitioning( LoadBalancer :: DataBase& db,
 bool GitterPll :: loadBalancerGridChangesNotify ( GatherScatterType* gs ) 
 {
   // create load balancer data base 
-  LoadBalancer :: DataBase db ;
+  LoadBalancer :: DataBase db( _graphSizes ) ;
 
   // check whether we have to repartition 
   const bool repartition = checkPartitioning( db, gs );
@@ -1146,6 +1146,9 @@ bool GitterPll :: loadBalancerGridChangesNotify ( GatherScatterType* gs )
   // if repartioning necessary, do it 
   if ( repartition ) 
   {
+    // clear graph sizes since they will change
+    _graphSizes.clear();
+
     const int ldbMth = int( _ldbMethod );
 #ifndef NDEBUG
     // make sure every process has the same ldb method 
@@ -1244,7 +1247,8 @@ void GitterPll :: notifyMacroGridChanges ()
 }
 
 GitterPll :: GitterPll ( MpAccessLocal & mpa ) 
-  : _ldbOver (0.0), 
+  : _graphSizes(),
+    _ldbOver (0.0), 
     _ldbUnder (0.0), 
     _ldbMethod (LoadBalancer :: DataBase :: NONE),
     _refineLoops( 0 ), 
