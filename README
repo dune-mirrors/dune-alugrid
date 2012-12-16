@@ -92,6 +92,9 @@ Available methods are:
 NONE = 0
 COLLECT = 1 (collect all elements to process 0)
 
+ALUGRID_SpaceFillingCurveNoEdges = 4 
+ALUGRID_SpaceFillingCurve = 5
+
 METIS_PartGraphKway = 11
 METIS_PartGraphRecursive = 12
 

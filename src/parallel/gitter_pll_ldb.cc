@@ -947,6 +947,10 @@ const char * LoadBalancer :: DataBase :: methodToString (method m)
       return "no dynamic load balancing" ;
     case COLLECT :
       return "COLLECT" ;
+    case ALUGRID_SpaceFillingCurveNoEdges:
+      return "ALUGRID_SpaceFillingCurveNoEdges" ;
+    case ALUGRID_SpaceFillingCurve:
+      return "ALUGRID_SpaceFillingCurve" ;
     case METIS_PartGraphKway :
       return "METIS_PartGraphKway" ;
     case METIS_PartGraphRecursive :
