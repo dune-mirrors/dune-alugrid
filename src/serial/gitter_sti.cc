@@ -405,7 +405,7 @@ void Gitter :: tovtkImpl( const std::string &fn,
                           const element_t*, const bndseg* ) 
 {
   const bool showbnd = false;
-  const bool showface = true;
+  const bool showface = ( elementVertices == 4 );
 
   const int nFaceVertices = ( elementVertices == 4 ) ? 3 : 4 ;
 
