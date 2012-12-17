@@ -336,13 +336,10 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimateBcast (MpAccessLocal & 
 
 void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & mpAccess) 
 {
-  const int allGatherMaxSize = ALUGridExternalParameters :: allGatherMaxSize();
-  assert( allGatherMaxSize == mpAccess.gmax( allGatherMaxSize ) );
-
   // for small processor numbers use gcollect( MPI_Allgather ) version 
   // this method should be faster (log p), 
   // but is more memory consuming O( p ) 
-  if( mpAccess.psize () < allGatherMaxSize )
+  if( ALUGridExternalParameters :: useAllGather( mpAccess ) ) 
   {
     vertexLinkageEstimateGCollect ( mpAccess );
   }

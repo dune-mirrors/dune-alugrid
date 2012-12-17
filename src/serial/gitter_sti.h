@@ -37,8 +37,18 @@ struct ALUGridExternalParameters
   // with the method MPI_Allgather 
   static int& allGatherMaxSize() 
   {
-    static int rankLimit = 100000 ;
+    // default is to use allgather
+    static int rankLimit = std::numeric_limits< int > ::max();
     return rankLimit;
+  }
+
+  // return true if number of cores is less or equal than all gather max size 
+  template <class MpAccessGlobal> 
+  static bool useAllGather( const MpAccessGlobal& mpa ) 
+  {
+    const int allGatherMaxProcs = allGatherMaxSize();
+    assert( allGatherMaxProcs == mpa.gmax( allGatherMaxProcs ) );
+    return mpa.psize() <= allGatherMaxProcs ;
   }
 };
 

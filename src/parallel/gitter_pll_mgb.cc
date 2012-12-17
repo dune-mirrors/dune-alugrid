@@ -911,7 +911,7 @@ doRepartitionMacroGrid (LoadBalancer :: DataBase & db,
     gatherScatter->repartition() :
     db.repartition (mpAccess (), LoadBalancer :: DataBase :: method (_ldbMethod)) ;
 
-  // get graph sizes from data base 
+  // get graph sizes from data base, this is only used for the serial partitioners
   if( ! userDefinedPartitioning ) 
   {
     _graphSizes = db.graphSizes();

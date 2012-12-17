@@ -184,7 +184,9 @@ inline LoadBalancer :: GraphEdge :: GraphEdge ( ObjectStream& os )
   readFromStream( os );
 }
 
-inline LoadBalancer :: GraphEdge :: GraphEdge (int i, int j, int w) : _leftNode (i), _rightNode (j), _weight (w) {
+inline LoadBalancer :: GraphEdge :: GraphEdge (int i, int j, int w) 
+  : _leftNode (i), _rightNode (j), _weight (w) 
+{
 }
 
 inline int LoadBalancer :: GraphEdge :: leftNode () const {
@@ -215,9 +217,10 @@ inline LoadBalancer :: GraphEdge LoadBalancer :: GraphEdge :: operator - () cons
   return GraphEdge (_rightNode, _leftNode, _weight) ;
 } 
 
-inline bool LoadBalancer :: GraphEdge :: readFromStream (ObjectStream & os) {
-  os.readObject (_leftNode) ;
-  os.readObject (_rightNode) ;
+inline bool LoadBalancer :: GraphEdge :: readFromStream (ObjectStream & os) 
+{
+  os.readObject ( _leftNode  );
+  os.readObject ( _rightNode );
   os.readObject (_weight) ;
   return true ;
 }

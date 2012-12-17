@@ -49,11 +49,8 @@ graphCollect (const MpAccessGlobal & mpa,
               insert_iterator < ldb_edge_set_t > edges,
               idx_t* vtxdist, const bool serialPartitioner ) const 
 {
-  const int allGatherMaxSize = ALUGridExternalParameters :: allGatherMaxSize();
-  assert( allGatherMaxSize == mpa.gmax( allGatherMaxSize ) );
-
   // if the number of ranks is small, then use old allgather method 
-  if( mpa.psize() < allGatherMaxSize )
+  if( ALUGridExternalParameters :: useAllGather( mpa ) )
   {
     // old method has O(p log p) time complexity 
     // and O(p) memory consumption which is critical 
@@ -88,11 +85,11 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
     {
       ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
       for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
-         i != iEnd; ++i ) 
+           i != iEnd; ++i, ++nodes ) 
       {
         {
           const GraphVertex& x = (*i).first;
-          * nodes ++ = pair < const GraphVertex, int > ( x , myrank) ;
+          *nodes = pair < const GraphVertex, int > ( x , myrank) ;
         } 
       }
     }
@@ -100,13 +97,15 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
     {
       ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
       for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; 
-           e != eEnd; ++e) 
+           e != eEnd; ++e ) 
       {
         const GraphEdge& x = (*e) ;
         // edges exists twice ( u , v ) and ( v , u )
         // with both orientations 
-        * edges ++ = x ;
-        * edges ++ = - x ;
+        * edges = x ;
+        ++ edges ;
+        * edges = - x ;
+        ++ edges ;
       }
     }
 
@@ -174,11 +173,11 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
         // read graph for serial partitioner 
         if( serialPartitioner ) 
         {
-          for (int j = 0 ; j < len ; ++j) 
+          for (int j = 0 ; j < len ; ++j, ++ nodes ) 
           {
             // constructor taking stream reads values form ObjectStream 
             GraphVertex x( osv_i );
-            * nodes ++ = pair < const GraphVertex, int > (x,i) ;
+            (*nodes) = pair < const GraphVertex, int > (x,i) ;
           } 
 
           osv_i.readObject (len) ;
@@ -188,8 +187,10 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
           {
             // constructor taking stream reads values form ObjectStream 
             GraphEdge x( osv_i );
-            * edges ++ = x ;
-            * edges ++ = - x ;
+            (*edges) =  x ;
+            ++ edges ;
+            (*edges) = -x ;
+            ++ edges ;
           }
         }
         else 
@@ -239,11 +240,11 @@ graphCollectBcast (const MpAccessGlobal & mpa,
     {
       ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
       for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; 
-         i != iEnd; ++i ) 
+           i != iEnd; ++i, ++nodes ) 
       {
         {
           const GraphVertex& x = (*i).first;
-          * nodes ++ = pair < const GraphVertex, int > ( x , me ) ;
+          *nodes = pair < const GraphVertex, int > ( x , me ) ;
         } 
       }
     }
@@ -251,13 +252,15 @@ graphCollectBcast (const MpAccessGlobal & mpa,
     {
       ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
       for (ldb_edge_set_t :: const_iterator e = _edgeSet.begin () ; 
-           e != eEnd; ++e) 
+           e != eEnd; ++e ) 
       {
         const GraphEdge& x = (*e) ;
         // edges exists twice ( u , v ) and ( v , u )
         // with both orientations 
-        * edges ++ = x ;
-        * edges ++ = - x ;
+        *edges =   x ;
+        ++ edges ;
+        *edges = - x ;
+        ++ edges ;
       }
     }
 
@@ -349,11 +352,11 @@ graphCollectBcast (const MpAccessGlobal & mpa,
         // read graph for serial partitioner 
         if( serialPartitioner ) 
         {
-          for (int j = 0 ; j < len ; ++j) 
+          for (int j = 0 ; j < len ; ++j, ++ nodes ) 
           {
             // constructor taking stream reads values form ObjectStream 
             GraphVertex x( sendrecv ) ;
-            * nodes ++ = pair < const GraphVertex, int > (x, rank) ;
+            *nodes = pair < const GraphVertex, int > (x, rank) ;
           } 
 
           sendrecv.readObject (len) ;
@@ -363,8 +366,10 @@ graphCollectBcast (const MpAccessGlobal & mpa,
           {
             // constructor taking stream reads values form ObjectStream 
             GraphEdge x( sendrecv ) ;
-            * edges ++ = x ;
-            * edges ++ = - x ;
+            * edges = x ;
+            ++ edges ;
+            * edges = - x ;
+            ++ edges ;
           }
         }
         else 
@@ -636,6 +641,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   // im CSR Format daraus erstellt werden m"ussen.
   
   const int ned = edges.size () ;
+
   // for ParMETIS nodes is a local graph that could be empty 
   const int nel = (serialPartitioner) ? nodes.size () : vtxdist[ np ];
 
@@ -643,9 +649,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   assert( nel == mpa.gmax( nel ) );
   assert( ned == mpa.gmax( ned ) );
   
-  //std::cout << "Got " << nel << " number of nodes " << std::endl;
-  //std::cout << "Got " << ned << " number of edges " << std::endl;
-
   // do repartition if edges exist (for serial partitioners) or for SFC and 
   // parallel partitioners anyway  
   if ( ! serialPartitioner || noEdgesInGraph || (ned > 0) ) 
@@ -676,7 +679,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
       int count = 0, index = -1 ;
       
       ldb_edge_set_t :: const_iterator iEnd = edges.end();
-      for (ldb_edge_set_t :: const_iterator i = edges.begin () ; i != iEnd ; ++i) 
+      for (ldb_edge_set_t :: const_iterator i = edges.begin () ; i != iEnd ; ++i, ++count ) 
       {
         const GraphEdge& e = (*i);
         if (e.leftNode () != index) 
@@ -686,17 +689,17 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           index = e.leftNode () ;
         }
         assert ( e.rightNode () < nel) ;
-        edge [ count ] = e.rightNode () ;
-        edge_w [count ++] = e.weight () ;
+        edge   [ count ] = e.rightNode () ;
+        edge_w [ count ] = e.weight () ;
       }
-
 
       * edge_pPos = count ;
       assert( edge_p [0] == 0 );
       assert( ( serialPartitioner && ned > 0 ) ? edge_p [nel] == ned : true ) ;
 
       // free memory, not needed anymore 
-      edges.clear();
+      // needed to determine graphSizes later 
+      // edges.clear();
     }
     
     // get vertex memory 
@@ -916,7 +919,8 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
         // in case of the simple SFC method we are able to store the sizes 
         // to avoid a second communication during graphCollect 
-        if( mth == ALUGRID_SpaceFillingCurveNoEdges ) 
+        // this is only needed for the allgatherv communication 
+        if( serialPartitioner && ALUGridExternalParameters :: useAllGather( mpa )  )
         {
           // resize vector 
           _graphSizes.resize( np );
@@ -931,10 +935,30 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           {
             _graphSizes[ neu[ i ] ] += sizeof( GraphVertex );
           }
+
+          // add edge sizes 
+          ldb_edge_set_t :: const_iterator iEnd = edges.end();
+          for (ldb_edge_set_t :: const_iterator i = edges.begin () ; i != iEnd ; ++i) 
+          {
+            const GraphEdge& e = (*i);
+            // get ranks of left and right node 
+            const int leftRank  = neu[ e.leftNode()  ];
+            const int rightRank = neu[ e.rightNode() ];
+
+            // only for edges at process boundaries we need to insert double 
+            if( leftRank < rightRank ) 
+            {
+              _graphSizes[ rightRank ] += sizeof( GraphEdge );
+              _graphSizes[ leftRank  ] += sizeof( GraphEdge );
+            }
+            // only add left node since only one edge is inserted per interior edge 
+            else if ( (leftRank == rightRank) && ( e.leftNode() < e.rightNode() ) )
+              _graphSizes[ leftRank ] += sizeof( GraphEdge );
+          }
         }
         else // otherwise disable this feature be clearing the vector 
         {
-          _graphSizes.resize( 0 );
+          _graphSizes.clear();
         }
       }
     }
