@@ -462,9 +462,6 @@ gcollect (const ObjectStream & in, const vector<int>& len ) const
     vector< int > checkLength = gcollect( snum );
     // check sizes 
     assert( len.size() == checkLength.size() );
-    // make sure the list is correct 
-    assert( equal( checkLength.begin(), checkLength.end(), len.begin() ) );
-    /*
     if( ! equal( checkLength.begin(), checkLength.end(), len.begin() ) )
     {
       for(size_t i=0; i<checkLength.size(); ++i ) 
@@ -473,7 +470,8 @@ gcollect (const ObjectStream & in, const vector<int>& len ) const
       }
       abort();
     }
-    */
+    // make sure the list is correct 
+    assert( equal( checkLength.begin(), checkLength.end(), len.begin() ) );
   }
 #endif
   
