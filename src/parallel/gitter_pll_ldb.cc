@@ -286,7 +286,6 @@ graphCollectBcast (const MpAccessGlobal & mpa,
 
     if( serialPartitioner )
     {
-
       // write vertices 
       ldb_vertex_map_t :: const_iterator iEnd = _vertexSet.end () ;
       for (ldb_vertex_map_t :: const_iterator i = _vertexSet.begin () ; i != iEnd; ++i ) 
@@ -311,10 +310,22 @@ graphCollectBcast (const MpAccessGlobal & mpa,
 
   try 
   {
-    // get max buffer size (only for serial partitioner we need to communicate)
-    const int maxSize = serialPartitioner ? mpa.gmax( os.size() ) : os.size();
+    const bool havePrecomputedSizes = (_graphSizes.size() == size_t(np)); 
+    int maxSize = 0 ;
+    // make each proc is on the same track
+    assert( havePrecomputedSizes == mpa.gmax( havePrecomputedSizes ) );
+    if( havePrecomputedSizes ) 
+    {
+      for( int rank = 0; rank < np; ++ rank ) 
+        maxSize = std::max( maxSize, _graphSizes[ rank ] );
+    }
+    else
+    {
+      // get max buffer size (only for serial partitioner we need to communicate)
+      maxSize = serialPartitioner ? mpa.gmax( os.size() ) : os.size();
+    }
 
-    // create bcast buffer  
+    // create bcast buffer and reserve memory 
     ObjectStream sendrecv ;
     sendrecv.reserve( maxSize * sizeof(char) );
 
@@ -335,15 +346,18 @@ graphCollectBcast (const MpAccessGlobal & mpa,
       // make sure size is still ok 
       assert( sendrecv.capacity() >= maxSize );
 
+      // get message size for current rank 
+      const int msgSize = havePrecomputedSizes ? _graphSizes[ rank ] : maxSize;
+
       // exchange data 
-      mpa.bcast( sendrecv.getBuff(0), maxSize, rank );
+      mpa.bcast( sendrecv.getBuff(0), msgSize, rank );
 
       // insert data into graph map 
       {
         // reset read posistion 
         sendrecv.resetReadPosition();
         // adjust write count to max length to avoid eof errors 
-        sendrecv.seekp( maxSize );
+        sendrecv.seekp( msgSize );
 
         int len ;
         sendrecv.readObject ( len ) ;
@@ -920,7 +934,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         // in case of the simple SFC method we are able to store the sizes 
         // to avoid a second communication during graphCollect 
         // this is only needed for the allgatherv communication 
-        if( serialPartitioner && ALUGridExternalParameters :: useAllGather( mpa )  )
+        if( serialPartitioner ) //&& ALUGridExternalParameters :: useAllGather( mpa )  )
         {
           // resize vector 
           _graphSizes.resize( np );
