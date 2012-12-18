@@ -249,6 +249,8 @@ int main (int argc, char ** argv, const char ** envp)
     filename = argv[ 1 ];
   }
 
+  const bool useClosure = argc > 4 ;
+
   {
     int rank = 0;
 #ifdef PARALLEL
@@ -283,11 +285,10 @@ int main (int argc, char ** argv, const char ** envp)
     {
 #ifdef PARALLEL
       GitterDunePll grid(macroname.c_str(),mpa);
-      //grid.disableGhostCells();
 #else 
       GitterDuneImpl grid(macroname.c_str());
 #endif
-      bool closure = needConformingClosure( grid, true );
+      bool closure = needConformingClosure( grid, useClosure );
 #ifdef PARALLEL
       closure = mpa.gmax( closure );
 #endif
