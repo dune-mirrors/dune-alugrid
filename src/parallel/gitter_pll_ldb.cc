@@ -960,12 +960,14 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           const int initSize = 3 * sizeof(int);
           std::fill( _graphSizes.begin(), _graphSizes.end(), initSize );
           // count number of graph vertices each process contains 
+          const int sizeofGraphVertex = sizeof( GraphVertex );
           for( int i=0; i<nel; ++i ) 
           {
-            _graphSizes[ neu[ i ] ] += sizeof( GraphVertex );
+            _graphSizes[ neu[ i ] ] += sizeofGraphVertex;
           }
 
           // add edge sizes 
+          const int sizeofGraphEdge = sizeof( GraphEdge );
           ldb_edge_set_t :: const_iterator iEnd = edges.end();
           for (ldb_edge_set_t :: const_iterator i = edges.begin () ; i != iEnd ; ++i) 
           {
@@ -975,7 +977,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
             if( e.leftNode() < e.rightNode() ) 
             {
               // increase size of message to be passed on the next repatition
-              _graphSizes[ neu[ e.leftNode() ] ] += sizeof( GraphEdge );
+              _graphSizes[ neu[ e.leftNode() ] ] += sizeofGraphEdge;
             }
           }
         }
