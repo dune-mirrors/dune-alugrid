@@ -124,9 +124,12 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
   ObjectStream os ;
 
   {
+    const int noPeriodicFaces = int( _noPeriodicFaces );
+    os.writeObject( noPeriodicFaces );
+
     // write number of elements  
-    int len = _vertexSet.size () ;
-    os.writeObject (len) ;
+    const int vertexSize = _vertexSet.size () ;
+    os.writeObject ( vertexSize ) ;
 
     if( serialPartitioner )
     {
@@ -139,8 +142,8 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
       }
 
       // write number of edges 
-      len = _edgeSet.size () ;
-      os.writeObject (len) ;
+      const int edgeSize = _edgeSet.size () ;
+      os.writeObject ( edgeSize ) ;
 
       // write edges 
       ldb_edge_set_t :: const_iterator eEnd = _edgeSet.end () ;
@@ -164,9 +167,14 @@ graphCollectAllgather (const MpAccessGlobal & mpa,
     {
       for (int i = 0 ; i < np ; ++i) 
       {
-        int len ;
         ObjectStream& osv_i = osv [i];
 
+        int noPeriodicFaces = 1 ;
+        osv_i.readObject( noPeriodicFaces );
+        // store result 
+        _noPeriodicFaces &= bool( noPeriodicFaces );
+
+        int len = -1 ;
         osv_i.readObject (len) ;
         assert (len >= 0) ;
 
@@ -280,6 +288,9 @@ graphCollectBcast (const MpAccessGlobal & mpa,
   ObjectStream os;
    
   {
+    const int noPeriodicFaces = int( _noPeriodicFaces );
+    os.writeObject( noPeriodicFaces );
+
     // write number of elements  
     const int vertexSize = _vertexSet.size () ;
     os.writeObject ( vertexSize ) ;
@@ -358,6 +369,11 @@ graphCollectBcast (const MpAccessGlobal & mpa,
         sendrecv.resetReadPosition();
         // adjust write count to max length to avoid eof errors 
         sendrecv.seekp( msgSize );
+
+        int noPeriodicFaces = 1 ;
+        sendrecv.readObject( noPeriodicFaces );
+        // store result 
+        _noPeriodicFaces &= bool( noPeriodicFaces );
 
         int len ;
         sendrecv.readObject ( len ) ;
@@ -929,18 +945,19 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           _connect.insert( (*i).second = neu [ (*i).first.index () ]) ;
         }
 
-        // in case of the simple SFC method we are able to store the sizes 
+        // in case of the serial partitioners we are able to store the sizes 
         // to avoid a second communication during graphCollect 
         // this is only needed for the allgatherv communication 
-        if( serialPartitioner ) //&& ALUGridExternalParameters :: useAllGather( mpa )  )
+        assert( _noPeriodicFaces == mpa.gmax( _noPeriodicFaces ) );
+        if( serialPartitioner && _noPeriodicFaces ) 
         {
           // resize vector 
           _graphSizes.resize( np );
 
           // clear _graphSizes vector, default is sizeof for the sizes that are send 
           // at the beginning of the object streams 
-          // (one for the vertices and one for the edges)
-          const int initSize = 2 * sizeof(int);
+          // (one for _noPeriodicFaces flag, one for the vertices, and one for the edges)
+          const int initSize = 3 * sizeof(int);
           std::fill( _graphSizes.begin(), _graphSizes.end(), initSize );
           // count number of graph vertices each process contains 
           for( int i=0; i<nel; ++i ) 

@@ -271,15 +271,24 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
   const myconnect_t * mycon1 = this->myhface().nb.front().first;
   const myconnect_t * mycon2 = this->myhface().nb.rear ().first;
 
+  // default is no periodic boundary
+  bool periodicBnd = false ;
+
   if(mycon1 && mycon2)
   {
-    // if one of them is periodic, increase factor
-    // this should reduce cutting of edges between 
-    // periodic and normal elements 
-    
+    // get graph vertex number of the adjacent elements 
     int ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
     int ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
-    bool periodicBnd = false ;
+
+    // only insert graph edge on the rank where the smaller vertex number is interior
+    if( ldbVx1 < ldbVx2 ) 
+    {
+      if ( mycon1->isboundary() ) return periodicBnd ;
+    }
+    else 
+    {
+      if ( mycon2->isboundary() ) return periodicBnd ;
+    }
 
     if( mycon1->isperiodic() ) 
     {
@@ -288,8 +297,6 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
       periodicBnd = true ;
     }
-    // only insert graph edge on the rank where the smaller vertex number is interior
-    else if( mycon1->isboundary() && ldbVx1 < ldbVx2 ) return true ;
 
     if( mycon2->isperiodic() ) 
     {
@@ -298,8 +305,6 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
       ldbVx2 = mycon2->otherLdbVertexIndex( myhface().getIndex() );
       periodicBnd = true ;
     }
-    // only insert graph edge on the rank where the smaller vertex number is interior
-    else if ( mycon2->isboundary() && ldbVx1 > ldbVx2 ) return true ;
     
     // count leaf faces for this macro face 
     const int weight =  TreeIterator < typename Gitter :: hface_STI, 
@@ -308,8 +313,10 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
     // if we have a periodic situation 
     if( periodicBnd ) 
     {
-      // TODO: Revise this in case of peridodic boundary 
-      // only insert this edge once 
+      // if one of them is periodic, increase factor
+      // this should reduce cutting of edges between 
+      // periodic and normal elements 
+    
       assert( mycon1->isperiodic() || mycon2->isperiodic() );
       assert( ldbVx1 >= 0 && ldbVx2 >= 0 );
       // increase the edge weight for periodic connections 
@@ -322,7 +329,7 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
       db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight ) );
     }
   }
-  return true ;
+  return periodicBnd ;
 }
 
 template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i) {

@@ -81,6 +81,8 @@ class LoadBalancer {
         // contains the sizes of the partition (vertices and edges of each proc)
         // if this is zero, then the sizes will be communicated 
         vector<int> _graphSizes ;
+        // true if no periodic faces are present 
+        mutable bool _noPeriodicFaces ;
       public :
         enum method { 
           // no load balancing 
@@ -128,6 +130,12 @@ class LoadBalancer {
                                 idx_t* , const bool ) const ;
       public :
         const vector<int>& graphSizes() const { return _graphSizes ; }
+        void clearGraphSizesVector () 
+        { 
+          _graphSizes = vector<int> ();
+          _noPeriodicFaces = false ;
+        }
+
         static const char * methodToString (method) ;
         inline DataBase () ;
         explicit DataBase ( const vector<int>& graphSizes ) ;
@@ -317,19 +325,20 @@ inline void LoadBalancer :: GraphVertex :: writeToStream (ObjectStream & os) con
 }
 
 inline LoadBalancer :: DataBase :: DataBase () : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-  _edgeSet (), _vertexSet (), _graphSizes() 
+  _edgeSet (), _vertexSet (), _graphSizes(), _noPeriodicFaces( true )
 {
 }
 
 inline LoadBalancer :: DataBase :: DataBase ( const vector<int>& graphSizes ) : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-  _edgeSet (), _vertexSet (), _graphSizes( graphSizes ) 
+  _edgeSet (), _vertexSet (), _graphSizes( graphSizes ), _noPeriodicFaces( true ) 
 {
 }
 
 inline LoadBalancer :: DataBase :: DataBase (const DataBase & b) : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
     _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
     _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) ,
-    _graphSizes( b._graphSizes ) 
+    _graphSizes( b._graphSizes ),
+    _noPeriodicFaces( b._noPeriodicFaces )
 {
   return ;
 }

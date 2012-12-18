@@ -269,21 +269,18 @@ class GitterPll : public virtual Gitter {
     inline pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
     createFaceIteratorTT (const StopRule_t rule , int) ;
   
-  /////////////////////////////////////
-  //  member variables  
-  /////////////////////////////////////
-    vector<int> _graphSizes; // only used for SFC partitioning 
+    /////////////////////////////////////
+    //  member variables  
+    /////////////////////////////////////
+    vector<int> _graphSizes; // only used for serial partitioners 
 
-  // Die drei Variablen der Klasse Gitter sollen erstmal als
-  // Murksl"osung dazu dienen, den Lastverteiler "uber ein
-  // File ("lastverteilung.cfg") rekonfigurieren zu k"onnen.
-
+    // Load Balancer parameters 
     double  _ldbOver, _ldbUnder ;
     LoadBalancer :: DataBase :: method _ldbMethod ;
     
-  // Die Variable _refineLoops dient nur der Kommunikation
-  // zwischen adapt () und refine (), damit die Zahl der
-  // Iterationen am Ende ausgegeben werden kann.
+    // Die Variable _refineLoops dient nur der Kommunikation
+    // zwischen adapt () und refine (), damit die Zahl der
+    // Iterationen am Ende ausgegeben werden kann.
  
     int  _refineLoops ;
     bool _ldbVerticesComputed ;

@@ -1091,8 +1091,26 @@ checkPartitioning( LoadBalancer :: DataBase& db,
   const bool insertGraphEdges = (_ldbMethod != LoadBalancer :: DataBase :: ALUGRID_SpaceFillingCurveNoEdges) ;
   if( insertGraphEdges )
   {
+    // insert edges to graph and check for periodic bnds 
+    bool foundPeriodicBnd = false ;
     AccessIterator < hface_STI > :: Handle w (containerPll ()) ;
-    for (w.first () ; ! w.done () ; w.next ()) w.item ().ldbUpdateGraphEdge (db) ;
+    for (w.first () ; ! w.done () ; w.next ()) 
+    {
+      foundPeriodicBnd |= w.item ().ldbUpdateGraphEdge (db) ;
+    }
+
+    // the foundPeriodic information is exchange upon graphCollect 
+    if( foundPeriodicBnd ) 
+    {
+      // this should not be set then 
+      assert( _graphSizes.size() == 0 );
+
+      // clear graph sizes since the 
+      // precomputed sizes don't work with periodic bnd 
+      // since we change the partitioning after the call of repartition 
+      // to make sure periodic elements stay on the same partition 
+      db.clearGraphSizesVector();
+    }
   }
 
   {
