@@ -277,45 +277,47 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
     // this should reduce cutting of edges between 
     // periodic and normal elements 
     
-    int ldbVx1 = -1 ;
-    int ldbVx2 = -1 ; 
+    int ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
+    int ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
+    bool periodicBnd = false ;
 
     if( mycon1->isperiodic() ) 
     {
       assert( ! mycon2->isperiodic() ); 
       ldbVx1 = mycon1->otherLdbVertexIndex( myhface().getIndex() );
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
+      periodicBnd = true ;
     }
+    // only insert graph edge on the rank where the smaller vertex number is interior
+    else if( mycon1->isboundary() && ldbVx1 < ldbVx2 ) return true ;
 
     if( mycon2->isperiodic() ) 
     {
       assert( ! mycon1->isperiodic() ); 
       ldbVx1 = mycon1->accessPllX ().ldbVertexIndex ();
       ldbVx2 = mycon2->otherLdbVertexIndex( myhface().getIndex() );
+      periodicBnd = true ;
     }
+    // only insert graph edge on the rank where the smaller vertex number is interior
+    else if ( mycon2->isboundary() && ldbVx1 > ldbVx2 ) return true ;
     
     // count leaf faces for this macro face 
     const int weight =  TreeIterator < typename Gitter :: hface_STI, 
                                        is_leaf < Gitter :: hface_STI > > ( myhface () ).size ();
 
     // if we have a periodic situation 
-    if( ldbVx1 != ldbVx2 ) 
+    if( periodicBnd ) 
     {
+      // TODO: Revise this in case of peridodic boundary 
+      // only insert this edge once 
       assert( mycon1->isperiodic() || mycon2->isperiodic() );
       assert( ldbVx1 >= 0 && ldbVx2 >= 0 );
       // increase the edge weight for periodic connections 
       // TODO: make weight factor (here 4) dynamically adjustable 
       db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight*4 ) );
     }
-    else // if (mycon1->nbLevel() == 0 && mycon2->nbLevel() == 0)  // this is not correct!!!!!!!!!!!!1
+    else
     {
-      ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
-      ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
-
-      // only insert graph edge on the rank where the smaller vertex number is interior
-      if( mycon1->isboundary() && ldbVx1 < ldbVx2 ) return true ;
-      if( mycon2->isboundary() && ldbVx1 > ldbVx2 ) return true ;
-
       // the default graph edge 
       db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight ) );
     }
