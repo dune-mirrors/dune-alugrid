@@ -971,7 +971,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           {
             const GraphEdge& e = (*i);
             // only do something when the left node is smaller then the right node 
-            // since each edge exists twice  
+            // since each edge exists twice in the edges set 
             if( e.leftNode() < e.rightNode() ) 
             {
               // increase size of message to be passed on the next repatition
