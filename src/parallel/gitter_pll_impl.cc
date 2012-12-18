@@ -312,6 +312,10 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
       ldbVx1 = mycon1->accessPllX ().ldbVertexIndex () ;
       ldbVx2 = mycon2->accessPllX ().ldbVertexIndex () ;
 
+      // only insert graph edge on the rank where the smaller vertex number is interior
+      if( mycon1->isboundary() && ldbVx1 < ldbVx2 ) return true ;
+      if( mycon2->isboundary() && ldbVx1 > ldbVx2 ) return true ;
+
       // the default graph edge 
       db.edgeUpdate ( LoadBalancer :: GraphEdge ( ldbVx1, ldbVx2, weight ) );
     }

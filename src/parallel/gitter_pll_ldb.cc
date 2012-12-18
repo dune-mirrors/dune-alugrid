@@ -550,7 +550,6 @@ static bool collectInsulatedNodes (const int nel,
       } 
       else 
       {
-//        cerr << "!!! Pass mal auf, ich weise dem Knoten " << i << " jetzt das Gebiet " << neu[edge [max]] << " zu." << endl ;
         neu [i] = neu [edge [max]] ;    
         change = true ;
       }
@@ -618,7 +617,6 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
                 vtxdist,
                 serialPartitioner 
               ) ;
-
 
   // only use ParMETIS_V3_GraphKway for the initial partitioning 
   // this is when all vertices are on proc 0 
@@ -955,19 +953,13 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           for (ldb_edge_set_t :: const_iterator i = edges.begin () ; i != iEnd ; ++i) 
           {
             const GraphEdge& e = (*i);
-            // get ranks of left and right node 
-            const int leftRank  = neu[ e.leftNode()  ];
-            const int rightRank = neu[ e.rightNode() ];
-
-            // only for edges at process boundaries we need to insert double 
-            if( leftRank < rightRank ) 
+            // only do something when the left node is smaller then the right node 
+            // since each edge exists twice  
+            if( e.leftNode() < e.rightNode() ) 
             {
-              _graphSizes[ rightRank ] += sizeof( GraphEdge );
-              _graphSizes[ leftRank  ] += sizeof( GraphEdge );
+              // increase size of message to be passed on the next repatition
+              _graphSizes[ neu[ e.leftNode() ] ] += sizeof( GraphEdge );
             }
-            // only add left node since only one edge is inserted per interior edge 
-            else if ( (leftRank == rightRank) && ( e.leftNode() < e.rightNode() ) )
-              _graphSizes[ leftRank ] += sizeof( GraphEdge );
           }
         }
         else // otherwise disable this feature be clearing the vector 
