@@ -1116,19 +1116,21 @@ public :
       Gitter* myGrid() { return _indexManagerStorage.myGrid(); }
       const Gitter* myGrid() const { return _indexManagerStorage.myGrid(); }
       IndexManagerStorageType& indexManagerStorage () { return _indexManagerStorage; }
+    protected:
+      IndexManagerType& indexManager() { 
+        return _indexManagerStorage.get( IndexManagerStorageType :: IM_Vertices ); 
+      }
+
     private :
       // the coordinates of this vertex 
-      alucoord_t _c [3] ;
+      alucoord_t _c [3] ; // 24 byte 
     protected:
       // index manager
-      IndexManagerStorageType & _indexManagerStorage;
+      IndexManagerStorageType & _indexManagerStorage; // 8 byte
 
-      IndexManagerType& indexManager() { 
-        return _indexManagerStorage.get( IndexManagerStorageType :: IM_Vertices ); }
-
-    private:   
+      //int _idn ;
       // the level of creation 
-      unsigned char _lvl ;
+      unsigned char _lvl ; // 1 byte (adds up to 8)
     public :
       // reference counter 
       using DuneIndexProvider :: ref ;
