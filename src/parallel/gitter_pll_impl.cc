@@ -11,7 +11,6 @@
 
 template < class A >
 const linkagePattern_t VertexPllBaseX< A > :: nullPattern ;
-//const linkagePattern_t  nullPattern ;
 
 template < class A >
 VertexPllBaseX< A > :: VertexPllBaseX (double x, double y, double z, int i, IndexManagerStorageType& ims )
@@ -20,7 +19,7 @@ VertexPllBaseX< A > :: VertexPllBaseX (double x, double y, double z, int i, Inde
     _moveTo ( 0 )
 {
   linkagePatternMap_t& _map = linkagePatterns() ;
-  linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
+  typename linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
   _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (nullPattern,0)).first ;
   (*_lpn).second ++ ;
   return ;
@@ -44,11 +43,12 @@ vector < int > VertexPllBaseX< A > :: estimateLinkage () const {
 }
 
 template < class A >
-bool VertexPllBaseX< A > :: setLinkage (vector < int > lp) {
+bool VertexPllBaseX< A > :: setLinkage (vector < int > lp) 
+{
   (*_lpn).second -- ;
   linkagePatternMap_t& _map = linkagePatterns() ;
   sort (lp.begin (), lp.end (), less < int > ()) ;
-  linkagePatternMap_t :: iterator pos = _map.find (lp) ;
+  typename linkagePatternMap_t :: iterator pos = _map.find (lp) ;
   _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (lp,0)).first ;
   (*_lpn).second ++ ;
   return true ;
