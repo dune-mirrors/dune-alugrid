@@ -17,7 +17,6 @@ VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m)
     _moveTo ( 0 )
 {
   linkagePatternMap_t& _map = linkagePatterns() ;
-  assert( & _map == &m );
   linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
   _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (nullPattern,0)).first ;
   (*_lpn).second ++ ;
@@ -111,10 +110,11 @@ void VertexPllBaseX :: unpackSelf (ObjectStream & os, bool i) {
 }
 
 template < class A >
-vector < int > EdgePllBaseXMacro< A > :: estimateLinkage () const {
+vector < int > EdgePllBaseXMacro< A > :: estimateLinkage () const 
+{
   vector < int > est ;
-  vector < int > l0 = myhedge ().myvertex(0)->accessPllX ().estimateLinkage () ;
-  vector < int > l1 = myhedge ().myvertex(1)->accessPllX ().estimateLinkage () ;
+  const vector < int > l0 ( myhedge ().myvertex(0)->accessPllX ().estimateLinkage () );
+  const vector < int > l1 ( myhedge ().myvertex(1)->accessPllX ().estimateLinkage () );
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (est), less < int > ()) ;
   return est ;
 }
@@ -267,8 +267,8 @@ template < class A > FacePllBaseXMacro < A > :: ~FacePllBaseXMacro()
   assert( _moveTo == 0 );
 }
 
-template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage () const {
-
+template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage () const 
+{
   // Diese Methode sch"atzt den Verbindungsstern der Grobgitterfl"ache,
   // indem sie die Schnittmenge der Verbindungssterne der anliegenden
   // Grobgitterknoten bildet. Je besser die Sch"atzung, desto schneller
@@ -277,10 +277,10 @@ template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage (
   // Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
 
   vector < int > t1, t2, est ;
-  vector < int > l0 = this->myhface ().myhedge (0)->estimateLinkage () ;
-  vector < int > l1 = this->myhface ().myhedge (1)->estimateLinkage () ;
-  vector < int > l2 = this->myhface ().myhedge (2)->estimateLinkage () ;
-  vector < int > l3 = this->myhface ().myhedge (A :: polygonlength == 3 ? 2 : 3)->estimateLinkage () ;
+  const vector < int > l0 ( this->myhface ().myhedge (0)->estimateLinkage () );
+  const vector < int > l1 ( this->myhface ().myhedge (1)->estimateLinkage () );
+  const vector < int > l2 ( this->myhface ().myhedge (2)->estimateLinkage () );
+  const vector < int > l3 ( (A :: polygonlength == 3) ? this->myhface ().myhedge (3)->estimateLinkage () : l2 ) ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (t1), less < int > ()) ;
   set_intersection (l2.begin (), l2.end (), l3.begin (), l3.end (), back_inserter (t2), less < int > ()) ;
   set_intersection (t1.begin (), t1.end (), t2.begin (), t2.end (), back_inserter (est), less < int > ()) ;
@@ -1834,7 +1834,7 @@ GitterBasisPll :: ObjectsPll :: VertexPllImplMacro ::
                         IndexManagerStorageType& ims,
                         linkagePatternMap_t & map) 
   : GitterBasis :: Objects :: VertexEmptyMacro (x,y,z,i,ims),
-    _pllx (new mypllx_t (*this, ims.linkagePatterns())) 
+    _pllx (new mypllx_t (*this, map)) 
 {
   assert( &map == &ims.linkagePatterns() );
   return ;
