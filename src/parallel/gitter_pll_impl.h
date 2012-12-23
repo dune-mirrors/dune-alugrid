@@ -39,7 +39,7 @@ class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     
-    //linkagePatternMap_t* linkagePatternMap () { return this->myGrid()->containerPll().linkagePatternMap() ;  }
+    linkagePatternMap_t& linkagePatterns () { return _v.indexManagerStorage().linkagePatterns() ;  }
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
@@ -49,10 +49,9 @@ class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
   private :
     static const linkagePattern_t nullPattern ;
     myvertex_t & _v ;
-    linkagePatternMap_t & _map ;
     linkagePatternMap_t :: iterator _lpn ;
     typedef map < int, int, less < int > > moveto_t ;
-    moveto_t _moveTo ;
+    moveto_t*  _moveTo ;
 } ;
 
 template < class A > 

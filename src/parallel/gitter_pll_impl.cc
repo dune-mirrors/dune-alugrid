@@ -12,16 +12,21 @@
 const linkagePattern_t VertexPllBaseX :: nullPattern ;
 
 VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) 
-  : _v (v), _map (m), _lpn (), _moveTo ()
+  : _v (v),
+    _lpn (), 
+    _moveTo ( 0 )
 {
+  linkagePatternMap_t& _map = linkagePatterns() ;
+  assert( & _map == &m );
   linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
   _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (nullPattern,0)).first ;
   (*_lpn).second ++ ;
   return ;
 }
 
-VertexPllBaseX :: ~VertexPllBaseX () {
-  assert (_moveTo.size () == 0) ;
+VertexPllBaseX :: ~VertexPllBaseX () 
+{
+  assert( _moveTo == 0 );
   (*_lpn).second -- ;
   return ;
 }
@@ -36,6 +41,7 @@ vector < int > VertexPllBaseX :: estimateLinkage () const {
 
 bool VertexPllBaseX :: setLinkage (vector < int > lp) {
   (*_lpn).second -- ;
+  linkagePatternMap_t& _map = linkagePatterns() ;
   sort (lp.begin (), lp.end (), less < int > ()) ;
   linkagePatternMap_t :: iterator pos = _map.find (lp) ;
   _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (lp,0)).first ;
@@ -45,41 +51,54 @@ bool VertexPllBaseX :: setLinkage (vector < int > lp) {
 
 void VertexPllBaseX :: unattach2 (int i) 
 {
-  typename moveto_t :: iterator pos = _moveTo.find (i) ;
-  assert (pos != _moveTo.end ()) ;
-  if ( (-- (*pos).second) == 0 ) _moveTo.erase ( pos ) ;
-  return ;
-}
-
-void VertexPllBaseX :: attach2 (int i) {
-  typename moveto_t :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) {
-    _moveTo.insert (pair < const int, int > (i,1)) ;
-  } 
-  else 
+  assert ( _moveTo );
+  typename moveto_t :: iterator pos = _moveTo->find( i ); 
+  assert ( pos != _moveTo->end ()) ;
+  if ( (-- (*pos).second ) == 0 ) 
   {
-    (*pos).second ++ ;
+    _moveTo->erase ( pos ) ;
+    if( _moveTo->empty() ) 
+    {
+      delete _moveTo ;
+      _moveTo = 0 ;
+    }
   }
   return ;
 }
 
-bool VertexPllBaseX :: packAll (vector < ObjectStream > & osv) {
+void VertexPllBaseX :: attach2 (int i) 
+{
+  // create moveTo if not already existent 
+  if( ! _moveTo ) _moveTo = new moveto_t ();
+
+  typename moveto_t :: iterator pos = _moveTo->find( i ); 
+  if( pos == _moveTo->end() )
+    _moveTo->insert (pair < const int, int > (i,1)) ;
+  else 
+    ++ (*pos).second ;
+}
+
+bool VertexPllBaseX :: packAll (vector < ObjectStream > & osv) 
+{
   bool action (false) ;
-  typedef map < int, int, less < int > > :: const_iterator  const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ; 
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  if( _moveTo ) 
   {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-    osv [j].writeObject (VERTEX) ;
-    osv [j].writeObject (myvertex ().ident ()) ;
-    osv [j].writeObject (myvertex ().Point ()[0]) ;
-    osv [j].writeObject (myvertex ().Point ()[1]) ;
-    osv [j].writeObject (myvertex ().Point ()[2]) ;
-    
-    inlineData (osv [j]) ;
-    
-    action = true ;
+    typedef typename moveto_t :: const_iterator  const_iterator;
+    const const_iterator iEnd =  _moveTo->end () ; 
+    for (const_iterator i = _moveTo->begin () ; i != iEnd ; ++i) 
+    {
+      int j = (*i).first ;
+      assert ((osv.begin () + j) < osv.end ()) ;
+      osv [j].writeObject (VERTEX) ;
+      osv [j].writeObject (myvertex ().ident ()) ;
+      osv [j].writeObject (myvertex ().Point ()[0]) ;
+      osv [j].writeObject (myvertex ().Point ()[1]) ;
+      osv [j].writeObject (myvertex ().Point ()[2]) ;
+      
+      inlineData (osv [j]) ;
+      
+      action = true ;
+    }
   }
   return action ;
 }
