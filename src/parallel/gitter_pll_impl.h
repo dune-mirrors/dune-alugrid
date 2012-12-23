@@ -52,8 +52,8 @@ class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
     myvertex_t & _v ;
     linkagePatternMap_t & _map ;
     linkagePatternMap_t :: iterator _lpn ;
-    map < int, int, less < int > > _moveTo ;
-    Refcount _ref ;
+    typedef map < int, int, less < int > > moveto_t ;
+    moveto_t _moveTo ;
 } ;
 
 template < class A > 
@@ -102,9 +102,9 @@ class EdgePllBaseXMacro : public A
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-  private :
-    map < int, int, less < int > > _moveTo ;
-    Refcount _ref ;
+  protected :
+    typedef map < int, int, less < int > > moveto_t ;
+    moveto_t*  _moveTo ;
 } ;
 
 template < class A > class FacePllBaseX : public A 
@@ -160,9 +160,9 @@ template < class A > class FacePllBaseXMacro : public A
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-  private :
-    map < int, int, less < int > > _moveTo ;
-    Refcount _ref ;
+  protected :
+    typedef map < int, int, less < int > > moveto_t ;
+    moveto_t*  _moveTo ;
 } ;
 
 template < class A >
@@ -993,14 +993,15 @@ inline bool EdgePllBaseX< A > :: unlockAndResume (bool r)
 
 template < class A >
 inline EdgePllBaseXMacro< A > :: EdgePllBaseXMacro(myvertex_t * a, myvertex_t * b) :
-  A(0, a, b), _moveTo(), _ref()
+  A(0, a, b), _moveTo( 0 )
 {
 }
 
 template < class A >
 inline EdgePllBaseXMacro< A > :: ~EdgePllBaseXMacro()
 {
-  assert (0 == _moveTo.size ()) ;
+  assert( _moveTo == 0 );
+  //assert (0 == _moveTo.size ()) ;
 }
 
 //////////////////////////////////////////////////////////

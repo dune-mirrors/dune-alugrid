@@ -1133,7 +1133,7 @@ public :
       unsigned char _lvl ; // 1 byte (adds up to 8)
     public :
       // reference counter 
-      using DuneIndexProvider :: ref ;
+      using DuneIndexProvider :: ref ; // 8 byte from DuneIndexProvider + 8 vtable = 56 byte
     } vertex_GEO ;
   
     typedef class hedge1 : public hedge_STI , public MyAlloc 

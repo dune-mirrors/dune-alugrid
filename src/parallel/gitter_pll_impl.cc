@@ -12,7 +12,7 @@
 const linkagePattern_t VertexPllBaseX :: nullPattern ;
 
 VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) 
-  : _v (v), _map (m), _lpn (), _moveTo (), _ref () 
+  : _v (v), _map (m), _lpn (), _moveTo ()
 {
   linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
   _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (nullPattern,0)).first ;
@@ -43,17 +43,21 @@ bool VertexPllBaseX :: setLinkage (vector < int > lp) {
   return true ;
 }
 
-void VertexPllBaseX :: unattach2 (int i) {
-  assert (_moveTo.find (i) != _moveTo.end ()) ;
-  if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
+void VertexPllBaseX :: unattach2 (int i) 
+{
+  typename moveto_t :: iterator pos = _moveTo.find (i) ;
+  assert (pos != _moveTo.end ()) ;
+  if ( (-- (*pos).second) == 0 ) _moveTo.erase ( pos ) ;
   return ;
 }
 
 void VertexPllBaseX :: attach2 (int i) {
-  map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
+  typename moveto_t :: iterator pos = _moveTo.find (i) ;
   if (pos == _moveTo.end ()) {
     _moveTo.insert (pair < const int, int > (i,1)) ;
-  } else {
+  } 
+  else 
+  {
     (*pos).second ++ ;
   }
   return ;
@@ -103,9 +107,20 @@ LinkedObject :: Identifier EdgePllBaseXMacro< A > :: getIdentifier () const
 }
 
 template < class A >
-void EdgePllBaseXMacro< A > :: unattach2 (int i) {
-  assert (_moveTo.find (i) != _moveTo.end ()) ;
-  if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
+void EdgePllBaseXMacro< A > :: unattach2 (int i) 
+{
+  assert ( _moveTo );
+  typename moveto_t :: iterator pos = _moveTo->find( i ); 
+  assert ( pos != _moveTo->end ()) ;
+  if ( (-- (*pos).second ) == 0 ) 
+  {
+    _moveTo->erase ( pos ) ;
+    if( _moveTo->size() == 0 ) 
+    {
+      delete _moveTo ;
+      _moveTo = 0 ;
+    }
+  }
   myhedge ().myvertex (0)->accessPllX ().unattach2 (i) ;
   myhedge ().myvertex (1)->accessPllX ().unattach2 (i) ;
   return ;
@@ -114,11 +129,16 @@ void EdgePllBaseXMacro< A > :: unattach2 (int i) {
 template < class A >
 void EdgePllBaseXMacro< A > :: attach2 (int i) 
 {
-  map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) {
-    _moveTo.insert (pair < const int, int > (i,1)) ;
-  } else {
-    (*pos).second ++ ;
+  if( ! _moveTo ) 
+  {
+    _moveTo = new moveto_t ();
+    _moveTo->insert (pair < const int, int > (i,1)) ;
+  }
+  else 
+  {
+    typename moveto_t :: iterator pos = _moveTo->find( i ); 
+    assert( pos != _moveTo->end() );
+    ++ (*pos).second ;
   }
   myhedge ().myvertex (0)->accessPllX ().attach2 (i) ;
   myhedge ().myvertex (1)->accessPllX ().attach2 (i) ;
@@ -129,29 +149,32 @@ template < class A >
 bool EdgePllBaseXMacro< A > :: packAll (vector < ObjectStream > & osv) 
 {
   bool action (false) ;
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  if( _moveTo ) 
   {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-
+    typedef typename moveto_t :: const_iterator const_iterator;
+    const const_iterator iEnd =  _moveTo->end () ;
+    for (const_iterator i = _moveTo->begin () ; i != iEnd ; ++i) 
     {
-      ObjectStream & os = osv[j];
-      os.writeObject (EDGE1) ;
-      os.writeObject (myhedge ().myvertex (0)->ident ()) ;
-      os.writeObject (myhedge ().myvertex (1)->ident ()) ;
-      
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhedge_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+      int j = (*i).first ;
+      assert ((osv.begin () + j) < osv.end ()) ;
 
-      // pack refinement information 
-      myhedge ().backup ( os ) ;
-      os.put( ObjectStream :: ENDOFSTREAM );
-      
-      inlineData ( os ) ;
+      {
+        ObjectStream & os = osv[j];
+        os.writeObject (EDGE1) ;
+        os.writeObject (myhedge ().myvertex (0)->ident ()) ;
+        os.writeObject (myhedge ().myvertex (1)->ident ()) ;
+        
+        // make sure ENDOFSTREAM is not a valid refinement rule 
+        assert( ! myhedge_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+
+        // pack refinement information 
+        myhedge ().backup ( os ) ;
+        os.put( ObjectStream :: ENDOFSTREAM );
+        
+        inlineData ( os ) ;
+      }
+      action = true ;
     }
-    action = true ;
   }
   return action ;
 }
@@ -209,7 +232,7 @@ template class EdgePllBaseXMacro< GitterBasisPll :: ObjectsPll :: hedge1_IMPL > 
 template <> FacePllBaseXMacro<GitterBasisPll :: ObjectsPll :: hface3_IMPL> :: 
 FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
                   myhedge_t * e2, int s2)
- : GitterBasisPll :: ObjectsPll :: hface3_IMPL(l, e0, s0, e1, s1, e2, s2), _moveTo(), _ref() 
+ : GitterBasisPll :: ObjectsPll :: hface3_IMPL(l, e0, s0, e1, s1, e2, s2), _moveTo( 0 ) 
 {
 }
 
@@ -217,14 +240,14 @@ FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
 template <> FacePllBaseXMacro<GitterBasisPll :: ObjectsPll :: hface4_IMPL> :: 
 FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
                   myhedge_t * e2, int s2, myhedge_t * e3, int s3)
- : GitterBasisPll :: ObjectsPll :: hface4_IMPL(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo(), _ref() 
+ : GitterBasisPll :: ObjectsPll :: hface4_IMPL(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo( 0 ) 
 {
 }
 
 // destructor 
 template < class A > FacePllBaseXMacro < A > :: ~FacePllBaseXMacro() 
 {
-  assert (0 == _moveTo.size ()); 
+  assert( _moveTo == 0 );
 }
 
 template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage () const {
@@ -332,30 +355,43 @@ bool FacePllBaseXMacro < A > :: ldbUpdateGraphEdge (LoadBalancer :: DataBase & d
   return periodicBnd ;
 }
 
-template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i) {
+template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i) 
+{
+  if( _moveTo ) 
+  {
+    // Diese Methode bindet die Fl"ache von einer Zuweisung zu einem neuen
+    // Teilgitter ab. D.h. der Eintrag in der Zuweisungsliste wird gel"oscht,
+    // und dann wird die M"oglichkeit an die anliegenden Kanten weitervermittelt.
+    typename moveto_t :: iterator pos = _moveTo->find( i );
 
-  // Diese Methode bindet die Fl"ache von einer Zuweisung zu einem neuen
-  // Teilgitter ab. D.h. der Eintrag in der Zuweisungsliste wird gel"oscht,
-  // und dann wird die M"oglichkeit an die anliegenden Kanten weitervermittelt.
+    if( pos == _moveTo->end () ) return ;
 
-  //assert (_moveTo.find (i) != _moveTo.end ()) ;
-  if( _moveTo.find (i) ==  _moveTo.end () ) 
-    return ;
-  if ( -- _moveTo [i] == 0) _moveTo.erase (i) ;
-  {for (int j = 0 ; j < A :: polygonlength ; ++j ) 
-    this->myhface ().myhedge (j)->unattach2 (i) ;}
-  return ;
+    if ( (--(*pos).second) == 0) 
+    {
+      _moveTo->erase ( pos ) ;
+      if( _moveTo->size() == 0 ) 
+      {
+        delete _moveTo ;
+        _moveTo = 0;
+      }
+    }
+
+    for (int j = 0 ; j < A :: polygonlength ; ++j ) 
+      this->myhface ().myhedge (j)->unattach2 (i) ;
+  }
 }
 
 template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) {
-  map < int, int, less < int > > :: iterator pos = _moveTo.find (i) ;
-  if (pos == _moveTo.end ()) 
+  if ( ! _moveTo ) 
   {
-    _moveTo.insert (pair < const int, int > (i,1)) ;
+    _moveTo = new moveto_t ();
+    _moveTo->insert (pair < const int, int > (i,1)) ;
   } 
   else 
   {
-    (*pos).second ++ ;
+    typename moveto_t :: iterator pos = _moveTo->find( i );
+    assert( pos != _moveTo->end() );
+    ++ (*pos).second ;
   }
 
   {
@@ -375,71 +411,74 @@ template < class A > bool FacePllBaseXMacro < A > :: packAll (vector < ObjectStr
   const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled() ;
 
   bool action = false ;
-  typedef map < int, int, less < int > > :: const_iterator const_iterator;
-  const const_iterator iEnd =  _moveTo.end () ;
-  for (const_iterator i = _moveTo.begin () ; i != iEnd ; ++i) 
+  if( _moveTo ) 
   {
-    int j = (*i).first ;
-    assert ((osv.begin () + j) < osv.end ()) ;
-    
-    ObjectStream& os = osv[j];
-    if (A :: polygonlength == 4) 
+    typedef typename moveto_t :: const_iterator const_iterator;
+    const const_iterator iEnd =  _moveTo->end () ;
+    for (const_iterator i = _moveTo->begin () ; i != iEnd ; ++i) 
     {
-      os.writeObject (MacroGridMoverIF :: FACE4) ;
-    }
-    else if (A :: polygonlength == 3) 
-    {
-      os.writeObject (MacroGridMoverIF :: FACE3) ;
-    }
-    else 
-    {
-      // something wrong 
-      assert(false);
-      abort () ;
-    }
-    
-    {
-      // write vertex idents 
-      for (int k = 0 ; k < A :: polygonlength ; ++ k)
+      int j = (*i).first ;
+      assert ((osv.begin () + j) < osv.end ()) ;
+      
+      ObjectStream& os = osv[j];
+      if (A :: polygonlength == 4) 
       {
-        os.writeObject (this->myhface ().myvertex (k)->ident ()) ;
+        os.writeObject (MacroGridMoverIF :: FACE4) ;
       }
-    }
-    try {
-    
-      // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
-      // mit einer Verfeinerungsregel identisch ist - sonst gibt's
-      // nachher beim Auspacken nur garbage.
-    
-      assert (! myhface_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
-    
-      this->myhface ().backup ( os );
-      os.put( ObjectStream :: ENDOFSTREAM );
+      else if (A :: polygonlength == 3) 
+      {
+        os.writeObject (MacroGridMoverIF :: FACE3) ;
+      }
+      else 
+      {
+        // something wrong 
+        assert(false);
+        abort () ;
+      }
+      
+      {
+        // write vertex idents 
+        for (int k = 0 ; k < A :: polygonlength ; ++ k)
+        {
+          os.writeObject (this->myhface ().myvertex (k)->ident ()) ;
+        }
+      }
+      try {
+      
+        // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
+        // mit einer Verfeinerungsregel identisch ist - sonst gibt's
+        // nachher beim Auspacken nur garbage.
+      
+        assert (! myhface_t :: myrule_t :: isValid (ObjectStream :: ENDOFSTREAM) ) ;
+      
+        this->myhface ().backup ( os );
+        os.put( ObjectStream :: ENDOFSTREAM );
 
-      // inline internal data if has any 
-      inlineData ( os ) ;
+        // inline internal data if has any 
+        inlineData ( os ) ;
 
-    } catch (ObjectStream :: OutOfMemoryException) {
-      cerr << "**FEHLER (FATAL) ObjectStream :: OutOfMemoryException aufgetreten in " << __FILE__ << " " << __LINE__ << endl ;
-      abort () ;
+      } catch (ObjectStream :: OutOfMemoryException) {
+        cerr << "**FEHLER (FATAL) ObjectStream :: OutOfMemoryException aufgetreten in " << __FILE__ << " " << __LINE__ << endl ;
+        abort () ;
+      }
+      try {
+      
+        // Wenn die Fl"ache auf den j. Strom des Lastverschiebers
+        // geschrieben wurde, dann mu"ussen auch die anliegenden
+        // Elemente daraufhin untersucht werden, ob sie sich nicht
+        // als Randelemente dorthin schreiben sollen - das tun sie
+        // aber selbst.
+      
+        this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os, ghostCellsEnabled ) ;
+        this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os, ghostCellsEnabled ) ;
+      } 
+      catch (Parallel :: AccessPllException) 
+      {
+        cerr << "**FEHLER (FATAL) AccessPllException aufgetreten in " << __FILE__ << " " << __LINE__ << ". Ende." << endl ;
+        abort () ;
+      }
+      action = true ;
     }
-    try {
-    
-      // Wenn die Fl"ache auf den j. Strom des Lastverschiebers
-      // geschrieben wurde, dann mu"ussen auch die anliegenden
-      // Elemente daraufhin untersucht werden, ob sie sich nicht
-      // als Randelemente dorthin schreiben sollen - das tun sie
-      // aber selbst.
-    
-      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os, ghostCellsEnabled ) ;
-      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os, ghostCellsEnabled ) ;
-    } 
-    catch (Parallel :: AccessPllException) 
-    {
-      cerr << "**FEHLER (FATAL) AccessPllException aufgetreten in " << __FILE__ << " " << __LINE__ << ". Ende." << endl ;
-      abort () ;
-    }
-    action = true ;
   }
   return action ;
 }
@@ -2183,8 +2222,11 @@ void GitterBasisPll :: printMemUsage ()
     typedef GitterBasisPll :: ObjectsPll :: hbndseg3_IMPL hbndseg3_IMPL ; 
     typedef GitterBasisPll :: ObjectsPll :: hbndseg4_IMPL hbndseg4_IMPL ; 
     typedef GitterBasisPll :: ObjectsPll :: hface3_IMPL hface3_IMPL ; 
+    typedef GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro  hface3_MACRO ; 
     typedef GitterBasisPll :: ObjectsPll :: hface4_IMPL hface4_IMPL ; 
+    typedef GitterBasisPll :: ObjectsPll :: Hface4EmptyPllMacro  hface4_MACRO ; 
     typedef GitterBasisPll :: ObjectsPll :: hedge1_IMPL hedge1_IMPL ; 
+    typedef GitterBasisPll :: ObjectsPll :: Hedge1EmptyPllMacro  hedge1_MACRO ; 
     typedef GitterBasisPll :: ObjectsPll :: VertexPllImplMacro VertexMacro; 
     typedef GitterBasis :: DuneIndexProvider DuneIndexProvider; 
     typedef GitterBasis :: Objects :: VertexEmptyMacro VertexEmptyMacro; 
@@ -2208,9 +2250,11 @@ void GitterBasisPll :: printMemUsage ()
     cout << "Tetrasize  = " << sizeof(tetra_IMPL) << endl;
     cout << "TetraMacro = " << sizeof(tetra_MACRO) << endl;
     cout << "MacroGhostTetra = " << sizeof(MacroGhostTetra) << endl;
+    cout << "Hface3_MACRO = " << sizeof(hface3_MACRO) << endl;
     cout << "Hface3_IMPL = " << sizeof(hface3_IMPL) << endl;
     cout << "Hface3_GEO = " << sizeof( Gitter :: Geometric :: hface3_GEO ) << endl;
     cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
+    cout << "HEdge1_MACRO = " << sizeof(hedge1_MACRO) << endl;
     cout << "HEdge1_IMPL = " << sizeof(hedge1_IMPL) << endl;
     cout << "HEdge1_GEO = " << sizeof(Gitter :: Geometric ::hedge1_GEO) << endl;
     cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
@@ -2223,6 +2267,7 @@ void GitterBasisPll :: printMemUsage ()
     cout << "Hexasize  = " << sizeof(hexa_IMPL) << endl;
     cout << "HexaMacro = " << sizeof(hexa_MACRO) << endl;
     cout << "MacroGhostHexa = " << sizeof(MacroGhostHexa) << endl;
+    cout << "Hface4_MACRO = " << sizeof(hface4_MACRO) << endl;
     cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
     cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
     cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
