@@ -115,7 +115,7 @@ void EdgePllBaseXMacro< A > :: unattach2 (int i)
   if ( (-- (*pos).second ) == 0 ) 
   {
     _moveTo->erase ( pos ) ;
-    if( _moveTo->size() == 0 ) 
+    if( _moveTo->empty() ) 
     {
       delete _moveTo ;
       _moveTo = 0 ;
@@ -129,17 +129,15 @@ void EdgePllBaseXMacro< A > :: unattach2 (int i)
 template < class A >
 void EdgePllBaseXMacro< A > :: attach2 (int i) 
 {
-  if( ! _moveTo ) 
-  {
-    _moveTo = new moveto_t ();
+  // create moveTo if not already existent 
+  if( ! _moveTo ) _moveTo = new moveto_t ();
+
+  typename moveto_t :: iterator pos = _moveTo->find( i ); 
+  if( pos == _moveTo->end() )
     _moveTo->insert (pair < const int, int > (i,1)) ;
-  }
   else 
-  {
-    typename moveto_t :: iterator pos = _moveTo->find( i ); 
-    assert( pos != _moveTo->end() );
     ++ (*pos).second ;
-  }
+
   myhedge ().myvertex (0)->accessPllX ().attach2 (i) ;
   myhedge ().myvertex (1)->accessPllX ().attach2 (i) ;
   return ;
@@ -369,30 +367,30 @@ template < class A > void FacePllBaseXMacro < A > :: unattach2 (int i)
     if ( (--(*pos).second) == 0) 
     {
       _moveTo->erase ( pos ) ;
-      if( _moveTo->size() == 0 ) 
+      if( _moveTo->empty() ) 
       {
         delete _moveTo ;
         _moveTo = 0;
       }
     }
 
-    for (int j = 0 ; j < A :: polygonlength ; ++j ) 
+    for (int j = 0 ; j < A :: polygonlength ; ++j )
+    {
       this->myhface ().myhedge (j)->unattach2 (i) ;
+    }
   }
 }
 
-template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) {
-  if ( ! _moveTo ) 
-  {
-    _moveTo = new moveto_t ();
+template < class A > void FacePllBaseXMacro < A > :: attach2 (int i) 
+{
+  // create moveTo if not already existent 
+  if ( ! _moveTo ) _moveTo = new moveto_t ();
+
+  typename moveto_t :: iterator pos = _moveTo->find( i );
+  if( pos == _moveTo->end() ) 
     _moveTo->insert (pair < const int, int > (i,1)) ;
-  } 
-  else 
-  {
-    typename moveto_t :: iterator pos = _moveTo->find( i );
-    assert( pos != _moveTo->end() );
+  else   
     ++ (*pos).second ;
-  }
 
   {
     for (int j = 0 ; j < A :: polygonlength ; ++j ) 

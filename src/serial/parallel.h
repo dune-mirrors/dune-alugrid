@@ -29,6 +29,8 @@ class MacroGridMoverIF {
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) = 0; 
     virtual void unpackSelf (ObjectStream &,bool) = 0 ;
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) = 0; 
+
+    // virtual int diagnostic() const { return 0; }
 } ;
 
 class MacroGridMoverDefault : public MacroGridMoverIF {

@@ -102,6 +102,7 @@ class EdgePllBaseXMacro : public A
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
+    // virtual int diagnostic() const { return (_moveTo != 0 ) ? 1 : 0; }
   protected :
     typedef map < int, int, less < int > > moveto_t ;
     moveto_t*  _moveTo ;
@@ -160,6 +161,7 @@ template < class A > class FacePllBaseXMacro : public A
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
+    // virtual int diagnostic() const { return (_moveTo != 0 ) ? 1 : 0; }
   protected :
     typedef map < int, int, less < int > > moveto_t ;
     moveto_t*  _moveTo ;
