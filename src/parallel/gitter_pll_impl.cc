@@ -9,10 +9,13 @@
 #include "gitter_hexa_top_pll.h"
 #include "gitter_tetra_top_pll.h"
 
-const linkagePattern_t VertexPllBaseX :: nullPattern ;
+template < class A >
+const linkagePattern_t VertexPllBaseX< A > :: nullPattern ;
+//const linkagePattern_t  nullPattern ;
 
-VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m) 
-  : _v (v),
+template < class A >
+VertexPllBaseX< A > :: VertexPllBaseX (double x, double y, double z, int i, IndexManagerStorageType& ims )
+  : A( x, y, z, i, ims ),
     _lpn (), 
     _moveTo ( 0 )
 {
@@ -23,22 +26,25 @@ VertexPllBaseX :: VertexPllBaseX (myvertex_t & v, linkagePatternMap_t & m)
   return ;
 }
 
-VertexPllBaseX :: ~VertexPllBaseX () 
+template < class A >
+VertexPllBaseX< A > :: ~VertexPllBaseX () 
 {
   assert( _moveTo == 0 );
-  (*_lpn).second -- ;
-  return ;
+  decreaseLinkCounter ();
 }
 
-LinkedObject :: Identifier VertexPllBaseX :: getIdentifier () const {
-  return Identifier (myvertex().ident ()) ;
+template < class A >
+LinkedObject :: Identifier VertexPllBaseX< A > :: getIdentifier () const {
+  return LinkedObject :: Identifier (myvertex().ident ()) ;
 }
 
-vector < int > VertexPllBaseX :: estimateLinkage () const {
+template < class A >
+vector < int > VertexPllBaseX< A > :: estimateLinkage () const {
   return vector < int > ((*_lpn).first) ;
 }
 
-bool VertexPllBaseX :: setLinkage (vector < int > lp) {
+template < class A >
+bool VertexPllBaseX< A > :: setLinkage (vector < int > lp) {
   (*_lpn).second -- ;
   linkagePatternMap_t& _map = linkagePatterns() ;
   sort (lp.begin (), lp.end (), less < int > ()) ;
@@ -48,7 +54,8 @@ bool VertexPllBaseX :: setLinkage (vector < int > lp) {
   return true ;
 }
 
-void VertexPllBaseX :: unattach2 (int i) 
+template < class A >
+void VertexPllBaseX< A > :: unattach2 (int i) 
 {
   assert ( _moveTo );
   typename moveto_t :: iterator pos = _moveTo->find( i ); 
@@ -65,7 +72,8 @@ void VertexPllBaseX :: unattach2 (int i)
   return ;
 }
 
-void VertexPllBaseX :: attach2 (int i) 
+template < class A >
+void VertexPllBaseX< A > :: attach2 (int i) 
 {
   // create moveTo if not already existent 
   if( ! _moveTo ) _moveTo = new moveto_t ();
@@ -77,7 +85,8 @@ void VertexPllBaseX :: attach2 (int i)
     ++ (*pos).second ;
 }
 
-bool VertexPllBaseX :: packAll (vector < ObjectStream > & osv) 
+template < class A >
+bool VertexPllBaseX< A > :: packAll (vector < ObjectStream > & osv) 
 {
   bool action (false) ;
   if( _moveTo ) 
@@ -102,13 +111,17 @@ bool VertexPllBaseX :: packAll (vector < ObjectStream > & osv)
   return action ;
 }
 
-void VertexPllBaseX :: unpackSelf (ObjectStream & os, bool i) {
+template < class A >
+void VertexPllBaseX< A > :: unpackSelf (ObjectStream & os, bool i) {
   if (i) {
     xtractData (os) ;
   }
   return ;
 }
 
+/////////////////////////////////////////////////////////////////
+// --EdgePllBaseXMacro
+/////////////////////////////////////////////////////////////////
 template < class A >
 vector < int > EdgePllBaseXMacro< A > :: estimateLinkage () const 
 {
@@ -1829,40 +1842,6 @@ pair < const ElementPllXIF_t *, int > BndsegPllBaseX :: accessInnerPllX (const p
   return x ;
 }
 
-GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: 
-    VertexPllImplMacro (double x, double y, double z, int i, 
-                        IndexManagerStorageType& ims,
-                        linkagePatternMap_t & map) 
-  : GitterBasis :: Objects :: VertexEmptyMacro (x,y,z,i,ims),
-    _pllx (new mypllx_t (*this, map)) 
-{
-  assert( &map == &ims.linkagePatterns() );
-  return ;
-}
-
-GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: ~VertexPllImplMacro () 
-{
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
-VertexPllXIF_t & GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: accessPllX () throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-const VertexPllXIF_t & GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
-  assert (_pllx) ;
-  return * _pllx ;
-}
-
-void GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  delete _pllx ;
-  _pllx = 0 ;
-  return ;
-}
-
 GitterBasisPll :: ObjectsPll :: Hface3EmptyPllMacro :: 
 Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2) 
   : Base_t(0, e0, s0, e1, s1, e2, s2) // 0 == level 0
@@ -2284,6 +2263,7 @@ void GitterBasisPll :: printMemUsage ()
     cout << "HEdge1_MACRO = " << sizeof(hedge1_MACRO) << endl;
     cout << "HEdge1_IMPL = " << sizeof(hedge1_IMPL) << endl;
     cout << "HEdge1_GEO = " << sizeof(Gitter :: Geometric ::hedge1_GEO) << endl;
+    cout << "VertexMacroPll = " << sizeof(VertexMacro) << endl;
     cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
     cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
     cout << "Vertex = " << sizeof(VertexEmpty) << endl;

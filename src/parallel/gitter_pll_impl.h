@@ -22,24 +22,39 @@
   // wieder die unreferenzierten Verbindungsmuster aus dem
   // Container. Es gibt "ubrigens kein firstScan () mehr ...
 
-class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
+//static const linkagePattern_t nullPattern ;
+template < class A > 
+class VertexPllBaseX : public A 
+{
   protected :
-    typedef Gitter :: Geometric :: VertexGeo myvertex_t ;
+    typedef A myvertex_t ;
+    inline myvertex_t & myvertex () { return *this; }
+    inline const myvertex_t & myvertex () const { return *this; }
 
-    inline myvertex_t & myvertex () ;
-    inline const myvertex_t & myvertex () const ;
+    using A :: VERTEX;
   public :
-    VertexPllBaseX (myvertex_t &,linkagePatternMap_t &) ;
+    VertexPllBaseX (double,double,double,int,IndexManagerStorageType&) ;
    ~VertexPllBaseX () ;
+
     virtual vector< int > estimateLinkage () const ;
     virtual bool setLinkage ( vector < int > ) ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
+
+    // decrease linkage counter 
+    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) { decreaseLinkCounter (); }
     
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     
-    linkagePatternMap_t& linkagePatterns () { return _v.indexManagerStorage().linkagePatterns() ;  }
+    inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns() ;  }
+    // decrease counter if not already zero
+    void decreaseLinkCounter () 
+    { 
+      if( (*_lpn).second > 0 ) 
+        -- (*_lpn).second ; 
+    }
+
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
@@ -48,7 +63,6 @@ class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
 
   private :
     static const linkagePattern_t nullPattern ;
-    myvertex_t & _v ;
     linkagePatternMap_t :: iterator _lpn ;
     typedef map < int, int, less < int > > moveto_t ;
     moveto_t*  _moveTo ;
@@ -608,19 +622,16 @@ public :
     ///////////////////////////////////////////////////////////////
     // --VertexImpl
     ///////////////////////////////////////////////////////////////
-    class VertexPllImplMacro : public VertexEmptyMacro 
+    class VertexPllImplMacro : public VertexPllBaseX< VertexEmptyMacro >
     {
     public :
-      typedef VertexPllBaseX mypllx_t ;
-    public :
-      VertexPllImplMacro (double,double,double,int,IndexManagerStorageType&, linkagePatternMap_t &) ;
-     ~VertexPllImplMacro () ;
-      virtual VertexPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      virtual const VertexPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-      virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-    private :
-      mypllx_t * _pllx ;
-      friend class VertexPllBaseX;
+      VertexPllImplMacro (double x, double y, double z, int i, IndexManagerStorageType& ims, linkagePatternMap_t & map) 
+        : VertexPllBaseX< VertexEmptyMacro >( x, y, z, i, ims )
+      {
+        assert( &map == &ims.linkagePatterns() );   
+      }
+      virtual VertexPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) { return *this ; }
+      virtual const VertexPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) { return *this ; }
     } ;
 
     ///////////////////////////////////////////////////////////////
@@ -890,14 +901,6 @@ public :
   //    #    #   ##  #          #    #   ##  #
   //    #    #    #  ######     #    #    #  ######
   //
-
-inline VertexPllBaseX :: myvertex_t & VertexPllBaseX :: myvertex () {
-  return _v ;
-}
-
-inline const VertexPllBaseX :: myvertex_t & VertexPllBaseX :: myvertex () const {
-  return _v ;
-}
 
 /////////////////////////////////////////////////////
 //  --EdgePllBaseX
