@@ -52,6 +52,10 @@ struct ALUGridExternalParameters
   }
 };
 
+// linkage pattern map for parallel grid (stored in IndexManagerStorage for convenience)
+typedef vector < int > linkagePattern_t ;
+typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternMap_t ;
+
 // forward declaration 
 class Gitter;
 
@@ -69,11 +73,11 @@ public:
          IM_Internal = 5  // 5 == internal bnds, parallel only 
   };
 
-  IndexManagerStorage() : _myGrid( 0 ) 
+  IndexManagerStorage() : _myGrid( 0 ), _linkagePatterns() 
   {}
   void setGrid( Gitter * grid ) { _myGrid = grid ; }
 
-  explicit IndexManagerStorage(Gitter * gitter) : _myGrid( gitter ) 
+  explicit IndexManagerStorage(Gitter * gitter) : _myGrid( gitter ), _linkagePatterns() 
   {}
 
   Gitter* myGrid() 
@@ -104,6 +108,11 @@ public:
       _indexmanager[i].compress();
     }
   }
+
+  // needed for the parallel linkage storage 
+  // (moved here to access in vertices without additional memory consumption) 
+  linkagePatternMap_t& linkagePatterns () { return _linkagePatterns ; }
+  const linkagePatternMap_t& linkagePatterns () const { return _linkagePatterns ; }
 private:
   IndexManagerStorage( const IndexManagerStorage& );
 
@@ -114,6 +123,9 @@ protected:
   // this lists use this objects to get  thier numbers 
   // index provider, for every codim one , 4 is for boundary
   IndexManagerType _indexmanager[ numOfIndexManager ];
+
+  // need for parallel linkage of partitions 
+  linkagePatternMap_t _linkagePatterns ;
 };
 
 typedef IndexManagerStorage IndexManagerStorageType;

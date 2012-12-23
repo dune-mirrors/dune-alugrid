@@ -1815,11 +1815,14 @@ GitterBasisPll :: ObjectsPll :: VertexPllImplMacro ::
                         IndexManagerStorageType& ims,
                         linkagePatternMap_t & map) 
   : GitterBasis :: Objects :: VertexEmptyMacro (x,y,z,i,ims),
-    _pllx (new mypllx_t (*this,map)) {
+    _pllx (new mypllx_t (*this, ims.linkagePatterns())) 
+{
+  assert( &map == &ims.linkagePatterns() );
   return ;
 }
 
-GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: ~VertexPllImplMacro () {
+GitterBasisPll :: ObjectsPll :: VertexPllImplMacro :: ~VertexPllImplMacro () 
+{
   delete _pllx ;
   _pllx = 0 ;
   return ;
@@ -1857,20 +1860,25 @@ Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
 ////////////////////////////////////////////////////////////////
 //  --MacroGitterBasisPll
 ////////////////////////////////////////////////////////////////
-GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid , istream & in) : GitterPll :: MacroGitterPll () , GitterBasis:: MacroGitterBasis (mygrid) 
+GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid , istream & in) 
+  : GitterPll :: MacroGitterPll (), 
+    GitterBasis:: MacroGitterBasis (mygrid),
+    _linkagePatterns( indexManagerStorage().linkagePatterns() )
 {
   macrogridBuilder (in ) ;
   return ;
 }
 
-GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid) : 
-  GitterPll :: MacroGitterPll () , 
-  GitterBasis :: MacroGitterBasis (mygrid) 
+GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid)
+ : GitterPll :: MacroGitterPll () , 
+   GitterBasis :: MacroGitterBasis (mygrid),
+   _linkagePatterns( indexManagerStorage().linkagePatterns() )
 {
   return ;
 }
 
-GitterBasisPll :: MacroGitterBasisPll :: ~MacroGitterBasisPll () {
+GitterBasisPll :: MacroGitterBasisPll :: ~MacroGitterBasisPll () 
+{
   try {
     {
       AccessIterator < helement_STI > :: Handle w (*this) ;
@@ -1899,10 +1907,12 @@ GitterBasisPll :: MacroGitterBasisPll :: ~MacroGitterBasisPll () {
   return ;
 }
 
-set < int, less < int > > GitterBasisPll :: MacroGitterBasisPll :: secondScan () {
+set < int, less < int > > GitterBasisPll :: MacroGitterBasisPll :: secondScan () 
+{
   set < int, less < int > > s ;
   int n = 0 ;
-  for (linkagePatternMap_t :: iterator p = _linkagePatterns.begin () ; p != _linkagePatterns.end () ; ) {
+  for (linkagePatternMap_t :: iterator p = _linkagePatterns.begin () ; p != _linkagePatterns.end () ; ) 
+  {
     if ((*p).second) {
       for (vector < int > :: const_iterator i = (*p).first.begin () ; i != (*p).first.end () ; s.insert (*i++)) ;
       p ++ ;
@@ -1917,7 +1927,7 @@ set < int, less < int > > GitterBasisPll :: MacroGitterBasisPll :: secondScan ()
 
 Gitter :: Geometric :: VertexGeo * GitterBasisPll :: MacroGitterBasisPll :: 
 insert_vertex (double x,double y,double z,int i) {
-  return new ObjectsPll :: VertexPllImplMacro (x,y,z,i,indexManagerStorage(),_linkagePatterns) ;
+  return new ObjectsPll :: VertexPllImplMacro (x, y, z, i, indexManagerStorage(), _linkagePatterns) ;
 }
 
 Gitter :: Geometric :: VertexGeo * GitterBasisPll :: MacroGitterBasisPll :: 

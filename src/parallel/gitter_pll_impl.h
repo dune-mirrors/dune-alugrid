@@ -22,9 +22,6 @@
   // wieder die unreferenzierten Verbindungsmuster aus dem
   // Container. Es gibt "ubrigens kein firstScan () mehr ...
 
-typedef vector < int > linkagePattern_t ;
-typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternMap_t ;
-
 class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
   protected :
     typedef Gitter :: Geometric :: VertexGeo myvertex_t ;
@@ -42,11 +39,13 @@ class VertexPllBaseX : public VertexPllXIF_t, public MyAlloc {
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     
+    //linkagePatternMap_t* linkagePatternMap () { return this->myGrid()->containerPll().linkagePatternMap() ;  }
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
+
   private :
     static const linkagePattern_t nullPattern ;
     myvertex_t & _v ;
@@ -813,7 +812,7 @@ public :
   public :
     class MacroGitterBasisPll : public MacroGitterPll, public GitterBasis :: MacroGitterBasis {
       protected :
-        linkagePatternMap_t _linkagePatterns ;
+        linkagePatternMap_t& _linkagePatterns ;
         set < int, less < int > > secondScan () ;
       protected :
         int iterators_attached () const ;
@@ -855,7 +854,8 @@ public :
         MacroGitterBasisPll (Gitter * , istream &) ;
         MacroGitterBasisPll (Gitter * ) ;
        ~MacroGitterBasisPll () ;
-    } ;
+    } ; // end MacroGitterBasisPll 
+
   protected :
     MpAccessLocal & _mpaccess ;
     MacroGitterPll* _macrogitter ;
