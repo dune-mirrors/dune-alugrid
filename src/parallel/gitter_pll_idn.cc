@@ -120,12 +120,13 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
         }
       }
       // reserve memory 
-      for(int k=0; k<nl; k++) inout[k].reserve( count[k] );
+      for(int k=0; k<nl; ++k) inout[k].reserve( count[k] );
     }
     
     {
+      const typename lmap_t :: const_iterator lookEnd = look.end () ;
       for (typename lmap_t :: const_iterator pos = look.begin () ; 
-           pos != look.end () ; pos ++) 
+           pos != lookEnd ; ++pos) 
       {
         const vector < int > & lk (*(*pos).second.second) ;
         if (* lk.begin () == me) 
@@ -134,7 +135,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
           { 
             typename vector < int > :: const_iterator iEnd = lk.end () ;
             for (typename vector < int > :: const_iterator i = lk.begin () ; 
-                 i != iEnd; i ++) 
+                 i != iEnd; ++i) 
             {
               if (*i != me) 
               {
@@ -143,7 +144,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
                 id.write (inout [l]) ;
               }
             } 
-         }
+          }
         }
       }
     }
@@ -152,10 +153,10 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
     inout = c.exchange (inout) ;
     
     {
-      for (int i = 0 ; i < nl ; i ++ ) 
+      for (int i = 0 ; i < nl ; ++i ) 
       {
         typename vector < int > :: const_iterator pos = inout [i].begin (), end = inout [i].end () ;
-        while (pos != inout [i].end ()) 
+        while (pos != end) 
         {
           typename LinkedObject :: Identifier id ;
           id.read (pos,end) ;
