@@ -114,7 +114,7 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     vertexMap_t  _vertexMap ;
     edgeMap_t    _edgeMap ;
     
-    faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd4Map; // _hbnd3Int,_hbnd4Int
+    faceMap_t    _face4Map, _face3Map, _hbnd3Map, _hbnd4Map;
     
     // new type here, so we dont have to cast to void *
     hbnd3intMap_t _hbnd3Int;

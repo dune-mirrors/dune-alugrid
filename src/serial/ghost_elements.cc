@@ -10,10 +10,6 @@ MacroGhostBuilder :: MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi, b
 // desctructor 
 MacroGhostBuilder ::  ~MacroGhostBuilder () 
 {
-  // remove all faces that already exist from the lists 
-  _existingEdge.clear();
-  _existingVertex.clear();
-
   finalize();
 }
 

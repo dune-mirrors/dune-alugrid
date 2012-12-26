@@ -24,9 +24,6 @@ class MacroGhostBuilder : public MacroGridBuilder
   typedef  MacroGridBuilder :: faceMap_t    hbnd3Map_t; 
   typedef  MacroGridBuilder :: faceMap_t    hbnd4Map_t; 
 
-  vertexMap_t _existingVertex;   
-  edgeMap_t   _existingEdge;
-
   // do not copy 
   MacroGhostBuilder(const MacroGhostBuilder& );
 public:  
