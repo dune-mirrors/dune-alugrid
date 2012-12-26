@@ -261,7 +261,9 @@ inline MacroGridBuilder :: Hbnd3IntStorage ::
 Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex )
  : _ptr(0), _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex )
 {
-  assert( _ldbVertexIndex >= 0 );
+  // for this constructor we need to allow ldbVertexIndex < 0 
+  // since this can happen on parallel construction via several macro files. 
+  // assert( _ldbVertexIndex >= 0 );
 }
 
 inline MacroGridBuilder :: Hbnd3IntStorage :: ~Hbnd3IntStorage () 
