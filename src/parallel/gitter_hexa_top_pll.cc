@@ -135,12 +135,12 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
 
   {
     int bfake;
-
     os.readObject (bfake) ;
 #ifndef NDEBUG 
     Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
     assert( b == Gitter :: hbndseg :: closure );
 #endif
+
     // read global graph vertex index 
     int ldbVertexIndex = -1;
     os.readObject( ldbVertexIndex );
@@ -154,22 +154,22 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
     int readPoint = 0; 
     os.readObject( readPoint ); 
     
-    // read ghost information 
-    MacroGhostInfoHexa* ghInfo = 0;
-    if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED ) 
+    // the following makes only sense if information has been transmitted 
+    if( readPoint != MacroGridMoverIF :: POINTTRANSMITTED ) 
     {
-      // read data from stream 
-      ghInfo = new MacroGhostInfoHexa( os );
+      cerr << "ERROR: No point transmitted, building ghost cells impossible in " << __FILE__ << ", " << __LINE__ << endl;
+      abort();
     }
 
     // create macro ghost cell     
     {
-      assert( ghInfo );
+      // create ghost info and read from stream 
+      MacroGhostInfoHexa ghInfo ( os );
 
       myhface4_t * f = this->myhface(0);
       assert( f );
 
-      _gm = new MacroGhostHexa( _mgb , ghInfo, f );
+      _gm = new MacroGhostHexa( _mgb , &ghInfo, f );
       this->setGhost ( _gm->getGhost() );
     }
   }

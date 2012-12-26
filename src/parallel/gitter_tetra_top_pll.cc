@@ -177,19 +177,22 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
     int readPoint = 0;
     os.readObject( readPoint );
 
-    MacroGhostInfoTetra * ghInfo = 0;
-    if( readPoint == MacroGridMoverIF :: POINTTRANSMITTED )
+    // the following makes only sense if information has been transmitted 
+    if( readPoint != MacroGridMoverIF :: POINTTRANSMITTED )
     {
-      // create ghInfo and read data from stream 
-      ghInfo = new MacroGhostInfoTetra(os);
+      cerr << "ERROR: No point transmitted, building ghost cells impossible in " << __FILE__ << ", " << __LINE__ << endl;
+      abort();
     }
 
+    // create macro ghost cell     
     {
-      assert( ghInfo );
+      // create ghost info and read from stream 
+      MacroGhostInfoTetra ghInfo( os );
+
       myhface3_t * f = this->myhface(0);
       assert( f );
 
-      _gm = new MacroGhostTetra( _mgb , ghInfo,  f );
+      _gm = new MacroGhostTetra( _mgb , &ghInfo,  f );
       this->setGhost ( _gm->getGhost() );   
     }
   }
