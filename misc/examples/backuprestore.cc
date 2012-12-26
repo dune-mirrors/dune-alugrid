@@ -12,7 +12,7 @@
 
 using namespace std;
 
-//#define PARALLEL
+#define PARALLEL
 
 #define COUNT_FLOPS
 
@@ -136,18 +136,22 @@ int main (int argc, char ** argv, const char ** envp)
 
   std::string macroname( filename );
 
-  cout << "\n-----------------------------------------------\n";
-  cout << "read macro grid from < " << macroname << " > !" << endl;
-  cout << "-----------------------------------------------\n";
+  if( rank == 0 ) 
+  {
+    cout << "\n-----------------------------------------------\n";
+    cout << "read macro grid from < " << macroname << " > !" << endl;
+    cout << "-----------------------------------------------\n";
+  }
 
   std::stringstream backupname ; 
   backupname << "file." << rank ;
   std::stringstream databuf;
   {
-//#ifdef PARALLEL
-//    MpAccessMPI a (MPI_COMM_WORLD);
-//    GitterDunePll grid(macroname.c_str(),a);
-//#else 
+#ifdef PARALLEL
+    MpAccessMPI a (MPI_COMM_WORLD);
+    GitterDunePll grid(macroname.c_str(),a);
+    grid.duneLoadBalance() ;
+#else 
     std::ifstream infile( macroname.c_str());
     GitterDuneImpl grid1( infile );
     infile.close();
@@ -155,12 +159,12 @@ int main (int argc, char ** argv, const char ** envp)
     std::ifstream infile2( macroname.c_str());
     GitterDuneImpl grid2( infile2 );
     infile2.close();
-//#endif
     GitterDuneImpl& grid = grid2; 
    
     cout << "Grid generated! \n";
     globalRefine(grid, mxl);
     cout << "---------------------------------------------\n";
+#endif
 
     std::ofstream file( backupname.str().c_str() );
     grid.duneBackup( file );
