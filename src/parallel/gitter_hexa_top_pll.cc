@@ -134,14 +134,18 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
   assert( code == MacroGridMoverIF :: HBND4INT );
 
   {
-    int bfake, v [4] = {-1,-1,-1,-1};
+    int bfake;
 
     os.readObject (bfake) ;
 #ifndef NDEBUG 
     Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
     assert( b == Gitter :: hbndseg :: closure );
 #endif
+    // read global graph vertex index 
+    int ldbVertexIndex = -1;
+    os.readObject( ldbVertexIndex );
 
+    int v [4] = {-1,-1,-1,-1};
     os.readObject (v[0]) ;
     os.readObject (v[1]) ;
     os.readObject (v[2]) ;
