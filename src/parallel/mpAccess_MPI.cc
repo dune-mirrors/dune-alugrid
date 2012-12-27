@@ -200,7 +200,7 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
     }
     delete [] buf ;
     delete [] req ;
-  }
+  } // end if( nl > 0 )
   return out ;
 }
 
