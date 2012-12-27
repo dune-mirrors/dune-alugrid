@@ -698,7 +698,7 @@ public:
     // wait until all processes are done with receiving
     {
       MPI_Status * sta = new MPI_Status [ _nLinks ] ;
-      assert (sta) ;
+      assert( sta );
       assert( _request );
       MY_INT_TEST MPI_Waitall ( _nLinks, _request, sta) ;
       assert (test == MPI_SUCCESS) ;
