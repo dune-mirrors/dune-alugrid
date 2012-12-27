@@ -991,6 +991,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
     delete [] vertex_w ;
     delete [] vertex_mem;
     delete [] edge_mem;
+    delete [] tpwgts;
     delete [] vtxdist ;
   }
 
