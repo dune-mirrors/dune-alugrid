@@ -709,6 +709,7 @@ InsertUniqueHbnd4_withPoint (int (&v)[4],
 // overloaded method because here we call insertion with point 
 inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os) 
 {
+  // see also gitter_{tetra,hexa}_pll_top.* for methods buildGhost 
   int bfake, v [3] ;
   os.readObject (bfake) ;
   Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
@@ -751,6 +752,7 @@ inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
 // overloaded method because here we call insertion with point 
 inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os) 
 {
+  // see also gitter_{tetra,hexa}_pll_top.* for methods buildGhost 
   int bfake, v [4] = {-1,-1,-1,-1};
 
   os.readObject (bfake) ;
