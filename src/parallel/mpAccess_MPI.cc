@@ -141,6 +141,9 @@ vector < vector < A > > doExchange (const vector < vector < A > > & in,
   assert (in.size() == d.size()) ;
   int nl = d.size () ;
   vector < vector < A > > out (nl) ;
+
+  // only do this if number of links is not zero 
+  if( nl > 0 ) 
   {
     A ** buf = new A * [nl] ;
     assert (buf) ;
@@ -625,6 +628,9 @@ public:
   // receive data implementation with given buffers 
   void receiveImpl ( vector< ObjectStream >& out ) 
   {
+    // do nothing if number of links is zero 
+    if( _nLinks == 0 ) return ; 
+
     const MpAccessMPI :: CommIF* _mpiCommPtr = _mpAccess.mpiCommPtr();
     // get mpi communicator (use define, see above)
     MPI_Comm comm = _mpiComm ;
