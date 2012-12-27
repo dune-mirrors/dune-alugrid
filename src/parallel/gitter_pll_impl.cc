@@ -2214,7 +2214,6 @@ void GitterBasisPll :: printMemUsage ()
     _mpaccess.barrier();
     if( rank != myrank ) continue ;
 
-
     typedef GitterBasisPll :: ObjectsPll :: TetraEmptyPllMacro tetra_MACRO ; 
     typedef GitterBasisPll :: ObjectsPll :: HexaEmptyPllMacro  hexa_MACRO ; 
     typedef GitterBasisPll :: ObjectsPll :: hbndseg3_IMPL hbndseg3_IMPL ; 
@@ -2238,48 +2237,51 @@ void GitterBasisPll :: printMemUsage ()
     typedef GitterBasis :: Objects :: VertexEmptyMacro VertexEmptyMacro; 
     typedef GitterBasis :: Objects :: VertexEmpty VertexEmpty; 
     typedef Gitter :: Geometric :: VertexGeo VertexGeo; 
-    cout << "bool   = " << sizeof(bool) << endl;
-    cout << "char   = " << sizeof(unsigned char) << endl;
-    cout << "signed char   = " << sizeof(signed char) << endl;
-    cout << "moveto = " << sizeof( map < int, int, less < int > > ) << endl;
-    cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
-    cout << "Refcount = " << sizeof(Refcount) << "\n";
-    cout << "HedgeRule  = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
-    cout << "Hface3Rule = " << sizeof(Gitter :: Geometric :: Hface3Rule) <<"\n";
-    cout << "Hface4Rule = " << sizeof(Gitter :: Geometric :: Hface4Rule) <<"\n";
-    cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n";
-    cout << "GraphVertex = " << sizeof(LoadBalancer::GraphVertex) << std::endl;
-    cout << "GraphEdge   = " << sizeof(LoadBalancer::GraphEdge) << std::endl;
-    cout << "Identifier  = " << sizeof(LinkedObject :: Identifier) << std::endl << std::endl;
-    
-    cout << "******** TETRA *************************8\n";
-    cout << "Tetrasize  = " << sizeof(tetra_IMPL) << endl;
-    cout << "TetraMacro = " << sizeof(tetra_MACRO) << endl;
-    cout << "MacroGhostTetra = " << sizeof(MacroGhostTetra) << endl;
-    cout << "Hface3_MACRO = " << sizeof(hface3_MACRO) << endl;
-    cout << "Hface3_IMPL = " << sizeof(hface3_IMPL) << endl;
-    cout << "Hface3_GEO = " << sizeof( Gitter :: Geometric :: hface3_GEO ) << endl;
-    cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
-    cout << "HEdge1_MACRO = " << sizeof(hedge1_MACRO) << endl;
-    cout << "HEdge1_IMPL = " << sizeof(hedge1_IMPL) << endl;
-    cout << "HEdge1_GEO = " << sizeof(Gitter :: Geometric ::hedge1_GEO) << endl;
-    cout << "VertexMacroPll = " << sizeof(VertexMacro) << endl;
-    cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
-    cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
-    cout << "Vertex = " << sizeof(VertexEmpty) << endl;
-    cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl;
-    cout << "MacroGhostInfoTetra = " << sizeof(MacroGhostInfoTetra) << endl << endl;
+    if( rank == 0 ) 
+    {
+      cout << "bool   = " << sizeof(bool) << endl;
+      cout << "char   = " << sizeof(unsigned char) << endl;
+      cout << "signed char   = " << sizeof(signed char) << endl;
+      cout << "moveto = " << sizeof( map < int, int, less < int > > ) << endl;
+      cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
+      cout << "Refcount = " << sizeof(Refcount) << "\n";
+      cout << "HedgeRule  = " << sizeof(Gitter :: Geometric :: Hedge1Rule) <<"\n";
+      cout << "Hface3Rule = " << sizeof(Gitter :: Geometric :: Hface3Rule) <<"\n";
+      cout << "Hface4Rule = " << sizeof(Gitter :: Geometric :: Hface4Rule) <<"\n";
+      cout << "DuneIndexProvider = "<< sizeof(DuneIndexProvider) << "\n";
+      cout << "GraphVertex = " << sizeof(LoadBalancer::GraphVertex) << std::endl;
+      cout << "GraphEdge   = " << sizeof(LoadBalancer::GraphEdge) << std::endl;
+      cout << "Identifier  = " << sizeof(LinkedObject :: Identifier) << std::endl << std::endl;
+      
+      cout << "******** TETRA *************************8\n";
+      cout << "Tetrasize  = " << sizeof(tetra_IMPL) << endl;
+      cout << "TetraMacro = " << sizeof(tetra_MACRO) << endl;
+      cout << "MacroGhostTetra = " << sizeof(MacroGhostTetra) << endl;
+      cout << "Hface3_MACRO = " << sizeof(hface3_MACRO) << endl;
+      cout << "Hface3_IMPL = " << sizeof(hface3_IMPL) << endl;
+      cout << "Hface3_GEO = " << sizeof( Gitter :: Geometric :: hface3_GEO ) << endl;
+      cout << "Hface3::nb = " << sizeof( Gitter :: Geometric :: hface3 :: face3Neighbour ) << endl;
+      cout << "HEdge1_MACRO = " << sizeof(hedge1_MACRO) << endl;
+      cout << "HEdge1_IMPL = " << sizeof(hedge1_IMPL) << endl;
+      cout << "HEdge1_GEO = " << sizeof(Gitter :: Geometric ::hedge1_GEO) << endl;
+      cout << "VertexMacroPll = " << sizeof(VertexMacro) << endl;
+      cout << "VertexMacro = " << sizeof(VertexEmptyMacro) << endl;
+      cout << "VertexGeo   = " << sizeof(VertexGeo) << endl;
+      cout << "Vertex = " << sizeof(VertexEmpty) << endl;
+      cout << "Hbnd3_IMPL  = " << sizeof(hbndseg3_IMPL) << endl;
+      cout << "MacroGhostInfoTetra = " << sizeof(MacroGhostInfoTetra) << endl << endl;
 
-    cout << "******** HEXA *************************8\n";
-    cout << "Hexasize  = " << sizeof(hexa_IMPL) << endl;
-    cout << "HexaMacro = " << sizeof(hexa_MACRO) << endl;
-    cout << "MacroGhostHexa = " << sizeof(MacroGhostHexa) << endl;
-    cout << "Hface4_MACRO = " << sizeof(hface4_MACRO) << endl;
-    cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
-    cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
-    cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
-    cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl;
-    cout << "MacroGhostInfoHexa = " << sizeof(MacroGhostInfoHexa) << endl << endl;
+      cout << "******** HEXA *************************8\n";
+      cout << "Hexasize  = " << sizeof(hexa_IMPL) << endl;
+      cout << "HexaMacro = " << sizeof(hexa_MACRO) << endl;
+      cout << "MacroGhostHexa = " << sizeof(MacroGhostHexa) << endl;
+      cout << "Hface4_MACRO = " << sizeof(hface4_MACRO) << endl;
+      cout << "Hface4_IMPL = " << sizeof(hface4_IMPL) << endl;
+      cout << "Hface4_GEO = " << sizeof( Gitter :: Geometric :: hface4_GEO ) << endl;
+      cout << "Hface4::nb = " << sizeof( Gitter :: Geometric :: hface4 :: face4Neighbour ) << endl;
+      cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << endl;
+      cout << "MacroGhostInfoHexa = " << sizeof(MacroGhostInfoHexa) << endl << endl;
+    }
 
     cout << "******** Number of Elements ************************8\n";
     {
@@ -2375,16 +2377,18 @@ void GitterBasisPll :: printMemUsage ()
       {
         size_t indexMem = 0;
         for(int i=0; i<4; ++i) 
+        {
+          cout << "P[ " << _mpaccess.myrank() << " ] max index codim " << i << " = " << indexManager( i ).getMaxIndex() << endl;
           indexMem += indexManager( i ).getMaxIndex() * sizeof( int );
+        }
         cout << "Indices : size = " << indexMem/1024/1024 << " MB" << endl;
-        cout << "P[ " << _mpaccess.myrank() << " Max Element number = " << indexManager( 0 ).getMaxIndex() << endl;
         allSize += indexMem;
       }
 
       size_t perElement = ( numElements > 0 ) ? allSize/numElements : 0;
-      cout << "All leaf size : " << allSize << " MB" << endl;
+      cout << "All leaf size : " << allSize/1024/1024 << " MB" << endl;
       cout << "bytes per Element: " << perElement << endl; 
-      cout << "Estimated all size : " << (9*long(allSize) / 8) << " MB" << endl;
+      cout << "Estimated all size : " << (9*long(allSize) / 8 / 1024/1024) << " MB" << endl;
 
       size_t build = container().memUsage();
       cout << "BuilderIF size = " << build/1024/1024 << " MB \n";
