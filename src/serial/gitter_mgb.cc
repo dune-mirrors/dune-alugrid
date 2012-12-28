@@ -273,6 +273,8 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
       tetra_GEO * tr = (tetra_GEO *)(*hit).second ;
       int ldbVertexIndex = tr->ldbVertexIndex() ;
 
+      typedef typename hbnd3intMap_t :: iterator iterator ;
+      const iterator end = _hbnd3Int.end() ;
       for (int i = 0 ; i < 4 ; ++i) 
       {
         // for periodic neighbours we do not create internal storages 
@@ -280,10 +282,27 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
           continue ;
 
         hface3_GEO* face = tr->myhface3 (i) ;
-        _hbnd3Int [faceKey_t (face->myvertex (0)->ident (), 
-                              face->myvertex (1)->ident (), 
-                              face->myvertex (2)->ident ())] 
-          = new Hbnd3IntStorage (face, tr->twist (i), ldbVertexIndex, tr , i ) ;
+        faceKey_t key (face->myvertex (0)->ident (), 
+                       face->myvertex (1)->ident (), 
+                       face->myvertex (2)->ident ()) ;
+
+        // if the face does not exist in the map of internal boundaries 
+        // we need to insert this 
+        iterator hbndit = _hbnd3Int.find( key );
+        if( hbndit == end ) 
+        {
+          Hbnd3IntStorage* hbnd = 
+            new Hbnd3IntStorage (face, tr->twist (i), ldbVertexIndex, tr , i ) ;
+          _hbnd3Int.insert( make_pair( key, hbnd ) );
+        }
+        // if the face already exists this means we can delete it, 
+        // since both adjacent element will disappear 
+        else 
+        {
+          Hbnd3IntStorage* hbnd = (*hbndit).second ;
+          _hbnd3Int.erase( hbndit );
+          delete hbnd ;
+        }
       }
 
       delete tr ;
@@ -297,6 +316,9 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
     {
       hexa_GEO * hx = (hexa_GEO *)(*hit).second ;
       int ldbVertexIndex = hx->ldbVertexIndex();
+
+      typedef typename hbnd4intMap_t :: iterator iterator ;
+      const iterator end = _hbnd4Int.end() ;
       for (int i = 0 ; i < 6 ; ++i) 
       {
         // for periodic neighbours we do not create internal storages 
@@ -304,10 +326,28 @@ void MacroGridBuilder :: removeElement (const elementKey_t & k, const bool realE
           continue ;
 
         hface4_GEO* face = hx->myhface4 (i);
-        _hbnd4Int [faceKey_t (face->myvertex (0)->ident (), 
-                              face->myvertex (1)->ident (), 
-                              face->myvertex (2)->ident ())
-                  ] = new Hbnd4IntStorage ( face, hx->twist (i), ldbVertexIndex, hx, i );
+        faceKey_t key (face->myvertex (0)->ident (), 
+                       face->myvertex (1)->ident (), 
+                       face->myvertex (2)->ident ()) ;
+
+        iterator hbndit = _hbnd4Int.find( key );
+        // if the face does not exist in the map of internal boundaries 
+        // we need to insert this 
+        if( hbndit == end ) 
+        {
+          Hbnd4IntStorage* hbnd = 
+            new Hbnd4IntStorage ( face, hx->twist (i), ldbVertexIndex, hx, i );
+
+          _hbnd4Int.insert( make_pair( key, hbnd ) );
+        }
+        // if the face already exists this means we can delete it, 
+        // since both adjacent element will disappear 
+        else 
+        {
+          Hbnd4IntStorage* hbnd = (*hbndit).second ;
+          _hbnd4Int.erase( hbndit );
+          delete hbnd ;
+        }
       }
 
       delete hx ;
@@ -821,7 +861,6 @@ void MacroGridBuilder :: finalize ()
   {
     typedef elementMap_t :: iterator  iterator ;
     const iterator periodic3MapEnd = _periodic3Map.end () ;
-    //myBuilder ()._periodic3List.reserve(_periodic3Map.size());
     for (elementMap_t :: iterator i = _periodic3Map.begin () ; i != periodic3MapEnd ; _periodic3Map.erase (i++))
       myBuilder ()._periodic3List.push_back ((periodic3_GEO *)(*i).second) ;
   }
@@ -829,7 +868,6 @@ void MacroGridBuilder :: finalize ()
   {
     typedef elementMap_t :: iterator  iterator ;
     const iterator periodic4MapEnd = _periodic4Map.end () ;
-    //myBuilder ()._periodic4List.reserve(_periodic4Map.size());
     for (elementMap_t :: iterator i = _periodic4Map.begin () ; i != periodic4MapEnd ; _periodic4Map.erase (i++))
       myBuilder ()._periodic4List.push_back ((periodic4_GEO *)(*i).second) ;
   }
@@ -837,7 +875,6 @@ void MacroGridBuilder :: finalize ()
   {
     typedef faceMap_t :: iterator iterator ;
     const iterator hbnd4MapEnd =  _hbnd4Map.end () ;
-    //myBuilder ()._hbndseg4List.reserve(_hbnd4Map.size() + _hbnd4Int.size());
     for (faceMap_t :: iterator i = _hbnd4Map.begin () ; i != hbnd4MapEnd ; )
     {
       if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
@@ -854,7 +891,6 @@ void MacroGridBuilder :: finalize ()
   {
     typedef faceMap_t :: iterator iterator;
     const iterator hbnd3MapEnd = _hbnd3Map.end () ;
-    //myBuilder ()._hbndseg3List.reserve(_hbnd3Map.size() + _hbnd3Int.size());
     for (faceMap_t :: iterator i = _hbnd3Map.begin () ; i != hbnd3MapEnd ; )
     {
       if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) {
@@ -870,7 +906,7 @@ void MacroGridBuilder :: finalize ()
   {
     typedef hbnd4intMap_t :: iterator iterator;
     const iterator hbnd4IntEnd = _hbnd4Int.end () ;
-    for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != hbnd4IntEnd ; i ++) 
+    for (hbnd4intMap_t :: iterator i = _hbnd4Int.begin () ; i != hbnd4IntEnd ; ++i) 
     {
       const Hbnd4IntStorage & p = * ((*i).second);
       if (p.first()->ref == 1) 
@@ -888,7 +924,7 @@ void MacroGridBuilder :: finalize ()
   {
     typedef hbnd3intMap_t :: iterator  iterator ;
     const iterator hbnd3IntEnd = _hbnd3Int.end () ;
-    for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != hbnd3IntEnd ; i ++) 
+    for (hbnd3intMap_t :: iterator i = _hbnd3Int.begin () ; i != hbnd3IntEnd ; ++i) 
     {
       const Hbnd3IntStorage & p = * ((*i).second);
       if (p.first()->ref == 1) 
@@ -903,7 +939,6 @@ void MacroGridBuilder :: finalize ()
   {
     typedef faceMap_t :: iterator iterator;
     const iterator face4MapEnd = _face4Map.end () ;
-    //myBuilder ()._hface4List.reserve( _face4Map.size() );
     for (faceMap_t :: iterator i = _face4Map.begin () ; i != face4MapEnd ; )
     if (!((hface4_GEO *)(*i).second)->ref) 
     {
@@ -919,7 +954,6 @@ void MacroGridBuilder :: finalize ()
   {
     typedef faceMap_t :: iterator iterator ;
     const iterator face3MapEnd = _face3Map.end () ;
-    //myBuilder ()._hface3List.reserve( _face3Map.size() );
     for (faceMap_t :: iterator i = _face3Map.begin () ; i != face3MapEnd ; ) 
     {
       if (!((hface3_GEO *)(*i).second)->ref) 
@@ -937,7 +971,6 @@ void MacroGridBuilder :: finalize ()
   {
     typedef edgeMap_t :: iterator iterator;
     const iterator edgeMapEnd = _edgeMap.end () ;
-    //myBuilder ()._hedge1List.reserve(_edgeMap.size());
     for (edgeMap_t :: iterator i = _edgeMap.begin () ; i != edgeMapEnd ; )
     {
       if (!(*i).second->ref) 
@@ -955,7 +988,6 @@ void MacroGridBuilder :: finalize ()
   {
     typedef vertexMap_t :: iterator  iterator;
     const iterator vertexMapEnd = _vertexMap.end () ;
-    //myBuilder ()._vertexList.reserve(_vertexMap.size());
     for (vertexMap_t :: iterator i = _vertexMap.begin () ; i != vertexMapEnd ; )
     {
       if (!(*i).second->ref) 
@@ -969,7 +1001,6 @@ void MacroGridBuilder :: finalize ()
       }
     }
   }
-
   _finalized = true;
   return ;
 }
