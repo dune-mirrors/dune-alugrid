@@ -22,12 +22,12 @@
   // wieder die unreferenzierten Verbindungsmuster aus dem
   // Container. Es gibt "ubrigens kein firstScan () mehr ...
 
-//static const linkagePattern_t nullPattern ;
 template < class A > 
 class VertexPllBaseX : public A 
 {
   protected :
     typedef A myvertex_t ;
+    typedef typename A :: moveto_t moveto_t ;
     inline myvertex_t & myvertex () { return *this; }
     inline const myvertex_t & myvertex () const { return *this; }
 
@@ -40,31 +40,20 @@ class VertexPllBaseX : public A
     virtual bool setLinkage ( vector < int > ) ;
     virtual LinkedObject :: Identifier getIdentifier () const ;
 
-    // decrease linkage counter 
-    virtual void detachPllXFromMacro () throw (Parallel :: AccessPllException) { decreaseLinkCounter (); }
-    
   protected :
     virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
     
     inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns() ;  }
-    // decrease counter if not already zero
-    void decreaseLinkCounter () 
-    { 
-      if( (*_lpn).second > 0 ) 
-        -- (*_lpn).second ; 
-    }
-
   public :
     virtual void attach2 (int) ;
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
 
-  private :
+  protected :
     static const linkagePattern_t nullPattern ;
     linkagePatternMap_t :: iterator _lpn ;
-    typedef map < int, int, less < int > > moveto_t ;
     moveto_t*  _moveTo ;
 } ;
 
@@ -98,6 +87,7 @@ class EdgePllBaseXMacro : public A
   public :
     typedef typename A :: myhedge_t  myhedge_t;
     typedef typename A :: myvertex_t myvertex_t;
+    typedef typename A :: moveto_t   moveto_t ;
 
     inline EdgePllBaseXMacro(myvertex_t *,myvertex_t *) ;
    ~EdgePllBaseXMacro () ;
@@ -114,9 +104,7 @@ class EdgePllBaseXMacro : public A
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-    // virtual int diagnostic() const { return (_moveTo != 0 ) ? 1 : 0; }
   protected :
-    typedef map < int, int, less < int > > moveto_t ;
     moveto_t*  _moveTo ;
 } ;
 
@@ -148,6 +136,7 @@ template < class A > class FacePllBaseXMacro : public A
     // some typedefs 
     typedef typename A :: myhface_t  myhface_t;
     typedef typename A :: myhedge_t myhedge_t;
+    typedef typename A :: moveto_t   moveto_t ;
 
     // constructor for hface3 
     inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
@@ -173,9 +162,7 @@ template < class A > class FacePllBaseXMacro : public A
     virtual void unattach2 (int) ;
     virtual bool packAll (vector < ObjectStream > &) ;
     virtual void unpackSelf (ObjectStream &, bool) ;
-    // virtual int diagnostic() const { return (_moveTo != 0 ) ? 1 : 0; }
   protected :
-    typedef map < int, int, less < int > > moveto_t ;
     moveto_t*  _moveTo ;
 } ;
 

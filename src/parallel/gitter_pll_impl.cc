@@ -20,16 +20,16 @@ VertexPllBaseX< A > :: VertexPllBaseX (double x, double y, double z, int i, Inde
 {
   linkagePatternMap_t& _map = linkagePatterns() ;
   typename linkagePatternMap_t :: iterator pos = _map.find (nullPattern) ;
-  _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (nullPattern,0)).first ;
-  (*_lpn).second ++ ;
+  _lpn = (pos != _map.end ()) ? pos : _map.insert ( make_pair( nullPattern, int(0) )).first ;
+  ++ (*_lpn).second ;
   return ;
 }
 
 template < class A >
 VertexPllBaseX< A > :: ~VertexPllBaseX () 
 {
+  // make sure _moveTo was already deleted 
   assert( _moveTo == 0 );
-  decreaseLinkCounter ();
 }
 
 template < class A >
@@ -45,12 +45,12 @@ vector < int > VertexPllBaseX< A > :: estimateLinkage () const {
 template < class A >
 bool VertexPllBaseX< A > :: setLinkage (vector < int > lp) 
 {
-  (*_lpn).second -- ;
+  -- (*_lpn).second ;
   linkagePatternMap_t& _map = linkagePatterns() ;
   sort (lp.begin (), lp.end (), less < int > ()) ;
   typename linkagePatternMap_t :: iterator pos = _map.find (lp) ;
-  _lpn = (pos != _map.end ()) ? pos : _map.insert (pair < const linkagePattern_t, int > (lp,0)).first ;
-  (*_lpn).second ++ ;
+  _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first ;
+  ++ (*_lpn).second ;
   return true ;
 }
 
@@ -1877,32 +1877,17 @@ GitterBasisPll :: MacroGitterBasisPll :: MacroGitterBasisPll (Gitter * mygrid)
 
 GitterBasisPll :: MacroGitterBasisPll :: ~MacroGitterBasisPll () 
 {
-  try {
+  try 
+  {
     {
       AccessIterator < helement_STI > :: Handle w (*this) ;
       for (w.first () ; ! w.done () ; w.next ()) w.item ().detachPllXFromMacro () ;
     }
-    {
-      AccessIterator < vertex_STI > :: Handle w (*this) ;
-      for (w.first () ; ! w.done () ; w.next ()) w.item ().detachPllXFromMacro () ;
-    }
-  } 
+  }
   catch (Parallel :: AccessPllException) 
   {
     cerr << "**WARNUNG (AUSNAHME IGNORIERT) in " << __FILE__ << " " << __LINE__ << endl ;
   }
-  {
-
-#ifndef NDEBUG
-    for (linkagePatternMap_t :: iterator p = _linkagePatterns.begin () ; p != _linkagePatterns.end () ; p ++) 
-    {
-      assert ((*p).second == 0) ;
-    }
-#endif
-    
-    _linkagePatterns.erase (_linkagePatterns.begin (), _linkagePatterns.end ()) ;
-  }
-  return ;
 }
 
 set < int, less < int > > GitterBasisPll :: MacroGitterBasisPll :: secondScan () 
@@ -2199,9 +2184,9 @@ GitterBasisPll :: GitterBasisPll (istream& in,
   return ;
 }
 
-GitterBasisPll :: ~GitterBasisPll () {
+GitterBasisPll :: ~GitterBasisPll () 
+{
   delete _macrogitter ;
-  return ;
 }
 
 void GitterBasisPll :: printMemUsage ()
