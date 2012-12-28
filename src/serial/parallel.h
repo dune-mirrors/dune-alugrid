@@ -29,9 +29,6 @@ class MacroGridMoverIF {
     virtual void attach2   (int) = 0 ;
     virtual void unattach2 (int) = 0 ;
 
-    virtual void attach2   (moveto_t&, int) = 0 ;
-    virtual void unattach2 (moveto_t&, int) = 0 ;
-
     virtual bool packAll (vector < ObjectStream > &) = 0 ;
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) = 0; 
     virtual void unpackSelf (ObjectStream &,bool) = 0 ;
@@ -47,8 +44,6 @@ class MacroGridMoverDefault : public MacroGridMoverIF {
 
     virtual void attach2   (int) { assert(false);abort(); }
     virtual void unattach2 (int) { assert(false);abort(); }
-    virtual void attach2   (moveto_t&, int) { assert(false);abort(); }
-    virtual void unattach2 (moveto_t&, int) { assert(false);abort(); }
 
     virtual bool packAll (vector < ObjectStream > &) { assert(false);abort(); }
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) { assert(false);return false; }
