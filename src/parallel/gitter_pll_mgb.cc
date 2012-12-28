@@ -647,27 +647,14 @@ InsertUniqueHbnd3_withPoint (int (&v)[3],
 {
   int twst = cyclicReorder (v,v+3) ;
   faceKey_t key (v [0], v [1], v [2]) ;
-  if (bt == Gitter :: hbndseg_STI :: closure) 
+  assert( bt == Gitter :: hbndseg_STI :: closure ); 
+  if (_hbnd3Int.find (key) == _hbnd3Int.end ()) 
   {
-    if (_hbnd3Int.find (key) == _hbnd3Int.end ()) 
-    {
-      assert( ghInfo );
-      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      // here the point is stored 
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst, ldbVertexIndex, ghInfo) ;
-      return true ;
-    }
-  } 
-  else 
-  {
-    if (_hbnd3Map.find (key) == _hbnd3Map.end ()) 
-    {
-      hface3_GEO * face =  InsertUniqueHface3 (v).first ;
-      hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst, bt) ;
-      hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
-      _hbnd3Map [key] = hb3 ;
-      return true ;
-    }
+    assert( ghInfo );
+    hface3_GEO * face =  InsertUniqueHface3 (v).first ;
+    // here the point is stored 
+    _hbnd3Int [key] = new Hbnd3IntStorage (face,twst, ldbVertexIndex, ghInfo) ;
+    return true ;
   }
   return false ;
 }
@@ -681,26 +668,13 @@ InsertUniqueHbnd4_withPoint (int (&v)[4],
 {
   int twst = cyclicReorder (v,v+4) ;
   faceKey_t key (v [0], v [1], v [2]) ;
-  if (bt == Gitter :: hbndseg_STI :: closure) 
+  assert( bt == Gitter :: hbndseg_STI :: closure );
+  if (_hbnd4Int.find (key) == _hbnd4Int.end ()) 
   {
-    if (_hbnd4Int.find (key) == _hbnd4Int.end ()) 
-    {
-      assert( ghInfo );
-      hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, ghInfo) ;
-      return true ;
-    }
-  } 
-  else 
-  {
-    if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
-    {
-      hface4_GEO * face =  InsertUniqueHface4 (v).first ;
-      hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst, bt) ;
-      hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
-      _hbnd4Map [key] = hb4 ;
-      return true ;
-    }
+    assert( ghInfo );
+    hface4_GEO * face =  InsertUniqueHface4 (v).first ;
+    _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, ghInfo) ;
+    return true ;
   }
   return false ;
 }
@@ -733,19 +707,22 @@ inline void ParallelGridMover :: unpackHbnd3Int (ObjectStream & os)
   // if internal boundary, create internal bnd face 
   if( b == Gitter :: hbndseg :: closure && ghInfo )
   {
-    InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, ghInfo ) ;
-  }
-  else
-  {
-    if( ghInfo ) delete ghInfo ;
+    // ghInfo is stored in the macro ghost created internally
+    const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, ghInfo ) ;
 
+    // if inserted then clear pointer to avoid deleting it 
+    if( inserted ) ghInfo = 0;
+  }
+  else 
+  {
     // create normal bnd face, and make sure that no Point was send
-    assert(readPoint == MacroGridMoverIF :: NO_POINT );
+    assert( readPoint == MacroGridMoverIF :: NO_POINT );
     // old method defined in base class 
     InsertUniqueHbnd3 (v, b, ldbVertexIndex ) ;
   }
 
-  return ;
+  // delete to avoid memory leak 
+  if( ghInfo ) delete ghInfo ;
 }
 
 // overloaded method because here we call insertion with point 
@@ -778,19 +755,22 @@ inline void ParallelGridMover :: unpackHbnd4Int (ObjectStream & os)
   // if internal boundary, create internal bnd face 
   if(b == Gitter :: hbndseg :: closure && ghInfo )
   {
-    InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, ghInfo ) ;
-  }
-  else
-  {
-    // delete ghost info not needed any longer 
-    if( ghInfo ) delete ghInfo;
+    // ghInfo is stored in the macro ghost created internally
+    const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, ghInfo ) ;
 
+    // if inserted then clear pointer to avoid deleting it 
+    if( inserted ) ghInfo = 0 ;
+  }
+  else 
+  {
     // create normal bnd face, and make sure that no Point was send
-    assert(readPoint == MacroGridMoverIF :: NO_POINT );
+    assert( readPoint == MacroGridMoverIF :: NO_POINT );
     // old method defined in base class 
     InsertUniqueHbnd4 (v, b, ldbVertexIndex ) ;
   }
-  return ;
+
+  // delete to avoid memory leak 
+  if( ghInfo ) delete ghInfo;
 }
 
 void ParallelGridMover :: unpackHbnd3Ext (ObjectStream & os) 
