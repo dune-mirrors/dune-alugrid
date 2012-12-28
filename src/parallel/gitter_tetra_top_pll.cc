@@ -187,12 +187,13 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
     // create macro ghost cell     
     {
       // create ghost info and read from stream 
-      MacroGhostInfoTetra ghInfo( os );
+      MacroGhostInfoTetra* ghInfo = new MacroGhostInfoTetra( os );
 
       myhface3_t * f = this->myhface(0);
       assert( f );
 
-      _gm = new MacroGhostTetra( _mgb , &ghInfo,  f );
+      // ghInfo is stored inside MacroGhostHexa
+      _gm = new MacroGhostTetra( _mgb , ghInfo,  f );
       this->setGhost ( _gm->getGhost() );   
     }
   }
