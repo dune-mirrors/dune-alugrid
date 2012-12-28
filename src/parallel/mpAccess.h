@@ -87,8 +87,11 @@ class MpAccessGlobal {
 
 class MpAccessLocal : public MpAccessGlobal 
 {
-  map < int, int, less < int > > _linkage ;
-  vector< int > _dest ;
+  typedef map < int, int, less < int > > linkage_t ;
+  typedef vector< int > vector_t ;
+
+  linkage_t _linkage ;
+  vector_t  _dest ;
   public :
     class NonBlockingExchange 
     {
@@ -148,8 +151,8 @@ inline int MpAccessLocal :: nlinks () const {
 
 inline void MpAccessLocal :: removeLinkage () 
 {
-  _linkage.clear();
-  _dest.clear();
+  _linkage = linkage_t();
+  _dest    = vector_t();
   return ;
 }
 
