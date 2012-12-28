@@ -35,6 +35,9 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     // ldb vertex index 
     int _ldbVertexIndex;
 
+    // prohibit copying 
+    Hbnd3IntStorage( const Hbnd3IntStorage& );
+
   public:  
     // destructor deleting _ptr if not zero 
     ~Hbnd3IntStorage(); 
@@ -49,7 +52,10 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex ); 
 
     // release internal MacroGhostInfoTetra pointer
-    MacroGhostInfoTetra * release ();
+    MacroGhostInfoTetra* release ();
+    
+    // release internal MacroGhostInfoTetra pointer
+    MacroGhostInfoTetra* ghInfo ();
     
     // this two method are just like in pair 
     hface3_GEO * first  () const { return _first;  }
@@ -71,6 +77,9 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     // ldb vertex index 
     int _ldbVertexIndex;
 
+    // prohibit copying 
+    Hbnd4IntStorage( const Hbnd4IntStorage& );
+
   public:  
     // destructor deleting _ptr if not zero 
     ~Hbnd4IntStorage (); 
@@ -83,6 +92,9 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     
     // store face and twist and set point to default 
     Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex ); 
+
+    // release internal ghost info pointer 
+    MacroGhostInfoHexa* ghInfo ();
 
     // release internal ghost info pointer 
     MacroGhostInfoHexa* release ();
@@ -108,8 +120,8 @@ class MacroGridBuilder : protected Gitter :: Geometric {
     typedef map < faceKey_t,    void *, less < faceKey_t > >            faceMap_t ;
     typedef map < elementKey_t, void *, less < elementKey_t > >         elementMap_t ;
   
-    typedef map < faceKey_t, Hbnd3IntStorage *, less < faceKey_t > > hbnd3intMap_t ;
-    typedef map < faceKey_t, Hbnd4IntStorage *, less < faceKey_t > > hbnd4intMap_t ;
+    typedef map < faceKey_t, Hbnd3IntStorage* , less < faceKey_t > > hbnd3intMap_t ;
+    typedef map < faceKey_t, Hbnd4IntStorage* , less < faceKey_t > > hbnd4intMap_t ;
     
     vertexMap_t  _vertexMap ;
     edgeMap_t    _edgeMap ;
@@ -271,10 +283,13 @@ inline MacroGridBuilder :: Hbnd3IntStorage :: ~Hbnd3IntStorage ()
   if( _ptr ) 
   {
     delete _ptr;
-#ifndef NDEBUG 
     _ptr = 0;
-#endif
   }
+}
+
+inline MacroGhostInfoTetra* MacroGridBuilder :: Hbnd3IntStorage :: ghInfo ()
+{ 
+  return _ptr;
 }
 
 inline MacroGhostInfoTetra* MacroGridBuilder :: Hbnd3IntStorage :: release ()
@@ -315,10 +330,13 @@ inline MacroGridBuilder :: Hbnd4IntStorage :: ~Hbnd4IntStorage ()
   if( _ptr ) 
   {
     delete _ptr;
-#ifndef NDEBUG 
     _ptr = 0;
-#endif
   }
+}
+
+inline MacroGhostInfoHexa* MacroGridBuilder :: Hbnd4IntStorage :: ghInfo() 
+{ 
+  return _ptr ;
 }
 
 inline MacroGhostInfoHexa* MacroGridBuilder :: Hbnd4IntStorage :: release() 

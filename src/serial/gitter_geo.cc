@@ -869,20 +869,18 @@ void Gitter :: Geometric :: BuilderIF :: backupCModeImpl (ostream_t & os) const
 }
 
 
-void Gitter :: Geometric :: BuilderIF :: backupCMode (const char * filePath, const char * fileName) const {
-  if (_modified) {
-    char * name = new char [strlen (filePath) + strlen (fileName) + 20] ;
-    sprintf (name, "%smacro.%s", filePath, fileName) ;
-    ofstream out (name) ;
-    if (out) {
-      backupCMode (out) ;
-    } else {
-      cerr << "**WARNUNG (IGNORIERT) in Gitter :: Geometric :: BuilderIF :: backupCMode (const char *, const char *)" ;
-      cerr << " beim Anlegen der Datei < " << name << " > in " << __FILE__ << " " << __LINE__ << endl ;
-    }
-    delete [] name ;
+void Gitter :: Geometric :: BuilderIF :: backupCMode (const char * filePath, const char * fileName) const 
+{
+  char * name = new char [strlen (filePath) + strlen (fileName) + 20] ;
+  sprintf (name, "%smacro.%s", filePath, fileName) ;
+  ofstream out (name) ;
+  if (out) {
+    backupCMode (out) ;
+  } else {
+    cerr << "**WARNUNG (IGNORIERT) in Gitter :: Geometric :: BuilderIF :: backupCMode (const char *, const char *)" ;
+    cerr << " beim Anlegen der Datei < " << name << " > in " << __FILE__ << " " << __LINE__ << endl ;
   }
-  return ;
+  delete [] name ;
 }
 
 void Gitter :: Geometric :: BuilderIF :: backup (ostream & os) const {

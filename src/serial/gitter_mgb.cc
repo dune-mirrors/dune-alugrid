@@ -969,7 +969,7 @@ void MacroGridBuilder :: finalize ()
       }
     }
   }
-  myBuilder ()._modified = true ; // wichtig !
+
   _finalized = true;
   return ;
 }

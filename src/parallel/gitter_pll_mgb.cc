@@ -483,7 +483,6 @@ void ParallelGridMover :: finalize ()
     }
   }
 
-  myBuilder ()._modified = true ; // wichtig !
   this->_finalized = true;
   return ;
 }
