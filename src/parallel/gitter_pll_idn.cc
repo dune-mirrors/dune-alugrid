@@ -356,9 +356,9 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & mpAcc
 void GitterPll :: MacroGitterPll :: identification (MpAccessLocal & c) 
 {
   // clear all entries and also clear memory be reassigning 
-  _vertexTT = vertexTT_t();
-  _hedgeTT  = hedgeTT_t();
-  _hfaceTT  = hfaceTT_t();
+  vertexTT_t().swap( _vertexTT );
+  hedgeTT_t ().swap( _hedgeTT );
+  hfaceTT_t ().swap( _hfaceTT );
 
   // make sure the memory was deallocated 
   assert( _vertexTT.capacity() == 0 );
