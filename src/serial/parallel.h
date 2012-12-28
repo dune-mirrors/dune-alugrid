@@ -19,18 +19,23 @@ class MacroGridMoverIF {
     MacroGridMoverIF () {}
     virtual ~MacroGridMoverIF () {}
   public :
+    // type of move to map
+    typedef map < int, int, less < int > > moveto_t ;
+
     enum { VERTEX = 1, EDGE1, FACE3, FACE4, 
            HEXA, TETRA, PERIODIC3, PERIODIC4=-65, 
            HBND3EXT, HBND4EXT, HBND3INT, HBND4INT = -22 ,
            ENDMARKER , ENDSTREAM,  NO_POINT = -777, POINTTRANSMITTED=-888 } ;
-    virtual void attach2 (int) = 0 ;
+    virtual void attach2   (int) = 0 ;
     virtual void unattach2 (int) = 0 ;
+
+    virtual void attach2   (moveto_t&, int) = 0 ;
+    virtual void unattach2 (moveto_t&, int) = 0 ;
+
     virtual bool packAll (vector < ObjectStream > &) = 0 ;
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) = 0; 
     virtual void unpackSelf (ObjectStream &,bool) = 0 ;
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) = 0; 
-
-    // virtual int diagnostic() const { return 0; }
 } ;
 
 class MacroGridMoverDefault : public MacroGridMoverIF {
@@ -38,8 +43,13 @@ class MacroGridMoverDefault : public MacroGridMoverIF {
     MacroGridMoverDefault () {}
     virtual ~MacroGridMoverDefault () {}
   public :
-    virtual void attach2 (int) { assert(false);abort(); }
+    typedef MacroGridMoverIF :: moveto_t moveto_t ;
+
+    virtual void attach2   (int) { assert(false);abort(); }
     virtual void unattach2 (int) { assert(false);abort(); }
+    virtual void attach2   (moveto_t&, int) { assert(false);abort(); }
+    virtual void unattach2 (moveto_t&, int) { assert(false);abort(); }
+
     virtual bool packAll (vector < ObjectStream > &) { assert(false);abort(); }
     virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) { assert(false);return false; }
     virtual void unpackSelf (ObjectStream &,bool) { assert(false);abort(); }
