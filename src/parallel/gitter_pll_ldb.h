@@ -132,7 +132,8 @@ class LoadBalancer {
         const vector<int>& graphSizes() const { return _graphSizes ; }
         void clearGraphSizesVector () 
         { 
-          _graphSizes.clear();
+          // clear graph size and also deallocate memory 
+          _graphSizes = vector<int> ();
           _noPeriodicFaces = false ;
         }
 

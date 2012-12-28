@@ -32,7 +32,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
       for (micopy.first () ; ! micopy.done () ; micopy.next ()) 
       {
         vector < int > estimate = micopy.item ().accessPllX ().estimateLinkage () ;
-        if (estimate.size ()) 
+        if ( ! estimate.empty() ) 
         {
           vector < int > :: const_iterator iEnd =  estimate.end ();
           for (vector < int > :: const_iterator i = estimate.begin (); 
@@ -43,7 +43,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
         }
       }
       // reserve memory 
-      for(int k=0; k<nl; k++) inout[k].reserve( count[k] );
+      for(int k=0; k<nl; ++k) inout[k].reserve( count[k] );
     }
     
     {
@@ -355,10 +355,15 @@ void GitterPll :: MacroGitterPll :: vertexLinkageEstimate (MpAccessLocal & mpAcc
 
 void GitterPll :: MacroGitterPll :: identification (MpAccessLocal & c) 
 {
-  // clear all entries 
-  _vertexTT.clear(); 
-  _hedgeTT.clear();
-  _hfaceTT.clear();
+  // clear all entries and also clear memory be reassigning 
+  _vertexTT = vertexTT_t();
+  _hedgeTT  = hedgeTT_t();
+  _hfaceTT  = hfaceTT_t();
+
+  // make sure the memory was deallocated 
+  assert( _vertexTT.capacity() == 0 );
+  assert( _hedgeTT.capacity()  == 0 );
+  assert( _hfaceTT.capacity()  == 0 );
 
   c.removeLinkage () ;
   

@@ -127,54 +127,59 @@ class GitterPll : public virtual Gitter {
   public :
     static inline bool debugOption (int = 0) ;
   public :
-    class MacroGitterPll : public virtual Gitter :: Geometric :: BuilderIF,
+  class MacroGitterPll : public virtual Gitter :: Geometric :: BuilderIF,
       public AccessIteratorTT < vertex_STI >, 
       public AccessIteratorTT < hedge_STI >, 
       public AccessIteratorTT < hface_STI > 
   {
-      protected :
+  protected :
       
-  // Die nachfolgenden Vektoren von Listenpaaren sind die Identifikationsabbildung auf dem Grobgitter:
-  // Jeder Vektoreintrag geh"ort zu dem entsprechenden lokalen Link (Verbindung zum Nachbargebiet) und
-  // enth"alt ein paar von zwei Listen ('inner' und 'outer'). Die erste Liste enth"alt Referenzen auf
-  // die Gitterobjekte, die hier und auf dem anderen Teilgebiet (zum Link) vorliegen und die aber hier
-  // als Besitzstand gef"uhrt werden. Die zweite Liste (outer) verweist auf all jene, die zum Besitz
-  // des Nachbargebiets zu rechnen sind. Die Ordnung der Listen ist folgendermassen: Durchl"auft man
-  // hier 'inner', dann korrespondieren auf dem Nachbargebiet die Objekte in 'outer' in der Reihenfolge
-  // des Durchlaufs (und umgekehrt).
-      
-        vector < pair < list < AccessIterator < vertex_STI > :: Handle >, list < AccessIterator < vertex_STI > :: Handle > > > _vertexTT ;
-        vector < pair < list < AccessIterator < hedge_STI > :: Handle >, list < AccessIterator < hedge_STI > :: Handle > > > _hedgeTT ;
-        vector < pair < list < AccessIterator < hface_STI > :: Handle >, list < AccessIterator < hface_STI > :: Handle > > > _hfaceTT ;
-        virtual set < int, less < int > > secondScan () ;
-        virtual void vertexLinkageEstimate (MpAccessLocal &) ;
-        // vertexLinkageEstimation with gcollect( MPI_Allgather, memory consuming )
-        // time = log p, memory = O(p)
-        void vertexLinkageEstimateGCollect (MpAccessLocal &) ;
-        // vertexLinkageEstimation with bcast( MPI_Bcast, memory O(1), more time consuming )
-        // time = p log p, memory = O(1)
-        void vertexLinkageEstimateBcast (MpAccessLocal &) ;
-      public :
-        MacroGitterPll () {}
-        virtual ~MacroGitterPll () {}
+    // Die nachfolgenden Vektoren von Listenpaaren sind die Identifikationsabbildung auf dem Grobgitter:
+    // Jeder Vektoreintrag geh"ort zu dem entsprechenden lokalen Link (Verbindung zum Nachbargebiet) und
+    // enth"alt ein paar von zwei Listen ('inner' und 'outer'). Die erste Liste enth"alt Referenzen auf
+    // die Gitterobjekte, die hier und auf dem anderen Teilgebiet (zum Link) vorliegen und die aber hier
+    // als Besitzstand gef"uhrt werden. Die zweite Liste (outer) verweist auf all jene, die zum Besitz
+    // des Nachbargebiets zu rechnen sind. Die Ordnung der Listen ist folgendermassen: Durchl"auft man
+    // hier 'inner', dann korrespondieren auf dem Nachbargebiet die Objekte in 'outer' in der Reihenfolge
+    // des Durchlaufs (und umgekehrt).
   
-  // Die Identifikationslisten k"onnen nicht direkt von aussen zugegriffen werden, sondern nur "uber ein
-  // Iterationsobjekt, das durch den Aufruf einer der untenstehenden Methoden erzeugt wird, und um dessen
-  // L"oschung der Aufrufer sich k"ummern muss. "Ublicherweise verwendet man das Smartpointerobjekt
-  // AccessIteratorTT < . > :: InnerHandle/OuterHandle um die verwaltung der Iterationsobjekte loszuwerden.
-  // Diese Smartpointer sehen nach aussen aus wie Iteratorenstandardschnittstellen, delegieren aber alles
-  // an die Iterationsobjekte, die sie vom Grobgittercontainer bekommen haben.
+    typedef vector < pair < list < AccessIterator < vertex_STI > :: Handle >, list < AccessIterator < vertex_STI > :: Handle > > > vertexTT_t ;
+    typedef vector < pair < list < AccessIterator < hedge_STI > :: Handle >, list < AccessIterator < hedge_STI > :: Handle > > >   hedgeTT_t  ;
+    typedef vector < pair < list < AccessIterator < hface_STI > :: Handle >, list < AccessIterator < hface_STI > :: Handle > > >   hfaceTT_t  ;
+    vertexTT_t  _vertexTT ;
+    hedgeTT_t   _hedgeTT ;
+    hfaceTT_t   _hfaceTT ;
+
+    virtual set < int, less < int > > secondScan () ;
+    virtual void vertexLinkageEstimate (MpAccessLocal &) ;
+    // vertexLinkageEstimation with gcollect( MPI_Allgather, memory consuming )
+    // time = log p, memory = O(p)
+    void vertexLinkageEstimateGCollect (MpAccessLocal &) ;
+    // vertexLinkageEstimation with bcast( MPI_Bcast, memory O(1), more time consuming )
+    // time = p log p, memory = O(1)
+    void vertexLinkageEstimateBcast (MpAccessLocal &) ;
+  public :
+    MacroGitterPll () {}
+    virtual ~MacroGitterPll () {}
+
+    // Die Identifikationslisten k"onnen nicht direkt von aussen zugegriffen werden, sondern nur "uber ein
+    // Iterationsobjekt, das durch den Aufruf einer der untenstehenden Methoden erzeugt wird, und um dessen
+    // L"oschung der Aufrufer sich k"ummern muss. "Ublicherweise verwendet man das Smartpointerobjekt
+    // AccessIteratorTT < . > :: InnerHandle/OuterHandle um die verwaltung der Iterationsobjekte loszuwerden.
+    // Diese Smartpointer sehen nach aussen aus wie Iteratorenstandardschnittstellen, delegieren aber alles
+    // an die Iterationsobjekte, die sie vom Grobgittercontainer bekommen haben.
   
-        pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > iteratorTT (const vertex_STI *, int) ;
-        pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > iteratorTT (const pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > &, int) ;
-        pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > iteratorTT (const hedge_STI *, int) ;
-        pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > iteratorTT (const pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > &, int) ;
-        pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const hface_STI *, int) ;
-        pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > &, int) ;
-        virtual inline int iterators_attached () const ;
-        virtual void identification (MpAccessLocal &) ;
-        virtual void fullIntegrityCheck (MpAccessLocal &) ;
-    } ;
+    pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > iteratorTT (const vertex_STI *, int) ;
+    pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > iteratorTT (const pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > &, int) ;
+    pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > iteratorTT (const hedge_STI *, int) ;
+    pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > iteratorTT (const pair < IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > &, int) ;
+    pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const hface_STI *, int) ;
+    pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > &, int) ;
+    virtual inline int iterators_attached () const ;
+    virtual void identification (MpAccessLocal &) ;
+    virtual void fullIntegrityCheck (MpAccessLocal &) ;
+  } ; // end MacroGitterPll 
+
   public :
   
   // Das verteilte Gitter "uberschreibt die meisten Methoden der
@@ -197,11 +202,10 @@ class GitterPll : public virtual Gitter {
              GatherScatterType & vertexData ,
              GatherScatterType & edgeData,
              GatherScatterType & faceData ,
-            GatherScatterType & elementData ) {
+            GatherScatterType & elementData ) 
+    {
       abort();
     }
-
-
     
   protected :
     virtual Makrogitter & container () = 0 ;
