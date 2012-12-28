@@ -112,7 +112,10 @@ class MacroGhostInfoTetra : public MacroGhostInfoStorage<1>
   MacroGhostInfoTetra(const MacroGhostInfoTetra&);
 public:  
   // create storage by reading data from stream 
-  MacroGhostInfoTetra(ObjectStream& os) { this->readData(os); }
+  explicit MacroGhostInfoTetra(ObjectStream& os) 
+  { 
+    this->readData(os); 
+  }
 
   // contructor for tetras 
   MacroGhostInfoTetra(const Gitter:: Geometric :: tetra_GEO *, 
@@ -127,7 +130,10 @@ class MacroGhostInfoHexa : public MacroGhostInfoStorage<4>
   MacroGhostInfoHexa(const MacroGhostInfoHexa&);
 public:  
   // create storage by reading data from stream 
-  MacroGhostInfoHexa(ObjectStream& os) { this->readData(os); }
+  explicit MacroGhostInfoHexa(ObjectStream& os) 
+  { 
+    this->readData(os); 
+  }
 
   // contructor for tetras 
   MacroGhostInfoHexa(const Gitter:: Geometric :: hexa_GEO * , 

@@ -1910,10 +1910,8 @@ public :
       hbndseg3list_t  _hbndseg3List ;
       hbndseg4list_t  _hbndseg4List ;
 
-      bool _modified ; // true if macro grid was modified 
-
     protected :
-      BuilderIF () : _modified (true) {}
+      BuilderIF () {}
 
       virtual ~BuilderIF () ;
 
