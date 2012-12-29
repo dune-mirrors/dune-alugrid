@@ -304,7 +304,10 @@ template < class A > class VectorAlign : public IteratorSTI < A >
 {
   typedef IteratorSTI < A > * pointer_t ;
   vector < pointer_t > _it ;
-  typename vector < pointer_t > :: const_iterator _curr, _ahead ;
+  typedef typename vector < pointer_t > :: iterator iterator_t ; 
+  typedef typename vector < pointer_t > :: const_iterator constiterator_t ;
+
+  constiterator_t  _curr, _ahead ;
   int _cnt ;
   public :
     inline VectorAlign (const vector < pointer_t > &) ;
@@ -662,8 +665,6 @@ VectorAlign (const VectorAlign < A > & org )
 {
   // _it is a vector with pointers of iterators, we have to clone all
   // pointers of the vector, therefore iterate over vector and call clone  
-  typedef typename vector < pointer_t > :: iterator iterator_t ; 
-  typedef typename vector < pointer_t > :: const_iterator constiterator_t ; 
   constiterator_t orgit = org._it.begin();
   iterator_t pend   = _it.end (); 
   for (iterator_t p = _it.begin (); p != pend ; ++ p , ++ orgit ) 
@@ -684,8 +685,8 @@ VectorAlign < A > :: clone () const
   return new VectorAlign < A > (*this);
 }
 
-template < class A > VectorAlign < A > :: ~VectorAlign () {
-  typedef typename vector < pointer_t > :: iterator iterator_t ; 
+template < class A > VectorAlign < A > :: ~VectorAlign () 
+{
   const iterator_t pend = _it.end (); 
   for (iterator_t p = _it.begin (); p != pend ; ++p ) 
   {
@@ -694,40 +695,50 @@ template < class A > VectorAlign < A > :: ~VectorAlign () {
   return ;
 }
 
-template < class A > void VectorAlign < A > :: first () {
-  for (_curr = _it.begin () ; (_curr == _it.end () ? 0 : ((*_curr)->first (), (*_curr)->done ())) ; _curr ++) ;
+template < class A > void VectorAlign < A > :: first () 
+{
+  const constiterator_t end = _it.end();
+  for (_curr = _it.begin () ; (_curr == end ? 0 : ((*_curr)->first (), (*_curr)->done ())) ; ++_curr) ;
   _ahead = _curr;
-  if (_ahead != _it.end ())
+  if (_ahead != end)
     _ahead++;
-  for ( ; (_ahead == _it.end () ? 0 : ((*_ahead)->first (), (*_ahead)->done ())) ; _ahead ++) ;
+  for ( ; (_ahead == end ? 0 : ((*_ahead)->first (), (*_ahead)->done ())) ; ++_ahead ) ;
   return ;
 }
 
-template < class A > void VectorAlign < A > :: next () {
+template < class A > void VectorAlign < A > :: next () 
+{
   (*_curr)->next () ;
   if ((*_curr)->done ())
   {
-    if (_ahead != _it.end ())
+    const constiterator_t end = _it.end();
+    if (_ahead != end)
       (_curr = _ahead, _ahead ++) ;
-    for ( ; (_ahead == _it.end () ? 0 : ((*_ahead)->first (), (*_ahead)->done ())) ; _ahead ++) ;
+    for ( ; (_ahead == end ? 0 : ((*_ahead)->first (), (*_ahead)->done ())) ; ++ _ahead ) ;
   }
   return ;
 }
 
-template < class A > int VectorAlign < A > :: size () {
-  if (_cnt == -1) {
+template < class A > int VectorAlign < A > :: size () 
+{
+  if (_cnt == -1) 
+  {
     _cnt = 0 ;
-    for (typename vector < pointer_t > :: iterator p = _it.begin () ; 
-        p != _it.end () ; _cnt += (*p++)->size ()) ;
+    const iterator_t pend = _it.end () ;
+    for ( iterator_t p = _it.begin () ; p != pend ; ++ p )
+      _cnt += (*p)->size () ;
   }
   return _cnt ;
 }
 
-template < class A > inline int VectorAlign < A > :: done () const {
-   return ((_ahead == _it.end ()) ? ((_curr == _it.end ()) ? 1 : (*_curr)->done ()) : 0);
+template < class A > inline int VectorAlign < A > :: done () const 
+{
+  const constiterator_t end = _it.end ();
+  return ((_ahead == end) ? ((_curr == end) ? 1 : (*_curr)->done ()) : 0);
 }
 
-template < class A > inline A & VectorAlign < A > :: item () const {
+template < class A > inline A & VectorAlign < A > :: item () const 
+{
   assert (! done ()) ;
   return (*_curr)->item () ;
 }
