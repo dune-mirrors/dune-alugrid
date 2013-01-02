@@ -5,6 +5,7 @@
 #define MYALLOC_H_INCLUDED
 
 #ifndef DONT_USE_ALUGRID_ALLOC 
+#warning "Using ALUGrid interal memory management!"
 
 class MyAlloc {
   // max number of storable items per stack 
@@ -38,11 +39,16 @@ class MyAlloc {
 
     // if called free of objects is not allowed 
     static void lockFree (void *); 
+
+    // try to make free memory available for the system 
+    static void clearFreeMemory () ;
+
   protected :
     MyAlloc () {}
    ~MyAlloc () {}
 
   public :
+
 #ifdef USE_MALLOC_AT_ONCE
     // new version of operator new 
     static void allocate( const size_t memSize, void* mem[], const size_t num ) throw (OutOfMemoryException) ;
