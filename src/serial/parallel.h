@@ -18,9 +18,19 @@ class MacroGridMoverIF {
   protected :
     MacroGridMoverIF () {}
     virtual ~MacroGridMoverIF () {}
+
+  private:
+    // type of move to map, derive from MyAlloc 
+    class MoveTo :
+      public MyAlloc, 
+      public map < int, int, less < int > > 
+    {
+      typedef map < int, int, less < int > >  base_t ;
+    public:
+      MoveTo () :  base_t () {}
+    };
   public :
-    // type of move to map
-    typedef map < int, int, less < int > > moveto_t ;
+    typedef MoveTo moveto_t ;
 
     enum { VERTEX = 1, EDGE1, FACE3, FACE4, 
            HEXA, TETRA, PERIODIC3, PERIODIC4=-65, 
