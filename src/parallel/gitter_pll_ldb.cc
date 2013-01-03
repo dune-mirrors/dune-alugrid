@@ -639,6 +639,8 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
   const bool nonDistributedMesh = ( ! serialPartitioner ) ? 
     vtxdist[ 1 ] == vtxdist[ np ] : false ;
 
+  // store information about real partitioner 
+  const bool realSerialPartitioner = serialPartitioner ;
   if( nonDistributedMesh && ! serialPartitioner ) 
   {
     serialPartitioner = true ;
@@ -675,7 +677,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
 
   // make sure every process got the same numbers 
   assert( nel == mpa.gmax( nel ) );
-  assert( ned == mpa.gmax( ned ) );
+  assert( ( serialPartitioner ) ? ( ned == mpa.gmax( ned ) ) : true );
   
   // do repartition if edges exist (for serial partitioners) or for SFC and 
   // parallel partitioners anyway  
@@ -949,7 +951,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         // to avoid a second communication during graphCollect 
         // this is only needed for the allgatherv communication 
         assert( _noPeriodicFaces == mpa.gmax( _noPeriodicFaces ) );
-        if( serialPartitioner && _noPeriodicFaces ) 
+        if( realSerialPartitioner && _noPeriodicFaces ) 
         {
           // resize vector 
           _graphSizes.resize( np );
@@ -983,7 +985,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         }
         else // otherwise disable this feature be clearing the vector 
         {
-          _graphSizes.clear();
+          clearGraphSizesVector () ;
         }
       }
     }
