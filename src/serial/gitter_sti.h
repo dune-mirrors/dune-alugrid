@@ -221,7 +221,11 @@ public :
 
 // EmptyIterator is an iterator of an empty set  
 // for some default values 
-template < class A > class EmptyIterator : public IteratorSTI < A > {
+template < class A > class EmptyIterator : public IteratorSTI < A >
+#ifndef ITERATORS_WITHOUT_MYALLOC
+                                         , public MyAlloc 
+#endif
+{
   EmptyIterator (const EmptyIterator < A > &) {}
 public :
   typedef A val_t ;
