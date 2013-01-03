@@ -54,6 +54,7 @@ typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic 
 struct GatherScatter;
 typedef GatherScatter GatherScatterType;
 
+#include "serial/myalloc.h"
 #include "serial/key.h"
 #include "serial/serialize.h"
 
@@ -132,7 +133,6 @@ typedef GatherScatter GatherScatterType;
 #include "serial/gitter_mgb.h"
 #include "serial/key.h"
 #include "serial/lock.h"
-#include "serial/myalloc.h"
 
 #include "duneinterface/gitter_dune_impl.h"
 }
