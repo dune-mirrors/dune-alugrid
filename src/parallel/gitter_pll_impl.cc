@@ -293,7 +293,7 @@ template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage (
   const vector < int > l0 ( this->myhface ().myhedge (0)->estimateLinkage () );
   const vector < int > l1 ( this->myhface ().myhedge (1)->estimateLinkage () );
   const vector < int > l2 ( this->myhface ().myhedge (2)->estimateLinkage () );
-  const vector < int > l3 ( (A :: polygonlength == 3) ? this->myhface ().myhedge (3)->estimateLinkage () : l2 ) ;
+  const vector < int > l3 ( (A :: polygonlength == 3) ? l2 : this->myhface ().myhedge (3)->estimateLinkage () ) ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (t1), less < int > ()) ;
   set_intersection (l2.begin (), l2.end (), l3.begin (), l3.end (), back_inserter (t2), less < int > ()) ;
   set_intersection (t1.begin (), t1.end (), t2.begin (), t2.end (), back_inserter (est), less < int > ()) ;
