@@ -7,18 +7,18 @@
 // MyAlloc initialize flag                                                   
 bool MyAlloc :: _initialized = false;
 
+const size_t MyAlloc :: MAX_HOLD_ADD  = 40000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
+const double MyAlloc :: MAX_HOLD_MULT = 0.25 ;   // max das MAX_HOLD_MULT-fache der momentan
+                                                 // aktiven Objekte werden gespeichert
+// if true objects could be freeed  
+bool MyAlloc :: _freeAllowed = true ;
+
 #if ONLY_MSPACES 
 #warning "Using DL malloc"
 #include "malloc.c"
 static void*  ALUGridMemorySpace = 0 ;
 static size_t ALUGridMemSpaceAllocated = 0;
 #else
-
-const size_t MyAlloc :: MAX_HOLD_ADD  = 40000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
-const double MyAlloc :: MAX_HOLD_MULT = 0.25 ;   // max das MAX_HOLD_MULT-fache der momentan
-                                                 // aktiven Objekte werden gespeichert
-// if true objects could be freeed  
-bool MyAlloc :: _freeAllowed = true ;
 
 // class to store items of same size in a stack 
 // also number of used items outside is stored 
