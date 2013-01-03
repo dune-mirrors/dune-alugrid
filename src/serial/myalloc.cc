@@ -1,6 +1,6 @@
 #ifndef DONT_USE_ALUGRID_ALLOC
 
-#define ONLY_MSPACES 1 
+//#define ONLY_MSPACES 1 
 
 #include "myalloc.h"
 
