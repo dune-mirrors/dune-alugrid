@@ -112,6 +112,24 @@ public:
   inline GitterDuneImpl () 
     : GitterBasisImpl () 
   {}
+
+  // compress memory of given grid and return new object (holding equivalent information)
+  static GitterDuneImpl* compress( GitterDuneImpl* grd ) 
+  {
+    // backup stream 
+    std::stringstream backup;
+    // backup grid 
+    grd->duneBackup( backup );
+    delete grd ; grd = 0 ;
+    // free allocated memory (only works if all grids are deleted at this point)
+    MyAlloc :: clearFreeMemory () ;
+    // restore saved grid 
+    grd = new GitterDuneImpl( backup );
+    assert( grd );
+    grd->duneRestore( backup );
+    return grd ;
+  }
+
 };
 
 
