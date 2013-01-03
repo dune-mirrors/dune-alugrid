@@ -43,7 +43,7 @@ template < class A > void identify (typename AccessIterator < A > :: Handle mi,
         }
       }
       // reserve memory 
-      for(int k=0; k<nl; ++k) inout[k].reserve( count[k] );
+      for(int k=0; k<nl; ++k) inout[ k ].reserve( count[k] );
     }
     
     {
