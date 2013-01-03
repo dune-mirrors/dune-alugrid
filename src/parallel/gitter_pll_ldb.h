@@ -9,7 +9,7 @@ class LoadBalancer {
   public :
     static inline bool debugOption (int = 0) ;
   public :
-    class GraphEdge 
+    class GraphEdge : public MyAlloc
     {
       int _leftNode ;
       int _rightNode ;
@@ -28,7 +28,7 @@ class LoadBalancer {
         inline void writeToStream  (ObjectStream &) const ;
     } ;
 
-    class GraphVertex
+    class GraphVertex : public MyAlloc
     {
 #ifdef GRAPHVERTEX_WITH_CENTER
       alucoord_t  _center [3] ;  // geographical coords of vertex 
