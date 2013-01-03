@@ -290,10 +290,11 @@ template < class A > vector < int > FacePllBaseXMacro < A > :: estimateLinkage (
   // Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
 
   vector < int > t1, t2, est ;
-  const vector < int > l0 ( this->myhface ().myhedge (0)->estimateLinkage () );
-  const vector < int > l1 ( this->myhface ().myhedge (1)->estimateLinkage () );
-  const vector < int > l2 ( this->myhface ().myhedge (2)->estimateLinkage () );
-  const vector < int > l3 ( (A :: polygonlength == 3) ? l2 : this->myhface ().myhedge (3)->estimateLinkage () ) ;
+  const vector < int >& l0 ( myhface ().myhedge (0)->estimateLinkage () );
+  const vector < int >& l1 ( myhface ().myhedge (1)->estimateLinkage () );
+  const vector < int >& l2 ( myhface ().myhedge (2)->estimateLinkage () );
+  // for tetras we don't need the forth linkage
+  const vector < int >& l3 ( (A :: polygonlength == 4) ? myhface ().myhedge (3)->estimateLinkage () : l2 ) ;
   set_intersection (l0.begin (), l0.end (), l1.begin (), l1.end (), back_inserter (t1), less < int > ()) ;
   set_intersection (l2.begin (), l2.end (), l3.begin (), l3.end (), back_inserter (t2), less < int > ()) ;
   set_intersection (t1.begin (), t1.end (), t2.begin (), t2.end (), back_inserter (est), less < int > ()) ;
