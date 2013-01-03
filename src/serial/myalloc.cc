@@ -1,103 +1,24 @@
 #ifndef DONT_USE_ALUGRID_ALLOC
 
+#define ONLY_MSPACES 1 
+
 #include "myalloc.h"
+
+// MyAlloc initialize flag                                                   
+bool MyAlloc :: _initialized = false;
+
+#if ONLY_MSPACES 
+#warning "Using DL malloc"
+#include "malloc.c"
+static void*  ALUGridMemorySpace = 0 ;
+static size_t ALUGridMemSpaceAllocated = 0;
+#else
 
 const size_t MyAlloc :: MAX_HOLD_ADD  = 40000 ;  // max MAX_HOLD_ADD Objekte werden gespeichert
 const double MyAlloc :: MAX_HOLD_MULT = 0.25 ;   // max das MAX_HOLD_MULT-fache der momentan
                                                  // aktiven Objekte werden gespeichert
-// MyAlloc initialize flag                                                   
-bool MyAlloc :: _initialized = false;
-
 // if true objects could be freeed  
 bool MyAlloc :: _freeAllowed = true ;
-
-#ifdef ALUGRID_GARBAGE_COLLECTION
-class MemoryBlock 
-{
-  //static const size_t _memSize = 32768 ; // 2^15 
-  static const size_t _memSize = 131072; // 2^17
-  void*  _mem ;
-
-  typedef unsigned int uint_t ;
-  uint_t _pos ;
-  uint_t _counter ;
-
-public:  
-  MemoryBlock() : _mem( 0 ), _pos( 0 ), _counter( 0 )
-  {
-    _mem = std::malloc( _memSize );
-    //assert( sizeof(char) == 1 );
-    assert( _mem );
-  }
-
-  ~MemoryBlock() 
-  {
-    std::free( _mem );
-    // all allocted entries should have been freed.
-    assert( empty() );
-  }
-
-  void* alloc( const size_t request ) 
-  {
-    if( (_pos + request) > _memSize ) 
-      return 0;
-    else 
-    {
-      assert( sizeof( char ) == 1 );
-      // get pointer 
-      char* p = ((char *) _mem) + _pos ;
-      _pos += request ; 
-      _counter += request ;
-      return p;
-    }
-  }
-
-  bool inside( char* p ) const 
-  {
-    char* mem = (char *) _mem;
-    return ( p >= mem ) && ( p < ( mem + _memSize ) ); 
-  }
-
-  void free( void* p, const size_t psize ) 
-  {
-    if( inside( (char*) p ) ) 
-    {
-      assert( _counter >= psize );
-      _counter -= psize ;
-    }
-  }
-
-  bool empty () const 
-  {
-    return _counter == 0 ;
-  }
-
-  //! comparison operator for map storage 
-  bool operator < ( const MemoryBlock& mb ) const 
-  {
-    return _mem < mb._mem ;
-  }
-
-  template <class memoryvec_t>
-  static MemoryBlock* find( memoryvec_t& memvec, void* p ) 
-  {
-    typedef typename memoryvec_t :: iterator iterator ;
-    const iterator end = memvec.end(); 
-    for( iterator it = memvec.begin(); it != end; ++it ) 
-    {
-      if( (*it)->inside( (char*) p ) )
-        return (*it);
-    }
-    // not found is not an option 
-    abort();
-    return 0;
-  }
-};
-// global memory block list 
-typedef list< MemoryBlock* > MemoryBlockVector_t ;
-static MemoryBlockVector_t* memoryBlocks = 0 ;
-
-#endif // end ifdef ALUGRID_GARBAGE_COLLECTION
 
 // class to store items of same size in a stack 
 // also number of used items outside is stored 
@@ -123,22 +44,21 @@ public:
   
   ~AllocEntry () 
   {
-#ifndef ALUGRID_GARBAGE_COLLECTION
     // only free memory here if garbage collection is disabled
     while (!S.empty ()) 
     {
       free (S.top ()) ;
       S.pop () ;
     }
-#endif
-    return ;
   }
 };
 
 // map holding AllocEntries for sizes 
 typedef map < size_t, AllocEntry, less < size_t > > memorymap_t ;
-static memorymap_t* freeStore = 0 ;
-static set < void * > myAllocFreeLockers;
+static  memorymap_t* freeStore = 0 ;
+static  set < void * > myAllocFreeLockers;
+
+#endif // end else of #if ONLY_MSPACES
 
 /*
 //! get memory in MB 
@@ -189,24 +109,29 @@ void printMemoryBytesUsed ()
 
 void MyAlloc :: lockFree (void * addr) 
 {
+#if ! ONLY_MSPACES
   // remember address of locker 
   myAllocFreeLockers.insert( addr );
   _freeAllowed = true ; 
+#endif
 }
 
 void MyAlloc :: unlockFree (void * addr) 
 {
+#if ! ONLY_MSPACES
   myAllocFreeLockers.erase( addr );
   // only if no-one else has locked 
   if( myAllocFreeLockers.empty () )
   {
     _freeAllowed = false ; 
   }
+#endif
 
   // make free memory available to the system again 
   clearFreeMemory();
 }
 
+#if ! ONLY_MSPACES
 void memAllocate( AllocEntry& fs, const size_t s, void* mem[], const size_t request)
 {
   assert(s > 0);
@@ -237,35 +162,26 @@ void MyAlloc :: allocate( const size_t s, void* mem[], const size_t request) thr
   AllocEntry & fs ((*freeStore) [s]) ;
   memAllocate( fs, s, mem, request );
 }
-#endif
+#endif // end #ifdef USE_MALLOC_AT_ONCE
+#endif // end #if ! ONLY_MSPACES
 
 void* MyAlloc :: operator new ( size_t s ) throw (OutOfMemoryException) 
 {
 #ifndef DONT_USE_ALUGRID_ALLOC
+
+#if ONLY_MSPACES
+  assert( s > 0 );
+  ++ ALUGridMemSpaceAllocated ;
+  return mspace_malloc( ALUGridMemorySpace, s );
+#else
   assert(s > 0);
   {
     AllocEntry & fs = ((*freeStore) [s]) ;
     ++ fs.N ;
     if ( fs.S.empty () ) 
     {
-#ifdef ALUGRID_GARBAGE_COLLECTION
-      assert( memoryBlocks->size() > 0 );
-      MemoryBlock* current = memoryBlocks->back();
-      assert( current );
-      void* p = current->alloc( s );
-      if( p == 0 ) 
-      {
-        MemoryBlock* newBlock = new MemoryBlock();
-        assert( newBlock );
-        memoryBlocks->push_back( newBlock );
-        p = newBlock->alloc( s );
-        // this should not be NULL
-        assert( p );
-      }
-#else
       // else simply allocate block 
       void * p = malloc (s) ;
-#endif
       if (p == 0) 
       {
         perror ("**ERROR (FATAL) in MyAlloc :: operator new ()") ;
@@ -282,13 +198,20 @@ void* MyAlloc :: operator new ( size_t s ) throw (OutOfMemoryException)
       return p ;
     }
   }
-#endif
+#endif // ONLY_MSPACES 
+#endif // DONT_USE_ALUGRID_ALLOC
 }
 
 // operator delete, put pointer to stack 
 void MyAlloc :: operator delete (void *ptr, size_t s) 
 {
 #ifndef DONT_USE_ALUGRID_ALLOC
+
+#if ONLY_MSPACES
+ // defined in dlmalloc.c 
+ mspace_free( ALUGridMemorySpace, ptr );
+ -- ALUGridMemSpaceAllocated ;
+#else  
   // get stack for size s 
   AllocEntry & fs ((*freeStore) [s]) ;
   // push pointer to stack 
@@ -296,9 +219,8 @@ void MyAlloc :: operator delete (void *ptr, size_t s)
   --fs.N ;
   fs.S.push (ptr) ;
  
-#ifndef ALUGRID_GARBAGE_COLLECTION
   // if free of objects is allowd 
-  if( _freeAllowed )
+  // if( _freeAllowed )
   {
     // check if max size is exceeded 
     const size_t stackSize = fs.S.size ();
@@ -311,69 +233,20 @@ void MyAlloc :: operator delete (void *ptr, size_t s)
       fs.S.pop() ;
     }
   }
-#endif // end #ifndef ALUGRID_GARBAGE_COLLECTION
+#endif // end #if     ONLY_MSPACES 
 #endif // end #ifndef DONT_USE_ALUGRID_ALLOC
 }
 
 // operator delete, put pointer to stack 
 void MyAlloc :: clearFreeMemory () 
 {
-#ifdef ALUGRID_GARBAGE_COLLECTION
-  // make a copy of the memory map 
-  // memorymap_t backup( *freeStore );
-  memorymap_t& backup = *freeStore ;
-
-  map< MemoryBlock*, memorymap_t > freePointer ;
-
-  typedef memorymap_t :: iterator  iterator ;
-  const iterator end = backup.end();
-  for( iterator it = backup.begin(); it != end ; ++it ) 
+#if ONLY_MSPACES
+  // if no objects are allocated clear memory space and reallocate
+  // this will free memory to the system 
+  if ( ALUGridMemSpaceAllocated == 0 ) 
   {
-    AllocEntry& fs = (*it).second ;
-    const size_t blockSize = (*it).first ;
-    while( ! fs.S.empty() )
-    {
-      void* p = fs.S.top();
-      fs.S.pop();
-      MemoryBlock* mb = MemoryBlock :: find( *memoryBlocks, p );
-      assert( mb );
-      memorymap_t& freeMap = freePointer[ mb ];
-      AllocEntry& ae = freeMap[ blockSize ];
-      ae.S.push( p );
-      mb->free( p, blockSize );
-    }
-  }
-
-  {
-    assert( memoryBlocks->size() > 0 );
-    typedef MemoryBlockVector_t :: iterator  stiterator ;
-    const stiterator end = memoryBlocks->end();
-    for( stiterator it =  memoryBlocks->begin(); it != end; ++it ) 
-    {
-      MemoryBlock* mb = (*it);
-      if( mb->empty() ) 
-      {
-        memoryBlocks->erase( it++ );
-        delete mb ;
-        std::cout << "Delete memory block" << endl;
-      }
-      else 
-      {
-        memorymap_t& freeMap = freePointer[ mb ];
-        const iterator endm = freeMap.end();
-        for( iterator itm = freeMap.begin(); itm != endm; ++itm ) 
-        {
-          const size_t blockSize = (*itm).first ;
-          AllocEntry& ae = (*itm).second ;
-          AllocEntry& fs = backup[ blockSize ];
-          while ( ae.S.empty() ) 
-          {
-            fs.S.push( ae.S.top() );
-            ae.S.pop();
-          }
-        }
-      }
-    }
+    destroy_mspace( ALUGridMemorySpace );
+    ALUGridMemorySpace = create_mspace( 0, 0 );
   }
 #endif
 }
@@ -382,13 +255,11 @@ MyAlloc :: Initializer :: Initializer ()
 {
   if ( ! MyAlloc :: _initialized ) 
   {
+#if ONLY_MSPACES 
+    ALUGridMemorySpace = create_mspace( 0, 0 );
+#else
     freeStore = new memorymap_t () ;
     assert (freeStore) ;
-
-#ifdef ALUGRID_GARBAGE_COLLECTION
-    memoryBlocks = new MemoryBlockVector_t ();
-    MemoryBlock* block = new MemoryBlock();
-    memoryBlocks->push_back( block );
 #endif
 
     MyAlloc :: _initialized = true;
@@ -400,15 +271,17 @@ MyAlloc :: Initializer :: ~Initializer ()
 {
   if ( MyAlloc :: _initialized ) 
   {
-    if(freeStore) delete freeStore ;
-    freeStore = 0 ;
-
-#ifdef ALUGRID_GARBAGE_COLLECTION
-    while( ! memoryBlocks->empty() ) 
+#if ONLY_MSPACES 
+    if( ALUGridMemorySpace ) 
     {
-      MemoryBlock* mb = memoryBlocks->back();
-      memoryBlocks->pop_back();
-      delete mb;
+      destroy_mspace( ALUGridMemorySpace );
+      ALUGridMemorySpace = 0;
+    }
+#else
+    if(freeStore) 
+    {
+      delete freeStore ;
+      freeStore = 0 ;
     }
 #endif
 
