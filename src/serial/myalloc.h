@@ -5,7 +5,6 @@
 #define MYALLOC_H_INCLUDED
 
 #ifndef DONT_USE_ALUGRID_ALLOC 
-#warning "Using ALUGrid internal memory management!"
 
 class MyAlloc {
   // max number of storable items per stack 
