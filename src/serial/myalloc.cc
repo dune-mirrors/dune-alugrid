@@ -1,7 +1,7 @@
 #ifndef DONT_USE_ALUGRID_ALLOC
 #warning "Using ALUGrid's internal memory management!"
 
-//#define ONLY_MSPACES 1 
+#define ONLY_MSPACES 1 
 
 #include "myalloc.h"
 
@@ -16,7 +16,7 @@ bool MyAlloc :: _freeAllowed = true ;
 
 #if ONLY_MSPACES 
 #warning "Using DL malloc"
-#include "malloc.c"
+#include "dlmalloc.c"
 static void*  ALUGridMemorySpace = 0 ;
 static size_t ALUGridMemSpaceAllocated = 0;
 #else
