@@ -551,6 +551,7 @@ template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
 
     void readDynamicState (ObjectStream &, GatherScatterType &);
     void writeDynamicState (ObjectStream &, GatherScatterType &) const;
+    using BndsegPllBaseX :: writeDynamicState ;
     
     void getRefinementRequest (ObjectStream &) ;
     bool setRefinementRequest (ObjectStream &) ;
@@ -837,16 +838,7 @@ public :
         virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter :: hbndseg_STI :: bnd_t (&)[2] ) ;
         virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter :: hbndseg_STI :: bnd_t (&)[2] ) ;
 
-        IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const ;
-        IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const ;
-        IteratorSTI < hedge_STI > * iterator (const hedge_STI *) const ;
-        IteratorSTI < hedge_STI > * iterator (const IteratorSTI < hedge_STI > *) const ;
-        IteratorSTI < hface_STI > * iterator (const hface_STI *) const ;
-        IteratorSTI < hface_STI > * iterator (const IteratorSTI < hface_STI > *) const ;
-        IteratorSTI < helement_STI > * iterator (const helement_STI *) const ;
-        IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) const ;
-        IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const ;
-        IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const ;
+        using GitterBasis :: MacroGitterBasis :: iterator ;
       public :
         MacroGitterBasisPll (Gitter * , istream &) ;
         MacroGitterBasisPll (Gitter * ) ;

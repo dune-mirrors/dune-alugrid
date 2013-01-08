@@ -428,6 +428,11 @@ public:
   // type of used object stream 
   typedef GatherScatterType :: ObjectStreamType   ObjectStreamType;
 
+  using GatherScatterType :: containsItem ;
+  using GatherScatterType :: sendData ;
+  using GatherScatterType :: recvData ;
+  using GatherScatterType :: setData ;
+
   // only contains edge information 
   virtual bool contains ( int dim, int codim ) const { return codim == 2 ; }
   // every element is contained 

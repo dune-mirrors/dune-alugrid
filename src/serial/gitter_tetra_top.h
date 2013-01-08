@@ -190,6 +190,7 @@ template < class A > class Hbnd3Top : public A {
                      typename Gitter::helement_STI * gh, int gFace ) ;
 
     inline virtual ~Hbnd3Top () ;
+    using A :: refineBalance ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
     void restoreFollowFace () ;
@@ -558,6 +559,7 @@ template < class A > class TetraTop : public A
     myrule_t requestrule () const ;
     bool refine () ;
     void request (myrule_t) ;
+    using A :: refineBalance ;
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;
@@ -668,6 +670,7 @@ template < class A > class Periodic3Top : public A {
     myrule_t getrule () const ;
     bool refine () ;
     void request (myrule_t) ;
+    using A :: refineBalance ;
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;

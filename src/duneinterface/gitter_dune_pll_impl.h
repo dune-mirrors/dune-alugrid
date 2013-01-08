@@ -93,7 +93,7 @@ protected:
 public:  
   using GitterPll :: duneRepartitionMacroGrid;
   using GitterPll :: repartitionMacroGrid ;
- 
+
   // notifyMacroGridChanges for dune
   void duneNotifyMacroGridChanges (); 
   
@@ -189,7 +189,11 @@ public:
     return grd ;
   }
 
+  using GitterDuneBasis :: restore ;
+  using GitterDuneBasis :: backup ;
+ 
 private:
+
   // restore grid from istream, needed to be overloaded 
   // because before restoring follow faces, index manager has to be
   // restored 

@@ -59,5 +59,7 @@ public:
   vector < vector < int > > gcollect (const vector < int > &) const ;
   vector < vector < double > > gcollect (const vector < double > &) const ;
   vector < ObjectStream > gcollect (const ObjectStream &, const vector<int>& ) const ;
+  using MpAccessMPI :: gcollect ;
+  using MpAccessMPI :: gmax ;
 } ;
 #endif

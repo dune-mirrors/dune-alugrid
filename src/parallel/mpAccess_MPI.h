@@ -110,6 +110,9 @@ public:
   void bcast(double*, int, int ) const; 
   int exscan ( int ) const ;
   int scan ( int ) const ;
+
+  using MpAccessLocal :: gcollect ;
+
   vector < int > gcollect (int) const ;
   vector < double > gcollect (double) const ;
   vector < vector < int > > gcollect (const vector < int > &) const ;

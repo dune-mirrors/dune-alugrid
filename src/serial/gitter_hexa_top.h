@@ -352,6 +352,7 @@ template < class A > class Hbnd4Top : public A
     inline Hbnd4Top (int,myhface4_t *,int, const bnd_t bt ) ;
 
     virtual ~Hbnd4Top () ;
+    using A :: refineBalance ;
     bool refineBalance (balrule_t,int) ;
     bool bndNotifyCoarsen () ;
     void restoreFollowFace () ;
@@ -442,6 +443,7 @@ template < class A > class HexaTop : public A {
     myrule_t requestrule () const ;
     bool refine () ;
     void request (myrule_t) ;
+    using A :: refineBalance ;
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;
@@ -552,6 +554,7 @@ template < class A > class Periodic4Top : public A {
     myrule_t getrule () const ;
     bool refine () ;
     void request (myrule_t) ;
+    using A :: refineBalance ;
     bool refineBalance (balrule_t,int) ;
     bool coarse () ;
     bool bndNotifyCoarsen () ;

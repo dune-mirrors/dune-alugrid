@@ -773,6 +773,9 @@ public :
       }
     }
 
+    using ElementPllXIF :: writeDynamicState ;
+    using ElementPllXIF :: readDynamicState ;
+
     virtual void writeDynamicState (ObjectStream &os, int i) const
     { 
       assert( up() != 0 );

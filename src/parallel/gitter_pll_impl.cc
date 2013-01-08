@@ -2058,46 +2058,6 @@ insert_hbnd3 (hface3_GEO * f, int t,
   }
 }
 
-IteratorSTI < Gitter :: vertex_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const vertex_STI * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: vertex_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const IteratorSTI < vertex_STI > * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: hedge_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const hedge_STI * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: hedge_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const IteratorSTI < hedge_STI > * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: hface_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const hface_STI * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: hface_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const IteratorSTI < hface_STI > * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: helement_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const helement_STI * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: helement_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const IteratorSTI < helement_STI > * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: hbndseg_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const hbndseg_STI * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
-IteratorSTI < Gitter :: hbndseg_STI > * GitterBasisPll :: MacroGitterBasisPll :: iterator (const IteratorSTI < hbndseg_STI > * a) const {
-  return GitterBasis :: MacroGitterBasis :: iterator (a) ;
-}
-
 GitterBasisPll :: GitterBasisPll (MpAccessLocal & mpa) 
   : GitterPll(mpa), 
     _mpaccess(mpa), _macrogitter (0) , _ppv( 0 ) 
