@@ -461,14 +461,15 @@ void Element < N, NV >::switchorientation(int a,int b)
   connect.nb[a]->nbconnect(connect.bck[a],this,a);
   connect.nb[b]->nbconnect(connect.bck[b],this,b);
 
-  if (numvertices() == 4)
+  const int lastVx = numvertices() - 1 ;
+  // only do this for cubes 
+  if ( lastVx == 3 ) 
   {
     vertex_t *tmpv=connect.vtx[0];
     connect.vtx[0]=connect.vtx[1];
     connect.vtx[1]=connect.vtx[2];
-    const int last = numvertices() -1 ;
-    connect.vtx[ 2 ] = connect.vtx[ last ];
-    connect.vtx[ last ] = tmpv;
+    connect.vtx[ 2 ] = connect.vtx[ lastVx ];
+    connect.vtx[ lastVx ] = tmpv;
   }
 }
 

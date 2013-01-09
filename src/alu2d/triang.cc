@@ -630,11 +630,11 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
     this->get_splitpoint( l, p );
     vertex_t* midvtx = new fullvertex_t(p,level());
     agnc->insert(midvtx);
-    const int last = numvertices() - 1 ;
-    newtr[0] = new Triang(connect.vtx[0],newvtx[last],midvtx,newvtx[2]);
-    newtr[1] = new Triang(newvtx[last],connect.vtx[1],newvtx[0],midvtx);
+    const int lastVx = numvertices() - 1 ;
+    newtr[0] = new Triang(connect.vtx[0],newvtx[lastVx],midvtx,newvtx[2]);
+    newtr[1] = new Triang(newvtx[lastVx],connect.vtx[1],newvtx[0],midvtx);
     newtr[2] = new Triang(midvtx,newvtx[0],connect.vtx[2],newvtx[1]);
-    newtr[3] = new Triang(newvtx[2],midvtx,newvtx[1],connect.vtx[last]);
+    newtr[3] = new Triang(newvtx[2],midvtx,newvtx[1],connect.vtx[lastVx]);
     for (int i=0 ; i<4 ; ++i) {
       newtr[i]->edgeconnect(i,newedge[8+i]);
       newtr[i]->edgeconnect(i+1,newedge[8+(i+3)%4]);
@@ -878,7 +878,8 @@ int Triang < N,NV >::docoarsen4(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *
   // fetch children associated with the vertices (always the first ones)
   element_t* child[ NV ] ;
   child[ 0 ] = down() ;
-  for(int nv=1 ; nv<numvertices(); ++nv )
+  const int numVx = numvertices();
+  for(int nv=1 ; nv<numVx; ++nv )
   {
     assert( child[ nv - 1 ] ) ;
     child[ nv ] = ((helement_t *) child[ nv - 1 ])->next() ;
