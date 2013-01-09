@@ -542,7 +542,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
     // use refcount for storage of nvertices (saves 8 bytes) 
     unsigned char& nvertices () { return refcount; }
-    const unsigned char nvertices () const { return refcount; }
+    unsigned char nvertices () const { return refcount; }
 
     int nv() const { return (NV==3) ? 3 : nvertices() ; }
     int mod(const int i) const { return i % nv(); }
