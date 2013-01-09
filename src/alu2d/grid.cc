@@ -466,8 +466,9 @@ void Element < N, NV >::switchorientation(int a,int b)
     vertex_t *tmpv=connect.vtx[0];
     connect.vtx[0]=connect.vtx[1];
     connect.vtx[1]=connect.vtx[2];
-    connect.vtx[2]=connect.vtx[3];
-    connect.vtx[3]=tmpv;
+    const int last = numvertices() -1 ;
+    connect.vtx[ 2 ] = connect.vtx[ last ];
+    connect.vtx[ last ] = tmpv;
   }
 }
 

@@ -98,8 +98,10 @@ class Hmesh_basic : public IndexProvider {
   protected :
 
     struct CompatibilityVertexProjection
-    : ProjectVertex_t
+    : public ProjectVertex_t
     {
+      using ProjectVertex_t :: operator () ;
+
       typedef typename ProjectVertex_t::hbndel_t hbndel_t;
       typedef typename ProjectVertex_t::helement_t helement_t;
 

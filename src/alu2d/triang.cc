@@ -630,10 +630,11 @@ int Triang < N,NV >::split4(void * (&e)[Basic::nparts], Listagency < vertex_t > 
     this->get_splitpoint( l, p );
     vertex_t* midvtx = new fullvertex_t(p,level());
     agnc->insert(midvtx);
-    newtr[0] = new Triang(connect.vtx[0],newvtx[3],midvtx,newvtx[2]);
-    newtr[1] = new Triang(newvtx[3],connect.vtx[1],newvtx[0],midvtx);
+    const int last = numvertices() - 1 ;
+    newtr[0] = new Triang(connect.vtx[0],newvtx[last],midvtx,newvtx[2]);
+    newtr[1] = new Triang(newvtx[last],connect.vtx[1],newvtx[0],midvtx);
     newtr[2] = new Triang(midvtx,newvtx[0],connect.vtx[2],newvtx[1]);
-    newtr[3] = new Triang(newvtx[2],midvtx,newvtx[1],connect.vtx[3]);
+    newtr[3] = new Triang(newvtx[2],midvtx,newvtx[1],connect.vtx[last]);
     for (int i=0 ; i<4 ; ++i) {
       newtr[i]->edgeconnect(i,newedge[8+i]);
       newtr[i]->edgeconnect(i+1,newedge[8+(i+3)%4]);

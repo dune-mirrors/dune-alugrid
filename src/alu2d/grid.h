@@ -762,8 +762,10 @@ template < class A > class Hier : public A {
          nconf_vtx_t *ncv,
          int nconfDeg,Refco::tag_t default_ref,prolong_basic_t *pro_el);
 
-    void write(ostream & ) const { }
+    using A :: write ;
+    using A :: read  ;
 
+    void write(ostream & ) const { }
     void read(istream & ) { }
 
 } ;

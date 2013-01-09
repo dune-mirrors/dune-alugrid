@@ -70,6 +70,7 @@ class Triang : public Hier < Element < N,NV > > {
     using helement_t::opposite;
     using helement_t::setnormdir;
     using helement_t::splitrule;
+    using helement_t::read;
 
     Triang();
 
@@ -238,6 +239,7 @@ class Bndel_periodic : public Bndel_triang < N,NV >
     using bndel_triang_t::opposite;
     using bndel_triang_t::splitrule;
     using bndel_triang_t::type;
+    using bndel_triang_t::read;
 
     Bndel_periodic *periodic_nb;
 
