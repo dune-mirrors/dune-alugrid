@@ -3,4 +3,3 @@ mapp_tetra_3d.cc  myalloc.cc  ghost_elements.cc ghost_info.cc \
 gitter_hexa_top.cc gitter_tetra_top.cc
 
 include $(top_srcdir)/am/global-rules
-

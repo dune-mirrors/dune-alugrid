@@ -3,6 +3,8 @@
 
 #include "alumetis.hh"
 
+#include "mpAccess.h"
+
 #if HAVE_PARMETIS
 // partitioning libs 
 // ParMETIS if not found here then dummy version is included 
