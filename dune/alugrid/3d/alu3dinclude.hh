@@ -29,10 +29,10 @@
 
 // if MPI was found include all headers 
 #if ALU3DGRID_PARALLEL
-#include <alugrid_parallel.h>
+#include <dune/alugrid/src/alugrid_parallel.h>
 #else  
 // if not, include only headers for serial version 
-#include <alugrid_serial.h>
+#include <dune/alugrid/src/alugrid_serial.h>
 #endif
 
 //- local includes 

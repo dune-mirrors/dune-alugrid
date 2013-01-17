@@ -3,7 +3,7 @@
 
 #define ALU2DGRID_COMPATIBILITY_LEVEL 2
 
-#include <alugrid_2d.h>
+#include <dune/alugrid/src/alugrid_2d.h>
 
 //////////////////////////////////////////////////////////////////////
 // compile imp.cc into lib (1 yes, 0 no)
