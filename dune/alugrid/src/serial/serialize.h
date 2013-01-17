@@ -5,8 +5,11 @@
 #define SERIALIZE_H_INCLUDED
 
 #include <cassert>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
+#include <utility>
 
 class ObjectStream;
 
@@ -199,10 +202,10 @@ public:
     // make sure that char has size of 1, 
     // otherwise check doExchange in mpAccess_MPI.cc 
     char * buffer = (char *) malloc (newSize * sizeof(char)) ;
-    if ( ! buffer ) 
+    if( !buffer )
     {
-      perror ("**EXCEPTION in ObjectStream :: allocateBuffer(size_t) ") ;
-      throw OutOfMemoryException () ;
+      perror( "**EXCEPTION in ObjectStream::allocateBuffer( size_t ) " );
+      throw OutOfMemoryException();
     }
     return buffer;
   }
@@ -309,7 +312,8 @@ protected:
 } ;
 
 // bufchunk 0.25 Megabyte 
-class ObjectStream : public ObjectStreamImpl 
+class ObjectStream
+: public ObjectStreamImpl
 {
   typedef ObjectStreamImpl BaseType;
   
@@ -319,38 +323,36 @@ class ObjectStream : public ObjectStreamImpl
   // true if object stream was not set 
   bool notReceived_ ;
 
-public :
+public:
   // ENDOFSTREAM should be in range of char, i.e. 0 to 256 
   // and not conflict with refinement rules in gitter_sti.h 
   static const char ENDOFSTREAM = 127;
   
   // create empty object stream 
-  inline ObjectStream () 
-    : BaseType(BufChunk),
-      notReceived_( true )
-  {
-  } 
+  ObjectStream () 
+  : BaseType( BufChunk ),
+    notReceived_( true )
+  {} 
   
   // create empty object stream with given chunk size 
-  explicit ObjectStream ( const size_t chunkSize ) 
+  explicit ObjectStream ( const std::size_t chunkSize ) 
     : BaseType( chunkSize ),
       notReceived_( true )
-  {
-  } 
+  {} 
   
   // copy constructor 
-  inline ObjectStream (const ObjectStream & os) 
-    : BaseType(os),
-      notReceived_( true )
+  ObjectStream ( const ObjectStream &os )
+  : BaseType( static_cast< const BaseType & >( os ) ),
+    notReceived_( true )
   {} 
  
 public:  
   // assigment of streams, owner ship of buffer is 
   // passed from os to this stream to avoid copy of large memory areas 
-  inline ObjectStream & operator = (const ObjectStream & os) 
+  ObjectStream &operator= ( const ObjectStream &os )
   {
-    BaseType::operator =(os); 
-    notReceived_ = os.notReceived_ ;
+    static_cast< BaseType & >( *this ) = static_cast< const BaseType & >( os );
+    notReceived_ = os.notReceived_;
     return *this;
   }
   
@@ -368,10 +370,10 @@ protected:
   // assign pair of char buffer and size to this object stream 
   // osvec will contain zeros after that assignment 
   // used by mpAccess_MPI.cc 
-  ObjectStream &operator = ( std::pair< char *, int > &osvec )
+  ObjectStream &operator= ( std::pair< char *, int > &osvec )
   {
-    BaseType :: removeObj();
-    BaseType :: assign( osvec.first , osvec.second );
+    BaseType::removeObj();
+    BaseType::assign( osvec.first, osvec.second );
     // reset osvec
     osvec.first = 0;
     osvec.second = 0;
