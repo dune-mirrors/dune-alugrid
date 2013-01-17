@@ -1,4 +1,4 @@
-alucommondir = $(includedir)/dune/grid/alugrid/common
+alucommondir = $(includedir)/dune/alugrid/common
 alucommon_HEADERS = backuprestore.hh \
                     bndprojection.hh  \
                     checkparallel.hh \
