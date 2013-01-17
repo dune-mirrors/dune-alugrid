@@ -1,15 +1,22 @@
 // (c) bernhard schupp 1997 - 1999
 #ifndef GITTER_PLL_LDB_H_INCLUDED
 #define GITTER_PLL_LDB_H_INCLUDED
- 
+
+#include <map>
+#include <set>
+#include <vector>
+
 #include "../serial/key.h"
+#include "../serial/myalloc.h"
 #include "mpAccess.h"
 
-class LoadBalancer {
+class LoadBalancer
+{
   public :
     static inline bool debugOption (int = 0) ;
   public :
-    class GraphEdge : public MyAlloc
+    class GraphEdge
+    : public MyAlloc
     {
       int _leftNode ;
       int _rightNode ;
@@ -53,22 +60,29 @@ class LoadBalancer {
         inline void writeToStream  (ObjectStream &) const ;
     } ;
 
-  public :
-    class DataBase {
+  public:
+    class DataBase
+    {
       public :
-        typedef map < GraphVertex, int, less < GraphVertex > >  ldb_vertex_map_t ;
-        typedef set < GraphEdge, less < GraphEdge > >           ldb_edge_set_t ;
-        typedef vector< int >                                   ldb_vector_t ;
+        typedef std::map< GraphVertex, int > ldb_vertex_map_t;
+        typedef std::set< GraphEdge > ldb_edge_set_t;
+        typedef std::vector< int > ldb_vector_t;
+
       public :
-        class AccVertexLoad {
-          public :
-            inline int operator () (int,const pair < const GraphVertex, int > &) const ;
-        } ;
-        class AccEdgeLoad {
-          public :
-            inline int operator () (int, const GraphEdge &) const ;
-        } ;
-        typedef set < int, less < int > > ldb_connect_set_t ;
+        class AccVertexLoad
+        {
+        public :
+          int operator () ( int, const std::pair< const GraphVertex, int > & ) const;
+        };
+
+        class AccEdgeLoad
+        {
+        public :
+          int operator () ( int, const GraphEdge & ) const;
+        };
+
+        typedef std::set< int > ldb_connect_set_t;
+
       private :
         int _minFaceLoad ;
         int _maxFaceLoad ;
@@ -80,7 +94,7 @@ class LoadBalancer {
 
         // contains the sizes of the partition (vertices and edges of each proc)
         // if this is zero, then the sizes will be communicated 
-        vector<int> _graphSizes ;
+        std::vector< int > _graphSizes;
         // true if no periodic faces are present 
         mutable bool _noPeriodicFaces ;
       public :
@@ -112,38 +126,42 @@ class LoadBalancer {
         } ;
       private :
         template <class idx_t>
-        void graphCollect (const MpAccessGlobal &,
-                           insert_iterator < ldb_vertex_map_t >,
-                           insert_iterator < ldb_edge_set_t >,
-                           idx_t* , const bool ) const ;
+        void graphCollect ( const MpAccessGlobal &,
+                            std::insert_iterator< ldb_vertex_map_t >,
+                            std::insert_iterator< ldb_edge_set_t >,
+                            idx_t *, const bool ) const;
 
         template <class idx_t>
-        void graphCollectAllgather (const MpAccessGlobal &,
-                                    insert_iterator < ldb_vertex_map_t >,
-                                    insert_iterator < ldb_edge_set_t >,
-                                    idx_t* , const bool ) const ;
+        void graphCollectAllgather ( const MpAccessGlobal &,
+                                     std::insert_iterator< ldb_vertex_map_t >,
+                                     std::insert_iterator< ldb_edge_set_t >,
+                                     idx_t* , const bool ) const ;
 
         template <class idx_t>
-        void graphCollectBcast (const MpAccessGlobal &,
-                                insert_iterator < ldb_vertex_map_t >,
-                                insert_iterator < ldb_edge_set_t >,
-                                idx_t* , const bool ) const ;
+        void graphCollectBcast ( const MpAccessGlobal &,
+                                 std::insert_iterator < ldb_vertex_map_t >,
+                                 std::insert_iterator < ldb_edge_set_t >,
+                                 idx_t* , const bool ) const ;
       public :
-        const vector<int>& graphSizes() const { return _graphSizes ; }
-        void clearGraphSizesVector () 
+        const std::vector< int > &graphSizes () const { return _graphSizes ; }
+
+        void clearGraphSizesVector ()
         { 
           // clear graph size and also deallocate memory 
-          vector<int> ().swap( _graphSizes );
-          _noPeriodicFaces = false ;
+          std::vector< int >().swap( _graphSizes );
+          _noPeriodicFaces = false;
         }
 
-        static const char * methodToString (method) ;
-        inline DataBase () ;
-        explicit DataBase ( const vector<int>& graphSizes ) ;
-        inline DataBase (const DataBase &) ;
-        inline virtual ~DataBase () ;
-        inline int nEdges () const ;
-        inline int nVertices () const ;
+        static const char *methodToString( method );
+
+        DataBase ();
+        explicit DataBase ( const std::vector< int > &graphSizes );
+        DataBase ( const DataBase & );
+
+        virtual ~DataBase ();
+
+        int nEdges () const;
+        int nVertices () const;
         void edgeUpdate (const GraphEdge &) ;
         void vertexUpdate (const GraphVertex &) ;
         void printLoad () const ;
@@ -164,15 +182,12 @@ class LoadBalancer {
 
         // original repartition method for ALUGrid 
         bool repartition (MpAccessGlobal &, method) ;
-        // repartition to be called from outside (communicator ALU2d)
-        vector< int > repartition (MpAccessGlobal &, 
-                                   method,
-                                   const int ) ;
+
+        std::vector< int > repartition ( MpAccessGlobal &, method, int );
+
       protected:  
-        // implementation of repartition 
-        bool repartition (MpAccessGlobal &, method,
-                          vector< int >& , const int ) ;
-    } ;
+        bool repartition ( MpAccessGlobal &, method, std::vector< int > &, int );
+    };
 } ;
 
   //
@@ -330,10 +345,10 @@ inline LoadBalancer :: DataBase :: DataBase () : _minFaceLoad (0), _maxFaceLoad 
 {
 }
 
-inline LoadBalancer :: DataBase :: DataBase ( const vector<int>& graphSizes ) : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
+inline LoadBalancer :: DataBase :: DataBase ( const std::vector< int > &graphSizes )
+: _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
   _edgeSet (), _vertexSet (), _graphSizes( graphSizes ), _noPeriodicFaces( true ) 
-{
-}
+{}
 
 inline LoadBalancer :: DataBase :: DataBase (const DataBase & b) : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
     _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
@@ -356,17 +371,18 @@ inline int LoadBalancer :: DataBase :: nVertices () const {
   return _vertexSet.size () ;
 }
  
-inline int LoadBalancer :: DataBase :: AccVertexLoad :: operator () (int s,const pair < const GraphVertex, int > & p) const {
-  return s + p.first.weight () ;
+inline int LoadBalancer :: DataBase :: AccVertexLoad :: operator() ( int s, const std::pair< const GraphVertex, int > &p ) const
+{
+  return s + p.first.weight();
 }
 
 inline int LoadBalancer :: DataBase :: AccEdgeLoad :: operator () (int s, const GraphEdge & e) const {
   return s + e.weight () ;
 }
 
-inline int LoadBalancer :: DataBase :: maxVertexLoad () const {
+inline int LoadBalancer :: DataBase :: maxVertexLoad () const
+{
   return _maxVertexLoad ;
 }
 
 #endif
-

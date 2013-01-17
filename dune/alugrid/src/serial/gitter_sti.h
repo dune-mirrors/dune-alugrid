@@ -4,15 +4,16 @@
 
 #include <limits>
 
+//! type of coordinate storage 
+typedef double alucoord_t;
+
 #include "../indexstack.h"
 #include "../projectvertex.h"
 
+#include "elementif.h"
 #include "myalloc.h"
 #include "parallel.h"
 #include "refinementrules.h"
-
-//! type of coordinate storage 
-typedef double alucoord_t;
 
 // interface class for projecting vertices for boundary adjustment 
 typedef VertexProjection< 3, alucoord_t > ProjectVertex;
@@ -313,15 +314,11 @@ template < class A > class LevelIterator ;
 
 
 // --Gitter 
-class Gitter {
-public :
-
+class Gitter
+{
+public:
   class helement ;
   class hbndseg ;
-///////////////////////////////////////////////////
-//  parallel element interfaces 
-///////////////////////////////////////////////////
-#include "elementif.h"
 
 ///////////////////////////////////////////////////
 

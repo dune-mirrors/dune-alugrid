@@ -80,10 +80,10 @@ class MacroGridMoverDefault : public MacroGridMoverIF {
   //       implementations of LinkedObject also derive from MacroGridMoverIf,
   //       this saves the additional pointer to the vtbl of MacroGridMoverIf.
 
-class LinkedObject : public MacroGridMoverDefault
+class LinkedObject
+: public MacroGridMoverDefault
 {
-  public :
-  
+public:
   // Der Identifier wird f"ur alle Gitterobjekte einheitlich verwendet.
   // Er ist der Schl"ussel f"ur die Identifikation der mehrdeutigen
   // Gitterobjekte. Kanten benutzen eine Schl"ussell"ange von zwei,
@@ -93,28 +93,29 @@ class LinkedObject : public MacroGridMoverDefault
   // Die Schnittstelle wird von den Parallelerweiterungen der Knoten
   // Kanten, Fl"achen und (sp"ater auch) Elemente implementiert.
   
-    class Identifier
-    {
-      int _i1, _i2, _i3, _i4 ;
-    public :
-      inline Identifier (int = -1, int = -1, int = -1, int = -1) ;
-      inline Identifier (const Identifier &) ;
-      inline const Identifier & operator = (const Identifier &) ;
-      inline bool operator < (const Identifier &) const ;
-      inline bool operator == (const Identifier &) const ;
-      void read ( std::vector< int >::const_iterator &, const std::vector< int >::const_iterator & );
-      void write ( std::vector< int > &) const ;
-      inline bool isValid () const ;
-    } ;
-
+  class Identifier
+  {
+    int _i1, _i2, _i3, _i4 ;
   public :
-    virtual ~LinkedObject () {}
+    inline Identifier (int = -1, int = -1, int = -1, int = -1) ;
+    inline Identifier (const Identifier &) ;
+    inline const Identifier & operator = (const Identifier &) ;
+    inline bool operator < (const Identifier &) const ;
+    inline bool operator == (const Identifier &) const ;
+    void read ( std::vector< int >::const_iterator &, const std::vector< int >::const_iterator & );
+    void write ( std::vector< int > &) const ;
+    inline bool isValid () const ;
+  } ;
 
-    virtual Identifier getIdentifier () const = 0 ;
-    virtual std::vector< int > estimateLinkage () const = 0;
+public :
+  virtual ~LinkedObject () {}
+
+  virtual Identifier getIdentifier () const = 0 ;
+  virtual std::vector< int > estimateLinkage () const = 0;
 };
 
-class LinkedObjectDefault : public LinkedObject
+class LinkedObjectDefault
+: public LinkedObject
 {
   public :
     virtual ~LinkedObjectDefault () {}

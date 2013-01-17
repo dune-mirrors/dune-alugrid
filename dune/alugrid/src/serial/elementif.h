@@ -5,6 +5,20 @@
 #include <utility>
 #include <vector>
 
+#include "../parallel/gitter_pll_ldb.h"
+
+#include "parallel.h"
+#include "refinementrules.h"
+
+
+// ParallelException
+// -----------------
+
+struct ParallelException 
+{
+  class AccessPllException {};
+};
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //
@@ -12,10 +26,6 @@
 //
 //
 //////////////////////////////////////////////////////////////////////////////
-struct ParallelException 
-{
-  class AccessPllException {};
-};
 
 class VertexPllXIF
 : public LinkedObjectDefault //, public MacroGridMoverIF
@@ -110,17 +120,19 @@ public:
 
   // returns true if a vertex projection is set 
   virtual bool hasVertexProjection () const { abort(); return false; }
+
   virtual ElementPllXIF& accessPllX () throw (stiExtender_t :: AccessPllException)
   {
-    cerr << "ERROR: hasFace::accessPllX not overloaded! " << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << "ERROR: hasFace::accessPllX has not been overloaded." << std::endl;
     abort();
-    throw stiExtender_t :: AccessPllException () ;
+    throw stiExtender_t::AccessPllException();
   }
+
   virtual const ElementPllXIF& accessPllX () const throw (stiExtender_t :: AccessPllException)
   {
-    cerr << "ERROR: hasFace::accessPllX not overloaded! " << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << "ERROR: hasFace::accessPllX has not been overloaded." << std::endl;
     abort();
-    throw stiExtender_t :: AccessPllException () ;
+    throw stiExtender_t::AccessPllException();
   }
 
   virtual void attachElement2( const int destination, const int face ) { abort(); }
@@ -137,7 +149,8 @@ public:
 
 
 // type of ElementPllXIF_t is ElementPllXIF, see parallel.h
-class ElementPllXIF : public hasFace 
+class ElementPllXIF
+: public hasFace 
 {
   protected :
     virtual ~ElementPllXIF () {}
@@ -152,7 +165,8 @@ class ElementPllXIF : public hasFace
     virtual accesspair_t accessInnerPllX (const accesspair_t&, int f) { return accesspair_t( this , f ); }
     virtual constaccesspair_t accessInnerPllX (const constaccesspair_t &, int f) const { return constaccesspair_t( this , f ); }
   public :
-    typedef std::pair< helement *, int > ghostpair_t ;
+    typedef std::pair< helement *, int > ghostpair_t;
+
     virtual ghostpair_t getGhost () 
     { 
       std::cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<< std::endl;

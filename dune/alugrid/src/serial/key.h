@@ -2,26 +2,28 @@
 #ifndef KEY_H_INCLUDED
 #define KEY_H_INCLUDED
 
-template < class A > class Key3 {
-  protected :
-    A _a, _b, _c ;
-  public :
-    inline Key3 () ;
-    inline Key3 (const A &,const A &,const A &) ;
-    inline Key3 (const Key3 < A > &) ;
-    inline const Key3 < A > & operator = (const Key3 < A > &) ;
-    inline bool operator < (const Key3 < A > &) const ;
+template < class A > class Key3
+{
+protected :
+  A _a, _b, _c ;
+public :
+  Key3 () ;
+  Key3 (const A &,const A &,const A &) ;
+  Key3 (const Key3 < A > &) ;
+  const Key3 < A > & operator = (const Key3 < A > &) ;
+  bool operator < (const Key3 < A > &) const ;
 } ;
 
-template < class A > class Key4 {
+template < class A > class Key4
+{
   protected :
     A _a, _b, _c, _d ;
   public :
-    inline Key4 () ;
-    inline Key4 (const A &, const A &, const A &, const A &) ;
-    inline Key4 (const Key4 < A > &) ;
-    inline const Key4 < A > & operator = (const Key4 < A > &) ;
-    inline bool operator < (const Key4 < A > &) const ;
+    Key4 () ;
+    Key4 (const A &, const A &, const A &, const A &) ;
+    Key4 (const Key4 < A > &) ;
+    const Key4 < A > & operator = (const Key4 < A > &) ;
+    bool operator < (const Key4 < A > &) const ;
 } ;
 
 template < class A > inline Key3 < A > :: Key3 () : _a (-1), _b (-1), _c (-1) {
