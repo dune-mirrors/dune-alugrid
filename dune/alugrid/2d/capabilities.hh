@@ -1,9 +1,6 @@
 #ifndef DUNE_ALU2DGRID_CAPABILITIES_HH
 #define DUNE_ALU2DGRID_CAPABILITIES_HH
 
-// only include this code, if ENABLE_ALUGRID is defined
-#if HAVE_ALUGRID
-
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
 #include <dune/grid/alugrid/common/declaration.hh>
@@ -234,7 +231,5 @@ namespace Dune
   } // namespace Capabilities
 
 } // namespace Dune 
-
-#endif // #if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALU2DGRID_CAPABILITIES_HH
