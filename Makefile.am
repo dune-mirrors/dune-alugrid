@@ -1,16 +1,25 @@
-# don't follow the full GNU-standard
-AUTOMAKE_OPTIONS = foreign 1.5
+EXTRA_DIST = dune.module
 
-# do everything in the subdirs
-SUBDIRS = src misc 
+SUBDIRS = doc m4 dune
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = alugrid.pc
+DISTCHECK_CONFIGURE_FLAGS = --with-dune-common=$(DUNE_COMMON_ROOT) --dune-geometry=$(DUNE_GEOMETRY_ROOT) --with-dune-grid=$(DUNE_GRID_ROOT) CXX="$(CXX)" CC="$(CC)"
 
 SOURCEFILE_MASK = -name \*.h -o -name \*.hh -o -name \*.c -o -name \*.cc
 
-# add library name, authors list, and license to progam files
+# add library name, authors list, and license to source files
 dist-hook:
-	if test -f ./addauthors.sh ; then \
-		find $(distdir) \( $(SOURCEFILE_MASK) \) -exec ./addauthors.sh ./AUTHORS {} \; ; \
-	fi
+	@for SOURCEFILE in `find $(distdir) \( $(SOURCEFILE_MASK) \) -print` ; do \
+	  TMPFILE=`mktemp authors.XXXXXX` ; \
+	  echo "/******************************************************************************" > $$TMPFILE ; \
+	  echo "" >> $$TMPFILE ; \
+	  cat $(top_srcdir)/AUTHORS >> $$TMPFILE ; \
+	  echo "" >> $$TMPFILE ; \
+	  echo "******************************************************************************/" >> $$TMPFILE ; \
+	  echo "" >> $$TMPFILE ; \
+	  cat $$SOURCEFILE >> $$TMPFILE ; \
+	  cp $$TMPFILE $$SOURCEFILE ; \
+	  rm -f $$TMPFILE ; \
+	done
+
+include $(top_srcdir)/am/top-rules
+include $(top_srcdir)/am/global-rules

@@ -1,0 +1,4 @@
+Module: dune-alugrid
+Version: 2.3
+Maintainer: alugrid@mathematik.uni-freiburg.de
+Depends: dune-grid (>= 2.3)
