@@ -1,7 +1,7 @@
 #ifndef DUNE_ALUGRID_CHECKPARALLEL_HH
 #define DUNE_ALUGRID_CHECKPARALLEL_HH
 
-#include <alugrid_defineparallel.h>
+#include <dune/alugrid/src/parallel/alugrid_defineparallel.h>
 
 #if HAVE_MPI
   // if this variable is defined, 

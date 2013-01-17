@@ -5,13 +5,13 @@
 #ifndef GITTER_PLL_IMPL_H_INCLUDED
 #define GITTER_PLL_IMPL_H_INCLUDED
 
-#include "myalloc.h"
-#include "gitter_impl.h"
-#include "walk.h"
+#include "../serial/myalloc.h"
+#include "../serial/gitter_impl.h"
+#include "../serial/walk.h"
   
 #include "gitter_pll_sti.h"
 #include "gitter_pll_ldb.h"
-#include "ghost_elements.h"
+#include "../serial/ghost_elements.h"
 
   // Der vector < int > wird als sog. linkagepattern, also als
   // Verbindungsmuster eingesetzt. Die Verbindungsmuster werden

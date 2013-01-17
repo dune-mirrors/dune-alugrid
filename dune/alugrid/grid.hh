@@ -2,7 +2,6 @@
 #define DUNE_ALUGRID_HH
 
 // only include this code, if HAVE_ALUGRID is true
-#if HAVE_ALUGRID
 
 #include <dune/alugrid/common/declaration.hh>
 
@@ -86,7 +85,5 @@ class ALUSimplexGrid;
 #include <dune/alugrid/common/declaration.hh>
 
 } //end  namespace Dune 
-
-#endif // #ifdef HAVE_ALUGRID
 
 #endif

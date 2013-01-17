@@ -2,7 +2,7 @@
 #ifndef GITTER_PLL_LDB_H_INCLUDED
 #define GITTER_PLL_LDB_H_INCLUDED
  
-#include "key.h"
+#include "../serial/key.h"
 #include "mpAccess.h"
 
 class LoadBalancer {
