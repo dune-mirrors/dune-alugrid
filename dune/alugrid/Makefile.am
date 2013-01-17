@@ -1,4 +1,4 @@
-dunedir = $(includedir)/dune
+alugriddir = $(includedir)/dune/alugrid
 
 SUBDIRS = 
 
