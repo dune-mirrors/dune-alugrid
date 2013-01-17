@@ -7,6 +7,9 @@
 #include "myalloc.h"
 #include "serialize.h"
 
+struct GatherScatter;
+typedef GatherScatter GatherScatterType;
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //
@@ -59,9 +62,9 @@ class MacroGridMoverDefault : public MacroGridMoverIF {
     virtual void attach2   (int) { assert(false);abort(); }
     virtual void unattach2 (int) { assert(false);abort(); }
 
-    virtual bool packAll (vector < ObjectStream > &) { assert(false);abort(); }
-    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) { assert(false);return false; }
-    virtual void unpackSelf (ObjectStream &,bool) { assert(false);abort(); }
+    virtual bool packAll ( std::vector< ObjectStream > &) { assert(false); abort(); }
+    virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) { assert(false); return false; }
+    virtual void unpackSelf ( ObjectStream &, bool ) { assert(false); abort(); }
     virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType *) {assert(false);}
 } ;
 
@@ -99,23 +102,24 @@ class LinkedObject : public MacroGridMoverDefault
       inline const Identifier & operator = (const Identifier &) ;
       inline bool operator < (const Identifier &) const ;
       inline bool operator == (const Identifier &) const ;
-      inline void read (vector < int > :: const_iterator &, const vector < int > :: const_iterator &) ;
-      inline void write (vector < int > &) const ;
+      void read ( std::vector< int >::const_iterator &, const std::vector< int >::const_iterator & );
+      void write ( std::vector< int > &) const ;
       inline bool isValid () const ;
     } ;
 
   public :
     virtual ~LinkedObject () {}
+
     virtual Identifier getIdentifier () const = 0 ;
-    virtual vector < int > estimateLinkage () const = 0 ;
-} ;
+    virtual std::vector< int > estimateLinkage () const = 0;
+};
 
 class LinkedObjectDefault : public LinkedObject
 {
   public :
     virtual ~LinkedObjectDefault () {}
     virtual Identifier getIdentifier () const { assert(false);abort(); return Identifier(); }
-    virtual vector < int > estimateLinkage () const { assert(false);abort(); return vector<int> (); }
+    virtual std::vector< int > estimateLinkage () const { assert(false); abort(); return std::vector< int >(); }
 } ;
 
   // Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
@@ -196,20 +200,21 @@ inline bool LinkedObject :: Identifier :: operator == (const Identifier & x) con
   return (_i1 == x._i1 && _i2 == x._i2 && _i3 == x._i3 && _i4 == x._i4) ? true : false ;
 }
 
-inline void LinkedObject :: Identifier :: read (vector < int > :: const_iterator & pos,
-  const vector < int > :: const_iterator & end) {
+inline void LinkedObject::Identifier::read ( std::vector< int >::const_iterator &pos,
+                                             const std::vector< int >::const_iterator &end )
+{
   assert (pos != end ) ; _i1 = * pos ++ ;
   assert (pos != end ) ; _i2 = * pos ++ ; 
   assert (pos != end ) ; _i3 = * pos ++ ;
   assert (pos != end ) ; _i4 = * pos ++ ;
 }
 
-inline void LinkedObject :: Identifier :: write (vector < int > & v) const
+inline void LinkedObject::Identifier::write ( std::vector< int > &v ) const
 {
-  v.push_back (_i1) ;
-  v.push_back (_i2) ;
-  v.push_back (_i3) ;
-  v.push_back (_i4) ;
+  v.push_back (_i1);
+  v.push_back (_i2);
+  v.push_back (_i3);
+  v.push_back (_i4);
 }
 
 #endif // #ifndef PARALLEL_H_INCLUDED

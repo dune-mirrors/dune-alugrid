@@ -2,10 +2,11 @@
 #ifndef ALUGRIDINDEXSTACK_H_INCLUDED
 #define ALUGRIDINDEXSTACK_H_INCLUDED
 
-namespace ALUGridSpace {
-
-// use standard namespace 
-using namespace std; 
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <stack>
+#include <vector>
 
 class RestoreInfo
 {
@@ -31,9 +32,9 @@ public:
 protected:
   enum{ nCodims = 4 };
 
-  vector< bool > isHole_[ nCodims ];
+  std::vector< bool > isHole_[ nCodims ];
   const bool toggleByteOrder_;
-  vector< char > buffer_ ;
+  std::vector< char > buffer_ ;
 
 public:
   RestoreInfo( const char byteOrder )
@@ -45,7 +46,7 @@ public:
 
   size_t size() const { return nCodims; }
 
-  vector< bool >& operator() ( const size_t codim )
+  std::vector< bool >& operator() ( const size_t codim )
   {
     assert( codim < size() );
     return isHole_[ codim ];
@@ -110,7 +111,7 @@ public :
   int size () const { return _f; }
 
   // backup stack to ostream 
-  void backup ( ostream & os ) const 
+  void backup ( std::ostream & os ) const 
   {
     os.write( ((const char *) &_f ), sizeof(int) ) ;
     for(int i=0; i<size(); ++i)
@@ -120,7 +121,7 @@ public :
   }
    
   // restore stack from istream 
-  void restore ( istream & is )  
+  void restore ( std::istream & is )  
   {
     is.read ( ((char *) &_f), sizeof(int) );
     assert( _f >= 0 );
@@ -147,7 +148,7 @@ template <class T, int length>
 class ALUGridIndexStack 
 {
   typedef ALUGridFiniteStack<T,length> StackType;
-  typedef stack < StackType * > StackListType;
+  typedef std::stack< StackType * > StackListType;
   
   StackListType fullStackList_;
   StackListType emptyStackList_;
@@ -193,7 +194,7 @@ public:
 
   // all entries in vector with value true 
   // are inserted as holes 
-  void generateHoles(const vector<bool> & isHole);
+  void generateHoles(const std::vector<bool> & isHole);
 
   // remove all indices that are not used (if possible)
   void compress ();
@@ -366,7 +367,7 @@ inline void ALUGridIndexStack<T,length>::clearStack ()
 }
 template <class T, int length>
 inline void ALUGridIndexStack<T,length>::
-generateHoles(const vector<bool> & isHole) 
+generateHoles(const std::vector<bool> & isHole) 
 {
   const int idxsize = isHole.size();
   assert( idxsize == maxIndex_ );
@@ -383,7 +384,7 @@ template <class T, int length>
 inline void ALUGridIndexStack<T,length>::
 compress() 
 {
-  vector<int> tmpStorage;
+  std::vector<int> tmpStorage;
 
   if( stack_ )
   {
@@ -425,7 +426,7 @@ compress()
 
   // sort so that the larges values is at the end 
   // this sort is necessary to really free indices 
-  sort( tmpStorage.begin(), tmpStorage.end() );
+  std::sort( tmpStorage.begin(), tmpStorage.end() );
 
   // now free all indices again, freeIndex 
   // does remove the maxIndex in case of freed index is equal  
@@ -457,5 +458,4 @@ memUsage () const
 enum { lengthOfFiniteStack = 262144 }; // 2^18 
 typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
 
-} // end namespace 
 #endif

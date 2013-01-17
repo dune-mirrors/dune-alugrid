@@ -2,6 +2,7 @@
 #define REFINEMENTRULES_H_INCLUDED
 
 #include <cassert>
+#include <iostream>
 
 struct RefinementRules 
 {
@@ -142,7 +143,7 @@ inline RefinementRules :: Hedge1Rule RefinementRules :: Hedge1Rule :: rotate (in
   return Hedge1Rule( _r );
 }
 
-inline ostream &operator<< ( ostream &out, const RefinementRules :: Hedge1Rule &rule )
+inline std::ostream &operator<< ( std::ostream &out, const RefinementRules::Hedge1Rule &rule )
 {
   switch( rule )
   {
@@ -219,7 +220,7 @@ inline RefinementRules :: Hface3Rule RefinementRules :: Hface3Rule :: rotate (in
       break ;
     }
   default :
-    cerr << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << __FILE__ << " " << __LINE__ << std::endl;
     abort () ;
     return Hface3Rule (nosplit) ;
   }
@@ -227,7 +228,7 @@ inline RefinementRules :: Hface3Rule RefinementRules :: Hface3Rule :: rotate (in
   return Hface3Rule( newr );
 }
 
-inline ostream &operator<< ( ostream &out, const RefinementRules :: Hface3Rule &rule )
+inline std::ostream &operator<< ( std::ostream &out, const RefinementRules::Hface3Rule &rule )
 {
   switch( rule )
   {
@@ -290,13 +291,13 @@ inline RefinementRules :: Hface4Rule RefinementRules :: Hface4Rule :: rotate (in
   case iso4 :
     return Hface4Rule (iso4) ;
   default :
-    cerr << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << __FILE__ << " " << __LINE__ << std::endl;
     abort () ;
     return Hface4Rule (nosplit) ;
   }
 }
 
-inline ostream &operator<< ( ostream &out, const RefinementRules :: Hface4Rule &rule )
+inline std::ostream &operator<< ( std::ostream &out, const RefinementRules::Hface4Rule &rule )
 {
   switch( rule )
   {
@@ -352,7 +353,7 @@ inline bool RefinementRules :: TetraRule :: isValid () const {
   return isValid( _r );
 }
 
-inline ostream &operator<< ( ostream &out, const RefinementRules :: TetraRule &rule )
+inline std::ostream &operator<< ( std::ostream &out, const RefinementRules::TetraRule &rule )
 {
   switch( rule )
   {
@@ -420,7 +421,7 @@ inline bool RefinementRules :: HexaRule :: isValid () const {
   return isValid( _r );
 }
 
-inline ostream &operator<< ( ostream &out, const RefinementRules :: HexaRule &rule )
+inline std::ostream &operator<< ( std::ostream &out, const RefinementRules::HexaRule &rule )
 {
   switch( rule )
   {

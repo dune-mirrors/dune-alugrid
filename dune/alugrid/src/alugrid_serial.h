@@ -46,9 +46,6 @@ namespace ALUGridSpace {
 // the code needs this 
 using namespace std;   
 
-//! type of coordinate storage 
-typedef double alucoord_t ;
-
 typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
 struct GatherScatter;

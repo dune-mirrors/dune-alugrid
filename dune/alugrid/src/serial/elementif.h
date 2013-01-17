@@ -2,6 +2,9 @@
 #ifndef ELEMENTIF_H_INCLUDED
 #define ELEMENTIF_H_INCLUDED
 
+#include <utility>
+#include <vector>
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //
@@ -11,23 +14,24 @@
 //////////////////////////////////////////////////////////////////////////////
 struct ParallelException 
 {
-  class AccessPllException {} ;
+  class AccessPllException {};
 };
 
-class VertexPllXIF : public LinkedObjectDefault //, public MacroGridMoverIF
+class VertexPllXIF
+: public LinkedObjectDefault //, public MacroGridMoverIF
 {
-  protected :
-    virtual ~VertexPllXIF () {}
-  public :
-    virtual bool setLinkage (vector < int >) = 0 ;
-} ;
+protected :
+  virtual ~VertexPllXIF () {}
+public :
+  virtual bool setLinkage ( std::vector< int > ) = 0;
+};
 
 class VertexPllXDefault : public VertexPllXIF
 {
-  protected :
-    virtual ~VertexPllXDefault () {}
-  public :
-    virtual bool setLinkage (vector < int >) { assert(false);abort(); return false ; } 
+protected :
+  virtual ~VertexPllXDefault () {}
+public :
+  virtual bool setLinkage ( std::vector< int > ) { assert(false); abort(); return false; }
 } ;
 
 
@@ -138,8 +142,8 @@ class ElementPllXIF : public hasFace
   protected :
     virtual ~ElementPllXIF () {}
   public :
-    typedef pair < ElementPllXIF *, int > accesspair_t; 
-    typedef pair < const ElementPllXIF *, int > constaccesspair_t; 
+    typedef std::pair< ElementPllXIF *, int > accesspair_t; 
+    typedef std::pair< const ElementPllXIF *, int > constaccesspair_t; 
     virtual void detachPllXFromMacro () {} 
 
     // default implementation for accessInnerPllX and accessOuterPllX
@@ -148,17 +152,17 @@ class ElementPllXIF : public hasFace
     virtual accesspair_t accessInnerPllX (const accesspair_t&, int f) { return accesspair_t( this , f ); }
     virtual constaccesspair_t accessInnerPllX (const constaccesspair_t &, int f) const { return constaccesspair_t( this , f ); }
   public :
-    typedef pair<helement*, int> ghostpair_t ;
+    typedef std::pair< helement *, int > ghostpair_t ;
     virtual ghostpair_t getGhost () 
     { 
-      cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      std::cerr << "ERROR: method getGhost of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<< std::endl;
       abort(); 
       return ghostpair_t( (helement*)0 , -1); 
     }
 
     virtual int ghostLevel () const
     { 
-      cerr << "ERROR: method ghostLevel of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<<"\n";
+      std::cerr << "ERROR: method ghostLevel of Interface class should not be used! in: " << __FILE__ << " line: " <<__LINE__<< std::endl;
       abort(); 
       return 0; 
     }
@@ -170,9 +174,9 @@ class ElementPllXIF : public hasFace
       return 0; 
     }
 
-    virtual void getAttachedElement ( pair < helement* , hbndseg * > & p)
+    virtual void getAttachedElement ( std::pair< helement *, hbndseg * > &p )
     {
-      cerr << "Overload method in the classes file:" << __FILE__ << " line:" << __LINE__ << "\n";
+      std::cerr << "Overload method in the classes file:" << __FILE__ << " line:" << __LINE__ << std::endl;
       abort();
       p.first  = 0;
       p.second = 0;
@@ -204,7 +208,7 @@ class ElementPllXIF : public hasFace
     virtual void insertGhostCell(ObjectStream &,int) {}
     
   public :
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &, GatherScatter* )
+    virtual bool ldbUpdateGraphVertex ( LoadBalancer::DataBase &, GatherScatter * )
     { assert(false);abort(); return false;  }
   public :
     virtual void packAsBnd (int,int,ObjectStream &, const bool) const
@@ -325,5 +329,6 @@ class Parallel {
           throw AccessPllException () ;
         }
     } ;
-} ;
-#endif
+};
+
+#endif // #ifndef ELEMENTIF_H_INCLUDED

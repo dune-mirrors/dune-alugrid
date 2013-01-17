@@ -1,4 +1,11 @@
-lib_LTLIBRARIES = libdunealugrid.la
+lib_LTLIBRARIES = libalugrid_serial.la libdunealugrid.la
+
+libalugrid_serial_la_SOURCES = \
+	$(top_srcdir)/dune/alugrid/src/serial/gitter_tetra_top.cc
+
+libalugrid_serial_la_CPPFLAGS = $(AM_CPPFLAGS)
+libalugrid_serial_la_LDFLAGS = $(AM_LDFLAGS)
+libalugrid_serial_la_LIBADD = 
 
 libdunealugrid_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/2d/intersection.cc \

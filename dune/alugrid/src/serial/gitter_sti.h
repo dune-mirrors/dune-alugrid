@@ -2,16 +2,24 @@
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
+#include <limits>
+
+#include "../indexstack.h"
+#include "../projectvertex.h"
+
 #include "myalloc.h"
 #include "parallel.h"
 #include "refinementrules.h"
 
+//! type of coordinate storage 
+typedef double alucoord_t;
+
 // interface class for projecting vertices for boundary adjustment 
-typedef VertexProjection<3, alucoord_t > ProjectVertex;
+typedef VertexProjection< 3, alucoord_t > ProjectVertex;
 // see ../projectvertex.h 
 
 // pair of projection and bnd segment index 
-typedef pair<const ProjectVertex* , const int > ProjectVertexPair;
+typedef std::pair< const ProjectVertex *, const int > ProjectVertexPair;
 
 // forward declaration, see ghost_info.h 
 class MacroGhostInfoHexa;
@@ -25,13 +33,13 @@ struct ALUGridExternalParameters
   // return precision to be used in standard ostreams 
   static size_t& precision()
   {
-    static size_t streamPrecision = 16 ;
+    static size_t streamPrecision = 16;
     return streamPrecision;
   }
 
   // return limit of number of ranks to be used 
   // with the method MPI_Allgather 
-  static int& allGatherMaxSize() 
+  static int &allGatherMaxSize ()
   {
     // default is to use allgather
     static int rankLimit = std::numeric_limits< int > ::max();
@@ -49,8 +57,8 @@ struct ALUGridExternalParameters
 };
 
 // linkage pattern map for parallel grid (stored in IndexManagerStorage for convenience)
-typedef vector < int > linkagePattern_t ;
-typedef map < linkagePattern_t, int, less < linkagePattern_t > > linkagePatternMap_t ;
+typedef std::vector< int > linkagePattern_t;
+typedef std::map< linkagePattern_t, int > linkagePatternMap_t;
 
 // forward declaration 
 class Gitter;

@@ -4,11 +4,6 @@
 
 #define ALUGRID_VERTEX_PROJECTION
 
-namespace ALUGridSpace {
-
-// use standard namespace 
-using namespace std;
-
 // interface class for projecting vertices for boundary adjustment 
 template <int dim, class coord_t = double > 
 class VertexProjection
@@ -25,5 +20,4 @@ public:
                          coord_t (&ret)[dim]) const = 0;
 };
 
-} // end namespace 
-#endif
+#endif // #ifndef ALUGRIDVERTEXPROJECTION_H_INCLUDED

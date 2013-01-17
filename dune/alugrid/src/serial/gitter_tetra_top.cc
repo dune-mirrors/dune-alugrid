@@ -1,4 +1,5 @@
 // (c) Robert Kloefkorn 2010 
+#include <config.h>
 
 #include "mapp_tetra_3d.h"
 #include "gitter_tetra_top.h"
