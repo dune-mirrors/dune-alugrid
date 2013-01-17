@@ -1,7 +1,7 @@
 #ifndef DUNE_ALUGRIDOBJECTFACTORY_HH
 #define DUNE_ALUGRIDOBJECTFACTORY_HH
 
-#include <dune/grid/alugrid/common/memory.hh>
+#include <dune/alugrid/common/memory.hh>
 
 #if defined USE_PTHREADS || defined _OPENMP  
 #define USE_SMP_PARALLEL

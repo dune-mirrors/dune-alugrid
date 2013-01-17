@@ -7,7 +7,7 @@
 //- Dune headers 
 #include <dune/common/exceptions.hh>
 #include <dune/grid/common/backuprestore.hh>
-#include <dune/grid/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/declaration.hh>
 
 namespace Dune
 {

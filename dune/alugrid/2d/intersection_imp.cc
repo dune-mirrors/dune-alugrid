@@ -6,9 +6,9 @@
 
 #include <dune/geometry/referenceelements.hh>
 
-#include <dune/grid/alugrid/2d/geometry.hh>
-#include <dune/grid/alugrid/2d/entity.hh>
-#include <dune/grid/alugrid/2d/grid.hh>
+#include <dune/alugrid/2d/geometry.hh>
+#include <dune/alugrid/2d/entity.hh>
+#include <dune/alugrid/2d/grid.hh>
 
 namespace Dune
 {

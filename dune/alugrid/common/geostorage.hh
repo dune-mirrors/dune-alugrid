@@ -6,11 +6,9 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 
-#if HAVE_ALUGRID
-
-#include <dune/grid/alugrid/common/declaration.hh>
-#include <dune/grid/alugrid/3d/alu3dinclude.hh>
-#include <dune/grid/alugrid/2d/alu2dinclude.hh>
+#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/3d/alu3dinclude.hh>
+#include <dune/alugrid/2d/alu2dinclude.hh>
 
 namespace Dune
 {
@@ -251,7 +249,5 @@ namespace Dune
   };  
 
 } // namespace Dune
-
-#endif // end HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALUGRIDGEOMETRYSTORAGE_HH

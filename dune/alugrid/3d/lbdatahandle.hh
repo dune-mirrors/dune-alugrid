@@ -1,7 +1,7 @@
 #ifndef DUNE_ALUGRID_LBDATAHANDLE_HH
 #define DUNE_ALUGRID_LBDATAHANDLE_HH
 
-#include <dune/grid/alugrid/3d/datahandle.hh>
+#include <dune/alugrid/3d/datahandle.hh>
 
 #include <dune/grid/common/datahandleif.hh>
 

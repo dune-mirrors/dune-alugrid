@@ -4,8 +4,6 @@
 #ifndef DUNE_ALU2DGRID_FACTORY_HH
 #define DUNE_ALU2DGRID_FACTORY_HH
 
-#if HAVE_ALUGRID
-
 #include <dune/common/array.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -13,9 +11,9 @@
 
 #include <dune/grid/common/gridfactory.hh>
 
-#include <dune/grid/alugrid/common/persistentcontainer.hh>
-#include <dune/grid/alugrid/common/transformation.hh>
-#include <dune/grid/alugrid/2d/grid.hh>
+#include <dune/alugrid/common/persistentcontainer.hh>
+#include <dune/alugrid/common/transformation.hh>
+#include <dune/alugrid/2d/grid.hh>
 
 namespace Dune
 {
@@ -466,7 +464,5 @@ namespace Dune
   }
 
 }
-
-#endif // #if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALU2DGRID_FACTORY_HH

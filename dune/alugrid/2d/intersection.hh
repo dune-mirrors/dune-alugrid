@@ -8,9 +8,9 @@
 // Dune includes
 #include <dune/grid/common/grid.hh>
 
-#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
-#include <dune/grid/alugrid/2d/alu2dinclude.hh>
-#include <dune/grid/alugrid/2d/entity.hh>
+#include <dune/alugrid/common/intersectioniteratorwrapper.hh>
+#include <dune/alugrid/2d/alu2dinclude.hh>
+#include <dune/alugrid/2d/entity.hh>
 
 namespace Dune
 {

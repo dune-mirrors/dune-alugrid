@@ -9,25 +9,25 @@
 //- Dune includes
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
-#include <dune/grid/alugrid/common/interfaces.hh>
+#include <dune/alugrid/common/interfaces.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/alugrid/common/declaration.hh>
-#include <dune/grid/alugrid/common/defaultindexsets.hh>
+#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/defaultgridview.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
-#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
+#include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 
 // bnd projection stuff 
 #include <dune/grid/common/boundaryprojection.hh>
-#include <dune/grid/alugrid/2d/bndprojection.hh>
+#include <dune/alugrid/2d/bndprojection.hh>
 
 //- Local includes
 #include "indexsets.hh"
-#include <dune/grid/alugrid/common/objectfactory.hh>
+#include <dune/alugrid/common/objectfactory.hh>
 #include "datahandle.hh"
 
 namespace Dune {
@@ -795,8 +795,8 @@ namespace Dune {
 
 #include "entity.hh"
 #include "geometry.hh"
-#include <dune/grid/alugrid/2d/intersection.hh>
-#include <dune/grid/alugrid/2d/iterator.hh>
+#include <dune/alugrid/2d/intersection.hh>
+#include <dune/alugrid/2d/iterator.hh>
 
 #include "grid_imp.cc"
 

@@ -1,7 +1,6 @@
 #ifndef DUNE_ALUGRID_CHECKPARALLEL_HH
 #define DUNE_ALUGRID_CHECKPARALLEL_HH
 
-#if HAVE_ALUGRID
 #include <alugrid_defineparallel.h>
 
 #if HAVE_MPI
@@ -18,9 +17,5 @@
 #else  // #if HAVE_MPI
   #define ALU3DGRID_PARALLEL 0
 #endif // #else  // #if HAVE_MPI
-
-#else // #if HAVE_ALUGRID
-  #define ALU3DGRID_PARALLEL 0
-#endif // #else // #if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALUGRID_CHECKPARALLEL_HH

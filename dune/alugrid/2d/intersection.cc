@@ -5,8 +5,8 @@
 #include <config.h>
 #endif
 
-#include <dune/grid/alugrid/2d/geometry.hh>
-#include <dune/grid/alugrid/2d/intersection.hh>
+#include <dune/alugrid/2d/geometry.hh>
+#include <dune/alugrid/2d/intersection.hh>
 
 namespace Dune
 {

@@ -1,17 +1,14 @@
 #ifndef DUNE_ALU3DGRID_ALUGRID_HH
 #define DUNE_ALU3DGRID_ALUGRID_HH
 
-// only include this code, if ENABLE_ALUGRID is defined
-#if HAVE_ALUGRID
-
 // 3d version 
-#include <dune/grid/alugrid/common/capabilities.hh>
-#include <dune/grid/alugrid/3d/capabilities.hh>
-#include <dune/grid/alugrid/3d/indexsets.hh>
-#include <dune/grid/alugrid/3d/iterator.hh>
-#include <dune/grid/alugrid/3d/entity.hh>
-#include <dune/grid/alugrid/3d/geometry.hh>
-#include <dune/grid/alugrid/3d/grid.hh>
+#include <dune/alugrid/common/capabilities.hh>
+#include <dune/alugrid/3d/capabilities.hh>
+#include <dune/alugrid/3d/indexsets.hh>
+#include <dune/alugrid/3d/iterator.hh>
+#include <dune/alugrid/3d/entity.hh>
+#include <dune/alugrid/3d/geometry.hh>
+#include <dune/alugrid/3d/grid.hh>
 
 /** @file
     @author Robert Kloefkorn
@@ -558,8 +555,6 @@ namespace Dune
   };
 
 } //end  namespace Dune 
-
-#endif // #if HAVE_ALUGRID
 
 #undef alu_inline
 #endif

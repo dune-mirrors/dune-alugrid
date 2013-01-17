@@ -3,7 +3,7 @@
 
 #define ALU2DGRID_COMPATIBILITY_LEVEL 2
 
-#include <alugrid_2d.h>
+#include <dune/alugrid/src/alugrid_2d.h>
 
 //////////////////////////////////////////////////////////////////////
 // compile imp.cc into lib (1 yes, 0 no)
@@ -35,7 +35,7 @@
 #define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
 
 // use the ALU3dGrid Parallel detection
-#include <dune/grid/alugrid/common/checkparallel.hh>
+#include <dune/alugrid/common/checkparallel.hh>
 //#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
 #define ALU2DGRID_PARALLEL 0
 

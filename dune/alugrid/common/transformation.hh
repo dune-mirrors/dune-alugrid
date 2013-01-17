@@ -4,8 +4,6 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 
-#if HAVE_ALUGRID
-
 namespace Dune
 {
 
@@ -44,7 +42,5 @@ namespace Dune
   };
 
 }
-
-#endif // #if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALUGRID_TRANSFORMATION_HH

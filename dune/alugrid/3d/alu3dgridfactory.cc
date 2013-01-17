@@ -12,9 +12,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
-
-#if HAVE_ALUGRID
+#include <dune/alugrid/3d/alu3dgridfactory.hh>
 
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline 
@@ -690,7 +688,6 @@ namespace Dune
   template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, conforming > >;
 #endif
 }
-#endif // end ENABLE_ALUGRID 
 #undef alu_inline
 
 #endif // end DUNE_ALU3DGRID_FACTORY_CC

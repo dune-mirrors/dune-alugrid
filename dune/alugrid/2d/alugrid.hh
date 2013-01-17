@@ -1,13 +1,10 @@
 #ifndef DUNE_ALU2D_ALUGRID_HH
 #define DUNE_ALU2D_ALUGRID_HH
 
-// only include this code, if ENABLE_ALUGRID is defined
-#if HAVE_ALUGRID
-
-#include <dune/grid/alugrid/common/declaration.hh>
-#include <dune/grid/alugrid/common/capabilities.hh>
-#include <dune/grid/alugrid/2d/capabilities.hh>
-#include <dune/grid/alugrid/2d/grid.hh>
+#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/capabilities.hh>
+#include <dune/alugrid/2d/capabilities.hh>
+#include <dune/alugrid/2d/grid.hh>
 
 namespace Dune
 {
@@ -750,9 +747,5 @@ private:
 };
 
 } //end  namespace Dune 
-
-#else
-#error "Trying to use <dune/grid/alugrid.hh> without ALUGRID_CPPFLAGS."
-#endif // #if HAVE_ALUGRID
 
 #endif

@@ -4,16 +4,16 @@
 // only include this code, if HAVE_ALUGRID is true
 #if HAVE_ALUGRID
 
-#include <dune/grid/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/declaration.hh>
 
-#include <dune/grid/alugrid/3d/alugrid.hh>
-#include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
+#include <dune/alugrid/3d/alugrid.hh>
+#include <dune/alugrid/3d/alu3dgridfactory.hh>
 
 // 2d version 
-#include <dune/grid/alugrid/2d/alugrid.hh>
-#include <dune/grid/alugrid/2d/alu2dgridfactory.hh>
+#include <dune/alugrid/2d/alugrid.hh>
+#include <dune/alugrid/2d/alu2dgridfactory.hh>
 
-#include <dune/grid/alugrid/common/persistentcontainer.hh>
+#include <dune/alugrid/common/persistentcontainer.hh>
 
 /** @file
     @author Robert Kloefkorn
@@ -83,7 +83,7 @@ template< int dim, int dimworld >
 class ALUSimplexGrid;
 
 //- include declaration of ALUGrid 
-#include <dune/grid/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/declaration.hh>
 
 } //end  namespace Dune 
 

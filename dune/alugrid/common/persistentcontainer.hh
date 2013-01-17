@@ -1,9 +1,8 @@
 #ifndef DUNE_ALU_PERSISTENTCONTAINER_HH
 #define DUNE_ALU_PERSISTENTCONTAINER_HH
 
-#if HAVE_ALUGRID
 #include <dune/grid/utility/persistentcontainer.hh>
-#include <dune/grid/alugrid.hh>
+#include <dune/alugrid.hh>
 
 namespace Dune
 {
@@ -138,6 +137,5 @@ namespace Dune
   };
 
 } // end namespace Dune
-#endif // ENABLE_ALU
 
 #endif // end DUNE_ALU_PERSISTENTCONTAINER_HH
