@@ -1,7 +1,7 @@
 AC_PREREQ(2.50)
 DUNE_AC_INIT
 AM_INIT_AUTOMAKE([foreign 1.5])
-AC_CONFIG_SRCDIR([dune/grid/spgrid.hh])
+AC_CONFIG_SRCDIR([dune/alugrid/grid.hh])
 AM_CONFIG_HEADER([config.h])
 
 
@@ -14,15 +14,20 @@ LIBS="$DUNE_LIBS"
 # generate Makefiles
 AC_CONFIG_FILES([
   Makefile
+  dune/Makefile
+  dune/alugrid/Makefile
+  dune/alugrid/2d/Makefile
+  dune/alugrid/3d/Makefile
+  dune/alugrid/common/Makefile
+  dune/alugrid/src/Makefile
+  dune/alugrid/src/alu2d/Makefile
+  dune/alugrid/src/duneinterface/Makefile
+  dune/alugrid/src/parallel/Makefile
+  dune/alugrid/src/serial/Makefile
   m4/Makefile
   misc/Makefile
   misc/macrogrids/Makefile
   misc/versioncheck/Makefile
-  src/serial/Makefile
-  src/parallel/Makefile
-  src/duneinterface/Makefile
-  src/alu2d/Makefile
-  src/Makefile
   dune-alugrid.pc
 ])
 

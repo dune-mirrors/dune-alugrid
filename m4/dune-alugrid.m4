@@ -6,5 +6,5 @@ AC_DEFUN([DUNE_ALUGRID_CHECKS],[
 
 AC_DEFUN([DUNE_ALUGRID_CHECK_MODULE],[
   AC_MSG_NOTICE([Searching for dune-alugrid...])
-  DUNE_CHECK_MODULES([dune-alugrid],[grid/alugrid.hh])
+  DUNE_CHECK_MODULES([dune-alugrid],[alugrid/grid.hh])
 ])
