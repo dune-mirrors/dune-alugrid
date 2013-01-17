@@ -35,3 +35,6 @@ include_HEADERS = serial/alugrid_defineparallel.h
 # build only serial grid lib
 dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_2d.cc
 endif
+
+include $(top_srcdir)/am/global-rules
+

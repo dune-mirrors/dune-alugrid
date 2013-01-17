@@ -1,6 +1,8 @@
 #ifndef METIS_H_INCLUDED
 #define METIS_H_INCLUDED
 
+
+#include <iostream>
 #if HAVE_METIS 
 
 // cover metis-4.0 bug   
