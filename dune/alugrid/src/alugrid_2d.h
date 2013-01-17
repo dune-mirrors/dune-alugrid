@@ -38,12 +38,12 @@ namespace ALU2DGrid
 
   using namespace std;
 
-#include "alu2d/grid.h"
-#include "alu2d/triang.h"
-#include "alu2d/listwalk.h"
-#include "alu2d/handle.h"
-#include "alu2d/vtx_btree.h"
-#include "alu2d/vmmap.h"
+#include "2d/grid.h"
+#include "2d/triang.h"
+#include "2d/listwalk.h"
+#include "2d/handle.h"
+#include "2d/vtx_btree.h"
+#include "2d/vmmap.h"
 
 }
 
@@ -69,7 +69,8 @@ namespace ALUGridSpace
   typedef ALU2DGrid :: AdaptRestrictProlong2d < 2, 3 > AdaptRestrictProlong2dType;
   typedef VertexProjection < 2 , double > ProjectVertex_t;
 
-}
+} // namespace ALUGridSpace
+
 #endif // #if (ALU2DGRID_COMPATIBILITY_LEVEL < 2)
 
 #endif // #ifndef __ALUGRID_2D_H_INCLUDED__

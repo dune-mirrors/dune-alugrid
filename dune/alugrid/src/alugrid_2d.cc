@@ -14,13 +14,13 @@ namespace ALU2DGrid
 // this is needed since the code does not used std :: 
 using namespace std; 
 
-#include "alu2d/grid.cc"
-#include "alu2d/triang.cc"
-#include "alu2d/hdlrw.cc"
-#include "alu2d/mknbrs.cc"
-#include "alu2d/handle.cc"
-#include "alu2d/vmmap.cc"
-#include "alu2d/vtx_btree.cc"
+#include "2d/grid.cc"
+#include "2d/triang.cc"
+#include "2d/hdlrw.cc"
+#include "2d/mknbrs.cc"
+#include "2d/handle.cc"
+#include "2d/vmmap.cc"
+#include "2d/vtx_btree.cc"
 
 } //end namespace 
 
