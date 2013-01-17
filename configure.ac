@@ -24,6 +24,7 @@ AC_CONFIG_FILES([
   dune/alugrid/src/duneinterface/Makefile
   dune/alugrid/src/parallel/Makefile
   dune/alugrid/src/serial/Makefile
+  lib/Makefile
   m4/Makefile
   misc/Makefile
   misc/macrogrids/Makefile
