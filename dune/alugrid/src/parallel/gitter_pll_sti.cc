@@ -5,7 +5,7 @@
 #define _GITTER_PLL_STI_CC_
 
 #include "gitter_pll_sti.h"
-#include "walk.h"
+#include "../serial/walk.h"
 
 int __STATIC_myrank = -1 ;
 int __STATIC_turn   = -1 ;

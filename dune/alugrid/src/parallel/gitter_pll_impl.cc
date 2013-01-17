@@ -2,8 +2,8 @@
 // modifications for Dune Interface 
 // (c) Robert Kloefkorn 2004 - 2005 
 
-#include "mapp_cube_3d.h"
-#include "mapp_tetra_3d.h"
+#include "../serial/mapp_cube_3d.h"
+#include "../serial/mapp_tetra_3d.h"
   
 #include "gitter_pll_impl.h"
 #include "gitter_hexa_top_pll.h"

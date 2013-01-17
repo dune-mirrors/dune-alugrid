@@ -2,8 +2,8 @@
 #ifndef GITTER_PLL_MGB_CC_INCLUDED
 #define GITTER_PLL_MGB_CC_INCLUDED
 
-#include "serialize.h"
-#include "gitter_mgb.h"
+#include "../serial/serialize.h"
+#include "../serial/gitter_mgb.h"
 
 #include "gitter_pll_sti.h"
 #include "gitter_pll_mgb.h"
