@@ -805,15 +805,12 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
         idx_t options[4] = {0, 1, 15, 1}; // these are the default values 
         idx_t nparts = np ;
 
-        // get communincator (see mpAccess_MPI.cc)
-        MPI_Comm comm = getMPICommunicator( mpa.communicator() );
-
         // for starting partitions use PartKway
         if( usePartKway ) 
         {
           ALUGridParMETIS :: CALL_ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
                                     & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
-                                    ubvec, options, & edgecut, neu, & comm ) ;
+                                    ubvec, options, & edgecut, neu, mpa );
         }
         else // otherwise do an adaptive repartition 
         {
@@ -832,7 +829,7 @@ bool LoadBalancer :: DataBase :: repartition (MpAccessGlobal & mpa,
           //cout << "Call AdaptiveRepart \n";
           ALUGridParMETIS :: CALL_ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
                                           & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
-                                          ubvec, &itr, options, & edgecut, neu, & comm ) ;
+                                          ubvec, &itr, options, & edgecut, neu, mpa );
         }
 
         // delete vtxdist and set zero (see below) 
