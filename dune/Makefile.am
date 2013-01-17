@@ -1,5 +1,5 @@
 dunedir = $(includedir)/dune
 
-SUBDIRS = 
+SUBDIRS = alugrid
 
 include $(top_srcdir)/am/global-rules
