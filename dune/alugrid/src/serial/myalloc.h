@@ -6,9 +6,12 @@
 
 #ifndef DONT_USE_ALUGRID_ALLOC 
 
-class MyAlloc {
+#include <cstddef>
+
+class MyAlloc
+{
   // max number of storable items per stack 
-  static const size_t MAX_HOLD_ADD ;
+  static const std::size_t MAX_HOLD_ADD;
   // overestimation factor 
   static const double MAX_HOLD_MULT ;
 

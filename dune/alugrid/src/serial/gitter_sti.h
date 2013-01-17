@@ -2,10 +2,6 @@
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
-// typdef these stream because this code uses a lot strstream 
-typedef stringbuf     strstreambuf_t ; 
-typedef stringstream  strstream_t;
-
 #include "myalloc.h"
 #include "parallel.h"
 #include "refinementrules.h"

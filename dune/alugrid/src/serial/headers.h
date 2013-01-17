@@ -6,4 +6,4 @@
 #include "lock.h"
 #include "gitter_sti.h"
 
-#endif
+#endif // #ifndef __FAKE_HEADERS_INCLUDED__

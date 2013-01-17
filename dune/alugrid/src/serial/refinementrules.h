@@ -1,6 +1,7 @@
 #ifndef REFINEMENTRULES_H_INCLUDED
 #define REFINEMENTRULES_H_INCLUDED
 
+#include <cassert>
 
 struct RefinementRules 
 {

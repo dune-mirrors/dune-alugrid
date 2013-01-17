@@ -2,47 +2,53 @@
 #ifndef LOCK_H_INCLUDED
 #define LOCK_H_INCLUDED
 
-	// Einfache Klasse, die w"ahrend ihrer Lebnsdauer ein
-	// Lockfile mit einem vorgegebenen Namen (Pfad) h"alt.
+#include <cassert>
+#include <cstring>
+#include <iostream>
 
-class FSLock {
-  char * _fname ;
-  public :
-    FSLock (const char * = "") ;
-   ~FSLock () ;
-} ;
+class FSLock
+{
+  char * _fname;
 
-inline FSLock :: FSLock (const char * name) : _fname (0) {
-  _fname = new char [strlen(name) + 100] ;
-  assert (_fname) ;
+public:
+  FSLock ( const char * = "" );
+ ~FSLock ();
+};
+
+inline FSLock::FSLock ( const char * name )
+: _fname( 0 )
+{
+  _fname = new char[ std::strlen( name ) + 100 ];
+  assert( _fname );
   sprintf (_fname, "%s.lock", name) ;
-  FILE * fp = fopen (_fname, "w") ;
-  if (fp == NULL) {
-    delete [] _fname ;
-    _fname = 0 ;
-    cerr << "**WARNUNG (IGNORIERT) Lockfile konnte nicht erzeugt werden" << endl ;
-  } else {
-    
+  FILE *fp = std::fopen( _fname, "w" );
+  if( !fp )
+  {
+    delete[] _fname;
+    _fname = 0;
+    std::cerr << "WARNING (ignored): Could not create lock file." << std::endl;
+  }
+  else
+  {
     // only test in debug mode 
 #ifndef NDEBUG 
     int test = 
 #endif
-    fclose (fp) ;
+    std::fclose( fp );
     assert (test == 0) ;
   }
-  return ;
 }
 
-inline FSLock :: ~FSLock () {
-  if (_fname) {
-    int test = remove (_fname) ;
-    if (test != 0) {
-      cerr << "**WARNUNG (IGNORIERT) Lockfile konnte nicht gel\"oscht werden." << endl ;
-    }
-    delete [] _fname ;
-    _fname = 0 ;
+inline FSLock::~FSLock ()
+{
+  if( _fname )
+  {
+    int test = std::remove( _fname );
+    if( test != 0 )
+      std::cerr << "WARNING (ignored): Could not remove lock file." << std::endl;
+    delete[] _fname;
+    _fname = 0;
   }
-  return ;
 }
 
 #endif  // LOCK_H_INCLUDED

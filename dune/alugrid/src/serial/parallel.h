@@ -1,6 +1,12 @@
 #ifndef PARALLEL_H_INCLUDED
 #define PARALLEL_H_INCLUDED
 
+#include <map>
+#include <vector>
+
+#include "myalloc.h"
+#include "serialize.h"
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //
@@ -14,21 +20,19 @@
   // werden, damit der Lastverteiler diese Objekte zuweisen, einpacken
   // und rekonstruieren kann.
 
-class MacroGridMoverIF {
+class MacroGridMoverIF
+{
   protected :
     MacroGridMoverIF () {}
     virtual ~MacroGridMoverIF () {}
 
   private:
     // type of move to map, derive from MyAlloc 
-    class MoveTo :
-      public MyAlloc, 
-      public map < int, int, less < int > > 
-    {
-      typedef map < int, int, less < int > >  base_t ;
-    public:
-      MoveTo () :  base_t () {}
-    };
+    class MoveTo
+    : public MyAlloc,
+      public std::map< int, int >
+    {};
+
   public :
     typedef MoveTo moveto_t ;
 
@@ -39,11 +43,11 @@ class MacroGridMoverIF {
     virtual void attach2   (int) = 0 ;
     virtual void unattach2 (int) = 0 ;
 
-    virtual bool packAll (vector < ObjectStream > &) = 0 ;
-    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType & ) = 0; 
-    virtual void unpackSelf (ObjectStream &,bool) = 0 ;
-    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) = 0; 
-} ;
+    virtual bool packAll ( std::vector< ObjectStream > & ) = 0;
+    virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) = 0;
+    virtual void unpackSelf ( ObjectStream &, bool ) = 0;
+    virtual void duneUnpackSelf ( ObjectStream &, bool, GatherScatterType * ) = 0;
+};
 
 class MacroGridMoverDefault : public MacroGridMoverIF {
   protected :
@@ -198,14 +202,14 @@ inline void LinkedObject :: Identifier :: read (vector < int > :: const_iterator
   assert (pos != end ) ; _i2 = * pos ++ ; 
   assert (pos != end ) ; _i3 = * pos ++ ;
   assert (pos != end ) ; _i4 = * pos ++ ;
-  return ;  
 }
 
-inline void LinkedObject :: Identifier :: write (vector < int > & v) const {
+inline void LinkedObject :: Identifier :: write (vector < int > & v) const
+{
   v.push_back (_i1) ;
   v.push_back (_i2) ;
   v.push_back (_i3) ;
   v.push_back (_i4) ;
-  return ;
 }
-#endif
+
+#endif // #ifndef PARALLEL_H_INCLUDED
