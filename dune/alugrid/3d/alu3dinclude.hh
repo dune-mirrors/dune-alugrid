@@ -25,7 +25,7 @@
 
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 
-#include <dune/grid/alugrid/common/checkparallel.hh>
+#include <dune/alugrid/common/checkparallel.hh>
 
 // if MPI was found include all headers 
 #if ALU3DGRID_PARALLEL
@@ -36,7 +36,7 @@
 #endif
 
 //- local includes 
-#include <dune/grid/alugrid/3d/topology.hh>
+#include <dune/alugrid/3d/topology.hh>
 
 namespace ALUGridSpace
 {

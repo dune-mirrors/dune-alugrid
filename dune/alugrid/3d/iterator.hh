@@ -8,8 +8,8 @@
 
 // Dune includes
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
-#include <dune/grid/alugrid/common/memory.hh>
+#include <dune/alugrid/common/intersectioniteratorwrapper.hh>
+#include <dune/alugrid/common/memory.hh>
 
 // Local includes
 #include "alu3dinclude.hh"

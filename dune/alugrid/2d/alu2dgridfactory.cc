@@ -7,9 +7,9 @@
 #include <iostream>
 #include <fstream>
 
-#include <dune/grid/alugrid/2d/alu2dgridfactory.hh>
-#include <dune/grid/alugrid/common/declaration.hh>
-#include <dune/grid/alugrid/2d/alugrid.hh>
+#include <dune/alugrid/2d/alu2dgridfactory.hh>
+#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/2d/alugrid.hh>
 
 namespace Dune
 {

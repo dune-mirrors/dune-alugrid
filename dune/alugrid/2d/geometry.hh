@@ -6,9 +6,9 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
-#include <dune/grid/alugrid/2d/alu2dinclude.hh>
-#include <dune/grid/alugrid/3d/mappings.hh>
-#include <dune/grid/alugrid/common/memory.hh>
+#include <dune/alugrid/2d/alu2dinclude.hh>
+#include <dune/alugrid/3d/mappings.hh>
+#include <dune/alugrid/common/memory.hh>
 
 namespace Dune
 {

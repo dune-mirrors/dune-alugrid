@@ -2,8 +2,8 @@
 #define DUNE_ALU3DGRID_CAPABILITIES_HH
 
 #include <dune/grid/common/capabilities.hh>
-#include <dune/grid/alugrid/common/declaration.hh>
-#include <dune/grid/alugrid/3d/alu3dinclude.hh>
+#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/3d/alu3dinclude.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
 

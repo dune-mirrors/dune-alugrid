@@ -6,13 +6,13 @@
 #endif
 
 #include "alu3dinclude.hh"
-#include <dune/grid/alugrid/3d/alugrid.hh>
+#include <dune/alugrid/3d/alugrid.hh>
 #include "entity.hh" 
 
 #if COMPILE_ALUGRID_INLINE == 0
-#include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
+#include <dune/alugrid/3d/alu3dgridfactory.hh>
 #endif
-#include <dune/grid/alugrid/common/geostorage.hh>
+#include <dune/alugrid/common/geostorage.hh>
 
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline 
@@ -187,7 +187,7 @@ namespace Dune {
     else 
     {
       // to be improved, when we using not the refine 8 rule 
-      // see dune/grid/alugrid/common/geostrage.hh for implementation 
+      // see dune/alugrid/common/geostrage.hh for implementation 
       typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 8 > GeometryStroage ;
       return LocalGeometry( GeometryStroage::geom( type(), true, child ) );
     }

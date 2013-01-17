@@ -2,13 +2,13 @@
 #define DUNE_ALU3DGRID_ALUGRID_HH
 
 // 3d version 
-#include <dune/grid/alugrid/common/capabilities.hh>
-#include <dune/grid/alugrid/3d/capabilities.hh>
-#include <dune/grid/alugrid/3d/indexsets.hh>
-#include <dune/grid/alugrid/3d/iterator.hh>
-#include <dune/grid/alugrid/3d/entity.hh>
-#include <dune/grid/alugrid/3d/geometry.hh>
-#include <dune/grid/alugrid/3d/grid.hh>
+#include <dune/alugrid/common/capabilities.hh>
+#include <dune/alugrid/3d/capabilities.hh>
+#include <dune/alugrid/3d/indexsets.hh>
+#include <dune/alugrid/3d/iterator.hh>
+#include <dune/alugrid/3d/entity.hh>
+#include <dune/alugrid/3d/geometry.hh>
+#include <dune/alugrid/3d/grid.hh>
 
 /** @file
     @author Robert Kloefkorn

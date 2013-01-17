@@ -7,24 +7,24 @@
 //- Dune includes
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
-#include <dune/grid/alugrid/common/interfaces.hh>
+#include <dune/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/alugrid/common/defaultindexsets.hh>
+#include <dune/alugrid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
-#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
+#include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
 // bnd projection stuff 
 #include <dune/grid/common/boundaryprojection.hh>
-#include <dune/grid/alugrid/common/bndprojection.hh>
-#include <dune/grid/alugrid/common/objectfactory.hh>
-#include <dune/grid/alugrid/common/backuprestore.hh>
+#include <dune/alugrid/common/bndprojection.hh>
+#include <dune/alugrid/common/objectfactory.hh>
+#include <dune/alugrid/common/backuprestore.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -32,7 +32,7 @@
 #include "indexsets.hh"
 #include "datahandle.hh"
 
-#include <dune/grid/alugrid/3d/lbdatahandle.hh>
+#include <dune/alugrid/3d/lbdatahandle.hh>
 
 #include <dune/common/parallel/mpihelper.hh>
 

@@ -2,8 +2,8 @@
 #define DUNE_ALUGRID_CAPABILITIES_HH
 
 #include <dune/grid/common/capabilities.hh>
-#include <dune/grid/alugrid/common/declaration.hh>
-#include <dune/grid/alugrid/common/checkparallel.hh>
+#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/checkparallel.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
 /** @file

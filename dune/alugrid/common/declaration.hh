@@ -8,7 +8,7 @@
 #endif
 
 //- ALUGrid includes
-#include <dune/grid/alugrid/common/checkparallel.hh>
+#include <dune/alugrid/common/checkparallel.hh>
 
 namespace Dune {
 

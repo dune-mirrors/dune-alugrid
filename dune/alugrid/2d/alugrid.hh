@@ -1,10 +1,10 @@
 #ifndef DUNE_ALU2D_ALUGRID_HH
 #define DUNE_ALU2D_ALUGRID_HH
 
-#include <dune/grid/alugrid/common/declaration.hh>
-#include <dune/grid/alugrid/common/capabilities.hh>
-#include <dune/grid/alugrid/2d/capabilities.hh>
-#include <dune/grid/alugrid/2d/grid.hh>
+#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/capabilities.hh>
+#include <dune/alugrid/2d/capabilities.hh>
+#include <dune/alugrid/2d/grid.hh>
 
 namespace Dune
 {

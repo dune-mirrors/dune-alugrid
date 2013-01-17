@@ -5,7 +5,7 @@
 
 // Dune includes
 #include <dune/grid/common/entity.hh>
-#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
+#include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 
 // Local includes
 #include "alu3dinclude.hh"

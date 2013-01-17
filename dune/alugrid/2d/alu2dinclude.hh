@@ -35,7 +35,7 @@
 #define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
 
 // use the ALU3dGrid Parallel detection
-#include <dune/grid/alugrid/common/checkparallel.hh>
+#include <dune/alugrid/common/checkparallel.hh>
 //#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
 #define ALU2DGRID_PARALLEL 0
 

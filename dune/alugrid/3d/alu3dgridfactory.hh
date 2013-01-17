@@ -15,8 +15,8 @@
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/boundaryprojection.hh>
 
-#include <dune/grid/alugrid/common/transformation.hh>
-#include <dune/grid/alugrid/3d/alugrid.hh>
+#include <dune/alugrid/common/transformation.hh>
+#include <dune/alugrid/3d/alugrid.hh>
 
 namespace Dune
 {

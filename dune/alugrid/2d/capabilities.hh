@@ -3,8 +3,8 @@
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
-#include <dune/grid/alugrid/common/declaration.hh>
-#include <dune/grid/alugrid/2d/alu2dinclude.hh>
+#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/common/capabilities.hh>
 
 

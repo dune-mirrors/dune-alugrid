@@ -8,9 +8,9 @@
 //#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 // Local includes
-#include <dune/grid/alugrid/2d/intersection.hh>
-#include <dune/grid/alugrid/2d/iterator.hh>
-#include <dune/grid/alugrid/2d/entityseed.hh>
+#include <dune/alugrid/2d/intersection.hh>
+#include <dune/alugrid/2d/iterator.hh>
+#include <dune/alugrid/2d/entityseed.hh>
 
 namespace Dune {
   // Forward declarations
