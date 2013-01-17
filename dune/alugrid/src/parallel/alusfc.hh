@@ -1,6 +1,8 @@
 #ifndef ALUGRID_SFC_H_INCLUDED
 #define ALUGRID_SFC_H_INCLUDED
 
+#include <cmath>
+
 namespace ALUGridMETIS
 {
 
@@ -22,7 +24,7 @@ void CALL_spaceFillingCurveNoEdges(const int myRank,       // my rank
   meanLoad /= double(nPart);
 
   // round the average load to get a threshold value 
-  const double meanThreshold = round( meanLoad );
+  const double meanThreshold = std::round( meanLoad );
 
   double load = 0;
   idxtype rank = 0;
