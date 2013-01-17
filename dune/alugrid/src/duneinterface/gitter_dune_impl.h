@@ -1,8 +1,8 @@
 #ifndef GITTER_DUNE_IMPL_H_INCLUDED
 #define GITTER_DUNE_IMPL_H_INCLUDED
 
-#include "gitter_impl.h"
-#include "lock.h"
+#include "../serial/gitter_impl.h"
+#include "../serial/lock.h"
 
 template < class A > class PureElementAccessIterator : public AccessIterator <A> 
 {

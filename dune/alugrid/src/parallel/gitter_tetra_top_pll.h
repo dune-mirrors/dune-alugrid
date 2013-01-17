@@ -6,7 +6,7 @@
 
 #include "../serial/parallel.h"
 #include "gitter_pll_impl.h"
-#include "gitter_tetra_top.h"
+#include "../serial/gitter_tetra_top.h"
 
 class MacroGhost;
 

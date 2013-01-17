@@ -4,8 +4,8 @@
 
 #include "gitter_dune_impl.h"
  
-#include "gitter_pll_impl.h"
-#include "gitter_pll_ldb.h"
+#include "../parallel/gitter_pll_impl.h"
+#include "../parallel/gitter_pll_ldb.h"
   
 class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
 {

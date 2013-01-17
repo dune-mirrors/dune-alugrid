@@ -1,7 +1,7 @@
 #ifndef MPACCESS_H_INCLUDED
 #define MPACCESS_H_INCLUDED
 
-#include "serialize.h"
+#include "../serial/serialize.h"
 
 class MpAccessGlobal {
   public :

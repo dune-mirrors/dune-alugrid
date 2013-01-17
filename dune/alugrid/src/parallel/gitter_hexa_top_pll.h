@@ -6,7 +6,7 @@
 
 #include "../serial/parallel.h"
 #include "gitter_pll_impl.h"
-#include "gitter_hexa_top.h"
+#include "../serial/gitter_hexa_top.h"
 
 template < class A, class MX > class Hbnd4PllExternal : public Hbnd4Top < A > {
   public :

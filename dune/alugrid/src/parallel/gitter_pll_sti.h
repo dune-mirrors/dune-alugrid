@@ -3,7 +3,7 @@
 #define GITTER_PLL_STI_H_INCLUDED
 
 #include "mpAccess.h"
-#include "gitter_sti.h"
+#include "../serial/gitter_sti.h"
 #include "gitter_pll_ldb.h"
 
   // Die statische Variable __STATIC_myrank sollte nur zum Debuggen
