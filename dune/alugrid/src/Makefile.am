@@ -1,4 +1,3 @@
-
 SUBDIRS = serial parallel duneinterface 2d 
 
 # here the headers to install are defined 
@@ -22,16 +21,9 @@ libalugrid_la_CPPFLAGS = $(ALUGRID_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
 libalugrid_la_LIBADD = $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(METIS_LDFLAGS) $(METIS_LIBS) $(MPI_LDFLAGS) $(MPI_LIBS)
 
 if MPI 
-# if MPI was found the parallel version is build 
-include_HEADERS = parallel/alugrid_defineparallel.h
-
 # build lib with parallel support 
 dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_parallel.cc alugrid_2d.cc starmpi.c
-
 else 
-# if no mpi build only serial lib 
-include_HEADERS = serial/alugrid_defineparallel.h
-
 # build only serial grid lib
 dist_libalugrid_la_SOURCES = alugrid_serial.cc alugrid_2d.cc
 endif

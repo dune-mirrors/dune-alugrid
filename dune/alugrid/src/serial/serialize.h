@@ -4,6 +4,10 @@
 #ifndef SERIALIZE_H_INCLUDED
 #define SERIALIZE_H_INCLUDED
 
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
+
 class ObjectStream;
 
 //  'ObjectStream' ist bereits die volle Implementierung eines einfachen
@@ -364,7 +368,7 @@ protected:
   // assign pair of char buffer and size to this object stream 
   // osvec will contain zeros after that assignment 
   // used by mpAccess_MPI.cc 
-  inline ObjectStream & operator = (pair< char* , int > & osvec)  
+  ObjectStream &operator = ( std::pair< char *, int > &osvec )
   {
     BaseType :: removeObj();
     BaseType :: assign( osvec.first , osvec.second );
@@ -444,7 +448,7 @@ inline ObjectStream& operator << ( ObjectStream& os, StandardEndLine manip)
 */
 
 // streaming operators for ObjectStream 
-inline ObjectStream& operator << ( ObjectStream& os, const string& s ) 
+inline ObjectStream &operator<< ( ObjectStream &os, const std::string &s )
 {
   const size_t size = s.size();
   os.write( size ); 
@@ -461,7 +465,7 @@ inline ObjectStream& operator >> ( ObjectStream& is, T& value )
 }
 
 // streaming operators for ObjectStream 
-inline ObjectStream& operator >> ( ObjectStream& is, string& s ) 
+inline ObjectStream &operator>> ( ObjectStream &is, std::string &s )
 {
   size_t size ;
   is.read( size ); 

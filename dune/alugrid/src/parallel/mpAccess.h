@@ -1,9 +1,15 @@
 #ifndef MPACCESS_H_INCLUDED
 #define MPACCESS_H_INCLUDED
 
-#include "serialize.h"
+#include <limits>
+#include <map>
+#include <set>
+#include <vector>
 
-class MpAccessGlobal {
+#include "../serial/serialize.h"
+
+class MpAccessGlobal
+{
   public :
     class CommIF
     {
@@ -16,14 +22,14 @@ class MpAccessGlobal {
 
     struct MinMaxSum 
     {
-      MinMaxSum() 
-        : min( numeric_limits< double > :: max() ),
-          max( numeric_limits< double > :: min() ),
-          sum( 0 )
+      MinMaxSum ()
+      : min( std::numeric_limits< double >::max() ),
+        max( std::numeric_limits< double >::min() ),
+        sum( 0 )
       {}
 
-      explicit MinMaxSum( const double value ) 
-        : min( value ), max( value ), sum( value )
+      explicit MinMaxSum( const double value )
+      : min( value ), max( value ), sum( value )
       {}
 
       double min ; 
@@ -54,28 +60,28 @@ class MpAccessGlobal {
     virtual void gmin (int*,int,int*) const = 0 ;
     virtual void gsum (int*,int,int*) const = 0 ;
     virtual minmaxsum_t minmaxsum( double ) const = 0;
-    virtual pair<double,double> gmax (pair<double,double>) const = 0 ;
-    virtual pair<double,double> gmin (pair<double,double>) const = 0 ;
-    virtual pair<double,double> gsum (pair<double,double>) const = 0 ;
+    virtual std::pair< double, double > gmax ( std::pair< double, double > ) const = 0;
+    virtual std::pair< double, double > gmin ( std::pair< double, double > ) const = 0;
+    virtual std::pair< double, double > gsum ( std::pair< double, double > ) const = 0;
     virtual void bcast(int*,int, int) const = 0 ;
     virtual void bcast(char*,int, int) const = 0 ;
     virtual void bcast(double*,int, int) const = 0 ;
     virtual int exscan( int ) const = 0; 
     virtual int scan( int ) const = 0; 
-    virtual vector < int > gcollect (int) const = 0 ;
-    virtual vector < double > gcollect (double) const = 0 ;
-    virtual vector < vector < int > > gcollect (const vector < int > &) const = 0 ;
-    virtual vector < vector < double > > gcollect (const vector < double > &) const = 0 ;
-    virtual vector < ObjectStream > gcollect (const ObjectStream &, const vector<int>& ) const = 0 ;
+    virtual std::vector< int > gcollect ( int ) const = 0;
+    virtual std::vector< double > gcollect ( double ) const = 0;
+    virtual std::vector< std::vector< int > > gcollect ( const std::vector< int > & ) const = 0;
+    virtual std::vector< std::vector< double > > gcollect ( const std::vector< double > & ) const = 0;
+    virtual std::vector< ObjectStream > gcollect (const ObjectStream &, const std::vector< int > & ) const = 0;
 
     // default gcollect method that first needs to communicate the sizes of the buffers 
     // this method actually does two communications, one allgather and one allgatherv 
-    virtual vector < ObjectStream > gcollect (const ObjectStream &in) const
+    virtual std::vector< ObjectStream > gcollect ( const ObjectStream &in ) const
     {
       // size of buffer 
       const int snum = in._wb - in._rb ;
       // get length vector 
-      vector< int > length = gcollect( snum );
+      std::vector< int > length = gcollect( snum );
 
       // return gcollect operation 
       return gcollect( in, length ); 
@@ -87,8 +93,8 @@ class MpAccessGlobal {
 
 class MpAccessLocal : public MpAccessGlobal 
 {
-  typedef map < int, int, less < int > > linkage_t ;
-  typedef vector< int > vector_t ;
+  typedef std::map< int, int > linkage_t;
+  typedef std::vector< int > vector_t;
 
   linkage_t _linkage ;
   vector_t  _dest ;
@@ -99,26 +105,26 @@ class MpAccessLocal : public MpAccessGlobal
       NonBlockingExchange () {}
     public:  
       virtual ~NonBlockingExchange () {}
-      virtual void send( const vector< ObjectStream >& ) = 0;  
-      virtual vector < ObjectStream > receive() = 0;  
+      virtual void send ( const std::vector< ObjectStream > & ) = 0;
+      virtual std::vector< ObjectStream > receive() = 0;  
     };
 
     inline virtual ~MpAccessLocal () ;
-    void printLinkage (ostream &) const ;
+    void printLinkage ( std::ostream & ) const;
     inline void removeLinkage () ;
     inline int nlinks () const ;
     inline int link (int) const ;
-    const vector < int >& dest () const{ return _dest ; }
-    int insertRequestSymetric (set < int, less < int > >) ;
-    virtual vector < vector < int > > exchange (const vector < vector < int > > &) const = 0 ;
-    virtual vector < vector < double > > exchange (const vector < vector < double > > &) const = 0 ;
-    virtual vector < vector < char > > exchange (const vector < vector < char > > &) const = 0 ;
+    const std::vector< int > &dest () const{ return _dest ; }
+    int insertRequestSymetric ( std::set< int > );
+    virtual std::vector< std::vector< int > > exchange (const std::vector< std::vector< int > > &) const = 0 ;
+    virtual std::vector< std::vector< double > > exchange (const std::vector< std::vector< double > > &) const = 0 ;
+    virtual std::vector< std::vector< char > > exchange (const std::vector< std::vector< char > > &) const = 0 ;
     // exchange data and return new vector of object streams 
-    virtual vector < ObjectStream > exchange (const vector < ObjectStream > &) const = 0 ;
+    virtual std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const = 0 ;
 
     // return handle for non-blocking exchange and already do send operation
     virtual NonBlockingExchange* nonBlockingExchange ( const int tag, 
-                                                       const vector < ObjectStream > & ) const = 0;
+                                                       const std::vector< ObjectStream > & ) const = 0;
 
     // return handle for non-blocking exchange 
     virtual NonBlockingExchange* nonBlockingExchange ( const int tag ) const = 0;
