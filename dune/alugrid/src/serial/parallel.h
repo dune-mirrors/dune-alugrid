@@ -10,6 +10,16 @@
 struct GatherScatter;
 typedef GatherScatter GatherScatterType;
 
+
+// ParallelException
+// -----------------
+
+struct ParallelException 
+{
+  class AccessPllException {};
+};
+
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //

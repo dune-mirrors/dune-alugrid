@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "gitter_sti.h"
+#include "mapp_cube_3d.h"
 
 class LinearMapping {
   private :

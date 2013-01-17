@@ -3,6 +3,8 @@
 
 #include "mapp_tetra_3d.h"
 #include "gitter_tetra_top.h"
+#include "gitter_impl.h"
+
 
 // #     #                                  #####  #######
 // #     #  ######    ##     ####   ###### #     #    #      ####   #####
@@ -12,9 +14,9 @@
 // #     #  #       #    #  #    #  #      #     #    #     #    #  #
 // #     #  #       #    #   ####   ######  #####     #      ####   #
 
-template < class A > 
-typename Hface3Top < A > :: myvertex_t* 
-Hface3Top < A > :: vertexNotOnSplitEdge( const int splitEdge )
+template< class A > 
+typename Hface3Top < A >::myvertex_t* 
+Hface3Top < A >::vertexNotOnSplitEdge( const int splitEdge )
 {
   const myhedge_t* edge = myhedge( splitEdge );
   const myvertex_t* edgeVx[ 2 ] = { edge->myvertex( 0 ), edge->myvertex( 1 ) };
@@ -30,8 +32,8 @@ Hface3Top < A > :: vertexNotOnSplitEdge( const int splitEdge )
   return vx ;
 }
 
-template < class A > typename Hface3Top < A > :: edgepair_t 
-Hface3Top < A > :: subEdges( myhedge_t* edge, const myvertex_t* vx0, const myvertex_t* vx1 )  
+template< class A > typename Hface3Top < A >::edgepair_t 
+Hface3Top < A >::subEdges( myhedge_t* edge, const myvertex_t* vx0, const myvertex_t* vx1 )  
 {
   assert( vx0 );
   assert( vx1 );
@@ -69,11 +71,11 @@ Hface3Top < A > :: subEdges( myhedge_t* edge, const myvertex_t* vx0, const myver
 
   if( ! found0 || ! found1 ) 
   {
-    cout << "Problem: " << edge << endl;
-    cout << " vx0 " << vx0 << endl;
-    cout << " vx1 " << vx1 << endl;
-    cout << "sub0 " << subEdge[ sub0 ] << endl;
-    cout << "sub1 " << subEdge[ ! sub0 ] << endl;
+    std::cout << "Problem: " << edge << std::endl;
+    std::cout << " vx0 " << vx0 << std::endl;
+    std::cout << " vx1 " << vx1 << std::endl;
+    std::cout << "sub0 " << subEdge[ sub0 ] << std::endl;
+    std::cout << "sub1 " << subEdge[ ! sub0 ] << std::endl;
   }
 
   assert( found0 );
@@ -84,7 +86,7 @@ Hface3Top < A > :: subEdges( myhedge_t* edge, const myvertex_t* vx0, const myver
 }
 
 
-template < class A > void Hface3Top < A > :: split_e01 () 
+template< class A > void Hface3Top < A >::split_e01 () 
 {
   // NOTE: edge numbering is not opposite vertex !!!
   // see gitter_geo.cc 
@@ -132,20 +134,20 @@ template < class A > void Hface3Top < A > :: split_e01 ()
                                       e0, 1, 
                                       1) ; // child number 
 
-  //std::cout << "split_e01 " << ev0 << endl;
-  //cout << "Split face " << this << " into " << endl;
-  //cout << "New subface 0" << f0 << endl;
-  //cout << "New subface 1" << f1 << endl;
+  //std::cout << "split_e01 " << ev0 << std::endl;
+  //std::cout << "Split face " << this << " into " << std::endl;
+  //std::cout << "New subface 0" << f0 << std::endl;
+  //std::cout << "New subface 1" << f1 << std::endl;
 
   assert (f0 && f1 ) ;
   f0->append(f1) ;
 
   _inner = new inner_t( f0 , e0 );
-  _rule = myrule_t :: e01 ;
+  _rule = myrule_t::e01 ;
   return ;
 }
 
-template < class A >  void Hface3Top < A > :: split_e12 () 
+template< class A >  void Hface3Top < A >::split_e12 () 
 {
   // NOTE: edge numbering is not opposite vertex !!!
   // see gitter_geo.cc 
@@ -186,8 +188,8 @@ template < class A >  void Hface3Top < A > :: split_e12 ()
   inneredge_t * e0 = new inneredge_t (newLevel, ev0, vxOld ) ;
   assert( e0 ) ;
 
-  //std::cout << "split_e12 " << ev0 << endl;
-  //cout << "new inner edge " << e0 << endl;
+  //std::cout << "split_e12 " << ev0 << std::endl;
+  //std::cout << "new inner edge " << e0 << std::endl;
   
   innerface_t * f0 = new innerface_t (newLevel, // level 
                                       myhedge(0), twist(0),         // edge 0, twist 
@@ -203,18 +205,18 @@ template < class A >  void Hface3Top < A > :: split_e12 ()
   assert (f0 && f1 ) ;
   f0->append(f1) ;
 
-  //cout << "Split face " << this << " into " << endl;
-  //cout << "New subface 0" << f0 << endl;
-  //cout << "New subface 1" << f1 << endl;
+  //std::cout << "Split face " << this << " into " << std::endl;
+  //std::cout << "New subface 0" << f0 << std::endl;
+  //std::cout << "New subface 1" << f1 << std::endl;
 
   _inner = new inner_t( f0 , e0 );
-  _rule = myrule_t :: e12 ;
+  _rule = myrule_t::e12 ;
 
 
   return ;
 }
 
-template < class A >  void Hface3Top < A > :: split_e20 () 
+template< class A >  void Hface3Top < A >::split_e20 () 
 {
   // NOTE: edge numbering is not opposite vertex !!!
   // see gitter_geo.cc 
@@ -270,19 +272,19 @@ template < class A >  void Hface3Top < A > :: split_e20 ()
 
   assert (f0 && f1 ) ;
 
-  //std::cout << "split_e20 " << ev0 << endl;
-  //cout << "Split face " << this << " into " << endl;
-  //cout << "New subface 0" << f0 << endl;
-  //cout << "New subface 1" << f1 << endl;
+  //std::cout << "split_e20 " << ev0 << std::endl;
+  //std::cout << "Split face " << this << " into " << std::endl;
+  //std::cout << "New subface 0" << f0 << std::endl;
+  //std::cout << "New subface 1" << f1 << std::endl;
 
   f0->append(f1) ;
   _inner = new inner_t( f0 , e0 );
-  _rule = myrule_t :: e20 ;
+  _rule = myrule_t::e20 ;
 
   return ;
 }
 
-template < class A >  void Hface3Top < A > :: split_iso4 () 
+template< class A >  void Hface3Top < A >::split_iso4 () 
 {
   assert( _inner == 0 );
   int l = 1 + level () ;
@@ -305,42 +307,42 @@ template < class A >  void Hface3Top < A > :: split_iso4 ()
   f1->append(f2) ;
   f2->append(f3) ;
   _inner = new inner_t( f0 , e0 );
-  _rule = myrule_t :: iso4 ;
+  _rule = myrule_t::iso4 ;
   return ;
 }
 
-template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r) 
+template< class A > void Hface3Top < A >::refineImmediate (myrule_t r) 
 {
   if ( r != getrule () ) 
   {
-    assert (getrule () == myrule_t :: nosplit) ;
+    assert (getrule () == myrule_t::nosplit) ;
     switch(r) 
     {
-      typedef typename myhedge_t :: myrule_t myhedgerule_t;
+      typedef typename myhedge_t::myrule_t myhedgerule_t;
 
       // rotate of hedge rule does nothing, 
       // so its actually useless 
 
-      case myrule_t :: e01 :
-        myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (0))) ;
+      case myrule_t::e01 :
+        myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (0))) ;
         split_e01 () ;
         break ;
-      case myrule_t :: e12 :
-        myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (1))) ;
+      case myrule_t::e12 :
+        myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1))) ;
         split_e12 () ;
         break ;
-      case myrule_t :: e20 :
-        myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (2))) ;
+      case myrule_t::e20 :
+        myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (2))) ;
         split_e20 () ;
         break ;
-      case myrule_t :: iso4 :
-        myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (0))) ;
-        myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (1))) ;
-        myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t :: myrule_t :: iso2).rotate (twist (2))) ;
+      case myrule_t::iso4 :
+        myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (0))) ;
+        myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1))) ;
+        myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (2))) ;
         split_iso4 () ;
         break ;
       default :
-        cerr << "**FEHLER (FATAL) falsche Verfeinerungsregel [" << r << "] in " << __FILE__ << " " << __LINE__ << endl ;
+        std::cerr << "**FEHLER (FATAL) falsche Verfeinerungsregel [" << r << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
         abort () ;
         break ;
     }
@@ -358,20 +360,20 @@ template < class A > void Hface3Top < A > :: refineImmediate (myrule_t r)
   return ;
 }
 
-template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist) 
+template< class A > bool Hface3Top < A >::refine (myrule_t r, int twist) 
 {
   if (r != getrule ()) 
   {
-    assert (getrule () == myrule_t :: nosplit ? 1 : 
-      (cerr << "**FEHLER beim Verfeinern mit Regel " << r << " auf " << getrule () << endl, 0)) ;
+    assert (getrule () == myrule_t::nosplit ? 1 : 
+      (std::cerr << "**FEHLER beim Verfeinern mit Regel " << r << " auf " << getrule () << std::endl, 0)) ;
     switch(r) 
     {
-      case myrule_t :: e01 :
-      case myrule_t :: e12 :
-      case myrule_t :: e20 :
-      case myrule_t :: iso4 :
+      case myrule_t::e01 :
+      case myrule_t::e12 :
+      case myrule_t::e20 :
+      case myrule_t::iso4 :
       {
-        typedef typename A :: face3Neighbour :: neighbour_t neighbour_t ;
+        typedef typename A::face3Neighbour::neighbour_t neighbour_t ;
         // get face neighbour 
         neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
         // check refineBalance 
@@ -379,7 +381,7 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
 
         if (a) 
         {  
-          if (getrule () == myrule_t :: nosplit) 
+          if (getrule () == myrule_t::nosplit) 
           {
             refineImmediate (r) ;
             { 
@@ -406,15 +408,15 @@ template < class A > bool Hface3Top < A > :: refine (myrule_t r, int twist)
         }
       }
       default :
-        cerr << "**WARNUNG (IGNORIERT) falsche Verfeinerungsregel gefunden: " ;
-        cerr << "[" << r << "] in " << __FILE__ << " " << __LINE__ << endl ;
+        std::cerr << "**WARNUNG (IGNORIERT) falsche Verfeinerungsregel gefunden: " ;
+        std::cerr << "[" << r << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
         return false ;
     }
   }
   return true ;
 }
 
-template < class A > bool Hface3Top < A > :: coarse () 
+template< class A > bool Hface3Top < A >::coarse () 
 {
   innerface_t * f = dwnPtr() ;
   if ( ! f ) return false ;
@@ -445,29 +447,31 @@ template < class A > bool Hface3Top < A > :: coarse ()
     // werden beseitigt, und das Bezugsobjekt wird zum neuen
     // Blatt im Baum.
     
-    // cout << "inner edge ref = " << inEd()->ref << endl;
+    // std::cout << "inner edge ref = " << inEd()->ref << std::endl;
     delete _inner; 
     _inner = 0 ;
 
-    _rule = myrule_t :: nosplit ;
+    _rule = myrule_t::nosplit ;
     { for (int i = 0 ; i < 3 ; ++i ) myhedge (i)->coarse () ; }
   }
   return x ;
 }
 
-template < class A > void Hface3Top < A > :: backup (ostream & os) const 
+template< class A >
+void Hface3Top< A >::backup ( std::ostream &os ) const
 {
   doBackup( os );
 }
 
-template < class A > void Hface3Top < A > :: backup (ObjectStream & os) const 
+template< class A >
+void Hface3Top< A >::backup ( ObjectStream &os ) const
 {
   doBackup( os );
 }
 
-template < class A > 
-template < class OutStream_t>
-void Hface3Top < A > :: doBackup (OutStream_t & os) const 
+template< class A > 
+template< class OutStream_t>
+void Hface3Top < A >::doBackup (OutStream_t & os) const 
 {
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
@@ -475,18 +479,19 @@ void Hface3Top < A > :: doBackup (OutStream_t & os) const
   return ;
 }
 
-template < class A > void Hface3Top < A > :: restore (istream & is) 
+template< class A >
+void Hface3Top< A >::restore ( std::istream &is )
 {
   doRestore( is );
 }
 
-template < class A > void Hface3Top < A > :: restore (ObjectStream& is) 
+template< class A > void Hface3Top< A >::restore ( ObjectStream &is ) 
 {
   doRestore( is );
 }
 
-template < class A > template <class InStream_t> 
-void Hface3Top < A > :: doRestore (InStream_t & is) 
+template< class A > template<class InStream_t> 
+void Hface3Top < A >::doRestore (InStream_t & is) 
 {
   refineImmediate (myrule_t ((char) is.get ())) ;
   {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
@@ -502,7 +507,7 @@ void Hface3Top < A > :: doRestore (InStream_t & is)
 // #     #  #    #  #   ##  #    # #     #    #     #    #  #
 // #     #  #####   #    #  #####   #####     #      ####   #
 
-template < class A >  void Hbnd3Top < A > :: 
+template< class A >  void Hbnd3Top < A >::
 setBoundaryId (const int id ) 
 {
   // set my id to the same as bnd 
@@ -517,11 +522,11 @@ setBoundaryId (const int id )
   }
 }
 
-template < class A >  void Hbnd3Top < A > :: split_bisection() 
+template< class A >  void Hbnd3Top < A >::split_bisection() 
 {
   int l = 1 + level () ;
 
-  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
+  typedef typename Gitter::GhostChildrenInfo GhostChildrenInfo; 
   GhostChildrenInfo ghostInfo;
   // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
   this->splitGhost( ghostInfo );
@@ -539,11 +544,11 @@ template < class A >  void Hbnd3Top < A > :: split_bisection()
   return ;
 }
 
-template < class A >  void Hbnd3Top < A > :: split_iso4 () 
+template< class A >  void Hbnd3Top < A >::split_iso4 () 
 {
   int l = 1 + level () ;
  
-  typedef typename Gitter :: GhostChildrenInfo GhostChildrenInfo; 
+  typedef typename Gitter::GhostChildrenInfo GhostChildrenInfo; 
   GhostChildrenInfo ghostInfo;
   // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
   this->splitGhost( ghostInfo );
@@ -561,7 +566,7 @@ template < class A >  void Hbnd3Top < A > :: split_iso4 ()
   return ;
 }
 
-template < class A >  bool Hbnd3Top < A > :: coarse () 
+template< class A >  bool Hbnd3Top < A >::coarse () 
 {
   innerbndseg_t * b = down () ;
   if (!b) return false ;
@@ -584,11 +589,11 @@ template < class A >  bool Hbnd3Top < A > :: coarse ()
   return x ;
 }
 
-template < class A >  bool Hbnd3Top < A > :: bndNotifyCoarsen () {
+template< class A >  bool Hbnd3Top < A >::bndNotifyCoarsen () {
   return coarse () ;
 }
 
-template < class A >  bool Hbnd3Top < A > :: refineBalance (balrule_t r, int b) 
+template< class A >  bool Hbnd3Top < A >::refineBalance (balrule_t r, int b) 
 {
 
   // Die Methode refineBalance () f"uhrt auf dem Randabschluss entweder
@@ -615,7 +620,7 @@ template < class A >  bool Hbnd3Top < A > :: refineBalance (balrule_t r, int b)
   {
     // refine face according to rule 
     myhface (0)->refineImmediate (r) ;
-    if(r == myrule_t :: iso4) 
+    if(r == myrule_t::iso4) 
     {
       // Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
       // sich selbst, weil die Anforderung durch die Fl"ache kam, und
@@ -629,9 +634,9 @@ template < class A >  bool Hbnd3Top < A > :: refineBalance (balrule_t r, int b)
     } 
     else 
     {
-      cerr << "**FEHLER (FATAL, weil nicht vorgesehen) beim Verfeinern am " ;
-      cerr << "Randst\"uck mit der Regel [" << r << "] in " ;
-      cerr << __FILE__ << " " << __LINE__ << endl ;
+      std::cerr << "**FEHLER (FATAL, weil nicht vorgesehen) beim Verfeinern am " ;
+      std::cerr << "Randst\"uck mit der Regel [" << r << "] in " ;
+      std::cerr << __FILE__ << " " << __LINE__ << std::endl ;
       abort () ;
     }
     
@@ -644,7 +649,7 @@ template < class A >  bool Hbnd3Top < A > :: refineBalance (balrule_t r, int b)
   }
 }
 
-template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r) 
+template< class A >  bool Hbnd3Top < A >::refineLikeElement (balrule_t r) 
 {
 
   // Mit der Methode refineLikeElement () verh"alt sich ein Randabschluss
@@ -658,16 +663,16 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
   // aufgel"ost ist. Erst die mehrfache Anwendung f"uhrt durch die 
   // Balancierung zu einer "Anderung am Elementgitter.
 
-  if (r == myrule_t :: nosplit) {
+  if (r == myrule_t::nosplit) {
   
-    cerr << "**WARNUNG (IGNORIERT) beim Versuch mit nosplit zu Verfeinern" ;
-    cerr << "  in " << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << "**WARNUNG (IGNORIERT) beim Versuch mit nosplit zu Verfeinern" ;
+    std::cerr << "  in " << __FILE__ << " " << __LINE__ << std::endl ;
     
       // Eine Anforderung mit nosplit zu Verfeinern nur erf"ullt,
   // falls die zugeh"orige Fl"achenregel auch nosplit ist, sonst
   // wird die Anforderung als nicht erf"ullt zur"uckgegeben.
     
-    return this->getrule () == balrule_t :: nosplit ? true : false ;
+    return this->getrule () == balrule_t::nosplit ? true : false ;
     
   } else 
     {
@@ -683,24 +688,24 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
       // der Fl"ache, da getrule () auf myhface (0)->getrule () umgeleitet
       // ist.
   
-      // assert (this->getrule () == myrule_t :: nosplit) ;
+      // assert (this->getrule () == myrule_t::nosplit) ;
       switch (r) {
-      case balrule_t :: e01 :
-      case balrule_t :: e12 :
-      case balrule_t :: e20 :
-        //cout << "refLikeEl: e01 " << endl;
-        // if (!myhface (0)->refine (balrule_t (balrule_t :: e01).rotate (twist (0)), twist (0))) return false ;
+      case balrule_t::e01 :
+      case balrule_t::e12 :
+      case balrule_t::e20 :
+        //std::cout << "refLikeEl: e01 " << std::endl;
+        // if (!myhface (0)->refine (balrule_t (balrule_t::e01).rotate (twist (0)), twist (0))) return false ;
         if (!myhface (0)->refine (r, twist (0))) return false ;
         split_bisection() ;
         break;
-      case balrule_t :: iso4 :
-        //if (!myhface (0)->refine (balrule_t (balrule_t :: iso4).rotate (twist (0)), twist (0))) return false ;
+      case balrule_t::iso4 :
+        //if (!myhface (0)->refine (balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false ;
         if (!myhface (0)->refine (r, twist (0))) return false ;
         split_iso4 () ;
         break;
       default :
-        cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << this->getrule () ;
-        cerr << "] (ignoriert) in " << __FILE__ << " " << __LINE__ << endl ;
+        std::cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << this->getrule () ;
+        std::cerr << "] (ignoriert) in " << __FILE__ << " " << __LINE__ << std::endl ;
         return false ;
       }
 
@@ -713,7 +718,7 @@ template < class A >  bool Hbnd3Top < A > :: refineLikeElement (balrule_t r)
   }
 }
 
-template < class A >  void Hbnd3Top < A > :: restoreFollowFace () 
+template< class A >  void Hbnd3Top < A >::restoreFollowFace () 
 {
   // retoreFollowFace () veranlasst das Randelement sich am 
   // bestehenden Fl"achenbaum wiederherzustellen durch die
@@ -723,16 +728,16 @@ template < class A >  void Hbnd3Top < A > :: restoreFollowFace ()
   if (!f.leaf ()) {
     balrule_t r = f.getrule () ;
     switch (r) {
-      case myrule_t :: e01 :
-      case myrule_t :: e12 :
-      case myrule_t :: e20 :
+      case myrule_t::e01 :
+      case myrule_t::e12 :
+      case myrule_t::e20 :
         split_bisection();
         break ;
-      case myrule_t :: iso4 :
+      case myrule_t::iso4 :
         split_iso4 () ;
         break ;
       default :
-        cerr << "**FEHLER (FATAL) beim Verfeinern am Randst\"uck mit der Regel [" << r << "] in " << __FILE__ << " " << __LINE__ << endl ;
+        std::cerr << "**FEHLER (FATAL) beim Verfeinern am Randst\"uck mit der Regel [" << r << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
         abort () ;
         break ;
     }
@@ -750,23 +755,19 @@ template < class A >  void Hbnd3Top < A > :: restoreFollowFace ()
 //    #     #          #    #   #   #    #    #     #    #  #
 //    #     ######     #    #    #  #    #    #      ####   #
 
-template < class A > TetraTop < A > 
+template< class A > TetraTop < A > 
 :: TetraTop (int l, myhface_t * f0, int t0,
              myhface_t * f1, int t1, myhface_t * f2, int t2, 
              myhface_t * f3, int t3, innertetra_t *up, int nChild, double vol) 
   : A (f0, t0, f1, t1, f2, t2, f3, t3), 
     _bbb (0), _up(up)
   , _inner( 0 )  
-  , _volume( (vol < 0.0) ?  
-            quadraturTetra3D < VolumeCalc > (
-                LinearMapping ( myvertex(0)->Point(), 
-                                myvertex(1)->Point(),
-                                myvertex(2)->Point(), 
-                                myvertex(3)->Point())).integrate1 (0.0) 
-            : vol )
+  , _volume( vol < 0.0 ? quadraturTetra3D< VolumeCalc >( 
+                           LinearMapping ( myvertex(0)->Point(), myvertex( 1 )->Point(), myvertex( 2 )->Point(), myvertex( 3 )->Point() ) ).integrate1( 0.0 )
+                       : vol )
   , _lvl (l) 
   , _nChild(nChild)
-  , _rule (myrule_t :: nosplit)
+  , _rule (myrule_t::nosplit)
 {
   // vxMap is set by the setNewMapping routine 
   _vxMap[ 0 ] = _vxMap[ 1 ] = _vxMap[ 2 ] = _vxMap[ 3 ] = -1;
@@ -789,13 +790,13 @@ template < class A > TetraTop < A >
                       myvertex(2)->Point(), 
                       myvertex(3)->Point())).integrate1 (0.0) );
   //if( std::abs( calculatedVolume - _volume ) >1e-10 ) 
-  //  cout << "Determinant of Tetra[" << this->getIndex() << "] is wrong" << endl;
+  //  std::cout << "Determinant of Tetra[" << this->getIndex() << "] is wrong" << std::endl;
   assert( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 ); 
 #endif
 }
 
 // this is the macro element constructor 
-template < class A > TetraTop < A > :: 
+template< class A > TetraTop < A >::
 TetraTop (int l,  // level 
           myhface_t * f0, int t0, // face, twist 
           myhface_t * f1, int t1, // face, twist
@@ -810,7 +811,7 @@ TetraTop (int l,  // level
                      myvertex(2)->Point(), myvertex(3)->Point())).integrate1 (0.0) )
   , _lvl (l) 
   , _nChild(0)  // we are macro ==> nChild 0 
-  , _rule (myrule_t :: nosplit)
+  , _rule (myrule_t::nosplit)
 { 
   assert( this->level() == l );
 
@@ -825,10 +826,10 @@ TetraTop (int l,  // level
   _vxMap[ 1 ] = 1;
   _vxMap[ 2 ] = 2 + mod ;
   _vxMap[ 3 ] = 3 - mod ;
-  // std::cout << "Create Tetra with orientation " << orientation << endl;
+  // std::cout << "Create Tetra with orientation " << orientation << std::endl;
 }
 
-template < class A > TetraTop < A > :: ~TetraTop () 
+template< class A > TetraTop < A >::~TetraTop () 
 {
   this->freeIndex( indexManager() );
   // attachleafs is called in constructor of TetraEmpty
@@ -844,7 +845,7 @@ template < class A > TetraTop < A > :: ~TetraTop ()
   if( bisection )
   {
     // setup connector containing father element
-    pair < Gitter::Geometric::hasFace3 *, int > connect( Gitter::Geometric::InternalHasFace3 ()(_up), int( -1 ) ) ;
+    std::pair< Gitter::Geometric::hasFace3 *, int > connect( Gitter::Geometric::InternalHasFace3()( _up ), int( -1 ) );
     for( int i=0; i<4; ++i ) 
     {
       // get face and twist
@@ -885,60 +886,60 @@ template < class A > TetraTop < A > :: ~TetraTop ()
 }
 
 //- --subedge
-template < class A >  typename TetraTop < A > :: myhedge_t * TetraTop < A > :: subedge (int face, int edge) 
+template< class A >  typename TetraTop < A >::myhedge_t * TetraTop < A >::subedge (int face, int edge) 
 {
   switch ( myhface( face )->getrule() ) 
   {
-  case myhface_t :: myrule_t :: e01 :
+  case myhface_t::myrule_t::e01 :
     assert( edge == 0 );  // for bisection we only get one subEdge of a face
     return myhface ( face )->subedge ( edge ) ;
-  case myhface_t :: myrule_t :: e12 :
+  case myhface_t::myrule_t::e12 :
     assert( edge == 0 );  // for bisection we only get one subEdge of a face
     return myhface ( face )->subedge ( edge ) ;
-  case myhface_t :: myrule_t :: e20 :
+  case myhface_t::myrule_t::e20 :
     assert( edge == 0 );  // for bisection we only get one subEdge of a face
     return myhface ( face )->subedge ( edge ) ;
-  case myhface_t :: myrule_t :: iso4 :
+  case myhface_t::myrule_t::iso4 :
     assert( edge < 3 );
     return ((twist ( face ) < 0) ? myhface ( face )->subedge ((8 - edge + twist ( face )) % 3) : myhface ( face )->subedge ((edge + twist ( face )) % 3)) ;
-  case myhface_t :: myrule_t :: nosplit :
-    cerr << "**ERROR (FATAL): subedge () called on non-refined face. In " << __FILE__ << " " << __LINE__ << endl ;
+  case myhface_t::myrule_t::nosplit :
+    std::cerr << "**ERROR (FATAL): subedge () called on non-refined face. In " << __FILE__ << " " << __LINE__ << std::endl ;
     abort () ;
     return 0 ;
   }
   return 0 ;
 }
 
-template < class A >  const typename TetraTop < A > :: myhedge_t * TetraTop < A > :: subedge (int i, int j) const {
+template< class A >  const typename TetraTop < A >::myhedge_t * TetraTop < A >::subedge (int i, int j) const {
   return ((TetraTop < A > *)this)->subedge (i,j) ;
 }
 
 
 // --subFaces
-template < class A >  
-typename TetraTop < A > :: facepair_t
-TetraTop < A > :: subFaces ( const int i ) 
+template< class A >  
+typename TetraTop < A >::facepair_t
+TetraTop < A >::subFaces ( const int i ) 
 {
   // get face that we want sub faces from 
   myhface_t* face = myhface( i );
 
-  typedef typename myhface_t :: myrule_t  myrule_t;
+  typedef typename myhface_t::myrule_t  myrule_t;
   // get split rule of face 
   const myrule_t rule = face->getrule() ;
-  assert( rule == myrule_t :: e01 || 
-          rule == myrule_t :: e12 || 
-          rule == myrule_t :: e20 );
+  assert( rule == myrule_t::e01 || 
+          rule == myrule_t::e12 || 
+          rule == myrule_t::e20 );
   assert( -3 <= twist( i ) && twist( i ) <= 2 ); 
 
 #ifndef NDEBUG
-  if( rule == myrule_t :: iso4 )
+  if( rule == myrule_t::iso4 )
   {
-    cerr << "**ERROR (FATAL): subFaces () not implemented for iso4 " << i << ". In " << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << "**ERROR (FATAL): subFaces () not implemented for iso4 " << i << ". In " << __FILE__ << " " << __LINE__ << std::endl ;
     abort () ;
   }
-  else if ( rule == myrule_t :: nosplit )
+  else if ( rule == myrule_t::nosplit )
   {
-    cerr << "**ERROR (FATAL): subFaces () called on non-refined face " << i << ". In " << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << "**ERROR (FATAL): subFaces () called on non-refined face " << i << ". In " << __FILE__ << " " << __LINE__ << std::endl ;
     abort () ;
   }
 #endif
@@ -947,7 +948,7 @@ TetraTop < A > :: subFaces ( const int i )
   const unsigned int ruleId = int(rule) - 2;
   assert( ruleId <= 2 );
 
-  // cout << "subFaces rule " << ruleId << " of face " << i << " with twist " << twist( i ) << endl;
+  // std::cout << "subFaces rule " << ruleId << " of face " << i << " with twist " << twist( i ) << std::endl;
 
   //                                twists  -3  -2  -1   0   1   2 
   static const int subFace[ 3 ][ 6 ] = {  {  1,  1,  0,  0,  0,  1  }, // rule e01 
@@ -968,9 +969,9 @@ TetraTop < A > :: subFaces ( const int i )
 }
 
 // --subFaces
-template < class A >  
-typename TetraTop < A > :: facepair_t
-TetraTop < A > :: subFaces ( const int i, 
+template< class A >  
+typename TetraTop < A >::facepair_t
+TetraTop < A >::subFaces ( const int i, 
                              const myvertex_t* vx0, 
                              const myvertex_t* vx1 ) 
 {
@@ -1012,11 +1013,11 @@ TetraTop < A > :: subFaces ( const int i,
   }
   if( ! found0 || ! found1 ) 
   {
-    cout << "Problem: " << face << endl;
-    cout << " vx0 " << vx0 << endl;
-    cout << " vx1 " << vx1 << endl;
-    cout << "sub0 " << subFce[ sub0 ] << endl;
-    cout << "sub1 " << subFce[ ! sub0 ] << endl;
+    std::cout << "Problem: " << face << std::endl;
+    std::cout << " vx0 " << vx0 << std::endl;
+    std::cout << " vx1 " << vx1 << std::endl;
+    std::cout << "sub0 " << subFce[ sub0 ] << std::endl;
+    std::cout << "sub1 " << subFce[ ! sub0 ] << std::endl;
   }
   assert( found0 );
   assert( found1 );
@@ -1026,62 +1027,62 @@ TetraTop < A > :: subFaces ( const int i,
 }
 
 // --subface
-template < class A >  typename TetraTop < A > ::  myhface_t * TetraTop < A > :: subface (int i, int j) 
+template< class A >  typename TetraTop < A >:: myhface_t * TetraTop < A >::subface (int i, int j) 
 {
   switch ( myhface( i )->getrule() ) 
   {
-  case myhface_t :: myrule_t :: e01 :
+  case myhface_t::myrule_t::e01 :
     assert( j < 2 );
     if ( twist(i) == 0 ||  twist(i) == 1 ||  twist(i) == -1 )
       return myhface(i)->subface( j ) ;
     if ( twist(i) == 2 ||  twist(i) == -2 || twist(i) == -3 )
       return myhface(i)->subface(!j) ;
-    cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << endl;
+    std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
     assert( false );
     return 0;
-  case myhface_t :: myrule_t :: e12 :
+  case myhface_t::myrule_t::e12 :
     assert( j < 2 );
     if ( twist(i) == 0 ||  twist(i) == 2 ||  twist(i) == -3 )
       return myhface(i)->subface(j) ;
     if ( twist(i) == -1 || twist(i) == 1 ||  twist(i) == -2 )
       return myhface(i)->subface(!j) ;
-    cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << endl;
+    std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
     return 0;
-  case myhface_t :: myrule_t :: e20 :
+  case myhface_t::myrule_t::e20 :
     assert( j < 2 );
     if ( twist(i) == 1 ||  twist(i) == 2 ||  twist(i) == -2 )
       return myhface(i)->subface(j) ;
     if ( twist(i) == 0 ||  twist(i) == -1 || twist(i) == -3 )
       return myhface(i)->subface(!j) ;
-    cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << endl;
+    std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
     return 0;
-  case myhface_t :: myrule_t :: iso4 :
+  case myhface_t::myrule_t::iso4 :
     assert( j < 4 );
     if ( j == 3 )
       return myhface(i)->subface(3);
     if ( j < 3 )
       return myhface(i)->subface(twist(i) < 0 ? (7 - j + twist(i)) % 3 : (j + twist(i)) % 3) ;
-  case myhface_t :: myrule_t :: nosplit :
-    cerr << "**ERROR (FATAL): subface () called on non-refined face. In " << __FILE__ << " " << __LINE__ << endl ;
+  case myhface_t::myrule_t::nosplit :
+    std::cerr << "**ERROR (FATAL): subface () called on non-refined face. In " << __FILE__ << " " << __LINE__ << std::endl ;
     abort () ;
     return 0 ;
   default:
-    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface(i)->getrule() << "] in " << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface(i)->getrule() << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
     abort() ;
   } 
   return 0 ;
 }
 
-template < class A >  const typename TetraTop < A > ::  myhface_t * TetraTop < A > :: subface (int i, int j) const {
+template< class A >  const typename TetraTop < A >:: myhface_t * TetraTop < A >::subface (int i, int j) const {
   return ((TetraTop < A > *)this)->subface (i,j) ;
 }
 
-template < class A >  void TetraTop < A > :: split_e01 () 
+template< class A >  void TetraTop < A >::split_e01 () 
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
 
-  splitInfo( myrule_t :: e01 );
+  splitInfo( myrule_t::e01 );
 
   myhedge_t* subEdge = this->subedge (2, 0);
   myhedge_t* subEdge2 = this->subedge (3, 0);
@@ -1158,17 +1159,17 @@ template < class A >  void TetraTop < A > :: split_e01 ()
   setNewMapping( h0, h1, newFace, 1, 0);
 
   // store refinement rule that was used to split this tetra 
-  _rule = myrule_t :: e01;
+  _rule = myrule_t::e01;
   return ;
 }
 
 // --split_e12
-template < class A >  void TetraTop < A > :: split_e12 () 
+template< class A >  void TetraTop < A >::split_e12 () 
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
 
-  splitInfo( myrule_t :: e12 );
+  splitInfo( myrule_t::e12 );
 
   myhedge_t* subEdge = this->subedge (3, 0);
   myhedge_t* subEdge2 = this->subedge (0, 0);
@@ -1245,15 +1246,15 @@ template < class A >  void TetraTop < A > :: split_e12 ()
   setNewMapping( h0, h1, newFace, 1, 2 );
 
   // set refinement rule that was used to refine this tetra 
-  _rule = myrule_t :: e12 ;
+  _rule = myrule_t::e12 ;
 }
 
-template < class A >  void TetraTop < A > :: split_e20 () 
+template< class A >  void TetraTop < A >::split_e20 () 
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
 
-  splitInfo( myrule_t :: e20 );
+  splitInfo( myrule_t::e20 );
 
   myhedge_t* subEdge2 = this->subedge (1, 0);
   myhedge_t* subEdge = this->subedge (3, 0);
@@ -1330,15 +1331,15 @@ template < class A >  void TetraTop < A > :: split_e20 ()
   setNewMapping( h0, h1, newFace, 2, 0 );
 
   // set refinement rule that was used to refine this tetra 
-  _rule = myrule_t :: e20;
+  _rule = myrule_t::e20;
 }
 
-template < class A >  void TetraTop < A > :: split_e23 () 
+template< class A >  void TetraTop < A >::split_e23 () 
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
 
-  splitInfo( myrule_t :: e23 );
+  splitInfo( myrule_t::e23 );
 
   myhedge_t* subEdge2 = this->subedge (1, 0);
   myhedge_t* subEdge = this->subedge (0, 0);
@@ -1414,15 +1415,15 @@ template < class A >  void TetraTop < A > :: split_e23 ()
   setNewMapping( h0, h1, newFace, 2, 3 );
 
   // set refinement rule that was used to refine this tetra 
-  _rule = myrule_t :: e23 ;
+  _rule = myrule_t::e23 ;
 }
 
-template < class A >  void TetraTop < A > :: split_e30 () 
+template< class A >  void TetraTop < A >::split_e30 () 
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level();
 
-  splitInfo( myrule_t :: e30 );
+  splitInfo( myrule_t::e30 );
   /* 
     
     3               2
@@ -1499,15 +1500,15 @@ template < class A >  void TetraTop < A > :: split_e30 ()
   setNewMapping( h0, h1, newFace, 3, 0 );
 
   // set refinement rule that was used to refine this tetra 
-  _rule = myrule_t :: e30;
+  _rule = myrule_t::e30;
 }
 
-template < class A >  void TetraTop < A > :: split_e31 () 
+template< class A >  void TetraTop < A >::split_e31 () 
 {
   assert( _inner == 0 );
   const int newLevel = 1 + this->level () ;
 
-  splitInfo( myrule_t :: e31 );
+  splitInfo( myrule_t::e31 );
 
   myhedge_t* subEdge2 = this->subedge (2, 0);
   myhedge_t* subEdge = this->subedge (0, 0);
@@ -1585,12 +1586,12 @@ template < class A >  void TetraTop < A > :: split_e31 ()
   setNewMapping( h0, h1, newFace, 3, 1 );
 
   // set refinement rule that was used to refine this tetra 
-  _rule = myrule_t :: e31;
+  _rule = myrule_t::e31;
 }
 
 // --setNewMapping  
-template < class A >  void 
-TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1, 
+template< class A >  void 
+TetraTop < A >::setNewMapping( innertetra_t* h0, innertetra_t* h1, 
                                  innerface_t* newFace,  
                                  const int newVx0, const int newVx1 ) 
 {
@@ -1651,18 +1652,18 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
 
 #ifndef NDEBUG
   /*
-  cout << "Map0 = ( " ;
+  std::cout << "Map0 = ( " ;
   for( int i=0; i<4 ; ++ i )
   {
-    cout << int(h0->_vxMap[i]) << " " ;
+    std::cout << int(h0->_vxMap[i]) << " " ;
   }
-  cout << " ) " << endl;
-  cout << "Map1 = ( " ;
+  std::cout << " ) " << std::endl;
+  std::cout << "Map1 = ( " ;
   for( int i=0; i<4 ; ++ i )
   {
-    cout << int(h1->_vxMap[i]) << " " ;
+    std::cout << int(h1->_vxMap[i]) << " " ;
   }
-  cout << " ) " << endl;
+  std::cout << " ) " << std::endl;
   */
 
   for(int i=0; i<4; ++i ) 
@@ -1678,14 +1679,14 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
   }
 #endif
 
-  //cout << "New tetra " << h0 << endl;
+  //std::cout << "New tetra " << h0 << std::endl;
   // assert( checkTetra( h0, 0 ) );
 
-  //cout << "New tetra " << h1 << endl;
+  //std::cout << "New tetra " << h1 << std::endl;
   // assert( checkTetra( h1, 1 ) );
 
-  //cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << endl;
-  //cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << endl;
+  //std::cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << std::endl;
+  //std::cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << std::endl;
 
   // append h1 to h0 
   h0->append( h1 );
@@ -1699,14 +1700,14 @@ TetraTop < A > :: setNewMapping( innertetra_t* h0, innertetra_t* h1,
 }
 
 
-template < class A >  int 
-TetraTop < A > :: vertexTwist( const int twst, const int vx ) const 
+template< class A >  int 
+TetraTop < A >::vertexTwist( const int twst, const int vx ) const 
 {
   return twst < 0 ? (7-vx+twst)%3 : (vx+twst)%3;
 }
 
-template < class A > int 
-TetraTop < A > :: calculateFace2Twist( const int vxIndex, const myhface_t* subFace ) const 
+template< class A > int 
+TetraTop < A >::calculateFace2Twist( const int vxIndex, const myhface_t* subFace ) const 
 {
   const int faceIndices[ 3 ] = { subFace->myvertex( 0 )->getIndex(),
                                  subFace->myvertex( 1 )->getIndex(),
@@ -1721,7 +1722,7 @@ TetraTop < A > :: calculateFace2Twist( const int vxIndex, const myhface_t* subFa
     }
   }
 
-  cout << "Valid twist not found!!!" << endl;
+  std::cout << "Valid twist not found!!!" << std::endl;
   return 0;
   // we should not get here 
   assert( false );
@@ -1729,15 +1730,15 @@ TetraTop < A > :: calculateFace2Twist( const int vxIndex, const myhface_t* subFa
   return -5;
 }
 
-template < class A > int 
-TetraTop < A > :: calculateFace3Twist( const int (&vx)[2], const myhface_t* subFace, const int secondVx ) const 
+template< class A > int 
+TetraTop < A >::calculateFace3Twist( const int (&vx)[2], const myhface_t* subFace, const int secondVx ) const 
 {
-  //cout << "check v0 = " << vx[0] << " v1 = " << vx[1] << endl;
+  //std::cout << "check v0 = " << vx[0] << " v1 = " << vx[1] << std::endl;
 
   const int faceIndices[ 3 ] = { subFace->myvertex( 0 )->getIndex(),
                                  subFace->myvertex( 1 )->getIndex(),
                                  subFace->myvertex( 2 )->getIndex() };
-  //cout << faceIndices[0] << " " << faceIndices[1] << " " << faceIndices[2] << " " << endl;
+  //std::cout << faceIndices[0] << " " << faceIndices[1] << " " << faceIndices[2] << " " << std::endl;
 
   for(int twst = -3; twst<3; ++twst ) 
   {
@@ -1749,7 +1750,7 @@ TetraTop < A > :: calculateFace3Twist( const int (&vx)[2], const myhface_t* subF
     }
   }
 
-  cout << "Valid twist not found!!!" << endl;
+  std::cout << "Valid twist not found!!!" << std::endl;
   return 0;
 
   // we should not get here 
@@ -1759,13 +1760,13 @@ TetraTop < A > :: calculateFace3Twist( const int (&vx)[2], const myhface_t* subF
 }
 
 // --checkTetra
-template < class A > bool 
-TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) const 
+template< class A > bool 
+TetraTop < A >::checkTetra( const innertetra_t *tetra, const int nChild ) const 
 {
   // make sure face twists are ok 
   bool twistOk = true ;
 
-  set< int > verticesFound ;
+  std::set< int > verticesFound;
   assert( tetra->nChild() == nChild );
 
   const bool isGhost = tetra->isGhost();
@@ -1780,18 +1781,18 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
     {
       verticesFound.insert( tetra->myvertex( fce, i )->getIndex() ); 
       // use proto type to check face twists 
-      if( tetra->myvertex( Gitter :: Geometric :: Tetra :: prototype[ fce ][ i ] ) 
+      if( tetra->myvertex( Gitter::Geometric::Tetra::prototype[ fce ][ i ] ) 
             != tetra->myvertex( fce, i ) )
       {
-        const int vx0 = Gitter :: Geometric :: Tetra :: prototype[ fce ][ 0 ] ;
-        const int vx1 = Gitter :: Geometric :: Tetra :: prototype[ fce ][ 1 ] ;
+        const int vx0 = Gitter::Geometric::Tetra::prototype[ fce ][ 0 ] ;
+        const int vx1 = Gitter::Geometric::Tetra::prototype[ fce ][ 1 ] ;
 
         const int vx[2] = { tetra->myvertex( vx0 )->getIndex(),
                             tetra->myvertex( vx1 )->getIndex() 
                           };
 
         int twst = calculateFace3Twist( vx, tetra->myhface( fce ), 1 ); 
-        cout << "Twist is wrong, it should be " << twst << endl;
+        std::cout << "Twist is wrong, it should be " << twst << std::endl;
         twistOk = false ;
         continue ;
       }
@@ -1799,8 +1800,8 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
 
     if( ! isGhost && ! tetra->myneighbour( fce ).first->isRealObject()  ) 
     {
-      cout << "Neighbour(type="<<tetra->isInterior() << ") " << fce << " of Tetra " << tetra->getIndex()  << " is wrong " << endl;
-      cout << "Check face " << tetra->myhface( fce )->getIndex() << endl;
+      std::cout << "Neighbour(type="<<tetra->isInterior() << ") " << fce << " of Tetra " << tetra->getIndex()  << " is wrong " << std::endl;
+      std::cout << "Check face " << tetra->myhface( fce )->getIndex() << std::endl;
     }
     // make sure neighbor is something meaningful 
     //assert( tetra->myneighbour( fce ).first->isRealObject() );
@@ -1812,12 +1813,12 @@ TetraTop < A > :: checkTetra( const innertetra_t *tetra, const int nChild ) cons
   return twistOk;
 }
 
-template < class A >  void TetraTop < A > :: 
+template< class A >  void TetraTop < A >::
 splitISO8 () 
 {
   assert( _inner == 0 );
-  typedef typename A :: myvertex_t  myvertex_t;
-  typedef typename A :: inneredge_t inneredge_t;
+  typedef typename A::myvertex_t  myvertex_t;
+  typedef typename A::inneredge_t inneredge_t;
   const int l = 1 + this->level () ; 
 
   myvertex_t * e31 = myhface (0)->myhedge ((twist(0) < 0) ? ((9+twist(0))%3) : (twist(0)%3))->subvertex (0) ;
@@ -1864,110 +1865,110 @@ splitISO8 ()
   h6->append(h7) ;
   _inner = new inner_t( h0, f0, e0 ); 
   assert( _inner );
-  _rule = myrule_t :: iso8 ;
+  _rule = myrule_t::iso8 ;
   
   this->detachleafs();
   return ;
 }
 
-template < class A > TetraTop < A > :: 
-BisectionInfo :: BisectionInfo ( myrule_t r ) : _caller( 0 )
+template< class A > TetraTop < A >::
+BisectionInfo::BisectionInfo ( myrule_t r ) : _caller( 0 )
 {
   switch(r) 
   {
-    case myrule_t :: e01 :
+    case myrule_t::e01 :
       _faces[ 0 ] = 2 ;
       _faces[ 1 ] = 3 ;
       _vertices[ 0 ] = 0 ;
       _vertices[ 1 ] = 1 ;
-      _faceRules[ 0 ] = face3rule_t :: e20;
-      _faceRules[ 1 ] = face3rule_t :: e01;
-      _caller = new CallSplitImpl< myrule_t :: e01 > ();
+      _faceRules[ 0 ] = face3rule_t::e20;
+      _faceRules[ 1 ] = face3rule_t::e01;
+      _caller = new CallSplitImpl< myrule_t::e01 > ();
       break ;
-    case myrule_t :: e12 :
+    case myrule_t::e12 :
       _faces[ 0 ] = 0 ;
       _faces[ 1 ] = 3 ;
       _vertices[ 0 ] = 1 ;
       _vertices[ 1 ] = 2 ;
-      _faceRules[ 0 ] = face3rule_t :: e20;
-      _faceRules[ 1 ] = face3rule_t :: e12;
-      _caller = new CallSplitImpl< myrule_t :: e12 > ();
+      _faceRules[ 0 ] = face3rule_t::e20;
+      _faceRules[ 1 ] = face3rule_t::e12;
+      _caller = new CallSplitImpl< myrule_t::e12 > ();
       break ;
-    case myrule_t :: e20 :
+    case myrule_t::e20 :
       _faces[ 0 ] = 1 ;
       _faces[ 1 ] = 3 ;
       _vertices[ 0 ] = 2 ;
       _vertices[ 1 ] = 0 ;
-      _faceRules[ 0 ] = face3rule_t :: e01;
-      _faceRules[ 1 ] = face3rule_t :: e20;
-      _caller = new CallSplitImpl< myrule_t :: e20 > ();
+      _faceRules[ 0 ] = face3rule_t::e01;
+      _faceRules[ 1 ] = face3rule_t::e20;
+      _caller = new CallSplitImpl< myrule_t::e20 > ();
       break ;
-    case myrule_t :: e23 :
+    case myrule_t::e23 :
       _faces[ 0 ] = 0 ;
       _faces[ 1 ] = 1 ;
       _vertices[ 0 ] = 2 ;
       _vertices[ 1 ] = 3 ;
-      _faceRules[ 0 ] = face3rule_t :: e12;
-      _faceRules[ 1 ] = face3rule_t :: e12;
-      _caller = new CallSplitImpl< myrule_t :: e23 > ();
+      _faceRules[ 0 ] = face3rule_t::e12;
+      _faceRules[ 1 ] = face3rule_t::e12;
+      _caller = new CallSplitImpl< myrule_t::e23 > ();
       break ;
-    case myrule_t :: e30 :
+    case myrule_t::e30 :
       _faces[ 0 ] = 1 ;
       _faces[ 1 ] = 2 ;
       _vertices[ 0 ] = 3 ;
       _vertices[ 1 ] = 0 ;
-      _faceRules[ 0 ] = face3rule_t :: e20;
-      _faceRules[ 1 ] = face3rule_t :: e01;
-      _caller = new CallSplitImpl< myrule_t :: e30 > ();
+      _faceRules[ 0 ] = face3rule_t::e20;
+      _faceRules[ 1 ] = face3rule_t::e01;
+      _caller = new CallSplitImpl< myrule_t::e30 > ();
       break ;
-    case myrule_t :: e31 :
+    case myrule_t::e31 :
       _faces[ 0 ] = 0 ;
       _faces[ 1 ] = 2 ;
       _vertices[ 0 ] = 3 ;
       _vertices[ 1 ] = 1 ;
-      _faceRules[ 0 ] = face3rule_t :: e01;
-      _faceRules[ 1 ] = face3rule_t :: e12;
-      _caller = new CallSplitImpl< myrule_t :: e31 > ();
+      _faceRules[ 0 ] = face3rule_t::e01;
+      _faceRules[ 1 ] = face3rule_t::e12;
+      _caller = new CallSplitImpl< myrule_t::e31 > ();
       break ;
     default :
-      cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
-      cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << endl ;
+      std::cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
+      std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
       abort () ;
       break ;
   }
 }
 
 // --refineImmediate 
-template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r) 
+template< class A >  void TetraTop < A >::refineImmediate (myrule_t r) 
 {
-  assert (getrule () == myrule_t :: nosplit) ;
-  typedef typename myhface_t :: myrule_t face3rule_t;
+  assert (getrule () == myrule_t::nosplit) ;
+  typedef typename myhface_t::myrule_t face3rule_t;
 
-  if( r == myrule_t :: iso8 ) 
+  if( r == myrule_t::iso8 ) 
   {
-    // Das refineImmediate (..) auf allen Fl"achen wird vom tetra :: refine (..)
+    // Das refineImmediate (..) auf allen Fl"achen wird vom tetra::refine (..)
     // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
-    // "uberall hface3 :: refine (..) true geliefert hat, wohl aber z.B. von
+    // "uberall hface3::refine (..) true geliefert hat, wohl aber z.B. von
     // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
     // erzwingen m"ussen und d"urfen.
       
     {
       for (int i = 0 ; i < 4 ; ++i)
-        myhface (i)->refineImmediate (face3rule_t (myhface_t :: myrule_t :: iso4).rotate (twist (i))) ; 
+        myhface (i)->refineImmediate (face3rule_t (myhface_t::myrule_t::iso4).rotate (twist (i))) ; 
     }
     splitISO8 () ;
   }
-  else if( r == myrule_t :: bisect )
+  else if( r == myrule_t::bisect )
   {
     // call refinement with appropriate rule 
     // given by suggestRule 
-    BisectionInfo :: splitEdge( this, suggestRule() );
+    BisectionInfo::splitEdge( this, suggestRule() );
   }
   else 
   {
     // it is assured that r is one out of e01 ... e32 
     // call refinement directly 
-    BisectionInfo :: splitEdge( this, r );
+    BisectionInfo::splitEdge( this, r );
   }
 
   // call post refinement procedure 
@@ -1977,37 +1978,37 @@ template < class A >  void TetraTop < A > :: refineImmediate (myrule_t r)
 
 
 // --refine 
-template < class A >  bool TetraTop < A > :: refine () 
+template< class A >  bool TetraTop < A >::refine () 
 {
   myrule_t r = _req ;
-  if (r != myrule_t :: crs && r != myrule_t :: nosplit) 
+  if (r != myrule_t::crs && r != myrule_t::nosplit) 
   {
     if (r != getrule ()) 
     {
-      assert (getrule () == myrule_t :: nosplit) ;
-      _req = myrule_t :: nosplit ;
+      assert (getrule () == myrule_t::nosplit) ;
+      _req = myrule_t::nosplit ;
       switch (r) 
       {
-        case myrule_t :: crs :
-        case myrule_t :: nosplit :
+        case myrule_t::crs :
+        case myrule_t::nosplit :
           return true ;
-        case myrule_t :: iso8 :
+        case myrule_t::iso8 :
           {
             for (int i = 0 ; i < 4 ; ++i )
-              if (!myhface (i)->refine (face3rule_t (face3rule_t :: iso4).rotate (twist (i)), twist (i))) return false ; 
+              if (!myhface (i)->refine (face3rule_t (face3rule_t::iso4).rotate (twist (i)), twist (i))) return false ; 
           }
           break ;
-        case myrule_t :: e01 :
-        case myrule_t :: e12 :
-        case myrule_t :: e20 :
-        case myrule_t :: e23 :
-        case myrule_t :: e30 :
-        case myrule_t :: e31 :
-          if( ! BisectionInfo :: refineFaces( this, r ) ) return false ;
+        case myrule_t::e01 :
+        case myrule_t::e12 :
+        case myrule_t::e20 :
+        case myrule_t::e23 :
+        case myrule_t::e30 :
+        case myrule_t::e31 :
+          if( ! BisectionInfo::refineFaces( this, r ) ) return false ;
           break ;
         default :
-          cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << int(getrule ()) ;
-          cerr << "] (ignoriert) in " << __FILE__ << " " << __LINE__ << endl ;
+          std::cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << int(getrule ()) ;
+          std::cerr << "] (ignoriert) in " << __FILE__ << " " << __LINE__ << std::endl ;
           assert( false );
           return false ;
       }
@@ -2022,12 +2023,12 @@ template < class A >  bool TetraTop < A > :: refine ()
   return true ;
 }
 
-template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce) 
+template< class A >  bool TetraTop < A >::refineBalance (balrule_t r, int fce) 
 {
   // if status is still non-refined 
-  if (getrule () == myrule_t :: nosplit) 
+  if (getrule () == myrule_t::nosplit) 
   {
-    if( r == balrule_t :: iso4 )
+    if( r == balrule_t::iso4 )
     {
       // if face is a leaf face 
       if (! myhface (fce)->leaf ()) 
@@ -2035,11 +2036,11 @@ template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce
         for (int i = 0 ; i < 4 ; ++i)
         {  
           if (i != fce)
-            if ( ! myhface (i)->refine (balrule_t ( balrule_t :: iso4 ).rotate (twist (i)), twist (i)) ) 
+            if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (i)), twist (i)) ) 
               return false ;
         }
-        _req = myrule_t :: nosplit ;
-        refineImmediate (myrule_t :: iso8) ;
+        _req = myrule_t::nosplit ;
+        refineImmediate (myrule_t::iso8) ;
       }
     }
     else 
@@ -2047,16 +2048,16 @@ template < class A >  bool TetraTop < A > :: refineBalance (balrule_t r, int fce
       // if face is a leaf face 
       if (! myhface (fce)->leaf ()) 
       {
-        _req = myrule_t :: nosplit ;
-        if (! BisectionInfo :: refineFaces( this, suggestRule() ) ) return false ;
-        refineImmediate ( myrule_t :: bisect ) ;
+        _req = myrule_t::nosplit ;
+        if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
+        refineImmediate ( myrule_t::bisect ) ;
       }
     }
   }
   return true ;
 }
 
-template < class A >  bool TetraTop < A > :: coarse () 
+template< class A >  bool TetraTop < A >::coarse () 
 {
   if (this->leaf ()) 
   {
@@ -2066,11 +2067,11 @@ template < class A >  bool TetraTop < A > :: coarse ()
       return false;
     }
 
-    assert (_req == myrule_t :: nosplit || _req == myrule_t :: crs) ;
+    assert (_req == myrule_t::nosplit || _req == myrule_t::crs) ;
     myrule_t w = _req ;
-    _req = myrule_t :: nosplit ;
+    _req = myrule_t::nosplit ;
     // end recursion if rule is not croarsen 
-    if (w != myrule_t :: crs) 
+    if (w != myrule_t::crs) 
     {
       return false ;
     }
@@ -2085,7 +2086,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
   } 
   else 
   {
-    assert (_req == myrule_t :: nosplit) ;
+    assert (_req == myrule_t::nosplit) ;
     bool x = true ;
     {
       for (innertetra_t * h = dwnPtr() ; h ; h = h->next ()) x &= h->coarse () ; 
@@ -2124,7 +2125,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
       _inner = 0 ;
 
       // reset refinement rule 
-      _rule = myrule_t :: nosplit ;
+      _rule = myrule_t::nosplit ;
       {
         for (int i = 0 ; i < 4 ; ++i ) 
         {
@@ -2139,7 +2140,7 @@ template < class A >  bool TetraTop < A > :: coarse ()
 }
 
 // buckupIndex of tetra  
-template < class A > void TetraTop < A > :: backupIndex (ostream & os) const 
+template< class A > void TetraTop < A >::backupIndex ( std::ostream &os ) const
 {
   this->doBackupIndex( os );
 
@@ -2151,7 +2152,7 @@ template < class A > void TetraTop < A > :: backupIndex (ostream & os) const
 }
 
 // buckupIndex of tetra  
-template < class A > void TetraTop < A > :: backupIndex (ObjectStream& os) const 
+template< class A > void TetraTop < A >::backupIndex (ObjectStream& os) const 
 {
   this->doBackupIndex( os );
 
@@ -2163,37 +2164,36 @@ template < class A > void TetraTop < A > :: backupIndex (ObjectStream& os) const
 }
 
 // buckupTetra 
-template < class A > void TetraTop < A > :: backup (ostream & os) const 
-{
-  doBackup( os );
-}
-template < class A > void TetraTop < A > :: backup (ObjectStream& os) const 
+template< class A > void TetraTop< A >::backup ( std::ostream &os ) const
 {
   doBackup( os );
 }
 
-template < class A > template <class OutStream_t> 
-void TetraTop < A > :: doBackup (OutStream_t & os) const 
+template< class A > void TetraTop < A >::backup (ObjectStream& os) const 
+{
+  doBackup( os );
+}
+
+template< class A > template<class OutStream_t> 
+void TetraTop < A >::doBackup (OutStream_t & os) const 
 {
   os.put ((char) getrule ()) ;
   {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
   {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
   {for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backup (os) ; }
-  
-  return ;
 }
 
 // overloaded restoreIndex Method 
-template < class A > 
-template < class istream_t>
-void TetraTop < A > :: 
+template< class A > 
+template< class istream_t>
+void TetraTop < A >::
 restoreIndexImpl (istream_t & is, RestoreInfo& restoreInfo ) 
 {
   // mark this element a non hole 
-  typedef typename Gitter :: Geometric :: BuilderIF BuilderIF; 
+  typedef typename Gitter::Geometric::BuilderIF BuilderIF; 
 
   // restore index 
-  this->doRestoreIndex( is, restoreInfo, BuilderIF :: IM_Elements );
+  this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Elements );
 
   // TODO 
   // restore other indices 
@@ -2205,32 +2205,30 @@ restoreIndexImpl (istream_t & is, RestoreInfo& restoreInfo )
 }
 
 // overloaded restoreIndex Method 
-template < class A > void TetraTop < A > :: 
-restoreIndex (istream & is, RestoreInfo& restoreInfo ) 
+template< class A >
+void TetraTop< A >::restoreIndex ( std::istream & is, RestoreInfo &restoreInfo )
 {
   restoreIndexImpl( is, restoreInfo );
 }
 
 // overloaded restoreIndex Method 
-template < class A > void TetraTop < A > :: 
+template< class A > void TetraTop < A >::
 restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) 
 {
   restoreIndexImpl( is, restoreInfo );
 }
 
 // restoreTetra
-template < class A > void TetraTop < A > :: restore (istream & is) 
+template< class A >
+void TetraTop < A >::restore ( std::istream &is ) { doRestore( is ); }
+
+template< class A > void TetraTop < A >::restore (ObjectStream & is) 
 {
   doRestore( is );
 }
 
-template < class A > void TetraTop < A > :: restore (ObjectStream & is) 
-{
-  doRestore( is );
-}
-
-template < class A > template <class InStream_t>
-void TetraTop < A > :: doRestore (InStream_t & is) 
+template< class A > template<class InStream_t>
+void TetraTop < A >::doRestore (InStream_t & is) 
 {
   // restore () stellt den Elementbaum aus der Verfeinerungs-
   // geschichte wieder her. Es ruft refine () auf und testet
@@ -2238,8 +2236,8 @@ void TetraTop < A > :: doRestore (InStream_t & is)
   // die inneren Gitterteile restore'd.
  
   myrule_t r ((char) is.get ()) ;
-  assert(getrule() == myrule_t :: nosplit) ;
-  if (r == myrule_t :: nosplit) 
+  assert(getrule() == myrule_t::nosplit) ;
+  if (r == myrule_t::nosplit) 
   {
     // Vorsicht: beim restore m"ussen sich sowohl Element als auch
     // Randelement um die Korrektheit der Nachbarschaft k"ummern,
@@ -2257,12 +2255,12 @@ void TetraTop < A > :: doRestore (InStream_t & is)
       {
         switch (f.getrule ()) 
         {
-          case balrule_t :: e01 :
-          case balrule_t :: e12 :
-          case balrule_t :: e20 :
+          case balrule_t::e01 :
+          case balrule_t::e12 :
+          case balrule_t::e20 :
             { for (int j = 0 ; j < 2 ; j ++) f.subface (j)->nb.complete (f.nb) ;}
             break ;
-          case balrule_t :: iso4 :
+          case balrule_t::iso4 :
             { for (int j = 0 ; j < 4 ; j ++) f.subface (j)->nb.complete (f.nb) ; }
             break ;
           default :
@@ -2305,76 +2303,76 @@ void TetraTop < A > :: doRestore (InStream_t & is)
 // #        #       #   #      #    #    #  #    #     #    #    # #     #   #     #    #  #
 // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
    
-template < class A > typename Periodic3Top < A > :: myhedge_t * Periodic3Top < A > :: subedge (int i, int j) {
+template< class A > typename Periodic3Top < A >::myhedge_t * Periodic3Top < A >::subedge (int i, int j) {
   switch (myhface(i)->getrule()) {
-    case myhface_t :: myrule_t :: e01 :
-    case myhface_t :: myrule_t :: e12 :
-    case myhface_t :: myrule_t :: e20 :
+    case myhface_t::myrule_t::e01 :
+    case myhface_t::myrule_t::e12 :
+    case myhface_t::myrule_t::e20 :
       assert( j == 0 );
       return myhface (i)->subedge (0) ;
-    case myhface_t :: myrule_t :: iso4 :
+    case myhface_t::myrule_t::iso4 :
       assert( j < 3 );
       return ((twist (i) < 0) ? myhface (i)->subedge ((8 - j + twist (i)) % 3) : myhface (i)->subedge ((j + twist (i)) % 3)) ;
-    case myhface_t :: myrule_t :: nosplit :
-      cerr << "**FEHLER (FATAL): subedge () auf nicht in verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << endl ;
+    case myhface_t::myrule_t::nosplit :
+      std::cerr << "**FEHLER (FATAL): subedge () auf nicht in verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << std::endl ;
       abort () ;
       return 0 ;
   }
   return 0 ;
 }
 
-template < class A > const typename Periodic3Top < A > :: myhedge_t * Periodic3Top < A > :: subedge (int i, int j) const {
+template< class A > const typename Periodic3Top < A >::myhedge_t * Periodic3Top < A >::subedge (int i, int j) const {
   return ((Periodic3Top < A > *)this)->subedge (i,j) ;
 }
 
-template < class A > typename Periodic3Top < A > ::  myhface_t * Periodic3Top < A > :: subface (int i, int j) {
+template< class A > typename Periodic3Top < A >:: myhface_t * Periodic3Top < A >::subface (int i, int j) {
   switch (myhface (i)->getrule ()) {
-  case myhface_t :: myrule_t :: e01 :
+  case myhface_t::myrule_t::e01 :
     assert( j < 2 );
     if ( twist(i) == 0 ||  twist(i) == 1  ||  twist(i) == -1 )
       return myhface(i)->subface(j) ;
     if ( twist(i) == 2 ||  twist(i) == -2 ||  twist(i) == -3 )
       return myhface(i)->subface(!j) ;
-      cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << endl;
+      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       return 0;
-  case myhface_t :: myrule_t :: e12 :
+  case myhface_t::myrule_t::e12 :
     assert( j < 2 );
     if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )
       return myhface(i)->subface(j) ;
     if ( twist(i) == -1 ||  twist(i) == 1 ||  twist(i) == -2 )
       return myhface(i)->subface(!j) ;
-    cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << endl;
+    std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
     return 0;
-  case myhface_t :: myrule_t :: e20 :
+  case myhface_t::myrule_t::e20 :
     assert( j < 2 );
     if ( twist(i) == 1 ||  twist(i) == 2 ||  twist(i) == -2 )
       return myhface(i)->subface(j) ;
     if ( twist(i) == 0 ||  twist(i) == -1 || twist(i) == -3 )
       return myhface(i)->subface(!j) ;
-    cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << endl;
+    std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
     return 0;
-  case myhface_t :: myrule_t :: iso4 :
+  case myhface_t::myrule_t::iso4 :
     assert( j < 4 );
     if ( j == 3 )
       return myhface(i)->subface (3) ;
     if ( j < 3 )
       return myhface (i)->subface (twist(i) < 0 ? (7 - j + twist(i)) % 3 : (j + twist(i)) % 3) ;
-  case myhface_t :: myrule_t :: nosplit :
-    cerr << "**FEHLER (FATAL): subface () auf nicht verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << endl ;
+  case myhface_t::myrule_t::nosplit :
+    std::cerr << "**FEHLER (FATAL): subface () auf nicht verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << std::endl ;
     abort () ;
     return 0 ;
   default:
-    cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface(i)->getrule() << "] in " << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface(i)->getrule() << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
     abort() ;
   } 
   return 0 ;
 }
 
-template < class A > const typename Periodic3Top < A > ::  myhface_t * Periodic3Top < A > :: subface (int i, int j) const {
+template< class A > const typename Periodic3Top < A >:: myhface_t * Periodic3Top < A >::subface (int i, int j) const {
   return ((Periodic3Top < A > *)this)->subface (i,j) ;
 }
 
-template < class A > void Periodic3Top < A > :: split_iso4 () 
+template< class A > void Periodic3Top < A >::split_iso4 () 
 {
   const int l = 1 + this->level () ;
   innerperiodic3_t * p0 = new innerperiodic3_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this , 0) ;
@@ -2391,12 +2389,12 @@ template < class A > void Periodic3Top < A > :: split_iso4 ()
   p1->append(p2) ;
   p2->append(p3) ;
   _dwn = p0 ;
-  _rule = myrule_t :: iso4 ;
+  _rule = myrule_t::iso4 ;
   p0->_up = p1->_up = p2->_up = p3->_up = this; //us
   return ;
 }
 
-template < class A > void Periodic3Top < A > :: refineImmediate (myrule_t r) {
+template< class A > void Periodic3Top < A >::refineImmediate (myrule_t r) {
 
   // Die Methode wird nur vom restore () und vom refineBalance () auf-
   // gerufen und geht davon aus, dass das betroffene Element noch nicht
@@ -2404,30 +2402,30 @@ template < class A > void Periodic3Top < A > :: refineImmediate (myrule_t r) {
 
   assert (this->leaf()) ;
   switch(r) {
-    case myrule_t :: iso4 :
+    case myrule_t::iso4 :
     
-      // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3 :: refine (..)
+      // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3::refine (..)
       // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
-      // "uberall hface3 :: refine (..) true geliefert hat, wohl aber z.B. von
+      // "uberall hface3::refine (..) true geliefert hat, wohl aber z.B. von
       // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
       // erzwingen m"ussen und d"urfen.
    
-      typedef typename myhface_t :: myrule_t face3rule_t;
+      typedef typename myhface_t::myrule_t face3rule_t;
       myhface (0)->refineImmediate (face3rule_t (r).rotate (twist (0))) ;
       myhface (1)->refineImmediate (face3rule_t (r).rotate (twist (1))) ;
       split_iso4 () ;
       break ;
 
-    case myrule_t :: e01 :
-    case myrule_t :: e12 :
-    case myrule_t :: e20 :
+    case myrule_t::e01 :
+    case myrule_t::e12 :
+    case myrule_t::e20 :
     
       // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
     
       abort () ;
     default :
-      cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
-      cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << endl ;
+      std::cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
+      std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
       abort () ;
       break ;
   }
@@ -2435,7 +2433,7 @@ template < class A > void Periodic3Top < A > :: refineImmediate (myrule_t r) {
   return ;
 }
 
-template < class A > bool Periodic3Top < A > :: refine () {
+template< class A > bool Periodic3Top < A >::refine () {
 
   // Das refine () reagiert nicht auf die Elementaktivierung zur Verfeinerung
   // in der globalen Schleife, weil das perioodische Randelement sich nur auf
@@ -2444,12 +2442,12 @@ template < class A > bool Periodic3Top < A > :: refine () {
   return true ;
 }
 
-template < class A > bool Periodic3Top < A > :: refineBalance (balrule_t r, int fce) 
+template< class A > bool Periodic3Top < A >::refineBalance (balrule_t r, int fce) 
 {
-  if (r != balrule_t :: iso4) 
+  if (r != balrule_t::iso4) 
   {
-    cerr << "**WARNUNG (IGNORIERT) in Periodic3Top < A > :: refineBalance (..) nachschauen, Datei " 
-       << __FILE__ << " Zeile " << __LINE__ << endl ;
+    std::cerr << "**WARNUNG (IGNORIERT) in Periodic3Top < A >::refineBalance (..) nachschauen, Datei " 
+       << __FILE__ << " Zeile " << __LINE__ << std::endl ;
    
   // Bisher kann die Balancierung nur die isotrope Achtelung handhaben,
   // falls mehr gew"unscht wird, muss es hier eingebaut werden. Im Moment wird
@@ -2467,7 +2465,7 @@ template < class A > bool Periodic3Top < A > :: refineBalance (balrule_t r, int 
     
     // take opposite face 
     const int opp = 1 - fce ;
-    if (myhface (opp)->refine (typename myhface_t :: myrule_t (r).rotate (twist (opp)), twist (opp))) 
+    if (myhface (opp)->refine (typename myhface_t::myrule_t (r).rotate (twist (opp)), twist (opp))) 
     {
       refineImmediate (r) ;
       return true ;
@@ -2479,7 +2477,7 @@ template < class A > bool Periodic3Top < A > :: refineBalance (balrule_t r, int 
   }
 }
 
-template < class A > bool Periodic3Top < A > :: coarse () {
+template< class A > bool Periodic3Top < A >::coarse () {
 
   // Das Vergr"obern geschieht auch passiv, sobald ein anliegendes Element
   // vergr"obert wird durch den Aufruf von "bndNotifyCoarsen ()" s.u.
@@ -2488,7 +2486,7 @@ template < class A > bool Periodic3Top < A > :: coarse () {
   return false ;
 }
 
-template < class A > bool Periodic3Top < A > :: bndNotifyCoarsen () {
+template< class A > bool Periodic3Top < A >::bndNotifyCoarsen () {
 
   // Wie beim Randelement auch: Die Vergr"oberung eines anliegenden Elements
   // l"ost einen Vorgang aus, der feststellt ob das periodische RE ebenfalls
@@ -2522,55 +2520,56 @@ template < class A > bool Periodic3Top < A > :: bndNotifyCoarsen () {
     
     delete _dwn ;
     _dwn = 0 ;
-    _rule = myrule_t :: nosplit ;
+    _rule = myrule_t::nosplit ;
     myhface (0)->coarse () ;
     myhface (1)->coarse () ;
   }
   return x ;
 }
 
-template < class A > void Periodic3Top < A > :: backup (ostream & os) const 
-{
-  doBackup( os );
-}
-template < class A > void Periodic3Top < A > :: backup (ObjectStream& os) const 
+template< class A > void Periodic3Top< A >::backup ( std::ostream &os ) const
 {
   doBackup( os );
 }
 
-template < class A > template <class OutStream_t>
-void Periodic3Top < A > :: doBackup (OutStream_t& os) const 
+template< class A > void Periodic3Top < A >::backup (ObjectStream& os) const 
+{
+  doBackup( os );
+}
+
+template< class A > template<class OutStream_t>
+void Periodic3Top < A >::doBackup (OutStream_t& os) const 
 {
   os.put ((char) getrule ()) ;
   { for (const innerperiodic3_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
   return ;
 }
 
-template < class A > void Periodic3Top < A > :: restore (istream & is) 
+template< class A > void Periodic3Top< A >::restore ( std::istream &is )
 {
   doRestore( is );
 }
-template < class A > void Periodic3Top < A > :: restore (ObjectStream& is) 
+template< class A > void Periodic3Top < A >::restore (ObjectStream& is) 
 {
   doRestore( is );
 }
 
-template < class A > template <class InStream_t> 
-void Periodic3Top < A > :: doRestore (InStream_t & is) 
+template< class A > template<class InStream_t> 
+void Periodic3Top < A >::doRestore (InStream_t & is) 
 {
   myrule_t r ((char) is.get ()) ;
-  assert(getrule () == myrule_t :: nosplit) ; // Testen auf unverfeinerten Zustand
-  if (r == myrule_t :: nosplit) {
+  assert(getrule () == myrule_t::nosplit) ; // Testen auf unverfeinerten Zustand
+  if (r == myrule_t::nosplit) {
     for (int i = 0 ; i < 2 ; i ++) {
       myhface_t & f (*(myhface (i))) ;
       if (!f.leaf ()) {
         switch (f.getrule ()) {
-    case balrule_t :: iso4 :
+    case balrule_t::iso4 :
             {for (int j = 0 ; j < 4 ; j ++) f.subface (j)->nb.complete (f.nb) ;}
       break ;
     default :
-      cerr << "**FEHLER (FATAL) beim restore mit unbekannter Balancierungsregel: "
-                 << "[" << r << "]. In " << __FILE__ << __LINE__ << endl ;
+      std::cerr << "**FEHLER (FATAL) beim restore mit unbekannter Balancierungsregel: "
+                 << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
       abort () ;
       break ;
   }
@@ -2586,10 +2585,13 @@ void Periodic3Top < A > :: doRestore (InStream_t & is)
 }
 
 
-// template instantiation 
+
+// Template Instantiation
+// ----------------------
+
 #ifndef GITTER_TETRA_TOP_PLL_H_INCLUDED
-template class Hface3Top< GitterBasis :: Objects :: Hface3Empty > ;
-template class Hbnd3Top< GitterBasis :: Objects :: Hbnd3Default > ;
-template class TetraTop < GitterBasis :: Objects :: TetraEmpty > ;
-template class Periodic3Top < GitterBasis :: Objects :: Periodic3Empty > ;
-#endif
+template class Hface3Top< GitterBasis::Objects::Hface3Empty >;
+template class Hbnd3Top< GitterBasis::Objects::Hbnd3Default >;
+template class TetraTop < GitterBasis::Objects::TetraEmpty >;
+template class Periodic3Top < GitterBasis::Objects::Periodic3Empty >;
+#endif // #ifndef GITTER_TETRA_TOP_PLL_H_INCLUDED
