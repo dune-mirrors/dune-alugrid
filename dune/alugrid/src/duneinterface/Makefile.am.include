@@ -1,3 +1,0 @@
-duneif=duneinterface
-duneinterfacehdrs= $(duneif)/gitter_dune_impl.h $(duneif)/gitter_dune_pll_impl.h
-

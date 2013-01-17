@@ -43,6 +43,7 @@ extern "C" {
 #endif
 
 
+namespace ALUGridSpace {
 // sfc stuff 
 #include "parallel/alusfc.hh"
 
@@ -51,6 +52,7 @@ extern "C" {
 
 // ParMETIS stuff 
 #include "parallel/aluparmetis.hh"
+}
 
 #ifdef COUNT_ALUGRID_FLOPS
 #define double Double
