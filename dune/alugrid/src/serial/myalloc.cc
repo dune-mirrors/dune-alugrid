@@ -1,6 +1,13 @@
 #ifndef DONT_USE_ALUGRID_ALLOC
 #warning "Using ALUGrid's internal memory management!"
 
+#include <cassert>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <set>
+#include <stack>
+
 //#define ONLY_MSPACES 1 
 
 #include "myalloc.h"
@@ -23,8 +30,8 @@ static size_t ALUGridMemSpaceAllocated = 0;
 
 // class to store items of same size in a stack 
 // also number of used items outside is stored 
-class AllocEntry {
-
+class AllocEntry
+{
 public:
 
   // N verfolgt die Anzahl der angelegten Objekte der entsprechenden
@@ -34,7 +41,7 @@ public:
 
   size_t N ;
 
-  typedef stack < void * > memstack_t ;
+  typedef std::stack< void * > memstack_t ;
   memstack_t  S ;
 
   AllocEntry () : N (0), S () {}
@@ -48,16 +55,16 @@ public:
     // only free memory here if garbage collection is disabled
     while (!S.empty ()) 
     {
-      free (S.top ()) ;
+      std::free (S.top ()) ;
       S.pop () ;
     }
   }
 };
 
 // map holding AllocEntries for sizes 
-typedef map < size_t, AllocEntry, less < size_t > > memorymap_t ;
-static  memorymap_t* freeStore = 0 ;
-static  set < void * > myAllocFreeLockers;
+typedef std::map< std::size_t, AllocEntry > memorymap_t ;
+static  memorymap_t *freeStore = 0;
+static  std::set< void * > myAllocFreeLockers;
 
 #endif // end else of #if ONLY_MSPACES
 
@@ -135,20 +142,20 @@ void MyAlloc :: unlockFree (void * addr)
 #if ! ONLY_MSPACES
 void memAllocate( AllocEntry& fs, const size_t s, void* mem[], const size_t request)
 {
-  assert(s > 0);
+  assert( s > 0 );
   {
     fs.N += request ;
-    const size_t fsSize  = fs.S.size();
-    const size_t popSize = request > fsSize ? fsSize : request ;
-    const size_t newSize = request - popSize ;
-    for( size_t i = 0; i<newSize; ++i )
+    const std::size_t fsSize  = fs.S.size();
+    const std::size_t popSize = request > fsSize ? fsSize : request ;
+    const std::size_t newSize = request - popSize ;
+    for( std::size_t i = 0; i<newSize; ++i )
     {
       mem[ i ] = malloc ( s ) ;
       assert( mem[ i ] );
     }
 
     // pop the rest from the stack
-    for( size_t i = newSize; i<popSize; ++i ) 
+    for( std::size_t i = newSize; i<popSize; ++i ) 
     {
       // get pointer from stack 
       mem[ i ] = fs.S.top () ;
@@ -183,13 +190,12 @@ void* MyAlloc :: operator new ( size_t s ) throw (OutOfMemoryException)
     {
       // else simply allocate block 
       void * p = malloc (s) ;
-      if (p == 0) 
+      if( !p ) 
       {
-        perror ("**ERROR (FATAL) in MyAlloc :: operator new ()") ;
-        cerr << "**INFO MyAlloc :: operator new (" << s << "): Out of memory!!" << endl;
-        throw OutOfMemoryException () ;
+        std::cerr << "ERROR: Out of memory." << std::endl;
+        throw OutOfMemoryException();
       }
-      return p ;
+      return p;
     }
     else
     {

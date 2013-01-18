@@ -2,7 +2,8 @@ lib_LTLIBRARIES = libalugrid_serial.la libdunealugrid.la
 
 libalugrid_serial_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/src/serial/gitter_hexa_top.cc \
-	$(top_srcdir)/dune/alugrid/src/serial/gitter_tetra_top.cc
+	$(top_srcdir)/dune/alugrid/src/serial/gitter_tetra_top.cc \
+	$(top_srcdir)/dune/alugrid/src/serial/myalloc.cc
 
 libalugrid_serial_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_serial_la_LDFLAGS = $(AM_LDFLAGS)
