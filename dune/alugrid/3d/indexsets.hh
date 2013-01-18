@@ -1,10 +1,8 @@
 #ifndef DUNE_ALU3DGRIDINDEXSETS_HH
 #define DUNE_ALU3DGRIDINDEXSETS_HH
 
-//- System includes
 #include <vector>
 
-//- Dune includes
 #include <dune/common/stdstreams.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/hash.hh>
@@ -12,8 +10,6 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
 
-
-//- Local includes
 #include "alu3dinclude.hh"
 #include "topology.hh"
 #include "alu3diterators.hh"
@@ -150,7 +146,6 @@ namespace Dune
     }
 
 #ifdef HAVE_DUNE_HASH
-
     inline friend std::size_t hash_value(const ALUMacroKey& arg)
     {
       std::size_t seed = 0;
@@ -160,7 +155,6 @@ namespace Dune
       hash_combine(seed,arg._d);
       return seed;
     }
-
 #endif // HAVE_DUNE_HASH
 
   };
@@ -308,15 +302,14 @@ namespace Dune {
     return s;
   }
 
-  //*****************************************************************
-  //
-  //  --GlobalIdSet 
-  //
-  //*****************************************************************
-  //! global id set for ALU3dGrid 
+
+
+  // ALU3dGlobalIdSet
+  // ----------------
+
   template< ALU3dGridElementType elType, class Comm >
   class ALU3dGridGlobalIdSet
-  : public IdSet< ALU3dGrid< elType, Comm >, ALU3dGridGlobalIdSet< elType, Comm > ,
+  : public IdSet< ALU3dGrid< elType, Comm >, ALU3dGridGlobalIdSet< elType, Comm >,
                   typename ALU3dGrid< elType, Comm >::Traits::GlobalIdType >,
     public ALU3DSPACE AdaptRestrictProlongType
   {
@@ -339,17 +332,16 @@ namespace Dune {
 
     typedef EntityCount< elType > EntityCountType;
 
-    using ALU3DSPACE AdaptRestrictProlongType :: postRefinement ;
-    using ALU3DSPACE AdaptRestrictProlongType :: preCoarsening ;
+    using ALU3DSPACE AdaptRestrictProlongType::postRefinement;
+    using ALU3DSPACE AdaptRestrictProlongType::preCoarsening;
 
   public:
-    //! export type of id 
     typedef typename GridType::Traits::GlobalIdType IdType;
 
   private:
     typedef ALUMacroKey MacroKeyType;
     
-    typedef ALUGridId <  MacroKeyType > MacroIdType; // same as IdType
+    typedef ALUGridId <  MacroKeyType > MacroIdType;
     enum { numCodim = GridType::dimension+1 };
 
     // this means that only up to 300000000 entities are allowed 

@@ -3,7 +3,6 @@
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/declaration.hh>
-#include <dune/alugrid/common/checkparallel.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
 /** @file
@@ -18,7 +17,7 @@ namespace Dune
   {
 
     // Capabilities for ALUGrid
-    // -------------------------------
+    // ------------------------
 
     /** \brief ALUGrid has only one geometry type for codim 0 entities 
     \ingroup ALUGrid

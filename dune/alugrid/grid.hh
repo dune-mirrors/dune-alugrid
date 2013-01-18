@@ -8,9 +8,11 @@
 #include <dune/alugrid/3d/alugrid.hh>
 #include <dune/alugrid/3d/alu3dgridfactory.hh>
 
+#if 0
 // 2d version 
 #include <dune/alugrid/2d/alugrid.hh>
 #include <dune/alugrid/2d/alu2dgridfactory.hh>
+#endif
 
 #include <dune/alugrid/common/persistentcontainer.hh>
 

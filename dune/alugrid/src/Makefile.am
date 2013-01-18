@@ -4,7 +4,7 @@ SUBDIRS = serial parallel duneinterface 2d
 lib_LTLIBRARIES = libalugrid.la
 
 # headers to install 
-nobase_include_HEADERS = alugrid_serial.h alugrid_parallel.h alugrid_2d.h stlheaders.h indexstack.h projectvertex.h 
+nobase_include_HEADERS = alugrid_2d.h stlheaders.h indexstack.h projectvertex.h 
 
 # add all package flags 
 libalugrid_la_CPPFLAGS = $(ALL_PKG_CPPFLAGS)

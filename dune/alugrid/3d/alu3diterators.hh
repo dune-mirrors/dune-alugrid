@@ -1,8 +1,6 @@
 #ifndef DUNE_ALU3DITERATORS_HH
 #define DUNE_ALU3DITERATORS_HH
 
-// System includes
-
 // Dune includes
 #include <dune/grid/common/grid.hh>
 
@@ -10,7 +8,7 @@
 #include "alu3dinclude.hh"
 #include "topology.hh"
 
-namespace ALUGridSpace
+namespace ALUGrid
 {
 
   //*************************************************************
@@ -81,7 +79,7 @@ namespace ALUGridSpace
   {
     typedef typename ALUHElementType< codim, Comm >::ElementType ElType;
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HBndSegType HBndSegType;
-    typedef pair< ElType *, HBndSegType * > val_t;
+    typedef std::pair< ElType *, HBndSegType * > val_t;
   };
   
   template< int codim, PartitionIteratorType pitype, class Comm >
@@ -1064,7 +1062,7 @@ namespace ALUGridSpace
 
       ghList.getItemList().reserve(maxSize);
       ghList.getItemList().resize(0);
-      map< int , int > visited; 
+      std::map< int , int > visited;
 
       const map<int,int>::iterator visitedEnd = visited.end();
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
@@ -1435,7 +1433,7 @@ namespace ALUGridSpace
       ElementLevelIterator iter(grid,level,nlinks);
 
       edgeList_.getItemList().resize(0);
-      map < int , int > visited; 
+      std::map< int, int > visited;
       
       for( iter.first(); ! iter.done(); iter.next() )
       {
@@ -1572,6 +1570,6 @@ namespace ALUGridSpace
   };
 #endif // #if ALU3DGRID_PARALLEL
 
-} // end namespace ALUGridSpace
+} // namespace ALUGrid
 
 #endif // #ifndef DUNE_ALU3DITERATORS_HH

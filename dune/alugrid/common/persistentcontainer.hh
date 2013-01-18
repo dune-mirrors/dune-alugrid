@@ -26,6 +26,7 @@ namespace Dune
     {}
   };
 
+#if 0
   template< int dim, int dimworld, ALU2DSPACE ElementType elType, class Data, class Allocator >
   class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, Data, Allocator >
   : public PersistentContainerVector< ALU2dGrid< dim, dimworld, elType >, 
@@ -44,6 +45,7 @@ namespace Dune
     : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
     {}
   };
+#endif
 
   template< ALU3dGridElementType elType, class Comm, class Data, class Allocator >
   class PersistentContainer< ALU3dGrid< elType, Comm >, Data, Allocator >

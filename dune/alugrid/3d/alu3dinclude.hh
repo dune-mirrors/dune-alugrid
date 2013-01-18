@@ -1,5 +1,5 @@
-#ifndef DUNE_ALU3DINCLUDE_HH
-#define DUNE_ALU3DINCLUDE_HH
+#ifndef DUNE_ALUGRID_ALU3DINCLUDE_HH
+#define DUNE_ALUGRID_ALU3DINCLUDE_HH
 
 //////////////////////////////////////////////////////////////////////
 // compile imp.cc into lib (1 yes, 0 no)
@@ -21,24 +21,66 @@
 /////////////////////////////////////////////////////////////////////
 
 // all methods and classes of the ALUGrid are defined in the namespace 
-#define ALU3DSPACE ALUGridSpace ::
+#define ALU3DSPACE ::ALUGrid::
 
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/alugrid/common/declaration.hh>
 
-#include <dune/alugrid/common/checkparallel.hh>
+#define ALUGRID_PERIODIC_BOUNDARY
+#define ALUGRID_PERIODIC_BOUNDARY_PARALLEL
+#define ALUGRID_CONSTRUCTION_WITH_STREAMS
+#define ALUGRID_3D_CONFORMING_REFINEMENT
 
-// if MPI was found include all headers 
+#define ALUGRID_VERTEX_PROJECTION
+
+#include <dune/alugrid/src/serial/gatherscatter.hh>
+#include <dune/alugrid/src/serial/key.h>
+#include <dune/alugrid/src/serial/myalloc.h>
+#include <dune/alugrid/src/serial/serialize.h>
+
+#include <dune/alugrid/src/parallel/mpAccess.h>
+#include <dune/alugrid/src/parallel/gitter_pll_ldb.h>
+
+#include <dune/alugrid/src/serial/gitter_sti.h>
+
+#include <dune/alugrid/src/serial/gitter_hexa_top.h>
+#include <dune/alugrid/src/serial/mapp_tetra_3d_ext.h>
+#include <dune/alugrid/src/serial/gitter_tetra_top.h>
+#include <dune/alugrid/src/serial/walk.h>
+#include <dune/alugrid/src/serial/gitter_impl.h>
+#include <dune/alugrid/src/serial/gitter_mgb.h>
+#include <dune/alugrid/src/serial/key.h>
+#include <dune/alugrid/src/serial/lock.h>
+
+#include <dune/alugrid/src/duneinterface/gitter_dune_impl.h>
+
+namespace ALUGrid
+{
+
+  typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
+
+} // namespace ALUGrid
+
+//#include <dune/alugrid/common/checkparallel.hh>
+
+// if MPI was found include all headers
 #if ALU3DGRID_PARALLEL
-#include <dune/alugrid/src/alugrid_parallel.h>
-#else  
-// if not, include only headers for serial version 
-#include <dune/alugrid/src/alugrid_serial.h>
-#endif
+#include <dune/alugrid/src/parallel/gitter_pll_sti.h>
+#include <dune/alugrid/src/parallel/gitter_pll_impl.h>
+#include <dune/alugrid/src/parallel/gitter_pll_ldb.h>
+#include <dune/alugrid/src/parallel/gitter_tetra_top_pll.h>
+#include <dune/alugrid/src/parallel/gitter_hexa_top_pll.h>
+#include <dune/alugrid/src/parallel/mpAccess.h>
+#include <dune/alugrid/src/parallel/mpAccess_MPI.h>
+//#include <dune/alugrid/src/parallel/mpAccess_STAR.h>
+#include <dune/alugrid/src/parallel/gitter_pll_mgb.h>
+
+#include <dune/alugrid/src/duneinterface/gitter_dune_pll_impl.h>
+#endif // #if ALU3DGRID_PARALLEL
 
 //- local includes 
 #include <dune/alugrid/3d/topology.hh>
 
-namespace ALUGridSpace
+namespace ALUGrid
 {
 
   static const int ProcessorBoundary_t = Gitter::hbndseg_STI::closure;
@@ -420,4 +462,4 @@ namespace Dune
 
 } // end namespace Dune
 
-#endif // #ifndef DUNE_ALU3DINCLUDE_HH
+#endif // #ifndef DUNE_ALUGRID_ALU3DINCLUDE_HH

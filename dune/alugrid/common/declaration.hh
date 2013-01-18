@@ -1,16 +1,17 @@
 #ifndef DUNE_ALUGRID_FORWARDDECLARATION
 #define DUNE_ALUGRID_FORWARDDECLARATION
 
+#define ALU3DGRID_PARALLEL HAVE_MPI
+
 //- common includes 
 #include <dune/common/parallel/collectivecommunication.hh>
-#if HAVE_MPI
+#if ALU3DGRID_PARALLEL
 #include <dune/common/parallel/mpicollectivecommunication.hh>
-#endif
+#endif // #if ALU3DGRID_PARALLEL
 
-//- ALUGrid includes
-#include <dune/alugrid/common/checkparallel.hh>
 
-namespace Dune {
+namespace Dune
+{
 
   //! \brief basic element types for ALUGrid
   enum ALUGridElementType { simplex, cube };
@@ -64,4 +65,4 @@ namespace Dune {
   template <int dim, int dimw, ALUGridElementType elType, class Comm >
   struct ALUGridBaseGrid ;
 }
-#endif
+#endif // #ifndef DUNE_ALUGRID_FORWARDDECLARATION
