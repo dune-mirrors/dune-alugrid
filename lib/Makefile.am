@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libalugrid_serial.la libdunealugrid.la
+lib_LTLIBRARIES = libalugrid_serial.la libalugrid_mpi.la libdunealugrid.la
 
 libalugrid_serial_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/src/serial/ghost_elements.cc \
@@ -17,6 +17,13 @@ libalugrid_serial_la_SOURCES = \
 libalugrid_serial_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_serial_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_serial_la_LIBADD = 
+
+libalugrid_mpi_la_SOURCES = \
+	$(top_srcdir)/dune/alugrid/src/parallel/mpAccess_MPI.cc
+
+libalugrid_mpi_la_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
+libalugrid_mpi_la_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+libalugrid_mpi_la_LIBADD = $(DUNEMPILIBS)
 
 libdunealugrid_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/2d/intersection.cc \

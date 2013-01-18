@@ -13,34 +13,6 @@
 #warning -- Compiling ALUGrid code in debug mode!!! Use -DNDEBUG to get more optimized code!!!
 #endif
 
-// avoid C++ bindings of MPI (-DMPIPP_H is not common enough)
-// this is the only thing all MPI implementations have in common
-// to do that we pretend that we are compiling C code 
-#if defined(__cplusplus) 
-#define rem__cplusplus __cplusplus
-#undef __cplusplus
-#endif
-
-#if defined(c_plusplus) 
-#define remc_plusplus c_plusplus
-#undef c_plusplus
-#endif
-
-extern "C" {
-  // the message passing interface (MPI) headers for C 
-  #include <mpi.h>
-}
-
-// restore defines 
-#if defined(rem__cplusplus) 
-#define __cplusplus rem__cplusplus
-#undef rem__cplusplus
-#endif
-
-#if defined(c_plusplus) 
-#define c_plusplus remc_plusplus
-#undef remc_plusplus
-#endif
 
 
 namespace ALUGridSpace {
