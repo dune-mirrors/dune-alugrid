@@ -24,6 +24,7 @@ libalugrid_parallel_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_impl.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_idn.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_ldb.cc \
+	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_mgb.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_sti.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_tetra_top_pll.cc
 

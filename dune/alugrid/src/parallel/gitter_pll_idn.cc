@@ -398,5 +398,4 @@ void GitterPll::MacroGitterPll::identification (MpAccessLocal & c)
     std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|edg|fce|all] ";
     std::cout << u2 << " " << u3 << " " << u4 << " " << u5 << " " << u6 << " sec." << std::endl;
   }
-  return;
 }
