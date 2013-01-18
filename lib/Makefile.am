@@ -19,6 +19,7 @@ libalugrid_serial_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_serial_la_LIBADD = 
 
 libalugrid_parallel_la_SOURCES = \
+	$(top_srcdir)/dune/alugrid/src/duneinterface/gitter_dune_pll_impl.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/mpAccess.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_hexa_top_pll.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_impl.cc \

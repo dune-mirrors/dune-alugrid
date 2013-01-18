@@ -7,13 +7,15 @@
 #include "../parallel/gitter_pll_impl.h"
 #include "../parallel/gitter_pll_ldb.h"
   
-class GitterDunePll : public GitterBasisPll , public virtual GitterDuneBasis
+class GitterDunePll
+: public GitterBasisPll,
+  public virtual GitterDuneBasis
 {
  
-  virtual IteratorSTI < Gitter :: helement_STI > * 
-    leafIterator (const Gitter :: helement_STI *) ;
-  virtual IteratorSTI < Gitter :: helement_STI > * 
-    leafIterator (const IteratorSTI < Gitter :: helement_STI > *) ;
+  virtual IteratorSTI < Gitter::helement_STI > * 
+    leafIterator (const Gitter::helement_STI *);
+  virtual IteratorSTI < Gitter::helement_STI > * 
+    leafIterator (const IteratorSTI < Gitter::helement_STI > *);
   
 protected:  
   bool balanceGrid_;
@@ -22,22 +24,20 @@ protected:
   typedef enum { Border_Border_Comm , 
                  Interior_Ghost_Comm , 
                  Ghost_Interior_Comm , 
-                 All_All_Comm  } CommunicationType ; 
+                 All_All_Comm  } CommunicationType; 
 
   typedef SmallObjectStream BufferType;
-  typedef vector< BufferType > DataBufferType;
+  typedef std::vector< BufferType > DataBufferType;
 
 public:
-  typedef Gitter :: Geometric Geometric;
-  typedef GitterDuneImpl :: Objects  Objects;
+  typedef Gitter::Geometric Geometric;
+  typedef GitterDuneImpl::Objects  Objects;
 
   
   // constructor taking filename containing the macro grid
-  GitterDunePll (const char * filename , 
-                 MpAccessLocal &mp, 
-                 ProjectVertex* ppv = 0 ) 
-    : GitterBasisPll (filename, mp, ppv) 
-    , balanceGrid_ (false) 
+  GitterDunePll ( const char * filename, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
+  : GitterBasisPll( filename, mp, ppv ),
+    balanceGrid_ ( false )
   {
 #ifndef NDEBUG
     __STATIC_myrank = mp.myrank(); 
@@ -46,12 +46,10 @@ public:
     rebuildGhostCells();
   }
 
-  // constructor taking istream containing the macro grid
-  GitterDunePll (istream& in,
-                 MpAccessLocal &mp, 
-                 ProjectVertex* ppv = 0 ) 
-    : GitterBasisPll (in, mp, ppv) 
-    , balanceGrid_ (false) 
+  // constructor taking std::istream containing the macro grid
+  GitterDunePll ( std::istream &in, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
+  : GitterBasisPll( in, mp, ppv ),
+    balanceGrid_( false )
   {
 #ifndef NDEBUG
     __STATIC_myrank = mp.myrank(); 
@@ -76,7 +74,7 @@ public:
   ~GitterDunePll () {}
 
   // adapts and witout calling loadBalancer  
-  bool adaptWithoutLoadBalancing () { return GitterPll :: adapt (); }
+  bool adaptWithoutLoadBalancing () { return GitterPll::adapt (); }
 
   // adapts and calls preCoarsening and
   // postRefinement, no loadBalancing done   
@@ -85,14 +83,14 @@ public:
   // return true if grid has to be balanced again 
   bool duneNotifyNewGrid ();
 
-  bool duneLoadBalance () ; // call loadBalancer 
-  bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ) ; // call loadBalancer a
+  bool duneLoadBalance (); // call loadBalancer 
+  bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ); // call loadBalancer a
 
 protected:  
-  void doRepartitionMacroGrid(LoadBalancer :: DataBase &, GatherScatterType* );
+  void doRepartitionMacroGrid(LoadBalancer::DataBase &, GatherScatterType* );
 public:  
-  using GitterPll :: duneRepartitionMacroGrid;
-  using GitterPll :: repartitionMacroGrid ;
+  using GitterPll::duneRepartitionMacroGrid;
+  using GitterPll::repartitionMacroGrid;
 
   // notifyMacroGridChanges for dune
   void duneNotifyMacroGridChanges (); 
@@ -149,10 +147,10 @@ public:
   }
 
   // restore parallel grid from before
-  void duneRestore (const char*) ;
+  void duneRestore (const char*);
 
   // backup current grid status 
-  void duneBackup (const char*) ;
+  void duneBackup (const char*);
 
   // backup current grid status 
   template <class ostream_t> 
@@ -162,8 +160,8 @@ public:
   }
 
   // restore parallel grid from before
-  template <class istream_t> 
-  void duneRestore( istream_t& is ) 
+  template< class istream_t >
+  void duneRestore ( istream_t &is )
   {
     GitterDuneBasis::duneRestore( is );
   }
@@ -179,25 +177,25 @@ public:
     std::stringstream backup;
     // backup grid 
     grd->duneBackup( backup );
-    delete grd ; grd = 0 ;
+    delete grd; grd = 0;
     // free allocated memory (only works if all grids are deleted at this point)
-    MyAlloc :: clearFreeMemory () ;
+    MyAlloc::clearFreeMemory ();
     // restore saved grid 
     grd = new GitterDunePll( backup, mpa );
     assert( grd );
     grd->duneRestore( backup );
-    return grd ;
+    return grd;
   }
 
-  using GitterDuneBasis :: restore ;
-  using GitterDuneBasis :: backup ;
+  using GitterDuneBasis::restore;
+  using GitterDuneBasis::backup;
  
 private:
 
-  // restore grid from istream, needed to be overloaded 
+  // restore grid from std::istream, needed to be overloaded 
   // because before restoring follow faces, index manager has to be
   // restored 
-  virtual void restore(istream & in);
+  virtual void restore(std::istream & in);
 
   // rebuild ghost cells by exchanging bounndary info on macro level 
   void rebuildGhostCells();
@@ -220,35 +218,35 @@ private:
   template <class ObjectStreamType, class HItemType>
   void sendSlaves (ObjectStreamType & sendBuff,
       HItemType * determType,
-      GatherScatterType & dataHandle , const int link ) ; 
+      GatherScatterType & dataHandle , const int link ); 
     
   template <class ObjectStreamType, class HItemType, class CommBuffMapType>
   void unpackOnMaster(ObjectStreamType & recvBuff,
       CommBuffMapType& commBufMap,
       HItemType * determType,
       GatherScatterType & dataHandle , 
-      const int nl, const int link) ; 
+      const int nl, const int link); 
     
   template <class ObjectStreamType, class HItemType, class CommBuffMapType>
   void sendMaster(ObjectStreamType & sendBuff,
       CommBuffMapType& commBufMap,
       HItemType * determType,
       GatherScatterType & dataHandle , 
-      const int nl, const int myLink) ; 
+      const int nl, const int myLink); 
     
   template <class ObjectStreamType, class HItemType>
   void unpackOnSlaves(ObjectStreamType & recvBuff,
       HItemType * determType,
       GatherScatterType & dataHandle , 
-      const int nOtherLinks, const int myLink) ; 
+      const int nOtherLinks, const int myLink); 
 
   void sendFaces (ObjectStream & sendBuff,
       IteratorSTI < hface_STI > * iter, 
-      GatherScatterType & dataHandle ) ; 
+      GatherScatterType & dataHandle ); 
     
   void unpackFaces (ObjectStream & recvBuff,
       IteratorSTI < hface_STI > * iter, 
-      GatherScatterType & dataHandle ) ; 
+      GatherScatterType & dataHandle ); 
     
   void sendInteriorGhostAllData (
     ObjectStream & sendBuff,
@@ -280,14 +278,14 @@ private:
     
   // communication of data on border 
   void doBorderBorderComm (
-      vector< ObjectStream > & osvec ,
+      std::vector< ObjectStream > & osvec ,
       GatherScatterType & vertexData ,
       GatherScatterType & edgeData,
       GatherScatterType & faceData );
 
   // communication of interior data 
   void doInteriorGhostComm(
-    vector< ObjectStream > & osvec ,
+    std::vector< ObjectStream > & osvec ,
     GatherScatterType & vertexData ,
     GatherScatterType & edgeData,
     GatherScatterType & faceData,
@@ -299,11 +297,12 @@ private:
   getCommunicationBuffer( HItemType&, CommMapType&, const int ); 
 
 public:
-  pair < IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int) ;
-  pair < IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> borderIteratorTT (const hedge_STI  *, int) ;
-  pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> borderIteratorTT  (const hface_STI  *, int) ;
+  std::pair< IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int);
+  std::pair< IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> borderIteratorTT (const hedge_STI  *, int);
+  std::pair< IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> borderIteratorTT  (const hface_STI  *, int);
   
-  pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> leafBorderIteratorTT  (const hface_STI  *, int) ;
-  pair < IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> levelBorderIteratorTT (const hface_STI  *, int link , int level) ;
+  std::pair< IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> leafBorderIteratorTT  (const hface_STI  *, int);
+  std::pair< IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> levelBorderIteratorTT (const hface_STI  *, int link , int level);
 };
-#endif
+
+#endif // #ifndef GITTER_DUNE_PLL_IMPL_H_INCLUDED

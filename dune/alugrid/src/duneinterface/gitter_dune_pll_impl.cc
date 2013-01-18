@@ -1,89 +1,91 @@
-#ifndef GITTER_DUNE_PLL_IMPL_CC_INCLUDED
-#define GITTER_DUNE_PLL_IMPL_CC_INCLUDED
+#include <config.h>
 
+#include <fstream>
+
+#include "../serial/gatherscatter.hh"
 #include "gitter_dune_pll_impl.h"
 
-IteratorSTI < Gitter :: helement_STI > * GitterDunePll :: 
+IteratorSTI < Gitter::helement_STI > * GitterDunePll::
 leafIterator (const helement_STI *)
 {
-  return new Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
-    TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > (container ()) ;
+  return new Insert < PureElementAccessIterator < Gitter::helement_STI >::Handle,
+    TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI> > > (container ());
 }
 
-IteratorSTI < Gitter :: helement_STI > * GitterDunePll ::
+IteratorSTI < Gitter::helement_STI > * GitterDunePll ::
 leafIterator (const IteratorSTI < helement_STI > * p)
 {
-  return new Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
-    TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > >
-    (*(const Insert < PureElementAccessIterator < Gitter :: helement_STI > :: Handle,
-       TreeIterator < Gitter :: helement_STI, is_leaf < Gitter :: helement_STI> > > *) p) ;
+  return new Insert < PureElementAccessIterator < Gitter::helement_STI >::Handle,
+    TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI> > >
+    (*(const Insert < PureElementAccessIterator < Gitter::helement_STI >::Handle,
+       TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI> > > *) p);
 }
 
-bool GitterDunePll :: duneNotifyNewGrid ()
+bool GitterDunePll::duneNotifyNewGrid ()
 {
-  LoadBalancer :: DataBase db ;
+  LoadBalancer::DataBase db;
   return checkPartitioning( db, (GatherScatter*) 0 );
 }
 
-void GitterDunePll :: duneNotifyMacroGridChanges ()
+void GitterDunePll::duneNotifyMacroGridChanges ()
 {
-  GitterPll :: notifyMacroGridChanges ();
+  GitterPll::notifyMacroGridChanges ();
   rebuildGhostCells ();
 }
 
 // done call notify and loadBalancer  
-bool GitterDunePll :: duneAdapt (AdaptRestrictProlongType & arp)   
+bool GitterDunePll::duneAdapt ( AdaptRestrictProlongType &arp )
 {
   this->setAdaptRestrictProlongOp(arp);
-  bool refined = this->adaptWithoutLoadBalancing();
+  const bool refined = this->adaptWithoutLoadBalancing();
   this->removeAdaptRestrictProlongOp ();
   return refined;
 }
 
-bool GitterDunePll :: duneLoadBalance () 
+bool GitterDunePll::duneLoadBalance () 
 {
-  return loadBalancerGridChangesNotify ( ( GatherScatterType* ) 0 ) ;
+  return loadBalancerGridChangesNotify ( ( GatherScatterType* ) 0 );
 }
 
 // returns true if grid was repartitioned 
-bool GitterDunePll :: duneLoadBalance (GatherScatterType & gs, AdaptRestrictProlongType & arp) 
+bool GitterDunePll::duneLoadBalance (GatherScatterType & gs, AdaptRestrictProlongType & arp) 
 {
   // set restriction/prolongation operator 
   this->setAdaptRestrictProlongOp(arp);
 
   // do load balancing 
-  const bool repartion = loadBalancerGridChangesNotify ( &gs ) ;
+  const bool repartion = loadBalancerGridChangesNotify ( &gs );
 
   // remove restriction/prolongation operator 
   this->removeAdaptRestrictProlongOp ();
   return repartion;
 }
 
-pair < IteratorSTI < GitterPll :: vertex_STI > *, IteratorSTI < GitterPll :: vertex_STI > *> 
-GitterDunePll :: borderIteratorTT (const vertex_STI * v, int link )
+std::pair< IteratorSTI < GitterPll::vertex_STI > *, IteratorSTI < GitterPll::vertex_STI > *> 
+GitterDunePll::borderIteratorTT (const vertex_STI * v, int link )
 {
   // return default vertex iterator 
   return this->iteratorTT(v, link);
 }
 
-pair < IteratorSTI < GitterPll :: hedge_STI > *, IteratorSTI < GitterPll :: hedge_STI > *> 
-GitterDunePll :: borderIteratorTT (const hedge_STI * e, int link )
+std::pair< IteratorSTI < GitterPll::hedge_STI > *, IteratorSTI < GitterPll::hedge_STI > *> 
+GitterDunePll::borderIteratorTT (const hedge_STI * e, int link )
 {
   // return edge iterator over all edges 
   is_def_true< hedge_STI > * s = 0;
   return this->createEdgeIteratorTT(s, link);
 }
 
-pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
-GitterDunePll :: borderIteratorTT (const hface_STI * f, int link )
+std::pair< IteratorSTI < GitterPll::hface_STI > *, IteratorSTI < GitterPll::hface_STI > *> 
+GitterDunePll::borderIteratorTT (const hface_STI * f, int link )
 {
   // return face iterator over all faces 
-  is_def_true< hface_STI > rule ;
+  is_def_true< hface_STI > rule;
   return this->createFaceIteratorTT( rule , link);
 }
 
-pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
-GitterDunePll :: leafBorderIteratorTT (const hface_STI * f, int link )
+std::pair< IteratorSTI < GitterPll::hface_STI > *, IteratorSTI < GitterPll::hface_STI > *> 
+GitterDunePll::leafBorderIteratorTT (const hface_STI * f, int link )
 {
   // return face iterator over all faces that are 
   // leaf faces in the DUNE context
@@ -91,8 +93,8 @@ GitterDunePll :: leafBorderIteratorTT (const hface_STI * f, int link )
   return this->createFaceIteratorTT( rule , link);
 }
 
-pair < IteratorSTI < GitterPll :: hface_STI > *, IteratorSTI < GitterPll :: hface_STI > *> 
-GitterDunePll :: levelBorderIteratorTT (const hface_STI * f, int link , int level)
+std::pair< IteratorSTI < GitterPll::hface_STI > *, IteratorSTI < GitterPll::hface_STI > *> 
+GitterDunePll::levelBorderIteratorTT (const hface_STI * f, int link , int level)
 {
   // return face iterator over faces with given level 
   any_has_level < hface_STI > rule(level);
@@ -100,7 +102,7 @@ GitterDunePll :: levelBorderIteratorTT (const hface_STI * f, int link , int leve
 }
 
 template <class ObjectStreamType, class HItemType> 
-void GitterDunePll :: sendSlaves (
+void GitterDunePll::sendSlaves (
     ObjectStreamType & sendBuff, 
     HItemType * fakeItem ,
     GatherScatterType & dataHandle, const int link )
@@ -108,16 +110,16 @@ void GitterDunePll :: sendSlaves (
   // temporary buffer 
   SmallObjectStream osTmp; 
 
-  pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
+  std::pair< IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
     a = borderIteratorTT (fakeItem, link ); //ueber alle meine Slave-Knoten 
  
   IteratorSTI < HItemType > & iter = *(a.second);
-  for (iter.first (); ! iter.done () ; iter.next ()) 
+  for (iter.first (); ! iter.done (); iter.next ()) 
   {
     HItemType & item = iter.item();
 
     // gather all data on slaves 
-    if ( dataHandle.containsItem(item) ) 
+    if( dataHandle.containsItem(item) ) 
     {
       // write marker that show data is transmitted 
       sendBuff.writeObject( transmittedData );
@@ -143,12 +145,12 @@ void GitterDunePll :: sendSlaves (
   delete a.first;
   delete a.second;      
 
-  return ;
+  return;
 }
 
 template <class HItemType, class CommMapType>
-GitterDunePll :: DataBufferType& 
-GitterDunePll :: 
+GitterDunePll::DataBufferType& 
+GitterDunePll::
 getCommunicationBuffer( HItemType& item, CommMapType& commMap, const int nCommBuff )
 {
 #ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
@@ -164,7 +166,7 @@ getCommunicationBuffer( HItemType& item, CommMapType& commMap, const int nCommBu
 }
 
 template <class ObjectStreamType, class HItemType, class CommBuffMapType> 
-void GitterDunePll :: unpackOnMaster (
+void GitterDunePll::unpackOnMaster (
     ObjectStreamType & recvBuff, 
     CommBuffMapType& commBuffMap,
     HItemType * determType,
@@ -174,15 +176,15 @@ void GitterDunePll :: unpackOnMaster (
   int hasdata;
 
   typedef SmallObjectStream BufferType;
-  typedef vector< BufferType > DataBufferType;
+  typedef std::vector< BufferType > DataBufferType;
 
-  pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
+  std::pair< IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
     a = borderIteratorTT (determType, link);
  
   IteratorSTI < HItemType > & iter = *(a.first);
 
   // for all master items 
-  for (iter.first (); ! iter.done () ; iter.next ()) 
+  for (iter.first (); ! iter.done (); iter.next ()) 
   {
     HItemType & item = iter.item();
    
@@ -222,11 +224,11 @@ void GitterDunePll :: unpackOnMaster (
   delete a.first;
   delete a.second;
 
-  return ;
+  return;
 }
 
 template <class ObjectStreamType, class HItemType, class CommBuffMapType > 
-void GitterDunePll :: sendMaster (
+void GitterDunePll::sendMaster (
     ObjectStreamType & sendBuff, 
     CommBuffMapType& commBuffMap,
     HItemType * determType,
@@ -235,16 +237,16 @@ void GitterDunePll :: sendMaster (
     const int myLink )
 {
   typedef SmallObjectStream BufferType;
-  typedef vector< BufferType > DataBufferType;
+  typedef std::vector< BufferType > DataBufferType;
 
-  pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
+  std::pair< IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
     a = borderIteratorTT (determType , myLink ); //ueber alle meine Slave-Knoten
  
   IteratorSTI < HItemType > & iter = *(a.first);
 
   // create new link vector 
-  vector< int > newLink( nl );
-  for(int link=0; link<nl ; ++link) 
+  std::vector< int > newLink( nl );
+  for(int link=0; link<nl; ++link) 
   {
     newLink[ link ] = link;
   }
@@ -255,7 +257,7 @@ void GitterDunePll :: sendMaster (
   newLink[myLink] = nl;
 
   // for all master items 
-  for (iter.first (); ! iter.done () ; iter.next ()) 
+  for (iter.first (); ! iter.done (); iter.next ()) 
   {
     HItemType & item = iter.item();
 
@@ -300,11 +302,11 @@ void GitterDunePll :: sendMaster (
   delete a.first;
   delete a.second;     
 
-  return ;
+  return;
 }
 
 template <class ObjectStreamType, class HItemType> 
-void GitterDunePll :: unpackOnSlaves (
+void GitterDunePll::unpackOnSlaves (
     ObjectStreamType & recvBuff, 
     HItemType * determType,
     GatherScatterType & dataHandle ,
@@ -312,13 +314,13 @@ void GitterDunePll :: unpackOnSlaves (
 {
   int hasdata;
 
-  pair < IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
+  std::pair< IteratorSTI < HItemType > *, IteratorSTI < HItemType > *> 
     a = borderIteratorTT (determType, myLink );
 
   // get slave iterator 
   IteratorSTI < HItemType > & iter = *(a.second);
   
-  for (iter.first (); ! iter.done () ; iter.next ()) 
+  for (iter.first (); ! iter.done (); iter.next ()) 
   {
     // read data marker 
     recvBuff.readObject(hasdata);
@@ -355,7 +357,7 @@ void GitterDunePll :: unpackOnSlaves (
   delete a.second;
 }
 
-void GitterDunePll :: sendFaces (
+void GitterDunePll::sendFaces (
     ObjectStream & sendBuff, 
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & faceData )
@@ -363,7 +365,7 @@ void GitterDunePll :: sendFaces (
   // temporary object buffer  
   SmallObjectStream osTmp; 
   
-  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  for (iter->first (); ! iter->done (); iter->next ()) 
   {
     hface_STI & face = iter->item();
     if ( faceData.containsItem( face ) ) 
@@ -384,13 +386,13 @@ void GitterDunePll :: sendFaces (
   }
 }
 
-void GitterDunePll :: unpackFaces (
+void GitterDunePll::unpackFaces (
     ObjectStream & recvBuff, 
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & faceData )
 {
   int hasdata;
-  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  for (iter->first (); ! iter->done (); iter->next ()) 
   {
     recvBuff.readObject(hasdata);
     if (hasdata != noData) 
@@ -415,8 +417,8 @@ void GitterDunePll :: unpackFaces (
 // communication of higher codim data (vertices,edges,faces)
 //
 ////////////////////////////////////////////////////////
-void GitterDunePll :: doBorderBorderComm( 
-  vector< ObjectStream > & osvec ,
+void GitterDunePll::doBorderBorderComm( 
+  std::vector< ObjectStream > & osvec ,
   GatherScatterType & vertexData , 
   GatherScatterType & edgeData,  
   GatherScatterType & faceData )
@@ -429,17 +431,17 @@ void GitterDunePll :: doBorderBorderComm(
 
   const bool haveVerticesOrEdges = containsVertices || containsEdges;
    
-  assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsVertices)=true " << endl, 1) : 1) ;
-  assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsEdges)=true " << endl, 1) : 1) ;
-  assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: borderBorderComm (): (containsFaces)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsVertices) ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsVertices)=true " << std::endl, 1) : 1);
+  assert ((debugOption (5) && containsEdges)    ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsEdges)=true " << std::endl, 1) : 1);
+  assert ((debugOption (5) && containsFaces)    ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsFaces)=true " << std::endl, 1) : 1);
    
   // buffers for vertex and edge master-slave communication
-  map< vertex_STI*, DataBufferType > vertexCommMap;
-  map< hedge_STI* , DataBufferType > edgeCommMap;
+  std::map< vertex_STI*, DataBufferType > vertexCommMap;
+  std::map< hedge_STI* , DataBufferType > edgeCommMap;
 
   {
     // gather all data from slaves 
-    for (int link = 0; link < nl ; ++link )  
+    for( int link = 0; link < nl; ++link )
     {
       ObjectStream & sendBuff = osvec[link];
       sendBuff.clear();
@@ -459,7 +461,7 @@ void GitterDunePll :: doBorderBorderComm(
       if (containsFaces) 
       {
         hface_STI * determType = 0;
-        pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * >
+        std::pair< IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * >
           iterpair = borderIteratorTT(determType , link );
        
         // pack all faces that we are master on 
@@ -497,7 +499,7 @@ void GitterDunePll :: doBorderBorderComm(
       if (containsFaces) 
       {
         hface_STI * determType = 0;
-        pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * >
+        std::pair< IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * >
           iterpair = borderIteratorTT( determType , link );
 
         // first unpack slave data 
@@ -568,12 +570,12 @@ void GitterDunePll :: doBorderBorderComm(
 
   } // end second loop over vertices and edges 
 
-  return ;
+  return;
 }
 
 
 // pack element data to stream 
-void GitterDunePll :: sendInteriorGhostElementData (
+void GitterDunePll::sendInteriorGhostElementData (
     ObjectStream & sendBuff, 
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & elementData)
@@ -583,19 +585,19 @@ void GitterDunePll :: sendInteriorGhostElementData (
   assert( containsElements );
 #endif
   const int transmit = 1;
-  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  for (iter->first (); ! iter->done (); iter->next ()) 
   {
     hface_STI & face = iter->item(); 
     
     // check ghost leaf 
-    pair < ElementPllXIF_t *, int > inner = face.accessInnerPllX () ;
+    std::pair< ElementPllXIF_t *, int > inner = face.accessInnerPllX ();
 
     if ( elementData.containsInterior(face, *(inner.first) ) ) 
     { 
       sendBuff.writeObject(transmit);
 
       // first interior elements are packed 
-      inner.first->writeDynamicState (sendBuff , elementData) ;
+      inner.first->writeDynamicState (sendBuff , elementData);
     }     
     else 
     {
@@ -603,11 +605,11 @@ void GitterDunePll :: sendInteriorGhostElementData (
     }
   }
 
-  return ;
+  return;
 }
 
 // unpack all data from stream 
-void GitterDunePll :: unpackInteriorGhostElementData (
+void GitterDunePll::unpackInteriorGhostElementData (
     ObjectStream & recvBuff, 
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & elementData )
@@ -617,22 +619,22 @@ void GitterDunePll :: unpackInteriorGhostElementData (
   assert( containsElements );
 #endif
   
-  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  for (iter->first (); ! iter->done (); iter->next ()) 
   {
     int hasdata = 0;        
     recvBuff.readObject(hasdata);
 
     if( hasdata ) 
     {
-      pair < ElementPllXIF_t *, int > p = iter->item ().accessOuterPllX () ;
+      std::pair< ElementPllXIF_t *, int > p = iter->item ().accessOuterPllX ();
       p.first->readDynamicState ( recvBuff , elementData);
     }
   }
-  return ;
+  return;
 }
 
 // pack all data to stream 
-void GitterDunePll :: sendInteriorGhostAllData (
+void GitterDunePll::sendInteriorGhostAllData (
     ObjectStream & sendBuff, 
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & vertexData , 
@@ -648,19 +650,19 @@ void GitterDunePll :: sendInteriorGhostAllData (
   
   const bool haveHigherCodimData = containsVertices || 
     containsEdges ||  
-    containsFaces ;
+    containsFaces;
 
   const bool containsElements = elementData.contains(3,0);
   
-  pair < ElementPllXIF_t *, int > bnd( ( ElementPllXIF_t * ) 0 , -1);
+  std::pair< ElementPllXIF_t *, int > bnd( ( ElementPllXIF_t * ) 0 , -1);
 
   // temporary object buffer  
-  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  for (iter->first (); ! iter->done (); iter->next ()) 
   {
     hface_STI & face = iter->item(); 
     
     // check ghost leaf 
-    pair < ElementPllXIF_t *, int > inner = face.accessInnerPllX () ;
+    std::pair< ElementPllXIF_t *, int > inner = face.accessInnerPllX ();
 
     int interiorLeaf = 0;
     int ghostLeaf = 0;
@@ -672,11 +674,11 @@ void GitterDunePll :: sendInteriorGhostAllData (
 
     if(packGhosts)
     {
-      bnd = face.accessOuterPllX () ;
+      bnd = face.accessOuterPllX ();
       ghostLeaf = (elementData.containsGhost(face , *(bnd.first))) ? 2 : 0;
     }
 
-    const int transmit = interiorLeaf + ghostLeaf ;
+    const int transmit = interiorLeaf + ghostLeaf;
     // transmit = 1 interior, transmit = 2 ghost, transmit = 3 both 
     // if at least one of this possibilities is true then send data
     if ( transmit > 0 ) 
@@ -697,7 +699,7 @@ void GitterDunePll :: sendInteriorGhostAllData (
         }
 
         if (containsElements) 
-          inner.first->writeDynamicState (sendBuff , elementData) ;
+          inner.first->writeDynamicState (sendBuff , elementData);
       }
 
       // then ghost elements 
@@ -705,8 +707,8 @@ void GitterDunePll :: sendInteriorGhostAllData (
       {
         if( haveHigherCodimData )
         {
-          // get pair < ghost, local face num > 
-          Gitter :: ghostpair_STI gpair = bnd.first->getGhost();
+          // get std::pair< ghost, local face num > 
+          Gitter::ghostpair_STI gpair = bnd.first->getGhost();
           assert( gpair.first );
 
           if (containsVertices) 
@@ -733,11 +735,11 @@ void GitterDunePll :: sendInteriorGhostAllData (
     }
   }
 
-  return ;
+  return;
 }
 
 // unpack all data from stream 
-void GitterDunePll :: unpackInteriorGhostAllData (
+void GitterDunePll::unpackInteriorGhostAllData (
     ObjectStream & recvBuff, 
     IteratorSTI < hface_STI > * iter , 
     GatherScatterType & vertexData , 
@@ -753,10 +755,10 @@ void GitterDunePll :: unpackInteriorGhostAllData (
 
   const bool haveHigherCodimData = containsVertices || 
                                    containsEdges ||  
-                                   containsFaces ;
+                                   containsFaces;
 
   
-  for (iter->first () ; ! iter->done () ; iter->next ()) 
+  for (iter->first (); ! iter->done (); iter->next ()) 
   {
     int hasdata;        
     recvBuff.readObject(hasdata);
@@ -774,10 +776,10 @@ void GitterDunePll :: unpackInteriorGhostAllData (
       // first unpack ghosts 
       if( ghostLeaf ) 
       {
-        pair < ElementPllXIF_t *, int > p = face.accessOuterPllX () ;
+        std::pair< ElementPllXIF_t *, int > p = face.accessOuterPllX ();
 
-        // get pair < ghost, local face num > 
-        Gitter :: ghostpair_STI gpair = p.first->getGhost();
+        // get std::pair< ghost, local face num > 
+        Gitter::ghostpair_STI gpair = p.first->getGhost();
         assert( gpair.first );
       
         if( haveHigherCodimData )
@@ -797,8 +799,8 @@ void GitterDunePll :: unpackInteriorGhostAllData (
       // then unpack interior 
       if( interiorLeaf )
       {
-        pair < ElementPllXIF_t *, int > pll = face.accessInnerPllX () ;
-        pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > 
+        std::pair< ElementPllXIF_t *, int > pll = face.accessInnerPllX ();
+        std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > 
           p ( (Gitter::helement_STI *) 0, (Gitter::hbndseg_STI *) 0);
 
         pll.first->getAttachedElement( p );
@@ -819,7 +821,7 @@ void GitterDunePll :: unpackInteriorGhostAllData (
       }
     }
   }
-  return ;
+  return;
 }
 
 
@@ -829,8 +831,8 @@ void GitterDunePll :: unpackInteriorGhostAllData (
 //
 /////////////////////////////////////////////////////
 
-void GitterDunePll :: doInteriorGhostComm( 
-  vector< ObjectStream > & osvec ,
+void GitterDunePll::doInteriorGhostComm( 
+  std::vector< ObjectStream > & osvec ,
   GatherScatterType & vertexData , 
   GatherScatterType & edgeData,  
   GatherScatterType & faceData, 
@@ -846,9 +848,9 @@ void GitterDunePll :: doInteriorGhostComm(
 
   const bool haveHigherCodimData = containsVertices || 
                                    containsEdges ||  
-                                   containsFaces ;
+                                   containsFaces;
 
-  const bool containsSomeThing = haveHigherCodimData || containsElements ;
+  const bool containsSomeThing = haveHigherCodimData || containsElements;
 
   const bool packInterior = (commType == All_All_Comm) || 
                             (commType == Interior_Ghost_Comm);
@@ -858,19 +860,19 @@ void GitterDunePll :: doInteriorGhostComm(
 
   if(!containsSomeThing) 
   {
-    cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
-    return ;
+    std::cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
+    return;
   }
    
   {
-    for (int link = 0 ; link < nl ; ++link ) 
+    for (int link = 0; link < nl; ++link ) 
     {   
       ObjectStream & sendBuff = osvec[link]; 
       sendBuff.clear();
       
       {
         const hface_STI * determType = 0; // only for type determination 
-        pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
+        std::pair< IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
           iterpair = borderIteratorTT( determType , link );
 
         if(haveHigherCodimData || packGhosts )
@@ -904,16 +906,16 @@ void GitterDunePll :: doInteriorGhostComm(
     ///////////////////////////////////////////
     // exchange data 
     ///////////////////////////////////////////
-    osvec = mpAccess ().exchange (osvec) ;     
+    osvec = mpAccess ().exchange (osvec);     
     
     //all ghost cells get new data
-    for (int link = 0 ; link < nl ; ++link ) 
+    for (int link = 0; link < nl; ++link ) 
     {  
       ObjectStream & recvBuff = osvec[link];
 
       {
         const hface_STI * determType = 0; // only for type determination 
-        pair < IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
+        std::pair< IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
           iterpair = borderIteratorTT( determType , link );
 
         if(haveHigherCodimData || packGhosts )
@@ -946,14 +948,14 @@ void GitterDunePll :: doInteriorGhostComm(
   }
 
   // end element communication 
-  return ;
+  return;
 } 
 ////////////////////////////////////////////////////////
 //
 // communicate data
 // 
 ////////////////////////////////////////////////////////
-void GitterDunePll :: doCommunication ( 
+void GitterDunePll::doCommunication ( 
              GatherScatterType & vertexData , 
              GatherScatterType & edgeData,  
              GatherScatterType & faceData ,
@@ -965,28 +967,28 @@ void GitterDunePll :: doCommunication (
   const bool containsVertices = vertexData.contains(3,3);
   const bool containsEdges    = edgeData.contains(3,2);
   const bool containsFaces    = faceData.contains(3,1);
-  const bool containsElements = elementData.contains(3,0) ;
+  const bool containsElements = elementData.contains(3,0);
 
   const bool haveHigherCodimData = containsVertices || 
     containsEdges ||  
-    containsFaces ;
+    containsFaces;
 
   const bool containsSomeThing = containsElements || haveHigherCodimData;
 
   if(!containsSomeThing) 
   {
-    cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
-    return ;
+    std::cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
+    return;
   }
    
-  assert ((debugOption (5) && containsVertices) ? (cout << "**INFO GitterDunePll :: doCommunication (): (containsVertices)=true " << endl, 1) : 1) ;
-  assert ((debugOption (5) && containsEdges)    ? (cout << "**INFO GitterDunePll :: doCommunication (): (containsEdges)=true " << endl, 1) : 1) ;
-  assert ((debugOption (5) && containsFaces)    ? (cout << "**INFO GitterDunePll :: doCommunication (): (containsFaces)=true " << endl, 1) : 1) ;
-  assert ((debugOption (5) && containsElements) ? (cout << "**INFO GitterDunePll :: doCommunication (): (containsElements)=true " << endl, 1) : 1) ;
+  assert ((debugOption (5) && containsVertices) ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsVertices)=true " << std::endl, 1) : 1);
+  assert ((debugOption (5) && containsEdges)    ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsEdges)=true " << std::endl, 1) : 1);
+  assert ((debugOption (5) && containsFaces)    ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsFaces)=true " << std::endl, 1) : 1);
+  assert ((debugOption (5) && containsElements) ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsElements)=true " << std::endl, 1) : 1);
    
   // create vector of message buffers 
   // this vector is created here, that the buffer is allocated only once 
-  vector < ObjectStream > vec (nl) ;
+  std::vector< ObjectStream > vec (nl);
  
   // if data on entities of higer codim exists
   // then communication if more complicated 
@@ -1003,11 +1005,11 @@ void GitterDunePll :: doCommunication (
     doInteriorGhostComm( vec, vertexData, edgeData, faceData, elementData , commType ); 
   }
 
-  return ;
+  return;
 }
 
 // border border comm 
-void GitterDunePll :: borderBorderCommunication ( 
+void GitterDunePll::borderBorderCommunication ( 
              GatherScatterType & vertexData , 
              GatherScatterType & edgeData,  
              GatherScatterType & faceData ,
@@ -1017,7 +1019,7 @@ void GitterDunePll :: borderBorderCommunication (
 }
 
 // interior ghost comm 
-void GitterDunePll :: interiorGhostCommunication ( 
+void GitterDunePll::interiorGhostCommunication ( 
              GatherScatterType & vertexData , 
              GatherScatterType & edgeData,  
              GatherScatterType & faceData ,
@@ -1027,7 +1029,7 @@ void GitterDunePll :: interiorGhostCommunication (
 }
 
 // ghost to interior comm 
-void GitterDunePll :: ghostInteriorCommunication ( 
+void GitterDunePll::ghostInteriorCommunication ( 
              GatherScatterType & vertexData , 
              GatherScatterType & edgeData,  
              GatherScatterType & faceData ,
@@ -1037,7 +1039,7 @@ void GitterDunePll :: ghostInteriorCommunication (
 }
 
 // all all comm 
-void GitterDunePll :: allAllCommunication ( 
+void GitterDunePll::allAllCommunication ( 
              GatherScatterType & vertexData , 
              GatherScatterType & edgeData,  
              GatherScatterType & faceData ,
@@ -1050,25 +1052,25 @@ void GitterDunePll :: allAllCommunication (
 ////////////////////////////////////////////////////////////////////////////
 
 // rebuild ghost cells 
-void GitterDunePll :: rebuildGhostCells() 
+void GitterDunePll::rebuildGhostCells() 
 {
   // only do this if ghost cells are enabled 
-  if( ! ghostCellsEnabled() ) return ;
+  if( ! ghostCellsEnabled() ) return;
 
-  const int nl = mpAccess ().nlinks () ;
+  const int nl = mpAccess ().nlinks ();
 
   try 
   {
-    vector < ObjectStream > osv (nl) ;
+    std::vector< ObjectStream > osv (nl);
     
     const hface_STI* determType = 0;
 
     // pack all elements neighbouring to internal boundary 
     // as ghost elements 
     {
-      for (int link = 0 ; link < nl ; ++link ) 
+      for (int link = 0; link < nl; ++link ) 
       {
-        pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
+        std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
               w = levelBorderIteratorTT (determType, link, 0 );
         
         ObjectStream & os = osv[link];
@@ -1076,19 +1078,19 @@ void GitterDunePll :: rebuildGhostCells()
         {
           IteratorSTI < hface_STI > & inner = *w.first;
         
-          for ( inner.first () ; ! inner.done () ; inner.next ()) 
+          for ( inner.first (); ! inner.done (); inner.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = inner.item ().accessInnerPllX () ;
-            p.first->packAsGhost(os, p.second) ;
+            std::pair< ElementPllXIF_t *, int > p = inner.item ().accessInnerPllX ();
+            p.first->packAsGhost(os, p.second);
           }
         }
 
         {
           IteratorSTI < hface_STI > & outer = *w.second;
-          for (outer.first () ; ! outer.done () ; outer.next ()) 
+          for (outer.first (); ! outer.done (); outer.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = outer.item ().accessInnerPllX () ;
-            p.first->packAsGhost(os, p.second) ;
+            std::pair< ElementPllXIF_t *, int > p = outer.item ().accessInnerPllX ();
+            p.first->packAsGhost(os, p.second);
           }
         }
 
@@ -1098,32 +1100,32 @@ void GitterDunePll :: rebuildGhostCells()
     }
     
     // exchange gathered data 
-    osv = mpAccess ().exchange (osv) ;
+    osv = mpAccess ().exchange (osv);
     
     // unpack all data on internal boundary and create 
     // ghost cells 
     {
-      for (int link = 0 ; link < nl ; ++link ) 
+      for (int link = 0; link < nl; ++link ) 
       {
-        pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
+        std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
               w = levelBorderIteratorTT (determType, link, 0 );
         
         ObjectStream & os = osv[link];
 
         {
           IteratorSTI < hface_STI > & outer = *w.second;
-          for (outer.first () ; ! outer.done () ; outer.next ()) 
+          for (outer.first (); ! outer.done (); outer.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = outer.item ().accessOuterPllX () ;
-            p.first->insertGhostCell(os, p.second) ;
+            std::pair< ElementPllXIF_t *, int > p = outer.item ().accessOuterPllX ();
+            p.first->insertGhostCell(os, p.second);
           }
         }
         {
           IteratorSTI < hface_STI > & inner = *w.first;
-          for (inner.first () ; ! inner.done () ; inner.next ()) 
+          for (inner.first (); ! inner.done (); inner.next ()) 
           {
-            pair < ElementPllXIF_t *, int > p = inner.item ().accessOuterPllX () ;
-            p.first->insertGhostCell(os, p.second) ;
+            std::pair< ElementPllXIF_t *, int > p = inner.item ().accessOuterPllX ();
+            p.first->insertGhostCell(os, p.second);
           }
         }
 
@@ -1132,38 +1134,38 @@ void GitterDunePll :: rebuildGhostCells()
       } 
     }
   } 
-  catch (Parallel ::  AccessPllException) 
+  catch (Parallel:: AccessPllException) 
   {
-    cerr << "  FEHLER Parallel :: AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << endl ;
+    std::cerr << "  FEHLER Parallel::AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << std::endl;
   }
 
-  return ;
+  return;
 }
 
-void GitterDunePll :: checkGhostIndices() 
+void GitterDunePll::checkGhostIndices() 
 {
   // only do this if ghost cells are enabled 
-  if( ! ghostCellsEnabled() ) return ;
+  if( ! ghostCellsEnabled() ) return;
 
   // get number of links 
-  const int nl = mpAccess ().nlinks () ;
+  const int nl = mpAccess ().nlinks ();
   
   const hface_STI* determType = 0;
   {
     // for all links check all ghost elements 
-    for (int link = 0 ; link < nl ; ++link ) 
+    for (int link = 0; link < nl; ++link ) 
     {
-      pair < IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
+      std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
             w = levelBorderIteratorTT (determType, link , 0);
       
       {
         IteratorSTI < hface_STI > & outer = *w.second;
-        for (outer.first () ; ! outer.done () ; outer.next ()) 
+        for (outer.first (); ! outer.done (); outer.next ()) 
         {
-          pair < ElementPllXIF_t *, int > p = outer.item ().accessOuterPllX () ;
+          std::pair< ElementPllXIF_t *, int > p = outer.item ().accessOuterPllX ();
 
-          // get pair < ghost, local face num > 
-          Gitter :: ghostpair_STI gpair = p.first->getGhost();
+          // get std::pair< ghost, local face num > 
+          Gitter::ghostpair_STI gpair = p.first->getGhost();
           assert( gpair.first );
 
           gpair.first->resetGhostIndices();
@@ -1172,12 +1174,12 @@ void GitterDunePll :: checkGhostIndices()
 
       {
         IteratorSTI < hface_STI > & inner = *w.first;
-        for (inner.first () ; ! inner.done () ; inner.next ()) 
+        for (inner.first (); ! inner.done (); inner.next ()) 
         {
-          pair < ElementPllXIF_t *, int > p = inner.item ().accessOuterPllX () ;
+          std::pair< ElementPllXIF_t *, int > p = inner.item ().accessOuterPllX ();
 
-          // get pair < ghost, local face num > 
-          Gitter :: ghostpair_STI gpair = p.first->getGhost();
+          // get std::pair< ghost, local face num > 
+          Gitter::ghostpair_STI gpair = p.first->getGhost();
           assert( gpair.first );
 
           gpair.first->resetGhostIndices();
@@ -1189,24 +1191,22 @@ void GitterDunePll :: checkGhostIndices()
       delete w.second;
     } 
   } 
-
-  return ;
 }
 
-void GitterDunePll :: duneBackup(const char *filename) 
+void GitterDunePll::duneBackup ( const char *filename ) 
 {
   // backup grid, same as in serial case 
-  GitterDuneBasis::duneBackup(filename);
+  GitterDuneBasis::duneBackup( filename );
 }
 
 // wird von Dune verwendet 
-void GitterDunePll ::restore (istream & in) 
+void GitterDunePll::restore ( std::istream &in ) 
 {
-  typedef Gitter :: Geometric :: BuilderIF BuilderIF;
-  assert (debugOption (20) ? (cout << "**INFO GitterDunePll :: restore (istream & = " << in << ") " << endl, 1) : 1) ;
+  typedef Gitter::Geometric::BuilderIF BuilderIF;
+  assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::restore (istream & = " << in << ") " << std::endl, 1) : 1);
   {
-    AccessIterator < hedge_STI > :: Handle ew (container ());
-    for (ew.first () ; !ew.done () ; ew.next ()) ew.item ().restore (in) ;
+    AccessIterator < hedge_STI >::Handle ew (container ());
+    for (ew.first (); !ew.done (); ew.next ()) ew.item ().restore (in);
   }
   {
     AccessIterator < hface_STI >:: Handle fw(container());
@@ -1222,7 +1222,7 @@ void GitterDunePll ::restore (istream & in)
   this->restoreIndices (in);
  
 #ifndef NDEBUG 
-  const int maxIndexBefore = this->indexManager(BuilderIF :: IM_Elements).getMaxIndex();
+  const int maxIndexBefore = this->indexManager(BuilderIF::IM_Elements).getMaxIndex();
 #endif
 
   // set ghost indices new for level 0 ghosts 
@@ -1231,61 +1231,57 @@ void GitterDunePll ::restore (istream & in)
   // now restore faces and by this ghosts 
   // will be refined 
   {
-    AccessIterator < hbndseg_STI > :: Handle bw (container ()) ;
-    for (bw.first () ; ! bw.done () ; bw.next ()) bw.item ().restoreFollowFace () ;
+    AccessIterator < hbndseg_STI >::Handle bw (container ());
+    for (bw.first (); ! bw.done (); bw.next ()) bw.item ().restoreFollowFace ();
   }
   
   // max index should not be largen than before
-  assert( (this->indexManager(BuilderIF :: IM_Elements).getMaxIndex() != maxIndexBefore) ?
-      (cout << maxIndexBefore << " vor | nach " << this->indexManager(BuilderIF :: IM_Elements).getMaxIndex() << "\n",0) : 1);
+  assert( (this->indexManager(BuilderIF::IM_Elements).getMaxIndex() != maxIndexBefore) ?
+      (std::cout << maxIndexBefore << " vor | nach " << this->indexManager(BuilderIF::IM_Elements).getMaxIndex() << "\n",0) : 1);
 
-  duneNotifyGridChanges () ;
-  return ;
+  duneNotifyGridChanges ();
+  return;
 }
 
-void GitterDunePll :: duneRestore(const char *fileName) 
+void GitterDunePll::duneRestore ( const char *fileName )
 {
   assert (debugOption (20) ? 
-      (cout << "**INFO GitterDuneBasis :: duneRestore (const char * = \""
-            << fileName << "\") " << endl, 1) : 1) ;
+      (std::cout << "**INFO GitterDuneBasis::duneRestore (const char * = \""
+            << fileName << "\") " << std::endl, 1) : 1);
                  
-  ifstream in (fileName) ;
+  std::ifstream in( fileName );
   if (!in) {
-    cerr << "**WARNUNG (IGNORIERT) GitterDunePll :: ";
-    cerr <<" duneRestore (const char *, double & ) Fehler beim \"Offnen von < "
-         << (fileName ? fileName : "null") << " > " << endl ;
+    std::cerr << "**WARNUNG (IGNORIERT) GitterDunePll::";
+    std::cerr <<" duneRestore (const char *, double & ) Fehler beim \"Offnen von < "
+         << (fileName ? fileName : "null") << " > " << std::endl;
   } 
   else 
   {
-    restore(in) ;
+    restore(in);
   }
 
-  return ;
+  return;
 }
 
-void GitterDunePll :: tovtk( const std::string &fn ) 
+void GitterDunePll::tovtk ( const std::string &fn ) 
 {
-  const int myrank = mpAccess ().myrank () ;
-  const int nProc = mpAccess ().psize () ;
+  const int myrank = mpAccess ().myrank ();
+  const int nProc = mpAccess ().psize ();
 
   std::ostringstream ss;
   ss << "p" << myrank << "-" << fn;
 
   // openfile
   std::ofstream vtuFile;
-  Gitter :: tovtk( ss.str() );
+  Gitter::tovtk( ss.str() );
 
   if( myrank == 0 )
   {
     std::ostringstream pllss;
     if( fn.substr(fn.find_last_of(".") + 1) == "vtu" )
-    {
       pllss << fn.substr(0,fn.find_last_of(".") + 1) << "pvtu";
-    }
     else
-    {
       pllss << fn << ".pvtu";
-    }
     std::ofstream pvtuFile;
     pvtuFile.open( pllss.str().c_str() );
   
@@ -1308,6 +1304,3 @@ void GitterDunePll :: tovtk( const std::string &fn )
     std::cout << "data written to " << pllss.str() << std::endl;
   }
 }
-
-
-#endif
