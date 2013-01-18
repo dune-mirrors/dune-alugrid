@@ -19,7 +19,8 @@ libalugrid_serial_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_serial_la_LIBADD = 
 
 libalugrid_parallel_la_SOURCES = \
-	$(top_srcdir)/dune/alugrid/src/parallel/mpAccess.cc
+	$(top_srcdir)/dune/alugrid/src/parallel/mpAccess.cc \
+	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_sti.cc
 
 libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)
