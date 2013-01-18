@@ -7,9 +7,6 @@
 #include <utility>
 #include <vector>
 
-//! type of coordinate storage 
-typedef double alucoord_t;
-
 #include "../indexstack.h"
 #include "../parallel/gitter_pll_ldb.h"
 #include "../projectvertex.h"
