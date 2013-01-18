@@ -864,7 +864,7 @@ public :
     virtual inline MacroGitterPll & containerPll ();
     virtual inline const MacroGitterPll & containerPll () const;
 
-    GitterBasisPll ( std::string, MpAccessLocal &, ProjectVertex* );
+    GitterBasisPll ( const std::string &, MpAccessLocal &, ProjectVertex* );
     GitterBasisPll ( std::istream &in, MpAccessLocal &, ProjectVertex* );
 
     virtual ~GitterBasisPll ();
