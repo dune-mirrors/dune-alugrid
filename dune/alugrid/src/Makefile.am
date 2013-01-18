@@ -12,7 +12,7 @@ libalugrid_la_LIBADD = $(PARMETIS_LDFLAGS) $(PARMETIS_LIBS) $(METIS_LDFLAGS) $(M
 
 if MPI 
 # build lib with parallel support 
-dist_libalugrid_la_SOURCES = alugrid_parallel.cc alugrid_2d.cc starmpi.c
+dist_libalugrid_la_SOURCES = alugrid_2d.cc starmpi.c
 else 
 # build only serial grid lib
 dist_libalugrid_la_SOURCES = alugrid_2d.cc
