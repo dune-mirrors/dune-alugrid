@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libalugrid_serial.la libdunealugrid.la
 
 libalugrid_serial_la_SOURCES = \
+	$(top_srcdir)/dune/alugrid/src/serial/gitter_geo.cc \
 	$(top_srcdir)/dune/alugrid/src/serial/gitter_hexa_top.cc \
 	$(top_srcdir)/dune/alugrid/src/serial/gitter_sti.cc \
 	$(top_srcdir)/dune/alugrid/src/serial/gitter_tetra_top.cc \
