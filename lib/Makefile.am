@@ -23,7 +23,8 @@ libalugrid_parallel_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_hexa_top_pll.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_impl.cc \
 	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_ldb.cc \
-	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_sti.cc
+	$(top_srcdir)/dune/alugrid/src/parallel/gitter_pll_sti.cc \
+	$(top_srcdir)/dune/alugrid/src/parallel/gitter_tetra_top_pll.cc
 
 libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)

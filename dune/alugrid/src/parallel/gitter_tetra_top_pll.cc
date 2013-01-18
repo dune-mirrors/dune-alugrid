@@ -1,16 +1,19 @@
 // (c) Robert Kloefkorn 2010
+#include <config.h>
+
+#include <cassert>
+
 #include "gitter_tetra_top_pll.h"
 #include "../serial/gitter_tetra_top.cc"
 
 template < class A, class X, class MX > 
-void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
-( GhostChildrenInfo_t & info ) 
+void Hbnd3PllInternal < A, X, MX >::HbndPll::splitGhost ( GhostChildrenInfo_t &info )
 {
   if(_ghostPair.first)
   {
     // get the childs 
-    typedef typename Gitter :: Geometric :: tetra_GEO  tetra_GEO;
-    typedef typename Gitter :: Geometric :: hface3_GEO hface3_GEO;
+    typedef typename Gitter::Geometric::tetra_GEO  tetra_GEO;
+    typedef typename Gitter::Geometric::hface3_GEO hface3_GEO;
 
     // ghostpair.second is the internal face number of the face 
     // connected to the interior of the process 
@@ -24,15 +27,15 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
       ghost->refine();
     }
 
-    typedef typename tetra_GEO :: myrule_t  myrule_t ;
+    typedef typename tetra_GEO::myrule_t  myrule_t;
 
-    typedef pair < Gitter :: Geometric :: hasFace3 *, int > neigh_t;
+    typedef std::pair< Gitter::Geometric::hasFace3 *, int > neigh_t;
 
     hface3_GEO * orgFace = ghost->myhface( _ghostPair.second ); 
     hface3_GEO * face    = orgFace->down();
 
 #ifndef NDEBUG
-    int breakCount = 0 ;
+    int breakCount = 0;
 #endif
     while( ! face )
     {
@@ -59,7 +62,7 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
     {
       assert( face );
       int count = 0;
-      for( ; face; face = face->next() )
+      for(; face; face = face->next() )
       {
         assert(face);
 
@@ -81,7 +84,7 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
         // set element pointer and local face number 
         info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
 
-        ++count ;
+        ++count;
       }
       assert( ghost->getrule().bisection() ? count == 2 : count == 4);
     }
@@ -89,7 +92,7 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  splitGhost
 }
 
 template < class A, class X, class MX > 
-void Hbnd3PllInternal < A, X, MX > :: HbndPll :: 
+void Hbnd3PllInternal < A, X, MX >::HbndPll::
 removeDescendents( helement_STI & elem ) 
 {
   elem.resetRefinementRequest(); 
@@ -101,7 +104,7 @@ removeDescendents( helement_STI & elem )
       removeDescendents( *child );
     
     // if something went wrong, return ghosts are removed later 
-    if( ! child->leaf () ) return ;
+    if( ! child->leaf () ) return;
 
     // mark child for coarsening 
     child->tagForGlobalCoarsening(); 
@@ -115,12 +118,12 @@ removeDescendents( helement_STI & elem )
 }
 
 template < class A, class X, class MX > 
-void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  coarseGhost () 
+void Hbnd3PllInternal < A, X, MX >::HbndPll:: coarseGhost () 
 {
   if(_ghostPair.first)
   {
     helement_STI& ghost = (*_ghostPair.first); 
-    if( ghost.leaf() ) return ;
+    if( ghost.leaf() ) return;
 
     // remove all descendents if possible 
     removeDescendents( ghost );
@@ -128,7 +131,7 @@ void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
 }
 
 template < class A, class X, class MX > 
-void Hbnd3PllInternal < A, X, MX > :: HbndPll ::  
+void Hbnd3PllInternal < A, X, MX >::HbndPll:: 
 setGhost ( const ghostpair_STI & gpair ) 
 {
   if(gpair.first)
@@ -141,8 +144,8 @@ setGhost ( const ghostpair_STI & gpair )
   }
   else 
   {
-    _ghostPair.first  =  0 ;
-    _ghostPair.second = -1 ;
+    _ghostPair.first  =  0;
+    _ghostPair.second = -1;
   }
 }
 
@@ -150,37 +153,37 @@ setGhost ( const ghostpair_STI & gpair )
 //  --HbndPllMacro
 //***************************************************************************************
 template < class A, class X, class MX > 
-const MacroGhostInfo_STI* Hbnd3PllInternal < A, X, MX > :: 
-HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
+const MacroGhostInfo_STI* Hbnd3PllInternal < A, X, MX >::
+HbndPllMacro::buildGhostCell(ObjectStream& os, int fce)
 {
   assert( _gm == 0 ); 
-  int code = MacroGridMoverIF :: ENDMARKER ;
+  int code = MacroGridMoverIF::ENDMARKER;
   os.readObject (code); 
-  assert( code == MacroGridMoverIF :: HBND3INT );
+  assert( code == MacroGridMoverIF::HBND3INT );
 
   {
     int bfake;
-    os.readObject (bfake) ;
+    os.readObject (bfake);
 #ifndef NDEBUG 
-    Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
-    assert( b == Gitter :: hbndseg :: closure );
+    Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
+    assert( b == Gitter::hbndseg::closure );
 #endif
     // read global graph vertex index 
     int ldbVertexIndex = -1;
     os.readObject( ldbVertexIndex );
 
     int v [3] = { -1, -1, -1 };
-    os.readObject (v[0]) ;
-    os.readObject (v[1]) ;
-    os.readObject (v[2]) ;
+    os.readObject (v[0]);
+    os.readObject (v[1]);
+    os.readObject (v[2]);
 
     int readPoint = 0;
     os.readObject( readPoint );
 
     // the following makes only sense if information has been transmitted 
-    if( readPoint != MacroGridMoverIF :: POINTTRANSMITTED )
+    if( readPoint != MacroGridMoverIF::POINTTRANSMITTED )
     {
-      cerr << "ERROR: No point transmitted, building ghost cells impossible in " << __FILE__ << ", " << __LINE__ << endl;
+      std::cerr << "ERROR: No point transmitted, building ghost cells impossible in " << __FILE__ << ", " << __LINE__ << std::endl;
       abort();
     }
 
@@ -203,12 +206,12 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
 }
 
 // template instantiation 
-typedef GitterBasis :: Objects :: Hbnd3Default Hbnd3DefaultType;
+typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
 template class Hbnd3PllInternal < Hbnd3DefaultType , 
                                   BndsegPllBaseXClosure < Hbnd3DefaultType > ,
-                                  BndsegPllBaseXMacroClosure < Hbnd3DefaultType > > ;
+                                  BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >;
 
 // from serial part with different template argument 
-template class Hface3Top< GitterBasisPll :: ObjectsPll :: Hface3EmptyPll >; 
-template class TetraTop< GitterBasisPll :: ObjectsPll :: TetraEmptyPll >; 
-template class Periodic3Top < GitterBasisPll :: ObjectsPll :: Periodic3EmptyPll >;
+template class Hface3Top< GitterBasisPll::ObjectsPll::Hface3EmptyPll >; 
+template class TetraTop< GitterBasisPll::ObjectsPll::TetraEmptyPll >; 
+template class Periodic3Top < GitterBasisPll::ObjectsPll::Periodic3EmptyPll >;
