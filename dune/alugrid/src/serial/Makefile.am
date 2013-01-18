@@ -8,7 +8,7 @@ serialhdrs = $(serialdirec)/gitter_tetra_top.h $(serialdirec)/mapp_cube_3d.h $(s
 	$(serialdirec)/gitter_impl.h $(serialdirec)/mapp_tetra_3d.h \
 	$(serialdirec)/gitter_mgb.h $(serialdirec)/key.h	$(serialdirec)/myalloc.h\
 	$(serialdirec)/gitter_sti.h $(serialdirec)/lock.h	$(serialdirec)/parallel.h \
-  $(serialdirec)/elementif.h $(serialdirec)/refinementrules.h \
+  $(serialdirec)/refinementrules.h \
   $(serialdirec)/ghost_elements.h $(serialdirec)/ghost_info.h 
 
 nobase_include_HEADERS = $(serialhdrs)
