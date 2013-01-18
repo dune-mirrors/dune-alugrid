@@ -5,24 +5,24 @@
 #define GITTER_HEXA_TOP_PLL_H_INCLUDED
 
 #include "../serial/parallel.h"
-#include "gitter_pll_impl.h"
 #include "../serial/gitter_hexa_top.h"
+#include "gitter_pll_impl.h"
 
 template < class A, class MX > class Hbnd4PllExternal : public Hbnd4Top < A > {
   public :
-    typedef MX mypllx_t ;
+    typedef MX mypllx_t;
   protected :
-    typedef typename A :: myhface4_t myhface4_t ;
-    typedef typename A :: bnd_t     bnd_t ;
+    typedef typename A::myhface4_t myhface4_t;
+    typedef typename A::bnd_t     bnd_t;
   public :
-    inline Hbnd4PllExternal (myhface4_t *, int, const bnd_t bt) ;
-    inline ~Hbnd4PllExternal () ;
-    ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-    const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-    void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+    inline Hbnd4PllExternal (myhface4_t *, int, const bnd_t bt);
+    inline ~Hbnd4PllExternal ();
+    ElementPllXIF_t & accessPllX () throw (Parallel::AccessPllException);
+    const ElementPllXIF_t & accessPllX () const throw (Parallel::AccessPllException);
+    void detachPllXFromMacro () throw (Parallel::AccessPllException);
   private :
-    mypllx_t * _mxt ;
-} ;
+    mypllx_t * _mxt;
+};
 
 template < class A, class X, class MX > class Hbnd4PllInternal {
   public :
@@ -30,32 +30,32 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
     //***************************************************************
     //  HbndPll
     //***************************************************************
-    // for example: A = GitterBasis :: Objects :: Hbnd4Default
+    // for example: A = GitterBasis::Objects::Hbnd4Default
     class HbndPll : public A {
       public :
-        typedef X mypllx_t ;
+        typedef X mypllx_t;
       protected :
 
-        typedef Gitter :: ghostpair_STI ghostpair_STI;
-        typedef Gitter :: helement_STI helement_STI;
-        typedef Gitter :: GhostChildrenInfo GhostChildrenInfo_t ;
+        typedef Gitter::ghostpair_STI ghostpair_STI;
+        typedef Gitter::helement_STI helement_STI;
+        typedef Gitter::GhostChildrenInfo GhostChildrenInfo_t;
         typedef typename GitterBasisImpl::Objects::hexa_IMPL GhostHexa_t;
-        typedef typename A :: myhface4_t myhface4_t ;
-        typedef typename A :: balrule_t  balrule_t ;
-        typedef typename A :: bnd_t     bnd_t ;
+        typedef typename A::myhface4_t myhface4_t;
+        typedef typename A::balrule_t  balrule_t;
+        typedef typename A::bnd_t     bnd_t;
 
-        inline HbndPll (myhface4_t *, int) ;
+        inline HbndPll (myhface4_t *, int);
        ~HbndPll () {}
-        virtual bool bndNotifyBalance (balrule_t,int) ;
-        virtual bool lockedAgainstCoarsening () const ;
+        virtual bool bndNotifyBalance (balrule_t,int);
+        virtual bool lockedAgainstCoarsening () const;
 
       public :
-        bnd_t bndtype () const ;
-        ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-        const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-        void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+        bnd_t bndtype () const;
+        ElementPllXIF_t & accessPllX () throw (Parallel::AccessPllException);
+        const ElementPllXIF_t & accessPllX () const throw (Parallel::AccessPllException);
+        void detachPllXFromMacro () throw (Parallel::AccessPllException);
       private :
-        mypllx_t _ext ;
+        mypllx_t _ext;
 
       protected :
         // ghost element behind pllx bnd, can be pointer to null 
@@ -79,9 +79,9 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
 
       public:
         // for dune 
-        inline int ghostLevel () const ;
-    } ;
-    typedef class HbndPll micro_t ;
+        inline int ghostLevel () const;
+    };
+    typedef class HbndPll micro_t;
 
     // NOTE: ghost element support is missing. 
     // the necessary changes are similar to the changes in 
@@ -89,33 +89,33 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
   public :
     class HbndPllMacro : public Hbnd4Top < micro_t > {
       public :
-        typedef MX mypllx_t ;
+        typedef MX mypllx_t;
       protected :
-        typedef typename A :: myhface4_t myhface4_t ;
-        typedef typename A :: balrule_t  balrule_t ;
-        typedef typename A :: bnd_t     bnd_t ;
-        typedef typename Gitter :: Geometric :: BuilderIF BuilderIF;
+        typedef typename A::myhface4_t myhface4_t;
+        typedef typename A::balrule_t  balrule_t;
+        typedef typename A::bnd_t     bnd_t;
+        typedef typename Gitter::Geometric::BuilderIF BuilderIF;
 
-        virtual bool bndNotifyBalance (balrule_t,int) ;
-        virtual bool lockedAgainstCoarsening () const ;
+        virtual bool bndNotifyBalance (balrule_t,int);
+        virtual bool lockedAgainstCoarsening () const;
       public :
         HbndPllMacro (myhface4_t *,int,
                       const bnd_t bt,
                       BuilderIF & ,
-                      MacroGhostInfoHexa* ) ;
+                      MacroGhostInfoHexa* );
         HbndPllMacro (myhface4_t *,int,
                       const bnd_t bt,
                       BuilderIF & );
 
-       ~HbndPllMacro () ;
-        ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-        const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-        void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+       ~HbndPllMacro ();
+        ElementPllXIF_t & accessPllX () throw (Parallel::AccessPllException);
+        const ElementPllXIF_t & accessPllX () const throw (Parallel::AccessPllException);
+        void detachPllXFromMacro () throw (Parallel::AccessPllException);
   
         // builds ghost cell if not exists 
         virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
         // for dune 
-        inline int ghostLevel () const ;
+        inline int ghostLevel () const;
 
         // overload ldbVertexIndex, otherwise the default is return which is wrong in this case 
         int ldbVertexIndex () const { assert( _mxt ); return _mxt->ldbVertexIndex(); }
@@ -123,12 +123,12 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
         void setLoadBalanceVertexIndex ( int ldbVx ) { assert( _mxt ); _mxt->setLoadBalanceVertexIndex( ldbVx ); }
 
       private :
-        mypllx_t * _mxt ;
+        mypllx_t * _mxt;
         BuilderIF & _mgb;
         MacroGhost * _gm;
-    } ;
-    typedef class HbndPllMacro macro_t ;
-} ;
+    };
+    typedef class HbndPllMacro macro_t;
+};
 
 
   //
@@ -140,87 +140,90 @@ template < class A, class X, class MX > class Hbnd4PllInternal {
   //    #    #    #  ######     #    #    #  ######
   //
 
-template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: 
+template < class A, class MX > inline Hbnd4PllExternal < A, MX >::
 Hbnd4PllExternal (myhface4_t * f, int t, const bnd_t bt) 
   : Hbnd4Top < A > (0,f,t,bt), _mxt (new MX (*this)) 
 {
-  this->restoreFollowFace () ;
-  return ;
+  this->restoreFollowFace ();
+  return;
 }
 
-template < class A, class MX > inline Hbnd4PllExternal < A, MX > :: ~Hbnd4PllExternal () {
-  delete _mxt ;
-  _mxt = 0 ;
-  return ;
+template < class A, class MX > inline Hbnd4PllExternal < A, MX >::~Hbnd4PllExternal () {
+  delete _mxt;
+  _mxt = 0;
+  return;
 }
 
-template < class A, class MX > ElementPllXIF_t & Hbnd4PllExternal < A, MX > :: accessPllX () throw (Parallel :: AccessPllException) {
-  assert (_mxt) ;
-  return * _mxt ;
+template < class A, class MX > ElementPllXIF_t & Hbnd4PllExternal < A, MX >::accessPllX () throw (Parallel::AccessPllException) {
+  assert (_mxt);
+  return * _mxt;
 }
 
-template < class A, class MX > const ElementPllXIF_t & Hbnd4PllExternal < A, MX > :: accessPllX () const throw (Parallel :: AccessPllException) {
-  assert (_mxt) ;
-  return * _mxt ;
+template < class A, class MX > const ElementPllXIF_t & Hbnd4PllExternal < A, MX >::accessPllX () const throw (Parallel::AccessPllException) {
+  assert (_mxt);
+  return * _mxt;
 }
 
-template < class A, class MX > void Hbnd4PllExternal < A, MX > :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  delete _mxt ;
-  _mxt = 0 ;
-  return ;
+template < class A, class MX > void Hbnd4PllExternal < A, MX >::detachPllXFromMacro () throw (Parallel::AccessPllException) {
+  delete _mxt;
+  _mxt = 0;
+  return;
 }
 
-template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX > :: HbndPll :: 
+template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX >::HbndPll::
 HbndPll (myhface4_t * f, int t) : A (f,t), _ext (*this) , _ghostPair((helement_STI *) 0 ,-1) {
-  return ;
+  return;
 }
 
-template < class A, class X, class MX > typename Hbnd4PllInternal < A, X, MX > :: HbndPll :: bnd_t Hbnd4PllInternal < A, X, MX > :: HbndPll ::  bndtype () const {
-  return Gitter :: hbndseg_STI :: closure ;
+template < class A, class X, class MX > typename Hbnd4PllInternal < A, X, MX >::HbndPll::bnd_t Hbnd4PllInternal < A, X, MX >::HbndPll:: bndtype () const {
+  return Gitter::hbndseg_STI::closure;
 }
 
-template < class A, class X, class MX > ElementPllXIF_t & Hbnd4PllInternal < A, X, MX > :: HbndPll :: accessPllX () throw (Parallel :: AccessPllException) {
-  return _ext ;
+template < class A, class X, class MX > ElementPllXIF_t & Hbnd4PllInternal < A, X, MX >::HbndPll::accessPllX () throw (Parallel::AccessPllException) {
+  return _ext;
 }
 
-template < class A, class X, class MX > const ElementPllXIF_t & Hbnd4PllInternal < A, X, MX > :: HbndPll :: accessPllX () const throw (Parallel :: AccessPllException) {
-  return _ext ;
+template < class A, class X, class MX > const ElementPllXIF_t & Hbnd4PllInternal < A, X, MX >::HbndPll::accessPllX () const throw (Parallel::AccessPllException) {
+  return _ext;
 }
 
-template < class A, class X, class MX > void Hbnd4PllInternal < A, X, MX > :: HbndPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  abort () ;
-  return ;
+template < class A, class X, class MX > void Hbnd4PllInternal < A, X, MX >::HbndPll::detachPllXFromMacro () throw (Parallel::AccessPllException) {
+  abort ();
+  return;
 }
 
-template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX > :: HbndPll :: bndNotifyBalance (balrule_t r, int w) {
-  if (r == balrule_t :: iso4) {
-    _ext.notifyBalance (r,w) ;
-    return true ;
-  } else {
-    cerr << "**WARNUNG Balancierungsanforderung vom Typ " << r << " ignoriert,\n" ;
-    cerr << "  weil nicht vorgesehen. In " << __FILE__ << " " << __LINE__ << endl ;
-    return false ;
+template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX >::HbndPll::bndNotifyBalance (balrule_t r, int w)
+{
+  if( r == balrule_t::iso4 )
+  {
+    _ext.notifyBalance( r, w );
+    return true;
+  }
+  else
+  {
+    std::cerr << "WARNING (ignored): Ignoring balancing request of type " << r << "." << std::endl;
+    return false;
   }
 }
 
-template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX > :: HbndPll :: lockedAgainstCoarsening () const {
-  return _ext.lockedAgainstCoarsening () ;
+template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX >::HbndPll::lockedAgainstCoarsening () const {
+  return _ext.lockedAgainstCoarsening ();
 }
 
-template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX > :: HbndPll ::  ghostLevel () const {
-  return _ext.ghostLevel () ;
+template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX >::HbndPll:: ghostLevel () const {
+  return _ext.ghostLevel ();
 }
 
 template < class A, class X, class MX >
-inline Gitter :: ghostpair_STI & 
-Hbnd4PllInternal < A, X, MX > :: HbndPll :: getGhost () const
+inline Gitter::ghostpair_STI & 
+Hbnd4PllInternal < A, X, MX >::HbndPll::getGhost () const
 {
   // assert is not needed here when we dont use ghost cells 
   return _ghostPair;
 }
 
-template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: 
-HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t,
+template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX >::
+HbndPllMacro::HbndPllMacro (myhface4_t * f, int t,
               const bnd_t bt, 
               BuilderIF & mgb,
               MacroGhostInfoHexa* ghInfo ) 
@@ -234,12 +237,12 @@ HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t,
   _mxt = new MX (*this, _gm->getGhostInfo() );
   assert( _mxt );
 
-  this->restoreFollowFace () ;
-  return ;
+  this->restoreFollowFace ();
+  return;
 }
 
-template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: 
-HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t,
+template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX >::
+HbndPllMacro::HbndPllMacro (myhface4_t * f, int t,
                               const bnd_t bt,
                               BuilderIF & mgb)
 : Hbnd4Top < micro_t > (0,f,t,bt)
@@ -248,52 +251,55 @@ HbndPllMacro :: HbndPllMacro (myhface4_t * f, int t,
 , _gm(0)  
 {
   assert( _mxt );
-  this->restoreFollowFace () ;
-  return ;
+  this->restoreFollowFace ();
+  return;
 }
 
-template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: ~HbndPllMacro () {
+template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX >::HbndPllMacro::~HbndPllMacro () {
   delete _gm;
   _gm = 0;
-  delete _mxt ;
-  _mxt = 0 ;
-  return ;
+  delete _mxt;
+  _mxt = 0;
+  return;
 }
 
-template < class A, class X, class MX > ElementPllXIF_t & Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: accessPllX () throw (Parallel :: AccessPllException) {
-  assert (_mxt) ;
-  return * _mxt ;
+template < class A, class X, class MX > ElementPllXIF_t & Hbnd4PllInternal < A, X, MX >::HbndPllMacro::accessPllX () throw (Parallel::AccessPllException) {
+  assert (_mxt);
+  return * _mxt;
 }
 
-template < class A, class X, class MX > const ElementPllXIF_t & Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
-  assert (_mxt) ;
-  return * _mxt ;
+template < class A, class X, class MX > const ElementPllXIF_t & Hbnd4PllInternal < A, X, MX >::HbndPllMacro::accessPllX () const throw (Parallel::AccessPllException) {
+  assert (_mxt);
+  return * _mxt;
 }
 
-template < class A, class X, class MX > void Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
-  delete _mxt ;
-  _mxt = 0 ;
-  return ;
+template < class A, class X, class MX > void Hbnd4PllInternal < A, X, MX >::HbndPllMacro::detachPllXFromMacro () throw (Parallel::AccessPllException) {
+  delete _mxt;
+  _mxt = 0;
+  return;
 }
 
-template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: bndNotifyBalance (balrule_t r, int w) {
-  if (r == balrule_t :: iso4) {
-    _mxt->notifyBalance (r,w) ;
-    return true ;
-  } else {
-    cerr << "**WARNUNG Balancierungsanforderung vom Typ " << r << " ignoriert,\n" ;
-    cerr << "  weil nicht vorgesehen. In " << __FILE__ << " " << __LINE__ << endl ;
-    return false ;
+template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX >::HbndPllMacro::bndNotifyBalance (balrule_t r, int w)
+{
+  if( r == balrule_t::iso4 )
+  {
+    _mxt->notifyBalance (r,w);
+    return true;
+  }
+  else
+  {
+    std::cerr << "WARNING (ignored): Ignoring balancing request of type " << r << "." << std::endl;
+    return false;
   }
 }
 
-template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX > :: 
-HbndPllMacro :: lockedAgainstCoarsening () const {
-  return _mxt->lockedAgainstCoarsening () ;
+template < class A, class X, class MX > bool Hbnd4PllInternal < A, X, MX >::
+HbndPllMacro::lockedAgainstCoarsening () const {
+  return _mxt->lockedAgainstCoarsening ();
 }
 
-template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX > :: HbndPllMacro :: ghostLevel () const {
-  return this->level () ;
+template < class A, class X, class MX > inline int Hbnd4PllInternal < A, X, MX >::HbndPllMacro::ghostLevel () const {
+  return this->level ();
 }
 
 #endif  // GITTER_HEXA_TOP_PLL_H_INCLUDED

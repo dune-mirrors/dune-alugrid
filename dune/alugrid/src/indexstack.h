@@ -458,4 +458,4 @@ memUsage () const
 enum { lengthOfFiniteStack = 262144 }; // 2^18 
 typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
 
-#endif
+#endif // #ifndef ALUGRIDINDEXSTACK_H_INCLUDED

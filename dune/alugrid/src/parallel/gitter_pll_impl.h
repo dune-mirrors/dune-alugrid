@@ -1,7 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
 // modifications for Dune Interface 
 // (c) Robert Kloefkorn 2004 - 2005 
-
 #ifndef GITTER_PLL_IMPL_H_INCLUDED
 #define GITTER_PLL_IMPL_H_INCLUDED
 
@@ -13,7 +12,7 @@
 #include "gitter_pll_ldb.h"
 #include "../serial/ghost_elements.h"
 
-  // Der vector < int > wird als sog. linkagepattern, also als
+  // Der std::vector< int > wird als sog. linkagepattern, also als
   // Verbindungsmuster eingesetzt. Die Verbindungsmuster werden
   // nicht in jeder Parallelerweiterung gespeichert sondern in
   // einem zentralen Container im verteilten Grobgitter, dem
@@ -26,151 +25,151 @@ template < class A >
 class VertexPllBaseX : public A 
 {
   protected :
-    typedef A myvertex_t ;
-    typedef typename A :: moveto_t moveto_t ;
+    typedef A myvertex_t;
+    typedef typename A::moveto_t moveto_t;
     inline myvertex_t & myvertex () { return *this; }
     inline const myvertex_t & myvertex () const { return *this; }
 
-    using A :: VERTEX;
+    using A::VERTEX;
   public :
-    VertexPllBaseX (double,double,double,int,IndexManagerStorageType&) ;
-   ~VertexPllBaseX () ;
+    VertexPllBaseX (double,double,double,int,IndexManagerStorageType&);
+   ~VertexPllBaseX ();
 
-    virtual vector< int > estimateLinkage () const ;
-    virtual bool setLinkage ( vector < int > ) ;
-    virtual LinkedObject :: Identifier getIdentifier () const ;
+    virtual std::vector< int > estimateLinkage () const;
+    virtual bool setLinkage ( std::vector< int > );
+    virtual LinkedObject::Identifier getIdentifier () const;
 
   protected :
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+    virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
+    virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
     
-    inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns() ;  }
+    inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns();  }
   public :
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
+    virtual void attach2 (int);
+    virtual void unattach2 (int);
+    virtual bool packAll (std::vector< ObjectStream > &);
+    virtual void unpackSelf (ObjectStream &, bool);
 
   protected :
-    static const linkagePattern_t nullPattern ;
-    linkagePatternMap_t :: iterator _lpn ;
-    moveto_t*  _moveTo ;
-} ;
+    static const linkagePattern_t nullPattern;
+    linkagePatternMap_t::iterator _lpn;
+    moveto_t*  _moveTo;
+};
 
 template < class A > 
 class EdgePllBaseX : public A 
 {
   protected :
-    typedef A myhedge_t ;
+    typedef A myhedge_t;
     inline myhedge_t & myhedge () { return *this; }
     inline const myhedge_t & myhedge () const { return *this; }
 
   public :
-    typedef typename A :: myvertex_t myvertex_t;
+    typedef typename A::myvertex_t myvertex_t;
 
-    inline EdgePllBaseX (myvertex_t * a, myvertex_t * b) ;
-    ~EdgePllBaseX () ;
-    virtual void getRefinementRequest (ObjectStream &) const ;
-    virtual bool setRefinementRequest (ObjectStream &) ;
-    virtual bool lockAndTry () ;
-    virtual bool unlockAndResume (bool) ;
-    virtual bool lockedAgainstCoarsening () const ;
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
-} ;
+    inline EdgePllBaseX (myvertex_t * a, myvertex_t * b);
+    ~EdgePllBaseX ();
+    virtual void getRefinementRequest (ObjectStream &) const;
+    virtual bool setRefinementRequest (ObjectStream &);
+    virtual bool lockAndTry ();
+    virtual bool unlockAndResume (bool);
+    virtual bool lockedAgainstCoarsening () const;
+    virtual void attach2 (int);
+    virtual void unattach2 (int);
+    virtual bool packAll (std::vector< ObjectStream > &);
+    virtual void unpackSelf (ObjectStream &, bool);
+};
 
 template < class A > 
 class EdgePllBaseXMacro : public A 
 {
   public :
-    typedef typename A :: myhedge_t  myhedge_t;
-    typedef typename A :: myvertex_t myvertex_t;
-    typedef typename A :: moveto_t   moveto_t ;
+    typedef typename A::myhedge_t  myhedge_t;
+    typedef typename A::myvertex_t myvertex_t;
+    typedef typename A::moveto_t   moveto_t;
 
-    inline EdgePllBaseXMacro(myvertex_t *,myvertex_t *) ;
-   ~EdgePllBaseXMacro () ;
-    virtual vector< int > estimateLinkage () const ;
-    virtual LinkedObject :: Identifier getIdentifier () const ;
+    inline EdgePllBaseXMacro(myvertex_t *,myvertex_t *);
+   ~EdgePllBaseXMacro ();
+    virtual std::vector< int > estimateLinkage () const;
+    virtual LinkedObject::Identifier getIdentifier () const;
   protected :
-    using A :: myhedge;
-    using A :: EDGE1;
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+    using A::myhedge;
+    using A::EDGE1;
+    virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
+    virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
   public :
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
+    virtual void attach2 (int);
+    virtual void unattach2 (int);
+    virtual bool packAll (std::vector< ObjectStream > &);
+    virtual void unpackSelf (ObjectStream &, bool);
   protected :
-    moveto_t*  _moveTo ;
-} ;
+    moveto_t*  _moveTo;
+};
 
 template < class A > class FacePllBaseX : public A 
 {
   protected :
-    typedef A myhface_t ;
-    typedef typename A :: myconnect_t myconnect_t ;
-    typedef typename A :: myhedge_t myhedge_t;
+    typedef A myhface_t;
+    typedef typename A::myconnect_t myconnect_t;
+    typedef typename A::myhedge_t myhedge_t;
       
   public :
-    inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int) ;
-    inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t*,int) ;
+    inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int);
+    inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t*,int);
     inline ~FacePllBaseX () {}
 
     inline myhface_t & myhface () { return *this; }
     inline const myhface_t & myhface () const { return *this; }
 
-    virtual vector < int > checkParallelConnectivity () const ;
-    virtual pair < ElementPllXIF_t *, int > accessOuterPllX () ;
-    virtual pair < const ElementPllXIF_t *, int > accessOuterPllX () const ;
-    virtual pair < ElementPllXIF_t *, int > accessInnerPllX () ;
-    virtual pair < const ElementPllXIF_t *, int > accessInnerPllX () const ;
-} ;
+    virtual std::vector< int > checkParallelConnectivity () const;
+    virtual std::pair< ElementPllXIF_t *, int > accessOuterPllX ();
+    virtual std::pair< const ElementPllXIF_t *, int > accessOuterPllX () const;
+    virtual std::pair< ElementPllXIF_t *, int > accessInnerPllX ();
+    virtual std::pair< const ElementPllXIF_t *, int > accessInnerPllX () const;
+};
 
 template < class A > class FacePllBaseXMacro : public A 
 {
   public :
     // some typedefs 
-    typedef typename A :: myhface_t  myhface_t;
-    typedef typename A :: myhedge_t myhedge_t;
-    typedef typename A :: moveto_t   moveto_t ;
+    typedef typename A::myhface_t  myhface_t;
+    typedef typename A::myhedge_t myhedge_t;
+    typedef typename A::moveto_t   moveto_t;
 
     // constructor for hface3 
     inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
-                                    myhedge_t * e2, int s2) ;
+                                    myhedge_t * e2, int s2);
     // constructor for hface4 
     inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
-                                    myhedge_t * e2, int s2, myhedge_t * e3, int s3) ; 
+                                    myhedge_t * e2, int s2, myhedge_t * e3, int s3); 
     // destructor only checking move-to
-    inline ~FacePllBaseXMacro () ; 
+    inline ~FacePllBaseXMacro (); 
 
-    virtual vector< int > estimateLinkage () const ;
-    virtual LinkedObject :: Identifier getIdentifier () const ;
+    virtual std::vector< int > estimateLinkage () const;
+    virtual LinkedObject::Identifier getIdentifier () const;
 
   protected :
-    using A :: myhface ; 
+    using A::myhface; 
 
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+    virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
+    virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
   public :
-    virtual bool ldbUpdateGraphEdge (LoadBalancer :: DataBase &) ;
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
+    virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &);
+    virtual void attach2 (int);
+    virtual void unattach2 (int);
+    virtual bool packAll (std::vector< ObjectStream > &);
+    virtual void unpackSelf (ObjectStream &, bool);
   protected :
-    moveto_t*  _moveTo ;
-} ;
+    moveto_t*  _moveTo;
+};
 
 template < class A >
 class TetraPllXBase : public A {
   public :
-    typedef A mytetra_t ;
-    typedef typename A :: myhface3_t myhface3_t;
+    typedef A mytetra_t;
+    typedef typename A::myhface3_t myhface3_t;
   protected:  
     inline TetraPllXBase(myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                          myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
@@ -182,71 +181,72 @@ class TetraPllXBase : public A {
     inline ~TetraPllXBase () {}
 
     // method to get internal tetra located behind this parallel interface 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
+    virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
 
   public :
-    void writeDynamicState (ObjectStream &, int) const ;
-    void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
-} ;
+    void writeDynamicState (ObjectStream &, int) const;
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const;
+};
 
-template < class A >
-class TetraPllXBaseMacro : public A 
+template< class A >
+class TetraPllXBaseMacro
+: public A 
 {
   public :
-   ~TetraPllXBaseMacro () ;
+   ~TetraPllXBaseMacro ();
   protected :
-    using A :: TETRA ;
-    using A :: HBND3INT ;
-    using A :: myneighbour ;
-    using A :: flagLock ;
-    using A :: isSet ;
-    using A :: unset ;
-    using A :: set ;
+    using A::TETRA;
+    using A::HBND3INT;
+    using A::myneighbour;
+    using A::flagLock;
+    using A::isSet;
+    using A::unset;
+    using A::set;
 
-    typedef A mytetra_t ;
+    typedef A mytetra_t;
     inline mytetra_t& mytetra() { return *this; }
     inline const mytetra_t& mytetra() const { return *this; }
 
-    typedef typename A :: myhface3_t myhface3_t;
-    typedef typename A :: myneighbour_t myneighbour_t;
+    typedef typename A::myhface3_t myhface3_t;
+    typedef typename A::myneighbour_t myneighbour_t;
 
     TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                        myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation);
 
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+    virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
+    virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
   public :
-    virtual int ldbVertexIndex () const ;
+    virtual int ldbVertexIndex () const;
     // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
     virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
-    virtual void setLoadBalanceVertexIndex ( const int ) ;
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &, GatherScatter* ) ;
+    virtual void setLoadBalanceVertexIndex ( const int );
+    virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
   public :
-    virtual bool erasable () const ;
+    virtual bool erasable () const;
     virtual void attachElement2 ( const int, const int );
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
+    virtual void attach2 (int);
+    virtual void unattach2 (int);
+    virtual bool packAll (std::vector< ObjectStream > &);
+    virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
     // pack ghost information 
-    virtual void packAsGhost(ObjectStream &,int) const ;
-    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
-    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
-    virtual int moveTo () const { return _moveTo ; }
+    virtual void packAsGhost(ObjectStream &,int) const;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
+    virtual void unpackSelf (ObjectStream &, bool);
+    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
+    virtual int moveTo () const { return _moveTo; }
   protected:
-    bool doPackAll (vector < ObjectStream > &, GatherScatterType * ) ;
-    void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
+    bool doPackAll (std::vector< ObjectStream > &, GatherScatterType * );
+    void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
     void packAsBndNow (int, ObjectStream &, const bool ) const;
     
   private :
 #ifdef GRAPHVERTEX_WITH_CENTER
-    alucoord_t _center [3] ;
+    alucoord_t _center [3];
 #endif
-    int _moveTo ;
+    int _moveTo;
     // globally unique element number 
-    int _ldbVertexIndex ;
-} ;
+    int _ldbVertexIndex;
+};
 
 // ######                                                           #####
 // #     #  ######  #####      #     ####   #####      #     ####  #     #
@@ -260,22 +260,22 @@ template < class A >
 class Periodic3PllXBase : public A 
 {
   public :
-    typedef typename A :: myhface3_t myhface3_t;
-    typedef A myperiodic_t ;
+    typedef typename A::myhface3_t myhface3_t;
+    typedef A myperiodic_t;
 
-    using A :: PERIODIC3 ;
-    using A :: HBND3INT ;
+    using A::PERIODIC3;
+    using A::HBND3INT;
 
     Periodic3PllXBase( myhface3_t* f0,int s0, myhface3_t *f1,int s1) 
       : A( f0, s0, f1, s1 ) {}
 
-    inline myperiodic_t & myperiodic () { return *this ; }
+    inline myperiodic_t & myperiodic () { return *this; }
     inline const myperiodic_t & myperiodic () const { return *this; }
 
     // method to get internal periodic located behind this parallel interface 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
+    virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
   public :
-    void writeDynamicState (ObjectStream &, int) const ;
+    void writeDynamicState (ObjectStream &, int) const;
 
     // access interior element and write data 
     void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
@@ -283,46 +283,46 @@ class Periodic3PllXBase : public A
       assert( false );
       abort(); 
     }
-} ;
+};
 
 template < class A > 
 class Periodic3PllXBaseMacro : public A  
 {
   public :
-    typedef typename A :: myhface3_t myhface3_t;
-    typedef typename A :: const_myneighbour_t const_myneighbour_t;
-    typedef A myperiodic_t ;
-    typedef Gitter :: hface_STI hface_STI ;
+    typedef typename A::myhface3_t myhface3_t;
+    typedef typename A::const_myneighbour_t const_myneighbour_t;
+    typedef A myperiodic_t;
+    typedef Gitter::hface_STI hface_STI;
 
-    using A :: PERIODIC3 ;
-    using A :: HBND3INT ;
-    using A :: myneighbour ;
-    using A :: myhface3 ;
-    using A :: flagLock ;
-    using A :: isSet ;
-    using A :: unset ;
-    using A :: set ;
+    using A::PERIODIC3;
+    using A::HBND3INT;
+    using A::myneighbour;
+    using A::myhface3;
+    using A::flagLock;
+    using A::isSet;
+    using A::unset;
+    using A::set;
 
     Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1, 
-                            const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] ) ;
-   ~Periodic3PllXBaseMacro () ;
+                            const Gitter::hbndseg_STI::bnd_t (&bt)[2] );
+   ~Periodic3PllXBaseMacro ();
 
   protected:
-    inline myperiodic_t & myperiodic () { return *this ; }
+    inline myperiodic_t & myperiodic () { return *this; }
     inline const myperiodic_t & myperiodic () const { return *this; }
 
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+    virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
+    virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
   public :
-    virtual void attachPeriodic( const int destination ) ;
-    virtual pair<int,int> insideLdbVertexIndex() const ;
-    virtual int otherLdbVertexIndex( const int faceIndex ) const ;
+    virtual void attachPeriodic( const int destination );
+    virtual std::pair<int,int> insideLdbVertexIndex() const;
+    virtual int otherLdbVertexIndex( const int faceIndex ) const;
   public :
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
+    virtual void attach2 (int);
+    virtual void unattach2 (int);
+    virtual bool packAll (std::vector< ObjectStream > &);
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
+    virtual void unpackSelf (ObjectStream &, bool);
     virtual bool erasable () const 
     { 
       assert( ! isSet( flagLock ) == ( _moveTo >= 0 ) );
@@ -330,10 +330,10 @@ class Periodic3PllXBaseMacro : public A
     }
   private :
 #ifdef GRAPHVERTEX_WITH_CENTER
-    alucoord_t _center [3] ;
+    alucoord_t _center [3];
 #endif
-    int _moveTo ;
-} ;
+    int _moveTo;
+};
 
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #
@@ -346,77 +346,77 @@ class Periodic3PllXBaseMacro : public A
 template < class A > 
 class Periodic4PllXBase : public A {
   public :
-    typedef typename A :: myhface4_t myhface4_t;
-    typedef A myperiodic_t ;
+    typedef typename A::myhface4_t myhface4_t;
+    typedef A myperiodic_t;
 
-    using A :: PERIODIC4 ;
-    using A :: HBND4INT ;
+    using A::PERIODIC4;
+    using A::HBND4INT;
 
     Periodic4PllXBase( myhface4_t* f0, int s0, myhface4_t *f1, int s1) 
       : A( f0, s0, f1, s1 ) {}
 
   protected:  
-    inline myperiodic_t & myperiodic () { return *this ; }
+    inline myperiodic_t & myperiodic () { return *this; }
     inline const myperiodic_t & myperiodic () const { return *this; }
   public :
     inline ~Periodic4PllXBase () {}
   public :
     // method to get internal periodic located behind this parallel interface 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
+    virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
 
-    void writeDynamicState (ObjectStream &, int) const ;
+    void writeDynamicState (ObjectStream &, int) const;
     void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
     { 
       assert( false ); abort();
     }
-} ;
+};
 
 template < class A >
 class Periodic4PllXBaseMacro : public A  
 {
   public :
-    typedef typename A :: myhface4_t    myhface4_t;
-    typedef typename A :: const_myneighbour_t const_myneighbour_t;
-    typedef A myperiodic_t ;
-    typedef Gitter :: hface_STI hface_STI ;
+    typedef typename A::myhface4_t    myhface4_t;
+    typedef typename A::const_myneighbour_t const_myneighbour_t;
+    typedef A myperiodic_t;
+    typedef Gitter::hface_STI hface_STI;
 
     Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1, 
-                            const Gitter :: hbndseg_STI :: bnd_t (&bt)[2] ) ;
-    ~Periodic4PllXBaseMacro () ;
+                            const Gitter::hbndseg_STI::bnd_t (&bt)[2] );
+    ~Periodic4PllXBaseMacro ();
 
-    using A :: PERIODIC4 ;
-    using A :: HBND4INT ;
-    using A :: myneighbour ;
-    using A :: myhface4 ;
-    using A :: flagLock ;
-    using A :: isSet ;
-    using A :: unset ;
-    using A :: set ;
+    using A::PERIODIC4;
+    using A::HBND4INT;
+    using A::myneighbour;
+    using A::myhface4;
+    using A::flagLock;
+    using A::isSet;
+    using A::unset;
+    using A::set;
 
 
   protected:  
-    inline myperiodic_t & myperiodic () { return *this ; }
+    inline myperiodic_t & myperiodic () { return *this; }
     inline const myperiodic_t & myperiodic () const { return *this; }
 
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+    virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
+    virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
   public :
-    virtual void attachPeriodic( const int destination ) ;
-    virtual pair<int,int> insideLdbVertexIndex() const ;
-    virtual int otherLdbVertexIndex( const int faceIndex ) const ;
+    virtual void attachPeriodic( const int destination );
+    virtual std::pair<int,int> insideLdbVertexIndex() const;
+    virtual int otherLdbVertexIndex( const int faceIndex ) const;
   public :
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
-    virtual bool packAll (vector < ObjectStream > &) ;
-    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
-    virtual bool erasable () const ;
+    virtual void attach2 (int);
+    virtual void unattach2 (int);
+    virtual bool packAll (std::vector< ObjectStream > &);
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
+    virtual void unpackSelf (ObjectStream &, bool);
+    virtual bool erasable () const;
   private :
 #ifdef GRAPHVERTEX_WITH_CENTER
-    alucoord_t _center [3] ;
+    alucoord_t _center [3];
 #endif
-    int _moveTo ;
-} ;
+    int _moveTo;
+};
 
 // #     #
 // #     #  ######  #    #    ##
@@ -430,8 +430,8 @@ template < class A >
 class HexaPllBaseX : public A 
 {
   protected :
-    typedef typename A :: myhface4_t myhface4_t;
-    typedef A  myhexa_t ;
+    typedef typename A::myhface4_t myhface4_t;
+    typedef A  myhexa_t;
     inline myhexa_t & myhexa () { return *this; }
     inline const myhexa_t & myhexa () const { return *this; }
 
@@ -440,171 +440,171 @@ class HexaPllBaseX : public A
                         myhface4_t *f4, int s4, myhface4_t *f5, int s5)
         : A(f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
   public :
-    void writeDynamicState (ObjectStream &, int) const ;
-    void writeDynamicState (ObjectStream &, GatherScatterType &) const ;
+    void writeDynamicState (ObjectStream &, int) const;
+    void writeDynamicState (ObjectStream &, GatherScatterType &) const;
  
     // method to get internal hexa located behind this parallel interface 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
-} ;
+    virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
+};
 
 template < class A > 
 class HexaPllBaseXMacro : public A 
 {
   protected:
-    using A :: HEXA ;
-    using A :: HBND4INT ;
-    using A :: myneighbour ;
-    using A :: flagLock ;
-    using A :: isSet ;
-    using A :: unset ;
-    using A :: set ;
+    using A::HEXA;
+    using A::HBND4INT;
+    using A::myneighbour;
+    using A::flagLock;
+    using A::isSet;
+    using A::unset;
+    using A::set;
 
-    typedef A  myhexa_t ;
+    typedef A  myhexa_t;
     inline myhexa_t & myhexa () { return *this; }
     inline const myhexa_t & myhexa () const { return *this; }
 
-    typedef typename A :: myhface4_t myhface4_t;
-    typedef typename A :: myneighbour_t  myneighbour_t;
+    typedef typename A::myhface4_t myhface4_t;
+    typedef typename A::myneighbour_t  myneighbour_t;
 
     HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
                              myhface4_t *f2, int s2, myhface4_t *f3, int s3,
-                             myhface4_t *f4, int s4, myhface4_t *f5, int s5) ;
+                             myhface4_t *f4, int s4, myhface4_t *f5, int s5);
   public :
-   ~HexaPllBaseXMacro () ;
-    virtual int ldbVertexIndex () const ;
+   ~HexaPllBaseXMacro ();
+    virtual int ldbVertexIndex () const;
     // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
     virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
-    virtual void setLoadBalanceVertexIndex ( const int ) ;
-    virtual bool ldbUpdateGraphVertex (LoadBalancer :: DataBase &, GatherScatter* ) ;
+    virtual void setLoadBalanceVertexIndex ( const int );
+    virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
   public:  
     virtual void attachElement2 ( const int, const int );
-    virtual void attach2 (int) ;
-    virtual void unattach2 (int) ;
+    virtual void attach2 (int);
+    virtual void unattach2 (int);
     
-    virtual bool packAll (vector < ObjectStream > &) ;
+    virtual bool packAll (std::vector< ObjectStream > &);
     // pack ghost information 
-    virtual void packAsGhost(ObjectStream &,int) const ;
-    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
-    virtual void unpackSelf (ObjectStream &, bool) ;
-    virtual bool erasable () const ;
+    virtual void packAsGhost(ObjectStream &,int) const;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
+    virtual void unpackSelf (ObjectStream &, bool);
+    virtual bool erasable () const;
 
     // pack and unpack funtions for dune 
-    virtual bool dunePackAll (vector < ObjectStream > &, GatherScatterType &) ;
-    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
-    virtual int moveTo () const { return _moveTo ; }
+    virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
+    virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
+    virtual int moveTo () const { return _moveTo; }
   protected :
-    bool doPackAll( vector < ObjectStream > &, GatherScatterType * );
-    void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* ) ;
-    virtual void inlineData (ObjectStream &) throw (ObjectStream :: EOFException) {}
-    virtual void xtractData (ObjectStream &) throw (ObjectStream :: EOFException) {}
+    bool doPackAll( std::vector< ObjectStream > &, GatherScatterType * );
+    void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
+    virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
+    virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
     void packAsBndNow (int, ObjectStream &, const bool ) const;
   protected:
 #ifdef GRAPHVERTEX_WITH_CENTER
-    alucoord_t _center [3] ;
+    alucoord_t _center [3];
 #endif
-    int _moveTo ;
+    int _moveTo;
     // globally unique element number 
-    int _ldbVertexIndex ;
-} ;
+    int _ldbVertexIndex;
+};
 
 class BndsegPllBaseX : public ElementPllXIF_t 
 {
   public :
-    void writeDynamicState (ObjectStream &, int) const { abort () ; }
+    void writeDynamicState (ObjectStream &, int) const { abort (); }
     void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); }
-    pair < ElementPllXIF_t *, int > accessOuterPllX (const pair < ElementPllXIF_t *, int > &, int) ;
-    pair < const ElementPllXIF_t *, int > accessOuterPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
-    pair < ElementPllXIF_t *, int > accessInnerPllX (const pair < ElementPllXIF_t *, int > &, int) ;
-    pair < const ElementPllXIF_t *, int > accessInnerPllX (const pair < const ElementPllXIF_t *, int > &, int) const ;
-} ;
+    std::pair< ElementPllXIF_t *, int > accessOuterPllX (const std::pair< ElementPllXIF_t *, int > &, int);
+    std::pair< const ElementPllXIF_t *, int > accessOuterPllX (const std::pair< const ElementPllXIF_t *, int > &, int) const;
+    std::pair< ElementPllXIF_t *, int > accessInnerPllX (const std::pair< ElementPllXIF_t *, int > &, int);
+    std::pair< const ElementPllXIF_t *, int > accessInnerPllX (const std::pair< const ElementPllXIF_t *, int > &, int) const;
+};
 
 template < class A > class BndsegPllBaseXMacro : public BndsegPllBaseX {
   protected :
-    typedef A                       myhbnd_t ;
-    typedef typename A :: myhface_t myhface_t ;
-    typedef typename A :: balrule_t balrule_t ;
-    inline myhbnd_t & myhbnd () ;
-    inline const myhbnd_t & myhbnd () const ;
+    typedef A                       myhbnd_t;
+    typedef typename A::myhface_t myhface_t;
+    typedef typename A::balrule_t balrule_t;
+    inline myhbnd_t & myhbnd ();
+    inline const myhbnd_t & myhbnd () const;
   public :
-    inline BndsegPllBaseXMacro (myhbnd_t &) ;
-    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
+    inline BndsegPllBaseXMacro (myhbnd_t &);
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
     
     // method to get internal bnd located behind this parallel interface 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
+    virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 
   private :
-    myhbnd_t & _hbnd ;
-} ;
+    myhbnd_t & _hbnd;
+};
 
 template < class A > class BndsegPllBaseXClosure : public BndsegPllBaseX {
   protected :
-    typedef A                       myhbnd_t ;
-    typedef typename A :: myhface_t myhface_t ;
-    typedef typename A :: balrule_t balrule_t ;
-    inline myhbnd_t & myhbnd () ;
-    inline const myhbnd_t & myhbnd () const ;
+    typedef A                       myhbnd_t;
+    typedef typename A::myhface_t myhface_t;
+    typedef typename A::balrule_t balrule_t;
+    inline myhbnd_t & myhbnd ();
+    inline const myhbnd_t & myhbnd () const;
   public :
-    inline BndsegPllBaseXClosure (myhbnd_t &) ;
+    inline BndsegPllBaseXClosure (myhbnd_t &);
     ~BndsegPllBaseXClosure () {}
-    void readDynamicState (ObjectStream &, int) ;
+    void readDynamicState (ObjectStream &, int);
 
     void readDynamicState (ObjectStream &, GatherScatterType &);
     void writeDynamicState (ObjectStream &, GatherScatterType &) const;
-    using BndsegPllBaseX :: writeDynamicState ;
+    using BndsegPllBaseX::writeDynamicState;
     
-    void getRefinementRequest (ObjectStream &) ;
-    bool setRefinementRequest (ObjectStream &) ;
+    void getRefinementRequest (ObjectStream &);
+    bool setRefinementRequest (ObjectStream &);
   public :
-    bool lockAndTry () ;
-    bool unlockAndResume (bool) ;
+    bool lockAndTry ();
+    bool unlockAndResume (bool);
   public :
-    virtual void notifyBalance (balrule_t,int) ;
-    virtual bool lockedAgainstCoarsening () const ;
+    virtual void notifyBalance (balrule_t,int);
+    virtual bool lockedAgainstCoarsening () const;
     
     // method to get internal bnd located behind this parallel interface 
-    virtual void getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
+    virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
     
   private :
-    myhbnd_t & _hbnd ;
+    myhbnd_t & _hbnd;
     int _ghostLevel;
     int _ghostLeaf;
-    balrule_t _rul ;
+    balrule_t _rul;
 
   public:
     inline int ghostLevel () const { return _ghostLevel; }
     inline bool ghostLeaf () const { return (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1); }
 
-    typedef Gitter :: ghostpair_STI ghostpair_STI;
+    typedef Gitter::ghostpair_STI ghostpair_STI;
     // to be revised (works for the moment )
     virtual ghostpair_STI getGhost () { return myhbnd().getGhost(); }
     virtual const ghostpair_STI getGhost () const { return myhbnd().getGhost(); }
-} ;
+};
 
 template < class A > class BndsegPllBaseXMacroClosure : public BndsegPllBaseXClosure < A > {
   public :
-    typedef A                       myhbnd_t ;
-    typedef typename A :: myhface_t myhface_t ;
-    inline BndsegPllBaseXMacroClosure (myhbnd_t &) ;
-    inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* ) ;
+    typedef A                       myhbnd_t;
+    typedef typename A::myhface_t myhface_t;
+    inline BndsegPllBaseXMacroClosure (myhbnd_t &);
+    inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* );
   public :
-    virtual int  ldbVertexIndex () const ;
-    virtual void setLoadBalanceVertexIndex ( const int ) ;
+    virtual int  ldbVertexIndex () const;
+    virtual void setLoadBalanceVertexIndex ( const int );
   public :
-    virtual void packAsBnd (int,int,ObjectStream &, const bool) const ;
+    virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
     
     // unpack ghost information and insert ghost cell 
     virtual void insertGhostCell(ObjectStream &,int);
 
   private :
     const MacroGhostInfo_STI * _ghInfo; 
-    int _ldbVertexIndex ;
-} ;
+    int _ldbVertexIndex;
+};
 
-class GitterBasisPll : public Gitter :: Geometric, public GitterPll
+class GitterBasisPll : public Gitter::Geometric, public GitterPll
 {
 public :
-  class ObjectsPll : public GitterBasis :: Objects
+  class ObjectsPll : public GitterBasis::Objects
   {
   public :
     ///////////////////////////////////////////////////////////////
@@ -618,9 +618,9 @@ public :
       {
         assert( &map == &ims.linkagePatterns() );   
       }
-      virtual VertexPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) { return *this ; }
-      virtual const VertexPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) { return *this ; }
-    } ;
+      virtual VertexPllXIF_t & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const VertexPllXIF_t & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+    };
 
     ///////////////////////////////////////////////////////////////
     // --EdgeImpl
@@ -631,7 +631,7 @@ public :
       inline Hedge1EmptyPll (myvertex_t * a, myvertex_t * b) 
         : EdgePllBaseX < Hedge1Empty > (a, b) {}
     };
-    typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL ;
+    typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL;
 
     class Hedge1EmptyPllMacro : public EdgePllBaseXMacro < hedge1_IMPL >
     {
@@ -647,41 +647,41 @@ public :
     {
     public :
       // we need to change this typedef here 
-      typedef hedge1_IMPL inneredge_t ;
+      typedef hedge1_IMPL inneredge_t;
 
       // constructor 
       inline Hface3EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, myhedge_t *e2, int s2)
         : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
-    } ;
-    typedef Hface3Top < Hface3EmptyPll > hface3_IMPL ;
+    };
+    typedef Hface3Top < Hface3EmptyPll > hface3_IMPL;
 
     class Hface3EmptyPllMacro : public FacePllBaseXMacro< hface3_IMPL >
     {
-      typedef FacePllBaseXMacro< hface3_IMPL > Base_t ;
+      typedef FacePllBaseXMacro< hface3_IMPL > Base_t;
     public :
-      Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2) ;
+      Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2);
     };
 
     class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
     {
     public :
       // we need to change this typedef here 
-      typedef hedge1_IMPL inneredge_t ;
+      typedef hedge1_IMPL inneredge_t;
 
       // constructor 
       inline Hface4EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, 
                              myhedge_t *e2, int s2, myhedge_t *e3, int s3)
         : FacePllBaseX< Hface4Empty >(e0,s0, e1,s1, e2,s2, e3,s3) {} 
-    } ;
-    typedef Hface4Top < Hface4EmptyPll > hface4_IMPL ;
+    };
+    typedef Hface4Top < Hface4EmptyPll > hface4_IMPL;
   
     class Hface4EmptyPllMacro : public FacePllBaseXMacro< hface4_IMPL >
     {
-      typedef  FacePllBaseXMacro< hface4_IMPL > Base_t ;
+      typedef  FacePllBaseXMacro< hface4_IMPL > Base_t;
     public :
       Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
-                           myhedge_t *e2, int s2, myhedge_t *e3, int s3) ;
-    } ;
+                           myhedge_t *e2, int s2, myhedge_t *e3, int s3);
+    };
 
 public :
     ///////////////////////////////////////////////////////////////
@@ -690,17 +690,17 @@ public :
     class TetraEmptyPll : public TetraPllXBase< TetraEmpty >
     {
     protected :
-      typedef hedge1_IMPL inneredge_t ;
-      typedef hface3_IMPL innerface_t ;
-      typedef TetraEmpty :: balrule_t balrule_t;
+      typedef hedge1_IMPL inneredge_t;
+      typedef hface3_IMPL innerface_t;
+      typedef TetraEmpty::balrule_t balrule_t;
     public :
       inline TetraEmptyPll (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                             myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
         : TetraPllXBase< TetraEmpty >(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
-      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
-    } ;
-    typedef TetraTop < TetraEmptyPll > tetra_IMPL ;
+      virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+    };
+    typedef TetraTop < TetraEmptyPll > tetra_IMPL;
 
     class TetraEmptyPllMacro : public TetraPllXBaseMacro< tetra_IMPL >
     {
@@ -708,9 +708,9 @@ public :
       inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                                  myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation) 
         : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, orientation) {} // 0 == level 0
-      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
-    } ;
+      virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+    };
 
    /////////////////////////////////
    // Periodic 3 
@@ -718,25 +718,25 @@ public :
    class Periodic3EmptyPll : public Periodic3PllXBase< Periodic3Empty >
    {
     protected :
-      typedef hedge1_IMPL inneredge_t ;
-      typedef hface3_IMPL innerface_t ;
+      typedef hedge1_IMPL inneredge_t;
+      typedef hface3_IMPL innerface_t;
     public :
       inline Periodic3EmptyPll (myhface3_t * f0, int s0, myhface3_t *f1, int s1 ) 
         : Periodic3PllXBase< Periodic3Empty >( f0, s0, f1, s1 ) {}
-      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
-    } ;
-    typedef Periodic3Top < Periodic3EmptyPll > periodic3_IMPL ;
+      virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+    };
+    typedef Periodic3Top < Periodic3EmptyPll > periodic3_IMPL;
   
     class Periodic3EmptyPllMacro : public Periodic3PllXBaseMacro< periodic3_IMPL >
     {
     public :
       Periodic3EmptyPllMacro (myhface3_t* f0, int s0, myhface3_t* f1, int s1, 
-                              const Gitter:: hbndseg_STI :: bnd_t (&bt)[2] ) 
+                              const Gitter:: hbndseg_STI::bnd_t (&bt)[2] ) 
         : Periodic3PllXBaseMacro< periodic3_IMPL >( 0, f0, s0, f1, s1, bt ) {}
-      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
-    } ;
+      virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+    };
 
 // ######                                                          #
 // #     #  ######  #####      #     ####   #####      #     ####  #    #
@@ -749,26 +749,26 @@ public :
     class Periodic4EmptyPll : public Periodic4PllXBase< Periodic4Empty >
     {
     protected :
-      typedef hedge1_IMPL inneredge_t ;
-      typedef hface4_IMPL innerface_t ;
+      typedef hedge1_IMPL inneredge_t;
+      typedef hface4_IMPL innerface_t;
     public :
       inline Periodic4EmptyPll (myhface4_t* f0, int s0, myhface4_t* f1, int s1) 
         : Periodic4PllXBase< Periodic4Empty >( f0, s0, f1, s1 ) {}
 
-      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
+      virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
     };
-    typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL ;
+    typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL;
   
     class Periodic4EmptyPllMacro : public Periodic4PllXBaseMacro< periodic4_IMPL >
     {
     public :
       Periodic4EmptyPllMacro (myhface4_t* f0, int s0, myhface4_t* f1, int s1, 
-                              const Gitter:: hbndseg_STI :: bnd_t (&bt)[2] ) 
+                              const Gitter:: hbndseg_STI::bnd_t (&bt)[2] ) 
         : Periodic4PllXBaseMacro< periodic4_IMPL >( 0, f0, s0, f1, s1, bt ) {}
 
-      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
+      virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
     };
 
     ///////////////////////////////////////////////////////////////
@@ -777,18 +777,18 @@ public :
     class HexaEmptyPll : public HexaPllBaseX< HexaEmpty >
     {
     protected :
-      typedef hedge1_IMPL inneredge_t ;
-      typedef hface4_IMPL innerface_t ;
-      typedef HexaEmpty :: balrule_t balrule_t;
+      typedef hedge1_IMPL inneredge_t;
+      typedef hface4_IMPL innerface_t;
+      typedef HexaEmpty::balrule_t balrule_t;
     public :
       inline HexaEmptyPll (myhface4_t *f0, int s0, myhface4_t *f1, int s1,
                            myhface4_t *f2, int s2, myhface4_t *f3, int s3,
                            myhface4_t *f4, int s4, myhface4_t *f5, int s5)
         : HexaPllBaseX< HexaEmpty >(f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
-      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
-    } ;
-    typedef HexaTop < HexaEmptyPll > hexa_IMPL ;
+      virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+    };
+    typedef HexaTop < HexaEmptyPll > hexa_IMPL;
 
     class HexaEmptyPllMacro : public HexaPllBaseXMacro< hexa_IMPL >
     {
@@ -797,79 +797,82 @@ public :
                                myhface4_t *f2, int s2, myhface4_t *f3, int s3,
                                myhface4_t *f4, int s4, myhface4_t *f5, int s5)
         : HexaPllBaseXMacro< hexa_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
-      virtual ElementPllXIF & accessPllX () throw (Parallel :: AccessPllException) { return *this; }
-      virtual const ElementPllXIF & accessPllX () const throw (Parallel :: AccessPllException) { return *this; }
-    } ;
+      virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
+      virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+    };
   
     // Die Randelemente des verteilten Gitters werden aus Templates 
     // in 'gitter_hexa_top_pll.h' und 'gitter_tetra_top_pll.h' erzeugt
     // indem diese die Randelementklassen des sequentiellen Verfahrens
     // "ubernehmen und mit passenden Extendern anreichern.
-  } ;
+  };
 
-  public :
-    class MacroGitterBasisPll : public MacroGitterPll, public GitterBasis :: MacroGitterBasis {
+  public:
+    class MacroGitterBasisPll
+    : public MacroGitterPll,
+      public GitterBasis::MacroGitterBasis
+    {
       protected :
-        linkagePatternMap_t& _linkagePatterns ;
-        set < int, less < int > > secondScan () ;
+        linkagePatternMap_t& _linkagePatterns;
+        std::set< int > secondScan();
       protected :
-        int iterators_attached () const ;
+        int iterators_attached () const;
         
-        virtual VertexGeo     * insert_vertex  (double,double,double,int) ;
-        virtual VertexGeo     * insert_ghostvx (double,double,double,int) ;
+        virtual VertexGeo     * insert_vertex  (double,double,double,int);
+        virtual VertexGeo     * insert_ghostvx (double,double,double,int);
        
         // insert hbnd_int without ghost hexa 
-        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t);
         // insert hbnd_int with ghost hexa 
-        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoHexa* );
+        virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
         
         // normal insert hbnd3 version
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t) ;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t);
         // version that get point and create ghost macro 
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter :: hbndseg_STI :: bnd_t, MacroGhostInfoTetra* ) ;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
         // version that created internal boundary on ghost elements 
-        virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) ;
-        hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int ) ;
-        virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) ;
-        virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) ;
-        virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) ;
-        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int) ;
+        virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *);
+        hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int );
+        virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]);
+        virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]);
+        virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]);
+        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int);
 
-        virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter :: hbndseg_STI :: bnd_t (&)[2] ) ;
-        virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter :: hbndseg_STI :: bnd_t (&)[2] ) ;
+        virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
+        virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
 
-        using GitterBasis :: MacroGitterBasis :: iterator ;
+        using GitterBasis::MacroGitterBasis::iterator;
       public :
-        MacroGitterBasisPll (Gitter * , istream &) ;
-        MacroGitterBasisPll (Gitter * ) ;
-       ~MacroGitterBasisPll () ;
-    } ; // end MacroGitterBasisPll 
+        MacroGitterBasisPll ( Gitter *, std::istream & );
+        MacroGitterBasisPll (Gitter * );
+       ~MacroGitterBasisPll ();
+    }; // end MacroGitterBasisPll 
 
   protected :
-    MpAccessLocal & _mpaccess ;
-    MacroGitterPll* _macrogitter ;
+    MpAccessLocal & _mpaccess;
+    MacroGitterPll* _macrogitter;
     ProjectVertex*  _ppv;
   public :
-    virtual inline Makrogitter & container () ;
-    virtual inline const Makrogitter & container () const ;
+    virtual inline Makrogitter & container ();
+    virtual inline const Makrogitter & container () const;
   protected :
-    virtual inline MpAccessLocal & mpAccess () ;
-    virtual inline const MpAccessLocal & mpAccess () const ;
-    GitterBasisPll (MpAccessLocal & ) ;
+    virtual inline MpAccessLocal & mpAccess ();
+    virtual inline const MpAccessLocal & mpAccess () const;
+    GitterBasisPll (MpAccessLocal & );
 
   public :
-    virtual inline MacroGitterPll & containerPll () ;
-    virtual inline const MacroGitterPll & containerPll () const ;
+    virtual inline MacroGitterPll & containerPll ();
+    virtual inline const MacroGitterPll & containerPll () const;
 
-    GitterBasisPll (const string, MpAccessLocal &, ProjectVertex* ) ;
-    GitterBasisPll (istream& in, MpAccessLocal &, ProjectVertex* ) ;
+    GitterBasisPll ( std::string, MpAccessLocal &, ProjectVertex* );
+    GitterBasisPll ( std::istream &in, MpAccessLocal &, ProjectVertex* );
 
-    virtual ~GitterBasisPll () ;
+    virtual ~GitterBasisPll ();
 
     virtual ProjectVertex* vertexProjection() const { return _ppv; }
     
     virtual void printMemUsage();
-} ;
+};
 
 
   //
@@ -885,13 +888,13 @@ public :
 //  --EdgePllBaseX
 /////////////////////////////////////////////////////
 template < class A >
-inline EdgePllBaseX< A > :: EdgePllBaseX( myvertex_t* a, myvertex_t *b )
+inline EdgePllBaseX< A >::EdgePllBaseX( myvertex_t* a, myvertex_t *b )
   : A( a, b ) 
 {
 }
 
 template < class A >
-inline EdgePllBaseX< A > :: ~EdgePllBaseX()
+inline EdgePllBaseX< A >::~EdgePllBaseX()
 {
 #ifndef NDEBUG
   // Falls die nachfolgende Situation eintritt, ist massiv was faul im
@@ -902,147 +905,147 @@ inline EdgePllBaseX< A > :: ~EdgePllBaseX()
 
   if( myhedge().isSet( myhedge_t::flagLock ) )
   {
-    cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl ;
-    abort () ;
+    cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl;
+    abort ();
   }
 #endif
 }
 
 template < class A > 
-inline bool EdgePllBaseX< A > :: lockedAgainstCoarsening () const
+inline bool EdgePllBaseX< A >::lockedAgainstCoarsening () const
 {
   return myhedge().isSet( myhedge_t::flagLock );
 }
 
 template < class A >
-inline void EdgePllBaseX< A > :: getRefinementRequest (ObjectStream & os) const 
+inline void EdgePllBaseX< A >::getRefinementRequest (ObjectStream & os) const 
 {
-  os.put( char(myhedge ().getrule ()) ) ;
-  return ;
+  os.put( char(myhedge ().getrule ()) );
+  return;
 }
 
 template < class A >
-inline bool EdgePllBaseX< A > :: setRefinementRequest (ObjectStream & os) {
-  char i ;
+inline bool EdgePllBaseX< A >::setRefinementRequest (ObjectStream & os) {
+  char i;
   try {
     i = os.get();
   } 
-  catch (ObjectStream :: EOFException) 
+  catch( ObjectStream::EOFException )
   {
-    cerr << "**FEHLER (FATAL) EOF gelesen in " << __FILE__ << " " << __LINE__ << endl ;
-    abort () ;
+    std::cerr << "ERROR (fatal): EOF encountered." << std::endl;
+    abort();
   }
-  typedef typename myhedge_t :: myrule_t  myrule_t;
-  return myrule_t (i) == myrule_t :: nosplit ? 
-    false : (myhedge ().refineImmediate (myrule_t (i)), true) ;
+  typedef typename myhedge_t::myrule_t  myrule_t;
+  return myrule_t (i) == myrule_t::nosplit ? 
+    false : (myhedge ().refineImmediate (myrule_t (i)), true);
 }
 
 template < class A >
-inline void EdgePllBaseX< A > :: unattach2 (int) {
-  abort () ;
-  return ;
+inline void EdgePllBaseX< A >::unattach2 (int) {
+  abort ();
+  return;
 }
 
 template < class A >
-inline void EdgePllBaseX< A > :: attach2 (int) {
-  abort () ;
-  return ;
+inline void EdgePllBaseX< A >::attach2 (int) {
+  abort ();
+  return;
 }
 
 template < class A >
-bool EdgePllBaseX< A > :: packAll (vector < ObjectStream > &) {
-  return (abort (), false) ;
+bool EdgePllBaseX< A >::packAll (std::vector< ObjectStream > &) {
+  return (abort (), false);
 }
 
 template < class A >
-inline void EdgePllBaseX< A > :: unpackSelf (ObjectStream &,bool) {
-  abort () ;
-  return ;
+inline void EdgePllBaseX< A >::unpackSelf (ObjectStream &,bool) {
+  abort ();
+  return;
 }
 
 template < class A >
-bool EdgePllBaseX< A > :: lockAndTry ()
+bool EdgePllBaseX< A >::lockAndTry ()
 {
   myhedge().set( myhedge_t::flagLock );
-  return myhedge().coarse () ;
+  return myhedge().coarse ();
 }
 
 template < class A >
-inline bool EdgePllBaseX< A > :: unlockAndResume (bool r)
+inline bool EdgePllBaseX< A >::unlockAndResume (bool r)
 {
   myhedge().unset( myhedge_t::flagLock );
-  return ( r ) ? myhedge().coarse () : false ;
+  return ( r ) ? myhedge().coarse () : false;
 }
 
 template < class A >
-inline EdgePllBaseXMacro< A > :: EdgePllBaseXMacro(myvertex_t * a, myvertex_t * b) :
+inline EdgePllBaseXMacro< A >::EdgePllBaseXMacro(myvertex_t * a, myvertex_t * b) :
   A(0, a, b), _moveTo( 0 )
 {
 }
 
 template < class A >
-inline EdgePllBaseXMacro< A > :: ~EdgePllBaseXMacro()
+inline EdgePllBaseXMacro< A >::~EdgePllBaseXMacro()
 {
   assert( _moveTo == 0 );
-  //assert (0 == _moveTo.size ()) ;
+  //assert (0 == _moveTo.size ());
 }
 
 //////////////////////////////////////////////////////////
 //  --FacePllBaseX
 //////////////////////////////////////////////////////////
-template < class A > inline FacePllBaseX < A > :: FacePllBaseX 
+template < class A > inline FacePllBaseX < A >::FacePllBaseX 
     (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2) 
   : A( e0, s0, e1, s1, e2, s2 )
 {
-  return ;
+  return;
 }
 
-template < class A > inline FacePllBaseX < A > :: 
+template < class A > inline FacePllBaseX < A >::
 FacePllBaseX (myhedge_t * e0, int s0, myhedge_t * e1, int s1, 
               myhedge_t * e2, int s2, myhedge_t * e3, int s3 ) 
   : A( e0, s0, e1, s1, e2, s2, e3, s3 )
 {
-  return ;
+  return;
 }
 
-template < class A > vector < int >  FacePllBaseX < A > :: checkParallelConnectivity () const {
-  vector < int > v (A :: polygonlength + 1) ;
-  int i ;
-  for (i = 0 ; i < A :: polygonlength ; ++i )
-    v [i] = myhface ().myvertex (0)->ident () ;
-  v [i] = myhface ().level () ;
-  return v ;
+template < class A > std::vector< int >  FacePllBaseX < A >::checkParallelConnectivity () const {
+  std::vector< int > v (A::polygonlength + 1);
+  int i;
+  for (i = 0; i < A::polygonlength; ++i )
+    v [i] = myhface ().myvertex (0)->ident ();
+  v [i] = myhface ().level ();
+  return v;
 }
 
-template < class A > pair < ElementPllXIF_t *, int > FacePllBaseX < A > :: accessOuterPllX () {
-  return myhface ().nb.front ().first->accessPllX ().accessOuterPllX (pair < ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (),myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
+template < class A > std::pair< ElementPllXIF_t *, int > FacePllBaseX < A >::accessOuterPllX () {
+  return myhface ().nb.front ().first->accessPllX ().accessOuterPllX (std::pair< ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (),myhface ().nb.rear ().second), myhface ().nb.front ().second);
 }
 
-template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > :: accessOuterPllX () const {
-  return myhface ().nb.front ().first->accessPllX ().accessOuterPllX (pair < const ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second) ;
+template < class A > std::pair< const ElementPllXIF_t *, int > FacePllBaseX < A >::accessOuterPllX () const {
+  return myhface ().nb.front ().first->accessPllX ().accessOuterPllX (std::pair< const ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second);
 }
 
-template < class A > pair < ElementPllXIF_t *, int > FacePllBaseX < A > :: accessInnerPllX () 
+template < class A > std::pair< ElementPllXIF_t *, int > FacePllBaseX < A >::accessInnerPllX () 
 {
-  typedef pair < myconnect_t * ,int > myconnectpair_t;
+  typedef std::pair< myconnect_t * ,int > myconnectpair_t;
   myconnectpair_t front = myhface ().nb.front ();
   assert( front.first );
   myconnectpair_t rear  = myhface ().nb.rear  ();
   assert( rear.first );
   return front.first->accessPllX ().accessInnerPllX (
-            pair < ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
-            front.second) ;
+            std::pair< ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
+            front.second);
 }
 
-template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > :: accessInnerPllX () const {
-  typedef pair < const myconnect_t * ,int > constmyconnectpair_t;
+template < class A > std::pair< const ElementPllXIF_t *, int > FacePllBaseX < A >::accessInnerPllX () const {
+  typedef std::pair< const myconnect_t * ,int > constmyconnectpair_t;
   constmyconnectpair_t front = myhface ().nb.front ();
   assert( front.first );
   constmyconnectpair_t rear  = myhface ().nb.rear  ();
   assert( rear.first );
   return front.first->accessPllX ().accessInnerPllX (
-            pair < const ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
-            front.second) ;
+            std::pair< const ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
+            front.second);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1052,14 +1055,14 @@ template < class A > pair < const ElementPllXIF_t *, int > FacePllBaseX < A > ::
 ///////////////////////////////////////////////////////////////////
 
 template < class A >
-inline void TetraPllXBase< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+inline void TetraPllXBase< A >::getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
   p.first  = & mytetra();
   p.second = 0;
 }
 
 template < class A >
-inline void Periodic3PllXBase< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+inline void Periodic3PllXBase< A >::getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
   p.first  = & myperiodic();
   p.second = 0;
@@ -1072,114 +1075,114 @@ inline void Periodic3PllXBase< A > :: getAttachedElement ( pair < Gitter::heleme
 ///////////////////////////////////////////////////////////////////
 
 template < class A >
-inline void HexaPllBaseX< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
+inline void HexaPllBaseX< A >::getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p)
 {
   p.first  = & myhexa();
   p.second = 0;
 }
 
 template < class A >
-inline void Periodic4PllXBase< A > :: getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+inline void Periodic4PllXBase< A >::getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
   p.first  = & myperiodic();
   p.second = 0;
 }
 
-template < class A > inline BndsegPllBaseXMacro < A > :: 
+template < class A > inline BndsegPllBaseXMacro < A >::
 BndsegPllBaseXMacro (myhbnd_t & b) : _hbnd (b) 
 {
 }
 
-template < class A > inline typename BndsegPllBaseXMacro < A > :: myhbnd_t & BndsegPllBaseXMacro < A > :: myhbnd () {
-  return _hbnd ;
+template < class A > inline typename BndsegPllBaseXMacro < A >::myhbnd_t & BndsegPllBaseXMacro < A >::myhbnd () {
+  return _hbnd;
 }
 
-template < class A > inline const typename BndsegPllBaseXMacro < A > :: myhbnd_t & BndsegPllBaseXMacro < A > :: myhbnd () const {
-  return _hbnd ;
+template < class A > inline const typename BndsegPllBaseXMacro < A >::myhbnd_t & BndsegPllBaseXMacro < A >::myhbnd () const {
+  return _hbnd;
 }
 
-template < class A > void BndsegPllBaseXMacro < A > :: 
+template < class A > void BndsegPllBaseXMacro < A >::
 packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) const 
 {
-  assert (!fce) ;
-  if (myhface_t :: polygonlength == 3) os.writeObject (MacroGridMoverIF :: HBND3EXT) ;
-  else if (myhface_t :: polygonlength == 4) os.writeObject (MacroGridMoverIF :: HBND4EXT) ;
-  else abort () ;
-  os.writeObject (myhbnd ().bndtype ()) ;
+  assert (!fce);
+  if (myhface_t::polygonlength == 3) os.writeObject (MacroGridMoverIF::HBND3EXT);
+  else if (myhface_t::polygonlength == 4) os.writeObject (MacroGridMoverIF::HBND4EXT);
+  else abort ();
+  os.writeObject (myhbnd ().bndtype ());
   {
-    for (int i = 0 ; i < myhface_t :: polygonlength ; ++i) 
-      os.writeObject ( myhbnd ().myvertex (fce,i)->ident () ) ; 
+    for (int i = 0; i < myhface_t::polygonlength; ++i) 
+      os.writeObject ( myhbnd ().myvertex (fce,i)->ident () ); 
   }
-  return ;
+  return;
 }
 
-template < class A > inline void BndsegPllBaseXMacro < A > :: 
-getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+template < class A > inline void BndsegPllBaseXMacro < A >::
+getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
   p.first  = 0;
   p.second = & myhbnd (); 
-  return ;
+  return;
 }
 
-template < class A > inline void BndsegPllBaseXClosure < A > :: 
-getAttachedElement ( pair < Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
+template < class A > inline void BndsegPllBaseXClosure < A >::
+getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
 {
   p.first  = 0;
   p.second = & myhbnd (); 
-  return ;
+  return;
 }
 
-template < class A > inline BndsegPllBaseXClosure < A > :: BndsegPllBaseXClosure (myhbnd_t & b) 
+template < class A > inline BndsegPllBaseXClosure < A >::BndsegPllBaseXClosure (myhbnd_t & b) 
   : _hbnd (b), _ghostLevel (-1), _ghostLeaf(0) 
 {
-  return ;
+  return;
 }
 
-template < class A > inline typename BndsegPllBaseXClosure < A > :: myhbnd_t & BndsegPllBaseXClosure < A > :: myhbnd () {
-  return _hbnd ;
+template < class A > inline typename BndsegPllBaseXClosure < A >::myhbnd_t & BndsegPllBaseXClosure < A >::myhbnd () {
+  return _hbnd;
 }
 
-template < class A > inline const typename BndsegPllBaseXClosure < A > :: myhbnd_t & BndsegPllBaseXClosure < A > :: myhbnd () const {
-  return _hbnd ;
+template < class A > inline const typename BndsegPllBaseXClosure < A >::myhbnd_t & BndsegPllBaseXClosure < A >::myhbnd () const {
+  return _hbnd;
 }
 
-template < class A > inline void BndsegPllBaseXClosure < A > :: notifyBalance (balrule_t r,int) {
-  _rul = r ;
-  return ;
+template < class A > inline void BndsegPllBaseXClosure < A >::notifyBalance (balrule_t r,int) {
+  _rul = r;
+  return;
 }
 
-template < class A > inline bool BndsegPllBaseXClosure < A > :: lockAndTry ()
+template < class A > inline bool BndsegPllBaseXClosure < A >::lockAndTry ()
 {
   myhbnd().set( myhbnd_t::flagLock );
   return myhbnd().bndNotifyCoarsen();
 }
 
-template < class A > inline bool BndsegPllBaseXClosure < A > :: lockedAgainstCoarsening () const
+template < class A > inline bool BndsegPllBaseXClosure < A >::lockedAgainstCoarsening () const
 {
   return myhbnd().isSet( myhbnd_t::flagLock );
 }
 
-template < class A > inline bool BndsegPllBaseXClosure < A > :: unlockAndResume (bool r)
+template < class A > inline bool BndsegPllBaseXClosure < A >::unlockAndResume (bool r)
 {
   myhbnd().unset( myhbnd_t::flagLock );
-  bool x ;
+  bool x;
   if (r) {
-    x = myhbnd ().bndNotifyCoarsen () ;
+    x = myhbnd ().bndNotifyCoarsen ();
   }
   else {
-    x = false ;
+    x = false;
   }
-  return x ;
+  return x;
 }
 
-template < class A > inline BndsegPllBaseXMacroClosure < A > :: BndsegPllBaseXMacroClosure (myhbnd_t & b)
+template < class A > inline BndsegPllBaseXMacroClosure < A >::BndsegPllBaseXMacroClosure (myhbnd_t & b)
   : BndsegPllBaseXClosure < A > (b)
   , _ghInfo (0) 
   , _ldbVertexIndex (-2)
 {
 }
 
-template < class A > inline BndsegPllBaseXMacroClosure < A > :: 
+template < class A > inline BndsegPllBaseXMacroClosure < A >::
 BndsegPllBaseXMacroClosure (myhbnd_t & b, const MacroGhostInfo_STI* ghinfo)
   : BndsegPllBaseXClosure < A > (b)
   , _ghInfo (ghinfo) 
@@ -1187,44 +1190,44 @@ BndsegPllBaseXMacroClosure (myhbnd_t & b, const MacroGhostInfo_STI* ghinfo)
 {
 }
 
-template < class A > inline int BndsegPllBaseXMacroClosure < A > :: ldbVertexIndex () const 
+template < class A > inline int BndsegPllBaseXMacroClosure < A >::ldbVertexIndex () const 
 {
   assert( _ldbVertexIndex != -2 );
   assert( _ldbVertexIndex >= 0 );
-  return _ldbVertexIndex ;
+  return _ldbVertexIndex;
 }
 
-template < class A > inline void BndsegPllBaseXMacroClosure < A > :: setLoadBalanceVertexIndex ( const int ldbVx ) 
+template < class A > inline void BndsegPllBaseXMacroClosure < A >::setLoadBalanceVertexIndex ( const int ldbVx ) 
 {
   assert( ldbVx >= 0 );
-  _ldbVertexIndex = ldbVx ;
+  _ldbVertexIndex = ldbVx;
 }
 
-inline int GitterBasisPll :: MacroGitterBasisPll :: iterators_attached () const {
-  return GitterBasis :: MacroGitterBasis :: iterators_attached () + MacroGitterPll :: iterators_attached () ;
+inline int GitterBasisPll::MacroGitterBasisPll::iterators_attached () const {
+  return GitterBasis::MacroGitterBasis::iterators_attached () + MacroGitterPll::iterators_attached ();
 }
 
-inline MpAccessLocal & GitterBasisPll :: mpAccess () {
-  return _mpaccess ;
+inline MpAccessLocal & GitterBasisPll::mpAccess () {
+  return _mpaccess;
 }
 
-inline const MpAccessLocal & GitterBasisPll :: mpAccess () const {
-  return _mpaccess ;
+inline const MpAccessLocal & GitterBasisPll::mpAccess () const {
+  return _mpaccess;
 }
 
-inline GitterBasisPll :: Makrogitter & GitterBasisPll :: container () {
-  return * _macrogitter ;
+inline GitterBasisPll::Makrogitter & GitterBasisPll::container () {
+  return * _macrogitter;
 }
 
-inline const GitterBasisPll :: Makrogitter & GitterBasisPll :: container () const {
-  return * _macrogitter ;
+inline const GitterBasisPll::Makrogitter & GitterBasisPll::container () const {
+  return * _macrogitter;
 }
 
-inline GitterBasisPll :: MacroGitterPll & GitterBasisPll :: containerPll () {
-  return * _macrogitter ;
+inline GitterBasisPll::MacroGitterPll & GitterBasisPll::containerPll () {
+  return * _macrogitter;
 }
 
-inline const GitterBasisPll :: MacroGitterPll & GitterBasisPll :: containerPll () const {
-  return * _macrogitter ;
+inline const GitterBasisPll::MacroGitterPll & GitterBasisPll::containerPll () const {
+  return * _macrogitter;
 }
 #endif

@@ -6,7 +6,7 @@
 #include "../serial/gitter_hexa_top.cc"
 
 template < class A, class X, class MX >
-void Hbnd4PllInternal < A, X, MX > :: HbndPll ::
+void Hbnd4PllInternal < A, X, MX >::HbndPll ::
 setGhost ( const ghostpair_STI & gpair )
 {
   if(gpair.first)
@@ -18,19 +18,19 @@ setGhost ( const ghostpair_STI & gpair )
   }
   else 
   {
-    _ghostPair.first  =  0 ;
-    _ghostPair.second = -1 ;
+    _ghostPair.first  =  0;
+    _ghostPair.second = -1;
   }
 }
 
 template < class A, class X, class MX >
-void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  
+void Hbnd4PllInternal < A, X, MX >::HbndPll:: 
 splitGhost ( GhostChildrenInfo_t & info )
 {
   if(_ghostPair.first)
   {
-    typedef typename Gitter :: Geometric :: hexa_GEO  hexa_GEO;
-    typedef typename Gitter :: Geometric :: hface4_GEO hface4_GEO;
+    typedef typename Gitter::Geometric::hexa_GEO  hexa_GEO;
+    typedef typename Gitter::Geometric::hface4_GEO hface4_GEO;
 
     hexa_GEO & ghost = static_cast<hexa_GEO &> (*(_ghostPair.first)); 
     if(!ghost.down())
@@ -52,7 +52,7 @@ splitGhost ( GhostChildrenInfo_t & info )
       assert(face);
       hexa_GEO * ghch = 0; 
 
-      typedef pair < Gitter :: Geometric :: hasFace4 *, int > neigh_t;
+      typedef std::pair< Gitter::Geometric::hasFace4 *, int > neigh_t;
       neigh_t neighbour = face->nb.front();
 
       if( ! neighbour.first->isboundary ())
@@ -74,13 +74,13 @@ splitGhost ( GhostChildrenInfo_t & info )
       // set element pointer and local face number 
       info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
 
-      ++count ;
+      ++count;
     }
   }
 }
  
 template < class A, class X, class MX >
-void Hbnd4PllInternal < A, X, MX > :: HbndPll ::
+void Hbnd4PllInternal < A, X, MX >::HbndPll ::
 removeDescendents( helement_STI & elem )
 {
   elem.resetRefinementRequest(); 
@@ -93,7 +93,7 @@ removeDescendents( helement_STI & elem )
       removeDescendents( *child );
     
     // if something went wrong, return ghosts are removed later 
-    if( ! child->leaf () ) return ;
+    if( ! child->leaf () ) return;
     
     // mark child for coarsening 
     child->tagForGlobalCoarsening();
@@ -107,12 +107,12 @@ removeDescendents( helement_STI & elem )
 }
  
 template < class A, class X, class MX >
-void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
+void Hbnd4PllInternal < A, X, MX >::HbndPll:: coarseGhost ()
 {
   if(_ghostPair.first)
   {
     helement_STI & ghost = (*_ghostPair.first);
-    if( ghost.leaf() ) return ;
+    if( ghost.leaf() ) return;
 
     // remove all descendents if possible 
     removeDescendents( ghost );
@@ -126,19 +126,19 @@ void Hbnd4PllInternal < A, X, MX > :: HbndPll ::  coarseGhost ()
 ////////////////////////////////////////////////////////////////////
 template < class A, class X, class MX >
 const MacroGhostInfo_STI* Hbnd4PllInternal < A, X, MX > ::
-HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
+HbndPllMacro::buildGhostCell(ObjectStream& os, int fce)
 {
   assert( _gm == 0 );
-  int code = MacroGridMoverIF :: ENDMARKER ;
+  int code = MacroGridMoverIF::ENDMARKER;
   os.readObject (code);
-  assert( code == MacroGridMoverIF :: HBND4INT );
+  assert( code == MacroGridMoverIF::HBND4INT );
 
   {
     int bfake;
-    os.readObject (bfake) ;
+    os.readObject (bfake);
 #ifndef NDEBUG 
-    Gitter :: hbndseg :: bnd_t b = (Gitter :: hbndseg :: bnd_t) bfake;
-    assert( b == Gitter :: hbndseg :: closure );
+    Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
+    assert( b == Gitter::hbndseg::closure );
 #endif
 
     // read global graph vertex index 
@@ -146,18 +146,18 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
     os.readObject( ldbVertexIndex );
 
     int v [4] = {-1,-1,-1,-1};
-    os.readObject (v[0]) ;
-    os.readObject (v[1]) ;
-    os.readObject (v[2]) ;
-    os.readObject (v[3]) ;
+    os.readObject (v[0]);
+    os.readObject (v[1]);
+    os.readObject (v[2]);
+    os.readObject (v[3]);
 
     int readPoint = 0; 
     os.readObject( readPoint ); 
     
     // the following makes only sense if information has been transmitted 
-    if( readPoint != MacroGridMoverIF :: POINTTRANSMITTED ) 
+    if( readPoint != MacroGridMoverIF::POINTTRANSMITTED ) 
     {
-      cerr << "ERROR: No point transmitted, building ghost cells impossible in " << __FILE__ << ", " << __LINE__ << endl;
+      std::cerr << "ERROR (fatal): No point transmitted, building ghost cells impossible." << std::endl;
       abort();
     }
 
@@ -181,14 +181,14 @@ HbndPllMacro :: buildGhostCell(ObjectStream& os, int fce)
 
 
 // template instantiation 
-typedef GitterBasis :: Objects :: Hbnd4Default Hbnd4DefaultType;
+typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
 template class Hbnd4PllInternal < Hbnd4DefaultType ,
                                   BndsegPllBaseXClosure < Hbnd4DefaultType > ,
-                                  BndsegPllBaseXMacroClosure < Hbnd4DefaultType > > ;
+                                  BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >;
 
 // from serial part with different template argument 
-template class Hedge1Top< GitterBasisPll :: ObjectsPll :: Hedge1EmptyPll >;
-template class Hface4Top< GitterBasisPll :: ObjectsPll :: Hface4EmptyPll >;
-template class HexaTop< GitterBasisPll :: ObjectsPll :: HexaEmptyPll >;
-template class Periodic4Top < GitterBasisPll :: ObjectsPll :: Periodic4EmptyPll >;
+template class Hedge1Top< GitterBasisPll::ObjectsPll::Hedge1EmptyPll >;
+template class Hface4Top< GitterBasisPll::ObjectsPll::Hface4EmptyPll >;
+template class HexaTop< GitterBasisPll::ObjectsPll::HexaEmptyPll >;
+template class Periodic4Top < GitterBasisPll::ObjectsPll::Periodic4EmptyPll >;
 
