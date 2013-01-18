@@ -1,7 +1,9 @@
 // (c) bernhard schupp 1997 - 1998
-#include <math.h>
-#include <assert.h>
-#include <stdlib.h>
+#include <config.h>
+
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
 
 #include "mapp_cube_3d.h"
 
@@ -92,5 +94,4 @@ void TrilinearMapping :: world2map (const alucoord_t (&wld)[3], alucoord_t (&map
     err = fabs (c0) + fabs (c1) + fabs (c2) ;
     assert (count ++ < 1000) ;
   } while (err > _epsilon) ;
-  return ;
 }

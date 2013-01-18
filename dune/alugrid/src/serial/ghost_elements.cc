@@ -1,4 +1,6 @@
 // (c) Robert Kloefkorn 2004 - 2005 
+#include <config.h>
+
 #include "ghost_elements.h"
 #include "gitter_impl.h"
 

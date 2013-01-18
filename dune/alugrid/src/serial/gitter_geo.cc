@@ -1,6 +1,8 @@
 // (c) bernhard schupp, 1997 - 1998
 // modification for the dune interface 
 // (c) Robert Kloefkorn 2004 -- 2005
+#include <config.h>
+
 #include <fstream>
 #include <sstream>
 #include <utility>

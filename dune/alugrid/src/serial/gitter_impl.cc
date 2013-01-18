@@ -1,4 +1,6 @@
 // (c) Robert Kloefkorn 2010
+#include <config.h>
+
 #include <fstream>
 
 #include "gatherscatter.hh"

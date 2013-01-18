@@ -1,4 +1,5 @@
 // (c) Robert Kloefkorn 2010
+#include <config.h>
 
 #include "mapp_cube_3d.h"
 #include "gitter_hexa_top.h"

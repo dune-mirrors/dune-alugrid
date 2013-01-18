@@ -1,6 +1,5 @@
 // Robert Kloefkorn (c) 2004 - 2005 
-#ifndef GITTER_DUNE_IMPL_CC_INCLUDED
-#define GITTER_DUNE_IMPL_CC_INCLUDED
+#include <config.h>
 
 #include <fstream>
 
@@ -123,4 +122,3 @@ bool GitterDuneBasis::duneAdapt (AdaptRestrictProlongType & arp)
   removeAdaptRestrictProlongOp ();
   return refined;
 }
-#endif // #ifndef GITTER_DUNE_IMPL_CC_INCLUDED

@@ -1,4 +1,5 @@
 // (c) Robert Kloefkorn 2010
+#include <config.h>
 
 #include "ghost_info.h"
 

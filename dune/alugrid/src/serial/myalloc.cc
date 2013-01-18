@@ -1,3 +1,5 @@
+#include <config.h>
+
 #ifndef DONT_USE_ALUGRID_ALLOC
 #warning "Using ALUGrid's internal memory management!"
 

@@ -1,8 +1,7 @@
 // (c) bernhard schupp 1997 - 1998
 // modifications for Dune Interface 
 // (c) Robert Kloefkorn 2004 - 2005 
-#ifndef GITTER_STI_CC_INCLUDED
-#define GITTER_STI_CC_INCLUDED
+#include <config.h>
 
 #include <fstream>
 #include <iostream>
@@ -896,5 +895,3 @@ Gitter::Makrogitter::~Makrogitter ()
   if( iterators_attached() )
     std::cerr << "WARNING: (ignored) There are still iterators attached to the grid, remove them before removal of the grid to avoid errors." << std::endl;
 }
-
-#endif // #ifndef GITTER_STI_CC_INCLUDED

@@ -1,10 +1,10 @@
 // (c) mario ohlberger 1998
+#include <config.h>
 
-#include <math.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 #include "mapp_tetra_3d.h"
 
@@ -231,7 +231,6 @@ void LinearMapping :: inverse() {
   Dfi[2][0] = ( Df[1][0] * Df[2][1] - Df[1][1] * Df[2][0] ) * val ;
   Dfi[2][1] = ( Df[0][1] * Df[2][0] - Df[0][0] * Df[2][1] ) * val ;
   Dfi[2][2] = ( Df[0][0] * Df[1][1] - Df[0][1] * Df[1][0] ) * val ;
-  return ;
 }
 
 void LinearMapping :: world2map (const alucoord_t (&wld)[3], alucoord_t (&map)[4]) {
@@ -248,8 +247,4 @@ void LinearMapping :: world2map (const alucoord_t (&wld)[3], alucoord_t (&map)[4
   map [0] = c0 ;
   map [1] = c1 ;
   map [2] = c2 ;
-  return ;
 }
-
-
-
