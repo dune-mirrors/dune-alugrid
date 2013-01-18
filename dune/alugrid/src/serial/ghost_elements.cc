@@ -1,35 +1,36 @@
 // (c) Robert Kloefkorn 2004 - 2005 
 #include "ghost_elements.h"
+#include "gitter_impl.h"
 
-MacroGhostBuilder :: MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi, bool(false) ) 
+MacroGhostBuilder::MacroGhostBuilder (BuilderIF & bi) : MacroGridBuilder(bi, bool(false) ) 
 {
   // create Builder with empty lists 
   this->_initialized = true;
 }
 
 // desctructor 
-MacroGhostBuilder ::  ~MacroGhostBuilder () 
+MacroGhostBuilder:: ~MacroGhostBuilder () 
 {
   finalize();
 }
 
 // insert new Vertex without linkagePattern 
-bool MacroGhostBuilder :: 
+bool MacroGhostBuilder::
 InsertNewUniqueVertex (double x, double y, double z, int i) 
 {
-  typedef GitterBasis :: MacroGitterBasis SerialMacroGridBuilder_t;
-  vertexMap_t :: const_iterator hit = this->_vertexMap.find (i) ;
+  typedef GitterBasis::MacroGitterBasis SerialMacroGridBuilder_t;
+  vertexMap_t::const_iterator hit = this->_vertexMap.find (i);
   if (hit == _vertexMap.end ()) 
   {
-    VertexGeo * v = myBuilder ().insert_ghostvx (x,y,z,i) ;
-    this->_vertexMap [i] = v ;
-    return true ;
+    VertexGeo * v = myBuilder ().insert_ghostvx (x,y,z,i);
+    this->_vertexMap [i] = v;
+    return true;
   }
-  return false ;
+  return false;
 }
 
 // delete all elementes and stuff 
-void MacroGhostBuilder :: finalize ()
+void MacroGhostBuilder::finalize ()
 {
   // empty all maps 
   this->_hexaMap.clear();
@@ -73,8 +74,8 @@ MacroGhostTetra( BuilderIF & bi,
 
   MacroGhostInfoTetra& ghInfo = *_ghInfoPtr;
 
-  typedef Gitter :: Geometric :: VertexGeo VertexGeo;
-  typedef Gitter :: Geometric :: hedge1_GEO hedge1_GEO;
+  typedef Gitter::Geometric::VertexGeo VertexGeo;
+  typedef Gitter::Geometric::hedge1_GEO hedge1_GEO;
 
   const alucoord_t (&p)[1][3]  = ghInfo.getPoints();
   const int (&oppVerts)[1] = ghInfo.getOuterVertices();
@@ -112,7 +113,7 @@ MacroGhostTetra( BuilderIF & bi,
   assert( wasNewlyInserted );
 
   // InsertUniqueHexa gets the global vertex numbers 
-  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first ;
+  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first;
 
   // set ghost and number 
   _ghostPair.first = ghost;
@@ -129,7 +130,7 @@ MacroGhostTetra( BuilderIF & bi,
 //Raendern haengen
 //sign = +/- 1  und ist dafuer da, um den Vektor 
 //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
-MacroGhostTetra :: 
+MacroGhostTetra::
 MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp, 
     Gitter::Geometric::tetra_GEO * orig, alucoord_t (&vec)[3] , double sign) :
   _ghInfoPtr(allp), 
@@ -148,7 +149,7 @@ MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp,
                               orig->myvertex(i)->ident()   );
   }
 
-  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->orientation() ).first ;
+  GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->orientation() ).first;
   _ghostPair.first = ghost;
   assert( _ghostPair.first );
   _ghostPair.second = ghInfo.internalFace(); 
@@ -160,7 +161,7 @@ MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp,
 }
   
 // desctructor deleting _ghInforPtr
-MacroGhostTetra :: ~MacroGhostTetra () 
+MacroGhostTetra::~MacroGhostTetra () 
 {
   // store all sub items of the ghost element before deleting it
   tetra_GEO* tetra = (tetra_GEO *) _ghostPair.first;
@@ -209,7 +210,7 @@ MacroGhostTetra :: ~MacroGhostTetra ()
 ///////////////////////////////////////////////////////////////////
 
 // constructor 
-MacroGhostHexa :: 
+MacroGhostHexa::
 MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * face) :
   _ghInfoPtr(allp), 
   _ghostPair( (GhostElement_t *)0 , -1) 
@@ -219,7 +220,7 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
  
   MacroGhostInfoHexa& ghInfo = *_ghInfoPtr;
   
-  typedef Gitter :: Geometric :: VertexGeo VertexGeo;
+  typedef Gitter::Geometric::VertexGeo VertexGeo;
 
   const alucoord_t (&p)[4][3]  = ghInfo.getPoints();
   const int (&oppVerts)[4] = ghInfo.getOuterVertices();
@@ -246,7 +247,7 @@ MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * fac
   }
 
   // InsertUniqueHexa gets the global vertex numbers 
-  hexa_GEO * ghost = mgb.InsertUniqueHexa ( ghInfo.vertices() ).first ;
+  hexa_GEO * ghost = mgb.InsertUniqueHexa ( ghInfo.vertices() ).first;
   assert( ghost );
 
   // set ghost values 
@@ -314,6 +315,6 @@ MacroGhostHexa ::~MacroGhostHexa ()
 }
 
 // instantiation 
-class MacroGhostBuilder ;
-class MacroGhostTetra ;
-class MacroGhostHexa ;
+class MacroGhostBuilder;
+class MacroGhostTetra;
+class MacroGhostHexa;
