@@ -33,7 +33,7 @@ namespace ALUGridParMETIS
                idxtype *vtxdist, idxtype *xadj, idxtype *adjncy, idxtype *vwgt,
                idxtype *adjwgt, idxtype *wgtflag, idxtype *numflag, idxtype *ncon, idxtype *nparts,
                realtype *tpwgts, realtype *ubvec, idxtype *options, idxtype *edgecut, idxtype *part,
-               MpAccessGlobal &mpa )
+               ALUGrid::MpAccessGlobal &mpa )
   {
 #if HAVE_PARMETIS
     // get communincator (see mpAccess_MPI.cc)
@@ -53,7 +53,7 @@ namespace ALUGridParMETIS
          idxtype *vsize, idxtype *adjwgt, idxtype *wgtflag, idxtype *numflag, idxtype *ncon,
          idxtype *nparts, realtype *tpwgts, realtype *ubvec, realtype *ipc2redist,
          idxtype *options, idxtype *edgecut, idxtype *part,
-         MpAccessGlobal &mpa )
+         ALUGrid::MpAccessGlobal &mpa )
   {
 #if HAVE_PARMETIS
     // get communincator (see mpAccess_MPI.cc)
@@ -68,6 +68,6 @@ namespace ALUGridParMETIS
 #endif // #else // #if HAVE_PARMETIS
   }
 
-}
+} // namespace ALUGridParMETIS 
 
 #endif // #ifndef PARMETIS_H_INCLUDED
