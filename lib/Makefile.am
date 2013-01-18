@@ -11,7 +11,8 @@ libalugrid_serial_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/src/serial/gitter_tetra_top.cc \
 	$(top_srcdir)/dune/alugrid/src/serial/mapp_cube_3d.cc \
 	$(top_srcdir)/dune/alugrid/src/serial/mapp_tetra_3d.cc \
-	$(top_srcdir)/dune/alugrid/src/serial/myalloc.cc
+	$(top_srcdir)/dune/alugrid/src/serial/myalloc.cc \
+	$(top_srcdir)/dune/alugrid/src/duneinterface/gitter_dune_impl.cc
 
 libalugrid_serial_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_serial_la_LDFLAGS = $(AM_LDFLAGS)
