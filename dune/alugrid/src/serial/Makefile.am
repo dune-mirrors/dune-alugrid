@@ -4,7 +4,7 @@ gitter_hexa_top.cc gitter_tetra_top.cc
 
 serialdirec = .
 serialhdrs = $(serialdirec)/gitter_tetra_top.h $(serialdirec)/mapp_cube_3d.h $(serialdirec)/serialize.h\
-	$(serialdirec)/gitter_hexa_top.h $(serialdirec)/headers.h $(serialdirec)/mapp_tetra_3d_ext.h $(serialdirec)/walk.h\
+	$(serialdirec)/gitter_hexa_top.h $(serialdirec)/mapp_tetra_3d_ext.h $(serialdirec)/walk.h\
 	$(serialdirec)/gitter_impl.h $(serialdirec)/mapp_tetra_3d.h \
 	$(serialdirec)/gitter_mgb.h $(serialdirec)/key.h	$(serialdirec)/myalloc.h\
 	$(serialdirec)/gitter_sti.h $(serialdirec)/lock.h	$(serialdirec)/parallel.h \

@@ -6,49 +6,54 @@
 #include <cstring>
 #include <iostream>
 
-class FSLock
+namespace ALUGrid
 {
-  char * _fname;
 
-public:
-  FSLock ( const char * = "" );
- ~FSLock ();
-};
+  class FSLock
+  {
+    char * _fname;
 
-inline FSLock::FSLock ( const char * name )
-: _fname( 0 )
-{
-  _fname = new char[ std::strlen( name ) + 100 ];
-  assert( _fname );
-  sprintf (_fname, "%s.lock", name) ;
-  FILE *fp = std::fopen( _fname, "w" );
-  if( !fp )
+  public:
+    FSLock ( const char * = "" );
+   ~FSLock ();
+  };
+
+  inline FSLock::FSLock ( const char * name )
+  : _fname( 0 )
   {
-    delete[] _fname;
-    _fname = 0;
-    std::cerr << "WARNING (ignored): Could not create lock file." << std::endl;
-  }
-  else
-  {
-    // only test in debug mode 
+    _fname = new char[ std::strlen( name ) + 100 ];
+    assert( _fname );
+    sprintf (_fname, "%s.lock", name) ;
+    FILE *fp = std::fopen( _fname, "w" );
+    if( !fp )
+    {
+      delete[] _fname;
+      _fname = 0;
+      std::cerr << "WARNING (ignored): Could not create lock file." << std::endl;
+    }
+    else
+    {
+      // only test in debug mode 
 #ifndef NDEBUG 
-    int test = 
+      int test = 
 #endif
-    std::fclose( fp );
-    assert (test == 0) ;
+      std::fclose( fp );
+      assert (test == 0) ;
+    }
   }
-}
 
-inline FSLock::~FSLock ()
-{
-  if( _fname )
+  inline FSLock::~FSLock ()
   {
-    int test = std::remove( _fname );
-    if( test != 0 )
-      std::cerr << "WARNING (ignored): Could not remove lock file." << std::endl;
-    delete[] _fname;
-    _fname = 0;
+    if( _fname )
+    {
+      int test = std::remove( _fname );
+      if( test != 0 )
+        std::cerr << "WARNING (ignored): Could not remove lock file." << std::endl;
+      delete[] _fname;
+      _fname = 0;
+    }
   }
-}
 
-#endif  // LOCK_H_INCLUDED
+} // namespace ALUGrid
+
+#endif // #ifndef LOCK_H_INCLUDED
