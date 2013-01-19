@@ -1,3 +1,7 @@
+#include <config.h>
+
+#include <fstream>
+
 #include "grid.h"
 #include "handle.h"
 #include "triang.h"
@@ -47,19 +51,19 @@ template < int N, int NV >
 void Hmesh<N,NV>::setup_grid(const std::string &filename) 
 {
 #ifndef NDEBUG 
-  cerr << "\n  Hmesh_basic::asciireadtriang(?) opens: " ;
-  cerr << filename << "\n" << endl ;
+  std::cerr << "\n  Hmesh_basic::asciireadtriang(?) opens: ";
+  std::cerr << filename << "\n" << std::endl;
 #endif
 
-  ifstream in;
-  in.open(filename.c_str(), ios::in);
+  std::ifstream in;
+  in.open( filename.c_str() );
   if( ! in.good() )
   {
     in.clear();
-    string macro = filename + ".macro";
-    cerr << "Warning: file \"" << filename << "\" not found, trying \"" << macro
-         << "\"." << endl;
-    in.open(macro.c_str(), ios::in);
+    std::string macro = filename + ".macro";
+    std::cerr << "Warning: file \"" << filename << "\" not found, trying \"" << macro
+         << "\"." << std::endl;
+    in.open( macro.c_str() );
   }
   assert(in);
 
@@ -71,9 +75,7 @@ void Hmesh<N,NV>::setup_grid(const std::string &filename)
 
   // if restart we have to read the hierarchy 
   if( restart )
-  {
     recoverGrid( in );
-  }
 }
 
 template < int N, int NV >
@@ -132,7 +134,7 @@ Hmesh<N,NV>::~Hmesh() {
 
   delete _pro_el;
   delete _rest_el;
-  delete adp ;
+  delete adp;
 
   assert(ncv==0);
 
@@ -141,23 +143,23 @@ Hmesh<N,NV>::~Hmesh() {
 template < int N, int NV >
 void Hmesh<N,NV>::refresh() { 
 
-  Listwalk_impl < macroelement_t > walk (mel) ;
+  Listwalk_impl < macroelement_t > walk (mel);
 
-  adp->refresh(walk) ;
+  adp->refresh(walk);
 
 } 
 
 template < int N, int NV >
 bool Hmesh<N,NV>::checkConf()
 {
-  bool elem_marked = false ;
+  bool elem_marked = false;
   Listwalkptr< helement_t > walk(*this); // Leafwalk
-  for( walk->first() ; !walk->done() ; walk->next() ) {
-    triang_t *item = (triang_t *)&walk->getitem() ;
+  for( walk->first(); !walk->done(); walk->next() ) {
+    triang_t *item = (triang_t *)&walk->getitem();
     if (item->confLevelExceeded(_nconfDeg))
-      item->mark(refinement_rule) ;
+      item->mark(refinement_rule);
     if (item->is(Refco::quart) || item->is(Refco::ref_1) || item->is(Refco::ref_2) )
-      elem_marked = true ;
+      elem_marked = true;
   }
   return elem_marked;
 }
@@ -205,7 +207,7 @@ bool Hmesh<N,NV>::duneAdapt(AdaptRestrictProlong2dType & arp) {
   _pro_el=&produne;
   _rest_el=&restdune;
   this->refine ();
-  this->coarse () ;
+  this->coarse ();
   _pro_el=pro_el_old;
   _rest_el=rest_el_old;
   return true;
@@ -214,67 +216,67 @@ bool Hmesh<N,NV>::duneAdapt(AdaptRestrictProlong2dType & arp) {
 template < int N, int NV >
 void Hmesh<N,NV>::refine() {
 
-  assert( ! mel.busy()) ;
-  assert( ! mbl.busy()) ;
-  assert( ! vl.busy()) ;
+  assert( ! mel.busy());
+  assert( ! mbl.busy());
+  assert( ! vl.busy());
 
   //Listwalk_impl <macroelement_t> walk(mel);
-  //for( walk.first() ; !walk.done() ; walk.next() )
+  //for( walk.first(); !walk.done(); walk.next() )
   //  walk.getitem()->clearAllWas();  
   
   do {
     Listwalk_impl <macroelement_t> walk(mel);
-    for (walk.first() ; !walk.done() ; walk.next())
-      walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el) ;
+    for (walk.first(); !walk.done(); walk.next())
+      walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el);
 #if 0
-    for (walk.first() ; !walk.done() ; walk.next())
-      walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el) ;
+    for (walk.first(); !walk.done(); walk.next())
+      walk.getitem()->refine(&vl, adp,ncv,_nconfDeg,refinement_rule,_pro_el);
 #endif
-   } while( checkConf() ) ;
+   } while( checkConf() );
 
   // renumber vertices
-  vl.renumber() ;
+  vl.renumber();
 }
 
 template < int N, int NV >
 void Hmesh<N,NV>::coarse() {
 
-  assert(!mel.busy()) ;
-  assert(!mbl.busy()) ;
-  assert(!vl.busy()) ;
+  assert(!mel.busy());
+  assert(!mbl.busy());
+  assert(!vl.busy());
 
   // walk over all macro elements and call hierarchic coarseining procedure
   {
-    Listwalk_impl < macroelement_t > walk(mel) ;
+    Listwalk_impl < macroelement_t > walk(mel);
 
-    for(walk.first() ; !walk.done() ; walk.next()) {
-      walk.getitem()->coarse(ncv,_nconfDeg,_rest_el) ;
+    for(walk.first(); !walk.done(); walk.next()) {
+      walk.getitem()->coarse(ncv,_nconfDeg,_rest_el);
     }
   }
 
   // remove all unused vertices
   {
-    Listwalk_impl < vertex_t > walk (vl) ;
+    Listwalk_impl < vertex_t > walk (vl);
 
-    for(walk.first() ; !walk.done() ; ) {
-      vertex_t * v = & walk.getitem() ;
-      walk.next() ;
+    for(walk.first(); !walk.done(); ) {
+      vertex_t * v = & walk.getitem();
+      walk.next();
 
       if (v->Basic::isfree()) {
-        vl.detach(v) ;
-        delete v ;
+        vl.detach(v);
+        delete v;
       }
     }
   }
 
   // renumber vertices
-  vl.renumber() ;
+  vl.renumber();
 }
 
 template < int N, int NV >
 void Hmesh<N,NV>::setdata(void (*f)(element_t &)) 
 {
-  Leafwalk < element_t > walk(mel) ;
+  Leafwalk < element_t > walk(mel);
   for (walk.first();walk.done();walk.next())
     f(walk.getitem());
 }
