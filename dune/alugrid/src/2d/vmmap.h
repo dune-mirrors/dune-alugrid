@@ -4,48 +4,53 @@
 #include <map>
 #include <vector>
 
-template< int N, int NV >
-class Multivertexadapter
+namespace ALU2DGrid
 {
-public:
-  typedef Vertex < N > vertex_t;
-  typedef Element < N, NV > element_t;
 
-  typedef Macro < element_t > macroelement_t;
-
-private:
-  typedef struct value
+  template< int N, int NV >
+  class Multivertexadapter
   {
-    void * a;
-    void * d;
-    int b;
-    int c;
+  public:
+    typedef Vertex < N > vertex_t;
+    typedef Element < N, NV > element_t;
 
-    value(vertex_t * x = 0, int y = 0) : a(x), b(y), c(0) {}
-   ~value() { }
-  } val_t;
+    typedef Macro < element_t > macroelement_t;
 
-  typedef std::map< std::vector< vertex_t * >, val_t > map_t;
+  private:
+    typedef struct value
+    {
+      void * a;
+      void * d;
+      int b;
+      int c;
 
-  std::vector< map_t > edmaps;
-  std::vector< map_t > f4maps;
+      value(vertex_t * x = 0, int y = 0) : a(x), b(y), c(0) {}
+     ~value() { }
+    } val_t;
 
-  Multivertexadapter(const Multivertexadapter &);
-  Multivertexadapter & operator=(const Multivertexadapter &);
+    typedef std::map< std::vector< vertex_t * >, val_t > map_t;
 
-public :
-  Multivertexadapter();
- ~Multivertexadapter() {}
+    std::vector< map_t > edmaps;
+    std::vector< map_t > f4maps;
 
-  void refresh(Listwalk < macroelement_t > & );
+    Multivertexadapter(const Multivertexadapter &);
+    Multivertexadapter & operator=(const Multivertexadapter &);
 
-  vertex_t * find( vertex_t *, vertex_t *, int );
+  public :
+    Multivertexadapter();
+   ~Multivertexadapter() {}
 
-  vertex_t * find( vertex_t *, vertex_t *, vertex_t *, vertex_t *, int );
+    void refresh(Listwalk < macroelement_t > & );
 
-  void insert( vertex_t *, vertex_t *, vertex_t *, int );
+    vertex_t * find( vertex_t *, vertex_t *, int );
 
-  void insert( vertex_t *, vertex_t *, vertex_t *, vertex_t *, vertex_t *, int );
-};
+    vertex_t * find( vertex_t *, vertex_t *, vertex_t *, vertex_t *, int );
+
+    void insert( vertex_t *, vertex_t *, vertex_t *, int );
+
+    void insert( vertex_t *, vertex_t *, vertex_t *, vertex_t *, vertex_t *, int );
+  };
+
+} // namespace ALU2DGrid
 
 #endif // #ifndef __HEADER__VMMAP

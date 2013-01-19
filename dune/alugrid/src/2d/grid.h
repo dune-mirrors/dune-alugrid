@@ -32,6 +32,8 @@
 
 #include "vtx_btree.h"
 
+namespace ALU2DGrid
+{
 
 // #define NCOORD 2
 // #define NVTX 4
@@ -922,6 +924,8 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
 };
 // #end(class)
 // ***************************************************
+
+} // namespace ALU2DGrid
 
 #include "grid_imp.cc"
 

@@ -3,19 +3,23 @@
 
 #include <algorithm>
 
-template < int N > class Vertex;
-template < int N, int NV > class Thinelement;
-template < int N, int NV > class Element;
+namespace ALU2DGrid
+{
 
-// ============================================================
-// Klasse Vtx_btree: Binaerer Baum von Vertex-Instanzen.
-// Ordnet die Knoten nach ihrem Abstand zu einem Referenzknoten,
-// der dem Konstruktor uebergeben wird.
-// ============================================================
+  template < int N > class Vertex;
+  template < int N, int NV > class Thinelement;
+  template < int N, int NV > class Element;
 
-template < int N, int NV > class Vtx_btree {
- public:
+  // ============================================================
+  // Klasse Vtx_btree: Binaerer Baum von Vertex-Instanzen.
+  // Ordnet die Knoten nach ihrem Abstand zu einem Referenzknoten,
+  // der dem Konstruktor uebergeben wird.
+  // ============================================================
 
+  template< int N, int NV >
+  class Vtx_btree
+  {
+  public:
     typedef Vertex < N > vertex_t;
     typedef Thinelement < N, NV > thinelement_t;
     typedef Element < N, NV > element_t;
@@ -58,17 +62,17 @@ template < int N, int NV > class Vtx_btree {
       {
         const int left  = (prev ? prev->deepestLevel() : 0);
         const int right = (next ? next->deepestLevel() : 0);
-        return std::max(left,right) + prevLvl + 1 ;
+        return std::max(left,right) + prevLvl + 1;
       }
 
       // return number of hanging nodes in this tree
       int count() const {
-        return 1 + (next ? next->count() : 0) + (prev ? prev->count() : 0) ;
+        return 1 + (next ? next->count() : 0) + (prev ? prev->count() : 0);
       }
 
       int remove(vertex_t *pvtx);
 
-      void nbconnect(int,thinelement_t *,int) ;
+      void nbconnect(int,thinelement_t *,int);
     }* head;
 
  public:
@@ -85,7 +89,6 @@ template < int N, int NV > class Vtx_btree {
     Vtx_btree* right() const;
 
   public:
-
     Vtx_btree(vertex_t *invtx, thinelement_t *plnb, thinelement_t *prnb)
       : head(0), rvtx(invtx), lnb(plnb), rnb(prnb) {
       assert(rvtx);
@@ -108,20 +111,21 @@ template < int N, int NV > class Vtx_btree {
     
     void merge(Vtx_btree* inleft, Vtx_btree* inright);
 
-    void nbconnect(int, thinelement_t *, int ) ;
+    void nbconnect ( int, thinelement_t *, int );
 
-    int deepestLevel() {
+    int deepestLevel ()
+    {
       return (head ? head->deepestLevel() : 0);
     }
 
-    int count() const {
-      return head->count();
-    }
+    int count () const { return head->count(); }
     
     bool remove(Vertex < N > *vtx) {
       assert(head->prev || head->next);
       return (head->remove(vtx)==1);
     }
-};
+  };
+
+} // namespace ALU2DGrid
 
 #endif // VTXBTREE_H

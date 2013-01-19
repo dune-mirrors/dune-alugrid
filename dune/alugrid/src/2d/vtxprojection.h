@@ -5,26 +5,31 @@
 
 #define ALUGRID_VERTEX_PROJECTION
 
-template <int N, int NV> 
-struct VtxProjection
+namespace ALU2DGrid
 {
-  typedef Hier< Bndel < N, NV > > hbndel_t;
-  typedef Hier< Element < N, NV > > helement_t;
 
-  enum { ncoord = helement_t::ncoord };
-
-  virtual ~VtxProjection()
-  {}
-
-  virtual int operator()(const hbndel_t *, const double, double (&) [ncoord]) const
+  template <int N, int NV> 
+  struct VtxProjection
   {
-    return 1;
-  }
+    typedef Hier< Bndel < N, NV > > hbndel_t;
+    typedef Hier< Element < N, NV > > helement_t;
 
-  virtual int operator()(const helement_t *, const double (&) [2], double (&) [ncoord]) const
-  {
-    return 1;
-  }
-};
+    enum { ncoord = helement_t::ncoord };
+
+    virtual ~VtxProjection()
+    {}
+
+    virtual int operator()(const hbndel_t *, const double, double (&) [ncoord]) const
+    {
+      return 1;
+    }
+
+    virtual int operator()(const helement_t *, const double (&) [2], double (&) [ncoord]) const
+    {
+      return 1;
+    }
+  };
+
+} // namespace ALU2DGrid
 
 #endif // #ifndef ALU2D_VTPROJECTION_H_INCLUDED
