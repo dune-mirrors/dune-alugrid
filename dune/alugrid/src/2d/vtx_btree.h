@@ -1,6 +1,8 @@
 #ifndef __HEADER__VTX_BTREE
 #define __HEADER__VTX_BTREE
 
+#include <algorithm>
+
 template < int N > class Vertex;
 template < int N, int NV > class Thinelement;
 template < int N, int NV > class Element;
@@ -52,9 +54,10 @@ template < int N, int NV > class Vtx_btree {
       }
 
       // return depth of this tree
-      int deepestLevel(int prevLvl = 0) const {
-        const int left  = (prev ? prev->deepestLevel() : 0) ;
-        const int right = (next ? next->deepestLevel() : 0) ;
+      int deepestLevel ( int prevLvl = 0 ) const
+      {
+        const int left  = (prev ? prev->deepestLevel() : 0);
+        const int right = (next ? next->deepestLevel() : 0);
         return std::max(left,right) + prevLvl + 1 ;
       }
 

@@ -1,6 +1,11 @@
 #ifndef __HEADER__GRID
 #define __HEADER__GRID
 
+#include <cassert>
+#include <iostream>
+#include <stack>
+#include <vector>
+
 //#define PERIODIC_VERTICES
 
 /***************************************************
@@ -42,47 +47,47 @@ class Hmesh;
 class Basic {
 
   private :
-    Basic(const Basic & ) ;
+    Basic(const Basic & );
 
-    Basic & operator=(const Basic &) ;
+    Basic & operator=(const Basic &);
 
   protected :
 
     Basic() : _idx(-1), refcount(0), _level(0), childNr_(0), numchild(0) {}
-    virtual ~Basic() { assert(!refcount) ; }
+    virtual ~Basic() { assert(!refcount); }
 
     int _idx;
-    unsigned char refcount ; // 16 byte + 8 vtable
+    unsigned char refcount; // 16 byte + 8 vtable
     // The macro level is -1, because new vertices always get the level of the
     // edge they split.
     signed char _level; 
     unsigned char childNr_;
-    unsigned char numchild ;
+    unsigned char numchild;
 
-    int &setIndex () { return _idx ; }
+    int &setIndex () { return _idx; }
 
   public:
-    virtual void sethdl(IndexProvider *phdl) = 0 ; 
+    virtual void sethdl(IndexProvider *phdl) = 0; 
 
     inline int getIndex () const { return _idx; }
 
-    enum { nparts = 4, max_points = 4 } ;
+    enum { nparts = 4, max_points = 4 };
 
   protected:  
-    void attach() { refcount ++ ; }
+    void attach() { refcount ++; }
 
-    void detach() { refcount -- ; }
+    void detach() { refcount --; }
 
-    int isfree() const { return refcount == 0 ; }
+    int isfree() const { return refcount == 0; }
 
   public:  
-    virtual void write(ostream &) const 
+    virtual void write( std::ostream & ) const
     { 
       std::cerr << "ERROR: method Basic::write( ostream& ) not overloaded! " << std::endl;
       abort(); 
     }
 
-    virtual void read(istream &) 
+    virtual void read ( std::istream & ) 
     { 
       std::cerr << "ERROR: method Basic::read( istream& ) not overloaded! " << std::endl;
       abort(); 
@@ -90,11 +95,11 @@ class Basic {
 
     template <int,int>
     friend class Hmesh;
-} ;
+};
 
 template < int N > class Vertex;
-template < int N, int NV > class Multivertexadapter ;
-template < class A > class Listagency ;
+template < int N, int NV > class Multivertexadapter;
+template < class A > class Listagency;
 template <class A> class Hier;
 
 /***************************************************
@@ -104,11 +109,11 @@ template <class A> class Hier;
 ****************************************************/
 template < class A > class Listagent : public Basic {
 
-  A * next_list ;
+  A * next_list;
   
-  A * prev_list ;
+  A * prev_list;
 
-  int number_list ;  // 24 byte 
+  int number_list;  // 24 byte 
   
   Listagent(const Listagent &) { }
 
@@ -124,15 +129,15 @@ template < class A > class Listagent : public Basic {
   
     virtual ~Listagent() { }
   
-    A * next() const { return next_list ; }
+    A * next() const { return next_list; }
     
-    A * prev() const { return prev_list ; }
+    A * prev() const { return prev_list; }
 
-    int number() const { return number_list ; }
+    int number() const { return number_list; }
           
-  friend class Listagency < A > ;
+  friend class Listagency < A >;
   
-} ;
+};
 // #end(class)
 // ***************************************************
 
@@ -191,24 +196,24 @@ template < int N, int NV > struct nconf_vtx
 // #definition:
 template < int N > class Vertex : public Listagent < Vertex < N > > // , public Basic 
 {
-  typedef Listagent < Vertex < N > >  BaseType ;
+  typedef Listagent < Vertex < N > >  BaseType;
   using Listagent < Vertex < N > > ::_idx;
   using Listagent < Vertex < N > > ::_level;
   public:
     enum { ncoord = N };
 
-    using BaseType :: attach ;
-    using BaseType :: detach ; 
-    using BaseType :: isfree ;
+    using BaseType :: attach;
+    using BaseType :: detach; 
+    using BaseType :: isfree;
 
   private :
 
-    Vertex & operator=(const Vertex &) ;
+    Vertex & operator=(const Vertex &);
     
-    Vertex(const Vertex &) ;
+    Vertex(const Vertex &);
 
  protected :
-    IndexProvider* hdl ;
+    IndexProvider* hdl;
 
 #ifdef PERIODIC_VERTICES 
     Vertex *pernb[3];
@@ -234,10 +239,10 @@ template < int N > class Vertex : public Listagent < Vertex < N > > // , public 
     virtual ~Vertex(); 
 
    
-    virtual const double (& coord() const )[ncoord] = 0 ;
+    virtual const double (& coord() const )[ncoord] = 0;
 
 
-    virtual void write(ostream &) const = 0 ;
+    virtual void write ( std::ostream & ) const = 0;
 
 #ifdef PERIODIC_VERTICES
     int get_nr_of_per_nbs() { return nr_of_pernbs; }
@@ -248,12 +253,12 @@ template < int N > class Vertex : public Listagent < Vertex < N > > // , public 
     Vertex *get_pernb(int pidx);
 #endif
 
-    virtual void read(istream &) = 0 ;
+    virtual void read ( std::istream & ) = 0;
  
     int level() const {  return _level;  }
 
     bool isMacro () const { return level() == -1; }
-} ;
+};
 // #end(class)
 // ***************************************************
 
@@ -270,54 +275,57 @@ class Fullvertex : public Vertex < N > {
     enum { ncoord = Vertex< N >::ncoord };
 
   private:
-    double vcoord[ncoord] ;
+    double vcoord[ncoord];
   
-    Fullvertex(const Fullvertex &) ;
+    Fullvertex(const Fullvertex &);
 
-    Fullvertex & operator = (const Fullvertex &) ;
+    Fullvertex & operator = (const Fullvertex &);
 
   public :
 
 
     Fullvertex() {}
 
-    Fullvertex(double (&)[ncoord],int ) ;
+    Fullvertex(double (&)[ncoord],int );
 
    ~Fullvertex() { }
   
-    const double (& coordTest() const )[ncoord] { return vcoord ; }
-    const double (& coord() const )[ncoord] { return vcoord ; }
+    const double (& coordTest() const )[ncoord] { return vcoord; }
+    const double (& coord() const )[ncoord] { return vcoord; }
 
-    void write(ostream &) const ;
+    void write ( std::ostream & ) const;
 
-    void read(istream &) ;
+    void read ( std::istream & );
 
-    friend ostream& operator<<(ostream& os, const Fullvertex& fv) {
+    friend std::ostream &operator<< ( std::ostream& os, const Fullvertex &fv )
+    {
       os << "(" << fv.vcoord[0];
       for (int i=1;i<ncoord;++i) 
         os << "," << fv.vcoord[i];
       os << ")";
       return os;
     }
-} ;
+};
 
 // #end(class)
 // ***************************************************
-class Edge : public Basic 
+class Edge
+: public Basic
 {
-    virtual void sethdl(IndexProvider *phdl);
- public:
-    using Basic :: attach ;
-    using Basic :: detach ; 
-    using Basic :: isfree ;
+  virtual void sethdl(IndexProvider *phdl);
+public:
+  using Basic :: attach;
+  using Basic :: detach; 
+  using Basic :: isfree;
 
-    explicit Edge(IndexProvider *phdl) { sethdl(phdl); }
-    void freeIndex(IndexProvider* phdl) ;
-    void write(ostream &) const ;
-    void read(istream &) ;
+  explicit Edge(IndexProvider *phdl) { sethdl(phdl); }
+  void freeIndex(IndexProvider* phdl);
+  void write ( std::ostream & ) const;
+  void read ( std::istream & );
 };
-template < int N, int NV > class Triang ;
-template < int N, int NV > class Bndel_triang ;
+
+template < int N, int NV > class Triang;
+template < int N, int NV > class Bndel_triang;
 
 
 // ***************************************************
@@ -325,20 +333,21 @@ template < int N, int NV > class Bndel_triang ;
 // #description:
 //   Basisklasse f"ur Verfeinerungsinformation
 // #definition:
-class Refco : public Basic {
-
+class Refco
+: public Basic
+{
   public :
     
   typedef enum { crs = -1 , ref = 1 , 
                  none = 0, crs_1 = -2, crs_2 = -3, crs_3 = -4, crs_4 = -5,
                  ref_1 = 2, ref_2 = 3, ref_3 = 4, ref_4 = 5, notref = 10,
-                 quart=9, notcrs = -10  } tag_t ;
+                 quart=9, notcrs = -10  } tag_t;
       
     virtual ~Refco () {} 
    
     void clear(tag_t) {}
       
-    int is(tag_t) const { return 0 ; }  // ist nie irgendein tag
+    int is(tag_t) const { return 0; }  // ist nie irgendein tag
 
     void mark(Refco::tag_t t) {}
 
@@ -346,7 +355,7 @@ class Refco : public Basic {
     
   protected:
     virtual void writeToWas() {}
-} ;
+};
 // #end(class)
 // ***************************************************
 
@@ -357,25 +366,25 @@ class Refco : public Basic {
 // #definition:
 class Refco_el : public Refco
 {
-    Refco::tag_t tag, tag_last ;
+    Refco::tag_t tag, tag_last;
     
   public :
 
     Refco_el() : tag(none), tag_last(none) {}
 
-    void clear(Refco::tag_t t = none) { tag = (t == tag ? none : tag) ; }
+    void clear(Refco::tag_t t = none) { tag = (t == tag ? none : tag); }
       
-    void mark(Refco::tag_t t) { tag = t ; }
+    void mark(Refco::tag_t t) { tag = t; }
       
-    int is(Refco::tag_t t) const { return tag == t ? 1 : 0 ; }
+    int is(Refco::tag_t t) const { return tag == t ? 1 : 0; }
 
-    int wasRefined() const { return tag_last == ref ? 1 : 0 ; }    
+    int wasRefined() const { return tag_last == ref ? 1 : 0; }    
 
-    void clearWas() { tag_last = none ; }
+    void clearWas() { tag_last = none; }
     
   protected:
     void writeToWas() { tag_last = ref; }
-} ;
+};
 // #end(class)
 // ***************************************************
 
@@ -388,10 +397,10 @@ template < int N, int NV > class Thinelement : public Refco_el {
 
   public :
     typedef enum { unsplit = 0, triang_bnd = -2, compatibility = 1,
-                   triang_conf2 = 2, triang_quarter = 4 } splitrule_t ;
+                   triang_conf2 = 2, triang_quarter = 4 } splitrule_t;
 
 
-    typedef enum { bndel_like, element_like } thintype_t ;
+    typedef enum { bndel_like, element_like } thintype_t;
 
     typedef Vertex < N > vertex_t;
 
@@ -408,50 +417,50 @@ template < int N, int NV > class Thinelement : public Refco_el {
 
   private :
   
-    Thinelement(const Thinelement & ) ;
+    Thinelement(const Thinelement & );
 
-    Thinelement & operator=(const Thinelement &) ;
+    Thinelement & operator=(const Thinelement &);
 
   protected :
-    splitrule_t mysplit ;
+    splitrule_t mysplit;
     Thinelement() : mysplit( unsplit ) { }
     
     virtual ~Thinelement() { }
 
   public :
-    using Refco_el :: read ;
+    using Refco_el :: read;
     
-    virtual int thinis(thintype_t ) const = 0 ;
+    virtual int thinis(thintype_t ) const = 0;
 
-    splitrule_t splitrule() const { return mysplit ; }
+    splitrule_t splitrule() const { return mysplit; }
      
     int numfacevertices(int ) const { return 2; }
     
-    virtual int facevertex(int , int ) const = 0 ;
+    virtual int facevertex(int , int ) const = 0;
 
-    virtual vertex_t *vertex(int ) const = 0 ;
+    virtual vertex_t *vertex(int ) const = 0;
     
-    inline vertex_t *vertex(int fce, int j) const { return vertex(facevertex(fce, j)) ; }
+    inline vertex_t *vertex(int fce, int j) const { return vertex(facevertex(fce, j)); }
 
-    virtual Thinelement * neighbour(int ) const = 0 ;
+    virtual Thinelement * neighbour(int ) const = 0;
 
-    virtual int opposite(int fce) const = 0 ;
+    virtual int opposite(int fce) const = 0;
 
-    virtual Edge *edge(int fce) const = 0 ;
+    virtual Edge *edge(int fce) const = 0;
 
-    virtual void nbconnect(int , Thinelement *, int ) = 0 ;
+    virtual void nbconnect(int , Thinelement *, int ) = 0;
 
     virtual int segmentIndex() const = 0;
 
-    virtual void write(ostream &) const = 0 ;
+    virtual void write ( std::ostream & ) const = 0;
 
-    virtual void read(istream &, vertex_t **, const int ) = 0 ;
+    virtual void read ( std::istream &, vertex_t **, const int ) = 0;
 
     virtual int get_splitpoint(int, double, double (&) [ncoord]) const = 0;
 
     virtual int split(void * (&) [nparts], Listagency < vertex_t > *,
                       multivertexadapter_t &,nconf_vtx_t *,splitrule_t,
-          int,Refco::tag_t, prolong_basic_t *pro_el) = 0 ;
+          int,Refco::tag_t, prolong_basic_t *pro_el) = 0;
 
     virtual int docoarsen(nconf_vtx_t*,int, restrict_basic_t *rest_el) { return 1; }
 
@@ -468,7 +477,7 @@ template < int N, int NV > class Thinelement : public Refco_el {
       return (el->thinis(bndel_like)) ? ((bndel_triang_t *)el) : 0;
     }   
 
-} ;
+};
 // ***************************************************
 
 
@@ -485,9 +494,9 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
   private :
              
-    Element(const Element &) ;
+    Element(const Element &);
 
-    Element & operator = (const Element &) ;
+    Element & operator = (const Element &);
 
   public :
     typedef Vertex < N > vertex_t;
@@ -504,7 +513,7 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
     virtual void sethdl(IndexProvider *phdl);
     IndexProvider* gethdl() const { return vertex(0)->gethdl(); }
 
-    int thinis(thintype_t t) const { return t == thinelement_t::element_like ; }
+    int thinis(thintype_t t) const { return t == thinelement_t::element_like; }
 
   protected:
 
@@ -512,49 +521,48 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
 
       enum {pv=2};
 
-      vertex_t * vtx [NV] ;
+      vertex_t * vtx [NV];
 
-      thinelement_t * nb [NV] ;
+      thinelement_t * nb [NV];
 
       Edge * edge [NV];
 
       mutable vtx_btree_t *hvtx[NV];
 
-      signed char bck [NV] ;
+      signed char bck [NV];
       
-      signed char normdir [NV] ;
+      signed char normdir [NV];
 
-      c() ;
+      c();
 
-     ~c() ;
+     ~c();
 
-      void set(vertex_t * v, int i) { (vtx[i] = v)->attach() ; }
+      void set(vertex_t * v, int i) { (vtx[i] = v)->attach(); }
 
-      void unset(int i) { vtx[i]->detach() ; vtx[i] = 0 ; }
+      void unset(int i) { vtx[i]->detach(); vtx[i] = 0; }
 
-      void write(ostream &) const ;
+      void write ( std::ostream & ) const;
 
-      int read(istream &, vertex_t ** , const int ) ;
+      int read ( std::istream &, vertex_t **, const int );
 
       int check();
-
-    } connect ;
+    } connect;
 
     // use refcount for storage of nvertices (saves 8 bytes) 
     unsigned char& nvertices () { return refcount; }
     unsigned char nvertices () const { return refcount; }
 
-    int nv() const { return (NV==3) ? 3 : nvertices() ; }
+    int nv() const { return (NV==3) ? 3 : nvertices(); }
     int mod(const int i) const { return i % nv(); }
 
     using thinelement_t::_idx;
-    using thinelement_t::refcount ; // used as nvertices 
+    using thinelement_t::refcount; // used as nvertices 
 
     double _area;
     double _outernormal[NV][ncoord]; // NV * ncoord * 8 = ( z.B. 48 )
 
   public :
-    typedef c connect_t ;
+    typedef c connect_t;
 
     int numfaces() const { return nv(); }
 
@@ -566,43 +574,43 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
     Element();
     virtual ~Element();
 
-    int facevertex(int , int ) const ;
+    int facevertex(int , int ) const;
       
-    void edge_vtx(int e, vertex_t * (& ) [2] ) const ;
+    void edge_vtx(int e, vertex_t * (& ) [2] ) const;
 
     // this is not a boundary segment and thus return negtive value 
     int segmentIndex() const { return -1; }
 
-    vertex_t * vertex(int ) const ;
+    vertex_t * vertex(int ) const;
 
-    fullvertex_t * getVertex(int ) const ;
+    fullvertex_t * getVertex(int ) const;
 
-    vertex_t * vertex(int fce, int j) const { return vertex(facevertex(fce, j)) ; }
+    vertex_t * vertex(int fce, int j) const { return vertex(facevertex(fce, j)); }
     
-    thinelement_t * neighbour(int ) const ;
+    thinelement_t * neighbour(int ) const;
 
-    int opposite(int ) const ;
+    int opposite(int ) const;
 
-    int edge_idx(int ) const ;
+    int edge_idx(int ) const;
 
-    Edge *edge(int ) const ;
+    Edge *edge(int ) const;
 
-    int normaldir(int ) const ;
+    int normaldir(int ) const;
 
-    void nbconnect(int , thinelement_t * , int ) ;
+    void nbconnect(int , thinelement_t * , int );
 
-    void edgeconnect(int, Edge *) ;
+    void edgeconnect(int, Edge *);
 
-    void setnormdir(int , int ) ;
+    void setnormdir(int , int );
 
-    void setrefine(int ) ;
+    void setrefine(int );
   
-    void init() ;
+    void init();
 
-    int setrefine() ;
+    int setrefine();
 
     template <class O>
-    void setorientation(vector<O> &str);
+    void setorientation ( std::vector< O > &str );
     void setorientation();
     void switchorientation(int a,int b);
 
@@ -644,21 +652,23 @@ template < int N, int NV > class Element : public Thinelement < N, NV > {
     }
         
   private:
-    void getAllNb(typename vtx_btree_t::Node* node, stack<thinelement_t *> vec) ;
+    void getAllNb ( typename vtx_btree_t::Node *node, std::stack< thinelement_t * > vec );
    
   public:
-    void removehvtx(int fce,vertex_t *vtx);
+    void removehvtx ( int fce, vertex_t *vtx );
 
-    int check() ;
+    int check();
 
-    friend ostream &operator<< (ostream& out, const Element& elem) {
+    friend std::ostream &operator<< ( std::ostream &out, const Element &elem )
+    {
       return out;
     }
 
-    friend istream &operator>> (istream& in, Element& elem) {
+    friend std::istream &operator>> ( std::istream &in, Element &elem )
+    {
       return in;
     }
-} ;
+};
 // #author:
 // #end(class)
 // ***************************************************
@@ -685,15 +695,15 @@ template < class A > class Hier : public A {
 
   private :
 
-  Hier * dwn ;
+  Hier * dwn;
 
-  Hier * nxt ;
+  Hier * nxt;
   
   Hier * up;
 
-  using A :: _level ;
-  using A :: childNr_ ; 
-  using A :: numchild ;
+  using A :: _level;
+  using A :: childNr_; 
+  using A :: numchild;
 
   protected :
 
@@ -701,7 +711,7 @@ template < class A > class Hier : public A {
   {
   }
 
-  void deletesubtree() { delete dwn ; dwn = 0; 
+  void deletesubtree() { delete dwn; dwn = 0; 
     //  this->check();
   }  // Wird f"ur konf. Dreiecke gebraucht
 
@@ -709,24 +719,24 @@ template < class A > class Hier : public A {
 
     virtual ~Hier();
 
-    Hier * down() const { return dwn ; }
+    Hier * down() const { return dwn; }
 
-    Hier * father() const { return up ; }
+    Hier * father() const { return up; }
 
-    Hier * next() const { return nxt ; }
+    Hier * next() const { return nxt; }
 
-    int leaf() const { return ! dwn ; }
+    int leaf() const { return ! dwn; }
 
     // use level for Basic 
-    int level() const { return _level ; }
+    int level() const { return _level; }
     // for assigment of level 
     signed char& lvl() { return _level; }
 
     int childNr() const { return childNr_; }
 
-    int nchild() const { return numchild ; }
+    int nchild() const { return numchild; }
 
-    int count() const { return (nxt ? nxt->count() : 0) + (dwn ? dwn->count() : 1) ; }
+    int count() const { return (nxt ? nxt->count() : 0) + (dwn ? dwn->count() : 1); }
 
     int count(int i) const { 
 
@@ -762,13 +772,13 @@ template < class A > class Hier : public A {
          nconf_vtx_t *ncv,
          int nconfDeg,Refco::tag_t default_ref,prolong_basic_t *pro_el);
 
-    using A :: write ;
-    using A :: read  ;
+    using A :: write;
+    using A :: read ;
 
-    void write(ostream & ) const { }
-    void read(istream & ) { }
+    void write ( std::ostream & ) const {}
+    void read ( std::istream & ) {}
 
-} ;
+};
 // #end(class)
 // ***************************************************
 
@@ -794,30 +804,30 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
 
     enum {nf=1,nv=2};
 
-    vertex_t * vtx[Basic::max_points] ;  // ????
-    thinelement_t * nb ;
+    vertex_t * vtx[Basic::max_points];  // ????
+    thinelement_t * nb;
     Edge *edge;
 
-    signed char bck ;
+    signed char bck;
 
-    c() ;
+    c();
 
-   ~c() ;
+   ~c();
 
-    void set(vertex_t * a, int i) { (vtx[i] = a)->attach() ; }
+    void set(vertex_t * a, int i) { (vtx[i] = a)->attach(); }
 
-    void unset(int i) { vtx[i]->detach() ; vtx[i] = 0 ; }
+    void unset(int i) { vtx[i]->detach(); vtx[i] = 0; }
 
-    void write(ostream &) const ;
+    void write ( std::ostream & ) const;
 
-    void read(istream &, vertex_t ** , const int ) ;
+    void read ( std::istream &, vertex_t **, const int );
 
-  } connect ;
+  } connect;
 
   public :
   
   enum {periodic = 1111,general_periodic = 2222};
-    typedef int bnd_t ;
+    typedef int bnd_t;
 
     // typedef int bnd_part_t[max_bndnr+offset_bndnr+1];
 
@@ -828,9 +838,9 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
 
   private :
       
-    Bndel(const Bndel &) ;
+    Bndel(const Bndel &);
     
-    Bndel & operator = (const Bndel &) ;
+    Bndel & operator = (const Bndel &);
  
   protected :
 
@@ -840,7 +850,7 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
 
     using thinelement_t::_idx;
 
-    bnd_t typ ;
+    bnd_t typ;
 
 #ifdef ALU2D_OLD_BND_PROJECTION
     double (*lf)(double);
@@ -855,20 +865,20 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
     
     virtual ~Bndel();
 
-    bnd_t type() const { return typ ; }
+    bnd_t type() const { return typ; }
 
-    int thinis(thintype_t t) const { return t == thinelement_t::bndel_like ; }
+    int thinis(thintype_t t) const { return t == thinelement_t::bndel_like; }
 
-    int facevertex(int , int ) const ;
+    int facevertex(int , int ) const;
 
-    // int numfacevertices(int ) const { return connect.nv ; }
+    // int numfacevertices(int ) const { return connect.nv; }
  
-    void edge_vtx(int e, vertex_t * (& ) [c::nv] ) const ;
+    void edge_vtx(int e, vertex_t * (& ) [c::nv] ) const;
 
 
-    vertex_t * vertex(int ) const ;
+    vertex_t * vertex(int ) const;
  
-    vertex_t * vertex(int , int j) const { return vertex(j) ; }
+    vertex_t * vertex(int , int j) const { return vertex(j); }
 
     int segmentIndex() const 
     { 
@@ -876,18 +886,18 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
       return _segmentIndex; 
     }
 
-    thinelement_t * neighbour(int ) const { return connect.nb ; }
+    thinelement_t * neighbour(int ) const { return connect.nb; }
 
     int neighbours(int ) const { return 1; }
 
-    int opposite(int ) const { return connect.bck ; }
+    int opposite(int ) const { return connect.bck; }
 
     int edge_idx(int ) const { return connect.edge->getIndex(); }
 
     Edge *edge(int ) const { return connect.edge; }
 
-    void nbconnect(int, thinelement_t *, int ) ;
-    void edgeconnect(int , Edge *) ;
+    void nbconnect(int, thinelement_t *, int );
+    void edgeconnect(int , Edge *);
 
 #ifdef ALU2D_OLD_BND_PROJECTION
     void set_bndfunctions(double (*pf)(double), double (*pDf)(double))
@@ -904,12 +914,12 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
 
     int get_splitpoint(int, double, double (&) [ncoord]) const;
 
-    double area() const ;
+    double area() const;
 
     virtual Bndel *create(vertex_t * , vertex_t *,bnd_t) const = 0;
 
     int setorientation();
-} ;
+};
 // #end(class)
 // ***************************************************
 

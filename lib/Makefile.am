@@ -1,4 +1,11 @@
-lib_LTLIBRARIES = libalugrid_serial.la libalugrid_parallel.la libalugrid_mpi.la libdunealugrid.la
+lib_LTLIBRARIES = libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la libalugrid_mpi.la libdunealugrid.la
+
+libalugrid_2d_la_SOURCES = \
+	$(top_srcdir)/dune/alugrid/src/2d/grid.cc
+
+libalugrid_2d_la_CPPFLAGS = $(AM_CPPFLAGS)
+libalugrid_2d_la_LDFLAGS = $(AM_LDFLAGS)
+libalugrid_2d_la_LIBADD = 
 
 libalugrid_serial_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/src/serial/ghost_elements.cc \
