@@ -32,7 +32,7 @@ namespace ALUGrid
     // auf, allerdings wird hier der path und filename in einer variablen
     // uebergeben 
 
-    assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis::duneBackup (const char * = \""
+    assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::duneBackup (const char * = \""
                          << fileName << "\") " << std::endl, 1) : 1);
 
     std::ofstream out( fileName );
@@ -64,7 +64,7 @@ namespace ALUGrid
     // diese Methode ruft intern restore auf, hier wird lediglich 
     // der path und filename in einer variablen uebergeben
 
-    assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis::duneRestore (const char * = \""
+    assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::duneRestore (const char * = \""
                    << fileName << "\") " << std::endl, 1) : 1);
 
     std::ifstream in( fileName );
@@ -116,7 +116,7 @@ namespace ALUGrid
 
   bool GitterDuneBasis::duneAdapt (AdaptRestrictProlongType & arp) 
   {
-    assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis::duneAdapt ()" << std::endl, 1) : 1);
+    assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::duneAdapt ()" << std::endl, 1) : 1);
     // set restriction-prolongation callback obj
     setAdaptRestrictProlongOp(arp); 
     // call adapt method 

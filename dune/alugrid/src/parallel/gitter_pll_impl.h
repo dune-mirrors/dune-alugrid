@@ -908,7 +908,7 @@ namespace ALUGrid
 
     if( myhedge().isSet( myhedge_t::flagLock ) )
     {
-      cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << endl;
+      std::cerr << "**FEHLER (FATAL) in Datei " << __FILE__ << " Zeile " << __LINE__ << std::endl;
       abort ();
     }
 #endif

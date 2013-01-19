@@ -18,8 +18,8 @@ namespace ALUGrid
   Refcount::Globalcount Refcount::_g;
 
   Refcount::Globalcount::~Globalcount () {
-    assert (_c ? (cerr << "**WARNING Refcount::Globalcount::~Globalcount() " << _c 
-             << " objects have not been removed correctly!" << endl, 1) : 1);
+    assert (_c ? (std::cerr << "**WARNING Refcount::Globalcount::~Globalcount() " << _c 
+             << " objects have not been removed correctly!" << std::endl, 1) : 1);
     return;
   }
 #endif
@@ -308,7 +308,7 @@ namespace ALUGrid
 #endif
   bool Gitter::refine () 
   {
-    assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis::refine ()" << endl, 1) : 1);
+    assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::refine ()" << std::endl, 1) : 1);
     bool x = true;
     leaf_element__macro_element__iterator i (container ());
     // refine marked elements
@@ -385,7 +385,7 @@ namespace ALUGrid
 
   void Gitter::doCoarse() 
   {
-    assert (debugOption (20) ? (cout << "**INFO Gitter::coarse ()" << endl, 1) : 1);
+    assert (debugOption (20) ? (std::cout << "**INFO Gitter::coarse ()" << std::endl, 1) : 1);
     {
       AccessIterator < helement_STI >::Handle i (container ());
       for( i.first(); ! i.done(); i.next() ) 
@@ -685,7 +685,7 @@ namespace ALUGrid
 
   bool Gitter::adapt () 
   {
-    assert (debugOption (20) ? (cout << "**INFO Gitter::adapt ()" << endl, 1) : 1);
+    assert (debugOption (20) ? (std::cout << "**INFO Gitter::adapt ()" << std::endl, 1) : 1);
     assert (! iterators_attached ());
 
     bool needConformingClosure = false;
