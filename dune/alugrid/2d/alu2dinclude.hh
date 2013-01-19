@@ -1,9 +1,19 @@
 #ifndef DUNE_ALU2DGRID_INCLUDE_HH
 #define DUNE_ALU2DGRID_INCLUDE_HH
 
-#define ALU2DGRID_COMPATIBILITY_LEVEL 2
+#define ALUGRID_NOTEMPFILE_2D
+#define ALUGRID_SURFACE_2D
 
-#include <dune/alugrid/src/alugrid_2d.h>
+#include "indexstack.h"
+
+#include "projectvertex.h"
+
+#include "2d/grid.h"
+#include "2d/triang.h"
+#include "2d/listwalk.h"
+#include "2d/handle.h"
+#include "2d/vtx_btree.h"
+#include "2d/vmmap.h"
 
 //////////////////////////////////////////////////////////////////////
 // compile imp.cc into lib (1 yes, 0 no)
