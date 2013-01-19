@@ -9,7 +9,7 @@ DUNE_CHECK_ALL
 
 AC_SUBST(AM_CPPFLAGS, $DUNE_CPPFLAGS)
 AC_SUBST(AM_LDFLAGS, $DUNE_LDFLAGS)
-AC_SUBST([LDADD], '$(top_builddir)/lib/libdunealugrid.la $(top_builddir)/lib/libalugrid_parallel.la $(top_builddir)/lib/libalugrid_serial.la $(top_builddir)/lib/libalugrid_mpi.la $(DUNE_LIBS)')
+AC_SUBST([LDADD], '$(top_builddir)/lib/libdunealugrid.la $(top_builddir)/lib/libalugrid_parallel.la $(top_builddir)/lib/libalugrid_serial.la $(top_builddir)/lib/libalugrid_2d.la $(top_builddir)/lib/libalugrid_mpi.la $(DUNE_LIBS)')
 
 # generate Makefiles
 AC_CONFIG_FILES([

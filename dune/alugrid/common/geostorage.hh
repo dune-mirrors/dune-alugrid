@@ -7,7 +7,7 @@
 
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/3d/alu3dinclude.hh>
-//#include <dune/alugrid/3d/alu3dinclude.hh>
+#include <dune/alugrid/2d/alu2dinclude.hh>
 
 namespace Dune
 {
@@ -40,7 +40,6 @@ namespace Dune
     template <int dummy, int dim, int dimworld, int > 
     struct CreateGeometries;
 
-#if 0
     template <int dummy, int dimworld> 
     struct CreateGeometries<dummy, 2, dimworld, ALU2DSPACE triangle >
     {
@@ -61,7 +60,6 @@ namespace Dune
         }
       }
     };
-#endif
 
     template <int dummy> 
     struct CreateGeometries<dummy, 3, 3, ALU3DSPACE tetra >
@@ -87,7 +85,6 @@ namespace Dune
       }
     };
 
-#if 0
     template <int dummy, int dimworld> 
     struct CreateGeometries<dummy, 2, dimworld, ALU2DSPACE quadrilateral >
     {
@@ -103,7 +100,6 @@ namespace Dune
         }
       }
     };
-#endif
 
     template <int dummy> 
     struct CreateGeometries<dummy, 3, 3, ALU3DSPACE hexa >

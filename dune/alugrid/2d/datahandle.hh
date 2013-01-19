@@ -1,89 +1,80 @@
 #ifndef DUNE_ALU2DGRIDDATAHANDLE_HH
 #define DUNE_ALU2DGRIDDATAHANDLE_HH
 
-//- system includes 
 #include <iostream>
 
 #include <dune/grid/common/adaptcallback.hh>
 
-//- local includes 
-#include "alu2dinclude.hh"
+#include <dune/alugrid/2d/alu2dinclude.hh>
 
-using std::endl;
-using std::cout;
-using std::flush;
-
-namespace ALU2DSPACENAME 
+namespace ALU2DGrid
 {
 
-/////////////////////////////////////////////////////////////////
-//
-//  --AdaptRestrictProlong 
-//
-/////////////////////////////////////////////////////////////////
-template< class GridType, class AdaptDataHandle >
-class AdaptRestrictProlong2dImpl
-: public AdaptRestrictProlong2d ALU2DDIMWORLD( GridType::dimensionworld, GridType::elementType )
-{
-  GridType & grid_;
-  typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-  typedef typename EntityType :: ImplementationType RealEntityType;
-  typedef typename Dune::ALU2dImplTraits< GridType::dimensionworld, GridType::elementType >::HElementType HElementType ;
-  
-  EntityType & reFather_;
-  EntityType & reSon_;
-  RealEntityType & realFather_;
-  RealEntityType & realSon_;
+  // AdaptRestrictProlong2dImpl
+  // --------------------------
 
-  AdaptDataHandle &rp_;
-
-  int maxlevel_;
-
-
-public:
-  //! Constructor
-  AdaptRestrictProlong2dImpl ( GridType &grid,
-                               EntityType &f, RealEntityType &rf,
-                               EntityType &s, RealEntityType &rs,
-                               AdaptDataHandle &rp )
-   : grid_(grid)
-    , reFather_(f)
-    , reSon_(s)
-    , realFather_(rf) 
-    , realSon_(rs) 
-    , rp_(rp) 
-    , maxlevel_(-1) 
+  template< class GridType, class AdaptDataHandle >
+  class AdaptRestrictProlong2dImpl
+  : public AdaptRestrictProlong2d ALU2DDIMWORLD( GridType::dimensionworld, GridType::elementType )
   {
-  }
+    GridType & grid_;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
+    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename Dune::ALU2dImplTraits< GridType::dimensionworld, GridType::elementType >::HElementType HElementType ;
+    
+    EntityType & reFather_;
+    EntityType & reSon_;
+    RealEntityType & realFather_;
+    RealEntityType & realSon_;
 
-  virtual ~AdaptRestrictProlong2dImpl () 
-  {}
+    AdaptDataHandle &rp_;
 
-  //! restrict data , elem is always the father 
-  int preCoarsening ( HElementType &father )
-  {
-    maxlevel_ = std::max( maxlevel_, father.level() );
-    //father.resetRefinedTag();
-    realFather_.setElement( father );
-    rp_.preCoarsening( reFather_ );
+    int maxlevel_;
 
-    return 0;
-  }
+  public:
+    //! Constructor
+    AdaptRestrictProlong2dImpl ( GridType &grid,
+                                 EntityType &f, RealEntityType &rf,
+                                 EntityType &s, RealEntityType &rs,
+                                 AdaptDataHandle &rp )
+     : grid_(grid)
+      , reFather_(f)
+      , reSon_(s)
+      , realFather_(rf) 
+      , realSon_(rs) 
+      , rp_(rp) 
+      , maxlevel_(-1) 
+    {
+    }
 
-  //! prolong data, elem is the father  
-  int postRefinement ( HElementType &father )
-  {
-    maxlevel_ = std::max( maxlevel_, father.level()+1 );
-    //father.resetRefinedTag();
-    realFather_.setElement( father );
-    rp_.postRefinement( reFather_ );
+    virtual ~AdaptRestrictProlong2dImpl () 
+    {}
 
-    return 0;
-  }
+    //! restrict data , elem is always the father 
+    int preCoarsening ( HElementType &father )
+    {
+      maxlevel_ = std::max( maxlevel_, father.level() );
+      //father.resetRefinedTag();
+      realFather_.setElement( father );
+      rp_.preCoarsening( reFather_ );
 
-  int maxLevel () const { return maxlevel_; }
-};
+      return 0;
+    }
 
-} // namespace ALU2DSPACENAME
+    //! prolong data, elem is the father  
+    int postRefinement ( HElementType &father )
+    {
+      maxlevel_ = std::max( maxlevel_, father.level()+1 );
+      //father.resetRefinedTag();
+      realFather_.setElement( father );
+      rp_.postRefinement( reFather_ );
+
+      return 0;
+    }
+
+    int maxLevel () const { return maxlevel_; }
+  };
+
+} // namespace ALU2DGrid
 
 #endif // #ifndef DUNE_ALU2DGRIDDATAHANDLE_HH

@@ -1,11 +1,9 @@
 #ifndef DUNE_ALU2DGRID_INTERSECTION_HH
 #define DUNE_ALU2DGRID_INTERSECTION_HH
 
-// System includes
 #include <stack>
 #include <utility>
 
-// Dune includes
 #include <dune/grid/common/grid.hh>
 
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>

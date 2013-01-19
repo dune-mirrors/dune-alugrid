@@ -1,19 +1,15 @@
 #ifndef DUNE_ALU2DGRIDINDEXSETS_HH
 #define DUNE_ALU2DGRIDINDEXSETS_HH
 
-//- System includes
 #include <vector>
 
-//- Dune includes
 #include <dune/common/stdstreams.hh>
 #include <dune/common/bigunsignedint.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
 
-
-//- Local includes
-#include "alu2dinclude.hh"
+#include <dune/alugrid/2d/alu2dinclude.hh>
 
 namespace Dune
 {

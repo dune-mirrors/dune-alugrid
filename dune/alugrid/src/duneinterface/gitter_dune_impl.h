@@ -206,9 +206,11 @@ namespace ALUGrid
     unsigned char indices = no_index;
     indices = in.get();
 
-    // set VERBOSE to 20 and you have the indices value printed 
-    assert (debugOption (20) ? (cout << "**INFO GitterDuneBasis::restoreIndices: index flag = " << (int)indices << " file: "
-                         << __FILE__ << " line: " << __LINE__ <<") " << endl, 1) : 1);
+    // set VERBOSE to 20 and you have the indices value printed
+#ifndef NDEBUG
+    if( debugOption( 20 ) )
+      std::cout << "INFO: GitterDuneBasis::restoreIndices.indices = " << (int)indices << std::endl;
+#endif // #ifndef NDEBUG
 
     typedef Gitter::Geometric::BuilderIF  BuilderIF;
     enum { numOfIndexManager = BuilderIF::numOfIndexManager };
@@ -261,7 +263,7 @@ namespace ALUGrid
       return;
     }
 
-    if(indices == leaf_index) // convert indices to leafindices 
+    if( indices == leaf_index ) // convert indices to leafindices 
     {
       int idx = 0;
       PureElementLeafIterator < helement_STI > ew(*this);
@@ -270,12 +272,14 @@ namespace ALUGrid
         ew->item().setIndex( idx );
         ++idx;
       }
-      this->indexManager(0).setMaxIndex ( idx );
-      assert (debugOption (20) ? (cout << endl << "**INFO GitterDuneBasis::restoreIndices: create new leaf indices with size = " << idx << " ! file: "<< __FILE__ << ", line: " << __LINE__ << endl, 1) : 1);
-      return;
+      this->indexManager( 0 ).setMaxIndex( idx );
+#ifndef NDEBUG
+      if( debugOption( 20 ) )
+        std::cout << "INFO: GitterDuneBasis::restoreIndices created new leaf indices with size " << idx << "." << std::endl;
+#endif // #ifndef NDEBUG
     }
-
-    std::cerr << "WARNING (ignored0: indices (id = " << indices << ") not read in GitterDuneBasis::restoreIndices." << std::endl;
+    else
+      std::cerr << "WARNING (ignored): indices (id = " << indices << ") not read in GitterDuneBasis::restoreIndices." << std::endl;
   }
 
   // wird von Dune verwendet 

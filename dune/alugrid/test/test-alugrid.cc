@@ -2,7 +2,7 @@
 
 #include <config.h>
 
-#define NO_2D
+// #define NO_2D
 // #define NO_3D
 
 #include <iostream>
@@ -532,11 +532,7 @@ int main (int argc , char **argv) {
     }
     else 
     {
-#ifdef ALUGRID_SURFACE_2D
       std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dcube> <display>" << std::endl;
-#else
-      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dconf|3d|3dsimp|3dcube> <display>" << std::endl;
-#endif
     }
 
     const char *newfilename = 0; 
@@ -613,15 +609,13 @@ int main (int argc , char **argv) {
 #endif
      
 #ifndef NO_2D
-#ifdef ALUGRID_SURFACE_2D
       // check non-conform ALUGrid for 2d 
       if( testALU2dCube ) 
       {
-        typedef Dune::ALUGrid<2,2, cube, nonconforming > GridType;
-        //typedef ALUCubeGrid<2,2> GridType;
-        std::string filename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-testgrid-2-2.dgf" );
+        typedef Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > GridType;
+        std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
-        GridPtr<GridType> gridPtr(filename);
+        Dune::GridPtr< GridType > gridPtr(filename);
         checkCapabilities< false >( *gridPtr );
         checkALUSerial(*gridPtr, 2, display);
 
@@ -629,23 +623,21 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-        typedef Dune::ALUGrid< 2, 3, cube, nonconforming > SurfaceGridType;
-        //typedef ALUCubeGrid< 2, 3 > SurfaceGridType;
-        std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-testgrid-2-3.dgf" );
+        typedef Dune::ALUGrid< 2, 3, Dune::cube, Dune::nonconforming > SurfaceGridType;
+        std::string surfaceFilename( "./dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
-        GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
+        Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
         checkALUSerial( *surfaceGridPtr, 1, display );
       }
-#endif // #ifdef ALUGRID_SURFACE_2D
+
       // check non-conform ALUGrid for 2d 
       if( testALU2dSimplex ) 
       {
-        typedef Dune::ALUGrid< 2, 2, simplex, nonconforming > GridType;
-        //typedef ALUSimplexGrid< 2, 2 > GridType;
-        std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-2.dgf");
+        typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
+        std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
-        GridPtr<GridType> gridPtr(filename);
+        Dune::GridPtr< GridType > gridPtr( filename );
         checkCapabilities< false >( *gridPtr );
         checkALUSerial(*gridPtr, 2, display);
 
@@ -653,24 +645,20 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-#ifdef ALUGRID_SURFACE_2D
-        typedef Dune::ALUGrid< 2, 3, simplex, nonconforming > SurfaceGridType;
-        //typedef ALUSimplexGrid< 2, 3 > SurfaceGridType;
-        std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
+        typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming > SurfaceGridType;
+        std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
-        GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
+        Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
         checkALUSerial( *surfaceGridPtr, 1, display );
-#endif // #ifdef ALUGRID_SURFACE_2D
       }
 
       // check conform ALUGrid for 2d 
       if( testALU2dConform ) 
       {
-        typedef Dune::ALUGrid< 2, 2, simplex, conforming > GridType;
-        //typedef ALUConformGrid< 2, 2 > GridType;
-        std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-2.dgf");
-        GridPtr<GridType> gridPtr(filename);
+        typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
+        std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
+        Dune::GridPtr<GridType> gridPtr( filename );
         checkCapabilities< true >( *gridPtr );
         checkALUSerial(*gridPtr, 2, display);
         
@@ -678,15 +666,13 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-#ifdef ALUGRID_SURFACE_2D
-        typedef Dune::ALUGrid< 2, 3, simplex, conforming > SurfaceGridType;
+        typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming > SurfaceGridType;
         //typedef ALUConformGrid< 2, 3 > SurfaceGridType;
-        std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
+        std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
-        GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
+        Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< true >( *surfaceGridPtr );
         checkALUSerial( *surfaceGridPtr, 1, display );
-#endif // #ifdef ALUGRID_SURFACE_2D
       }
 #endif // #ifndef NO_2D
 

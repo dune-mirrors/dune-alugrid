@@ -1,36 +1,31 @@
 #ifndef DUNE_ALU2DGRIDGRID_HH
 #define DUNE_ALU2DGRIDGRID_HH
 
-//- System includes
-#include "alu2dinclude.hh"
 #include <iostream>
 #include <vector>
 
-//- Dune includes
+#include <dune/common/static_assert.hh>
+
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
-#include <dune/alugrid/common/interfaces.hh>
-#include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
-#include <dune/grid/common/defaultgridview.hh>
-#include <dune/common/parallel/mpihelper.hh>
-
-#include <dune/alugrid/common/intersectioniteratorwrapper.hh>
-
-// bnd projection stuff 
 #include <dune/grid/common/boundaryprojection.hh>
-#include <dune/alugrid/2d/bndprojection.hh>
+#include <dune/grid/common/defaultgridview.hh>
 
-//- Local includes
-#include "indexsets.hh"
+#include <dune/alugrid/common/interfaces.hh>
+#include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/alugrid/common/objectfactory.hh>
-#include "datahandle.hh"
+#include <dune/alugrid/2d/alu2dinclude.hh>
+#include <dune/alugrid/2d/bndprojection.hh>
+#include <dune/alugrid/2d/indexsets.hh>
+#include <dune/alugrid/2d/datahandle.hh>
 
-namespace Dune {
+namespace Dune
+{
 
   // Forward declarations
   template<int cd, int dim, class GridImp> 
@@ -71,6 +66,8 @@ namespace Dune {
   class ALULocalGeometryStorage;
   
   class ALU2dObjectStream;
+
+
 
   // Internal Forward Declarations
   // -----------------------------
@@ -172,20 +169,14 @@ namespace Dune {
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 
-#if ALU2DGRID_PARALLEL
-      typedef Dune :: CollectiveCommunication< MPI_Comm >
-        CollectiveCommunication;
-#else 
-      typedef Dune :: CollectiveCommunication< GridImp >
-        CollectiveCommunication;
-#endif
+      typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
     };
 
     //! Type of the level index set implementation
-    typedef typename Traits :: LevelIndexSetImp  LevelIndexSetImp;
+    typedef typename Traits::LevelIndexSetImp  LevelIndexSetImp;
 
     //! Type of the leaf index set implementation
-    typedef typename Traits :: LeafIndexSetImp   LeafIndexSetImp;
+    typedef typename Traits::LeafIndexSetImp   LeafIndexSetImp;
   }; // end of ALU2dGridFamily
 
 
@@ -278,16 +269,16 @@ namespace Dune {
     typedef LocalIdSetImp GlobalIdSetImp;
 
     //! Type of the global id set 
-    typedef typename Traits :: GlobalIdSet GlobalIdSet;
+    typedef typename Traits::GlobalIdSet GlobalIdSet;
     
     //! Type of the local id set 
-    typedef typename Traits :: LocalIdSet LocalIdSet;
+    typedef typename Traits::LocalIdSet LocalIdSet;
    
 
     //! Type of the level index set
-    typedef typename GridFamily :: LevelIndexSetImp  LevelIndexSetImp;
+    typedef typename GridFamily::LevelIndexSetImp  LevelIndexSetImp;
     //! Type of the leaf index set
-    typedef typename GridFamily :: LeafIndexSetImp  LeafIndexSetImp;
+    typedef typename GridFamily::LeafIndexSetImp  LeafIndexSetImp;
     
     //! a standard leaf iterator  
     typedef ALU2dGridLeafIterator<0, All_Partition, const ThisType> LeafIteratorImp;
@@ -322,13 +313,13 @@ namespace Dune {
       refineEstimate_ = 40 };
         
     //! \brief boundary projection type 
-    typedef typename Traits :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+    typedef typename Traits::DuneBoundaryProjectionType DuneBoundaryProjectionType;
     //! \brief boundary projection type 
-    typedef typename Traits :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+    typedef typename Traits::DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
 #ifdef ALUGRID_VERTEX_PROJECTION
     //! type of ALUGrid Vertex Projection Interface
-    typedef ALUGridSpace :: VertexProjection< dimworld > ALUGridVertexProjectionType;
+    typedef ::ALUGrid::VertexProjection< dimworld > ALUGridVertexProjectionType;
 #endif
 
 
@@ -453,10 +444,10 @@ namespace Dune {
     const HierarchicIndexSet & hierarchicIndexSet () const ;
     
     //! get leaf index set of the grid
-    const typename Traits :: LeafIndexSet & leafIndexSet () const;
+    const typename Traits::LeafIndexSet & leafIndexSet () const;
     
     //! get level index set of the grid
-    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const;   
+    const typename Traits::LevelIndexSet & levelIndexSet (int level) const;   
     
     
     //**********************************************************
@@ -627,22 +618,23 @@ namespace Dune {
       return (vertexProjection_ != 0);
     }
 
-    using BaseType :: getRealImplementation ;
+    using BaseType::getRealImplementation ;
 
   public:
     template< class IntersectionType >
     const typename BaseType
-      :: template ReturnImplementationType< IntersectionType>
-      :: ImplementationType &
+     ::template ReturnImplementationType< IntersectionType>
+     ::ImplementationType &
     getRealIntersection ( const IntersectionType &intersection ) const
     {
       return this->getRealImplementation( intersection );
     }
 
-    const GridObjectFactoryType& factory() const {
+    const GridObjectFactoryType& factory() const
+    {
 #ifdef USE_SMP_PARALLEL
-      assert( (int) factoryVec_.size() > GridObjectFactoryType :: threadNumber() );
-      return factoryVec_[ GridObjectFactoryType :: threadNumber() ];
+      assert( (int) factoryVec_.size() > GridObjectFactoryType::threadNumber() );
+      return factoryVec_[ GridObjectFactoryType::threadNumber() ];
 #else
       return factory_;
 #endif
@@ -665,11 +657,11 @@ namespace Dune {
 
   public: 
     template < class EntitySeed >
-    typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
+    typename Traits::template Codim< EntitySeed::codimension >::EntityPointer
     entityPointer( const EntitySeed& seed ) const
     {
-      enum { codim = EntitySeed :: codimension };
-      typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
+      enum { codim = EntitySeed::codimension };
+      typedef typename Traits::template Codim< codim >::EntityPointer EntityPointer;
       typedef ALU2dGridEntityPointer < codim, const ThisType > ALUPointer ;
       return ALUPointer( factory(), seed ) ;
     }
@@ -723,16 +715,6 @@ namespace Dune {
       return (nrOfHangingNodes_ > 0);
     }
 
-#if ALU2DGRID_PARALLEL
-    typedef RankManager<ThisType> RankManagerType;
-    RankManagerType rankManager_;
-  public:    
-    const RankManagerType& rankManager() const 
-    {
-      return rankManager_;
-    }
-#endif
-
   public:
       /** \brief @copydoc Dune::Grid::communicate */
     template<class DataHandleImp,class DataTypeImp>
@@ -746,19 +728,8 @@ namespace Dune {
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, 
         InterfaceType iftype, CommunicationDirection dir) const;
 
-    int ghostSize ( int level, int codim ) const
-    {
-      return ghostSize( codim );
-    }
-
-    int ghostSize ( int codim ) const
-    {
-#if ALU2DGRID_PARALLEL
-      return 1;
-#else
-      return 0;
-#endif
-    }
+    int ghostSize ( int level, int codim ) const { return 0; }
+    int ghostSize ( int codim ) const { return 0; }
 
     /** \brief @copydoc Dune::Grid::loadBalance */
     bool loadBalance() ;
@@ -767,11 +738,7 @@ namespace Dune {
     template<class DataHandle>
     bool loadBalance(DataHandle& data) ;
 
-    void checkManager() { 
-#if ALU2DGRID_PARALLEL
-      rankManager_.notifyMarking () ; 
-#endif
-    }
+    void checkManager() {}
 
   }; // end class ALU2dGrid
 
@@ -800,4 +767,4 @@ namespace Dune {
 
 #include "grid_imp.cc"
 
-#endif
+#endif // #ifndef DUNE_ALU2DGRIDGRID_HH

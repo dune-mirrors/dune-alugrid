@@ -4,16 +4,15 @@
 #define ALUGRID_NOTEMPFILE_2D
 #define ALUGRID_SURFACE_2D
 
-#include "indexstack.h"
+#include <dune/alugrid/src/indexstack.h>
+#include <dune/alugrid/src/projectvertex.h>
 
-#include "projectvertex.h"
-
-#include "2d/grid.h"
-#include "2d/triang.h"
-#include "2d/listwalk.h"
-#include "2d/handle.h"
-#include "2d/vtx_btree.h"
-#include "2d/vmmap.h"
+#include <dune/alugrid/src/2d/grid.h>
+#include <dune/alugrid/src/2d/triang.h>
+#include <dune/alugrid/src/2d/listwalk.h>
+#include <dune/alugrid/src/2d/handle.h>
+#include <dune/alugrid/src/2d/vtx_btree.h>
+#include <dune/alugrid/src/2d/vmmap.h>
 
 //////////////////////////////////////////////////////////////////////
 // compile imp.cc into lib (1 yes, 0 no)
@@ -34,40 +33,26 @@
 #endif
 /////////////////////////////////////////////////////////////////////
 
-// fix for ALUGrid 1.22, where ALUGRID_VERTEX_PROJECTION is defined only in alugrid_serial.h
-#ifndef ALUGRID_VERTEX_PROJECTION
-#include <alugrid_serial.h>
-#endif
-
 #define ALU2DSPACE ALU2DSPACENAME ::
 
 #define ALU2DSPACENAME ALU2DGrid
 #define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
 
-// use the ALU3dGrid Parallel detection
-#include <dune/alugrid/common/checkparallel.hh>
-//#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
 #define ALU2DGRID_PARALLEL 0
 
 #include <dune/common/parallel/collectivecommunication.hh>
 
-#if ALU2DGRID_PARALLEL
-//#include "communicator.hh"
-#warning "Using ALU2dGrid in parallel"
-#endif
-
-
-namespace ALU2DSPACENAME
+namespace ALU2DGrid
 {
 
   enum ElementType { triangle, quadrilateral, mixed };
 
-}
+} // namespace ALU2DGrid
 
 
 namespace Dune
 {
-  
+
   typedef double alu2d_ctype;
 
 

@@ -1,7 +1,6 @@
 #ifndef DUNE_ALU2DGRIDGEOMETRY_HH
 #define DUNE_ALU2DGRIDGEOMETRY_HH
 
-// Dune includes
 #include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
@@ -777,4 +776,4 @@ namespace Dune
 
 #include "geometry_imp.cc"
 
-#endif
+#endif // #ifndef DUNE_ALU2DGRIDGEOMETRY_HH

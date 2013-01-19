@@ -3,7 +3,6 @@
 
 #define ALU3DGRID_PARALLEL HAVE_MPI
 
-//- common includes 
 #include <dune/common/parallel/collectivecommunication.hh>
 #if ALU3DGRID_PARALLEL
 #include <dune/common/parallel/mpicollectivecommunication.hh>

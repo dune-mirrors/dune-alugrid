@@ -218,20 +218,24 @@ namespace ALUGrid
     };
   protected :
     AccessIterator () {}
+
     virtual ~AccessIterator () 
     { 
 #ifndef NDEBUG 
-      if(ref) 
-        cerr << "WARNING: (IGNORED) There still exist iterators while corresponding grid is deleted! in: " << __FILE__ << " line: " << __LINE__ << endl; 
+      if( ref )
+        std::cerr << "WARNING: (ignored) Some iterators still exist when removing the corresponding grid." << std::endl;
 #endif
     }
   };
 
+
   // the Leaf Iterators 
-  template < class A > class LeafIterator;
+  template< class A >
+  class LeafIterator;
 
   // the Level Iterators 
-  template < class A > class LevelIterator;
+  template< class A >
+  class LevelIterator;
 
 
   class Gitter
@@ -506,69 +510,69 @@ namespace ALUGrid
     //
     /////////////////////////////////////////////////////////////////////////////
 
-    class Parallel {
-      public :
+    class Parallel
+    {
+    public:
+      class CommunicationBuffer 
+      {
+      protected:
+        typedef std::vector< SmallObjectStream > BufferType; 
+        BufferType * _buff; 
 
-        class CommunicationBuffer 
+        CommunicationBuffer () : _buff(0) {}
+        ~CommunicationBuffer () 
+        { 
+          if(_buff) delete _buff; 
+          _buff = 0;  
+        }
+      public:   
+        void reserveBuffer (const size_t size)
         {
-          protected:
-            typedef std::vector< SmallObjectStream > BufferType; 
-            BufferType * _buff; 
+          if(_buff) 
+          {
+            // adjust size 
+            if( size > _buff->size() ) _buff->resize( size );
+          }
+          else 
+          {
+            _buff = new BufferType( size ); 
+          }
+        }
 
-            CommunicationBuffer () : _buff(0) {}
-            ~CommunicationBuffer () 
-            { 
-              if(_buff) delete _buff; 
-              _buff = 0;  
-            }
-          public:   
-            void reserveBuffer (const size_t size)
-            {
-              if(_buff) 
-              {
-                // adjust size 
-                if( size > _buff->size() ) _buff->resize( size );
-              }
-              else 
-              {
-                _buff = new BufferType( size ); 
-              }
-            }
-            BufferType & commBuffer () { assert(_buff); return *_buff; }
-            const BufferType & commBuffer () const { assert(_buff); return *_buff; }
-        };
+        BufferType & commBuffer () { assert(_buff); return *_buff; }
+        const BufferType & commBuffer () const { assert(_buff); return *_buff; }
+      };
         
-        typedef ParallelException::AccessPllException  AccessPllException;
+      typedef ParallelException::AccessPllException  AccessPllException;
       
-        class VertexIF : public VertexPllXDefault
+      class VertexIF
+      : public VertexPllXDefault
 #ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
-          : public CommunicationBuffer 
+      : public CommunicationBuffer
 #endif
+      {
+      public:
+        virtual ~VertexIF () {}
+        typedef class Key1SLZ identifier_t;
+        virtual VertexPllXIF & accessPllX () throw (AccessPllException) 
         {
-          public :
-            virtual ~VertexIF () {}
-            typedef class Key1SLZ identifier_t;
-            virtual VertexPllXIF & accessPllX () throw (AccessPllException) 
-            {
-              assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl)));
-              throw AccessPllException ();
-            }
-            virtual const VertexPllXIF & accessPllX () const throw (AccessPllException)
-            {
-              assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl)));
-              throw AccessPllException ();
-            }
-            virtual void detachPllXFromMacro () throw (AccessPllException)
-            {
-              assert ((abort (), (cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << endl)));
-              throw AccessPllException ();
-            }
-        };
+          assert((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
+          throw AccessPllException ();
+        }
+        virtual const VertexPllXIF & accessPllX () const throw (AccessPllException)
+        {
+          assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
+          throw AccessPllException ();
+        }
+        virtual void detachPllXFromMacro () throw (AccessPllException)
+        {
+          assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
+          throw AccessPllException ();
+        }
+      };
     };
+
   public:
-
-  ///////////////////////////////////////////////////
-
     IteratorRefcount ref;
     static bool debugOption (int = 0);
 
@@ -2972,7 +2976,7 @@ namespace ALUGrid
   inline Gitter::Geometric::VertexGeo::~VertexGeo () 
   {
     this->freeIndex( indexManager() );
-    assert (ref ? (cerr << "**WARNING VertexGeo::refcount was " << ref << endl, 1) : 1);
+    assert (ref ? (std::cerr << "**WARNING VertexGeo::refcount was " << ref << std::endl, 1) : 1);
     return;
   }
 
@@ -3028,33 +3032,30 @@ namespace ALUGrid
   // #     #  #       #    #  #    #  #         #
   // #     #  ######  #####    ####   ######  #####
 
-  inline Gitter::Geometric::hedge1::hedge1 (myvertex_t * a, myvertex_t * b) : v0 (a), v1 (b) { 
-    v0->ref ++; 
-    v1->ref ++;
-    return;
+  inline Gitter::Geometric::hedge1::hedge1 ( myvertex_t *a, myvertex_t *b )
+  : v0( a ), v1( b )
+  {
+    ++v0->ref;
+    ++v1->ref;
   }
 
-  inline Gitter::Geometric::hedge1::~hedge1 () {
-    assert (ref ? (cerr << "**WARNING hedge1::refcount was " << ref << endl, 1) : 1);
+  inline Gitter::Geometric::hedge1::~hedge1 ()
+  {
+    assert (ref ? (std::cerr << "**WARNING hedge1::refcount was " << ref << std::endl, 1) : 1);
     assert ( ref == 0 );
     v0->ref --; 
     v1->ref --;
     return;
   }
 
-  inline int Gitter::Geometric::hedge1::postRefinement () {
-    return 0;
-  }
+  inline int Gitter::Geometric::hedge1::postRefinement () { return 0; }
 
-  inline int Gitter::Geometric::hedge1::preCoarsening () {
-    return 0;
-  }
+  inline int Gitter::Geometric::hedge1::preCoarsening () { return 0; }
 
-  inline bool Gitter::Geometric::hedge1::lockedAgainstCoarsening () const {
-    return false;
-  }
+  inline bool Gitter::Geometric::hedge1::lockedAgainstCoarsening () const { return false; }
 
-  inline Gitter::Geometric::VertexGeo * Gitter::Geometric::hedge1::myvertex (int i) {
+  inline Gitter::Geometric::VertexGeo * Gitter::Geometric::hedge1::myvertex (int i)
+  {
     assert (i == 0 || i == 1);
     return i == 1 ? v1 : v0;
   }
@@ -3217,7 +3218,7 @@ namespace ALUGrid
   {
     assert( nb.emptyFront() );
     assert( nb.emptyRear() );
-    assert (ref ? (cerr << "**WARNING hface3::refcount was " << ref << endl, 1) : 1);
+    assert (ref ? (std::cerr << "**WARNING hface3::refcount was " << ref << std::endl, 1) : 1);
     e [0] -> ref --;
     e [1] -> ref --;
     e [2] -> ref --;
@@ -3426,7 +3427,7 @@ namespace ALUGrid
   }
 
   inline Gitter::Geometric::hface4::~hface4 () {
-    assert (ref ? (cerr << "**WARNING hface4::refcount was " << ref << endl, 1) : 1);
+    assert (ref ? (std::cerr << "**WARNING hface4::refcount was " << ref << std::endl, 1) : 1);
     e [0] -> ref --;
     e [1] -> ref --;
     e [2] -> ref --;

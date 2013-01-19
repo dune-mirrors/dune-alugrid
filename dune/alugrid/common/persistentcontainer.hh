@@ -6,6 +6,7 @@
 
 namespace Dune
 {
+
   template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm,
             class Data, class Allocator >
   class PersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, Data, Allocator >
@@ -26,7 +27,6 @@ namespace Dune
     {}
   };
 
-#if 0
   template< int dim, int dimworld, ALU2DSPACE ElementType elType, class Data, class Allocator >
   class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, Data, Allocator >
   : public PersistentContainerVector< ALU2dGrid< dim, dimworld, elType >, 
@@ -45,7 +45,6 @@ namespace Dune
     : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
     {}
   };
-#endif
 
   template< ALU3dGridElementType elType, class Comm, class Data, class Allocator >
   class PersistentContainer< ALU3dGrid< elType, Comm >, Data, Allocator >
@@ -78,6 +77,6 @@ namespace Dune
     }
   };
 
-} // end namespace Dune
+} // namespace Dune
 
-#endif // end DUNE_ALU_PERSISTENTCONTAINER_HH
+#endif // #ifndef DUNE_ALU_PERSISTENTCONTAINER_HH
