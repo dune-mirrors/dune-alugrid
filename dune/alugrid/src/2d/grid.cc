@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include "grid.h"
 
 // ***************************************************
@@ -12,12 +14,11 @@
 // ***************************************************
 
 template < int N >
-void Fullvertex < N >::write(ostream & out) const {
-
-  for(int i = 0 ; i < ncoord ; i ++ ) out << vcoord[i] << "  " ;
-   
-  out << endl ;
-
+void Fullvertex < N >::write ( std::ostream &out ) const
+{
+  for( int i = 0; i < ncoord; ++i )
+    out << vcoord[ i ] << "  ";
+  out << std::endl;
 }
 // ***************************************************
 // #begin(method)
@@ -30,13 +31,11 @@ void Fullvertex < N >::write(ostream & out) const {
 // #end(method)
 // ***************************************************
 
-template < int N >
-void Fullvertex < N >::read(istream & in) {
-
-  for(int i = 0 ; i < ncoord ; i ++) 
-
+template< int N >
+void Fullvertex< N >::read ( std::istream &in )
+{
+  for ( int i = 0; i < ncoord; ++i ) 
     in >> vcoord[i] ;
-
 }
 // ***************************************************
 // #begin(method)
@@ -49,11 +48,10 @@ void Fullvertex < N >::read(istream & in) {
 // #end(method)
 // ***************************************************
 
-void Edge::write(ostream & out) const {
-
+void Edge::write ( std::ostream &out ) const
+{
   out << getIndex();
-  out << endl ;
-
+  out << std::endl;
 }
 // ***************************************************
 // #begin(method)
@@ -66,10 +64,9 @@ void Edge::write(ostream & out) const {
 // #end(method)
 // ***************************************************
 
-void Edge::read(istream & in) {
-
+void Edge::read ( std::istream &in )
+{
   in >> setIndex();
-
 }
 
 template < int N, int NV >
@@ -119,7 +116,8 @@ Element < N, NV >::~Element()
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-void Element < N, NV >::c::write(ostream &out) const {
+void Element < N, NV >::c::write ( std::ostream &out ) const
+{
   for(int i = 0 ; i < NV ; i ++ ) 
   {
     out << (vtx[i] ? vtx[i]->Listagent < vertex_t > :: number() : -1 ) << "  " ;
@@ -139,11 +137,12 @@ void Element < N, NV >::c::write(ostream &out) const {
 // #end(method)
 // ***************************************************
 template < int N, int NV >
-int Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
-  string line;
+int Element < N, NV >::c::read ( std::istream &in, vertex_t **v, const int l )
+{
+  std::string line;
   while (in && line == "")
-    getline( in, line );
-  istringstream linein( line );
+    std::getline( in, line );
+  std::istringstream linein( line );
   int i;
   for (i = 0; ; ++i)
   {
@@ -154,17 +153,17 @@ int Element < N, NV >::c::read(istream & in, vertex_t ** v, const int l) {
       // we want at least 3 vertices (also for NV = 4)
       if ( i >= 3 )
         break;
-      cerr << "Too few element vertices read from file" << endl;
+      std::cerr << "Too few element vertices read from file" << std::endl;
       abort();
     }
     if ( i >= NV )
     {
-      cerr << "Too many element vertices read from file" << endl;
+      std::cerr << "Too many element vertices read from file" << std::endl;
       abort();
     }
     if ( (vtxNumber < 0) || (vtxNumber >= l) )
     {
-      cerr << "Wrong vertex number for element read from file" << endl;
+      std::cerr << "Wrong vertex number for element read from file" << std::endl;
       abort();
     }
     set((vertex_t *)v[vtxNumber], i) ;
@@ -407,11 +406,12 @@ void Element < N, NV >::setorientation()
     const double (&v1)[ncoord]=connect.vtx[1]->coord();
     const double (&v2)[ncoord]=connect.vtx[2]->coord();
     o=(v1[0]-v0[0])*(v2[1]-v1[1])-(v1[1]-v0[1])*(v2[0]-v1[0]);
-    if (fabs(o)<1e-10) {
-      cerr << o << " " 
+    if (fabs(o)<1e-10)
+    {
+      std::cerr << o << " " 
            << v0[0] << "," << v0[1] << " "
            << v1[0] << "," << v1[1] << " "
-           << v2[0] << "," << v2[1] << endl;
+           << v2[0] << "," << v2[1] << std::endl;
     }
     if (NV == 4) 
     { // test that element is convex
@@ -450,13 +450,13 @@ void Element < N, NV >::setorientation()
 template < int N, int NV >
 void Element < N, NV >::switchorientation(int a,int b)
 {
-  swap(connect.vtx[a],connect.vtx[b]);
-  swap(connect.nb[a],connect.nb[b]);
-  swap(connect.edge[a],connect.edge[b]);
-  swap(connect.bck[a],connect.bck[b]);
-  swap(connect.normdir[a],connect.normdir[b]);
+  std::swap(connect.vtx[a],connect.vtx[b]);
+  std::swap(connect.nb[a],connect.nb[b]);
+  std::swap(connect.edge[a],connect.edge[b]);
+  std::swap(connect.bck[a],connect.bck[b]);
+  std::swap(connect.normdir[a],connect.normdir[b]);
   for (int i=0;i<ncoord;++i)
-    swap(_outernormal[a][i],_outernormal[b][i]);
+    std::swap(_outernormal[a][i],_outernormal[b][i]);
 
   connect.nb[a]->nbconnect(connect.bck[a],this,a);
   connect.nb[b]->nbconnect(connect.bck[b],this,b);
@@ -610,19 +610,16 @@ Bndel < N,NV >::c::~c() {
 }
 
 template < int N, int NV >
-void Bndel < N,NV >::c::write(ostream &out) const {
-
+void Bndel < N,NV >::c::write ( std::ostream &out ) const
+{
   // out << nv << "  " ;
-
   for( int i = 0 ; i < nv ; i ++ )
-
     out << vtx[i]->Listagent < vertex_t > :: number() << "  " ;
-    
 }
 
 template < int  N, int NV >
-void Bndel < N,NV >::c::read(istream & in, vertex_t ** v, const int l) {
-
+void Bndel < N,NV >::c::read ( std::istream &in, vertex_t **v, const int l )
+{
   int c ;
 
   for(int i = 0 ; i < nv ; i ++) {
@@ -632,9 +629,7 @@ void Bndel < N,NV >::c::read(istream & in, vertex_t ** v, const int l) {
     assert(-1 <= c && c < l) ;
 
     if(c != -1) set((vertex_t *)v[c], i) ;
- 
   }
-
 }
 
 // ***************************************************

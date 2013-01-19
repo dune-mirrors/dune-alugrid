@@ -1,59 +1,51 @@
 #ifndef __HEADER__VMMAP
 #define __HEADER__VMMAP
 
-template < int N, int NV >
-class Multivertexadapter {
+#include <map>
+#include <vector>
 
-  public:
-    typedef Vertex < N > vertex_t;
-    typedef Element < N, NV > element_t;
+template< int N, int NV >
+class Multivertexadapter
+{
+public:
+  typedef Vertex < N > vertex_t;
+  typedef Element < N, NV > element_t;
 
-    typedef Macro < element_t > macroelement_t;
+  typedef Macro < element_t > macroelement_t;
 
-  private:
+private:
+  typedef struct value
+  {
+    void * a;
+    void * d;
+    int b;
+    int c;
 
-  typedef struct value {
-
-    void * a ;
-
-    void * d ;
-
-    int b ;
-
-    int c ;
-
-    value(vertex_t * x = 0, int y = 0) : a(x), b(y), c(0) { }
-
+    value(vertex_t * x = 0, int y = 0) : a(x), b(y), c(0) {}
    ~value() { }
+  } val_t;
 
-  } val_t ;
+  typedef std::map< std::vector< vertex_t * >, val_t > map_t;
 
-  typedef map < vector < vertex_t * > , val_t , less < vector < vertex_t * > > > map_t ;
+  std::vector< map_t > edmaps;
+  std::vector< map_t > f4maps;
 
-  vector < map_t > edmaps ;
+  Multivertexadapter(const Multivertexadapter &);
+  Multivertexadapter & operator=(const Multivertexadapter &);
 
-  vector < map_t > f4maps ;
+public :
+  Multivertexadapter();
+ ~Multivertexadapter() {}
 
-  Multivertexadapter(const Multivertexadapter &) ;
+  void refresh(Listwalk < macroelement_t > & );
 
-  Multivertexadapter & operator=(const Multivertexadapter &) ;
+  vertex_t * find( vertex_t *, vertex_t *, int );
 
-  public :
+  vertex_t * find( vertex_t *, vertex_t *, vertex_t *, vertex_t *, int );
 
-    Multivertexadapter() ;
+  void insert( vertex_t *, vertex_t *, vertex_t *, int );
 
-   ~Multivertexadapter() { }
+  void insert( vertex_t *, vertex_t *, vertex_t *, vertex_t *, vertex_t *, int );
+};
 
-    void refresh(Listwalk < macroelement_t > & ) ;
-
-    vertex_t * find( vertex_t *, vertex_t *, int ) ;
-
-    vertex_t * find( vertex_t *, vertex_t *, vertex_t *, vertex_t *, int ) ;
-
-    void insert( vertex_t *, vertex_t *, vertex_t *, int ) ;
-
-    void insert( vertex_t *, vertex_t *, vertex_t *, vertex_t *, vertex_t *, int ) ;
-
-} ;
-
-#endif
+#endif // #ifndef __HEADER__VMMAP

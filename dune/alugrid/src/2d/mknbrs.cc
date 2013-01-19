@@ -1,3 +1,7 @@
+#include <config.h>
+
+#include <map>
+
 #include "grid.h"
 #include "handle.h"
 
@@ -6,9 +10,9 @@
   template < int N, int NV >
   struct k {
 
-    Thinelement < N,NV > * a ;
+    Thinelement < N,NV > * a;
 
-    int b ;
+    int b;
 
     k(const struct k & l) : a(l.a), b(l.b) { }
 
@@ -19,29 +23,30 @@
   };
 
 template <int N,int NV>
-void Hmesh_basic<N,NV>::makeneighbours() {
+void Hmesh_basic<N,NV>::makeneighbours ()
+{
 /*
 #ifndef NDEBUG
-  int start = clock() ;
+  int start = clock();
 #endif
 */
 
   typedef k < ncoord, nvtx > value_t;
   //typedef vector < vertex_t * > key_t;
-  typedef pair < vertex_t *, vertex_t * > key_t;
-  typedef map < key_t , value_t , less < key_t > > map_t ;
+  typedef std::pair< vertex_t *, vertex_t * > key_t;
+  typedef std::map< key_t, value_t > map_t;
 
-  int count = 0 ;
+  int count = 0;
 
-  map_t m ;
+  map_t m;
 
   {
 
-    Levelwalk < element_t > lwe (mel,0) ;
+    Levelwalk < element_t > lwe (mel,0);
 
-    Levelwalk < bndel_t > lwb (mbl,0) ;
+    Levelwalk < bndel_t > lwb (mbl,0);
 
-    Alignwalk < helement_t, hbndel_t, thinelement_t > walk (lwe, lwb) ;
+    Alignwalk < helement_t, hbndel_t, thinelement_t > walk (lwe, lwb);
 
     for(walk.first(); !walk.done(); walk.next())
     {
@@ -80,22 +85,22 @@ void Hmesh_basic<N,NV>::makeneighbours() {
 
     if(!m.empty())
     {
-      cerr << "Wrong connectivity:" << endl;
-      typename map_t::iterator end = m.end() ;
+      std::cerr << "Wrong connectivity:" << std::endl;
+      typename map_t::iterator end = m.end();
       for(typename map_t::iterator it = m.begin(); it != end; ++it)
       {
         const key_t &key = it->first;
-        cerr << "key:" << key.first->getIndex() 
-             << " " << key.second->getIndex() << endl;
+        std::cerr << "key:" << key.first->getIndex() 
+             << " " << key.second->getIndex() << std::endl;
       }
       abort();
     }
 
   /*
 #ifndef NDEBUG
-  float used = (float)(clock() - start)/(float)(CLOCKS_PER_SEC) ;
-  cerr << "\n  Hmesh_basic::makeneighbours(?) resulted in " << count << " hits, " ;
-  cerr << m.size() << " faults, used time: " << (float)(used) << "\n" << endl ;
+  float used = (float)(clock() - start)/(float)(CLOCKS_PER_SEC);
+  std::cerr << "\n  Hmesh_basic::makeneighbours(?) resulted in " << count << " hits, ";
+  std::cerr << m.size() << " faults, used time: " << (float)(used) << "\n" << std::endl;
 #endif
   */
   }

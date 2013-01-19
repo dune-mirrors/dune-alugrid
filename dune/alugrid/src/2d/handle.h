@@ -1,15 +1,17 @@
 #ifndef __HEADER__HANDLE
 #define __HEADER__HANDLE
 
+#include "../indexstack.h"
+#include "../projectvertex.h"
 #include "vtxprojection.h"
 #include "grid.h"                               
 #include "listwalk.h"
 
 // is defined in indexstack.h 
-typedef ALUGridSpace::IndexManagerType IndexManager2dType;
+typedef ALUGrid::IndexManagerType IndexManager2dType;
 
 // is defined in indexstack.h 
-typedef ALUGridSpace::RestoreInfo  RestoreInfo;
+typedef ALUGrid::RestoreInfo RestoreInfo;
 
 // number of different index manager that exists
 enum { numOfIndexManager2d = 4 };
@@ -70,11 +72,11 @@ class Hmesh_basic : public IndexProvider {
     typedef Element < ncoord,nvtx > element_t;
     typedef Bndel < ncoord,nvtx > bndel_t;
 
-    typedef Hier < element_t > helement_t ;
-    typedef Hier < bndel_t > hbndel_t ;
+    typedef Hier < element_t > helement_t;
+    typedef Hier < bndel_t > hbndel_t;
 
-    typedef Macro < element_t > macroelement_t ;
-    typedef Macro < bndel_t > macrobndel_t ;
+    typedef Macro < element_t > macroelement_t;
+    typedef Macro < bndel_t > macrobndel_t;
 
     typedef Triang < ncoord, nvtx > triang_t;
     typedef Bndel_triang < ncoord, nvtx > bndel_triang_t;
@@ -86,7 +88,7 @@ class Hmesh_basic : public IndexProvider {
     typedef nconf_vtx < ncoord, nvtx > nconf_vtx_t;
 
     typedef VtxProjection < ncoord, nvtx > ProjectVertex_t;
-    typedef ALUGridSpace :: VertexProjection < N , double > CompatibilityProjectVertex_t;
+    typedef ALUGrid::VertexProjection< N , double > CompatibilityProjectVertex_t;
 
     struct OrientStr
     {
@@ -100,7 +102,7 @@ class Hmesh_basic : public IndexProvider {
     struct CompatibilityVertexProjection
     : public ProjectVertex_t
     {
-      using ProjectVertex_t :: operator () ;
+      using ProjectVertex_t :: operator ();
 
       typedef typename ProjectVertex_t::hbndel_t hbndel_t;
       typedef typename ProjectVertex_t::helement_t helement_t;
@@ -135,36 +137,36 @@ class Hmesh_basic : public IndexProvider {
 
     Listagency < vertex_t > vl;
 
-    Listagency < macroelement_t > mel ;
+    Listagency < macroelement_t > mel;
 
     Listagency < macrobndel_t >  mbl;
 
     const ProjectVertex_t  *_projectVertex;
     CompatibilityVertexProjection _compatibilityVertexProjection;
     
-    Listwalk < helement_t > * walk( helement_t *) { return new Leafwalk < element_t > (mel) ; }
+    Listwalk < helement_t > * walk( helement_t *) { return new Leafwalk < element_t > (mel); }
 
     // von mir dazugeschrieben...
-    Listwalk < helement_t > * walk( helement_t *, int level) { return new Levelwalk < element_t > (mel, level) ; }
+    Listwalk < helement_t > * walk( helement_t *, int level) { return new Levelwalk < element_t > (mel, level); }
     
-    Listwalk < vertex_t > * walk(vertex_t *) { return new Listwalk_impl < vertex_t > (vl) ; } 
+    Listwalk < vertex_t > * walk(vertex_t *) { return new Listwalk_impl < vertex_t > (vl); } 
 
-    Listwalk < macroelement_t > * walk(macroelement_t *) { return new Listwalk_impl < macroelement_t > (mel) ; }
+    Listwalk < macroelement_t > * walk(macroelement_t *) { return new Listwalk_impl < macroelement_t > (mel); }
     
-    Listwalk < hbndel_t > * walk( hbndel_t *) { return new Leafwalk < bndel_t > (mbl) ; }
+    Listwalk < hbndel_t > * walk( hbndel_t *) { return new Leafwalk < bndel_t > (mbl); }
     
     // von mir dazugeschrieben... (von wem?)
-    Listwalk < hbndel_t > * walk( hbndel_t *, int level) { return new Levelwalk < bndel_t > (mbl, level) ; }
+    Listwalk < hbndel_t > * walk( hbndel_t *, int level) { return new Levelwalk < bndel_t > (mbl, level); }
 
-    Hmesh_basic(const Hmesh_basic &) ;
+    Hmesh_basic(const Hmesh_basic &);
     
-    Hmesh_basic & operator = (const Hmesh_basic &) ;
+    Hmesh_basic & operator = (const Hmesh_basic &);
 
  protected:
     void asciiwritetriang(std::ostream &, double, unsigned long int nbr, 
                           int nconfDeg, Refco::tag_t ref_rule);
     
-    void asciireadtriang(istream &, const bool = true ) ;
+    void asciireadtriang ( std::istream &, const bool = true );
 
     void setorientation();
 
@@ -208,7 +210,7 @@ class Hmesh_basic : public IndexProvider {
    // set vertex projection pointer 
    void setVertexProjection(const ProjectVertex_t* ppv)
    {
-     _projectVertex = ppv ;
+     _projectVertex = ppv;
    }
 
    void setVertexProjection ( const CompatibilityProjectVertex_t *ppv )
@@ -217,17 +219,17 @@ class Hmesh_basic : public IndexProvider {
      _projectVertex = &_compatibilityVertexProjection;
    }
    
-   void makeneighbours() ;
+   void makeneighbours();
            
    virtual void refresh() { }
        
-   friend class Listwalkptr < helement_t > ;
+   friend class Listwalkptr < helement_t >;
  
-   friend class Listwalkptr < vertex_t > ;
+   friend class Listwalkptr < vertex_t >;
   
-   friend class Listwalkptr < hbndel_t > ;
+   friend class Listwalkptr < hbndel_t >;
 
-   friend class Listwalkptr < macroelement_t > ;
+   friend class Listwalkptr < macroelement_t >;
 
 };
 
@@ -235,9 +237,9 @@ class Hmesh_basic : public IndexProvider {
 template < int N, int NV >
 class Hmesh : public Hmesh_basic<N,NV> {
 
-  Hmesh & operator=(const Hmesh &) ;
+  Hmesh & operator=(const Hmesh &);
 
-  Hmesh(const Hmesh &) ;
+  Hmesh(const Hmesh &);
 
   typedef Hmesh_basic<N,NV> hmesh_basic_t;
 
@@ -252,11 +254,11 @@ class Hmesh : public Hmesh_basic<N,NV> {
   typedef Element < ncoord,nvtx > element_t;
   typedef Bndel < ncoord,nvtx > bndel_t;
 
-  typedef Hier < element_t > helement_t ;
-  typedef Hier < bndel_t > hbndel_t ;
+  typedef Hier < element_t > helement_t;
+  typedef Hier < bndel_t > hbndel_t;
 
-  typedef Macro < element_t > macroelement_t ;
-  typedef Macro < bndel_t > macrobndel_t ;
+  typedef Macro < element_t > macroelement_t;
+  typedef Macro < bndel_t > macrobndel_t;
 
   typedef Triang < ncoord, nvtx > triang_t;
   typedef Bndel_triang < ncoord, nvtx > bndel_triang_t;
@@ -281,13 +283,12 @@ class Hmesh : public Hmesh_basic<N,NV> {
 
   using hmesh_basic_t::vl;
 
-  using hmesh_basic_t::mel ;
+  using hmesh_basic_t::mel;
 
   using hmesh_basic_t::mbl;
 
-  private:
-
-  multivertexadapter_t * adp ;
+private:
+  multivertexadapter_t * adp;
 
   int _nconfDeg;
 
@@ -300,53 +301,49 @@ class Hmesh : public Hmesh_basic<N,NV> {
   nconf_vtx_t *ncv;
 
   void setup_grid(const std::string &);
-  bool setup_grid(istream &, double &, unsigned long int & );
+  bool setup_grid ( std::istream &, double &, unsigned long int & );
 
-  bool asciireadtriang(istream &, double &, unsigned long int & );
+  bool asciireadtriang ( std::istream &, double &, unsigned long int & );
   void asciiwritetriang(const std::string &, double, unsigned long int);
 
-  public:
-
-  Hmesh();
-
-  Hmesh(const std::string &, int, Refco::tag_t pref_rule);
+public:
+  Hmesh ();
+  Hmesh ( const std::string &, int, Refco::tag_t pref_rule );
 
   void printMemSize () 
   {
-    cout << "short int    = " << sizeof(short int) << endl ;
-    cout << "Basic        = " << sizeof( Basic  ) << endl;
-    cout << "Edge         = " << sizeof( Edge   ) << endl;
-    cout << "Element      = " << sizeof( element_t ) << endl;
-    cout << "connect      = " << sizeof( typename element_t :: connect_t  ) << endl;
-    cout << "BndEl        = " << sizeof( bndel_t ) << endl;
-    cout << "Triangle     = " << sizeof( triang_t ) << endl;
-    cout << "NonConf Vx   = " << sizeof( nconf_vtx_t ) << endl;
-    cout << "FullVertex   = " << sizeof( fullvertex_t ) << endl;
-    cout << "Vertex       = " << sizeof( Vertex < 3 > ) << endl;
-    cout << "Listagent    = " << sizeof( Listagent < Vertex < 3 > >) << endl;
-    cout << "Multi Vx Adp = " << sizeof( multivertexadapter_t ) << endl;
-    cout << "HElement     = " << sizeof( helement_t ) << endl;
+    std::cout << "short int    = " << sizeof(short int) << std::endl;
+    std::cout << "Basic        = " << sizeof( Basic  ) << std::endl;
+    std::cout << "Edge         = " << sizeof( Edge   ) << std::endl;
+    std::cout << "Element      = " << sizeof( element_t ) << std::endl;
+    std::cout << "connect      = " << sizeof( typename element_t :: connect_t  ) << std::endl;
+    std::cout << "BndEl        = " << sizeof( bndel_t ) << std::endl;
+    std::cout << "Triangle     = " << sizeof( triang_t ) << std::endl;
+    std::cout << "NonConf Vx   = " << sizeof( nconf_vtx_t ) << std::endl;
+    std::cout << "FullVertex   = " << sizeof( fullvertex_t ) << std::endl;
+    std::cout << "Vertex       = " << sizeof( Vertex < 3 > ) << std::endl;
+    std::cout << "Listagent    = " << sizeof( Listagent < Vertex < 3 > >) << std::endl;
+    std::cout << "Multi Vx Adp = " << sizeof( multivertexadapter_t ) << std::endl;
+    std::cout << "HElement     = " << sizeof( helement_t ) << std::endl;
   }
 
   // constructor taking istream with macro triang
   // number of hanging nodes and refinement rule 
-  Hmesh(istream&, int, Refco::tag_t pref_rule);
+  Hmesh ( std::istream &, int, Refco::tag_t pref_rule );
+  Hmesh ( const std::string &, Refco::tag_t pref_rule = Refco::ref_1 );
+  Hmesh ( const std::string &, int );
 
-  Hmesh(const std::string &, Refco::tag_t pref_rule = Refco::ref_1);
+  virtual ~Hmesh();
 
-  Hmesh(const std::string &, int);
+  void storeGrid ( const std::string &, double time = 0, unsigned long int nbr = 0 );
+  void storeGrid ( std::ostream &, double time = 0, unsigned long int nbr = 0 );
 
-  virtual ~Hmesh() ;
-
-  void storeGrid(const std::string &, double time = 0, unsigned long int nbr = 0);
-  void storeGrid(std::ostream &, double time = 0, unsigned long int nbr = 0);
-
-  bool recoverGrid(std::istream &);
+  bool recoverGrid ( std::istream & );
 
   void storeIndicies(std::ostream &out);
   void recoverIndicies(std::istream &in);
 
-  void refine() ;
+  void refine();
 
   // done call notify and loadBalancer
   bool duneAdapt (AdaptRestrictProlong2dType & arp);
@@ -355,9 +352,9 @@ class Hmesh : public Hmesh_basic<N,NV> {
 
   void coarse();
 
-  void refresh() ;
+  void refresh();
 
-  void setdata(void (*)(element_t &)) ;
-} ;
+  void setdata(void (*)(element_t &));
+};
 
-#endif
+#endif // #ifndef __HEADER__HANDLE

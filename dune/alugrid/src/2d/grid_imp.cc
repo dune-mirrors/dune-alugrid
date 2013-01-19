@@ -374,7 +374,7 @@ inline void Element < N, NV >::dirnormal(int fce,double (&n)[ncoord]) const
 
 template < int N, int NV >
 template <class O>
-void Element < N, NV >::setorientation(vector<O> &str)
+void Element< N, NV >::setorientation ( std::vector< O > &str )
 {
   assert( N == 3 );
   const int nf = numfaces();

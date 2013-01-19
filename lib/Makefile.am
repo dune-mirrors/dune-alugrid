@@ -1,7 +1,11 @@
 lib_LTLIBRARIES = libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la libalugrid_mpi.la libdunealugrid.la
 
 libalugrid_2d_la_SOURCES = \
-	$(top_srcdir)/dune/alugrid/src/2d/grid.cc
+	$(top_srcdir)/dune/alugrid/src/2d/grid.cc \
+	$(top_srcdir)/dune/alugrid/src/2d/mknbrs.cc \
+	$(top_srcdir)/dune/alugrid/src/2d/triang.cc \
+	$(top_srcdir)/dune/alugrid/src/2d/vmmap.cc \
+	$(top_srcdir)/dune/alugrid/src/2d/vtx_btree.cc
 
 libalugrid_2d_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_2d_la_LDFLAGS = $(AM_LDFLAGS)
