@@ -1,8 +1,12 @@
-// typdef these stream because this code uses a lot strstream
-typedef std::basic_stringbuf<char> strstreambuf_t;
+#include <config.h>
 
 #include <cassert>
+#include <fstream>
+#include <iostream>
 #include <vector>
+
+// typdef these stream because this code uses a lot strstream
+typedef std::basic_stringbuf<char> strstreambuf_t;
 
 #include "grid.h"
 #include "triang.h"
@@ -99,14 +103,14 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
 
   // read boundaries
   {
-    string line;
+    std::string line;
     // read line and skip empty lines 
     while( in && line.empty() )
     {
-      getline(in, line);
+      std::getline(in, line);
       line.erase(0, line.find_first_not_of( ' ' ));
     }
-    istringstream linein( line );
+    std::istringstream linein( line );
 
     // read number of boundary segments
     int nb = 0;
@@ -131,7 +135,7 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
     for( int i = 0; i < nb; ++i ) 
     {
       getline( in, line );
-      istringstream linein( line );
+      std::istringstream linein( line );
 
       // peek boundary element type
       int lt;
@@ -285,13 +289,13 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
     std::cerr << "\n  -------------------------- closed.\n" << std::endl;
 #endif
 
-  vl.renumber() ;
+  vl.renumber();
 
-  makeneighbours() ;
+  makeneighbours();
 
   {
-    Listwalk_impl < macroelement_t > walk(mel) ;
-    for (walk.first() ; !walk.done() ; walk.next() )
+    Listwalk_impl < macroelement_t > walk(mel);
+    for (walk.first(); !walk.done(); walk.next() )
     {
       triang_t &tr=( (triang_t &)(*walk.getitem()) );
       for (int l=0;l<tr.numfaces();l++) {
@@ -317,10 +321,10 @@ void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose)
 template <int N,int NV>
 void Hmesh_basic<N,NV> :: setorientation() 
 {
-  Listwalk_impl < macroelement_t > walkel(mel) ;
+  Listwalk_impl < macroelement_t > walkel(mel);
   if (N == 2)
   {
-    for (walkel.first() ; !walkel.done() ; walkel.next() )
+    for (walkel.first(); !walkel.done(); walkel.next() )
     {
       walkel.getitem()->setorientation();
       if (walkel.getitem()->numvertices() == 3)
@@ -329,9 +333,9 @@ void Hmesh_basic<N,NV> :: setorientation()
   }
   else
   {
-    vector<OrientStr> orientStack;
-    vector<bool> visited(walkel.size(),false);
-    for (walkel.first() ; !walkel.done() ; walkel.next() )
+    std::vector< OrientStr > orientStack;
+    std::vector< bool > visited(walkel.size(),false);
+    for (walkel.first(); !walkel.done(); walkel.next() )
     {
       if ( visited[ walkel.getitem()->getIndex() ] ) continue;
       walkel.getitem()->setorientation(orientStack);
@@ -355,8 +359,8 @@ void Hmesh_basic<N,NV> :: setorientation()
       }
     }
   }
-  Listwalk_impl < macrobndel_t > walkbnd(mbl) ;
-  for (walkbnd.first() ; !walkbnd.done() ; walkbnd.next() ) {
+  Listwalk_impl < macrobndel_t > walkbnd(mbl);
+  for (walkbnd.first(); !walkbnd.done(); walkbnd.next() ) {
     walkbnd.getitem()->setorientation();
     walkbnd.getitem()->edgeconnect(0,walkbnd.getitem()->neighbour(0)->edge(walkbnd.getitem()->opposite(0)));
   }
@@ -368,12 +372,12 @@ Hmesh<N,NV> :: asciiwritetriang(const std::string &filename,
                                 double time, unsigned long int nbr)
 {
 #ifndef NDEBUG
-  std::cerr << "\n  Hmesh_basic::asciiwritetriang(?) opens: " ;
+  std::cerr << "\n  Hmesh_basic::asciiwritetriang(?) opens: ";
   std::cerr << filename << "\n" << std::endl;
 #endif
 
   // create stream 
-  std::ofstream out(filename.c_str(), ios::out|ios::trunc);
+  std::ofstream out( filename.c_str(), std::ios::out | std::ios::trunc );
 
   // call write triang with stream 
   hmesh_basic_t::asciiwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
@@ -385,12 +389,12 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
                                       double time, unsigned long int nbr,
                                       int nconfDeg, Refco::tag_t refinement_rule)
 {
-  vl.renumber() ;
+  vl.renumber();
 
-  out.setf(ios::fixed, ios::floatfield) ;
+  out.setf( std::ios::fixed, std::ios::floatfield );
   
-  out << scientific ;
-  out.precision(16) ;
+  out << std::scientific;
+  out.precision(16);
 
   out << "!Backup ";
   out << time << " " << nbr << " ";
@@ -398,7 +402,7 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
 
   {
  
-    Listwalk_impl < vertex_t > walk(vl) ;
+    Listwalk_impl < vertex_t > walk(vl);
   
 #ifndef NDEBUG
     std::cerr << "    Number of Vertices:       " << walk.size() << std::endl;
@@ -406,22 +410,22 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
     
     int nr = 0;
     
-    for( walk.first() ; ! walk.done() ; walk.next() ) {
+    for( walk.first(); ! walk.done(); walk.next() ) {
     
-      vertex_t & v = walk.getitem() ;
+      vertex_t & v = walk.getitem();
 
-      if (v.isMacro()) ++nr ;
+      if (v.isMacro()) ++nr;
               
     }
 
     out << nr << std::endl;
 
-    for( walk.first() ; ! walk.done() ; walk.next() ) {
+    for( walk.first(); ! walk.done(); walk.next() ) {
     
-      vertex_t & v = walk.getitem() ;
+      vertex_t & v = walk.getitem();
 
       if (v.isMacro())
-        v.write(out) ;
+        v.write(out);
     
     }
     
@@ -429,9 +433,9 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
   
   {
 
-    Listwalk_impl < macroelement_t > walk(mel) ;
+    Listwalk_impl < macroelement_t > walk(mel);
 
-    int count = 0 ;
+    int count = 0;
 
     const int numMacroElements = walk.size();
 
@@ -441,7 +445,7 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
     
     out << numMacroElements << std::endl;
     
-    for( walk.first() ; ! walk.done() ; walk.next() ) {
+    for( walk.first(); ! walk.done(); walk.next() ) {
     
       walk.getitem()->write(out);
 
@@ -455,7 +459,7 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
   }
   
   {
-    Listwalk_impl < macrobndel_t > walk(mbl) ;
+    Listwalk_impl < macrobndel_t > walk(mbl);
     const int numMacroBoundaryElements = walk.size();
 
 #ifndef NDEBUG
@@ -465,7 +469,7 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
     out << numMacroBoundaryElements << std::endl;
 
     int index = 0, count = 0;
-    for( walk.first() ; ! walk.done() ; walk.next() )
+    for( walk.first(); ! walk.done(); walk.next() )
     {
       // make sure we can use the segment index to write out periodic neighbors
       if( index != walk.getitem()->segmentIndex() )
@@ -474,9 +478,9 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
         abort();
       }
 
-      walk.getitem()->write(out) ;
+      walk.getitem()->write(out);
 
-      count += walk.getitem()->count() ;
+      count += walk.getitem()->count();
       ++index;
     }
 
@@ -491,17 +495,16 @@ Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
  
 }
 
-template <int N,int NV>
-void Hmesh<N,NV>::
-storeGrid(const std::string &filename, double time, unsigned long int nbr)
+template< int N, int NV >
+void Hmesh< N, NV >::storeGrid ( const std::string &filename, double time, unsigned long int nbr )
 {
   // create outstream 
-  std::ofstream out(filename.c_str(), ios::out|ios::trunc);
+  std::ofstream out ( filename.c_str(), std::ios::out | std::ios::trunc );
 
-  if( ! out ) 
+  if( !out ) 
   {
     std::cerr << "ERROR: could not open file " << filename << std::endl << std::endl;
-    return ;
+    return;
   }
 
   // call stream version of store grid 
@@ -516,7 +519,7 @@ storeGrid(std::ostream &out, double time, unsigned long int nbr)
   hmesh_basic_t::asciiwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
 
   // Status des Gitters sichern
-  for( int level = 0 ;; level++ ) 
+  for( int level = 0;; level++ ) 
   {
     Levelwalk < element_t > walk(mel, level);
     if( ! walk.size() ) 
@@ -525,7 +528,7 @@ storeGrid(std::ostream &out, double time, unsigned long int nbr)
     } 
     else 
     {
-      for( walk.first() ; !walk.done() ; walk.next() )
+      for( walk.first(); !walk.done(); walk.next() )
       	out.put(walk.getitem().splitrule());
     }
   }
@@ -546,33 +549,33 @@ Hmesh<N,NV>::storeIndicies(std::ostream &out)
 
   // backup vertex indices 
   {
-    Listwalk_impl < vertex_t > walk(vl) ;
-    for( walk.first() ; ! walk.done() ; walk.next() ) 
+    Listwalk_impl < vertex_t > walk(vl);
+    for( walk.first(); ! walk.done(); walk.next() ) 
     {
       int idx=walk.getitem().getIndex();
-      out.write( ((const char *) &idx ), sizeof(int) ) ;
+      out.write( ((const char *) &idx ), sizeof(int) );
     }
   }
   
   // backup element and edge indices 
   {
     Levelwalk < element_t > walk(mel, 0);
-    for( walk.first() ; !walk.done() ; walk.next() ) 
+    for( walk.first(); !walk.done(); walk.next() ) 
     {
       SubtreeIterator < element_t > hier(&(walk.getitem()));
-      for (hier.first() ; !hier.done() ; hier.next() ) 
+      for (hier.first(); !hier.done(); hier.next() ) 
       {
         // element 
         {
 	        int idx=hier.getitem().getIndex();
-	        out.write( ((const char *) &idx ), sizeof(int) ) ;
+	        out.write( ((const char *) &idx ), sizeof(int) );
         }
 
         // edges 
 	      for (int e=0;e<hier.getitem().numfaces(); ++e) 
         {
 	        int idx=hier.getitem().edge(e)->getIndex();
-	        out.write( ((const char *) &idx ), sizeof(int) ) ;
+	        out.write( ((const char *) &idx ), sizeof(int) );
 	      }
       }
     }
@@ -586,13 +589,13 @@ Hmesh<N,NV>::recoverGrid(std::istream &in)
   int compwarn = 0;
 
   // Gitter wiederherstellen
-  for( int level = 0 ;; level++ ) 
+  for( int level = 0;; level++ ) 
   {
     {
       Levelwalk < element_t > walk(mel, level);
       if( !walk.size() )
         break;
-      for( walk.first() ; !walk.done() ; walk.next() ) 
+      for( walk.first(); !walk.done(); walk.next() ) 
       {
         char flag;
         in.get(flag);
@@ -660,10 +663,10 @@ Hmesh<N,NV>::recoverIndicies(std::istream &in)
     const int idxSize = vertexManager.getMaxIndex();
 
     // create vector, all entries are marked true 
-    vector<bool> isHole (idxSize, true );
+    std::vector< bool > isHole( idxSize, true );
 
-    Listwalk_impl < vertex_t > walk(vl) ;
-    for( walk.first() ; ! walk.done() ; walk.next() ) 
+    Listwalk_impl < vertex_t > walk(vl);
+    for( walk.first(); ! walk.done(); walk.next() ) 
     {
       vertex_t& vx = walk.getitem();
       in.read ( ((char *) &(vx.setIndex())), sizeof(int) );
@@ -685,14 +688,14 @@ Hmesh<N,NV>::recoverIndicies(std::istream &in)
     IndexManager2dType& edgeManager = indexmanager[IndexProvider::IM_Edges];
     const int edgeSize = edgeManager.getMaxIndex();
     // create vector, all entries are marked true
-    vector<bool> elementIsHole (elSize, true );
-    vector<bool> edgeIsHole  (edgeSize, true );
+    std::vector< bool > elementIsHole ( elSize, true );
+    std::vector< bool > edgeIsHole ( edgeSize, true );
     
     Levelwalk < element_t > walk(mel, 0);
-    for( walk.first() ; !walk.done() ; walk.next() ) 
+    for( walk.first(); !walk.done(); walk.next() ) 
     {
       SubtreeIterator < element_t > hier(&(walk.getitem()));
-      for (hier.first() ; !hier.done() ; hier.next() ) 
+      for (hier.first(); !hier.done(); hier.next() ) 
       {
         element_t &elem = hier.getitem();
 

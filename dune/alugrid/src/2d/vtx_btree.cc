@@ -1,4 +1,6 @@
-#include <math.h>
+#include <config.h>
+
+#include <cmath>
 #include "grid.h"
 #include "triang.h"
 
