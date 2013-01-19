@@ -79,9 +79,6 @@ namespace Dune
   first ( const EntityImp &en, int wLevel )
   {
     setFirstItem(en.getItem(),wLevel); 
-#if ALU2DGRID_PARALLEL 
-    checkValid();
-#endif
   }
     
 
@@ -372,9 +369,6 @@ namespace Dune
   inline void ALU2dGridLevelIntersectionIterator<GridImp> :: increment () 
   { 
     doIncrement();
-  #if ALU2DGRID_PARALLEL 
-    this->checkValid(); 
-  #endif
   }
 
 
@@ -385,9 +379,6 @@ namespace Dune
   first(const EntityType & en, int wLevel) 
   {
     setFirstItem(en.getItem(),wLevel); 
-  #if ALU2DGRID_PARALLEL 
-    this->checkValid();
-  #endif
   }
     
   //********************************************************************
@@ -445,9 +436,6 @@ namespace Dune
   inline void ALU2dGridLeafIntersectionIterator<GridImp> :: increment () 
   { 
     doIncrement();
-  #if ALU2DGRID_PARALLEL 
-    this->checkValid(); 
-  #endif
   }
 
   //! reset IntersectionIterator to first neighbour

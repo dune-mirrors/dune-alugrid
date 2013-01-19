@@ -71,50 +71,43 @@ namespace Dune
  
   //! Constructor which constructs an empty ALU2dGrid
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
-  inline ALU2dGrid< dim, dimworld, eltype >::ALU2dGrid(int nrOfHangingNodes)
-    : 
-#if ALU2DGRID_PARALLEL 
-      comm_( MPIHelper::getCommunicator() ),
-#endif
-    mygrid_ (0)
+  inline ALU2dGrid< dim, dimworld, eltype >::ALU2dGrid ( int nrOfHangingNodes )
+  : mygrid_( 0 ),
 #ifdef USE_SMP_PARALLEL
-    , factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) )
+    factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) ),
 #else
-    , factory_( *this )
+    factory_( *this ),
 #endif
-    , hIndexSet_(*this)      
-    , localIdSet_(*this)
-    , levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 ) 
-    , geomTypes_( dim+1 )
-    , leafIndexSet_(0)
-    , maxLevel_(0)
-    , refineMarked_ (0)
-    , coarsenMarked_ (0) 
-    , nrOfHangingNodes_(nrOfHangingNodes)
-    , sizeCache_(0)
-    , lockPostAdapt_(false)
-    , bndPrj_ ( 0 )
-    , bndVec_ ( 0 )
-    , vertexProjection_( 0 )
-#if ALU2DGRID_PARALLEL 
-    , rankManager_( *this )
-#endif
+    hIndexSet_(*this),
+    localIdSet_(*this),
+    levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 ),
+    geomTypes_( dim+1 ),
+    leafIndexSet_(0),
+    maxLevel_(0),
+    refineMarked_ (0),
+    coarsenMarked_ (0),
+    nrOfHangingNodes_(nrOfHangingNodes),
+    sizeCache_(0),
+    lockPostAdapt_(false),
+    bndPrj_ ( 0 ),
+    bndVec_ ( 0 ),
+    vertexProjection_( 0 )
   {
     makeGeomTypes();
   }
 
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
-  inline ALU2dGrid< dim, dimworld, eltype >::ALU2dGrid( const ALU2dGrid< dim, dimworld, eltype > &g )
-    : mygrid_ (0) 
-    , maxLevel_(0)
-    , coarsenMarked_(0) , refineMarked_(0)    
-    , geomTypes_(dim+1,1)
-    , hIndexSet_(*this)
-    , localIdSet_ (*this)   
-    , levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 ) 
-    , leafIndexSet_(0)
+  inline ALU2dGrid< dim, dimworld, eltype >::ALU2dGrid ( const ALU2dGrid< dim, dimworld, eltype > &g )
+  : mygrid_ ( 0 ),
+    maxLevel_(0),
+    coarsenMarked_(0) , refineMarked_(0),
+    geomTypes_(dim+1,1),
+    hIndexSet_(*this),
+    localIdSet_ (*this),
+    levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 ),
+    leafIndexSet_( 0 )
   {
-    DUNE_THROW(GridError,"Do not use copy constructor of ALU2dGrid! \n");
+    DUNE_THROW( GridError, "Do not use copy constructor of ALU2dGrid!" );
   }
 
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
@@ -277,9 +270,6 @@ namespace Dune
     ALU2DSPACE Listwalkptr< HElementType > walk( mesh() );
     for( walk->first(); !walk->done(); walk->next() ) 
       maxLevel_ = std::max( maxLevel_, walk->getitem().level() );
-#if ALU2DGRID_PARALLEL
-    maxLevel_ = comm().max( maxLevel_ );
-#endif
   }  
   
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
@@ -287,9 +277,6 @@ namespace Dune
   {
     // only in truly parallel runs update this 
     //if( comm_.size() > 1 ) rankManager_.update();
-#if ALU2DGRID_PARALLEL
-    rankManager_.update();
-#endif
 
     ////////////////////////////////////
     // reset size cache 
@@ -395,21 +382,10 @@ namespace Dune
       for( walk->first(); !walk->done(); walk->next() )
       {
         HElementType &item = walk->getitem();
-#if ALU2DGRID_PARALLEL
-        if( rankManager().isValid( item.getIndex(), Interior_Partition ) )
-#endif // #if ALU2DGRID_PARALLEL
         item.ALU2DSPACE Refco_el::mark( ALU2DSPACE Refco::ref );
       }
-#if ALU2DGRID_PARALLEL
-      rankManager_.notifyMarking();
-#endif // #if ALU2DGRID_PARALLEL
 
       mesh().refine();
-
-      // in parallel update rank information 
-#if ALU2DGRID_PARALLEL 
-      rankManager_.update();
-#endif
     }
 
     //update data
@@ -494,19 +470,10 @@ namespace Dune
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline bool ALU2dGrid< dim, dimworld, eltype >::adapt () 
   {
-
-#if ALU2DGRID_PARALLEL 
-    // make marking of ghost elements 
-    // needs one communication
-    rankManager_.notifyMarking();
-#else 
     if( lockPostAdapt_ == true )
-    {
-      DUNE_THROW(InvalidStateException,"Make sure that postAdapt is called after adapt was called and returned true!");
-    }
+      DUNE_THROW( InvalidStateException, "Make sure that postAdapt is called after adapt was called and returned true!" );
 
     if( (refineMarked_ > 0) || (coarsenMarked_ > 0) ) 
-#endif
     {
       // refine only will be done if 
       // at least one element was marked for refinement 
@@ -521,12 +488,8 @@ namespace Dune
 
       return adapted;
     }    
-#if ALU2DGRID_PARALLEL == 0
     else 
-    {
       return false;
-    }
-#endif
   }
 
 
@@ -550,12 +513,6 @@ namespace Dune
 
     // reserve memory
     handle.preAdapt( newElements );
-
-#if ALU2DGRID_PARALLEL 
-    // make marking of ghost elements 
-    // needs one communication
-    rankManager_.notifyMarking();
-#endif 
 
     bool ref = false;
     {
@@ -730,10 +687,6 @@ namespace Dune
     HmeshType & mygrd = myGrid();
     mygrd.storeGrid(filename.c_str(),time,0);
 
-#if ALU2DGRID_PARALLEL 
-      rankManager_.backup( filename );
-#endif
-
     // write time and maxlevel 
     {
       std::string extraName(filename);
@@ -767,11 +720,6 @@ namespace Dune
       assert(mygrid_ != 0);
     }
 
-#if ALU2DGRID_PARALLEL
-    calcMaxlevel();
-    rankManager_.restore( filename );
-#endif
-
     // calculate new maxlevel 
     // calculate indices 
     updateStatus();
@@ -790,10 +738,6 @@ namespace Dune
     myGrid().storeGrid( stream );
 #else 
     DUNE_THROW(NotImplemented,"ALUGrid::backup not implemented yet!");
-#endif
-
-#if ALU2DGRID_PARALLEL 
-    // rankManager_.backup( filename );
 #endif
   }
 
@@ -814,11 +758,6 @@ namespace Dune
       DUNE_THROW(InvalidStateException,"ALUGrid::restore failed");
     }
 
-#if ALU2DGRID_PARALLEL
-    calcMaxlevel();
-    rankManager_.restore( filename );
-#endif
-
     // calculate new maxlevel 
     // calculate indices 
     updateStatus();
@@ -834,15 +773,7 @@ namespace Dune
   inline void ALU2dGrid< dim, dimworld, eltype >::
   communicate (CommDataHandleIF<DataHandleImp,DataType> & data, 
                InterfaceType iftype, CommunicationDirection dir, int level ) const
-  {
-    // only communicate, if number of processes is larger than 1 
-#if ALU2DGRID_PARALLEL
-    if( comm_.size() > 1 ) 
-    {
-      rankManager_.communicate(data,iftype,dir,level);
-    }
-#endif
-  }
+  {}
 
   // communicate level data   
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
@@ -850,28 +781,13 @@ namespace Dune
   inline void ALU2dGrid< dim, dimworld, eltype >::
   communicate (CommDataHandleIF<DataHandleImp,DataType> & data, 
                InterfaceType iftype, CommunicationDirection dir) const
-  {
-#if ALU2DGRID_PARALLEL
-    // only communicate, if number of processes is larger than 1 
-    if( comm_.size() > 1 ) 
-    {
-      rankManager_.communicate(data,iftype,dir);
-    }
-#endif
-  }
+  {}
 
   // re-balance load of grid 
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline bool ALU2dGrid< dim, dimworld, eltype >::loadBalance () 
   {
-#if ALU2DGRID_PARALLEL 
-    if( comm_.size()  <= 1 ) return false;
-    bool changed = rankManager_.loadBalance();
-    if( changed ) updateStatus();
-    return changed;
-#else 
     return false;
-#endif
   } 
 
   // re-balance load of grid 
@@ -879,15 +795,9 @@ namespace Dune
   template <class DataHandleImp>
   inline bool ALU2dGrid< dim, dimworld, eltype >::loadBalance (DataHandleImp& data) 
   {
-#if ALU2DGRID_PARALLEL 
-    if( comm_.size()  <= 1 ) return false;
-    bool changed = rankManager_.loadBalance();
-    if( changed ) updateStatus();
-    return changed;
-#else 
     return false;
-#endif
-  } 
-}
+  }
 
-#endif
+} // namespace Dune
+
+#endif // #ifndef DUNE_ALU2DGRID_IMP_CC

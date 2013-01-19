@@ -403,11 +403,7 @@ public:
   //! return partition type of this entity ( see grid.hh )
   PartitionType partitionType() const
   { 
-#if ALU2DGRID_PARALLEL
     return grid().rankManager().partitionType( item_->getIndex() );
-#else 
-    return InteriorEntity;
-#endif
   }
    
   /**

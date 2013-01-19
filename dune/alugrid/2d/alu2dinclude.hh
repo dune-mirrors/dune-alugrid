@@ -1,8 +1,7 @@
 #ifndef DUNE_ALU2DGRID_INCLUDE_HH
 #define DUNE_ALU2DGRID_INCLUDE_HH
 
-#define ALUGRID_NOTEMPFILE_2D
-#define ALUGRID_SURFACE_2D
+#include <dune/common/parallel/collectivecommunication.hh>
 
 #include <dune/alugrid/src/indexstack.h>
 #include <dune/alugrid/src/projectvertex.h>
@@ -33,14 +32,7 @@
 #endif
 /////////////////////////////////////////////////////////////////////
 
-#define ALU2DSPACE ALU2DSPACENAME ::
-
-#define ALU2DSPACENAME ALU2DGrid
-#define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
-
-#define ALU2DGRID_PARALLEL 0
-
-#include <dune/common/parallel/collectivecommunication.hh>
+#define ALU2DSPACE ::ALU2DGrid::
 
 namespace ALU2DGrid
 {
@@ -66,19 +58,19 @@ namespace Dune
   template< int dimw, ALU2DSPACE ElementType eltype >
   struct ALU2dImplInterface< 0, dimw, eltype >
   {
-    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD(dimw,eltype) ::vertex_t Type;
+    typedef typename ALU2DSPACE Hmesh_basic< dimw, (eltype == ALU2DSPACE triangle ? 3 : 4) >::vertex_t Type;
   };
 
   template< int dimw, ALU2DSPACE ElementType eltype >
   struct ALU2dImplInterface< 1, dimw, eltype >
   {
-    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD(dimw,eltype) ::helement_t Type;
+    typedef typename ALU2DSPACE Hmesh_basic< dimw, (eltype == ALU2DSPACE triangle ? 3 : 4) >::helement_t Type;
   };
 
   template< int dimw, ALU2DSPACE ElementType eltype >
   struct ALU2dImplInterface< 2, dimw, eltype >
   {
-    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD(dimw,eltype) ::helement_t Type;
+    typedef typename ALU2DSPACE Hmesh_basic< dimw, (eltype == ALU2DSPACE triangle ? 3 : 4) >::helement_t Type;
   };
 #endif
 
@@ -95,12 +87,12 @@ namespace Dune
       typedef typename ALU2dImplInterface< 2-cdim, dimw, eltype >::Type InterfaceType;
     };
 
-    typedef ALU2DSPACE Hmesh ALU2DDIMWORLD(dimw,eltype) HmeshType;
-    typedef ALU2DSPACE Thinelement ALU2DDIMWORLD(dimw,eltype) ThinelementType;
-    typedef ALU2DSPACE Element ALU2DDIMWORLD(dimw,eltype) ElementType;
+    typedef ALU2DSPACE Hmesh< dimw, (eltype == ALU2DSPACE triangle ? 3 : 4) > HmeshType;
+    typedef ALU2DSPACE Thinelement< dimw, (eltype == ALU2DSPACE triangle ? 3 : 4) > ThinelementType;
+    typedef ALU2DSPACE Element< dimw, (eltype == ALU2DSPACE triangle ? 3 : 4) > ElementType;
     typedef typename HmeshType::helement_t HElementType;
     typedef typename HmeshType::hbndel_t HBndElType;
-    typedef ALU2DSPACE Bndel_periodic ALU2DDIMWORLD(dimw,eltype) PeriodicBndElType;
+    typedef ALU2DSPACE Bndel_periodic< dimw, (eltype == ALU2DSPACE triangle ? 3 : 4) > PeriodicBndElType;
   };
 
 
@@ -152,10 +144,6 @@ namespace Dune
         ElementType & elem = iter->getitem();
         int elIdx = elem.getIndex();
 
-        // if element is not valid, go to next 
-#if ALU2DGRID_PARALLEL 
-        if( ! grid.rankManager().isValid( elIdx , All_Partition ) ) continue;
-#endif
         for(int i=0; i<elem.numvertices(); ++i) 
         {
           enum { vxCodim = 1 };
@@ -234,10 +222,6 @@ namespace Dune
         ElementType & elem = iter->getitem();
         int elIdx = elem.getIndex();
 
-#if ALU2DGRID_PARALLEL 
-        // is element is not valid, go to next 
-        if( ! grid.rankManager().isValid( elIdx , All_Partition ) ) continue;
-#endif
         int level = elem.level();
 
         for(int i=0; i<elem.numvertices(); ++i) 
@@ -299,5 +283,6 @@ namespace Dune
       void write (const T &) {}
   };  
       
-} //end namespace Dune
-#endif
+} // namespace Dune
+
+#endif // #ifndef DUNE_ALU2DGRID_INCLUDE_HH

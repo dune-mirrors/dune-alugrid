@@ -10,9 +10,9 @@ namespace Dune
 
   template< class Grid >
   class ALU2dGridBoundaryProjection
-  : public ALU2DSPACE VtxProjection ALU2DDIMWORLD(Grid::dimensionworld,Grid::elementType)
+  : public ALU2DSPACE VtxProjection< Grid::dimensionworld,(Grid::elementType == ALU2DSPACE triangle ? 3 : 4) >
   {
-    typedef ALU2DSPACE VtxProjection ALU2DDIMWORLD(Grid::dimensionworld,Grid::elementType) Base;
+    typedef ALU2DSPACE VtxProjection< Grid::dimensionworld,(Grid::elementType == ALU2DSPACE triangle ? 3 : 4) > Base;
 
   public:
     enum { ncoord = Base::ncoord };

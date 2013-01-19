@@ -13,15 +13,15 @@ namespace ALU2DGrid
   // AdaptRestrictProlong2dImpl
   // --------------------------
 
-  template< class GridType, class AdaptDataHandle >
+  template< class Grid, class AdaptDataHandle >
   class AdaptRestrictProlong2dImpl
-  : public AdaptRestrictProlong2d ALU2DDIMWORLD( GridType::dimensionworld, GridType::elementType )
+  : public AdaptRestrictProlong2d< Grid::dimensionworld,(Grid::elementType == ALU2DSPACE triangle ? 3 : 4) >
   {
-    GridType & grid_;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
-    typedef typename Dune::ALU2dImplTraits< GridType::dimensionworld, GridType::elementType >::HElementType HElementType ;
-    
+    typedef Dune::MakeableInterfaceObject< typename Grid::template Codim< 0 >::Entity > EntityType;
+    typedef typename EntityType::ImplementationType RealEntityType;
+    typedef typename Dune::ALU2dImplTraits< Grid::dimensionworld, Grid::elementType >::HElementType HElementType;
+
+    Grid & grid_;
     EntityType & reFather_;
     EntityType & reSon_;
     RealEntityType & realFather_;
@@ -33,7 +33,7 @@ namespace ALU2DGrid
 
   public:
     //! Constructor
-    AdaptRestrictProlong2dImpl ( GridType &grid,
+    AdaptRestrictProlong2dImpl ( Grid &grid,
                                  EntityType &f, RealEntityType &rf,
                                  EntityType &s, RealEntityType &rs,
                                  AdaptDataHandle &rp )
@@ -44,8 +44,7 @@ namespace ALU2DGrid
       , realSon_(rs) 
       , rp_(rp) 
       , maxlevel_(-1) 
-    {
-    }
+    {}
 
     virtual ~AdaptRestrictProlong2dImpl () 
     {}

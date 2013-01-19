@@ -1,13 +1,11 @@
-#include "geometry.hh"
-#include "entity.hh"
-#include "grid.hh"
-//#include "faceutility.hh"
-#include <stack>
-#include <utility>
-
 #ifndef DUNE_ALU2DGRID_ITERATOR_IMP_CC
 #define DUNE_ALU2DGRID_ITERATOR_IMP_CC
 
+#include "geometry.hh"
+#include "entity.hh"
+#include "grid.hh"
+#include <stack>
+#include <utility>
 
 namespace Dune
 {
@@ -21,7 +19,7 @@ namespace Dune
 
 //! constructor
 template<int cdim, PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLeafIterator<cdim, pitype, GridImp> :: 
+inline ALU2dGridLeafIterator<cdim, pitype, GridImp>::
 ALU2dGridLeafIterator(const FactoryType& factory, bool end) :   
   EntityPointerType ( factory ),
   endIter_(end),
@@ -42,25 +40,7 @@ ALU2dGridLeafIterator(const FactoryType& factory, bool end) :
     if((!iter_->done()))
     {       
       elem_ = &(iter_->getitem());
-
-#if ALU2DGRID_PARALLEL
-      const bool valid = (cdim == 0) ? 
-        (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) : 
-        marker_.isValidVertex( elem_->getIndex() );
-#else 
-      const bool valid = true;
-#endif
-  
-      // if we found valid item, call update 
-      if( valid ) 
-      {
-        this->updateEntityPointer(elem_, -1, 
-            GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_)); 
-      }
-      else 
-      {
-        increment(); 
-      }
+      this->updateEntityPointer(elem_, -1, GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
     }
   }
   else
@@ -72,7 +52,7 @@ ALU2dGridLeafIterator(const FactoryType& factory, bool end) :
   
 //! copy constructor
 template<int cdim, PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLeafIterator<cdim, pitype, GridImp> :: 
+inline ALU2dGridLeafIterator<cdim, pitype, GridImp>::
 ALU2dGridLeafIterator(const ALU2dGridLeafIterator<cdim,pitype,GridImp> & org)
   : EntityPointerType (org)
   , endIter_( org.endIter_ )
@@ -86,10 +66,10 @@ ALU2dGridLeafIterator(const ALU2dGridLeafIterator<cdim,pitype,GridImp> & org)
 //! assignment 
 template<int cdim, PartitionIteratorType pitype, class GridImp>
 inline ALU2dGridLeafIterator<cdim, pitype, GridImp> & 
-ALU2dGridLeafIterator<cdim, pitype, GridImp> :: 
+ALU2dGridLeafIterator<cdim, pitype, GridImp>::
 operator = (const ThisType & org)
 {
-  EntityPointerType :: operator = (org);
+  EntityPointerType::operator = (org);
   endIter_ =  org.endIter_ ;
   level_   =  org.level_; 
   elem_    =  org.elem_;
@@ -103,7 +83,7 @@ operator = (const ThisType & org)
 
 //! prefix increment
 template<int cdim, PartitionIteratorType pitype, class GridImp> 
-inline void ALU2dGridLeafIterator<cdim, pitype, GridImp> :: increment () 
+inline void ALU2dGridLeafIterator<cdim, pitype, GridImp>::increment () 
 {
   if(endIter_) return ;          
 
@@ -119,31 +99,6 @@ inline void ALU2dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
   // get element pointer 
   elem_ = &(iter_->getitem());
 
-#if ALU2DGRID_PARALLEL
-  bool valid = (cdim == 0) ? 
-    (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) : 
-    marker_.isValidVertex( elem_->getIndex() );
-
-  while ( ! valid ) 
-  {
-    // go to next item 
-    iter_->next();
-      
-    if(iter_->done()) 
-    {      
-      endIter_ = true;
-      this->done();          
-      return ;    
-    }
-      
-    // get element pointer 
-    elem_ = &(iter_->getitem());
-    valid = (cdim == 0) ? 
-       (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) : 
-        marker_.isValidVertex( elem_->getIndex() );
-  }
-#endif
-
   this->updateEntityPointer(elem_, -1, 
       GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_)); 
 }
@@ -158,7 +113,7 @@ inline void ALU2dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
 
 //! constructor
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLeafIterator<1, pitype, GridImp> :: 
+inline ALU2dGridLeafIterator<1, pitype, GridImp>::
 ALU2dGridLeafIterator(const FactoryType& factory, bool end) :   
   EntityPointerType ( factory ),
   endIter_(end),
@@ -192,7 +147,7 @@ ALU2dGridLeafIterator(const FactoryType& factory, bool end) :
   
 //! copy constructor
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLeafIterator<1, pitype, GridImp> :: 
+inline ALU2dGridLeafIterator<1, pitype, GridImp>::
 ALU2dGridLeafIterator(const ALU2dGridLeafIterator<1,pitype,GridImp> & org)
   : EntityPointerType (org)
   , endIter_( org.endIter_ )
@@ -207,10 +162,10 @@ ALU2dGridLeafIterator(const ALU2dGridLeafIterator<1,pitype,GridImp> & org)
 //! assignment 
 template<PartitionIteratorType pitype, class GridImp>
 inline ALU2dGridLeafIterator<1, pitype, GridImp> & 
-ALU2dGridLeafIterator<1, pitype, GridImp> :: 
+ALU2dGridLeafIterator<1, pitype, GridImp>::
 operator = (const ThisType & org)
 {
-  EntityPointerType :: operator = (org);
+  EntityPointerType::operator = (org);
   endIter_ =  org.endIter_ ;
   level_   =  org.level_; 
   face_    =  org.face_; 
@@ -225,7 +180,7 @@ operator = (const ThisType & org)
 
 //! prefix increment
 template<PartitionIteratorType pitype, class GridImp> 
-inline void ALU2dGridLeafIterator<1, pitype, GridImp> :: increment() {
+inline void ALU2dGridLeafIterator<1, pitype, GridImp>::increment() {
   
   IteratorType & iter = iter_;       
   if(iter->done()) { 
@@ -249,22 +204,7 @@ inline void ALU2dGridLeafIterator<1, pitype, GridImp> :: increment() {
     }
     // get new element
     elem_ = &(iter->getitem());
-#if ALU2DGRID_PARALLEL 
-    while ( ! this->grid().rankManager().isValid( elem_->getIndex(), pitype ) )
-    {
-      // go to next item 
-      iter->next();
-      if(iter->done()) 
-      {            
-        endIter_=true;
-        face_= -1;      
-        this->done();
-        return ;    
-      }
-      elem_ = &(iter->getitem());
-    }
-#endif
-      
+
     face_=0;  
     // whatever this is good for 
     this->updateEntityPointer(elem_, face_, elem_->level());       
@@ -287,7 +227,7 @@ inline void ALU2dGridLeafIterator<1, pitype, GridImp> :: increment() {
 }
 
 template<PartitionIteratorType pitype, class GridImp> 
-inline int ALU2dGridLeafIterator<1, pitype, GridImp> :: goNextElement() 
+inline int ALU2dGridLeafIterator<1, pitype, GridImp>::goNextElement() 
 {
   assert(face_>=0);            
   const ElementType* item = this->seed_.item();
@@ -315,7 +255,7 @@ inline int ALU2dGridLeafIterator<1, pitype, GridImp> :: goNextElement()
 
 //! constructor for cd=0
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLevelIterator<0, pitype, GridImp> ::  
+inline ALU2dGridLevelIterator<0, pitype, GridImp>:: 
 ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :   
   EntityPointerType ( factory ),
   endIter_(end),
@@ -332,14 +272,7 @@ ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :
     {       
       item_ = &(iter_->getitem());      
       this->updateEntityPointer(item_, -1 , level_);       
-#if ALU2DGRID_PARALLEL
-      if ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-      {
-        increment();
-      }
-#endif
     }
-
   }
   else
   {
@@ -350,7 +283,7 @@ ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :
 
 //! copy constructor for cd=1
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLevelIterator<0, pitype, GridImp> :: 
+inline ALU2dGridLevelIterator<0, pitype, GridImp>::
 ALU2dGridLevelIterator(const ALU2dGridLevelIterator<0,pitype,GridImp> & org)
   : EntityPointerType (org)  
   , endIter_( org.endIter_ )
@@ -363,10 +296,10 @@ ALU2dGridLevelIterator(const ALU2dGridLevelIterator<0,pitype,GridImp> & org)
 //! assignment 
 template<PartitionIteratorType pitype, class GridImp>
 inline ALU2dGridLevelIterator<0, pitype, GridImp> & 
-ALU2dGridLevelIterator<0, pitype, GridImp> :: 
+ALU2dGridLevelIterator<0, pitype, GridImp>::
 operator = (const ThisType & org)
 {
-  EntityPointerType :: operator = (org);
+  EntityPointerType::operator = (org);
   endIter_ =  org.endIter_ ;
   level_   =  org.level_; 
   item_    =  org.item_;
@@ -376,7 +309,8 @@ operator = (const ThisType & org)
 
 //! prefix increment
 template<PartitionIteratorType pitype, class GridImp> 
-inline void ALU2dGridLevelIterator<0, pitype, GridImp> :: increment () {
+inline void ALU2dGridLevelIterator<0, pitype, GridImp>::increment ()
+{
   
   if(endIter_) return ;              
   
@@ -390,25 +324,7 @@ inline void ALU2dGridLevelIterator<0, pitype, GridImp> :: increment () {
   }
   item_ = &iter->getitem();    
 
-#if ALU2DGRID_PARALLEL 
-  while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-  {
-    // go to next item 
-    iter_->next();
-      
-    if(iter_->done()) {      
-      endIter_ = true;
-      this->done();          
-      return ;    
-    }
-      
-    // get element pointer 
-    item_ = &(iter_->getitem());
-  }
-#endif
-
-  this->updateEntityPointer(item_, -1 , level_);     
-  return;    
+  this->updateEntityPointer ( item_, -1 , level_ );
 }        
   
 
@@ -421,7 +337,7 @@ inline void ALU2dGridLevelIterator<0, pitype, GridImp> :: increment () {
 
 //! constructor for cd=1
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLevelIterator<1, pitype, GridImp> ::  
+inline ALU2dGridLevelIterator<1, pitype, GridImp>:: 
 ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :   
   EntityPointerType ( factory ),
   endIter_(end),
@@ -456,7 +372,7 @@ ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :
 
 //! copy constructor for cd=1
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLevelIterator<1, pitype, GridImp> :: 
+inline ALU2dGridLevelIterator<1, pitype, GridImp>::
 ALU2dGridLevelIterator(const ALU2dGridLevelIterator<1,pitype,GridImp> & org)
   : EntityPointerType (org)  
   , endIter_( org.endIter_ )
@@ -472,10 +388,10 @@ ALU2dGridLevelIterator(const ALU2dGridLevelIterator<1,pitype,GridImp> & org)
 //! assignment 
 template<PartitionIteratorType pitype, class GridImp>
 inline ALU2dGridLevelIterator<1, pitype, GridImp> & 
-ALU2dGridLevelIterator<1, pitype, GridImp> :: 
+ALU2dGridLevelIterator<1, pitype, GridImp>::
 operator = (const ThisType & org)
 {
-  EntityPointerType :: operator = (org);
+  EntityPointerType::operator = (org);
   endIter_ = org.endIter_ ;
   level_   = org.level_; 
   myFace_  = org.myFace_; 
@@ -489,14 +405,14 @@ operator = (const ThisType & org)
 }
 
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLevelIterator<1, pitype, GridImp> :: 
+inline ALU2dGridLevelIterator<1, pitype, GridImp>::
 ~ALU2dGridLevelIterator()
 {  
 }
 
 //! prefix increment
 template<PartitionIteratorType pitype, class GridImp> 
-inline void ALU2dGridLevelIterator<1, pitype, GridImp> :: increment () 
+inline void ALU2dGridLevelIterator<1, pitype, GridImp>::increment () 
 {
   // if already end iter, return 
   if(endIter_)  return ;              
@@ -535,20 +451,6 @@ inline void ALU2dGridLevelIterator<1, pitype, GridImp> :: increment ()
     
     // get new element 
     item_ = &iter->getitem();    
-#if ALU2DGRID_PARALLEL
-    while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-    {
-      iter->next();
-      if(iter->done()) 
-      {      
-        endIter_ = true;
-        myFace_= 0;
-        this->done();          
-        return ;    
-      }
-      item_ = &iter->getitem();    
-    }
-#endif
     
     myFace_= 0;  
     // whatever this does 
@@ -579,7 +481,7 @@ inline void ALU2dGridLevelIterator<1, pitype, GridImp> :: increment ()
 
 //! constructor for cd=2
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLevelIterator<2, pitype, GridImp> ::  
+inline ALU2dGridLevelIterator<2, pitype, GridImp>:: 
 ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :   
   EntityPointerType ( factory ),
   endIter_(end),
@@ -601,20 +503,6 @@ ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :
     if((!iter_->done()))
     { 
       item_ = &iter_->getitem();
-#if ALU2DGRID_PARALLEL 
-      while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-      {
-        iter_->next();
-        if(iter_->done()) 
-        {      
-          endIter_ = true;
-          myFace_= 0;
-          this->done();          
-          return ;    
-        }
-        item_ = &iter_->getitem();
-      }
-#endif
       vertex_ = item_->getVertex(myFace_);
       this->updateEntityPointer(vertex_, myFace_, level_);                   
       increment();
@@ -629,7 +517,7 @@ ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :
 
 //! copy constructor for cd=2
 template<PartitionIteratorType pitype, class GridImp>
-inline ALU2dGridLevelIterator<2, pitype, GridImp> :: 
+inline ALU2dGridLevelIterator<2, pitype, GridImp>::
 ALU2dGridLevelIterator(const ALU2dGridLevelIterator<2,pitype,GridImp> & org)
   : EntityPointerType (org)  
   , endIter_( org.endIter_ )
@@ -645,10 +533,10 @@ ALU2dGridLevelIterator(const ALU2dGridLevelIterator<2,pitype,GridImp> & org)
 //! assignment 
 template<PartitionIteratorType pitype, class GridImp>
 inline ALU2dGridLevelIterator<2, pitype, GridImp> & 
-ALU2dGridLevelIterator<2, pitype, GridImp> :: 
+ALU2dGridLevelIterator<2, pitype, GridImp>::
 operator = (const ThisType & org)
 {
-  EntityPointerType :: operator = (org);
+  EntityPointerType::operator = (org);
   endIter_ = org.endIter_ ;
   level_   = org.level_; 
   myFace_  = org.myFace_; 
@@ -670,7 +558,7 @@ inline ALU2dGridLevelIterator<2, pitype, GridImp> ::
 
 //! prefix increment
 template<PartitionIteratorType pitype, class GridImp> 
-inline void ALU2dGridLevelIterator<2, pitype, GridImp> :: increment () {
+inline void ALU2dGridLevelIterator<2, pitype, GridImp>::increment () {
   
   if(endIter_)
     return ;        
@@ -709,21 +597,6 @@ inline void ALU2dGridLevelIterator<2, pitype, GridImp> :: increment () {
     }
     item_ = &iter->getitem();
 
-#if ALU2DGRID_PARALLEL 
-    while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-    {
-      iter->next();
-      if(iter->done()) 
-      {      
-        endIter_ = true;
-        myFace_= 0;
-        this->done();          
-        return ;    
-      }
-      item_ = &iter->getitem();
-    }
-#endif
-    
     myFace_ = 0;  
     vertex_ = item_->getVertex(myFace_);
     this->updateEntityPointer(vertex_, myFace_, level_);   
@@ -754,7 +627,7 @@ inline void ALU2dGridLevelIterator<2, pitype, GridImp> :: increment () {
 
 //! the normal Constructor
 template<class GridImp>
-inline ALU2dGridHierarchicIterator<GridImp> :: 
+inline ALU2dGridHierarchicIterator<GridImp>::
 ALU2dGridHierarchicIterator(const FactoryType& factory, const HElementType & elem, int maxlevel, bool end)
   : ALU2dGridEntityPointer<0,GridImp>( factory )
   , elem_(&elem)
@@ -786,7 +659,7 @@ ALU2dGridHierarchicIterator(const FactoryType& factory, const HElementType & ele
   
 //! the normal Constructor
 template<class GridImp>
-inline ALU2dGridHierarchicIterator<GridImp> :: 
+inline ALU2dGridHierarchicIterator<GridImp>::
 ALU2dGridHierarchicIterator(const ALU2dGridHierarchicIterator<GridImp> &org) : 
     ALU2dGridEntityPointer<0,GridImp> (org)
   , elem_ (org.elem_)
@@ -834,8 +707,8 @@ goNextElement(HElementType * oldelem )
     
 //! increment, go to next entity
 template<class GridImp>
-inline void ALU2dGridHierarchicIterator<GridImp> :: increment() {
-
+inline void ALU2dGridHierarchicIterator<GridImp>::increment()
+{
   assert( this->seed_.item() != 0);
 
   HElementType * nextItem = goNextElement( this->seed_.item() );
@@ -846,8 +719,8 @@ inline void ALU2dGridHierarchicIterator<GridImp> :: increment() {
   }
 
   this->updateEntityPointer(nextItem);
-  return ; 
 }
  
-} //end namespace Dune
-#endif
+} // namespace Dune
+
+#endif // #ifndef DUNE_ALU2DGRID_ITERATOR_IMP_CC
