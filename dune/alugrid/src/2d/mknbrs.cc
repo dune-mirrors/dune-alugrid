@@ -57,7 +57,7 @@ namespace ALU2DGrid
           assert( e.numfacevertices(fce) == 2 );
           key_t key(e.vertex(fce, 0), e.vertex(fce, 1));
           if( key.first < key.second )
-            swap( key.first, key.second );
+            std::swap( key.first, key.second );
 
           /*
           int npv = e.numfacevertices(fce);
@@ -104,5 +104,16 @@ namespace ALU2DGrid
     */
     }
   }
+
+
+
+  // Template Instantiation
+  // ----------------------
+
+  template void Hmesh_basic< 2, 3 >::makeneighbours();
+  template void Hmesh_basic< 3, 3 >::makeneighbours();
+
+  template void Hmesh_basic< 2, 4 >::makeneighbours();
+  template void Hmesh_basic< 3, 4 >::makeneighbours();
 
 } // namespace ALU2DGrid

@@ -267,7 +267,7 @@ namespace ALU2DGrid
     typedef Bndel_triang < ncoord, nvtx > bndel_triang_t;
     typedef Bndel_periodic < ncoord, nvtx > bndel_periodic_t;
 
-    typedef Multivertexadapter < ncoord, nvtx > multivertexadapter_t;
+    typedef Multivertexadapter< ncoord, nvtx > multivertexadapter_t;
     typedef Vertex < ncoord > vertex_t;
     typedef Fullvertex < ncoord > fullvertex_t;
 

@@ -1,5 +1,5 @@
-#ifndef __HEADER__VMMAP
-#define __HEADER__VMMAP
+#ifndef ALUGRID_SRC_2d_VMMAP_H
+#define ALUGRID_SRC_2d_VMMAP_H
 
 #include <map>
 #include <vector>
@@ -53,4 +53,4 @@ namespace ALU2DGrid
 
 } // namespace ALU2DGrid
 
-#endif // #ifndef __HEADER__VMMAP
+#endif // #ifndef ALUGRID_SRC_2d_VMMAP_H

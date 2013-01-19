@@ -8,6 +8,7 @@
 #include "grid.h"
 #include "triang.h"
 #include "handle.h"
+#include "vmmap.h"
 
 namespace ALU2DGrid
 {
@@ -15,9 +16,8 @@ namespace ALU2DGrid
   // typdef these stream because this code uses a lot strstream
   typedef std::basic_stringbuf<char> strstreambuf_t;
 
-  template <int N,int NV>
-  bool
-  Hmesh<N,NV> :: asciireadtriang(std::istream &in, double &time, unsigned long int &nbr)
+  template< int N, int NV >
+  bool Hmesh< N, NV >::asciireadtriang ( std::istream &in, double &time, unsigned long int &nbr )
   {
     bool isbackup = false; // Wiederaufsetzen?
     int c = in.peek();
@@ -67,8 +67,8 @@ namespace ALU2DGrid
     return isbackup;
   }
    
-  template <int N,int NV>
-  void Hmesh_basic<N,NV> :: asciireadtriang(std::istream &in, const bool verbose) 
+  template< int N, int NV >
+  void Hmesh_basic< N, NV >::asciireadtriang ( std::istream &in, const bool verbose )
   {
     // read vertices
     int nv = 0;
@@ -726,5 +726,20 @@ namespace ALU2DGrid
       edgeManager.generateHoles( edgeIsHole );
     }
   }
+
+
+
+  // Template Instantiation
+  // ----------------------
+
+  template class Hmesh_basic< 2,3 >;
+  template class Hmesh< 2,3 >;
+  template class Hmesh_basic< 3,3 >;
+  template class Hmesh< 3,3 >;
+
+  template class Hmesh_basic< 2,4 >;
+  template class Hmesh< 2,4 >;
+  template class Hmesh_basic< 3,4 >;
+  template class Hmesh< 3,4 >;
 
 } // namespace ALU2DGrid
