@@ -1,6 +1,8 @@
 #ifndef DUNE_ALU2DGRID_IMP_CC
 #define DUNE_ALU2DGRID_IMP_CC
 
+#include <fstream>
+
 namespace Dune
 {
   
@@ -34,38 +36,27 @@ namespace Dune
             const DuneBoundaryProjectionVector* bndVec,
             std::istream* macroFile )
   : 
-#if ALU2DGRID_PARALLEL 
-    comm_( MPIHelper::getCommunicator() ), 
-#endif
-    mygrid_ ( createGrid(macroTriangFilename, nrOfHangingNodes, macroFile ) )
+    mygrid_ ( createGrid(macroTriangFilename, nrOfHangingNodes, macroFile ) ),
 #ifdef USE_SMP_PARALLEL
-    , factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) )
+    factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) ),
 #else
-    , factory_( *this )
+    factory_( *this ),
 #endif
-    , hIndexSet_(*this)      
-    , localIdSet_(*this)
-    , levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 ) 
-    , geomTypes_( dim+1 )
-    , leafIndexSet_(0)
-    , maxLevel_(0)
-    , refineMarked_ (0)
-    , coarsenMarked_ (0) 
-    , nrOfHangingNodes_( nrOfHangingNodes )
-    , sizeCache_(0)
-    , lockPostAdapt_(false)
-    , bndPrj_ ( bndPrj )
-    , bndVec_ ( bndVec )
-    , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
-#if ALU2DGRID_PARALLEL
-    , rankManager_( *this )
-#endif
+    hIndexSet_(*this),
+    localIdSet_(*this),
+    levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 ) ,
+    geomTypes_( dim+1 ),
+    leafIndexSet_(0),
+    maxLevel_(0),
+    refineMarked_ (0),
+    coarsenMarked_ (0) ,
+    nrOfHangingNodes_( nrOfHangingNodes ),
+    sizeCache_(0),
+    lockPostAdapt_(false),
+    bndPrj_ ( bndPrj ),
+    bndVec_ ( bndVec ),
+    vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
   {
-#if ALU2DGRID_PARALLEL
-    rankManager_.initialize();
-    //rankManager_.loadBalance();
-#endif
-
     assert(mygrid_);
 
 #ifdef ALUGRID_VERTEX_PROJECTION
@@ -154,8 +145,8 @@ namespace Dune
   inline const char * 
   ALU2dGrid< dim, dimworld, eltype >::checkMacroGridFile(const std::string & filename) 
   {
-    std::ifstream file(filename.c_str());
-    if(!file)
+    std::ifstream file( filename.c_str() );
+    if( !file )
     {
       std::cerr << "Couldn't open file '" << filename <<"' !" << std::endl;
       DUNE_THROW(IOError,"Couldn't open file '" << filename <<"' !");

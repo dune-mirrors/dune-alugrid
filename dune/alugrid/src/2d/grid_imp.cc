@@ -61,8 +61,8 @@ namespace ALU2DGrid
   inline Fullvertex < N >::Fullvertex(double (&p)[ncoord],int level) 
     : Vertex < N >( level ) 
   {
-    for(int i = 0 ; i < ncoord ; i ++) 
-      vcoord[i] = p[i] ;
+    for(int i = 0; i < ncoord; i ++) 
+      vcoord[i] = p[i];
   }
 
   // ***************************************************
@@ -132,9 +132,9 @@ namespace ALU2DGrid
   // ***************************************************
   template < int N, int NV >
   inline void Element < N, NV >::edge_vtx(int e, vertex_t *(&v) [2]) const {
-    assert(0 <= e) ;
-    v[0] = connect.vtx[mod(e+1)] ;
-    v[1] = connect.vtx[mod(e+2)] ;
+    assert(0 <= e);
+    v[0] = connect.vtx[mod(e+1)];
+    v[1] = connect.vtx[mod(e+2)];
   }
 
   // ***************************************************
@@ -147,18 +147,20 @@ namespace ALU2DGrid
   //   Liefert iten Punkt zur"uck modulo 3
   // #end(method)
   // ***************************************************
-  template < int N, int NV >
-  inline typename Element < N, NV >::fullvertex_t *
-  Element < N,NV >::getVertex(int i) const {
-    assert(0 <= i) ;
-    return (fullvertex_t *)(connect.vtx[mod(i)]) ; 
+  template< int N, int NV >
+  inline typename Element< N, NV >::fullvertex_t *
+  Element< N,NV >::getVertex ( int i ) const
+  {
+    assert(0 <= i);
+    return (fullvertex_t *)(connect.vtx[mod(i)]); 
   }
 
-  template < int N, int NV >
-  inline typename Element < N, NV >::vertex_t *
-  Element < N, NV >::vertex(int i) const {
-    assert(0 <= i) ;
-    return connect.vtx[mod(i)] ; 
+  template< int N, int NV >
+  inline typename Element< N, NV >::vertex_t *
+  Element< N, NV >::vertex ( int i ) const
+  {
+    assert(0 <= i);
+    return connect.vtx[mod(i)]; 
   }
 
   // ***************************************************
@@ -174,8 +176,8 @@ namespace ALU2DGrid
   template < int N, int NV >
   inline typename Element < N, NV >::thinelement_t *
   Element < N, NV >::neighbour(int fce) const {
-    assert(0 <= fce) ;
-    return connect.nb[mod(fce)] ;
+    assert(0 <= fce);
+    return connect.nb[mod(fce)];
   }
 
   // ***************************************************
@@ -191,17 +193,17 @@ namespace ALU2DGrid
   // ***************************************************
   template < int N, int NV >
   inline int Element < N, NV >::opposite(int fce) const {
-    assert(0 <= fce) ;
-    return connect.bck [mod(fce)] ;
+    assert(0 <= fce);
+    return connect.bck [mod(fce)];
   }
   template < int N, int NV >
   inline int Element < N, NV >::edge_idx(int fce) const {
-    assert(0 <= fce) ;
-    return connect.edge[mod(fce)]->getIndex() ;
+    assert(0 <= fce);
+    return connect.edge[mod(fce)]->getIndex();
   }
   template < int N, int NV >
   inline Edge *Element < N, NV >::edge(int fce) const {
-    assert(0 <= fce) ;
+    assert(0 <= fce);
     return connect.edge[fce];
   }
 
@@ -220,10 +222,10 @@ namespace ALU2DGrid
   // ***************************************************
   template < int N, int NV >
   inline int Element < N, NV >::facevertex(int fce, int loc) const { 
-    assert(0 <= fce) ;
-    assert(0 <= loc) ;
+    assert(0 <= fce);
+    assert(0 <= loc);
     fce = mod(fce); 
-    loc %= connect.pv ;
+    loc %= connect.pv;
     return mod(fce+loc+1); 
   }
 
@@ -251,9 +253,9 @@ namespace ALU2DGrid
   template < int N, int NV >
   inline int Element < N, NV >::normaldir(int fce) const
   {
-    assert(0 <= fce) ;
+    assert(0 <= fce);
     fce=mod(fce);
-    return connect.normdir[fce] ;
+    return connect.normdir[fce];
   }
 
   // ***************************************************
@@ -271,18 +273,18 @@ namespace ALU2DGrid
   // ***************************************************
   template < int N, int NV >
   inline void Element < N, NV >::nbconnect(int fce, thinelement_t * n, int b) { 
-    assert(0 <= fce) ;
-    fce = mod(fce) ;
+    assert(0 <= fce);
+    fce = mod(fce);
 
-    connect.nb[fce] = n ; 
-    connect.bck[fce] = b ;
+    connect.nb[fce] = n; 
+    connect.bck[fce] = b;
     }
   template < int N, int NV >
   inline void Element < N, NV >::edgeconnect(int fce, Edge * n) { 
-    assert(0 <= fce) ;
-    fce = mod(fce) ;
+    assert(0 <= fce);
+    fce = mod(fce);
 
-    connect.edge[fce] = n ; 
+    connect.edge[fce] = n; 
     n->attach();
   }
 
@@ -300,7 +302,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   inline void Element < N, NV >::setnormdir(int fce, int dir) {
     assert( 0 <= fce );
-    fce = mod(fce) ;
+    fce = mod(fce);
     assert( dir == 1 || dir == -1);
     connect.normdir[fce] = dir;
   }
@@ -316,8 +318,8 @@ namespace ALU2DGrid
   // ***************************************************
   template < int N, int NV >
   inline Element < N, NV >::c::c() { 
-    for( int i = 0 ; i < NV ; i ++ ) vtx[i] = 0; 
-    for( int j = 0 ; j < NV ; j ++ ) { hvtx[j] = 0 ; nb[j] = 0 ; bck[j] = -1 ; normdir[j]=0 ; edge[j] = 0;}  
+    for( int i = 0; i < NV; i ++ ) vtx[i] = 0; 
+    for( int j = 0; j < NV; j ++ ) { hvtx[j] = 0; nb[j] = 0; bck[j] = -1; normdir[j]=0; edge[j] = 0;}  
   }
 
   // ***************************************************
@@ -330,10 +332,11 @@ namespace ALU2DGrid
   // #end(method)
   // ***************************************************
   template < int N, int NV >
-  inline Element < N, NV >::c::~c() {
-    for(int i = 0 ; i < NV ; i ++ ) 
-      if(vtx[i]) vtx[i]->detach() ;
-    for(int i = 0 ; i < NV ; i ++ ) 
+  inline Element < N, NV >::c::~c()
+  {
+    for(int i = 0; i < NV; i ++ ) 
+      if(vtx[i]) vtx[i]->detach();
+    for(int i = 0; i < NV; i ++ ) 
       if(hvtx[i]) delete hvtx[i];  
     // edges are detached in the Element destructor
   }
