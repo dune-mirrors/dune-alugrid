@@ -3,15 +3,15 @@
 
 #include <dune/common/parallel/collectivecommunication.hh>
 
-#include <dune/alugrid/src/indexstack.h>
-#include <dune/alugrid/src/projectvertex.h>
+#include <dune/alugrid/impl/indexstack.h>
+#include <dune/alugrid/impl/projectvertex.h>
 
-#include <dune/alugrid/src/2d/grid.h>
-#include <dune/alugrid/src/2d/triang.h>
-#include <dune/alugrid/src/2d/listwalk.h>
-#include <dune/alugrid/src/2d/handle.h>
-#include <dune/alugrid/src/2d/vtx_btree.h>
-#include <dune/alugrid/src/2d/vmmap.h>
+#include <dune/alugrid/impl/2d/grid.h>
+#include <dune/alugrid/impl/2d/triang.h>
+#include <dune/alugrid/impl/2d/listwalk.h>
+#include <dune/alugrid/impl/2d/handle.h>
+#include <dune/alugrid/impl/2d/vtx_btree.h>
+#include <dune/alugrid/impl/2d/vmmap.h>
 
 //////////////////////////////////////////////////////////////////////
 // compile imp.cc into lib (1 yes, 0 no)

@@ -375,7 +375,7 @@ namespace Dune {
     {
       if(elType == hexa) 
       {
-        // see ALUGrid/src/serial/gitter_mgb.cc 
+        // see dune/alugrid/impl/serial/gitter_mgb.cc 
         // InsertUniqueHexa 
         const int vxKey[4] = {0,1,3,4};
         for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i]; 
@@ -383,7 +383,7 @@ namespace Dune {
       else 
       {
         assert( elType == tetra );
-        // see ALUGrid/src/serial/gitter_mgb.cc 
+        // see dune/alugrid/impl/serial/gitter_mgb.cc 
         // InsertUniqueTetra 
         const int vxKey[4] = {0,1,2,3};
         for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i]; 

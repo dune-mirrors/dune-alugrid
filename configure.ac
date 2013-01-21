@@ -19,11 +19,11 @@ AC_CONFIG_FILES([
   dune/alugrid/2d/Makefile
   dune/alugrid/3d/Makefile
   dune/alugrid/common/Makefile
-  dune/alugrid/src/Makefile
-  dune/alugrid/src/2d/Makefile
-  dune/alugrid/src/duneinterface/Makefile
-  dune/alugrid/src/parallel/Makefile
-  dune/alugrid/src/serial/Makefile
+  dune/alugrid/impl/Makefile
+  dune/alugrid/impl/2d/Makefile
+  dune/alugrid/impl/duneinterface/Makefile
+  dune/alugrid/impl/parallel/Makefile
+  dune/alugrid/impl/serial/Makefile
   dune/alugrid/test/Makefile
   lib/Makefile
   m4/Makefile

@@ -32,26 +32,26 @@
 
 #define ALUGRID_VERTEX_PROJECTION
 
-#include <dune/alugrid/src/serial/gatherscatter.hh>
-#include <dune/alugrid/src/serial/key.h>
-#include <dune/alugrid/src/serial/myalloc.h>
-#include <dune/alugrid/src/serial/serialize.h>
+#include <dune/alugrid/impl/serial/gatherscatter.hh>
+#include <dune/alugrid/impl/serial/key.h>
+#include <dune/alugrid/impl/serial/myalloc.h>
+#include <dune/alugrid/impl/serial/serialize.h>
 
-#include <dune/alugrid/src/parallel/mpAccess.h>
-#include <dune/alugrid/src/parallel/gitter_pll_ldb.h>
+#include <dune/alugrid/impl/parallel/mpAccess.h>
+#include <dune/alugrid/impl/parallel/gitter_pll_ldb.h>
 
-#include <dune/alugrid/src/serial/gitter_sti.h>
+#include <dune/alugrid/impl/serial/gitter_sti.h>
 
-#include <dune/alugrid/src/serial/gitter_hexa_top.h>
-#include <dune/alugrid/src/serial/mapp_tetra_3d_ext.h>
-#include <dune/alugrid/src/serial/gitter_tetra_top.h>
-#include <dune/alugrid/src/serial/walk.h>
-#include <dune/alugrid/src/serial/gitter_impl.h>
-#include <dune/alugrid/src/serial/gitter_mgb.h>
-#include <dune/alugrid/src/serial/key.h>
-#include <dune/alugrid/src/serial/lock.h>
+#include <dune/alugrid/impl/serial/gitter_hexa_top.h>
+#include <dune/alugrid/impl/serial/mapp_tetra_3d_ext.h>
+#include <dune/alugrid/impl/serial/gitter_tetra_top.h>
+#include <dune/alugrid/impl/serial/walk.h>
+#include <dune/alugrid/impl/serial/gitter_impl.h>
+#include <dune/alugrid/impl/serial/gitter_mgb.h>
+#include <dune/alugrid/impl/serial/key.h>
+#include <dune/alugrid/impl/serial/lock.h>
 
-#include <dune/alugrid/src/duneinterface/gitter_dune_impl.h>
+#include <dune/alugrid/impl/duneinterface/gitter_dune_impl.h>
 
 namespace ALUGrid
 {
@@ -64,17 +64,17 @@ namespace ALUGrid
 
 // if MPI was found include all headers
 #if ALU3DGRID_PARALLEL
-#include <dune/alugrid/src/parallel/gitter_pll_sti.h>
-#include <dune/alugrid/src/parallel/gitter_pll_impl.h>
-#include <dune/alugrid/src/parallel/gitter_pll_ldb.h>
-#include <dune/alugrid/src/parallel/gitter_tetra_top_pll.h>
-#include <dune/alugrid/src/parallel/gitter_hexa_top_pll.h>
-#include <dune/alugrid/src/parallel/mpAccess.h>
-#include <dune/alugrid/src/parallel/mpAccess_MPI.h>
-//#include <dune/alugrid/src/parallel/mpAccess_STAR.h>
-#include <dune/alugrid/src/parallel/gitter_pll_mgb.h>
+#include <dune/alugrid/impl/parallel/gitter_pll_sti.h>
+#include <dune/alugrid/impl/parallel/gitter_pll_impl.h>
+#include <dune/alugrid/impl/parallel/gitter_pll_ldb.h>
+#include <dune/alugrid/impl/parallel/gitter_tetra_top_pll.h>
+#include <dune/alugrid/impl/parallel/gitter_hexa_top_pll.h>
+#include <dune/alugrid/impl/parallel/mpAccess.h>
+#include <dune/alugrid/impl/parallel/mpAccess_MPI.h>
+//#include <dune/alugrid/impl/parallel/mpAccess_STAR.h>
+#include <dune/alugrid/impl/parallel/gitter_pll_mgb.h>
 
-#include <dune/alugrid/src/duneinterface/gitter_dune_pll_impl.h>
+#include <dune/alugrid/impl/duneinterface/gitter_dune_pll_impl.h>
 #endif // #if ALU3DGRID_PARALLEL
 
 //- local includes 
