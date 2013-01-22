@@ -55,7 +55,7 @@ libalugrid_mpi_la_LIBADD = $(DUNEMPILIBS)
 
 libdunealugrid_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/2d/intersection.cc \
-	$(top_srcdir)/dune/alugrid/2d/alu2dgridfactory.cc \
+	$(top_srcdir)/dune/alugrid/2d/gridfactory.cc \
 	$(top_srcdir)/dune/alugrid/3d/faceutility.cc \
 	$(top_srcdir)/dune/alugrid/3d/mappings.cc \
 	$(top_srcdir)/dune/alugrid/3d/topology.cc

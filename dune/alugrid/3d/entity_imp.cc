@@ -10,7 +10,7 @@
 #include "entity.hh" 
 
 #if COMPILE_ALUGRID_INLINE == 0
-#include <dune/alugrid/3d/alu3dgridfactory.hh>
+#include <dune/alugrid/3d/gridfactory.hh>
 #endif
 #include <dune/alugrid/common/geostorage.hh>
 
