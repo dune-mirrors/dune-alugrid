@@ -12,7 +12,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <dune/alugrid/3d/alu3dgridfactory.hh>
+#include <dune/alugrid/3d/gridfactory.hh>
 
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline 

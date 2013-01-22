@@ -6,11 +6,11 @@
 #include <dune/alugrid/common/declaration.hh>
 
 #include <dune/alugrid/3d/alugrid.hh>
-#include <dune/alugrid/3d/alu3dgridfactory.hh>
+#include <dune/alugrid/3d/gridfactory.hh>
 
 // 2d version 
 #include <dune/alugrid/2d/alugrid.hh>
-#include <dune/alugrid/2d/alu2dgridfactory.hh>
+#include <dune/alugrid/2d/gridfactory.hh>
 
 #include <dune/alugrid/common/persistentcontainer.hh>
 

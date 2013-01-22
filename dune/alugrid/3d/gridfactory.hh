@@ -502,6 +502,6 @@ namespace Dune
 } // end namespace Dune
 
 #if COMPILE_ALUGRID_INLINE
-  #include "alu3dgridfactory.cc"
+  #include "gridfactory.cc"
 #endif
 #endif

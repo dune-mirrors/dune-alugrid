@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <dune/alugrid/2d/alu2dgridfactory.hh>
+#include <dune/alugrid/2d/gridfactory.hh>
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/2d/alugrid.hh>
 
