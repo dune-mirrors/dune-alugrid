@@ -328,84 +328,6 @@ namespace Dune
     }
   }
   
-
-  /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<3,3>
-   *  \ingroup GridFactory
-   *  \note template parameter dimw is only added to avoid the ALUSimplexGrid
-   *        deprecation warning. 
-   */
-  template< int dimw >
-  class GridFactory< ALUSimplexGrid< 3, dimw > >
-  : public ALU3dGridFactory< ALUSimplexGrid< 3, dimw > >
-  {
-    typedef GridFactory< ALUSimplexGrid< 3, dimw > > ThisType;
-    typedef ALU3dGridFactory< ALUSimplexGrid< 3, dimw > > BaseType;
-
-  public:
-    typedef typename BaseType::Grid Grid;
-
-    typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
-
-    /** \brief Default constructor */
-    explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
-    : BaseType( communicator )
-    {}
-
-    /** \brief constructor taking filename */
-    GridFactory ( const std::string &filename, 
-                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
-    : BaseType( filename, communicator )
-    {}
-
-  protected:  
-    template< class, class, int > friend class ALULocalGeometryStorage;
-    /** \brief constructor taking verbosity flag */
-    GridFactory ( const bool realGrid, 
-                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
-    : BaseType( realGrid, communicator )
-    {}
-  };
-
-
-
-  /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
-   *  \ingroup GridFactory
-   *  \note template parameter dimw is only added to avoid the ALUCubeGrid
-   *        deprecation warning. 
-   */
-  template< int dimw >
-  class GridFactory< ALUCubeGrid< 3, dimw > >
-  : public ALU3dGridFactory< ALUCubeGrid< 3, dimw > >
-  {
-    typedef GridFactory< ALUCubeGrid< 3, dimw > > ThisType;
-    typedef ALU3dGridFactory< ALUCubeGrid< 3, dimw > > BaseType;
-
-  public:
-    typedef typename BaseType::Grid Grid;
-
-    typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
-
-    /** \brief Default constructor */
-    explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
-    : BaseType( communicator )
-    {}
-    
-    /** \brief constructor taking filename */
-    GridFactory ( const std::string &filename, 
-                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
-    : BaseType( filename, communicator )
-    {}
-
-  protected:  
-    template< class, class, int > friend class ALULocalGeometryStorage;
-    /** \brief constructor taking verbosity flag */
-    GridFactory ( const bool realGrid, 
-                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
-    : BaseType( realGrid, communicator )
-    {}
-  };
-
-
   /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
    *  \ingroup GridFactory
    */
@@ -440,7 +362,6 @@ namespace Dune
     : BaseType( realGrid, communicator )
     {}
   };
-
 
 
   // Implementation of ALU3dGridFactory
