@@ -403,7 +403,7 @@ public:
   //! return partition type of this entity ( see grid.hh )
   PartitionType partitionType() const
   { 
-    return grid().rankManager().partitionType( item_->getIndex() );
+    return InteriorEntity ;
   }
    
   /**
