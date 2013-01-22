@@ -1,4 +1,5 @@
-lib_LTLIBRARIES = libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la libalugrid_mpi.la libdunealugrid.la
+ALGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la libalugrid_mpi.la
+lib_LTLIBRARIES = $(ALGRID_IMPL_LIBS) libdunealugrid.la
 
 libalugrid_2d_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/impl/2d/grid.cc \
@@ -63,6 +64,6 @@ libdunealugrid_la_SOURCES = \
 
 libdunealugrid_la_CPPFLAGS = $(AM_CPPFLAGS)
 libdunealugrid_la_LDFLAGS = $(AM_LDFLAGS)
-libdunealugrid_la_LIBADD = $(DUNE_LIBS)
+libdunealugrid_la_LIBADD = $(DUNE_LIBS) $(ALGRID_IMPL_LIBS)
 
 include $(top_srcdir)/am/global-rules
