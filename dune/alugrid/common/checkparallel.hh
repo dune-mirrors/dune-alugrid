@@ -12,8 +12,8 @@
  Defaulting to serial ALUGrid!"
     #define ALU3DGRID_PARALLEL 0
   #endif
-#else  // #if HAVE_MPI
+#else  // #else  #if HAVE_MPI
   #define ALU3DGRID_PARALLEL 0
-#endif // #else  // #if HAVE_MPI
+#endif // #endif // #if HAVE_MPI
 
 #endif // #ifndef DUNE_ALUGRID_CHECKPARALLEL_HH
