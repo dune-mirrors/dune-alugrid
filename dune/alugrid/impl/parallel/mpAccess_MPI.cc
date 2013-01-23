@@ -40,7 +40,6 @@ extern "C" {
 
 namespace ALUGrid
 {
-
   MPI_Comm getMPICommunicator(const MpAccessMPI::CommIF* mpiCommPtr) 
   {
     typedef MpAccessMPI::Comm< MPI_Comm > MyComm;

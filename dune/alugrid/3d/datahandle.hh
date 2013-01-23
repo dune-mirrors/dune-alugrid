@@ -465,7 +465,7 @@ namespace ALUGrid
       typedef Gitter::hbndseg_STI HBndSegType;
 
       // check interior element here, might have a coarser level
-      pair< HElementType *, HBndSegType * > p( (HElementType *)0, (HBndSegType *)0 );
+      std::pair< HElementType *, HBndSegType * > p( (HElementType *)0, (HBndSegType *)0 );
       pll.getAttachedElement( p );
       assert( p.first );
       // check inside level 

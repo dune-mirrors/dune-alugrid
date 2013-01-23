@@ -239,7 +239,7 @@ namespace ALUGrid
   template< int codim, PartitionIteratorType pitype, class Comm >
   class ALU3dGridLeafIteratorWrapper;
 
-  //typedef pair< ALUHElementType<0>::ElementType * , HBndSegType * > LeafValType;
+  //typedef std::pair< ALUHElementType<0>::ElementType * , HBndSegType * > LeafValType;
   //typedef IteratorWrapperInterface<LeafValType> IteratorWrapperInterfaceType;
 
   //**********************************************************
@@ -504,7 +504,7 @@ namespace ALUGrid
     // constructor creating leafBorderIteratorTT 
     LeafLevelIteratorTTProxy( GitterImplType & gitter , int link ) 
     {
-      pair < IteratorSTI< ElType > * , IteratorSTI< ElType > * > 
+      std::pair < IteratorSTI< ElType > * , IteratorSTI< ElType > * > 
         p = gitter.leafBorderIteratorTT( (ElType *) 0 , link );
       
       inner_ = p.first;
@@ -514,7 +514,7 @@ namespace ALUGrid
     // constructor creating levelBorderIteratorTT 
     LeafLevelIteratorTTProxy( GitterImplType & gitter , int link , int level ) 
     {
-      pair < IteratorSTI< ElType > * , IteratorSTI< ElType > * > 
+      std::pair < IteratorSTI< ElType > * , IteratorSTI< ElType > * > 
         p = gitter.levelBorderIteratorTT( (ElType *) 0 , link , level );
       
       inner_ = p.first;
@@ -537,7 +537,7 @@ namespace ALUGrid
   };
  
 
-  typedef pair< ALUHElementType< 0, MPI_Comm >::ElementType *, Dune::ALU3dBasicImplTraits< MPI_Comm >::HBndSegType * > LeafValType;
+  typedef std::pair< ALUHElementType< 0, MPI_Comm >::ElementType *, Dune::ALU3dBasicImplTraits< MPI_Comm >::HBndSegType * > LeafValType;
 
   //****************************
   //
@@ -665,8 +665,8 @@ namespace ALUGrid
         if(!it.done())
         {
           usingInner_ = true;
-          pair < ElementPllXIF_t *, int > p = it.item ().accessPllX ().accessOuterPllX () ;
-          pair< HElementType *, HBndSegType * > elems( (HElementType *)0, (HBndSegType *)0 );
+          std::pair < ElementPllXIF_t *, int > p = it.item ().accessPllX ().accessOuterPllX () ;
+          std::pair< HElementType *, HBndSegType * > elems( (HElementType *)0, (HBndSegType *)0 );
           p.first->getAttachedElement(elems);
 
           assert( elems.first || elems.second );
@@ -683,8 +683,8 @@ namespace ALUGrid
       out.first();
       if(!out.done())
       {
-        pair < ElementPllXIF_t *, int > p = out.item ().accessPllX ().accessOuterPllX () ;
-        pair< HElementType *, HBndSegType * > elems( (HElementType *)0, (HBndSegType *)0 );
+        std::pair < ElementPllXIF_t *, int > p = out.item ().accessPllX ().accessOuterPllX () ;
+        std::pair< HElementType *, HBndSegType * > elems( (HElementType *)0, (HBndSegType *)0 );
         p.first->getAttachedElement(elems);
 
         assert( elems.second );
@@ -761,8 +761,8 @@ namespace ALUGrid
     val_t & item () const
     {
       assert(it_);
-      pair < ElementPllXIF_t *, int > p = it_->item ().accessPllX ().accessOuterPllX () ;
-      pair < HElementType  * , HBndSegType * > p2;
+      std::pair < ElementPllXIF_t *, int > p = it_->item ().accessPllX ().accessOuterPllX () ;
+      std::pair < HElementType  * , HBndSegType * > p2;
       p.first->getAttachedElement(p2);
       assert(p2.second);
       elem_.second = p2.second;
@@ -967,7 +967,7 @@ namespace ALUGrid
     {
       typedef typename Dune::ALU3dImplTraits< elType, MPI_Comm >::GEOElementType GEOElementType;
 
-      static const vector< int > &getNotOnItemVector ( int face )
+      static const std::vector< int > &getNotOnItemVector ( int face )
       {
         return GEOElementType::facesNotOnFace( face );
       }
@@ -977,7 +977,7 @@ namespace ALUGrid
     struct SelectVector< elType, 2 >
     {
       typedef typename Dune::ALU3dImplTraits< elType, MPI_Comm >::GEOElementType GEOElementType;
-      static const vector< int > &getNotOnItemVector( int face )
+      static const std::vector< int > &getNotOnItemVector( int face )
       {
         return GEOElementType::edgesNotOnFace( face );
       }
@@ -987,7 +987,7 @@ namespace ALUGrid
     struct SelectVector< elType, 3 > 
     {
       typedef typename Dune::ALU3dImplTraits< elType, MPI_Comm >::GEOElementType GEOElementType;
-      static const vector< int > &getNotOnItemVector ( int face )
+      static const std::vector< int > &getNotOnItemVector ( int face )
       {
         return GEOElementType::verticesNotOnFace( face );
       }
@@ -1064,11 +1064,11 @@ namespace ALUGrid
       ghList.getItemList().resize(0);
       std::map< int , int > visited;
 
-      const map<int,int>::iterator visitedEnd = visited.end();
+      const std::map<int,int>::iterator visitedEnd = visited.end();
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
-        const vector<int> & notOnFace = SelectVector<GridImp::elementType,codim>::
+        const std::vector<int> & notOnFace = SelectVector<GridImp::elementType,codim>::
                                           getNotOnItemVector(ghPair.second); 
         for(int i=0; i<numItems; ++i) 
         {
