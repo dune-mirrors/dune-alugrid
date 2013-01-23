@@ -6,13 +6,42 @@
 // the following implementation is only available in case MPI is available
 #if HAVE_MPI 
 
+// avoid C++ bindings of MPI (-DMPIPP_H is not common enough)
+// this is the only thing all MPI implementations have in common
+// to do that we pretend that we are compiling C code 
+#if defined(__cplusplus) 
+#define rem__cplusplus __cplusplus
+#undef __cplusplus
+#endif
+
+#if defined(c_plusplus) 
+#define remc_plusplus c_plusplus
+#undef c_plusplus
+#endif
+
+extern "C" {
+// the message passing interface (MPI) headers for C 
+#include <mpi.h>
+}
+
+// restore defines 
+#if defined(rem__cplusplus) 
+#define __cplusplus rem__cplusplus
+#undef rem__cplusplus
+#endif
+
+#if defined(c_plusplus) 
+#define c_plusplus remc_plusplus
+#undef remc_plusplus
+#endif
+
 namespace ALUGrid
 {
-
   class MpAccessMPI
   : public MpAccessLocal 
   {
   public:
+    // type of min,max, and sum structure 
     typedef MpAccessLocal::minmaxsum_t  minmaxsum_t;
 
     class MinMaxSumIF 
@@ -24,39 +53,18 @@ namespace ALUGrid
       virtual minmaxsum_t  minmaxsum( double ) const = 0;
     };
 
-    typedef MpAccessGlobal::CommIF CommIF;
-
-    template <class MPICommunicator>
-    class Comm : public CommIF
-    {
-      // no copying or assigning
-      Comm( const Comm& );
-      Comm& operator= ( const Comm& );
-      // we don't want MPI types here to avoid include of mpi.h 
-      mutable MPICommunicator _mpiComm;
-    public:  
-      // constructor duplicating mpi communicator
-      Comm( MPICommunicator );
-      // destructor freeing mpi communicator 
-      ~Comm();
-      // conversion operator to MPI_Comm 
-      operator MPICommunicator () const { return _mpiComm; }
-
-      //! return copy of this object  
-      virtual CommIF* clone() const { return new Comm< MPICommunicator > ( _mpiComm ); }
-    };
-
+    // non blocking exchange handler 
     typedef MpAccessLocal::NonBlockingExchange  NonBlockingExchange;
 
     // MPI communication tag  
     enum { messagetag = 123 };
 
-    // return pointer to class holding the MPI communicator 
-    const CommIF* mpiCommPtr() const { return _mpiCommPtr; }
+    // conversion operator to MPI_Comm 
+    MPI_Comm communicator () const { return _mpiComm; }
 
   protected:  
-    // class holding the MPI communicator 
-    const CommIF* _mpiCommPtr;
+    // the MPI communicator 
+    MPI_Comm _mpiComm ;
     // pointer to minmaxsum communication 
     const MinMaxSumIF* _minmaxsum;
     // number of processors
@@ -71,21 +79,13 @@ namespace ALUGrid
     void initMinMaxSum();
   public :
     // constructor taking MPI_Comm 
-    // to avoid MPI types here this is a template constructor 
-    template <class MPICommunicator>  
-    inline MpAccessMPI (MPICommunicator mpicomm ) 
-      : _mpiCommPtr( new Comm<MPICommunicator> ( mpicomm ) ), 
-        _minmaxsum( 0 ),
-        _psize( getSize() ), _myrank( getRank() )
-    {
-      initMinMaxSum();
-    }
-
+    explicit MpAccessMPI ( MPI_Comm mpicomm ) ;
     // copy constructor 
     MpAccessMPI (const MpAccessMPI &);
     // destructor 
     ~MpAccessMPI ();
   protected:  
+    MinMaxSumIF* copyMPIComm( MPI_Comm mpicomm ); 
     int getSize ();
     int getRank ();
   public:  
@@ -131,9 +131,6 @@ namespace ALUGrid
     
     std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const;
 
-    // return MPI communicator wrapper 
-    const CommIF* communicator() const { return _mpiCommPtr; }
-
     // return handle for non-blocking exchange and already do send operation
     NonBlockingExchange* nonBlockingExchange( const int tag, const std::vector< ObjectStream > & ) const;
     // return handle for non-blocking exchange
@@ -162,7 +159,7 @@ namespace ALUGrid
 
 } // namespace ALUGrid
 
-// include implementation 
+// include inline implementation 
 #include <dune/alugrid/impl/parallel/mpAccess_MPI_inline.h>
 
 #endif // #if HAVE_MPI 

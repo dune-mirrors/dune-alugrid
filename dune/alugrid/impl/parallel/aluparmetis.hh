@@ -36,8 +36,12 @@ namespace ALUGridParMETIS
                ALUGrid::MpAccessGlobal &mpa )
   {
 #if HAVE_PARMETIS
+    ALUGrid::MpAccess_MPI* mpaMPI = dynamic_cast<ALUGrid::MpAccess_MPI *> (&mpa);
+    assert( mpaMPI );
+
     // get communincator (see mpAccess_MPI.cc)
-    MPI_Comm comm = getMPICommunicator( mpa.communicator() );
+    MPI_Comm comm = mpaMPI->communicator();
+
      :: ParMETIS_V3_PartKway(vtxdist, xadj, adjncy, vwgt, adjwgt,
                              wgtflag, numflag, ncon, nparts, tpwgts,
                              ubvec, options, edgecut, part, &comm ) ;
@@ -57,7 +61,12 @@ namespace ALUGridParMETIS
   {
 #if HAVE_PARMETIS
     // get communincator (see mpAccess_MPI.cc)
-    MPI_Comm comm = getMPICommunicator( mpa.communicator() );
+    ALUGrid::MpAccess_MPI* mpaMPI = dynamic_cast<ALUGrid::MpAccess_MPI *> (&mpa);
+    assert( mpaMPI );
+
+    // get communincator (see mpAccess_MPI.cc)
+    MPI_Comm comm = mpaMPI->communicator();
+
     :: ParMETIS_V3_AdaptiveRepart(vtxdist, xadj, adjncy, vwgt, vsize, adjwgt,
                                   wgtflag, numflag, ncon, nparts, tpwgts,
                                   ubvec, ipc2redist, options, edgecut, part, &comm ) ;

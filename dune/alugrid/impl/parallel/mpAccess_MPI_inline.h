@@ -2,38 +2,6 @@
 
 #include "mpAccess_MPI.h"
 
-#if HAVE_MPI
-
-// avoid C++ bindings of MPI (-DMPIPP_H is not common enough)
-// this is the only thing all MPI implementations have in common
-// to do that we pretend that we are compiling C code 
-#if defined(__cplusplus) 
-#define rem__cplusplus __cplusplus
-#undef __cplusplus
-#endif
-
-#if defined(c_plusplus) 
-#define remc_plusplus c_plusplus
-#undef c_plusplus
-#endif
-
-extern "C" {
-  // the message passing interface (MPI) headers for C 
-#include <mpi.h>
-}
-
-// restore defines 
-#if defined(rem__cplusplus) 
-#define __cplusplus rem__cplusplus
-#undef rem__cplusplus
-#endif
-
-#if defined(c_plusplus) 
-#define c_plusplus remc_plusplus
-#undef remc_plusplus
-#endif
-
-
 #ifndef NDEBUG
 #define MY_INT_TEST int test =
 #else
@@ -42,30 +10,13 @@ extern "C" {
 
 namespace ALUGrid
 {
-  inline MPI_Comm getMPICommunicator(const MpAccessMPI::CommIF* mpiCommPtr) 
-  {
-    typedef MpAccessMPI::Comm< MPI_Comm > MyComm;
-    return static_cast<const MyComm&> (*mpiCommPtr);
-  }
-
-  template <>
-  inline MpAccessMPI::Comm< MPI_Comm >::Comm( MPI_Comm mpicomm ) 
+  inline MpAccessMPI::MinMaxSumIF* MpAccessMPI::copyMPIComm ( MPI_Comm mpicomm ) 
   {
     // duplicate mpi communicator 
     MY_INT_TEST MPI_Comm_dup ( mpicomm, &_mpiComm);
     assert (test == MPI_SUCCESS);
+    return 0 ; // return NULL pointer to initialize _mpimaxsum
   }
-
-  template <>
-  inline MpAccessMPI::Comm< MPI_Comm >::~Comm( ) 
-  {
-    // free mpi communicator 
-    MY_INT_TEST MPI_Comm_free (&_mpiComm);
-    assert (test == MPI_SUCCESS);
-  }
-
-  // workarround for old member variable 
-#define _mpiComm (getMPICommunicator(_mpiCommPtr))
 
   inline int MpAccessMPI::getSize()
   {
@@ -85,19 +36,33 @@ namespace ALUGrid
     return rank;
   }
 
+  inline MpAccessMPI::MpAccessMPI ( MPI_Comm mpicomm )
+   : _minmaxsum( copyMPIComm( mpicomm ) ),
+     _psize( getSize() ), _myrank( getRank() )
+  {
+    initMinMaxSum();
+  }
+
+
+
   inline MpAccessMPI::MpAccessMPI (const MpAccessMPI & a)
-  : _mpiCommPtr( a._mpiCommPtr->clone() ),
-    _minmaxsum( 0 ),
-    _psize( getSize() ) , _myrank( getRank() )
+   : _minmaxsum( copyMPIComm( a._mpiComm ) ),
+     _psize( getSize() ) , _myrank( getRank() )
   {
     initMinMaxSum();
   }
 
   inline MpAccessMPI::~MpAccessMPI ()
   {
-    delete _minmaxsum;
-    delete _mpiCommPtr;
-    _mpiCommPtr = 0;
+    if( _minmaxsum ) 
+    {
+      delete _minmaxsum;
+      _minmaxsum = 0 ;
+    }
+
+    // free mpi communicator 
+    MY_INT_TEST MPI_Comm_free (&_mpiComm);
+    assert (test == MPI_SUCCESS);
   }
 
   inline int MpAccessMPI::barrier () const {
@@ -382,9 +347,8 @@ namespace ALUGrid
 
     minmaxsum_t minmaxsum( double value ) const 
     {
-      const MpAccessMPI::CommIF* _mpiCommPtr = _mpAccess.mpiCommPtr();
-      // get mpi communicator (use define, see above)
-      MPI_Comm comm = _mpiComm;
+      // get mpi communicator
+      MPI_Comm comm = _mpAccess.communicator();
 
       // create send buf 
       minmaxsum_t sendbuf( value ); 
@@ -632,9 +596,8 @@ namespace ALUGrid
     // send data implementation 
     void sendImpl( const std::vector< ObjectStream > & osv ) 
     {
-      const MpAccessMPI::CommIF* _mpiCommPtr = _mpAccess.mpiCommPtr();
-      // get mpi communicator (use define, see above)
-      MPI_Comm comm = _mpiComm;
+      // get mpi communicator
+      MPI_Comm comm = _mpAccess.communicator();
 
       // get vector with destinations 
       const std::vector< int >& dest = _mpAccess.dest();
@@ -668,9 +631,8 @@ namespace ALUGrid
       // do nothing if number of links is zero 
       if( _nLinks == 0 ) return; 
 
-      const MpAccessMPI::CommIF* _mpiCommPtr = _mpAccess.mpiCommPtr();
-      // get mpi communicator (use define, see above)
-      MPI_Comm comm = _mpiComm;
+      // get mpi communicator
+      MPI_Comm comm = _mpAccess.communicator();
 
       // get vector with destinations 
       const std::vector< int >& dest = _mpAccess.dest();

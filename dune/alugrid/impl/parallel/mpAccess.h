@@ -14,15 +14,6 @@ namespace ALUGrid
   class MpAccessGlobal
   {
     public :
-      class CommIF
-      {
-      protected:
-        CommIF () {}
-      public:
-        virtual ~CommIF() {}
-        virtual CommIF* clone () const = 0;
-      };
-
       struct MinMaxSum 
       {
         MinMaxSum ()
@@ -89,9 +80,6 @@ namespace ALUGrid
         // return gcollect operation 
         return gcollect( in, length ); 
       }
-
-      //! return address of communicator (not optimal but avoid explicit MPI types here)
-      virtual const CommIF* communicator() const = 0;
   } ;
 
   class MpAccessLocal : public MpAccessGlobal 
