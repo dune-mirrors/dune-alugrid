@@ -76,7 +76,6 @@ class ALU3dGridIntersectionIterator
   typedef typename ALU3dImplTraits< hexa, Comm >::BNDFaceType GEOQuadBndType; 
 
   typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
-  typedef typename std::auto_ptr< FaceInfoType > FaceInfoPointer;
 
   typedef typename SelectType<
     tetra == GridImp::elementType,
@@ -308,7 +307,6 @@ public ALU3dGridIntersectionIterator<GridImp>
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
   typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
-  typedef typename std::auto_ptr< FaceInfoType > FaceInfoPointer;
 
   typedef typename SelectType<
     tetra == GridImp::elementType,
