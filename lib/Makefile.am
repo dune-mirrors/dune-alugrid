@@ -1,6 +1,3 @@
-ALGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la libalugrid_mpi.la
-lib_LTLIBRARIES = $(ALGRID_IMPL_LIBS) libdunealugrid.la
-
 libalugrid_2d_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/impl/2d/grid.cc \
 	$(top_srcdir)/dune/alugrid/impl/2d/handle.cc \
@@ -47,12 +44,23 @@ libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_parallel_la_LIBADD = 
 
+ALUGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la
+
+# only build libalugrid_mpi if MPI was found
+if MPI
 libalugrid_mpi_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/impl/parallel/mpAccess_MPI.cc
 
 libalugrid_mpi_la_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
 libalugrid_mpi_la_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-libalugrid_mpi_la_LIBADD = $(DUNEMPILIBS)
+libalugrid_mpi_la_LIBADD = 
+#$(DUNEMPILIBS)
+
+# add alugrid_mpi to alugrid impl libs
+ALUGRID_IMPL_LIBS += libalugrid_mpi.la 
+endif 
+
+lib_LTLIBRARIES = $(ALUGRID_IMPL_LIBS) libdunealugrid.la
 
 libdunealugrid_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/2d/intersection.cc \
@@ -62,8 +70,8 @@ libdunealugrid_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/3d/topology.cc
 
 
-libdunealugrid_la_CPPFLAGS = $(AM_CPPFLAGS)
+libdunealugrid_la_CPPFLAGS = $(AM_CPPFLAGS) 
 libdunealugrid_la_LDFLAGS = $(AM_LDFLAGS)
-libdunealugrid_la_LIBADD = $(DUNE_LIBS) $(ALGRID_IMPL_LIBS)
+libdunealugrid_la_LIBADD = $(DUNE_LIBS) $(ALUGRID_IMPL_LIBS)
 
 include $(top_srcdir)/am/global-rules
