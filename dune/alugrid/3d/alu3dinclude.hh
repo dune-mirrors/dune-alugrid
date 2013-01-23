@@ -60,7 +60,7 @@ namespace ALUGrid
 
 } // namespace ALUGrid
 
-//#include <dune/alugrid/common/checkparallel.hh>
+#include <dune/alugrid/common/checkparallel.hh>
 
 // if MPI was found include all headers
 #if ALU3DGRID_PARALLEL
