@@ -1,7 +1,7 @@
 #ifndef DUNE_ALUGRID_FORWARDDECLARATION
 #define DUNE_ALUGRID_FORWARDDECLARATION
 
-#include <dune/alugrid/common/checkparallel.hh>
+#define ALU3DGRID_PARALLEL HAVE_MPI
 
 #include <dune/common/parallel/collectivecommunication.hh>
 #if ALU3DGRID_PARALLEL

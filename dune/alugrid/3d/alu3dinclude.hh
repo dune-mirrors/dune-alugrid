@@ -58,9 +58,13 @@ namespace ALUGrid
 
   typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
 
+  static const int ProcessorBoundary_t = Gitter::hbndseg_STI::closure;
+  
+  // general GatherScatter type 
+  typedef GatherScatter GatherScatterType;
+
 } // namespace ALUGrid
 
-#include <dune/alugrid/common/checkparallel.hh>
 
 // if MPI was found include all headers
 #if ALU3DGRID_PARALLEL
@@ -69,9 +73,7 @@ namespace ALUGrid
 #include <dune/alugrid/impl/parallel/gitter_pll_ldb.h>
 #include <dune/alugrid/impl/parallel/gitter_tetra_top_pll.h>
 #include <dune/alugrid/impl/parallel/gitter_hexa_top_pll.h>
-#include <dune/alugrid/impl/parallel/mpAccess.h>
 #include <dune/alugrid/impl/parallel/mpAccess_MPI.h>
-//#include <dune/alugrid/impl/parallel/mpAccess_STAR.h>
 #include <dune/alugrid/impl/parallel/gitter_pll_mgb.h>
 
 #include <dune/alugrid/impl/duneinterface/gitter_dune_pll_impl.h>
@@ -79,16 +81,6 @@ namespace ALUGrid
 
 //- local includes 
 #include <dune/alugrid/3d/topology.hh>
-
-namespace ALUGrid
-{
-
-  static const int ProcessorBoundary_t = Gitter::hbndseg_STI::closure;
-  
-  // general GatherScatter type 
-  typedef GatherScatter GatherScatterType;
-
-}
 
 namespace Dune
 {

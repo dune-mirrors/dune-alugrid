@@ -2,7 +2,6 @@ alucommondir = $(includedir)/dune/alugrid/common
 alucommon_HEADERS = backuprestore.hh \
 										bndprojection.hh \
 										capabilities.hh \
-										checkparallel.hh \
 										declaration.hh \
 										defaultindexsets.hh \
 										geostorage.hh \

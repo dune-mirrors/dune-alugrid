@@ -2,6 +2,8 @@
 
 #include "mpAccess_MPI.h"
 
+#if HAVE_MPI
+
 // avoid C++ bindings of MPI (-DMPIPP_H is not common enough)
 // this is the only thing all MPI implementations have in common
 // to do that we pretend that we are compiling C code 
@@ -40,14 +42,14 @@ extern "C" {
 
 namespace ALUGrid
 {
-  MPI_Comm getMPICommunicator(const MpAccessMPI::CommIF* mpiCommPtr) 
+  inline MPI_Comm getMPICommunicator(const MpAccessMPI::CommIF* mpiCommPtr) 
   {
     typedef MpAccessMPI::Comm< MPI_Comm > MyComm;
     return static_cast<const MyComm&> (*mpiCommPtr);
   }
 
   template <>
-  MpAccessMPI::Comm< MPI_Comm >::Comm( MPI_Comm mpicomm ) 
+  inline MpAccessMPI::Comm< MPI_Comm >::Comm( MPI_Comm mpicomm ) 
   {
     // duplicate mpi communicator 
     MY_INT_TEST MPI_Comm_dup ( mpicomm, &_mpiComm);
@@ -55,7 +57,7 @@ namespace ALUGrid
   }
 
   template <>
-  MpAccessMPI::Comm< MPI_Comm >::~Comm( ) 
+  inline MpAccessMPI::Comm< MPI_Comm >::~Comm( ) 
   {
     // free mpi communicator 
     MY_INT_TEST MPI_Comm_free (&_mpiComm);
@@ -65,7 +67,7 @@ namespace ALUGrid
   // workarround for old member variable 
 #define _mpiComm (getMPICommunicator(_mpiCommPtr))
 
-  int MpAccessMPI::getSize()
+  inline int MpAccessMPI::getSize()
   {
     // get size from MPI 
     int size = 0; 
@@ -74,7 +76,7 @@ namespace ALUGrid
     return size;
   }
 
-  int MpAccessMPI::getRank()
+  inline int MpAccessMPI::getRank()
   {
     // get rank from MPI 
     int rank = -1;
@@ -83,7 +85,7 @@ namespace ALUGrid
     return rank;
   }
 
-  MpAccessMPI::MpAccessMPI (const MpAccessMPI & a)
+  inline MpAccessMPI::MpAccessMPI (const MpAccessMPI & a)
   : _mpiCommPtr( a._mpiCommPtr->clone() ),
     _minmaxsum( 0 ),
     _psize( getSize() ) , _myrank( getRank() )
@@ -91,31 +93,31 @@ namespace ALUGrid
     initMinMaxSum();
   }
 
-  MpAccessMPI::~MpAccessMPI ()
+  inline MpAccessMPI::~MpAccessMPI ()
   {
     delete _minmaxsum;
     delete _mpiCommPtr;
     _mpiCommPtr = 0;
   }
 
-  int MpAccessMPI::barrier () const {
+  inline int MpAccessMPI::barrier () const {
       return MPI_SUCCESS == MPI_Barrier (_mpiComm) ? psize () : 0;
   }
 
-  int MpAccessMPI::mpi_allgather (int * i, int si, int * o, int so) const {
+  inline int MpAccessMPI::mpi_allgather (int * i, int si, int * o, int so) const {
       return MPI_Allgather (i, si, MPI_INT, o, so, MPI_INT, _mpiComm);
   }
 
-  int MpAccessMPI::mpi_allgather (char * i, int si, char * o, int so) const {
+  inline int MpAccessMPI::mpi_allgather (char * i, int si, char * o, int so) const {
       return MPI_Allgather (i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm);
   }
 
-  int MpAccessMPI::mpi_allgather (double * i, int si, double * o, int so) const {
+  inline int MpAccessMPI::mpi_allgather (double * i, int si, double * o, int so) const {
       return MPI_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm);
   }
 
   template < class A > std::vector< std::vector< A > > 
-  doGcollectV (const std::vector< A > & in, MPI_Datatype mpiType, MPI_Comm comm) 
+  inline doGcollectV (const std::vector< A > & in, MPI_Datatype mpiType, MPI_Comm comm) 
   {
     int np, me, test;
 
@@ -166,7 +168,7 @@ namespace ALUGrid
   }
 
   template < class A > 
-  std::vector< std::vector< A > > doExchange (const std::vector< std::vector< A > > & in,
+  inline std::vector< std::vector< A > > doExchange (const std::vector< std::vector< A > > & in,
                                       MPI_Datatype mpiType, 
                                       MPI_Comm comm, 
                                       const std::vector< int > & d) 
@@ -238,7 +240,7 @@ namespace ALUGrid
     return out;
   }
 
-  bool MpAccessMPI::gmax (bool i) const 
+  inline bool MpAccessMPI::gmax (bool i) const 
   {
     int j = int( i );
     // call int method 
@@ -246,95 +248,95 @@ namespace ALUGrid
     return (ret == 1) ? true : false;
   }
 
-  int MpAccessMPI::gmax (int i) const {
+  inline int MpAccessMPI::gmax (int i) const {
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm);
     assert (test == MPI_SUCCESS);
     return j;
   }
 
-  int MpAccessMPI::gmin (int i) const {
+  inline int MpAccessMPI::gmin (int i) const {
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MIN, _mpiComm);
     assert (test == MPI_SUCCESS);
     return j;
   }
 
-  int MpAccessMPI::gsum (int i) const {
+  inline int MpAccessMPI::gsum (int i) const {
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_SUM, _mpiComm);
     assert (test == MPI_SUCCESS);
     return j;
   }
 
-  long MpAccessMPI::gmax (long i) const {
+  inline long MpAccessMPI::gmax (long i) const {
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MAX, _mpiComm);
     assert (test == MPI_SUCCESS);
     return j;
   }
 
-  long MpAccessMPI::gmin (long i) const {
+  inline long MpAccessMPI::gmin (long i) const {
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MIN, _mpiComm);
     assert (test == MPI_SUCCESS);
     return j;
   }
 
-  long MpAccessMPI::gsum (long i) const {
+  inline long MpAccessMPI::gsum (long i) const {
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_SUM, _mpiComm);
     assert (test == MPI_SUCCESS);
     return j;
   }
 
-  double MpAccessMPI::gmax (double a) const {
+  inline double MpAccessMPI::gmax (double a) const {
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MAX, _mpiComm);
     assert (test == MPI_SUCCESS);
     return x;
   }
 
-  double MpAccessMPI::gmin (double a) const {
+  inline double MpAccessMPI::gmin (double a) const {
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MIN, _mpiComm);
     assert (test == MPI_SUCCESS);
     return x;
   }
 
-  double MpAccessMPI::gsum (double a) const {
+  inline double MpAccessMPI::gsum (double a) const {
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_SUM, _mpiComm);
     assert (test == MPI_SUCCESS);
     return x;
   }
 
-  void MpAccessMPI::gmax (double* a,int size,double *x) const {
+  inline void MpAccessMPI::gmax (double* a,int size,double *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MAX, _mpiComm);
     assert (test == MPI_SUCCESS);
   }
 
-  void MpAccessMPI::gmin (double* a,int size,double *x) const {
+  inline void MpAccessMPI::gmin (double* a,int size,double *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MIN, _mpiComm);
     assert (test == MPI_SUCCESS);
   }
 
-  void MpAccessMPI::gsum (double* a,int size,double *x) const {
+  inline void MpAccessMPI::gsum (double* a,int size,double *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_SUM, _mpiComm);
     assert (test == MPI_SUCCESS);
   }
 
-  void MpAccessMPI::gmax (int* a,int size,int *x) const {
+  inline void MpAccessMPI::gmax (int* a,int size,int *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_MAX, _mpiComm);
     assert (test == MPI_SUCCESS);
   }
 
-  void MpAccessMPI::gmin (int* a,int size,int *x) const {
+  inline void MpAccessMPI::gmin (int* a,int size,int *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_MIN, _mpiComm);
     assert (test == MPI_SUCCESS);
   }
 
-  void MpAccessMPI::gsum (int* a,int size,int *x) const {
+  inline void MpAccessMPI::gsum (int* a,int size,int *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_SUM, _mpiComm);
     assert (test == MPI_SUCCESS);
   }
@@ -395,19 +397,19 @@ namespace ALUGrid
     }
   };
 
-  void MpAccessMPI::initMinMaxSum() 
+  inline void MpAccessMPI::initMinMaxSum() 
   {
     if( ! _minmaxsum ) 
       _minmaxsum = new MinMaxSumOp( *this );
   }
 
-  MpAccessMPI::minmaxsum_t  MpAccessMPI::minmaxsum( double value ) const
+  inline MpAccessMPI::minmaxsum_t  MpAccessMPI::minmaxsum( double value ) const
   {
     assert( _minmaxsum );
     return _minmaxsum->minmaxsum( value );
   }
 
-  std::pair<double,double> MpAccessMPI::gmax (std::pair<double,double> p) const {
+  inline std::pair<double,double> MpAccessMPI::gmax (std::pair<double,double> p) const {
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MAX, _mpiComm);
@@ -415,7 +417,7 @@ namespace ALUGrid
     return std::pair<double,double>(x[0],x[1]);
   }
 
-  std::pair<double,double> MpAccessMPI::gmin (std::pair<double,double> p) const {
+  inline std::pair<double,double> MpAccessMPI::gmin (std::pair<double,double> p) const {
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MIN, _mpiComm);
@@ -423,7 +425,7 @@ namespace ALUGrid
     return std::pair<double,double>(x[0],x[1]);
   }
 
-  std::pair<double,double> MpAccessMPI::gsum (std::pair<double,double> p) const {
+  inline std::pair<double,double> MpAccessMPI::gsum (std::pair<double,double> p) const {
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_SUM, _mpiComm);
@@ -431,57 +433,57 @@ namespace ALUGrid
     return std::pair<double,double>(x[0],x[1]);
   }
 
-  void MpAccessMPI::bcast (int* buff, int length, int root ) const 
+  inline void MpAccessMPI::bcast (int* buff, int length, int root ) const 
   {
     MPI_Bcast(buff, length, MPI_INT, root, _mpiComm);
   }
 
-  void MpAccessMPI::bcast (char* buff, int length, int root ) const 
+  inline void MpAccessMPI::bcast (char* buff, int length, int root ) const 
   {
     MPI_Bcast(buff, length, MPI_BYTE, root, _mpiComm);
   }
 
-  void MpAccessMPI::bcast (double* buff, int length, int root ) const 
+  inline void MpAccessMPI::bcast (double* buff, int length, int root ) const 
   {
     MPI_Bcast(buff, length, MPI_DOUBLE, root, _mpiComm);
   }
 
-  int MpAccessMPI::exscan( int myvalue ) const 
+  inline int MpAccessMPI::exscan( int myvalue ) const 
   {
     int sum = myvalue;
     MPI_Exscan(&myvalue, &sum, 1, MPI_INT, MPI_SUM, _mpiComm);
     return sum;
   }
 
-  int MpAccessMPI::scan( int myvalue ) const 
+  inline int MpAccessMPI::scan( int myvalue ) const 
   {
     int sum = myvalue;
     MPI_Scan(&myvalue, &sum, 1, MPI_INT, MPI_SUM, _mpiComm);
     return sum;
   }
 
-  std::vector< int > MpAccessMPI::gcollect (int i) const {
+  inline std::vector< int > MpAccessMPI::gcollect (int i) const {
     std::vector< int > r (psize (), 0L);
     mpi_allgather (&i, 1, &r[ 0], 1);
     return r;
   }
 
-  std::vector< double > MpAccessMPI::gcollect (double a) const 
+  inline std::vector< double > MpAccessMPI::gcollect (double a) const 
   {
     std::vector< double > r (psize (),0.0);
     mpi_allgather (& a, 1, &r[ 0 ], 1);
     return r;
   }
 
-  std::vector< std::vector< int > > MpAccessMPI::gcollect (const std::vector< int > & v) const {
+  inline std::vector< std::vector< int > > MpAccessMPI::gcollect (const std::vector< int > & v) const {
     return doGcollectV (v, MPI_INT, _mpiComm);
   }
 
-  std::vector< std::vector< double > > MpAccessMPI::gcollect (const std::vector< double > & v) const {
+  inline std::vector< std::vector< double > > MpAccessMPI::gcollect (const std::vector< double > & v) const {
     return doGcollectV (v, MPI_DOUBLE, _mpiComm);
   }
 
-  std::vector< ObjectStream > MpAccessMPI::
+  inline std::vector< ObjectStream > MpAccessMPI::
   gcollect (const ObjectStream & in, const std::vector<int>& len ) const 
   {
     // number of processes 
@@ -554,17 +556,17 @@ namespace ALUGrid
     return o;
   }
 
-  std::vector< std::vector< int > > MpAccessMPI::exchange (const std::vector< std::vector< int > > & in) const {
+  inline std::vector< std::vector< int > > MpAccessMPI::exchange (const std::vector< std::vector< int > > & in) const {
     assert (static_cast<int> (in.size ()) == nlinks ());
     return doExchange (in, MPI_INT, _mpiComm, dest ());
   }
 
-  std::vector< std::vector< double > > MpAccessMPI::exchange (const std::vector< std::vector< double > > & in) const {
+  inline std::vector< std::vector< double > > MpAccessMPI::exchange (const std::vector< std::vector< double > > & in) const {
     assert (static_cast<int> (in.size ()) == nlinks ());
     return doExchange (in, MPI_DOUBLE, _mpiComm, dest ());
   }
 
-  std::vector< std::vector< char > > MpAccessMPI::exchange (const std::vector< std::vector< char > > & in) const {
+  inline std::vector< std::vector< char > > MpAccessMPI::exchange (const std::vector< std::vector< char > > & in) const {
     assert (static_cast<int> (in.size ()) == nlinks ());
     return doExchange (in, MPI_BYTE, _mpiComm, dest ());
   }
@@ -771,14 +773,14 @@ namespace ALUGrid
 
   };
 
-  MpAccessMPI::NonBlockingExchange*
+  inline MpAccessMPI::NonBlockingExchange*
   MpAccessMPI::nonBlockingExchange( const int tag, const std::vector< ObjectStream > & in ) const 
   {
     assert( tag > messagetag+1 );
     return new NonBlockingExchangeMPI( *this, tag, in );
   }
 
-  MpAccessMPI::NonBlockingExchange*
+  inline MpAccessMPI::NonBlockingExchange*
   MpAccessMPI::nonBlockingExchange( const int tag ) const 
   {
     assert( tag > messagetag+1 );
@@ -786,7 +788,7 @@ namespace ALUGrid
   }
 
   // --exchange
-  std::vector< ObjectStream > MpAccessMPI::exchange (const std::vector< ObjectStream > & in) const 
+  inline std::vector< ObjectStream > MpAccessMPI::exchange (const std::vector< ObjectStream > & in) const 
   {
     NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
     return nonBlockingExchange.receiveImpl();

@@ -3,6 +3,9 @@
 
 #include "mpAccess.h"
 
+// the following implementation is only available in case MPI is available
+#if HAVE_MPI 
+
 namespace ALUGrid
 {
 
@@ -137,7 +140,6 @@ namespace ALUGrid
     NonBlockingExchange* nonBlockingExchange( const int tag ) const;
   };
 
-
   //
   //    #    #    #  #          #    #    #  ######
   //    #    ##   #  #          #    ##   #  #
@@ -159,5 +161,10 @@ namespace ALUGrid
   }
 
 } // namespace ALUGrid
+
+// include implementation 
+#include <dune/alugrid/impl/parallel/mpAccess_MPI_inline.h>
+
+#endif // #if HAVE_MPI 
 
 #endif // #ifndef MPACCESS_MPI_H_INCLUDED

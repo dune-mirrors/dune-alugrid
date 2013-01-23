@@ -45,21 +45,6 @@ libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_parallel_la_LIBADD = 
 
 ALUGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la
-
-# only build libalugrid_mpi if MPI was found
-if MPI
-libalugrid_mpi_la_SOURCES = \
-	$(top_srcdir)/dune/alugrid/impl/parallel/mpAccess_MPI.cc
-
-libalugrid_mpi_la_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
-libalugrid_mpi_la_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-libalugrid_mpi_la_LIBADD = 
-#$(DUNEMPILIBS)
-
-# add alugrid_mpi to alugrid impl libs
-ALUGRID_IMPL_LIBS += libalugrid_mpi.la 
-endif 
-
 lib_LTLIBRARIES = $(ALUGRID_IMPL_LIBS) libdunealugrid.la
 
 libdunealugrid_la_SOURCES = \
