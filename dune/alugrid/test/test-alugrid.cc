@@ -504,7 +504,7 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
   // -1 stands for leaf check 
   checkCommunication(grid, -1, std::cout);
 
-  if( Capabilities :: isLevelwiseConforming< GridType > :: v )
+  if( Dune :: Capabilities :: isLevelwiseConforming< GridType > :: v )
   { 
     for(int l=0; l<= mxl; ++l)
       checkCommunication(grid, l , Dune::dvverb);
