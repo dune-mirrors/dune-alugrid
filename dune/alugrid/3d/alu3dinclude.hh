@@ -29,11 +29,6 @@
 #define ALUGRID_PERIODIC_BOUNDARY_PARALLEL
 #define ALUGRID_CONSTRUCTION_WITH_STREAMS
 #define ALUGRID_3D_CONFORMING_REFINEMENT
-
-// this is needed for shared memory parallelization
-// otherwise the iterator are not thread safe 
-#define ITERATORS_WITHOUT_MYALLOC 
-
 #define ALUGRID_VERTEX_PROJECTION
 
 #include <dune/alugrid/impl/serial/gatherscatter.hh>

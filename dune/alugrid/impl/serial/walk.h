@@ -220,7 +220,7 @@ namespace ALUGrid
   template < class A >
   class ListIterator
   : public IteratorSTI< A >
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
   , public MyAlloc 
 #endif
   {
@@ -245,7 +245,7 @@ namespace ALUGrid
   };
 
   template < class A, class B > class TreeIterator : public IteratorSTI < A >
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
        , public MyAlloc 
 #endif
   {
@@ -282,7 +282,7 @@ namespace ALUGrid
   };
 
   template < class A, class B > class Wrapper : public IteratorSTI < typename B :: val_t >
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
        , public MyAlloc 
 #endif
   {
@@ -301,7 +301,7 @@ namespace ALUGrid
   };
 
   template < class A, class B, class C > class AlignIterator : public IteratorSTI < C >
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
        , public MyAlloc 
 #endif
   {
@@ -322,7 +322,7 @@ namespace ALUGrid
   };
 
   template < class A > class VectorAlign : public IteratorSTI < A >
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
        , public MyAlloc 
 #endif
   {
@@ -346,7 +346,7 @@ namespace ALUGrid
   };
 
   template < class  A, class B > class Insert : public IteratorSTI < typename B :: val_t >
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
        , public MyAlloc 
 #endif
   {
