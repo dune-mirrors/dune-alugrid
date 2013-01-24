@@ -1,7 +1,6 @@
 // (c) Robert Kloefkorn 2010 
 #include "gitter_hexa_top_pll.h"
 #include "../serial/gitter_hexa_top.cc"
-#include "../serial/ghost_elements.cc"
 
 namespace ALUGrid
 {

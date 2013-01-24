@@ -301,22 +301,6 @@ namespace ALUGrid
   // #     #  #    #  #   ##  #    #      #     #     #    #  #
   // #     #  #####   #    #  #####       #     #      ####   #
 
-
-  template< class A >  void Hbnd4Top < A >::
-  setBoundaryId( const int id ) 
-  {
-    // set my id to the same as bnd 
-    this->setBndId( id );
-    myhface4_t & face = *(myhface4(0));
-    face.setBndId( id );
-    // 4 fertices and edges  
-    for(int i=0; i<4; ++i)
-    {
-      face.myvertex(i)->setBndId( id );
-      face.myhedge(i)->setBndId( id );
-    }
-  }
-
   template< class A > bool Hbnd4Top < A >::coarse () {
     innerbndseg_t * b = down ();
     if (!b) return false;

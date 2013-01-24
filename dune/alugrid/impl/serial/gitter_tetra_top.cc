@@ -509,21 +509,6 @@ namespace ALUGrid
   // #     #  #    #  #   ##  #    # #     #    #     #    #  #
   // #     #  #####   #    #  #####   #####     #      ####   #
 
-  template< class A >  void Hbnd3Top < A >::
-  setBoundaryId (const int id ) 
-  {
-    // set my id to the same as bnd 
-    this->setBndId( id );
-    myhface_t & face = *(myhface(0));
-    face.setBndId( id );
-    // 3 vertices and edges 
-    for(int i=0; i<3; ++i) 
-    {
-      face.myvertex(i)->setBndId( id );
-      face.myhedge(i)->setBndId( id );
-    }
-  }
-
   template< class A >  void Hbnd3Top < A >::split_bisection() 
   {
     int l = 1 + level () ;
