@@ -279,7 +279,7 @@ namespace ALUGrid
         tetra_GEO * tr = (tetra_GEO *)(*hit).second;
         int ldbVertexIndex = tr->ldbVertexIndex();
 
-        typedef typename hbnd3intMap_t::iterator iterator;
+        typedef hbnd3intMap_t::iterator iterator;
         const iterator end = _hbnd3Int.end();
         for (int i = 0; i < 4; ++i) 
         {
@@ -321,7 +321,7 @@ namespace ALUGrid
         hexa_GEO * hx = (hexa_GEO *)(*hit).second;
         int ldbVertexIndex = hx->ldbVertexIndex();
 
-        typedef typename hbnd4intMap_t::iterator iterator;
+        typedef hbnd4intMap_t::iterator iterator;
         const iterator end = _hbnd4Int.end();
         for (int i = 0; i < 6; ++i) 
         {

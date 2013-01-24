@@ -2,6 +2,7 @@
 #define __HEADER__GRID
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <stack>
 #include <vector>

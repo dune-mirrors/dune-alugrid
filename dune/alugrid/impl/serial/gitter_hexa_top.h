@@ -4,6 +4,7 @@
 #ifndef GITTER_HEXA_TOP_H_INCLUDED
 #define GITTER_HEXA_TOP_H_INCLUDED
 
+#include <cmath>
 #include "gitter_sti.h"
 
 namespace ALUGrid
