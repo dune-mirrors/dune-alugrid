@@ -1,4 +1,4 @@
-M4FILES = dune-alugrid.m4 metis.m4 parmetis.m4
+M4FILES = dune-alugrid.m4
 
 aclocaldir = $(datadir)/aclocal
 aclocal_DATA = $(M4FILES)

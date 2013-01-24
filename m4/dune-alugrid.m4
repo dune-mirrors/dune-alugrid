@@ -1,12 +1,17 @@
 AC_DEFUN([DUNE_ALUGRID_CHECKS],[
 
-  AC_SUBST(METIS_INCLUDE, "" )
-  AC_SUBST(METIS_LDFLAGS, "" )
-  AC_SUBST(METIS_LIB, "" )
+  # check for the ParMETIS library
+  AC_REQUIRE([DUNE_PATH_PARMETIS])
+  # check for the METIS library (check needs to after ParMETIS check)
+  AC_REQUIRE([IMMDX_LIB_METIS])
 
-  # check for the ParMetis and Metis libraries 
-  AC_REQUIRE([ALUGRID_PATH_METIS])
-  AC_REQUIRE([ALUGRID_PATH_PARMETIS])
+  # add to global list
+  DUNE_ADD_ALL_PKG([PARMETIS], [\${PARMETIS_CPPFLAGS}],
+                   [\${PARMETIS_LDFLAGS}], [\${PARMETIS_LIBS}])
+
+  # add to global list
+  DUNE_ADD_ALL_PKG([METIS], [\${METIS_INCLUDE}],
+                   [\${METIS_LDFLAGS}], [\${METIS_LIB}])
 
   # check whether ALUGrid was found by the dune-grid module 
   # this conflicts with this package
