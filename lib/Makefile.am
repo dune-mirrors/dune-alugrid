@@ -39,9 +39,9 @@ libalugrid_parallel_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/impl/parallel/gitter_pll_sti.cc \
 	$(top_srcdir)/dune/alugrid/impl/parallel/gitter_tetra_top_pll.cc
 
-libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS)
-libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)
-libalugrid_parallel_la_LIBADD = 
+libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS) $(METIS_INCLUDE)
+libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS) $(METIS_LDFLAGS)
+libalugrid_parallel_la_LIBADD = $(METIS_LIB)
 
 ALUGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la
 lib_LTLIBRARIES = $(ALUGRID_IMPL_LIBS) libdunealugrid.la
