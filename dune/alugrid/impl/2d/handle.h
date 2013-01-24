@@ -11,10 +11,10 @@ namespace ALU2DGrid
 {
 
   // is defined in indexstack.h 
-  typedef ALUGrid::IndexManagerType IndexManager2dType;
+  typedef ::ALUGrid::IndexManagerType IndexManager2dType;
 
   // is defined in indexstack.h 
-  typedef ALUGrid::RestoreInfo RestoreInfo;
+  typedef ::ALUGrid::RestoreInfo RestoreInfo;
 
   // number of different index manager that exists
   enum { numOfIndexManager2d = 4 };
@@ -91,7 +91,7 @@ namespace ALU2DGrid
       typedef nconf_vtx < ncoord, nvtx > nconf_vtx_t;
 
       typedef VtxProjection < ncoord, nvtx > ProjectVertex_t;
-      typedef ALUGrid::VertexProjection< N , double > CompatibilityProjectVertex_t;
+      typedef ::ALUGrid::VertexProjection< N , double > CompatibilityProjectVertex_t;
 
       struct OrientStr
       {
