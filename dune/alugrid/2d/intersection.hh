@@ -40,16 +40,18 @@ namespace Dune
   // ALU2DIntersectionGeometryStorage
   // --------------------------------
   
-  template< class LocalGeometryImpl >
-  class ALU2DIntersectionGeometryStorage 
+  template< class GridImp, class LocalGeometryImpl >
+  class ALU2DIntersectionGeometryStorage
   {
-    typedef ALU2DIntersectionGeometryStorage< LocalGeometryImpl > ThisType;
+    typedef ALU2DIntersectionGeometryStorage< GridImp, LocalGeometryImpl > ThisType;
 
     // one geometry for each face and twist 0 and 1
     LocalGeometryImpl geoms_[ 2 ][ 4 ][ 2 ];
-    //std::vector< LocalGeometryImpl > geoms_[ 2 ][ 4 ];
 
-  private:
+#ifdef USE_SMP_PARALLEL
+  // make public because of std::vector
+  public:
+#endif
     ALU2DIntersectionGeometryStorage ();
 
   public:
@@ -65,8 +67,14 @@ namespace Dune
     // return static instance 
     static const ThisType &instance ()
     {
-      static const ThisType geomStorage; 
-      return geomStorage; 
+#ifdef USE_SMP_PARALLEL
+      typedef ALUGridObjectFactory< GridImp >  GridObjectFactoryType;
+      static const std::vector< ThisType > storage( GridObjectFactoryType :: maxThreads() );
+      return storage[ GridObjectFactoryType :: threadNumber () ];
+#else
+      static const ThisType geomStorage;
+      return geomStorage;
+#endif
     }
   };
 
@@ -121,7 +129,7 @@ namespace Dune
     typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
 
     // type of local geometry storage 
-    typedef ALU2DIntersectionGeometryStorage< LocalGeometryImpl > LocalGeometryStorageType;
+    typedef ALU2DIntersectionGeometryStorage< GridImp, LocalGeometryImpl > LocalGeometryStorageType;
 
     typedef ALU2dGridIntersectionBase<GridImp> ThisType;
     friend class LevelIntersectionIteratorWrapper<GridImp>;
