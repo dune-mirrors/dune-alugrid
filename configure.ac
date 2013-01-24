@@ -7,9 +7,9 @@ AM_CONFIG_HEADER([config.h])
 
 DUNE_CHECK_ALL
 
-AC_SUBST(AM_CPPFLAGS, $ALL_PKG_CPPFLAGS)
-AC_SUBST(AM_LDFLAGS, $ALL_PKG_LDFLAGS)
-AC_SUBST([LDADD], '$(top_builddir)/lib/libdunealugrid.la $(ALL_PKG_LIBS)')
+AC_SUBST(AM_CPPFLAGS, "\${ALL_PKG_CPPFLAGS}" )
+AC_SUBST(AM_LDFLAGS, "\${ALL_PKG_LDFLAGS}")
+AC_SUBST([LDADD], '$(top_builddir)/lib/libdunealugrid.la \${ALL_PKG_LIBS}')
 
 # generate Makefiles
 AC_CONFIG_FILES([
