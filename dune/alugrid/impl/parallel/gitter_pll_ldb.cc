@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iterator>
 #include <iostream>
+#include <numeric>
 
 #include "alusfc.hh"
 #include "alumetis.hh"
