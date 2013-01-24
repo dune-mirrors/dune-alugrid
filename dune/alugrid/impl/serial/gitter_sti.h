@@ -146,7 +146,7 @@ namespace ALUGrid
   // EmptyIterator is an iterator of an empty set  
   // for some default values 
   template < class A > class EmptyIterator : public IteratorSTI < A >
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
                                            , public MyAlloc 
 #endif
   {
@@ -2424,7 +2424,7 @@ namespace ALUGrid
   // zu verwalten.
 
   template < class A > class LeafIterator 
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
    : public MyAlloc 
 #endif
   {
@@ -2448,7 +2448,7 @@ namespace ALUGrid
   };
 
   template < class A, class StopRule_t > class GridIterator
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
    : public MyAlloc 
 #endif
   {
@@ -2474,7 +2474,7 @@ namespace ALUGrid
   // LevelIterator is the same construct as LeafIterator, but the iterator
   // rule differs, here we use any_has_level, see walk.h 
   template < class A > class LevelIterator
-#ifndef ITERATORS_WITHOUT_MYALLOC
+#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
    : public MyAlloc 
 #endif
   {
