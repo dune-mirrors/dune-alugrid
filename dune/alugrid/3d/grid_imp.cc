@@ -894,33 +894,31 @@ namespace Dune
 
 #if COMPILE_ALUGRID_LIB 
   // Instantiation
-  template class ALU3dGrid< hexa, No_Comm >;
-  template class ALU3dGrid< tetra, No_Comm >;
+  template class ALU3dGrid< hexa, ALUGridNoComm >;
+  template class ALU3dGrid< tetra, ALUGridNoComm >;
 
-  template bool ALU3dGrid< tetra, No_Comm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< tetra, No_Comm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< tetra, No_Comm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< tetra, No_Comm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
+  template bool ALU3dGrid< tetra, ALUGridNoComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
+  template bool ALU3dGrid< tetra, ALUGridNoComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
+  template bool ALU3dGrid< tetra, ALUGridNoComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
+  template bool ALU3dGrid< tetra, ALUGridNoComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
 
-  template bool ALU3dGrid< hexa, No_Comm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< hexa, No_Comm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< hexa, No_Comm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< hexa, No_Comm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
+  template bool ALU3dGrid< hexa, ALUGridNoComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
+  template bool ALU3dGrid< hexa, ALUGridNoComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
+  template bool ALU3dGrid< hexa, ALUGridNoComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
+  template bool ALU3dGrid< hexa, ALUGridNoComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
 
-#if ALU3DGRID_PARALLEL
-  template class ALU3dGrid< hexa, MPI_Comm >;
-  template class ALU3dGrid< tetra, MPI_Comm >;
+  template class ALU3dGrid< hexa, ALUGridMPIComm >;
+  template class ALU3dGrid< tetra, ALUGridMPIComm >;
 
-  template bool ALU3dGrid< tetra, MPI_Comm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< tetra, MPI_Comm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< tetra, MPI_Comm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< tetra, MPI_Comm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
+  template bool ALU3dGrid< tetra, ALUGridMPIComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
+  template bool ALU3dGrid< tetra, ALUGridMPIComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
+  template bool ALU3dGrid< tetra, ALUGridMPIComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
+  template bool ALU3dGrid< tetra, ALUGridMPIComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
 
-  template bool ALU3dGrid< hexa, MPI_Comm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< hexa, MPI_Comm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< hexa, MPI_Comm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< hexa, MPI_Comm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
-#endif // #if ALU3DGRID_PARALLEL
+  template bool ALU3dGrid< hexa, ALUGridMPIComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
+  template bool ALU3dGrid< hexa, ALUGridMPIComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
+  template bool ALU3dGrid< hexa, ALUGridMPIComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
+  template bool ALU3dGrid< hexa, ALUGridMPIComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
 #endif // #if COMPILE_ALUGRID_LIB 
 
 } // end namespace Dune

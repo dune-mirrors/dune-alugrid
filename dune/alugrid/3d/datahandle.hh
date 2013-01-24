@@ -272,7 +272,6 @@ namespace ALUGrid
     }
   };
 
-#if ALU3DGRID_PARALLEL
   //! the corresponding interface class is defined in bsinclude.hh
   template< class GridType, class DataCollectorType, int codim >
   class GatherScatterLeafData 
@@ -483,7 +482,6 @@ namespace ALUGrid
       return (pll.ghostLevel() == level_);
     }
   };
-#endif // #if ALU3DGRID_PARALLEL
 
   //! the corresponding interface class is defined in bsinclude.hh
   template <class GridType, class DataCollectorType, class IndexOperatorType> 

@@ -412,9 +412,9 @@ namespace Dune
   struct ALU3dGridCommHelper;
 
   template< ALU3dGridElementType elType >
-  struct ALU3dGridCommHelper< elType, No_Comm >
+  struct ALU3dGridCommHelper< elType, ALUGridNoComm >
   {
-    typedef ALU3dGrid< elType, No_Comm > Grid;
+    typedef ALU3dGrid< elType, ALUGridNoComm > Grid;
 
     static bool loadBalance ( Grid &grid ) { return false; }
 
@@ -437,11 +437,10 @@ namespace Dune
     {}
   }; // ALU3dGridCommHelper
 
-#if ALU3DGRID_PARALLEL
   template< ALU3dGridElementType elType >
-  struct ALU3dGridCommHelper< elType, MPI_Comm >
+  struct ALU3dGridCommHelper< elType, ALUGridMPIComm >
   {
-    typedef ALU3dGrid< elType, MPI_Comm > Grid;
+    typedef ALU3dGrid< elType, ALUGridMPIComm > Grid;
     typedef ALU3DSPACE GatherScatter GatherScatterType;
 
     static bool loadBalance ( Grid &grid )
@@ -644,9 +643,6 @@ namespace Dune
         DUNE_THROW( GridError, "Wrong set of parameters in ALUGridCommHelper::doCommunication" );
     }
   }; // ALU3dGridCommHelper
-#endif // #if ALU3DGRID_PARALLEL
-
-
 
   template< ALU3dGridElementType elType, class Comm >
   inline bool ALU3dGrid< elType, Comm >::loadBalance ()

@@ -132,7 +132,7 @@ namespace Dune
 
     //! return whether we are in a parallel environment or not 
     bool parallel() const {
-      return ! Conversion< Comm, No_Comm > :: sameType ;
+      return ! Conversion< Comm, ALUGridNoComm > :: sameType ;
     }
 
     //! return true if conforming refinement is enabled 

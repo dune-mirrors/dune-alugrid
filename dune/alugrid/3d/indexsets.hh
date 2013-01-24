@@ -600,10 +600,8 @@ namespace Dune {
       // in parallel some faces and edges of ghost exists more than once
       // but have the same id, but not the same index, there for the check
       // will fail for ghost elements  
-#if ! ALU3DGRID_PARALLEL
       // be carefull with this check, it's complexity is O(N^2)
       //uniquenessCheck();
-#endif
     }
 
     IdType buildMacroVertexId(const VertexType & item )

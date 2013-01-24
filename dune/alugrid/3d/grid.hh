@@ -91,10 +91,10 @@ namespace Dune
   // -----------------------------
 
 #if ALU3DGRID_PARALLEL
-  template< ALU3dGridElementType elType, class Comm = MPI_Comm >
+  template< ALU3dGridElementType elType, class Comm = ALUGridMPIComm >
   class ALU3dGrid;
 #else // #if ALU3DGRID_PARALLEL
-  template< ALU3dGridElementType elType, class Comm = No_Comm >
+  template< ALU3dGridElementType elType, class Comm = ALUGridNoComm >
   class ALU3dGrid;
 #endif // #else // #if ALU3DGRID_PARALLEL
 
@@ -153,18 +153,18 @@ namespace Dune
   struct ALU3dGridCommunications;
 
   template< ALU3dGridElementType elType >
-  struct ALU3dGridCommunications< elType, No_Comm > : public ALU3dGridCommunicationsBase 
+  struct ALU3dGridCommunications< elType, ALUGridNoComm > : public ALU3dGridCommunicationsBase 
   {
     using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
 
-    typedef ALU3dGridLocalIdSet< elType, No_Comm > GlobalIdSet;
+    typedef ALU3dGridLocalIdSet< elType, ALUGridNoComm > GlobalIdSet;
     typedef int GlobalId;
 
     typedef ALU3DSPACE GitterDuneImpl GitterImplType;
 
     typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
 
-    explicit ALU3dGridCommunications ( No_Comm comm ) {}
+    explicit ALU3dGridCommunications ( ALUGridNoComm comm ) {}
 
     int nlinks () const { return 0; }
 
@@ -191,9 +191,9 @@ namespace Dune
 #endif
     }
 
-    static No_Comm defaultComm () { return No_Comm(); }
+    static ALUGridNoComm defaultComm () { return ALUGridNoComm(); }
 
-    static int getRank ( No_Comm comm ) { return 0; }
+    static int getRank ( ALUGridNoComm comm ) { return 0; }
 
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
     {
@@ -211,11 +211,11 @@ namespace Dune
 
 #if ALU3DGRID_PARALLEL
   template< ALU3dGridElementType elType >
-  struct ALU3dGridCommunications< elType, MPI_Comm > : public ALU3dGridCommunicationsBase
+  struct ALU3dGridCommunications< elType, ALUGridMPIComm > : public ALU3dGridCommunicationsBase
   {
     using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
 
-    typedef ALU3dGridGlobalIdSet< elType, MPI_Comm > GlobalIdSet;
+    typedef ALU3dGridGlobalIdSet< elType, ALUGridMPIComm > GlobalIdSet;
     typedef ALUGridId< ALUMacroKey > GlobalId;
 
     typedef ALU3DSPACE GitterDunePll GitterImplType;
@@ -373,7 +373,8 @@ namespace Dune
       typedef IdSet< Grid, LocalIdSetImp, LocalIdType > LocalIdSet;
       typedef IdSet< Grid, GlobalIdSetImp, GlobalIdType > GlobalIdSet;
 
-      typedef Dune::CollectiveCommunication< Comm > CollectiveCommunication;
+      //! Type of the communication class 
+      typedef typename ALU3dGridCommunications< elType, Comm >::CollectiveCommunication CollectiveCommunication;
     }; // struct Traits
 
     //! Type of the level index set implementation

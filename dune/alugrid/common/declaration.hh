@@ -17,6 +17,18 @@ namespace Dune
   //! \brief available refinement types for ALUGrid
   enum ALUGridRefinementType { conforming, nonconforming };
 
+  //! \brief type of class for specialization of serial ALUGrid (No_Comm as communicator) 
+  struct ALUGridNoComm : public No_Comm {} ;
+  //! \brief type of class for specialization of parallel ALUGrid (MPI_Comm as communicator) 
+  struct ALUGridMPIComm {
+#if ALU3DGRID_PARALLEL
+    MPI_Comm mpiComm_;
+    ALUGridMPIComm() : mpiComm_( MPI_COMM_WORLD ) {}
+    ALUGridMPIComm( MPI_Comm comm ) : mpiComm_( comm ) {}
+    operator MPI_Comm () const { return mpiComm_; }
+#endif
+  } ;
+
 /**
    \brief [<em> provides \ref Dune::Grid </em>]
    \brief grid with support for quadrilateral and hexahedral grid (template parameter cube) 
@@ -53,9 +65,9 @@ namespace Dune
   template <int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType, 
             class Comm = 
 #if ALU3DGRID_PARALLEL
-              MPI_Comm 
+              ALUGridMPIComm
 #else 
-              No_Comm 
+              ALUGridNoComm 
 #endif
            >
   class ALUGrid;

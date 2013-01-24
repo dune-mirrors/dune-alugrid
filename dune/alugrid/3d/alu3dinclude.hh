@@ -66,17 +66,18 @@ namespace ALUGrid
 } // namespace ALUGrid
 
 
-// if MPI was found include all headers
-#if ALU3DGRID_PARALLEL
+// headers for parallel grid structures
 #include <dune/alugrid/impl/parallel/gitter_pll_sti.h>
 #include <dune/alugrid/impl/parallel/gitter_pll_impl.h>
 #include <dune/alugrid/impl/parallel/gitter_pll_ldb.h>
 #include <dune/alugrid/impl/parallel/gitter_tetra_top_pll.h>
 #include <dune/alugrid/impl/parallel/gitter_hexa_top_pll.h>
-#include <dune/alugrid/impl/parallel/mpAccess_MPI.h>
 #include <dune/alugrid/impl/parallel/gitter_pll_mgb.h>
-
 #include <dune/alugrid/impl/duneinterface/gitter_dune_pll_impl.h>
+
+#if ALU3DGRID_PARALLEL
+// if MPI was found include MPI communications 
+#include <dune/alugrid/impl/parallel/mpAccess_MPI.h>
 #endif // #if ALU3DGRID_PARALLEL
 
 //- local includes 
@@ -99,7 +100,7 @@ namespace Dune
   struct ALU3dBasicImplTraits;
 
   template<>
-  struct ALU3dBasicImplTraits< No_Comm >
+  struct ALU3dBasicImplTraits< ALUGridNoComm >
   {
     typedef ALU3DSPACE Gitter GitterType;
     typedef ALU3DSPACE GitterDuneImpl GitterImplType;
@@ -123,9 +124,8 @@ namespace Dune
     }
   };
 
-#if ALU3DGRID_PARALLEL
   template<>
-  struct ALU3dBasicImplTraits< MPI_Comm >
+  struct ALU3dBasicImplTraits< ALUGridMPIComm >
   {
     typedef ALU3DSPACE GitterDunePll GitterType;
     typedef ALU3DSPACE GitterDunePll GitterImplType;
@@ -148,8 +148,6 @@ namespace Dune
       return ( ghost != 0 );
     }
   };
-#endif // #if ALU3DGRID_PARALLEL
-
 
 
   // ALU3dCodimImplTraits

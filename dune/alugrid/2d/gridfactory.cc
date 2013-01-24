@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <dune/alugrid/common/declaration.hh>
+
 #include <dune/alugrid/2d/gridfactory.hh>
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/2d/alugrid.hh>
@@ -520,24 +522,20 @@ namespace Dune
 // Template Instantiation
 // ----------------------
 
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming,    Dune::No_Comm > >;
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming, Dune::No_Comm > >;
-#if HAVE_MPI
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming,    MPI_Comm > >;
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming, MPI_Comm > >;
-#endif // #if HAVE_MPI
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming,    Dune::ALUGridNoComm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming, Dune::ALUGridNoComm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming,    Dune::ALUGridMPIComm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming, Dune::ALUGridMPIComm > >;
 
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming, Dune::No_Comm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming, Dune::ALUGridNoComm > >;
 
 // new versions 
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming,    Dune::No_Comm > >;
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming, Dune::No_Comm > >;
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::cube,    Dune::nonconforming, Dune::No_Comm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming,    Dune::ALUGridNoComm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming, Dune::ALUGridNoComm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::cube,    Dune::nonconforming, Dune::ALUGridNoComm > >;
 
-#if HAVE_MPI
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::cube,    Dune::nonconforming, MPI_Comm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::cube,    Dune::nonconforming, Dune::ALUGridMPIComm > >;
 
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming,    MPI_Comm > >;
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming, MPI_Comm > >;
-template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::cube,    Dune::nonconforming, MPI_Comm > >;
-#endif // #if HAVE_MPI
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming,    Dune::ALUGridMPIComm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming, Dune::ALUGridMPIComm > >;
+template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::cube,    Dune::nonconforming, Dune::ALUGridMPIComm > >;

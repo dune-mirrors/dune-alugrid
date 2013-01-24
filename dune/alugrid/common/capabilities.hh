@@ -40,31 +40,29 @@ namespace Dune
       static const bool v = true;
     };
 
-    /** \brief ALUGrid is parallel when Comm == MPI_Comm 
+    /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm 
     \ingroup ALUGrid
     */
     template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isParallel< ALUGrid< dim, dimworld, eltype, refinementtype, No_Comm > >
+    struct isParallel< ALUGrid< dim, dimworld, eltype, refinementtype, ALUGridNoComm > >
     {
       static const bool v = false;
     };
 
-    /** \brief ALUGrid is parallel when Comm == MPI_Comm 
+    /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm 
     \ingroup ALUGrid
     */
-#if ALU3DGRID_PARALLEL
     template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isParallel< ALUGrid< 3, 3, eltype, refinementtype,  MPI_Comm > >
+    struct isParallel< ALUGrid< 3, 3, eltype, refinementtype,  ALUGridMPIComm > >
     {
       static const bool v = true;
     };
-#endif
 
-    /** \brief ALUGrid can communicate when Comm == MPI_Comm
+    /** \brief ALUGrid can communicate when Comm == ALUGridMPIComm
     \ingroup ALUGrid
     */
     template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, int codim >
-    struct canCommunicate< ALUGrid< dim, dimworld, eltype, refinementtype, No_Comm >, codim >
+    struct canCommunicate< ALUGrid< dim, dimworld, eltype, refinementtype, ALUGridNoComm >, codim >
     {
       static const bool v = false;
     };
@@ -72,13 +70,11 @@ namespace Dune
     /** \brief ALUGrid can communicate 
     \ingroup ALUGrid
     */
-#if ALU3DGRID_PARALLEL
     template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, int codim >
-    struct canCommunicate< ALUGrid< 3, 3, eltype, refinementtype, MPI_Comm >, codim >
+    struct canCommunicate< ALUGrid< 3, 3, eltype, refinementtype, ALUGridMPIComm >, codim >
     {
       static const bool v = true;
     };
-#endif
 
     /** \brief ALUGrid has conforming level grids
     \ingroup ALUGrid

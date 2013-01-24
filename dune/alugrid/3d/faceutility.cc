@@ -104,18 +104,16 @@ namespace Dune
   // Explicit Template Instatiation
   // ------------------------------
 
-  template struct ALU3dGridSurfaceMappingFactory< tetra, No_Comm >;
-  template struct ALU3dGridSurfaceMappingFactory< hexa, No_Comm >;
+  template struct ALU3dGridSurfaceMappingFactory< tetra, ALUGridNoComm >;
+  template struct ALU3dGridSurfaceMappingFactory< hexa, ALUGridNoComm >;
 
-  template class ALU3dGridGeometricFaceInfoBase< tetra, No_Comm >;
-  template class ALU3dGridGeometricFaceInfoBase< hexa, No_Comm >;
+  template class ALU3dGridGeometricFaceInfoBase< tetra, ALUGridNoComm >;
+  template class ALU3dGridGeometricFaceInfoBase< hexa, ALUGridNoComm >;
 
-#if ALU3DGRID_PARALLEL
-  template struct ALU3dGridSurfaceMappingFactory< tetra, MPI_Comm >;
-  template struct ALU3dGridSurfaceMappingFactory< hexa, MPI_Comm >;
+  template struct ALU3dGridSurfaceMappingFactory< tetra, ALUGridMPIComm >;
+  template struct ALU3dGridSurfaceMappingFactory< hexa, ALUGridMPIComm >;
 
-  template class ALU3dGridGeometricFaceInfoBase< tetra, MPI_Comm >;
-  template class ALU3dGridGeometricFaceInfoBase< hexa, MPI_Comm >;
-#endif // #if ALU3DGRID_PARALLEL
+  template class ALU3dGridGeometricFaceInfoBase< tetra, ALUGridMPIComm >;
+  template class ALU3dGridGeometricFaceInfoBase< hexa, ALUGridMPIComm >;
 
 } // end namespace Dune

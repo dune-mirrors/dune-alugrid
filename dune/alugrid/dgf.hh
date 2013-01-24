@@ -165,16 +165,18 @@ namespace Dune
                                const char *filename,
                                MPICommunicatorType communicator )
     {
-#if ALU3DGRID_PARALLEL
-      // in parallel runs add rank to filename 
-      std :: stringstream tmps;
-      tmps << filename << "." << rank;
-      const std :: string &tmp = tmps.str();
+      if( ! Conversion< MPICommunicatorType , No_Comm > :: sameType ) 
+      {
+        // in parallel runs add rank to filename 
+        std :: stringstream tmps;
+        tmps << filename << "." << rank;
+        const std :: string &tmp = tmps.str();
 
-      // if file exits then use it 
-      if( fileExists( tmp.c_str() ) )
-        return new Grid( tmp.c_str(), communicator );
-#endif
+        // if file exits then use it 
+        if( fileExists( tmp.c_str() ) )
+          return new Grid( tmp.c_str(), communicator );
+      }
+
       // for rank 0 we also check the normal file name 
       if( rank == 0 ) 
       {

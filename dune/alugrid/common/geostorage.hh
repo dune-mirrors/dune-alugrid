@@ -50,12 +50,12 @@ namespace Dune
       {
         if( nonConform ) 
         {
-          typedef ALUGrid< 2, dimworld, simplex, nonconforming, No_Comm > Grid;
+          typedef ALUGrid< 2, dimworld, simplex, nonconforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
         }
         else 
         {
-          typedef ALUGrid< 2, dimworld, simplex, conforming, No_Comm > Grid;
+          typedef ALUGrid< 2, dimworld, simplex, conforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
@@ -71,14 +71,14 @@ namespace Dune
       {
         assert ( nonConform ) ;
         {
-          typedef ALUGrid< 3, 3, simplex, nonconforming, No_Comm > Grid;
+          typedef ALUGrid< 3, 3, simplex, nonconforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
         }
         /*
          // TODO, implement this for refinement of all edges (conforming)
         else 
         {
-          typedef ALUGrid< 3, 3, simplex, conforming, No_Comm > Grid;
+          typedef ALUGrid< 3, 3, simplex, conforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
         }
         */
@@ -95,7 +95,7 @@ namespace Dune
       {
         assert ( nonConform ) ;
         {
-          typedef ALUGrid< 2, dimworld, cube, nonconforming, No_Comm > Grid;
+          typedef ALUGrid< 2, dimworld, cube, nonconforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
@@ -111,7 +111,7 @@ namespace Dune
       {
         assert( nonConform );
         {
-          typedef ALUGrid< 3, 3, cube, nonconforming, No_Comm > Grid;
+          typedef ALUGrid< 3, 3, cube, nonconforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }

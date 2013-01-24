@@ -283,12 +283,10 @@ namespace Dune
   // Explicit Template Instatiation
   // ------------------------------
 
-  template class NonConformingFaceMapping< tetra, No_Comm >;
-  template class NonConformingFaceMapping< hexa, No_Comm >;
+  template class NonConformingFaceMapping< tetra, ALUGridNoComm >;
+  template class NonConformingFaceMapping< hexa, ALUGridNoComm >;
 
-#if ALU3DGRID_PARALLEL
-  template class NonConformingFaceMapping< tetra, MPI_Comm >;
-  template class NonConformingFaceMapping< hexa, MPI_Comm >;
-#endif // #if ALU3DGRID_PARALLEL
+  template class NonConformingFaceMapping< tetra, ALUGridMPIComm >;
+  template class NonConformingFaceMapping< hexa, ALUGridMPIComm >;
 
 } // end namespace Dune

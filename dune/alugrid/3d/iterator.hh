@@ -673,7 +673,7 @@ class ALU3dGridHierarchicIterator
 
   //! empty implementation for 
   template < class PointerType > 
-  class GhostElementStorage< PointerType, No_Comm >
+  class GhostElementStorage< PointerType, ALUGridNoComm >
   {
   public:  
     GhostElementStorage() {}
@@ -689,10 +689,9 @@ class ALU3dGridHierarchicIterator
     bool valid () const { return false; }
   };
 
-#if ALU3DGRID_PARALLEL
   //! implementation holding two ghost pointer 
   template < class PointerType > 
-  class GhostElementStorage< PointerType, MPI_Comm >
+  class GhostElementStorage< PointerType, ALUGridMPIComm >
   {
   private:  
     // pointers to ghost and current ghost 
@@ -723,7 +722,6 @@ class ALU3dGridHierarchicIterator
     }
     bool valid () const { return (ghost_ != 0); }
   };
-#endif
 
 public:
   typedef typename GridImp::GridObjectFactoryType FactoryType;
