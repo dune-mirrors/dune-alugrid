@@ -18,7 +18,14 @@ namespace Dune
   enum ALUGridRefinementType { conforming, nonconforming };
 
   //! \brief type of class for specialization of serial ALUGrid (No_Comm as communicator) 
-  struct ALUGridNoComm : public No_Comm {} ;
+  struct ALUGridNoComm 
+  {
+    No_Comm noComm_;
+    ALUGridNoComm() : noComm_() {}
+    ALUGridNoComm( const No_Comm& comm ) : noComm_( comm ) {}
+    operator No_Comm () const { return noComm_; }
+  };
+
   //! \brief type of class for specialization of parallel ALUGrid (MPI_Comm as communicator) 
   struct ALUGridMPIComm {
 #if ALU3DGRID_PARALLEL
