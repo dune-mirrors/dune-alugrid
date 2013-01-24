@@ -318,13 +318,13 @@ namespace Dune
     {
       if( !geometry.isSimplex() )
         DUNE_THROW( GridError, "Only simplex geometries can be inserted into "
-                               "ALUSimplexGrid< 3, 3 >." );
+                               "ALUGrid< 3, 3, simplex, refrule >." );
     }
     else
     {
       if( !geometry.isCube() )
         DUNE_THROW( GridError, "Only cube geometries can be inserted into "
-                               "ALUCubeGrid< 3, 3 >." );
+                               "ALUGrid< 3, 3, cube, refrule >." );
     }
   }
   

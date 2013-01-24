@@ -223,47 +223,6 @@ namespace Dune
     DuneGridFormatParser dgf_;
   };
 
-  // note: template parameter dimw is only added to avoid ALUSimplexGrid deprecation warning
-  template < int dimw >
-  struct DGFGridFactory< ALUSimplexGrid<3,dimw> > : 
-    public DGFBaseFactory< ALUSimplexGrid<3,dimw> >
-  {
-    typedef ALUSimplexGrid<3,dimw> DGFGridType;
-    typedef DGFBaseFactory< DGFGridType > BaseType;
-    typedef typename BaseType :: MPICommunicatorType MPICommunicatorType;
-  protected:  
-    using BaseType :: grid_;
-    using BaseType :: callDirectly;
-  public:  
-    explicit DGFGridFactory ( std::istream &input,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
-    : DGFBaseFactory< DGFGridType >( comm )
-    {
-      input.clear();
-      input.seekg( 0 );
-      if( !input )
-        DUNE_THROW( DGFException, "Error resetting input stream." );
-      generate( input, comm );
-    }
-
-    explicit DGFGridFactory ( const std::string &filename, 
-                              MPICommunicatorType comm = MPIHelper::getCommunicator()) 
-    : DGFBaseFactory< DGFGridType >( comm ) 
-    {
-      std::ifstream input( filename.c_str() );
-
-      bool fileFound = input.is_open() ;
-      if( fileFound ) 
-        fileFound = generate( input, comm, filename );
-
-      if( ! fileFound ) 
-        grid_ = callDirectly( "ALUSimplexGrid< 3 , 3 >", this->rank( comm ), filename.c_str(), comm );
-    }
-
-  protected:
-    bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
-  };
-
   template < ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
   struct DGFGridFactory< ALUGrid<3,3, eltype, refinementtype, Comm > > : 
     public DGFBaseFactory< ALUGrid<3,3, eltype, refinementtype, Comm > >

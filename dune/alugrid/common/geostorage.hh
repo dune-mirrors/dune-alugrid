@@ -11,16 +11,6 @@
 
 namespace Dune
 {
-
-  template<int dim, int dimw>
-  class ALUCubeGrid;
-
-  template<int dim, int dimw>
-  class ALUSimplexGrid;
-
-  template<int dim, int dimw>
-  class ALUConformGrid;
-
   template< class GridImp, class GeometryImpl, int nChild >
   class ALULocalGeometryStorage 
   {
