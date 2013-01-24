@@ -41,7 +41,7 @@ libalugrid_parallel_la_SOURCES = \
 
 libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)
-libalugrid_parallel_la_LIBADD =
+libalugrid_parallel_la_LIBADD = $(ALL_PKG_LIBS)
 
 ALUGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la
 lib_LTLIBRARIES = $(ALUGRID_IMPL_LIBS) libdunealugrid.la
