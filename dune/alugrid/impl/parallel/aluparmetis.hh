@@ -11,6 +11,7 @@
 extern "C" {
   #include <parmetis.h>
 }
+  #include "mpAccess_MPI.h"
 #else // #if HAVE_PARMETIS
 static const char parmetmess[]
   = "**INFO Due to license reasons the library ParMETIS is\n"
@@ -36,10 +37,10 @@ namespace ALUGridParMETIS
                ALUGrid::MpAccessGlobal &mpa )
   {
 #if HAVE_PARMETIS
-    ALUGrid::MpAccess_MPI* mpaMPI = dynamic_cast<ALUGrid::MpAccess_MPI *> (&mpa);
+    ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
     assert( mpaMPI );
 
-    // get communincator (see mpAccess_MPI.cc)
+    // get communincator (see mpAccess_MPI.cc
     MPI_Comm comm = mpaMPI->communicator();
 
      :: ParMETIS_V3_PartKway(vtxdist, xadj, adjncy, vwgt, adjwgt,
@@ -61,7 +62,7 @@ namespace ALUGridParMETIS
   {
 #if HAVE_PARMETIS
     // get communincator (see mpAccess_MPI.cc)
-    ALUGrid::MpAccess_MPI* mpaMPI = dynamic_cast<ALUGrid::MpAccess_MPI *> (&mpa);
+    ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
     assert( mpaMPI );
 
     // get communincator (see mpAccess_MPI.cc)
