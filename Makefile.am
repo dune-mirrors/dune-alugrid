@@ -1,6 +1,6 @@
 EXTRA_DIST = dune.module
 
-SUBDIRS = m4 lib dune
+SUBDIRS = m4 lib dune examples
 
 DISTCHECK_CONFIGURE_FLAGS = --with-dune-common=$(DUNE_COMMON_ROOT) --dune-geometry=$(DUNE_GEOMETRY_ROOT) --with-dune-grid=$(DUNE_GRID_ROOT) CXX="$(CXX)" CC="$(CC)"
 
