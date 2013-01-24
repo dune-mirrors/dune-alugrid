@@ -3,7 +3,7 @@
 AC_DEFUN([ALUGRID_PATH_PARMETIS],[
   AC_REQUIRE([AC_PROG_CC])
   AC_REQUIRE([ALUGRID_PATH_METIS])
-  AC_REQUIRE([CHECK_MPI])
+  AC_REQUIRE([DUNE_MPI])
 
   AC_ARG_WITH(parmetis,
     AC_HELP_STRING([--with-parmetis=PATH],[directory with ParMETIS (version >= 3.1)  inside]))
