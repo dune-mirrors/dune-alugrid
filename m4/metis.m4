@@ -13,11 +13,11 @@ ac_save_LIBS="$LIBS"
 LIBS=""
 
 ## do nothing if no --with-metis was supplied
-if test x$with_parmetis != x ; then
-  with_metis=$with_parmetis
-  AC_MSG_WARN([Using METIS version of ParMETIS!])
-  ALU_METIS_VERSION="(ParMETIS)"
-fi 
+#if test x$with_parmetis != x ; then
+#  with_metis=$with_parmetis
+#  AC_MSG_WARN([Using METIS version of ParMETIS!])
+#  ALU_METIS_VERSION="(ParMETIS)"
+#fi 
 
 ## do nothing if no --with-metis was supplied
 if test x$with_metis != x && test x$with_metis != xno ; then
@@ -111,9 +111,8 @@ if test x$HAVE_METIS = x1 ; then
   AC_DEFINE(HAVE_METIS, 1, [Define to 1 if metis-library is found])
 
   # add to global list
-  ALUGRID_PKG_LDFLAGS="$ALUGRID_PKG_LDFLAGS $METIS_LDFLAGS"
-  ALUGRID_PKG_LIBS="$ALUGRID_PKG_LIBS $METIS_LIBS"
-  ALUGRID_PKG_CPPFLAGS="$ALUGRID_PKG_CPPFLAGS $METIS_CPPFLAGS"
+  DUNE_ADD_ALL_PKG([METIS], [\${METIS_CPPFLAGS}],
+                   [\${METIS_LDFLAGS}], [\${METIS_LIBS}])
 
   # set variable for summary
   with_metis="yes $ALU_METIS_VERSION"
