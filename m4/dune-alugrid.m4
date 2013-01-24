@@ -1,5 +1,6 @@
 AC_DEFUN([DUNE_ALUGRID_CHECKS],[
-  # check for the ParMetis library 
+  # check for the ParMetis and Metis libraries 
+  AC_REQUIRE([IMMDX_LIB_METIS])
   AC_REQUIRE([DUNE_PATH_PARMETIS])
 
   # check whether ALUGrid was found by the dune-grid module 
