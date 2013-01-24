@@ -3,7 +3,6 @@
 
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/common/capabilities.hh>
-#include <dune/alugrid/2d/capabilities.hh>
 #include <dune/alugrid/2d/grid.hh>
 
 namespace Dune
