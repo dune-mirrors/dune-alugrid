@@ -1,9 +1,14 @@
 #include <iostream>
 
+#include <config.h>
+
 // include serial part of ALUGrid 
 #ifdef HAVE_MPI
-  #include <alugrid_parallel.h>
   #define PARALLEL
+  #include <dune/alugrid/impl/parallel/mpAccess_MPI.h>
+  // #include <dune/alugrid/impl/parallel/gitter_pll_impl.h>
+#include <dune/alugrid/impl/duneinterface/gitter_dune_pll_impl.h>
+  #include <dune/alugrid/impl/serial/gatherscatter.hh>
 #else
   #include <dune/alugrid/impl/serial/gitter_impl.h>
   #include <dune/alugrid/impl/serial/gatherscatter.hh>
