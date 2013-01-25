@@ -133,12 +133,8 @@ namespace ALUGrid
   {
     typedef typename IteratorElType< 1, Comm >::ElType ElType;
     typedef typename IteratorElType< 1, Comm >::HBndSegType HBndSegType;
-#ifdef ALUGRID_PERIODIC_BOUNDARY
     typedef ALU3DSPACE any_has_level_periodic< ElType > StopRule_t;
     typedef GridIterator< ElType, StopRule_t > IteratorType;
-#else 
-    typedef ALU3DSPACE LevelIterator< ElType > IteratorType;
-#endif
     
     // the iterator 
     IteratorType it_;
@@ -150,11 +146,7 @@ namespace ALUGrid
     // constructor creating iterator 
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
-#ifdef ALUGRID_PERIODIC_BOUNDARY
     : it_( grid.myGrid(), StopRule_t(level) ),
-#else 
-    : it_( grid.myGrid(), level ),
-#endif
       elem_( (ElType *)0, (HBndSegType*)0 )
     {}
     

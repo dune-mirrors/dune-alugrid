@@ -25,8 +25,6 @@
 
 #include <dune/alugrid/common/declaration.hh>
 
-#define ALUGRID_PERIODIC_BOUNDARY
-#define ALUGRID_PERIODIC_BOUNDARY_PARALLEL
 #define ALUGRID_CONSTRUCTION_WITH_STREAMS
 #define ALUGRID_3D_CONFORMING_REFINEMENT
 #define ALUGRID_VERTEX_PROJECTION
@@ -249,13 +247,7 @@ namespace Dune
     typedef typename GitterType::Geometric::TetraRule MarkRuleType;
 
     // refinement and coarsening enum
-    enum { bisect_element_t  = 
-#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
-      MarkRuleType::bisect 
-#else 
-      MarkRuleType::iso8 
-#endif
-    };
+    enum { bisect_element_t  = MarkRuleType::bisect  };
     enum { refine_element_t  = MarkRuleType::iso8    };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };

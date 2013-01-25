@@ -119,30 +119,18 @@ namespace Dune
       // check for ghosts 
       // this check is only need in the parallel case 
       // if this cast fails we have a periodic element 
-//#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
-///      const bool periodicBnd = outerElement_->isperiodic();
-//      const BNDFaceType * bnd = 0;
-//      const BNDFaceType * bnd = static_cast<const BNDFaceType *> (outerElement_);
-//#else 
       const BNDFaceType * bnd = dynamic_cast<const BNDFaceType *> (outerElement_);
       const bool periodicBnd = ( bnd == 0 ) ;
-//#endif
+
       if( periodicBnd ) // the periodic case 
       {
         bndType_ = periodicBoundary ;
         assert( dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) );
         const GEOPeriodicType* periodicClosure = static_cast< const GEOPeriodicType* > ( outerElement_ ) ;
 
-#ifdef ALUGRID_PERIODIC_BOUNDARY
         // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
         segmentIndex_ = periodicClosure->segmentIndex( outerFaceNumber_ );
-#else 
-        // set to zero (grid test will fail)
-        segmentIndex_ = 0 ;
-#endif
-#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
         bndId_  = periodicClosure->bndtype( outerFaceNumber_ );
-#endif  
 
         const GEOFaceType* face = ImplTraits::getFace( *periodicClosure, 1 - outerFaceNumber_ );
         assert( (face->nb.front().first == periodicClosure) || (face->nb.rear().first == periodicClosure) );
