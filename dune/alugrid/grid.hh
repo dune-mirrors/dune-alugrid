@@ -13,8 +13,6 @@
 #include <dune/alugrid/2d/gridfactory.hh>
 
 #include <dune/alugrid/common/persistentcontainer.hh>
-
-//- include declaration of ALUGrid 
-#include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/backuprestore.hh>
 
 #endif // #ifndef DUNE_ALUGRID_HH
