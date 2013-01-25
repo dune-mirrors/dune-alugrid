@@ -4,9 +4,9 @@
 # headers to install 
 check_PROGRAMS = aluball
 aluball_SOURCES = aluball.cc
-test_aluball_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
-test_aluball_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-test_aluball_LDADD = $(LDADD) $(DUNEMPILIBS)
+aluball_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
+aluball_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+aluball_LDADD = $(LDADD) $(DUNEMPILIBS)
 
 include $(top_srcdir)/am/global-rules
 
