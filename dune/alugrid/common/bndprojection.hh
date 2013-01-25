@@ -7,9 +7,7 @@ namespace Dune {
   //!  DuneBndProjection has to fulfil the DuneBoundaryProjection interface 
   template <class GridImp, class ctype = double > 
   class ALUGridBoundaryProjection 
-#ifdef ALUGRID_VERTEX_PROJECTION
     : public GridImp :: ALUGridVertexProjectionType
-#endif
   {
     typedef GridImp GridType;
     // type of double coordinate vector 
@@ -43,7 +41,6 @@ namespace Dune {
                      const int segmentIndex,
                      coord_t &prj) const 
     {
-#ifdef ALUGRID_VERTEX_PROJECTION
       // get boundary projection 
       const DuneBoundaryProjectionType* bndPrj = 
         grid_.boundaryProjection( segmentIndex );
@@ -55,7 +52,6 @@ namespace Dune {
         reinterpret_cast<CoordinateType &> (* (&prj[0])) = 
           (*bndPrj)( reinterpret_cast<const CoordinateType &> (* (&orig[0])) );
       }
-#endif
 
       // return 1 for success 
       return 1;

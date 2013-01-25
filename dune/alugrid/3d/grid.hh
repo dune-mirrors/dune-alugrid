@@ -181,14 +181,10 @@ namespace Dune
     GitterImplType *createALUGrid ( std::istream& stream, ALU3DSPACE ProjectVertex *projection,
                                     const bool conformingRefinement )
     {
-#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
       GitterImplType* grid = new GitterImplType ( stream, projection );
       // check whether conforming refinement should be enabled 
       checkForConformingRefinement( grid, conformingRefinement );
       return grid ;
-#else 
-      return 0;
-#endif
     }
 
     static ALUGridNoComm defaultComm () { return ALUGridNoComm(); }
@@ -240,14 +236,10 @@ namespace Dune
     GitterImplType *createALUGrid ( std::istream& stream, ALU3DSPACE ProjectVertex *projection,
                                     const bool conformingRefinement )
     {
-#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
       GitterImplType* grid = new GitterImplType ( stream, mpAccess_, projection );
       // check whether conforming refinement should be enabled 
       checkForConformingRefinement( grid, conformingRefinement );
       return grid ;
-#else 
-      return 0;
-#endif
     }
 
     static MPI_Comm defaultComm () { return MPI_COMM_WORLD; }

@@ -244,12 +244,7 @@ namespace Dune
   template< ALU3dGridElementType elType, class Comm >
   size_t ALU3dGrid< elType, Comm >::numBoundarySegments () const
   {
-#ifdef ALUGRID_VERTEX_PROJECTION
     return myGrid().numMacroBndSegments();
-#else 
-    derr << "Method available in any version of ALUGrid > 1.14" << std::endl;
-    return 0;
-#endif
   }
 
 
@@ -779,12 +774,8 @@ namespace Dune
   alu_inline 
   void ALU3dGrid< elType, Comm >::backup( std::ostream& stream ) const
   {
-#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
     // backup grid to given stream 
     myGrid().duneBackup( stream );
-#else 
-    DUNE_THROW(NotImplemented,"ALUGrid::backup not implemented yet!");
-#endif
   }
 
   template< ALU3dGridElementType elType, class Comm >
@@ -805,10 +796,8 @@ namespace Dune
     // check for element type 
     this->checkMacroGrid ();
     
-#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
     // restore hierarchy from given stream 
     myGrid().duneRestore( stream );
-#endif
 
     // calculate new maxlevel 
     // calculate indices 

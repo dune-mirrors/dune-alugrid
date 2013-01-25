@@ -114,12 +114,7 @@ namespace Dune
   { 
     // only call this method on boundary intersections 
     assert( current.isBoundary() );
-#ifdef ALUGRID_VERTEX_PROJECTION
     return current.boundary()->segmentIndex();
-#else 
-    derr << "Method available in any version of ALUGrid > 1.14 \n";
-    return 0;
-#endif
   }
 
   //! return true if intersection is with neighbor on this level

@@ -59,11 +59,9 @@ namespace Dune
   {
     assert(mygrid_);
 
-#ifdef ALUGRID_VERTEX_PROJECTION
     // this feature is available in ALUGrid-1.15 
     if( vertexProjection_ )
       myGrid().setVertexProjection( vertexProjection_ );
-#endif
 
     makeGeomTypes();
     updateStatus();

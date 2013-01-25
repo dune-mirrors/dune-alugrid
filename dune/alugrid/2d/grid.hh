@@ -317,11 +317,8 @@ namespace Dune
     //! \brief boundary projection type 
     typedef typename Traits::DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
-#ifdef ALUGRID_VERTEX_PROJECTION
     //! type of ALUGrid Vertex Projection Interface
     typedef ::ALUGrid::VertexProjection< dimworld > ALUGridVertexProjectionType;
-#endif
-
 
   protected:
 
@@ -604,12 +601,7 @@ namespace Dune
     //! return number of macro boundary segments 
     size_t numBoundarySegments () const
     { 
-#ifdef ALUGRID_VERTEX_PROJECTION
       return myGrid().numMacroBndSegments();
-#else 
-      derr << "Method available in any version of ALUGrid > 1.14 \n";
-      return 0;
-#endif
     }
 
     //! return true if boudanry projection is set 

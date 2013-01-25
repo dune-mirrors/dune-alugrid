@@ -25,9 +25,7 @@
 
 #include <dune/alugrid/common/declaration.hh>
 
-#define ALUGRID_CONSTRUCTION_WITH_STREAMS
 #define ALUGRID_3D_CONFORMING_REFINEMENT
-#define ALUGRID_VERTEX_PROJECTION
 
 #include <dune/alugrid/impl/serial/gatherscatter.hh>
 #include <dune/alugrid/impl/serial/key.h>
