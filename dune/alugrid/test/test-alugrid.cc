@@ -740,7 +740,6 @@ int main (int argc , char **argv) {
         }
       }
 
-#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
       if( testALU3dConform )  
       {
         std::string filename;
@@ -771,7 +770,6 @@ int main (int argc , char **argv) {
           checkALUParallel(grid,0,2);  //1,3
         }
       }
-#endif
 #endif
     };
 

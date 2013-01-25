@@ -25,8 +25,6 @@
 
 #include <dune/alugrid/common/declaration.hh>
 
-#define ALUGRID_3D_CONFORMING_REFINEMENT
-
 #include <dune/alugrid/impl/serial/gatherscatter.hh>
 #include <dune/alugrid/impl/serial/key.h>
 #include <dune/alugrid/impl/serial/myalloc.h>

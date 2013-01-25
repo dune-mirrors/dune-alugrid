@@ -138,13 +138,11 @@ namespace Dune
     void checkForConformingRefinement( GitterImpl* grid, 
                                        const bool conformingRefinement ) 
     {
-#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
       if( grid && conformingRefinement )
       {
         grid->enableConformingClosure();
         grid->disableGhostCells();
       }
-#endif
     }
   };
 
@@ -1030,11 +1028,7 @@ namespace Dune
     // return true if ghost cells are available 
     bool ghostCellsEnabled () const
     {
-#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
       return myGrid().ghostCellsEnabled(); 
-#else 
-      return true ;
-#endif
     }
   protected:
     /////////////////////////////////////////////////////////////////
