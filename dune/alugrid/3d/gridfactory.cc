@@ -315,11 +315,7 @@ namespace Dune
     // insert grid using ALUGrid macro grid builder   
     if( !vertices_.empty() )
     {
-      ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder()
-#ifdef ALUGRID_VERTEX_PROJECTION
-          , grid->vertexProjection() 
-#endif
-          );
+      ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder(), grid->vertexProjection() );
 
       // now start inserting grid 
       const int vxSize = vertices_.size(); 
@@ -353,11 +349,7 @@ namespace Dune
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( (*it)[ i ] );
           }
-          mgb.InsertUniqueTetra( element
-#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
-             , (elemIndex % 2) 
-#endif
-              );
+          mgb.InsertUniqueTetra( element, (elemIndex % 2) );
         }
         else 
           DUNE_THROW( GridError, "Invalid element type");
@@ -403,14 +395,10 @@ namespace Dune
             perel[ i+4 ] = globalId( facePair.second.first[ i ] );
           }
 
-#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
           bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ), 
                                bnd_t( facePair.second.second ) };
           mgb.InsertUniquePeriodic4( perel, bndId );
-#else 
-          mgb.InsertUniquePeriodic4( perel );
-#endif
 
         }
         else if( elementType == tetra )
@@ -421,14 +409,10 @@ namespace Dune
             perel[ i+0 ] = globalId( facePair.first.first[ (3 - i) % 3 ] );
             perel[ i+3 ] = globalId( facePair.second.first[ (3 - i) % 3 ] );
           }
-#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
           bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ), 
                                bnd_t( facePair.second.second ) };
           mgb.InsertUniquePeriodic3( perel, bndId );
-#else 
-          mgb.InsertUniquePeriodic3( perel );
-#endif
         }
         else 
           DUNE_THROW( GridError, "Invalid element type" );
@@ -442,16 +426,11 @@ namespace Dune
     // free memory 
     boundaryIds_.clear();
 
-#ifdef ALUGRID_EXPORT_MACROGRID_CHANGES
     if( realGrid_ )
     {
       // make changes in macro grid known in every partition
       grid->duneNotifyMacroGridChanges();
     }
-#else 
-    if( grid->comm().size() > 1 )
-      DUNE_THROW(NotImplemented,"ALUGrid factory not working in parallel right now!");
-#endif // #ifdef ALUGRID_EXPORT_MACROGRID_CHANGES
 
     // reset wasRefined flags 
     grid->postAdapt();
