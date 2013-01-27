@@ -5,6 +5,8 @@
 #include "../serial/gatherscatter.hh"
 #include "gitter_dune_pll_impl.h"
 
+#include "gitter_dune_impl.cc"
+
 namespace ALUGrid
 {
 
