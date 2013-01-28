@@ -205,7 +205,7 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   const bool mightCoarsen = grid_.preAdapt();
 
   // if elements might be removed
-  if( 1 || mightCoarsen )
+  if( mightCoarsen )
   {
     // restrict data and save leaf level 
     const LevelIterator end = grid_.template lend< 0, partition >( 0 );
@@ -217,7 +217,7 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   const bool refined = grid_.adapt();
 
   // interpolate all new cells to leaf level 
-  if( 1 || refined )
+  if( refined )
   {
     container.update();
     const LevelIterator end = grid_.template lend< 0, partition >( 0 );
@@ -225,19 +225,17 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
       hierarchicProlong<Vector>( *it, container );
   }
 
-  /*
   // re-balance grid 
   LoadBalanceHandle<Container> loadBalanceHandle( container ) ;
   typedef Dune::CommDataHandleIF< LoadBalanceHandle<Container>, Container > DataHandleInterface;
   grid_.loadBalance( (DataHandleInterface&)(loadBalanceHandle) );
-  */
 
   // cleanup adaptation markers 
   grid_.postAdapt();
 
   // resize solution vector if elements might have been removed 
   // or were created 
-  if( 1 || refined || mightCoarsen ) 
+  if( refined || mightCoarsen ) 
     solution.resize();
 
   // retrieve data from container and store on new loeaf grid
@@ -274,10 +272,10 @@ inline void LeafAdaptation< Grid >
     }
 
     // if there is a child that does not vanish, this entity may not vanish
-    // assert( doRestrict || !entity.mightVanish() );
+    assert( doRestrict || !entity.mightVanish() );
 
     // if( doRestrict )
-    Vector::restrictLocal( entity, dataMap );
+      Vector::restrictLocal( entity, dataMap );
   }
   assert( cdataMap[entity][0] > 1e-8 );
 }
@@ -294,7 +292,7 @@ inline void LeafAdaptation< Grid >
     HierarchicIterator hit = entity.hbegin( childLevel );
 
     const bool doProlong = hit->isNew();
-    if( 1 || doProlong )
+    if( doProlong )
       Vector::prolongLocal( entity, dataMap );
 
     // if the children have children then we have to go deeper 

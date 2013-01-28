@@ -106,6 +106,7 @@ public:
   template <class Arg>
   double
   operator() ( const double time, const Arg &solution, Vector &update ) const;
+#if 0
   /** \brief compute the update vector for one time step for reconstructed
    *         finite-volume scheme
    *
@@ -122,7 +123,7 @@ public:
    */
   double
   operator() ( const double time, const Vector &solution, Vector &update ) ;
-
+#endif
   /** \brief set grid marker for refinement / coarsening 
    *
    *  \param[in]  time      current time
@@ -247,6 +248,7 @@ inline void FiniteVolumeScheme< V, Model >
   std::cout << "Higher order compute" << std::endl;
 }
 
+#if 0
 template< class V, class Model > 
 inline double FiniteVolumeScheme< V, Model >
   ::operator() ( const double time, const Vector &solution, 
@@ -256,6 +258,7 @@ inline double FiniteVolumeScheme< V, Model >
   P1Function<GridView,typename Vector::RangeType> recon(solution,grad_);
   return (*this)(time,recon,update);
 }
+#endif
 
 template< class V, class Model > 
 template< class Arg >
@@ -431,7 +434,9 @@ inline void FiniteVolumeScheme< V, Model >
 
     // now see if this entity can be removed
     if( entityIndicator < model_.problem().coarsenTol() )
+    {
       marker.coarsen( entity );
+    }
   } // end of loop over entities
 }
 
