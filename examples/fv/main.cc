@@ -88,11 +88,21 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
   /* vector to store update */
   DataType update( gridView );
 
+#if 0
+  /* vector to store old state for RK scheme */
+  DataType solOld( gridView );
+#endif
+
   /* now do the time stepping */
   unsigned int step = 0;
   double time = 0.0;
   while ( time < endTime ) 
   {
+#if 0
+    // store solution
+    solOld.resize();
+    solOld.assign( solution );
+#endif
     // update vector might not be of the right size if grid has changed
     update.resize();
 
@@ -108,6 +118,11 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
 
     // update solution
     solution.axpy( dt, update );
+
+#if 0
+    scheme( time+dt, solution, update );
+    solution.addAndScale( 0.5, 0.5, solOld );
+#endif
 
     /* augment time */
     time += dt;

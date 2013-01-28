@@ -8,7 +8,6 @@
 
 #include "adaptation.hh"
 #include "p1function.hh"
-#include "reconstruct.hh"
 
 // FiniteVolumeScheme
 // ------------------
@@ -79,8 +78,6 @@ struct FiniteVolumeScheme
   typedef Dune::FieldVector< ctype, dim >        DomainType;
   typedef Dune::FieldVector< ctype, dimworld >   GlobalType;
   typedef typename Model::RangeType              RangeType;
-  // type of reconstruction operator
-  typedef ReconstructOperator< GridView, Model > ReconstructType;
 
 public:
   /** \brief constructor
@@ -91,7 +88,7 @@ public:
   FiniteVolumeScheme ( const GridView &gridView, const Model &model )
   : gridView_( gridView )
     , model_( model )
-    , grad_( gridView )
+    // , grad_( gridView )
   {}
 
   /** \brief compute the update vector for one time step
@@ -106,6 +103,7 @@ public:
   template <class Arg>
   double
   operator() ( const double time, const Arg &solution, Vector &update ) const;
+
 #if 0
   /** \brief compute the update vector for one time step for reconstructed
    *         finite-volume scheme
@@ -124,6 +122,7 @@ public:
   double
   operator() ( const double time, const Vector &solution, Vector &update ) ;
 #endif
+
   /** \brief set grid marker for refinement / coarsening 
    *
    *  \param[in]  time      current time
@@ -147,20 +146,20 @@ public:
 private:
   const GridView gridView_;
   const Model &model_;
-  void reconstruct(double time, const Vector &solution) ;
-  DomainType baryCenter(const Entity &entity) {return DomainType(0);}
-  mutable PiecewiseFunction<GridView,Dune::FieldMatrix<double,RangeType::dimension,dim> > grad_;
-  std::vector<DomainType> C_; // constraint matrix
-  Dune::FieldVector<std::vector<double>,dimRange> b_; // constraint RHS
+  // void reconstruct(double time, const Vector &solution) ;
+  // DomainType baryCenter(const Entity &entity) {return // entity.geometry().center();}
+  // mutable PiecewiseFunction<GridView,Dune::FieldMatrix<double,RangeType::dimension,dim> > grad_;
+  // std::vector<DomainType> C_; // constraint matrix
+  // Dune::FieldVector<std::vector<double>,dimRange> b_; // constraint RHS
 }; // end FiniteVolumeScheme
 
+#if 0
 // Implementation of FiniteVolumeScheme
 // ------------------------------------
 template< class V, class Model > 
 inline void FiniteVolumeScheme< V, Model >
   ::reconstruct ( double time, const Vector &solution) 
 {
-  return;
   grad_.resize();
   grad_.clear();
   /****************************************
@@ -223,7 +222,7 @@ inline void FiniteVolumeScheme< V, Model >
     for (size_t i=0;i<numberOfNb;++i) {
       // compute components of quadratic form
       for (int q=0;q<dim;++q)
-        for (int p=0;q<dim;++p)
+        for (int p=0;p<dim;++p)
           H[q][p] += C_[i][q]*C_[i][p];
       for (int r=0;r<dimRange;++r) 
         for (int q=0;q<dim;++q)
@@ -245,10 +244,9 @@ inline void FiniteVolumeScheme< V, Model >
     for (int r=0;r<dimRange;++r)
       D[r] = 0 ; // calc(H,g[r],C,b[r]);
   }
-  std::cout << "Higher order compute" << std::endl;
 }
 
-#if 0
+
 template< class V, class Model > 
 inline double FiniteVolumeScheme< V, Model >
   ::operator() ( const double time, const Vector &solution, 
@@ -287,8 +285,6 @@ inline double FiniteVolumeScheme< V, Model >
     
     // 1 over cell volume
     const double enVolume_1 = 1.0/enVolume; 
-
-    ReconstructType reconstruct(gridView(), model_);
 
     // index of entity
     unsigned int enIdx = gridView().indexSet().index(entity);

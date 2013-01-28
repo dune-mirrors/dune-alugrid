@@ -95,6 +95,12 @@ public:
     return dof_.size();
   }
 
+  /** \brief make a copy of the of he vector **/
+  void assign( const This &other )
+  {
+    this->dof_ = other.dof_;
+  }
+
   /** \brief obtain the grid view, this function lives on */
   const GridView &gridView () const
   {
@@ -119,6 +125,18 @@ public:
    *  \param[in]  other   function to add to this one
    */
   void axpy ( const double &lambda, const This &other );
+
+  /** \brief add a multiple of another function to this one
+   *
+   *  \code
+   *  (*this) = mu * (*this) + lambda * other
+   *  \endcode
+   *
+   *  \param[in]  mu      factor to multiply the this function by
+   *  \param[in]  lambda  factor to multiply the other function by
+   *  \param[in]  other   function to add to this one
+   */
+  void addAndScale ( const double &mu, const double &lambda, const This &other );
 
   /** \brief set this function to zero */
   void clear ();
@@ -233,6 +251,18 @@ PiecewiseFunction< View, Range >::axpy ( const double &lambda, const This &other
   const size_t size = dof_.size();
   for( size_t i = 0; i < size; ++i )
     (*this)[ i ].axpy( lambda, other[ i ] );
+}
+
+template< class View, class Range >
+inline void
+PiecewiseFunction< View, Range >::addAndScale ( const double &mu, const double &lambda, const This &other )
+{
+  const size_t size = dof_.size();
+  for( size_t i = 0; i < size; ++i )
+  {
+    (*this)[ i ] *= mu;
+    (*this)[ i ].axpy( lambda, other[ i ] );
+  }
 }
 
 template< class View, class Range >
