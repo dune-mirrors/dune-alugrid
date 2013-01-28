@@ -5,8 +5,6 @@
 
 #include "gitter_tetra_top_pll.h"
 #include "../serial/gitter_tetra_top.cc"
-// include ghost elements here to avoid linker problems
-#include "../serial/ghost_elements.cc"
 
 namespace ALUGrid
 {

@@ -12,7 +12,6 @@ libalugrid_2d_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_2d_la_LIBADD = 
 
 libalugrid_serial_la_SOURCES = \
-	$(top_srcdir)/dune/alugrid/impl/serial/ghost_info.cc \
 	$(top_srcdir)/dune/alugrid/impl/serial/gitter_geo.cc \
 	$(top_srcdir)/dune/alugrid/impl/serial/gitter_hexa_top.cc \
 	$(top_srcdir)/dune/alugrid/impl/serial/gitter_impl.cc \
@@ -29,6 +28,8 @@ libalugrid_serial_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_serial_la_LIBADD = 
 
 libalugrid_parallel_la_SOURCES = \
+	$(top_srcdir)/dune/alugrid/impl/serial/ghost_info.cc \
+	$(top_srcdir)/dune/alugrid/impl/serial/ghost_elements.cc \
 	$(top_srcdir)/dune/alugrid/impl/duneinterface/gitter_dune_pll_impl.cc \
 	$(top_srcdir)/dune/alugrid/impl/parallel/mpAccess.cc \
 	$(top_srcdir)/dune/alugrid/impl/parallel/gitter_hexa_top_pll.cc \
@@ -43,7 +44,7 @@ libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS)
 libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_parallel_la_LIBADD = $(ALL_PKG_LIBS)
 
-ALUGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_serial.la libalugrid_parallel.la
+ALUGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_parallel.la libalugrid_serial.la 
 lib_LTLIBRARIES = $(ALUGRID_IMPL_LIBS) libdunealugrid.la
 
 libdunealugrid_la_SOURCES = \
