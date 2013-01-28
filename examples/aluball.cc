@@ -152,7 +152,7 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
      // adapt grid 
      grid.duneAdapt( rp );
 
-#ifdef HAVE_MPI
+#if HAVE_MPI
      if( loadBalance ) 
      {
        // load balance 
@@ -203,7 +203,7 @@ void globalCoarsening(GitterType& grid, int refcount) {
 // exmaple on read grid, refine global and print again 
 int main (int argc, char ** argv, const char ** envp) 
 {
-#ifdef HAVE_MPI
+#if HAVE_MPI
   MPI_Init(&argc,&argv);
 #endif
 
@@ -225,7 +225,7 @@ int main (int argc, char ** argv, const char ** envp)
 
   {
     int rank = 0;
-#ifdef HAVE_MPI
+#if HAVE_MPI
     MpAccessMPI mpa (MPI_COMM_WORLD);
     rank = mpa.myrank();
 #endif
@@ -255,13 +255,13 @@ int main (int argc, char ** argv, const char ** envp)
     }
 
     {
-#ifdef HAVE_MPI
+#if HAVE_MPI
       GitterDunePll  grid(macroname.c_str(),mpa);
 #else 
       GitterDuneImpl grid(macroname.c_str(),0);
 #endif
       bool closure = needConformingClosure( grid, useClosure );
-#ifdef HAVE_MPI
+#if HAVE_MPI
       closure = mpa.gmax( closure );
 #endif
       if( closure ) 
@@ -269,7 +269,7 @@ int main (int argc, char ** argv, const char ** envp)
         grid.enableConformingClosure() ;
         grid.disableGhostCells();
       }
-#ifdef HAVE_MPI
+#if HAVE_MPI
       grid.duneLoadBalance();
 #endif
 
@@ -320,7 +320,7 @@ int main (int argc, char ** argv, const char ** envp)
     }
   }
 
-#ifdef HAVE_MPI
+#if HAVE_MPI
   MPI_Finalize();
 #endif
   return 0;
