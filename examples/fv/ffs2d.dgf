@@ -1,0 +1,20 @@
+DGF
+Interval
+% first interval
+0   0       % first corner 
+0.6 1       % second corner
+6   10       % 3 cells in x, 5 in y
+% second interval
+0.6 0.2     % first corner 
+3.0 1       % second corner
+24  8       % 12 cells in x, 4 in y
+#
+
+simplex
+#
+
+boundarydomain
+default 3          % default is 3 = reflection 
+1   -1 -1   0 1    % inflow 
+2    3  0   4 1    % outflow 
+#

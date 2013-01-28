@@ -1,7 +1,5 @@
-# AM_CPPFLAGS = ${ALL_PKG_CPPFLAGS} ${DUNEMPICPPFLAGS} 
-# LDADD = ${LDADD} ${ALL_PKG_LIBS} ${DUNEMPILDFLAGS} ${DUNEMPILIBS} -ldunealugrid -lalugrid_serial -lalugrid_parallel -L../lib
+SUBDIRS = fv 
 
-# headers to install 
 check_PROGRAMS = aluball
 aluball_SOURCES = aluball.cc
 aluball_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
