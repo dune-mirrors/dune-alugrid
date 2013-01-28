@@ -19,7 +19,7 @@
 //#define ENABLE_ALUGRID_VTK_OUTPUT
 
 // include serial part of ALUGrid 
-#include <dune/alugrid/grid.hh>
+#include <dune/alugrid/3d/alu3dinclude.hh>
 
 using namespace ALUGrid;
 
@@ -96,9 +96,9 @@ void checkRefinements( GitterType& grid )
 
   for (int i=0; i<6; ++i ) 
   {
-    cout << "*********************************************" <<endl;
-    cout << "Refinement rule " << rules[ i ] << endl;
-    cout << "*********************************************" <<endl;
+    std::cout << "*********************************************" << std::endl;
+    std::cout << "Refinement rule " << rules[ i ] << std::endl;
+    std::cout << "*********************************************" << std::endl;
 
     {
       // get LeafIterator which iterates over all leaf elements of the grid 
@@ -128,9 +128,9 @@ void checkRefinements( GitterType& grid )
     globalCoarsening( grid , 1 );
   }
 
-  cout << "*********************************************" <<endl;
-  cout << " Check of rules done " << endl;
-  cout << "*********************************************" <<endl;
+  std::cout << "*********************************************" << std::endl;
+  std::cout << " Check of rules done " << std::endl;
+  std::cout << "*********************************************" << std::endl;
 }
 
 // refine grid globally, i.e. mark all elements and then call adapt 
@@ -192,7 +192,7 @@ void globalCoarsening(GitterType& grid, int refcount) {
     
   for (int count=refcount ; count > 0; count--) 
   {
-    cout << "Global Coarsening: run " << refcount-count << endl;
+    std::cout << "Global Coarsening: run " << refcount-count << std::endl;
     {
        // get leafiterator which iterates over all leaf elements of the grid 
        LeafIterator < Gitter::helement_STI > w (grid) ;
@@ -229,9 +229,9 @@ void levelwalk(GitterBasisImpl* grid, int level) {
    int i = 0;
    for (it.first(); !it.done(); it.next()) 
    {
-      cout << "Element " << it.item().getIndex() << " has " << i++ << " as level index " << endl;
+     std::cout << "Element " << it.item().getIndex() << " has " << i++ << " as level index " << std::endl;
    }
-   cout << endl;
+   std::cout << std::endl;
 }
 
 
@@ -246,10 +246,10 @@ int main (int argc, char ** argv, const char ** envp)
   const char* filename = 0 ;
   if (argc < 2) 
   {
-    filename = "../macrogrids/reference.tetra";
+    filename = "./grids/reference.tetra";
     mxl = 1;
     glb = 1;
-    cout << "usage: "<< argv[0] << " <macro grid> <opt: level global> \n";
+    std::cout << "usage: "<< argv[0] << " <macro grid> <opt: level global> \n";
   }
   else 
   {
@@ -268,14 +268,14 @@ int main (int argc, char ** argv, const char ** envp)
     if (argc < 3)
     {
       if( rank == 0 ) 
-        cout << "Default level = "<< mxl << " choosen! \n";
+        std::cout << "Default level = "<< mxl << " choosen! \n";
     }
     else 
       mxl = atoi(argv[2]);
     if (argc < 4)
     {
       if( rank == 0 ) 
-        cout << "Default global refinement = "<< glb << " choosen! \n";
+        std::cout << "Default global refinement = "<< glb << " choosen! \n";
     }
     else 
       glb = atoi(argv[3]);
@@ -284,9 +284,9 @@ int main (int argc, char ** argv, const char ** envp)
 
     if( rank == 0 ) 
     {
-      cout << "\n-----------------------------------------------\n";
-      cout << "read macro grid from < " << macroname << " > !" << endl;
-      cout << "-----------------------------------------------\n";
+      std::cout << "\n-----------------------------------------------\n";
+      std::cout << "read macro grid from < " << macroname << " > !" << std::endl;
+      std::cout << "-----------------------------------------------\n";
     }
 
     {
@@ -327,7 +327,7 @@ int main (int argc, char ** argv, const char ** envp)
       //cout << "P[ " << rank << " ] : Grid generated! \n";
 #ifdef PRINT_OUTPUT
       grid.printsize(); 
-      cout << "---------------------------------------------\n";
+      std::cout << "---------------------------------------------\n";
 #endif
     
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
@@ -403,7 +403,7 @@ int main (int argc, char ** argv, const char ** envp)
   }
 
   // MyAlloc :: clearFreeMemory ();
-  while( 1 ){}
+  // while( 1 ){}
 #if HAVE_MPI
   MPI_Finalize();
 #endif
