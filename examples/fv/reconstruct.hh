@@ -1,3 +1,4 @@
+#if 0
 #ifndef RECONSTRUCT_HH
 #define RECONSTRUCT_HH
 
@@ -8,7 +9,7 @@
  * \brief Class which calculates the linear reconstruction
  *        in one entity, using minmod limiter
  *
- * This class provides a mehtod to calculate the linear reconstruction 
+ * This class provides a method to calculate the linear reconstruction 
  * in one entity. The reconstruction is limited by the minmod limiter.
  */
 
@@ -46,7 +47,7 @@ class ReconstructOperator
   const Problem &problem_;
 public:  
   /** \brief constructor
-   *  \param gridView     the gridView, to know where the neighbors of
+   *  \param gridView the gridView, to know where the neighbors of
    *            an entity are
    *  \param problem to calculated proper boundary reconstructions
    */
@@ -58,8 +59,8 @@ public:
   virtual ~ReconstructOperator(){}
 
   /* \brief returns the reconstruction
-   * \param entity The entity on which the reconstruction is calc
-   * \param x The point in which the reconstruction is calc
+   * \param entity The entity on which the reconstruction is calculated
+   * \param x The point in which the reconstruction is calculated
    * \param solution The solution to get the values one the neighbors
    * \param time The Time the reconstruction is calced
    */
@@ -280,4 +281,5 @@ private:
   }
 };
 
+#endif
 #endif

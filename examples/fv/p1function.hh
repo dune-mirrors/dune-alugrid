@@ -1,4 +1,4 @@
-// could be lesson 5
+#if 0
 #ifndef P1FUNCTION_HH
 #define P1FUNCTION_HH
 
@@ -105,3 +105,4 @@ private:
 };
 
 #endif // #ifndef P1FUNCTION_HH
+#endif
