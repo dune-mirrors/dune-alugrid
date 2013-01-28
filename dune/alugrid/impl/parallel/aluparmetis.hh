@@ -25,8 +25,16 @@ static const char parmetmess[]
 
 namespace ALUGridParMETIS 
 {
+#if HAVE_METIS
   typedef ALUGridMETIS :: idxtype  idxtype ;
   typedef ALUGridMETIS :: realtype realtype ;
+#elif HAVE_PARMETIS 
+  typedef idx_t  idxtype ;
+  typedef real_t realtype ;
+#else   
+  typedef int   idxtype ;
+  typedef float realtype ;
+#endif
 
   inline void CALL_ParMETIS_V3_PartKway(
                idxtype *vtxdist, idxtype *xadj, idxtype *adjncy, idxtype *vwgt,

@@ -15,7 +15,12 @@ extern "C" {
 #if not defined IDXTYPEWIDTH && not defined REALTYPEWIDTH 
 #define HAVE_METIS_VERSION_4
 #endif // #if not defined IDXTYPEWIDTH && not defined REALTYPEWIDTH 
+
 #else  // #if HAVE_METIS 
+
+// include ParMETIS header because of idx_t and real_t
+#include "aluparmetis.hh"
+
 static const char metmess [] =  "**INFO Due to license reasons the library METIS is\n"
         "       not part of the ALUGrid library distribution. \n"
         "       To use this feature get a copy of the METIS library \n"
@@ -24,7 +29,7 @@ static const char metmess [] =  "**INFO Due to license reasons the library METIS
         "       --with-metis=PATH_TO_METIS option, \n"
         "       or choose another Graph partitioning method. \n"
         "       Exiting program, bye! \n";
-#endif // #else  // #if HAVE_METIS 
+#endif // #if HAVE_METIS 
 
 namespace ALUGridMETIS
 {
@@ -32,7 +37,10 @@ namespace ALUGridMETIS
 #if HAVE_METIS && not defined HAVE_METIS_VERSION_4
   typedef idx_t  idxtype ;
   typedef real_t realtype ;
-#else 
+#elif HAVE_PARMETIS 
+  typedef ALUGridParMETIS :: idxtype  idxtype;
+  typedef ALUGridParMETIS :: realtype realtype;
+#else
   typedef int   idxtype ;
   typedef float realtype ;
 #endif 
