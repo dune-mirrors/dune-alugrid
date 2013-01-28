@@ -2,7 +2,6 @@
 #define PARMETIS_H_INCLUDED
 
 #include "alumetis.hh"
-
 #include "mpAccess.h"
 
 #if HAVE_PARMETIS
@@ -11,7 +10,7 @@
 extern "C" {
   #include <parmetis.h>
 }
-  #include "mpAccess_MPI.h"
+#include "mpAccess_MPI.h"
 #else // #if HAVE_PARMETIS
 static const char parmetmess[]
   = "**INFO Due to license reasons the library ParMETIS is\n"
@@ -26,7 +25,6 @@ static const char parmetmess[]
 
 namespace ALUGridParMETIS 
 {
-
   typedef ALUGridMETIS :: idxtype  idxtype ;
   typedef ALUGridMETIS :: realtype realtype ;
 
@@ -38,7 +36,11 @@ namespace ALUGridParMETIS
   {
 #if HAVE_PARMETIS
     ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
-    assert( mpaMPI );
+    if( mpaMPI == 0 ) 
+    {
+      std::cerr << "ERROR: wrong mpAccess object, couldn't convert to MpAccessMPI!! in: " << __FILE__ << " line: " << __LINE__ << std::endl;
+      abort();
+    }
 
     // get communincator (see mpAccess_MPI.cc
     MPI_Comm comm = mpaMPI->communicator();
@@ -47,7 +49,7 @@ namespace ALUGridParMETIS
                              wgtflag, numflag, ncon, nparts, tpwgts,
                              ubvec, options, edgecut, part, &comm ) ;
 #else // #if HAVE_PARMETIS
-    std::cerr << "**ERROR The use of ParMETIS is not supported, when the ParMETIS library is missing! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+    std::cerr << "**ERROR The use of ParMETIS is not supported, when the ParMETIS library is missing! in: " << __FILE__ << " line: " << __LINE__ << std::endl;
     std::cerr << parmetmess << std::endl ;
     exit( 1 );
 #endif // #else // #if HAVE_PARMETIS
@@ -63,7 +65,11 @@ namespace ALUGridParMETIS
 #if HAVE_PARMETIS
     // get communincator (see mpAccess_MPI.cc)
     ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
-    assert( mpaMPI );
+    if( mpaMPI == 0 ) 
+    {
+      std::cerr << "ERROR: wrong mpAccess object, couldn't convert to MpAccessMPI!! in: " << __FILE__ << " line: " << __LINE__ << std::endl;
+      abort();
+    }
 
     // get communincator (see mpAccess_MPI.cc)
     MPI_Comm comm = mpaMPI->communicator();

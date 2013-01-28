@@ -616,7 +616,7 @@ namespace ALUGrid
     bool change = partition.size() > 0;
     
     // flag to indicate whether we use a serial or a parallel partitioner 
-    bool serialPartitioner    = ( mth <= METIS_PartGraphRecursive ); 
+    bool serialPartitioner    = serialPartitionerUsed( mth );
     const bool usePartKway    = ( mth == ParMETIS_V3_PartKway );
     const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurveNoEdges );
 

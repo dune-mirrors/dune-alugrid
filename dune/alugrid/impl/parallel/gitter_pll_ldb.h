@@ -163,6 +163,12 @@ namespace ALUGrid
             _noPeriodicFaces = false;
           }
 
+          //! return true if mth specifies a serial partitioner
+          static bool serialPartitionerUsed ( const method mth )
+          {
+            return mth < ParMETIS_V3_PartKway ;
+          }
+
           static const char *methodToString( method );
 
           DataBase ();

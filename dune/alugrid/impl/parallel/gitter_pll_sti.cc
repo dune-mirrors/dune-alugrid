@@ -1232,8 +1232,8 @@ namespace ALUGrid
         w.item ().setLoadBalanceVertexIndex ( cnt );
       }
 
-      // mark unique element indices as computed 
-      _ldbVerticesComputed = true;
+      // mark unique element indices as computed, if serialPartitioner is used
+      _ldbVerticesComputed = LoadBalancer::DataBase::serialPartitionerUsed( _ldbMethod );
     }
 
 #ifndef NDEBUG
