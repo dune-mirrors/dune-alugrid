@@ -919,6 +919,7 @@ namespace ALUGrid
   template < class A >
   void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
   {
+    assert( ldbVertexIndex () >= 0 );
     os.writeObject (ldbVertexIndex ()) ;
   }
 
@@ -1634,6 +1635,7 @@ namespace ALUGrid
   template < class A >
   void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
   {
+    assert( ldbVertexIndex () >= 0 );
     os.writeObject (ldbVertexIndex ()) ;
   }
 
