@@ -159,7 +159,7 @@ namespace ALUGrid
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
     public :
-      virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &);
+      virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool );
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
@@ -220,6 +220,7 @@ namespace ALUGrid
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
     public :
       virtual int ldbVertexIndex () const;
+      virtual void writeStaticState (ObjectStream &, int) const ;
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
@@ -475,6 +476,7 @@ namespace ALUGrid
     public :
      ~HexaPllBaseXMacro ();
       virtual int ldbVertexIndex () const;
+      virtual void writeStaticState (ObjectStream &, int) const ;
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
@@ -550,8 +552,8 @@ namespace ALUGrid
     public :
       inline BndsegPllBaseXClosure (myhbnd_t &);
       ~BndsegPllBaseXClosure () {}
-      void readDynamicState (ObjectStream &, int);
 
+      void readDynamicState (ObjectStream &, int);
       void readDynamicState (ObjectStream &, GatherScatterType &);
       void writeDynamicState (ObjectStream &, GatherScatterType &) const;
       using BndsegPllBaseX::writeDynamicState;
@@ -592,6 +594,7 @@ namespace ALUGrid
       inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* );
     public :
       virtual int  ldbVertexIndex () const;
+      virtual void readStaticState (ObjectStream &, int) ;
       virtual void setLoadBalanceVertexIndex ( const int );
     public :
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;

@@ -233,6 +233,7 @@ namespace ALUGrid
     // Dementsprechend werden die exchange--*-- Methoden immer
     // aufgerufen, sobald sich der zugeh"orige Zustand ge"andert hat.
       
+      virtual void exchangeStaticState ();
       virtual void exchangeDynamicState ();
 
       // pack or unpack dynamic state data 
@@ -280,6 +281,8 @@ namespace ALUGrid
       template <class StopRule_t> 
       inline std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
       createFaceIteratorTT (const StopRule_t rule , int);
+
+      bool serialPartitioner() const { return LoadBalancer::DataBase::serialPartitionerUsed( _ldbMethod ); }
     
       /////////////////////////////////////
       //  member variables  

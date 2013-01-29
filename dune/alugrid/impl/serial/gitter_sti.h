@@ -421,6 +421,11 @@ namespace ALUGrid
           p.second = 0;
         }
 
+        virtual void writeStaticState (ObjectStream &, int) const 
+        { assert(false);abort(); }
+        virtual void readStaticState (ObjectStream &, int)
+        { assert(false);abort(); }
+
         virtual void writeDynamicState (ObjectStream &, int) const
         { assert(false);abort(); }
         virtual void readDynamicState (ObjectStream &, int)
@@ -482,7 +487,7 @@ namespace ALUGrid
         virtual std::pair< const ElementPllXIF *, int > accessInnerPllX () const = 0;
 
       public :
-        virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &) = 0;
+        virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool ) = 0;
 
         // only for compatibility for Dune release 2.0 (to be removed later)
         FacePllXIF & accessPllX () { return *this; }
@@ -501,7 +506,7 @@ namespace ALUGrid
         virtual std::pair< ElementPllXIF *, int > accessInnerPllX ()  { assert( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
         virtual std::pair< const ElementPllXIF *, int > accessInnerPllX () const { assert( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
 
-        virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &) { assert(false);abort(); return false; }
+        virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool ) { assert(false);abort(); return false; }
     };
 
     /////////////////////////////////////////////////////////////////////////////

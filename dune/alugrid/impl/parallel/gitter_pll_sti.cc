@@ -1038,6 +1038,89 @@ namespace ALUGrid
     }
   }
 
+  void GitterPll :: exchangeStaticState () 
+  {
+    // Die Methode wird jedesmal aufgerufen, wenn sich der statische
+    // Zustand (d.h. der Zustand, der mit dem Makrogitter verbunden ist)
+    // ge"andert hat: Makrogitteraufbau und Lastvertielung. Der statische
+    // Zustand darf durch Verfeinerung und h"ohere Methoden nicht beeinflusst
+    // sein.
+
+#ifndef NDEBUG
+    const int start = clock () ;
+#endif
+    try {
+      const int nl = mpAccess ().nlinks () ;
+      std::vector < ObjectStream > osv (nl) ;
+
+      {
+        for (int l = 0 ; l < nl ; ++l) 
+        {
+          ObjectStream& os = osv[ l ];
+          AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
+          for (wi.first () ; ! wi.done () ; wi.next ()) 
+          {
+            std::pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
+            p.first->writeStaticState (os, p.second) ;
+          }
+          for (wo.first () ; ! wo.done () ; wo.next ()) 
+          {
+            std::pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
+            p.first->writeStaticState (os, p.second) ;
+          }
+
+          // mark end of stream 
+          os.writeObject( MacroGridMoverIF :: ENDSTREAM ); 
+        }
+      }
+
+      // exchange data 
+      osv = mpAccess ().exchange (osv) ;
+
+      {
+        for (int l = 0 ; l < nl ; ++l) 
+        {
+          ObjectStream& os = osv[ l ];
+          AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
+          AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
+          for (wo.first () ; ! wo.done () ; wo.next ()) 
+          {
+            std::pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
+            p.first->readStaticState (os, p.second) ;
+          }
+          for (wi.first () ; ! wi.done () ; wi.next ()) 
+          {
+            std::pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
+            p.first->readStaticState (os, p.second) ;
+          }
+          // check consistency of stream 
+          int endStream ; 
+          os.readObject( endStream );
+          if( endStream != MacroGridMoverIF :: ENDSTREAM )
+          {
+            os.readObject( endStream );
+            if( endStream != MacroGridMoverIF :: ENDSTREAM )
+            {
+              std::cerr << "**ERROR: writeStaticState: inconsistent stream, got " << endStream << std::endl;
+              assert( false );
+              abort();
+            }
+          } 
+        } 
+      }
+    } 
+    catch (Parallel ::  AccessPllException) 
+    {
+      std::cerr << "  FEHLER Parallel :: AccessPllException entstanden" << std::endl ;
+    }
+    assert (debugOption (20) ? (std::cout << "**INFO GitterPll :: exchangeStaticState () used " 
+      << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << std::endl, 1) : 1 ) ;
+    return ;
+  }
+
+
+
   void GitterPll::exchangeDynamicState () 
   {
     // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
@@ -1094,10 +1177,11 @@ namespace ALUGrid
     {
       // insert edges to graph and check for periodic bnds 
       bool foundPeriodicBnd = false;
+      const bool serialPart = serialPartitioner();
       AccessIterator < hface_STI >::Handle w (containerPll ());
       for (w.first (); ! w.done (); w.next ()) 
       {
-        foundPeriodicBnd |= w.item ().ldbUpdateGraphEdge (db);
+        foundPeriodicBnd |= w.item ().ldbUpdateGraphEdge (db, serialPart );
       }
 
       // the foundPeriodic information is exchange upon graphCollect 
@@ -1232,8 +1316,16 @@ namespace ALUGrid
         w.item ().setLoadBalanceVertexIndex ( cnt );
       }
 
+      const bool serialPartitioning = serialPartitioner();
       // mark unique element indices as computed, if serialPartitioner is used
-      _ldbVerticesComputed = LoadBalancer::DataBase::serialPartitionerUsed( _ldbMethod );
+      if( ! serialPartitioning ) 
+      {
+        // exchanges the ldbVertexIndex for the internal boundaries 
+        exchangeStaticState();
+      }
+      
+      // don't do this computation again for serial partitioning 
+      _ldbVerticesComputed = serialPartitioning ;
     }
 
 #ifndef NDEBUG

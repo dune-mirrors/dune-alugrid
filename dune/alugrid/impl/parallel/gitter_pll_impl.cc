@@ -322,9 +322,8 @@ namespace ALUGrid
   }
 
   template < class A > 
-  bool FacePllBaseXMacro < A >::ldbUpdateGraphEdge (LoadBalancer::DataBase & db) 
+  bool FacePllBaseXMacro < A >::ldbUpdateGraphEdge (LoadBalancer::DataBase & db, const bool serialPartitioner ) 
   {
-    
     // Diese Methode erzeugt eine Kante im Graphen f"ur die Berechnung
     // der Neupartitionierung, der sie das Gewicht der Anzahl aller feinsten
     // Fl"achen "uber der verwalteten Grobgitterfl"ache gibt.
@@ -343,13 +342,17 @@ namespace ALUGrid
       int ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
 
       // only insert graph edge on the rank where the smaller vertex number is interior
-      if( ldbVx1 < ldbVx2 ) 
+      // and this we only need to do for serial partitioners 
+      if( serialPartitioner ) 
       {
-        if ( mycon1->isboundary() ) return periodicBnd;
-      }
-      else 
-      {
-        if ( mycon2->isboundary() ) return periodicBnd;
+        if( ldbVx1 < ldbVx2 ) 
+        {
+          if ( mycon1->isboundary() ) return periodicBnd;
+        }
+        else 
+        {
+          if ( mycon2->isboundary() ) return periodicBnd;
+        }
       }
 
       if( mycon1->isperiodic() ) 
@@ -695,6 +698,21 @@ namespace ALUGrid
     }
   }
 
+  template < class A > 
+  void BndsegPllBaseXMacroClosure < A > :: readStaticState( ObjectStream & os, int) 
+  {
+    try 
+    {
+      os.readObject ( _ldbVertexIndex ) ;
+    } 
+    catch (ObjectStream :: EOFException) 
+    {
+      std::cerr << "**ERROR (fatal): EOF encountered." << std::endl ;
+      abort () ;
+    }
+    assert (_ldbVertexIndex >= 0) ;
+  }
+
   template < class A > void BndsegPllBaseXMacroClosure < A >::
   packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
   {
@@ -896,6 +914,12 @@ namespace ALUGrid
       mytetra ().myhface3 (2)->attach2 (i);
       mytetra ().myhface3 (3)->attach2 (i);
     }
+  }
+
+  template < class A >
+  void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
+  {
+    os.writeObject (ldbVertexIndex ()) ;
   }
 
   template < class A >
@@ -1605,6 +1629,12 @@ namespace ALUGrid
       // this method only affects periodic neighbours 
       myneighbour( f ).first->attachPeriodic( destination );
     }
+  }
+
+  template < class A >
+  void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
+  {
+    os.writeObject (ldbVertexIndex ()) ;
   }
 
   template < class A >
