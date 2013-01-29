@@ -7,27 +7,33 @@
 //  The  grid is refined and coarsend again. 
 //
 //***********************************************************************
+#include <config.h>
 #include <iostream>
-#include <mpi.h>
-
-using namespace std;
-
-#define PARALLEL
-
-#define COUNT_FLOPS
-
-// enable vtk output 
-#define PRINT_OUTPUT
-#define ENABLE_ALUGRID_VTK_OUTPUT
 
 // include serial part of ALUGrid 
-#ifdef PARALLEL
-  #include <alugrid_parallel.h>
+#include <dune/alugrid/grid.hh>
+
+using namespace ALUGrid;
+using namespace std;
+
+typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
+
+typedef Gitter::helement_STI  HElemType;    // Interface Element
+typedef Gitter::hface_STI     HFaceType;    // Interface Element
+typedef Gitter::hedge_STI     HEdgeType;    // Interface Element
+typedef Gitter::vertex_STI    HVertexType;  // Interface Element
+typedef Gitter::hbndseg       HGhostType;
+
+#if HAVE_MPI
+  #define PARALLEL 1
+#warning RUNNING PARALLEL VERSION
 #else
-  #include <alugrid_serial.h>
+  #define PARALLEL 0
 #endif
 
-using namespace ALUGridSpace;
+#define PRINT_OUTPUT
+#define ENABLE_ALUGRID_VTK_OUTPUT
+#define COUNT_FLOPS
 
 struct EmptyGatherScatter : public GatherScatter
 {
@@ -233,7 +239,9 @@ void levelwalk(GitterBasisImpl* grid, int level) {
 // exmaple on read grid, refine global and print again 
 int main (int argc, char ** argv, const char ** envp) 
 {
+#if PARALLEL
   MPI_Init(&argc,&argv);
+#endif
 
   int mxl = 0, glb = 0; 
   const char* filename = 0 ;
@@ -348,7 +356,9 @@ int main (int argc, char ** argv, const char ** envp)
     }
   }
 
+#if PARALLEL
   MPI_Finalize();
+#endif
   return 0;
 }
 

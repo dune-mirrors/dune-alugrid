@@ -1,5 +1,5 @@
 GRIDTYPE = ALUGRID_CUBE
-GRIDDIM = 2
+GRIDDIM = 3
 
 EXTRA_DIST = alugrid.cfg
 

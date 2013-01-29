@@ -7,25 +7,34 @@
 //  The  grid is refined and coarsend again. 
 //
 //***********************************************************************
+#include <config.h>
 #include <iostream>
-#include <mpi.h>
 
+// include serial part of ALUGrid 
+#include <dune/alugrid/grid.hh>
+
+using namespace ALUGrid;
 using namespace std;
 
-#define PARALLEL
+typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
+
+typedef Gitter::helement_STI  HElemType;    // Interface Element
+typedef Gitter::hface_STI     HFaceType;    // Interface Element
+typedef Gitter::hedge_STI     HEdgeType;    // Interface Element
+typedef Gitter::vertex_STI    HVertexType;  // Interface Element
+typedef Gitter::hbndseg       HGhostType;
+
+#if HAVE_MPI
+  #define PARALLEL 1
+#warning RUNNING PARALLEL VERSION
+#else
+  #define PARALLEL 0
+#endif
 
 #define COUNT_FLOPS
-
 //#define DONT_USE_ALUGRID_ALLOC
 
 // include serial part of ALUGrid 
-#ifdef PARALLEL
-  #include <alugrid_parallel.h>
-#else
-  #include <alugrid_serial.h>
-#endif
-
-using namespace ALUGridSpace;
 
 template <class Item> 
 class GatherScatterImpl : public GatherScatter 
