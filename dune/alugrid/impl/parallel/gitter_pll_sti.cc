@@ -1317,13 +1317,13 @@ namespace ALUGrid
       }
 
       const bool serialPartitioning = serialPartitioner();
-      // mark unique element indices as computed, if serialPartitioner is used
       if( ! serialPartitioning ) 
       {
         // exchanges the ldbVertexIndex for the internal boundaries 
         exchangeStaticState();
       }
       
+      // mark unique element indices as computed, if serialPartitioner is used
       // don't do this computation again for serial partitioning 
       _ldbVerticesComputed = serialPartitioning ;
     }
