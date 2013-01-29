@@ -80,6 +80,9 @@ namespace ALUGrid
 
     // if called free of objects is not allowed 
     inline static void lockFree (void *) {} 
+
+    // try to make free memory available for the system 
+    inline static void clearFreeMemory () {}
   };
 
 #endif // #else //  #ifndef DONT_USE_ALUGRID_ALLOC 
