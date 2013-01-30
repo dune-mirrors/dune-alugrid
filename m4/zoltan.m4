@@ -31,6 +31,7 @@
 AC_DEFUN([DUNE_PATH_ZOLTAN],[
   AC_REQUIRE([AC_PROG_CXX])
   AC_REQUIRE([DUNE_MPI])
+  AC_REQUIRE([DUNE_PATH_PARMETIS])
 
   AC_ARG_WITH(zoltan,
     AC_HELP_STRING([--with-zoltan=PATH],[directory where ZOLTAN is installed]))
