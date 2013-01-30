@@ -133,7 +133,9 @@ namespace ALUGrid
             ParMETIS_V3_PartKway = 13,
 
             // ParMETIS method for adaptive repartition 
-            ParMETIS_V3_AdaptiveRepart = 14   
+            ParMETIS_V3_AdaptiveRepart = 14, 
+
+            ZOLTAN_LB_Partition = 15 
           };
         private :
           template <class idx_t>
