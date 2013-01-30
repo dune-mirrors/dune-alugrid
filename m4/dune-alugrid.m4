@@ -1,5 +1,4 @@
 AC_DEFUN([DUNE_ALUGRID_CHECKS],[
-
   dnl check for the ParMETIS library
   AC_REQUIRE([DUNE_PATH_PARMETIS])
   dnl check for the METIS library (check needs to after ParMETIS check)
@@ -15,9 +14,9 @@ AC_DEFUN([DUNE_ALUGRID_CHECKS],[
 
   dnl check whether ALUGrid was found by the dune-grid module 
   dnl this conflicts with this package
-  if test "x$ALUGRID_CPPFLAGS" != "x" ; then 
+  AS_IF([test "x$ALUGRID_CPPFLAGS" != "x"],[
     AC_MSG_ERROR([--with-alugrid conflicts with dune-alugrid module, remove the --with-alugrid from the configure options and rebuild dune-grid and dune-alugrid!]);
-  fi
+  ])
 
   DUNE_DEFINE_GRIDTYPE([ALUGRID_CONFORM],[],[Dune::ALUGrid< dimgrid, dimworld, Dune::simplex, Dune::conforming >],[dune/alugrid/grid.hh],[dune/alugrid/dgf.hh])
   DUNE_DEFINE_GRIDTYPE([ALUGRID_CUBE],[],[Dune::ALUGrid< dimgrid, dimworld, Dune::cube, Dune::nonconforming >],[dune/alugrid/grid.hh],[dune/alugrid/dgf.hh])

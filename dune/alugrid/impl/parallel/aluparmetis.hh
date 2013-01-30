@@ -28,13 +28,18 @@ namespace ALUGridParMETIS
 #if HAVE_METIS
   typedef ALUGridMETIS :: idxtype  idxtype ;
   typedef ALUGridMETIS :: realtype realtype ;
-#elif HAVE_PARMETIS 
+#elif HAVE_PARMETIS // #if HAVE_METIS
+#if PARMETIS_MAJOR_VERSION >= 4
   typedef idx_t  idxtype ;
   typedef real_t realtype ;
-#else   
+#else // #if PARMETIS_MAJOR_VERSION >= 4
+  typedef ::idxtype idxtype;
+  typedef float     realtype;
+#endif // #else // #if PARMETIS_MAJOR_VERSION >= 4
+#else // #elif HAVE_PARMETIS // #if HAVE_METIS
   typedef int   idxtype ;
   typedef float realtype ;
-#endif
+#endif // #else // #elif HAVE_PARMETIS // #if HAVE_METIS
 
   inline void CALL_ParMETIS_V3_PartKway(
                idxtype *vtxdist, idxtype *xadj, idxtype *adjncy, idxtype *vwgt,
