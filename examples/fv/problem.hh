@@ -58,6 +58,9 @@ struct ProblemData
     return initial(x);
   }
 
+  /** \brief obtain the type of boundary condition */
+  virtual int bndType( const DomainType &normal, const DomainType &x, const double time) const = 0;
+
   /** \brief obtain the end time for the evolution problem */
   virtual double endTime () const = 0;
 

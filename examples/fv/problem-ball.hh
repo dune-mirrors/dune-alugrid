@@ -38,6 +38,11 @@ struct BallData
     return 1.0;
   }
 
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const 
+  {
+    return 0;
+  }
+
   //! \copydoc ProblemData::adaptationIndicator
   double adaptationIndicator ( const DomainType x, double time,
                                const RangeType &uLeft, const RangeType &uRight ) const 
