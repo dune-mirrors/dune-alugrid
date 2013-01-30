@@ -18,9 +18,6 @@ extern "C" {
 
 #else  // #if HAVE_METIS 
 
-// include ParMETIS header because of idx_t and real_t
-#include "aluparmetis.hh"
-
 static const char metmess [] =  "**INFO Due to license reasons the library METIS is\n"
         "       not part of the ALUGrid library distribution. \n"
         "       To use this feature get a copy of the METIS library \n"
@@ -37,9 +34,6 @@ namespace ALUGridMETIS
 #if HAVE_METIS && not defined HAVE_METIS_VERSION_4
   typedef idx_t  idxtype ;
   typedef real_t realtype ;
-#elif HAVE_PARMETIS 
-  typedef ALUGridParMETIS :: idxtype  idxtype;
-  typedef ALUGridParMETIS :: realtype realtype;
 #else
   typedef int   idxtype ;
   typedef float realtype ;

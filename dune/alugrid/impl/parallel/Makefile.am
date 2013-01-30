@@ -1,5 +1,5 @@
 paralleldir = dune/alugrid/impl/parallel
-parallel_HEADERS = alumetis.hh aluparmetis.hh alusfc.hh aluzoltan.hh \
+parallel_HEADERS = alumetis.hh alusfc.hh aluzoltan.hh \
 			gitter_hexa_top_pll.h gitter_pll_impl.h \
 			gitter_pll_ldb.h gitter_pll_mgb.h \
 			gitter_pll_sti.h gitter_tetra_top_pll.h mpAccess.h \

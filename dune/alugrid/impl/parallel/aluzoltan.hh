@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cassert>
 
+#include "mpAccess_MPI.h"
+
 #if HAVE_ZOLTAN 
 #define ZOLTAN_CONFIG_H_INCLUDED
 #include <zoltan_cpp.h>
@@ -11,6 +13,7 @@
 
 namespace ALUGridZoltan
 {
+#if HAVE_ZOLTAN
   template < class ldb_vertex_map_t >
   class ObjectCollection 
   {
@@ -93,6 +96,7 @@ namespace ALUGridZoltan
       }
     }
   };
+#endif // #if HAVE_ZOLTAN
 
   template< class ldb_vertex_map_t, class ldb_connect_set_t >
   void CALL_Zoltan_LB_Partition( ALUGrid::MpAccessGlobal &mpa,
@@ -113,7 +117,7 @@ namespace ALUGridZoltan
     typedef ObjectCollection< ldb_vertex_map_t > ObjectCollectionType;
 
     ObjectCollectionType objects( vertexMap );
-    Zoltan *zz = new Zoltan( comm );
+    Zoltan *zz = new Zoltan( MPI_COMM_WORLD );
     assert( zz );
 
     // General parameters 
@@ -177,7 +181,7 @@ namespace ALUGridZoltan
     Zoltan::LB_Free_Part(&exportGlobalIds, &exportLocalIds, &exportProcs, &exportToPart);
 
     delete zz;
-#endif
+#endif // #if HAVE_ZOLTAN
   } // CALL_Zoltan_LB_Partition 
 
 } // namespace ALUGridZoltan
