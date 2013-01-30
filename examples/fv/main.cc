@@ -148,7 +148,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
     if( gridMarker.marked() )
       adaptation( solution );
     /* print info about time, timestep size and counter */
-    if (step % 100 == 0) 
+    if (step % 1 == 0) 
     {
       std::cout << "elements = " << gridView.indexSet().size( 0 );
       std::cout << "   maxLevel = " << grid.maxLevel();

@@ -14,7 +14,7 @@
  *  \brief Mach 3 flow from left hitting a forward facing step
  */
 template< int dimD >
-struct EulerProblemData1
+struct EulerProblemFFS
 : public ProblemData< dimD, dimD+2 >
 {
   typedef ProblemData< dimD, dimD+2 > Base;
@@ -24,9 +24,8 @@ struct EulerProblemData1
 
   static const int dimDomain = DomainType::dimension;
   static const int dimRange = RangeType::dimension;
-  static const bool hasFlux = true;
 
-  EulerProblemData1 ()
+  EulerProblemFFS ()
   {}
 
   //! \copydoc ProblemData::gridFile
@@ -56,6 +55,15 @@ struct EulerProblemData1
     return initial( x );
   }
 
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const
+  {
+    if (normal[0]<-0.1 && x[0]<0.1)
+      return 1;
+    else if (normal[0]>0.1 && x[0]>1)
+      return 2;
+    return 3;
+  }
+
   //! \copydoc ProblemData::endTime
   double endTime () const
   {
@@ -81,6 +89,122 @@ struct EulerProblemData1
     return 0.05;
   }
 };
+
+// ShockBubble  
+template< int dimD >
+class EulerProblemShockBubble 
+: public ProblemData< dimD, dimD+2 >
+{
+public:
+  typedef ProblemData< dimD, dimD+2 > Base;
+
+  typedef typename Base::DomainType DomainType;
+  typedef typename Base::RangeType RangeType;
+
+  static const int dimDomain = DomainType::dimension;
+  static const int dimRange = RangeType::dimension;
+
+  EulerProblemShockBubble() 
+   : gamma(1.4) 
+   , center_(0.5) , radius2_( 0.2 * 0.2 ) 
+  {
+    center_[dimDomain-1] = 0;
+  }
+
+  //! \copydoc ProblemData::gridFile
+  std::string gridFile ( const std::string &path ) const
+  { 
+    std::ostringstream dgfFileName;
+    dgfFileName << path << "/sb" << dimDomain << "d.dgf";
+    return dgfFileName.str();
+  }
+
+  //! \copydoc ProblemData::initial
+  RangeType initial ( const DomainType &x ) const
+  {
+    RangeType val( 0 );
+
+    enum { dimR = RangeType :: dimension };
+
+    // behind shock 
+    if ( x[0] <= 0.2 ) 
+    {
+      const double gamma1 = gamma-1.;
+      // pressure left of shock 
+      const double pinf = 5;
+      const double rinf = ( gamma1 + (gamma+1)*pinf )/( (gamma+1) + gamma1*pinf );
+      const double vinf = (1.0/std::sqrt(gamma)) * (pinf - 1.)/
+              std::sqrt( 0.5*((gamma+1)/gamma) * pinf + 0.5*gamma1/gamma);
+
+      val[0] = rinf;
+      val[dimR-1] = 0.5*rinf*vinf*vinf + pinf/gamma1;
+      val[1] = vinf * rinf;
+    }
+    else if( (x - center_).two_norm2() <= radius2_ ) 
+    {
+      val[0] = 0.1;
+      // pressure in bubble  
+      val[dimR-1] = 2.5;
+    }
+    // elsewhere 
+    else 
+    {
+      val[0] = 1;
+      val[dimR-1] = 2.5;
+
+      //RangeType prim; 
+      //cons2prim( res, prim );
+      //std::cout << "Primitve outside : "<< prim << "\n";
+    }
+    return val;
+  }
+
+  //! \copydoc ProblemData::boundaryValue
+  RangeType boundaryValue ( const DomainType &x, double time ) const
+  {
+    return initial( x );
+  }
+
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const
+  {
+    if (normal[0]<-0.1 && x[0]<0.1)
+      return 1;
+    else if (normal[0]>0.1 && x[0]>1)
+      return 2;
+    return 3;
+  }
+
+  //! \copydoc ProblemData::endTime
+  double endTime () const
+  {
+    return 0.3;
+  }
+
+  //! \copydoc ProblemData::adaptationIndicator
+  double adaptationIndicator ( const DomainType x, double time,
+                               const RangeType &uLeft, const RangeType &uRight ) const 
+  { 
+    return std::abs( uLeft[ 0 ] - uRight[ 0 ] )/(0.5*(uLeft[0]+uRight[0]));
+  } 
+
+  //! \copydoc ProblemData::refineTol
+  double refineTol () const
+  {
+    return 0.1;
+  }
+
+  //! \copydoc ProblemData::saveInterval
+  double saveInterval() const 
+  {
+    return 0.005;
+  }
+
+  private:
+  const double gamma;
+  DomainType center_; 
+  const double radius2_; 
+};
+
 
 // Enumerations
 // ------------
@@ -204,12 +328,15 @@ struct EulerModel
     switch( problem )
     {
     case 1:
-      problem_ = new EulerProblemData1< dimDomain >();
+      problem_ = new EulerProblemFFS< dimDomain >();
+      break;
+    case 2:
+      problem_ = new EulerProblemShockBubble< dimDomain >();
       break;
 
     default:
       std::cerr << "ProblemData not defined - using problem 1!" << std::endl;
-      problem_ = new EulerProblemData1< dimDomain >();
+      problem_ = new EulerProblemFFS< dimDomain >();
     }
   }
 
@@ -301,11 +428,12 @@ private:
                       const RangeType& uLeft,
                       RangeType& uRight) const
   {
-    if (normal[0]<-0.1 && xGlobal[0]<0.1)
+    int bndType = problem_->bndType(normal,xGlobal,time);
+    if (bndType == 1) // Dirichlet
       uRight = problem().boundaryValue(xGlobal,time);
-    else if (normal[0]>0.1 && xGlobal[0]>1)
+    else if (bndType == 2) // Neumann
       uRight = uLeft;
-    else
+    else 
       {
         DomainType unitNormal( normal );
         const double faceVol = normal.two_norm();

@@ -49,6 +49,11 @@ public:
     return initial( x );                                                               
   }                                                                                        
                                                                                            
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const 
+  {
+    return 1; 
+  }
+
   double saveInterval () const                                                             
   {                                                                                        
     return 0.05;                                                                           
@@ -109,6 +114,11 @@ public:
     return initial( x );                                                               
   }                                                                                        
                                                                                            
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const 
+  {
+    return 1; 
+  }
+
   double saveInterval () const                                                             
   {                                                                                        
     return 0.05;                                                                           
