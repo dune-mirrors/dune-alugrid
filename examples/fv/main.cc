@@ -20,11 +20,17 @@ typedef Dune::GridSelector::GridType Grid;
 /** pde and problem description **/
 #include "problem.hh"
 #include "problem-transport.hh"
+#include "problem-ball.hh"
 #include "problem-euler.hh"
 
 /** type of pde to solve **/
-// typedef TransportModel< Grid::dimensionworld > ModelType;
+#if TRANSPORT
+typedef TransportModel< Grid::dimensionworld > ModelType;
+#elif BALL
+typedef BallModel< Grid::dimensionworld > ModelType;
+#elif EULER
 typedef EulerModel< Grid::dimensionworld > ModelType;
+#endif
 
 // method
 // ------

@@ -41,7 +41,10 @@ struct ProblemData
    *
    *  \returns the evaluated initial data
    */
-  virtual RangeType initial ( const DomainType &x ) const = 0;
+  virtual RangeType initial ( const DomainType &x ) const 
+  {
+    return RangeType(0);
+  }
 
   /** \brief evaluate the data for inflow boundaries
    *
@@ -50,7 +53,10 @@ struct ProblemData
    *
    *  \returns the evaluated boundary data
    */
-  virtual RangeType boundaryValue ( const DomainType &x, double time ) const = 0;
+  virtual RangeType boundaryValue ( const DomainType &x, double time ) const 
+  {
+    return initial(x);
+  }
 
   /** \brief obtain the end time for the evolution problem */
   virtual double endTime () const = 0;
@@ -64,7 +70,8 @@ struct ProblemData
    *  \param uRight right state
    *  \return the indicator
    */
-  virtual double adaptationIndicator ( const RangeType &uLeft, const RangeType &uRight ) const = 0;
+  virtual double adaptationIndicator ( const DomainType x, double time,
+                                       const RangeType &uLeft, const RangeType &uRight ) const = 0;
   /** \brief refine tolerance to use */
   virtual double refineTol () const = 0;
   /** \brief coarsening tolerance (defaults to 1/3 of refinement tolerance 

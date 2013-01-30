@@ -263,6 +263,8 @@ template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
   ::operator() ( const double time, const Arg &solution, Vector &update ) const
 {
+  if (!Model::hasFlux)
+    return model_.fixedDt();
   // set update to zero 
   update.clear();
 

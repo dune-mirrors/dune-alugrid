@@ -1,5 +1,5 @@
-#ifndef Problem_EULER_HH
-#define Problem_EULER_HH
+#ifndef Problem_BALL_HH
+#define Problem_BALL_HH
 
 #include <cmath>
 #include <cassert>
@@ -113,4 +113,4 @@ struct BallModel
   Problem *problem_;
 };
 
-#endif // #ifndef EULERFLUXES_HH
+#endif 
