@@ -15,7 +15,7 @@
 
 #if HAVE_ZOLTAN
 #define ZOLTAN_CONFIG_H_INCLUDED
-#include <zoltan_cpp.h>
+#include <zoltan.h>
 #endif
 
 #ifdef MPICPP

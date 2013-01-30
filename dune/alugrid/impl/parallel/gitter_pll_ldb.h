@@ -14,6 +14,10 @@ namespace ALUGrid
 
 } // namespace ALUGrid
 
+#if HAVE_ZOLTAN
+#define GRAPHVERTEX_WITH_CENTER
+#endif
+
 #include "../serial/key.h"
 #include "../serial/myalloc.h"
 #include "mpAccess.h"
