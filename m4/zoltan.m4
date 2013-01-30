@@ -36,11 +36,6 @@ AC_DEFUN([DUNE_PATH_ZOLTAN],[
   AC_ARG_WITH(zoltan,
     AC_HELP_STRING([--with-zoltan=PATH],[directory where ZOLTAN is installed]))
 
-  AC_ARG_WITH([zoltan-libdir],dnl
-    AS_HELP_STRING([--with-zoltan-libdir=PATH],dnl
-      [Directory where ZOLTAN library is installed (deprecated). Note that this will override library path detection, so use this parameter only if default library detection fails and you know exactly where your ZOLTAN library is located.]))dnl
-
-
 # do not use zoltan debug lib 
 
 # store old values
