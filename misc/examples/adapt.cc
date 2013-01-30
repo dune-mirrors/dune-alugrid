@@ -1,12 +1,15 @@
-#ifdef HAVE_CONFIG_H
-# include "config.h"     
-#endif
+
+#include <config.h>
 #include <iostream>
 #include <string>
 
-#include "../src/alugrid_2d.h"
+// include serial part of ALUGrid 
+#include <dune/alugrid/grid.hh>
 
-using namespace ALUGridSpace ;
+using namespace ALUGrid;
+using namespace std;
+
+// using namespace ALUGridSpace ;
 
 typedef Hmesh GridType;
 

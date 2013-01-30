@@ -313,6 +313,8 @@ namespace ALUGrid
 
         delete tr;
         _tetraMap.erase (hit);
+
+        return;
       }
 
       hit = _hexaMap.find (k);

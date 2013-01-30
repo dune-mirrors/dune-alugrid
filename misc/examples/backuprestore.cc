@@ -7,25 +7,34 @@
 //  The  grid is refined and coarsend again. 
 //
 //***********************************************************************
+//
+#include <config.h>
 #include <iostream>
-#include <mpi.h>
-
-using namespace std;
-
-#define PARALLEL
-
-#define COUNT_FLOPS
-
-#define DONT_USE_ALUGRID_ALLOC
 
 // include serial part of ALUGrid 
-#ifdef PARALLEL
-  #include <alugrid_parallel.h>
+#include <dune/alugrid/grid.hh>
+
+using namespace ALUGrid;
+using namespace std;
+
+typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
+
+typedef Gitter::helement_STI  HElemType;    // Interface Element
+typedef Gitter::hface_STI     HFaceType;    // Interface Element
+typedef Gitter::hedge_STI     HEdgeType;    // Interface Element
+typedef Gitter::vertex_STI    HVertexType;  // Interface Element
+typedef Gitter::hbndseg       HGhostType;
+
+#if HAVE_MPI
+  #define PARALLEL 1
+#warning RUNNING PARALLEL VERSION
 #else
-  #include <alugrid_serial.h>
+  #define PARALLEL 0
 #endif
 
-using namespace ALUGridSpace;
+#define COUNT_FLOPS
+#define DONT_USE_ALUGRID_ALLOC
+
 
 template <class GitterType, class element_t> 
 void checkElement( GitterType& grid, element_t& elem ) 
