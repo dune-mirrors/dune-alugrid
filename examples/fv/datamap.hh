@@ -67,6 +67,7 @@ public:
   {
     assert( n == size( entity ) );
 
+    data_.update();
     // we only have data on the leaf level
     if( entity.isLeaf() )
       buffer.read( data_[ entity ] );
