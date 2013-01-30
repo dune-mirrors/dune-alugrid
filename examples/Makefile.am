@@ -1,4 +1,4 @@
-SUBDIRS = fv 
+SUBDIRS = fv ball
 
 check_PROGRAMS = aluball
 aluball_SOURCES = aluball.cc

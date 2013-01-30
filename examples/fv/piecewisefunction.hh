@@ -294,14 +294,12 @@ inline void PiecewiseFunction< View, Range >
   ::getLocalDofVector ( const Entity &entity, LocalDofVector &localDofs ) const
 {
   localDofs = (*this)[ entity ];
-  assert(localDofs[0]>1e-8);
 }
 
 template< class View, class Range >
 inline void PiecewiseFunction< View, Range >
   ::setLocalDofVector ( const Entity &entity, const LocalDofVector &localDofs )
 {
-  assert( localDofs[0] > 1e-8 );
   (*this)[ entity ] = localDofs;
 }
 

@@ -59,6 +59,12 @@ public:
   {
     return 0.1;
   }
+  //! \copydoc ProblemData::adaptationIndicator
+  double adaptationIndicator ( const DomainType x, double time,
+                               const RangeType &uLeft, const RangeType &uRight ) const 
+  { 
+    return std::abs( uLeft[ 0 ] - uRight[ 0 ] );
+  } 
 };
 
 /**
@@ -112,6 +118,11 @@ public:
   {
     return 0.1;
   }
+  double adaptationIndicator ( const DomainType x, double time,
+                               const RangeType &uLeft, const RangeType &uRight ) const 
+  { 
+    return std::abs( uLeft[ 0 ] - uRight[ 0 ] );
+  } 
 };
 
 // TransportModel
@@ -133,11 +144,12 @@ struct TransportModel
 {
   typedef ProblemData< dimD,1 > Problem;
 
-  static const int dimDomain = Problem::dimDomain;
-  static const int dimRange = Problem::dimRange;
-
   typedef typename Problem::DomainType DomainType;
   typedef typename Problem::RangeType RangeType;
+
+  static const int dimDomain = Problem::dimDomain;
+  static const int dimRange = Problem::dimRange;
+  static const bool hasFlux = true;
 
   /** \brief constructor 
    *  \param problem switch between different data settings 
@@ -172,6 +184,11 @@ struct TransportModel
   const Problem &problem () const
   {
     return *problem_;
+  }
+
+  const double fixedDt () const
+  {
+    return -1;
   }
 
   /** \brief obtain the (constant) velocity for the transport problem */
@@ -242,7 +259,7 @@ struct TransportModel
                      const DomainType &xGlobal,
                      const RangeType &uLeft, const RangeType &uRight) const 
   {
-    return problem().adaptationIndicator( uLeft, uRight );
+    return problem().adaptationIndicator( xGlobal, time, uLeft, uRight );
   }
 
   /** \brief compute adaptation indicator at boundary
@@ -264,6 +281,8 @@ struct TransportModel
     return indicator( normal,time,xGlobal, uLeft, problem().boundaryValue(xGlobal,time) );
   }
 
+protected:
+  TransportModel ( ) : problem_(0), velocity_(1) {}
 private:
   Problem *problem_;
   DomainType velocity_;

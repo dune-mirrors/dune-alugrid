@@ -7,30 +7,18 @@
 /** dune (mpi, field-vector and grid type for dgf) **/
 #include <dune/common/mpihelper.hh>     
 #include <dune/common/fvector.hh>        
+#include <dune/grid/io/file/vtk/vtksequencewriter.hh>
 
 typedef Dune::GridSelector::GridType Grid;
 
-/** numerical scheme **/
-#include "piecewisefunction.hh"
-#include "fvscheme.hh"
-
 /** adaptation scheme **/
 #include "adaptation.hh"
-
-/** pde and problem description **/
-#include "problem.hh"
-#include "problem-transport.hh"
 #include "problem-ball.hh"
-#include "problem-euler.hh"
+#include "ballscheme.hh"
 
-/** type of pde to solve **/
-#if TRANSPORT
-typedef TransportModel< Grid::dimensionworld > ModelType;
-#elif BALL
+// method
+// ------
 typedef BallModel< Grid::dimensionworld > ModelType;
-#elif EULER
-typedef EulerModel< Grid::dimensionworld > ModelType;
-#endif
 
 // method
 // ------
@@ -51,18 +39,11 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
   typedef Grid::Partition< Dune::Interior_Partition >::LeafGridView GridView;
   GridView gridView = grid.leafView< Dune::Interior_Partition >();
 
-  /* construct data vector for solution */
-  typedef PiecewiseFunction< GridView, Dune::FieldVector< double, ModelType::dimRange > > DataType;
-  DataType solution( gridView );
-  /* initialize data */
-  solution.initialize( model.problem() );
-
   /* create finite volume and ODE solver */
-  typedef FiniteVolumeScheme< DataType, ModelType > FVScheme;
-  FVScheme scheme( gridView, model );
+  typedef BallScheme< GridView, ModelType > Scheme;
+  Scheme scheme( gridView, model );
   /* create VTK writer for data sequqnce */
   Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", "./", ".", Dune::VTK::nonconforming );
-  VTKData< DataType >::addTo( solution, vtkOut );
 
   /* create adaptation method */
   typedef LeafAdaptation< Grid > AdaptationType;
@@ -72,12 +53,10 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
   {
     // mark grid for initial refinement
     GridMarker< Grid > gridMarker( grid, 0, maxLevel );
-    scheme.mark( 0, solution, gridMarker );
+    scheme.mark( 0, gridMarker );
     // adapt grid 
     if( gridMarker.marked() )
-      adaptation( solution );
-    // initialize solution for new grid
-    solution.initialize( model.problem() );
+      adaptation( );
   }
   /* output the initial grid and the solution */
   vtkOut.write( 0.0 );
@@ -89,46 +68,17 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
   const double saveInterval = model.problem().saveInterval();     
   /* first point where data is saved */
   double saveStep = saveInterval;
-  /* cfl number */
-  double cfl = 0.9;
-  /* vector to store update */
-  DataType update( gridView );
-
-#if 0
-  /* vector to store old state for RK scheme */
-  DataType solOld( gridView );
-#endif
 
   /* now do the time stepping */
   unsigned int step = 0;
   double time = 0.0;
   while ( time < endTime ) 
   {
-#if 0
-    // store solution
-    solOld.resize();
-    solOld.assign( solution );
-#endif
-    // update vector might not be of the right size if grid has changed
-    update.resize();
-
     // apply the spacial operator
-    double dt = scheme( time, solution, update );
-    // multiply time step by CFL number
-    dt *= cfl;
+    double dt = scheme( time );
 
     // minimize time step over all processes
-    dt = solution.gridView().comm().min( dt );
-    // communicate update
-    update.communicate();
-
-    // update solution
-    solution.axpy( dt, update );
-
-#if 0
-    scheme( time+dt, solution, update );
-    solution.addAndScale( 0.5, 0.5, solOld );
-#endif
+    dt = gridView.comm().min( dt );
 
     /* augment time */
     time += dt;
@@ -143,13 +93,14 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
     }
     /* mark the grid for adaptation */
     GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
-    scheme.mark( time, solution, gridMarker );
+    scheme.mark( time, gridMarker );
     /* call adaptation algorithm */
     if( gridMarker.marked() )
-      adaptation( solution );
+      adaptation( );
     /* print info about time, timestep size and counter */
-    if (step % 100 == 0) 
+    if (step % 1 == 0) 
     {
+      std::cout << "[" << grid.comm().rank() << "] : ";
       std::cout << "elements = " << gridView.indexSet().size( 0 );
       std::cout << "   maxLevel = " << grid.maxLevel();
       std::cout << "   step = " << step;
@@ -180,6 +131,7 @@ try
       std::cout << "Usage: " << argv[ 0 ] << " [problem-nr] [startLevel] [maxLevel]" << std::endl;
     return 0;
   }
+
   /* create problem */
   ModelType model(atoi(argv[1]));
 

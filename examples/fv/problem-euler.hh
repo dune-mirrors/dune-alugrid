@@ -22,8 +22,9 @@ struct EulerProblemData1
   typedef typename Base::DomainType DomainType;
   typedef typename Base::RangeType RangeType;
 
-  const static int dimDomain = DomainType::dimension;
-  const static int dimRange = RangeType::dimension;
+  static const int dimDomain = DomainType::dimension;
+  static const int dimRange = RangeType::dimension;
+  static const bool hasFlux = true;
 
   EulerProblemData1 ()
   {}
@@ -62,7 +63,8 @@ struct EulerProblemData1
   }
 
   //! \copydoc ProblemData::adaptationIndicator
-  double adaptationIndicator ( const RangeType &uLeft, const RangeType &uRight ) const
+  double adaptationIndicator ( const DomainType x, double time,
+                               const RangeType &uLeft, const RangeType &uRight ) const 
   { 
     return std::abs( uLeft[ 0 ] - uRight[ 0 ] )/(0.5*(uLeft[0]+uRight[0]));
   } 
@@ -188,8 +190,9 @@ struct EulerModel
   typedef typename Problem::DomainType DomainType;
   typedef typename Problem::RangeType RangeType;
 
-  const static int dimDomain = DomainType::dimension;
-  const static int dimRange = RangeType::dimension;
+  static const int dimDomain = DomainType::dimension;
+  static const int dimRange = RangeType::dimension;
+  static const bool hasFlux = true;
 
   /** \brief constructor 
    *  \param problem switch between different data settings 
@@ -214,6 +217,11 @@ struct EulerModel
   ~EulerModel() 
   {
     delete problem_;
+  }
+
+  const double fixedDt () const
+  {
+    return -1;
   }
 
   /** \copydoc TransportProblem::data */
@@ -267,7 +275,7 @@ struct EulerModel
                      const DomainType &xGlobal,
                      const RangeType &uLeft, const RangeType &uRight) const 
   {
-    return problem().adaptationIndicator( uLeft, uRight );
+    return problem().adaptationIndicator( xGlobal, time, uLeft, uRight );
   }
 
   /** \copydoc TransportProblem::boundaryIndicator */
