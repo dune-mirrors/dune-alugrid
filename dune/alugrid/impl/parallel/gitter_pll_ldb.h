@@ -14,6 +14,10 @@ namespace ALUGrid
 
 } // namespace ALUGrid
 
+#if HAVE_ZOLTAN
+#define GRAPHVERTEX_WITH_CENTER
+#endif
+
 #include "../serial/key.h"
 #include "../serial/myalloc.h"
 #include "mpAccess.h"
@@ -129,30 +133,24 @@ namespace ALUGrid
             METIS_PartGraphKway = 11,
             METIS_PartGraphRecursive = 12,
 
-            // parallel partkway
-            ParMETIS_V3_PartKway = 13,
-
-            // ParMETIS method for adaptive repartition 
-            ParMETIS_V3_AdaptiveRepart = 14   
+            // ZOLTAN partitioning 
+            ZOLTAN_LB_Partition = 13 
           };
         private :
-          template <class idx_t>
           void graphCollect ( const MpAccessGlobal &,
                               std::insert_iterator< ldb_vertex_map_t >,
                               std::insert_iterator< ldb_edge_set_t >,
-                              idx_t *, const bool ) const;
+                              const bool ) const;
 
-          template <class idx_t>
           void graphCollectAllgather ( const MpAccessGlobal &,
                                        std::insert_iterator< ldb_vertex_map_t >,
                                        std::insert_iterator< ldb_edge_set_t >,
-                                       idx_t* , const bool ) const;
+                                       const bool ) const;
 
-          template <class idx_t>
           void graphCollectBcast ( const MpAccessGlobal &,
                                    std::insert_iterator < ldb_vertex_map_t >,
                                    std::insert_iterator < ldb_edge_set_t >,
-                                   idx_t* , const bool ) const;
+                                   const bool ) const;
         public :
           const std::vector< int > &graphSizes () const { return _graphSizes; }
 
@@ -166,7 +164,7 @@ namespace ALUGrid
           //! return true if mth specifies a serial partitioner
           static bool serialPartitionerUsed ( const method mth )
           {
-            return mth < ParMETIS_V3_PartKway ;
+            return true ; // mth < ZOLTAN_LB_Partition ;
           }
 
           static const char *methodToString( method );
@@ -373,7 +371,6 @@ namespace ALUGrid
       _graphSizes( b._graphSizes ),
       _noPeriodicFaces( b._noPeriodicFaces )
   {
-    return;
   }
 
   inline LoadBalancer::DataBase::~DataBase () {}

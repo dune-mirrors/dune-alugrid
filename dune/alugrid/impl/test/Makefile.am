@@ -25,7 +25,7 @@ sizes_SOURCES = sizes.cc \
 
 sizes_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
 sizes_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-sizes_LDADD = ${PARMETIS_LIBS} ${METIS_LIB} $(DUNEMPILIBS)
+sizes_LDADD = ${ZOLTAN_LIBS} ${PARMETIS_LIBS} ${METIS_LIB} $(DUNEMPILIBS)
 
 include $(top_srcdir)/am/global-rules
 

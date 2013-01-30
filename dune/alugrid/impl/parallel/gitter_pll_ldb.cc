@@ -8,11 +8,12 @@
 #include <iostream>
 #include <numeric>
 
-#include "alusfc.hh"
-#include "alumetis.hh"
-#include "aluparmetis.hh"
 #include "../serial/gitter_sti.h"
 #include "gitter_pll_ldb.h"
+
+#include "alusfc.hh"
+#include "alumetis.hh"
+#include "aluzoltan.hh"
 
 namespace ALUGrid
 {
@@ -57,12 +58,11 @@ namespace ALUGrid
     std::cout << accVertexLoad () << " " << maxVertexLoad () << " " << accEdgeLoad () << std::endl;
   } 
 
-  template <class idx_t>
   void LoadBalancer::DataBase::
   graphCollect ( const MpAccessGlobal &mpa,
                  std::insert_iterator< ldb_vertex_map_t > nodes,
                  std::insert_iterator< ldb_edge_set_t > edges,
-                 idx_t* vtxdist, const bool serialPartitioner ) const 
+                 const bool serialPartitioner ) const 
   {
     // if the number of ranks is small, then use old allgather method 
     if( ALUGridExternalParameters::useAllGather( mpa ) )
@@ -70,23 +70,23 @@ namespace ALUGrid
       // old method has O(p log p) time complexity 
       // and O(p) memory consumption which is critical 
       // for higher number of cores 
-      graphCollectAllgather( mpa, nodes, edges, vtxdist, serialPartitioner );
+      graphCollectAllgather( mpa, nodes, edges, serialPartitioner );
     }
     else 
     {
       // otherwise use method with O(p log p) time complexity 
       // and O(1) memory consumption
-      graphCollectBcast( mpa, nodes, edges, vtxdist, serialPartitioner );
+      graphCollectBcast( mpa, nodes, edges, serialPartitioner );
     }
   }
 
-  template <class idx_t>
   void LoadBalancer::DataBase::
   graphCollectAllgather ( const MpAccessGlobal &mpa,
                           std::insert_iterator< ldb_vertex_map_t > nodes, 
                           std::insert_iterator< ldb_edge_set_t > edges,
-                          idx_t* vtxdist, const bool serialPartitioner ) const 
+                          const bool serialPartitioner ) const 
   {
+    assert( serialPartitioner );
     // for parallel partitioner return local vertices and edges 
     // for serial partitioner these have to be communicates to all
     // processes 
@@ -122,14 +122,6 @@ namespace ALUGrid
           * edges = - x;
           ++ edges;
         }
-      }
-
-      // if vtxdist is given, we set it up here
-      if( vtxdist ) 
-      {
-        // vtxdist always starts with 0 
-        // so initialize here 
-        vtxdist[ 0 ] = 0;
       }
     }
 
@@ -216,12 +208,6 @@ namespace ALUGrid
               ++ edges;
             }
           }
-          else 
-          {
-            // see above vtxdist [ 0 ] = 0
-            // sum up number of vertices for processor i 
-            vtxdist[ i + 1 ] = vtxdist[ i ] + len;
-          }
 
           // free memory of osv[i]
           osv_i.reset();
@@ -240,12 +226,11 @@ namespace ALUGrid
     }
   }
 
-  template <class idx_t>
   void LoadBalancer::DataBase::
   graphCollectBcast ( const MpAccessGlobal &mpa, 
                       std::insert_iterator< ldb_vertex_map_t > nodes, 
                       std::insert_iterator< ldb_edge_set_t > edges,
-                      idx_t* vtxdist, const bool serialPartitioner ) const 
+                      const bool serialPartitioner ) const 
   {
     // for parallel partitioner return local vertices and edges 
     // for serial partitioner these have to be communicates to all
@@ -284,14 +269,6 @@ namespace ALUGrid
           *edges = - x;
           ++ edges;
         }
-      }
-
-      // if vtxdist is given, we set it up here
-      if( vtxdist ) 
-      {
-        // vtxdist always starts with 0 
-        // so initialize here 
-        vtxdist[ 0 ] = 0;
       }
     }
 
@@ -415,12 +392,6 @@ namespace ALUGrid
               * edges = - x;
               ++ edges;
             }
-          }
-          else 
-          {
-            // see above vtxdist [ 0 ] = 0
-            // sum up number of vertices for processor rank 
-            vtxdist[ rank + 1 ] = vtxdist[ rank ] + len;
           }
         }
       }
@@ -600,16 +571,23 @@ namespace ALUGrid
   }
 
   bool LoadBalancer::DataBase::repartition (MpAccessGlobal & mpa, 
-                                                method mth,
-                                                std::vector< int >& partition,
-                                                // number of partitions to be created 
-                                                // this is not neccesarily equal to mpa.psize()
-                                                const int np )
+                                            method mth,
+                                            std::vector< int >& partition,
+                                            // number of partitions to be created 
+                                            // this is not neccesarily equal to mpa.psize()
+                                            const int np )
   {
     if (debugOption (3)) printLoad ();
     
     // if method for load balancing is none, do nothing 
     if (mth == NONE) return false;
+
+    // ZOLTAN partitioning 
+    if (mth == ZOLTAN_LB_Partition ) 
+    {
+      ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _connect );
+      return true ;
+    }
 
     const int start = clock (), me = mpa.myrank ();
     // intitial value for change 
@@ -617,7 +595,6 @@ namespace ALUGrid
     
     // flag to indicate whether we use a serial or a parallel partitioner 
     bool serialPartitioner    = serialPartitionerUsed( mth );
-    const bool usePartKway    = ( mth == ParMETIS_V3_PartKway );
     const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurveNoEdges );
 
     // create maps for edges and vertices 
@@ -627,9 +604,6 @@ namespace ALUGrid
     typedef ALUGridMETIS::realtype real_t;
     typedef ALUGridMETIS::idxtype  idx_t;
 
-    // vector of vertex distribution (only for ParMETIS)
-    idx_t* vtxdist = ( serialPartitioner ) ?  0 : new idx_t [np + 1];
-
     // for the first SFC approach we don't have edges in the graph 
     assert( noEdgesInGraph ? _edgeSet.size() == 0 : true ); 
 
@@ -638,37 +612,8 @@ namespace ALUGrid
     graphCollect( mpa,
                   std::insert_iterator< ldb_vertex_map_t > (nodes,nodes.begin ()),
                   std::insert_iterator< ldb_edge_set_t > (edges,edges.begin ()), 
-                  vtxdist,
                   serialPartitioner 
                 );
-
-    // only use ParMETIS_V3_GraphKway for the initial partitioning 
-    // this is when all vertices are on proc 0 
-    const bool nonDistributedMesh = ( ! serialPartitioner ) ? 
-      vtxdist[ 1 ] == vtxdist[ np ] : false;
-
-    // store information about real partitioner 
-    const bool realSerialPartitioner = serialPartitioner;
-    if( nonDistributedMesh && ! serialPartitioner ) 
-    {
-      serialPartitioner = true;
-
-      nodes.clear();
-      edges.clear();
-      delete [] vtxdist; 
-      vtxdist = 0;
-
-      // use METIS_PartGraphKway for initial distribution of the mesh 
-      mth = METIS_PartGraphKway;
-      
-      // redo the graph collect in the case that the mesh is not distributed 
-      graphCollect( mpa,
-                    std::insert_iterator< ldb_vertex_map_t > (nodes,nodes.begin ()),
-                    std::insert_iterator< ldb_edge_set_t > (edges,edges.begin ()), 
-                    vtxdist,
-                    serialPartitioner 
-                   );
-    }
 
     // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
     // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
@@ -679,17 +624,15 @@ namespace ALUGrid
     // im CSR Format daraus erstellt werden m"ussen.
     
     const int ned = edges.size ();
-
-    // for ParMETIS nodes is a local graph that could be empty 
-    const int nel = (serialPartitioner) ? nodes.size () : vtxdist[ np ];
+    const int nel = nodes.size ();
 
     // make sure every process got the same numbers 
     assert( nel == mpa.gmax( nel ) );
-    assert( ( serialPartitioner ) ? ( ned == mpa.gmax( ned ) ) : true );
+    assert( ned == mpa.gmax( ned ) );
     
     // do repartition if edges exist (for serial partitioners) or for SFC and 
     // parallel partitioners anyway  
-    if ( ! serialPartitioner || noEdgesInGraph || (ned > 0) ) 
+    if ( noEdgesInGraph || (ned > 0) ) 
     {
       if( serialPartitioner && (ned > 0) ) 
       {
@@ -721,11 +664,12 @@ namespace ALUGrid
           const GraphEdge& e = (*i);
           if (e.leftNode () != index) 
           {
-            assert ( e.leftNode () < nel);
-            * edge_pPos ++ = count;
+            assert ( serialPartitioner ? e.leftNode () < nel : true );
+            *edge_pPos = count;
+            ++edge_pPos ; 
             index = e.leftNode ();
           }
-          assert ( e.rightNode () < nel);
+          assert ( serialPartitioner ? e.rightNode () < nel : true );
           edge   [ count ] = e.rightNode ();
           edge_w [ count ] = e.weight ();
         }
@@ -743,14 +687,13 @@ namespace ALUGrid
       real_t * const vertex_w    = new real_t [nel];
 
       const int sizeNeu = (np > 1) ? nel : 0;
-      const int memFactor = ( usePartKway ) ? 2 : 3; // need extra memory for adaptive repartitioning
+      const int memFactor = 2 ; // need extra memory for adaptive repartitioning
       idx_t  * vertex_mem = new idx_t [ (memFactor * nel)  + sizeNeu];
       idx_t  * const vertex_wInt = vertex_mem; 
       idx_t  * part              = vertex_mem + nel; 
-
+      idx_t ncon = 1 ;
 
       real_t  ubvec[1] = {1.2}; // array of length ncon 
-      //int options[4] = {0, 1, 15, 1}; // these are the default values 
       real_t* tpwgts = new real_t [ np ]; // ncon * npart, but ncon = 1 
       
       const real_t value = 1.0/ ((real_t) np);
@@ -766,7 +709,7 @@ namespace ALUGrid
           const std::pair< const GraphVertex , int >& item = (*i);
           const int j = item.first.index ();
 
-          assert (0 <= j && j < nel);
+          assert ( serialPartitioner ? 0 <= j && j < nel : true );
           assert (0 <= item.second && item.second < np);
           part [j] = item.second;
           check [j] = 1;
@@ -787,8 +730,6 @@ namespace ALUGrid
           delete[] vertex_w;
           delete[] vertex_mem;
           delete[] edge_mem;
-          delete[] vtxdist;
-
           return false;
         }
       }
@@ -801,47 +742,6 @@ namespace ALUGrid
         // copy part to neu, this is needed by some of the partitioning tools  
         std::copy( part, part + nel, neu );
         
-        idx_t ncon = 1; // number of constraints per vertex, here only one 
-        if( ! serialPartitioner ) 
-        {
-          //cout << "ParMETIS partitioner \n";
-          idx_t numflag = 0; // C-style numbering, arrays start with 0  
-          idx_t edgecut;
-          idx_t wgtflag = 3; // means weights for vertices and edges 
-          idx_t options[4] = {0, 1, 15, 1}; // these are the default values 
-          idx_t nparts = np;
-
-          // for starting partitions use PartKway
-          if( usePartKway ) 
-          {
-            ALUGridParMETIS::CALL_ParMETIS_V3_PartKway(vtxdist, edge_p, edge, vertex_wInt, edge_w, 
-                                      & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
-                                      ubvec, options, & edgecut, neu, mpa );
-          }
-          else // otherwise do an adaptive repartition 
-          {
-            // recommmended by ParMETIS docu 
-            real_t itr = 1000.0;
-            //float itr = 10.0; // like dennis does 
-            
-            // vsize stores the size of the vertex with respect to
-            // redistribution costs (we use the same as vertex_wInt)
-            idx_t* vsize = neu + nel; 
-            assert ( vsize );
-            // for the moment use vertex weights 
-            std::copy( vertex_wInt, vertex_wInt + nel, vsize );
-
-            // adaptive repartition 
-            //cout << "Call AdaptiveRepart \n";
-            ALUGridParMETIS::CALL_ParMETIS_V3_AdaptiveRepart(vtxdist, edge_p, edge, vertex_wInt, vsize, edge_w, 
-                                            & wgtflag, & numflag, &ncon, & nparts, tpwgts, 
-                                            ubvec, &itr, options, & edgecut, neu, mpa );
-          }
-
-          // delete vtxdist and set zero (see below) 
-          delete[] vtxdist; vtxdist = 0;
-        }
-        else 
         {
           // if the number of graph vertices is smaller  
           // then the number of partitions 
@@ -926,7 +826,7 @@ namespace ALUGrid
         }
 
         // Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
-        change = (serialPartitioner ? !std::equal (neu, neu + nel, part) : true);
+        change = (serialPartitioner ? ! std::equal (neu, neu + nel, part) : true);
 
         // if partition vector is given fill it with the calculated partitioning 
         if( partition.size() > 0 ) 
@@ -953,7 +853,7 @@ namespace ALUGrid
           // to avoid a second communication during graphCollect 
           // this is only needed for the allgatherv communication 
           assert( _noPeriodicFaces == mpa.gmax( _noPeriodicFaces ) );
-          if( realSerialPartitioner && _noPeriodicFaces ) 
+          if( _noPeriodicFaces ) 
           {
             // resize vector 
             _graphSizes.resize( np );
@@ -996,7 +896,6 @@ namespace ALUGrid
       delete [] vertex_mem;
       delete [] edge_mem;
       delete [] tpwgts;
-      delete [] vtxdist;
     }
 
 
@@ -1032,8 +931,8 @@ namespace ALUGrid
         return "METIS_PartGraphKway";
       case METIS_PartGraphRecursive :
         return "METIS_PartGraphRecursive";
-      case ParMETIS_V3_AdaptiveRepart :
-        return "ParMETIS_V3_AdaptiveRepart";
+      case ZOLTAN_LB_Partition :
+        return "ZOLTAN_LB_Partition";
       default :
         return "unknown method";
     }
