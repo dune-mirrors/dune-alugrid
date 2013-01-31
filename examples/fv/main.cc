@@ -7,6 +7,7 @@
 /** dune (mpi, field-vector and grid type for dgf) **/
 #include <dune/common/mpihelper.hh>     
 #include <dune/common/fvector.hh>        
+#include <dune/common/timer.hh>        
 
 typedef Dune::GridSelector::GridType Grid;
 
@@ -22,6 +23,8 @@ typedef Dune::GridSelector::GridType Grid;
 #include "problem-transport.hh"
 #include "problem-ball.hh"
 #include "problem-euler.hh"
+
+#include "diagnostics.hh"
 
 /** type of pde to solve **/
 #if TRANSPORT
@@ -42,9 +45,13 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
 
   Grid &grid = *gridPtr;
   grid.loadBalance();
+  const bool verboseRank = grid.comm().rank() == 0 ;
+
+  Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1 );
 
   /* ... some global refinement steps */
-  std::cout << "globalRefine: " << startLevel << std::endl;
+  if( verboseRank ) 
+    std::cout << "globalRefine: " << startLevel << std::endl;
   grid.globalRefine( startLevel );
 
   /* get view to leaf grid */
@@ -104,6 +111,8 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
   double time = 0.0;
   while ( time < endTime ) 
   {
+    Dune::Timer overallTimer ;
+
 #if 0
     // store solution
     solOld.resize();
@@ -112,15 +121,21 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
     // update vector might not be of the right size if grid has changed
     update.resize();
 
+    Dune :: Timer solveTimer ;
     // apply the spacial operator
     double dt = scheme( time, solution, update );
     // multiply time step by CFL number
     dt *= cfl;
 
+    // stop time 
+    const double solveTime = solveTimer.elapsed(); 
+
+    Dune :: Timer commTimer ;
     // minimize time step over all processes
     dt = solution.gridView().comm().min( dt );
     // communicate update
     update.communicate();
+    const double commTime = commTimer.elapsed();
 
     // update solution
     solution.axpy( dt, update );
@@ -133,6 +148,11 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
     /* augment time */
     time += dt;
     ++step;
+
+    /* mark the grid for adaptation */
+    GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
+    size_t elements = scheme.mark( time, solution, gridMarker );
+
     /* check if data should be written */
     if( time >= saveStep )
     {
@@ -140,26 +160,51 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
       vtkOut.write( time );
       /* set saveStep for next save point */
       saveStep += saveInterval;
+
+      size_t overallElements = gridView.grid().comm().sum( elements );
+
+      /* print info about time, timestep size and counter */
+      if ( verboseRank )  
+      {
+        std::cout << "overallElements = " << overallElements ;
+        std::cout << "   maxLevel = " << grid.maxLevel();
+        std::cout << "   step = " << step;
+        std::cout << "   time = " << time;
+        std::cout << "   dt = " << dt;
+        std::cout << std::endl;
+      }
     }
-    /* mark the grid for adaptation */
-    GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
-    scheme.mark( time, solution, gridMarker );
+
     /* call adaptation algorithm */
     if( gridMarker.marked() )
       adaptation( solution );
+
     /* print info about time, timestep size and counter */
-    if (step % 1 == 0) 
+    if (step % 1000 == 0) 
     {
-      std::cout << "elements = " << gridView.indexSet().size( 0 );
+      std::cout << "elements = " << elements;
       std::cout << "   maxLevel = " << grid.maxLevel();
       std::cout << "   step = " << step;
       std::cout << "   time = " << time;
       std::cout << "   dt = " << dt;
       std::cout << std::endl;
     }
+
+    // write times to run file 
+    diagnostics.write( time, dt,                     // time and time step
+                       elements,                     // number of elements
+                       solution.size()/elements,     // number of dofs per element (max)
+                       solveTime,                    // time for operator evaluation 
+                       commTime,                     // communication time  
+                       adaptation.adaptationTime(),  // time for adaptation 
+                       adaptation.loadBalanceTime(), // time for load balance
+                       overallTimer.elapsed());      // time step overall time
   }           
   /* output final result */
   vtkOut.write( time );
+
+  // flush diagnostics 
+  diagnostics.flush();
 }
 /***************************************************
  ** main program with parameters:                 **

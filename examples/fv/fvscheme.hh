@@ -131,7 +131,7 @@ public:
    *
    *  \note The marker is responsible for limiting the grid depth.
    */
-  void
+  size_t 
   mark ( const double time, const Vector &solution, GridMarker< Grid > &marker ) const;
 
   /** \brief obtain the grid view for this scheme
@@ -363,12 +363,13 @@ inline double FiniteVolumeScheme< V, Model >
 }
 
 template< class V, class Model > 
-inline void FiniteVolumeScheme< V, Model >
+inline size_t FiniteVolumeScheme< V, Model >
   ::mark ( const double time, const Vector &solution, GridMarker<Grid> &marker ) const
 {
+  size_t elements = 0; 
   // grid traversal
   const Iterator endit = gridView().template end< 0 >();     
-  for( Iterator it = gridView().template begin< 0 >(); it != endit; ++it )
+  for( Iterator it = gridView().template begin< 0 >(); it != endit; ++it, ++elements )
   {
     const Entity &entity = *it;
 
@@ -436,6 +437,9 @@ inline void FiniteVolumeScheme< V, Model >
       marker.coarsen( entity );
     }
   } // end of loop over entities
+
+  // return number of elements 
+  return elements;
 }
 
 #endif // #ifndef FVSCHEME_HH
