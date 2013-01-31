@@ -191,15 +191,18 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
       std::cout << std::endl;
     }
 
-    // write times to run file 
-    diagnostics.write( time, dt,                     // time and time step
+    {
+      const size_t maxDofsPerElem = (elements > 0) ? (solution.size()/elements) : 0;
+      // write times to run file 
+      diagnostics.write( time, dt,                   // time and time step
                        elements,                     // number of elements
-                       solution.size()/elements,     // number of dofs per element (max)
+                       maxDofsPerElem,               // number of dofs per element (max)
                        solveTime,                    // time for operator evaluation 
                        commTime + adaptation.communicationTime(), // communication time  
                        adaptation.adaptationTime(),  // time for adaptation 
                        adaptation.loadBalanceTime(), // time for load balance
                        overallTimer.elapsed());      // time step overall time
+    }
   }           
   /* output final result */
   vtkOut.write( time );
