@@ -41,7 +41,8 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
 {
   /* Grid construction ... */
   std::string name = model.problem().gridFile( "./" );
-  Dune::GridPtr<Grid> gridPtr(name);
+  // create grid pointer and release to free memory of GridPtr
+  Grid* gridPtr = Dune::GridPtr<Grid>(name).release() ;
 
   Grid &grid = *gridPtr;
   grid.loadBalance();
@@ -205,6 +206,9 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
 
   // flush diagnostics 
   diagnostics.flush();
+
+  // delete grid 
+  delete gridPtr ;
 }
 /***************************************************
  ** main program with parameters:                 **
