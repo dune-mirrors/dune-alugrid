@@ -71,6 +71,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
   /* create VTK writer for data sequqnce */
   Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", "./", ".", Dune::VTK::nonconforming );
   VTKData< DataType >::addTo( solution, vtkOut );
+  VTKData< DataType >::addPartitioningData( grid.comm().rank(), vtkOut );
 
   /* create adaptation method */
   typedef LeafAdaptation< Grid > AdaptationType;
