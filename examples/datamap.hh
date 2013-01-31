@@ -4,8 +4,6 @@
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/datahandleif.hh>
 
-#include "lbdatahandle.hh"
-
 // DataMap::LoadBalanceHandle
 // --------------------------
  /** \brief the communication data handle for load balancing
