@@ -175,18 +175,22 @@ namespace ALUGrid
     // compress memory of given grid and return new object (holding equivalent information)
     static GitterDunePll* compress( GitterDunePll* grd ) 
     {
-      MpAccessLocal& mpa = grd->mpAccess (); 
-      // backup stream 
-      std::stringstream backup;
-      // backup grid 
-      grd->duneBackup( backup );
-      delete grd; grd = 0;
-      // free allocated memory (only works if all grids are deleted at this point)
-      MyAlloc::clearFreeMemory ();
-      // restore saved grid 
-      grd = new GitterDunePll( backup, mpa );
-      assert( grd );
-      grd->duneRestore( backup );
+      // only do the backup-restore thing if dlmalloc is enabled
+      if( MyAlloc :: ALUGridUsesDLMalloc ) 
+      {
+        MpAccessLocal& mpa = grd->mpAccess (); 
+        // backup stream 
+        std::stringstream backup;
+        // backup grid 
+        grd->duneBackup( backup );
+        delete grd; grd = 0;
+        // free allocated memory (only works if all grids are deleted at this point)
+        MyAlloc::clearFreeMemory ();
+        // restore saved grid 
+        grd = new GitterDunePll( backup, mpa );
+        assert( grd );
+        grd->duneRestore( backup );
+      }
       return grd;
     }
 

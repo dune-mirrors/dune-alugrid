@@ -188,8 +188,11 @@ namespace Dune
         DUNE_THROW( GridError, "Unable to create " << gridname << " from '"
                     << filename << "'." );
       }
-      else 
-        dwarn << "WARNING:  P[" << rank << "]: Creating empty grid!" << std::endl;
+      // don't create messages in every proc, this does not work for many cores.
+      //else 
+      //{
+      //  dwarn << "WARNING:  P[" << rank << "]: Creating empty grid!" << std::endl;
+      //}
 
       // return empty grid on all other processes 
       return new Grid( communicator );

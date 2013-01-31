@@ -1,11 +1,9 @@
 AC_DEFUN([DUNE_ALUGRID_CHECKS],[
-  dnl check for the ParMETIS library
-  AC_REQUIRE([DUNE_PATH_PARMETIS])
-  dnl check for the METIS library (check needs to after ParMETIS check)
-  AC_REQUIRE([IMMDX_LIB_METIS])
-
   dnl check for ZOLTAN library 
   AC_REQUIRE([DUNE_PATH_ZOLTAN])
+
+  dnl check for the METIS library (check needs to after ParMETIS check)
+  AC_REQUIRE([IMMDX_LIB_METIS])
 
   dnl add to global list
   dnl DUNE_ADD_ALL_PKG([PARMETIS], [\${PARMETIS_CPPFLAGS}],

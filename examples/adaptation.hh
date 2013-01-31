@@ -90,6 +90,7 @@ struct GridMarker
   {
     return grid_.getMark( entity );
   }
+
   /** \brief returns true if any entity was marked for refinement 
    */
   bool marked() 
@@ -139,7 +140,10 @@ public:
    *  \param grid   the grid to be adapted
    */
   LeafAdaptation ( Grid &grid )
-  : grid_( grid )
+  : grid_( grid ),
+    adaptTime_( 0.0 ),
+    lbTime_( 0.0 ),
+    commTime_( 0.0 )
   {}
 
   /** \brief main method performing the adaptation and
@@ -151,6 +155,13 @@ public:
   **/
   template< class Vector >
   void operator() ( Vector &solution );
+
+  //! return time spent for the last adapation in sec 
+  double adaptationTime() const { return adaptTime_; }
+  //! return time spent for the last load balancing in sec
+  double loadBalanceTime() const { return lbTime_; }
+  //! return time spent for the last communication in sec
+  double communicationTime() const { return commTime_; }
 
 private:
   /** \brief do restriction of data on leafs which might vanish
@@ -171,6 +182,10 @@ private:
   void hierarchicProlong ( const Entity &entity, DataMap &dataMap ) const;
 
   Grid &grid_;
+
+  double adaptTime_;
+  double lbTime_;
+  double commTime_;
 };
 
 template< class Grid >
@@ -179,6 +194,12 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
 {
   if (Dune :: Capabilities :: isCartesian<Grid> :: v)
     return;
+
+  adaptTime_ = 0.0;
+  lbTime_    = 0.0;
+  commTime_  = 0.0;
+  Dune :: Timer adaptTimer ; 
+
   // copy complete solution vector to map
   typedef typename Vector::GridView GridView;
   typedef typename GridView
@@ -225,7 +246,10 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
       hierarchicProlong<Vector>( *it, container );
   }
 
-  // re-balance grid
+  adaptTime_ = adaptTimer.elapsed();
+
+  Dune :: Timer lbTimer ;
+  // re-balance grid 
   LoadBalanceHandle<Container> loadBalanceHandle( container ) ;
 #if 0
   LoadBalanceDH< Grid, LoadBalanceHandle<Container>, Container > lbh( grid_, loadBalanceHandle );
@@ -237,6 +261,7 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   typedef Dune::CommDataHandleIF< LoadBalanceHandle<Container>, Container > DataHandleInterface;
   grid_.loadBalance( (DataHandleInterface&)(loadBalanceHandle) );
 #endif
+
 
   // cleanup adaptation markers 
   grid_.postAdapt();
@@ -255,8 +280,12 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
       solution.setLocalDofVector( entity, ccontainer[ entity ] );
     }
   }
+  lbTime_ = lbTimer.elapsed();
+
+  Dune::Timer commTimer ;
   // copy data to ghost entities
   solution.communicate();
+  commTime_ = commTimer.elapsed();
 }
 
 template< class Grid >

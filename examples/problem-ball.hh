@@ -28,7 +28,8 @@ struct BallData
   std::string gridFile ( const std::string &path ) const
   { 
     std::ostringstream dgfFileName;
-    dgfFileName << path << "/unitcube" << dimDomain << "d.dgf";
+    dgfFileName << path << "/cube_hc_512.hexa";
+   // unitcube" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
 

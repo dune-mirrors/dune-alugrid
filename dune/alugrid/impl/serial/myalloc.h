@@ -6,9 +6,10 @@
 
 #include <cstddef>
 
+//#define ALUGRID_USES_DLMALLOC 
+
 namespace ALUGrid
 {
-
 #ifndef DONT_USE_ALUGRID_ALLOC 
 
   class MyAlloc
@@ -24,7 +25,14 @@ namespace ALUGrid
     // if true objects are not free, only pushed to stack 
     static bool _freeAllowed ;
     
-    public :
+  public :
+    static const bool ALUGridUsesDLMalloc = 
+#ifdef ALUGRID_USES_DLMALLOC
+      true ;
+#else 
+      false ;
+#endif
+
       class Initializer 
       {
         // initializer versucht, die statischen Objekte der Speicherverwaltung
@@ -75,6 +83,9 @@ namespace ALUGrid
   class MyAlloc 
   {
   public:  
+    // this is false here anyway 
+    static const bool ALUGridUsesDLMalloc = false ;
+
     // if called, freeing objects is allowed again 
     inline static void unlockFree(void *) {}
 

@@ -763,7 +763,7 @@ namespace Dune
       LBHandle lbHandle( *this, dataHandle );
       return loadBalance( lbHandle );
     }
- 
+
     /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
     int ghostSize (int level, int codim) const; 
 
@@ -788,6 +788,10 @@ namespace Dune
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, 
         InterfaceType iftype, CommunicationDirection dir) const;
 
+  protected:  
+    // load balance and compress memory if possible 
+    void finalizeGridCreation();
+ 
   private:
     typedef ALU3DSPACE GatherScatter GatherScatterType;
 

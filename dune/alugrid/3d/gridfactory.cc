@@ -432,11 +432,9 @@ namespace Dune
       grid->duneNotifyMacroGridChanges();
     }
 
-    // reset wasRefined flags 
-    grid->postAdapt();
-    // update additional information on grid 
-    grid->calcExtras();
-
+    // load balance the grid and free memory if possible 
+    grid->finalizeGridCreation();
+    
     return grid;
   }
 

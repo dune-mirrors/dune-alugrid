@@ -25,7 +25,7 @@ public:
 
 private:
   // data map 
-  mutable Container &data_;
+  Container &data_;
 
 public:
   //! create DiscreteOperator with a LocalOperator 
