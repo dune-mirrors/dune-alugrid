@@ -659,6 +659,20 @@ namespace Dune
     return ALU3dGridCommHelper< elType, Comm >::loadBalance( *this, data );
   }
 
+  template< ALU3dGridElementType elType, class Comm >
+  inline void ALU3dGrid< elType, Comm >::finalizeGridCreation()
+  {
+    // distribute the grid 
+    loadBalance();
+
+    // free memory by reinitializing the grid 
+    mygrid_ = GitterImplType :: compress( mygrid_ );
+
+    // reset wasRefined flags 
+    postAdapt();
+    // update additional information on grid 
+    calcExtras();
+  }
 
   // communicate level data   
   template< ALU3dGridElementType elType, class Comm >

@@ -10,9 +10,11 @@
 #include <set>
 #include <stack>
 
-//#define ONLY_MSPACES 1 
-
 #include "myalloc.h"
+
+#ifdef ALUGRID_USES_DLMALLOC
+#define ONLY_MSPACES 1 
+#endif 
 
 namespace ALUGrid
 {
