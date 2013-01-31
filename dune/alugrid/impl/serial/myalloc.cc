@@ -1,8 +1,5 @@
 #include <config.h>
 
-#ifndef DONT_USE_ALUGRID_ALLOC
-#warning "Using ALUGrid's internal memory management!"
-
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
@@ -11,6 +8,9 @@
 #include <stack>
 
 #include "myalloc.h"
+
+#ifndef DONT_USE_ALUGRID_ALLOC
+#warning "Using ALUGrid's internal memory management!"
 
 #ifdef ALUGRID_USES_DLMALLOC
 #define ONLY_MSPACES 1 
