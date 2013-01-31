@@ -134,7 +134,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
     time += dt;
     ++step;
     /* check if data should be written */
-    if( time >= saveStep )
+    if( 1 || time >= saveStep )
     {
       /* visualize with VTK */
       vtkOut.write( time );
@@ -145,7 +145,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
     GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
     scheme.mark( time, solution, gridMarker );
     /* call adaptation algorithm */
-    if( gridMarker.marked() )
+    // if( gridMarker.marked() )
       adaptation( solution );
     /* print info about time, timestep size and counter */
     if (step % 1 == 0) 

@@ -572,6 +572,47 @@ namespace ALUGrid
     {
       dc_.compress();
     } 
+
+    // return true if user defined partitioning methods should be used 
+    bool userDefinedPartitioning () const 
+    {
+      return dc_.userDefinedPartitioning();
+    }
+    // return true if user defined load balancing weights are provided
+    bool userDefinedLoadWeights () const 
+    { 
+      return dc_.userDefinedLoadWeights();
+    }
+    // returns true if user defined partitioning needs to be readjusted 
+    bool repartition () const 
+    { 
+      if ( userDefinedPartitioning() )
+        return dc_.repartition();
+      return false;
+    }
+    // return load weight of given element 
+    int loadWeight( const HElementType &elem ) const 
+    { 
+      if ( userDefinedLoadWeights() )
+      {
+        assert( elem.level () == 0 );
+        realEntity_.setElement(elem);
+        return dc_.loadWeight(entity_);
+      }
+      return 1; 
+    }
+    // return destination (i.e. rank) where the given element should be moved to 
+    // this needs the methods userDefinedPartitioning to return true
+    int destination( const HElementType &elem ) const 
+    { 
+      if ( userDefinedPartitioning() )
+      {
+        assert( elem.level () == 0 );
+        realEntity_.setElement(elem);
+        return dc_.destination(entity_);
+      }
+      return -1; 
+    }
   };
 
   /////////////////////////////////////////////////////////////////

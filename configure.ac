@@ -29,8 +29,6 @@ AC_CONFIG_FILES([
   lib/Makefile
   m4/Makefile
   examples/Makefile
-  examples/fv/Makefile
-  examples/ball/Makefile
   misc/Makefile
   misc/macrogrids/Makefile
   misc/versioncheck/Makefile

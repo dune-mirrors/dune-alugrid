@@ -4,12 +4,13 @@
 #include <dune/alugrid/3d/datahandle.hh>
 
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/common/bartonnackmanifcheck.hh>
 
 namespace Dune
 {
 
   template< class Grid, class DataHandleImpl, class Data >
-  class ALUGridLoadBalanceDataHandle
+  class ALUGridLoadBalanceOldDataHandle
   {
     typedef typename Grid :: Traits :: HierarchicIterator HierarchicIterator;
 
@@ -35,7 +36,7 @@ namespace Dune
     DataHandle &dataHandle_;
 
   public:
-    ALUGridLoadBalanceDataHandle ( const Grid &grid, DataHandle &dataHandle )
+    ALUGridLoadBalanceOldDataHandle ( const Grid &grid, DataHandle &dataHandle )
     : grid_( grid ),
       dataHandle_( dataHandle )
     {}
@@ -58,6 +59,33 @@ namespace Dune
       const HierarchicIterator end = element.hend( maxLevel );
       for( HierarchicIterator it = element.hbegin( maxLevel ); it != end; ++it )
         xtractElementData( stream, *it );
+    }
+
+    // return true if user defined partitioning methods should be used 
+    bool userDefinedPartitioning () const 
+    {
+      return false;
+    }
+    // return true if user defined load balancing weights are provided
+    bool userDefinedLoadWeights () const 
+    { 
+      return false;
+    }
+    // returns true if user defined partitioning needs to be readjusted 
+    bool repartition () const 
+    { 
+      return false;
+    }
+    // return load weight of given element 
+    int loadWeight( const Element &element ) const 
+    { 
+      return 1;
+    }
+    // return destination (i.e. rank) where the given element should be moved to 
+    // this needs the methods userDefinedPartitioning to return true
+    int destination( const Element &element ) const 
+    { 
+      return -1;
     }
 
     void compress ()
@@ -143,6 +171,139 @@ namespace Dune
     }
   };
 
+  template <class DataHandleImpl, class DataTypeImpl>
+  class LoadBalanceDataHandleIF : public DataHandleImpl
+  {
+  protected:  
+    // one should not create an explicit instance of this inteface object
+    LoadBalanceDataHandleIF() {} 
+
+  public:
+    typedef typename DataHandleImpl::Entity Entity;
+    //! data type of data to communicate 
+    typedef DataTypeImpl DataType; 
+
+    bool userDefinedPartitioning () const 
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().userDefinedPartitioning()));
+      return asImp().userDefinedPartitioning();
+    }
+    // return true if user defined load balancing weights are provided
+    bool userDefinedLoadWeights () const 
+    { 
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().userDefinedPartitioning()));
+      return asImp().userDefinedLoadWeights();
+    }
+    // returns true if user defined partitioning needs to be readjusted 
+    bool repartition () const 
+    { 
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().repartition()));
+      return asImp().repartition();
+    }
+    // return load weight of given element 
+    int loadWeight( const Entity &element ) const 
+    { 
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().loadWeight(element)));
+      return asImp().loadWeight( element );
+    }
+    // return destination (i.e. rank) where the given element should be moved to 
+    // this needs the methods userDefinedPartitioning to return true
+    int destination( const Entity &element ) const 
+    { 
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().destination(element)));
+      return asImp().destination( element );
+    }
+
+    // from CommDataHandleIF
+  public:
+    bool contains (int dim, int codim) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(dim,codim)));
+      return asImp().contains(dim,codim);
+    }
+    bool fixedsize (int dim, int codim) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().fixedsize(dim,codim)));
+      return asImp().fixedsize(dim,codim); 
+    }
+    template<class EntityType>
+    size_t size (const EntityType& e) const
+    { 
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().size(e)));
+      return asImp().size(e);
+    }
+    template<class MessageBufferImp, class EntityType>
+    void gather (MessageBufferImp& buff, const EntityType& e) const
+    { 
+      MessageBufferIF<MessageBufferImp> buffIF(buff);
+    }
+    template<class MessageBufferImp, class EntityType>
+    void scatter (MessageBufferImp& buff, const EntityType& e, size_t n)
+    { 
+      MessageBufferIF<MessageBufferImp> buffIF(buff);
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().scatter(buffIF,e,n)));
+    }
+
+  private:
+    //!  Barton-Nackman trick 
+    DataHandleImpl& asImp () {return static_cast<DataHandleImpl &> (*this);}
+    //!  Barton-Nackman trick 
+    const DataHandleImpl& asImp () const 
+    {
+      return static_cast<const DataHandleImpl &>(*this);
+    }
+  }; // end class LoadBalanceDataHandleIF 
+
+  template< class Grid, class DataHandleImpl, class Data >
+  class ALUGridLoadBalanceDataHandle : public ALUGridLoadBalanceOldDataHandle<Grid,DataHandleImpl,Data>
+  {
+  public:
+    typedef LoadBalanceDataHandleIF< DataHandleImpl, Data > DataHandle;
+    typedef CommDataHandleIF< DataHandleImpl, Data > CommDataHandle;
+    typedef typename DataHandleImpl::Entity Entity;
+    typedef ALUGridLoadBalanceOldDataHandle<Grid,DataHandleImpl,Data> Base;
+
+  private:
+    const Grid &grid_;
+    DataHandle &dataHandle_;
+
+  public:
+    ALUGridLoadBalanceDataHandle ( const Grid &grid, DataHandle &dataHandle )
+    : Base(grid, (CommDataHandle&)(dataHandle) ),
+      grid_( grid ),
+      dataHandle_( dataHandle )
+    {}
+
+    // return true if user defined partitioning methods should be used 
+    bool userDefinedPartitioning () const 
+    {
+      return dataHandle_.userDefinedPartitioning();
+    }
+    // return true if user defined load balancing weights are provided
+    bool userDefinedLoadWeights () const 
+    { 
+      return dataHandle_.userDefinedLoadWeights();
+    }
+    // returns true if user defined partitioning needs to be readjusted 
+    bool repartition () const 
+    { 
+      return dataHandle_.repartition();
+    }
+    // return load weight of given element 
+    int loadWeight( const Entity &element ) const 
+    { 
+      return dataHandle_.loadWeight( element );
+    }
+    // return destination (i.e. rank) where the given element should be moved to 
+    // this needs the methods userDefinedPartitioning to return true
+    int destination( const Entity &element ) const 
+    { 
+      return dataHandle_.destination( element );
+    }
+  };
+
+#undef CHECK_INTERFACE_IMPLEMENTATION
+#undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 }
 
 #endif

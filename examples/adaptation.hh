@@ -225,10 +225,18 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
       hierarchicProlong<Vector>( *it, container );
   }
 
-  // re-balance grid 
+  // re-balance grid
   LoadBalanceHandle<Container> loadBalanceHandle( container ) ;
+#if 0
+  LoadBalanceDH< Grid, LoadBalanceHandle<Container>, Container > lbh( grid_, loadBalanceHandle );
+  grid_.loadBalance( lbh );
+#elif 1
+  typedef Dune::LoadBalanceDataHandleIF< LoadBalanceHandle<Container>, Container > DataHandleInterface;
+  grid_.loadBalance( (DataHandleInterface&)(loadBalanceHandle) );
+#else 
   typedef Dune::CommDataHandleIF< LoadBalanceHandle<Container>, Container > DataHandleInterface;
   grid_.loadBalance( (DataHandleInterface&)(loadBalanceHandle) );
+#endif
 
   // cleanup adaptation markers 
   grid_.postAdapt();
@@ -256,7 +264,6 @@ template< class Vector, class DataMap >
 inline void LeafAdaptation< Grid >
   ::hierarchicRestrict ( const Entity &entity, DataMap &dataMap ) const
 {
-  const DataMap &cdataMap = dataMap;
   // for leaf entities just copy the data to the data map
   if( !entity.isLeaf() )
   {
@@ -277,7 +284,6 @@ inline void LeafAdaptation< Grid >
     // if( doRestrict )
       Vector::restrictLocal( entity, dataMap );
   }
-  assert( cdataMap[entity][0] > 1e-8 );
 }
 
 template< class Grid >

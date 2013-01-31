@@ -18,18 +18,18 @@ namespace ALUGrid
     virtual ~GatherScatter () {}
 
     // return true if user defined partitioning methods should be used 
-    virtual bool userDefinedPartitioning () const { return false ; }
+    virtual bool userDefinedPartitioning () const { assert(false); abort(); return false ; }
     // return true if user defined load balancing weights are provided
-    virtual bool userDefinedLoadWeights () const { return false ; }
+    virtual bool userDefinedLoadWeights () const { assert(false); abort(); return false ; }
     // returns true if user defined partitioning needs to be readjusted 
-    virtual bool repartition () const { return false; }
+    virtual bool repartition () const { assert(false); abort(); return false; }
 
     // return load weight of given element 
-    virtual int loadWeight( const Gitter::helement_STI &elem ) const { return 1; }
+    virtual int loadWeight( const Gitter::helement_STI &elem ) const { assert(false); abort(); return 1; }
 
     // return destination (i.e. rank) where the given element should be moved to 
-    // this needs the methods userDefinedPartitioning to return false 
-    virtual int destination( const Gitter::helement_STI &elem ) const { return -1; }
+    // this needs the methods userDefinedPartitioning to return true
+    virtual int destination( const Gitter::helement_STI &elem ) const { assert(false); abort(); return -1; }
 
     virtual bool contains(int,int) const = 0;
 
