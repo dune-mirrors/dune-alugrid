@@ -7,6 +7,7 @@
 #include <cstddef>
 
 //#define ALUGRID_USES_DLMALLOC 
+//#define DONT_USE_ALUGRID_ALLOC 
 
 namespace ALUGrid
 {
