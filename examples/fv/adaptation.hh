@@ -90,6 +90,7 @@ struct GridMarker
   {
     return grid_.getMark( entity );
   }
+
   /** \brief returns true if any entity was marked for refinement 
    */
   bool marked() 
@@ -141,7 +142,8 @@ public:
   LeafAdaptation ( Grid &grid )
   : grid_( grid ),
     adaptTime_( 0.0 ),
-    lbTime_( 0.0 )
+    lbTime_( 0.0 ),
+    commTime_( 0.0 )
   {}
 
   /** \brief main method performing the adaptation and
@@ -158,6 +160,8 @@ public:
   double adaptationTime() const { return adaptTime_; }
   //! return time spent for the last load balancing in sec
   double loadBalanceTime() const { return lbTime_; }
+  //! return time spent for the last communication in sec
+  double communicationTime() const { return commTime_; }
 
 private:
   /** \brief do restriction of data on leafs which might vanish
@@ -181,6 +185,7 @@ private:
 
   double adaptTime_;
   double lbTime_;
+  double commTime_;
 };
 
 template< class Grid >
@@ -192,6 +197,7 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
 
   adaptTime_ = 0.0;
   lbTime_    = 0.0;
+  commTime_  = 0.0;
   Dune :: Timer adaptTimer ; 
 
   // copy complete solution vector to map
@@ -266,10 +272,12 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
       solution.setLocalDofVector( entity, ccontainer[ entity ] );
     }
   }
+  lbTime_ = lbTimer.elapsed();
+
+  Dune::Timer commTimer ;
   // copy data to ghost entities
   solution.communicate();
-
-  lbTime_ = lbTimer.elapsed();
+  commTime_ = commTimer.elapsed();
 }
 
 template< class Grid >

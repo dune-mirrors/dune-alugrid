@@ -195,7 +195,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
                        elements,                     // number of elements
                        solution.size()/elements,     // number of dofs per element (max)
                        solveTime,                    // time for operator evaluation 
-                       commTime,                     // communication time  
+                       commTime + adaptation.communicationTime(), // communication time  
                        adaptation.adaptationTime(),  // time for adaptation 
                        adaptation.loadBalanceTime(), // time for load balance
                        overallTimer.elapsed());      // time step overall time
