@@ -8,9 +8,9 @@
 // --------------------------
  /** \brief the communication data handle for load balancing
  */
-template< class Container >
+template< class Grid, class Container >
 class LoadBalanceHandle
-: public Dune::CommDataHandleIF< LoadBalanceHandle<Container>, Container >
+: public Dune::CommDataHandleIF< LoadBalanceHandle<Grid,Container>, Container >
 {
   typedef LoadBalanceHandle This;
   typedef Dune::CommDataHandleIF< This, Container > Base;
@@ -24,11 +24,13 @@ public:
 private:
   // data map 
   Container &data_;
+  const Grid &grid_;
 
 public:
   //! create DiscreteOperator with a LocalOperator 
-  LoadBalanceHandle ( Container &data )
+  LoadBalanceHandle ( const Grid &grid, Container &data )
   : data_( data )
+  , grid_(grid)
   {}
 
   //! see documentation in Dune::CommDataHandleIF 
@@ -121,8 +123,7 @@ public:
     double phi=arg(std::complex<double>(w[0],w[1]));
     if (w[1]<0) phi+=2.*M_PI;
     phi += angle_;
-    int p = int(phi) % 6;
-    // int p = int(w[0]*2.);
+    int p = int(phi) % grid_.comm().size();
     return p;
   }
   void compress () {}
@@ -130,7 +131,7 @@ private:
   static double angle_;
 };
 
-template< class Container >
-double LoadBalanceHandle<Container>::angle_ = 0;
+template< class Grid, class Container >
+double LoadBalanceHandle<Grid,Container>::angle_ = 0;
 
 #endif // #ifndef DATAMAP_HH
