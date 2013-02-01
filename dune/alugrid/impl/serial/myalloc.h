@@ -6,7 +6,7 @@
 
 #include <cstddef>
 
-//#define ALUGRID_USES_DLMALLOC 
+#define ALUGRID_USES_DLMALLOC 
 //#define DONT_USE_ALUGRID_ALLOC 
 
 namespace ALUGrid
@@ -57,6 +57,10 @@ namespace ALUGrid
       // try to make free memory available for the system 
       static void clearFreeMemory () ;
 
+      // return size of allocated memory 
+      static size_t allocatedMemory () ;
+
+
     protected :
       MyAlloc () {}
      ~MyAlloc () {}
@@ -95,6 +99,10 @@ namespace ALUGrid
 
     // try to make free memory available for the system 
     inline static void clearFreeMemory () {}
+
+    // return size of allocated memory 
+    inline static size_t allocatedMemory () { return 0; }
+
   };
 
 #endif // #else //  #ifndef DONT_USE_ALUGRID_ALLOC 

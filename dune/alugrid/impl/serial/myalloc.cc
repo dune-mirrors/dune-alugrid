@@ -186,7 +186,7 @@ namespace ALUGrid
 
 #if ONLY_MSPACES
     assert( s > 0 );
-    ++ ALUGridMemSpaceAllocated;
+    ALUGridMemSpaceAllocated += s ;
     return mspace_malloc( ALUGridMemorySpace, s );
 #else
     assert(s > 0);
@@ -224,7 +224,7 @@ namespace ALUGrid
 #if ONLY_MSPACES
    // defined in dlmalloc.c 
    mspace_free( ALUGridMemorySpace, ptr );
-   -- ALUGridMemSpaceAllocated;
+   ALUGridMemSpaceAllocated -= s ;
 #else  
     // get stack for size s 
     AllocEntry & fs ((*freeStore) [s]);
@@ -262,6 +262,16 @@ namespace ALUGrid
       destroy_mspace( ALUGridMemorySpace );
       ALUGridMemorySpace = create_mspace( 0, 0 );
     }
+#endif
+  }
+
+  // operator delete, put pointer to stack 
+  size_t MyAlloc::allocatedMemory () 
+  {
+#if ONLY_MSPACES
+    return ALUGridMemSpaceAllocated ;
+#else 
+    return 0;
 #endif
   }
 
