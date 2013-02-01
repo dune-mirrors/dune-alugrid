@@ -2,6 +2,7 @@
 #define ALUGRID_SFC_H_INCLUDED
 
 #include <cmath>
+#include <vector>
 
 namespace ALUGridMETIS
 {
@@ -24,27 +25,45 @@ namespace ALUGridMETIS
     meanLoad /= double(nPart);
 
     // round the average load to get a threshold value 
-    const double meanThreshold = std::round( meanLoad );
+    double meanThreshold = std::round( meanLoad );
 
-    double load = 0;
-    idxtype rank = 0;
-    const idxtype lastRank = nPart - 1 ;
-    for( idxtype i = 0; i < nCells; ++i )
+    bool emptyProc = true ;
+    bool readjust = false ;
+    while ( emptyProc ) 
     {
-      double nextLoad = load + weights[ i ] ;
-      if( load > 0 && ( nextLoad > meanThreshold ) )           
+      double load = 0;
+      idxtype rank = 0;
+      const idxtype lastRank = nPart - 1 ;
+      for( idxtype i = 0; i < nCells; ++i )
       {
-        // only increase rank if not already the last rank 
-        if( rank < lastRank ) ++rank ;
-        load = 0;
+        double nextLoad = load + weights[ i ] ;
+        if( load > 0 && ( nextLoad > meanThreshold ) )           
+        {
+          // only increase rank if not already the last rank 
+          if( rank < lastRank ) ++rank ;
+          load = 0;
+        }
+
+        part[ i ] = rank ;
+        load += weights[ i ];
       }
 
-      part[ i ] = rank ;
-      load += weights[ i ];
+      // the last element should belong to the last proc,
+      // otherwise the partition is not balanced 
+      if( part[ nCells-1 ] == lastRank )
+      {
+        emptyProc = false ;
+      }
+      else 
+      {
+        readjust = true ;
+        // lower threshold and do it again 
+        meanThreshold *= 0.95;
+      }
     }
 
-    /* 
-    if( myRank == 0 ) 
+    /*
+    if( myRank == 0 && readjust ) 
     {
       // vector of loads 
       std::vector< double > loads( nPart, 0.0 );
@@ -53,7 +72,8 @@ namespace ALUGridMETIS
         loads[ part[ i ] ] += weights[ i ];
       }
 
-      std::cout << "Loads: " << std::endl;
+      std::cout << "OrgLoad: mean = " << std::round( meanLoad ) << std::endl;
+      std::cout << "Loads: mean = " << meanThreshold << std::endl;
       for( idxtype i = 0; i<nPart; ++i )
       {
         std::cout << "P[ " << i << " ] = " << loads[ i ] << std::endl;
