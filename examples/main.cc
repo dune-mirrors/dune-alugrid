@@ -37,7 +37,7 @@ typedef EulerModel< Grid::dimensionworld > ModelType;
 
 // method
 // ------
-void method ( const ModelType &model, int startLevel, int maxLevel )
+void method ( const ModelType &model, int startLevel, int maxLevel, const char* outpath )
 {
   /* Grid construction ... */
   std::string name = model.problem().gridFile( "./" );
@@ -68,10 +68,16 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
   /* create finite volume and ODE solver */
   typedef FiniteVolumeScheme< DataType, ModelType > FVScheme;
   FVScheme scheme( gridView, model );
+
   /* create VTK writer for data sequqnce */
-  Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", "./", ".", Dune::VTK::nonconforming );
-  VTKData< DataType >::addTo( solution, vtkOut );
-  VTKData< DataType >::addPartitioningData( grid.comm().rank(), vtkOut );
+  std::string outPath( outpath );
+  const bool writeOutput = ( outPath != "none" ) ;
+  Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", outPath, ".", Dune::VTK::nonconforming );
+  if( writeOutput ) 
+  {
+    VTKData< DataType >::addTo( solution, vtkOut );
+    VTKData< DataType >::addPartitioningData( grid.comm().rank(), vtkOut );
+  }
 
   /* create adaptation method */
   typedef LeafAdaptation< Grid > AdaptationType;
@@ -88,8 +94,12 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
     // initialize solution for new grid
     solution.initialize( model.problem() );
   }
-  /* output the initial grid and the solution */
-  vtkOut.write( 0.0 );
+
+  if( writeOutput ) 
+  {
+    /* output the initial grid and the solution */
+    vtkOut.write( 0.0 );
+  }
 
   /* prepare for time stepping scheme */
   /* final time for simulation */
@@ -156,10 +166,13 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
     size_t elements = scheme.mark( time, solution, gridMarker );
 
     /* check if data should be written */
-    if( 1 || time >= saveStep )
+    if( time >= saveStep )
     {
-      /* visualize with VTK */
-      vtkOut.write( time );
+      if( writeOutput ) 
+      {
+        /* visualize with VTK */
+        vtkOut.write( time );
+      }
       /* set saveStep for next save point */
       saveStep += saveInterval;
 
@@ -205,11 +218,15 @@ void method ( const ModelType &model, int startLevel, int maxLevel )
                          overallTimer.elapsed());      // time step overall time
     }
   }           
-  /* output final result */
-  vtkOut.write( time );
 
-  // flush diagnostics 
-  diagnostics.flush();
+  if( writeOutput ) 
+  {
+    /* output final result */
+    vtkOut.write( time );
+
+    // flush diagnostics 
+    diagnostics.flush();
+  }
 
   // delete grid 
   delete gridPtr ;
@@ -239,7 +256,9 @@ try
   /* get level to use for computationa */
   const int startLevel = (argc > 2 ? atoi( argv[ 2 ] ) : 0);
   const int maxLevel = (argc > 3 ? atoi( argv[ 3 ] ) : startLevel);
-  method( model, startLevel, maxLevel );
+
+  const char* path = (argc > 4) ? argv[ 4 ] : "./";
+  method( model, startLevel, maxLevel, path );
 
   /* done */
   return 0;
