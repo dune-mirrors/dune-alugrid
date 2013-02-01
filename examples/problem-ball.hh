@@ -54,7 +54,7 @@ struct BallData
     y[1] = std::sin(time*2.*M_PI)*r0_;
     xx -= y;
     double r = xx.two_norm();
-    return ( (r>0.1 && r<0.2)? 1 : 0 );
+    return ( (r>0.15 && r<0.25)? 1 : 0 );
   } 
 
   //! \copydoc ProblemData::refineTol

@@ -7,7 +7,6 @@
 #include <dune/grid/common/gridenums.hh>
 
 #include "adaptation.hh"
-#include "p1function.hh"
 
 // FiniteVolumeScheme
 // ------------------
@@ -88,7 +87,6 @@ public:
   FiniteVolumeScheme ( const GridView &gridView, const Model &model )
   : gridView_( gridView )
     , model_( model )
-    // , grad_( gridView )
   {}
 
   /** \brief compute the update vector for one time step
@@ -103,25 +101,6 @@ public:
   template <class Arg>
   double
   operator() ( const double time, const Arg &solution, Vector &update ) const;
-
-#if 0
-  /** \brief compute the update vector for one time step for reconstructed
-   *         finite-volume scheme
-   *
-   *  This is a specialized version of the previous operator taking
-   *  where the argument type (\c solution) is the same as for the
-   *  result type (\c update). First a reconstruction is computed
-   *  and then the general operator() is called.
-   *
-   *  \param[in]   time      current time
-   *  \param[in]   solution  solution at time <tt>time</tt> 
-   *  \param[out]  update    result of the flux computation
-   *
-   *  \returns maximal time step
-   */
-  double
-  operator() ( const double time, const Vector &solution, Vector &update ) ;
-#endif
 
   /** \brief set grid marker for refinement / coarsening 
    *
@@ -146,117 +125,7 @@ public:
 private:
   const GridView gridView_;
   const Model &model_;
-  // void reconstruct(double time, const Vector &solution) ;
-  // DomainType baryCenter(const Entity &entity) {return // entity.geometry().center();}
-  // mutable PiecewiseFunction<GridView,Dune::FieldMatrix<double,RangeType::dimension,dim> > grad_;
-  // std::vector<DomainType> C_; // constraint matrix
-  // Dune::FieldVector<std::vector<double>,dimRange> b_; // constraint RHS
 }; // end FiniteVolumeScheme
-
-#if 0
-// Implementation of FiniteVolumeScheme
-// ------------------------------------
-template< class V, class Model > 
-inline void FiniteVolumeScheme< V, Model >
-  ::reconstruct ( double time, const Vector &solution) 
-{
-  grad_.resize();
-  grad_.clear();
-  /****************************************
-   * Assume first dimRange=1
-   * Let wi=omega_i-omega_0
-   *     ui=ubari-ubar0
-   * Then H=ATA and g=ATU mit 
-   * with A=(w1,...,wN)^T and U=(u1,...,uN)^T.
-   * The constraints are
-   * C=(-w1,w1,-w2,w2,...,-wN,wN)^T and
-   * b=(b10,b11,b20,b21,...,bN0,bN1)^T satisfying
-   *     bi0 = 0,  bi1 = ui with ui>0
-   *     bi0 = ui, bi1 = 0  otherwise
-   **********************************************
-   * H,C are independent of dimRange
-   * 1) we store w1,..,wN in C
-   * 2) compute H and the full matrix C
-   ********************************
-   * Storage for dimRange>1:
-   * for each r=0..dimRange-1
-   * 1) store ui[r] in b[r][i]
-   * 2) compute g[r]=ATb[r] and full b[r]
-   * 3) compute D[r] = CLS(H^{-1},g[r],C,b[r])
-   ************************************************/
-  Dune::FieldMatrix<double,dim,dim> H;
-  Dune::FieldVector<DomainType,dimRange> g,D;
-  const Iterator endit = gridView().template end< 0 >();     
-  for( Iterator it = gridView().template begin< 0 >(); it != endit; ++it ) {
-    const Entity &entity = *it;
-    C_.resize(0);
-    for (int r=0;r<dimRange;++r)
-      b_[r].resize(0);
-    // Step 1
-    DomainType omega0 = baryCenter(entity);
-    RangeType ubar0   = solution[entity];    
-    const IntersectionIterator iitend = gridView().iend( entity ); 
-    for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
-    {
-      const Intersection &intersection = *iit;
-      if( intersection.neighbor() )
-      {
-        // access neighbor
-        const EntityPointer outside = intersection.outside();
-        const Entity &neighbor = *outside;
-        DomainType omegai = baryCenter(neighbor);
-        RangeType ubari   = solution[neighbor];    
-        C_.push_back(omegai-omega0);
-        for (int r=0;r<dimRange;++r)
-          b_[r].push_back(ubari[r]-ubar0[r]);
-      }
-      else
-      { // TODO
-      }
-    }
-    // Step 2 
-    size_t numberOfNb = C_.size();
-    H = 0;
-    for (int r=0;r<dimRange;++r)
-      g[r] = 0;
-    for (size_t i=0;i<numberOfNb;++i) {
-      // compute components of quadratic form
-      for (int q=0;q<dim;++q)
-        for (int p=0;p<dim;++p)
-          H[q][p] += C_[i][q]*C_[i][p];
-      for (int r=0;r<dimRange;++r) 
-        for (int q=0;q<dim;++q)
-          g[r][q] += C_[i][q]*b_[r][i];
-      // set up constraints
-      C_.push_back(C_[i]);
-      C_[i] *= -1.;
-      for (int r=0;r<dimRange;++r) {
-        if (b_[r][i]>0) {
-          b_[r].push_back(b_[r][i]);
-          b_[r][i]=0.;
-        } else {
-          b_[r].push_back(0);
-          b_[r][i] *= -1.;
-        }
-      }
-    }
-    H.invert();
-    for (int r=0;r<dimRange;++r)
-      D[r] = 0 ; // calc(H,g[r],C,b[r]);
-  }
-}
-
-
-template< class V, class Model > 
-inline double FiniteVolumeScheme< V, Model >
-  ::operator() ( const double time, const Vector &solution, 
-                 Vector &update ) 
-{
-  reconstruct(time,solution);
-  P1Function<GridView,typename Vector::RangeType> recon(solution,grad_);
-  return (*this)(time,recon,update);
-}
-#endif
 
 template< class V, class Model > 
 template< class Arg >
