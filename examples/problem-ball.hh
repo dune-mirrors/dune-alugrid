@@ -21,7 +21,7 @@ struct BallData
 
   const static int dimDomain = DomainType::dimension;
 
-  BallData ()
+  BallData () : c_(0.5), r0_(0.3)
   {}
 
   //! \copydoc ProblemData::gridFile
@@ -29,7 +29,6 @@ struct BallData
   { 
     std::ostringstream dgfFileName;
     dgfFileName << path << "/cube_hc_512.hexa";
-   // unitcube" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
 
@@ -49,9 +48,13 @@ struct BallData
                                const RangeType &uLeft, const RangeType &uRight ) const 
   { 
     DomainType xx(x);
-    xx -= DomainType(time);
+    xx -= c_;
+    DomainType y;
+    y[0] = std::cos(time*2.*M_PI)*r0_;
+    y[1] = std::sin(time*2.*M_PI)*r0_;
+    xx -= y;
     double r = xx.two_norm();
-    return ( (r>0.45 && r<0.55)? 1 : 0 );
+    return ( (r>0.1 && r<0.2)? 1 : 0 );
   } 
 
   //! \copydoc ProblemData::refineTol
@@ -65,6 +68,10 @@ struct BallData
   {
     return 0.1;
   }
+
+  private:
+  DomainType c_;
+  double r0_;
 };
 
 // BallModel

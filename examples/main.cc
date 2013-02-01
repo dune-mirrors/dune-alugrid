@@ -100,7 +100,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
   for( int i = 0; i <= maxLevel; ++i )
   {
     // mark grid for initial refinement
-    GridMarker< Grid > gridMarker( grid, 0, maxLevel );
+    GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
     scheme.mark( 0, solution, gridMarker );
     // adapt grid 
     if( gridMarker.marked() )
