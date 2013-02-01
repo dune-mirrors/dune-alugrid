@@ -300,14 +300,17 @@ namespace ALUGrid
     
       bool repeat (false);
       _refineLoops = 0;
+      std::vector< ObjectStream > osv (nl);
       do {
         repeat = false;
         {
-          std::vector< ObjectStream > osv (nl);
           try {
             for (int l = 0; l < nl; ++l) 
             {
               ObjectStream& os = osv[ l ];
+              // clear stream 
+              os.clear();
+
               // reserve memory for object stream 
               os.reserve( (outerFaces[l].size() + innerFaces[l].size() ) * sizeof(char) );
               {
@@ -357,7 +360,9 @@ namespace ALUGrid
 
         _refineLoops ++;
       } 
-      while (mpAccess ().gmax ( repeat ) );
+      while ( mpAccess ().gmax ( repeat ) );
+
+      // std::cout << _refineLoops << " refLoops " << std::endl;
 
       // Jetzt noch die Kantensituation richtigstellen, es gen"ugt ein Durchlauf,
       // weil die Verfeinerung einer Kante keine Fernwirkungen hat. Vorsicht: Die
@@ -369,11 +374,14 @@ namespace ALUGrid
       __STATIC_phase = 3;
 
       {
-        std::vector< ObjectStream > osv (nl);
         {
           for (int l = 0; l < nl; ++l) 
           {
             ObjectStream& os = osv[ l ];
+            os.clear();
+            // reserve memory 
+            os.reserve( outerEdges[l].size() * sizeof(char) );
+            // write refinement request 
             const hedge_iterator iEnd = outerEdges[l].end ();
             for (hedge_iterator i = outerEdges [l].begin (); i != iEnd; ++i )
               (*i)->getRefinementRequest ( os );
@@ -392,14 +400,15 @@ namespace ALUGrid
               (*i)->setRefinementRequest ( os );
           }
         }
-      } // ~std::vector< ObjectStream > ... 
+      } 
        
       {
-        std::vector< ObjectStream > osv (nl);
         {
           for (int l = 0; l < nl; ++l)
           {
             ObjectStream& os = osv[ l ];
+            os.clear();
+
             // reserve memory 
             os.reserve( innerEdges[l].size() * sizeof(char) );
 
@@ -624,6 +633,7 @@ namespace ALUGrid
         abort ();
       }
       
+      std::vector< ObjectStream > inout( nl );
       try {
       
         // Phase des Fl"achenausgleichs des verteilten Vergr"oberungsalgorithmus
@@ -637,11 +647,12 @@ namespace ALUGrid
         typedef std::vector< int > cleanvector_t;
         std::vector< cleanvector_t > clean (nl);
         {
-          std::vector< ObjectStream > inout( nl );
           {
             for (int l = 0; l < nl; ++l)
             {
               ObjectStream& os = inout[ l ];
+              os.clear();
+
               // reserve memory 
               os.reserve( outerFaces [l].size() * sizeof(char) );
 
@@ -683,40 +694,37 @@ namespace ALUGrid
         }
         
         {
-          std::vector< ObjectStream > inout (nl);
+          for (int l = 0; l < nl; ++l) 
           {
-            for (int l = 0; l < nl; ++l) 
-            {
-              ObjectStream& os = inout[ l ];
-              // reserve memory  
-              os.reserve( innerFaces [l].size() * sizeof(char) );
+            ObjectStream& os = inout[ l ];
+            inout.clear(); 
 
-              cleanvector_t::iterator j = clean [l].begin ();
-              const hface_iterator iEnd = innerFaces [l].end ();
-              for (hface_iterator i = innerFaces [l].begin (); i != iEnd; ++i, ++j) 
-              {
-                const bool unlock = *j;
-                os.putNoChk( char(unlock) );
-                (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
-              }
-            }     
-          }
-        
+            // reserve memory  
+            os.reserve( innerFaces [l].size() * sizeof(char) );
+
+            cleanvector_t::iterator j = clean [l].begin ();
+            const hface_iterator iEnd = innerFaces [l].end ();
+            for (hface_iterator i = innerFaces [l].begin (); i != iEnd; ++i, ++j) 
+            {
+              const bool unlock = *j;
+              os.putNoChk( char(unlock) );
+              (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
+            }
+          }     
+      
           // exchange data 
           inout = mpAccess ().exchange (inout);
-        
+      
+          for (int l = 0; l < nl; ++l) 
           {
-            for (int l = 0; l < nl; ++l) 
+            ObjectStream& os = inout[ l ];
+            const hface_iterator iEnd = outerFaces [l].end ();
+            for (hface_iterator i = outerFaces [l].begin (); i != iEnd; ++i )
             {
-              ObjectStream& os = inout[ l ];
-              const hface_iterator iEnd = outerFaces [l].end ();
-              for (hface_iterator i = outerFaces [l].begin (); i != iEnd; ++i )
-              {
-                const bool unlock = bool( os.get() );
-                (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
-              }
-            }     
-          }
+              const bool unlock = bool( os.get() );
+              (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
+            }
+          }     
         }
       } 
       catch( Parallel::AccessPllException )
@@ -765,81 +773,77 @@ namespace ALUGrid
         }
         
         {
-          std::vector< ObjectStream > inout( nl );
+          for (int l = 0; l < nl; ++l)
           {
-            for (int l = 0; l < nl; ++l)
-            {
-              ObjectStream& os = inout[ l ];
-              // reserve memory first 
-              os.reserve( outerEdges [l].size() * sizeof(char) );
+            ObjectStream& os = inout[ l ];
+            os.clear();
 
-              // get end iterator 
-              const hedge_iterator iEnd = outerEdges [l].end ();
-              for (hedge_iterator i = outerEdges [l].begin (); i != iEnd; ++i)
-              {
-                char lockAndTry = (*i)->lockAndTry ();
-                os.putNoChk( lockAndTry );
-              }
+            // reserve memory first 
+            os.reserve( outerEdges [l].size() * sizeof(char) );
+
+            // get end iterator 
+            const hedge_iterator iEnd = outerEdges [l].end ();
+            for (hedge_iterator i = outerEdges [l].begin (); i != iEnd; ++i)
+            {
+              char lockAndTry = (*i)->lockAndTry ();
+              os.putNoChk( lockAndTry );
             }
           }
           
           // exchange data 
           inout = mpAccess ().exchange (inout);
           
+          for (int l = 0; l < nl; ++l) 
           {
-            for (int l = 0; l < nl; ++l) 
-            {
-              ObjectStream& os = inout[ l ];
+            ObjectStream& os = inout[ l ];
 
-              // get end iterator 
-              const hedge_iterator iEnd = innerEdges [l].end ();
-              for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i)
+            // get end iterator 
+            const hedge_iterator iEnd = innerEdges [l].end ();
+            for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i)
+            {
+              const bool locked = bool( os.get() );
+              if( locked == false ) 
               {
-                const bool locked = bool( os.get() );
-                if( locked == false ) 
-                {
-                  assert (clean.find (*i) != cleanEnd );
-                  clean[ *i ].first = false;
-                }
+                assert (clean.find (*i) != cleanEnd );
+                clean[ *i ].first = false;
               }
             }
           }
         }
         
         {
-          std::vector< ObjectStream > inout( nl );
+          for (int l = 0; l < nl; ++l) 
           {
-            for (int l = 0; l < nl; ++l) 
+            ObjectStream& os = inout[ l ];
+            os.clear();
+
+            // reserve memory first 
+            os.reserve( innerEdges [l].size() * sizeof(char) );
+
+            // get end iterator 
+            const hedge_iterator iEnd = innerEdges [l].end ();
+            for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i) 
             {
-              ObjectStream& os = inout[ l ];
-              // reserve memory first 
-              os.reserve( innerEdges [l].size() * sizeof(char) );
+              hedge_STI* edge = (*i);
+              assert (clean.find ( edge ) != clean.end ());
 
-              // get end iterator 
-              const hedge_iterator iEnd = innerEdges [l].end ();
-              for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i) 
+              clean_t& a = clean [ edge ];
+              os.putNoChk( char( a.first) );
+
+              if (a.second) 
               {
-                hedge_STI* edge = (*i);
-                assert (clean.find ( edge ) != clean.end ());
-
-                clean_t& a = clean [ edge ];
-                os.putNoChk( char( a.first) );
-
-                if (a.second) 
-                {
-                  // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
-                  // sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
-                  // einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
-                  // mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
-                  // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
-                
-                  a.second = false;
+                // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
+                // sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
+                // einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
+                // mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
+                // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
+              
+                a.second = false;
 #ifndef NDEBUG
-                  bool b = 
+                bool b = 
 #endif
-                    edge->unlockAndResume (a.first);
-                  assert (b == a.first);
-                }
+                  edge->unlockAndResume (a.first);
+                assert (b == a.first);
               }
             }
           }
