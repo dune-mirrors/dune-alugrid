@@ -35,6 +35,14 @@ typedef BallModel< Grid::dimensionworld > ModelType;
 typedef EulerModel< Grid::dimensionworld > ModelType;
 #endif
 
+//! get memory in MB 
+static double getMemoryUsage()
+{
+  struct rusage info;
+  getrusage( RUSAGE_SELF, &info );
+  return (double(info.ru_maxrss)/ 1024.0);
+}
+
 // method
 // ------
 void method ( const ModelType &model, int startLevel, int maxLevel, const char* outpath )
@@ -206,6 +214,10 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
     }
 
     {
+      std::vector<double> memUsage(2);
+      memUsage[ 0 ] = getMemoryUsage();
+      memUsage[ 1 ] = ALUGrid::MyAlloc::allocatedMemory();
+      //std::cout << "mem : " << memUsage[ 0 ] << std::endl;
       const size_t maxDofsPerElem = (elements > 0) ? (solution.size()/elements) : 0;
       // write times to run file 
       diagnostics.write( time, dt,                   // time and time step
@@ -215,7 +227,9 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
                          commTime + adaptation.communicationTime(), // communication time  
                          adaptation.adaptationTime(),  // time for adaptation 
                          adaptation.loadBalanceTime(), // time for load balance
-                         overallTimer.elapsed());      // time step overall time
+                         overallTimer.elapsed(),       // time step overall time
+                         memUsage );                   // memory usage
+
     }
   }           
 
