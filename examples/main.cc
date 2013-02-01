@@ -43,7 +43,7 @@ static std::vector<double> getMemoryUsage()
   getrusage( RUSAGE_SELF, &info );
   // convert to KB
   memUsage[ 0 ] = (double(info.ru_maxrss)/ 1024.0);
-  memUsage[ 1 ] = (double(ALUGrid::MyAlloc::allocatedMemory())/1024.0);
+  memUsage[ 1 ] = (double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
   return memUsage;
 }
 
