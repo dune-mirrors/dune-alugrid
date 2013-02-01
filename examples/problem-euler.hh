@@ -346,7 +346,7 @@ struct EulerModel
     delete problem_;
   }
 
-  const double fixedDt () const
+  double fixedDt () const
   {
     return -1;
   }
