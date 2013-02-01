@@ -37,9 +37,9 @@ namespace Dune {
       runfile << "  adapt      ";
       runfile << "     lb   ";
       runfile << "       all  ";
-      runfile << "      indi   ";
-      runfile << "   limfunc   ";
-      runfile << "     limit (in ms)  " << std::endl;
+      runfile << "      rusage   ";
+      runfile << "   alumem   ";
+      runfile << std::endl;
       runfile.flush();
     }
 
@@ -184,7 +184,7 @@ namespace Dune {
             file << "# Max DoFs (per element): " << maxDofs << std::endl;
             file << "# Elements / timestep: sum    max    min    average  " << std::endl;
             file << sumTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
-            file << "# SOLVE     COMM     ADAPT    LB      TIMESTEP    " << std::endl ;
+            file << "# SOLVE     COMM     ADAPT    LB      TIMESTEP   RUSAGE  ALUMEM  " << std::endl ;
 
             // multiply sumTimes with maxThhreads since the sum would be to small otherwise 
             for(size_t i=0; i<size; ++i)
@@ -279,8 +279,10 @@ namespace Dune {
       times[ 2 ] = adaptTime ;
       times[ 3 ] = lbTime ;
       times[ 4 ] = timeStepTime ;
-      for(size_t i=5; i<limitSteps.size(); ++i)
-        times[ i ] = limitSteps[ i ];
+      for(size_t i=0; i<limitSteps.size(); ++i)
+      {
+        times[ i+5 ] = limitSteps[ i ];
+      }
 
       maxDofs_ = std::max( double(maxDofs), maxDofs_ );
 

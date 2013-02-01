@@ -36,11 +36,15 @@ typedef EulerModel< Grid::dimensionworld > ModelType;
 #endif
 
 //! get memory in MB 
-static double getMemoryUsage()
+static std::vector<double> getMemoryUsage()
 {
+  std::vector<double> memUsage(2);
   struct rusage info;
   getrusage( RUSAGE_SELF, &info );
-  return (double(info.ru_maxrss)/ 1024.0);
+  // convert to KB
+  memUsage[ 0 ] = (double(info.ru_maxrss)/ 1024.0);
+  memUsage[ 1 ] = (double(ALUGrid::MyAlloc::allocatedMemory())/1024.0);
+  return memUsage;
 }
 
 // method
@@ -56,6 +60,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
   grid.loadBalance();
   const bool verboseRank = grid.comm().rank() == 0 ;
 
+  // create the diagnostics object 
   Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1 );
 
   /* ... some global refinement steps */
@@ -214,10 +219,6 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
     }
 
     {
-      std::vector<double> memUsage(2);
-      memUsage[ 0 ] = getMemoryUsage();
-      memUsage[ 1 ] = ALUGrid::MyAlloc::allocatedMemory();
-      //std::cout << "mem : " << memUsage[ 0 ] << std::endl;
       const size_t maxDofsPerElem = (elements > 0) ? (solution.size()/elements) : 0;
       // write times to run file 
       diagnostics.write( time, dt,                   // time and time step
@@ -228,7 +229,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
                          adaptation.adaptationTime(),  // time for adaptation 
                          adaptation.loadBalanceTime(), // time for load balance
                          overallTimer.elapsed(),       // time step overall time
-                         memUsage );                   // memory usage
+                         getMemoryUsage() );                   // memory usage
 
     }
   }           
