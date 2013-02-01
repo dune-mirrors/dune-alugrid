@@ -60,8 +60,11 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
   grid.loadBalance();
   const bool verboseRank = grid.comm().rank() == 0 ;
 
+  std::string outPath( outpath );
+  const bool writeOutput = ( outPath != "none" ) ;
+
   // create the diagnostics object 
-  Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1 );
+  Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1);
 
   /* ... some global refinement steps */
   if( verboseRank ) 
@@ -83,8 +86,6 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
   FVScheme scheme( gridView, model );
 
   /* create VTK writer for data sequqnce */
-  std::string outPath( outpath );
-  const bool writeOutput = ( outPath != "none" ) ;
   Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", outPath, ".", Dune::VTK::nonconforming );
   if( writeOutput ) 
   {
@@ -238,10 +239,10 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
   {
     /* output final result */
     vtkOut.write( time );
-
-    // flush diagnostics 
-    diagnostics.flush();
   }
+
+  // flush diagnostics 
+  diagnostics.flush();
 
   // delete grid 
   delete gridPtr ;
@@ -265,6 +266,10 @@ try
       std::cout << "Usage: " << argv[ 0 ] << " [problem-nr] [startLevel] [maxLevel]" << std::endl;
     return 0;
   }
+
+  // meassure program time 
+  Dune::Timer timer ;
+
   /* create problem */
   ModelType model(atoi(argv[1]));
 
@@ -274,6 +279,13 @@ try
 
   const char* path = (argc > 4) ? argv[ 4 ] : "./";
   method( model, startLevel, maxLevel, path );
+
+#if HAVE_MPI 
+  MPI_Barrier ( MPI_COMM_WORLD );
+#endif
+
+  if( mpi.rank() == 0 ) 
+    std::cout << "Program finished: CPU time = " << timer.elapsed() << " sec." << std::endl;
 
   /* done */
   return 0;
