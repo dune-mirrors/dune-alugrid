@@ -241,7 +241,7 @@ namespace ALUGrid
        new listSmartpointer__to__iteratorSTI < hface_STI > (*(const listSmartpointer__to__iteratorSTI < hface_STI > *)p.second));
   }
 
-  class UnpackRefineLoop : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  class PackUnpackRefineLoop : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
     typedef Gitter::hface_STI hface_STI ;
     typedef std::vector< hface_STI * > facevec_t ;
@@ -251,9 +251,9 @@ namespace ALUGrid
     typedef facevec_t::const_iterator hface_iterator;
 
     bool _repeat ;
-    UnpackRefineLoop( const UnpackRefineLoop& );
+    PackUnpackRefineLoop( const PackUnpackRefineLoop& );
   public:
-    UnpackRefineLoop( std::vector< facevec_t >& innerFaces,
+    PackUnpackRefineLoop( std::vector< facevec_t >& innerFaces,
                       std::vector< facevec_t >& outerFaces )
       : _innerFaces( innerFaces ),
         _outerFaces( outerFaces ),
@@ -308,6 +308,56 @@ namespace ALUGrid
       {
         std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
         abort();
+      }
+    }
+  };
+
+  class PackUnpackEdgeCleanup : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hedge_STI hedge_STI ;
+    typedef std::vector< hedge_STI * > edgevec_t ;
+    std::vector< edgevec_t >& _innerEdges ;
+    std::vector< edgevec_t >& _outerEdges ;
+    const bool _firstLoop ;
+
+    typedef edgevec_t::const_iterator hedge_iterator;
+
+    PackUnpackEdgeCleanup( const PackUnpackEdgeCleanup& );
+  public:
+    PackUnpackEdgeCleanup( std::vector< edgevec_t >& innerEdges,
+                           std::vector< edgevec_t >& outerEdges,
+                           const bool firstLoop )
+      : _innerEdges( innerEdges ),
+        _outerEdges( outerEdges ),
+        _firstLoop( firstLoop )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // the first loop needs outerEdges the second loop inner
+      edgevec_t& edges = ( _firstLoop ) ? _outerEdges[ link ] : _innerEdges[ link ];
+
+      os.clear();
+      // reserve memory 
+      os.reserve( edges.size() * sizeof(char) );
+
+      // write refinement request 
+      const hedge_iterator iEnd = edges.end ();
+      for (hedge_iterator i = edges.begin (); i != iEnd; ++i )
+      {
+        (*i)->getRefinementRequest ( os );
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      // the first loop needs innerEdges the second loop outer
+      edgevec_t& edges = ( _firstLoop ) ? _innerEdges[ link ] : _outerEdges[ link ];
+
+      const hedge_iterator iEnd = edges.end ();
+      for (hedge_iterator i = edges.begin (); i != iEnd; ++i )
+      {
+        (*i)->setRefinementRequest ( os );
       }
     }
   };
@@ -384,7 +434,7 @@ namespace ALUGrid
         repeat = false;
         {
           // unpack handle to unpack the data once their received 
-          UnpackRefineLoop dataHandle ( innerFaces, outerFaces );
+          PackUnpackRefineLoop dataHandle ( innerFaces, outerFaces );
 
           // exchange data and unpack when received 
           mpAccess ().exchange ( dataHandle );
@@ -463,6 +513,10 @@ namespace ALUGrid
       __STATIC_phase = 3;
 
       {
+        PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, true );
+        mpAccess().exchange( edgeData );
+        /*
+
         {
           for (int l = 0; l < nl; ++l) 
           {
@@ -489,9 +543,13 @@ namespace ALUGrid
               (*i)->setRefinementRequest ( os );
           }
         }
+        */
       } 
        
       {
+        PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, false );
+        mpAccess().exchange( edgeData );
+        /*
         {
           for (int l = 0; l < nl; ++l)
           {
@@ -519,6 +577,7 @@ namespace ALUGrid
               (*i)->setRefinementRequest ( os );
           }
         }
+        */
       }
     }
     

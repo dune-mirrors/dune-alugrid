@@ -833,7 +833,6 @@ namespace ALUGrid
       // this will only set the pointer in ObjectStream 
       return bufferpair_t( buffer, bufferSize );
     }
-
   };
 
   inline MpAccessMPI::NonBlockingExchange*
