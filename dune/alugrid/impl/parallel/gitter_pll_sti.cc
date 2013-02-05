@@ -241,6 +241,77 @@ namespace ALUGrid
        new listSmartpointer__to__iteratorSTI < hface_STI > (*(const listSmartpointer__to__iteratorSTI < hface_STI > *)p.second));
   }
 
+  class UnpackRefineLoop : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hface_STI hface_STI ;
+    typedef std::vector< hface_STI * > facevec_t ;
+    std::vector< facevec_t >& _innerFaces ;
+    std::vector< facevec_t >& _outerFaces ;
+
+    typedef facevec_t::const_iterator hface_iterator;
+
+    bool _repeat ;
+    UnpackRefineLoop( const UnpackRefineLoop& );
+  public:
+    UnpackRefineLoop( std::vector< facevec_t >& innerFaces,
+                      std::vector< facevec_t >& outerFaces )
+      : _innerFaces( innerFaces ),
+        _outerFaces( outerFaces ),
+        _repeat( false )
+    {}
+
+    bool repeat () const { return _repeat; }
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      try 
+      {
+        // clear stream 
+        os.clear();
+
+        // reserve memory for object stream 
+        os.reserve( (_outerFaces[ link ].size() + _innerFaces[ link ].size() ) * sizeof(char) );
+        {
+          const hface_iterator iEnd = _outerFaces[ link ].end ();
+          for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i ) 
+            (*i)->accessOuterPllX ().first->getRefinementRequest ( os ); 
+        }
+        {
+          const hface_iterator iEnd = _innerFaces[ link ].end ();
+          for (hface_iterator i = _innerFaces[ link ].begin (); i != iEnd; ++i )
+            (*i)->accessOuterPllX ().first->getRefinementRequest ( os ); 
+        }
+      } 
+      catch( Parallel::AccessPllException )
+      {
+        std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
+        abort();
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      try 
+      {
+        {
+          const hface_iterator iEnd = _innerFaces[ link ].end ();
+          for (hface_iterator i = _innerFaces [ link ].begin (); i != iEnd; ++i ) 
+            _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
+        }
+        {
+          const hface_iterator iEnd = _outerFaces[ link ].end (); 
+          for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
+            _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
+        }
+      } 
+      catch (Parallel::AccessPllException) 
+      {
+        std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
+        abort();
+      }
+    }
+  };
+
   bool GitterPll::refine () 
   {
     assert (debugOption (5) ? (std::cout << "**INFO GitterPll::refine () " << std::endl, 1) : 1);
@@ -312,6 +383,15 @@ namespace ALUGrid
       do {
         repeat = false;
         {
+          // unpack handle to unpack the data once their received 
+          UnpackRefineLoop dataHandle ( innerFaces, outerFaces );
+
+          // exchange data and unpack when received 
+          mpAccess ().exchange ( dataHandle );
+
+          repeat = dataHandle.repeat();
+
+          /*
           try {
             for (int l = 0; l < nl; ++l) 
             {
@@ -338,10 +418,10 @@ namespace ALUGrid
             std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
             abort();
           }
-    
-          // exchange data 
+   
+          // exchange data and unpack when received 
           osv = mpAccess ().exchange ( osv );
-    
+
           try 
           {
             for (int l = 0; l < nl; ++l) 
@@ -364,6 +444,7 @@ namespace ALUGrid
             std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
             abort();
           }
+          */
         }
 
         _refineLoops ++;

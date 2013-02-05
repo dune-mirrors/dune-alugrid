@@ -131,6 +131,9 @@ namespace ALUGrid
     
     std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const;
 
+    // exchange object stream and immediately unpack, when data was received 
+    void exchange ( NonBlockingExchange::DataHandleIF& ) const;
+
     // return handle for non-blocking exchange and already do send operation
     NonBlockingExchange* nonBlockingExchange( const int tag, const std::vector< ObjectStream > & ) const;
     // return handle for non-blocking exchange
