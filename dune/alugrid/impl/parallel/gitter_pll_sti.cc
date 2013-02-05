@@ -246,11 +246,14 @@ namespace ALUGrid
     assert (debugOption (5) ? (std::cout << "**INFO GitterPll::refine () " << std::endl, 1) : 1);
     const int nl = mpAccess ().nlinks ();
     bool state = false;
-    std::vector< std::vector< hedge_STI * > > innerEdges (nl), outerEdges (nl);
-    std::vector< std::vector< hface_STI * > > innerFaces (nl), outerFaces (nl);
 
-    typedef std::vector< hedge_STI * >::const_iterator hedge_iterator;
-    typedef std::vector< hface_STI * >::const_iterator hface_iterator;
+    typedef std::vector< hedge_STI * > edgevec_t ;
+    typedef std::vector< hface_STI * > facevec_t ;
+    std::vector< edgevec_t > innerEdges (nl), outerEdges (nl);
+    std::vector< facevec_t > innerFaces (nl), outerFaces (nl);
+
+    typedef edgevec_t::const_iterator hedge_iterator;
+    typedef facevec_t::const_iterator hface_iterator;
 
     {
       // Erst die Zeiger auf alle Fl"achen und Kanten mit paralleler
@@ -261,27 +264,32 @@ namespace ALUGrid
       {
         for (int l = 0; l < nl; ++l) 
         {
-          //std::cout << "refinepll \n";
           LeafIteratorTT < hface_STI > fw (*this,l);
           LeafIteratorTT < hedge_STI > dw (*this,l);
 
-          // reserve memory first 
-          outerFaces[l].reserve( fw.outer().size() );
-          innerFaces[l].reserve( fw.inner().size() );
-          
-          for (fw.outer ().first (); ! fw.outer().done (); fw.outer ().next ())
-            outerFaces [l].push_back (& fw.outer ().item ());
-          for (fw.inner ().first (); ! fw.inner ().done (); fw.inner ().next ())
-            innerFaces [l].push_back (& fw.inner ().item ());
+          facevec_t& outerFace = outerFaces[ l ]; 
+          facevec_t& innerFace = innerFaces[ l ]; 
 
           // reserve memory first 
-          outerEdges[l].reserve( dw.outer().size() );
-          innerEdges[l].reserve( dw.inner().size() );
+          outerFace.reserve( fw.outer().size() );
+          innerFace.reserve( fw.inner().size() );
+          
+          for (fw.outer ().first (); ! fw.outer().done (); fw.outer ().next ())
+            outerFace.push_back (& fw.outer ().item ());
+          for (fw.inner ().first (); ! fw.inner ().done (); fw.inner ().next ())
+            innerFace.push_back (& fw.inner ().item ());
+
+          edgevec_t& outerEdge = outerEdges[ l ];
+          edgevec_t& innerEdge = innerEdges[ l ];
+
+          // reserve memory first 
+          outerEdge.reserve( dw.outer().size() );
+          innerEdge.reserve( dw.inner().size() );
           
           for (dw.outer ().first (); ! dw.outer().done (); dw.outer ().next ())
-            outerEdges [l].push_back (& dw.outer ().item ());
+            outerEdge.push_back (& dw.outer ().item ());
           for (dw.inner ().first (); ! dw.inner ().done (); dw.inner ().next ())
-            innerEdges [l].push_back (& dw.inner ().item ());
+            innerEdge.push_back (& dw.inner ().item ());
         }
       }
       // jetzt normal verfeinern und den Status der Verfeinerung
@@ -332,7 +340,7 @@ namespace ALUGrid
           }
     
           // exchange data 
-          osv = mpAccess ().exchange (osv);
+          osv = mpAccess ().exchange ( osv );
     
           try 
           {
@@ -389,7 +397,7 @@ namespace ALUGrid
         }
         
         // exchange data 
-        osv = mpAccess ().exchange (osv);
+        osv = mpAccess ().exchange ( osv );
         
         {
           for (int l = 0; l < nl; ++l)
@@ -667,7 +675,7 @@ namespace ALUGrid
           }
 
           // exchange data 
-          inout = mpAccess ().exchange (inout);
+          inout = mpAccess ().exchange ( inout );
           
           {
             for (int l = 0; l < nl; ++l) 
@@ -697,7 +705,7 @@ namespace ALUGrid
           for (int l = 0; l < nl; ++l) 
           {
             ObjectStream& os = inout[ l ];
-            inout.clear(); 
+            os.clear(); 
 
             // reserve memory  
             os.reserve( innerFaces [l].size() * sizeof(char) );
@@ -713,7 +721,7 @@ namespace ALUGrid
           }     
       
           // exchange data 
-          inout = mpAccess ().exchange (inout);
+          inout = mpAccess ().exchange ( inout );
       
           for (int l = 0; l < nl; ++l) 
           {
