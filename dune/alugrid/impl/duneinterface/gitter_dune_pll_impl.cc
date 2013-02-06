@@ -833,6 +833,119 @@ namespace ALUGrid
   //  interior to ghost communication 
   //
   /////////////////////////////////////////////////////
+  class PackUnpackInteriorGhostData : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hface_STI hface_STI ;
+
+    GitterDunePll& _gitter ;
+    GatherScatterType& _vertexData ;
+    GatherScatterType& _edgeData ;
+    GatherScatterType& _faceData ;
+    GatherScatterType& _elementData ;
+
+    const bool _haveHigherCodimData;
+
+    const GitterDunePll::CommunicationType _commType;
+
+    PackUnpackInteriorGhostData( const PackUnpackInteriorGhostData& );
+  public:
+    PackUnpackInteriorGhostData( GitterDunePll& gitter,
+                                 GatherScatterType& vertexData, 
+                                 GatherScatterType& edgeData, 
+                                 GatherScatterType& faceData, 
+                                 GatherScatterType& elementData, 
+                                 const GitterDunePll::CommunicationType commType )
+      : _gitter( gitter ),
+        _vertexData ( vertexData ),
+        _edgeData   ( edgeData ),
+        _faceData   ( faceData ),
+        _elementData( elementData ),
+        _haveHigherCodimData( vertexData.contains(3,3) || edgeData.contains(3,2) || faceData.contains(3,1) ),
+        _commType( commType )
+    {
+    }
+
+    void pack( const int link, ObjectStream& sendBuff ) 
+    {
+      const bool packInterior = (_commType == GitterDunePll::All_All_Comm) || 
+                                (_commType == GitterDunePll::Interior_Ghost_Comm);
+      
+      const bool packGhosts   = (_commType == GitterDunePll::All_All_Comm) || 
+                                (_commType == GitterDunePll::Ghost_Interior_Comm);
+
+      // clear buffer 
+      sendBuff.clear();
+      
+      const hface_STI * determType = 0; // only for type determination 
+      std::pair< IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
+        iterpair = _gitter.borderIteratorTT( determType , link );
+
+      if( _haveHigherCodimData || packGhosts )
+      {
+        // write all data belong to interior of master faces 
+        _gitter.sendInteriorGhostAllData( sendBuff, iterpair.first , 
+                                          _vertexData, _edgeData,
+                                          _faceData, _elementData, 
+                                          packInterior , packGhosts );
+      
+        // write all data belong to interior of slave faces 
+        _gitter.sendInteriorGhostAllData( sendBuff, iterpair.second , 
+                                          _vertexData, _edgeData,
+                                          _faceData, _elementData ,
+                                          packInterior , packGhosts );
+      }
+      else 
+      {
+        // write all data belong to interior of master faces 
+        _gitter.sendInteriorGhostElementData( sendBuff, iterpair.first, _elementData);
+      
+        // write all data belong to interior of slave faces 
+        _gitter.sendInteriorGhostElementData( sendBuff, iterpair.second, _elementData);
+      }
+
+      delete iterpair.first; 
+      delete iterpair.second; 
+    }
+
+    void unpack( const int link, ObjectStream& recvBuff ) 
+    {
+      const hface_STI * determType = 0; // only for type determination 
+      std::pair< IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
+        iterpair = _gitter.borderIteratorTT( determType , link );
+
+      const bool packGhosts = (_commType == GitterDunePll::All_All_Comm) || 
+                              (_commType == GitterDunePll::Ghost_Interior_Comm);
+
+      if( _haveHigherCodimData || packGhosts )
+      {
+        // first unpack slave data, because this has been pack from master
+        // first , see above 
+        _gitter.unpackInteriorGhostAllData( recvBuff, iterpair.second , 
+                                            _vertexData, _edgeData,
+                                            _faceData, _elementData );
+                       
+        // now unpack data sended from slaves to master 
+        _gitter.unpackInteriorGhostAllData( recvBuff, iterpair.first , 
+                                            _vertexData, _edgeData,
+                                            _faceData, _elementData );
+      }
+      else 
+      {
+        // first unpack slave data, because this has been pack from master
+        // first , see above 
+        _gitter.unpackInteriorGhostElementData( recvBuff, iterpair.second, _elementData );
+       
+        // now unpack data sended from slaves to master 
+        _gitter.unpackInteriorGhostElementData( recvBuff, iterpair.first, _elementData );
+      }
+
+      delete iterpair.first;
+      delete iterpair.second;
+    }
+  };
+
+  
+
 
   void GitterDunePll::doInteriorGhostComm( 
     std::vector< ObjectStream > & osvec ,
@@ -866,7 +979,16 @@ namespace ALUGrid
       std::cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
       return;
     }
-     
+
+#if 1
+    // create data handle 
+    PackUnpackInteriorGhostData data( *this, vertexData, edgeData, faceData, elementData, commType );
+
+    ///////////////////////////////////////////
+    // exchange data 
+    ///////////////////////////////////////////
+    mpAccess ().exchange ( data );     
+#else 
     {
       for (int link = 0; link < nl; ++link ) 
       {   
@@ -949,6 +1071,7 @@ namespace ALUGrid
         }
       }
     }
+#endif
 
     // end element communication 
     return;
