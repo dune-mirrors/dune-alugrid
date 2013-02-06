@@ -689,7 +689,7 @@ namespace ALUGrid
         }
 
         // also pack dynamic state here since this is the last communication 
-        _gitter.packUnpackDynamicState( os, link, true );
+        // _gitter.packUnpackDynamicState( os, link, true );
       }
     }
 
@@ -742,7 +742,7 @@ namespace ALUGrid
         }
 
         // unpack dynamic state 
-        _gitter.packUnpackDynamicState( os, link, false );
+        // _gitter.packUnpackDynamicState( os, link, false );
       }
     }
   };
@@ -901,7 +901,6 @@ namespace ALUGrid
         abort ();
       }
       
-      std::vector< ObjectStream > inout( nl );
       try {
       
         // Phase des Fl"achenausgleichs des verteilten Vergr"oberungsalgorithmus
@@ -926,6 +925,7 @@ namespace ALUGrid
           PackUnpackCoarsenLoop faceData( clean, innerFaces, outerFaces, false );
           mpAccess().exchange( faceData );
         }
+
       } 
       catch( Parallel::AccessPllException )
       {
@@ -964,6 +964,8 @@ namespace ALUGrid
           PackUnpackEdgeCoarsen edgeData( *this, clean, innerEdges, outerEdges, false );
           mpAccess().exchange( edgeData );
         }
+
+        exchangeDynamicState();
       } 
       catch( Parallel::AccessPllException )
       {
