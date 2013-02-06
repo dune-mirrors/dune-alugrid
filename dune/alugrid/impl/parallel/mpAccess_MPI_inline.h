@@ -726,7 +726,9 @@ namespace ALUGrid
       // get received vector 
       std::vector< bool > linkReceived( _nLinks, false );
 
-      // count noumber of received messages 
+      ObjectStream& osRecv = os;
+
+      // count number of received messages 
       int numReceived = 0;
       while( numReceived < _nLinks ) 
       {
@@ -750,24 +752,28 @@ namespace ALUGrid
               // this should be the same, otherwise we got an error
               assert( dest[ link ] == status.MPI_SOURCE );
 
-              // receive message for link 
-              bufferpair_t buff = receiveLink( comm, status );
+              // length of message 
+              int bufferSize = -1;
 
-#ifndef NDEBUG
-              const int length = buff.second;
-#endif
-              // create object stream (reuse buffer, for later)
-              ObjectStream objStream ;
+              // get length of message 
+              {
+                MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bufferSize );
+                assert (test == MPI_SUCCESS);
+              }
 
-              // copy to buffers (buff is reset to (0,0))
-              // also sets objStream.notReceived() to false 
-              objStream = buff;
+              // reserve memory 
+              osRecv.reserve( bufferSize );
+              // reset read and write counter
+              osRecv.clear();
 
-              // make sure buffer match 
-              assert( length == objStream.size() );
+              // receive data
+              receiveLink( comm, status, bufferSize, osRecv._buf );
+
+              // set wb of ObjectStream  
+              osRecv.seekp( bufferSize );
 
               // unpack data 
-              dataHandle.unpack( link, objStream );
+              dataHandle.unpack( link, osRecv );
 
               // increase number of received messages 
               ++ numReceived;
@@ -791,7 +797,7 @@ namespace ALUGrid
       }
     }
   protected:  
-    void sendLink( const int link, const int dest, const ObjectStream& os, MPI_Comm comm ) 
+    void sendLink( const int link, const int dest, const ObjectStream& os, MPI_Comm& comm ) 
     {
       // get send buffer from object stream 
       char* buffer     = os._buf + os._rb;
@@ -822,7 +828,16 @@ namespace ALUGrid
       // use alloc from objects stream because this is the 
       // buffer of the object stream
       char* buffer = ObjectStream::allocateBuffer( bufferSize );
-      
+
+      // return receiveLink given a buffer 
+      return receiveLink( comm, status, bufferSize, buffer );
+    }
+
+    // does receive operation for one link 
+    bufferpair_t receiveLink( MPI_Comm& comm, 
+                              MPI_Status& status,
+                              int bufferSize, char* buffer )
+    {
       // MPI receive 
       {
         MY_INT_TEST MPI_Recv ( buffer, bufferSize, MPI_BYTE, status.MPI_SOURCE, _tag, comm, & status);

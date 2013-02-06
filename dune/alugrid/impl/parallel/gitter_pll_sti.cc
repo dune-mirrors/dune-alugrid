@@ -429,7 +429,7 @@ namespace ALUGrid
     
       bool repeat (false);
       _refineLoops = 0;
-      std::vector< ObjectStream > osv (nl);
+      //std::vector< ObjectStream > osv (nl);
       do {
         repeat = false;
         {
@@ -627,6 +627,100 @@ namespace ALUGrid
     }
   };
 
+  class PackUnpackCoarsenLoop : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hface_STI hface_STI ;
+    typedef std::vector< hface_STI * > facevec_t ;
+
+    typedef std::vector< int > cleanvector_t;
+    std::vector< cleanvector_t >& _clean ;
+
+    std::vector< facevec_t >& _innerFaces ;
+    std::vector< facevec_t >& _outerFaces ;
+
+    const bool _firstLoop ;
+
+    typedef facevec_t::const_iterator hface_iterator;
+
+    PackUnpackCoarsenLoop( const PackUnpackCoarsenLoop& );
+  public:
+    PackUnpackCoarsenLoop( std::vector< cleanvector_t >& clean,
+                           std::vector< facevec_t >& innerFaces,
+                           std::vector< facevec_t >& outerFaces,
+                           const bool firstLoop )
+      : _clean( clean ),
+        _innerFaces( innerFaces ),
+        _outerFaces( outerFaces ),
+        _firstLoop( firstLoop )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // clear stream 
+      os.clear();
+
+      if( _firstLoop ) 
+      {
+        // reserve memory 
+        os.reserve( _outerFaces[ link ].size() * sizeof(char) );
+
+        // get end iterator 
+        const hface_iterator iEnd = _outerFaces[ link ].end ();
+        for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i)
+        {
+          char lockAndTry = (*i)->accessOuterPllX ().first->lockAndTry ();
+          os.putNoChk( lockAndTry );
+        }
+      }
+      else 
+      {
+        // reserve memory  
+        os.reserve( _innerFaces[ link ].size() * sizeof(char) );
+
+        cleanvector_t::iterator j = _clean[ link ].begin ();
+        const hface_iterator iEnd = _innerFaces[ link ].end ();
+        for (hface_iterator i = _innerFaces[ link ].begin (); i != iEnd; ++i, ++j) 
+        {
+          const bool unlock = *j;
+          os.putNoChk( char(unlock) );
+          (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
+        }
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      if( _firstLoop ) 
+      {
+        cleanvector_t& cl = _clean[ link ];
+
+        // reset clean vector 
+        cl = cleanvector_t( _innerFaces[ link ].size (), int(true) );
+
+        cleanvector_t::iterator j = cl.begin (); 
+
+        const hface_iterator iEnd = _innerFaces[ link ].end ();
+        for (hface_iterator i = _innerFaces[ link ].begin (); i != iEnd; ++i, ++j ) 
+        {
+          // get lockAndTry info 
+          const bool locked = bool( os.get() );
+
+          assert (j != cl.end ()); 
+          (*j) &= locked && (*i)->accessOuterPllX ().first->lockAndTry ();
+        } 
+      }
+      else 
+      {
+        const hface_iterator iEnd = _outerFaces[ link ].end ();
+        for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i )
+        {
+          const bool unlock = bool( os.get() );
+          (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
+        }
+      }
+    }
+  };
+
   void GitterPll::coarse () 
   {
     assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::coarse () " << std::endl, 1) : 1);
@@ -794,6 +888,18 @@ namespace ALUGrid
       
         typedef std::vector< int > cleanvector_t;
         std::vector< cleanvector_t > clean (nl);
+
+        {
+          PackUnpackCoarsenLoop faceData( clean, innerFaces, outerFaces, true );
+          mpAccess().exchange( faceData );
+        }
+
+        {
+          PackUnpackCoarsenLoop faceData( clean, innerFaces, outerFaces, false );
+          mpAccess().exchange( faceData );
+        }
+
+        /*
         {
           {
             for (int l = 0; l < nl; ++l)
@@ -874,6 +980,7 @@ namespace ALUGrid
             }
           }     
         }
+        */
       } 
       catch( Parallel::AccessPllException )
       {
