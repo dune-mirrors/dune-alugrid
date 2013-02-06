@@ -663,15 +663,17 @@ namespace ALUGrid
   {
     try 
     {
-
       // read the real level of ghost 
       assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
       const bool wasLeaf = this->ghostLeaf();
      
       // read level and leaf of interior element on other side
       // this changes the state of this leaf or not leaf
-      os.readObject( _ghostLevel );
-      os.readObject( _ghostLeaf );
+      unsigned char ghLvl = 0;
+      os.read( ghLvl );
+      _ghostLevel = ghLvl ;
+
+      _ghostLeaf  = bool( os.get() );
 
       const bool nowLeaf = this->ghostLeaf();
 
@@ -784,8 +786,9 @@ namespace ALUGrid
     // write level and leaf for the ghost element 
     // to determine leafEntity or not 
 
-    os.writeObject( mytetra().level() );
-    os.writeObject( mytetra().leaf()  );
+    const unsigned char lvl = mytetra().level(); 
+    os.write( lvl );
+    os.put( char( mytetra().leaf() ) );
     return;
   }
 
@@ -1125,21 +1128,8 @@ namespace ALUGrid
   // #        ######  #    #     #     ####   #####      #     ####   #####
 
   template < class A > 
-  void Periodic3PllXBase< A >::writeDynamicState (ObjectStream & os, int) const {
-
-    // Der Schwerpunkt des "flachen" periodischen Randelements wird
-    // auf die Mitte der linken Fl"ache gelegt. Per Definition.
-
-    /*
-    static const double x = 1./3.;
-    alucoord_t p [3];
-    LinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
-      myperiodic ().myvertex (0,2)->Point ()).map2world (x,x,x,p);
-    os.writeObject (p [0]);
-    os.writeObject (p [1]);
-    os.writeObject (p [2]);
-    */
-    return;
+  void Periodic3PllXBase< A >::writeDynamicState (ObjectStream & os, int) const 
+  {
   }
 
   template < class A >
@@ -1314,21 +1304,8 @@ namespace ALUGrid
   // #        ######  #    #     #     ####   #####      #     ####       #
 
   template < class A > 
-  void Periodic4PllXBase< A >::writeDynamicState (ObjectStream & os, int) const {
-
-    // Der Schwerpunkt des "flachen" periodischen Randelements wird
-    // auf die Mitte der linken Fl"ache gelegt. Per Definition.
-
-    /*
-    static const double x = .0;
-    alucoord_t p [3];
-    BilinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
-      myperiodic ().myvertex (0,2)->Point (),myperiodic ().myvertex (0,3)->Point ()).map2world (x,x,p);
-    os.writeObject (p [0]);
-    os.writeObject (p [1]);
-    os.writeObject (p [2]);
-    */
-    return;
+  void Periodic4PllXBase< A >::writeDynamicState (ObjectStream & os, int) const 
+  {
   }
 
   template < class A > 
@@ -1520,12 +1497,9 @@ namespace ALUGrid
   {
     // write level and leaf for the ghost element 
     // to determine leafEntity or not 
-
-    // write level to know the level of ghost on the other side
-    os.writeObject( myhexa().level() );
-    os.writeObject( myhexa().leaf()  );
-
-    return;
+    const unsigned char lvl = myhexa().level(); 
+    os.write( lvl );
+    os.put( char( myhexa().leaf() ) );
   }
 
   template < class A >
