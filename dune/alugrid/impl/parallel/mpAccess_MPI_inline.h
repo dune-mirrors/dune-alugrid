@@ -132,79 +132,6 @@ namespace ALUGrid
     return res;
   }
 
-  template < class A > 
-  inline std::vector< std::vector< A > > doExchange (const std::vector< std::vector< A > > & in,
-                                      MPI_Datatype mpiType, 
-                                      MPI_Comm comm, 
-                                      const std::vector< int > & d) 
-  {
-    const int messagetag = MpAccessMPI::messagetag;
-    assert (in.size() == d.size());
-    int nl = d.size ();
-    std::vector< std::vector< A > > out (nl);
-
-    // only do this if number of links is not zero 
-    if( nl > 0 ) 
-    {
-      A ** buf = new A * [nl];
-      assert (buf);
-      MPI_Request * req = new MPI_Request [nl];
-      assert (req);
-      {
-        for (int link = 0; link < nl; ++ link) 
-        {
-          int size = in [link].size();
-          A * lne = new A [size];
-          assert (lne);
-          copy (in [link].begin (), in [link].end (), lne);
-          buf [link] = lne;
-          MY_INT_TEST MPI_Isend (lne, size, mpiType, d [link], messagetag, comm, & req [link]);
-          assert (test == MPI_SUCCESS);
-        } 
-      }
-      
-      {
-        for (int link = 0; link < nl; ++ link) 
-        {
-          MPI_Status s;
-          int cnt;
-          {
-            MY_INT_TEST MPI_Probe (d [link], messagetag, comm, & s);
-            assert (test == MPI_SUCCESS);
-          }
-          
-          {
-            MY_INT_TEST MPI_Get_count ( & s, mpiType, & cnt );
-            assert (test == MPI_SUCCESS);
-          }
-          
-          A * lne = new A [cnt];
-          assert (lne);
-          {
-            MY_INT_TEST MPI_Recv (lne, cnt, mpiType, d [link], messagetag, comm, & s);
-            assert (test == MPI_SUCCESS);
-          }
-          copy (lne, lne + cnt, back_inserter (out[link]));
-          delete [] lne;
-        } 
-      }
-
-      {
-        MPI_Status * sta = new MPI_Status [nl];
-        assert (sta);
-        MY_INT_TEST MPI_Waitall (nl, req, sta);
-        assert (test == MPI_SUCCESS);
-        delete [] sta;
-      }
-      {
-        for (int i = 0; i < nl; ++i) delete [] buf [i]; 
-      }
-      delete [] buf;
-      delete [] req;
-    } // end if( nl > 0 )
-    return out;
-  }
-
   inline bool MpAccessMPI::gmax (bool i) const 
   {
     int j = int( i );
@@ -518,21 +445,6 @@ namespace ALUGrid
     delete [] rcounts;
     
     return o;
-  }
-
-  inline std::vector< std::vector< int > > MpAccessMPI::exchange (const std::vector< std::vector< int > > & in) const {
-    assert (static_cast<int> (in.size ()) == nlinks ());
-    return doExchange (in, MPI_INT, _mpiComm, dest ());
-  }
-
-  inline std::vector< std::vector< double > > MpAccessMPI::exchange (const std::vector< std::vector< double > > & in) const {
-    assert (static_cast<int> (in.size ()) == nlinks ());
-    return doExchange (in, MPI_DOUBLE, _mpiComm, dest ());
-  }
-
-  inline std::vector< std::vector< char > > MpAccessMPI::exchange (const std::vector< std::vector< char > > & in) const {
-    assert (static_cast<int> (in.size ()) == nlinks ());
-    return doExchange (in, MPI_BYTE, _mpiComm, dest ());
   }
 
   //////////////////////////////////////////////////////////////////////////

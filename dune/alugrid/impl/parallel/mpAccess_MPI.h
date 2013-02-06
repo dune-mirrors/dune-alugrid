@@ -125,9 +125,6 @@ namespace ALUGrid
     std::vector< std::vector< int > > gcollect (const std::vector< int > &) const;
     std::vector< std::vector< double > > gcollect (const std::vector< double > &) const;
     std::vector< ObjectStream > gcollect (const ObjectStream &, const std::vector<int>& ) const;
-    std::vector< std::vector< int > > exchange (const std::vector< std::vector< int > > &) const;
-    std::vector< std::vector< double > > exchange (const std::vector< std::vector< double > > &) const;
-    std::vector< std::vector< char > > exchange (const std::vector< std::vector< char > > &) const;
     
     std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const;
 

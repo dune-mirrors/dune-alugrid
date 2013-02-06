@@ -1,4 +1,5 @@
 // (c) bernhard schupp 1997 - 1998
+// (c) Robert Kloefkorn 2012 - 2013
 #include <config.h>
 
 #include <list>
@@ -105,185 +106,72 @@ namespace ALUGrid
     lp_map_t linkagePatternMap;
     lmap_t look;
     
+    std::vector< ObjectStream > inout (nl);
     {
-      //std::vector< std::vector< int > > inout (nl);
-      std::vector< ObjectStream > inout (nl);
       lp_map_t::const_iterator meIt = linkagePatternMap.insert (std::vector< int >  (1L, me)).first;
-      /*
+
+      for (mi.first (); ! mi.done (); mi.next ()) 
       {
-        std::vector< int > count (nl);
-        for(int k=0; k<nl; ++k) count[k] = 0;
-        
-        typename AccessIterator < A >::Handle micopy ( mi );
-        for (micopy.first (); ! micopy.done (); micopy.next ()) 
+        std::vector< int > estimate = mi.item ().accessPllX ().estimateLinkage ();
+        if (estimate.size ()) 
         {
-          std::vector< int > estimate = micopy.item ().accessPllX ().estimateLinkage ();
-          if ( ! estimate.empty() ) 
+          LinkedObject::Identifier id = mi.item ().accessPllX ().getIdentifier ();
+          look [id].first  = mi;
+          look [id].second = meIt;
           {
-            std::vector< int >::const_iterator iEnd =  estimate.end ();
+            std::vector< int >::const_iterator iEnd = estimate.end ();
             for (std::vector< int >::const_iterator i = estimate.begin (); 
                  i != iEnd; ++i )
             {
-              count[ mpa.link (*i) ] += 4;
-            }
-          }
-        }
-        // reserve memory 
-        for(int k=0; k<nl; ++k) inout[ k ].reserve( count[k] );
-      }
-      */
-
-      {
-        for (mi.first (); ! mi.done (); mi.next ()) 
-        {
-          std::vector< int > estimate = mi.item ().accessPllX ().estimateLinkage ();
-          if (estimate.size ()) 
-          {
-            LinkedObject::Identifier id = mi.item ().accessPllX ().getIdentifier ();
-            look [id].first  = mi;
-            look [id].second = meIt;
-            {
-              std::vector< int >::const_iterator iEnd = estimate.end ();
-              for (std::vector< int >::const_iterator i = estimate.begin (); 
-                   i != iEnd; ++i )
-              {
-                id.write ( inout [ mpa.link (*i) ] );
-              }
+              id.write ( inout [ mpa.link (*i) ] );
             }
           }
         }
       }
 
+      // unpack data, first loop 
       UnpackIdentification< A > unpackData( linkagePatternMap, look, tt, mpa.dest(), true );
       
       // exchange data 
       mpa.exchange (inout, unpackData );
-
-      /*
-      std::vector< int > d = mpa.dest ();
-      { 
-        for (int l = 0; l < nl; ++l ) 
-        {
-          ObjectStream& os = inout[ l ];
-
-          //std::vector< int >::const_iterator pos = inout [l].begin (), end = inout [l].end ();
-          //while ( pos != end) 
-          
-          typename LinkedObject::Identifier id;
-          bool good = id.read( os );
-          while ( good ) 
-          {
-            // id.read (pos,end);
-
-            typename lmap_t::iterator hit = look.find (id);
-            if (hit != look.end ()) 
-            {
-              std::vector< int > lpn (*(*hit).second.second);
-              if (find (lpn.begin (), lpn.end (), d [l]) == lpn.end ()) 
-              {
-                lpn.push_back (d [l]);
-                std::sort (lpn.begin(), lpn.end() );
-                (*hit).second.second = linkagePatternMap.insert (lpn).first;
-              }
-            }
-
-            // read next id and check whether it was successful 
-            good = id.read( os );
-          }
-        } 
-      }
-      */
     }
 
     tt = std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
                       std::list< typename AccessIterator < A >::Handle > > > (nl);
     {
-      //std::vector< std::vector< int > > inout (nl);
-      std::vector< ObjectStream > inout (nl);
-      /*
+      // clear streams 
+      for( int l=0; l < nl; ++ l ) 
+        inout[ l ].clear();
+      
+      const typename lmap_t::const_iterator lookEnd = look.end ();
+      for (typename lmap_t::const_iterator pos = look.begin (); 
+           pos != lookEnd; ++pos) 
       {
-        std::vector<int> count(nl);
-        for(int k=0; k<nl; k++) count[k] = 0;
-
-        for (typename lmap_t::const_iterator pos = look.begin (); 
-          pos != look.end (); pos ++) 
+        const std::vector< int > & lk (*(*pos).second.second);
+        if (* lk.begin () == me) 
         {
-          const std::vector< int > & lk (*(*pos).second.second);
-          if (* lk.begin () == me) 
-          {
+          typename LinkedObject::Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier ();
+          { 
             typename std::vector< int >::const_iterator iEnd = lk.end ();
             for (typename std::vector< int >::const_iterator i = lk.begin (); 
-                 i != iEnd; i ++) 
+                 i != iEnd; ++i) 
             {
               if (*i != me) 
               {
                 int l = mpa.link (*i);
-                count[l] += 4; 
+                tt [l].first.push_back ((*pos).second.first);
+                id.write ( inout [l] );
               }
-            }
-          }
-        }
-        // reserve memory 
-        for(int k=0; k<nl; ++k) inout[k].reserve( count[k] );
-      }
-      */
-      
-      {
-        const typename lmap_t::const_iterator lookEnd = look.end ();
-        for (typename lmap_t::const_iterator pos = look.begin (); 
-             pos != lookEnd; ++pos) 
-        {
-          const std::vector< int > & lk (*(*pos).second.second);
-          if (* lk.begin () == me) 
-          {
-            typename LinkedObject::Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier ();
-            { 
-              typename std::vector< int >::const_iterator iEnd = lk.end ();
-              for (typename std::vector< int >::const_iterator i = lk.begin (); 
-                   i != iEnd; ++i) 
-              {
-                if (*i != me) 
-                {
-                  int l = mpa.link (*i);
-                  tt [l].first.push_back ((*pos).second.first);
-                  id.write ( inout [l] );
-                }
-              } 
-            }
+            } 
           }
         }
       }
 
+      // unpack data, second loop 
       UnpackIdentification< A > unpackData( linkagePatternMap, look, tt, mpa.dest(), false );
       
       // exchange data 
       mpa.exchange (inout, unpackData );
-
-      // exchange data 
-      //inout = mpa.exchange (inout);
-      
-      /*
-      {
-        for (int i = 0; i < nl; ++i ) 
-        {
-          ObjectStream& os = inout[ i ];
-
-          //typename std::vector< int >::const_iterator pos = inout [i].begin (), end = inout [i].end ();
-          //while (pos != end) 
-          typename LinkedObject::Identifier id;
-          bool good = id.read( os );
-          while ( good ) 
-          {
-            //typename LinkedObject::Identifier id;
-            //id.read (pos,end);
-            assert (look.find (id) != look.end ());
-            tt [i].second.push_back ((*look.find (id)).second.first);
-          
-            good = id.read( os );
-          } 
-        }
-      }
-      */
     }
     return;
   }

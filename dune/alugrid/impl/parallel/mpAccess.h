@@ -118,9 +118,6 @@ namespace ALUGrid
       inline int link (int) const ;
       const std::vector< int > &dest () const{ return _dest ; }
       int insertRequestSymetric ( std::set< int > );
-      virtual std::vector< std::vector< int > > exchange (const std::vector< std::vector< int > > &) const = 0 ;
-      virtual std::vector< std::vector< double > > exchange (const std::vector< std::vector< double > > &) const = 0 ;
-      virtual std::vector< std::vector< char > > exchange (const std::vector< std::vector< char > > &) const = 0 ;
       // exchange data and return new vector of object streams 
       virtual std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const = 0 ;
       virtual void exchange ( const std::vector< ObjectStream > &, NonBlockingExchange::DataHandleIF& ) const = 0 ;
