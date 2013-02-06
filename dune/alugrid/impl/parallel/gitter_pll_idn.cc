@@ -91,10 +91,10 @@ namespace ALUGrid
               std::vector< int > lpn (*(*hit).second.second);
               if (find (lpn.begin (), lpn.end (), d [l]) == lpn.end ()) 
               {
-                      lpn.push_back (d [l]);
-                      std::sort (lpn.begin(), lpn.end() );
-                      (*hit).second.second = linkagePatternMap.insert (lpn).first;
-                    }
+                lpn.push_back (d [l]);
+                std::sort (lpn.begin(), lpn.end() );
+                (*hit).second.second = linkagePatternMap.insert (lpn).first;
+              }
             }
           }
         } 
