@@ -144,7 +144,7 @@ namespace ALUGrid
       const int nl = mpa.nlinks();
       for( int link = 0; link < nl ; ++ link ) 
       {
-        inout[ link ].writeObject( ObjectStream :: ENDOFSTREAM );
+        LinkedObject::Identifier::endOfStream( inout[ link ] );
       }
     }
       
@@ -183,7 +183,7 @@ namespace ALUGrid
       const int nl = mpa.nlinks();
       for( int link = 0; link < nl ; ++ link ) 
       {
-        inout[ link ].writeObject( ObjectStream :: ENDOFSTREAM );
+        LinkedObject::Identifier::endOfStream( inout[ link ] );
       }
     }
 
@@ -289,16 +289,10 @@ namespace ALUGrid
     edg_lmap_t lookEdg;
     fce_lmap_t lookFce;
 
+    // resize vectors 
     vertexTT.resize( nl );
     edgeTT.resize( nl );
     faceTT.resize( nl );
-
-    //vertexTT = std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
-    //                        std::list< typename AccessIterator < A >::Handle > > > (nl);
-    //edgeTT = std::vector< std::pair< std::list< typename AccessIterator < B >::Handle >, 
-     //                       std::list< typename AccessIterator < B >::Handle > > > (nl);
-    //faceTT = std::vector< std::pair< std::list< typename AccessIterator < C >::Handle >, 
-     //                     std::list< typename AccessIterator < C >::Handle > > > (nl);
 
     std::vector< ObjectStream > inout (nl);
 
@@ -356,7 +350,7 @@ namespace ALUGrid
       // write end marker to stream 
       for( int link = 0; link < nl ; ++ link ) 
       {
-        inout [ link ].writeObject( ObjectStream :: ENDOFSTREAM );
+        LinkedObject::Identifier::endOfStream( inout[ link ] );
       }
 
       // unpack data, first loop 
@@ -398,7 +392,7 @@ namespace ALUGrid
       // write end marker to stream 
       for( int link = 0; link < nl ; ++ link ) 
       {
-        inout [ link ].writeObject( ObjectStream :: ENDOFSTREAM );
+        LinkedObject::Identifier::endOfStream( inout[ link ] );
       }
 
       // unpack data, second loop 

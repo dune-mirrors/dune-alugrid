@@ -110,6 +110,7 @@ namespace ALUGrid
     class Identifier
     {
       int _i1, _i2, _i3, _i4 ;
+      static const int _endOfStream = -128 ; // must be a negative value 
     public :
       inline Identifier (int = -1, int = -1, int = -1, int = -1) ;
       inline Identifier (const Identifier &) ;
@@ -120,6 +121,12 @@ namespace ALUGrid
       bool read ( ObjectStream& );
       void write ( ObjectStream& ) const ;
       inline bool isValid () const ;
+      // read stream termination marker 
+      static void endOfStream( ObjectStream& os ) 
+      {
+        os.writeObject( _endOfStream );
+      }
+
     } ;
 
   public :
@@ -222,28 +229,18 @@ namespace ALUGrid
   {
     // if the next entry is end of stream do nothing more 
     os.readObject( _i1 );
-    if( _i1 == ObjectStream :: ENDOFSTREAM ) 
+    if( _i1 == _endOfStream ) 
       return false ;
 
     os.readObject( _i2 );
     os.readObject( _i3 );
     os.readObject( _i4 );
     return true ;
-      /*
-    if( os.goodToRead( sizeof(Identifier) ) )
-    {
-      // read object from stream 
-      os.read( *this );
-      return true ;
-    }
-    return false ;
-    */
   }
 
   inline void LinkedObject::Identifier::write ( ObjectStream& os ) const
   {
     // write object to stream 
-    // os.write( *this );
     os.writeObject( _i1 );
     os.writeObject( _i2 );
     os.writeObject( _i3 );
