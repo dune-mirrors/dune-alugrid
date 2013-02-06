@@ -116,8 +116,9 @@ namespace ALUGrid
       inline const Identifier & operator = (const Identifier &) ;
       inline bool operator < (const Identifier &) const ;
       inline bool operator == (const Identifier &) const ;
-      void read ( std::vector< int >::const_iterator &, const std::vector< int >::const_iterator & );
-      void write ( std::vector< int > &) const ;
+      // read identifier from stream and return true if successful 
+      bool read ( ObjectStream& );
+      void write ( ObjectStream& ) const ;
       inline bool isValid () const ;
     } ;
 
@@ -195,7 +196,8 @@ namespace ALUGrid
     : _i1 (x._i1), _i2 (x._i2), _i3 (x._i3), _i4 (x._i4) {
   }
 
-  inline const LinkedObject :: Identifier & LinkedObject :: Identifier :: operator = (const Identifier & x) {
+  inline const LinkedObject :: Identifier & LinkedObject :: Identifier :: operator = (const Identifier & x) 
+  {
     assert (x.isValid ()) ;
     _i1 = x._i1 ;
     _i2 = x._i2 ;
@@ -215,21 +217,22 @@ namespace ALUGrid
     return (_i1 == x._i1 && _i2 == x._i2 && _i3 == x._i3 && _i4 == x._i4) ? true : false ;
   }
 
-  inline void LinkedObject::Identifier::read ( std::vector< int >::const_iterator &pos,
-                                               const std::vector< int >::const_iterator &end )
+  // read identifier and return true if successful 
+  inline bool LinkedObject::Identifier::read ( ObjectStream& os ) 
   {
-    assert (pos != end ) ; _i1 = * pos ++ ;
-    assert (pos != end ) ; _i2 = * pos ++ ; 
-    assert (pos != end ) ; _i3 = * pos ++ ;
-    assert (pos != end ) ; _i4 = * pos ++ ;
+    if( os.goodToRead( sizeof(Identifier) ) )
+    {
+      // read object from stream 
+      os.read( *this );
+      return true ;
+    }
+    return false ;
   }
 
-  inline void LinkedObject::Identifier::write ( std::vector< int > &v ) const
+  inline void LinkedObject::Identifier::write ( ObjectStream& os ) const
   {
-    v.push_back (_i1);
-    v.push_back (_i2);
-    v.push_back (_i3);
-    v.push_back (_i4);
+    // write object to stream 
+    os.write( *this );
   }
 
 } // namespace ALUGrid

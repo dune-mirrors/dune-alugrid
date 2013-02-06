@@ -11,27 +11,27 @@
 namespace ALUGrid
 {
 
-  // vorsicht mit optimierenden compilern bei dem untenstehnden template !
-
   template < class A > void identify (typename AccessIterator < A >::Handle mi, 
                                       std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
-                                                      std::list< typename AccessIterator < A >::Handle > > > & tt, 
-                                      const MpAccessLocal & c) 
+                                                   std::list< typename AccessIterator < A >::Handle > > > & tt, 
+                                      const MpAccessLocal & mpa) 
   {
     typedef std::set< std::vector< int > > lp_map_t;
 
     typedef std::map< typename LinkedObject::Identifier, 
-                  std::pair< typename AccessIterator < A >::Handle, 
-                  typename lp_map_t::const_iterator > > lmap_t;
+                      std::pair< typename AccessIterator < A >::Handle, 
+                      typename lp_map_t::const_iterator > > lmap_t;
 
-    const int me = c.myrank (), nl = c.nlinks ();
+    const int me = mpa.myrank (), nl = mpa.nlinks ();
     
     lp_map_t linkagePatternMap;
     lmap_t look;
     
     {
-      std::vector< std::vector< int > > inout (nl);
+      //std::vector< std::vector< int > > inout (nl);
+      std::vector< ObjectStream > inout (nl);
       lp_map_t::const_iterator meIt = linkagePatternMap.insert (std::vector< int >  (1L, me)).first;
+      /*
       {
         std::vector< int > count (nl);
         for(int k=0; k<nl; ++k) count[k] = 0;
@@ -46,14 +46,15 @@ namespace ALUGrid
             for (std::vector< int >::const_iterator i = estimate.begin (); 
                  i != iEnd; ++i )
             {
-              count[c.link (*i)] += 4;
+              count[ mpa.link (*i) ] += 4;
             }
           }
         }
         // reserve memory 
         for(int k=0; k<nl; ++k) inout[ k ].reserve( count[k] );
       }
-      
+      */
+
       {
         for (mi.first (); ! mi.done (); mi.next ()) 
         {
@@ -61,30 +62,38 @@ namespace ALUGrid
           if (estimate.size ()) 
           {
             LinkedObject::Identifier id = mi.item ().accessPllX ().getIdentifier ();
-            look [id].first = mi;
+            look [id].first  = mi;
             look [id].second = meIt;
-                  {
+            {
               std::vector< int >::const_iterator iEnd = estimate.end ();
               for (std::vector< int >::const_iterator i = estimate.begin (); 
                    i != iEnd; ++i )
-                id.write (inout [c.link (*i)]);
+              {
+                id.write ( inout [mpa.link (*i)] );
+              }
             }
           }
         }
       }
       
       // exchange data 
-      inout = c.exchange (inout);
+      inout = mpa.exchange (inout);
 
-      std::vector< int > d = c.dest ();
+      std::vector< int > d = mpa.dest ();
       { 
         for (int l = 0; l < nl; ++l ) 
         {
-          std::vector< int >::const_iterator pos = inout [l].begin (), end = inout [l].end ();
-          while (pos != end) 
+          ObjectStream& os = inout[ l ];
+
+          //std::vector< int >::const_iterator pos = inout [l].begin (), end = inout [l].end ();
+          //while ( pos != end) 
+          
+          typename LinkedObject::Identifier id;
+          bool good = id.read( os );
+          while ( good ) 
           {
-            typename LinkedObject::Identifier id;
-            id.read (pos,end);
+            // id.read (pos,end);
+
             typename lmap_t::iterator hit = look.find (id);
             if (hit != look.end ()) 
             {
@@ -96,15 +105,20 @@ namespace ALUGrid
                 (*hit).second.second = linkagePatternMap.insert (lpn).first;
               }
             }
+
+            // read next id and check whether it was successful 
+            good = id.read( os );
           }
         } 
       }
     }
 
     tt = std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
-                         std::list< typename AccessIterator < A >::Handle > > > (nl);
+                      std::list< typename AccessIterator < A >::Handle > > > (nl);
     {
-      std::vector< std::vector< int > > inout (nl);
+      //std::vector< std::vector< int > > inout (nl);
+      std::vector< ObjectStream > inout (nl);
+      /*
       {
         std::vector<int> count(nl);
         for(int k=0; k<nl; k++) count[k] = 0;
@@ -121,7 +135,7 @@ namespace ALUGrid
             {
               if (*i != me) 
               {
-                int l = c.link (*i);
+                int l = mpa.link (*i);
                 count[l] += 4; 
               }
             }
@@ -130,6 +144,7 @@ namespace ALUGrid
         // reserve memory 
         for(int k=0; k<nl; ++k) inout[k].reserve( count[k] );
       }
+      */
       
       {
         const typename lmap_t::const_iterator lookEnd = look.end ();
@@ -147,9 +162,9 @@ namespace ALUGrid
               {
                 if (*i != me) 
                 {
-                  int l = c.link (*i);
+                  int l = mpa.link (*i);
                   tt [l].first.push_back ((*pos).second.first);
-                  id.write (inout [l]);
+                  id.write ( inout [l] );
                 }
               } 
             }
@@ -158,18 +173,25 @@ namespace ALUGrid
       }
 
       // exchange data 
-      inout = c.exchange (inout);
+      inout = mpa.exchange (inout);
       
       {
         for (int i = 0; i < nl; ++i ) 
         {
-          typename std::vector< int >::const_iterator pos = inout [i].begin (), end = inout [i].end ();
-          while (pos != end) 
+          ObjectStream& os = inout[ i ];
+
+          //typename std::vector< int >::const_iterator pos = inout [i].begin (), end = inout [i].end ();
+          //while (pos != end) 
+          typename LinkedObject::Identifier id;
+          bool good = id.read( os );
+          while ( good ) 
           {
-            typename LinkedObject::Identifier id;
-            id.read (pos,end);
+            //typename LinkedObject::Identifier id;
+            //id.read (pos,end);
             assert (look.find (id) != look.end ());
             tt [i].second.push_back ((*look.find (id)).second.first);
+          
+            good = id.read( os );
           } 
         }
       }
@@ -361,7 +383,7 @@ namespace ALUGrid
     }
   }
 
-  void GitterPll::MacroGitterPll::identification (MpAccessLocal & c) 
+  void GitterPll::MacroGitterPll::identification (MpAccessLocal & mpa) 
   {
     // clear all entries and also clear memory be reassigning 
     vertexTT_t().swap( _vertexTT );
@@ -373,22 +395,22 @@ namespace ALUGrid
     assert( _hedgeTT.capacity()  == 0 );
     assert( _hfaceTT.capacity()  == 0 );
 
-    c.removeLinkage ();
+    mpa.removeLinkage ();
     
     int lap1 = clock ();
-    vertexLinkageEstimate (c);
+    vertexLinkageEstimate ( mpa );
 
-    c.insertRequestSymetric (secondScan ());
-    if (debugOption (2)) c.printLinkage (std::cout);
+    mpa.insertRequestSymetric (secondScan ());
+    if (debugOption (2)) mpa.printLinkage (std::cout);
 
     int lap2 = clock ();
-    identify < vertex_STI > (AccessIterator < vertex_STI >::Handle (*this), _vertexTT, c);
+    identify < vertex_STI > (AccessIterator < vertex_STI >::Handle (*this), _vertexTT, mpa);
     
     int lap3 = clock ();
-    identify < hedge_STI > (AccessIterator < hedge_STI >::Handle (*this), _hedgeTT, c);
+    identify < hedge_STI > (AccessIterator < hedge_STI >::Handle (*this), _hedgeTT, mpa);
     
     int lap4 = clock ();
-    identify < hface_STI > (AccessIterator < hface_STI >::Handle (*this), _hfaceTT, c);
+    identify < hface_STI > (AccessIterator < hface_STI >::Handle (*this), _hfaceTT, mpa);
 
     int lap5 = clock ();
     if (debugOption (2)) {

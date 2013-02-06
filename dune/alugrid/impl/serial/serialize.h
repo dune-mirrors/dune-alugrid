@@ -120,6 +120,13 @@ namespace ALUGrid
     bool good () const { return (this->_rb <= this->_wb); }
     /////////////////////////////////////
 
+    // good function 
+    bool goodToRead ( const size_t readSize ) const 
+    { 
+      return ((this->_rb+readSize) <= this->_wb); 
+    }
+
+    /////////////////////////////////////
   protected:  
     template <class T>
     inline void writeT (const T & a, const bool checkLength )  
