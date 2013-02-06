@@ -236,8 +236,9 @@ namespace ALUGrid
       virtual void exchangeStaticState ();
       virtual void exchangeDynamicState ();
 
+    public:  
       // pack or unpack dynamic state data 
-      void packUnpackDynamicState ( std::vector<ObjectStream> & osv, const int nl, const bool packData );
+      void packUnpackDynamicState ( ObjectStream &os, const int link, const bool packData );
     protected:   
       void doRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
     public:  

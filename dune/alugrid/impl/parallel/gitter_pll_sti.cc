@@ -721,6 +721,146 @@ namespace ALUGrid
     }
   };
 
+  class PackUnpackEdgeCoarsen : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hedge_STI hedge_STI ;
+    typedef std::vector< hedge_STI * > edgevec_t ;
+
+    typedef std::pair< bool, bool >  clean_t;
+    typedef std::map< hedge_STI *, clean_t > cleanmap_t;
+    typedef cleanmap_t::iterator cleanmapiterator_t;
+
+    GitterPll& _gitter; 
+    cleanmap_t& _clean;
+    std::vector< edgevec_t >& _innerEdges ;
+    std::vector< edgevec_t >& _outerEdges ;
+    const bool _firstLoop ;
+
+    typedef edgevec_t::const_iterator hedge_iterator;
+
+    PackUnpackEdgeCoarsen( const PackUnpackEdgeCoarsen& );
+  public:
+    PackUnpackEdgeCoarsen( GitterPll& gitter,
+                           cleanmap_t& clean, 
+                           std::vector< edgevec_t >& innerEdges,
+                           std::vector< edgevec_t >& outerEdges,
+                           const bool firstLoop )
+      : _gitter( gitter ), 
+        _clean( clean ),
+        _innerEdges( innerEdges ),
+        _outerEdges( outerEdges ),
+        _firstLoop( firstLoop )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // clear stream  
+      os.clear();
+
+      if( _firstLoop ) 
+      {
+        // reserve memory first 
+        os.reserve( _outerEdges[ link ].size() * sizeof(char) );
+
+        // get end iterator 
+        const hedge_iterator iEnd = _outerEdges[ link ].end ();
+        for (hedge_iterator i = _outerEdges[ link ].begin (); i != iEnd; ++i)
+        {
+          char lockAndTry = (*i)->lockAndTry ();
+          os.putNoChk( lockAndTry );
+        }
+      }
+      else 
+      {
+        // reserve memory first 
+        os.reserve( _innerEdges[ link ].size() * sizeof(char) );
+
+        // get end iterator 
+        const hedge_iterator iEnd = _innerEdges[ link ].end ();
+        for (hedge_iterator i = _innerEdges[ link ].begin (); i != iEnd; ++i) 
+        {
+          hedge_STI* edge = (*i);
+          assert ( _clean.find ( edge ) != _clean.end ());
+
+          clean_t& a = _clean[ edge ];
+          os.putNoChk( char( a.first) );
+
+          if (a.second) 
+          {
+            // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
+            // sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
+            // einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
+            // mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
+            // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
+          
+            a.second = false;
+#ifndef NDEBUG
+            bool b = 
+#endif
+              edge->unlockAndResume (a.first);
+            assert (b == a.first);
+          }
+        }
+
+        // also pack dynamic state here since this is the last communication 
+        _gitter.packUnpackDynamicState( os, link, true );
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      if( _firstLoop ) 
+      {
+        // get end iterators 
+        const cleanmapiterator_t cleanEnd = _clean.end();
+        const hedge_iterator iEnd = _innerEdges[ link ].end ();
+        // fill cleanmap first 
+        for (hedge_iterator i = _innerEdges[ link ].begin (); i != iEnd; ++i)
+        {
+          hedge_STI* edge = (*i);
+          cleanmapiterator_t cit = _clean.find ( edge );
+          if (cit == cleanEnd ) 
+          {
+            clean_t& cp = _clean[ edge ];
+            cp.first  = edge->lockAndTry ();
+            cp.second = true;
+          }
+        }
+          
+        for (hedge_iterator i = _innerEdges[ link ].begin (); i != iEnd; ++i)
+        {
+          const bool locked = bool( os.get() );
+          if( locked == false ) 
+          {
+            assert ( _clean.find (*i) != cleanEnd );
+            _clean[ *i ].first = false;
+          }
+        }
+      }
+      else
+      {
+        // get end iterator 
+        const hedge_iterator iEnd = _outerEdges[ link ].end ();
+        for (hedge_iterator i = _outerEdges[ link ].begin (); i != iEnd; ++i )
+        {
+          // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
+          // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
+          // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
+        
+          const bool unlock = bool( os.get() );
+#ifndef NDEBUG
+          bool b = 
+#endif
+            (*i)->unlockAndResume ( unlock );
+          assert (b == unlock);
+        }
+
+        // unpack dynamic state 
+        _gitter.packUnpackDynamicState( os, link, false );
+      }
+    }
+  };
+
   void GitterPll::coarse () 
   {
     assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::coarse () " << std::endl, 1) : 1);
@@ -1008,6 +1148,17 @@ namespace ALUGrid
         typedef cleanmap_t::iterator cleanmapiterator_t;
         cleanmap_t clean;
         
+        {
+          PackUnpackEdgeCoarsen edgeData( *this, clean, innerEdges, outerEdges, true );
+          mpAccess().exchange( edgeData );
+        }
+
+        {
+          PackUnpackEdgeCoarsen edgeData( *this, clean, innerEdges, outerEdges, false );
+          mpAccess().exchange( edgeData );
+        }
+
+        /*
         const cleanmapiterator_t cleanEnd = clean.end();
         {
           for (int l = 0; l < nl; l ++)
@@ -1104,7 +1255,10 @@ namespace ALUGrid
           }
 
           // also pack dynamic state here since this is the last communication 
-          packUnpackDynamicState( inout, nl, true );
+          for( int link=0; link < nl ; ++ link )
+          {
+            packUnpackDynamicState( inout[ link ], link, true );
+          }
           
           // exchange data 
           inout = mpAccess ().exchange (inout);
@@ -1132,8 +1286,13 @@ namespace ALUGrid
           }
 
           // unpack dynamic state here since this is the last communication 
-          packUnpackDynamicState( inout, nl, false );
+          for( int link=0; link < nl ; ++ link )
+          {
+            // unpack dynamic state 
+            packUnpackDynamicState( inout[ link ], link, false );
+          }
         }
+        */
       } 
       catch( Parallel::AccessPllException )
       {
@@ -1146,7 +1305,7 @@ namespace ALUGrid
   }
 
   void GitterPll::
-  packUnpackDynamicState ( std::vector< ObjectStream >& osv, const int nl, const bool packData )
+  packUnpackDynamicState ( ObjectStream& os, const int link, const bool packData )
   {
     typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
        TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
@@ -1156,52 +1315,40 @@ namespace ALUGrid
     // if pack data is true, then write data to stream, otherwise read 
     if( packData ) 
     {
-      for (int l = 0; l < nl; ++l) 
+      AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (),link );
+      AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (),link );
+
+      InnerIteratorType wi (mif);
+      for (wi.first (); ! wi.done (); wi.next ()) 
       {
-        // get object stream 
-        ObjectStream& os = osv[ l ];
-
-        AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (),l);
-        AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (),l);
-
-        InnerIteratorType wi (mif);
-        for (wi.first (); ! wi.done (); wi.next ()) 
-        {
-          std::pair< ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX ();
-          p.first->writeDynamicState (os, p.second);
-        }
-    
-        OuterIteratorType wo (mof);
-        for (wo.first (); ! wo.done (); wo.next ()) 
-        {
-          std::pair< ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX ();
-          p.first->writeDynamicState (os, p.second);
-        }
+        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX ();
+        p.first->writeDynamicState (os, p.second);
+      }
+  
+      OuterIteratorType wo (mof);
+      for (wo.first (); ! wo.done (); wo.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX ();
+        p.first->writeDynamicState (os, p.second);
       }
     }
     else // unpack data 
     { 
-      for (int l = 0; l < nl; ++l) 
+      AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (), link );
+      AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (), link );
+  
+      OuterIteratorType wo (mof);
+      for (wo.first (); ! wo.done (); wo.next ()) 
       {
-        // get object stream 
-        ObjectStream& os = osv[ l ];
-
-        AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (),l);
-        AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (),l);
-    
-        OuterIteratorType wo (mof);
-        for (wo.first (); ! wo.done (); wo.next ()) 
-        {
-          std::pair< ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX ();
-          p.first->readDynamicState (os, p.second);
-        }
-    
-        InnerIteratorType wi (mif);
-        for (wi.first (); ! wi.done (); wi.next ()) 
-        {
-          std::pair< ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX ();
-          p.first->readDynamicState (os, p.second);
-        }
+        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX ();
+        p.first->readDynamicState (os, p.second);
+      }
+  
+      InnerIteratorType wi (mif);
+      for (wi.first (); ! wi.done (); wi.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX ();
+        p.first->readDynamicState (os, p.second);
       }
     } 
   }
@@ -1406,14 +1553,20 @@ namespace ALUGrid
         // create message buffers 
         std::vector< ObjectStream > osv (nl);
 
-        // pack dynamic state 
-        packUnpackDynamicState( osv, nl, true );
+        for( int link=0; link < nl ; ++ link )
+        {
+          // pack dynamic state 
+          packUnpackDynamicState( osv[ link ], link, true );
+        }
           
         // exchange data 
         osv = mpAccess ().exchange (osv);
       
-        // unpack dynamic state 
-        packUnpackDynamicState( osv, nl, false );
+        for( int link=0; link < nl ; ++ link )
+        {
+          // unpack dynamic state 
+          packUnpackDynamicState( osv[ link ], link, false );
+        }
           
       } 
       catch( Parallel:: AccessPllException )
