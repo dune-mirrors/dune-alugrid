@@ -10,6 +10,84 @@
 
 namespace ALUGrid
 {
+  
+  template < class A >
+  class UnpackIdentification 
+    : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef std::set< std::vector< int > > lp_map_t;
+
+    typedef std::map< typename LinkedObject::Identifier, 
+                      std::pair< typename AccessIterator < A >::Handle, 
+                      typename lp_map_t::const_iterator > > lmap_t;
+
+    typedef std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
+                         std::list< typename AccessIterator < A >::Handle > > > tt_t;
+    lp_map_t& _linkagePatternMap;
+    lmap_t&   _look;
+    tt_t& _tt;
+    const std::vector< int >& _dest;
+    const bool _firstLoop ;
+
+    UnpackIdentification( const UnpackIdentification& );
+  public:
+    UnpackIdentification( lp_map_t& linkagePatternMap, 
+                          lmap_t&   look, 
+                          tt_t& tt,
+                          const std::vector< int >& dest,
+                          const bool firstLoop )
+      : _linkagePatternMap( linkagePatternMap ),
+        _look( look ),
+        _tt( tt ),
+        _dest( dest ),
+        _firstLoop( firstLoop )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      std::cerr << "ERROR: UnpackIdentification::pack should not be called!" << std::endl;
+      abort();
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      if( _firstLoop ) 
+      {
+        typename LinkedObject::Identifier id;
+        bool good = id.read( os );
+        while ( good ) 
+        {
+          typename lmap_t::iterator hit = _look.find (id);
+          if (hit != _look.end ()) 
+          {
+            std::vector< int > lpn (*(*hit).second.second);
+            if (find (lpn.begin (), lpn.end (), _dest[ link ]) == lpn.end () ) 
+            {
+              lpn.push_back ( _dest[ link ] );
+              std::sort (lpn.begin(), lpn.end() );
+              (*hit).second.second = _linkagePatternMap.insert (lpn).first;
+            }
+          }
+
+          // read next id and check whether it was successful 
+          good = id.read( os );
+        }
+      }
+      else
+      {
+        typename LinkedObject::Identifier id;
+        bool good = id.read( os );
+        while ( good ) 
+        {
+          assert ( _look.find (id) != _look.end () );
+          _tt[ link ].second.push_back ((*_look.find (id)).second.first);
+        
+          good = id.read( os );
+        } 
+      }
+    }
+  };
+
 
   template < class A > void identify (typename AccessIterator < A >::Handle mi, 
                                       std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
@@ -69,16 +147,19 @@ namespace ALUGrid
               for (std::vector< int >::const_iterator i = estimate.begin (); 
                    i != iEnd; ++i )
               {
-                id.write ( inout [mpa.link (*i)] );
+                id.write ( inout [ mpa.link (*i) ] );
               }
             }
           }
         }
       }
+
+      UnpackIdentification< A > unpackData( linkagePatternMap, look, tt, mpa.dest(), true );
       
       // exchange data 
-      inout = mpa.exchange (inout);
+      mpa.exchange (inout, unpackData );
 
+      /*
       std::vector< int > d = mpa.dest ();
       { 
         for (int l = 0; l < nl; ++l ) 
@@ -111,6 +192,7 @@ namespace ALUGrid
           }
         } 
       }
+      */
     }
 
     tt = std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
@@ -172,9 +254,15 @@ namespace ALUGrid
         }
       }
 
-      // exchange data 
-      inout = mpa.exchange (inout);
+      UnpackIdentification< A > unpackData( linkagePatternMap, look, tt, mpa.dest(), false );
       
+      // exchange data 
+      mpa.exchange (inout, unpackData );
+
+      // exchange data 
+      //inout = mpa.exchange (inout);
+      
+      /*
       {
         for (int i = 0; i < nl; ++i ) 
         {
@@ -195,6 +283,7 @@ namespace ALUGrid
           } 
         }
       }
+      */
     }
     return;
   }

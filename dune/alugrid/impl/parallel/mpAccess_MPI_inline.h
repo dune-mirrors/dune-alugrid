@@ -548,6 +548,8 @@ namespace ALUGrid
 
     MPI_Request* _request;
 
+    const bool _notYetSent ;
+
     // no copying 
     NonBlockingExchangeMPI( const NonBlockingExchangeMPI& );
 
@@ -559,7 +561,8 @@ namespace ALUGrid
       : _mpAccess( mpAccess ),
         _nLinks( _mpAccess.nlinks() ),
         _tag( tag ),
-        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
+        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
+        _notYetSent( true )
     {
     }
 
@@ -569,7 +572,8 @@ namespace ALUGrid
       : _mpAccess( mpAccess ),
         _nLinks( _mpAccess.nlinks() ),
         _tag( tag ),
-        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
+        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
+        _notYetSent( false )
     {
       assert( _nLinks == int( in.size() ) );
       sendImpl( in ); 
@@ -713,14 +717,18 @@ namespace ALUGrid
       // get object stream 
       ObjectStream os ;
 
-      // send data 
-      for (int link = 0; link < _nLinks; ++link) 
+      // if data was noy send yet, do it now 
+      if( _notYetSent ) 
       {
-        // pack data 
-        dataHandle.pack( link, os );
-
         // send data 
-        sendLink( link, dest[ link ], os, comm );
+        for (int link = 0; link < _nLinks; ++link) 
+        {
+          // pack data 
+          dataHandle.pack( link, os );
+
+          // send data 
+          sendLink( link, dest[ link ], os, comm );
+        }
       }
 
       // get received vector 
@@ -869,6 +877,13 @@ namespace ALUGrid
   {
     NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
     return nonBlockingExchange.receiveImpl();
+  }
+
+  // --exchange
+  inline void MpAccessMPI::exchange ( const std::vector< ObjectStream > & in, NonBlockingExchange::DataHandleIF& handle ) const 
+  {
+    NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
+    nonBlockingExchange.exchange( handle );
   }
 
   // --exchange

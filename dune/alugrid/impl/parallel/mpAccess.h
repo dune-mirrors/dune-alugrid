@@ -123,6 +123,7 @@ namespace ALUGrid
       virtual std::vector< std::vector< char > > exchange (const std::vector< std::vector< char > > &) const = 0 ;
       // exchange data and return new vector of object streams 
       virtual std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const = 0 ;
+      virtual void exchange ( const std::vector< ObjectStream > &, NonBlockingExchange::DataHandleIF& ) const = 0 ;
       virtual void exchange ( NonBlockingExchange::DataHandleIF& ) const = 0 ;
 
       // return handle for non-blocking exchange and already do send operation
