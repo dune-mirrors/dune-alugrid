@@ -220,6 +220,16 @@ namespace ALUGrid
   // read identifier and return true if successful 
   inline bool LinkedObject::Identifier::read ( ObjectStream& os ) 
   {
+    // if the next entry is end of stream do nothing more 
+    os.readObject( _i1 );
+    if( _i1 == ObjectStream :: ENDOFSTREAM ) 
+      return false ;
+
+    os.readObject( _i2 );
+    os.readObject( _i3 );
+    os.readObject( _i4 );
+    return true ;
+      /*
     if( os.goodToRead( sizeof(Identifier) ) )
     {
       // read object from stream 
@@ -227,12 +237,17 @@ namespace ALUGrid
       return true ;
     }
     return false ;
+    */
   }
 
   inline void LinkedObject::Identifier::write ( ObjectStream& os ) const
   {
     // write object to stream 
-    os.write( *this );
+    // os.write( *this );
+    os.writeObject( _i1 );
+    os.writeObject( _i2 );
+    os.writeObject( _i3 );
+    os.writeObject( _i4 );
   }
 
 } // namespace ALUGrid
