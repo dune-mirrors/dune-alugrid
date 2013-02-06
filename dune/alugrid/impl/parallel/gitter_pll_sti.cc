@@ -687,9 +687,6 @@ namespace ALUGrid
             assert (b == a.first);
           }
         }
-
-        // also pack dynamic state here since this is the last communication 
-        // _gitter.packUnpackDynamicState( os, link, true );
       }
     }
 
@@ -740,9 +737,6 @@ namespace ALUGrid
             (*i)->unlockAndResume ( unlock );
           assert (b == unlock);
         }
-
-        // unpack dynamic state 
-        // _gitter.packUnpackDynamicState( os, link, false );
       }
     }
   };
@@ -977,55 +971,6 @@ namespace ALUGrid
     __STATIC_phase = -1;
   }
 
-  void GitterPll::
-  packUnpackDynamicState ( ObjectStream& os, const int link, const bool packData )
-  {
-    typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
-       TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
-    typedef Insert < AccessIteratorTT < hface_STI >::OuterHandle, 
-      TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
-                
-    // if pack data is true, then write data to stream, otherwise read 
-    if( packData ) 
-    {
-      AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (),link );
-      AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (),link );
-
-      InnerIteratorType wi (mif);
-      for (wi.first (); ! wi.done (); wi.next ()) 
-      {
-        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX ();
-        p.first->writeDynamicState (os, p.second);
-      }
-  
-      OuterIteratorType wo (mof);
-      for (wo.first (); ! wo.done (); wo.next ()) 
-      {
-        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX ();
-        p.first->writeDynamicState (os, p.second);
-      }
-    }
-    else // unpack data 
-    { 
-      AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (), link );
-      AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (), link );
-  
-      OuterIteratorType wo (mof);
-      for (wo.first (); ! wo.done (); wo.next ()) 
-      {
-        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX ();
-        p.first->readDynamicState (os, p.second);
-      }
-  
-      InnerIteratorType wi (mif);
-      for (wi.first (); ! wi.done (); wi.next ()) 
-      {
-        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX ();
-        p.first->readDynamicState (os, p.second);
-      }
-    } 
-  }
-
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
   extern int adaptstep;
   extern int stepnumber;
@@ -1203,6 +1148,115 @@ namespace ALUGrid
     return ;
   }
 
+  class PackUnpackDynamicState : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+
+    typedef Gitter::hface_STI hface_STI ;
+    typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
+       TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
+    typedef Insert < AccessIteratorTT < hface_STI >::OuterHandle, 
+      TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
+                
+    GitterPll::MacroGitterPll& _containerPll; 
+
+    PackUnpackDynamicState( const PackUnpackDynamicState& );
+  public:
+    PackUnpackDynamicState( GitterPll::MacroGitterPll& containerPll )
+      : _containerPll( containerPll )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // clear stream  
+      os.clear();
+
+      AccessIteratorTT < hface_STI >::InnerHandle mif ( _containerPll, link );
+      AccessIteratorTT < hface_STI >::OuterHandle mof ( _containerPll, link );
+
+      InnerIteratorType wi (mif);
+      for (wi.first (); ! wi.done (); wi.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX ();
+        p.first->writeDynamicState (os, p.second);
+      }
+  
+      OuterIteratorType wo (mof);
+      for (wo.first (); ! wo.done (); wo.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX ();
+        p.first->writeDynamicState (os, p.second);
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      AccessIteratorTT < hface_STI >::OuterHandle mof ( _containerPll, link );
+      AccessIteratorTT < hface_STI >::InnerHandle mif ( _containerPll, link );
+  
+      OuterIteratorType wo (mof);
+      for (wo.first (); ! wo.done (); wo.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX ();
+        p.first->readDynamicState (os, p.second);
+      }
+  
+      InnerIteratorType wi (mif);
+      for (wi.first (); ! wi.done (); wi.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX ();
+        p.first->readDynamicState (os, p.second);
+      }
+    }
+  };
+
+  void GitterPll::
+  packUnpackDynamicState ( ObjectStream& os, const int link, const bool packData )
+  {
+    typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
+       TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
+    typedef Insert < AccessIteratorTT < hface_STI >::OuterHandle, 
+      TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
+                
+    // if pack data is true, then write data to stream, otherwise read 
+    if( packData ) 
+    {
+      AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (),link );
+      AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (),link );
+
+      InnerIteratorType wi (mif);
+      for (wi.first (); ! wi.done (); wi.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX ();
+        p.first->writeDynamicState (os, p.second);
+      }
+  
+      OuterIteratorType wo (mof);
+      for (wo.first (); ! wo.done (); wo.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX ();
+        p.first->writeDynamicState (os, p.second);
+      }
+    }
+    else // unpack data 
+    { 
+      AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (), link );
+      AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (), link );
+  
+      OuterIteratorType wo (mof);
+      for (wo.first (); ! wo.done (); wo.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX ();
+        p.first->readDynamicState (os, p.second);
+      }
+  
+      InnerIteratorType wi (mif);
+      for (wi.first (); ! wi.done (); wi.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX ();
+        p.first->readDynamicState (os, p.second);
+      }
+    } 
+  }
 
 
   void GitterPll::exchangeDynamicState () 
@@ -1214,39 +1268,29 @@ namespace ALUGrid
     // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
     // Regel hier eingeschleift werden.
     {
-      const int nl = mpAccess ().nlinks ();
-    
 #ifndef NDEBUG 
       // if debug mode, then count time 
       const int start = clock ();
 #endif
-    
       try 
       {
-        typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
-           TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
-        typedef Insert < AccessIteratorTT < hface_STI >::OuterHandle, 
-          TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
-                  
-        // create message buffers 
-        std::vector< ObjectStream > osv (nl);
+        PackUnpackDynamicState data( this->containerPll() );
+        mpAccess().exchange( data );
 
-        for( int link=0; link < nl ; ++ link )
+        const int nl = mpAccess().nlinks();
+        std::vector< ObjectStream > inout ( nl );
+        for( int l=0; l<nl; ++l ) 
         {
-          // pack dynamic state 
-          packUnpackDynamicState( osv[ link ], link, true );
+          packUnpackDynamicState( inout[ l ], l, true );
         }
-          
-        // exchange data 
-        osv = mpAccess ().exchange (osv);
-      
-        for( int link=0; link < nl ; ++ link )
+
+        inout = mpAccess().exchange( inout );
+
+        for( int l=0; l<nl; ++l ) 
         {
-          // unpack dynamic state 
-          packUnpackDynamicState( osv[ link ], link, false );
+          packUnpackDynamicState( inout[ l ], l, false );
         }
-          
-      } 
+      }
       catch( Parallel:: AccessPllException )
       {
         std::cerr << "ERROR: Parallel::AccessPllException caught." << std::endl;

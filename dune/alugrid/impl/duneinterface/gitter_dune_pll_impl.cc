@@ -980,7 +980,7 @@ namespace ALUGrid
       return;
     }
 
-#if 1
+#if 0
     // create data handle 
     PackUnpackInteriorGhostData data( *this, vertexData, edgeData, faceData, elementData, commType );
 

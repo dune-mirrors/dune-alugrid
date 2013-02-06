@@ -646,6 +646,7 @@ namespace ALUGrid
       // get received vector 
       std::vector< bool > linkReceived( _nLinks, false );
 
+      // reuse the message buffer 
       ObjectStream& osRecv = os;
 
       // count number of received messages 
