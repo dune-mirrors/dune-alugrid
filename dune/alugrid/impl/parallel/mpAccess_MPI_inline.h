@@ -460,7 +460,7 @@ namespace ALUGrid
 
     MPI_Request* _request;
 
-    const bool _notYetSent ;
+    const bool _needToSend ;
 
     // no copying 
     NonBlockingExchangeMPI( const NonBlockingExchangeMPI& );
@@ -474,7 +474,7 @@ namespace ALUGrid
         _nLinks( _mpAccess.nlinks() ),
         _tag( tag ),
         _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
-        _notYetSent( true )
+        _needToSend( true )
     {
     }
 
@@ -485,7 +485,7 @@ namespace ALUGrid
         _nLinks( _mpAccess.nlinks() ),
         _tag( tag ),
         _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
-        _notYetSent( false )
+        _needToSend( false )
     {
       assert( _nLinks == int( in.size() ) );
       sendImpl( in ); 
@@ -626,28 +626,32 @@ namespace ALUGrid
       // get vector with destinations 
       const std::vector< int >& dest = _mpAccess.dest();
 
-      // get object stream 
-      ObjectStream os ;
+      // send message buffers, we need several because of the 
+      // non-blocking send routines 
+      std::vector< ObjectStream > osSend ;
 
       // if data was noy send yet, do it now 
-      if( _notYetSent ) 
+      if( _needToSend ) 
       {
+        // resize message buffer vector 
+        osSend.resize( _nLinks );
+
         // send data 
         for (int link = 0; link < _nLinks; ++link) 
         {
           // pack data 
-          dataHandle.pack( link, os );
+          dataHandle.pack( link, osSend[ link ] );
 
           // send data 
-          sendLink( link, dest[ link ], os, comm );
+          sendLink( link, dest[ link ], osSend[ link ], comm );
         }
       }
 
       // get received vector 
       std::vector< bool > linkReceived( _nLinks, false );
 
-      // reuse the message buffer 
-      ObjectStream& osRecv = os;
+      // receive message buffer 
+      ObjectStream osRecv ;
 
       // count number of received messages 
       int numReceived = 0;
@@ -807,5 +811,3 @@ namespace ALUGrid
   }
 
 } // namespace ALUGrid
-
-#undef _mpiComm
