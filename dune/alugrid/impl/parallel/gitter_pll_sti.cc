@@ -1042,6 +1042,7 @@ namespace ALUGrid
           mpAccess().exchange( edgeData );
         }
 
+        // exchange dynamic state here
         exchangeDynamicState();
       } 
       catch( Parallel::AccessPllException )
