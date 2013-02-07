@@ -801,87 +801,118 @@ namespace ALUGrid
     return;
   }
 
+  /*
   void ParallelGridMover::
   unpackAll (std::vector< ObjectStream > & osv, GatherScatterType* gs) 
   {
     for (std::vector< ObjectStream >::iterator j = osv.begin (); j != osv.end (); ++j) 
     {
-      ObjectStream & os (*j);
-      int code = MacroGridMoverIF::ENDMARKER;
-      for (os.readObject (code); code != MacroGridMoverIF::ENDMARKER; os.readObject (code)) 
-      {
-        switch (code) {
-        case MacroGridMoverIF:: VERTEX :
-          {
-            unpackVertex (os);
-            break;
-          }
-        case MacroGridMoverIF::EDGE1 :
-          {
-            unpackHedge1 (os);
-            break;
-          }
-        case MacroGridMoverIF::FACE3 :
-          {
-            unpackHface3 (os);
-            break;
-          }
-        case MacroGridMoverIF::FACE4 :
-          {
-            unpackHface4 (os);
-            break;
-          }
-        case MacroGridMoverIF::TETRA :
-          {
-            unpackTetra (os, gs);
-            break;
-          }
-        case MacroGridMoverIF::HEXA :
-          {
-            unpackHexa (os, gs);
-            break;
-          }
-        case MacroGridMoverIF::PERIODIC3 :
-          {
-            unpackPeriodic3 (os);
-            break;
-          }
-        case MacroGridMoverIF::PERIODIC4 :
-          {
-            unpackPeriodic4 (os);
-            break;
-          }
-        case MacroGridMoverIF::HBND3INT :
-          {
-            unpackHbnd3Int (os);
-            break;
-          }
-        case MacroGridMoverIF::HBND3EXT :
-          {
-            unpackHbnd3Ext (os);
-            break;
-          }
-        case MacroGridMoverIF::HBND4INT :
-          {
-            unpackHbnd4Int (os);
-            break; 
-          }
-        case MacroGridMoverIF::HBND4EXT :
-          {
-            unpackHbnd4Ext (os);
-            break;
-          }
-        default :
-          std::cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n";
-          std::cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << std::endl;
-          assert(false);
-          abort ();
+      unpackAll( *j, gs );
+    }  
+  }
+  */
+
+  void ParallelGridMover::
+  unpackAll( ObjectStream& os, GatherScatterType* gs) 
+  {
+    int code = MacroGridMoverIF::ENDMARKER;
+    for (os.readObject (code); code != MacroGridMoverIF::ENDMARKER; os.readObject (code)) 
+    {
+      switch (code) {
+      case MacroGridMoverIF:: VERTEX :
+        {
+          unpackVertex (os);
           break;
         }
+      case MacroGridMoverIF::EDGE1 :
+        {
+          unpackHedge1 (os);
+          break;
+        }
+      case MacroGridMoverIF::FACE3 :
+        {
+          unpackHface3 (os);
+          break;
+        }
+      case MacroGridMoverIF::FACE4 :
+        {
+          unpackHface4 (os);
+          break;
+        }
+      case MacroGridMoverIF::TETRA :
+        {
+          unpackTetra (os, gs);
+          break;
+        }
+      case MacroGridMoverIF::HEXA :
+        {
+          unpackHexa (os, gs);
+          break;
+        }
+      case MacroGridMoverIF::PERIODIC3 :
+        {
+          unpackPeriodic3 (os);
+          break;
+        }
+      case MacroGridMoverIF::PERIODIC4 :
+        {
+          unpackPeriodic4 (os);
+          break;
+        }
+      case MacroGridMoverIF::HBND3INT :
+        {
+          unpackHbnd3Int (os);
+          break;
+        }
+      case MacroGridMoverIF::HBND3EXT :
+        {
+          unpackHbnd3Ext (os);
+          break;
+        }
+      case MacroGridMoverIF::HBND4INT :
+        {
+          unpackHbnd4Int (os);
+          break; 
+        }
+      case MacroGridMoverIF::HBND4EXT :
+        {
+          unpackHbnd4Ext (os);
+          break;
+        }
+      default :
+        std::cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n";
+        std::cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << std::endl;
+        assert(false);
+        abort ();
+        break;
       }
     }  
-    return;
   }
+
+  class UnpackLBData : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    ParallelGridMover  _pgm;
+    GatherScatterType* _gs; 
+
+    UnpackLBData( const UnpackLBData& );
+  public:
+    UnpackLBData( GitterPll::MacroGitterPll& containerPll, GatherScatterType* gs ) 
+      : _pgm( containerPll ),
+        _gs( gs )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      std::cerr << "ERROR: called UnpackLBData::pack" << std::endl;
+      abort();
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      // unpack data for given stream 
+      _pgm.unpackAll( os, _gs );
+    }
+  };
 
   // method was overloaded because here we use our DuneParallelGridMover 
   void GitterPll::doRepartitionMacroGrid ( LoadBalancer::DataBase &db, GatherScatterType *gatherScatter )
@@ -1035,6 +1066,15 @@ namespace ALUGrid
 
       lap2 = clock ();
       
+      {
+        // unpack data class 
+        UnpackLBData unpackData( containerPll (), gatherScatter );
+        // exchange data and immediately unpack upon arrival
+        mpAccess ().exchange ( osv, unpackData );
+      }
+
+      lap3 = clock ();
+      /*
       // exchange stuff 
       osv = mpAccess ().exchange ( osv );
       lap3 = clock ();
@@ -1044,7 +1084,9 @@ namespace ALUGrid
         ParallelGridMover pgm (containerPll ());
         // unpack all data  
         pgm.unpackAll (osv, gatherScatter );
-
+      }
+      */
+      {
 #ifndef NDEBUG
         // check that all leaf elements are in conforming status (bisection only)
         bool x = true;

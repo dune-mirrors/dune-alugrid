@@ -48,7 +48,9 @@ namespace ALUGrid
     public :
       ParallelGridMover (BuilderIF &);
       // unpack all elements from the stream 
-      void unpackAll (std::vector< ObjectStream > &, GatherScatterType* );
+      void unpackAll (ObjectStream &, GatherScatterType* );
+      // unpack all elements from all streams
+      // void unpackAll (std::vector< ObjectStream > &, GatherScatterType* );
 
       ~ParallelGridMover ();
   };
