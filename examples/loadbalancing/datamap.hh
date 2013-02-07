@@ -1,25 +1,21 @@
-#ifndef DATAMAP_HH
-#define DATAMAP_HH
+#ifndef NEWDATAMAP_HH
+#define NEWDATAMAP_HH
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/datahandleif.hh>
+
+#include "../datamap.hh"
 
 // DataMap::LoadBalanceHandle
 // --------------------------
  /** \brief the communication data handle for load balancing
  */
 template< class Grid, class Container >
-class LoadBalanceHandle
-: public Dune::CommDataHandleIF< LoadBalanceHandle<Grid,Container>, Container >
+class NewLoadBalanceHandle
+:  public Dune::LoadBalanceDataHandleIF< NewLoadBalanceHandle< Grid, Container >, Container >
 {
-  typedef LoadBalanceHandle This;
-  typedef Dune::CommDataHandleIF< This, Container > Base;
-
-
-public:
-  // type of data transported in the stream
-  typedef typename Base::DataType DataType;
-  typedef typename Container::GridType::template Codim< 0 >::Entity Entity;
+  typedef NewLoadBalanceHandle This;
+  typedef Dune::LoadBalanceDataHandleIF< This, Container > Base;
 
 protected:
   // data map 
@@ -27,8 +23,12 @@ protected:
   const Grid &grid_;
 
 public:
+  // type of data transported in the stream
+  typedef typename Base::DataType DataType;
+  typedef typename Grid::template Codim< 0 >::Entity Entity;
+
   //! create DiscreteOperator with a LocalOperator 
-  LoadBalanceHandle ( const Grid &grid, Container &data )
+  NewLoadBalanceHandle ( const Grid &grid, Container &data )
   : data_( data )
   , grid_(grid)
   {}
@@ -93,6 +93,48 @@ public:
   {
     assert( n == size( entity ) );
   }
+
+  // return true if user defined partitioning methods should be used 
+  bool userDefinedPartitioning () const 
+  { 
+    std::cout << "usedDefinedPartitioning" << std::endl;
+    return true ; 
+  }
+  // return true if user defined load balancing weights are provided
+  bool userDefinedLoadWeights () const 
+  { 
+    return false ; 
+  }
+  // returns true if user defined partitioning needs to be readjusted 
+  bool repartition () const 
+  { 
+    std::cout << "repartition" << std::endl;
+    angle_ += 2.*M_PI/100.;
+    return true; 
+  }
+  // return load weight of given element 
+  int loadWeight( const Entity &element ) const 
+  { 
+    std::cout << "loadWeight" << std::endl;
+    return -1;
+  }
+  // return destination (i.e. rank) where the given element should be moved to 
+  // this needs the methods userDefinedPartitioning to return true
+  int destination( const Entity &element ) const 
+  { 
+    typename Entity::Geometry::GlobalCoordinate w = element.geometry().center();
+    double phi=arg(std::complex<double>(w[0],w[1]));
+    if (w[1]<0) phi+=2.*M_PI;
+    phi += angle_;
+    int p = int(phi) % this->grid_.comm().size();
+    std::cout << "destination: " << p << std::endl;
+    return p;
+  }
+private:
+  static double angle_;
 };
 
-#endif // #ifndef DATAMAP_HH
+template< class Grid, class Container >
+double NewLoadBalanceHandle<Grid,Container>::angle_ = 0;
+
+#endif // #ifndef NEWDATAMAP_HH

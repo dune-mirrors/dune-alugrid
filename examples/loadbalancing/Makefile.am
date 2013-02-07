@@ -1,0 +1,19 @@
+GRIDTYPE = ALUGRID_CUBE
+GRIDDIM = 3
+
+EXTRA_DIST = alugrid.cfg
+
+DATACLEANFILES = dgfparser.log
+CLEANFILES = $(DATACLEANFILES)
+
+check_PROGRAMS = main
+
+main_SOURCES = main.cc
+main_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) 
+main_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+main_LDADD = $(LDADD) $(DUNEMPILIBS)
+
+dataclean:
+	@rm -f $(DATACLEANFILES)
+
+include $(top_srcdir)/am/global-rules

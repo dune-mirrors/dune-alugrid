@@ -190,7 +190,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
     }
 
     /* call adaptation algorithm */
-    // if( gridMarker.marked() )
+    if( gridMarker.marked() )
       adaptation( solution );
 
     /* print info about time, timestep size and counter */

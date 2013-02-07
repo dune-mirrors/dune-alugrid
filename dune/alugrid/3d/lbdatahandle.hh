@@ -172,14 +172,13 @@ namespace Dune
   };
 
   template <class DataHandleImpl, class DataTypeImpl>
-  class LoadBalanceDataHandleIF : public DataHandleImpl
+  class LoadBalanceDataHandleIF : public CommDataHandleIF<DataHandleImpl, DataTypeImpl>
   {
   protected:  
     // one should not create an explicit instance of this inteface object
     LoadBalanceDataHandleIF() {} 
 
   public:
-    typedef typename DataHandleImpl::Entity Entity;
     //! data type of data to communicate 
     typedef DataTypeImpl DataType; 
 
@@ -201,6 +200,7 @@ namespace Dune
       return asImp().repartition();
     }
     // return load weight of given element 
+    template <class Entity>
     int loadWeight( const Entity &element ) const 
     { 
       CHECK_INTERFACE_IMPLEMENTATION((asImp().loadWeight(element)));
@@ -208,6 +208,7 @@ namespace Dune
     }
     // return destination (i.e. rank) where the given element should be moved to 
     // this needs the methods userDefinedPartitioning to return true
+    template <class Entity>
     int destination( const Entity &element ) const 
     { 
       CHECK_INTERFACE_IMPLEMENTATION((asImp().destination(element)));
@@ -264,13 +265,11 @@ namespace Dune
     typedef ALUGridLoadBalanceOldDataHandle<Grid,DataHandleImpl,Data> Base;
 
   private:
-    const Grid &grid_;
     DataHandle &dataHandle_;
 
   public:
     ALUGridLoadBalanceDataHandle ( const Grid &grid, DataHandle &dataHandle )
     : Base(grid, (CommDataHandle&)(dataHandle) ),
-      grid_( grid ),
       dataHandle_( dataHandle )
     {}
 
