@@ -28,9 +28,9 @@ void method ( int startLevel, int maxLevel, const char* outpath )
 
   Grid &grid = *gridPtr;
 
-  MyLoadBalanceHandle<Grid> ldb(grid);
-  grid.loadBalance(ldb);
-
+  LoadBalanceHandle<Grid> ldb(grid);
+  typedef Dune::LoadBalanceHandleIF< LoadBalanceHandle<Grid> > DataHandleInterface;
+  grid.loadBalance( (DataHandleInterface&)(ldb) );
   const bool verboseRank = grid.comm().rank() == 0 ;
 
   std::string outPath( outpath );
@@ -68,11 +68,10 @@ void method ( int startLevel, int maxLevel, const char* outpath )
   }
 
 
-#if 0
   /* final time for simulation */
   const double endTime = 1.;
   /* interval for saving data */
-  const double saveInterval = 0.1;
+  const double saveInterval = 0.02;
   /* first point where data is saved */
   double saveStep = saveInterval;
 
@@ -108,7 +107,6 @@ void method ( int startLevel, int maxLevel, const char* outpath )
     /* output final result */
     vtkOut.write( time );
   }
-#endif
 
   // delete grid 
   delete gridPtr ;

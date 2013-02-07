@@ -123,6 +123,8 @@ namespace ALUGridZoltan
     // General parameters 
     zz->Set_Param( "DEBUG_LEVEL", "1");
     zz->Set_Param( "LB_METHOD", "RCB");
+    // zz->Set_Param( "LB_METHOD", "GRAPH");
+    // zz->Set_Param( "LB_APPROACH", "PARTITION"); 
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
     zz->Set_Param( "OBJ_WEIGHT_DIM", "0");

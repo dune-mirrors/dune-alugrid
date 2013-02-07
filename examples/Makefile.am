@@ -11,7 +11,7 @@ CLEANFILES = $(DATACLEANFILES)
 check_PROGRAMS = main_transport main_ball main_euler
 
 main_transport_SOURCES = main.cc
-main_transport_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DTRANSPORT
+main_transport_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DTRANSPORT $(ZOLTAN_CPPFLAGS)
 main_tranaport_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 main_transport_LDADD = $(LDADD) $(DUNEMPILIBS)
 
