@@ -668,10 +668,11 @@ namespace Dune
     // free memory by reinitializing the grid 
     mygrid_ = GitterImplType :: compress( mygrid_ );
 
-    // reset wasRefined flags 
+    // update all internal structures 
+    updateStatus();
+
+    // call post adapt
     postAdapt();
-    // update additional information on grid 
-    calcExtras();
   }
 
   // communicate level data   

@@ -95,9 +95,20 @@ namespace ALUGrid
       protected:
         NonBlockingExchange () {}
       public:  
+        class DataHandleIF 
+        {
+        protected:  
+          DataHandleIF () {}
+        public:
+          virtual ~DataHandleIF () {}
+          virtual void   pack( const int link, ObjectStream& os ) = 0 ;
+          virtual void unpack( const int link, ObjectStream& os ) = 0 ;
+        };
+
         virtual ~NonBlockingExchange () {}
         virtual void send ( const std::vector< ObjectStream > & ) = 0;
         virtual std::vector< ObjectStream > receive() = 0;  
+        virtual void exchange( DataHandleIF& ) = 0;  
       };
 
       inline virtual ~MpAccessLocal () ;
@@ -107,11 +118,10 @@ namespace ALUGrid
       inline int link (int) const ;
       const std::vector< int > &dest () const{ return _dest ; }
       int insertRequestSymetric ( std::set< int > );
-      virtual std::vector< std::vector< int > > exchange (const std::vector< std::vector< int > > &) const = 0 ;
-      virtual std::vector< std::vector< double > > exchange (const std::vector< std::vector< double > > &) const = 0 ;
-      virtual std::vector< std::vector< char > > exchange (const std::vector< std::vector< char > > &) const = 0 ;
       // exchange data and return new vector of object streams 
       virtual std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const = 0 ;
+      virtual void exchange ( const std::vector< ObjectStream > &, NonBlockingExchange::DataHandleIF& ) const = 0 ;
+      virtual void exchange ( NonBlockingExchange::DataHandleIF& ) const = 0 ;
 
       // return handle for non-blocking exchange and already do send operation
       virtual NonBlockingExchange* nonBlockingExchange ( const int tag, 

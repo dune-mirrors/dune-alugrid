@@ -9,6 +9,7 @@
 
 namespace ALUGrid
 {
+  class PackUnpackInteriorGhostData ;
 
   class GitterDunePll
   : public GitterBasisPll,
@@ -20,6 +21,7 @@ namespace ALUGrid
     virtual IteratorSTI < Gitter::helement_STI > * 
       leafIterator (const IteratorSTI < Gitter::helement_STI > *);
     
+    friend class PackUnpackInteriorGhostData ;
   protected:  
     bool balanceGrid_;
 
@@ -190,6 +192,9 @@ namespace ALUGrid
         grd = new GitterDunePll( backup, mpa );
         assert( grd );
         grd->duneRestore( backup );
+
+        // make sure every process got here
+        mpa.barrier();
       }
       return grd;
     }

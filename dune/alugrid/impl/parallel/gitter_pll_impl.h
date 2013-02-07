@@ -572,13 +572,13 @@ namespace ALUGrid
       
     private :
       myhbnd_t & _hbnd;
-      int _ghostLevel;
-      int _ghostLeaf;
+      int  _ghostLevel;
+      bool _ghostLeaf;
       balrule_t _rul;
 
     public:
       inline int ghostLevel () const { return _ghostLevel; }
-      inline bool ghostLeaf () const { return (_ghostLevel == myhbnd().level()) && (_ghostLeaf==1); }
+      inline bool ghostLeaf () const { return (_ghostLevel == myhbnd().level()) && _ghostLeaf; }
 
       typedef Gitter::ghostpair_STI ghostpair_STI;
       // to be revised (works for the moment )
@@ -1139,7 +1139,7 @@ namespace ALUGrid
   }
 
   template < class A > inline BndsegPllBaseXClosure < A >::BndsegPllBaseXClosure (myhbnd_t & b) 
-    : _hbnd (b), _ghostLevel (-1), _ghostLeaf(0) 
+    : _hbnd (b), _ghostLevel (-1), _ghostLeaf( false ) 
   {
     return;
   }

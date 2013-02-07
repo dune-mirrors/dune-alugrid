@@ -428,13 +428,11 @@ namespace Dune
 
     if( realGrid_ )
     {
+      grid->comm().barrier();
       // make changes in macro grid known in every partition
       grid->duneNotifyMacroGridChanges();
     }
 
-    // load balance the grid and free memory if possible 
-    grid->finalizeGridCreation();
-    
     return grid;
   }
 

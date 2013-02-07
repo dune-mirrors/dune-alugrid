@@ -125,11 +125,14 @@ namespace ALUGrid
     std::vector< std::vector< int > > gcollect (const std::vector< int > &) const;
     std::vector< std::vector< double > > gcollect (const std::vector< double > &) const;
     std::vector< ObjectStream > gcollect (const ObjectStream &, const std::vector<int>& ) const;
-    std::vector< std::vector< int > > exchange (const std::vector< std::vector< int > > &) const;
-    std::vector< std::vector< double > > exchange (const std::vector< std::vector< double > > &) const;
-    std::vector< std::vector< char > > exchange (const std::vector< std::vector< char > > &) const;
     
     std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const;
+
+    // exchange object stream and then unpack one-by-one as received 
+    void exchange ( const std::vector< ObjectStream > &, NonBlockingExchange::DataHandleIF& ) const;
+
+    // exchange object stream and immediately unpack, when data was received 
+    void exchange ( NonBlockingExchange::DataHandleIF& ) const;
 
     // return handle for non-blocking exchange and already do send operation
     NonBlockingExchange* nonBlockingExchange( const int tag, const std::vector< ObjectStream > & ) const;

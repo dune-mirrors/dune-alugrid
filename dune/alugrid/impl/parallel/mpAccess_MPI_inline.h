@@ -132,79 +132,6 @@ namespace ALUGrid
     return res;
   }
 
-  template < class A > 
-  inline std::vector< std::vector< A > > doExchange (const std::vector< std::vector< A > > & in,
-                                      MPI_Datatype mpiType, 
-                                      MPI_Comm comm, 
-                                      const std::vector< int > & d) 
-  {
-    const int messagetag = MpAccessMPI::messagetag;
-    assert (in.size() == d.size());
-    int nl = d.size ();
-    std::vector< std::vector< A > > out (nl);
-
-    // only do this if number of links is not zero 
-    if( nl > 0 ) 
-    {
-      A ** buf = new A * [nl];
-      assert (buf);
-      MPI_Request * req = new MPI_Request [nl];
-      assert (req);
-      {
-        for (int link = 0; link < nl; ++ link) 
-        {
-          int size = in [link].size();
-          A * lne = new A [size];
-          assert (lne);
-          copy (in [link].begin (), in [link].end (), lne);
-          buf [link] = lne;
-          MY_INT_TEST MPI_Isend (lne, size, mpiType, d [link], messagetag, comm, & req [link]);
-          assert (test == MPI_SUCCESS);
-        } 
-      }
-      
-      {
-        for (int link = 0; link < nl; ++ link) 
-        {
-          MPI_Status s;
-          int cnt;
-          {
-            MY_INT_TEST MPI_Probe (d [link], messagetag, comm, & s);
-            assert (test == MPI_SUCCESS);
-          }
-          
-          {
-            MY_INT_TEST MPI_Get_count ( & s, mpiType, & cnt );
-            assert (test == MPI_SUCCESS);
-          }
-          
-          A * lne = new A [cnt];
-          assert (lne);
-          {
-            MY_INT_TEST MPI_Recv (lne, cnt, mpiType, d [link], messagetag, comm, & s);
-            assert (test == MPI_SUCCESS);
-          }
-          copy (lne, lne + cnt, back_inserter (out[link]));
-          delete [] lne;
-        } 
-      }
-
-      {
-        MPI_Status * sta = new MPI_Status [nl];
-        assert (sta);
-        MY_INT_TEST MPI_Waitall (nl, req, sta);
-        assert (test == MPI_SUCCESS);
-        delete [] sta;
-      }
-      {
-        for (int i = 0; i < nl; ++i) delete [] buf [i]; 
-      }
-      delete [] buf;
-      delete [] req;
-    } // end if( nl > 0 )
-    return out;
-  }
-
   inline bool MpAccessMPI::gmax (bool i) const 
   {
     int j = int( i );
@@ -520,21 +447,6 @@ namespace ALUGrid
     return o;
   }
 
-  inline std::vector< std::vector< int > > MpAccessMPI::exchange (const std::vector< std::vector< int > > & in) const {
-    assert (static_cast<int> (in.size ()) == nlinks ());
-    return doExchange (in, MPI_INT, _mpiComm, dest ());
-  }
-
-  inline std::vector< std::vector< double > > MpAccessMPI::exchange (const std::vector< std::vector< double > > & in) const {
-    assert (static_cast<int> (in.size ()) == nlinks ());
-    return doExchange (in, MPI_DOUBLE, _mpiComm, dest ());
-  }
-
-  inline std::vector< std::vector< char > > MpAccessMPI::exchange (const std::vector< std::vector< char > > & in) const {
-    assert (static_cast<int> (in.size ()) == nlinks ());
-    return doExchange (in, MPI_BYTE, _mpiComm, dest ());
-  }
-
   //////////////////////////////////////////////////////////////////////////
   // non-blocking communication object 
   // this class is defined here since it contains MPI information 
@@ -548,16 +460,21 @@ namespace ALUGrid
 
     MPI_Request* _request;
 
+    const bool _notYetSent ;
+
     // no copying 
     NonBlockingExchangeMPI( const NonBlockingExchangeMPI& );
 
   public:
+    typedef MpAccessLocal::NonBlockingExchange::DataHandleIF DataHandleIF;
+
     NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
                             const int tag )
       : _mpAccess( mpAccess ),
         _nLinks( _mpAccess.nlinks() ),
         _tag( tag ),
-        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
+        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
+        _notYetSent( true )
     {
     }
 
@@ -567,7 +484,8 @@ namespace ALUGrid
       : _mpAccess( mpAccess ),
         _nLinks( _mpAccess.nlinks() ),
         _tag( tag ),
-        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0)
+        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
+        _notYetSent( false )
     {
       assert( _nLinks == int( in.size() ) );
       sendImpl( in ); 
@@ -605,13 +523,7 @@ namespace ALUGrid
       // send data 
       for (int link = 0; link < _nLinks; ++link) 
       {
-        // get send buffer from object stream 
-        char* buffer     = osv[ link ]._buf + osv[ link ]._rb;
-        // get number of bytes to send 
-        int   bufferSize = osv[ link ]._wb  - osv[ link ]._rb; 
-
-        MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest[ link ], _tag, comm, & _request[ link ] );
-        assert (test == MPI_SUCCESS);
+        sendLink( link, dest[ link ], osv[ link ], comm );
       }
     }
 
@@ -701,8 +613,124 @@ namespace ALUGrid
         delete [] sta;
       }
     }
+
+    // receive data implementation with given buffers 
+    void exchange( DataHandleIF& dataHandle )
+    {
+      // do nothing if number of links is zero 
+      if( _nLinks == 0 ) return; 
+
+      // get mpi communicator
+      MPI_Comm comm = _mpAccess.communicator();
+
+      // get vector with destinations 
+      const std::vector< int >& dest = _mpAccess.dest();
+
+      // get object stream 
+      ObjectStream os ;
+
+      // if data was noy send yet, do it now 
+      if( _notYetSent ) 
+      {
+        // send data 
+        for (int link = 0; link < _nLinks; ++link) 
+        {
+          // pack data 
+          dataHandle.pack( link, os );
+
+          // send data 
+          sendLink( link, dest[ link ], os, comm );
+        }
+      }
+
+      // get received vector 
+      std::vector< bool > linkReceived( _nLinks, false );
+
+      // reuse the message buffer 
+      ObjectStream& osRecv = os;
+
+      // count number of received messages 
+      int numReceived = 0;
+      while( numReceived < _nLinks ) 
+      {
+        // check for all links messages 
+        for (int link = 0; link < _nLinks; ++link ) 
+        {
+          if( ! linkReceived[ link ] ) 
+          {
+            // corresponding MPI status 
+            MPI_Status status;
+
+            // received, 0 or 1 
+            int received = 0;
+
+            // check for any message with tag (nonblocking)
+            MPI_Iprobe( dest[ link ], _tag, comm, &received, &status ); 
+
+            // receive message of received flag is true 
+            if( received ) 
+            {
+              // this should be the same, otherwise we got an error
+              assert( dest[ link ] == status.MPI_SOURCE );
+
+              // length of message 
+              int bufferSize = -1;
+
+              // get length of message 
+              {
+                MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bufferSize );
+                assert (test == MPI_SUCCESS);
+              }
+
+              // reserve memory 
+              osRecv.reserve( bufferSize );
+              // reset read and write counter
+              osRecv.clear();
+
+              // receive data
+              receiveLink( comm, status, bufferSize, osRecv._buf );
+
+              // set wb of ObjectStream  
+              osRecv.seekp( bufferSize );
+
+              // unpack data 
+              dataHandle.unpack( link, osRecv );
+
+              // increase number of received messages 
+              ++ numReceived;
+
+              // store received information 
+              linkReceived[ link ] = true ;
+            }
+          }
+        }
+      }
+      
+      // Is this really needed?
+      // wait until all processes are done with receiving
+      {
+        MPI_Status * sta = new MPI_Status [ _nLinks ];
+        assert( sta );
+        assert( _request );
+        MY_INT_TEST MPI_Waitall ( _nLinks, _request, sta);
+        assert (test == MPI_SUCCESS);
+        delete [] sta;
+      }
+    }
   protected:  
+    void sendLink( const int link, const int dest, const ObjectStream& os, MPI_Comm& comm ) 
+    {
+      // get send buffer from object stream 
+      char* buffer     = os._buf + os._rb;
+      // get number of bytes to send 
+      int   bufferSize = os._wb  - os._rb; 
+
+      MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest, _tag, comm, &_request[ link ] );
+      assert (test == MPI_SUCCESS);
+    }
+
     typedef std::pair< char*, int > bufferpair_t;
+
     // does receive operation for one link 
     bufferpair_t  receiveLink( MPI_Comm& comm, 
                                MPI_Status& status ) 
@@ -721,7 +749,16 @@ namespace ALUGrid
       // use alloc from objects stream because this is the 
       // buffer of the object stream
       char* buffer = ObjectStream::allocateBuffer( bufferSize );
-      
+
+      // return receiveLink given a buffer 
+      return receiveLink( comm, status, bufferSize, buffer );
+    }
+
+    // does receive operation for one link 
+    bufferpair_t receiveLink( MPI_Comm& comm, 
+                              MPI_Status& status,
+                              int bufferSize, char* buffer )
+    {
       // MPI receive 
       {
         MY_INT_TEST MPI_Recv ( buffer, bufferSize, MPI_BYTE, status.MPI_SOURCE, _tag, comm, & status);
@@ -732,7 +769,6 @@ namespace ALUGrid
       // this will only set the pointer in ObjectStream 
       return bufferpair_t( buffer, bufferSize );
     }
-
   };
 
   inline MpAccessMPI::NonBlockingExchange*
@@ -754,6 +790,20 @@ namespace ALUGrid
   {
     NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
     return nonBlockingExchange.receiveImpl();
+  }
+
+  // --exchange
+  inline void MpAccessMPI::exchange ( const std::vector< ObjectStream > & in, NonBlockingExchange::DataHandleIF& handle ) const 
+  {
+    NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
+    nonBlockingExchange.exchange( handle );
+  }
+
+  // --exchange
+  inline void MpAccessMPI::exchange ( NonBlockingExchange::DataHandleIF& handle ) const 
+  {
+    NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1 );
+    nonBlockingExchange.exchange( handle );
   }
 
 } // namespace ALUGrid

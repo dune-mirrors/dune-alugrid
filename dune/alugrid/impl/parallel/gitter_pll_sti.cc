@@ -241,16 +241,140 @@ namespace ALUGrid
        new listSmartpointer__to__iteratorSTI < hface_STI > (*(const listSmartpointer__to__iteratorSTI < hface_STI > *)p.second));
   }
 
+  class PackUnpackRefineLoop : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hface_STI hface_STI ;
+    typedef std::vector< hface_STI * > facevec_t ;
+    std::vector< facevec_t >& _innerFaces ;
+    std::vector< facevec_t >& _outerFaces ;
+
+    typedef facevec_t::const_iterator hface_iterator;
+
+    bool _repeat ;
+    PackUnpackRefineLoop( const PackUnpackRefineLoop& );
+  public:
+    PackUnpackRefineLoop( std::vector< facevec_t >& innerFaces,
+                      std::vector< facevec_t >& outerFaces )
+      : _innerFaces( innerFaces ),
+        _outerFaces( outerFaces ),
+        _repeat( false )
+    {}
+
+    bool repeat () const { return _repeat; }
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      try 
+      {
+        // clear stream 
+        os.clear();
+
+        // reserve memory for object stream 
+        os.reserve( (_outerFaces[ link ].size() + _innerFaces[ link ].size() ) * sizeof(char) );
+        {
+          const hface_iterator iEnd = _outerFaces[ link ].end ();
+          for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i ) 
+            (*i)->accessOuterPllX ().first->getRefinementRequest ( os ); 
+        }
+        {
+          const hface_iterator iEnd = _innerFaces[ link ].end ();
+          for (hface_iterator i = _innerFaces[ link ].begin (); i != iEnd; ++i )
+            (*i)->accessOuterPllX ().first->getRefinementRequest ( os ); 
+        }
+      } 
+      catch( Parallel::AccessPllException )
+      {
+        std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
+        abort();
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      try 
+      {
+        {
+          const hface_iterator iEnd = _innerFaces[ link ].end ();
+          for (hface_iterator i = _innerFaces [ link ].begin (); i != iEnd; ++i ) 
+            _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
+        }
+        {
+          const hface_iterator iEnd = _outerFaces[ link ].end (); 
+          for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
+            _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
+        }
+      } 
+      catch (Parallel::AccessPllException) 
+      {
+        std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
+        abort();
+      }
+    }
+  };
+
+  class PackUnpackEdgeCleanup : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hedge_STI hedge_STI ;
+    typedef std::vector< hedge_STI * > edgevec_t ;
+    std::vector< edgevec_t >& _innerEdges ;
+    std::vector< edgevec_t >& _outerEdges ;
+    const bool _firstLoop ;
+
+    typedef edgevec_t::const_iterator hedge_iterator;
+
+    PackUnpackEdgeCleanup( const PackUnpackEdgeCleanup& );
+  public:
+    PackUnpackEdgeCleanup( std::vector< edgevec_t >& innerEdges,
+                           std::vector< edgevec_t >& outerEdges,
+                           const bool firstLoop )
+      : _innerEdges( innerEdges ),
+        _outerEdges( outerEdges ),
+        _firstLoop( firstLoop )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // the first loop needs outerEdges the second loop inner
+      edgevec_t& edges = ( _firstLoop ) ? _outerEdges[ link ] : _innerEdges[ link ];
+
+      os.clear();
+      // reserve memory 
+      os.reserve( edges.size() * sizeof(char) );
+
+      // write refinement request 
+      const hedge_iterator iEnd = edges.end ();
+      for (hedge_iterator i = edges.begin (); i != iEnd; ++i )
+      {
+        (*i)->getRefinementRequest ( os );
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      // the first loop needs innerEdges the second loop outer
+      edgevec_t& edges = ( _firstLoop ) ? _innerEdges[ link ] : _outerEdges[ link ];
+
+      const hedge_iterator iEnd = edges.end ();
+      for (hedge_iterator i = edges.begin (); i != iEnd; ++i )
+      {
+        (*i)->setRefinementRequest ( os );
+      }
+    }
+  };
+
   bool GitterPll::refine () 
   {
     assert (debugOption (5) ? (std::cout << "**INFO GitterPll::refine () " << std::endl, 1) : 1);
     const int nl = mpAccess ().nlinks ();
     bool state = false;
-    std::vector< std::vector< hedge_STI * > > innerEdges (nl), outerEdges (nl);
-    std::vector< std::vector< hface_STI * > > innerFaces (nl), outerFaces (nl);
 
-    typedef std::vector< hedge_STI * >::const_iterator hedge_iterator;
-    typedef std::vector< hface_STI * >::const_iterator hface_iterator;
+    typedef std::vector< hedge_STI * > edgevec_t ;
+    typedef std::vector< hface_STI * > facevec_t ;
+    std::vector< edgevec_t > innerEdges (nl), outerEdges (nl);
+    std::vector< facevec_t > innerFaces (nl), outerFaces (nl);
+
+    typedef edgevec_t::const_iterator hedge_iterator;
+    typedef facevec_t::const_iterator hface_iterator;
 
     {
       // Erst die Zeiger auf alle Fl"achen und Kanten mit paralleler
@@ -261,27 +385,32 @@ namespace ALUGrid
       {
         for (int l = 0; l < nl; ++l) 
         {
-          //std::cout << "refinepll \n";
           LeafIteratorTT < hface_STI > fw (*this,l);
           LeafIteratorTT < hedge_STI > dw (*this,l);
 
-          // reserve memory first 
-          outerFaces[l].reserve( fw.outer().size() );
-          innerFaces[l].reserve( fw.inner().size() );
-          
-          for (fw.outer ().first (); ! fw.outer().done (); fw.outer ().next ())
-            outerFaces [l].push_back (& fw.outer ().item ());
-          for (fw.inner ().first (); ! fw.inner ().done (); fw.inner ().next ())
-            innerFaces [l].push_back (& fw.inner ().item ());
+          facevec_t& outerFace = outerFaces[ l ]; 
+          facevec_t& innerFace = innerFaces[ l ]; 
 
           // reserve memory first 
-          outerEdges[l].reserve( dw.outer().size() );
-          innerEdges[l].reserve( dw.inner().size() );
+          outerFace.reserve( fw.outer().size() );
+          innerFace.reserve( fw.inner().size() );
+          
+          for (fw.outer ().first (); ! fw.outer().done (); fw.outer ().next ())
+            outerFace.push_back (& fw.outer ().item ());
+          for (fw.inner ().first (); ! fw.inner ().done (); fw.inner ().next ())
+            innerFace.push_back (& fw.inner ().item ());
+
+          edgevec_t& outerEdge = outerEdges[ l ];
+          edgevec_t& innerEdge = innerEdges[ l ];
+
+          // reserve memory first 
+          outerEdge.reserve( dw.outer().size() );
+          innerEdge.reserve( dw.inner().size() );
           
           for (dw.outer ().first (); ! dw.outer().done (); dw.outer ().next ())
-            outerEdges [l].push_back (& dw.outer ().item ());
+            outerEdge.push_back (& dw.outer ().item ());
           for (dw.inner ().first (); ! dw.inner ().done (); dw.inner ().next ())
-            innerEdges [l].push_back (& dw.inner ().item ());
+            innerEdge.push_back (& dw.inner ().item ());
         }
       }
       // jetzt normal verfeinern und den Status der Verfeinerung
@@ -300,64 +429,18 @@ namespace ALUGrid
     
       bool repeat (false);
       _refineLoops = 0;
-      std::vector< ObjectStream > osv (nl);
-      do {
-        repeat = false;
-        {
-          try {
-            for (int l = 0; l < nl; ++l) 
-            {
-              ObjectStream& os = osv[ l ];
-              // clear stream 
-              os.clear();
+      do 
+      {
+        // unpack handle to unpack the data once their received 
+        PackUnpackRefineLoop dataHandle ( innerFaces, outerFaces );
 
-              // reserve memory for object stream 
-              os.reserve( (outerFaces[l].size() + innerFaces[l].size() ) * sizeof(char) );
-              {
-                const hface_iterator iEnd = outerFaces[l].end ();
-                for (hface_iterator i = outerFaces [l].begin (); i != iEnd; ++i ) 
-                  (*i)->accessOuterPllX ().first->getRefinementRequest ( os ); 
-              }
-              {
-                const hface_iterator iEnd = innerFaces[l].end ();
-                for (hface_iterator i = innerFaces [l].begin (); i != iEnd; ++i )
-                  (*i)->accessOuterPllX ().first->getRefinementRequest ( os ); 
-              }
-            }
-          } 
-          catch( Parallel::AccessPllException )
-          {
-            std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
-            abort();
-          }
-    
-          // exchange data 
-          osv = mpAccess ().exchange (osv);
-    
-          try 
-          {
-            for (int l = 0; l < nl; ++l) 
-            {
-              ObjectStream& os = osv [l];
-              {
-                const hface_iterator iEnd = innerFaces[l].end ();
-                for (hface_iterator i = innerFaces [l].begin (); i != iEnd; ++i ) 
-                  repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
-              }
-              {
-                const hface_iterator iEnd = outerFaces[l].end (); 
-                for (hface_iterator i = outerFaces [l].begin (); i != iEnd; ++i )
-                  repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
-              }
-            }
-          } 
-          catch (Parallel::AccessPllException) 
-          {
-            std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
-            abort();
-          }
-        }
+        // exchange data and unpack when received 
+        mpAccess ().exchange ( dataHandle );
 
+        // get repeat flag 
+        repeat = dataHandle.repeat();
+
+        // count loops 
         _refineLoops ++;
       } 
       while ( mpAccess ().gmax ( repeat ) );
@@ -374,62 +457,13 @@ namespace ALUGrid
       __STATIC_phase = 3;
 
       {
-        {
-          for (int l = 0; l < nl; ++l) 
-          {
-            ObjectStream& os = osv[ l ];
-            os.clear();
-            // reserve memory 
-            os.reserve( outerEdges[l].size() * sizeof(char) );
-            // write refinement request 
-            const hedge_iterator iEnd = outerEdges[l].end ();
-            for (hedge_iterator i = outerEdges [l].begin (); i != iEnd; ++i )
-              (*i)->getRefinementRequest ( os );
-          }
-        }
-        
-        // exchange data 
-        osv = mpAccess ().exchange (osv);
-        
-        {
-          for (int l = 0; l < nl; ++l)
-          {
-            ObjectStream& os = osv[ l ];
-            const hedge_iterator iEnd = innerEdges[l].end ();
-            for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i )
-              (*i)->setRefinementRequest ( os );
-          }
-        }
+        PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, true );
+        mpAccess().exchange( edgeData );
       } 
        
       {
-        {
-          for (int l = 0; l < nl; ++l)
-          {
-            ObjectStream& os = osv[ l ];
-            os.clear();
-
-            // reserve memory 
-            os.reserve( innerEdges[l].size() * sizeof(char) );
-
-            const hedge_iterator iEnd = innerEdges[l].end ();
-            for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i ) 
-              (*i)->getRefinementRequest ( os );
-          }
-        }
-        
-        // exchange data 
-        osv = mpAccess ().exchange (osv);
-        
-        {
-          for (int l = 0; l < nl; ++l)
-          {
-            ObjectStream& os = osv[ l ];
-            const hedge_iterator iEnd = outerEdges [l].end ();
-            for (hedge_iterator i = outerEdges [l].begin (); i != iEnd; ++i ) 
-              (*i)->setRefinementRequest ( os );
-          }
-        }
+        PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, false );
+        mpAccess().exchange( edgeData );
       }
     }
     
@@ -476,6 +510,315 @@ namespace ALUGrid
     { 
       std::cout << "ERROR: EdgeFlagExchange::setData was called in " << __FILE__ << " " << __LINE__ << std::endl;
       abort();
+    }
+  };
+
+  class PackUnpackCoarsenLoop : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hface_STI hface_STI ;
+    typedef std::vector< hface_STI * > facevec_t ;
+
+    typedef std::vector< int > cleanvector_t;
+    std::vector< cleanvector_t >& _clean ;
+
+    std::vector< facevec_t >& _innerFaces ;
+    std::vector< facevec_t >& _outerFaces ;
+
+    const bool _firstLoop ;
+
+    typedef facevec_t::const_iterator hface_iterator;
+
+    PackUnpackCoarsenLoop( const PackUnpackCoarsenLoop& );
+  public:
+    PackUnpackCoarsenLoop( std::vector< cleanvector_t >& clean,
+                           std::vector< facevec_t >& innerFaces,
+                           std::vector< facevec_t >& outerFaces,
+                           const bool firstLoop )
+      : _clean( clean ),
+        _innerFaces( innerFaces ),
+        _outerFaces( outerFaces ),
+        _firstLoop( firstLoop )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // clear stream 
+      os.clear();
+
+      if( _firstLoop ) 
+      {
+        // reserve memory 
+        os.reserve( _outerFaces[ link ].size() * sizeof(char) );
+
+        // get end iterator 
+        const hface_iterator iEnd = _outerFaces[ link ].end ();
+        for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i)
+        {
+          char lockAndTry = (*i)->accessOuterPllX ().first->lockAndTry ();
+          os.putNoChk( lockAndTry );
+        }
+      }
+      else 
+      {
+        // reserve memory  
+        os.reserve( _innerFaces[ link ].size() * sizeof(char) );
+
+        cleanvector_t::iterator j = _clean[ link ].begin ();
+        const hface_iterator iEnd = _innerFaces[ link ].end ();
+        for (hface_iterator i = _innerFaces[ link ].begin (); i != iEnd; ++i, ++j) 
+        {
+          const bool unlock = *j;
+          os.putNoChk( char(unlock) );
+          (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
+        }
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      if( _firstLoop ) 
+      {
+        cleanvector_t& cl = _clean[ link ];
+
+        // reset clean vector 
+        cl = cleanvector_t( _innerFaces[ link ].size (), int(true) );
+
+        cleanvector_t::iterator j = cl.begin (); 
+
+        const hface_iterator iEnd = _innerFaces[ link ].end ();
+        for (hface_iterator i = _innerFaces[ link ].begin (); i != iEnd; ++i, ++j ) 
+        {
+          // get lockAndTry info 
+          const bool locked = bool( os.get() );
+
+          assert (j != cl.end ()); 
+          (*j) &= locked && (*i)->accessOuterPllX ().first->lockAndTry ();
+        } 
+      }
+      else 
+      {
+        const hface_iterator iEnd = _outerFaces[ link ].end ();
+        for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i )
+        {
+          const bool unlock = bool( os.get() );
+          (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
+        }
+      }
+    }
+  };
+
+  class PackUnpackDynamicState : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+
+    typedef Gitter::hface_STI hface_STI ;
+    typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
+       TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
+    typedef Insert < AccessIteratorTT < hface_STI >::OuterHandle, 
+      TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
+                
+    GitterPll::MacroGitterPll& _containerPll; 
+
+    PackUnpackDynamicState( const PackUnpackDynamicState& );
+  public:
+    PackUnpackDynamicState( GitterPll::MacroGitterPll& containerPll )
+      : _containerPll( containerPll )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // clear stream  
+      os.clear();
+
+      AccessIteratorTT < hface_STI >::InnerHandle mif ( _containerPll, link );
+      AccessIteratorTT < hface_STI >::OuterHandle mof ( _containerPll, link );
+
+      InnerIteratorType wi (mif);
+      for (wi.first (); ! wi.done (); wi.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX ();
+        p.first->writeDynamicState (os, p.second);
+      }
+  
+      OuterIteratorType wo (mof);
+      for (wo.first (); ! wo.done (); wo.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX ();
+        p.first->writeDynamicState (os, p.second);
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      AccessIteratorTT < hface_STI >::OuterHandle mof ( _containerPll, link );
+      AccessIteratorTT < hface_STI >::InnerHandle mif ( _containerPll, link );
+  
+      OuterIteratorType wo (mof);
+      for (wo.first (); ! wo.done (); wo.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX ();
+        p.first->readDynamicState (os, p.second);
+      }
+  
+      InnerIteratorType wi (mif);
+      for (wi.first (); ! wi.done (); wi.next ()) 
+      {
+        std::pair< ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX ();
+        p.first->readDynamicState (os, p.second);
+      }
+    }
+  };
+
+
+  class PackUnpackEdgeCoarsen : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    typedef Gitter::hedge_STI hedge_STI ;
+    typedef std::vector< hedge_STI * > edgevec_t ;
+
+    typedef std::pair< bool, bool >  clean_t;
+    typedef std::map< hedge_STI *, clean_t > cleanmap_t;
+    typedef cleanmap_t::iterator cleanmapiterator_t;
+
+    PackUnpackDynamicState _dynamicState ;
+
+    cleanmap_t& _clean;
+    std::vector< edgevec_t >& _innerEdges ;
+    std::vector< edgevec_t >& _outerEdges ;
+    const bool _firstLoop ;
+
+    typedef edgevec_t::const_iterator hedge_iterator;
+
+    PackUnpackEdgeCoarsen( const PackUnpackEdgeCoarsen& );
+  public:
+    PackUnpackEdgeCoarsen( GitterPll::MacroGitterPll& containerPll,
+                           cleanmap_t& clean, 
+                           std::vector< edgevec_t >& innerEdges,
+                           std::vector< edgevec_t >& outerEdges,
+                           const int nLinks, 
+                           const bool firstLoop )
+      : _dynamicState( containerPll ),
+        _clean( clean ),
+        _innerEdges( innerEdges ),
+        _outerEdges( outerEdges ),
+        _firstLoop( firstLoop )
+    {}
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // clear stream  
+      os.clear();
+
+      if( _firstLoop ) 
+      {
+        // reserve memory first 
+        os.reserve( _outerEdges[ link ].size() * sizeof(char) );
+
+        // get end iterator 
+        const hedge_iterator iEnd = _outerEdges[ link ].end ();
+        for (hedge_iterator i = _outerEdges[ link ].begin (); i != iEnd; ++i)
+        {
+          char lockAndTry = (*i)->lockAndTry ();
+          os.putNoChk( lockAndTry );
+        }
+      }
+      else 
+      {
+        // reserve memory first 
+        os.reserve( _innerEdges[ link ].size() * sizeof(char) );
+
+        // get end iterator 
+        const hedge_iterator iEnd = _innerEdges[ link ].end ();
+        for (hedge_iterator i = _innerEdges[ link ].begin (); i != iEnd; ++i) 
+        {
+          hedge_STI* edge = (*i);
+          assert ( _clean.find ( edge ) != _clean.end ());
+
+          clean_t& a = _clean[ edge ];
+          os.putNoChk( char( a.first) );
+
+          if (a.second) 
+          {
+            // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
+            // sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
+            // einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
+            // mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
+            // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
+          
+            a.second = false;
+#ifndef NDEBUG
+            bool b = 
+#endif
+              edge->unlockAndResume (a.first);
+            assert (b == a.first);
+          }
+        }
+
+        //char stop = -5 ;
+        //os.put( stop );
+
+        // pack dynamic state 
+        //_dynamicState.pack( link, os );
+      }
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      if( _firstLoop ) 
+      {
+        // get end iterators 
+        const cleanmapiterator_t cleanEnd = _clean.end();
+        const hedge_iterator iEnd = _innerEdges[ link ].end ();
+        // fill cleanmap first 
+        for (hedge_iterator i = _innerEdges[ link ].begin (); i != iEnd; ++i)
+        {
+          hedge_STI* edge = (*i);
+          cleanmapiterator_t cit = _clean.find ( edge );
+          if (cit == cleanEnd ) 
+          {
+            clean_t& cp = _clean[ edge ];
+            cp.first  = edge->lockAndTry ();
+            cp.second = true;
+          }
+        }
+          
+        for (hedge_iterator i = _innerEdges[ link ].begin (); i != iEnd; ++i)
+        {
+          const bool locked = bool( os.get() );
+          if( locked == false ) 
+          {
+            assert ( _clean.find (*i) != cleanEnd );
+            _clean[ *i ].first = false;
+          }
+        }
+      }
+      else
+      {
+        // get end iterator 
+        const hedge_iterator iEnd = _outerEdges[ link ].end ();
+        for (hedge_iterator i = _outerEdges[ link ].begin (); i != iEnd; ++i )
+        {
+          // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
+          // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
+          // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
+        
+          const bool unlock = bool( os.get() );
+#ifndef NDEBUG
+          bool b = 
+#endif
+            (*i)->unlockAndResume ( unlock );
+          assert (b == unlock);
+        }
+
+        /*
+        char stop = os.get() ;
+        while ( stop != -5 )
+        {
+          stop = os.get();
+        }
+
+        // unpack dynamic state 
+        _dynamicState.unpack( link, os );
+        */
+      }
     }
   };
 
@@ -633,7 +976,6 @@ namespace ALUGrid
         abort ();
       }
       
-      std::vector< ObjectStream > inout( nl );
       try {
       
         // Phase des Fl"achenausgleichs des verteilten Vergr"oberungsalgorithmus
@@ -646,86 +988,19 @@ namespace ALUGrid
       
         typedef std::vector< int > cleanvector_t;
         std::vector< cleanvector_t > clean (nl);
+
         {
-          {
-            for (int l = 0; l < nl; ++l)
-            {
-              ObjectStream& os = inout[ l ];
-              os.clear();
-
-              // reserve memory 
-              os.reserve( outerFaces [l].size() * sizeof(char) );
-
-              // get end iterator 
-              const hface_iterator iEnd = outerFaces [l].end ();
-              for (hface_iterator i = outerFaces [l].begin (); i != iEnd; ++i)
-              {
-                char lockAndTry = (*i)->accessOuterPllX ().first->lockAndTry ();
-                os.putNoChk( lockAndTry );
-              }
-            }
-          }
-
-          // exchange data 
-          inout = mpAccess ().exchange (inout);
-          
-          {
-            for (int l = 0; l < nl; ++l) 
-            {
-              ObjectStream& os = inout[ l ];
-              cleanvector_t& cl = clean[ l ];
-
-              // reset clean vector 
-              cl = cleanvector_t( innerFaces [l].size (), int(true) );
-
-              cleanvector_t::iterator j = cl.begin (); 
-
-              const hface_iterator iEnd = innerFaces [l].end ();
-              for (hface_iterator i = innerFaces [l].begin (); i != iEnd; ++i, ++j ) 
-              {
-                // get lockAndTry info 
-                const bool locked = bool( os.get() );
-
-                assert (j != cl.end ()); 
-                (*j) &= locked && (*i)->accessOuterPllX ().first->lockAndTry ();
-              }
-            } 
-          }
+          // face data, first loop 
+          PackUnpackCoarsenLoop faceData( clean, innerFaces, outerFaces, true );
+          mpAccess().exchange( faceData );
         }
-        
+
         {
-          for (int l = 0; l < nl; ++l) 
-          {
-            ObjectStream& os = inout[ l ];
-            inout.clear(); 
-
-            // reserve memory  
-            os.reserve( innerFaces [l].size() * sizeof(char) );
-
-            cleanvector_t::iterator j = clean [l].begin ();
-            const hface_iterator iEnd = innerFaces [l].end ();
-            for (hface_iterator i = innerFaces [l].begin (); i != iEnd; ++i, ++j) 
-            {
-              const bool unlock = *j;
-              os.putNoChk( char(unlock) );
-              (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
-            }
-          }     
-      
-          // exchange data 
-          inout = mpAccess ().exchange (inout);
-      
-          for (int l = 0; l < nl; ++l) 
-          {
-            ObjectStream& os = inout[ l ];
-            const hface_iterator iEnd = outerFaces [l].end ();
-            for (hface_iterator i = outerFaces [l].begin (); i != iEnd; ++i )
-            {
-              const bool unlock = bool( os.get() );
-              (*i)->accessOuterPllX ().first->unlockAndResume ( unlock );
-            }
-          }     
+          // face data, second loop 
+          PackUnpackCoarsenLoop faceData( clean, innerFaces, outerFaces, false );
+          mpAccess().exchange( faceData );
         }
+
       } 
       catch( Parallel::AccessPllException )
       {
@@ -753,132 +1028,22 @@ namespace ALUGrid
         typedef cleanmap_t::iterator cleanmapiterator_t;
         cleanmap_t clean;
         
-        const cleanmapiterator_t cleanEnd = clean.end();
         {
-          for (int l = 0; l < nl; l ++)
-          {
-            const hedge_iterator iEnd = innerEdges [l].end ();
-            for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i)
-            {
-              hedge_STI* edge = (*i);
-              cleanmapiterator_t cit = clean.find ( edge );
-              if (cit == cleanEnd ) 
-              {
-                clean_t& cp = clean[ edge ];
-                cp.first  = edge->lockAndTry ();
-                cp.second = true;
-              }
-            }
-          }
+          // edge data, first loop 
+          PackUnpackEdgeCoarsen edgeData( this->containerPll(), 
+                                          clean, innerEdges, outerEdges, nl, true );
+          mpAccess().exchange( edgeData );
         }
-        
+
         {
-          for (int l = 0; l < nl; ++l)
-          {
-            ObjectStream& os = inout[ l ];
-            os.clear();
-
-            // reserve memory first 
-            os.reserve( outerEdges [l].size() * sizeof(char) );
-
-            // get end iterator 
-            const hedge_iterator iEnd = outerEdges [l].end ();
-            for (hedge_iterator i = outerEdges [l].begin (); i != iEnd; ++i)
-            {
-              char lockAndTry = (*i)->lockAndTry ();
-              os.putNoChk( lockAndTry );
-            }
-          }
-          
-          // exchange data 
-          inout = mpAccess ().exchange (inout);
-          
-          for (int l = 0; l < nl; ++l) 
-          {
-            ObjectStream& os = inout[ l ];
-
-            // get end iterator 
-            const hedge_iterator iEnd = innerEdges [l].end ();
-            for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i)
-            {
-              const bool locked = bool( os.get() );
-              if( locked == false ) 
-              {
-                assert (clean.find (*i) != cleanEnd );
-                clean[ *i ].first = false;
-              }
-            }
-          }
+          // edge data, second loop 
+          PackUnpackEdgeCoarsen edgeData( this->containerPll(), 
+                                          clean, innerEdges, outerEdges, nl, false );
+          mpAccess().exchange( edgeData );
         }
-        
-        {
-          for (int l = 0; l < nl; ++l) 
-          {
-            ObjectStream& os = inout[ l ];
-            os.clear();
 
-            // reserve memory first 
-            os.reserve( innerEdges [l].size() * sizeof(char) );
-
-            // get end iterator 
-            const hedge_iterator iEnd = innerEdges [l].end ();
-            for (hedge_iterator i = innerEdges [l].begin (); i != iEnd; ++i) 
-            {
-              hedge_STI* edge = (*i);
-              assert (clean.find ( edge ) != clean.end ());
-
-              clean_t& a = clean [ edge ];
-              os.putNoChk( char( a.first) );
-
-              if (a.second) 
-              {
-                // Wenn wir hier sind, kann die Kante tats"achlich vergr"obert werden, genauer gesagt,
-                // sie wird es auch und der R"uckgabewert testet den Vollzug der Aktion. Weil aber nur
-                // einmal vergr"obert werden kann, und die Iteratoren 'innerEdges [l]' aber eventuell
-                // mehrfach "uber eine Kante hinweglaufen, muss diese Vergr"oberung im map 'clean'
-                // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
-              
-                a.second = false;
-#ifndef NDEBUG
-                bool b = 
-#endif
-                  edge->unlockAndResume (a.first);
-                assert (b == a.first);
-              }
-            }
-          }
-
-          // also pack dynamic state here since this is the last communication 
-          packUnpackDynamicState( inout, nl, true );
-          
-          // exchange data 
-          inout = mpAccess ().exchange (inout);
-          
-          {
-            for (int l = 0; l < nl; ++l ) 
-            {
-              ObjectStream& os = inout[ l ];
-              // get end iterator 
-              const hedge_iterator iEnd = outerEdges [l].end ();
-              for (hedge_iterator i = outerEdges [l].begin (); i != iEnd; ++i )
-              {
-                // Selbe Situation wie oben, aber der Eigent"umer der Kante hat mitgeteilt, dass sie
-                // vergr"obert werden darf und auch wird auf allen Teilgebieten also auch hier. Der
-                // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
-              
-                const bool unlock = bool( os.get() );
-#ifndef NDEBUG
-                bool b = 
-#endif
-                  (*i)->unlockAndResume ( unlock );
-                assert (b == unlock);
-              }
-            }
-          }
-
-          // unpack dynamic state here since this is the last communication 
-          packUnpackDynamicState( inout, nl, false );
-        }
+        // exchange dynamic state here
+        exchangeDynamicState();
       } 
       catch( Parallel::AccessPllException )
       {
@@ -888,67 +1053,6 @@ namespace ALUGrid
     }
     
     __STATIC_phase = -1;
-  }
-
-  void GitterPll::
-  packUnpackDynamicState ( std::vector< ObjectStream >& osv, const int nl, const bool packData )
-  {
-    typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
-       TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
-    typedef Insert < AccessIteratorTT < hface_STI >::OuterHandle, 
-      TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
-                
-    // if pack data is true, then write data to stream, otherwise read 
-    if( packData ) 
-    {
-      for (int l = 0; l < nl; ++l) 
-      {
-        // get object stream 
-        ObjectStream& os = osv[ l ];
-
-        AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (),l);
-        AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (),l);
-
-        InnerIteratorType wi (mif);
-        for (wi.first (); ! wi.done (); wi.next ()) 
-        {
-          std::pair< ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX ();
-          p.first->writeDynamicState (os, p.second);
-        }
-    
-        OuterIteratorType wo (mof);
-        for (wo.first (); ! wo.done (); wo.next ()) 
-        {
-          std::pair< ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX ();
-          p.first->writeDynamicState (os, p.second);
-        }
-      }
-    }
-    else // unpack data 
-    { 
-      for (int l = 0; l < nl; ++l) 
-      {
-        // get object stream 
-        ObjectStream& os = osv[ l ];
-
-        AccessIteratorTT < hface_STI >::OuterHandle mof (this->containerPll (),l);
-        AccessIteratorTT < hface_STI >::InnerHandle mif (this->containerPll (),l);
-    
-        OuterIteratorType wo (mof);
-        for (wo.first (); ! wo.done (); wo.next ()) 
-        {
-          std::pair< ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX ();
-          p.first->readDynamicState (os, p.second);
-        }
-    
-        InnerIteratorType wi (mif);
-        for (wi.first (); ! wi.done (); wi.next ()) 
-        {
-          std::pair< ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX ();
-          p.first->readDynamicState (os, p.second);
-        }
-      }
-    } 
   }
 
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
@@ -1002,7 +1106,11 @@ namespace ALUGrid
     return refined;
   }
 
-  void GitterPll::MacroGitterPll::fullIntegrityCheck (MpAccessLocal & mpa) {
+  void GitterPll::MacroGitterPll::fullIntegrityCheck (MpAccessLocal & mpa) 
+  {
+    std::cerr << "ERROR: GitterPll::MacroGitterPll::fullIntegrityCheck needs a reimplementation to avoid the old exchange methods" << std::endl;
+    abort();
+    /*
     const int nl = mpa.nlinks (), me = mpa.myrank ();
 
     try {
@@ -1040,6 +1148,7 @@ namespace ALUGrid
       std::cerr << "ERROR (fatal): Parallel::AccessPllException caught." << std::endl;
       abort();
     }
+    */
   }
 
   void GitterPll :: exchangeStaticState () 
@@ -1123,8 +1232,6 @@ namespace ALUGrid
     return ;
   }
 
-
-
   void GitterPll::exchangeDynamicState () 
   {
     // Zustand des Gitters ge"andert hat: Verfeinerung und alle Situationen
@@ -1134,33 +1241,15 @@ namespace ALUGrid
     // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
     // Regel hier eingeschleift werden.
     {
-      const int nl = mpAccess ().nlinks ();
-    
 #ifndef NDEBUG 
       // if debug mode, then count time 
       const int start = clock ();
 #endif
-    
       try 
       {
-        typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
-           TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
-        typedef Insert < AccessIteratorTT < hface_STI >::OuterHandle, 
-          TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
-                  
-        // create message buffers 
-        std::vector< ObjectStream > osv (nl);
-
-        // pack dynamic state 
-        packUnpackDynamicState( osv, nl, true );
-          
-        // exchange data 
-        osv = mpAccess ().exchange (osv);
-      
-        // unpack dynamic state 
-        packUnpackDynamicState( osv, nl, false );
-          
-      } 
+        PackUnpackDynamicState data( this->containerPll() );
+        mpAccess().exchange( data );
+      }
       catch( Parallel:: AccessPllException )
       {
         std::cerr << "ERROR: Parallel::AccessPllException caught." << std::endl;

@@ -110,15 +110,23 @@ namespace ALUGrid
     class Identifier
     {
       int _i1, _i2, _i3, _i4 ;
+      static const int _endOfStream = -128 ; // must be a negative value 
     public :
       inline Identifier (int = -1, int = -1, int = -1, int = -1) ;
       inline Identifier (const Identifier &) ;
       inline const Identifier & operator = (const Identifier &) ;
       inline bool operator < (const Identifier &) const ;
       inline bool operator == (const Identifier &) const ;
-      void read ( std::vector< int >::const_iterator &, const std::vector< int >::const_iterator & );
-      void write ( std::vector< int > &) const ;
+      // read identifier from stream and return true if successful 
+      bool read ( ObjectStream& );
+      void write ( ObjectStream& ) const ;
       inline bool isValid () const ;
+      // read stream termination marker 
+      static void endOfStream( ObjectStream& os ) 
+      {
+        os.writeObject( _endOfStream );
+      }
+
     } ;
 
   public :
@@ -195,7 +203,8 @@ namespace ALUGrid
     : _i1 (x._i1), _i2 (x._i2), _i3 (x._i3), _i4 (x._i4) {
   }
 
-  inline const LinkedObject :: Identifier & LinkedObject :: Identifier :: operator = (const Identifier & x) {
+  inline const LinkedObject :: Identifier & LinkedObject :: Identifier :: operator = (const Identifier & x) 
+  {
     assert (x.isValid ()) ;
     _i1 = x._i1 ;
     _i2 = x._i2 ;
@@ -215,21 +224,27 @@ namespace ALUGrid
     return (_i1 == x._i1 && _i2 == x._i2 && _i3 == x._i3 && _i4 == x._i4) ? true : false ;
   }
 
-  inline void LinkedObject::Identifier::read ( std::vector< int >::const_iterator &pos,
-                                               const std::vector< int >::const_iterator &end )
+  // read identifier and return true if successful 
+  inline bool LinkedObject::Identifier::read ( ObjectStream& os ) 
   {
-    assert (pos != end ) ; _i1 = * pos ++ ;
-    assert (pos != end ) ; _i2 = * pos ++ ; 
-    assert (pos != end ) ; _i3 = * pos ++ ;
-    assert (pos != end ) ; _i4 = * pos ++ ;
+    // if the next entry is end of stream do nothing more 
+    os.readObject( _i1 );
+    if( _i1 == _endOfStream ) 
+      return false ;
+
+    os.readObject( _i2 );
+    os.readObject( _i3 );
+    os.readObject( _i4 );
+    return true ;
   }
 
-  inline void LinkedObject::Identifier::write ( std::vector< int > &v ) const
+  inline void LinkedObject::Identifier::write ( ObjectStream& os ) const
   {
-    v.push_back (_i1);
-    v.push_back (_i2);
-    v.push_back (_i3);
-    v.push_back (_i4);
+    // write object to stream 
+    os.writeObject( _i1 );
+    os.writeObject( _i2 );
+    os.writeObject( _i3 );
+    os.writeObject( _i4 );
   }
 
 } // namespace ALUGrid

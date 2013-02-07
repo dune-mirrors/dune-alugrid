@@ -49,7 +49,7 @@ struct BallData
   { 
     DomainType xx(x);
     xx -= c_;
-    DomainType y;
+    DomainType y(0);
     y[0] = std::cos(time*2.*M_PI)*r0_;
     y[1] = std::sin(time*2.*M_PI)*r0_;
     xx -= y;
