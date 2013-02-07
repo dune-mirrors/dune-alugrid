@@ -23,10 +23,3 @@ dist-hook:
 
 include $(top_srcdir)/am/top-rules
 include $(top_srcdir)/am/global-rules
-dune/alugrid/impl/2d/grid.h
-dune/alugrid/impl/2d/handle.h
-dune/alugrid/impl/2d/listwalk.h
-dune/alugrid/impl/2d/triang.h
-dune/alugrid/impl/2d/vmmap.h
-dune/alugrid/impl/2d/vtx_btree.h
-dune/alugrid/impl/2d/vtxprojection.h
