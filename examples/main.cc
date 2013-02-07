@@ -89,7 +89,9 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
   Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", outPath, ".", Dune::VTK::nonconforming );
   if( writeOutput ) 
   {
+#if ! BALL
     VTKData< DataType >::addTo( solution, vtkOut );
+#endif
     VTKData< DataType >::addPartitioningData( grid.comm().rank(), vtkOut );
   }
 
@@ -175,12 +177,15 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
       /* set saveStep for next save point */
       saveStep += saveInterval;
 
-      size_t overallElements = gridView.grid().comm().sum( elements );
+      size_t sumElements = gridView.grid().comm().sum( elements );
+      size_t minElements = gridView.grid().comm().min( elements );
+      size_t maxElements = gridView.grid().comm().max( elements );
 
       /* print info about time, timestep size and counter */
       if ( verboseRank )  
       {
-        std::cout << "overallElements = " << overallElements ;
+        std::cout << "elements = " << sumElements ;
+        std::cout << " ("<<minElements << "," << maxElements << ")";
         std::cout << "   maxLevel = " << grid.maxLevel();
         std::cout << "   step = " << step;
         std::cout << "   time = " << time;
