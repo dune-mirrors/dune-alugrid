@@ -29,10 +29,6 @@ AC_CONFIG_FILES([
   lib/Makefile
   m4/Makefile
   examples/Makefile
-  misc/Makefile
-  misc/macrogrids/Makefile
-  misc/versioncheck/Makefile
-  misc/examples/Makefile
   dune-alugrid.pc
 ])
 
