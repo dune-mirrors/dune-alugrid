@@ -192,6 +192,9 @@ namespace ALUGrid
         grd = new GitterDunePll( backup, mpa );
         assert( grd );
         grd->duneRestore( backup );
+
+        // make sure every process got here
+        mpa.barrier();
       }
       return grd;
     }
