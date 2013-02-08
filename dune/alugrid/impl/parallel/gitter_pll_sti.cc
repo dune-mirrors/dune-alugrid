@@ -340,6 +340,8 @@ namespace ALUGrid
       os.clear();
       // reserve memory 
       os.reserve( edges.size() * sizeof(char) );
+      size_t edSize = edges.size() ;
+      os.write( edSize );
 
       // write refinement request 
       const hedge_iterator iEnd = edges.end ();
@@ -353,6 +355,15 @@ namespace ALUGrid
     {
       // the first loop needs innerEdges the second loop outer
       edgevec_t& edges = ( _firstLoop ) ? _innerEdges[ link ] : _outerEdges[ link ];
+      size_t edSize ;
+      os.read( edSize );
+
+      if( edSize != edges.size() )
+      {
+        std::cerr << "ERROR: PackUnpackEdgeCleanup::unpack number of edges does not match" << std::endl;
+        assert( edSize == edges.size() );
+        abort();
+      }
 
       const hedge_iterator iEnd = edges.end ();
       for (hedge_iterator i = edges.begin (); i != iEnd; ++i )
