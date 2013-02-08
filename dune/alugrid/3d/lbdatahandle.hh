@@ -257,7 +257,6 @@ namespace Dune
     // return true if user defined partitioning methods should be used 
     bool userDefinedPartitioning () const 
     {
-      std::cout << "IF: userDefined" << std::endl;
       return ldbHandle_.userDefinedPartitioning();
     }
     // return true if user defined load balancing weights are provided
@@ -268,7 +267,6 @@ namespace Dune
     // returns true if user defined partitioning needs to be readjusted 
     bool repartition () const 
     { 
-      std::cout << "IF: repartition" << std::endl;
       return ldbHandle_.repartition();
     }
     // return load weight of given element 
