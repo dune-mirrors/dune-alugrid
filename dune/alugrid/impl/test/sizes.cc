@@ -289,21 +289,26 @@ int main (int argc, char ** argv, const char ** envp)
 
     {
 #ifdef PARALLEL
-      ALUGrid::GitterDunePll grid(macroname.c_str(),mpa);
+      ALUGrid::GitterDunePll* gridPtr = new ALUGrid::GitterDunePll(macroname.c_str(),mpa);
 #else 
-      ALUGrid::GitterDuneImpl grid(macroname.c_str());
+      ALUGrid::GitterDuneImpl* gridPtr = new ALUGrid::GitterDuneImpl(macroname.c_str());
 #endif
-      bool closure = needConformingClosure( grid, useClosure );
+      bool closure = needConformingClosure( *gridPtr, useClosure );
 #ifdef PARALLEL
       closure = mpa.gmax( closure );
 #endif
       if( closure ) 
       {
-        grid.enableConformingClosure() ;
-        grid.disableGhostCells();
+        gridPtr->enableConformingClosure() ;
+        gridPtr->disableGhostCells();
       }
+
 #ifdef PARALLEL
-      grid.duneLoadBalance();
+      gridPtr->duneLoadBalance();
+      gridPtr = ALUGrid::GitterDunePll::compress( gridPtr );
+      ALUGrid::GitterDunePll& grid = *gridPtr ;
+#else
+      ALUGrid::GitterDuneImpl& grid = *gridPtr ;
 #endif
 
       //std::cout << "P[ " << rank << " ] : Grid generated! \n";
