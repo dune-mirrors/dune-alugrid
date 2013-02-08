@@ -4,16 +4,23 @@
 #include <cmath>
 #include <vector>
 
+#include "mpAccess.h"
+
 namespace ALUGridMETIS
 {
 
   template< class idxtype >
-  void CALL_spaceFillingCurveNoEdges(const int myRank,       // my rank 
+  void CALL_spaceFillingCurveNoEdges(const ALUGrid::MpAccessGlobal& mpa, // communicator
                                      const idxtype nCells,   // number of cells 
-                                     const idxtype nPart,    // number of partitions 
                                      const idxtype *weights, // vertex weights 
                                      idxtype* part )         // new partitioning 
   {
+    // get number of partitions 
+    const int nPart = mpa.psize();
+
+    // make sure that the number of cells in the graph is the same on each core 
+    assert( nCells == mpa.gmax( nCells ) );
+
     // calculate mean load 
     double meanLoad = 0 ;
     for( idxtype i = 0 ; i<nCells; ++i )
@@ -23,6 +30,9 @@ namespace ALUGridMETIS
 
     // calculate average load 
     meanLoad /= double(nPart);
+
+    // make sure that the mean load is the same on each proc 
+    assert( std::abs( meanLoad - mpa.gmax( meanLoad ) ) < 1e-8 );
 
     // round the average load to get a threshold value 
     double meanThreshold = std::round( meanLoad );
@@ -83,14 +93,13 @@ namespace ALUGridMETIS
   } // end of simple sfc splitting without edges 
 
   template < class idxtype >
-  void CALL_spaceFillingCurve(const int myRank,       // my rank 
+  void CALL_spaceFillingCurve(const ALUGrid::MpAccessGlobal& mpa, // communicator
                               const idxtype nCells,   // number of cells 
-                              const idxtype nPart,    // number of partitions 
                               const idxtype *weights, // vertex weights 
                               idxtype* part )         // new partitioning 
   {
     // TODO, also use edge info 
-    CALL_spaceFillingCurveNoEdges(myRank, nCells, nPart, weights, part ); 
+    CALL_spaceFillingCurveNoEdges( mpa, nCells, weights, part ); 
   } // end of simple sfc splitting 
 
 } // namespace ALUGridMETIS

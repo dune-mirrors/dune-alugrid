@@ -407,11 +407,11 @@ namespace ALUGrid
     }
   }
 
-  template <class real_t, class idx_t>
+  template <class idx_t>
   static void optimizeCoverage (const int nparts, 
                                 const int len, 
                                 const idx_t* const reference, 
-                                const real_t* const weight, 
+                                const idx_t* const weight, 
                                 idx_t* const proposal, 
                                 const int verbose) 
   {
@@ -427,7 +427,10 @@ namespace ALUGrid
     {
       std::vector< std::vector< int > > cov (nparts, std::vector< int > (nparts, 0L));
 
-      for (int k = 0; k < len; ++k) cov [reference [k]][proposal[k]] += 1 + int (sqrt(weight [k])); 
+      for (int k = 0; k < len; ++k) 
+      {
+        cov [reference [k]][proposal[k]] += 1 + int (sqrt(double(weight [k])));
+      }
     
       for (int i = 0; i < nparts; ++i ) 
       {
@@ -505,9 +508,8 @@ namespace ALUGrid
     return;
   }
 
-  template <class real_t, class idx_t>
+  template <class idx_t>
   static bool collectInsulatedNodes (const int nel, 
-                                     const real_t* const vertex_w, 
                                      const idx_t* const edge_p, 
                                      const idx_t* const edge, 
                                      const idx_t* const edge_w, 
@@ -682,9 +684,6 @@ namespace ALUGrid
         // edges.clear();
       }
       
-      // get vertex memory 
-      real_t * const vertex_w    = new real_t [nel];
-
       const int sizeNeu = (np > 1) ? nel : 0;
       const int memFactor = 2 ; // need extra memory for adaptive repartitioning
       idx_t  * vertex_mem = new idx_t [ (memFactor * nel)  + sizeNeu];
@@ -699,7 +698,7 @@ namespace ALUGrid
       // set weights (uniform distribution, to be adjusted)
       for(int l=0; l<np; ++l) tpwgts[l] = value;
 
-      assert ( vertex_w && vertex_wInt && part);
+      assert ( vertex_wInt && part);
       {
         std::vector< int > check (nel, 0L);
         ldb_vertex_map_t::const_iterator iEnd = nodes.end ();
@@ -712,7 +711,7 @@ namespace ALUGrid
           assert (0 <= item.second && item.second < np);
           part [j] = item.second;
           check [j] = 1;
-          vertex_w [j] = vertex_wInt [j] = item.first.weight ();
+          vertex_wInt [j] = item.first.weight ();
         }
 
         // store nodes size before clearing   
@@ -726,7 +725,6 @@ namespace ALUGrid
         {
           std::cerr << "WARNING (ignored): No repartitioning due to failed consistency check." << std::endl;
 
-          delete[] vertex_w;
           delete[] vertex_mem;
           delete[] edge_mem;
           return false;
@@ -762,13 +760,13 @@ namespace ALUGrid
             case ALUGRID_SpaceFillingCurveNoEdges:
               {
                 idx_t n = nel, npart = np;
-                ALUGridMETIS::CALL_spaceFillingCurveNoEdges( me, n, npart, vertex_wInt, neu );
+                ALUGridMETIS::CALL_spaceFillingCurveNoEdges( mpa, n, vertex_wInt, neu );
               }
               break;
             case ALUGRID_SpaceFillingCurve:
               {
                 idx_t n = nel, npart = np;
-                ALUGridMETIS::CALL_spaceFillingCurve( me, n, npart, vertex_wInt, neu);
+                ALUGridMETIS::CALL_spaceFillingCurve( mpa, n, vertex_wInt, neu);
               }
               break;
 
@@ -796,7 +794,6 @@ namespace ALUGrid
             default :
               std::cerr << "WARNING (ignored): Invalid repartitioning method [" << mth << "]." << std::endl;
                 
-              delete[] vertex_w;
               delete[] vertex_mem;
               delete[] edge_mem;
               delete[] tpwgts;
@@ -813,7 +810,7 @@ namespace ALUGrid
           // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
           // zusammen.
            
-          collectInsulatedNodes (nel, vertex_w, edge_p, edge, edge_w, np, neu);
+          collectInsulatedNodes (nel, edge_p, edge, edge_w, np, neu);
 
           // optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
           // Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
@@ -821,7 +818,7 @@ namespace ALUGrid
           // in Aktion tritt.
            
           const int verbose = me == 0 ? debugOption (4) : 0;
-          optimizeCoverage (np, nel, part, vertex_w, neu, verbose );
+          optimizeCoverage (np, nel, part, vertex_wInt, neu, verbose );
         }
 
         // Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
@@ -891,7 +888,6 @@ namespace ALUGrid
         }
       }
 
-      delete [] vertex_w;
       delete [] vertex_mem;
       delete [] edge_mem;
       delete [] tpwgts;

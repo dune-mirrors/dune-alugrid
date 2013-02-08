@@ -226,6 +226,7 @@ namespace ALUGrid
   inline LoadBalancer::GraphEdge::GraphEdge (int i, int j, int w) 
     : _leftNode (i), _rightNode (j), _weight (w) 
   {
+    assert( _weight >= 0 );
   }
 
   inline int LoadBalancer::GraphEdge::leftNode () const {
@@ -241,7 +242,8 @@ namespace ALUGrid
   }
 
   inline bool LoadBalancer::GraphEdge::isValid () const {
-    return !(_leftNode < 0 || _rightNode < 0 || _weight <= 0);
+    //return !(_leftNode < 0 || _rightNode < 0 || _weight <= 0);
+    return ( _leftNode >= 0 ) && ( _rightNode >= 0 ) && ( _weight > 0 );
   }
 
   inline bool LoadBalancer::GraphEdge::operator < (const GraphEdge & x) const {
@@ -260,7 +262,7 @@ namespace ALUGrid
   {
     os.readObject ( _leftNode  );
     os.readObject ( _rightNode );
-    os.readObject (_weight);
+    os.readObject ( _weight );
     return true;
   }
 
@@ -284,6 +286,7 @@ namespace ALUGrid
     _center [1] = p [1];
     _center [2] = p [2];
 #endif
+    assert( _weight > 0 );
     return;
   }
 
@@ -297,11 +300,12 @@ namespace ALUGrid
   }
 
   inline LoadBalancer::GraphVertex::GraphVertex (int i) 
-    : _index (i), _weight (0) 
+    : _index (i), _weight (1) 
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
     _center [0] = _center [1] = _center [2] = 0.0;
 #endif
+    assert( _weight > 0 );
     return;
   }
 
@@ -310,6 +314,7 @@ namespace ALUGrid
   }
 
   inline int LoadBalancer::GraphVertex::weight () const {
+    assert( _weight > 0 );
     return _weight;
   }
 
@@ -320,7 +325,7 @@ namespace ALUGrid
 #endif
 
   inline bool LoadBalancer::GraphVertex::isValid () const {
-    return !(_index < 0 || _weight <= 0);
+    return (_index >= 0 ) && ( _weight > 0 );
   }
 
   inline bool LoadBalancer::GraphVertex::operator < (const GraphVertex & x) const {
