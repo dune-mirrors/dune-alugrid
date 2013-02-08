@@ -921,8 +921,11 @@ namespace ALUGrid
     const bool userDefinedPartitioning = gatherScatter && gatherScatter->userDefinedPartitioning();
 
     // default partitioning method 
-    const bool doRepartition = userDefinedPartitioning ? 
-      gatherScatter->repartition() :
+    // for user defined paritioning gatherScatter.partitioning() was called in gitter_pll_sti.cc before 
+    // calling this method and returned true - that method should thus already have compute the 
+    // new partitioning. For the internal partitioner repartition is called hear and
+    // could still be lead to no repartitioning being carried out
+    const bool doRepartition = userDefinedPartitioning ? true : 
       db.repartition (mpAccess (), LoadBalancer::DataBase::method (_ldbMethod));
 
     // get graph sizes from data base, this is only used for the serial partitioners

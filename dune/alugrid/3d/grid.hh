@@ -763,10 +763,10 @@ namespace Dune
       LBHandle lbHandle( *this, lbHandleIF );
       return loadBalance( lbHandle );
     }
-    template< class LoadBalanceHandleImpl, class DataHandleImpl >
-    bool loadBalance ( LoadBalanceHandleImpl &ldbHandle, DataHandleImpl &dataHandle )
+    template< class LoadBalanceHandleImpl, class DataHandleImpl, class Data >
+    bool loadBalance ( LoadBalanceHandleImpl &ldbHandle, CommDataHandleIF<DataHandleImpl,Data> &dataHandle )
     {
-      typedef ALUGridLoadBalanceDataHandle< ThisType, LoadBalanceHandleImpl, DataHandleImpl > LBHandle;
+      typedef ALUGridLoadBalanceDataHandle< ThisType, LoadBalanceHandleImpl, DataHandleImpl, Data > LBHandle;
       LBHandle lbHandle( *this, ldbHandle, dataHandle );
       return loadBalance( lbHandle );
     }

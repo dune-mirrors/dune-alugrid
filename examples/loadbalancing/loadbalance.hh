@@ -33,6 +33,7 @@ public:
   : grid_( grid )
   {}
 
+  /*
   void inlineData ( ObjectStream &stream, const Element &element ) const
   {
     return;
@@ -43,24 +44,23 @@ public:
   }
   void compress ()
   {}
+  */
 
-
-  // return true if user defined partitioning methods should be used 
-  bool userDefinedPartitioning () const 
+  // return true if user defined partitioning methods should be used
+  bool userDefinedPartitioning () const
   {
-    std::cout << "is user defined partitioning" << std::endl;
     return true;
   }
   // return true if user defined load balancing weights are provided
-  bool userDefinedLoadWeights () const 
-  { 
+  bool userDefinedLoadWeights () const
+  {
     return false;
   }
+
   // returns true if user defined partitioning needs to be readjusted 
   bool repartition () const 
   { 
     angle_ += 2.*M_PI/50.;
-    std::cout << "repartition" << std::endl;
     return true;
   }
   // return load weight of given element 
@@ -78,7 +78,6 @@ public:
     phi += angle_;
     phi *= double(this->grid_.comm().size())/(2.*M_PI);
     int p = int(phi) % this->grid_.comm().size();
-    std::cout << "destination: " << phi << " " << angle_ << " " << p << std::endl;
     return p;
   }
 private:
