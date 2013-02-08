@@ -332,6 +332,13 @@ namespace ALUGrid
         _firstLoop( firstLoop )
     {}
 
+    void packAll( std::vector< ObjectStream >& osv ) 
+    {
+      const int nl = osv.size();
+      for( int link = 0; link < nl; ++link )
+        pack( link, osv[ link ] );
+    }
+
     void pack( const int link, ObjectStream& os ) 
     {
       // the first loop needs outerEdges the second loop inner
@@ -467,14 +474,17 @@ namespace ALUGrid
 
       __STATIC_phase = 3;
 
+      std::vector< ObjectStream > osv( nl );
       {
         PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, true );
-        mpAccess().exchange( edgeData );
+        edgeData.packAll( osv );
+        mpAccess().exchange( osv, edgeData );
       } 
        
       {
         PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, false );
-        mpAccess().exchange( edgeData );
+        edgeData.packAll( osv );
+        mpAccess().exchange( osv, edgeData );
       }
     }
     
