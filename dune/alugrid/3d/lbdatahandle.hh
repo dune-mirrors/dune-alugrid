@@ -285,12 +285,13 @@ namespace Dune
     } 
   };
 
-  template< class Grid, class LoadBalanceHandleImpl, class DataHandleImpl >
+  template< class Grid, class LoadBalanceHandleImpl, class DataHandleImpl, class Data >
   class ALUGridLoadBalanceDataHandle 
   {
     typedef typename Grid :: Traits :: HierarchicIterator HierarchicIterator;
   public:
     typedef typename Grid :: ObjectStreamType ObjectStream;
+    typedef CommDataHandleIF< DataHandleImpl, Data > DataHandle;
 
     template< int codim >
     struct Codim
@@ -305,10 +306,11 @@ namespace Dune
   private:
     const Grid &grid_;
     LoadBalanceHandleImpl &ldbHandle_;
-    DataHandleImpl &dataHandle_;
+    DataHandle &dataHandle_;
 
   public:
-    ALUGridLoadBalanceDataHandle ( const Grid &grid, LoadBalanceHandleImpl &ldbHandle, DataHandleImpl &dataHandle )
+    ALUGridLoadBalanceDataHandle ( const Grid &grid, LoadBalanceHandleImpl &ldbHandle, 
+                                   DataHandle &dataHandle )
     : grid_(grid),
       ldbHandle_(ldbHandle),
       dataHandle_(dataHandle)
