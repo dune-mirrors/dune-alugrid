@@ -300,6 +300,10 @@ namespace ALUGrid
     {
       try 
       {
+#ifndef NDEBUG
+        const size_t expecetedSize = (_innerFaces[ link ].size() + _outerFaces[ link ].size() ) * sizeof( char );
+        assert( os.size() == expecetedSize );
+#endif
         {
           const hface_iterator iEnd = _innerFaces[ link ].end ();
           for (hface_iterator i = _innerFaces [ link ].begin (); i != iEnd; ++i ) 
@@ -607,6 +611,10 @@ namespace ALUGrid
     {
       if( _firstLoop ) 
       {
+#ifndef NDEBUG
+        const size_t expecetedSize = (_innerFaces[ link ].size() ) * sizeof( char );
+        assert( os.size() == expecetedSize );
+#endif
         cleanvector_t& cl = _clean[ link ];
 
         // reset clean vector 
@@ -626,6 +634,10 @@ namespace ALUGrid
       }
       else 
       {
+#ifndef NDEBUG
+        const size_t expecetedSize = (_outerFaces[ link ].size() ) * sizeof( char );
+        assert( os.size() == expecetedSize );
+#endif
         const hface_iterator iEnd = _outerFaces[ link ].end ();
         for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i )
         {
@@ -1440,16 +1452,13 @@ namespace ALUGrid
         w.item ().setLoadBalanceVertexIndex ( cnt );
       }
 
-      const bool serialPartitioning = serialPartitioner();
-      if( ! serialPartitioning ) 
-      {
-        // exchanges the ldbVertexIndex for the internal boundaries 
-        exchangeStaticState();
-      }
+      // exchanges the ldbVertexIndex for the internal boundaries 
+      // to obtain a consistent numbering 
+      exchangeStaticState();
       
       // mark unique element indices as computed, if serialPartitioner is used
       // don't do this computation again for serial partitioning 
-      _ldbVerticesComputed = serialPartitioning ;
+      _ldbVerticesComputed = serialPartitioner(); 
     }
 
 #ifndef NDEBUG
