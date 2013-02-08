@@ -71,7 +71,7 @@ struct EulerProblemFFS
   }
 
   //! \copydoc ProblemData::adaptationIndicator
-  double adaptationIndicator ( const DomainType x, double time,
+  double adaptationIndicator ( const DomainType& x, double time,
                                const RangeType &uLeft, const RangeType &uRight ) const 
   { 
     return std::abs( uLeft[ 0 ] - uRight[ 0 ] )/(0.5*(uLeft[0]+uRight[0]));

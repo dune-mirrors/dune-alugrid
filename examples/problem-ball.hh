@@ -44,8 +44,8 @@ struct BallData
   }
 
   //! \copydoc ProblemData::adaptationIndicator
-  double adaptationIndicator ( const DomainType x, double time,
-                               const RangeType &uLeft, const RangeType &uRight ) const 
+  double adaptationIndicator ( const DomainType& x, double time,
+                               const RangeType& uLeft, const RangeType &uRight ) const 
   { 
     DomainType xx(x);
     xx -= c_;

@@ -73,7 +73,7 @@ struct ProblemData
    *  \param uRight right state
    *  \return the indicator
    */
-  virtual double adaptationIndicator ( const DomainType x, double time,
+  virtual double adaptationIndicator ( const DomainType& x, double time,
                                        const RangeType &uLeft, const RangeType &uRight ) const = 0;
   /** \brief refine tolerance to use */
   virtual double refineTol () const = 0;
