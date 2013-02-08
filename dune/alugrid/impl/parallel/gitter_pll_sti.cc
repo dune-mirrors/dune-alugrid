@@ -1364,9 +1364,12 @@ namespace ALUGrid
   {
     // create load balancer data base 
     LoadBalancer::DataBase db( _graphSizes );
-
+ 
+    // check if partioner is provided by used
+    const bool userDefinedPartitioning = gs && gs->userDefinedPartitioning();
     // check whether we have to repartition 
-    const bool repartition = checkPartitioning( db, gs );
+    const bool repartition = (userDefinedPartitioning)? gs->repartition() : 
+                                                        checkPartitioning( db, gs );
 
     // if repartioning necessary, do it 
     if ( repartition ) 
@@ -1382,14 +1385,13 @@ namespace ALUGrid
 #endif
 
       // if a method was given, perform load balancing
-      if( ldbMth ) 
+      if (userDefinedPartitioning || ldbMth)
       {
         // check gather-scatter object and call appropriate method 
         if( gs ) 
           duneRepartitionMacroGrid( db, *gs );  
         else   
           repartitionMacroGrid (db);
-
         // calls identification and exchangeDynamicState 
         notifyMacroGridChanges ();
       }

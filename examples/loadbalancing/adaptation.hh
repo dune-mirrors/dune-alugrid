@@ -251,14 +251,9 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
 
   Dune :: Timer lbTimer ;
   // re-balance grid 
-  std::cout << "repartititoning" << std::endl;
-  // DataHandle<Grid,Container> dataHandle( grid_, container ) ;
-  // LoadBalanceHandle<Grid> ldb( grid_ );
-  // grid_.loadBalance( ldb, dataHandle );
-
-  LoadBalanceHandle<Grid> ldb(grid_);
-  typedef Dune::LoadBalanceHandleIF< LoadBalanceHandle<Grid> > DataHandleInterface;
-  grid_.loadBalance( (DataHandleInterface&)(ldb) );
+  DataHandle<Grid,Container> dataHandle( grid_, container ) ;
+  LoadBalanceHandle<Grid> ldb( grid_ );
+  grid_.loadBalance( ldb, dataHandle );
 
   // cleanup adaptation markers 
   grid_.postAdapt();
