@@ -262,6 +262,13 @@ namespace ALUGrid
 
     bool repeat () const { return _repeat; }
 
+    void packAll( std::vector< ObjectStream >& osv ) 
+    {
+      const int nl = osv.size();
+      for( int link = 0; link < nl; ++link )
+        pack( link, osv[ link ] );
+    }
+
     void pack( const int link, ObjectStream& os ) 
     {
       try 
@@ -447,13 +454,15 @@ namespace ALUGrid
     
       bool repeat (false);
       _refineLoops = 0;
+      std::vector< ObjectStream > osv( nl );
       do 
       {
         // unpack handle to unpack the data once their received 
         PackUnpackRefineLoop dataHandle ( innerFaces, outerFaces );
+        dataHandle.packAll( osv );
 
         // exchange data and unpack when received 
-        mpAccess ().exchange ( dataHandle );
+        mpAccess ().exchange ( osv, dataHandle );
 
         // get repeat flag 
         repeat = dataHandle.repeat();
@@ -474,7 +483,6 @@ namespace ALUGrid
 
       __STATIC_phase = 3;
 
-      std::vector< ObjectStream > osv( nl );
       {
         PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, true );
         edgeData.packAll( osv );
