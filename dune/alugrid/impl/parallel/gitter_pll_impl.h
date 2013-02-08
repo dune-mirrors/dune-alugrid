@@ -938,7 +938,7 @@ namespace ALUGrid
     } 
     catch( ObjectStream::EOFException )
     {
-      std::cerr << "ERROR (fatal): EOF encountered." << std::endl;
+      std::cerr << "ERROR (fatal): EdgePllBaseX< A >::setRefinementRequest EOF encountered." << std::endl;
       abort();
     }
     typedef typename myhedge_t::myrule_t  myrule_t;

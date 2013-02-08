@@ -248,7 +248,7 @@ namespace ALUGrid
       } 
       catch( ObjectStream::EOFException )
       {
-        std::cerr << "ERROR (fatal): EOF encountered." << std::endl;
+        std::cerr << "ERROR (fatal): EdgePllBaseXMacro< A >::unpackSelf EOF encountered." << std::endl;
         abort();
       }
     }
@@ -571,7 +571,7 @@ namespace ALUGrid
       } 
       catch( ObjectStream::EOFException )
       {
-        std::cerr << "ERROR (fatal): EOF encountered." << std::endl;
+        std::cerr << "ERROR (fatal): FacePllBaseXMacro < A >::unpackSelf EOF encountered." << std::endl;
         abort();
       }
     }
@@ -695,7 +695,7 @@ namespace ALUGrid
     catch (ObjectStream::EOFException) 
     {
       return;
-      std::cerr << "ERROR (fatal): EOF encountered." << std::endl;
+      std::cerr << "ERROR (fatal): BndsegPllBaseXClosure < A >::readDynamicState EOF encountered." << std::endl;
       abort();
     }
   }
@@ -709,7 +709,7 @@ namespace ALUGrid
     } 
     catch (ObjectStream :: EOFException) 
     {
-      std::cerr << "**ERROR (fatal): EOF encountered." << std::endl ;
+      std::cerr << "**ERROR (fatal): BndsegPllBaseXMacroClosure < A >::readStaticState EOF encountered." << std::endl ;
       abort () ;
     }
     assert (_ldbVertexIndex >= 0) ;
