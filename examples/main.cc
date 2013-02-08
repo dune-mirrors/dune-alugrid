@@ -9,6 +9,10 @@
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
 
+#if HAVE_ZOLTAN 
+#include <zoltan_cpp.h>
+#endif
+
 typedef Dune::GridSelector::GridType Grid;
 
 /** numerical scheme **/
@@ -249,6 +253,11 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
+#if HAVE_ZOLTAN 
+  int version;
+  Zoltan_Initialize(argc, argv, &version);
+#endif
+
   if( argc < 2 )
   {
     /* display usage */

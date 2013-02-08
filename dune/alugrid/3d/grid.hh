@@ -752,15 +752,22 @@ namespace Dune
     template< class DataHandleImpl, class Data >
     bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandle )
     {
-      typedef ALUGridLoadBalanceOldDataHandle< ThisType, DataHandleImpl, Data > LBHandle;
+      typedef ALUGridLoadBalanceDataHandle1< ThisType, DataHandleImpl, Data > LBHandle;
       LBHandle lbHandle( *this, dataHandle );
       return loadBalance( lbHandle );
     }
-    template< class DataHandleImpl, class Data >
-    bool loadBalance ( LoadBalanceDataHandleIF< DataHandleImpl, Data > &dataHandle )
+    template< class LoadBalanceHandleImpl >
+    bool loadBalance ( LoadBalanceHandleIF< LoadBalanceHandleImpl > &lbHandleIF )
     {
-      typedef ALUGridLoadBalanceDataHandle< ThisType, DataHandleImpl, Data > LBHandle;
-      LBHandle lbHandle( *this, dataHandle );
+      typedef ALUGridLoadBalanceHandle2< ThisType, LoadBalanceHandleImpl > LBHandle;
+      LBHandle lbHandle( *this, lbHandleIF );
+      return loadBalance( lbHandle );
+    }
+    template< class LoadBalanceHandleImpl, class DataHandleImpl >
+    bool loadBalance ( LoadBalanceHandleImpl &ldbHandle, DataHandleImpl &dataHandle )
+    {
+      typedef ALUGridLoadBalanceDataHandle< ThisType, LoadBalanceHandleImpl, DataHandleImpl > LBHandle;
+      LBHandle lbHandle( *this, ldbHandle, dataHandle );
       return loadBalance( lbHandle );
     }
 

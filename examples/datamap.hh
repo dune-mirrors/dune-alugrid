@@ -9,10 +9,10 @@
  /** \brief the communication data handle for load balancing
  */
 template< class Grid, class Container >
-class LoadBalanceHandle
-: public Dune::CommDataHandleIF< LoadBalanceHandle<Grid,Container>, Container >
+class DataHandle
+: public Dune::CommDataHandleIF< DataHandle<Grid,Container>, Container >
 {
-  typedef LoadBalanceHandle This;
+  typedef DataHandle This;
   typedef Dune::CommDataHandleIF< This, Container > Base;
 
 
@@ -28,7 +28,7 @@ protected:
 
 public:
   //! create DiscreteOperator with a LocalOperator 
-  LoadBalanceHandle ( const Grid &grid, Container &data )
+  DataHandle ( const Grid &grid, Container &data )
   : data_( data )
   , grid_(grid)
   {}
