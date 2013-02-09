@@ -10,6 +10,8 @@
 #include <string>
 #include <utility>
 
+#include "myalloc.h"
+
 namespace ALUGrid
 {
 
@@ -29,7 +31,11 @@ namespace ALUGrid
     mutable bool _owner;
 
   public :
-    class EOFException {} ;
+    class EOFException : public ALUGridException 
+    {
+    public:  
+      virtual std::string what () const { return "EOFException"; }
+    };
     class OutOfMemoryException {} ;
     inline ObjectStreamImpl (size_t chunk) 
       : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(chunk) , _owner(true)

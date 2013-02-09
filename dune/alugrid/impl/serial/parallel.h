@@ -20,7 +20,11 @@ namespace ALUGrid
 
   struct ParallelException 
   {
-    class AccessPllException {};
+    class AccessPllException : public ALUGridException 
+    {
+    public:
+      virtual std::string what () const { return "AccessPllException"; }
+    };
   };
 
 
