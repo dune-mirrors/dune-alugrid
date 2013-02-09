@@ -1635,9 +1635,4 @@ BOUNDARYSEGMENTS
 1   718 719 727 728
 #
 
-GridParameter
-dumpfilename out.alu
-#
-
-
 #
