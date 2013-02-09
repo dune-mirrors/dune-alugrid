@@ -5,12 +5,22 @@
 #define MYALLOC_H_INCLUDED
 
 #include <cstddef>
+#include <string>
 
 #define ALUGRID_USES_DLMALLOC 
 //#define DONT_USE_ALUGRID_ALLOC 
 
 namespace ALUGrid
 {
+  class ALUGridException 
+  {
+  protected:
+    ALUGridException () {}
+  public:  
+    virtual ~ALUGridException () {}
+    virtual std::string what () const = 0 ;
+  };
+
 #ifndef DONT_USE_ALUGRID_ALLOC 
 
   class MyAlloc
@@ -45,7 +55,11 @@ namespace ALUGrid
          ~Initializer () ;
       } ;
       
-      class OutOfMemoryException { };
+      class OutOfMemoryException : public ALUGridException 
+      { 
+      public:
+        virtual std::string what () const { return "OutOfMemoryException"; }
+      };
       friend class Initializer;
 
       // if called, freeing objects is allowed again 
