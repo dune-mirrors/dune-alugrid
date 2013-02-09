@@ -62,6 +62,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
 
   Grid &grid = *gridPtr;
   grid.loadBalance();
+  //grid.finalizeGridCreation() ;
   const bool verboseRank = grid.comm().rank() == 0 ;
 
   std::string outPath( outpath );
@@ -297,6 +298,11 @@ catch( const std::exception &e )
 catch( const Dune::Exception &e )
 {
   std::cout << "DUNE ERROR: " << e << std::endl;
+  return 1;
+}
+catch( const ALUGrid::ALUGridException& e )
+{
+  std::cout << "ALUGrid ERROR: " << e.what() << std::endl;
   return 1;
 }
 catch( ... )
