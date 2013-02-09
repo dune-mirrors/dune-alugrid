@@ -1183,10 +1183,14 @@ namespace ALUGrid
     // only do this if ghost cells are enabled 
     if( ! ghostCellsEnabled() ) return;
 
-    const int nl = mpAccess ().nlinks ();
+    // compute the graph vertices first 
+    GitterPll :: computeGraphVertexIndices  ();
 
     try 
     {
+      // get number of links
+      const int nl = mpAccess ().nlinks ();
+
       std::vector< ObjectStream > osv (nl);
       
       const hface_STI* determType = 0;
