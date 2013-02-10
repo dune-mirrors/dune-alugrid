@@ -279,7 +279,7 @@ namespace ALUGrid
                       std::pair< typename AccessIterator < C >::Handle, 
                       typename lp_map_t::const_iterator > > fce_lmap_t;
 
-    const int me = mpa.myrank (), nl = mpa.nlinks ();
+    const int nl = mpa.nlinks ();
     
     lp_map_t linkagePatternMapVx;
     lp_map_t linkagePatternMapEdg;
