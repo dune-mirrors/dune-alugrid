@@ -42,6 +42,7 @@ namespace ALUGridMETIS
 
     bool emptyProc = true ;
     bool readjust = false ;
+    offsets[ 0 ] = 0;
     while ( emptyProc ) 
     {
       double load = 0;
@@ -98,7 +99,7 @@ namespace ALUGridMETIS
         if( maxLoad/meanThreshold > 1.02 || minLoad/meanThreshold < 0.97 ) 
         {
           const double upperBound = 1.01 * meanThreshold;
-          // backwards sweep 
+          // backward sweep 
           for( int i = nPart-1; i > 0; -- i ) 
           {
             while ( loads[ i ] > upperBound && offsets[ i ] < (offsets[ i+1 ] - 1) )
@@ -113,19 +114,22 @@ namespace ALUGridMETIS
             }
           }
 
-          // backwards sweep 
+          // forward sweep 
           for( int i = 0; i<nPart-1; ++i ) 
           {
-            while ( loads[ i ] > upperBound && offsets[ i ] < (offsets[ i+1 ] - 1) )
+            int lastIndex = (offsets[ i+1 ]-1);
+            const int firstIndex = offsets[ i ];
+            while ( loads[ i ] > upperBound && lastIndex > firstIndex )
             {
               // put the firt element of this partition to the 
               // previous proc 
-              const int lastIndex = (offsets[ i+1 ]-1);
               ++part[ lastIndex ] ;
               loads[ i ]   -= weights[ lastIndex ];
-              loads[ i-1 ] += weights[ lastIndex ];
+              loads[ i+1 ] += weights[ lastIndex ];
               --offsets[ i+1 ];
               assert( part[ lastIndex ] < nPart );
+              // update lastIndex 
+              lastIndex = (offsets[ i+1 ]-1);
             }
           }
         }
@@ -152,7 +156,7 @@ namespace ALUGridMETIS
       double maxLoad = loads[ 0 ];
 
       // check load balance 
-      for( int i = 0; i < nPart; ++ i ) 
+      for( int i = 1; i < nPart; ++ i ) 
       {
         minLoad = std::min( minLoad, loads[ i ] );
         maxLoad = std::max( maxLoad, loads[ i ] );
@@ -161,7 +165,6 @@ namespace ALUGridMETIS
       std::cout << "OrgLoad: mean = " << std::round( meanLoad ) << std::endl;
       std::cout << "Loads: mean = " << meanThreshold << std::endl;
       std::cout << "Loads: min = " << minLoad << "  max = " << maxLoad << std::endl;
-      std::cout << "unbal counter = " << unbalancedCounter << std::endl;
       for( idxtype i = 0; i<nPart; ++i )
       {
         std::cout << "P[ " << i << " ] = " << loads[ i ] << std::endl;
