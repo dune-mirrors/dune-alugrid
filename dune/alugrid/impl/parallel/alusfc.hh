@@ -72,8 +72,8 @@ namespace ALUGridMETIS
       }
     }
 
-    /*
-    if( myRank == 0 && readjust ) 
+#ifndef NDEBUG
+    if( mpa.myrank() == 0 && readjust ) 
     {
       // vector of loads 
       std::vector< double > loads( nPart, 0.0 );
@@ -89,7 +89,7 @@ namespace ALUGridMETIS
         std::cout << "P[ " << i << " ] = " << loads[ i ] << std::endl;
       }
     }
-    */
+#endif
   } // end of simple sfc splitting without edges 
 
   template < class idxtype >
