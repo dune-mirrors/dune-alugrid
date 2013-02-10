@@ -797,6 +797,8 @@ namespace ALUGrid
   // --exchange
   inline std::vector< ObjectStream > MpAccessMPI::exchange (const std::vector< ObjectStream > & in) const 
   {
+    // note: for the non-blocking exchange the message tag 
+    // should be different each time to avoid MPI problems 
     NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag(), in );
     return nonBlockingExchange.receiveImpl();
   }
@@ -804,6 +806,8 @@ namespace ALUGrid
   // --exchange
   inline void MpAccessMPI::exchange ( const std::vector< ObjectStream > & in, NonBlockingExchange::DataHandleIF& handle ) const 
   {
+    // note: for the non-blocking exchange the message tag 
+    // should be different each time to avoid MPI problems 
     NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag(), in );
     nonBlockingExchange.exchange( handle );
   }
@@ -811,6 +815,8 @@ namespace ALUGrid
   // --exchange
   inline void MpAccessMPI::exchange ( NonBlockingExchange::DataHandleIF& handle ) const 
   {
+    // note: for the non-blocking exchange the message tag 
+    // should be different each time to avoid MPI problems 
     NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag() );
     nonBlockingExchange.exchange( handle );
   }
