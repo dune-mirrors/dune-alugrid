@@ -1077,18 +1077,6 @@ namespace ALUGrid
       }
 
       lap3 = clock ();
-      /*
-      // exchange stuff 
-      osv = mpAccess ().exchange ( osv );
-      lap3 = clock ();
-      
-      // delete and unpack  
-      {
-        ParallelGridMover pgm (containerPll ());
-        // unpack all data  
-        pgm.unpackAll (osv, gatherScatter );
-      }
-      */
       {
 #ifndef NDEBUG
         // check that all leaf elements are in conforming status (bisection only)
