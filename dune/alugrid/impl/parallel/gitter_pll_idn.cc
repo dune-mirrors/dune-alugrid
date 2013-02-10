@@ -606,38 +606,27 @@ namespace ALUGrid
     int lap1 = clock ();
     vertexLinkageEstimate ( mpa );
 
+    int lap2 = clock ();
     mpa.insertRequestSymetric (secondScan ());
     if (debugOption (2)) mpa.printLinkage (std::cout);
 
+    int lap3 = clock ();
     identify< vertex_STI, hedge_STI, hface_STI >( AccessIterator < vertex_STI >::Handle (*this), _vertexTT, 
               AccessIterator < hedge_STI >::Handle (*this), _hedgeTT,
               AccessIterator < hface_STI >::Handle (*this), _hfaceTT,
               mpa);
-    /*
-    int lap2 = clock ();
-    identify < vertex_STI > (AccessIterator < vertex_STI >::Handle (*this), _vertexTT, mpa);
-    
-    int lap3 = clock ();
-    identify < hedge_STI > (AccessIterator < hedge_STI >::Handle (*this), _hedgeTT, mpa);
-    
-    int lap4 = clock ();
-    identify < hface_STI > (AccessIterator < hface_STI >::Handle (*this), _hfaceTT, mpa);
-    */
 
-    int lap5 = clock ();
-    /*
+    int lap4 = clock ();
+
     if (debugOption (2)) 
     {
       float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC);
       float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC);
       float u4 = (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC);
-      float u5 = (float)(lap5 - lap4)/(float)(CLOCKS_PER_SEC);
-      float u6 = (float)(lap5 - lap1)/(float)(CLOCKS_PER_SEC);
       std::cout.precision (3);
-      std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|edg|fce|all] ";
-      std::cout << u2 << " " << u3 << " " << u4 << " " << u5 << " " << u6 << " sec." << std::endl;
+      std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
+      std::cout << u2 << " " << u3 << " " << u4 << " sec." << std::endl;
     }
-    */
   }
 
 } // namespace ALUGrid
