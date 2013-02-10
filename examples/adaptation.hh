@@ -254,9 +254,9 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   }
 
 
-  const bool callBalance = ( (balanceCounter_ >= balanceStep_) && (balanceStep_ > 0) );
+  bool callBalance = ( (balanceCounter_ >= balanceStep_) && (balanceStep_ > 0) );
   // make sure everybody is on the same track 
-  assert( callBalance == bool( grid_.comm().max( int(callBalance) ) ) );
+  assert( callBalance == grid_.comm().max( callBalance) );
   // increase balanceCounter if balancing is enabled 
   if( balanceStep_ > 0 ) ++balanceCounter_;
 
