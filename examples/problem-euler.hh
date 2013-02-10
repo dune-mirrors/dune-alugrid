@@ -115,7 +115,10 @@ public:
   std::string gridFile ( const std::string &path ) const
   { 
     std::ostringstream dgfFileName;
-    dgfFileName << path << "/sb" << dimDomain << "d.dgf";
+    if( dimD == 3 ) 
+      dgfFileName << path << "/dgf/cube_hc_512.dgf";
+    else 
+      dgfFileName << path << "/dgfsb" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
 
