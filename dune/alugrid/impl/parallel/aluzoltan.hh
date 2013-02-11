@@ -191,12 +191,14 @@ namespace ALUGridZoltan
     }
 
     const iterator iEnd = vertexMap.end ();
+    const int myrank = mpaMPI->myrank();
     for ( iterator i = vertexMap.begin (); i != iEnd; ++i )
     {
+      int& moveTo = i->second;
       // insert and also set partition number new (including own number)
-      if (i->second==-1) 
-        i->second = mpaMPI->myrank();
-      connect.insert( (*i).second );
+      if ( moveTo == -1 ) 
+        moveTo = myrank ;
+      connect.insert( moveTo );
     }
 
     ////////////////////////////////////////////////////////////////
