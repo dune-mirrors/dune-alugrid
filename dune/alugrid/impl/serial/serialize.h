@@ -120,10 +120,10 @@ namespace ALUGrid
     }
 
     // eof function 
-    bool eof () const { return (this->_rb > this->_wb); }
+    bool eof () const { return (this->_rb >= this->_wb); }
 
     // good function 
-    bool good () const { return (this->_rb <= this->_wb); }
+    bool good () const { return (this->_rb < this->_wb); }
     /////////////////////////////////////
 
   protected:  
