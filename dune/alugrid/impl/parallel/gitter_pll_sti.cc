@@ -262,13 +262,6 @@ namespace ALUGrid
 
     bool repeat () const { return _repeat; }
 
-    void packAll( std::vector< ObjectStream >& osv ) 
-    {
-      const int nl = osv.size();
-      for( int link = 0; link < nl; ++link )
-        pack( link, osv[ link ] );
-    }
-
     void pack( const int link, ObjectStream& os ) 
     {
       try 
@@ -300,6 +293,10 @@ namespace ALUGrid
     {
       try 
       {
+#ifndef NDEBUG
+        const size_t expecetedSize = (_innerFaces[ link ].size() + _outerFaces[ link ].size() ) * sizeof( char );
+        assert( os.size() == expecetedSize );
+#endif
         {
           const hface_iterator iEnd = _innerFaces[ link ].end ();
           for (hface_iterator i = _innerFaces [ link ].begin (); i != iEnd; ++i ) 
@@ -339,13 +336,6 @@ namespace ALUGrid
         _firstLoop( firstLoop )
     {}
 
-    void packAll( std::vector< ObjectStream >& osv ) 
-    {
-      const int nl = osv.size();
-      for( int link = 0; link < nl; ++link )
-        pack( link, osv[ link ] );
-    }
-
     void pack( const int link, ObjectStream& os ) 
     {
       // the first loop needs outerEdges the second loop inner
@@ -354,8 +344,6 @@ namespace ALUGrid
       os.clear();
       // reserve memory 
       os.reserve( edges.size() * sizeof(char) );
-      size_t edSize = edges.size() ;
-      os.write( edSize );
 
       // write refinement request 
       const hedge_iterator iEnd = edges.end ();
@@ -369,15 +357,9 @@ namespace ALUGrid
     {
       // the first loop needs innerEdges the second loop outer
       edgevec_t& edges = ( _firstLoop ) ? _innerEdges[ link ] : _outerEdges[ link ];
-      size_t edSize ;
-      os.read( edSize );
 
-      if( edSize != edges.size() )
-      {
-        std::cerr << "ERROR: PackUnpackEdgeCleanup::unpack number of edges does not match" << std::endl;
-        assert( edSize == edges.size() );
-        abort();
-      }
+      // the edge sizes should match on both sides 
+      assert( os.size() == ( edges.size() * sizeof(char)) );
 
       const hedge_iterator iEnd = edges.end ();
       for (hedge_iterator i = edges.begin (); i != iEnd; ++i )
@@ -454,15 +436,13 @@ namespace ALUGrid
     
       bool repeat (false);
       _refineLoops = 0;
-      std::vector< ObjectStream > osv( nl );
       do 
       {
         // unpack handle to unpack the data once their received 
         PackUnpackRefineLoop dataHandle ( innerFaces, outerFaces );
-        dataHandle.packAll( osv );
 
         // exchange data and unpack when received 
-        mpAccess ().exchange ( osv, dataHandle );
+        mpAccess ().exchange ( dataHandle );
 
         // get repeat flag 
         repeat = dataHandle.repeat();
@@ -485,14 +465,12 @@ namespace ALUGrid
 
       {
         PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, true );
-        edgeData.packAll( osv );
-        mpAccess().exchange( osv, edgeData );
+        mpAccess().exchange( edgeData );
       } 
        
       {
         PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, false );
-        edgeData.packAll( osv );
-        mpAccess().exchange( osv, edgeData );
+        mpAccess().exchange( edgeData );
       }
     }
     
@@ -607,6 +585,11 @@ namespace ALUGrid
     {
       if( _firstLoop ) 
       {
+#ifndef NDEBUG
+        const size_t expecetedSize = (_innerFaces[ link ].size() ) * sizeof( char );
+        // the size of the received ObjectStream should be the faces  
+        assert( os.size() == expecetedSize );
+#endif
         cleanvector_t& cl = _clean[ link ];
 
         // reset clean vector 
@@ -626,6 +609,11 @@ namespace ALUGrid
       }
       else 
       {
+#ifndef NDEBUG
+        const size_t expecetedSize = (_outerFaces[ link ].size() ) * sizeof( char );
+        // the size of the received ObjectStream should be the faces  
+        assert( os.size() == expecetedSize );
+#endif
         const hface_iterator iEnd = _outerFaces[ link ].end ();
         for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i )
         {
@@ -1440,16 +1428,13 @@ namespace ALUGrid
         w.item ().setLoadBalanceVertexIndex ( cnt );
       }
 
-      const bool serialPartitioning = serialPartitioner();
-      if( ! serialPartitioning ) 
-      {
-        // exchanges the ldbVertexIndex for the internal boundaries 
-        exchangeStaticState();
-      }
+      // exchanges the ldbVertexIndex for the internal boundaries 
+      // to obtain a consistent numbering 
+      exchangeStaticState();
       
       // mark unique element indices as computed, if serialPartitioner is used
       // don't do this computation again for serial partitioning 
-      _ldbVerticesComputed = serialPartitioning ;
+      _ldbVerticesComputed = serialPartitioner(); 
     }
 
 #ifndef NDEBUG

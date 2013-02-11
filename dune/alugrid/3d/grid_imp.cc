@@ -342,9 +342,8 @@ namespace Dune
       int level = elem->level();
       if(level > testMaxLevel) testMaxLevel = level;
     }
-    maxlevel_ = testMaxLevel;
-
-    //assert( maxlevel_ == comm().max( maxlevel_ ));
+    maxlevel_ = comm().max( testMaxLevel );
+    assert( maxlevel_ == comm().max( maxlevel_ ));
   }
 
 

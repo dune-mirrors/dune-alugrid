@@ -88,6 +88,19 @@ namespace ALUGrid
     MinMaxSumIF* copyMPIComm( MPI_Comm mpicomm ); 
     int getSize ();
     int getRank ();
+    // return new tag number for the exchange messages
+    static int getMessageTag() 
+    {
+      static int tag = messagetag + 2 ;
+      // increase tag counter 
+      ++tag ;
+      if( tag < 0 ) 
+      {
+        tag = messagetag + 2 ;
+      }
+      return tag;
+    }
+
   public:  
     inline int psize () const;
     inline int myrank () const;

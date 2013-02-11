@@ -62,10 +62,10 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
 
   Grid &grid = *gridPtr;
   grid.loadBalance();
+  //grid.finalizeGridCreation() ;
   const bool verboseRank = grid.comm().rank() == 0 ;
 
   std::string outPath( outpath );
-  const bool writeOutput = ( outPath != "none" ) ;
 
   // create the diagnostics object 
   Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1);
@@ -90,13 +90,14 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
   FVScheme scheme( gridView, model );
 
   /* create VTK writer for data sequqnce */
-  Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", outPath, ".", Dune::VTK::nonconforming );
-  if( writeOutput ) 
+  Dune::VTKSequenceWriter< GridView >* vtkOut = 0 ;
+  if( outPath != "none" )
   {
+    vtkOut = new Dune::VTKSequenceWriter< GridView >(  gridView, "solution", outPath, ".", Dune::VTK::nonconforming );
 #if ! BALL
-    VTKData< DataType >::addTo( solution, vtkOut );
+    VTKData< DataType >::addTo( solution, *vtkOut );
 #endif
-    VTKData< DataType >::addPartitioningData( grid.comm().rank(), vtkOut );
+    VTKData< DataType >::addPartitioningData( grid.comm().rank(), *vtkOut );
   }
 
   /* create adaptation method */
@@ -115,10 +116,10 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
     solution.initialize( model.problem() );
   }
 
-  if( writeOutput ) 
+  if( vtkOut ) 
   {
     /* output the initial grid and the solution */
-    vtkOut.write( 0.0 );
+    vtkOut->write( 0.0 );
   }
 
   /* prepare for time stepping scheme */
@@ -173,10 +174,10 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
     /* check if data should be written */
     if( time >= saveStep )
     {
-      if( writeOutput ) 
+      if( vtkOut ) 
       {
         /* visualize with VTK */
-        vtkOut.write( time );
+        vtkOut->write( time );
       }
       /* set saveStep for next save point */
       saveStep += saveInterval;
@@ -229,15 +230,16 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
     }
   }           
 
-  if( writeOutput ) 
+  if( vtkOut ) 
   {
     /* output final result */
-    vtkOut.write( time );
+    vtkOut->write( time );
   }
 
   // flush diagnostics 
   diagnostics.flush();
 
+  delete vtkOut ;
   // delete grid 
   delete gridPtr ;
 }
@@ -297,6 +299,11 @@ catch( const std::exception &e )
 catch( const Dune::Exception &e )
 {
   std::cout << "DUNE ERROR: " << e << std::endl;
+  return 1;
+}
+catch( const ALUGrid::ALUGridException& e )
+{
+  std::cout << "ALUGrid ERROR: " << e.what() << std::endl;
   return 1;
 }
 catch( ... )

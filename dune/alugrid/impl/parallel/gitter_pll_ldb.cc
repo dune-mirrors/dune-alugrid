@@ -759,13 +759,13 @@ namespace ALUGrid
             // space filling curve approach 
             case ALUGRID_SpaceFillingCurveNoEdges:
               {
-                idx_t n = nel, npart = np;
+                idx_t n = nel ;
                 ALUGridMETIS::CALL_spaceFillingCurveNoEdges( mpa, n, vertex_wInt, neu );
               }
               break;
             case ALUGRID_SpaceFillingCurve:
               {
-                idx_t n = nel, npart = np;
+                idx_t n = nel ;
                 ALUGridMETIS::CALL_spaceFillingCurve( mpa, n, vertex_wInt, neu);
               }
               break;

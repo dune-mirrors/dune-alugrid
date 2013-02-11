@@ -139,8 +139,10 @@ public:
   /** \brief constructor
    *  \param grid   the grid to be adapted
    */
-  LeafAdaptation ( Grid &grid )
+  LeafAdaptation ( Grid &grid, const int balanceStep = 1 )
   : grid_( grid ),
+    balanceStep_( balanceStep ),
+    balanceCounter_( 0 ),
     adaptTime_( 0.0 ),
     lbTime_( 0.0 ),
     commTime_( 0.0 )
@@ -182,6 +184,11 @@ private:
   void hierarchicProlong ( const Entity &entity, DataMap &dataMap ) const;
 
   Grid &grid_;
+
+  // call loadBalance ervery balanceStep_ step
+  const int balanceStep_ ;
+  // count actual balance call
+  int balanceCounter_;
 
   double adaptTime_;
   double lbTime_;
@@ -246,14 +253,28 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
       hierarchicProlong<Vector>( *it, container );
   }
 
+
+  bool callBalance = ( (balanceCounter_ >= balanceStep_) && (balanceStep_ > 0) );
+  // make sure everybody is on the same track 
+  assert( callBalance == grid_.comm().max( callBalance) );
+  // increase balanceCounter if balancing is enabled 
+  if( balanceStep_ > 0 ) ++balanceCounter_;
+
   adaptTime_ = adaptTimer.elapsed();
 
-  Dune :: Timer lbTimer ;
-  // re-balance grid 
-  typedef DataHandle<Grid,Container> DH;
-  DH dataHandle( grid_, container ) ;
-  typedef Dune::CommDataHandleIF< DH, Container > DataHandleInterface;
-  grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
+  if( callBalance ) 
+  {
+    Dune :: Timer lbTimer ;
+    // re-balance grid 
+    typedef DataHandle<Grid,Container> DH;
+    DH dataHandle( grid_, container ) ;
+    typedef Dune::CommDataHandleIF< DH, Container > DataHandleInterface;
+    grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
+    lbTime_ = lbTimer.elapsed();
+  }
+
+  // reset timer to count again 
+  adaptTimer.reset();
 
   // cleanup adaptation markers 
   grid_.postAdapt();
@@ -272,7 +293,9 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
       solution.setLocalDofVector( entity, ccontainer[ entity ] );
     }
   }
-  lbTime_ = lbTimer.elapsed();
+
+  // store adaptation time 
+  adaptTime_ += adaptTimer.elapsed();
 
   Dune::Timer commTimer ;
   // copy data to ghost entities

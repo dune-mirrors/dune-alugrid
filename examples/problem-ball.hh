@@ -21,14 +21,21 @@ struct BallData
 
   const static int dimDomain = DomainType::dimension;
 
-  BallData () : c_(0.5), r0_(0.3)
+  explicit BallData (const int problem) : c_(0.5), r0_(0.3), problem_( problem )
   {}
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path ) const
   { 
     std::ostringstream dgfFileName;
-    dgfFileName << path << "/cube_hc_512.hexa";
+    if( problem_ == 1 ) 
+      dgfFileName << path << "/dgf/cube_hc_512.dgf";
+    else if ( problem_ == 2 ) 
+      dgfFileName << path << "/dgf/cube_hc_4096.dgf";
+    else if ( problem_ == 3 ) 
+      dgfFileName << path << "/dgf/cube_hc_32768.dgf";
+    else 
+      dgfFileName << path << "/unitcube3d.dgf";
     return dgfFileName.str();
   }
 
@@ -69,9 +76,10 @@ struct BallData
     return 0.1;
   }
 
-  private:
+private:
   DomainType c_;
   double r0_;
+  const int problem_;
 };
 
 // BallModel
@@ -99,13 +107,16 @@ struct BallModel : public TransportModel<dimD>
   {
     switch( problem )
     {
+    case 0:
     case 1:
-      problem_ = new BallData< dimDomain >();
+    case 2:
+    case 3:
+      problem_ = new BallData< dimDomain >( problem );
       break;
 
     default:
       std::cerr << "ProblemData not defined - using problem 1!" << std::endl;
-      problem_ = new BallData< dimDomain >();
+      problem_ = new BallData< dimDomain >( problem );
     }
   }
 

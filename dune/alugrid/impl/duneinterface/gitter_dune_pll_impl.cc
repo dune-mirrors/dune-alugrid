@@ -955,7 +955,6 @@ namespace ALUGrid
     GatherScatterType & elementData ,
     const CommunicationType commType )
   {
-    const int nl = mpAccess ().nlinks ();
     
     const bool containsVertices = vertexData.contains(3,3);
     const bool containsEdges    = edgeData.contains(3,2);
@@ -968,11 +967,13 @@ namespace ALUGrid
 
     const bool containsSomeThing = haveHigherCodimData || containsElements;
 
-    const bool packInterior = (commType == All_All_Comm) || 
-                              (commType == Interior_Ghost_Comm);
+    //const bool packInterior = (commType == All_All_Comm) || 
+    //                          (commType == Interior_Ghost_Comm);
     
-    const bool packGhosts   = (commType == All_All_Comm) || 
-                              (commType == Ghost_Interior_Comm);
+    //const bool packGhosts   = (commType == All_All_Comm) || 
+    //                         (commType == Ghost_Interior_Comm);
+
+    //const int nl = mpAccess ().nlinks ();
 
     if(!containsSomeThing) 
     {
@@ -980,7 +981,7 @@ namespace ALUGrid
       return;
     }
 
-#if 0
+#if 1
     // create data handle 
     PackUnpackInteriorGhostData data( *this, vertexData, edgeData, faceData, elementData, commType );
 
@@ -1183,10 +1184,14 @@ namespace ALUGrid
     // only do this if ghost cells are enabled 
     if( ! ghostCellsEnabled() ) return;
 
-    const int nl = mpAccess ().nlinks ();
+    // compute the graph vertices first 
+    GitterPll :: computeGraphVertexIndices  ();
 
     try 
     {
+      // get number of links
+      const int nl = mpAccess ().nlinks ();
+
       std::vector< ObjectStream > osv (nl);
       
       const hface_STI* determType = 0;

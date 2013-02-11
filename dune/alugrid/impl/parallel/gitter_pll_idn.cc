@@ -279,7 +279,7 @@ namespace ALUGrid
                       std::pair< typename AccessIterator < C >::Handle, 
                       typename lp_map_t::const_iterator > > fce_lmap_t;
 
-    const int me = mpa.myrank (), nl = mpa.nlinks ();
+    const int nl = mpa.nlinks ();
     
     lp_map_t linkagePatternMapVx;
     lp_map_t linkagePatternMapEdg;
@@ -323,86 +323,6 @@ namespace ALUGrid
       // exchange data 
       mpa.exchange (inout, data );
     }
-
-    /*
-    {
-      lp_map_t::const_iterator meIt = linkagePatternMap.insert (std::vector< int >  (1L, me)).first;
-
-      for (mi.first (); ! mi.done (); mi.next ()) 
-      {
-        std::vector< int > estimate = mi.item ().accessPllX ().estimateLinkage ();
-        if (estimate.size ()) 
-        {
-          LinkedObject::Identifier id = mi.item ().accessPllX ().getIdentifier ();
-          look [id].first  = mi;
-          look [id].second = meIt;
-          {
-            std::vector< int >::const_iterator iEnd = estimate.end ();
-            for (std::vector< int >::const_iterator i = estimate.begin (); 
-                 i != iEnd; ++i )
-            {
-              id.write ( inout [ mpa.link (*i) ] );
-            }
-          }
-        }
-      }
-
-      // write end marker to stream 
-      for( int link = 0; link < nl ; ++ link ) 
-      {
-        LinkedObject::Identifier::endOfStream( inout[ link ] );
-      }
-
-      // unpack data, first loop 
-      UnpackIdentification< A > unpackData( linkagePatternMap, look, tt, mpa.dest(), true );
-      
-      // exchange data 
-      mpa.exchange (inout, unpackData );
-    }
-
-    {
-      // clear streams 
-      for( int l=0; l < nl; ++ l ) 
-        inout[ l ].clear();
-      
-      const typename lmap_t::const_iterator lookEnd = look.end ();
-      for (typename lmap_t::const_iterator pos = look.begin (); 
-           pos != lookEnd; ++pos) 
-      {
-        const std::vector< int > & lk (*(*pos).second.second);
-        if (* lk.begin () == me) 
-        {
-          typename LinkedObject::Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier ();
-          { 
-            typename std::vector< int >::const_iterator iEnd = lk.end ();
-            for (typename std::vector< int >::const_iterator i = lk.begin (); 
-                 i != iEnd; ++i) 
-            {
-              if (*i != me) 
-              {
-                int l = mpa.link (*i);
-                tt [l].first.push_back ((*pos).second.first);
-                id.write ( inout [l] );
-              }
-            } 
-          }
-        }
-      }
-
-      // write end marker to stream 
-      for( int link = 0; link < nl ; ++ link ) 
-      {
-        LinkedObject::Identifier::endOfStream( inout[ link ] );
-      }
-
-      // unpack data, second loop 
-      UnpackIdentification< A > unpackData( linkagePatternMap, look, tt, mpa.dest(), false );
-      
-      // exchange data 
-      mpa.exchange (inout, unpackData );
-    }
-  */
-    return;
   }
 
   std::set< int > GitterPll::MacroGitterPll::secondScan () 
@@ -606,38 +526,27 @@ namespace ALUGrid
     int lap1 = clock ();
     vertexLinkageEstimate ( mpa );
 
+    int lap2 = clock ();
     mpa.insertRequestSymetric (secondScan ());
     if (debugOption (2)) mpa.printLinkage (std::cout);
 
+    int lap3 = clock ();
     identify< vertex_STI, hedge_STI, hface_STI >( AccessIterator < vertex_STI >::Handle (*this), _vertexTT, 
               AccessIterator < hedge_STI >::Handle (*this), _hedgeTT,
               AccessIterator < hface_STI >::Handle (*this), _hfaceTT,
               mpa);
-    /*
-    int lap2 = clock ();
-    identify < vertex_STI > (AccessIterator < vertex_STI >::Handle (*this), _vertexTT, mpa);
-    
-    int lap3 = clock ();
-    identify < hedge_STI > (AccessIterator < hedge_STI >::Handle (*this), _hedgeTT, mpa);
-    
-    int lap4 = clock ();
-    identify < hface_STI > (AccessIterator < hface_STI >::Handle (*this), _hfaceTT, mpa);
-    */
 
-    int lap5 = clock ();
-    /*
+    int lap4 = clock ();
+
     if (debugOption (2)) 
     {
       float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC);
       float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC);
       float u4 = (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC);
-      float u5 = (float)(lap5 - lap4)/(float)(CLOCKS_PER_SEC);
-      float u6 = (float)(lap5 - lap1)/(float)(CLOCKS_PER_SEC);
       std::cout.precision (3);
-      std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|edg|fce|all] ";
-      std::cout << u2 << " " << u3 << " " << u4 << " " << u5 << " " << u6 << " sec." << std::endl;
+      std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
+      std::cout << u2 << " " << u3 << " " << u4 << " sec." << std::endl;
     }
-    */
   }
 
 } // namespace ALUGrid

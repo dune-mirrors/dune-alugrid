@@ -476,6 +476,8 @@ namespace ALUGrid
         _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
         _needToSend( true )
     {
+      // make sure every process has the same tag 
+      assert( tag == mpAccess.gmax( tag ) );
     }
 
     NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
@@ -487,6 +489,9 @@ namespace ALUGrid
         _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
         _needToSend( false )
     {
+      // make sure every process has the same tag 
+      assert( tag == mpAccess.gmax( tag ) );
+
       assert( _nLinks == int( in.size() ) );
       sendImpl( in ); 
     }
@@ -792,21 +797,27 @@ namespace ALUGrid
   // --exchange
   inline std::vector< ObjectStream > MpAccessMPI::exchange (const std::vector< ObjectStream > & in) const 
   {
-    NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
+    // note: for the non-blocking exchange the message tag 
+    // should be different each time to avoid MPI problems 
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag(), in );
     return nonBlockingExchange.receiveImpl();
   }
 
   // --exchange
   inline void MpAccessMPI::exchange ( const std::vector< ObjectStream > & in, NonBlockingExchange::DataHandleIF& handle ) const 
   {
-    NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1, in );
+    // note: for the non-blocking exchange the message tag 
+    // should be different each time to avoid MPI problems 
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag(), in );
     nonBlockingExchange.exchange( handle );
   }
 
   // --exchange
   inline void MpAccessMPI::exchange ( NonBlockingExchange::DataHandleIF& handle ) const 
   {
-    NonBlockingExchangeMPI nonBlockingExchange( *this, messagetag+1 );
+    // note: for the non-blocking exchange the message tag 
+    // should be different each time to avoid MPI problems 
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag() );
     nonBlockingExchange.exchange( handle );
   }
 
