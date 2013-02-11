@@ -99,7 +99,7 @@ if test x$with_zoltan != xno ; then
   ac_save_LDFLAGS="$LDFLAGS"
   LDFLAGS="$LDFLAGS -L$ZOLTAN_LIB_PATH $DUNEMPILDFLAGS"
   ac_save_LIBS="$LIBS"
-  LIBS="$LIBS $PARMETIS_LIBS $DUNEMPILIBS"
+  LIBS="$LIBS $DUNEMPILIBS"
 
   # if header is found...
   if test x$HAVE_ZOLTAN = x1 ; then

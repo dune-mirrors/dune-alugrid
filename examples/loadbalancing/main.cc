@@ -68,7 +68,6 @@ void method ( int startLevel, int maxLevel, const char* outpath )
     vtkOut.write( 0.0 );
   }
 
-
   /* final time for simulation */
   const double endTime = 1.;
   /* interval for saving data */

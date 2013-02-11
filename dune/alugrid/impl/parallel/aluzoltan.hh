@@ -187,13 +187,15 @@ namespace ALUGridZoltan
     {
       iterator vertex = vertexMap.find( exportGlobalIds[ i ] );
       assert( vertex != vertexMap.end () );
-      (*vertex).second = exportToPart[ i ];
+      (*vertex).second = exportProcs[ i ];
     }
 
     const iterator iEnd = vertexMap.end ();
     for ( iterator i = vertexMap.begin (); i != iEnd; ++i )
     {
-      // insert and also set partition number new 
+      // insert and also set partition number new (including own number)
+      if (i->second==-1) 
+        i->second = mpaMPI->myrank();
       connect.insert( (*i).second );
     }
 
