@@ -30,7 +30,8 @@ void method ( int startLevel, int maxLevel, const char* outpath )
 
   LoadBalanceHandle<Grid> ldb(grid);
   typedef Dune::LoadBalanceHandleIF< LoadBalanceHandle<Grid> > DataHandleInterface;
-  grid.loadBalance( (DataHandleInterface&)(ldb) );
+  // grid.loadBalance( (DataHandleInterface&)(ldb) );
+  grid.loadBalance();
   const bool verboseRank = grid.comm().rank() == 0 ;
 
   std::string outPath( outpath );

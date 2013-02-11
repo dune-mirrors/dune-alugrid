@@ -6,6 +6,10 @@ EXTRA_DIST =
 DATACLEANFILES = dgfparser.log
 CLEANFILES = $(DATACLEANFILES)
 
+exampleslbdir = $(includedir)/examples/loadbalanacing
+exampleslb_HEADERS = \
+  adaptation.hh  loadbalance.hh
+
 check_PROGRAMS = main
 
 main_SOURCES = main.cc

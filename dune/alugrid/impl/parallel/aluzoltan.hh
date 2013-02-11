@@ -60,6 +60,22 @@ namespace ALUGridZoltan
       }
     }
 
+    static void get_num_edges_list(void *data, int sizeGID, int sizeLID,
+                                  int num_obj,
+                                  ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
+                                  int *numEdges, int *ierr)
+    {
+      abort();
+    }
+    static void get_edge_list(void *data, int sizeGID, int sizeLID,
+                              int num_obj, ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
+                              int *num_edges,
+                              ZOLTAN_ID_PTR nborGID, int *nborProc,
+                              int wgt_dim, float *ewgts, int *ierr)
+    {
+      abort();
+    }
+
     // return dimension of coordinates 
     static int get_num_geometry(void *data, int *ierr)
     {
@@ -123,22 +139,29 @@ namespace ALUGridZoltan
     // General parameters 
     zz->Set_Param( "DEBUG_LEVEL", "1");
     zz->Set_Param( "LB_METHOD", "RCB");
+    zz->Set_Param( "OBJ_WEIGHT_DIM", "0");
     // zz->Set_Param( "LB_METHOD", "GRAPH");
     // zz->Set_Param( "LB_APPROACH", "PARTITION"); 
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
-    zz->Set_Param( "OBJ_WEIGHT_DIM", "0");
     zz->Set_Param( "RETURN_LISTS", "ALL");
 
     /* RCB parameters */
 
     zz->Set_Param( "RCB_OUTPUT_LEVEL", "0");
     zz->Set_Param( "RCB_RECTILINEAR_BLOCKS", "1");
+    
+    /* Graph parameters 
+    Zoltan_Set_Param(zz, "CHECK_GRAPH", "2"); 
+    Zoltan_Set_Param(zz, "PHG_EDGE_SIZE_THRESHOLD", ".35");
+    */
 
     zz->Set_Num_Obj_Fn ( ObjectCollectionType::get_number_of_objects, &objects);
     zz->Set_Obj_List_Fn( ObjectCollectionType::get_object_list, &objects);
     zz->Set_Num_Geom_Fn( ObjectCollectionType::get_num_geometry, &objects);
     zz->Set_Geom_Multi_Fn( ObjectCollectionType::get_geometry_list, &objects);
+    zz->Set_Num_Edges_Multi_Fn(ObjectCollectionType::get_num_edges_list, &objects);
+    zz->Set_Edge_List_Multi_Fn(ObjectCollectionType::get_edge_list, &objects);
 
     int changes;
     int numGidEntries;

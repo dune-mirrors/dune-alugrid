@@ -254,7 +254,7 @@ try
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
 #if HAVE_ZOLTAN 
-  int version;
+  float version;
   Zoltan_Initialize(argc, argv, &version);
 #endif
 
@@ -279,7 +279,7 @@ try
   const char* path = (argc > 4) ? argv[ 4 ] : "./";
   method( model, startLevel, maxLevel, path );
 
-#if HAVE_MPI 
+#ifdef HAVE_MPI 
   MPI_Barrier ( MPI_COMM_WORLD );
 #endif
 

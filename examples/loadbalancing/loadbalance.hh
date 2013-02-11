@@ -33,20 +33,6 @@ public:
   : grid_( grid )
   {}
 
-  /*
-  void inlineData ( ObjectStream &stream, const Element &element ) const
-  {
-    return;
-  }
-  void xtractData ( ObjectStream &stream, const Element &element, size_t newElements )
-  {
-    return;
-  }
-  void compress ()
-  {}
-  */
-
-  // return true if user defined partitioning methods should be used
   bool userDefinedPartitioning () const
   {
     return true;
