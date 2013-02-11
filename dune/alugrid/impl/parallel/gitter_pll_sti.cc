@@ -643,18 +643,16 @@ namespace ALUGrid
 
     void pack( const int link, ObjectStream& os ) 
     {
-      pack( link, os, true );
+      // clear stream  
+      os.clear();
+
+      // pack data 
+      packNoClear( link, os );
     }
 
-    // pack version with bool flag whether to clear os or not 
-    void pack( const int link, ObjectStream& os, const bool clearStream ) 
+    // pack version without clearing ObjectStream 
+    void packNoClear( const int link, ObjectStream& os ) 
     {
-      if( clearStream ) 
-      {
-        // clear stream  
-        os.clear();
-      }
-
       AccessIteratorTT < hface_STI >::InnerHandle mif ( _containerPll, link );
       AccessIteratorTT < hface_STI >::OuterHandle mof ( _containerPll, link );
 
@@ -779,7 +777,7 @@ namespace ALUGrid
         }
 
         // pack dynamic state, don't clear object stream 
-        _dynamicState.pack( link, os, false );
+        _dynamicState.packNoClear( link, os );
       }
     }
 
