@@ -646,6 +646,13 @@ namespace ALUGrid
       // clear stream  
       os.clear();
 
+      // pack data 
+      packNoClear( link, os );
+    }
+
+    // pack version without clearing ObjectStream 
+    void packNoClear( const int link, ObjectStream& os ) 
+    {
       AccessIteratorTT < hface_STI >::InnerHandle mif ( _containerPll, link );
       AccessIteratorTT < hface_STI >::OuterHandle mof ( _containerPll, link );
 
@@ -769,11 +776,8 @@ namespace ALUGrid
           }
         }
 
-        //char stop = -5 ;
-        //os.put( stop );
-
-        // pack dynamic state 
-        //_dynamicState.pack( link, os );
+        // pack dynamic state, don't clear object stream 
+        _dynamicState.packNoClear( link, os );
       }
     }
 
@@ -825,16 +829,8 @@ namespace ALUGrid
           assert (b == unlock);
         }
 
-        /*
-        char stop = os.get() ;
-        while ( stop != -5 )
-        {
-          stop = os.get();
-        }
-
         // unpack dynamic state 
         _dynamicState.unpack( link, os );
-        */
       }
     }
   };
@@ -1053,14 +1049,11 @@ namespace ALUGrid
         }
 
         {
-          // edge data, second loop 
+          // edge data, second loop, also exchanges dynamic state
           PackUnpackEdgeCoarsen edgeData( this->containerPll(), 
                                           clean, innerEdges, outerEdges, nl, false );
           mpAccess().exchange( edgeData );
         }
-
-        // exchange dynamic state here
-        exchangeDynamicState();
       } 
       catch( Parallel::AccessPllException )
       {
