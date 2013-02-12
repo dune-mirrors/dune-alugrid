@@ -68,7 +68,6 @@ namespace ALUGridMETIS
     double threshold = meanLoad ;
 
     bool converged  = false ;
-    bool readjust = false ;
     const idxtype lastRank = nPart - 1 ;
     int count = 0 ;
     int overallcount = 0 ;
@@ -76,8 +75,8 @@ namespace ALUGridMETIS
     // vector of loads 
     std::vector< double > loads( nPart, 0.0 );
 
-    double bestMaxDir = 1e308 ;
-    double bestMinDir = 1e308 ;
+    double bestSumMinMax = 1e308 ;
+    double bestMinMax = 1e308 ;
     double bestThreshold = threshold ;
     double factor = 1.0;
     while ( ! converged ) 
@@ -112,7 +111,7 @@ namespace ALUGridMETIS
         // if unbalanced partition detected 
         // the situation is most likely that the last proc has 
         // to many elements assigned 
-        double minDir = 1.0 - minLd/ meanLoad ;
+        double minDir = 1.0 - minLd / meanLoad ;
         double maxDir = 1.0 - meanLoad / maxLd ;
         assert( minDir >= 0.0 ); 
         assert( maxDir >= 0.0 );
@@ -131,13 +130,14 @@ namespace ALUGridMETIS
           // otherwise adjust threshold 
           converged = false ;
 
-          //if( (minDir < bestMinDir) && (maxDir < bestMaxDir) )
-          if( (minDir+maxDir) < (bestMinDir+bestMaxDir) && 
-              std::min(minDir,maxDir) < std::min(bestMinDir, bestMaxDir) )
+          const double sumMinMax = minDir + maxDir;
+          const double minMax    = std::min( minDir, maxDir);
+
+          if( sumMinMax < bestSumMinMax && minMax < bestMinMax ) 
           {
             bestThreshold = threshold ;
-            bestMinDir = minDir ;
-            bestMaxDir = maxDir ;
+            bestMinMax    = minMax ;
+            bestSumMinMax = sumMinMax ;
             // we found a better result, count new 
             count = 0 ;
           }
