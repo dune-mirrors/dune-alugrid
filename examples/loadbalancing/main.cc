@@ -17,6 +17,18 @@ typedef Dune::GridSelector::GridType Grid;
 /** adaptation scheme **/
 #include "adaptation.hh"
 
+struct AssignRank
+{
+  AssignRank(const int rank) : rank_(rank) {}
+  Dune::FieldVector<double,2> 
+    initial(const Dune::FieldVector<double,Grid::dimensionworld> &) const
+  {
+    return Dune::FieldVector<double,2>(rank_);
+  }
+  private:
+  int rank_;
+};
+
 // method
 // ------
 void method ( int startLevel, int maxLevel, const char* outpath )
@@ -47,8 +59,9 @@ void method ( int startLevel, int maxLevel, const char* outpath )
   GridView gridView = grid.leafView< Dune::Interior_Partition >();
 
   /* construct data vector for solution */
-  typedef PiecewiseFunction< GridView, Dune::FieldVector< double, 1 > > DataType;
+  typedef PiecewiseFunction< GridView, Dune::FieldVector< double, 2 > > DataType;
   DataType solution( gridView );
+  solution.initialize( AssignRank(grid.comm().rank()) );
 
   /* create VTK writer for data sequqnce */
   Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", outPath, ".", Dune::VTK::nonconforming );

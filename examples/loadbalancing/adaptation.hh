@@ -8,7 +8,6 @@
 
 #include "../datamap.hh"
 #include "loadbalance.hh"
-// #include "lbzoltan.hh"
 
 
 // GridMarker
@@ -273,7 +272,11 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
     for( Iterator it = gridView.template begin< 0, partition >(); it != end; ++it )
     {
       const Entity &entity = *it;
-      solution.setLocalDofVector( entity, ccontainer[ entity ] );
+
+      typename Vector::LocalDofVector dat( ccontainer[ entity ] );
+      dat[0] = dat[1];
+      dat[1] = grid_.comm().rank();
+      solution.setLocalDofVector( entity, dat );
     }
   }
   lbTime_ = lbTimer.elapsed();
