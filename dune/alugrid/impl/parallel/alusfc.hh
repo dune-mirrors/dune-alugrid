@@ -9,6 +9,34 @@
 namespace ALUGridMETIS
 {
 
+  template < class idxtype >
+  void calculatePartition( const int nPart, 
+                           const double threshold,
+                           const idxtype nCells, 
+                           const idxtype* weights, 
+                           idxtype* part ) 
+  {
+    double load = 0;
+    idxtype rank = 0;
+    const idxtype lastRank = nPart - 1 ;
+    for( idxtype elem = 0; elem < nCells; ++elem )
+    {
+      double nextLoad = load + weights[ elem ] ;
+      if( load > 0 && ( nextLoad > threshold ) )           
+      {
+        // only increase rank if not already the last rank 
+        if( rank < lastRank ) 
+        {
+          ++rank ;
+        }
+        load = 0;
+      }
+
+      part[ elem ] = rank ;
+      load += weights[ elem ];
+    }
+  }
+
   template< class idxtype >
   void CALL_spaceFillingCurveNoEdges(const ALUGrid::MpAccessGlobal& mpa, // communicator
                                      const idxtype nCells,   // number of cells 
@@ -42,30 +70,13 @@ namespace ALUGridMETIS
 
     bool emptyProc = true ;
     bool readjust = false ;
+    const idxtype lastRank = nPart - 1 ;
     offsets[ 0 ] = 0;
     while ( emptyProc ) 
     {
-      double load = 0;
-      idxtype rank = 0;
-      const idxtype lastRank = nPart - 1 ;
-      for( idxtype elem = 0; elem < nCells; ++elem )
-      {
-        double nextLoad = load + weights[ elem ] ;
-        if( load > 0 && ( nextLoad > meanThreshold ) )           
-        {
-          // only increase rank if not already the last rank 
-          if( rank < lastRank ) 
-          {
-            ++rank ;
-            // remember first occurance of rank 
-            offsets[ rank ] = elem;
-          }
-          load = 0;
-        }
+      // compute new partition 
+      calculatePartition( nPart, meanThreshold, nCells, weights, part ); 
 
-        part[ elem ] = rank ;
-        load += weights[ elem ];
-      }
       offsets[ nPart ] = nCells;
 
       // the last element should belong to the last proc,
