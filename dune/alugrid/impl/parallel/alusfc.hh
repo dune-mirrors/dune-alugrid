@@ -54,6 +54,8 @@ namespace ALUGridMETIS
     for( idxtype i = 0 ; i<nCells; ++i )
     {
       meanLoad += weights[ i ];
+      // initialize partitition 
+      part[ i ] = 0;
     }
 
     // calculate average load 
@@ -63,30 +65,33 @@ namespace ALUGridMETIS
     assert( std::abs( meanLoad - mpa.gmax( meanLoad ) ) < 1e-8 );
 
     // round the average load to get a threshold value 
-    double meanThreshold = std::round ( meanLoad ) ;
+    double threshold = meanLoad ;
 
-    // vector of loads 
-    std::vector< int > offsets( nPart+1, -1 );
-
-    bool emptyProc = true ;
+    bool converged  = false ;
     bool readjust = false ;
     const idxtype lastRank = nPart - 1 ;
-    offsets[ 0 ] = 0;
-    while ( emptyProc ) 
+    int count = 0 ;
+    int overallcount = 0 ;
+
+    // vector of loads 
+    std::vector< double > loads( nPart, 0.0 );
+
+    double bestMaxDir = 1e308 ;
+    double bestMinDir = 1e308 ;
+    double bestThreshold = threshold ;
+    double factor = 1.0;
+    while ( ! converged ) 
     {
       // compute new partition 
-      calculatePartition( nPart, meanThreshold, nCells, weights, part ); 
+      calculatePartition( nPart, threshold, nCells, weights, part ); 
 
-      offsets[ nPart ] = nCells;
-
-      // the last element should belong to the last proc,
-      // otherwise the partition is not balanced 
-      if( part[ nCells-1 ] == lastRank )
+      if( part[ nCells - 1 ] != lastRank )
       {
-        emptyProc  = false ;
-
-        // vector of loads 
-        std::vector< double > loads( nPart, 0.0 );
+        threshold *= 0.975 ;
+      }
+      else 
+      {
+        std::fill( loads.begin(), loads.end(), 0.0 );
 
         // check load balance 
         for( idxtype i = 0; i<nCells; ++i )
@@ -94,67 +99,80 @@ namespace ALUGridMETIS
           loads[ part[ i ] ] += weights[ i ];
         }
 
-        double minLoad = loads[ 0 ];
-        double maxLoad = loads[ 0 ];
+        double minLd = loads[ 0 ];
+        double maxLd = loads[ 0 ];
 
         // check load balance 
         for( int i = 1; i < nPart; ++ i ) 
         {
-          minLoad = std::min( minLoad, loads[ i ] );
-          maxLoad = std::max( maxLoad, loads[ i ] );
+          minLd = std::min( minLd, loads[ i ] );
+          maxLd = std::max( maxLd, loads[ i ] );
         }
 
         // if unbalanced partition detected 
         // the situation is most likely that the last proc has 
         // to many elements assigned 
-        if( maxLoad/meanThreshold > 1.02 || minLoad/meanThreshold < 0.97 ) 
+        double minDir = 1.0 - minLd/ meanLoad ;
+        double maxDir = 1.0 - meanLoad / maxLd ;
+        assert( minDir >= 0.0 ); 
+        assert( maxDir >= 0.0 );
+
+        //if( mpa.myrank() == 0 ) 
+        //  std::cout << minDir << " " << maxDir << "  |  "  << bestMinDir << " " << bestMaxDir << std::endl;
+        if( minDir < 0.01 && maxDir < 0.01 )
         {
-          const double upperBound = 1.01 * meanThreshold;
-          // backward sweep 
-          for( int i = nPart-1; i > 0; -- i ) 
+          // store best threshold 
+          bestThreshold = threshold ;
+          converged = true ;
+          break ;
+        }
+        else 
+        {
+          // otherwise adjust threshold 
+          converged = false ;
+
+          //if( (minDir < bestMinDir) && (maxDir < bestMaxDir) )
+          if( (minDir+maxDir) < (bestMinDir+bestMaxDir) && 
+              std::min(minDir,maxDir) < std::min(bestMinDir, bestMaxDir) )
           {
-            while ( loads[ i ] > upperBound && offsets[ i ] < (offsets[ i+1 ] - 1) )
-            {
-              // put the firt element of this partition to the 
-              // previous proc 
-              --part[ offsets[ i ] ] ;
-              loads[ i ]   -= weights[ offsets[ i ] ];
-              loads[ i-1 ] += weights[ offsets[ i ] ];
-              ++offsets[ i ];
-              assert( part[ offsets[ i ] ] >= 0 );
-            }
+            bestThreshold = threshold ;
+            bestMinDir = minDir ;
+            bestMaxDir = maxDir ;
+            // we found a better result, count new 
+            count = 0 ;
           }
 
-          // forward sweep 
-          for( int i = 0; i<nPart-1; ++i ) 
+          factor *= 0.9;
+
+          if( maxDir > minDir ) 
           {
-            int lastIndex = (offsets[ i+1 ]-1);
-            const int firstIndex = offsets[ i ];
-            while ( loads[ i ] > upperBound && lastIndex > firstIndex )
-            {
-              // put the firt element of this partition to the 
-              // previous proc 
-              ++part[ lastIndex ] ;
-              loads[ i ]   -= weights[ lastIndex ];
-              loads[ i+1 ] += weights[ lastIndex ];
-              --offsets[ i+1 ];
-              assert( part[ lastIndex ] < nPart );
-              // update lastIndex 
-              lastIndex = (offsets[ i+1 ]-1);
-            }
+            threshold *= 1.0 + factor * std::min( 0.05, maxDir );
           }
+          else
+          {
+            threshold *= 1.0 - factor * std::min( 0.05, minDir );
+          }
+          //if( mpa.myrank() == 0 )
+          // std::cout << "New threshold = "  << threshold << std::endl;
         }
       }
-      else 
-      {
-        readjust = true ;
-        // lower threshold and do it again 
-        meanThreshold *= 0.95;
-      }
+
+      // if we did not improve result for 5 iterations then break
+      if( count > 5 ) break ;
+      ++ count ;
+      // if we have more than 20 iterations also break 
+      if( overallcount > 50 ) break ;
+      ++ overallcount ;
     }
 
-#ifndef NDEBUG
-    if( mpa.myrank() == 0 && readjust ) 
+    if( ! converged ) 
+    {
+      // compute new partition 
+      calculatePartition( nPart, bestThreshold, nCells, weights, part ); 
+    }
+
+    /*
+    if( mpa.myrank() == 0 ) 
     {
       // vector of loads 
       std::vector< double > loads( nPart, 0.0 );
@@ -174,14 +192,15 @@ namespace ALUGridMETIS
       }
 
       std::cout << "OrgLoad: mean = " << std::round( meanLoad ) << std::endl;
-      std::cout << "Loads: mean = " << meanThreshold << std::endl;
+      std::cout << "Loads: mean = " << bestThreshold << std::endl;
       std::cout << "Loads: min = " << minLoad << "  max = " << maxLoad << std::endl;
+      std::cout << "count = " << overallcount << std::endl;
       for( idxtype i = 0; i<nPart; ++i )
       {
         std::cout << "P[ " << i << " ] = " << loads[ i ] << std::endl;
       }
     }
-#endif
+    */
   } // end of simple sfc splitting without edges 
 
   template < class idxtype >
