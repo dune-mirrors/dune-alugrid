@@ -586,7 +586,7 @@ namespace ALUGrid
     // ZOLTAN partitioning 
     if (mth == ZOLTAN_LB_Partition ) 
     {
-      ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _connect );
+      ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _edgeSet,  _connect );
       return true ;
     }
 
