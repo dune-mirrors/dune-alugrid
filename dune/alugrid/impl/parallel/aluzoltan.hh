@@ -182,7 +182,7 @@ namespace ALUGridZoltan
     assert( zz );
 
     // General parameters 
-    zz->Set_Param( "DEBUG_LEVEL", "1");
+    zz->Set_Param( "DEBUG_LEVEL", "0");
     zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
@@ -190,7 +190,7 @@ namespace ALUGridZoltan
 
     if ( 1 || edgeSet.size() == 0 )
     {
-      std::cout << "ZoltanAlu: RCB" << std::endl;
+      // std::cout << "ZoltanAlu: RCB" << std::endl;
       zz->Set_Param( "LB_METHOD", "HSFC");
       zz->Set_Param( "RCB_OUTPUT_LEVEL", "0");
       zz->Set_Param( "RCB_RECTILINEAR_BLOCKS", "1");
