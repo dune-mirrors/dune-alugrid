@@ -162,7 +162,7 @@ namespace ALUGridZoltan
   void CALL_Zoltan_LB_Partition( ALUGrid::MpAccessGlobal &mpa,
                                  ldb_vertex_map_t& vertexMap,
                                  ldb_edge_set_t& edgeSet,
-                                 ldb_connect_set_t& connect ) 
+                                 ldb_connect_set_t& connect )
   {
 #if HAVE_ZOLTAN 
     ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
@@ -178,7 +178,7 @@ namespace ALUGridZoltan
     typedef ObjectCollection< ldb_vertex_map_t, ldb_edge_set_t > ObjectCollectionType;
 
     ObjectCollectionType objects( vertexMap, edgeSet );
-    Zoltan *zz = new Zoltan( MPI_COMM_WORLD );
+    Zoltan *zz = new Zoltan( comm );
     assert( zz );
 
     // General parameters 
@@ -188,7 +188,7 @@ namespace ALUGridZoltan
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
     zz->Set_Param( "RETURN_LISTS", "ALL");
 
-    if ( 1 || edgeSet.size() == 0 )
+    if ( edgeSet.size() == 0 )
     {
       // std::cout << "ZoltanAlu: RCB" << std::endl;
       zz->Set_Param( "LB_METHOD", "HSFC");
@@ -206,11 +206,9 @@ namespace ALUGridZoltan
       zz->Set_Param( "GRAPH_SYMMETRIZE","TRANSPOSE");
       zz->Set_Param( "GRAPH_SYM_WEIGHT","ADD");
 #ifdef HAVE_PARMETIS
-     zz->Set_Param(z "GRAPH_PACKAGE","PARMETIS");
-#else
-  #ifdef HAVE_SCOTCH
-     zz->Set_Param( "GRAPH_PACKAGE","SCOTCH");
-  #endif
+      zz->Set_Param( "GRAPH_PACKAGE","PARMETIS");
+#elif  HAVE_SCOTCH
+      zz->Set_Param( "GRAPH_PACKAGE","SCOTCH");
 #endif
       zz->Set_Param( "CHECK_GRAPH", "2"); 
       zz->Set_Param( "PHG_EDGE_SIZE_THRESHOLD", ".35");
@@ -270,6 +268,9 @@ namespace ALUGridZoltan
     Zoltan::LB_Free_Part(&exportGlobalIds, &exportLocalIds, &exportProcs, &exportToPart);
 
     delete zz;
+#else 
+    std::cerr << "ERROR: Zoltan library not found, cannot use Zoltan partitioning! " << std::endl;
+    exit(1);
 #endif // #if HAVE_ZOLTAN
   } // CALL_Zoltan_LB_Partition 
 
