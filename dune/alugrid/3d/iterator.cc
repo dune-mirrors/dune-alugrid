@@ -279,25 +279,17 @@ alu_inline ALU3dGridHierarchicIterator<GridImp> ::
 {
   if (!end) 
   {
-    HElementType * item = 
-      const_cast<HElementType *> (elem.down());
-    if(item) 
+    HElementType * item = const_cast<HElementType *> (elem.down());
+    if(item && item->level() <= maxlevel_)  
     {
       // we have children and they lie in the disired level range 
-      if(item->level() <= maxlevel_)
-      {
-        this->updateEntityPointer( item );
-      }
-      else 
-      { // otherwise do nothing 
-        this->done();
-      }
-    }
-    else 
-    {
-      this->done();
+      this->updateEntityPointer( item );
+      return ;
     }
   }
+
+  // otherwise 
+  this->done();
 }
 
 template <class GridImp>
@@ -319,16 +311,14 @@ alu_inline ALU3dGridHierarchicIterator<GridImp> ::
     if( ghostElem_ != 0 && ghostElem_->ghostLevel() <= maxlevel_)
     {
       this->updateGhostPointer( *ghostElem_ );
+      return ;
     }
     else 
-    { // otherwise do nothing 
-      this->done();
-    }
+      ghostElem_ = 0;
   }
-  else 
-  {
-    this->done();
-  }
+   
+  // otherwise do nothing 
+  this->done();
 }
 
 template <class GridImp>

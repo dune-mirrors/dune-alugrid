@@ -668,7 +668,8 @@ protected:
   //! Constructor for EntityPointer init of Level-, and Leaf-, and
   //! HierarchicIterator
   ALU3dGridEntityPointer(const FactoryType& factory, int level )
-    : ALU3dGridEntityPointerBase<cd,GridImp> (factory,level) {}
+    : ALU3dGridEntityPointerBase<cd,GridImp> (factory,level) 
+  {}
 };
 
 
