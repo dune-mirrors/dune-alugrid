@@ -134,7 +134,8 @@ namespace ALUGrid
             METIS_PartGraphRecursive = 12,
 
             // ZOLTAN partitioning 
-            ZOLTAN_LB_Partition = 13 
+            ZOLTAN_LB_HSFC = 13 , 
+            ZOLTAN_LB_GraphPartitioning = 14 
           };
         private :
           void graphCollect ( const MpAccessGlobal &,
@@ -165,6 +166,13 @@ namespace ALUGrid
           static bool serialPartitionerUsed ( const method mth )
           {
             return true ; // mth < ZOLTAN_LB_Partition ;
+          }
+
+          //! return true if mth specifies a serial partitioner
+          static bool graphEdgesNeeded ( const method mth )
+          {
+            return mth != ALUGRID_SpaceFillingCurveNoEdges && 
+                   mth != ZOLTAN_LB_HSFC ;
           }
 
           static const char *methodToString( method );

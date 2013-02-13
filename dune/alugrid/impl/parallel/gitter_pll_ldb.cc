@@ -584,10 +584,11 @@ namespace ALUGrid
     if (mth == NONE) return false;
 
     // ZOLTAN partitioning 
-    if (mth == ZOLTAN_LB_Partition ) 
+    if (mth >= ZOLTAN_LB_HSFC ) 
     {
+      // if no Zoltan was found the return value will be false 
       ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _edgeSet,  _connect );
-      return true ;
+      return true;
     }
 
     const int start = clock (), me = mpa.myrank ();
@@ -926,8 +927,10 @@ namespace ALUGrid
         return "METIS_PartGraphKway";
       case METIS_PartGraphRecursive :
         return "METIS_PartGraphRecursive";
-      case ZOLTAN_LB_Partition :
-        return "ZOLTAN_LB_Partition";
+      case ZOLTAN_LB_HSFC :
+        return "ZOLTAN_LB_HSFC";
+      case ZOLTAN_LB_GraphPartitioning:
+        return "ZOLTAN_LB_GraphPartitioning";
       default :
         return "unknown method";
     }

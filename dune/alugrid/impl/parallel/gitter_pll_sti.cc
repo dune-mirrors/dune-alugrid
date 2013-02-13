@@ -1275,7 +1275,7 @@ namespace ALUGrid
     // build macro graph, either using user defined weights or default weighs 
     assert (debugOption (20) ? (std::cout << "**GitterPll::checkPartitioning ( db, gs ) " << std::endl, 1) : 1);
     // only for the SFC approach without edges we don't need to setup these connections 
-    const bool insertGraphEdges = (_ldbMethod != LoadBalancer::DataBase::ALUGRID_SpaceFillingCurveNoEdges);
+    const bool insertGraphEdges = LoadBalancer::DataBase:: graphEdgesNeeded( _ldbMethod ) ;
     if( insertGraphEdges )
     {
       // insert edges to graph and check for periodic bnds 
