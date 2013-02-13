@@ -14,19 +14,26 @@
 namespace ALUGridZoltan
 {
 #if HAVE_ZOLTAN
-  template < class ldb_vertex_map_t >
+  template < class ldb_vertex_map_t, class ldb_edge_set_t >
   class ObjectCollection 
   {
     ldb_vertex_map_t& _vertexMap ;
+    ldb_edge_set_t& _edgeMap ;
+    std::vector< std::vector<int> > _edges;
     static const int dimension = 3 ;
 
   public:
     // constructor
-    ObjectCollection( ldb_vertex_map_t& vertexMap ) 
-      : _vertexMap( vertexMap ) 
+    ObjectCollection( ldb_vertex_map_t& vertexMap, ldb_edge_set_t& edgeMap ) 
+      : _vertexMap( vertexMap ),
+        _edgeMap( edgeMap ),
+        _edges(0)
     {}
 
     ldb_vertex_map_t& vertexMap() { return _vertexMap; }
+    ldb_edge_set_t& edgeMap() { return _edgeMap; }
+    std::vector< std::vector<int> >& edges() { return _edges; }
+    int edge(int i,int k) { assert( i < _edges.size() && k < _edges[i].size() ); return _edges[i][k]; }
 
     // query functions that respond to requests from Zoltan 
 
@@ -44,6 +51,7 @@ namespace ALUGridZoltan
     {
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
       assert( objs );
+      assert(wgt_dim==1);
       *ierr = ZOLTAN_OK;
 
       ldb_vertex_map_t& vertexMap = objs->vertexMap();
@@ -57,6 +65,7 @@ namespace ALUGridZoltan
       {
         globalID[ i ] = (*it).first.index() ;
         localID [ i ] = i;
+        obj_wgts[ i ] = (*it).first.weight();
       }
     }
 
@@ -65,7 +74,26 @@ namespace ALUGridZoltan
                                   ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
                                   int *numEdges, int *ierr)
     {
+      std::cout << "aluzoltan.hh: get_num_edges_list not yet implemented" << std::endl;
       abort();
+      #if 0
+      // typedef std::set< GraphEdge > ldb_edge_set_t;
+      ObjectCollection *objs = static_cast<ObjectCollection *> (data);
+      for (int i=0;i<num_obj;++i)
+      {
+        numEdges[i] = 0;
+      }
+      objs->edges().resize(num_obj);
+      typename ldb_edge_set_t::const_iterator iEnd = objs->edgeMap().end();
+      for (typename ldb_edge_set_t::const_iterator i = objs->edgeMap().begin (); i != iEnd; ++i ) 
+      {
+        int leftNode = i->leftNode();
+        assert( leftNode < num_obj );
+        ++numEdges[leftNode];
+        objs->edges()[leftNode].push_back( i->rightNode() );
+      }
+      *ierr = ZOLTAN_OK;
+      #endif
     }
     static void get_edge_list(void *data, int sizeGID, int sizeLID,
                               int num_obj, ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
@@ -73,7 +101,23 @@ namespace ALUGridZoltan
                               ZOLTAN_ID_PTR nborGID, int *nborProc,
                               int wgt_dim, float *ewgts, int *ierr)
     {
+      std::cout << "aluzoltan.hh: get_edges_list not yet implemented" << std::endl;
       abort();
+      #if 0
+      ObjectCollection *objs = static_cast<ObjectCollection *> (data);
+      int k=0;
+      for (int j=0;j<num_obj;++j)
+      {
+        for (int l=0;l<num_edges[j];++l)
+        {
+          nborGID[k] = objs->edge(j,l);
+          ++k;
+          if (wgt_dim==1)
+            ewgts[k]=1;
+        }
+      }
+      *ierr = ZOLTAN_OK;
+      #endif
     }
 
     // return dimension of coordinates 
@@ -114,9 +158,10 @@ namespace ALUGridZoltan
   };
 #endif // #if HAVE_ZOLTAN
 
-  template< class ldb_vertex_map_t, class ldb_connect_set_t >
+  template< class ldb_vertex_map_t, class ldb_edge_set_t, class ldb_connect_set_t >
   void CALL_Zoltan_LB_Partition( ALUGrid::MpAccessGlobal &mpa,
                                  ldb_vertex_map_t& vertexMap,
+                                 ldb_edge_set_t& edgeSet,
                                  ldb_connect_set_t& connect ) 
   {
 #if HAVE_ZOLTAN 
@@ -130,31 +175,46 @@ namespace ALUGridZoltan
     // get communincator (see mpAccess_MPI.cc
     MPI_Comm comm = mpaMPI->communicator();
 
-    typedef ObjectCollection< ldb_vertex_map_t > ObjectCollectionType;
+    typedef ObjectCollection< ldb_vertex_map_t, ldb_edge_set_t > ObjectCollectionType;
 
-    ObjectCollectionType objects( vertexMap );
+    ObjectCollectionType objects( vertexMap, edgeSet );
     Zoltan *zz = new Zoltan( MPI_COMM_WORLD );
     assert( zz );
 
     // General parameters 
     zz->Set_Param( "DEBUG_LEVEL", "1");
-    zz->Set_Param( "LB_METHOD", "RCB");
-    zz->Set_Param( "OBJ_WEIGHT_DIM", "0");
-    // zz->Set_Param( "LB_METHOD", "GRAPH");
-    // zz->Set_Param( "LB_APPROACH", "PARTITION"); 
+    zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
     zz->Set_Param( "RETURN_LISTS", "ALL");
 
-    /* RCB parameters */
-
-    zz->Set_Param( "RCB_OUTPUT_LEVEL", "0");
-    zz->Set_Param( "RCB_RECTILINEAR_BLOCKS", "1");
-    
-    /* Graph parameters 
-    Zoltan_Set_Param(zz, "CHECK_GRAPH", "2"); 
-    Zoltan_Set_Param(zz, "PHG_EDGE_SIZE_THRESHOLD", ".35");
-    */
+    if ( 1 || edgeSet.size() == 0 )
+    {
+      std::cout << "ZoltanAlu: RCB" << std::endl;
+      zz->Set_Param( "LB_METHOD", "HSFC");
+      zz->Set_Param( "RCB_OUTPUT_LEVEL", "0");
+      zz->Set_Param( "RCB_RECTILINEAR_BLOCKS", "1");
+    }
+    else
+    {
+      std::cout << "ZoltanAlu: Graph" << std::endl;
+      zz->Set_Param( "LB_METHOD", "GRAPH");
+      zz->Set_Param( "LB_APPROACH", "PARTITION"); 
+      // zz->Set_Param(,"LB_APPROACH","REPARTITION");
+      zz->Set_Param( "EDGE_WEIGHT_DIM","1");
+      zz->Set_Param( "OBJ_WEIGHT_DIM", "0");
+      zz->Set_Param( "GRAPH_SYMMETRIZE","TRANSPOSE");
+      zz->Set_Param( "GRAPH_SYM_WEIGHT","ADD");
+#ifdef HAVE_PARMETIS
+     zz->Set_Param(z "GRAPH_PACKAGE","PARMETIS");
+#else
+  #ifdef HAVE_SCOTCH
+     zz->Set_Param( "GRAPH_PACKAGE","SCOTCH");
+  #endif
+#endif
+      zz->Set_Param( "CHECK_GRAPH", "2"); 
+      zz->Set_Param( "PHG_EDGE_SIZE_THRESHOLD", ".35");
+    }
 
     zz->Set_Num_Obj_Fn ( ObjectCollectionType::get_number_of_objects, &objects);
     zz->Set_Obj_List_Fn( ObjectCollectionType::get_object_list, &objects);
