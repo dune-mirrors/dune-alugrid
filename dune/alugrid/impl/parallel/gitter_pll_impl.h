@@ -220,6 +220,7 @@ namespace ALUGrid
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
     public :
       virtual int ldbVertexIndex () const;
+      virtual int master () const { return -1; }
       virtual void writeStaticState (ObjectStream &, int) const ;
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
@@ -476,6 +477,7 @@ namespace ALUGrid
     public :
      ~HexaPllBaseXMacro ();
       virtual int ldbVertexIndex () const;
+      virtual int master () const { return -1; }
       virtual void writeStaticState (ObjectStream &, int) const ;
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
@@ -594,6 +596,7 @@ namespace ALUGrid
       inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* );
     public :
       virtual int  ldbVertexIndex () const;
+      virtual int master () const { return -1; }
       virtual void readStaticState (ObjectStream &, int) ;
       virtual void setLoadBalanceVertexIndex ( const int );
     public :

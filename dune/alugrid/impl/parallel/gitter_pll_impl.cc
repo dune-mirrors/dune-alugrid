@@ -10,6 +10,7 @@
 #include "../serial/mapp_cube_3d.h"
 #include "../serial/mapp_tetra_3d.h"
   
+#include "gitter_pll_ldb.h"
 #include "gitter_pll_impl.h"
 #include "gitter_hexa_top_pll.h"
 #include "gitter_tetra_top_pll.h"
@@ -857,6 +858,7 @@ namespace ALUGrid
 #ifdef GRAPHVERTEX_WITH_CENTER
                                     , _center
 #endif
+                                    , master()
                                     ) );
     return true;
   }
@@ -1570,6 +1572,7 @@ namespace ALUGrid
 #ifdef GRAPHVERTEX_WITH_CENTER
                                     , _center
 #endif
+                                    , master()
                                     ) );
     return true;
   }
