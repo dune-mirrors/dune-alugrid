@@ -75,9 +75,16 @@ namespace ALUGridMETIS
     // vector of loads 
     std::vector< double > loads( nPart, 0.0 );
 
+    std::vector< std::pair< double, double > > lastMinMax; 
+    lastMinMax.reserve( 10 );
+
     double bestSumMinMax = 1e308 ;
     double bestMinMax = 1e308 ;
     double bestThreshold = threshold ;
+
+    double lastMaxThreshold = 0.0;
+    double lastMinThreshold = 0.0;
+
     double factor = 1.0;
     while ( ! converged ) 
     {
@@ -113,11 +120,10 @@ namespace ALUGridMETIS
         // to many elements assigned 
         double minDir = 1.0 - minLd / meanLoad ;
         double maxDir = 1.0 - meanLoad / maxLd ;
+
         assert( minDir >= 0.0 ); 
         assert( maxDir >= 0.0 );
 
-        //if( mpa.myrank() == 0 ) 
-        //  std::cout << minDir << " " << maxDir << "  |  "  << bestMinDir << " " << bestMaxDir << std::endl;
         if( minDir < 0.01 && maxDir < 0.01 )
         {
           // store best threshold 
@@ -133,11 +139,19 @@ namespace ALUGridMETIS
           const double sumMinMax = minDir + maxDir;
           const double minMax    = std::min( minDir, maxDir);
 
+          const double lastLoad = loads[ nPart - 1 ];
+          
           if( sumMinMax < bestSumMinMax && minMax < bestMinMax ) 
           {
             bestThreshold = threshold ;
             bestMinMax    = minMax ;
             bestSumMinMax = sumMinMax ;
+
+            if( lastLoad < meanLoad ) 
+              lastMaxThreshold = threshold ;
+            else if ( lastLoad > meanLoad ) 
+              lastMinThreshold = threshold ;
+
             // we found a better result, count new 
             count = 0 ;
           }
@@ -147,18 +161,27 @@ namespace ALUGridMETIS
           if( maxDir > minDir ) 
           {
             threshold *= 1.0 + factor * std::min( 0.05, maxDir );
+            if( threshold < lastMinThreshold ) 
+              threshold = 0.5 * ( lastMinThreshold + meanLoad );
           }
-          else
+          else // if( lastLoad < meanLoad ) 
           {
             threshold *= 1.0 - factor * std::min( 0.05, minDir );
+            if( threshold > lastMaxThreshold ) 
+              threshold = 0.5 * ( lastMaxThreshold + meanLoad );
           }
-          //if( mpa.myrank() == 0 )
-          // std::cout << "New threshold = "  << threshold << std::endl;
+
+          if( mpa.myrank() == 0 )
+          {
+            std::cout << minMax << " " << sumMinMax << "  |  "  
+                      << bestMinMax << " " << bestSumMinMax<< " " << std::endl;
+            std::cout << "New threshold = "  << threshold << std::endl;
+          }
         }
       }
 
       // if we did not improve result for 5 iterations then break
-      if( count > 5 ) break ;
+      if( count > 10 ) break ;
       ++ count ;
       // if we have more than 20 iterations also break 
       if( overallcount > 50 ) break ;
@@ -171,7 +194,6 @@ namespace ALUGridMETIS
       calculatePartition( nPart, bestThreshold, nCells, weights, part ); 
     }
 
-    /*
     if( mpa.myrank() == 0 ) 
     {
       // vector of loads 
@@ -200,7 +222,6 @@ namespace ALUGridMETIS
         std::cout << "P[ " << i << " ] = " << loads[ i ] << std::endl;
       }
     }
-    */
   } // end of simple sfc splitting without edges 
 
   template < class idxtype >

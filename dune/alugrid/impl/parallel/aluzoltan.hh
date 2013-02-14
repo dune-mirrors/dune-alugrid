@@ -192,6 +192,7 @@ namespace ALUGridZoltan
     {
       // std::cout << "ZoltanAlu: RCB" << std::endl;
       zz->Set_Param( "LB_METHOD", "HSFC");
+      //zz->Set_Param( "KEEP_CUTS", "1" );
       zz->Set_Param( "RCB_OUTPUT_LEVEL", "0");
       zz->Set_Param( "RCB_RECTILINEAR_BLOCKS", "1");
     }
