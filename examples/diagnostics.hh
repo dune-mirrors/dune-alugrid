@@ -105,16 +105,16 @@ namespace Dune {
     template <class T>
     void writeVectors(std::ostream& file, 
                       const std::string& descr, 
-                      const std::vector< T >& sumTimes,
+                      const std::vector< T >& avgTimes,
                       const std::vector< T >& maxTimes,
                       const std::vector< T >& minTimes ) const 
     {
-      const size_t size = sumTimes.size();
+      const size_t size = avgTimes.size();
       file << "#########################################" << std::endl ;
-      file << "# Sum " << descr << std::endl ;
+      file << "# Aver " << descr << std::endl ;
       for(size_t i=0; i<size-1; ++i)
       {
-        file << sumTimes[ i ] << "  ";
+        file << avgTimes[ i ] << "  ";
       }
       file << std::endl;
       file << "# Max " << descr << std::endl ;
@@ -141,12 +141,12 @@ namespace Dune {
 
         times.push_back( elements_ );
         const size_t size = times.size();
-        std::vector< double > sumTimes ( times );
+        std::vector< double > avgTimes ( times );
         std::vector< double > maxTimes ( times );
         std::vector< double > minTimes ( times );
 
         // sum, max, and min for all procs 
-        comm_.sum( &sumTimes[ 0 ], size );
+        comm_.sum( &avgTimes[ 0 ], size );
         comm_.min( &minTimes[ 0 ], size );
 
         maxTimes.push_back( maxDofs_ );
@@ -162,7 +162,7 @@ namespace Dune {
 
           { // adjust elements to be the average element number  
             size_t i = size - 1 ;
-            sumTimes[ i ] /= (double) timesteps_;
+            avgTimes[ i ] /= (double) timesteps_;
             maxTimes[ i ] /= (double) timesteps_;
             minTimes[ i ] /= (double) timesteps_;
           }
@@ -172,7 +172,7 @@ namespace Dune {
           std::ofstream file ( runfile.str().c_str() );
           if( file ) 
           {
-            const double averageElements = sumTimes[ size - 1 ] / tasks ;
+            const double averageElements = avgTimes[ size - 1 ] / tasks ;
 
             // get information about communication type 
             const bool nonBlocking = false ;
@@ -183,59 +183,59 @@ namespace Dune {
             file << "# Timesteps = " << timesteps_ << std::endl ;
             file << "# Max DoFs (per element): " << maxDofs << std::endl;
             file << "# Elements / timestep: sum    max    min    average  " << std::endl;
-            file << sumTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
+            file << avgTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
             file << "# SOLVE     COMM     ADAPT    LB      TIMESTEP   RUSAGE  ALUGRID" << std::endl ;
 
-            // multiply sumTimes with maxThhreads since the sum would be to small otherwise 
+            // multiply avgTimes with maxThhreads since the sum would be to small otherwise 
             for(size_t i=0; i<size; ++i)
             {
-              sumTimes[ i ] *= maxThreads ;
+              avgTimes[ i ] *= maxThreads / tasks ;
 #if HAVE_BLUEGENE_P_ARCH
               // for some reason the time on bluegene is 
               // devided by number of threads 
-              sumTimes[ i ] *= maxThreads ;
+              avgTimes[ i ] *= maxThreads ;
               maxTimes[ i ] *= maxThreads ;
               minTimes[ i ] *= maxThreads ;
 #endif
             }
             { 
-              std::vector<size_t> sumTimesElem(size);
+              std::vector<size_t> avgTimesElem(size);
               std::vector<size_t> maxTimesElem(size);
               std::vector<size_t> minTimesElem(size);
 
               for(size_t i=0; i<size; ++i)
               {
-                sumTimesElem[ i ] = inMS( sumTimes[ i ] * averageElements );
+                avgTimesElem[ i ] = inMS( avgTimes[ i ] * averageElements );
                 maxTimesElem[ i ] = inMS( maxTimes[ i ] * averageElements );
                 minTimesElem[ i ] = inMS( minTimes[ i ] * averageElements );
               }
               {
                 std::string descr("(time of all timesteps in ms)");
-                writeVectors( file, descr, sumTimesElem, maxTimesElem, minTimesElem );
+                writeVectors( file, descr, avgTimesElem, maxTimesElem, minTimesElem );
               }
               for(size_t i=0; i<size; ++i)
               {
-                sumTimesElem[ i ] /= timesteps_;
-                maxTimesElem[ i ] /= timesteps_;
-                minTimesElem[ i ] /= timesteps_;
+                avgTimesElem[ i ] /= double( timesteps_ );
+                maxTimesElem[ i ] /= double( timesteps_ );
+                minTimesElem[ i ] /= double( timesteps_ );
               }
               {
                 std::string descr("(average time / timestep in ms)");
-                writeVectors( file, descr, sumTimesElem, maxTimesElem, minTimesElem );
+                writeVectors( file, descr, avgTimesElem, maxTimesElem, minTimesElem );
               }
             }
 
             // devide by timesteps 
             for(size_t i=0; i<size; ++i)
             {
-              sumTimes[ i ] /= (double) timesteps_;
+              avgTimes[ i ] /= (double) timesteps_;
               maxTimes[ i ] /= (double) timesteps_;
               minTimes[ i ] /= (double) timesteps_;
             }
 
             {
               std::string descr( "( average time / timestep / element in sec )" );
-              writeVectors( file, descr, sumTimes, maxTimes, minTimes );
+              writeVectors( file, descr, avgTimes, maxTimes, minTimes );
             }
           }
         } // end speedup file 
@@ -271,17 +271,17 @@ namespace Dune {
                        const double adaptTime,
                        const double lbTime,
                        const double timeStepTime,
-                       const std::vector<double>& limitSteps = std::vector<double>() )
+                       const std::vector<double>& extraSteps = std::vector<double>() )
     {
-      std::vector< double > times( 5 + limitSteps.size(), 0.0 );
+      std::vector< double > times( 5 + extraSteps.size(), 0.0 );
       times[ 0 ] = dgOperatorTime ; 
       times[ 1 ] = odeSolve ;
       times[ 2 ] = adaptTime ;
       times[ 3 ] = lbTime ;
       times[ 4 ] = timeStepTime ;
-      for(size_t i=0; i<limitSteps.size(); ++i)
+      for(size_t i=0; i<extraSteps.size(); ++i)
       {
-        times[ i+5 ] = limitSteps[ i ];
+        times[ i+5 ] = extraSteps[ i ];
       }
 
       maxDofs_ = std::max( double(maxDofs), maxDofs_ );
@@ -306,10 +306,10 @@ namespace Dune {
             times_[ i ] = 0;
         }
 
-        const double elems = nElements ;
-        elements_ += elems ;
+        elements_ += double( nElements );
+
         for(size_t i=0; i<size; ++i ) 
-          times_[ i ] += times[ i ] / elems ; 
+          times_[ i ] += times[ i ] ; 
 
         ++timesteps_ ;
 

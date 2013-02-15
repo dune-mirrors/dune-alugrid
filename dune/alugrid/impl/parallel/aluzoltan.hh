@@ -195,6 +195,7 @@ namespace ALUGridZoltan
       //zz->Set_Param( "KEEP_CUTS", "1" );
       zz->Set_Param( "RCB_OUTPUT_LEVEL", "0");
       zz->Set_Param( "RCB_RECTILINEAR_BLOCKS", "1");
+      zz->Set_Param( "LB_APPROACH","REPARTITION");
     }
     else
     {
