@@ -124,7 +124,6 @@ namespace ALUGridMETIS
     double lastThreshold = meanLoad ;
     double threshold = meanLoad ;
 
-    double sign = 1.0;
     {
       double minLd = 0;
       double maxLd = 0;
@@ -138,17 +137,6 @@ namespace ALUGridMETIS
         //std::cout << "Converged " << std::endl;
       } 
 
-      /*
-      if( mpa.myrank() == 0 )
-      {
-        std::cout << "Start load" << std::endl;
-        for( idxtype i = 0; i<nPart; ++i )
-        {
-          std::cout << "P[ " << i << " ] = " << loads[ i ] << std::endl;
-        }
-      }
-      */
-
       // if unbalanced partition detected 
       // the situation is most likely that the last proc has 
       // to many elements assigned 
@@ -158,7 +146,7 @@ namespace ALUGridMETIS
       assert( minDir >= 0.0 ); 
       assert( maxDir >= 0.0 );
 
-      if( minDir > maxDir ) sign = -1.0;
+      // if( minDir > maxDir ) sign = -1.0;
 
       const double sumMinMax = minDir + maxDir;
       const double minMax    = std::max( minDir, maxDir);
@@ -170,18 +158,11 @@ namespace ALUGridMETIS
         bestMinMax    = minMax ;
         bestSumMinMax = sumMinMax ;
       }
-
-      if( sumMinMax < lastSumMinMax && minMax < lastMinMax ) 
-      {
-        count = 0;
-        lastThreshold = threshold ;
-        lastMinMax    = minMax ;
-        lastSumMinMax = sumMinMax ;
-      }
     }
 
     double factor = 0.2;
-    threshold = ( 1.0 + sign * factor ) * meanLoad ;
+    double sign = 1.0 ;
+    threshold = ( 1.0 + factor ) * meanLoad ;
 
     //if( mpa.myrank() == 0 )
     //  std::cout << "Start serach " << meanLoad << " " << threshold << std::endl;
@@ -239,15 +220,20 @@ namespace ALUGridMETIS
         std::cout << " minMax = " << minMax << " sum = " << sumMinMax ;
         std::cout << " bestMinMax = " << bestMinMax << "  bestSum " << bestSumMinMax << std::endl;
       }
-
-      if( mpa.myrank() == 0 ) 
-      {
-        std::cout << " new thres =  " << threshold << " " << bestThreshold << std::endl;
-      }
       */
 
+      if( factor < 0 ) 
+      {
+        if( sign > 0 ) 
+        {
+          sign = -1.0; 
+          factor = 0.2;
+        }
+        else 
+          break ; 
+      }
       ++ count ;
-      if( count > 25 ) break ;
+      // if( count > 25 ) break ;
     }
 
     if( ! converged ) 
