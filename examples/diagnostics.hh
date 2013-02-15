@@ -271,17 +271,17 @@ namespace Dune {
                        const double adaptTime,
                        const double lbTime,
                        const double timeStepTime,
-                       const std::vector<double>& limitSteps = std::vector<double>() )
+                       const std::vector<double>& extraSteps = std::vector<double>() )
     {
-      std::vector< double > times( 5 + limitSteps.size(), 0.0 );
+      std::vector< double > times( 5 + extraSteps.size(), 0.0 );
       times[ 0 ] = dgOperatorTime ; 
       times[ 1 ] = odeSolve ;
       times[ 2 ] = adaptTime ;
       times[ 3 ] = lbTime ;
       times[ 4 ] = timeStepTime ;
-      for(size_t i=0; i<limitSteps.size(); ++i)
+      for(size_t i=0; i<extraSteps.size(); ++i)
       {
-        times[ i+5 ] = limitSteps[ i ];
+        times[ i+5 ] = extraSteps[ i ];
       }
 
       maxDofs_ = std::max( double(maxDofs), maxDofs_ );
@@ -306,10 +306,10 @@ namespace Dune {
             times_[ i ] = 0;
         }
 
-        const double elems = nElements ;
-        elements_ += elems ;
+        elements_ += double( nElements );
+
         for(size_t i=0; i<size; ++i ) 
-          times_[ i ] += times[ i ] / elems ; 
+          times_[ i ] += times[ i ] ; 
 
         ++timesteps_ ;
 
