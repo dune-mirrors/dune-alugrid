@@ -576,7 +576,8 @@ namespace ALUGrid
           // if nothing was received for this link yet
           if( osRecv.notReceived() ) 
           {
-            if( checkAndReceive( comm, dest, osRecv, link ) )
+            // checks for message and if received also fills osRecv
+            if( checkAndReceive( comm, dest[ link ], osRecv ) )
             {
               // increase number of received messages 
               ++ numReceived;
@@ -647,7 +648,8 @@ namespace ALUGrid
         {
           if( ! linkReceived[ link ] ) 
           {
-            if( checkAndReceive( comm, dest, osRecv, link ) )
+            // checks for message and if received also fills osRecv
+            if( checkAndReceive( comm, dest[ link ], osRecv ) )
             {
               // unpack data 
               dataHandle.unpack( link, osRecv );
@@ -713,9 +715,8 @@ namespace ALUGrid
 
     // does receive operation for one link 
     bool checkAndReceive( MPI_Comm& comm, 
-                          const std::vector<int>& dest, 
-                          ObjectStream& osRecv,
-                          const int link ) 
+                          const int source, 
+                          ObjectStream& osRecv )
     {
       // corresponding MPI status 
       MPI_Status status;
@@ -724,13 +725,13 @@ namespace ALUGrid
       int received = 0;
 
       // check for any message with tag (nonblocking)
-      MPI_Iprobe( dest[ link ], _tag, comm, &received, &status ); 
+      MPI_Iprobe( source, _tag, comm, &received, &status ); 
 
       // receive message of received flag is true 
       if( received ) 
       {
         // this should be the same, otherwise we got an error
-        assert( dest[ link ] == status.MPI_SOURCE );
+        assert( source == status.MPI_SOURCE );
 
         // length of message 
         int bufferSize = -1;
