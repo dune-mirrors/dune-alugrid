@@ -189,7 +189,7 @@ namespace Dune {
             // multiply sumTimes with maxThhreads since the sum would be to small otherwise 
             for(size_t i=0; i<size; ++i)
             {
-              sumTimes[ i ] *= maxThreads ;
+              sumTimes[ i ] *= maxThreads / tasks ;
 #if HAVE_BLUEGENE_P_ARCH
               // for some reason the time on bluegene is 
               // devided by number of threads 
