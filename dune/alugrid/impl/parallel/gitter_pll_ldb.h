@@ -54,10 +54,10 @@ namespace ALUGrid
       {
 #ifdef GRAPHVERTEX_WITH_CENTER
         alucoord_t  _center [3];  // geographical coords of vertex 
+        int _master;
 #endif
         int _index;   // global graph index 
         int _weight; // weight of vertex 
-        int _master;
         public :
           explicit GraphVertex( ObjectStream& os );
           inline GraphVertex (int,int,const alucoord_t (&)[3],int);
@@ -65,9 +65,9 @@ namespace ALUGrid
           // constructor without center is initializing center and weight to zero 
           inline GraphVertex (int);
           inline int index () const;
-          inline int master () const;
           inline int weight () const;
 #ifdef GRAPHVERTEX_WITH_CENTER
+          inline int master () const;
           inline const alucoord_t (&center () const)[3];
 #endif
           inline bool operator < (const GraphVertex &) const;
@@ -288,10 +288,11 @@ namespace ALUGrid
     readFromStream( os );
   }
 
-  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w, const alucoord_t (&p)[3],int m) 
-  : _index (i), _weight (w), _master(m)
+  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w, const alucoord_t (&p)[3], int m) 
+  : _index (i), _weight (w)
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
+    _master = m ;
     _center [0] = p [0];
     _center [1] = p [1];
     _center [2] = p [2];
@@ -300,19 +301,21 @@ namespace ALUGrid
     return;
   }
 
-  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w,int m)
-  : _index (i), _weight (w), _master(m)
+  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w, int m)
+  : _index (i), _weight (w)
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
+    _master = m ;
     _center [0] = _center [1] = _center [2] = 0.0;
 #endif
     return;
   }
 
   inline LoadBalancer::GraphVertex::GraphVertex (int i) 
-    : _index (i), _weight (1), _master(-1)
+    : _index (i), _weight (1)
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
+    _master = -1 ;
     _center [0] = _center [1] = _center [2] = 0.0;
 #endif
     assert( _weight > 0 );
@@ -328,11 +331,11 @@ namespace ALUGrid
     return _weight;
   }
 
+#ifdef GRAPHVERTEX_WITH_CENTER
   inline int LoadBalancer::GraphVertex::master () const {
     return _master;
   }
 
-#ifdef GRAPHVERTEX_WITH_CENTER
   inline const alucoord_t (& LoadBalancer::GraphVertex::center () const)[3] {
     return _center;
   }
@@ -354,8 +357,8 @@ namespace ALUGrid
   {
     os.readObject (_index);
     os.readObject (_weight);
-    os.readObject (_master);
 #ifdef GRAPHVERTEX_WITH_CENTER
+    os.readObject (_master);
     os.readObject (_center [0]);
     os.readObject (_center [1]);
     os.readObject (_center [2]);
@@ -367,8 +370,8 @@ namespace ALUGrid
   {
     os.writeObject (_index);
     os.writeObject (_weight);
-    os.writeObject( _master);
 #ifdef GRAPHVERTEX_WITH_CENTER
+    os.writeObject( _master);
     os.writeObject (_center [0]);
     os.writeObject (_center [1]);
     os.writeObject (_center [2]);
