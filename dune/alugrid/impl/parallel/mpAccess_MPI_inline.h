@@ -460,7 +460,7 @@ namespace ALUGrid
 
     MPI_Request* _request;
 
-    const bool _needToSend ;
+    bool _needToSend ;
 
     // no copying 
     NonBlockingExchangeMPI( const NonBlockingExchangeMPI& );
@@ -530,6 +530,9 @@ namespace ALUGrid
       {
         sendLink( link, dest[ link ], osv[ link ], comm );
       }
+
+      // set send info 
+      _needToSend = false ;
     }
 
     // receive data without buffer given 
@@ -540,7 +543,6 @@ namespace ALUGrid
       receiveImpl( out );
       return out; 
     }
-
 
     // receive data implementation with given buffers 
     void receiveImpl ( std::vector< ObjectStream >& out ) 
@@ -570,37 +572,12 @@ namespace ALUGrid
         // check for all links messages 
         for (int link = 0; link < _nLinks; ++link ) 
         {
-          ObjectStream& objStream = out[ link ];
-          if( objStream.notReceived() ) 
+          ObjectStream& osRecv = out[ link ];
+          // if nothing was received for this link yet
+          if( osRecv.notReceived() ) 
           {
-            // corresponding MPI status 
-            MPI_Status status;
-
-            // received, 0 or 1 
-            int received = 0;
-
-            // check for any message with tag (nonblocking)
-            MPI_Iprobe( dest[ link ], _tag, comm, &received, &status ); 
-
-            // receive message of received flag is true 
-            if( received ) 
+            if( checkAndReceive( comm, dest, osRecv, link ) )
             {
-              // this should be the same, otherwise we got an error
-              assert( dest[ link ] == status.MPI_SOURCE );
-
-              // receive message for link 
-              bufferpair_t buff = receiveLink( comm, status );
-
-#ifndef NDEBUG
-              const int length = buff.second;
-#endif
-              // copy to buffers (buff is reset to (0,0))
-              // also sets objStream.notReceived() to false 
-              objStream = buff;
-
-              // make sure buffer match 
-              assert( length == objStream.size() );
-
               // increase number of received messages 
               ++ numReceived;
             }
@@ -620,26 +597,16 @@ namespace ALUGrid
     }
 
     // receive data implementation with given buffers 
-    void exchange( DataHandleIF& dataHandle )
+    void send( std::vector< ObjectStream >& osSend, 
+               DataHandleIF& dataHandle )
     {
-      // do nothing if number of links is zero 
-      if( _nLinks == 0 ) return; 
-
-      // get mpi communicator
-      MPI_Comm comm = _mpAccess.communicator();
-
-      // get vector with destinations 
-      const std::vector< int >& dest = _mpAccess.dest();
-
-      // send message buffers, we need several because of the 
-      // non-blocking send routines 
-      std::vector< ObjectStream > osSend ;
-
-      // if data was noy send yet, do it now 
       if( _needToSend ) 
       {
-        // resize message buffer vector 
-        osSend.resize( _nLinks );
+        // get mpi communicator
+        MPI_Comm comm = _mpAccess.communicator();
+
+        // get vector with destinations 
+        const std::vector< int >& dest = _mpAccess.dest();
 
         // send data 
         for (int link = 0; link < _nLinks; ++link) 
@@ -650,7 +617,20 @@ namespace ALUGrid
           // send data 
           sendLink( link, dest[ link ], osSend[ link ], comm );
         }
+
+        // set send info 
+        _needToSend = false ;
       }
+    }
+
+    // receive data implementation with given buffers 
+    void receive( DataHandleIF& dataHandle )
+    {
+      // get mpi communicator
+      MPI_Comm comm = _mpAccess.communicator();
+
+      // get vector with destinations 
+      const std::vector< int >& dest = _mpAccess.dest();
 
       // get received vector 
       std::vector< bool > linkReceived( _nLinks, false );
@@ -667,41 +647,8 @@ namespace ALUGrid
         {
           if( ! linkReceived[ link ] ) 
           {
-            // corresponding MPI status 
-            MPI_Status status;
-
-            // received, 0 or 1 
-            int received = 0;
-
-            // check for any message with tag (nonblocking)
-            MPI_Iprobe( dest[ link ], _tag, comm, &received, &status ); 
-
-            // receive message of received flag is true 
-            if( received ) 
+            if( checkAndReceive( comm, dest, osRecv, link ) )
             {
-              // this should be the same, otherwise we got an error
-              assert( dest[ link ] == status.MPI_SOURCE );
-
-              // length of message 
-              int bufferSize = -1;
-
-              // get length of message 
-              {
-                MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bufferSize );
-                assert (test == MPI_SUCCESS);
-              }
-
-              // reserve memory 
-              osRecv.reserve( bufferSize );
-              // reset read and write counter
-              osRecv.clear();
-
-              // receive data
-              receiveLink( comm, status, bufferSize, osRecv._buf );
-
-              // set wb of ObjectStream  
-              osRecv.seekp( bufferSize );
-
               // unpack data 
               dataHandle.unpack( link, osRecv );
 
@@ -726,6 +673,32 @@ namespace ALUGrid
         delete [] sta;
       }
     }
+
+    // receive data implementation with given buffers 
+    void exchange( DataHandleIF& dataHandle )
+    {
+      // do nothing if number of links is zero 
+      if( _nLinks == 0 ) return; 
+
+      // send message buffers, we need several because of the 
+      // non-blocking send routines, send might not be finished 
+      // when we start recieving
+      std::vector< ObjectStream > osSend ;
+
+      // if data was noy send yet, do it now 
+      if( _needToSend ) 
+      {
+        // resize message buffer vector 
+        osSend.resize( _nLinks );
+
+        // send data 
+        send( osSend, dataHandle );
+      }
+
+      // now receive data 
+      receive( dataHandle );
+    }
+
   protected:  
     void sendLink( const int link, const int dest, const ObjectStream& os, MPI_Comm& comm ) 
     {
@@ -738,45 +711,53 @@ namespace ALUGrid
       assert (test == MPI_SUCCESS);
     }
 
-    typedef std::pair< char*, int > bufferpair_t;
-
     // does receive operation for one link 
-    bufferpair_t  receiveLink( MPI_Comm& comm, 
-                               MPI_Status& status ) 
+    bool checkAndReceive( MPI_Comm& comm, 
+                          const std::vector<int>& dest, 
+                          ObjectStream& osRecv,
+                          const int link ) 
     {
-      // length of message 
-      int bufferSize = -1;
+      // corresponding MPI status 
+      MPI_Status status;
 
-      // get length of message 
+      // received, 0 or 1 
+      int received = 0;
+
+      // check for any message with tag (nonblocking)
+      MPI_Iprobe( dest[ link ], _tag, comm, &received, &status ); 
+
+      // receive message of received flag is true 
+      if( received ) 
       {
-        MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bufferSize );
-        assert (test == MPI_SUCCESS);
+        // this should be the same, otherwise we got an error
+        assert( dest[ link ] == status.MPI_SOURCE );
+
+        // length of message 
+        int bufferSize = -1;
+
+        // get length of message 
+        {
+          MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bufferSize );
+          assert (test == MPI_SUCCESS);
+        }
+
+        // reserve memory 
+        osRecv.reserve( bufferSize );
+        // reset read and write counter
+        osRecv.clear();
+
+        // MPI receive 
+        {
+          MY_INT_TEST MPI_Recv ( osRecv._buf, bufferSize, MPI_BYTE, status.MPI_SOURCE, _tag, comm, & status);
+          assert (test == MPI_SUCCESS);
+        }
+
+        // set wb of ObjectStream  
+        osRecv.seekp( bufferSize );
+
+        return true ; // received 
       }
-
-      assert( bufferSize >= 0 );
-
-      // use alloc from objects stream because this is the 
-      // buffer of the object stream
-      char* buffer = ObjectStream::allocateBuffer( bufferSize );
-
-      // return receiveLink given a buffer 
-      return receiveLink( comm, status, bufferSize, buffer );
-    }
-
-    // does receive operation for one link 
-    bufferpair_t receiveLink( MPI_Comm& comm, 
-                              MPI_Status& status,
-                              int bufferSize, char* buffer )
-    {
-      // MPI receive 
-      {
-        MY_INT_TEST MPI_Recv ( buffer, bufferSize, MPI_BYTE, status.MPI_SOURCE, _tag, comm, & status);
-        assert (test == MPI_SUCCESS);
-      }
-
-      // copy buffer and count to object stream 
-      // this will only set the pointer in ObjectStream 
-      return bufferpair_t( buffer, bufferSize );
+      return false ;  // not yet received 
     }
   };
 

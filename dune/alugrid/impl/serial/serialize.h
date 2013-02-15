@@ -373,6 +373,13 @@ namespace ALUGrid
 
     // return true if object stream was not set yet 
     bool notReceived () const { return notReceived_; } 
+
+    //! set position of write counter and also mark as received 
+    void seekp( const size_t pos ) 
+    { 
+      BaseType :: seekp( pos );
+      notReceived_ = false ;
+    }
       
   protected:  
     // assign pair of char buffer and size to this object stream 
