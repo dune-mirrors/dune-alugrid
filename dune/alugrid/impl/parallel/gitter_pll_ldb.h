@@ -35,8 +35,9 @@ namespace ALUGrid
       {
         int _leftNode;
         int _rightNode;
-        int  _weight;
-        public :
+        int _weight;
+      public :
+        static const int sizeOfData = 3 * sizeof( int );
           explicit GraphEdge ( ObjectStream& os );
           inline GraphEdge (int,int,int);
           inline int leftNode () const;
@@ -48,6 +49,7 @@ namespace ALUGrid
           inline bool isValid () const;
           inline bool readFromStream (ObjectStream &);
           inline void writeToStream  (ObjectStream &) const;
+        private:  
       };
 
       class GraphVertex : public MyAlloc
@@ -58,7 +60,14 @@ namespace ALUGrid
 #endif
         int _index;   // global graph index 
         int _weight; // weight of vertex 
+
         public :
+          static const int sizeOfData = 2 * sizeof(int) 
+#ifdef GRAPHVERTEX_WITH_CENTER
+            + sizeof(int) + 3 * sizeof(alucoord_t)
+#endif      
+            ;
+
           explicit GraphVertex( ObjectStream& os );
           inline GraphVertex (int,int,const alucoord_t (&)[3],int);
           inline GraphVertex (int,int,int);

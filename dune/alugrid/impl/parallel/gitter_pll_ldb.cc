@@ -858,17 +858,16 @@ namespace ALUGrid
             // clear _graphSizes vector, default is sizeof for the sizes that are send 
             // at the beginning of the object streams 
             // (one for _noPeriodicFaces flag, one for the vertices, and one for the edges)
-            const int initSize = 3 * sizeof(int);
+            const int initSize = 3 * sizeof(int); // see graphCollect 
             std::fill( _graphSizes.begin(), _graphSizes.end(), initSize );
+
             // count number of graph vertices each process contains 
-            const int sizeofGraphVertex = sizeof( GraphVertex );
             for( int i=0; i<nel; ++i ) 
             {
-              _graphSizes[ neu[ i ] ] += sizeofGraphVertex;
+              _graphSizes[ neu[ i ] ] += GraphVertex :: sizeOfData ;
             }
 
             // add edge sizes 
-            const int sizeofGraphEdge = sizeof( GraphEdge );
             ldb_edge_set_t::const_iterator iEnd = edges.end();
             for (ldb_edge_set_t::const_iterator i = edges.begin (); i != iEnd; ++i) 
             {
@@ -878,7 +877,7 @@ namespace ALUGrid
               if( e.leftNode() < e.rightNode() ) 
               {
                 // increase size of message to be passed on the next repatition
-                _graphSizes[ neu[ e.leftNode() ] ] += sizeofGraphEdge;
+                _graphSizes[ neu[ e.leftNode() ] ] += GraphEdge :: sizeOfData ;
               }
             }
           }
