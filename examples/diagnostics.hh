@@ -111,7 +111,7 @@ namespace Dune {
     {
       const size_t size = sumTimes.size();
       file << "#########################################" << std::endl ;
-      file << "# Sum " << descr << std::endl ;
+      file << "# Aver " << descr << std::endl ;
       for(size_t i=0; i<size-1; ++i)
       {
         file << sumTimes[ i ] << "  ";
