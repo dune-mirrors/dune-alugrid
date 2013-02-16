@@ -1,6 +1,11 @@
 #ifndef DUNE_ALUGRID_DGF_HH
 #define DUNE_ALUGRID_DGF_HH
 
+#if HAVE_ALUGRID
+#include <dune/alugrid/grid.hh>
+#include <dune/grid/io/file/dgfparser/dgfalu.hh>
+#else
+
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/parser.hh>
@@ -597,5 +602,7 @@ namespace Dune
   }
 
 } // namespace Dune
+
+#endif // else if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALUGRID_DGF_HH
