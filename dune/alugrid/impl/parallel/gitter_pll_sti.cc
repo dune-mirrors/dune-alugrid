@@ -1161,6 +1161,79 @@ namespace ALUGrid
     */
   }
 
+  class PackUnpackStaticState : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+
+    typedef Gitter::hface_STI hface_STI ;
+    typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
+       TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
+    typedef Insert < AccessIteratorTT < hface_STI >::OuterHandle, 
+      TreeIterator < hface_STI, is_def_true < hface_STI > > > OuterIteratorType;
+                
+    GitterPll::MacroGitterPll& _containerPll; 
+
+    PackUnpackStaticState( const PackUnpackDynamicState& );
+  public:
+    PackUnpackStaticState( GitterPll::MacroGitterPll& containerPll )
+      : _containerPll( containerPll )
+    {}
+
+    // pack version without clearing ObjectStream 
+    void pack( const int link, ObjectStream& os ) 
+    {
+      // clear stream  
+      os.clear();
+
+      // pack data 
+      AccessIteratorTT < hface_STI > :: InnerHandle wi ( _containerPll, link ) ;
+      AccessIteratorTT < hface_STI > :: OuterHandle wo ( _containerPll, link ) ;
+      for (wi.first () ; ! wi.done () ; wi.next ()) 
+      {
+        std::pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
+        p.first->writeStaticState (os, p.second) ;
+      }
+      for (wo.first () ; ! wo.done () ; wo.next ()) 
+      {
+        std::pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
+        p.first->writeStaticState (os, p.second) ;
+      }
+
+      // mark end of stream 
+      os.writeObject( MacroGridMoverIF :: ENDSTREAM ); 
+    }
+
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      AccessIteratorTT < hface_STI > :: InnerHandle wi ( _containerPll, link ) ;
+      AccessIteratorTT < hface_STI > :: OuterHandle wo ( _containerPll, link ) ;
+      for (wo.first () ; ! wo.done () ; wo.next ()) 
+      {
+        std::pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
+        p.first->readStaticState (os, p.second) ;
+      }
+      for (wi.first () ; ! wi.done () ; wi.next ()) 
+      {
+        std::pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
+        p.first->readStaticState (os, p.second) ;
+      }
+
+      // check consistency of stream 
+      int endStream ; 
+      os.readObject( endStream );
+      if( endStream != MacroGridMoverIF :: ENDSTREAM )
+      {
+        os.readObject( endStream );
+        if( endStream != MacroGridMoverIF :: ENDSTREAM )
+        {
+          std::cerr << "**ERROR: writeStaticState: inconsistent stream, got " << endStream << std::endl;
+          assert( false );
+          abort();
+        }
+      } 
+    }
+  };
+
+
   void GitterPll :: exchangeStaticState () 
   {
     // Die Methode wird jedesmal aufgerufen, wenn sich der statische
@@ -1172,66 +1245,10 @@ namespace ALUGrid
 #ifndef NDEBUG
     const int start = clock () ;
 #endif
-    try {
-      const int nl = mpAccess ().nlinks () ;
-      std::vector < ObjectStream > osv (nl) ;
-
-      {
-        for (int l = 0 ; l < nl ; ++l) 
-        {
-          ObjectStream& os = osv[ l ];
-          AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
-          AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
-          for (wi.first () ; ! wi.done () ; wi.next ()) 
-          {
-            std::pair < ElementPllXIF_t *, int > p = wi.item ().accessInnerPllX () ;
-            p.first->writeStaticState (os, p.second) ;
-          }
-          for (wo.first () ; ! wo.done () ; wo.next ()) 
-          {
-            std::pair < ElementPllXIF_t *, int > p = wo.item ().accessInnerPllX () ;
-            p.first->writeStaticState (os, p.second) ;
-          }
-
-          // mark end of stream 
-          os.writeObject( MacroGridMoverIF :: ENDSTREAM ); 
-        }
-      }
-
-      // exchange data 
-      osv = mpAccess ().exchange (osv) ;
-
-      {
-        for (int l = 0 ; l < nl ; ++l) 
-        {
-          ObjectStream& os = osv[ l ];
-          AccessIteratorTT < hface_STI > :: InnerHandle wi (containerPll (),l) ;
-          AccessIteratorTT < hface_STI > :: OuterHandle wo (containerPll (),l) ;
-          for (wo.first () ; ! wo.done () ; wo.next ()) 
-          {
-            std::pair < ElementPllXIF_t *, int > p = wo.item ().accessOuterPllX () ;
-            p.first->readStaticState (os, p.second) ;
-          }
-          for (wi.first () ; ! wi.done () ; wi.next ()) 
-          {
-            std::pair < ElementPllXIF_t *, int > p = wi.item ().accessOuterPllX () ;
-            p.first->readStaticState (os, p.second) ;
-          }
-          // check consistency of stream 
-          int endStream ; 
-          os.readObject( endStream );
-          if( endStream != MacroGridMoverIF :: ENDSTREAM )
-          {
-            os.readObject( endStream );
-            if( endStream != MacroGridMoverIF :: ENDSTREAM )
-            {
-              std::cerr << "**ERROR: writeStaticState: inconsistent stream, got " << endStream << std::endl;
-              assert( false );
-              abort();
-            }
-          } 
-        } 
-      }
+    try 
+    {
+      PackUnpackStaticState data( containerPll () );
+      mpAccess ().exchange ( data );
     } 
     catch (Parallel ::  AccessPllException) 
     {

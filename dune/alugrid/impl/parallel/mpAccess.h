@@ -107,7 +107,9 @@ namespace ALUGrid
 
         virtual ~NonBlockingExchange () {}
         virtual void send ( const std::vector< ObjectStream > & ) = 0;
+        virtual void send ( std::vector< ObjectStream > &, DataHandleIF& ) = 0;
         virtual std::vector< ObjectStream > receive() = 0;  
+        virtual void receive( DataHandleIF& ) = 0;  
         virtual void exchange( DataHandleIF& ) = 0;  
       };
 
