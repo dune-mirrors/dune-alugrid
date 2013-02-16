@@ -1,3 +1,5 @@
+if ! ALUGRID
+
 libalugrid_2d_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/impl/2d/grid.cc \
 	$(top_srcdir)/dune/alugrid/impl/2d/handle.cc \
@@ -60,3 +62,5 @@ libdunealugrid_la_LDFLAGS = $(AM_LDFLAGS)
 libdunealugrid_la_LIBADD = $(DUNE_LIBS) $(ALUGRID_IMPL_LIBS)
 
 include $(top_srcdir)/am/global-rules
+
+endif

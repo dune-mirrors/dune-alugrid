@@ -47,7 +47,9 @@ static std::vector<double> getMemoryUsage()
   getrusage( RUSAGE_SELF, &info );
   // convert to KB
   memUsage[ 0 ] = (double(info.ru_maxrss)/ 1024.0);
+#if ! HAVE_ALUGRID
   memUsage[ 1 ] = (double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
+#endif
   return memUsage;
 }
 
@@ -301,11 +303,13 @@ catch( const Dune::Exception &e )
   std::cout << "DUNE ERROR: " << e << std::endl;
   return 1;
 }
+#if ! HAVE_ALUGRID
 catch( const ALUGrid::ALUGridException& e )
 {
   std::cout << "ALUGrid ERROR: " << e.what() << std::endl;
   return 1;
 }
+#endif
 catch( ... )
 {
   std::cout << "Unknown ERROR" << std::endl;
