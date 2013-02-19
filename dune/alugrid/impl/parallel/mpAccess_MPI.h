@@ -94,8 +94,10 @@ namespace ALUGrid
       static int tag = messagetag + 2 ;
       // increase tag counter 
       ++tag ;
-      if( tag < 0 ) 
+      // the MPI standard guaratees only up to 2^15-1
+      if( tag >= 32767 ) 
       {
+        // reset tag to initial value 
         tag = messagetag + 2 ;
       }
       return tag;
