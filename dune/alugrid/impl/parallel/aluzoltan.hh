@@ -186,7 +186,7 @@ namespace ALUGridZoltan
     zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
-    zz->Set_Param( "RETURN_LISTS", "ALL");
+    zz->Set_Param( "RETURN_LISTS", "EXPORT");
 
     if ( edgeSet.size() == 0 )
     {
@@ -223,19 +223,19 @@ namespace ALUGridZoltan
     zz->Set_Num_Edges_Multi_Fn(ObjectCollectionType::get_num_edges_list, &objects);
     zz->Set_Edge_List_Multi_Fn(ObjectCollectionType::get_edge_list, &objects);
 
-    int changes;
-    int numGidEntries;
-    int numLidEntries;
-    int numImport;
-    ZOLTAN_ID_PTR importGlobalIds;
-    ZOLTAN_ID_PTR importLocalIds;
-    int *importProcs;
-    int *importToPart;
-    int numExport;
-    ZOLTAN_ID_PTR exportGlobalIds;
-    ZOLTAN_ID_PTR exportLocalIds;
-    int *exportProcs;
-    int *exportToPart;
+    int changes = 0;
+    int numGidEntries = 0;
+    int numLidEntries = 0;
+    int numImport = 0;
+    ZOLTAN_ID_PTR importGlobalIds = 0;
+    ZOLTAN_ID_PTR importLocalIds  = 0;
+    int *importProcs  = 0;
+    int *importToPart = 0;
+    int numExport = 0;
+    ZOLTAN_ID_PTR exportGlobalIds = 0;
+    ZOLTAN_ID_PTR exportLocalIds  = 0;
+    int *exportProcs  = 0;
+    int *exportToPart = 0;
 
     int rc = zz->LB_Partition(changes, numGidEntries, numLidEntries,
                               numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
@@ -256,8 +256,7 @@ namespace ALUGridZoltan
     {
       int& moveTo = i->second;
       // insert and also set partition number new (including own number)
-      if ( moveTo == -1 ) 
-        moveTo = myrank ;
+      if ( moveTo == -1 ) moveTo = myrank ;
       connect.insert( moveTo );
     }
 
@@ -269,6 +268,7 @@ namespace ALUGridZoltan
     Zoltan::LB_Free_Part(&importGlobalIds, &importLocalIds, &importProcs, &importToPart);
     Zoltan::LB_Free_Part(&exportGlobalIds, &exportLocalIds, &exportProcs, &exportToPart);
 
+    // delete zoltan structure 
     delete zz;
 #else 
     std::cerr << "ERROR: Zoltan library not found, cannot use Zoltan partitioning! " << std::endl;
