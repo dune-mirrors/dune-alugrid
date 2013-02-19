@@ -240,6 +240,12 @@ namespace ALUGridZoltan
     int rc = zz->LB_Partition(changes, numGidEntries, numLidEntries,
                               numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
                               numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
+    if (rc != ZOLTAN_OK) 
+    {
+      std::cerr << "ERROR: Zoltan partitioning failed" << std::endl; 
+      assert( false );
+      abort();
+    }
 
     typedef typename ldb_vertex_map_t::iterator iterator;
 

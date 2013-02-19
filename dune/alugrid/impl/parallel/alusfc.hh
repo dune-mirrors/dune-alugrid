@@ -121,7 +121,6 @@ namespace ALUGridMETIS
 
     double lastSumMinMax = 1e308 ;
     double lastMinMax = 1e308 ;
-    double lastThreshold = meanLoad ;
     double threshold = meanLoad ;
 
     {
@@ -205,7 +204,6 @@ namespace ALUGridMETIS
       if( sumMinMax < lastSumMinMax && minMax < lastMinMax ) 
       {
         //count = 0;
-        lastThreshold = threshold ;
         lastMinMax    = minMax ;
         lastSumMinMax = sumMinMax ;
       }
