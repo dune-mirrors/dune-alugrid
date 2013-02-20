@@ -4,6 +4,7 @@
 #include <vector>
 #include <rpc/rpc.h>
 
+#include <dune/common/forloop.hh>
 #include <dune/common/misc.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -53,23 +54,6 @@ namespace Dune
   };
 
 
-  namespace DefaultIndexSetHelper
-  {
-
-    template< class Grid, class Index >
-    struct ContainsIndex
-    {
-      static bool
-      contains ( const PersistentContainer< Grid, Index > &container,
-                 const size_t index )
-      {
-        DUNE_THROW( NotImplemented, "DefaultIndexSetHelper::ContainsIndex not implemented for this grid." );
-        return true;
-      }
-    };
-
-  } // namespace DefaultIndexSetHelper
-
 
   /*! \brief 
     DefaultIndexSet creates an index set by using the grids persistent container 
@@ -88,9 +72,11 @@ namespace Dune
     //! type of index 
     typedef unsigned int IndexType;
 
+  private:
     //! type of iterator to generate index set 
     typedef IteratorImp IteratorType ;
-    
+
+  public:
     struct Index 
     {
       int index_;
@@ -105,27 +91,35 @@ namespace Dune
   private:
     typedef DefaultIndexSet<GridType, IteratorType > ThisType;
 
+    template< int codim >
+    struct InsertEntity
+    {
+      static void apply ( const typename GridImp::template Codim< 0 >::Entity &entity,
+                          PersistentContainerVectorType &indexContainer,
+                          std::vector< int > &sizes )
+      {
+        PersistentContainerType &codimContainer = *(indexContainer[ codim ]);
+        if( codim == 0 )
+        {
+          Index &idx = codimContainer[ entity ];
+          if( idx.index() < 0 )
+            idx.set( sizes[ codim ]++ );
+        }
+        else
+        {
+          for( int i = 0; i < entity.template count< codim >(); ++i )
+          {
+            Index &idx = codimContainer( entity, i );
+            if( idx.index() < 0 )
+              idx.set( sizes[ codim ]++ );
+          }
+        }
+      }
+    };
+
     template <class EntityType, int codim> 
     struct EntitySpec
     {
-      template <class SizeVector>
-      static void insert(const EntityType & en, 
-                         PersistentContainerVectorType &indexContainer, 
-                         SizeVector& sizes)
-      {
-        PersistentContainerType& codimContainer = *(indexContainer[ codim ]);
-        for( int i = 0; i < en.template count< codim >(); ++i )
-        {
-          Index& idx = codimContainer( en , i );
-          if( idx.index() < 0 )
-          {
-            idx.set( sizes[codim] );
-            ++ sizes[ codim ];
-          }
-        }
-        EntitySpec<EntityType,codim-1>::insert(en, indexContainer, sizes);
-      }
-
       static IndexType subIndex( const PersistentContainerType& indexContainer,
                                  const EntityType & e, 
                                  int i ) 
@@ -142,21 +136,6 @@ namespace Dune
     template <class EntityType> 
     struct EntitySpec<EntityType,0>
     {
-      template <class SizeVector>
-      static void insert(const EntityType & en, 
-                         PersistentContainerVectorType &indexContainer, 
-                         SizeVector& sizes)
-      {
-        enum { codim = 0 };
-        PersistentContainerType& codimContainer = *(indexContainer[ codim ]);
-        Index& idx = codimContainer[ en ];
-        if( idx.index() < 0 )
-        {
-          idx.set( sizes[codim] );
-          ++ sizes[ codim ];
-        }
-      }
-
       static IndexType subIndex( const PersistentContainerType& indexContainer,
                                  const EntityType & e, 
                                  int i ) 
@@ -275,21 +254,23 @@ namespace Dune
 
     //! do calculation of the index set, has to be called when grid was
     //! changed or if index set is created 
-    void calcNewIndex (const IteratorType& begin, const IteratorType& end )
+    void calcNewIndex ( const IteratorType &begin, const IteratorType &end )
     {
       // resize arrays to new size 
       // and set size to zero 
-      for(int cd=0; cd<ncodim; ++cd) 
+      for( int cd = 0; cd < ncodim; ++cd )
       {
-        indexContainer( cd ).clear();
-        size_[cd] = 0;
+        indexContainer( cd ).resize( Index() );
+        indexContainer( cd ).shrinkToFit();
+        indexContainer( cd ).fill( Index() );
+        size_[ cd ] = 0;
       }
 
       // grid walk to setup index set 
-      for(IteratorType it = begin; it != end; ++it)
+      for( IteratorType it = begin; it != end; ++it )
       {
         assert( ( level_ < 0 ) ? it->isLeaf() : (it->level() == level_) );
-        insertEntity( *it, size_ );
+        ForLoop< InsertEntity, 0, dim >::apply( *it, indexContainers_, size_ );
       }
 
       // remember the number of entity on level and cd = 0
@@ -303,7 +284,7 @@ namespace Dune
           std::cout << "DefaultIndexSet[ " << level_ << " ]: " << mySize << " s | g " << gridSize << std::endl;
         }
         // this assertion currently fails for 3d conforming
-        assert( ( grid_.conformingRefinement() && dim == 3 && level_ >= 0 ) ? true : (mySize <= gridSize) );
+        // assert( ( grid_.conformingRefinement() && dim == 3 && level_ >= 0 ) ? true : (mySize <= gridSize) );
 #endif
       }
     }
@@ -315,10 +296,10 @@ namespace Dune
     }
 
     //! returns true if this set provides an index for given entity
-    bool containsIndex ( const int cd , const int idx) const
+    bool containsIndex ( const int cd, const int idx ) const
     {
-      typedef DefaultIndexSetHelper::ContainsIndex< GridType, Index > ContainsIndex;
-      return ContainsIndex::contains( indexContainer( cd ), idx ); 
+      assert( (typename PersistentContainerType::Size)idx < indexContainer( cd ).size() );
+      return ((indexContainer( cd ).begin() + idx)->index() >= 0);
     }
 
   private:
@@ -329,13 +310,6 @@ namespace Dune
       const std::vector<GeometryType> & geomT = geomTypes(codim); 
       for(size_t i=0; i<geomT.size(); ++i) if(geomT[i] == type) return false;
       return true;  
-    }
-
-    // calculate index for the codim 
-    template <class EntityType, class SizeVector>
-    void insertEntity(EntityType & en, SizeVector& sizes)
-    {
-      EntitySpec<EntityType,dim>::insert( en, indexContainers_, sizes);
     }
 
     // grid this index set belongs to 
@@ -349,7 +323,6 @@ namespace Dune
 
     // the level for which this index set is created 
     const int level_;
-    
   };
 
 } // namespace Dune
