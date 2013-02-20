@@ -223,6 +223,7 @@ namespace ALUGrid
       using A :: myGrid;
       using A :: nEdges;
       using A :: myhedge;
+      using A :: isGhost;
 
       typedef TetraTop < A >    innertetra_t ;
       typedef typename A :: innervertex_t innervertex_t;
@@ -372,14 +373,17 @@ namespace ALUGrid
       virtual bool markForConformingClosure () 
       {
         assert( myGrid()->conformingClosureNeeded() );
-        // if an edge exits, that has children, we also have to refine this tetra 
-        assert( nEdges() == 6 );
-        for (int e=0; e < 6; ++e)
+        if( ! isGhost() ) 
         {
-          if( myhedge( e )->down() )
+          // if an edge exits, that has children, we also have to refine this tetra 
+          assert( nEdges() == 6 );
+          for (int e=0; e < 6; ++e)
           {
-            request ( myrule_t :: bisect );
-            return true;
+            if( myhedge( e )->down() )
+            {
+              request ( myrule_t :: bisect );
+              return true;
+            }
           }
         }
         return false;

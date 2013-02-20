@@ -1081,10 +1081,10 @@ namespace ALUGrid
       if( conformingClosureNeeded() ) 
       {
         // check that all leaf elements are in conforming status (bisection only)
-        bool x = true;
+        bool x = false ;
         LeafIterator< helement_STI > i( *this );
         for( i->first(); ! i->done(); i->next()) { x &= i->item().markForConformingClosure (); }
-        assert( x == true );
+        assert( x == false );
       }
 #endif
 
