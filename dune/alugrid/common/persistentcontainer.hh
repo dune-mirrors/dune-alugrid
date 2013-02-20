@@ -22,6 +22,9 @@ namespace Dune
     typedef typename Base::Grid Grid;
     typedef typename Base::Value Value;
 
+    /** \brief \deprecated typedef of class Grid */
+    typedef typename Base::Grid GridType;
+
     ALUGridPersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
     : Base( grid.hierarchicIndexSet(), codim, value )
     {}
@@ -41,6 +44,9 @@ namespace Dune
     typedef typename Base::Grid Grid;
     typedef typename Base::Value Value;
 
+    /** \brief \deprecated typedef of class Grid */
+    typedef typename Base::Grid GridType;
+
     PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
     : Base( grid, codim, value )
     {}
@@ -56,6 +62,9 @@ namespace Dune
     typedef typename Base::Grid Grid;
     typedef typename Base::Value Value;
 
+    /** \brief \deprecated typedef of class Grid */
+    typedef typename Base::Grid GridType;
+
     PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
     : Base( grid, codim, value )
     {}
@@ -70,6 +79,9 @@ namespace Dune
   public:
     typedef typename Base::Grid Grid;
     typedef typename Base::Value Value;
+
+    /** \brief \deprecated typedef of class Grid */
+    typedef typename Base::Grid GridType;
 
     PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
     : Base( grid, codim, value )
