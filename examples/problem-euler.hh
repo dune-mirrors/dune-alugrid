@@ -25,7 +25,7 @@ struct EulerProblemFFS
   static const int dimDomain = DomainType::dimension;
   static const int dimRange = RangeType::dimension;
 
-  EulerProblemFFS ()
+  EulerProblemFFS ( const int problem )
   {}
 
   //! \copydoc ProblemData::gridFile
@@ -104,9 +104,11 @@ public:
   static const int dimDomain = DomainType::dimension;
   static const int dimRange = RangeType::dimension;
 
-  EulerProblemShockBubble() 
+  EulerProblemShockBubble( const int problem ) 
    : gamma(1.4) 
-   , center_(0.5) , radius2_( 0.2 * 0.2 ) 
+   , center_(0.5)
+   , radius2_( 0.2 * 0.2 ) 
+   , problem_( problem )
   {
     center_[dimDomain-1] = 0;
   }
@@ -116,7 +118,16 @@ public:
   { 
     std::ostringstream dgfFileName;
     if( dimD == 3 ) 
-      dgfFileName << path << "/dgf/cube_hc_512.dgf";
+    {
+      if( problem_ == 21 )
+        dgfFileName << path << "/dgf/cube_hc_512.dgf";
+      else if( problem_ == 22 )
+        dgfFileName << path << "/dgf/cube_hc_4096.dgf";
+      else if( problem_ == 23 )
+        dgfFileName << path << "/dgf/cube_hc_32768.dgf";
+      else 
+        dgfFileName << path << "/dgfsb" << dimDomain << "d.dgf";
+    }
     else 
       dgfFileName << path << "/dgfsb" << dimDomain << "d.dgf";
     return dgfFileName.str();
@@ -199,13 +210,14 @@ public:
   //! \copydoc ProblemData::saveInterval
   double saveInterval() const 
   {
-    return 0.005;
+    return 0.01;
   }
 
   private:
   const double gamma;
   DomainType center_; 
   const double radius2_; 
+  const int problem_;
 };
 
 
@@ -331,15 +343,21 @@ struct EulerModel
     switch( problem )
     {
     case 1:
-      problem_ = new EulerProblemFFS< dimDomain >();
+    case 11:
+    case 12:
+    case 13: 
+      problem_ = new EulerProblemFFS< dimDomain >( problem );
       break;
     case 2:
-      problem_ = new EulerProblemShockBubble< dimDomain >();
+    case 21:
+    case 22:
+    case 23:
+      problem_ = new EulerProblemShockBubble< dimDomain >( problem );
       break;
 
     default:
       std::cerr << "ProblemData not defined - using problem 1!" << std::endl;
-      problem_ = new EulerProblemFFS< dimDomain >();
+      problem_ = new EulerProblemFFS< dimDomain >( problem );
     }
   }
 
