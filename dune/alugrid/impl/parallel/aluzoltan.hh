@@ -196,7 +196,7 @@ namespace ALUGridZoltan
     {
       std::stringstream tol; 
       tol << tolerance ;
-      zz->Set_Param( "IMBALANCE_TOL", tol.str().c_str() );
+      zz->Set_Param( "IMBALANCE_TOL", tol.str() );
     }
 
     if ( edgeSet.size() == 0 )
