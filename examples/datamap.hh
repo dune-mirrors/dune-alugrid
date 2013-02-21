@@ -19,7 +19,7 @@ class DataHandle
 public:
   // type of data transported in the stream
   typedef typename Base::DataType DataType;
-  typedef typename Container::GridType::template Codim< 0 >::Entity Entity;
+  typedef typename Container::Grid::template Codim< 0 >::Entity Entity;
 
 protected:
   // data map 
@@ -69,7 +69,7 @@ public:
   {
     assert( n == size( entity ) );
 
-    data_.update();
+    data_.resize();
     // we only have data on the leaf level
     if( entity.isLeaf() )
       buffer.read( data_[ entity ] );

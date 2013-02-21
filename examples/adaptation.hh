@@ -247,7 +247,7 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   // interpolate all new cells to leaf level 
   if( refined )
   {
-    container.update();
+    container.resize();
     const LevelIterator end = grid_.template lend< 0, partition >( 0 );
     for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
       hierarchicProlong<Vector>( *it, container );
@@ -294,6 +294,9 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
     }
   }
 
+  // compress data again 
+  container.shrinkToFit();
+
   // store adaptation time 
   adaptTime_ += adaptTimer.elapsed();
 
@@ -301,6 +304,7 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   // copy data to ghost entities
   solution.communicate();
   commTime_ = commTimer.elapsed();
+
 }
 
 template< class Grid >
