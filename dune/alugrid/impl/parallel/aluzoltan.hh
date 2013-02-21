@@ -186,7 +186,7 @@ namespace ALUGridZoltan
     zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
-    zz->Set_Param( "RETURN_LISTS", "EXPORT");
+    zz->Set_Param( "RETURN_LISTS", "ALL");
 
     if ( edgeSet.size() == 0 )
     {
