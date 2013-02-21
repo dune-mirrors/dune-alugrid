@@ -262,8 +262,8 @@ namespace ALUGridZoltan
       {
         tolerance *= 1.05 ;
         ++ count ;
+        if( count > 3 ) break ;
       }
-      if( count > 3 ) break ;
     }
 
     // if new partitioning has been calculated 
