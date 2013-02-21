@@ -251,30 +251,34 @@ namespace ALUGridZoltan
     int rc = zz->LB_Partition(changes, numGidEntries, numLidEntries,
                               numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
                               numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
-    if (rc != ZOLTAN_OK) 
+
+    // if new partitioning has been calculated 
+    if (rc == ZOLTAN_OK) 
+    {
+      typedef typename ldb_vertex_map_t::iterator iterator;
+      for (int i=0; i < numExport; ++i)
+      {
+        iterator vertex = vertexMap.find( exportGlobalIds[ i ] );
+        assert( vertex != vertexMap.end () );
+        (*vertex).second = exportProcs[ i ];
+      }
+
+      const iterator iEnd = vertexMap.end ();
+      const int myrank = mpaMPI->myrank();
+      for ( iterator i = vertexMap.begin (); i != iEnd; ++i )
+      {
+        int& moveTo = i->second;
+        // insert and also set partition number new (including own number)
+        if ( moveTo == -1 ) moveTo = myrank ;
+        connect.insert( moveTo );
+      }
+    }
+    else 
     {
       if( verbose ) 
         std::cerr << "ERROR: Zoltan partitioning failed, partitioning won't change! " << std::endl; 
-      return false ;
-    }
-
-    typedef typename ldb_vertex_map_t::iterator iterator;
-
-    for (int i=0; i < numExport; ++i)
-    {
-      iterator vertex = vertexMap.find( exportGlobalIds[ i ] );
-      assert( vertex != vertexMap.end () );
-      (*vertex).second = exportProcs[ i ];
-    }
-
-    const iterator iEnd = vertexMap.end ();
-    const int myrank = mpaMPI->myrank();
-    for ( iterator i = vertexMap.begin (); i != iEnd; ++i )
-    {
-      int& moveTo = i->second;
-      // insert and also set partition number new (including own number)
-      if ( moveTo == -1 ) moveTo = myrank ;
-      connect.insert( moveTo );
+      // no changes 
+      changes = 0;
     }
 
     ////////////////////////////////////////////////////////////////
