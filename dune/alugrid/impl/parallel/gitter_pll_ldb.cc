@@ -588,7 +588,7 @@ namespace ALUGrid
     if (mth >= ZOLTAN_LB_HSFC ) 
     {
       // if no Zoltan was found the return value will be false 
-      return ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _edgeSet,  _connect, tolerance );
+      return ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _edgeSet,  _connect, tolerance, debugOption(5) );
     }
 
     const int start = clock (), me = mpa.myrank ();

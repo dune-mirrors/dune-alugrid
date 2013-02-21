@@ -164,7 +164,8 @@ namespace ALUGridZoltan
                                  ldb_vertex_map_t& vertexMap,
                                  ldb_edge_set_t& edgeSet,
                                  ldb_connect_set_t& connect,
-                                 const double tolerance )
+                                 const double tolerance,
+                                 const bool verbose )
   {
 #if HAVE_ZOLTAN 
     ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
@@ -184,14 +185,22 @@ namespace ALUGridZoltan
     assert( zz );
 
     // General parameters 
-    zz->Set_Param( "DEBUG_LEVEL", "0");
+    if( verbose ) 
+      zz->Set_Param( "DEBUG_LEVEL", "1");
+    else 
+      zz->Set_Param( "DEBUG_LEVEL", "0");
+
     zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
-    zz->Set_Param( "RETURN_LISTS", "ALL");
-    std::stringstream tol; 
-    tol << tolerance ;
-    zz->Set_Param( "IMBALANCE_TOL", tol.str().c_str() );
+    zz->Set_Param( "RETURN_LISTS", "EXPORT");
+
+    // tolerance for load imbalance 
+    {
+      std::stringstream tol; 
+      tol << tolerance ;
+      zz->Set_Param( "IMBALANCE_TOL", tol.str().c_str() );
+    }
 
     if ( edgeSet.size() == 0 )
     {
@@ -247,9 +256,9 @@ namespace ALUGridZoltan
                               numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
     if (rc != ZOLTAN_OK) 
     {
-      std::cerr << "ERROR: Zoltan partitioning failed" << std::endl; 
-      assert( false );
-      abort();
+      if( verbose ) 
+        std::cerr << "ERROR: Zoltan partitioning failed, partitioning won't change! " << std::endl; 
+      return false ;
     }
 
     typedef typename ldb_vertex_map_t::iterator iterator;
