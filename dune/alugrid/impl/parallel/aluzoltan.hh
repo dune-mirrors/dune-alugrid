@@ -164,7 +164,7 @@ namespace ALUGridZoltan
                                  ldb_vertex_map_t& vertexMap,
                                  ldb_edge_set_t& edgeSet,
                                  ldb_connect_set_t& connect,
-                                 const double tolerance,
+                                 const double givenTolerance,
                                  const bool verbose )
   {
 #if HAVE_ZOLTAN 
@@ -191,13 +191,6 @@ namespace ALUGridZoltan
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
     zz->Set_Param( "RETURN_LISTS", "EXPORT");
-
-    // tolerance for load imbalance 
-    {
-      std::stringstream tol; 
-      tol << tolerance ;
-      zz->Set_Param( "IMBALANCE_TOL", tol.str() );
-    }
 
     if ( edgeSet.size() == 0 )
     {
@@ -248,9 +241,30 @@ namespace ALUGridZoltan
     int *exportProcs  = 0;
     int *exportToPart = 0;
 
-    int rc = zz->LB_Partition(changes, numGidEntries, numLidEntries,
-                              numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
-                              numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
+    double tolerance = givenTolerance ; 
+    int rc = ZOLTAN_OK + 1 ;
+    int count = 0 ;
+    while( rc != ZOLTAN_OK ) 
+    {
+      // tolerance for load imbalance 
+      {
+        std::stringstream tol; 
+        tol << tolerance ;
+        zz->Set_Param( "IMBALANCE_TOL", tol.str() );
+      }
+
+      rc = zz->LB_Partition(changes, numGidEntries, numLidEntries,
+                            numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
+                            numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
+
+      // increase imbalance tolerance and try again 
+      if( rc != ZOLTAN_OK )
+      {
+        tolerance *= 1.05 ;
+        ++ count ;
+      }
+      if( count > 3 ) break ;
+    }
 
     // if new partitioning has been calculated 
     if (rc == ZOLTAN_OK) 
@@ -275,7 +289,7 @@ namespace ALUGridZoltan
     }
     else 
     {
-      if( verbose ) 
+      if( verbose && mpa.myrank() == 0 ) 
         std::cerr << "ERROR: Zoltan partitioning failed, partitioning won't change! " << std::endl; 
       // no changes 
       changes = 0;
