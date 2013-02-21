@@ -106,7 +106,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
 
   /* create adaptation method */
   typedef LeafAdaptation< Grid > AdaptationType;
-  AdaptationType adaptation( grid );
+  AdaptationType adaptation( grid, model.problem().balanceStep() );
 
   for( int i = 0; i <= maxLevel; ++i )
   {
@@ -208,6 +208,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
       adaptation( solution );
 
     /* print info about time, timestep size and counter */
+    /*
     if (step % 1000 == 0) 
     {
       std::cout << "elements = " << elements;
@@ -217,6 +218,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
       std::cout << "   dt = " << dt;
       std::cout << std::endl;
     }
+    */
 
     {
       const size_t maxDofsPerElem = (elements > 0) ? (solution.size()/elements) : 0;

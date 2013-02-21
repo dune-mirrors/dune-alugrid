@@ -84,6 +84,10 @@ struct ProblemData
   {
     return refineTol()/3.;
   }
+
+  /**\brief return number of timestep to pass until load balancing is done again  */
+  virtual int balanceStep() const { return 1; }
+
 }; // end class ProblemData
 // Code moved to problem-transport.hh 
 

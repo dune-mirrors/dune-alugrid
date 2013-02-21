@@ -213,6 +213,9 @@ public:
     return 0.01;
   }
 
+  //! only every 10th timestep we want load balancing 
+  int balanceStep() const { return 10; }
+
   private:
   const double gamma;
   DomainType center_; 
