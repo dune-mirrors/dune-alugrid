@@ -588,6 +588,7 @@ namespace ALUGrid
     if (mth >= ZOLTAN_LB_HSFC ) 
     {
       // if no Zoltan was found the return value will be false 
+      // otherwise the return value will be true if the partitioning changed
       return ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _edgeSet,  _connect, tolerance, debugOption(5) );
     }
 

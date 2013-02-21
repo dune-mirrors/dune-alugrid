@@ -185,11 +185,8 @@ namespace ALUGridZoltan
     assert( zz );
 
     // General parameters 
-    if( verbose ) 
-      zz->Set_Param( "DEBUG_LEVEL", "1");
-    else 
-      zz->Set_Param( "DEBUG_LEVEL", "0");
-
+    const char* debug = ( verbose ) ? "1" : "0";
+    zz->Set_Param( "DEBUG_LEVEL", debug );
     zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
