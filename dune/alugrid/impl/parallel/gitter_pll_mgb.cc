@@ -926,7 +926,7 @@ namespace ALUGrid
     // new partitioning. For the internal partitioner repartition is called hear and
     // could still be lead to no repartitioning being carried out
     const bool doRepartition = userDefinedPartitioning ? true : 
-      db.repartition (mpAccess (), LoadBalancer::DataBase::method (_ldbMethod));
+      db.repartition (mpAccess (), LoadBalancer::DataBase::method (_ldbMethod), _ldbOver );
 
     // get graph sizes from data base, this is only used for the serial partitioners
     if( ! userDefinedPartitioning ) 

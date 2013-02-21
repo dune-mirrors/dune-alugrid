@@ -215,12 +215,12 @@ namespace ALUGrid
           const ldb_connect_set_t& scan () const { return _connect; }
 
           // original repartition method for ALUGrid 
-          bool repartition (MpAccessGlobal &, method);
+          bool repartition (MpAccessGlobal &, method, const double tolerance = 1.2 );
 
-          std::vector< int > repartition ( MpAccessGlobal &, method, int );
+          std::vector< int > repartition ( MpAccessGlobal &, method, int, const double tolerance = 1.2  );
 
         protected:  
-          bool repartition ( MpAccessGlobal &, method, std::vector< int > &, int );
+          bool repartition ( MpAccessGlobal &, method, std::vector< int > &, const int, const double );
       };
   };
 

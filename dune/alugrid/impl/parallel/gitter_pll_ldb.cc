@@ -555,19 +555,19 @@ namespace ALUGrid
     return change;
   }
 
-  bool LoadBalancer::DataBase::repartition ( MpAccessGlobal &mpa, method mth )
+  bool LoadBalancer::DataBase::repartition ( MpAccessGlobal &mpa, method mth, const double tolerance  )
   {
     std::vector< int > partition;
-    return repartition( mpa, mth, partition, mpa.psize() );
+    return repartition( mpa, mth, partition, mpa.psize(), tolerance );
   }
 
   std::vector< int > LoadBalancer::DataBase::
   repartition (MpAccessGlobal & mpa, 
                method mth,
-               const int np ) 
+               const int np, const double tolerance ) 
   {
     std::vector< int > partition( 1 );
-    repartition( mpa, mth, partition, np );
+    repartition( mpa, mth, partition, np, tolerance );
     return partition;
   }
 
@@ -576,7 +576,8 @@ namespace ALUGrid
                                             std::vector< int >& partition,
                                             // number of partitions to be created 
                                             // this is not neccesarily equal to mpa.psize()
-                                            const int np )
+                                            const int np,
+                                            const double tolerance )
   {
     if (debugOption (3)) printLoad ();
     
@@ -587,8 +588,7 @@ namespace ALUGrid
     if (mth >= ZOLTAN_LB_HSFC ) 
     {
       // if no Zoltan was found the return value will be false 
-      ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _edgeSet,  _connect );
-      return true;
+      return ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _edgeSet,  _connect, tolerance );
     }
 
     const int start = clock (), me = mpa.myrank ();

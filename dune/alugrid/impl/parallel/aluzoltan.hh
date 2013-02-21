@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <sstream>
 
 #include "mpAccess_MPI.h"
 
@@ -159,10 +160,11 @@ namespace ALUGridZoltan
 #endif // #if HAVE_ZOLTAN
 
   template< class ldb_vertex_map_t, class ldb_edge_set_t, class ldb_connect_set_t >
-  void CALL_Zoltan_LB_Partition( ALUGrid::MpAccessGlobal &mpa,
+  bool CALL_Zoltan_LB_Partition( ALUGrid::MpAccessGlobal &mpa,
                                  ldb_vertex_map_t& vertexMap,
                                  ldb_edge_set_t& edgeSet,
-                                 ldb_connect_set_t& connect )
+                                 ldb_connect_set_t& connect,
+                                 const double tolerance )
   {
 #if HAVE_ZOLTAN 
     ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
@@ -187,6 +189,9 @@ namespace ALUGridZoltan
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
     zz->Set_Param( "RETURN_LISTS", "ALL");
+    std::stringstream tol; 
+    tol << tolerance ;
+    zz->Set_Param( "IMBALANCE_TOL", tol.str().c_str() );
 
     if ( edgeSet.size() == 0 )
     {
@@ -276,9 +281,13 @@ namespace ALUGridZoltan
 
     // delete zoltan structure 
     delete zz;
+
+    // return true if partition changed 
+    return (changes > 0);
 #else 
     std::cerr << "ERROR: Zoltan library not found, cannot use Zoltan partitioning! " << std::endl;
     exit(1);
+    return false ;
 #endif // #if HAVE_ZOLTAN
   } // CALL_Zoltan_LB_Partition 
 
