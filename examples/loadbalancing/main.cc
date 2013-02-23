@@ -34,7 +34,7 @@ struct AssignRank
 void method ( int startLevel, int maxLevel, const char* outpath )
 {
   /* Grid construction ... */
-  std::string name = "../unitcube3d.dgf" ;
+  std::string name = "./unitcube3d.dgf" ;
   // create grid pointer and release to free memory of GridPtr
   Grid* gridPtr = Dune::GridPtr<Grid>(name).release() ;
 

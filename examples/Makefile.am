@@ -1,9 +1,9 @@
 GRIDTYPE = ALUGRID_CUBE
 GRIDDIM = 3
 
-SUBDIRS = loadbalancing
+SUBDIRS = loadbalancing dgf
 
-EXTRA_DIST = alugrid.cfg
+EXTRA_DIST = alugrid.cfg *.dgf
 
 DATACLEANFILES = dgfparser.log
 CLEANFILES = $(DATACLEANFILES)
