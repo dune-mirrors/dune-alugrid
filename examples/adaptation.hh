@@ -36,7 +36,8 @@ struct GridMarker
   : grid_(grid),
     minLevel_( minLevel ),
     maxLevel_( maxLevel ),
-    wasMarked_( 0 )
+    wasMarked_( 0 ),
+    adaptive_( maxLevel_ > minLevel_ ) 
   {}
 
   /** \brief mark an element for refinement 
@@ -88,22 +89,33 @@ struct GridMarker
    */
   int get ( const Entity &entity ) const
   {
-    return grid_.getMark( entity );
+    if( adaptive_ ) 
+      return grid_.getMark( entity );
+    else
+    {
+      // return so that in scheme.mark we only count the elements
+      return 1;
+    }
   }
 
   /** \brief returns true if any entity was marked for refinement 
    */
   bool marked() 
   {
-    wasMarked_ = grid_.comm().max (wasMarked_);
-    return (wasMarked_ != 0);
+    if( adaptive_ ) 
+    {
+      wasMarked_ = grid_.comm().max (wasMarked_);
+      return (wasMarked_ != 0);
+    }
+    return false ;
   }
 
 private:
   Grid &grid_;
-  int minLevel_;
-  int maxLevel_;
+  const int minLevel_;
+  const int maxLevel_;
   int wasMarked_;
+  const bool adaptive_ ;
 };
 
 // LeafAdaptation

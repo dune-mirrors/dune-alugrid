@@ -32,7 +32,7 @@ struct EulerProblemFFS
   std::string gridFile ( const std::string &path ) const
   { 
     std::ostringstream dgfFileName;
-    dgfFileName << path << "/ffs" << dimDomain << "d.dgf";
+    dgfFileName << path << "/dgf/ffs" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
 
@@ -126,10 +126,10 @@ public:
       else if( problem_ == 23 )
         dgfFileName << path << "/dgf/cube_hc_32768.dgf";
       else 
-        dgfFileName << path << "/dgfsb" << dimDomain << "d.dgf";
+        dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
     }
     else 
-      dgfFileName << path << "/dgfsb" << dimDomain << "d.dgf";
+      dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
 

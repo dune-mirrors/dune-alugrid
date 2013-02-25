@@ -207,19 +207,6 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
     if( gridMarker.marked() )
       adaptation( solution );
 
-    /* print info about time, timestep size and counter */
-    /*
-    if (step % 1000 == 0) 
-    {
-      std::cout << "elements = " << elements;
-      std::cout << "   maxLevel = " << grid.maxLevel();
-      std::cout << "   step = " << step;
-      std::cout << "   time = " << time;
-      std::cout << "   dt = " << dt;
-      std::cout << std::endl;
-    }
-    */
-
     {
       const size_t maxDofsPerElem = (elements > 0) ? (solution.size()/elements) : 0;
       // write times to run file 
