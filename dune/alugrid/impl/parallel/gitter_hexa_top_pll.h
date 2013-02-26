@@ -125,8 +125,10 @@ namespace ALUGrid
 
           // overload ldbVertexIndex, otherwise the default is return which is wrong in this case 
           int ldbVertexIndex () const { assert( _mxt ); return _mxt->ldbVertexIndex(); }
+          int master() const { assert( _mxt ); return _mxt->master(); }
           // call mxt's setLoadBalanceVertexIndex (otherwise default impl is called which is wrong)
           void setLoadBalanceVertexIndex ( int ldbVx ) { assert( _mxt ); _mxt->setLoadBalanceVertexIndex( ldbVx ); }
+          void setMaster ( int master ) { assert( _mxt ); _mxt->setMaster( master ); }
 
         private :
           mypllx_t * _mxt;

@@ -120,8 +120,10 @@ namespace ALUGrid
 
           // return mxt's ldbVertexIndex, otherwise the default is returned which is wrong 
           int ldbVertexIndex() const { assert( _mxt ); return _mxt->ldbVertexIndex(); }
+          int master() const { assert( _mxt ); return _mxt->master(); }
           // call mxt's setLoadBalanceVertexIndex (otherwise default impl is called which is wrong)
           void setLoadBalanceVertexIndex ( int ldbVx ) { assert( _mxt ); _mxt->setLoadBalanceVertexIndex( ldbVx ); }
+          void setMaster ( int master ) { assert( _mxt ); _mxt->setMaster( master ); }
 
           virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
 

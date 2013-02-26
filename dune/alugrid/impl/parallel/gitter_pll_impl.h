@@ -220,11 +220,12 @@ namespace ALUGrid
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
     public :
       virtual int ldbVertexIndex () const;
-      virtual int master () const { return -1; }
+      virtual int master () const { return _master; }
       virtual void writeStaticState (ObjectStream &, int) const ;
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
+      virtual void setMaster ( const int master ) { _master = master; }
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
     public :
       virtual bool erasable () const;
@@ -251,6 +252,7 @@ namespace ALUGrid
       int _moveTo;
       // globally unique element number 
       int _ldbVertexIndex;
+      int _master;
   };
 
   // ######                                                           #####
@@ -477,11 +479,12 @@ namespace ALUGrid
     public :
      ~HexaPllBaseXMacro ();
       virtual int ldbVertexIndex () const;
-      virtual int master () const { return -1; }
+      virtual int master () const { return _master; }
       virtual void writeStaticState (ObjectStream &, int) const ;
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
+      virtual void setMaster ( const int master ) { _master = master; }
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
     public:  
       virtual void attachElement2 ( const int, const int );
@@ -513,6 +516,7 @@ namespace ALUGrid
       int _moveTo;
       // globally unique element number 
       int _ldbVertexIndex;
+      int _master;
   };
 
   class BndsegPllBaseX : public ElementPllXIF_t 
@@ -596,9 +600,10 @@ namespace ALUGrid
       inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* );
     public :
       virtual int  ldbVertexIndex () const;
-      virtual int master () const { return -1; }
+      virtual int master () const { return _master; }
       virtual void readStaticState (ObjectStream &, int) ;
       virtual void setLoadBalanceVertexIndex ( const int );
+      virtual void setMaster ( const int master ) { _master = master; }
     public :
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       
@@ -608,6 +613,7 @@ namespace ALUGrid
     private :
       const MacroGhostInfo_STI * _ghInfo; 
       int _ldbVertexIndex;
+      int _master;
   };
 
   class GitterBasisPll : public Gitter::Geometric, public GitterPll
@@ -1188,6 +1194,7 @@ namespace ALUGrid
     : BndsegPllBaseXClosure < A > (b)
     , _ghInfo (0) 
     , _ldbVertexIndex (-2)
+    , _master( -2 )
   {
   }
 
@@ -1196,6 +1203,7 @@ namespace ALUGrid
     : BndsegPllBaseXClosure < A > (b)
     , _ghInfo (ghinfo) 
     , _ldbVertexIndex (-2)
+    , _master( -2 )
   {
   }
 

@@ -32,12 +32,14 @@ namespace ALUGrid
       bool InsertUniqueHbnd3_withPoint (int (&)[3],
                                         Gitter::hbndseg::bnd_t,
                                         int ldbVertexIndex,
+                                        int master,
                                         MacroGhostInfoTetra* );
     
       // creates Hbnd4IntStorage with ghost info if needed 
       bool InsertUniqueHbnd4_withPoint (int (&)[4], 
                                         Gitter::hbndseg::bnd_t, 
                                         int ldbVertexIndex,
+                                        int master,
                                         MacroGhostInfoHexa* );
 
 

@@ -72,8 +72,8 @@ namespace ALUGrid
             ;
 
           explicit GraphVertex( ObjectStream& os );
-          inline GraphVertex (int,int,const alucoord_t (&)[3],int);
-          inline GraphVertex (int,int,int);
+          inline GraphVertex (int,int,const alucoord_t (&)[3]);
+          inline GraphVertex (int,int);
           // constructor without center is initializing center and weight to zero 
           inline GraphVertex (int);
           inline int index () const;
@@ -311,7 +311,7 @@ namespace ALUGrid
     readFromStream( os );
   }
 
-  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w, const alucoord_t (&p)[3], int m) 
+  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w, const alucoord_t (&p)[3]) 
   : _index (i), _weight (w)
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
@@ -323,7 +323,7 @@ namespace ALUGrid
     return;
   }
 
-  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w, int m)
+  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w)
   : _index (i), _weight (w)
   {
 #ifdef GRAPHVERTEX_WITH_CENTER

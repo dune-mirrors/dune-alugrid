@@ -322,8 +322,6 @@ namespace ALUGrid
       virtual bool isRealObject () const { return true; }
       
       virtual int moveTo () const { abort(); return -1; }
-
-      virtual int master () const { abort(); return -1; }
     protected :
       hasFace () {}
       virtual ~hasFace () {}
@@ -337,8 +335,10 @@ namespace ALUGrid
     public:
       // default implementation does nothing
       virtual void setLoadBalanceVertexIndex( const int ) {}
+      virtual void setMaster( const int ) {}
       // return unique macro graph vertex index (default returns -7)
       virtual int ldbVertexIndex () const { return -7; }
+      virtual int master () const { return -1; }
 
       virtual bool isboundary() const { return false; }
       virtual bool isperiodic() const { return false; }
@@ -1034,6 +1034,10 @@ namespace ALUGrid
           return this->getIndex();
         }
       }
+      virtual int master () const 
+      {
+        return 0;
+      }
 
       using ElementPllXIF::writeDynamicState;
       using ElementPllXIF::readDynamicState;
@@ -1187,6 +1191,10 @@ namespace ALUGrid
         const hbndseg* father = up();
         assert( father );
         return father->ldbVertexIndex ();
+      }
+      virtual int master () const 
+      {
+        return 0;
       }
 
     protected:
@@ -1358,6 +1366,7 @@ namespace ALUGrid
 
         // default returns some negative value 
         int ldbVertexIndex () const { return -5; }
+        int master () const { return -1; }
       private:
         hasFaceEmpty () {}
         hasFaceEmpty (const hasFaceEmpty & );

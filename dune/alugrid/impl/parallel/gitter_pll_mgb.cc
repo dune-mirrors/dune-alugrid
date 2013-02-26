@@ -120,11 +120,12 @@ namespace ALUGrid
           {
             _hbnd4Int [key] = new Hbnd4IntStorage (face , (*i)->twist (0), 
                                                    (*i)->ldbVertexIndex(),
+                                                   (*i)->master(),
                                                    gh, gpair.second );
           }
           else 
             _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->twist (0),
-                                                   (*i)->ldbVertexIndex() );
+                                                   (*i)->ldbVertexIndex(), (*i)->master() );
 
           toDeleteHbnd.push_back( (*i ) );
         } 
@@ -160,13 +161,13 @@ namespace ALUGrid
           {
             // insert new internal storage 
             _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0), 
-                                                    (*i)->ldbVertexIndex(),
+                                                    (*i)->ldbVertexIndex(), (*i)->master(),
                                                     gh , gpair.second );
           }
           // until here
           else 
             _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0),
-                                                    (*i)->ldbVertexIndex() );
+                                                    (*i)->ldbVertexIndex(), (*i)->master() );
           
           toDeleteHbnd.push_back( (*i) );
         } 
@@ -381,6 +382,7 @@ namespace ALUGrid
                 insert_hbnd4 (p->first(), p->second(), 
                               Gitter::hbndseg_STI::closure, ghInfo );
           hb4->setLoadBalanceVertexIndex( p->ldbVertexIndex() );
+          hb4->setMaster( p->master() );
           _hbndseg4List.push_back (hb4);
         }
         delete p; 
@@ -404,6 +406,7 @@ namespace ALUGrid
                                                          ghInfo );
           assert( p->ldbVertexIndex() >= 0 );
           hb3->setLoadBalanceVertexIndex( p->ldbVertexIndex() );
+          hb3->setMaster( p->master() );
 
           // insert to list 
           _hbndseg3List.push_back (hb3);
@@ -557,9 +560,10 @@ namespace ALUGrid
 
   void ParallelGridMover::unpackTetra (ObjectStream & os, GatherScatterType* gs ) 
   {
-    int ldbVertexIndex = -1;
+    int ldbVertexIndex = -1, master = -1;
     int v [4];
     os.readObject (ldbVertexIndex); 
+    os.readObject( master );
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
@@ -569,6 +573,7 @@ namespace ALUGrid
     std::pair< tetra_GEO *, bool > p = InsertUniqueTetra (v, orientation);
     // set unique element number 
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
+    p.first->setMaster( master );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs);
     return;
   }
@@ -624,9 +629,10 @@ namespace ALUGrid
 
   void ParallelGridMover::unpackHexa (ObjectStream & os, GatherScatterType* gs) 
   {
-    int ldbVertexIndex = -1;
+    int ldbVertexIndex = -1, master = -1;
     int v [8];
     os.readObject (ldbVertexIndex); 
+    os.readObject (master); 
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
@@ -638,6 +644,7 @@ namespace ALUGrid
     std::pair< hexa_GEO *, bool > p = InsertUniqueHexa (v);
     // set unique element number 
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
+    p.first->setMaster( master );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs );
     return;
   }
@@ -647,6 +654,7 @@ namespace ALUGrid
   InsertUniqueHbnd3_withPoint (int (&v)[3],         
                                Gitter::hbndseg_STI ::bnd_t bt, 
                                int ldbVertexIndex,
+                               int master,
                                MacroGhostInfoTetra * ghInfo) 
   {
     int twst = cyclicReorder (v,v+3);
@@ -657,7 +665,7 @@ namespace ALUGrid
       assert( ghInfo );
       hface3_GEO * face =  InsertUniqueHface3 (v).first;
       // here the point is stored 
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst, ldbVertexIndex, ghInfo);
+      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst, ldbVertexIndex, master, ghInfo);
       return true;
     }
     return false;
@@ -668,6 +676,7 @@ namespace ALUGrid
   InsertUniqueHbnd4_withPoint (int (&v)[4],         
                                Gitter::hbndseg_STI ::bnd_t bt, 
                                int ldbVertexIndex,
+                               int master,
                                MacroGhostInfoHexa* ghInfo) 
   {
     int twst = cyclicReorder (v,v+4);
@@ -677,7 +686,7 @@ namespace ALUGrid
     {
       assert( ghInfo );
       hface4_GEO * face =  InsertUniqueHface4 (v).first;
-      _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, ghInfo);
+      _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, master, ghInfo);
       return true;
     }
     return false;
@@ -691,8 +700,9 @@ namespace ALUGrid
     os.readObject (bfake);
     Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
 
-    int ldbVertexIndex;
+    int ldbVertexIndex,master;
     os.readObject( ldbVertexIndex );
+    os.readObject( master );
     
     os.readObject (v[0]);
     os.readObject (v[1]);
@@ -712,7 +722,7 @@ namespace ALUGrid
     if( b == Gitter::hbndseg::closure && ghInfo )
     {
       // ghInfo is stored in the macro ghost created internally
-      const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, ghInfo );
+      const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, master, ghInfo );
 
       // if inserted then clear pointer to avoid deleting it 
       if( inserted ) ghInfo = 0;
@@ -722,7 +732,7 @@ namespace ALUGrid
       // create normal bnd face, and make sure that no Point was send
       assert( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class 
-      InsertUniqueHbnd3 (v, b, ldbVertexIndex );
+      InsertUniqueHbnd3 (v, b, ldbVertexIndex, master );
     }
 
     // delete to avoid memory leak 
@@ -738,8 +748,9 @@ namespace ALUGrid
     os.readObject (bfake);
     Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
 
-    int ldbVertexIndex;
+    int ldbVertexIndex,master;
     os.readObject( ldbVertexIndex );
+    os.readObject( master );
     
     os.readObject (v[0]);
     os.readObject (v[1]);
@@ -760,7 +771,7 @@ namespace ALUGrid
     if(b == Gitter::hbndseg::closure && ghInfo )
     {
       // ghInfo is stored in the macro ghost created internally
-      const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, ghInfo );
+      const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, master, ghInfo );
 
       // if inserted then clear pointer to avoid deleting it 
       if( inserted ) ghInfo = 0;
@@ -770,7 +781,7 @@ namespace ALUGrid
       // create normal bnd face, and make sure that no Point was send
       assert( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class 
-      InsertUniqueHbnd4 (v, b, ldbVertexIndex );
+      InsertUniqueHbnd4 (v, b, ldbVertexIndex, master );
     }
 
     // delete to avoid memory leak 
@@ -785,7 +796,8 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
     int ldbVertexIndex = -1;
-    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex);
+    int master = -1;
+    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master);
     return;
   }
     
@@ -797,7 +809,8 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
     int ldbVertexIndex = -1;
-    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex);
+    int master = -1;
+    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master);
     return;
   }
 

@@ -141,7 +141,7 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
-  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex ) 
+  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master) 
   {
     int twst = cyclicReorder (v,v+3);
     faceKey_t key (v [0], v [1], v [2]);
@@ -149,7 +149,7 @@ namespace ALUGrid
     {
       if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
         hface3_GEO * face =  InsertUniqueHface (v).first;
-        _hbnd3Int [key] = new Hbnd3IntStorage (face, twst, ldbVertexIndex);
+        _hbnd3Int [key] = new Hbnd3IntStorage (face, twst, ldbVertexIndex, master);
         return true;
       }
     } 
@@ -160,6 +160,7 @@ namespace ALUGrid
         hface3_GEO * face  = InsertUniqueHface (v).first;
         hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt);
         hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
+        hb3->setMaster( master );
         _hbnd3Map [key] = hb3;
         return true;
       }
@@ -168,7 +169,7 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
-  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex ) 
+  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master ) 
   {
     int twst = cyclicReorder (v,v+4);
     faceKey_t key (v [0], v [1], v [2]);
@@ -176,7 +177,7 @@ namespace ALUGrid
     {
       if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
         hface4_GEO * face =  InsertUniqueHface (v).first;
-        _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex );
+        _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, master );
         return true;
       }
     } 
@@ -187,6 +188,7 @@ namespace ALUGrid
         hface4_GEO * face =  InsertUniqueHface (v).first;
         hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt);
         hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
+        hb4->setMaster( master );
         _hbnd4Map [key] = hb4;
         return true;
       }
@@ -278,6 +280,7 @@ namespace ALUGrid
       {
         tetra_GEO * tr = (tetra_GEO *)(*hit).second;
         int ldbVertexIndex = tr->ldbVertexIndex();
+        int master = tr->master();
 
         typedef hbnd3intMap_t::iterator iterator;
         const iterator end = _hbnd3Int.end();
@@ -298,7 +301,7 @@ namespace ALUGrid
           if( hbndit == end ) 
           {
             Hbnd3IntStorage* hbnd = 
-              new Hbnd3IntStorage (face, tr->twist (i), ldbVertexIndex, tr , i );
+              new Hbnd3IntStorage (face, tr->twist (i), ldbVertexIndex, master, tr , i );
             _hbnd3Int.insert( std::make_pair( key, hbnd ) );
           }
           // if the face already exists this means we can delete it, 
@@ -322,6 +325,7 @@ namespace ALUGrid
       {
         hexa_GEO * hx = (hexa_GEO *)(*hit).second;
         int ldbVertexIndex = hx->ldbVertexIndex();
+        int master = hx->master();
 
         typedef hbnd4intMap_t::iterator iterator;
         const iterator end = _hbnd4Int.end();
@@ -342,7 +346,7 @@ namespace ALUGrid
           if( hbndit == end ) 
           {
             Hbnd4IntStorage* hbnd = 
-              new Hbnd4IntStorage ( face, hx->twist (i), ldbVertexIndex, hx, i );
+              new Hbnd4IntStorage ( face, hx->twist (i), ldbVertexIndex, master, hx, i );
 
             _hbnd4Int.insert( std::make_pair( key, hbnd ) );
           }
@@ -728,7 +732,7 @@ namespace ALUGrid
       {
         faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ());
         if ((*i)->bndtype () == Gitter::hbndseg_STI::closure) {
-          _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0),(*i)->ldbVertexIndex());
+          _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0),(*i)->ldbVertexIndex(),(*i)->master());
           delete (*i);
         } 
         else 
@@ -745,7 +749,7 @@ namespace ALUGrid
         faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ());
         if ((*i)->bndtype () == Gitter::hbndseg_STI::closure) 
         {
-          _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0),(*i)->ldbVertexIndex());
+          _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0),(*i)->ldbVertexIndex(),(*i)->master());
           delete (*i);
         } 
         else 

@@ -341,6 +341,8 @@ namespace ALUGrid
       // get graph vertex number of the adjacent elements 
       int ldbVx1 = mycon1->accessPllX ().ldbVertexIndex ();
       int ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
+      int master1 = mycon1->accessPllX ().master ();
+      int master2 = mycon2->accessPllX ().master ();
 
       // only insert graph edge on the rank where the smaller vertex number is interior
       // and this we only need to do for serial partitioners 
@@ -388,13 +390,13 @@ namespace ALUGrid
         // increase the edge weight for periodic connections 
         // TODO: make weight factor (here 4) dynamically adjustable 
         db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight*4,
-              mycon1->master(), mycon2->master() ) );
+              master1, master2 ) );
       }
       else
       {
         // the default graph edge 
         db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight,
-              mycon1->master(), mycon2->master() ) );
+              master1, master2 ) );
       }
     }
     return periodicBnd;
@@ -709,6 +711,7 @@ namespace ALUGrid
     try 
     {
       os.readObject ( _ldbVertexIndex ) ;
+      os.readObject ( _master );
     } 
     catch (ObjectStream :: EOFException) 
     {
@@ -716,6 +719,7 @@ namespace ALUGrid
       abort () ;
     }
     assert (_ldbVertexIndex >= 0) ;
+    assert (_master >= 0) ;
   }
 
   template < class A > void BndsegPllBaseXMacroClosure < A >::
@@ -736,6 +740,7 @@ namespace ALUGrid
 
     // write unique graph vertex index 
     os.writeObject ( _ldbVertexIndex );
+    os.writeObject ( _master );
     
     {
       for (int i = 0; i < myhface_t::polygonlength; ++i) 
@@ -803,6 +808,7 @@ namespace ALUGrid
     : A(l, f0, s0, f1, s1, f2, s2, f3, s3, orientation )
     , _moveTo ( -1 )
     , _ldbVertexIndex (-1)
+    , _master (-1)
   {
     // don't allow erase
     set( flagLock );
@@ -859,9 +865,8 @@ namespace ALUGrid
         LoadBalancer::GraphVertex (ldbVertexIndex (), weight
 #ifdef GRAPHVERTEX_WITH_CENTER
                                     , _center
-#endif
-                                    , master()
                                     ) );
+#endif
     return true;
   }
 
@@ -928,6 +933,7 @@ namespace ALUGrid
   {
     assert( ldbVertexIndex () >= 0 );
     os.writeObject (ldbVertexIndex ()) ;
+    os.writeObject (master ());
   }
 
   template < class A >
@@ -957,6 +963,7 @@ namespace ALUGrid
 
       os.writeObject (TETRA);
       os.writeObject (_ldbVertexIndex);
+      os.writeObject (master ());
       os.writeObject (mytetra ().myvertex (0)->ident ());
       os.writeObject (mytetra ().myvertex (1)->ident ());
       os.writeObject (mytetra ().myvertex (2)->ident ());
@@ -1002,6 +1009,7 @@ namespace ALUGrid
     os.writeObject ( Gitter::hbndseg::closure );
     assert( _ldbVertexIndex >= 0 );
     os.writeObject (_ldbVertexIndex ); // write unique graph vertex index 
+    os.writeObject (master ());
     os.writeObject ( mytetra ().myvertex (fce,0)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,1)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,2)->ident () );
@@ -1514,6 +1522,7 @@ namespace ALUGrid
   : A(l, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5)
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
+  , _master (-1)
   {
     // don't allow erase
     set( flagLock );
@@ -1574,7 +1583,6 @@ namespace ALUGrid
 #ifdef GRAPHVERTEX_WITH_CENTER
                                     , _center
 #endif
-                                    , master()
                                     ) );
     return true;
   }
@@ -1616,6 +1624,7 @@ namespace ALUGrid
   {
     assert( ldbVertexIndex () >= 0 );
     os.writeObject (ldbVertexIndex ()) ;
+    os.writeObject (master ());
   }
 
   template < class A >
@@ -1652,6 +1661,7 @@ namespace ALUGrid
       os.writeObject (HEXA);
       assert( _ldbVertexIndex >= 0 );
       os.writeObject (_ldbVertexIndex ); 
+      os.writeObject (_master);
       os.writeObject (myhexa ().myvertex (0)->ident ());
       os.writeObject (myhexa ().myvertex (1)->ident ());
       os.writeObject (myhexa ().myvertex (2)->ident ());
@@ -1707,6 +1717,7 @@ namespace ALUGrid
     os.writeObject (Gitter::hbndseg::closure);
     assert( _ldbVertexIndex >= 0 );
     os.writeObject (_ldbVertexIndex ); // write unique graph vertex index 
+    os.writeObject (_master ); // write unique graph vertex index 
 
     // write the four identifiers of the hexa 
     os.writeObject (myhexa ().myvertex (fce,0)->ident ());

@@ -173,7 +173,9 @@ namespace ALUGrid
 #endif
       // read global graph vertex index 
       int ldbVertexIndex = -1;
+      int master = -1;
       os.readObject( ldbVertexIndex );
+      os.readObject( master );
 
       int v [3] = { -1, -1, -1 };
       os.readObject (v[0]);
