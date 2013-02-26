@@ -1326,7 +1326,10 @@ namespace ALUGrid
     }
 
     const int np = mpAccess ().psize ();
-    bool repartition = false;
+    // do a repartitioning in the case that gs is null, otherwise check 
+    bool repartition = ( gs == 0 ) ;
+    // check in case repartition is initially false 
+    if( ! repartition ) 
     {
       // Criterion, if a repartition has to be done 
       // 

@@ -29,6 +29,7 @@ typedef Dune::GridSelector::GridType Grid;
 #include "problem-euler.hh"
 
 #include "diagnostics.hh"
+#include "paralleldgf.hh"
 
 /** type of pde to solve **/
 #if TRANSPORT
@@ -62,7 +63,7 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
   /* Grid construction ... */
   std::string name = model.problem().gridFile( "./" );
   // create grid pointer and release to free memory of GridPtr
-  Grid* gridPtr = Dune::GridPtr<Grid>(name).release() ;
+  Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
 
   Grid &grid = *gridPtr;
   grid.loadBalance();
