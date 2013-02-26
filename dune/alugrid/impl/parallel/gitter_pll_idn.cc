@@ -355,14 +355,14 @@ namespace ALUGrid
     const int np = mpAccess.psize (), me = mpAccess.myrank ();
 
     ObjectStream os;
+    // choose negative endmarker, since all ids should be positive 
+    const int endMarker = -127 ;
     {
-      ObjectStream ostmp;
       AccessIterator < vertex_STI >::Handle w (*this);
 
       const int estimate = 0.25 * w.size() + 1;
       // reserve memory 
-      ostmp.reserve( estimate * sizeof(int) );
-      int size = 0;
+      os.reserve( estimate * sizeof(int) );
       for (w.first (); ! w.done (); w.next ()) 
       {
         vertex_STI& vertex = w.item();
@@ -370,14 +370,12 @@ namespace ALUGrid
         // only insert border vertices 
         if( vertex.isBorder() )
         {
-          ++size;
           int id = vertex.ident ();
-          ostmp.writeObject( id );
+          os.writeObject( id );
           vxmap[ id ] = w;
         }
       }
-      os.writeObject( size );
-      os.writeStream( ostmp );
+      os.writeObject( endMarker );
     }
 
     // exchange data 
@@ -394,12 +392,10 @@ namespace ALUGrid
         {
           ObjectStream& osv_i = osv[ i ]; 
 
-          int size;
-          osv_i.readObject ( size );
-          for (int j = 0; j < size; ++j ) 
+          int id ;
+          osv_i.readObject ( id );
+          while( id != endMarker )
           {
-            int id;
-            osv_i.readObject( id );
             map_t::const_iterator hit = vxmap.find (id);
             if( hit != vxmapEnd ) 
             {
@@ -407,16 +403,17 @@ namespace ALUGrid
                     if (find (s.begin (), s.end (), i) == s.end ()) 
               {
                 s.push_back( i );
-                      (*hit).second.item ().accessPllX ().setLinkage (s);
-                    }
-                  }
+                (*hit).second.item ().accessPllX ().setLinkage (s);
+              }
+            }
+            // read next id 
+            osv_i.readObject( id );
           }
           // free memory 
           osv_i.reset();
         }
       }
     }
-    return;
   }
 
   void GitterPll::MacroGitterPll::vertexLinkageEstimateBcast (MpAccessLocal & mpAccess) 
