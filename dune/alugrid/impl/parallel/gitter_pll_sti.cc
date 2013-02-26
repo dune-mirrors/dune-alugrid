@@ -1399,54 +1399,59 @@ namespace ALUGrid
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 
   {
-    computeGraphVertexIndices ();
+    checkGraphVertexIndices ();
+  }
+
+  void GitterPll::checkGraphVertexIndices () 
+  {
+    if( ! _ldbVerticesComputed ) 
+      computeGraphVertexIndices ();
   }
 
   void GitterPll::computeGraphVertexIndices () 
   {
-    if( ! _ldbVerticesComputed ) 
-    {
-      // this method computes the globally unique element indices 
-      // that are needed for the graph partitioning methods 
+    // this method computes the globally unique element indices 
+    // that are needed for the graph partitioning methods 
 
-      assert (debugOption (20) ? (std::cout << "**INFO GitterPll::loadBalancerMacroGridChangesNotify () " << std::endl, 1) : 1);
-      AccessIterator < helement_STI >::Handle w ( containerPll () );
+    assert (debugOption (20) ? (std::cout << "**INFO GitterPll::loadBalancerMacroGridChangesNotify () " << std::endl, 1) : 1);
+    AccessIterator < helement_STI >::Handle w ( containerPll () );
 
-      // get number of macro elements 
-      const int macroElements = w.size ();
+    // get number of macro elements 
+    const int macroElements = w.size ();
 
-      // sum up for each process and and substract macroElements again 
-      int cnt = mpAccess ().scan( macroElements ) - macroElements;
+    // sum up for each process and and substract macroElements again 
+    int cnt = mpAccess ().scan( macroElements ) - macroElements;
 
 #ifndef NDEBUG 
-      // make sure that we get the same value as before 
-      //std::cout << "P[ " << mpAccess().myrank() << " ] cnt = " << cnt << std::endl;
-      { 
-        int oldcnt = 0;
-        // get sizes from all processes 
-        std::vector< int > sizes = mpAccess ().gcollect ( macroElements );
+    // make sure that we get the same value as before 
+    //std::cout << "P[ " << mpAccess().myrank() << " ] cnt = " << cnt << std::endl;
+    { 
+      int oldcnt = 0;
+      // get sizes from all processes 
+      std::vector< int > sizes = mpAccess ().gcollect ( macroElements );
 
-        // count sizes for all processors with a rank lower than mine 
-        for (int i = 0; i < mpAccess ().myrank (); oldcnt += sizes [ i++ ]);
-        assert( oldcnt == cnt );
-      }
+      // count sizes for all processors with a rank lower than mine 
+      for (int i = 0; i < mpAccess ().myrank (); oldcnt += sizes [ i++ ]);
+      assert( oldcnt == cnt );
+    }
 #endif // #ifndef NDEBUG 
 
-      // set ldb vertex indices to all elements 
-      for (w.first (); ! w.done (); w.next (), ++ cnt ) 
-      {
-        w.item ().setLoadBalanceVertexIndex ( cnt );
-      }
-
-      // exchanges the ldbVertexIndex for the internal boundaries 
-      // to obtain a consistent numbering 
-      exchangeStaticState();
-      
-      // mark unique element indices as computed, if serialPartitioner is used
-      // don't do this computation again for serial partitioning 
-      _ldbVerticesComputed = serialPartitioner(); 
+    // set ldb vertex indices to all elements 
+    for (w.first (); ! w.done (); w.next (), ++ cnt ) 
+    {
+      w.item ().setLoadBalanceVertexIndex ( cnt );
     }
 
+    // exchanges the ldbVertexIndex for the internal boundaries 
+    // to obtain a consistent numbering 
+    exchangeStaticState();
+    
+    // mark unique element indices as computed, if serialPartitioner is used
+    // don't do this computation again for serial partitioning 
+    _ldbVerticesComputed = serialPartitioner(); 
+    
+    // clear graphSize vector since the new numbering leads to different sizes
+    std::vector< int >().swap( _graphSizes );
 #ifndef NDEBUG
     {
       assert (debugOption (20) ? (std::cout << "**INFO GitterPll::loadBalancerMacroGridChangesNotify () " << std::endl, 1) : 1);

@@ -238,6 +238,8 @@ namespace ALUGrid
 
     protected:   
       void doRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
+      void checkGraphVertexIndices();
+      void computeGraphVertexIndices();
     public:  
       virtual void repartitionMacroGrid (LoadBalancer::DataBase &);
       virtual void duneRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType& );
@@ -245,7 +247,6 @@ namespace ALUGrid
       virtual bool checkPartitioning(LoadBalancer::DataBase &, GatherScatterType* );
       virtual bool loadBalancerGridChangesNotify ( GatherScatterType* );
       virtual void loadBalancerMacroGridChangesNotify ();
-      virtual void computeGraphVertexIndices();
       virtual void notifyMacroGridChanges ();
       
     // Die Methoden iteratorTT (const . *, int)  sind der Zugang zu den
