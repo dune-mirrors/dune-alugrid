@@ -69,23 +69,22 @@ namespace Dune
     protected:
       void calculatePartitioning()
       {
-
-        const size_t partSize = indexSet_.size( 0 );
+        const size_t nElements = indexSet_.size( 0 );
 
         // get number of MPI processes  
-        const int procSize = comm_.size();
+        const int nRanks = comm_.size();
 
         // get minimal number of entities per process 
-        const size_t minPerProc = (double(partSize) / double( procSize ));
+        const size_t minPerProc = (double(nElements) / double( nRanks ));
         size_t maxPerProc = minPerProc ;
-        if( partSize % procSize != 0 )
+        if( nElements % nRanks != 0 )
           ++ maxPerProc ;
 
         // calculate percentage of elements with larger number 
         // of elements per process 
-        double percentage = (double(partSize) / double( procSize ));
+        double percentage = (double(nElements) / double( nRanks ));
         percentage -= minPerProc ;
-        percentage *= procSize ;
+        percentage *= nRanks ;
 
         // per default every entity is on rank 0 
         partition_.resize( indexSet_.size( 0 ) );
@@ -95,7 +94,7 @@ namespace Dune
         size_t elementCount  = maxPerProc ;
         size_t elementNumber = 0;
         size_t localElementNumber = 0;
-        const int lastRank = procSize - 1;
+        const int lastRank = nRanks - 1;
         // create the space filling curve iterator 
         typedef typename GridView::template Codim< 0 >::Iterator Iterator;
         const Iterator end = gridView_.template end< 0 > ();
@@ -116,7 +115,7 @@ namespace Dune
           }
 
           const size_t index = indexSet_.index( element );
-          assert( rank < procSize );
+          assert( rank < nRanks );
           partition_[ index ] = rank ;
 
           // increase counters 
@@ -142,6 +141,7 @@ namespace Dune
         return GridPtr< Grid >( filename );
 
 #if ! HAVE_ALUGRID 
+      typedef typename Grid :: ctype ctype ;
       // type of communicator 
       typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
@@ -149,23 +149,53 @@ namespace Dune
       CollectiveCommunication comm( MPIHelper :: getCommunicator() );
       const int myrank = comm.rank();
 
-      typedef SGrid< dim, dimworld > SGridType ;
+      typedef SGrid< dim, dimworld, ctype > SGridType ;
       // only work for the new ALUGrid version 
       // if creation of SGrid fails the DGF file does not contain a proper
       // IntervalBlock, and thus we cannot create the grid parallel, 
       // we will use the standard technique 
-      GridPtr< SGridType > sPtr;
-      try 
-      { 
-        sPtr = GridPtr< SGridType >( filename );
-      }
-      catch ( DGFException & e ) 
+      bool sgridCreated = true ;
+      array<int, dim> dims;
+      FieldVector<ctype, dimworld> lowerLeft ( 0 ); 
+      FieldVector<ctype, dimworld> upperRight( 0 ); 
+      if( myrank == 0 ) 
       {
-        if( myrank == 0 ) 
+        GridPtr< SGridType > sPtr;
+        try 
+        { 
+          sPtr = GridPtr< SGridType >( filename );
+        }
+        catch ( DGFException & e ) 
+        {
+          sgridCreated = false ;
           std::cout << "Caught DGFException on creation of SGrid, trying default DGF method!" << std::endl;
+        }
+        if( sgridCreated ) 
+        { 
+          SGridType& sgrid = *sPtr ;
+          dims = sgrid.dims( 0 );
+          lowerLeft  = sgrid.lowerLeft();
+          upperRight = sgrid.upperRight();
+        }
+      }
+
+      // get global min to be on the same path
+      sgridCreated = comm.min( sgridCreated );
+      if( ! sgridCreated ) 
+      {
+        // use traditional method
         return GridPtr< Grid >( filename );
       }
-      SGridType& sgrid = *sPtr ; 
+      else 
+      { 
+        // broadcast array values 
+        comm.broadcast( &dims[ 0 ], dim, 0 );
+        comm.broadcast( &lowerLeft [ 0 ], dim, 0 );
+        comm.broadcast( &upperRight[ 0 ], dim, 0 );
+      }
+
+      // create SGrid to partition and insert elements that belong to process directly 
+      SGridType sgrid( &dims[ 0 ], &lowerLeft[ 0 ], &upperRight[ 0 ] );  
 
       typedef typename SGridType :: LeafGridView GridView ;
       typedef typename GridView :: IndexSet  IndexSet ;
@@ -245,7 +275,9 @@ namespace Dune
         ++elIndex;
       }
 
-      return GridPtr< Grid> ( factory.createGrid() );
+      std::string name( filename );
+      name += " via SGrid";
+      return GridPtr< Grid> ( factory.createGrid( true, true, name ) );
 #else 
       return GridPtr< Grid > (filename);
 #endif // if ! HAVE_ALUGRID 
