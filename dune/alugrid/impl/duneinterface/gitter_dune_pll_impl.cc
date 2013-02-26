@@ -1184,7 +1184,7 @@ namespace ALUGrid
     // only do this if ghost cells are enabled 
     if( ! ghostCellsEnabled() ) return;
 
-    // compute the graph vertices first 
+    // compute the graph vertices new, even if already computed 
     GitterPll :: computeGraphVertexIndices  ();
 
     try 
