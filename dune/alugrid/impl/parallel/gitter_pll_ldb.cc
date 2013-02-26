@@ -585,7 +585,7 @@ namespace ALUGrid
     if (mth == NONE) return false;
 
     // ZOLTAN partitioning 
-    if (mth >= ZOLTAN_LB_HSFC ) 
+    if (mth == ZOLTAN_LB_HSFC || mth == ZOLTAN_LB_GraphPartitioning ) 
     {
       // if no Zoltan was found the return value will be false 
       // otherwise the return value will be true if the partitioning changed

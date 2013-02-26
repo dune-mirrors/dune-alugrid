@@ -18,23 +18,27 @@ namespace ALUGridZoltan
   template < class ldb_vertex_map_t, class ldb_edge_set_t >
   class ObjectCollection 
   {
+    int _rank;
     ldb_vertex_map_t& _vertexMap ;
     ldb_edge_set_t& _edgeMap ;
-    std::vector< std::vector<int> > _edges;
+    std::vector< std::vector< std::pair<int,int> > > _edges;
     static const int dimension = 3 ;
 
   public:
     // constructor
-    ObjectCollection( ldb_vertex_map_t& vertexMap, ldb_edge_set_t& edgeMap ) 
-      : _vertexMap( vertexMap ),
+    ObjectCollection( int rank, ldb_vertex_map_t& vertexMap, ldb_edge_set_t& edgeMap ) 
+      : _rank( rank ),
+        _vertexMap( vertexMap ),
         _edgeMap( edgeMap ),
         _edges(0)
     {}
 
+    int rank() { return _rank; }
     ldb_vertex_map_t& vertexMap() { return _vertexMap; }
     ldb_edge_set_t& edgeMap() { return _edgeMap; }
-    std::vector< std::vector<int> >& edges() { return _edges; }
-    int edge(int i,int k) { assert( i < _edges.size() && k < _edges[i].size() ); return _edges[i][k]; }
+    std::vector< std::vector<std::pair<int,int> > >& edges() { return _edges; }
+    int edgeIdx(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); return _edges[i][k].first; }
+    int edgeMaster(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); return _edges[i][k].second; }
 
     // query functions that respond to requests from Zoltan 
 
@@ -75,10 +79,6 @@ namespace ALUGridZoltan
                                   ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
                                   int *numEdges, int *ierr)
     {
-      std::cout << "aluzoltan.hh: get_num_edges_list not yet implemented" << std::endl;
-      abort();
-      #if 0
-      // typedef std::set< GraphEdge > ldb_edge_set_t;
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
       for (int i=0;i<num_obj;++i)
       {
@@ -91,10 +91,9 @@ namespace ALUGridZoltan
         int leftNode = i->leftNode();
         assert( leftNode < num_obj );
         ++numEdges[leftNode];
-        objs->edges()[leftNode].push_back( i->rightNode() );
+        objs->edges()[leftNode].push_back( std::make_pair(i->rightNode(), i->rightMaster()) );
       }
       *ierr = ZOLTAN_OK;
-      #endif
     }
     static void get_edge_list(void *data, int sizeGID, int sizeLID,
                               int num_obj, ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
@@ -102,23 +101,21 @@ namespace ALUGridZoltan
                               ZOLTAN_ID_PTR nborGID, int *nborProc,
                               int wgt_dim, float *ewgts, int *ierr)
     {
-      std::cout << "aluzoltan.hh: get_edges_list not yet implemented" << std::endl;
-      abort();
-      #if 0
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
       int k=0;
       for (int j=0;j<num_obj;++j)
       {
         for (int l=0;l<num_edges[j];++l)
         {
-          nborGID[k] = objs->edge(j,l);
+          nborGID[k]  = objs->edgeIdx(j,l);
+          nborProc[k] = objs->edgeMaster(j,l);
+          if (nborProc[k]==-1) nborProc[k] = objs->rank();
           ++k;
           if (wgt_dim==1)
             ewgts[k]=1;
         }
       }
       *ierr = ZOLTAN_OK;
-      #endif
     }
 
     // return dimension of coordinates 
@@ -177,10 +174,11 @@ namespace ALUGridZoltan
 
     // get communincator (see mpAccess_MPI.cc
     MPI_Comm comm = mpaMPI->communicator();
+    int rank = mpaMPI->myrank();
 
     typedef ObjectCollection< ldb_vertex_map_t, ldb_edge_set_t > ObjectCollectionType;
 
-    ObjectCollectionType objects( vertexMap, edgeSet );
+    ObjectCollectionType objects( rank, vertexMap, edgeSet );
     Zoltan *zz = new Zoltan( comm );
     assert( zz );
 

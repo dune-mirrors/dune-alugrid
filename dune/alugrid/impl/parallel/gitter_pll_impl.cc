@@ -387,12 +387,14 @@ namespace ALUGrid
         assert( ldbVx1 >= 0 && ldbVx2 >= 0 );
         // increase the edge weight for periodic connections 
         // TODO: make weight factor (here 4) dynamically adjustable 
-        db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight*4 ) );
+        db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight*4,
+              mycon1->master(), mycon2->master() ) );
       }
       else
       {
         // the default graph edge 
-        db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight ) );
+        db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight,
+              mycon1->master(), mycon2->master() ) );
       }
     }
     return periodicBnd;

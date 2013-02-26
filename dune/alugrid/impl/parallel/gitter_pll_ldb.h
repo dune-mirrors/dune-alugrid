@@ -36,10 +36,12 @@ namespace ALUGrid
         int _leftNode;
         int _rightNode;
         int _weight;
+        int _leftMaster;
+        int _rightMaster;
       public :
-        static const int sizeOfData = 3 * sizeof( int );
+          static const int sizeOfData = 3 * sizeof( int );
           explicit GraphEdge ( ObjectStream& os );
-          inline GraphEdge (int,int,int);
+          inline GraphEdge (int,int,int,int,int);
           inline int leftNode () const;
           inline int rightNode () const;
           inline int weight () const;
@@ -49,6 +51,8 @@ namespace ALUGrid
           inline bool isValid () const;
           inline bool readFromStream (ObjectStream &);
           inline void writeToStream  (ObjectStream &) const;
+          inline int leftMaster () const;
+          inline int rightMaster () const;
         private:  
       };
 
@@ -56,7 +60,6 @@ namespace ALUGrid
       {
 #ifdef GRAPHVERTEX_WITH_CENTER
         alucoord_t  _center [3];  // geographical coords of vertex 
-        int _master;
 #endif
         int _index;   // global graph index 
         int _weight; // weight of vertex 
@@ -76,7 +79,6 @@ namespace ALUGrid
           inline int index () const;
           inline int weight () const;
 #ifdef GRAPHVERTEX_WITH_CENTER
-          inline int master () const;
           inline const alucoord_t (&center () const)[3];
 #endif
           inline bool operator < (const GraphVertex &) const;
@@ -183,7 +185,7 @@ namespace ALUGrid
           static bool graphEdgesNeeded ( const method mth )
           {
             return mth != ALUGRID_SpaceFillingCurveNoEdges && 
-                   mth != ZOLTAN_LB_HSFC ;
+                   mth != ZOLTAN_LB_HSFC;
           }
 
           static const char *methodToString( method );
@@ -242,8 +244,9 @@ namespace ALUGrid
     readFromStream( os );
   }
 
-  inline LoadBalancer::GraphEdge::GraphEdge (int i, int j, int w) 
-    : _leftNode (i), _rightNode (j), _weight (w) 
+  inline LoadBalancer::GraphEdge::GraphEdge (int i, int j, int w, int lmaster, int rmaster) 
+    : _leftNode (i), _rightNode (j), _weight (w), 
+      _leftMaster(lmaster), _rightMaster(rmaster)
   {
     assert( _weight >= 0 );
   }
@@ -260,6 +263,13 @@ namespace ALUGrid
     return _weight;
   }
 
+  inline int LoadBalancer::GraphEdge::leftMaster () const {
+    return _leftMaster;
+  }
+  inline int LoadBalancer::GraphEdge::rightMaster () const {
+    return _rightMaster;
+  }
+
   inline bool LoadBalancer::GraphEdge::isValid () const {
     //return !(_leftNode < 0 || _rightNode < 0 || _weight <= 0);
     return ( _leftNode >= 0 ) && ( _rightNode >= 0 ) && ( _weight > 0 );
@@ -274,7 +284,7 @@ namespace ALUGrid
   }
 
   inline LoadBalancer::GraphEdge LoadBalancer::GraphEdge::operator - () const {
-    return GraphEdge (_rightNode, _leftNode, _weight);
+    return GraphEdge (_rightNode, _leftNode, _weight, _rightMaster, _leftMaster);
   } 
 
   inline bool LoadBalancer::GraphEdge::readFromStream (ObjectStream & os) 
@@ -282,6 +292,8 @@ namespace ALUGrid
     os.readObject ( _leftNode  );
     os.readObject ( _rightNode );
     os.readObject ( _weight );
+    os.readObject( _leftMaster );
+    os.readObject( _rightMaster );
     return true;
   }
 
@@ -289,6 +301,8 @@ namespace ALUGrid
     os.writeObject (_leftNode);
     os.writeObject (_rightNode);
     os.writeObject (_weight);
+    os.writeObject( _leftMaster );
+    os.writeObject( _rightMaster );
     return;
   }
 
@@ -301,7 +315,6 @@ namespace ALUGrid
   : _index (i), _weight (w)
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
-    _master = m ;
     _center [0] = p [0];
     _center [1] = p [1];
     _center [2] = p [2];
@@ -314,7 +327,6 @@ namespace ALUGrid
   : _index (i), _weight (w)
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
-    _master = m ;
     _center [0] = _center [1] = _center [2] = 0.0;
 #endif
     return;
@@ -324,7 +336,6 @@ namespace ALUGrid
     : _index (i), _weight (1)
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
-    _master = -1 ;
     _center [0] = _center [1] = _center [2] = 0.0;
 #endif
     assert( _weight > 0 );
@@ -341,10 +352,6 @@ namespace ALUGrid
   }
 
 #ifdef GRAPHVERTEX_WITH_CENTER
-  inline int LoadBalancer::GraphVertex::master () const {
-    return _master;
-  }
-
   inline const alucoord_t (& LoadBalancer::GraphVertex::center () const)[3] {
     return _center;
   }
@@ -367,7 +374,6 @@ namespace ALUGrid
     os.readObject (_index);
     os.readObject (_weight);
 #ifdef GRAPHVERTEX_WITH_CENTER
-    os.readObject (_master);
     os.readObject (_center [0]);
     os.readObject (_center [1]);
     os.readObject (_center [2]);
@@ -380,7 +386,6 @@ namespace ALUGrid
     os.writeObject (_index);
     os.writeObject (_weight);
 #ifdef GRAPHVERTEX_WITH_CENTER
-    os.writeObject( _master);
     os.writeObject (_center [0]);
     os.writeObject (_center [1]);
     os.writeObject (_center [2]);

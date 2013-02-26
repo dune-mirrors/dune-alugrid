@@ -322,6 +322,8 @@ namespace ALUGrid
       virtual bool isRealObject () const { return true; }
       
       virtual int moveTo () const { abort(); return -1; }
+
+      virtual int master () const { abort(); return -1; }
     protected :
       hasFace () {}
       virtual ~hasFace () {}

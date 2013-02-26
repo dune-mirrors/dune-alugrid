@@ -295,7 +295,7 @@ namespace ALUGrid
       {
 #ifndef NDEBUG
         const size_t expecetedSize = (_innerFaces[ link ].size() + _outerFaces[ link ].size() ) * sizeof( char );
-        assert( os.size() == expecetedSize );
+        assert( os.size() == (int)expecetedSize );
 #endif
         {
           const hface_iterator iEnd = _innerFaces[ link ].end ();
@@ -359,7 +359,7 @@ namespace ALUGrid
       edgevec_t& edges = ( _firstLoop ) ? _innerEdges[ link ] : _outerEdges[ link ];
 
       // the edge sizes should match on both sides 
-      assert( os.size() == ( edges.size() * sizeof(char)) );
+      assert( os.size() == int( edges.size() * sizeof(char)) );
 
       const hedge_iterator iEnd = edges.end ();
       for (hedge_iterator i = edges.begin (); i != iEnd; ++i )
@@ -588,7 +588,7 @@ namespace ALUGrid
 #ifndef NDEBUG
         const size_t expecetedSize = (_innerFaces[ link ].size() ) * sizeof( char );
         // the size of the received ObjectStream should be the faces  
-        assert( os.size() == expecetedSize );
+        assert( os.size() == (int)expecetedSize );
 #endif
         cleanvector_t& cl = _clean[ link ];
 
@@ -612,7 +612,7 @@ namespace ALUGrid
 #ifndef NDEBUG
         const size_t expecetedSize = (_outerFaces[ link ].size() ) * sizeof( char );
         // the size of the received ObjectStream should be the faces  
-        assert( os.size() == expecetedSize );
+        assert( os.size() == (int)expecetedSize );
 #endif
         const hface_iterator iEnd = _outerFaces[ link ].end ();
         for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i )
