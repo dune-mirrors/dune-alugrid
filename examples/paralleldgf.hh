@@ -142,10 +142,29 @@ namespace Dune
         return GridPtr< Grid >( filename );
 
 #if ! HAVE_ALUGRID 
-      std::cout << "Create parallel grid" << std::endl;
-      // only work for the new ALUGrid version 
+      // type of communicator 
+      typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
+        CollectiveCommunication ;
+
+      CollectiveCommunication comm( MPIHelper :: getCommunicator() );
+      const int myrank = comm.rank();
+
       typedef SGrid< dim, dimworld > SGridType ;
-      GridPtr< SGridType > sPtr( filename );
+      // only work for the new ALUGrid version 
+      // if creation of SGrid fails the DGF file does not contain a proper
+      // IntervalBlock, and thus we cannot create the grid parallel, 
+      // we will use the standard technique 
+      GridPtr< SGridType > sPtr;
+      try 
+      { 
+        sPtr = GridPtr< SGridType >( filename );
+      }
+      catch ( DGFException & e ) 
+      {
+        if( myrank == 0 ) 
+          std::cout << "Caught DGFException on creation of SGrid, trying default DGF method!" << std::endl;
+        return GridPtr< Grid >( filename );
+      }
       SGridType& sgrid = *sPtr ; 
 
       typedef typename SGridType :: LeafGridView GridView ;
@@ -158,13 +177,6 @@ namespace Dune
 
       GridView gridView = sgrid.leafView();
       const IndexSet& indexSet = gridView.indexSet();
-
-      // type of communicator 
-      typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
-        CollectiveCommunication ;
-
-      CollectiveCommunication comm( MPIHelper :: getCommunicator() );
-      const int myrank = comm.rank();
 
       // get decompostition of the marco grid 
       SimplePartitioner< GridView, InteriorBorder_Partition > partitioner( gridView );
@@ -211,7 +223,6 @@ namespace Dune
         assert( numVertices == entity.template count< dim >() );
         for( int i = 0; i < numVertices; ++i )
           vertices[ i ] = vertexId[ indexSet.subIndex( entity, i, dim ) ];
-        std::cout << "P[ " << myrank << " ] insert " << elIndex << std::endl;
         factory.insertElement( entity.type(), vertices );
 
         const IntersectionIterator iend = gridView.iend( entity );
@@ -227,7 +238,6 @@ namespace Dune
             EntityPointer outside = iit->outside();
             if( partitioner.rank( *outside ) != myrank ) 
             {
-              std::cout << "P[ " << myrank << " ] insert internal bnd for " << elIndex << " on face " << face << std::endl;
               factory.insertProcessBorder( elIndex, face );
             }
           }
