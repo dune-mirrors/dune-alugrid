@@ -400,7 +400,7 @@ namespace ALUGrid
             if( hit != vxmapEnd ) 
             {
               std::vector< int > s = (*hit).second.item ().accessPllX ().estimateLinkage ();
-                    if (find (s.begin (), s.end (), i) == s.end ()) 
+              if (find (s.begin (), s.end (), i) == s.end ()) 
               {
                 s.push_back( i );
                 (*hit).second.item ().accessPllX ().setLinkage (s);
