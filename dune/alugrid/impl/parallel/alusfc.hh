@@ -10,10 +10,10 @@ namespace ALUGridMETIS
 {
   // Bresenham line drawing algorithm to partition the space filling curve
   template< class idxtype >
-  void CALL_spaceFillingCurveNoEdges(const ALUGrid::MpAccessGlobal& mpa, // communicator
-                                     const idxtype N,        // number of cells 
-                                     const idxtype *weights, // vertex weights 
-                                     idxtype* ranks )         // new partitioning 
+  bool CALL_spaceFillingCurveNoEdges(const ALUGrid::MpAccessGlobal& mpa, // communicator
+                                     const idxtype N,                    // number of cells 
+                                     const idxtype *weights,             // vertex weights 
+                                     idxtype* ranks )                    // new partitioning 
   {
     // get number of partitions 
     const int numProcs = mpa.psize();
@@ -23,20 +23,35 @@ namespace ALUGridMETIS
       sum += weights[ i ];
 
     int rank = 0;
-    long int d = -sum / 2;
+    long int d = -sum ;
     for( int i = 0; i < N; ++i )
     {
-      if( d >= sum / 2 )
+      if( d >= sum )
       {
         ++rank;
-        d -= sum;
+        d -= 2 * sum;
       }
       ranks[ i ] = rank;
-      d += numProcs*weights[ i ];
+      d += (2 * numProcs) * weights[ i ];
     }
 
-    // make sure that the rank does not exceed the number of cores 
+    /*
+    std::vector< int > els( numProcs, 0 );
+    std::vector< int > load( numProcs, 0 );
+    for( std::size_t i = 0; i < N; ++i )
+    {
+      ++els[ ranks[ i ] ];
+      load[ ranks[ i ] ] += weights[ i ];
+      // std::cout << ranks[ i ] << "  ";
+    }
+
+    //for( int i=0 ; i<numProcs; ++i ) 
+    //  std::cout << "load[ " << i << " ] = " << load[ i ] << std::endl;
+    */
+
     assert( rank < numProcs );
+    // return true if partitioning is ok, should never be false 
+    return (rank < numProcs);
   } // end of simple sfc splitting without edges 
 
   template < class idxtype >
