@@ -190,12 +190,13 @@ void method ( const ModelType &model, int startLevel, int maxLevel, const char* 
       size_t sumElements = gridView.grid().comm().sum( elements );
       size_t minElements = gridView.grid().comm().min( elements );
       size_t maxElements = gridView.grid().comm().max( elements );
+      double unbalance = double(maxElements)/double(minElements);
 
       /* print info about time, timestep size and counter */
       if ( verboseRank )  
       {
         std::cout << "elements = " << sumElements ;
-        std::cout << " ("<<minElements << "," << maxElements << ")";
+        std::cout << " ("<<minElements << "," << maxElements << "," << unbalance << ")";
         std::cout << "   maxLevel = " << grid.maxLevel();
         std::cout << "   step = " << step;
         std::cout << "   time = " << time;
