@@ -85,11 +85,15 @@ namespace ALUGridZoltan
         numEdges[i] = 0;
       }
       objs->edges().resize(num_obj);
+      std::cout << objs->rank() << " : " << num_obj << std::endl;
       typename ldb_edge_set_t::const_iterator iEnd = objs->edgeMap().end();
       for (typename ldb_edge_set_t::const_iterator i = objs->edgeMap().begin (); i != iEnd; ++i ) 
       {
         int leftNode = i->leftNode();
-        assert( leftNode < num_obj );
+        std::cout << "[" << objs->rank() << "]: ";
+        std::cout << "(" << i->leftNode() << "," << i->leftMaster() << ") -> ";
+        std::cout << "[" << objs->rank() << "]: ";
+        std::cout << "(" << i->rightNode() << "," << i->rightMaster() << ")" << std::endl;
         ++numEdges[leftNode];
         objs->edges()[leftNode].push_back( std::make_pair(i->rightNode(), i->rightMaster()) );
       }
@@ -206,7 +210,7 @@ namespace ALUGridZoltan
       zz->Set_Param( "LB_APPROACH", "PARTITION"); 
       // zz->Set_Param(,"LB_APPROACH","REPARTITION");
       zz->Set_Param( "EDGE_WEIGHT_DIM","1");
-      zz->Set_Param( "OBJ_WEIGHT_DIM", "0");
+      zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
       zz->Set_Param( "GRAPH_SYMMETRIZE","TRANSPOSE");
       zz->Set_Param( "GRAPH_SYM_WEIGHT","ADD");
 #ifdef HAVE_PARMETIS

@@ -39,7 +39,7 @@ namespace ALUGrid
         int _leftMaster;
         int _rightMaster;
       public :
-          static const int sizeOfData = 3 * sizeof( int );
+          static const int sizeOfData = 5 * sizeof( int );
           explicit GraphEdge ( ObjectStream& os );
           inline GraphEdge (int,int,int,int,int);
           inline int leftNode () const;
@@ -67,7 +67,7 @@ namespace ALUGrid
         public :
           static const int sizeOfData = 2 * sizeof(int) 
 #ifdef GRAPHVERTEX_WITH_CENTER
-            + sizeof(int) + 3 * sizeof(alucoord_t)
+            + 3 * sizeof(alucoord_t)
 #endif      
             ;
 
