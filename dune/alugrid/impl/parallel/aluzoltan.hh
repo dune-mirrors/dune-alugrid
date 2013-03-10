@@ -97,12 +97,18 @@ namespace ALUGridZoltan
       typename ldb_edge_set_t::const_iterator iEnd = objs->edgeMap().end();
       for (typename ldb_edge_set_t::const_iterator it = objs->edgeMap().begin (); it != iEnd; ++it ) 
       {
+        if ( it->leftMaster() != objs->rank() ) // is ghost
+          continue;
         int leftNode = it->leftNode();
+        std::cout << "[" << objs->rank() << "]: ";
+        std::cout << "(" << i << "," << vertex << ") -- " << leftNode << " " << it->leftMaster() << std::endl;
         while (leftNode != vertex)
         {
           ++vertexIt;
           vertex = vertexIt->first.index() ;
           ++i;
+          std::cout << "[" << objs->rank() << "]: ";
+          std::cout << "(" << i << "," << vertex << ") -- " << leftNode << " " << it->leftMaster() << std::endl;
           assert( i < num_obj );
           assert( vertexIt != vertexMap.end() );
         }
