@@ -80,23 +80,38 @@ namespace ALUGridZoltan
                                   int *numEdges, int *ierr)
     {
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
+      assert( num_obj == objs->vertexMap().size() );
       for (int i=0;i<num_obj;++i)
       {
         numEdges[i] = 0;
       }
       objs->edges().resize(num_obj);
-      std::cout << objs->rank() << " : " << num_obj << std::endl;
+      std::cout << "[" << objs->rank() << "]: ";
+      std::cout << num_obj << std::endl;
+
+      ldb_vertex_map_t& vertexMap = objs->vertexMap();
+      typename ldb_vertex_map_t :: iterator vertexIt = vertexMap.begin();
+      int i = 0;
+      int vertex = vertexIt->first.index() ;
+
       typename ldb_edge_set_t::const_iterator iEnd = objs->edgeMap().end();
-      for (typename ldb_edge_set_t::const_iterator i = objs->edgeMap().begin (); i != iEnd; ++i ) 
+      for (typename ldb_edge_set_t::const_iterator it = objs->edgeMap().begin (); it != iEnd; ++it ) 
       {
-        int leftNode = i->leftNode();
-        std::cout << "[" << objs->rank() << "]: ";
-        std::cout << "(" << i->leftNode() << "," << i->leftMaster() << ") -> ";
-        std::cout << "[" << objs->rank() << "]: ";
-        std::cout << "(" << i->rightNode() << "," << i->rightMaster() << ")" << std::endl;
-        ++numEdges[leftNode];
-        objs->edges()[leftNode].push_back( std::make_pair(i->rightNode(), i->rightMaster()) );
+        int leftNode = it->leftNode();
+        while (leftNode != vertex)
+        {
+          ++vertexIt;
+          vertex = vertexIt->first.index() ;
+          ++i;
+          assert( i < num_obj );
+          assert( vertexIt != vertexMap.end() );
+        }
+        assert( leftNode == vertex );
+        ++numEdges[i];
+        // assert( it->leftMaster() == objs->rank() );
+        objs->edges()[i].push_back( std::make_pair(it->rightNode(), it->rightMaster()) );
       }
+
       *ierr = ZOLTAN_OK;
     }
     static void get_edge_list(void *data, int sizeGID, int sizeLID,
@@ -113,10 +128,10 @@ namespace ALUGridZoltan
         {
           nborGID[k]  = objs->edgeIdx(j,l);
           nborProc[k] = objs->edgeMaster(j,l);
-          if (nborProc[k]==-1) nborProc[k] = objs->rank();
-          ++k;
+          assert( nborProc[k] >= 0 );
           if (wgt_dim==1)
             ewgts[k]=1;
+          ++k;
         }
       }
       *ierr = ZOLTAN_OK;
@@ -212,7 +227,7 @@ namespace ALUGridZoltan
       zz->Set_Param( "EDGE_WEIGHT_DIM","1");
       zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
       zz->Set_Param( "GRAPH_SYMMETRIZE","TRANSPOSE");
-      zz->Set_Param( "GRAPH_SYM_WEIGHT","ADD");
+      zz->Set_Param( "GRAPH_SYM_WEIGHT","MAX");
 #ifdef HAVE_PARMETIS
       zz->Set_Param( "GRAPH_PACKAGE","PARMETIS");
 #elif  HAVE_SCOTCH
@@ -222,6 +237,8 @@ namespace ALUGridZoltan
       zz->Set_Param( "PHG_EDGE_SIZE_THRESHOLD", ".35");
     }
 
+
+    
     zz->Set_Num_Obj_Fn ( ObjectCollectionType::get_number_of_objects, &objects);
     zz->Set_Obj_List_Fn( ObjectCollectionType::get_object_list, &objects);
     zz->Set_Num_Geom_Fn( ObjectCollectionType::get_num_geometry, &objects);
