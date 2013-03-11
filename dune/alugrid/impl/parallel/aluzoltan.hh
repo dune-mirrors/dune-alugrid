@@ -86,8 +86,6 @@ namespace ALUGridZoltan
         numEdges[i] = 0;
       }
       objs->edges().resize(num_obj);
-      std::cout << "[" << objs->rank() << "]: ";
-      std::cout << num_obj << std::endl;
 
       ldb_vertex_map_t& vertexMap = objs->vertexMap();
       typename ldb_vertex_map_t :: iterator vertexIt = vertexMap.begin();
@@ -100,18 +98,15 @@ namespace ALUGridZoltan
         if ( it->leftMaster() != objs->rank() ) // is ghost
           continue;
         int leftNode = it->leftNode();
-        std::cout << "[" << objs->rank() << "]: ";
-        std::cout << "(" << i << "," << vertex << ") -- " << leftNode << " " << it->leftMaster() << std::endl;
         while (leftNode != vertex)
         {
           ++vertexIt;
           vertex = vertexIt->first.index() ;
           ++i;
-          std::cout << "[" << objs->rank() << "]: ";
-          std::cout << "(" << i << "," << vertex << ") -- " << leftNode << " " << it->leftMaster() << std::endl;
           assert( i < num_obj );
           assert( vertexIt != vertexMap.end() );
         }
+
         assert( leftNode == vertex );
         ++numEdges[i];
         // assert( it->leftMaster() == objs->rank() );
@@ -217,7 +212,6 @@ namespace ALUGridZoltan
 
     if ( edgeSet.size() == 0 )
     {
-      // std::cout << "ZoltanAlu: RCB" << std::endl;
       zz->Set_Param( "LB_METHOD", "HSFC");
       //zz->Set_Param( "KEEP_CUTS", "1" );
       zz->Set_Param( "RCB_OUTPUT_LEVEL", "0");
@@ -226,9 +220,8 @@ namespace ALUGridZoltan
     }
     else
     {
-      std::cout << "ZoltanAlu: Graph" << std::endl;
       zz->Set_Param( "LB_METHOD", "GRAPH");
-      zz->Set_Param( "LB_APPROACH", "PARTITION"); 
+      zz->Set_Param( "LB_APPROACH", "REPARTITION"); 
       // zz->Set_Param(,"LB_APPROACH","REPARTITION");
       zz->Set_Param( "EDGE_WEIGHT_DIM","1");
       zz->Set_Param( "OBJ_WEIGHT_DIM", "1");

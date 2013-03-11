@@ -178,7 +178,7 @@ namespace ALUGrid
           //! return true if mth specifies a serial partitioner
           static bool serialPartitionerUsed ( const method mth )
           {
-            return true ; // mth < ZOLTAN_LB_Partition ;
+            return mth < ZOLTAN_LB_HSFC ;
           }
 
           //! return true if mth specifies a serial partitioner

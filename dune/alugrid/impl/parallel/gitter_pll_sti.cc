@@ -1407,7 +1407,7 @@ namespace ALUGrid
 
   void GitterPll::checkGraphVertexIndices () 
   {
-    if( ! _ldbVerticesComputed ) 
+    if( !  _ldbVerticesComputed ) 
       computeGraphVertexIndices ();
   }
 
