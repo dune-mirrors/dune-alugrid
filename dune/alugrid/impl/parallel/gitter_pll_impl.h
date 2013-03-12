@@ -205,6 +205,7 @@ namespace ALUGrid
       using A::isSet;
       using A::unset;
       using A::set;
+      using A::master;
 
       typedef A mytetra_t;
       inline mytetra_t& mytetra() { return *this; }
@@ -220,12 +221,10 @@ namespace ALUGrid
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
     public :
       virtual int ldbVertexIndex () const;
-      virtual int master () const { return _master; }
       virtual void writeStaticState (ObjectStream &, int) const ;
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
-      virtual void setMaster ( const int master ) { _master = master; }
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
     public :
       virtual bool erasable () const;
@@ -252,7 +251,6 @@ namespace ALUGrid
       int _moveTo;
       // globally unique element number 
       int _ldbVertexIndex;
-      int _master;
   };
 
   // ######                                                           #####
@@ -465,6 +463,7 @@ namespace ALUGrid
       using A::isSet;
       using A::unset;
       using A::set;
+      using A::master;
 
       typedef A  myhexa_t;
       inline myhexa_t & myhexa () { return *this; }
@@ -479,12 +478,10 @@ namespace ALUGrid
     public :
      ~HexaPllBaseXMacro ();
       virtual int ldbVertexIndex () const;
-      virtual int master () const { return _master; }
       virtual void writeStaticState (ObjectStream &, int) const ;
       // overload firstLdbVertexIndex from hasFacePllXIF since it only makes sense here
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
-      virtual void setMaster ( const int master ) { _master = master; }
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
     public:  
       virtual void attachElement2 ( const int, const int );
@@ -516,7 +513,6 @@ namespace ALUGrid
       int _moveTo;
       // globally unique element number 
       int _ldbVertexIndex;
-      int _master;
   };
 
   class BndsegPllBaseX : public ElementPllXIF_t 
@@ -858,8 +854,8 @@ namespace ALUGrid
 
           using GitterBasis::MacroGitterBasis::iterator;
         public :
-          MacroGitterBasisPll ( Gitter *, std::istream & );
-          MacroGitterBasisPll (Gitter * );
+          MacroGitterBasisPll (GitterBasisPll *, std::istream & );
+          MacroGitterBasisPll (GitterBasisPll * );
          ~MacroGitterBasisPll ();
       }; // end MacroGitterBasisPll 
 

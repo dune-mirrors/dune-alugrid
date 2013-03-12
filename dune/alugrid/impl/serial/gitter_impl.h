@@ -178,6 +178,9 @@ namespace ALUGrid
         int preCoarsening  (); 
         int postRefinement ();
 
+        // return MPI rank of master which is always the same as myrank 
+        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
+
         //! return pointer to grid 
         Gitter * myGrid() { return myvertex(0)->myGrid(); }
         const Gitter * myGrid() const { return myvertex(0)->myGrid(); }
@@ -224,6 +227,9 @@ namespace ALUGrid
         // Neu: burriad 29.4.05
         int preCoarsening(); 
         int postRefinement();
+
+        // return MPI rank of master which is always the same as myrank 
+        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
 
         //! return pointer to grid 
         Gitter * myGrid() { return myvertex(0)->myGrid(); }

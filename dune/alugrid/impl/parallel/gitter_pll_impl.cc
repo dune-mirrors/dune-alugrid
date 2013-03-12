@@ -808,7 +808,6 @@ namespace ALUGrid
     : A(l, f0, s0, f1, s1, f2, s2, f3, s3, orientation )
     , _moveTo ( -1 )
     , _ldbVertexIndex (-1)
-    , _master (-1)
   {
     // don't allow erase
     set( flagLock );
@@ -963,7 +962,6 @@ namespace ALUGrid
 
       os.writeObject (TETRA);
       os.writeObject (_ldbVertexIndex);
-      os.writeObject (master ());
       os.writeObject (mytetra ().myvertex (0)->ident ());
       os.writeObject (mytetra ().myvertex (1)->ident ());
       os.writeObject (mytetra ().myvertex (2)->ident ());
@@ -1008,8 +1006,8 @@ namespace ALUGrid
     os.writeObject (HBND3INT);
     os.writeObject ( Gitter::hbndseg::closure );
     assert( _ldbVertexIndex >= 0 );
-    os.writeObject (_ldbVertexIndex ); // write unique graph vertex index 
-    os.writeObject (master ());
+    os.writeObject ( _ldbVertexIndex ); // write unique graph vertex index 
+    os.writeObject ( master() );
     os.writeObject ( mytetra ().myvertex (fce,0)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,1)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,2)->ident () );
@@ -1522,7 +1520,6 @@ namespace ALUGrid
   : A(l, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5)
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
-  , _master (-1)
   {
     // don't allow erase
     set( flagLock );
@@ -1661,7 +1658,6 @@ namespace ALUGrid
       os.writeObject (HEXA);
       assert( _ldbVertexIndex >= 0 );
       os.writeObject (_ldbVertexIndex ); 
-      os.writeObject (_master);
       os.writeObject (myhexa ().myvertex (0)->ident ());
       os.writeObject (myhexa ().myvertex (1)->ident ());
       os.writeObject (myhexa ().myvertex (2)->ident ());
@@ -1717,7 +1713,7 @@ namespace ALUGrid
     os.writeObject (Gitter::hbndseg::closure);
     assert( _ldbVertexIndex >= 0 );
     os.writeObject (_ldbVertexIndex ); // write unique graph vertex index 
-    os.writeObject (_master ); // write unique graph vertex index 
+    os.writeObject ( master() ); // write unique graph vertex index 
 
     // write the four identifiers of the hexa 
     os.writeObject (myhexa ().myvertex (fce,0)->ident ());
@@ -1880,21 +1876,21 @@ namespace ALUGrid
   ////////////////////////////////////////////////////////////////
   //  --MacroGitterBasisPll
   ////////////////////////////////////////////////////////////////
-  GitterBasisPll::MacroGitterBasisPll::MacroGitterBasisPll ( Gitter * mygrid, std::istream &in )
+  GitterBasisPll::MacroGitterBasisPll::MacroGitterBasisPll ( GitterBasisPll * mygrid, std::istream &in )
     : GitterPll::MacroGitterPll (), 
       GitterBasis:: MacroGitterBasis (mygrid),
       _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
     macrogridBuilder (in );
-    return;
+    indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
   }
 
-  GitterBasisPll::MacroGitterBasisPll::MacroGitterBasisPll (Gitter * mygrid)
+  GitterBasisPll::MacroGitterBasisPll::MacroGitterBasisPll (GitterBasisPll * mygrid)
    : GitterPll::MacroGitterPll () , 
      GitterBasis::MacroGitterBasis (mygrid),
      _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
-    return;
+    indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
   }
 
   GitterBasisPll::MacroGitterBasisPll::~MacroGitterBasisPll () 
