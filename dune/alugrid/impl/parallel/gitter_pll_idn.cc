@@ -299,9 +299,9 @@ namespace ALUGrid
     {
       // data, first loop 
       UnpackIdentification< A, B, C > data( linkagePatternMapVx,  lookVx,  vertexTT, 
-                                          linkagePatternMapEdg, lookEdg, edgeTT, 
-                                          linkagePatternMapFce, lookFce, faceTT,
-                                          mpa.dest(), true );
+                                            linkagePatternMapEdg, lookEdg, edgeTT, 
+                                            linkagePatternMapFce, lookFce, faceTT,
+                                            mpa.dest(), true );
 
       // pack all data 
       data.packAll( vxMi, edgMi, fceMi, inout, mpa );
@@ -313,9 +313,9 @@ namespace ALUGrid
     {
       // data, second loop 
       UnpackIdentification< A, B, C > data( linkagePatternMapVx,  lookVx,  vertexTT, 
-                                          linkagePatternMapEdg, lookEdg, edgeTT, 
-                                          linkagePatternMapFce, lookFce, faceTT,
-                                          mpa.dest(), false );
+                                            linkagePatternMapEdg, lookEdg, edgeTT, 
+                                            linkagePatternMapFce, lookFce, faceTT,
+                                            mpa.dest(), false );
 
       // pack all data 
       data.packAll( vxMi, edgMi, fceMi, inout, mpa );
@@ -528,7 +528,8 @@ namespace ALUGrid
     if (debugOption (2)) mpa.printLinkage (std::cout);
 
     int lap3 = clock ();
-    identify< vertex_STI, hedge_STI, hface_STI >( AccessIterator < vertex_STI >::Handle (*this), _vertexTT, 
+    identify< vertex_STI, hedge_STI, hface_STI >( 
+              AccessIterator < vertex_STI >::Handle (*this), _vertexTT, 
               AccessIterator < hedge_STI >::Handle (*this), _hedgeTT,
               AccessIterator < hface_STI >::Handle (*this), _hfaceTT,
               mpa);
