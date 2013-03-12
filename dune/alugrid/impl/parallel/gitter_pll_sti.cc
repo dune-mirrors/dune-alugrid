@@ -1443,7 +1443,6 @@ namespace ALUGrid
     for (w.first (); ! w.done (); w.next (), ++ cnt ) 
     {
       w.item ().setLoadBalanceVertexIndex ( cnt );
-      w.item ().setMaster( mpAccess().myrank() );
     }
 
     // exchanges the ldbVertexIndex for the internal boundaries 
