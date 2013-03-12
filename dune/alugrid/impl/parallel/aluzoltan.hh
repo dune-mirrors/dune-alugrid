@@ -21,7 +21,8 @@ namespace ALUGridZoltan
     int _rank;
     ldb_vertex_map_t& _vertexMap ;
     ldb_edge_set_t& _edgeMap ;
-    std::vector< std::vector< std::pair<int,int> > > _edges;
+    typedef typename ldb_edge_set_t::const_iterator edgeType;
+    std::vector< std::vector< edgeType > > _edges;
     static const int dimension = 3 ;
 
   public:
@@ -36,9 +37,13 @@ namespace ALUGridZoltan
     int rank() { return _rank; }
     ldb_vertex_map_t& vertexMap() { return _vertexMap; }
     ldb_edge_set_t& edgeMap() { return _edgeMap; }
-    std::vector< std::vector<std::pair<int,int> > >& edges() { return _edges; }
-    int edgeIdx(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); return _edges[i][k].first; }
-    int edgeMaster(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); return _edges[i][k].second; }
+    std::vector< std::vector<edgeType> >& edges() { return _edges; }
+    int edgeIdx(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+                               return _edges[i][k]->rightNode(); }
+    int edgeMaster(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+                               return _edges[i][k]->rightMaster(); }
+    int edgeWeight(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+                                 return _edges[i][k]->weight(); }
 
     // query functions that respond to requests from Zoltan 
 
@@ -80,7 +85,7 @@ namespace ALUGridZoltan
                                   int *numEdges, int *ierr)
     {
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
-      assert( num_obj == objs->vertexMap().size() );
+      assert( num_obj == (int)objs->vertexMap().size() );
       for (int i=0;i<num_obj;++i)
       {
         numEdges[i] = 0;
@@ -110,7 +115,7 @@ namespace ALUGridZoltan
         assert( leftNode == vertex );
         ++numEdges[i];
         // assert( it->leftMaster() == objs->rank() );
-        objs->edges()[i].push_back( std::make_pair(it->rightNode(), it->rightMaster()) );
+        objs->edges()[i].push_back( it );
       }
 
       *ierr = ZOLTAN_OK;
@@ -131,7 +136,7 @@ namespace ALUGridZoltan
           nborProc[k] = objs->edgeMaster(j,l);
           assert( nborProc[k] >= 0 );
           if (wgt_dim==1)
-            ewgts[k]=1;
+            ewgts[k]=objs->edgeWeight(j,l);
           ++k;
         }
       }
