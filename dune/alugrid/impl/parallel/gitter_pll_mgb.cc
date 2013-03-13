@@ -560,10 +560,9 @@ namespace ALUGrid
 
   void ParallelGridMover::unpackTetra (ObjectStream & os, GatherScatterType* gs ) 
   {
-    int ldbVertexIndex = -1, master = -1;
+    int ldbVertexIndex = -1;
     int v [4];
     os.readObject (ldbVertexIndex); 
-    os.readObject( master );
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
@@ -573,7 +572,6 @@ namespace ALUGrid
     std::pair< tetra_GEO *, bool > p = InsertUniqueTetra (v, orientation);
     // set unique element number 
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
-    p.first->setMaster( master );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs);
     return;
   }
@@ -629,10 +627,9 @@ namespace ALUGrid
 
   void ParallelGridMover::unpackHexa (ObjectStream & os, GatherScatterType* gs) 
   {
-    int ldbVertexIndex = -1, master = -1;
+    int ldbVertexIndex = -1;
     int v [8];
     os.readObject (ldbVertexIndex); 
-    os.readObject (master); 
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
@@ -644,7 +641,6 @@ namespace ALUGrid
     std::pair< hexa_GEO *, bool > p = InsertUniqueHexa (v);
     // set unique element number 
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
-    p.first->setMaster( master );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs );
     return;
   }
