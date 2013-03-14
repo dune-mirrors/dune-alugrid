@@ -864,8 +864,8 @@ namespace ALUGrid
         LoadBalancer::GraphVertex (ldbVertexIndex (), weight
 #ifdef GRAPHVERTEX_WITH_CENTER
                                     , _center
+#endif // #ifdef GRAPHVERTEX_WITH_CENTER
                                     ) );
-#endif
     return true;
   }
 
