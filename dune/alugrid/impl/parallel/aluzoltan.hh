@@ -106,35 +106,7 @@ namespace ALUGridZoltan
 
       ldb_vertex_map_t& vertexMap = objs->vertexMap();
       typename ldb_vertex_map_t :: iterator vertexIt = vertexMap.begin();
-      int i = 0;
-      int vertex = vertexIt->first.index() ;
 
-#if 0
-      typename ldb_edge_set_t::const_iterator iEnd = objs->edgeMap().end();
-      for (typename ldb_edge_set_t::const_iterator it = objs->edgeMap().begin (); it != iEnd; ++it ) 
-      {
-        std::cout << "edges for " << vertex << std::endl;
-        if ( it->leftMaster() != objs->rank() ) // is ghost
-          continue;
-        int leftNode = it->leftNode();
-        std::cout << "[" << objs->rank() << "]: ";
-        while (leftNode != vertex)
-        {
-          ++vertexIt;
-          vertex = vertexIt->first.index() ;
-          ++i;
-          assert( i < num_obj );
-          assert( vertexIt != vertexMap.end() );
-        }
-
-        std::cout << "[" << objs->rank() << "]: ";
-        std::cout << "edge(" << i << ") = " << it->rightNode() << " " << it->rightMaster() << std::endl;
-        assert( leftNode == vertex );
-        ++numEdges[i];
-        // assert( it->leftMaster() == objs->rank() );
-        objs->edges()[i].push_back( it );
-      }
-#else
       typename ldb_edge_set_t::const_iterator iEnd = objs->edgeMap().end();
       for (typename ldb_edge_set_t::const_iterator it = objs->edgeMap().begin (); it != iEnd; ++it ) 
       {
@@ -143,7 +115,7 @@ namespace ALUGridZoltan
           int node = it->leftNode();
           int i=0;
           for (;i<num_obj;++i)
-            if (globalID[i] == node) break;
+            if ((int)globalID[i] == node) break;
           assert( i<num_obj );
           //std::cout << "[" << objs->rank() << "]: ";
           //std::cout << "edge(" << i << ") = " << it->rightNode() << " " << it->rightMaster() << std::endl;
@@ -155,7 +127,7 @@ namespace ALUGridZoltan
           int node = it->rightNode();
           int i=0;
           for (;i<num_obj;++i)
-            if (globalID[i] == node) break;
+            if ((int)globalID[i] == node) break;
           assert( i<num_obj );
           //std::cout << "[" << objs->rank() << "]: ";
           //std::cout << "edge(" << i << ") = " << it->leftNode() << " " << it->leftMaster() << std::endl;
@@ -163,7 +135,6 @@ namespace ALUGridZoltan
           objs->edges()[i].push_back( std::make_pair(it,false) );
         }
       }
-#endif
       *ierr = ZOLTAN_OK;
     }
     static void get_edge_list(void *data, int sizeGID, int sizeLID,
@@ -281,13 +252,11 @@ namespace ALUGridZoltan
     else
     {
       zz->Set_Param( "LB_METHOD", "GRAPH");
-      // zz->Set_Param( "LB_APPROACH","PARTITION");
-      static bool first = true;
-      if (first)
-        zz->Set_Param( "LB_APPROACH", "REPARTITION"); 
-      else
-        zz->Set_Param( "LB_APPROACH", "REFINE"); 
-      first = false;
+      zz->Set_Param( "LB_APPROACH", "REPARTITION"); 
+      // zz->Set_Param( "LB_APPROACH","PARTITION"); // give an error in PARMETIS with an
+      //       empty partitioning - no idea why...
+      // zz->Set_Param( "LB_APPROACH", "REFINE");  // gives bad loadbalance with
+      //       PARMETOS and the rest of the setting - no idea why
       zz->Set_Param( "EDGE_WEIGHT_DIM","1");
       zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
       zz->Set_Param( "GRAPH_SYMMETRIZE","NONE" ); 
