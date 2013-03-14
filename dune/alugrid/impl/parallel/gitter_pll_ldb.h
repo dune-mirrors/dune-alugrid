@@ -148,7 +148,8 @@ namespace ALUGrid
 
             // ZOLTAN partitioning 
             ZOLTAN_LB_HSFC = 13 , 
-            ZOLTAN_LB_GraphPartitioning = 14 
+            ZOLTAN_LB_GraphPartitioning = 14 ,
+            ZOLTAN_LB_PARMETIS = 15
           };
         private :
           void graphCollect ( const MpAccessGlobal &,

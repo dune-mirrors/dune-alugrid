@@ -585,11 +585,19 @@ namespace ALUGrid
     if (mth == NONE) return false;
 
     // ZOLTAN partitioning 
-    if (mth == ZOLTAN_LB_HSFC || mth == ZOLTAN_LB_GraphPartitioning ) 
+    // if no Zoltan was found the return value will be false 
+    // otherwise the return value will be true if the partitioning changed
+    if (mth == ZOLTAN_LB_HSFC) 
     {
-      // if no Zoltan was found the return value will be false 
-      // otherwise the return value will be true if the partitioning changed
-      return ALUGridZoltan :: CALL_Zoltan_LB_Partition( mpa, _vertexSet, _edgeSet,  _connect, tolerance, debugOption(5) );
+      return ALUGridZoltan :: CALL_Zoltan_LB_Partition( ALUGridZoltan::HSFC, mpa, _vertexSet, _edgeSet,  _connect, tolerance, debugOption(5) );
+    }
+    else if (mth == ZOLTAN_LB_GraphPartitioning) 
+    {
+      return ALUGridZoltan :: CALL_Zoltan_LB_Partition( ALUGridZoltan::PHG, mpa, _vertexSet, _edgeSet,  _connect, tolerance, debugOption(5) );
+    }
+    if (mth == ZOLTAN_LB_PARMETIS) 
+    {
+      return ALUGridZoltan :: CALL_Zoltan_LB_Partition( ALUGridZoltan::PARMETIS, mpa, _vertexSet, _edgeSet,  _connect, tolerance, debugOption(5) );
     }
 
     const int start = clock (), me = mpa.myrank ();
