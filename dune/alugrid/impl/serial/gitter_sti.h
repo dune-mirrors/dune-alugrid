@@ -85,11 +85,11 @@ namespace ALUGrid
            IM_Internal = 5  // 5 == internal bnds, parallel only 
     };
 
-    IndexManagerStorage() : _myGrid( 0 ), _linkagePatterns() 
+    IndexManagerStorage() : _myGrid( 0 ), _linkagePatterns(), _myrank(-1)
     {}
     void setGrid( Gitter * grid ) { _myGrid = grid; }
 
-    explicit IndexManagerStorage(Gitter * gitter) : _myGrid( gitter ), _linkagePatterns() 
+    explicit IndexManagerStorage(Gitter * gitter) : _myGrid( gitter ), _linkagePatterns(), _myrank(-1) 
     {}
 
     Gitter* myGrid() 
@@ -111,7 +111,18 @@ namespace ALUGrid
       return _indexmanager[ codim ];
     }
 
+    // return index 
     int getIndex( const int codim ) { return get( codim ).getIndex(); }
+
+    // return MPI rank info 
+    int myrank () const 
+    { 
+      assert( _myrank >= 0 ); 
+      return _myrank; 
+    }
+
+    // set rank to given value 
+    void setRank( const int rank ) { _myrank = rank ; }
 
     void compress() 
     {
@@ -138,8 +149,10 @@ namespace ALUGrid
 
     // need for parallel linkage of partitions 
     linkagePatternMap_t _linkagePatterns;
-  };
 
+    // MPI rank 
+    int _myrank ;
+  };
   typedef IndexManagerStorage IndexManagerStorageType;
 
 
@@ -1406,6 +1419,7 @@ namespace ALUGrid
         Gitter* myGrid() { return _indexManagerStorage.myGrid(); }
         const Gitter* myGrid() const { return _indexManagerStorage.myGrid(); }
         IndexManagerStorageType& indexManagerStorage () { return _indexManagerStorage; }
+        const IndexManagerStorageType& indexManagerStorage () const { return _indexManagerStorage; }
       protected:
         IndexManagerType& indexManager() { 
           return _indexManagerStorage.get( IndexManagerStorageType::IM_Vertices ); 
