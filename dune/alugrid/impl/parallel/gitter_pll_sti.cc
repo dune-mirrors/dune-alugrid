@@ -1389,6 +1389,7 @@ namespace ALUGrid
       if (userDefinedPartitioning || ldbMth)
       {
 #ifdef STORE_LINKAGE_IN_VERTICES
+#warning "Using linkage storage in vertices to avoid allgather"
         const bool precomputeLinkage = serialPartitioner ();
 #else 
         const bool precomputeLinkage = false ;
