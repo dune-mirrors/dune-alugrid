@@ -272,6 +272,7 @@ namespace ALUGrid
       virtual ~VertexPllXIF () {}
     public :
       virtual bool setLinkage ( std::vector< int > ) = 0;
+      virtual bool addGraphVertexIndex ( const int ldbVxIndex ) = 0;
     };
 
     class VertexPllXDefault : public VertexPllXIF
@@ -280,6 +281,8 @@ namespace ALUGrid
       virtual ~VertexPllXDefault () {}
     public :
       virtual bool setLinkage ( std::vector< int > ) { assert(false); abort(); return false; }
+      virtual bool addGraphVertexIndex ( const int ldbVxIndex ) { assert(false); abort(); return false; }
+      virtual const std::vector<int>& linkedElements() const { assert(false); abort();  return *((std::vector<int> *) 0); }
     };
 
 
@@ -404,6 +407,8 @@ namespace ALUGrid
         virtual constaccesspair_t accessOuterPllX (const constaccesspair_t &x, int) const { return x;}
         virtual accesspair_t accessInnerPllX (const accesspair_t&, int f) { return accesspair_t( this , f ); }
         virtual constaccesspair_t accessInnerPllX (const constaccesspair_t &, int f) const { return constaccesspair_t( this , f ); }
+
+        virtual void computeVertexLinkage() { assert(false); abort(); }
       public :
         typedef std::pair< helement *, int > ghostpair_t;
 
