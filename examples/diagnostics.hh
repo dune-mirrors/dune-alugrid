@@ -3,6 +3,14 @@
 
 #include "threadmanager.hh"
 
+#ifdef PRINT_IDENTIFICATION_TIMES 
+namespace ALUGrid { 
+  extern double identU2;
+  extern double identU3;
+  extern double identU4;
+}
+#endif
+
 namespace Dune {
 
   template <class GridType>
@@ -131,12 +139,41 @@ namespace Dune {
       file << std::endl;
     }
 
+#ifdef PRINT_IDENTIFICATION_TIMES 
+    void printIdentificationTimes() const
+    {
+      std::vector<double> times(3);
+      times[ 0 ] = ::ALUGrid::identU2;
+      times[ 1 ] = ::ALUGrid::identU3;
+      times[ 2 ] = ::ALUGrid::identU4;
+
+      std::vector<double> maxTimes( times );
+      std::vector<double> minTimes( times );
+
+      // sum, max, and min for all procs 
+      comm_.max( &maxTimes[ 0 ], 3 );
+      comm_.min( &minTimes[ 0 ], 3 );
+
+      if( comm_.rank() == 0 )  
+      {
+        for(int i=0; i<3; ++i )
+        {
+          std::cout << "U" << i+2 << " max: " << maxTimes[ i ] << "  min: " << minTimes[ i ] << std::endl;
+        }
+      }
+    }
+#endif
+
   public:  
     void flush() const
     {
       // if write is > 0 then create speedup file 
       if( writeDiagnostics_ )
       {
+#ifdef PRINT_IDENTIFICATION_TIMES 
+        printIdentificationTimes();
+#endif
+
         std::vector< double > times( times_ );
 
         times.push_back( elements_ );
