@@ -506,6 +506,10 @@ namespace ALUGrid
     }
   }
 
+  double identU2 = 0.0 ;
+  double identU3 = 0.0 ;
+  double identU4 = 0.0 ;
+
   void GitterPll::MacroGitterPll::identification (MpAccessLocal & mpa) 
   {
     // clear all entries and also clear memory be reassigning 
@@ -525,22 +529,29 @@ namespace ALUGrid
 
     int lap2 = clock ();
     mpa.insertRequestSymetric (secondScan ());
+
     if (debugOption (2)) mpa.printLinkage (std::cout);
 
     int lap3 = clock ();
     identify< vertex_STI, hedge_STI, hface_STI >( 
               AccessIterator < vertex_STI >::Handle (*this), _vertexTT, 
-              AccessIterator < hedge_STI >::Handle (*this), _hedgeTT,
-              AccessIterator < hface_STI >::Handle (*this), _hfaceTT,
+              AccessIterator < hedge_STI  >::Handle (*this), _hedgeTT,
+              AccessIterator < hface_STI  >::Handle (*this), _hfaceTT,
               mpa);
 
     int lap4 = clock ();
 
+    float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC);
+    float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC);
+    float u4 = (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC);
+
+    // accumulate times 
+    identU2 += u2 ;
+    identU3 += u3 ;
+    identU4 += u4 ;
+
     if (debugOption (2)) 
     {
-      float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC);
-      float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC);
-      float u4 = (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC);
       std::cout.precision (3);
       std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
       std::cout << u2 << " " << u3 << " " << u4 << " sec." << std::endl;
