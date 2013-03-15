@@ -53,10 +53,30 @@ namespace ALUGrid
       virtual bool packAll (std::vector< ObjectStream > &);
       virtual void unpackSelf (ObjectStream &, bool);
 
+#ifdef STORE_LINKAGE_IN_VERTICES
+      virtual bool addGraphVertexIndex( const int ldbVxIndex ) 
+      {
+        const int elSize = _elements.size(); 
+        for( int i=0; i<elSize; ++i ) 
+        {
+          if( _elements[ i ] == ldbVxIndex ) 
+            return false ;
+        }
+
+        _elements.push_back( ldbVxIndex ); 
+        return true ;
+      }
+
+      virtual const std::vector<int>& linkedElements () const { return _elements; }
+#endif
+
     protected :
       static const linkagePattern_t nullPattern;
       linkagePatternMap_t::iterator _lpn;
       moveto_t*  _moveTo;
+#ifdef STORE_LINKAGE_IN_VERTICES
+      std::vector< int > _elements ;
+#endif
   };
 
   template < class A > 
@@ -226,6 +246,7 @@ namespace ALUGrid
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
+      virtual void computeVertexLinkage() ;
     public :
       virtual bool erasable () const;
       virtual void attachElement2 ( const int, const int );
@@ -483,6 +504,7 @@ namespace ALUGrid
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
+      virtual void computeVertexLinkage() ;
     public:  
       virtual void attachElement2 ( const int, const int );
       virtual void attach2 (int);

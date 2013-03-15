@@ -11,7 +11,6 @@
 
 namespace ALUGrid
 {
-  
   template < class A, class B, class C >
   class UnpackIdentification 
     : public MpAccessLocal::NonBlockingExchange::DataHandleIF
@@ -510,7 +509,7 @@ namespace ALUGrid
   double identU3 = 0.0 ;
   double identU4 = 0.0 ;
 
-  void GitterPll::MacroGitterPll::identification (MpAccessLocal & mpa) 
+  void GitterPll::MacroGitterPll::identification (MpAccessLocal & mpa, bool computeVertexLinkage ) 
   {
     // clear all entries and also clear memory be reassigning 
     vertexTT_t().swap( _vertexTT );
@@ -525,7 +524,12 @@ namespace ALUGrid
     mpa.removeLinkage ();
     
     int lap1 = clock ();
-    vertexLinkageEstimate ( mpa );
+    // this does not have to be computed every time (depending on partitioning method)
+    if( computeVertexLinkage ) 
+    {
+      // std::cout << "Computing VertexLinkage with allgather" << std::endl;
+      vertexLinkageEstimate ( mpa );
+    }
 
     int lap2 = clock ();
     mpa.insertRequestSymetric (secondScan ());

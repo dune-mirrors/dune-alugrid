@@ -222,6 +222,7 @@ namespace ALUGrid
 
           std::vector< int > repartition ( MpAccessGlobal &, method, int, const double tolerance = 1.2  );
 
+          void printVertexSet() const;
         protected:  
           bool repartition ( MpAccessGlobal &, method, std::vector< int > &, const int, const double );
       };

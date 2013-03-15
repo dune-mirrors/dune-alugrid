@@ -42,12 +42,14 @@ namespace ALUGrid
   }
 
   template < class A >
-  LinkedObject::Identifier VertexPllBaseX< A >::getIdentifier () const {
+  LinkedObject::Identifier VertexPllBaseX< A >::getIdentifier () const
+  {
     return LinkedObject::Identifier (myvertex().ident ());
   }
 
   template < class A >
-  std::vector< int > VertexPllBaseX< A >::estimateLinkage () const {
+  std::vector< int > VertexPllBaseX< A >::estimateLinkage () const
+  {
     return std::vector< int > ((*_lpn).first);
   }
 
@@ -106,13 +108,21 @@ namespace ALUGrid
       {
         int j = (*i).first;
         assert ((osv.begin () + j) < osv.end ());
-        osv [j].writeObject (VERTEX);
-        osv [j].writeObject (myvertex ().ident ());
-        osv [j].writeObject (myvertex ().Point ()[0]);
-        osv [j].writeObject (myvertex ().Point ()[1]);
-        osv [j].writeObject (myvertex ().Point ()[2]);
-        
-        inlineData (osv [j]);
+
+        ObjectStream& os = osv [j];
+        os.writeObject (VERTEX);
+        os.writeObject (myvertex ().ident ());
+        os.writeObject (myvertex ().Point ()[0]);
+        os.writeObject (myvertex ().Point ()[1]);
+        os.writeObject (myvertex ().Point ()[2]);
+
+#ifdef STORE_LINKAGE_IN_VERTICES
+        const int elSize = _elements.size();
+        os.writeObject( elSize );
+        for( int el=0; el<elSize; ++el )
+          os.writeObject( _elements[ el ] );
+#endif
+        inlineData (os);
         
         action = true;
       }
@@ -121,8 +131,23 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool i) {
-    if (i) {
+  void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool i) 
+  {
+#ifdef STORE_LINKAGE_IN_VERTICES
+    _elements.clear();
+    int elSize; 
+    os.readObject( elSize );
+    _elements.reserve( elSize );
+    for( int el=0; el<elSize; ++el ) 
+    {
+      int elem; 
+      os.readObject( elem );
+      _elements.push_back( elem );
+    }
+#endif 
+
+    if (i) 
+    {
       xtractData (os);
     }
     return;
@@ -839,9 +864,20 @@ namespace ALUGrid
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::setLoadBalanceVertexIndex ( const int ldbVx ) {
+  void TetraPllXBaseMacro< A >::setLoadBalanceVertexIndex ( const int ldbVx ) 
+  {
     //std::cout << "Set ldbVertex " << ldbVx << std::endl;
     _ldbVertexIndex = ldbVx;
+  }
+
+  template < class A >
+  void TetraPllXBaseMacro< A >::computeVertexLinkage() 
+  {
+    for( int i=0; i<4; ++i ) 
+    {
+      // add my ldb vertex index to vertex's list of elements 
+      mytetra().myvertex( i )->addGraphVertexIndex( _ldbVertexIndex );
+    }
   }
 
   template < class A >
@@ -1555,9 +1591,19 @@ namespace ALUGrid
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::setLoadBalanceVertexIndex ( const int ldbVx ) {
-    // std::cout << "Set ldbVertex " << ldbVx << std::endl;
+  void HexaPllBaseXMacro< A >::setLoadBalanceVertexIndex ( const int ldbVx ) 
+  {
     _ldbVertexIndex = ldbVx ;
+  }
+
+  template < class A >
+  void HexaPllBaseXMacro< A >::computeVertexLinkage() 
+  {
+    for( int i=0; i<8; ++i ) 
+    {
+      // add my ldb vertex index to vertex's list of elements 
+      myhexa().myvertex( i )->addGraphVertexIndex( _ldbVertexIndex );
+    }
   }
 
   template < class A >
@@ -2203,7 +2249,7 @@ namespace ALUGrid
         std::cout << "bool   = " << sizeof(bool) << std::endl;
         std::cout << "char   = " << sizeof(unsigned char) << std::endl;
         std::cout << "signed char   = " << sizeof(signed char) << std::endl;
-        std::cout << "moveto = " << sizeof( std::map< int, int > ) << std::endl;
+        std::cout << "moveto = " << sizeof( MacroGridMoverIF::moveto_t ) << std::endl;
         std::cout << "MyAlloc = " << sizeof(MyAlloc) << "\n";
         std::cout << "Refcount = " << sizeof(Refcount) << "\n";
         std::cout << "HedgeRule  = " << sizeof(Gitter::Geometric::Hedge1Rule) <<"\n";

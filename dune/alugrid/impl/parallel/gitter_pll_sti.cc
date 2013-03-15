@@ -1388,17 +1388,90 @@ namespace ALUGrid
       // if a method was given, perform load balancing
       if (userDefinedPartitioning || ldbMth)
       {
+#ifdef STORE_LINKAGE_IN_VERTICES
+        const bool precomputeLinkage = serialPartitioner ();
+#else 
+        const bool precomputeLinkage = false ;
+#endif
+
+        if( precomputeLinkage ) 
+          computeVertexLinkage();
+
         // check gather-scatter object and call appropriate method 
         if( gs ) 
           duneRepartitionMacroGrid( db, *gs );  
         else   
           repartitionMacroGrid (db);
+
+        if( precomputeLinkage ) 
+          setVertexLinkage( db );
+
         // calls identification and exchangeDynamicState 
-        notifyMacroGridChanges ();
+        doNotifyMacroGridChanges ( ! precomputeLinkage );
       }
     }
     return repartition;
   }
+
+#ifdef STORE_LINKAGE_IN_VERTICES
+  void GitterPll::computeVertexLinkage() 
+  {
+    static bool firstCall = false ;
+
+    if( ! firstCall ) 
+    {
+      AccessIterator < helement_STI >::Handle w ( containerPll () );
+
+      // set ldb vertex indices to all elements 
+      for (w.first (); ! w.done (); w.next () ) 
+      {
+        w.item ().computeVertexLinkage();
+      }
+      firstCall = true ;
+    }
+
+    // communication 
+  }
+
+  void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
+  {
+    AccessIterator < vertex_STI >::Handle w ( containerPll () );
+
+    const int me = mpAccess().myrank(); 
+
+    // set ldb vertex indices to all elements 
+    for (w.first (); ! w.done (); w.next () ) 
+    {
+      vertex_STI& vertex = w.item();
+      if( vertex.isBorder() ) 
+      {
+        const std::vector<int>& linkedElements = vertex.linkedElements();
+        const int elSize = linkedElements.size();
+        std::vector< int > linkage; 
+        linkage.reserve( elSize );
+        for( int el=0; el<elSize; ++el )
+        {
+          const int rank = db.destination( linkedElements[ el ] ) ;
+          if( rank != me ) 
+          {
+            // std::cout << "Vertex " << vertex.ident() << " --> " << *it << " ( " << rank << " ) " << std::endl;
+            linkage.push_back( rank );
+          }
+        }
+      
+        // set linkage 
+        vertex.setLinkage( linkage );
+      }
+      else 
+      {
+        // clear linkage
+        vertex.setLinkage( std::vector< int > () );
+      }
+    }
+
+    // communication 
+  }
+#endif
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 
   {
@@ -1474,10 +1547,15 @@ namespace ALUGrid
 
   void GitterPll::notifyMacroGridChanges () 
   {
+    doNotifyMacroGridChanges( true );
+  }
+
+  void GitterPll::doNotifyMacroGridChanges ( bool computeVertexLinkage ) 
+  {
     assert (debugOption (20) ? (std::cout << "**INFO GitterPll::notifyMacroGridChanges () " << std::endl, 1) : 1 );
     Gitter::notifyMacroGridChanges ();
 
-    containerPll ().identification (mpAccess ());
+    containerPll ().identification (mpAccess (), computeVertexLinkage );
 
     loadBalancerMacroGridChangesNotify ();
     exchangeDynamicState ();

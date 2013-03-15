@@ -727,6 +727,10 @@ namespace ALUGrid
         // store nodes size before clearing   
         const int nNodes = ( serialPartitioner ) ? nel : nodes.size();
 
+#ifdef STORE_LINKAGE_IN_VERTICES
+        // store complete graph since we need this for later linkage identification
+        _vertexSet = nodes ;
+#endif
         // free memory, not needed anymore
         nodes.clear();
         
@@ -916,8 +920,20 @@ namespace ALUGrid
   {
     // use constructor to initialize default values 
     GraphVertex e (i);
+    assert (_vertexSet.size() > 0 );
     assert (_vertexSet.find (e) != _vertexSet.end ());
     return (*_vertexSet.find (e)).second;
+  }
+
+  void LoadBalancer::DataBase::printVertexSet() const 
+  {
+    typedef typename ldb_vertex_map_t :: const_iterator const_iterator ;
+    const const_iterator end = _vertexSet.end ();
+    std::cout << "VXSet size = " << _vertexSet.size() << std::endl;
+    for( const_iterator it = _vertexSet.begin(); it != end; ++it ) 
+    {
+      std::cout << "vx " << (*it).first.index() << std::endl;
+    }
   }
 
   const char * LoadBalancer::DataBase::methodToString (method m) 

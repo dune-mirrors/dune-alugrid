@@ -184,7 +184,7 @@ namespace ALUGrid
       std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const hface_STI *, int);
       std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > &, int);
       virtual inline int iterators_attached () const;
-      virtual void identification (MpAccessLocal &);
+      virtual void identification (MpAccessLocal &, bool );
       virtual void fullIntegrityCheck (MpAccessLocal &);
     }; // end MacroGitterPll 
 
@@ -240,6 +240,9 @@ namespace ALUGrid
       void doRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
       void checkGraphVertexIndices();
       void computeGraphVertexIndices();
+      void computeVertexLinkage();
+      void setVertexLinkage( LoadBalancer::DataBase & );
+      void doNotifyMacroGridChanges ( bool );
     public:  
       virtual void repartitionMacroGrid (LoadBalancer::DataBase &);
       virtual void duneRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType& );

@@ -810,17 +810,6 @@ namespace ALUGrid
     return;
   }
 
-  /*
-  void ParallelGridMover::
-  unpackAll (std::vector< ObjectStream > & osv, GatherScatterType* gs) 
-  {
-    for (std::vector< ObjectStream >::iterator j = osv.begin (); j != osv.end (); ++j) 
-    {
-      unpackAll( *j, gs );
-    }  
-  }
-  */
-
   void ParallelGridMover::
   unpackAll( ObjectStream& os, GatherScatterType* gs) 
   {
