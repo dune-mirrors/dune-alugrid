@@ -974,7 +974,8 @@ namespace ALUGrid
 
     void unpack( const int link, ObjectStream& os ) 
     {
-      // this will modify the macro grid, since the 
+      // create ParallelGridMover when all data was packed, otherwise the link packing
+      // will fail since this will modify the macro grid, since the 
       // parallel macro grid mover clears the lists of macro elements 
       if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll );
 
@@ -1093,7 +1094,7 @@ namespace ALUGrid
       lap2 = lap1 ;
       
       {
-        // unpack data class 
+        // data handle  
         UnpackLBData data( containerPll (), mpAccess().nlinks(), gatherScatter );
 
         // pack, exchange, and unpack data 
