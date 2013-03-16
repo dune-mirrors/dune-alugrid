@@ -887,22 +887,53 @@ namespace ALUGrid
     }  
   }
 
+  void ParallelGridMover::
+  packAll( const int link, ObjectStream& os, GatherScatterType* gs) 
+  {
+  }
+
   class UnpackLBData : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
+    GitterPll::MacroGitterPll& _containerPll;
     ParallelGridMover  _pgm;
     GatherScatterType* _gs; 
 
     UnpackLBData( const UnpackLBData& );
   public:
     UnpackLBData( GitterPll::MacroGitterPll& containerPll, GatherScatterType* gs ) 
-      : _pgm( containerPll ),
+      : _containerPll( containerPll ),
+        _pgm( containerPll ),
         _gs( gs )
     {}
 
     void pack( const int link, ObjectStream& os ) 
     {
-      std::cerr << "ERROR: called UnpackLBData::pack" << std::endl;
-      abort();
+      // pack all stuff 
+      {
+        AccessIterator < Gitter::vertex_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) w.item ().accessPllX ().packLink( link, os );
+      }
+      {
+        AccessIterator < Gitter::hedge_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) w.item ().packLink( link, os );
+      }
+      {
+        AccessIterator < Gitter::hface_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) w.item ().packLink( link, os );
+      }
+      {
+        AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
+        // use dunePackAll method 
+        for (w.first (); ! w.done (); w.next ()) 
+        {
+          w.item ().packLink( link, os, _gs );
+        }
+      }
+      {
+        AccessIterator < Gitter::hperiodic_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) w.item ().packLink( link, os );
+      }
+      os.writeObject (MacroGridMoverIF::ENDMARKER);
     }
 
     void unpack( const int link, ObjectStream& os ) 
@@ -959,7 +990,7 @@ namespace ALUGrid
       mpAccess ().removeLinkage ();
       mpAccess ().insertRequestSymetric ( *connectScan );
 
-      const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks ();
+      const int me = mpAccess ().myrank (); 
       {
         if ( ! userDefinedPartitioning )
         {
@@ -1017,7 +1048,7 @@ namespace ALUGrid
         }
       }
       lap1 = clock ();
-      
+      /*
       // create vector of object streams 
       std::vector< ObjectStream > osv (nl);
 
@@ -1064,6 +1095,7 @@ namespace ALUGrid
           (*i).writeObject (MacroGridMoverIF::ENDMARKER);
         }
       }
+      */
 
       lap2 = clock ();
       
@@ -1071,7 +1103,8 @@ namespace ALUGrid
         // unpack data class 
         UnpackLBData unpackData( containerPll (), gatherScatter );
         // exchange data and immediately unpack upon arrival
-        mpAccess ().exchange ( osv, unpackData );
+        //mpAccess ().exchange ( osv, unpackData );
+        mpAccess ().exchange ( unpackData );
       }
 
       lap3 = clock ();
