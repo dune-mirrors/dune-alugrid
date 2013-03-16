@@ -50,7 +50,8 @@ namespace ALUGrid
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
-      virtual bool packAll (std::vector< ObjectStream > &);
+      virtual bool packAll  (std::vector< ObjectStream > &);
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
 
 #ifdef STORE_LINKAGE_IN_VERTICES
@@ -99,8 +100,6 @@ namespace ALUGrid
       virtual bool lockedAgainstCoarsening () const;
       virtual void attach2 (int);
       virtual void unattach2 (int);
-      virtual bool packAll (std::vector< ObjectStream > &);
-      virtual void unpackSelf (ObjectStream &, bool);
   };
 
   template < class A > 
@@ -125,6 +124,7 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
     protected :
       moveto_t*  _moveTo;
@@ -183,6 +183,7 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
     protected :
       moveto_t*  _moveTo;
@@ -253,6 +254,7 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual bool packLink (const int link, ObjectStream& os, GatherScatterType* );
       virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
       // pack ghost information 
       virtual void packAsGhost(ObjectStream &,int) const;
@@ -347,6 +349,7 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const 
@@ -434,6 +437,7 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const;
@@ -511,6 +515,7 @@ namespace ALUGrid
       virtual void unattach2 (int);
       
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual bool packLink (const int link, ObjectStream& os, GatherScatterType* );
       // pack ghost information 
       virtual void packAsGhost(ObjectStream &,int) const;
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
@@ -981,17 +986,6 @@ namespace ALUGrid
 
   template < class A >
   inline void EdgePllBaseX< A >::attach2 (int) {
-    abort ();
-    return;
-  }
-
-  template < class A >
-  bool EdgePllBaseX< A >::packAll (std::vector< ObjectStream > &) {
-    return (abort (), false);
-  }
-
-  template < class A >
-  inline void EdgePllBaseX< A >::unpackSelf (ObjectStream &,bool) {
     abort ();
     return;
   }

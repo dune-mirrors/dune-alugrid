@@ -106,28 +106,30 @@ namespace ALUGrid
       const const_iterator iEnd =  _moveTo->end (); 
       for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
       {
-        int j = (*i).first;
-        assert ((osv.begin () + j) < osv.end ());
-
-        ObjectStream& os = osv [j];
-        os.writeObject (VERTEX);
-        os.writeObject (myvertex ().ident ());
-        os.writeObject (myvertex ().Point ()[0]);
-        os.writeObject (myvertex ().Point ()[1]);
-        os.writeObject (myvertex ().Point ()[2]);
-
-#ifdef STORE_LINKAGE_IN_VERTICES
-        const int elSize = _elements.size();
-        os.writeObject( elSize );
-        for( int el=0; el<elSize; ++el )
-          os.writeObject( _elements[ el ] );
-#endif
-        inlineData (os);
-        
-        action = true;
+        const int link = (*i).first;
+        action = packLink( link, osv[ link ] );
       }
     }
-    return action;
+    return action ;
+  }
+
+  template < class A >
+  bool VertexPllBaseX< A >::packLink ( const int link, ObjectStream& os ) 
+  {
+    os.writeObject (VERTEX);
+    os.writeObject (myvertex ().ident ());
+    os.writeObject (myvertex ().Point ()[0]);
+    os.writeObject (myvertex ().Point ()[1]);
+    os.writeObject (myvertex ().Point ()[2]);
+
+#ifdef STORE_LINKAGE_IN_VERTICES
+    const int elSize = _elements.size();
+    os.writeObject( elSize );
+    for( int el=0; el<elSize; ++el )
+      os.writeObject( _elements[ el ] );
+#endif
+    inlineData (os);
+    return true ; 
   }
 
   template < class A >
@@ -219,28 +221,30 @@ namespace ALUGrid
       const const_iterator iEnd =  _moveTo->end ();
       for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
       {
-        int j = (*i).first;
-        assert ((osv.begin () + j) < osv.end ());
-
-        {
-          ObjectStream & os = osv[j];
-          os.writeObject (EDGE1);
-          os.writeObject (myhedge ().myvertex (0)->ident ());
-          os.writeObject (myhedge ().myvertex (1)->ident ());
-          
-          // make sure ENDOFSTREAM is not a valid refinement rule 
-          assert( ! myhedge_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-
-          // pack refinement information 
-          myhedge ().backup ( os );
-          os.put( ObjectStream::ENDOFSTREAM );
-          
-          inlineData ( os );
-        }
-        action = true;
+        const int link = (*i).first;
+        assert ((osv.begin () + link) < osv.end ());
+        action = packLink( link, osv[ link ] );
       }
     }
     return action;
+  }
+
+  template < class A >
+  bool EdgePllBaseXMacro< A >::packLink ( const int link, ObjectStream& os ) 
+  {
+    os.writeObject (EDGE1);
+    os.writeObject (myhedge ().myvertex (0)->ident ());
+    os.writeObject (myhedge ().myvertex (1)->ident ());
+    
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! myhedge_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+
+    // pack refinement information 
+    myhedge ().backup ( os );
+    os.put( ObjectStream::ENDOFSTREAM );
+    
+    inlineData ( os );
+    return true ;
   }
 
   template < class A >
@@ -480,7 +484,6 @@ namespace ALUGrid
     // die zu Teilgittern f"uhren, an die sie zugewiesen wurde mit attach2 ().
     // Ausserdem geht die Methode noch an die anliegenden Elemente (Randelemente)
     // "uber.
-    const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled();
 
     bool action = false;
     if( _moveTo ) 
@@ -489,74 +492,81 @@ namespace ALUGrid
       const const_iterator iEnd =  _moveTo->end ();
       for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
       {
-        int j = (*i).first;
-        assert ((osv.begin () + j) < osv.end ());
-        
-        ObjectStream& os = osv[j];
-        if (A::polygonlength == 4) 
-        {
-          os.writeObject (MacroGridMoverIF::FACE4);
-        }
-        else if (A::polygonlength == 3) 
-        {
-          os.writeObject (MacroGridMoverIF::FACE3);
-        }
-        else 
-        {
-          // something wrong 
-          assert(false);
-          abort ();
-        }
-        
-        {
-          // write vertex idents 
-          for (int k = 0; k < A::polygonlength; ++ k)
-          {
-            os.writeObject (this->myhface ().myvertex (k)->ident ());
-          }
-        }
-        try {
-        
-          // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
-          // mit einer Verfeinerungsregel identisch ist - sonst gibt's
-          // nachher beim Auspacken nur garbage.
-        
-          assert (! myhface_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-        
-          this->myhface ().backup ( os );
-          os.put( ObjectStream::ENDOFSTREAM );
-
-          // inline internal data if has any 
-          inlineData ( os );
-
-        }
-        catch( ObjectStream::OutOfMemoryException )
-        {
-          std::cerr << "ERROR (fatal): Out of memory." << std::endl;
-          abort();
-        }
-
-        try
-        {
-        
-          // Wenn die Fl"ache auf den j. Strom des Lastverschiebers
-          // geschrieben wurde, dann mu"ussen auch die anliegenden
-          // Elemente daraufhin untersucht werden, ob sie sich nicht
-          // als Randelemente dorthin schreiben sollen - das tun sie
-          // aber selbst.
-        
-          this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, j, os, ghostCellsEnabled );
-          this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, j, os, ghostCellsEnabled );
-        } 
-        catch( Parallel::AccessPllException )
-        {
-          std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
-          abort();
-        }
-        action = true;
+        const int link = (*i).first;
+        assert ((osv.begin () + link) < osv.end ());
+        action = packLink( link, osv[ link ] );
       }
     }
     return action;
+  }
+        
+  template < class A > bool 
+  FacePllBaseXMacro < A >::packLink ( const int link, ObjectStream & os ) 
+  {
+    const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled();
+
+    if (A::polygonlength == 4) 
+    {
+      os.writeObject (MacroGridMoverIF::FACE4);
+    }
+    else if (A::polygonlength == 3) 
+    {
+      os.writeObject (MacroGridMoverIF::FACE3);
+    }
+    else 
+    {
+      // something wrong 
+      assert(false);
+      abort ();
+    }
+    
+    {
+      // write vertex idents 
+      for (int k = 0; k < A::polygonlength; ++ k)
+      {
+        os.writeObject (this->myhface ().myvertex (k)->ident ());
+      }
+    }
+
+    try {
+    
+      // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
+      // mit einer Verfeinerungsregel identisch ist - sonst gibt's
+      // nachher beim Auspacken nur garbage.
+    
+      assert (! myhface_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    
+      this->myhface ().backup ( os );
+      os.put( ObjectStream::ENDOFSTREAM );
+
+      // inline internal data if has any 
+      inlineData ( os );
+
+    }
+    catch( ObjectStream::OutOfMemoryException )
+    {
+      std::cerr << "ERROR (fatal): Out of memory." << std::endl;
+      abort();
+    }
+
+    try
+    {
+    
+      // Wenn die Fl"ache auf den j. Strom des Lastverschiebers
+      // geschrieben wurde, dann mu"ussen auch die anliegenden
+      // Elemente daraufhin untersucht werden, ob sie sich nicht
+      // als Randelemente dorthin schreiben sollen - das tun sie
+      // aber selbst.
+    
+      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, link, os, ghostCellsEnabled );
+      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, link, os, ghostCellsEnabled );
+    } 
+    catch( Parallel::AccessPllException )
+    {
+      std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
+      abort();
+    }
+    return true;
   }
 
   //- --unpackSelf
@@ -979,59 +989,64 @@ namespace ALUGrid
 
   template < class A >
   bool TetraPllXBaseMacro< A >::doPackAll (std::vector< ObjectStream > & osv,
-                                             GatherScatterType* gs) 
+                                           GatherScatterType* gs) 
   {
     if( _moveTo >= 0 ) 
     {
       assert ((osv.begin () + _moveTo) < osv.end ());
-      ObjectStream& os = osv[ _moveTo ];
-
-#ifdef NDEBUG 
-      for( int i=0; i<4; ++i ) 
-      {
-        if( this->myneighbour( i ).first->isboundary() ) 
-        {
-          assert( this->myneighbour( i ).first->moveTo() == _moveTo );
-        }
-      }
-#endif
-
-      os.writeObject (TETRA);
-      os.writeObject (_ldbVertexIndex);
-      os.writeObject (mytetra ().myvertex (0)->ident ());
-      os.writeObject (mytetra ().myvertex (1)->ident ());
-      os.writeObject (mytetra ().myvertex (2)->ident ());
-      os.writeObject (mytetra ().myvertex (3)->ident ());
-      int orientation = mytetra ().orientation();
-      os.writeObject ( orientation );
-
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! mytetra_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-      
-      // pack refinement information 
-      mytetra ().backup ( os );
-      os.put( ObjectStream::ENDOFSTREAM );
-
-      // pack internal data if has any 
-      inlineData ( os );
-      
-      // if gather scatter was passed 
-      if( gs ) 
-      {
-        // pack Dune data 
-        gs->inlineData( os , mytetra() );
-      }
-
-      // unset erasable flag
-      unset( flagLock );
-      return true;
+      return packLink( _moveTo, osv[ _moveTo ], gs );
     }
     return false;
   }
 
   template < class A >
+  bool TetraPllXBaseMacro< A >::packLink( const int link, ObjectStream& os,
+                                          GatherScatterType* gs) 
+  {
+#ifdef NDEBUG 
+    for( int i=0; i<4; ++i ) 
+    {
+      if( this->myneighbour( i ).first->isboundary() ) 
+      {
+        assert( this->myneighbour( i ).first->moveTo() == link );
+      }
+    }
+#endif
+
+    os.writeObject (TETRA);
+    os.writeObject (_ldbVertexIndex);
+    os.writeObject (mytetra ().myvertex (0)->ident ());
+    os.writeObject (mytetra ().myvertex (1)->ident ());
+    os.writeObject (mytetra ().myvertex (2)->ident ());
+    os.writeObject (mytetra ().myvertex (3)->ident ());
+    int orientation = mytetra ().orientation();
+    os.writeObject ( orientation );
+
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! mytetra_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    
+    // pack refinement information 
+    mytetra ().backup ( os );
+    os.put( ObjectStream::ENDOFSTREAM );
+
+    // pack internal data if has any 
+    inlineData ( os );
+    
+    // if gather scatter was passed 
+    if( gs ) 
+    {
+      // pack Dune data 
+      gs->inlineData( os , mytetra() );
+    }
+
+    // unset erasable flag
+    unset( flagLock );
+    return true;
+  }
+
+  template < class A >
   bool TetraPllXBaseMacro< A >::dunePackAll (std::vector< ObjectStream > & osv,
-                                               GatherScatterType & gs) 
+                                             GatherScatterType & gs) 
   {
     return doPackAll( osv, &gs );
   }
@@ -1271,38 +1286,45 @@ namespace ALUGrid
       assert( myneighbour( 0 ).first->moveTo() == _moveTo );
       assert( myneighbour( 1 ).first->moveTo() == _moveTo );
 
-      assert ((osv.begin () + _moveTo) < osv.end ());
-      ObjectStream& os = osv[ _moveTo ];
-
-      os.writeObject (PERIODIC3);
-
-      // write boundary id 
-      const int bnd[ 2 ] = { int( this->bndtype( 0 ) ), int( this->bndtype( 1 ) ) };
-      os.writeObject ( bnd[ 0 ] );
-      os.writeObject ( bnd[ 1 ] );
-
-      os.writeObject (myperiodic ().myvertex (0)->ident ());
-      os.writeObject (myperiodic ().myvertex (1)->ident ());
-      os.writeObject (myperiodic ().myvertex (2)->ident ());
-      os.writeObject (myperiodic ().myvertex (3)->ident ());
-      os.writeObject (myperiodic ().myvertex (4)->ident ());
-      os.writeObject (myperiodic ().myvertex (5)->ident ());
-      
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-      
-      // pack refinement information 
-      myperiodic ().backup ( os );
-      os.put( ObjectStream::ENDOFSTREAM );
-
-      // pack internal data if has any 
-      inlineData ( os );
-
-      // allow erasure 
-      unset( flagLock );
-      return true;
+      return packLink( _moveTo, osv[ _moveTo ] );
     }
     return false;
+  }
+
+  template < class A >
+  bool Periodic3PllXBaseMacro< A >::packLink( const int link, ObjectStream& os ) 
+  {
+    assert( link == _moveTo );
+    assert( myneighbour( 0 ).first->moveTo() == link );
+    assert( myneighbour( 1 ).first->moveTo() == link );
+
+    os.writeObject (PERIODIC3);
+
+    // write boundary id 
+    const int bnd[ 2 ] = { int( this->bndtype( 0 ) ), int( this->bndtype( 1 ) ) };
+    os.writeObject ( bnd[ 0 ] );
+    os.writeObject ( bnd[ 1 ] );
+
+    os.writeObject (myperiodic ().myvertex (0)->ident ());
+    os.writeObject (myperiodic ().myvertex (1)->ident ());
+    os.writeObject (myperiodic ().myvertex (2)->ident ());
+    os.writeObject (myperiodic ().myvertex (3)->ident ());
+    os.writeObject (myperiodic ().myvertex (4)->ident ());
+    os.writeObject (myperiodic ().myvertex (5)->ident ());
+    
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    
+    // pack refinement information 
+    myperiodic ().backup ( os );
+    os.put( ObjectStream::ENDOFSTREAM );
+
+    // pack internal data if has any 
+    inlineData ( os );
+
+    // allow erasure 
+    unset( flagLock );
+    return true;
   }
 
   template < class A >
@@ -1448,39 +1470,47 @@ namespace ALUGrid
       assert( myneighbour( 1 ).first->moveTo() == _moveTo );
 
       assert ((osv.begin () + _moveTo) < osv.end ());
-      ObjectStream& os = osv[ _moveTo ];
-      
-      os.writeObject (PERIODIC4);
-
-      // write boundary id 
-      const int bnd[ 2 ] = { int( this->bndtype( 0 ) ), int( this->bndtype( 1 ) ) };
-      os.writeObject ( bnd[ 0 ] );
-      os.writeObject ( bnd[ 1 ] );
-
-      os.writeObject (myperiodic ().myvertex (0)->ident ());
-      os.writeObject (myperiodic ().myvertex (1)->ident ());
-      os.writeObject (myperiodic ().myvertex (2)->ident ());
-      os.writeObject (myperiodic ().myvertex (3)->ident ());
-      os.writeObject (myperiodic ().myvertex (4)->ident ());
-      os.writeObject (myperiodic ().myvertex (5)->ident ());
-      os.writeObject (myperiodic ().myvertex (6)->ident ());
-      os.writeObject (myperiodic ().myvertex (7)->ident ());
-
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-      
-      // pack refinement information 
-      myperiodic ().backup ( os );
-      os.put( ObjectStream::ENDOFSTREAM );
-      
-      // pack internal data if has any 
-      inlineData ( os );
-
-      // allow erase
-      unset( flagLock );
-      return true;
+      return packLink( _moveTo, osv[ _moveTo ] );
     }
-    return false;
+    return false ;
+  }
+
+  template < class A > 
+  bool Periodic4PllXBaseMacro< A >::packLink( const int link, ObjectStream& os ) 
+  {
+    assert( link == _moveTo );
+    assert( myneighbour( 0 ).first->moveTo() == _moveTo );
+    assert( myneighbour( 1 ).first->moveTo() == _moveTo );
+    
+    os.writeObject (PERIODIC4);
+
+    // write boundary id 
+    const int bnd[ 2 ] = { int( this->bndtype( 0 ) ), int( this->bndtype( 1 ) ) };
+    os.writeObject ( bnd[ 0 ] );
+    os.writeObject ( bnd[ 1 ] );
+
+    os.writeObject (myperiodic ().myvertex (0)->ident ());
+    os.writeObject (myperiodic ().myvertex (1)->ident ());
+    os.writeObject (myperiodic ().myvertex (2)->ident ());
+    os.writeObject (myperiodic ().myvertex (3)->ident ());
+    os.writeObject (myperiodic ().myvertex (4)->ident ());
+    os.writeObject (myperiodic ().myvertex (5)->ident ());
+    os.writeObject (myperiodic ().myvertex (6)->ident ());
+    os.writeObject (myperiodic ().myvertex (7)->ident ());
+
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    
+    // pack refinement information 
+    myperiodic ().backup ( os );
+    os.put( ObjectStream::ENDOFSTREAM );
+    
+    // pack internal data if has any 
+    inlineData ( os );
+
+    // allow erase
+    unset( flagLock );
+    return true;
   }
 
   template < class A > 
@@ -1691,49 +1721,58 @@ namespace ALUGrid
 
     //std::cout << "Don't attach hexa to " << i << " " << _moveTo << std::endl;
   }
+
   // pack all function for dune 
   template < class A >
   bool HexaPllBaseXMacro< A >::doPackAll (std::vector< ObjectStream > & osv,
-                                            GatherScatterType* gs) 
+                                          GatherScatterType* gs) 
   {
     if( _moveTo >= 0 ) 
     {
       assert ((osv.begin () + _moveTo) < osv.end ());
-      ObjectStream& os = osv[ _moveTo ];
-      
-      os.writeObject (HEXA);
-      assert( _ldbVertexIndex >= 0 );
-      os.writeObject (_ldbVertexIndex ); 
-      os.writeObject (myhexa ().myvertex (0)->ident ());
-      os.writeObject (myhexa ().myvertex (1)->ident ());
-      os.writeObject (myhexa ().myvertex (2)->ident ());
-      os.writeObject (myhexa ().myvertex (3)->ident ());
-      os.writeObject (myhexa ().myvertex (4)->ident ());
-      os.writeObject (myhexa ().myvertex (5)->ident ());
-      os.writeObject (myhexa ().myvertex (6)->ident ());
-      os.writeObject (myhexa ().myvertex (7)->ident ());
-
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhexa_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-      
-      // backup refinement information 
-      myhexa(). backup ( os );
-      os.put( ObjectStream::ENDOFSTREAM );
-      
-      // pack internal data if has any 
-      inlineData ( os );
-
-      if( gs ) 
-      {
-        // pack Dune data 
-        gs->inlineData( os , myhexa() );
-      }
-
-      //allow erase
-      unset( flagLock );
-      return true;
+      return packLink( _moveTo, osv[ _moveTo ], gs );
     }
     return false;
+  }
+      
+  // pack all function for dune 
+  template < class A >
+  bool HexaPllBaseXMacro< A >::packLink ( const int link, ObjectStream& os,
+                                          GatherScatterType* gs) 
+  {
+    assert( link == _moveTo );
+      
+    os.writeObject (HEXA);
+    assert( _ldbVertexIndex >= 0 );
+    os.writeObject (_ldbVertexIndex ); 
+    os.writeObject (myhexa ().myvertex (0)->ident ());
+    os.writeObject (myhexa ().myvertex (1)->ident ());
+    os.writeObject (myhexa ().myvertex (2)->ident ());
+    os.writeObject (myhexa ().myvertex (3)->ident ());
+    os.writeObject (myhexa ().myvertex (4)->ident ());
+    os.writeObject (myhexa ().myvertex (5)->ident ());
+    os.writeObject (myhexa ().myvertex (6)->ident ());
+    os.writeObject (myhexa ().myvertex (7)->ident ());
+
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! myhexa_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    
+    // backup refinement information 
+    myhexa(). backup ( os );
+    os.put( ObjectStream::ENDOFSTREAM );
+    
+    // pack internal data if has any 
+    inlineData ( os );
+
+    if( gs ) 
+    {
+      // pack Dune data 
+      gs->inlineData( os , myhexa() );
+    }
+
+    //allow erase
+    unset( flagLock );
+    return true;
   }
 
 
@@ -1747,7 +1786,7 @@ namespace ALUGrid
   // pack all function for dune 
   template < class A >
   bool HexaPllBaseXMacro< A >::dunePackAll (std::vector< ObjectStream > & osv,
-                                              GatherScatterType & gs) 
+                                            GatherScatterType & gs) 
   {
     return doPackAll( osv, &gs );
   }

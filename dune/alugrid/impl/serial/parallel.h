@@ -64,7 +64,9 @@ namespace ALUGrid
       virtual void attach2   (int) = 0 ;
       virtual void unattach2 (int) = 0 ;
 
-      virtual bool packAll ( std::vector< ObjectStream > & ) = 0;
+      virtual bool packAll  ( std::vector< ObjectStream > & ) = 0;
+      virtual bool packLink ( const int, ObjectStream & ) = 0;
+      virtual bool packLink ( const int, ObjectStream &, GatherScatterType * ) = 0;
       virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) = 0;
       virtual void unpackSelf ( ObjectStream &, bool ) = 0;
       virtual void duneUnpackSelf ( ObjectStream &, bool, GatherScatterType * ) = 0;
@@ -81,6 +83,8 @@ namespace ALUGrid
       virtual void unattach2 (int) { assert(false);abort(); }
 
       virtual bool packAll ( std::vector< ObjectStream > &) { assert(false); abort(); }
+      virtual bool packLink ( const int, ObjectStream & ) { assert(false); abort(); return false; }
+      virtual bool packLink ( const int, ObjectStream &, GatherScatterType * ) { assert(false); abort(); return false; }
       virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) { assert(false); return false; }
       virtual void unpackSelf ( ObjectStream &, bool ) { assert(false); abort(); }
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType *) {assert(false);}
