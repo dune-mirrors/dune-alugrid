@@ -907,21 +907,27 @@ namespace ALUGrid
         // ist zul"assig, weil kein Objekt auf das eine Referenz im 'cache' vorliegt
         // beseitigt werden kann. Sie sind alle ein Niveau darunter.
 
+        std::vector< hedge_STI * >& innerEdgesLink = innerEdges[ l ];    
+        std::vector< hedge_STI * >& outerEdgesLink = outerEdges[ l ];    
+
+        std::vector< hface_STI * >& innerFacesLink = innerFaces[ l ];    
+        std::vector< hface_STI * >& outerFacesLink = outerFaces[ l ];    
+
         // reserve memory first 
-        innerFaces [l].reserve( fwi.size() );
-        outerFaces [l].reserve( fwo.size() );
+        innerFacesLink.reserve( fwi.size() );
+        outerFacesLink.reserve( fwo.size() );
           
-        for (fwi.first (); ! fwi.done (); fwi.next ()) innerFaces [l].push_back (& fwi.item ());
-        for (fwo.first (); ! fwo.done (); fwo.next ()) outerFaces [l].push_back (& fwo.item ());
+        for (fwi.first (); ! fwi.done (); fwi.next ()) innerFacesLink.push_back (& fwi.item ());
+        for (fwo.first (); ! fwo.done (); fwo.next ()) outerFacesLink.push_back (& fwo.item ());
 
         // reserve memory first 
-        innerEdges[l].reserve( dwi.size() + dfi.size() );
-        outerEdges[l].reserve( dwo.size() + dfo.size() );
+        innerEdgesLink.reserve( dwi.size() + dfi.size() );
+        outerEdgesLink.reserve( dwo.size() + dfo.size() );
 
-        for (dwo.first (); ! dwo.done (); dwo.next ()) outerEdges [l].push_back (& dwo.item ());
-        for (dfo.first (); ! dfo.done (); dfo.next ()) outerEdges [l].push_back (& dfo.item ());
-        for (dwi.first (); ! dwi.done (); dwi.next ()) innerEdges [l].push_back (& dwi.item ());
-        for (dfi.first (); ! dfi.done (); dfi.next ()) innerEdges [l].push_back (& dfi.item ());
+        for (dwo.first (); ! dwo.done (); dwo.next ()) outerEdgesLink.push_back (& dwo.item ());
+        for (dfo.first (); ! dfo.done (); dfo.next ()) outerEdgesLink.push_back (& dfo.item ());
+        for (dwi.first (); ! dwi.done (); dwi.next ()) innerEdgesLink.push_back (& dwi.item ());
+        for (dfi.first (); ! dfi.done (); dfi.next ()) innerEdgesLink.push_back (& dfi.item ());
       }
 
       // first check edges that cannot be coarsened 
