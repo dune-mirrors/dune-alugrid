@@ -980,13 +980,17 @@ namespace ALUGrid
 #endif
     }
 
-    void unpack( const int link, ObjectStream& os ) 
+    void meantimeWork () 
     {
       // create ParallelGridMover when all data was packed, otherwise the link packing
       // will fail since this will modify the macro grid, since the 
       // parallel macro grid mover clears the lists of macro elements 
       if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll );
+    }
 
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      assert( _pgm );
       // unpack data for given stream 
       _pgm->unpackAll( os, _gs );
     }

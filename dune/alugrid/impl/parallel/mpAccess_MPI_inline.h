@@ -627,6 +627,9 @@ namespace ALUGrid
     // receive data implementation with given buffers 
     void receive( DataHandleIF& dataHandle )
     {
+      // do work that can be done between send and receive 
+      dataHandle.meantimeWork() ;
+
       // get mpi communicator
       MPI_Comm comm = _mpAccess.communicator();
 
