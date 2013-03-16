@@ -40,7 +40,7 @@ namespace ALUGrid
       for (BuilderIF::hedge1list_t::iterator i = _hedge1List.begin ();
            i != _hedge1Listend; _hedge1List.erase (i ++)) 
       {
-        long k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident ();
+        int k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident ();
         _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
       }
     }
