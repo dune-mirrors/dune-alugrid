@@ -894,9 +894,9 @@ namespace ALUGrid
     std::vector< std::vector< MacroGridMoverIF* > > _vertices;
     std::vector< std::vector< MacroGridMoverIF* > > _edges;
     std::vector< std::vector< MacroGridMoverIF* > > _faces;
-    std::vector< std::vector< MacroGridMoverIF* > > _elements;
 
     GatherScatterType* _gs; 
+    const int _estimateSize;
 
     UnpackLBData( const UnpackLBData& );
   public:
@@ -909,14 +909,13 @@ namespace ALUGrid
         _vertices( nLinks ),
         _edges( nLinks ),
         _faces( nLinks ),
-        _elements( nLinks ),
-        _gs( gs )
+        _gs( gs ),
+        _estimateSize( typename AccessIterator < Gitter::hface_STI >::Handle(_containerPll).size() )
     {
       // create lists of items that should be packed
-      addItems< Gitter::vertex_STI >   ( _vertices );
-      addItems< Gitter::hedge_STI  >   ( _edges );
-      addItems< Gitter::hface_STI >    ( _faces );
-      addItems< Gitter::helement_STI > ( _elements );
+      addItems< Gitter::vertex_STI > ( _vertices );
+      addItems< Gitter::hedge_STI  > ( _edges );
+      addItems< Gitter::hface_STI >  ( _faces );
     }
 
     // destructor deleting parallel macro grid mover
@@ -926,9 +925,8 @@ namespace ALUGrid
     void addItems( std::vector< std::vector< MacroGridMoverIF* > >& items ) 
     {
       typename AccessIterator < item_STI >::Handle w ( _containerPll );
-      const int size = w.size();
       const int nLinks = items.size();
-      for( int i=0; i<nLinks; ++i ) items[ i ].reserve( size );
+      for( int i=0; i<nLinks; ++i ) items[ i ].reserve( _estimateSize );
       for (w.first (); ! w.done (); w.next ()) 
       {
         w.item().addAll( items );
@@ -963,8 +961,12 @@ namespace ALUGrid
       packItems( _edges[ link ], link, os );
       // pack faces 
       packItems( _faces[ link ], link, os );
+
       // pack elements
-      packElements( _elements[ link ], link, os );
+      {
+        AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) w.item ().packLink( link, os, _gs );
+      }
       // pack periodic elements 
       {
         AccessIterator < Gitter::hperiodic_STI >::Handle w ( _containerPll );

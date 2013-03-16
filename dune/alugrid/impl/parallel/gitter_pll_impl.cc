@@ -1056,6 +1056,8 @@ namespace ALUGrid
   bool TetraPllXBaseMacro< A >::packLink( const int link, ObjectStream& os,
                                           GatherScatterType* gs) 
   {
+    if( _moveTo != link ) return false ;
+
 #ifdef NDEBUG 
     for( int i=0; i<4; ++i ) 
     {
@@ -1813,6 +1815,8 @@ namespace ALUGrid
   bool HexaPllBaseXMacro< A >::packLink ( const int link, ObjectStream& os,
                                           GatherScatterType* gs) 
   {
+    if( _moveTo != link ) return false ;
+
     os.writeObject (HEXA);
     assert( _ldbVertexIndex >= 0 );
     os.writeObject (_ldbVertexIndex ); 
