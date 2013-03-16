@@ -980,6 +980,8 @@ namespace ALUGrid
 #endif
     }
 
+    // work that can be done between send and receive, 
+    // such as the construction of the ParallelGridMover 
     void meantimeWork () 
     {
       // create ParallelGridMover when all data was packed, otherwise the link packing
