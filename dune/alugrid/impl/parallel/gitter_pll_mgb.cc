@@ -926,6 +926,9 @@ namespace ALUGrid
     void addItems( std::vector< std::vector< MacroGridMoverIF* > >& items ) 
     {
       typename AccessIterator < item_STI >::Handle w ( _containerPll );
+      const int size = w.size();
+      const int nLinks = items.size();
+      for( int i=0; i<nLinks; ++i ) items[ i ].reserve( size );
       for (w.first (); ! w.done (); w.next ()) 
       {
         w.item().addAll( items );
