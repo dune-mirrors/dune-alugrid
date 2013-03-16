@@ -51,7 +51,9 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll  (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
       virtual bool packLink (const int link, ObjectStream& os );
+      virtual moveto_t* moveToMap() { return _moveTo; }
       virtual void unpackSelf (ObjectStream &, bool);
 
 #ifdef STORE_LINKAGE_IN_VERTICES
@@ -124,8 +126,10 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
       virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
+      virtual moveto_t* moveToMap() { return _moveTo; }
     protected :
       moveto_t*  _moveTo;
   };
@@ -183,8 +187,10 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
       virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
+      virtual moveto_t* moveToMap() { return _moveTo; }
     protected :
       moveto_t*  _moveTo;
   };
@@ -254,6 +260,7 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
       virtual bool packLink (const int link, ObjectStream& os, GatherScatterType* );
       virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
       // pack ghost information 
@@ -349,6 +356,7 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
       virtual bool packLink (const int link, ObjectStream& os );
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
@@ -437,6 +445,7 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
       virtual bool packLink (const int link, ObjectStream& os );
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
@@ -515,6 +524,7 @@ namespace ALUGrid
       virtual void unattach2 (int);
       
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
       virtual bool packLink (const int link, ObjectStream& os, GatherScatterType* );
       // pack ghost information 
       virtual void packAsGhost(ObjectStream &,int) const;

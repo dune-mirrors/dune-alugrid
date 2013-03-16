@@ -114,26 +114,37 @@ namespace ALUGrid
   }
 
   template < class A >
+  void VertexPllBaseX< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > > & vec) 
+  {
+    if( _moveTo ) 
+    {
+      typedef typename moveto_t::const_iterator  const_iterator;
+      const const_iterator iEnd =  _moveTo->end (); 
+      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
+      {
+        const int link = (*i).first;
+        vec[ link ].push_back( this );
+      }
+    }
+  }
+
+  template < class A >
   bool VertexPllBaseX< A >::packLink ( const int link, ObjectStream& os ) 
   {
-    if( _moveTo && _moveTo->find( link ) != _moveTo->end() ) 
-    {
-      os.writeObject (VERTEX);
-      os.writeObject (myvertex ().ident ());
-      os.writeObject (myvertex ().Point ()[0]);
-      os.writeObject (myvertex ().Point ()[1]);
-      os.writeObject (myvertex ().Point ()[2]);
+    os.writeObject (VERTEX);
+    os.writeObject (myvertex ().ident ());
+    os.writeObject (myvertex ().Point ()[0]);
+    os.writeObject (myvertex ().Point ()[1]);
+    os.writeObject (myvertex ().Point ()[2]);
 
 #ifdef STORE_LINKAGE_IN_VERTICES
-      const int elSize = _elements.size();
-      os.writeObject( elSize );
-      for( int el=0; el<elSize; ++el )
-        os.writeObject( _elements[ el ] );
+    const int elSize = _elements.size();
+    os.writeObject( elSize );
+    for( int el=0; el<elSize; ++el )
+      os.writeObject( _elements[ el ] );
 #endif
-      inlineData (os);
-      return true ; 
-    }
-    return false;
+    inlineData (os);
+    return true ; 
   }
 
   template < class A >
@@ -234,25 +245,36 @@ namespace ALUGrid
   }
 
   template < class A >
+  void EdgePllBaseXMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
+  {
+    if( _moveTo ) 
+    {
+      typedef typename moveto_t::const_iterator const_iterator;
+      const const_iterator iEnd =  _moveTo->end ();
+      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
+      {
+        const int link = (*i).first;
+        vec[ link ].push_back( this );
+      }
+    }
+  }
+
+  template < class A >
   bool EdgePllBaseXMacro< A >::packLink ( const int link, ObjectStream& os ) 
   {
-    if( _moveTo && _moveTo->find( link ) != _moveTo->end() ) 
-    {
-      os.writeObject (EDGE1);
-      os.writeObject (myhedge ().myvertex (0)->ident ());
-      os.writeObject (myhedge ().myvertex (1)->ident ());
-      
-      // make sure ENDOFSTREAM is not a valid refinement rule 
-      assert( ! myhedge_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    os.writeObject (EDGE1);
+    os.writeObject (myhedge ().myvertex (0)->ident ());
+    os.writeObject (myhedge ().myvertex (1)->ident ());
+    
+    // make sure ENDOFSTREAM is not a valid refinement rule 
+    assert( ! myhedge_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
 
-      // pack refinement information 
-      myhedge ().backup ( os );
-      os.put( ObjectStream::ENDOFSTREAM );
-      
-      inlineData ( os );
-      return true ;
-    }
-    return false;
+    // pack refinement information 
+    myhedge ().backup ( os );
+    os.put( ObjectStream::ENDOFSTREAM );
+    
+    inlineData ( os );
+    return true ;
   }
 
   template < class A >
@@ -507,78 +529,88 @@ namespace ALUGrid
     }
     return action;
   }
+
+  template < class A > 
+  void FacePllBaseXMacro < A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
+  {
+    if( _moveTo ) 
+    {
+      typedef typename moveto_t::const_iterator const_iterator;
+      const const_iterator iEnd =  _moveTo->end ();
+      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
+      {
+        const int link = (*i).first;
+        vec[ link ].push_back( (MacroGridMoverIF*) this );
+      }
+    }
+  }
         
   template < class A > bool 
   FacePllBaseXMacro < A >::packLink ( const int link, ObjectStream & os ) 
   {
-    if( _moveTo && _moveTo->find( link ) != _moveTo->end() ) 
+    const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled();
+
+    if (A::polygonlength == 4) 
     {
-      const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled();
-
-      if (A::polygonlength == 4) 
-      {
-        os.writeObject (MacroGridMoverIF::FACE4);
-      }
-      else if (A::polygonlength == 3) 
-      {
-        os.writeObject (MacroGridMoverIF::FACE3);
-      }
-      else 
-      {
-        // something wrong 
-        assert(false);
-        abort ();
-      }
-      
-      {
-        // write vertex idents 
-        for (int k = 0; k < A::polygonlength; ++ k)
-        {
-          os.writeObject (this->myhface ().myvertex (k)->ident ());
-        }
-      }
-
-      try {
-      
-        // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
-        // mit einer Verfeinerungsregel identisch ist - sonst gibt's
-        // nachher beim Auspacken nur garbage.
-      
-        assert (! myhface_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-      
-        this->myhface ().backup ( os );
-        os.put( ObjectStream::ENDOFSTREAM );
-
-        // inline internal data if has any 
-        inlineData ( os );
-
-      }
-      catch( ObjectStream::OutOfMemoryException )
-      {
-        std::cerr << "ERROR (fatal): Out of memory." << std::endl;
-        abort();
-      }
-
-      try
-      {
-      
-        // Wenn die Fl"ache auf den j. Strom des Lastverschiebers
-        // geschrieben wurde, dann mu"ussen auch die anliegenden
-        // Elemente daraufhin untersucht werden, ob sie sich nicht
-        // als Randelemente dorthin schreiben sollen - das tun sie
-        // aber selbst.
-      
-        this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, link, os, ghostCellsEnabled );
-        this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, link, os, ghostCellsEnabled );
-      } 
-      catch( Parallel::AccessPllException )
-      {
-        std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
-        abort();
-      }
-      return true;
+      os.writeObject (MacroGridMoverIF::FACE4);
     }
-    return false;
+    else if (A::polygonlength == 3) 
+    {
+      os.writeObject (MacroGridMoverIF::FACE3);
+    }
+    else 
+    {
+      // something wrong 
+      assert(false);
+      abort ();
+    }
+    
+    {
+      // write vertex idents 
+      for (int k = 0; k < A::polygonlength; ++ k)
+      {
+        os.writeObject (this->myhface ().myvertex (k)->ident ());
+      }
+    }
+
+    try {
+    
+      // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
+      // mit einer Verfeinerungsregel identisch ist - sonst gibt's
+      // nachher beim Auspacken nur garbage.
+    
+      assert (! myhface_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    
+      this->myhface ().backup ( os );
+      os.put( ObjectStream::ENDOFSTREAM );
+
+      // inline internal data if has any 
+      inlineData ( os );
+
+    }
+    catch( ObjectStream::OutOfMemoryException )
+    {
+      std::cerr << "ERROR (fatal): Out of memory." << std::endl;
+      abort();
+    }
+
+    try
+    {
+      // Wenn die Fl"ache auf den link-ten Strom des Lastverschiebers
+      // geschrieben wurde, dann mu"ussen auch die anliegenden
+      // Elemente daraufhin untersucht werden, ob sie sich nicht
+      // als Randelemente dorthin schreiben sollen - das tun sie
+      // aber selbst.
+    
+      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, link, os, ghostCellsEnabled );
+      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, link, os, ghostCellsEnabled );
+    } 
+    catch( Parallel::AccessPllException )
+    {
+      std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
+      abort();
+    }
+    return true;
   }
 
   //- --unpackSelf
@@ -1012,11 +1044,18 @@ namespace ALUGrid
   }
 
   template < class A >
+  void TetraPllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec)
+  {
+    if( _moveTo >= 0 ) 
+    {
+      vec[ _moveTo ].push_back( this );
+    }
+  }
+
+  template < class A >
   bool TetraPllXBaseMacro< A >::packLink( const int link, ObjectStream& os,
                                           GatherScatterType* gs) 
   {
-    if( _moveTo != link ) return false ;
-
 #ifdef NDEBUG 
     for( int i=0; i<4; ++i ) 
     {
@@ -1306,9 +1345,18 @@ namespace ALUGrid
   }
 
   template < class A >
+  void Periodic3PllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
+  {
+    if( _moveTo >= 0 ) 
+    { 
+      vec[ _moveTo ].push_back( this );
+    }
+  }
+
+  template < class A >
   bool Periodic3PllXBaseMacro< A >::packLink( const int link, ObjectStream& os ) 
   {
-    if( _moveTo != link ) return false ;
+    if( _moveTo != link ) return false;
 
     assert( myneighbour( 0 ).first->moveTo() == link );
     assert( myneighbour( 1 ).first->moveTo() == link );
@@ -1490,10 +1538,19 @@ namespace ALUGrid
     return false ;
   }
 
+  template < class A >
+  void Periodic4PllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
+  {
+    if( _moveTo >= 0 ) 
+    { 
+      vec[ _moveTo ].push_back( this );
+    }
+  }
+
   template < class A > 
   bool Periodic4PllXBaseMacro< A >::packLink( const int link, ObjectStream& os ) 
   {
-    if( _moveTo != link ) return false ;
+    if( _moveTo != link ) return false;
 
     assert( myneighbour( 0 ).first->moveTo() == _moveTo );
     assert( myneighbour( 1 ).first->moveTo() == _moveTo );
@@ -1756,8 +1813,6 @@ namespace ALUGrid
   bool HexaPllBaseXMacro< A >::packLink ( const int link, ObjectStream& os,
                                           GatherScatterType* gs) 
   {
-    if( _moveTo != link ) return false ;
-      
     os.writeObject (HEXA);
     assert( _ldbVertexIndex >= 0 );
     os.writeObject (_ldbVertexIndex ); 
@@ -1797,6 +1852,15 @@ namespace ALUGrid
   bool HexaPllBaseXMacro< A >::packAll (std::vector< ObjectStream > & osv) 
   {
     return doPackAll( osv, ( GatherScatterType* ) 0 );
+  }
+
+  template < class A >
+  void HexaPllBaseXMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
+  {
+    if( _moveTo >= 0 ) 
+    { 
+      vec[ _moveTo ].push_back( this );
+    }
   }
 
   // pack all function for dune 
