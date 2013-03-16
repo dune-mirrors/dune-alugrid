@@ -47,6 +47,7 @@ namespace ALUGrid
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
       
       inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns();  }
+      bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
@@ -122,6 +123,7 @@ namespace ALUGrid
       virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
+      bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
@@ -182,6 +184,7 @@ namespace ALUGrid
       virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
+      bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool );
       virtual void attach2 (int);
@@ -270,6 +273,7 @@ namespace ALUGrid
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
     protected:
+      bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll (std::vector< ObjectStream > &, GatherScatterType * );
       void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       void packAsBndNow (int, ObjectStream &, const bool ) const;
@@ -537,6 +541,7 @@ namespace ALUGrid
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
     protected :
+      bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll( std::vector< ObjectStream > &, GatherScatterType * );
       void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}

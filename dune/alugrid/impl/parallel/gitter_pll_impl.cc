@@ -107,7 +107,7 @@ namespace ALUGrid
       for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
       {
         const int link = (*i).first;
-        action = packLink( link, osv[ link ] );
+        action = doPackLink( link, osv[ link ] );
       }
     }
     return action ;
@@ -130,6 +130,12 @@ namespace ALUGrid
 
   template < class A >
   bool VertexPllBaseX< A >::packLink ( const int link, ObjectStream& os ) 
+  {
+    return doPackLink( link, os );
+  }
+
+  template < class A >
+  bool VertexPllBaseX< A >::doPackLink ( const int link, ObjectStream& os ) 
   {
     os.writeObject (VERTEX);
     os.writeObject (myvertex ().ident ());
@@ -238,7 +244,7 @@ namespace ALUGrid
       {
         const int link = (*i).first;
         assert ((osv.begin () + link) < osv.end ());
-        action = packLink( link, osv[ link ] );
+        action = doPackLink( link, osv[ link ] );
       }
     }
     return action;
@@ -261,6 +267,12 @@ namespace ALUGrid
 
   template < class A >
   bool EdgePllBaseXMacro< A >::packLink ( const int link, ObjectStream& os ) 
+  {
+    return doPackLink( link, os );
+  }
+
+  template < class A >
+  bool EdgePllBaseXMacro< A >::doPackLink ( const int link, ObjectStream& os ) 
   {
     os.writeObject (EDGE1);
     os.writeObject (myhedge ().myvertex (0)->ident ());
@@ -524,7 +536,7 @@ namespace ALUGrid
       {
         const int link = (*i).first;
         assert ((osv.begin () + link) < osv.end ());
-        action = packLink( link, osv[ link ] );
+        action = doPackLink( link, osv[ link ] );
       }
     }
     return action;
@@ -547,6 +559,12 @@ namespace ALUGrid
         
   template < class A > bool 
   FacePllBaseXMacro < A >::packLink ( const int link, ObjectStream & os ) 
+  {
+    return doPackLink( link, os );
+  }
+  
+  template < class A > bool 
+  FacePllBaseXMacro < A >::doPackLink ( const int link, ObjectStream & os ) 
   {
     const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled();
 
@@ -1038,7 +1056,7 @@ namespace ALUGrid
     if( _moveTo >= 0 ) 
     {
       assert ((osv.begin () + _moveTo) < osv.end ());
-      return packLink( _moveTo, osv[ _moveTo ], gs );
+      return doPackLink( _moveTo, osv[ _moveTo ], gs );
     }
     return false;
   }
@@ -1057,7 +1075,13 @@ namespace ALUGrid
                                           GatherScatterType* gs) 
   {
     if( _moveTo != link ) return false ;
+    return doPackLink( link, os, gs );
+  }
 
+  template < class A >
+  bool TetraPllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os,
+                                          GatherScatterType* gs) 
+  {
 #ifdef NDEBUG 
     for( int i=0; i<4; ++i ) 
     {
@@ -1805,7 +1829,7 @@ namespace ALUGrid
     if( _moveTo >= 0 ) 
     {
       assert ((osv.begin () + _moveTo) < osv.end ());
-      return packLink( _moveTo, osv[ _moveTo ], gs );
+      return doPackLink( _moveTo, osv[ _moveTo ], gs );
     }
     return false;
   }
@@ -1816,7 +1840,14 @@ namespace ALUGrid
                                           GatherScatterType* gs) 
   {
     if( _moveTo != link ) return false ;
+    return doPackLink( link, os, gs );
+  }
 
+  // pack all function for dune 
+  template < class A >
+  bool HexaPllBaseXMacro< A >::doPackLink ( const int link, ObjectStream& os,
+                                            GatherScatterType* gs) 
+  {
     os.writeObject (HEXA);
     assert( _ldbVertexIndex >= 0 );
     os.writeObject (_ldbVertexIndex ); 

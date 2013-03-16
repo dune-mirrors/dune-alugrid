@@ -891,12 +891,14 @@ namespace ALUGrid
   {
     GitterPll::MacroGitterPll& _containerPll;
     ParallelGridMover*  _pgm;
+    GatherScatterType* _gs; 
+
+#ifdef USE_NONBLOCKING_SEND_PGM
     std::vector< std::vector< MacroGridMoverIF* > > _vertices;
     std::vector< std::vector< MacroGridMoverIF* > > _edges;
     std::vector< std::vector< MacroGridMoverIF* > > _faces;
-
-    GatherScatterType* _gs; 
     const int _estimateSize;
+#endif
 
     UnpackLBData( const UnpackLBData& );
   public:
@@ -906,10 +908,11 @@ namespace ALUGrid
                   GatherScatterType* gs ) 
       : _containerPll( containerPll ),
         _pgm( 0 ),
-        _vertices( nLinks ),
+        _gs( gs )
+#ifdef USE_NONBLOCKING_SEND_PGM
+        , _vertices( nLinks ),
         _edges( nLinks ),
         _faces( nLinks ),
-        _gs( gs ),
         _estimateSize( typename AccessIterator < Gitter::hface_STI >::Handle(_containerPll).size() )
     {
       // create lists of items that should be packed
@@ -917,10 +920,14 @@ namespace ALUGrid
       addItems< Gitter::hedge_STI  > ( _edges );
       addItems< Gitter::hface_STI >  ( _faces );
     }
+#else 
+    {}
+#endif
 
     // destructor deleting parallel macro grid mover
     ~UnpackLBData() { delete _pgm; }
 
+#ifdef USE_NONBLOCKING_SEND_PGM
     template <class item_STI>
     void addItems( std::vector< std::vector< MacroGridMoverIF* > >& items ) 
     {
@@ -942,19 +949,11 @@ namespace ALUGrid
         (*it)->packLink( link, os );
       }
     }
-
-    void packElements( std::vector< MacroGridMoverIF* >& items, const int link, ObjectStream& os ) 
-    {
-      typedef typename std::vector< MacroGridMoverIF* > :: iterator iterator ;
-      const iterator end = items.end();
-      for( iterator it = items.begin(); it != end ; ++it ) 
-      {
-        (*it)->packLink( link, os, _gs );
-      }
-    }
+#endif
 
     void pack( const int link, ObjectStream& os ) 
     {
+#ifdef USE_NONBLOCKING_SEND_PGM
       // pack vertices 
       packItems( _vertices[ link ], link, os );
       // pack edges  
@@ -975,6 +974,10 @@ namespace ALUGrid
 
       // write end marker 
       os.writeObject (MacroGridMoverIF::ENDMARKER);
+#else
+      std::cerr << "ERROR: UnpackLBData::pack should not be called!" << std::endl;
+      abort();
+#endif
     }
 
     void unpack( const int link, ObjectStream& os ) 
@@ -1096,14 +1099,59 @@ namespace ALUGrid
       }
       lap1 = clock ();
 
-      lap2 = lap1 ;
+#ifndef USE_NONBLOCKING_SEND_PGM
+      // message buffers 
+      std::vector< ObjectStream > osv( nl );
+
+      // pack vertices 
+      {
+        AccessIterator < vertex_STI >::Handle w (containerPll ());
+        for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
+      }
+      // pack edges 
+      {
+        AccessIterator < hedge_STI >::Handle w (containerPll ());
+        for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
+      }
+      // pack faces  
+      {
+        AccessIterator < hface_STI >::Handle w (containerPll ());
+        for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
+      }
+      // pack elements 
+      {
+        AccessIterator < helement_STI >::Handle w (containerPll ());
+        if( gatherScatter ) 
+        {
+          GatherScatterType& gs = *gatherScatter ;
+          for (w.first (); ! w.done (); w.next ()) w.item().dunePackAll( osv, gs );
+        }
+        else 
+          for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
+      }
+      // pack periodic elements
+      {
+        AccessIterator < hperiodic_STI >::Handle w (containerPll ());
+        for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
+      }
+
+      // write end marker to terminate stream 
+      for( int link=0; link<nl; ++link ) 
+        osv[ link ].writeObject( MacroGridMoverIF::ENDMARKER );
+#endif
+
+      lap2 = clock ();
       
       {
         // data handle  
-        UnpackLBData data( containerPll (), mpAccess().nlinks(), gatherScatter );
+        UnpackLBData data( containerPll (), nl, gatherScatter );
 
         // pack, exchange, and unpack data 
+#ifndef USE_NONBLOCKING_SEND_PGM
+        mpAccess ().exchange ( osv, data );
+#else 
         mpAccess ().exchange ( data );
+#endif
       }
 
       lap3 = clock ();
