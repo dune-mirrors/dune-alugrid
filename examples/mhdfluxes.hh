@@ -15,6 +15,10 @@ class DWNumFlux;
 template < int dimDomain >
 class HLLEMNumFlux;
 
+// HLLEM
+template < int dimDomain, bool >
+class MHDNumFlux;
+
 // ************************************************
 template <int dimDomain>
 class ConsVec : public Dune :: FieldVector< double, dimDomain+2> 
@@ -29,7 +33,7 @@ namespace Mhd {
 }
 
 // ***********************
-template < int dimDomain, Mhd :: MhdFluxType fluxtype >
+template < int dimDomain >
 class MHDNumFluxBase
 {
 public:
@@ -40,7 +44,7 @@ public:
   typedef Dune::FieldVector< double, dimDomain+2 > RangeType;
 
 protected:  
-  MHDNumFluxBase(const double gamma ) 
+  MHDNumFluxBase(const double gamma, const Mhd :: MhdFluxType fluxtype )
    : eos( MhdSolverType::Eosmode::me_ideal ),
      numFlux_(eos, gamma, 1.0 ),
      rot_(1) 
@@ -107,24 +111,35 @@ protected:
 //
 //////////////////////////////////////////////////////////
 
-template <int dimDomain>
-class DWNumFlux : public MHDNumFluxBase< dimDomain, Mhd::DW >
+template <int dimDomain, bool hllem >
+class MHDNumFlux : public MHDNumFluxBase< dimDomain > 
 {
-  typedef MHDNumFluxBase< dimDomain, Mhd::DW > BaseType ; 
+  typedef MHDNumFluxBase< dimDomain > BaseType ; 
+public:  
+  MHDNumFlux( const double gamma ) 
+    : BaseType( gamma, hllem ? Mhd::HLLEM : Mhd::DW ) 
+  {}
+  static std::string name () { return hllem ? "HLLEM (Mhd)" : "DW (Mhd)"; }
+};
+
+template <int dimDomain>
+class DWNumFlux : public MHDNumFluxBase< dimDomain >
+{
+  typedef MHDNumFluxBase< dimDomain > BaseType ; 
 public:  
   DWNumFlux( const double gamma ) 
-    : BaseType( gamma ) 
+    : BaseType( gamma, Mhd::DW ) 
   {}
   static std::string name () { return "DW (Mhd)"; }
 };
 
 template <int dimDomain>
-class HLLEMNumFlux : public MHDNumFluxBase< dimDomain, Mhd::HLLEM >
+class HLLEMNumFlux : public MHDNumFluxBase< dimDomain >
 {
-  typedef MHDNumFluxBase< dimDomain, Mhd::HLLEM > BaseType ; 
+  typedef MHDNumFluxBase< dimDomain > BaseType ; 
 public:  
   HLLEMNumFlux( const double gamma ) 
-    : BaseType( gamma ) 
+    : BaseType( gamma, Mhd::HLLEM ) 
   {}
   static std::string name () { return "HLLEM (Mhd)"; }
 };
