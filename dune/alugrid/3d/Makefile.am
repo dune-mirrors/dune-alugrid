@@ -1,6 +1,6 @@
 alu3dgriddir = $(includedir)/dune/alugrid/3d
 alu3dgrid_HEADERS = alu3dinclude.hh \
-  datahandle.hh grid.hh grid_imp.cc grid_inline.hh \
+  datacollectorcaps.hh datahandle.hh grid.hh grid_imp.cc grid_inline.hh \
   mappings.hh mappings_imp.cc topology.hh \
   entity.hh entity_imp.cc entity_inline.hh entityseed.hh \
   faceutility.hh faceutility_imp.cc geometry.hh geometry_imp.cc \
