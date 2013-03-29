@@ -175,10 +175,7 @@ namespace Dune
       {
         DUNE_THROW(InvalidStateException,"file not found " << filename );
       }
-
-      std::string name( filename );
-      name += " via SGrid";
-      return createCubeGrid( file, name, mpiComm );
+      return createCubeGrid( file, filename, mpiComm );
     }
 
     static GridPtr< Grid > 
