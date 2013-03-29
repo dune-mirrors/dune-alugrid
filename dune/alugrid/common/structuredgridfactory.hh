@@ -1,8 +1,6 @@
 #ifndef DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 #define DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 
-#warning "ALUGrid SFG"
-
 #include <vector>
 
 #include <dune/common/array.hh>
@@ -15,6 +13,9 @@
 #include <dune/grid/common/exceptions.hh>
 
 #include <dune/grid/alugrid/common/declaration.hh>
+
+// include DGF parser implementation for SGrid 
+#include <dune/grid/io/file/dgfparser/dgfs.hh>
 
 namespace Dune
 {
@@ -161,17 +162,105 @@ namespace Dune
     typedef typename Grid::ctype ctype;
     typedef typename MPIHelper :: MPICommunicator MPICommunicatorType ;
 
+    // type of communicator 
+    typedef Dune :: CollectiveCommunication< MPICommunicatorType >
+        CollectiveCommunication ;
+
+    static GridPtr< Grid > 
+    createCubeGrid( const std::string& filename,  
+                    MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )       
+    {
+      std::ifstream file( filename );
+      if( ! file ) 
+      {
+        DUNE_THROW(InvalidStateException,"file not found " << filename );
+      }
+
+      std::string name( filename );
+      name += " via SGrid";
+      return createCubeGrid( file, name, mpiComm );
+    }
+
+    static GridPtr< Grid > 
+    createCubeGrid( std::istream& input,  
+                    const std::string& name, 
+                    MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )       
+    {
+      CollectiveCommunication comm( MPIHelper :: getCommunicator() );
+      const int myrank = comm.rank();
+
+      typedef SGrid< dim, dimworld, ctype > SGridType ;
+      // only work for the new ALUGrid version 
+      // if creation of SGrid fails the DGF file does not contain a proper
+      // IntervalBlock, and thus we cannot create the grid parallel, 
+      // we will use the standard technique 
+      bool sgridCreated = true ;
+      array<int, dim> dims;
+      FieldVector<ctype, dimworld> lowerLeft ( 0 ); 
+      FieldVector<ctype, dimworld> upperRight( 0 ); 
+      if( myrank == 0 ) 
+      {
+        GridPtr< SGridType > sPtr;
+        try 
+        { 
+          sPtr = GridPtr< SGridType >( input, mpiComm );
+        }
+        catch ( DGFException & e ) 
+        {
+          sgridCreated = false ;
+          std::cout << "Caught DGFException on creation of SGrid, trying default DGF method!" << std::endl;
+        }
+        if( sgridCreated ) 
+        { 
+          SGridType& sgrid = *sPtr ;
+          dims = sgrid.dims( 0 );
+          lowerLeft  = sgrid.lowerLeft();
+          upperRight = sgrid.upperRight();
+        }
+      }
+
+      // get global min to be on the same path
+      sgridCreated = comm.min( sgridCreated );
+      if( ! sgridCreated ) 
+      {
+        // use traditional DGF method
+        return GridPtr< Grid >( input, mpiComm );
+      }
+      else 
+      { 
+        // broadcast array values 
+        comm.broadcast( &dims[ 0 ], dim, 0 );
+        comm.broadcast( &lowerLeft [ 0 ], dim, 0 );
+        comm.broadcast( &upperRight[ 0 ], dim, 0 );
+      }
+
+      std::string nameS( name );
+      nameS += " via SGrid";
+      typedef StructuredGridFactory< Grid > SGF;
+      return SGF :: createCubeGridImpl( lowerLeft, upperRight, dims, comm, nameS );
+    }
+
     template < class int_t >
-    static shared_ptr< Grid > 
+    static GridPtr< Grid > 
     createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
                      const FieldVector<ctype,dimworld>& upperRight,
                      const array< int_t, dim>& elements, 
                      MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )       
     {
-      // type of communicator 
-      typedef Dune :: CollectiveCommunication< MPICommunicatorType > CollectiveCommunication ;
-
       CollectiveCommunication comm( mpiComm );
+      std::string name( "Cartesian ALUGrid via SGrid" );
+      return createCubeGridImpl( lowerLeft, upperRight, elements, comm, name );
+    }
+
+  protected:  
+    template < class int_t >
+    static GridPtr< Grid > 
+    createCubeGridImpl ( const FieldVector<ctype,dimworld>& lowerLeft,
+                         const FieldVector<ctype,dimworld>& upperRight,
+                         const array< int_t, dim>& elements, 
+                         const CollectiveCommunication& comm,
+                         const std::string& name ) 
+    {
       const int myrank = comm.rank();
 
       typedef SGrid< dim, dimworld, ctype > SGridType ;
@@ -187,7 +276,8 @@ namespace Dune
       typedef typename GridView  :: template Codim< 0 > :: Iterator ElementIterator ;
       typedef typename ElementIterator::Entity  Entity ;
       typedef typename Entity::EntityPointer    EntityPointer ;
-      typedef typename GridView :: IntersectionIterator  IntersectionIterator ;
+      typedef typename GridView :: IntersectionIterator     IntersectionIterator ;
+      typedef typename IntersectionIterator :: Intersection Intersection ;
 
       GridView gridView = sgrid.leafView();
       const IndexSet& indexSet = gridView.indexSet();
@@ -242,14 +332,15 @@ namespace Dune
         const IntersectionIterator iend = gridView.iend( entity );
         for( IntersectionIterator iit = gridView.ibegin( entity ); iit != iend; ++iit )
         {
-          const int face = iit->indexInInside();
+          const Intersection& intersection = *iit ;
+          const int face = intersection.indexInInside();
           // insert boundary face in case of domain boundary 
-          if( iit->boundary() )
-            factory.insertBoundary( elIndex, face, iit->boundaryId() );
+          if( intersection.boundary() )
+            factory.insertBoundary( elIndex, face, intersection.boundaryId() );
           // insert process boundary in case the neighboring element has a different rank
-          if(   iit->neighbor() ) 
+          if( intersection.neighbor() ) 
           {
-            EntityPointer outside = iit->outside();
+            EntityPointer outside = intersection.outside();
             if( partitioner.rank( *outside ) != myrank ) 
             {
               factory.insertProcessBorder( elIndex, face );
@@ -259,8 +350,8 @@ namespace Dune
         ++elIndex;
       }
 
-      std::string name( "Cartestian ALUGrid via SGrid" );
-      return shared_ptr< Grid> ( factory.createGrid( true, true, name ) );
+      // create grid pointer (behaving like a shared_ptr) 
+      return GridPtr< Grid> ( factory.createGrid( true, true, name ) );
     }
   };
 
