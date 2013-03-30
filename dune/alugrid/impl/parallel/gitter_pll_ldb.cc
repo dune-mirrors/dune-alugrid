@@ -927,7 +927,7 @@ namespace ALUGrid
 
   void LoadBalancer::DataBase::printVertexSet() const 
   {
-    typedef typename ldb_vertex_map_t :: const_iterator const_iterator ;
+    typedef ldb_vertex_map_t :: const_iterator const_iterator ;
     const const_iterator end = _vertexSet.end ();
     std::cout << "VXSet size = " << _vertexSet.size() << std::endl;
     for( const_iterator it = _vertexSet.begin(); it != end; ++it ) 
