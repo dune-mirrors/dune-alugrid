@@ -383,21 +383,22 @@ namespace Dune {
 
   }; // end class Diagnostics
 
-  //! get memory in MB 
-  static std::vector<double> getMemoryUsage()
-  {
-    std::vector<double> memUsage(2);
-    struct rusage info;
-    getrusage( RUSAGE_SELF, &info );
-    // convert to KB
-    memUsage[ 0 ] = (double(info.ru_maxrss)/ 1024.0);
-  #if HAVE_ALUGRID
-    memUsage[ 1 ] = (double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
-  #else
-    memUsage[ 1 ] = (double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
-  #endif
-    return memUsage;
-  }
-
 } // end namespace Dune 
+
+//! get memory in MB 
+static std::vector<double> getMemoryUsage()
+{
+  std::vector<double> memUsage(2);
+  struct rusage info;
+  getrusage( RUSAGE_SELF, &info );
+  // convert to KB
+  memUsage[ 0 ] = (double(info.ru_maxrss)/ 1024.0);
+#if HAVE_ALUGRID
+  memUsage[ 1 ] = (double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
+#else
+  memUsage[ 1 ] = (double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
+#endif
+  return memUsage;
+}
+
 #endif
