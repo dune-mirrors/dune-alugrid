@@ -116,7 +116,7 @@ private:
  *
  *  \tparam Grid     is the type of the underlying grid
  */
-template< class Grid, class LoadBalanceHandle >
+template< class Grid>
 struct LeafAdaptation
 {
   // dimensions of grid and world
@@ -141,9 +141,9 @@ public:
   /** \brief constructor
    *  \param grid   the grid to be adapted
    */
-  LeafAdaptation ( Grid &grid, LoadBalanceHandle &ldb )
+  LeafAdaptation ( Grid &grid, ZOLTAN_PARTITIONING new_partitioning )
   : grid_( grid ),
-    ldb_( ldb ),
+	new_partitioning_( new_partitioning ),
     adaptTime_( 0.0 ),
     lbTime_( 0.0 ),
     commTime_( 0.0 )
@@ -185,16 +185,16 @@ private:
   void hierarchicProlong ( const Entity &entity, DataMap &dataMap ) const;
 
   Grid &grid_;
-  LoadBalanceHandle &ldb_;
+  ZOLTAN_PARTITIONING new_partitioning_;
 
   double adaptTime_;
   double lbTime_;
   double commTime_;
 };
 
-template< class Grid, class LoadBalanceHandle >
+template< class Grid >
 template< class Vector >
-inline void LeafAdaptation< Grid, LoadBalanceHandle >::operator() ( Vector &solution )
+inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
 {
   if (Dune :: Capabilities :: isCartesian<Grid> :: v)
     return;
@@ -216,7 +216,7 @@ inline void LeafAdaptation< Grid, LoadBalanceHandle >::operator() ( Vector &solu
   Container container(grid_,0);
   const Container & ccontainer = container;
 
-  // first store all leave data in container
+  // first store all leaf data in container
   {
     const Iterator &end = gridView.template end< 0, partition >();
     for( Iterator it = gridView.template begin< 0, partition >(); it != end; ++it )
@@ -244,7 +244,7 @@ inline void LeafAdaptation< Grid, LoadBalanceHandle >::operator() ( Vector &solu
   // interpolate all new cells to leaf level 
   if( refined )
   {
-    container.resize();
+    container.update();
     const LevelIterator end = grid_.template lend< 0, partition >( 0 );
     for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
       hierarchicProlong<Vector>( *it, container );
@@ -255,8 +255,9 @@ inline void LeafAdaptation< Grid, LoadBalanceHandle >::operator() ( Vector &solu
   Dune :: Timer lbTimer ;
   // re-balance grid 
   DataHandle<Grid,Container> dataHandle( grid_, container ) ;
-  grid_.loadBalance( ldb_, dataHandle );
-  // typedef Dune::CommDataHandleIF< DataHandle<Grid,Container>, Container > DataHandleInterface;
+  LoadBalanceHandle<Grid> ldb( grid_, new_partitioning_ );
+  grid_.loadBalance( ldb, dataHandle );
+  typedef Dune::CommDataHandleIF< DataHandle<Grid,Container>, Container > DataHandleInterface;
   // grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
 
   // cleanup adaptation markers 
@@ -288,9 +289,9 @@ inline void LeafAdaptation< Grid, LoadBalanceHandle >::operator() ( Vector &solu
   commTime_ = commTimer.elapsed();
 }
 
-template< class Grid, class LoadBalanceHandle >
+template< class Grid >
 template< class Vector, class DataMap >
-inline void LeafAdaptation< Grid, LoadBalanceHandle >
+inline void LeafAdaptation< Grid >
   ::hierarchicRestrict ( const Entity &entity, DataMap &dataMap ) const
 {
   // for leaf entities just copy the data to the data map
@@ -315,9 +316,9 @@ inline void LeafAdaptation< Grid, LoadBalanceHandle >
   }
 }
 
-template< class Grid, class LoadBalanceHandle >
+template< class Grid >
 template< class Vector, class DataMap >
-inline void LeafAdaptation< Grid, LoadBalanceHandle >
+inline void LeafAdaptation< Grid >
   ::hierarchicProlong ( const Entity &entity, DataMap &dataMap ) const
 {
   if ( !entity.isLeaf() )

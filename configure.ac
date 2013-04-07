@@ -31,6 +31,7 @@ AC_CONFIG_FILES([
   examples/Makefile
   examples/dgf/Makefile
   examples/loadbalancing/Makefile
+  examples/zoltan/Makefile
   dune-alugrid.pc
 ])
 

@@ -30,7 +30,8 @@ private:
 
 public:
   LoadBalanceHandle ( const Grid &grid )
-  : grid_( grid )
+  : grid_( grid ),
+    angle_( 0 )
   {}
 
   bool userDefinedPartitioning () const
@@ -67,10 +68,8 @@ public:
     return p;
   }
 private:
-  static double angle_;
+  mutable double angle_;
 };
 
-template< class Grid >
-double LoadBalanceHandle<Grid>::angle_ = 0;
 
 #endif // #ifndef LOADBALNCE_HH
