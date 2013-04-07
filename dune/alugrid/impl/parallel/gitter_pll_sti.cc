@@ -907,21 +907,27 @@ namespace ALUGrid
         // ist zul"assig, weil kein Objekt auf das eine Referenz im 'cache' vorliegt
         // beseitigt werden kann. Sie sind alle ein Niveau darunter.
 
+        std::vector< hedge_STI * >& innerEdgesLink = innerEdges[ l ];    
+        std::vector< hedge_STI * >& outerEdgesLink = outerEdges[ l ];    
+
+        std::vector< hface_STI * >& innerFacesLink = innerFaces[ l ];    
+        std::vector< hface_STI * >& outerFacesLink = outerFaces[ l ];    
+
         // reserve memory first 
-        innerFaces [l].reserve( fwi.size() );
-        outerFaces [l].reserve( fwo.size() );
+        innerFacesLink.reserve( fwi.size() );
+        outerFacesLink.reserve( fwo.size() );
           
-        for (fwi.first (); ! fwi.done (); fwi.next ()) innerFaces [l].push_back (& fwi.item ());
-        for (fwo.first (); ! fwo.done (); fwo.next ()) outerFaces [l].push_back (& fwo.item ());
+        for (fwi.first (); ! fwi.done (); fwi.next ()) innerFacesLink.push_back (& fwi.item ());
+        for (fwo.first (); ! fwo.done (); fwo.next ()) outerFacesLink.push_back (& fwo.item ());
 
         // reserve memory first 
-        innerEdges[l].reserve( dwi.size() + dfi.size() );
-        outerEdges[l].reserve( dwo.size() + dfo.size() );
+        innerEdgesLink.reserve( dwi.size() + dfi.size() );
+        outerEdgesLink.reserve( dwo.size() + dfo.size() );
 
-        for (dwo.first (); ! dwo.done (); dwo.next ()) outerEdges [l].push_back (& dwo.item ());
-        for (dfo.first (); ! dfo.done (); dfo.next ()) outerEdges [l].push_back (& dfo.item ());
-        for (dwi.first (); ! dwi.done (); dwi.next ()) innerEdges [l].push_back (& dwi.item ());
-        for (dfi.first (); ! dfi.done (); dfi.next ()) innerEdges [l].push_back (& dfi.item ());
+        for (dwo.first (); ! dwo.done (); dwo.next ()) outerEdgesLink.push_back (& dwo.item ());
+        for (dfo.first (); ! dfo.done (); dfo.next ()) outerEdgesLink.push_back (& dfo.item ());
+        for (dwi.first (); ! dwi.done (); dwi.next ()) innerEdgesLink.push_back (& dwi.item ());
+        for (dfi.first (); ! dfi.done (); dfi.next ()) innerEdgesLink.push_back (& dfi.item ());
       }
 
       // first check edges that cannot be coarsened 
@@ -1360,9 +1366,15 @@ namespace ALUGrid
     return repartition;
   }
 
+  double ldbTimerU2 = 0.0;
+  double ldbTimerU3 = 0.0;
+  double ldbTimerU4 = 0.0;
+  double ldbTimerU5 = 0.0;
+
   // --loadBalance 
   bool GitterPll::loadBalancerGridChangesNotify ( GatherScatterType* gs ) 
   {
+    int lap1 = clock ();
     // create load balancer data base 
     LoadBalancer::DataBase db( _graphSizes );
  
@@ -1371,6 +1383,10 @@ namespace ALUGrid
     // check whether we have to repartition 
     const bool repartition = (userDefinedPartitioning)? gs->repartition() : 
                                                         checkPartitioning( db, gs );
+
+    int lap2 = clock ();
+    int lap3 = lap2 ;
+    int lap4 = lap2 ;
 
     // if repartioning necessary, do it 
     if ( repartition ) 
@@ -1388,17 +1404,107 @@ namespace ALUGrid
       // if a method was given, perform load balancing
       if (userDefinedPartitioning || ldbMth)
       {
+#ifdef STORE_LINKAGE_IN_VERTICES
+#warning "Using linkage storage in vertices to avoid allgather"
+        const bool precomputeLinkage = serialPartitioner ();
+#else 
+        const bool precomputeLinkage = false ;
+#endif
+        lap3 = clock();
+
+        if( precomputeLinkage ) 
+          computeVertexLinkage();
+
         // check gather-scatter object and call appropriate method 
         if( gs ) 
           duneRepartitionMacroGrid( db, *gs );  
         else   
           repartitionMacroGrid (db);
+
+        if( precomputeLinkage ) 
+          setVertexLinkage( db );
+
+        lap4 = clock();
+
         // calls identification and exchangeDynamicState 
-        notifyMacroGridChanges ();
+        doNotifyMacroGridChanges ( ! precomputeLinkage );
       }
     }
+
+    int lap5 = clock ();
+
+    float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC);
+    float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC);
+    float u4 = (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC);
+    float u5 = (float)(lap5 - lap4)/(float)(CLOCKS_PER_SEC);
+
+    ldbTimerU2 += u2 ;
+    ldbTimerU3 += u3 ;
+    ldbTimerU4 += u4 ;
+    ldbTimerU5 += u5 ;
+
     return repartition;
   }
+
+#ifdef STORE_LINKAGE_IN_VERTICES
+  void GitterPll::computeVertexLinkage() 
+  {
+    static bool firstCall = false ;
+
+    if( ! firstCall ) 
+    {
+      AccessIterator < helement_STI >::Handle w ( containerPll () );
+
+      // set ldb vertex indices to all elements 
+      for (w.first (); ! w.done (); w.next () ) 
+      {
+        w.item ().computeVertexLinkage();
+      }
+      firstCall = true ;
+    }
+
+    // communication 
+  }
+
+  void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
+  {
+    AccessIterator < vertex_STI >::Handle w ( containerPll () );
+
+    const int me = mpAccess().myrank(); 
+
+    // set ldb vertex indices to all elements 
+    for (w.first (); ! w.done (); w.next () ) 
+    {
+      vertex_STI& vertex = w.item();
+      if( vertex.isBorder() ) 
+      {
+        const std::vector<int>& linkedElements = vertex.linkedElements();
+        const int elSize = linkedElements.size();
+        std::vector< int > linkage; 
+        linkage.reserve( elSize );
+        for( int el=0; el<elSize; ++el )
+        {
+          const int rank = db.destination( linkedElements[ el ] ) ;
+          if( rank != me ) 
+          {
+            // std::cout << "Vertex " << vertex.ident() << " --> " << *it << " ( " << rank << " ) " << std::endl;
+            linkage.push_back( rank );
+          }
+        }
+      
+        // set linkage 
+        vertex.setLinkage( linkage );
+      }
+      else 
+      {
+        // clear linkage
+        vertex.setLinkage( std::vector< int > () );
+      }
+    }
+
+    // communication 
+  }
+#endif
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 
   {
@@ -1474,10 +1580,15 @@ namespace ALUGrid
 
   void GitterPll::notifyMacroGridChanges () 
   {
+    doNotifyMacroGridChanges( true );
+  }
+
+  void GitterPll::doNotifyMacroGridChanges ( bool computeVertexLinkage ) 
+  {
     assert (debugOption (20) ? (std::cout << "**INFO GitterPll::notifyMacroGridChanges () " << std::endl, 1) : 1 );
     Gitter::notifyMacroGridChanges ();
 
-    containerPll ().identification (mpAccess ());
+    containerPll ().identification (mpAccess (), computeVertexLinkage );
 
     loadBalancerMacroGridChangesNotify ();
     exchangeDynamicState ();

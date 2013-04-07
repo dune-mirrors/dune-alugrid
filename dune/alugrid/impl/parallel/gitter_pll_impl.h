@@ -47,16 +47,40 @@ namespace ALUGrid
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
       
       inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns();  }
+      bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
-      virtual bool packAll (std::vector< ObjectStream > &);
+      virtual bool packAll  (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
+      virtual bool packLink (const int link, ObjectStream& os );
+      virtual moveto_t* moveToMap() { return _moveTo; }
       virtual void unpackSelf (ObjectStream &, bool);
+
+#ifdef STORE_LINKAGE_IN_VERTICES
+      virtual bool addGraphVertexIndex( const int ldbVxIndex ) 
+      {
+        const int elSize = _elements.size(); 
+        for( int i=0; i<elSize; ++i ) 
+        {
+          if( _elements[ i ] == ldbVxIndex ) 
+            return false ;
+        }
+
+        _elements.push_back( ldbVxIndex ); 
+        return true ;
+      }
+
+      virtual const std::vector<int>& linkedElements () const { return _elements; }
+#endif
 
     protected :
       static const linkagePattern_t nullPattern;
       linkagePatternMap_t::iterator _lpn;
       moveto_t*  _moveTo;
+#ifdef STORE_LINKAGE_IN_VERTICES
+      std::vector< int > _elements ;
+#endif
   };
 
   template < class A > 
@@ -79,8 +103,6 @@ namespace ALUGrid
       virtual bool lockedAgainstCoarsening () const;
       virtual void attach2 (int);
       virtual void unattach2 (int);
-      virtual bool packAll (std::vector< ObjectStream > &);
-      virtual void unpackSelf (ObjectStream &, bool);
   };
 
   template < class A > 
@@ -101,11 +123,15 @@ namespace ALUGrid
       virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
+      bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
+      virtual moveto_t* moveToMap() { return _moveTo; }
     protected :
       moveto_t*  _moveTo;
   };
@@ -158,12 +184,16 @@ namespace ALUGrid
       virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
+      bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool );
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
+      virtual moveto_t* moveToMap() { return _moveTo; }
     protected :
       moveto_t*  _moveTo;
   };
@@ -226,12 +256,15 @@ namespace ALUGrid
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
+      virtual void computeVertexLinkage() ;
     public :
       virtual bool erasable () const;
       virtual void attachElement2 ( const int, const int );
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
+      virtual bool packLink (const int link, ObjectStream& os, GatherScatterType* );
       virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
       // pack ghost information 
       virtual void packAsGhost(ObjectStream &,int) const;
@@ -240,6 +273,7 @@ namespace ALUGrid
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
     protected:
+      bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll (std::vector< ObjectStream > &, GatherScatterType * );
       void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       void packAsBndNow (int, ObjectStream &, const bool ) const;
@@ -326,6 +360,8 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const 
@@ -413,6 +449,8 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
+      virtual bool packLink (const int link, ObjectStream& os );
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const;
@@ -483,12 +521,15 @@ namespace ALUGrid
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
+      virtual void computeVertexLinkage() ;
     public:  
       virtual void attachElement2 ( const int, const int );
       virtual void attach2 (int);
       virtual void unattach2 (int);
       
       virtual bool packAll (std::vector< ObjectStream > &);
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
+      virtual bool packLink (const int link, ObjectStream& os, GatherScatterType* );
       // pack ghost information 
       virtual void packAsGhost(ObjectStream &,int) const;
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
@@ -500,6 +541,7 @@ namespace ALUGrid
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
     protected :
+      bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll( std::vector< ObjectStream > &, GatherScatterType * );
       void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
@@ -959,17 +1001,6 @@ namespace ALUGrid
 
   template < class A >
   inline void EdgePllBaseX< A >::attach2 (int) {
-    abort ();
-    return;
-  }
-
-  template < class A >
-  bool EdgePllBaseX< A >::packAll (std::vector< ObjectStream > &) {
-    return (abort (), false);
-  }
-
-  template < class A >
-  inline void EdgePllBaseX< A >::unpackSelf (ObjectStream &,bool) {
     abort ();
     return;
   }

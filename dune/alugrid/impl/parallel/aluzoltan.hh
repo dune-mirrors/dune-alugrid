@@ -104,13 +104,12 @@ namespace ALUGridZoltan
       }
       objs->edges().resize(num_obj);
 
-      ldb_vertex_map_t& vertexMap = objs->vertexMap();
-      typename ldb_vertex_map_t :: iterator vertexIt = vertexMap.begin();
+      const int rank = objs->rank();
 
       typename ldb_edge_set_t::const_iterator iEnd = objs->edgeMap().end();
       for (typename ldb_edge_set_t::const_iterator it = objs->edgeMap().begin (); it != iEnd; ++it ) 
       {
-        if ( it->leftMaster() == objs->rank() ) 
+        if ( it->leftMaster() == rank ) 
         {  
           int node = it->leftNode();
           int i=0;
@@ -122,7 +121,7 @@ namespace ALUGridZoltan
           ++numEdges[i];
           objs->edges()[i].push_back( std::make_pair(it,true) );
         }
-        if ( it->rightMaster() == objs->rank() ) 
+        if ( it->rightMaster() == rank ) 
         {  
           int node = it->rightNode();
           int i=0;

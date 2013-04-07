@@ -103,6 +103,8 @@ namespace ALUGrid
           virtual ~DataHandleIF () {}
           virtual void   pack( const int link, ObjectStream& os ) = 0 ;
           virtual void unpack( const int link, ObjectStream& os ) = 0 ;
+          // should contain work that could be done between send and receive 
+          virtual void meantimeWork () {}
         };
 
         virtual ~NonBlockingExchange () {}

@@ -3,6 +3,21 @@
 
 #include "threadmanager.hh"
 
+#define PRINT_IDENTIFICATION_TIMES
+
+#ifdef PRINT_IDENTIFICATION_TIMES 
+namespace ALUGrid { 
+  extern double identU2;
+  extern double identU3;
+  extern double identU4;
+
+  extern double ldbTimerU2;
+  extern double ldbTimerU3;
+  extern double ldbTimerU4;
+  extern double ldbTimerU5;
+}
+#endif
+
 namespace Dune {
 
   template <class GridType>
@@ -131,12 +146,49 @@ namespace Dune {
       file << std::endl;
     }
 
+#ifdef PRINT_IDENTIFICATION_TIMES 
+    void printIdentificationTimes() const
+    {
+      std::vector<double> times;
+
+      times.push_back( ::ALUGrid::identU2 );
+      times.push_back( ::ALUGrid::identU3 );
+      times.push_back( ::ALUGrid::identU4 );
+
+      times.push_back( ::ALUGrid::ldbTimerU2 );
+      times.push_back( ::ALUGrid::ldbTimerU3 );
+      times.push_back( ::ALUGrid::ldbTimerU4 );
+      times.push_back( ::ALUGrid::ldbTimerU5 );
+
+      const int timerSize = times.size();
+
+      std::vector<double> maxTimes( times );
+      std::vector<double> minTimes( times );
+
+      // sum, max, and min for all procs 
+      comm_.max( &maxTimes[ 0 ], timerSize );
+      comm_.min( &minTimes[ 0 ], timerSize );
+
+      if( comm_.rank() == 0 )  
+      {
+        for(int i=0; i<timerSize; ++i )
+        {
+          std::cout << "U" << i+2 << " max: " << maxTimes[ i ] << "  min: " << minTimes[ i ] << std::endl;
+        }
+      }
+    }
+#endif
+
   public:  
     void flush() const
     {
       // if write is > 0 then create speedup file 
       if( writeDiagnostics_ )
       {
+#ifdef PRINT_IDENTIFICATION_TIMES 
+        printIdentificationTimes();
+#endif
+
         std::vector< double > times( times_ );
 
         times.push_back( elements_ );

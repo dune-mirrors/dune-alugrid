@@ -4,8 +4,12 @@
 //- system includes 
 #include <iostream>
 
+#include <dune/common/typetraits.hh>
+
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/adaptcallback.hh>
+
+#include <dune/alugrid/3d/datacollectorcaps.hh>
 
 //- local includes 
 #include "alu3dinclude.hh"
@@ -576,41 +580,102 @@ namespace ALUGrid
     // return true if user defined partitioning methods should be used 
     bool userDefinedPartitioning () const 
     {
-      return dc_.userDefinedPartitioning();
+      const bool v = DataCollectorCaps::HasUserDefinedPartitioning< DataCollectorType >::v;
+      return userDefinedPartitioning ( Dune::integral_constant< bool, v >() );
     }
+
     // return true if user defined load balancing weights are provided
-    bool userDefinedLoadWeights () const 
-    { 
-      return dc_.userDefinedLoadWeights();
+    bool userDefinedLoadWeights () const
+    {
+      const bool v = DataCollectorCaps::HasUserDefinedLoadWeights< DataCollectorType >::v;
+      return userDefinedLoadWeights ( Dune::integral_constant< bool, v >() );
     }
+
     // returns true if user defined partitioning needs to be readjusted 
     bool repartition () const 
     { 
-      if ( userDefinedPartitioning() )
-        return dc_.repartition();
-      return false;
+      const bool v = DataCollectorCaps::HasUserDefinedPartitioning< DataCollectorType >::v;
+      return repartition( Dune::integral_constant< bool, v >() );
     }
+
     // return load weight of given element 
-    int loadWeight( const HElementType &elem ) const 
-    { 
-      if ( userDefinedLoadWeights() )
-      {
-        assert( elem.level () == 0 );
-        realEntity_.setElement(elem);
-        return dc_.loadWeight(entity_);
-      }
-      return 1; 
+    int loadWeight ( const HElementType &elem ) const
+    {
+      const bool v = DataCollectorCaps::HasUserDefinedLoadWeights< DataCollectorType >::v;
+      return loadWeight( elem, Dune::integral_constant< bool, v >() );
     }
+
     // return destination (i.e. rank) where the given element should be moved to 
     // this needs the methods userDefinedPartitioning to return true
-    int destination( const HElementType &elem ) const 
+    int destination ( const HElementType &elem ) const
     { 
-      if ( userDefinedPartitioning() )
+      const bool v = DataCollectorCaps::HasUserDefinedPartitioning< DataCollectorType >::v;
+      return destination( elem, Dune::integral_constant< bool, v >() );
+    }
+
+  private:
+    bool userDefinedPartitioning ( Dune::integral_constant< bool, true > ) const
+    {
+      return dc_.userDefinedPartitioning();
+    }
+
+    bool userDefinedPartitioning ( Dune::integral_constant< bool, false > ) const
+    {
+      return false;
+    }
+
+    bool userDefinedLoadWeights ( Dune::integral_constant< bool, true > ) const
+    {
+      return dc_.userDefinedLoadWeights();
+    }
+
+    bool userDefinedLoadWeights ( Dune::integral_constant< bool, false > ) const
+    {
+      return false;
+    }
+
+    bool repartition ( Dune::integral_constant< bool, true >) const
+    {
+      return (dc_.userDefinedPartitioning() && dc_.repartition());
+    }
+
+    bool repartition ( Dune::integral_constant< bool, false >) const
+    {
+      return false;
+    }
+
+    int loadWeight ( const HElementType &elem, Dune::integral_constant< bool, true > ) const
+    { 
+      assert( elem.level() == 0 );
+      if( dc_.userDefinedLoadWeights() )
       {
-        assert( elem.level () == 0 );
-        realEntity_.setElement(elem);
-        return dc_.destination(entity_);
+        realEntity_.setElement( elem );
+        return dc_.loadWeight( entity_ );
       }
+      else
+        return 1; 
+    }
+
+    int loadWeight ( const HElementType &elem, Dune::integral_constant< bool, false > ) const
+    { 
+      assert( elem.level() == 0 );
+      return 1; 
+    }
+
+    int destination ( const HElementType &elem, Dune::integral_constant< bool, true > ) const
+    { 
+      assert( elem.level () == 0 );
+      if( dc_.userDefinedPartitioning() )
+      {
+        realEntity_.setElement( elem );
+        return dc_.destination( entity_ );
+      }
+      else
+        return -1; 
+    }
+
+    int destination ( const HElementType &elem, Dune::integral_constant< bool, false > ) const
+    { 
       return -1; 
     }
   };

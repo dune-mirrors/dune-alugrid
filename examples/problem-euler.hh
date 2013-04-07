@@ -8,6 +8,10 @@
 
 #include <dune/common/fvector.hh>
 
+#if HAVE_DUNE_FEM_DG
+#include "mhdfluxes.hh"
+#endif
+
 #include "problem.hh"
 
 /** \class EulerProblemData1
@@ -227,7 +231,7 @@ public:
 // Enumerations
 // ------------
 
-enum EulerFluxType { LLF, HLL };
+enum EulerFluxType { LLF, HLL, HLLEM, DW };
 
 // EulerFlux
 // ---------
@@ -240,10 +244,19 @@ enum EulerFluxType { LLF, HLL };
  *  for \c Dune::FieldVector
  *
  *  \tparam dim space dimension
- *  \tparam flux switch between local Lax-Friedrich (LLF) and
- *          Harten-Lax-Leer (HLL) flux
+ *  \tparam flux switch between local Lax-Friedrich (LLF), and
+ *          Harten-Lax-Leer (HLL) flux, and  
+ *          Dai-Woodward (DW), and 
+ *          Harten-Lax-Leer-Einfeld-Modified (HLLEM) flux
+ *
  */
-template< int dim, EulerFluxType flux_type = HLL >
+template< int dim, 
+#ifdef DUNE_FEM_DG_MHDFLUXES_HH
+  EulerFluxType flux_type = HLLEM 
+#else 
+  EulerFluxType flux_type = HLL
+#endif
+  >
 struct EulerFlux
 {
   /** \internal
@@ -267,7 +280,20 @@ struct EulerFlux
   double numFlux ( const RangeType &uLeft, const RangeType &uRight,
                    const DomainType &unitNormal, RangeType &flux ) const
   {
-    return num_flux( &(uLeft[ 0 ]), &(uRight[ 0 ]), &(unitNormal[ 0 ]), &(flux[ 0 ]) );
+#ifdef DUNE_FEM_DG_MHDFLUXES_HH    
+    if( flux_type == HLLEM ) 
+    {  
+      static const HLLEMNumFlux< DomainType::dimension > numFluxHLLEM( _gamma ); 
+      return numFluxHLLEM.numericalFlux( uLeft, uRight, unitNormal, flux );
+    }
+    else if( flux_type == DW ) 
+    {
+      static const DWNumFlux< DomainType::dimension > numFluxDW( _gamma ); 
+      return numFluxDW.numericalFlux( uLeft, uRight, unitNormal, flux );
+    }
+    else 
+#endif
+      return num_flux( &(uLeft[ 0 ]), &(uRight[ 0 ]), &(unitNormal[ 0 ]), &(flux[ 0 ]) );
   }
 
   /** \internal

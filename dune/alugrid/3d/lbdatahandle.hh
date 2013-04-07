@@ -446,8 +446,6 @@ namespace Dune
     }
   };
 
-#undef CHECK_INTERFACE_IMPLEMENTATION
-#undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
-}
+} // namespace Dune
 
-#endif
+#endif // #ifndef DUNE_ALUGRID_LBDATAHANDLE_HH

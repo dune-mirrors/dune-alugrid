@@ -40,7 +40,7 @@ namespace ALUGrid
       for (BuilderIF::hedge1list_t::iterator i = _hedge1List.begin ();
            i != _hedge1Listend; _hedge1List.erase (i ++)) 
       {
-        long k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident ();
+        int k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident ();
         _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
       }
     }
@@ -810,17 +810,6 @@ namespace ALUGrid
     return;
   }
 
-  /*
-  void ParallelGridMover::
-  unpackAll (std::vector< ObjectStream > & osv, GatherScatterType* gs) 
-  {
-    for (std::vector< ObjectStream >::iterator j = osv.begin (); j != osv.end (); ++j) 
-    {
-      unpackAll( *j, gs );
-    }  
-  }
-  */
-
   void ParallelGridMover::
   unpackAll( ObjectStream& os, GatherScatterType* gs) 
   {
@@ -900,26 +889,112 @@ namespace ALUGrid
 
   class UnpackLBData : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
-    ParallelGridMover  _pgm;
+    GitterPll::MacroGitterPll& _containerPll;
+    ParallelGridMover*  _pgm;
     GatherScatterType* _gs; 
+
+#ifdef USE_NONBLOCKING_SEND_PGM
+    std::vector< std::vector< MacroGridMoverIF* > > _vertices;
+    std::vector< std::vector< MacroGridMoverIF* > > _edges;
+    std::vector< std::vector< MacroGridMoverIF* > > _faces;
+    const int _estimateSize;
+#endif
 
     UnpackLBData( const UnpackLBData& );
   public:
-    UnpackLBData( GitterPll::MacroGitterPll& containerPll, GatherScatterType* gs ) 
-      : _pgm( containerPll ),
+    // constructor 
+    UnpackLBData( GitterPll::MacroGitterPll& containerPll, 
+                  const int nLinks,
+                  GatherScatterType* gs ) 
+      : _containerPll( containerPll ),
+        _pgm( 0 ),
         _gs( gs )
+#ifdef USE_NONBLOCKING_SEND_PGM
+        , _vertices( nLinks ),
+        _edges( nLinks ),
+        _faces( nLinks ),
+        _estimateSize( typename AccessIterator < Gitter::hface_STI >::Handle(_containerPll).size() )
+    {
+      // create lists of items that should be packed
+      addItems< Gitter::vertex_STI > ( _vertices );
+      addItems< Gitter::hedge_STI  > ( _edges );
+      addItems< Gitter::hface_STI >  ( _faces );
+    }
+#else 
     {}
+#endif
+
+    // destructor deleting parallel macro grid mover
+    ~UnpackLBData() { delete _pgm; }
+
+#ifdef USE_NONBLOCKING_SEND_PGM
+    template <class item_STI>
+    void addItems( std::vector< std::vector< MacroGridMoverIF* > >& items ) 
+    {
+      typename AccessIterator < item_STI >::Handle w ( _containerPll );
+      const int nLinks = items.size();
+      for( int i=0; i<nLinks; ++i ) items[ i ].reserve( _estimateSize );
+      for (w.first (); ! w.done (); w.next ()) 
+      {
+        w.item().addAll( items );
+      }
+    }
+
+    void packItems( std::vector< MacroGridMoverIF* >& items, const int link, ObjectStream& os ) 
+    {
+      typedef typename std::vector< MacroGridMoverIF* > :: iterator iterator ;
+      const iterator end = items.end();
+      for( iterator it = items.begin(); it != end ; ++it ) 
+      {
+        (*it)->packLink( link, os );
+      }
+    }
+#endif
 
     void pack( const int link, ObjectStream& os ) 
     {
-      std::cerr << "ERROR: called UnpackLBData::pack" << std::endl;
+#ifdef USE_NONBLOCKING_SEND_PGM
+      // pack vertices 
+      packItems( _vertices[ link ], link, os );
+      // pack edges  
+      packItems( _edges[ link ], link, os );
+      // pack faces 
+      packItems( _faces[ link ], link, os );
+
+      // pack elements
+      {
+        AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) w.item ().packLink( link, os, _gs );
+      }
+      // pack periodic elements 
+      {
+        AccessIterator < Gitter::hperiodic_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) w.item ().packLink( link, os );
+      }
+
+      // write end marker 
+      os.writeObject (MacroGridMoverIF::ENDMARKER);
+#else
+      std::cerr << "ERROR: UnpackLBData::pack should not be called!" << std::endl;
       abort();
+#endif
+    }
+
+    // work that can be done between send and receive, 
+    // such as the construction of the ParallelGridMover 
+    void meantimeWork () 
+    {
+      // create ParallelGridMover when all data was packed, otherwise the link packing
+      // will fail since this will modify the macro grid, since the 
+      // parallel macro grid mover clears the lists of macro elements 
+      if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll );
     }
 
     void unpack( const int link, ObjectStream& os ) 
     {
+      assert( _pgm );
       // unpack data for given stream 
-      _pgm.unpackAll( os, _gs );
+      _pgm->unpackAll( os, _gs );
     }
   };
 
@@ -970,7 +1045,8 @@ namespace ALUGrid
       mpAccess ().removeLinkage ();
       mpAccess ().insertRequestSymetric ( *connectScan );
 
-      const int me = mpAccess ().myrank (), nl = mpAccess ().nlinks ();
+      const int me = mpAccess ().myrank (); 
+      const int nl = mpAccess ().nlinks (); 
       {
         if ( ! userDefinedPartitioning )
         {
@@ -1028,61 +1104,60 @@ namespace ALUGrid
         }
       }
       lap1 = clock ();
-      
-      // create vector of object streams 
-      std::vector< ObjectStream > osv (nl);
 
-      // pack all stuff 
+#ifndef USE_NONBLOCKING_SEND_PGM
+      // message buffers 
+      std::vector< ObjectStream > osv( nl );
+
+      // pack vertices 
       {
         AccessIterator < vertex_STI >::Handle w (containerPll ());
-        for (w.first (); ! w.done (); w.next ()) w.item ().accessPllX ().packAll (osv);
+        for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
       }
+      // pack edges 
       {
         AccessIterator < hedge_STI >::Handle w (containerPll ());
-        for (w.first (); ! w.done (); w.next ()) w.item ().packAll (osv);
+        for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
       }
+      // pack faces  
       {
         AccessIterator < hface_STI >::Handle w (containerPll ());
-        for (w.first (); ! w.done (); w.next ()) w.item ().packAll (osv);
+        for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
       }
+      // pack elements 
       {
         AccessIterator < helement_STI >::Handle w (containerPll ());
         if( gatherScatter ) 
         {
-          GatherScatterType& gs = *gatherScatter;
-          // use dunePackAll method 
-          for (w.first (); ! w.done (); w.next ()) 
-          {
-            w.item ().dunePackAll (osv, gs);
-          }
+          GatherScatterType& gs = *gatherScatter ;
+          for (w.first (); ! w.done (); w.next ()) w.item().dunePackAll( osv, gs );
         }
         else 
-        {
-          // use old method 
-          for (w.first (); ! w.done (); w.next ()) w.item ().packAll (osv);
-        }
+          for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
       }
+      // pack periodic elements
       {
         AccessIterator < hperiodic_STI >::Handle w (containerPll ());
-        for (w.first (); ! w.done (); w.next ()) w.item ().packAll (osv);
+        for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
       }
 
-      {
-        typedef std::vector< ObjectStream >::iterator iterator;
-        const iterator endit = osv.end ();
-        for ( iterator i = osv.begin (); i != endit; ++ i ) 
-        {
-          (*i).writeObject (MacroGridMoverIF::ENDMARKER);
-        }
-      }
+      // write end marker to terminate stream 
+      for( int link=0; link<nl; ++link ) 
+        osv[ link ].writeObject( MacroGridMoverIF::ENDMARKER );
+#endif
 
       lap2 = clock ();
       
       {
-        // unpack data class 
-        UnpackLBData unpackData( containerPll (), gatherScatter );
-        // exchange data and immediately unpack upon arrival
-        mpAccess ().exchange ( osv, unpackData );
+        // data handle  
+        UnpackLBData data( containerPll (), nl, gatherScatter );
+
+        // pack, exchange, and unpack data 
+#ifndef USE_NONBLOCKING_SEND_PGM
+        mpAccess ().exchange ( osv, data );
+#else 
+        mpAccess ().exchange ( data );
+#endif
       }
 
       lap3 = clock ();
