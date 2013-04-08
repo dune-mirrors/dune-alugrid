@@ -49,7 +49,7 @@ void method ( int startLevel, int maxLevel, const char* outpath )
   MPI_Comm_size(MPI_COMM_WORLD, &numProcs); //MJ
 
   /* Grid construction ... */
-  std::string name = "./unitcube3d.dgf" ;
+  std::string name = "../dgf/unitcube3d.dgf" ;
   // create grid pointer and release to free memory of GridPtr
   Grid* gridPtr = Dune::GridPtr<Grid>(name).release() ;
 
