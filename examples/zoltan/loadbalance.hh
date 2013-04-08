@@ -43,8 +43,7 @@ public:
   struct Codim
   {
     typedef typename Grid :: Traits :: template Codim< codim > :: Entity Entity;
-    typedef typename Grid :: Traits :: template Codim< codim > :: EntityPointer
-      EntityPointer;
+    typedef typename Grid :: Traits :: template Codim< codim > :: EntityPointer EntityPointer;
   };
   typedef typename Codim< 0 > :: Entity Element;
 
@@ -53,9 +52,9 @@ private:
 
 public:
   LoadBalanceHandle ( const Grid &grid, ZOLTAN_PARTITIONING new_partitioning)
-  : grid_( grid ),
-	new_partitioning_( new_partitioning ),
-	globalIdSet_( grid.globalIdSet() )
+  : grid_( grid )
+	, globalIdSet_( grid.globalIdSet() )
+	, new_partitioning_( new_partitioning )
   {}
 
   bool userDefinedPartitioning () const
@@ -83,27 +82,27 @@ public:
   // this needs the methods userDefinedPartitioning to return true
   int destination( const Element &element ) const 
   { 
-	gIdType bla = globalIdSet_.id(element);
-	std::vector<int> elementGID(4); // because we have 4 vertices
-	bla.getKey().extractKey(elementGID);
+    gIdType bla = globalIdSet_.id(element);
+    std::vector<int> elementGID(4); // because we have 4 vertices
+    bla.getKey().extractKey(elementGID);
 
-	// add one to the GIDs, so that they match the ones from Zoltan
-	transform(elementGID.begin(), elementGID.end(), elementGID.begin(), bind2nd(std::plus<int>(), 1));
+    // add one to the GIDs, so that they match the ones from Zoltan
+    transform(elementGID.begin(), elementGID.end(), elementGID.begin(), bind2nd(std::plus<int>(), 1));
 
-	int p = int(this->grid_.comm().rank());
+    int p = int(this->grid_.comm().rank());
 
-	for (int i = 0; i<new_partitioning_.numExport; ++i)
-	{
-	  if (std::equal(elementGID.begin(),elementGID.end(), &new_partitioning_.exportGlobalGids[i*new_partitioning_.numGidEntries]) )
-		p = new_partitioning_.exportProcs[i];
-	}
+    for (int i = 0; i<new_partitioning_.numExport; ++i)
+    {
+      if (std::equal(elementGID.begin(),elementGID.end(), &new_partitioning_.exportGlobalGids[i*new_partitioning_.numGidEntries]) )
+      p = new_partitioning_.exportProcs[i];
+    }
 
-	/*typename Element::Geometry::GlobalCoordinate w = element.geometry().center();
-    double phi=arg(std::complex<double>(w[0],w[1]));
-    if (w[1]<0) phi+=2.*M_PI;
-    phi += angle_;
-    phi *= double(this->grid_.comm().size())/(2.*M_PI);
-    int p = int(phi) % this->grid_.comm().size();*/
+    /*typename Element::Geometry::GlobalCoordinate w = element.geometry().center();
+      double phi=arg(std::complex<double>(w[0],w[1]));
+      if (w[1]<0) phi+=2.*M_PI;
+      phi += angle_;
+      phi *= double(this->grid_.comm().size())/(2.*M_PI);
+      int p = int(phi) % this->grid_.comm().size();*/
     return p;
   }
 private:

@@ -63,12 +63,8 @@ void write_hypergraph(int myRank, int numProcs, const GridType &grid, HGRAPH_DAT
   typedef typename GlobalIdSet::IdType gIdType;
 
 
-  typedef typename GridView::IndexSet IndexSetType;
-  const IndexSetType &indexSetGlobal = gridView.indexSet();
-
   int tempNumMyVertices = gridView.size(0);
   ZOLTAN_ID_TYPE *tempVtxGID = (ZOLTAN_ID_TYPE *)malloc(sizeof(ZOLTAN_ID_TYPE) * NUM_GID_ENTRIES * tempNumMyVertices);
-  int tempNumMyHEdges = tempNumMyVertices;	   // We have the same amount of Hyperedges
   ZOLTAN_ID_TYPE *tempEdgeGID = (ZOLTAN_ID_TYPE *)malloc(sizeof(ZOLTAN_ID_TYPE) * NUM_GID_ENTRIES * tempNumMyVertices);
 
   int *tempNborIndex = (int *)malloc(sizeof(int) * (tempNumMyVertices + 1));
