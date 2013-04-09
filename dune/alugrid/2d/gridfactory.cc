@@ -24,6 +24,16 @@ namespace Dune
 
   
   template< class GridImp >
+  typename ALU2dGridFactory< GridImp >::VertexId 
+  ALU2dGridFactory< GridImp >::insertVertex ( const VertexType &pos, const size_t globalId )
+  {
+    const VertexId vertexId = vertices_.size();
+    vertices_.push_back( pos );
+    return vertexId;
+  }
+
+  
+  template< class GridImp >
   void ALU2dGridFactory< GridImp >
     ::insertElement ( const GeometryType &geometry,
                       const std::vector< unsigned int > &vertices )
