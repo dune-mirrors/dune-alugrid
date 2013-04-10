@@ -1056,7 +1056,7 @@ namespace ALUGrid
       }
       virtual int master () const 
       {
-        return 0;
+        return (assert(0),-1);
       }
 
       using ElementPllXIF::writeDynamicState;

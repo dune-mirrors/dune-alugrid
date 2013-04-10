@@ -638,10 +638,16 @@ namespace ALUGrid
       inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* );
     public :
       virtual int  ldbVertexIndex () const;
-      virtual int master () const { return _master; }
+      virtual int master () const 
+      { 
+        assert( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
+        return _master; 
+      }
       virtual void readStaticState (ObjectStream &, int) ;
       virtual void setLoadBalanceVertexIndex ( const int );
-      virtual void setMaster ( const int master ) { _master = master; }
+      virtual void setMaster ( const int master ) { 
+        _master = master; 
+      }
     public :
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       
