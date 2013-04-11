@@ -640,7 +640,7 @@ namespace ALUGrid
       virtual int  ldbVertexIndex () const;
       virtual int master () const 
       { 
-        assert( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
+        // assert( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
         return _master; 
       }
       virtual void readStaticState (ObjectStream &, int) ;
