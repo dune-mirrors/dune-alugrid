@@ -1515,6 +1515,8 @@ namespace ALUGrid
   {
     if( !  _ldbVerticesComputed ) 
       computeGraphVertexIndices ();
+    else
+      exchangeStaticState ();
   }
 
   void GitterPll::computeGraphVertexIndices () 
@@ -1557,7 +1559,7 @@ namespace ALUGrid
     
     // mark unique element indices as computed, if serialPartitioner is used
     // don't do this computation again for serial partitioning 
-    _ldbVerticesComputed = serialPartitioner(); 
+    _ldbVerticesComputed = true; // serialPartitioner(); 
     
     // clear graphSize vector since the new numbering leads to different sizes
     std::vector< int >().swap( _graphSizes );
