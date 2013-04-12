@@ -398,7 +398,6 @@ namespace ALUGrid
             map_t::const_iterator hit = vxmap.find (id);
             if( hit != vxmapEnd ) 
             {
-              //std::vector< int > s = (*hit).second.item ().accessPllX ().estimateLinkage ();
               std::vector< int > s = (*hit).second->estimateLinkage ();
               if (find (s.begin (), s.end (), i) == s.end ()) 
               {
