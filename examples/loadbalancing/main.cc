@@ -40,11 +40,13 @@ void method ( int startLevel, int maxLevel, const char* outpath )
 
   Grid &grid = *gridPtr;
 
+  typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
+  LoadBalancer ldb(grid);
+
   {
-    LoadBalanceHandle<Grid> ldb(grid);
-    typedef Dune::LoadBalanceHandleIF< LoadBalanceHandle<Grid> > DataHandleInterface;
-    // grid.loadBalance( (DataHandleInterface&)(ldb) );
-    grid.loadBalance();
+    typedef Dune::LoadBalanceHandleIF< LoadBalancer > DataHandleInterface;
+    grid.loadBalance( (DataHandleInterface&)(ldb) );
+    // grid.loadBalance();
   }
 
   const bool verboseRank = grid.comm().rank() == 0 ;
@@ -75,9 +77,7 @@ void method ( int startLevel, int maxLevel, const char* outpath )
   }
 
   /* create adaptation method */
-  typedef LoadBalanceHandle<Grid> LoadBalance;
-  LoadBalance ldb( grid );
-  typedef LeafAdaptation< Grid, LoadBalance > AdaptationType;
+  typedef LeafAdaptation< Grid, LoadBalancer > AdaptationType;
   AdaptationType adaptation( grid, ldb );
 
   if( writeOutput ) 
