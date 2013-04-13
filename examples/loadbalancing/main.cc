@@ -40,8 +40,8 @@ void method ( int startLevel, int maxLevel, const char* outpath )
 
   Grid &grid = *gridPtr;
 
-  typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
-  // typedef ZoltanLoadBalanceHandle<Grid> LoadBalancer;
+  // typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
+  typedef ZoltanLoadBalanceHandle<Grid> LoadBalancer;
   LoadBalancer ldb(grid);
 
   {
