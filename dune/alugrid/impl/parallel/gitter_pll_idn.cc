@@ -349,7 +349,7 @@ namespace ALUGrid
 
   void GitterPll::MacroGitterPll::vertexLinkageEstimateGCollect (MpAccessLocal & mpAccess) 
   {
-    typedef std::map< int, AccessIterator < vertex_STI >::Handle > map_t;
+    typedef std::map< int, vertex_STI* > map_t;
     map_t vxmap;
     const int np = mpAccess.psize (), me = mpAccess.myrank ();
 
@@ -371,7 +371,7 @@ namespace ALUGrid
         {
           int id = vertex.ident ();
           os.writeObject( id );
-          vxmap[ id ] = w;
+          vxmap[ id ] = &vertex;
         }
       }
       os.writeObject( endMarker );
@@ -398,11 +398,11 @@ namespace ALUGrid
             map_t::const_iterator hit = vxmap.find (id);
             if( hit != vxmapEnd ) 
             {
-              std::vector< int > s = (*hit).second.item ().accessPllX ().estimateLinkage ();
+              std::vector< int > s = (*hit).second->estimateLinkage ();
               if (find (s.begin (), s.end (), i) == s.end ()) 
               {
                 s.push_back( i );
-                (*hit).second.item ().accessPllX ().setLinkage (s);
+                (*hit).second->setLinkage (s);
               }
             }
             // read next id 
@@ -475,11 +475,11 @@ namespace ALUGrid
           map_t::const_iterator hit = vxmap.find (id);
           if( hit != vxmapEnd ) 
           {
-            std::vector< int > s = (*hit).second->accessPllX ().estimateLinkage ();
+            std::vector< int > s = (*hit).second->estimateLinkage ();
             if (find (s.begin (), s.end (), rank) == s.end ()) 
             {
               s.push_back( rank );
-              (*hit).second->accessPllX ().setLinkage (s);
+              (*hit).second->setLinkage (s);
             }
           }
         }
