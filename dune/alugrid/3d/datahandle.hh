@@ -592,7 +592,7 @@ namespace ALUGrid
     }
 
     // returns true if user defined partitioning needs to be readjusted 
-    bool repartition () const 
+    bool repartition () 
     { 
       const bool v = DataCollectorCaps::HasUserDefinedPartitioning< DataCollectorType >::v;
       return repartition( Dune::integral_constant< bool, v >() );

@@ -41,6 +41,7 @@ void method ( int startLevel, int maxLevel, const char* outpath )
   Grid &grid = *gridPtr;
 
   typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
+  // typedef ZoltanLoadBalanceHandle<Grid> LoadBalancer;
   LoadBalancer ldb(grid);
 
   {
@@ -141,6 +142,16 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
+#if HAVE_ZOLTAN 
+  float version;
+  int rc = Zoltan_Initialize(argc, argv, &version);
+  if (rc != ZOLTAN_OK){
+    printf("sorry zoltan did not initialize successfully...\n");
+    MPI_Finalize();
+    exit(0);
+  }
+#endif
+
   if( argc < 1 )
   {
     /* display usage */

@@ -22,7 +22,7 @@ namespace ALUGrid
     // return true if user defined load balancing weights are provided
     virtual bool userDefinedLoadWeights () const { assert(false); abort(); return false ; }
     // returns true if user defined partitioning needs to be readjusted 
-    virtual bool repartition () const { assert(false); abort(); return false; }
+    virtual bool repartition () { assert(false); abort(); return false; }
 
     // return load weight of given element 
     virtual int loadWeight( const Gitter::helement_STI &elem ) const { assert(false); abort(); return 1; }
