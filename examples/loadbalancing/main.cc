@@ -9,14 +9,14 @@
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
 
-typedef Dune::GridSelector::GridType Grid;
-
 /** numerical scheme **/
 #include "../piecewisefunction.hh"
 
 /** adaptation scheme **/
+#include "loadbalance.hh"
 #include "adaptation.hh"
 
+template <class Grid>
 struct AssignRank
 {
   AssignRank(const int rank) : rank_(rank) {}
@@ -33,6 +33,7 @@ struct AssignRank
 // ------
 void method ( int startLevel, int maxLevel, const char* outpath )
 {
+  typedef Dune::GridSelector::GridType Grid;
   /* Grid construction ... */
   std::string name = "./unitcube3d.dgf" ;
   // create grid pointer and release to free memory of GridPtr
@@ -67,7 +68,7 @@ void method ( int startLevel, int maxLevel, const char* outpath )
   /* construct data vector for solution */
   typedef PiecewiseFunction< GridView, Dune::FieldVector< double, 2 > > DataType;
   DataType solution( gridView );
-  solution.initialize( AssignRank(grid.comm().rank()) );
+  solution.initialize( AssignRank<Grid>(grid.comm().rank()) );
 
   /* create VTK writer for data sequqnce */
   Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", outPath, ".", Dune::VTK::nonconforming );

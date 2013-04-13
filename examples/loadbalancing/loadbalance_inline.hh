@@ -1,9 +1,4 @@
-// #include <config.h>
-
 #if HAVE_ZOLTAN 
-// #include "loadbalance.hh"
-#warning HALLO
-
 template< class Grid >
 ZoltanLoadBalanceHandle<Grid>::
 ZoltanLoadBalanceHandle(const Grid &grid)
@@ -62,9 +57,6 @@ template< class Grid >
 void ZoltanLoadBalanceHandle<Grid>::
 generateHypergraph()
 {
-  int myRank = grid_.comm().rank();
-  int numProcs = grid_.comm().size();
-
   const Dune::PartitionIteratorType partition = Dune::Interior_Partition;
   typedef typename Grid::LevelGridView GridView;
   const GridView &gridView = grid_.levelView(0);

@@ -189,7 +189,6 @@ public:
         break;
       }
     }
-    std::cout << "proc: " << p << std::endl;
     return p;
   }
 private:
@@ -219,6 +218,6 @@ private:
 };
 #endif // if HAVE_ZOLTAN
 
-#include "loadbalance.cc"
+#include "loadbalance_inline.hh"
 
 #endif // #ifndef LOADBALNCE_HH
