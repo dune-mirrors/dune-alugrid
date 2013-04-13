@@ -10,6 +10,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/shared_ptr.hh>
 
+#include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/exceptions.hh>
 
 #include <dune/grid/alugrid/common/declaration.hh>
