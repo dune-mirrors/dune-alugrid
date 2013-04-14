@@ -363,7 +363,7 @@ namespace ALUGrid
         _me( me ) 
     {}
 
-    void pack( const int link, ObjectStream& os ) 
+    void pack( const int rank, ObjectStream& os ) 
     {
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
 
@@ -385,9 +385,9 @@ namespace ALUGrid
       os.writeObject( endMarker );
     }
 
-    void unpack( const int link, ObjectStream& os )
+    void unpack( const int rank, ObjectStream& os )
     {
-      if( link == _me ) return ;
+      if( rank == _me ) return ;
 
       map_t::const_iterator vxmapEnd = _vxmap.end();
 
@@ -399,9 +399,9 @@ namespace ALUGrid
         if( hit != vxmapEnd ) 
         {
           std::vector< int > s = (*hit).second->estimateLinkage ();
-          if (find (s.begin (), s.end (), link) == s.end ()) 
+          if (find (s.begin (), s.end (), rank) == s.end ()) 
           {
-            s.push_back( link );
+            s.push_back( rank );
             (*hit).second->setLinkage (s);
           }
         }
@@ -413,28 +413,47 @@ namespace ALUGrid
 
   void GitterPll::MacroGitterPll::vertexLinkageEstimateGCollect (MpAccessLocal & mpAccess) 
   {
-    typedef std::map< int, vertex_STI* > map_t;
-    map_t vxmap;
     const int np = mpAccess.psize (), me = mpAccess.myrank ();
 
-    ObjectStream os;
-    // data handle 
-    UnpackVertexLinkage data( *this, me );
-    // pack data 
-    data.pack( 0, os );
-
-    // exchange data 
-    std::vector< ObjectStream > osv = mpAccess.gcollect( os );
-
-    // free memory 
-    os.reset();
-
-    for (int link = 0; link < np; ++link ) 
+    static bool useAllgather = true ;
+    if( useAllgather ) 
     {
-      // unpack data for link 
-      data.unpack( link, osv[ link ] );
-      // free memory 
-      osv[ link ].reset(); 
+      try 
+      {
+        ObjectStream os;
+        // data handle 
+        UnpackVertexLinkage data( *this, me );
+        // pack data 
+        data.pack( me, os );
+
+        // exchange data 
+        std::vector< ObjectStream > osv = mpAccess.gcollect( os );
+
+        // free memory 
+        os.reset();
+
+        for (int link = 0; link < np; ++link ) 
+        {
+          // unpack data for link 
+          data.unpack( link, osv[ link ] );
+          // free memory 
+          osv[ link ].reset(); 
+        }
+      }
+      catch( MyAlloc :: OutOfMemoryException ) 
+      {
+        useAllgather = false ;
+        // make sure every process caught an exception 
+        mpAccess.barrier();
+      }
+    }
+
+    if( ! useAllgather ) 
+    {
+      // data handle 
+      UnpackVertexLinkage data( *this, me );
+      // exchange all-to-all 
+      mpAccess.allToAll( data );
     }
   }
 

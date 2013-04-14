@@ -915,4 +915,13 @@ namespace ALUGrid
     nonBlockingExchange.exchange( handle );
   }
 
+  // --all-to-all
+  inline void MpAccessMPI::allToAll ( NonBlockingExchange::DataHandleIF& handle ) const 
+  {
+    // note: for the non-blocking exchange the message tag 
+    // should be different each time to avoid MPI problems 
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag(), 512 );
+    nonBlockingExchange.allToAll( handle );
+  }
+
 } // namespace ALUGrid
