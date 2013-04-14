@@ -920,7 +920,7 @@ namespace ALUGrid
   {
     // note: for the non-blocking exchange the message tag 
     // should be different each time to avoid MPI problems 
-    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag(), 512 );
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag(), psize() );
     nonBlockingExchange.allToAll( handle );
   }
 

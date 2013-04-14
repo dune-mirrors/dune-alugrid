@@ -387,7 +387,7 @@ namespace ALUGrid
 
     void unpack( const int rank, ObjectStream& os )
     {
-      if( rank == _me ) return ;
+      assert( rank != _me );
 
       map_t::const_iterator vxmapEnd = _vxmap.end();
 
@@ -434,6 +434,9 @@ namespace ALUGrid
 
         for (int link = 0; link < np; ++link ) 
         {
+          // skip my rank 
+          if( link == me ) continue ;
+
           // unpack data for link 
           data.unpack( link, osv[ link ] );
           // free memory 
