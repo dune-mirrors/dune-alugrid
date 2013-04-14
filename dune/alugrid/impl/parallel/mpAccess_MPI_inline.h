@@ -739,14 +739,16 @@ namespace ALUGrid
 
       assert( _nLinks > 0 );
 
-      // pack own data 
-      dataHandle.pack( 0, sendBuffers[ 0 ] );
-
       int tag = _tag ;
 
       const int me = _mpAccess.myrank(); 
       const int np = _mpAccess.psize();
       const int totalMesg = np-1 ;
+
+      // write rank from where message started at the beginning of the stream 
+      sendBuffers[ 0 ].writeObject( me );
+      // pack own data 
+      dataHandle.pack( 0, sendBuffers[ 0 ] );
 
       // ring structure receive from previous and send to next 
       const int dest   = (me == totalMesg) ? 0    : me + 1; 
@@ -778,13 +780,18 @@ namespace ALUGrid
                 sendBuffers[ link ].writeStream( recvBuffers[ l ] );
                 sendLink( link, dest, _tag+link, sendBuffers[ link ], comm );
 
+                int rank; 
+                // read rank from where the message came 
+                recvBuffers[ l ].readObject( rank );
+
                 // unpack data 
-                dataHandle.unpack( l, recvBuffers[ l ] );
+                dataHandle.unpack( rank, recvBuffers[ l ] );
                 // reset read-write position
                 recvBuffers[ l ].clear();
 
                 ++received ;
                 linkReceived[ l ] = true ;
+                ++totalRecv ;
               }
             }
           }
