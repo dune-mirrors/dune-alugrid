@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "mpAccess_MPI.h"
+#include "../indexstack.h"
 
 #ifndef NDEBUG
 #define MY_INT_TEST int test =
@@ -496,6 +497,20 @@ namespace ALUGrid
       sendImpl( in ); 
     }
 
+    // constructor for intializing all-to-all non-blocking communication
+    NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
+                            const int tag,
+                            const int maxMesg )
+      : _mpAccess( mpAccess ),
+        _nLinks( maxMesg ),
+        _tag( tag ),
+        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
+        _needToSend( false )
+    {
+      // make sure every process has the same tag 
+      assert( tag == mpAccess.gmax( tag ) );
+    }
+
     /////////////////////////////////////////
     //  interface methods 
     /////////////////////////////////////////
@@ -528,7 +543,7 @@ namespace ALUGrid
       // send data 
       for (int link = 0; link < _nLinks; ++link) 
       {
-        sendLink( link, dest[ link ], osv[ link ], comm );
+        sendLink( link, dest[ link ], _tag, osv[ link ], comm );
       }
 
       // set send info 
@@ -577,7 +592,7 @@ namespace ALUGrid
           if( osRecv.notReceived() ) 
           {
             // checks for message and if received also fills osRecv
-            if( checkAndReceive( comm, dest[ link ], osRecv ) )
+            if( checkAndReceive( comm, dest[ link ], _tag, osRecv ) )
             {
               // increase number of received messages 
               ++ numReceived;
@@ -616,7 +631,7 @@ namespace ALUGrid
           dataHandle.pack( link, osSend[ link ] );
 
           // send data 
-          sendLink( link, dest[ link ], osSend[ link ], comm );
+          sendLink( link, dest[ link ], _tag, osSend[ link ], comm );
         }
 
         // set send info 
@@ -652,7 +667,7 @@ namespace ALUGrid
           if( ! linkReceived[ link ] ) 
           {
             // checks for message and if received also fills osRecv
-            if( checkAndReceive( comm, dest[ link ], osRecv ) )
+            if( checkAndReceive( comm, dest[ link ], _tag, osRecv ) )
             {
               // unpack data 
               dataHandle.unpack( link, osRecv );
@@ -704,21 +719,115 @@ namespace ALUGrid
       receive( dataHandle );
     }
 
+    // all-to-all communication using the pack and unpack of the data handle 
+    void allToAll( DataHandleIF& dataHandle )
+    {
+      // get mpi communicator
+      MPI_Comm comm = _mpAccess.communicator();
+
+      // create send and recv buffers 
+      std::vector< ObjectStream > sendBuffers( _nLinks );
+      std::vector< ObjectStream > recvBuffers( _nLinks );
+
+      ALUGridFiniteStack< int, 1024 > sendLinks; 
+
+      // don't push 0 to sendLinks because this is used for the first message
+      for( int l=_nLinks-1; l > 0 ; --l )
+      {
+        sendLinks.push( l );
+      }
+
+      assert( _nLinks > 0 );
+
+      // pack own data 
+      dataHandle.pack( 0, sendBuffers[ 0 ] );
+
+      int tag = _tag ;
+
+      const int me = _mpAccess.myrank(); 
+      const int np = _mpAccess.psize();
+      const int totalMesg = np-1 ;
+
+      // ring structure receive from previous and send to next 
+      const int dest   = (me == totalMesg) ? 0    : me + 1; 
+      const int source = (me == 0)    ? totalMesg : me - 1; 
+
+      // send first message 
+      sendLink( 0, dest, tag, sendBuffers[ 0 ], comm );
+
+      int totalRecv = 0 ;
+      while( totalRecv < totalMesg )
+      {
+        const int nLinks = ( (totalRecv + _nLinks) <= totalMesg ) ? _nLinks : totalMesg - totalRecv ;
+        // get received vector 
+        std::vector< bool > linkReceived( _nLinks, false );
+
+        int received = 0 ;
+        while( received < nLinks ) 
+        {
+          for( int l=0; l<nLinks; ++ l )
+          {
+            if( ! linkReceived[ l ] ) 
+            {
+              // checks for message and if received also fills osRecv
+              if( checkAndReceive( comm, source, tag+l, recvBuffers[ l ] ) )
+              {
+                // get link number and send data to next process 
+                int link = sendLinks.pop();
+                sendBuffers[ link ].clear();
+                sendBuffers[ link ].writeStream( recvBuffers[ l ] );
+                sendLink( link, dest, _tag+link, sendBuffers[ link ], comm );
+
+                // unpack data 
+                dataHandle.unpack( l, recvBuffers[ l ] );
+                // reset read-write position
+                recvBuffers[ l ].clear();
+
+                ++received ;
+                linkReceived[ l ] = true ;
+              }
+            }
+          }
+        }
+
+        // Is this really needed?
+        // wait until all messages have been send and received 
+        {
+          MPI_Status * sta = new MPI_Status [ nLinks ];
+          assert( sta );
+          assert( _request );
+          MY_INT_TEST MPI_Waitall ( nLinks, _request, sta);
+          assert (test == MPI_SUCCESS);
+          delete [] sta;
+        }
+
+        sendLinks.clear();
+        for( int l=_nLinks-1; l >= 0 ; --l )
+        {
+          sendLinks.push( l );
+        }
+
+        // increase msg tags 
+        tag += nLinks ;
+      }
+    }
+
   protected:  
-    void sendLink( const int link, const int dest, const ObjectStream& os, MPI_Comm& comm ) 
+    void sendLink( const int link, const int dest, const int tag, const ObjectStream& os, MPI_Comm& comm ) 
     {
       // get send buffer from object stream 
       char* buffer     = os._buf + os._rb;
       // get number of bytes to send 
       int   bufferSize = os._wb  - os._rb; 
 
-      MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest, _tag, comm, &_request[ link ] );
+      MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest, tag, comm, &_request[ link ] );
       assert (test == MPI_SUCCESS);
     }
 
     // does receive operation for one link 
     bool checkAndReceive( MPI_Comm& comm, 
                           const int source, 
+                          const int tag,
                           ObjectStream& osRecv )
     {
       // corresponding MPI status 
@@ -728,7 +837,7 @@ namespace ALUGrid
       int received = 0;
 
       // check for any message with tag (nonblocking)
-      MPI_Iprobe( source, _tag, comm, &received, &status ); 
+      MPI_Iprobe( source, tag, comm, &received, &status ); 
 
       // receive message of received flag is true 
       if( received ) 
@@ -752,7 +861,7 @@ namespace ALUGrid
 
         // MPI receive 
         {
-          MY_INT_TEST MPI_Recv ( osRecv._buf, bufferSize, MPI_BYTE, status.MPI_SOURCE, _tag, comm, & status);
+          MY_INT_TEST MPI_Recv ( osRecv._buf, bufferSize, MPI_BYTE, status.MPI_SOURCE, tag, comm, & status);
           assert (test == MPI_SUCCESS);
         }
 
