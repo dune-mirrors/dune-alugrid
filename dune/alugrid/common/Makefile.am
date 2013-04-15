@@ -10,6 +10,7 @@ alucommon_HEADERS = backuprestore.hh \
 										memory.hh \
 										objectfactory.hh \
 										persistentcontainer.hh \
+										structuredgridfactory.hh \
 										transformation.hh
 
 include $(top_srcdir)/am/global-rules

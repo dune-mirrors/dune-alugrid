@@ -9,12 +9,6 @@
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
 
-#if HAVE_ZOLTAN 
-#include <zoltan_cpp.h>
-#endif
-
-typedef Dune::GridSelector::GridType Grid;
-
 /** numerical scheme **/
 #include "piecewisefunction.hh"
 #include "fvscheme.hh"
@@ -31,35 +25,21 @@ typedef Dune::GridSelector::GridType Grid;
 #include "diagnostics.hh"
 #include "paralleldgf.hh"
 
-/** type of pde to solve **/
-#if TRANSPORT
-typedef TransportModel< Grid::dimensionworld > ModelType;
-#elif BALL
-typedef BallModel< Grid::dimensionworld > ModelType;
-#elif EULER
-typedef EulerModel< Grid::dimensionworld > ModelType;
-#endif
-
-//! get memory in MB 
-static std::vector<double> getMemoryUsage()
-{
-  std::vector<double> memUsage(2);
-  struct rusage info;
-  getrusage( RUSAGE_SELF, &info );
-  // convert to KB
-  memUsage[ 0 ] = (double(info.ru_maxrss)/ 1024.0);
-#if HAVE_ALUGRID
-  memUsage[ 1 ] = (double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
-#else
-  memUsage[ 1 ] = (double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
-#endif
-  return memUsage;
-}
-
 // method
 // ------
-void method ( const ModelType &model, int startLevel, int maxLevel, const char* outpath )
+void method ( int problem, int startLevel, int maxLevel, const char* outpath )
 {
+  typedef Dune::GridSelector::GridType Grid;
+  /** type of pde to solve **/
+#if TRANSPORT
+  typedef TransportModel< Grid::dimensionworld > ModelType;
+#elif BALL
+  typedef BallModel< Grid::dimensionworld > ModelType;
+#elif EULER
+  typedef EulerModel< Grid::dimensionworld > ModelType;
+#endif
+  ModelType model(problem);
+
   /* Grid construction ... */
   std::string name = model.problem().gridFile( "./" );
   // create grid pointer and release to free memory of GridPtr
@@ -250,11 +230,6 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
-#if HAVE_ZOLTAN 
-  float version;
-  Zoltan_Initialize(argc, argv, &version);
-#endif
-
   if( argc < 2 )
   {
     /* display usage */
@@ -267,14 +242,14 @@ try
   Dune::Timer timer ;
 
   /* create problem */
-  ModelType model(atoi(argv[1]));
+  const int problem = (argc > 1 ? atoi( argv[ 1 ] ) : 0);
 
   /* get level to use for computationa */
   const int startLevel = (argc > 2 ? atoi( argv[ 2 ] ) : 0);
   const int maxLevel = (argc > 3 ? atoi( argv[ 3 ] ) : startLevel);
 
   const char* path = (argc > 4) ? argv[ 4 ] : "./";
-  method( model, startLevel, maxLevel, path );
+  method( problem, startLevel, maxLevel, path );
 
 #ifdef HAVE_MPI 
   MPI_Barrier ( MPI_COMM_WORLD );

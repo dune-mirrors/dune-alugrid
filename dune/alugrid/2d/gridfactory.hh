@@ -59,6 +59,8 @@ namespace Dune
     static const int periodicBndId = ALU2dImplTraits< dimensionworld, elementType >::HBndElType::general_periodic;
 
   public:
+    typedef unsigned int VertexId;
+
     typedef ALUGridTransformation< ctype, dimensionworld > Transformation;
 
     //! type of vector for world coordinates
@@ -107,6 +109,9 @@ namespace Dune
      */
     virtual void insertVertex ( const VertexType &pos );
 
+    // for testing parallel GridFactory
+    VertexId insertVertex ( const VertexType &pos, const size_t globalId );
+
     /** \brief insert an element into the coarse grid
      * 
      *  \note The order of the vertices must coincide with the vertex order in
@@ -141,6 +146,12 @@ namespace Dune
      *  \param[in]  id       boundary id to assign to the face
      */
     virtual void insertBoundary ( const int element, const int face, const int id );
+
+    // for testing parallel GridFactory
+    void insertProcessBorder ( const int element, const int face )
+    {
+      insertBoundary( element, face, 222 );
+    }
 
     /** \brief insert a boundary projection into the macro grid
      *

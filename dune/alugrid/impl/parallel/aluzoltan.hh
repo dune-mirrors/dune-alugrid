@@ -70,8 +70,7 @@ namespace ALUGridZoltan
 
       ldb_vertex_map_t& vertexMap = objs->vertexMap();
 
-      // In this example, return the IDs of our objects, but no weights.
-      // Zoltan will assume equally weighted objects.
+      // In this example, return the IDs of our objects, 
       int i = 0; 
       typedef typename ldb_vertex_map_t :: iterator iterator ;
       const iterator end = vertexMap.end();
@@ -81,7 +80,8 @@ namespace ALUGridZoltan
         // std::cout << "vertex(" << i << ") = " << (*it).first.index() << std::endl;
         globalID[ i ] = (*it).first.index() ;
         localID [ i ] = i;
-        obj_wgts[ i ] = (*it).first.weight();
+        if (wgt_dim == 1)
+          obj_wgts[ i ] = (*it).first.weight();
       }
     }
 
@@ -113,23 +113,27 @@ namespace ALUGridZoltan
         {  
           int node = it->leftNode();
           int i=0;
+          // std::cout << "[" << objs->rank() << "]: ";
+          // std::cout << "edge(" << node << ") = " << it->rightNode() << " " << it->rightMaster() << std::endl;
           for (;i<num_obj;++i)
             if ((int)globalID[i] == node) break;
           assert( i<num_obj );
-          //std::cout << "[" << objs->rank() << "]: ";
-          //std::cout << "edge(" << i << ") = " << it->rightNode() << " " << it->rightMaster() << std::endl;
+          assert(it->rightMaster() >= 0);
+          assert(it->weight() >= 0);
           ++numEdges[i];
           objs->edges()[i].push_back( std::make_pair(it,true) );
         }
         if ( it->rightMaster() == rank ) 
         {  
           int node = it->rightNode();
+          // std::cout << "[" << objs->rank() << "]: ";
+          // std::cout << "edge(" << node << ") = " << it->leftNode() << " " << it->leftMaster() << std::endl;
           int i=0;
           for (;i<num_obj;++i)
             if ((int)globalID[i] == node) break;
           assert( i<num_obj );
-          //std::cout << "[" << objs->rank() << "]: ";
-          //std::cout << "edge(" << i << ") = " << it->leftNode() << " " << it->leftMaster() << std::endl;
+          assert(it->leftMaster() >= 0);
+          assert(it->weight() >= 0);
           ++numEdges[i];
           objs->edges()[i].push_back( std::make_pair(it,false) );
         }
@@ -159,7 +163,10 @@ namespace ALUGridZoltan
           nborProc[k] = objs->edgeMaster(j,l);
           assert( nborProc[k] >= 0 );
           if (wgt_dim==1)
+          {
             ewgts[k]=objs->edgeWeight(j,l);
+            assert( ewgts[k] >= 0 );
+          }
           ++k;
         }
       }
@@ -257,17 +264,17 @@ namespace ALUGridZoltan
       // zz->Set_Param( "LB_APPROACH", "REFINE");  // gives bad loadbalance with
       //       PARMETOS and the rest of the setting - no idea why
       zz->Set_Param( "EDGE_WEIGHT_DIM","1");
-      zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
       zz->Set_Param( "GRAPH_SYMMETRIZE","NONE" ); 
       // zz->Set_Param( "GRAPH_SYMMETRIZE","TRANSPOSE");
       zz->Set_Param( "GRAPH_SYM_WEIGHT","MAX");
+      // zz->Set_Param( "GRAPH_BUILD_TYPE","FAST_NO_DUP");
 #ifdef HAVE_PARMETIS
       if (method == PARMETIS)
         zz->Set_Param( "GRAPH_PACKAGE","PARMETIS");
 #elif  HAVE_SCOTCH
       zz->Set_Param( "GRAPH_PACKAGE","SCOTCH");
 #endif
-      zz->Set_Param( "CHECK_GRAPH", "2"); 
+      zz->Set_Param( "CHECK_GRAPH", "0"); 
       zz->Set_Param( "PHG_EDGE_SIZE_THRESHOLD", ".35");
     }
 

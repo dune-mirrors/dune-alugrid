@@ -91,6 +91,9 @@ namespace ALUGrid
     // Returns true if the stack is full
     bool full () const { return (_f >= length); }
 
+    // clear stack 
+    void clear() { _f = 0; }
+
     // Puts a new object onto the stack
     void push (const T& t) 
     { 

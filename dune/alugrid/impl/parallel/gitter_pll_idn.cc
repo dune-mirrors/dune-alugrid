@@ -347,17 +347,26 @@ namespace ALUGrid
     return s;
   }
 
-  void GitterPll::MacroGitterPll::vertexLinkageEstimateGCollect (MpAccessLocal & mpAccess) 
+  class UnpackVertexLinkage 
+    : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
-    typedef std::map< int, AccessIterator < vertex_STI >::Handle > map_t;
-    map_t vxmap;
-    const int np = mpAccess.psize (), me = mpAccess.myrank ();
-
-    ObjectStream os;
     // choose negative endmarker, since all ids should be positive 
-    const int endMarker = -127 ;
+    static const int endMarker = -127 ;
+    typedef Gitter :: vertex_STI vertex_STI ;
+    typedef std::map< int, vertex_STI* > map_t;
+    map_t _vxmap;
+    GitterPll::MacroGitterPll& _containerPll ;
+    const int _me ;
+  public: 
+    UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, const int me ) 
+      : _containerPll( containerPll ),
+        _me( me ) 
+    {}
+
+    void pack( const int rank, ObjectStream& os ) 
     {
-      AccessIterator < vertex_STI >::Handle w (*this);
+      assert( rank == _me );
+      AccessIterator < vertex_STI >::Handle w ( _containerPll );
 
       const int estimate = 0.25 * w.size() + 1;
       // reserve memory 
@@ -371,47 +380,111 @@ namespace ALUGrid
         {
           int id = vertex.ident ();
           os.writeObject( id );
-          vxmap[ id ] = w;
+          _vxmap[ id ] = &vertex;
         }
       }
       os.writeObject( endMarker );
     }
 
-    // exchange data 
-    std::vector< ObjectStream > osv = mpAccess.gcollect( os );
-
-    // free memory 
-    os.reset();
-
+    void unpack( const int rank, ObjectStream& os )
     {
-      map_t::const_iterator vxmapEnd = vxmap.end();
-      for (int i = 0; i < np; ++i ) 
-      {
-        if (i != me) 
-        {
-          ObjectStream& osv_i = osv[ i ]; 
+      assert( rank != _me );
 
-          int id ;
-          osv_i.readObject ( id );
-          while( id != endMarker )
+      const map_t::const_iterator vxmapEnd = _vxmap.end();
+
+      int id ;
+      os.readObject ( id );
+      while( id != endMarker )
+      {
+        map_t::const_iterator hit = _vxmap.find (id);
+        if( hit != vxmapEnd ) 
+        {
+          std::vector< int > s = (*hit).second->estimateLinkage ();
+          if (find (s.begin (), s.end (), rank) == s.end ()) 
           {
-            map_t::const_iterator hit = vxmap.find (id);
-            if( hit != vxmapEnd ) 
-            {
-              std::vector< int > s = (*hit).second.item ().accessPllX ().estimateLinkage ();
-              if (find (s.begin (), s.end (), i) == s.end ()) 
-              {
-                s.push_back( i );
-                (*hit).second.item ().accessPllX ().setLinkage (s);
-              }
-            }
-            // read next id 
-            osv_i.readObject( id );
+            s.push_back( rank );
+            (*hit).second->setLinkage (s);
           }
-          // free memory 
-          osv_i.reset();
+        }
+        // read next id 
+        os.readObject( id );
+      }
+    }
+
+    void printVertexLinkage()
+    {
+      AccessIterator < vertex_STI >::Handle w ( _containerPll );
+      for (w.first (); ! w.done (); w.next ()) 
+      {
+        vertex_STI& vertex = w.item();
+        std::vector< int > s = vertex.estimateLinkage() ;
+        const size_t size = s.size() ;
+        if( size > 0 ) 
+        {
+          std::cout << "Vx[ " << vertex.ident() << " ] = ";
+          for( size_t i=0; i<size ; ++i ) 
+            std::cout << s[ i ] << ",";
+          std::cout << std::endl;
         }
       }
+    }
+  };
+
+  void GitterPll::MacroGitterPll::vertexLinkageEstimateGCollect (MpAccessLocal & mpAccess) 
+  {
+    const int np = mpAccess.psize (), me = mpAccess.myrank ();
+
+    static bool useAllgather = true ;
+    if( useAllgather ) 
+    {
+      try 
+      {
+        ObjectStream os;
+        // data handle 
+        UnpackVertexLinkage data( *this, me );
+
+        // pack data 
+        data.pack( me, os );
+
+        // exchange data 
+        std::vector< ObjectStream > osv = mpAccess.gcollect( os );
+
+        // free memory 
+        os.reset();
+
+        for (int link = 0; link < np; ++link ) 
+        {
+          // skip my rank 
+          if( link == me ) continue ;
+
+          // unpack data for link 
+          data.unpack( link, osv[ link ] );
+          // free memory 
+          osv[ link ].reset(); 
+        }
+      }
+      catch( MyAlloc :: OutOfMemoryException ) 
+      {
+        useAllgather = false ;
+        // make sure every process caught an exception 
+        // this needs to be revised since the exception 
+        // might only be caught on a few processes 
+        mpAccess.barrier();
+      }
+    }
+
+    if( ! useAllgather ) 
+    {
+      // data handle 
+      UnpackVertexLinkage data( *this, me );
+
+      //std::cout <<"Print first linkage" << std::endl;
+      //data.printVertexLinkage();
+      //std::cout <<"Exchange data " << std::endl;
+      // exchange all-to-all 
+      mpAccess.allToAll( data );
+
+      //data.printVertexLinkage();
     }
   }
 
@@ -475,11 +548,11 @@ namespace ALUGrid
           map_t::const_iterator hit = vxmap.find (id);
           if( hit != vxmapEnd ) 
           {
-            std::vector< int > s = (*hit).second->accessPllX ().estimateLinkage ();
+            std::vector< int > s = (*hit).second->estimateLinkage ();
             if (find (s.begin (), s.end (), rank) == s.end ()) 
             {
               s.push_back( rank );
-              (*hit).second->accessPllX ().setLinkage (s);
+              (*hit).second->setLinkage (s);
             }
           }
         }
@@ -554,7 +627,7 @@ namespace ALUGrid
     identU3 += u3 ;
     identU4 += u4 ;
 
-    if (debugOption (2)) 
+    //if (debugOption (2)) 
     {
       std::cout.precision (3);
       std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";

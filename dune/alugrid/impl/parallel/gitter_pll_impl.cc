@@ -448,6 +448,7 @@ namespace ALUGrid
       // count leaf faces for this macro face 
       const int weight =  TreeIterator < typename Gitter::hface_STI, 
                                          is_leaf < Gitter::hface_STI > > ( myhface () ).size ();
+      assert( weight>=0 );
 
       // if we have a periodic situation 
       if( periodicBnd ) 
@@ -809,6 +810,7 @@ namespace ALUGrid
     {
       os.readObject ( _ldbVertexIndex ) ;
       os.readObject ( _master );
+      assert( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
     } 
     catch (ObjectStream :: EOFException) 
     {
@@ -837,7 +839,8 @@ namespace ALUGrid
 
     // write unique graph vertex index 
     os.writeObject ( _ldbVertexIndex );
-    os.writeObject ( _master );
+    // os.writeObject ( _master );
+    os.writeObject ( this->myhbnd().myvertex(0,0)->indexManagerStorage().myrank() );
     
     {
       for (int i = 0; i < myhface_t::polygonlength; ++i) 

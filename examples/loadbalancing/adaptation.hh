@@ -3,11 +3,12 @@
 
 /** include the grid capabilities 
  ** to distiguish grids without local adaptation **/
+#include <dune/common/timer.hh>
+
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
 
 #include "../datamap.hh"
-#include "loadbalance.hh"
 
 
 // GridMarker
@@ -116,7 +117,7 @@ private:
  *
  *  \tparam Grid     is the type of the underlying grid
  */
-template< class Grid>
+template< class Grid, class LoadBalanceHandle >
 struct LeafAdaptation
 {
   // dimensions of grid and world
@@ -141,8 +142,9 @@ public:
   /** \brief constructor
    *  \param grid   the grid to be adapted
    */
-  LeafAdaptation ( Grid &grid )
+  LeafAdaptation ( Grid &grid, LoadBalanceHandle &ldb )
   : grid_( grid ),
+    ldb_( ldb ),
     adaptTime_( 0.0 ),
     lbTime_( 0.0 ),
     commTime_( 0.0 )
@@ -184,15 +186,16 @@ private:
   void hierarchicProlong ( const Entity &entity, DataMap &dataMap ) const;
 
   Grid &grid_;
+  LoadBalanceHandle &ldb_;
 
   double adaptTime_;
   double lbTime_;
   double commTime_;
 };
 
-template< class Grid >
+template< class Grid, class LoadBalanceHandle >
 template< class Vector >
-inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
+inline void LeafAdaptation< Grid, LoadBalanceHandle >::operator() ( Vector &solution )
 {
   if (Dune :: Capabilities :: isCartesian<Grid> :: v)
     return;
@@ -253,10 +256,9 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   Dune :: Timer lbTimer ;
   // re-balance grid 
   DataHandle<Grid,Container> dataHandle( grid_, container ) ;
-  LoadBalanceHandle<Grid> ldb( grid_ );
-  // grid_.loadBalance( ldb, dataHandle );
-  typedef Dune::CommDataHandleIF< DataHandle<Grid,Container>, Container > DataHandleInterface;
-  grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
+  grid_.loadBalance( ldb_, dataHandle );
+  // typedef Dune::CommDataHandleIF< DataHandle<Grid,Container>, Container > DataHandleInterface;
+  // grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
 
   // cleanup adaptation markers 
   grid_.postAdapt();
@@ -287,9 +289,9 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   commTime_ = commTimer.elapsed();
 }
 
-template< class Grid >
+template< class Grid, class LoadBalanceHandle >
 template< class Vector, class DataMap >
-inline void LeafAdaptation< Grid >
+inline void LeafAdaptation< Grid, LoadBalanceHandle >
   ::hierarchicRestrict ( const Entity &entity, DataMap &dataMap ) const
 {
   // for leaf entities just copy the data to the data map
@@ -314,9 +316,9 @@ inline void LeafAdaptation< Grid >
   }
 }
 
-template< class Grid >
+template< class Grid, class LoadBalanceHandle >
 template< class Vector, class DataMap >
-inline void LeafAdaptation< Grid >
+inline void LeafAdaptation< Grid, LoadBalanceHandle >
   ::hierarchicProlong ( const Entity &entity, DataMap &dataMap ) const
 {
   if ( !entity.isLeaf() )

@@ -140,6 +140,16 @@ namespace Dune
       return ( (!this->operator == (org)) && (!this->operator <(org)) ); 
     }
 
+
+    void extractKey(std::vector<int> &key) const  
+    { 
+      assert( key.size() == 4 );
+      key[0] = this->_a;
+      key[1] = this->_b;
+      key[2] = this->_c;
+      key[3] = this->_d;
+    }
+
     void print(std::ostream & out) const 
     {
       out << "[" << this->_a << "," << this->_b << "," << this->_c << "," << this->_d << "]";

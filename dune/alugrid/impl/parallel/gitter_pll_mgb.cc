@@ -1007,8 +1007,8 @@ namespace ALUGrid
     // default partitioning method 
     // for user defined paritioning gatherScatter.partitioning() was called in gitter_pll_sti.cc before 
     // calling this method and returned true - that method should thus already have compute the 
-    // new partitioning. For the internal partitioner repartition is called hear and
-    // could still be lead to no repartitioning being carried out
+    // new partitioning. For the internal partitioner, repartition is called heer and
+    // could still lead to no repartitioning being carried out
     const bool doRepartition = userDefinedPartitioning ? true : 
       db.repartition (mpAccess (), LoadBalancer::DataBase::method (_ldbMethod), _ldbOver );
 

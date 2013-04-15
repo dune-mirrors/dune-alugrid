@@ -3,8 +3,13 @@
 
 /** include the grid capabilities 
  ** to distiguish grids without local adaptation **/
+#include <dune/common/timer.hh>
+
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
+
+// global counter of adaptation cyclces 
+static int adaptationSequenceNumber = 0; 
 
 #include "datamap.hh"
 
@@ -23,7 +28,8 @@
 template< class Grid >
 struct GridMarker 
 {
-  typedef typename Grid::template Codim< 0 >::Entity Entity;
+  typedef typename Grid::template Codim< 0 >::Entity        Entity;
+  typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
   /** \brief constructor
    *  \param grid     the grid. Here we can not use a grid view since they only
@@ -56,8 +62,9 @@ struct GridMarker
    *  \param gridView the grid view from which to take the intersection iterator 
    *  \param entity the corresponding entity
    */
-  template< class GridView >
-  void refineNeighbors ( const GridView &gridView, const Entity &entity )
+  template< class GridView, class NBChecker >
+  void refineNeighbors ( const GridView &gridView, const Entity &entity, 
+                         const NBChecker& nbChecker )
   {
     typedef typename GridView::IntersectionIterator IntersectionIterator;
     typedef typename IntersectionIterator::Intersection Intersection;
@@ -67,7 +74,12 @@ struct GridMarker
     {
       const Intersection &intersection = *it;
       if( intersection.neighbor() )
-        refine( *intersection.outside() );
+      {
+        EntityPointer ep = intersection.outside() ;
+        const Entity& outside = *ep;
+        if( nbChecker.check( entity, outside ) )
+          refine( outside );
+      }
     }
   }
 
@@ -321,6 +333,8 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   solution.communicate();
   commTime_ = commTimer.elapsed();
 
+  // increase adaptation secuence number 
+  ++adaptationSequenceNumber;
 }
 
 template< class Grid >
