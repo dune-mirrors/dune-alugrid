@@ -277,11 +277,15 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   if( callBalance ) 
   {
     Dune :: Timer lbTimer ;
+#if BALL 
+    grid_.loadBalance() ;
+#else
     // re-balance grid 
     typedef DataHandle<Grid,Container> DH;
     DH dataHandle( grid_, container ) ;
     typedef Dune::CommDataHandleIF< DH, Container > DataHandleInterface;
     grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
+#endif
     lbTime_ = lbTimer.elapsed();
   }
 
