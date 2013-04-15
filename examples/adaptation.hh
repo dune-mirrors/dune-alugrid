@@ -62,9 +62,8 @@ struct GridMarker
    *  \param gridView the grid view from which to take the intersection iterator 
    *  \param entity the corresponding entity
    */
-  template< class GridView, class NBChecker >
-  void refineNeighbors ( const GridView &gridView, const Entity &entity, 
-                         const NBChecker& nbChecker )
+  template< class GridView >
+  void refineNeighbors ( const GridView &gridView, const Entity &entity )
   {
     typedef typename GridView::IntersectionIterator IntersectionIterator;
     typedef typename IntersectionIterator::Intersection Intersection;
@@ -77,8 +76,7 @@ struct GridMarker
       {
         EntityPointer ep = intersection.outside() ;
         const Entity& outside = *ep;
-        if( nbChecker.check( entity, outside ) )
-          refine( outside );
+        refine( outside );
       }
     }
   }

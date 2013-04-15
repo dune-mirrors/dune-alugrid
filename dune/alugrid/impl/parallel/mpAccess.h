@@ -154,7 +154,7 @@ namespace ALUGrid
   }
 
   inline int MpAccessLocal :: link (int i) const {
-    assert (_linkage.end () != _linkage.find (i)) ;
+    alugrid_assert (_linkage.end () != _linkage.find (i)) ;
     return (* _linkage.find (i)).second ;
   }
 

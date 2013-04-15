@@ -34,7 +34,7 @@ namespace ALU2DGrid
       int _lidx,_ridx;
       Node(vertex_t *invtx, thinelement_t *plnb, thinelement_t *prnb)
       : vtx(invtx), lnb(plnb), rnb(prnb), next(0), prev(0)
-      {assert(invtx);}
+      {alugrid_assert (invtx);}
 
       ~Node() {
         if(next) delete next;
@@ -91,9 +91,9 @@ namespace ALU2DGrid
   public:
     Vtx_btree(vertex_t *invtx, thinelement_t *plnb, thinelement_t *prnb)
       : head(0), rvtx(invtx), lnb(plnb), rnb(prnb) {
-      assert(rvtx);
-      assert(plnb);
-      assert(prnb);
+      alugrid_assert (rvtx);
+      alugrid_assert (plnb);
+      alugrid_assert (prnb);
     }
     
     ~Vtx_btree() {
@@ -121,7 +121,7 @@ namespace ALU2DGrid
     int count () const { return head->count(); }
     
     bool remove(Vertex < N > *vtx) {
-      assert(head->prev || head->next);
+      alugrid_assert (head->prev || head->next);
       return (head->remove(vtx)==1);
     }
   };

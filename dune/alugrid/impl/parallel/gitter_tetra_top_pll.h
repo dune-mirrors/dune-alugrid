@@ -119,11 +119,11 @@ namespace ALUGrid
           inline int ghostLevel () const ; 
 
           // return mxt's ldbVertexIndex, otherwise the default is returned which is wrong 
-          int ldbVertexIndex() const { assert( _mxt ); return _mxt->ldbVertexIndex(); }
-          int master() const { assert( _mxt ); return _mxt->master(); }
+          int ldbVertexIndex() const { alugrid_assert ( _mxt ); return _mxt->ldbVertexIndex(); }
+          int master() const { alugrid_assert ( _mxt ); return _mxt->master(); }
           // call mxt's setLoadBalanceVertexIndex (otherwise default impl is called which is wrong)
-          void setLoadBalanceVertexIndex ( int ldbVx ) { assert( _mxt ); _mxt->setLoadBalanceVertexIndex( ldbVx ); }
-          void setMaster ( int master ) { assert( _mxt ); _mxt->setMaster( master ); }
+          void setLoadBalanceVertexIndex ( int ldbVx ) { alugrid_assert ( _mxt ); _mxt->setLoadBalanceVertexIndex( ldbVx ); }
+          void setMaster ( int master ) { alugrid_assert ( _mxt ); _mxt->setMaster( master ); }
 
           virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
 
@@ -158,12 +158,12 @@ namespace ALUGrid
   }
 
   template < class A, class MX > ElementPllXIF_t & Hbnd3PllExternal < A, MX > :: accessPllX () throw (Parallel :: AccessPllException) {
-    assert (_mxt) ;
+    alugrid_assert (_mxt) ;
     return * _mxt ;
   }
 
   template < class A, class MX > const ElementPllXIF_t & Hbnd3PllExternal < A, MX > :: accessPllX () const throw (Parallel :: AccessPllException) {
-    assert (_mxt) ;
+    alugrid_assert (_mxt) ;
     return * _mxt ;
   }
 
@@ -236,7 +236,7 @@ namespace ALUGrid
    , _mgb(mgb)
    , _gm( new MacroGhostTetra( _mgb , ghInfo, f ) ) 
   {
-    assert( _gm );
+    alugrid_assert ( _gm );
     this->setGhost ( _gm->getGhost() );   
     _mxt = new MX (*this, _gm->getGhostInfo() );
     
@@ -254,7 +254,7 @@ namespace ALUGrid
    , _mgb(mgb)
    , _gm( 0 ) 
   {
-    assert( _mxt );
+    alugrid_assert ( _mxt );
     this->restoreFollowFace () ;
     return ;
   }
@@ -269,12 +269,12 @@ namespace ALUGrid
   }
 
   template < class A, class X, class MX > ElementPllXIF_t & Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: accessPllX () throw (Parallel :: AccessPllException) {
-    assert (_mxt) ;
+    alugrid_assert (_mxt) ;
     return * _mxt ;
   }
 
   template < class A, class X, class MX > const ElementPllXIF_t & Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
-    assert (_mxt) ;
+    alugrid_assert (_mxt) ;
     return * _mxt ;
   }
 
@@ -287,14 +287,14 @@ namespace ALUGrid
   template < class A, class X, class MX > 
   bool Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: bndNotifyBalance (balrule_t r, int w) 
   {
-    assert (_mxt) ;
+    alugrid_assert (_mxt) ;
     _mxt->notifyBalance (r,w) ;
     return true ;
   }
 
   template < class A, class X, class MX > bool Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: lockedAgainstCoarsening () const
   {
-    assert (_mxt) ;
+    alugrid_assert (_mxt) ;
     return _mxt->lockedAgainstCoarsening () ;
   }
 

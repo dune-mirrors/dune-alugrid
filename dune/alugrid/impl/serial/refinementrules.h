@@ -1,7 +1,7 @@
 #ifndef REFINEMENTRULES_H_INCLUDED
 #define REFINEMENTRULES_H_INCLUDED
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <iostream>
 
 namespace ALUGrid
@@ -116,13 +116,13 @@ namespace ALUGrid
   inline RefinementRules :: Hedge1Rule :: Hedge1Rule ( const rule_t &r )
   : _r ( r )
   {
-    assert( isValid() );
+    alugrid_assert ( isValid() );
   }
 
   inline RefinementRules :: Hedge1Rule :: Hedge1Rule ( const rule_enum &r )
   : _r( r )
   {
-    assert( isValid() );
+    alugrid_assert ( isValid() );
   }
 
   inline RefinementRules :: Hedge1Rule :: operator rule_t () const
@@ -141,8 +141,8 @@ namespace ALUGrid
 
   inline RefinementRules :: Hedge1Rule RefinementRules :: Hedge1Rule :: rotate (int i) const 
   {
-    assert (i == 0 || i == 1) ;
-    assert ( _r == nosplit || _r == iso2 );  
+    alugrid_assert (i == 0 || i == 1) ;
+    alugrid_assert ( _r == nosplit || _r == iso2 );  
     return Hedge1Rule( _r );
   }
 
@@ -171,13 +171,13 @@ namespace ALUGrid
   inline RefinementRules :: Hface3Rule :: Hface3Rule ( const rule_t &r )
   : _r( r )
   {
-    assert( _r == undefined || isValid() );
+    alugrid_assert ( _r == undefined || isValid() );
   }
 
   inline RefinementRules :: Hface3Rule :: Hface3Rule ( const rule_enum &r )
   : _r( r )
   {
-    assert( _r == undefined || isValid() );
+    alugrid_assert ( _r == undefined || isValid() );
   }
 
   inline RefinementRules :: Hface3Rule :: operator rule_t () const
@@ -195,7 +195,7 @@ namespace ALUGrid
    
   inline RefinementRules :: Hface3Rule RefinementRules :: Hface3Rule :: rotate (int t) const 
   {
-    assert ((-4 < t) && (t < 3)) ;
+    alugrid_assert ((-4 < t) && (t < 3)) ;
     rule_t newr = _r ;
     switch (_r) {
     case nosplit :
@@ -264,13 +264,13 @@ namespace ALUGrid
   inline RefinementRules :: Hface4Rule :: Hface4Rule ( const rule_t &r )
   : _r( r )
   {
-    assert( _r == undefined || isValid() );
+    alugrid_assert ( _r == undefined || isValid() );
   }
 
   inline RefinementRules :: Hface4Rule :: Hface4Rule ( const rule_enum &r )
   : _r( r )
   {
-    assert( _r == undefined || isValid() );
+    alugrid_assert ( _r == undefined || isValid() );
   }
 
   inline RefinementRules :: Hface4Rule :: operator rule_t () const
@@ -327,19 +327,19 @@ namespace ALUGrid
   inline RefinementRules :: TetraRule :: TetraRule ( const rule_t &r )
   : _r( r )
   {
-    assert( isValid() );
+    alugrid_assert ( isValid() );
   }
 
   inline RefinementRules :: TetraRule :: TetraRule ( const int r )
   : _r( (rule_t) r )
   {
-    assert( isValid() );
+    alugrid_assert ( isValid() );
   }
 
   inline RefinementRules :: TetraRule :: TetraRule ( const rule_enum &r )
   : _r( r )
   {
-    assert( isValid() );
+    alugrid_assert ( isValid() );
   }
 
   inline RefinementRules :: TetraRule :: operator rule_t () const
@@ -396,19 +396,19 @@ namespace ALUGrid
   inline RefinementRules :: HexaRule :: HexaRule ( const rule_t &r )
   : _r( r )
   {
-    assert( isValid() );
+    alugrid_assert ( isValid() );
   }
 
   inline RefinementRules :: HexaRule :: HexaRule ( const int r )
   : _r( (rule_t) r )
   {
-    assert( isValid() );
+    alugrid_assert ( isValid() );
   }
 
   inline RefinementRules :: HexaRule :: HexaRule ( const rule_enum &r )
   : _r( r )
   {
-    assert( isValid() );
+    alugrid_assert ( isValid() );
   }
 
   inline RefinementRules :: HexaRule :: operator rule_t () const

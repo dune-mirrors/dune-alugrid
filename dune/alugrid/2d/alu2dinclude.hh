@@ -176,9 +176,9 @@ namespace Dune
     // return true, if edge is visited on given element 
     bool isOnElement(int elementIndex, int idx, int codim) const 
     {
-      assert( valid_ );
+      alugrid_assert ( valid_ );
       // this marker only works for codim 1, i.e. edges  
-      assert( codim == 1 );
+      alugrid_assert ( codim == 1 );
       return marker_[idx] == elementIndex; 
     }
     
@@ -239,18 +239,18 @@ namespace Dune
     //! return level of vertex 
     int levelOfVertex(const int vxIdx) const 
     {
-      assert( valid_ );
-      assert( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
+      alugrid_assert ( valid_ );
+      alugrid_assert ( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
       // if this assertion is thrown, the level has not been initialized 
-      assert( vertexLevels_[vxIdx] >= 0 );
+      alugrid_assert ( vertexLevels_[vxIdx] >= 0 );
       return vertexLevels_[vxIdx];
     }
 
     //! return level of vertex 
     bool isValidVertex(const int vxIdx) const 
     {
-      assert( valid_ );
-      assert( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
+      alugrid_assert ( valid_ );
+      alugrid_assert ( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
       return (vertexLevels_[vxIdx] >= 0);
     }
 

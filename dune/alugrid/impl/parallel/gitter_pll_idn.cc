@@ -242,7 +242,7 @@ namespace ALUGrid
       bool good = id.read( os );
       while ( good ) 
       {
-        assert ( look.find (id) != look.end () );
+        alugrid_assert ( look.find (id) != look.end () );
         tt[ link ].second.push_back ((*look.find (id)).second.first);
       
         // is end marker was read break while loop
@@ -365,7 +365,7 @@ namespace ALUGrid
 
     void pack( const int rank, ObjectStream& os ) 
     {
-      assert( rank == _me );
+      alugrid_assert ( rank == _me );
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
 
       const int estimate = 0.25 * w.size() + 1;
@@ -388,7 +388,7 @@ namespace ALUGrid
 
     void unpack( const int rank, ObjectStream& os )
     {
-      assert( rank != _me );
+      alugrid_assert ( rank != _me );
 
       const map_t::const_iterator vxmapEnd = _vxmap.end();
 
@@ -590,9 +590,9 @@ namespace ALUGrid
     hfaceTT_t ().swap( _hfaceTT );
 
     // make sure the memory was deallocated 
-    assert( _vertexTT.capacity() == 0 );
-    assert( _hedgeTT.capacity()  == 0 );
-    assert( _hfaceTT.capacity()  == 0 );
+    alugrid_assert ( _vertexTT.capacity() == 0 );
+    alugrid_assert ( _hedgeTT.capacity()  == 0 );
+    alugrid_assert ( _hfaceTT.capacity()  == 0 );
 
     mpa.removeLinkage ();
     
@@ -627,7 +627,7 @@ namespace ALUGrid
     identU3 += u3 ;
     identU4 += u4 ;
 
-    //if (debugOption (2)) 
+    if (debugOption (2)) 
     {
       std::cout.precision (3);
       std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";

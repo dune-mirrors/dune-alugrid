@@ -2,7 +2,7 @@
 #define ALUGRID_ZOLTAN_H_INCLUDED
 
 #include <cmath>
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <sstream>
 
 #include "mpAccess_MPI.h"
@@ -38,15 +38,15 @@ namespace ALUGridZoltan
     ldb_vertex_map_t& vertexMap() { return _vertexMap; }
     ldb_edge_set_t& edgeMap() { return _edgeMap; }
     std::vector< std::vector<std::pair<edgeType,bool> > >& edges() { return _edges; }
-    int edgeIdx(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+    int edgeIdx(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
                                return ( (_edges[i][k].second) ?
                                    _edges[i][k].first->rightNode() : 
                                    _edges[i][k].first->leftNode() ) ; }
-    int edgeMaster(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+    int edgeMaster(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
                                return ( (_edges[i][k].second) ?
                                    _edges[i][k].first->rightMaster() : 
                                    _edges[i][k].first->leftMaster() ) ; }
-    int edgeWeight(int i,int k) { assert( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+    int edgeWeight(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
                                  return _edges[i][k].first->weight(); }
 
     // query functions that respond to requests from Zoltan 
@@ -54,7 +54,7 @@ namespace ALUGridZoltan
     static int get_number_of_objects(void *data, int *ierr)
     {
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
-      assert( objs );
+      alugrid_assert ( objs );
       *ierr = ZOLTAN_OK;
       return objs->vertexMap().size();
     }
@@ -64,8 +64,8 @@ namespace ALUGridZoltan
                                 int wgt_dim, float *obj_wgts, int *ierr)
     {
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
-      assert( objs );
-      assert(wgt_dim==1);
+      alugrid_assert ( objs );
+      alugrid_assert (wgt_dim==1);
       *ierr = ZOLTAN_OK;
 
       ldb_vertex_map_t& vertexMap = objs->vertexMap();
@@ -91,7 +91,7 @@ namespace ALUGridZoltan
                                   int *numEdges, int *ierr)
     {
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
-      assert( num_obj == (int)objs->vertexMap().size() );
+      alugrid_assert ( num_obj == (int)objs->vertexMap().size() );
       if (num_obj == 0)
       {
         *ierr = ZOLTAN_OK;
@@ -117,9 +117,9 @@ namespace ALUGridZoltan
           // std::cout << "edge(" << node << ") = " << it->rightNode() << " " << it->rightMaster() << std::endl;
           for (;i<num_obj;++i)
             if ((int)globalID[i] == node) break;
-          assert( i<num_obj );
-          assert(it->rightMaster() >= 0);
-          assert(it->weight() >= 0);
+          alugrid_assert ( i<num_obj );
+          alugrid_assert (it->rightMaster() >= 0);
+          alugrid_assert (it->weight() >= 0);
           ++numEdges[i];
           objs->edges()[i].push_back( std::make_pair(it,true) );
         }
@@ -131,9 +131,9 @@ namespace ALUGridZoltan
           int i=0;
           for (;i<num_obj;++i)
             if ((int)globalID[i] == node) break;
-          assert( i<num_obj );
-          assert(it->leftMaster() >= 0);
-          assert(it->weight() >= 0);
+          alugrid_assert ( i<num_obj );
+          alugrid_assert (it->leftMaster() >= 0);
+          alugrid_assert (it->weight() >= 0);
           ++numEdges[i];
           objs->edges()[i].push_back( std::make_pair(it,false) );
         }
@@ -161,11 +161,11 @@ namespace ALUGridZoltan
           // std::cout << "v(" << j << ")(" << l << ")=" << objs->edgeIdx(j,l) << " " << objs->edgeMaster(j,l) << std::endl;
           nborGID[k]  = objs->edgeIdx(j,l);
           nborProc[k] = objs->edgeMaster(j,l);
-          assert( nborProc[k] >= 0 );
+          alugrid_assert ( nborProc[k] >= 0 );
           if (wgt_dim==1)
           {
             ewgts[k]=objs->edgeWeight(j,l);
-            assert( ewgts[k] >= 0 );
+            alugrid_assert ( ewgts[k] >= 0 );
           }
           ++k;
         }
@@ -186,7 +186,7 @@ namespace ALUGridZoltan
                                   int num_dim, double *geom_vec, int *ierr)
     {
       ObjectCollection *objs = static_cast<ObjectCollection *> (data);
-      assert( objs );
+      alugrid_assert ( objs );
 
       if ( (sizeGID != 1) || (sizeLID != 1) || (num_dim != dimension))
       {
@@ -237,7 +237,7 @@ namespace ALUGridZoltan
 
     ObjectCollectionType objects( rank, vertexMap, edgeSet );
     Zoltan *zz = new Zoltan( comm );
-    assert( zz );
+    alugrid_assert ( zz );
 
     // General parameters 
     const char* debug = ( verbose ) ? "1" : "0";
@@ -335,7 +335,7 @@ namespace ALUGridZoltan
       for (int i=0; i < numExport; ++i)
       {
         iterator vertex = vertexMap.find( exportGlobalIds[ i ] );
-        assert( vertex != vertexMap.end () );
+        alugrid_assert ( vertex != vertexMap.end () );
         (*vertex).second = exportProcs[ i ];
       }
 

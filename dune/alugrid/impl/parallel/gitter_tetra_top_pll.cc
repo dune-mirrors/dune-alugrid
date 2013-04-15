@@ -1,7 +1,7 @@
 // (c) Robert Kloefkorn 2010
 #include <config.h>
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 
 #include "gitter_tetra_top_pll.h"
 #include "../serial/gitter_tetra_top.cc"
@@ -37,7 +37,7 @@ namespace ALUGrid
       hface3_GEO * orgFace = ghost->myhface( _ghostPair.second ); 
       hface3_GEO * face    = orgFace->down();
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       int breakCount = 0;
 #endif
       while( ! face )
@@ -46,50 +46,50 @@ namespace ALUGrid
         // this is true for the boundaries of ghost elements (see null face3Neighbour)
         if( neighbour.second < 0 )
         {
-          assert( neighbour.first->isboundary() );
+          alugrid_assert ( neighbour.first->isboundary() );
           neighbour = orgFace->nb.rear();
         }
 
         tetra_GEO* elem = static_cast<tetra_GEO *> (neighbour.first);
         // make sure that cast worked 
-        assert( dynamic_cast<tetra_GEO *> (neighbour.first) );
+        alugrid_assert ( dynamic_cast<tetra_GEO *> (neighbour.first) );
         // refine element with suitable refinement rule 
         elem->tagForGlobalRefinement();
         elem->refine();
 
         face = orgFace->down();
-        assert( breakCount++ < 5 );
+        alugrid_assert ( breakCount++ < 5 );
       }
 
       // find new ghost elements 
       {
-        assert( face );
+        alugrid_assert ( face );
         int count = 0;
         for(; face; face = face->next() )
         {
-          assert(face);
+          alugrid_assert (face);
 
           // check neighbours 
           neigh_t neighbour = face->nb.front();
           // if nb is boundary take other neighbour 
           if( neighbour.second < 0 )
           {
-            assert( neighbour.first->isboundary() );
+            alugrid_assert ( neighbour.first->isboundary() );
             neighbour = face->nb.rear();
           }
 
-          assert( ! neighbour.first->isboundary () );
+          alugrid_assert ( ! neighbour.first->isboundary () );
           tetra_GEO* ghch = static_cast<tetra_GEO *> (neighbour.first);
-          assert( dynamic_cast<tetra_GEO *> (neighbour.first) );
+          alugrid_assert ( dynamic_cast<tetra_GEO *> (neighbour.first) );
           // check father only for non-conforming refinement
-          assert( ghost->getrule().bisection() ? true : ghch->up() == ghost );
+          alugrid_assert ( ghost->getrule().bisection() ? true : ghch->up() == ghost );
          
           // set element pointer and local face number 
           info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
 
           ++count;
         }
-        assert( ghost->getrule().bisection() ? count == 2 : count == 4);
+        alugrid_assert ( ghost->getrule().bisection() ? count == 2 : count == 4);
       }
     }
   }
@@ -140,7 +140,7 @@ namespace ALUGrid
     if(gpair.first)
     {
       _ghostPair = gpair; 
-      assert( _ghostPair.first );
+      alugrid_assert ( _ghostPair.first );
       
       // copy indices from internal boundry to myhface(.) of ghost
       _ghostPair.first->setIndicesAndBndId ( *(this->myhface(0)) , _ghostPair.second );
@@ -159,17 +159,17 @@ namespace ALUGrid
   const MacroGhostInfo_STI* Hbnd3PllInternal < A, X, MX >::
   HbndPllMacro::buildGhostCell(ObjectStream& os, int fce)
   {
-    assert( _gm == 0 ); 
+    alugrid_assert ( _gm == 0 ); 
     int code = MacroGridMoverIF::ENDMARKER;
     os.readObject (code); 
-    assert( code == MacroGridMoverIF::HBND3INT );
+    alugrid_assert ( code == MacroGridMoverIF::HBND3INT );
 
     {
       int bfake;
       os.readObject (bfake);
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
-      assert( b == Gitter::hbndseg::closure );
+      alugrid_assert ( b == Gitter::hbndseg::closure );
 #endif
       // read global graph vertex index 
       int ldbVertexIndex = -1;
@@ -198,7 +198,7 @@ namespace ALUGrid
         MacroGhostInfoTetra* ghInfo = new MacroGhostInfoTetra( os );
 
         myhface3_t * f = this->myhface(0);
-        assert( f );
+        alugrid_assert ( f );
 
         // ghInfo is stored inside MacroGhostHexa
         _gm = new MacroGhostTetra( _mgb , ghInfo,  f );
@@ -206,7 +206,7 @@ namespace ALUGrid
       }
     }
 
-    assert( _gm );
+    alugrid_assert ( _gm );
     return _gm->getGhostInfo();
   }
 

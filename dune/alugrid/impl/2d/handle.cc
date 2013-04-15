@@ -53,7 +53,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Hmesh<N,NV>::setup_grid(const std::string &filename) 
   {
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     std::cerr << "\n  Hmesh_basic::asciireadtriang(?) opens: ";
     std::cerr << filename << "\n" << std::endl;
 #endif
@@ -68,7 +68,7 @@ namespace ALU2DGrid
            << "\"." << std::endl;
       in.open( macro.c_str() );
     }
-    assert(in);
+    alugrid_assert (in);
 
     double time;
     long unsigned int nbr;
@@ -100,9 +100,9 @@ namespace ALU2DGrid
         bndel_triang_t *bel = (bndel_triang_t *)&(walkb->getitem());
         if (bel->type() == bndel_t::periodic)
         {
-          assert(vertex_t::ncoord == 2);
+          alugrid_assert (vertex_t::ncoord == 2);
           bndel_triang_t *nbbel = ((bndel_periodic_t *)bel)->periodic_nb;
-          assert(nbbel);
+          alugrid_assert (nbbel);
           bel->vertex(0)->set_pernb(nbbel->vertex(1));
           bel->vertex(1)->set_pernb(nbbel->vertex(0));
         }
@@ -123,7 +123,7 @@ namespace ALU2DGrid
             for (int j=0; j < pnv->get_nr_of_per_nbs(); ++j)
               v->set_pernb(pnv->get_pernb(j));
           }
-          assert(v->get_nr_of_per_nbs() == 3);
+          alugrid_assert (v->get_nr_of_per_nbs() == 3);
         }
       }
     }
@@ -139,7 +139,7 @@ namespace ALU2DGrid
     delete _rest_el;
     delete adp;
 
-    assert(ncv==0);
+    alugrid_assert (ncv==0);
 
   }
 
@@ -219,9 +219,9 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Hmesh<N,NV>::refine() {
 
-    assert( ! mel.busy());
-    assert( ! mbl.busy());
-    assert( ! vl.busy());
+    alugrid_assert ( ! mel.busy());
+    alugrid_assert ( ! mbl.busy());
+    alugrid_assert ( ! vl.busy());
 
     //Listwalk_impl <macroelement_t> walk(mel);
     //for( walk.first(); !walk.done(); walk.next() )
@@ -244,9 +244,9 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Hmesh<N,NV>::coarse() {
 
-    assert(!mel.busy());
-    assert(!mbl.busy());
-    assert(!vl.busy());
+    alugrid_assert (!mel.busy());
+    alugrid_assert (!mbl.busy());
+    alugrid_assert (!vl.busy());
 
     // walk over all macro elements and call hierarchic coarseining procedure
     {

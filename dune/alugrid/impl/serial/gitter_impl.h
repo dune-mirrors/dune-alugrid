@@ -395,7 +395,7 @@ namespace ALUGrid
   inline void GitterBasis::Objects::Hedge1Empty::projectInnerVertex(const ProjectVertexPair &pv) 
   {
     if (innerVertex()) {
-      assert(!leaf());
+      alugrid_assert (!leaf());
       innerVertex()->project(pv);
     }
   }
@@ -407,7 +407,7 @@ namespace ALUGrid
 
   inline void GitterBasis::Objects::Hface3Empty::projectVertex(const ProjectVertexPair &pv) 
   {
-    assert(!leaf());
+    alugrid_assert (!leaf());
     for (int e = 0; e < polygonlength; e++)
       myhedge1(e)->projectInnerVertex(pv);
     if (innerVertex())

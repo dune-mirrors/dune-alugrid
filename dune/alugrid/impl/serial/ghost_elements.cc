@@ -41,11 +41,11 @@ namespace ALUGrid
     this->_hexaMap.clear();
     this->_tetraMap.clear();
 
-    assert( this->_hbnd3Int.empty ());
-    assert( this->_hbnd4Int.empty ());
+    alugrid_assert ( this->_hbnd3Int.empty ());
+    alugrid_assert ( this->_hbnd4Int.empty ());
 
-    assert( this->_hbnd3Map.empty ());
-    assert( this->_hbnd4Map.empty ());
+    alugrid_assert ( this->_hbnd3Map.empty ());
+    alugrid_assert ( this->_hbnd4Map.empty ());
 
     // faces 
     this->_face4Map.clear();
@@ -90,41 +90,41 @@ namespace ALUGrid
     for(int i=0; i<3; ++i)
     {
       const VertexGeo * vx = face->myvertex(i);
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       int idx = vx->ident();
       bool found = false;
       for(int j=0; j<4; ++j) 
         if(ghInfo.vertices()[j] == idx) found = true;
-      assert( found );
+      alugrid_assert ( found );
 #endif
       const alucoord_t (&point)[3] = vx->Point();
       mgb.InsertNewUniqueVertex(point[0],point[1],point[2],vx->ident());
     }
 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     int idx = oppVerts[0];
     bool found = false;
     for(int j=0; j<4; ++j) 
       if( ghInfo.vertices()[j] == idx) found = true;
-    assert( found );
+    alugrid_assert ( found );
 #endif
     const alucoord_t (&px)[3] = p[0];
     //cout << "Insert new point " << oppVerts[0] << endl;
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     bool wasNewlyInserted = 
 #endif
       mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
 
-    assert( wasNewlyInserted );
+    alugrid_assert ( wasNewlyInserted );
 
     // InsertUniqueHexa gets the global vertex numbers 
     GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first;
 
     // set ghost and number 
     _ghostPair.first = ghost;
-    assert( _ghostPair.first );
+    alugrid_assert ( _ghostPair.first );
     _ghostPair.second = ghInfo.internalFace(); 
-    assert( _ghostPair.second >= 0 );
+    alugrid_assert ( _ghostPair.second >= 0 );
 
     // NOTE: we do not insert boundary faces, because we don't need them
     // here. This is ok because of the hasFaceEmpty class (gitter_sti.h) 
@@ -156,9 +156,9 @@ namespace ALUGrid
 
     GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->orientation() ).first;
     _ghostPair.first = ghost;
-    assert( _ghostPair.first );
+    alugrid_assert ( _ghostPair.first );
     _ghostPair.second = ghInfo.internalFace(); 
-    assert( _ghostPair.second >= 0 );
+    alugrid_assert ( _ghostPair.second >= 0 );
     
     // NOTE: we do not insert boundary faces, because we don't need them
     // here. This is ok because of the hasFaceEmpty class (gitter_sti.h) 
@@ -170,7 +170,7 @@ namespace ALUGrid
   {
     // store all sub items of the ghost element before deleting it
     tetra_GEO* tetra = (tetra_GEO *) _ghostPair.first;
-    assert( tetra );
+    alugrid_assert ( tetra );
 
     VertexGeo* vertices[ 4 ] = { 
       tetra->myvertex(0), 
@@ -204,7 +204,7 @@ namespace ALUGrid
     // detele vertices 
     for( int i=0; i<4; ++i ) delete vertices[ i ];
 
-    assert( _ghInfoPtr );
+    alugrid_assert ( _ghInfoPtr );
     delete _ghInfoPtr;
   }
 
@@ -244,16 +244,16 @@ namespace ALUGrid
     for(int i=0; i<4; ++i)
     {
       const alucoord_t (&px)[3] = p[i];
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       bool wasNewlyInserted = 
 #endif
         mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
-      assert( wasNewlyInserted );
+      alugrid_assert ( wasNewlyInserted );
     }
 
     // InsertUniqueHexa gets the global vertex numbers 
     hexa_GEO * ghost = mgb.InsertUniqueHexa ( ghInfo.vertices() ).first;
-    assert( ghost );
+    alugrid_assert ( ghost );
 
     // set ghost values 
     _ghostPair.first  = ghost;
@@ -268,7 +268,7 @@ namespace ALUGrid
   {
     // store all sub items of the ghost element before deleting it
     hexa_GEO* hexa = (hexa_GEO *) _ghostPair.first;
-    assert( hexa );
+    alugrid_assert ( hexa );
 
     VertexGeo* vertices[ 8 ] = { 
       hexa->myvertex(0), 
@@ -315,7 +315,7 @@ namespace ALUGrid
     // detele vertices 
     for( int i=0; i<8; ++i ) delete vertices[ i ];
 
-    assert( _ghInfoPtr );
+    alugrid_assert ( _ghInfoPtr );
     delete _ghInfoPtr;
   }
 

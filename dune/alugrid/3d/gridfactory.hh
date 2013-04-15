@@ -60,7 +60,7 @@ namespace Dune
     typedef typename Transformation::WorldMatrix WorldMatrix;
 
   private:
-    dune_static_assert( (elementType == tetra || elementType == hexa),
+    dune_static_assert ( (elementType == tetra || elementType == hexa),
                         "ALU3dGridFactory supports only grids containing "
                         "tetrahedrons or hexahedrons exclusively." );
 
@@ -257,13 +257,13 @@ namespace Dune
   private:
     size_t globalId ( const VertexId &id ) const
     {
-      assert( id < vertices_.size() );
+      alugrid_assert ( id < vertices_.size() );
       return vertices_[ id ].second;
     }
 
     const VertexType &position ( const VertexId &id ) const
     {
-      assert( id < vertices_.size() );
+      alugrid_assert ( id < vertices_.size() );
       return vertices_[ id ].first;
     }
 
@@ -460,7 +460,7 @@ namespace Dune
     for( size_t i = 0; i < numVx; ++i )
     {
       // if this assertions is thrown vertices were not inserted at first 
-      assert( vertices_.size() > vertices[ i ] );
+      alugrid_assert ( vertices_.size() > vertices[ i ] );
 
       // get global coordinate and copy it 
       const VertexType &x = position( vertices[ i ] );
@@ -471,7 +471,7 @@ namespace Dune
     BoundarySegmentWrapperType* prj
       = new BoundarySegmentWrapperType( type, coords, boundarySegment );
     boundaryProjections_[ faceId ] = prj;
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     // consistency check 
     for( size_t i = 0; i < numVx; ++i )
     {

@@ -252,7 +252,7 @@ namespace ALUGrid
     : _leftNode (i), _rightNode (j), _weight (w), 
       _leftMaster(lmaster), _rightMaster(rmaster)
   {
-    assert( _weight >= 0 );
+    alugrid_assert ( _weight >= 0 );
   }
 
   inline int LoadBalancer::GraphEdge::leftNode () const {
@@ -323,7 +323,7 @@ namespace ALUGrid
     _center [1] = p [1];
     _center [2] = p [2];
 #endif
-    assert( _weight > 0 );
+    alugrid_assert ( _weight > 0 );
     return;
   }
 
@@ -342,7 +342,7 @@ namespace ALUGrid
 #ifdef GRAPHVERTEX_WITH_CENTER
     _center [0] = _center [1] = _center [2] = 0.0;
 #endif
-    assert( _weight > 0 );
+    alugrid_assert ( _weight > 0 );
     return;
   }
 
@@ -351,7 +351,7 @@ namespace ALUGrid
   }
 
   inline int LoadBalancer::GraphVertex::weight () const {
-    assert( _weight > 0 );
+    alugrid_assert ( _weight > 0 );
     return _weight;
   }
 

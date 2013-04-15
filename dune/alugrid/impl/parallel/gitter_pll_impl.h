@@ -319,7 +319,7 @@ namespace ALUGrid
       // access interior element and write data 
       void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
       { 
-        assert( false );
+        alugrid_assert ( false );
         abort(); 
       }
   };
@@ -366,7 +366,7 @@ namespace ALUGrid
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const 
       { 
-        assert( ! isSet( flagLock ) == ( _moveTo >= 0 ) );
+        alugrid_assert ( ! isSet( flagLock ) == ( _moveTo >= 0 ) );
         return ! isSet( flagLock );
       }
     private :
@@ -408,7 +408,7 @@ namespace ALUGrid
       void writeDynamicState (ObjectStream &, int) const;
       void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
       { 
-        assert( false ); abort();
+        alugrid_assert ( false ); abort();
       }
   };
 
@@ -561,7 +561,7 @@ namespace ALUGrid
   {
     public :
       void writeDynamicState (ObjectStream &, int) const { abort (); }
-      void writeDynamicState (ObjectStream &, GatherScatterType &) const { assert(false); abort(); }
+      void writeDynamicState (ObjectStream &, GatherScatterType &) const { alugrid_assert (false); abort(); }
       std::pair< ElementPllXIF_t *, int > accessOuterPllX (const std::pair< ElementPllXIF_t *, int > &, int);
       std::pair< const ElementPllXIF_t *, int > accessOuterPllX (const std::pair< const ElementPllXIF_t *, int > &, int) const;
       std::pair< ElementPllXIF_t *, int > accessInnerPllX (const std::pair< ElementPllXIF_t *, int > &, int);
@@ -640,7 +640,7 @@ namespace ALUGrid
       virtual int  ldbVertexIndex () const;
       virtual int master () const 
       { 
-        // assert( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
+        // alugrid_assert ( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
         return _master; 
       }
       virtual void readStaticState (ObjectStream &, int) ;
@@ -675,7 +675,7 @@ namespace ALUGrid
         VertexPllImplMacro (double x, double y, double z, int i, IndexManagerStorageType& ims, linkagePatternMap_t & map) 
           : VertexPllBaseX< VertexEmptyMacro >( x, y, z, i, ims )
         {
-          assert( &map == &ims.linkagePatterns() );   
+          alugrid_assert ( &map == &ims.linkagePatterns() );   
         }
         virtual VertexPllXIF_t & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const VertexPllXIF_t & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
@@ -955,7 +955,7 @@ namespace ALUGrid
   template < class A >
   inline EdgePllBaseX< A >::~EdgePllBaseX()
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     // Falls die nachfolgende Situation eintritt, ist massiv was faul im
     // parallelen Vergr"oberungsalgorithmus: Eine Kante, die gegen Ver-
     // gr"oberung gesperrt war, ist gel"oscht worden. Bestenfalls h"atten
@@ -1034,8 +1034,8 @@ namespace ALUGrid
   template < class A >
   inline EdgePllBaseXMacro< A >::~EdgePllBaseXMacro()
   {
-    assert( _moveTo == 0 );
-    //assert (0 == _moveTo.size ());
+    alugrid_assert ( _moveTo == 0 );
+    //alugrid_assert (0 == _moveTo.size ());
   }
 
   //////////////////////////////////////////////////////////
@@ -1077,9 +1077,9 @@ namespace ALUGrid
   {
     typedef std::pair< myconnect_t * ,int > myconnectpair_t;
     myconnectpair_t front = myhface ().nb.front ();
-    assert( front.first );
+    alugrid_assert ( front.first );
     myconnectpair_t rear  = myhface ().nb.rear  ();
-    assert( rear.first );
+    alugrid_assert ( rear.first );
     return front.first->accessPllX ().accessInnerPllX (
               std::pair< ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
               front.second);
@@ -1088,9 +1088,9 @@ namespace ALUGrid
   template < class A > std::pair< const ElementPllXIF_t *, int > FacePllBaseX < A >::accessInnerPllX () const {
     typedef std::pair< const myconnect_t * ,int > constmyconnectpair_t;
     constmyconnectpair_t front = myhface ().nb.front ();
-    assert( front.first );
+    alugrid_assert ( front.first );
     constmyconnectpair_t rear  = myhface ().nb.rear  ();
-    assert( rear.first );
+    alugrid_assert ( rear.first );
     return front.first->accessPllX ().accessInnerPllX (
               std::pair< const ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
               front.second);
@@ -1152,7 +1152,7 @@ namespace ALUGrid
   template < class A > void BndsegPllBaseXMacro < A >::
   packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) const 
   {
-    assert (!fce);
+    alugrid_assert (!fce);
     if (myhface_t::polygonlength == 3) os.writeObject (MacroGridMoverIF::HBND3EXT);
     else if (myhface_t::polygonlength == 4) os.writeObject (MacroGridMoverIF::HBND4EXT);
     else abort ();
@@ -1242,14 +1242,14 @@ namespace ALUGrid
 
   template < class A > inline int BndsegPllBaseXMacroClosure < A >::ldbVertexIndex () const 
   {
-    assert( _ldbVertexIndex != -2 );
-    assert( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ldbVertexIndex != -2 );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
     return _ldbVertexIndex;
   }
 
   template < class A > inline void BndsegPllBaseXMacroClosure < A >::setLoadBalanceVertexIndex ( const int ldbVx ) 
   {
-    assert( ldbVx >= 0 );
+    alugrid_assert ( ldbVx >= 0 );
     _ldbVertexIndex = ldbVx;
   }
 

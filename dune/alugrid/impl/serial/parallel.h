@@ -81,17 +81,17 @@ namespace ALUGrid
     public :
       typedef MacroGridMoverIF :: moveto_t moveto_t ;
 
-      virtual void attach2   (int) { assert(false);abort(); }
-      virtual void unattach2 (int) { assert(false);abort(); }
+      virtual void attach2   (int) { alugrid_assert (false);abort(); }
+      virtual void unattach2 (int) { alugrid_assert (false);abort(); }
 
-      virtual bool packAll ( std::vector< ObjectStream > &) { assert(false); abort(); }
-      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& ) { assert(false); abort(); }
-      virtual moveto_t* moveToMap () { assert(false); abort(); return ((moveto_t *) 0); }
-      virtual bool packLink ( const int, ObjectStream & ) { assert(false); abort(); return false; }
-      virtual bool packLink ( const int, ObjectStream &, GatherScatterType * ) { assert(false); abort(); return false; }
-      virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) { assert(false); return false; }
-      virtual void unpackSelf ( ObjectStream &, bool ) { assert(false); abort(); }
-      virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType *) {assert(false);}
+      virtual bool packAll ( std::vector< ObjectStream > &) { alugrid_assert (false); abort(); }
+      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& ) { alugrid_assert (false); abort(); }
+      virtual moveto_t* moveToMap () { alugrid_assert (false); abort(); return ((moveto_t *) 0); }
+      virtual bool packLink ( const int, ObjectStream & ) { alugrid_assert (false); abort(); return false; }
+      virtual bool packLink ( const int, ObjectStream &, GatherScatterType * ) { alugrid_assert (false); abort(); return false; }
+      virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) { alugrid_assert (false); return false; }
+      virtual void unpackSelf ( ObjectStream &, bool ) { alugrid_assert (false); abort(); }
+      virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType *) {alugrid_assert (false);}
   } ;
 
     // LinkedObjekt ist die Schnittstelle, die im parallelen Gitter zur
@@ -153,8 +153,8 @@ namespace ALUGrid
   {
     public :
       virtual ~LinkedObjectDefault () {}
-      virtual Identifier getIdentifier () const { assert(false);abort(); return Identifier(); }
-      virtual std::vector< int > estimateLinkage () const { assert(false); abort(); return std::vector< int >(); }
+      virtual Identifier getIdentifier () const { alugrid_assert (false);abort(); return Identifier(); }
+      virtual std::vector< int > estimateLinkage () const { alugrid_assert (false); abort(); return std::vector< int >(); }
   } ;
 
     // Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
@@ -185,8 +185,8 @@ namespace ALUGrid
       RefineableObjectDefault () {}
       virtual ~RefineableObjectDefault () {}
     public :
-      virtual void getRefinementRequest (ObjectStream &) const { assert(false);abort(); }
-      virtual bool setRefinementRequest (ObjectStream &) { assert(false);abort(); return false ;}
+      virtual void getRefinementRequest (ObjectStream &) const { alugrid_assert (false);abort(); }
+      virtual bool setRefinementRequest (ObjectStream &) { alugrid_assert (false);abort(); return false ;}
   } ;
 
     //
@@ -217,7 +217,7 @@ namespace ALUGrid
 
   inline const LinkedObject :: Identifier & LinkedObject :: Identifier :: operator = (const Identifier & x) 
   {
-    assert (x.isValid ()) ;
+    alugrid_assert (x.isValid ()) ;
     _i1 = x._i1 ;
     _i2 = x._i2 ;
     _i3 = x._i3 ;
@@ -226,7 +226,7 @@ namespace ALUGrid
   }
 
   inline bool LinkedObject :: Identifier :: operator < (const Identifier & x) const {
-    assert (isValid () && x.isValid ()) ;
+    alugrid_assert (isValid () && x.isValid ()) ;
     return (_i1 < x._i1) ? true : (_i1 == x._i1 ? (_i2 < x._i2 ? true : 
         (_i2 == x._i2 ? (_i3 < x._i3 ? true : (_i3 == x._i3 ? 
       (_i4 < x._i4 ? true : false) : false )) : false )) : false ) ;

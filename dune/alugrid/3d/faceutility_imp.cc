@@ -59,15 +59,15 @@ namespace Dune
     } // end if
 
     // if not true we are accessing a fake bnd 
-    assert( innerElement_->isRealObject() );
+    alugrid_assert ( innerElement_->isRealObject() );
     // if not true we are accessing a fake bnd 
-    assert( outerElement_->isRealObject() );
+    alugrid_assert ( outerElement_->isRealObject() );
     
     // we only have to do this in parallel runs 
     if( parallel() && innerElement_->isboundary() ) 
     {
       bndType_ = innerGhostBoundary;
-      assert( ! dynamic_cast< const GEOPeriodicType* > ( innerElement_ ) );
+      alugrid_assert ( ! dynamic_cast< const GEOPeriodicType* > ( innerElement_ ) );
     }
 
     if( parallel() && innerBoundary() )
@@ -82,7 +82,7 @@ namespace Dune
         if( bnd->level () != bnd->ghostLevel() )
         {
           bnd = static_cast<const BNDFaceType *>(bnd->up());
-          assert( bnd );
+          alugrid_assert ( bnd );
           innerElement_ = static_cast<const HasFaceType*> (bnd);
         }
 
@@ -94,7 +94,7 @@ namespace Dune
 
         // this doesn't count as outer boundary 
         const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
-        assert(ghost);
+        alugrid_assert (ghost);
 
         innerTwist_ = ghost->twist(innerFaceNumber_);
       }
@@ -106,13 +106,13 @@ namespace Dune
     else 
     {
       // set inner twist 
-      assert(innerTwist == innerEntity().twist(innerFaceNumber_));
+      alugrid_assert (innerTwist == innerEntity().twist(innerFaceNumber_));
       innerTwist_ = innerTwist; 
     }
 
     if( outerElement_->isboundary() )
     {
-      assert( ! innerBoundary() );
+      alugrid_assert ( ! innerBoundary() );
       // set to default boundary (with domain boundary)
       bndType_ = domainBoundary ;
 
@@ -125,7 +125,7 @@ namespace Dune
       if( periodicBnd ) // the periodic case 
       {
         bndType_ = periodicBoundary ;
-        assert( dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) );
+        alugrid_assert ( dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) );
         const GEOPeriodicType* periodicClosure = static_cast< const GEOPeriodicType* > ( outerElement_ ) ;
 
         // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
@@ -133,24 +133,24 @@ namespace Dune
         bndId_  = periodicClosure->bndtype( outerFaceNumber_ );
 
         const GEOFaceType* face = ImplTraits::getFace( *periodicClosure, 1 - outerFaceNumber_ );
-        assert( (face->nb.front().first == periodicClosure) || (face->nb.rear().first == periodicClosure) );
+        alugrid_assert ( (face->nb.front().first == periodicClosure) || (face->nb.rear().first == periodicClosure) );
         if( face->nb.rear().first == periodicClosure )
         {
-          assert( dynamic_cast< const GEOPeriodicType * >( face->nb.rear().first ) );
+          alugrid_assert ( dynamic_cast< const GEOPeriodicType * >( face->nb.rear().first ) );
           outerElement_    = face->nb.front().first ;
           outerFaceNumber_ = face->nb.front().second ;
         }
         else 
         {
-          assert( dynamic_cast< const GEOPeriodicType * >( face->nb.front().first ) );
+          alugrid_assert ( dynamic_cast< const GEOPeriodicType * >( face->nb.front().first ) );
           outerElement_    = face->nb.rear().first ;
           outerFaceNumber_ = face->nb.rear().second ;
         }
 
-        assert( outerElement_->isRealObject() );
+        alugrid_assert ( outerElement_->isRealObject() );
         if( outerElement_->isboundary() )
         {
-          assert( dynamic_cast< const BNDFaceType * >( outerElement_ ) );
+          alugrid_assert ( dynamic_cast< const BNDFaceType * >( outerElement_ ) );
           bnd = static_cast< const BNDFaceType * >( outerElement_ );
         }
         else
@@ -159,7 +159,7 @@ namespace Dune
 
       if ( bnd ) // the boundary case 
       {
-        assert( bnd );
+        alugrid_assert ( bnd );
 
         // if this cast is valid we have either 
         // a boundary or a ghost element
@@ -170,7 +170,7 @@ namespace Dune
           if( bnd->level () != bnd->ghostLevel() )
           {
             bnd = static_cast<const BNDFaceType *>(bnd->up());
-            assert( bnd );
+            alugrid_assert ( bnd );
             outerElement_ = static_cast<const HasFaceType*> (bnd);
           }
 
@@ -185,7 +185,7 @@ namespace Dune
             outerFaceNumber_ = p.second;
 
             const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
-            assert( ghost );
+            alugrid_assert ( ghost );
             outerTwist_ = ghost->twist(outerFaceNumber_);
           }
         }
@@ -206,7 +206,7 @@ namespace Dune
     }
 
     // make sure we got boundary id correctly 
-    assert( bndType_ == periodicBoundary || bndType_ == domainBoundary ? bndId_ > 0 : bndId_ == 0 );
+    alugrid_assert ( bndType_ == periodicBoundary || bndType_ == domainBoundary ? bndId_ > 0 : bndId_ == 0 );
 
     // set conformance information 
     conformanceState_ = getConformanceState(innerLevel);
@@ -286,7 +286,7 @@ namespace Dune
   inline const typename ALU3dGridFaceInfo< type, Comm >::GEOElementType& 
   ALU3dGridFaceInfo< type, Comm >::innerEntity() const 
   {
-    assert( ! innerElement_->isboundary() );
+    alugrid_assert ( ! innerElement_->isboundary() );
     return static_cast<const GEOElementType&>(*innerElement_);
   }
 
@@ -294,7 +294,7 @@ namespace Dune
   inline const typename ALU3dGridFaceInfo< type, Comm >::GEOElementType& 
   ALU3dGridFaceInfo< type, Comm >::outerEntity() const 
   {
-    assert( isElementLike() );
+    alugrid_assert ( isElementLike() );
     return static_cast<const GEOElementType&>(*outerElement_);
   }
 
@@ -302,30 +302,30 @@ namespace Dune
   inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType& 
   ALU3dGridFaceInfo< type, Comm >::innerFace() const 
   {
-    assert( innerElement_->isboundary() ); 
+    alugrid_assert ( innerElement_->isboundary() ); 
     return static_cast<const BNDFaceType&>(*innerElement_);
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType& 
   ALU3dGridFaceInfo< type, Comm >::boundaryFace() const {
-    assert( ! isElementLike() );
+    alugrid_assert ( ! isElementLike() );
     return static_cast<const BNDFaceType&>(*outerElement_);
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< type, Comm >::outsideLevel() const 
   {
-    assert( outerElement_ );
-    assert( !isElementLike() || outerEntity().level() == outerElement_->nbLevel() );
-    assert( isElementLike() || boundaryFace().level() == outerElement_->nbLevel() );
+    alugrid_assert ( outerElement_ );
+    alugrid_assert ( !isElementLike() || outerEntity().level() == outerElement_->nbLevel() );
+    alugrid_assert ( isElementLike() || boundaryFace().level() == outerElement_->nbLevel() );
     return outerElement_->nbLevel();
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< type, Comm >::segmentIndex() const 
   {
-    assert( segmentIndex_ >= 0 );
+    alugrid_assert ( segmentIndex_ >= 0 );
     return segmentIndex_;
   }
 
@@ -339,7 +339,7 @@ namespace Dune
   inline int ALU3dGridFaceInfo< type, Comm >::innerTwist() const 
   {
     // don't check ghost boundaries here 
-    assert( ( ! innerBoundary() ) ? 
+    alugrid_assert ( ( ! innerBoundary() ) ? 
         innerEntity().twist(innerALUFaceIndex()) == innerTwist_ : true );
     return innerTwist_; 
   }
@@ -365,7 +365,7 @@ namespace Dune
   inline int ALU3dGridFaceInfo< type, Comm >::outerTwist() const 
   {
     // don't check ghost boundaries here 
-    //assert( (outerBoundary_) ?
+    //alugrid_assert ( (outerBoundary_) ?
     //          (outerTwist_ == boundaryFace().twist(0)) :
     //          (! ghostBoundary_) ?
     //          (outerTwist_ == outerEntity().twist(outerALUFaceIndex())) : true
@@ -387,7 +387,7 @@ namespace Dune
   typename ALU3dGridFaceInfo< type, Comm >::ConformanceState 
   inline ALU3dGridFaceInfo< type, Comm >::conformanceState() const 
   {
-    assert( conformanceState_ != UNDEFINED );
+    alugrid_assert ( conformanceState_ != UNDEFINED );
     return conformanceState_;
   }
 
@@ -452,16 +452,16 @@ namespace Dune
   inline const typename ALU3dGridGeometricFaceInfoBase< type, Comm >::CoordinateType& 
   ALU3dGridGeometricFaceInfoBase< type, Comm >::intersectionSelfLocal() const {
     generateLocalGeometries();
-    assert(generatedLocal_);
+    alugrid_assert (generatedLocal_);
     return coordsSelfLocal_;
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridGeometricFaceInfoBase< type, Comm >::CoordinateType& 
   ALU3dGridGeometricFaceInfoBase< type, Comm >::intersectionNeighborLocal() const {
-    assert(!connector_.outerBoundary());
+    alugrid_assert (!connector_.outerBoundary());
     generateLocalGeometries();
-    assert(generatedLocal_);
+    alugrid_assert (generatedLocal_);
     return coordsNeighborLocal_;
   }
 
@@ -642,7 +642,7 @@ namespace Dune
         break;
       default :
         std::cerr << "ERROR: Wrong conformanceState in generateLocalGeometries! in: " << __FILE__ << " line: " << __LINE__<< std::endl;
-        assert(false);
+        alugrid_assert (false);
         exit(1);
       } // end switch
 

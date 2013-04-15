@@ -407,7 +407,7 @@ public:
   // return reference to internal item 
   const BNDFaceType& getGhost () const 
   { 
-    assert( isGhost() );
+    alugrid_assert ( isGhost() );
     return *ghost_; 
   }
 
@@ -569,7 +569,7 @@ protected:
 
   // return reference to internal entity implementation 
   EntityImp & entityImp () const { 
-    assert( entity_ );
+    alugrid_assert ( entity_ );
     return GridImp :: getRealImplementation(*entity_); 
   }
 };
@@ -636,9 +636,9 @@ public:
     // for ghost entities we have to copy right away 
     if( seed.isGhost() ) 
     {
-      assert( entity_ == 0 );
+      alugrid_assert ( entity_ == 0 );
       entity_ = factory_.template getNewEntity<0> ();
-      assert( entity_ );
+      alugrid_assert ( entity_ );
       entityImp().setGhost( *seed.ghost() );
     }
   }
@@ -651,9 +651,9 @@ public:
     // for ghost entities we have to copy right away 
     if( entity.isGhost() ) 
     {
-      assert( entity_ == 0 );
+      alugrid_assert ( entity_ == 0 );
       entity_ = factory_.template getNewEntity<0> ();
-      assert( entity_ );
+      alugrid_assert ( entity_ );
       entityImp().setEntity( entity );
     }
   } 

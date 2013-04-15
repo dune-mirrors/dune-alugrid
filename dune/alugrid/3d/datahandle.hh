@@ -77,13 +77,13 @@ namespace ALUGrid
     void setData ( ObjectStreamType & str , HElementType & elem )
     {
       // one of this should be either true 
-      assert( this->containsItem( elem ) || elem.isGhost() );
+      alugrid_assert ( this->containsItem( elem ) || elem.isGhost() );
 
       // set element and then start 
       setElement(elem);
 
       // make sure partition type is set correct 
-      assert( elem.isGhost() == (entity_.partitionType() == Dune :: GhostEntity) );
+      alugrid_assert ( elem.isGhost() == (entity_.partitionType() == Dune :: GhostEntity) );
 
       size_t size = getSize(str, entity_);
       // use normal scatter method 
@@ -94,7 +94,7 @@ namespace ALUGrid
     void sendData ( ObjectStreamType & str , HElementType & elem )
     {
       // make sure element is contained in communication interface
-      //assert( this->containsItem( elem ) );
+      //alugrid_assert ( this->containsItem( elem ) );
       setElement(elem);
 
       // if varaible size, also send size 
@@ -110,7 +110,7 @@ namespace ALUGrid
     //! read Data of one element from stream 
     void recvData ( ObjectStreamType & str , HElementType & elem )
     {
-      assert( this->containsItem( elem ) );
+      alugrid_assert ( this->containsItem( elem ) );
       setElement( elem );
 
       size_t size = getSize(str, entity_);
@@ -207,7 +207,7 @@ namespace ALUGrid
     //! write Data of one element to stream 
     void sendData ( ObjectStreamType & str , const HElementType & elem )
     {
-      assert( this->containsItem(elem) );
+      alugrid_assert ( this->containsItem(elem) );
       realEntity_.setElement( const_cast<HElementType &> (elem) );
 
       // write size in case of variable size 
@@ -219,7 +219,7 @@ namespace ALUGrid
     //! write Data of one ghost element to stream 
     void sendData ( ObjectStreamType & str , const HGhostType& ghost)
     {
-      assert( this->containsItem( ghost ) );
+      alugrid_assert ( this->containsItem( ghost ) );
 
       // set ghost as entity
       realEntity_.setGhost( const_cast <HGhostType &> (ghost) );
@@ -233,7 +233,7 @@ namespace ALUGrid
     //! read Data of one element from stream 
     void recvData ( ObjectStreamType & str , HElementType & elem )
     {
-      // assert( this->containsItem( elem ) );
+      // alugrid_assert ( this->containsItem( elem ) );
       realEntity_.setElement( elem ); 
       
       size_t size = getSize(str, entity_); 
@@ -243,7 +243,7 @@ namespace ALUGrid
     //! read Data of one element from stream 
     void recvData ( ObjectStreamType & str , HGhostType & ghost )
     {
-      assert( this->containsItem( ghost ) );
+      alugrid_assert ( this->containsItem( ghost ) );
 
       // set ghost as entity
       realEntity_.setGhost( ghost );
@@ -454,7 +454,7 @@ namespace ALUGrid
     // returns true, if element is contained in set of comm interface 
     bool containsItem (const HGhostType & ghost) const 
     {
-      assert( ghost.getGhost().first );
+      alugrid_assert ( ghost.getGhost().first );
       return containsItem( * (ghost.getGhost().first) );
     }
     
@@ -470,10 +470,10 @@ namespace ALUGrid
       // check interior element here, might have a coarser level
       std::pair< HElementType *, HBndSegType * > p( (HElementType *)0, (HBndSegType *)0 );
       pll.getAttachedElement( p );
-      assert( p.first );
+      alugrid_assert ( p.first );
       // check inside level 
       bool contained = (p.first->level() == level_);
-      assert( contained == this->containsItem( *p.first ));
+      alugrid_assert ( contained == this->containsItem( *p.first ));
       return contained;
     }
 
@@ -547,7 +547,7 @@ namespace ALUGrid
     {
       str.write(grid_.maxLevel());
       // set element and then start 
-      assert( elem.level () == 0 );
+      alugrid_assert ( elem.level () == 0 );
       realEntity_.setElement(elem);
       dc_.inlineData(str,entity_);
     }
@@ -557,7 +557,7 @@ namespace ALUGrid
     //! here the data is read from the ObjectStream 
     void xtractData ( ObjectStreamType & str , HElementType & elem )
     {
-      assert( elem.level () == 0 );
+      alugrid_assert ( elem.level () == 0 );
       int mxl; 
       str.read(mxl);
       // set element and then start 
@@ -565,7 +565,7 @@ namespace ALUGrid
 
       // reserve memory for new elements 
       size_t elChunk = idxOp_.newElements();
-      assert( elChunk > 0 );
+      alugrid_assert ( elChunk > 0 );
       
       realEntity_.setElement(elem);
       dc_.xtractData(str,entity_, elChunk);
@@ -646,7 +646,7 @@ namespace ALUGrid
 
     int loadWeight ( const HElementType &elem, Dune::integral_constant< bool, true > ) const
     { 
-      assert( elem.level() == 0 );
+      alugrid_assert ( elem.level() == 0 );
       if( dc_.userDefinedLoadWeights() )
       {
         realEntity_.setElement( elem );
@@ -658,13 +658,13 @@ namespace ALUGrid
 
     int loadWeight ( const HElementType &elem, Dune::integral_constant< bool, false > ) const
     { 
-      assert( elem.level() == 0 );
+      alugrid_assert ( elem.level() == 0 );
       return 1; 
     }
 
     int destination ( const HElementType &elem, Dune::integral_constant< bool, true > ) const
     { 
-      assert( elem.level () == 0 );
+      alugrid_assert ( elem.level () == 0 );
       if( dc_.userDefinedPartitioning() )
       {
         realEntity_.setElement( elem );

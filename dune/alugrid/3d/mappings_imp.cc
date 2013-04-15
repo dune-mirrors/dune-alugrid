@@ -184,7 +184,7 @@ namespace Dune {
     DetDf = (t4*Df[2][2]-t6*Df[2][1]-t8*Df[2][2]+
             t10*Df[2][1]+t12*Df[1][2]-t14*Df[1][1]);
 
-    assert( DetDf > 0 );
+    alugrid_assert ( DetDf > 0 );
     //: ( std::cout << "DetDf wrong: " << DetDf << std::endl,false ) );
 
     // set calced det to affine (true if affine false otherwise)
@@ -220,7 +220,7 @@ namespace Dune {
   {
     //  Newton - Iteration zum Invertieren der Abbildung f.
     double err = 10.0 * _epsilon ;
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     int count = 0 ;
 #endif
     // start with barycenter 
@@ -243,7 +243,7 @@ namespace Dune {
       map [1] -= c1 ;
       map [2] -= c2 ;
       err = std::abs (c0) + std::abs (c1) + std::abs (c2) ;
-      assert (count ++ < 1000) ;
+      alugrid_assert (count ++ < 1000) ;
     } while (err > _epsilon) ;
     return ;
   }
@@ -562,7 +562,7 @@ namespace Dune {
     //  Newton - Iteration zum Invertieren der Abbildung f.
     double err = 10.0 * _epsilon ;
     coord3_t map_ (0.5);
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     int count = 0 ;
 #endif
     coord3_t upd ;
@@ -581,7 +581,7 @@ namespace Dune {
       map_ [1] -= c1 ;
       map_ [2] -= c2 ;
       err = std::abs (c0) + std::abs (c1) + std::abs (c2) ;
-      assert (count ++ < 3000);
+      alugrid_assert (count ++ < 3000);
     } 
     while (err > _epsilon) ;
 
@@ -933,7 +933,7 @@ namespace Dune {
   alu_inline void LinearMapping<cdim, mydim> :: 
   buildMapping  (const vector_t & p0, const vector_t & p1) 
   {
-    assert( mydim == 1 );
+    alugrid_assert ( mydim == 1 );
 
     _matrix [0][0] = p1[0] - p0 [0] ;
     _matrix [0][1] = p1[1] - p0 [1] ;

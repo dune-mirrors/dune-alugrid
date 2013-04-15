@@ -1,6 +1,6 @@
 #include <config.h>
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -21,7 +21,7 @@ namespace ALU2DGrid
   {
     bool isbackup = false; // Wiederaufsetzen?
     int c = in.peek();
-    assert(in.good());
+    alugrid_assert (in.good());
     // Beginnt die erste Zeile mit einem Kommentarzeichen?
     if( c == int('!') )
     {
@@ -74,7 +74,7 @@ namespace ALU2DGrid
     int nv = 0;
     in >> nv;
       
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( verbose ) 
       std::cerr << "    Number of Vertices:             " << nv << std::endl;
 #endif
@@ -92,7 +92,7 @@ namespace ALU2DGrid
     int ne = 0;
     in >> ne;
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( verbose ) 
       std::cerr << "    Number of MacroElements:        " << ne << std::endl;
 #endif
@@ -119,7 +119,7 @@ namespace ALU2DGrid
       int nb = 0;
       linein >> nb;
 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       if( verbose )
         std::cerr << "    Number of BoundarySegments:     " << nb << std::endl;
 #endif
@@ -170,7 +170,7 @@ namespace ALU2DGrid
           bnd_list[i].first = new bndel_triang_t(i, t);
           break;
         }
-        assert( bnd_list[i].first );
+        alugrid_assert ( bnd_list[i].first );
         bnd_list[i].second = -1;
 
         bnd_list[i].first->read(linein, &(v[0]), nv);
@@ -241,7 +241,7 @@ namespace ALU2DGrid
           }
           else 
           {
-            assert(fabs(b->vertex(0)->coord()[1]-b->vertex(1)->coord()[1])<EPS);
+            alugrid_assert (fabs(b->vertex(0)->coord()[1]-b->vertex(1)->coord()[1])<EPS);
 
             double x0,x1;
             if (b->vertex(0)->coord()[0]<b->vertex(1)->coord()[0])
@@ -277,17 +277,17 @@ namespace ALU2DGrid
       delete[]( y_axis );
       delete[]( x_axis );
 
-      assert(y_ok == y_card);
-      assert(x_ok == x_card);
+      alugrid_assert (y_ok == y_card);
+      alugrid_assert (x_ok == x_card);
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       if( verbose )
         std::cerr << "    Number of periodic boundaries:  " << npb << std::endl;
 #endif
     
     }       
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( verbose )
       std::cerr << "\n  -------------------------- closed.\n" << std::endl;
 #endif
@@ -302,7 +302,7 @@ namespace ALU2DGrid
       {
         triang_t &tr=( (triang_t &)(*walk.getitem()) );
         for (int l=0;l<tr.numfaces();l++) {
-          assert( tr.neighbour(l) );
+          alugrid_assert ( tr.neighbour(l) );
           if (!tr.normaldir(l)) 
           {
             tr.setnormdir(l,1);
@@ -374,7 +374,7 @@ namespace ALU2DGrid
   Hmesh<N,NV> :: asciiwritetriang(const std::string &filename,
                                   double time, unsigned long int nbr)
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     std::cerr << "\n  Hmesh_basic::asciiwritetriang(?) opens: ";
     std::cerr << filename << "\n" << std::endl;
 #endif
@@ -407,7 +407,7 @@ namespace ALU2DGrid
    
       Listwalk_impl < vertex_t > walk(vl);
     
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       std::cerr << "    Number of Vertices:       " << walk.size() << std::endl;
 #endif
       
@@ -442,7 +442,7 @@ namespace ALU2DGrid
 
       const int numMacroElements = walk.size();
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       std::cerr << "    Number of macro Elements:  " << numMacroElements << std::endl;
 #endif
       
@@ -456,7 +456,7 @@ namespace ALU2DGrid
 
       }
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       std::cerr << "    Number of Elements:       " << count << std::endl;
 #endif
     }
@@ -465,7 +465,7 @@ namespace ALU2DGrid
       Listwalk_impl < macrobndel_t > walk(mbl);
       const int numMacroBoundaryElements = walk.size();
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       std::cerr << "    Number of macro boundary Elements:   " << numMacroBoundaryElements << std::endl;
 #endif
 
@@ -487,12 +487,12 @@ namespace ALU2DGrid
         ++index;
       }
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       std::cerr << "    Number of boundary Elements:       " << count << std::endl;
 #endif
     }
     
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     std::cerr << "\n  -------------------------- closed.\n" << std::endl;
 #endif
    
@@ -673,7 +673,7 @@ namespace ALU2DGrid
       {
         vertex_t& vx = walk.getitem();
         in.read ( ((char *) &(vx.setIndex())), sizeof(int) );
-        assert( vx.getIndex() < idxSize );
+        alugrid_assert ( vx.getIndex() < idxSize );
         isHole[vx.getIndex()] = false;  
       }
 
@@ -705,7 +705,7 @@ namespace ALU2DGrid
           // read element index
           int &index = elem.setIndex();
           in.read ( ((char *)&index), sizeof(int) );
-          assert( elem.getIndex() < elSize );
+          alugrid_assert ( elem.getIndex() < elSize );
           elementIsHole[elem.getIndex()] = false;
           
           // read edges 
@@ -713,7 +713,7 @@ namespace ALU2DGrid
           {
             int edgeNum = -1; 
                   in.read ( ((char *) &(edgeNum)), sizeof(int) );
-            assert( edgeNum < edgeSize );
+            alugrid_assert ( edgeNum < edgeSize );
             edgeIsHole[edgeNum] = false;
             // set edge index 
             elem.edge(e)->setIndex() = edgeNum;

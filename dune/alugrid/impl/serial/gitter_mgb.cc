@@ -34,8 +34,8 @@ namespace ALUGrid
     {
       vertexMap_t::const_iterator a = _vertexMap.find (l), b = _vertexMap.find (r);
 
-      assert( a != _vertexMap.end() );
-      assert( b != _vertexMap.end() );
+      alugrid_assert ( a != _vertexMap.end() );
+      alugrid_assert ( b != _vertexMap.end() );
       
       hedge1_GEO * h = myBuilder ().insert_hedge1 ((*a).second,(*b).second);
       _edgeMap [key] = h;
@@ -105,7 +105,7 @@ namespace ALUGrid
         face [fce] =  InsertUniqueHface (x).first;
       }
       tetra_GEO * t = myBuilder ().insert_tetra (face,twst,orientation);
-      assert (t);
+      alugrid_assert (t);
       _tetraMap [key] = t;
       return std::pair< tetra_GEO *, bool > (t,true);
     } 
@@ -220,7 +220,7 @@ namespace ALUGrid
         face [fce] = InsertUniqueHface (x).first;
       }
       periodic3_GEO * t = myBuilder ().insert_periodic3 (face,twst,bt);
-      assert (t);
+      alugrid_assert (t);
       _periodic3Map [key] = t;
       return std::pair< periodic3_GEO *, bool > (t,true);
     } else {
@@ -253,7 +253,7 @@ namespace ALUGrid
         face [fce] = InsertUniqueHface (x).first;
       }
       periodic4_GEO * t = myBuilder ().insert_periodic4 (face,twst,bt);
-      assert (t);
+      alugrid_assert (t);
       _periodic4Map [key] = t;
       return std::pair< periodic4_GEO *, bool > (t,true);
     } 
@@ -268,7 +268,7 @@ namespace ALUGrid
   {
     // Der Schl"ussel sollte nur in genau einer Map vorliegen.
 
-    assert ((_hexaMap.find (k) == _hexaMap.end () ? 0 : 1)
+    alugrid_assert ((_hexaMap.find (k) == _hexaMap.end () ? 0 : 1)
           + (_tetraMap.find(k) == _tetraMap.end () ? 0 : 1)
           + (_periodic3Map.find (k) == _periodic3Map.end () ? 0 : 1)
           + (_periodic4Map.find (k) == _periodic4Map.end () ? 0 : 1) == 1);
@@ -535,19 +535,19 @@ namespace ALUGrid
     const int elementVertices = elementId;
     const int faceVertices = (elementId == TETRA_RAW) ? 3 : 4;
     const int periodicVertices = (elementId == TETRA_RAW) ? 6 : 8;
-    assert( faceVertices == 4 ? elementId == HEXA_RAW : true );
-    assert( periodicVertices == 8 ? elementId == HEXA_RAW : true );
+    alugrid_assert ( faceVertices == 4 ? elementId == HEXA_RAW : true );
+    alugrid_assert ( periodicVertices == 8 ? elementId == HEXA_RAW : true );
     {
       in >> nv;
       coord = new double [nv][3];
-      assert (coord);
+      alugrid_assert (coord);
       for (int i = 0; i < nv; ++i) in >> coord [i][0] >> coord [i][1] >> coord [i][2];
     }
 
     {
       in >> ne;
       vnum = new int [ne][8];
-      assert (vnum);
+      alugrid_assert (vnum);
       for (int i = 0; i < ne; ++i)
       {
         for( int vx = 0; vx < elementVertices; ++ vx ) 
@@ -562,8 +562,8 @@ namespace ALUGrid
       in >> temp_nb;
       bvec = new int [temp_nb][5];
       pervec = new int [temp_nb][9];
-      assert (bvec);
-      assert (pervec);
+      alugrid_assert (bvec);
+      alugrid_assert (pervec);
 
       for (int i = 0; i < temp_nb; ++i) 
       {
@@ -848,7 +848,7 @@ namespace ALUGrid
           elem_GEO* elem = (elem_GEO *)(*i).second;
           // make sure that the insertion order 
           // in the list is reflected by getIndex 
-          assert( setIndex ? (elem->getIndex() == elemCount) : true );
+          alugrid_assert ( setIndex ? (elem->getIndex() == elemCount) : true );
           // insert into macro element list 
           elemList.push_back ( elem );
         }
@@ -859,7 +859,7 @@ namespace ALUGrid
   // clean the map tables 
   void MacroGridBuilder::finalize () 
   {
-    assert(_initialized);
+    alugrid_assert (_initialized);
     
     // copy elements from hexa map to hexa list respecting the insertion order 
     hexaMapToList( _hexaMap, myBuilder()._hexaList, true );
@@ -956,7 +956,7 @@ namespace ALUGrid
       } 
       else 
       {
-        assert (((hface4_GEO *)(*i).second)->ref == 2);
+        alugrid_assert (((hface4_GEO *)(*i).second)->ref == 2);
         myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second );
       }
     }
@@ -972,7 +972,7 @@ namespace ALUGrid
         } 
         else 
         {
-          assert (((hface3_GEO *)(*i).second)->ref == 2);
+          alugrid_assert (((hface3_GEO *)(*i).second)->ref == 2);
           myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second );
         }
       }
@@ -989,7 +989,7 @@ namespace ALUGrid
         } 
         else 
         {
-          assert ((*i).second->ref >= 1);
+          alugrid_assert ((*i).second->ref >= 1);
           myBuilder ()._hedge1List.push_back ((*i ++).second);
         }
       }
@@ -1005,7 +1005,7 @@ namespace ALUGrid
           _vertexMap.erase (i++);
         } 
         else {
-          assert ((*i).second->ref >= 2);
+          alugrid_assert ((*i).second->ref >= 2);
           myBuilder ()._vertexList.push_back ((*i ++).second);
         }
       }

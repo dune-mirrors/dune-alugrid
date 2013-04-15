@@ -114,7 +114,7 @@ namespace Dune {
     }
     else
     {
-      assert( item.isInterior() );
+      alugrid_assert ( item.isInterior() );
       return InteriorEntity;
     }
   }
@@ -159,7 +159,7 @@ namespace Dune {
   alu_inline typename ALU3dGridEntity< 0, dim, GridImp >::Geometry
   ALU3dGridEntity< 0, dim, GridImp >::geometry () const
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     if( ! geo_.valid() )
       geo_.buildGeom( *item_ );
     return Geometry( geo_ );
@@ -169,9 +169,9 @@ namespace Dune {
   alu_inline typename ALU3dGridEntity<0,dim,GridImp>::LocalGeometry
   ALU3dGridEntity< 0, dim, GridImp >::geometryInFather () const
   {
-    assert( item_ );
+    alugrid_assert ( item_ );
     // this method should only be called if a father exists 
-    assert( item_->up() );
+    alugrid_assert ( item_->up() );
 
     // get child number 
     const int child = item_->nChild();
@@ -250,7 +250,7 @@ namespace Dune {
   template<int cc> 
   alu_inline int ALU3dGridEntity<0,dim,GridImp> :: getSubIndex (int i) const
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     typedef typename  ImplTraits::IMPLElementType IMPLElType;
     return IndexWrapper<IMPLElType,GridImp::elementType,cc>::subIndex ( *item_, i);
   }
@@ -260,7 +260,7 @@ namespace Dune {
   {
     typedef ElementTopologyMapping<GridImp::elementType> ElemTopo;
 
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     switch (codim) 
     {
       case 0: 
@@ -272,7 +272,7 @@ namespace Dune {
       case 3: 
         return item_->myvertex( ElemTopo::dune2aluVertex( i ) )->getIndex();
       default :
-        assert(false);
+        alugrid_assert (false);
         abort();
     }  
     return -1;
@@ -417,7 +417,7 @@ namespace Dune {
   template<int dim, class GridImp>
   bool ALU3dGridEntity<0,dim,GridImp> :: mark (int ref) const
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
 
     // do not allow to mark ghost cells or non-leaf cells 
     // this will lead to unpredictable results errors 
@@ -458,7 +458,7 @@ namespace Dune {
   template<int dim, class GridImp>
   alu_inline int ALU3dGridEntity<0,dim,GridImp> :: getMark () const
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
 
     const MarkRuleType rule = (*item_).requestrule();
 
@@ -483,7 +483,7 @@ namespace Dune {
     typedef typename ImplTraits::HasFaceType HasFaceType;
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
 
-    assert( item_ );
+    alugrid_assert ( item_ );
     for(int i=0; i<numFaces; ++i) 
     {
       const GEOFaceType &face = *ALU3dGridFaceGetter< Comm >::getFace( *item_, i );
@@ -499,7 +499,7 @@ namespace Dune {
         outerElement = face.nb.rear().first;
       }
 
-      assert( outerElement );
+      alugrid_assert ( outerElement );
       if( outerElement->isboundary() ) return true; 
     }
     return false; 

@@ -160,7 +160,7 @@ integrationElement (const LocalCoordinate& local) const
   // this is the only case we need to specialize
   if( mydim == cdim && elementType == tetra ) 
   {
-    assert( geoImpl().valid() );
+    alugrid_assert ( geoImpl().valid() );
     return 6.0 * geoImpl().volume();
   }
   else 
@@ -174,7 +174,7 @@ volume () const
 {
   if( mydim == cdim ) 
   {
-    assert( geoImpl().valid() );
+    alugrid_assert ( geoImpl().valid() );
     return geoImpl().volume() ;
   }
   else if ( mydim == cdim - 1 && elementType == tetra )
@@ -245,9 +245,9 @@ buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
   {
     volume /= 6.0; 
     geoImpl().setVolume( volume );
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     LocalCoordinate local( 0.0 );
-    assert( std::abs( 6.0 * geoImpl().volume() - integrationElement( local ) ) < 1e-12 );
+    alugrid_assert ( std::abs( 6.0 * geoImpl().volume() - integrationElement( local ) ) < 1e-12 );
 #endif
   }
   else 
@@ -266,14 +266,14 @@ buildGeom(const IMPLElementType& item)
   {
     // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
     // of number when calling myvertex 
-    assert( ElementTopo::dune2aluVertex(0) == 0 );
-    assert( ElementTopo::dune2aluVertex(1) == 1 );
-    assert( ElementTopo::dune2aluVertex(2) == 3 );
-    assert( ElementTopo::dune2aluVertex(3) == 2 );
-    assert( ElementTopo::dune2aluVertex(4) == 4 );
-    assert( ElementTopo::dune2aluVertex(5) == 5 );
-    assert( ElementTopo::dune2aluVertex(6) == 7 );
-    assert( ElementTopo::dune2aluVertex(7) == 6 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(0) == 0 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(1) == 1 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(2) == 3 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(3) == 2 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(4) == 4 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(5) == 5 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(6) == 7 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(7) == 6 );
 
     // update geo impl 
     geoImpl().update( item.myvertex(0)->Point(),
@@ -289,10 +289,10 @@ buildGeom(const IMPLElementType& item)
   {
     // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
     // of number when calling myvertex 
-    assert( ElementTopo::dune2aluVertex(0) == 0 );
-    assert( ElementTopo::dune2aluVertex(1) == 1 );
-    assert( ElementTopo::dune2aluVertex(2) == 2 );
-    assert( ElementTopo::dune2aluVertex(3) == 3 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(0) == 0 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(1) == 1 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(2) == 2 );
+    alugrid_assert ( ElementTopo::dune2aluVertex(3) == 3 );
 
     // update geo impl 
     geoImpl().update( item.myvertex(0)->Point(),
@@ -387,7 +387,7 @@ buildGeom(const FaceCoordinatesType& coords)
     return buildGeom( coords[0], coords[1], coords[2], coords[3] );  
   else 
   {
-    assert( elementType == tetra );
+    alugrid_assert ( elementType == tetra );
     return buildGeom( coords[0], coords[1], coords[2] );
   }
 }

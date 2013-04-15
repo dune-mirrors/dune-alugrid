@@ -12,7 +12,7 @@ namespace ALUGrid
     if(gpair.first)
     {
       _ghostPair = gpair; 
-      assert( _ghostPair.first );
+      alugrid_assert ( _ghostPair.first );
       // copy indices from internal boundry to myhface(.) of ghost
       _ghostPair.first->setIndicesAndBndId( *this->myhface(0), _ghostPair.second );
     }
@@ -40,16 +40,16 @@ namespace ALUGrid
       } 
 
       int gFaceNum = _ghostPair.second;
-      assert( gFaceNum >= 0 );
-      assert( gFaceNum < 6 );
+      alugrid_assert ( gFaceNum >= 0 );
+      alugrid_assert ( gFaceNum < 6 );
 
       hface4_GEO * face = ghost.myhface( gFaceNum );
-      assert( face );
+      alugrid_assert ( face );
 
       int count = 0; 
       for(face = face->down(); face; face = face->next() )
       {
-        assert(face);
+        alugrid_assert (face);
         hexa_GEO * ghch = 0; 
 
         typedef std::pair< Gitter::Geometric::hasFace4 *, int > neigh_t;
@@ -58,18 +58,18 @@ namespace ALUGrid
         if( ! neighbour.first->isboundary ())
         {
           ghch = dynamic_cast<hexa_GEO *> (neighbour.first);
-          assert(ghch);
-          assert( ghch->up() == &ghost );
+          alugrid_assert (ghch);
+          alugrid_assert ( ghch->up() == &ghost );
         }
         else
         {
           neighbour = face->nb.rear();
-          assert( ! neighbour.first->isboundary () );
+          alugrid_assert ( ! neighbour.first->isboundary () );
           ghch = dynamic_cast<hexa_GEO *> (neighbour.first);
         }
 
-        assert(ghch);
-        assert(ghch->up() == &ghost );
+        alugrid_assert (ghch);
+        alugrid_assert (ghch->up() == &ghost );
 
         // set element pointer and local face number 
         info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
@@ -128,17 +128,17 @@ namespace ALUGrid
   const MacroGhostInfo_STI* Hbnd4PllInternal < A, X, MX > ::
   HbndPllMacro::buildGhostCell(ObjectStream& os, int fce)
   {
-    assert( _gm == 0 );
+    alugrid_assert ( _gm == 0 );
     int code = MacroGridMoverIF::ENDMARKER;
     os.readObject (code);
-    assert( code == MacroGridMoverIF::HBND4INT );
+    alugrid_assert ( code == MacroGridMoverIF::HBND4INT );
 
     {
       int bfake;
       os.readObject (bfake);
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
-      assert( b == Gitter::hbndseg::closure );
+      alugrid_assert ( b == Gitter::hbndseg::closure );
 #endif
 
       // read global graph vertex index 
@@ -169,7 +169,7 @@ namespace ALUGrid
         MacroGhostInfoHexa* ghInfo = new MacroGhostInfoHexa( os );
 
         myhface4_t * f = this->myhface(0);
-        assert( f );
+        alugrid_assert ( f );
 
         // ghInfo is stored inside MacroGhostHexa
         _gm = new MacroGhostHexa( _mgb , ghInfo, f );
@@ -177,7 +177,7 @@ namespace ALUGrid
       }
     }
 
-    assert( _gm );
+    alugrid_assert ( _gm );
     return _gm->getGhostInfo();
   }
 

@@ -68,7 +68,7 @@ namespace ALUGrid
     virtual void first() = 0;
     virtual int done  () const = 0;
     virtual val_t & item () const = 0;
-    virtual IteratorSTI< val_t > * clone () const { assert(false); abort(); return 0; } 
+    virtual IteratorSTI< val_t > * clone () const { alugrid_assert (false); abort(); return 0; } 
   };
 
   typedef Dune::PartitionIteratorType PartitionIteratorType;
@@ -120,7 +120,7 @@ namespace ALUGrid
     int done () const     { return it_->done(); }
     val_t & item () const 
     { 
-      assert( ! done () );
+      alugrid_assert ( ! done () );
       elem_.first  = & it_->item(); 
       return elem_; 
     }
@@ -161,7 +161,7 @@ namespace ALUGrid
     int done () const     { return it_->done(); }
     val_t & item () const 
     { 
-      assert( ! done () );
+      alugrid_assert ( ! done () );
       elem_.first  = & it_->item(); 
       return elem_; 
     }
@@ -196,7 +196,7 @@ namespace ALUGrid
       size_( vxList_.size() ),
       elem_( (ElType *)0, (HBndSegType *)0 )
     {
-      assert( vxList_.up2Date() );
+      alugrid_assert ( vxList_.up2Date() );
     }
   
     // copy constructor 
@@ -221,9 +221,9 @@ namespace ALUGrid
     int done () const { return (count_ >= size_) ? 1 : 0; }
     val_t & item () const 
     { 
-      assert( ! done () );
+      alugrid_assert ( ! done () );
       elem_.first = vxList_.getItemList()[count_]; 
-      assert( elem_.first );
+      alugrid_assert ( elem_.first );
       return elem_;
     }
   };
@@ -273,7 +273,7 @@ namespace ALUGrid
     int done () const     { return it_->done(); }
     val_t & item () const 
     { 
-      assert( ! done () );
+      alugrid_assert ( ! done () );
       elem_.first  = & it_->item(); 
       return elem_; 
     }
@@ -332,7 +332,7 @@ namespace ALUGrid
     int done () const     { return it_->done(); }
     val_t & item () const 
     { 
-      assert( ! done () );
+      alugrid_assert ( ! done () );
       elem_.first  = & it_->item(); 
       return elem_; 
     }
@@ -374,7 +374,7 @@ namespace ALUGrid
     int done () const { return it_->done(); }
     val_t & item () const 
     { 
-      assert( ! done () );
+      alugrid_assert ( ! done () );
       elem_.first  = & it_->item(); 
       return elem_; 
     }
@@ -413,7 +413,7 @@ namespace ALUGrid
       elem_( (ElType *)0, (HBndSegType *)0 ),
       rule_()
     {
-      assert( vxList_.up2Date() );
+      alugrid_assert ( vxList_.up2Date() );
     }
   
     // copy constructor 
@@ -444,15 +444,15 @@ namespace ALUGrid
     int done () const { return (count_ >= size_) ? 1 : 0; }
     val_t & item () const 
     { 
-      assert( ! done () );
-      assert( elem_.first );
+      alugrid_assert ( ! done () );
+      alugrid_assert ( elem_.first );
       return elem_;
     }
   private:
     val_t & getItem () const 
     { 
       //elem_.first = vxList_.getItemList()[count_].first; 
-      assert( ! done () );
+      alugrid_assert ( ! done () );
       elem_.first = vxList_.getItemList()[count_].first; 
       return elem_;
     }
@@ -466,7 +466,7 @@ namespace ALUGrid
       }
       else 
       {
-        assert( elem_.first );
+        alugrid_assert ( elem_.first );
         if(! rule_( elem_.first ) ) 
         {
           ++count_;
@@ -520,8 +520,8 @@ namespace ALUGrid
       delete outer_;
     }
 
-    IteratorType & inner () { assert(inner_); return *inner_; }
-    IteratorType & outer () { assert(outer_); return *outer_; }
+    IteratorType & inner () { alugrid_assert (inner_); return *inner_; }
+    IteratorType & outer () { alugrid_assert (outer_); return *outer_; }
   };
  
 
@@ -597,7 +597,7 @@ namespace ALUGrid
         usingInner_ = org.usingInner_;
         if( org.it_ ) 
         {
-          assert( ! org.it_->done() );
+          alugrid_assert ( ! org.it_->done() );
           it_ = (usingInner_) ? &( iterTT_->inner() ) : &( iterTT_->outer() );
         }
       }
@@ -634,7 +634,7 @@ namespace ALUGrid
         if(link_ < nl_)
         {
           iterTT_ = newIterator();
-          assert(iterTT_);
+          alugrid_assert (iterTT_);
           checkInnerOuter();
           if (!it_) createIterator();
         }
@@ -646,7 +646,7 @@ namespace ALUGrid
       it_ = 0;
       if (!usingInner_)
       {
-        assert(iterTT_);
+        alugrid_assert (iterTT_);
         it_ = &( iterTT_->inner() );
         InnerIteratorType & it = iterTT_->inner();
         it.first();
@@ -657,7 +657,7 @@ namespace ALUGrid
           std::pair< HElementType *, HBndSegType * > elems( (HElementType *)0, (HBndSegType *)0 );
           p.first->getAttachedElement(elems);
 
-          assert( elems.first || elems.second );
+          alugrid_assert ( elems.first || elems.second );
 
           if(elems.second)
           {
@@ -675,7 +675,7 @@ namespace ALUGrid
         std::pair< HElementType *, HBndSegType * > elems( (HElementType *)0, (HBndSegType *)0 );
         p.first->getAttachedElement(elems);
 
-        assert( elems.second );
+        alugrid_assert ( elems.second );
         it_ = &out;
         return ;
       }
@@ -691,7 +691,7 @@ namespace ALUGrid
         {
           val_t & el = item();
           HBndSegType * pll = el.second;
-          assert( pll );
+          alugrid_assert ( pll );
 
           // this occurs if internal element is leaf but the corresponding 
           // ghost is not leaf, we have to go next 
@@ -736,23 +736,23 @@ namespace ALUGrid
         // create iterator calls also first of iterators 
         createIterator();
         checkLeafEntity();
-        if( it_ ) assert( !it_->done());
+        if( it_ ) alugrid_assert ( !it_->done());
       }
     }
 
     int done () const
     {
-      assert( (link_ >= nl_) ? (it_ == 0) : 1 );
+      alugrid_assert ( (link_ >= nl_) ? (it_ == 0) : 1 );
       return ((link_ >= nl_ || !it_ ) ? 1 : 0);
     }
 
     val_t & item () const
     {
-      assert(it_);
+      alugrid_assert (it_);
       std::pair < ElementPllXIF_t *, int > p = it_->item ().accessPllX ().accessOuterPllX () ;
       std::pair < HElementType  * , HBndSegType * > p2;
       p.first->getAttachedElement(p2);
-      assert(p2.second);
+      alugrid_assert (p2.second);
       elem_.second = p2.second;
       return elem_;
     }
@@ -780,7 +780,7 @@ namespace ALUGrid
         {
           val_t & el = this->item();
           HBndSegType * pll = el.second;
-          assert( pll );
+          alugrid_assert ( pll );
 
           // this occurs if internal element is leaf but the corresponding 
           // ghost is not leaf, we have to go next 
@@ -822,7 +822,7 @@ namespace ALUGrid
         {
           val_t & el = this->item();
           
-          assert( el.second );
+          alugrid_assert ( el.second );
           HBndSegType & pll = *(el.second);
 
           // this occurs if internal element is leaf but the corresponding 
@@ -1028,10 +1028,10 @@ namespace ALUGrid
     int done () const { return (count_ >= ghList_.getItemList().size() ? 1 : 0); } 
     val_t & item () const 
     { 
-      assert( ! done() ); 
+      alugrid_assert ( ! done() ); 
       void * item = ghList_.getItemList()[count_]; 
       elem_.first = ((ElType * ) item);
-      assert( elem_.first );
+      alugrid_assert ( elem_.first );
       return elem_; 
     }
 
@@ -1206,7 +1206,7 @@ namespace ALUGrid
     void next () { iter_.next(); }
     void first() { iter_.first(); }
     int done () const {return iter_.done(); }
-    val_t & item () const { assert( ! done() ); return iter_.item(); }
+    val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
   // the all partition iterator 
@@ -1240,7 +1240,7 @@ namespace ALUGrid
     void next () { iter_.next(); }
     void first() { iter_.first(); }
     int done () const {return iter_.done(); }
-    val_t & item () const { assert( ! done() ); return iter_.item(); }
+    val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
   // the all partition iterator 
@@ -1274,7 +1274,7 @@ namespace ALUGrid
     void next () { iter_.next(); }
     void first() { iter_.first(); }
     int done () const {return iter_.done(); }
-    val_t & item () const { assert( ! done() ); return iter_.item(); }
+    val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
   // the all partition iterator 
@@ -1308,7 +1308,7 @@ namespace ALUGrid
     void next () { iter_.next(); }
     void first() { iter_.first(); }
     int done () const {return iter_.done(); }
-    val_t & item () const { assert( ! done() ); return iter_.item(); }
+    val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
   // the all partition iterator 
@@ -1341,7 +1341,7 @@ namespace ALUGrid
     void next () { iter_.next(); }
     void first() { iter_.first(); }
     int done () const {return iter_.done(); }
-    val_t & item () const { assert( ! done() ); return iter_.item(); }
+    val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
   // placed here because we need ALU3dGridLevelIteratorWrapper<0,Dune::All_Partition> here 
@@ -1404,10 +1404,10 @@ namespace ALUGrid
     
     val_t & item () const 
     { 
-      assert( ! done () );
+      alugrid_assert ( ! done () );
       elem_.first = ( (ElType *) edgeList_.getItemList()[count_]);
 
-      assert( elem_.first );
+      alugrid_assert ( elem_.first );
       return elem_; 
     }
 
@@ -1435,7 +1435,7 @@ namespace ALUGrid
         else if( item.second )
           elem = static_cast< GEOElementType * > (item.second->getGhost().first);
 
-        assert( elem );
+        alugrid_assert ( elem );
         for(int e=0; e<numEdges; ++e) 
         {
           ElType * edge = elem->myhedge1(e);
@@ -1484,7 +1484,7 @@ namespace ALUGrid
     void next () { iter_.next(); }
     void first() { iter_.first(); }
     int done () const {return iter_.done(); }
-    val_t & item () const { assert( ! done() ); return iter_.item(); }
+    val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
   // the all partition iterator 
@@ -1518,7 +1518,7 @@ namespace ALUGrid
     void next () { iter_.next(); }
     void first() { iter_.first(); }
     int done () const {return iter_.done(); }
-    val_t & item () const { assert( ! done() ); return iter_.item(); }
+    val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
   // the all partition iterator 
@@ -1552,7 +1552,7 @@ namespace ALUGrid
     void next () { iter_.next(); }
     void first() { iter_.first(); }
     int done () const {return iter_.done(); }
-    val_t & item () const { assert( ! done() ); return iter_.item(); }
+    val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
 } // namespace ALUGrid

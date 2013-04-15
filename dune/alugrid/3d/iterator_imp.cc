@@ -129,7 +129,7 @@ first (const EntityType & en, int wLevel)
   }
   else 
   {
-    assert( numFaces == en.getItem().nFaces() );
+    alugrid_assert ( numFaces == en.getItem().nFaces() );
     setFirstItem(en.getItem(), wLevel);
   }
 }
@@ -176,7 +176,7 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
   else {
     done();
   }
-  assert( equals(org) );
+  alugrid_assert ( equals(org) );
 }
 
 // check whether entities are the same or whether iterator is done 
@@ -195,7 +195,7 @@ template<class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp> :: increment () 
 {
   // leaf increment 
-  assert(item_);
+  alugrid_assert (item_);
 
   const GEOFaceType * nextFace = 0;
 
@@ -233,14 +233,14 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
 
   // ... else we can take the next face
   nextFace = getFace(connector_.innerEntity(), index_);
-  assert(nextFace);
+  alugrid_assert (nextFace);
 
   // Check whether we need to go down first
   //if (nextFace has children which need to be visited)
   const GEOFaceType * childFace = nextFace->down();
   if( childFace ) nextFace = childFace; 
 
-  assert(nextFace);
+  alugrid_assert (nextFace);
   setNewFace(*nextFace);
   return;
 }
@@ -250,7 +250,7 @@ template<class GridImp>
 inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
 ALU3dGridIntersectionIterator<GridImp>::outside () const
 {
-  assert( neighbor() );
+  alugrid_assert ( neighbor() );
   // make sure that outside is not called for an end iterator  
 
   if( connector_.ghostBoundary() )
@@ -259,7 +259,7 @@ ALU3dGridIntersectionIterator<GridImp>::outside () const
     return EntityPointer(factory_, connector_.boundaryFace() );
   }
 
-  assert( &connector_.outerEntity() );
+  alugrid_assert ( &connector_.outerEntity() );
   return EntityPointer(factory_, connector_.outerEntity() );
 }
 
@@ -294,7 +294,7 @@ template<class GridImp>
 inline int
 ALU3dGridIntersectionIterator< GridImp >::indexInInside () const
 {
-  assert(ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
+  alugrid_assert (ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
   return index_;
 }
 
@@ -334,7 +334,7 @@ template< class GridImp >
 inline typename ALU3dGridIntersectionIterator< GridImp >::LocalGeometry
 ALU3dGridIntersectionIterator< GridImp >::geometryInOutside () const
 {
-  assert(neighbor());
+  alugrid_assert (neighbor());
   buildLocalGeometries();
   return LocalGeometry( intersectionNeighborLocal_ );
 }
@@ -352,7 +352,7 @@ inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType &
 ALU3dGridIntersectionIterator<GridImp>::
 outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
-  assert(item_ != 0);
+  alugrid_assert (item_ != 0);
   return geoProvider_.outerNormal(local);
 }
   
@@ -390,7 +390,7 @@ template<class GridImp>
 inline int
 ALU3dGridIntersectionIterator<GridImp>::boundaryId () const
 {
-  assert( item_ );
+  alugrid_assert ( item_ );
   return ( boundary() ) ? connector_.boundaryId() : 0;
 }
 
@@ -398,8 +398,8 @@ template<class GridImp>
 inline size_t 
 ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
 {
-  assert( item_ );
-  assert( boundary() );
+  alugrid_assert ( item_ );
+  alugrid_assert ( boundary() );
   return connector_.segmentIndex();
 }
 
@@ -431,7 +431,7 @@ template <class GridImp>
 inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOTetraElementType& elem, int index) const {
-  assert(index >= 0 && index < numFaces);
+  alugrid_assert (index >= 0 && index < numFaces);
   return elem.myhface3(ElementTopo::dune2aluFace(index));
 }
 
@@ -439,7 +439,7 @@ template <class GridImp>
 inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOHexaElementType& elem, int index) const {
-  assert(index >= 0 && index < numFaces);
+  alugrid_assert (index >= 0 && index < numFaces);
   return elem.myhface4(ElementTopo::dune2aluFace(index));
 }
 
@@ -447,8 +447,8 @@ template <class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp>::
 setNewFace(const GEOFaceType& newFace) 
 {
-  assert( ! ghost_ );
-  assert( innerLevel_ == item_->level() );
+  alugrid_assert ( ! ghost_ );
+  alugrid_assert ( innerLevel_ == item_->level() );
   connector_.updateFaceInfo(newFace,innerLevel_,
               item_->twist(ElementTopo::dune2aluFace(index_)) );
   geoProvider_.resetFaceGeom();
@@ -458,8 +458,8 @@ template <class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp>::
 setGhostFace(const GEOFaceType& newFace) 
 {
-  assert( ghost_ );
-  assert( innerLevel_ == ghost_->level() );
+  alugrid_assert ( ghost_ );
+  alugrid_assert ( innerLevel_ == ghost_->level() );
   connector_.updateFaceInfo(newFace,innerLevel_, ghost_->twist(0) );
   geoProvider_.resetFaceGeom();
 }
@@ -468,7 +468,7 @@ template <class GridImp>
 inline int 
 ALU3dGridIntersectionIterator<GridImp>::
 level() const {
-  assert( item_ && (innerLevel_ == item_->level()) );
+  alugrid_assert ( item_ && (innerLevel_ == item_->level()) );
   return innerLevel_;
 }
 
@@ -520,7 +520,7 @@ first (const EntityType & en, int wLevel)
   }
   else 
   {
-    assert( numFaces == en.getItem().nFaces() );
+    alugrid_assert ( numFaces == en.getItem().nFaces() );
     setFirstItem(en.getItem(), wLevel);
   }
 }
@@ -582,7 +582,7 @@ template<class GridImp>
 inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment () 
 {
   // level increment 
-  assert( item_ );
+  alugrid_assert ( item_ );
 
   // Next face number of starting element
   ++index_;
@@ -597,7 +597,7 @@ inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
 
   // ... else we can take the next face
   const GEOFaceType * nextFace = getFace(connector_.innerEntity(), index_);
-  assert(nextFace);
+  alugrid_assert (nextFace);
 
   setNewFace(*nextFace);
   return;
@@ -613,7 +613,7 @@ template <class GridImp>
 inline void ALU3dGridLevelIntersectionIterator<GridImp>::
 setNewFace(const GEOFaceType& newFace) 
 {
-  assert( item_->level() == innerLevel_ );
+  alugrid_assert ( item_->level() == innerLevel_ );
   levelNeighbor_ = (newFace.level() == innerLevel_); 
   connector_.updateFaceInfo(newFace, innerLevel_,
               ( ImplTraits::isGhost( ghost_ ) ) ? 

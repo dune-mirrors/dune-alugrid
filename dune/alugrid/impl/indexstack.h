@@ -3,7 +3,7 @@
 #define ALUGRIDINDEXSTACK_H_INCLUDED
 
 #include <algorithm>
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <iostream>
 #include <stack>
 #include <vector>
@@ -51,7 +51,7 @@ namespace ALUGrid
 
     std::vector< bool >& operator() ( const size_t codim )
     {
-      assert( codim < size() );
+      alugrid_assert ( codim < size() );
       return isHole_[ codim ];
     }
 
@@ -97,19 +97,19 @@ namespace ALUGrid
     // Puts a new object onto the stack
     void push (const T& t) 
     { 
-      assert( _f < length );
+      alugrid_assert ( _f < length );
       _s[_f++] = t; 
     }
 
     // Removes and returns the uppermost object from the stack
     T pop () { 
-      assert( _f > 0 );
+      alugrid_assert ( _f > 0 );
       return _s[--_f]; 
     }
 
     // Returns the uppermost object on the stack
     T top () const { 
-      assert( _f > 0 );
+      alugrid_assert ( _f > 0 );
       return _s[_f-1]; 
     }
 
@@ -130,8 +130,8 @@ namespace ALUGrid
     void restore ( std::istream & is )  
     {
       is.read ( ((char *) &_f), sizeof(int) );
-      assert( _f >= 0 );
-      assert( _f < length );
+      alugrid_assert ( _f >= 0 );
+      alugrid_assert ( _f < length );
       for(int i=0; i<size(); ++i)
       {
         is.read ( ((char *) &_s[i]), sizeof(int) );
@@ -257,7 +257,7 @@ namespace ALUGrid
     {
       if( fullStackList_.empty() )
       {
-        assert( fullStackList_.size() <= 0 );
+        alugrid_assert ( fullStackList_.size() <= 0 );
         return maxIndex_++;
       }
       else 
@@ -293,7 +293,7 @@ namespace ALUGrid
       fullStackList_.push( stack_ );
       if( emptyStackList_.empty() )
       {
-        assert( emptyStackList_.size() <= 0 );
+        alugrid_assert ( emptyStackList_.size() <= 0 );
         stack_ = new StackType (); 
       }
       else 
@@ -360,7 +360,7 @@ namespace ALUGrid
     {
       delete stack_;
       stack_ = new StackType();
-      assert(stack_);
+      alugrid_assert (stack_);
     }
 
     while( !fullStackList_.empty() )
@@ -376,7 +376,7 @@ namespace ALUGrid
   generateHoles(const std::vector<bool> & isHole) 
   {
     const int idxsize = isHole.size();
-    assert( idxsize == maxIndex_ );
+    alugrid_assert ( idxsize == maxIndex_ );
     // big indices are inserted first 
     for(int i=idxsize-1; i>=0; --i)
     {
@@ -437,7 +437,7 @@ namespace ALUGrid
     // now free all indices again, freeIndex 
     // does remove the maxIndex in case of freed index is equal  
     stack_ = new StackType();
-    assert( stack_ );
+    alugrid_assert ( stack_ );
     // until tmpStorage is not empty, freeIndices 
     while( ! tmpStorage.empty () )
     {

@@ -72,7 +72,7 @@ namespace ALUGrid
         _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
              (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i);
       }
-      assert( _periodic3List.size() == 0 );
+      alugrid_assert ( _periodic3List.size() == 0 );
     }
 
 
@@ -86,7 +86,7 @@ namespace ALUGrid
         _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
              (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i);
       }
-      assert( _periodic4List.size() == 0 );
+      alugrid_assert ( _periodic4List.size() == 0 );
     }
 
 
@@ -103,7 +103,7 @@ namespace ALUGrid
       {
         typedef Gitter::Geometric::hface4_GEO hface4_GEO;
         hface4_GEO * face = (*i)->myhface4 (0);
-        assert( face );
+        alugrid_assert ( face );
         faceKey_t key (face->myvertex (0)->ident (), 
                        face->myvertex (1)->ident (), 
                        face->myvertex (2)->ident ());
@@ -146,7 +146,7 @@ namespace ALUGrid
       {
         typedef Gitter::Geometric::hface3_GEO hface3_GEO;
         hface3_GEO * face = (*i)->myhface3 (0);
-        assert( face );
+        alugrid_assert ( face );
         faceKey_t key ( face->myvertex (0)->ident (), face->myvertex (1)->ident (), face->myvertex (2)->ident ());
         // if internal face 
         if ((*i)->bndtype () == Gitter::hbndseg_STI::closure) 
@@ -301,8 +301,8 @@ namespace ALUGrid
         }
         else 
         {
-          assert( periodic->myhface3( 0 )->ref == 2 );
-          assert( periodic->myhface3( 1 )->ref == 2 );
+          alugrid_assert ( periodic->myhface3( 0 )->ref == 2 );
+          alugrid_assert ( periodic->myhface3( 1 )->ref == 2 );
           _periodic3List.push_back ( periodic );
         }
       }
@@ -322,8 +322,8 @@ namespace ALUGrid
         }
         else 
         {
-          assert( periodic->myhface4( 0 )->ref == 2 );
-          assert( periodic->myhface4( 1 )->ref == 2 );
+          alugrid_assert ( periodic->myhface4( 0 )->ref == 2 );
+          alugrid_assert ( periodic->myhface4( 1 )->ref == 2 );
           _periodic4List.push_back ( periodic );
         }
       }
@@ -404,7 +404,7 @@ namespace ALUGrid
           hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p->first(), p->second(),
                                                          Gitter::hbndseg_STI::closure, 
                                                          ghInfo );
-          assert( p->ldbVertexIndex() >= 0 );
+          alugrid_assert ( p->ldbVertexIndex() >= 0 );
           hb3->setLoadBalanceVertexIndex( p->ldbVertexIndex() );
           hb3->setMaster( p->master() );
 
@@ -427,7 +427,7 @@ namespace ALUGrid
         } 
         else 
         {
-          assert ( face->ref == 2 );
+          alugrid_assert ( face->ref == 2 );
           _hface4List.push_back ( face );
           ++ i;
         }
@@ -446,7 +446,7 @@ namespace ALUGrid
         } 
         else 
         {
-           assert ( face->ref == 2 ); 
+           alugrid_assert ( face->ref == 2 ); 
           _hface3List.push_back ( face );
           ++ i;
         }
@@ -465,7 +465,7 @@ namespace ALUGrid
         } 
         else 
         {
-          assert ( edge->ref >= 1 );
+          alugrid_assert ( edge->ref >= 1 );
           _hedge1List.push_back ( edge );
           ++ i;
         }
@@ -484,7 +484,7 @@ namespace ALUGrid
         } 
         else 
         {
-          assert ( vertex->ref >= 2);
+          alugrid_assert ( vertex->ref >= 2);
           _vertexList.push_back ( vertex );
           ++i;
         }
@@ -497,7 +497,7 @@ namespace ALUGrid
 
   ParallelGridMover::~ParallelGridMover () 
   {
-    assert(_initialized);
+    alugrid_assert (_initialized);
 
     if(!_finalized)
     {   
@@ -655,10 +655,10 @@ namespace ALUGrid
   {
     int twst = cyclicReorder (v,v+3);
     faceKey_t key (v [0], v [1], v [2]);
-    assert( bt == Gitter::hbndseg_STI::closure ); 
+    alugrid_assert ( bt == Gitter::hbndseg_STI::closure ); 
     if (_hbnd3Int.find (key) == _hbnd3Int.end ()) 
     {
-      assert( ghInfo );
+      alugrid_assert ( ghInfo );
       hface3_GEO * face =  InsertUniqueHface3 (v).first;
       // here the point is stored 
       _hbnd3Int [key] = new Hbnd3IntStorage (face,twst, ldbVertexIndex, master, ghInfo);
@@ -677,10 +677,10 @@ namespace ALUGrid
   {
     int twst = cyclicReorder (v,v+4);
     faceKey_t key (v [0], v [1], v [2]);
-    assert( bt == Gitter::hbndseg_STI::closure );
+    alugrid_assert ( bt == Gitter::hbndseg_STI::closure );
     if (_hbnd4Int.find (key) == _hbnd4Int.end ()) 
     {
-      assert( ghInfo );
+      alugrid_assert ( ghInfo );
       hface4_GEO * face =  InsertUniqueHface4 (v).first;
       _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, master, ghInfo);
       return true;
@@ -726,7 +726,7 @@ namespace ALUGrid
     else 
     {
       // create normal bnd face, and make sure that no Point was send
-      assert( readPoint == MacroGridMoverIF::NO_POINT );
+      alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class 
       InsertUniqueHbnd3 (v, b, ldbVertexIndex, master );
     }
@@ -775,7 +775,7 @@ namespace ALUGrid
     else 
     {
       // create normal bnd face, and make sure that no Point was send
-      assert( readPoint == MacroGridMoverIF::NO_POINT );
+      alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class 
       InsertUniqueHbnd4 (v, b, ldbVertexIndex, master );
     }
@@ -880,7 +880,7 @@ namespace ALUGrid
       default :
         std::cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n";
         std::cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << std::endl;
-        assert(false);
+        alugrid_assert (false);
         abort ();
         break;
       }
@@ -992,7 +992,7 @@ namespace ALUGrid
 
     void unpack( const int link, ObjectStream& os ) 
     {
-      assert( _pgm );
+      alugrid_assert ( _pgm );
       // unpack data for given stream 
       _pgm->unpackAll( os, _gs );
     }
@@ -1161,14 +1161,14 @@ namespace ALUGrid
       }
 
       lap3 = clock ();
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       if( conformingClosureNeeded() ) 
       {
         // check that all leaf elements are in conforming status (bisection only)
         bool x = false ;
         LeafIterator< helement_STI > i( *this );
         for( i->first(); ! i->done(); i->next()) { x &= i->item().markForConformingClosure (); }
-        assert( x == false );
+        alugrid_assert ( x == false );
       }
 #endif
 

@@ -3,7 +3,7 @@
 #include "mpAccess_MPI.h"
 #include "../indexstack.h"
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
 #define MY_INT_TEST int test =
 #else
 #define MY_INT_TEST
@@ -15,7 +15,7 @@ namespace ALUGrid
   {
     // duplicate mpi communicator 
     MY_INT_TEST MPI_Comm_dup ( mpicomm, &_mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return 0 ; // return NULL pointer to initialize _mpimaxsum
   }
 
@@ -24,7 +24,7 @@ namespace ALUGrid
     // get size from MPI 
     int size = 0; 
     MY_INT_TEST MPI_Comm_size ( _mpiComm, & size );
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return size;
   }
 
@@ -33,7 +33,7 @@ namespace ALUGrid
     // get rank from MPI 
     int rank = -1;
     MY_INT_TEST MPI_Comm_rank ( _mpiComm, & rank );
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return rank;
   }
 
@@ -63,7 +63,7 @@ namespace ALUGrid
 
     // free mpi communicator 
     MY_INT_TEST MPI_Comm_free (&_mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline int MpAccessMPI::barrier () const {
@@ -103,12 +103,12 @@ namespace ALUGrid
 
     int * rcounts = new int [np];
     int * displ = new int [np];
-    assert (rcounts);
+    alugrid_assert (rcounts);
     std::vector< std::vector< A > > res (np);
     {
       int ln = in.size ();
       MY_INT_TEST MPI_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm);
-      assert (test == MPI_SUCCESS);
+      alugrid_assert (test == MPI_SUCCESS);
       displ [0] = 0;
       {for (int j = 1; j < np; j ++) {
         displ [j] = displ [j-1] + rcounts [j-1];
@@ -116,12 +116,12 @@ namespace ALUGrid
       const int xSize = displ [np-1] + rcounts [np-1];
       A * x = new A [xSize];
       A * y = new A [ln];
-      assert (x && y);
+      alugrid_assert (x && y);
       copy (in.begin(), in.end(), y);
       test = MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
       delete [] y;
       y = 0;
-      assert (test == MPI_SUCCESS);
+      alugrid_assert (test == MPI_SUCCESS);
       {for (int i = 0; i < np; i ++ ) {
         res [i].reserve (rcounts [i]);
         copy (x + displ [i], x + displ [i] + rcounts [i], back_inserter(res [i]));
@@ -144,94 +144,94 @@ namespace ALUGrid
   inline int MpAccessMPI::gmax (int i) const {
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return j;
   }
 
   inline int MpAccessMPI::gmin (int i) const {
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MIN, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return j;
   }
 
   inline int MpAccessMPI::gsum (int i) const {
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_SUM, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return j;
   }
 
   inline long MpAccessMPI::gmax (long i) const {
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MAX, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return j;
   }
 
   inline long MpAccessMPI::gmin (long i) const {
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MIN, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return j;
   }
 
   inline long MpAccessMPI::gsum (long i) const {
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_SUM, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return j;
   }
 
   inline double MpAccessMPI::gmax (double a) const {
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MAX, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return x;
   }
 
   inline double MpAccessMPI::gmin (double a) const {
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MIN, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return x;
   }
 
   inline double MpAccessMPI::gsum (double a) const {
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_SUM, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return x;
   }
 
   inline void MpAccessMPI::gmax (double* a,int size,double *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MAX, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gmin (double* a,int size,double *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MIN, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gsum (double* a,int size,double *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_SUM, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gmax (int* a,int size,int *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_MAX, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gmin (int* a,int size,int *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_MIN, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gsum (int* a,int size,int *x) const {
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_SUM, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
   }
 
   struct MinMaxSumOp : public MpAccessMPI::MinMaxSumIF 
@@ -297,7 +297,7 @@ namespace ALUGrid
 
   inline MpAccessMPI::minmaxsum_t  MpAccessMPI::minmaxsum( double value ) const
   {
-    assert( _minmaxsum );
+    alugrid_assert ( _minmaxsum );
     return _minmaxsum->minmaxsum( value );
   }
 
@@ -305,7 +305,7 @@ namespace ALUGrid
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MAX, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return std::pair<double,double>(x[0],x[1]);
   }
 
@@ -313,7 +313,7 @@ namespace ALUGrid
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MIN, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return std::pair<double,double>(x[0],x[1]);
   }
 
@@ -321,7 +321,7 @@ namespace ALUGrid
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_SUM, _mpiComm);
-    assert (test == MPI_SUCCESS);
+    alugrid_assert (test == MPI_SUCCESS);
     return std::pair<double,double>(x[0],x[1]);
   }
 
@@ -387,12 +387,12 @@ namespace ALUGrid
     // create empty objects streams 
     std::vector< ObjectStream > o (np);
 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     // check that given length values are correct 
     {
       std::vector< int > checkLength = gcollect( snum );
       // check sizes 
-      assert( len.size() == checkLength.size() );
+      alugrid_assert ( len.size() == checkLength.size() );
       if( ! equal( checkLength.begin(), checkLength.end(), len.begin() ) )
       {
         for(size_t i=0; i<checkLength.size(); ++i ) 
@@ -400,15 +400,15 @@ namespace ALUGrid
         abort();
       }
       // make sure the list is correct 
-      assert( equal( checkLength.begin(), checkLength.end(), len.begin() ) );
+      alugrid_assert ( equal( checkLength.begin(), checkLength.end(), len.begin() ) );
     }
 #endif
     
     int * rcounts = new int [np];
-    assert (rcounts);
+    alugrid_assert (rcounts);
     copy (len.begin (), len.end (), rcounts);
     int * const displ = new int [np];
-    assert (displ);
+    alugrid_assert (displ);
     
     // set offsets 
     displ [0] = 0;
@@ -422,11 +422,11 @@ namespace ALUGrid
     {    
       // allocate buffer 
       char * y = ObjectStream::allocateBuffer(bufSize);
-      assert (y);
+      alugrid_assert (y);
       
       // gather all data 
       MY_INT_TEST MPI_Allgatherv (in._buf + in._rb, snum, MPI_BYTE, y, rcounts, displ, MPI_BYTE, _mpiComm);
-      assert (test == MPI_SUCCESS);
+      alugrid_assert (test == MPI_SUCCESS);
       // copy data to object streams 
       for (int i = 0; i < np; ++ i ) 
       {
@@ -478,7 +478,7 @@ namespace ALUGrid
         _needToSend( true )
     {
       // make sure every process has the same tag 
-      assert( tag == mpAccess.gmax( tag ) );
+      alugrid_assert ( tag == mpAccess.gmax( tag ) );
     }
 
     NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
@@ -491,9 +491,9 @@ namespace ALUGrid
         _needToSend( false )
     {
       // make sure every process has the same tag 
-      assert( tag == mpAccess.gmax( tag ) );
+      alugrid_assert ( tag == mpAccess.gmax( tag ) );
 
-      assert( _nLinks == int( in.size() ) );
+      alugrid_assert ( _nLinks == int( in.size() ) );
       sendImpl( in ); 
     }
 
@@ -508,7 +508,7 @@ namespace ALUGrid
         _needToSend( false )
     {
       // make sure every process has the same tag 
-      assert( tag == mpAccess.gmax( tag ) );
+      alugrid_assert ( tag == mpAccess.gmax( tag ) );
     }
 
     /////////////////////////////////////////
@@ -571,12 +571,12 @@ namespace ALUGrid
       // get vector with destinations 
       const std::vector< int >& dest = _mpAccess.dest();
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       // check for all links messages 
       for (int link = 0; link < _nLinks; ++link ) 
       {
         // contains no written data
-        assert( out[ link ].notReceived() ); 
+        alugrid_assert ( out[ link ].notReceived() ); 
       }
 #endif
 
@@ -604,10 +604,10 @@ namespace ALUGrid
       // wait until all processes are done with receiving
       {
         MPI_Status * sta = new MPI_Status [ _nLinks ];
-        assert( sta );
-        assert( _request );
+        alugrid_assert ( sta );
+        alugrid_assert ( _request );
         MY_INT_TEST MPI_Waitall ( _nLinks, _request, sta);
-        assert (test == MPI_SUCCESS);
+        alugrid_assert (test == MPI_SUCCESS);
         delete [] sta;
       }
     }
@@ -686,10 +686,10 @@ namespace ALUGrid
       // wait until all processes are done with receiving
       {
         MPI_Status * sta = new MPI_Status [ _nLinks ];
-        assert( sta );
-        assert( _request );
+        alugrid_assert ( sta );
+        alugrid_assert ( _request );
         MY_INT_TEST MPI_Waitall ( _nLinks, _request, sta);
-        assert (test == MPI_SUCCESS);
+        alugrid_assert (test == MPI_SUCCESS);
         delete [] sta;
       }
     }
@@ -725,7 +725,7 @@ namespace ALUGrid
       // get mpi communicator
       MPI_Comm comm = _mpAccess.communicator();
 
-      assert( _nLinks > 0 );
+      alugrid_assert ( _nLinks > 0 );
 
       // create send and recv buffers 
       std::vector< ObjectStream > sendBuffers( _nLinks );
@@ -759,7 +759,7 @@ namespace ALUGrid
       while( totalRecv < totalMesg )
       {
         const int nLinks = ( (totalRecv + _nLinks - 1) <= totalMesg ) ? _nLinks-1 : totalMesg - totalRecv ;
-        assert( nLinks < _nLinks );
+        alugrid_assert ( nLinks < _nLinks );
 
         int received = 0 ;
         while( received < nLinks ) 
@@ -776,7 +776,7 @@ namespace ALUGrid
                 // only if we are not the last receiver 
                 if( msgSent < totalMesg ) 
                 {
-                  assert( link < int(sendBuffers.size()) );
+                  alugrid_assert ( link < int(sendBuffers.size()) );
                   ObjectStream& sendBuff = sendBuffers[ link ];
                   sendBuff.clear();
                   sendBuff.writeStream( recvBuff );
@@ -806,10 +806,10 @@ namespace ALUGrid
         // wait until all messages have been send and received 
         {
           MPI_Status * sta = new MPI_Status [ nLinks ];
-          assert( sta );
-          assert( _request );
+          alugrid_assert ( sta );
+          alugrid_assert ( _request );
           MY_INT_TEST MPI_Waitall ( nLinks, _request, sta);
-          assert (test == MPI_SUCCESS);
+          alugrid_assert (test == MPI_SUCCESS);
           delete [] sta;
         }
 
@@ -830,7 +830,7 @@ namespace ALUGrid
       int   bufferSize = os._wb  - os._rb; 
 
       MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest, tag, comm, &_request[ link ] );
-      assert (test == MPI_SUCCESS);
+      alugrid_assert (test == MPI_SUCCESS);
     }
 
     // does receive operation for one link 
@@ -852,7 +852,7 @@ namespace ALUGrid
       if( received ) 
       {
         // this should be the same, otherwise we got an error
-        assert( source == status.MPI_SOURCE );
+        alugrid_assert ( source == status.MPI_SOURCE );
 
         // length of message 
         int bufferSize = -1;
@@ -860,7 +860,7 @@ namespace ALUGrid
         // get length of message 
         {
           MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bufferSize );
-          assert (test == MPI_SUCCESS);
+          alugrid_assert (test == MPI_SUCCESS);
         }
 
         // reserve memory 
@@ -871,7 +871,7 @@ namespace ALUGrid
         // MPI receive 
         {
           MY_INT_TEST MPI_Recv ( osRecv._buf, bufferSize, MPI_BYTE, status.MPI_SOURCE, tag, comm, & status);
-          assert (test == MPI_SUCCESS);
+          alugrid_assert (test == MPI_SUCCESS);
         }
 
         // set wb of ObjectStream  
@@ -886,14 +886,14 @@ namespace ALUGrid
   inline MpAccessMPI::NonBlockingExchange*
   MpAccessMPI::nonBlockingExchange( const int tag, const std::vector< ObjectStream > & in ) const 
   {
-    assert( tag > messagetag+1 );
+    alugrid_assert ( tag > messagetag+1 );
     return new NonBlockingExchangeMPI( *this, tag, in );
   }
 
   inline MpAccessMPI::NonBlockingExchange*
   MpAccessMPI::nonBlockingExchange( const int tag ) const 
   {
-    assert( tag > messagetag+1 );
+    alugrid_assert ( tag > messagetag+1 );
     return new NonBlockingExchangeMPI( *this, tag );
   }
 

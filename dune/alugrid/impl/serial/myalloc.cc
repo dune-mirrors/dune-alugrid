@@ -1,6 +1,6 @@
 #include <config.h>
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -150,7 +150,7 @@ namespace ALUGrid
 #if ! ONLY_MSPACES
   void memAllocate( AllocEntry& fs, const size_t s, void* mem[], const size_t request)
   {
-    assert( s > 0 );
+    alugrid_assert ( s > 0 );
     {
       fs.N += request;
       const std::size_t fsSize  = fs.S.size();
@@ -159,7 +159,7 @@ namespace ALUGrid
       for( std::size_t i = 0; i<newSize; ++i )
       {
         mem[ i ] = malloc ( s );
-        assert( mem[ i ] );
+        alugrid_assert ( mem[ i ] );
       }
 
       // pop the rest from the stack
@@ -186,11 +186,11 @@ namespace ALUGrid
 #ifndef DONT_USE_ALUGRID_ALLOC
 
 #if ONLY_MSPACES
-    assert( s > 0 );
+    alugrid_assert ( s > 0 );
     ALUGridMemSpaceAllocated += s ;
     return mspace_malloc( ALUGridMemorySpace, s );
 #else
-    assert(s > 0);
+    alugrid_assert (s > 0);
     {
       AllocEntry & fs = ((*freeStore) [s]);
       ++ fs.N;
@@ -230,7 +230,7 @@ namespace ALUGrid
     // get stack for size s 
     AllocEntry & fs ((*freeStore) [s]);
     // push pointer to stack 
-    assert (fs.N > 0);
+    alugrid_assert (fs.N > 0);
     --fs.N;
     fs.S.push (ptr);
    
@@ -243,7 +243,7 @@ namespace ALUGrid
            ( double (stackSize) >= MAX_HOLD_MULT * double (fs.N) )
          ) 
       {
-        assert (!fs.S.empty());
+        alugrid_assert (!fs.S.empty());
         free ( fs.S.top () );
         fs.S.pop();
       }
@@ -284,7 +284,7 @@ namespace ALUGrid
       ALUGridMemorySpace = create_mspace( 0, 0 );
 #else
       freeStore = new memorymap_t ();
-      assert (freeStore);
+      alugrid_assert (freeStore);
 #endif
 
       MyAlloc::_initialized = true;

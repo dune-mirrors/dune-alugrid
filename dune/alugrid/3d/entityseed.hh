@@ -74,8 +74,8 @@ protected:
       else 
         return static_cast< HElementType * > (0) ;
     }
-    static bool isGhost(KeyType* key) { assert( key ); return key->isboundary(); }
-    static BNDFaceType* ghost( KeyType* key ) { assert( key ); return (static_cast< BNDFaceType* > ( key )); }
+    static bool isGhost(KeyType* key) { alugrid_assert ( key ); return key->isboundary(); }
+    static BNDFaceType* ghost( KeyType* key ) { alugrid_assert ( key ); return (static_cast< BNDFaceType* > ( key )); }
   };
 public:
   static const int defaultValue = -1 ;
@@ -98,7 +98,7 @@ public:
   //! Destructor  
   ~ALU3dGridEntitySeedBase() 
   {
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     // clear pointer 
     clear();
 #endif
@@ -159,7 +159,7 @@ public:
   //! return iterior item 
   HElementType* interior() const 
   { 
-    assert( ! isGhost() );
+    alugrid_assert ( ! isGhost() );
     return static_cast< HElementType * > (static_cast< ImplementationType* > (item_));
   }
 
@@ -167,7 +167,7 @@ public:
   bool isGhost() const { return Bnd<codim,KeyType>::isGhost( item_ ); }
   BNDFaceType* ghost() const 
   {
-    assert( isGhost() );
+    alugrid_assert ( isGhost() );
     return Bnd<codim,KeyType>::ghost( item_ ); 
   }
 
@@ -237,7 +237,7 @@ public:
   ALU3dGridEntitySeed(const ImplementationType & item) 
   {
     // this constructor should only be called by codim=0 entity keys
-    assert( false );
+    alugrid_assert ( false );
     abort();
   }
 

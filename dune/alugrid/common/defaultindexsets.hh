@@ -140,7 +140,7 @@ namespace Dune
                                  const EntityType & e, 
                                  int i ) 
       {
-        assert( indexContainer( e, i ).index() >= 0 );
+        alugrid_assert ( indexContainer( e, i ).index() >= 0 );
         return indexContainer( e, i ).index();
       }
     };
@@ -176,15 +176,15 @@ namespace Dune
 
     const PersistentContainerType& indexContainer( const size_t codim ) const 
     {
-      assert( codim < indexContainers_.size() );
-      assert( indexContainers_[ codim ] );
+      alugrid_assert ( codim < indexContainers_.size() );
+      alugrid_assert ( indexContainers_[ codim ] );
       return *( indexContainers_[ codim ] );
     }
 
     PersistentContainerType& indexContainer( const size_t codim ) 
     {
-      assert( codim < indexContainers_.size() );
-      assert( indexContainers_[ codim ] );
+      alugrid_assert ( codim < indexContainers_.size() );
+      alugrid_assert ( indexContainers_[ codim ] );
       return *( indexContainers_[ codim ] );
     }
 
@@ -195,10 +195,10 @@ namespace Dune
       enum { cd = EntityType::codimension };
       // this must not be true for vertices 
       // therefore only check other codims 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       const int codim = cd;
-      assert( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() )); 
-      assert( indexContainer( codim )[ en ].index() >= 0 );
+      alugrid_assert ( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() )); 
+      alugrid_assert ( indexContainer( codim )[ en ].index() >= 0 );
 #endif
       return indexContainer( cd )[ en ].index();
     }
@@ -209,11 +209,11 @@ namespace Dune
     {
       // this must not be true for vertices 
       // therefore only check other codims 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       const int codim = cd;
       //const bool isLeaf = (codim == 0) ? en.isLeaf() : true ;
-      assert( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() )); 
-      assert( indexContainer( cd )[ en ].index() >= 0 );
+      alugrid_assert ( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() )); 
+      alugrid_assert ( indexContainer( cd )[ en ].index() >= 0 );
 #endif
       return indexContainer( cd )[ en ].index();
     }
@@ -224,7 +224,7 @@ namespace Dune
     IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
-      assert( (codim != 0) || (level_ < 0) || ( level_ == e.level() ) );
+      alugrid_assert ( (codim != 0) || (level_ < 0) || ( level_ == e.level() ) );
       typedef typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity Entity;
       return EntitySpec< Entity, cc >::subIndex( indexContainer( codim ), e, i );
     }
@@ -240,7 +240,7 @@ namespace Dune
     //! return size of IndexSet for a given level and codim 
     IndexType size ( int codim ) const
     {
-      assert( codim >= 0 && codim <= GridType::dimension );
+      alugrid_assert ( codim >= 0 && codim <= GridType::dimension );
       return size_[ codim ];
     }
 
@@ -269,14 +269,14 @@ namespace Dune
       // grid walk to setup index set 
       for( IteratorType it = begin; it != end; ++it )
       {
-        assert( ( level_ < 0 ) ? it->isLeaf() : (it->level() == level_) );
+        alugrid_assert ( ( level_ < 0 ) ? it->isLeaf() : (it->level() == level_) );
         ForLoop< InsertEntity, 0, dim >::apply( *it, indexContainers_, size_ );
       }
 
       // remember the number of entity on level and cd = 0
       for(int cd=0; cd<ncodim; ++cd) 
       {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
         const int gridSize = ( level_ < 0 ) ? grid_.size( cd ) : grid_.size( level_, cd); 
         const int mySize = size_[cd];
         if( mySize > gridSize ) 
@@ -284,7 +284,7 @@ namespace Dune
           std::cout << "DefaultIndexSet[ " << level_ << " ]: " << mySize << " s | g " << gridSize << std::endl;
         }
         // this assertion currently fails for 3d conforming
-        // assert( ( grid_.conformingRefinement() && dim == 3 && level_ >= 0 ) ? true : (mySize <= gridSize) );
+        // alugrid_assert ( ( grid_.conformingRefinement() && dim == 3 && level_ >= 0 ) ? true : (mySize <= gridSize) );
 #endif
       }
     }
@@ -298,7 +298,7 @@ namespace Dune
     //! returns true if this set provides an index for given entity
     bool containsIndex ( const int cd, const int idx ) const
     {
-      assert( (typename PersistentContainerType::Size)idx < indexContainer( cd ).size() );
+      alugrid_assert ( (typename PersistentContainerType::Size)idx < indexContainer( cd ).size() );
       return ((indexContainer( cd ).begin() + idx)->index() >= 0);
     }
 

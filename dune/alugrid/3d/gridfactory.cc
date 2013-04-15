@@ -131,7 +131,7 @@ namespace Dune
   {
     if( (int)type.dim() != dimension-1 )
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
-    assert( type.isCube() || type.isSimplex() );
+    alugrid_assert ( type.isCube() || type.isSimplex() );
 
     FaceType faceId;
     copyAndSort( vertices, faceId );
@@ -287,7 +287,7 @@ namespace Dune
           // we need to wrap the global projection because of 
           // delete in desctructor of ALUGrid 
           projection = new ProjectionWrapperType( *globalProjection_ );
-          assert( projection );
+          alugrid_assert ( projection );
         }
 
         // copy pointer 
@@ -305,7 +305,7 @@ namespace Dune
     // ALUGrid is taking ownership of bndProjections 
     // and is going to delete this pointer 
     Grid* grid = createGridObj( bndProjections , name );
-    assert( grid );
+    alugrid_assert ( grid );
 
     // remove pointers 
     globalProjection_ = 0;
@@ -628,7 +628,7 @@ namespace Dune
     // swap current boundary ids with an empty vector
     BoundaryIdMap boundaryIds;
     boundaryIds_.swap( boundaryIds );
-    assert( boundaryIds_.size() == 0 );
+    alugrid_assert ( boundaryIds_.size() == 0 );
 
     // add all current boundary ids again (with their reordered keys)
     typedef typename BoundaryIdMap::iterator BoundaryIterator;

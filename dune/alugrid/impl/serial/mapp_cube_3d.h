@@ -41,14 +41,14 @@ namespace ALUGrid
         barycenter[1] = 0.125 * (p0[1] + p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1]);
         barycenter[2] = 0.125 * (p0[2] + p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2]);
 
-  #ifndef NDEBUG 
+  #ifdef ALUGRIDDEBUG 
         {
           TrilinearMapping map(p0,p1,p2,p3,p4,p5,p6,p7);
           alucoord_t p[3];
           map.map2world(.0, .0, .0, p);
           for(int j=0; j<3; ++j)
           {
-            assert( fabs(barycenter[j] - p[j]) < 1e-8 );
+            alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
           }
         }
   #endif
@@ -126,14 +126,14 @@ namespace ALUGrid
         barycenter[1] = 0.25 * (p0[1] + p1[1] + p2[1] + p3[1]);
         barycenter[2] = 0.25 * (p0[2] + p1[2] + p2[2] + p3[2]);
 
-  #ifndef NDEBUG 
+  #ifdef ALUGRIDDEBUG 
         {
           BilinearSurfaceMapping map(p0,p1,p2,p3); 
           alucoord_t p[3];
           map.map2world(.0, .0, p);
           for(int j=0; j<3; ++j)
           {
-            assert( fabs(barycenter[j] - p[j]) < 1e-8 );
+            alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
           }
         }
   #endif

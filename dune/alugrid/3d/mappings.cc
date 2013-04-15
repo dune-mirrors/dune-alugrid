@@ -35,7 +35,7 @@ namespace Dune
     }
     else {  
       // check with cases in Hface3Rule (gitter_sti.h)
-      assert(false);
+      alugrid_assert (false);
       DUNE_THROW(InvalidStateException,"Invalid refinement rule");
     } // end if
   }
@@ -202,7 +202,7 @@ namespace Dune
     } 
     else {
       // check with cases in Hface3Rule (gitter_sti.h)
-      assert(false);
+      alugrid_assert (false);
       DUNE_THROW(InvalidStateException,"Invalid refinement rule");
     }
   }

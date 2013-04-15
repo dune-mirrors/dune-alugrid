@@ -26,7 +26,7 @@ namespace ALUGrid
     const std::vector<int> & edgesNotOnFace = 
       Gitter::Geometric::tetra_GEO::edgesNotOnFace( borderFace );
     const int numEdges = edgesNotOnFace.size();
-    assert( numEdges == 3 );
+    alugrid_assert ( numEdges == 3 );
     for(int e = 0; e<numEdges; ++e)
     {
       gs.setData( os, *myhedge1( edgesNotOnFace[e] ) );
@@ -39,7 +39,7 @@ namespace ALUGrid
     const std::vector<int> & facesNotOnFace = 
       Gitter::Geometric::tetra_GEO::facesNotOnFace( borderFace );
     const int numFaces = facesNotOnFace.size();
-    assert( numFaces == 3 );
+    alugrid_assert ( numFaces == 3 );
     for (int i = 0; i <numFaces; ++i) 
     {
       gs.setData( os, *myhface3( facesNotOnFace[i] ) );
@@ -62,7 +62,7 @@ namespace ALUGrid
     const std::vector<int> & edgesNotOnFace = 
       Gitter::Geometric::tetra_GEO::edgesNotOnFace( borderFace );
     const int numEdges = edgesNotOnFace.size();
-    assert( numEdges == 3 );
+    alugrid_assert ( numEdges == 3 );
     for(int e=0; e<numEdges; ++e)
     {
       gs.sendData( os, *myhedge1( edgesNotOnFace[e] ) );
@@ -75,7 +75,7 @@ namespace ALUGrid
     const std::vector<int> & facesNotOnFace = 
       Gitter::Geometric::tetra_GEO::facesNotOnFace( borderFace );
     const int numFaces = facesNotOnFace.size();
-    assert( numFaces == 3 );
+    alugrid_assert ( numFaces == 3 );
     for (int i = 0; i <numFaces; ++i)
     {
       gs.sendData( os,  *myhface3( facesNotOnFace[i] ) );
@@ -114,7 +114,7 @@ namespace ALUGrid
 
       typedef Gitter::Geometric::BuilderIF BuilderIF;
       // only call for ghosts 
-      assert( this->isGhost() ); 
+      alugrid_assert ( this->isGhost() ); 
 
       // check my index first 
       resetGhostIndex( ims.get( BuilderIF::IM_Elements ));
@@ -167,11 +167,11 @@ namespace ALUGrid
     for (int i = 0; i < 3; ++i) 
     {
       // make sure we got the right face 
-      assert(std::abs(myface.myvertex(i)->Point()[0]-
+      alugrid_assert (std::abs(myface.myvertex(i)->Point()[0]-
              face.myvertex(i)->Point()[0])<1e-8);
-      assert(std::abs(myface.myvertex(i)->Point()[1]-
+      alugrid_assert (std::abs(myface.myvertex(i)->Point()[1]-
              face.myvertex(i)->Point()[1])<1e-8);
-      assert(std::abs(myface.myvertex(i)->Point()[2]-
+      alugrid_assert (std::abs(myface.myvertex(i)->Point()[2]-
              face.myvertex(i)->Point()[2])<1e-8);
 
       vertex_GEO * vx = myface.myvertex(i); 
@@ -208,7 +208,7 @@ namespace ALUGrid
     const std::vector<int> & verticesNotOnFace = 
       Gitter::Geometric::hexa_GEO::verticesNotOnFace( borderFace );
     const int numVertices = verticesNotOnFace.size();
-    assert( numVertices == 4 );
+    alugrid_assert ( numVertices == 4 );
     for (int i = 0; i <numVertices; ++i) 
     {
       gs.setData( os, *myvertex( verticesNotOnFace[i] ) );
@@ -222,7 +222,7 @@ namespace ALUGrid
     const std::vector<int> & edgesNotOnFace = 
       Gitter::Geometric::hexa_GEO::edgesNotOnFace( borderFace );
     const int numEdges = edgesNotOnFace.size();
-    assert( numEdges == 8 );
+    alugrid_assert ( numEdges == 8 );
     for(int e = 0; e<numEdges; ++e)
     {
       gs.setData( os, *myhedge1( edgesNotOnFace[e] ) );
@@ -236,7 +236,7 @@ namespace ALUGrid
     const std::vector<int> & facesNotOnFace = 
       Gitter::Geometric::hexa_GEO::facesNotOnFace( borderFace );
     const int numFaces = facesNotOnFace.size();
-    assert( numFaces == 5 );
+    alugrid_assert ( numFaces == 5 );
     for (int i = 0; i <numFaces; ++i) 
     {
       gs.setData( os, *myhface4( facesNotOnFace[i] ) );
@@ -252,7 +252,7 @@ namespace ALUGrid
     const std::vector<int> & verticesNotOnFace = 
       Gitter::Geometric::hexa_GEO::verticesNotOnFace( borderFace );
     const int numVertices = verticesNotOnFace.size();
-    assert( numVertices == 4 );
+    alugrid_assert ( numVertices == 4 );
     for (int i = 0; i <numVertices; ++i)
     {
       gs.sendData( os, *myvertex( verticesNotOnFace[i] ) );
@@ -265,7 +265,7 @@ namespace ALUGrid
     const std::vector<int> & edgesNotOnFace = 
       Gitter::Geometric::hexa_GEO::edgesNotOnFace( borderFace );
     const int numEdges = edgesNotOnFace.size();
-    assert( numEdges == 8 );
+    alugrid_assert ( numEdges == 8 );
     for(int e=0; e<numEdges; ++e)
     {
       gs.sendData( os, *myhedge1( edgesNotOnFace[e] ) );
@@ -278,7 +278,7 @@ namespace ALUGrid
     const std::vector<int> & facesNotOnFace = 
       Gitter::Geometric::hexa_GEO::facesNotOnFace( borderFace );
     const int numFaces = facesNotOnFace.size();
-    assert( numFaces == 5 );
+    alugrid_assert ( numFaces == 5 );
     for (int i = 0; i < numFaces; ++i)
     {
       gs.sendData( os, *myhface4( facesNotOnFace[i] ) );
@@ -288,7 +288,7 @@ namespace ALUGrid
   void GitterBasis::Objects::HexaEmpty ::
   attachleafs() 
   {  
-    assert(this->leafRefCount()==0);
+    alugrid_assert (this->leafRefCount()==0);
     addleaf();
     for (int i = 0; i < 6; ++i) myhface4(i)->addleaf();
     for (int i = 0; i < 12; ++i) myhedge1(i)->addleaf();
@@ -298,7 +298,7 @@ namespace ALUGrid
   void GitterBasis::Objects::HexaEmpty ::
   detachleafs() 
   {
-    assert(this->leafRefCount()==1);
+    alugrid_assert (this->leafRefCount()==1);
     removeleaf();
     for (int i = 0; i < 6; ++i) myhface4(i)->removeleaf();
     for (int i = 0; i < 12; ++i) myhedge1(i)->removeleaf();
@@ -317,7 +317,7 @@ namespace ALUGrid
 
       typedef Gitter::Geometric::BuilderIF BuilderIF;
       // only call for ghosts 
-      assert( this->isGhost() ); 
+      alugrid_assert ( this->isGhost() ); 
 
       // check my index first 
       resetGhostIndex( ims.get(BuilderIF::IM_Elements ));
@@ -370,11 +370,11 @@ namespace ALUGrid
      for (int i = 0; i < 4; ++i) 
      {
        // make sure we got the right face 
-       assert(fabs(myface.myvertex(i)->Point()[0]-
+       alugrid_assert (fabs(myface.myvertex(i)->Point()[0]-
               face.myvertex(i)->Point()[0])<1e-8);
-       assert(fabs(myface.myvertex(i)->Point()[1]-
+       alugrid_assert (fabs(myface.myvertex(i)->Point()[1]-
               face.myvertex(i)->Point()[1])<1e-8);
-       assert(fabs(myface.myvertex(i)->Point()[2]-
+       alugrid_assert (fabs(myface.myvertex(i)->Point()[2]-
               face.myvertex(i)->Point()[2])<1e-8);
        
        vertex_GEO * vx = myface.myvertex(i); 
@@ -409,7 +409,7 @@ namespace ALUGrid
   GitterBasisImpl::GitterBasisImpl () : _macrogitter (0) , _ppv(0) 
   {
     _macrogitter = new MacroGitterBasis ( this );
-    assert (_macrogitter);
+    alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
@@ -418,7 +418,7 @@ namespace ALUGrid
     : _macrogitter (0) , _ppv( ppv ) 
   {
     _macrogitter = new MacroGitterBasis ( this , in);
-    assert (_macrogitter);
+    alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
@@ -428,7 +428,7 @@ namespace ALUGrid
     _ppv( ppv )
   {
     _macrogitter = new MacroGitterBasis ( this , in);
-    assert (_macrogitter);
+    alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
@@ -445,7 +445,7 @@ namespace ALUGrid
     } 
     else
       _macrogitter = new MacroGitterBasis( this, in );
-    assert( _macrogitter );
+    alugrid_assert ( _macrogitter );
     notifyMacroGridChanges();
   }
 

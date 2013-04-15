@@ -40,7 +40,7 @@ namespace ALUGrid
 
   void LoadBalancer::DataBase::vertexUpdate (const GraphVertex & v) 
   {
-    assert (v.isValid ());
+    alugrid_assert (v.isValid ());
     _maxVertexLoad = _maxVertexLoad < v.weight () ? v.weight () : _maxVertexLoad;
     _vertexSet.find (v) != _vertexSet.end () ? 
       (_vertexSet.erase (v), _vertexSet [v] = -1) : _vertexSet [v] = -1;
@@ -104,7 +104,7 @@ namespace ALUGrid
                           std::insert_iterator< ldb_edge_set_t > edges,
                           const bool serialPartitioner ) const 
   {
-    assert( serialPartitioner );
+    alugrid_assert ( serialPartitioner );
     // for parallel partitioner return local vertices and edges 
     // for serial partitioner these have to be communicates to all
     // processes 
@@ -201,7 +201,7 @@ namespace ALUGrid
 
           int len = -1;
           osv_i.readObject (len);
-          assert (len >= 0);
+          alugrid_assert (len >= 0);
 
           // read graph for serial partitioner 
           if( serialPartitioner ) 
@@ -214,7 +214,7 @@ namespace ALUGrid
             } 
 
             osv_i.readObject (len);
-            assert (len >= 0);
+            alugrid_assert (len >= 0);
 
             for (int j = 0; j < len; ++j) 
             {
@@ -333,7 +333,7 @@ namespace ALUGrid
       const bool havePrecomputedSizes = (_graphSizes.size() == size_t(np)); 
       int maxSize = 0;
       // make each proc is on the same track
-      assert( havePrecomputedSizes == mpa.gmax( havePrecomputedSizes ) );
+      alugrid_assert ( havePrecomputedSizes == mpa.gmax( havePrecomputedSizes ) );
       if( havePrecomputedSizes ) 
       {
         for( int rank = 0; rank < np; ++ rank ) 
@@ -364,7 +364,7 @@ namespace ALUGrid
         }
 
         // make sure size is still ok 
-        assert( sendrecv.capacity() >= maxSize );
+        alugrid_assert ( sendrecv.capacity() >= maxSize );
 
         // get message size for current rank 
         const int msgSize = havePrecomputedSizes ? _graphSizes[ rank ] : maxSize;
@@ -386,7 +386,7 @@ namespace ALUGrid
 
           int len;
           sendrecv.readObject ( len );
-          assert (len >= 0);
+          alugrid_assert (len >= 0);
 
           // read graph for serial partitioner 
           if( serialPartitioner ) 
@@ -399,7 +399,7 @@ namespace ALUGrid
             } 
 
             sendrecv.readObject (len);
-            assert (len >= 0);
+            alugrid_assert (len >= 0);
 
             for (int j = 0; j < len; ++j) 
             {
@@ -545,17 +545,17 @@ namespace ALUGrid
     // periodischen Adapter nur indirekt, d.h. durch die Anzahl der abgehenden
     // Kanten, unterscheiden lassen (das ist aber ein zu schwaches Kriterium).
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     const int ned = edge_p [nel];
 #endif
-    assert (edge_p [0] == 0);
+    alugrid_assert (edge_p [0] == 0);
     bool change = false;
     for (int i = 0; i < nel; ++i ) 
     {
       int j = 0, max = 0;
       for (j = max = edge_p [i]; j < edge_p [i+1]; ++j ) 
       {
-        assert (j < ned);
+        alugrid_assert (j < ned);
         if (neu [i] == neu [edge [j]]) break;
         else max = edge_w [j] > edge_w [max] ? j : max;
       }
@@ -635,7 +635,7 @@ namespace ALUGrid
     typedef ALUGridMETIS::idxtype  idx_t;
 
     // for the first SFC approach we don't have edges in the graph 
-    assert( noEdgesInGraph ? _edgeSet.size() == 0 : true ); 
+    alugrid_assert ( noEdgesInGraph ? _edgeSet.size() == 0 : true ); 
 
     // collect graph from all processors 
     // needs a all-to-all (allgather) communication 
@@ -657,8 +657,8 @@ namespace ALUGrid
     const int nel = nodes.size ();
 
     // make sure every process got the same numbers 
-    assert( nel == mpa.gmax( nel ) );
-    assert( ned == mpa.gmax( ned ) );
+    alugrid_assert ( nel == mpa.gmax( nel ) );
+    alugrid_assert ( ned == mpa.gmax( ned ) );
     
     // do repartition if edges exist (for serial partitioners) or for SFC and 
     // parallel partitioners anyway  
@@ -682,7 +682,7 @@ namespace ALUGrid
       idx_t  * const edge        = edge_mem + (nel +1);
       idx_t  * const edge_w      = edge + ned; 
 
-      assert ( edge_p && edge && edge_w );
+      alugrid_assert ( edge_p && edge && edge_w );
       
       {
         idx_t* edge_pPos = edge_p;
@@ -694,19 +694,19 @@ namespace ALUGrid
           const GraphEdge& e = (*i);
           if (e.leftNode () != index) 
           {
-            assert ( serialPartitioner ? e.leftNode () < nel : true );
+            alugrid_assert ( serialPartitioner ? e.leftNode () < nel : true );
             *edge_pPos = count;
             ++edge_pPos ; 
             index = e.leftNode ();
           }
-          assert ( serialPartitioner ? e.rightNode () < nel : true );
+          alugrid_assert ( serialPartitioner ? e.rightNode () < nel : true );
           edge   [ count ] = e.rightNode ();
           edge_w [ count ] = e.weight ();
         }
 
         * edge_pPos = count;
-        assert( edge_p [0] == 0 );
-        assert( ( serialPartitioner && ned > 0 ) ? edge_p [nel] == ned : true );
+        alugrid_assert ( edge_p [0] == 0 );
+        alugrid_assert ( ( serialPartitioner && ned > 0 ) ? edge_p [nel] == ned : true );
 
         // free memory, not needed anymore 
         // needed to determine graphSizes later 
@@ -727,7 +727,7 @@ namespace ALUGrid
       // set weights (uniform distribution, to be adjusted)
       for(int l=0; l<np; ++l) tpwgts[l] = value;
 
-      assert ( vertex_wInt && part);
+      alugrid_assert ( vertex_wInt && part);
       {
         std::vector< int > check (nel, 0L);
         ldb_vertex_map_t::const_iterator iEnd = nodes.end ();
@@ -736,8 +736,8 @@ namespace ALUGrid
           const std::pair< const GraphVertex , int >& item = (*i);
           const int j = item.first.index ();
 
-          assert ( serialPartitioner ? 0 <= j && j < nel : true );
-          assert (0 <= item.second && item.second < np);
+          alugrid_assert ( serialPartitioner ? 0 <= j && j < nel : true );
+          alugrid_assert (0 <= item.second && item.second < np);
           part [j] = item.second;
           check [j] = 1;
           vertex_wInt [j] = item.first.weight ();
@@ -767,7 +767,7 @@ namespace ALUGrid
       if (np > 1) 
       {
         idx_t* neu = vertex_mem + (2 * nel);
-        assert (neu);
+        alugrid_assert (neu);
 
         // copy part to neu, this is needed by some of the partitioning tools  
         std::copy( part, part + nel, neu );
@@ -881,7 +881,7 @@ namespace ALUGrid
           // in case of the serial partitioners we are able to store the sizes 
           // to avoid a second communication during graphCollect 
           // this is only needed for the allgatherv communication 
-          assert( _noPeriodicFaces == mpa.gmax( _noPeriodicFaces ) );
+          alugrid_assert ( _noPeriodicFaces == mpa.gmax( _noPeriodicFaces ) );
           if( _noPeriodicFaces ) 
           {
             // resize vector 
@@ -939,8 +939,8 @@ namespace ALUGrid
   {
     // use constructor to initialize default values 
     GraphVertex e (i);
-    assert (_vertexSet.size() > 0 );
-    assert (_vertexSet.find (e) != _vertexSet.end ());
+    alugrid_assert (_vertexSet.size() > 0 );
+    alugrid_assert (_vertexSet.find (e) != _vertexSet.end ());
     return (*_vertexSet.find (e)).second;
   }
 

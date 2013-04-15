@@ -61,7 +61,7 @@ namespace ALUGrid
     static bool useAllGather( const MpAccessGlobal& mpa ) 
     {
       const int allGatherMaxProcs = allGatherMaxSize();
-      assert( allGatherMaxProcs == mpa.gmax( allGatherMaxProcs ) );
+      alugrid_assert ( allGatherMaxProcs == mpa.gmax( allGatherMaxProcs ) );
       return mpa.psize() <= allGatherMaxProcs;
     }
   };
@@ -96,20 +96,20 @@ namespace ALUGrid
 
     Gitter* myGrid() 
     { 
-      assert( _myGrid );
+      alugrid_assert ( _myGrid );
       return _myGrid; 
     }
 
     const Gitter* myGrid() const 
     { 
-      assert( _myGrid );
+      alugrid_assert ( _myGrid );
       return _myGrid; 
     }
 
     IndexManagerType& get(const int codim) 
     {
-      assert( codim >= 0 );
-      assert( codim < numOfIndexManager );
+      alugrid_assert ( codim >= 0 );
+      alugrid_assert ( codim < numOfIndexManager );
       return _indexmanager[ codim ];
     }
 
@@ -119,7 +119,7 @@ namespace ALUGrid
     // return MPI rank info 
     int myrank () const 
     { 
-      assert( _myrank >= 0 ); 
+      alugrid_assert ( _myrank >= 0 ); 
       return _myrank; 
     }
 
@@ -236,7 +236,7 @@ namespace ALUGrid
 
     virtual ~AccessIterator () 
     { 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       if( ref )
         std::cerr << "WARNING: (ignored) Some iterators still exist when removing the corresponding grid." << std::endl;
 #endif
@@ -282,9 +282,9 @@ namespace ALUGrid
     protected :
       virtual ~VertexPllXDefault () {}
     public :
-      virtual bool setLinkage ( std::vector< int > ) { assert(false); abort(); return false; }
-      virtual bool addGraphVertexIndex ( const int ldbVxIndex ) { assert(false); abort(); return false; }
-      virtual const std::vector<int>& linkedElements() const { assert(false); abort();  return *((std::vector<int> *) 0); }
+      virtual bool setLinkage ( std::vector< int > ) { alugrid_assert (false); abort(); return false; }
+      virtual bool addGraphVertexIndex ( const int ldbVxIndex ) { alugrid_assert (false); abort(); return false; }
+      virtual const std::vector<int>& linkedElements() const { alugrid_assert (false); abort();  return *((std::vector<int> *) 0); }
     };
 
 
@@ -311,9 +311,9 @@ namespace ALUGrid
       protected :
         virtual ~EdgePllXDefault () {}
       public :
-        virtual bool lockAndTry () { assert(false);abort(); return false; }
-        virtual bool unlockAndResume (bool) { assert(false);abort(); return false; }
-        virtual bool lockedAgainstCoarsening () const { assert(false);abort(); return false; }
+        virtual bool lockAndTry () { alugrid_assert (false);abort(); return false; }
+        virtual bool unlockAndResume (bool) { alugrid_assert (false);abort(); return false; }
+        virtual bool lockedAgainstCoarsening () const { alugrid_assert (false);abort(); return false; }
     };
 
     //  hasFace needs to be one of the basic classes 
@@ -410,7 +410,7 @@ namespace ALUGrid
         virtual accesspair_t accessInnerPllX (const accesspair_t&, int f) { return accesspair_t( this , f ); }
         virtual constaccesspair_t accessInnerPllX (const constaccesspair_t &, int f) const { return constaccesspair_t( this , f ); }
 
-        virtual void computeVertexLinkage() { assert(false); abort(); }
+        virtual void computeVertexLinkage() { alugrid_assert (false); abort(); }
       public :
         typedef std::pair< helement *, int > ghostpair_t;
 
@@ -444,27 +444,27 @@ namespace ALUGrid
         }
 
         virtual void writeStaticState (ObjectStream &, int) const 
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual void readStaticState (ObjectStream &, int)
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
 
         virtual void writeDynamicState (ObjectStream &, int) const
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual void readDynamicState (ObjectStream &, int)
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
 
         virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) 
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int)
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int)
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual void writeElementData (ObjectStream &, GatherScatterType &)
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual void readDynamicState (ObjectStream &, GatherScatterType &)
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
 
         // pack as ghost, default does nothing but macro elements are pack as
         // ghosts 
@@ -475,22 +475,22 @@ namespace ALUGrid
         
       public :
         virtual bool ldbUpdateGraphVertex ( LoadBalancer::DataBase &, GatherScatter * )
-        { assert(false);abort(); return false;  }
+        { alugrid_assert (false);abort(); return false;  }
       public :
         virtual void packAsBnd (int,int,ObjectStream &, const bool) const
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual bool erasable () const
-        { assert(false);abort(); return false;  }
+        { alugrid_assert (false);abort(); return false;  }
       public :
         virtual void getRefinementRequest (ObjectStream &)
-        { assert(false);abort(); }
+        { alugrid_assert (false);abort(); }
         virtual bool setRefinementRequest (ObjectStream &)
-        { assert(false);abort(); return false;  }
+        { alugrid_assert (false);abort(); return false;  }
       public :
         virtual bool lockAndTry ()
-        { assert(false);abort(); return false;  }
+        { alugrid_assert (false);abort(); return false;  }
         virtual bool unlockAndResume (bool)
-        { assert(false);abort(); return false;  }
+        { alugrid_assert (false);abort(); return false;  }
     };
 
 
@@ -522,13 +522,13 @@ namespace ALUGrid
       protected :
         virtual ~FacePllXDefault () {}
       public :
-        virtual std::vector< int > checkParallelConnectivity () const { assert( false ); abort(); return std::vector< int >(); }
-        virtual std::pair< ElementPllXIF *, int > accessOuterPllX () { assert( false ); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-        virtual std::pair< const ElementPllXIF *, int > accessOuterPllX () const  { assert( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-        virtual std::pair< ElementPllXIF *, int > accessInnerPllX ()  { assert( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-        virtual std::pair< const ElementPllXIF *, int > accessInnerPllX () const { assert( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+        virtual std::vector< int > checkParallelConnectivity () const { alugrid_assert ( false ); abort(); return std::vector< int >(); }
+        virtual std::pair< ElementPllXIF *, int > accessOuterPllX () { alugrid_assert ( false ); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+        virtual std::pair< const ElementPllXIF *, int > accessOuterPllX () const  { alugrid_assert ( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+        virtual std::pair< ElementPllXIF *, int > accessInnerPllX ()  { alugrid_assert ( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+        virtual std::pair< const ElementPllXIF *, int > accessInnerPllX () const { alugrid_assert ( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
 
-        virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool ) { assert(false);abort(); return false; }
+        virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool ) { alugrid_assert (false);abort(); return false; }
     };
 
     /////////////////////////////////////////////////////////////////////////////
@@ -566,8 +566,8 @@ namespace ALUGrid
           }
         }
 
-        BufferType & commBuffer () { assert(_buff); return *_buff; }
-        const BufferType & commBuffer () const { assert(_buff); return *_buff; }
+        BufferType & commBuffer () { alugrid_assert (_buff); return *_buff; }
+        const BufferType & commBuffer () const { alugrid_assert (_buff); return *_buff; }
       };
         
       typedef ParallelException::AccessPllException  AccessPllException;
@@ -583,17 +583,17 @@ namespace ALUGrid
         typedef class Key1SLZ identifier_t;
         virtual VertexPllXIF & accessPllX () throw (AccessPllException) 
         {
-          assert((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
+          alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
         }
         virtual const VertexPllXIF & accessPllX () const throw (AccessPllException)
         {
-          assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
+          alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
         }
         virtual void detachPllXFromMacro () throw (AccessPllException)
         {
-          assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
+          alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
         }
       };
@@ -689,7 +689,7 @@ namespace ALUGrid
           restoreInfo.changeByteOrder( (char *) & _idx, sizeof(int) );
 
         // make sure sizes match 
-        assert( _idx < (int) restoreInfo( codim ).size() );
+        alugrid_assert ( _idx < (int) restoreInfo( codim ).size() );
         // make index to be not a hole 
         restoreInfo( codim )[_idx] = false;
       }
@@ -710,13 +710,13 @@ namespace ALUGrid
       // return index of item 
       int getIndex () const 
       { 
-        assert( _idx >= 0);
+        alugrid_assert ( _idx >= 0);
         return _idx; 
       }
       // set index of item 
       void setIndex ( const int index ) 
       { 
-        assert( index >= 0 );
+        alugrid_assert ( index >= 0 );
         _idx = index; 
       }
       
@@ -724,7 +724,7 @@ namespace ALUGrid
       {
         if( !isSet( flagCopy ) )
         {
-          assert( _idx >= 0 );
+          alugrid_assert ( _idx >= 0 );
           im.freeIndex(_idx); 
         }
       }
@@ -990,13 +990,13 @@ namespace ALUGrid
       //testweise us
       virtual helement * up () = 0;
       virtual const helement * up () const = 0;
-      virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
-      virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
-      virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { assert(false); abort();} 
+      virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort();}
+      virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort();} 
+      virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort();} 
 
-      virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort();}
-      virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
-      virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { assert(false); abort(); }
+      virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort();}
+      virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort(); }
+      virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort(); }
       //us
       virtual helement * down () = 0;
       virtual const helement * down () const = 0;
@@ -1056,7 +1056,7 @@ namespace ALUGrid
       }
       virtual int master () const 
       {
-        return (assert(0),-1);
+        return (alugrid_assert (0),-1);
       }
 
       using ElementPllXIF::writeDynamicState;
@@ -1064,27 +1064,27 @@ namespace ALUGrid
 
       virtual void writeDynamicState (ObjectStream &os, int i) const
       { 
-        assert( up() != 0 );
+        alugrid_assert ( up() != 0 );
         up()->writeDynamicState(os,i);
       }
       virtual void readDynamicState (ObjectStream &os, int i)
       { 
-        assert( up() != 0 );
+        alugrid_assert ( up() != 0 );
         up()->readDynamicState(os,i);
       }
       virtual void packAsBnd (int a,int b,ObjectStream &os, const bool ghostCellsEnabled ) const
       { 
-        assert( up() != 0 );
+        alugrid_assert ( up() != 0 );
         up()->packAsBnd(a,b,os, ghostCellsEnabled);
       }
       virtual bool erasable () const
       { 
-        assert( up() != 0 );
+        alugrid_assert ( up() != 0 );
         return up()->erasable();
       }
 
-      virtual double volume () const { assert(false); abort(); return 0.0; } //= 0;
-      virtual void setIndicesAndBndId (const hface & , int ) { assert(false); abort(); }
+      virtual double volume () const { alugrid_assert (false); abort(); return 0.0; } //= 0;
+      virtual void setIndicesAndBndId (const hface & , int ) { alugrid_assert (false); abort(); }
       virtual void resetGhostIndices() = 0;
     public :
       virtual bool refine () = 0;
@@ -1126,22 +1126,22 @@ namespace ALUGrid
 
         helement * child(int i) const
         {
-          assert( i >= 0 && i < 4 );
+          alugrid_assert ( i >= 0 && i < 4 );
           return _ghchl[i];
         }
 
         int face(int i) const
         {
-          assert( i >= 0 && i < 4 );
+          alugrid_assert ( i >= 0 && i < 4 );
           return _gFace[i];
         }
 
         void setGhostPair(const std::pair< helement * , int > & g, int i)
         {
-          assert( i >= 0 && i < 4 );
-          assert( g.first );
+          alugrid_assert ( i >= 0 && i < 4 );
+          alugrid_assert ( g.first );
           _ghchl[i] = g.first;
-          assert( g.second >=0 );
+          alugrid_assert ( g.second >=0 );
           _gFace[i] = g.second;
         }
     };
@@ -1209,7 +1209,7 @@ namespace ALUGrid
       virtual int ldbVertexIndex () const 
       { 
         const hbndseg* father = up();
-        assert( father );
+        alugrid_assert ( father );
         return father->ldbVertexIndex ();
       }
       virtual int master () const 
@@ -2551,7 +2551,7 @@ namespace ALUGrid
     return std::pair< int, int > (a.first += b.first, a.second += b.second);
   }
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
 #ifdef DEBUG_ALUGRID 
   inline Refcount::Globalcount::Globalcount () : _c (0) {
     return;
@@ -2635,7 +2635,7 @@ namespace ALUGrid
   template < class A > inline A & EmptyIterator < A >::item () const 
   {
     // don't dereference an empty iterator 
-    assert( ! done () );
+    alugrid_assert ( ! done () );
     abort();
     A * p = 0;
     return *p;
@@ -2700,8 +2700,8 @@ namespace ALUGrid
   template < class A > inline void 
   AccessIterator < A >::Handle::assign (const ThisType & x) 
   {
-    assert( _fac == 0 );
-    assert( _w == 0 );
+    alugrid_assert ( _fac == 0 );
+    alugrid_assert ( _w == 0 );
     
     _fac = x._fac; 
     if( _fac ) _fac->ref ++;
@@ -3013,7 +3013,7 @@ namespace ALUGrid
   inline Gitter::Geometric::VertexGeo::~VertexGeo () 
   {
     this->freeIndex( indexManager() );
-    assert (ref ? (std::cerr << "**WARNING VertexGeo::refcount was " << ref << std::endl, 1) : 1);
+    alugrid_assert (ref ? (std::cerr << "**WARNING VertexGeo::refcount was " << ref << std::endl, 1) : 1);
     return;
   }
 
@@ -3022,7 +3022,7 @@ namespace ALUGrid
     // copy current coordinates  
     const alucoord_t p[3] = {_c[0],_c[1],_c[2]};
     // call projection operator 
-    assert( pv.first );
+    alugrid_assert ( pv.first );
     const int ok = (*pv.first)( p, pv.second, _c );
 
     if ( ! ok ) 
@@ -3078,8 +3078,8 @@ namespace ALUGrid
 
   inline Gitter::Geometric::hedge1::~hedge1 ()
   {
-    assert (ref ? (std::cerr << "**WARNING hedge1::refcount was " << ref << std::endl, 1) : 1);
-    assert ( ref == 0 );
+    alugrid_assert (ref ? (std::cerr << "**WARNING hedge1::refcount was " << ref << std::endl, 1) : 1);
+    alugrid_assert ( ref == 0 );
     v0->ref --; 
     v1->ref --;
     return;
@@ -3093,12 +3093,12 @@ namespace ALUGrid
 
   inline Gitter::Geometric::VertexGeo * Gitter::Geometric::hedge1::myvertex (int i)
   {
-    assert (i == 0 || i == 1);
+    alugrid_assert (i == 0 || i == 1);
     return i == 1 ? v1 : v0;
   }
 
   inline const Gitter::Geometric::hedge1::myvertex_t * Gitter::Geometric::hedge1::myvertex (int i) const {
-    assert (i == 0 || i == 1);
+    alugrid_assert (i == 0 || i == 1);
     return i == 1 ? v1 : v0;
   }
 
@@ -3168,7 +3168,7 @@ namespace ALUGrid
   {
     setFront( p );
 
-    assert( _attachedFront > 0 );
+    alugrid_assert ( _attachedFront > 0 );
     // decrease front counter 
     -- _attachedFront;
   }
@@ -3178,7 +3178,7 @@ namespace ALUGrid
   {
     setRear( p );
 
-    assert( _attachedRear > 0 );
+    alugrid_assert ( _attachedRear > 0 );
     // decrease attached counter 
     -- _attachedRear;
   }
@@ -3241,10 +3241,10 @@ namespace ALUGrid
   inline Gitter::Geometric::hface3::
   hface3 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2) 
   {
-    assert( nb.emptyFront() );
-    assert( nb.emptyRear() );
+    alugrid_assert ( nb.emptyFront() );
+    alugrid_assert ( nb.emptyRear() );
     nb._parRule = (Hface3Rule::undefined);
-    assert(e0 && e1 && e2);
+    alugrid_assert (e0 && e1 && e2);
     (e [0] = e0)->ref ++; nb.s [0] = s0;
     (e [1] = e1)->ref ++; nb.s [1] = s1;
     (e [2] = e2)->ref ++; nb.s [2] = s2;
@@ -3253,9 +3253,9 @@ namespace ALUGrid
 
   inline Gitter::Geometric::hface3::~hface3 () 
   {
-    assert( nb.emptyFront() );
-    assert( nb.emptyRear() );
-    assert (ref ? (std::cerr << "**WARNING hface3::refcount was " << ref << std::endl, 1) : 1);
+    alugrid_assert ( nb.emptyFront() );
+    alugrid_assert ( nb.emptyRear() );
+    alugrid_assert (ref ? (std::cerr << "**WARNING hface3::refcount was " << ref << std::endl, 1) : 1);
     e [0] -> ref --;
     e [1] -> ref --;
     e [2] -> ref --;
@@ -3265,7 +3265,7 @@ namespace ALUGrid
   inline void Gitter::Geometric::hface3::
   attachElement (const std::pair< myconnect_t *, int > & p, int t)
   {
-    assert( ref == 0 ? (nb._attachedRear + nb._attachedFront) == 0 : true );
+    alugrid_assert ( ref == 0 ? (nb._attachedRear + nb._attachedFront) == 0 : true );
     if ( t < 0 ) 
     {
       // if nothing was attached to rear then increase ref
@@ -3282,7 +3282,7 @@ namespace ALUGrid
       // set pair to front  
       nb.setNextFront( p );
     }
-    assert( ref <= 2 );
+    alugrid_assert ( ref <= 2 );
   }
 
   // detachElement and set connector to null
@@ -3322,27 +3322,27 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::hface3::twist (int i) const {
-    assert (i < 3);
+    alugrid_assert (i < 3);
     return nb.s [i];
   }
 
   inline Gitter::Geometric::hface3::myhedge_t * Gitter::Geometric::hface3::myhedge (int i) {
-    assert (i < 3);
+    alugrid_assert (i < 3);
     return e [i];
   }
 
   inline const Gitter::Geometric::hface3::myhedge_t * Gitter::Geometric::hface3::myhedge (int i) const {
-    assert (i < 3);
+    alugrid_assert (i < 3);
     return e [i];
   }
 
   inline Gitter::Geometric::hface3::myvertex_t * Gitter::Geometric::hface3::myvertex (int i) {
-    assert(0<=i && i < 3);
+    alugrid_assert (0<=i && i < 3);
     return myhedge (i)->myvertex ( nb.s[i] );
   }
 
   inline const Gitter::Geometric::hface3::myvertex_t * Gitter::Geometric::hface3::myvertex (int i) const {
-    assert(0<=i && i < 3);
+    alugrid_assert (0<=i && i < 3);
     return myhedge (i)->myvertex (nb.s[i]);
   }
 
@@ -3455,7 +3455,7 @@ namespace ALUGrid
   inline Gitter::Geometric::hface4::
   hface4 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2, myhedge_t * e3, int s3) 
   {
-    assert(e0 && e1 && e2 && e3);
+    alugrid_assert (e0 && e1 && e2 && e3);
     (e [0] = e0)->ref ++; nb.s [0] = s0;
     (e [1] = e1)->ref ++; nb.s [1] = s1;
     (e [2] = e2)->ref ++; nb.s [2] = s2;
@@ -3464,7 +3464,7 @@ namespace ALUGrid
   }
 
   inline Gitter::Geometric::hface4::~hface4 () {
-    assert (ref ? (std::cerr << "**WARNING hface4::refcount was " << ref << std::endl, 1) : 1);
+    alugrid_assert (ref ? (std::cerr << "**WARNING hface4::refcount was " << ref << std::endl, 1) : 1);
     e [0] -> ref --;
     e [1] -> ref --;
     e [2] -> ref --;
@@ -3501,27 +3501,27 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::hface4::twist (int i) const {
-    assert (i < 4);
+    alugrid_assert (i < 4);
     return nb.s [i];
   }
 
   inline Gitter::Geometric::hface4::myhedge_t * Gitter::Geometric::hface4::myhedge (int i) {
-    assert (i < 4);
+    alugrid_assert (i < 4);
     return e [i];
   }
 
   inline const Gitter::Geometric::hface4::myhedge_t * Gitter::Geometric::hface4::myhedge (int i) const {
-    assert (i < 4);
+    alugrid_assert (i < 4);
     return e [i];
   }
 
   inline Gitter::Geometric::hface4::myvertex_t * Gitter::Geometric::hface4::myvertex (int i) {
-    assert(0<=i && i < 4);
+    alugrid_assert (0<=i && i < 4);
     return myhedge (i)->myvertex (nb.s[i]);
   }
 
   inline const Gitter::Geometric::hface4::myvertex_t * Gitter::Geometric::hface4::myvertex (int i) const {
-    assert(0<=i && i < 4);
+    alugrid_assert (0<=i && i < 4);
     return myhedge (i)->myvertex (nb.s[i]);
   }
 
@@ -3587,21 +3587,21 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::Tetra::twist (int i) const {
-    assert (i < 4);
+    alugrid_assert (i < 4);
     return s [i]; 
   }
 
   inline Gitter::Geometric::Tetra::myhface_t * Gitter::Geometric::Tetra::myhface (int i) {
-    assert ( i <  4 );
-    assert ( i >= 0 );
-    assert ( f [i] ); 
+    alugrid_assert ( i <  4 );
+    alugrid_assert ( i >= 0 );
+    alugrid_assert ( f [i] ); 
     return f [i];
   }
 
   inline const Gitter::Geometric::Tetra::myhface_t * Gitter::Geometric::Tetra::myhface (int i) const {
-    assert ( i < 4 );
-    assert ( i >= 0 );
-    assert ( f [i] ); 
+    alugrid_assert ( i < 4 );
+    alugrid_assert ( i >= 0 );
+    alugrid_assert ( f [i] ); 
     return f [i];
   }
 
@@ -3615,10 +3615,10 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::Tetra::evalVertexTwist(int face, int vertex) const {
     // make sure vertex and face are in range is 
-    assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
-    assert( vertex >= 0 && vertex < 3 );
+    alugrid_assert ( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
+    alugrid_assert ( vertex >= 0 && vertex < 3 );
     // make sure that we get the same result 
-    assert( originalVertexTwist(face,vertex) == vertexTwist[twist(face)+3][vertex] );
+    alugrid_assert ( originalVertexTwist(face,vertex) == vertexTwist[twist(face)+3][vertex] );
     return vertexTwist[twist(face)+3][vertex];  
   }
 
@@ -3633,16 +3633,16 @@ namespace ALUGrid
   inline int Gitter::Geometric::Tetra::evalEdgeTwist(int face, int vertex) const 
   {
     // make sure vertex and face are in range is 
-    assert( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
-    assert( vertex >= 0 && vertex < 3 );
+    alugrid_assert ( (twist(face) + 3 >= 0) && (twist(face)+3 < 6) );
+    alugrid_assert ( vertex >= 0 && vertex < 3 );
     // make sure that we get the same result 
-    assert( originalEdgeTwist(face,vertex) == edgeTwist[twist(face)+3][vertex]);
+    alugrid_assert ( originalEdgeTwist(face,vertex) == edgeTwist[twist(face)+3][vertex]);
     return edgeTwist[twist(face)+3][vertex];
   }
 
   inline Gitter::Geometric::Tetra::myhedge_t * Gitter::Geometric::Tetra::myhedge (int edge) 
   {
-    assert(edge >= 0 && edge < 6);
+    alugrid_assert (edge >= 0 && edge < 6);
 
     typedef Gitter::Geometric::Tetra ThisType;
 
@@ -3652,7 +3652,7 @@ namespace ALUGrid
 
   inline const Gitter::Geometric::Tetra::myhedge_t * Gitter::Geometric::Tetra::myhedge (int edge) const
   {
-    assert(edge >= 0 && edge < 6);
+    alugrid_assert (edge >= 0 && edge < 6);
 
     typedef Gitter::Geometric::Tetra ThisType;
 
@@ -3671,12 +3671,12 @@ namespace ALUGrid
 
   //- --tetramyvertex
   inline Gitter::Geometric::Tetra::myvertex_t * Gitter::Geometric::Tetra::myvertex (int i) {
-    assert (0 <= i && i < 4);
+    alugrid_assert (0 <= i && i < 4);
     return (i < 3) ? myvertex (3,i) : myvertex (2,1);
   }
 
   inline const Gitter::Geometric::Tetra::myvertex_t * Gitter::Geometric::Tetra::myvertex (int i) const {
-    assert (0 <= i && i < 4);
+    alugrid_assert (0 <= i && i < 4);
     return (i < 3) ? myvertex (3,i) : myvertex (2,1);
   }
 
@@ -3733,22 +3733,22 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::Periodic3::twist (int i) const {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return s [i]; 
   }
 
   inline Gitter::Geometric::Periodic3::myhface_t * Gitter::Geometric::Periodic3::myhface (int i) {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return f [i];
   }
 
   inline const Gitter::Geometric::Periodic3::myhface_t * Gitter::Geometric::Periodic3::myhface (int i) const {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return f [i];
   }
 
   inline Gitter::Geometric::Periodic3::myvertex_t * Gitter::Geometric::Periodic3::myvertex (int i, int j) {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return (twist(i) < 0) ? myhface( i )->myvertex((7 - j + twist(i)) % 3) : myhface( i )->myvertex((j + twist(i)) % 3);
   }
 
@@ -3757,7 +3757,7 @@ namespace ALUGrid
   }
 
   inline Gitter::Geometric::Periodic3::myvertex_t * Gitter::Geometric::Periodic3::myvertex (int i) {
-    assert (0 <= i && i < 6);
+    alugrid_assert (0 <= i && i < 6);
     
     // Der Ausdruck liefert 0-> (0,0)
     //      1-> (0,1)
@@ -3769,17 +3769,17 @@ namespace ALUGrid
   }
 
   inline const Gitter::Geometric::Periodic3::myvertex_t * Gitter::Geometric::Periodic3::myvertex (int i) const {
-    assert (0 <= i && i < 6);
+    alugrid_assert (0 <= i && i < 6);
     return (i < 3) ? myvertex (0,i) : myvertex (1,(6-i)%3);
   }
 
   inline std::pair< Gitter::Geometric::hasFace3 *, int > Gitter::Geometric::Periodic3::myneighbour (int i) {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return twist (i) < 0 ? myhface( i )->nb.front () : myhface( i )->nb.rear ();
   }
 
   inline std::pair< const Gitter::Geometric::hasFace3 *, int > Gitter::Geometric::Periodic3::myneighbour (int i) const {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return twist (i) < 0 ? std::pair< const hasFace3 *, int > (myhface( i )->nb.front ().first, myhface( i )->nb.front ().second)
       : std::pair< const hasFace3 *, int > (myhface( i )->nb.rear ().first, myhface( i )->nb.rear ().second);
   }
@@ -3816,47 +3816,47 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::Periodic4::twist (int i) const {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return s [i]; 
   }
 
   inline Gitter::Geometric::Periodic4::myhface_t * Gitter::Geometric::Periodic4::myhface (int i) {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return f [i];
   }
 
   inline const Gitter::Geometric::Periodic4::myhface_t * Gitter::Geometric::Periodic4::myhface (int i) const {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return f [i];
   }
 
   inline Gitter::Geometric::Periodic4::myvertex_t * Gitter::Geometric::Periodic4::myvertex (int i, int j) {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return (twist(i) < 0) ? myhface(i)->myvertex((9 - j + twist(i)) % 4) : myhface(i)->myvertex((j + twist(i)) % 4);
   }
 
   inline const Gitter::Geometric::Periodic4::myvertex_t * Gitter::Geometric::Periodic4::myvertex (int i, int j) const {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return (twist(i) < 0) ? myhface(i)->myvertex((9 - j + twist(i)) % 4) : myhface(i)->myvertex((j + twist(i)) % 4);
   }
 
   inline Gitter::Geometric::Periodic4::myvertex_t * Gitter::Geometric::Periodic4::myvertex (int i) { // ok
-    assert (0 <= i && i < 8);
+    alugrid_assert (0 <= i && i < 8);
     return (i < 4) ? myvertex (0, (4 - i) % 4) : myvertex (1, i - 4);
   }
 
   inline const Gitter::Geometric::Periodic4::myvertex_t * Gitter::Geometric::Periodic4::myvertex (int i) const { // ok
-    assert (0 <= i && i < 8);
+    alugrid_assert (0 <= i && i < 8);
     return (i < 4) ? myvertex (0,i) : myvertex (1,(8-i)%4);
   }
 
   inline std::pair< Gitter::Geometric::hasFace4 *, int > Gitter::Geometric::Periodic4::myneighbour (int i) {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return twist (i) < 0 ? myhface( i )->nb.front () : myhface( i )->nb.rear ();
   }
 
   inline std::pair< const Gitter::Geometric::hasFace4 *, int > Gitter::Geometric::Periodic4::myneighbour (int i) const {
-    assert (0 <= i && i < 2);
+    alugrid_assert (0 <= i && i < 2);
     return twist (i) < 0 ? std::pair< const hasFace4 *, int > (myhface( i )->nb.front ().first, myhface( i )->nb.front ().second)
       : std::pair< const hasFace4 *, int > (myhface( i )->nb.rear ().first, myhface( i )->nb.rear ().second);
   }
@@ -3904,17 +3904,17 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::Hexa::twist (int i) const {
-    assert (i < 6);
+    alugrid_assert (i < 6);
     return s [i]; 
   }
 
   inline Gitter::Geometric::Hexa::myhface_t * Gitter::Geometric::Hexa::myhface (int i) {
-    assert (i < 6);
+    alugrid_assert (i < 6);
     return f [i];
   }
 
   inline const Gitter::Geometric::Hexa::myhface_t * Gitter::Geometric::Hexa::myhface (int i) const {
-    assert (i < 6);
+    alugrid_assert (i < 6);
     return f [i];
   }
 
@@ -3931,19 +3931,19 @@ namespace ALUGrid
   inline Gitter::Geometric::Hexa::myvertex_t * 
   Gitter::Geometric::Hexa::myvertex (int i) 
   {
-    assert (0 <= i && i < 8);
+    alugrid_assert (0 <= i && i < 8);
     return myvertex( vertex2Face[i][0] , vertex2Face[i][1] );
   }
 
   inline const Gitter::Geometric::Hexa::myvertex_t * 
   Gitter::Geometric::Hexa::myvertex (int i) const 
   {
-    assert (0 <= i && i < 8);
+    alugrid_assert (0 <= i && i < 8);
     return myvertex( vertex2Face[i][0] , vertex2Face[i][1] );
   }
 
   inline Gitter::Geometric::Hexa::myhedge_t * Gitter::Geometric::Hexa::myhedge(int i) {
-    assert (0 <= i && i < 12);
+    alugrid_assert (0 <= i && i < 12);
 
     typedef Gitter::Geometric::Hexa MyType;
     return myhface(MyType::edgeMap[i][0])->
@@ -3951,7 +3951,7 @@ namespace ALUGrid
   }
 
   inline const Gitter::Geometric::Hexa::myhedge_t * Gitter::Geometric::Hexa::myhedge(int i) const {
-    assert (0 <= i && i < 12);
+    alugrid_assert (0 <= i && i < 12);
 
     typedef Gitter::Geometric::Hexa MyType;
     return myhface(MyType::edgeMap[i][0])->
@@ -3984,19 +3984,19 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::Hexa::evalVertexTwist (int face, int vertex) const 
   {
-    assert( (twist(face) + 4 >= 0) && (twist(face)+4 < 8) );
-    assert( vertex >= 0 && vertex < 4 );
+    alugrid_assert ( (twist(face) + 4 >= 0) && (twist(face)+4 < 8) );
+    alugrid_assert ( vertex >= 0 && vertex < 4 );
     // make sure that we get the same result 
-    assert( originalVertexTwist(face,vertex) == vertexTwist[twist(face)+4][vertex] );
+    alugrid_assert ( originalVertexTwist(face,vertex) == vertexTwist[twist(face)+4][vertex] );
     return vertexTwist[twist(face)+4][vertex];
   }
 
   inline int Gitter::Geometric::Hexa::evalEdgeTwist (int face, int edge) const 
   {
-    assert( (twist(face) + 4 >= 0) && (twist(face)+4 < 8) );
-    assert( edge >= 0 && edge < 4 );
+    alugrid_assert ( (twist(face) + 4 >= 0) && (twist(face)+4 < 8) );
+    alugrid_assert ( edge >= 0 && edge < 4 );
     // make sure that we get the same result 
-    assert( originalEdgeTwist(face,edge) == edgeTwist[twist(face)+4][edge] );
+    alugrid_assert ( originalEdgeTwist(face,edge) == edgeTwist[twist(face)+4][edge] );
     return edgeTwist[twist(face)+4][edge];
   }
 
@@ -4079,12 +4079,12 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::hbndseg3::twist (int i) const {
-    assert (i == 0);
+    alugrid_assert (i == 0);
     return _twist;
   }
 
   inline Gitter::Geometric::hbndseg3::myhface_t * Gitter::Geometric::hbndseg3::myhface (int i) const {
-    assert (i == 0);
+    alugrid_assert (i == 0);
     return _face;
   }
 
@@ -4101,7 +4101,7 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::hbndseg3::nChild () const {
-    assert(_face);
+    alugrid_assert (_face);
     return _face->nChild ();
   }
 
@@ -4129,7 +4129,7 @@ namespace ALUGrid
 
   inline void Gitter::Geometric::hbndseg4::attachleafs () 
   {
-    assert(this->leafRefCount()==0);
+    alugrid_assert (this->leafRefCount()==0);
     this->addleaf();
     
     myhface_t& face = *(myhface(0));
@@ -4143,7 +4143,7 @@ namespace ALUGrid
 
   inline void Gitter::Geometric::hbndseg4::detachleafs () 
   {
-    assert(this->leafRefCount()==1);
+    alugrid_assert (this->leafRefCount()==1);
     this->removeleaf();
 
     myhface_t& face = *(myhface(0));
@@ -4172,12 +4172,12 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::hbndseg4::twist (int i) const 
   {
-    assert (i == 0);
+    alugrid_assert (i == 0);
     return _twist;
   }
 
   inline Gitter::Geometric::hbndseg4::myhface_t * Gitter::Geometric::hbndseg4::myhface (int i) const {
-    assert (i == 0);
+    alugrid_assert (i == 0);
     return _face;
   }
 
@@ -4194,7 +4194,7 @@ namespace ALUGrid
   }
 
   inline int Gitter::Geometric::hbndseg4::nChild () const {
-    assert(_face);
+    alugrid_assert (_face);
     return _face->nChild ();
   }
 
@@ -4251,11 +4251,11 @@ namespace ALUGrid
 
   template < class A > inline void LeafIterator < A >::assign (const LeafIterator < A > & x)  
   {
-    assert( _grd == 0 );
-    assert( _w   == 0 );
+    alugrid_assert ( _grd == 0 );
+    alugrid_assert ( _w   == 0 );
     _grd = x._grd; 
     _grd->ref ++;
-    assert( x._w );
+    alugrid_assert ( x._w );
     _w = x._w->clone();
   }
 
@@ -4330,11 +4330,11 @@ namespace ALUGrid
   inline void GridIterator < A , StopRule_t >::
   assign (const GridIterator < A , StopRule_t > & x)  
   {
-    assert( _grd == 0 );
-    assert( _w   == 0 );
+    alugrid_assert ( _grd == 0 );
+    alugrid_assert ( _w   == 0 );
     _grd = x._grd; 
     _grd->ref ++;
-    assert( x._w );
+    alugrid_assert ( x._w );
     _w = x._w->clone();
   }
 
@@ -4409,11 +4409,11 @@ namespace ALUGrid
 
   template < class A > inline void LevelIterator < A >::assign (const LevelIterator < A > & x)  
   {
-    assert( _grd == 0 );
-    assert( _w == 0 );
+    alugrid_assert ( _grd == 0 );
+    alugrid_assert ( _w == 0 );
     _grd = x._grd; 
     _grd->ref ++;
-    assert( x._w );
+    alugrid_assert ( x._w );
     _w = x._w->clone();
   }
 

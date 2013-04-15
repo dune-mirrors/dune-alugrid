@@ -176,13 +176,13 @@ namespace ALUGrid
   //
   inline int MpAccessMPI::psize () const 
   {
-    assert( _psize > 0 );
+    alugrid_assert ( _psize > 0 );
     return _psize;
   }
 
   inline int MpAccessMPI::myrank () const 
   {
-    assert( _myrank != -1 );
+    alugrid_assert ( _myrank != -1 );
     return _myrank;
   }
 

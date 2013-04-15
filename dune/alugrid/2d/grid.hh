@@ -203,8 +203,8 @@ namespace Dune
     typedef ALU2dGrid< dim, dimworld, eltype > ThisType; 
     typedef GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > > BaseType;
 
-    dune_static_assert( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
-    dune_static_assert( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
+    dune_static_assert ( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
+    dune_static_assert ( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
 
   public:
     static const ALU2DSPACE ElementType elementType = eltype;
@@ -530,7 +530,7 @@ namespace Dune
 
     // return reference to grid 
     HmeshType& mesh() const {
-      assert(mygrid_);
+      alugrid_assert (mygrid_);
       return *mygrid_;
     }
 
@@ -591,8 +591,8 @@ namespace Dune
       else
       {
         // note pointer can be zero (identity mapping)
-        assert( bndVec_ );
-        assert( segmentIndex < (int) bndVec_->size() );
+        alugrid_assert ( bndVec_ );
+        alugrid_assert ( segmentIndex < (int) bndVec_->size() );
         return (*bndVec_)[ segmentIndex ];
       }
     }
@@ -625,7 +625,7 @@ namespace Dune
     const GridObjectFactoryType& factory() const
     {
 #ifdef USE_SMP_PARALLEL
-      assert( (int) factoryVec_.size() > GridObjectFactoryType::threadNumber() );
+      alugrid_assert ( (int) factoryVec_.size() > GridObjectFactoryType::threadNumber() );
       return factoryVec_[ GridObjectFactoryType::threadNumber() ];
 #else
       return factory_;
@@ -661,8 +661,8 @@ namespace Dune
     //! visted for this level 
     ALU2dGridMarkerVector & getMarkerVector(int level) const
     {
-      assert( level >= 0);
-      assert( level <= MAXL);
+      alugrid_assert ( level >= 0);
+      alugrid_assert ( level <= MAXL);
       return marker_[level];
     }
 

@@ -453,7 +453,7 @@ namespace ALUGrid
 
   template < class A, class B > inline int TreeIterator < A, B > :: pushdown () {
     A * e = _stack [_pos];
-    assert( _pos+1 < maxStackDepth );
+    alugrid_assert ( _pos+1 < maxStackDepth );
     for(; e ? ! _cmp (e) : 0; _stack [ ++ _pos] = (e = e->down ()));
     return e ? 1 : (-- _pos, 0);
   }
@@ -510,7 +510,7 @@ namespace ALUGrid
     _pos  = w._pos;
     _cmp  = w._cmp;
 
-    assert( _pos < maxStackDepth );
+    alugrid_assert ( _pos < maxStackDepth );
     for (int i = 0; i <= _pos; ++i) _stack [i] = w._stack [i];
   }
 
@@ -553,13 +553,13 @@ namespace ALUGrid
   }
 
   template < class A, class B > inline int TreeIterator < A , B > :: done () const {
-    assert( _pos >= 0 );
-    assert( _pos < maxStackDepth );
+    alugrid_assert ( _pos >= 0 );
+    alugrid_assert ( _pos < maxStackDepth );
     return ! _stack [_pos];
   }
 
   template < class A, class B > inline A & TreeIterator < A , B > :: item () const {
-    assert (! done ()) ;
+    alugrid_assert (! done ()) ;
     return * _stack [_pos];
   }
 
@@ -608,7 +608,7 @@ namespace ALUGrid
 
   template < class A, class B > inline typename Wrapper < A, B > :: val_t & 
   Wrapper < A, B > :: item () const {
-    assert (! done ());
+    alugrid_assert (! done ());
     return B ()(_walk.A :: item ());
   }
 
@@ -666,7 +666,7 @@ namespace ALUGrid
   }
 
   template < class A, class B, class C > inline C & AlignIterator < A, B, C > :: item () const {
-    assert (! done ());
+    alugrid_assert (! done ());
     if (_curr) return (C &) _walk2.B::item (); 
     else return (C &) _walk1.A::item ();
   }
@@ -698,9 +698,9 @@ namespace ALUGrid
       if( org._ahead == orgit ) _ahead = p;
     }
 
-    assert( (! org.done()) ? (_curr  != _it.end()) : 1 );
-    assert( (! org.done()) ? ((org._ahead != org._it.end()) ? (_ahead != _it.end()) : 1) : 1 );
-    assert( (! org.done()) ? (!done()) : 1); 
+    alugrid_assert ( (! org.done()) ? (_curr  != _it.end()) : 1 );
+    alugrid_assert ( (! org.done()) ? ((org._ahead != org._it.end()) ? (_ahead != _it.end()) : 1) : 1 );
+    alugrid_assert ( (! org.done()) ? (!done()) : 1); 
   }
 
   template < class A > inline IteratorSTI < A > * 
@@ -763,7 +763,7 @@ namespace ALUGrid
 
   template < class A > inline A & VectorAlign < A > :: item () const 
   {
-    assert (! done ());
+    alugrid_assert (! done ());
     return (*_curr)->item ();
   }
 
@@ -827,7 +827,7 @@ namespace ALUGrid
   }
 
   template < class  A, class B > inline void Insert < A, B > :: next () {
-    assert(_inner);
+    alugrid_assert (_inner);
     _inner->B::next ();
     if(_inner->B::done ()) 
     {
@@ -858,7 +858,7 @@ namespace ALUGrid
   template < class  A, class B > inline typename Insert < A, B > :: val_t & 
   Insert < A, B > :: item () const 
   {
-    assert (! done ()); 
+    alugrid_assert (! done ()); 
     return _inner->B::item ();
   }
 

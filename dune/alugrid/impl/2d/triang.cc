@@ -112,7 +112,7 @@ namespace ALU2DGrid
 
   template < int N, int NV >
   Triang < N,NV >::Triang(vertex_t * v0,vertex_t * v1, vertex_t * v2, vertex_t * v3) {
-    assert( NV == 4);
+    alugrid_assert ( NV == 4);
     if (NV == 4) 
     {
       connect.set( v0, 0);
@@ -218,9 +218,9 @@ namespace ALU2DGrid
                             splitrule_t sr, bool setnormal)
   {
     // TWIST
-    assert(sr == thinelement_t::triang_conf2);
-    assert(fce >= 0);
-    assert(nbfce >= 0);
+    alugrid_assert (sr == thinelement_t::triang_conf2);
+    alugrid_assert (fce >= 0);
+    alugrid_assert (nbfce >= 0);
     fce = mod(fce);
     nbfce = mod(nbfce);
 
@@ -267,7 +267,7 @@ namespace ALU2DGrid
                              Refco::tag_t default_ref,
                              prolong_basic_t *pro_el)
   {
-    assert(splitrule() == thinelement_t::unsplit);
+    alugrid_assert (splitrule() == thinelement_t::unsplit);
 
     switch (sr)
     {
@@ -291,7 +291,7 @@ namespace ALU2DGrid
                                 Refco::tag_t default_ref,
                                 prolong_basic_t *pro_el)
   {
-    assert(NV==3);
+    alugrid_assert (NV==3);
 
     Triang* t1;
     Triang* t2;
@@ -413,11 +413,11 @@ namespace ALU2DGrid
         tr = (Triang*)(tr->down()->next());
         if( tr->leaf() ) {
           t1->nbconnect(1, tr, 2);
-          assert(connect.hvtx[0]->getrnb()==tr);
+          alugrid_assert (connect.hvtx[0]->getrnb()==tr);
         } else {
           tr = (Triang*)(tr->down());
           t1->nbconnect(1, tr, 0);
-          assert(connect.hvtx[0]->getrnb()==tr);
+          alugrid_assert (connect.hvtx[0]->getrnb()==tr);
         }
       } else {
         t1->nbconnect(1, neighbour(0), opposite(0));
@@ -432,11 +432,11 @@ namespace ALU2DGrid
         tr = (Triang*)(tr->down());
         if( tr->leaf() ) {
           t2->nbconnect(2, tr, 1);
-          assert(connect.hvtx[0]->getlnb()==tr);
+          alugrid_assert (connect.hvtx[0]->getlnb()==tr);
         } else {
           tr = (Triang*)(tr->down()->next());
           t2->nbconnect(2, tr, 0);
-          assert(connect.hvtx[0]->getlnb()==tr);
+          alugrid_assert (connect.hvtx[0]->getlnb()==tr);
         }
       } else {
         t2->nbconnect(2, neighbour(0), opposite(0));
@@ -575,7 +575,7 @@ namespace ALU2DGrid
       usehvtx[i] = connect.hvtx[i];
       if (connect.nb[i]->thinis(thinelement_t::bndel_like))
       {
-        assert(!usehvtx[i]);
+        alugrid_assert (!usehvtx[i]);
         connect.nb[i]->get_splitpoint(connect.bck[i], 0.5, p);
         newvtx[i] = new fullvertex_t(p,level());
         agnc->insert(newvtx[i]);
@@ -698,17 +698,17 @@ namespace ALU2DGrid
 
           // TWIST
           Triang *trnb2 = (Triang *)(trnb0->down());
-          assert(trnb2);
+          alugrid_assert (trnb2);
           for (int k=0; k<mod(opposite(i)+1); ++k) {
             trnb2 = (Triang *)(trnb2->next());
-            assert(trnb2);
+            alugrid_assert (trnb2);
           }
 
           Triang *trnb1 = (Triang *)(opposite(i)!=numfaces()-2 ? trnb2->next() : trnb0->down());
-          assert( trnb1 );
+          alugrid_assert ( trnb1 );
 
-          assert(trnb1->connect.vtx[mod(opposite(i)+1)] == newvtx[i]);
-          assert(trnb2->connect.vtx[mod(opposite(i)+2)] == newvtx[i]);
+          alugrid_assert (trnb1->connect.vtx[mod(opposite(i)+1)] == newvtx[i]);
+          alugrid_assert (trnb2->connect.vtx[mod(opposite(i)+2)] == newvtx[i]);
 
           newtr[mod(i+1)]->nbconnect(i,trnb1,opposite(i));
           newtr[mod(i+2)]->nbconnect(i,trnb2,opposite(i));
@@ -720,7 +720,7 @@ namespace ALU2DGrid
           if (newtr[mod(i+2)]->connect.hvtx[i])
             newtr[mod(i+2)]->connect.hvtx[i]->nbconnect(opposite(i),newtr[mod(i+2)],i);
         } else {
-          assert(neighbour(i)->splitrule() == thinelement_t::unsplit);
+          alugrid_assert (neighbour(i)->splitrule() == thinelement_t::unsplit);
           newtr[mod(i+1)]->nbconnect(i,neighbour(i),opposite(i));
           newtr[mod(i+2)]->nbconnect(i,neighbour(i),opposite(i));
         }
@@ -742,7 +742,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   int Triang < N,NV >::docoarsen(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
   {
-    assert(splitrule() != thinelement_t::unsplit);
+    alugrid_assert (splitrule() != thinelement_t::unsplit);
 
     switch (splitrule())
     {
@@ -761,7 +761,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   int Triang < N,NV >::docoarsen2tr(nconf_vtx_t *ncv,int nconfDeg,restrict_basic_t *rest_el)
   {
-    assert(NV==3);
+    alugrid_assert (NV==3);
 
     if (nconfDeg != 0) {
       std::cerr << "ERROR (Triang::docoarsen2tr): not implemented for non-conforming refinement." << std::endl;
@@ -807,7 +807,7 @@ namespace ALU2DGrid
       {
         helement_t *child=down();
         ncv = new nconf_vtx_t(child->vertex(0),child,child->next());
-        assert( ncv );
+        alugrid_assert ( ncv );
         child->neighbour(1)->nbconnect(2,this,-1);
         child->neighbour(0)->nbconnect(child->opposite(0),this,2);
         this->nbconnect(2,child->neighbour(0),child->opposite(0));
@@ -828,13 +828,13 @@ namespace ALU2DGrid
           setnormdir(1, 1);
         setnormdir(0, -1);
               
-  #ifndef NDEBUG
+  #ifdef ALUGRIDDEBUG
         // only used in assert 
         bool didcoarse = 
   #endif
           // do coarsen 
           ((helement_t *)connect.nb[0])->docoarsen(ncv,nconfDeg,rest_el);
-          assert( didcoarse );
+          alugrid_assert ( didcoarse );
           lcancoarsen=1;
         }
       }
@@ -885,9 +885,9 @@ namespace ALU2DGrid
     const int numVx = numvertices();
     for(int nv=1; nv<numVx; ++nv )
     {
-      assert( child[ nv - 1 ] );
+      alugrid_assert ( child[ nv - 1 ] );
       child[ nv ] = ((helement_t *) child[ nv - 1 ])->next();
-      assert( child[ nv ] );
+      alugrid_assert ( child[ nv ] );
     }
 
     // check whether coarsening this element would violate conformity rules?
@@ -916,7 +916,7 @@ namespace ALU2DGrid
       // administration of hanging nodes
       for (int i=0; i<numfaces(); ++i) {
         // we have children, so we may not have a hanging nodes
-        assert(!hashvtx(i));
+        alugrid_assert (!hashvtx(i));
 
         if (nbel(i)) {
           if (!(nbel(i)->leaf())) {
@@ -928,7 +928,7 @@ namespace ALU2DGrid
             connect.hvtx[i]->nbconnect(opposite(i),this,i);
           } else {
             // neighbor is leaf, so remove the hanging node
-            assert(nbel(i)->hashvtx(opposite(i)));
+            alugrid_assert (nbel(i)->hashvtx(opposite(i)));
             nbel(i)->removehvtx(opposite(i),child[mod(i+1)]->vertex(i+2));
           }
         }
@@ -984,7 +984,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Bndel_triang < N,NV >::restrictLocal(bndel_t **pbel, int pnr)
   {
-    assert(   ((Bndel_triang *)(pbel[0]))->time
+    alugrid_assert (   ((Bndel_triang *)(pbel[0]))->time
         == ((Bndel_triang *)(pbel[1]))->time);
 
     time = ((Bndel_triang *)(pbel[0]))->time; 
@@ -1008,12 +1008,12 @@ namespace ALU2DGrid
     int idx[2];
     IndexProvider * hdl = this->gethdl();
 
-    assert(sr == thinelement_t::triang_bnd);
-    assert(splitrule() == thinelement_t::unsplit);
+    alugrid_assert (sr == thinelement_t::triang_bnd);
+    alugrid_assert (splitrule() == thinelement_t::unsplit);
     mysplit = thinelement_t::triang_bnd;
 
     // create new elements
-    assert(ncv);
+    alugrid_assert (ncv);
     bndel_t *t1=create(connect.vtx[0],ncv->vtx,bndel_t::typ);
     bndel_t *t2=create(ncv->vtx,connect.vtx[1],bndel_t::typ);
 
@@ -1070,7 +1070,7 @@ namespace ALU2DGrid
   int Bndel_triang < N,NV >::docoarsen(nconf_vtx_t *ncv,
             int nconfDeg,restrict_basic_t *rest_el)
   {
-    assert(splitrule() == thinelement_t::triang_bnd);
+    alugrid_assert (splitrule() == thinelement_t::triang_bnd);
 
     // Daten auf dem Rand restringieren
     bndel_t *bel[2];
@@ -1088,7 +1088,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Bndel_periodic < N,NV >::write(std::ostream &out) const
   {
-    assert( periodic_nb );
+    alugrid_assert ( periodic_nb );
     out << bndel_t::general_periodic << "  ";
     connect.write(out);
 
@@ -1122,8 +1122,8 @@ namespace ALU2DGrid
                                      Refco::tag_t default_ref,
                                      prolong_basic_t *pro_el)
   {
-    assert(sr == thinelement_t::triang_bnd);
-    assert(splitrule() == thinelement_t::unsplit);
+    alugrid_assert (sr == thinelement_t::triang_bnd);
+    alugrid_assert (splitrule() == thinelement_t::unsplit);
 
     // split
     bndel_triang_t::split(el,agnc,mva,ncv,thinelement_t::triang_bnd,nconfDeg,default_ref,pro_el);
@@ -1199,8 +1199,8 @@ namespace ALU2DGrid
       // can we coarsen the "opposite" boundary?
       if (periodic_nb->opposite(0)!=0)
         return 0;
-      assert(periodic_nb->nbel(0));
-      assert(!(periodic_nb->nbel(0)->leaf()));
+      alugrid_assert (periodic_nb->nbel(0));
+      alugrid_assert (!(periodic_nb->nbel(0)->leaf()));
 
       helement_t *h=periodic_nb->nbel(0)->down();
       while (h) {
@@ -1214,8 +1214,8 @@ namespace ALU2DGrid
       // we can coarsen!
       bndel_triang_t::docoarsen(ncv,nconfDeg,rest_el);  
       periodic_nb->nbel(0)->coarse(ncv,nconfDeg,rest_el);
-      assert(periodic_nb->nbel(0)->leaf());
-      assert(periodic_nb->leaf());  
+      alugrid_assert (periodic_nb->nbel(0)->leaf());
+      alugrid_assert (periodic_nb->leaf());  
     } else
       bndel_triang_t::docoarsen(ncv,nconfDeg,rest_el);
     
