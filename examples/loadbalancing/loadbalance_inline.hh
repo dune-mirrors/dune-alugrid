@@ -50,6 +50,16 @@ ZoltanLoadBalanceHandle(const Grid &grid)
   ** partition 0, process rank 1 will own partition 1, and so on.
   ******************************************************************/
 }
+template <class Grid>
+ZoltanLoadBalanceHandle<Grid>::
+~ZoltanLoadBalanceHandle()
+{
+  free(hg_.nborGID); 
+  free(hg_.nborIndex);
+  free(hg_.edgeGID);
+  free(hg_.vtxGID);
+  Zoltan_Destroy(&zz_);
+}
 
 /********************************************************************************
  * This method is called in the repartition callback function.
@@ -102,7 +112,7 @@ generateHypergraph()
 	  // Find if element is candidate for user-defined partitioning:
     // we keep the center on one process...
 	  typename Entity::Geometry::GlobalCoordinate c = entity.geometry().center();
-	  if (r.two_norm() < 0.5)
+	  if (c.two_norm() < 0.5)
 	  {
 	    for (int i=0; i<NUM_GID_ENTRIES; ++i)
 	    {
@@ -168,21 +178,14 @@ generateHypergraph()
   free(tempEdgeGID);
   free(tempVtxGID);
 }
-ZoltanLoadBalanceHandle<Grid>::
-~ZoltanLoadBalanceHandle()
-  free(hg_.nborGID); 
-  free(hg_.nborIndex);
-  free(hg_.edgeGID);
-  free(hg_.vtxGID);
-  Zoltan_Destroy(zz_);
-}
+
 
 // implement the required zoltan callback functions
 template< class Grid >
 int ZoltanLoadBalanceHandle<Grid>::
 get_num_fixed_obj(void *data, int *ierr)
 {
-  HGRAPH_DATA *graph = (HGRAPH_DATA *)data;
+  HGraphData *graph = (HGraphData *)data;
   return graph->fixed_elmts.fixed_entities;
 }
 template< class Grid >
@@ -190,7 +193,7 @@ void ZoltanLoadBalanceHandle<Grid>::
 get_fixed_obj_list(void *data, int num_fixed_obj,
                    int num_gid_entries, ZOLTAN_ID_PTR fixed_gids, int *fixed_part, int *ierr)
 {
-  HGRAPH_DATA *graph = (HGRAPH_DATA *)data;
+  HGraphData *graph = (HGraphData *)data;
   *ierr = ZOLTAN_OK;
 
   for (int i=0; i<num_fixed_obj*num_gid_entries; i++)
@@ -209,7 +212,7 @@ template< class Grid >
 int ZoltanLoadBalanceHandle<Grid>::
 get_number_of_vertices(void *data, int *ierr)
 {
-  HGRAPH_DATA *temphg = (HGRAPH_DATA *)data;
+  HGraphData *temphg = (HGraphData *)data;
   *ierr = ZOLTAN_OK;
   return temphg->numMyVertices;
 }
@@ -222,7 +225,7 @@ get_vertex_list(void *data, int sizeGID, int sizeLID,
 {
   int i;
 
-  HGRAPH_DATA *temphg= (HGRAPH_DATA *)data;
+  HGraphData *temphg= (HGraphData *)data;
   *ierr = ZOLTAN_OK;
 
   for (i=0; i<temphg->numMyVertices*sizeGID; i++)
@@ -241,7 +244,7 @@ void ZoltanLoadBalanceHandle<Grid>::
 get_hypergraph_size(void *data, int *num_lists, int *num_nonzeroes,
                     int *format, int *ierr)
 {
-  HGRAPH_DATA *temphg = (HGRAPH_DATA *)data;
+  HGraphData *temphg = (HGraphData *)data;
   *ierr = ZOLTAN_OK;
 
   *num_lists = temphg->numMyHEdges;
@@ -260,7 +263,7 @@ get_hypergraph(void *data, int sizeGID, int num_edges, int num_nonzeroes,
 {
   int i;
 
-  HGRAPH_DATA *temphg = (HGRAPH_DATA *)data;
+  HGraphData *temphg = (HGraphData *)data;
   *ierr = ZOLTAN_OK;
 
   if ( (num_edges != temphg->numMyHEdges) || (num_nonzeroes != temphg->numAllNbors) ||
