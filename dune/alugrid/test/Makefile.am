@@ -1,3 +1,5 @@
+SUBDIRS = dgf
+
 check_PROGRAMS = test-alugrid
 TESTS = test-alugrid
 

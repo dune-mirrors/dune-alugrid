@@ -35,14 +35,17 @@ void method ( int startLevel, int maxLevel, const char* outpath )
 {
   typedef Dune::GridSelector::GridType Grid;
   /* Grid construction ... */
-  std::string name = "./unitcube3d.dgf" ;
+  std::string name = "../dgf/unitcube3d.dgf" ;
   // create grid pointer and release to free memory of GridPtr
   Grid* gridPtr = Dune::GridPtr<Grid>(name).release() ;
 
   Grid &grid = *gridPtr;
 
-  // typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
+#if HAVE_ZOLTAN && USE_ZOLTANLB
   typedef ZoltanLoadBalanceHandle<Grid> LoadBalancer;
+#else
+  typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
+#endif
   LoadBalancer ldb(grid);
 
   {

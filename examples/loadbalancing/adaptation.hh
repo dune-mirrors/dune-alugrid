@@ -9,7 +9,6 @@
 #include <dune/grid/utility/persistentcontainer.hh>
 
 #include "../datamap.hh"
-#include "loadbalance.hh"
 
 
 // GridMarker
