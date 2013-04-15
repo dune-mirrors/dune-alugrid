@@ -365,6 +365,7 @@ namespace ALUGrid
 
     void pack( const int rank, ObjectStream& os ) 
     {
+      assert( rank == _me );
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
 
       const int estimate = 0.25 * w.size() + 1;

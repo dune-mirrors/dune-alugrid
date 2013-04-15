@@ -502,7 +502,7 @@ namespace ALUGrid
                             const int tag,
                             const int maxMesg )
       : _mpAccess( mpAccess ),
-        _nLinks( maxMesg ),
+        _nLinks( maxMesg+1 ), // we need one element more 
         _tag( tag ),
         _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
         _needToSend( false )
@@ -736,27 +736,31 @@ namespace ALUGrid
       const int np = _mpAccess.psize();
       const int totalMesg = np-1 ;
 
-      // write rank from where message started at the beginning of the stream 
+      // write rank from where message originally came at the beginning of the stream 
       sendBuffers[ 0 ].writeObject( me );
       // pack own data 
-      dataHandle.pack( 0, sendBuffers[ 0 ] );
+      dataHandle.pack( me, sendBuffers[ 0 ] );
 
       // ring structure receive from previous and send to next 
-      const int dest   = (me == totalMesg) ? 0    : me + 1; 
       const int source = (me == 0)    ? totalMesg : me - 1; 
+      const int dest   = (me == totalMesg) ? 0    : me + 1; 
 
       // send first message 
       sendLink( 0, dest, tag, sendBuffers[ 0 ], comm );
 
-      int totalRecv = 0 ;
+      // we need one receive buffer 
+      ObjectStream recvBuff ;
+
+      // get received vector 
+      std::vector< bool > linkReceived( _nLinks, false );
+
+      int totalRecv = 0 ; // number of messages already handled  
+      int msgSent   = 1 ; // number of messages already sent 
       while( totalRecv < totalMesg )
       {
-        const int nLinks = ( (totalRecv + _nLinks) <= totalMesg ) ? _nLinks : totalMesg - totalRecv ;
-        // get received vector 
-        std::vector< bool > linkReceived( nLinks, false );
+        const int nLinks = ( (totalRecv + _nLinks - 1) <= totalMesg ) ? _nLinks-1 : totalMesg - totalRecv ;
+        assert( nLinks < _nLinks );
 
-        // we need one receive buffer 
-        ObjectStream  recvBuff ;
         int received = 0 ;
         while( received < nLinks ) 
         {
@@ -770,12 +774,14 @@ namespace ALUGrid
                 // send to next process with increased link number 
                 int link = l+1;
                 // only if we are not the last receiver 
-                if( link < nLinks ) 
+                if( msgSent < totalMesg ) 
                 {
+                  assert( link < int(sendBuffers.size()) );
                   ObjectStream& sendBuff = sendBuffers[ link ];
                   sendBuff.clear();
                   sendBuff.writeStream( recvBuff );
                   sendLink( link, dest, tag+link, sendBuff, comm );
+                  ++ msgSent ;
                 }
 
                 int rank; 
@@ -787,8 +793,9 @@ namespace ALUGrid
                 // reset read-write position
                 recvBuff.clear();
 
-                ++received ;
                 linkReceived[ l ] = true ;
+                // increase counters 
+                ++received ;
                 ++totalRecv ;
               }
             }
@@ -805,6 +812,9 @@ namespace ALUGrid
           assert (test == MPI_SUCCESS);
           delete [] sta;
         }
+
+        // reset received vector 
+        for( int i=0; i<_nLinks; ++ i ) linkReceived[ i ] = false ;
 
         // increase msg tags 
         tag += nLinks ;
@@ -919,8 +929,10 @@ namespace ALUGrid
   {
     // note: for the non-blocking exchange the message tag 
     // should be different each time to avoid MPI problems 
-    const int links = psize()-1;
-    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag( links ), links );
+    const int maxMsg = psize()-1;
+    // 512 is the max number of simultaneously messages that we allow 
+    // due to memory restrictions 
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag( maxMsg ), 512 );
     nonBlockingExchange.allToAll( handle );
   }
 
