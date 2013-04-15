@@ -189,6 +189,8 @@ namespace ALUGrid
                    mth != ZOLTAN_LB_HSFC;
           }
 
+          static bool initializeZoltan( const method mth );
+
           static const char *methodToString( method );
 
           DataBase ();

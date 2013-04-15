@@ -1640,6 +1640,9 @@ namespace ALUGrid
     _ldbUnder  = buff[ 1 ];
     _ldbMethod = (LoadBalancer::DataBase::method ) buff[ 2 ];
 
+    // we possibly need to initialize zoltan at some point - we will do it here...
+    LoadBalancer::DataBase::initializeZoltan( _ldbMethod );
+
     // wait for all to finish 
 #ifndef NDEBUG
     mpa.barrier();

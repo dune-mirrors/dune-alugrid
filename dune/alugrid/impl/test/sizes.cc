@@ -13,11 +13,6 @@
 // include serial part of ALUGrid 
 #include <dune/alugrid/3d/alu3dinclude.hh>
 
-#if HAVE_ZOLTAN
-#define ZOLTAN_CONFIG_H_INCLUDED
-#include <zoltan.h>
-#endif
-
 #ifdef MPICPP
 #error
 #endif
@@ -234,10 +229,6 @@ int main (int argc, char ** argv, const char ** envp)
 {
 #if PARALLEL
   MPI_Init(&argc,&argv);
-#if HAVE_ZOLTAN 
-  float version ;
-  Zoltan_Initialize(argc, argv, &version);
-#endif
 #endif
 
   int mxl = 0, glb = 0; 

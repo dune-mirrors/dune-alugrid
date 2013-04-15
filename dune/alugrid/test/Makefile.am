@@ -1,6 +1,7 @@
-check_PROGRAMS = test-alugrid
-TESTS = test-alugrida
 SUBDIRS = dgf
+
+check_PROGRAMS = test-alugrid
+TESTS = test-alugrid
 
 test_alugrid_SOURCES = test-alugrid.cc
 test_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
