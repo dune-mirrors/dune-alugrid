@@ -8,10 +8,6 @@
 
 #include <dune/common/fvector.hh>
 
-#if HAVE_DUNE_FEM_DG
-#include "mhdfluxes.hh"
-#endif
-
 #include "problem.hh"
 
 /** \class EulerProblemData1

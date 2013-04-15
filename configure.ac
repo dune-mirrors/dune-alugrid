@@ -26,12 +26,12 @@ AC_CONFIG_FILES([
   dune/alugrid/impl/serial/Makefile
   dune/alugrid/impl/test/Makefile
   dune/alugrid/test/Makefile
+  dune/alugrid/test/dgf/Makefile
   lib/Makefile
   m4/Makefile
   examples/Makefile
   examples/dgf/Makefile
   examples/loadbalancing/Makefile
-  examples/zoltan/Makefile
   dune-alugrid.pc
 ])
 

@@ -1515,6 +1515,8 @@ namespace ALUGrid
   {
     if( !  _ldbVerticesComputed ) 
       computeGraphVertexIndices ();
+    else
+      exchangeStaticState ();
   }
 
   void GitterPll::computeGraphVertexIndices () 
@@ -1557,7 +1559,7 @@ namespace ALUGrid
     
     // mark unique element indices as computed, if serialPartitioner is used
     // don't do this computation again for serial partitioning 
-    _ldbVerticesComputed = serialPartitioner(); 
+    _ldbVerticesComputed = true; // serialPartitioner(); 
     
     // clear graphSize vector since the new numbering leads to different sizes
     std::vector< int >().swap( _graphSizes );
@@ -1637,6 +1639,9 @@ namespace ALUGrid
     _ldbOver   = buff[ 0 ];
     _ldbUnder  = buff[ 1 ];
     _ldbMethod = (LoadBalancer::DataBase::method ) buff[ 2 ];
+
+    // we possibly need to initialize zoltan at some point - we will do it here...
+    LoadBalancer::DataBase::initializeZoltan( _ldbMethod );
 
     // wait for all to finish 
 #ifndef NDEBUG

@@ -9,14 +9,14 @@
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
 
-typedef Dune::GridSelector::GridType Grid;
-
 /** numerical scheme **/
 #include "../piecewisefunction.hh"
 
 /** adaptation scheme **/
+#include "loadbalance.hh"
 #include "adaptation.hh"
 
+template <class Grid>
 struct AssignRank
 {
   AssignRank(const int rank) : rank_(rank) {}
@@ -33,18 +33,25 @@ struct AssignRank
 // ------
 void method ( int startLevel, int maxLevel, const char* outpath )
 {
+  typedef Dune::GridSelector::GridType Grid;
   /* Grid construction ... */
-  std::string name = "./unitcube3d.dgf" ;
+  std::string name = "../dgf/unitcube3d.dgf" ;
   // create grid pointer and release to free memory of GridPtr
   Grid* gridPtr = Dune::GridPtr<Grid>(name).release() ;
 
   Grid &grid = *gridPtr;
 
+#if HAVE_ZOLTAN && USE_ZOLTANLB
+  typedef ZoltanLoadBalanceHandle<Grid> LoadBalancer;
+#else
+  typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
+#endif
+  LoadBalancer ldb(grid);
+
   {
-    LoadBalanceHandle<Grid> ldb(grid);
-    typedef Dune::LoadBalanceHandleIF< LoadBalanceHandle<Grid> > DataHandleInterface;
-    // grid.loadBalance( (DataHandleInterface&)(ldb) );
-    grid.loadBalance();
+    typedef Dune::LoadBalanceHandleIF< LoadBalancer > DataHandleInterface;
+    grid.loadBalance( (DataHandleInterface&)(ldb) );
+    // grid.loadBalance();
   }
 
   const bool verboseRank = grid.comm().rank() == 0 ;
@@ -64,7 +71,7 @@ void method ( int startLevel, int maxLevel, const char* outpath )
   /* construct data vector for solution */
   typedef PiecewiseFunction< GridView, Dune::FieldVector< double, 2 > > DataType;
   DataType solution( gridView );
-  solution.initialize( AssignRank(grid.comm().rank()) );
+  solution.initialize( AssignRank<Grid>(grid.comm().rank()) );
 
   /* create VTK writer for data sequqnce */
   Dune::VTKSequenceWriter< GridView > vtkOut( gridView, "solution", outPath, ".", Dune::VTK::nonconforming );
@@ -75,9 +82,7 @@ void method ( int startLevel, int maxLevel, const char* outpath )
   }
 
   /* create adaptation method */
-  typedef LoadBalanceHandle<Grid> LoadBalance;
-  LoadBalance ldb( grid );
-  typedef LeafAdaptation< Grid, LoadBalance > AdaptationType;
+  typedef LeafAdaptation< Grid, LoadBalancer > AdaptationType;
   AdaptationType adaptation( grid, ldb );
 
   if( writeOutput ) 
@@ -141,6 +146,16 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
+#if HAVE_ZOLTAN 
+  float version;
+  int rc = Zoltan_Initialize(argc, argv, &version);
+  if (rc != ZOLTAN_OK){
+    printf("sorry zoltan did not initialize successfully...\n");
+    MPI_Finalize();
+    exit(0);
+  }
+#endif
+
   if( argc < 1 )
   {
     /* display usage */

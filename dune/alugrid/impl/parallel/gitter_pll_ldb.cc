@@ -14,6 +14,12 @@
 #include "../serial/gitter_sti.h"
 #include "gitter_pll_ldb.h"
 
+#if HAVE_ZOLTAN 
+// #include <zoltan_cpp.h>
+extern int Zoltan_Initialize( int argc, char **argv, float *ver );
+#endif 
+
+
 namespace ALUGrid
 {
 
@@ -56,6 +62,19 @@ namespace ALUGrid
     std::cout << "INFO: LoadBalancer::DataBase::printLoad () [elt(max)|fce] ";
     std::cout << accVertexLoad () << " " << maxVertexLoad () << " " << accEdgeLoad () << std::endl;
   } 
+
+  bool LoadBalancer::DataBase::initializeZoltan( const method mth )
+  {
+#if HAVE_ZOLTAN
+    if (mth >= ZOLTAN_LB_HSFC && mth <= ZOLTAN_LB_PARMETIS)
+    {
+      float version;
+      Zoltan_Initialize((int)0,(char**)0, &version);
+      return true; // (rc == ZOLTAN_OK);
+    }
+#endif   
+    return true;
+  }
 
   void LoadBalancer::DataBase::
   graphCollect ( const MpAccessGlobal &mpa,

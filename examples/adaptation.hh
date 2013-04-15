@@ -3,6 +3,8 @@
 
 /** include the grid capabilities 
  ** to distiguish grids without local adaptation **/
+#include <dune/common/timer.hh>
+
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
 

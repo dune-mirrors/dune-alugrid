@@ -1,6 +1,8 @@
 #ifndef DUNE_FEM_DG_RUNFILE_HH
 #define DUNE_FEM_DG_RUNFILE_HH
 
+#include <dune/common/timer.hh>        
+
 #include "threadmanager.hh"
 
 #define PRINT_IDENTIFICATION_TIMES
@@ -386,7 +388,7 @@ namespace Dune {
 } // end namespace Dune 
 
 //! get memory in MB 
-static std::vector<double> getMemoryUsage()
+std::vector<double> getMemoryUsage()
 {
   std::vector<double> memUsage(2);
   struct rusage info;

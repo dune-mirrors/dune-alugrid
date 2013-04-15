@@ -267,7 +267,7 @@ namespace ALUGridZoltan
       zz->Set_Param( "GRAPH_SYMMETRIZE","NONE" ); 
       // zz->Set_Param( "GRAPH_SYMMETRIZE","TRANSPOSE");
       zz->Set_Param( "GRAPH_SYM_WEIGHT","MAX");
-      zz->Set_Param( "GRAPH_BUILD_TYPE","FAST_NO_DUP");
+      // zz->Set_Param( "GRAPH_BUILD_TYPE","FAST_NO_DUP");
 #ifdef HAVE_PARMETIS
       if (method == PARMETIS)
         zz->Set_Param( "GRAPH_PACKAGE","PARMETIS");

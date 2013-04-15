@@ -29,7 +29,7 @@ namespace Dune
       return asImp().userDefinedLoadWeights();
     }
     // returns true if user defined partitioning needs to be readjusted 
-    bool repartition () const 
+    bool repartition () 
     { 
       CHECK_INTERFACE_IMPLEMENTATION((asImp().repartition()));
       return asImp().repartition();

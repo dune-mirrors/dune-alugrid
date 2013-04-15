@@ -1,14 +1,16 @@
 GRIDTYPE = ALUGRID_CUBE
 GRIDDIM = 3
 
-EXTRA_DIST = *.dgf *.cfg
+EXTRA_DIST = *.cfg
 
 DATACLEANFILES = dgfparser.log
 CLEANFILES = $(DATACLEANFILES)
 
 exampleslbdir = $(includedir)/examples/loadbalanacing
 exampleslb_HEADERS = \
-  adaptation.hh  loadbalance.hh
+  adaptation.hh  loadbalance.hh loadbalance_inline.hh
+
+headercheck_IGNORE = loadbalance_inline.hh
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
