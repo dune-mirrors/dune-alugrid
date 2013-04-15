@@ -9,10 +9,6 @@
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
 
-#if HAVE_ZOLTAN 
-#include <zoltan_cpp.h>
-#endif
-
 /** numerical scheme **/
 #include "piecewisefunction.hh"
 #include "fvscheme.hh"
@@ -234,11 +230,6 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
-#if HAVE_ZOLTAN 
-  float version;
-  Zoltan_Initialize(argc, argv, &version);
-#endif
-
   if( argc < 2 )
   {
     /* display usage */
