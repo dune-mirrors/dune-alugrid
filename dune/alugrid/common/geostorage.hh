@@ -59,7 +59,7 @@ namespace Dune
                                    const GeometryType& type,
                                    const bool nonConform )
       {
-        assert ( nonConform ) ;
+        alugrid_assert ( nonConform ) ;
         {
           typedef ALUGrid< 3, 3, simplex, nonconforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
@@ -83,7 +83,7 @@ namespace Dune
                                    const GeometryType& type,
                                    const bool nonConform )
       {
-        assert ( nonConform ) ;
+        alugrid_assert ( nonConform ) ;
         {
           typedef ALUGrid< 2, dimworld, cube, nonconforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
@@ -99,7 +99,7 @@ namespace Dune
                                    const GeometryType& type,
                                    const bool nonConform )
       {
-        assert( nonConform );
+        alugrid_assert ( nonConform );
         {
           typedef ALUGrid< 3, 3, cube, nonconforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
@@ -125,7 +125,7 @@ namespace Dune
     // return reference to local geometry
     const GeometryImpl & operator [] (int child) const
     {
-      assert( geomCreated(child) );
+      alugrid_assert ( geomCreated(child) );
       return *(geoms_[child]);
     }
 
@@ -209,10 +209,10 @@ namespace Dune
                   const Geometry &son, 
                   const int child )
     {
-      assert( !geomCreated( child ) );
-      assert( (child >= 0) && (child < nChild) );
+      alugrid_assert ( !geomCreated( child ) );
+      alugrid_assert ( (child >= 0) && (child < nChild) );
 
-      assert( (count_ < nChild) );
+      alugrid_assert ( (count_ < nChild) );
       ++count_;
 
       geoms_[ child ] = new GeometryImpl();
@@ -233,7 +233,7 @@ namespace Dune
       // create static variable on heap
       static ThisType instance( type, nonConforming );
       // make sure the geometry type is the same 
-      assert( type == instance[ child ].type() );
+      alugrid_assert ( type == instance[ child ].type() );
       return instance[ child ];
     }
   };  

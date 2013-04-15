@@ -42,7 +42,7 @@ namespace Dune
   {
     int ret = (nrInChild==0) ? (2-nrOfChild)
               : ((nrInChild-nrOfChild==2 || nrInChild-nrOfChild==0) ? -1 : 0);
-    assert(ret >= -1 && ret < 3);
+    alugrid_assert (ret >= -1 && ret < 3);
     return ret;
   }
 
@@ -53,7 +53,7 @@ namespace Dune
     ::getOppositeInChild ( const int nrInFather, const int nrOfChild )
   {
     int ret = (nrInFather==0) ? (nrOfChild+1) : ((nrInFather-nrOfChild==1) ? -1 : 0);
-    assert( ret >= -1 && ret < 3 );
+    alugrid_assert ( ret >= -1 && ret < 3 );
     return ret;
   }
 
@@ -62,10 +62,10 @@ namespace Dune
   alu2d_inline 
   void ALU2dGridLevelIntersectionIterator< GridImp >::addNeighboursToStack ()
   {
-    assert( current.index_ < current.nFaces() );
+    alugrid_assert ( current.index_ < current.nFaces() );
 
     ThinelementType *neighbor = current.inside()->neighbour( current.index_ );
-    assert( neighbor );
+    alugrid_assert ( neighbor );
 
     IntersectionInfo info;
     if( neighbor->thinis( ThinelementType::bndel_like ) )
@@ -75,22 +75,22 @@ namespace Dune
         return;
 
       PeriodicBndElType *bndnb = ((PeriodicBndElType *)bndel)->periodic_nb;
-      assert( bndnb && bndnb->neighbour( 0 ) && bndnb->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+      alugrid_assert ( bndnb && bndnb->neighbour( 0 ) && bndnb->neighbour( 0 )->thinis( ThinelementType::element_like ) );
       info.first = (HElementType *)bndnb->neighbour( 0 );
       info.second = bndnb->opposite( 0 );
     }
     else
     {
-      assert( neighbor->thinis( ThinelementType::element_like ) );
+      alugrid_assert ( neighbor->thinis( ThinelementType::element_like ) );
       info.first = (HElementType *)neighbor;
       info.second = current.inside()->opposite( current.index_ );
     }
-    assert( info.first );
+    alugrid_assert ( info.first );
 
     while( info.first->level() > walkLevel_ )
     {
       info.second = getOppositeInFather( info.second, info.first->childNr() );
-      assert( (info.second >= 0) && (info.second < current.nFaces()) );
+      alugrid_assert ( (info.second >= 0) && (info.second < current.nFaces()) );
       info.first = info.first->father();
     }
 
@@ -104,13 +104,13 @@ namespace Dune
     while( info.first && (info.first->level() < walkLevel_ - 1) )
     {
       info.second = getOppositeInFather( info.second, info.first->childNr() );
-      assert( (info.second >= 0) && (info.second < current.nFaces()) );
+      alugrid_assert ( (info.second >= 0) && (info.second < current.nFaces()) );
       info.first = info.first->father();
     }      
 
     if( info.first )
     {
-      assert( info.first->level() == walkLevel_ - 1 );
+      alugrid_assert ( info.first->level() == walkLevel_ - 1 );
 
       const int opposite = info.second;
       for( info.first = info.first->down(); info.first; info.first = info.first->next() )
@@ -127,7 +127,7 @@ namespace Dune
   alu2d_inline 
   void ALU2dGridLevelIntersectionIterator< GridImp >::doIncrement ()
   {
-    assert( current.index_ < current.nFaces() );
+    alugrid_assert ( current.index_ < current.nFaces() );
 
     this->unsetUp2Date();
     
@@ -136,7 +136,7 @@ namespace Dune
       ++current.index_;
       if( current.index_ >= current.nFaces() )
       {
-        assert( current.index_ == current.nFaces() );
+        alugrid_assert ( current.index_ == current.nFaces() );
         return;
       }
       
@@ -150,7 +150,7 @@ namespace Dune
 
     setupIntersection();
 
-    assert( !current.outside() || (current.outside()->level() == walkLevel_) );
+    alugrid_assert ( !current.outside() || (current.outside()->level() == walkLevel_) );
   }
 
 
@@ -168,7 +168,7 @@ namespace Dune
     
     walkLevel_ = wLevel;
     
-    assert( current.inside() );
+    alugrid_assert ( current.inside() );
 
     increment();
   }
@@ -178,7 +178,7 @@ namespace Dune
   alu2d_inline 
   void ALU2dGridLevelIntersectionIterator< GridImp >::setupIntersection ()
   {
-    assert( !nbStack_.empty() );
+    alugrid_assert ( !nbStack_.empty() );
 
     IntersectionInfo &info = nbStack_.top();
     current.setOutside( info.first, info.second );
@@ -195,7 +195,7 @@ namespace Dune
   alu2d_inline 
   void ALU2dGridLeafIntersectionIterator< GridImp >::doIncrement ()
   {  
-    assert( current.index_ < current.nFaces() );
+    alugrid_assert ( current.index_ < current.nFaces() );
 
     this->unsetUp2Date();
 
@@ -206,12 +206,12 @@ namespace Dune
     ++current.index_;
     if( current.index_ >= current.nFaces())
     {
-      assert( current.index_ == current.nFaces() );
+      alugrid_assert ( current.index_ == current.nFaces() );
       return;
     }
 
     ThinelementType *neighbor = current.inside()->neighbour( current.index_ );
-    assert( neighbor );
+    alugrid_assert ( neighbor );
 
     if( neighbor->thinis( ThinelementType::bndel_like ) )
     {
@@ -223,7 +223,7 @@ namespace Dune
       }
 
       PeriodicBndElType *bndnb = ((PeriodicBndElType *)bndel)->periodic_nb;
-      assert( bndnb && bndnb->neighbour( 0 ) && bndnb->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+      alugrid_assert ( bndnb && bndnb->neighbour( 0 ) && bndnb->neighbour( 0 )->thinis( ThinelementType::element_like ) );
       current.useOutside_ = !bndnb->leaf();
       if( current.useOutside_ )
       {
@@ -231,15 +231,15 @@ namespace Dune
         
         // insert left intersection
         HBndElType *left = bndnb->down();
-        assert( left && left->leaf() );
-        assert( left->neighbour( 0 ) && left->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+        alugrid_assert ( left && left->leaf() );
+        alugrid_assert ( left->neighbour( 0 ) && left->neighbour( 0 )->thinis( ThinelementType::element_like ) );
         info.first = (HElementType *)left->neighbour( 0 );
         info.second = left->opposite( 0 );
         nbStack_.push( info );
 
         HBndElType *right = left->next();
-        assert( right && right->leaf() );
-        assert( right->neighbour( 0 ) && right->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+        alugrid_assert ( right && right->leaf() );
+        alugrid_assert ( right->neighbour( 0 ) && right->neighbour( 0 )->thinis( ThinelementType::element_like ) );
         info.first = (HElementType *)right->neighbour( 0 );
         info.second = right->opposite( 0 );
         nbStack_.push( info );
@@ -259,18 +259,18 @@ namespace Dune
         
         // insert left intersection
         ThinelementType *left = current.inside()->getLeftIntersection( current.index_ );
-        assert( left && left->thinis( ThinelementType::element_like ) );
+        alugrid_assert ( left && left->thinis( ThinelementType::element_like ) );
         info.first = (HElementType *)left;   // neighbor
         info.second = opposite;              // opposite vertex
-        assert( info.first->leaf() );
+        alugrid_assert ( info.first->leaf() );
         nbStack_.push( info );
 
         // insert right intersection
         ThinelementType *right = current.inside()->getRightIntersection( current.index_ );
-        assert( right && right->thinis( ThinelementType::element_like ) );
+        alugrid_assert ( right && right->thinis( ThinelementType::element_like ) );
         info.first = (HElementType *)right;  // neighbor
         info.second = opposite;              // opposite vertex
-        assert( info.first->leaf() );
+        alugrid_assert ( info.first->leaf() );
         nbStack_.push( info );
 
         setupIntersection();
@@ -290,7 +290,7 @@ namespace Dune
     
     current.setInside( const_cast< HElementType * >( &elem ) );
     current.index_ = -1;  
-    assert( current.inside() );
+    alugrid_assert ( current.inside() );
     walkLevel_ = wLevel;
     increment();
   }
@@ -300,7 +300,7 @@ namespace Dune
   alu2d_inline 
   void ALU2dGridLeafIntersectionIterator< GridImp >::setupIntersection ()
   {
-    assert( !nbStack_.empty() );
+    alugrid_assert ( !nbStack_.empty() );
 
     IntersectionInfo &info = nbStack_.top();
     current.setOutside( info.first, info.second );

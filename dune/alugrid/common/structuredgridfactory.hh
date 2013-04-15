@@ -83,7 +83,7 @@ namespace Dune
       template< class Entity >
       int rank( const Entity &entity ) const
       {
-        assert( Entity::codimension == 0 );
+        alugrid_assert ( Entity::codimension == 0 );
         return rank( (int)indexSet_.index( entity ) );
       }
 
@@ -141,7 +141,7 @@ namespace Dune
           }
 
           const size_t index = indexSet_.index( element );
-          assert( rank < nRanks );
+          alugrid_assert ( rank < nRanks );
           partition_[ index ] = rank ;
 
           // increase counters 
@@ -302,7 +302,7 @@ namespace Dune
         // if the element does not belong to our partitioning, continue 
         if( partitioner.rank( entity ) != myrank ) continue ;
 
-        assert( numVertices == entity.template count< dim >() );
+        alugrid_assert ( numVertices == entity.template count< dim >() );
         for( int i = 0; i < numVertices; ++i )
         {
           const IndexType idx = indexSet.subIndex( entity, i, dim );
@@ -322,7 +322,7 @@ namespace Dune
         // if the element does not belong to our partitioning, continue 
         if( partitioner.rank( entity ) != myrank ) continue ;
 
-        assert( numVertices == entity.template count< dim >() );
+        alugrid_assert ( numVertices == entity.template count< dim >() );
         for( int i = 0; i < numVertices; ++i )
           vertices[ i ] = vertexId[ indexSet.subIndex( entity, i, dim ) ];
         factory.insertElement( entity.type(), vertices );

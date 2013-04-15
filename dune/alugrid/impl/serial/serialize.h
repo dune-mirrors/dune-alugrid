@@ -3,7 +3,7 @@
 #ifndef SERIALIZE_H_INCLUDED
 #define SERIALIZE_H_INCLUDED
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -57,7 +57,7 @@ namespace ALUGrid
     void seekp( const size_t pos ) 
     { 
       _wb = pos ; 
-      assert( _wb <= _len );
+      alugrid_assert ( _wb <= _len );
     }
 
     // return's true if size > 0 and read position is zero
@@ -130,7 +130,7 @@ namespace ALUGrid
     template <class T>
     inline void writeT (const T & a, const bool checkLength )  
     {
-      assert( _owner );
+      alugrid_assert ( _owner );
       const size_t ap = _wb;
       _wb += sizeof(T) ;
 
@@ -139,7 +139,7 @@ namespace ALUGrid
       {
         reallocateBuffer(_wb);
       }
-      assert( _wb <= _len );
+      alugrid_assert ( _wb <= _len );
 
       // call assignment operator of type T 
       static_cast<T &> (*((T *) getBuff(ap) )) = a;
@@ -157,7 +157,7 @@ namespace ALUGrid
 #ifndef NO_OBJECTSTREAM_DEBUG 
       if (_rb > _wb) throw EOFException () ;
 #endif
-      assert( _rb <= _wb );
+      alugrid_assert ( _rb <= _wb );
 
       // call assignment operator of type T 
       a = static_cast<const T &> (*((const T *) getBuff(ap) ));
@@ -192,7 +192,7 @@ namespace ALUGrid
 #ifndef NO_OBJECTSTREAM_DEBUG 
       if( _rb > _wb) throw EOFException () ;
 #endif
-      assert( _rb <= _wb );
+      alugrid_assert ( _rb <= _wb );
     }
    
     //! free allocated memory 
@@ -228,7 +228,7 @@ namespace ALUGrid
     // compatibility with ostream 
     inline void write(const char* buff, const size_t length )
     {
-      assert( _owner );
+      alugrid_assert ( _owner );
       if( length == 0 ) return ;
 
       const size_t newWb = _wb + length;
@@ -247,7 +247,7 @@ namespace ALUGrid
 #ifndef NO_OBJECTSTREAM_DEBUG 
       if (newRb > _wb) throw EOFException () ;
 #endif
-      assert( newRb <= _wb );
+      alugrid_assert ( newRb <= _wb );
       
       memcpy( buff, getBuff(_rb), length );
       _rb = newRb;
@@ -260,7 +260,7 @@ namespace ALUGrid
     // reallocated the buffer if necessary 
     inline void reallocateBuffer(size_t newSize) throw (OutOfMemoryException)
     {
-      assert( _owner );
+      alugrid_assert ( _owner );
       _len += _bufChunk; 
       if(_len < newSize) _len = newSize;
       _buf = (char *) realloc (_buf, _len) ;
@@ -281,7 +281,7 @@ namespace ALUGrid
     // assign buffer 
     inline void assign(const ObjectStreamImpl & os) throw (OutOfMemoryException)
     {
-      assert( _buf == 0 );
+      alugrid_assert ( _buf == 0 );
       if( os._len > 0 ) 
       {
         _len = os._len;
@@ -303,7 +303,7 @@ namespace ALUGrid
       if( length == 0 ) return ;
 
       // if length > 0, buff should be valid 
-      assert( buff );
+      alugrid_assert ( buff );
       
       // set length 
       _wb = _len = length;

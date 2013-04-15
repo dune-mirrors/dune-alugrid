@@ -434,9 +434,9 @@ namespace ALUGrid
 
     const bool haveVerticesOrEdges = containsVertices || containsEdges;
      
-    assert ((debugOption (5) && containsVertices) ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsVertices)=true " << std::endl, 1) : 1);
-    assert ((debugOption (5) && containsEdges)    ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsEdges)=true " << std::endl, 1) : 1);
-    assert ((debugOption (5) && containsFaces)    ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsFaces)=true " << std::endl, 1) : 1);
+    alugrid_assert ((debugOption (5) && containsVertices) ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsVertices)=true " << std::endl, 1) : 1);
+    alugrid_assert ((debugOption (5) && containsEdges)    ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsEdges)=true " << std::endl, 1) : 1);
+    alugrid_assert ((debugOption (5) && containsFaces)    ? (std::cout << "**INFO GitterDunePll::borderBorderComm (): (containsFaces)=true " << std::endl, 1) : 1);
      
     // buffers for vertex and edge master-slave communication
     std::map< vertex_STI*, DataBufferType > vertexCommMap;
@@ -583,9 +583,9 @@ namespace ALUGrid
       IteratorSTI < hface_STI > * iter , 
       GatherScatterType & elementData)
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     const bool containsElements = elementData.contains(3,0);
-    assert( containsElements );
+    alugrid_assert ( containsElements );
 #endif
     const int transmit = 1;
     for (iter->first (); ! iter->done (); iter->next ()) 
@@ -617,9 +617,9 @@ namespace ALUGrid
       IteratorSTI < hface_STI > * iter , 
       GatherScatterType & elementData )
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     const bool containsElements = elementData.contains(3,0);
-    assert( containsElements );
+    alugrid_assert ( containsElements );
 #endif
     
     for (iter->first (); ! iter->done (); iter->next ()) 
@@ -712,7 +712,7 @@ namespace ALUGrid
           {
             // get std::pair< ghost, local face num > 
             Gitter::ghostpair_STI gpair = bnd.first->getGhost();
-            assert( gpair.first );
+            alugrid_assert ( gpair.first );
 
             if (containsVertices) 
               gpair.first->VertexData2os( sendBuff , vertexData, gpair.second );
@@ -724,7 +724,7 @@ namespace ALUGrid
           
           if( containsElements ) 
           {
-            assert( bnd.first );
+            alugrid_assert ( bnd.first );
             bnd.first->writeDynamicState(sendBuff, elementData );
           }
 
@@ -783,7 +783,7 @@ namespace ALUGrid
 
           // get std::pair< ghost, local face num > 
           Gitter::ghostpair_STI gpair = p.first->getGhost();
-          assert( gpair.first );
+          alugrid_assert ( gpair.first );
         
           if( haveHigherCodimData )
           {
@@ -807,7 +807,7 @@ namespace ALUGrid
             p ( (Gitter::helement_STI *) 0, (Gitter::hbndseg_STI *) 0);
 
           pll.first->getAttachedElement( p );
-          assert( p.first );
+          alugrid_assert ( p.first );
 
           if( haveHigherCodimData )
           {
@@ -1108,10 +1108,10 @@ namespace ALUGrid
       return;
     }
      
-    assert ((debugOption (5) && containsVertices) ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsVertices)=true " << std::endl, 1) : 1);
-    assert ((debugOption (5) && containsEdges)    ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsEdges)=true " << std::endl, 1) : 1);
-    assert ((debugOption (5) && containsFaces)    ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsFaces)=true " << std::endl, 1) : 1);
-    assert ((debugOption (5) && containsElements) ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsElements)=true " << std::endl, 1) : 1);
+    alugrid_assert ((debugOption (5) && containsVertices) ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsVertices)=true " << std::endl, 1) : 1);
+    alugrid_assert ((debugOption (5) && containsEdges)    ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsEdges)=true " << std::endl, 1) : 1);
+    alugrid_assert ((debugOption (5) && containsFaces)    ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsFaces)=true " << std::endl, 1) : 1);
+    alugrid_assert ((debugOption (5) && containsElements) ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsElements)=true " << std::endl, 1) : 1);
      
     // create vector of message buffers 
     // this vector is created here, that the buffer is allocated only once 
@@ -1297,7 +1297,7 @@ namespace ALUGrid
 
             // get std::pair< ghost, local face num > 
             Gitter::ghostpair_STI gpair = p.first->getGhost();
-            assert( gpair.first );
+            alugrid_assert ( gpair.first );
 
             gpair.first->resetGhostIndices();
           }
@@ -1311,7 +1311,7 @@ namespace ALUGrid
 
             // get std::pair< ghost, local face num > 
             Gitter::ghostpair_STI gpair = p.first->getGhost();
-            assert( gpair.first );
+            alugrid_assert ( gpair.first );
 
             gpair.first->resetGhostIndices();
           }
@@ -1334,7 +1334,7 @@ namespace ALUGrid
   void GitterDunePll::restore ( std::istream &in ) 
   {
     typedef Gitter::Geometric::BuilderIF BuilderIF;
-    assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::restore (istream & = " << in << ") " << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::restore (istream & = " << in << ") " << std::endl, 1) : 1);
     {
       AccessIterator < hedge_STI >::Handle ew (container ());
       for (ew.first (); !ew.done (); ew.next ()) ew.item ().restore (in);
@@ -1352,7 +1352,7 @@ namespace ALUGrid
     // otherwise indices of ghost will be wrong 
     this->restoreIndices (in);
    
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     const int maxIndexBefore = this->indexManager(BuilderIF::IM_Elements).getMaxIndex();
 #endif
 
@@ -1367,7 +1367,7 @@ namespace ALUGrid
     }
     
     // max index should not be largen than before
-    assert( (this->indexManager(BuilderIF::IM_Elements).getMaxIndex() != maxIndexBefore) ?
+    alugrid_assert ( (this->indexManager(BuilderIF::IM_Elements).getMaxIndex() != maxIndexBefore) ?
         (std::cout << maxIndexBefore << " vor | nach " << this->indexManager(BuilderIF::IM_Elements).getMaxIndex() << "\n",0) : 1);
 
     duneNotifyGridChanges ();
@@ -1376,7 +1376,7 @@ namespace ALUGrid
 
   void GitterDunePll::duneRestore ( const char *fileName )
   {
-    assert (debugOption (20) ? 
+    alugrid_assert (debugOption (20) ? 
         (std::cout << "**INFO GitterDuneBasis::duneRestore (const char * = \""
               << fileName << "\") " << std::endl, 1) : 1);
                    

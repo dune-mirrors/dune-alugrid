@@ -57,7 +57,7 @@ namespace Dune
     bndVec_ ( bndVec ),
     vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
   {
-    assert(mygrid_);
+    alugrid_assert (mygrid_);
 
     // this feature is available in ALUGrid-1.15 
     if( vertexProjection_ )
@@ -325,7 +325,7 @@ namespace Dune
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline int ALU2dGrid< dim, dimworld, eltype >::size (int level, int cd) const 
   {
-    assert( sizeCache_ );
+    alugrid_assert ( sizeCache_ );
     return sizeCache_->size(level,cd);
   }
   
@@ -362,7 +362,7 @@ namespace Dune
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline int ALU2dGrid< dim, dimworld, eltype >::size (int codim) const 
   {
-    assert( sizeCache_ );
+    alugrid_assert ( sizeCache_ );
     return sizeCache_->size(codim);
   }
 
@@ -399,7 +399,7 @@ namespace Dune
   inline void ALU2dGrid< dim, dimworld, eltype >
     ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
-    assert( (refCount + maxLevel()) < MAXL ); 
+    alugrid_assert ( (refCount + maxLevel()) < MAXL ); 
     
     for( int count = refCount; count > 0; --count )
     {
@@ -556,7 +556,7 @@ namespace Dune
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline void ALU2dGrid< dim, dimworld, eltype >::makeGeomTypes()
   {
-    assert( eltype != ALU2DSPACE mixed ); // ?????????
+    alugrid_assert ( eltype != ALU2DSPACE mixed ); // ?????????
     const GeometryType :: BasicType basic = ( eltype == ALU2DSPACE triangle )?  
       GeometryType :: simplex : GeometryType::cube;
     // stored is the dim, where is the codim
@@ -607,9 +607,9 @@ namespace Dune
   ALU2dGrid< dim, dimworld, eltype >::levelIndexSet( int level ) const
   {
     // check if level fits in vector
-    assert( level >= 0 );
-    assert( levelIndexVec_.size() == MAXL );
-    assert( level < (int) levelIndexVec_.size() );
+    alugrid_assert ( level >= 0 );
+    alugrid_assert ( levelIndexVec_.size() == MAXL );
+    alugrid_assert ( level < (int) levelIndexVec_.size() );
 
     if( levelIndexVec_[level] == 0 )
       levelIndexVec_[level] = 
@@ -714,7 +714,7 @@ namespace Dune
       // if grid exists delete first 
       if( mygrid_ ) delete mygrid_;
       mygrid_ = new HmeshType (filename.c_str());
-      assert(mygrid_ != 0);
+      alugrid_assert (mygrid_ != 0);
     }
 
     // calculate new maxlevel 

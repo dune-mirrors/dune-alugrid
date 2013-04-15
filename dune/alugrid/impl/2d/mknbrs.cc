@@ -25,7 +25,7 @@ namespace ALU2DGrid
   void Hmesh_basic<N,NV>::makeneighbours ()
   {
   /*
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     int start = clock();
 #endif
   */
@@ -54,7 +54,7 @@ namespace ALU2DGrid
 
         for(int fce = 0; fce < numfce; ++fce)
         {
-          assert( e.numfacevertices(fce) == 2 );
+          alugrid_assert ( e.numfacevertices(fce) == 2 );
           key_t key(e.vertex(fce, 0), e.vertex(fce, 1));
           if( key.first < key.second )
             std::swap( key.first, key.second );
@@ -96,7 +96,7 @@ namespace ALU2DGrid
       }
 
     /*
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     float used = (float)(clock() - start)/(float)(CLOCKS_PER_SEC);
     std::cerr << "\n  Hmesh_basic::makeneighbours(?) resulted in " << count << " hits, ";
     std::cerr << m.size() << " faults, used time: " << (float)(used) << "\n" << std::endl;

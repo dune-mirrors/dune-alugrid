@@ -69,7 +69,7 @@ namespace Dune
 
     const MappingType& mapping() const 
     {
-      assert( valid() );
+      alugrid_assert ( valid() );
       return mapping_;
     }
 
@@ -96,7 +96,7 @@ namespace Dune
     void operator ++ () { ++ refCount_; }
 
     //! decrease reference count 
-    void operator -- () { assert( refCount_ > 0 ); --refCount_; }
+    void operator -- () { alugrid_assert ( refCount_ > 0 ); --refCount_; }
 
     //! return true if object has no references anymore 
     bool operator ! () const { return refCount_ == 0; }
@@ -116,7 +116,7 @@ namespace Dune
     // return true if geometry is affine 
     bool affine() const
     {
-      assert( valid() );
+      alugrid_assert ( valid() );
       return mapping().affine();
     }
 
@@ -237,7 +237,7 @@ namespace Dune
     template< class Geo, class LocalGeo >
     void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
     {
-      assert( localGeo.corners() == corners_ );
+      alugrid_assert ( localGeo.corners() == corners_ );
       // compute the local coordinates in father refelem
       FieldMatrix< alu2d_ctype, corners_, cdim > coord;
       for( int i = 0; i < corners_; ++i )
@@ -291,7 +291,7 @@ namespace Dune
     MyALU2dGridGeometryImpl () : BaseType( type() ) 
     {
       // if this assertion fails change factor in method det below 
-      assert( std::abs( referenceElement_.volume() - 0.5 ) < 1e-10 );
+      alugrid_assert ( std::abs( referenceElement_.volume() - 0.5 ) < 1e-10 );
     }
 
     GeometryType type () const
@@ -303,7 +303,7 @@ namespace Dune
     template< class Geo, class LocalGeo >
     void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
     {
-      assert( localGeo.corners() == corners_ );
+      alugrid_assert ( localGeo.corners() == corners_ );
       // compute the local coordinates in father refelem
       FieldMatrix< alu2d_ctype, corners_, cdim > coord;
       for( int i = 0; i < corners_; ++i )
@@ -317,7 +317,7 @@ namespace Dune
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
       // set volume to a fraction of the reference volume which is 0.5 
       volume_ = referenceElement_.volume() * ( localGeo.volume() / geo.volume() );
-      assert( (volume_ > 0.0) && (volume_ < referenceElement_.volume() ) );
+      alugrid_assert ( (volume_ > 0.0) && (volume_ < referenceElement_.volume() ) );
       valid_  = true ;
     }
 
@@ -367,7 +367,7 @@ namespace Dune
     template< class Geo, class LocalGeo >
     void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
     {
-      assert( localGeo.corners() == corners_ );
+      alugrid_assert ( localGeo.corners() == corners_ );
       // compute the local coordinates in father refelem
       FieldMatrix< alu2d_ctype, corners_, cdim > coord;
       for( int i = 0; i < corners_; ++i )
@@ -380,7 +380,7 @@ namespace Dune
       }
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
       volume_ = referenceElement_.volume() * ( localGeo.volume() / geo.volume() );
-      assert( (volume_ > 0.0) && (volume_ < referenceElement_.volume() ) );
+      alugrid_assert ( (volume_ > 0.0) && (volume_ < referenceElement_.volume() ) );
       valid_ = true ;
     }
 
@@ -436,7 +436,7 @@ namespace Dune
         myCorners_( 0 ) 
     {
       // make sure that bilinear mapping reserves more memory, othersize change 
-      assert( sizeof( BilinearMappingType ) >= sizeof( LinearMappingType ) );
+      alugrid_assert ( sizeof( BilinearMappingType ) >= sizeof( LinearMappingType ) );
     }
 
   public:
@@ -533,7 +533,7 @@ namespace Dune
         volume_ = referenceElement_.volume() * ( localGeo.volume() / geo.volume() );
       }
 
-      assert( (volume_ > 0.0) && (volume_ < 1.0) );
+      alugrid_assert ( (volume_ > 0.0) && (volume_ < 1.0) );
       valid_ = true ;
     }
 
@@ -558,31 +558,31 @@ namespace Dune
 
     const LinearMappingType &linearMapping () const 
     { 
-      assert( valid() );
+      alugrid_assert ( valid() );
       return static_cast< const LinearMappingType * >( &mapping_ ); 
     }
 
     LinearMappingType &linearMapping () 
     { 
-      assert( valid() );
+      alugrid_assert ( valid() );
       return static_cast< LinearMappingType * >( &mapping_ ); 
     }
 
     const BilinearMappingType &bilinearMapping () const 
     {
-      assert( valid() );
+      alugrid_assert ( valid() );
       return static_cast< const BilinearMappingType * >( &mapping_ ); 
     }
 
     BilinearMappingType &bilinearMapping () 
     { 
-      assert( valid() );
+      alugrid_assert ( valid() );
       return static_cast< BilinearMappingType * >( &mapping_ ); 
     }
 
     void updateMapping ( const int corners )
     {
-      assert( (corners == 3) || (corners == 4) );
+      alugrid_assert ( (corners == 3) || (corners == 4) );
       if( corners != myCorners_ )
       {
         destroyMapping();
@@ -759,7 +759,7 @@ namespace Dune
     // return reference to geometry implementation 
     GeometryImplType& geoImpl() const
     {
-      assert( geoImpl_ );
+      alugrid_assert ( geoImpl_ );
       return *geoImpl_;
     }
 

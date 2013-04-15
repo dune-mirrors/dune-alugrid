@@ -163,7 +163,7 @@ namespace ALUGrid
 
     // could better use MPI_gather here 
     std::vector< std::vector< int > > in = mpAccess ().gcollect (n);
-    assert (static_cast<int> (in.size ()) == np);
+    alugrid_assert (static_cast<int> (in.size ()) == np);
 
     if (me == 0) 
     {
@@ -198,7 +198,7 @@ namespace ALUGrid
 
   std::pair< IteratorSTI < Gitter::vertex_STI > *, IteratorSTI < Gitter::vertex_STI > * >
     GitterPll::MacroGitterPll::iteratorTT (const vertex_STI *, int i) {
-    assert (i < static_cast<int> (_vertexTT.size ()) );
+    alugrid_assert (i < static_cast<int> (_vertexTT.size ()) );
     return std::pair< IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > 
     (new listSmartpointer__to__iteratorSTI < vertex_STI > (_vertexTT [i].first), 
            new listSmartpointer__to__iteratorSTI < vertex_STI > (_vertexTT [i].second));
@@ -213,7 +213,7 @@ namespace ALUGrid
 
   std::pair< IteratorSTI < Gitter::hedge_STI > *, IteratorSTI < Gitter::hedge_STI > * >
     GitterPll::MacroGitterPll::iteratorTT (const hedge_STI *, int i) {
-    assert (i < static_cast<int> (_hedgeTT.size ()));
+    alugrid_assert (i < static_cast<int> (_hedgeTT.size ()));
     return std::pair< IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > 
     (new listSmartpointer__to__iteratorSTI < hedge_STI > (_hedgeTT [i].first),
            new listSmartpointer__to__iteratorSTI < hedge_STI > (_hedgeTT [i].second));
@@ -228,7 +228,7 @@ namespace ALUGrid
 
   std::pair< IteratorSTI < Gitter::hface_STI > *, IteratorSTI < Gitter::hface_STI > * >
     GitterPll::MacroGitterPll::iteratorTT (const hface_STI *, int i) {
-    assert (i < static_cast<int> (_hfaceTT.size ()));
+    alugrid_assert (i < static_cast<int> (_hfaceTT.size ()));
     return std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > 
     (new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].first),
      new listSmartpointer__to__iteratorSTI < hface_STI > (_hfaceTT [i].second));
@@ -293,9 +293,9 @@ namespace ALUGrid
     {
       try 
       {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
         const size_t expecetedSize = (_innerFaces[ link ].size() + _outerFaces[ link ].size() ) * sizeof( char );
-        assert( os.size() == (int)expecetedSize );
+        alugrid_assert ( os.size() == (int)expecetedSize );
 #endif
         {
           const hface_iterator iEnd = _innerFaces[ link ].end ();
@@ -359,7 +359,7 @@ namespace ALUGrid
       edgevec_t& edges = ( _firstLoop ) ? _innerEdges[ link ] : _outerEdges[ link ];
 
       // the edge sizes should match on both sides 
-      assert( os.size() == int( edges.size() * sizeof(char)) );
+      alugrid_assert ( os.size() == int( edges.size() * sizeof(char)) );
 
       const hedge_iterator iEnd = edges.end ();
       for (hedge_iterator i = edges.begin (); i != iEnd; ++i )
@@ -371,7 +371,7 @@ namespace ALUGrid
 
   bool GitterPll::refine () 
   {
-    assert (debugOption (5) ? (std::cout << "**INFO GitterPll::refine () " << std::endl, 1) : 1);
+    alugrid_assert (debugOption (5) ? (std::cout << "**INFO GitterPll::refine () " << std::endl, 1) : 1);
     const int nl = mpAccess ().nlinks ();
     bool state = false;
 
@@ -585,10 +585,10 @@ namespace ALUGrid
     {
       if( _firstLoop ) 
       {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
         const size_t expecetedSize = (_innerFaces[ link ].size() ) * sizeof( char );
         // the size of the received ObjectStream should be the faces  
-        assert( os.size() == (int)expecetedSize );
+        alugrid_assert ( os.size() == (int)expecetedSize );
 #endif
         cleanvector_t& cl = _clean[ link ];
 
@@ -603,16 +603,16 @@ namespace ALUGrid
           // get lockAndTry info 
           const bool locked = bool( os.get() );
 
-          assert (j != cl.end ()); 
+          alugrid_assert (j != cl.end ()); 
           (*j) &= locked && (*i)->accessOuterPllX ().first->lockAndTry ();
         } 
       }
       else 
       {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
         const size_t expecetedSize = (_outerFaces[ link ].size() ) * sizeof( char );
         // the size of the received ObjectStream should be the faces  
-        assert( os.size() == (int)expecetedSize );
+        alugrid_assert ( os.size() == (int)expecetedSize );
 #endif
         const hface_iterator iEnd = _outerFaces[ link ].end ();
         for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i )
@@ -754,7 +754,7 @@ namespace ALUGrid
         for (hedge_iterator i = _innerEdges[ link ].begin (); i != iEnd; ++i) 
         {
           hedge_STI* edge = (*i);
-          assert ( _clean.find ( edge ) != _clean.end ());
+          alugrid_assert ( _clean.find ( edge ) != _clean.end ());
 
           clean_t& a = _clean[ edge ];
           os.putNoChk( char( a.first) );
@@ -768,11 +768,11 @@ namespace ALUGrid
             // vermerkt werden. Dann wird kein zweiter Versuch unternommen.
           
             a.second = false;
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
             bool b = 
 #endif
               edge->unlockAndResume (a.first);
-            assert (b == a.first);
+            alugrid_assert (b == a.first);
           }
         }
 
@@ -806,7 +806,7 @@ namespace ALUGrid
           const bool locked = bool( os.get() );
           if( locked == false ) 
           {
-            assert ( _clean.find (*i) != cleanEnd );
+            alugrid_assert ( _clean.find (*i) != cleanEnd );
             _clean[ *i ].first = false;
           }
         }
@@ -822,11 +822,11 @@ namespace ALUGrid
           // Vollzug der Vergr"oberung wird durch den R"uckgabewert getestet.
         
           const bool unlock = bool( os.get() );
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
           bool b = 
 #endif
             (*i)->unlockAndResume ( unlock );
-          assert (b == unlock);
+          alugrid_assert (b == unlock);
         }
 
         // unpack dynamic state 
@@ -837,7 +837,7 @@ namespace ALUGrid
 
   void GitterPll::coarse () 
   {
-    assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::coarse () " << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::coarse () " << std::endl, 1) : 1);
     const int nl = mpAccess ().nlinks ();
 
     typedef std::vector< hedge_STI * >::iterator hedge_iterator;
@@ -1085,15 +1085,15 @@ namespace ALUGrid
     bool refined = false;
     bool needConformingClosure = false;
     const bool bisectionEnabled = conformingClosureNeeded();
-    assert( bisectionEnabled == mpAccess().gmax( bisectionEnabled ) );
+    alugrid_assert ( bisectionEnabled == mpAccess().gmax( bisectionEnabled ) );
 
     // loop until refinement leads to a conforming situation (conforming refinement only)
     do 
     {
       __STATIC_myrank = mpAccess ().myrank ();
       __STATIC_turn ++;
-      assert (debugOption (20) ? (std::cout << "**INFO GitterPll::adapt ()" << std::endl, 1) : 1);
-      assert (! iterators_attached ());
+      alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::adapt ()" << std::endl, 1) : 1);
+      alugrid_assert (! iterators_attached ());
 
       // call refine 
       refined |= refine ();
@@ -1109,10 +1109,10 @@ namespace ALUGrid
     // now do one coarsening step 
     coarse ();
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     needConformingClosure = 
       bisectionEnabled ? mpAccess().gmax( markForConformingClosure() ) : false;
-    assert( ! needConformingClosure );
+    alugrid_assert ( ! needConformingClosure );
 #endif
 
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
@@ -1232,7 +1232,7 @@ namespace ALUGrid
         if( endStream != MacroGridMoverIF :: ENDSTREAM )
         {
           std::cerr << "**ERROR: writeStaticState: inconsistent stream, got " << endStream << std::endl;
-          assert( false );
+          alugrid_assert ( false );
           abort();
         }
       } 
@@ -1248,7 +1248,7 @@ namespace ALUGrid
     // Zustand darf durch Verfeinerung und h"ohere Methoden nicht beeinflusst
     // sein.
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     const int start = clock () ;
 #endif
     try 
@@ -1260,7 +1260,7 @@ namespace ALUGrid
     {
       std::cerr << "  FEHLER Parallel :: AccessPllException entstanden" << std::endl ;
     }
-    assert (debugOption (20) ? (std::cout << "**INFO GitterPll :: exchangeStaticState () used " 
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll :: exchangeStaticState () used " 
       << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << std::endl, 1) : 1 ) ;
     return ;
   }
@@ -1274,7 +1274,7 @@ namespace ALUGrid
     // Methoden die noch h"aufigere Updates erfordern m"ussen diese in der
     // Regel hier eingeschleift werden.
     {
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       // if debug mode, then count time 
       const int start = clock ();
 #endif
@@ -1287,7 +1287,7 @@ namespace ALUGrid
       {
         std::cerr << "ERROR: Parallel::AccessPllException caught." << std::endl;
       }
-      assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::packUnpackDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << std::endl, 1) : 1 );
+      alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::packUnpackDynamicState () used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " sec. " << std::endl, 1) : 1 );
     }
   }
 
@@ -1296,7 +1296,7 @@ namespace ALUGrid
                      GatherScatterType* gs ) 
   {
     // build macro graph, either using user defined weights or default weighs 
-    assert (debugOption (20) ? (std::cout << "**GitterPll::checkPartitioning ( db, gs ) " << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "**GitterPll::checkPartitioning ( db, gs ) " << std::endl, 1) : 1);
     // only for the SFC approach without edges we don't need to setup these connections 
     const bool insertGraphEdges = LoadBalancer::DataBase:: graphEdgesNeeded( _ldbMethod ) ;
     if( insertGraphEdges )
@@ -1314,7 +1314,7 @@ namespace ALUGrid
       if( foundPeriodicBnd ) 
       {
         // this should not be set then 
-        assert( _graphSizes.size() == 0 );
+        alugrid_assert ( _graphSizes.size() == 0 );
 
         // clear graph sizes since the 
         // precomputed sizes don't work with periodic bnd 
@@ -1357,10 +1357,10 @@ namespace ALUGrid
         repartition = true;
     }
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     // make sure every process has the same value of repartition
     const bool checkNeu = mpAccess().gmax( repartition );
-    assert( repartition == checkNeu );
+    alugrid_assert ( repartition == checkNeu );
 #endif
 
     return repartition;
@@ -1395,10 +1395,10 @@ namespace ALUGrid
       _graphSizes.clear();
 
       const int ldbMth = int( _ldbMethod );
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       // make sure every process has the same ldb method 
       int checkMth = mpAccess ().gmax( ldbMth );
-      assert( checkMth == ldbMth ); 
+      alugrid_assert ( checkMth == ldbMth ); 
 #endif
 
       // if a method was given, perform load balancing
@@ -1524,7 +1524,7 @@ namespace ALUGrid
     // this method computes the globally unique element indices 
     // that are needed for the graph partitioning methods 
 
-    assert (debugOption (20) ? (std::cout << "**INFO GitterPll::loadBalancerMacroGridChangesNotify () " << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::loadBalancerMacroGridChangesNotify () " << std::endl, 1) : 1);
     AccessIterator < helement_STI >::Handle w ( containerPll () );
 
     // get number of macro elements 
@@ -1533,7 +1533,7 @@ namespace ALUGrid
     // sum up for each process and and substract macroElements again 
     int cnt = mpAccess ().scan( macroElements ) - macroElements;
 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     // make sure that we get the same value as before 
     //std::cout << "P[ " << mpAccess().myrank() << " ] cnt = " << cnt << std::endl;
     { 
@@ -1543,9 +1543,9 @@ namespace ALUGrid
 
       // count sizes for all processors with a rank lower than mine 
       for (int i = 0; i < mpAccess ().myrank (); oldcnt += sizes [ i++ ]);
-      assert( oldcnt == cnt );
+      alugrid_assert ( oldcnt == cnt );
     }
-#endif // #ifndef NDEBUG 
+#endif // #ifdef ALUGRIDDEBUG 
 
     // set ldb vertex indices to all elements 
     for (w.first (); ! w.done (); w.next (), ++ cnt ) 
@@ -1563,9 +1563,9 @@ namespace ALUGrid
     
     // clear graphSize vector since the new numbering leads to different sizes
     std::vector< int >().swap( _graphSizes );
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     {
-      assert (debugOption (20) ? (std::cout << "**INFO GitterPll::loadBalancerMacroGridChangesNotify () " << std::endl, 1) : 1);
+      alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::loadBalancerMacroGridChangesNotify () " << std::endl, 1) : 1);
       AccessIterator < helement_STI >::Handle w ( containerPll () );
 
       int lastIndex = -1;
@@ -1573,11 +1573,11 @@ namespace ALUGrid
       for (w.first (); ! w.done (); w.next () ) 
       {
         const int ldbVx = w.item ().ldbVertexIndex();
-        assert( lastIndex < ldbVx );
+        alugrid_assert ( lastIndex < ldbVx );
         lastIndex = ldbVx;
       }
     }
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
   }
 
   void GitterPll::notifyMacroGridChanges () 
@@ -1587,7 +1587,7 @@ namespace ALUGrid
 
   void GitterPll::doNotifyMacroGridChanges ( bool computeVertexLinkage ) 
   {
-    assert (debugOption (20) ? (std::cout << "**INFO GitterPll::notifyMacroGridChanges () " << std::endl, 1) : 1 );
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::notifyMacroGridChanges () " << std::endl, 1) : 1 );
     Gitter::notifyMacroGridChanges ();
 
     containerPll ().identification (mpAccess (), computeVertexLinkage );
@@ -1644,7 +1644,7 @@ namespace ALUGrid
     LoadBalancer::DataBase::initializeZoltan( _ldbMethod );
 
     // wait for all to finish 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     mpa.barrier();
 #endif
   }

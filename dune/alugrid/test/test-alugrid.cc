@@ -43,16 +43,16 @@ struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid< 3, 3, Dune::simplex,
 template <bool leafconform, class Grid> 
 void checkCapabilities(const Grid& grid) 
 {
-   dune_static_assert( Dune::Capabilities::hasSingleGeometryType< Grid > :: v == true, 
+   dune_static_assert ( Dune::Capabilities::hasSingleGeometryType< Grid > :: v == true, 
                        "hasSingleGeometryType is not set correctly"); 
-   dune_static_assert( Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform, 
+   dune_static_assert ( Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform, 
                        "isLevelwiseConforming is not set correctly"); 
-   dune_static_assert( Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform, 
+   dune_static_assert ( Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform, 
                        "isLevelwiseConforming is not set correctly"); 
    static const bool hasEntity = Dune::Capabilities::hasEntity<Grid, 1> :: v == true;
-   dune_static_assert( hasEntity, 
+   dune_static_assert ( hasEntity, 
                        "hasEntity is not set correctly"); 
-   dune_static_assert( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true, 
+   dune_static_assert ( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true, 
                        "hasBackupRestoreFacilities is not set correctly"); 
 
    static const bool reallyParallel = 
@@ -61,7 +61,7 @@ void checkCapabilities(const Grid& grid)
 #else 
     false ;
 #endif
-   dune_static_assert( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel, 
+   dune_static_assert ( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel, 
                        "isParallel is not set correctly"); 
 
    static const bool reallyCanCommunicate = 
@@ -72,7 +72,7 @@ void checkCapabilities(const Grid& grid)
 #endif
    static const bool canCommunicate = Dune::Capabilities::canCommunicate< Grid, 1 > :: v
      == reallyCanCommunicate;
-   dune_static_assert( canCommunicate, 
+   dune_static_assert ( canCommunicate, 
                        "canCommunicate is not set correctly"); 
 
 }
@@ -128,20 +128,20 @@ void checkIteratorAssignment(GridType & grid)
 
     if( it != grid.template lend<dim>(0) )
     {
-      assert( it->level() == 0 );
+      alugrid_assert ( it->level() == 0 );
       EntityPointerType p( it );
      
-      assert( p.level()  == 0 );
-      assert( p->level() == 0 );
+      alugrid_assert ( p.level()  == 0 );
+      alugrid_assert ( p->level() == 0 );
 
       if( grid.maxLevel() > 0 )
       {
         it = grid.template lbegin<dim>(1);
         p = it;
 
-        assert( it->level() == 1 );
-        assert( p.level()   == 1 );
-        assert( p->level()  == 1 );
+        alugrid_assert ( it->level() == 1 );
+        alugrid_assert ( p.level()   == 1 );
+        alugrid_assert ( p->level()  == 1 );
       }
     }
   }
@@ -209,7 +209,7 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
   // if no twist found, then something is wrong 
   if( twistFound == -66 ) 
   {
-    assert(false);
+    alugrid_assert (false);
     DUNE_THROW( Dune::GridError, "Not matching twist found" );
   }
   
@@ -288,7 +288,7 @@ void checkIteratorCodim(GridType & grid)
       if( diff.two_norm() < 1e-8 ) 
       {
         std::cout << diff << " twonorm = " << diff.two_norm() << " point 0 and 1 do not differ! " << std::endl;
-        assert( diff.two_norm() > 1e-8 );
+        alugrid_assert ( diff.two_norm() > 1e-8 );
       }
     }
   }
@@ -401,7 +401,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
     GridType* gr = new GridType(); 
-    assert( gr );
+    alugrid_assert ( gr );
     delete gr;
   }
 

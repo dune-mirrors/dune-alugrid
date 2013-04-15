@@ -28,7 +28,7 @@ level () const {
     else 
       level_ = item_->level() + 1;
   }
-  assert(level_ != -1);
+  alugrid_assert (level_ != -1);
   return level_;
 }
 
@@ -95,7 +95,7 @@ ALU2dGridEntity< cd, dim, GridImp >::geometry () const
   if( !geoObj_.valid() )
     geoObj_.buildGeom( *item_,face_ );
 
-  assert( geoObj_.valid() );
+  alugrid_assert ( geoObj_.valid() );
   return Geometry( geoObj_ );
 }
 
@@ -110,7 +110,7 @@ ALU2dGridEntity<cd, dim, GridImp> :: type () const
 template<int cd, int dim, class GridImp>
 inline int ALU2dGridEntity<cd,dim,GridImp > :: getIndex() const 
 {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     return ElementWrapper<cd, dim, GridImp>::getElemIndex (grid(), *item_, face_);
 }
 
@@ -160,7 +160,7 @@ ALU2dGridEntity(const ALU2dGridEntity<0,dim,GridImp> & org)
 //! level of this element
 template<int dim, class GridImp>
 inline int ALU2dGridEntity<0,dim,GridImp> :: level () const {
-  assert( item_ );
+  alugrid_assert ( item_ );
   return (*item_).level();
 }
 
@@ -169,11 +169,11 @@ template< int dim, class GridImp >
 inline typename ALU2dGridEntity< 0, dim, GridImp >::Geometry
 ALU2dGridEntity< 0, dim, GridImp >::geometry () const
 {
-  assert( item_ != 0 );
+  alugrid_assert ( item_ != 0 );
   if( !geoObj_.valid() ) 
     geoObj_.buildGeom( *item_ );
   
-  assert( geoObj_.valid() );
+  alugrid_assert ( geoObj_.valid() );
   return Geometry( geoObj_ );
 }
 
@@ -196,14 +196,14 @@ inline bool ALU2dGridEntity<0,dim,GridImp> :: isLeaf () const {
 template<int dim, class GridImp>
 inline typename ALU2dGridEntity<0, dim, GridImp> :: EntityPointer ALU2dGridEntity<0,dim,GridImp> :: father () const {
   // don't request for father on macro level
-  assert(level()>0);
+  alugrid_assert (level()>0);
   return EntityPointer(factory_, *(item_->father()));  
 }
 
 template<int dim, class GridImp>
 inline int ALU2dGridEntity<0, dim, GridImp> :: nChild() const
 {
-  assert( item_ );
+  alugrid_assert ( item_ );
   return item_->childNr();
 }
 
@@ -211,14 +211,14 @@ template< int dim, class GridImp >
 inline typename ALU2dGridEntity< 0, dim, GridImp >::LocalGeometry
 ALU2dGridEntity< 0, dim, GridImp >::geometryInFather () const
 {
-  assert( level() > 0 );
+  alugrid_assert ( level() > 0 );
 
   const GeometryType myType = type();
   // we need to storages in case of cube grid, 
   // one for quadrilaterals and one for triangles 
   if( (GridImp::elementType != ALU2DSPACE triangle) && myType.isCube() ) 
   {
-    assert( grid().nonConform() );
+    alugrid_assert ( grid().nonConform() );
     typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 >  GeometryStorage;
     return LocalGeometry( GeometryStorage::geom( myType, true, nChild() ) );
   }
@@ -239,7 +239,7 @@ ALU2dGridEntity< 0, dim, GridImp >::geometryInFather () const
 
 template<int dim, class GridImp>
 inline int ALU2dGridEntity<0,dim,GridImp> :: getIndex() const {
-  assert( item_ );
+  alugrid_assert ( item_ );
   return (*item_).getIndex();
 }
 
@@ -250,7 +250,7 @@ inline int ALU2dGridEntity<0,dim,GridImp> :: getIndex() const {
 template<int dim, class GridImp>
 template<int cc>
 inline int ALU2dGridEntity<0,dim,GridImp> :: getSubIndex(int i) const {
-  assert(item_ != 0);    
+  alugrid_assert (item_ != 0);    
   return ElementWrapper<cc, dim, GridImp>::subIndex (grid(), *item_,i);
 } 
 
@@ -260,21 +260,21 @@ template<int dim, class GridImp>
 template <int cc>
 inline typename ALU2dGridEntity<0,dim,GridImp > ::template Codim<cc> :: EntityPointer 
 ALU2dGridEntity<0,dim,GridImp> :: entity (int i) const {
-  assert(item_ != 0);    
+  alugrid_assert (item_ != 0);    
   return ElementWrapper<cc,dim, GridImp>::subEntity (factory(), *item_, i);
 }  
 
 template<int dim, class GridImp>
 template <int cc> 
 inline int ALU2dGridEntity<0,dim,GridImp> :: subBoundaryId  ( int i ) const {
-  assert(item_ != 0);    
+  alugrid_assert (item_ != 0);    
   return ElementWrapper<cc, dim, GridImp>::subBoundary (grid(), *item_,i);
 }
   
 template<int dim, class GridImp>
 inline int ALU2dGridEntity<0,dim,GridImp> :: subIndex(int i, unsigned int codim) const 
 {
-  assert( item_ != 0 );
+  alugrid_assert ( item_ != 0 );
   int j = i;
   switch( codim ) 
   { 
@@ -301,7 +301,7 @@ inline int ALU2dGridEntity<0,dim,GridImp> :: subIndex(int i, unsigned int codim)
                    }
       return ElementWrapper<2, dim, GridImp>::subIndex (grid(), *item_, j);
     default: 
-      assert( false );
+      alugrid_assert ( false );
       abort();
   }
   return -1;
@@ -319,7 +319,7 @@ inline bool ALU2dGridEntity<0,dim,GridImp> :: mark( int refCount ) const
 
   // if this assertion is thrown then you try to mark a non leaf entity
   // which is leads to unpredictable results
-  assert(item_ != 0);
+  alugrid_assert (item_ != 0);
 
   // mark for coarsening
   if(refCount < 0) 
@@ -344,10 +344,10 @@ inline bool ALU2dGridEntity<0,dim,GridImp> :: mark( int refCount ) const
 template<int dim, class GridImp>
 inline int ALU2dGridEntity<0,dim,GridImp> :: getMark() const 
 {
-  assert(item_ != 0);
+  alugrid_assert (item_ != 0);
   if(item_->ALU2DSPACE Refco_el::is(ALU2DSPACE Refco::ref)) return 1;
   if(item_->ALU2DSPACE Refco_el::is(ALU2DSPACE Refco::crs)) return -1;
-  assert( item_->ALU2DSPACE Refco_el::is(ALU2DSPACE Refco::none) );
+  alugrid_assert ( item_->ALU2DSPACE Refco_el::is(ALU2DSPACE Refco::none) );
   return 0;
 }
 
@@ -427,7 +427,7 @@ inline bool ALU2dGridEntityPointer<cd, GridImp> :: equals(const ALU2dGridEntityP
 template<int cd, class GridImp>
 inline void ALU2dGridEntityPointer<cd, GridImp> :: updateEntityPointer(ElementType * item, int face, int level) 
 {
-  assert(item != 0);
+  alugrid_assert (item != 0);
   seed_.set( *item, level, face );
   
   if( entity_ ) 
@@ -497,7 +497,7 @@ ALU2dGridEntityPointer<cd, GridImp>:: dereference() const
     entity_ = factory_.template getNewEntity<cd> (level());
     entityImp().setElement( seed_ );
   }
-  assert( entity_ );  
+  alugrid_assert ( entity_ );  
   return *entity_; 
 }
 
@@ -505,7 +505,7 @@ ALU2dGridEntityPointer<cd, GridImp>:: dereference() const
 template<int cd, class GridImp>
 inline int ALU2dGridEntityPointer<cd, GridImp>:: level () const 
 {
-  assert( seed_.level() >= 0 );
+  alugrid_assert ( seed_.level() >= 0 );
   return seed_.level();
 }
 
@@ -514,7 +514,7 @@ inline typename ALU2dGridEntityPointer<cd, GridImp>:: ThisType &
 ALU2dGridEntityPointer<cd, GridImp>:: operator = (const typename ALU2dGridEntityPointer<cd, GridImp>::ThisType & org) 
 {
   this->done();
-  assert(&factory_ == &org.factory_);
+  alugrid_assert (&factory_ == &org.factory_);
   seed_ = org.seed_; // copy seed 
   entity_ = 0; // is set when dereference is called 
   return *this;
@@ -523,14 +523,14 @@ ALU2dGridEntityPointer<cd, GridImp>:: operator = (const typename ALU2dGridEntity
 template<int cd, class GridImp>
 inline typename ALU2dGridEntityPointer<cd, GridImp>::EntityImp & ALU2dGridEntityPointer<cd, GridImp>::entityImp() 
 { 
-  assert( entity_ ); 
+  alugrid_assert ( entity_ ); 
   return GridImp :: getRealImplementation(*entity_); 
 }
 
 template<int cd, class GridImp>
 inline const typename ALU2dGridEntityPointer<cd, GridImp>:: EntityImp & 
 ALU2dGridEntityPointer<cd, GridImp>::entityImp() const { 
-  assert( entity_ ); 
+  alugrid_assert ( entity_ ); 
   return GridImp :: getRealImplementation(*entity_); 
 }
 
@@ -550,20 +550,20 @@ struct ElementWrapper<0,dim, GridImp>
   typedef typename GridImp :: GridObjectFactoryType  FactoryType;
 
   static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i) {   
-    //assert(!i);    
+    //alugrid_assert (!i);    
     return elem.getIndex();
   }
   static inline int subIndex(GridImp & grid, const HElementType &elem, int i) {   
-    //assert(!i);    
+    //alugrid_assert (!i);    
     return elem.getIndex();
   }
   static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<0>:: EntityPointer 
   subEntity(const FactoryType& factory, const HElementType &elem, int i) {   
-    //assert(!i);    
+    //alugrid_assert (!i);    
     return ALU2dGridEntityPointer<0, GridImp > (factory, elem, -1, elem.level());
   }
   static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {   
-    //assert(!i);    
+    //alugrid_assert (!i);    
     return elem.nbbnd(i)->type();      
     
   }  
@@ -581,18 +581,18 @@ struct ElementWrapper<1, dim, GridImp>{
 
   static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i) 
   {   
-    assert(i < elem.numvertices() && i >= 0);    
+    alugrid_assert (i < elem.numvertices() && i >= 0);    
     return elem.edge_idx(i);      
   }   
   static inline int subIndex(GridImp & grid, const HElementType &elem, int i) 
   {  
-    assert(i < elem.numvertices() && i >= 0);    
+    alugrid_assert (i < elem.numvertices() && i >= 0);    
     return elem.edge_idx(i);      
   }
   static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<1>:: EntityPointer 
   subEntity(const FactoryType& factory, const HElementType &elem, int i)    
   {   
-    assert(i < elem.numvertices() && i >= 0);    
+    alugrid_assert (i < elem.numvertices() && i >= 0);    
     return ALU2dGridEntityPointer<1, GridImp > (factory, elem, i, elem.level());
   } 
   static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {   
@@ -628,14 +628,14 @@ struct ElementWrapper<2, dim, GridImp>{
     return elem.getIndex();      
   }   
   static inline int subIndex(GridImp & grid, const HElementType &elem, int i) {  
-    assert(i < elem.numvertices() && i >= 0);   
+    alugrid_assert (i < elem.numvertices() && i >= 0);   
     //return elem.vertex(i)->getIndex();          
     return elem.getVertex(i)->getIndex();
   }
   static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<2>:: EntityPointer 
   subEntity(const FactoryType& factory, const HElementType &elem, int i)   
   {
-    assert(i < elem.numvertices() && i >= 0);   
+    alugrid_assert (i < elem.numvertices() && i >= 0);   
     //return ALU2dGridEntityPointer<2, GridImp > (grid, *(elem.vertex(i)), -1, elem.level());
     return ALU2dGridEntityPointer<2, GridImp > (factory, *(elem.getVertex(i)), -1, elem.level());
   }

@@ -60,28 +60,28 @@ namespace ALUGrid
     // return reference to _p
     const alucoord_t (& getPoints () const )[points][3] 
     { 
-      assert( _fce != invalidFace );
+      alugrid_assert ( _fce != invalidFace );
       return _p; 
     }
     
     // return idents of ghost element  
     int (& vertices () )[noVx]
     {
-      assert( _fce != invalidFace );
+      alugrid_assert ( _fce != invalidFace );
       return _vx; 
     }
     
     // return reference to vector with non-internal vertex idents 
     const int (& getOuterVertices () const )[noFaceVx]
     {
-      assert( _fce != invalidFace );
+      alugrid_assert ( _fce != invalidFace );
       return _vxface;
     }
 
     // return local number of internal face 
     int internalFace () const 
     {
-      assert( _fce != invalidFace );
+      alugrid_assert ( _fce != invalidFace );
       return _fce < 0 ? (-_fce) - 1 : _fce;
     }
 
@@ -92,8 +92,8 @@ namespace ALUGrid
     ///////////////////////////////////// 
     virtual const alucoord_t (& getPoint (int i) const )[3] 
     {
-      assert( _fce != invalidFace );
-      assert( i>= 0 && i < points );
+      alugrid_assert ( _fce != invalidFace );
+      alugrid_assert ( i>= 0 && i < points );
       return _p[i];
     }
 

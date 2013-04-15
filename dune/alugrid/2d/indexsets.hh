@@ -73,7 +73,7 @@ namespace Dune
     int size ( GeometryType type ) const
     {
       const int codim = dim-type.dim();      
-      assert( grid_.geomTypes(codim).size() == 1 );
+      alugrid_assert ( grid_.geomTypes(codim).size() == 1 );
       if( type != grid_.geomTypes(codim)[0] ) return 0;
       // return size of hierarchic index set
       return grid_.hierSetSize(codim);
@@ -145,7 +145,7 @@ namespace Dune
     int id (const EntityType & ep) const
     {
       enum { cd = EntityType :: codimension };
-      assert( hset_.size(cd) < codimMultiplier );
+      alugrid_assert ( hset_.size(cd) < codimMultiplier );
       return codimStart_[cd] + hset_.index(ep);
     }
 
@@ -154,14 +154,14 @@ namespace Dune
     int id (const typename GridType:: template Codim<codim> :: Entity & ep) const
     {
       //enum { cd = EntityType :: codimension };
-      assert( hset_.size(codim) < codimMultiplier );
+      alugrid_assert ( hset_.size(codim) < codimMultiplier );
       return codimStart_[codim] + hset_.index(ep);
     }
 
     //! return subId of given entity
     int subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
-      assert( hset_.size( codim ) < codimMultiplier );
+      alugrid_assert ( hset_.size( codim ) < codimMultiplier );
       return codimStart_[ codim ] + hset_.subIndex( e, i, codim );
     }
 

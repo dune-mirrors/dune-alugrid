@@ -34,8 +34,8 @@ namespace ALU2DGrid
   void
   Vtx_btree < N,NV >::insertNode(Node* node, Node* newNode)
   {
-    assert(node->vtx);
-    assert(newNode->vtx);
+    alugrid_assert (node->vtx);
+    alugrid_assert (newNode->vtx);
     if( dist(node->vtx) < dist(newNode->vtx) ) {
       if( node->next != 0 )
         insertNode(node->next, newNode);
@@ -118,7 +118,7 @@ namespace ALU2DGrid
   void
   Vtx_btree < N,NV >::merge(Vtx_btree < N,NV > *inleft, Vtx_btree < N,NV > *inright)
   {
-    assert(count() == 1);
+    alugrid_assert (count() == 1);
     head->prev = (inleft != NULL ? inleft->head : NULL);
     head->next = (inright != NULL ? inright->head : NULL);
     if( inleft )
@@ -137,7 +137,7 @@ namespace ALU2DGrid
   double
   Vtx_btree < N,NV >::dist(vertex_t *invtx)
   {
-    assert(rvtx);
+    alugrid_assert (rvtx);
     double ret=0;
     for (int i=0;i<vertex_t::ncoord;++i)
     {
@@ -170,7 +170,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   int Vtx_btree < N,NV >::Node::remove(vertex_t *pvtx) {
     if (vtx==pvtx) {
-      assert(!prev && !next);
+      alugrid_assert (!prev && !next);
       return -1;
     }
     int left  = (prev ? prev->remove(pvtx) : 0);

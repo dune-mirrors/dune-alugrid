@@ -272,15 +272,15 @@ namespace ALUGrid
    : _ptr(new MacroGhostInfoTetra(tetra,fce))
    , _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
-    assert( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
   }
       
   inline MacroGridBuilder::Hbnd3IntStorage::
   Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex, int master, MacroGhostInfoTetra *p)
    : _ptr(p) , _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
-    assert( _ldbVertexIndex >= 0 );
-    assert( _ptr );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ptr );
   }
       
   inline MacroGridBuilder::Hbnd3IntStorage::
@@ -289,7 +289,7 @@ namespace ALUGrid
   {
     // for this constructor we need to allow ldbVertexIndex < 0 
     // since this can happen on parallel construction via several macro files. 
-    // assert( _ldbVertexIndex >= 0 );
+    // alugrid_assert ( _ldbVertexIndex >= 0 );
   }
 
   inline MacroGridBuilder::Hbnd3IntStorage::~Hbnd3IntStorage () 
@@ -318,7 +318,7 @@ namespace ALUGrid
   Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex, int master, const hexa_GEO * hexa, int fce)
    : _ptr( new MacroGhostInfoHexa(hexa,fce) ), _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
-    assert( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
   }
       
   // hface4 storage
@@ -326,8 +326,8 @@ namespace ALUGrid
   Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex, int master, MacroGhostInfoHexa* p)
    : _ptr(p) , _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   { 
-    assert( _ldbVertexIndex >= 0 );
-    assert( _ptr ); 
+    alugrid_assert ( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ptr ); 
   }
       
   inline MacroGridBuilder::Hbnd4IntStorage::
@@ -336,7 +336,7 @@ namespace ALUGrid
   {
     // for this constructor we need to allow ldbVertexIndex < 0 
     // since this can happen on parallel construction via several macro files. 
-    // assert( _ldbVertexIndex >= 0 );
+    // alugrid_assert ( _ldbVertexIndex >= 0 );
   }
 
   inline MacroGridBuilder::Hbnd4IntStorage::~Hbnd4IntStorage () 

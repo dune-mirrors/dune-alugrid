@@ -83,7 +83,7 @@ class ZoltanLoadBalanceHandle
 
 private:
   typedef typename Grid::GlobalIdSet GlobalIdSet;
-  typedef typename GlobalIdSet::IdType gIdType;
+  typedef typename GlobalIdSet::IdType GIdType;
   static const int dimension = Grid :: dimension;
   static const int NUM_GID_ENTRIES = 4;
   template< int codim >
@@ -93,7 +93,7 @@ private:
     typedef typename Grid :: Traits :: template Codim< codim > :: EntityPointer EntityPointer;
   };
 
-  typedef struct{
+  struct ZoltanPartitioning{
     int changes; // 1 if partitioning was changed, 0 otherwise 
     int numGidEntries;  // Number of integers used for a global ID 
     int numLidEntries;  // Number of integers used for a global ID 
@@ -107,13 +107,14 @@ private:
     int *exportProcs;    // Process to which I send each of the vertices 
     int *importToPart;
     int *exportToPart;
-  } ZOLTAN_PARTITIONING;
-  typedef struct{
+  };
+  struct FixedElements {
     int fixed_entities;
     std::vector<int> fixed_GID;
     std::vector<int> fixed_Process;
-  } FIXED_ELEMENTS;
-  typedef struct{      /* Zoltan will partition vertices, while minimizing edge cuts */
+    FixedElements() : fixed_GID(0), fixed_Process(0) {}
+  };
+  struct HGraphData {      /* Zoltan will partition vertices, while minimizing edge cuts */
     int numMyVertices;  /* number of vertices that I own initially */
     ZOLTAN_ID_TYPE *vtxGID;        /* global ID of these vertices */
     int numMyHEdges;    /* number of my hyperedges */
@@ -121,11 +122,13 @@ private:
     ZOLTAN_ID_TYPE *edgeGID;       /* global ID of each of my hyperedges */
     int *nborIndex;     /* index into nborGID array of edge's vertices */
     ZOLTAN_ID_TYPE *nborGID;       /* Vertices of edge edgeGID[i] begin at nborGID[nborIndex[i]] */
-    FIXED_ELEMENTS fixed_elmts;
-  } HGRAPH_DATA;
+    FixedElements fixed_elmts;
+    HGraphData() : vtxGID(0), edgeGID(0), nborIndex(0), nborGID(0) {}
+  };
 public:
   typedef typename Codim< 0 > :: Entity Element;
   ZoltanLoadBalanceHandle ( const Grid &grid);
+  ~ZoltanLoadBalanceHandle();
 
   bool userDefinedPartitioning () const
   {
@@ -172,9 +175,9 @@ public:
   // this needs the methods userDefinedPartitioning to return true
   int destination( const Element &element ) const 
   { 
-    gIdType bla = globalIdSet_.id(element);
+    GIdType id = globalIdSet_.id(element);
     std::vector<int> elementGID(4); // because we have 4 vertices
-    bla.getKey().extractKey(elementGID);
+    id.getKey().extractKey(elementGID);
 
     // add one to the GIDs, so that they match the ones from Zoltan
     transform(elementGID.begin(), elementGID.end(), elementGID.begin(), bind2nd(std::plus<int>(), 1));
@@ -212,8 +215,8 @@ private:
   const GlobalIdSet &globalIdSet_;
 
   Zoltan_Struct *zz_;
-  HGRAPH_DATA hg_;
-  ZOLTAN_PARTITIONING new_partitioning_;
+  HGraphData hg_;
+  ZoltanPartitioning new_partitioning_;
   int rc;
 };
 #endif // if HAVE_ZOLTAN

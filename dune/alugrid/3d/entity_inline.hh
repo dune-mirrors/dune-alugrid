@@ -115,9 +115,9 @@ namespace Dune {
   setElement(HElementType & element)
   {
     item_ = static_cast<IMPLElementType *> (&element);
-    assert( item_ );
+    alugrid_assert ( item_ );
     // make sure this method is not called for ghosts 
-    assert( ! item_->isGhost() ); 
+    alugrid_assert ( ! item_->isGhost() ); 
     ghost_   = 0;
     level_   = (*item_).level();
     isLeaf_  = ((*item_).down() == 0);
@@ -134,19 +134,19 @@ namespace Dune {
     item_  = static_cast<IMPLElementType *> ( ghost.getGhost().first );
 
     // method getGhost can return 0, but then is something wrong
-    assert(item_);
-    assert(item_->isGhost());
+    alugrid_assert (item_);
+    alugrid_assert (item_->isGhost());
     
     level_   = item_->level();
     // remember pointer to ghost face 
     ghost_ = static_cast<BNDFaceType *> (&ghost);
-    assert( ghost_ );
+    alugrid_assert ( ghost_ );
 
     BNDFaceType * dwn = static_cast<BNDFaceType *> (ghost.down());
     if ( ! dwn ) isLeaf_ = true;
     else
     {
-      assert( ghost.level() == level_ );
+      alugrid_assert ( ghost.level() == level_ );
       if(dwn->ghostLevel() == level_) 
         isLeaf_ = true;
       else 
@@ -185,7 +185,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline int ALU3dGridEntity<0,dim,GridImp> :: getIndex() const
   {
-    assert( item_ );
+    alugrid_assert ( item_ );
     return (*item_).getIndex();
   }
 
@@ -200,9 +200,9 @@ namespace Dune {
   inline PartitionType ALU3dGridEntity<0,dim,GridImp> ::
   partitionType () const
   {
-    assert( item_ );
+    alugrid_assert ( item_ );
     // make sure we really got a ghost 
-    assert( (isGhost()) ? item_->isGhost() : true );
+    alugrid_assert ( (isGhost()) ? item_->isGhost() : true );
     return (isGhost() ?  GhostEntity : InteriorEntity);
   }
 
@@ -216,7 +216,7 @@ namespace Dune {
   inline ALU3dGridHierarchicIterator<GridImp> 
   ALU3dGridEntity<0,dim,GridImp> :: hbegin (int maxlevel) const
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     // if isGhost is true the end iterator will be returned 
     if( isGhost() ) 
     {
@@ -228,7 +228,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline ALU3dGridHierarchicIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: hend (int maxlevel) const 
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     return ALU3dGridHierarchicIterator<GridImp> (factory_, *item_, maxlevel, true);
   }
 
@@ -236,7 +236,7 @@ namespace Dune {
   inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridLeafIntersectionIteratorType
   ALU3dGridEntity<0,dim,GridImp> :: ileafbegin () const 
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     return ALU3dGridIntersectionIteratorType (*this, this->level(), false);
   }
 
@@ -244,7 +244,7 @@ namespace Dune {
   inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridLeafIntersectionIteratorType
   ALU3dGridEntity<0,dim,GridImp> :: ileafend () const
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     return ALU3dGridLeafIntersectionIteratorType (*this, this->level(), true);
   }
 
@@ -252,7 +252,7 @@ namespace Dune {
   inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridLevelIntersectionIteratorType
   ALU3dGridEntity<0,dim,GridImp> :: ilevelbegin () const 
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     // disable level intersection iterator for conforming refinement
     return ALU3dGridLevelIntersectionIteratorType (*this, this->level(), grid().conformingRefinement() );
   }
@@ -261,7 +261,7 @@ namespace Dune {
   inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridLevelIntersectionIteratorType
   ALU3dGridEntity<0,dim,GridImp> :: ilevelend () const
   {
-    assert(item_ != 0);
+    alugrid_assert (item_ != 0);
     return ALU3dGridLevelIntersectionIteratorType (*this, this->level(), true);
   }
 
@@ -269,14 +269,14 @@ namespace Dune {
   template<int dim, class GridImp>
   inline bool ALU3dGridEntity<0,dim,GridImp> :: isNew () const 
   {
-    assert( item_ );
+    alugrid_assert ( item_ );
     return item_->hasBeenRefined();
   }
   
   template<int dim, class GridImp>
   inline bool ALU3dGridEntity<0,dim,GridImp> :: mightVanish () const 
   {
-    assert( item_ );
+    alugrid_assert ( item_ );
     return ((*item_).requestrule() == coarse_element_t);
   }
   
@@ -362,7 +362,7 @@ namespace Dune {
     // if entity existed for original pointer then copy  
     if( org.entity_ )
     {
-      assert( entity_ == 0 );
+      alugrid_assert ( entity_ == 0 );
       entity_ = factory_.template getNewEntity<codim> ();
       // set entity right away 
       entityImp().setEntity( org.entityImp() );
@@ -383,7 +383,7 @@ namespace Dune {
   ALU3dGridEntityPointerBase<codim,GridImp> :: 
   clone (const ALU3dGridEntityPointerType & org)
   {
-    assert( &factory_ == &org.factory_ );
+    alugrid_assert ( &factory_ == &org.factory_ );
     
     // set item 
     seed_ = org.seed_;
@@ -404,7 +404,7 @@ namespace Dune {
         if( item->isGhost() )
         {
           // on ghosts entity pointers entity always exists 
-          assert( org.entity_ );
+          alugrid_assert ( org.entity_ );
           entityImp().setEntity( org.entityImp() );
         }
         else 
@@ -461,20 +461,20 @@ namespace Dune {
   ALU3dGridEntityPointerBase<codim,GridImp>::dereference () const
   {
     // don't dereference empty entity pointer 
-    assert( seed_.item() );
+    alugrid_assert ( seed_.item() );
     if( ! entity_ )
     {
       entity_ = factory_.template getNewEntity<codim> ();
       entityImp().setElement( seed_ );
     }
-    assert( seed_.item() == & entityImp().getItem() );
+    alugrid_assert ( seed_.item() == & entityImp().getItem() );
     return (*entity_);
   }
 
   template<int codim, class GridImp >
   inline int ALU3dGridEntityPointerBase<codim,GridImp>::level () const
   {
-    assert( seed_.item() );
+    alugrid_assert ( seed_.item() );
     return seed_.item()->level();
   }
 
@@ -482,7 +482,7 @@ namespace Dune {
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::
   updateGhostPointer( HBndSegType & ghostFace )
   {
-    assert( entity_ );
+    alugrid_assert ( entity_ );
     entityImp().setGhost( ghostFace );
     // inside the method setGhost the method getGhost of the ghostFace is
     // called and set as item 
@@ -542,7 +542,7 @@ namespace Dune {
     // copy key   
     seed_ = org.seed_;
 
-    assert( &factory_ == &org.factory_ );
+    alugrid_assert ( &factory_ == &org.factory_ );
     
     // if entity exists, just remove item pointer 
     if( seed_.item() ) 
@@ -562,13 +562,13 @@ namespace Dune {
   ALU3dGridEntityPointer<codim,GridImp>::dereference () const
   {
     // don't dereference empty entity pointer 
-    assert( seed_.item() );
+    alugrid_assert ( seed_.item() );
     if( ! entity_ )
     {
       entity_ = factory_.template getNewEntity<codim> ();
       entityImp().setElement( seed_ );
     }
-    assert( seed_.item() == & entityImp().getItem() );
+    alugrid_assert ( seed_.item() == & entityImp().getItem() );
     return (*entity_);
   }
   

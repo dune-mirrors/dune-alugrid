@@ -36,13 +36,13 @@ namespace ALUGrid
         barycenter[0] = 0.25 * (p0[0] + p1[0] + p2[0] + p3[0]);
         barycenter[1] = 0.25 * (p0[1] + p1[1] + p2[1] + p3[1]);
         barycenter[2] = 0.25 * (p0[2] + p1[2] + p2[2] + p3[2]);
-  #ifndef NDEBUG
+  #ifdef ALUGRIDDEBUG
         LinearMapping map(p0,p1,p2,p3);
         alucoord_t p[3] ;
         map.map2world(.25, .25, .25, .25, p) ;
         for(int j=0; j<3; ++j)
         {
-          assert( fabs(barycenter[j] - p[j]) < 1e-8 );
+          alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
         }
   #endif
       }

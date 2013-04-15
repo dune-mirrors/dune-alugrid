@@ -38,7 +38,7 @@ namespace ALUGrid
   VertexPllBaseX< A >::~VertexPllBaseX () 
   {
     // make sure _moveTo was already deleted 
-    assert( _moveTo == 0 );
+    alugrid_assert ( _moveTo == 0 );
   }
 
   template < class A >
@@ -68,9 +68,9 @@ namespace ALUGrid
   template < class A >
   void VertexPllBaseX< A >::unattach2 (int i) 
   {
-    assert ( _moveTo );
+    alugrid_assert ( _moveTo );
     typename moveto_t::iterator pos = _moveTo->find( i ); 
-    assert ( pos != _moveTo->end ());
+    alugrid_assert ( pos != _moveTo->end ());
     if ( (-- (*pos).second ) == 0 ) 
     {
       _moveTo->erase ( pos );
@@ -198,9 +198,9 @@ namespace ALUGrid
   template < class A >
   void EdgePllBaseXMacro< A >::unattach2 (int i) 
   {
-    assert ( _moveTo );
+    alugrid_assert ( _moveTo );
     typename moveto_t::iterator pos = _moveTo->find( i ); 
-    assert ( pos != _moveTo->end ());
+    alugrid_assert ( pos != _moveTo->end ());
     if ( (-- (*pos).second ) == 0 ) 
     {
       _moveTo->erase ( pos );
@@ -243,7 +243,7 @@ namespace ALUGrid
       for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
       {
         const int link = (*i).first;
-        assert ((osv.begin () + link) < osv.end ());
+        alugrid_assert ((osv.begin () + link) < osv.end ());
         action = doPackLink( link, osv[ link ] );
       }
     }
@@ -279,7 +279,7 @@ namespace ALUGrid
     os.writeObject (myhedge ().myvertex (1)->ident ());
     
     // make sure ENDOFSTREAM is not a valid refinement rule 
-    assert( ! myhedge_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    alugrid_assert ( ! myhedge_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
 
     // pack refinement information 
     myhedge ().backup ( os );
@@ -357,7 +357,7 @@ namespace ALUGrid
   // destructor 
   template < class A > FacePllBaseXMacro < A >::~FacePllBaseXMacro() 
   {
-    assert( _moveTo == 0 );
+    alugrid_assert ( _moveTo == 0 );
   }
 
   template < class A > std::vector< int > FacePllBaseXMacro < A >::estimateLinkage () const 
@@ -431,7 +431,7 @@ namespace ALUGrid
 
       if( mycon1->isperiodic() ) 
       {
-        assert( ! mycon2->isperiodic() ); 
+        alugrid_assert ( ! mycon2->isperiodic() ); 
         ldbVx1 = mycon1->otherLdbVertexIndex( myhface().getIndex() );
         ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
         periodicBnd = true;
@@ -439,7 +439,7 @@ namespace ALUGrid
 
       if( mycon2->isperiodic() ) 
       {
-        assert( ! mycon1->isperiodic() ); 
+        alugrid_assert ( ! mycon1->isperiodic() ); 
         ldbVx1 = mycon1->accessPllX ().ldbVertexIndex ();
         ldbVx2 = mycon2->otherLdbVertexIndex( myhface().getIndex() );
         periodicBnd = true;
@@ -448,7 +448,7 @@ namespace ALUGrid
       // count leaf faces for this macro face 
       const int weight =  TreeIterator < typename Gitter::hface_STI, 
                                          is_leaf < Gitter::hface_STI > > ( myhface () ).size ();
-      assert( weight>=0 );
+      alugrid_assert ( weight>=0 );
 
       // if we have a periodic situation 
       if( periodicBnd ) 
@@ -457,8 +457,8 @@ namespace ALUGrid
         // this should reduce cutting of edges between 
         // periodic and normal elements 
       
-        assert( mycon1->isperiodic() || mycon2->isperiodic() );
-        assert( ldbVx1 >= 0 && ldbVx2 >= 0 );
+        alugrid_assert ( mycon1->isperiodic() || mycon2->isperiodic() );
+        alugrid_assert ( ldbVx1 >= 0 && ldbVx2 >= 0 );
         // increase the edge weight for periodic connections 
         // TODO: make weight factor (here 4) dynamically adjustable 
         db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight*4,
@@ -536,7 +536,7 @@ namespace ALUGrid
       for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
       {
         const int link = (*i).first;
-        assert ((osv.begin () + link) < osv.end ());
+        alugrid_assert ((osv.begin () + link) < osv.end ());
         action = doPackLink( link, osv[ link ] );
       }
     }
@@ -580,7 +580,7 @@ namespace ALUGrid
     else 
     {
       // something wrong 
-      assert(false);
+      alugrid_assert (false);
       abort ();
     }
     
@@ -598,7 +598,7 @@ namespace ALUGrid
       // mit einer Verfeinerungsregel identisch ist - sonst gibt's
       // nachher beim Auspacken nur garbage.
     
-      assert (! myhface_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+      alugrid_assert (! myhface_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
     
       this->myhface ().backup ( os );
       os.put( ObjectStream::ENDOFSTREAM );
@@ -767,7 +767,7 @@ namespace ALUGrid
     try 
     {
       // read the real level of ghost 
-      assert(myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
+      alugrid_assert (myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
       const bool wasLeaf = this->ghostLeaf();
      
       // read level and leaf of interior element on other side
@@ -790,9 +790,9 @@ namespace ALUGrid
         myhbnd().detachleafs();
       }
       
-      assert( myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1 );
-      assert( (!nowLeaf) ? (! myhbnd().isLeafEntity()) : 1);
-      assert( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
+      alugrid_assert ( myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1 );
+      alugrid_assert ( (!nowLeaf) ? (! myhbnd().isLeafEntity()) : 1);
+      alugrid_assert ( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
       
     } 
     catch (ObjectStream::EOFException) 
@@ -810,22 +810,22 @@ namespace ALUGrid
     {
       os.readObject ( _ldbVertexIndex ) ;
       os.readObject ( _master );
-      assert( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
+      alugrid_assert ( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
     } 
     catch (ObjectStream :: EOFException) 
     {
       std::cerr << "**ERROR (fatal): BndsegPllBaseXMacroClosure < A >::readStaticState EOF encountered." << std::endl ;
       abort () ;
     }
-    assert (_ldbVertexIndex >= 0) ;
-    assert (_master >= 0) ;
+    alugrid_assert (_ldbVertexIndex >= 0) ;
+    alugrid_assert (_master >= 0) ;
   }
 
   template < class A > void BndsegPllBaseXMacroClosure < A >::
   packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
   {
-    assert (!fce); // fce should be 0, because we only have 1 face 
-    assert (this->myhbnd ().bndtype () == Gitter::hbndseg::closure);
+    alugrid_assert (!fce); // fce should be 0, because we only have 1 face 
+    alugrid_assert (this->myhbnd ().bndtype () == Gitter::hbndseg::closure);
 
     if (myhface_t::polygonlength == 3) os.writeObject (MacroGridMoverIF::HBND3INT);
     else if (myhface_t::polygonlength == 4) os.writeObject (MacroGridMoverIF::HBND4INT);
@@ -864,9 +864,9 @@ namespace ALUGrid
   template < class A > inline void BndsegPllBaseXMacroClosure < A >::
   insertGhostCell(ObjectStream & os, int fce)
   {
-    assert( _ghInfo == 0 );
+    alugrid_assert ( _ghInfo == 0 );
     _ghInfo = this->myhbnd().buildGhostCell(os , fce);
-    assert( _ghInfo );
+    alugrid_assert ( _ghInfo );
   }
 
   // template Instantiation 
@@ -934,7 +934,7 @@ namespace ALUGrid
   template < class A >
   int TetraPllXBaseMacro< A >::ldbVertexIndex () const 
   {
-    assert( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
     return _ldbVertexIndex;
   }
 
@@ -983,7 +983,7 @@ namespace ALUGrid
   template < class A >
   void TetraPllXBaseMacro< A >::unattach2 (int i) 
   {
-    assert( i >= 0 );
+    alugrid_assert ( i >= 0 );
     mytetra ().myhface3 (0)->unattach2 (i);
     mytetra ().myhface3 (1)->unattach2 (i);
     mytetra ().myhface3 (2)->unattach2 (i);
@@ -1001,13 +1001,13 @@ namespace ALUGrid
   template < class A >
   void TetraPllXBaseMacro< A >::attachElement2 (const int destination, const int face) 
   {
-    assert( destination >= 0 );
+    alugrid_assert ( destination >= 0 );
 
     // attach the element 
     attach2( destination );
 
     // make sure we to correct destination 
-    assert( _moveTo == destination );
+    alugrid_assert ( _moveTo == destination );
 
     // check all neighbours 
     // face is the face this method was called from 
@@ -1041,7 +1041,7 @@ namespace ALUGrid
   template < class A >
   void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
   {
-    assert( ldbVertexIndex () >= 0 );
+    alugrid_assert ( ldbVertexIndex () >= 0 );
     os.writeObject (ldbVertexIndex ()) ;
     os.writeObject (master ());
   }
@@ -1058,7 +1058,7 @@ namespace ALUGrid
   {
     if( _moveTo >= 0 ) 
     {
-      assert ((osv.begin () + _moveTo) < osv.end ());
+      alugrid_assert ((osv.begin () + _moveTo) < osv.end ());
       return doPackLink( _moveTo, osv[ _moveTo ], gs );
     }
     return false;
@@ -1090,7 +1090,7 @@ namespace ALUGrid
     {
       if( this->myneighbour( i ).first->isboundary() ) 
       {
-        assert( this->myneighbour( i ).first->moveTo() == link );
+        alugrid_assert ( this->myneighbour( i ).first->moveTo() == link );
       }
     }
 #endif
@@ -1105,7 +1105,7 @@ namespace ALUGrid
     os.writeObject ( orientation );
 
     // make sure ENDOFSTREAM is not a valid refinement rule 
-    assert( ! mytetra_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    alugrid_assert ( ! mytetra_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
     
     // pack refinement information 
     mytetra ().backup ( os );
@@ -1138,7 +1138,7 @@ namespace ALUGrid
   {
     os.writeObject (HBND3INT);
     os.writeObject ( Gitter::hbndseg::closure );
-    assert( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
     os.writeObject ( _ldbVertexIndex ); // write unique graph vertex index 
     os.writeObject ( master() );
     os.writeObject ( mytetra ().myvertex (fce,0)->ident () );
@@ -1148,7 +1148,7 @@ namespace ALUGrid
     // see method unpackHbnd3Int 
     if( packGhost ) 
     {
-      assert( this->myGrid()->ghostCellsEnabled() );
+      alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
 
       int writePoint = MacroGridMoverIF::POINTTRANSMITTED; // point is transmitted 
       os.writeObject ( writePoint ); // write point info  
@@ -1165,7 +1165,7 @@ namespace ALUGrid
 
       {
         const Gitter::Geometric::VertexGeo * vertex = mytetra().myvertex(fce);
-        assert( vertex );
+        alugrid_assert ( vertex );
 
         // know identifier of transmitted point 
         os.writeObject ( vertex->ident ());
@@ -1199,7 +1199,7 @@ namespace ALUGrid
   template < class A >
   void TetraPllXBaseMacro< A >::packAsGhost(ObjectStream & os, int fce) const 
   {
-    assert( this->myGrid()->ghostCellsEnabled() );
+    alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
     packAsBndNow(fce,os, true);
   }
 
@@ -1221,7 +1221,7 @@ namespace ALUGrid
   void TetraPllXBaseMacro< A >::
   doUnpackSelf (ObjectStream & os, const bool i, GatherScatterType* gatherScatter )
   {
-    assert (i);
+    alugrid_assert (i);
     if (i) 
     {
       // restore refinement information 
@@ -1303,7 +1303,7 @@ namespace ALUGrid
   template < class A >
   void Periodic3PllXBaseMacro< A >::unattach2 (int i) 
   {
-    assert ( i>= 0 );
+    alugrid_assert ( i>= 0 );
     myperiodic ().myhface3 (0)->unattach2 (i);
     myperiodic ().myhface3 (1)->unattach2 (i);
     _moveTo = -1;
@@ -1327,7 +1327,7 @@ namespace ALUGrid
       return myneighbour( 1 ).first->firstLdbVertexIndex();
     else
     {
-      assert(  myhface3( 1 )->getIndex() == faceIndex  );
+      alugrid_assert (  myhface3( 1 )->getIndex() == faceIndex  );
       return myneighbour( 0 ).first->firstLdbVertexIndex();
     }
   }
@@ -1337,7 +1337,7 @@ namespace ALUGrid
   {
     //std::cout << "Attach periodic element" << std::endl;
     attach2( destination );
-    assert( _moveTo == destination );
+    alugrid_assert ( _moveTo == destination );
   }
 
   template < class A >
@@ -1365,8 +1365,8 @@ namespace ALUGrid
   {
     if( _moveTo >= 0 ) 
     { 
-      assert( myneighbour( 0 ).first->moveTo() == _moveTo );
-      assert( myneighbour( 1 ).first->moveTo() == _moveTo );
+      alugrid_assert ( myneighbour( 0 ).first->moveTo() == _moveTo );
+      alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
 
       return packLink( _moveTo, osv[ _moveTo ] );
     }
@@ -1387,8 +1387,8 @@ namespace ALUGrid
   {
     if( _moveTo != link ) return false;
 
-    assert( myneighbour( 0 ).first->moveTo() == link );
-    assert( myneighbour( 1 ).first->moveTo() == link );
+    alugrid_assert ( myneighbour( 0 ).first->moveTo() == link );
+    alugrid_assert ( myneighbour( 1 ).first->moveTo() == link );
 
     os.writeObject (PERIODIC3);
 
@@ -1405,7 +1405,7 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (5)->ident ());
     
     // make sure ENDOFSTREAM is not a valid refinement rule 
-    assert( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    alugrid_assert ( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
     
     // pack refinement information 
     myperiodic ().backup ( os );
@@ -1425,13 +1425,13 @@ namespace ALUGrid
   {
     // we require that periodic element are never packed as boundary 
     // since they are on the same process as their faces 
-    assert( _moveTo == who );
+    alugrid_assert ( _moveTo == who );
   }
 
   template < class A >
   void Periodic3PllXBaseMacro< A >::unpackSelf (ObjectStream & os, bool i) 
   {
-    assert (i);
+    alugrid_assert (i);
 
     if (i) 
     {
@@ -1496,7 +1496,7 @@ namespace ALUGrid
   template < class A > 
   void Periodic4PllXBaseMacro< A >::unattach2 (int i) 
   {
-    assert (i >= 0 );
+    alugrid_assert (i >= 0 );
     _moveTo = -1;
 
     myperiodic ().myhface4 (0)->unattach2 (i);
@@ -1518,7 +1518,7 @@ namespace ALUGrid
       return myneighbour( 1 ).first->firstLdbVertexIndex();
     else
     {
-      assert(  myhface4( 1 )->getIndex() == faceIndex );
+      alugrid_assert (  myhface4( 1 )->getIndex() == faceIndex );
       return myneighbour( 0 ).first->firstLdbVertexIndex();
     }
   }
@@ -1558,10 +1558,10 @@ namespace ALUGrid
     if( _moveTo >= 0 ) 
     {
       // make sure the connected elements are moved to the same proc  
-      assert( myneighbour( 0 ).first->moveTo() == _moveTo );
-      assert( myneighbour( 1 ).first->moveTo() == _moveTo );
+      alugrid_assert ( myneighbour( 0 ).first->moveTo() == _moveTo );
+      alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
 
-      assert ((osv.begin () + _moveTo) < osv.end ());
+      alugrid_assert ((osv.begin () + _moveTo) < osv.end ());
       return packLink( _moveTo, osv[ _moveTo ] );
     }
     return false ;
@@ -1581,8 +1581,8 @@ namespace ALUGrid
   {
     if( _moveTo != link ) return false;
 
-    assert( myneighbour( 0 ).first->moveTo() == _moveTo );
-    assert( myneighbour( 1 ).first->moveTo() == _moveTo );
+    alugrid_assert ( myneighbour( 0 ).first->moveTo() == _moveTo );
+    alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
     
     os.writeObject (PERIODIC4);
 
@@ -1601,7 +1601,7 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (7)->ident ());
 
     // make sure ENDOFSTREAM is not a valid refinement rule 
-    assert( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    alugrid_assert ( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
     
     // pack refinement information 
     myperiodic ().backup ( os );
@@ -1621,13 +1621,13 @@ namespace ALUGrid
   {
     // we require that periodic element are never packed as boundary 
     // since they are on the same process as their faces 
-    // assert( _moveTo[ 0 ].first == who );
+    // alugrid_assert ( _moveTo[ 0 ].first == who );
   }
 
   template < class A > 
   void Periodic4PllXBaseMacro< A >::unpackSelf (ObjectStream & os, bool i) 
   {
-    assert (i);
+    alugrid_assert (i);
     if (i) 
     {
       myperiodic ().restore (os);
@@ -1718,7 +1718,7 @@ namespace ALUGrid
 
   template < class A >
   int HexaPllBaseXMacro< A >::ldbVertexIndex () const {
-    assert( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
     return _ldbVertexIndex;
   }
 
@@ -1765,7 +1765,7 @@ namespace ALUGrid
   template < class A >
   void HexaPllBaseXMacro< A >::unattach2 (int i) 
   {
-    assert( i >= 0 );
+    alugrid_assert ( i >= 0 );
     myhexa ().myhface4 (0)->unattach2 (i);
     myhexa ().myhface4 (1)->unattach2 (i);
     myhexa ().myhface4 (2)->unattach2 (i);
@@ -1797,7 +1797,7 @@ namespace ALUGrid
   template < class A >
   void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
   {
-    assert( ldbVertexIndex () >= 0 );
+    alugrid_assert ( ldbVertexIndex () >= 0 );
     os.writeObject (ldbVertexIndex ()) ;
     os.writeObject (master ());
   }
@@ -1831,7 +1831,7 @@ namespace ALUGrid
   {
     if( _moveTo >= 0 ) 
     {
-      assert ((osv.begin () + _moveTo) < osv.end ());
+      alugrid_assert ((osv.begin () + _moveTo) < osv.end ());
       return doPackLink( _moveTo, osv[ _moveTo ], gs );
     }
     return false;
@@ -1852,7 +1852,7 @@ namespace ALUGrid
                                             GatherScatterType* gs) 
   {
     os.writeObject (HEXA);
-    assert( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
     os.writeObject (_ldbVertexIndex ); 
     os.writeObject (myhexa ().myvertex (0)->ident ());
     os.writeObject (myhexa ().myvertex (1)->ident ());
@@ -1864,7 +1864,7 @@ namespace ALUGrid
     os.writeObject (myhexa ().myvertex (7)->ident ());
 
     // make sure ENDOFSTREAM is not a valid refinement rule 
-    assert( ! myhexa_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
+    alugrid_assert ( ! myhexa_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
     
     // backup refinement information 
     myhexa(). backup ( os );
@@ -1914,7 +1914,7 @@ namespace ALUGrid
   {
     os.writeObject (HBND4INT);
     os.writeObject (Gitter::hbndseg::closure);
-    assert( _ldbVertexIndex >= 0 );
+    alugrid_assert ( _ldbVertexIndex >= 0 );
     os.writeObject (_ldbVertexIndex ); // write unique graph vertex index 
     os.writeObject ( master() ); // write unique graph vertex index 
 
@@ -1927,7 +1927,7 @@ namespace ALUGrid
     // see method unpackHbnd4Int 
     if( packGhost )
     {
-      assert( this->myGrid()->ghostCellsEnabled() );
+      alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
 
       int writePoint = MacroGridMoverIF::POINTTRANSMITTED; 
       os.writeObject ( writePoint ); // 1 == points are transmitted 
@@ -1961,7 +1961,7 @@ namespace ALUGrid
   template < class A >
   void HexaPllBaseXMacro< A >::packAsGhost(ObjectStream & os, int fce) const 
   {
-    assert( this->myGrid()->ghostCellsEnabled() );
+    alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
     packAsBndNow(fce, os, true );
   }
 
@@ -2000,7 +2000,7 @@ namespace ALUGrid
                 const bool i, 
                 GatherScatterType* gatherScatter ) 
   {
-    assert (i);
+    alugrid_assert (i);
     if (i) 
     {
       // unpack refinement data and restore 
@@ -2046,7 +2046,7 @@ namespace ALUGrid
   ///////////////////////////////////////////////////////////
 
   std::pair< ElementPllXIF_t *, int > BndsegPllBaseX::accessOuterPllX (const std::pair< ElementPllXIF_t *, int > &, int f) {
-    assert (!f);  
+    alugrid_assert (!f);  
     return std::pair< ElementPllXIF_t *, int > (this,0);
   }
 
@@ -2055,7 +2055,7 @@ namespace ALUGrid
   }
 
   std::pair< const ElementPllXIF_t *, int > BndsegPllBaseX::accessOuterPllX (const std::pair< const ElementPllXIF_t *, int > &, int f) const {
-    assert (!f);
+    alugrid_assert (!f);
     return std::pair< const ElementPllXIF_t *, int > (this,0);
   }
 
@@ -2125,7 +2125,7 @@ namespace ALUGrid
         n ++;
       }
     }
-    assert (debugOption (20) ? (std::cout << "  GitterBasisPll::MacroGitterBasisPll::secondScan () deleted " << n << " patterns" << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "  GitterBasisPll::MacroGitterBasisPll::secondScan () deleted " << n << " patterns" << std::endl, 1) : 1);
     return s;
   }
 
@@ -2222,7 +2222,7 @@ namespace ALUGrid
       if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() ) 
         return insert_hbnd4( f, t, b );
 
-      assert( ghInfo );
+      alugrid_assert ( ghInfo );
       return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
             BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::
             macro_t (f,t, b, *this, ghInfo );
@@ -2246,7 +2246,7 @@ namespace ALUGrid
       if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() ) 
         return insert_hbnd3( f, t, b );
 
-      assert( ghInfo );
+      alugrid_assert ( ghInfo );
       // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
       return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
             BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::
@@ -2283,7 +2283,7 @@ namespace ALUGrid
       _mpaccess(mpa), _macrogitter (0) , _ppv( 0 ) 
   {
     _macrogitter = new MacroGitterBasisPll (this);
-    assert (_macrogitter);
+    alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
@@ -2294,7 +2294,7 @@ namespace ALUGrid
     _macrogitter( 0 ),
     _ppv( ppv ) 
   {
-    assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll (const char * = \"" << filename << "\" ...)" << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll (const char * = \"" << filename << "\" ...)" << std::endl, 1) : 1);
 
     const int myrank = mpa.myrank();
     std::stringstream rank;
@@ -2311,7 +2311,7 @@ namespace ALUGrid
         _macrogitter = new MacroGitterBasisPll (this, in);
       else 
       {
-        assert (debugOption (5) ? 
+        alugrid_assert (debugOption (5) ? 
           ( std::cerr << "  GitterBasisPll::GitterBasisPll () file: " << extendedName 
              << " cannot be read. Try " << filename << " instead. In " << __FILE__ << " line " << __LINE__ << std::endl, 1) : 1);
       }
@@ -2345,7 +2345,7 @@ namespace ALUGrid
     // create empty macro gitter 
     if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (this);
 
-    assert (_macrogitter);
+    alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
@@ -2356,10 +2356,10 @@ namespace ALUGrid
     _macrogitter( 0 ),
     _ppv( ppv ) 
   {
-    assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << in << "\" ...)" << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << in << "\" ...)" << std::endl, 1) : 1);
 
     _macrogitter = new MacroGitterBasisPll (this, in);
-    assert( _macrogitter );
+    alugrid_assert ( _macrogitter );
     notifyMacroGridChanges ();
   }
 

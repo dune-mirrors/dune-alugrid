@@ -18,7 +18,7 @@ extern "C" {
   extern void FinalizeStarMPI();
 }
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
 #define MY_INT_TEST int test =
 #else
 #define MY_INT_TEST
@@ -67,19 +67,19 @@ doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm)
 {
   int np, me, test ;
   test = MPI_Comm_rank (comm, & me) ;       
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   test = MPI_Comm_size (comm, & np) ;       
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   int * rcounts = new int [np] ;
   int * displ = new int [np] ;
-  assert (rcounts) ;
+  alugrid_assert (rcounts) ;
   vector < vector < A > > res (np) ;
   {
     int ln = in.size () ;
     {
       static const int call_site_id = getNextCallSiteId();
       test = STAR_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm, call_site_id) ;
-      assert (test == MPI_SUCCESS) ;
+      alugrid_assert (test == MPI_SUCCESS) ;
     }
     displ [0] = 0 ;
     {for (int j = 1 ; j < np ; j ++) {
@@ -88,12 +88,12 @@ doGcollectV_STAR (const vector < A > & in, MPI_Datatype mpiType, MPI_Comm comm)
     const int xSize = displ [np-1] + rcounts [np-1] ;
     A * x = new A [xSize] ;
     A * y = new A [ln] ;
-    assert (x && y) ;
+    alugrid_assert (x && y) ;
     copy (in.begin(), in.end(), y) ;
     {
       static const int call_site_id = getNextCallSiteId();
       test = STAR_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm, call_site_id) ;
-      assert (test == MPI_SUCCESS) ;
+      alugrid_assert (test == MPI_SUCCESS) ;
     }
     delete [] y ;
     y = 0 ;
@@ -112,7 +112,7 @@ int MpAccessSTAR_MPI :: gmax (int i) const {
   static const int call_site_id = getNextCallSiteId();
   int j ;
   MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
@@ -120,7 +120,7 @@ int MpAccessSTAR_MPI :: gmin (int i) const {
   static const int call_site_id = getNextCallSiteId();
   int j ;
   MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_MIN, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
@@ -128,7 +128,7 @@ int MpAccessSTAR_MPI :: gsum (int i) const {
   static const int call_site_id = getNextCallSiteId();
   int j ;
   MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_INT, MPI_SUM, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
@@ -136,7 +136,7 @@ long MpAccessSTAR_MPI :: gmax (long i) const {
   static const int call_site_id = getNextCallSiteId();
   long j ;
   MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_MAX, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
@@ -144,7 +144,7 @@ long MpAccessSTAR_MPI :: gmin (long i) const {
   static const int call_site_id = getNextCallSiteId();
   long j ;
   MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_MIN, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
@@ -152,7 +152,7 @@ long MpAccessSTAR_MPI :: gsum (long i) const {
   static const int call_site_id = getNextCallSiteId();
   long j ;
   MY_INT_TEST STAR_Allreduce (&i, &j, 1, MPI_LONG, MPI_SUM, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return j ;
 }
 
@@ -160,7 +160,7 @@ double MpAccessSTAR_MPI :: gmax (double a) const {
   static const int call_site_id = getNextCallSiteId();
   double x ;
   MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MAX, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
@@ -168,7 +168,7 @@ double MpAccessSTAR_MPI :: gmin (double a) const {
   static const int call_site_id = getNextCallSiteId();
   double x ;
   MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MIN, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
@@ -176,44 +176,44 @@ double MpAccessSTAR_MPI :: gsum (double a) const {
   static const int call_site_id = getNextCallSiteId();
   double x ;
   MY_INT_TEST STAR_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_SUM, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return x ;
 }
 
 void MpAccessSTAR_MPI :: gmax (double* a,int size,double *x) const {
   static const int call_site_id = getNextCallSiteId();
   MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_MAX, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessSTAR_MPI :: gmin (double* a,int size,double *x) const {
   static const int call_site_id = getNextCallSiteId();
   MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_MIN, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessSTAR_MPI :: gsum (double* a,int size,double *x) const {
   static const int call_site_id = getNextCallSiteId();
   MY_INT_TEST STAR_Allreduce (a, x, size, MPI_DOUBLE, MPI_SUM, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessSTAR_MPI :: gmax (int* a,int size,int *x) const {
   static const int call_site_id = getNextCallSiteId();
   MY_INT_TEST STAR_Allreduce (a, x, size, MPI_INT, MPI_MAX, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessSTAR_MPI :: gmin (int* a,int size,int *x) const {
   static const int call_site_id = getNextCallSiteId();
   MY_INT_TEST STAR_Allreduce (a, x, size, MPI_INT, MPI_MIN, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
 }
 
 void MpAccessSTAR_MPI :: gsum (int* a,int size,int *x) const {
   static const int call_site_id = getNextCallSiteId();
   MY_INT_TEST STAR_Allreduce (a, x, size, MPI_INT, MPI_SUM, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
 }
 
 pair<double,double> MpAccessSTAR_MPI :: gmax (pair<double,double> p) const {
@@ -221,7 +221,7 @@ pair<double,double> MpAccessSTAR_MPI :: gmax (pair<double,double> p) const {
   double x[2] ;
   double a[2]={p.first,p.second};
   MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MAX, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
 
@@ -230,7 +230,7 @@ pair<double,double> MpAccessSTAR_MPI :: gmin (pair<double,double> p) const {
   double x[2] ;
   double a[2]={p.first,p.second};
   MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MIN, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
 
@@ -239,7 +239,7 @@ pair<double,double> MpAccessSTAR_MPI :: gsum (pair<double,double> p) const {
   double x[2] ;
   double a[2]={p.first,p.second};
   MY_INT_TEST STAR_Allreduce (a, x, 2, MPI_DOUBLE, MPI_SUM, _mpiComm, call_site_id) ;
-  assert (test == MPI_SUCCESS) ;
+  alugrid_assert (test == MPI_SUCCESS) ;
   return pair<double,double>(x[0],x[1]) ;
 }
 
@@ -282,10 +282,10 @@ vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in, c
   vector < ObjectStream > o (np) ;
   
   int * rcounts = new int [np] ;
-  assert (rcounts) ;
+  alugrid_assert (rcounts) ;
   copy (len.begin (), len.end (), rcounts) ;
   int * const displ = new int [np] ;
-  assert (displ) ;
+  alugrid_assert (displ) ;
   
   // set offsets 
   displ [0] = 0 ;
@@ -299,12 +299,12 @@ vector < ObjectStream > MpAccessSTAR_MPI :: gcollect (const ObjectStream & in, c
   {    
     // allocate buffer 
     char * y = ObjectStream :: allocateBuffer(bufSize);
-    assert (y) ;
+    alugrid_assert (y) ;
     
     static const int call_site_id = getNextCallSiteId();
     // gather all data 
     MY_INT_TEST STAR_Allgatherv (in._buf + in._rb, snum, MPI_BYTE, y, rcounts, displ, MPI_BYTE, _mpiComm, call_site_id) ;
-    assert (test == MPI_SUCCESS) ;
+    alugrid_assert (test == MPI_SUCCESS) ;
     // copy data to object streams 
     for (int i = 0 ; i < np ; ++ i ) 
     {

@@ -46,7 +46,7 @@ namespace Dune
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
   {
-    assert( elType == tetra || elType == hexa );
+    alugrid_assert ( elType == tetra || elType == hexa );
 
     geomTypes_.resize( dimension+1 );
     GeometryType tmpType;
@@ -64,7 +64,7 @@ namespace Dune
     checkMacroGridFile( macroTriangFilename );
    
     mygrid_ = createALUGrid( macroTriangFilename );
-    assert( mygrid_ );
+    alugrid_assert ( mygrid_ );
 
     dverb << "************************************************" << std::endl;
     dverb << "Created grid on p=" << comm().rank() << std::endl;
@@ -105,7 +105,7 @@ namespace Dune
   inline typename ALU3dGrid< elType, Comm >::GitterImplType &
   ALU3dGrid< elType, Comm >::myGrid () const
   {
-    assert( mygrid_ );
+    alugrid_assert ( mygrid_ );
     return *mygrid_;
   }
 
@@ -116,7 +116,7 @@ namespace Dune
   inline typename ALU3dGrid< elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LevelIterator
   ALU3dGrid< elType, Comm >::lbegin ( int level ) const
   {
-    assert( level >= 0 );
+    alugrid_assert ( level >= 0 );
     // if we dont have this level return empty iterator 
     if( level > maxlevel_ )
       return this->template lend<cd,pitype> (level);
@@ -130,7 +130,7 @@ namespace Dune
   inline typename ALU3dGrid< elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LevelIterator
   ALU3dGrid< elType, Comm >::lend ( int level ) const
   {
-    assert( level >= 0 );
+    alugrid_assert ( level >= 0 );
     return ALU3dGridLevelIterator< cd, pitype, const ThisType >( factory(), level );
   }
 
@@ -150,7 +150,7 @@ namespace Dune
   inline typename ALU3dGrid< elType, Comm >::Traits::template Codim< cd >::template Partition< All_Partition >::LevelIterator
   ALU3dGrid< elType, Comm >::lend ( int level ) const
   {
-    assert( level >= 0 );
+    alugrid_assert ( level >= 0 );
     return this->template lend<cd,All_Partition>( level );
   }
 
@@ -165,7 +165,7 @@ namespace Dune
   inline typename ALU3dGrid< elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
   ALU3dGrid< elType, Comm >::createLeafIteratorBegin ( int level ) const
   {
-    assert( level >= 0 );
+    alugrid_assert ( level >= 0 );
     return ALU3dGridLeafIterator< cd, pitype, const ThisType >( factory(), level, true );
   }
 
@@ -232,7 +232,7 @@ namespace Dune
   inline typename ALU3dGrid< elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
   ALU3dGrid< elType, Comm >::createLeafIteratorEnd ( int level ) const
   {
-    assert( level >= 0 );
+    alugrid_assert ( level >= 0 );
     return ALU3dGridLeafIterator<cd, pitype, const MyType> ( factory() , level);
   }
 
@@ -322,7 +322,7 @@ namespace Dune
   void ALU3dGrid< elType, Comm >
     ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
-    assert( (refCount + maxLevel()) < MAXL ); 
+    alugrid_assert ( (refCount + maxLevel()) < MAXL ); 
     
     for( int count = refCount; count > 0; --count )
     {

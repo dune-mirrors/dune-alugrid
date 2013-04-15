@@ -94,21 +94,21 @@ namespace ALUGrid
     
     ghostpair_STI getGhost() 
     {
-      assert(_ghostPair.first); 
+      alugrid_assert (_ghostPair.first); 
       return _ghostPair; 
     }
 
     // return local number of fake face 
     int ghostFaceNumber () const 
     { 
-      assert(_ghostPair.second >= 0);
+      alugrid_assert (_ghostPair.second >= 0);
       return _ghostPair.second; 
     } 
 
     // for storage in PllClosure Elements, if packed, we need the point 
     const MacroGhostInfo_STI * getGhostInfo () const
     {
-      assert( _ghInfoPtr );
+      alugrid_assert ( _ghInfoPtr );
       return _ghInfoPtr;
     }
   };
@@ -146,21 +146,21 @@ namespace ALUGrid
     
     ghostpair_STI getGhost() 
     { 
-      assert( _ghostPair.first );
+      alugrid_assert ( _ghostPair.first );
       return _ghostPair; 
     }
 
     // return local number of fake face 
     int ghostFaceNumber () const 
     { 
-      assert( _ghostPair.second >= 0 );
+      alugrid_assert ( _ghostPair.second >= 0 );
       return _ghostPair.second; 
     }
 
     // for storage in PllClosure Elements, if packed, we need the point 
     const MacroGhostInfo_STI * getGhostInfo () const
     {
-      assert( _ghInfoPtr );
+      alugrid_assert ( _ghInfoPtr );
       return _ghInfoPtr; 
     }
   };

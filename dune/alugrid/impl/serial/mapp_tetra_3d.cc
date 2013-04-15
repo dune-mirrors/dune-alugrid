@@ -1,7 +1,7 @@
 // (c) mario ohlberger 1998
 #include <config.h>
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>

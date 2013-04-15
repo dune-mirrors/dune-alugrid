@@ -335,7 +335,7 @@ namespace ALUGrid
   }
 
   template < class A > inline AccessIteratorTT < A >::~AccessIteratorTT () {
-    assert (!ref);
+    alugrid_assert (!ref);
   }
 
   template < class A > inline AccessIteratorTT < A >::HandleBase::
@@ -385,7 +385,7 @@ namespace ALUGrid
   template < class A > inline A & AccessIteratorTT < A >::HandleBase::
   item () const 
   { 
-    assert( ! done ()); 
+    alugrid_assert ( ! done ()); 
     A * a = 0;
     return *a; 
   }
@@ -425,7 +425,7 @@ namespace ALUGrid
   }
 
   template < class A > inline A & AccessIteratorTT < A >::InnerHandle::item () const {
-    assert ( ! done ());
+    alugrid_assert ( ! done ());
     return this->_pw.first->item ();
   }
 
@@ -463,7 +463,7 @@ namespace ALUGrid
   }
 
   template < class A > inline A & AccessIteratorTT < A >::OuterHandle::item () const {
-    assert (! done ());
+    alugrid_assert (! done ());
     return this->_pw.second->item ();
   }
 
@@ -505,7 +505,7 @@ namespace ALUGrid
   }
 
   template < class A > A & listSmartpointer__to__iteratorSTI < A >::item () const {
-    assert (! done ());
+    alugrid_assert (! done ());
     return (*_curr).item ();
   }
 

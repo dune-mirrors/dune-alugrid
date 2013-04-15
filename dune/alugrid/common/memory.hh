@@ -1,7 +1,7 @@
 #ifndef DUNE_ALU3DGRIDMEMORY_HH
 #define DUNE_ALU3DGRIDMEMORY_HH
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <cstdlib>
 #include <vector>
 
@@ -73,7 +73,7 @@ namespace Dune
   protected:
     inline ObjectType * stackObject() 
     {
-      assert( ! objStack().empty() );
+      alugrid_assert ( ! objStack().empty() );
       // finite stack does also return object on pop
       return objStack().pop();
     }

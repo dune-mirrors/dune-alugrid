@@ -1,7 +1,7 @@
 // (c) bernhard schupp 1997 - 1998
 #include <config.h>
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <cmath>
 #include <cstdlib>
 
@@ -77,7 +77,7 @@ namespace ALUGrid
   void TrilinearMapping :: world2map (const alucoord_t (&wld)[3], alucoord_t (&map)[3]) {
           //  Newton - Iteration zum Invertieren der Abbildung f.
     alucoord_t err = 10.0 * _epsilon ;
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     int count = 0 ;
 #endif
     map [0] = map [1] = map [2] = .0 ;
@@ -95,7 +95,7 @@ namespace ALUGrid
       map [1] -= c1 ;
       map [2] -= c2 ;
       err = fabs (c0) + fabs (c1) + fabs (c2) ;
-      assert (count ++ < 1000) ;
+      alugrid_assert (count ++ < 1000) ;
     } while (err > _epsilon) ;
   }
 

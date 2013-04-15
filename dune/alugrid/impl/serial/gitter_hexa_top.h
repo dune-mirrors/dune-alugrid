@@ -558,7 +558,7 @@ namespace ALUGrid
       inline int segmentIndex (const int) const;
       inline bnd_t bndtype (const int i) const 
       { 
-        assert( i==0 || i == 1 );
+        alugrid_assert ( i==0 || i == 1 );
         return _bt[ i ]; 
       }
     public :
@@ -610,7 +610,7 @@ namespace ALUGrid
     _lvl (l), 
     _child( 0 )
   {
-    assert( isRealLine() );
+    alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );  
     return;
   }
@@ -623,8 +623,8 @@ namespace ALUGrid
     _lvl (l), 
     _child( nChild )
   {
-    assert( _child == 0 || _child == 1 );
-    assert( isRealLine() );
+    alugrid_assert ( _child == 0 || _child == 1 );
+    alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );  
     return;
   }
@@ -676,7 +676,7 @@ namespace ALUGrid
   }
 
   template < class A > inline int Hedge1Top < A >::nChild () const {
-    assert( _child == 0 || _child == 1 );
+    alugrid_assert ( _child == 0 || _child == 1 );
     return _child; 
   }
 
@@ -737,7 +737,7 @@ namespace ALUGrid
   }
 
   template < class A >  inline void Hedge1Top < A >::append (inneredge_t * e) {
-    assert (!_bbb && e); 
+    alugrid_assert (!_bbb && e); 
     _bbb = e;
     return;
   }
@@ -748,14 +748,14 @@ namespace ALUGrid
   }
 
   template < class A > Hedge1Top < A > * Hedge1Top < A >::subedge (int n) {
-    assert (n == 0 || n == 1);
-    assert (n ? this->dwnPtr()->next () : this->dwnPtr());
+    alugrid_assert (n == 0 || n == 1);
+    alugrid_assert (n ? this->dwnPtr()->next () : this->dwnPtr());
     return n ? this->dwnPtr()->next () : this->dwnPtr();
   }
 
   template < class A > const Hedge1Top < A > * Hedge1Top < A >::subedge (int n) const {
-    assert (n == 0 || n == 1);
-    assert (n ? this->dwnPtr()->next () : this->dwnPtr());
+    alugrid_assert (n == 0 || n == 1);
+    alugrid_assert (n ? this->dwnPtr()->next () : this->dwnPtr());
     return n ? this->dwnPtr()->next () : this->dwnPtr();
   }
 
@@ -810,31 +810,31 @@ namespace ALUGrid
   }
 
   template < class A > inline int Hface4Top < A >::nChild () const {
-    assert( _nChild >= 0 && _nChild < 4 );
+    alugrid_assert ( _nChild >= 0 && _nChild < 4 );
     return _nChild;
   }
 
   template < class A > typename Hface4Top < A >::myhedge_t * 
   Hface4Top < A >::subedge (int i,int j) {
-    assert(j == 0 || j == 1);
+    alugrid_assert (j == 0 || j == 1);
     return this->myhedge (i)->subedge (j ? 1 - this->twist(i) : this->twist(i));
   }
 
   template < class A > const typename Hface4Top < A >::myhedge_t * 
   Hface4Top < A >::subedge (int i,int j) const {
-    assert(j == 0 || j == 1);
+    alugrid_assert (j == 0 || j == 1);
     return this->myhedge (i)->subedge (j ? 1 - this->twist(i) : this->twist(i));
   }
 
   template < class A > inline typename Hface4Top < A >::innervertex_t * 
   Hface4Top < A >::subvertex (int) {
-    assert (getrule() == myrule_t::iso4);
+    alugrid_assert (getrule() == myrule_t::iso4);
     return inVx();
   }
 
   template < class A > inline const typename Hface4Top < A >::innervertex_t * 
   Hface4Top < A >::subvertex (int) const {
-    assert (getrule() == myrule_t::iso4);
+    alugrid_assert (getrule() == myrule_t::iso4);
     return inVx();
   }
 
@@ -842,7 +842,7 @@ namespace ALUGrid
   Hface4Top < A >::subedge (int n) {
     inneredge_t * e = inEd();
     for (int i = 0; i < n; i ++ ) e = e ? e->next () : 0;
-    assert (e);
+    alugrid_assert (e);
     return e;
   }
 
@@ -850,7 +850,7 @@ namespace ALUGrid
   Hface4Top < A >::subedge (int n) const {
     const inneredge_t * e = inEd();
     for (int i = 0; i < n; i ++ ) e = e ? e->next () : 0;
-    assert (e);
+    alugrid_assert (e);
     return e;
   }
 
@@ -858,7 +858,7 @@ namespace ALUGrid
   Hface4Top < A >::subface (int n) {
     innerface_t * f = dwnPtr();
     for (int i = 0; i < n; i++ ) f = f ? f->next () : 0;
-    assert (f);
+    alugrid_assert (f);
     return f;
   }
 
@@ -866,7 +866,7 @@ namespace ALUGrid
   Hface4Top < A >::subface (int n) const {
     const innerface_t * f = dwnPtr();
     for (int i = 0; i < n; i++ ) f = f ? f->next () : 0;
-    assert (f);
+    alugrid_assert (f);
     return f;
   }
 
@@ -959,7 +959,7 @@ namespace ALUGrid
   }
 
   template < class A > inline void Hface4Top < A >::append (innerface_t * f) {
-    assert (_bbb == 0);
+    alugrid_assert (_bbb == 0);
     _bbb = f;
     return;
   }
@@ -1114,7 +1114,7 @@ namespace ALUGrid
   }
 
   template < class A > inline void Hbnd4Top < A >::append (innerbndseg_t * b) {
-    assert (_bbb == 0);
+    alugrid_assert (_bbb == 0);
     _bbb = b;
     return;
   }
@@ -1208,7 +1208,7 @@ namespace ALUGrid
   }
 
   template < class A > inline void HexaTop < A >::append (HexaTop < A > * h) {
-    assert (_bbb == 0);
+    alugrid_assert (_bbb == 0);
     _bbb = h;
     return;
   }
@@ -1222,7 +1222,7 @@ namespace ALUGrid
   }
 
   template < class A > inline int HexaTop < A >::nChild () const {
-    assert( _nChild >= 0 && _nChild < 8 );
+    alugrid_assert ( _nChild >= 0 && _nChild < 8 );
     return _nChild;
   }
 
@@ -1235,7 +1235,7 @@ namespace ALUGrid
   }
 
   template < class A > void HexaTop < A >::request (myrule_t r) {
-    assert (r.isValid ());
+    alugrid_assert (r.isValid ());
     _req = r;
     return;
   }
@@ -1255,7 +1255,7 @@ namespace ALUGrid
   }
 
   template < class A > inline int Periodic4Top < A >::nChild () const { 
-    assert( _nChild >= 0 && _nChild < 4 );
+    alugrid_assert ( _nChild >= 0 && _nChild < 4 );
     return _nChild;
   }
 
@@ -1308,7 +1308,7 @@ namespace ALUGrid
   }
 
   template < class A > inline void Periodic4Top < A >::append (Periodic4Top < A > * h) { 
-    assert (_bbb == 0);
+    alugrid_assert (_bbb == 0);
     _bbb = h;
     return;
   }
@@ -1337,7 +1337,7 @@ namespace ALUGrid
   template< class A >
   inline int Periodic4Top < A >::segmentIndex ( const int fce ) const
   {
-    assert( fce == 0 || fce == 1 );
+    alugrid_assert ( fce == 0 || fce == 1 );
     return _segmentIndex[ fce ];
   }
 

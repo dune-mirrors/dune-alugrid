@@ -35,7 +35,7 @@ namespace ALUGrid
 
     protected :
       PureElementAccessIterator () {}
-      virtual ~PureElementAccessIterator () { assert (!ref); }
+      virtual ~PureElementAccessIterator () { alugrid_assert (!ref); }
   };
 
   template < class A > class PureElementLeafIterator; 
@@ -136,7 +136,7 @@ namespace ALUGrid
         MyAlloc::clearFreeMemory ();
         // restore saved grid 
         grd = new GitterDuneImpl( backup );
-        assert( grd );
+        alugrid_assert ( grd );
         grd->duneRestore( backup );
       }
       return grd;
@@ -211,10 +211,10 @@ namespace ALUGrid
     indices = in.get();
 
     // set VERBOSE to 20 and you have the indices value printed
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( debugOption( 20 ) )
       std::cout << "INFO: GitterDuneBasis::restoreIndices.indices = " << (int)indices << std::endl;
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
 
     typedef Gitter::Geometric::BuilderIF  BuilderIF;
     enum { numOfIndexManager = BuilderIF::numOfIndexManager };
@@ -231,7 +231,7 @@ namespace ALUGrid
 
       // will fail if numbering was changed 
       // and one forgot to apply changes here 
-      assert( BuilderIF ::IM_Vertices+1 == 4 );
+      alugrid_assert ( BuilderIF ::IM_Vertices+1 == 4 );
 
       // resize and reset 
       for(size_t i=0; i<restoreInfo.size(); ++i)
@@ -277,10 +277,10 @@ namespace ALUGrid
         ++idx;
       }
       this->indexManager( 0 ).setMaxIndex( idx );
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       if( debugOption( 20 ) )
         std::cout << "INFO: GitterDuneBasis::restoreIndices created new leaf indices with size " << idx << "." << std::endl;
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
     }
     else
       std::cerr << "WARNING (ignored): indices (id = " << indices << ") not read in GitterDuneBasis::restoreIndices." << std::endl;
@@ -317,7 +317,7 @@ namespace ALUGrid
     this->_fac = &f;
     this->_fac->ref ++;
 
-    assert( this->_w == 0 );
+    alugrid_assert ( this->_w == 0 );
     // this is the difference to the normal AccessIterator, we insert
     // pureElementIterator, all other things are the same   
     this->_w = this->_fac->iterator(this->_a);

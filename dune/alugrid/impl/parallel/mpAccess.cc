@@ -33,7 +33,7 @@ namespace ALUGrid
     {
       if( std::find (in[ i ].begin(), in[ i ].end(), me) != in[ i ].end()  )
       {
-        assert (i != me);
+        alugrid_assert (i != me);
         if (_linkage.find (i) == _linkage.end ())
         {
           int n = _linkage.size ();

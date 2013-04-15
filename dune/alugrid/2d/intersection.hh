@@ -58,9 +58,9 @@ namespace Dune
     // return reference to local geometry  
     const LocalGeometryImpl &localGeom ( const int aluFace, const int twist, const int corners ) const
     {
-      assert( corners == 3 || corners == 4 );
-      assert( 0 <= aluFace && aluFace < corners );
-      assert( twist == 0 || twist == 1 );
+      alugrid_assert ( corners == 3 || corners == 4 );
+      alugrid_assert ( 0 <= aluFace && aluFace < corners );
+      alugrid_assert ( twist == 0 || twist == 1 );
       return geoms_[ corners-3 ][ aluFace ][ twist ];
     }
 
@@ -159,13 +159,13 @@ namespace Dune
 
       bool isBoundary () const
       {
-        assert( inside() && (index_ < nFaces()) && inside()->neighbour( index_ ) );
+        alugrid_assert ( inside() && (index_ < nFaces()) && inside()->neighbour( index_ ) );
         return inside()->neighbour( index_ )->thinis( ThinelementType::bndel_like );
       }
 
       HBndElType *boundary () const
       {
-        assert( isBoundary() );
+        alugrid_assert ( isBoundary() );
         return (HBndElType *)inside()->neighbour( index_ );
       }
 

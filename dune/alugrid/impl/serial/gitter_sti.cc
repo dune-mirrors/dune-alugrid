@@ -13,12 +13,12 @@
 namespace ALUGrid
 {
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
 #ifdef DEBUG_ALUGRID
   Refcount::Globalcount Refcount::_g;
 
   Refcount::Globalcount::~Globalcount () {
-    assert (_c ? (std::cerr << "**WARNING Refcount::Globalcount::~Globalcount() " << _c 
+    alugrid_assert (_c ? (std::cerr << "**WARNING Refcount::Globalcount::~Globalcount() " << _c 
              << " objects have not been removed correctly!" << std::endl, 1) : 1);
     return;
   }
@@ -308,7 +308,7 @@ namespace ALUGrid
 #endif
   bool Gitter::refine () 
   {
-    assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::refine ()" << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::refine ()" << std::endl, 1) : 1);
     bool x = true;
     leaf_element__macro_element__iterator i (container ());
     // refine marked elements
@@ -337,7 +337,7 @@ namespace ALUGrid
         // this should only be called for tetra 
         // (although default impl for other elements exists and
         //  returns false )
-        assert( i.item ().type() == tetra );
+        alugrid_assert ( i.item ().type() == tetra );
         // stores the result if it is true 
         needConformingClosure |= i.item ().markForConformingClosure();
       }
@@ -385,7 +385,7 @@ namespace ALUGrid
 
   void Gitter::doCoarse() 
   {
-    assert (debugOption (20) ? (std::cout << "**INFO Gitter::coarse ()" << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO Gitter::coarse ()" << std::endl, 1) : 1);
     {
       AccessIterator < helement_STI >::Handle i (container ());
       for( i.first(); ! i.done(); i.next() ) 
@@ -459,7 +459,7 @@ namespace ALUGrid
         {
           Vertex v(3);
           const myvertex_t* vx = item->myvertex( i );
-          assert( vx );
+          alugrid_assert ( vx );
           const alucoord_t (&coord)[ 3 ] = vx->Point();
           // copy coordinates  
           for (int k=0;k<3;++k) v[k] = coord[ k ];
@@ -525,9 +525,9 @@ namespace ALUGrid
           if (!ok)
           {
             if ( item->myhface(0)->nb.front().first->isRealObject() )
-              assert( item->myhface(0)->nb.front().first == item );
+              alugrid_assert ( item->myhface(0)->nb.front().first == item );
             if ( item->myhface(0)->nb.rear().first->isRealObject() )
-              assert( item->myhface(0)->nb.rear().first == item );
+              alugrid_assert ( item->myhface(0)->nb.rear().first == item );
             std::cout << "Problem: " << item << std::endl;
             std::cout << item->myhface(0) << std::endl;
             std::cout << item->myhface(0)->nb.front().first << std::endl;
@@ -546,7 +546,7 @@ namespace ALUGrid
           bool ok = true;
           ok &= item->nb.front().first->isRealObject();
           ok &= item->nb.rear().first->isRealObject();
-          // assert(item->ref>0);
+          // alugrid_assert (item->ref>0);
           vtuFile << ((ok)?1:-1)*item->ref << " ";
         }
       }
@@ -685,8 +685,8 @@ namespace ALUGrid
 
   bool Gitter::adapt () 
   {
-    assert (debugOption (20) ? (std::cout << "**INFO Gitter::adapt ()" << std::endl, 1) : 1);
-    assert (! iterators_attached ());
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO Gitter::adapt ()" << std::endl, 1) : 1);
+    alugrid_assert (! iterators_attached ());
 
     bool needConformingClosure = false;
     bool refined = true;
@@ -706,7 +706,7 @@ namespace ALUGrid
     coarse();
 
     // make sure that no non-conforming element are present in case of bisection 
-    assert( !markForConformingClosure() );
+    alugrid_assert ( !markForConformingClosure() );
 
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
     ++adaptstep;
@@ -755,10 +755,10 @@ namespace ALUGrid
   // backup taking std::ostream 
   void Gitter::backup ( std::ostream &out )
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( debugOption( 20 ) )
       std::cout << "INFO: Gitter::backup ( out = " << out << " )" << std::endl;
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
     backupImpl( out );
   }
 
@@ -803,10 +803,10 @@ namespace ALUGrid
   // restore taking std::istream 
   void Gitter::restore ( std::istream &in )
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( debugOption( 20 ) )
       std::cout << "INFO: Gitter::restore ( in = " << in << " )" << std::endl;
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
     restoreImpl( in );
   }
 
@@ -821,10 +821,10 @@ namespace ALUGrid
 
   void Gitter::refineGlobal ()
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( debugOption( 20 ) )
       std::cout << "INFO: Gitter::refineGlobal()" << std::endl;
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
     const int start = clock ();
     {leaf_element__macro_element__iterator w (container ());
       for (w.first (); ! w.done (); w.next ()) w.item (). tagForGlobalRefinement (); }
@@ -835,10 +835,10 @@ namespace ALUGrid
 
   void Gitter::refineRandom (double p)
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( debugOption( 20 ) )
       std::cout << "INFO: Gitter::refineRandom( p = " << p << " )." << std::endl;
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
     const int start = clock ();
     if( (p >= .0) || (p <= 1.) )
     {
@@ -874,10 +874,10 @@ namespace ALUGrid
 
   void Gitter::notifyMacroGridChanges ()
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     if( debugOption( 20 ) )
       std::cout << "INFO: Gitter::notifyMacroGridChanges()." << std::endl;
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
   }
 
   Gitter::~Gitter ()

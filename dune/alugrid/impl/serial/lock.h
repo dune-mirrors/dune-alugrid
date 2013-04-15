@@ -2,7 +2,7 @@
 #ifndef LOCK_H_INCLUDED
 #define LOCK_H_INCLUDED
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <cstring>
 #include <iostream>
 
@@ -22,7 +22,7 @@ namespace ALUGrid
   : _fname( 0 )
   {
     _fname = new char[ std::strlen( name ) + 100 ];
-    assert( _fname );
+    alugrid_assert ( _fname );
     sprintf (_fname, "%s.lock", name) ;
     FILE *fp = std::fopen( _fname, "w" );
     if( !fp )
@@ -34,11 +34,11 @@ namespace ALUGrid
     else
     {
       // only test in debug mode 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       int test = 
 #endif
       std::fclose( fp );
-      assert (test == 0) ;
+      alugrid_assert (test == 0) ;
     }
   }
 

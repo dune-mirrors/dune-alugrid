@@ -47,7 +47,7 @@ namespace Dune
   ALU2dGridIntersectionBase<GridImp> :: 
   assign(const ALU2dGridIntersectionBase<GridImp> & org) 
   {
-    assert( &factory_ == &org.factory_ ); 
+    alugrid_assert ( &factory_ == &org.factory_ ); 
     walkLevel_ = org.walkLevel_;
     current = org.current;
 
@@ -68,7 +68,7 @@ namespace Dune
   template<class GridImp>
   inline int ALU2dGridIntersectionBase<GridImp> :: level () const 
   {
-    assert( current.inside() );
+    alugrid_assert ( current.inside() );
     return current.inside()->level();
   }
 
@@ -104,7 +104,7 @@ namespace Dune
   template<class GridImp>
   inline int ALU2dGridIntersectionBase<GridImp> :: boundaryId() const 
   {
-    assert( current.inside() );
+    alugrid_assert ( current.inside() );
     // ALUGrid stores negative values, so make 'em positive
     return (current.isBoundary() ? std::abs( current.boundary()->type() ) : 0);
   }
@@ -113,7 +113,7 @@ namespace Dune
   inline size_t ALU2dGridIntersectionBase<GridImp> :: boundarySegmentIndex() const 
   { 
     // only call this method on boundary intersections 
-    assert( current.isBoundary() );
+    alugrid_assert ( current.isBoundary() );
     return current.boundary()->segmentIndex();
   }
 
@@ -129,7 +129,7 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< GridImp >::EntityPointer
   ALU2dGridIntersectionBase< GridImp >::inside() const
   {
-    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
+    alugrid_assert ( (current.inside() != 0) && (current.index_ < current.nFaces()) );
     return EntityPointerImp( factory_, *current.inside(), -1, walkLevel_ );
   }
 
@@ -146,7 +146,7 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< GridImp >::EntityPointer 
   ALU2dGridIntersectionBase< GridImp >::outside() const
   {
-    assert( current.inside() && current.outside() );
+    alugrid_assert ( current.inside() && current.outside() );
     return EntityPointerImp( factory_, *current.outside(), -1, walkLevel_ );
   }   
 
@@ -192,7 +192,7 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase<GridImp>::NormalType
   ALU2dGridIntersectionBase< GridImp >::outerNormal ( const LocalCoordinate &local ) const
   {
-    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
+    alugrid_assert ( (current.inside() != 0) && (current.index_ < current.nFaces()) );
 
     typedef double (&normal_t)[dimworld];
 
@@ -234,14 +234,14 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< GridImp >::LocalGeometry
   ALU2dGridIntersectionBase< GridImp >::geometryInInside () const
   {
-    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
+    alugrid_assert ( (current.inside() != 0) && (current.index_ < current.nFaces()) );
     
     // only in non-conform situation we use default method 
     if( current.useOutside_ )
     {
       if( !intersectionSelfLocal_.valid() )
         intersectionSelfLocal_.buildLocalGeom( inside()->geometry(), geometry() );
-      assert( intersectionSelfLocal_.valid() );
+      alugrid_assert ( intersectionSelfLocal_.valid() );
       return LocalGeometry( intersectionSelfLocal_ );
     }
     else
@@ -257,14 +257,14 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< GridImp >::LocalGeometry
   ALU2dGridIntersectionBase< GridImp >::geometryInOutside () const
   {
-    assert( current.inside() && current.outside() );
+    alugrid_assert ( current.inside() && current.outside() );
     
     // only in non-conform situation we use default method
     if( (current.nFaces() != 3) || !conforming() ) 
     {
       if( !intersectionNeighborLocal_.valid() )
         intersectionNeighborLocal_.buildLocalGeom( outside()->geometry(), geometry() );
-      assert( intersectionNeighborLocal_.valid() );
+      alugrid_assert ( intersectionNeighborLocal_.valid() );
       return LocalGeometry( intersectionNeighborLocal_ );
     }
     else 
@@ -280,7 +280,7 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< GridImp >::Geometry
   ALU2dGridIntersectionBase< GridImp >::geometry () const
   {
-    assert( current.inside() );
+    alugrid_assert ( current.inside() );
 
     if( !intersectionGlobal_.valid() )
     {
@@ -290,7 +290,7 @@ namespace Dune
         intersectionGlobal_.buildGeom( *current.inside(), current.index_ );    
     }
 
-    assert( intersectionGlobal_.valid() );
+    alugrid_assert ( intersectionGlobal_.valid() );
     return Geometry( intersectionGlobal_ );
   }
 
@@ -327,7 +327,7 @@ namespace Dune
   {  
     if (!end)
     {
-      assert(this->walkLevel_ >= 0);    
+      alugrid_assert (this->walkLevel_ >= 0);    
       setFirstItem(*el,wLevel);       
     }
     else
@@ -392,7 +392,7 @@ namespace Dune
   {
     if (!end)
     {
-      assert(this->walkLevel_ >= 0);    
+      alugrid_assert (this->walkLevel_ >= 0);    
       setFirstItem(*el,wLevel);       
     }
     else

@@ -50,7 +50,7 @@ public:
   //! Destructor  
   ~ALU2dGridEntitySeedBase() 
   {
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     // clear pointer 
     clear();
 #endif
@@ -153,7 +153,7 @@ public:
   ALU2dGridEntitySeed(const ImplementationType & item) 
   {
     // this constructor should only be called by codim=0 entity keys
-    assert( false );
+    alugrid_assert ( false );
     abort();
   }
 
@@ -342,7 +342,7 @@ ALU2dGridEntitySeed(const HElementType &item,
   , level_(level)
   , face_(duneFace)
 {
-  assert( (codim == 1) ? (face_ >= 0) : 1 );
+  alugrid_assert ( (codim == 1) ? (face_ >= 0) : 1 );
 }
 
 template<int codim, class GridImp >

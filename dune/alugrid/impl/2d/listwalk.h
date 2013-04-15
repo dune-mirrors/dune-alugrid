@@ -61,7 +61,7 @@ namespace ALU2DGrid
     {}
 
      ~Listagency() { 
-        assert(! busy());
+        alugrid_assert (! busy());
 
         A * curr = first_list;
 
@@ -188,7 +188,7 @@ namespace ALU2DGrid
       virtual int size() { return 0; }
       
       virtual A & getitem() const { 
-        assert( ! done () );
+        alugrid_assert ( ! done () );
         void * p = (void *)(0);  // schlechter Trick ...
         // in der Tat, sehr schlechter Trick, R.K.
         abort();      // .. und Tsch"uss ! 
@@ -335,7 +335,7 @@ namespace ALU2DGrid
 
       A & getitem() const 
       { 
-        assert( curr ); 
+        alugrid_assert ( curr ); 
         return * curr; 
       }
 
@@ -410,7 +410,7 @@ namespace ALU2DGrid
         : agency(a), macro(agency) , pos(0) 
       { 
         stack = new hier_t * [max];
-        assert(stack);
+        alugrid_assert (stack);
       }
 
       Leafwalk(const Leafwalk & w) : agency(w.agency)
@@ -418,7 +418,7 @@ namespace ALU2DGrid
                                    , pos(w.pos)
       {
         stack = new hier_t * [max];
-        assert(stack);
+        alugrid_assert (stack);
         // pos is implicitly set by iterating until w.pos 
         for(int p = 0; p <= w.pos; ++ p) stack [p] = w.stack [p];
       }
@@ -436,7 +436,7 @@ namespace ALU2DGrid
 
         * stack = macro.done() ? 0 : & * macro.getitem();
     
-        for( hier_t * e = stack[pos]; e ? ! e->leaf() : 0; assert(pos < max) ) 
+        for( hier_t * e = stack[pos]; e ? ! e->leaf() : 0; alugrid_assert (pos < max) ) 
 
           stack[ ++ pos] = (e = e->down());
       }
@@ -474,7 +474,7 @@ namespace ALU2DGrid
           * stack = macro.done() ? 0 : & * macro.getitem();
         }
 
-        for( hier_t * e = stack[pos]; e ? ! e->leaf() : 0; assert(pos < max)) 
+        for( hier_t * e = stack[pos]; e ? ! e->leaf() : 0; alugrid_assert (pos < max)) 
           stack[ ++ pos] = (e = e->down());
       }
       
@@ -523,7 +523,7 @@ namespace ALU2DGrid
      
      hier_t & getitem() const 
      {
-        assert( stack[pos] );
+        alugrid_assert ( stack[pos] );
         return * stack[pos];
      }
 
@@ -584,7 +584,7 @@ namespace ALU2DGrid
         : agency(a), macro(agency), pos(0) , depth(d)  
       {
         stack = new hier_t * [depth + 1];
-        assert(stack);
+        alugrid_assert (stack);
       }
 
       Levelwalk( const Levelwalk & w ) 
@@ -594,7 +594,7 @@ namespace ALU2DGrid
         , depth(w.depth) 
       {
         stack = new hier_t * [depth + 1];
-        assert(stack);
+        alugrid_assert (stack);
         // pos is implicitly set by iterating until w.pos 
         for(int p = 0; p <= w.pos; ++p) stack [p] = w.stack [p];
       }
@@ -678,16 +678,16 @@ namespace ALU2DGrid
 
       hier_t & getitem() const 
       {
-        assert( stack[pos] ); 
-        assert( stack[pos]->level() == depth);
+        alugrid_assert ( stack[pos] ); 
+        alugrid_assert ( stack[pos]->level() == depth);
         return * stack[pos];
       }
 
       macro_t & getmacro() const 
       {
-        assert( stack[pos] );
-        assert(stack[pos]->level() == depth);
-        assert(depth==0);
+        alugrid_assert ( stack[pos] );
+        alugrid_assert (stack[pos]->level() == depth);
+        alugrid_assert (depth==0);
         return macro.getitem();
       }
       
@@ -785,7 +785,7 @@ namespace ALU2DGrid
       return (done_ ? NULL : stack[pos]);
     }
     Hier<T>& getitem() const {	
-      assert(!done_);
+      alugrid_assert (!done_);
       return *(stack[pos]);
     }
 
@@ -821,7 +821,7 @@ namespace ALU2DGrid
       
       Listwalkptr(const Listwalkptr & p) : hdl(p.hdl) , a(0)
       { 
-        assert( p.walk );
+        alugrid_assert ( p.walk );
         walk = p.walk->clone(); 
       }
       
@@ -831,7 +831,7 @@ namespace ALU2DGrid
       {
         delete walk;
         hdl = p.hdl;
-        assert( p.walk );
+        alugrid_assert ( p.walk );
         walk = p.walk->clone(); 
         return *this;
       }

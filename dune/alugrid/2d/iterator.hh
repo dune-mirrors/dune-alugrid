@@ -320,7 +320,7 @@ private:
 
   ALU2dGridMarkerVector & marker() 
   { 
-    assert( marker_ );
+    alugrid_assert ( marker_ );
     return *marker_; 
   }
 }; 
@@ -395,7 +395,7 @@ private:
   ALU2dGridMarkerVector * marker_;
   ALU2dGridMarkerVector & marker() 
   { 
-    assert( marker_ );
+    alugrid_assert ( marker_ );
     return *marker_; 
   }
 }; 

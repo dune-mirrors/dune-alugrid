@@ -71,12 +71,12 @@ namespace Dune
       else if( item.second )
         elem = static_cast<IMPLElementType *> (item.second->getGhost().first); 
 
-      assert( elem );
+      alugrid_assert ( elem );
 
       for(int i=0; i<nVx; ++i)
       {
         VertexType * vx = elem->myvertex(i); 
-        assert( vx );
+        alugrid_assert ( vx );
 
         // insert only interior and border vertices 
         if( vx->isGhost() ) continue;
@@ -90,7 +90,7 @@ namespace Dune
         visited_[idx] = 1;
       }
     }
-    assert( count == (int) vxList.size());;
+    alugrid_assert ( count == (int) vxList.size());;
     up2Date_ = true;    
   }
 
@@ -130,7 +130,7 @@ namespace Dune
     
     ElementIteratorType it ( grid, grid.maxLevel() , grid.nlinks() );
 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
     int count = 0;
 #endif
     for( it.first(); !it.done() ; it.next())
@@ -143,13 +143,13 @@ namespace Dune
       else if( item.second )
         elem = static_cast<IMPLElementType *> (item.second->getGhost().first); 
       
-      assert( elem );
+      alugrid_assert ( elem );
       int level = elem->level();
 
       for(int i=0; i<nVx; ++i)
       {
         VertexType * vx = elem->myvertex(i); 
-        assert( vx );
+        alugrid_assert ( vx );
 
         // insert only interior and border vertices 
         if( vx->isGhost() ) continue;
@@ -160,7 +160,7 @@ namespace Dune
         {
           vxpair.first  = vx; 
           vxpair.second = level; 
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
           ++ count;
 #endif
         }
@@ -175,7 +175,7 @@ namespace Dune
     
     //std::cout << count << "c | s " << vxList.size() << "\n";
     // make sure that the found number of vertices equals to stored ones 
-    //assert( count == (int)vxList.size() );
+    //alugrid_assert ( count == (int)vxList.size() );
     up2Date_ = true;    
   }
 
@@ -233,10 +233,10 @@ namespace Dune
     // if we dont have this level return 0 
     if( (level > maxlevel_) || (level < 0) ) return 0;
 
-    assert( codim >= 0);
-    assert( codim < dimension+1 );
+    alugrid_assert ( codim >= 0);
+    alugrid_assert ( codim < dimension+1 );
 
-    assert( sizeCache_ );
+    alugrid_assert ( sizeCache_ );
     return sizeCache_->size(level,codim);
   }
 
@@ -263,10 +263,10 @@ namespace Dune
   alu_inline 
   int ALU3dGrid< elType, Comm >::size ( int codim ) const
   {
-    assert( codim >= 0 );
-    assert( codim <= dimension );
+    alugrid_assert ( codim >= 0 );
+    alugrid_assert ( codim <= dimension );
 
-    assert( sizeCache_ );
+    alugrid_assert ( sizeCache_ );
     return sizeCache_->size(codim);
   }
 
@@ -337,13 +337,13 @@ namespace Dune
       else if( item.second )
         elem = static_cast<IMPLElementType *> (item.second->getGhost().first); 
 
-      assert( elem );
+      alugrid_assert ( elem );
       
       int level = elem->level();
       if(level > testMaxLevel) testMaxLevel = level;
     }
     maxlevel_ = comm().max( testMaxLevel );
-    assert( maxlevel_ == comm().max( maxlevel_ ));
+    alugrid_assert ( maxlevel_ == comm().max( maxlevel_ ));
   }
 
 
@@ -353,7 +353,7 @@ namespace Dune
   void ALU3dGrid< elType, Comm >::calcExtras ()
   {
     // make sure maxLevel is the same on all processes ????
-    //assert( maxlevel_ == comm().max( maxlevel_ ));
+    //alugrid_assert ( maxlevel_ == comm().max( maxlevel_ ));
 
     if(sizeCache_) delete sizeCache_;
     sizeCache_ = new SizeCacheType (*this);
@@ -413,8 +413,8 @@ namespace Dune
   ALU3dGrid< elType, Comm >::levelIndexSet ( int level ) const 
   {
     // check if level fits in vector  
-    assert( level >= 0 );
-    assert( level < (int) levelIndexVec_.size() );
+    alugrid_assert ( level >= 0 );
+    alugrid_assert ( level < (int) levelIndexVec_.size() );
 
     if( levelIndexVec_[level] == 0 )
       levelIndexVec_[level] = 
@@ -431,7 +431,7 @@ namespace Dune
   alu_inline 
   void ALU3dGrid< elType, Comm >::globalRefine ( int refCount )
   {
-    assert( (refCount + maxLevel()) < MAXL ); 
+    alugrid_assert ( (refCount + maxLevel()) < MAXL ); 
     
     for( int count = refCount; count > 0; --count )
     {
@@ -518,14 +518,14 @@ namespace Dune
       {
         val_t & item = w.item();
 
-        assert( item.first || item.second );
+        alugrid_assert ( item.first || item.second );
         IMPLElementType * elem = 0; 
         if( item.first )
           elem = static_cast<IMPLElementType *> (item.first); 
         else if( item.second )
         {
           elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
-          assert( elem );
+          alugrid_assert ( elem );
         }
         elem->resetRefinedTag();
       }
@@ -576,7 +576,7 @@ namespace Dune
 
         typedef double ShortVecType[3];
         ShortVecType * vxvec = new ShortVecType [vxsize];
-        assert( vxvec );
+        alugrid_assert ( vxvec );
         
         for( leafVertices->first(); !leafVertices->done() ; leafVertices->next() )
         {
@@ -748,7 +748,7 @@ namespace Dune
     }
 
 
-    assert(mygrid_ != 0);
+    alugrid_assert (mygrid_ != 0);
 
     // check for element type 
     this->checkMacroGrid ();
@@ -859,7 +859,7 @@ namespace Dune
       {
         derr << "\nERROR: " << elType2Name(elType) << " Grid tries to read a ";
         derr << elType2Name(type) << " macro grid file! \n\n";
-        assert(type == elType);
+        alugrid_assert (type == elType);
         DUNE_THROW(GridError,"\nERROR: " << elType2Name(elType) << " Grid tries to read a " << elType2Name(type) << " macro grid file! ");
       }
     }

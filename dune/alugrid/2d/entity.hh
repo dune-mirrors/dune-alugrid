@@ -155,7 +155,7 @@ public:
   //! return reference to current item 
   ElementType& getItem() const 
   { 
-    assert( item_ );
+    alugrid_assert ( item_ );
     return *item_; 
   }
 
@@ -284,7 +284,7 @@ public:
   template<int cc> 
   int count () const 
   {
-    assert( item_ );
+    alugrid_assert ( item_ );
     return (cc==0) ? 1 : item_->numvertices();
   }
   
@@ -474,7 +474,7 @@ public:
   // return reference to HElement (needed by IntersectionIterator)
   HElementType & getItem() const 
   { 
-    assert( item_ );
+    alugrid_assert ( item_ );
     return *item_; 
   }
   

@@ -44,7 +44,7 @@ namespace ALUGrid
     : GitterBasisPll( filename, mp, ppv ),
       balanceGrid_ ( false )
     {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       __STATIC_myrank = mp.myrank(); 
 #endif
       // if grid is created from backup, then restore ghost cells 
@@ -56,7 +56,7 @@ namespace ALUGrid
     : GitterBasisPll( in, mp, ppv ),
       balanceGrid_( false )
     {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       __STATIC_myrank = mp.myrank(); 
 #endif
       // if grid is created from backup, then restore ghost cells 
@@ -68,7 +68,7 @@ namespace ALUGrid
       : GitterBasisPll ("", mp, 0) 
       , balanceGrid_ (false) 
     {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       __STATIC_myrank = mp.myrank(); 
 #endif
       // if grid is created from backup, then restore ghost cells 
@@ -190,7 +190,7 @@ namespace ALUGrid
         MyAlloc::clearFreeMemory ();
         // restore saved grid 
         grd = new GitterDunePll( backup, mpa );
-        assert( grd );
+        alugrid_assert ( grd );
         grd->duneRestore( backup );
 
         // make sure every process got here

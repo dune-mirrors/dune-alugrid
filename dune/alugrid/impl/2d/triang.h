@@ -262,7 +262,7 @@ namespace ALU2DGrid
         { }
       
       virtual double area() const {
-        assert(periodic_nb);
+        alugrid_assert (periodic_nb);
         return periodic_nb->nbel(0)->area();
       }
 
@@ -273,7 +273,7 @@ namespace ALU2DGrid
 
       void set_pnb(bndel_t *pnb)
       {
-        assert(pnb->type()==bndel_t::periodic);
+        alugrid_assert (pnb->type()==bndel_t::periodic);
         periodic_nb=(Bndel_periodic*)pnb;
 
         if( !leaf() ) {
@@ -284,7 +284,7 @@ namespace ALU2DGrid
 
       int depth() const {
         if (down()) {
-          assert(down()->next() && !down()->next()->next()) ;
+          alugrid_assert (down()->next() && !down()->next()->next()) ;
           const int left = ((Bndel_periodic *)down())->depth();
           const int right = ((Bndel_periodic *)down()->next())->depth();
           return std::max(left,right)+1 ;

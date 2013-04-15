@@ -65,8 +65,8 @@ namespace ALUGrid
   // return list with edges that lie not on given face 
   const std::vector<int> & Gitter::Geometric::Tetra::verticesNotOnFace( const int face ) 
   {
-    assert( face >= 0 );
-    assert( face < 4 );
+    alugrid_assert ( face >= 0 );
+    alugrid_assert ( face < 4 );
     
     static std::vector<int> verticesNotFace[4];
     static bool calculated = false;
@@ -85,8 +85,8 @@ namespace ALUGrid
   // return list with edges that lie not on given face 
   const std::vector<int> & Gitter::Geometric::Tetra::edgesNotOnFace( const int face ) 
   {
-    assert( face >= 0 );
-    assert( face < 4 );
+    alugrid_assert ( face >= 0 );
+    alugrid_assert ( face < 4 );
     
     static std::vector<int> edgesNotFace[4];
     static bool calculated = false;
@@ -123,7 +123,7 @@ namespace ALUGrid
             ++edgeCount;
           }
         }
-        assert( edgeCount == 3 );
+        alugrid_assert ( edgeCount == 3 );
       }
       calculated = true;
     }
@@ -133,8 +133,8 @@ namespace ALUGrid
   // return list with edges that lie not on given face 
   const std::vector<int> & Gitter::Geometric::Tetra::facesNotOnFace( const int face ) 
   {
-    assert( face >= 0 );
-    assert( face < 4 );
+    alugrid_assert ( face >= 0 );
+    alugrid_assert ( face < 4 );
     
     static std::vector<int> facesNotFace[4];
     static bool calculated = false;
@@ -150,7 +150,7 @@ namespace ALUGrid
           facesNotFace[f][count] = i;
           ++count;
         }
-        assert( count == 3 );
+        alugrid_assert ( count == 3 );
       }
       calculated = true;
     }
@@ -216,8 +216,8 @@ namespace ALUGrid
   // return list with edges that lie not on given face 
   const std::vector<int> & Gitter::Geometric::Hexa::verticesNotOnFace( const int face ) 
   {
-    assert( face >= 0 );
-    assert( face < 6 );
+    alugrid_assert ( face >= 0 );
+    alugrid_assert ( face < 6 );
     
     static std::vector<int> verticesNotFace[6];
     static bool calculated = false;
@@ -243,8 +243,8 @@ namespace ALUGrid
 
   const std::vector<int> & Gitter::Geometric::Hexa::edgesNotOnFace( const int face )
   {
-    assert( face >= 0 );
-    assert( face < 6 );
+    alugrid_assert ( face >= 0 );
+    alugrid_assert ( face < 6 );
     
     static std::vector<int> edgesNotFace[6];
     static bool calculated = false;
@@ -278,7 +278,7 @@ namespace ALUGrid
             ++edgeCount;
           }
         }
-        assert( edgeCount == 8 );
+        alugrid_assert ( edgeCount == 8 );
       }
       calculated = true;
     }
@@ -288,8 +288,8 @@ namespace ALUGrid
   // return list with edges that lie not on given face 
   const std::vector<int> & Gitter::Geometric::Hexa::facesNotOnFace( const int face ) 
   {
-    assert( face >= 0 );
-    assert( face < 6 );
+    alugrid_assert ( face >= 0 );
+    alugrid_assert ( face < 6 );
     
     static std::vector<int> facesNotFace[6];
     static bool calculated = false;
@@ -305,7 +305,7 @@ namespace ALUGrid
           facesNotFace[f][count] = i;
           ++count;
         }
-        assert( count == 5 );
+        alugrid_assert ( count == 5 );
       }
       calculated = true;
     }
@@ -791,7 +791,7 @@ namespace ALUGrid
     }
     if (tetraListSize == 0) 
     {
-      assert (_hbndseg3List.size () == 0);
+      alugrid_assert (_hbndseg3List.size () == 0);
       os << hexaListSize << std::endl;
       {
         const hexalist_t::const_iterator end = _hexaList.end ();
@@ -940,7 +940,7 @@ namespace ALUGrid
 
   IndexManagerType&  Gitter::Geometric::BuilderIF::indexManager(int codim)
   {
-    assert( codim >= 0 && codim < numOfIndexManager );
+    alugrid_assert ( codim >= 0 && codim < numOfIndexManager );
     return _indexManagerStorage.get( codim );
   }
 

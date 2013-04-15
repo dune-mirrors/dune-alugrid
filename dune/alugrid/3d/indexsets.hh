@@ -143,7 +143,7 @@ namespace Dune
 
     void extractKey(std::vector<int> &key) const  
     { 
-      assert( key.size() == 4 );
+      alugrid_assert ( key.size() == 4 );
       key[0] = this->_a;
       key[1] = this->_b;
       key[2] = this->_c;
@@ -280,7 +280,7 @@ namespace Dune
         else 
           return nChild_ < org.nChild_;
       }
-      assert( equals(org) );     
+      alugrid_assert ( equals(org) );     
       return false;
     } 
      
@@ -392,7 +392,7 @@ namespace Dune {
       }
       else 
       {
-        assert( elType == tetra );
+        alugrid_assert ( elType == tetra );
         // see dune/alugrid/impl/serial/gitter_mgb.cc 
         // InsertUniqueTetra 
         const int vxKey[4] = {0,1,2,3};
@@ -448,17 +448,17 @@ namespace Dune {
           {
             //std::cout << "Check(codim,num = " << codim<< "," << num <<") failed for k="<<k << " codim = " << i << "\n";
             std::cout << id << " equals " << checkId << "\n";
-            assert( id != checkId );
+            alugrid_assert ( id != checkId );
             DUNE_THROW(GridError," " << id << " equals " << checkId << "\n");
           }
           else 
           {
             bool lesser  = (id < checkId);
             bool greater = (id > checkId);
-            assert( lesser != greater );
+            alugrid_assert ( lesser != greater );
             if( lesser == greater ) 
             {
-              assert( lesser != greater );
+              alugrid_assert ( lesser != greater );
               DUNE_THROW(GridError," lesser equals greater of one id ");
             }
           }
@@ -516,7 +516,7 @@ namespace Dune {
         for (fw.first () ; ! fw.done () ; fw.next ()) 
         {
           val_t & item = fw.item();
-          assert( item.first );
+          alugrid_assert ( item.first );
           VertexType & vx = * (item.first); 
           int idx = vx.getIndex();
           ids_[3][idx] = buildMacroVertexId( vx );
@@ -542,7 +542,7 @@ namespace Dune {
         for (fw.first () ; ! fw.done () ; fw.next ()) 
         {
           val_t & item = fw.item();
-          assert( item.first );
+          alugrid_assert ( item.first );
           HEdgeType & edge = * (item.first); 
           int idx = edge.getIndex();
           
@@ -571,7 +571,7 @@ namespace Dune {
         for (fw.first () ; ! fw.done () ; fw.next ()) 
         {
           val_t & item = fw.item();
-          assert( item.first );
+          alugrid_assert ( item.first );
           HFaceType & face = * (item.first); 
           int idx = face.getIndex();
           ids_[1][idx] = buildMacroFaceId( face );
@@ -598,7 +598,7 @@ namespace Dune {
         for (fw.first () ; ! fw.done () ; fw.next ()) 
         {
           val_t & item = fw.item();
-          assert( item.second );
+          alugrid_assert ( item.second );
           HElementType & elem = * ( item.second->getGhost().first ); 
           int idx = elem.getIndex();
           ids_[0][idx] = buildMacroElementId( elem );
@@ -670,19 +670,19 @@ namespace Dune {
     IdType createId(const typename ImplTraitsType::
         template Codim<cd>::InterfaceType & item , const IdType & creatorId , int nChild )
     {
-      assert( creatorId.isValid() );
+      alugrid_assert ( creatorId.isValid() );
        
       // we have up to 12 internal hexa faces, therefore need 100 offset 
       enum { childOffSet = ((cd == 1) && (elType == hexa)) ? 16 : 8 };
       enum { codimOffSet = 4 };
 
-      assert( nChild < childOffSet );
+      alugrid_assert ( nChild < childOffSet );
       
       int newChild = (creatorId.nChild() * childOffSet ) + nChild;
       int newCodim = (creatorId.codim()  * codimOffSet ) + ( cd + startOffSet_ );
       
       IdType newId( creatorId.getKey() , newChild , newCodim );
-      assert( newId != creatorId );
+      alugrid_assert ( newId != creatorId );
       return newId;
     }
 
@@ -700,7 +700,7 @@ namespace Dune {
     // build ids for all children of this element 
     void buildInteriorElementIds(const HElementType & item , const IdType & fatherId)
     {
-      assert( fatherId.isValid() );
+      alugrid_assert ( fatherId.isValid() );
       
       // build id for inner vertex 
       {
@@ -734,7 +734,7 @@ namespace Dune {
         int numChild = startOffSet_;
         for(const HElementType * child = item.down(); child; child =child->next() )
         {
-          //assert( numChild == child->nChild() );
+          //alugrid_assert ( numChild == child->nChild() );
           buildElementIds(*child, fatherId, numChild);
           ++numChild;
         }
@@ -754,7 +754,7 @@ namespace Dune {
     // build ids for all children of this face 
     void buildInteriorFaceIds(const HFaceType & face, const IdType & faceId)
     {
-      assert( faceId.isValid () );
+      alugrid_assert ( faceId.isValid () );
       
       // build id for inner vertex 
       {
@@ -778,7 +778,7 @@ namespace Dune {
         int child = startOffSet_;
         for(const HFaceType * f = face.down () ; f ; f = f->next ())
         {
-          assert( child == f->nChild()+startOffSet_);
+          alugrid_assert ( child == f->nChild()+startOffSet_);
           buildFaceIds(*f,faceId,child); 
           ++child;
         }
@@ -796,7 +796,7 @@ namespace Dune {
     
     void buildInteriorEdgeIds(const HEdgeType & edge, const IdType & edgeId)
     {
-      assert( edgeId.isValid() );
+      alugrid_assert ( edgeId.isValid() );
 
       // build id for inner vertex 
       {
@@ -809,7 +809,7 @@ namespace Dune {
         int child = startOffSet_;
         for (const HEdgeType * e = edge.down () ; e ; e = e->next ()) 
         {
-          assert( child == e->nChild()+ startOffSet_ );
+          alugrid_assert ( child == e->nChild()+ startOffSet_ );
           buildEdgeIds(*e,edgeId , child ); 
           ++child;
         }
@@ -822,7 +822,7 @@ namespace Dune {
       enum { codim = 3 };
       // inner vertex number is 1 
       ids_[codim][vertex.getIndex()] = createId<codim>(vertex,fatherId,1); 
-      assert( ids_[codim][vertex.getIndex()].isValid() );
+      alugrid_assert ( ids_[codim][vertex.getIndex()].isValid() );
     }
 
     friend class ALU3dGrid< elType, Comm >;
@@ -838,9 +838,9 @@ namespace Dune {
     IdType id (const EntityType & ep) const
     {
       enum { cd = EntityType :: codimension };
-      assert( ids_[cd].find( hset_.index(ep) ) != ids_[cd].end() );
+      alugrid_assert ( ids_[cd].find( hset_.index(ep) ) != ids_[cd].end() );
       const IdType & macroId = ids_[cd][hset_.index(ep)]; 
-      assert( macroId.isValid() );
+      alugrid_assert ( macroId.isValid() );
       return getId(macroId);
     }
 
@@ -848,9 +848,9 @@ namespace Dune {
     template <int codim>
     IdType id (const typename GridType:: template Codim<codim> :: Entity & ep) const
     {
-      assert( ids_[codim].find( hset_.index(ep) ) != ids_[codim].end() );
+      alugrid_assert ( ids_[codim].find( hset_.index(ep) ) != ids_[codim].end() );
       const IdType & macroId = ids_[codim][hset_.index(ep)]; 
-      assert( macroId.isValid() );
+      alugrid_assert ( macroId.isValid() );
       return getId(macroId);
     }
 
@@ -858,9 +858,9 @@ namespace Dune {
     IdType subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
       const int hIndex = hset_.subIndex( e, i, codim );
-      assert( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
+      alugrid_assert ( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
       const IdType &macroId = ids_[ codim ][ hIndex ]; 
-      assert( macroId.isValid() );
+      alugrid_assert ( macroId.isValid() );
       return getId( macroId );
     }
 
@@ -878,7 +878,7 @@ namespace Dune {
         const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
         const HFaceType & face  = *(elem.myhface3(faceNum));
         const IdType & id = ids[face.getIndex()];
-        assert( id.isValid() );
+        alugrid_assert ( id.isValid() );
         set.buildInteriorFaceIds(face,id);
       }
     };
@@ -894,7 +894,7 @@ namespace Dune {
         const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
         const HFaceType & face  = *(elem.myhface4(faceNum));
         const IdType & id = ids[face.getIndex()];
-        assert( id.isValid() );
+        alugrid_assert ( id.isValid() );
         set.buildInteriorFaceIds(face,id);
       }
     };
@@ -905,7 +905,7 @@ namespace Dune {
       {
         enum { elCodim = 0 };
         const IdType & fatherId = ids_[elCodim][item.getIndex()];
-        assert( fatherId.isValid() );
+        alugrid_assert ( fatherId.isValid() );
         buildInteriorElementIds(item, fatherId ); 
       }
 
@@ -921,7 +921,7 @@ namespace Dune {
         const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
         const HEdgeType & edge  = *( elem.myhedge1(i));
         const IdType & id = ids_[edgeCodim][edge.getIndex()];
-        assert( id.isValid() );
+        alugrid_assert ( id.isValid() );
         buildInteriorEdgeIds(edge,id);
       }
       return 0;
@@ -943,11 +943,11 @@ namespace Dune {
         const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
         const HEdgeType & edge  = *( elem.myhedge1(i));
         const HEdgeType * child = edge.down();
-        assert( child ); 
+        alugrid_assert ( child ); 
         if( ids_[2][child->getIndex() ] > zero_ ) continue;
         buildEdgeIds(edge,ids_[2][edge.getIndex()],0);
       }
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       //uniquenessCheck();
 #endif
       */
@@ -1015,7 +1015,7 @@ namespace Dune {
     int id (const EntityType & ep) const
     {
       enum { cd = EntityType :: codimension };
-      assert( hset_.size(cd) < codimMultiplier );
+      alugrid_assert ( hset_.size(cd) < codimMultiplier );
       return codimStart_[cd] + hset_.index(ep);
     }
 
@@ -1024,14 +1024,14 @@ namespace Dune {
     int id (const typename GridType:: template Codim<codim> :: Entity & ep) const
     {
       //enum { cd = EntityType :: codimension };
-      assert( hset_.size(codim) < codimMultiplier );
+      alugrid_assert ( hset_.size(codim) < codimMultiplier );
       return codimStart_[codim] + hset_.index(ep);
     }
 
     //! return subId of given entity
     IdType subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
-      assert( hset_.size( codim ) < codimMultiplier );
+      alugrid_assert ( hset_.size( codim ) < codimMultiplier );
       return codimStart_[ codim ] + hset_.subIndex( e, i, codim );
     }
 

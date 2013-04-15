@@ -1,7 +1,7 @@
 #ifndef __HEADER__GRID
 #define __HEADER__GRID
 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <cmath>
 #include <iostream>
 #include <stack>
@@ -57,7 +57,7 @@ class Basic {
   protected :
 
     Basic() : _idx(-1), refcount(0), _level(0), childNr_(0), numchild(0) {}
-    virtual ~Basic() { assert(!refcount); }
+    virtual ~Basic() { alugrid_assert (!refcount); }
 
     int _idx;
     unsigned char refcount; // 16 byte + 8 vtable
@@ -237,7 +237,7 @@ template < int N > class Vertex : public Listagent < Vertex < N > > // , public 
 
   public :
     virtual void sethdl(IndexProvider *phdl);
-    IndexProvider* gethdl() { assert( hdl ); return hdl; }
+    IndexProvider* gethdl() { alugrid_assert ( hdl ); return hdl; }
 
     virtual ~Vertex(); 
 
@@ -476,7 +476,7 @@ template < int N, int NV > class Thinelement : public Refco_el {
     bndel_triang_t * nbbnd(int l) const
     {
       Thinelement *el=neighbour(l);
-      assert(el != NULL);
+      alugrid_assert (el != NULL);
       return (el->thinis(bndel_like)) ? ((bndel_triang_t *)el) : 0;
     }   
 
@@ -885,7 +885,7 @@ template < int N, int NV > class Bndel : public Thinelement < N,NV > {
 
     int segmentIndex() const 
     { 
-      assert( _segmentIndex >= 0 );
+      alugrid_assert ( _segmentIndex >= 0 );
       return _segmentIndex; 
     }
 

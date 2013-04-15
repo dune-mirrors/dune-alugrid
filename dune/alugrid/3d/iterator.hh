@@ -371,7 +371,7 @@ public:
   //! return true if intersection is conforming 
   bool conforming () const 
   {
-    assert( ( ! connector_.conformingRefinement() ) ? 
+    alugrid_assert ( ( ! connector_.conformingRefinement() ) ? 
       ( !neighbor() || this->connector_.conformanceState() == FaceInfoType::CONFORMING ) : true );  
     // for conforming refinement use base implementation 
     // otherwise its true 
@@ -412,7 +412,7 @@ public:
     template <class ItemType> 
     static int getLevel(const GridImp & grid, const ItemType & item, int level )
     {
-      assert( & item );
+      alugrid_assert ( & item );
       return (level < 0) ? item.level() : level;
     }
   };
@@ -449,7 +449,7 @@ protected:
     iter.first(); 
     if( ! iter.done() )
     {
-      assert( iter.size() > 0 );
+      alugrid_assert ( iter.size() > 0 );
       setItem(grid,it,iter,level);
     } 
     else 
@@ -464,7 +464,7 @@ protected:
   {
     enum { codim = IteratorImp :: codimension };
     val_t & item = iter.item();
-    assert( item.first || item.second );
+    alugrid_assert ( item.first || item.second );
     if( item.first )
     {
       it.updateEntityPointer( item.first , 
@@ -570,7 +570,7 @@ private:
 
   IteratorType & internalIterator () 
   { 
-    assert( iter_ ); 
+    alugrid_assert ( iter_ ); 
     return *iter_; 
   }
 };
@@ -647,7 +647,7 @@ private:
   // return reference to iter_ 
   InternalIteratorType & internalIterator () 
   { 
-    assert( iter_ );
+    alugrid_assert ( iter_ );
     return *iter_;
   }
 };
@@ -678,7 +678,7 @@ class ALU3dGridHierarchicIterator
   public:  
     GhostElementStorage() {}
     explicit GhostElementStorage( const PointerType& ) {}
-    PointerType& operator * () {  PointerType* p = 0; assert( false ); abort(); return *p; }
+    PointerType& operator * () {  PointerType* p = 0; alugrid_assert ( false ); abort(); return *p; }
     const PointerType* ghost () const { return 0; }
     PointerType* nextGhost () const { return 0; }
     PointerType* operator -> () const { return 0; }
@@ -703,7 +703,7 @@ class ALU3dGridHierarchicIterator
     GhostElementStorage( const GhostElementStorage& org ) 
       : ghost_( org.ghost_ ), nextGhost_( org.nextGhost_ ) {}
 
-    PointerType& operator * () { assert( nextGhost_ ); return *nextGhost_; }
+    PointerType& operator * () { alugrid_assert ( nextGhost_ ); return *nextGhost_; }
     const PointerType* ghost () const { return ghost_; }
     PointerType* nextGhost () const { return nextGhost_; }
     PointerType* operator -> () { return nextGhost_; }

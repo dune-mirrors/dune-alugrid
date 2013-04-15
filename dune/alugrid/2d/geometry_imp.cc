@@ -156,14 +156,14 @@ template< int mydim, int cdim, class GridImp >
 inline alu2d_ctype
 ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoordinate &local ) const
 {
-  assert( geoImpl().valid() );
+  alugrid_assert ( geoImpl().valid() );
   if( mydim == cdim ) 
   {
     if( std::abs( geoImpl().det( local ) - jacobianTransposed( local 
                      ).determinant() ) > 1e-8 )
       std::cout << "det = " << geoImpl().det( local ) << "  inv.det " <<
         jacobianTransposed( local ).determinant() << std::endl;
-    assert( std::abs( geoImpl().det( local ) - jacobianTransposed( local
+    alugrid_assert ( std::abs( geoImpl().det( local ) - jacobianTransposed( local
           ).determinant() ) < 1e-8 );
   }
   return geoImpl().det( local );
@@ -173,7 +173,7 @@ ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoord
 template< int mydim, int cdim, class GridImp >
 inline alu2d_ctype ALU2dGridGeometry< mydim, cdim, GridImp >::volume () const
 {
-  assert( geoImpl().valid() );
+  alugrid_assert ( geoImpl().valid() );
   return geoImpl().volume();
 }
 
@@ -200,8 +200,8 @@ inline bool
 ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom( const HElementType &item )
 {
   // check item 
-  assert( &item );
-  assert( mydim == 2 );
+  alugrid_assert ( &item );
+  alugrid_assert ( mydim == 2 );
 
   // update geometry impl 
   geoImpl().update( item );
@@ -216,7 +216,7 @@ template <int mydim, int cdim, class GridImp>
 inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
 buildGeom(const HElementType & item, const int aluFace)
 {
-  assert( mydim == 1 );
+  alugrid_assert ( mydim == 1 );
   // face 1 is twisted 
   const int nf = item.numfaces();
 
@@ -228,7 +228,7 @@ buildGeom(const HElementType & item, const int aluFace)
   //           << " ) " << std::endl;
 
   // check item 
-  assert( &item );
+  alugrid_assert ( &item );
 
 
   // update geometry impl 
@@ -246,9 +246,9 @@ template <int mydim, int cdim, class GridImp>
 inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
 buildGeom(const VertexType & item , const int )
 {
-  assert( mydim == 0 );
+  alugrid_assert ( mydim == 0 );
 
-  assert( &item );
+  alugrid_assert ( &item );
   // update geometry impl 
   // volume is already 1.0 
   geoImpl().update( item.coord() );
@@ -301,8 +301,8 @@ template <int mydim, int cdim, class GridImp>
 inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
 buildLocalGeometry(const int aluFace, const int twist, const int corners)
 {
-  assert( twist == 0 || twist == 1 );
-  assert( mydim == 1 );
+  alugrid_assert ( twist == 0 || twist == 1 );
+  alugrid_assert ( mydim == 1 );
 
   // get coordinates of reference element
   typedef std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > > RefCoord;

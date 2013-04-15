@@ -49,7 +49,7 @@ namespace ALUGridMETIS
     //  std::cout << "load[ " << i << " ] = " << load[ i ] << std::endl;
     */
 
-    assert( rank < numProcs );
+    alugrid_assert ( rank < numProcs );
     // return true if partitioning is ok, should never be false 
     return (rank < numProcs);
   } // end of simple sfc splitting without edges 

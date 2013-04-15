@@ -2,7 +2,7 @@
 #define DUNE_ALU3DGRIDTOPOLOGY_HH
 
 //- system includes 
-#include <cassert>
+#include <dune/alugrid/common/alugrid_assert.hh>
 
 namespace Dune {
 
@@ -171,128 +171,128 @@ namespace Dune {
   //- class ElementTopologyMapping
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::dune2aluFace(int index) {
-    assert(index >= 0 && index < numFaces);
+    alugrid_assert (index >= 0 && index < numFaces);
     return dune2aluFace_[index];
   }
   
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::alu2duneFace(int index) {
-    assert(index >= 0 && index < numFaces);
+    alugrid_assert (index >= 0 && index < numFaces);
     return alu2duneFace_[index];
   }
 
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::dune2aluEdge(int index) {
-    assert(index >= 0 && index < numEdges);
+    alugrid_assert (index >= 0 && index < numEdges);
     return dune2aluEdge_[index];
   }
   
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::alu2duneEdge(int index) {
-    assert(index >= 0 && index < numEdges);
+    alugrid_assert (index >= 0 && index < numEdges);
     return alu2duneEdge_[index];
   }
 
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::dune2aluVertex(int index) 
   {
-    assert(index >= 0 && index < numVertices);
+    alugrid_assert (index >= 0 && index < numVertices);
     return dune2aluVertex_[index];
   }
 
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::alu2duneVertex(int index) {
-    assert(index >= 0 && index < numVertices);
+    alugrid_assert (index >= 0 && index < numVertices);
     return alu2duneVertex_[index];
   }
 
   template< ALU3dGridElementType type >
   inline int ElementTopologyMapping< type >::generic2aluFace ( const int index )
   {
-    assert( (index >= 0) && (index < numFaces) );
+    alugrid_assert ( (index >= 0) && (index < numFaces) );
     return generic2aluFace_[ index ];
   }
 
   template< ALU3dGridElementType type >
   inline int ElementTopologyMapping< type >::alu2genericFace ( const int index )
   {
-    assert( (index >= 0) && (index < numFaces) );
+    alugrid_assert ( (index >= 0) && (index < numFaces) );
     return alu2genericFace_[ index ];
   }
 
   template< ALU3dGridElementType type >
   inline int ElementTopologyMapping< type >::generic2aluVertex ( const int index )
   {
-    assert( (index >= 0) && (index < numVertices) );
+    alugrid_assert ( (index >= 0) && (index < numVertices) );
     return generic2aluVertex_[ index ];
   }
 
   template< ALU3dGridElementType type >
   inline int ElementTopologyMapping< type >::alu2genericVertex ( const int index )
   {
-    assert( (index >= 0) && (index < numVertices) );
+    alugrid_assert ( (index >= 0) && (index < numVertices) );
     return alu2genericVertex_[ index ];
   }
 
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::faceOrientation(int index) {
-    assert(index >= 0 && index < numVertices);
+    alugrid_assert (index >= 0 && index < numVertices);
     return faceOrientation_[index];
   }
 
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::
   dune2aluFaceVertex(int face, int localVertex) {
-    assert(face >= 0 && face < numFaces);
-    assert(localVertex >= 0 && localVertex < numVerticesPerFace);
+    alugrid_assert (face >= 0 && face < numFaces);
+    alugrid_assert (localVertex >= 0 && localVertex < numVerticesPerFace);
     return dune2aluFaceVertex_[face][localVertex];
   }
 
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::
   alu2duneFaceVertex(int face, int localVertex) {
-    assert(face >= 0 && face < numFaces);
-    assert(localVertex >= 0 && localVertex < numVerticesPerFace);
+    alugrid_assert (face >= 0 && face < numFaces);
+    alugrid_assert (localVertex >= 0 && localVertex < numVerticesPerFace);
     return alu2duneFaceVertex_[face][localVertex];
   }
 
   template< ALU3dGridElementType type >
   inline int ElementTopologyMapping< type >::faceVertex ( int face, int local )
   {
-    assert( (face >= 0) && (face < numFaces) );
-    assert( (local >= 0) && (local < numVerticesPerFace) );
+    alugrid_assert ( (face >= 0) && (face < numFaces) );
+    alugrid_assert ( (local >= 0) && (local < numVerticesPerFace) );
     return faceVertex_[ face ][ local ];
   }
 
   //- class FaceTopologyMapping
   template <ALU3dGridElementType type>
   inline int FaceTopologyMapping<type>::dune2aluVertex(int index) {
-    assert(index >= 0 && index < EntityCount<type>::numVerticesPerFace);
+    alugrid_assert (index >= 0 && index < EntityCount<type>::numVerticesPerFace);
     return dune2aluVertex_[index];
   }
 
   template <ALU3dGridElementType type>
   inline int FaceTopologyMapping<type>::dune2aluVertex(int index, int twist) {
-    assert(index >= 0 && index < EntityCount<type>::numVerticesPerFace);
+    alugrid_assert (index >= 0 && index < EntityCount<type>::numVerticesPerFace);
     return invTwist(dune2aluVertex_[index], twist);
   }
 
   template <ALU3dGridElementType type>
   inline int FaceTopologyMapping<type>::alu2duneVertex(int index) {
-    assert(index >= 0 && index < EntityCount<type>::numVerticesPerFace);
+    alugrid_assert (index >= 0 && index < EntityCount<type>::numVerticesPerFace);
     return alu2duneVertex_[index];
   }
 
   template <ALU3dGridElementType type>
   inline int FaceTopologyMapping<type>::alu2duneVertex(int index, int twist) 
   {
-    assert(index >= 0 && index < EntityCount<type>::numVerticesPerFace);
+    alugrid_assert (index >= 0 && index < EntityCount<type>::numVerticesPerFace);
     return alu2duneVertex_[invTwist(index, twist)];
   }
 
   template <ALU3dGridElementType type>
   inline int FaceTopologyMapping<type>::alu2duneEdge(int index) {
-    assert(index >= 0 && index < EntityCount<type>::numEdgesPerFace);
+    alugrid_assert (index >= 0 && index < EntityCount<type>::numEdgesPerFace);
     return alu2duneEdge_[index];
   }
 
@@ -322,7 +322,7 @@ namespace Dune {
 
   template <ALU3dGridElementType type>
   inline int FaceTopologyMapping<type>::dune2aluEdge(int index) {
-    assert(index >= 0 && index < EntityCount<type>::numEdgesPerFace);
+    alugrid_assert (index >= 0 && index < EntityCount<type>::numEdgesPerFace);
     return dune2aluEdge_[index];
   }
 

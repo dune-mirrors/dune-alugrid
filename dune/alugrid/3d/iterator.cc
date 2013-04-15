@@ -29,7 +29,7 @@ alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
 {
   const GridImp& grid = factory.grid();
   iter_  = new IteratorType ( grid, level_, grid.nlinks() );
-  assert( iter_ );
+  alugrid_assert ( iter_ );
   this->firstItem( grid, *this, level_);
 }
 
@@ -77,17 +77,17 @@ template<int codim, PartitionIteratorType pitype, class GridImp>
 alu_inline void ALU3dGridLevelIterator<codim, pitype, GridImp> :: 
 assign(const ThisType & org)
 {
-  assert( iter_ == 0 );
+  alugrid_assert ( iter_ == 0 );
   ALU3dGridEntityPointer <codim,GridImp> :: clone (org);
   level_ = org.level_;
   if( org.iter_ ) 
   {
     iter_ = new IteratorType ( *(org.iter_) );
-    assert( iter_ );
+    alugrid_assert ( iter_ );
     if(!(iter_->done()))
     {
       this->setItem( this->grid(), *this, *iter_, level_ );
-      assert( this->equals(org) );
+      alugrid_assert ( this->equals(org) );
     }
   }
   else 
@@ -116,16 +116,16 @@ template<int cdim, PartitionIteratorType pitype, class GridImp>
 alu_inline typename ALU3dGridLevelIterator<cdim, pitype, GridImp> :: Entity &
 ALU3dGridLevelIterator<cdim, pitype, GridImp> :: dereference () const 
 { 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
   const ALU3dGridLevelIterator<cdim, pitype, GridImp> endIterator ( this->factory_,level_);
   // assert that iterator not equals end iterator 
-  assert( ! this->equals(endIterator) );
+  alugrid_assert ( ! this->equals(endIterator) );
 #endif
   
   // don't dereference empty entity pointer 
-  assert( this->seed_.item() );
-  assert( this->entity_ );
-  assert( this->seed_.item() == & this->entityImp().getItem() );
+  alugrid_assert ( this->seed_.item() );
+  alugrid_assert ( this->entity_ );
+  alugrid_assert ( this->seed_.item() == & this->entityImp().getItem() );
   return (*this->entity_);
 } 
 
@@ -157,7 +157,7 @@ ALU3dGridLeafIterator(const FactoryType& factory, int level ,
   const GridImp& grid = factory.grid();
   // create interior iterator 
   iter_ = new IteratorType ( grid , level , grid.nlinks() );
-  assert( iter_ );
+  alugrid_assert ( iter_ );
   // -1 to identify as leaf iterator 
   this->firstItem(grid,*this,-1);
 }
@@ -206,22 +206,22 @@ template<int cdim, PartitionIteratorType pitype, class GridImp>
 alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: 
 assign (const ThisType & org)
 {
-  assert( iter_ == 0 );
+  alugrid_assert ( iter_ == 0 );
   ALU3dGridEntityPointer <cdim,GridImp> :: clone (org);
 
   if( org.iter_ ) 
   { 
-    assert( !org.iter_->done() );
+    alugrid_assert ( !org.iter_->done() );
     iter_ = new IteratorType ( *(org.iter_) );
-    assert( iter_ );
+    alugrid_assert ( iter_ );
 
     if( !(iter_->done() ))
     {
-      assert( !iter_->done());
-      assert( !org.iter_->done() );
+      alugrid_assert ( !iter_->done());
+      alugrid_assert ( !org.iter_->done() );
       // -1 to identify leaf iterator 
       this->setItem( this->grid(),*this, *iter_,-1);
-      assert( this->equals(org) );
+      alugrid_assert ( this->equals(org) );
     }
   }
   else 
@@ -244,16 +244,16 @@ template<int cdim, PartitionIteratorType pitype, class GridImp>
 alu_inline typename ALU3dGridLeafIterator<cdim, pitype, GridImp> :: Entity &
 ALU3dGridLeafIterator<cdim, pitype, GridImp> :: dereference () const 
 { 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
   const ALU3dGridLeafIterator<cdim, pitype, GridImp> endIterator (this->factory_, this->grid().maxLevel());
   // assert that iterator not equals end iterator 
-  assert( ! this->equals(endIterator) );
+  alugrid_assert ( ! this->equals(endIterator) );
 #endif
   
   // don't dereference empty entity pointer 
-  assert( this->seed_.item() );
-  assert( this->entity_ );
-  assert( this->seed_.item() == & this->entityImp().getItem() );
+  alugrid_assert ( this->seed_.item() );
+  alugrid_assert ( this->entity_ );
+  alugrid_assert ( this->seed_.item() == & this->entityImp().getItem() );
   return (*this->entity_);
 } 
 
@@ -359,7 +359,7 @@ ALU3dGridHierarchicIterator<GridImp>::
 getLevel(const HBndSegType* face) const 
 {
   // return ghost level 
-  assert( face );
+  alugrid_assert ( face );
   return face->ghostLevel();      
 }
 
@@ -369,7 +369,7 @@ ALU3dGridHierarchicIterator<GridImp>::
 getLevel(const HElementType * item) const 
 {
   // return normal level 
-  assert( item );
+  alugrid_assert ( item );
   return item->level();
 }
 template <class GridImp>
@@ -415,7 +415,7 @@ goNextElement(const HItemType* startElem, HItemType * oldelem )
 template <class GridImp>
 alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment () 
 {
-  assert(this->seed_.item() != 0);
+  alugrid_assert (this->seed_.item() != 0);
 
   if( ghostElem_.valid() ) 
   {
@@ -447,9 +447,9 @@ alu_inline typename ALU3dGridHierarchicIterator<GridImp> :: Entity &
 ALU3dGridHierarchicIterator<GridImp> :: dereference () const 
 { 
   // don't dereference empty entity pointer 
-  assert( this->seed_.item() );
-  assert( this->entity_ );
-  assert( this->seed_.item() == & this->entityImp().getItem() );
+  alugrid_assert ( this->seed_.item() );
+  alugrid_assert ( this->entity_ );
+  alugrid_assert ( this->seed_.item() == & this->entityImp().getItem() );
   return (*this->entity_);
 } 
 

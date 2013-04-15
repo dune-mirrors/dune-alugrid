@@ -51,7 +51,7 @@ namespace Dune
                                  "ALUGrid< 2, " << dimensionworld << ", quadrilateral >." );
         break;
       default:
-        assert( geometry.isSimplex() || geometry.isCube() );
+        alugrid_assert ( geometry.isSimplex() || geometry.isCube() );
     }
     if( (geometry.isSimplex() && (vertices.size() != 3))
         || (geometry.isCube() && (vertices.size() != 4)) )
@@ -68,7 +68,7 @@ namespace Dune
                        const int id )
   {
     // lines can be either cube or simplex 
-    assert( geometry.isSimplex() || geometry.isCube() );
+    alugrid_assert ( geometry.isSimplex() || geometry.isCube() );
     if( geometry.dim() != dimension-1 )
     {
       DUNE_THROW( GridError, "Only 1-dimensional boundaries can be inserted "
@@ -119,7 +119,7 @@ namespace Dune
                                  const std::vector< unsigned int > &vertices,
                                  const DuneBoundaryProjectionType *projection )
   {
-    assert( type.isSimplex() || type.isCube() );
+    alugrid_assert ( type.isSimplex() || type.isCube() );
     if( (int)type.dim() != dimension-1 )
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
 
@@ -183,7 +183,7 @@ namespace Dune
     for( size_t i = 0; i < numVx; ++i )
     {
       // if this assertions is thrown vertices were not inserted at first 
-      assert( vertices_.size() > vertices[ i ] );
+      alugrid_assert ( vertices_.size() > vertices[ i ] );
 
       // get global coordinate and copy it 
       const VertexType &x = vertices_[ vertices[ i ] ];
@@ -195,7 +195,7 @@ namespace Dune
       = new BoundarySegmentWrapperType( type, coords, boundarySegment );
     boundaryProjections_[ faceId ] = prj;
 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     // consistency check 
     for( size_t i = 0; i < numVx; ++i )
     {
@@ -501,7 +501,7 @@ namespace Dune
     // swap current boundary ids with an empty vector
     BoundaryIdVector boundaryIds;
     boundaryIds_.swap( boundaryIds );
-    assert( boundaryIds_.size() == 0 );
+    alugrid_assert ( boundaryIds_.size() == 0 );
     
     // add all current boundary ids again (with their reordered keys)
     typedef typename BoundaryIdVector::iterator BoundaryIterator;

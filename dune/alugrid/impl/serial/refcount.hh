@@ -13,7 +13,7 @@ namespace ALUGrid
 
   class Refcount
   {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
 #ifdef DEBUG_ALUGRID
     // Der Globale Z"ahler soll helfen, nicht gel"oschte
     // Gitterobjekte oder Iteratorobjekte zu erkennen.
@@ -33,7 +33,7 @@ namespace ALUGrid
 
     static Globalcount _g;
 #endif // #ifdef DEBUG_ALUGRID
-#endif // #ifndef NDEBUG
+#endif // #ifdef ALUGRIDDEBUG
 
     mutable unsigned char _c;
 

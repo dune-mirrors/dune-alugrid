@@ -20,12 +20,12 @@ namespace ALUGrid
   template< class A > void Hedge1Top < A >::refineImmediate (myrule_t r) 
   {
     if (r != getrule ()) {
-      assert (getrule () == myrule_t::nosplit);
+      alugrid_assert (getrule () == myrule_t::nosplit);
       switch (r) {
         case myrule_t::iso2 :
           {
             int l = 1 + level ();
-            assert ( _inner == 0 );
+            alugrid_assert ( _inner == 0 );
            
             innervertex_t* v0 = static_cast<innervertex_t *> (myvertex(0));
             innervertex_t* v1 = static_cast<innervertex_t *> (myvertex(1));
@@ -39,7 +39,7 @@ namespace ALUGrid
                                   0.5 * (p0[1] + p1[1]),  
                                   0.5 * (p0[2] + p1[2]), 
                                   *v0 );
-            assert (_inner);
+            alugrid_assert (_inner);
 
 #ifdef USE_MALLOC_AT_ONCE
             void* edgeMem[2] = {0,0};
@@ -52,7 +52,7 @@ namespace ALUGrid
             inneredge_t * e1 = new inneredge_t (l, inVx(), v1,     1 );
 #endif
 
-            assert (e0 && e1);
+            alugrid_assert (e0 && e1);
             e0->append (e1);
             _inner->store( e0 );
             _rule = myrule_t::iso2;
@@ -120,7 +120,7 @@ namespace ALUGrid
 
   template< class A >  void Hface4Top < A >::splitISO4 () {
     int l = 1 + level ();
-    assert ( _inner == 0 );
+    alugrid_assert ( _inner == 0 );
 
     {
       // calculate barycenter of face 
@@ -135,14 +135,14 @@ namespace ALUGrid
 
       // myvertex(0) is submitted for the indexmanager reference 
       _inner = new inner_t (l, p[0], p[1], p[2], *v0 );
-      assert (_inner);
+      alugrid_assert (_inner);
     }
     
     myvertex_t * ev0 = myhedge(0)->subvertex (0);
     myvertex_t * ev1 = myhedge(1)->subvertex (0);
     myvertex_t * ev2 = myhedge(2)->subvertex (0);
     myvertex_t * ev3 = myhedge(3)->subvertex (0);
-    assert(ev0 && ev1 && ev2 && ev3);
+    alugrid_assert (ev0 && ev1 && ev2 && ev3);
 
 #ifdef USE_MALLOC_AT_ONCE
     void* edgeMem[4] = {0,0,0,0};
@@ -158,7 +158,7 @@ namespace ALUGrid
     inneredge_t * e2 = new inneredge_t (l, ev2, inVx());
     inneredge_t * e3 = new inneredge_t (l, ev3, inVx());
 #endif
-    assert( e0 && e1 && e2 && e3);
+    alugrid_assert ( e0 && e1 && e2 && e3);
     e0->append(e1);
     e1->append(e2);
     e2->append(e3);
@@ -178,7 +178,7 @@ namespace ALUGrid
     innerface_t * f3 = new innerface_t (l, e3, 0, e2, 1, this->subedge(2,1), twist(2), this->subedge(3,0), twist(3), 3);
 #endif
 
-    assert (f0 && f1 && f2 && f3);  
+    alugrid_assert (f0 && f1 && f2 && f3);  
     f0->append(f1);
     f1->append(f2);
     f2->append(f3);
@@ -192,7 +192,7 @@ namespace ALUGrid
 
   template< class A > void Hface4Top < A >::refineImmediate (myrule_t r) {
     if (r != getrule ()) {
-      assert (getrule () == myrule_t::nosplit);
+      alugrid_assert (getrule () == myrule_t::nosplit);
       switch(r) {
         typedef typename myhedge_t::myrule_t myhedgerule_t;
         case myrule_t::iso4 :
@@ -227,7 +227,7 @@ namespace ALUGrid
       if( getrule() != myrule_t::nosplit )
       {
         std::cerr << "ERROR: Trying to apply refinement rule " << r << " on top of rule " << getrule() << std::endl;
-        assert( false );
+        alugrid_assert ( false );
       }
 
       switch( r )
@@ -247,7 +247,7 @@ namespace ALUGrid
                 f->nb.assign( this->nb ); 
             } 
             else 
-              assert( getrule() == myrule_t::iso4 );
+              alugrid_assert ( getrule() == myrule_t::iso4 );
           }
           return a;
         }
@@ -327,7 +327,7 @@ namespace ALUGrid
 
   template< class A >  void Hbnd4Top < A >::splitISO4 () {
     int l = 1 + level ();
-    assert (_dwn == 0);
+    alugrid_assert (_dwn == 0);
 
     // refine ghost element and fill ghost info 
     typedef typename Gitter::GhostChildrenInfo GhostChildrenInfo; 
@@ -349,7 +349,7 @@ namespace ALUGrid
     innerbndseg_t * b2 = new innerbndseg_t (l, subface (0,2), twist (0), this, ghostInfo.child(2), ghostInfo.face(2));
     innerbndseg_t * b3 = new innerbndseg_t (l, subface (0,3), twist (0), this, ghostInfo.child(3), ghostInfo.face(3));
 #endif 
-    assert (b0 && b1 && b2 && b3);
+    alugrid_assert (b0 && b1 && b2 && b3);
     b0->append(b1);
     b1->append(b2);
     b2->append(b3);
@@ -365,8 +365,8 @@ namespace ALUGrid
     // ODER gibt die Verfeinerung als nicht erf"ullt zur"uck: Dann liegt
     // es am Aufrufer die Verfeinerung nochmals anzuforern.
 
-    assert (b == 0);
-    assert (this->leaf ());
+    alugrid_assert (b == 0);
+    alugrid_assert (this->leaf ());
     if (! bndNotifyBalance (r,b)) 
     {
       // Hier kann der innere Rand [parallel] die Verfeinerung
@@ -442,7 +442,7 @@ namespace ALUGrid
         // der Fl"ache, da getrule () auf myhface4 (0)->getrule () umgeleitet
         // ist.
         
-        assert (this->getrule () == myrule_t::nosplit);
+        alugrid_assert (this->getrule () == myrule_t::nosplit);
         switch (r) 
         {
         case balrule_t::iso4 :
@@ -527,7 +527,7 @@ namespace ALUGrid
     if( ! trMap.affine() ) 
       this->setNonAffineGeometry(); 
 
-    assert( this->level() == l );
+    alugrid_assert ( this->level() == l );
     
     this->setIndex( indexManager().getIndex() );   
     return;
@@ -546,7 +546,7 @@ namespace ALUGrid
     , _nChild(nChild) 
     , _rule (myrule_t::nosplit), _req (myrule_t::nosplit)
   { 
-    assert( this->level() == l );
+    alugrid_assert ( this->level() == l );
 
     this->setIndex( indexManager().getIndex() );   
 
@@ -565,10 +565,10 @@ namespace ALUGrid
                                myvertex(6)->Point(),
                                myvertex(7)->Point() );
 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
       // make sure determinant is ok 
       alucoord_t point[3] = { 0.0, 0.0, 0.0 };
-      assert( triMap.det( point ) > 0 );
+      alugrid_assert ( triMap.det( point ) > 0 );
 #endif
 
       // calculate volume 
@@ -578,14 +578,14 @@ namespace ALUGrid
     }
 
     // make sure that given volume is the same as calulated 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     const double calculatedVolume = 
         QuadraturCube3D < VolumeCalc >
          (TrilinearMapping (myvertex(0)->Point(), myvertex(1)->Point(),
                             myvertex(2)->Point(), myvertex(3)->Point(),
                             myvertex(4)->Point(), myvertex(5)->Point(),
                             myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
-    assert( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
+    alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
 #endif
 
     return;
@@ -596,7 +596,7 @@ namespace ALUGrid
     this->freeIndex( indexManager() );
       
     if (! _inner ) this->detachleafs();
-    else assert(!this->isLeafEntity());
+    else alugrid_assert (!this->isLeafEntity());
     if (_bbb) delete _bbb;
     if (_inner) delete _inner;
     return;
@@ -632,7 +632,7 @@ namespace ALUGrid
   {
     int l = 1 + this->level ();
 
-    assert (_inner == 0 );  
+    alugrid_assert (_inner == 0 );  
     {
       alucoord_t p[3];
       // calculate barycenter 
@@ -644,7 +644,7 @@ namespace ALUGrid
       
       innervertex_t* v0 = static_cast<innervertex_t *> (myvertex (0));
       _inner = new inner_t (l, p[0], p[1], p[2], *v0 );
-      assert (_inner);
+      alugrid_assert (_inner);
     }
 
     myvertex_t * fv0 = myhface4 (0)->subvertex (0);
@@ -653,7 +653,7 @@ namespace ALUGrid
     myvertex_t * fv3 = myhface4 (3)->subvertex (0);
     myvertex_t * fv4 = myhface4 (4)->subvertex (0);
     myvertex_t * fv5 = myhface4 (5)->subvertex (0);
-    assert(fv0 && fv1 && fv2 && fv3 && fv4 && fv5);
+    alugrid_assert (fv0 && fv1 && fv2 && fv3 && fv4 && fv5);
 
 #ifdef USE_MALLOC_AT_ONCE
     void* edgeMem[6] = {0,0,0,0,0,0};
@@ -674,7 +674,7 @@ namespace ALUGrid
     inneredge_t * e5 = new inneredge_t (l, fv5, inVx());
 #endif
 
-    assert(e0 && e1 && e2 && e3 && e4 && e5);
+    alugrid_assert (e0 && e1 && e2 && e3 && e4 && e5);
     e0->append(e1);
     e1->append(e2);
     e2->append(e3);
@@ -711,7 +711,7 @@ namespace ALUGrid
     innerface_t * f11 = new innerface_t (l, e5, 0, e1, 1, this->subedge (1, 7), 1, this->subedge (5, 5), 0 );
 #endif
 
-    assert(f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7 && f8 && f9 && f10 && f11);
+    alugrid_assert (f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7 && f8 && f9 && f10 && f11);
     f0->append(f1);
     f1->append(f2);
     f2->append(f3);
@@ -766,7 +766,7 @@ namespace ALUGrid
     innerhexa_t * h7 = new innerhexa_t (l, f3, -1, subface(1, 3), twist (1), f11, 0, f6, 0, subface(4, 2), twist (4), subface(5, 2), twist (5)   , this, 7, childVolume);
 #endif
 
-    assert(h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7);
+    alugrid_assert (h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7);
     h0->append(h1);
     h1->append(h2);
     h2->append(h3);
@@ -794,7 +794,7 @@ namespace ALUGrid
     // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
     // erzwingen m"ussen und d"urfen.
 
-    assert( getrule() == myrule_t::nosplit );
+    alugrid_assert ( getrule() == myrule_t::nosplit );
     switch( r )
     {
     case myrule_t::iso8 :
@@ -821,7 +821,7 @@ namespace ALUGrid
     {
       if( r != getrule() )
       {
-        assert( getrule() == myrule_t::nosplit );
+        alugrid_assert ( getrule() == myrule_t::nosplit );
         _req = myrule_t::nosplit;
         switch( r )
         {
@@ -849,7 +849,7 @@ namespace ALUGrid
   }
 
   template< class A > bool HexaTop < A >::refineBalance (balrule_t r, int fce) {
-    assert (r == balrule_t::iso4);
+    alugrid_assert (r == balrule_t::iso4);
     if (getrule () == myrule_t::nosplit) {
       if (! myhface4 (fce)->leaf ()) {
         for (int i = 0; i < 6; i ++)
@@ -866,7 +866,7 @@ namespace ALUGrid
   template< class A > bool HexaTop < A >::coarse () {
     if (this->leaf ()) 
     {
-      assert (_req == myrule_t::nosplit || _req == myrule_t::crs);
+      alugrid_assert (_req == myrule_t::nosplit || _req == myrule_t::crs);
       myrule_t w = _req;
       _req = myrule_t::nosplit;
       if (w != myrule_t::crs)
@@ -881,7 +881,7 @@ namespace ALUGrid
     } 
     else 
     {
-      assert (_req == myrule_t::nosplit);
+      alugrid_assert (_req == myrule_t::nosplit);
       bool x = true;
       {
         for (innerhexa_t * h = dwnPtr(); h; h = h->next ()) x &= h->coarse (); 
@@ -997,7 +997,7 @@ namespace ALUGrid
     // die inneren Gitterteile restore'd.
 
     myrule_t r ((char) is.get ());
-    assert(getrule() == myrule_t::nosplit);
+    alugrid_assert (getrule() == myrule_t::nosplit);
     if (r == myrule_t::nosplit) 
     {
     
@@ -1017,7 +1017,7 @@ namespace ALUGrid
     {
       request (r);
       refine ();
-      assert (getrule() == r);
+      alugrid_assert (getrule() == r);
       {for (inneredge_t * e = innerHedge (); e; e = e->next ()) e->restore (is); }
       {for (innerface_t * f = innerHface (); f; f = f->next ()) f->restore (is); }
       {for (innerhexa_t * c = dwnPtr (); c; c = c->next ()) c->restore (is); }
@@ -1065,7 +1065,7 @@ namespace ALUGrid
     // get index 
     this->setIndex( indexManager().getIndex() );
 
-    assert( _up );
+    alugrid_assert ( _up );
     // get segment index from father 
     _segmentIndex[ 0 ] = _up->_segmentIndex[ 0 ];
     _segmentIndex[ 1 ] = _up->_segmentIndex[ 1 ];
@@ -1089,7 +1089,7 @@ namespace ALUGrid
   }
 
   template< class A > typename Periodic4Top < A >::myhedge_t * Periodic4Top < A >::subedge (int i, int j) {  
-    assert (getrule () == myrule_t::iso4);
+    alugrid_assert (getrule () == myrule_t::iso4);
     return (j < 4) ? ((twist (i) < 0) ? myhface4 (i)->myhedge ((8 - j + twist (i)) % 4) :  // aus dem Hexaeder
       myhface4 (i)->myhedge ((j + twist (i)) % 4)) : 
       ((twist (i) < 0) ? myhface4 (i)->subedge ((12 - j + twist (i)) % 4) : 
@@ -1112,14 +1112,14 @@ namespace ALUGrid
 
   template< class A > void Periodic4Top < A >::splitISO4 () 
   {  
-    assert (_dwn == 0);
+    alugrid_assert (_dwn == 0);
 
     const int l = 1 + this->level ();
     innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this, 0);
     innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,3), twist (1), this, 1);
     innerperiodic4_t * p2 = new innerperiodic4_t (l, subface (0,2), twist (0), subface (1,2), twist (1), this, 2);
     innerperiodic4_t * p3 = new innerperiodic4_t (l, subface (0,3), twist (0), subface (1,1), twist (1), this, 3);
-    assert (p0 && p1 && p2 && p3);
+    alugrid_assert (p0 && p1 && p2 && p3);
     p0->append(p1);
     p1->append(p2);
     p2->append(p3);
@@ -1134,7 +1134,7 @@ namespace ALUGrid
     // gerufen und geht davon aus, dass das betroffene Element noch nicht
     // verfeinert ist -> ist ein Blatt der Hierarchie.
 
-    assert (this->leaf());
+    alugrid_assert (this->leaf());
     switch (r) {
       case myrule_t::iso4 :
       
@@ -1277,7 +1277,7 @@ namespace ALUGrid
   void Periodic4Top< A >::doRestore ( InStream_t &is )
   {
     myrule_t r( (char)is.get() );
-    assert( getrule() == myrule_t::nosplit ); // Testen auf unverfeinerten Zustand
+    alugrid_assert ( getrule() == myrule_t::nosplit ); // Testen auf unverfeinerten Zustand
     if( r == myrule_t::nosplit )
     {
       for( int i = 0; i < 2; ++i )
@@ -1305,7 +1305,7 @@ namespace ALUGrid
     else 
     {
       refineImmediate( r );
-      assert( getrule() == r );
+      alugrid_assert ( getrule() == r );
       for( innerperiodic4_t *c = down(); c; c = c->next () )
         c->restore( is );
     }

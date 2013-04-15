@@ -88,7 +88,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   Element < N, NV >::~Element() 
   {
-    assert(_idx>=0);
+    alugrid_assert (_idx>=0);
     IndexProvider* hdl = gethdl();
     hdl->freeIndex(IndexProvider::IM_Elements,_idx);
 
@@ -249,8 +249,8 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Element < N, NV >::setrefine(int fce) 
   {
-    assert( numfaces() == 3 && numvertices() == 3 );
-    assert( 0<=fce );
+    alugrid_assert ( numfaces() == 3 && numvertices() == 3 );
+    alugrid_assert ( 0<=fce );
     fce=mod(fce);
     vertex_t *tmp_v[3]={connect.vtx[0],connect.vtx[1],connect.vtx[2]};
     thinelement_t *tmp_n[3]={connect.nb[0],connect.nb[1],connect.nb[2]};
@@ -352,7 +352,7 @@ namespace ALU2DGrid
       _area /= ( numvertices()==3 ? 3.:2. );
     }
 
-    assert(_area > 0.0);
+    alugrid_assert (_area > 0.0);
   }
 
   // ***************************************************
@@ -442,7 +442,7 @@ namespace ALU2DGrid
           }
         }
       }
-      assert(o);  // Entartet!
+      alugrid_assert (o);  // Entartet!
       if (o<0)
       {
         switchorientation(1,nf-1);
@@ -492,13 +492,13 @@ namespace ALU2DGrid
   void Element < N, NV >::addhvtx(vertex_t *invtx, thinelement_t *lnb, thinelement_t *rnb,int fce)
   {
     if( invtx ) {
-      assert(rnb);
-      assert(lnb);
+      alugrid_assert (rnb);
+      alugrid_assert (lnb);
       if( !connect.hvtx[fce] )
         connect.hvtx[fce] = new vtx_btree_t(connect.vtx[mod(fce+1)],lnb,rnb);
       connect.hvtx[fce]->insert(invtx,lnb,rnb);
     } else {
-      assert(!connect.hvtx[fce]); 
+      alugrid_assert (!connect.hvtx[fce]); 
     }
   }
 
@@ -507,18 +507,18 @@ namespace ALU2DGrid
   {
     if (connect.hvtx[fce]->count()==1) 
     {
-      assert(connect.hvtx[fce]->getHead()==vtx);
+      alugrid_assert (connect.hvtx[fce]->getHead()==vtx);
       delete connect.hvtx[fce];
       connect.hvtx[fce] = 0;
     } 
     else 
     {
-#ifndef NDEBUG
+#ifdef ALUGRIDDEBUG
       // only used in assert 
       bool found=
 #endif
         connect.hvtx[fce]->remove(vtx);
-      assert(found);
+      alugrid_assert (found);
     }
   }
 
@@ -526,7 +526,7 @@ namespace ALU2DGrid
   Bndel < N, NV >::~Bndel() 
   {
     IndexProvider* hdl = gethdl();
-    assert(_idx>=0);
+    alugrid_assert (_idx>=0);
     hdl->freeIndex(IndexProvider::IM_Bnd,_idx);
 
     if (connect.edge) 
@@ -543,9 +543,9 @@ namespace ALU2DGrid
   template < int N, int NV >
   int Bndel < N,NV >::facevertex(int , int j) const {
    
-    assert(0 <= j) ;
+    alugrid_assert (0 <= j) ;
     
-    assert(j < connect.nv) ;
+    alugrid_assert (j < connect.nv) ;
     
     return j ;
     
@@ -554,7 +554,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Bndel < N,NV >::edge_vtx(int e, vertex_t * (&v) [c::nv]) const {
 
-    assert(e < connect.nv) ;
+    alugrid_assert (e < connect.nv) ;
 
     v[0] = connect.vtx[e ++ ] ;
 
@@ -565,7 +565,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   typename Bndel < N,NV >::vertex_t * Bndel < N,NV >::vertex(int i) const {
 
-    assert(0 <= i);
+    alugrid_assert (0 <= i);
 
     i%=connect.nv;
    
@@ -576,7 +576,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Bndel < N,NV >::nbconnect(int fce, thinelement_t * n, int b) {
 
-    assert(!fce) ;
+    alugrid_assert (!fce) ;
    
     connect.nb = n ; 
 
@@ -585,7 +585,7 @@ namespace ALU2DGrid
   }
   template < int N, int NV >
   void Bndel < N,NV >::edgeconnect(int fce, Edge * n) { 
-    assert(0 <= fce) ;
+    alugrid_assert (0 <= fce) ;
     connect.edge = n ; 
     n->attach();
   }
@@ -629,7 +629,7 @@ namespace ALU2DGrid
 
       in >> c ;
 
-      assert(-1 <= c && c < l) ;
+      alugrid_assert (-1 <= c && c < l) ;
 
       if(c != -1) set((vertex_t *)v[c], i) ;
     }
@@ -649,7 +649,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   int Bndel < N, NV >::get_splitpoint(int fce, double pos, double (&ppoint) [ncoord]) const
   {
-    assert( fce == 0 );
+    alugrid_assert ( fce == 0 );
 
     const double (&c0)[ncoord] = connect.vtx[0]->coord();
     const double (&c1)[ncoord] = connect.vtx[1]->coord();
@@ -668,9 +668,9 @@ namespace ALU2DGrid
       int li=0,lret=0;
 
       double ldiv,lx,ly,lvx=0.0,lvy=0.0,lt=0.0;
-      assert(fabs(  lf(connect.vtx[0]->coord()[0])
+      alugrid_assert (fabs(  lf(connect.vtx[0]->coord()[0])
                   - connect.vtx[0]->coord()[1]) <= 2.0 * ltol);
-      assert(fabs(  lf(connect.vtx[1]->coord()[0])
+      alugrid_assert (fabs(  lf(connect.vtx[1]->coord()[0])
       - connect.vtx[1]->coord()[1]) <= 2.0 * ltol);
 
       lvx = connect.vtx[0]->coord()[1] - connect.vtx[1]->coord()[1];
@@ -777,7 +777,7 @@ namespace ALU2DGrid
                               nconf_vtx_t *ncv,int nconfDeg,Refco::tag_t default_ref,
                               prolong_basic_t *pro_el)
   {
-    assert(leaf());
+    alugrid_assert (leaf());
 
     if (this->is(Refco::ref))
       this->mark(default_ref);
@@ -802,7 +802,7 @@ namespace ALU2DGrid
       }
       else
       {
-        assert(this->thinis(this->bndel_like));
+        alugrid_assert (this->thinis(this->bndel_like));
         numchild = this->split(els,a,*b,ncv,this->triang_bnd,nconfDeg,default_ref,pro_el);
       }
 

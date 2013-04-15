@@ -37,13 +37,13 @@ namespace ALU2DGrid
 
      int getIndex(int indextype) 
      {
-       assert( indextype >= 0 && indextype < numOfIndexManager2d );
+       alugrid_assert ( indextype >= 0 && indextype < numOfIndexManager2d );
        return indexmanager[indextype].getIndex();
      }
 
      void freeIndex(int indextype, int index) 
      {
-       assert( indextype >= 0 && indextype < numOfIndexManager2d );
+       alugrid_assert ( indextype >= 0 && indextype < numOfIndexManager2d );
        indexmanager[indextype].freeIndex(index);
      }
 
@@ -51,7 +51,7 @@ namespace ALU2DGrid
      int indexManagerSize (int cd) const 
      {
        // only for elements, edges, and vertices 
-       assert(cd<3 && cd>=0);
+       alugrid_assert (cd<3 && cd>=0);
        return indexmanager[cd].getMaxIndex();
      }
      
@@ -198,14 +198,14 @@ namespace ALU2DGrid
 
      void projectVertex ( const bndel_t *bndel, const double local, double (&global) [ncoord] ) const
      {
-       assert( bndel );
+       alugrid_assert ( bndel );
        if( _projectVertex )
          (*_projectVertex)( static_cast< const hbndel_t * >( bndel ), local, global );
      }
 
      void projectVertex ( const element_t *element, const double (&local) [2], double (&global) [ncoord] ) const
      {
-       assert( element );
+       alugrid_assert ( element );
        if( _projectVertex )
          (*_projectVertex)( static_cast< const helement_t * >( element ), local, global );
      }

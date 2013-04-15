@@ -109,7 +109,7 @@ namespace Dune
       void operator ++ () { ++ refCount_; }
 
       //! decrease reference count 
-      void operator -- () { assert( refCount_ > 0 ); --refCount_; }
+      void operator -- () { alugrid_assert ( refCount_ > 0 ); --refCount_; }
 
       //! return true if object has no references anymore 
       bool operator ! () const { return refCount_ == 0; }
@@ -122,7 +122,7 @@ namespace Dune
       static inline void copy(const CoordPtrType& p,
                               CoordinateVectorType& c)
       { 
-        assert( cdim == 3 );
+        alugrid_assert ( cdim == 3 );
         c[0] = p[0];
         c[1] = p[1];
         c[2] = p[2];
@@ -195,14 +195,14 @@ namespace Dune
       // return coordinate vector 
       inline const CoordinateVectorType& operator [] (const int i) const
       {
-        assert( valid() );
-        assert( i>=0 && i<corners_ );
+        alugrid_assert ( valid() );
+        alugrid_assert ( i>=0 && i<corners_ );
         return coord_[i];
       }
 
       inline MappingType& mapping() 
       { 
-        assert( valid() );
+        alugrid_assert ( valid() );
         if( status_ == buildmapping ) return map_;
 
         map_.buildMapping( coord_[0] );
@@ -214,7 +214,7 @@ namespace Dune
       template <class CoordPtrType>
       inline void update(const CoordPtrType& p0)
       {
-        assert( corners_ == 1 );
+        alugrid_assert ( corners_ == 1 );
         copy( p0, coord_[0] );
         // we need to update the mapping 
         status_ = updated ;
@@ -243,14 +243,14 @@ namespace Dune
       // return coordinate vector 
       inline const CoordinateVectorType& operator [] (const int i) const
       {
-        assert( valid() );
-        assert( i>=0 && i<corners_ );
+        alugrid_assert ( valid() );
+        alugrid_assert ( i>=0 && i<corners_ );
         return coord_[i];
       }
 
       inline MappingType& mapping() 
       { 
-        assert( valid() );
+        alugrid_assert ( valid() );
         if( status_ == buildmapping ) return map_;
 
         map_.buildMapping( coord_[0], coord_[1] );
@@ -263,7 +263,7 @@ namespace Dune
       inline void update(const CoordPtrType& p0,
                          const CoordPtrType& p1)
       {
-        assert( corners_ == 2 );
+        alugrid_assert ( corners_ == 2 );
         copy( p0, coord_[0] );
         copy( p1, coord_[1] );
         status_ = updated;
@@ -292,8 +292,8 @@ namespace Dune
       // return coordinate vector 
       inline const CoordinateVectorType& operator [] (const int i) const
       {
-        assert( valid() );
-        assert( i>=0 && i<corners_ );
+        alugrid_assert ( valid() );
+        alugrid_assert ( i>=0 && i<corners_ );
         return coord_[i];
       }
 
@@ -312,7 +312,7 @@ namespace Dune
       // return mapping (always up2date)
       inline MappingType& mapping()
       {
-        assert( valid() );
+        alugrid_assert ( valid() );
         if( status_ == buildmapping ) return map_;
 
         map_.buildMapping( coord_[0], coord_[1], coord_[2] );
@@ -349,8 +349,8 @@ namespace Dune
       // return coordinate vector 
       inline const CoordinateVectorType& operator [] (const int i) const
       {
-        assert( valid() );
-        assert( i>=0 && i<corners_ );
+        alugrid_assert ( valid() );
+        alugrid_assert ( i>=0 && i<corners_ );
         return coord_[i];
       }
 
@@ -371,7 +371,7 @@ namespace Dune
       // return mapping (always up2date)
       inline MappingType& mapping()
       {
-        assert( valid() );
+        alugrid_assert ( valid() );
         if( status_ == buildmapping ) return map_;
 
         map_.buildMapping( coord_[0], coord_[1], coord_[2], coord_[3] );
@@ -421,9 +421,9 @@ namespace Dune
 
       const alu3d_ctype* point( const int i ) const 
       {
-        assert( valid() );
-        assert( i>=0 && i<corners_ );
-        assert( coordPtr_[i] );
+        alugrid_assert ( valid() );
+        alugrid_assert ( i>=0 && i<corners_ );
+        alugrid_assert ( coordPtr_[i] );
         return coordPtr_[ i ];
       }
         
@@ -489,7 +489,7 @@ namespace Dune
       // return mapping (always up2date)
       inline MappingType& mapping()
       {
-        assert( valid() );
+        alugrid_assert ( valid() );
         if( status_ == buildmapping ) return map_;
 
         map_.buildMapping( point( 0 ), point( 1 ), point( 2 ), point( 3 ),
@@ -548,9 +548,9 @@ namespace Dune
 
       const alu3d_ctype* point( const int i ) const
       {
-        assert( valid() );
-        assert( i>=0 && i<corners_ );
-        assert( coordPtr_[ i ] );
+        alugrid_assert ( valid() );
+        alugrid_assert ( i>=0 && i<corners_ );
+        alugrid_assert ( coordPtr_[ i ] );
         return coordPtr_[ i ];
       }
         
@@ -608,7 +608,7 @@ namespace Dune
       // return mapping (always up2date)
       inline MappingType& mapping()
       {
-        assert( valid() );
+        alugrid_assert ( valid() );
         if( status_ == buildmapping ) return map_;
 
         map_.buildMapping( point( 0 ), point( 1 ), point( 2 ), point( 3 ) );
@@ -780,7 +780,7 @@ namespace Dune
     // return reference to geometry implementation 
     GeometryImplType& geoImpl() const 
     { 
-      assert( geoImpl_ ); 
+      alugrid_assert ( geoImpl_ ); 
       return *geoImpl_;
     }
 

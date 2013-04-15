@@ -39,13 +39,13 @@ namespace ALUGrid
       os.readObject ( _vx[i] );
     }
 
-#ifndef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     for( int i=0; i<noVx; ++i )
     {
       for( int j=0; j<noVx; ++j)
       {
         if( j == i ) continue;
-        assert( _vx[ i ] != _vx[ j ] );
+        alugrid_assert ( _vx[ i ] != _vx[ j ] );
       }
     }
 #endif
@@ -61,14 +61,14 @@ namespace ALUGrid
       os.readObject (pr[2]);
     }
 
-    assert( _fce != invalidFace );
+    alugrid_assert ( _fce != invalidFace );
   }
 
   MacroGhostInfoHexa::
   MacroGhostInfoHexa(const Gitter::Geometric::hexa_GEO * hexa, 
                      const int fce)
   {
-    assert( points == this->nop() );
+    alugrid_assert ( points == this->nop() );
     int oppFace = Gitter::Geometric::hexa_GEO::oppositeFace[fce];
     for(int vx=0; vx<points; vx++)
     {
@@ -89,9 +89,9 @@ namespace ALUGrid
 
   MacroGhostInfoTetra::MacroGhostInfoTetra ( const Gitter::Geometric::tetra_GEO *tetra, const int fce )
   {
-    assert( points == this->nop() );
+    alugrid_assert ( points == this->nop() );
     const Gitter::Geometric::VertexGeo * vertex = tetra->myvertex( fce );
-    assert( vertex );
+    alugrid_assert ( vertex );
     for(int vx=0; vx<points; ++vx)
     {
       this->_vxface[vx] = vertex->ident();

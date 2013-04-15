@@ -38,7 +38,7 @@ namespace ALUGrid
             std::cout << "edge " << face->myhedge( e )->myvertex( 0 ) << " " <<
               face->myhedge( e )->myvertex( 1 ) << std::endl;
           }
-          assert( false );
+          alugrid_assert ( false );
         }
       }
 
@@ -53,7 +53,7 @@ namespace ALUGrid
         {
           std::cout << "Edge " << i << "  " << face->myhedge( i ) << std::endl;
           std::cout << "Edge " << f << "  " << face->myhedge( f ) << std::endl;
-          assert( false );
+          alugrid_assert ( false );
         }
       }
     }
@@ -289,7 +289,7 @@ namespace ALUGrid
 
         static const BisectionInfo& instance( const myrule_t& rule ) 
         { 
-          assert( rule == myrule_t :: e01 ||
+          alugrid_assert ( rule == myrule_t :: e01 ||
                   rule == myrule_t :: e12 || 
                   rule == myrule_t :: e20 || 
                   rule == myrule_t :: e23 || 
@@ -312,7 +312,7 @@ namespace ALUGrid
         {
           static const face3rule_t rules[ 3 ] = { face3rule_t :: e01, face3rule_t :: e12, face3rule_t :: e20 };
 
-          assert( checkFace( face, face->nChild() ) );
+          alugrid_assert ( checkFace( face, face->nChild() ) );
 
           for(int j=0; j<3; ++j ) 
           {
@@ -326,7 +326,7 @@ namespace ALUGrid
             }
           }
 
-          assert( false );
+          alugrid_assert ( false );
           abort();
           return rules[ 0 ];
         }
@@ -364,16 +364,16 @@ namespace ALUGrid
           info.caller().splitEdge( tetra );
         }
 
-        const CallSplitIF& caller() const { assert( _caller ); return *_caller; }
+        const CallSplitIF& caller() const { alugrid_assert ( _caller ); return *_caller; }
       };
       // end BisectionInfo 
 
       // return true if further refinement is needed to create conforming closure 
       virtual bool markForConformingClosure () 
       {
-        assert( myGrid()->conformingClosureNeeded() );
+        alugrid_assert ( myGrid()->conformingClosureNeeded() );
         // if an edge exits, that has children, we also have to refine this tetra 
-        assert( nEdges() == 6 );
+        alugrid_assert ( nEdges() == 6 );
         for (int e=0; e < 6; ++e)
         {
           if( myhedge( e )->down() )
@@ -388,8 +388,8 @@ namespace ALUGrid
       // mark edges to prohibit coarsening 
       virtual void markEdgeCoarsening () 
       { 
-        assert( this->myGrid()->conformingClosureNeeded() );
-        assert( this->nEdges() == 6 );
+        alugrid_assert ( this->myGrid()->conformingClosureNeeded() );
+        alugrid_assert ( this->nEdges() == 6 );
         // nothing to do for macro element 
         if ( _lvl == 0 ) return;
 
@@ -489,7 +489,7 @@ namespace ALUGrid
           cout << " ) " << endl;
 
           cout << rule << " not valid " << endl;
-          //assert( false );
+          //alugrid_assert ( false );
         }
   #endif
       }
@@ -505,7 +505,7 @@ namespace ALUGrid
           { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 },
           { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs }
         };
-        assert( int(_vxMap[ 0 ]) != int(_vxMap[ vxSecond ]) );
+        alugrid_assert ( int(_vxMap[ 0 ]) != int(_vxMap[ vxSecond ]) );
         return rules[ int(_vxMap[ 0 ]) ][ int(_vxMap[ vxSecond ]) ]; 
       }
 
@@ -665,7 +665,7 @@ namespace ALUGrid
       inline int segmentIndex (const int) const;
       inline bnd_t bndtype (const int i) const 
       {
-        assert( i==0 || i==1 );
+        alugrid_assert ( i==0 || i==1 );
         return _bt[ i ];
       } 
     public :
@@ -744,7 +744,7 @@ namespace ALUGrid
   }
 
   template < class A > inline int Hface3Top < A > :: nChild () const {
-    assert( _nChild >= 0 && _nChild < 4 );
+    alugrid_assert ( _nChild >= 0 && _nChild < 4 );
     return _nChild;
   }
 
@@ -765,55 +765,55 @@ namespace ALUGrid
   }
 
   template < class A > inline typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: subvertex (int) {
-    assert (getrule() == myrule_t :: iso4);
+    alugrid_assert (getrule() == myrule_t :: iso4);
     return 0;
   }
 
   template < class A > inline const typename Hface3Top < A > :: innervertex_t * Hface3Top < A > :: subvertex (int) const {
-    assert (getrule() == myrule_t :: iso4);
+    alugrid_assert (getrule() == myrule_t :: iso4);
     return 0;
   }
 
   template < class A > inline typename Hface3Top < A > :: myhedge_t * Hface3Top < A > :: subedge (int i,int j) {
-    assert(j == 0 || j == 1);
+    alugrid_assert (j == 0 || j == 1);
     return myhedge (i)->subedge (j ? 1 - twist(i) : twist(i));
   }
 
   template < class A > inline const typename Hface3Top < A > :: myhedge_t * Hface3Top < A > :: subedge (int i,int j) const {
-    assert(j == 0 || j == 1);
+    alugrid_assert (j == 0 || j == 1);
     return myhedge (i)->subedge (j ? 1 - twist(i) : twist(i));
   }
 
   template < class A > inline typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge (int n) {
     inneredge_t * e = inEd();
     for (int i = 0; i < n; ++i ) e = e ? e->next () : 0;
-    assert (e);
+    alugrid_assert (e);
     return e;
   }
 
   template < class A > inline const typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge (int n) const {
     const inneredge_t * e = inEd();
     for (int i = 0; i < n; ++i ) e = e ? e->next () : 0;
-    assert (e);
+    alugrid_assert (e);
     return e;
   }
 
   template < class A > inline typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface (int n) {
     innerface_t * f = dwnPtr();
     for (int i = 0; i < n; i++ ) f = f ? f->next () : 0;
-    assert (f);
+    alugrid_assert (f);
     return f;
   }
 
   template < class A > inline const typename Hface3Top < A > :: innerface_t * Hface3Top < A > :: subface (int n) const {
     const innerface_t * f = dwnPtr();
     for (int i = 0; i < n; i++ ) f = f ? f->next () : 0;
-    assert (f);
+    alugrid_assert (f);
     return f;
   }
 
   template < class A > inline void Hface3Top < A > :: append (innerface_t * f) {
-    assert (!_bbb);
+    alugrid_assert (!_bbb);
     _bbb = f;
     return;
   }
@@ -846,9 +846,9 @@ namespace ALUGrid
       cout << "Determinant of " << this << " is wrong" <<endl;
       cout << "normal: " << n[0] << "," << n[1] << "," << n[2] << endl;
     }
-    assert( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) >= 1e-8 );
+    alugrid_assert ( (n[0]*n[0] + n[1]*n[1] + n[2]*n[2] ) >= 1e-8 );
   #endif
-    assert( checkFace( this, nChild ) );
+    alugrid_assert ( checkFace( this, nChild ) );
     return;
   }
 
@@ -863,7 +863,7 @@ namespace ALUGrid
     _rule (myrule_t :: nosplit)
   {
     this->setIndex( indexManager().getIndex() );
-    assert( checkFace( this, nChild() ) );
+    alugrid_assert ( checkFace( this, nChild() ) );
   }
 
   template < class A > inline Hface3Top < A > :: ~Hface3Top () 
@@ -910,7 +910,7 @@ namespace ALUGrid
     _bt (bt),
     _lvl (l) 
   {
-    assert( this->myGrid()->ghostCellsEnabled() && _bt == A::closure ? gh != 0 : true );
+    alugrid_assert ( this->myGrid()->ghostCellsEnabled() && _bt == A::closure ? gh != 0 : true );
     // store ghost element 
     typedef Gitter :: ghostpair_STI ghostpair_STI;
     this->setGhost ( ghostpair_STI (gh , gFace) );
@@ -986,7 +986,7 @@ namespace ALUGrid
   }
 
   template < class A > inline void Hbnd3Top < A > :: append (innerbndseg_t * b) {
-    assert (_bbb == 0);
+    alugrid_assert (_bbb == 0);
     _bbb = b;
     return;
   }
@@ -1039,7 +1039,7 @@ namespace ALUGrid
   }
 
   template < class A > inline int TetraTop < A > :: nChild () const {
-    assert( _nChild >= 0 && _nChild < 8 );
+    alugrid_assert ( _nChild >= 0 && _nChild < 8 );
     return _nChild;
   }
 
@@ -1091,7 +1091,7 @@ namespace ALUGrid
   }
 
   template < class A > inline void TetraTop < A > :: append (TetraTop < A > * h) {
-    assert (_bbb == 0);
+    alugrid_assert (_bbb == 0);
     _bbb = h;
     return;
   }
@@ -1107,12 +1107,12 @@ namespace ALUGrid
   // --request 
   template < class A > inline void TetraTop < A > :: request (myrule_t r) 
   {
-    assert (r.isValid ());
+    alugrid_assert (r.isValid ());
 
     if( r == myrule_t :: bisect )
     {
       // this can only be used when conforming closure is enabled 
-      assert( this->myGrid()->conformingClosureNeeded() );
+      alugrid_assert ( this->myGrid()->conformingClosureNeeded() );
 
       // we always split edge 0 and 3 following 
       // the idea of Stevenson, Nochetto, Veser, Siebert 
@@ -1174,7 +1174,7 @@ namespace ALUGrid
     this->setIndex( indexManager().getIndex() );
     
     // get segment index from father
-    assert( _up );
+    alugrid_assert ( _up );
     _segmentIndex[ 0 ] = _up->_segmentIndex[ 0 ];
     _segmentIndex[ 1 ] = _up->_segmentIndex[ 1 ];
 
@@ -1202,12 +1202,12 @@ namespace ALUGrid
   }
 
   template < class A > inline int Periodic3Top < A > :: segmentIndex (const int fce) const {
-    assert( fce == 0  || fce == 1 );
+    alugrid_assert ( fce == 0  || fce == 1 );
     return _segmentIndex[ fce ];
   }
 
   template < class A > inline int Periodic3Top < A > :: nChild () const {
-    assert( _nChild >= 0 && _nChild < 4 );
+    alugrid_assert ( _nChild >= 0 && _nChild < 4 );
     return _nChild;
   }
 
@@ -1261,7 +1261,7 @@ namespace ALUGrid
   template< class A >
   inline void Periodic3Top< A >::append ( Periodic3Top< A > * h )
   {
-    assert (_bbb == 0);
+    alugrid_assert (_bbb == 0);
     _bbb = h;
     return;
   }

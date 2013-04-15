@@ -372,8 +372,8 @@ namespace Dune
     int getLevel ( const VertexType &vertex ) const
     {
       const int idx = vertex.getIndex();
-      assert( idx >= 0 );
-      assert( idx < (int)size());
+      alugrid_assert ( idx >= 0 );
+      alugrid_assert ( idx < (int)size());
       const ItemType & p = vertexList_[idx];
       if( p.first == 0 )
         return vertex.level();
@@ -425,14 +425,14 @@ namespace Dune
     static const typename ALU3dImplTraits< tetra, Comm >::GEOFaceType *
     getFace( const typename ALU3dImplTraits< tetra, Comm >::GEOElementType& elem, int index)
     {
-      assert(index >= 0 && index < 4);
+      alugrid_assert (index >= 0 && index < 4);
       return elem.myhface3( ElementTopologyMapping< tetra >::dune2aluFace(index) );
     }
 
     static const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType*
     getFace( const typename ALU3dImplTraits< hexa, Comm >::GEOElementType &elem, int index )
     {
-      assert(index >= 0 && index < 6);
+      alugrid_assert (index >= 0 && index < 6);
       return elem.myhface4( ElementTopologyMapping< hexa >::dune2aluFace(index) );
     }
   };

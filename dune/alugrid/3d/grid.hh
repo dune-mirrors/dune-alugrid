@@ -880,13 +880,13 @@ namespace Dune
 
     virtual GitterImplType *createALUGrid ( const std::string &macroName )
     {
-      assert( communications_ );
+      alugrid_assert ( communications_ );
       return communications_->createALUGrid( macroName, vertexProjection(), conformingRefinement() );
     }
 
     virtual GitterImplType *createALUGrid ( std::istream& stream )
     {
-      assert( communications_ );
+      alugrid_assert ( communications_ );
       return communications_->createALUGrid( stream, vertexProjection(), conformingRefinement() );
     }
 
@@ -927,14 +927,14 @@ namespace Dune
 
     int getLevelOfLeafVertex ( const typename ALU3dImplTraits< elType, Comm >::VertexType &vertex ) const
     {
-      assert( leafVertexList_.up2Date() );
+      alugrid_assert ( leafVertexList_.up2Date() );
       return leafVertexList_.getLevel(vertex);
     }
       
     VertexListType & getVertexList(int level) const 
     {
-      assert( level >= 0 );
-      assert( level <= maxLevel() );
+      alugrid_assert ( level >= 0 );
+      alugrid_assert ( level <= maxLevel() );
       VertexListType & vxList = vertexList_[level];
       if(!vxList.up2Date()) vxList.setupVxList(*this,level);
       return vxList; 
@@ -942,25 +942,25 @@ namespace Dune
     
     ALU3dGridItemListType & getGhostLeafList(int codim) const
     {
-      assert( codim >= 1 );
-      assert( codim <= 3 );
+      alugrid_assert ( codim >= 1 );
+      alugrid_assert ( codim <= 3 );
       return ghostLeafList_[codim-1];
     }
     
     ALU3dGridItemListType & getGhostLevelList(int codim, int level) const
     {
-      assert( codim >= 1 );
-      assert( codim <= 3 );
+      alugrid_assert ( codim >= 1 );
+      alugrid_assert ( codim <= 3 );
 
-      assert( level >= 0 );
-      assert( level <= maxLevel() );
+      alugrid_assert ( level >= 0 );
+      alugrid_assert ( level <= maxLevel() );
       return ghostLevelList_[codim-1][level];
     }
     
     ALU3dGridItemListType & getEdgeList(int level) const 
     { 
-      assert( level >= 0 );
-      assert( level <= maxLevel() );
+      alugrid_assert ( level >= 0 );
+      alugrid_assert ( level <= maxLevel() );
       return levelEdgeList_[level]; 
     }
 
@@ -996,21 +996,21 @@ namespace Dune
       else 
       {
         // pointer can be zero (which is emulates the identity mapping then)
-        assert( bndVec_ );
-        assert( segmentIndex < (int) bndVec_->size() );
+        alugrid_assert ( bndVec_ );
+        alugrid_assert ( segmentIndex < (int) bndVec_->size() );
         return (*bndVec_)[ segmentIndex ];
       }
     }
 
     const Communications &communications () const
     {
-      assert( communications_ );
+      alugrid_assert ( communications_ );
       return *communications_;
     }
 
     const GridObjectFactoryType& factory() const { 
 #ifdef USE_SMP_PARALLEL
-      assert( (int) factoryVec_.size() > GridObjectFactoryType :: threadNumber() );
+      alugrid_assert ( (int) factoryVec_.size() > GridObjectFactoryType :: threadNumber() );
       return factoryVec_[ GridObjectFactoryType :: threadNumber() ];
 #else 
       return factory_; 

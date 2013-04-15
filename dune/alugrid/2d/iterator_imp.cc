@@ -76,7 +76,7 @@ operator = (const ThisType & org)
   iter_    =  org.iter_;
 
   // there is only one reference, so we don't copy
-  assert(&marker_ == &org.marker_);
+  alugrid_assert (&marker_ == &org.marker_);
   return *this;
 }
 
@@ -173,7 +173,7 @@ operator = (const ThisType & org)
   iter_    =  org.iter_;
 
   // there is only one reference, so we don't copy
-  assert(&marker_ == &org.marker_);
+  alugrid_assert (&marker_ == &org.marker_);
   return *this;
 }
 
@@ -190,7 +190,7 @@ inline void ALU2dGridLeafIterator<1, pitype, GridImp>::increment() {
 
   int goNext = goNextElement();  
   if (goNext) {    
-    assert( (eltype == ALU2DSPACE triangle && face_==3) || 
+    alugrid_assert ( (eltype == ALU2DSPACE triangle && face_==3) || 
             (eltype == ALU2DSPACE quadrilateral && face_==4) );
 
     // go next element 
@@ -229,9 +229,9 @@ inline void ALU2dGridLeafIterator<1, pitype, GridImp>::increment() {
 template<PartitionIteratorType pitype, class GridImp> 
 inline int ALU2dGridLeafIterator<1, pitype, GridImp>::goNextElement() 
 {
-  assert(face_>=0);            
+  alugrid_assert (face_>=0);            
   const ElementType* item = this->seed_.item();
-  assert( item );
+  alugrid_assert ( item );
   int elIdx = item->getIndex();
 
   while (face_ < item->numfaces() ) {
@@ -400,7 +400,7 @@ operator = (const ThisType & org)
   iter_    = org.iter_;
   marker_  = org.marker_;
 
-  assert(marker_ == org.marker_);
+  alugrid_assert (marker_ == org.marker_);
   return *this;
 }
 
@@ -418,7 +418,7 @@ inline void ALU2dGridLevelIterator<1, pitype, GridImp>::increment ()
   if(endIter_)  return ;              
 
   IteratorType & iter = iter_;
-  assert(myFace_>=0);         
+  alugrid_assert (myFace_>=0);         
     
   int goNext = 1;  
   item_ = &iter->getitem();
@@ -437,7 +437,7 @@ inline void ALU2dGridLevelIterator<1, pitype, GridImp>::increment ()
   
   if (goNext) 
   {         
-    assert( (eltype == ALU2DSPACE triangle && myFace_==3) || 
+    alugrid_assert ( (eltype == ALU2DSPACE triangle && myFace_==3) || 
             (eltype == ALU2DSPACE quadrilateral && myFace_==4) );
 
     iter->next();
@@ -545,7 +545,7 @@ operator = (const ThisType & org)
   iter_    = org.iter_;
   marker_  = org.marker_;
 
-  assert(marker_ == org.marker_);
+  alugrid_assert (marker_ == org.marker_);
   return *this;
 }
 
@@ -564,7 +564,7 @@ inline void ALU2dGridLevelIterator<2, pitype, GridImp>::increment () {
     return ;        
   
   IteratorType & iter = iter_;           
-  assert(myFace_>=0);       
+  alugrid_assert (myFace_>=0);       
 
   int goNext = 1;  
   item_ = &iter->getitem();
@@ -584,7 +584,7 @@ inline void ALU2dGridLevelIterator<2, pitype, GridImp>::increment () {
   }
   
   if (goNext) {         
-    assert( (eltype == ALU2DSPACE triangle && myFace_==3) || 
+    alugrid_assert ( (eltype == ALU2DSPACE triangle && myFace_==3) || 
             (eltype == ALU2DSPACE quadrilateral && myFace_==4) );
 
     iter->next();
@@ -709,7 +709,7 @@ goNextElement(HElementType * oldelem )
 template<class GridImp>
 inline void ALU2dGridHierarchicIterator<GridImp>::increment()
 {
-  assert( this->seed_.item() != 0);
+  alugrid_assert ( this->seed_.item() != 0);
 
   HElementType * nextItem = goNextElement( this->seed_.item() );
   if(!nextItem)
