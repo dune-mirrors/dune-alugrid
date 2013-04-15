@@ -389,7 +389,7 @@ namespace ALUGrid
     {
       assert( rank != _me );
 
-      map_t::const_iterator vxmapEnd = _vxmap.end();
+      const map_t::const_iterator vxmapEnd = _vxmap.end();
 
       int id ;
       os.readObject ( id );
@@ -409,6 +409,24 @@ namespace ALUGrid
         os.readObject( id );
       }
     }
+
+    void printVertexLinkage()
+    {
+      AccessIterator < vertex_STI >::Handle w ( _containerPll );
+      for (w.first (); ! w.done (); w.next ()) 
+      {
+        vertex_STI& vertex = w.item();
+        std::vector< int > s = vertex.estimateLinkage() ;
+        const size_t size = s.size() ;
+        if( size > 0 ) 
+        {
+          std::cout << "Vx[ " << vertex.ident() << " ] = ";
+          for( size_t i=0; i<size ; ++i ) 
+            std::cout << s[ i ] << ",";
+          std::cout << std::endl;
+        }
+      }
+    }
   };
 
   void GitterPll::MacroGitterPll::vertexLinkageEstimateGCollect (MpAccessLocal & mpAccess) 
@@ -423,6 +441,7 @@ namespace ALUGrid
         ObjectStream os;
         // data handle 
         UnpackVertexLinkage data( *this, me );
+
         // pack data 
         data.pack( me, os );
 
@@ -447,6 +466,8 @@ namespace ALUGrid
       {
         useAllgather = false ;
         // make sure every process caught an exception 
+        // this needs to be revised since the exception 
+        // might only be caught on a few processes 
         mpAccess.barrier();
       }
     }
@@ -455,8 +476,14 @@ namespace ALUGrid
     {
       // data handle 
       UnpackVertexLinkage data( *this, me );
+
+      //std::cout <<"Print first linkage" << std::endl;
+      //data.printVertexLinkage();
+      //std::cout <<"Exchange data " << std::endl;
       // exchange all-to-all 
       mpAccess.allToAll( data );
+
+      //data.printVertexLinkage();
     }
   }
 
@@ -599,7 +626,7 @@ namespace ALUGrid
     identU3 += u3 ;
     identU4 += u4 ;
 
-    if (debugOption (2)) 
+    //if (debugOption (2)) 
     {
       std::cout.precision (3);
       std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";

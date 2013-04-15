@@ -89,18 +89,26 @@ namespace ALUGrid
     int getSize ();
     int getRank ();
     // return new tag number for the exchange messages
-    static int getMessageTag() 
+    static int getMessageTag( const unsigned int icrement ) 
     {
       static int tag = messagetag + 2 ;
       // increase tag counter 
-      ++tag ;
+      const int retTag = tag;
+      tag += icrement ;
       // the MPI standard guaratees only up to 2^15-1
+      // this needs to be revised for the all-to-all communication 
       if( tag >= 32767 ) 
       {
         // reset tag to initial value 
         tag = messagetag + 2 ;
       }
-      return tag;
+      return retTag;
+    }
+
+    // return new tag number for the exchange messages
+    static int getMessageTag() 
+    {
+      return getMessageTag( 1 );
     }
 
   public:  

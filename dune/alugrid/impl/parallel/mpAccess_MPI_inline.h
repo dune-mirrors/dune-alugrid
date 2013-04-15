@@ -725,19 +725,10 @@ namespace ALUGrid
       // get mpi communicator
       MPI_Comm comm = _mpAccess.communicator();
 
+      assert( _nLinks > 0 );
+
       // create send and recv buffers 
       std::vector< ObjectStream > sendBuffers( _nLinks );
-      std::vector< ObjectStream > recvBuffers( _nLinks );
-
-      ALUGridFiniteStack< int, 1024 > sendLinks; 
-
-      // don't push 0 to sendLinks because this is used for the first message
-      for( int l=_nLinks-1; l > 0 ; --l )
-      {
-        sendLinks.push( l );
-      }
-
-      assert( _nLinks > 0 );
 
       int tag = _tag ;
 
@@ -762,8 +753,10 @@ namespace ALUGrid
       {
         const int nLinks = ( (totalRecv + _nLinks) <= totalMesg ) ? _nLinks : totalMesg - totalRecv ;
         // get received vector 
-        std::vector< bool > linkReceived( _nLinks, false );
+        std::vector< bool > linkReceived( nLinks, false );
 
+        // we need one receive buffer 
+        ObjectStream  recvBuff ;
         int received = 0 ;
         while( received < nLinks ) 
         {
@@ -772,22 +765,27 @@ namespace ALUGrid
             if( ! linkReceived[ l ] ) 
             {
               // checks for message and if received also fills osRecv
-              if( checkAndReceive( comm, source, tag+l, recvBuffers[ l ] ) )
+              if( checkAndReceive( comm, source, tag+l, recvBuff ) )
               {
-                // get link number and send data to next process 
-                int link = sendLinks.pop();
-                sendBuffers[ link ].clear();
-                sendBuffers[ link ].writeStream( recvBuffers[ l ] );
-                sendLink( link, dest, _tag+link, sendBuffers[ link ], comm );
+                // send to next process with increased link number 
+                int link = l+1;
+                // only if we are not the last receiver 
+                if( link < nLinks ) 
+                {
+                  ObjectStream& sendBuff = sendBuffers[ link ];
+                  sendBuff.clear();
+                  sendBuff.writeStream( recvBuff );
+                  sendLink( link, dest, tag+link, sendBuff, comm );
+                }
 
                 int rank; 
                 // read rank from where the message came 
-                recvBuffers[ l ].readObject( rank );
+                recvBuff.readObject( rank );
 
                 // unpack data 
-                dataHandle.unpack( rank, recvBuffers[ l ] );
+                dataHandle.unpack( rank, recvBuff );
                 // reset read-write position
-                recvBuffers[ l ].clear();
+                recvBuff.clear();
 
                 ++received ;
                 linkReceived[ l ] = true ;
@@ -806,12 +804,6 @@ namespace ALUGrid
           MY_INT_TEST MPI_Waitall ( nLinks, _request, sta);
           assert (test == MPI_SUCCESS);
           delete [] sta;
-        }
-
-        sendLinks.clear();
-        for( int l=_nLinks-1; l >= 0 ; --l )
-        {
-          sendLinks.push( l );
         }
 
         // increase msg tags 
@@ -927,7 +919,8 @@ namespace ALUGrid
   {
     // note: for the non-blocking exchange the message tag 
     // should be different each time to avoid MPI problems 
-    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag(), psize() );
+    const int links = psize()-1;
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag( links ), links );
     nonBlockingExchange.allToAll( handle );
   }
 
