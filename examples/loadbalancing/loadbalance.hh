@@ -83,7 +83,7 @@ class ZoltanLoadBalanceHandle
 
 private:
   typedef typename Grid::GlobalIdSet GlobalIdSet;
-  typedef typename GlobalIdSet::IdType gIdType;
+  typedef typename GlobalIdSet::IdType GIdType;
   static const int dimension = Grid :: dimension;
   static const int NUM_GID_ENTRIES = 4;
   template< int codim >
@@ -112,6 +112,7 @@ private:
     int fixed_entities;
     std::vector<int> fixed_GID;
     std::vector<int> fixed_Process;
+    FIXED_ELEMENTS() : fixed_GID(0), fixed_Process(0) {}
   } FIXED_ELEMENTS;
   typedef struct{      /* Zoltan will partition vertices, while minimizing edge cuts */
     int numMyVertices;  /* number of vertices that I own initially */
@@ -122,6 +123,7 @@ private:
     int *nborIndex;     /* index into nborGID array of edge's vertices */
     ZOLTAN_ID_TYPE *nborGID;       /* Vertices of edge edgeGID[i] begin at nborGID[nborIndex[i]] */
     FIXED_ELEMENTS fixed_elmts;
+    HGRAPH_DATA() : vtxGID(0), edgeGID(0), nborIndex(0), nborGID(0) {}
   } HGRAPH_DATA;
 public:
   typedef typename Codim< 0 > :: Entity Element;
