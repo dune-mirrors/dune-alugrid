@@ -16,20 +16,23 @@ examples_HEADERS = \
   problem-transport.hh datamap.hh      fvscheme.hh           problem-ball.hh \
   problem.hh           threadmanager.hh paralleldgf.hh
 
-check_PROGRAMS = main_transport main_ball main_euler
+check_PROGRAMS = main_transport main_ball main_euler 
 
 main_transport_SOURCES = main.cc
-main_transport_CPPFLAGS = $(AM_CPPFLAGS) $(USE_OMP) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DTRANSPORT $(ZOLTAN_CPPFLAGS)
+main_transport_CPPFLAGS = $(AM_CPPFLAGS) $(USE_OMP) $(DUNEMPICPPFLAGS) $(ALL_PKG_CPPFLAGS) $(GRIDDIM_CPPFLAGS) -DTRANSPORT 
 main_transport_LDFLAGS = $(AM_LDFLAGS) $(ALL_PKG_LDFLAGS) $(USE_OMP) $(DUNEMPILDFLAGS)
 main_transport_LDADD = $(LDADD) $(ALL_PKG_LIBS) $(DUNEMPILIBS)
 
 main_ball_SOURCES = main.cc
-main_ball_CPPFLAGS = $(AM_CPPFLAGS) $(USE_OMP) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DBALL $(ZOLTAN_CPPFLAGS)
-main_ball_LDFLAGS = $(AM_LDFLAGS) $(ALL_PKG_LDFLAGS) $(USE_OMP) $(DUNEMPILDFLAGS)
-main_ball_LDADD = $(LDADD) $(ALL_PKG_LIBS) $(DUNEMPILIBS)
+# main_ball_CPPFLAGS = $(AM_CPPFLAGS) $(USE_OMP) $(DUNEMPICPPFLAGS) $(ALL_PKG_CPPFLAGS) $(GRIDDIM_CPPFLAGS) -DBALL
+# main_ball_LDFLAGS = $(AM_LDFLAGS) $(ALL_PKG_LDFLAGS) $(USE_OMP) $(DUNEMPILDFLAGS)
+# main_ball_LDADD = $(LDADD) $(ALL_PKG_LIBS) $(DUNEMPILIBS)
+main_ball_CPPFLAGS = $(AM_CPPFLAGS) $(USE_OMP) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DBALL 
+main_ball_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS) $(USE_OMP) 
+main_ball_LDADD = $(LDADD) $(DUNEMPILIBS) 
 
 main_euler_SOURCES = main.cc
-main_euler_CPPFLAGS = $(AM_CPPFLAGS) $(USE_OMP) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DEULER $(ZOLTAN_CPPFLAGS)
+main_euler_CPPFLAGS = $(AM_CPPFLAGS) $(USE_OMP) $(DUNEMPICPPFLAGS) $(ALL_PKG_CPPFLAGS) $(GRIDDIM_CPPFLAGS) -DEULER 
 main_euler_LDFLAGS = $(AM_LDFLAGS) $(ALL_PKG_LDFLAGS) $(USE_OMP) $(DUNEMPILDFLAGS)
 main_euler_LDADD = $(LDADD) $(ALL_PKG_LIBS) $(DUNEMPILIBS)
 
