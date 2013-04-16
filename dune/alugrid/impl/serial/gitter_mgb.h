@@ -263,7 +263,7 @@ namespace ALUGrid
   }
 
   inline bool MacroGridBuilder::debugOption (int level) {
-#ifndef ALUGRIDDEBUG
+#ifdef ALUGRIDDEBUG
     return (getenv ("VERBOSE_MGB") ? ( atoi (getenv ("VERBOSE_MGB")) > level ? true : (level == 0)) : false);
 #else 
     return false;
