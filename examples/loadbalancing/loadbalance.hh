@@ -124,6 +124,14 @@ private:
     ZOLTAN_ID_TYPE *nborGID;       /* Vertices of edge edgeGID[i] begin at nborGID[nborIndex[i]] */
     FixedElements fixed_elmts;
     HGraphData() : vtxGID(0), edgeGID(0), nborIndex(0), nborGID(0) {}
+    ~HGraphData() { freeMemory();}
+    void freeMemory() 
+    {
+      free(nborGID); 
+      free(nborIndex);
+      free(edgeGID);
+      free(vtxGID);
+    }
   };
 public:
   typedef typename Codim< 0 > :: Entity Element;
@@ -143,6 +151,17 @@ public:
   // returns true if user defined partitioning needs to be readjusted 
   bool repartition ()
   { 
+    if (!first_)
+    {
+      Zoltan_LB_Free_Part(&(new_partitioning_.importGlobalGids), 
+                   &(new_partitioning_.importLocalGids), 
+                   &(new_partitioning_.importProcs), 
+                   &(new_partitioning_.importToPart) );
+      Zoltan_LB_Free_Part(&(new_partitioning_.exportGlobalGids), 
+                   &(new_partitioning_.exportLocalGids), 
+                   &(new_partitioning_.exportProcs), 
+                   &(new_partitioning_.exportToPart) );
+    }
     generateHypergraph();
     /******************************************************************
     ** Zoltan can now partition the vertices of hypergraph.
@@ -150,7 +169,7 @@ public:
     ** equal to the number of processes.  Process rank 0 will own
     ** partition 0, process rank 1 will own partition 1, and so on.
     ******************************************************************/
-    rc = Zoltan_LB_Partition(zz_, // input (all remaining fields are output)
+    Zoltan_LB_Partition(zz_, // input (all remaining fields are output)
           &new_partitioning_.changes,        // 1 if partitioning was changed, 0 otherwise 
           &new_partitioning_.numGidEntries,  // Number of integers used for a global ID 
           &new_partitioning_.numLidEntries,  // Number of integers used for a local ID 
@@ -164,12 +183,13 @@ public:
           &new_partitioning_.exportLocalGids,   // Local IDs of the vertices I must send 
           &new_partitioning_.exportProcs,    // Process to which I send each of the vertices 
           &new_partitioning_.exportToPart);  // Partition to which each vertex will belong 
-    return true;
+    first_ = false;
+    return (new_partitioning_.changes == 1);
   }
   // return load weight of given element 
   int loadWeight( const Element &element ) const 
   { 
-    return 1;
+    return -1; // not used
   }
   // return destination (i.e. rank) where the given element should be moved to 
   // this needs the methods userDefinedPartitioning to return true
@@ -217,7 +237,7 @@ private:
   Zoltan_Struct *zz_;
   HGraphData hg_;
   ZoltanPartitioning new_partitioning_;
-  int rc;
+  bool first_;
 };
 #endif // if HAVE_ZOLTAN
 
