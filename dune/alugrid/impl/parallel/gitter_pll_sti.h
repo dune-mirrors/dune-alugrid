@@ -516,7 +516,7 @@ namespace ALUGrid
   }
 
   inline bool GitterPll::debugOption (int level) {
-#ifndef NDEBUG
+#ifndef ALUGRIDDEBUG
     return (getenv ("VERBOSE_PLL") ? ( atoi (getenv ("VERBOSE_PLL")) > level ? true : (level == 0)) : false);
 #else 
     return false ;

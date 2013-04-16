@@ -240,7 +240,7 @@ namespace ALUGrid
     //
 
   inline bool LoadBalancer::debugOption (int level) {
-#ifndef NDEBUG
+#ifndef ALUGRIDDEBUG
     return (getenv ("VERBOSE_LDB") ? ( atoi (getenv ("VERBOSE_LDB")) > level ? true : (level == 0)) : false);
 #else 
     return false ;
