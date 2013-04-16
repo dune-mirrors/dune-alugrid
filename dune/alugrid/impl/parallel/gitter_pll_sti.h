@@ -516,7 +516,11 @@ namespace ALUGrid
   }
 
   inline bool GitterPll::debugOption (int level) {
+#ifndef NDEBUG
     return (getenv ("VERBOSE_PLL") ? ( atoi (getenv ("VERBOSE_PLL")) > level ? true : (level == 0)) : false);
+#else 
+    return false ;
+#endif
   }
 
   template <class StopRule_t>
