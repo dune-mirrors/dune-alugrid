@@ -932,7 +932,8 @@ namespace ALUGrid
     const int maxMsg = psize()-1;
     // 512 is the max number of simultaneously messages that we allow 
     // due to memory restrictions 
-    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag( maxMsg ), 512 );
+    const int links = std::min( 512, maxMsg );
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag( maxMsg ), links );
     nonBlockingExchange.allToAll( handle );
   }
 
