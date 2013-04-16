@@ -643,7 +643,7 @@ namespace ALUGrid
       {
         std::cout.precision (6);
         std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
-        std::cout << uMax[ 2 ] << " " << uMax[ 3 ] << " " << uMax[ 4 ] << " sec." << std::endl;
+        std::cout << uMax[ 0 ] << " " << uMax[ 1 ] << " " << uMax[ 2 ] << " sec." << std::endl;
       }
     }
   }
