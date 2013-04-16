@@ -2111,22 +2111,36 @@ namespace ALUGrid
     }
   }
 
-  std::set< int > GitterBasisPll::MacroGitterBasisPll::secondScan ()
+  void GitterBasisPll::MacroGitterBasisPll::secondScan ( std::set< int >& s )
   {
-    std::set< int > s;
+    // clear set 
+    s.clear();
+
     int n = 0;
-    for (linkagePatternMap_t::iterator p = _linkagePatterns.begin (); p != _linkagePatterns.end (); ) 
+    const linkagePatternMap_t::iterator pEnd = _linkagePatterns.end ();
+    for (linkagePatternMap_t::iterator p = _linkagePatterns.begin (); p != pEnd; ) 
     {
-      if ((*p).second) {
-        for (std::vector< int >::const_iterator i = (*p).first.begin (); i != (*p).first.end (); s.insert (*i++));
-        p ++;
-      } else {
-        _linkagePatterns.erase (p ++);
-        n ++;
+      // if linkage exists 
+      if ((*p).second) 
+      {
+        typedef std::vector< int >::const_iterator  const_iterator ;
+        const const_iterator iEnd = (*p).first.end ();
+        // insert all links into set 
+        for ( const_iterator i = (*p).first.begin (); i != iEnd; ++i )
+        {
+          s.insert( *i );
+        }
+        // next pattern 
+        ++p;
+      } 
+      // else remove vertex from pattern list
+      else 
+      {
+        _linkagePatterns.erase ( p++ );
+        ++n;
       }
     }
     alugrid_assert (debugOption (20) ? (std::cout << "  GitterBasisPll::MacroGitterBasisPll::secondScan () deleted " << n << " patterns" << std::endl, 1) : 1);
-    return s;
   }
 
   Gitter::Geometric::VertexGeo * GitterBasisPll::MacroGitterBasisPll::
