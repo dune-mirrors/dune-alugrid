@@ -2823,7 +2823,7 @@ namespace ALUGrid
   }
 
   inline bool Gitter::debugOption (int level) {
-#ifndef ALUGRIDDEBUG
+#ifdef ALUGRIDDEBUG
     return (getenv ("VERBOSE") ? ( atoi (getenv ("VERBOSE")) > level ? true : (level == 0)) : false);
 #else 
     return false ;
