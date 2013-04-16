@@ -41,16 +41,8 @@ namespace ALUGrid
                                   *v0 );
             alugrid_assert (_inner);
 
-#ifdef USE_MALLOC_AT_ONCE
-            void* edgeMem[2] = {0,0};
-            MyAlloc::allocate( sizeof(inneredge_t), edgeMem, 2 );
-
-            inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, v0 ,    inVx(), 0 );
-            inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, inVx(), v1,     1 );
-#else
             inneredge_t * e0 = new inneredge_t (l, v0 ,    inVx(), 0 );
             inneredge_t * e1 = new inneredge_t (l, inVx(), v1,     1 );
-#endif
 
             alugrid_assert (e0 && e1);
             e0->append (e1);
@@ -144,39 +136,20 @@ namespace ALUGrid
     myvertex_t * ev3 = myhedge(3)->subvertex (0);
     alugrid_assert (ev0 && ev1 && ev2 && ev3);
 
-#ifdef USE_MALLOC_AT_ONCE
-    void* edgeMem[4] = {0,0,0,0};
-    MyAlloc::allocate( sizeof(inneredge_t), edgeMem, 4 );
-
-    inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, ev0, inVx());
-    inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, ev1, inVx());
-    inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, ev2, inVx());
-    inneredge_t * e3 = new (edgeMem[3]) inneredge_t (l, ev3, inVx());
-#else
     inneredge_t * e0 = new inneredge_t (l, ev0, inVx());
     inneredge_t * e1 = new inneredge_t (l, ev1, inVx());
     inneredge_t * e2 = new inneredge_t (l, ev2, inVx());
     inneredge_t * e3 = new inneredge_t (l, ev3, inVx());
-#endif
+
     alugrid_assert ( e0 && e1 && e2 && e3);
     e0->append(e1);
     e1->append(e2);
     e2->append(e3);
 
-#ifdef USE_MALLOC_AT_ONCE
-    void* faceMem[4] = {0,0,0,0};
-    MyAlloc::allocate( sizeof(innerface_t), faceMem, 4 );
-
-    innerface_t * f0 = new (faceMem[ 0 ]) innerface_t (l, this->subedge(0,0), twist(0), e0, 0, e3, 1, this->subedge(3,1), twist(3), 0);
-    innerface_t * f1 = new (faceMem[ 1 ]) innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), e1, 0, e0, 1, 1);
-    innerface_t * f2 = new (faceMem[ 2 ]) innerface_t (l, e1, 1, this->subedge(1,1), twist(1), this->subedge(2,0), twist(2), e2, 0, 2);
-    innerface_t * f3 = new (faceMem[ 3 ]) innerface_t (l, e3, 0, e2, 1, this->subedge(2,1), twist(2), this->subedge(3,0), twist(3), 3);
-#else 
     innerface_t * f0 = new innerface_t (l, this->subedge(0,0), twist(0), e0, 0, e3, 1, this->subedge(3,1), twist(3), 0);
     innerface_t * f1 = new innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), e1, 0, e0, 1, 1);
     innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge(1,1), twist(1), this->subedge(2,0), twist(2), e2, 0, 2);
     innerface_t * f3 = new innerface_t (l, e3, 0, e2, 1, this->subedge(2,1), twist(2), this->subedge(3,0), twist(3), 3);
-#endif
 
     alugrid_assert (f0 && f1 && f2 && f3);  
     f0->append(f1);
@@ -335,20 +308,11 @@ namespace ALUGrid
     // ghostInfo is filled by splitGhost, see gitter_hexa_top_pll.h  
     this->splitGhost( ghostInfo );
 
-#ifdef USE_MALLOC_AT_ONCE
-    void* bndMem[ 4 ] = {0,0,0,0};
-    MyAlloc::allocate( sizeof(innerbndseg_t), bndMem, 4 );
-
-    innerbndseg_t * b0 = new (bndMem[ 0 ]) innerbndseg_t (l, subface (0,0), twist (0), this, ghostInfo.child(0), ghostInfo.face(0));
-    innerbndseg_t * b1 = new (bndMem[ 1 ]) innerbndseg_t (l, subface (0,1), twist (0), this, ghostInfo.child(1), ghostInfo.face(1));
-    innerbndseg_t * b2 = new (bndMem[ 2 ]) innerbndseg_t (l, subface (0,2), twist (0), this, ghostInfo.child(2), ghostInfo.face(2));
-    innerbndseg_t * b3 = new (bndMem[ 3 ]) innerbndseg_t (l, subface (0,3), twist (0), this, ghostInfo.child(3), ghostInfo.face(3));
-#else
     innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this, ghostInfo.child(0), ghostInfo.face(0));
     innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this, ghostInfo.child(1), ghostInfo.face(1));
     innerbndseg_t * b2 = new innerbndseg_t (l, subface (0,2), twist (0), this, ghostInfo.child(2), ghostInfo.face(2));
     innerbndseg_t * b3 = new innerbndseg_t (l, subface (0,3), twist (0), this, ghostInfo.child(3), ghostInfo.face(3));
-#endif 
+
     alugrid_assert (b0 && b1 && b2 && b3);
     b0->append(b1);
     b1->append(b2);
@@ -655,24 +619,12 @@ namespace ALUGrid
     myvertex_t * fv5 = myhface4 (5)->subvertex (0);
     alugrid_assert (fv0 && fv1 && fv2 && fv3 && fv4 && fv5);
 
-#ifdef USE_MALLOC_AT_ONCE
-    void* edgeMem[6] = {0,0,0,0,0,0};
-    // allocate 6 * sizeof innerege_t 
-    MyAlloc::allocate( sizeof(inneredge_t), edgeMem, 6 );
-    inneredge_t * e0 = new (edgeMem[0]) inneredge_t (l, fv0, inVx());
-    inneredge_t * e1 = new (edgeMem[1]) inneredge_t (l, fv1, inVx());
-    inneredge_t * e2 = new (edgeMem[2]) inneredge_t (l, fv2, inVx());
-    inneredge_t * e3 = new (edgeMem[3]) inneredge_t (l, fv3, inVx());
-    inneredge_t * e4 = new (edgeMem[4]) inneredge_t (l, fv4, inVx());
-    inneredge_t * e5 = new (edgeMem[5]) inneredge_t (l, fv5, inVx());
-#else 
     inneredge_t * e0 = new inneredge_t (l, fv0, inVx());
     inneredge_t * e1 = new inneredge_t (l, fv1, inVx());
     inneredge_t * e2 = new inneredge_t (l, fv2, inVx());
     inneredge_t * e3 = new inneredge_t (l, fv3, inVx());
     inneredge_t * e4 = new inneredge_t (l, fv4, inVx());
     inneredge_t * e5 = new inneredge_t (l, fv5, inVx());
-#endif
 
     alugrid_assert (e0 && e1 && e2 && e3 && e4 && e5);
     e0->append(e1);
@@ -681,22 +633,6 @@ namespace ALUGrid
     e3->append(e4);
     e4->append(e5);
 
-#ifdef USE_MALLOC_AT_ONCE
-    void* faceMem[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-    MyAlloc::allocate( sizeof(innerface_t), faceMem, 12 );
-    innerface_t * f0  = new (faceMem[ 0 ]) innerface_t (l, this->subedge (2, 7), 0, e2, 0, e5, 1, this->subedge (5, 4), 1);
-    innerface_t * f1  = new (faceMem[ 1 ]) innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e3, 0, e2, 1);
-    innerface_t * f2  = new (faceMem[ 2 ]) innerface_t (l, e3, 1, this->subedge (3, 5), 1, this->subedge (4, 7), 0, e4, 0 );
-    innerface_t * f3  = new (faceMem[ 3 ]) innerface_t (l, e5, 0, e4, 1, this->subedge (4, 5), 1, this->subedge (5, 6), 0 );
-    innerface_t * f4  = new (faceMem[ 4 ]) innerface_t (l, this->subedge (0, 7), 0, e0, 0, e2, 1, this->subedge (2, 4), 1 );
-    innerface_t * f5  = new (faceMem[ 5 ]) innerface_t (l, this->subedge (0, 5), 1, this->subedge (4, 4), 0, e4, 0, e0, 1 ); 
-    innerface_t * f6  = new (faceMem[ 6 ]) innerface_t (l, e4, 1, this->subedge (4, 6), 1, this->subedge (1, 6), 0, e1, 0 );
-    innerface_t * f7  = new (faceMem[ 7 ]) innerface_t (l, e2, 0, e1, 1, this->subedge (1, 4), 1, this->subedge (2, 6), 0 );
-    innerface_t * f8  = new (faceMem[ 8 ]) innerface_t (l, this->subedge (0, 4), 0, e0, 0, e5, 1, this->subedge (5, 7), 1 );
-    innerface_t * f9  = new (faceMem[ 9 ]) innerface_t (l, this->subedge (0, 6), 1, this->subedge (3, 4), 0, e3, 0, e0, 1 );
-    innerface_t * f10 = new (faceMem[ 10 ]) innerface_t (l, e3, 1, this->subedge (3, 6), 1, this->subedge (1, 5), 0, e1, 0 );
-    innerface_t * f11 = new (faceMem[ 11 ]) innerface_t (l, e5, 0, e1, 1, this->subedge (1, 7), 1, this->subedge (5, 5), 0 );
-#else 
     innerface_t * f0 = new innerface_t (l, this->subedge (2, 7), 0, e2, 0, e5, 1, this->subedge (5, 4), 1);
     innerface_t * f1 = new innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e3, 0, e2, 1);
     innerface_t * f2 = new innerface_t (l, e3, 1, this->subedge (3, 5), 1, this->subedge (4, 7), 0, e4, 0 );
@@ -709,7 +645,6 @@ namespace ALUGrid
     innerface_t * f9 = new innerface_t (l, this->subedge (0, 6), 1, this->subedge (3, 4), 0, e3, 0, e0, 1 );
     innerface_t * f10 = new innerface_t (l, e3, 1, this->subedge (3, 6), 1, this->subedge (1, 5), 0, e1, 0 );
     innerface_t * f11 = new innerface_t (l, e5, 0, e1, 1, this->subedge (1, 7), 1, this->subedge (5, 5), 0 );
-#endif
 
     alugrid_assert (f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7 && f8 && f9 && f10 && f11);
     f0->append(f1);
@@ -743,19 +678,6 @@ namespace ALUGrid
       }
     }
 
-#ifdef USE_MALLOC_AT_ONCE
-    void* hexaMem[8] = {0,0,0,0,0,0,0,0};
-    MyAlloc::allocate( sizeof(innerhexa_t), hexaMem, 8 );
-
-    innerhexa_t * h0 = new (hexaMem[ 0 ]) innerhexa_t (l, subface (0, 0), twist (0), f0, 0, subface (2, 0), twist (2), f4, 0, f8, -4, subface (5, 0), twist (5) , this, 0, childVolume);
-    innerhexa_t * h1 = new (hexaMem[ 1 ]) innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f9, -4, f4, -1, this, 1, childVolume);
-    innerhexa_t * h2 = new (hexaMem[ 2 ]) innerhexa_t (l, subface (0, 2), twist (0), f2, 0,f9, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f5, -1        , this, 2, childVolume);
-    innerhexa_t * h3 = new (hexaMem[ 3 ]) innerhexa_t (l, subface (0, 1), twist (0), f3, 0, f8, 0, f5, 0, subface(4, 1), twist (4), subface(5, 3), twist (5)    , this, 3, childVolume);
-    innerhexa_t * h4 = new (hexaMem[ 4 ]) innerhexa_t (l, f0, -1, subface(1, 0), twist (1), subface(2, 3), twist (2), f7, 0, f11, -4, subface(5, 1), twist (5)  , this, 4, childVolume);
-    innerhexa_t * h5 = new (hexaMem[ 5 ]) innerhexa_t (l, f1, -1, subface(1, 1), twist (1), subface(2, 2), twist (2), subface(3, 3), twist (3), f10, -4, f7, -1 , this, 5, childVolume);
-    innerhexa_t * h6 = new (hexaMem[ 6 ]) innerhexa_t (l, f2, -1, subface(1, 2), twist (1), f10, 0, subface(3, 2), twist (3), subface(4, 3), twist (4), f6, -1  , this, 6, childVolume);
-    innerhexa_t * h7 = new (hexaMem[ 7 ]) innerhexa_t (l, f3, -1, subface(1, 3), twist (1), f11, 0, f6, 0, subface(4, 2), twist (4), subface(5, 2), twist (5)   , this, 7, childVolume);
-#else 
     innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), twist (0), f0, 0, subface (2, 0), twist (2), f4, 0, f8, -4, subface (5, 0), twist (5) , this, 0, childVolume);
     innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f9, -4, f4, -1, this, 1, childVolume);
     innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), f2, 0,f9, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f5, -1        , this, 2, childVolume);
@@ -764,7 +686,6 @@ namespace ALUGrid
     innerhexa_t * h5 = new innerhexa_t (l, f1, -1, subface(1, 1), twist (1), subface(2, 2), twist (2), subface(3, 3), twist (3), f10, -4, f7, -1 , this, 5, childVolume);
     innerhexa_t * h6 = new innerhexa_t (l, f2, -1, subface(1, 2), twist (1), f10, 0, subface(3, 2), twist (3), subface(4, 3), twist (4), f6, -1  , this, 6, childVolume);
     innerhexa_t * h7 = new innerhexa_t (l, f3, -1, subface(1, 3), twist (1), f11, 0, f6, 0, subface(4, 2), twist (4), subface(5, 2), twist (5)   , this, 7, childVolume);
-#endif
 
     alugrid_assert (h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7);
     h0->append(h1);

@@ -171,14 +171,6 @@ namespace ALUGrid
       }
     }
   }
-
-#ifdef USE_MALLOC_AT_ONCE
-  void MyAlloc::allocate( const size_t s, void* mem[], const size_t request) throw (OutOfMemoryException) 
-  {
-    AllocEntry & fs ((*freeStore) [s]);
-    memAllocate( fs, s, mem, request );
-  }
-#endif // end #ifdef USE_MALLOC_AT_ONCE
 #endif // end #if ! ONLY_MSPACES
 
   void* MyAlloc::operator new ( size_t s ) throw (OutOfMemoryException) 

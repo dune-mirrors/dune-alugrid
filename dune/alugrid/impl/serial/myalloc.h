@@ -81,13 +81,6 @@ namespace ALUGrid
 
     public :
 
-#ifdef USE_MALLOC_AT_ONCE
-      // new version of operator new 
-      static void allocate( const size_t memSize, void* mem[], const size_t num ) throw (OutOfMemoryException) ;
-      // placement new operator 
-      void * operator new (size_t, void* mem) { return mem; }
-#endif
-
       // new version of operator new 
       void * operator new (size_t) throw (OutOfMemoryException) ;
       // corresponding version of operator delete 
