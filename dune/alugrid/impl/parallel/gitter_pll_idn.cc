@@ -627,11 +627,24 @@ namespace ALUGrid
     identU3 += u3 ;
     identU4 += u4 ;
 
-    if (debugOption (2)) 
+    if (debugOption (5)) 
     {
-      std::cout.precision (3);
+      std::cout.precision (6);
       std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
       std::cout << u2 << " " << u3 << " " << u4 << " sec." << std::endl;
+    }
+
+    if (debugOption (1)) 
+    {
+      double  u[ 3 ] = { u2, u3, u4 };
+      double  uMax[ 3 ];
+      mpa.gmax( &u[ 0 ], 3, &uMax[ 0 ] );
+      if( mpa.myrank() == 0 ) 
+      {
+        std::cout.precision (6);
+        std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
+        std::cout << uMax[ 2 ] << " " << uMax[ 3 ] << " " << uMax[ 4 ] << " sec." << std::endl;
+      }
     }
   }
 

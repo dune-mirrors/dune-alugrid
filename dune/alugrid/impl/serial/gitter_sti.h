@@ -2823,7 +2823,11 @@ namespace ALUGrid
   }
 
   inline bool Gitter::debugOption (int level) {
+#ifndef ALUGRIDDEBUG
     return (getenv ("VERBOSE") ? ( atoi (getenv ("VERBOSE")) > level ? true : (level == 0)) : false);
+#else 
+    return false ;
+#endif
   }
 
   inline int Gitter::iterators_attached () const {
