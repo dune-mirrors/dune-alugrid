@@ -606,9 +606,11 @@ namespace ALUGrid
 
       unsigned char _flags;
 
+    public:
       // store refcount here to fill up the 8 byte of mem 
       Refcount ref;
 
+    protected:
       // constructor 
       DuneIndexProvider () : 
         _idx(-1), 
