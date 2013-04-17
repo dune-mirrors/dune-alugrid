@@ -540,43 +540,10 @@ namespace ALUGrid
     class Parallel
     {
     public:
-      class CommunicationBuffer 
-      {
-      protected:
-        typedef std::vector< SmallObjectStream > BufferType; 
-        BufferType * _buff; 
-
-        CommunicationBuffer () : _buff(0) {}
-        ~CommunicationBuffer () 
-        { 
-          if(_buff) delete _buff; 
-          _buff = 0;  
-        }
-      public:   
-        void reserveBuffer (const size_t size)
-        {
-          if(_buff) 
-          {
-            // adjust size 
-            if( size > _buff->size() ) _buff->resize( size );
-          }
-          else 
-          {
-            _buff = new BufferType( size ); 
-          }
-        }
-
-        BufferType & commBuffer () { alugrid_assert (_buff); return *_buff; }
-        const BufferType & commBuffer () const { alugrid_assert (_buff); return *_buff; }
-      };
-        
       typedef ParallelException::AccessPllException  AccessPllException;
       
       class VertexIF
       : public VertexPllXDefault
-#ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
-      : public CommunicationBuffer
-#endif
       {
       public:
         virtual ~VertexIF () {}

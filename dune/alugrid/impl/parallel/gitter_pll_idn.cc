@@ -324,29 +324,6 @@ namespace ALUGrid
     }
   }
 
-  std::set< int > GitterPll::MacroGitterPll::secondScan () 
-  {
-    std::set< int > s;
-    {
-      AccessIterator < vertex_STI >::Handle w (*this);
-      for ( w.first (); ! w.done (); w.next ()) 
-      {
-        vertex_STI& vertex = w.item();
-        // only border vertices can have linkage 
-        if( vertex.isBorder() ) 
-        {
-          const std::vector< int > l = w.item ().accessPllX ().estimateLinkage ();
-          const std::vector< int >::const_iterator iEnd = l.end ();
-          for (std::vector< int >::const_iterator i = l.begin (); i != iEnd; ++i ) 
-          {
-            s.insert ( *i );
-          }
-        }
-      }
-    }
-    return s;
-  }
-
   class UnpackVertexLinkage 
     : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
@@ -605,7 +582,11 @@ namespace ALUGrid
     }
 
     int lap2 = clock ();
-    mpa.insertRequestSymetric (secondScan ());
+    // compute linkage due to vertex linkage 
+    std::set< int > linkage; 
+    secondScan( linkage );
+    // insert linage into mpAccess 
+    mpa.insertRequestSymetric ( linkage );
 
     if (debugOption (2)) mpa.printLinkage (std::cout);
 

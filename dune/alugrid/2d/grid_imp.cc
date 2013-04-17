@@ -730,12 +730,8 @@ namespace Dune
   inline void ALU2dGrid< dim, dimworld, eltype >::
   backup( std::ostream& stream ) const 
   {
-#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
     // write grid to stream 
     myGrid().storeGrid( stream );
-#else 
-    DUNE_THROW(NotImplemented,"ALUGrid::backup not implemented yet!");
-#endif
   }
 
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >

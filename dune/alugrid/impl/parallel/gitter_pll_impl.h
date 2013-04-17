@@ -873,7 +873,7 @@ namespace ALUGrid
       {
         protected :
           linkagePatternMap_t& _linkagePatterns;
-          std::set< int > secondScan();
+          void secondScan( std::set< int >& );
         protected :
           int iterators_attached () const;
           

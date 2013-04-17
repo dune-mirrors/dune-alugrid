@@ -10,6 +10,8 @@
 #include "gitter_pll_sti.h"
 #include "gitter_pll_mgb.h"
 
+#define USE_NONBLOCKING_SEND_PGM
+
 namespace ALUGrid
 {
 

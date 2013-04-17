@@ -156,16 +156,10 @@ namespace ALUGrid
   GitterDunePll::
   getCommunicationBuffer( HItemType& item, CommMapType& commMap, const int nCommBuff )
   {
-#ifdef ALUGRID_USE_COMM_BUFFER_IN_ITEM
-    // reserve and get comm buffers 
-    item.reserveBuffer( nCommBuff );
-    return item.commBuffer();
-#else 
     DataBufferType& commBuff = commMap[ &item ];
     if( (int) commBuff.size() != nCommBuff ) 
       commBuff.resize( nCommBuff );
     return commBuff;
-#endif
   }
 
   template <class ObjectStreamType, class HItemType, class CommBuffMapType> 

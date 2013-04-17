@@ -13,10 +13,6 @@
 #ifndef DONT_USE_ALUGRID_ALLOC
 #warning "Using ALUGrid's internal memory management!"
 
-#ifdef ALUGRID_USES_DLMALLOC
-#define ONLY_MSPACES 1 
-#endif 
-
 namespace ALUGrid
 {
 
@@ -29,9 +25,11 @@ namespace ALUGrid
   // if true objects could be freeed  
   bool MyAlloc::_freeAllowed = true;
 
-#if ONLY_MSPACES 
+#ifdef ALUGRID_USES_DLMALLOC
+#define ONLY_MSPACES 1 
 #warning "Using DL malloc"
 #include "dlmalloc.c"
+#undef ONLY_MSPACES  
   static void*  ALUGridMemorySpace = 0;
   static size_t ALUGridMemSpaceAllocated = 0;
 #else
@@ -74,7 +72,7 @@ namespace ALUGrid
   static  memorymap_t *freeStore = 0;
   static  std::set< void * > myAllocFreeLockers;
 
-#endif // end else of #if ONLY_MSPACES
+#endif
 
   /*
   //! get memory in MB 
@@ -125,7 +123,7 @@ namespace ALUGrid
 
   void MyAlloc::lockFree (void * addr) 
   {
-#if ! ONLY_MSPACES
+#ifndef ALUGRID_USES_DLMALLOC
     // remember address of locker 
     myAllocFreeLockers.insert( addr );
     _freeAllowed = true; 
@@ -134,7 +132,7 @@ namespace ALUGrid
 
   void MyAlloc::unlockFree (void * addr) 
   {
-#if ! ONLY_MSPACES
+#ifndef ALUGRID_USES_DLMALLOC
     myAllocFreeLockers.erase( addr );
     // only if no-one else has locked 
     if( myAllocFreeLockers.empty () )
@@ -147,7 +145,7 @@ namespace ALUGrid
     clearFreeMemory();
   }
 
-#if ! ONLY_MSPACES
+#ifndef ALUGRID_USES_DLMALLOC
   void memAllocate( AllocEntry& fs, const size_t s, void* mem[], const size_t request)
   {
     alugrid_assert ( s > 0 );
@@ -171,21 +169,13 @@ namespace ALUGrid
       }
     }
   }
-
-#ifdef USE_MALLOC_AT_ONCE
-  void MyAlloc::allocate( const size_t s, void* mem[], const size_t request) throw (OutOfMemoryException) 
-  {
-    AllocEntry & fs ((*freeStore) [s]);
-    memAllocate( fs, s, mem, request );
-  }
-#endif // end #ifdef USE_MALLOC_AT_ONCE
-#endif // end #if ! ONLY_MSPACES
+#endif // end ALUGRID_USES_DLMALLOC
 
   void* MyAlloc::operator new ( size_t s ) throw (OutOfMemoryException) 
   {
 #ifndef DONT_USE_ALUGRID_ALLOC
 
-#if ONLY_MSPACES
+#ifdef ALUGRID_USES_DLMALLOC
     alugrid_assert ( s > 0 );
     ALUGridMemSpaceAllocated += s ;
     return mspace_malloc( ALUGridMemorySpace, s );
@@ -213,7 +203,7 @@ namespace ALUGrid
         return p;
       }
     }
-#endif // ONLY_MSPACES 
+#endif // ALUGRID_USES_DLMALLOC
 #endif // DONT_USE_ALUGRID_ALLOC
   }
 
@@ -222,7 +212,7 @@ namespace ALUGrid
   {
 #ifndef DONT_USE_ALUGRID_ALLOC
 
-#if ONLY_MSPACES
+#ifdef ALUGRID_USES_DLMALLOC
    // defined in dlmalloc.c 
    mspace_free( ALUGridMemorySpace, ptr );
    ALUGridMemSpaceAllocated -= s ;
@@ -248,14 +238,14 @@ namespace ALUGrid
         fs.S.pop();
       }
     }
-#endif // end #if     ONLY_MSPACES 
+#endif // end #ifdef ALUGRID_USES_DLMALLOC
 #endif // end #ifndef DONT_USE_ALUGRID_ALLOC
   }
 
   // operator delete, put pointer to stack 
   void MyAlloc::clearFreeMemory () 
   {
-#if ONLY_MSPACES
+#ifdef ALUGRID_USES_DLMALLOC
     // if no objects are allocated clear memory space and reallocate
     // this will free memory to the system 
     if ( ALUGridMemSpaceAllocated == 0 ) 
@@ -269,7 +259,7 @@ namespace ALUGrid
   // operator delete, put pointer to stack 
   size_t MyAlloc::allocatedMemory () 
   {
-#if ONLY_MSPACES
+#ifdef ALUGRID_USES_DLMALLOC
     return ALUGridMemSpaceAllocated ;
 #else 
     return 0;
@@ -280,7 +270,7 @@ namespace ALUGrid
   {
     if ( ! MyAlloc::_initialized ) 
     {
-#if ONLY_MSPACES 
+#ifdef ALUGRID_USES_DLMALLOC
       ALUGridMemorySpace = create_mspace( 0, 0 );
 #else
       freeStore = new memorymap_t ();
@@ -296,7 +286,7 @@ namespace ALUGrid
   {
     if ( MyAlloc::_initialized ) 
     {
-#if ONLY_MSPACES 
+#ifdef ALUGRID_USES_DLMALLOC
       if( ALUGridMemorySpace ) 
       {
         destroy_mspace( ALUGridMemorySpace );
