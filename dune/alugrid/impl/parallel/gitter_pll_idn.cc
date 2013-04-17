@@ -335,10 +335,12 @@ namespace ALUGrid
     map_t _vxmap;
     GitterPll::MacroGitterPll& _containerPll ;
     const int _me ;
+    int _size ;
   public: 
     UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, const int me ) 
       : _containerPll( containerPll ),
-        _me( me ) 
+      _me( me ),
+      _size( 0 )
     {}
 
     void pack( const int rank, ObjectStream& os ) 
@@ -346,20 +348,24 @@ namespace ALUGrid
       alugrid_assert ( rank == _me );
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
 
-      const int estimate = 0.25 * w.size() + 1;
+      int _size = w.size() ;
+      const int estimate = 0.25 * _size + 1;
       // reserve memory 
       os.reserve( estimate * sizeof(int) );
+      os.writeObject( _size );
       for (w.first (); ! w.done (); w.next ()) 
       {
         vertex_STI& vertex = w.item();
 
         // only insert border vertices 
-        if( vertex.isBorder() )
+        if( vertex.isBorder() && vertex.ref )
         {
           int id = vertex.ident ();
           os.writeObject( id );
           _vxmap[ id ] = &vertex;
         }
+        else 
+          vertex.setLinkage( std::vector< int > () );
       }
       os.writeObject( endMarker );
     }
@@ -369,6 +375,10 @@ namespace ALUGrid
       alugrid_assert ( rank != _me );
 
       const map_t::const_iterator vxmapEnd = _vxmap.end();
+
+      int wSize; 
+      os.readObject( wSize );
+      _size += wSize ;
 
       int id ;
       os.readObject ( id );
@@ -391,6 +401,8 @@ namespace ALUGrid
 
     void printVertexLinkage()
     {
+      std::cout << "Global Vertex Size = " << _size << std::endl;
+
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
       for (w.first (); ! w.done (); w.next ()) 
       {
@@ -440,6 +452,7 @@ namespace ALUGrid
           // free memory 
           osv[ link ].reset(); 
         }
+        //data.printVertexLinkage();
       }
       catch( MyAlloc :: OutOfMemoryException ) 
       {
@@ -587,7 +600,7 @@ namespace ALUGrid
     std::set< int > linkage; 
     secondScan( linkage );
     // insert linage into mpAccess 
-    mpa.insertRequest( linkage );
+    mpa.insertRequestSymetric( linkage );
 
     if (debugOption (2)) 
       mpa.printLinkage (std::cout);
