@@ -639,7 +639,7 @@ namespace ALUGrid
       if( mpa.myrank() == 0 ) 
       {
         std::cout.precision (6);
-        std::cout << "**INFO MacroGitterPll::identification () nlinks = "<< int(uMax[ 3 ]) << " [lnk|vtx|idn] ";
+        std::cout << "**INFO MacroGitterPll::identification (): max links = "<< int(uMax[ 3 ]) << " [lnk|vtx|idn] ";
         std::cout << uMax[ 0 ] << " " << uMax[ 1 ] << " " << uMax[ 2 ] << " sec." << std::endl;
       }
     }
