@@ -184,8 +184,8 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
 #if HAVE_MPI 
      if( loadBalance ) 
      {
-      // create empty gather scatter 
-      EmptyAdaptRestrictProlong rp;
+       // create empty gather scatter 
+       EmptyAdaptRestrictProlong rp;
 
        EmptyGatherScatter gs ( grid.mpAccess().myrank(), grid.mpAccess().psize(), false );
        // load balance 
