@@ -341,7 +341,8 @@ namespace ALUGrid
       : _containerPll( containerPll ),
       _me( me ),
       _size( 0 )
-    {}
+    {
+    }
 
     void pack( const int rank, ObjectStream& os ) 
     {
@@ -364,8 +365,9 @@ namespace ALUGrid
           os.writeObject( id );
           _vxmap[ id ] = &vertex;
         }
-        else 
-          vertex.setLinkage( std::vector< int > () );
+
+        // clear all linkage of this vertex 
+        vertex.clearLinkage();
       }
       os.writeObject( endMarker );
     }
@@ -452,7 +454,6 @@ namespace ALUGrid
           // free memory 
           osv[ link ].reset(); 
         }
-        //data.printVertexLinkage();
       }
       catch( MyAlloc :: OutOfMemoryException ) 
       {
@@ -474,8 +475,6 @@ namespace ALUGrid
       //std::cout <<"Exchange data " << std::endl;
       // exchange all-to-all 
       mpAccess.allToAll( data );
-
-      //data.printVertexLinkage();
     }
   }
 
@@ -498,6 +497,9 @@ namespace ALUGrid
         {
           vxmap[ vertex.ident() ] = &vertex;
         }
+
+        // clear all linkage of this vertex 
+        vertex.clearLinkage();
       }
     }
 
@@ -585,13 +587,17 @@ namespace ALUGrid
     alugrid_assert ( _hedgeTT.capacity()  == 0 );
     alugrid_assert ( _hfaceTT.capacity()  == 0 );
 
+    // clear linkage of mpAccess 
     mpa.removeLinkage ();
     
     clock_t lap1 = clock ();
     // this does not have to be computed every time (depending on partitioning method)
     if( computeVertexLinkage ) 
     {
-      // std::cout << "Computing VertexLinkage with allgather" << std::endl;
+      // clear linkage pattern map since it is newly build here
+      clearLinkagePattern();
+
+      // compute new vertex linkage 
       vertexLinkageEstimate ( mpa );
     }
 
@@ -600,7 +606,7 @@ namespace ALUGrid
     std::set< int > linkage; 
     secondScan( linkage );
     // insert linage into mpAccess 
-    mpa.insertRequestSymetric( linkage );
+    mpa.insertRequest( linkage );
 
     if (debugOption (2)) 
       mpa.printLinkage (std::cout);
