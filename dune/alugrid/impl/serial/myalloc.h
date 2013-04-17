@@ -7,7 +7,9 @@
 #include <cstddef>
 #include <string>
 
+// if defined the memory allocation from dlmalloc is used
 #define ALUGRID_USES_DLMALLOC 
+// if defined, standard C++ new and delete are used
 //#define DONT_USE_ALUGRID_ALLOC 
 
 namespace ALUGrid
