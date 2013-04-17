@@ -13,10 +13,6 @@
 // include serial part of ALUGrid 
 #include <dune/alugrid/3d/alu3dinclude.hh>
 
-#ifdef MPICPP
-#error
-#endif
-
 //using namespace ALUGrid;
 //using namespace std;
 
@@ -29,15 +25,10 @@ typedef ALUGrid::Gitter::vertex_STI    HVertexType;  // Interface Element
 typedef ALUGrid::Gitter::hbndseg       HGhostType;
 
 #if HAVE_MPI
-  #define PARALLEL 1
 #warning RUNNING PARALLEL VERSION
-#else
-  #define PARALLEL 0
 #endif
 
-#define PRINT_OUTPUT
 //#define ENABLE_ALUGRID_VTK_OUTPUT
-#define COUNT_FLOPS
 
 struct EmptyGatherScatter : public ALUGrid::GatherScatter
 {
@@ -143,7 +134,7 @@ void checkRefinements( GitterType& grid )
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
 void globalRefine(GitterType& grid, bool global, int step, int mxl,
-                  const bool loadBalance = true )
+                  const bool loadBalance = true, const bool printOutput = false )
 {
    {
      if (global)
@@ -176,7 +167,7 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
      // adapt grid 
      grid.duneAdapt( rp );
 
-#ifdef PARALLEL
+#if HAVE_MPI 
      if( loadBalance ) 
      {
        // load balance 
@@ -184,10 +175,11 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
      }
 #endif
 
-#ifdef PRINT_OUTPUT
-     // print size of grid 
-     grid.printsize () ;
-#endif
+     if( printOutput ) 
+     {
+       // print size of grid 
+       grid.printsize () ;
+     }
    }
 
 }
@@ -227,9 +219,10 @@ void globalCoarsening(GitterType& grid, int refcount) {
 // exmaple on read grid, refine global and print again 
 int main (int argc, char ** argv, const char ** envp) 
 {
-#if PARALLEL
+#if HAVE_MPI
   MPI_Init(&argc,&argv);
 #endif
+  const bool printOutput = true ;
 
   int mxl = 0, glb = 0; 
   const char* filename = 0 ;
@@ -249,7 +242,7 @@ int main (int argc, char ** argv, const char ** envp)
 
   {
     int rank = 0;
-#ifdef PARALLEL
+#if HAVE_MPI
     ALUGrid::MpAccessMPI mpa (MPI_COMM_WORLD);
     rank = mpa.myrank();
 #endif
@@ -279,13 +272,13 @@ int main (int argc, char ** argv, const char ** envp)
     }
 
     {
-#ifdef PARALLEL
+#if HAVE_MPI
       ALUGrid::GitterDunePll* gridPtr = new ALUGrid::GitterDunePll(macroname.c_str(),mpa);
 #else 
       ALUGrid::GitterDuneImpl* gridPtr = new ALUGrid::GitterDuneImpl(macroname.c_str());
 #endif
       bool closure = needConformingClosure( *gridPtr, useClosure );
-#ifdef PARALLEL
+#if HAVE_MPI
       closure = mpa.gmax( closure );
 #endif
       if( closure ) 
@@ -294,7 +287,7 @@ int main (int argc, char ** argv, const char ** envp)
         gridPtr->disableGhostCells();
       }
 
-#ifdef PARALLEL
+#if HAVE_MPI
       gridPtr->duneLoadBalance();
       gridPtr = ALUGrid::GitterDunePll::compress( gridPtr );
       ALUGrid::GitterDunePll& grid = *gridPtr ;
@@ -303,10 +296,11 @@ int main (int argc, char ** argv, const char ** envp)
 #endif
 
       //std::cout << "P[ " << rank << " ] : Grid generated! \n";
-#ifdef PRINT_OUTPUT
-      grid.printsize(); 
-      std::cout << "---------------------------------------------\n";
-#endif
+      if( printOutput ) 
+      {
+        grid.printsize(); 
+        std::cout << "---------------------------------------------\n";
+      }
     
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
       {
@@ -318,9 +312,9 @@ int main (int argc, char ** argv, const char ** envp)
 
       grid.printMemUsage();
       for (int i = 0; i < glb; ++i)
-        globalRefine(grid, true, -1, mxl);
+        globalRefine(grid, true, -1, mxl, true, printOutput);
       for (int i = 0; i < glb; ++i)
-        globalRefine(grid, false,0, mxl);
+        globalRefine(grid, false,0, mxl, true, printOutput);
       for( int i = 0; i < 4*mxl; ++i )
       {
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
@@ -328,7 +322,7 @@ int main (int argc, char ** argv, const char ** envp)
         ss << "out-" << ZeroPadNumber(i) << ".vtu";
         grid.tovtk(  ss.str().c_str() );
 #endif
-        globalRefine(grid, false,i, mxl);
+        globalRefine(grid, false,i, mxl, true, printOutput);
       }
       /*
       {
@@ -349,7 +343,7 @@ int main (int argc, char ** argv, const char ** envp)
     }
   }
 
-#if PARALLEL
+#if HAVE_MPI
   MPI_Finalize();
 #endif
   return 0;
