@@ -626,19 +626,20 @@ namespace ALUGrid
     if (debugOption (5)) 
     {
       std::cout.precision (6);
-      std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
+      std::cout << "**INFO MacroGitterPll::identification () [lnk|vtx|idn] ";
       std::cout << u2 << " " << u3 << " " << u4 << " sec." << std::endl;
     }
 
     if (debugOption (1)) 
     {
-      double  u[ 3 ] = { u2, u3, u4 };
-      double  uMax[ 3 ];
-      mpa.gmax( &u[ 0 ], 3, &uMax[ 0 ] );
+      const double nlinks = mpa.nlinks();
+      double  u[ 4 ] = { u2, u3, u4, nlinks };
+      double  uMax[ 4 ];
+      mpa.gmax( &u[ 0 ], 4, &uMax[ 0 ] );
       if( mpa.myrank() == 0 ) 
       {
         std::cout.precision (6);
-        std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
+        std::cout << "**INFO MacroGitterPll::identification () nlinks = "<< int(uMax[ 3 ]) << " [lnk|vtx|idn] ";
         std::cout << uMax[ 0 ] << " " << uMax[ 1 ] << " " << uMax[ 2 ] << " sec." << std::endl;
       }
     }
