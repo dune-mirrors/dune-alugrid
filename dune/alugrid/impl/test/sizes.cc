@@ -33,8 +33,22 @@ typedef ALUGrid::Gitter::hbndseg       HGhostType;
 struct EmptyGatherScatter : public ALUGrid::GatherScatter
 {
   typedef ALUGrid::GatherScatter :: ObjectStreamType  ObjectStreamType;
+  const int _rank; 
+  const int _size;
+  const bool _userPartitioning;
 
-  EmptyGatherScatter () {}
+  EmptyGatherScatter (const int rank, const int size, const bool useUserPart ) 
+    : _rank( rank ), _size( size ), _userPartitioning( useUserPart ) {}
+
+  virtual bool userDefinedPartitioning () const { return _userPartitioning; }
+  virtual bool userDefinedLoadWeights  () const { return false ; }
+  virtual bool repartition () { return true ; }
+  virtual int destination( const ALUGrid::Gitter::helement_STI &elem ) const 
+  { 
+    return _rank < (_size-1) ? _rank+1 : 0 ;
+  }
+
+  bool contains ( int, int ) const { return true ;} 
 
   virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) {}
   virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) {}
@@ -170,8 +184,12 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
 #if HAVE_MPI 
      if( loadBalance ) 
      {
+       // create empty gather scatter 
+       EmptyAdaptRestrictProlong rp;
+
+       EmptyGatherScatter gs ( grid.mpAccess().myrank(), grid.mpAccess().psize(), false );
        // load balance 
-       grid.duneLoadBalance();
+       grid.duneLoadBalance( gs , rp );
      }
 #endif
 

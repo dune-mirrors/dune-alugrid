@@ -40,6 +40,7 @@ namespace ALUGrid
 
       virtual std::vector< int > estimateLinkage () const;
       virtual bool setLinkage ( std::vector< int > );
+      virtual void clearLinkage ();
       virtual LinkedObject::Identifier getIdentifier () const;
 
     protected :
@@ -874,6 +875,7 @@ namespace ALUGrid
         protected :
           linkagePatternMap_t& _linkagePatterns;
           void secondScan( std::set< int >& );
+          void clearLinkagePattern();
         protected :
           int iterators_attached () const;
           
@@ -914,9 +916,9 @@ namespace ALUGrid
     public :
       virtual inline Makrogitter & container ();
       virtual inline const Makrogitter & container () const;
-    protected :
       virtual inline MpAccessLocal & mpAccess ();
       virtual inline const MpAccessLocal & mpAccess () const;
+    protected :
       GitterBasisPll (MpAccessLocal & );
 
     public :

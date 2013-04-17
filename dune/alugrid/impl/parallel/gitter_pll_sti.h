@@ -159,6 +159,7 @@ namespace ALUGrid
       hfaceTT_t   _hfaceTT;
 
       virtual void secondScan ( std::set< int >& ) = 0 ;
+      virtual void clearLinkagePattern () = 0;
       virtual void vertexLinkageEstimate (MpAccessLocal &);
       // vertexLinkageEstimation with gcollect( MPI_Allgather, memory consuming )
       // time = log p, memory = O(p)
