@@ -28,13 +28,11 @@ namespace ALUGrid
       for (const_iterator i = req.begin (); i != reqEnd; ++i )
       {
         const int rank = (*i);
-        if( rank == me ) 
-          continue ;
-        else // if rank was not inserted, insert with current link number 
-          if (_linkage.find ( rank ) == linkageEnd ) 
-          {
-            _linkage.insert( std::make_pair( rank, link++) );
-          }
+        // if rank was not inserted, insert with current link number 
+        if( rank != me && (_linkage.find ( rank ) == linkageEnd ) )
+        {
+          _linkage.insert( std::make_pair( rank, link++) );
+        }
       }
     }
 
@@ -71,7 +69,7 @@ namespace ALUGrid
       for (const_iterator i = req.begin (); i != reqEnd; ++i )
       {
         const int rank = (*i);
-        if( rank != me && (_linkage.find (rank) == _linkage.end () ) )
+        if( rank != me && (_linkage.find (rank) == linkageEnd ) )
           out.push_back ( rank );
       }
     }

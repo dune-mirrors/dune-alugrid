@@ -914,9 +914,9 @@ namespace ALUGrid
     public :
       virtual inline Makrogitter & container ();
       virtual inline const Makrogitter & container () const;
-    protected :
       virtual inline MpAccessLocal & mpAccess ();
       virtual inline const MpAccessLocal & mpAccess () const;
+    protected :
       GitterBasisPll (MpAccessLocal & );
 
     public :

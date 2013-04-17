@@ -335,10 +335,12 @@ namespace ALUGrid
     map_t _vxmap;
     GitterPll::MacroGitterPll& _containerPll ;
     const int _me ;
+    int _size ;
   public: 
     UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, const int me ) 
       : _containerPll( containerPll ),
-        _me( me ) 
+      _me( me ),
+      _size( 0 )
     {}
 
     void pack( const int rank, ObjectStream& os ) 
@@ -346,9 +348,11 @@ namespace ALUGrid
       alugrid_assert ( rank == _me );
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
 
-      const int estimate = 0.25 * w.size() + 1;
+      int _size = w.size() ;
+      const int estimate = 0.25 * _size + 1;
       // reserve memory 
       os.reserve( estimate * sizeof(int) );
+      os.writeObject( _size );
       for (w.first (); ! w.done (); w.next ()) 
       {
         vertex_STI& vertex = w.item();
@@ -360,6 +364,8 @@ namespace ALUGrid
           os.writeObject( id );
           _vxmap[ id ] = &vertex;
         }
+        else 
+          vertex.setLinkage( std::vector< int > () );
       }
       os.writeObject( endMarker );
     }
@@ -369,6 +375,10 @@ namespace ALUGrid
       alugrid_assert ( rank != _me );
 
       const map_t::const_iterator vxmapEnd = _vxmap.end();
+
+      int wSize; 
+      os.readObject( wSize );
+      _size += wSize ;
 
       int id ;
       os.readObject ( id );
@@ -391,6 +401,8 @@ namespace ALUGrid
 
     void printVertexLinkage()
     {
+      std::cout << "Global Vertex Size = " << _size << std::endl;
+
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
       for (w.first (); ! w.done (); w.next ()) 
       {
@@ -440,6 +452,7 @@ namespace ALUGrid
           // free memory 
           osv[ link ].reset(); 
         }
+        //data.printVertexLinkage();
       }
       catch( MyAlloc :: OutOfMemoryException ) 
       {
@@ -587,7 +600,7 @@ namespace ALUGrid
     std::set< int > linkage; 
     secondScan( linkage );
     // insert linage into mpAccess 
-    mpa.insertRequest( linkage );
+    mpa.insertRequestSymetric( linkage );
 
     if (debugOption (2)) 
       mpa.printLinkage (std::cout);
@@ -613,19 +626,20 @@ namespace ALUGrid
     if (debugOption (5)) 
     {
       std::cout.precision (6);
-      std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
+      std::cout << "**INFO MacroGitterPll::identification () [lnk|vtx|idn] ";
       std::cout << u2 << " " << u3 << " " << u4 << " sec." << std::endl;
     }
 
     if (debugOption (1)) 
     {
-      double  u[ 3 ] = { u2, u3, u4 };
-      double  uMax[ 3 ];
-      mpa.gmax( &u[ 0 ], 3, &uMax[ 0 ] );
+      const double nlinks = mpa.nlinks();
+      double  u[ 4 ] = { u2, u3, u4, nlinks };
+      double  uMax[ 4 ];
+      mpa.gmax( &u[ 0 ], 4, &uMax[ 0 ] );
       if( mpa.myrank() == 0 ) 
       {
         std::cout.precision (6);
-        std::cout << "**INFO GitterPll::MacroGitterPll::identification () [lnk|vtx|idn] ";
+        std::cout << "**INFO MacroGitterPll::identification (): max links = "<< int(uMax[ 3 ]) << " [lnk|vtx|idn] ";
         std::cout << uMax[ 0 ] << " " << uMax[ 1 ] << " " << uMax[ 2 ] << " sec." << std::endl;
       }
     }

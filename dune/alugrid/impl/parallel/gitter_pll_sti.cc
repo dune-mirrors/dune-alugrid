@@ -1446,9 +1446,9 @@ namespace ALUGrid
     return repartition;
   }
 
-#ifdef STORE_LINKAGE_IN_VERTICES
   void GitterPll::computeVertexLinkage() 
   {
+#ifdef STORE_LINKAGE_IN_VERTICES
     static bool firstCall = false ;
 
     if( ! firstCall ) 
@@ -1462,13 +1462,14 @@ namespace ALUGrid
       }
       firstCall = true ;
 
-      // communication 
+      // communication is done in vertexLinkageEstimate 
     }
-
+#endif
   }
 
   void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
   {
+#ifdef STORE_LINKAGE_IN_VERTICES
     AccessIterator < vertex_STI >::Handle w ( containerPll () );
 
     const int me = mpAccess().myrank(); 
@@ -1506,10 +1507,8 @@ namespace ALUGrid
         vertex.setLinkage( linkage );
       }
     }
-
-    // communication 
-  }
 #endif
+  }
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 
   {
