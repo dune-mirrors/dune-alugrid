@@ -358,7 +358,7 @@ namespace ALUGrid
         vertex_STI& vertex = w.item();
 
         // only insert border vertices 
-        if( vertex.isBorder() && vertex.ref )
+        if( vertex.isBorder() )
         {
           int id = vertex.ident ();
           os.writeObject( id );
