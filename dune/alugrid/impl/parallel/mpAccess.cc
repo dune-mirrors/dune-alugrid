@@ -14,12 +14,9 @@ namespace ALUGrid
     out << std::endl;
   }
 
-  int MpAccessLocal::insertRequestSymetric ( const std::set< int >& req )
+  int MpAccessLocal::insertRequest( const std::set< int >& req )
   {
     const int me = myrank ();
-
-    //std::vector< int > out;
-    //out.reserve( req.size() );
 
     {
       typedef std::map< int, int >::iterator iterator ;
@@ -41,7 +38,44 @@ namespace ALUGrid
       }
     }
 
-    /*
+    // setup destination vector from linkage map 
+    {
+      typedef std::map< int, int >::const_iterator const_iterator ;
+      _dest.resize( _linkage.size () );
+      const const_iterator linkageEnd = _linkage.end ();
+      for( const_iterator i = _linkage.begin (); i != linkageEnd; ++i )
+      {
+        //std::cout << "link: " << (*i).first << " " <<  (*i).second << std::endl;
+        _dest[ (*i).second ] = (*i).first;
+      }
+    }
+    return _linkage.size();
+  }
+
+  // insertRequestSymmetric needs a global communication 
+  // this method is used to build the pattern for the loadBalancing 
+  // where we don't know who is sending whom something 
+  int MpAccessLocal::insertRequestSymetric ( const std::set< int >& req )
+  {
+    const int me = myrank ();
+
+    std::vector< int > out;
+    out.reserve( req.size() );
+
+    {
+      typedef std::map< int, int >::iterator iterator ;
+      typedef std::set< int >::const_iterator const_iterator;
+
+      const iterator linkageEnd = _linkage.end ();
+      const const_iterator reqEnd = req.end ();
+      for (const_iterator i = req.begin (); i != reqEnd; ++i )
+      {
+        const int rank = (*i);
+        if( rank != me && (_linkage.find (rank) == _linkage.end () ) )
+          out.push_back ( rank );
+      }
+    }
+
     std::vector< std::vector< int > > in = gcollect (out);
     { 
       for (std::vector< int >::const_iterator i = out.begin (); i != out.end (); ++i )
@@ -68,7 +102,6 @@ namespace ALUGrid
         }
       }
     }
-    */
 
     // setup destination vector from linkage map 
     {

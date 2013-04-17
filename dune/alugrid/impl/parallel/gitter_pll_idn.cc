@@ -587,7 +587,7 @@ namespace ALUGrid
     std::set< int > linkage; 
     secondScan( linkage );
     // insert linage into mpAccess 
-    mpa.insertRequestSymetric ( linkage );
+    mpa.insertRequest( linkage );
 
     if (debugOption (2)) 
       mpa.printLinkage (std::cout);
