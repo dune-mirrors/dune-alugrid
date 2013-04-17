@@ -602,14 +602,9 @@ namespace ALUGrid
       }
       
       // wait until all processes are done with receiving
-      {
-        //MPI_Status * sta = new MPI_Status [ _nLinks ];
-        //alugrid_assert ( sta );
-        alugrid_assert ( _request );
-        MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
-        alugrid_assert (test == MPI_SUCCESS);
-        //delete [] sta;
-      }
+      alugrid_assert ( _request );
+      MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
+      alugrid_assert (test == MPI_SUCCESS);
     }
 
     // receive data implementation with given buffers 
@@ -682,16 +677,10 @@ namespace ALUGrid
         }
       }
       
-      // Is this really needed?
       // wait until all processes are done with receiving
-      {
-        //MPI_Status * sta = new MPI_Status [ _nLinks ];
-        //alugrid_assert ( sta );
-        alugrid_assert ( _request );
-        MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
-        alugrid_assert (test == MPI_SUCCESS);
-        //delete [] sta;
-      }
+      alugrid_assert ( _request );
+      MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
+      alugrid_assert (test == MPI_SUCCESS);
     }
 
     // receive data implementation with given buffers 
@@ -802,13 +791,10 @@ namespace ALUGrid
           }
         }
 
-        // Is this really needed?
         // wait until all messages have been send and received 
-        {
-          alugrid_assert ( _request );
-          MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
-          alugrid_assert (test == MPI_SUCCESS);
-        }
+        alugrid_assert ( _request );
+        MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
+        alugrid_assert (test == MPI_SUCCESS);
 
         for( int i=0; i<_nLinks; ++ i ) 
         {
