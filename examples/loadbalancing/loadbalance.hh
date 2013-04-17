@@ -62,12 +62,17 @@ public:
   int destination( const Element &element ) const 
   { 
     typename Element::Geometry::GlobalCoordinate w = element.geometry().center();
-    double phi=arg(std::complex<double>(w[0],w[1]));
-    if (w[1]<0) phi+=2.*M_PI;
-    phi += angle_;
-    phi *= double(this->grid_.comm().size())/(2.*M_PI);
-    int p = int(phi) % this->grid_.comm().size();
-    return p;
+    if (w[0]*w[0]+w[1]*w[1] > 0.2 && this->grid_.comm().size()>0)
+    {
+      double phi=arg(std::complex<double>(w[0],w[1]));
+      if (w[1]<0) phi+=2.*M_PI;
+      phi += angle_;
+      phi *= double(this->grid_.comm().size()-1)/(2.*M_PI);
+      int p = int(phi) % (this->grid_.comm().size()-1);
+      return p+1;
+    }
+    else
+      return 0;
   }
 private:
   double angle_;
