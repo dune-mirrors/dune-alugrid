@@ -122,10 +122,11 @@ namespace ALUGrid
 
       for (mi.first (); ! mi.done (); mi.next ()) 
       {
-        std::vector< int > estimate = mi.item ().accessPllX ().estimateLinkage ();
+        T& item = mi.item ();
+        std::vector< int > estimate = item.estimateLinkage ();
         if (estimate.size ()) 
         {
-          LinkedObject::Identifier id = mi.item ().accessPllX ().getIdentifier ();
+          LinkedObject::Identifier id = item.getIdentifier ();
           look [id].first  = mi;
           look [id].second = meIt;
           {
@@ -573,7 +574,7 @@ namespace ALUGrid
 
     mpa.removeLinkage ();
     
-    int lap1 = clock ();
+    clock_t lap1 = clock ();
     // this does not have to be computed every time (depending on partitioning method)
     if( computeVertexLinkage ) 
     {
@@ -581,23 +582,24 @@ namespace ALUGrid
       vertexLinkageEstimate ( mpa );
     }
 
-    int lap2 = clock ();
+    clock_t lap2 = clock ();
     // compute linkage due to vertex linkage 
     std::set< int > linkage; 
     secondScan( linkage );
     // insert linage into mpAccess 
     mpa.insertRequestSymetric ( linkage );
 
-    if (debugOption (2)) mpa.printLinkage (std::cout);
+    if (debugOption (2)) 
+      mpa.printLinkage (std::cout);
 
-    int lap3 = clock ();
+    clock_t lap3 = clock ();
     identify< vertex_STI, hedge_STI, hface_STI >( 
               AccessIterator < vertex_STI >::Handle (*this), _vertexTT, 
               AccessIterator < hedge_STI  >::Handle (*this), _hedgeTT,
               AccessIterator < hface_STI  >::Handle (*this), _hfaceTT,
               mpa);
 
-    int lap4 = clock ();
+    clock_t lap4 = clock ();
 
     float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC);
     float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC);
