@@ -10,8 +10,6 @@
 #include "gitter_pll_sti.h"
 #include "gitter_pll_mgb.h"
 
-#define USE_NONBLOCKING_SEND_PGM
-
 namespace ALUGrid
 {
 
@@ -895,13 +893,6 @@ namespace ALUGrid
     ParallelGridMover*  _pgm;
     GatherScatterType* _gs; 
 
-#ifdef USE_NONBLOCKING_SEND_PGM
-    std::vector< std::vector< MacroGridMoverIF* > > _vertices;
-    std::vector< std::vector< MacroGridMoverIF* > > _edges;
-    std::vector< std::vector< MacroGridMoverIF* > > _faces;
-    const int _estimateSize;
-#endif
-
     UnpackLBData( const UnpackLBData& );
   public:
     // constructor 
@@ -911,75 +902,15 @@ namespace ALUGrid
       : _containerPll( containerPll ),
         _pgm( 0 ),
         _gs( gs )
-#ifdef USE_NONBLOCKING_SEND_PGM
-        , _vertices( nLinks ),
-        _edges( nLinks ),
-        _faces( nLinks ),
-        _estimateSize( typename AccessIterator < Gitter::hface_STI >::Handle(_containerPll).size() )
-    {
-      // create lists of items that should be packed
-      addItems< Gitter::vertex_STI > ( _vertices );
-      addItems< Gitter::hedge_STI  > ( _edges );
-      addItems< Gitter::hface_STI >  ( _faces );
-    }
-#else 
     {}
-#endif
 
     // destructor deleting parallel macro grid mover
     ~UnpackLBData() { delete _pgm; }
 
-#ifdef USE_NONBLOCKING_SEND_PGM
-    template <class item_STI>
-    void addItems( std::vector< std::vector< MacroGridMoverIF* > >& items ) 
-    {
-      typename AccessIterator < item_STI >::Handle w ( _containerPll );
-      const int nLinks = items.size();
-      for( int i=0; i<nLinks; ++i ) items[ i ].reserve( _estimateSize );
-      for (w.first (); ! w.done (); w.next ()) 
-      {
-        w.item().addAll( items );
-      }
-    }
-
-    void packItems( std::vector< MacroGridMoverIF* >& items, const int link, ObjectStream& os ) 
-    {
-      typedef typename std::vector< MacroGridMoverIF* > :: iterator iterator ;
-      const iterator end = items.end();
-      for( iterator it = items.begin(); it != end ; ++it ) 
-      {
-        (*it)->packLink( link, os );
-      }
-    }
-#endif
-
     void pack( const int link, ObjectStream& os ) 
     {
-#ifdef USE_NONBLOCKING_SEND_PGM
-      // pack vertices 
-      packItems( _vertices[ link ], link, os );
-      // pack edges  
-      packItems( _edges[ link ], link, os );
-      // pack faces 
-      packItems( _faces[ link ], link, os );
-
-      // pack elements
-      {
-        AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
-        for (w.first (); ! w.done (); w.next ()) w.item ().packLink( link, os, _gs );
-      }
-      // pack periodic elements 
-      {
-        AccessIterator < Gitter::hperiodic_STI >::Handle w ( _containerPll );
-        for (w.first (); ! w.done (); w.next ()) w.item ().packLink( link, os );
-      }
-
-      // write end marker 
-      os.writeObject (MacroGridMoverIF::ENDMARKER);
-#else
       std::cerr << "ERROR: UnpackLBData::pack should not be called!" << std::endl;
       abort();
-#endif
     }
 
     // work that can be done between send and receive, 
@@ -1107,7 +1038,6 @@ namespace ALUGrid
       }
       lap1 = clock ();
 
-#ifndef USE_NONBLOCKING_SEND_PGM
       // message buffers 
       std::vector< ObjectStream > osv( nl );
 
@@ -1146,7 +1076,6 @@ namespace ALUGrid
       // write end marker to terminate stream 
       for( int link=0; link<nl; ++link ) 
         osv[ link ].writeObject( MacroGridMoverIF::ENDMARKER );
-#endif
 
       lap2 = clock ();
       
@@ -1155,11 +1084,7 @@ namespace ALUGrid
         UnpackLBData data( containerPll (), nl, gatherScatter );
 
         // pack, exchange, and unpack data 
-#ifndef USE_NONBLOCKING_SEND_PGM
         mpAccess ().exchange ( osv, data );
-#else 
-        mpAccess ().exchange ( data );
-#endif
       }
 
       lap3 = clock ();
