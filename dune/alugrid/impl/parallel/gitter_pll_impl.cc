@@ -54,6 +54,17 @@ namespace ALUGrid
   }
 
   template < class A >
+  void VertexPllBaseX< A >::clearLinkage() 
+  {
+    // set iterator to empty linkage 
+    std::vector< int > lp;
+    linkagePatternMap_t& _map = linkagePatterns();
+    typename linkagePatternMap_t::iterator pos = _map.find ( lp );
+    _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first;
+    ++ (*_lpn).second;
+  }
+
+  template < class A >
   bool VertexPllBaseX< A >::setLinkage (std::vector< int > lp) 
   {
     -- (*_lpn).second;
@@ -2109,6 +2120,12 @@ namespace ALUGrid
     {
       std::cerr << "WARNING (ignored): Ignoring AccessPllException." << std::endl;
     }
+  }
+
+  void GitterBasisPll::MacroGitterBasisPll::clearLinkagePattern()
+  {
+    // clear linkage pattern map 
+    _linkagePatterns.clear();
   }
 
   void GitterBasisPll::MacroGitterBasisPll::secondScan ( std::set< int >& s )
