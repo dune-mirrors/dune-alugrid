@@ -7,7 +7,9 @@
 #include <cstddef>
 #include <string>
 
+// if defined the memory allocation from dlmalloc is used
 #define ALUGRID_USES_DLMALLOC 
+// if defined, standard C++ new and delete are used
 //#define DONT_USE_ALUGRID_ALLOC 
 
 namespace ALUGrid
@@ -80,13 +82,6 @@ namespace ALUGrid
      ~MyAlloc () {}
 
     public :
-
-#ifdef USE_MALLOC_AT_ONCE
-      // new version of operator new 
-      static void allocate( const size_t memSize, void* mem[], const size_t num ) throw (OutOfMemoryException) ;
-      // placement new operator 
-      void * operator new (size_t, void* mem) { return mem; }
-#endif
 
       // new version of operator new 
       void * operator new (size_t) throw (OutOfMemoryException) ;

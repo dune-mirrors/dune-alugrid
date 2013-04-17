@@ -1446,9 +1446,9 @@ namespace ALUGrid
     return repartition;
   }
 
-#ifdef STORE_LINKAGE_IN_VERTICES
   void GitterPll::computeVertexLinkage() 
   {
+#ifdef STORE_LINKAGE_IN_VERTICES
     static bool firstCall = false ;
 
     if( ! firstCall ) 
@@ -1461,13 +1461,15 @@ namespace ALUGrid
         w.item ().computeVertexLinkage();
       }
       firstCall = true ;
-    }
 
-    // communication 
+      // communication is done in vertexLinkageEstimate 
+    }
+#endif
   }
 
   void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
   {
+#ifdef STORE_LINKAGE_IN_VERTICES
     AccessIterator < vertex_STI >::Handle w ( containerPll () );
 
     const int me = mpAccess().myrank(); 
@@ -1480,31 +1482,33 @@ namespace ALUGrid
       {
         const std::vector<int>& linkedElements = vertex.linkedElements();
         const int elSize = linkedElements.size();
-        std::vector< int > linkage; 
-        linkage.reserve( elSize );
+        std::set< int > uniqueLinkage; 
         for( int el=0; el<elSize; ++el )
         {
           const int rank = db.destination( linkedElements[ el ] ) ;
           if( rank != me ) 
           {
             // std::cout << "Vertex " << vertex.ident() << " --> " << *it << " ( " << rank << " ) " << std::endl;
-            linkage.push_back( rank );
+            uniqueLinkage.insert( rank );
           }
+        }
+      
+        const size_t lSize = uniqueLinkage.size();
+        std::vector< int > linkage;
+        linkage.reserve( lSize );
+        typedef std::set< int >::const_iterator const_iterator;
+        const const_iterator end = uniqueLinkage.end();
+        for( const_iterator it = uniqueLinkage.begin(); it != end; ++it ) 
+        {
+          linkage.push_back( *it );
         }
       
         // set linkage 
         vertex.setLinkage( linkage );
       }
-      else 
-      {
-        // clear linkage
-        vertex.setLinkage( std::vector< int > () );
-      }
     }
-
-    // communication 
-  }
 #endif
+  }
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 
   {

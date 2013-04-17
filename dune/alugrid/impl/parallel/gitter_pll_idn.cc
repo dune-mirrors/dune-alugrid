@@ -122,10 +122,11 @@ namespace ALUGrid
 
       for (mi.first (); ! mi.done (); mi.next ()) 
       {
-        std::vector< int > estimate = mi.item ().accessPllX ().estimateLinkage ();
+        T& item = mi.item ();
+        std::vector< int > estimate = item.estimateLinkage ();
         if (estimate.size ()) 
         {
-          LinkedObject::Identifier id = mi.item ().accessPllX ().getIdentifier ();
+          LinkedObject::Identifier id = item.getIdentifier ();
           look [id].first  = mi;
           look [id].second = meIt;
           {
@@ -324,29 +325,6 @@ namespace ALUGrid
     }
   }
 
-  std::set< int > GitterPll::MacroGitterPll::secondScan () 
-  {
-    std::set< int > s;
-    {
-      AccessIterator < vertex_STI >::Handle w (*this);
-      for ( w.first (); ! w.done (); w.next ()) 
-      {
-        vertex_STI& vertex = w.item();
-        // only border vertices can have linkage 
-        if( vertex.isBorder() ) 
-        {
-          const std::vector< int > l = w.item ().accessPllX ().estimateLinkage ();
-          const std::vector< int >::const_iterator iEnd = l.end ();
-          for (std::vector< int >::const_iterator i = l.begin (); i != iEnd; ++i ) 
-          {
-            s.insert ( *i );
-          }
-        }
-      }
-    }
-    return s;
-  }
-
   class UnpackVertexLinkage 
     : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
@@ -357,10 +335,12 @@ namespace ALUGrid
     map_t _vxmap;
     GitterPll::MacroGitterPll& _containerPll ;
     const int _me ;
+    int _size ;
   public: 
     UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, const int me ) 
       : _containerPll( containerPll ),
-        _me( me ) 
+      _me( me ),
+      _size( 0 )
     {}
 
     void pack( const int rank, ObjectStream& os ) 
@@ -368,20 +348,24 @@ namespace ALUGrid
       alugrid_assert ( rank == _me );
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
 
-      const int estimate = 0.25 * w.size() + 1;
+      int _size = w.size() ;
+      const int estimate = 0.25 * _size + 1;
       // reserve memory 
       os.reserve( estimate * sizeof(int) );
+      os.writeObject( _size );
       for (w.first (); ! w.done (); w.next ()) 
       {
         vertex_STI& vertex = w.item();
 
         // only insert border vertices 
-        if( vertex.isBorder() )
+        if( vertex.isBorder() && vertex.ref )
         {
           int id = vertex.ident ();
           os.writeObject( id );
           _vxmap[ id ] = &vertex;
         }
+        else 
+          vertex.setLinkage( std::vector< int > () );
       }
       os.writeObject( endMarker );
     }
@@ -391,6 +375,10 @@ namespace ALUGrid
       alugrid_assert ( rank != _me );
 
       const map_t::const_iterator vxmapEnd = _vxmap.end();
+
+      int wSize; 
+      os.readObject( wSize );
+      _size += wSize ;
 
       int id ;
       os.readObject ( id );
@@ -413,6 +401,8 @@ namespace ALUGrid
 
     void printVertexLinkage()
     {
+      std::cout << "Global Vertex Size = " << _size << std::endl;
+
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
       for (w.first (); ! w.done (); w.next ()) 
       {
@@ -462,6 +452,7 @@ namespace ALUGrid
           // free memory 
           osv[ link ].reset(); 
         }
+        //data.printVertexLinkage();
       }
       catch( MyAlloc :: OutOfMemoryException ) 
       {
@@ -596,7 +587,7 @@ namespace ALUGrid
 
     mpa.removeLinkage ();
     
-    int lap1 = clock ();
+    clock_t lap1 = clock ();
     // this does not have to be computed every time (depending on partitioning method)
     if( computeVertexLinkage ) 
     {
@@ -604,19 +595,24 @@ namespace ALUGrid
       vertexLinkageEstimate ( mpa );
     }
 
-    int lap2 = clock ();
-    mpa.insertRequestSymetric (secondScan ());
+    clock_t lap2 = clock ();
+    // compute linkage due to vertex linkage 
+    std::set< int > linkage; 
+    secondScan( linkage );
+    // insert linage into mpAccess 
+    mpa.insertRequestSymetric( linkage );
 
-    if (debugOption (2)) mpa.printLinkage (std::cout);
+    if (debugOption (2)) 
+      mpa.printLinkage (std::cout);
 
-    int lap3 = clock ();
+    clock_t lap3 = clock ();
     identify< vertex_STI, hedge_STI, hface_STI >( 
               AccessIterator < vertex_STI >::Handle (*this), _vertexTT, 
               AccessIterator < hedge_STI  >::Handle (*this), _hedgeTT,
               AccessIterator < hface_STI  >::Handle (*this), _hfaceTT,
               mpa);
 
-    int lap4 = clock ();
+    clock_t lap4 = clock ();
 
     float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC);
     float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC);

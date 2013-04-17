@@ -543,7 +543,7 @@ namespace ALUGrid
       // send data 
       for (int link = 0; link < _nLinks; ++link) 
       {
-        sendLink( link, dest[ link ], _tag, osv[ link ], comm );
+        sendLink( dest[ link ], _tag, osv[ link ], _request[ link ], comm );
       }
 
       // set send info 
@@ -602,14 +602,9 @@ namespace ALUGrid
       }
       
       // wait until all processes are done with receiving
-      {
-        MPI_Status * sta = new MPI_Status [ _nLinks ];
-        alugrid_assert ( sta );
-        alugrid_assert ( _request );
-        MY_INT_TEST MPI_Waitall ( _nLinks, _request, sta);
-        alugrid_assert (test == MPI_SUCCESS);
-        delete [] sta;
-      }
+      alugrid_assert ( _request );
+      MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
+      alugrid_assert (test == MPI_SUCCESS);
     }
 
     // receive data implementation with given buffers 
@@ -631,7 +626,7 @@ namespace ALUGrid
           dataHandle.pack( link, osSend[ link ] );
 
           // send data 
-          sendLink( link, dest[ link ], _tag, osSend[ link ], comm );
+          sendLink( dest[ link ], _tag, osSend[ link ], _request[ link ], comm );
         }
 
         // set send info 
@@ -682,16 +677,10 @@ namespace ALUGrid
         }
       }
       
-      // Is this really needed?
       // wait until all processes are done with receiving
-      {
-        MPI_Status * sta = new MPI_Status [ _nLinks ];
-        alugrid_assert ( sta );
-        alugrid_assert ( _request );
-        MY_INT_TEST MPI_Waitall ( _nLinks, _request, sta);
-        alugrid_assert (test == MPI_SUCCESS);
-        delete [] sta;
-      }
+      alugrid_assert ( _request );
+      MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
+      alugrid_assert (test == MPI_SUCCESS);
     }
 
     // receive data implementation with given buffers 
@@ -746,7 +735,7 @@ namespace ALUGrid
       const int dest   = (me == totalMesg) ? 0    : me + 1; 
 
       // send first message 
-      sendLink( 0, dest, tag, sendBuffers[ 0 ], comm );
+      sendLink( dest, tag, sendBuffers[ 0 ], _request[ 0 ], comm );
 
       // we need one receive buffer 
       ObjectStream recvBuff ;
@@ -780,7 +769,7 @@ namespace ALUGrid
                   ObjectStream& sendBuff = sendBuffers[ link ];
                   sendBuff.clear();
                   sendBuff.writeStream( recvBuff );
-                  sendLink( link, dest, tag+link, sendBuff, comm );
+                  sendLink( dest, tag+link, sendBuff, _request[ link ], comm );
                   ++ msgSent ;
                 }
 
@@ -802,19 +791,18 @@ namespace ALUGrid
           }
         }
 
-        // Is this really needed?
         // wait until all messages have been send and received 
-        {
-          MPI_Status * sta = new MPI_Status [ nLinks ];
-          alugrid_assert ( sta );
-          alugrid_assert ( _request );
-          MY_INT_TEST MPI_Waitall ( nLinks, _request, sta);
-          alugrid_assert (test == MPI_SUCCESS);
-          delete [] sta;
-        }
+        alugrid_assert ( _request );
+        MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
+        alugrid_assert (test == MPI_SUCCESS);
 
-        // reset received vector 
-        for( int i=0; i<_nLinks; ++ i ) linkReceived[ i ] = false ;
+        for( int i=0; i<_nLinks; ++ i ) 
+        {
+          // reset received vector 
+          linkReceived[ i ] = false ;
+          // reset request status 
+          _request[ i ] = MPI_REQUEST_NULL;
+        }
 
         // increase msg tags 
         tag += nLinks ;
@@ -822,14 +810,14 @@ namespace ALUGrid
     }
 
   protected:  
-    void sendLink( const int link, const int dest, const int tag, const ObjectStream& os, MPI_Comm& comm ) 
+    void sendLink( const int dest, const int tag, const ObjectStream& os, MPI_Request& request, MPI_Comm& comm ) 
     {
       // get send buffer from object stream 
       char* buffer     = os._buf + os._rb;
       // get number of bytes to send 
       int   bufferSize = os._wb  - os._rb; 
 
-      MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest, tag, comm, &_request[ link ] );
+      MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest, tag, comm, &request );
       alugrid_assert (test == MPI_SUCCESS);
     }
 
@@ -932,7 +920,8 @@ namespace ALUGrid
     const int maxMsg = psize()-1;
     // 512 is the max number of simultaneously messages that we allow 
     // due to memory restrictions 
-    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag( maxMsg ), 512 );
+    const int links = std::min( 128, maxMsg );
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag( maxMsg ), links );
     nonBlockingExchange.allToAll( handle );
   }
 
