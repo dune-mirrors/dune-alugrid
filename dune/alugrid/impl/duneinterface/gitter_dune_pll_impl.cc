@@ -859,6 +859,9 @@ namespace ALUGrid
     {
     }
 
+    // return true if at least one codimension is contained 
+    bool containsSomeThing () const { return (_haveHigherCodimData || _elementData.contains(3,0) ); }
+
     void pack( const int link, ObjectStream& sendBuff ) 
     {
       const bool packInterior = (_commType == GitterDunePll::All_All_Comm) || 
@@ -938,9 +941,6 @@ namespace ALUGrid
     }
   };
 
-  
-
-
   void GitterDunePll::doInteriorGhostComm( 
     std::vector< ObjectStream > & osvec ,
     GatherScatterType & vertexData , 
@@ -949,128 +949,21 @@ namespace ALUGrid
     GatherScatterType & elementData ,
     const CommunicationType commType )
   {
-    
-    const bool containsVertices = vertexData.contains(3,3);
-    const bool containsEdges    = edgeData.contains(3,2);
-    const bool containsFaces    = faceData.contains(3,1);
-    const bool containsElements = elementData.contains(3,0);
+    // create data handle 
+    PackUnpackInteriorGhostData data( *this, vertexData, edgeData, faceData, elementData, commType );
 
-    const bool haveHigherCodimData = containsVertices || 
-                                     containsEdges ||  
-                                     containsFaces;
-
-    const bool containsSomeThing = haveHigherCodimData || containsElements;
-
-    //const bool packInterior = (commType == All_All_Comm) || 
-    //                          (commType == Interior_Ghost_Comm);
-    
-    //const bool packGhosts   = (commType == All_All_Comm) || 
-    //                         (commType == Ghost_Interior_Comm);
-
-    //const int nl = mpAccess ().nlinks ();
-
-    if(!containsSomeThing) 
+    if(! data.containsSomeThing() ) 
     {
       std::cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
       return;
     }
 
-#if 1
-    // create data handle 
-    PackUnpackInteriorGhostData data( *this, vertexData, edgeData, faceData, elementData, commType );
-
     ///////////////////////////////////////////
     // exchange data 
     ///////////////////////////////////////////
     mpAccess ().exchange ( data );     
-#else 
-    {
-      for (int link = 0; link < nl; ++link ) 
-      {   
-        ObjectStream & sendBuff = osvec[link]; 
-        sendBuff.clear();
-        
-        {
-          const hface_STI * determType = 0; // only for type determination 
-          std::pair< IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
-            iterpair = borderIteratorTT( determType , link );
-
-          if(haveHigherCodimData || packGhosts )
-          {
-            // write all data belong to interior of master faces 
-            sendInteriorGhostAllData( sendBuff, iterpair.first , 
-                              vertexData, edgeData,
-                              faceData, elementData, 
-                              packInterior , packGhosts );
-          
-            // write all data belong to interior of slave faces 
-            sendInteriorGhostAllData( sendBuff, iterpair.second , 
-                              vertexData, edgeData,
-                              faceData, elementData ,
-                              packInterior , packGhosts );
-          }
-          else 
-          {
-            // write all data belong to interior of master faces 
-            sendInteriorGhostElementData( sendBuff, iterpair.first, elementData);
-          
-            // write all data belong to interior of slave faces 
-            sendInteriorGhostElementData( sendBuff, iterpair.second, elementData);
-          }
-
-          delete iterpair.first; 
-          delete iterpair.second; 
-        }
-      }
-
-      ///////////////////////////////////////////
-      // exchange data 
-      ///////////////////////////////////////////
-      osvec = mpAccess ().exchange (osvec);     
-      
-      //all ghost cells get new data
-      for (int link = 0; link < nl; ++link ) 
-      {  
-        ObjectStream & recvBuff = osvec[link];
-
-        {
-          const hface_STI * determType = 0; // only for type determination 
-          std::pair< IteratorSTI < hface_STI > * , IteratorSTI < hface_STI > * > 
-            iterpair = borderIteratorTT( determType , link );
-
-          if(haveHigherCodimData || packGhosts )
-          {
-            // first unpack slave data, because this has been pack from master
-            // first , see above 
-            unpackInteriorGhostAllData( recvBuff, iterpair.second , 
-                                vertexData, edgeData,
-                                faceData, elementData );
-           
-            // now unpack data sended from slaves to master 
-            unpackInteriorGhostAllData( recvBuff, iterpair.first , 
-                                vertexData, edgeData,
-                                faceData, elementData );
-          }
-          else 
-          {
-            // first unpack slave data, because this has been pack from master
-            // first , see above 
-            unpackInteriorGhostElementData( recvBuff, iterpair.second, elementData );
-           
-            // now unpack data sended from slaves to master 
-            unpackInteriorGhostElementData( recvBuff, iterpair.first, elementData );
-          }
-
-          delete iterpair.first;
-          delete iterpair.second;
-        }
-      }
-    }
-#endif
-
-    // end element communication 
-    return;
   } 
+
   ////////////////////////////////////////////////////////
   //
   // communicate data

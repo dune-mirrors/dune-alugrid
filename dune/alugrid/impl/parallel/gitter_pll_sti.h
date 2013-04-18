@@ -159,6 +159,7 @@ namespace ALUGrid
       hfaceTT_t   _hfaceTT;
 
       virtual void secondScan ( std::set< int >& ) = 0 ;
+    public:  
       virtual void clearLinkagePattern () = 0;
       virtual void vertexLinkageEstimate (MpAccessLocal &);
       // vertexLinkageEstimation with gcollect( MPI_Allgather, memory consuming )
@@ -241,7 +242,7 @@ namespace ALUGrid
       void doRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
       void checkGraphVertexIndices();
       void computeGraphVertexIndices();
-      void computeVertexLinkage();
+      bool computeVertexLinkage();
       void setVertexLinkage( LoadBalancer::DataBase & );
       void doNotifyMacroGridChanges ( bool );
     public:  
@@ -302,6 +303,7 @@ namespace ALUGrid
    
       int  _refineLoops;
       bool _ldbVerticesComputed;
+      bool _vertexLinkageComputed; 
   };
 
   template < class A > class LeafIteratorTT : public MyAlloc 

@@ -329,7 +329,7 @@ namespace ALUGrid
     : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
     // choose negative endmarker, since all ids should be positive 
-    static const int endMarker = -127 ;
+    static const int endMarker = -32767 ;
     typedef Gitter :: vertex_STI vertex_STI ;
     typedef std::map< int, vertex_STI* > map_t;
     map_t _vxmap;
@@ -358,16 +358,25 @@ namespace ALUGrid
       {
         vertex_STI& vertex = w.item();
 
+        // clear all linkage of this vertex 
+        vertex.clearLinkage();
+
         // only insert border vertices 
         if( vertex.isBorder() )
         {
           int id = vertex.ident ();
           os.writeObject( id );
           _vxmap[ id ] = &vertex;
+#ifdef STORE_LINKAGE_IN_VERTICES
+          const std::vector<int>& linkedElements = vertex.linkedElements();
+          const int linkedSize = linkedElements.size();
+          os.writeObject( -linkedSize-1 );
+          for( int el=0; el< linkedSize; ++el ) 
+          {
+            os.writeObject( linkedElements[ el ] );
+          }
+#endif
         }
-
-        // clear all linkage of this vertex 
-        vertex.clearLinkage();
       }
       os.writeObject( endMarker );
     }
@@ -384,20 +393,45 @@ namespace ALUGrid
 
       int id ;
       os.readObject ( id );
+      std::vector< int > linkedElements ;
       while( id != endMarker )
       {
+        // search vertex 
         map_t::const_iterator hit = _vxmap.find (id);
-        if( hit != vxmapEnd ) 
-        {
-          std::vector< int > s = (*hit).second->estimateLinkage ();
-          if (find (s.begin (), s.end (), rank) == s.end ()) 
-          {
-            s.push_back( rank );
-            (*hit).second->setLinkage (s);
-          }
-        }
         // read next id 
         os.readObject( id );
+#ifdef STORE_LINKAGE_IN_VERTICES
+        if( id < 0 && id != endMarker ) 
+        {
+          const int linkedSize = -id-1 ;
+          linkedElements.resize( linkedSize );
+          for( int el=0; el< linkedSize; ++el ) 
+          {
+            os.readObject( linkedElements[ el ] );
+          }
+          // read next vertex id 
+          os.readObject( id );
+        }
+#endif
+        // check vertex linkages 
+        if( hit != vxmapEnd ) 
+        {
+          vertex_STI* vertex = (*hit).second;
+#ifdef STORE_LINKAGE_IN_VERTICES
+          const int linkedSize = linkedElements.size();
+          for( int el=0; el< linkedSize; ++el ) 
+          {
+            vertex->addGraphVertexIndex( linkedElements[ el ] );
+          }
+#endif
+          std::vector< int > s = vertex->estimateLinkage ();
+          const std::vector< int >::iterator sEnd = s.end();
+          if (std::find (s.begin (), sEnd, rank) == sEnd ) 
+          {
+            s.push_back( rank );
+            vertex->setLinkage (s);
+          }
+        }
       }
     }
 
@@ -605,7 +639,8 @@ namespace ALUGrid
     // compute linkage due to vertex linkage 
     std::set< int > linkage; 
     secondScan( linkage );
-    // insert linage into mpAccess 
+
+    // insert linkage without communication into mpAccess 
     mpa.insertRequest( linkage );
 
     if (debugOption (2)) 
