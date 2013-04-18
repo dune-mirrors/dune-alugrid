@@ -69,6 +69,7 @@ namespace ALUGrid
       virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) = 0;
       virtual void unpackSelf ( ObjectStream &, bool ) = 0;
       virtual void duneUnpackSelf ( ObjectStream &, bool, GatherScatterType * ) = 0;
+      virtual void computeBaryCenter( double (&center)[3] ) const = 0;
   };
 
   class MacroGridMoverDefault : public MacroGridMoverIF {
@@ -86,6 +87,7 @@ namespace ALUGrid
       virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) { alugrid_assert (false); return false; }
       virtual void unpackSelf ( ObjectStream &, bool ) { alugrid_assert (false); abort(); }
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType *) {alugrid_assert (false);}
+      virtual void computeBaryCenter( double (&center)[3] ) const { center[ 0 ] = center[ 1 ] = center[ 2 ] = 0; }
   } ;
 
     // LinkedObjekt ist die Schnittstelle, die im parallelen Gitter zur

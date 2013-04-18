@@ -20,6 +20,7 @@ namespace ALUGrid
 
 #include "../serial/key.h"
 #include "../serial/myalloc.h"
+#include "../serial/parallel.h"
 #include "mpAccess.h"
 
 namespace ALUGrid
@@ -58,29 +59,26 @@ namespace ALUGrid
 
       class GraphVertex : public MyAlloc
       {
+        typedef alucoord_t center_t[ 3 ];
 #ifdef GRAPHVERTEX_WITH_CENTER
-        alucoord_t  _center [3];  // geographical coords of vertex 
+        const MacroGridMoverIF* _element ; // for computing the bary center if necessary 
 #endif
+
         int _index;   // global graph index 
-        int _weight; // weight of vertex 
+        int _weight;  // weight of vertex 
 
         public :
-          static const int sizeOfData = 2 * sizeof(int) 
-#ifdef GRAPHVERTEX_WITH_CENTER
-            + 3 * sizeof(alucoord_t)
-#endif      
-            ;
+          static const int sizeOfData = 2 * sizeof(int);
 
           explicit GraphVertex( ObjectStream& os );
-          inline GraphVertex (int,int,const alucoord_t (&)[3]);
+          // contructor taking linked object (for barycenter calculation)
+          inline GraphVertex (int,int, const MacroGridMoverIF& );
           inline GraphVertex (int,int);
           // constructor without center is initializing center and weight to zero 
           inline GraphVertex (int);
           inline int index () const;
           inline int weight () const;
-#ifdef GRAPHVERTEX_WITH_CENTER
-          inline const alucoord_t (&center () const)[3];
-#endif
+          inline void computeBaryCenter( center_t& center ) const;
           inline bool operator < (const GraphVertex &) const;
           inline bool operator == (const GraphVertex &) const;
           inline bool isValid () const;
@@ -319,35 +317,31 @@ namespace ALUGrid
     readFromStream( os );
   }
 
-  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w, const alucoord_t (&p)[3]) 
+  inline LoadBalancer::GraphVertex::GraphVertex (int i, int w, const MacroGridMoverIF& obj )
   : _index (i), _weight (w)
-  {
 #ifdef GRAPHVERTEX_WITH_CENTER
-    _center [0] = p [0];
-    _center [1] = p [1];
-    _center [2] = p [2];
+    , _element( &obj )
 #endif
+  {
     alugrid_assert ( _weight > 0 );
-    return;
   }
 
   inline LoadBalancer::GraphVertex::GraphVertex (int i, int w)
   : _index (i), _weight (w)
-  {
 #ifdef GRAPHVERTEX_WITH_CENTER
-    _center [0] = _center [1] = _center [2] = 0.0;
+    , _element( 0 )
 #endif
-    return;
+  {
+    alugrid_assert ( _weight > 0 );
   }
 
   inline LoadBalancer::GraphVertex::GraphVertex (int i) 
     : _index (i), _weight (1)
-  {
 #ifdef GRAPHVERTEX_WITH_CENTER
-    _center [0] = _center [1] = _center [2] = 0.0;
+      , _element( 0 )
 #endif
+  {
     alugrid_assert ( _weight > 0 );
-    return;
   }
 
   inline int LoadBalancer::GraphVertex::index () const {
@@ -359,11 +353,15 @@ namespace ALUGrid
     return _weight;
   }
 
+  inline void LoadBalancer::GraphVertex::computeBaryCenter( center_t& center ) const 
+  {
 #ifdef GRAPHVERTEX_WITH_CENTER
-  inline const alucoord_t (& LoadBalancer::GraphVertex::center () const)[3] {
-    return _center;
-  }
+    assert( _element ) ;
+    _element->computeBaryCenter( center );
+#else 
+    center[ 2 ] = center[ 1 ] = center[ 0 ] = 0;
 #endif
+  }
 
   inline bool LoadBalancer::GraphVertex::isValid () const {
     return (_index >= 0 ) && ( _weight > 0 );
@@ -381,11 +379,6 @@ namespace ALUGrid
   {
     os.readObject (_index);
     os.readObject (_weight);
-#ifdef GRAPHVERTEX_WITH_CENTER
-    os.readObject (_center [0]);
-    os.readObject (_center [1]);
-    os.readObject (_center [2]);
-#endif
     return true;
   }
 
@@ -393,16 +386,12 @@ namespace ALUGrid
   {
     os.writeObject (_index);
     os.writeObject (_weight);
-#ifdef GRAPHVERTEX_WITH_CENTER
-    os.writeObject (_center [0]);
-    os.writeObject (_center [1]);
-    os.writeObject (_center [2]);
-#endif
     return;
   }
 
-  inline LoadBalancer::DataBase::DataBase () : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-    _edgeSet (), _vertexSet (), _graphSizes(), _noPeriodicFaces( true )
+  inline LoadBalancer::DataBase::DataBase () 
+    : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
+      _edgeSet (), _vertexSet (), _graphSizes(), _noPeriodicFaces( true )
   {
   }
 
@@ -411,7 +400,8 @@ namespace ALUGrid
     _edgeSet (), _vertexSet (), _graphSizes( graphSizes ), _noPeriodicFaces( true ) 
   {}
 
-  inline LoadBalancer::DataBase::DataBase (const DataBase & b) : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
+  inline LoadBalancer::DataBase::DataBase (const DataBase & b) 
+    : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
       _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
       _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) ,
       _graphSizes( b._graphSizes ),

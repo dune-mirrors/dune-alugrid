@@ -266,6 +266,7 @@ namespace ALUGrid
       virtual void unpackSelf (ObjectStream &, bool);
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
+      virtual void computeBaryCenter( alucoord_t (&center)[3] ) const ;
     protected:
       bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll (std::vector< ObjectStream > &, GatherScatterType * );
@@ -273,9 +274,7 @@ namespace ALUGrid
       void packAsBndNow (int, ObjectStream &, const bool ) const;
       
     private :
-#ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t _center [3];
-#endif
+      // link number corresponding to rank where element is moved to
       int _moveTo;
       // globally unique element number 
       int _ldbVertexIndex;
@@ -363,9 +362,6 @@ namespace ALUGrid
         return ! isSet( flagLock );
       }
     private :
-#ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t _center [3];
-#endif
       int _moveTo;
   };
 
@@ -447,9 +443,6 @@ namespace ALUGrid
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const;
     private :
-#ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t _center [3];
-#endif
       int _moveTo;
   };
 
@@ -530,6 +523,7 @@ namespace ALUGrid
       virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
+      virtual void computeBaryCenter( alucoord_t (&center)[3] ) const ;
     protected :
       bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll( std::vector< ObjectStream > &, GatherScatterType * );
@@ -539,9 +533,7 @@ namespace ALUGrid
 
       void packAsBndNow (int, ObjectStream &, const bool ) const;
     protected:
-#ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t _center [3];
-#endif
+      // link number corresponding to rank where element is moved to
       int _moveTo;
       // globally unique element number 
       int _ldbVertexIndex;
