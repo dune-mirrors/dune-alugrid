@@ -917,7 +917,7 @@ namespace ALUGrid
     // parameter for GraphVertex are: 
     // - macro vertex index
     // - number of elementes below macro element 
-    // - bary center (only if GRAPHVERTEX_WITH_CENTER defined)
+    // - pointer to this element in case bary center is needed (only if GRAPHVERTEX_WITH_CENTER defined)
     typedef TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI > >  TreeIteratorType;
 
     // get macro element weight 
@@ -1644,7 +1644,7 @@ namespace ALUGrid
     // parameter for GraphVertex are: 
     // - macro vertex index
     // - number of elementes below macro element 
-    // - bary center (only if GRAPHVERTEX_WITH_CENTER defined)
+    // - pointer to this element in case bary center is needed (only if GRAPHVERTEX_WITH_CENTER defined)
     typedef TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI > >  TreeIteratorType;
 
     // get macro element weight 
