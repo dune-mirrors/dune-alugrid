@@ -34,6 +34,7 @@ namespace ALUGrid
       inline const myvertex_t & myvertex () const { return *this; }
 
       using A::VERTEX;
+      void doClearLinkage ();
     public :
       VertexPllBaseX (double,double,double,int,IndexManagerStorageType&);
      ~VertexPllBaseX ();

@@ -27,11 +27,7 @@ namespace ALUGrid
       _lpn (), 
       _moveTo ( 0 )
   {
-    linkagePatternMap_t& _map = linkagePatterns();
-    typename linkagePatternMap_t::iterator pos = _map.find (nullPattern);
-    _lpn = (pos != _map.end ()) ? pos : _map.insert ( make_pair( nullPattern, int(0) )).first;
-    ++ (*_lpn).second;
-    return;
+    doClearLinkage();
   }
 
   template < class A >
@@ -54,14 +50,19 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::clearLinkage() 
+  void VertexPllBaseX< A >::doClearLinkage() 
   {
     // set iterator to empty linkage 
-    std::vector< int > lp;
     linkagePatternMap_t& _map = linkagePatterns();
-    typename linkagePatternMap_t::iterator pos = _map.find ( lp );
-    _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first;
+    typename linkagePatternMap_t::iterator pos = _map.find ( nullPattern );
+    _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( nullPattern, int(0) )).first;
     ++ (*_lpn).second;
+  }
+
+  template < class A >
+  void VertexPllBaseX< A >::clearLinkage() 
+  {
+    doClearLinkage();
   }
 
   template < class A >
