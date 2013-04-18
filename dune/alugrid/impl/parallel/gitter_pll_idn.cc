@@ -416,22 +416,20 @@ namespace ALUGrid
         // check vertex linkages 
         if( hit != vxmapEnd ) 
         {
+          vertex_STI* vertex = (*hit).second;
 #ifdef STORE_LINKAGE_IN_VERTICES
           const int linkedSize = linkedElements.size();
-          std::cout << "el size = " << linkedSize << " ";
           for( int el=0; el< linkedSize; ++el ) 
           {
-            std::cout << linkedElements[ el ] << " ";
-            (*hit).second->addGraphVertexIndex( linkedElements[ el ] );
+            vertex->addGraphVertexIndex( linkedElements[ el ] );
           }
-          std::cout << std::endl;
 #endif
-          std::vector< int > s = (*hit).second->estimateLinkage ();
+          std::vector< int > s = vertex->estimateLinkage ();
           const std::vector< int >::iterator sEnd = s.end();
           if (std::find (s.begin (), sEnd, rank) == sEnd ) 
           {
             s.push_back( rank );
-            (*hit).second->setLinkage (s);
+            vertex->setLinkage (s);
           }
         }
       }

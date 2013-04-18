@@ -1412,8 +1412,7 @@ namespace ALUGrid
 #endif
         lap3 = clock();
 
-        if( precomputeLinkage ) 
-          computeVertexLinkage();
+        const bool computeVertexLinkageAgain = computeVertexLinkage();
 
         // check gather-scatter object and call appropriate method 
         if( gs ) 
@@ -1423,19 +1422,15 @@ namespace ALUGrid
 
         if( precomputeLinkage ) 
         {
-          static bool firstCall = true ;
-          if( firstCall ) 
-          {
+          if( computeVertexLinkageAgain )
             containerPll ().identification (mpAccess (), true );
-            firstCall = false ;
-          }
           setVertexLinkage( db );
         }
 
         lap4 = clock();
 
         // calls identification and exchangeDynamicState 
-        doNotifyMacroGridChanges ( ! precomputeLinkage );
+        doNotifyMacroGridChanges ( computeVertexLinkageAgain );
       }
     }
 
@@ -1454,12 +1449,10 @@ namespace ALUGrid
     return repartition;
   }
 
-  void GitterPll::computeVertexLinkage() 
+  bool GitterPll::computeVertexLinkage() 
   {
 #ifdef STORE_LINKAGE_IN_VERTICES
-    static bool firstCall = true ;
-
-    if( firstCall ) 
+    if( ! _vertexLinkageComputed ) 
     {
       AccessIterator < helement_STI >::Handle w ( containerPll () );
 
@@ -1468,10 +1461,13 @@ namespace ALUGrid
       {
         w.item ().computeVertexLinkage();
       }
-      firstCall = false ;
-
+      _vertexLinkageComputed = true ;
+      return true ;
       // communication is done in vertexLinkageEstimate 
     }
+    return false ;
+#else
+    return true ;
 #endif
   }
 
@@ -1498,7 +1494,6 @@ namespace ALUGrid
         const std::vector<int>& linkedElements = vertex.linkedElements();
         const int elSize = linkedElements.size();
         assert( elSize > 0  );
-        std::cout << "Found border vertex with linked els = " << elSize << std::endl;
         std::set< int > uniqueLinkage; 
         for( int el=0; el<elSize; ++el )
         {
@@ -1516,7 +1511,6 @@ namespace ALUGrid
         const const_iterator end = uniqueLinkage.end();
         for( const_iterator it = uniqueLinkage.begin(); it != end; ++it ) 
         {
-          std::cout << "Vertex " << vertex.ident() << " --> " << *it << std::endl;
           linkage.push_back( *it );
         }
       
@@ -1624,7 +1618,8 @@ namespace ALUGrid
       _ldbUnder (0.0), 
       _ldbMethod (LoadBalancer::DataBase::NONE),
       _refineLoops( 0 ), 
-      _ldbVerticesComputed( false )
+      _ldbVerticesComputed( false ),
+      _vertexLinkageComputed( false )
   {
     if( mpa.myrank() == 0 ) 
     {
