@@ -65,10 +65,14 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool VertexPllBaseX< A >::setLinkage (std::vector< int > lp) 
+  bool VertexPllBaseX< A >::setLinkage ( const std::vector< int >& newLinkage ) 
   {
     -- (*_lpn).second;
     linkagePatternMap_t& _map = linkagePatterns();
+    static std::vector< int > lp;
+    lp.resize( newLinkage.size() );
+    std::copy( newLinkage.begin(), newLinkage.end(), lp.begin() );
+    //std::vector< int > lp( newLinkage );
     std::sort( lp.begin(), lp.end() );
     typename linkagePatternMap_t::iterator pos = _map.find (lp);
     _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first;
@@ -125,27 +129,6 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > > & vec) 
-  {
-    if( _moveTo ) 
-    {
-      typedef typename moveto_t::const_iterator  const_iterator;
-      const const_iterator iEnd =  _moveTo->end (); 
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
-      {
-        const int link = (*i).first;
-        vec[ link ].push_back( this );
-      }
-    }
-  }
-
-  template < class A >
-  bool VertexPllBaseX< A >::packLink ( const int link, ObjectStream& os ) 
-  {
-    return doPackLink( link, os );
-  }
-
-  template < class A >
   bool VertexPllBaseX< A >::doPackLink ( const int link, ObjectStream& os ) 
   {
     os.writeObject (VERTEX);
@@ -155,10 +138,16 @@ namespace ALUGrid
     os.writeObject (myvertex ().Point ()[2]);
 
 #ifdef STORE_LINKAGE_IN_VERTICES
-    const int elSize = _elements.size();
+    const std::vector< int >& elements = linkedElements();
+    const int elSize = elements.size();
+    //std::cout << "Pack el = " << elSize << " ";
     os.writeObject( elSize );
     for( int el=0; el<elSize; ++el )
-      os.writeObject( _elements[ el ] );
+    {
+      //std::cout << elements[ el ] << " ";
+      os.writeObject( elements[ el ] );
+    }
+    //std::cout << std::endl;
 #endif
     inlineData (os);
     return true ; 
@@ -168,16 +157,19 @@ namespace ALUGrid
   void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool i) 
   {
 #ifdef STORE_LINKAGE_IN_VERTICES
-    _elements.clear();
+    //_elements.clear();
     int elSize; 
     os.readObject( elSize );
-    _elements.reserve( elSize );
+    std::cout << "unpack el = " << elSize << " ";
+    //_elements.reserve( elSize );
     for( int el=0; el<elSize; ++el ) 
     {
       int elem; 
       os.readObject( elem );
-      _elements.push_back( elem );
+      std::cout << elem << " ";
+      addGraphVertexIndex( elem );
     }
+    std::cout << std::endl;
 #endif 
 
     if (i) 
@@ -259,27 +251,6 @@ namespace ALUGrid
       }
     }
     return action;
-  }
-
-  template < class A >
-  void EdgePllBaseXMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo ) 
-    {
-      typedef typename moveto_t::const_iterator const_iterator;
-      const const_iterator iEnd =  _moveTo->end ();
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
-      {
-        const int link = (*i).first;
-        vec[ link ].push_back( this );
-      }
-    }
-  }
-
-  template < class A >
-  bool EdgePllBaseXMacro< A >::packLink ( const int link, ObjectStream& os ) 
-  {
-    return doPackLink( link, os );
   }
 
   template < class A >
@@ -554,27 +525,6 @@ namespace ALUGrid
     return action;
   }
 
-  template < class A > 
-  void FacePllBaseXMacro < A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo ) 
-    {
-      typedef typename moveto_t::const_iterator const_iterator;
-      const const_iterator iEnd =  _moveTo->end ();
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
-      {
-        const int link = (*i).first;
-        vec[ link ].push_back( (MacroGridMoverIF*) this );
-      }
-    }
-  }
-        
-  template < class A > bool 
-  FacePllBaseXMacro < A >::packLink ( const int link, ObjectStream & os ) 
-  {
-    return doPackLink( link, os );
-  }
-  
   template < class A > bool 
   FacePllBaseXMacro < A >::doPackLink ( const int link, ObjectStream & os ) 
   {
@@ -1076,27 +1026,10 @@ namespace ALUGrid
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec)
-  {
-    if( _moveTo >= 0 ) 
-    {
-      vec[ _moveTo ].push_back( this );
-    }
-  }
-
-  template < class A >
-  bool TetraPllXBaseMacro< A >::packLink( const int link, ObjectStream& os,
-                                          GatherScatterType* gs) 
-  {
-    if( _moveTo != link ) return false ;
-    return doPackLink( link, os, gs );
-  }
-
-  template < class A >
   bool TetraPllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os,
                                           GatherScatterType* gs) 
   {
-#ifdef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     for( int i=0; i<4; ++i ) 
     {
       if( this->myneighbour( i ).first->isboundary() ) 
@@ -1379,22 +1312,13 @@ namespace ALUGrid
       alugrid_assert ( myneighbour( 0 ).first->moveTo() == _moveTo );
       alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
 
-      return packLink( _moveTo, osv[ _moveTo ] );
+      return doPackLink( _moveTo, osv[ _moveTo ] );
     }
     return false;
   }
 
   template < class A >
-  void Periodic3PllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo >= 0 ) 
-    { 
-      vec[ _moveTo ].push_back( this );
-    }
-  }
-
-  template < class A >
-  bool Periodic3PllXBaseMacro< A >::packLink( const int link, ObjectStream& os ) 
+  bool Periodic3PllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os ) 
   {
     if( _moveTo != link ) return false;
 
@@ -1573,22 +1497,13 @@ namespace ALUGrid
       alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
 
       alugrid_assert ((osv.begin () + _moveTo) < osv.end ());
-      return packLink( _moveTo, osv[ _moveTo ] );
+      return doPackLink( _moveTo, osv[ _moveTo ] );
     }
     return false ;
   }
 
-  template < class A >
-  void Periodic4PllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo >= 0 ) 
-    { 
-      vec[ _moveTo ].push_back( this );
-    }
-  }
-
   template < class A > 
-  bool Periodic4PllXBaseMacro< A >::packLink( const int link, ObjectStream& os ) 
+  bool Periodic4PllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os ) 
   {
     if( _moveTo != link ) return false;
 
@@ -1850,15 +1765,6 @@ namespace ALUGrid
       
   // pack all function for dune 
   template < class A >
-  bool HexaPllBaseXMacro< A >::packLink ( const int link, ObjectStream& os,
-                                          GatherScatterType* gs) 
-  {
-    if( _moveTo != link ) return false ;
-    return doPackLink( link, os, gs );
-  }
-
-  // pack all function for dune 
-  template < class A >
   bool HexaPllBaseXMacro< A >::doPackLink ( const int link, ObjectStream& os,
                                             GatherScatterType* gs) 
   {
@@ -1901,15 +1807,6 @@ namespace ALUGrid
   bool HexaPllBaseXMacro< A >::packAll (std::vector< ObjectStream > & osv) 
   {
     return doPackAll( osv, ( GatherScatterType* ) 0 );
-  }
-
-  template < class A >
-  void HexaPllBaseXMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo >= 0 ) 
-    { 
-      vec[ _moveTo ].push_back( this );
-    }
   }
 
   // pack all function for dune 

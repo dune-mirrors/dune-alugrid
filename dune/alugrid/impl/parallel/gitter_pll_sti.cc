@@ -1406,7 +1406,7 @@ namespace ALUGrid
       {
 #ifdef STORE_LINKAGE_IN_VERTICES
 #warning "Using linkage storage in vertices to avoid allgather"
-        const bool precomputeLinkage = serialPartitioner ();
+        const bool precomputeLinkage = true ; //serialPartitioner ();
 #else 
         const bool precomputeLinkage = false ;
 #endif
@@ -1422,7 +1422,15 @@ namespace ALUGrid
           repartitionMacroGrid (db);
 
         if( precomputeLinkage ) 
+        {
+          static bool firstCall = true ;
+          if( firstCall ) 
+          {
+            containerPll ().identification (mpAccess (), true );
+            firstCall = false ;
+          }
           setVertexLinkage( db );
+        }
 
         lap4 = clock();
 
@@ -1449,9 +1457,9 @@ namespace ALUGrid
   void GitterPll::computeVertexLinkage() 
   {
 #ifdef STORE_LINKAGE_IN_VERTICES
-    static bool firstCall = false ;
+    static bool firstCall = true ;
 
-    if( ! firstCall ) 
+    if( firstCall ) 
     {
       AccessIterator < helement_STI >::Handle w ( containerPll () );
 
@@ -1460,7 +1468,7 @@ namespace ALUGrid
       {
         w.item ().computeVertexLinkage();
       }
-      firstCall = true ;
+      firstCall = false ;
 
       // communication is done in vertexLinkageEstimate 
     }
@@ -1474,21 +1482,29 @@ namespace ALUGrid
 
     const int me = mpAccess().myrank(); 
 
+    // clear linkage pattern map since it is newly build here
+    containerPll().clearLinkagePattern();
+
     // set ldb vertex indices to all elements 
     for (w.first (); ! w.done (); w.next () ) 
     {
       vertex_STI& vertex = w.item();
+
+      // clear linkage first 
+      vertex.clearLinkage();
+
       if( vertex.isBorder() ) 
       {
         const std::vector<int>& linkedElements = vertex.linkedElements();
         const int elSize = linkedElements.size();
+        assert( elSize > 0  );
+        std::cout << "Found border vertex with linked els = " << elSize << std::endl;
         std::set< int > uniqueLinkage; 
         for( int el=0; el<elSize; ++el )
         {
           const int rank = db.destination( linkedElements[ el ] ) ;
           if( rank != me ) 
           {
-            // std::cout << "Vertex " << vertex.ident() << " --> " << *it << " ( " << rank << " ) " << std::endl;
             uniqueLinkage.insert( rank );
           }
         }
@@ -1500,6 +1516,7 @@ namespace ALUGrid
         const const_iterator end = uniqueLinkage.end();
         for( const_iterator it = uniqueLinkage.begin(); it != end; ++it ) 
         {
+          std::cout << "Vertex " << vertex.ident() << " --> " << *it << std::endl;
           linkage.push_back( *it );
         }
       
