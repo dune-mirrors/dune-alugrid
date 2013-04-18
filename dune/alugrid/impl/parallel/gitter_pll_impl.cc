@@ -864,15 +864,6 @@ namespace ALUGrid
   {
     // don't allow erase
     set( flagLock );
-#ifdef GRAPHVERTEX_WITH_CENTER
-    LinearMapping::barycenter(
-        mytetra ().myvertex (0)->Point (), 
-        mytetra ().myvertex (1)->Point (),
-        mytetra ().myvertex (2)->Point (),
-        mytetra ().myvertex (3)->Point (),
-        _center);
-#endif
-    return;
   }
 
   template < class A >
@@ -882,6 +873,17 @@ namespace ALUGrid
     {
       unattach2 ( _moveTo );
     }
+  }
+
+  template < class A >
+  void TetraPllXBaseMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const 
+  {
+    LinearMapping::barycenter(
+        mytetra ().myvertex (0)->Point (), 
+        mytetra ().myvertex (1)->Point (),
+        mytetra ().myvertex (2)->Point (),
+        mytetra ().myvertex (3)->Point (),
+        center);
   }
 
   template < class A >
@@ -924,12 +926,7 @@ namespace ALUGrid
     const int weight = ( gs ) ? gs->loadWeight( mytetra() ) : 
                                 TreeIteratorType( mytetra () ).size ();
      
-    db.vertexUpdate (
-        LoadBalancer::GraphVertex (ldbVertexIndex (), weight
-#ifdef GRAPHVERTEX_WITH_CENTER
-                                    , _center
-#endif // #ifdef GRAPHVERTEX_WITH_CENTER
-                                    ) );
+    db.vertexUpdate ( LoadBalancer::GraphVertex (ldbVertexIndex (), weight, *this ) );
     return true;
   }
 
@@ -947,8 +944,6 @@ namespace ALUGrid
 
     // unset erasable flag
     set( flagLock );
-
-    return;
   }
 
   template < class A >
@@ -1128,7 +1123,6 @@ namespace ALUGrid
       // write data to stream 
       packAsBndNow(fce, os, ghostCellsEnabled); 
     }
-    return;
   }
 
   // packs macro element as internal bnd for other proc 
@@ -1219,12 +1213,6 @@ namespace ALUGrid
   {
     // don't allow erase
     set( flagLock );
-#ifdef GRAPHVERTEX_WITH_CENTER
-    static const double x = 1./3.;
-    LinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
-           myperiodic ().myvertex (0,2)->Point ()).map2world (x,x,x,_center);
-#endif
-    return;
   }
 
   template < class A > 
@@ -1245,7 +1233,6 @@ namespace ALUGrid
     _moveTo = -1;
     // unset erasable flag 
     set( flagLock );
-    return;
   }
 
   // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
@@ -1403,12 +1390,6 @@ namespace ALUGrid
   {
     // don't allow erase
     set( flagLock );
-#ifdef GRAPHVERTEX_WITH_CENTER
-    static const double x = .0;
-    BilinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
-           myperiodic ().myvertex (0,2)->Point (), myperiodic ().myvertex (0,3)->Point ()).map2world (x,x,_center);
-#endif
-    return;
   }
 
   template < class A > 
@@ -1585,7 +1566,6 @@ namespace ALUGrid
   void HexaPllBaseX< A > ::writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
   {
     gs.sendData( os , myhexa () );
-    return;
   }
 
   template < class A >
@@ -1609,7 +1589,20 @@ namespace ALUGrid
   {
     // don't allow erase
     set( flagLock );
-#ifdef GRAPHVERTEX_WITH_CENTER
+  }
+
+  template < class A >
+  HexaPllBaseXMacro< A >::~HexaPllBaseXMacro () 
+  {
+    if( _moveTo >= 0 ) 
+    {
+      unattach2( _moveTo );
+    }
+  }
+
+  template < class A >
+  void HexaPllBaseXMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const 
+  {
     // calculate bary center 
     TrilinearMapping::barycenter (
         myhexa ().myvertex (0)->Point (), 
@@ -1620,18 +1613,7 @@ namespace ALUGrid
         myhexa ().myvertex (5)->Point (), 
         myhexa ().myvertex (6)->Point (), 
         myhexa ().myvertex (7)->Point (),
-        _center );
-#endif
-    return;
-  }
-
-  template < class A >
-  HexaPllBaseXMacro< A >::~HexaPllBaseXMacro () 
-  {
-    if( _moveTo >= 0 ) 
-    {
-      unattach2( _moveTo );
-    }
+        center );
   }
 
   template < class A >
@@ -1671,12 +1653,7 @@ namespace ALUGrid
     const int weight = ( gs ) ? gs->loadWeight( myhexa() ) : 
                                 TreeIteratorType( myhexa() ).size ();
      
-    db.vertexUpdate (
-        LoadBalancer::GraphVertex (ldbVertexIndex (), weight
-#ifdef GRAPHVERTEX_WITH_CENTER
-                                    , _center
-#endif
-                                    ) );
+    db.vertexUpdate ( LoadBalancer::GraphVertex (ldbVertexIndex (), weight, *this ) );
     return true;
   }
 

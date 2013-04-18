@@ -200,10 +200,11 @@ namespace ALUGridZoltan
 
       int idx = 0; 
       typedef typename ldb_vertex_map_t :: iterator iterator ;
+      double coord[ 3 ];
       const iterator end = vertexMap.end();
       for ( iterator it = vertexMap.begin(); it != end; ++ it ) 
       {
-        const double (&coord)[ 3 ] = (*it).first.center();
+        (*it).first.computeBaryCenter( coord );
         for( int d=0; d<dimension; ++d, ++idx )
           geom_vec[ idx ] = coord[ d ];
       }
