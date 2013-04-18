@@ -9,7 +9,7 @@ ZoltanLoadBalanceHandle(const Grid &grid)
   zz_ = Zoltan_Create(MPI_COMM_WORLD);
 
   // General parameters
-  Zoltan_Set_Param(zz_, "DEBUG_LEVEL", "0");
+  Zoltan_Set_Param(zz_, "DEBUG_LEVEL", "1");
   Zoltan_Set_Param(zz_, "LB_METHOD", "HYPERGRAPH");   /* partitioning method */
   Zoltan_Set_Param(zz_, "HYPERGRAPH_PACKAGE", "PHG"); /* version of method */
   Zoltan_Set_Param(zz_, "NUM_GID_ENTRIES", "4");      /* global IDs are 4 integers */
@@ -122,7 +122,9 @@ generateHypergraph()
 	  // Find if element is candidate for user-defined partitioning:
     // we keep the center on one process...
 	  typename Entity::Geometry::GlobalCoordinate c = entity.geometry().center();
-	  if (c[0]*c[0]+c[1]*c[1] < 0.5*0.5)
+    double vol = 4./double(this->grid_.comm().size()); // this is the size of the domain for proz zero
+    double R2 = vol/M_PI*0.5; // correct size for the central circle (half the optimal size)
+	  if ( c[0]*c[0]+c[1]*c[1] < R2 )
 	  {
 	    for (int i=0; i<NUM_GID_ENTRIES; ++i)
 	    {
