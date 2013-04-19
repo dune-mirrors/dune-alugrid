@@ -6,7 +6,6 @@
 // Dune includes
 #include <dune/grid/common/entity.hh>
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
-#include <dune/alugrid/common/macrogridview.hh>
 
 // Local includes
 #include "alu3dinclude.hh"
