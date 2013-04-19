@@ -480,7 +480,7 @@ namespace ALUGrid
   }
 
   template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A * s, const B & c) 
-    : _seed (s), _cnt (-1), _pos (0), _cmp (c) {
+    : _seed (s), _cmp(c), _pos(0), _cnt (-1) {
     _stack [0] = 0;
     return;
   }

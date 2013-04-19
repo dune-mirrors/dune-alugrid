@@ -6,6 +6,7 @@
 // Dune includes
 #include <dune/grid/common/entity.hh>
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
+#include <dune/alugrid/common/macrogridview.hh>
 
 // Local includes
 #include "alu3dinclude.hh"
@@ -427,6 +428,22 @@ public:
       return EntitySeed( getGhost () );
     else 
       return EntitySeed( getItem() );
+  }
+
+  int macroId() const
+  {
+    if (isGhost())
+      return getGhost().ldbVertexIndex();
+    else
+      return getItem().ldbVertexIndex();
+  }
+
+  int master() const
+  {
+    if (isGhost())
+      return getGhost().master();
+    else
+      return getItem().master();
   }
 
 private:

@@ -2,6 +2,7 @@
 #define DUNE_INTERSECTIONITERATORWRAPPER_HH
 
 #include <dune/grid/common/intersectioniterator.hh>
+#include <dune/alugrid/common/macrogridview.hh>
 
 /** @file
  @author Robert Kloefkorn
@@ -392,6 +393,13 @@ public:
   {
     impl().increment(); 
   }
+
+  double weight() const
+  {
+    return impl().it().weight();
+  }
+
+  // template <class,PartitionIteratorType> friend class MacroGridView; // specialize
 protected:  
   // intersection object 
   Intersection intersection_; 

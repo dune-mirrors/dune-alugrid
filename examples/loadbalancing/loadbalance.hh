@@ -90,7 +90,7 @@ private:
   typedef typename Grid::GlobalIdSet GlobalIdSet;
   typedef typename GlobalIdSet::IdType GIdType;
   static const int dimension = Grid :: dimension;
-  static const int NUM_GID_ENTRIES = 4;
+  static const int NUM_GID_ENTRIES = 1;
   template< int codim >
   struct Codim
   {
@@ -200,9 +200,10 @@ public:
   // this needs the methods userDefinedPartitioning to return true
   int destination( const Element &element ) const 
   { 
-    GIdType id = globalIdSet_.id(element);
-    std::vector<int> elementGID(4); // because we have 4 vertices
-    id.getKey().extractKey(elementGID);
+	  std::vector<int> elementGID(NUM_GID_ENTRIES);
+    // GIdType id = globalIdSet_.id(element);
+    // id.getKey().extractKey(elementGID);
+	  elementGID[0] = grid_.macroView().macroId(element); //   element.impl().macroID();
 
     // add one to the GIDs, so that they match the ones from Zoltan
     transform(elementGID.begin(), elementGID.end(), elementGID.begin(), bind2nd(std::plus<int>(), 1));
