@@ -613,8 +613,8 @@ namespace ALUGrid
   {
     // clear all entries and also clear memory be reassigning 
     vertexTT_t().swap( _vertexTT );
-    hedgeTT_t ().swap( _hedgeTT );
-    hfaceTT_t ().swap( _hfaceTT );
+    hedgeTT_t ().swap( _hedgeTT  );
+    hfaceTT_t ().swap( _hfaceTT  );
 
     // make sure the memory was deallocated 
     alugrid_assert ( _vertexTT.capacity() == 0 );
