@@ -34,12 +34,13 @@ namespace ALUGrid
       inline const myvertex_t & myvertex () const { return *this; }
 
       using A::VERTEX;
+      void doClearLinkage ();
     public :
       VertexPllBaseX (double,double,double,int,IndexManagerStorageType&);
      ~VertexPllBaseX ();
 
       virtual std::vector< int > estimateLinkage () const;
-      virtual bool setLinkage ( std::vector< int > );
+      virtual bool setLinkage ( const std::vector< int >& );
       virtual void clearLinkage ();
       virtual LinkedObject::Identifier getIdentifier () const;
 
@@ -53,8 +54,6 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll  (std::vector< ObjectStream > &);
-      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
-      virtual bool packLink (const int link, ObjectStream& os );
       virtual moveto_t* moveToMap() { return _moveTo; }
       virtual void unpackSelf (ObjectStream &, bool);
 
@@ -129,8 +128,6 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
-      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
-      virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
       virtual moveto_t* moveToMap() { return _moveTo; }
     protected :
@@ -191,8 +188,6 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
-      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
-      virtual bool packLink (const int link, ObjectStream& os );
       virtual void unpackSelf (ObjectStream &, bool);
       virtual moveto_t* moveToMap() { return _moveTo; }
     protected :
@@ -264,8 +259,6 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
-      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
-      virtual bool packLink (const int link, ObjectStream& os, GatherScatterType* );
       virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
       // pack ghost information 
       virtual void packAsGhost(ObjectStream &,int) const;
@@ -273,6 +266,7 @@ namespace ALUGrid
       virtual void unpackSelf (ObjectStream &, bool);
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
+      virtual void computeBaryCenter( alucoord_t (&center)[3] ) const ;
     protected:
       bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll (std::vector< ObjectStream > &, GatherScatterType * );
@@ -280,9 +274,7 @@ namespace ALUGrid
       void packAsBndNow (int, ObjectStream &, const bool ) const;
       
     private :
-#ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t _center [3];
-#endif
+      // link number corresponding to rank where element is moved to
       int _moveTo;
       // globally unique element number 
       int _ldbVertexIndex;
@@ -353,6 +345,7 @@ namespace ALUGrid
 
       virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
+      bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attachPeriodic( const int destination );
       virtual std::pair<int,int> insideLdbVertexIndex() const;
@@ -361,8 +354,6 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
-      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
-      virtual bool packLink (const int link, ObjectStream& os );
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const 
@@ -371,9 +362,6 @@ namespace ALUGrid
         return ! isSet( flagLock );
       }
     private :
-#ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t _center [3];
-#endif
       int _moveTo;
   };
 
@@ -442,6 +430,7 @@ namespace ALUGrid
 
       virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
+      bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attachPeriodic( const int destination );
       virtual std::pair<int,int> insideLdbVertexIndex() const;
@@ -450,15 +439,10 @@ namespace ALUGrid
       virtual void attach2 (int);
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
-      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
-      virtual bool packLink (const int link, ObjectStream& os );
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const;
     private :
-#ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t _center [3];
-#endif
       int _moveTo;
   };
 
@@ -529,8 +513,6 @@ namespace ALUGrid
       virtual void unattach2 (int);
       
       virtual bool packAll (std::vector< ObjectStream > &);
-      virtual void addAll ( std::vector< std::vector< MacroGridMoverIF* > >& );
-      virtual bool packLink (const int link, ObjectStream& os, GatherScatterType* );
       // pack ghost information 
       virtual void packAsGhost(ObjectStream &,int) const;
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
@@ -541,6 +523,7 @@ namespace ALUGrid
       virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
+      virtual void computeBaryCenter( alucoord_t (&center)[3] ) const ;
     protected :
       bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll( std::vector< ObjectStream > &, GatherScatterType * );
@@ -550,9 +533,7 @@ namespace ALUGrid
 
       void packAsBndNow (int, ObjectStream &, const bool ) const;
     protected:
-#ifdef GRAPHVERTEX_WITH_CENTER
-      alucoord_t _center [3];
-#endif
+      // link number corresponding to rank where element is moved to
       int _moveTo;
       // globally unique element number 
       int _ldbVertexIndex;

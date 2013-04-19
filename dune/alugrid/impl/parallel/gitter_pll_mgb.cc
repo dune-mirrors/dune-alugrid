@@ -952,8 +952,8 @@ namespace ALUGrid
     }
       
     // time meassure 
-    const long start = clock ();
-    long lap1 (start), lap2 (start), lap3 (start), lap4 (start);
+    const clock_t start = clock ();
+    clock_t lap1 (start), lap2 (start), lap3 (start), lap4 (start);
 
     // if partitining should be done, erase linkage and setup moveto directions 
     if( doRepartition ) 

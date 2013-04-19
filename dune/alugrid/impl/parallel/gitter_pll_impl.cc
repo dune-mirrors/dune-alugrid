@@ -27,11 +27,7 @@ namespace ALUGrid
       _lpn (), 
       _moveTo ( 0 )
   {
-    linkagePatternMap_t& _map = linkagePatterns();
-    typename linkagePatternMap_t::iterator pos = _map.find (nullPattern);
-    _lpn = (pos != _map.end ()) ? pos : _map.insert ( make_pair( nullPattern, int(0) )).first;
-    ++ (*_lpn).second;
-    return;
+    doClearLinkage();
   }
 
   template < class A >
@@ -54,21 +50,30 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::clearLinkage() 
+  void VertexPllBaseX< A >::doClearLinkage() 
   {
     // set iterator to empty linkage 
-    std::vector< int > lp;
     linkagePatternMap_t& _map = linkagePatterns();
-    typename linkagePatternMap_t::iterator pos = _map.find ( lp );
-    _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first;
+    typename linkagePatternMap_t::iterator pos = _map.find ( nullPattern );
+    _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( nullPattern, int(0) )).first;
     ++ (*_lpn).second;
   }
 
   template < class A >
-  bool VertexPllBaseX< A >::setLinkage (std::vector< int > lp) 
+  void VertexPllBaseX< A >::clearLinkage() 
+  {
+    doClearLinkage();
+  }
+
+  template < class A >
+  bool VertexPllBaseX< A >::setLinkage ( const std::vector< int >& newLinkage ) 
   {
     -- (*_lpn).second;
     linkagePatternMap_t& _map = linkagePatterns();
+    static std::vector< int > lp;
+    lp.resize( newLinkage.size() );
+    std::copy( newLinkage.begin(), newLinkage.end(), lp.begin() );
+    //std::vector< int > lp( newLinkage );
     std::sort( lp.begin(), lp.end() );
     typename linkagePatternMap_t::iterator pos = _map.find (lp);
     _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first;
@@ -125,27 +130,6 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > > & vec) 
-  {
-    if( _moveTo ) 
-    {
-      typedef typename moveto_t::const_iterator  const_iterator;
-      const const_iterator iEnd =  _moveTo->end (); 
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
-      {
-        const int link = (*i).first;
-        vec[ link ].push_back( this );
-      }
-    }
-  }
-
-  template < class A >
-  bool VertexPllBaseX< A >::packLink ( const int link, ObjectStream& os ) 
-  {
-    return doPackLink( link, os );
-  }
-
-  template < class A >
   bool VertexPllBaseX< A >::doPackLink ( const int link, ObjectStream& os ) 
   {
     os.writeObject (VERTEX);
@@ -158,7 +142,9 @@ namespace ALUGrid
     const int elSize = _elements.size();
     os.writeObject( elSize );
     for( int el=0; el<elSize; ++el )
+    {
       os.writeObject( _elements[ el ] );
+    }
 #endif
     inlineData (os);
     return true ; 
@@ -168,15 +154,13 @@ namespace ALUGrid
   void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool i) 
   {
 #ifdef STORE_LINKAGE_IN_VERTICES
-    _elements.clear();
     int elSize; 
     os.readObject( elSize );
-    _elements.reserve( elSize );
     for( int el=0; el<elSize; ++el ) 
     {
       int elem; 
       os.readObject( elem );
-      _elements.push_back( elem );
+      addGraphVertexIndex( elem );
     }
 #endif 
 
@@ -259,27 +243,6 @@ namespace ALUGrid
       }
     }
     return action;
-  }
-
-  template < class A >
-  void EdgePllBaseXMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo ) 
-    {
-      typedef typename moveto_t::const_iterator const_iterator;
-      const const_iterator iEnd =  _moveTo->end ();
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
-      {
-        const int link = (*i).first;
-        vec[ link ].push_back( this );
-      }
-    }
-  }
-
-  template < class A >
-  bool EdgePllBaseXMacro< A >::packLink ( const int link, ObjectStream& os ) 
-  {
-    return doPackLink( link, os );
   }
 
   template < class A >
@@ -554,27 +517,6 @@ namespace ALUGrid
     return action;
   }
 
-  template < class A > 
-  void FacePllBaseXMacro < A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo ) 
-    {
-      typedef typename moveto_t::const_iterator const_iterator;
-      const const_iterator iEnd =  _moveTo->end ();
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
-      {
-        const int link = (*i).first;
-        vec[ link ].push_back( (MacroGridMoverIF*) this );
-      }
-    }
-  }
-        
-  template < class A > bool 
-  FacePllBaseXMacro < A >::packLink ( const int link, ObjectStream & os ) 
-  {
-    return doPackLink( link, os );
-  }
-  
   template < class A > bool 
   FacePllBaseXMacro < A >::doPackLink ( const int link, ObjectStream & os ) 
   {
@@ -922,15 +864,6 @@ namespace ALUGrid
   {
     // don't allow erase
     set( flagLock );
-#ifdef GRAPHVERTEX_WITH_CENTER
-    LinearMapping::barycenter(
-        mytetra ().myvertex (0)->Point (), 
-        mytetra ().myvertex (1)->Point (),
-        mytetra ().myvertex (2)->Point (),
-        mytetra ().myvertex (3)->Point (),
-        _center);
-#endif
-    return;
   }
 
   template < class A >
@@ -940,6 +873,17 @@ namespace ALUGrid
     {
       unattach2 ( _moveTo );
     }
+  }
+
+  template < class A >
+  void TetraPllXBaseMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const 
+  {
+    LinearMapping::barycenter(
+        mytetra ().myvertex (0)->Point (), 
+        mytetra ().myvertex (1)->Point (),
+        mytetra ().myvertex (2)->Point (),
+        mytetra ().myvertex (3)->Point (),
+        center);
   }
 
   template < class A >
@@ -973,7 +917,7 @@ namespace ALUGrid
     // parameter for GraphVertex are: 
     // - macro vertex index
     // - number of elementes below macro element 
-    // - bary center (only if GRAPHVERTEX_WITH_CENTER defined)
+    // - pointer to this element in case bary center is needed (only if GRAPHVERTEX_WITH_CENTER defined)
     typedef TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI > >  TreeIteratorType;
 
     // get macro element weight 
@@ -982,12 +926,7 @@ namespace ALUGrid
     const int weight = ( gs ) ? gs->loadWeight( mytetra() ) : 
                                 TreeIteratorType( mytetra () ).size ();
      
-    db.vertexUpdate (
-        LoadBalancer::GraphVertex (ldbVertexIndex (), weight
-#ifdef GRAPHVERTEX_WITH_CENTER
-                                    , _center
-#endif // #ifdef GRAPHVERTEX_WITH_CENTER
-                                    ) );
+    db.vertexUpdate ( LoadBalancer::GraphVertex (ldbVertexIndex (), weight, *this ) );
     return true;
   }
 
@@ -1005,8 +944,6 @@ namespace ALUGrid
 
     // unset erasable flag
     set( flagLock );
-
-    return;
   }
 
   template < class A >
@@ -1076,27 +1013,10 @@ namespace ALUGrid
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec)
-  {
-    if( _moveTo >= 0 ) 
-    {
-      vec[ _moveTo ].push_back( this );
-    }
-  }
-
-  template < class A >
-  bool TetraPllXBaseMacro< A >::packLink( const int link, ObjectStream& os,
-                                          GatherScatterType* gs) 
-  {
-    if( _moveTo != link ) return false ;
-    return doPackLink( link, os, gs );
-  }
-
-  template < class A >
   bool TetraPllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os,
                                           GatherScatterType* gs) 
   {
-#ifdef NDEBUG 
+#ifdef ALUGRIDDEBUG 
     for( int i=0; i<4; ++i ) 
     {
       if( this->myneighbour( i ).first->isboundary() ) 
@@ -1203,7 +1123,6 @@ namespace ALUGrid
       // write data to stream 
       packAsBndNow(fce, os, ghostCellsEnabled); 
     }
-    return;
   }
 
   // packs macro element as internal bnd for other proc 
@@ -1294,12 +1213,6 @@ namespace ALUGrid
   {
     // don't allow erase
     set( flagLock );
-#ifdef GRAPHVERTEX_WITH_CENTER
-    static const double x = 1./3.;
-    LinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
-           myperiodic ().myvertex (0,2)->Point ()).map2world (x,x,x,_center);
-#endif
-    return;
   }
 
   template < class A > 
@@ -1320,7 +1233,6 @@ namespace ALUGrid
     _moveTo = -1;
     // unset erasable flag 
     set( flagLock );
-    return;
   }
 
   // return the first element's ldbVertexIndex (used in Periodic3PllXBaseMacro)
@@ -1379,22 +1291,13 @@ namespace ALUGrid
       alugrid_assert ( myneighbour( 0 ).first->moveTo() == _moveTo );
       alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
 
-      return packLink( _moveTo, osv[ _moveTo ] );
+      return doPackLink( _moveTo, osv[ _moveTo ] );
     }
     return false;
   }
 
   template < class A >
-  void Periodic3PllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo >= 0 ) 
-    { 
-      vec[ _moveTo ].push_back( this );
-    }
-  }
-
-  template < class A >
-  bool Periodic3PllXBaseMacro< A >::packLink( const int link, ObjectStream& os ) 
+  bool Periodic3PllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os ) 
   {
     if( _moveTo != link ) return false;
 
@@ -1487,12 +1390,6 @@ namespace ALUGrid
   {
     // don't allow erase
     set( flagLock );
-#ifdef GRAPHVERTEX_WITH_CENTER
-    static const double x = .0;
-    BilinearSurfaceMapping (myperiodic ().myvertex (0,0)->Point (), myperiodic ().myvertex (0,1)->Point (),
-           myperiodic ().myvertex (0,2)->Point (), myperiodic ().myvertex (0,3)->Point ()).map2world (x,x,_center);
-#endif
-    return;
   }
 
   template < class A > 
@@ -1573,22 +1470,13 @@ namespace ALUGrid
       alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
 
       alugrid_assert ((osv.begin () + _moveTo) < osv.end ());
-      return packLink( _moveTo, osv[ _moveTo ] );
+      return doPackLink( _moveTo, osv[ _moveTo ] );
     }
     return false ;
   }
 
-  template < class A >
-  void Periodic4PllXBaseMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo >= 0 ) 
-    { 
-      vec[ _moveTo ].push_back( this );
-    }
-  }
-
   template < class A > 
-  bool Periodic4PllXBaseMacro< A >::packLink( const int link, ObjectStream& os ) 
+  bool Periodic4PllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os ) 
   {
     if( _moveTo != link ) return false;
 
@@ -1678,7 +1566,6 @@ namespace ALUGrid
   void HexaPllBaseX< A > ::writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
   {
     gs.sendData( os , myhexa () );
-    return;
   }
 
   template < class A >
@@ -1702,7 +1589,20 @@ namespace ALUGrid
   {
     // don't allow erase
     set( flagLock );
-#ifdef GRAPHVERTEX_WITH_CENTER
+  }
+
+  template < class A >
+  HexaPllBaseXMacro< A >::~HexaPllBaseXMacro () 
+  {
+    if( _moveTo >= 0 ) 
+    {
+      unattach2( _moveTo );
+    }
+  }
+
+  template < class A >
+  void HexaPllBaseXMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const 
+  {
     // calculate bary center 
     TrilinearMapping::barycenter (
         myhexa ().myvertex (0)->Point (), 
@@ -1713,18 +1613,7 @@ namespace ALUGrid
         myhexa ().myvertex (5)->Point (), 
         myhexa ().myvertex (6)->Point (), 
         myhexa ().myvertex (7)->Point (),
-        _center );
-#endif
-    return;
-  }
-
-  template < class A >
-  HexaPllBaseXMacro< A >::~HexaPllBaseXMacro () 
-  {
-    if( _moveTo >= 0 ) 
-    {
-      unattach2( _moveTo );
-    }
+        center );
   }
 
   template < class A >
@@ -1755,7 +1644,7 @@ namespace ALUGrid
     // parameter for GraphVertex are: 
     // - macro vertex index
     // - number of elementes below macro element 
-    // - bary center (only if GRAPHVERTEX_WITH_CENTER defined)
+    // - pointer to this element in case bary center is needed (only if GRAPHVERTEX_WITH_CENTER defined)
     typedef TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI > >  TreeIteratorType;
 
     // get macro element weight 
@@ -1764,12 +1653,7 @@ namespace ALUGrid
     const int weight = ( gs ) ? gs->loadWeight( myhexa() ) : 
                                 TreeIteratorType( myhexa() ).size ();
      
-    db.vertexUpdate (
-        LoadBalancer::GraphVertex (ldbVertexIndex (), weight
-#ifdef GRAPHVERTEX_WITH_CENTER
-                                    , _center
-#endif
-                                    ) );
+    db.vertexUpdate ( LoadBalancer::GraphVertex (ldbVertexIndex (), weight, *this ) );
     return true;
   }
 
@@ -1850,15 +1734,6 @@ namespace ALUGrid
       
   // pack all function for dune 
   template < class A >
-  bool HexaPllBaseXMacro< A >::packLink ( const int link, ObjectStream& os,
-                                          GatherScatterType* gs) 
-  {
-    if( _moveTo != link ) return false ;
-    return doPackLink( link, os, gs );
-  }
-
-  // pack all function for dune 
-  template < class A >
   bool HexaPllBaseXMacro< A >::doPackLink ( const int link, ObjectStream& os,
                                             GatherScatterType* gs) 
   {
@@ -1901,15 +1776,6 @@ namespace ALUGrid
   bool HexaPllBaseXMacro< A >::packAll (std::vector< ObjectStream > & osv) 
   {
     return doPackAll( osv, ( GatherScatterType* ) 0 );
-  }
-
-  template < class A >
-  void HexaPllBaseXMacro< A >::addAll (std::vector< std::vector< MacroGridMoverIF* > >& vec) 
-  {
-    if( _moveTo >= 0 ) 
-    { 
-      vec[ _moveTo ].push_back( this );
-    }
   }
 
   // pack all function for dune 

@@ -273,7 +273,7 @@ namespace ALUGrid
     protected :
       virtual ~VertexPllXIF () {}
     public :
-      virtual bool setLinkage ( std::vector< int > ) = 0;
+      virtual bool setLinkage ( const std::vector< int >& ) = 0;
       virtual void clearLinkage () = 0;
       virtual bool addGraphVertexIndex ( const int ldbVxIndex ) = 0;
     };
@@ -283,7 +283,7 @@ namespace ALUGrid
     protected :
       virtual ~VertexPllXDefault () {}
     public :
-      virtual bool setLinkage ( std::vector< int > ) { alugrid_assert (false); abort(); return false; }
+      virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
       virtual void clearLinkage () { alugrid_assert (false); abort(); }
       virtual bool addGraphVertexIndex ( const int ldbVxIndex ) { alugrid_assert (false); abort(); return false; }
       virtual const std::vector<int>& linkedElements() const { alugrid_assert (false); abort();  return *((std::vector<int> *) 0); }
