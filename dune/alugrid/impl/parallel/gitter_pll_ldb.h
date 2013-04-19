@@ -60,12 +60,13 @@ namespace ALUGrid
       class GraphVertex : public MyAlloc
       {
         typedef alucoord_t center_t[ 3 ];
-#ifdef GRAPHVERTEX_WITH_CENTER
-        const MacroGridMoverIF* _element ; // for computing the bary center if necessary 
-#endif
 
         int _index;   // global graph index 
         int _weight;  // weight of vertex 
+
+#ifdef GRAPHVERTEX_WITH_CENTER
+        const MacroGridMoverIF* _element ; // for computing the bary center if necessary 
+#endif
 
         public :
           static const int sizeOfData = 2 * sizeof(int);
