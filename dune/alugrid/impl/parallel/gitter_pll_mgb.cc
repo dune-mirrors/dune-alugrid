@@ -975,8 +975,20 @@ namespace ALUGrid
       else // take connections from db in default version
         connectScan = & db.scan();
 
+      // remove old linkage 
       mpAccess ().removeLinkage ();
-      mpAccess ().insertRequestSymetric ( *connectScan );
+
+      if( userDefinedPartitioning ) 
+      {
+        // set new linkage depending on connectivity 
+        // needs a global communication 
+        mpAccess ().insertRequestSymetric( *connectScan );
+      }
+      else 
+      {
+        // set new linkage depending on connectivity 
+        mpAccess ().insertRequest( *connectScan );
+      }
 
       const int me = mpAccess ().myrank (); 
       const int nl = mpAccess ().nlinks (); 
