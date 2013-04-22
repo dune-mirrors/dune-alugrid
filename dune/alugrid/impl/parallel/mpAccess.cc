@@ -10,7 +10,7 @@ namespace ALUGrid
   {
     const char* tag = ( symmetricLinkage() ) ? "linkage" : "sendLinkage" ;
     out << "  MpAccessLocal::printLinkage() " << myrank () << " (" << tag << ") -> ";
-    typedef typename linkage_t :: const_iterator const_iterator;
+    typedef linkage_t :: const_iterator const_iterator;
     for (const_iterator i = _sendLinkage.begin (); i != _sendLinkage.end(); ++i )
       out << (*i).first << " ";
     out << std::endl;
@@ -25,7 +25,7 @@ namespace ALUGrid
 
   void MpAccessLocal::computeDestinations( const linkage_t& linkage, vector_t& dest )  
   {
-    typedef typename linkage_t::const_iterator const_iterator ;
+    typedef linkage_t::const_iterator const_iterator ;
     dest.resize( linkage.size() );
     const const_iterator linkageEnd = linkage.end ();
     for( const_iterator i = linkage.begin (); i != linkageEnd; ++i )
@@ -132,7 +132,7 @@ namespace ALUGrid
     std::vector< int > out;
     out.reserve( req.size() );
 
-    typedef typename linkage_t::iterator iterator ;
+    typedef linkage_t::iterator iterator ;
     typedef std::set< int >::const_iterator const_iterator;
 
     {
