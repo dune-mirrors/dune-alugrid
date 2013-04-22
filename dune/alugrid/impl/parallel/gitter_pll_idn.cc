@@ -339,8 +339,8 @@ namespace ALUGrid
   public: 
     UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, const int me ) 
       : _containerPll( containerPll ),
-      _me( me ),
-      _size( 0 )
+        _me( me ),
+        _size( 0 )
     {
     }
 
