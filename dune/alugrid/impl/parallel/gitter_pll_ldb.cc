@@ -882,8 +882,8 @@ namespace ALUGrid
             {
               // set destination of element 
               (*i).second = destination ;
-              // insert into linkage set 
-              _connect.insert( destination );
+              // insert into linkage set as send rank  
+              _connect.insert( MpAccessLocal::sendRank( destination ) );
             }
             else if( source != me ) 
             {
@@ -894,8 +894,8 @@ namespace ALUGrid
               // insert connectivity 
               if( destination == me )  
               {
-                // insert into linkage set 
-                _connect.insert( source );
+                // insert into linkage set (receive ranks have negative numbers) 
+                _connect.insert( MpAccessLocal::recvRank( source ) );
               }
             }
           }

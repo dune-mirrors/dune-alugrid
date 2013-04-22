@@ -641,7 +641,7 @@ namespace ALUGrid
     secondScan( linkage );
 
     // insert linkage without communication into mpAccess 
-    mpa.insertRequest( linkage );
+    mpa.insertRequestSymmetric( linkage );
 
     if (debugOption (2)) 
       mpa.printLinkage (std::cout);

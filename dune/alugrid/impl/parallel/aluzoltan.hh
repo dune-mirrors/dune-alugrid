@@ -347,13 +347,13 @@ namespace ALUGridZoltan
         int& moveTo = i->second;
         // insert and also set partition number new (including own number)
         if ( moveTo == -1 ) moveTo = myrank ;
-        connect.insert( moveTo );
+        connect.insert( ALUGrid::MpAccessLocal::sendRank( moveTo ) );
       }
 
       // insert also process number that I will receive objects from
       for (int i=0; i < numImport; ++i)
       {
-         connect.insert( importProcs[ i ] );
+        connect.insert( ALUGrid::MpAccessLocal::recvRank( importProcs[ i ] ) );
       }
     }
     else 
