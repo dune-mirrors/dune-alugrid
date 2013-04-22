@@ -1041,6 +1041,16 @@ namespace ALUGrid
         alugrid_assert ( up() != 0 );
         up()->readDynamicState(os,i);
       }
+      virtual void writeStaticState (ObjectStream &os, int i) const
+      { 
+        alugrid_assert ( up() != 0 );
+        up()->writeStaticState(os,i);
+      }
+      virtual void readStaticState (ObjectStream &os, int i)
+      { 
+        alugrid_assert ( up() != 0 );
+        up()->readStaticState(os,i);
+      }
       virtual void packAsBnd (int a,int b,ObjectStream &os, const bool ghostCellsEnabled ) const
       { 
         alugrid_assert ( up() != 0 );
