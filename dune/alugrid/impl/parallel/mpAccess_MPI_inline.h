@@ -456,7 +456,7 @@ namespace ALUGrid
   {
     const MpAccessMPI& _mpAccess;
 
-    const int _nLinks; 
+    const int _sendLinks; 
     const int _tag;
 
     MPI_Request* _request;
@@ -472,9 +472,9 @@ namespace ALUGrid
     NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
                             const int tag )
       : _mpAccess( mpAccess ),
-        _nLinks( _mpAccess.nlinks() ),
+        _sendLinks( _mpAccess.sendLinks() ),
         _tag( tag ),
-        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
+        _request( ( _sendLinks > 0 ) ? new MPI_Request [ _sendLinks ] : 0),
         _needToSend( true )
     {
       // make sure every process has the same tag 
@@ -485,15 +485,15 @@ namespace ALUGrid
                             const int tag,
                             const std::vector< ObjectStream > & in ) 
       : _mpAccess( mpAccess ),
-        _nLinks( _mpAccess.nlinks() ),
+        _sendLinks( _mpAccess.sendLinks() ),
         _tag( tag ),
-        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
+        _request( ( _sendLinks > 0 ) ? new MPI_Request [ _sendLinks ] : 0),
         _needToSend( false )
     {
       // make sure every process has the same tag 
       alugrid_assert ( tag == mpAccess.gmax( tag ) );
 
-      alugrid_assert ( _nLinks == int( in.size() ) );
+      alugrid_assert ( _sendLinks == int( in.size() ) );
       sendImpl( in ); 
     }
 
@@ -502,9 +502,9 @@ namespace ALUGrid
                             const int tag,
                             const int maxMesg )
       : _mpAccess( mpAccess ),
-        _nLinks( maxMesg+1 ), // we need one element more 
+        _sendLinks( maxMesg+1 ), // we need one element more 
         _tag( tag ),
-        _request( ( _nLinks > 0 ) ? new MPI_Request [ _nLinks ] : 0),
+        _request( ( _sendLinks > 0 ) ? new MPI_Request [ _sendLinks ] : 0),
         _needToSend( false )
     {
       // make sure every process has the same tag 
@@ -538,12 +538,12 @@ namespace ALUGrid
       MPI_Comm comm = _mpAccess.communicator();
 
       // get vector with destinations 
-      const std::vector< int >& dest = _mpAccess.dest();
+      const std::vector< int >& sendDest = _mpAccess.sendDest();
 
       // send data 
-      for (int link = 0; link < _nLinks; ++link) 
+      for (int link = 0; link < _sendLinks; ++link) 
       {
-        sendLink( dest[ link ], _tag, osv[ link ], _request[ link ], comm );
+        sendLink( sendDest[ link ], _tag, osv[ link ], _request[ link ], comm );
       }
 
       // set send info 
@@ -554,7 +554,7 @@ namespace ALUGrid
     std::vector< ObjectStream > receiveImpl () 
     {
       // create vector of empty streams 
-      std::vector< ObjectStream > out ( _nLinks );
+      std::vector< ObjectStream > out ( _mpAccess.recvLinks() );
       receiveImpl( out );
       return out; 
     }
@@ -562,18 +562,19 @@ namespace ALUGrid
     // receive data implementation with given buffers 
     void receiveImpl ( std::vector< ObjectStream >& out ) 
     {
+      const int recvLinks = out.size();
       // do nothing if number of links is zero 
-      if( _nLinks == 0 ) return; 
+      if( (recvLinks+_sendLinks) == 0 ) return; 
 
       // get mpi communicator
       MPI_Comm comm = _mpAccess.communicator();
 
       // get vector with destinations 
-      const std::vector< int >& dest = _mpAccess.dest();
+      const std::vector< int >& recvSource = _mpAccess.recvSource();
 
 #ifdef ALUGRIDDEBUG
       // check for all links messages 
-      for (int link = 0; link < _nLinks; ++link ) 
+      for (int link = 0; link < recvLinks; ++link ) 
       {
         // contains no written data
         alugrid_assert ( out[ link ].notReceived() ); 
@@ -582,17 +583,17 @@ namespace ALUGrid
 
       // count noumber of received messages 
       int numReceived = 0;
-      while( numReceived < _nLinks ) 
+      while( numReceived < recvLinks ) 
       {
         // check for all links messages 
-        for (int link = 0; link < _nLinks; ++link ) 
+        for (int link = 0; link < recvLinks; ++link ) 
         {
           ObjectStream& osRecv = out[ link ];
           // if nothing was received for this link yet
           if( osRecv.notReceived() ) 
           {
             // checks for message and if received also fills osRecv
-            if( checkAndReceive( comm, dest[ link ], _tag, osRecv ) )
+            if( checkAndReceive( comm, recvSource[ link ], _tag, osRecv ) )
             {
               // increase number of received messages 
               ++ numReceived;
@@ -601,10 +602,13 @@ namespace ALUGrid
         }
       }
       
-      // wait until all processes are done with receiving
-      alugrid_assert ( _request );
-      MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
-      alugrid_assert (test == MPI_SUCCESS);
+      // if request exists, i.e. some messages have been sent
+      if( _request ) 
+      {
+        // wait until all processes are done with receiving
+        MY_INT_TEST MPI_Waitall ( _sendLinks, _request, MPI_STATUSES_IGNORE);
+        alugrid_assert (test == MPI_SUCCESS);
+      }
     }
 
     // receive data implementation with given buffers 
@@ -617,16 +621,16 @@ namespace ALUGrid
         MPI_Comm comm = _mpAccess.communicator();
 
         // get vector with destinations 
-        const std::vector< int >& dest = _mpAccess.dest();
+        const std::vector< int >& sendDest = _mpAccess.sendDest();
 
         // send data 
-        for (int link = 0; link < _nLinks; ++link) 
+        for (int link = 0; link < _sendLinks; ++link) 
         {
           // pack data 
           dataHandle.pack( link, osSend[ link ] );
 
           // send data 
-          sendLink( dest[ link ], _tag, osSend[ link ], _request[ link ], comm );
+          sendLink( sendDest[ link ], _tag, osSend[ link ], _request[ link ], comm );
         }
 
         // set send info 
@@ -644,25 +648,28 @@ namespace ALUGrid
       MPI_Comm comm = _mpAccess.communicator();
 
       // get vector with destinations 
-      const std::vector< int >& dest = _mpAccess.dest();
+      const std::vector< int >& recvSource = _mpAccess.recvSource();
+
+      // get number of receive links 
+      const int recvLinks = _mpAccess.recvLinks();
 
       // get received vector 
-      std::vector< bool > linkReceived( _nLinks, false );
+      std::vector< bool > linkReceived( recvLinks, false );
 
       // receive message buffer 
       ObjectStream osRecv ;
 
       // count number of received messages 
       int numReceived = 0;
-      while( numReceived < _nLinks ) 
+      while( numReceived < recvLinks ) 
       {
         // check for all links messages 
-        for (int link = 0; link < _nLinks; ++link ) 
+        for (int link = 0; link < recvLinks; ++link ) 
         {
           if( ! linkReceived[ link ] ) 
           {
             // checks for message and if received also fills osRecv
-            if( checkAndReceive( comm, dest[ link ], _tag, osRecv ) )
+            if( checkAndReceive( comm, recvSource[ link ], _tag, osRecv ) )
             {
               // unpack data 
               dataHandle.unpack( link, osRecv );
@@ -677,17 +684,21 @@ namespace ALUGrid
         }
       }
       
-      // wait until all processes are done with receiving
-      alugrid_assert ( _request );
-      MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
-      alugrid_assert (test == MPI_SUCCESS);
+      // if request exists, i.e. some messages have been sent
+      if( _request ) 
+      {
+        // wait until all processes are done with receiving
+        MY_INT_TEST MPI_Waitall ( _sendLinks, _request, MPI_STATUSES_IGNORE);
+        alugrid_assert (test == MPI_SUCCESS);
+      }
     }
 
     // receive data implementation with given buffers 
     void exchange( DataHandleIF& dataHandle )
     {
+      const int recvLinks = _mpAccess.recvLinks();
       // do nothing if number of links is zero 
-      if( _nLinks == 0 ) return; 
+      if( (recvLinks + _sendLinks) == 0 ) return; 
 
       // send message buffers, we need several because of the 
       // non-blocking send routines, send might not be finished 
@@ -698,7 +709,7 @@ namespace ALUGrid
       if( _needToSend ) 
       {
         // resize message buffer vector 
-        osSend.resize( _nLinks );
+        osSend.resize( _sendLinks );
 
         // send data 
         send( osSend, dataHandle );
@@ -714,10 +725,10 @@ namespace ALUGrid
       // get mpi communicator
       MPI_Comm comm = _mpAccess.communicator();
 
-      alugrid_assert ( _nLinks > 0 );
+      alugrid_assert ( _sendLinks > 0 );
 
       // create send and recv buffers 
-      std::vector< ObjectStream > sendBuffers( _nLinks );
+      std::vector< ObjectStream > sendBuffers( _sendLinks );
 
       int tag = _tag ;
 
@@ -741,14 +752,14 @@ namespace ALUGrid
       ObjectStream recvBuff ;
 
       // get received vector 
-      std::vector< bool > linkReceived( _nLinks, false );
+      std::vector< bool > linkReceived( _sendLinks, false );
 
       int totalRecv = 0 ; // number of messages already handled  
       int msgSent   = 1 ; // number of messages already sent 
       while( totalRecv < totalMesg )
       {
-        const int nLinks = ( (totalRecv + _nLinks - 1) <= totalMesg ) ? _nLinks-1 : totalMesg - totalRecv ;
-        alugrid_assert ( nLinks < _nLinks );
+        const int nLinks = ( (totalRecv + _sendLinks - 1) <= totalMesg ) ? _sendLinks-1 : totalMesg - totalRecv ;
+        alugrid_assert ( nLinks < _sendLinks );
 
         int received = 0 ;
         while( received < nLinks ) 
@@ -793,10 +804,10 @@ namespace ALUGrid
 
         // wait until all messages have been send and received 
         alugrid_assert ( _request );
-        MY_INT_TEST MPI_Waitall ( _nLinks, _request, MPI_STATUSES_IGNORE);
+        MY_INT_TEST MPI_Waitall ( _sendLinks, _request, MPI_STATUSES_IGNORE);
         alugrid_assert (test == MPI_SUCCESS);
 
-        for( int i=0; i<_nLinks; ++ i ) 
+        for( int i=0; i<_sendLinks; ++ i ) 
         {
           // reset received vector 
           linkReceived[ i ] = false ;
