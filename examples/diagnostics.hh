@@ -153,13 +153,20 @@ namespace Dune {
     {
       std::vector<double> times;
 
+      // vertex linkage estimate
       times.push_back( ::ALUGrid::identU2 );
+      // request linkage
       times.push_back( ::ALUGrid::identU3 );
+      // identify 
       times.push_back( ::ALUGrid::identU4 );
 
+      // calculate partitioning 
       times.push_back( ::ALUGrid::ldbTimerU2 );
+
       times.push_back( ::ALUGrid::ldbTimerU3 );
+      // load-balaning
       times.push_back( ::ALUGrid::ldbTimerU4 );
+      // identification 
       times.push_back( ::ALUGrid::ldbTimerU5 );
 
       const int timerSize = times.size();
