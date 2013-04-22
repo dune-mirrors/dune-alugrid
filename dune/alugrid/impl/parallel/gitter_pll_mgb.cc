@@ -514,7 +514,7 @@ namespace ALUGrid
     return;
   }
 
-  void ParallelGridMover::unpackVertex ( ObjectStream &os )
+  void ParallelGridMover::unpackVertex ( const int sourceRank, ObjectStream &os )
   {
     int id;
     double x, y, z;
@@ -523,7 +523,8 @@ namespace ALUGrid
     os.readObject (y);
     os.readObject (z);
     std::pair< VertexGeo *, bool > p = InsertUniqueVertex (x,y,z,id);
-    p.first->accessPllX ().unpackSelf (os,p.second);
+    p.first->unpackSelf (os,p.second);
+    p.first->checkAndAddLinkage( sourceRank );
   }
 
   void ParallelGridMover::unpackHedge1 (ObjectStream & os) {
@@ -811,7 +812,7 @@ namespace ALUGrid
   }
 
   void ParallelGridMover::
-  unpackAll( ObjectStream& os, GatherScatterType* gs) 
+  unpackAll( const int sourceRank, ObjectStream& os, GatherScatterType* gs) 
   {
     int code = MacroGridMoverIF::ENDMARKER;
     for (os.readObject (code); code != MacroGridMoverIF::ENDMARKER; os.readObject (code)) 
@@ -819,7 +820,7 @@ namespace ALUGrid
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
         {
-          unpackVertex (os);
+          unpackVertex (sourceRank, os);
           break;
         }
       case MacroGridMoverIF::EDGE1 :
@@ -890,15 +891,18 @@ namespace ALUGrid
   class UnpackLBData : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
     GitterPll::MacroGitterPll& _containerPll;
+    MpAccessLocal&      _mpa;
     ParallelGridMover*  _pgm;
-    GatherScatterType* _gs; 
+    GatherScatterType*  _gs; 
 
     UnpackLBData( const UnpackLBData& );
   public:
     // constructor 
     UnpackLBData( GitterPll::MacroGitterPll& containerPll, 
+                  MpAccessLocal& mpa,
                   GatherScatterType* gs ) 
       : _containerPll( containerPll ),
+        _mpa( mpa ), 
         _pgm( 0 ),
         _gs( gs )
     {}
@@ -925,8 +929,10 @@ namespace ALUGrid
     void unpack( const int link, ObjectStream& os ) 
     {
       alugrid_assert ( _pgm );
+      // get rank number of source 
+      const int source = _mpa.recvSource()[ link ];
       // unpack data for given stream 
-      _pgm->unpackAll( os, _gs );
+      _pgm->unpackAll( source, os, _gs );
     }
   };
 
@@ -954,6 +960,8 @@ namespace ALUGrid
     const clock_t start = clock ();
     clock_t lap1 (start), lap2 (start), lap3 (start), lap4 (start);
 
+    MpAccessLocal& mpa = mpAccess();
+
     // if partitining should be done, erase linkage and setup moveto directions 
     if( doRepartition ) 
     {
@@ -975,26 +983,26 @@ namespace ALUGrid
         connectScan = & db.scan();
 
       // remove old linkage 
-      mpAccess ().removeLinkage ();
+      mpa.removeLinkage ();
 
       if( userDefinedPartitioning ) 
       {
         // set new linkage depending on connectivity 
         // needs a global communication 
-        mpAccess ().insertRequestSymmetricGlobalComm( *connectScan );
+        mpa.insertRequestSymmetricGlobalComm( *connectScan );
       }
       else 
       {
         // set new linkage depending on connectivity, 
         // here the linkage could be non-symmetric since send and receive procs are not
         // necessarily the same 
-        mpAccess ().insertRequestNonSymmetric( *connectScan );
+        mpa.insertRequestNonSymmetric( *connectScan );
       }
 
       // get my rank number 
-      const int me = mpAccess ().myrank (); 
+      const int me = mpa.myrank (); 
       // get number of send links 
-      const int sendLinks = mpAccess ().sendLinks(); 
+      const int sendLinks = mpa.sendLinks(); 
       {
         if ( ! userDefinedPartitioning )
         {
@@ -1026,7 +1034,7 @@ namespace ALUGrid
             // and all connected real elements 
             if( moveTo != me ) 
             {
-              w.item ().attach2 ( mpAccess ().sendLink( moveTo ) );
+              w.item ().attach2 ( mpa.sendLink( moveTo ) );
             }
           }
         }
@@ -1045,7 +1053,7 @@ namespace ALUGrid
               const int to = db.destination ( item, gsDestination );
               if (me != to)
               {
-                item.attach2 ( mpAccess ().sendLink (to) );
+                item.attach2 ( mpa.sendLink (to) );
               }
             }
           }
@@ -1096,10 +1104,10 @@ namespace ALUGrid
       
       {
         // data handle  
-        UnpackLBData data( containerPll (), gatherScatter );
+        UnpackLBData data( containerPll (), mpa, gatherScatter );
 
         // pack, exchange, and unpack data 
-        mpAccess ().exchange ( osv, data );
+        mpa.exchange ( osv, data );
       }
 
       lap3 = clock ();
