@@ -729,10 +729,13 @@ namespace ALUGrid
   template<class ostream_t>
   void Gitter::backupImpl (ostream_t & out) 
   {
+    char bisection = char(conformingClosureNeeded());
     // store whether we have bisection refinement 
-    out.put( char(conformingClosureNeeded()) );
+    out.put( bisection );
+
+    char ghosts = char(ghostCellsEnabled());
     // store whether ghost cells are enabled 
-    out.put( char(ghostCellsEnabled()) );
+    out.put( ghosts );
 
     // backup edges 
     {
