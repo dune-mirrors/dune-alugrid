@@ -729,6 +729,11 @@ namespace ALUGrid
   template<class ostream_t>
   void Gitter::backupImpl (ostream_t & out) 
   {
+    // store whether we have bisection refinement 
+    out.put( char(conformingClosureNeeded()) );
+    // store whether ghost cells are enabled 
+    out.put( char(ghostCellsEnabled()) );
+
     // backup edges 
     {
       AccessIterator <hedge_STI>::Handle fw (container ());
@@ -749,7 +754,6 @@ namespace ALUGrid
       AccessIterator <hperiodic_STI>::Handle ew (container ());
       for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backup (out); 
     }
-    return;
   }
 
   // backup taking std::ostream 
@@ -771,6 +775,15 @@ namespace ALUGrid
   template<class istream_t>
   void Gitter ::restoreImpl (istream_t & in) 
   {
+    // store whether we have bisection refinement 
+    const char bisection = in.get();
+    if( bisection ) enableConformingClosure();
+
+    // store whether ghost cells are enabled 
+    const char ghostCells = in.get();
+    if( ! ghostCells )
+      disableGhostCells();
+
     // restore edges 
     {
       AccessIterator < hedge_STI >::Handle ew (container ());
