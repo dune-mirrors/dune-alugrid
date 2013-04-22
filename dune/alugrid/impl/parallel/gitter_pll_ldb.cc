@@ -641,9 +641,12 @@ namespace ALUGrid
     // needs a all-to-all (allgather) communication 
     graphCollect( mpa,
                   std::insert_iterator< ldb_vertex_map_t > (nodes,nodes.begin ()),
-                  std::insert_iterator< ldb_edge_set_t > (edges,edges.begin ()), 
+                  std::insert_iterator< ldb_edge_set_t >   (edges,edges.begin ()), 
                   serialPartitioner 
                 );
+
+    // clear memory 
+    _vertexSet.clear();
 
     // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
     // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
@@ -746,13 +749,10 @@ namespace ALUGrid
         // store nodes size before clearing   
         const int nNodes = ( serialPartitioner ) ? nel : nodes.size();
 
-#ifdef STORE_LINKAGE_IN_VERTICES
-        // store complete graph since we need this for later linkage identification
-        _vertexSet = nodes ;
-#endif
-        // free memory, not needed anymore
-        nodes.clear();
-        
+        // store complete graph since we need 
+        // this for later linkage identification
+        _vertexSet.swap( nodes );
+
         // only for serial partitioners 
         if (nNodes != accumulate (check.begin (), check.end (), 0)) 
         {
@@ -868,15 +868,51 @@ namespace ALUGrid
         // to the vertices (elements of the macro mesh) of the graph 
         if (change) 
         {
-          // Hier die neue Zuordnung auf den eigenen Lastvertex-Container schreiben.
-          // Dadurch werden die Grobgitterelemente an das neue Teilgebiet zugewiesen. 
-
-          ldb_vertex_map_t::iterator iEnd =  _vertexSet.end ();
+          // insert all different ranks we send elements to 
+          const ldb_vertex_map_t::iterator iEnd =  _vertexSet.end ();
           for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; ++i)
           {
-            // insert and also set partition number new 
-            _connect.insert( (*i).second = neu [ (*i).first.index () ]);
+            const int elementIdx  = (*i).first.index () ;
+            const int destination = neu [ elementIdx ] ;
+            const int source      = part[ elementIdx ] ;
+
+            // if the element currently belongs 
+            // then check the new destination 
+            if( source == me && destination != me)
+            {
+              // set destination of element 
+              (*i).second = destination ;
+              // insert into linkage set as send rank  
+              _connect.insert( MpAccessLocal::sendRank( destination ) );
+            }
+            else if( source != me ) 
+            {
+              // mark element for delete 
+              (*i).second = -1 ;
+
+              // if the element will belong to me in the future 
+              // insert connectivity 
+              if( destination == me )  
+              {
+                // insert into linkage set (receive ranks have negative numbers) 
+                _connect.insert( MpAccessLocal::recvRank( source ) );
+              }
+            }
           }
+
+#ifndef STORE_LINKAGE_IN_VERTICES
+          // erase elements that a not further needed 
+          for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; )
+          {
+            // if element does neither belong to me not will belong to me, erase it 
+            if( (*i).second < 0 ) 
+            {
+              _vertexSet.erase( i++ );
+            }
+            else 
+              ++ i;
+          }
+#endif
 
           // in case of the serial partitioners we are able to store the sizes 
           // to avoid a second communication during graphCollect 

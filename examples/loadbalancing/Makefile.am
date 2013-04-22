@@ -14,12 +14,17 @@ headercheck_IGNORE = loadbalance_inline.hh
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
-check_PROGRAMS = main
+check_PROGRAMS = main_simple main_zoltan
 
-main_SOURCES = main.cc
-main_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) 
-main_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-main_LDADD = $(LDADD) $(DUNEMPILIBS)
+main_simple_SOURCES = main.cc
+main_simple_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) 
+main_simple_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+main_simple_LDADD = $(LDADD) $(DUNEMPILIBS)
+
+main_zoltan_SOURCES = main.cc
+main_zoltan_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_ZOLTANLB
+main_zoltan_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+main_zoltan_LDADD = $(LDADD) $(DUNEMPILIBS)
 endif
 
 dataclean:

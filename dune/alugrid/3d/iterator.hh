@@ -378,6 +378,13 @@ public:
     return connector_.conformingRefinement() ? 
       BaseType :: conforming() : true ;
   }
+
+  //! return communication weight (only available on macro iterator)
+  double weight() const 
+  {
+    return this->getItem().weight();
+  }
+
 private:  
   // set new face
   void setNewFace(const GEOFaceType& newFace);

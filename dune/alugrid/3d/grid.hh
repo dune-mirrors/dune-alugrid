@@ -25,6 +25,7 @@
 #include <dune/alugrid/common/bndprojection.hh>
 #include <dune/alugrid/common/objectfactory.hh>
 #include <dune/alugrid/common/backuprestore.hh>
+#include <dune/alugrid/common/macrogridview.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -332,7 +333,9 @@ namespace Dune
       {
         typedef Dune::GridView<DefaultLevelGridViewTraits< const Grid, pitype > > LevelGridView;
         typedef Dune::GridView<DefaultLeafGridViewTraits< const Grid, pitype > > LeafGridView;
+        typedef Dune::MacroGridView<const Grid, pitype> MacroGridView;
       }; // struct Partition
+      typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
 
       //! Type of the level index set
       typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp; 
@@ -468,6 +471,22 @@ namespace Dune
     friend class ALULocalGeometryStorage< const ThisType, GeometryObject, 8 >;
 
   public: 
+    /** \brief Types for GridView */
+    template <PartitionIteratorType pitype>
+    struct Partition
+    {
+      typedef typename GridFamily::Traits::template Partition<pitype>::LevelGridView
+         LevelGridView;
+      typedef typename GridFamily::Traits::template Partition<pitype>::LeafGridView
+         LeafGridView;
+      typedef typename GridFamily::Traits::template Partition<pitype>::MacroGridView
+         MacroGridView;
+    };
+    /** \brief View types for All_Partition */
+    typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
+    typedef typename Partition< All_Partition > :: LeafGridView LeafGridView;
+    typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
+
     //! Type of the hierarchic index set
     typedef ALU3dGridHierarchicIndexSet< elType, Comm > HierarchicIndexSet;
     
@@ -685,6 +704,19 @@ namespace Dune
       if( !globalIdSet_ )
         globalIdSet_ = new GlobalIdSetImp( *this );
       return *globalIdSet_;
+    }
+
+    //! View for a grid level
+    template<PartitionIteratorType pitype>
+    typename Partition<pitype>::MacroGridView macroView() const {
+      typedef typename Traits::template Partition<pitype>::MacroGridView View;
+      return View(*this);
+    }
+
+    //! View for a grid level for All_Partition
+    MacroGridView macroView() const {
+      typedef MacroGridView View;
+      return View(*this);
     }
 
     //! get global id set of grid 

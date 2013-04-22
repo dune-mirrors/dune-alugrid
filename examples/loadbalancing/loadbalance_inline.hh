@@ -4,16 +4,17 @@ ZoltanLoadBalanceHandle<Grid>::
 ZoltanLoadBalanceHandle(const Grid &grid)
 : grid_( grid )
 , globalIdSet_( grid.globalIdSet() )
+, first_(true)
 {
   zz_ = Zoltan_Create(MPI_COMM_WORLD);
 
   // General parameters
-  Zoltan_Set_Param(zz_, "DEBUG_LEVEL", "0");
+  Zoltan_Set_Param(zz_, "DEBUG_LEVEL", "1");
   Zoltan_Set_Param(zz_, "LB_METHOD", "HYPERGRAPH");   /* partitioning method */
   Zoltan_Set_Param(zz_, "HYPERGRAPH_PACKAGE", "PHG"); /* version of method */
-  Zoltan_Set_Param(zz_, "NUM_GID_ENTRIES", "4");      /* global IDs are integers */
-  //Zoltan_Set_Param(zz_, "NUM_GID_ENTRIES", "1");    /* global IDs are integers */
-  Zoltan_Set_Param(zz_, "NUM_LID_ENTRIES", "1");      /* local IDs are integers */
+  Zoltan_Set_Param(zz_, "NUM_GID_ENTRIES", "1");      /* global IDs are 1 integers */
+  //Zoltan_Set_Param(zz_, "NUM_GID_ENTRIES", "1");    /* global IDs are 1 integers */
+  Zoltan_Set_Param(zz_, "NUM_LID_ENTRIES", "1");      /* local IDs are 1 integers */
   Zoltan_Set_Param(zz_, "RETURN_LISTS", "ALL");       /* export AND import lists */
   Zoltan_Set_Param(zz_, "OBJ_WEIGHT_DIM", "0");       /* use Zoltan default vertex weights */
   Zoltan_Set_Param(zz_, "EDGE_WEIGHT_DIM", "0");      /* use Zoltan default hyperedge weights */
@@ -24,6 +25,7 @@ ZoltanLoadBalanceHandle(const Grid &grid)
    * from scratch.  It may be faster but of lower quality that LB_APPROACH=PARTITION.)
   */
   Zoltan_Set_Param(zz_, "LB_APPROACH", "REPARTITION");
+  Zoltan_Set_Param(zz_, "REMAP", "1");
 
   /* Application defined query functions */
   Zoltan_Set_Num_Obj_Fn(zz_, get_number_of_vertices, &hg_);
@@ -54,10 +56,17 @@ template <class Grid>
 ZoltanLoadBalanceHandle<Grid>::
 ~ZoltanLoadBalanceHandle()
 {
-  free(hg_.nborGID); 
-  free(hg_.nborIndex);
-  free(hg_.edgeGID);
-  free(hg_.vtxGID);
+  if (!first_)
+  {
+    Zoltan_LB_Free_Part(&(new_partitioning_.importGlobalGids), 
+                 &(new_partitioning_.importLocalGids), 
+                 &(new_partitioning_.importProcs), 
+                 &(new_partitioning_.importToPart) );
+    Zoltan_LB_Free_Part(&(new_partitioning_.exportGlobalGids), 
+                 &(new_partitioning_.exportLocalGids), 
+                 &(new_partitioning_.exportProcs), 
+                 &(new_partitioning_.exportToPart) );
+  }
   Zoltan_Destroy(&zz_);
 }
 
@@ -69,11 +78,12 @@ template< class Grid >
 void ZoltanLoadBalanceHandle<Grid>::
 generateHypergraph()
 {
+  hg_.freeMemory();
   // setup the hypergraph by iterating over the macro level 
   // (ALU can only partition on the macro level)
   const Dune::PartitionIteratorType partition = Dune::Interior_Partition;
-  typedef typename Grid::LevelGridView GridView;
-  const GridView &gridView = grid_.levelView(0);
+  typedef typename Grid::MacroGridView GridView;
+  const GridView &gridView = grid_.macroView();
   typedef typename GridView::template Codim< 0 >::template Partition< partition >::Iterator Iterator;
   typedef typename Codim< 0 >::Entity Entity;
   typedef typename Entity::EntityPointer EntityPointer;
@@ -95,12 +105,12 @@ generateHypergraph()
   for( Iterator it = gridView.template begin< 0, partition >(); it != end; ++it )
   {
 	  const Entity &entity = *it;
-	  GIdType id = globalIdSet_.id(entity);
 	  std::vector<int> elementGID(NUM_GID_ENTRIES);
     // use special ALU method that returns a pure integer tuple which is a
     // unique id on the macrolevel
-	  id.getKey().extractKey(elementGID);
-	  //elementGID[0] = entity.impl().macroID();
+	  // GIdType id = globalIdSet_.id(entity);
+	  // id.getKey().extractKey(elementGID);
+	  elementGID[0] = gridView.macroId(entity); //   entity.impl().macroID();
 
 	  for (int i=0; i<NUM_GID_ENTRIES; ++i)
 	  {
@@ -112,7 +122,9 @@ generateHypergraph()
 	  // Find if element is candidate for user-defined partitioning:
     // we keep the center on one process...
 	  typename Entity::Geometry::GlobalCoordinate c = entity.geometry().center();
-	  if (c.two_norm() < 0.5)
+    double vol = 4./double(this->grid_.comm().size()); // this is the size of the domain for proz zero
+    double R2 = vol/M_PI*0.5; // correct size for the central circle (half the optimal size)
+	  if ( c[0]*c[0]+c[1]*c[1] < R2 )
 	  {
 	    for (int i=0; i<NUM_GID_ENTRIES; ++i)
 	    {
@@ -131,16 +143,19 @@ generateHypergraph()
 	    {
         const EntityPointer pOutside = intersection.outside();
 		    const Entity &neighbor = *pOutside;
-		    GIdType id = globalIdSet_.id(neighbor);
-		    std::vector<int> globalID(NUM_GID_ENTRIES);
+		    std::vector<int> neighborGID(NUM_GID_ENTRIES);
         // use special ALU method that returns a pure integer tuple which is a
         // unique id on the macrolevel
-		    id.getKey().extractKey(globalID);
-		    // globalID[0] = neighbor.impl().macroID();
+		    // GIdType id = globalIdSet_.id(neighbor);
+		    // id.getKey().extractKey(neighborGID);
+	      neighborGID[0] = gridView.macroId(neighbor); //   entity.impl().macroID();
+        int weight = gridView.weight( iit );
+        if (grid_.comm().rank() == 0 && gridView.master(neighbor)!=0)
+          std::cout << weight << " " << gridView.master(neighbor) << std::endl;
 
 		    for (int i=0; i<NUM_GID_ENTRIES; ++i)
 		    {
-		      tempNborGID.push_back((ZOLTAN_ID_TYPE)globalID[i] + 1);
+		      tempNborGID.push_back((ZOLTAN_ID_TYPE)neighborGID[i] + 1);
 		    }
 
 		    num_of_neighbors++;

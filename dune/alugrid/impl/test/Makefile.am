@@ -23,7 +23,7 @@ sizes_SOURCES = sizes.cc \
   $(top_srcdir)/dune/alugrid/impl/parallel/gitter_pll_sti.cc \
   $(top_srcdir)/dune/alugrid/impl/parallel/gitter_tetra_top_pll.cc
 
-sizes_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -Wfatal-errors
+sizes_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -Wfatal-errors -DALUGRIDDEBUG
 sizes_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 sizes_LDADD = ${ZOLTAN_LIBS} ${PARMETIS_LIBS} ${METIS_LIB} $(DUNEMPILIBS)
 

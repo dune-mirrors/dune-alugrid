@@ -35,20 +35,6 @@ namespace ALUGridMETIS
       d += (2 * numProcs) * weights[ i ];
     }
 
-    /*
-    std::vector< int > els( numProcs, 0 );
-    std::vector< int > load( numProcs, 0 );
-    for( std::size_t i = 0; i < N; ++i )
-    {
-      ++els[ ranks[ i ] ];
-      load[ ranks[ i ] ] += weights[ i ];
-      // std::cout << ranks[ i ] << "  ";
-    }
-
-    //for( int i=0 ; i<numProcs; ++i ) 
-    //  std::cout << "load[ " << i << " ] = " << load[ i ] << std::endl;
-    */
-
     alugrid_assert ( rank < numProcs );
     // return true if partitioning is ok, should never be false 
     return (rank < numProcs);

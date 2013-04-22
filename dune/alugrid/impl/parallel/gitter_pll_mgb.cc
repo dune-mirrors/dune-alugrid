@@ -897,7 +897,6 @@ namespace ALUGrid
   public:
     // constructor 
     UnpackLBData( GitterPll::MacroGitterPll& containerPll, 
-                  const int nLinks,
                   GatherScatterType* gs ) 
       : _containerPll( containerPll ),
         _pgm( 0 ),
@@ -975,11 +974,27 @@ namespace ALUGrid
       else // take connections from db in default version
         connectScan = & db.scan();
 
+      // remove old linkage 
       mpAccess ().removeLinkage ();
-      mpAccess ().insertRequestSymetric ( *connectScan );
 
+      if( userDefinedPartitioning ) 
+      {
+        // set new linkage depending on connectivity 
+        // needs a global communication 
+        mpAccess ().insertRequestSymmetricGlobalComm( *connectScan );
+      }
+      else 
+      {
+        // set new linkage depending on connectivity, 
+        // here the linkage could be non-symmetric since send and receive procs are not
+        // necessarily the same 
+        mpAccess ().insertRequestNonSymmetric( *connectScan );
+      }
+
+      // get my rank number 
       const int me = mpAccess ().myrank (); 
-      const int nl = mpAccess ().nlinks (); 
+      // get number of send links 
+      const int sendLinks = mpAccess ().sendLinks(); 
       {
         if ( ! userDefinedPartitioning )
         {
@@ -1011,7 +1026,7 @@ namespace ALUGrid
             // and all connected real elements 
             if( moveTo != me ) 
             {
-              w.item ().attach2 ( mpAccess ().link( moveTo ) );
+              w.item ().attach2 ( mpAccess ().sendLink( moveTo ) );
             }
           }
         }
@@ -1030,7 +1045,7 @@ namespace ALUGrid
               const int to = db.destination ( item, gsDestination );
               if (me != to)
               {
-                item.attach2 ( mpAccess ().link (to) );
+                item.attach2 ( mpAccess ().sendLink (to) );
               }
             }
           }
@@ -1039,7 +1054,7 @@ namespace ALUGrid
       lap1 = clock ();
 
       // message buffers 
-      std::vector< ObjectStream > osv( nl );
+      std::vector< ObjectStream > osv( sendLinks );
 
       // pack vertices 
       {
@@ -1074,14 +1089,14 @@ namespace ALUGrid
       }
 
       // write end marker to terminate stream 
-      for( int link=0; link<nl; ++link ) 
+      for( int link=0; link<sendLinks; ++link ) 
         osv[ link ].writeObject( MacroGridMoverIF::ENDMARKER );
 
       lap2 = clock ();
       
       {
         // data handle  
-        UnpackLBData data( containerPll (), nl, gatherScatter );
+        UnpackLBData data( containerPll (), gatherScatter );
 
         // pack, exchange, and unpack data 
         mpAccess ().exchange ( osv, data );

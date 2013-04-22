@@ -246,7 +246,7 @@ namespace ALUGridZoltan
     zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
     zz->Set_Param( "NUM_GID_ENTRIES", "1");
     zz->Set_Param( "NUM_LID_ENTRIES", "1");
-    zz->Set_Param( "RETURN_LISTS", "EXPORT");
+    zz->Set_Param( "RETURN_LISTS", "ALL");
 
     if ( method == HSFC ) // edgeSet.size() == 0 )
     {
@@ -347,7 +347,13 @@ namespace ALUGridZoltan
         int& moveTo = i->second;
         // insert and also set partition number new (including own number)
         if ( moveTo == -1 ) moveTo = myrank ;
-        connect.insert( moveTo );
+        connect.insert( ALUGrid::MpAccessLocal::sendRank( moveTo ) );
+      }
+
+      // insert also process number that I will receive objects from
+      for (int i=0; i < numImport; ++i)
+      {
+        connect.insert( ALUGrid::MpAccessLocal::recvRank( importProcs[ i ] ) );
       }
     }
     else 

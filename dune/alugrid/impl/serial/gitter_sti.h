@@ -1550,6 +1550,14 @@ namespace ALUGrid
       public:  
         // reference counter 
         using DuneIndexProvider::ref;
+
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight =  TreeIterator < const hface_STI, 
+                                             is_leaf < const hface_STI > > ( this ).size ();
+          return weight;
+        }
       } hface3_GEO;
 
       typedef class hface4 : public hface_STI, public MyAlloc {
@@ -1636,6 +1644,14 @@ namespace ALUGrid
       public:  
         // reference counter 
         using DuneIndexProvider::ref;
+
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const hface_STI, 
+                                            is_leaf < const hface_STI > > ( this ).size ();
+          return weight;
+        }
       } hface4_GEO; // 56 + 16 = 72 
     
       // Geometriesockelklasse des Tetraeders: Vorsicht der Prototyp der dem

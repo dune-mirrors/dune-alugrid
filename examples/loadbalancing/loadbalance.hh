@@ -62,12 +62,17 @@ public:
   int destination( const Element &element ) const 
   { 
     typename Element::Geometry::GlobalCoordinate w = element.geometry().center();
-    double phi=arg(std::complex<double>(w[0],w[1]));
-    if (w[1]<0) phi+=2.*M_PI;
-    phi += angle_;
-    phi *= double(this->grid_.comm().size())/(2.*M_PI);
-    int p = int(phi) % this->grid_.comm().size();
-    return p;
+    if (w[0]*w[0]+w[1]*w[1] > 0.2 && this->grid_.comm().size()>0)
+    {
+      double phi=arg(std::complex<double>(w[0],w[1]));
+      if (w[1]<0) phi+=2.*M_PI;
+      phi += angle_;
+      phi *= double(this->grid_.comm().size()-1)/(2.*M_PI);
+      int p = int(phi) % (this->grid_.comm().size()-1);
+      return p+1;
+    }
+    else
+      return 0;
   }
 private:
   double angle_;
@@ -85,7 +90,7 @@ private:
   typedef typename Grid::GlobalIdSet GlobalIdSet;
   typedef typename GlobalIdSet::IdType GIdType;
   static const int dimension = Grid :: dimension;
-  static const int NUM_GID_ENTRIES = 4;
+  static const int NUM_GID_ENTRIES = 1;
   template< int codim >
   struct Codim
   {
@@ -124,6 +129,14 @@ private:
     ZOLTAN_ID_TYPE *nborGID;       /* Vertices of edge edgeGID[i] begin at nborGID[nborIndex[i]] */
     FixedElements fixed_elmts;
     HGraphData() : vtxGID(0), edgeGID(0), nborIndex(0), nborGID(0) {}
+    ~HGraphData() { freeMemory();}
+    void freeMemory() 
+    {
+      free(nborGID); 
+      free(nborIndex);
+      free(edgeGID);
+      free(vtxGID);
+    }
   };
 public:
   typedef typename Codim< 0 > :: Entity Element;
@@ -143,6 +156,17 @@ public:
   // returns true if user defined partitioning needs to be readjusted 
   bool repartition ()
   { 
+    if (!first_)
+    {
+      Zoltan_LB_Free_Part(&(new_partitioning_.importGlobalGids), 
+                   &(new_partitioning_.importLocalGids), 
+                   &(new_partitioning_.importProcs), 
+                   &(new_partitioning_.importToPart) );
+      Zoltan_LB_Free_Part(&(new_partitioning_.exportGlobalGids), 
+                   &(new_partitioning_.exportLocalGids), 
+                   &(new_partitioning_.exportProcs), 
+                   &(new_partitioning_.exportToPart) );
+    }
     generateHypergraph();
     /******************************************************************
     ** Zoltan can now partition the vertices of hypergraph.
@@ -150,7 +174,7 @@ public:
     ** equal to the number of processes.  Process rank 0 will own
     ** partition 0, process rank 1 will own partition 1, and so on.
     ******************************************************************/
-    rc = Zoltan_LB_Partition(zz_, // input (all remaining fields are output)
+    Zoltan_LB_Partition(zz_, // input (all remaining fields are output)
           &new_partitioning_.changes,        // 1 if partitioning was changed, 0 otherwise 
           &new_partitioning_.numGidEntries,  // Number of integers used for a global ID 
           &new_partitioning_.numLidEntries,  // Number of integers used for a local ID 
@@ -164,20 +188,22 @@ public:
           &new_partitioning_.exportLocalGids,   // Local IDs of the vertices I must send 
           &new_partitioning_.exportProcs,    // Process to which I send each of the vertices 
           &new_partitioning_.exportToPart);  // Partition to which each vertex will belong 
-    return true;
+    first_ = false;
+    return (new_partitioning_.changes == 1);
   }
   // return load weight of given element 
   int loadWeight( const Element &element ) const 
   { 
-    return 1;
+    return -1; // not used
   }
   // return destination (i.e. rank) where the given element should be moved to 
   // this needs the methods userDefinedPartitioning to return true
   int destination( const Element &element ) const 
   { 
-    GIdType id = globalIdSet_.id(element);
-    std::vector<int> elementGID(4); // because we have 4 vertices
-    id.getKey().extractKey(elementGID);
+	  std::vector<int> elementGID(NUM_GID_ENTRIES);
+    // GIdType id = globalIdSet_.id(element);
+    // id.getKey().extractKey(elementGID);
+	  elementGID[0] = grid_.macroView().macroId(element); //   element.impl().macroID();
 
     // add one to the GIDs, so that they match the ones from Zoltan
     transform(elementGID.begin(), elementGID.end(), elementGID.begin(), bind2nd(std::plus<int>(), 1));
@@ -217,7 +243,7 @@ private:
   Zoltan_Struct *zz_;
   HGraphData hg_;
   ZoltanPartitioning new_partitioning_;
-  int rc;
+  bool first_;
 };
 #endif // if HAVE_ZOLTAN
 

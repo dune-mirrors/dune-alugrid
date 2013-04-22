@@ -429,6 +429,22 @@ public:
       return EntitySeed( getItem() );
   }
 
+  int macroId() const
+  {
+    if (isGhost())
+      return getGhost().ldbVertexIndex();
+    else
+      return getItem().ldbVertexIndex();
+  }
+
+  int master() const
+  {
+    if (isGhost())
+      return getGhost().master();
+    else
+      return getItem().master();
+  }
+
 private:
   //! index is unique within the grid hierachy and per codim
   int getIndex () const;

@@ -178,15 +178,14 @@ namespace ALUGrid
         int preCoarsening  (); 
         int postRefinement ();
 
-        // return MPI rank of master which is always the same as myrank 
-        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
-
         //! return pointer to grid 
         Gitter * myGrid() { return myvertex(0)->myGrid(); }
         const Gitter * myGrid() const { return myvertex(0)->myGrid(); }
       public: 
         //ghost tetra gets indices of grid, to which it belongs actually
         virtual void setIndicesAndBndId (const hface_STI & f, int face_nr);
+        // return MPI rank of master which is always the same as myrank 
+        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
     
     private:     
         //ghost tetra gets indices of grid, to which it belongs actually
@@ -228,9 +227,6 @@ namespace ALUGrid
         int preCoarsening(); 
         int postRefinement();
 
-        // return MPI rank of master which is always the same as myrank 
-        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
-
         //! return pointer to grid 
         Gitter * myGrid() { return myvertex(0)->myGrid(); }
         const Gitter * myGrid() const { return myvertex(0)->myGrid(); }
@@ -264,6 +260,8 @@ namespace ALUGrid
       public:
         //ghost hexa gets indices of grid, to which it belongs actually
         virtual void setIndicesAndBndId (const hface_STI & f, int face_nr);
+        // return MPI rank of master which is always the same as myrank 
+        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
 
       private:
         //ghost tetra gets indices of grid, to which it belongs actually
