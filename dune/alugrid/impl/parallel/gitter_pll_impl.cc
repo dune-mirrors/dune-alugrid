@@ -44,6 +44,23 @@ namespace ALUGrid
   }
 
   template < class A >
+  void VertexPllBaseX< A >::checkAndAddLinkage( const int rank ) 
+  {
+    const std::vector< int >& lp = ((*_lpn).first);
+    const std::vector< int >::const_iterator lpEnd = lp.end();
+    // if rank is not contained in the linkage, add it 
+    if( std::find( lp.begin(), lpEnd, rank ) == lpEnd ) 
+    {
+      const size_t lpSize = lp.size() ;
+      std::vector< int > newLinkage( lpSize+1 );
+      // copy content 
+      std::copy( lp.begin(), lpEnd, newLinkage.begin() );
+      newLinkage[ lpSize ] = rank ;
+      setLinkage( newLinkage );      
+    }
+  }
+
+  template < class A >
   std::vector< int > VertexPllBaseX< A >::estimateLinkage () const
   {
     return std::vector< int > ((*_lpn).first);

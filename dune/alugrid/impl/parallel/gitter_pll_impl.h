@@ -39,6 +39,7 @@ namespace ALUGrid
       VertexPllBaseX (double,double,double,int,IndexManagerStorageType&);
      ~VertexPllBaseX ();
 
+      virtual void checkAndAddLinkage( const int rank ) ;
       virtual std::vector< int > estimateLinkage () const;
       virtual bool setLinkage ( const std::vector< int >& );
       virtual void clearLinkage ();
