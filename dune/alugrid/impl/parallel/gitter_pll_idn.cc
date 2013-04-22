@@ -339,8 +339,8 @@ namespace ALUGrid
   public: 
     UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, const int me ) 
       : _containerPll( containerPll ),
-      _me( me ),
-      _size( 0 )
+        _me( me ),
+        _size( 0 )
     {
     }
 
@@ -424,13 +424,8 @@ namespace ALUGrid
             vertex->addGraphVertexIndex( linkedElements[ el ] );
           }
 #endif
-          std::vector< int > s = vertex->estimateLinkage ();
-          const std::vector< int >::iterator sEnd = s.end();
-          if (std::find (s.begin (), sEnd, rank) == sEnd ) 
-          {
-            s.push_back( rank );
-            vertex->setLinkage (s);
-          }
+          // check whether rank already is contained in the linkage and add otherwise 
+          vertex->checkAndAddLinkage( rank );
         }
       }
     }

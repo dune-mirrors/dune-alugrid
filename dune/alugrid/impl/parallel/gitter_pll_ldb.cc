@@ -887,9 +887,10 @@ namespace ALUGrid
             }
             else if( source != me ) 
             {
+#ifndef STORE_LINKAGE_IN_VERTICES
               // mark element for delete 
               (*i).second = -1 ;
-
+#endif
               // if the element will belong to me in the future 
               // insert connectivity 
               if( destination == me )  

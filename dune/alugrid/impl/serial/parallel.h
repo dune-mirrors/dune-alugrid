@@ -142,6 +142,7 @@ namespace ALUGrid
 
     virtual Identifier getIdentifier () const = 0 ;
     virtual std::vector< int > estimateLinkage () const = 0;
+    virtual void checkAndAddLinkage ( const int ) = 0;
   };
 
   class LinkedObjectDefault
@@ -151,6 +152,7 @@ namespace ALUGrid
       virtual ~LinkedObjectDefault () {}
       virtual Identifier getIdentifier () const { alugrid_assert (false);abort(); return Identifier(); }
       virtual std::vector< int > estimateLinkage () const { alugrid_assert (false); abort(); return std::vector< int >(); }
+      virtual void checkAndAddLinkage ( const int ) { alugrid_assert (false); abort(); }
   } ;
 
     // Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
