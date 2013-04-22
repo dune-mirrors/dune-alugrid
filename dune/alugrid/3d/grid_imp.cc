@@ -527,7 +527,17 @@ namespace Dune
           elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
           alugrid_assert ( elem );
         }
-        elem->resetRefinedTag();
+        if (elem->hasBeenRefined())
+        {
+          elem->resetRefinedTag();
+          // on bisected grids its possible that not only leaf elements where added so
+          // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
+          while (elem->up())
+          {
+            elem = static_cast<IMPLElementType *>(elem->up());
+            elem->resetRefinedTag();
+          }
+        }
       }
     }
 
