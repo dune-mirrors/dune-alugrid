@@ -1033,7 +1033,7 @@ namespace ALUGrid
   bool TetraPllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os,
                                           GatherScatterType* gs) 
   {
-#ifdef ALUGRIDDEBUG 
+#if 0 // def ALUGRIDDEBUG 
     for( int i=0; i<4; ++i ) 
     {
       if( this->myneighbour( i ).first->isboundary() ) 
