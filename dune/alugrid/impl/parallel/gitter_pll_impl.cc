@@ -1033,16 +1033,6 @@ namespace ALUGrid
   bool TetraPllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os,
                                           GatherScatterType* gs) 
   {
-#if 0 // def ALUGRIDDEBUG 
-    for( int i=0; i<4; ++i ) 
-    {
-      if( this->myneighbour( i ).first->isboundary() ) 
-      {
-        alugrid_assert ( this->myneighbour( i ).first->moveTo() == link );
-      }
-    }
-#endif
-
     os.writeObject (TETRA);
     os.writeObject (_ldbVertexIndex);
     os.writeObject (mytetra ().myvertex (0)->ident ());
