@@ -128,20 +128,22 @@ void checkIteratorAssignment(GridType & grid)
 
     if( it != grid.template lend<dim>(0) )
     {
-      alugrid_assert ( it->level() == 0 );
+      assert ( it->level() == 0 );
       EntityPointerType p( it );
      
-      alugrid_assert ( p.level()  == 0 );
-      alugrid_assert ( p->level() == 0 );
+      assert ( p.level()  == 0 );
+      assert ( p->level() == 0 );
 
-      if( grid.maxLevel() > 0 )
+      if( grid.maxLevel() > 0 ) // maxLevel is updated over all grids and could still be zero on this partition
       {
         it = grid.template lbegin<dim>(1);
-        p = it;
-
-        alugrid_assert ( it->level() == 1 );
-        alugrid_assert ( p.level()   == 1 );
-        alugrid_assert ( p->level()  == 1 );
+        if (grid.size(1,0)>0)
+        {
+          p = it;
+          assert( it->level() == 1 );
+          assert( p.level()   == 1 );
+          assert( p->level()  == 1 );
+        }
       }
     }
   }
@@ -209,7 +211,7 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
   // if no twist found, then something is wrong 
   if( twistFound == -66 ) 
   {
-    alugrid_assert (false);
+    assert (false);
     DUNE_THROW( Dune::GridError, "Not matching twist found" );
   }
   
@@ -288,7 +290,7 @@ void checkIteratorCodim(GridType & grid)
       if( diff.two_norm() < 1e-8 ) 
       {
         std::cout << diff << " twonorm = " << diff.two_norm() << " point 0 and 1 do not differ! " << std::endl;
-        alugrid_assert ( diff.two_norm() > 1e-8 );
+        assert ( diff.two_norm() > 1e-8 );
       }
     }
   }
@@ -401,7 +403,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
     GridType* gr = new GridType(); 
-    alugrid_assert ( gr );
+    assert ( gr );
     delete gr;
   }
 
@@ -532,7 +534,7 @@ int main (int argc , char **argv) {
     }
     else 
     {
-      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dcube> <display>" << std::endl;
+      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dconf|3dcube> <display>" << std::endl;
     }
 
     const char *newfilename = 0; 
@@ -767,7 +769,7 @@ int main (int argc , char **argv) {
           if (myrank == 0) std::cout << "Check conform grid" << std::endl;
           checkALUParallel(grid,0,0);  //1,3
           if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
-          checkALUParallel(grid,0,2);  //1,3
+          checkALUParallel(grid,0,4);  //1,3
         }
       }
 #endif
