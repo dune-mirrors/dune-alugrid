@@ -249,7 +249,7 @@ int main (int argc, char ** argv, const char ** envp)
     filename = "../macrogrids/reference.tetra";
     mxl = 1;
     glb = 1;
-    std::cout << "usage: "<< argv[0] << " <macro grid> <opt: level global> \n";
+    std::cout << "usage: "<< argv[0] << " <macro grid> <opt: maxlevel> <opt: global refinement>\n";
   }
   else 
   {
@@ -307,7 +307,8 @@ int main (int argc, char ** argv, const char ** envp)
 
 #if HAVE_MPI
       gridPtr->duneLoadBalance();
-      gridPtr = ALUGrid::GitterDunePll::compress( gridPtr );
+      if( ! closure ) 
+        gridPtr = ALUGrid::GitterDunePll::compress( gridPtr );
       ALUGrid::GitterDunePll& grid = *gridPtr ;
 #else
       ALUGrid::GitterDuneImpl& grid = *gridPtr ;
