@@ -195,8 +195,8 @@ namespace ALUGrid
   std::vector< int > EdgePllBaseXMacro< A >::estimateLinkage () const 
   {
     std::vector< int > est;
-    const std::vector< int > l0 ( myhedge ().myvertex(0)->accessPllX ().estimateLinkage () );
-    const std::vector< int > l1 ( myhedge ().myvertex(1)->accessPllX ().estimateLinkage () );
+    const std::vector< int > l0 ( myhedge ().myvertex(0)->estimateLinkage () );
+    const std::vector< int > l1 ( myhedge ().myvertex(1)->estimateLinkage () );
     set_intersection( l0.begin(), l0.end(), l1.begin(), l1.end(), std::back_inserter( est ) );
     return est;
   }
@@ -222,8 +222,8 @@ namespace ALUGrid
         _moveTo = 0;
       }
     }
-    myhedge ().myvertex (0)->accessPllX ().unattach2 (i);
-    myhedge ().myvertex (1)->accessPllX ().unattach2 (i);
+    myhedge ().myvertex (0)->unattach2 (i);
+    myhedge ().myvertex (1)->unattach2 (i);
     return;
   }
 
@@ -239,8 +239,8 @@ namespace ALUGrid
     else 
       ++ (*pos).second;
 
-    myhedge ().myvertex (0)->accessPllX ().attach2 (i);
-    myhedge ().myvertex (1)->accessPllX ().attach2 (i);
+    myhedge ().myvertex (0)->attach2 (i);
+    myhedge ().myvertex (1)->attach2 (i);
     return;
   }
 

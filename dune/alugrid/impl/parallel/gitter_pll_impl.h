@@ -64,10 +64,12 @@ namespace ALUGrid
         const int elSize = _elements.size(); 
         for( int i=0; i<elSize; ++i ) 
         {
+          // if element number was found, return false 
           if( _elements[ i ] == ldbVxIndex ) 
             return false ;
         }
 
+        // otherwise store new connection 
         _elements.push_back( ldbVxIndex ); 
         return true ;
       }

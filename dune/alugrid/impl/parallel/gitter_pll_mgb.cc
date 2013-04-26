@@ -514,7 +514,7 @@ namespace ALUGrid
     return;
   }
 
-  void ParallelGridMover::unpackVertex ( const int sourceRank, ObjectStream &os )
+  void ParallelGridMover::unpackVertex ( ObjectStream &os )
   {
     int id;
     double x, y, z;
@@ -524,7 +524,6 @@ namespace ALUGrid
     os.readObject (z);
     std::pair< VertexGeo *, bool > p = InsertUniqueVertex (x,y,z,id);
     p.first->unpackSelf (os,p.second);
-    p.first->checkAndAddLinkage( sourceRank );
   }
 
   void ParallelGridMover::unpackHedge1 (ObjectStream & os) {
@@ -812,7 +811,7 @@ namespace ALUGrid
   }
 
   void ParallelGridMover::
-  unpackAll( const int sourceRank, ObjectStream& os, GatherScatterType* gs) 
+  unpackAll(ObjectStream& os, GatherScatterType* gs) 
   {
     int code = MacroGridMoverIF::ENDMARKER;
     for (os.readObject (code); code != MacroGridMoverIF::ENDMARKER; os.readObject (code)) 
@@ -820,7 +819,7 @@ namespace ALUGrid
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
         {
-          unpackVertex (sourceRank, os);
+          unpackVertex (os);
           break;
         }
       case MacroGridMoverIF::EDGE1 :
@@ -929,10 +928,8 @@ namespace ALUGrid
     void unpack( const int link, ObjectStream& os ) 
     {
       alugrid_assert ( _pgm );
-      // get rank number of source 
-      const int source = _mpa.recvSource()[ link ];
       // unpack data for given stream 
-      _pgm->unpackAll( source, os, _gs );
+      _pgm->unpackAll( os, _gs );
     }
   };
 

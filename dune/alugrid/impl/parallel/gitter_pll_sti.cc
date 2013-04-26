@@ -1406,13 +1406,11 @@ namespace ALUGrid
       {
 #ifdef STORE_LINKAGE_IN_VERTICES
 #warning "Using linkage storage in vertices to avoid allgather"
-        const bool precomputeLinkage = true ; //serialPartitioner ();
+        const bool precomputeLinkage = serialPartitioner ();
 #else 
         const bool precomputeLinkage = false ;
 #endif
         lap3 = clock();
-
-        const bool computeVertexLinkageAgain = computeVertexLinkage();
 
         // check gather-scatter object and call appropriate method 
         if( gs ) 
@@ -1422,15 +1420,20 @@ namespace ALUGrid
 
         if( precomputeLinkage ) 
         {
-          if( computeVertexLinkageAgain )
+          if( ! _vertexLinkageComputed ) 
+          {
             containerPll ().identification (mpAccess (), true );
+            _vertexLinkageComputed = true ;
+          }
+
+          // set vertex linkage
           setVertexLinkage( db );
         }
 
         lap4 = clock();
 
         // calls identification and exchangeDynamicState 
-        doNotifyMacroGridChanges ( computeVertexLinkageAgain );
+        doNotifyMacroGridChanges ( ! precomputeLinkage );
       }
     }
 
@@ -1449,38 +1452,15 @@ namespace ALUGrid
     return repartition;
   }
 
-  bool GitterPll::computeVertexLinkage() 
-  {
-#ifdef STORE_LINKAGE_IN_VERTICES
-    if( ! _vertexLinkageComputed ) 
-    {
-      AccessIterator < helement_STI >::Handle w ( containerPll () );
-
-      // set ldb vertex indices to all elements 
-      for (w.first (); ! w.done (); w.next () ) 
-      {
-        w.item ().computeVertexLinkage();
-      }
-      _vertexLinkageComputed = true ;
-      return true ;
-      // communication is done in vertexLinkageEstimate 
-    }
-    return false ;
-#else
-    return true ;
-#endif
-  }
-
   void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
   {
 #ifdef STORE_LINKAGE_IN_VERTICES
-    AccessIterator < vertex_STI >::Handle w ( containerPll () );
-
     const int me = mpAccess().myrank(); 
 
     // clear linkage pattern map since it is newly build here
     containerPll().clearLinkagePattern();
 
+    AccessIterator < vertex_STI >::Handle w ( containerPll () );
     // set ldb vertex indices to all elements 
     for (w.first (); ! w.done (); w.next () ) 
     {

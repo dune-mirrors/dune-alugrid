@@ -342,6 +342,16 @@ namespace ALUGrid
         _me( me ),
         _size( 0 )
     {
+#ifdef STORE_LINKAGE_IN_VERTICES
+      // compute vertex linkage locally 
+      {
+        AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) 
+        {
+          w.item().computeVertexLinkage();
+        }
+      }
+#endif
     }
 
     void pack( const int rank, ObjectStream& os ) 
@@ -370,8 +380,8 @@ namespace ALUGrid
 #ifdef STORE_LINKAGE_IN_VERTICES
           const std::vector<int>& linkedElements = vertex.linkedElements();
           const int linkedSize = linkedElements.size();
-          os.writeObject( -linkedSize-1 );
-          for( int el=0; el< linkedSize; ++el ) 
+          os.writeObject( int(-linkedSize-1) );
+          for( int el=0; el<linkedSize; ++el ) 
           {
             os.writeObject( linkedElements[ el ] );
           }
@@ -405,7 +415,7 @@ namespace ALUGrid
         {
           const int linkedSize = -id-1 ;
           linkedElements.resize( linkedSize );
-          for( int el=0; el< linkedSize; ++el ) 
+          for( int el=0; el<linkedSize; ++el ) 
           {
             os.readObject( linkedElements[ el ] );
           }
