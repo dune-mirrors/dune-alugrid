@@ -13,6 +13,12 @@ static int adaptationSequenceNumber = 0;
 
 #include "datamap.hh"
 
+#define CALLBACK
+
+#ifdef CALLBACK
+#include "callbackadaptation.hh"
+#endif 
+
 // GridMarker
 // ----------
 
@@ -251,6 +257,7 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
     }
   }
 
+#ifndef CALLBACK
   // check if elements might be removed in next adaptation cycle 
   const bool mightCoarsen = grid_.preAdapt();
 
@@ -274,7 +281,12 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
     for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
       hierarchicProlong<Vector>( *it, container );
   }
-
+#else
+  AdaptDataHandle<Grid,Vector,Container> adaptHandle( container );
+  grid_.adapt( adaptHandle );
+  container.resize();
+  solution.resize();
+#endif
 
   bool callBalance = ( (balanceCounter_ >= balanceStep_) && (balanceStep_ > 0) );
   // make sure everybody is on the same track 
@@ -298,6 +310,7 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   // reset timer to count again 
   adaptTimer.reset();
 
+#ifndef CALLBACK
   // cleanup adaptation markers 
   grid_.postAdapt();
 
@@ -305,8 +318,9 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   // or were created 
   if( refined || mightCoarsen ) 
     solution.resize();
+#endif
 
-  // retrieve data from container and store on new loeaf grid
+  // retrieve data from container and store on new leaf grid
   {
     const Iterator &end = gridView.template end< 0, partition >();
     for( Iterator it = gridView.template begin< 0, partition >(); it != end; ++it )
