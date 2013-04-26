@@ -87,10 +87,7 @@ namespace ALUGrid
   {
     -- (*_lpn).second;
     linkagePatternMap_t& _map = linkagePatterns();
-    static std::vector< int > lp;
-    lp.resize( newLinkage.size() );
-    std::copy( newLinkage.begin(), newLinkage.end(), lp.begin() );
-    //std::vector< int > lp( newLinkage );
+    std::vector< int > lp ( newLinkage );
     std::sort( lp.begin(), lp.end() );
     typename linkagePatternMap_t::iterator pos = _map.find (lp);
     _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first;
@@ -158,9 +155,10 @@ namespace ALUGrid
 #ifdef STORE_LINKAGE_IN_VERTICES
     const int elSize = _elements.size();
     os.writeObject( elSize );
-    for( int el=0; el<elSize; ++el )
+    const set_iterator endElem = _elements.end();
+    for( set_iterator it = _elements.begin(); it != endElem; ++ it )
     {
-      os.writeObject( _elements[ el ] );
+      os.writeObject( *it );
     }
 #endif
     inlineData (os);

@@ -286,7 +286,7 @@ namespace ALUGrid
       virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
       virtual void clearLinkage () { alugrid_assert (false); abort(); }
       virtual bool addGraphVertexIndex ( const int ldbVxIndex ) { alugrid_assert (false); abort(); return false; }
-      virtual const std::vector<int>& linkedElements() const { alugrid_assert (false); abort();  return *((std::vector<int> *) 0); }
+      virtual const std::set<int>& linkedElements() const { alugrid_assert (false); abort();  return *((std::set<int> *) 0); }
     };
 
 

@@ -63,24 +63,16 @@ namespace ALUGrid
       linkagePatternMap_t::iterator _lpn;
       moveto_t*  _moveTo;
 #ifdef STORE_LINKAGE_IN_VERTICES
-      std::vector< int > _elements ;
+      typedef std::set< int > :: iterator set_iterator ;
+      std::set< int > _elements ;
     public:  
       virtual bool addGraphVertexIndex( const int ldbVxIndex ) 
       {
-        const int elSize = _elements.size(); 
-        for( int i=0; i<elSize; ++i ) 
-        {
-          // if element number was found, return false 
-          if( _elements[ i ] == ldbVxIndex ) 
-            return false ;
-        }
-
-        // otherwise store new connection 
-        _elements.push_back( ldbVxIndex ); 
+        _elements.insert( ldbVxIndex );
         return true ;
       }
 
-      virtual const std::vector<int>& linkedElements () const { return _elements; }
+      virtual const std::set<int>& linkedElements () const { return _elements; }
 #endif
   };
 

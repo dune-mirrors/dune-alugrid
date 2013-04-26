@@ -1469,29 +1469,34 @@ namespace ALUGrid
       // clear linkage first 
       vertex.clearLinkage();
 
+
+      typedef std::set<int>::const_iterator set_iterator ;
+
       if( vertex.isBorder() ) 
       {
-        const std::vector<int>& linkedElements = vertex.linkedElements();
-        const int elSize = linkedElements.size();
-        assert( elSize > 0  );
-        std::set< int > uniqueLinkage; 
-        for( int el=0; el<elSize; ++el )
         {
-          const int rank = db.destination( linkedElements[ el ] ) ;
-          if( rank != me ) 
+          const std::set<int>& linkedElements = vertex.linkedElements();
+          const set_iterator endElem = linkedElements.end();
+          std::cout << "Vertex " << vertex.ident() << " (";
+          for( set_iterator it = linkedElements.begin(); it != endElem; ++it ) 
           {
-            uniqueLinkage.insert( rank );
+            std::cout << *it << ",";
           }
+          std::cout << ")"<< std::endl;
         }
       
-        const size_t lSize = uniqueLinkage.size();
+        const std::set<int>& linkedElements = vertex.linkedElements();
         std::vector< int > linkage;
-        linkage.reserve( lSize );
-        typedef std::set< int >::const_iterator const_iterator;
-        const const_iterator end = uniqueLinkage.end();
-        for( const_iterator it = uniqueLinkage.begin(); it != end; ++it ) 
+        linkage.reserve( linkedElements.size() );
+        const set_iterator endElem = linkedElements.end();
+        for( set_iterator it = linkedElements.begin(); it != endElem; ++it ) 
         {
-          linkage.push_back( *it );
+          const int rank = db.destination( *it ) ;
+          assert( rank >= 0 );
+          if( rank != me ) 
+          {
+            linkage.push_back( rank );
+          }
         }
       
         // set linkage 
@@ -1586,6 +1591,8 @@ namespace ALUGrid
     Gitter::notifyMacroGridChanges ();
 
     containerPll ().identification (mpAccess (), computeVertexLinkage );
+    if( computeVertexLinkage ) 
+      _vertexLinkageComputed = true ; 
 
     loadBalancerMacroGridChangesNotify ();
     exchangeDynamicState ();

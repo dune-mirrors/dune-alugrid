@@ -378,12 +378,14 @@ namespace ALUGrid
           os.writeObject( id );
           _vxmap[ id ] = &vertex;
 #ifdef STORE_LINKAGE_IN_VERTICES
-          const std::vector<int>& linkedElements = vertex.linkedElements();
+          const std::set<int>& linkedElements = vertex.linkedElements();
+          typedef std::set<int>::const_iterator set_iterator;
           const int linkedSize = linkedElements.size();
           os.writeObject( int(-linkedSize-1) );
-          for( int el=0; el<linkedSize; ++el ) 
+          const set_iterator endElem = linkedElements.end();
+          for( set_iterator it = linkedElements.begin(); it != endElem; ++it ) 
           {
-            os.writeObject( linkedElements[ el ] );
+            os.writeObject( *it );
           }
 #endif
         }
