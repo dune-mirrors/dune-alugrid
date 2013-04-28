@@ -105,7 +105,7 @@ public:
   std::string gridFile ( const std::string &path ) const
   { 
     std::ostringstream dgfFileName;
-    dgfFileName << path << "/unitcube" << dimDomain << ".dgf";
+    dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
 
