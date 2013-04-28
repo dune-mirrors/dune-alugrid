@@ -13,7 +13,7 @@ static int adaptationSequenceNumber = 0;
 
 #include "datamap.hh"
 
-#define CALLBACK
+// #define CALLBACK
 
 #ifdef CALLBACK
 #include "callbackadaptation.hh"
