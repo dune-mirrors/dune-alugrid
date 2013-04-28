@@ -58,29 +58,21 @@ namespace ALUGrid
       virtual moveto_t* moveToMap() { return _moveTo; }
       virtual void unpackSelf (ObjectStream &, bool);
 
-#ifdef STORE_LINKAGE_IN_VERTICES
-      virtual bool addGraphVertexIndex( const int ldbVxIndex ) 
-      {
-        const int elSize = _elements.size(); 
-        for( int i=0; i<elSize; ++i ) 
-        {
-          if( _elements[ i ] == ldbVxIndex ) 
-            return false ;
-        }
-
-        _elements.push_back( ldbVxIndex ); 
-        return true ;
-      }
-
-      virtual const std::vector<int>& linkedElements () const { return _elements; }
-#endif
-
     protected :
       static const linkagePattern_t nullPattern;
       linkagePatternMap_t::iterator _lpn;
       moveto_t*  _moveTo;
 #ifdef STORE_LINKAGE_IN_VERTICES
-      std::vector< int > _elements ;
+      typedef std::set< int > :: iterator set_iterator ;
+      std::set< int > _elements ;
+    public:  
+      virtual bool addGraphVertexIndex( const int ldbVxIndex ) 
+      {
+        _elements.insert( ldbVxIndex );
+        return true ;
+      }
+
+      virtual const std::set<int>& linkedElements () const { return _elements; }
 #endif
   };
 

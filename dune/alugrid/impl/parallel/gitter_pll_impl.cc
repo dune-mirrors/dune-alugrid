@@ -87,10 +87,7 @@ namespace ALUGrid
   {
     -- (*_lpn).second;
     linkagePatternMap_t& _map = linkagePatterns();
-    static std::vector< int > lp;
-    lp.resize( newLinkage.size() );
-    std::copy( newLinkage.begin(), newLinkage.end(), lp.begin() );
-    //std::vector< int > lp( newLinkage );
+    std::vector< int > lp ( newLinkage );
     std::sort( lp.begin(), lp.end() );
     typename linkagePatternMap_t::iterator pos = _map.find (lp);
     _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first;
@@ -158,9 +155,10 @@ namespace ALUGrid
 #ifdef STORE_LINKAGE_IN_VERTICES
     const int elSize = _elements.size();
     os.writeObject( elSize );
-    for( int el=0; el<elSize; ++el )
+    const set_iterator endElem = _elements.end();
+    for( set_iterator it = _elements.begin(); it != endElem; ++ it )
     {
-      os.writeObject( _elements[ el ] );
+      os.writeObject( *it );
     }
 #endif
     inlineData (os);
@@ -195,8 +193,8 @@ namespace ALUGrid
   std::vector< int > EdgePllBaseXMacro< A >::estimateLinkage () const 
   {
     std::vector< int > est;
-    const std::vector< int > l0 ( myhedge ().myvertex(0)->accessPllX ().estimateLinkage () );
-    const std::vector< int > l1 ( myhedge ().myvertex(1)->accessPllX ().estimateLinkage () );
+    const std::vector< int > l0 ( myhedge ().myvertex(0)->estimateLinkage () );
+    const std::vector< int > l1 ( myhedge ().myvertex(1)->estimateLinkage () );
     set_intersection( l0.begin(), l0.end(), l1.begin(), l1.end(), std::back_inserter( est ) );
     return est;
   }
@@ -222,8 +220,8 @@ namespace ALUGrid
         _moveTo = 0;
       }
     }
-    myhedge ().myvertex (0)->accessPllX ().unattach2 (i);
-    myhedge ().myvertex (1)->accessPllX ().unattach2 (i);
+    myhedge ().myvertex (0)->unattach2 (i);
+    myhedge ().myvertex (1)->unattach2 (i);
     return;
   }
 
@@ -239,8 +237,8 @@ namespace ALUGrid
     else 
       ++ (*pos).second;
 
-    myhedge ().myvertex (0)->accessPllX ().attach2 (i);
-    myhedge ().myvertex (1)->accessPllX ().attach2 (i);
+    myhedge ().myvertex (0)->attach2 (i);
+    myhedge ().myvertex (1)->attach2 (i);
     return;
   }
 
