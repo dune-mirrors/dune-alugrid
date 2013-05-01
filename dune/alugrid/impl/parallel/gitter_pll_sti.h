@@ -242,7 +242,6 @@ namespace ALUGrid
       void doRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
       void checkGraphVertexIndices();
       void computeGraphVertexIndices();
-      bool computeVertexLinkage();
       void setVertexLinkage( LoadBalancer::DataBase & );
       void doNotifyMacroGridChanges ( bool );
     public:  

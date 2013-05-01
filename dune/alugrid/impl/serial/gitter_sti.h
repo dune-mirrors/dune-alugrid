@@ -286,7 +286,7 @@ namespace ALUGrid
       virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
       virtual void clearLinkage () { alugrid_assert (false); abort(); }
       virtual bool addGraphVertexIndex ( const int ldbVxIndex ) { alugrid_assert (false); abort(); return false; }
-      virtual const std::vector<int>& linkedElements() const { alugrid_assert (false); abort();  return *((std::vector<int> *) 0); }
+      virtual const std::set<int>& linkedElements() const { alugrid_assert (false); abort();  return *((std::set<int> *) 0); }
     };
 
 
@@ -1040,6 +1040,16 @@ namespace ALUGrid
       { 
         alugrid_assert ( up() != 0 );
         up()->readDynamicState(os,i);
+      }
+      virtual void writeStaticState (ObjectStream &os, int i) const
+      { 
+        alugrid_assert ( up() != 0 );
+        up()->writeStaticState(os,i);
+      }
+      virtual void readStaticState (ObjectStream &os, int i)
+      { 
+        alugrid_assert ( up() != 0 );
+        up()->readStaticState(os,i);
       }
       virtual void packAsBnd (int a,int b,ObjectStream &os, const bool ghostCellsEnabled ) const
       { 

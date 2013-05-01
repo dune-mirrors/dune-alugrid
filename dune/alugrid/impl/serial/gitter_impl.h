@@ -495,8 +495,12 @@ namespace ALUGrid
   // calles method on grid which return 0 for default impl 
   inline int GitterBasis::Objects::TetraEmpty::postRefinement () 
   {
-    // reset refined tag of this element because no leaf anymore 
-    this->resetRefinedTag();
+    // NOTE: this method is called after an element is refined removing the Refined Tag
+    // from the parent element - for bisection this is wrong since the parent has 
+    // possibly also been generated in the same refinement cycle
+
+    // OLD: // reset refined tag of this element because no leaf anymore 
+    // OLD: this->resetRefinedTag();
 
     // only call postRefinement on non ghost elements 
     return ((this->isGhost()) ? 0 : myGrid()->postRefinement(*this));
@@ -531,9 +535,15 @@ namespace ALUGrid
 
   inline int GitterBasis::Objects::HexaEmpty::postRefinement() 
   {
-    // reset refined tag of this element because no leaf anymore 
-    this->resetRefinedTag();
-    
+    // NOTE: this method is called after an element is refined removing the Refined Tag
+    // from the parent element - for bisection this is wrong since the parent has 
+    // possibly also been generated in the same refinement cycle
+    // This is only a problem for bisection, i.e., on TetraEmpty but the reset method 
+    // is also removed here for symmetry (and the reset is apparently not needed...)
+
+    // OLD: // reset refined tag of this element because no leaf anymore 
+    // OLD: this->resetRefinedTag();
+
     // only call postRefinement on non ghost elements 
     return ((this->isGhost()) ? 0 : myGrid()->postRefinement(*this));
   }
