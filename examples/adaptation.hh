@@ -245,7 +245,7 @@ private:
    **/
   void hierarchicProlong ( const Entity &entity, Container &dataMap ) const;
 
-  Vector& getSolution() { assert( solution_ ); return *solution_; }
+  Vector& getSolution()             { assert( solution_ ); return *solution_; }
   const Vector& getSolution() const { assert( solution_ ); return *solution_; }
 
   Grid&              grid_;
