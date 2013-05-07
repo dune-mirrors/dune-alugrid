@@ -8,11 +8,12 @@
 #include <iostream>
 #include <numeric>
 
+#include "gitter_pll_ldb.h"
+
 #include "alusfc.hh"
 #include "alumetis.hh"
 #include "aluzoltan.hh"
 #include "../serial/gitter_sti.h"
-#include "gitter_pll_ldb.h"
 
 #if HAVE_ZOLTAN 
 // #include <zoltan_cpp.h>
@@ -625,7 +626,7 @@ namespace ALUGrid
     
     // flag to indicate whether we use a serial or a parallel partitioner 
     bool serialPartitioner    = serialPartitionerUsed( mth );
-    const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurveNoEdges );
+    const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurve );
 
     // create maps for edges and vertices 
     ldb_edge_set_t    edges;
@@ -645,275 +646,294 @@ namespace ALUGrid
                   serialPartitioner 
                 );
 
-    // clear memory 
-    _vertexSet.clear();
-
-    // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
-    // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
-    // durch Zusammenführen der einzelnen Container aus den Teilgrobgittern.
-    // Der Container 'edges' enthält alle Kanten des gesamten Grobgittergraphen
-    // doppelt, einmal mit jeder Orientierung (vorw"arts/r"uckw"arts). Diese Form
-    // der Datenhaltung ist vorteilhaft, wenn die Eingangsdaten der Partitionierer
-    // im CSR Format daraus erstellt werden m"ussen.
-    
-    const int ned = edges.size ();
-    const int nel = nodes.size ();
-
-    // make sure every process got the same numbers 
-    alugrid_assert ( nel == mpa.gmax( nel ) );
-    alugrid_assert ( ned == mpa.gmax( ned ) );
-    
-    // do repartition if edges exist (for serial partitioners) or for SFC and 
-    // parallel partitioners anyway  
-    if ( noEdgesInGraph || (ned > 0) ) 
+    // in case of the serial partitioners we are able to store the sizes 
+    // to avoid a second communication during graphCollect 
+    // this is only needed for the allgatherv communication 
+    alugrid_assert ( _noPeriodicFaces == mpa.gmax( _noPeriodicFaces ) );
+    if( _noPeriodicFaces ) 
     {
-      if( serialPartitioner && (ned > 0) ) 
-      {
-        if (!((*edges.rbegin ()).leftNode () < nel)) 
-        {
-          std::cerr << "WARNING (ignored): Incomplete index set during repartitioning." << std::endl;
-          return false;
-        }
-      }
+      // resize vector 
+      _graphSizes.resize( np );
 
-      // allocate edge memory for graph partitioners 
-      // get memory at once 
-      idx_t  * const edge_mem    = new idx_t [(nel + 1) + ned + ned ];
+      // clear _graphSizes vector, default is sizeof for the sizes that are send 
+      // at the beginning of the object streams 
+      // (one for _noPeriodicFaces flag, one for the vertices, and one for the edges)
+      const int initSize = 3 * sizeof(int); // see graphCollect 
+      std::fill( _graphSizes.begin(), _graphSizes.end(), initSize );
+    }
+    else // otherwise disable this feature be clearing the vector 
+    {
+      clearGraphSizesVector ();
+    }
 
-      // set pointer 
-      idx_t  * const edge_p      = edge_mem; 
-      idx_t  * const edge        = edge_mem + (nel +1);
-      idx_t  * const edge_w      = edge + ned; 
+    // ALUGrid own space filling curve partitioning 
+    if( mth == ALUGRID_SpaceFillingCurve ) 
+    {
+      // store complete graph since we need 
+      // this for later linkage identification
+      _vertexSet.swap( nodes );
 
-      alugrid_assert ( edge_p && edge && edge_w );
+      // call sfc partitioning that changes _vertexSet and _connect
+      return ALUGridMETIS::CALL_spaceFillingCurve( mpa, _vertexSet, _connect, _graphSizes );
+    }
+    else  // this is the METIS section 
+    { 
+      // clear memory 
+      _vertexSet.clear();
+
+      // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
+      // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
+      // durch Zusammenführen der einzelnen Container aus den Teilgrobgittern.
+      // Der Container 'edges' enthält alle Kanten des gesamten Grobgittergraphen
+      // doppelt, einmal mit jeder Orientierung (vorw"arts/r"uckw"arts). Diese Form
+      // der Datenhaltung ist vorteilhaft, wenn die Eingangsdaten der Partitionierer
+      // im CSR Format daraus erstellt werden m"ussen.
       
+      const int ned = edges.size ();
+      const int nel = nodes.size ();
+
+      // make sure every process got the same numbers 
+      alugrid_assert ( nel == mpa.gmax( nel ) );
+      alugrid_assert ( ned == mpa.gmax( ned ) );
+      
+      // do repartition if edges exist (for serial partitioners) or for SFC and 
+      // parallel partitioners anyway  
+      if ( noEdgesInGraph || (ned > 0) ) 
       {
-        idx_t* edge_pPos = edge_p;
-        int count = 0, index = -1;
-        
-        ldb_edge_set_t::const_iterator iEnd = edges.end();
-        for (ldb_edge_set_t::const_iterator i = edges.begin (); i != iEnd; ++i, ++count ) 
+        if( serialPartitioner && (ned > 0) ) 
         {
-          const GraphEdge& e = (*i);
-          if (e.leftNode () != index) 
+          if (!((*edges.rbegin ()).leftNode () < nel)) 
           {
-            alugrid_assert ( serialPartitioner ? e.leftNode () < nel : true );
-            *edge_pPos = count;
-            ++edge_pPos ; 
-            index = e.leftNode ();
+            std::cerr << "WARNING (ignored): Incomplete index set during repartitioning." << std::endl;
+            return false;
           }
-          alugrid_assert ( serialPartitioner ? e.rightNode () < nel : true );
-          edge   [ count ] = e.rightNode ();
-          edge_w [ count ] = e.weight ();
         }
 
-        * edge_pPos = count;
-        alugrid_assert ( edge_p [0] == 0 );
-        alugrid_assert ( ( serialPartitioner && ned > 0 ) ? edge_p [nel] == ned : true );
+        // allocate edge memory for graph partitioners 
+        // get memory at once 
+        idx_t  * const edge_mem    = new idx_t [(nel + 1) + ned + ned ];
 
-        // free memory, not needed anymore 
-        // needed to determine graphSizes later 
-        // edges.clear();
-      }
-      
-      const int sizeNeu = (np > 1) ? nel : 0;
-      const int memFactor = 2 ; // need extra memory for adaptive repartitioning
-      idx_t  * vertex_mem = new idx_t [ (memFactor * nel)  + sizeNeu];
-      idx_t  * const vertex_wInt = vertex_mem; 
-      idx_t  * part              = vertex_mem + nel; 
-      idx_t ncon = 1 ;
+        // set pointer 
+        idx_t  * const edge_p      = edge_mem; 
+        idx_t  * const edge        = edge_mem + (nel +1);
+        idx_t  * const edge_w      = edge + ned; 
 
-      real_t  ubvec[1] = {1.2}; // array of length ncon 
-      real_t* tpwgts = new real_t [ np ]; // ncon * npart, but ncon = 1 
-      
-      const real_t value = 1.0/ ((real_t) np);
-      // set weights (uniform distribution, to be adjusted)
-      for(int l=0; l<np; ++l) tpwgts[l] = value;
-
-      alugrid_assert ( vertex_wInt && part);
-      {
-        std::vector< int > check (nel, 0L);
-        ldb_vertex_map_t::const_iterator iEnd = nodes.end ();
-        for (ldb_vertex_map_t::const_iterator i = nodes.begin (); i != iEnd; ++i ) 
-        {
-          const std::pair< const GraphVertex , int >& item = (*i);
-          const int j = item.first.index ();
-
-          alugrid_assert ( serialPartitioner ? 0 <= j && j < nel : true );
-          alugrid_assert (0 <= item.second && item.second < np);
-          part [j] = item.second;
-          check [j] = 1;
-          vertex_wInt [j] = item.first.weight ();
-        }
-
-        // store nodes size before clearing   
-        const int nNodes = ( serialPartitioner ) ? nel : nodes.size();
-
-        // store complete graph since we need 
-        // this for later linkage identification
-        _vertexSet.swap( nodes );
-
-        // only for serial partitioners 
-        if (nNodes != accumulate (check.begin (), check.end (), 0)) 
-        {
-          std::cerr << "WARNING (ignored): No repartitioning due to failed consistency check." << std::endl;
-
-          delete[] vertex_mem;
-          delete[] edge_mem;
-          return false;
-        }
-      }
-
-      if (np > 1) 
-      {
-        idx_t* neu = vertex_mem + (2 * nel);
-        alugrid_assert (neu);
-
-        // copy part to neu, this is needed by some of the partitioning tools  
-        std::copy( part, part + nel, neu );
+        alugrid_assert ( edge_p && edge && edge_w );
         
         {
-          // if the number of graph vertices is smaller  
-          // then the number of partitions 
-          if( nel <= np ) 
+          idx_t* edge_pPos = edge_p;
+          int count = 0, index = -1;
+          
+          ldb_edge_set_t::const_iterator iEnd = edges.end();
+          for (ldb_edge_set_t::const_iterator i = edges.begin (); i != iEnd; ++i, ++count ) 
           {
-            // set easy partitioning 
-            for( int p=0; p<nel; ++ p ) 
+            const GraphEdge& e = (*i);
+            if (e.leftNode () != index) 
             {
-              neu[ p ] = p;
+              alugrid_assert ( serialPartitioner ? e.leftNode () < nel : true );
+              *edge_pPos = count;
+              ++edge_pPos ; 
+              index = e.leftNode ();
             }
+            alugrid_assert ( serialPartitioner ? e.rightNode () < nel : true );
+            edge   [ count ] = e.rightNode ();
+            edge_w [ count ] = e.weight ();
           }
-          else 
-          {
-            // serial partitioning methods 
-            switch (mth) 
-            {
 
-            // space filling curve approach 
-            case ALUGRID_SpaceFillingCurveNoEdges:
-              {
-                idx_t n = nel ;
-                ALUGridMETIS::CALL_spaceFillingCurveNoEdges( mpa, n, vertex_wInt, neu );
-              }
-              break;
-            case ALUGRID_SpaceFillingCurve:
-              {
-                idx_t n = nel ;
-                ALUGridMETIS::CALL_spaceFillingCurve( mpa, n, vertex_wInt, neu);
-              }
-              break;
+          * edge_pPos = count;
+          alugrid_assert ( edge_p [0] == 0 );
+          alugrid_assert ( ( serialPartitioner && ned > 0 ) ? edge_p [nel] == ned : true );
 
-            // METIS methods 
-            case METIS_PartGraphKway :
-              {
-                idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np;
-                ALUGridMETIS::CALL_METIS_PartGraphKway (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
-                              & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu);
-              }
-              break;
-            case METIS_PartGraphRecursive :
-              {
-                idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np;
-                ALUGridMETIS::CALL_METIS_PartGraphRecursive (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
-                              & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu);
-              }
-              break;
+          // free memory, not needed anymore 
+          // needed to determine graphSizes later 
+          // edges.clear();
+        }
+        
+        const int sizeNeu = (np > 1) ? nel : 0;
+        const int memFactor = 2 ; // need extra memory for adaptive repartitioning
+        idx_t  * vertex_mem = new idx_t [ (memFactor * nel)  + sizeNeu];
+        idx_t  * const vertex_wInt = vertex_mem; 
+        idx_t  * part              = vertex_mem + nel; 
+        idx_t ncon = 1 ;
 
-            // the method 'collect' moves all elements to rank 0 
-            case COLLECT:
-              std::fill( neu, neu + nel, 0L );
-              break;
+        real_t  ubvec[1] = {1.2}; // array of length ncon 
+        real_t* tpwgts = new real_t [ np ]; // ncon * npart, but ncon = 1 
+        
+        const real_t value = 1.0/ ((real_t) np);
+        // set weights (uniform distribution, to be adjusted)
+        for(int l=0; l<np; ++l) tpwgts[l] = value;
 
-            default :
-              std::cerr << "WARNING (ignored): Invalid repartitioning method [" << mth << "]." << std::endl;
-                
-              delete[] vertex_mem;
-              delete[] edge_mem;
-              delete[] tpwgts;
-              return false;
-            }
-          }
-        } // end serialPartitioner 
-
-        // only do the following for serialPartitioners and 
-        // if we really have a graph much larger then partition number 
-        if( serialPartitioner && ( nel > 3*np ) && ( mth > ALUGRID_SpaceFillingCurve ) ) 
+        alugrid_assert ( vertex_wInt && part);
         {
-          // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
-          // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
-          // zusammen.
-           
-          collectInsulatedNodes (nel, edge_p, edge, edge_w, np, neu);
+          std::vector< int > check (nel, 0L);
+          ldb_vertex_map_t::const_iterator iEnd = nodes.end ();
+          for (ldb_vertex_map_t::const_iterator i = nodes.begin (); i != iEnd; ++i ) 
+          {
+            const std::pair< const GraphVertex , int >& item = (*i);
+            const int j = item.first.index ();
 
-          // optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
-          // Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
-          // abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
-          // in Aktion tritt.
-           
-          const int verbose = me == 0 ? debugOption (4) : 0;
-          optimizeCoverage (np, nel, part, vertex_wInt, neu, verbose );
+            alugrid_assert ( serialPartitioner ? 0 <= j && j < nel : true );
+            alugrid_assert (0 <= item.second && item.second < np);
+            part [j] = item.second;
+            check [j] = 1;
+            vertex_wInt [j] = item.first.weight ();
+          }
+
+          // store nodes size before clearing   
+          const int nNodes = ( serialPartitioner ) ? nel : nodes.size();
+
+          // store complete graph since we need 
+          // this for later linkage identification
+          _vertexSet.swap( nodes );
+
+          // only for serial partitioners 
+          if (nNodes != accumulate (check.begin (), check.end (), 0)) 
+          {
+            std::cerr << "WARNING (ignored): No repartitioning due to failed consistency check." << std::endl;
+
+            delete[] vertex_mem;
+            delete[] edge_mem;
+            return false;
+          }
         }
 
-        // Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
-        change = (serialPartitioner ? ! std::equal (neu, neu + nel, part) : true);
-
-        // if partition vector is given fill it with the calculated partitioning 
-        if( partition.size() > 0 ) 
-        { 
-          partition.resize( nel );
-          std::copy( neu, neu + nel, partition.begin() );
-        }
-
-        // apply partitioning be reassigning a new processor number 
-        // to the vertices (elements of the macro mesh) of the graph 
-        if (change) 
+        if (np > 1) 
         {
-          // insert all different ranks we send elements to 
-          const ldb_vertex_map_t::iterator iEnd =  _vertexSet.end ();
-          for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; ++i)
-          {
-            const int elementIdx  = (*i).first.index () ;
-            const int destination = neu [ elementIdx ] ;
-            const int source      = part[ elementIdx ] ;
+          idx_t* neu = vertex_mem + (2 * nel);
+          alugrid_assert (neu);
 
-            // if the element currently belongs 
-            // then check the new destination 
-            if( source == me && destination != me)
+          // copy part to neu, this is needed by some of the partitioning tools  
+          std::copy( part, part + nel, neu );
+          
+          {
+            // if the number of graph vertices is smaller  
+            // then the number of partitions 
+            if( nel <= np ) 
             {
-              // set destination of element 
-              (*i).second = destination ;
-              // insert into linkage set as send rank  
-              _connect.insert( MpAccessLocal::sendRank( destination ) );
-            }
-            else if( source != me ) 
-            {
-#ifndef STORE_LINKAGE_IN_VERTICES
-              // mark element for delete 
-              (*i).second = -1 ;
-#endif
-              // if the element will belong to me in the future 
-              // insert connectivity 
-              if( destination == me )  
+              // set easy partitioning 
+              for( int p=0; p<nel; ++ p ) 
               {
-                // insert into linkage set (receive ranks have negative numbers) 
-                _connect.insert( MpAccessLocal::recvRank( source ) );
+                neu[ p ] = p;
               }
-            }
-          }
-
-#ifndef STORE_LINKAGE_IN_VERTICES
-          // erase elements that a not further needed 
-          for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; )
-          {
-            // if element does neither belong to me not will belong to me, erase it 
-            if( (*i).second < 0 ) 
-            {
-              _vertexSet.erase( i++ );
             }
             else 
-              ++ i;
+            {
+              // serial partitioning methods 
+              switch (mth) 
+              {
+
+              // METIS methods 
+              case METIS_PartGraphKway :
+                {
+                  idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np;
+                  ALUGridMETIS::CALL_METIS_PartGraphKway (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
+                                & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu);
+                }
+                break;
+              case METIS_PartGraphRecursive :
+                {
+                  idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np;
+                  ALUGridMETIS::CALL_METIS_PartGraphRecursive (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
+                                & wgtflag, & numflag, & npart, tpwgts, ubvec, & options, & edgecut, neu);
+                }
+                break;
+
+              // the method 'collect' moves all elements to rank 0 
+              case COLLECT:
+                std::fill( neu, neu + nel, 0L );
+                break;
+
+              default :
+                std::cerr << "WARNING (ignored): Invalid repartitioning method [" << mth << "]." << std::endl;
+                  
+                delete[] vertex_mem;
+                delete[] edge_mem;
+                delete[] tpwgts;
+                return false;
+              }
+            }
+          } // end serialPartitioner 
+
+          // only do the following for serialPartitioners and 
+          // if we really have a graph much larger then partition number 
+          if( serialPartitioner && ( nel > 3*np ) ) 
+          {
+            // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
+            // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
+            // zusammen.
+             
+            collectInsulatedNodes (nel, edge_p, edge, edge_w, np, neu);
+
+            // optimizeCoverage () versucht, die Lastverschiebung durch Permutation der
+            // Gebietszuordnung zu beschleunigen. Wenn die alte Aufteilung von der neuen
+            // abweicht, dann wird 'change'auf 'true' gestetzt, damit der Lastverschieber
+            // in Aktion tritt.
+             
+            const int verbose = me == 0 ? debugOption (4) : 0;
+            optimizeCoverage (np, nel, part, vertex_wInt, neu, verbose );
           }
+
+          // Vergleichen, ob sich die Aufteilung des Gebiets "uberhaupt ver"andert hat.
+          change = (serialPartitioner ? ! std::equal (neu, neu + nel, part) : true);
+
+          // if partition vector is given fill it with the calculated partitioning 
+          if( partition.size() > 0 ) 
+          { 
+            partition.resize( nel );
+            std::copy( neu, neu + nel, partition.begin() );
+          }
+
+          // apply partitioning be reassigning a new processor number 
+          // to the vertices (elements of the macro mesh) of the graph 
+          if (change) 
+          {
+            // insert all different ranks we send elements to 
+            const ldb_vertex_map_t::iterator iEnd =  _vertexSet.end ();
+            for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; ++i)
+            {
+              const int elementIdx  = (*i).first.index () ;
+              const int destination = neu [ elementIdx ] ;
+              const int source      = part[ elementIdx ] ;
+
+              // if the element currently belongs 
+              // then check the new destination 
+              if( source == me && destination != me)
+              {
+                // set destination of element 
+                (*i).second = destination ;
+                // insert into linkage set as send rank  
+                _connect.insert( MpAccessLocal::sendRank( destination ) );
+              }
+              else if( source != me ) 
+              {
+#ifndef STORE_LINKAGE_IN_VERTICES
+                // mark element for delete 
+                (*i).second = -1 ;
 #endif
+                // if the element will belong to me in the future 
+                // insert connectivity 
+                if( destination == me )  
+                {
+                  // insert into linkage set (receive ranks have negative numbers) 
+                  _connect.insert( MpAccessLocal::recvRank( source ) );
+                }
+              }
+            }
+
+#ifndef STORE_LINKAGE_IN_VERTICES
+            // erase elements that a not further needed 
+            for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; )
+            {
+              // if element does neither belong to me not will belong to me, erase it 
+              if( (*i).second < 0 ) 
+              {
+                _vertexSet.erase( i++ );
+              }
+              else 
+                ++ i;
+            }
+#endif
+          }
 
           // in case of the serial partitioners we are able to store the sizes 
           // to avoid a second communication during graphCollect 
@@ -921,24 +941,15 @@ namespace ALUGrid
           alugrid_assert ( _noPeriodicFaces == mpa.gmax( _noPeriodicFaces ) );
           if( _noPeriodicFaces ) 
           {
-            // resize vector 
-            _graphSizes.resize( np );
-
-            // clear _graphSizes vector, default is sizeof for the sizes that are send 
-            // at the beginning of the object streams 
-            // (one for _noPeriodicFaces flag, one for the vertices, and one for the edges)
-            const int initSize = 3 * sizeof(int); // see graphCollect 
-            std::fill( _graphSizes.begin(), _graphSizes.end(), initSize );
-
-            // count number of graph vertices each process contains 
-            for( int i=0; i<nel; ++i ) 
+            // insert all different ranks we send elements to 
+            for ( int i=0; i<nel; ++ i ) 
             {
               _graphSizes[ neu[ i ] ] += GraphVertex :: sizeOfData ;
             }
 
             // add edge sizes 
-            ldb_edge_set_t::const_iterator iEnd = edges.end();
-            for (ldb_edge_set_t::const_iterator i = edges.begin (); i != iEnd; ++i) 
+            ldb_edge_set_t::const_iterator eEnd = edges.end();
+            for (ldb_edge_set_t::const_iterator i = edges.begin (); i != eEnd; ++i) 
             {
               const GraphEdge& e = (*i);
               // only do something when the left node is smaller then the right node 
@@ -950,23 +961,18 @@ namespace ALUGrid
               }
             }
           }
-          else // otherwise disable this feature be clearing the vector 
-          {
-            clearGraphSizesVector ();
-          }
         }
+
+        delete [] vertex_mem;
+        delete [] edge_mem;
+        delete [] tpwgts;
       }
-
-      delete [] vertex_mem;
-      delete [] edge_mem;
-      delete [] tpwgts;
-    }
-
+    } // end METIS section   
 
     if( debugOption( 3 ) && !me )
     {
       std::cout << "INFO: LoadBalancerPll::DataBase::repartition() partitioned global graph with ";
-      std::cout << (ned/2) << " edges and " << nel << " nodes using method " << methodToString( mth );
+      std::cout << " method " << methodToString( mth );
       std::cout << " in " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " s." << std::endl;
     }
     return change;
@@ -999,8 +1005,6 @@ namespace ALUGrid
         return "no dynamic load balancing";
       case COLLECT :
         return "COLLECT";
-      case ALUGRID_SpaceFillingCurveNoEdges:
-        return "ALUGRID_SpaceFillingCurveNoEdges";
       case ALUGRID_SpaceFillingCurve:
         return "ALUGRID_SpaceFillingCurve";
       case METIS_PartGraphKway :
