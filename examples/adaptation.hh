@@ -13,7 +13,7 @@ static int adaptationSequenceNumber = 0;
 
 #include "datamap.hh"
 
-// #define CALLBACK
+#define CALLBACK
 
 #ifdef CALLBACK
 #include "callbackadaptation.hh"
@@ -244,13 +244,13 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
 
   // container to keep data save during adaptation and load balancing
   typedef Dune::PersistentContainer<Grid,typename Vector::LocalDofVector> Container;
-  Container container(grid_,0);
-  const Container & ccontainer = container;
+  // create persistent container for codimension 0
+  Container container( grid_, 0 );
 
   // first store all leave data in container
   {
-    const Iterator &end = gridView.template end< 0, partition >();
-    for( Iterator it = gridView.template begin< 0, partition >(); it != end; ++it )
+    const Iterator end = gridView.template end  < 0, partition >();
+    for(  Iterator it  = gridView.template begin< 0, partition >(); it != end; ++it )
     {
       const Entity &entity = *it;
       solution.getLocalDofVector( entity, container[ entity ] );
@@ -284,8 +284,8 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
 #else
   AdaptDataHandle<Grid,Vector,Container> adaptHandle( container );
   grid_.adapt( adaptHandle );
-  container.resize();
-  solution.resize();
+  // reduce container to size that is needed 
+  container.shrinkToFit();
 #endif
 
   bool callBalance = ( (balanceCounter_ >= balanceStep_) && (balanceStep_ > 0) );
@@ -317,21 +317,18 @@ inline void LeafAdaptation< Grid >::operator() ( Vector &solution )
   // resize solution vector if elements might have been removed 
   // or were created 
   if( refined || mightCoarsen ) 
+#endif // for CALLBACK resize anyway 
     solution.resize();
-#endif
 
   // retrieve data from container and store on new leaf grid
   {
-    const Iterator &end = gridView.template end< 0, partition >();
-    for( Iterator it = gridView.template begin< 0, partition >(); it != end; ++it )
+    const Iterator end = gridView.template end  < 0, partition >();
+    for(  Iterator it  = gridView.template begin< 0, partition >(); it != end; ++it )
     {
       const Entity &entity = *it;
-      solution.setLocalDofVector( entity, ccontainer[ entity ] );
+      solution.setLocalDofVector( entity, container[ entity ] );
     }
   }
-
-  // compress data again 
-  container.shrinkToFit();
 
   // store adaptation time 
   adaptTime_ += adaptTimer.elapsed();
@@ -367,7 +364,7 @@ inline void LeafAdaptation< Grid >
     // if there is a child that does not vanish, this entity may not vanish
     assert( doRestrict || !entity.mightVanish() );
 
-    // if( doRestrict )
+    if( doRestrict )
       Vector::restrictLocal( entity, dataMap );
   }
 }

@@ -19,13 +19,14 @@ private:
 public:
 // constructor
   AdaptDataHandle( Container &container) 
-  : container_(container) 
+  : container_( container ) 
   {}
-// interface methods
-  void preAdapt ( const unsigned int estimateAdditionalElements )
-  {}
-  void postAdapt ()
-  {}
+
+  // interface methods
+  void preAdapt ( const unsigned int estimateAdditionalElements ) {}
+
+  void postAdapt () {}
+
   void preCoarsening ( const Entity &father ) const
   {
     Vector::restrictLocal( father, container_ );
@@ -36,11 +37,13 @@ public:
     Vector::prolongLocal( father, container_ );
   }
   void restrictLocal( const Entity &father, const Entity& son, bool initialize ) const 
-  {}
+  {
+  }
   void prolongLocal( const Entity &father, const Entity& son, bool initialize ) const 
-  {}
-  private:
-  mutable Container container_;
+  {
+  }
+private:
+  Container& container_;
 };
 
 #endif
