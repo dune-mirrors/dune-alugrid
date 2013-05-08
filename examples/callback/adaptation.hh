@@ -151,39 +151,49 @@ public:
   // type used for coordinates in the grid
   typedef typename Grid::ctype ctype;
 
-  // types of grid's level and hierarchic iterator
-  static const Dune::PartitionIteratorType partition = Dune::Interior_Partition;
-  typedef typename Grid::template Codim< 0 >::template Partition< partition >::LevelIterator LevelIterator;
-  typedef typename Grid::Traits::HierarchicIterator HierarchicIterator;
-
   // types of entity, entity pointer and geometry
   typedef typename Grid::template Codim< 0 >::Entity Entity;
 
-  // container to keep data save during adaptation and load balancing
-  typedef Dune::PersistentContainer<Grid,typename Vector::LocalDofVector> Container;
+  // container to keep index set during adaptation and load balancing
+  typedef Dune::PersistentContainer<Grid,int> Container;
 
   // type of grid view used 
   typedef typename Vector :: GridView  GridView;
 
+  static const Dune::PartitionIteratorType partition = Dune::Interior_Partition;
   typedef typename GridView
       ::template Codim< 0 >::template Partition< partition >::Iterator 
       Iterator;
+
+  typedef typename Vector::LocalDofVector LocalDofVector;
+
 public:
   /** \brief constructor
    *  \param grid   the grid to be adapted
    */
-  LeafAdaptation ( Grid &grid, const int balanceStep = 1 )
+  LeafAdaptation ( Grid &grid, Vector &solution, const int balanceStep = 1 )
   : grid_( grid ),
     // create persistent container for codimension 0
     container_( grid_, 0 ),
-    solution_( 0 ),
+    solution_( solution ),
+    tmpSolution_( solution.gridView() ),
     adaptTimer_(),
     balanceStep_( balanceStep ),
     balanceCounter_( 0 ),
     adaptTime_( 0.0 ),
     lbTime_( 0.0 ),
     commTime_( 0.0 )
-  {}
+  {
+    container_.resize();
+    const GridView &gridView = solution.gridView();
+    // retrieve data from container and store on new leaf grid
+    const Iterator end = gridView.template end  < 0, partition >();
+    for(  Iterator it  = gridView.template begin< 0, partition >(); it != end; ++it )
+    {
+      const Entity &entity = *it;
+      container_[entity] = gridView.indexSet().index(entity);
+    }
+  }
 
   /** \brief main method performing the adaptation and
              perserving the data.
@@ -194,7 +204,7 @@ public:
       \param callback  true if callback adaptation is used, 
                        otherwise generic adaptation is used
   **/
-  void operator() ( Vector &solution, const bool callback = true);
+  void operator() ( );
 
   //! return time spent for the last adapation in sec 
   double adaptationTime() const { return adaptTime_; }
@@ -216,38 +226,75 @@ public:
   // called when children of father are going to vanish
   void preCoarsening ( const Entity &father ) const
   {
-    Vector::restrictLocal( father, container_ );
+    typedef typename Entity::HierarchicIterator HierarchicIterator;
+
+    LocalDofVector fatherValue(0);
+    double volume = 0;
+
+    const int childLevel = father.level() + 1;
+    const HierarchicIterator hend = father.hend( childLevel );
+    for( HierarchicIterator hit = father.hbegin( childLevel ) ; hit != hend; ++hit )
+    {
+      const Entity &child = *hit;
+      const double childVolume = child.geometry().volume();
+      const LocalDofVector &childValue = getValue(child);
+      fatherValue.axpy( childVolume, childValue );
+      volume += childVolume;
+    }
+
+    // Note: only true if we are not on a surface
+    assert( std::abs( volume - father.geometry().volume() ) < 1e-12 );
+    fatherValue /= volume;
+    container_[father] = setTmpStorage( fatherValue );
   }
 
   // called when children of father where newly created
   void postRefinement ( const Entity &father ) const
   {
     container_.resize();
-    Vector::prolongLocal( father, container_ );
+    const LocalDofVector &fatherValue = getValue(father);
+
+    typedef typename Entity::HierarchicIterator HierarchicIterator;
+
+    const int childLevel = father.level() + 1;
+    const HierarchicIterator hend = father.hend( childLevel );
+    for( HierarchicIterator hit = father.hbegin( childLevel ); hit != hend; ++hit )
+    {
+      const Entity &child = *hit;
+      container_[child] = setTmpStorage( fatherValue );
+    }
   }
 
 private:
-  /** \brief do restriction of data on leafs which might vanish
-   *         in the grid hierarchy below a given entity
-   *  \param entity   the entity from where to start the restriction process
-   *  \param dataMap  map containing the leaf data to be used to store the
-   *                  restricted data.
-   **/
-  void hierarchicRestrict ( const Entity &entity, Container &dataMap ) const;
-
-  /** \brief do prolongation of data to new elements below the given entity
-   *  \param entity  the entity from where to start the prolongation
-   *  \param dataMap the map containing the data and used to store the
-   *                 data prolongt to the new elements
-   **/
-  void hierarchicProlong ( const Entity &entity, Container &dataMap ) const;
-
-  Vector& getSolution()             { assert( solution_ ); return *solution_; }
-  const Vector& getSolution() const { assert( solution_ ); return *solution_; }
-
+  Vector& getSolution()             { return solution_; }
+  const Vector& getSolution() const { return solution_; }
+  int setTmpStorage( const LocalDofVector &data) const
+  {
+    assert(data[0]>0);
+    tmpStorage_.push_back(data);
+    assert(-int(tmpStorage_.size())<0);
+    return -int(tmpStorage_.size());
+  }
+  const LocalDofVector &getTmpStorage( int negIndex ) const
+  { 
+    int index = -negIndex - 1;
+    assert( index >= 0 && (unsigned int)(index) < tmpStorage_.size() );
+    return tmpStorage_[index];
+  }
+  const LocalDofVector &getValue( const Entity &entity ) const
+  {
+    int index = container_[entity];
+    if (index >= 0) // data is in solution vector
+      return solution_[index];
+    else // data is in temporary storage
+      return getTmpStorage( index );
+  }
+  
   Grid&              grid_;
   mutable Container  container_;
-  Vector*            solution_;
+  Vector&            solution_;
+  Vector             tmpSolution_;
+  mutable std::vector<LocalDofVector> tmpStorage_;
 
   Dune :: Timer      adaptTimer_ ; 
   // call loadBalance ervery balanceStep_ step
@@ -261,13 +308,10 @@ private:
 };
 
 template< class Grid, class Vector >
-inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution, const bool callback )
+inline void LeafAdaptation< Grid, Vector >::operator() ( )
 {
   if (Dune :: Capabilities :: isCartesian<Grid> :: v)
     return;
-
-  // set pointer to solution 
-  solution_ = & solution ;
 
   adaptTime_ = 0.0;
   lbTime_    = 0.0;
@@ -277,46 +321,7 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution, const
   adaptTimer_.reset() ; 
 
   // callback adaptation, see interface methods above 
-  if( callback ) 
-  {
-    grid_.adapt( *this );
-  }
-  // generic adaptation
-  else
-  {
-    // check if elements might be removed in next adaptation cycle 
-    const bool mightCoarsen = grid_.preAdapt();
-
-    // copy data to container 
-    preAdapt( 0 );
-
-    // if elements might be removed
-    if( mightCoarsen )
-    {
-      // restrict data and save leaf level 
-      const LevelIterator end = grid_.template lend< 0, partition >( 0 );
-      for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
-        hierarchicRestrict( *it, container_ );
-    }
-
-    // adapt grid, returns true if new elements were created 
-    const bool refined = grid_.adapt();
-
-    // interpolate all new cells to leaf level 
-    if( refined )
-    {
-      container_.resize();
-      const LevelIterator end = grid_.template lend< 0, partition >( 0 );
-      for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
-        hierarchicProlong( *it, container_ );
-    }
-
-    // copy data back to solution, load balance, and communication
-    postAdapt();
-
-    // reset adaptation information in grid
-    grid_.postAdapt();
-  }
+  grid_.adapt( *this );
 
   // increase adaptation secuence number 
   ++adaptationSequenceNumber;
@@ -326,16 +331,8 @@ template< class Grid, class Vector >
 inline void LeafAdaptation< Grid, Vector >
   ::preAdapt( const unsigned int estimateAdditionalElements ) 
 {
-  const Vector& solution = getSolution();
-  const GridView &gridView = solution.gridView();
-
-  // first store all leave data in container
-  const Iterator end = gridView.template end  < 0, partition >();
-  for(  Iterator it  = gridView.template begin< 0, partition >(); it != end; ++it )
-  {
-    const Entity &entity = *it;
-    solution.getLocalDofVector( entity, container_[ entity ] );
-  }
+  tmpStorage_.reserve( estimateAdditionalElements );
+  tmpStorage_.clear();
 }
 
 template< class Grid, class Vector >
@@ -343,6 +340,7 @@ inline void LeafAdaptation< Grid, Vector >::postAdapt()
 {
   adaptTime_ = adaptTimer_.elapsed();
 
+/*
   bool callBalance = ( (balanceCounter_ >= balanceStep_) && (balanceStep_ > 0) );
   // make sure everybody is on the same track 
   assert( callBalance == grid_.comm().max( callBalance) );
@@ -359,8 +357,9 @@ inline void LeafAdaptation< Grid, Vector >::postAdapt()
     grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
     lbTime_ = lbTimer.elapsed();
   }
-
+*/
   // reduce size of container, if possible 
+  container_.resize();
   container_.shrinkToFit();
 
   // reset timer to count again 
@@ -370,15 +369,19 @@ inline void LeafAdaptation< Grid, Vector >::postAdapt()
   const GridView &gridView = solution.gridView();
 
   // resize to current grid size 
-  solution.resize();
+  tmpSolution_.resize();
 
   // retrieve data from container and store on new leaf grid
   const Iterator end = gridView.template end  < 0, partition >();
   for(  Iterator it  = gridView.template begin< 0, partition >(); it != end; ++it )
   {
     const Entity &entity = *it;
-    solution.setLocalDofVector( entity, container_[ entity ] );
+
+    tmpSolution_.setLocalDofVector( entity, getValue(entity) );
+    container_[entity] = gridView.indexSet().index(entity);
   }
+
+  solution_.swap(tmpSolution_);
 
   // store adaptation time 
   adaptTime_ += adaptTimer_.elapsed();
@@ -388,57 +391,7 @@ inline void LeafAdaptation< Grid, Vector >::postAdapt()
   solution.communicate();
   commTime_ = commTimer.elapsed();
 
-  // reset pointer 
-  solution_ = 0;
 }
 
-template< class Grid, class Vector >
-inline void LeafAdaptation< Grid, Vector >
-  ::hierarchicRestrict ( const Entity &entity, Container &dataMap ) const
-{
-  // for leaf entities just copy the data to the data map
-  if( !entity.isLeaf() )
-  {
-    // check all children first 
-    bool doRestrict = true;
-    const int childLevel = entity.level() + 1;
-    const HierarchicIterator hend = entity.hend( childLevel );
-    for( HierarchicIterator hit = entity.hbegin( childLevel ); hit != hend; ++hit )
-    {
-      const Entity &child = *hit;
-      hierarchicRestrict( child, dataMap );
-      doRestrict &= child.mightVanish();
-    }
-
-    // if there is a child that does not vanish, this entity may not vanish
-    assert( doRestrict || !entity.mightVanish() );
-
-    if( doRestrict )
-      Vector::restrictLocal( entity, dataMap );
-  }
-}
-
-template< class Grid, class Vector >
-inline void LeafAdaptation< Grid, Vector >
-  ::hierarchicProlong ( const Entity &entity, Container &dataMap ) const
-{
-  if ( !entity.isLeaf() )
-  {
-    const int childLevel = entity.level() + 1;
-    const HierarchicIterator hend = entity.hend( childLevel );
-    HierarchicIterator hit = entity.hbegin( childLevel );
-
-    const bool doProlong = hit->isNew();
-    if( doProlong )
-      Vector::prolongLocal( entity, dataMap );
-
-    // if the children have children then we have to go deeper 
-    for( ; hit != hend; ++hit ) 
-    {
-      assert(doProlong == hit->isNew());
-      hierarchicProlong( *hit, dataMap );
-    }
-  }
-}
 
 #endif 
