@@ -24,7 +24,6 @@ namespace ALUGridMETIS
     connect.clear();
 
     typedef typename vertexmap_t :: iterator   iterator ;
-
     const iterator vertexEnd = vertexMap.end();
     long int sum = 0 ;
     // compute sum at first 
@@ -47,7 +46,7 @@ namespace ALUGridMETIS
       // get current rank
       const int source = (*it).second ;
 
-      // set new  rank information 
+      // set new rank information 
       (*it).second = destination ;
       // add weight 
       d += (2 * numProcs) * ((*it).first.weight());

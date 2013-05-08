@@ -79,9 +79,7 @@ namespace ALUGrid
 
   void LoadBalancer::DataBase::
   graphCollect ( const MpAccessGlobal &mpa,
-                 std::insert_iterator< ldb_vertex_map_t > nodes,
-                 std::insert_iterator< ldb_edge_set_t > edges,
-                 const bool serialPartitioner ) const 
+                 std::insert_iterator< ldb_edge_set_t > edges )
   {
     // if the number of ranks is small, then use old allgather method 
     if( ALUGridExternalParameters::useAllGather( mpa ) )
@@ -89,63 +87,40 @@ namespace ALUGrid
       // old method has O(p log p) time complexity 
       // and O(p) memory consumption which is critical 
       // for higher number of cores 
-      graphCollectAllgather( mpa, nodes, edges, serialPartitioner );
+      graphCollectAllgather( mpa, edges );
     }
     else 
     {
       // otherwise use method with O(p log p) time complexity 
       // and O(1) memory consumption
-      graphCollectBcast( mpa, nodes, edges, serialPartitioner );
+      graphCollectBcast( mpa, edges );
     }
   }
 
   void LoadBalancer::DataBase::
   graphCollectAllgather ( const MpAccessGlobal &mpa,
-                          std::insert_iterator< ldb_vertex_map_t > nodes, 
-                          std::insert_iterator< ldb_edge_set_t > edges,
-                          const bool serialPartitioner ) const 
+                          std::insert_iterator< ldb_edge_set_t > edges )
   {
-    alugrid_assert ( serialPartitioner );
     // for parallel partitioner return local vertices and edges 
     // for serial partitioner these have to be communicates to all
     // processes 
      
     // number of processes 
     const int np = mpa.psize();
+    const int me = mpa.myrank();
 
-    if( ! serialPartitioner || np == 1 )
+    ldb_edge_set_t::const_iterator eEnd = _edgeSet.end ();
+    for (ldb_edge_set_t::const_iterator e = _edgeSet.begin (); 
+         e != eEnd; ++e ) 
     {
-      const int myrank = mpa.myrank();
-      {
-        ldb_vertex_map_t::const_iterator iEnd = _vertexSet.end ();
-        for (ldb_vertex_map_t::const_iterator i = _vertexSet.begin (); 
-             i != iEnd; ++i, ++nodes ) 
-        {
-          {
-            const GraphVertex& x = (*i).first;
-            *nodes = std::pair< const GraphVertex, int > ( x , myrank);
-          } 
-        }
-      }
-
-      {
-        ldb_edge_set_t::const_iterator eEnd = _edgeSet.end ();
-        for (ldb_edge_set_t::const_iterator e = _edgeSet.begin (); 
-             e != eEnd; ++e ) 
-        {
-          const GraphEdge& x = (*e);
-          // edges exists twice ( u , v ) and ( v , u )
-          // with both orientations 
-          * edges = x;
-          ++ edges;
-          * edges = - x;
-          ++ edges;
-        }
-      }
+      const GraphEdge& x = (*e);
+      // edges exists twice ( u , v ) and ( v , u )
+      // with both orientations 
+      * edges = x;
+      ++ edges;
+      * edges = - x;
+      ++ edges;
     }
-
-    // for serial calls we are done here 
-    if( np == 1 ) return;
 
     ObjectStream os;
 
@@ -157,29 +132,31 @@ namespace ALUGrid
       const int vertexSize = _vertexSet.size ();
       os.writeObject ( vertexSize );
 
-      if( serialPartitioner )
+      // write vertices 
+      ldb_vertex_map_t::iterator iEnd = _vertexSet.end ();
+      for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; ++i ) 
       {
-        // write vertices 
-        ldb_vertex_map_t::const_iterator iEnd = _vertexSet.end ();
-        for (ldb_vertex_map_t::const_iterator i = _vertexSet.begin (); i != iEnd; ++i ) 
-        {
-          // write graph vertex to stream 
-          (*i).first.writeToStream( os );
-        }
+        // write graph vertex to stream 
+        (*i).first.writeToStream( os );
+        // store my rank info
+        (*i).second = me ;
+      }
 
-        // write number of edges 
-        const int edgeSize = _edgeSet.size ();
-        os.writeObject ( edgeSize );
+      // write number of edges 
+      const int edgeSize = _edgeSet.size ();
+      os.writeObject ( edgeSize );
 
-        // write edges 
-        ldb_edge_set_t::const_iterator eEnd = _edgeSet.end ();
-        for (ldb_edge_set_t::const_iterator e = _edgeSet.begin (); e != eEnd; ++e )
-        {
-          // write graph edge to stream 
-          (*e).writeToStream( os );
-        }
+      // write edges 
+      ldb_edge_set_t::const_iterator eEnd = _edgeSet.end ();
+      for (ldb_edge_set_t::const_iterator e = _edgeSet.begin (); e != eEnd; ++e )
+      {
+        // write graph edge to stream 
+        (*e).writeToStream( os );
       }
     }
+
+    // for serial calls we are done here 
+    if( np == 1 ) return;
 
     try 
     {
@@ -189,48 +166,50 @@ namespace ALUGrid
 
       // free memory 
       os.reset ();
+      // also reset stream for me 
+      osv[ me ].reset();
 
+      for (int i = 0; i < np; ++i) 
       {
-        for (int i = 0; i < np; ++i) 
+        // I already got my graph 
+        if( i == me ) continue ;
+
+        ObjectStream& osv_i = osv [i];
+
+        int noPeriodicFaces = 1;
+        osv_i.readObject( noPeriodicFaces );
+        // store result 
+        _noPeriodicFaces &= bool( noPeriodicFaces );
+
+        int len = -1;
+        osv_i.readObject (len);
+        alugrid_assert (len >= 0);
+
+        // read graph for serial partitioner 
+        typedef ldb_vertex_map_t::value_type GraphVertexPair;
+        for (int j = 0; j < len; ++j ) 
         {
-          ObjectStream& osv_i = osv [i];
+          // constructor taking stream reads values form ObjectStream 
+          // also store source info 
+          GraphVertexPair vx( GraphVertex( osv_i ), i );
+          _vertexSet.insert( vx );
+        } 
 
-          int noPeriodicFaces = 1;
-          osv_i.readObject( noPeriodicFaces );
-          // store result 
-          _noPeriodicFaces &= bool( noPeriodicFaces );
+        osv_i.readObject (len);
+        alugrid_assert (len >= 0);
 
-          int len = -1;
-          osv_i.readObject (len);
-          alugrid_assert (len >= 0);
-
-          // read graph for serial partitioner 
-          if( serialPartitioner ) 
-          {
-            for (int j = 0; j < len; ++j, ++ nodes ) 
-            {
-              // constructor taking stream reads values form ObjectStream 
-              GraphVertex x( osv_i );
-              (*nodes) = std::pair< const GraphVertex, int > (x,i);
-            } 
-
-            osv_i.readObject (len);
-            alugrid_assert (len >= 0);
-
-            for (int j = 0; j < len; ++j) 
-            {
-              // constructor taking stream reads values form ObjectStream 
-              GraphEdge x( osv_i );
-              (*edges) =  x;
-              ++ edges;
-              (*edges) = -x;
-              ++ edges;
-            }
-          }
-
-          // free memory of osv[i]
-          osv_i.reset();
+        for (int j = 0; j < len; ++j) 
+        {
+          // constructor taking stream reads values form ObjectStream 
+          GraphEdge x( osv_i );
+          (*edges) =  x;
+          ++ edges;
+          (*edges) = -x;
+          ++ edges;
         }
+
+        // free memory of osv[i]
+        osv_i.reset();
       }
     } 
     catch (ObjectStream::EOFException) 
@@ -247,9 +226,7 @@ namespace ALUGrid
 
   void LoadBalancer::DataBase::
   graphCollectBcast ( const MpAccessGlobal &mpa, 
-                      std::insert_iterator< ldb_vertex_map_t > nodes, 
-                      std::insert_iterator< ldb_edge_set_t > edges,
-                      const bool serialPartitioner ) const 
+                      std::insert_iterator< ldb_edge_set_t > edges )
   {
     // for parallel partitioner return local vertices and edges 
     // for serial partitioner these have to be communicates to all
@@ -261,73 +238,49 @@ namespace ALUGrid
     // number of processes 
     const int np = mpa.psize();
 
-    if( ! serialPartitioner || np == 1 )
-    {
-      {
-        ldb_vertex_map_t::const_iterator iEnd = _vertexSet.end ();
-        for (ldb_vertex_map_t::const_iterator i = _vertexSet.begin (); 
-             i != iEnd; ++i, ++nodes ) 
-        {
-          {
-            const GraphVertex& x = (*i).first;
-            *nodes = std::pair< const GraphVertex, int > ( x , me );
-          } 
-        }
-      }
+    // my data stream 
+    ObjectStream os;
+     
+    const int noPeriodicFaces = int( _noPeriodicFaces );
+    os.writeObject( noPeriodicFaces );
 
-      {
-        ldb_edge_set_t::const_iterator eEnd = _edgeSet.end ();
-        for (ldb_edge_set_t::const_iterator e = _edgeSet.begin (); 
-             e != eEnd; ++e ) 
-        {
-          const GraphEdge& x = (*e);
-          // edges exists twice ( u , v ) and ( v , u )
-          // with both orientations 
-          *edges =   x;
-          ++ edges;
-          *edges = - x;
-          ++ edges;
-        }
-      }
+    // write number of elements  
+    const int vertexSize = _vertexSet.size ();
+    os.writeObject ( vertexSize );
+
+    // write vertices 
+    ldb_vertex_map_t::iterator iEnd = _vertexSet.end ();
+    for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; ++i ) 
+    {
+      // write graph vertex to stream 
+      (*i).first.writeToStream( os );
+      // store my rank info
+      (*i).second = me ;
+    }
+
+    // write number of edges 
+    const int edgeSize = _edgeSet.size ();
+    os.writeObject ( edgeSize );
+
+    ldb_edge_set_t::const_iterator eEnd = _edgeSet.end ();
+    for (ldb_edge_set_t::const_iterator e = _edgeSet.begin (); 
+         e != eEnd; ++e ) 
+    {
+      const GraphEdge& x = (*e);
+
+      // write to stream 
+      x.writeToStream( os );
+
+      // edges exists twice ( u , v ) and ( v , u )
+      // with both orientations 
+      *edges =   x;
+      ++ edges;
+      *edges = - x;
+      ++ edges;
     }
 
     // for serial calls we are done here 
     if( np == 1 ) return;
-
-    // my data stream 
-    ObjectStream os;
-     
-    {
-      const int noPeriodicFaces = int( _noPeriodicFaces );
-      os.writeObject( noPeriodicFaces );
-
-      // write number of elements  
-      const int vertexSize = _vertexSet.size ();
-      os.writeObject ( vertexSize );
-
-      if( serialPartitioner )
-      {
-        // write vertices 
-        ldb_vertex_map_t::const_iterator iEnd = _vertexSet.end ();
-        for (ldb_vertex_map_t::const_iterator i = _vertexSet.begin (); i != iEnd; ++i ) 
-        {
-          // write graph vertex to stream 
-          (*i).first.writeToStream( os );
-        }
-
-        // write number of edges 
-        const int edgeSize = _edgeSet.size ();
-        os.writeObject ( edgeSize );
-
-        // write edges 
-        ldb_edge_set_t::const_iterator eEnd = _edgeSet.end ();
-        for (ldb_edge_set_t::const_iterator e = _edgeSet.begin (); e != eEnd; ++e )
-        {
-          // write graph edge to stream 
-          (*e).writeToStream( os );
-        }
-      }
-    }
 
     try 
     {
@@ -343,7 +296,7 @@ namespace ALUGrid
       else
       {
         // get max buffer size (only for serial partitioner we need to communicate)
-        maxSize = serialPartitioner ? mpa.gmax( os.size() ) : os.size();
+        maxSize = mpa.gmax( os.size() ) ; 
       }
 
       // create bcast buffer and reserve memory 
@@ -374,6 +327,7 @@ namespace ALUGrid
         mpa.bcast( sendrecv.getBuff(0), msgSize, rank );
 
         // insert data into graph map 
+        if( rank != me )
         {
           // reset read posistion 
           sendrecv.resetReadPosition();
@@ -389,28 +343,27 @@ namespace ALUGrid
           sendrecv.readObject ( len );
           alugrid_assert (len >= 0);
 
-          // read graph for serial partitioner 
-          if( serialPartitioner ) 
+          typedef ldb_vertex_map_t::value_type GraphVertexPair;
+
+          for (int j = 0; j < len; ++j ) 
           {
-            for (int j = 0; j < len; ++j, ++ nodes ) 
-            {
-              // constructor taking stream reads values form ObjectStream 
-              GraphVertex x( sendrecv );
-              *nodes = std::pair< const GraphVertex, int > (x, rank);
-            } 
+            // constructor taking stream reads values form ObjectStream 
+            // also store source info 
+            GraphVertexPair vx( GraphVertex( sendrecv ), rank );
+            _vertexSet.insert( vx );
+          } 
 
-            sendrecv.readObject (len);
-            alugrid_assert (len >= 0);
+          sendrecv.readObject (len);
+          alugrid_assert (len >= 0);
 
-            for (int j = 0; j < len; ++j) 
-            {
-              // constructor taking stream reads values form ObjectStream 
-              GraphEdge x( sendrecv );
-              * edges = x;
-              ++ edges;
-              * edges = - x;
-              ++ edges;
-            }
+          for (int j = 0; j < len; ++j) 
+          {
+            // constructor taking stream reads values form ObjectStream 
+            GraphEdge x( sendrecv );
+            * edges = x;
+            ++ edges;
+            * edges = - x;
+            ++ edges;
           }
         }
       }
@@ -629,8 +582,8 @@ namespace ALUGrid
     const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurve );
 
     // create maps for edges and vertices 
-    ldb_edge_set_t    edges;
-    ldb_vertex_map_t  nodes; 
+    ldb_edge_set_t     edges;
+    ldb_vertex_map_t&  nodes = _vertexSet ; 
 
     typedef ALUGridMETIS::realtype real_t;
     typedef ALUGridMETIS::idxtype  idx_t;
@@ -640,11 +593,7 @@ namespace ALUGrid
 
     // collect graph from all processors 
     // needs a all-to-all (allgather) communication 
-    graphCollect( mpa,
-                  std::insert_iterator< ldb_vertex_map_t > (nodes,nodes.begin ()),
-                  std::insert_iterator< ldb_edge_set_t >   (edges,edges.begin ()), 
-                  serialPartitioner 
-                );
+    graphCollect( mpa, std::insert_iterator< ldb_edge_set_t > (edges,edges.begin ()) );
 
     // in case of the serial partitioners we are able to store the sizes 
     // to avoid a second communication during graphCollect 
@@ -669,18 +618,11 @@ namespace ALUGrid
     // ALUGrid own space filling curve partitioning 
     if( mth == ALUGRID_SpaceFillingCurve ) 
     {
-      // store complete graph since we need 
-      // this for later linkage identification
-      _vertexSet.swap( nodes );
-
       // call sfc partitioning that changes _vertexSet and _connect
       return ALUGridMETIS::CALL_spaceFillingCurve( mpa, _vertexSet, _connect, _graphSizes );
     }
     else  // this is the METIS section 
     { 
-      // clear memory 
-      _vertexSet.clear();
-
       // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
       // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
       // durch Zusammenführen der einzelnen Container aus den Teilgrobgittern.
@@ -781,10 +723,6 @@ namespace ALUGrid
 
           // store nodes size before clearing   
           const int nNodes = ( serialPartitioner ) ? nel : nodes.size();
-
-          // store complete graph since we need 
-          // this for later linkage identification
-          _vertexSet.swap( nodes );
 
           // only for serial partitioners 
           if (nNodes != accumulate (check.begin (), check.end (), 0)) 

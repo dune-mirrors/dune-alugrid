@@ -148,19 +148,13 @@ namespace ALUGrid
           };
         private :
           void graphCollect ( const MpAccessGlobal &,
-                              std::insert_iterator< ldb_vertex_map_t >,
-                              std::insert_iterator< ldb_edge_set_t >,
-                              const bool ) const;
+                              std::insert_iterator< ldb_edge_set_t > );
 
           void graphCollectAllgather ( const MpAccessGlobal &,
-                                       std::insert_iterator< ldb_vertex_map_t >,
-                                       std::insert_iterator< ldb_edge_set_t >,
-                                       const bool ) const;
+                                       std::insert_iterator< ldb_edge_set_t > );
 
           void graphCollectBcast ( const MpAccessGlobal &,
-                                   std::insert_iterator < ldb_vertex_map_t >,
-                                   std::insert_iterator < ldb_edge_set_t >,
-                                   const bool ) const;
+                                   std::insert_iterator < ldb_edge_set_t > );
         public :
           const std::vector< int > &graphSizes () const { return _graphSizes; }
 
