@@ -618,7 +618,7 @@ namespace ALUGrid
     // ALUGrid own space filling curve partitioning 
     if( mth == ALUGRID_SpaceFillingCurve ) 
     {
-      // call sfc partitioning that changes _vertexSet and _connect
+      // call sfc partitioning that changes _vertexSet and _connect and also compute graph sizes 
       return ALUGridMETIS::CALL_spaceFillingCurve( mpa, _vertexSet, _connect, _graphSizes );
     }
     else  // this is the METIS section 

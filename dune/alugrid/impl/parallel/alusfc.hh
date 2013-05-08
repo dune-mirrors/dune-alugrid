@@ -32,6 +32,8 @@ namespace ALUGridMETIS
       sum += (*it).first.weight();
     }
 
+    const bool graphSizeCalculation = graphSizes.size() > 0 ;
+
     int destination = 0;
     long int d = -sum ;
     for( iterator it = vertexMap.begin(); it != vertexEnd; ++ it ) 
@@ -51,6 +53,10 @@ namespace ALUGridMETIS
       // add weight 
       d += (2 * numProcs) * ((*it).first.weight());
 
+      // add communication sizes of graph
+      if( graphSizeCalculation ) 
+        graphSizes[ destination ] += ALUGrid::LoadBalancer::GraphVertex::sizeOfData ;
+
       // if the element currently belongs to me
       // then check the new destination 
       if( source == me && destination != me )
@@ -60,12 +66,10 @@ namespace ALUGridMETIS
       }
       else if( source != me ) 
       {
-/*
 #ifndef STORE_LINKAGE_IN_VERTICES
         // mark element for delete 
         (*it).second = -1 ;
 #endif
-*/
         if( destination == me )
         {
           // insert into linkage set (receive ranks have negative numbers), see MpAccessLocal 
@@ -74,15 +78,6 @@ namespace ALUGridMETIS
       }
     }
 
-    if( graphSizes.size() > 0 ) 
-    {
-      // add size of graph vertices to be communicated 
-      for( iterator it = vertexMap.begin(); it != vertexEnd; ++ it ) 
-      {
-        graphSizes[ (*it).second ] += ALUGrid::LoadBalancer::GraphVertex::sizeOfData ;
-      }
-    }
-/*
 #ifndef STORE_LINKAGE_IN_VERTICES
     // erase elements that are not further needed to save memory 
     for (iterator it = vertexMap.begin (); it != vertexEnd; )
@@ -96,7 +91,6 @@ namespace ALUGridMETIS
         ++ it;
     }
 #endif
-*/
 
     alugrid_assert ( destination < numProcs );
     // return true if partitioning is ok, should never be false 
