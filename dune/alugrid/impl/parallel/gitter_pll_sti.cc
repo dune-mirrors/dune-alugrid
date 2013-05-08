@@ -1404,12 +1404,8 @@ namespace ALUGrid
       // if a method was given, perform load balancing
       if (userDefinedPartitioning || ldbMth)
       {
-#ifdef STORE_LINKAGE_IN_VERTICES
-#warning "Using linkage storage in vertices to avoid allgather"
-        const bool precomputeLinkage = serialPartitioner ();
-#else 
-        const bool precomputeLinkage = false ;
-#endif
+        const bool precomputeLinkage = Gitter :: storeLinkageInVertices && serialPartitioner ();
+
         lap3 = clock();
 
         // check gather-scatter object and call appropriate method 
@@ -1454,56 +1450,46 @@ namespace ALUGrid
 
   void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
   {
-#ifdef STORE_LINKAGE_IN_VERTICES
-    const int me = mpAccess().myrank(); 
-
-    // clear linkage pattern map since it is newly build here
-    containerPll().clearLinkagePattern();
-
-    AccessIterator < vertex_STI >::Handle w ( containerPll () );
-    // set ldb vertex indices to all elements 
-    for (w.first (); ! w.done (); w.next () ) 
+    if( Gitter :: storeLinkageInVertices ) 
     {
-      vertex_STI& vertex = w.item();
+      const int me = mpAccess().myrank(); 
 
-      // clear linkage first 
-      vertex.clearLinkage();
+      // clear linkage pattern map since it is newly build here
+      containerPll().clearLinkagePattern();
 
-
-      typedef std::set<int>::const_iterator set_iterator ;
-
-      if( vertex.isBorder() ) 
+      AccessIterator < vertex_STI >::Handle w ( containerPll () );
+      // set ldb vertex indices to all elements 
+      for (w.first (); ! w.done (); w.next () ) 
       {
+        vertex_STI& vertex = w.item();
+
+        // clear linkage first 
+        vertex.clearLinkage();
+
+
+        typedef std::set<int>::const_iterator set_iterator ;
+
+        if( vertex.isBorder() ) 
         {
           const std::set<int>& linkedElements = vertex.linkedElements();
+          std::vector< int > linkage;
+          linkage.reserve( linkedElements.size() );
           const set_iterator endElem = linkedElements.end();
-          std::cout << "Vertex " << vertex.ident() << " (";
           for( set_iterator it = linkedElements.begin(); it != endElem; ++it ) 
           {
-            std::cout << *it << ",";
+            const int rank = db.destination( *it ) ;
+            assert( rank >= 0 );
+            if( rank != me ) 
+            {
+              linkage.push_back( rank );
+            }
           }
-          std::cout << ")"<< std::endl;
+        
+          // set linkage 
+          vertex.setLinkage( linkage );
         }
-      
-        const std::set<int>& linkedElements = vertex.linkedElements();
-        std::vector< int > linkage;
-        linkage.reserve( linkedElements.size() );
-        const set_iterator endElem = linkedElements.end();
-        for( set_iterator it = linkedElements.begin(); it != endElem; ++it ) 
-        {
-          const int rank = db.destination( *it ) ;
-          assert( rank >= 0 );
-          if( rank != me ) 
-          {
-            linkage.push_back( rank );
-          }
-        }
-      
-        // set linkage 
-        vertex.setLinkage( linkage );
       }
     }
-#endif
   }
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 

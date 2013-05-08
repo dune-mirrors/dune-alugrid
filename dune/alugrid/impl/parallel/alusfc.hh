@@ -32,7 +32,12 @@ namespace ALUGridMETIS
       sum += (*it).first.weight();
     }
 
+    // clear map only when storeLinkageInVertices is not enabled 
+    // since the vertices are still needed in that situation 
+    const bool clearMap = ! ALUGrid :: Gitter :: storeLinkageInVertices ;
+
     const bool graphSizeCalculation = graphSizes.size() > 0 ;
+    const int sizeOfVertexData = ALUGrid::LoadBalancer::GraphVertex::sizeOfData ;
 
     int destination = 0;
     long int d = -sum ;
@@ -55,7 +60,7 @@ namespace ALUGridMETIS
 
       // add communication sizes of graph
       if( graphSizeCalculation ) 
-        graphSizes[ destination ] += ALUGrid::LoadBalancer::GraphVertex::sizeOfData ;
+        graphSizes[ destination ] += sizeOfVertexData ;
 
       // if the element currently belongs to me
       // then check the new destination 
@@ -66,10 +71,12 @@ namespace ALUGridMETIS
       }
       else if( source != me ) 
       {
-#ifndef STORE_LINKAGE_IN_VERTICES
-        // mark element for delete 
-        (*it).second = -1 ;
-#endif
+        if( clearMap ) 
+        {
+          // mark element for delete 
+          (*it).second = -1 ;
+        }
+
         if( destination == me )
         {
           // insert into linkage set (receive ranks have negative numbers), see MpAccessLocal 
@@ -78,19 +85,20 @@ namespace ALUGridMETIS
       }
     }
 
-#ifndef STORE_LINKAGE_IN_VERTICES
-    // erase elements that are not further needed to save memory 
-    for (iterator it = vertexMap.begin (); it != vertexEnd; )
+    if( clearMap )
     {
-      // if element does neither belong to me not will belong to me, erase it 
-      if( (*it).second < 0 )
+      // erase elements that are not further needed to save memory 
+      for (iterator it = vertexMap.begin (); it != vertexEnd; )
       {
-        vertexMap.erase( it++ );
+        // if element does neither belong to me not will belong to me, erase it 
+        if( (*it).second < 0 )
+        {
+          vertexMap.erase( it++ );
+        }
+        else
+          ++ it;
       }
-      else
-        ++ it;
     }
-#endif
 
     alugrid_assert ( destination < numProcs );
     // return true if partitioning is ok, should never be false 

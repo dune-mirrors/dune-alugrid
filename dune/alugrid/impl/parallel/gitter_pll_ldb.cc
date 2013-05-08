@@ -9,11 +9,11 @@
 #include <numeric>
 
 #include "gitter_pll_ldb.h"
+#include "../serial/gitter_sti.h"
 
 #include "alusfc.hh"
 #include "alumetis.hh"
 #include "aluzoltan.hh"
-#include "../serial/gitter_sti.h"
 
 #if HAVE_ZOLTAN 
 // #include <zoltan_cpp.h>
@@ -122,6 +122,9 @@ namespace ALUGrid
       ++ edges;
     }
 
+    // for serial calls we are done here 
+    if( np == 1 ) return;
+
     ObjectStream os;
 
     {
@@ -154,9 +157,6 @@ namespace ALUGrid
         (*e).writeToStream( os );
       }
     }
-
-    // for serial calls we are done here 
-    if( np == 1 ) return;
 
     try 
     {
@@ -581,7 +581,6 @@ namespace ALUGrid
 
     // create maps for edges and vertices 
     ldb_edge_set_t     edges;
-    ldb_vertex_map_t&  nodes = _vertexSet ; 
 
     typedef ALUGridMETIS::realtype real_t;
     typedef ALUGridMETIS::idxtype  idx_t;
@@ -616,11 +615,18 @@ namespace ALUGrid
     // ALUGrid own space filling curve partitioning 
     if( mth == ALUGRID_SpaceFillingCurve ) 
     {
+      //std::cout << "Before " << std::endl;
+      //printVertexSet();
+
+      //std::cout << "call SFC " << std::endl;
       // call sfc partitioning that changes _vertexSet and _connect and also compute graph sizes 
       return ALUGridMETIS::CALL_spaceFillingCurve( mpa, _vertexSet, _connect, _graphSizes );
     }
     else  // this is the METIS section 
     { 
+      // use the vertexSet directly 
+      ldb_vertex_map_t&  nodes = _vertexSet ; 
+
       // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
       // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
       // durch Zusammenführen der einzelnen Container aus den Teilgrobgittern.
@@ -823,6 +829,10 @@ namespace ALUGrid
           // to the vertices (elements of the macro mesh) of the graph 
           if (change) 
           {
+            // clear map only when storeLinkageInVertices is not enabled 
+            // since the vertices are still needed in that situation 
+            const bool clearMap = ! Gitter :: storeLinkageInVertices ;
+
             // insert all different ranks we send elements to 
             const ldb_vertex_map_t::iterator iEnd =  _vertexSet.end ();
             for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; ++i)
@@ -842,10 +852,12 @@ namespace ALUGrid
               }
               else if( source != me ) 
               {
-#ifndef STORE_LINKAGE_IN_VERTICES
-                // mark element for delete 
-                (*i).second = -1 ;
-#endif
+                if( clearMap ) 
+                {
+                  // mark element for delete 
+                  (*i).second = -1 ;
+                }
+
                 // if the element will belong to me in the future 
                 // insert connectivity 
                 if( destination == me )  
@@ -856,19 +868,20 @@ namespace ALUGrid
               }
             }
 
-#ifndef STORE_LINKAGE_IN_VERTICES
-            // erase elements that a not further needed 
-            for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; )
+            if( clearMap ) 
             {
-              // if element does neither belong to me not will belong to me, erase it 
-              if( (*i).second < 0 ) 
+              // erase elements that a not further needed 
+              for (ldb_vertex_map_t::iterator i = _vertexSet.begin (); i != iEnd; )
               {
-                _vertexSet.erase( i++ );
+                // if element does neither belong to me not will belong to me, erase it 
+                if( (*i).second < 0 ) 
+                {
+                  _vertexSet.erase( i++ );
+                }
+                else 
+                  ++ i;
               }
-              else 
-                ++ i;
             }
-#endif
           }
 
           // in case of the serial partitioners we are able to store the sizes 
@@ -930,7 +943,7 @@ namespace ALUGrid
     std::cout << "VXSet size = " << _vertexSet.size() << std::endl;
     for( const_iterator it = _vertexSet.begin(); it != end; ++it ) 
     {
-      std::cout << "vx " << (*it).first.index() << std::endl;
+      std::cout << "vx " << (*it).first.index() << " --> " << (*it).second << std::endl;
     }
   }
 
