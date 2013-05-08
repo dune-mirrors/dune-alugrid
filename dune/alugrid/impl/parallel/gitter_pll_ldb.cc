@@ -191,8 +191,7 @@ namespace ALUGrid
         {
           // constructor taking stream reads values form ObjectStream 
           // also store source info 
-          GraphVertexPair vx( GraphVertex( osv_i ), i );
-          _vertexSet.insert( vx );
+          _vertexSet.insert( GraphVertexPair( GraphVertex( osv_i ), i ) );
         } 
 
         osv_i.readObject (len);
@@ -349,8 +348,7 @@ namespace ALUGrid
           {
             // constructor taking stream reads values form ObjectStream 
             // also store source info 
-            GraphVertexPair vx( GraphVertex( sendrecv ), rank );
-            _vertexSet.insert( vx );
+            _vertexSet.insert( GraphVertexPair( GraphVertex( sendrecv ), rank ) );
           } 
 
           sendrecv.readObject (len);
