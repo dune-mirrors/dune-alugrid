@@ -152,7 +152,7 @@ namespace ALUGrid
     os.writeObject (myvertex ().Point ()[1]);
     os.writeObject (myvertex ().Point ()[2]);
 
-#ifdef STORE_LINKAGE_IN_VERTICES
+#ifdef STORE_LINKAGE_IN_VERTICES    
     const int elSize = _elements.size();
     os.writeObject( elSize );
     const set_iterator endElem = _elements.end();
@@ -161,6 +161,7 @@ namespace ALUGrid
       os.writeObject( *it );
     }
 #endif
+
     inlineData (os);
     return true ; 
   }
@@ -168,16 +169,16 @@ namespace ALUGrid
   template < class A >
   void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool i) 
   {
-#ifdef STORE_LINKAGE_IN_VERTICES
-    int elSize; 
+#ifdef STORE_LINKAGE_IN_VERTICES    
+    int elSize;
     os.readObject( elSize );
-    for( int el=0; el<elSize; ++el ) 
+    for( int el=0; el<elSize; ++el )
     {
-      int elem; 
+      int elem;
       os.readObject( elem );
-      addGraphVertexIndex( elem );
+      _elements.insert( elem );
     }
-#endif 
+#endif
 
     if (i) 
     {

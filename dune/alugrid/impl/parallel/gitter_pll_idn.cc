@@ -342,8 +342,8 @@ namespace ALUGrid
         _me( me ),
         _size( 0 )
     {
-#ifdef STORE_LINKAGE_IN_VERTICES
       // compute vertex linkage locally 
+      if( Gitter :: storeLinkageInVertices ) 
       {
         AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
         for (w.first (); ! w.done (); w.next ()) 
@@ -351,7 +351,6 @@ namespace ALUGrid
           w.item().computeVertexLinkage();
         }
       }
-#endif
     }
 
     void pack( const int rank, ObjectStream& os ) 
@@ -377,17 +376,18 @@ namespace ALUGrid
           int id = vertex.ident ();
           os.writeObject( id );
           _vxmap[ id ] = &vertex;
-#ifdef STORE_LINKAGE_IN_VERTICES
-          const std::set<int>& linkedElements = vertex.linkedElements();
-          typedef std::set<int>::const_iterator set_iterator;
-          const int linkedSize = linkedElements.size();
-          os.writeObject( int(-linkedSize-1) );
-          const set_iterator endElem = linkedElements.end();
-          for( set_iterator it = linkedElements.begin(); it != endElem; ++it ) 
+          if( Gitter :: storeLinkageInVertices ) 
           {
-            os.writeObject( *it );
+            const std::set<int>& linkedElements = vertex.linkedElements();
+            typedef std::set<int>::const_iterator set_iterator;
+            const int linkedSize = linkedElements.size();
+            os.writeObject( int(-linkedSize-1) );
+            const set_iterator endElem = linkedElements.end();
+            for( set_iterator it = linkedElements.begin(); it != endElem; ++it ) 
+            {
+              os.writeObject( *it );
+            }
           }
-#endif
         }
       }
       os.writeObject( endMarker );
@@ -403,6 +403,8 @@ namespace ALUGrid
       os.readObject( wSize );
       _size += wSize ;
 
+      const bool storeLinkage = Gitter::storeLinkageInVertices ;
+
       int id ;
       os.readObject ( id );
       std::vector< int > linkedElements ;
@@ -412,8 +414,7 @@ namespace ALUGrid
         map_t::const_iterator hit = _vxmap.find (id);
         // read next id 
         os.readObject( id );
-#ifdef STORE_LINKAGE_IN_VERTICES
-        if( id < 0 && id != endMarker ) 
+        if( storeLinkage && id < 0 && id != endMarker ) 
         {
           const int linkedSize = -id-1 ;
           linkedElements.resize( linkedSize );
@@ -424,18 +425,19 @@ namespace ALUGrid
           // read next vertex id 
           os.readObject( id );
         }
-#endif
+
         // check vertex linkages 
         if( hit != vxmapEnd ) 
         {
           vertex_STI* vertex = (*hit).second;
-#ifdef STORE_LINKAGE_IN_VERTICES
-          const int linkedSize = linkedElements.size();
-          for( int el=0; el< linkedSize; ++el ) 
+          if( storeLinkage ) 
           {
-            vertex->addGraphVertexIndex( linkedElements[ el ] );
+            const int linkedSize = linkedElements.size();
+            for( int el=0; el< linkedSize; ++el ) 
+            {
+              vertex->addGraphVertexIndex( linkedElements[ el ] );
+            }
           }
-#endif
           // check whether rank already is contained in the linkage and add otherwise 
           vertex->checkAndAddLinkage( rank );
         }

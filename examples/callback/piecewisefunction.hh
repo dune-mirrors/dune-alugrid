@@ -179,6 +179,15 @@ public:
   /** \brief copy interior cell data to overlap of ghost cells */
   void communicate ();
 
+  void swap( This &other )
+  {
+    std::swap( dof_, other.dof_ );
+  }
+  void copy( This &other ) const
+  {
+    std::copy( dof_.begin(), dof_.end(), other.dof_.begin() );
+  }
+
 private:  
   GridView gridView_;
   /* storage for dofs */
@@ -300,6 +309,7 @@ template< class View, class Range >
 inline void PiecewiseFunction< View, Range >
   ::setLocalDofVector ( const Entity &entity, const LocalDofVector &localDofs )
 {
+  assert( localDofs[0] > 0 );
   (*this)[ entity ] = localDofs;
 }
 

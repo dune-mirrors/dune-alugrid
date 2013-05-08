@@ -87,7 +87,7 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
 
   /* create adaptation method */
   typedef LeafAdaptation< Grid, DataType > AdaptationType;
-  AdaptationType adaptation( grid, model.problem().balanceStep() );
+  AdaptationType adaptation( grid, solution, model.problem().balanceStep() );
 
   for( int i = 0; i <= maxLevel; ++i )
   {
@@ -96,7 +96,7 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
     scheme.mark( 0, solution, gridMarker );
     // adapt grid 
     if( gridMarker.marked() )
-      adaptation( solution );
+      adaptation( );
     // initialize solution for new grid
     solution.initialize( model.problem() );
   }
@@ -187,7 +187,7 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
 
     /* call adaptation algorithm */
     if( gridMarker.marked() )
-      adaptation( solution );
+      adaptation( );
 
     {
       const size_t maxDofsPerElem = (elements > 0) ? (solution.size()/elements) : 0;
