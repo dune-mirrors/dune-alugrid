@@ -94,7 +94,7 @@ namespace Dune
     template< int codim >
     struct InsertEntity
     {
-      static void apply ( const typename GridImp::template Codim< 0 >::Entity &entity,
+      static void apply ( const typename GridType::template Codim< 0 >::Entity &entity,
                           PersistentContainerVectorType &indexContainer,
                           std::vector< int > &sizes )
       {
