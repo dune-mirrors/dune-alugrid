@@ -1,0 +1,145 @@
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+elements = 7317143 (114057,114789,1.00642)   maxLevel = 3   step = 12   time = 0.108   dt = 0.009
+elements = 7208041 (112335,112870,1.00476)   maxLevel = 3   step = 23   time = 0.207   dt = 0.009
+elements = 7160938 (111485,112501,1.00911)   maxLevel = 3   step = 34   time = 0.306   dt = 0.009
+elements = 7319670 (113902,114688,1.0069)   maxLevel = 3   step = 45   time = 0.405   dt = 0.009
+elements = 7061685 (110038,110666,1.00571)   maxLevel = 3   step = 56   time = 0.504   dt = 0.009
+elements = 7317220 (114076,114703,1.0055)   maxLevel = 3   step = 67   time = 0.603   dt = 0.009
+elements = 7202427 (112259,112790,1.00473)   maxLevel = 3   step = 78   time = 0.702   dt = 0.009
+elements = 7125021 (110989,111691,1.00632)   maxLevel = 3   step = 89   time = 0.801   dt = 0.009
+elements = 7308925 (113799,114550,1.0066)   maxLevel = 3   step = 100   time = 0.9   dt = 0.009
+elements = 7046880 (109782,110466,1.00623)   maxLevel = 3   step = 112   time = 1.008   dt = 0.009
+U2 max: 88.44  min: 67.68
+U3 max: 0.02  min: 0
+U4 max: 9.4  min: 8.61
+U5 max: 16.25  min: 10.16
+U6 max: 0.01  min: 0
+U7 max: 63.75  min: 42.79
+U8 max: 99.63  min: 78.9
+Program finished: CPU time = 275.735 sec.
+Job  /ncar/opt/lsf/8.3/linux2.6-glibc2.3-x86_64/bin/poejob ./main_ball 4 0 3 none
+
+TID   HOST_NAME   COMMAND_LINE            STATUS            TERMINATION_TIME
+===== ========== ================  =======================  ===================
+00048 ys6045-ib  ./main_ball 4 0   Done                     05/15/2013 17:19:01
+00049 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00052 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00053 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00054 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00055 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00056 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00057 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00058 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00060 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00059 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00061 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00062 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00063 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00050 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00051 ys6045-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00032 ys6034-ib  ./main_ball 4 0   Done                     05/15/2013 17:19:02
+00033 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00034 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00035 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00036 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00037 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00038 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00040 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00039 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00041 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00042 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00043 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00044 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00045 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00046 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00047 ys6034-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00016 ys3369-ib  ./main_ball 4 0   Done                     05/15/2013 17:19:02
+00017 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00018 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00020 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00019 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00021 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00022 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00023 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00024 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00025 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00026 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00027 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00028 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00030 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00029 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00031 ys3369-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00000 ys3368-ib  ./main_ball 4 0   Done                     05/15/2013 17:19:02
+00005 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00006 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00007 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00001 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00002 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00014 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00003 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00015 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00004 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00008 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00009 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00010 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00011 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:01
+00012 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+00013 ys3368-ib   ./main_ball 4 0  Done                     05/15/2013 17:19:02
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys3368-ib>
+Subject: Job 662782: <mb.64> Done
+
+Job <mb.64> was submitted from host <yslogin5-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys3368-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys3369-ib>
+                            <16*ys6034-ib>
+                            <16*ys6045-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples> was used as the working directory.
+Started at Wed May 15 17:14:18 2013
+Results reported at Wed May 15 17:19:06 2013
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:30               # wall-clock time (hrs:mins)
+#BSUB -n 64              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.64            # job name
+#BSUB -o ./out/mb.64.%J.out  # output file name 
+#BSUB -e ./err/mb.64.%J.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+mpirun.lsf ./main_ball 4 0 3 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time   :  17710.62 sec.
+    Max Memory :       151 MB
+    Max Swap   :      1133 MB
+
+    Max Processes  :         7
+    Max Threads    :        21
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./err/mb.64.662782.err> for stderr output of this job.
+

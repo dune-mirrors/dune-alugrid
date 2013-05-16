@@ -1,0 +1,213 @@
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 1
+elements = 7284432 (53070,60570,1.14132)   maxLevel = 4   step = 12   time = 0.108   dt = 0.009
+elements = 7182771 (52075,59887,1.15001)   maxLevel = 4   step = 23   time = 0.207   dt = 0.009
+elements = 7141758 (52321,59683,1.14071)   maxLevel = 4   step = 34   time = 0.306   dt = 0.009
+elements = 7328987 (53591,61208,1.14213)   maxLevel = 4   step = 45   time = 0.405   dt = 0.009
+elements = 7078142 (51468,58683,1.14018)   maxLevel = 4   step = 56   time = 0.504   dt = 0.009
+elements = 7314847 (53572,60832,1.13552)   maxLevel = 4   step = 67   time = 0.603   dt = 0.009
+elements = 7208937 (53057,60040,1.13161)   maxLevel = 4   step = 78   time = 0.702   dt = 0.009
+elements = 7105239 (52169,59365,1.13794)   maxLevel = 4   step = 89   time = 0.801   dt = 0.009
+elements = 7274786 (53017,60568,1.14243)   maxLevel = 4   step = 100   time = 0.9   dt = 0.009
+elements = 7009892 (51217,57746,1.12748)   maxLevel = 4   step = 112   time = 1.008   dt = 0.009
+U2 max: 24.78  min: 11.65
+U3 max: 0.04  min: 0
+U4 max: 2.11  min: 1.44
+U5 max: 7.02  min: 3.87
+U6 max: 0.01  min: 0
+U7 max: 28.08  min: 14.94
+U8 max: 27.85  min: 14.44
+Program finished: CPU time = 103.844 sec.
+Job  /ncar/opt/lsf/8.3/linux2.6-glibc2.3-x86_64/bin/poejob ./main_ball 3 1 4 none
+
+TID   HOST_NAME   COMMAND_LINE            STATUS            TERMINATION_TIME
+===== ========== ================  =======================  ===================
+00112 ys3920-ib  ./main_ball 3 1   Done                     05/15/2013 15:34:04
+00113 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00114 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00115 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00116 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00117 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00119 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00124 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00125 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00126 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00127 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00118 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00120 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00121 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00122 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00123 ys3920-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00096 ys3919-ib  ./main_ball 3 1   Done                     05/15/2013 15:34:04
+00105 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00107 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00108 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00111 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00097 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00098 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00099 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00100 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00101 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00102 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00103 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00104 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00106 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00110 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00109 ys3919-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00080 ys3918-ib  ./main_ball 3 1   Done                     05/15/2013 15:34:04
+00081 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00082 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00083 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00084 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00085 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00090 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00089 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00091 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00092 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00093 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00094 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00095 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00086 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00087 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00088 ys3918-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00064 ys3917-ib  ./main_ball 3 1   Done                     05/15/2013 15:34:04
+00071 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00072 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00073 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00074 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00075 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00076 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00077 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00078 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00079 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00065 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00066 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00067 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00068 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00070 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00069 ys3917-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00048 ys3916-ib  ./main_ball 3 1   Done                     05/15/2013 15:34:04
+00056 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00057 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00058 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00060 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00051 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00052 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00053 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00054 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00055 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00059 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00061 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00062 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00063 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00050 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00049 ys3916-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00032 ys2655-ib  ./main_ball 3 1   Done                     05/15/2013 15:34:04
+00033 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00034 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00036 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00038 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00035 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00037 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00040 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00039 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00041 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00042 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00043 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00044 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00045 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00046 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00047 ys2655-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00016 ys2653-ib  ./main_ball 3 1   Done                     05/15/2013 15:34:04
+00018 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00019 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00017 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00020 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00021 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00022 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00023 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00024 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00025 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00026 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00027 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00028 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00030 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00029 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00031 ys2653-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00000 ys2652-ib  ./main_ball 3 1   Done                     05/15/2013 15:34:04
+00014 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00003 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00015 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00004 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00005 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00006 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00007 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00008 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00009 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00010 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00011 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00012 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00001 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00013 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+00002 ys2652-ib   ./main_ball 3 1  Done                     05/15/2013 15:34:04
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys2652-ib>
+Subject: Job 662192: <mb.128> Done
+
+Job <mb.128> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys2652-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys2653-ib>
+                            <16*ys2655-ib>
+                            <16*ys3916-ib>
+                            <16*ys3917-ib>
+                            <16*ys3918-ib>
+                            <16*ys3919-ib>
+                            <16*ys3920-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples> was used as the working directory.
+Started at Wed May 15 15:32:12 2013
+Results reported at Wed May 15 15:34:08 2013
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:10               # wall-clock time (hrs:mins)
+#BSUB -n 128              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.128            # job name
+#BSUB -o ./out/mb.128.%J.out  # output file name 
+#BSUB -e ./err/mb.128.%J.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+mpirun.lsf ./main_ball 3 1 4 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time   :  13357.81 sec.
+    Max Memory :       152 MB
+    Max Swap   :      1407 MB
+
+    Max Processes  :         7
+    Max Threads    :        29
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./err/mb.128.662192.err> for stderr output of this job.
+
