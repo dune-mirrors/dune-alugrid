@@ -1,0 +1,28 @@
+# Procs = 4096 * 1 (MPI * threads)
+# Comm: standard
+# Timesteps = 112
+# Max DoFs (per element): 1010
+# Elements / timestep: sum    max    min    average  
+7.2303e+06  3017.4  644.054  1765
+# SOLVE     COMM     ADAPT    LB      TIMESTEP   RUSAGE  ALUGRID
+#########################################
+# Aver (time of all timesteps in ms)
+21  1329625  5528592  15619443  24099438  37567983409  598214441  
+# Max (time of all timesteps in ms)
+1765  1579628  6223183  15969200  24497394  42355428102  1026628973  
+# Min (time of all timesteps in ms)
+0  753637  5270116  15256168  23736703  28573121199  248861090  
+#########################################
+# Aver (average time / timestep in ms)
+0  11871  49362  139459  215173  335428423  5341200  
+# Max (average time / timestep in ms)
+15  14103  55564  142582  218726  378173465  9166330  
+# Min (average time / timestep in ms)
+0  6728  47054  136215  211934  255117153  2221974  
+#########################################
+# Aver ( average time / timestep / element in sec )
+1.11143e-07  0.00672535  0.0279641  0.0790044  0.121897  190.022  3.02582  
+# Max ( average time / timestep / element in sec )
+8.92857e-06  0.00798988  0.0314773  0.0807735  0.12391  214.237  5.19277  
+# Min ( average time / timestep / element in sec )
+0  0.00381196  0.0266567  0.0771669  0.120062  144.525  1.25876  

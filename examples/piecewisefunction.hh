@@ -314,17 +314,12 @@ inline void PiecewiseFunction< View, Range >
   LocalDofVector &fatherValue = localDofs[ father ];
 
   double volume = 0;
+  // reset fatherValue to zero 
+  fatherValue = 0;
 
   const int childLevel = father.level() + 1;
   const HierarchicIterator hend = father.hend( childLevel );
-  HierarchicIterator hit = father.hbegin( childLevel );
-  const Entity &child = *hit;
-  const double childVolume = child.geometry().volume();
-  fatherValue = clocalDofs[ child ];
-  fatherValue *= childVolume;
-  volume += childVolume;
-  ++hit;
-  for( ; hit != hend; ++hit )
+  for( HierarchicIterator hit = father.hbegin( childLevel ) ; hit != hend; ++hit )
   {
     const Entity &child = *hit;
     const double childVolume = child.geometry().volume();

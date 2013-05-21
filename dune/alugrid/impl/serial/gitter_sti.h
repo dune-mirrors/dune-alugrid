@@ -256,6 +256,12 @@ namespace ALUGrid
   class Gitter
   {
   public:
+#ifdef STORE_LINKAGE_IN_VERTICES
+    static const bool storeLinkageInVertices = true ;
+#else
+    static const bool storeLinkageInVertices = false ;
+#endif
+
     class helement;
     class hbndseg;
 

@@ -86,7 +86,7 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
   }
 
   /* create adaptation method */
-  typedef LeafAdaptation< Grid > AdaptationType;
+  typedef LeafAdaptation< Grid, DataType > AdaptationType;
   AdaptationType adaptation( grid, model.problem().balanceStep() );
 
   for( int i = 0; i <= maxLevel; ++i )

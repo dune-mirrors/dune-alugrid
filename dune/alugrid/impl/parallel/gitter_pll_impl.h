@@ -62,18 +62,20 @@ namespace ALUGrid
       static const linkagePattern_t nullPattern;
       linkagePatternMap_t::iterator _lpn;
       moveto_t*  _moveTo;
+
 #ifdef STORE_LINKAGE_IN_VERTICES
       typedef std::set< int > :: iterator set_iterator ;
       std::set< int > _elements ;
+
     public:  
       virtual bool addGraphVertexIndex( const int ldbVxIndex ) 
       {
         _elements.insert( ldbVxIndex );
         return true ;
       }
-
       virtual const std::set<int>& linkedElements () const { return _elements; }
-#endif
+#endif // STORE_LINKAGE_IN_VERTICES
+
   };
 
   template < class A > 
