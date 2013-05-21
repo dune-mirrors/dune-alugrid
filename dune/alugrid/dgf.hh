@@ -18,6 +18,43 @@ namespace Dune
 
   // DGFGridInfo (specialization for ALUGrid)
   // ----------------------------------------
+  namespace
+  {
+    class VertexIndexBlock
+    : public dgf::BasicBlock
+    {
+      unsigned int nofvtx;
+      bool goodline;       
+
+    public:
+      VertexIndexBlock ( std :: istream &in )
+      : dgf::BasicBlock( in, "GlobalVertexIndex" ),
+        goodline( true )
+      {}
+
+      bool next ( int &index )
+      {
+        assert( ok() );
+        if( !getnextline() )
+          return (goodline = false);
+
+        if( !getnextentry( index ) )
+        {
+          DUNE_THROW ( DGFException, "Error in " << *this << ": "
+                                     << "Wrong global vertex indices " );
+        }
+        return (goodline = true);
+      }
+
+      // some information
+      bool ok ()
+      {
+        return goodline;
+      }
+    };
+
+  } // end empty namespace 
+
 
   template<int dimg, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
   struct DGFGridInfo< Dune::ALUGrid< dimg, dimw, eltype, refinementtype, Comm > >
@@ -390,7 +427,10 @@ namespace Dune
 
     typedef FieldVector< typename DGFGridType :: ctype, dimworld > CoordinateType ;
 
-    if( rank == 0 )
+    VertexIndexBlock vertexIndex( file );
+    std::cout << "dgf: " << rank << " " << vertexIndex.isactive() << std::endl;
+
+    if( rank == 0 || vertexIndex.isactive() )
     {
       if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
@@ -405,7 +445,16 @@ namespace Dune
         CoordinateType pos;
         for( int i = 0; i < dimworld; ++i )
           pos[ i ] = dgf_.vtx[ n ][ i ];
-        factory_.insertVertex( pos );
+        if ( !vertexIndex.isactive() )
+          factory_.insertVertex( pos );
+        else
+        {
+          int globalIndex;
+          bool ok = vertexIndex.next(globalIndex);
+          if (!ok)
+            DUNE_THROW( DGFException, "Not enough values in GlobalVertexIndex block" );
+          factory_.insertVertex( pos, globalIndex );
+        }
       }
 
       GeometryType elementType( (eltype == simplex) ? 

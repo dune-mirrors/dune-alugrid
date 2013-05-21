@@ -14,7 +14,12 @@ headercheck_IGNORE = loadbalance_inline.hh
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
-check_PROGRAMS = main_simple main_zoltan
+check_PROGRAMS = main_simple main_zoltan partition
+
+partition_SOURCES = partition.cc
+partition_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_ZOLTANLB
+partition_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+partition_LDADD = $(LDADD) $(DUNEMPILIBS)
 
 main_simple_SOURCES = main.cc
 main_simple_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) 
