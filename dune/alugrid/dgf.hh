@@ -428,7 +428,6 @@ namespace Dune
     typedef FieldVector< typename DGFGridType :: ctype, dimworld > CoordinateType ;
 
     VertexIndexBlock vertexIndex( file );
-    std::cout << "dgf: " << rank << " " << vertexIndex.isactive() << std::endl;
 
     if( rank == 0 || vertexIndex.isactive() )
     {
