@@ -20,14 +20,14 @@ namespace Dune
   // ----------------------------------------
   namespace
   {
-    class VertexIndexBlock
+    class GlobalVertexIndexBlock
     : public dgf::BasicBlock
     {
       unsigned int nofvtx;
       bool goodline;       
 
     public:
-      VertexIndexBlock ( std :: istream &in )
+      GlobalVertexIndexBlock ( std :: istream &in )
       : dgf::BasicBlock( in, "GlobalVertexIndex" ),
         goodline( true )
       {}
@@ -39,6 +39,38 @@ namespace Dune
           return (goodline = false);
 
         if( !getnextentry( index ) )
+        {
+          DUNE_THROW ( DGFException, "Error in " << *this << ": "
+                                     << "Wrong global vertex indices " );
+        }
+        return (goodline = true);
+      }
+
+      // some information
+      bool ok ()
+      {
+        return goodline;
+      }
+    };
+    class ALUParallelBlock
+    : public dgf::BasicBlock
+    {
+      unsigned int nofvtx;
+      bool goodline;       
+
+    public:
+      ALUParallelBlock ( std :: istream &in )
+      : dgf::BasicBlock( in, "ALUParallel" ),
+        goodline( true )
+      {}
+
+      bool next ( std::string &name )
+      {
+        assert( ok() );
+        if( !getnextline() )
+          return (goodline = false);
+
+        if( !getnextentry( name ) )
         {
           DUNE_THROW ( DGFException, "Error in " << *this << ": "
                                      << "Wrong global vertex indices " );
@@ -427,9 +459,27 @@ namespace Dune
 
     typedef FieldVector< typename DGFGridType :: ctype, dimworld > CoordinateType ;
 
-    VertexIndexBlock vertexIndex( file );
+    ALUParallelBlock aluParallelBlock( file );
+    const bool readFromParallelDGF = aluParallelBlock.isactive();
+    bool parallelFileExists = false;
 
-    if( rank == 0 || vertexIndex.isactive() )
+    std::string newfilename;
+    if (readFromParallelDGF)
+    {
+      bool ok = true;
+      for (int p=0;p<=rank && ok;++p)
+        ok = aluParallelBlock.next(newfilename);
+      if (ok)
+      {
+        parallelFileExists = true;
+        std::ifstream newfile(newfilename.c_str());
+        return generateALUGrid(eltype,newfile,communicator,filename);
+      }
+    }
+
+    GlobalVertexIndexBlock vertexIndex( file );
+    const bool globalVertexIndexFound = vertexIndex.isactive();
+    if( rank == 0 || globalVertexIndexFound )
     {
       if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
@@ -439,12 +489,13 @@ namespace Dune
         dgf_.setOrientation( 2, 3 );
       }
 
+      assert( !parallelFileExists || globalVertexIndexFound );
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
         CoordinateType pos;
         for( int i = 0; i < dimworld; ++i )
           pos[ i ] = dgf_.vtx[ n ][ i ];
-        if ( !vertexIndex.isactive() )
+        if ( !globalVertexIndexFound )
           factory_.insertVertex( pos );
         else
         {

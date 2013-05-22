@@ -106,9 +106,7 @@ namespace Dune
     // return grid object 
     virtual Grid* createGridObj( BoundaryProjectionVector* bndProjections, const std::string& name ) const
     {
-      return ( allowGridGeneration_ ) ?
-              new Grid( communicator_, globalProjection_, bndProjections , name, realGrid_ ) :
-              new Grid( communicator_ );
+      return new Grid( communicator_, globalProjection_, bndProjections , name, realGrid_ );
     }
 
   public:

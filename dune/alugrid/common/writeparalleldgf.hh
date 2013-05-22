@@ -64,7 +64,11 @@ public:
    *  \param[in] fileName  name of the write to write the grid to
    */
   template <class LoadBalanceHandle>
-  void write ( const std::string &fileName, const LoadBalanceHandle &ldb, const int process ) const;
+  std::string write ( const std::string &fileName, const LoadBalanceHandle &ldb, 
+                      const int size, const int rank ) const;
+  template <class LoadBalanceHandle>
+  void write ( const std::string &fileName, const LoadBalanceHandle &ldb, 
+               const int size ) const;
 
 protected:  
   GridView gridView_;
@@ -99,10 +103,10 @@ protected:
 
 template <class GV>
 template <class LoadBalanceHandle>
-inline void DGFWriter< GV >::write ( const std::string &fileName, const LoadBalanceHandle &ldb, const int process ) const
+inline std::string DGFWriter< GV >::write ( const std::string &fileName, const LoadBalanceHandle &ldb, const int size, const int rank ) const
 {
   std::stringstream newName;
-  newName << fileName << "." << process;
+  newName << fileName << "." << size << "." << rank;
   std::ofstream gridout( newName.str().c_str() );
   // set the stream to full double precision
   gridout.setf( std::ios_base::scientific, std::ios_base::floatfield );
@@ -132,7 +136,7 @@ inline void DGFWriter< GV >::write ( const std::string &fileName, const LoadBala
     for( ; it != end; ++it)
     {
       const Element& element = *it ;
-      if( ldb.destination(element)==process ) // test if element is assigned to this process
+      if( ldb.destination(element)==rank ) // test if element is assigned to this process
       {
         // push element into seed vector
         elementSeeds.push_back( element.seed() ) ;
@@ -263,6 +267,23 @@ inline void DGFWriter< GV >::write ( const std::string &fileName, const LoadBala
     }
   }
   gridout << "#" << std::endl << std::endl;
+  return newName.str();
 }
-
+template <class GV>
+template <class LoadBalanceHandle>
+inline void DGFWriter< GV >::write ( const std::string &fileName, const LoadBalanceHandle &ldb, const int size ) const
+{
+  std::stringstream newName;
+  newName << fileName << "." << size;
+  std::ofstream gridout( newName.str().c_str() );
+  gridout << "DGF" << std::endl;
+  const IndexSet &indexSet = gridView_.indexSet();
+  gridout << "%" << " Elements = " << indexSet.size( 0 ) << "  |  Vertices = " << indexSet.size(dimGrid) << std::endl;
+  gridout << "ALUPARALLEL" << std::endl;
+  for (int p=0;p<size;++p)
+  {
+    gridout << write(fileName,ldb,size,p) << std::endl;
+  }
+  gridout << "#" << std::endl;
+}
 #endif // #ifndef DUNE_DGFWRITER_HH

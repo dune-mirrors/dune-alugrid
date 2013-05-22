@@ -9,9 +9,10 @@
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
 
+#include <dune/alugrid/common/writeparalleldgf.hh>
+
 #include "../piecewisefunction.hh"
 #include "loadbalance.hh"
-#include "writedgf.hh"
 
 template <class Grid>
 struct AssignRank
@@ -72,8 +73,7 @@ void partition ( const std::string name, int level )
   if (grid.comm().rank() == 0)
   {
     DGFWriter<GridView> writer(grid.leafView());
-    for (int q=0;q<grid.comm().size();q++)
-      writer.write(name,ldb,q);
+    writer.write(name,ldb,grid.comm().size());
   }
 }
 
@@ -85,6 +85,7 @@ void method ( const std::string name, const char *outpath )
   Grid* gridPtr = Dune::GridPtr<Grid>(name).release() ;
 
   Grid &grid = *gridPtr;
+  grid.loadBalance();
 
   std::string outPath( outpath );
   const bool writeOutput = ( outPath != "none" ) ;
@@ -128,25 +129,31 @@ try
   }
 #endif
 
-  if( argc < 2 )
+  if( argc < 3 )
   {
     /* display usage */
     if( mpi.rank() == 0 )
-      std::cout << "Usage: " << argv[ 0 ] << " [dgf file] [Level]" << std::endl;
+      std::cout << "Usage: " << argv[ 0 ] << " [partition] [dgf file] [Level]" << std::endl;
     return 0;
   }
 
   /* get level to use for computationa */
-  const char* filename = argv[ 1 ];
-  const int level = (argc > 2 ? atoi( argv[ 1 ] ) : 0);
-  const char* path = (argc > 3) ? argv[ 3 ] : "./";
+  const bool doPartition = atoi(argv[1]);
+  const char* filename = argv[ 2 ];
+  const int level = (argc > 3 ? atoi( argv[ 3 ] ) : 0);
+  const char* path = (argc > 4 ) ? argv[ 4 ] : "./";
 
-  partition( filename, level );
-
-  mpi.getCollectiveCommunication().barrier();
+  if (doPartition)
+  {
+    partition( filename, level );
+    mpi.getCollectiveCommunication().barrier();
+  }
 
   std::stringstream newName;
-  newName << filename << "." << mpi.rank();
+  if (argc > 3)
+    newName << filename << "." << level;
+  else
+    newName << filename << "." << mpi.size();
   method( newName.str(), path );
 
   /* done */
