@@ -171,7 +171,7 @@ namespace Dune
     createCubeGrid( const std::string& filename,  
                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )       
     {
-      std::ifstream file( filename );
+      std::ifstream file( filename.c_str() );
       if( ! file ) 
       {
         DUNE_THROW(InvalidStateException,"file not found " << filename );
