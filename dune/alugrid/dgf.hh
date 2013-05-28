@@ -16,10 +16,12 @@
 namespace Dune
 {
 
-  // DGFGridInfo (specialization for ALUGrid)
-  // ----------------------------------------
   namespace
   {
+
+    // GlobalVertexIndexBlock
+    // ----------------------
+
     class GlobalVertexIndexBlock
     : public dgf::BasicBlock
     {
@@ -52,6 +54,12 @@ namespace Dune
         return goodline;
       }
     };
+
+
+
+    // ALUParallelBlock
+    // ----------------
+
     class ALUParallelBlock
     : public dgf::BasicBlock
     {
@@ -87,6 +95,10 @@ namespace Dune
 
   } // end empty namespace 
 
+
+
+  // DGFGridInfo (specialization for ALUGrid)
+  // ----------------------------------------
 
   template<int dimg, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
   struct DGFGridInfo< Dune::ALUGrid< dimg, dimw, eltype, refinementtype, Comm > >
@@ -357,7 +369,7 @@ namespace Dune
       input.clear();
       input.seekg( 0 );
       if( !input )
-        DUNE_THROW(DGFException, "Error resetting input stream." );
+        DUNE_THROW( DGFException, "Error resetting input stream." );
       generate( input, comm );
     }
 
@@ -489,7 +501,9 @@ namespace Dune
         dgf_.setOrientation( 2, 3 );
       }
 
-      assert( !parallelFileExists || globalVertexIndexFound );
+      if( parallelFileExists && !globalVertexIndexFound )
+        DUNE_THROW( DGFException, "Parallel DGF file requires GLOBALVERTEXINDEX block." );
+
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
         CoordinateType pos;
