@@ -617,7 +617,7 @@ namespace ALUGrid
     {
       const bool fillPartitionVector = partition.size() > 0 ;
       // call sfc partitioning that changes _vertexSet and _connect and also compute graph sizes 
-      const bool change = ALUGridMETIS::CALL_spaceFillingCurve( mpa, _vertexSet, _connect, _graphSizes, fillPartitionVector );
+      const bool change = ALUGridMETIS::CALL_spaceFillingCurve( mpa, np, _vertexSet, _connect, _graphSizes, fillPartitionVector );
 
       // if partition vector is given fill it with the calculated partitioning 
       if( fillPartitionVector ) 

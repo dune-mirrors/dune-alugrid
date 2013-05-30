@@ -11,13 +11,12 @@ namespace ALUGridMETIS
   // Bresenham line drawing algorithm to partition the space filling curve
   template< class vertexmap_t, class connect_t, class vec_t >
   bool CALL_spaceFillingCurve(const ALUGrid::MpAccessGlobal& mpa, // communicator
+                              const int numProcs,                 // number of partitions 
                               vertexmap_t& vertexMap,             // the space filling curve
                               connect_t&   connect,               // connectivity set
                               vec_t& graphSizes,                  // graph sizes to be communicated
                               const bool keepMapEntries )         // true if vertex entries should no be deleted 
   {
-    // get number of partitions 
-    const int numProcs = mpa.psize();
     // my rank 
     const int me = mpa.myrank();
 
