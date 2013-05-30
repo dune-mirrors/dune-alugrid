@@ -13,7 +13,8 @@ namespace ALUGridMETIS
   bool CALL_spaceFillingCurve(const ALUGrid::MpAccessGlobal& mpa, // communicator
                               vertexmap_t& vertexMap,             // the space filling curve
                               connect_t&   connect,               // connectivity set
-                              vec_t& graphSizes )                 // graph sizes to be communicated 
+                              vec_t& graphSizes,                  // graph sizes to be communicated
+                              const bool keepMapEntries )         // true if vertex entries should no be deleted 
   {
     // get number of partitions 
     const int numProcs = mpa.psize();
@@ -34,7 +35,7 @@ namespace ALUGridMETIS
 
     // clear map only when storeLinkageInVertices is not enabled 
     // since the vertices are still needed in that situation 
-    const bool clearMap = ! ALUGrid :: Gitter :: storeLinkageInVertices ;
+    const bool clearMap = ! ALUGrid :: Gitter :: storeLinkageInVertices && ! keepMapEntries ;
 
     const bool graphSizeCalculation = graphSizes.size() > 0 ;
     const int sizeOfVertexData = ALUGrid::LoadBalancer::GraphVertex::sizeOfData ;

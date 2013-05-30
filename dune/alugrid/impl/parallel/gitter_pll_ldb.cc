@@ -615,12 +615,23 @@ namespace ALUGrid
     // ALUGrid own space filling curve partitioning 
     if( mth == ALUGRID_SpaceFillingCurve ) 
     {
-      //std::cout << "Before " << std::endl;
-      //printVertexSet();
-
-      //std::cout << "call SFC " << std::endl;
+      const bool fillPartitionVector = partition.size() > 0 ;
       // call sfc partitioning that changes _vertexSet and _connect and also compute graph sizes 
-      return ALUGridMETIS::CALL_spaceFillingCurve( mpa, _vertexSet, _connect, _graphSizes );
+      const bool change = ALUGridMETIS::CALL_spaceFillingCurve( mpa, _vertexSet, _connect, _graphSizes, fillPartitionVector );
+
+      // if partition vector is given fill it with the calculated partitioning 
+      if( fillPartitionVector ) 
+      { 
+        partition.resize( _vertexSet.size() );
+        typedef typename ldb_vertex_map_t :: iterator   iterator ;
+        const iterator end = _vertexSet.end() ;
+        int pos = 0;
+        for( iterator it = _vertexSet.begin(); it != end; ++it, ++pos ) 
+        {
+          partition[ pos ] = (*it).second ;
+        }
+      }
+      return change ;
     }
     else  // this is the METIS section 
     { 
