@@ -612,10 +612,12 @@ namespace ALUGrid
       clearGraphSizesVector ();
     }
 
+    // true if partition vector should be filled appropriately 
+    const bool fillPartitionVector = partition.size() > 0 ;
+
     // ALUGrid own space filling curve partitioning 
     if( mth == ALUGRID_SpaceFillingCurve ) 
     {
-      const bool fillPartitionVector = partition.size() > 0 ;
       // call sfc partitioning that changes _vertexSet and _connect and also compute graph sizes 
       const bool change = ALUGridMETIS::CALL_spaceFillingCurve( mpa, np, _vertexSet, _connect, _graphSizes, fillPartitionVector );
 
@@ -809,7 +811,7 @@ namespace ALUGrid
 
           // only do the following for serialPartitioners and 
           // if we really have a graph much larger then partition number 
-          if( serialPartitioner && ( nel > 3*np ) ) 
+          if( serialPartitioner && ( nel > 3*np ) && ! fillPartitionVector ) 
           {
             // collectInsulatedNodes () sucht alle isolierten Knoten im Graphen und klebt
             // diese einfach mit dem Nachbarknoten "uber die Kante mit dem gr"ossten Gewicht
@@ -830,7 +832,7 @@ namespace ALUGrid
           change = (serialPartitioner ? ! std::equal (neu, neu + nel, part) : true);
 
           // if partition vector is given fill it with the calculated partitioning 
-          if( partition.size() > 0 ) 
+          if( fillPartitionVector ) 
           { 
             partition.resize( nel );
             std::copy( neu, neu + nel, partition.begin() );
