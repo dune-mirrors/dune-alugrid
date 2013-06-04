@@ -625,7 +625,7 @@ namespace ALUGrid
       if( fillPartitionVector ) 
       { 
         partition.resize( _vertexSet.size() );
-        typedef typename ldb_vertex_map_t :: iterator   iterator ;
+        typedef ldb_vertex_map_t :: iterator   iterator ;
         const iterator end = _vertexSet.end() ;
         int pos = 0;
         for( iterator it = _vertexSet.begin(); it != end; ++it, ++pos ) 
