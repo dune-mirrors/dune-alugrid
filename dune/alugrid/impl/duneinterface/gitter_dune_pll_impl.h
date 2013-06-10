@@ -168,7 +168,12 @@ namespace ALUGrid
     template< class istream_t >
     void duneRestore ( istream_t &is )
     {
+      // restore grid hierarchy 
       GitterDuneBasis::duneRestore( is );
+
+      // exchange dynamic state after restore 
+      // (i.e. ghost information, since grid has changed after restore)
+      GitterPll::exchangeDynamicState();
     }
     
     // write grid to vtk file 

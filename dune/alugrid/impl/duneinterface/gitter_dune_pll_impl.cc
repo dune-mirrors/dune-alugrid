@@ -1275,10 +1275,8 @@ namespace ALUGrid
     } 
     else 
     {
-      restore(in);
+      duneRestore( in );
     }
-
-    return;
   }
 
   void GitterDunePll::tovtk ( const std::string &fn ) 
