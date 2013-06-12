@@ -451,9 +451,6 @@ namespace Dune
       const bool changed = grid.myGrid().duneLoadBalance();
       if( changed )
       {
-        // some exchanges on ALUGrid side 
-        grid.myGrid().duneExchangeDynamicState();
-
         // calculate new maxlevel 
         // reset size and things  
         grid.updateStatus();
@@ -500,9 +497,6 @@ namespace Dune
 
       if( changed )
       {
-        // exchange some data for internal useage
-        grid.myGrid().duneExchangeDynamicState();
-
         // calculate new maxlevel 
         // reset size and things  
         grid.updateStatus();

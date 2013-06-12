@@ -307,8 +307,8 @@ int main (int argc, char ** argv, const char ** envp)
 
 #if HAVE_MPI
       gridPtr->duneLoadBalance();
-      if( ! closure ) 
-        gridPtr = ALUGrid::GitterDunePll::compress( gridPtr );
+      //if( ! closure ) 
+      //  gridPtr = ALUGrid::GitterDunePll::compress( gridPtr );
       ALUGrid::GitterDunePll& grid = *gridPtr ;
 #else
       ALUGrid::GitterDuneImpl& grid = *gridPtr ;

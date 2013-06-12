@@ -1257,8 +1257,6 @@ namespace ALUGrid
     alugrid_assert ( (this->indexManager(BuilderIF::IM_Elements).getMaxIndex() != maxIndexBefore) ?
         (std::cout << maxIndexBefore << " vor | nach " << this->indexManager(BuilderIF::IM_Elements).getMaxIndex() << "\n",0) : 1);
 
-    duneNotifyGridChanges ();
-    return;
   }
 
   void GitterDunePll::duneRestore ( const char *fileName )

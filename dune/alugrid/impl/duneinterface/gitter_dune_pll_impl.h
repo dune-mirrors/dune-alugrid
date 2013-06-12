@@ -47,7 +47,7 @@ namespace ALUGrid
 #ifdef ALUGRIDDEBUG
       __STATIC_myrank = mp.myrank(); 
 #endif
-      // if grid is created from backup, then restore ghost cells 
+      // build ghost cells after the macro grid has been assembled 
       rebuildGhostCells();
     }
 
@@ -59,7 +59,7 @@ namespace ALUGrid
 #ifdef ALUGRIDDEBUG
       __STATIC_myrank = mp.myrank(); 
 #endif
-      // if grid is created from backup, then restore ghost cells 
+      // build ghost cells after the macro grid has been assembled 
       rebuildGhostCells();
     }
 
@@ -71,7 +71,7 @@ namespace ALUGrid
 #ifdef ALUGRIDDEBUG
       __STATIC_myrank = mp.myrank(); 
 #endif
-      // if grid is created from backup, then restore ghost cells 
+      // build ghost cells after the macro grid has been assembled 
       rebuildGhostCells();
     }
 
@@ -99,12 +99,6 @@ namespace ALUGrid
 
     // notifyMacroGridChanges for dune
     void duneNotifyMacroGridChanges (); 
-    
-    // deprecated method, does nothing anymore but is needed for convenience 
-    void duneNotifyGridChanges () { } 
-    
-    // deprecated method, does nothing anymore but is needed for convenience 
-    void duneExchangeDynamicState () { }
     
     // communication of border data 
     void borderBorderCommunication (

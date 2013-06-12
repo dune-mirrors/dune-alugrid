@@ -933,11 +933,6 @@ namespace ALUGrid
     return (_inner) ? _inner->ed() : 0;
   }
 
-  //template < class A > inline const typename Hface4Top < A >::inneredge_t * 
-  //Hface4Top < A >::inEd () const {
-  //  return (_inner) ? _inner->ed() : 0;
-  //}
-
   template < class A > inline typename Hface4Top < A >::innervertex_t * 
   Hface4Top < A >::innerVertex () {
     return inVx();
