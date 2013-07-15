@@ -23,6 +23,117 @@ typedef ALUGrid::Gitter::hedge_STI     HEdgeType;    // Interface Element
 typedef ALUGrid::Gitter::vertex_STI    HVertexType;  // Interface Element
 typedef ALUGrid::Gitter::hbndseg       HGhostType;
 
+
+struct ExchangeBaryCenter : public ALUGrid::GatherScatter
+{
+  typedef ALUGrid::GatherScatter :: ObjectStreamType  ObjectStreamType;
+  typedef ALUGrid::Gitter::helement_STI  helement_STI;
+  typedef ALUGrid::Gitter::hface_STI     hface_STI;
+  typedef ALUGrid::Gitter::hbndseg       hbndseg;
+
+#if HAVE_MPI
+  typedef ALUGrid::GitterDunePll  GitterType ;
+#else
+  typedef ALUGrid::GitterDuneImpl GitterType ;
+#endif
+
+  ExchangeBaryCenter () {}
+
+  bool contains ( int dim, int codim ) const { return codim == 0; }
+
+
+  virtual bool containsItem(const helement_STI &elem ) const { return elem.isLeafEntity(); }
+  virtual bool containsItem(const HGhostType & ghost) const { return ghost.isLeafEntity(); }
+  virtual bool containsInterior (const hface_STI  & face , ALUGrid::ElementPllXIF_t & elif) const 
+  { 
+    return face.isInteriorLeaf();
+  }
+
+  void computeBaryCenter( const helement_STI& elem, double (&center)[3] ) const 
+  {
+    if( elem.type() == ALUGrid::tetra )
+    {
+      typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
+      // mark element for refinement 
+      tetra_IMPL& tetra = ((tetra_IMPL &) elem);
+      ALUGrid::LinearMapping::
+        barycenter(
+          tetra.myvertex (0)->Point (),
+          tetra.myvertex (1)->Point (),
+          tetra.myvertex (2)->Point (),
+          tetra.myvertex (3)->Point (),
+          center);
+    }
+    else 
+    {
+      typedef typename GitterType :: Objects :: hexa_IMPL hexa_IMPL ;
+      // mark element for refinement 
+      hexa_IMPL& hexa = ((hexa_IMPL &) elem);
+      ALUGrid::TrilinearMapping::
+        barycenter(
+          hexa.myvertex (0)->Point (),
+          hexa.myvertex (1)->Point (),
+          hexa.myvertex (2)->Point (),
+          hexa.myvertex (3)->Point (),
+          hexa.myvertex (4)->Point (),
+          hexa.myvertex (5)->Point (),
+          hexa.myvertex (6)->Point (),
+          hexa.myvertex (7)->Point (),
+          center);
+    }
+  }
+
+  void writeBaryCenter( ObjectStreamType & str, const helement_STI& elem ) const 
+  {
+    double center[ 3 ] = { 0 };
+    computeBaryCenter( elem, center );
+    for( int i=0; i<3; ++i ) 
+      str.write( center[ i ] );
+  }
+
+  void readBaryCenter( ObjectStreamType & str, const helement_STI& elem ) const 
+  {
+    double checkCenter[ 3 ] = { 0 };
+    computeBaryCenter( elem, checkCenter );
+    double center[ 3 ] = { 0 };
+    double sum = 0 ;
+    for( int i=0; i<3; ++i ) 
+    {
+      str.read( center[ i ] );
+      double diff = center[ i ] - checkCenter[ i ];
+      sum += (diff * diff);
+    }
+
+    std::cout << "Got   c = { " << center[ 0 ] << ", " << center[ 1 ] << ", " << center[ 2 ] << std::endl;
+    std::cout << "Check b = { " << checkCenter[ 0 ] << ", " << checkCenter[ 1 ] << ", " << checkCenter[ 2 ] << std::endl << std::endl;
+
+    if( sum > 1e-10 ) 
+    {
+      std::cerr << "ERROR: barycenter do not match!!!" << std::endl;
+    }
+  }
+
+  virtual void sendData ( ObjectStreamType & str , const helement_STI  & elem ) 
+  {
+    writeBaryCenter( str, elem );
+  }
+
+  virtual void recvData ( ObjectStreamType & str , hbndseg & ghost ) 
+  { 
+    helement_STI* elem = ghost.getGhost().first;
+    readBaryCenter( str, *elem );
+  }
+
+  // only needed for backward communication 
+  virtual void sendData ( ObjectStreamType & str , const hbndseg & elem ) { alugrid_assert (false); abort(); }
+  virtual void recvData ( ObjectStreamType & str , helement_STI  & elem ) { alugrid_assert (false); abort(); }
+
+  virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) {}
+  virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) {}
+};
+
+
+
 #if HAVE_MPI
 #warning RUNNING PARALLEL VERSION
 #endif
@@ -213,6 +324,10 @@ int main (int argc, char ** argv, const char ** envp)
 
     //grid.duneRestore( file );
     // adapt grid 
+    
+    ExchangeBaryCenter dataHandle ;
+    grid.interiorGhostCommunication( dataHandle, dataHandle, dataHandle, dataHandle );
+
 
     std::cout << "Grid restored!" << std::endl;
     grid.printsize();
