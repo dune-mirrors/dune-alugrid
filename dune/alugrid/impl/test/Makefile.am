@@ -36,3 +36,5 @@ backuprestore_LDADD = ${ZOLTAN_LIBS} ${PARMETIS_LIBS} ${METIS_LIB} $(DUNEMPILIBS
 include $(top_srcdir)/am/global-rules
 
 CXXFLAGS=-g 
+
+CLEANFILES=file.*
