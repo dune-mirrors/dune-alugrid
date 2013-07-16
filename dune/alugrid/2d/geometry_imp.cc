@@ -13,7 +13,21 @@ namespace Dune
 // --ALU2dGridGeometry
 // --Geometry
 //**********************************************************************
+//! return storage provider for geometry objects 
 
+template< int mydim, int cdim, class GridImp >
+inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GeometryProviderType&
+ALU2dGridGeometry< mydim, cdim, GridImp >::geoProvider()
+{
+#ifdef USE_SMP_PARALLEL
+    typedef ALUGridObjectFactory< GridImp >  GridObjectFactoryType;
+    static std::vector< GeometryProviderType > storage( GridObjectFactoryType :: maxThreads() );
+    return storage[ GridObjectFactoryType :: threadNumber () ];
+#else
+    static GeometryProviderType storage;
+    return storage;
+#endif
+}
 
 template< int mydim, int cdim, class GridImp >
 inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ()

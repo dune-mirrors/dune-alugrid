@@ -744,17 +744,7 @@ namespace Dune
     typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
 
     //! return storage provider for geometry objects 
-    static GeometryProviderType& geoProvider()
-    {
-#ifdef USE_SMP_PARALLEL
-      typedef ALUGridObjectFactory< GridImp >  GridObjectFactoryType;
-      static std::vector< GeometryProviderType > storage( GridObjectFactoryType :: maxThreads() );
-      return storage[ GridObjectFactoryType :: threadNumber () ];
-#else
-      static GeometryProviderType storage;
-      return storage;
-#endif
-    }
+    GeometryProviderType& geoProvider();
 
     // return reference to geometry implementation 
     GeometryImplType& geoImpl() const
@@ -779,7 +769,5 @@ namespace Dune
   }
 
 } // end namespace Dune
-
-#include "geometry_imp.cc"
 
 #endif // #ifndef DUNE_ALU2DGRIDGEOMETRY_HH

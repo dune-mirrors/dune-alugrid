@@ -753,6 +753,7 @@ namespace Dune
 
 #include "entity.hh"
 #include "geometry.hh"
+#include "geometry_imp.cc"
 #include <dune/alugrid/2d/intersection.hh>
 #include <dune/alugrid/2d/iterator.hh>
 
