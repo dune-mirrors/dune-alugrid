@@ -81,7 +81,7 @@ inline void ALU2dGridEntity<cd,dim,GridImp> :: removeElement() {
 template<int cd, int dim, class GridImp>
 inline ALU2dGridEntity<cd, dim, GridImp> :: 
 ALU2dGridEntity(const ALU2dGridEntity<cd,dim,GridImp> & org)
-  : factory_( org.factory_ ), 
+  : factory_( org.factory() ), 
     item_(org.item_),     
     level_(org.level_), 
     face_(org.face_)
@@ -151,7 +151,7 @@ ALU2dGridEntity(const FactoryType& factory, int level)
 template<int dim, class GridImp>
 inline ALU2dGridEntity<0, dim, GridImp> :: 
 ALU2dGridEntity(const ALU2dGridEntity<0,dim,GridImp> & org)
-  : factory_( org.factory_ ), 
+  : factory_( org.factory() ), 
     item_(org.item_), 
     isLeaf_(org.isLeaf_) 
 { 
@@ -197,7 +197,7 @@ template<int dim, class GridImp>
 inline typename ALU2dGridEntity<0, dim, GridImp> :: EntityPointer ALU2dGridEntity<0,dim,GridImp> :: father () const {
   // don't request for father on macro level
   alugrid_assert (level()>0);
-  return EntityPointer(factory_, *(item_->father()));  
+  return EntityPointer(factory(), *(item_->father()));  
 }
 
 template<int dim, class GridImp>
