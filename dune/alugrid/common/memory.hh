@@ -5,10 +5,6 @@
 #include <cstdlib>
 #include <vector>
 
-#if defined USE_PTHREADS || defined _OPENMP  
-#define USE_SMP_PARALLEL
-#endif
-
 #ifdef _OPENMP
 #include <omp.h>
 #endif

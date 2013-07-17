@@ -21,6 +21,9 @@ namespace Dune
 
     // count local geometry creation
     int count_;
+  
+    // true if geoms have been initialized 
+    bool initialized_;
 
     // type of grid impl 
     typedef typename GridImp :: ctype ctype; 
@@ -110,13 +113,35 @@ namespace Dune
   public:  
     // create empty storage
     ALULocalGeometryStorage ( const GeometryType type, const bool nonConform )
-    : count_( 0 )
+    : count_( 0 ), initialized_( true )
     {
       geoms_.fill( (GeometryImpl *) 0 );
-      // the idea is to create a grid containing the reference element,
-      // refine once and the store the father - child relations 
-      CreateGeometries<0, dimension, dimensionworld, GridImp :: elementType >
-        ::createGeometries(*this, type, nonConform);
+
+      initialize( type, nonConform );
+
+    }
+
+    // create empty storage
+    ALULocalGeometryStorage ()
+    : count_( 0 ), initialized_( false )
+    {
+      geoms_.fill( (GeometryImpl *) 0 );
+    }
+
+    //! initialize local geometries 
+    void initialize( const GeometryType type, const bool nonConform )
+    {
+      if( ! initialized_ ) 
+      {
+        // first set flag, because this method might be called again during 
+        // creation of local geometries 
+        initialized_ = true ;
+
+        // the idea is to create a grid containing the reference element,
+        // refine once and the store the father - child relations 
+        CreateGeometries<0, dimension, dimensionworld, GridImp :: elementType >
+          ::createGeometries(*this, type, nonConform);
+      }
     }
 
     // check if geometry has been created
@@ -132,75 +157,80 @@ namespace Dune
     template < class Grid >
     void createGeometries(const GeometryType& type) 
     {
-      // create factory without verbosity 
-      GridFactory< Grid > factory( false );
-
-      const Dune::ReferenceElement< ctype, dimension > &refElem
-        = Dune::ReferenceElements< ctype, dimension >::general( type );
-
-      // insert vertices 
-      FieldVector<ctype, dimensionworld> pos( 0 );
-      const int vxSize = refElem.size(dimension);  
-      for(int i=0; i<vxSize; ++i)
+      static bool firstCall = true ;
+      if( firstCall ) 
       {
-        FieldVector<ctype, dimension> position = refElem.position(i, dimension );
-        // copy position 
-        for(int d = 0; d<dimension; ++d )
-          pos[ d ] = position[ d ];
+        firstCall = false ;
+        // create factory without verbosity 
+        GridFactory< Grid > factory( false );
 
-        factory.insertVertex( pos );
-      }
+        const Dune::ReferenceElement< ctype, dimension > &refElem
+          = Dune::ReferenceElements< ctype, dimension >::general( type );
 
-      std::vector< unsigned int > vertices( vxSize );
-      // create grid with reference element
-      for(size_t i=0; i<vertices.size(); ++i) vertices[ i ] = i;
-      factory.insertElement(type, vertices);
-
-      // save original sbuf
-      std::streambuf* cerr_sbuf = std::cerr.rdbuf();
-      std::stringstream tempout; 
-      // redirect 'cerr' to a 'fout' to avoid unnecessary output in constructors 
-      std::cerr.rdbuf(tempout.rdbuf()); 
-
-      Grid* gridPtr = factory.createGrid();
-      Grid& grid    = *gridPtr; 
-
-      // restore the original stream buffer
-      std::cerr.rdbuf(cerr_sbuf); 
-
-      //std::cerr = savecerr;
-      
-      // refine once to get children 
-      const int level = 1;
-      grid.globalRefine( level );
-
-      {
-        typedef typename Grid :: template Partition< All_Partition >:: LevelGridView MacroGridView;
-        MacroGridView macroView = grid.template levelView< All_Partition > ( 0 );
-        typedef typename MacroGridView :: template Codim< 0 > :: Iterator Iterator;
-
-        Iterator it = macroView.template begin<0> (); 
-
-        if( it == macroView.template end<0>() ) 
-          DUNE_THROW(InvalidStateException,"Empty Grid, should contain at least 1 element");
-
-        typedef typename Iterator :: Entity EntityType;
-
-        const EntityType& entity = *it;
-        const typename EntityType :: Geometry& geo = entity.geometry();
-        typedef typename EntityType :: HierarchicIterator HierarchicIteratorType;
-        const HierarchicIteratorType end = entity.hend( level );
-
-        int childNum = 0;
-        for( HierarchicIteratorType child = entity.hbegin( level ); 
-             child != end; ++child, ++childNum ) 
+        // insert vertices 
+        FieldVector<ctype, dimensionworld> pos( 0 );
+        const int vxSize = refElem.size(dimension);  
+        for(int i=0; i<vxSize; ++i)
         {
-          create( geo, child->geometry(), childNum );
-        }
-      }
+          FieldVector<ctype, dimension> position = refElem.position(i, dimension );
+          // copy position 
+          for(int d = 0; d<dimension; ++d )
+            pos[ d ] = position[ d ];
 
-      // delete grid 
-      delete gridPtr;
+          factory.insertVertex( pos );
+        }
+
+        std::vector< unsigned int > vertices( vxSize );
+        // create grid with reference element
+        for(size_t i=0; i<vertices.size(); ++i) vertices[ i ] = i;
+        factory.insertElement(type, vertices);
+
+        // save original sbuf
+        std::streambuf* cerr_sbuf = std::cerr.rdbuf();
+        std::stringstream tempout; 
+        // redirect 'cerr' to a 'fout' to avoid unnecessary output in constructors 
+        std::cerr.rdbuf(tempout.rdbuf()); 
+
+        Grid* gridPtr = factory.createGrid();
+        Grid& grid    = *gridPtr; 
+
+        // restore the original stream buffer
+        std::cerr.rdbuf(cerr_sbuf); 
+
+        //std::cerr = savecerr;
+        
+        // refine once to get children 
+        const int level = 1;
+        grid.globalRefine( level );
+
+        {
+          typedef typename Grid :: template Partition< All_Partition >:: LevelGridView MacroGridView;
+          MacroGridView macroView = grid.template levelView< All_Partition > ( 0 );
+          typedef typename MacroGridView :: template Codim< 0 > :: Iterator Iterator;
+
+          Iterator it = macroView.template begin<0> (); 
+
+          if( it == macroView.template end<0>() ) 
+            DUNE_THROW(InvalidStateException,"Empty Grid, should contain at least 1 element");
+
+          typedef typename Iterator :: Entity EntityType;
+
+          const EntityType& entity = *it;
+          const typename EntityType :: Geometry& geo = entity.geometry();
+          typedef typename EntityType :: HierarchicIterator HierarchicIteratorType;
+          const HierarchicIteratorType end = entity.hend( level );
+
+          int childNum = 0;
+          for( HierarchicIteratorType child = entity.hbegin( level ); 
+               child != end; ++child, ++childNum ) 
+          {
+            create( geo, child->geometry(), childNum );
+          }
+        }
+
+        // delete grid 
+        delete gridPtr;
+      }
     }
 
     // create local geometry
@@ -225,6 +255,32 @@ namespace Dune
     {
       for(size_t i=0; i<geoms_.size(); ++i)
         if(geoms_[i]) delete geoms_[i];
+    }
+
+    //! access local geometry storage 
+    static const ThisType& storage( const GeometryType type, const bool nonConforming )
+    {
+      if( type.isSimplex() ) 
+      {
+        // create static variable on heap
+        static ThisType simplexGeoms; 
+        // initialize (only done once)
+        simplexGeoms.initialize( type, nonConforming );
+        alugrid_assert ( type == simplexGeoms[ 0 ].type() );
+        return simplexGeoms ;
+      }
+      else 
+      {
+        // should be a cube geometry a this point 
+        alugrid_assert( type.isCube() );
+
+        // create static variable on heap
+        static ThisType cubeGeoms;
+        // initialize (only done once)
+        cubeGeoms.initialize( type, nonConforming );
+        alugrid_assert ( type == cubeGeoms[ 0 ].type() );
+        return cubeGeoms ;
+      }
     }
 
     //! access local geometries 

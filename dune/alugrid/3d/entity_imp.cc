@@ -186,10 +186,10 @@ namespace Dune {
     }
     else 
     {
-      // to be improved, when we using not the refine 8 rule 
-      // see dune/alugrid/common/geostrage.hh for implementation 
-      typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 8 > GeometryStroage ;
-      return LocalGeometry( GeometryStroage::geom( type(), true, child ) );
+      // make sure the types match 
+      alugrid_assert( grid().nonConformingGeometryInFatherStorage()[ child ].type() == type() );
+      // get geometryInFather storage from grid and return childs geom
+      return LocalGeometry( grid().nonConformingGeometryInFatherStorage()[ child ] ); 
     }
   }
 

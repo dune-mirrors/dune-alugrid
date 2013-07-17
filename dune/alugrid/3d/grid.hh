@@ -1042,6 +1042,12 @@ namespace Dune
 
     const GridObjectFactoryType& factory() const { return factory_; }
 
+    // geometry in father storage
+    typedef ALULocalGeometryStorage< const ThisType, typename Traits::template Codim< 0 >::LocalGeometryImpl, 8 > GeometryInFatherStorage ;
+    // return geometryInFather for non-conforming grids 
+    const GeometryInFatherStorage& nonConformingGeometryInFatherStorage() const { return nonConformingGeoInFatherStorage_; }
+    // initialize geometry types and return correct geometryInFather storage
+    const GeometryInFatherStorage& makeGeometries();
   public:  
     // return true if conforming refinement is enabled 
     bool conformingRefinement() const
@@ -1125,6 +1131,9 @@ namespace Dune
 
     // refinement type (nonconforming or conforming)
     const ALUGridRefinementType refinementType_ ;
+
+    // local geometry storage for geometries in father 
+    const GeometryInFatherStorage& nonConformingGeoInFatherStorage_ ;
   }; // end class ALU3dGrid
 
 

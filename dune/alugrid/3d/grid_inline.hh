@@ -41,21 +41,8 @@ namespace Dune
     , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
+    , nonConformingGeoInFatherStorage_( makeGeometries() )
   {
-    alugrid_assert ( elType == tetra || elType == hexa );
-
-    geomTypes_.resize( dimension+1 );
-    GeometryType tmpType;
-    for( int codim = 0; codim <= dimension; ++codim ) 
-    {
-        if (elType == tetra)
-            tmpType.makeSimplex( dimension - codim );
-        else
-            tmpType.makeCube( dimension - codim );
-        
-        geomTypes_[ codim ].push_back( tmpType );
-    }
-    
     // check macro grid file for keyword 
     checkMacroGridFile( macroTriangFilename );
    
@@ -69,13 +56,38 @@ namespace Dune
   
     postAdapt();
     calcExtras();
+  } // end constructor
+
+
+  template< ALU3dGridElementType elType, class Comm >
+  const typename ALU3dGrid< elType, Comm >::GeometryInFatherStorage& 
+  ALU3dGrid< elType, Comm >::makeGeometries()
+  {
+    alugrid_assert ( elType == tetra || elType == hexa );
+
+    geomTypes_.clear();
+    geomTypes_.resize( dimension+1 );
+    GeometryType tmpType;
+    for( int codim = 0; codim <= dimension; ++codim ) 
+    {
+      if (elType == tetra)
+        tmpType.makeSimplex( dimension - codim );
+      else
+        tmpType.makeCube( dimension - codim );
+      
+      geomTypes_[ codim ].push_back( tmpType );
+    }
 
     // initialize static storage variables 
     ALU3dGridGeometry< 0, 3, const ThisType> :: geoProvider();
     ALU3dGridGeometry< 1, 3, const ThisType> :: geoProvider();
     ALU3dGridGeometry< 2, 3, const ThisType> :: geoProvider();
     ALU3dGridGeometry< 3, 3, const ThisType> :: geoProvider();
-  } // end constructor
+
+    // return non-conforming geometryInFather storage
+    // true == non-conforming 
+    return GeometryInFatherStorage :: storage( geomTypes_[ 0 ][ 0 ], true );
+  }
 
 
   template< ALU3dGridElementType elType, class Comm >

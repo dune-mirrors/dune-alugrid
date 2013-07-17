@@ -337,7 +337,7 @@ public:
     is only done for simple discretizations. Assumes that meshes are nested.
   */
   LocalGeometry geometryInFather () const;
- 
+
   /*! Inter-level access to son elements on higher levels<=maxlevel.
     This is provided for sparsely stored nested unstructured meshes.
     Returns iterator to first son.
