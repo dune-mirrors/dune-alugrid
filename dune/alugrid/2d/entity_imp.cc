@@ -209,32 +209,38 @@ inline int ALU2dGridEntity<0, dim, GridImp> :: nChild() const
 
 template< int dim, class GridImp >
 inline typename ALU2dGridEntity< 0, dim, GridImp >::LocalGeometry
-ALU2dGridEntity< 0, dim, GridImp >::geometryInFather () const
+ALU2dGridEntity< 0, dim, GridImp >::
+geometryInFatherImpl ( const bool nonConforming, const GeometryType& myType, const int nChild )
 {
-  alugrid_assert ( level() > 0 );
-
-  const GeometryType myType = type();
   // we need to storages in case of cube grid, 
   // one for quadrilaterals and one for triangles 
   if( (GridImp::elementType != ALU2DSPACE triangle) && myType.isCube() ) 
   {
-    alugrid_assert ( grid().nonConform() );
+    alugrid_assert ( nonConforming );
     typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 >  GeometryStorage;
-    return LocalGeometry( GeometryStorage::geom( myType, true, nChild() ) );
+    return LocalGeometry( GeometryStorage::geom( myType, true, nChild ) );
   }
   else 
   {
-    if( grid().nonConform() ) 
+    if( nonConforming ) 
     {
       typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 >  GeometryStorage;
-      return LocalGeometry( GeometryStorage::geom( myType, true, nChild() ) );
+      return LocalGeometry( GeometryStorage::geom( myType, true, nChild ) );
     }
     else 
     {
       typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 2 >  GeometryStorage;
-      return LocalGeometry( GeometryStorage::geom( myType, false, nChild() ) );
+      return LocalGeometry( GeometryStorage::geom( myType, false, nChild ) );
     }
   }
+}
+
+template< int dim, class GridImp >
+inline typename ALU2dGridEntity< 0, dim, GridImp >::LocalGeometry
+ALU2dGridEntity< 0, dim, GridImp >::geometryInFather () const
+{
+  alugrid_assert ( level() > 0 );
+  return geometryInFatherImpl( grid().nonConform(), type(), nChild() );
 }
 
 template<int dim, class GridImp>

@@ -444,6 +444,11 @@ public:
   //***************************************************************
  
  public:
+  //! static implementation of geometryInFather 
+  static LocalGeometry geometryInFatherImpl ( const bool nonConforming, 
+                                              const GeometryType& myType, 
+                                              const int nChild );  
+
   //! marks an element for refCount refines. if refCount is negative the
   //! element is coarsend -refCount times
   //! mark returns true if element was marked, otherwise false
