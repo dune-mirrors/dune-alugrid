@@ -113,18 +113,20 @@ namespace Dune
   public:  
     // create empty storage
     ALULocalGeometryStorage ( const GeometryType type, const bool nonConform )
-    : count_( 0 ), initialized_( true )
+    : count_( 0 ), initialized_( false )
     {
+      // nullify geometries 
       geoms_.fill( (GeometryImpl *) 0 );
 
+      // initialize geometries 
       initialize( type, nonConform );
-
     }
 
     // create empty storage
     ALULocalGeometryStorage ()
     : count_( 0 ), initialized_( false )
     {
+      // nullify geometries 
       geoms_.fill( (GeometryImpl *) 0 );
     }
 
@@ -134,7 +136,7 @@ namespace Dune
       if( ! initialized_ ) 
       {
         // first set flag, because this method might be called again during 
-        // creation of local geometries 
+        // creation of local geometries and then result in an infinite loop
         initialized_ = true ;
 
         // the idea is to create a grid containing the reference element,
