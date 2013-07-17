@@ -14,15 +14,6 @@ namespace Dune
 // --Geometry
 //**********************************************************************
 
-//! return storage provider for geometry objects 
-template< int mydim, int cdim, class GridImp >
-inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GeometryProviderType&
-ALU2dGridGeometry< mydim, cdim, GridImp >::geoProvider()
-{
-  static GeometryProviderType storage;
-  return storage;
-}
-
 template< int mydim, int cdim, class GridImp >
 inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ()
 {

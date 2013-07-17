@@ -732,7 +732,11 @@ namespace Dune
     typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
 
     //! return storage provider for geometry objects 
-    static GeometryProviderType& geoProvider();
+    static GeometryProviderType& geoProvider()
+    {
+      static GeometryProviderType storage;
+      return storage;
+    }
 
   protected:
     // return reference coordinates of the alu triangle 
