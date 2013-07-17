@@ -5,6 +5,18 @@
 #include <cstdlib>
 #include <vector>
 
+#if defined USE_PTHREADS || defined _OPENMP  
+#define USE_SMP_PARALLEL
+#endif
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+#if HAVE_DUNE_FEM 
+#include <dune/fem/misc/threads/threadmanager.hh>
+#endif
+
 namespace ALUGrid
 {
 
@@ -23,22 +35,43 @@ namespace Dune
     enum { maxStackObjects = 256 };
     typedef ::ALUGrid::ALUGridFiniteStack< Object *, maxStackObjects > StackType;
 
-    StackType objStack_;
+    std::vector< StackType > objStackVector_;
 
     typedef ALUMemoryProvider < Object > MyType;
 
-    StackType &objStack () { return objStack_; }
+    StackType &objStack () { return objStackVector_[ thread() ]; }
 
   public:
+    // return thread number 
+    static inline int thread()
+    {
+#ifdef _OPENMP
+      return omp_get_thread_num();
+#elif HAVE_DUNE_FEM 
+      return Fem :: ThreadManager :: thread() ;
+#else
+      return 0;
+#endif
+    }
+
+    // return maximal possible number of threads 
+    static inline int maxThreads() {
+#ifdef _OPENMP
+      return omp_get_max_threads();
+#elif HAVE_DUNE_FEM 
+      return Fem :: ThreadManager :: maxThreads() ;
+#else
+      return 1;
+#endif
+    }
+
     typedef Object ObjectType;
 
-    //!default constructor 
-    ALUMemoryProvider() {}
+    //! default constructor 
+    ALUMemoryProvider() : objStackVector_( maxThreads() ) {}
 
-    //! do not copy pointers  
-    ALUMemoryProvider(const ALUMemoryProvider<Object> & org)
-      : objStack_( org.objStack_ )
-    {}
+    //! copy constructor 
+    ALUMemoryProvider( const ALUMemoryProvider& org ) : objStackVector_( maxThreads() ) {}
 
     //! call deleteEntity 
     ~ALUMemoryProvider ();
@@ -133,11 +166,18 @@ namespace Dune
   template <class Object>
   inline ALUMemoryProvider<Object>::~ALUMemoryProvider()
   {
-    StackType& objStk = objStack_;
-    while ( ! objStk.empty() )
+    if( thread() == 0 ) 
     {
-      ObjectType * obj = objStk.pop();
-      delete obj;
+      const int threads = maxThreads();
+      for( int i=0; i<threads; ++i) 
+      {
+        StackType& objStk = objStackVector_[ i ];
+        while ( ! objStk.empty() )
+        {
+          ObjectType * obj = objStk.pop();
+          delete obj;
+        }
+      }
     }
   }
 
@@ -150,8 +190,6 @@ namespace Dune
     else 
       stk.push( obj );
   }
-
-#undef USE_FINITE_STACK
 
 } // namespace Dune
 

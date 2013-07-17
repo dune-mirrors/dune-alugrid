@@ -37,11 +37,7 @@ namespace Dune
             std::istream* macroFile )
   : 
     mygrid_ ( createGrid(macroTriangFilename, nrOfHangingNodes, macroFile ) ),
-#ifdef USE_SMP_PARALLEL
-    factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) ),
-#else
     factory_( *this ),
-#endif
     hIndexSet_(*this),
     localIdSet_(*this),
     levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 ) ,
@@ -71,11 +67,7 @@ namespace Dune
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline ALU2dGrid< dim, dimworld, eltype >::ALU2dGrid ( int nrOfHangingNodes )
   : mygrid_( 0 ),
-#ifdef USE_SMP_PARALLEL
-    factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) ),
-#else
     factory_( *this ),
-#endif
     hIndexSet_(*this),
     localIdSet_(*this),
     levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 ),
@@ -499,8 +491,8 @@ namespace Dune
     typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
 
     typedef typename EntityObject::ImplementationType EntityImp;
-    EntityObject father( EntityImp(*this, this->maxLevel()) );
-    EntityObject son( EntityImp(*this, this->maxLevel()) );
+    EntityObject father( EntityImp( factory(), maxLevel()) );
+    EntityObject son   ( EntityImp( factory(), maxLevel()) );
 
     int defaultChunk = newElementsChunk_;
     int actChunk     = refineEstimate_ * refineMarked_;

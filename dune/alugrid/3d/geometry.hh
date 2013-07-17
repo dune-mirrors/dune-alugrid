@@ -767,14 +767,8 @@ namespace Dune
     //! return storage provider for geometry objects 
     static GeometryProviderType& geoProvider() 
     {
-#ifdef USE_SMP_PARALLEL
-      typedef ALUGridObjectFactory< GridImp >  GridObjectFactoryType;
-      static std::vector< GeometryProviderType > storage( GridObjectFactoryType :: maxThreads() );
-      return storage[ GridObjectFactoryType :: threadNumber () ];
-#else
       static GeometryProviderType storage;
       return storage;
-#endif
     }
 
     // return reference to geometry implementation 

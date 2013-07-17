@@ -1040,14 +1040,7 @@ namespace Dune
       return *communications_;
     }
 
-    const GridObjectFactoryType& factory() const { 
-#ifdef USE_SMP_PARALLEL
-      alugrid_assert ( (int) factoryVec_.size() > GridObjectFactoryType :: threadNumber() );
-      return factoryVec_[ GridObjectFactoryType :: threadNumber() ];
-#else 
-      return factory_; 
-#endif
-    }
+    const GridObjectFactoryType& factory() const { return factory_; }
 
   public:  
     // return true if conforming refinement is enabled 
@@ -1113,11 +1106,7 @@ namespace Dune
     typedef SizeCache<MyType> SizeCacheType;
     SizeCacheType * sizeCache_;
 
-#ifdef USE_SMP_PARALLEL
-    std::vector< GridObjectFactoryType > factoryVec_;
-#else 
     GridObjectFactoryType factory_;
-#endif
 
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;

@@ -48,10 +48,6 @@ namespace Dune
     // one geometry for each face and twist 0 and 1
     LocalGeometryImpl geoms_[ 2 ][ 4 ][ 2 ];
 
-#ifdef USE_SMP_PARALLEL
-  // make public because of std::vector
-  public:
-#endif
     ALU2DIntersectionGeometryStorage ();
 
   public:
@@ -67,14 +63,8 @@ namespace Dune
     // return static instance 
     static const ThisType &instance ()
     {
-#ifdef USE_SMP_PARALLEL
-      typedef ALUGridObjectFactory< GridImp >  GridObjectFactoryType;
-      static const std::vector< ThisType > storage( GridObjectFactoryType :: maxThreads() );
-      return storage[ GridObjectFactoryType :: threadNumber () ];
-#else
       static const ThisType geomStorage;
       return geomStorage;
-#endif
     }
   };
 
@@ -514,6 +504,7 @@ namespace Dune
 } // end namespace Dune
 
 #include "intersection_imp.cc"
+
 #if COMPILE_ALU2DGRID_INLINE
   #include "intersection.cc"
 #endif

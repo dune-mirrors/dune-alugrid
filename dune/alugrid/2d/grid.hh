@@ -534,11 +534,7 @@ namespace Dune
       return *mygrid_;
     }
 
-#ifdef USE_SMP_PARALLEL
-    std::vector< GridObjectFactoryType > factoryVec_;
-#else
     GridObjectFactoryType factory_;
-#endif
 
     //! the hierarchic index set 
     HierarchicIndexSet hIndexSet_;
@@ -624,12 +620,7 @@ namespace Dune
 
     const GridObjectFactoryType& factory() const
     {
-#ifdef USE_SMP_PARALLEL
-      alugrid_assert ( (int) factoryVec_.size() > GridObjectFactoryType::threadNumber() );
-      return factoryVec_[ GridObjectFactoryType::threadNumber() ];
-#else
       return factory_;
-#endif
     }
 
   protected:

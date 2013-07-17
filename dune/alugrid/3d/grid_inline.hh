@@ -34,11 +34,7 @@ namespace Dune
         ? ReferenceElements< alu3d_ctype, dimension > :: simplex()
         : ReferenceElements< alu3d_ctype, dimension > :: cube() )
     , sizeCache_ ( 0 )
-#ifdef USE_SMP_PARALLEL
-    , factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) )
-#else 
     , factory_( *this )
-#endif
     , lockPostAdapt_( false )
     , bndPrj_ ( bndPrj )
     , bndVec_ ( (bndVec) ? (new DuneBoundaryProjectionVector( *bndVec )) : 0 )

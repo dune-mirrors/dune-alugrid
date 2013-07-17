@@ -3,18 +3,6 @@
 
 #include <dune/alugrid/common/memory.hh>
 
-#if defined USE_PTHREADS || defined _OPENMP  
-#define USE_SMP_PARALLEL
-#endif
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#if HAVE_DUNE_FEM 
-#include <dune/fem/misc/threads/threadmanager.hh>
-#endif
-
 namespace Dune 
 {
   template <class InterfaceType>
@@ -153,10 +141,8 @@ namespace Dune
 
     const GridType& grid_ ;
 
-#ifdef USE_SMP_PARALLEL
-  public:  
-#endif
-    ALUGridObjectFactory( const ALUGridObjectFactory& other ) : grid_( other.grid_ ) {}
+  private:  
+    ALUGridObjectFactory( const ALUGridObjectFactory& other );
 
   public:
     const  GridType& grid() const { return grid_; }
@@ -189,29 +175,6 @@ namespace Dune
     //! free intersection 
     void freeIntersection(LeafIntersectionIteratorImp  & it) const { leafInterItProvider_.freeObject( &it ); }
     void freeIntersection(LevelIntersectionIteratorImp & it) const { levelInterItProvider_.freeObject( &it ); }
-
-    // return thread number 
-    static inline int threadNumber()
-    {
-#ifdef _OPENMP
-      return omp_get_thread_num();
-#elif HAVE_DUNE_FEM 
-      return Fem :: ThreadManager :: thread() ;
-#else
-      return 0;
-#endif
-    }
-
-    // return maximal possible number of threads 
-    static inline int maxThreads() {
-#ifdef _OPENMP
-      return omp_get_max_threads();
-#elif HAVE_DUNE_FEM 
-      return Fem :: ThreadManager :: maxThreads() ;
-#else
-      return 1;
-#endif
-    }
   }; /// end class ALUGridObjectFactory
 
 }  // end namespace Dune 

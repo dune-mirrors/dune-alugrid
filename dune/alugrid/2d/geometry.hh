@@ -744,7 +744,7 @@ namespace Dune
     typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
 
     //! return storage provider for geometry objects 
-    GeometryProviderType& geoProvider();
+    static GeometryProviderType& geoProvider();
 
     // return reference to geometry implementation 
     GeometryImplType& geoImpl() const
