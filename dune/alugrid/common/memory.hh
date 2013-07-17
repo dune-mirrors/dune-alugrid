@@ -39,7 +39,11 @@ namespace Dune
 
     typedef ALUMemoryProvider < Object > MyType;
 
-    StackType &objStack () { return objStackVector_[ thread() ]; }
+    StackType &objStack () 
+    {
+      alugrid_assert( thread() < int(objStackVector_.size()) );
+      return objStackVector_[ thread() ]; 
+    }
 
   public:
     // return thread number 
