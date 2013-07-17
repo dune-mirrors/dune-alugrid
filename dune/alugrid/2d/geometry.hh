@@ -728,6 +728,12 @@ namespace Dune
     // invalidate geometry implementation 
     void invalidate () ;
 
+    // type of object provider 
+    typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
+
+    //! return storage provider for geometry objects 
+    static GeometryProviderType& geoProvider();
+
   protected:
     // return reference coordinates of the alu triangle 
     static std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > >
@@ -740,12 +746,6 @@ namespace Dune
     //! get a new pointer object
     void getObject();
 
-    // type of object provider 
-    typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
-
-    //! return storage provider for geometry objects 
-    static GeometryProviderType& geoProvider();
-
     // return reference to geometry implementation 
     GeometryImplType& geoImpl() const
     {
@@ -756,6 +756,7 @@ namespace Dune
     // implementation of the coordinates and mapping 
     GeometryImplType* geoImpl_;
   };
+
 
   namespace FacadeOptions
   {

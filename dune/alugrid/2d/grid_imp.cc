@@ -557,6 +557,13 @@ namespace Dune
     geomTypes_[ 2 ].push_back( GeometryType( basic, 0 ) );
     geomTypes_[ 1 ].push_back( GeometryType( basic, 1 ) );
     geomTypes_[ 0 ].push_back( GeometryType( basic, 2 ) );
+
+    // initialize static storage variables 
+    ALU2dGridGeometry<0,   dimworld, const ThisType> :: geoProvider();
+    ALU2dGridGeometry<1,   dimworld, const ThisType> :: geoProvider();
+    ALU2dGridGeometry<dim, dimworld, const ThisType> :: geoProvider();
+
+    ALU2dGridIntersectionBase < const ThisType > :: LocalGeometryStorageType :: instance();
   }
     
    //! get global id set of grid

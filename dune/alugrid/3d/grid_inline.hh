@@ -69,6 +69,12 @@ namespace Dune
   
     postAdapt();
     calcExtras();
+
+    // initialize static storage variables 
+    ALU3dGridGeometry< 0, 3, const ThisType> :: geoProvider();
+    ALU3dGridGeometry< 1, 3, const ThisType> :: geoProvider();
+    ALU3dGridGeometry< 2, 3, const ThisType> :: geoProvider();
+    ALU3dGridGeometry< 3, 3, const ThisType> :: geoProvider();
   } // end constructor
 
 

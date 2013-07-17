@@ -753,14 +753,6 @@ namespace Dune
     //! invalidate geometry implementation to avoid errors 
     bool valid () const ;
 
-  protected:
-    //! assign pointer 
-    void assign( const ALU3dGridGeometry& other );
-    //! remove pointer object
-    void removeObj();
-    //! get a new pointer object
-    void getObject();
-
     // type of object provider 
     typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
 
@@ -770,6 +762,14 @@ namespace Dune
       static GeometryProviderType storage;
       return storage;
     }
+
+  protected:
+    //! assign pointer 
+    void assign( const ALU3dGridGeometry& other );
+    //! remove pointer object
+    void removeObj();
+    //! get a new pointer object
+    void getObject();
 
     // return reference to geometry implementation 
     GeometryImplType& geoImpl() const 
