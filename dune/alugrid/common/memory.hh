@@ -30,17 +30,54 @@ namespace Dune
     enum { maxStackObjects = 256 };
     typedef ::ALUGrid::ALUGridFiniteStack< Object *, maxStackObjects > StackType;
 
+    // stack to store object pointers 
     StackType objStack_;
 
+    // thread number 
+    int thread_;
+
+    // return reference to object stack
     StackType &objStack () { return objStack_; }
   public:
+    // type of object to be stored 
     typedef Object ObjectType;
 
-    //! default constructor 
-    ALUMemoryProviderSingleThread() {}
+    // return thread number 
+    static inline int thread()
+    {
+#ifdef _OPENMP
+      return omp_get_thread_num();
+#elif HAVE_DUNE_FEM 
+      return Fem :: ThreadManager :: thread() ;
+#else
+      return 0;
+#endif
+    }
+
+    // return maximal possible number of threads 
+    static inline int maxThreads() 
+    {
+#ifdef _OPENMP
+      return omp_get_max_threads();
+#elif HAVE_DUNE_FEM 
+      return Fem :: ThreadManager :: maxThreads() ;
+#else
+      return 1;
+#endif
+    }
+
+    //! default constructor
+    ALUMemoryProviderSingleThread() 
+      : objStack_(), thread_( -1 ) 
+    {}
 
     //! copy constructor 
-    ALUMemoryProviderSingleThread( const ALUMemoryProviderSingleThread& org ) : objStack_() {}
+    ALUMemoryProviderSingleThread( const ALUMemoryProviderSingleThread& org ) 
+      : objStack_(), thread_( org.thread_ ) 
+    {}
+
+    //! set thread number this memory provider works for
+    void setThreadNumber( const int thread ) { thread_ = thread; }
 
     //! call deleteEntity 
     ~ALUMemoryProviderSingleThread ();
@@ -51,7 +88,7 @@ namespace Dune
 
     //! i.e. return pointer to Entity
     template <class FactoryType, class EntityImp>
-    inline ObjectType * getEntityObject(const FactoryType& factory, int level , EntityImp * fakePtr ) 
+    inline ObjectType * getEntityObject(const FactoryType& factory, int level, EntityImp* ) 
     {
       if( objStack().empty() )
       {
@@ -64,7 +101,7 @@ namespace Dune
     }
 
     //! return object, if created default constructor is used 
-    ObjectType * getEmptyObject ();
+    ObjectType* getEmptyObject ();
 
     //! free, move element to stack, returns NULL 
     void freeObject (ObjectType * obj);
@@ -72,6 +109,9 @@ namespace Dune
   protected:
     inline ObjectType * stackObject() 
     {
+      // make sure we operate on the correct thread 
+      alugrid_assert ( thread_ == thread() ); 
+      // make sure stack is not empty
       alugrid_assert ( ! objStack().empty() );
       // finite stack does also return object on pop
       return objStack().pop();
@@ -85,9 +125,9 @@ namespace Dune
   //
   //************************************************************************
   template <class Object> template <class FactoryType>
-  inline typename ALUMemoryProviderSingleThread<Object>::ObjectType * 
-  ALUMemoryProviderSingleThread<Object>::getObject
-  (const FactoryType &factory, int level )
+  inline typename ALUMemoryProviderSingleThread<Object>::ObjectType* 
+  ALUMemoryProviderSingleThread<Object>::
+  getObject( const FactoryType &factory, int level )
   {
     if( objStack().empty() )
     {
@@ -126,7 +166,9 @@ namespace Dune
 
   template <class Object>
   inline void ALUMemoryProviderSingleThread<Object>::freeObject( Object * obj )
-  {
+  { 
+    // make sure we operate on the correct thread 
+    alugrid_assert ( thread_ == thread() ); 
     StackType& stk = objStack();
     if( stk.full() ) 
       delete obj;
@@ -148,39 +190,36 @@ namespace Dune
       return memProviders_[ thread ];
     }
 
-  public:
-    // return thread number 
-    static inline int thread()
+    void init () 
     {
-#ifdef _OPENMP
-      return omp_get_thread_num();
-#elif HAVE_DUNE_FEM 
-      return Fem :: ThreadManager :: thread() ;
-#else
-      return 0;
-#endif
+      const int threads = maxThreads();
+      for( int thread = 0; thread < threads; ++ thread ) 
+      {
+        memProviders_[ thread ].setThreadNumber( thread );
+      }
     }
 
+  public:
+    // return thread number 
+    static inline int thread() { return MemoryProvider :: thread(); }
+
     // return maximal possible number of threads 
-    static inline int maxThreads() 
-    {
-#ifdef _OPENMP
-      return omp_get_max_threads();
-#elif HAVE_DUNE_FEM 
-      return Fem :: ThreadManager :: maxThreads() ;
-#else
-      return 1;
-#endif
-    }
+    static inline int maxThreads() { return MemoryProvider :: maxThreads(); }
 
     // type of stored object 
     typedef Object ObjectType;
 
     //! default constructor 
-    ALUMemoryProvider() : memProviders_( maxThreads() ) {}
+    ALUMemoryProvider() : memProviders_( maxThreads() ) 
+    { 
+      init();
+    }
 
     //! copy constructor (don't copy memory providers)
-    ALUMemoryProvider( const ALUMemoryProvider& org ) : memProviders_( maxThreads() ) {}
+    ALUMemoryProvider( const ALUMemoryProvider& org ) : memProviders_( maxThreads() )
+    {
+      init();
+    }
 
     //! i.e. return pointer to Entity
     template <class FactoryType>
