@@ -48,9 +48,10 @@ namespace Dune
     // one geometry for each face and twist 0 and 1
     LocalGeometryImpl geoms_[ 2 ][ 4 ][ 2 ];
 
-    ALU2DIntersectionGeometryStorage ();
 
   public:
+    ALU2DIntersectionGeometryStorage ();
+
     // return reference to local geometry  
     const LocalGeometryImpl &localGeom ( const int aluFace, const int twist, const int corners ) const
     {
@@ -63,8 +64,10 @@ namespace Dune
     // return static instance 
     static const ThisType &instance ()
     {
-      static const ThisType geomStorage;
-      return geomStorage;
+      typedef ALUMemoryProvider< ThisType > MemoryProvider ;
+      // create a storage for each thread, otherwise we get conflicts with the geometry references 
+      static const std::vector< ThisType > geomStorage( MemoryProvider :: maxThreads() );
+      return geomStorage[ MemoryProvider :: thread() ];
     }
   };
 
