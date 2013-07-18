@@ -1,7 +1,6 @@
 B: Parallelisierung unabhaengig vom Gitter aufbauen mit ParMetis
 C: Einlesen des Makrogitters flexibler gestallten - keine Orientierung
    und festes Makroelement vorschreiben (waere sicher gut)
-D: Konforme Bisektion eibauen (in Arbeit)
 F: vertex identifier auf von int auf IdType oder so umbauen, damit eventuell 
    long verwendet werden kann.
 
