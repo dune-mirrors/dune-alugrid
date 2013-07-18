@@ -1060,6 +1060,12 @@ namespace Dune
     {
       return myGrid().ghostCellsEnabled(); 
     }
+
+    //! return current thread number 
+    static int thread () { return ALUMemoryProvider< int > :: thread(); }
+
+    //! return max number of threads  
+    static int maxThreads () { return ALUMemoryProvider< int > :: maxThreads(); }
   protected:
     /////////////////////////////////////////////////////////////////
     //

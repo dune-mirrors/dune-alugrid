@@ -176,6 +176,9 @@ namespace Dune {
     // get child number 
     const int child = item_->nChild();
 
+    // type of memory provider to get thread numbers 
+    typedef ALUMemoryProvider< LocalGeometryImpl > MemoryProvider ;
+
     // if the rule of the farher is not refine_element, it has to be bisection 
     // this can only be true for tetrahedral elements 
     if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::refine_element_t) )

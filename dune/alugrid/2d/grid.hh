@@ -623,6 +623,12 @@ namespace Dune
       return factory_;
     }
 
+    //! return current thread number 
+    static int thread () { return ALUMemoryProvider< int > :: thread(); }
+    
+    //! return max number of threads  
+    static int maxThreads () { return ALUMemoryProvider< int > :: maxThreads(); }
+
   protected:
     // max level of grid
     int maxlevel_;

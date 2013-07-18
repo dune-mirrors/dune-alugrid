@@ -64,10 +64,9 @@ namespace Dune
     // return static instance 
     static const ThisType &instance ()
     {
-      typedef ALUMemoryProvider< ThisType > MemoryProvider ;
       // create a storage for each thread, otherwise we get conflicts with the geometry references 
-      static const std::vector< ThisType > geomStorage( MemoryProvider :: maxThreads() );
-      return geomStorage[ MemoryProvider :: thread() ];
+      static const std::vector< ThisType > geomStorage( GridImp :: maxThreads() );
+      return geomStorage[ GridImp :: thread() ];
     }
   };
 

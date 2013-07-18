@@ -150,9 +150,11 @@ namespace Dune
     bool geomCreated(int child) const { return geoms_[child] != 0; }
 
     // return reference to local geometry
-    const GeometryImpl & operator [] (int child) const
+    const GeometryImpl& operator [] (int child) const
     {
       alugrid_assert ( geomCreated(child) );
+      // this method is not thread safe yet
+      assert( GridImp :: thread() == 0 );
       return *(geoms_[child]);
     }
 
@@ -288,6 +290,8 @@ namespace Dune
     //! access local geometries 
     static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child ) 
     {
+      // this method is not thread safe yet
+      assert( GridImp :: thread() == 0 );
       // create static variable on heap
       static ThisType instance( type, nonConforming );
       // make sure the geometry type is the same 
