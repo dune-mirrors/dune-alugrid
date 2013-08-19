@@ -77,10 +77,10 @@ class ALU3dGridIntersectionIterator
 
   typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
 
-  typedef typename SelectType<
+  typedef typename conditional<
     tetra == GridImp::elementType,
     ALU3dGridGeometricFaceInfoTetra< Comm >,
-    ALU3dGridGeometricFaceInfoHexa< Comm > >::Type GeometryInfoType;
+    ALU3dGridGeometricFaceInfoHexa< Comm > >::type GeometryInfoType;
       
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
@@ -308,10 +308,10 @@ public ALU3dGridIntersectionIterator<GridImp>
 
   typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
 
-  typedef typename SelectType<
+  typedef typename conditional<
     tetra == GridImp::elementType,
     ALU3dGridGeometricFaceInfoTetra< Comm >,
-    ALU3dGridGeometricFaceInfoHexa< Comm > >::Type GeometryInfoType;
+    ALU3dGridGeometricFaceInfoHexa< Comm > >::type GeometryInfoType;
       
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
