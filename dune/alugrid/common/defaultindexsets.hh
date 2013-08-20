@@ -261,7 +261,6 @@ namespace Dune
       for( int cd = 0; cd < ncodim; ++cd )
       {
         indexContainer( cd ).resize( Index() );
-        indexContainer( cd ).shrinkToFit();
         indexContainer( cd ).fill( Index() );
         size_[ cd ] = 0;
       }
