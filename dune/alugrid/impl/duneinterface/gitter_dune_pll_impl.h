@@ -38,7 +38,6 @@ namespace ALUGrid
     typedef Gitter::Geometric Geometric;
     typedef GitterDuneImpl::Objects  Objects;
 
-    
     // constructor taking filename containing the macro grid
     GitterDunePll ( const char * filename, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
     : GitterBasisPll( filename, mp, ppv ),
@@ -74,9 +73,6 @@ namespace ALUGrid
       // build ghost cells after the macro grid has been assembled 
       rebuildGhostCells();
     }
-
-    // destructor 
-    ~GitterDunePll () {}
 
     // adapts and witout calling loadBalancer  
     bool adaptWithoutLoadBalancing () { return GitterPll::adapt (); }
