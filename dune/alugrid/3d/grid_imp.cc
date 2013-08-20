@@ -704,7 +704,11 @@ namespace Dune
   bool ALU3dGrid< elType, Comm >
     ::writeGrid_Xdr ( const std::string filename, alu3d_ctype time ) const
   {
-    myGrid().duneBackup( filename.c_str() );
+    std::ofstream out( filename.c_str() );
+    if( ! out ) 
+      std::cerr << "Couldn't open "<< filename << " for writing grid backup" << std::endl;
+    else 
+      myGrid().backup( out );
     return true;
   }
 
@@ -763,7 +767,11 @@ namespace Dune
     // check for element type 
     this->checkMacroGrid ();
     
-    myGrid().duneRestore(filename.c_str());
+    std::ifstream in( filename.c_str() );
+    if( ! in ) 
+      std::cerr << "Couldn't open file " << filename << " for restoring grid" << std::endl;
+    else 
+      myGrid().restore( in );
 
     // don't restore time 
     time = 0;
@@ -783,7 +791,7 @@ namespace Dune
   void ALU3dGrid< elType, Comm >::backup( std::ostream& stream ) const
   {
     // backup grid to given stream 
-    myGrid().duneBackup( stream );
+    myGrid().backup( stream );
   }
 
   template< ALU3dGridElementType elType, class Comm >
@@ -805,7 +813,7 @@ namespace Dune
     this->checkMacroGrid ();
     
     // restore hierarchy from given stream 
-    myGrid().duneRestore( stream );
+    myGrid().restore( stream );
 
     // calculate new maxlevel 
     // calculate indices 
