@@ -1294,10 +1294,8 @@ namespace ALUGrid
     public :
       virtual int iterators_attached () const;
       virtual void backup (std::ostream &) const = 0;
-      virtual void backup (ObjectStream&) const = 0;
       virtual void backup (const char*,const char *) const = 0;
 
-      virtual void backupCMode (ObjectStream &) const = 0;
       virtual void backupCMode (std::ostream &) const = 0;
       virtual void backupCMode (const char *,const char *) const = 0;
     
@@ -2392,10 +2390,7 @@ namespace ALUGrid
     virtual void refineRandom (double);
 
     virtual void backup (std::ostream &);
-    virtual void backup (ObjectStream& );
-
     virtual void restore (std::istream &);
-    virtual void restore (ObjectStream&);
 
     // print memory consumption of grid 
     virtual void printMemUsage () = 0;
@@ -2414,11 +2409,7 @@ namespace ALUGrid
     void tovtkImpl( const std::string &fn,
                     const int, const element_t*, const bnd_t* );
 
-    template <class ostream_t>
-    void backupImpl( ostream_t& );
-
-    template <class istream_t>
-    void restoreImpl( istream_t& );
+    void restoreImpl( std::istream&, const bool restoreBndFaces );
 
     // these classes are friend because the must call the method iterator on grid 
     friend class LeafIterator < helement_STI >;

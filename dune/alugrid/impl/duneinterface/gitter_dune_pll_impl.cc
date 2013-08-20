@@ -1211,32 +1211,14 @@ namespace ALUGrid
     } 
   }
 
-  void GitterDunePll::duneBackup ( const char *filename ) 
-  {
-    // backup grid, same as in serial case 
-    GitterDuneBasis::duneBackup( filename );
-  }
-
   // wird von Dune verwendet 
   void GitterDunePll::restore ( std::istream &in ) 
   {
-    typedef Gitter::Geometric::BuilderIF BuilderIF;
-    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterDunePll::restore (istream & = " << in << ") " << std::endl, 1) : 1);
-    {
-      AccessIterator < hedge_STI >::Handle ew (container ());
-      for (ew.first (); !ew.done (); ew.next ()) ew.item ().restore (in);
-    }
-    {
-      AccessIterator < hface_STI >:: Handle fw(container());
-      for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in);
-    }
-    {
-      AccessIterator < helement_STI >:: Handle ew(container());
-      for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in);
-    }
+    // false means that bnd faces are not restored 
+    Gitter :: restoreImpl( in, false );
 
     // restore indices before ghosts are created 
-    // otherwise indices of ghost will be wrong 
+    // otherwise indices of ghosts will be wrong 
     this->restoreIndices (in);
    
 #ifdef ALUGRIDDEBUG 
@@ -1257,24 +1239,9 @@ namespace ALUGrid
     alugrid_assert ( (this->indexManager(BuilderIF::IM_Elements).getMaxIndex() != maxIndexBefore) ?
         (std::cout << maxIndexBefore << " vor | nach " << this->indexManager(BuilderIF::IM_Elements).getMaxIndex() << "\n",0) : 1);
 
-  }
-
-  void GitterDunePll::duneRestore ( const char *fileName )
-  {
-    alugrid_assert (debugOption (20) ? 
-        (std::cout << "**INFO GitterDuneBasis::duneRestore (const char * = \""
-              << fileName << "\") " << std::endl, 1) : 1);
-                   
-    std::ifstream in( fileName );
-    if (!in) {
-      std::cerr << "**WARNUNG (IGNORIERT) GitterDunePll::";
-      std::cerr <<" duneRestore (const char *, double & ) Fehler beim \"Offnen von < "
-           << (fileName ? fileName : "null") << " > " << std::endl;
-    } 
-    else 
-    {
-      duneRestore( in );
-    }
+    // exchange dynamic state after restore 
+    // (i.e. ghost information, since grid has changed after restore)
+    GitterPll::exchangeDynamicState();
   }
 
   void GitterDunePll::tovtk ( const std::string &fn ) 

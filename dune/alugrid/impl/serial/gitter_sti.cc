@@ -726,9 +726,13 @@ namespace ALUGrid
     return adapt();
   }
 
-  template<class ostream_t>
-  void Gitter::backupImpl (ostream_t & out) 
+  // backup taking std::ostream 
+  void Gitter::backup ( std::ostream &out )
   {
+#ifdef ALUGRIDDEBUG
+    if( debugOption( 20 ) )
+      std::cout << "INFO: Gitter::backup ( out = " << out << " )" << std::endl;
+#endif // #ifdef ALUGRIDDEBUG
     char bisection = char(conformingClosureNeeded());
     // store whether we have bisection refinement 
     out.put( bisection );
@@ -759,24 +763,7 @@ namespace ALUGrid
     }
   }
 
-  // backup taking std::ostream 
-  void Gitter::backup ( std::ostream &out )
-  {
-#ifdef ALUGRIDDEBUG
-    if( debugOption( 20 ) )
-      std::cout << "INFO: Gitter::backup ( out = " << out << " )" << std::endl;
-#endif // #ifdef ALUGRIDDEBUG
-    backupImpl( out );
-  }
-
-  // backup taking ObjectStream 
-  void Gitter::backup (ObjectStream& out) 
-  {
-    backupImpl( out );
-  }
-
-  template<class istream_t>
-  void Gitter ::restoreImpl (istream_t & in) 
+  void Gitter ::restoreImpl ( std::istream& in, const bool restoreBndFaces ) 
   {
     // store whether we have bisection refinement 
     const char bisection = in.get();
@@ -810,6 +797,7 @@ namespace ALUGrid
       
     // since the faces have been refined before the elements
     // the boundary faces might not habe benn refined at all
+    if( restoreBndFaces )
     {
       AccessIterator < hbndseg_STI >::Handle bw (container ());
       for (bw.first (); ! bw.done (); bw.next ()) bw.item ().restoreFollowFace (); 
@@ -823,16 +811,7 @@ namespace ALUGrid
     if( debugOption( 20 ) )
       std::cout << "INFO: Gitter::restore ( in = " << in << " )" << std::endl;
 #endif // #ifdef ALUGRIDDEBUG
-    restoreImpl( in );
-  }
-
-  // restore taking ObjectStream 
-  void Gitter::restore( ObjectStream &in )
-  {
-    // restoreImpl ( in );
-
-    std::cerr << "ERROR (fatal): Gitter::restore not implemented for ObjectStream." << std::endl;
-    abort();
+    restoreImpl( in, true );
   }
 
   void Gitter::refineGlobal ()

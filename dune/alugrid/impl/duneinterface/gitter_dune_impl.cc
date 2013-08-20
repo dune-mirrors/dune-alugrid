@@ -24,59 +24,6 @@ namespace ALUGrid
     TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI> > > *) p);
   }
 
-  // wird von Dune verwendet 
-  void GitterDuneBasis::duneBackup (const char * fileName) 
-  {
-    // diese Methode wird von der Dune Schnittstelle aufgerufen und ruft
-    // intern lediglich backup (siehe oben) und backupCMode des Makrogitters
-    // auf, allerdings wird hier der path und filename in einer variablen
-    // uebergeben 
-
-    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::duneBackup (const char * = \""
-                         << fileName << "\") " << std::endl, 1) : 1);
-
-    std::ofstream out( fileName );
-    if( !out )
-    {
-      std::cerr << "WARNING (ignored): Error creating '" << (fileName ? fileName : "") << "' in GitterDuneBasis::duneBackup( const char *, double )." << std::endl;
-    }
-    else
-    {
-      Gitter::backup (out);
-
-      backupIndices ( out );
-
-      {
-        std::string fullName = std::string( fileName ) + std::string( ".macro" );
-        std::ofstream macro( fullName.c_str() );
-        if( !macro )
-          std::cerr << "WARNING (ignored): Cannot create '" << fullName << "' in GitterDuneBasis::duneBackup( const char *, const char * )." << std::endl;
-        else
-          container ().backupCMode( macro );
-      }
-    }
-  }
-
-  // wird von Dune verwendet 
-  void GitterDuneBasis::duneRestore (const char * fileName)
-  {
-    // diese Methode wird von der Dune Schnittstelle aufgerufen 
-    // diese Methode ruft intern restore auf, hier wird lediglich 
-    // der path und filename in einer variablen uebergeben
-
-    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::duneRestore (const char * = \""
-                   << fileName << "\") " << std::endl, 1) : 1);
-
-    std::ifstream in( fileName );
-    if( !in )
-      std::cerr << "WARNING (ignored): Cannot open '" << (fileName ? fileName : "") << "' in GitterDuneBasis::duneRestore( const char *, double & )." << std::endl;
-    else
-    {
-      Gitter::restore( in );
-      this->restoreIndices( in );
-    }
-  }
-
   int GitterDuneBasis::preCoarsening  (Gitter::helement_STI & elem)
   {
     // if _arp is set then the extrenal preCoarsening is called 

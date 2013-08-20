@@ -283,7 +283,7 @@ int main (int argc, char ** argv, const char ** envp)
 #endif
 
     std::ofstream file( backupname.str().c_str() );
-    grid.duneBackup( file );
+    grid.backup( file );
     file.close();
 
     globalCoarsening(grid, mxl);
@@ -300,12 +300,12 @@ int main (int argc, char ** argv, const char ** envp)
 #endif
     grid.printsize();
 
-    grid.duneRestore( file );
+    grid.restore( file );
     file.close();
     //globalRefine(grid, mxl);
     // adapt grid 
 
-    grid.duneBackup( databuf );
+    grid.backup( databuf );
 
     std::cout << "Grid restored!" << std::endl;
     grid.printsize();
@@ -325,9 +325,9 @@ int main (int argc, char ** argv, const char ** envp)
     ALUGrid::GitterDuneImpl grid( databuf );
 #endif
     grid.printsize();
-    grid.duneRestore( databuf );
+    grid.restore( databuf );
 
-    //grid.duneRestore( file );
+    //grid.restore( file );
     // adapt grid 
     
     ExchangeBaryCenter dataHandle ;

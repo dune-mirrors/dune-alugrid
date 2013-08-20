@@ -77,16 +77,10 @@ namespace ALUGrid
     void restoreIndices (istream_t & in );
 
     // write status of grid  
-    void duneBackup (const char*); 
-
-    // write status of grid  
-    void duneBackup ( std::ostream &out );
+    void backup ( std::ostream &out );
 
     // read status of grid 
-    void duneRestore (const char*);
-   
-    // read status of grid 
-    void duneRestore ( std::istream &in );
+    void restore ( std::istream &in );
    
     // done call notify and loadBalancer  
     bool duneAdapt (AdaptRestrictProlongType & arp);
@@ -130,14 +124,14 @@ namespace ALUGrid
         // backup stream 
         std::stringstream backup;
         // backup grid 
-        grd->duneBackup( backup );
+        grd->backup( backup );
         delete grd; grd = 0;
         // free allocated memory (only works if all grids are deleted at this point)
         MyAlloc::clearFreeMemory ();
         // restore saved grid 
         grd = new GitterDuneImpl( backup );
         alugrid_assert ( grd );
-        grd->duneRestore( backup );
+        grd->restore( backup );
       }
       return grd;
     }
@@ -287,22 +281,23 @@ namespace ALUGrid
   }
 
   // wird von Dune verwendet 
-  inline void GitterDuneBasis::duneBackup ( std::ostream &out )
+  inline void GitterDuneBasis::backup ( std::ostream &out )
   {
     // backup macro grid 
     container ().backupCMode ( out );
     // backup hierarchy 
-    Gitter::backup ( out );
+    Gitter :: backup ( out );
     // backup indices 
     backupIndices ( out );
   }
 
   // wird von Dune verwendet 
-  inline void GitterDuneBasis::duneRestore ( std::istream &in )
+  inline void GitterDuneBasis::restore ( std::istream &in )
   {
     // macro grid is created during grid creation
     // restore hierarchy 
-    Gitter::restore (in);
+    Gitter :: restore (in);
+
     // restore indices 
     restoreIndices (in);
   }

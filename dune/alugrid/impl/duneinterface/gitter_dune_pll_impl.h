@@ -145,31 +145,11 @@ namespace ALUGrid
       return containerPll().numMacroBndSegments();
     }
 
-    // restore parallel grid from before
-    void duneRestore (const char*);
+    // restore grid from std::istream, needed to be overloaded 
+    // because before restoring follow faces, index manager has to be
+    // restored 
+    virtual void restore(std::istream & in);
 
-    // backup current grid status 
-    void duneBackup (const char*);
-
-    // backup current grid status 
-    template <class ostream_t> 
-    void duneBackup ( ostream_t& os ) 
-    {
-      GitterDuneBasis::duneBackup( os );
-    }
-
-    // restore parallel grid from before
-    template< class istream_t >
-    void duneRestore ( istream_t &is )
-    {
-      // restore grid hierarchy 
-      GitterDuneBasis::duneRestore( is );
-
-      // exchange dynamic state after restore 
-      // (i.e. ghost information, since grid has changed after restore)
-      GitterPll::exchangeDynamicState();
-    }
-    
     // write grid to vtk file 
     void tovtk( const std::string &fn);
 
@@ -183,14 +163,14 @@ namespace ALUGrid
         // backup stream 
         std::stringstream backup;
         // backup grid 
-        grd->duneBackup( backup );
+        grd->backup( backup );
         delete grd; grd = 0;
         // free allocated memory (only works if all grids are deleted at this point)
         MyAlloc::clearFreeMemory ();
         // restore saved grid 
         grd = new GitterDunePll( backup, mpa );
         alugrid_assert ( grd );
-        grd->duneRestore( backup );
+        grd->restore( backup );
 
         // make sure every process got here
         mpa.barrier();
@@ -202,12 +182,6 @@ namespace ALUGrid
     using GitterDuneBasis::backup;
    
   private:
-
-    // restore grid from std::istream, needed to be overloaded 
-    // because before restoring follow faces, index manager has to be
-    // restored 
-    virtual void restore(std::istream & in);
-
     // rebuild ghost cells by exchanging bounndary info on macro level 
     void rebuildGhostCells();
     
