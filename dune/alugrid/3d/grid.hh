@@ -181,7 +181,7 @@ namespace Dune
       return *builder;
     }
 
-    static void duneNotifyMacroGridChanges ( GitterImplType &grid ) {}
+    static void completeGrid ( GitterImplType &grid ) {}
 
     CollectiveCommunication ccobj_;
   };
@@ -241,9 +241,12 @@ namespace Dune
       return *builder;
     }
 
-    static void duneNotifyMacroGridChanges ( GitterImplType &grid )
+    static void completeGrid ( GitterImplType &grid )
     {
-      grid.duneNotifyMacroGridChanges();
+      // setup communication patterns 
+      grid.notifyMacroGridChanges();
+      // rebuild ghost cells 
+      grid.rebuildGhostCells();
     } 
 
     CollectiveCommunication ccobj_;
@@ -931,9 +934,9 @@ namespace Dune
     }
 
     // helper function for factory 
-    virtual void duneNotifyMacroGridChanges ()
+    virtual void completeGrid ()
     {
-      Communications::duneNotifyMacroGridChanges( myGrid() );
+      Communications::completeGrid( myGrid() );
     }
     
     //! return reference to Dune reference element according to elType 

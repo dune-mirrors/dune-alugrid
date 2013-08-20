@@ -430,7 +430,7 @@ namespace Dune
     {
       grid->comm().barrier();
       // make changes in macro grid known in every partition
-      grid->duneNotifyMacroGridChanges();
+      grid->completeGrid();
     }
 
     return grid;

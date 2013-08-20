@@ -30,12 +30,6 @@ namespace ALUGrid
     return checkPartitioning( db, (GatherScatter*) 0 );
   }
 
-  void GitterDunePll::duneNotifyMacroGridChanges ()
-  {
-    GitterPll::notifyMacroGridChanges ();
-    rebuildGhostCells ();
-  }
-
   // done call notify and loadBalancer  
   bool GitterDunePll::duneAdapt ( AdaptRestrictProlongType &arp )
   {

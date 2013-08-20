@@ -93,9 +93,6 @@ namespace ALUGrid
     using GitterPll::duneRepartitionMacroGrid;
     using GitterPll::repartitionMacroGrid;
 
-    // notifyMacroGridChanges for dune
-    void duneNotifyMacroGridChanges (); 
-    
     // communication of border data 
     void borderBorderCommunication (
            GatherScatterType & vertexData ,
@@ -177,10 +174,10 @@ namespace ALUGrid
     using GitterDuneBasis::restore;
     using GitterDuneBasis::backup;
    
-  private:
     // rebuild ghost cells by exchanging bounndary info on macro level 
     void rebuildGhostCells();
     
+  private:
     // check that indices of ghost cells are within range of
     // the index managers maxIndex  
     void checkGhostIndices();
