@@ -1598,7 +1598,8 @@ namespace ALUGrid
     {
       // set default values 
       _ldbOver = 1.2;
-      _ldbMethod = LoadBalancer::DataBase::METIS_PartGraphKway;
+      // default partitioning whcih does not require external packages 
+      _ldbMethod = LoadBalancer::DataBase::ALUGRID_SpaceFillingCurve;
 
       std::ifstream in( "alugrid.cfg" );
       if( in )
