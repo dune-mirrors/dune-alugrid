@@ -179,6 +179,7 @@ namespace Dune
     template <int dummy, int dim, ALU3dGridElementType eltype> 
     class GeometryImpl : public GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> >
     {
+    protected:  
       typedef GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> > BaseType;
 
       using BaseType :: corners_ ;
@@ -226,6 +227,7 @@ namespace Dune
     class GeometryImpl<dummy,1,eltype> 
       : public GeometryImplBase< 1, 2, LinearMapping<cdim, 1> >
     {
+    protected:  
       enum { dim = 1 };
       typedef GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> > BaseType;
 
@@ -275,6 +277,7 @@ namespace Dune
     class GeometryImpl<dummy, 2, tetra> 
       : public GeometryImplBase< 2, 3, LinearMapping<cdim, 2> >
     {
+    protected:  
       // dim = 2, corners = 3 
       typedef GeometryImplBase< 2, 3, LinearMapping<cdim, 2> > BaseType;
 
@@ -332,6 +335,7 @@ namespace Dune
     class GeometryImpl<dummy, 2, hexa> 
       : public GeometryImplBase< 2, 4, BilinearSurfaceMapping > 
     {
+    protected:  
       // dim = 2, corners = 4 
       typedef GeometryImplBase< 2, 4, BilinearSurfaceMapping > BaseType;
 
@@ -385,6 +389,7 @@ namespace Dune
     class GeometryImpl<dummy,3, hexa> 
       : public GeometryImplBase< 3, 8, TrilinearMapping >
     {
+    protected:  
       // dim = 3, corners = 8
       typedef GeometryImplBase< 3, 8, TrilinearMapping > BaseType;
 
