@@ -46,7 +46,7 @@ namespace ALUGrid
 
   template < class A > class AccessIteratorTT {
     public :
-      Refcount ref;
+      IteratorRefcount ref;
       virtual ~AccessIteratorTT ();
     public :
       virtual std::pair< IteratorSTI < A > *, IteratorSTI < A > * > iteratorTT (const A *, int) = 0;
