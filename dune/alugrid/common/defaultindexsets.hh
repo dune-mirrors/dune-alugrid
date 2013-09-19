@@ -269,7 +269,8 @@ namespace Dune
       for( IteratorType it = begin; it != end; ++it )
       {
         alugrid_assert ( ( level_ < 0 ) ? it->isLeaf() : (it->level() == level_) );
-        ForLoop< InsertEntity, 0, dim >::apply( *it, indexContainers_, size_ );
+        const typename IteratorType::Entity &entity = *it;
+        ForLoop< InsertEntity, 0, dim >::apply( entity, indexContainers_, size_ );
       }
 
       // remember the number of entity on level and cd = 0
