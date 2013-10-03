@@ -1,7 +1,6 @@
 #ifndef DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 #define DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 
-#include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 

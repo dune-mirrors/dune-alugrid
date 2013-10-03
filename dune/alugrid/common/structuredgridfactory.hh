@@ -13,7 +13,8 @@
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/exceptions.hh>
 
-#include <dune/grid/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/alugrid_assert.hh>
+#include <dune/alugrid/common/declaration.hh>
 
 // include DGF parser implementation for SGrid 
 #include <dune/grid/io/file/dgfparser/dgfs.hh>

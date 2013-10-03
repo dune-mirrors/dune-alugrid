@@ -10,8 +10,6 @@
 #include "grid.hh"
 #include "faceutility.hh"
 
-#include <dune/common/misc.hh>
-
 namespace Dune {
 
 /************************************************************************************
