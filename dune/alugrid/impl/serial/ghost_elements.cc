@@ -80,7 +80,6 @@ namespace ALUGrid
     MacroGhostInfoTetra& ghInfo = *_ghInfoPtr;
 
     typedef Gitter::Geometric::VertexGeo VertexGeo;
-    typedef Gitter::Geometric::hedge1_GEO hedge1_GEO;
 
     const alucoord_t (&p)[1][3]  = ghInfo.getPoints();
     const int (&oppVerts)[1] = ghInfo.getOuterVertices();

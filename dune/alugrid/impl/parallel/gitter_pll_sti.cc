@@ -380,9 +380,6 @@ namespace ALUGrid
     std::vector< edgevec_t > innerEdges (nl), outerEdges (nl);
     std::vector< facevec_t > innerFaces (nl), outerFaces (nl);
 
-    typedef edgevec_t::const_iterator hedge_iterator;
-    typedef facevec_t::const_iterator hface_iterator;
-
     {
       // Erst die Zeiger auf alle Fl"achen und Kanten mit paralleler
       // Mehrdeutigkeit sichern, da die LeafIteratorTT < . > nach dem 

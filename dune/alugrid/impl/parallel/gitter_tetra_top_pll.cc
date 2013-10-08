@@ -30,8 +30,6 @@ namespace ALUGrid
         ghost->refine();
       }
 
-      typedef typename tetra_GEO::myrule_t  myrule_t;
-
       typedef std::pair< Gitter::Geometric::hasFace3 *, int > neigh_t;
 
       hface3_GEO * orgFace = ghost->myhface( _ghostPair.second ); 
