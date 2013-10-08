@@ -1041,7 +1041,6 @@ namespace ALUGrid
       
         typedef std::pair< bool, bool >  clean_t;
         typedef std::map< hedge_STI *, clean_t > cleanmap_t;
-        typedef cleanmap_t::iterator cleanmapiterator_t;
         cleanmap_t clean;
         
         {

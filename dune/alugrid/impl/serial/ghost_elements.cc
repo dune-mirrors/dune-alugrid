@@ -23,7 +23,6 @@ namespace ALUGrid
   bool MacroGhostBuilder::
   InsertNewUniqueVertex (double x, double y, double z, int i) 
   {
-    typedef GitterBasis::MacroGitterBasis SerialMacroGridBuilder_t;
     vertexMap_t::const_iterator hit = this->_vertexMap.find (i);
     if (hit == _vertexMap.end ()) 
     {
