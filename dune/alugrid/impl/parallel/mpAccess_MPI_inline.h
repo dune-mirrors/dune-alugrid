@@ -709,11 +709,19 @@ namespace ALUGrid
         }
       }
       
-      // if request exists, i.e. some messages have been sent
+      // if send request exists, i.e. some messages have been sent
       if( _sendRequest ) 
       {
         // wait until all processes are done with receiving
         MY_INT_TEST MPI_Waitall ( _sendLinks, _sendRequest, MPI_STATUSES_IGNORE);
+        alugrid_assert (test == MPI_SUCCESS);
+      }
+
+      // if recv request exists then wait for all messages to finish 
+      if( _recvRequest ) 
+      {
+        // wait until all processes are done with receiving
+        MY_INT_TEST MPI_Waitall ( _recvLinks, _recvRequest, MPI_STATUSES_IGNORE);
         alugrid_assert (test == MPI_SUCCESS);
       }
     }
