@@ -672,8 +672,7 @@ namespace ALUGrid
           const bool notAlreadyReceived = ( useTestAndIrecv ) ? 
             osRecv.size() > 0 && osRecv.validToRead() : linkNotReceived[ link ] ;
 
-          // if object stream wasn't unpacked yet 
-          // and size of stream is not zero
+          // if message was not received yet, check again 
           if( notAlreadyReceived ) 
           {
             // at this point _recvRequest should be available when useTestAndIrecv is true
