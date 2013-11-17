@@ -182,9 +182,9 @@ namespace ALUGrid
     }
     else 
     {
-      int dummy ;
-      for( int el=0; el<elSize; ++el )
-        os.readObject( dummy );
+      alugrid_assert( elSize == _elements.size() );
+      // advance buffer by elsize * sizeof( int ) bytes 
+      os.removeObject( elSize * sizeof( int ) );
     }
 #endif
 
