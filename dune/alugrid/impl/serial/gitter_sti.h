@@ -2,7 +2,7 @@
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
-#define STORE_LINKAGE_IN_VERTICES
+//#define STORE_LINKAGE_IN_VERTICES
 
 #include <limits>
 #include <list>
