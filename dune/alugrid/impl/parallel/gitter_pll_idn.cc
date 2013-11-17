@@ -332,13 +332,20 @@ namespace ALUGrid
     static const int endMarker = -32767 ;
     typedef Gitter :: vertex_STI vertex_STI ;
     typedef std::map< int, vertex_STI* > map_t;
+    typedef Gitter :: ElementPllXIF :: vertexelementlinkage_t vertexelementlinkage_t;
+    typedef typename vertexelementlinkage_t :: mapped_type  linkageset_t ;
+
     map_t _vxmap;
+    vertexelementlinkage_t _vxElemLinkage;
+
     GitterPll::MacroGitterPll& _containerPll ;
     const int _me ;
     int _size ;
   public: 
     UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, const int me ) 
-      : _containerPll( containerPll ),
+      : _vxmap(),
+        _vxElemLinkage(),
+        _containerPll( containerPll ),
         _me( me ),
         _size( 0 )
     {
@@ -348,7 +355,21 @@ namespace ALUGrid
         AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
         for (w.first (); ! w.done (); w.next ()) 
         {
-          w.item().computeVertexLinkage();
+          w.item().computeVertexLinkage( _vxElemLinkage );
+        }
+      }
+    }
+
+    ~UnpackVertexLinkage() 
+    {
+      if( Gitter :: storeLinkageInVertices ) 
+      {
+        // add computed vertex-element linkage to vertices 
+        AccessIterator < vertex_STI >::Handle w ( _containerPll );
+        for (w.first (); ! w.done (); w.next ()) 
+        {
+          vertex_STI& vertex = w.item();
+          vertex.insertLinkedElements( _vxElemLinkage[ &vertex ] );
         }
       }
     }
@@ -378,8 +399,8 @@ namespace ALUGrid
           _vxmap[ id ] = &vertex;
           if( Gitter :: storeLinkageInVertices ) 
           {
-            const std::set<int>& linkedElements = vertex.linkedElements();
-            typedef std::set<int>::const_iterator set_iterator;
+            linkageset_t& linkedElements = _vxElemLinkage[ &vertex ];
+            typedef typename linkageset_t::const_iterator set_iterator;
             const int linkedSize = linkedElements.size();
             os.writeObject( int(-linkedSize-1) );
             const set_iterator endElem = linkedElements.end();
@@ -432,10 +453,11 @@ namespace ALUGrid
           vertex_STI* vertex = (*hit).second;
           if( storeLinkage ) 
           {
+            linkageset_t& vxElemLinkage = _vxElemLinkage[ vertex ];
             const int linkedSize = linkedElements.size();
             for( int el=0; el< linkedSize; ++el ) 
             {
-              vertex->addGraphVertexIndex( linkedElements[ el ] );
+              vxElemLinkage.insert( linkedElements[ el ] );
             }
           }
           // check whether rank already is contained in the linkage and add otherwise 

@@ -2,7 +2,7 @@
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
-//#define STORE_LINKAGE_IN_VERTICES
+#define STORE_LINKAGE_IN_VERTICES
 
 #include <limits>
 #include <list>
@@ -277,11 +277,66 @@ namespace ALUGrid
     : public LinkedObjectDefault //, public MacroGridMoverIF
     {
     protected :
+      class ElementLinkage
+      {
+        int* _elements ;
+      public:
+        ElementLinkage() : _elements( 0 ) {}
+        ~ElementLinkage()
+        {
+          if( _elements )
+          {
+            delete [] _elements ;
+            _elements = 0;
+          }
+        }
+
+        template < class container_t >
+        bool insertElementLinkage( const container_t& elements )
+        {
+          if( ! _elements )
+          {
+            const int elSize = elements.size();
+            _elements = new int[ elSize + 1 ];
+            // first element holds the number of elements linked 
+            _elements[ 0 ] = elSize ;
+
+            typedef typename container_t :: const_iterator iterator ;
+            const iterator end = elements.end();
+            int idx = 1 ;
+            for( iterator it = elements.begin(); it != end; ++ it, ++idx )
+            {
+              _elements[ idx ] = *it ;
+            }
+            return true ;
+          }
+        }
+
+        bool notActive() const { return _elements == 0 ; }
+
+        int size () const
+        {
+          alugrid_assert( _elements );
+          return _elements[ 0 ];
+        }
+
+        int operator [] ( const int i ) const
+        {
+          alugrid_assert( _elements );
+          alugrid_assert( i < size() );
+          return _elements[ i+1 ];
+        }
+      };
+
       virtual ~VertexPllXIF () {}
     public :
       virtual bool setLinkage ( const std::vector< int >& ) = 0;
       virtual void clearLinkage () = 0;
-      virtual bool addGraphVertexIndex ( const int ldbVxIndex ) = 0;
+
+      typedef ElementLinkage ElementLinkage_t ;
+      typedef std::set< int > linkageset_t ;
+      virtual bool insertLinkedElements( const linkageset_t& ) = 0 ;
+      virtual const ElementLinkage_t& linkedElements() const = 0 ;
     };
 
     class VertexPllXDefault : public VertexPllXIF
@@ -291,8 +346,12 @@ namespace ALUGrid
     public :
       virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
       virtual void clearLinkage () { alugrid_assert (false); abort(); }
-      virtual bool addGraphVertexIndex ( const int ldbVxIndex ) { alugrid_assert (false); abort(); return false; }
-      virtual const std::set<int>& linkedElements() const { alugrid_assert (false); abort();  return *((std::set<int> *) 0); }
+
+      typedef VertexPllXIF :: linkageset_t  linkageset_t ;
+      virtual bool insertLinkedElements( const linkageset_t& ) { alugrid_assert (false); abort(); return false; }
+
+      typedef VertexPllXIF :: ElementLinkage_t ElementLinkage_t;
+      virtual const ElementLinkage_t& linkedElements() const { alugrid_assert (false); abort(); return *((ElementLinkage_t * ) 0 ); }
     };
 
 
@@ -400,6 +459,7 @@ namespace ALUGrid
       virtual int otherLdbVertexIndex( const int faceIndex ) const { return firstLdbVertexIndex(); }
     };
 
+    class vertex ;
 
     // type of ElementPllXIF_t is ElementPllXIF, see parallel.h
     class ElementPllXIF
@@ -408,6 +468,8 @@ namespace ALUGrid
       protected :
         virtual ~ElementPllXIF () {}
       public :
+        typedef std::map< vertex*, std::set< int > > vertexelementlinkage_t;
+
         typedef std::pair< ElementPllXIF *, int > accesspair_t; 
         typedef std::pair< const ElementPllXIF *, int > constaccesspair_t; 
         virtual void detachPllXFromMacro () {} 
@@ -418,7 +480,7 @@ namespace ALUGrid
         virtual accesspair_t accessInnerPllX (const accesspair_t&, int f) { return accesspair_t( this , f ); }
         virtual constaccesspair_t accessInnerPllX (const constaccesspair_t &, int f) const { return constaccesspair_t( this , f ); }
 
-        virtual void computeVertexLinkage() { alugrid_assert (false); abort(); }
+        virtual void computeVertexLinkage( vertexelementlinkage_t& ) { alugrid_assert (false); abort(); }
       public :
         typedef std::pair< helement *, int > ghostpair_t;
 

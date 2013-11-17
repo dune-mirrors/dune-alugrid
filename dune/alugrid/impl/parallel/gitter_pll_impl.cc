@@ -155,10 +155,9 @@ namespace ALUGrid
 #ifdef STORE_LINKAGE_IN_VERTICES    
     const int elSize = _elements.size();
     os.writeObject( elSize );
-    const set_iterator endElem = _elements.end();
-    for( set_iterator it = _elements.begin(); it != endElem; ++ it )
+    for( int i=0; i<elSize; ++ i ) 
     {
-      os.writeObject( *it );
+      os.writeObject( _elements[ i ] );
     }
 #endif
 
@@ -172,11 +171,20 @@ namespace ALUGrid
 #ifdef STORE_LINKAGE_IN_VERTICES    
     int elSize;
     os.readObject( elSize );
-    for( int el=0; el<elSize; ++el )
+    if( _elements.notActive() ) 
     {
-      int elem;
-      os.readObject( elem );
-      _elements.insert( elem );
+      std::vector< int > elements( elSize ) ;
+      for( int el=0; el<elSize; ++el )
+      {
+        os.readObject( elements[ el ] );
+      }
+      _elements.insertElementLinkage( elements );
+    }
+    else 
+    {
+      int dummy ;
+      for( int el=0; el<elSize; ++el )
+        os.readObject( dummy );
     }
 #endif
 
@@ -917,12 +925,13 @@ namespace ALUGrid
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::computeVertexLinkage() 
+  void TetraPllXBaseMacro< A >::
+  computeVertexLinkage( vertexelementlinkage_t& vxElemLinkge ) 
   {
     for( int i=0; i<4; ++i ) 
     {
       // add my ldb vertex index to vertex's list of elements 
-      mytetra().myvertex( i )->addGraphVertexIndex( _ldbVertexIndex );
+      vxElemLinkge[ mytetra().myvertex( i ) ].insert( _ldbVertexIndex );
     }
   }
 
@@ -1635,12 +1644,13 @@ namespace ALUGrid
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::computeVertexLinkage() 
+  void HexaPllBaseXMacro< A >::
+  computeVertexLinkage( vertexelementlinkage_t& vxElemLinkge ) 
   {
     for( int i=0; i<8; ++i ) 
     {
       // add my ldb vertex index to vertex's list of elements 
-      myhexa().myvertex( i )->addGraphVertexIndex( _ldbVertexIndex );
+      vxElemLinkge[ myhexa().myvertex( i ) ].insert( _ldbVertexIndex );
     }
   }
 

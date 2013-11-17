@@ -1462,18 +1462,18 @@ namespace ALUGrid
         // clear linkage first 
         vertex.clearLinkage();
 
-
         typedef std::set<int>::const_iterator set_iterator ;
 
         if( vertex.isBorder() ) 
         {
-          const std::set<int>& linkedElements = vertex.linkedElements();
+          typedef typename vertex_STI :: ElementLinkage_t ElementLinkage_t ;
+          const ElementLinkage_t& linkedElements = vertex.linkedElements();
           std::vector< int > linkage;
-          linkage.reserve( linkedElements.size() );
-          const set_iterator endElem = linkedElements.end();
-          for( set_iterator it = linkedElements.begin(); it != endElem; ++it ) 
+          const int elSize = linkedElements.size() ;
+          linkage.reserve( elSize );
+          for( int i=0; i<elSize; ++ i )
           {
-            const int rank = db.destination( *it ) ;
+            const int rank = db.destination( linkedElements[ i ] ) ;
             assert( rank >= 0 );
             if( rank != me ) 
             {

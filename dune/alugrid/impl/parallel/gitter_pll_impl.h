@@ -36,6 +36,8 @@ namespace ALUGrid
       using A::VERTEX;
       void doClearLinkage ();
     public :
+      typedef typename A :: ElementLinkage_t ElementLinkage_t ;
+
       VertexPllBaseX (double,double,double,int,IndexManagerStorageType&);
      ~VertexPllBaseX ();
 
@@ -64,16 +66,16 @@ namespace ALUGrid
       moveto_t*  _moveTo;
 
 #ifdef STORE_LINKAGE_IN_VERTICES
-      typedef std::set< int > :: iterator set_iterator ;
-      std::set< int > _elements ;
+      ElementLinkage_t _elements ;
+      typedef std::set< int > elementset_t ;
 
     public:  
-      virtual bool addGraphVertexIndex( const int ldbVxIndex ) 
+      virtual bool insertLinkedElements( const elementset_t& elements ) 
       {
-        _elements.insert( ldbVxIndex );
-        return true ;
+        return _elements.insertElementLinkage( elements );
       }
-      virtual const std::set<int>& linkedElements () const { return _elements; }
+
+      const ElementLinkage_t& linkedElements() const { return _elements ; }
 #endif // STORE_LINKAGE_IN_VERTICES
 
   };
@@ -234,6 +236,7 @@ namespace ALUGrid
 
       typedef typename A::myhface3_t myhface3_t;
       typedef typename A::myneighbour_t myneighbour_t;
+      typedef typename A::vertexelementlinkage_t vertexelementlinkage_t ;
 
       TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                          myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation);
@@ -247,7 +250,7 @@ namespace ALUGrid
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
-      virtual void computeVertexLinkage() ;
+      virtual void computeVertexLinkage( vertexelementlinkage_t& ) ;
     public :
       virtual bool erasable () const;
       virtual void attachElement2 ( const int, const int );
@@ -489,6 +492,7 @@ namespace ALUGrid
 
       typedef typename A::myhface4_t myhface4_t;
       typedef typename A::myneighbour_t  myneighbour_t;
+      typedef typename A::vertexelementlinkage_t vertexelementlinkage_t ;
 
       HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
                                myhface4_t *f2, int s2, myhface4_t *f3, int s3,
@@ -501,7 +505,7 @@ namespace ALUGrid
       virtual int firstLdbVertexIndex() const { return ldbVertexIndex(); }
       virtual void setLoadBalanceVertexIndex ( const int );
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
-      virtual void computeVertexLinkage() ;
+      virtual void computeVertexLinkage( vertexelementlinkage_t& ) ;
     public:  
       virtual void attachElement2 ( const int, const int );
       virtual void attach2 (int);
