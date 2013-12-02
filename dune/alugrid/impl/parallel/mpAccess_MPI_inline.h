@@ -469,6 +469,9 @@ namespace ALUGrid
     // otherwise MPI_Iprobe/MPI_Recv will be used
     //static const bool useTestAndIrecv = true ;
     static const bool useTestAndIrecv = false ;
+    
+    //static const bool oldBlockingMethod = true ;
+    static const bool oldBlockingMethod = false ;
 
     // no copying 
     NonBlockingExchangeMPI( const NonBlockingExchangeMPI& );
@@ -756,15 +759,34 @@ namespace ALUGrid
     // receive data implementation with given buffers 
     void receive( DataHandleIF& dataHandle )
     {
-      // do work that can be done between send and receive 
-      dataHandle.meantimeWork() ;
+      if( oldBlockingMethod ) 
+      {
+        // buffer size differs depending on method used 
+        const int recvBufferSize = ( useTestAndIrecv ) ? _recvLinks : 1 ;
+        // create receive message buffers 
+        std::vector< ObjectStream > out( recvBufferSize );
 
-      // buffer size differs depending on method used 
-      const int recvBufferSize = ( useTestAndIrecv ) ? _recvLinks : 1 ;
-      // create receive message buffers 
-      std::vector< ObjectStream > out( recvBufferSize );
-      // receive data 
-      receiveImpl( out, &dataHandle );
+        // receive data 
+        receiveImpl( out );
+
+        // do work that can be done between send and receive 
+        dataHandle.meantimeWork() ;
+
+        for( int link=0; link<_recvLinks; ++link ) 
+          dataHandle.unpack( link, out[ link ] );
+      }
+      else 
+      {
+        // do work that can be done between send and receive 
+        dataHandle.meantimeWork() ;
+
+        // buffer size differs depending on method used 
+        const int recvBufferSize = ( useTestAndIrecv ) ? _recvLinks : 1 ;
+        // create receive message buffers 
+        std::vector< ObjectStream > out( recvBufferSize );
+        // receive data 
+        receiveImpl( out, &dataHandle );
+      }
     }
 
     // receive data implementation with given buffers 
