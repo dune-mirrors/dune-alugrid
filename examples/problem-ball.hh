@@ -114,6 +114,7 @@ struct BallModel : public TransportModel<dimD>
     case 1:
     case 2:
     case 3:
+    case 4:
       problem_ = new BallData< dimDomain >( problem );
       break;
 
