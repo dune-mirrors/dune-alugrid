@@ -365,7 +365,7 @@ inline void LeafAdaptation< Grid, Vector >::postAdapt()
   }
 
   // reduce size of container, if possible 
-  container_.shrinkToFit();
+  container_.resize();
 
   // reset timer to count again 
   adaptTimer_.reset();

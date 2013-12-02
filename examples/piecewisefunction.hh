@@ -471,6 +471,41 @@ private:
 };
 
 
+template <class GridViewType>
+class VolumeData
+  : public Dune::VTKFunction< GridViewType >
+{
+  typedef VolumeData   ThisType;
+
+public:
+  typedef typename GridViewType :: template Codim< 0 >::Entity EntityType;
+  typedef typename EntityType::Geometry::LocalCoordinate LocalCoordinateType;
+
+  //! constructor taking discrete function 
+  VolumeData() {}
+
+  //! virtual destructor
+  virtual ~VolumeData () {}
+
+  //! return number of components
+  virtual int ncomps () const { return 1; }
+
+  //! evaluate single component comp in
+  //! the entity
+  virtual double evaluate ( int comp, const EntityType &e, const LocalCoordinateType &xi ) const
+  {
+    //return e.geometry().volume();
+    return double( e.level() );
+  }
+
+  //! get name
+  virtual std::string name () const
+  {
+    return std::string( "level" );
+  }
+};
+
+
 
 /**
  * \brief a class for vtk output of a PiecewiseFunction instance
@@ -526,6 +561,7 @@ struct VTKData< PiecewiseFunction< GridView, Dune::FieldVector<double,dimRange> 
   //! add rank function for visualization of the partitioning 
   static void addPartitioningData( const int rank, Dune::VTKWriter< GridView > &vtkWriter ) 
   {
+    vtkWriter.addCellData( new VolumeData< GridView >() );
     vtkWriter.addCellData( new PartitioningData< GridView >(rank) );
   }
 
