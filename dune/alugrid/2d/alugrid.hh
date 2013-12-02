@@ -125,8 +125,20 @@ public:
   typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
   typedef typename Partition< All_Partition > :: LeafGridView LeafGridView;
 
+  // old grid View methods
   template< PartitionIteratorType pitype >
-  typename Partition< pitype >::LevelGridView levelView ( int level ) const
+  typename Partition< pitype >::LevelGridView levelView ( int level ) const { return levelGridView< pitype >( level ); }
+
+  template< PartitionIteratorType pitype >
+  typename Partition< pitype >::LeafGridView leafView () const { return leafGridView< pitype >(); }
+
+  LevelGridView levelView ( int level ) const { return levelGridView( level ); }
+
+  LeafGridView leafView () const { return leafGridView(); }
+ 
+  // new grid view methods
+  template< PartitionIteratorType pitype >
+  typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
   {
     typedef typename Partition< pitype >::LevelGridView LevelGridView;
     typedef typename LevelGridView::GridViewImp LevelGridViewImp;
@@ -134,20 +146,20 @@ public:
   }
 
   template< PartitionIteratorType pitype >
-  typename Partition< pitype >::LeafGridView leafView () const
+  typename Partition< pitype >::LeafGridView leafGridView () const
   {
     typedef typename Partition< pitype >::LeafGridView LeafGridView;
     typedef typename LeafGridView::GridViewImp LeafGridViewImp;
     return LeafGridView( LeafGridViewImp( *this ) );
   }
 
-  LevelGridView levelView ( int level ) const
+  LevelGridView levelGridView ( int level ) const
   {
     typedef typename LevelGridView::GridViewImp LevelGridViewImp;
     return LevelGridView( LevelGridViewImp( *this, level ) );
   }
 
-  LeafGridView leafView () const
+  LeafGridView leafGridView () const
   {
     typedef typename LeafGridView::GridViewImp LeafGridViewImp;
     return LeafGridView( LeafGridViewImp( *this ) );
