@@ -733,6 +733,16 @@ namespace ALUGrid
     void send( std::vector< ObjectStream >& osSend, 
                DataHandleIF& dataHandle )
     {
+      if( oldBlockingMethod ) 
+      {
+        // send data 
+        for (int link = 0; link < _sendLinks; ++link) 
+        {
+          // pack data 
+          dataHandle.pack( link, osSend[ link ] );
+        }
+      }
+
       if( _needToSend ) 
       {
         // get mpi communicator
@@ -744,8 +754,11 @@ namespace ALUGrid
         // send data 
         for (int link = 0; link < _sendLinks; ++link) 
         {
-          // pack data 
-          dataHandle.pack( link, osSend[ link ] );
+          if( ! oldBlockingMethod ) 
+          {
+            // pack data 
+            dataHandle.pack( link, osSend[ link ] );
+          }
 
           // send data 
           sendLink( sendDest[ link ], _tag, osSend[ link ], _sendRequest[ link ], comm );
