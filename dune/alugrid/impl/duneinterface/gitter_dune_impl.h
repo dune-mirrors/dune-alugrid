@@ -358,6 +358,7 @@ namespace ALUGrid
     return * _w;
   }
 
+#if 0
   namespace {
   std::string ZeroPadNumber(int num)
   {
@@ -366,6 +367,7 @@ namespace ALUGrid
       return ss.str();
   }
   }
+#endif
 
 } // namespace ALUGrid
 
