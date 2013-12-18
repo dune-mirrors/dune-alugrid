@@ -25,7 +25,6 @@ namespace Dune
     class GlobalVertexIndexBlock
     : public dgf::BasicBlock
     {
-      unsigned int nofvtx;
       bool goodline;       
 
     public:
@@ -63,7 +62,6 @@ namespace Dune
     class ALUParallelBlock
     : public dgf::BasicBlock
     {
-      unsigned int nofvtx;
       bool goodline;       
 
     public:
