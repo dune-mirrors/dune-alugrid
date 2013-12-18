@@ -69,7 +69,9 @@ public:
   /////////////////////////////////////////////////////////////
   //! copy constructor 
   ALU2dGridEntitySeedBase(const ALU2dGridEntitySeedType & org);
-  
+
+  bool isValid () const { return bool( item_ ); }
+
   //! equality operator 
   bool operator == (const ALU2dGridEntitySeedType& i) const
   {
