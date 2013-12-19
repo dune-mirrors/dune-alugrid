@@ -64,7 +64,7 @@ namespace ALU2DGrid
 
     sort(e.begin(), e.end());
 
-    if( !(l < edmaps.size()) )
+    if( !(l < int(edmaps.size())) )
       edmaps.push_back( map_t() );
 
     map_t & map = edmaps[l];
@@ -91,7 +91,7 @@ namespace ALU2DGrid
 
     sort(v.begin(), v.end());
 
-    if( !(l < f4maps.size()) )
+    if( !(l < int(f4maps.size())) )
       f4maps.push_back( map_t() );
 
     map_t & map = f4maps[l];
