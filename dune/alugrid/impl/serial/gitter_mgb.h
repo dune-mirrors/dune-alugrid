@@ -231,12 +231,6 @@ namespace ALUGrid
       template<class istream_t> 
       static void generateRawImage ( istream_t &, std::ostream &, const ElementRawID, const ElementRawID );
 
-      // insert all tetra from elemMap into tetraList 
-      void tetraMapToList( elementMap_t& elemMap, std::list< tetra_GEO* >& elemList, const bool setIndex  );
-      // insert all hexa from elemMap into hexaList 
-      void hexaMapToList( elementMap_t& elemMap, std::list< hexa_GEO* >& elemList, const bool setIndex  );
-
-    private :
       // insert all element from elemMap into elemList 
       template<class elem_GEO>
       void elementMapToList( elementMap_t& elemMap, std::list< elem_GEO* >& elemList, const bool setIndex  );

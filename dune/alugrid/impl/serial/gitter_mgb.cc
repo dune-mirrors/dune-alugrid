@@ -803,19 +803,7 @@ namespace ALUGrid
     if(!_finalized) finalize();
   }
 
-  void MacroGridBuilder::
-  tetraMapToList( elementMap_t& elementMap, std::list< tetra_GEO* >& elemList, const bool setIndex  )
-  {
-    elementMapToList( elementMap, elemList, setIndex );
-  }
-
-  void MacroGridBuilder::
-  hexaMapToList( elementMap_t& elementMap, std::list< hexa_GEO* >& elemList, const bool setIndex  )
-  {
-    elementMapToList( elementMap, elemList, setIndex );
-  }
-
-  template<class elem_GEO> 
+  template< class elem_GEO > 
   void MacroGridBuilder::
   elementMapToList( elementMap_t& elementMap, std::list< elem_GEO* >& elemList, const bool setIndex  )
   {
@@ -827,7 +815,7 @@ namespace ALUGrid
         typedef typename elementMap_t::iterator  iterator;
         const iterator elementMapEnd = elementMap.end();
         for (iterator i = elementMap.begin (); 
-           i != elementMapEnd; elementMap.erase (i++) )
+             i != elementMapEnd; elementMap.erase (i++) )
         {
           elem_GEO* elem = (elem_GEO *)(*i).second;
           // if ldbVertexIndex still needs to be set (in case of initial read)
@@ -862,10 +850,10 @@ namespace ALUGrid
     alugrid_assert (_initialized);
     
     // copy elements from hexa map to hexa list respecting the insertion order 
-    hexaMapToList( _hexaMap, myBuilder()._hexaList, true );
+    elementMapToList( _hexaMap, myBuilder()._hexaList, true );
 
     // copy elements from tetra map to tetra list respecting the insertion order 
-    tetraMapToList( _tetraMap, myBuilder()._tetraList, true );
+    elementMapToList( _tetraMap, myBuilder()._tetraList, true );
 
     {
       typedef elementMap_t::iterator  iterator;
