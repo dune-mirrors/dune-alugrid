@@ -123,7 +123,9 @@ public:
   /////////////////////////////////////////////////////////////
   //! copy constructor 
   ALU3dGridEntitySeedBase(const ALU3dGridEntitySeedType & org);
-  
+
+  bool isValid () const { return bool( item_ ); }
+
   //! equality operator 
   bool operator == (const ALU3dGridEntitySeedType& i) const
   {
