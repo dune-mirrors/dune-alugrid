@@ -30,48 +30,58 @@ namespace ALUGrid
     {
       BuilderIF::vertexlist_t& _vertexList = myBuilder ()._vertexList;
       const BuilderIF::vertexlist_t::iterator _vertexListend  = _vertexList.end ();
-      for (BuilderIF::vertexlist_t::iterator i = _vertexList.begin ();
-        i != _vertexListend; _vertexList.erase (i ++)) 
-          _vertexMap [(*i)->ident ()] = (*i);
+      // copy list entries to map 
+      for (BuilderIF::vertexlist_t::iterator i = _vertexList.begin (); i != _vertexListend; ++i )
+        _vertexMap [(*i)->ident ()] = (*i);
+      // clear list 
+      _vertexList.clear();
     }
     {
       BuilderIF::hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
       const BuilderIF::hedge1list_t::iterator _hedge1Listend = _hedge1List.end ();
-      for (BuilderIF::hedge1list_t::iterator i = _hedge1List.begin ();
-           i != _hedge1Listend; _hedge1List.erase (i ++)) 
+      // copy list entries to map 
+      for (BuilderIF::hedge1list_t::iterator i = _hedge1List.begin (); i != _hedge1Listend; ++i )
       {
         int k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident ();
         _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
       }
+      // clear list 
+      _hedge1List.clear();
     }
     {
       BuilderIF::hface3list_t& _hface3List = myBuilder ()._hface3List;
       const BuilderIF::hface3list_t::iterator _hface3Listend = _hface3List.end ();
-      for (BuilderIF::hface3list_t::iterator i = _hface3List.begin (); 
-           i != _hface3Listend; _hface3List.erase (i ++)) 
+      // copy list entries to map 
+      for (BuilderIF::hface3list_t::iterator i = _hface3List.begin (); i != _hface3Listend; ++i )
       {
         _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
       }
+      // clear list 
+      _hface3List.clear();
     }
     {
       BuilderIF::hface4list_t& _hface4List = myBuilder ()._hface4List;
       const BuilderIF::hface4list_t::iterator _hface4Listend = _hface4List.end ();
-      for (BuilderIF::hface4list_t::iterator i = _hface4List.begin (); 
-           i != _hface4Listend; _hface4List.erase (i ++)) 
+      // copy list entries to map 
+      for (BuilderIF::hface4list_t::iterator i = _hface4List.begin (); i != _hface4Listend; ++i )
         _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
+      // clear list 
+      _hface4List.clear();
     }
 
     // all periodic elements (need to be removed before hbndseg and elements) 
     {
       BuilderIF::periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 
       const BuilderIF::periodic3list_t::iterator _periodic3Listend = _periodic3List.end ();
-      for (BuilderIF::periodic3list_t::iterator i = _periodic3List.begin (); 
-           i != _periodic3Listend; _periodic3List.erase (i++)) 
+      // copy list entries to map
+      for (BuilderIF::periodic3list_t::iterator i = _periodic3List.begin (); i != _periodic3Listend; ++i )
       {
         // note: the last vertex is flipped because of confusion with tetra keys
         _periodic3Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
              (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i);
       }
+      // clear list
+      _periodic3List.clear();
       alugrid_assert ( _periodic3List.size() == 0 );
     }
 
@@ -79,13 +89,15 @@ namespace ALUGrid
     {
       BuilderIF::periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
       const BuilderIF::periodic4list_t::iterator _periodic4Listend = _periodic4List.end ();
-      for (BuilderIF::periodic4list_t::iterator i = _periodic4List.begin (); 
-           i != _periodic4Listend; _periodic4List.erase (i++)) 
+      // copy list entries to map
+      for (BuilderIF::periodic4list_t::iterator i = _periodic4List.begin (); i != _periodic4Listend; ++i )
       {
         // note: the last vertex is flipped because of confusion with hexa keys
         _periodic4Map [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
              (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i);
       }
+      // clear list
+      _periodic4List.clear();
       alugrid_assert ( _periodic4List.size() == 0 );
     }
 
@@ -98,8 +110,9 @@ namespace ALUGrid
       toDeleteHbnd.reserve( _hbndseg4List.size() );
 
       const BuilderIF::hbndseg4list_t::iterator _hbndseg4Listend = _hbndseg4List.end ();
+      // copy list entries to map
       for (BuilderIF::hbndseg4list_t::iterator i = _hbndseg4List.begin (); 
-           i != _hbndseg4Listend; _hbndseg4List.erase (i++)) 
+           i != _hbndseg4Listend; ++i )
       {
         typedef Gitter::Geometric::hface4_GEO hface4_GEO;
         hface4_GEO * face = (*i)->myhface4 (0);
@@ -134,6 +147,9 @@ namespace ALUGrid
           _hbnd4Map [key] = (*i);
         }
       }
+
+      // clear list
+      _hbndseg4List.clear();
     }
     
     {
@@ -141,8 +157,8 @@ namespace ALUGrid
       toDeleteHbnd.reserve( toDeleteHbnd.size() + _hbndseg3List.size() );
 
       const BuilderIF::hbndseg3list_t::iterator _hbndseg3Listend = _hbndseg3List.end ();
-      for (BuilderIF::hbndseg3list_t::iterator i = _hbndseg3List.begin (); 
-           i != _hbndseg3Listend; _hbndseg3List.erase (i++)) 
+      // copy list entries to map
+      for (BuilderIF::hbndseg3list_t::iterator i = _hbndseg3List.begin (); i != _hbndseg3Listend; ++i )
       {
         typedef Gitter::Geometric::hface3_GEO hface3_GEO;
         hface3_GEO * face = (*i)->myhface3 (0);
@@ -176,28 +192,35 @@ namespace ALUGrid
           _hbnd3Map [key] = (*i);
         }
       }
+      // clear list
+      _hbndseg3List.clear();
     }
 
     // all elements 
     {
       BuilderIF::tetralist_t& _tetraList = myBuilder ()._tetraList; 
       const BuilderIF::tetralist_t::iterator _tetraListend = _tetraList.end ();
-      for (BuilderIF::tetralist_t::iterator i = _tetraList.begin (); 
-           i != _tetraListend; _tetraList.erase (i++)) 
+      // copy list entries to map
+      for (BuilderIF::tetralist_t::iterator i = _tetraList.begin (); i != _tetraListend; ++i )
       {
         _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
              (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
       } 
+      // clear list
+      _tetraList.clear();
     }
+
     {
       BuilderIF::hexalist_t& _hexaList = myBuilder()._hexaList;
       const BuilderIF::hexalist_t::iterator _hexaListend = _hexaList.end ();
-      for (BuilderIF::hexalist_t::iterator i = _hexaList.begin (); 
-           i != _hexaListend; _hexaList.erase (i++)) 
+      // copy list entries to map
+      for (BuilderIF::hexalist_t::iterator i = _hexaList.begin (); i != _hexaListend; ++i )
       {
         _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
                   (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
       }
+      // clear list
+      _hexaList.clear();
     }
 
     /////////////////////////////////////////
@@ -936,6 +959,12 @@ namespace ALUGrid
   // method was overloaded because here we use our DuneParallelGridMover 
   void GitterPll::doRepartitionMacroGrid ( LoadBalancer::DataBase &db, GatherScatterType *gatherScatter )
   {
+    // get communicator 
+    MpAccessLocal& mpa = mpAccess();
+
+    // for serial run do nothing here
+    if( mpa.psize() <= 1 ) return ;
+
     // in case gatherScatter is given check for overloaded partitioning 
     const bool userDefinedPartitioning = gatherScatter && gatherScatter->userDefinedPartitioning();
 
@@ -945,7 +974,7 @@ namespace ALUGrid
     // new partitioning. For the internal partitioner, repartition is called heer and
     // could still lead to no repartitioning being carried out
     const bool doRepartition = userDefinedPartitioning ? true : 
-      db.repartition (mpAccess (), LoadBalancer::DataBase::method (_ldbMethod), _ldbOver );
+      db.repartition (mpa, LoadBalancer::DataBase::method (_ldbMethod), _ldbOver );
 
     // get graph sizes from data base, this is only used for the serial partitioners
     if( ! userDefinedPartitioning ) 
@@ -957,7 +986,6 @@ namespace ALUGrid
     const clock_t start = clock ();
     clock_t lap1 (start), lap2 (start), lap3 (start), lap4 (start);
 
-    MpAccessLocal& mpa = mpAccess();
 
     // if partitining should be done, erase linkage and setup moveto directions 
     if( doRepartition ) 

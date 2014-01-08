@@ -697,38 +697,59 @@ namespace ALUGrid
   void MacroGridBuilder::initialize () 
   {
     {
+      BuilderIF::vertexlist_t& _vertexList = myBuilder ()._vertexList;
       typedef BuilderIF::vertexlist_t::iterator  iterator;
-      const iterator vertexListEnd = myBuilder ()._vertexList.end ();
-      for ( iterator i = myBuilder ()._vertexList.begin (); i != vertexListEnd; myBuilder ()._vertexList.erase (i ++)) 
-        _vertexMap [(*i)->ident ()] = (*i);
+      const iterator vertexListEnd = _vertexList.end ();
+      // copy list entries to map
+      for ( iterator i = _vertexList.begin (); i != vertexListEnd; ++i )
+        _vertexMap [ (*i)->ident ()] = (*i);
+      // clear list
+      _vertexList.clear();
     }
     {
+      BuilderIF::hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
       typedef BuilderIF::hedge1list_t::iterator  iterator;
-      const iterator hedge1ListEnd = myBuilder ()._hedge1List.end ();
-      for ( iterator i = myBuilder ()._hedge1List.begin (); i != hedge1ListEnd; myBuilder ()._hedge1List.erase (i ++)) 
+      const iterator hedge1ListEnd = _hedge1List.end ();
+      // copy list entries to map
+      for ( iterator i = _hedge1List.begin (); i != hedge1ListEnd; ++i )
       {
         long k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident ();
         _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
       }
+      // clear list
+      _hedge1List.clear();
     }
     {
+      BuilderIF::hface3list_t& _hface3List = myBuilder ()._hface3List;
       typedef BuilderIF::hface3list_t::iterator  iterator;
-      const iterator  hface3ListEnd = myBuilder ()._hface3List.end ();
-      for ( iterator i = myBuilder ()._hface3List.begin (); i != hface3ListEnd; myBuilder ()._hface3List.erase (i ++)) 
+      const iterator  hface3ListEnd = _hface3List.end ();
+      // copy list entries to map
+      for ( iterator i = _hface3List.begin (); i != hface3ListEnd; ++i )
       {
         _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
       }
+      // clear list
+      _hface3List.clear();
     }
     {
+      BuilderIF::hface4list_t& _hface4List = myBuilder ()._hface4List;
       typedef BuilderIF::hface4list_t::iterator  iterator;
-      const iterator hface4ListEnd = myBuilder ()._hface4List.end ();
-      for ( iterator i = myBuilder ()._hface4List.begin (); i != hface4ListEnd; myBuilder ()._hface4List.erase (i ++)) 
+      const iterator hface4ListEnd = _hface4List.end ();
+      // copy list entries to map
+      for ( iterator i = _hface4List.begin (); i != hface4ListEnd; ++i )
+      {
         _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
+      }
+
+      // clear list
+      _hface4List.clear();
     }
     {
+      BuilderIF::hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List;
       typedef BuilderIF::hbndseg4list_t::iterator  iterator;
-      const iterator hbndseg4ListEnd = myBuilder ()._hbndseg4List.end ();
-      for ( iterator i = myBuilder ()._hbndseg4List.begin (); i != hbndseg4ListEnd; myBuilder ()._hbndseg4List.erase (i++)) 
+      const iterator hbndseg4ListEnd = _hbndseg4List.end ();
+      // copy entries to map
+      for ( iterator i = myBuilder ()._hbndseg4List.begin (); i != hbndseg4ListEnd; ++i )
       {
         faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ());
         if ((*i)->bndtype () == Gitter::hbndseg_STI::closure) {
@@ -740,11 +761,15 @@ namespace ALUGrid
           _hbnd4Map [key] = (*i);
         }
       } 
+      // clear list
+      _hbndseg4List.clear();
     }
     {
+      BuilderIF::hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List;
       typedef BuilderIF::hbndseg3list_t::iterator iterator;
-      const iterator hbndseg3ListEnd = myBuilder ()._hbndseg3List.end ();
-      for ( iterator i = myBuilder ()._hbndseg3List.begin (); i != hbndseg3ListEnd; myBuilder ()._hbndseg3List.erase (i++)) 
+      const iterator hbndseg3ListEnd = _hbndseg3List.end ();
+      // copy entries to map
+      for ( iterator i = _hbndseg3List.begin (); i != hbndseg3ListEnd; ++i )
       {
         faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ());
         if ((*i)->bndtype () == Gitter::hbndseg_STI::closure) 
@@ -757,40 +782,58 @@ namespace ALUGrid
           _hbnd3Map [key] = (*i);
         }
       }
+      // clear list
+      _hbndseg3List.clear();
     }
     {
+      BuilderIF::tetralist_t& _tetraList = myBuilder ()._tetraList;
       typedef BuilderIF::tetralist_t::iterator  iterator;
-      const iterator tetraListEnd = myBuilder ()._tetraList.end ();
-      for ( iterator i = myBuilder ()._tetraList.begin (); i != tetraListEnd; myBuilder ()._tetraList.erase (i++)) 
+      const iterator tetraListEnd = _tetraList.end ();
+      // copy entries to map
+      for ( iterator i = _tetraList.begin (); i != tetraListEnd; ++i ) 
       {
         _tetraMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
                                   (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
       }
+      // clear list
+      _tetraList.clear();
     }
     {
+      BuilderIF::periodic3list_t& _periodic3List = myBuilder ()._periodic3List;
       typedef BuilderIF::periodic3list_t::iterator iterator;
-      const iterator periodic3ListEnd = myBuilder ()._periodic3List.end ();
-      for ( iterator i = myBuilder ()._periodic3List.begin (); i != periodic3ListEnd; myBuilder ()._periodic3List.erase (i++)) 
+      const iterator periodic3ListEnd = _periodic3List.end ();
+      // copy entries to map
+      for ( iterator i = _periodic3List.begin (); i != periodic3ListEnd; ++i ) 
       {
         _periodic3Map [elementKey_t ( (*i)->myvertex (0)->ident (),  (*i)->myvertex (1)->ident (), 
                                       (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i);
       }
+      // clear list
+      _periodic3List.clear();
     }
     {
+      BuilderIF::periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
       typedef BuilderIF::periodic4list_t::iterator  iterator;
-      const iterator periodic4ListEnd = myBuilder ()._periodic4List.end ();
-      for ( iterator i = myBuilder ()._periodic4List.begin (); i != periodic4ListEnd; myBuilder ()._periodic4List.erase (i++)) 
+      const iterator periodic4ListEnd = _periodic4List.end ();
+      // copy entries to map
+      for ( iterator i = _periodic4List.begin (); i != periodic4ListEnd; ++i )
       {
         _periodic4Map [elementKey_t ( (*i)->myvertex (0)->ident (),  (*i)->myvertex (1)->ident (), 
                                       (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i);
       }
+      // clear list
+      _periodic4List.clear();
     }
     {
+      BuilderIF::hexalist_t& _hexaList = myBuilder ()._hexaList;
       typedef BuilderIF::hexalist_t::iterator  iterator;
-      const iterator  hexaListEnd = myBuilder ()._hexaList.end ();
-      for ( iterator i = myBuilder ()._hexaList.begin (); i != hexaListEnd;  myBuilder ()._hexaList.erase (i++)) 
+      const iterator  hexaListEnd = _hexaList.end ();
+      // copy entries to map
+      for ( iterator i = _hexaList.begin (); i != hexaListEnd; ++i )
         _hexaMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
                                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
+      // clear list
+      _hexaList.clear();
     }
 
     _initialized = true;
