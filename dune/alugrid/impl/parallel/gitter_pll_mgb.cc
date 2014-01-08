@@ -312,6 +312,10 @@ namespace ALUGrid
 
     {
       BuilderIF::periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 
+
+      // reserve memory for container in case it's vector
+      reserve( _periodic3List, _periodic3Map.size() );
+
       const elementMap_t::iterator _periodic3Mapend = _periodic3Map.end ();
       for (elementMap_t::iterator i = _periodic3Map.begin (); i != _periodic3Mapend; _periodic3Map.erase (i++))
       {
@@ -333,6 +337,10 @@ namespace ALUGrid
     
     {
       BuilderIF::periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
+
+      // reserve memory for container in case it's vector
+      reserve( _periodic4List, _periodic4Map.size() );
+
       const elementMap_t::iterator _periodic4Mapend =  _periodic4Map.end ();
       for (elementMap_t::iterator i = _periodic4Map.begin (); i != _periodic4Mapend; _periodic4Map.erase (i++))
       {
@@ -354,6 +362,10 @@ namespace ALUGrid
 
     {
       BuilderIF::hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hbndseg4List, _hbnd4Map.size() );
+
       const faceMap_t::iterator _hbnd4Mapend = _hbnd4Map.end ();
       for (faceMap_t::iterator i = _hbnd4Map.begin (); i != _hbnd4Mapend; )
       {
@@ -373,6 +385,10 @@ namespace ALUGrid
 
     {
       BuilderIF::hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hbndseg3List, _hbnd3Map.size() );
+
       const faceMap_t::iterator _hbnd3Mapend = _hbnd3Map.end ();
       for (faceMap_t::iterator i = _hbnd3Map.begin (); i != _hbnd3Mapend; )
       {
@@ -392,6 +408,10 @@ namespace ALUGrid
 
     {
       BuilderIF::hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List; 
+
+      // reserve memory for container in case it's vector
+      reserve( _hbndseg4List, _hbnd4Int.size() );
+
       const hbnd4intMap_t::iterator _hbnd4Intend = _hbnd4Int.end ();
       for (hbnd4intMap_t::iterator i = _hbnd4Int.begin (); i != _hbnd4Intend; ++i) 
       {
@@ -415,6 +435,10 @@ namespace ALUGrid
     // here the internal boundary elements are created 
     {
       BuilderIF::hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List; 
+
+      // reserve memory for container in case it's vector
+      reserve( _hbndseg3List, _hbnd3Int.size() );
+
       const hbnd3intMap_t::iterator _hbnd3Intend = _hbnd3Int.end ();
       for (hbnd3intMap_t::iterator i = _hbnd3Int.begin (); i != _hbnd3Intend; ++i ) 
       {
@@ -439,6 +463,10 @@ namespace ALUGrid
     }
     {
       BuilderIF::hface4list_t& _hface4List = myBuilder ()._hface4List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hface4List, _face4Map.size() );
+
       const faceMap_t::iterator _face4Mapend = _face4Map.end ();
       for (faceMap_t::iterator i = _face4Map.begin (); i != _face4Mapend; )
       {
@@ -458,6 +486,10 @@ namespace ALUGrid
     }
     {
       BuilderIF::hface3list_t& _hface3List = myBuilder ()._hface3List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hface3List, _face3Map.size() );
+
       const faceMap_t::iterator _face3Mapend = _face3Map.end ();
       for (faceMap_t::iterator i = _face3Map.begin (); i != _face3Mapend; ) 
       {
@@ -477,6 +509,10 @@ namespace ALUGrid
     }
     {
       BuilderIF::hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hedge1List, _edgeMap.size() );
+
       const edgeMap_t::iterator _edgeMapend = _edgeMap.end ();
       for (edgeMap_t::iterator i = _edgeMap.begin (); i != _edgeMapend; )
       {
@@ -496,6 +532,10 @@ namespace ALUGrid
     }
     {
       BuilderIF::vertexlist_t& _vertexList = myBuilder ()._vertexList;
+
+      // reserve memory for container in case it's vector
+      reserve( _vertexList, _vertexMap.size() );
+
       const vertexMap_t::iterator _vertexMapend = _vertexMap.end ();
       for (vertexMap_t::iterator i = _vertexMap.begin (); i != _vertexMapend; )
       {

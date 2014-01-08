@@ -128,6 +128,19 @@ namespace ALUGrid
       typedef typename BuilderIF :: hexalist_t  hexalist_t;
       typedef typename BuilderIF :: tetralist_t tetralist_t;
 
+      // reserve memory for container for additional 'size' elements
+      template <class A>
+      void reserve( std::vector< A >& container, size_t size ) const 
+      {
+        container.reserve( container.size() + size );
+      }
+
+      // reserve memory for container, nothing to do for list 
+      template <class A>
+      void reserve( std::list< A >& container, size_t size ) const 
+      {
+      }
+
       typedef long    vertexKey_t;
       typedef std::pair< int, int >   edgeKey_t;
       typedef Key3 < int >  faceKey_t;

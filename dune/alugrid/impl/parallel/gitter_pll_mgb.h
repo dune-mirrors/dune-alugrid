@@ -56,6 +56,8 @@ namespace ALUGrid
       // void unpackAll (std::vector< ObjectStream > &, GatherScatterType* );
 
       ~ParallelGridMover ();
+    protected:
+      using MacroGridBuilder :: reserve ;
   };
 
 } // namespace ALUGrid
