@@ -34,7 +34,7 @@ namespace ALUGrid
       for (BuilderIF::vertexlist_t::iterator i = _vertexList.begin (); i != _vertexListend; ++i )
         _vertexMap [(*i)->ident ()] = (*i);
       // clear list 
-      _vertexList.clear();
+      clear( _vertexList );
     }
     {
       BuilderIF::hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
@@ -46,7 +46,7 @@ namespace ALUGrid
         _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
       }
       // clear list 
-      _hedge1List.clear();
+      clear( _hedge1List );
     }
     {
       BuilderIF::hface3list_t& _hface3List = myBuilder ()._hface3List;
@@ -57,7 +57,7 @@ namespace ALUGrid
         _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
       }
       // clear list 
-      _hface3List.clear();
+      clear( _hface3List );
     }
     {
       BuilderIF::hface4list_t& _hface4List = myBuilder ()._hface4List;
@@ -66,7 +66,7 @@ namespace ALUGrid
       for (BuilderIF::hface4list_t::iterator i = _hface4List.begin (); i != _hface4Listend; ++i )
         _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
       // clear list 
-      _hface4List.clear();
+      clear( _hface4List );
     }
 
     // all periodic elements (need to be removed before hbndseg and elements) 
@@ -81,10 +81,8 @@ namespace ALUGrid
              (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i);
       }
       // clear list
-      _periodic3List.clear();
-      alugrid_assert ( _periodic3List.size() == 0 );
+      clear( _periodic3List );
     }
-
 
     {
       BuilderIF::periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
@@ -97,8 +95,7 @@ namespace ALUGrid
              (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i);
       }
       // clear list
-      _periodic4List.clear();
-      alugrid_assert ( _periodic4List.size() == 0 );
+      clear( _periodic4List );
     }
 
 
@@ -149,7 +146,7 @@ namespace ALUGrid
       }
 
       // clear list
-      _hbndseg4List.clear();
+      clear( _hbndseg4List );
     }
     
     {
@@ -193,7 +190,7 @@ namespace ALUGrid
         }
       }
       // clear list
-      _hbndseg3List.clear();
+      clear( _hbndseg3List );
     }
 
     // all elements 
@@ -207,7 +204,7 @@ namespace ALUGrid
              (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
       } 
       // clear list
-      _tetraList.clear();
+      clear( _tetraList );
     }
 
     {
@@ -220,7 +217,7 @@ namespace ALUGrid
                   (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
       }
       // clear list
-      _hexaList.clear();
+      clear( _hexaList );
     }
 
     /////////////////////////////////////////

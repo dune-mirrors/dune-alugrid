@@ -703,8 +703,9 @@ namespace ALUGrid
       // copy list entries to map
       for ( iterator i = _vertexList.begin (); i != vertexListEnd; ++i )
         _vertexMap [ (*i)->ident ()] = (*i);
+
       // clear list
-      _vertexList.clear();
+      clear( _vertexList );
     }
     {
       BuilderIF::hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
@@ -717,7 +718,7 @@ namespace ALUGrid
         _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
       }
       // clear list
-      _hedge1List.clear();
+      clear( _hedge1List );
     }
     {
       BuilderIF::hface3list_t& _hface3List = myBuilder ()._hface3List;
@@ -729,7 +730,7 @@ namespace ALUGrid
         _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
       }
       // clear list
-      _hface3List.clear();
+      clear( _hface3List );
     }
     {
       BuilderIF::hface4list_t& _hface4List = myBuilder ()._hface4List;
@@ -742,7 +743,7 @@ namespace ALUGrid
       }
 
       // clear list
-      _hface4List.clear();
+      clear( _hface4List );
     }
     {
       BuilderIF::hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List;
@@ -762,7 +763,7 @@ namespace ALUGrid
         }
       } 
       // clear list
-      _hbndseg4List.clear();
+      clear( _hbndseg4List );
     }
     {
       BuilderIF::hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List;
@@ -783,7 +784,7 @@ namespace ALUGrid
         }
       }
       // clear list
-      _hbndseg3List.clear();
+      clear( _hbndseg3List );
     }
     {
       BuilderIF::tetralist_t& _tetraList = myBuilder ()._tetraList;
@@ -796,7 +797,7 @@ namespace ALUGrid
                                   (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
       }
       // clear list
-      _tetraList.clear();
+      clear( _tetraList );
     }
     {
       BuilderIF::periodic3list_t& _periodic3List = myBuilder ()._periodic3List;
@@ -809,7 +810,7 @@ namespace ALUGrid
                                       (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i);
       }
       // clear list
-      _periodic3List.clear();
+      clear( _periodic3List );
     }
     {
       BuilderIF::periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
@@ -822,7 +823,7 @@ namespace ALUGrid
                                       (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i);
       }
       // clear list
-      _periodic4List.clear();
+      clear( _periodic4List );
     }
     {
       BuilderIF::hexalist_t& _hexaList = myBuilder ()._hexaList;
@@ -833,7 +834,7 @@ namespace ALUGrid
         _hexaMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
                                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
       // clear list
-      _hexaList.clear();
+      clear( _hexaList );
     }
 
     _initialized = true;

@@ -58,6 +58,7 @@ namespace ALUGrid
       ~ParallelGridMover ();
     protected:
       using MacroGridBuilder :: reserve ;
+      using MacroGridBuilder :: clear ;
   };
 
 } // namespace ALUGrid
