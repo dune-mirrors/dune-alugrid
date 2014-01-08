@@ -145,7 +145,7 @@ namespace Dune
     ALUGridObjectFactory( const ALUGridObjectFactory& other );
 
   public:
-    const  GridType& grid() const { return grid_; }
+    const GridType& grid() const { return grid_; }
 
     ALUGridObjectFactory( const GridType& grid ) : grid_( grid ) {}
 

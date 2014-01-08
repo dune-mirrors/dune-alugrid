@@ -278,7 +278,7 @@ namespace Dune
       typedef typename GridView :: IntersectionIterator     IntersectionIterator ;
       typedef typename IntersectionIterator :: Intersection Intersection ;
 
-      GridView gridView = sgrid.leafView();
+      GridView gridView = sgrid.leafGridView();
       const IndexSet& indexSet = gridView.indexSet();
 
       // get decompostition of the marco grid 
