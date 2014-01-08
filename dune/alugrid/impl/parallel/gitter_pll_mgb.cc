@@ -280,12 +280,12 @@ namespace ALUGrid
     // copy elements from hexaMap to hexaList by 
     // respecting the order given by ldbVertexIndex 
     // false indicates that the vertex should not be set
-    MacroGridBuilder::elementMapToList( _hexaMap, myBuilder ()._hexaList, false );
+    MacroGridBuilder::hexaMapToList( _hexaMap, myBuilder ()._hexaList, false );
 
     // copy elements from tetraMap to tetraList by 
     // respecting the order given by ldbVertexIndex 
     // false indicates that the vertex should not be set
-    MacroGridBuilder::elementMapToList( _tetraMap, myBuilder ()._tetraList, false );
+    MacroGridBuilder::tetraMapToList( _tetraMap, myBuilder ()._tetraList, false );
 
     {
       BuilderIF::periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 

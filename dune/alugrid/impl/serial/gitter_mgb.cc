@@ -803,13 +803,27 @@ namespace ALUGrid
     if(!_finalized) finalize();
   }
 
-  template< class elem_GEO > 
   void MacroGridBuilder::
-  elementMapToList( elementMap_t& elementMap, std::list< elem_GEO* >& elemList, const bool setIndex  )
+  hexaMapToList( elementMap_t& elementMap, hexalist_t& elemList, const bool setIndex  )
   {
+    elementMapToList( elementMap, elemList, setIndex );
+  }
+
+  void MacroGridBuilder::
+  tetraMapToList( elementMap_t& elementMap, tetralist_t& elemList, const bool setIndex  )
+  {
+    elementMapToList( elementMap, elemList, setIndex );
+  }
+
+  template< class elemlist_t > 
+  void MacroGridBuilder::
+  elementMapToList( elementMap_t& elementMap, elemlist_t& elemList, const bool setIndex  )
+  {
+    // elem_GEO_ptr is either hexa_GEO* or tetra_GEO* 
+    typedef typename elemlist_t :: value_type elem_GEO_ptr; 
     {
       // sort by element numbering which is unique for macro elements 
-      typedef std::map< int, elem_GEO* > elemmap_t;
+      typedef std::map< int, elem_GEO_ptr > elemmap_t;
       elemmap_t elemMap;
       {
         typedef typename elementMap_t::iterator  iterator;
@@ -817,7 +831,7 @@ namespace ALUGrid
         for (iterator i = elementMap.begin (); 
              i != elementMapEnd; elementMap.erase (i++) )
         {
-          elem_GEO* elem = (elem_GEO *)(*i).second;
+          elem_GEO_ptr elem = (elem_GEO_ptr)(*i).second;
           // if ldbVertexIndex still needs to be set (in case of initial read)
           if( setIndex ) 
           {
@@ -833,7 +847,7 @@ namespace ALUGrid
         const iterator iend = elemMap.end();
         for ( iterator i = elemMap.begin (); i != iend; ++ i, ++elemCount )
         {
-          elem_GEO* elem = (elem_GEO *)(*i).second;
+          elem_GEO_ptr elem = (elem_GEO_ptr)(*i).second;
           // make sure that the insertion order 
           // in the list is reflected by getIndex 
           alugrid_assert ( setIndex ? (elem->getIndex() == elemCount) : true );
@@ -850,10 +864,10 @@ namespace ALUGrid
     alugrid_assert (_initialized);
     
     // copy elements from hexa map to hexa list respecting the insertion order 
-    elementMapToList( _hexaMap, myBuilder()._hexaList, true );
+    hexaMapToList( _hexaMap, myBuilder()._hexaList, true );
 
     // copy elements from tetra map to tetra list respecting the insertion order 
-    elementMapToList( _tetraMap, myBuilder()._tetraList, true );
+    tetraMapToList( _tetraMap, myBuilder()._tetraList, true );
 
     {
       typedef elementMap_t::iterator  iterator;

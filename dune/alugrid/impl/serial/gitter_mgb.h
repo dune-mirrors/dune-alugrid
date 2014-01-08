@@ -125,6 +125,9 @@ namespace ALUGrid
     protected :
       enum ElementRawID {TETRA_RAW=4, HEXA_RAW=8, PERIODIC3_RAW=33, PERIODIC4_RAW=44}; 
     protected :
+      typedef typename BuilderIF :: hexalist_t  hexalist_t;
+      typedef typename BuilderIF :: tetralist_t tetralist_t;
+
       typedef long    vertexKey_t;
       typedef std::pair< int, int >   edgeKey_t;
       typedef Key3 < int >  faceKey_t;
@@ -231,9 +234,15 @@ namespace ALUGrid
       template<class istream_t> 
       static void generateRawImage ( istream_t &, std::ostream &, const ElementRawID, const ElementRawID );
 
+      // insert all hexas from elemMap into elemList 
+      void hexaMapToList( elementMap_t& elemMap, hexalist_t& elemList, const bool setIndex  );
+
+      // insert all hexas from elemMap into elemList 
+      void tetraMapToList( elementMap_t& elemMap, tetralist_t& elemList, const bool setIndex  );
+
       // insert all element from elemMap into elemList 
-      template<class elem_GEO>
-      void elementMapToList( elementMap_t& elemMap, std::list< elem_GEO* >& elemList, const bool setIndex  );
+      template<class elemlist_t>
+      void elementMapToList( elementMap_t& elemMap, elemlist_t& elemList, const bool setIndex  );
 
     private:  
       BuilderIF & _mgb;
