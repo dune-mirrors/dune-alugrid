@@ -5,6 +5,15 @@
 
 #if HAVE_METIS 
 
+// make sure that metis compiles and does not include 
+// parmetis which would include the mpi header
+#if ! HAVE_MPI && ! HAVE_PARMETIS
+#define __parmetis_h__
+extern "C" { 
+  typedef int idxtype;
+}
+#endif
+
 // cover metis-4.0 bug   
 #define __log2 __METIS__log2
 extern "C" {
