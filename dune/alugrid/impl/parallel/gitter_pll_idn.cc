@@ -636,6 +636,151 @@ namespace ALUGrid
     }
   }
 
+  class SendRecvElementRankInfo
+   : public MpAccessLocal::NonBlockingExchange::DataHandleIF
+  {
+    // choose negative endmarker, since all ids should be positive 
+    static const int endMarker = -32767 ;
+
+    typedef Gitter :: vertex_STI vertex_STI ;
+    // compute linkage due to vertex linkage 
+    typedef std::map< int, int > elrankmap_t ;
+
+    typedef typename Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
+    typedef typename vertex_STI :: ElementLinkage_t ElementLinkage_t;
+
+    elrankmap_t& _globalMap ;
+
+  public:
+    SendRecvElementRankInfo( elrankmap_t& globalMap ) 
+      : _globalMap( globalMap )
+    {
+    }
+
+    void pack( const int link, ObjectStream& os ) 
+    {
+      typedef typename elrankmap_t :: iterator iterator;
+      const iterator end = _globalMap.end();
+      for( iterator it = _globalMap.begin(); it != end; ++it ) 
+      {
+        // if rank has been set send it 
+        if( (*it).second >= 0 )
+        {
+          //std::cout << "Link: " << link << " send el " << (*it).first << " " << (*it).second << std::endl;
+          os.writeObject( (*it).first  );
+          os.writeObject( (*it).second );
+        }
+      }
+      os.writeObject( endMarker );
+    }
+    
+    void unpack( const int link, ObjectStream& os ) 
+    {
+      int elIndex ;
+      os.readObject( elIndex );
+      while( elIndex != endMarker ) 
+      {
+        int rank; 
+        os.readObject( rank );
+        // store rank info for given element index
+        _globalMap[ elIndex ] = rank;
+        //std::cout << "Link " << link << " receive el " << elIndex << " rank " << rank << std::endl;
+        os.readObject( elIndex );
+      }
+    }
+
+    bool repeat () const 
+    {
+      typedef typename elrankmap_t :: const_iterator iterator;
+      // check that all ranks have been set
+      const iterator end = _globalMap.end();
+      for( iterator it = _globalMap.begin(); it != end ; ++ it )
+      {
+        //std::cout << "El " << (*it).first << " rank " << (*it).second << std::endl;
+        if( (*it).second < 0 ) 
+        {
+          return true ;
+        }
+      }
+
+      return false ;
+    }
+  };
+
+  void GitterPll::MacroGitterPll::computeElementDestinations( MpAccessLocal & mpAccess, LoadBalancer::DataBase& db ) 
+  {
+    // compute linkage due to vertex linkage 
+    typedef std::map< int, int > elrankmap_t ;
+
+    typedef typename Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
+    typedef Gitter :: vertex_STI vertex_STI ;
+    typedef typename vertex_STI :: ElementLinkage_t ElementLinkage_t;
+
+    // for each link hold element numbers for which we need to obtain the rank 
+    elrankmap_t elements ;
+
+    AccessIterator < vertex_STI >::Handle vx ( *this );
+    for( vx.first(); ! vx.done(); vx.next() )
+    {
+      const ElementLinkage_t& linkedElements = vx.item().linkedElements();
+      const int elSize = linkedElements.size() ;
+      for( int i=0; i<elSize; ++ i )
+      {
+        elements[ linkedElements[ i ] ] = -1;
+      }
+    }
+
+    // insert linkage without communication into mpAccess 
+    // (symmetric needed here)
+    //mpAccess.insertRequestSymmetric( linkage );
+    //mpAccess.printLinkage( std::cout );
+
+    typedef typename elrankmap_t :: iterator iterator ;
+    // set rank info for interior elements 
+    AccessIterator< helement_STI >::Handle w ( *this );
+    const int myrank = mpAccess.myrank();
+    const iterator end = elements.end();
+    for( w.first(); ! w.done(); w.next() ) 
+    {
+      const int interiorIndex = w.item().ldbVertexIndex();
+      iterator el = elements.find( interiorIndex );
+      // if element is in list then set rank 
+      if( el != end )
+        (*el).second = myrank ;
+    }
+
+    bool repeat = true ;
+    SendRecvElementRankInfo data( elements );
+    while ( repeat ) 
+    {
+      mpAccess.exchange( data );
+
+      mpAccess.barrier();
+      // make sure every process is done
+      repeat = mpAccess.gmax( data.repeat() ) ;
+    }
+
+    typedef typename elrankmap_t :: iterator iterator ;
+    for( iterator it = elements.begin(); it != end; ++it )
+    {
+      // insert element number and master rank info
+      db.insertVertex( LoadBalancer :: GraphVertex( (*it).first, 1 ), (*it).second );   
+    }
+
+#if 0
+    // check that all element indices are available
+    for( vx.first(); ! vx.done(); vx.next() )
+    {
+      const ElementLinkage_t& linkedElements = vx.item().linkedElements();
+      const int elSize = linkedElements.size() ;
+      for( int i=0; i<elSize; ++ i )
+      {
+        const int rank = db.destination( linkedElements[ i ] ) ;
+      }
+    }
+#endif
+  }
+
   double identU2 = 0.0 ;
   double identU3 = 0.0 ;
   double identU4 = 0.0 ;
@@ -654,7 +799,7 @@ namespace ALUGrid
 
     // clear linkage of mpAccess 
     mpa.removeLinkage ();
-    
+
     clock_t lap1 = clock ();
     // this does not have to be computed every time (depending on partitioning method)
     if( computeVertexLinkage ) 

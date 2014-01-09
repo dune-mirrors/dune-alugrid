@@ -192,6 +192,7 @@ namespace ALUGrid
           int nVertices () const;
           void edgeUpdate (const GraphEdge &);
           void vertexUpdate (const GraphVertex &);
+          void insertVertex (const GraphVertex &, const int );
           void printLoad () const;
           int accVertexLoad ()const;
           int accEdgeLoad () const;
