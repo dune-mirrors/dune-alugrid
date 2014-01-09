@@ -2,7 +2,7 @@
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
-//#define STORE_LINKAGE_IN_VERTICES
+#define STORE_LINKAGE_IN_VERTICES
 
 #include <limits>
 #include <list>
@@ -279,6 +279,8 @@ namespace ALUGrid
     protected :
       class ElementLinkage
       {
+        ElementLinkage( const ElementLinkage& );
+
         int* _elements ;
       public:
         ElementLinkage() : _elements( 0 ) {}
@@ -2251,18 +2253,18 @@ namespace ALUGrid
         // Gitter erbaut werden soll. Der Builder geht direkt mit den Listen um und
         // wendet sich an die Factorymethoden insert_--*-- (), um neue Objekte zu erhalten.
       public:
-        typedef std::list< VertexGeo * >     vertexlist_t;
-        typedef std::list< hedge1_GEO * >    hedge1list_t;
-        typedef std::list< hface4_GEO * >    hface4list_t;
-        typedef std::list< hface3_GEO * >    hface3list_t;
-        typedef std::list< tetra_GEO * >     tetralist_t;
-        typedef std::list< periodic3_GEO * > periodic3list_t;
+        typedef std::vector< VertexGeo * >     vertexlist_t;
+        typedef std::vector< hedge1_GEO * >    hedge1list_t;
+        typedef std::vector< hface4_GEO * >    hface4list_t;
+        typedef std::vector< hface3_GEO * >    hface3list_t;
+        typedef std::vector< tetra_GEO * >     tetralist_t;
+        typedef std::vector< periodic3_GEO * > periodic3list_t;
 
-        typedef std::list< periodic4_GEO * > periodic4list_t;
-        typedef std::list< hexa_GEO * >      hexalist_t;
+        typedef std::vector< periodic4_GEO * > periodic4list_t;
+        typedef std::vector< hexa_GEO * >      hexalist_t;
 
-        typedef std::list< hbndseg3_GEO * >  hbndseg3list_t;
-        typedef std::list< hbndseg4_GEO * >  hbndseg4list_t;
+        typedef std::vector< hbndseg3_GEO * >  hbndseg3list_t;
+        typedef std::vector< hbndseg4_GEO * >  hbndseg4list_t;
 
       private:   
         // macro object lists 

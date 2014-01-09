@@ -34,7 +34,7 @@ namespace ALUGrid
       for (BuilderIF::vertexlist_t::iterator i = _vertexList.begin (); i != _vertexListend; ++i )
         _vertexMap [(*i)->ident ()] = (*i);
       // clear list 
-      _vertexList.clear();
+      clear( _vertexList );
     }
     {
       BuilderIF::hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
@@ -46,7 +46,7 @@ namespace ALUGrid
         _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
       }
       // clear list 
-      _hedge1List.clear();
+      clear( _hedge1List );
     }
     {
       BuilderIF::hface3list_t& _hface3List = myBuilder ()._hface3List;
@@ -57,7 +57,7 @@ namespace ALUGrid
         _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
       }
       // clear list 
-      _hface3List.clear();
+      clear( _hface3List );
     }
     {
       BuilderIF::hface4list_t& _hface4List = myBuilder ()._hface4List;
@@ -66,7 +66,7 @@ namespace ALUGrid
       for (BuilderIF::hface4list_t::iterator i = _hface4List.begin (); i != _hface4Listend; ++i )
         _face4Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
       // clear list 
-      _hface4List.clear();
+      clear( _hface4List );
     }
 
     // all periodic elements (need to be removed before hbndseg and elements) 
@@ -81,10 +81,8 @@ namespace ALUGrid
              (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i);
       }
       // clear list
-      _periodic3List.clear();
-      alugrid_assert ( _periodic3List.size() == 0 );
+      clear( _periodic3List );
     }
-
 
     {
       BuilderIF::periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
@@ -97,8 +95,7 @@ namespace ALUGrid
              (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i);
       }
       // clear list
-      _periodic4List.clear();
-      alugrid_assert ( _periodic4List.size() == 0 );
+      clear( _periodic4List );
     }
 
 
@@ -149,7 +146,7 @@ namespace ALUGrid
       }
 
       // clear list
-      _hbndseg4List.clear();
+      clear( _hbndseg4List );
     }
     
     {
@@ -193,7 +190,7 @@ namespace ALUGrid
         }
       }
       // clear list
-      _hbndseg3List.clear();
+      clear( _hbndseg3List );
     }
 
     // all elements 
@@ -207,7 +204,7 @@ namespace ALUGrid
              (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
       } 
       // clear list
-      _tetraList.clear();
+      clear( _tetraList );
     }
 
     {
@@ -220,7 +217,7 @@ namespace ALUGrid
                   (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
       }
       // clear list
-      _hexaList.clear();
+      clear( _hexaList );
     }
 
     /////////////////////////////////////////
@@ -312,6 +309,10 @@ namespace ALUGrid
 
     {
       BuilderIF::periodic3list_t& _periodic3List = myBuilder ()._periodic3List; 
+
+      // reserve memory for container in case it's vector
+      reserve( _periodic3List, _periodic3Map.size() );
+
       const elementMap_t::iterator _periodic3Mapend = _periodic3Map.end ();
       for (elementMap_t::iterator i = _periodic3Map.begin (); i != _periodic3Mapend; _periodic3Map.erase (i++))
       {
@@ -333,6 +334,10 @@ namespace ALUGrid
     
     {
       BuilderIF::periodic4list_t& _periodic4List = myBuilder ()._periodic4List;
+
+      // reserve memory for container in case it's vector
+      reserve( _periodic4List, _periodic4Map.size() );
+
       const elementMap_t::iterator _periodic4Mapend =  _periodic4Map.end ();
       for (elementMap_t::iterator i = _periodic4Map.begin (); i != _periodic4Mapend; _periodic4Map.erase (i++))
       {
@@ -354,6 +359,10 @@ namespace ALUGrid
 
     {
       BuilderIF::hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hbndseg4List, _hbnd4Map.size() );
+
       const faceMap_t::iterator _hbnd4Mapend = _hbnd4Map.end ();
       for (faceMap_t::iterator i = _hbnd4Map.begin (); i != _hbnd4Mapend; )
       {
@@ -373,6 +382,10 @@ namespace ALUGrid
 
     {
       BuilderIF::hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hbndseg3List, _hbnd3Map.size() );
+
       const faceMap_t::iterator _hbnd3Mapend = _hbnd3Map.end ();
       for (faceMap_t::iterator i = _hbnd3Map.begin (); i != _hbnd3Mapend; )
       {
@@ -392,6 +405,10 @@ namespace ALUGrid
 
     {
       BuilderIF::hbndseg4list_t& _hbndseg4List = myBuilder ()._hbndseg4List; 
+
+      // reserve memory for container in case it's vector
+      reserve( _hbndseg4List, _hbnd4Int.size() );
+
       const hbnd4intMap_t::iterator _hbnd4Intend = _hbnd4Int.end ();
       for (hbnd4intMap_t::iterator i = _hbnd4Int.begin (); i != _hbnd4Intend; ++i) 
       {
@@ -415,6 +432,10 @@ namespace ALUGrid
     // here the internal boundary elements are created 
     {
       BuilderIF::hbndseg3list_t& _hbndseg3List = myBuilder ()._hbndseg3List; 
+
+      // reserve memory for container in case it's vector
+      reserve( _hbndseg3List, _hbnd3Int.size() );
+
       const hbnd3intMap_t::iterator _hbnd3Intend = _hbnd3Int.end ();
       for (hbnd3intMap_t::iterator i = _hbnd3Int.begin (); i != _hbnd3Intend; ++i ) 
       {
@@ -439,6 +460,10 @@ namespace ALUGrid
     }
     {
       BuilderIF::hface4list_t& _hface4List = myBuilder ()._hface4List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hface4List, _face4Map.size() );
+
       const faceMap_t::iterator _face4Mapend = _face4Map.end ();
       for (faceMap_t::iterator i = _face4Map.begin (); i != _face4Mapend; )
       {
@@ -458,6 +483,10 @@ namespace ALUGrid
     }
     {
       BuilderIF::hface3list_t& _hface3List = myBuilder ()._hface3List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hface3List, _face3Map.size() );
+
       const faceMap_t::iterator _face3Mapend = _face3Map.end ();
       for (faceMap_t::iterator i = _face3Map.begin (); i != _face3Mapend; ) 
       {
@@ -477,6 +506,10 @@ namespace ALUGrid
     }
     {
       BuilderIF::hedge1list_t& _hedge1List = myBuilder ()._hedge1List;
+
+      // reserve memory for container in case it's vector
+      reserve( _hedge1List, _edgeMap.size() );
+
       const edgeMap_t::iterator _edgeMapend = _edgeMap.end ();
       for (edgeMap_t::iterator i = _edgeMap.begin (); i != _edgeMapend; )
       {
@@ -496,6 +529,10 @@ namespace ALUGrid
     }
     {
       BuilderIF::vertexlist_t& _vertexList = myBuilder ()._vertexList;
+
+      // reserve memory for container in case it's vector
+      reserve( _vertexList, _vertexMap.size() );
+
       const vertexMap_t::iterator _vertexMapend = _vertexMap.end ();
       for (vertexMap_t::iterator i = _vertexMap.begin (); i != _vertexMapend; )
       {
@@ -965,6 +1002,11 @@ namespace ALUGrid
     // for serial run do nothing here
     if( mpa.psize() <= 1 ) return ;
 
+    // store current linkage 
+    std::set< int > currentLinkage;
+    for( int l=0; l<mpa.nlinks(); ++l )
+      currentLinkage.insert( mpa.dest()[ l ] );
+
     // in case gatherScatter is given check for overloaded partitioning 
     const bool userDefinedPartitioning = gatherScatter && gatherScatter->userDefinedPartitioning();
 
@@ -1127,6 +1169,10 @@ namespace ALUGrid
 
       lap2 = clock ();
       
+      // add ld ranks to linkage
+      for( int l=0; l<mpa.sendLinks(); ++ l ) currentLinkage.insert( mpa.sendDest()[ l ] );
+      for( int l=0; l<mpa.recvLinks(); ++ l ) currentLinkage.insert( mpa.recvSource()[ l ] );
+
       {
         // data handle  
         UnpackLBData data( containerPll (), mpa, gatherScatter );
@@ -1134,6 +1180,10 @@ namespace ALUGrid
         // pack, exchange, and unpack data 
         mpa.exchange ( osv, data );
       }
+
+      // set broader linkage for identification process 
+      mpa.removeLinkage();
+      mpa.insertRequestSymmetric( currentLinkage );
 
       lap3 = clock ();
 #ifdef ALUGRIDDEBUG

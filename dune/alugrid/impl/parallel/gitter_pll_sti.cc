@@ -1165,7 +1165,6 @@ namespace ALUGrid
 
   class PackUnpackStaticState : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
-
     typedef Gitter::hface_STI hface_STI ;
     typedef Insert < AccessIteratorTT < hface_STI >::InnerHandle,
        TreeIterator < hface_STI, is_def_true < hface_STI > > > InnerIteratorType;
@@ -1400,7 +1399,7 @@ namespace ALUGrid
       // if a method was given, perform load balancing
       if (userDefinedPartitioning || ldbMth)
       {
-        const bool precomputeLinkage = Gitter :: storeLinkageInVertices && serialPartitioner ();
+        const bool precomputeLinkage = Gitter :: storeLinkageInVertices; // && serialPartitioner ();
 
         lap3 = clock();
 
@@ -1449,6 +1448,9 @@ namespace ALUGrid
     if( Gitter :: storeLinkageInVertices ) 
     {
       const int me = mpAccess().myrank(); 
+
+      // compute missing element destinations 
+      containerPll().computeElementDestinations( mpAccess(), db );
 
       // clear linkage pattern map since it is newly build here
       containerPll().clearLinkagePattern();

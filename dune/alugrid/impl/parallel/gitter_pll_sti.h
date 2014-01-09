@@ -172,6 +172,7 @@ namespace ALUGrid
       // vertexLinkageEstimation with bcast( MPI_Bcast, memory O(1), more time consuming )
       // time = p log p, memory = O(1)
       void vertexLinkageEstimateBcast (MpAccessLocal &);
+      void computeElementDestinations(MpAccessLocal &, LoadBalancer::DataBase& );
     public :
       MacroGitterPll () {}
       virtual ~MacroGitterPll () {}

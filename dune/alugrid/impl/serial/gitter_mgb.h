@@ -244,6 +244,27 @@ namespace ALUGrid
       template<class elemlist_t>
       void elementMapToList( elementMap_t& elemMap, elemlist_t& elemList, const bool setIndex  );
 
+      // reserve memory for container for additional 'size' elements
+      template <class A>
+      void reserve( std::vector< A >& container, size_t size ) const 
+      {
+        container.reserve( container.size() + size );
+      }
+
+      // reserve memory for container, nothing to do for list 
+      template <class A>
+      void reserve( std::list< A >& container, size_t size ) const 
+      {
+      }
+
+      // reserve memory for container for additional 'size' elements
+      template <class container_t>
+      void clear( container_t& container ) const 
+      {
+        // clear container and also free memory 
+        container_t().swap( container );
+      }
+
     private:  
       BuilderIF & _mgb;
   };

@@ -48,6 +48,13 @@ namespace ALUGrid
     return;
   }
 
+  void LoadBalancer::DataBase::insertVertex(const GraphVertex & v, const int rank ) 
+  {
+    alugrid_assert (v.isValid ());
+    _vertexSet[ v ] = rank ;
+    return;
+  }
+
   int LoadBalancer::DataBase::accVertexLoad () const
   {
     return std::accumulate( _vertexSet.begin(), _vertexSet.end(), 0, AccVertexLoad() );

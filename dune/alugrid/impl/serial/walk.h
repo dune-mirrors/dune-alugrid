@@ -224,7 +224,7 @@ namespace ALUGrid
   , public MyAlloc 
 #endif
   {
-    typedef std::list< A * > ListType;
+    typedef std::vector< A * > ListType;
 
     ListType &_list;
     typename ListType::iterator _curr;
