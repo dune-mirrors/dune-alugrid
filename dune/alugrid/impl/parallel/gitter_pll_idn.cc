@@ -650,11 +650,34 @@ namespace ALUGrid
     typedef typename vertex_STI :: ElementLinkage_t ElementLinkage_t;
 
     elrankmap_t& _globalMap ;
+    LoadBalancer::DataBase& _db; 
 
   public:
-    SendRecvElementRankInfo( elrankmap_t& globalMap ) 
-      : _globalMap( globalMap )
+    SendRecvElementRankInfo( elrankmap_t& globalMap, LoadBalancer::DataBase& db ) 
+      : _globalMap( globalMap ),
+        _db( db )
     {
+    }
+
+    ~SendRecvElementRankInfo() 
+    {
+      // insert last received elements
+      meantimeWork();
+    }
+
+    void meantimeWork() 
+    {
+      typedef typename elrankmap_t :: iterator iterator ;
+      const iterator end = _globalMap.end();
+      for( iterator it = _globalMap.begin(); it != end; ++it )
+      {
+        if( (*it).second >= 0 ) 
+        {
+          // insert element number and master rank info
+          _db.insertVertex( LoadBalancer :: GraphVertex( (*it).first, 1 ), (*it).second );   
+          _globalMap.erase( it ++ );
+        }
+      }
     }
 
     void pack( const int link, ObjectStream& os ) 
@@ -702,7 +725,6 @@ namespace ALUGrid
           return true ;
         }
       }
-
       return false ;
     }
   };
@@ -749,15 +771,17 @@ namespace ALUGrid
         (*el).second = myrank ;
     }
 
-    bool repeat = true ;
-    SendRecvElementRankInfo data( elements );
-    while ( repeat ) 
     {
-      mpAccess.exchange( data );
+      bool repeat = true ;
+      SendRecvElementRankInfo data( elements, db );
+      while ( repeat ) 
+      {
+        mpAccess.exchange( data );
 
-      mpAccess.barrier();
-      // make sure every process is done
-      repeat = mpAccess.gmax( data.repeat() ) ;
+        mpAccess.barrier();
+        // make sure every process is done
+        repeat = mpAccess.gmax( data.repeat() ) ;
+      }
     }
 
     typedef typename elrankmap_t :: iterator iterator ;
@@ -767,7 +791,7 @@ namespace ALUGrid
       db.insertVertex( LoadBalancer :: GraphVertex( (*it).first, 1 ), (*it).second );   
     }
 
-#if 0
+#if 1
     // check that all element indices are available
     for( vx.first(); ! vx.done(); vx.next() )
     {
