@@ -4,7 +4,9 @@
 #include <cmath>
 #include <vector>
 
-#include "mpAccess.h"
+#include <dune/alugrid/impl/serial/gitter_sti.h>
+#include <dune/alugrid/impl/parallel/mpAccess.h>
+#include <dune/alugrid/impl/parallel/gitter_pll_ldb.h>
 
 namespace ALUGridMETIS
 {
