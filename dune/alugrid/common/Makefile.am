@@ -1,5 +1,6 @@
 alucommondir = $(includedir)/dune/alugrid/common
-alucommon_HEADERS = backuprestore.hh \
+alucommon_HEADERS = alugrid_assert.hh \
+                    backuprestore.hh \
 										bndprojection.hh \
 										capabilities.hh \
 										declaration.hh \
@@ -7,10 +8,12 @@ alucommon_HEADERS = backuprestore.hh \
 										geostorage.hh \
 										intersectioniteratorwrapper.hh \
 										interfaces.hh \
+                    macrogridview.hh \
 										memory.hh \
 										objectfactory.hh \
 										persistentcontainer.hh \
 										structuredgridfactory.hh \
-										transformation.hh
+										transformation.hh \
+                    writeparalleldgf.hh
 
 include $(top_srcdir)/am/global-rules
