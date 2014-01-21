@@ -651,11 +651,17 @@ namespace ALUGrid
 
     elrankmap_t& _globalMap ;
     LoadBalancer::DataBase& _db; 
+    const int _nlinks;
+    mutable int _counter;
 
   public:
-    SendRecvElementRankInfo( elrankmap_t& globalMap, LoadBalancer::DataBase& db ) 
-      : _globalMap( globalMap ),
-        _db( db )
+    SendRecvElementRankInfo( elrankmap_t& globalMap, 
+                             LoadBalancer::DataBase& db, 
+                             const int nlinks  ) 
+     : _globalMap( globalMap ),
+       _db( db ),
+       _nlinks( nlinks ),
+       _counter( 0 )
     {
     }
 
@@ -671,6 +677,7 @@ namespace ALUGrid
       const iterator end = _globalMap.end();
       for( iterator it = _globalMap.begin(); it != end; ++it )
       {
+        // if rank is available insert and erase from list
         if( (*it).second >= 0 ) 
         {
           // insert element number and master rank info
@@ -701,6 +708,10 @@ namespace ALUGrid
     {
       int elIndex ;
       os.readObject( elIndex );
+
+      // this link is done
+      if( elIndex == endMarker ) ++_counter;
+
       while( elIndex != endMarker ) 
       {
         int rank; 
@@ -714,6 +725,9 @@ namespace ALUGrid
 
     bool repeat () const 
     {
+      // if the map is empty we are done 
+      bool repeat = _globalMap.size() > 0 || _counter < _nlinks ;
+
       typedef typename elrankmap_t :: const_iterator iterator;
       // check that all ranks have been set
       const iterator end = _globalMap.end();
@@ -726,6 +740,9 @@ namespace ALUGrid
         }
       }
       return false ;
+
+      _counter = 0;
+      return repeat;
     }
   };
 
@@ -773,7 +790,8 @@ namespace ALUGrid
 
     {
       bool repeat = true ;
-      SendRecvElementRankInfo data( elements, db );
+      int count = 0;
+      SendRecvElementRankInfo data( elements, db, mpAccess.nlinks() );
       while ( repeat ) 
       {
         mpAccess.exchange( data );
@@ -781,6 +799,9 @@ namespace ALUGrid
         mpAccess.barrier();
         // make sure every process is done
         repeat = mpAccess.gmax( data.repeat() ) ;
+        //repeat = data.repeat() ;
+        //alugrid_assert( mpAccess.gmax( data.repeat() ) == repeat );
+        ++ count ;
       }
     }
 
