@@ -125,8 +125,8 @@ namespace ALUGrid
     protected :
       enum ElementRawID {TETRA_RAW=4, HEXA_RAW=8, PERIODIC3_RAW=33, PERIODIC4_RAW=44}; 
     protected :
-      typedef typename BuilderIF :: hexalist_t  hexalist_t;
-      typedef typename BuilderIF :: tetralist_t tetralist_t;
+      typedef BuilderIF::hexalist_t  hexalist_t;
+      typedef BuilderIF::tetralist_t tetralist_t;
 
       typedef long    vertexKey_t;
       typedef std::pair< int, int >   edgeKey_t;

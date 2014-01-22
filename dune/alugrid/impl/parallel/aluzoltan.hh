@@ -1,6 +1,7 @@
 #ifndef ALUGRID_ZOLTAN_H_INCLUDED
 #define ALUGRID_ZOLTAN_H_INCLUDED
 
+#include <iostream>
 #include <cmath>
 #include <dune/alugrid/common/alugrid_assert.hh>
 #include <sstream>

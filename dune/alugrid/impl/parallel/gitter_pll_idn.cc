@@ -333,7 +333,7 @@ namespace ALUGrid
     typedef Gitter :: vertex_STI vertex_STI ;
     typedef std::map< int, vertex_STI* > map_t;
     typedef Gitter :: ElementPllXIF :: vertexelementlinkage_t vertexelementlinkage_t;
-    typedef typename vertexelementlinkage_t :: mapped_type  linkageset_t ;
+    typedef vertexelementlinkage_t :: mapped_type  linkageset_t ;
 
     map_t _vxmap;
     vertexelementlinkage_t _vxElemLinkage;
@@ -400,7 +400,7 @@ namespace ALUGrid
           if( Gitter :: storeLinkageInVertices ) 
           {
             linkageset_t& linkedElements = _vxElemLinkage[ &vertex ];
-            typedef typename linkageset_t::const_iterator set_iterator;
+            typedef linkageset_t::const_iterator set_iterator;
             const int linkedSize = linkedElements.size();
             os.writeObject( int(-linkedSize-1) );
             const set_iterator endElem = linkedElements.end();
@@ -646,16 +646,22 @@ namespace ALUGrid
     // compute linkage due to vertex linkage 
     typedef std::map< int, int > elrankmap_t ;
 
-    typedef typename Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
-    typedef typename vertex_STI :: ElementLinkage_t ElementLinkage_t;
+    typedef Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
+    typedef vertex_STI :: ElementLinkage_t ElementLinkage_t;
 
     elrankmap_t& _globalMap ;
     LoadBalancer::DataBase& _db; 
+    const int _nlinks;
+    mutable int _counter;
 
   public:
-    SendRecvElementRankInfo( elrankmap_t& globalMap, LoadBalancer::DataBase& db ) 
-      : _globalMap( globalMap ),
-        _db( db )
+    SendRecvElementRankInfo( elrankmap_t& globalMap, 
+                             LoadBalancer::DataBase& db, 
+                             const int nlinks  ) 
+     : _globalMap( globalMap ),
+       _db( db ),
+       _nlinks( nlinks ),
+       _counter( 0 )
     {
     }
 
@@ -667,10 +673,11 @@ namespace ALUGrid
 
     void meantimeWork() 
     {
-      typedef typename elrankmap_t :: iterator iterator ;
+      typedef elrankmap_t :: iterator iterator ;
       const iterator end = _globalMap.end();
       for( iterator it = _globalMap.begin(); it != end; ++it )
       {
+        // if rank is available insert and erase from list
         if( (*it).second >= 0 ) 
         {
           // insert element number and master rank info
@@ -682,7 +689,7 @@ namespace ALUGrid
 
     void pack( const int link, ObjectStream& os ) 
     {
-      typedef typename elrankmap_t :: iterator iterator;
+      typedef elrankmap_t :: iterator iterator;
       const iterator end = _globalMap.end();
       for( iterator it = _globalMap.begin(); it != end; ++it ) 
       {
@@ -701,6 +708,10 @@ namespace ALUGrid
     {
       int elIndex ;
       os.readObject( elIndex );
+
+      // this link is done
+      if( elIndex == endMarker ) ++_counter;
+
       while( elIndex != endMarker ) 
       {
         int rank; 
@@ -714,7 +725,10 @@ namespace ALUGrid
 
     bool repeat () const 
     {
-      typedef typename elrankmap_t :: const_iterator iterator;
+      // if the map is empty we are done 
+      bool repeat = _globalMap.size() > 0 || _counter < _nlinks ;
+      typedef elrankmap_t :: const_iterator iterator;
+
       // check that all ranks have been set
       const iterator end = _globalMap.end();
       for( iterator it = _globalMap.begin(); it != end ; ++ it )
@@ -726,6 +740,9 @@ namespace ALUGrid
         }
       }
       return false ;
+
+      _counter = 0;
+      return repeat;
     }
   };
 
@@ -734,9 +751,9 @@ namespace ALUGrid
     // compute linkage due to vertex linkage 
     typedef std::map< int, int > elrankmap_t ;
 
-    typedef typename Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
+    typedef Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
     typedef Gitter :: vertex_STI vertex_STI ;
-    typedef typename vertex_STI :: ElementLinkage_t ElementLinkage_t;
+    typedef vertex_STI :: ElementLinkage_t ElementLinkage_t;
 
     // for each link hold element numbers for which we need to obtain the rank 
     elrankmap_t elements ;
@@ -757,7 +774,7 @@ namespace ALUGrid
     //mpAccess.insertRequestSymmetric( linkage );
     //mpAccess.printLinkage( std::cout );
 
-    typedef typename elrankmap_t :: iterator iterator ;
+    typedef elrankmap_t :: iterator iterator ;
     // set rank info for interior elements 
     AccessIterator< helement_STI >::Handle w ( *this );
     const int myrank = mpAccess.myrank();
@@ -773,7 +790,8 @@ namespace ALUGrid
 
     {
       bool repeat = true ;
-      SendRecvElementRankInfo data( elements, db );
+      int count = 0;
+      SendRecvElementRankInfo data( elements, db, mpAccess.nlinks() );
       while ( repeat ) 
       {
         mpAccess.exchange( data );
@@ -781,10 +799,13 @@ namespace ALUGrid
         mpAccess.barrier();
         // make sure every process is done
         repeat = mpAccess.gmax( data.repeat() ) ;
+        //repeat = data.repeat() ;
+        //alugrid_assert( mpAccess.gmax( data.repeat() ) == repeat );
+        ++ count ;
       }
     }
 
-    typedef typename elrankmap_t :: iterator iterator ;
+    typedef elrankmap_t :: iterator iterator ;
     for( iterator it = elements.begin(); it != end; ++it )
     {
       // insert element number and master rank info
