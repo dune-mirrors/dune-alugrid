@@ -1468,7 +1468,7 @@ namespace ALUGrid
 
         if( vertex.isBorder() ) 
         {
-          typedef typename vertex_STI :: ElementLinkage_t ElementLinkage_t ;
+          typedef ertex_STI :: ElementLinkage_t ElementLinkage_t ;
           const ElementLinkage_t& linkedElements = vertex.linkedElements();
           std::vector< int > linkage;
           const int elSize = linkedElements.size() ;
