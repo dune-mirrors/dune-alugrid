@@ -986,6 +986,7 @@ namespace ALUGrid
     }
 
     std::cerr << "ERROR: destination for ldb index not found!" << std::endl;
+    assert( false );
     abort();
     //alugrid_assert (_vertexSet.size() > 0 );
     //alugrid_assert (_vertexSet.find (e) != _vertexSet.end ());
