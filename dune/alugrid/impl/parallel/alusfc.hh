@@ -288,17 +288,6 @@ namespace ALUGridMETIS
       }
     }
 
-    //if( (wStart == oldStart) && (oldEnd == wEnd) ) connect.clear();
-
-    //if( me == 0 ) 
-    // compute my sum of  
-    /*
-    for( iterator it = vertexMap.begin(); it != vertexEnd; ++ it, ++i ) 
-    {
-      std::cout << "dest[ " << (*it).first.index() << " ] = " << (*it).second << std::endl;
-    }
-    */
-
     // check whether the element cuts have changed
     {
       typedef std::vector<int>::iterator iterator ;
