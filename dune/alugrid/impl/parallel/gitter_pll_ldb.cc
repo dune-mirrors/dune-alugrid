@@ -954,13 +954,42 @@ namespace ALUGrid
     return change;
   }
 
-  int LoadBalancer::DataBase::destination (int i) const 
+  int LoadBalancer::DataBase::destination (int index)  
   {
     // use constructor to initialize default values 
-    GraphVertex e (i);
-    alugrid_assert (_vertexSet.size() > 0 );
-    alugrid_assert (_vertexSet.find (e) != _vertexSet.end ());
-    return (*_vertexSet.find (e)).second;
+    GraphVertex vx (index);
+    typedef typename ldb_vertex_map_t :: const_iterator iterator ;
+    iterator it = _vertexSet.find ( vx );
+    assert( it != _vertexSet.end () || _elementCuts.size() > 0 );
+    if( it != _vertexSet.end() )
+    {
+      return (*it).second;
+    }
+    else 
+    {
+      const int ranks = _elementCuts.size();
+      assert( ranks > 0 );
+      if( ranks > 0 ) 
+      {
+        int last = 0; 
+        for( int rank = 0; rank<ranks; ++rank ) 
+        {
+          if( index >= last && index < _elementCuts[ rank ] ) 
+          {
+            // insert for later use
+            _vertexSet.insert( typename ldb_vertex_map_t :: value_type( vx, rank ) );
+            return rank;
+          }
+          last = _elementCuts[ rank ];
+        }
+      }
+    }
+
+    std::cerr << "ERROR: destination for ldb index not found!" << std::endl;
+    abort();
+    //alugrid_assert (_vertexSet.size() > 0 );
+    //alugrid_assert (_vertexSet.find (e) != _vertexSet.end ());
+    return -1;
   }
 
   void LoadBalancer::DataBase::printVertexSet() const 

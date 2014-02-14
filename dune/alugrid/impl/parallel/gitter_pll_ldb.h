@@ -203,16 +203,17 @@ namespace ALUGrid
           int accEdgeLoad () const;
           inline int maxVertexLoad () const;
         public :
-          int getDestination ( int i ) const { return destination( i ); }
+          int getDestination ( int i ) { return destination( i ); }
           template <class helement_t, class gatherscatter_t >
-          int destination (const helement_t& elem, gatherscatter_t* gs ) const 
+          int destination (const helement_t& elem, gatherscatter_t* gs ) 
           {
             // if gs is given use this to obtain detination 
             return ( gs ) ? gs->destination( elem ) :
                             destination( elem.ldbVertexIndex() );
           }
 
-          int destination (int) const;
+          int destination (int);
+
           const ldb_connect_set_t& scan () const { return _connect; }
 
           // original repartition method for ALUGrid 
