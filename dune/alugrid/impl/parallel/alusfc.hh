@@ -300,9 +300,16 @@ namespace ALUGridMETIS
     */
 
     // check whether the element cuts have changed
-    for( int p=0; p<pSize; ++p ) 
-      if( oldCuts[ p ] != elementCuts[ p ] )
-        return true ;
+    {
+      typedef std::vector<int>::iterator iterator ;
+      const iterator end = elementCuts.end();
+      for( iterator newCut = elementCuts.begin(), oldCut = oldCuts.begin();
+           newCut != end; ++newCut, ++oldCut )
+      {
+        // if cuts changed return true 
+        if( *newCut != *oldCut ) return true ;
+      }
+    }
 
     // no change 
     return false;
