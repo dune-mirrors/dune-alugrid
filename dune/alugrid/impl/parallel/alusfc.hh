@@ -234,15 +234,6 @@ namespace ALUGridMETIS
     // communicate cuts 
     mpa.gmax( &cuts[ 0 ], pSize, &elementCuts[ 0 ] );
 
-    for( int i=0; i<pSize; ++ i ) 
-    {
-      if( elementCuts[ i ] == 0 ) 
-        elementCuts[ i ] = oldCuts[ i ];
-    }
-
-    //for( int i=0; i<pSize; ++ i ) 
-    //  std::cout << "P[ " << i << " ] = " << elementCuts[ i ] << std::endl;
-
     // get start and end element
     const int wStart = (me == 0) ? 0 : elementCuts[ me-1 ];
     const int wEnd   = elementCuts[ me ];
