@@ -124,9 +124,6 @@ namespace ALUGridMETIS
     // number of procs 
     const int pSize = mpa.psize();
 
-    typedef std::pair< long int, int > pair_t; 
-    const int wSize = vertexMap.size();
-
     typedef typename vertexmap_t :: iterator   iterator ;
     const iterator vertexEnd = vertexMap.end();
 
@@ -146,7 +143,7 @@ namespace ALUGridMETIS
     // if element cuts have not been computed, compute current cuts 
     if( elementCuts.size() == 0 ) 
     {
-      std::cout << "Compute element cuts" << std::endl;
+      //std::cout << "Compute element cuts" << std::endl;
       elementCuts = mpa.gcollect( myCut ); 
     }
 
