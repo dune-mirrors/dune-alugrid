@@ -562,6 +562,13 @@ namespace ALUGrid
     // if method for load balancing is none, do nothing 
     if (mth == NONE) return false;
 
+    // ALUGrid own space filling curve partitioning 
+    if( mth == ALUGRID_SpaceFillingCurve ) 
+    {
+      // call sfc partitioning that changes _vertexSet and _connect and also computes element cuts 
+      return ALUGridMETIS::CALL_parallelSpaceFillingCurve( mpa, np, _vertexSet, _connect, _elementCuts );
+    }
+
     // ZOLTAN partitioning 
     // if no Zoltan was found the return value will be false 
     // otherwise the return value will be true if the partitioning changed
@@ -584,7 +591,7 @@ namespace ALUGrid
     
     // flag to indicate whether we use a serial or a parallel partitioner 
     bool serialPartitioner    = serialPartitionerUsed( mth );
-    const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurve );
+    const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurveSerial );
 
     // create maps for edges and vertices 
     ldb_edge_set_t     edges;
@@ -623,7 +630,7 @@ namespace ALUGrid
     const bool fillPartitionVector = partition.size() > 0 ;
 
     // ALUGrid own space filling curve partitioning 
-    if( mth == ALUGRID_SpaceFillingCurve ) 
+    if( mth == ALUGRID_SpaceFillingCurveSerial ) 
     {
       // call sfc partitioning that changes _vertexSet and _connect and also compute graph sizes 
       const bool change = ALUGridMETIS::CALL_spaceFillingCurve( mpa, np, _vertexSet, _connect, _graphSizes, fillPartitionVector );
@@ -976,6 +983,8 @@ namespace ALUGrid
         return "COLLECT";
       case ALUGRID_SpaceFillingCurve:
         return "ALUGRID_SpaceFillingCurve";
+      case ALUGRID_SpaceFillingCurveSerial:
+        return "ALUGRID_SpaceFillingCurveSerial";
       case METIS_PartGraphKway :
         return "METIS_PartGraphKway";
       case METIS_PartGraphRecursive :

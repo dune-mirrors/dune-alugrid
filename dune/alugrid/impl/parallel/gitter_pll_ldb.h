@@ -122,6 +122,7 @@ namespace ALUGrid
           // contains the sizes of the partition (vertices and edges of each proc)
           // if this is zero, then the sizes will be communicated 
           std::vector< int > _graphSizes;
+          std::vector< int > _elementCuts;
           // true if no periodic faces are present 
           mutable bool _noPeriodicFaces;
         public :
@@ -135,7 +136,10 @@ namespace ALUGrid
             // assuming the elements to be ordered by a 
             // space filling curve approach 
             // here, the edges in the graph are neglected 
+            // parallel version 
             ALUGRID_SpaceFillingCurve = 4, 
+            // serial version that requires the whole graph to be avaiable
+            ALUGRID_SpaceFillingCurveSerial = 5, 
 
             // METIS method for graph partitioning 
             METIS_PartGraphKway = 11,
@@ -174,7 +178,7 @@ namespace ALUGrid
           //! return true if mth specifies a serial partitioner
           static bool graphEdgesNeeded ( const method mth )
           {
-            return mth != ALUGRID_SpaceFillingCurve && 
+            return mth > ALUGRID_SpaceFillingCurveSerial && 
                    mth != ZOLTAN_LB_HSFC;
           }
 
@@ -183,7 +187,8 @@ namespace ALUGrid
           static const char *methodToString( method );
 
           DataBase ();
-          explicit DataBase ( const std::vector< int > &graphSizes );
+          explicit DataBase ( const std::vector< int > &graphSizes, 
+                              std::vector< int > &elementCuts );
           DataBase ( const DataBase & );
 
           virtual ~DataBase ();
@@ -206,6 +211,7 @@ namespace ALUGrid
             return ( gs ) ? gs->destination( elem ) :
                             destination( elem.ldbVertexIndex() );
           }
+
           int destination (int) const;
           const ldb_connect_set_t& scan () const { return _connect; }
 
@@ -215,6 +221,12 @@ namespace ALUGrid
           std::vector< int > repartition ( MpAccessGlobal &, method, int, const double tolerance = 1.2  );
 
           void printVertexSet() const;
+
+          // store internal element cuts in elementCuts 
+          void storeElementCuts( std::vector<int>& elementCuts ) 
+          { 
+            elementCuts.swap( _elementCuts );
+          }
         protected:  
           bool repartition ( MpAccessGlobal &, method, std::vector< int > &, const int, const double );
       };
@@ -387,16 +399,22 @@ namespace ALUGrid
   {
   }
 
-  inline LoadBalancer::DataBase::DataBase ( const std::vector< int > &graphSizes )
+  inline LoadBalancer::DataBase::DataBase ( const std::vector< int > &graphSizes, 
+                                            std::vector< int > &elementCuts )
   : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-    _edgeSet (), _vertexSet (), _graphSizes( graphSizes ), _noPeriodicFaces( true ) 
-  {}
+    _edgeSet (), _vertexSet (), _graphSizes( graphSizes ), 
+    _elementCuts(), _noPeriodicFaces( true ) 
+  {
+    // swap memory 
+    _elementCuts.swap( elementCuts );
+  }
 
   inline LoadBalancer::DataBase::DataBase (const DataBase & b) 
     : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
       _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
       _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) ,
       _graphSizes( b._graphSizes ),
+      _elementCuts( b._elementCuts ),
       _noPeriodicFaces( b._noPeriodicFaces )
   {
   }

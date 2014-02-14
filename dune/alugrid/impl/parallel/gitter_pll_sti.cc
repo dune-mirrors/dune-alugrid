@@ -1370,8 +1370,9 @@ namespace ALUGrid
   bool GitterPll::loadBalancerGridChangesNotify ( GatherScatterType* gs ) 
   {
     int lap1 = clock ();
-    // create load balancer data base 
-    LoadBalancer::DataBase db( _graphSizes );
+
+    // create load balancer data base, _elementCuts will be empty afterwards
+    LoadBalancer::DataBase db( _graphSizes, _elementCuts );
  
     // check if partioner is provided by used
     const bool userDefinedPartitioning = gs && gs->userDefinedPartitioning();
@@ -1425,6 +1426,7 @@ namespace ALUGrid
 
         // calls identification and exchangeDynamicState 
         doNotifyMacroGridChanges ( ! precomputeLinkage );
+
       }
     }
 
@@ -1439,6 +1441,9 @@ namespace ALUGrid
     ldbTimerU3 += u3 ;
     ldbTimerU4 += u4 ;
     ldbTimerU5 += u5 ;
+
+    // store element cut information for later use (parallel sfc only)
+    db.storeElementCuts( _elementCuts );
 
     return repartition;
   }

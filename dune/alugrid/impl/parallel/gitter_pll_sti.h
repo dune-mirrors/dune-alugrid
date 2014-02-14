@@ -295,7 +295,8 @@ namespace ALUGrid
       /////////////////////////////////////
       //  member variables  
       /////////////////////////////////////
-      std::vector<int> _graphSizes; // only used for serial partitioners 
+      std::vector<int> _graphSizes;  // only used for serial partitioners 
+      std::vector<int> _elementCuts; // only used for parallel sfc partitioning
 
       // Load Balancer parameters 
       double  _ldbOver, _ldbUnder;
