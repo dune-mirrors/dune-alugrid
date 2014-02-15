@@ -163,10 +163,11 @@ namespace Dune {
       // calculate partitioning 
       times.push_back( ::ALUGrid::ldbTimerU2 );
 
-      times.push_back( ::ALUGrid::ldbTimerU3 );
       // load-balaning
-      times.push_back( ::ALUGrid::ldbTimerU4 );
+      times.push_back( ::ALUGrid::ldbTimerU3 );
       // identification 
+      times.push_back( ::ALUGrid::ldbTimerU4 );
+      // notify macro change
       times.push_back( ::ALUGrid::ldbTimerU5 );
 
       const int timerSize = times.size();
