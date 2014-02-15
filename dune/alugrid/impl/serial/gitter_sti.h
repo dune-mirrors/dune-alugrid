@@ -312,6 +312,7 @@ namespace ALUGrid
             }
             return true ;
           }
+          return false ;
         }
 
         bool notActive() const { return _elements == 0 ; }
