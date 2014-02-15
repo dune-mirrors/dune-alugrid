@@ -147,25 +147,28 @@ namespace ALUGridMETIS
       elementCuts = mpa.gcollect( myCut ); 
     }
 
-    // accumulated weights 
-    std::vector< long int > W( pSize+1, 0 );
+    long int Wme   = 0;
+    long int Wnext = 0;
+    long int Wlast = 0;
+
     {
-      // allgather W[1,...,p+1] 
+      // allgather W[0,...,p] 
       std::vector< int > Wlocal = mpa.gcollect( sum );
 
       // accumulate weights 
-      for( int i=1; i<=pSize; ++i ) 
-      {
-        W[ i ]  = Wlocal[ i-1 ];
-        W[ i ] += W[ i-1 ];
-      }
+      for( int i=0; i<pSize; ++i ) 
+        Wlast += Wlocal[ i ];
+
+      // get cumulative weight for me
+      for( int i=0; i<me; ++i )
+        Wme += Wlocal[ i ];
+
+      // get sum for me+1
+      Wnext = Wme + sum;
     }
 
-    //for( int i=0; i<=pSize; ++i ) 
-    //  std::cout << "P[ " << me << " ], W[ " << i << " ] = " << W[ i ] << std::endl;
-
     // compute the average weight 
-    const double averageWeight = double(W[ pSize ]) / double(pSize);
+    const double averageWeight = double(Wlast) / double(pSize);
     
     // clear connectivity set 
     connect.clear();
@@ -176,7 +179,7 @@ namespace ALUGridMETIS
     for( int pstar=1; pstar<=pSize; ++pstar )
     {
       const long int pStarAver = std::floor( averageWeight * double(pstar) );
-      if( W[ me ] < pStarAver && pStarAver <= W[ me + 1 ] )
+      if( Wme < pStarAver && pStarAver <= Wnext )
       {
         S.insert( pstar );
       }
@@ -190,8 +193,6 @@ namespace ALUGridMETIS
       pHigh = std::max( *it, pHigh );
     }
 
-    //std::cout << "P[ " << me << " ] " << pLow-1 << " " << pHigh-1 << std::endl;
-
     // cuts of partitioning
     std::vector< int > cuts( pSize, 0 );
 
@@ -202,7 +203,7 @@ namespace ALUGridMETIS
         int minI = std::numeric_limits< int > :: max();
         const long int pStarAver = std::floor( averageWeight * double(pstar) );
         // use cummulative weight 
-        long int weight = W[ me ];
+        long int weight = Wme;
         for( iterator it = vertexMap.begin(); it != vertexEnd; ++ it ) 
         {
           // accumulate weight 
@@ -225,9 +226,6 @@ namespace ALUGridMETIS
     elementCuts.clear();
     elementCuts.resize( pSize, 0 );
 
-    //for( size_t i=0; i<cuts.size(); ++i ) 
-    //  std::cout << "cuts = " << cuts[ i ] << std::endl;
-    
     // communicate cuts 
     mpa.gmax( &cuts[ 0 ], pSize, &elementCuts[ 0 ] );
 
