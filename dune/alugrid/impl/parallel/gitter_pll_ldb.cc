@@ -958,15 +958,16 @@ namespace ALUGrid
   {
     // use constructor to initialize default values 
     GraphVertex vx (index);
-    typedef typename ldb_vertex_map_t :: const_iterator iterator ;
+    typedef typename ldb_vertex_map_t :: iterator iterator ;
     iterator it = _vertexSet.find ( vx );
     assert( it != _vertexSet.end () || _elementCuts.size() > 0 );
-    if( it != _vertexSet.end() )
+    if( it != _vertexSetEnd )
     {
       return (*it).second;
     }
     else 
     {
+      //std::cout << "serach element rank" << std::endl;
       const int ranks = _elementCuts.size();
       assert( ranks > 0 );
       if( ranks > 0 ) 

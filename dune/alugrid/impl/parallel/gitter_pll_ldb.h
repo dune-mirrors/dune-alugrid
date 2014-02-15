@@ -92,8 +92,8 @@ namespace ALUGrid
       {
         public :
           typedef std::map< GraphVertex, int > ldb_vertex_map_t;
-          typedef std::set< GraphEdge > ldb_edge_set_t;
-          typedef std::vector< int > ldb_vector_t;
+          typedef std::set< GraphEdge >        ldb_edge_set_t;
+          typedef std::vector< int >           ldb_vector_t;
 
         public :
           class AccVertexLoad
@@ -118,6 +118,7 @@ namespace ALUGrid
           ldb_connect_set_t  _connect;
           ldb_edge_set_t     _edgeSet;
           ldb_vertex_map_t   _vertexSet;
+          const typename ldb_vertex_map_t :: iterator _vertexSetEnd ;
 
           // contains the sizes of the partition (vertices and edges of each proc)
           // if this is zero, then the sizes will be communicated 
@@ -396,14 +397,16 @@ namespace ALUGrid
 
   inline LoadBalancer::DataBase::DataBase () 
     : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-      _edgeSet (), _vertexSet (), _graphSizes(), _noPeriodicFaces( true )
+      _edgeSet (), _vertexSet (), _vertexSetEnd( _vertexSet.end() ),
+      _graphSizes(), _noPeriodicFaces( true )
   {
   }
 
   inline LoadBalancer::DataBase::DataBase ( const std::vector< int > &graphSizes, 
                                             std::vector< int > &elementCuts )
   : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-    _edgeSet (), _vertexSet (), _graphSizes( graphSizes ), 
+    _edgeSet (), _vertexSet (), _vertexSetEnd( _vertexSet.end() ), 
+    _graphSizes( graphSizes ), 
     _elementCuts(), _noPeriodicFaces( true ) 
   {
     // swap memory 
@@ -413,7 +416,8 @@ namespace ALUGrid
   inline LoadBalancer::DataBase::DataBase (const DataBase & b) 
     : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
       _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
-      _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) ,
+      _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) , 
+      _vertexSetEnd( _vertexSet.end() ),
       _graphSizes( b._graphSizes ),
       _elementCuts( b._elementCuts ),
       _noPeriodicFaces( b._noPeriodicFaces )
