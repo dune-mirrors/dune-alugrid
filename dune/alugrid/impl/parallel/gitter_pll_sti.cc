@@ -1402,13 +1402,13 @@ namespace ALUGrid
       {
         const bool precomputeLinkage = Gitter :: storeLinkageInVertices; // && serialPartitioner ();
 
-        lap3 = clock();
-
         // check gather-scatter object and call appropriate method 
         if( gs ) 
           duneRepartitionMacroGrid( db, *gs );  
         else   
           repartitionMacroGrid (db);
+
+        lap3 = clock();
 
         if( precomputeLinkage ) 
         {
@@ -1432,10 +1432,10 @@ namespace ALUGrid
 
     int lap5 = clock ();
 
-    float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC);
-    float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC);
-    float u4 = (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC);
-    float u5 = (float)(lap5 - lap4)/(float)(CLOCKS_PER_SEC);
+    float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC); // check partitioning
+    float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC); // repartition macro grid
+    float u4 = (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC); // identification 
+    float u5 = (float)(lap5 - lap4)/(float)(CLOCKS_PER_SEC); // notify macro grid changes
 
     ldbTimerU2 += u2 ;
     ldbTimerU3 += u3 ;
