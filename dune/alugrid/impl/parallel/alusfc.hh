@@ -109,6 +109,79 @@ namespace ALUGridMETIS
     return (destination < numProcs);
   } // end of simple sfc splitting without edges 
 
+  template <class vec_t> 
+  void shiftElementCuts( const int me, const int pSize, vec_t& elementCuts ) 
+  {
+    typedef typename vec_t :: value_type value_type ;
+
+    // get number of elements 
+    const int nElem = elementCuts[ pSize ];
+    // only do this if number of procs is smaller then number of elements 
+    if( pSize <= nElem ) 
+    {
+      /*
+      if( me == 0 ) 
+      {
+        std::cout << "Cut before" << std::endl;
+        for( int i=0; i<pSize; ++i ) 
+          std::cout << elementCuts[ i ] << " cut" << std::endl;
+      }
+      */
+
+      bool emptyPart = false ;
+      for( int i=1; i<pSize; ++i ) 
+      {
+        // check for empty partition 
+        if( elementCuts[ i-1 ] == elementCuts[ i ] ) 
+        {
+          emptyPart = true ; 
+          break ;
+        }
+      }
+
+      int count = 0 ;
+      // assign at least one element to each proc 
+      while( emptyPart ) 
+      {
+        emptyPart = false ;
+        for( int i=1; i<pSize; ++i ) 
+        {
+          value_type& elemCut = elementCuts[ i ];
+          if( elementCuts[ i-1 ] >= elemCut && elemCut < nElem )
+          {
+            emptyPart = true ;
+            // assign at least one element
+            ++elemCut ;
+          }
+        }
+
+        for( int i=pSize-1; i>0; --i ) 
+        {
+          value_type& elemCut = elementCuts[ i-1 ];
+          if( elementCuts[ i ] <= elemCut && elemCut > 0 )
+          {
+            emptyPart = true ;
+            // assign at least one element
+            --elemCut ;
+          }
+        }
+
+        // only allow for pSize iterations 
+        ++ count ;
+        if( count > pSize ) break ;
+      }
+
+      /*
+      if( me == 0 ) 
+      {
+        std::cout << "Cut after" << std::endl;
+        for( int i=0; i<pSize; ++i ) 
+          std::cout << elementCuts[ i ] << " cut" << std::endl;
+      }
+      */
+    }
+  } // shiftElementCuts
+
   // Partitioning of the space filling curve after Burstedde, Wilcox, and Ghattas, p4est, 2011. 
   // This method needs to global communications. 
   template< class vertexmap_t, class connect_t, class vec_t >
@@ -302,80 +375,6 @@ namespace ALUGridMETIS
     // no change 
     return false;
   } // end of simple sfc splitting without edges 
-
-  template <class vec_t> 
-  void shiftElementCuts( const int me, const int pSize, vec_t& elementCuts ) 
-  {
-    typedef typename vec_t :: value_type value_type ;
-
-    // get number of elements 
-    const int nElem = elementCuts[ pSize ];
-    // only do this if number of procs is smaller then number of elements 
-    if( pSize <= nElem ) 
-    {
-      /*
-      if( me == 0 ) 
-      {
-        std::cout << "Cut before" << std::endl;
-        for( int i=0; i<pSize; ++i ) 
-          std::cout << elementCuts[ i ] << " cut" << std::endl;
-      }
-      */
-
-      bool emptyPart = false ;
-      for( int i=1; i<pSize; ++i ) 
-      {
-        // check for empty partition 
-        if( elementCuts[ i-1 ] == elementCuts[ i ] ) 
-        {
-          emptyPart = true ; 
-          break ;
-        }
-      }
-
-      int count = 0 ;
-      // assign at least one element to each proc 
-      while( emptyPart ) 
-      {
-        emptyPart = false ;
-        for( int i=1; i<pSize; ++i ) 
-        {
-          value_type& elemCut = elementCuts[ i ];
-          if( elementCuts[ i-1 ] >= elemCut && elemCut < nElem )
-          {
-            emptyPart = true ;
-            // assign at least one element
-            ++elemCut ;
-          }
-        }
-
-        for( int i=pSize-1; i>0; --i ) 
-        {
-          value_type& elemCut = elementCuts[ i-1 ];
-          if( elementCuts[ i ] <= elemCut && elemCut > 0 )
-          {
-            emptyPart = true ;
-            // assign at least one element
-            --elemCut ;
-          }
-        }
-
-        // only allow for pSize iterations 
-        ++ count ;
-        if( count > pSize ) break ;
-      }
-
-      /*
-      if( me == 0 ) 
-      {
-        std::cout << "Cut after" << std::endl;
-        for( int i=0; i<pSize; ++i ) 
-          std::cout << elementCuts[ i ] << " cut" << std::endl;
-      }
-      */
-    }
-  } // shiftElementCuts
-
 } // namespace ALUGridMETIS
 
 #endif // #ifndef ALUGRID_SFC_H_INCLUDED
