@@ -1455,10 +1455,13 @@ namespace ALUGrid
       const int me = mpAccess().myrank(); 
 
       // compute missing element destinations 
-      containerPll().computeElementDestinations( mpAccess(), db );
+      // containerPll().computeElementDestinations( mpAccess(), db );
 
       // clear linkage pattern map since it is newly build here
       containerPll().clearLinkagePattern();
+
+      // linkage vector (avoid reallocation)
+      std::vector< int > linkage;
 
       AccessIterator < vertex_STI >::Handle w ( containerPll () );
       // set ldb vertex indices to all elements 
@@ -1475,16 +1478,17 @@ namespace ALUGrid
         {
           typedef vertex_STI :: ElementLinkage_t ElementLinkage_t ;
           const ElementLinkage_t& linkedElements = vertex.linkedElements();
-          std::vector< int > linkage;
           const int elSize = linkedElements.size() ;
+          // clear old content 
+          linkage.clear();
           linkage.reserve( elSize );
           for( int i=0; i<elSize; ++ i )
           {
-            const int rank = db.destination( linkedElements[ i ] ) ;
-            assert( rank >= 0 );
-            if( rank != me ) 
+            const int dest = db.destination( linkedElements[ i ] ) ;
+            assert( dest >= 0 );
+            if( dest != me ) 
             {
-              linkage.push_back( rank );
+              linkage.push_back( dest );
             }
           }
         

@@ -1,4 +1,5 @@
-// (c) bernhard schupp 1997 - 1998
+// (c) bernhard schupp  1997 - 1998
+// (c) Robert Kloefkorn 2004 - 2014
 #include <config.h>
 
 #include <iomanip>
