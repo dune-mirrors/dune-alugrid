@@ -123,9 +123,11 @@ namespace ALUGrid
       for (mi.first (); ! mi.done (); mi.next ()) 
       {
         T& item = mi.item ();
-        std::vector< int > estimate = item.estimateLinkage ();
-        if (estimate.size ()) 
+        if( item.isBorder() ) 
         {
+          std::vector< int > estimate = item.estimateLinkage ();
+          alugrid_assert( estimate.size () > 0 ) ;
+
           LinkedObject::Identifier id = item.getIdentifier ();
           look [id].first  = mi;
           look [id].second = meIt;
@@ -160,7 +162,7 @@ namespace ALUGrid
            pos != lookEnd; ++pos) 
       {
         const std::vector< int > & lk (*(*pos).second.second);
-        if (* lk.begin () == me) 
+        if (* lk.begin () == me ) 
         {
           typename LinkedObject::Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier ();
           { 
@@ -849,6 +851,8 @@ namespace ALUGrid
     // this does not have to be computed every time (depending on partitioning method)
     if( computeVertexLinkage ) 
     {
+      //std::cout << "idn, compute vertex linkage" << std::endl;
+
       // clear linkage pattern map since it is newly build here
       clearLinkagePattern();
 
