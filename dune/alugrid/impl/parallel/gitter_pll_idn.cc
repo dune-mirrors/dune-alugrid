@@ -36,10 +36,6 @@ namespace ALUGrid
     typedef std::vector< std::pair< std::list< typename AccessIterator < C >::Handle >, 
                          std::list< typename AccessIterator < C >::Handle > > > fce_tt_t;
 
-    std::vector< A* > _borderVx;
-    std::vector< B* > _borderEdge;
-    std::vector< C* > _borderFace;
-
     lp_map_t&   _linkagePatternMapVx;
     vx_lmap_t&  _lookVx;
     vx_tt_t& _vx;
@@ -80,46 +76,8 @@ namespace ALUGrid
 
     void pack( const int link, ObjectStream& os ) 
     {
-      if( _firstLoop ) 
-      {
-        // vertices 
-        packFirstLoopLink( link, os, _borderVx );
-        // edges 
-        packFirstLoopLink( link, os, _borderEdge );
-        // faces 
-        packFirstLoopLink( link, os, _borderFace );
-      }
-      //std::cerr << "ERROR: UnpackIdentification::pack should not be called!" << std::endl;
-      //abort();
-    }
-
-    template < class T, class look_t > 
-    void createBorderItems( std::vector< T* >& borderItem, 
-                            typename AccessIterator < T >::Handle& mi,
-                            const MpAccessLocal & mpa,
-                            lp_map_t& linkagePatternMap,  
-                            look_t& look )
-    {
-      const int me = mpa.myrank ();
-      lp_map_t::const_iterator meIt = linkagePatternMap.insert (std::vector< int >  (1L, me)).first;
-
-      borderItem.clear();
-      borderItem.reserve( mi.size() );
-      for( mi.first(); !mi.done(); mi.next() )
-      {
-        T& item = mi.item ();
-        if( item.isBorder() ) 
-        {
-          borderItem.push_back( &item );
-          LinkedObject::Identifier id = item.getIdentifier ();
-          look [id].first  = mi;
-          look [id].second = meIt;
-        }
-      }
-    }
-
-    void meantimeWork() 
-    {
+      std::cerr << "ERROR: UnpackIdentification::pack should not be called!" << std::endl;
+      abort();
     }
 
     void packAll( typename AccessIterator < A >::Handle& vxMi,
@@ -134,18 +92,12 @@ namespace ALUGrid
       
       if( _firstLoop ) 
       {
-        createBorderItems( _borderVx,   vxMi,  mpa, _linkagePatternMapVx,  _lookVx );
-        createBorderItems( _borderEdge, edgMi, mpa, _linkagePatternMapEdg, _lookEdg );
-        createBorderItems( _borderFace, fceMi, mpa, _linkagePatternMapFce, _lookFce );
-
-        /*
         // vertices 
         packFirstLoop< A >( inout, mpa, vxMi , _linkagePatternMapVx , _lookVx );
         // edges 
         packFirstLoop< B >( inout, mpa, edgMi, _linkagePatternMapEdg, _lookEdg );
         // faces 
         packFirstLoop< C >( inout, mpa, fceMi, _linkagePatternMapFce, _lookFce );
-        */
       }
       else 
       {
@@ -158,38 +110,6 @@ namespace ALUGrid
       }
     }
 
-    template < class T > 
-    void packFirstLoopLink( const int link,
-                            ObjectStream &os,
-                            std::vector< T* >& borderItem ) 
-    {
-      // convert link to destination rank 
-      const int dest = _dest[ link ];
-
-      typedef typename std::vector< T* >:: iterator iterator;
-      const iterator end = borderItem.end();
-      for ( iterator it = borderItem.begin(); it != end; ++it )
-      {
-        T& item = *(*it);
-        alugrid_assert( item.isBorder() );
-
-        std::vector< int > estimate = item.estimateLinkage ();
-        if( estimate.size() )
-        {
-          const typename std::vector< int > :: iterator estimateEnd = estimate.end();
-
-          if( std::find( estimate.begin(), estimateEnd, dest ) != estimateEnd ) 
-          {
-            LinkedObject::Identifier id = item.getIdentifier ();
-            id.write( os );
-          }
-        }
-      }
-
-      // write end marker to stream 
-      LinkedObject::Identifier::endOfStream( os );
-    }
-      
     template < class T, class look_t > 
     void packFirstLoop( std::vector< ObjectStream> &inout,
                         const MpAccessLocal & mpa,
@@ -197,7 +117,6 @@ namespace ALUGrid
                         lp_map_t& linkagePatternMap,  
                         look_t& look )
     {
-      abort();
       const int me = mpa.myrank ();
       lp_map_t::const_iterator meIt = linkagePatternMap.insert (std::vector< int >  (1L, me)).first;
 
@@ -207,17 +126,18 @@ namespace ALUGrid
         if( item.isBorder() ) 
         {
           std::vector< int > estimate = item.estimateLinkage ();
-          alugrid_assert( estimate.size () > 0 ) ;
-
-          LinkedObject::Identifier id = item.getIdentifier ();
-          look [id].first  = mi;
-          look [id].second = meIt;
+          if( estimate.size() )
           {
-            std::vector< int >::const_iterator iEnd = estimate.end ();
-            for (std::vector< int >::const_iterator i = estimate.begin (); 
-                 i != iEnd; ++i )
+            LinkedObject::Identifier id = item.getIdentifier ();
+            look [id].first  = mi;
+            look [id].second = meIt;
             {
-              id.write ( inout [ mpa.link (*i) ] );
+              std::vector< int >::const_iterator iEnd = estimate.end ();
+              for (std::vector< int >::const_iterator i = estimate.begin (); 
+                   i != iEnd; ++i )
+              {
+                id.write ( inout [ mpa.link (*i) ] );
+              }
             }
           }
         }
@@ -390,7 +310,7 @@ namespace ALUGrid
       data.packAll( vxMi, edgMi, fceMi, inout, mpa );
       
       // exchange data 
-      mpa.exchange ( data );
+      mpa.exchange (inout, data );
     }
 
     {
