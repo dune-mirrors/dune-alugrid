@@ -954,7 +954,7 @@ namespace ALUGrid
     return change;
   }
 
-  int LoadBalancer::DataBase::destination (int index)  
+  int LoadBalancer::DataBase::destination (int index) const
   {
     // use constructor to initialize default values 
     GraphVertex vx (index);

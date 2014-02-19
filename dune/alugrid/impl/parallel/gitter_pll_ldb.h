@@ -117,7 +117,7 @@ namespace ALUGrid
           int _maxVertexLoad;
           ldb_connect_set_t  _connect;
           ldb_edge_set_t     _edgeSet;
-          ldb_vertex_map_t   _vertexSet;
+          mutable ldb_vertex_map_t   _vertexSet;
           const typename ldb_vertex_map_t :: iterator _vertexSetEnd ;
 
           // contains the sizes of the partition (vertices and edges of each proc)
@@ -204,16 +204,15 @@ namespace ALUGrid
           int accEdgeLoad () const;
           inline int maxVertexLoad () const;
         public :
-          int getDestination ( int i ) { return destination( i ); }
           template <class helement_t, class gatherscatter_t >
-          int destination (const helement_t& elem, gatherscatter_t* gs ) 
+          int destination (const helement_t& elem, gatherscatter_t* gs ) const
           {
             // if gs is given use this to obtain detination 
             return ( gs ) ? gs->destination( elem ) :
                             destination( elem.ldbVertexIndex() );
           }
 
-          int destination (int);
+          int destination (int) const;
 
           const ldb_connect_set_t& scan () const { return _connect; }
 
