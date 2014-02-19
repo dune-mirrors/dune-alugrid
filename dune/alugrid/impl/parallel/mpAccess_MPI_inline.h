@@ -467,11 +467,11 @@ namespace ALUGrid
 
     // true if MPI_Irecv/MPI_test should be used 
     // otherwise MPI_Iprobe/MPI_Recv will be used
-    static const bool useTestAndIrecv = true ;
-    //static const bool useTestAndIrecv = false ;
+    //static const bool useTestAndIrecv = true ;
+    static const bool useTestAndIrecv = false ;
     
-    static const bool oldBlockingMethod = true ;
-    //static const bool oldBlockingMethod = false ;
+    //static const bool oldBlockingMethod = true ;
+    static const bool oldBlockingMethod = false ;
 
     // no copying 
     NonBlockingExchangeMPI( const NonBlockingExchangeMPI& );
@@ -695,8 +695,11 @@ namespace ALUGrid
                 // unpack data 
                 dataHandle->unpack( link, osRecv );
 
-                // remove buffer memory (not needed anymore)
-                osRecv.reset();
+                if( useTestAndIrecv ) 
+                {
+                  // remove buffer memory (not needed anymore)
+                  osRecv.reset();
+                }
               }
               
               if( ! useTestAndIrecv ) 
