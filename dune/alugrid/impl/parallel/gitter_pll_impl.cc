@@ -85,12 +85,18 @@ namespace ALUGrid
   template < class A >
   bool VertexPllBaseX< A >::setLinkage ( const std::vector< int >& newLinkage ) 
   {
-    -- (*_lpn).second;
-    linkagePatternMap_t& _map = linkagePatterns();
     std::vector< int > lp ( newLinkage );
     std::sort( lp.begin(), lp.end() );
-    typename linkagePatternMap_t::iterator pos = _map.find (lp);
-    _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( lp, int(0) )).first;
+    return setLinkageSorted( lp );
+  }
+
+  template < class A >
+  bool VertexPllBaseX< A >::setLinkageSorted ( const std::vector< int >& slp ) 
+  {
+    -- (*_lpn).second;
+    linkagePatternMap_t& _map = linkagePatterns();
+    typename linkagePatternMap_t::iterator pos = _map.find ( slp);
+    _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( slp, int(0) )).first;
     ++ (*_lpn).second;
     return true;
   }

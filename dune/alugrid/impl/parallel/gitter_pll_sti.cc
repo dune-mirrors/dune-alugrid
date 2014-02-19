@@ -1492,8 +1492,10 @@ namespace ALUGrid
             }
           }
         
+          // sort linkage 
+          std::sort( linkage.begin(), linkage.end() );
           // set linkage 
-          vertex.setLinkage( linkage );
+          vertex.setLinkageSorted( linkage );
         }
       }
     }
