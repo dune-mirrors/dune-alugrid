@@ -118,7 +118,7 @@ namespace ALUGrid
           ldb_connect_set_t  _connect;
           ldb_edge_set_t     _edgeSet;
           mutable ldb_vertex_map_t   _vertexSet;
-          const typename ldb_vertex_map_t :: iterator _vertexSetEnd ;
+          const ldb_vertex_map_t :: iterator _vertexSetEnd ;
 
           // contains the sizes of the partition (vertices and edges of each proc)
           // if this is zero, then the sizes will be communicated 

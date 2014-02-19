@@ -958,7 +958,7 @@ namespace ALUGrid
   {
     // use constructor to initialize default values 
     GraphVertex vx (index);
-    typedef typename ldb_vertex_map_t :: iterator iterator ;
+    typedef ldb_vertex_map_t :: iterator iterator ;
     iterator it = _vertexSet.find ( vx );
     assert( it != _vertexSet.end () || _elementCuts.size() > 0 );
     if( it != _vertexSetEnd )
@@ -978,7 +978,7 @@ namespace ALUGrid
           if( index >= last && index < _elementCuts[ rank ] ) 
           {
             // insert for later use
-            _vertexSet.insert( typename ldb_vertex_map_t :: value_type( vx, rank ) );
+            _vertexSet.insert( ldb_vertex_map_t :: value_type( vx, rank ) );
             return rank;
           }
           last = _elementCuts[ rank ];
