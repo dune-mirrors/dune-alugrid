@@ -145,6 +145,12 @@ namespace ALUGridMETIS
     {
       //std::cout << "Compute element cuts" << std::endl;
       elementCuts = mpa.gcollect( myCut ); 
+      int nElem = 0 ;
+      for( int i=0; i<pSize; ++ i) 
+        nElem = std::max( nElem, elementCuts[ i ] );
+
+      // store number of overall macro elements 
+      elementCuts.push_back( nElem );
     }
 
     long int Wme   = 0;
@@ -224,10 +230,14 @@ namespace ALUGridMETIS
     std::vector< int > oldCuts( elementCuts );
 
     elementCuts.clear();
-    elementCuts.resize( pSize, 0 );
+    elementCuts.resize( pSize+1, 0 );
+    elementCuts[ pSize ] = oldCuts[ pSize ];
 
     // communicate cuts 
     mpa.gmax( &cuts[ 0 ], pSize, &elementCuts[ 0 ] );
+
+    // make sure that every process has at least one element
+    shiftElementCuts( me, pSize, elementCuts );
 
     // get start and end element
     const int wStart = (me == 0) ? 0 : elementCuts[ me-1 ];
@@ -274,6 +284,9 @@ namespace ALUGridMETIS
       }
     }
 
+    //std::cout << elementCuts[ pSize ] << " nelem " << std::endl;
+    //abort();
+
     // check whether the element cuts have changed
     {
       typedef std::vector<int>::iterator iterator ;
@@ -289,6 +302,79 @@ namespace ALUGridMETIS
     // no change 
     return false;
   } // end of simple sfc splitting without edges 
+
+  template <class vec_t> 
+  void shiftElementCuts( const int me, const int pSize, vec_t& elementCuts ) 
+  {
+    typedef typename vec_t :: value_type value_type ;
+
+    // get number of elements 
+    const int nElem = elementCuts[ pSize ];
+    // only do this if number of procs is smaller then number of elements 
+    if( pSize <= nElem ) 
+    {
+      /*
+      if( me == 0 ) 
+      {
+        std::cout << "Cut before" << std::endl;
+        for( int i=0; i<pSize; ++i ) 
+          std::cout << elementCuts[ i ] << " cut" << std::endl;
+      }
+      */
+
+      bool emptyPart = false ;
+      for( int i=1; i<pSize; ++i ) 
+      {
+        // check for empty partition 
+        if( elementCuts[ i-1 ] == elementCuts[ i ] ) 
+        {
+          emptyPart = true ; 
+          break ;
+        }
+      }
+
+      int count = 0 ;
+      // assign at least one element to each proc 
+      while( emptyPart ) 
+      {
+        emptyPart = false ;
+        for( int i=1; i<pSize; ++i ) 
+        {
+          value_type& elemCut = elementCuts[ i ];
+          if( elementCuts[ i-1 ] >= elemCut && elemCut < nElem )
+          {
+            emptyPart = true ;
+            // assign at least one element
+            ++elemCut ;
+          }
+        }
+
+        for( int i=pSize-1; i>0; --i ) 
+        {
+          value_type& elemCut = elementCuts[ i-1 ];
+          if( elementCuts[ i ] <= elemCut && elemCut > 0 )
+          {
+            emptyPart = true ;
+            // assign at least one element
+            --elemCut ;
+          }
+        }
+
+        // only allow for pSize iterations 
+        ++ count ;
+        if( count > pSize ) break ;
+      }
+
+      /*
+      if( me == 0 ) 
+      {
+        std::cout << "Cut after" << std::endl;
+        for( int i=0; i<pSize; ++i ) 
+          std::cout << elementCuts[ i ] << " cut" << std::endl;
+      }
+      */
+    }
+  } // shiftElementCuts
 
 } // namespace ALUGridMETIS
 
