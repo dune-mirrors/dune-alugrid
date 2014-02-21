@@ -1,0 +1,143 @@
+Execute poe command line: poe  ./main_ball 4 0 3 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+elements = 7325634 (6653,7646,1.14926)   maxLevel = 3   step = 12   time = 0.108   dt = 0.009
+elements = 7215258 (6589,7536,1.14372)   maxLevel = 3   step = 23   time = 0.207   dt = 0.009
+elements = 7166076 (6507,7485,1.1503)   maxLevel = 3   step = 34   time = 0.306   dt = 0.009
+elements = 7334160 (6656,7653,1.14979)   maxLevel = 3   step = 45   time = 0.405   dt = 0.009
+elements = 7067845 (6391,7383,1.15522)   maxLevel = 3   step = 56   time = 0.504   dt = 0.009
+elements = 7323786 (6651,7626,1.14659)   maxLevel = 3   step = 67   time = 0.603   dt = 0.009
+elements = 7214726 (6570,7542,1.14795)   maxLevel = 3   step = 78   time = 0.702   dt = 0.009
+elements = 7129872 (6486,7456,1.14955)   maxLevel = 3   step = 89   time = 0.801   dt = 0.009
+elements = 7318179 (6656,7632,1.14663)   maxLevel = 3   step = 100   time = 0.9   dt = 0.009
+elements = 7049820 (6374,7375,1.15704)   maxLevel = 3   step = 112   time = 1.008   dt = 0.009
+U2 max: 18.09  min: 10.2
+U3 max: 0.03  min: 0
+U4 max: 2.09  min: 1.05
+U5 max: 0.36  min: 0
+U6 max: 15.77  min: 9.01
+U7 max: 0.01  min: 0
+U8 max: 20.63  min: 12.48
+Program finished: CPU time = 42.8815 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys0648-ib>
+Subject: Job 926081: <mb.1024> in cluster <yellowstone> Done
+
+Job <mb.1024> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys0648-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys0651-ib>
+                            <16*ys0652-ib>
+                            <16*ys0653-ib>
+                            <16*ys0657-ib>
+                            <16*ys0658-ib>
+                            <16*ys0659-ib>
+                            <16*ys0660-ib>
+                            <16*ys0662-ib>
+                            <16*ys0664-ib>
+                            <16*ys0670-ib>
+                            <16*ys0704-ib>
+                            <16*ys0711-ib>
+                            <16*ys0713-ib>
+                            <16*ys0723-ib>
+                            <16*ys0724-ib>
+                            <16*ys0749-ib>
+                            <16*ys0750-ib>
+                            <16*ys0808-ib>
+                            <16*ys0809-ib>
+                            <16*ys0810-ib>
+                            <16*ys0811-ib>
+                            <16*ys0812-ib>
+                            <16*ys0813-ib>
+                            <16*ys0814-ib>
+                            <16*ys0815-ib>
+                            <16*ys0816-ib>
+                            <16*ys0817-ib>
+                            <16*ys0818-ib>
+                            <16*ys0819-ib>
+                            <16*ys0820-ib>
+                            <16*ys0821-ib>
+                            <16*ys0822-ib>
+                            <16*ys0823-ib>
+                            <16*ys0824-ib>
+                            <16*ys0825-ib>
+                            <16*ys0826-ib>
+                            <16*ys0827-ib>
+                            <16*ys0828-ib>
+                            <16*ys0831-ib>
+                            <16*ys0832-ib>
+                            <16*ys0833-ib>
+                            <16*ys0834-ib>
+                            <16*ys0837-ib>
+                            <16*ys0838-ib>
+                            <16*ys0839-ib>
+                            <16*ys0840-ib>
+                            <16*ys0841-ib>
+                            <16*ys0842-ib>
+                            <16*ys0843-ib>
+                            <16*ys0844-ib>
+                            <16*ys0845-ib>
+                            <16*ys0846-ib>
+                            <16*ys0847-ib>
+                            <16*ys0848-ib>
+                            <16*ys0849-ib>
+                            <16*ys0850-ib>
+                            <16*ys0851-ib>
+                            <16*ys0852-ib>
+                            <16*ys0853-ib>
+                            <16*ys0854-ib>
+                            <16*ys0855-ib>
+                            <16*ys0857-ib>
+                            <16*ys0858-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_alusfc_403> was used as the working directory.
+Started at Thu Feb 20 15:29:30 2014
+Results reported at Thu Feb 20 15:31:02 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:30               # wall-clock time (hrs:mins)
+#BSUB -n 1024              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.1024            # job name
+#BSUB -o ./mb.1024.out  # output file name 
+#BSUB -e ./mb.1024.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 4 0 3 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               57239.00 sec.
+    Max Memory :             2430 MB
+    Average Memory :         1221.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          4
+    Max Threads :            137
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.1024.err> for stderr output of this job.
+
