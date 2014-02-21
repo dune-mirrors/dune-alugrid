@@ -1,0 +1,207 @@
+Execute poe command line: poe  ./main_ball 4 0 3 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+elements = 7293882 (2560,4840,1.89062)   maxLevel = 3   step = 12   time = 0.108   dt = 0.009
+elements = 7185746 (2048,4096,2)   maxLevel = 3   step = 23   time = 0.207   dt = 0.009
+elements = 7139056 (2048,4101,2.00244)   maxLevel = 3   step = 34   time = 0.306   dt = 0.009
+elements = 7309513 (2048,4608,2.25)   maxLevel = 3   step = 45   time = 0.405   dt = 0.009
+elements = 7036639 (2048,4096,2)   maxLevel = 3   step = 56   time = 0.504   dt = 0.009
+elements = 7287512 (2048,4385,2.14111)   maxLevel = 3   step = 67   time = 0.603   dt = 0.009
+elements = 7183863 (2048,4096,2)   maxLevel = 3   step = 78   time = 0.702   dt = 0.009
+elements = 7103202 (2504,4328,1.72843)   maxLevel = 3   step = 89   time = 0.801   dt = 0.009
+elements = 7295408 (2048,4608,2.25)   maxLevel = 3   step = 100   time = 0.9   dt = 0.009
+elements = 7034203 (2048,4096,2)   maxLevel = 3   step = 112   time = 1.008   dt = 0.009
+U2 max: 39.39  min: 23.49
+U3 max: 0.04  min: 0
+U4 max: 1.73  min: 1.03
+U5 max: 0.71  min: 0
+U6 max: 255.83  min: 240.9
+U7 max: 0.01  min: 0
+U8 max: 41.72  min: 25.96
+Program finished: CPU time = 269.758 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys1653-ib>
+Subject: Job 932349: <mb.2048> in cluster <yellowstone> Done
+
+Job <mb.2048> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys1653-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys1654-ib>
+                            <16*ys1655-ib>
+                            <16*ys1656-ib>
+                            <16*ys1665-ib>
+                            <16*ys1666-ib>
+                            <16*ys1667-ib>
+                            <16*ys1670-ib>
+                            <16*ys1701-ib>
+                            <16*ys1702-ib>
+                            <16*ys1703-ib>
+                            <16*ys1704-ib>
+                            <16*ys1705-ib>
+                            <16*ys1706-ib>
+                            <16*ys1708-ib>
+                            <16*ys1709-ib>
+                            <16*ys1722-ib>
+                            <16*ys1723-ib>
+                            <16*ys1724-ib>
+                            <16*ys1725-ib>
+                            <16*ys1726-ib>
+                            <16*ys1727-ib>
+                            <16*ys1728-ib>
+                            <16*ys1734-ib>
+                            <16*ys1757-ib>
+                            <16*ys1760-ib>
+                            <16*ys1761-ib>
+                            <16*ys1763-ib>
+                            <16*ys1764-ib>
+                            <16*ys1765-ib>
+                            <16*ys1766-ib>
+                            <16*ys1767-ib>
+                            <16*ys1768-ib>
+                            <16*ys1769-ib>
+                            <16*ys1770-ib>
+                            <16*ys1771-ib>
+                            <16*ys1772-ib>
+                            <16*ys1802-ib>
+                            <16*ys1811-ib>
+                            <16*ys1821-ib>
+                            <16*ys1851-ib>
+                            <16*ys1853-ib>
+                            <16*ys1854-ib>
+                            <16*ys1901-ib>
+                            <16*ys1902-ib>
+                            <16*ys1903-ib>
+                            <16*ys1904-ib>
+                            <16*ys1905-ib>
+                            <16*ys1906-ib>
+                            <16*ys1907-ib>
+                            <16*ys1908-ib>
+                            <16*ys1909-ib>
+                            <16*ys1910-ib>
+                            <16*ys1911-ib>
+                            <16*ys1912-ib>
+                            <16*ys1913-ib>
+                            <16*ys1914-ib>
+                            <16*ys1915-ib>
+                            <16*ys1916-ib>
+                            <16*ys1917-ib>
+                            <16*ys1922-ib>
+                            <16*ys1964-ib>
+                            <16*ys1965-ib>
+                            <16*ys3357-ib>
+                            <16*ys4058-ib>
+                            <16*ys4162-ib>
+                            <16*ys4163-ib>
+                            <16*ys4212-ib>
+                            <16*ys4213-ib>
+                            <16*ys4214-ib>
+                            <16*ys4215-ib>
+                            <16*ys4216-ib>
+                            <16*ys4217-ib>
+                            <16*ys4218-ib>
+                            <16*ys4219-ib>
+                            <16*ys4220-ib>
+                            <16*ys4221-ib>
+                            <16*ys4424-ib>
+                            <16*ys4425-ib>
+                            <16*ys4550-ib>
+                            <16*ys4551-ib>
+                            <16*ys4552-ib>
+                            <16*ys4640-ib>
+                            <16*ys4641-ib>
+                            <16*ys4642-ib>
+                            <16*ys4643-ib>
+                            <16*ys4849-ib>
+                            <16*ys4850-ib>
+                            <16*ys4851-ib>
+                            <16*ys4852-ib>
+                            <16*ys6033-ib>
+                            <16*ys6049-ib>
+                            <16*ys6050-ib>
+                            <16*ys6051-ib>
+                            <16*ys6056-ib>
+                            <16*ys6057-ib>
+                            <16*ys6061-ib>
+                            <16*ys6062-ib>
+                            <16*ys6063-ib>
+                            <16*ys6064-ib>
+                            <16*ys6101-ib>
+                            <16*ys6102-ib>
+                            <16*ys6109-ib>
+                            <16*ys6110-ib>
+                            <16*ys6111-ib>
+                            <16*ys6130-ib>
+                            <16*ys6131-ib>
+                            <16*ys6132-ib>
+                            <16*ys6139-ib>
+                            <16*ys6165-ib>
+                            <16*ys6317-ib>
+                            <16*ys6318-ib>
+                            <16*ys6319-ib>
+                            <16*ys6337-ib>
+                            <16*ys6338-ib>
+                            <16*ys6339-ib>
+                            <16*ys6340-ib>
+                            <16*ys6341-ib>
+                            <16*ys6342-ib>
+                            <16*ys6343-ib>
+                            <16*ys6344-ib>
+                            <16*ys6357-ib>
+                            <16*ys6361-ib>
+                            <16*ys6367-ib>
+                            <16*ys6368-ib>
+                            <16*ys6370-ib>
+                            <16*ys6371-ib>
+                            <16*ys6372-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_kway_403> was used as the working directory.
+Started at Fri Feb 21 12:15:44 2014
+Results reported at Fri Feb 21 12:21:25 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:20               # wall-clock time (hrs:mins)
+#BSUB -n 2048              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.2048            # job name
+#BSUB -o ./mb.2048.out  # output file name 
+#BSUB -e ./mb.2048.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 4 0 3 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               629077.50 sec.
+    Max Memory :             582958 MB
+    Average Memory :         276227.69 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          2180
+    Max Threads :            23433
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.2048.err> for stderr output of this job.
+

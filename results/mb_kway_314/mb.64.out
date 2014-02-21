@@ -1,0 +1,211 @@
+Execute poe command line: poe  ./main_ball 3 1 4 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 1
+elements = 7289591 (107194,117685,1.09787)   maxLevel = 4   step = 12   time = 0.108   dt = 0.009
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+elements = 7181518 (96874,115934,1.19675)   maxLevel = 4   step = 23   time = 0.207   dt = 0.009
+elements = 7149941 (103287,118465,1.14695)   maxLevel = 4   step = 34   time = 0.306   dt = 0.009
+elements = 7339011 (107615,120291,1.11779)   maxLevel = 4   step = 45   time = 0.405   dt = 0.009
+elements = 7069070 (106912,113890,1.06527)   maxLevel = 4   step = 56   time = 0.504   dt = 0.009
+elements = 7318368 (111031,117726,1.0603)   maxLevel = 4   step = 67   time = 0.603   dt = 0.009
+elements = 7196862 (109198,115840,1.06083)   maxLevel = 4   step = 78   time = 0.702   dt = 0.009
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+You just increased the maxndoms: 18 17
+elements = 7105925 (107977,114360,1.05911)   maxLevel = 4   step = 89   time = 0.801   dt = 0.009
+elements = 7271391 (107459,117008,1.08886)   maxLevel = 4   step = 100   time = 0.9   dt = 0.009
+elements = 7005629 (104381,112738,1.08006)   maxLevel = 4   step = 112   time = 1.008   dt = 0.009
+U2 max: 23.54  min: 17.39
+U3 max: 0.01  min: 0
+U4 max: 1.69  min: 1.25
+U5 max: 2.01  min: 0.99
+U6 max: 57.32  min: 51.64
+U7 max: 0.01  min: 0
+U8 max: 26.47  min: 20.39
+Program finished: CPU time = 131.019 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys1670-ib>
+Subject: Job 932329: <mb.64> in cluster <yellowstone> Done
+
+Job <mb.64> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys1670-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys1671-ib>
+                            <16*ys1672-ib>
+                            <16*ys1701-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_kway_314> was used as the working directory.
+Started at Fri Feb 21 10:08:23 2014
+Results reported at Fri Feb 21 10:11:43 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:20               # wall-clock time (hrs:mins)
+#BSUB -n 64              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.64            # job name
+#BSUB -o ./mb.64.out  # output file name 
+#BSUB -e ./mb.64.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 3 1 4 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               12973.00 sec.
+    Max Memory :             17040 MB
+    Average Memory :         10867.60 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          72
+    Max Threads :            741
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.64.err> for stderr output of this job.
+
