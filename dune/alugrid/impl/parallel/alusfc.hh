@@ -119,15 +119,6 @@ namespace ALUGridMETIS
     // only do this if number of procs is smaller then number of elements 
     if( pSize <= nElem ) 
     {
-      /*
-      if( me == 0 ) 
-      {
-        std::cout << "Cut before" << std::endl;
-        for( int i=0; i<pSize; ++i ) 
-          std::cout << elementCuts[ i ] << " cut" << std::endl;
-      }
-      */
-
       bool emptyPart = false ;
       for( int i=1; i<pSize; ++i ) 
       {
@@ -170,15 +161,6 @@ namespace ALUGridMETIS
         ++ count ;
         if( count > pSize ) break ;
       }
-
-      /*
-      if( me == 0 ) 
-      {
-        std::cout << "Cut after" << std::endl;
-        for( int i=0; i<pSize; ++i ) 
-          std::cout << elementCuts[ i ] << " cut" << std::endl;
-      }
-      */
     }
   } // shiftElementCuts
 
@@ -356,9 +338,6 @@ namespace ALUGridMETIS
         connect.insert( ALUGrid::MpAccessLocal::sendRank( destination ) );
       }
     }
-
-    //std::cout << elementCuts[ pSize ] << " nelem " << std::endl;
-    //abort();
 
     // check whether the element cuts have changed
     {
