@@ -1,0 +1,335 @@
+Execute poe command line: poe  ./main_ball 4 0 3 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+elements = 7330324 (1282,2294,1.78939)   maxLevel = 3   step = 12   time = 0.108   dt = 0.009
+elements = 7218401 (1284,2266,1.7648)   maxLevel = 3   step = 23   time = 0.207   dt = 0.009
+elements = 7174175 (1243,2252,1.81175)   maxLevel = 3   step = 34   time = 0.306   dt = 0.009
+elements = 7345465 (1292,2298,1.77864)   maxLevel = 3   step = 45   time = 0.405   dt = 0.009
+elements = 7078107 (1243,2224,1.78922)   maxLevel = 3   step = 56   time = 0.504   dt = 0.009
+elements = 7329855 (1305,2294,1.75785)   maxLevel = 3   step = 67   time = 0.603   dt = 0.009
+elements = 7222776 (1264,2259,1.78718)   maxLevel = 3   step = 78   time = 0.702   dt = 0.009
+elements = 7135885 (1252,2242,1.79073)   maxLevel = 3   step = 89   time = 0.801   dt = 0.009
+elements = 7324171 (1288,2274,1.76553)   maxLevel = 3   step = 100   time = 0.9   dt = 0.009
+elements = 7054636 (1256,2224,1.7707)   maxLevel = 3   step = 112   time = 1.008   dt = 0.009
+U2 max: 1.06  min: 0.49
+U3 max: 0.03  min: 0
+U4 max: 8.95  min: 1.71
+U5 max: 0.18  min: 0
+U6 max: 30.02  min: 23.5
+U7 max: 0.3  min: 0
+U8 max: 10.08  min: 2.96
+Program finished: CPU time = 45.5391 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys0202-ib>
+Subject: Job 927795: <mb.4096> in cluster <yellowstone> Done
+
+Job <mb.4096> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys0202-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys0203-ib>
+                            <16*ys0210-ib>
+                            <16*ys0232-ib>
+                            <16*ys0301-ib>
+                            <16*ys0313-ib>
+                            <16*ys0314-ib>
+                            <16*ys0318-ib>
+                            <16*ys0319-ib>
+                            <16*ys0323-ib>
+                            <16*ys0325-ib>
+                            <16*ys0327-ib>
+                            <16*ys0330-ib>
+                            <16*ys0332-ib>
+                            <16*ys0334-ib>
+                            <16*ys0335-ib>
+                            <16*ys0336-ib>
+                            <16*ys0338-ib>
+                            <16*ys0339-ib>
+                            <16*ys0340-ib>
+                            <16*ys0341-ib>
+                            <16*ys0345-ib>
+                            <16*ys0346-ib>
+                            <16*ys0347-ib>
+                            <16*ys2651-ib>
+                            <16*ys2652-ib>
+                            <16*ys2653-ib>
+                            <16*ys2654-ib>
+                            <16*ys2655-ib>
+                            <16*ys2656-ib>
+                            <16*ys2657-ib>
+                            <16*ys2658-ib>
+                            <16*ys2659-ib>
+                            <16*ys2660-ib>
+                            <16*ys2661-ib>
+                            <16*ys2662-ib>
+                            <16*ys2663-ib>
+                            <16*ys2664-ib>
+                            <16*ys2665-ib>
+                            <16*ys2666-ib>
+                            <16*ys2667-ib>
+                            <16*ys2668-ib>
+                            <16*ys2669-ib>
+                            <16*ys2671-ib>
+                            <16*ys2672-ib>
+                            <16*ys2701-ib>
+                            <16*ys2702-ib>
+                            <16*ys2703-ib>
+                            <16*ys2704-ib>
+                            <16*ys2705-ib>
+                            <16*ys2706-ib>
+                            <16*ys2707-ib>
+                            <16*ys2708-ib>
+                            <16*ys2709-ib>
+                            <16*ys2710-ib>
+                            <16*ys2711-ib>
+                            <16*ys2712-ib>
+                            <16*ys2713-ib>
+                            <16*ys2714-ib>
+                            <16*ys2715-ib>
+                            <16*ys2716-ib>
+                            <16*ys2717-ib>
+                            <16*ys2718-ib>
+                            <16*ys2719-ib>
+                            <16*ys2720-ib>
+                            <16*ys2721-ib>
+                            <16*ys2722-ib>
+                            <16*ys2723-ib>
+                            <16*ys2724-ib>
+                            <16*ys2725-ib>
+                            <16*ys2726-ib>
+                            <16*ys2741-ib>
+                            <16*ys2745-ib>
+                            <16*ys2746-ib>
+                            <16*ys2747-ib>
+                            <16*ys2748-ib>
+                            <16*ys2749-ib>
+                            <16*ys2755-ib>
+                            <16*ys2828-ib>
+                            <16*ys2829-ib>
+                            <16*ys2830-ib>
+                            <16*ys2831-ib>
+                            <16*ys2832-ib>
+                            <16*ys2833-ib>
+                            <16*ys2834-ib>
+                            <16*ys2835-ib>
+                            <16*ys2836-ib>
+                            <16*ys2837-ib>
+                            <16*ys2838-ib>
+                            <16*ys2839-ib>
+                            <16*ys2840-ib>
+                            <16*ys2841-ib>
+                            <16*ys2842-ib>
+                            <16*ys2843-ib>
+                            <16*ys2844-ib>
+                            <16*ys2845-ib>
+                            <16*ys2846-ib>
+                            <16*ys2847-ib>
+                            <16*ys2848-ib>
+                            <16*ys2849-ib>
+                            <16*ys2850-ib>
+                            <16*ys2851-ib>
+                            <16*ys2852-ib>
+                            <16*ys2853-ib>
+                            <16*ys2854-ib>
+                            <16*ys2855-ib>
+                            <16*ys2856-ib>
+                            <16*ys2858-ib>
+                            <16*ys2859-ib>
+                            <16*ys2860-ib>
+                            <16*ys2861-ib>
+                            <16*ys2862-ib>
+                            <16*ys2863-ib>
+                            <16*ys2865-ib>
+                            <16*ys2866-ib>
+                            <16*ys2867-ib>
+                            <16*ys2868-ib>
+                            <16*ys2869-ib>
+                            <16*ys2926-ib>
+                            <16*ys2927-ib>
+                            <16*ys2928-ib>
+                            <16*ys2929-ib>
+                            <16*ys2930-ib>
+                            <16*ys2964-ib>
+                            <16*ys2965-ib>
+                            <16*ys2966-ib>
+                            <16*ys3030-ib>
+                            <16*ys3031-ib>
+                            <16*ys3032-ib>
+                            <16*ys3033-ib>
+                            <16*ys3034-ib>
+                            <16*ys3035-ib>
+                            <16*ys3036-ib>
+                            <16*ys3037-ib>
+                            <16*ys3038-ib>
+                            <16*ys3039-ib>
+                            <16*ys3040-ib>
+                            <16*ys3041-ib>
+                            <16*ys3042-ib>
+                            <16*ys3043-ib>
+                            <16*ys3044-ib>
+                            <16*ys3045-ib>
+                            <16*ys3046-ib>
+                            <16*ys3047-ib>
+                            <16*ys3048-ib>
+                            <16*ys3049-ib>
+                            <16*ys3050-ib>
+                            <16*ys3051-ib>
+                            <16*ys3052-ib>
+                            <16*ys3053-ib>
+                            <16*ys3054-ib>
+                            <16*ys3056-ib>
+                            <16*ys3057-ib>
+                            <16*ys3058-ib>
+                            <16*ys3059-ib>
+                            <16*ys3061-ib>
+                            <16*ys3062-ib>
+                            <16*ys3063-ib>
+                            <16*ys3064-ib>
+                            <16*ys3065-ib>
+                            <16*ys3066-ib>
+                            <16*ys3067-ib>
+                            <16*ys3071-ib>
+                            <16*ys3101-ib>
+                            <16*ys3104-ib>
+                            <16*ys3227-ib>
+                            <16*ys3228-ib>
+                            <16*ys3229-ib>
+                            <16*ys3230-ib>
+                            <16*ys3231-ib>
+                            <16*ys3232-ib>
+                            <16*ys3233-ib>
+                            <16*ys3234-ib>
+                            <16*ys3235-ib>
+                            <16*ys3236-ib>
+                            <16*ys3237-ib>
+                            <16*ys3238-ib>
+                            <16*ys3239-ib>
+                            <16*ys3245-ib>
+                            <16*ys3251-ib>
+                            <16*ys3252-ib>
+                            <16*ys3253-ib>
+                            <16*ys3256-ib>
+                            <16*ys3257-ib>
+                            <16*ys3258-ib>
+                            <16*ys3259-ib>
+                            <16*ys3260-ib>
+                            <16*ys3261-ib>
+                            <16*ys3262-ib>
+                            <16*ys3263-ib>
+                            <16*ys3264-ib>
+                            <16*ys3265-ib>
+                            <16*ys3619-ib>
+                            <16*ys3659-ib>
+                            <16*ys3660-ib>
+                            <16*ys3705-ib>
+                            <16*ys3706-ib>
+                            <16*ys3707-ib>
+                            <16*ys3708-ib>
+                            <16*ys3709-ib>
+                            <16*ys3711-ib>
+                            <16*ys3712-ib>
+                            <16*ys3713-ib>
+                            <16*ys3714-ib>
+                            <16*ys3715-ib>
+                            <16*ys3716-ib>
+                            <16*ys3717-ib>
+                            <16*ys3720-ib>
+                            <16*ys3724-ib>
+                            <16*ys3725-ib>
+                            <16*ys3726-ib>
+                            <16*ys3727-ib>
+                            <16*ys3729-ib>
+                            <16*ys3732-ib>
+                            <16*ys3733-ib>
+                            <16*ys3735-ib>
+                            <16*ys3742-ib>
+                            <16*ys3747-ib>
+                            <16*ys4262-ib>
+                            <16*ys4263-ib>
+                            <16*ys4264-ib>
+                            <16*ys4265-ib>
+                            <16*ys4266-ib>
+                            <16*ys4267-ib>
+                            <16*ys4268-ib>
+                            <16*ys4269-ib>
+                            <16*ys4270-ib>
+                            <16*ys4272-ib>
+                            <16*ys4403-ib>
+                            <16*ys4404-ib>
+                            <16*ys4405-ib>
+                            <16*ys4539-ib>
+                            <16*ys4546-ib>
+                            <16*ys4547-ib>
+                            <16*ys4713-ib>
+                            <16*ys4835-ib>
+                            <16*ys4843-ib>
+                            <16*ys4844-ib>
+                            <16*ys4845-ib>
+                            <16*ys4846-ib>
+                            <16*ys5058-ib>
+                            <16*ys5125-ib>
+                            <16*ys5126-ib>
+                            <16*ys5127-ib>
+                            <16*ys5128-ib>
+                            <16*ys5129-ib>
+                            <16*ys5130-ib>
+                            <16*ys5131-ib>
+                            <16*ys5133-ib>
+                            <16*ys5135-ib>
+                            <16*ys5229-ib>
+                            <16*ys5368-ib>
+                            <16*ys5411-ib>
+                            <16*ys5412-ib>
+                            <16*ys5413-ib>
+                            <16*ys5511-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_bresen_403> was used as the working directory.
+Started at Thu Feb 20 22:19:18 2014
+Results reported at Thu Feb 20 22:20:29 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:30               # wall-clock time (hrs:mins)
+#BSUB -n 4096              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.4096            # job name
+#BSUB -o ./mb.4096.out  # output file name 
+#BSUB -e ./mb.4096.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 4 0 3 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               237129.00 sec.
+    Max Memory :             3860 MB
+    Average Memory :         1943.50 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          35
+    Max Threads :            521
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.4096.err> for stderr output of this job.
+

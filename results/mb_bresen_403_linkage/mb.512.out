@@ -1,0 +1,111 @@
+Execute poe command line: poe  ./main_ball 4 0 3 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+elements = 7325970 (13817,14816,1.0723)   maxLevel = 3   step = 12   time = 0.108   dt = 0.009
+elements = 7212801 (13601,14575,1.07161)   maxLevel = 3   step = 23   time = 0.207   dt = 0.009
+elements = 7161372 (13489,14458,1.07184)   maxLevel = 3   step = 34   time = 0.306   dt = 0.009
+elements = 7332382 (13824,14813,1.07154)   maxLevel = 3   step = 45   time = 0.405   dt = 0.009
+elements = 7063582 (13305,14290,1.07403)   maxLevel = 3   step = 56   time = 0.504   dt = 0.009
+elements = 7320496 (13810,14792,1.07111)   maxLevel = 3   step = 67   time = 0.603   dt = 0.009
+elements = 7212045 (13600,14570,1.07132)   maxLevel = 3   step = 78   time = 0.702   dt = 0.009
+elements = 7128129 (13433,14411,1.07281)   maxLevel = 3   step = 89   time = 0.801   dt = 0.009
+elements = 7311011 (13783,14770,1.07161)   maxLevel = 3   step = 100   time = 0.9   dt = 0.009
+elements = 7053859 (13298,14253,1.07182)   maxLevel = 3   step = 112   time = 1.008   dt = 0.009
+U2 max: 0.75  min: 0.46
+U3 max: 0.03  min: 0
+U4 max: 21.34  min: 12.5
+U5 max: 0.47  min: 0.02
+U6 max: 26.76  min: 22.09
+U7 max: 0.54  min: 0
+U8 max: 25.44  min: 18.16
+Program finished: CPU time = 68.2296 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys0467-ib>
+Subject: Job 927792: <mb.512> in cluster <yellowstone> Done
+
+Job <mb.512> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys0467-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys0510-ib>
+                            <16*ys0513-ib>
+                            <16*ys0514-ib>
+                            <16*ys0515-ib>
+                            <16*ys0517-ib>
+                            <16*ys0518-ib>
+                            <16*ys0521-ib>
+                            <16*ys0523-ib>
+                            <16*ys0524-ib>
+                            <16*ys0525-ib>
+                            <16*ys0526-ib>
+                            <16*ys0528-ib>
+                            <16*ys0529-ib>
+                            <16*ys0530-ib>
+                            <16*ys0532-ib>
+                            <16*ys0534-ib>
+                            <16*ys0535-ib>
+                            <16*ys0536-ib>
+                            <16*ys0537-ib>
+                            <16*ys0538-ib>
+                            <16*ys1047-ib>
+                            <16*ys1763-ib>
+                            <16*ys1764-ib>
+                            <16*ys1765-ib>
+                            <16*ys1766-ib>
+                            <16*ys1767-ib>
+                            <16*ys1768-ib>
+                            <16*ys1769-ib>
+                            <16*ys1770-ib>
+                            <16*ys1771-ib>
+                            <16*ys1772-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_bresen_403> was used as the working directory.
+Started at Thu Feb 20 20:44:21 2014
+Results reported at Thu Feb 20 20:46:21 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:30               # wall-clock time (hrs:mins)
+#BSUB -n 512              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.512            # job name
+#BSUB -o ./mb.512.out  # output file name 
+#BSUB -e ./mb.512.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 4 0 3 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               44958.00 sec.
+    Max Memory :             59337 MB
+    Average Memory :         2104.67 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          395
+    Max Threads :            4236
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.512.err> for stderr output of this job.
+

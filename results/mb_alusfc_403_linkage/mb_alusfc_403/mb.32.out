@@ -1,0 +1,81 @@
+Execute poe command line: poe  ./main_ball 4 0 3 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+elements = 7315246 (228197,229052,1.00375)   maxLevel = 3   step = 12   time = 0.108   dt = 0.009
+elements = 7203680 (224651,225523,1.00388)   maxLevel = 3   step = 23   time = 0.207   dt = 0.009
+elements = 7158376 (223228,224058,1.00372)   maxLevel = 3   step = 34   time = 0.306   dt = 0.009
+elements = 7317696 (228239,229112,1.00382)   maxLevel = 3   step = 45   time = 0.405   dt = 0.009
+elements = 7051325 (219854,220699,1.00384)   maxLevel = 3   step = 56   time = 0.504   dt = 0.009
+elements = 7309597 (228009,228789,1.00342)   maxLevel = 3   step = 67   time = 0.603   dt = 0.009
+elements = 7206172 (224869,225620,1.00334)   maxLevel = 3   step = 78   time = 0.702   dt = 0.009
+elements = 7122977 (222107,223094,1.00444)   maxLevel = 3   step = 89   time = 0.801   dt = 0.009
+elements = 7305572 (227846,228715,1.00381)   maxLevel = 3   step = 100   time = 0.9   dt = 0.009
+elements = 7044059 (219667,220558,1.00406)   maxLevel = 3   step = 112   time = 1.008   dt = 0.009
+U2 max: 0.69  min: 0.44
+U3 max: 0.01  min: 0
+U4 max: 99.37  min: 68.1
+U5 max: 3.82  min: 1.55
+U6 max: 111.42  min: 80.85
+U7 max: 2.05  min: 0.08
+U8 max: 102.96  min: 73.85
+Program finished: CPU time = 328.649 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys6232-ib>
+Subject: Job 927772: <mb.32> in cluster <yellowstone> Done
+
+Job <mb.32> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys6232-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys6233-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_alusfc_403> was used as the working directory.
+Started at Thu Feb 20 19:53:12 2014
+Results reported at Thu Feb 20 20:00:26 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:30               # wall-clock time (hrs:mins)
+#BSUB -n 32              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.32            # job name
+#BSUB -o ./mb.32.out  # output file name 
+#BSUB -e ./mb.32.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 4 0 3 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               20054.27 sec.
+    Max Memory :             19176 MB
+    Average Memory :         14116.62 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          38
+    Max Threads :            375
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.32.err> for stderr output of this job.
+
