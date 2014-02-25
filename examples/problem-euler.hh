@@ -125,6 +125,8 @@ public:
         dgfFileName << path << "/dgf/cube_hc_4096.dgf";
       else if( problem_ == 23 )
         dgfFileName << path << "/dgf/cube_hc_32768.dgf";
+      else if( problem_ == 24 )
+        dgfFileName << path << "/dgf/cube_hc_262144.dgf";
       else 
         dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
     }
