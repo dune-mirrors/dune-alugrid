@@ -1004,9 +1004,9 @@ namespace ALUGrid
     if( mpa.psize() <= 1 ) return ;
 
     // store current linkage 
-    std::set< int > currentLinkage;
-    for( int l=0; l<mpa.nlinks(); ++l )
-      currentLinkage.insert( mpa.dest()[ l ] );
+    //std::set< int > currentLinkage;
+    //for( int l=0; l<mpa.nlinks(); ++l )
+    //  currentLinkage.insert( mpa.dest()[ l ] );
 
     // in case gatherScatter is given check for overloaded partitioning 
     const bool userDefinedPartitioning = gatherScatter && gatherScatter->userDefinedPartitioning();
@@ -1171,8 +1171,8 @@ namespace ALUGrid
       lap2 = clock ();
       
       // add ld ranks to linkage
-      for( int l=0; l<mpa.sendLinks(); ++ l ) currentLinkage.insert( mpa.sendDest()[ l ] );
-      for( int l=0; l<mpa.recvLinks(); ++ l ) currentLinkage.insert( mpa.recvSource()[ l ] );
+      //for( int l=0; l<mpa.sendLinks(); ++ l ) currentLinkage.insert( mpa.sendDest()[ l ] );
+      //for( int l=0; l<mpa.recvLinks(); ++ l ) currentLinkage.insert( mpa.recvSource()[ l ] );
 
       {
         // data handle  
@@ -1183,8 +1183,8 @@ namespace ALUGrid
       }
 
       // set broader linkage for identification process 
-      mpa.removeLinkage();
-      mpa.insertRequestSymmetric( currentLinkage );
+      //mpa.removeLinkage();
+      //mpa.insertRequestSymmetric( currentLinkage );
 
       lap3 = clock ();
 #ifdef ALUGRIDDEBUG
