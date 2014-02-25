@@ -23,4 +23,5 @@ p "mb_alusfc_403/optimal.dat" using 1:u title "optimal" w l lw c, \
   "mb_alusfc_403_linkage/scaling.dat" using 1:u title "alusfc_l" w lp lw c, \
   "mb_hsfc_403/scaling.dat" using 1:u title "hsfc" w lp lw c, \
   "mb_zgraph_403/scaling.dat" using 1:u title "zgraph" w lp lw c, \
-  "mb_kway_403/scaling.dat" using 1:u title "kway" w lp lw c
+  "mb_kway_403/scaling.dat" using 1:u title "kway" w lp lw c, \
+  "mb_parmetis_403/scaling.dat" using 1:u title "parmetis" w lp lw c
