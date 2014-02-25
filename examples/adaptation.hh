@@ -68,6 +68,7 @@ struct GridMarker
   template< class GridView >
   void refineNeighbors ( const GridView &gridView, const Entity &entity )
   {
+    return ;
     typedef typename GridView::IntersectionIterator IntersectionIterator;
     typedef typename IntersectionIterator::Intersection Intersection;
 
