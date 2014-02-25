@@ -191,7 +191,7 @@ public:
   //! \copydoc ProblemData::endTime
   double endTime () const
   {
-    return 0.3;
+    return 0.25;
   }
 
   //! \copydoc ProblemData::adaptationIndicator
