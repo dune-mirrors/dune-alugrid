@@ -1400,7 +1400,7 @@ namespace ALUGrid
       // if a method was given, perform load balancing
       if (userDefinedPartitioning || ldbMth)
       {
-        const bool precomputeLinkage = Gitter :: storeLinkageInVertices; // && serialPartitioner ();
+        const bool precomputeLinkage = Gitter :: storeLinkageInVertices && serialPartitioner ();
 
         // check gather-scatter object and call appropriate method 
         if( gs ) 
