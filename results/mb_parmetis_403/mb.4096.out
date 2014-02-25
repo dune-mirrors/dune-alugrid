@@ -1,0 +1,311 @@
+Execute poe command line: poe  ./main_ball 4 0 3 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+elements = 7286497 (835,2048,2.45269)   maxLevel = 3   step = 12   time = 0.108   dt = 0.009
+elements = 7177535 (872,2048,2.34862)   maxLevel = 3   step = 23   time = 0.207   dt = 0.009
+elements = 7141863 (912,2048,2.24561)   maxLevel = 3   step = 34   time = 0.306   dt = 0.009
+elements = 7304669 (588,2112,3.59184)   maxLevel = 3   step = 45   time = 0.405   dt = 0.009
+PARMETIS ERROR adjncy is NULL.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys0311-ib>
+Subject: Job 955156: <mb.4096> in cluster <yellowstone> Exited
+
+Job <mb.4096> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys0311-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys0450-ib>
+                            <16*ys0451-ib>
+                            <16*ys0454-ib>
+                            <16*ys0455-ib>
+                            <16*ys0456-ib>
+                            <16*ys0458-ib>
+                            <16*ys0459-ib>
+                            <16*ys0469-ib>
+                            <16*ys0470-ib>
+                            <16*ys0471-ib>
+                            <16*ys0472-ib>
+                            <16*ys0501-ib>
+                            <16*ys0502-ib>
+                            <16*ys0503-ib>
+                            <16*ys0504-ib>
+                            <16*ys0509-ib>
+                            <16*ys0517-ib>
+                            <16*ys0519-ib>
+                            <16*ys0520-ib>
+                            <16*ys0521-ib>
+                            <16*ys0522-ib>
+                            <16*ys0540-ib>
+                            <16*ys0543-ib>
+                            <16*ys0548-ib>
+                            <16*ys0551-ib>
+                            <16*ys0560-ib>
+                            <16*ys0561-ib>
+                            <16*ys0603-ib>
+                            <16*ys0604-ib>
+                            <16*ys0622-ib>
+                            <16*ys0623-ib>
+                            <16*ys0633-ib>
+                            <16*ys0639-ib>
+                            <16*ys0654-ib>
+                            <16*ys0655-ib>
+                            <16*ys0656-ib>
+                            <16*ys0662-ib>
+                            <16*ys0722-ib>
+                            <16*ys0727-ib>
+                            <16*ys0732-ib>
+                            <16*ys0733-ib>
+                            <16*ys0734-ib>
+                            <16*ys0749-ib>
+                            <16*ys0824-ib>
+                            <16*ys0826-ib>
+                            <16*ys0828-ib>
+                            <16*ys0830-ib>
+                            <16*ys0842-ib>
+                            <16*ys0843-ib>
+                            <16*ys0844-ib>
+                            <16*ys0851-ib>
+                            <16*ys0855-ib>
+                            <16*ys0857-ib>
+                            <16*ys0858-ib>
+                            <16*ys0866-ib>
+                            <16*ys0917-ib>
+                            <16*ys0918-ib>
+                            <16*ys0931-ib>
+                            <16*ys0932-ib>
+                            <16*ys0935-ib>
+                            <16*ys0937-ib>
+                            <16*ys0938-ib>
+                            <16*ys0939-ib>
+                            <16*ys1057-ib>
+                            <16*ys1136-ib>
+                            <16*ys1142-ib>
+                            <16*ys1143-ib>
+                            <16*ys1366-ib>
+                            <16*ys1415-ib>
+                            <16*ys1416-ib>
+                            <16*ys1417-ib>
+                            <16*ys1418-ib>
+                            <16*ys1456-ib>
+                            <16*ys1457-ib>
+                            <16*ys1458-ib>
+                            <16*ys1459-ib>
+                            <16*ys1468-ib>
+                            <16*ys1521-ib>
+                            <16*ys1551-ib>
+                            <16*ys1570-ib>
+                            <16*ys1571-ib>
+                            <16*ys1572-ib>
+                            <16*ys1601-ib>
+                            <16*ys1617-ib>
+                            <16*ys1618-ib>
+                            <16*ys1619-ib>
+                            <16*ys1620-ib>
+                            <16*ys1622-ib>
+                            <16*ys1623-ib>
+                            <16*ys1625-ib>
+                            <16*ys1626-ib>
+                            <16*ys1629-ib>
+                            <16*ys1634-ib>
+                            <16*ys1635-ib>
+                            <16*ys1636-ib>
+                            <16*ys1639-ib>
+                            <16*ys1642-ib>
+                            <16*ys1643-ib>
+                            <16*ys1644-ib>
+                            <16*ys1651-ib>
+                            <16*ys1652-ib>
+                            <16*ys1653-ib>
+                            <16*ys1654-ib>
+                            <16*ys1655-ib>
+                            <16*ys1656-ib>
+                            <16*ys1661-ib>
+                            <16*ys1662-ib>
+                            <16*ys1663-ib>
+                            <16*ys1666-ib>
+                            <16*ys1670-ib>
+                            <16*ys1671-ib>
+                            <16*ys1672-ib>
+                            <16*ys1702-ib>
+                            <16*ys1703-ib>
+                            <16*ys1704-ib>
+                            <16*ys1705-ib>
+                            <16*ys1706-ib>
+                            <16*ys1707-ib>
+                            <16*ys1708-ib>
+                            <16*ys1709-ib>
+                            <16*ys1710-ib>
+                            <16*ys1711-ib>
+                            <16*ys1712-ib>
+                            <16*ys1718-ib>
+                            <16*ys1746-ib>
+                            <16*ys1747-ib>
+                            <16*ys1748-ib>
+                            <16*ys1752-ib>
+                            <16*ys1753-ib>
+                            <16*ys1754-ib>
+                            <16*ys1755-ib>
+                            <16*ys1756-ib>
+                            <16*ys1757-ib>
+                            <16*ys1758-ib>
+                            <16*ys1759-ib>
+                            <16*ys1760-ib>
+                            <16*ys1761-ib>
+                            <16*ys1762-ib>
+                            <16*ys1763-ib>
+                            <16*ys1764-ib>
+                            <16*ys1765-ib>
+                            <16*ys1766-ib>
+                            <16*ys1769-ib>
+                            <16*ys1770-ib>
+                            <16*ys1771-ib>
+                            <16*ys1772-ib>
+                            <16*ys1806-ib>
+                            <16*ys1813-ib>
+                            <16*ys1814-ib>
+                            <16*ys1815-ib>
+                            <16*ys1816-ib>
+                            <16*ys1817-ib>
+                            <16*ys1820-ib>
+                            <16*ys1821-ib>
+                            <16*ys1822-ib>
+                            <16*ys1823-ib>
+                            <16*ys1824-ib>
+                            <16*ys1825-ib>
+                            <16*ys1826-ib>
+                            <16*ys1827-ib>
+                            <16*ys1828-ib>
+                            <16*ys1829-ib>
+                            <16*ys1830-ib>
+                            <16*ys1831-ib>
+                            <16*ys1833-ib>
+                            <16*ys1836-ib>
+                            <16*ys1837-ib>
+                            <16*ys1838-ib>
+                            <16*ys1839-ib>
+                            <16*ys1840-ib>
+                            <16*ys1841-ib>
+                            <16*ys1847-ib>
+                            <16*ys1848-ib>
+                            <16*ys1849-ib>
+                            <16*ys1850-ib>
+                            <16*ys1851-ib>
+                            <16*ys1853-ib>
+                            <16*ys1854-ib>
+                            <16*ys1855-ib>
+                            <16*ys1856-ib>
+                            <16*ys1857-ib>
+                            <16*ys1858-ib>
+                            <16*ys1859-ib>
+                            <16*ys1860-ib>
+                            <16*ys1861-ib>
+                            <16*ys1867-ib>
+                            <16*ys1868-ib>
+                            <16*ys1869-ib>
+                            <16*ys1901-ib>
+                            <16*ys1902-ib>
+                            <16*ys1906-ib>
+                            <16*ys1910-ib>
+                            <16*ys1911-ib>
+                            <16*ys1912-ib>
+                            <16*ys1913-ib>
+                            <16*ys1918-ib>
+                            <16*ys1919-ib>
+                            <16*ys1920-ib>
+                            <16*ys1921-ib>
+                            <16*ys1932-ib>
+                            <16*ys1933-ib>
+                            <16*ys1934-ib>
+                            <16*ys1935-ib>
+                            <16*ys1936-ib>
+                            <16*ys1942-ib>
+                            <16*ys1943-ib>
+                            <16*ys1944-ib>
+                            <16*ys1945-ib>
+                            <16*ys1946-ib>
+                            <16*ys1955-ib>
+                            <16*ys1956-ib>
+                            <16*ys1958-ib>
+                            <16*ys1959-ib>
+                            <16*ys1971-ib>
+                            <16*ys1972-ib>
+                            <16*ys2001-ib>
+                            <16*ys2016-ib>
+                            <16*ys2032-ib>
+                            <16*ys2033-ib>
+                            <16*ys2034-ib>
+                            <16*ys2108-ib>
+                            <16*ys2109-ib>
+                            <16*ys2110-ib>
+                            <16*ys2115-ib>
+                            <16*ys2152-ib>
+                            <16*ys2164-ib>
+                            <16*ys2165-ib>
+                            <16*ys2166-ib>
+                            <16*ys2167-ib>
+                            <16*ys2168-ib>
+                            <16*ys2169-ib>
+                            <16*ys2170-ib>
+                            <16*ys2245-ib>
+                            <16*ys2246-ib>
+                            <16*ys2247-ib>
+                            <16*ys2248-ib>
+                            <16*ys2249-ib>
+                            <16*ys2250-ib>
+                            <16*ys2255-ib>
+                            <16*ys2256-ib>
+                            <16*ys2257-ib>
+                            <16*ys2318-ib>
+                            <16*ys2319-ib>
+                            <16*ys2320-ib>
+                            <16*ys2321-ib>
+                            <16*ys2322-ib>
+                            <16*ys2323-ib>
+                            <16*ys2324-ib>
+                            <16*ys2346-ib>
+                            <16*ys2347-ib>
+                            <16*ys2348-ib>
+                            <16*ys2356-ib>
+                            <16*ys2358-ib>
+                            <16*ys2360-ib>
+                            <16*ys2362-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_parmetis_403> was used as the working directory.
+Started at Mon Feb 24 21:56:11 2014
+Results reported at Mon Feb 24 22:26:53 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:20               # wall-clock time (hrs:mins)
+#BSUB -n 4096              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.4096            # job name
+#BSUB -o ./mb.4096.out  # output file name 
+#BSUB -e ./mb.4096.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 4 0 3 none
+
+------------------------------------------------------------
+
+TERM_RUNLIMIT: job killed after reaching LSF run time limit.
+Exited
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.4096.err> for stderr output of this job.
+

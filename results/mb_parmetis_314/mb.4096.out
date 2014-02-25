@@ -1,0 +1,2348 @@
+Execute poe command line: poe  ./main_ball 3 1 4 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 1
+	***Cannot bisect a graph with 0 vertices!
+	***You are trying to partition a graph into too many parts!
+	***Cannot bisect a graph with 0 vertices!
+	***You are trying to partition a graph into too many parts!
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR adjncy is NULL.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+PARMETIS ERROR: sum weight for constraint 0 is zero.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys1415-ib>
+Subject: Job 955071: <mb.4096> in cluster <yellowstone> Exited
+
+Job <mb.4096> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys1415-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys1634-ib>
+                            <16*ys1642-ib>
+                            <16*ys1644-ib>
+                            <16*ys1654-ib>
+                            <16*ys1655-ib>
+                            <16*ys1656-ib>
+                            <16*ys1661-ib>
+                            <16*ys1662-ib>
+                            <16*ys1663-ib>
+                            <16*ys1670-ib>
+                            <16*ys1671-ib>
+                            <16*ys1672-ib>
+                            <16*ys1702-ib>
+                            <16*ys1707-ib>
+                            <16*ys1709-ib>
+                            <16*ys1710-ib>
+                            <16*ys1718-ib>
+                            <16*ys1748-ib>
+                            <16*ys1753-ib>
+                            <16*ys1754-ib>
+                            <16*ys1755-ib>
+                            <16*ys1756-ib>
+                            <16*ys1757-ib>
+                            <16*ys1758-ib>
+                            <16*ys1759-ib>
+                            <16*ys1760-ib>
+                            <16*ys1761-ib>
+                            <16*ys1769-ib>
+                            <16*ys1806-ib>
+                            <16*ys1820-ib>
+                            <16*ys1821-ib>
+                            <16*ys1822-ib>
+                            <16*ys1823-ib>
+                            <16*ys1824-ib>
+                            <16*ys1825-ib>
+                            <16*ys1826-ib>
+                            <16*ys1827-ib>
+                            <16*ys1828-ib>
+                            <16*ys1829-ib>
+                            <16*ys1830-ib>
+                            <16*ys1831-ib>
+                            <16*ys1833-ib>
+                            <16*ys1836-ib>
+                            <16*ys1837-ib>
+                            <16*ys1838-ib>
+                            <16*ys1839-ib>
+                            <16*ys1840-ib>
+                            <16*ys1841-ib>
+                            <16*ys1847-ib>
+                            <16*ys1848-ib>
+                            <16*ys1849-ib>
+                            <16*ys1850-ib>
+                            <16*ys1851-ib>
+                            <16*ys1853-ib>
+                            <16*ys1854-ib>
+                            <16*ys1855-ib>
+                            <16*ys1856-ib>
+                            <16*ys1857-ib>
+                            <16*ys1858-ib>
+                            <16*ys1859-ib>
+                            <16*ys1860-ib>
+                            <16*ys1861-ib>
+                            <16*ys1867-ib>
+                            <16*ys1868-ib>
+                            <16*ys1869-ib>
+                            <16*ys1901-ib>
+                            <16*ys1902-ib>
+                            <16*ys1906-ib>
+                            <16*ys1910-ib>
+                            <16*ys1911-ib>
+                            <16*ys1912-ib>
+                            <16*ys1913-ib>
+                            <16*ys1918-ib>
+                            <16*ys1919-ib>
+                            <16*ys1920-ib>
+                            <16*ys1921-ib>
+                            <16*ys1933-ib>
+                            <16*ys1934-ib>
+                            <16*ys1935-ib>
+                            <16*ys1936-ib>
+                            <16*ys1942-ib>
+                            <16*ys1943-ib>
+                            <16*ys1944-ib>
+                            <16*ys1945-ib>
+                            <16*ys1946-ib>
+                            <16*ys2032-ib>
+                            <16*ys2152-ib>
+                            <16*ys2164-ib>
+                            <16*ys2165-ib>
+                            <16*ys2166-ib>
+                            <16*ys2167-ib>
+                            <16*ys2168-ib>
+                            <16*ys2169-ib>
+                            <16*ys2170-ib>
+                            <16*ys2569-ib>
+                            <16*ys2606-ib>
+                            <16*ys2712-ib>
+                            <16*ys2713-ib>
+                            <16*ys2835-ib>
+                            <16*ys2836-ib>
+                            <16*ys2837-ib>
+                            <16*ys2838-ib>
+                            <16*ys2839-ib>
+                            <16*ys2840-ib>
+                            <16*ys2842-ib>
+                            <16*ys2843-ib>
+                            <16*ys2844-ib>
+                            <16*ys2846-ib>
+                            <16*ys2847-ib>
+                            <16*ys2848-ib>
+                            <16*ys2849-ib>
+                            <16*ys2854-ib>
+                            <16*ys2855-ib>
+                            <16*ys2856-ib>
+                            <16*ys2868-ib>
+                            <16*ys2872-ib>
+                            <16*ys2901-ib>
+                            <16*ys2902-ib>
+                            <16*ys2903-ib>
+                            <16*ys2904-ib>
+                            <16*ys2905-ib>
+                            <16*ys2906-ib>
+                            <16*ys2907-ib>
+                            <16*ys2908-ib>
+                            <16*ys3249-ib>
+                            <16*ys3250-ib>
+                            <16*ys3251-ib>
+                            <16*ys3252-ib>
+                            <16*ys3668-ib>
+                            <16*ys3669-ib>
+                            <16*ys3704-ib>
+                            <16*ys3709-ib>
+                            <16*ys3710-ib>
+                            <16*ys3711-ib>
+                            <16*ys3712-ib>
+                            <16*ys3713-ib>
+                            <16*ys3737-ib>
+                            <16*ys3742-ib>
+                            <16*ys3743-ib>
+                            <16*ys3744-ib>
+                            <16*ys3745-ib>
+                            <16*ys3746-ib>
+                            <16*ys3747-ib>
+                            <16*ys3748-ib>
+                            <16*ys3804-ib>
+                            <16*ys3811-ib>
+                            <16*ys3812-ib>
+                            <16*ys3813-ib>
+                            <16*ys3831-ib>
+                            <16*ys3832-ib>
+                            <16*ys3833-ib>
+                            <16*ys3925-ib>
+                            <16*ys3926-ib>
+                            <16*ys3927-ib>
+                            <16*ys3928-ib>
+                            <16*ys3929-ib>
+                            <16*ys3930-ib>
+                            <16*ys3931-ib>
+                            <16*ys3932-ib>
+                            <16*ys3933-ib>
+                            <16*ys3934-ib>
+                            <16*ys3955-ib>
+                            <16*ys3956-ib>
+                            <16*ys3957-ib>
+                            <16*ys3958-ib>
+                            <16*ys3959-ib>
+                            <16*ys3960-ib>
+                            <16*ys3961-ib>
+                            <16*ys3962-ib>
+                            <16*ys3967-ib>
+                            <16*ys3968-ib>
+                            <16*ys3969-ib>
+                            <16*ys3970-ib>
+                            <16*ys3972-ib>
+                            <16*ys4001-ib>
+                            <16*ys4035-ib>
+                            <16*ys4036-ib>
+                            <16*ys4041-ib>
+                            <16*ys4042-ib>
+                            <16*ys4065-ib>
+                            <16*ys4067-ib>
+                            <16*ys4068-ib>
+                            <16*ys4069-ib>
+                            <16*ys4070-ib>
+                            <16*ys4071-ib>
+                            <16*ys4072-ib>
+                            <16*ys4101-ib>
+                            <16*ys4102-ib>
+                            <16*ys4103-ib>
+                            <16*ys4104-ib>
+                            <16*ys4105-ib>
+                            <16*ys4106-ib>
+                            <16*ys4107-ib>
+                            <16*ys4108-ib>
+                            <16*ys4109-ib>
+                            <16*ys4110-ib>
+                            <16*ys4111-ib>
+                            <16*ys4112-ib>
+                            <16*ys4113-ib>
+                            <16*ys4114-ib>
+                            <16*ys4117-ib>
+                            <16*ys4118-ib>
+                            <16*ys4129-ib>
+                            <16*ys4130-ib>
+                            <16*ys4131-ib>
+                            <16*ys4202-ib>
+                            <16*ys4203-ib>
+                            <16*ys4241-ib>
+                            <16*ys4315-ib>
+                            <16*ys4316-ib>
+                            <16*ys4318-ib>
+                            <16*ys4326-ib>
+                            <16*ys4327-ib>
+                            <16*ys4328-ib>
+                            <16*ys4329-ib>
+                            <16*ys4330-ib>
+                            <16*ys4331-ib>
+                            <16*ys4332-ib>
+                            <16*ys4347-ib>
+                            <16*ys4348-ib>
+                            <16*ys4356-ib>
+                            <16*ys4357-ib>
+                            <16*ys4361-ib>
+                            <16*ys4413-ib>
+                            <16*ys4414-ib>
+                            <16*ys4415-ib>
+                            <16*ys4416-ib>
+                            <16*ys4417-ib>
+                            <16*ys4418-ib>
+                            <16*ys4419-ib>
+                            <16*ys4420-ib>
+                            <16*ys4423-ib>
+                            <16*ys4518-ib>
+                            <16*ys4519-ib>
+                            <16*ys4529-ib>
+                            <16*ys4531-ib>
+                            <16*ys4532-ib>
+                            <16*ys4533-ib>
+                            <16*ys4534-ib>
+                            <16*ys4535-ib>
+                            <16*ys4536-ib>
+                            <16*ys4537-ib>
+                            <16*ys4538-ib>
+                            <16*ys4539-ib>
+                            <16*ys4540-ib>
+                            <16*ys4541-ib>
+                            <16*ys4542-ib>
+                            <16*ys4543-ib>
+                            <16*ys4544-ib>
+                            <16*ys4545-ib>
+                            <16*ys4546-ib>
+                            <16*ys4547-ib>
+                            <16*ys4548-ib>
+                            <16*ys4549-ib>
+                            <16*ys4550-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_parmetis_314> was used as the working directory.
+Started at Mon Feb 24 21:25:20 2014
+Results reported at Mon Feb 24 21:56:03 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:20               # wall-clock time (hrs:mins)
+#BSUB -n 4096              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.4096            # job name
+#BSUB -o ./mb.4096.out  # output file name 
+#BSUB -e ./mb.4096.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 3 1 4 none
+
+------------------------------------------------------------
+
+TERM_RUNLIMIT: job killed after reaching LSF run time limit.
+Exited
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.4096.err> for stderr output of this job.
+

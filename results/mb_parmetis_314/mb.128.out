@@ -1,0 +1,87 @@
+Execute poe command line: poe  ./main_ball 3 1 4 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 1
+elements = 7282199 (46462,60461,1.3013)   maxLevel = 4   step = 12   time = 0.108   dt = 0.009
+elements = 7176401 (49312,59287,1.20228)   maxLevel = 4   step = 23   time = 0.207   dt = 0.009
+elements = 7145636 (46765,59551,1.27341)   maxLevel = 4   step = 34   time = 0.306   dt = 0.009
+elements = 7331339 (48977,61865,1.26314)   maxLevel = 4   step = 45   time = 0.405   dt = 0.009
+elements = 7063239 (46815,59558,1.2722)   maxLevel = 4   step = 56   time = 0.504   dt = 0.009
+elements = 7312579 (46201,60515,1.30982)   maxLevel = 4   step = 67   time = 0.603   dt = 0.009
+elements = 7194517 (49310,59042,1.19736)   maxLevel = 4   step = 78   time = 0.702   dt = 0.009
+elements = 7096804 (45017,59871,1.32996)   maxLevel = 4   step = 89   time = 0.801   dt = 0.009
+elements = 7276886 (48905,59893,1.22468)   maxLevel = 4   step = 100   time = 0.9   dt = 0.009
+elements = 7005034 (48277,58358,1.20882)   maxLevel = 4   step = 112   time = 1.008   dt = 0.009
+U2 max: 13.94  min: 7.7
+U3 max: 0.02  min: 0
+U4 max: 1.58  min: 1.19
+U5 max: 1.96  min: 0.35
+U6 max: 54.59  min: 49.68
+U7 max: 0.01  min: 0
+U8 max: 16.34  min: 10.17
+Program finished: CPU time = 80.0818 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys6056-ib>
+Subject: Job 955066: <mb.128> in cluster <yellowstone> Done
+
+Job <mb.128> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys6056-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys6057-ib>
+                            <16*ys6058-ib>
+                            <16*ys6059-ib>
+                            <16*ys6060-ib>
+                            <16*ys6061-ib>
+                            <16*ys6072-ib>
+                            <16*ys6125-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/mb_parmetis_314> was used as the working directory.
+Started at Mon Feb 24 20:28:57 2014
+Results reported at Mon Feb 24 20:31:25 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:20               # wall-clock time (hrs:mins)
+#BSUB -n 128              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J mb.128            # job name
+#BSUB -o ./mb.128.out  # output file name 
+#BSUB -e ./mb.128.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_ball 3 1 4 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               16292.00 sec.
+    Max Memory :             19471 MB
+    Average Memory :         7488.33 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          140
+    Max Threads :            1473
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./mb.128.err> for stderr output of this job.
+
