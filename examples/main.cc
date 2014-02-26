@@ -118,6 +118,10 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
   /* vector to store update */
   DataType update( gridView );
 
+  /* print info about initialization */
+  if ( verboseRank )  
+    std::cout << "Intialization done!" << std::endl;
+
   /* now do the time stepping */
   unsigned int step = 0;
   double time = 0.0;
