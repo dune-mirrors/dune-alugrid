@@ -229,7 +229,7 @@ public:
 // Enumerations
 // ------------
 
-enum EulerFluxType { LLF, HLL, HLLEM, DW };
+enum EulerFluxType { LLF, HLL, HLLC };
 
 // EulerFlux
 // ---------
@@ -243,18 +243,11 @@ enum EulerFluxType { LLF, HLL, HLLEM, DW };
  *
  *  \tparam dim space dimension
  *  \tparam flux switch between local Lax-Friedrich (LLF), and
- *          Harten-Lax-Leer (HLL) flux, and  
- *          Dai-Woodward (DW), and 
- *          Harten-Lax-Leer-Einfeld-Modified (HLLEM) flux
+ *          Harten-Lax-vanLeer (HLL) flux, and  
+ *          Harten-Lax-vanLeer-Contact (HLLC) flux
  *
  */
-template< int dim, 
-#ifdef DUNE_FEM_DG_MHDFLUXES_HH
-  EulerFluxType flux_type = HLLEM 
-#else 
-  EulerFluxType flux_type = HLL
-#endif
-  >
+template< int dim, EulerFluxType flux_type = HLLC >
 struct EulerFlux
 {
   /** \internal
@@ -278,20 +271,7 @@ struct EulerFlux
   double numFlux ( const RangeType &uLeft, const RangeType &uRight,
                    const DomainType &unitNormal, RangeType &flux ) const
   {
-#ifdef DUNE_FEM_DG_MHDFLUXES_HH    
-    if( flux_type == HLLEM ) 
-    {  
-      static const HLLEMNumFlux< DomainType::dimension > numFluxHLLEM( _gamma ); 
-      return numFluxHLLEM.numericalFlux( uLeft, uRight, unitNormal, flux );
-    }
-    else if( flux_type == DW ) 
-    {
-      static const DWNumFlux< DomainType::dimension > numFluxDW( _gamma ); 
-      return numFluxDW.numericalFlux( uLeft, uRight, unitNormal, flux );
-    }
-    else 
-#endif
-      return num_flux( &(uLeft[ 0 ]), &(uRight[ 0 ]), &(unitNormal[ 0 ]), &(flux[ 0 ]) );
+    return num_flux( &(uLeft[ 0 ]), &(uRight[ 0 ]), &(unitNormal[ 0 ]), &(flux[ 0 ]) );
   }
 
   /** \internal
@@ -334,6 +314,9 @@ private:
   double num_flux_HLL(const double Uj[dim+2], const double Un[dim+2], 
                       const double normal[dim], double gj[dim+2]) const;
   
+  double num_flux_HLLC(const double Uj[dim+2], const double Un[dim+2], 
+                       const double normal[dim], double gj[dim+2]) const;
+  
   static void rotate(const double normal[dim], 
                      const double u[dim], double u_rot[dim]);
 
@@ -348,7 +331,7 @@ private:
 
 /** \brief Problem describing the Euler equation of gas dynamics 
  */
-template< int dimD, EulerFluxType flux_type = HLL >
+template< int dimD, EulerFluxType flux_type = HLLC >
 struct EulerModel
 {
   typedef ProblemData< dimD, dimD+2 > Problem;
@@ -627,6 +610,9 @@ inline double EulerFlux< dim, flux_type >
   case HLL:
     return num_flux_HLL( Uj, Un, normal, gj );
 
+  case HLLC:
+    return num_flux_HLLC( Uj, Un, normal, gj );
+
   default:
     std::cerr << "Invalid numerical flux selected." << std::endl;
     abort();
@@ -784,6 +770,106 @@ inline double EulerFlux< dim, flux_type >
 
   rotate_inv(normal, guj, gj+1);
   return (fabs(sj) > fabs(sn))? fabs(sj): fabs(sn);
+}
+
+template< int dim, EulerFluxType flux_type >
+inline double EulerFlux< dim, flux_type >
+::num_flux_HLLC ( const double Um[ dim+2 ], const double Up[ dim+2 ],
+                  const double normal[ dim ], double g[ dim+2 ] ) const
+{
+  const double rhom = Um[0];
+  const double rhop = Up[0];
+  const double Em = Um[dim+1];
+  const double Ep = Up[dim+1];
+
+  double rho_um[dim], rho_up[dim];
+  rotate( normal, Um+1, rho_um );
+  rotate( normal, Up+1, rho_up );
+
+  double Ekinm = 0.;
+  double Ekinp = 0.;
+  double um[dim], up[dim];
+  for( int i=0; i<dim; ++i )
+  {
+    um[i] = rho_um[i] / rhom;
+    up[i] = rho_up[i] / rhop;
+    Ekinm += rho_um[i] * um[i];
+    Ekinp += rho_up[i] * up[i];
+  }
+
+  const double pm = (_gamma-1.0)*(Em - 0.5*Ekinm);
+  const double pp = (_gamma-1.0)*(Ep - 0.5*Ekinp);
+
+  assert( rhom>0.0 && pm>0.0 && rhop>0.0 && pp>0.0 );
+
+  const double cm = sqrt(_gamma*pm/rhom);
+  const double cp = sqrt(_gamma*pp/rhop);
+
+  const double rho_bar = 0.5 * (rhom + rhop);
+  const double c_bar = 0.5 * (cm + cp);
+  const double p_star = 0.5 * ( (pm+pp) - (up[0]-um[0])*rho_bar*c_bar );
+  const double u_star = 0.5 * ( (um[0]+up[0]) - (pp-pm)/(rho_bar*c_bar) );
+  const double tmp = 0.5*(_gamma+1.0)/_gamma;
+  const double qm = (p_star > pm) ? sqrt( 1.0 + tmp*(p_star/pm - 1.0) ) : 1.0;
+  const double qp = (p_star > pp) ? sqrt( 1.0 + tmp*(p_star/pp - 1.0) ) : 1.0;
+
+  const double sm = um[0] - cm*qm;
+  const double sp = up[0] + cp*qp;
+
+  double guj[dim];
+
+  if (sm >= 0.0)
+  {
+    g[0] = rho_um[0];
+
+    for(int i=0; i<dim; i++) 
+      guj[i] = rho_um[i]*um[0];
+    guj[0] += pm;
+
+    g[dim+1] = (Em+pm)*um[0];
+  }
+  else if (sp <= 0.0)
+  {
+    g[0] = rho_up[0];
+
+    for(int i=0; i<dim; i++) 
+      guj[i] = rho_up[i]*up[0];
+    guj[0] += pp;
+
+    g[dim+1] = (Ep+pp)*up[0];
+  }
+  else
+  {
+    const double tmpm = sm*(sm-um[0])/(sm-u_star);
+    const double tmpp = sp*(sp-up[0])/(sp-u_star);
+
+    if (u_star >= 0.0)
+    {
+      g[0] = rho_um[0] + rhom*(tmpm-sm);
+
+      for(int i=0; i<dim; i++) 
+        guj[i] = rho_um[i]*um[0] + rhom*um[i]*tmpm - sm*rho_um[i];
+      guj[0] += pm + rhom*(u_star-um[0])*tmpm;
+
+      g[dim+1] = (Em+pm)*um[0] + Em*(tmpm-sm) 
+        + tmpm*(u_star-um[0])*( rhom*u_star + pm/(sm-um[0]) );
+    }
+    else
+    {
+      g[0] = rho_up[0] + rhop*(tmpp-sp);
+
+      for(int i=0; i<dim; i++) 
+        guj[i] = rho_up[i]*up[0] + rhop*up[i]*tmpp - sp*rho_up[i];
+      guj[0] += pp + rhop*(u_star-up[0])*tmpp;
+
+      g[dim+1] = (Ep+pp)*up[0] + Ep*(tmpp-sp) 
+        + tmpp*(u_star-up[0])*( rhop*u_star + pp/(sp-up[0]) );
+    }
+  }
+
+  rotate_inv( normal, guj, g+1 );
+
+  return std::max( std::abs(sm), std::abs(sp) );
 }
 
 #endif // #ifndef EULERFLUXES_HH
