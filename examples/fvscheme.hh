@@ -61,8 +61,11 @@ struct FiniteVolumeScheme
   static const int dimRange = Model::dimRange;
   typedef typename Grid::ctype ctype;
 
+  // only apply the scheme to interior elements 
+  static const Dune :: PartitionIteratorType ptype = Dune :: InteriorBorder_Partition ;
+
   // types of codim zero entity iterator and geometry
-  typedef typename GridView::template Codim< 0 >::Iterator  Iterator;
+  typedef typename GridView::template Codim< 0 >:: template Partition< ptype > :: Iterator  Iterator;
   typedef typename Iterator::Entity                         Entity;
   typedef typename Entity::EntityPointer                    EntityPointer;
   typedef typename Entity::Geometry                         Geometry;
@@ -141,8 +144,8 @@ inline double FiniteVolumeScheme< V, Model >
   double dt = std::numeric_limits<double>::infinity(); 
   
   // compute update vector and optimum dt in one grid traversal
-  const Iterator endit = gridView().template end< 0 >();     
-  for( Iterator it = gridView().template begin< 0 >(); it != endit; ++it )
+  const Iterator endit = gridView().template end< 0, ptype >();     
+  for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it )
   {
     // get entity and geometry
     const Entity &entity = *it;
@@ -237,8 +240,8 @@ inline size_t FiniteVolumeScheme< V, Model >
 {
   size_t elements = 0; 
   // grid traversal
-  const Iterator endit = gridView().template end< 0 >();     
-  for( Iterator it = gridView().template begin< 0 >(); it != endit; ++it, ++elements )
+  const Iterator endit = gridView().template end< 0, ptype >();     
+  for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it, ++elements )
   {
     const Entity &entity = *it;
 
