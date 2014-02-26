@@ -86,7 +86,7 @@ struct EulerProblemFFS
   //! \copydoc ProblemData::saveInterval
   double saveInterval() const 
   {
-    return 0.05;
+    return 0.025 * endTime();
   }
 };
 
@@ -212,7 +212,7 @@ public:
   //! \copydoc ProblemData::saveInterval
   double saveInterval() const 
   {
-    return 0.01;
+    return 0.04 * endTime();
   }
 
   //! only every 10th timestep we want load balancing 
@@ -373,12 +373,14 @@ struct EulerModel
     case 11:
     case 12:
     case 13: 
+    case 14:  
       problem_ = new EulerProblemFFS< dimDomain >( problem );
       break;
     case 2:
     case 21:
     case 22:
     case 23:
+    case 24:
       problem_ = new EulerProblemShockBubble< dimDomain >( problem );
       break;
 
