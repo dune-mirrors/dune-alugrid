@@ -652,8 +652,8 @@ inline double EulerFlux< dim, flux_type >
 
   assert(rhoj>0.0 && pj>0.0 && rhoj>0.0 && pj>0.0);
 
-  const double alphaj = fabs(u_normal_j) + cj;
-  const double alphan = fabs(u_normal_n) + cn;
+  const double alphaj = std::abs(u_normal_j) + cj;
+  const double alphan = std::abs(u_normal_n) + cn;
   const double alpha = (alphaj > alphan)? alphaj : alphan;
 
   gj[0] = gj[dim+1] = 0.0;
@@ -769,7 +769,7 @@ inline double EulerFlux< dim, flux_type >
   }
 
   rotate_inv(normal, guj, gj+1);
-  return (fabs(sj) > fabs(sn))? fabs(sj): fabs(sn);
+  return std::max( std::abs(sj), std::abs(sn) );
 }
 
 template< int dim, EulerFluxType flux_type >
@@ -868,7 +868,6 @@ inline double EulerFlux< dim, flux_type >
   }
 
   rotate_inv( normal, guj, g+1 );
-
   return std::max( std::abs(sm), std::abs(sp) );
 }
 
