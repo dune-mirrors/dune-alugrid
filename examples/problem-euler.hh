@@ -216,7 +216,7 @@ public:
   }
 
   //! only every 10th timestep we want load balancing 
-  int balanceStep() const { return 10; }
+  int balanceStep() const { return 1; }
 
   private:
   const double gamma;
@@ -751,7 +751,7 @@ inline double EulerFlux< dim, flux_type >
       gj[0] = tmp2 * ( sn*rho_uj[0] - sj*rho_un[0] + tmp1*(rhon - rhoj) );
 
       for(int i=0; i<dim; i++){
-  guj[i] = tmp2*((sn*uj[0]-tmp1)*rho_uj[i] - (sj*un[0]-tmp1)*rho_un[i]);
+        guj[i] = tmp2*((sn*uj[0]-tmp1)*rho_uj[i] - (sj*un[0]-tmp1)*rho_un[i]);
       }
       guj[0] += tmp2 * (sn*pj - sj*pn);
 
@@ -773,7 +773,7 @@ inline double EulerFlux< dim, flux_type >
       gj[0] = tmp2 * ( sn*rho_uj[0] - sj*rho_un[0] + tmp1*(rhon - rhoj) );
 
       for(int i=0; i<dim; i++){
-  guj[i] = tmp2*((sn*uj[0]-tmp1)*rho_uj[i] - (sj*un[0]-tmp1)*rho_un[i]);
+        guj[i] = tmp2*((sn*uj[0]-tmp1)*rho_uj[i] - (sj*un[0]-tmp1)*rho_un[i]);
       }
       guj[0] += tmp2 * (sn*pj - sj*pn);
 
