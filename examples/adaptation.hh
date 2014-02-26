@@ -180,7 +180,7 @@ public:
     solution_( 0 ),
     adaptTimer_(),
     balanceStep_( balanceStep ),
-    balanceCounter_( 0 ),
+    balanceCounter_( balanceStep-1 ),
     adaptTime_( 0.0 ),
     lbTime_( 0.0 ),
     commTime_( 0.0 )
