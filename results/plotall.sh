@@ -9,3 +9,4 @@ gnuplot scaling403_ad.gnu
 gnuplot scaling403_lb.gnu
 
 gnuplot scalingeuler.gnu
+gnuplot scalingeuler_fv.gnu

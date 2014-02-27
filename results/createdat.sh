@@ -22,17 +22,19 @@ for DAT in $FILES; do
   LBTIME=`echo $LINE | cut -d " " -f 4`
   ADTIME=`echo $LINE | cut -d " " -f 3`
   MEM=`echo $LINE | cut -d " " -f 6`
+  FV=`echo $LINE | cut -d " " -f 1`
   if test $PROC -le $MINPROC ; then 
     MINPROC=$PROC
     MINVAL[0]=$TIME
     MINVAL[1]=$ADTIME
     MINVAL[2]=$LBTIME
     MINVAL[3]=$MEM
+    MINVAL[4]=$FV
   fi  
   if test $PROC -ge $MAXPROC ; then 
     MAXPROC=$PROC
   fi  
-  echo "$PROC $TIME $ADTIME $LBTIME $MEM" >> $RESULT
+  echo "$PROC $TIME $ADTIME $LBTIME $MEM $FV" >> $RESULT
 done  
 
 cp $RESULT /tmp/$RESULT
@@ -42,6 +44,7 @@ MAXVAL[0]=`echo "${MINVAL[0]} / $MAXPROC * $MINPROC" | bc -l`
 MAXVAL[1]=`echo "${MINVAL[1]} / $MAXPROC * $MINPROC" | bc -l` 
 MAXVAL[2]=`echo "${MINVAL[2]} / $MAXPROC * $MINPROC" | bc -l` 
 MAXVAL[3]=`echo "${MINVAL[3]} / $MAXPROC * $MINPROC" | bc -l` 
+MAXVAL[4]=`echo "${MINVAL[4]} / $MAXPROC * $MINPROC" | bc -l` 
 
-echo "$MINPROC ${MINVAL[0]} ${MINVAL[1]} ${MINVAL[2]} ${MINVAL[3]}" >> $OPTIMAL 
-echo "$MAXPROC ${MAXVAL[0]} ${MAXVAL[1]} ${MAXVAL[2]} ${MAXVAL[3]}" >> $OPTIMAL 
+echo "$MINPROC ${MINVAL[0]} ${MINVAL[1]} ${MINVAL[2]} ${MINVAL[3]} ${MINVAL[4]}" >> $OPTIMAL 
+echo "$MAXPROC ${MAXVAL[0]} ${MAXVAL[1]} ${MAXVAL[2]} ${MAXVAL[3]} ${MAXVAL[4]}" >> $OPTIMAL 
