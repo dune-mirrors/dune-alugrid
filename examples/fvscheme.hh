@@ -112,6 +112,8 @@ public:
    *  \param      marker    grid marker
    *
    *  \note The marker is responsible for limiting the grid depth.
+   *
+   *  \return number of interior elements 
    */
   size_t 
   mark ( const double time, const Vector &solution, GridMarker< Grid > &marker ) const;
@@ -239,6 +241,10 @@ inline size_t FiniteVolumeScheme< V, Model >
   ::mark ( const double time, const Vector &solution, GridMarker<Grid> &marker ) const
 {
   size_t elements = 0; 
+
+  // clear grid markers internal flags
+  marker.reset();
+
   // grid traversal
   const Iterator endit = gridView().template end< 0, ptype >();     
   for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it, ++elements )

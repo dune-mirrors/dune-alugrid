@@ -124,6 +124,8 @@ struct GridMarker
     return false ;
   }
 
+  void reset() { wasMarked_ = 0 ; }
+
 private:
   Grid &grid_;
   const int minLevel_;
