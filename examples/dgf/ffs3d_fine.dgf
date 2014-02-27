@@ -1,0 +1,29 @@
+DGF
+Interval
+% first interval
+0    0    0       % first corner 
+0.6  0.2  1       % second corner
+30   10   50       %  3 cells in x, 3  in y, and 5 in z direction
+
+% second interval
+0.6  0    0.2     % first corner 
+3    0.2  1       % second corner
+120  10   40       % 12 cells in x, 3 in y, and 4 in z direction
+#
+
+simplex
+#
+
+GridParameter
+% overlap value is 1 for YaspGrid 
+overlap 1 
+% chose either none or green 
+closure none 
+# 
+
+BOUNDARYDOMAIN
+default 3             % default boundary id Reflection  
+1   -0.1  -0.1  -0.1    0.0 1.1 1.1  % Inflow  
+2    3.0   0.0   0.0    3.1 1.1 1.1  % Outflow 
+# step.dgf
+
