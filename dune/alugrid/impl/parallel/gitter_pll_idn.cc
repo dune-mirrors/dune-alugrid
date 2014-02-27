@@ -219,17 +219,22 @@ namespace ALUGrid
     {
       typename LinkedObject::Identifier id;
       bool good = id.read( os );
+      std::vector< int > copylpn;
       while ( good ) 
       {
         typename look_t::iterator hit = look.find (id);
         if (hit != look.end ()) 
         {
-          std::vector< int > lpn (*(*hit).second.second);
-          if (find (lpn.begin (), lpn.end (), _dest[ link ]) == lpn.end () ) 
+          const std::vector< int >& lpn( *(*hit).second.second );
+          const std::vector< int > :: const_iterator end = lpn.end();
+          if (find (lpn.begin (), end, _dest[ link ]) == end ) 
           {
-            lpn.push_back ( _dest[ link ] );
-            std::sort (lpn.begin(), lpn.end() );
-            (*hit).second.second = linkagePatternMap.insert (lpn).first;
+            const int size = lpn.size();
+            copylpn.resize( size+1 );
+            std::copy( lpn.begin(), end, copylpn.begin() );
+            copylpn[ size ] = _dest[ link ] ;
+            std::sort (copylpn.begin(), copylpn.end() );
+            (*hit).second.second = linkagePatternMap.insert( copylpn ).first;
           }
         }
 
