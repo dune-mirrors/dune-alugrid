@@ -144,7 +144,7 @@ inline double FiniteVolumeScheme< V, Model >
 
   // time step size (using std:min(.,dt) so set to maximum) 
   double dt = std::numeric_limits<double>::infinity(); 
-  
+
   // compute update vector and optimum dt in one grid traversal
   const Iterator endit = gridView().template end< 0, ptype >();     
   for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it )
@@ -161,9 +161,6 @@ inline double FiniteVolumeScheme< V, Model >
     
     // 1 over cell volume
     const double enVolume_1 = 1.0/enVolume; 
-
-    // index of entity
-    unsigned int enIdx = gridView().indexSet().index(entity);
 
     // run through all intersections with neighbors and boundary
     const IntersectionIterator iitend = gridView().iend( entity ); 
@@ -184,20 +181,20 @@ inline double FiniteVolumeScheme< V, Model >
         // access neighbor
         const EntityPointer outside = intersection.outside();
         const Entity &neighbor = *outside;
-        unsigned int nbIdx = gridView().indexSet().index(neighbor);
 
+        const bool visitNeighbor = update.visitNeighbor( entity, neighbor );
+        //const bool calculateNeighbor = (enIdx < nbIdx);
         // compute flux from one side only
         // this should become easier with the new IntersectionIterator functionality!
-        if( (entity.level() > neighbor.level())
-            || ((entity.level() == neighbor.level()) && (enIdx < nbIdx))
-            || (neighbor.partitionType() != Dune::InteriorEntity) )
+        if( visitNeighbor || 
+            (neighbor.partitionType() != Dune::InteriorEntity) )
         {
           // calculate (1 / neighbor volume)
           const double nbVolume = neighbor.geometry().volume();
           const double nbVolume_1 = 1.0 / nbVolume;
 
           // evaluate data
-          const RangeType uLeft = solution.evaluate( entity, point );
+          const RangeType uLeft  = solution.evaluate( entity, point );
           const RangeType uRight = solution.evaluate( neighbor, point );
           // apply numerical flux
           RangeType flux; 
@@ -230,6 +227,9 @@ inline double FiniteVolumeScheme< V, Model >
         dt = std::min( dt, enVolume / waveSpeed );
       }
     } // end all intersections            
+
+    // make entity as done 
+    update.visited( entity );
   } // end grid traversal                     
 
   // return time step
