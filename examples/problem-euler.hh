@@ -24,15 +24,21 @@ struct EulerProblemFFS
 
   static const int dimDomain = DomainType::dimension;
   static const int dimRange = RangeType::dimension;
+protected:
+  const int problem_;
 
-  EulerProblemFFS ( const int problem )
+public:  
+  EulerProblemFFS ( const int problem ) : problem_( problem )
   {}
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path ) const
   { 
     std::ostringstream dgfFileName;
-    dgfFileName << path << "/dgf/ffs" << dimDomain << "d.dgf";
+    if( problem_ < 12 )
+      dgfFileName << path << "/dgf/ffs" << dimDomain << "d.dgf";
+    else 
+      dgfFileName << path << "/dgf/ffs" << dimDomain << "d_fine.dgf";
     return dgfFileName.str();
   }
 
@@ -216,7 +222,7 @@ public:
   }
 
   //! only every 10th timestep we want load balancing 
-  int balanceStep() const { return 1; }
+  int balanceStep() const { return 25; }
 
   private:
   const double gamma;
