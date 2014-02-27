@@ -1,0 +1,222 @@
+Execute poe command line: poe  ./main_euler 23 0 6 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+Intialization done!
+elements = 26486272 (0,22472,inf)   maxLevel = 6   step = 11   time = 6.45968e-05   dt = 5.87244e-06
+elements = 33826304 (0,29512,inf)   maxLevel = 6   step = 21   time = 0.000123321   dt = 5.87244e-06
+elements = 33826304 (0,29512,inf)   maxLevel = 6   step = 31   time = 0.000182046   dt = 5.87244e-06
+elements = 33826304 (0,29512,inf)   maxLevel = 6   step = 41   time = 0.00024077   dt = 5.87244e-06
+elements = 33826304 (0,29512,inf)   maxLevel = 6   step = 52   time = 0.000305367   dt = 5.87244e-06
+elements = 43001344 (0,38472,inf)   maxLevel = 6   step = 62   time = 0.000364091   dt = 5.87244e-06
+elements = 43001344 (0,38472,inf)   maxLevel = 6   step = 72   time = 0.000422816   dt = 5.87244e-06
+elements = 43001344 (0,38472,inf)   maxLevel = 6   step = 82   time = 0.00048154   dt = 5.87244e-06
+elements = 43001344 (0,38472,inf)   maxLevel = 6   step = 92   time = 0.000540264   dt = 5.87244e-06
+elements = 43001344 (0,38472,inf)   maxLevel = 6   step = 103   time = 0.000604861   dt = 5.87244e-06
+elements = 50341376 (0,45640,inf)   maxLevel = 6   step = 113   time = 0.000663586   dt = 5.87244e-06
+elements = 50341376 (0,45640,inf)   maxLevel = 6   step = 123   time = 0.00072231   dt = 5.87244e-06
+elements = 50341376 (0,45640,inf)   maxLevel = 6   step = 133   time = 0.000781034   dt = 5.87244e-06
+elements = 50341376 (0,45640,inf)   maxLevel = 6   step = 144   time = 0.000845631   dt = 5.87244e-06
+elements = 50341376 (0,45640,inf)   maxLevel = 6   step = 154   time = 0.000904356   dt = 5.87244e-06
+elements = 60118528 (0,55160,inf)   maxLevel = 6   step = 164   time = 0.00096308   dt = 5.87244e-06
+elements = 60118528 (0,55160,inf)   maxLevel = 6   step = 174   time = 0.0010218   dt = 5.87244e-06
+elements = 60118528 (0,55160,inf)   maxLevel = 6   step = 184   time = 0.00108053   dt = 5.87244e-06
+elements = 60118528 (0,55160,inf)   maxLevel = 6   step = 195   time = 0.00114513   dt = 5.87244e-06
+elements = 60118528 (0,55160,inf)   maxLevel = 6   step = 205   time = 0.00120385   dt = 5.87244e-06
+elements = 60118528 (0,55160,inf)   maxLevel = 6   step = 215   time = 0.00126257   dt = 5.87244e-06
+elements = 67458560 (0,62328,inf)   maxLevel = 6   step = 225   time = 0.0013213   dt = 5.87244e-06
+elements = 67458560 (0,62328,inf)   maxLevel = 6   step = 235   time = 0.00138002   dt = 5.87244e-06
+elements = 60118528 (0,55160,inf)   maxLevel = 6   step = 246   time = 0.00144462   dt = 5.87244e-06
+elements = 60118528 (0,55160,inf)   maxLevel = 6   step = 256   time = 0.00150334   dt = 5.87244e-06
+U2 max: 7  min: 5.23
+U3 max: 0.04  min: 0
+U4 max: 3.01  min: 0.01
+U5 max: 3.73  min: 1.42
+U6 max: 15.58  min: 14.12
+U7 max: 0.01  min: 0
+U8 max: 10.52  min: 6.24
+Program finished: CPU time = 83.4913 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys2267-ib>
+Subject: Job 996466: <primdgx.2048> in cluster <yellowstone> Done
+
+Job <primdgx.2048> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys2267-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys2268-ib>
+                            <16*ys2269-ib>
+                            <16*ys2270-ib>
+                            <16*ys2271-ib>
+                            <16*ys2272-ib>
+                            <16*ys2301-ib>
+                            <16*ys2302-ib>
+                            <16*ys2303-ib>
+                            <16*ys2304-ib>
+                            <16*ys2305-ib>
+                            <16*ys2306-ib>
+                            <16*ys2307-ib>
+                            <16*ys2308-ib>
+                            <16*ys2309-ib>
+                            <16*ys2310-ib>
+                            <16*ys2311-ib>
+                            <16*ys2312-ib>
+                            <16*ys2317-ib>
+                            <16*ys2318-ib>
+                            <16*ys2319-ib>
+                            <16*ys2320-ib>
+                            <16*ys2321-ib>
+                            <16*ys2322-ib>
+                            <16*ys2323-ib>
+                            <16*ys2324-ib>
+                            <16*ys2325-ib>
+                            <16*ys2326-ib>
+                            <16*ys2327-ib>
+                            <16*ys2328-ib>
+                            <16*ys2329-ib>
+                            <16*ys2330-ib>
+                            <16*ys2331-ib>
+                            <16*ys2332-ib>
+                            <16*ys2333-ib>
+                            <16*ys2334-ib>
+                            <16*ys2335-ib>
+                            <16*ys2336-ib>
+                            <16*ys2337-ib>
+                            <16*ys2338-ib>
+                            <16*ys2339-ib>
+                            <16*ys2340-ib>
+                            <16*ys2341-ib>
+                            <16*ys2342-ib>
+                            <16*ys2343-ib>
+                            <16*ys2344-ib>
+                            <16*ys2345-ib>
+                            <16*ys2346-ib>
+                            <16*ys2347-ib>
+                            <16*ys2348-ib>
+                            <16*ys2349-ib>
+                            <16*ys2350-ib>
+                            <16*ys2351-ib>
+                            <16*ys2352-ib>
+                            <16*ys2353-ib>
+                            <16*ys2354-ib>
+                            <16*ys2355-ib>
+                            <16*ys2356-ib>
+                            <16*ys2357-ib>
+                            <16*ys2358-ib>
+                            <16*ys2359-ib>
+                            <16*ys2360-ib>
+                            <16*ys2361-ib>
+                            <16*ys2362-ib>
+                            <16*ys2401-ib>
+                            <16*ys2418-ib>
+                            <16*ys2426-ib>
+                            <16*ys2445-ib>
+                            <16*ys2446-ib>
+                            <16*ys2447-ib>
+                            <16*ys2448-ib>
+                            <16*ys2449-ib>
+                            <16*ys2450-ib>
+                            <16*ys2637-ib>
+                            <16*ys2645-ib>
+                            <16*ys2714-ib>
+                            <16*ys2715-ib>
+                            <16*ys2716-ib>
+                            <16*ys2850-ib>
+                            <16*ys2868-ib>
+                            <16*ys2963-ib>
+                            <16*ys2964-ib>
+                            <16*ys2965-ib>
+                            <16*ys2970-ib>
+                            <16*ys2971-ib>
+                            <16*ys2972-ib>
+                            <16*ys3001-ib>
+                            <16*ys3002-ib>
+                            <16*ys3003-ib>
+                            <16*ys3004-ib>
+                            <16*ys3005-ib>
+                            <16*ys3006-ib>
+                            <16*ys3007-ib>
+                            <16*ys3008-ib>
+                            <16*ys3009-ib>
+                            <16*ys3010-ib>
+                            <16*ys3011-ib>
+                            <16*ys3012-ib>
+                            <16*ys3013-ib>
+                            <16*ys3014-ib>
+                            <16*ys3015-ib>
+                            <16*ys3016-ib>
+                            <16*ys3018-ib>
+                            <16*ys3022-ib>
+                            <16*ys3023-ib>
+                            <16*ys3024-ib>
+                            <16*ys3025-ib>
+                            <16*ys3159-ib>
+                            <16*ys3169-ib>
+                            <16*ys3170-ib>
+                            <16*ys3171-ib>
+                            <16*ys3202-ib>
+                            <16*ys3203-ib>
+                            <16*ys3204-ib>
+                            <16*ys3205-ib>
+                            <16*ys3228-ib>
+                            <16*ys3234-ib>
+                            <16*ys3236-ib>
+                            <16*ys3237-ib>
+                            <16*ys3238-ib>
+                            <16*ys3239-ib>
+                            <16*ys3248-ib>
+                            <16*ys3249-ib>
+                            <16*ys3250-ib>
+                            <16*ys3251-ib>
+                            <16*ys3252-ib>
+                            <16*ys3253-ib>
+                            <16*ys3254-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/me_hsfc_306> was used as the working directory.
+Started at Thu Feb 27 16:28:43 2014
+Results reported at Thu Feb 27 16:30:48 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:20               # wall-clock time (hrs:mins)
+#BSUB -n 2048              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J primdgx.2048            # job name
+#BSUB -o ./primdgx.2048.out  # output file name 
+#BSUB -e ./primdgx.2048.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_euler 23 0 6 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               172195.00 sec.
+    Max Memory :             2643 MB
+    Average Memory :         1711.33 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          35
+    Max Threads :            265
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./primdgx.2048.err> for stderr output of this job.
+
