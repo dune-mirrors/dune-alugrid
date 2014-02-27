@@ -19,4 +19,5 @@ set ylabel "run time"
 c = 3 
 p "me_alusfc_306/optimal.dat" using 1:u title "optimal" w l lw c, \
   "me_alusfc_306/scaling.dat" using 1:u title "alusfc" w lp lw c, \
+  "me_alusfc_306_linkage/scaling.dat" using 1:u title "alusfc_l" w lp lw c, \
   "me_hsfc_306/scaling.dat" using 1:u title "hsfc" w lp lw c
