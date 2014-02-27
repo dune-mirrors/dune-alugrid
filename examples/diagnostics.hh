@@ -398,15 +398,18 @@ namespace Dune {
 //! get memory in MB 
 std::vector<double> getMemoryUsage()
 {
+  std::vector<double> memUsage;
+  /*
   std::vector<double> memUsage(2);
   struct rusage info;
   getrusage( RUSAGE_SELF, &info );
   // convert to KB
-  memUsage[ 0 ] = (double(info.ru_maxrss)/ 1024.0);
+  memUsage.push_back(double(info.ru_maxrss)/ 1024.0);
+  */
 #if HAVE_ALUGRID
-  memUsage[ 1 ] = (double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
+  memUsage.push_back(double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
 #else
-  memUsage[ 1 ] = (double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
+  memUsage.push_back(double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
 #endif
   return memUsage;
 }
