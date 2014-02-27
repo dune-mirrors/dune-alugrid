@@ -1,0 +1,127 @@
+Execute poe command line: poe  ./main_euler 23 0 6 none
+Caught DGFException on creation of SGrid, trying default DGF method!
+
+Created parallel ALUGrid<3,3,cube,nonconforming> from macro grid file ''. 
+
+globalRefine: 0
+Intialization done!
+elements = 26486272 (33343,65576,1.96671)   maxLevel = 6   step = 11   time = 6.45968e-05   dt = 5.87244e-06
+elements = 33826304 (47343,87568,1.84965)   maxLevel = 6   step = 21   time = 0.000123321   dt = 5.87244e-06
+elements = 33826304 (47343,87568,1.84965)   maxLevel = 6   step = 31   time = 0.000182046   dt = 5.87244e-06
+elements = 33826304 (47343,87568,1.84965)   maxLevel = 6   step = 41   time = 0.00024077   dt = 5.87244e-06
+elements = 33826304 (47343,87568,1.84965)   maxLevel = 6   step = 52   time = 0.000305367   dt = 5.87244e-06
+elements = 43001344 (56231,113960,2.02664)   maxLevel = 6   step = 62   time = 0.000364091   dt = 5.87244e-06
+elements = 43001344 (56231,113960,2.02664)   maxLevel = 6   step = 72   time = 0.000422816   dt = 5.87244e-06
+elements = 43001344 (56231,113960,2.02664)   maxLevel = 6   step = 82   time = 0.00048154   dt = 5.87244e-06
+elements = 43001344 (56231,113960,2.02664)   maxLevel = 6   step = 92   time = 0.000540264   dt = 5.87244e-06
+elements = 43001344 (56231,113960,2.02664)   maxLevel = 6   step = 103   time = 0.000604861   dt = 5.87244e-06
+elements = 50341376 (78302,135464,1.73002)   maxLevel = 6   step = 113   time = 0.000663586   dt = 5.87244e-06
+elements = 50341376 (78302,135464,1.73002)   maxLevel = 6   step = 123   time = 0.00072231   dt = 5.87244e-06
+elements = 50341376 (78302,135464,1.73002)   maxLevel = 6   step = 133   time = 0.000781034   dt = 5.87244e-06
+elements = 50341376 (78302,135464,1.73002)   maxLevel = 6   step = 144   time = 0.000845631   dt = 5.87244e-06
+elements = 50341376 (78302,135464,1.73002)   maxLevel = 6   step = 154   time = 0.000904356   dt = 5.87244e-06
+elements = 60118528 (96454,164512,1.7056)   maxLevel = 6   step = 164   time = 0.00096308   dt = 5.87244e-06
+elements = 60118528 (96454,164512,1.7056)   maxLevel = 6   step = 174   time = 0.0010218   dt = 5.87244e-06
+elements = 60118528 (96454,164512,1.7056)   maxLevel = 6   step = 184   time = 0.00108053   dt = 5.87244e-06
+elements = 60118528 (96454,164512,1.7056)   maxLevel = 6   step = 195   time = 0.00114513   dt = 5.87244e-06
+elements = 60118528 (96454,164512,1.7056)   maxLevel = 6   step = 205   time = 0.00120385   dt = 5.87244e-06
+elements = 60118528 (96454,164512,1.7056)   maxLevel = 6   step = 215   time = 0.00126257   dt = 5.87244e-06
+elements = 67458560 (101587,186016,1.8311)   maxLevel = 6   step = 225   time = 0.0013213   dt = 5.87244e-06
+elements = 67458560 (101587,186016,1.8311)   maxLevel = 6   step = 235   time = 0.00138002   dt = 5.87244e-06
+elements = 60118528 (96454,164512,1.7056)   maxLevel = 6   step = 246   time = 0.00144462   dt = 5.87244e-06
+elements = 60118528 (96454,164512,1.7056)   maxLevel = 6   step = 256   time = 0.00150334   dt = 5.87244e-06
+U2 max: 4.75  min: 1.92
+U3 max: 0.04  min: 0
+U4 max: 3  min: 0.99
+U5 max: 6.05  min: 3.83
+U6 max: 3.48  min: 0.55
+U7 max: 0.01  min: 0
+U8 max: 9.72  min: 5.96
+Program finished: CPU time = 156.136 sec.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@ys2606-ib>
+Subject: Job 994067: <primdgx.512> in cluster <yellowstone> Done
+
+Job <primdgx.512> was submitted from host <yslogin3-ib> by user <robertk> in cluster <yellowstone>.
+Job was executed on host(s) <16*ys2606-ib>, in queue <small>, as user <robertk> in cluster <yellowstone>.
+                            <16*ys2629-ib>
+                            <16*ys2631-ib>
+                            <16*ys2632-ib>
+                            <16*ys2634-ib>
+                            <16*ys2635-ib>
+                            <16*ys2636-ib>
+                            <16*ys2641-ib>
+                            <16*ys2642-ib>
+                            <16*ys2643-ib>
+                            <16*ys2644-ib>
+                            <16*ys2648-ib>
+                            <16*ys2649-ib>
+                            <16*ys2650-ib>
+                            <16*ys2651-ib>
+                            <16*ys2652-ib>
+                            <16*ys2653-ib>
+                            <16*ys2654-ib>
+                            <16*ys2655-ib>
+                            <16*ys2656-ib>
+                            <16*ys2657-ib>
+                            <16*ys3109-ib>
+                            <16*ys3112-ib>
+                            <16*ys3213-ib>
+                            <16*ys3214-ib>
+                            <16*ys3215-ib>
+                            <16*ys3216-ib>
+                            <16*ys3217-ib>
+                            <16*ys3218-ib>
+                            <16*ys3225-ib>
+                            <16*ys3226-ib>
+                            <16*ys3258-ib>
+</glade/u/home/robertk> was used as the home directory.
+</glade/u/home/robertk/work/Dune/trunk/alugrid/examples/run/me_alusfc_306> was used as the working directory.
+Started at Thu Feb 27 13:47:29 2014
+Results reported at Thu Feb 27 13:50:57 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# LSF batch script to run an MPI application
+#
+#BSUB -P P86850055           # project code
+#BSUB -W 00:20               # wall-clock time (hrs:mins)
+#BSUB -n 512              # number of tasks in job
+#BSUB -R span[ptile=16]    # run 16 MPI tasks per node
+#BSUB -J primdgx.512            # job name
+#BSUB -o ./primdgx.512.out  # output file name 
+#BSUB -e ./primdgx.512.err  # error file name
+#BSUB -q small             # queue
+#run the executable
+export MP_CSS_INTERRUPT=yes
+export MP_EAGER_LIMIT=4194305
+export MP_EAGER_LIMIT_LOCAL=4194305
+mpirun.lsf ./main_euler 23 0 6 none
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               93463.95 sec.
+    Max Memory :             117398 MB
+    Average Memory :         29471.17 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          548
+    Max Threads :            5865
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <./primdgx.512.err> for stderr output of this job.
+
