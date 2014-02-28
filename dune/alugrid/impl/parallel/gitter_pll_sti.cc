@@ -1417,9 +1417,6 @@ namespace ALUGrid
             containerPll ().identification (mpAccess (), true );
             _vertexLinkageComputed = true ;
           }
-
-          // set vertex linkage
-          // setVertexLinkage( db );
         }
 
         lap4 = clock();
@@ -1446,60 +1443,6 @@ namespace ALUGrid
     db.storeElementCuts( _elementCuts );
 
     return repartition;
-  }
-
-  void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
-  {
-    return ;
-    if( Gitter :: storeLinkageInVertices ) 
-    {
-      const int me = mpAccess().myrank(); 
-
-      // compute missing element destinations 
-      // containerPll().computeElementDestinations( mpAccess(), db );
-
-      // clear linkage pattern map since it is newly build here
-      containerPll().clearLinkagePattern();
-
-      // linkage vector (avoid reallocation)
-      std::vector< int > linkage;
-
-      AccessIterator < vertex_STI >::Handle w ( containerPll () );
-      // set ldb vertex indices to all elements 
-      for (w.first (); ! w.done (); w.next () ) 
-      {
-        vertex_STI& vertex = w.item();
-
-        // clear linkage first 
-        vertex.clearLinkage();
-
-        typedef std::set<int>::const_iterator set_iterator ;
-
-        if( vertex.isBorder() ) 
-        {
-          typedef vertex_STI :: ElementLinkage_t ElementLinkage_t ;
-          const ElementLinkage_t& linkedElements = vertex.linkedElements();
-          const int elSize = linkedElements.size() ;
-          // clear old content 
-          linkage.resize( 0 );
-          linkage.reserve( elSize );
-          for( int i=0; i<elSize; ++ i )
-          {
-            const int dest = db.destination( linkedElements[ i ] ) ;
-            assert( dest >= 0 );
-            if( dest != me ) 
-            {
-              linkage.push_back( dest );
-            }
-          }
-        
-          // sort linkage 
-          std::sort( linkage.begin(), linkage.end() );
-          // set linkage 
-          vertex.setLinkageSorted( linkage );
-        }
-      }
-    }
   }
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 
