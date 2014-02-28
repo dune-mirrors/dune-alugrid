@@ -18,23 +18,20 @@ namespace ALUGrid
     typedef std::set< std::vector< int > > lp_map_t;
 
     typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< typename AccessIterator < A >::Handle, 
+                      std::pair< A*, 
                       typename lp_map_t::const_iterator > > vx_lmap_t;
 
     typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< typename AccessIterator < B >::Handle, 
+                      std::pair< B*, 
                       typename lp_map_t::const_iterator > > edg_lmap_t;
 
     typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< typename AccessIterator < C >::Handle, 
+                      std::pair< C*, 
                       typename lp_map_t::const_iterator > > fce_lmap_t;
 
-    typedef std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
-                         std::list< typename AccessIterator < A >::Handle > > > vx_tt_t;
-    typedef std::vector< std::pair< std::list< typename AccessIterator < B >::Handle >, 
-                         std::list< typename AccessIterator < B >::Handle > > > edg_tt_t;
-    typedef std::vector< std::pair< std::list< typename AccessIterator < C >::Handle >, 
-                         std::list< typename AccessIterator < C >::Handle > > > fce_tt_t;
+    typedef std::vector< std::pair< std::list< A* >, std::list< A* > > > vx_tt_t;
+    typedef std::vector< std::pair< std::list< B* >, std::list< B* > > > edg_tt_t;
+    typedef std::vector< std::pair< std::list< C* >, std::list< C* > > > fce_tt_t;
 
     lp_map_t&   _linkagePatternMapVx;
     vx_lmap_t&  _lookVx;
@@ -129,7 +126,7 @@ namespace ALUGrid
           if( estimate.size() )
           {
             LinkedObject::Identifier id = item.getIdentifier ();
-            look [id].first  = mi;
+            look [id].first  = &item;
             look [id].second = meIt;
             {
               std::vector< int >::const_iterator iEnd = estimate.end ();
@@ -165,7 +162,7 @@ namespace ALUGrid
         const std::vector< int > & lk (*(*pos).second.second);
         if (* lk.begin () == me ) 
         {
-          typename LinkedObject::Identifier id = (*pos).second.first.item ().accessPllX ().getIdentifier ();
+          typename LinkedObject::Identifier id = (*pos).second.first->accessPllX ().getIdentifier ();
           { 
             typename std::vector< int >::const_iterator iEnd = lk.end ();
             for (typename std::vector< int >::const_iterator i = lk.begin (); 
@@ -260,31 +257,27 @@ namespace ALUGrid
     }
   };
 
-
   template < class A, class B, class C > 
   void identify (typename AccessIterator < A >::Handle vxMi, 
-                 std::vector< std::pair< std::list< typename AccessIterator < A >::Handle >, 
-                              std::list< typename AccessIterator < A >::Handle > > > & vertexTT, 
+                 std::vector< std::pair< std::list< A* >, std::list< A* > > >& vertexTT, 
                  typename AccessIterator < B >::Handle edgMi, 
-                 std::vector< std::pair< std::list< typename AccessIterator < B >::Handle >, 
-                              std::list< typename AccessIterator < B >::Handle > > > & edgeTT, 
+                 std::vector< std::pair< std::list< B* >, std::list< B* > > >& edgeTT, 
                  typename AccessIterator < C >::Handle fceMi, 
-                 std::vector< std::pair< std::list< typename AccessIterator < C >::Handle >, 
-                              std::list< typename AccessIterator < C >::Handle > > > & faceTT, 
+                 std::vector< std::pair< std::list< C* >, std::list< C* > > >& faceTT, 
                  const MpAccessLocal & mpa) 
   {
     typedef std::set< std::vector< int > > lp_map_t;
 
     typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< typename AccessIterator < A >::Handle, 
+                      std::pair< A*, 
                       typename lp_map_t::const_iterator > > vx_lmap_t;
 
     typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< typename AccessIterator < B >::Handle, 
+                      std::pair< B*, 
                       typename lp_map_t::const_iterator > > edg_lmap_t;
 
     typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< typename AccessIterator < C >::Handle, 
+                      std::pair< C*, 
                       typename lp_map_t::const_iterator > > fce_lmap_t;
 
     const int nl = mpa.nlinks ();

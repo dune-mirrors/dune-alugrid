@@ -116,15 +116,15 @@ namespace ALUGrid
 #endif
   {
     // list to iterate 
-    std::list< typename AccessIterator < A >::Handle > & _l;
+    std::list< A* >& _l;
     // current item 
-    typedef typename std::list< typename AccessIterator < A >::Handle >::iterator listiterator_t;
+    typedef typename std::list< A* >::iterator listiterator_t;
     
     const listiterator_t _end ;
     listiterator_t _curr;
 
     public :
-      listSmartpointer__to__iteratorSTI (std::list< typename AccessIterator < A >::Handle > &);
+      listSmartpointer__to__iteratorSTI ( std::list< A* > &);
       listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > &);
      ~listSmartpointer__to__iteratorSTI ();
       void first ();
@@ -155,9 +155,12 @@ namespace ALUGrid
       // hier 'inner', dann korrespondieren auf dem Nachbargebiet die Objekte in 'outer' in der Reihenfolge
       // des Durchlaufs (und umgekehrt).
     
-      typedef std::vector< std::pair< std::list< AccessIterator < vertex_STI >::Handle >, std::list< AccessIterator < vertex_STI >::Handle > > > vertexTT_t;
-      typedef std::vector< std::pair< std::list< AccessIterator < hedge_STI >::Handle >, std::list< AccessIterator < hedge_STI >::Handle > > >   hedgeTT_t ;
-      typedef std::vector< std::pair< std::list< AccessIterator < hface_STI >::Handle >, std::list< AccessIterator < hface_STI >::Handle > > >   hfaceTT_t ;
+      //typedef std::vector< std::pair< std::list< AccessIterator < vertex_STI >::Handle >, std::list< AccessIterator < vertex_STI >::Handle > > > vertexTT_t;
+      //typedef std::vector< std::pair< std::list< AccessIterator < hedge_STI >::Handle >, std::list< AccessIterator < hedge_STI >::Handle > > >   hedgeTT_t ;
+      //typedef std::vector< std::pair< std::list< AccessIterator < hface_STI >::Handle >, std::list< AccessIterator < hface_STI >::Handle > > >   hfaceTT_t ;
+      typedef std::vector< std::pair< std::list< vertex_STI* >, std::list< vertex_STI* > > > vertexTT_t;
+      typedef std::vector< std::pair< std::list< hedge_STI*  >, std::list< hedge_STI*  > > > hedgeTT_t ;
+      typedef std::vector< std::pair< std::list< hface_STI*  >, std::list< hface_STI*  > > > hfaceTT_t ;
       vertexTT_t  _vertexTT;
       hedgeTT_t   _hedgeTT;
       hfaceTT_t   _hfaceTT;
@@ -486,7 +489,7 @@ namespace ALUGrid
 
 
   template < class A > listSmartpointer__to__iteratorSTI < A >::
-  listSmartpointer__to__iteratorSTI (std::list< typename AccessIterator < A >::Handle > & a) 
+  listSmartpointer__to__iteratorSTI (std::list< A* > & a) 
    : _l (a),  _end( _l.end() ), _curr( _end )
   {
   }
@@ -517,7 +520,7 @@ namespace ALUGrid
 
   template < class A > A & listSmartpointer__to__iteratorSTI < A >::item () const {
     alugrid_assert (! done ());
-    return (*_curr).item ();
+    return *(*_curr);
   }
 
   template < class A > IteratorSTI < A > * listSmartpointer__to__iteratorSTI < A >::
