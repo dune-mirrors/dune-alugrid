@@ -7,6 +7,7 @@
 #include <iterator>
 
 #include "gitter_pll_sti.h"
+#include "gitter_pll_mgb.h"
 #include "../serial/gatherscatter.hh"
 #include "../serial/walk.h"
 
@@ -1417,6 +1418,9 @@ namespace ALUGrid
             containerPll ().identification (mpAccess (), true );
             _vertexLinkageComputed = true ;
           }
+
+          // set vertex linkage
+          setVertexLinkage( db );
         }
 
         lap4 = clock();
@@ -1443,6 +1447,31 @@ namespace ALUGrid
     db.storeElementCuts( _elementCuts );
 
     return repartition;
+  }
+
+  void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
+  {
+    if( Gitter :: storeLinkageInVertices && _vertexLinkageComputed ) 
+    {
+      const int me = mpAccess().myrank(); 
+
+      // compute missing element destinations 
+      // containerPll().computeElementDestinations( mpAccess(), db );
+
+      // clear linkage pattern map since it is newly build here
+      containerPll().clearLinkagePattern();
+
+      //VertexLinkage vxLinkage( me, db, _vertexLinkageComputed );
+      VertexLinkage vxLinkage( me, db, true );
+
+      AccessIterator < vertex_STI >::Handle w ( containerPll () );
+      // set ldb vertex indices to all elements 
+      for (w.first (); ! w.done (); w.next () ) 
+      {
+        // compute vertex linkage for given vertex (clear linkage in any case)
+        vxLinkage.compute( w.item() );
+      }
+    }
   }
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 

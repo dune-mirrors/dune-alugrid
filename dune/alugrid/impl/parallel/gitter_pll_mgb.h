@@ -29,6 +29,9 @@ namespace ALUGrid
 
     void compute( vertex_STI& vertex ) 
     {
+      // clear existing vertex linkage 
+      vertex.clearLinkage();
+
       if( Gitter :: storeLinkageInVertices && 
           vertex.isBorder() && _computeVertexLinkage )
       {
@@ -53,8 +56,6 @@ namespace ALUGrid
         // set linkage 
         vertex.setLinkageSorted( _linkage );
       }
-      else 
-        vertex.clearLinkage();
     }
   };
 
