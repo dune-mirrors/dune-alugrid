@@ -117,14 +117,14 @@ namespace ALUGrid
       A * x = new A [xSize];
       A * y = new A [ln];
       alugrid_assert (x && y);
-      copy (in.begin(), in.end(), y);
+      std::copy (in.begin(), in.end(), y);
       test = MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
       delete [] y;
       y = 0;
       alugrid_assert (test == MPI_SUCCESS);
       {for (int i = 0; i < np; i ++ ) {
         res [i].reserve (rcounts [i]);
-        copy (x + displ [i], x + displ [i] + rcounts [i], back_inserter(res [i]));
+        std::copy (x + displ [i], x + displ [i] + rcounts [i], back_inserter(res [i]));
       }}
       delete [] x;
     }
@@ -356,7 +356,7 @@ namespace ALUGrid
 
   inline std::vector< int > MpAccessMPI::gcollect (int i) const {
     std::vector< int > r (psize (), 0L);
-    mpi_allgather (&i, 1, &r[ 0], 1);
+    mpi_allgather (&i, 1, &r[ 0 ], 1);
     return r;
   }
 
@@ -383,6 +383,9 @@ namespace ALUGrid
     
     // size of buffer 
     const int snum = in._wb - in._rb;
+
+    // check that size is correct 
+    alugrid_assert( snum == len [ myrank() ] );
     
     // create empty objects streams 
     std::vector< ObjectStream > o (np);
@@ -406,7 +409,7 @@ namespace ALUGrid
     
     int * rcounts = new int [np];
     alugrid_assert (rcounts);
-    copy (len.begin (), len.end (), rcounts);
+    std::copy (len.begin (), len.end (), rcounts);
     int * const displ = new int [np];
     alugrid_assert (displ);
     
