@@ -36,7 +36,7 @@ namespace ALUGrid
       {
         Gitter::Geometric::VertexGeo* vertex = (*i);
         // clear vertex linkage if this vertex is not border
-        if( vertex->isBorder() ) vertex->clearLinkage();
+        //if( vertex->isBorder() ) vertex->clearLinkage();
         _vertexMap [ vertex->ident ()] = vertex;
       }
 
@@ -552,7 +552,7 @@ namespace ALUGrid
         else 
         {
           alugrid_assert ( vertex->ref >= 2);
-          _vxLinkage.compute( *vertex ); 
+          //_vxLinkage.compute( *vertex ); 
           // compute vertex linkage 
           _vertexList.push_back ( vertex );
           ++i;
@@ -595,8 +595,8 @@ namespace ALUGrid
     p.first->unpackSelf (os,p.second);
 
     // compute vertex linkage if enabled 
-    if( Gitter :: storeLinkageInVertices ) 
-      _vxLinkage.compute( *p.first );
+    //if( Gitter :: storeLinkageInVertices ) 
+    // _vxLinkage.compute( *p.first );
   }
 
   void ParallelGridMover::unpackHedge1 (ObjectStream & os) {
@@ -980,7 +980,7 @@ namespace ALUGrid
         _mpa( mpa ), 
         _pgm( 0 ),
         _gs( gs ),
-        _vxLinkage( _mpa.myrank(), db, ! vertexLinkageComputed )
+        _vxLinkage( _mpa.myrank(), db, vertexLinkageComputed )
     {}
 
     // destructor deleting parallel macro grid mover
@@ -1005,7 +1005,7 @@ namespace ALUGrid
       if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll, _vxLinkage );
 
       // clear linkage patterns 
-      _containerPll.clearLinkagePattern();
+      //_containerPll.clearLinkagePattern();
     }
 
     void unpack( const int link, ObjectStream& os ) 
