@@ -1419,7 +1419,7 @@ namespace ALUGrid
           }
 
           // set vertex linkage
-          setVertexLinkage( db );
+          // setVertexLinkage( db );
         }
 
         lap4 = clock();
@@ -1450,6 +1450,7 @@ namespace ALUGrid
 
   void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
   {
+    return ;
     if( Gitter :: storeLinkageInVertices ) 
     {
       const int me = mpAccess().myrank(); 
@@ -1480,7 +1481,7 @@ namespace ALUGrid
           const ElementLinkage_t& linkedElements = vertex.linkedElements();
           const int elSize = linkedElements.size() ;
           // clear old content 
-          linkage.clear();
+          linkage.resize( 0 );
           linkage.reserve( elSize );
           for( int i=0; i<elSize; ++ i )
           {

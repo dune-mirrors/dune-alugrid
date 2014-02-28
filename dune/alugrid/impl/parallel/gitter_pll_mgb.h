@@ -15,7 +15,8 @@ namespace ALUGrid
   : public MacroGridBuilder
   {
     protected :
-      void unpackVertex (ObjectStream &);
+      template <class VertexLinkage>  
+      void unpackVertex (ObjectStream &, VertexLinkage& );
       void unpackHedge1 (ObjectStream &);
       void unpackHface3 (ObjectStream &);
       void unpackHface4 (ObjectStream &);
@@ -50,7 +51,8 @@ namespace ALUGrid
     public :
       ParallelGridMover (BuilderIF &);
       // unpack all elements from the stream 
-      void unpackAll (ObjectStream &, GatherScatterType* );
+      template <class VertexLinkage>  
+      void unpackAll (ObjectStream &, GatherScatterType*, VertexLinkage& );
       void packAll   (const int link, ObjectStream &, GatherScatterType* );
       // unpack all elements from all streams
       // void unpackAll (std::vector< ObjectStream > &, GatherScatterType* );
