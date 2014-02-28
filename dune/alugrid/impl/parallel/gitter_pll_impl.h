@@ -46,6 +46,7 @@ namespace ALUGrid
       virtual bool setLinkage ( const std::vector< int >& );
       virtual bool setLinkageSorted ( const std::vector< int >& );
       virtual void clearLinkage ();
+      virtual bool noLinkage () const { return linkagePatterns().find( nullPattern ) == _lpn; }
       virtual LinkedObject::Identifier getIdentifier () const;
 
     protected :
@@ -53,6 +54,7 @@ namespace ALUGrid
       virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
       
       inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns();  }
+      const linkagePatternMap_t& linkagePatterns () const { return this->indexManagerStorage().linkagePatterns();  }
       bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attach2 (int);
