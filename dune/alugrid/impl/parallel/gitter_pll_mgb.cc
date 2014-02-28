@@ -552,8 +552,8 @@ namespace ALUGrid
         else 
         {
           alugrid_assert ( vertex->ref >= 2);
-          //_vxLinkage.compute( *vertex ); 
           // compute vertex linkage 
+          // _vxLinkage.compute( *vertex ); 
           _vertexList.push_back ( vertex );
           ++i;
         }
@@ -594,9 +594,9 @@ namespace ALUGrid
     std::pair< VertexGeo *, bool > p = InsertUniqueVertex (x,y,z,id);
     p.first->unpackSelf (os,p.second);
 
-    // compute vertex linkage if enabled 
-    //if( Gitter :: storeLinkageInVertices ) 
-    // _vxLinkage.compute( *p.first );
+    // compute vertex linkage if enabled and vertex is new 
+    //if( Gitter :: storeLinkageInVertices && p.second ) 
+    //  _vxLinkage.compute( *p.first );
   }
 
   void ParallelGridMover::unpackHedge1 (ObjectStream & os) {
@@ -1005,7 +1005,7 @@ namespace ALUGrid
       if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll, _vxLinkage );
 
       // clear linkage patterns 
-      //_containerPll.clearLinkagePattern();
+      // _containerPll.clearLinkagePattern();
     }
 
     void unpack( const int link, ObjectStream& os ) 
