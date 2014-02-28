@@ -336,7 +336,6 @@ namespace ALUGrid
       virtual bool setLinkage ( const std::vector< int >& ) = 0;
       virtual bool setLinkageSorted ( const std::vector< int >& ) = 0;
       virtual void clearLinkage () = 0;
-      virtual bool noLinkage () { return true; }
 
       typedef ElementLinkage ElementLinkage_t ;
       typedef std::set< int > linkageset_t ;
