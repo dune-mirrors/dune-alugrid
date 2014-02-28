@@ -46,6 +46,7 @@ namespace ALUGrid
       virtual bool setLinkage ( const std::vector< int >& );
       virtual bool setLinkageSorted ( const std::vector< int >& );
       virtual void clearLinkage ();
+      virtual bool noLinkage() { return linkagePatterns().find ( nullPattern ) == _lpn; }
       virtual LinkedObject::Identifier getIdentifier () const;
 
     protected :

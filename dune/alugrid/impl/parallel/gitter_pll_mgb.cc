@@ -33,7 +33,13 @@ namespace ALUGrid
       const BuilderIF::vertexlist_t::iterator _vertexListend  = _vertexList.end ();
       // copy list entries to map 
       for (BuilderIF::vertexlist_t::iterator i = _vertexList.begin (); i != _vertexListend; ++i )
-        _vertexMap [(*i)->ident ()] = (*i);
+      {
+        Gitter::Geometric::VertexGeo* vertex = (*i);
+        // clear vertex linkage if this vertex is not border
+        if( vertex->isBorder() ) vertex->clearLinkage();
+        _vertexMap [ vertex->ident ()] = vertex;
+      }
+
       // clear list 
       clear( _vertexList );
     }
@@ -575,7 +581,8 @@ namespace ALUGrid
     return;
   }
 
-  void ParallelGridMover::unpackVertex ( ObjectStream &os )
+  template <class VertexLinkage>
+  void ParallelGridMover::unpackVertex ( ObjectStream &os, VertexLinkage& vxLinkage )
   {
     int id;
     double x, y, z;
@@ -585,6 +592,10 @@ namespace ALUGrid
     os.readObject (z);
     std::pair< VertexGeo *, bool > p = InsertUniqueVertex (x,y,z,id);
     p.first->unpackSelf (os,p.second);
+
+    // compute vertex linkage if enabled 
+    if( Gitter :: storeLinkageInVertices ) 
+      vxLinkage.compute( *p.first );
   }
 
   void ParallelGridMover::unpackHedge1 (ObjectStream & os) {
@@ -871,8 +882,9 @@ namespace ALUGrid
     return;
   }
 
+  template <class VertexLinkage> 
   void ParallelGridMover::
-  unpackAll(ObjectStream& os, GatherScatterType* gs) 
+  unpackAll(ObjectStream& os, GatherScatterType* gs, VertexLinkage& vxLinkage ) 
   {
     int code = MacroGridMoverIF::ENDMARKER;
     for (os.readObject (code); code != MacroGridMoverIF::ENDMARKER; os.readObject (code)) 
@@ -880,7 +892,7 @@ namespace ALUGrid
       switch (code) {
       case MacroGridMoverIF:: VERTEX :
         {
-          unpackVertex (os);
+          unpackVertex (os, vxLinkage );
           break;
         }
       case MacroGridMoverIF::EDGE1 :
@@ -948,27 +960,101 @@ namespace ALUGrid
     }  
   }
 
+  class VertexLinkage
+  {
+    typedef Gitter :: vertex_STI vertex_STI ;
+    const LoadBalancer::DataBase& _db;
+    std::vector< int > _linkage;
+    const int _me ;
+    const bool _computeVertexLinkage;
+  public:
+    VertexLinkage( const int me, const LoadBalancer::DataBase& db, const bool computeVertexLinkage )
+      : _db( db ),
+        _linkage(),
+        _me( me ),
+        _computeVertexLinkage( computeVertexLinkage )
+    {}
+
+    void compute( vertex_STI& vertex ) 
+    {
+      if( vertex.isBorder() && _computeVertexLinkage )
+      {
+        typedef vertex_STI :: ElementLinkage_t ElementLinkage_t ;
+        const ElementLinkage_t& linkedElements = vertex.linkedElements();
+        const int elSize = linkedElements.size() ;
+        // clear old content 
+        _linkage.resize( 0 );
+        _linkage.reserve( elSize );
+        for( int i=0; i<elSize; ++ i )
+        {
+          const int dest = _db.destination( linkedElements[ i ] ) ;
+          assert( dest >= 0 );
+          if( dest != _me )
+          {
+            _linkage.push_back( dest );
+          }
+        }
+
+        // sort linkage 
+        std::sort( _linkage.begin(), _linkage.end() );
+        // set linkage 
+        vertex.setLinkageSorted( _linkage );
+      }
+      else 
+        vertex.clearLinkage();
+    }
+  };
+
   class UnpackLBData : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
     GitterPll::MacroGitterPll& _containerPll;
     MpAccessLocal&      _mpa;
     ParallelGridMover*  _pgm;
     GatherScatterType*  _gs; 
+    const LoadBalancer::DataBase& _db;
+    const bool _computeVertexLinkage;
 
     UnpackLBData( const UnpackLBData& );
   public:
     // constructor 
     UnpackLBData( GitterPll::MacroGitterPll& containerPll, 
                   MpAccessLocal& mpa,
-                  GatherScatterType* gs ) 
+                  GatherScatterType* gs,
+                  LoadBalancer::DataBase& db, 
+                  const bool vertexLinkageComputed ) 
       : _containerPll( containerPll ),
         _mpa( mpa ), 
         _pgm( 0 ),
-        _gs( gs )
+        _gs( gs ),
+        _db( db ),
+        _computeVertexLinkage( ! vertexLinkageComputed )
     {}
 
     // destructor deleting parallel macro grid mover
-    ~UnpackLBData() { delete _pgm; }
+    ~UnpackLBData() 
+    {
+      delete _pgm; 
+      // set vertex linkage for remaining vertices 
+      
+      if( Gitter ::  storeLinkageInVertices ) 
+      {
+        // create vertex linkage computer 
+        VertexLinkage vxLinkage( _mpa.myrank(), _db, _computeVertexLinkage );
+
+        typedef Gitter :: vertex_STI  vertex_STI;
+        // get vertex iterator 
+        AccessIterator < vertex_STI >::Handle w ( _containerPll );
+        // set ldb vertex indices to all elements 
+        for (w.first (); ! w.done (); w.next () )
+        {
+          vertex_STI& vertex = w.item();
+          if( vertex.isBorder() && vertex.noLinkage() )
+            vxLinkage.compute( vertex );
+          else 
+            vertex.clearLinkage();
+        }
+      }
+    }
 
     void pack( const int link, ObjectStream& os ) 
     {
@@ -984,13 +1070,20 @@ namespace ALUGrid
       // will fail since this will modify the macro grid, since the 
       // parallel macro grid mover clears the lists of macro elements 
       if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll );
+
+      // clear linkage patterns 
+      _containerPll.clearLinkagePattern();
     }
 
     void unpack( const int link, ObjectStream& os ) 
     {
       alugrid_assert ( _pgm );
+
+      // create vertex linkage computer 
+      VertexLinkage vxLinkage( _mpa.myrank(), _db, _computeVertexLinkage );
+
       // unpack data for given stream 
-      _pgm->unpackAll( os, _gs );
+      _pgm->unpackAll( os, _gs , vxLinkage );
     }
   };
 
@@ -1176,7 +1269,7 @@ namespace ALUGrid
 
       {
         // data handle  
-        UnpackLBData data( containerPll (), mpa, gatherScatter );
+        UnpackLBData data( containerPll (), mpa, gatherScatter, db, _vertexLinkageComputed );
 
         // pack, exchange, and unpack data 
         mpa.exchange ( osv, data );
