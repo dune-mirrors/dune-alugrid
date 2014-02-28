@@ -97,6 +97,11 @@ namespace ALUGrid
   class MyAlloc 
   {
   public:  
+    class OutOfMemoryException : public ALUGridException 
+    { 
+    public:
+      virtual std::string what () const { return "OutOfMemoryException"; }
+    };
     // this is false here anyway 
     static const bool ALUGridUsesDLMalloc = false ;
 
