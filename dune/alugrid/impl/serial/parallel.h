@@ -117,7 +117,7 @@ namespace ALUGrid
     
     class Identifier
     {
-      int _i1, _i2, _i3, _i4 ;
+      int _i[ 4 ];
       static const int _endOfStream = -128 ; // must be a negative value 
     public :
       inline Identifier (int = -1, int = -1, int = -1, int = -1) ;
@@ -127,7 +127,9 @@ namespace ALUGrid
       inline bool operator == (const Identifier &) const ;
       // read identifier from stream and return true if successful 
       bool read ( ObjectStream& );
+      bool read ( ObjectStream&, const int );
       void write ( ObjectStream& ) const ;
+      void write ( ObjectStream&, const int ) const ;
       inline bool isValid () const ;
       // read stream termination marker 
       static void endOfStream( ObjectStream& os ) 
@@ -202,59 +204,81 @@ namespace ALUGrid
   ///////////////////////////////////////////////////////////////////
 
   inline bool LinkedObject :: Identifier :: isValid () const {
-    return _i1 == -1 ? false : true ;
+    return _i[ 0 ] == -1 ? false : true ;
   }
 
   inline LinkedObject :: Identifier :: Identifier (int a, int b, int c, int d) 
-    : _i1 (a), _i2 (b), _i3 (c), _i4 (d) {
+  {
+    _i[ 0 ] = a;
+    _i[ 1 ] = b;
+    _i[ 2 ] = c;
+    _i[ 3 ] = d;
   }
 
   inline LinkedObject :: Identifier :: Identifier (const Identifier & x) 
-    : _i1 (x._i1), _i2 (x._i2), _i3 (x._i3), _i4 (x._i4) {
+  {
+    for( int i=0; i<4; ++i ) _i[ i ] = x._i[ i ];
   }
 
   inline const LinkedObject :: Identifier & LinkedObject :: Identifier :: operator = (const Identifier & x) 
   {
     alugrid_assert (x.isValid ()) ;
-    _i1 = x._i1 ;
-    _i2 = x._i2 ;
-    _i3 = x._i3 ;
-    _i4 = x._i4 ;
+    for( int i=0; i<4; ++i ) _i[ i ] = x._i[ i ];
     return * this ;
   }
 
   inline bool LinkedObject :: Identifier :: operator < (const Identifier & x) const {
     alugrid_assert (isValid () && x.isValid ()) ;
-    return (_i1 < x._i1) ? true : (_i1 == x._i1 ? (_i2 < x._i2 ? true : 
-        (_i2 == x._i2 ? (_i3 < x._i3 ? true : (_i3 == x._i3 ? 
-      (_i4 < x._i4 ? true : false) : false )) : false )) : false ) ;
+    return (_i[ 0 ] < x._i[ 0 ]) ? true : (_i[ 0 ] == x._i[ 0 ] ? (_i[ 1 ] < x._i[ 1 ] ? true : 
+        (_i[ 1 ] == x._i[ 1 ] ? (_i[ 2 ] < x._i[ 2 ] ? true : (_i[ 2 ] == x._i[ 2 ] ? 
+      (_i[ 3 ] < x._i[ 3 ] ? true : false) : false )) : false )) : false ) ;
   }
 
   inline bool LinkedObject :: Identifier :: operator == (const Identifier & x) const {
-    return (_i1 == x._i1 && _i2 == x._i2 && _i3 == x._i3 && _i4 == x._i4) ? true : false ;
+    return (_i[ 0 ] == x._i[ 0 ] && _i[ 1 ] == x._i[ 1 ] && _i[ 2 ] == x._i[ 2 ] && _i[ 3 ] == x._i[ 3 ]) ? true : false ;
   }
 
   // read identifier and return true if successful 
   inline bool LinkedObject::Identifier::read ( ObjectStream& os ) 
   {
     // if the next entry is end of stream do nothing more 
-    os.readObject( _i1 );
-    if( _i1 == _endOfStream ) 
+    os.readObject( _i[ 0 ] );
+    if( _i[ 0 ] == _endOfStream ) 
       return false ;
 
-    os.readObject( _i2 );
-    os.readObject( _i3 );
-    os.readObject( _i4 );
+    os.readObject( _i[ 1 ] );
+    os.readObject( _i[ 2 ] );
+    os.readObject( _i[ 3 ] );
     return true ;
   }
 
   inline void LinkedObject::Identifier::write ( ObjectStream& os ) const
   {
     // write object to stream 
-    os.writeObject( _i1 );
-    os.writeObject( _i2 );
-    os.writeObject( _i3 );
-    os.writeObject( _i4 );
+    os.writeObject( _i[ 0 ] );
+    os.writeObject( _i[ 1 ] );
+    os.writeObject( _i[ 2 ] );
+    os.writeObject( _i[ 3 ] );
+  }
+
+  // read identifier and return true if successful 
+  inline bool LinkedObject::Identifier::read ( ObjectStream& os, const int cnt ) 
+  {
+    // if the next entry is end of stream do nothing more 
+    os.readObject( _i[ 0 ] );
+    if( _i[ 0 ] == _endOfStream ) 
+      return false ;
+
+    for( int i=1; i<cnt; ++i )
+      os.readObject( _i[ i ] );
+    return true ;
+  }
+
+  inline void LinkedObject::Identifier::write ( ObjectStream& os, const int cnt ) const
+  {
+    // write object to stream 
+    for( int i=0; i<cnt; ++i )
+      os.writeObject( _i[ i ] );
   }
 
 } // namespace ALUGrid
