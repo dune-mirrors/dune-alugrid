@@ -232,20 +232,20 @@ namespace ALUGrid
       if( _firstLoop ) 
       {
         // vertices 
-        unpackFirstLoop( link, os, counter( (A*) 0 ), _linkagePatternMapVx , _lookVx );
+        unpackFirstLoop( link, os, 1, _linkagePatternMapVx , _lookVx );
         // edges 
-        unpackFirstLoop( link, os, counter( (B*) 0 ), _linkagePatternMapEdg, _lookEdg );
+        unpackFirstLoop( link, os, 2, _linkagePatternMapEdg, _lookEdg );
         // faces 
-        unpackFirstLoop( link, os, counter( (C*) 0 ),_linkagePatternMapFce, _lookFce );
+        unpackFirstLoop( link, os, 3, _linkagePatternMapFce, _lookFce );
       }
       else
       {
         // vertices 
-        unpackSecondLoop( link, os, counter( (A*) 0 ), _lookVx , _vx  );
+        unpackSecondLoop( link, os, 1, _lookVx , _vx  );
         // edges 
-        unpackSecondLoop( link, os, counter( (B*) 0 ), _lookEdg, _edg );
+        unpackSecondLoop( link, os, 2, _lookEdg, _edg );
         // faces
-        unpackSecondLoop( link, os, counter( (C*) 0 ), _lookFce, _fce );
+        unpackSecondLoop( link, os, 3, _lookFce, _fce );
       }
     }
 
