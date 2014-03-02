@@ -115,21 +115,47 @@ namespace ALUGrid
     // Die Schnittstelle wird von den Parallelerweiterungen der Knoten
     // Kanten, Fl"achen und (sp"ater auch) Elemente implementiert.
     
-    class Identifier
+    template <int size>
+    class IdentifierImpl
     {
-      int _i[ 4 ];
+      typedef IdentifierImpl< size > This;
+      template <int xsize>
+      void assign( const IdentifierImpl< xsize >& );
+
+      template <int k, int s>
+      struct Spec
+      {
+        static bool less( const int (&a)[ size ], const int (&b)[ size ] )
+        {
+          if( a[ k ]  < b[ k ] ) return true;
+          else if( a[ k ] > b[ k ] ) return false ; 
+          else return Spec<k+1,s>::less( a, b );
+        }
+      };
+
+      template <int k>
+      struct Spec< k, k >
+      {
+        static bool less( const int (&a)[ size ], const int (&b)[ size ] )
+        {
+          return  a[ k ]  < b[ k ];
+        }
+      };
+
+    public:  
+      int _i[ size ];
       static const int _endOfStream = -128 ; // must be a negative value 
     public :
-      inline Identifier (int = -1, int = -1, int = -1, int = -1) ;
-      inline Identifier (const Identifier &) ;
-      inline const Identifier & operator = (const Identifier &) ;
-      inline bool operator < (const Identifier &) const ;
-      inline bool operator == (const Identifier &) const ;
+      inline IdentifierImpl (int = -1, int = -1, int = -1, int = -1) ;
+      template <int xsize>
+      inline IdentifierImpl (const IdentifierImpl< xsize > &) ;
+      template <int xsize>
+      inline const IdentifierImpl & operator = (const IdentifierImpl< xsize >&) ;
+      inline bool operator < (const This &) const ;
+      inline bool operator == (const This &) const ;
       // read identifier from stream and return true if successful 
       bool read ( ObjectStream& );
-      bool read ( ObjectStream&, const int );
       void write ( ObjectStream& ) const ;
-      void write ( ObjectStream&, const int ) const ;
       inline bool isValid () const ;
       // read stream termination marker 
       static void endOfStream( ObjectStream& os ) 
@@ -138,6 +164,9 @@ namespace ALUGrid
       }
 
     } ;
+
+    // the identifier need at most 4 entries 
+    typedef IdentifierImpl< 4 > Identifier ;
 
   public :
     virtual ~LinkedObject () {}
@@ -203,82 +232,87 @@ namespace ALUGrid
   //
   ///////////////////////////////////////////////////////////////////
 
-  inline bool LinkedObject :: Identifier :: isValid () const {
+  template <int size>
+  inline bool LinkedObject :: IdentifierImpl< size > :: isValid () const 
+  {
     return _i[ 0 ] == -1 ? false : true ;
   }
 
-  inline LinkedObject :: Identifier :: Identifier (int a, int b, int c, int d) 
+  template <int size>
+  inline LinkedObject :: IdentifierImpl< size > :: IdentifierImpl (int a, int b, int c, int d) 
   {
     _i[ 0 ] = a;
-    _i[ 1 ] = b;
-    _i[ 2 ] = c;
-    _i[ 3 ] = d;
+    if( size > 1 )
+      _i[ 1 ] = b;
+    if( size > 2 )
+      _i[ 2 ] = c;
+    if( size > 3 )
+      _i[ 3 ] = d;
   }
 
-  inline LinkedObject :: Identifier :: Identifier (const Identifier & x) 
+  template <int size>
+  template <int xsize>
+  inline void LinkedObject :: IdentifierImpl< size > :: 
+  assign (const IdentifierImpl< xsize >& x) 
   {
-    for( int i=0; i<4; ++i ) _i[ i ] = x._i[ i ];
-  }
-
-  inline const LinkedObject :: Identifier & LinkedObject :: Identifier :: operator = (const Identifier & x) 
-  {
+    alugrid_assert( size <= xsize );
     alugrid_assert (x.isValid ()) ;
-    for( int i=0; i<4; ++i ) _i[ i ] = x._i[ i ];
+    for( int i=0; i<size; ++i ) _i[ i ] = x._i[ i ];
+  }
+
+  template <int size>
+  template <int xsize>
+  inline LinkedObject :: IdentifierImpl< size > :: 
+  IdentifierImpl (const IdentifierImpl< xsize > & x) 
+  {
+    assign( x );
+  }
+
+  template <int size>
+  template <int xsize>
+  inline const LinkedObject :: IdentifierImpl< size > & 
+  LinkedObject :: IdentifierImpl< size > :: operator = (const IdentifierImpl< xsize >& x) 
+  {
+    assign( x );
     return * this ;
   }
 
-  inline bool LinkedObject :: Identifier :: operator < (const Identifier & x) const {
-    alugrid_assert (isValid () && x.isValid ()) ;
-    return (_i[ 0 ] < x._i[ 0 ]) ? true : (_i[ 0 ] == x._i[ 0 ] ? (_i[ 1 ] < x._i[ 1 ] ? true : 
-        (_i[ 1 ] == x._i[ 1 ] ? (_i[ 2 ] < x._i[ 2 ] ? true : (_i[ 2 ] == x._i[ 2 ] ? 
-      (_i[ 3 ] < x._i[ 3 ] ? true : false) : false )) : false )) : false ) ;
+  template <int size>
+  inline bool LinkedObject :: IdentifierImpl< size > :: operator < (const This & x) const 
+  {
+    return Spec< 0, size-1 > :: less( _i, x._i );
   }
 
-  inline bool LinkedObject :: Identifier :: operator == (const Identifier & x) const {
-    return (_i[ 0 ] == x._i[ 0 ] && _i[ 1 ] == x._i[ 1 ] && _i[ 2 ] == x._i[ 2 ] && _i[ 3 ] == x._i[ 3 ]) ? true : false ;
+  template <int size>
+  inline bool LinkedObject :: IdentifierImpl< size > :: operator == (const This & x) const {
+    bool equal = _i[ 0 ] == x._i[ 0 ];
+    for( int k=1; k<size; ++k ) 
+      equal &= (_i[ k ] == x._i[ k ]);
+    return equal ;
+    //return (_i[ 0 ] == x._i[ 0 ] && _i[ 1 ] == x._i[ 1 ] && _i[ 2 ] == x._i[ 2 ] && _i[ 3 ] == x._i[ 3 ]) ? true : false ;
   }
 
   // read identifier and return true if successful 
-  inline bool LinkedObject::Identifier::read ( ObjectStream& os ) 
+  template <int size>
+  inline bool LinkedObject::IdentifierImpl< size >::read ( ObjectStream& os ) 
   {
     // if the next entry is end of stream do nothing more 
     os.readObject( _i[ 0 ] );
     if( _i[ 0 ] == _endOfStream ) 
       return false ;
 
-    os.readObject( _i[ 1 ] );
-    os.readObject( _i[ 2 ] );
-    os.readObject( _i[ 3 ] );
+    for( int k=1; k<size; ++k )
+      os.readObject( _i[ k ] );
+
     return true ;
   }
 
-  inline void LinkedObject::Identifier::write ( ObjectStream& os ) const
+  template <int size>
+  inline void LinkedObject::IdentifierImpl< size >::write ( ObjectStream& os ) const
   {
     // write object to stream 
-    os.writeObject( _i[ 0 ] );
-    os.writeObject( _i[ 1 ] );
-    os.writeObject( _i[ 2 ] );
-    os.writeObject( _i[ 3 ] );
-  }
-
-  // read identifier and return true if successful 
-  inline bool LinkedObject::Identifier::read ( ObjectStream& os, const int cnt ) 
-  {
-    // if the next entry is end of stream do nothing more 
-    os.readObject( _i[ 0 ] );
-    if( _i[ 0 ] == _endOfStream ) 
-      return false ;
-
-    for( int i=1; i<cnt; ++i )
-      os.readObject( _i[ i ] );
-    return true ;
-  }
-
-  inline void LinkedObject::Identifier::write ( ObjectStream& os, const int cnt ) const
-  {
-    // write object to stream 
-    for( int i=0; i<cnt; ++i )
-      os.writeObject( _i[ i ] );
+    for( int k=0; k<size; ++k )
+      os.writeObject( _i[ k ] );
   }
 
 } // namespace ALUGrid

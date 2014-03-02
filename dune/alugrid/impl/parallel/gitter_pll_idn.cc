@@ -17,15 +17,30 @@ namespace ALUGrid
   {
     typedef std::set< std::vector< int > > lp_map_t;
 
-    typedef std::map< typename LinkedObject::Identifier, 
+    template <class T, int d> struct Identifier;
+
+    template <int d> struct Identifier<A, d> 
+    { 
+      typedef typename LinkedObject::IdentifierImpl< 1 > Type ;
+    };
+    template <int d> struct Identifier<B, d> 
+    { 
+      typedef typename LinkedObject::IdentifierImpl< 2 > Type ;
+    };
+    template <int d> struct Identifier<C, d> 
+    { 
+      typedef typename LinkedObject::IdentifierImpl< 3 > Type ;
+    };
+
+    typedef std::map< typename Identifier< A, 0 > :: Type, 
                       std::pair< A*, 
                       typename lp_map_t::const_iterator > > vx_lmap_t;
 
-    typedef std::map< typename LinkedObject::Identifier, 
+    typedef std::map< typename Identifier< B, 0 > :: Type, 
                       std::pair< B*, 
                       typename lp_map_t::const_iterator > > edg_lmap_t;
 
-    typedef std::map< typename LinkedObject::Identifier, 
+    typedef std::map< typename Identifier< C, 0 > :: Type, 
                       std::pair< C*, 
                       typename lp_map_t::const_iterator > > fce_lmap_t;
 
@@ -34,41 +49,40 @@ namespace ALUGrid
     typedef std::vector< std::pair< std::vector< C* >, std::vector< C* > > > fce_tt_t;
 
     lp_map_t&   _linkagePatternMapVx;
-    vx_lmap_t&  _lookVx;
-    vx_tt_t& _vx;
+    vx_lmap_t   _lookVx;
+    vx_tt_t&    _vx;
 
     lp_map_t&   _linkagePatternMapEdg;
-    edg_lmap_t& _lookEdg;
-    edg_tt_t& _edg;
+    edg_lmap_t  _lookEdg;
+    edg_tt_t&   _edg;
 
     lp_map_t&   _linkagePatternMapFce;
-    fce_lmap_t& _lookFce;
-    fce_tt_t& _fce;
+    fce_lmap_t  _lookFce;
+    fce_tt_t&   _fce;
 
     const std::vector< int >& _dest;
-    const bool _firstLoop ;
+    bool _firstLoop ;
 
     UnpackIdentification( const UnpackIdentification& );
   public:
     UnpackIdentification( lp_map_t& linkagePatternMapVx, 
-                          vx_lmap_t&  lookVx, vx_tt_t& vx,
+                          vx_tt_t& vx,
                           lp_map_t& linkagePatternMapEdg, 
-                          edg_lmap_t& lookEdg, edg_tt_t& edg,
+                          edg_tt_t& edg,
                           lp_map_t& linkagePatternMapFce, 
-                          fce_lmap_t& lookFce, fce_tt_t& fce,
-                          const std::vector< int >& dest,
-                          const bool firstLoop )
+                          fce_tt_t& fce,
+                          const std::vector< int >& dest )
       : _linkagePatternMapVx( linkagePatternMapVx ),
-        _lookVx( lookVx ),
+        _lookVx(),
         _vx( vx ),
         _linkagePatternMapEdg( linkagePatternMapEdg ),
-        _lookEdg( lookEdg ),
+        _lookEdg(),
         _edg( edg ),
         _linkagePatternMapFce( linkagePatternMapFce ),
-        _lookFce( lookFce ),
+        _lookFce(),
         _fce( fce ),
         _dest( dest ),
-        _firstLoop( firstLoop )
+        _firstLoop( true )
     {}
 
     ~UnpackIdentification () 
@@ -76,15 +90,13 @@ namespace ALUGrid
       meantimeWork();
     }
 
+    void secondPhase() { _firstLoop = false; }
+
     void pack( const int link, ObjectStream& os ) 
     {
       std::cerr << "ERROR: UnpackIdentification::pack should not be called!" << std::endl;
       abort();
     }
-
-    int counter( const A* ) const { return 1; }
-    int counter( const B* ) const { return 2; }
-    int counter( const C* ) const { return 3; }
 
     // mean time work is to copy the list entries to the vectors 
     void meantimeWork() 
@@ -137,11 +149,11 @@ namespace ALUGrid
       else 
       {
         // vertices 
-        packSecondLoop( inout, mpa, _lookVx , _vx  );
+        packSecondLoop< A >( inout, mpa, _lookVx , _vx  );
         // edges 
-        packSecondLoop( inout, mpa, _lookEdg, _edg );
+        packSecondLoop< B >( inout, mpa, _lookEdg, _edg );
         // faces 
-        packSecondLoop( inout, mpa, _lookFce, _fce );
+        packSecondLoop< C >( inout, mpa, _lookFce, _fce );
       }
     }
 
@@ -155,6 +167,8 @@ namespace ALUGrid
       const int me = mpa.myrank ();
       lp_map_t::const_iterator meIt = linkagePatternMap.insert (std::vector< int >  (1L, me)).first;
 
+      typedef typename Identifier< T, 0 > :: Type Identifier;
+
       for (mi.first (); ! mi.done (); mi.next ()) 
       {
         T& item = mi.item ();
@@ -163,16 +177,15 @@ namespace ALUGrid
           std::vector< int > estimate = item.estimateLinkage ();
           if( estimate.size() )
           {
-            LinkedObject::Identifier id = item.getIdentifier ();
+            Identifier id = item.getIdentifier ();
             look[ id ].first  = &item;
             look[ id ].second = meIt;
-            const int cnt = counter( &item );
             {
               std::vector< int >::const_iterator iEnd = estimate.end ();
               for (std::vector< int >::const_iterator i = estimate.begin (); 
                    i != iEnd; ++i )
               {
-                id.write ( inout [ mpa.link (*i) ], cnt );
+                id.write ( inout [ mpa.link (*i) ] );
               }
             }
           }
@@ -187,12 +200,14 @@ namespace ALUGrid
       }
     }
       
-    template < class look_t, class ttt > 
+    template < class T, class look_t, class ttt > 
     void packSecondLoop( std::vector< ObjectStream> &inout,
                          const MpAccessLocal & mpa,
                          look_t& look, ttt& tt ) 
     {
       const int me = mpa.myrank ();
+
+      typedef typename Identifier< T, 0 > :: Type Identifier;
 
       const typename look_t::const_iterator lookEnd = look.end ();
       for (typename look_t::const_iterator pos = look.begin (); 
@@ -201,8 +216,7 @@ namespace ALUGrid
         const std::vector< int > & lk (*(*pos).second.second);
         if (* lk.begin () == me ) 
         {
-          const int cnt = counter( (*pos).second.first );
-          typename LinkedObject::Identifier id = (*pos).second.first->accessPllX ().getIdentifier ();
+          Identifier id = (*pos).second.first->accessPllX ().getIdentifier ();
           { 
             typename std::vector< int >::const_iterator iEnd = lk.end ();
             for (typename std::vector< int >::const_iterator i = lk.begin (); 
@@ -212,7 +226,7 @@ namespace ALUGrid
               {
                 const int link = mpa.link (*i);
                 tt[ link ].first.push_back( (*pos).second.first );
-                id.write ( inout[ link ], cnt );
+                id.write ( inout[ link ] );
               }
             } 
           }
@@ -232,30 +246,31 @@ namespace ALUGrid
       if( _firstLoop ) 
       {
         // vertices 
-        unpackFirstLoop( link, os, 1, _linkagePatternMapVx , _lookVx );
+        unpackFirstLoop< A >( link, os, _linkagePatternMapVx , _lookVx );
         // edges 
-        unpackFirstLoop( link, os, 2, _linkagePatternMapEdg, _lookEdg );
+        unpackFirstLoop< B >( link, os, _linkagePatternMapEdg, _lookEdg );
         // faces 
-        unpackFirstLoop( link, os, 3, _linkagePatternMapFce, _lookFce );
+        unpackFirstLoop< C >( link, os, _linkagePatternMapFce, _lookFce );
       }
       else
       {
         // vertices 
-        unpackSecondLoop( link, os, 1, _lookVx , _vx  );
+        unpackSecondLoop< A >( link, os, _lookVx , _vx  );
         // edges 
-        unpackSecondLoop( link, os, 2, _lookEdg, _edg );
+        unpackSecondLoop< B >( link, os, _lookEdg, _edg );
         // faces
-        unpackSecondLoop( link, os, 3, _lookFce, _fce );
+        unpackSecondLoop< C >( link, os, _lookFce, _fce );
       }
     }
 
-    template < class look_t > 
+    template < class T, class look_t > 
     void unpackFirstLoop( const int link, ObjectStream& os,
-                          const int cnt, lp_map_t& linkagePatternMap,  
+                          lp_map_t& linkagePatternMap,  
                           look_t& look )
     {
-      typename LinkedObject::Identifier id;
-      bool good = id.read( os, cnt );
+      typedef typename Identifier< T, 0 > :: Type Identifier;
+      Identifier id ;
+      bool good = id.read( os  );
       std::vector< int > copylpn;
       while ( good ) 
       {
@@ -276,23 +291,24 @@ namespace ALUGrid
         }
 
         // read next id and check whether it was successful 
-        good = id.read( os, cnt );
+        good = id.read( os );
       }
     }
 
-    template < class look_t, class ttt > 
+    template < class T, class look_t, class ttt > 
     void unpackSecondLoop( const int link, ObjectStream& os, 
-                           const int cnt, look_t& look, ttt& tt ) 
+                           look_t& look, ttt& tt ) 
     {
-      typename LinkedObject::Identifier id;
-      bool good = id.read( os, cnt );
+      typedef typename Identifier< T, 0 > :: Type Identifier;
+      Identifier id ;
+      bool good = id.read( os );
       while ( good ) 
       {
         alugrid_assert ( look.find (id) != look.end () );
         tt[ link ].second.push_back ((*look.find (id)).second.first);
       
         // is end marker was read break while loop
-        good = id.read( os, cnt );
+        good = id.read( os );
       } 
     }
   };
@@ -308,27 +324,11 @@ namespace ALUGrid
   {
     typedef std::set< std::vector< int > > lp_map_t;
 
-    typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< A*, 
-                      typename lp_map_t::const_iterator > > vx_lmap_t;
-
-    typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< B*, 
-                      typename lp_map_t::const_iterator > > edg_lmap_t;
-
-    typedef std::map< typename LinkedObject::Identifier, 
-                      std::pair< C*, 
-                      typename lp_map_t::const_iterator > > fce_lmap_t;
-
     const int nl = mpa.nlinks ();
     
     lp_map_t linkagePatternMapVx;
     lp_map_t linkagePatternMapEdg;
     lp_map_t linkagePatternMapFce;
-
-    vx_lmap_t  lookVx;
-    edg_lmap_t lookEdg;
-    fce_lmap_t lookFce;
 
     // resize vectors 
     vertexTT.resize( nl );
@@ -337,13 +337,13 @@ namespace ALUGrid
 
     std::vector< ObjectStream > inout (nl);
 
-    {
-      // data, first loop 
-      UnpackIdentification< A, B, C > data( linkagePatternMapVx,  lookVx,  vertexTT, 
-                                            linkagePatternMapEdg, lookEdg, edgeTT, 
-                                            linkagePatternMapFce, lookFce, faceTT,
-                                            mpa.dest(), true );
+    // data, first loop 
+    UnpackIdentification< A, B, C > data( linkagePatternMapVx,  vertexTT, 
+                                          linkagePatternMapEdg, edgeTT, 
+                                          linkagePatternMapFce, faceTT,
+                                          mpa.dest() );
 
+    {
       // pack all data 
       data.packAll( vxMi, edgMi, fceMi, inout, mpa );
       
@@ -351,13 +351,9 @@ namespace ALUGrid
       mpa.exchange (inout, data );
     }
 
-    {
-      // data, second loop 
-      UnpackIdentification< A, B, C > data( linkagePatternMapVx,  lookVx,  vertexTT, 
-                                            linkagePatternMapEdg, lookEdg, edgeTT, 
-                                            linkagePatternMapFce, lookFce, faceTT,
-                                            mpa.dest(), false );
+    data.secondPhase();
 
+    {
       // pack all data 
       data.packAll( vxMi, edgMi, fceMi, inout, mpa );
       
