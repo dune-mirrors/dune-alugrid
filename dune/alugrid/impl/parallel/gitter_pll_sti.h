@@ -156,9 +156,6 @@ namespace ALUGrid
       // hier 'inner', dann korrespondieren auf dem Nachbargebiet die Objekte in 'outer' in der Reihenfolge
       // des Durchlaufs (und umgekehrt).
     
-      //typedef std::vector< std::pair< std::list< AccessIterator < vertex_STI >::Handle >, std::list< AccessIterator < vertex_STI >::Handle > > > vertexTT_t;
-      //typedef std::vector< std::pair< std::list< AccessIterator < hedge_STI >::Handle >, std::list< AccessIterator < hedge_STI >::Handle > > >   hedgeTT_t ;
-      //typedef std::vector< std::pair< std::list< AccessIterator < hface_STI >::Handle >, std::list< AccessIterator < hface_STI >::Handle > > >   hfaceTT_t ;
       typedef std::vector< std::pair< std::list< vertex_STI* >, std::list< vertex_STI* > > > vertexTT_t;
       typedef std::vector< std::pair< std::list< hedge_STI*  >, std::list< hedge_STI*  > > > hedgeTT_t ;
       typedef std::vector< std::pair< std::list< hface_STI*  >, std::list< hface_STI*  > > > hfaceTT_t ;
