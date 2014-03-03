@@ -44,9 +44,9 @@ namespace ALUGrid
                       std::pair< C*, 
                       typename lp_map_t::const_iterator > > fce_lmap_t;
 
-    typedef std::vector< std::pair< std::vector< A* >, std::vector< A* > > > vx_tt_t;
-    typedef std::vector< std::pair< std::vector< B* >, std::vector< B* > > > edg_tt_t;
-    typedef std::vector< std::pair< std::vector< C* >, std::vector< C* > > > fce_tt_t;
+    typedef std::vector< std::pair< std::list< A* >, std::list< A* > > > vx_tt_t;
+    typedef std::vector< std::pair< std::list< B* >, std::list< B* > > > edg_tt_t;
+    typedef std::vector< std::pair< std::list< C* >, std::list< C* > > > fce_tt_t;
 
     lp_map_t&   _linkagePatternMapVx;
     vx_lmap_t   _lookVx;
@@ -85,46 +85,12 @@ namespace ALUGrid
         _firstLoop( true )
     {}
 
-    ~UnpackIdentification () 
-    {
-      meantimeWork();
-    }
-
     void secondPhase() { _firstLoop = false; }
 
     void pack( const int link, ObjectStream& os ) 
     {
       std::cerr << "ERROR: UnpackIdentification::pack should not be called!" << std::endl;
       abort();
-    }
-
-    // mean time work is to copy the list entries to the vectors 
-    void meantimeWork() 
-    {
-      const int vxSize  = _lookVx.size();
-      const int edgSize = _lookEdg.size();
-      const int fceSize = _lookFce.size();
-      const int nl = _vx.size();
-      if( _firstLoop ) 
-      {
-        // first is used in packSecond
-        for( int l=0; l < nl; ++ l ) 
-        {
-          _vx [ l ].first.reserve( vxSize  );
-          _edg[ l ].first.reserve( edgSize );
-          _fce[ l ].first.reserve( fceSize );
-        }
-      }
-      else 
-      {
-        // the second is used in unpackSecond
-        for( int l=0; l < nl; ++ l ) 
-        {
-          _vx [ l ].second.reserve( vxSize  );
-          _edg[ l ].second.reserve( edgSize );
-          _fce[ l ].second.reserve( fceSize );
-        }
-      }
     }
 
     void packAll( typename AccessIterator < A >::Handle& vxMi,
@@ -220,14 +186,15 @@ namespace ALUGrid
         const_iterator i = lk.begin ();
         if ( *i == me ) 
         {
-          Identifier id = (*pos).second.first->accessPllX ().getIdentifier ();
+          T* item = (*pos).second.first ;
+          Identifier id = item->accessPllX ().getIdentifier ();
           const_iterator iEnd = lk.end ();
           for ( ; i != iEnd; ++i) 
           {
             if (*i != me) 
             {
               const int link = mpa.link (*i);
-              tt[ link ].first.push_back( (*pos).second.first );
+              tt[ link ].first.push_back( item );
               id.write ( inout[ link ] );
             }
           } 
@@ -302,13 +269,13 @@ namespace ALUGrid
     {
       typedef typename Identifier< T, 0 > :: Type Identifier;
       Identifier id ;
-      typedef std::vector< T* > vec_t;
-      vec_t& vec = tt[ link ].second;
+      typedef std::list< T* > list_t;
+      list_t& lst = tt[ link ].second;
       bool good = id.read( os );
       while ( good ) 
       {
         alugrid_assert ( look.find (id) != look.end () );
-        vec.push_back ((*look.find (id)).second.first);
+        lst.push_back ((*look.find (id)).second.first);
         // is end marker was read break while loop
         good = id.read( os );
       } 
@@ -317,11 +284,11 @@ namespace ALUGrid
 
   template < class A, class B, class C > 
   void identify (typename AccessIterator < A >::Handle vxMi, 
-                 std::vector< std::pair< std::vector< A* >, std::vector< A* > > >& vertexTT, 
+                 std::vector< std::pair< std::list< A* >, std::list< A* > > >& vertexTT, 
                  typename AccessIterator < B >::Handle edgMi, 
-                 std::vector< std::pair< std::vector< B* >, std::vector< B* > > >& edgeTT, 
+                 std::vector< std::pair< std::list< B* >, std::list< B* > > >& edgeTT, 
                  typename AccessIterator < C >::Handle fceMi, 
-                 std::vector< std::pair< std::vector< C* >, std::vector< C* > > >& faceTT, 
+                 std::vector< std::pair< std::list< C* >, std::list< C* > > >& faceTT, 
                  const MpAccessLocal & mpa) 
   {
     typedef std::set< std::vector< int > > lp_map_t;

@@ -115,7 +115,7 @@ namespace ALUGrid
                                                                , public MyAlloc 
 #endif
   {
-    typedef std::vector< A* > container_t ;
+    typedef std::list< A* > container_t ;
     // list to iterate 
     container_t& _l;
     // current item 
@@ -159,9 +159,9 @@ namespace ALUGrid
       //typedef std::vector< std::pair< std::list< AccessIterator < vertex_STI >::Handle >, std::list< AccessIterator < vertex_STI >::Handle > > > vertexTT_t;
       //typedef std::vector< std::pair< std::list< AccessIterator < hedge_STI >::Handle >, std::list< AccessIterator < hedge_STI >::Handle > > >   hedgeTT_t ;
       //typedef std::vector< std::pair< std::list< AccessIterator < hface_STI >::Handle >, std::list< AccessIterator < hface_STI >::Handle > > >   hfaceTT_t ;
-      typedef std::vector< std::pair< std::vector< vertex_STI* >, std::vector< vertex_STI* > > > vertexTT_t;
-      typedef std::vector< std::pair< std::vector< hedge_STI*  >, std::vector< hedge_STI*  > > > hedgeTT_t ;
-      typedef std::vector< std::pair< std::vector< hface_STI*  >, std::vector< hface_STI*  > > > hfaceTT_t ;
+      typedef std::vector< std::pair< std::list< vertex_STI* >, std::list< vertex_STI* > > > vertexTT_t;
+      typedef std::vector< std::pair< std::list< hedge_STI*  >, std::list< hedge_STI*  > > > hedgeTT_t ;
+      typedef std::vector< std::pair< std::list< hface_STI*  >, std::list< hface_STI*  > > > hfaceTT_t ;
       vertexTT_t  _vertexTT;
       hedgeTT_t   _hedgeTT;
       hfaceTT_t   _hfaceTT;
