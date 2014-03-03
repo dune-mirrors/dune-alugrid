@@ -225,7 +225,12 @@ namespace ALUGrid
               if (*i != me) 
               {
                 const int link = mpa.link (*i);
-                tt[ link ].first.push_back( (*pos).second.first );
+                typedef std::vector< T* > vec_t;
+                vec_t& vec = tt[ link ].first;
+                const size_t size = vec.size();
+                if( size == vec.capacity() ) 
+                  vec.reserve( 2*size );
+                vec.push_back( (*pos).second.first );
                 id.write ( inout[ link ] );
               }
             } 
@@ -301,11 +306,16 @@ namespace ALUGrid
     {
       typedef typename Identifier< T, 0 > :: Type Identifier;
       Identifier id ;
+      typedef std::vector< T* > vec_t;
+      vec_t& vec = tt[ link ].second;
       bool good = id.read( os );
       while ( good ) 
       {
         alugrid_assert ( look.find (id) != look.end () );
-        tt[ link ].second.push_back ((*look.find (id)).second.first);
+        const size_t size = vec.size();
+        if( size == vec.capacity() ) 
+          vec.reserve( 2*size );
+        vec.push_back ((*look.find (id)).second.first);
       
         // is end marker was read break while loop
         good = id.read( os );
