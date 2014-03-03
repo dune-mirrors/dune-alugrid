@@ -178,8 +178,10 @@ namespace ALUGrid
           if( estimate.size() )
           {
             Identifier id = item.getIdentifier ();
-            look[ id ].first  = &item;
-            look[ id ].second = meIt;
+            typedef typename look_t :: mapped_type mapped_type ;
+            mapped_type& entry = look[ id ];
+            entry.first  = &item;
+            entry.second = meIt;
             {
               std::vector< int >::const_iterator iEnd = estimate.end ();
               for (std::vector< int >::const_iterator i = estimate.begin (); 
@@ -214,27 +216,21 @@ namespace ALUGrid
            pos != lookEnd; ++pos) 
       {
         const std::vector< int > & lk (*(*pos).second.second);
-        if (* lk.begin () == me ) 
+        typedef typename std::vector< int >::const_iterator const_iterator ;
+        const_iterator i = lk.begin ();
+        if ( *i == me ) 
         {
           Identifier id = (*pos).second.first->accessPllX ().getIdentifier ();
-          { 
-            typename std::vector< int >::const_iterator iEnd = lk.end ();
-            for (typename std::vector< int >::const_iterator i = lk.begin (); 
-                 i != iEnd; ++i) 
+          const_iterator iEnd = lk.end ();
+          for ( ; i != iEnd; ++i) 
+          {
+            if (*i != me) 
             {
-              if (*i != me) 
-              {
-                const int link = mpa.link (*i);
-                typedef std::vector< T* > vec_t;
-                vec_t& vec = tt[ link ].first;
-                const size_t size = vec.size();
-                if( size == vec.capacity() ) 
-                  vec.reserve( 2*size );
-                vec.push_back( (*pos).second.first );
-                id.write ( inout[ link ] );
-              }
-            } 
-          }
+              const int link = mpa.link (*i);
+              tt[ link ].first.push_back( (*pos).second.first );
+              id.write ( inout[ link ] );
+            }
+          } 
         }
       }
 
@@ -312,11 +308,7 @@ namespace ALUGrid
       while ( good ) 
       {
         alugrid_assert ( look.find (id) != look.end () );
-        const size_t size = vec.size();
-        if( size == vec.capacity() ) 
-          vec.reserve( 2*size );
         vec.push_back ((*look.find (id)).second.first);
-      
         // is end marker was read break while loop
         good = id.read( os );
       } 
