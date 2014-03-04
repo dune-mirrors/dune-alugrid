@@ -277,7 +277,7 @@ namespace ALUGridZoltan
       zz->Set_Param( "GRAPH_PACKAGE","SCOTCH");
 #endif
       zz->Set_Param( "CHECK_GRAPH", "0"); 
-      zz->Set_Param( "PHG_EDGE_SIZE_THRESHOLD", ".35");
+      zz->Set_Param( "PHG_EDGE_SIZE_THRESHOLD", ".25");
     }
 
 
