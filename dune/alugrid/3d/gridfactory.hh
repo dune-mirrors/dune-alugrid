@@ -274,6 +274,9 @@ namespace Dune
     void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
+    // sort elements according to hilbert space filling curve (if Zoltan is available)
+    void sortElements( const VertexVector& vertices, const ElementVector& elements, std::vector< int >& ordering );
+
     int rank_;
 
     VertexVector vertices_;
@@ -286,6 +289,7 @@ namespace Dune
     unsigned int numFacesInserted_;
     bool realGrid_;
     const bool allowGridGeneration_;
+    bool foundGlobalIndex_ ; 
 
     MPICommunicatorType communicator_;
   };
@@ -388,6 +392,7 @@ namespace Dune
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
+    foundGlobalIndex_( false ),
     communicator_( communicator )
   {}
 
@@ -401,6 +406,7 @@ namespace Dune
     numFacesInserted_ ( 0 ),
     realGrid_( realGrid ),
     allowGridGeneration_( true ),
+    foundGlobalIndex_( false ),
     communicator_( communicator )
   {}
 

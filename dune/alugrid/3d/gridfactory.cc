@@ -14,6 +14,16 @@
 
 #include <dune/alugrid/3d/gridfactory.hh>
 
+#if HAVE_ZOLTAN 
+#define ZOLTAN_CONFIG_H_INCLUDED
+#include <zoltan_cpp.h>
+
+extern "C" {
+  extern double Zoltan_HSFC_InvHilbert3d (Zoltan_Struct *zz, double *coord);
+}
+
+#endif
+
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline 
 #else
@@ -45,6 +55,7 @@ namespace Dune
   typename ALU3dGridFactory< ALUGrid >::VertexId
   ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexType &pos, const size_t globalId )
   {
+    foundGlobalIndex_ = true ;
     const VertexId vertexId = vertices_.size();
     vertices_.push_back( std::make_pair( pos, globalId ) );
     return vertexId;
@@ -153,6 +164,69 @@ namespace Dune
     faceTransformations_.push_back( Transformation( matrix, shift ) );
   }
 
+  template< class ALUGrid >
+  alu_inline
+  void ALU3dGridFactory< ALUGrid >
+    ::sortElements( const VertexVector& vertices, 
+                    const ElementVector& elements,
+                    std::vector< int >& ordering ) 
+  {
+    int flag = int( foundGlobalIndex_ );
+    int globalFlag = flag ;
+#if HAVE_MPI
+    MPI_Allreduce( &flag, &globalFlag, 1, MPI_INT, MPI_MAX, Dune::MPIHelper::getCommunicator() );
+#endif
+    foundGlobalIndex_ = bool( globalFlag );
+    if( foundGlobalIndex_ == true ) 
+      DUNE_THROW(NotImplemented,"ALU3dGridFactory::sortElements: parallel hsfc not implemented yet!");
+
+    const size_t elemSize = elements.size(); 
+    ordering.resize( elemSize );
+    // default ordering
+    for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
+
+    // the serial version do not special ordering 
+    // since no load balancing has to be done
+#if HAVE_ZOLTAN && HAVE_MPI
+    {
+      Zoltan* zz = new Zoltan( Dune::MPIHelper::getCommunicator() );
+      alugrid_assert( zz );
+
+      typedef std::map< double, int > hsfc_t;
+      hsfc_t hsfc;
+
+      Dune::FieldVector<double,dimension> center;
+      for( size_t i=0; i<elemSize; ++i ) 
+      {
+        center = 0;
+        // compute barycenter 
+        const int vxSize = elements[ i ].size(); 
+        for( int vx = 0; vx<vxSize; ++vx ) 
+        {
+          for( unsigned int d=0; d<dimension; ++d )
+            center[ d ] += vertices[ elements[ i ][ vx ] ].first[ d ];
+        }
+        center /= double(vxSize);
+
+        // call Zoltan's hilber curve coordinate mapping 
+        const double hidx = Zoltan_HSFC_InvHilbert3d(zz->Get_C_Handle(), &center[ 0 ] );
+        // store element index 
+        hsfc[ hidx ] = i;
+      }
+
+      ordering.clear();
+      ordering.reserve( elemSize );
+      typedef typename hsfc_t :: iterator iterator;
+      const iterator end = hsfc.end(); 
+      for( iterator it = hsfc.begin(); it != end; ++it )
+      {
+        ordering.push_back( (*it).second );
+      }
+
+      delete zz;
+    }
+#endif
+  }
 
   template< class ALUGrid >
   alu_inline
@@ -176,6 +250,10 @@ namespace Dune
   {
     typedef typename BoundaryIdMap :: iterator  BoundaryIdIteratorType;
     BoundaryProjectionVector* bndProjections = 0;
+
+    std::vector< int > ordering;
+    // sort element given a hilbert space filling curve (if Zoltan is available)
+    sortElements( vertices_, elements_, ordering );
 
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
@@ -214,16 +292,16 @@ namespace Dune
         out << std :: endl;
       }
 
-      out << elements_.size() << std :: endl;
-      typedef typename ElementVector::iterator ElementIteratorType;
-      const ElementIteratorType endE = elements_.end();
-      for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
+      const size_t elemSize = elements_.size();
+      out << elemSize << std :: endl;
+      for( size_t el = 0; el<elemSize; ++el )
       {
+        const size_t elemIndex = ordering[ el ];
         array< unsigned int, numCorners > element;
         for( unsigned int i = 0; i < numCorners; ++i )
         {
           const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-          element[ j ] = (*it)[ i ];
+          element[ j ] = elements_[ elemIndex ][ i ];
         }
 
         out << element[ 0 ];
@@ -326,18 +404,17 @@ namespace Dune
         mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx ) );
       }
 
-      typedef typename ElementVector::iterator ElementIteratorType;
-      const ElementIteratorType endE = elements_.end();
-      unsigned int elemIndex = 0;
-      for( ElementIteratorType it = elements_.begin(); it != endE; ++it, ++elemIndex )
+      const size_t elemSize = elements_.size();
+      for( size_t el = 0; el<elemSize; ++el )
       {
+        const size_t elemIndex = ordering[ el ];
         if( elementType == hexa )
         {
           int element[ 8 ];
           for( unsigned int i = 0; i < 8; ++i )
           {
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-            element[ j ] = globalId( (*it)[ i ] );
+            element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
           mgb.InsertUniqueHexa( element );
         }
@@ -347,7 +424,7 @@ namespace Dune
           for( unsigned int i = 0; i < 4; ++i )
           {
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-            element[ j ] = globalId( (*it)[ i ] );
+            element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
           mgb.InsertUniqueTetra( element, (elemIndex % 2) );
         }
@@ -420,9 +497,9 @@ namespace Dune
     }
 
     // clear vertices  
-    vertices_ = VertexVector();
+    VertexVector().swap( vertices_ );
     // clear elements 
-    elements_ = ElementVector();
+    ElementVector().swap( elements_ );
     // free memory 
     boundaryIds_.clear();
 
