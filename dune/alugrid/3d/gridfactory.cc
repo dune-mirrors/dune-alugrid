@@ -189,7 +189,7 @@ namespace Dune
     // since no load balancing has to be done
 #if HAVE_ZOLTAN && HAVE_MPI
     {
-      Zoltan* zz = new Zoltan( Dune::MPIHelper::getCommunicator() );
+      Zoltan zz( Dune::MPIHelper::getCommunicator() );
       alugrid_assert( zz );
 
       typedef std::map< double, int > hsfc_t;
@@ -209,7 +209,7 @@ namespace Dune
         center /= double(vxSize);
 
         // call Zoltan's hilber curve coordinate mapping 
-        const double hidx = Zoltan_HSFC_InvHilbert3d(zz->Get_C_Handle(), &center[ 0 ] );
+        const double hidx = Zoltan_HSFC_InvHilbert3d(zz.Get_C_Handle(), &center[ 0 ] );
         // store element index 
         hsfc[ hidx ] = i;
       }
@@ -222,8 +222,6 @@ namespace Dune
       {
         ordering.push_back( (*it).second );
       }
-
-      delete zz;
     }
 #endif
   }
