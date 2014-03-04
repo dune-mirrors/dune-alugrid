@@ -1492,7 +1492,7 @@ namespace ALUGrid
     // this method computes the globally unique element indices 
     // that are needed for the graph partitioning methods 
 
-    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::loadBalancerMacroGridChangesNotify () " << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::computeGraphVertexIndices () " << std::endl, 1) : 1);
     AccessIterator < helement_STI >::Handle w ( containerPll () );
 
     // get number of macro elements 
