@@ -818,7 +818,7 @@ namespace ALUGrid
       db.insertVertex( LoadBalancer :: GraphVertex( (*it).first, 1 ), (*it).second );   
     }
 
-#if 1
+#if 0
     // check that all element indices are available
     for( vx.first(); ! vx.done(); vx.next() )
     {
