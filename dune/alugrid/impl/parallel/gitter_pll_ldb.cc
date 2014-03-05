@@ -817,11 +817,14 @@ namespace ALUGrid
                 break;
 
               default :
-                std::cerr << "WARNING (ignored): Invalid repartitioning method [" << mth << "]." << std::endl;
-                  
+                if( mpa.myrank() == 0 ) 
+                  std::cerr << "ERROR: Invalid repartitioning method [ " << mth << " = " << methodToString( mth ) << " ]." << std::endl << std::endl;
+                                                  
                 delete[] vertex_mem;
                 delete[] edge_mem;
                 delete[] tpwgts;
+
+                abort();
                 return false;
               }
             }
@@ -1010,7 +1013,7 @@ namespace ALUGrid
     }
   }
 
-  const char * LoadBalancer::DataBase::methodToString (method m) 
+  std::string LoadBalancer::DataBase::methodToString (method m) 
   {
     switch (m) {
       case NONE :
@@ -1040,7 +1043,7 @@ namespace ALUGrid
       case ZOLTAN_LB_PARMETIS:
         return "ZOLTAN_LB_PARMETIS";
       default :
-        return "unknown method";
+        return "unknown";
     }
     return "";
   }
