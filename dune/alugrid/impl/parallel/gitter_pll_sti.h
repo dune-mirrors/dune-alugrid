@@ -166,13 +166,13 @@ namespace ALUGrid
       virtual void secondScan ( std::set< int >& ) = 0 ;
     public:  
       virtual void clearLinkagePattern () = 0;
-      virtual void vertexLinkageEstimate (MpAccessLocal &);
+      virtual void vertexLinkageEstimate (MpAccessLocal &, const bool );
       // vertexLinkageEstimation with gcollect( MPI_Allgather, memory consuming )
       // time = log p, memory = O(p)
-      void vertexLinkageEstimateGCollect (MpAccessLocal &);
+      void vertexLinkageEstimateGCollect (MpAccessLocal &, const bool );
       // vertexLinkageEstimation with bcast( MPI_Bcast, memory O(1), more time consuming )
       // time = p log p, memory = O(1)
-      void vertexLinkageEstimateBcast (MpAccessLocal &);
+      void vertexLinkageEstimateBcast (MpAccessLocal &, const bool );
       void computeElementDestinations(MpAccessLocal &, LoadBalancer::DataBase& );
     public :
       MacroGitterPll () {}
@@ -192,7 +192,7 @@ namespace ALUGrid
       std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const hface_STI *, int);
       std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > &, int);
       virtual inline int iterators_attached () const;
-      virtual void identification (MpAccessLocal &, bool );
+      virtual void identification (MpAccessLocal &, const bool, const bool );
       virtual void fullIntegrityCheck (MpAccessLocal &);
     }; // end MacroGitterPll 
 
@@ -291,7 +291,8 @@ namespace ALUGrid
       inline std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
       createFaceIteratorTT (const StopRule_t rule , int);
 
-      bool serialPartitioner() const { return LoadBalancer::DataBase::serialPartitionerUsed( _ldbMethod ); }
+      bool serialPartitioner()      const { return LoadBalancer::DataBase::serialPartitionerUsed( _ldbMethod ); }
+      bool storeLinkageInVertices() const { return LoadBalancer::DataBase::storeLinkageInVertices( _ldbMethod ); }
     
       /////////////////////////////////////
       //  member variables  

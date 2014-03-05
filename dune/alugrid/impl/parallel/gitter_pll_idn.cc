@@ -347,16 +347,20 @@ namespace ALUGrid
     GitterPll::MacroGitterPll& _containerPll ;
     const int _me ;
     int _size ;
+    const bool _storeLinkageInVertices;
   public: 
-    UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, const int me ) 
+    UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, 
+                         const int me,
+                         const bool storeLinkageInVertices ) 
       : _vxmap(),
         _vxElemLinkage(),
         _containerPll( containerPll ),
         _me( me ),
-        _size( 0 )
+        _size( 0 ),
+        _storeLinkageInVertices( storeLinkageInVertices )
     {
       // compute vertex linkage locally 
-      if( Gitter :: storeLinkageInVertices ) 
+      if( _storeLinkageInVertices ) 
       {
         AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
         for (w.first (); ! w.done (); w.next ()) 
@@ -368,7 +372,7 @@ namespace ALUGrid
 
     ~UnpackVertexLinkage() 
     {
-      if( Gitter :: storeLinkageInVertices ) 
+      if( _storeLinkageInVertices ) 
       {
         // add computed vertex-element linkage to vertices 
         AccessIterator < vertex_STI >::Handle w ( _containerPll );
@@ -403,7 +407,7 @@ namespace ALUGrid
           int id = vertex.ident ();
           os.writeObject( id );
           _vxmap[ id ] = &vertex;
-          if( Gitter :: storeLinkageInVertices ) 
+          if( _storeLinkageInVertices ) 
           {
             linkageset_t& linkedElements = _vxElemLinkage[ &vertex ];
             typedef linkageset_t::const_iterator set_iterator;
@@ -430,8 +434,6 @@ namespace ALUGrid
       os.readObject( wSize );
       _size += wSize ;
 
-      const bool storeLinkage = Gitter::storeLinkageInVertices ;
-
       int id ;
       os.readObject ( id );
       std::vector< int > linkedElements ;
@@ -441,7 +443,7 @@ namespace ALUGrid
         map_t::const_iterator hit = _vxmap.find (id);
         // read next id 
         os.readObject( id );
-        if( storeLinkage && id < 0 && id != endMarker ) 
+        if( _storeLinkageInVertices && id < 0 && id != endMarker ) 
         {
           const int linkedSize = -id-1 ;
           linkedElements.resize( linkedSize );
@@ -457,7 +459,7 @@ namespace ALUGrid
         if( hit != vxmapEnd ) 
         {
           vertex_STI* vertex = (*hit).second;
-          if( storeLinkage ) 
+          if( _storeLinkageInVertices ) 
           {
             linkageset_t& vxElemLinkage = _vxElemLinkage[ vertex ];
             const int linkedSize = linkedElements.size();
@@ -493,7 +495,8 @@ namespace ALUGrid
     }
   };
 
-  void GitterPll::MacroGitterPll::vertexLinkageEstimateGCollect (MpAccessLocal & mpAccess) 
+  void GitterPll::MacroGitterPll::
+  vertexLinkageEstimateGCollect (MpAccessLocal & mpAccess, const bool storeLinkageInVertices ) 
   {
     const int np = mpAccess.psize (), me = mpAccess.myrank ();
 
@@ -504,7 +507,7 @@ namespace ALUGrid
       {
         ObjectStream os;
         // data handle 
-        UnpackVertexLinkage data( *this, me );
+        UnpackVertexLinkage data( *this, me, storeLinkageInVertices );
 
         // pack data 
         data.pack( me, os );
@@ -539,7 +542,7 @@ namespace ALUGrid
     if( ! useAllgather ) 
     {
       // data handle 
-      UnpackVertexLinkage data( *this, me );
+      UnpackVertexLinkage data( *this, me, storeLinkageInVertices );
 
       //std::cout <<"Print first linkage" << std::endl;
       //data.printVertexLinkage();
@@ -549,7 +552,8 @@ namespace ALUGrid
     }
   }
 
-  void GitterPll::MacroGitterPll::vertexLinkageEstimateBcast (MpAccessLocal & mpAccess) 
+  void GitterPll::MacroGitterPll::
+  vertexLinkageEstimateBcast (MpAccessLocal & mpAccess, const bool storeLinkageInVertices) 
   {
     typedef std::map< int, vertex_STI* > map_t;
     map_t vxmap;
@@ -624,21 +628,22 @@ namespace ALUGrid
     }
   }
 
-  void GitterPll::MacroGitterPll::vertexLinkageEstimate (MpAccessLocal & mpAccess) 
+  void GitterPll::MacroGitterPll::
+  vertexLinkageEstimate (MpAccessLocal & mpAccess, const bool storeLinkageInVertices) 
   {
-    // for small processor numbers use gcollect( MPI_Allgather ) version 
+    // for small processor numbers use gcollect( MPI_AllgatherV ) version 
     // this method should be faster (log p), 
     // but is more memory consuming O( p ) 
     if( ALUGridExternalParameters::useAllGather( mpAccess ) ) 
     {
-      vertexLinkageEstimateGCollect ( mpAccess );
+      vertexLinkageEstimateGCollect ( mpAccess, storeLinkageInVertices );
     }
     else 
     {
       // for larger processor numbers use bcast ( MPI_Bcast ) version 
       // this method is more time consuming (p log p)
       // but is the memory consumption is only O( 1 )
-      vertexLinkageEstimateBcast ( mpAccess );
+      vertexLinkageEstimateBcast ( mpAccess, storeLinkageInVertices );
     }
   }
 
@@ -836,7 +841,10 @@ namespace ALUGrid
   double identU3 = 0.0 ;
   double identU4 = 0.0 ;
 
-  void GitterPll::MacroGitterPll::identification (MpAccessLocal & mpa, bool computeVertexLinkage ) 
+  void GitterPll::MacroGitterPll::
+  identification (MpAccessLocal & mpa, 
+                  const bool computeVertexLinkage, 
+                  const bool storeLinkageInVertices ) 
   {
     // clear all entries and also clear memory be reassigning 
     vertexTT_t().swap( _vertexTT );
@@ -855,13 +863,11 @@ namespace ALUGrid
     // this does not have to be computed every time (depending on partitioning method)
     if( computeVertexLinkage ) 
     {
-      //std::cout << "idn, compute vertex linkage" << std::endl;
-
       // clear linkage pattern map since it is newly build here
       clearLinkagePattern();
 
-      // compute new vertex linkage 
-      vertexLinkageEstimate ( mpa );
+      // compute new vertex linkage (does not mean we store the linkage)
+      vertexLinkageEstimate ( mpa, storeLinkageInVertices );
     }
 
     clock_t lap2 = clock ();

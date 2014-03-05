@@ -8,7 +8,7 @@
 #include <dune/alugrid/impl/parallel/mpAccess.h>
 #include <dune/alugrid/impl/parallel/gitter_pll_ldb.h>
 
-namespace ALUGridMETIS
+namespace ALUGridSFC
 {
   // Bresenham line drawing algorithm to partition the space filling curve.
   // This requires the complete graph weights to be present on all cores.
@@ -19,7 +19,7 @@ namespace ALUGridMETIS
                               vertexmap_t& vertexMap,             // the space filling curve
                               connect_t&   connect,               // connectivity set
                               vec_t& graphSizes,                  // graph sizes to be communicated
-                              const bool keepMapEntries )         // true if vertex entries should no be deleted 
+                              const bool clearMap )               // true if vertex entries should no be deleted 
   {
     // my rank 
     const int me = mpa.myrank();
@@ -35,10 +35,6 @@ namespace ALUGridMETIS
     {
       sum += (*it).first.weight();
     }
-
-    // clear map only when storeLinkageInVertices is not enabled 
-    // since the vertices are still needed in that situation 
-    const bool clearMap = ! ALUGrid :: Gitter :: storeLinkageInVertices && ! keepMapEntries ;
 
     const bool graphSizeCalculation = graphSizes.size() > 0 ;
     const int sizeOfVertexData = ALUGrid::LoadBalancer::GraphVertex::sizeOfData ;

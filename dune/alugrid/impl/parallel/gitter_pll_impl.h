@@ -67,7 +67,6 @@ namespace ALUGrid
       linkagePatternMap_t::iterator _lpn;
       moveto_t*  _moveTo;
 
-#ifdef STORE_LINKAGE_IN_VERTICES
       ElementLinkage_t _elements ;
       typedef std::set< int > elementset_t ;
 
@@ -78,8 +77,6 @@ namespace ALUGrid
       }
 
       const ElementLinkage_t& linkedElements() const { return _elements ; }
-#endif // STORE_LINKAGE_IN_VERTICES
-
   };
 
   template < class A > 

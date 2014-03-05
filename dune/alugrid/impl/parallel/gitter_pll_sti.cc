@@ -1401,7 +1401,7 @@ namespace ALUGrid
       // if a method was given, perform load balancing
       if (userDefinedPartitioning || ldbMth)
       {
-        const bool precomputeLinkage = Gitter :: storeLinkageInVertices && serialPartitioner ();
+        const bool storeLinkage = storeLinkageInVertices();
 
         // check gather-scatter object and call appropriate method 
         if( gs ) 
@@ -1411,11 +1411,11 @@ namespace ALUGrid
 
         lap3 = clock();
 
-        if( precomputeLinkage ) 
+        if( storeLinkage ) 
         {
           if( ! _vertexLinkageComputed ) 
           {
-            containerPll ().identification (mpAccess (), true );
+            containerPll ().identification (mpAccess (), true, storeLinkage );
             _vertexLinkageComputed = true ;
           }
 
@@ -1426,7 +1426,7 @@ namespace ALUGrid
         lap4 = clock();
 
         // calls identification and exchangeDynamicState 
-        doNotifyMacroGridChanges ( ! precomputeLinkage );
+        doNotifyMacroGridChanges ( ! storeLinkage );
 
       }
     }
@@ -1451,7 +1451,7 @@ namespace ALUGrid
 
   void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
   {
-    if( Gitter :: storeLinkageInVertices && _vertexLinkageComputed ) 
+    if( _vertexLinkageComputed ) 
     {
       const int me = mpAccess().myrank(); 
 
@@ -1461,8 +1461,8 @@ namespace ALUGrid
       // clear linkage pattern map since it is newly build here
       containerPll().clearLinkagePattern();
 
-      //VertexLinkage vxLinkage( me, db, _vertexLinkageComputed );
-      VertexLinkage vxLinkage( me, db, true );
+      // vertex linkage compute object (gitter_pll_mgb.h)
+      VertexLinkage vxLinkage( me, db, _vertexLinkageComputed );
 
       AccessIterator < vertex_STI >::Handle w ( containerPll () );
       // set ldb vertex indices to all elements 
@@ -1558,7 +1558,7 @@ namespace ALUGrid
     alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::notifyMacroGridChanges () " << std::endl, 1) : 1 );
     Gitter::notifyMacroGridChanges ();
 
-    containerPll ().identification (mpAccess (), computeVertexLinkage );
+    containerPll ().identification (mpAccess (), computeVertexLinkage, storeLinkageInVertices() );
     if( computeVertexLinkage ) 
       _vertexLinkageComputed = true ; 
 
