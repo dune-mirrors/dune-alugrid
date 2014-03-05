@@ -1019,12 +1019,20 @@ namespace ALUGrid
         return "COLLECT";
       case ALUGRID_SpaceFillingCurve:
         return "ALUGRID_SpaceFillingCurve";
+      case ALUGRID_SpaceFillingCurveLinkage:
+        return "ALUGRID_SpaceFillingCurveLinkage";
       case ALUGRID_SpaceFillingCurveSerial:
         return "ALUGRID_SpaceFillingCurveSerial";
+      case ALUGRID_SpaceFillingCurveSerialLinkage:
+        return "ALUGRID_SpaceFillingCurveSerialLinkage";
       case METIS_PartGraphKway :
         return "METIS_PartGraphKway";
+      case METIS_PartGraphKwayLinkage :
+        return "METIS_PartGraphKwayLinkage";
       case METIS_PartGraphRecursive :
         return "METIS_PartGraphRecursive";
+      case METIS_PartGraphRecursiveLinkage :
+        return "METIS_PartGraphRecursiveLinkage";
       case ZOLTAN_LB_HSFC :
         return "ZOLTAN_LB_HSFC";
       case ZOLTAN_LB_GraphPartitioning:
