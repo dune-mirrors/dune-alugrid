@@ -205,18 +205,43 @@ namespace Dune
       typedef std::map< double, int > hsfc_t;
       hsfc_t hsfc;
 
-      Dune::FieldVector<double,dimension> center;
+      VertexType maxCoord;
+      VertexType minCoord;
+      const size_t vertexSize = vertices.size();
+      if( vertexSize > 0 ) 
+      {
+        maxCoord = vertices[ 0 ].first;
+        minCoord = vertices[ 0 ].first;
+      }
+
+      for( size_t i=0; i<vertexSize; ++i ) 
+      {
+        const VertexType& vx = vertices[ i ].first;
+        for( unsigned int d=0; d<dimension; ++d )
+        {
+          maxCoord[ d ] = std::max( maxCoord[ d ], vx[ d ] );
+          minCoord[ d ] = std::min( minCoord[ d ], vx[ d ] );
+        }
+      }
+
+      VertexType length( maxCoord );
+      length -= minCoord ;
+
       for( size_t i=0; i<elemSize; ++i ) 
       {
-        center = 0;
+        VertexType center( 0 );
         // compute barycenter 
         const int vxSize = elements[ i ].size(); 
         for( int vx = 0; vx<vxSize; ++vx ) 
         {
           for( unsigned int d=0; d<dimension; ++d )
-            center[ d ] += vertices[ elements[ i ][ vx ] ].first[ d ];
+            center[ d ] += float(vertices[ elements[ i ][ vx ] ].first[ d ]);
         }
         center /= double(vxSize);
+
+        // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
+        for( unsigned int d=0; d<dimension; ++d )
+          center[ d ] = (center[ d ] - minCoord[ d ]) / length[ d ];
 
         // call Zoltan's hilber curve coordinate mapping 
         const double hidx = Zoltan_HSFC_InvHilbert3d(zz.Get_C_Handle(), &center[ 0 ] );
