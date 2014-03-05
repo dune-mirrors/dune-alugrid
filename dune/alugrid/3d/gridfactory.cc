@@ -187,20 +187,16 @@ namespace Dune
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
 #ifdef USE_ZOLTAN_HSFC_ORDERING
-    int flag = int( foundGlobalIndex_ );
-    int globalFlag = flag ;
-#if HAVE_MPI
-    MPI_Allreduce( &flag, &globalFlag, 1, MPI_INT, MPI_MAX, Dune::MPIHelper::getCommunicator() );
-#endif
-    foundGlobalIndex_ = bool( globalFlag );
-    if( foundGlobalIndex_ == true ) 
+    ALU3DSPACE MpAccessMPI mpa( Dune::MPIHelper::getCommunicator() );
+
+    const bool foundGlobalIndex = mpa.gmax( foundGlobalIndex_ );
+    if( foundGlobalIndex == true ) 
       DUNE_THROW(NotImplemented,"ALU3dGridFactory::sortElements: parallel hsfc not implemented yet!");
 
     // the serial version do not special ordering 
     // since no load balancing has to be done
     {
-      Zoltan zz( Dune::MPIHelper::getCommunicator() );
-      alugrid_assert( zz );
+      Zoltan zz( mpa.communicator() );
 
       typedef std::map< double, int > hsfc_t;
       hsfc_t hsfc;
@@ -234,8 +230,9 @@ namespace Dune
         const int vxSize = elements[ i ].size(); 
         for( int vx = 0; vx<vxSize; ++vx ) 
         {
+          const VertexType& vertex = vertices[ elements[ i ][ vx ] ].first;
           for( unsigned int d=0; d<dimension; ++d )
-            center[ d ] += float(vertices[ elements[ i ][ vx ] ].first[ d ]);
+            center[ d ] += vertex[ d ];
         }
         center /= double(vxSize);
 
@@ -249,13 +246,12 @@ namespace Dune
         hsfc[ hidx ] = i;
       }
 
-      ordering.clear();
-      ordering.reserve( elemSize );
       typedef typename hsfc_t :: iterator iterator;
       const iterator end = hsfc.end(); 
-      for( iterator it = hsfc.begin(); it != end; ++it )
+      size_t idx = 0;
+      for( iterator it = hsfc.begin(); it != end; ++it, ++idx )
       {
-        ordering.push_back( (*it).second );
+        ordering[ idx ] = (*it).second ;
       }
     }
 #endif
