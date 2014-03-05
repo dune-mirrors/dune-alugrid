@@ -399,18 +399,19 @@ namespace Dune {
 std::vector<double> getMemoryUsage()
 {
   std::vector<double> memUsage;
+#elif HAVE_ALUGRID && defined ALUGRID_USES_DLMALLOC 
+  // dune-grid + alugrid version (1.52) with memory patch 
+  memUsage.push_back(double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
+#else
+  // dune-alugrid version 
+  memUsage.push_back(double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
+#endif
   /*
-  std::vector<double> memUsage(2);
   struct rusage info;
   getrusage( RUSAGE_SELF, &info );
   // convert to KB
   memUsage.push_back(double(info.ru_maxrss)/ 1024.0);
   */
-#if HAVE_ALUGRID
-  memUsage.push_back(double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
-#else
-  memUsage.push_back(double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
-#endif
   return memUsage;
 }
 
