@@ -2,8 +2,6 @@
 #ifndef GITTER_STI_H_INCLUDED
 #define GITTER_STI_H_INCLUDED
 
-//#define STORE_LINKAGE_IN_VERTICES
-
 #include <limits>
 #include <list>
 #include <utility>
@@ -256,12 +254,6 @@ namespace ALUGrid
   class Gitter
   {
   public:
-#ifdef STORE_LINKAGE_IN_VERTICES
-    static const bool storeLinkageInVertices = true ;
-#else
-    static const bool storeLinkageInVertices = false ;
-#endif
-
     class helement;
     class hbndseg;
 
@@ -315,7 +307,7 @@ namespace ALUGrid
           return false ;
         }
 
-        bool notActive() const { return _elements == 0 ; }
+        bool inactive() const { return _elements == 0 ; }
 
         int size () const
         {

@@ -154,18 +154,17 @@ namespace ALUGrid
   {
     os.writeObject (VERTEX);
     os.writeObject (myvertex ().ident ());
-    os.writeObject (myvertex ().Point ()[0]);
-    os.writeObject (myvertex ().Point ()[1]);
-    os.writeObject (myvertex ().Point ()[2]);
+    const alucoord_t (&point)[ 3 ] = myvertex ().Point ();
+    os.writeObject ( point[0] );
+    os.writeObject ( point[1] );
+    os.writeObject ( point[2] );
 
-#ifdef STORE_LINKAGE_IN_VERTICES    
-    const int elSize = _elements.size();
+    const int elSize = _elements.inactive() ? 0 : _elements.size();
     os.writeObject( elSize );
     for( int i=0; i<elSize; ++ i ) 
     {
       os.writeObject( _elements[ i ] );
     }
-#endif
 
     inlineData (os);
     return true ; 
@@ -174,10 +173,9 @@ namespace ALUGrid
   template < class A >
   void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool i) 
   {
-#ifdef STORE_LINKAGE_IN_VERTICES    
     int elSize;
     os.readObject( elSize );
-    if( _elements.notActive() ) 
+    if( _elements.inactive() ) 
     {
       std::vector< int > elements( elSize ) ;
       for( int el=0; el<elSize; ++el )
@@ -192,7 +190,6 @@ namespace ALUGrid
       // advance buffer by elsize * sizeof( int ) bytes 
       os.removeObject( elSize * sizeof( int ) );
     }
-#endif
 
     if (i) 
     {

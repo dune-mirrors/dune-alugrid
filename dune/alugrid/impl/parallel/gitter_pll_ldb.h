@@ -138,9 +138,15 @@ namespace ALUGrid
             // space filling curve approach 
             // here, the edges in the graph are neglected 
             // parallel version 
-            ALUGRID_SpaceFillingCurve = 4, 
+            ALUGRID_SpaceFillingCurveLinkage = 4, 
             // serial version that requires the whole graph to be avaiable
-            ALUGRID_SpaceFillingCurveSerial = 5, 
+            ALUGRID_SpaceFillingCurveSerialLinkage = 5, 
+
+            METIS_PartGraphKwayLinkage      = 6,
+            METIS_PartGraphRecursiveLinkage = 7,
+
+            ALUGRID_SpaceFillingCurve       = 9, 
+            ALUGRID_SpaceFillingCurveSerial = 10,
 
             // METIS method for graph partitioning 
             METIS_PartGraphKway = 11,
@@ -176,10 +182,18 @@ namespace ALUGrid
             return mth < ZOLTAN_LB_HSFC ;
           }
 
+          //! return true if linkage should be stored in vertices
+          static bool storeLinkageInVertices ( const method mth )
+          {
+            return mth < ALUGRID_SpaceFillingCurve ;
+          }
+
           //! return true if mth specifies a serial partitioner
           static bool graphEdgesNeeded ( const method mth )
           {
-            return mth > ALUGRID_SpaceFillingCurveSerial && 
+            return mth == METIS_PartGraphKwayLinkage || 
+                   mth == METIS_PartGraphRecursiveLinkage || 
+                   mth > ALUGRID_SpaceFillingCurveSerial && 
                    mth != ZOLTAN_LB_HSFC;
           }
 

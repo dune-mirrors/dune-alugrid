@@ -20,7 +20,9 @@ namespace ALUGrid
     const int _me ;
     const bool _computeVertexLinkage;
   public:
-    VertexLinkage( const int me, const LoadBalancer::DataBase& db, const bool computeVertexLinkage )
+    VertexLinkage( const int me, 
+                   const LoadBalancer::DataBase& db, 
+                   const bool computeVertexLinkage )
       : _db( db ),
         _linkage(),
         _me( me ),
@@ -32,8 +34,7 @@ namespace ALUGrid
       // clear existing vertex linkage 
       vertex.clearLinkage();
 
-      if( Gitter :: storeLinkageInVertices && 
-          vertex.isBorder() && _computeVertexLinkage )
+      if( vertex.isBorder() && _computeVertexLinkage )
       {
         typedef vertex_STI :: ElementLinkage_t ElementLinkage_t ;
         const ElementLinkage_t& linkedElements = vertex.linkedElements();

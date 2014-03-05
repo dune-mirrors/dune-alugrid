@@ -563,10 +563,11 @@ namespace ALUGrid
     if (mth == NONE) return false;
 
     // ALUGrid own space filling curve partitioning 
-    if( mth == ALUGRID_SpaceFillingCurve ) 
+    if( mth == ALUGRID_SpaceFillingCurve || 
+        mth == ALUGRID_SpaceFillingCurveLinkage ) 
     {
       // call sfc partitioning that changes _vertexSet and _connect and also computes element cuts 
-      return ALUGridMETIS::CALL_parallelSpaceFillingCurve( mpa, np, _vertexSet, _connect, _elementCuts );
+      return ALUGridSFC::CALL_parallelSpaceFillingCurve( mpa, np, _vertexSet, _connect, _elementCuts );
     }
 
     // ZOLTAN partitioning 
@@ -580,7 +581,7 @@ namespace ALUGrid
     {
       return ALUGridZoltan :: CALL_Zoltan_LB_Partition( ALUGridZoltan::PHG, mpa, _vertexSet, _edgeSet,  _connect, tolerance, debugOption(5) );
     }
-    if (mth == ZOLTAN_LB_PARMETIS) 
+    else if (mth == ZOLTAN_LB_PARMETIS) 
     {
       return ALUGridZoltan :: CALL_Zoltan_LB_Partition( ALUGridZoltan::PARMETIS, mpa, _vertexSet, _edgeSet,  _connect, tolerance, debugOption(5) );
     }
@@ -591,7 +592,7 @@ namespace ALUGrid
     
     // flag to indicate whether we use a serial or a parallel partitioner 
     bool serialPartitioner    = serialPartitionerUsed( mth );
-    const bool noEdgesInGraph = ( mth == ALUGRID_SpaceFillingCurveSerial );
+    const bool noEdgesInGraph = ! graphEdgesNeeded( mth );
 
     // create maps for edges and vertices 
     ldb_edge_set_t     edges;
@@ -630,10 +631,12 @@ namespace ALUGrid
     const bool fillPartitionVector = partition.size() > 0 ;
 
     // ALUGrid own space filling curve partitioning 
-    if( mth == ALUGRID_SpaceFillingCurveSerial ) 
+    if( mth == ALUGRID_SpaceFillingCurveSerial || 
+        mth == ALUGRID_SpaceFillingCurveSerialLinkage ) 
     {
       // call sfc partitioning that changes _vertexSet and _connect and also compute graph sizes 
-      const bool change = ALUGridMETIS::CALL_spaceFillingCurve( mpa, np, _vertexSet, _connect, _graphSizes, fillPartitionVector );
+      const bool change = ALUGridSFC::CALL_spaceFillingCurve( mpa, np, _vertexSet, 
+                   _connect, _graphSizes, ! fillPartitionVector && (mth == ALUGRID_SpaceFillingCurveSerial) );
 
       // if partition vector is given fill it with the calculated partitioning 
       if( fillPartitionVector ) 
@@ -793,6 +796,7 @@ namespace ALUGrid
 
               // METIS methods 
               case METIS_PartGraphKway :
+              case METIS_PartGraphKwayLinkage :
                 {
                   idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np;
                   ALUGridMETIS::CALL_METIS_PartGraphKway (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
@@ -800,6 +804,7 @@ namespace ALUGrid
                 }
                 break;
               case METIS_PartGraphRecursive :
+              case METIS_PartGraphRecursiveLinkage :
                 {
                   idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np;
                   ALUGridMETIS::CALL_METIS_PartGraphRecursive (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
@@ -858,7 +863,7 @@ namespace ALUGrid
           {
             // clear map only when storeLinkageInVertices is not enabled 
             // since the vertices are still needed in that situation 
-            const bool clearMap = ! Gitter :: storeLinkageInVertices ;
+            const bool clearMap = ! storeLinkageInVertices( mth );
 
             // insert all different ranks we send elements to 
             const ldb_vertex_map_t::iterator iEnd =  _vertexSet.end ();
