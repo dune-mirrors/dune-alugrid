@@ -26,9 +26,13 @@
 
 // method
 // ------
-void method ( int problem, int startLevel, int maxLevel, const char* outpath )
+void method ( int problem, int startLvl, int maxLvl, const char* outpath )
 {
   typedef Dune::GridSelector::GridType Grid;
+
+  const int startLevel = startLvl * Dune :: DGFGridInfo< Grid > :: refineStepsForHalf();
+  const int maxLevel   = maxLvl   * Dune :: DGFGridInfo< Grid > :: refineStepsForHalf();
+
   /** type of pde to solve **/
 #if TRANSPORT
   typedef TransportModel< Grid::dimensionworld > ModelType;
