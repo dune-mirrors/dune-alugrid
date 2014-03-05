@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <dune/common/parallel/mpicollectivecommunication.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
 
 // to disable Zoltans HSFC ordering of the macro elements define 
@@ -187,16 +188,23 @@ namespace Dune
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
 #ifdef USE_ZOLTAN_HSFC_ORDERING
-    ALU3DSPACE MpAccessMPI mpa( Dune::MPIHelper::getCommunicator() );
-
-    const bool foundGlobalIndex = mpa.gmax( foundGlobalIndex_ );
-    if( foundGlobalIndex == true ) 
-      DUNE_THROW(NotImplemented,"ALU3dGridFactory::sortElements: parallel hsfc not implemented yet!");
-
     // the serial version do not special ordering 
     // since no load balancing has to be done
     {
-      Zoltan zz( mpa.communicator() );
+      typedef MPIHelper :: MPICommunicator MPICommunicator;
+      CollectiveCommunication< MPICommunicator > comm( Dune::MPIHelper::getCommunicator() );
+
+      // if we are in parallel insertion mode we need communication
+      const bool foundGlobalIndex = comm.max( foundGlobalIndex_ );
+      if( foundGlobalIndex ) 
+      {
+        if( comm.rank() == 0 ) 
+          std::cerr << "WARNING: Hilbert space filling curve ordering does not work for parallel grid factory yet!" << std::endl;
+        return ;
+      }
+
+      // create Zoltan object
+      Zoltan zz( comm );
 
       typedef std::map< double, int > hsfc_t;
       hsfc_t hsfc;
