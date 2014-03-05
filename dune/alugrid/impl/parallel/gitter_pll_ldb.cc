@@ -16,7 +16,6 @@
 #include "aluzoltan.hh"
 
 #if HAVE_ZOLTAN 
-// #include <zoltan_cpp.h>
 extern int Zoltan_Initialize( int argc, char **argv, float *ver );
 #endif 
 
@@ -796,7 +795,7 @@ namespace ALUGrid
 
               // METIS methods 
               case METIS_PartGraphKway :
-              case METIS_PartGraphKwayLinkage :
+              //case METIS_PartGraphKwayLinkage :
                 {
                   idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np;
                   ALUGridMETIS::CALL_METIS_PartGraphKway (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
@@ -804,7 +803,7 @@ namespace ALUGrid
                 }
                 break;
               case METIS_PartGraphRecursive :
-              case METIS_PartGraphRecursiveLinkage :
+              //case METIS_PartGraphRecursiveLinkage :
                 {
                   idx_t wgtflag = 3, numflag = 0, options = 0, edgecut, n = nel, npart = np;
                   ALUGridMETIS::CALL_METIS_PartGraphRecursive (&n, &ncon, edge_p, edge, vertex_wInt, edge_w, 
@@ -965,9 +964,10 @@ namespace ALUGrid
     GraphVertex vx (index);
     typedef ldb_vertex_map_t :: iterator iterator ;
     iterator it = _vertexSet.find ( vx );
-    assert( it != _vertexSet.end () || _elementCuts.size() > 0 );
+    alugrid_assert( it != _vertexSet.end () || _elementCuts.size() > 0 );
     if( it != _vertexSetEnd )
     {
+      alugrid_assert( (*it).second >= 0 );
       return (*it).second;
     }
     else 
@@ -1027,12 +1027,12 @@ namespace ALUGrid
         return "ALUGRID_SpaceFillingCurveSerialLinkage";
       case METIS_PartGraphKway :
         return "METIS_PartGraphKway";
-      case METIS_PartGraphKwayLinkage :
-        return "METIS_PartGraphKwayLinkage";
+      //case METIS_PartGraphKwayLinkage :
+      //  return "METIS_PartGraphKwayLinkage";
       case METIS_PartGraphRecursive :
         return "METIS_PartGraphRecursive";
-      case METIS_PartGraphRecursiveLinkage :
-        return "METIS_PartGraphRecursiveLinkage";
+      //case METIS_PartGraphRecursiveLinkage :
+      //  return "METIS_PartGraphRecursiveLinkage";
       case ZOLTAN_LB_HSFC :
         return "ZOLTAN_LB_HSFC";
       case ZOLTAN_LB_GraphPartitioning:
