@@ -1037,6 +1037,8 @@ namespace ALUGrid
         return "ZOLTAN_LB_HSFC";
       case ZOLTAN_LB_GraphPartitioning:
         return "ZOLTAN_LB_GraphPartitioning";
+      case ZOLTAN_LB_PARMETIS:
+        return "ZOLTAN_LB_PARMETIS";
       default :
         return "unknown method";
     }
