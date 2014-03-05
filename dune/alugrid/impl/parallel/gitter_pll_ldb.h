@@ -142,9 +142,11 @@ namespace ALUGrid
             // serial version that requires the whole graph to be avaiable
             ALUGRID_SpaceFillingCurveSerialLinkage = 5, 
 
-            METIS_PartGraphKwayLinkage      = 6,
-            METIS_PartGraphRecursiveLinkage = 7,
+            // METIS method for graph partitioning (with linkage storage) 
+            //METIS_PartGraphKwayLinkage      = 6,
+            //METIS_PartGraphRecursiveLinkage = 7,
 
+            // ALU sfc without linkage 
             ALUGRID_SpaceFillingCurve       = 9, 
             ALUGRID_SpaceFillingCurveSerial = 10,
 
@@ -191,8 +193,8 @@ namespace ALUGrid
           //! return true if mth specifies a serial partitioner
           static bool graphEdgesNeeded ( const method mth )
           {
-            return mth == METIS_PartGraphKwayLinkage || 
-                   mth == METIS_PartGraphRecursiveLinkage || 
+            return //mth == METIS_PartGraphKwayLinkage || 
+                   //mth == METIS_PartGraphRecursiveLinkage || 
                    mth > ALUGRID_SpaceFillingCurveSerial && 
                    mth != ZOLTAN_LB_HSFC;
           }
