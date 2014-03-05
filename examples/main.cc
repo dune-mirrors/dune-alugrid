@@ -245,6 +245,11 @@ try
     return 0;
   }
 
+#if HAVE_ALUGRID
+  if( mpi.rank() == 0 ) 
+    std::cout << "WARNING: Using old ALUGrid version from dune-grid." << std::endl;
+#endif
+     
   // meassure program time 
   Dune::Timer timer ;
 
