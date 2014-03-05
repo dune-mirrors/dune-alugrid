@@ -8,7 +8,10 @@
 #include <string>
 
 // if defined the memory allocation from dlmalloc is used
+#if HAVE_DLMALLOC
 #define ALUGRID_USES_DLMALLOC 
+#endif
+
 // if defined, standard C++ new and delete are used
 //#define DONT_USE_ALUGRID_ALLOC 
 

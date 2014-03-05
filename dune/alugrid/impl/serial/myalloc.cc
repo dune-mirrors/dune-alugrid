@@ -28,7 +28,7 @@ namespace ALUGrid
 #ifdef ALUGRID_USES_DLMALLOC
 #define ONLY_MSPACES 1 
 #warning "Using DL malloc"
-#include "dlmalloc.c"
+#include DLMALLOC_SOURCE_INCLUDE
 #undef ONLY_MSPACES  
   static void*  ALUGridMemorySpace = 0;
   static size_t ALUGridMemSpaceAllocated = 0;
