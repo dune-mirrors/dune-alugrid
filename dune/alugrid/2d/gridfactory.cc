@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/alugrid_assert.hh>
 
 #include <dune/alugrid/2d/gridfactory.hh>
 #include <dune/alugrid/common/declaration.hh>
