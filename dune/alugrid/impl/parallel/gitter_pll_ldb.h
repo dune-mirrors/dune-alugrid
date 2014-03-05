@@ -201,7 +201,7 @@ namespace ALUGrid
 
           static bool initializeZoltan( const method mth );
 
-          static const char *methodToString( method );
+          static std::string methodToString( method );
 
           DataBase ();
           explicit DataBase ( const std::vector< int > &graphSizes, 

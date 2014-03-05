@@ -362,7 +362,6 @@ namespace ALUGrid
       // compute vertex linkage locally 
       if( _storeLinkageInVertices ) 
       {
-        std::cout << "Store Linkage " << std::endl;
         AccessIterator < Gitter::helement_STI >::Handle w ( _containerPll );
         for (w.first (); ! w.done (); w.next ()) 
         {
@@ -864,8 +863,6 @@ namespace ALUGrid
     // this does not have to be computed every time (depending on partitioning method)
     if( computeVertexLinkage ) 
     {
-      std::cout << "Compute vertex linkage " << std::endl;
-
       // clear linkage pattern map since it is newly build here
       clearLinkagePattern();
 
