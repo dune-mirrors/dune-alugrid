@@ -645,9 +645,7 @@ MAX_RELEASE_CHECK_RATE   default: 4095 unless not HAVE_MMAP
 #ifndef HAVE_MREMAP
 #ifdef linux
 #define HAVE_MREMAP 1
-#ifndef _GNU_SOURCE 
 #define _GNU_SOURCE /* Turns on mremap() definition */
-#endif
 #else   /* linux */
 #define HAVE_MREMAP 0
 #endif  /* linux */
@@ -1257,7 +1255,7 @@ DLMALLOC_EXPORT void  dlmalloc_stats(void);
   debugging and assertions, for example:
 
   p = malloc(n);
-  alugrid_assert (malloc_usable_size(p) >= 256);
+  assert(malloc_usable_size(p) >= 256);
 */
 size_t dlmalloc_usable_size(void*);
 
@@ -1443,13 +1441,13 @@ DLMALLOC_EXPORT int mspace_mallopt(int, int);
 #ifdef DEBUG
 #if ABORT_ON_ASSERT_FAILURE
 #undef assert
-#define alugrid_assert (x) if(!(x)) ABORT
+#define assert(x) if(!(x)) ABORT
 #else /* ABORT_ON_ASSERT_FAILURE */
 #include <assert.h>
 #endif /* ABORT_ON_ASSERT_FAILURE */
 #else  /* DEBUG */
 #ifndef assert
-#define alugrid_assert (x)
+#define assert(x)
 #endif
 #define DEBUG 0
 #endif /* DEBUG */
@@ -1842,7 +1840,7 @@ static FORCEINLINE int x86_cas_lock(int *sl) {
 }
 
 static FORCEINLINE void x86_clear_lock(int* sl) {
-  alugrid_assert (*sl != 0);
+  assert(*sl != 0);
   int prev = 0;
   int ret;
   __asm__ __volatile__ ("lock; xchgl %0, %1"
@@ -1920,7 +1918,7 @@ struct malloc_recursive_lock {
 static MLOCK_T malloc_global_mutex = { 0, 0, (THREAD_ID_T)0};
 
 static FORCEINLINE void recursive_release_lock(MLOCK_T *lk) {
-  alugrid_assert (lk->sl != 0);
+  assert(lk->sl != 0);
   if (--lk->c == 0) {
     CLEAR_LOCK(&lk->sl);
   }
@@ -3214,45 +3212,45 @@ static int change_mparam(int param_number, int value) {
 
 /* Check properties of any chunk, whether free, inuse, mmapped etc  */
 static void do_check_any_chunk(mstate m, mchunkptr p) {
-  alugrid_assert ((is_aligned(chunk2mem(p))) || (p->head == FENCEPOST_HEAD));
-  alugrid_assert (ok_address(m, p));
+  assert((is_aligned(chunk2mem(p))) || (p->head == FENCEPOST_HEAD));
+  assert(ok_address(m, p));
 }
 
 /* Check properties of top chunk */
 static void do_check_top_chunk(mstate m, mchunkptr p) {
   msegmentptr sp = segment_holding(m, (char*)p);
   size_t  sz = p->head & ~INUSE_BITS; /* third-lowest bit can be set! */
-  alugrid_assert (sp != 0);
-  alugrid_assert ((is_aligned(chunk2mem(p))) || (p->head == FENCEPOST_HEAD));
-  alugrid_assert (ok_address(m, p));
-  alugrid_assert (sz == m->topsize);
-  alugrid_assert (sz > 0);
-  alugrid_assert (sz == ((sp->base + sp->size) - (char*)p) - TOP_FOOT_SIZE);
-  alugrid_assert (pinuse(p));
-  alugrid_assert (!pinuse(chunk_plus_offset(p, sz)));
+  assert(sp != 0);
+  assert((is_aligned(chunk2mem(p))) || (p->head == FENCEPOST_HEAD));
+  assert(ok_address(m, p));
+  assert(sz == m->topsize);
+  assert(sz > 0);
+  assert(sz == ((sp->base + sp->size) - (char*)p) - TOP_FOOT_SIZE);
+  assert(pinuse(p));
+  assert(!pinuse(chunk_plus_offset(p, sz)));
 }
 
 /* Check properties of (inuse) mmapped chunks */
 static void do_check_mmapped_chunk(mstate m, mchunkptr p) {
   size_t  sz = chunksize(p);
   size_t len = (sz + (p->prev_foot) + MMAP_FOOT_PAD);
-  alugrid_assert (is_mmapped(p));
-  alugrid_assert (use_mmap(m));
-  alugrid_assert ((is_aligned(chunk2mem(p))) || (p->head == FENCEPOST_HEAD));
-  alugrid_assert (ok_address(m, p));
-  alugrid_assert (!is_small(sz));
-  alugrid_assert ((len & (mparams.page_size-SIZE_T_ONE)) == 0);
-  alugrid_assert (chunk_plus_offset(p, sz)->head == FENCEPOST_HEAD);
-  alugrid_assert (chunk_plus_offset(p, sz+SIZE_T_SIZE)->head == 0);
+  assert(is_mmapped(p));
+  assert(use_mmap(m));
+  assert((is_aligned(chunk2mem(p))) || (p->head == FENCEPOST_HEAD));
+  assert(ok_address(m, p));
+  assert(!is_small(sz));
+  assert((len & (mparams.page_size-SIZE_T_ONE)) == 0);
+  assert(chunk_plus_offset(p, sz)->head == FENCEPOST_HEAD);
+  assert(chunk_plus_offset(p, sz+SIZE_T_SIZE)->head == 0);
 }
 
 /* Check properties of inuse chunks */
 static void do_check_inuse_chunk(mstate m, mchunkptr p) {
   do_check_any_chunk(m, p);
-  alugrid_assert (is_inuse(p));
-  alugrid_assert (next_pinuse(p));
+  assert(is_inuse(p));
+  assert(next_pinuse(p));
   /* If not pinuse and not mmapped, previous chunk has OK offset */
-  alugrid_assert (is_mmapped(p) || pinuse(p) || next_chunk(prev_chunk(p)) == p);
+  assert(is_mmapped(p) || pinuse(p) || next_chunk(prev_chunk(p)) == p);
   if (is_mmapped(p))
     do_check_mmapped_chunk(m, p);
 }
@@ -3262,21 +3260,21 @@ static void do_check_free_chunk(mstate m, mchunkptr p) {
   size_t sz = chunksize(p);
   mchunkptr next = chunk_plus_offset(p, sz);
   do_check_any_chunk(m, p);
-  alugrid_assert (!is_inuse(p));
-  alugrid_assert (!next_pinuse(p));
-  alugrid_assert (!is_mmapped(p));
+  assert(!is_inuse(p));
+  assert(!next_pinuse(p));
+  assert (!is_mmapped(p));
   if (p != m->dv && p != m->top) {
     if (sz >= MIN_CHUNK_SIZE) {
-      alugrid_assert ((sz & CHUNK_ALIGN_MASK) == 0);
-      alugrid_assert (is_aligned(chunk2mem(p)));
-      alugrid_assert (next->prev_foot == sz);
-      alugrid_assert (pinuse(p));
-      alugrid_assert (next == m->top || is_inuse(next));
-      alugrid_assert (p->fd->bk == p);
-      alugrid_assert (p->bk->fd == p);
+      assert((sz & CHUNK_ALIGN_MASK) == 0);
+      assert(is_aligned(chunk2mem(p)));
+      assert(next->prev_foot == sz);
+      assert(pinuse(p));
+      assert (next == m->top || is_inuse(next));
+      assert(p->fd->bk == p);
+      assert(p->bk->fd == p);
     }
     else  /* markers are always of size SIZE_T_SIZE */
-      alugrid_assert (sz == SIZE_T_SIZE);
+      assert(sz == SIZE_T_SIZE);
   }
 }
 
@@ -3286,11 +3284,11 @@ static void do_check_malloced_chunk(mstate m, void* mem, size_t s) {
     mchunkptr p = mem2chunk(mem);
     size_t sz = p->head & ~INUSE_BITS;
     do_check_inuse_chunk(m, p);
-    alugrid_assert ((sz & CHUNK_ALIGN_MASK) == 0);
-    alugrid_assert (sz >= MIN_CHUNK_SIZE);
-    alugrid_assert (sz >= s);
+    assert((sz & CHUNK_ALIGN_MASK) == 0);
+    assert(sz >= MIN_CHUNK_SIZE);
+    assert(sz >= s);
     /* unless mmapped, size is less than MIN_CHUNK_SIZE more than request */
-    alugrid_assert (is_mmapped(p) || sz < (s + MIN_CHUNK_SIZE));
+    assert(is_mmapped(p) || sz < (s + MIN_CHUNK_SIZE));
   }
 }
 
@@ -3302,47 +3300,47 @@ static void do_check_tree(mstate m, tchunkptr t) {
   size_t tsize = chunksize(t);
   bindex_t idx;
   compute_tree_index(tsize, idx);
-  alugrid_assert (tindex == idx);
-  alugrid_assert (tsize >= MIN_LARGE_SIZE);
-  alugrid_assert (tsize >= minsize_for_tree_index(idx));
-  alugrid_assert ((idx == NTREEBINS-1) || (tsize < minsize_for_tree_index((idx+1))));
+  assert(tindex == idx);
+  assert(tsize >= MIN_LARGE_SIZE);
+  assert(tsize >= minsize_for_tree_index(idx));
+  assert((idx == NTREEBINS-1) || (tsize < minsize_for_tree_index((idx+1))));
 
   do { /* traverse through chain of same-sized nodes */
     do_check_any_chunk(m, ((mchunkptr)u));
-    alugrid_assert (u->index == tindex);
-    alugrid_assert (chunksize(u) == tsize);
-    alugrid_assert (!is_inuse(u));
-    alugrid_assert (!next_pinuse(u));
-    alugrid_assert (u->fd->bk == u);
-    alugrid_assert (u->bk->fd == u);
+    assert(u->index == tindex);
+    assert(chunksize(u) == tsize);
+    assert(!is_inuse(u));
+    assert(!next_pinuse(u));
+    assert(u->fd->bk == u);
+    assert(u->bk->fd == u);
     if (u->parent == 0) {
-      alugrid_assert (u->child[0] == 0);
-      alugrid_assert (u->child[1] == 0);
+      assert(u->child[0] == 0);
+      assert(u->child[1] == 0);
     }
     else {
-      alugrid_assert (head == 0); /* only one node on chain has parent */
+      assert(head == 0); /* only one node on chain has parent */
       head = u;
-      alugrid_assert (u->parent != u);
-      alugrid_assert (u->parent->child[0] == u ||
+      assert(u->parent != u);
+      assert (u->parent->child[0] == u ||
               u->parent->child[1] == u ||
               *((tbinptr*)(u->parent)) == u);
       if (u->child[0] != 0) {
-        alugrid_assert (u->child[0]->parent == u);
-        alugrid_assert (u->child[0] != u);
+        assert(u->child[0]->parent == u);
+        assert(u->child[0] != u);
         do_check_tree(m, u->child[0]);
       }
       if (u->child[1] != 0) {
-        alugrid_assert (u->child[1]->parent == u);
-        alugrid_assert (u->child[1] != u);
+        assert(u->child[1]->parent == u);
+        assert(u->child[1] != u);
         do_check_tree(m, u->child[1]);
       }
       if (u->child[0] != 0 && u->child[1] != 0) {
-        alugrid_assert (chunksize(u->child[0]) < chunksize(u->child[1]));
+        assert(chunksize(u->child[0]) < chunksize(u->child[1]));
       }
     }
     u = u->fd;
   } while (u != t);
-  alugrid_assert (head != 0);
+  assert(head != 0);
 }
 
 /*  Check all the chunks in a treebin.  */
@@ -3351,7 +3349,7 @@ static void do_check_treebin(mstate m, bindex_t i) {
   tchunkptr t = *tb;
   int empty = (m->treemap & (1U << i)) == 0;
   if (t == 0)
-    alugrid_assert (empty);
+    assert(empty);
   if (!empty)
     do_check_tree(m, t);
 }
@@ -3362,7 +3360,7 @@ static void do_check_smallbin(mstate m, bindex_t i) {
   mchunkptr p = b->bk;
   unsigned int empty = (m->smallmap & (1U << i)) == 0;
   if (p == b)
-    alugrid_assert (empty);
+    assert(empty);
   if (!empty) {
     for (; p != b; p = p->bk) {
       size_t size = chunksize(p);
@@ -3370,8 +3368,8 @@ static void do_check_smallbin(mstate m, bindex_t i) {
       /* each chunk claims to be free */
       do_check_free_chunk(m, p);
       /* chunk belongs in bin */
-      alugrid_assert (small_index(size) == i);
-      alugrid_assert (p->bk == b || chunksize(p->bk) == chunksize(p));
+      assert(small_index(size) == i);
+      assert(p->bk == b || chunksize(p->bk) == chunksize(p));
       /* chunk is followed by an inuse chunk */
       q = next_chunk(p);
       if (q->head != FENCEPOST_HEAD)
@@ -3425,17 +3423,17 @@ static size_t traverse_and_check(mstate m) {
     while (s != 0) {
       mchunkptr q = align_as_chunk(s->base);
       mchunkptr lastq = 0;
-      alugrid_assert (pinuse(q));
+      assert(pinuse(q));
       while (segment_holds(s, q) &&
              q != m->top && q->head != FENCEPOST_HEAD) {
         sum += chunksize(q);
         if (is_inuse(q)) {
-          alugrid_assert (!bin_find(m, q));
+          assert(!bin_find(m, q));
           do_check_inuse_chunk(m, q);
         }
         else {
-          alugrid_assert (q == m->dv || bin_find(m, q));
-          alugrid_assert (lastq == 0 || is_inuse(lastq)); /* Not 2 consecutive free */
+          assert(q == m->dv || bin_find(m, q));
+          assert(lastq == 0 || is_inuse(lastq)); /* Not 2 consecutive free */
           do_check_free_chunk(m, q);
         }
         lastq = q;
@@ -3460,21 +3458,21 @@ static void do_check_malloc_state(mstate m) {
 
   if (m->dvsize != 0) { /* check dv chunk */
     do_check_any_chunk(m, m->dv);
-    alugrid_assert (m->dvsize == chunksize(m->dv));
-    alugrid_assert (m->dvsize >= MIN_CHUNK_SIZE);
-    alugrid_assert (bin_find(m, m->dv) == 0);
+    assert(m->dvsize == chunksize(m->dv));
+    assert(m->dvsize >= MIN_CHUNK_SIZE);
+    assert(bin_find(m, m->dv) == 0);
   }
 
   if (m->top != 0) {   /* check top chunk */
     do_check_top_chunk(m, m->top);
-    /*alugrid_assert (m->topsize == chunksize(m->top)); redundant */
-    alugrid_assert (m->topsize > 0);
-    alugrid_assert (bin_find(m, m->top) == 0);
+    /*assert(m->topsize == chunksize(m->top)); redundant */
+    assert(m->topsize > 0);
+    assert(bin_find(m, m->top) == 0);
   }
 
   total = traverse_and_check(m);
-  alugrid_assert (total <= m->footprint);
-  alugrid_assert (m->footprint <= m->max_footprint);
+  assert(total <= m->footprint);
+  assert(m->footprint <= m->max_footprint);
 }
 #endif /* DEBUG */
 
@@ -3568,7 +3566,7 @@ static void internal_malloc_stats(mstate m) {
   bindex_t I  = small_index(S);\
   mchunkptr B = smallbin_at(M, I);\
   mchunkptr F = B;\
-  alugrid_assert (S >= MIN_CHUNK_SIZE);\
+  assert(S >= MIN_CHUNK_SIZE);\
   if (!smallmap_is_marked(M, I))\
     mark_smallmap(M, I);\
   else if (RTCHECK(ok_address(M, B->fd)))\
@@ -3587,9 +3585,9 @@ static void internal_malloc_stats(mstate m) {
   mchunkptr F = P->fd;\
   mchunkptr B = P->bk;\
   bindex_t I = small_index(S);\
-  alugrid_assert (P != B);\
-  alugrid_assert (P != F);\
-  alugrid_assert (chunksize(P) == small_index2size(I));\
+  assert(P != B);\
+  assert(P != F);\
+  assert(chunksize(P) == small_index2size(I));\
   if (RTCHECK(F == smallbin_at(M,I) || (ok_address(M, F) && F->bk == P))) { \
     if (B == F) {\
       clear_smallmap(M, I);\
@@ -3611,9 +3609,9 @@ static void internal_malloc_stats(mstate m) {
 /* Unlink the first chunk from a smallbin */
 #define unlink_first_small_chunk(M, B, P, I) {\
   mchunkptr F = P->fd;\
-  alugrid_assert (P != B);\
-  alugrid_assert (P != F);\
-  alugrid_assert (chunksize(P) == small_index2size(I));\
+  assert(P != B);\
+  assert(P != F);\
+  assert(chunksize(P) == small_index2size(I));\
   if (B == F) {\
     clear_smallmap(M, I);\
   }\
@@ -3630,7 +3628,7 @@ static void internal_malloc_stats(mstate m) {
 /* Used only when dvsize known to be small */
 #define replace_dv(M, P, S) {\
   size_t DVS = M->dvsize;\
-  alugrid_assert (is_small(DVS));\
+  assert(is_small(DVS));\
   if (DVS != 0) {\
     mchunkptr DV = M->dv;\
     insert_small_chunk(M, DV, DVS);\
@@ -3843,7 +3841,7 @@ static void* mmap_alloc(mstate m, size_t nb) {
         m->least_addr = mm;
       if ((m->footprint += mmsize) > m->max_footprint)
         m->max_footprint = m->footprint;
-      alugrid_assert (is_aligned(chunk2mem(p)));
+      assert(is_aligned(chunk2mem(p)));
       check_mmapped_chunk(m, p);
       return chunk2mem(p);
     }
@@ -3943,9 +3941,9 @@ static void* prepend_alloc(mstate m, char* newbase, char* oldbase,
   size_t qsize = psize - nb;
   set_size_and_pinuse_of_inuse_chunk(m, p, nb);
 
-  alugrid_assert ((char*)oldfirst > (char*)q);
-  alugrid_assert (pinuse(oldfirst));
-  alugrid_assert (qsize >= MIN_CHUNK_SIZE);
+  assert((char*)oldfirst > (char*)q);
+  assert(pinuse(oldfirst));
+  assert(qsize >= MIN_CHUNK_SIZE);
 
   /* consolidate remainder with first chunk of old base */
   if (oldfirst == m->top) {
@@ -3996,7 +3994,7 @@ static void add_segment(mstate m, char* tbase, size_t tsize, flag_t mmapped) {
   init_top(m, (mchunkptr)tbase, tsize - TOP_FOOT_SIZE);
 
   /* Set up segment record */
-  alugrid_assert (is_aligned(ss));
+  assert(is_aligned(ss));
   set_size_and_pinuse_of_inuse_chunk(m, sp, ssize);
   *ss = m->seg; /* Push current record */
   m->seg.base = tbase;
@@ -4014,7 +4012,7 @@ static void add_segment(mstate m, char* tbase, size_t tsize, flag_t mmapped) {
     else
       break;
   }
-  alugrid_assert (nfences >= 2);
+  assert(nfences >= 2);
 
   /* Insert the rest of old top into a bin as an ordinary free chunk */
   if (csp != old_top) {
@@ -4258,7 +4256,7 @@ static size_t release_unused_segments(mstate m) {
       /* Can unmap if first chunk holds entire segment and not pinned */
       if (!is_inuse(p) && (char*)p + psize >= base + size - TOP_FOOT_SIZE) {
         tchunkptr tp = (tchunkptr)p;
-        alugrid_assert (segment_holds(sp, (char*)sp));
+        assert(segment_holds(sp, (char*)sp));
         if (p == m->dv) {
           m->dv = 0;
           m->dvsize = 0;
@@ -4480,7 +4478,7 @@ static void* tmalloc_large(mstate m, size_t nb) {
   if (v != 0 && rsize < (size_t)(m->dvsize - nb)) {
     if (RTCHECK(ok_address(m, v))) { /* split */
       mchunkptr r = chunk_plus_offset(v, nb);
-      alugrid_assert (chunksize(v) == rsize + nb);
+      assert(chunksize(v) == rsize + nb);
       if (RTCHECK(ok_next(v, r))) {
         unlink_large_chunk(m, v);
         if (rsize < MIN_CHUNK_SIZE)
@@ -4518,7 +4516,7 @@ static void* tmalloc_small(mstate m, size_t nb) {
 
   if (RTCHECK(ok_address(m, v))) {
     mchunkptr r = chunk_plus_offset(v, nb);
-    alugrid_assert (chunksize(v) == rsize + nb);
+    assert(chunksize(v) == rsize + nb);
     if (RTCHECK(ok_next(v, r))) {
       unlink_large_chunk(m, v);
       if (rsize < MIN_CHUNK_SIZE)
@@ -4581,7 +4579,7 @@ void* dlmalloc(size_t bytes) {
         idx += ~smallbits & 1;       /* Uses next bin if idx empty */
         b = smallbin_at(gm, idx);
         p = b->fd;
-        alugrid_assert (chunksize(p) == small_index2size(idx));
+        assert(chunksize(p) == small_index2size(idx));
         unlink_first_small_chunk(gm, b, p, idx);
         set_inuse_and_pinuse(gm, p, small_index2size(idx));
         mem = chunk2mem(p);
@@ -4599,7 +4597,7 @@ void* dlmalloc(size_t bytes) {
           compute_bit2idx(leastbit, i);
           b = smallbin_at(gm, i);
           p = b->fd;
-          alugrid_assert (chunksize(p) == small_index2size(i));
+          assert(chunksize(p) == small_index2size(i));
           unlink_first_small_chunk(gm, b, p, i);
           rsize = small_index2size(i) - nb;
           /* Fit here cannot be remainderless if 4byte sizes */
@@ -4949,8 +4947,8 @@ static void* internal_memalign(mstate m, size_t alignment, size_t bytes) {
       }
 
       mem = chunk2mem(p);
-      alugrid_assert (chunksize(p) >= nb);
-      alugrid_assert (((size_t)mem & (alignment - 1)) == 0);
+      assert (chunksize(p) >= nb);
+      assert(((size_t)mem & (alignment - 1)) == 0);
       check_inuse_chunk(m, p);
       POSTACTION(m);
     }
@@ -5030,7 +5028,7 @@ static void** ialloc(mstate m,
   p = mem2chunk(mem);
   remainder_size = chunksize(p);
 
-  alugrid_assert (!is_mmapped(p));
+  assert(!is_mmapped(p));
 
   if (opts & 0x2) {       /* optionally clear the elements */
     memset((size_t*)mem, 0, remainder_size - SIZE_T_SIZE - array_size);
@@ -5068,10 +5066,10 @@ static void** ialloc(mstate m,
   if (marray != chunks) {
     /* final element must have exactly exhausted chunk */
     if (element_size != 0) {
-      alugrid_assert (remainder_size == element_size);
+      assert(remainder_size == element_size);
     }
     else {
-      alugrid_assert (remainder_size == request2size(sizes[i]));
+      assert(remainder_size == request2size(sizes[i]));
     }
     check_inuse_chunk(m, mem2chunk(marray));
   }
@@ -5515,7 +5513,7 @@ void* mspace_malloc(mspace msp, size_t bytes) {
         idx += ~smallbits & 1;       /* Uses next bin if idx empty */
         b = smallbin_at(ms, idx);
         p = b->fd;
-        alugrid_assert (chunksize(p) == small_index2size(idx));
+        assert(chunksize(p) == small_index2size(idx));
         unlink_first_small_chunk(ms, b, p, idx);
         set_inuse_and_pinuse(ms, p, small_index2size(idx));
         mem = chunk2mem(p);
@@ -5533,7 +5531,7 @@ void* mspace_malloc(mspace msp, size_t bytes) {
           compute_bit2idx(leastbit, i);
           b = smallbin_at(ms, i);
           p = b->fd;
-          alugrid_assert (chunksize(p) == small_index2size(i));
+          assert(chunksize(p) == small_index2size(i));
           unlink_first_small_chunk(ms, b, p, i);
           rsize = small_index2size(i) - nb;
           /* Fit here cannot be remainderless if 4byte sizes */

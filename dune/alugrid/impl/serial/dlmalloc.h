@@ -516,7 +516,7 @@ void  dlmalloc_stats(void);
   debugging and assertions, for example:
 
   p = malloc(n);
-  alugrid_assert (malloc_usable_size(p) >= 256);
+  assert(malloc_usable_size(p) >= 256);
 */
 size_t dlmalloc_usable_size(const void*);
 
