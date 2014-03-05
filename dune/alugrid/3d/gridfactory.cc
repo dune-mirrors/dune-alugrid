@@ -14,7 +14,17 @@
 
 #include <dune/alugrid/3d/gridfactory.hh>
 
-#if HAVE_ZOLTAN 
+// to disable Zoltans HSFC ordering of the macro elements define 
+// DISABLE_ZOLTAN_HSFC_ORDERING on the command line
+#if HAVE_ZOLTAN && HAVE_MPI 
+#ifndef DISABLE_ZOLTAN_HSFC_ORDERING
+#define USE_ZOLTAN_HSFC_ORDERING
+#else
+#warning "ZOLTAN_HSFC_ORDERING disabled by DISABLE_ZOLTAN_HSFC_ORDERING"
+#endif
+#endif
+
+#ifdef USE_ZOLTAN_HSFC_ORDERING
 #define ZOLTAN_CONFIG_H_INCLUDED
 #include <zoltan_cpp.h>
 
@@ -171,6 +181,12 @@ namespace Dune
                     const ElementVector& elements,
                     std::vector< int >& ordering ) 
   {
+    const size_t elemSize = elements.size(); 
+    ordering.resize( elemSize );
+    // default ordering
+    for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
+
+#ifdef USE_ZOLTAN_HSFC_ORDERING
     int flag = int( foundGlobalIndex_ );
     int globalFlag = flag ;
 #if HAVE_MPI
@@ -180,14 +196,8 @@ namespace Dune
     if( foundGlobalIndex_ == true ) 
       DUNE_THROW(NotImplemented,"ALU3dGridFactory::sortElements: parallel hsfc not implemented yet!");
 
-    const size_t elemSize = elements.size(); 
-    ordering.resize( elemSize );
-    // default ordering
-    for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
-
     // the serial version do not special ordering 
     // since no load balancing has to be done
-#if HAVE_ZOLTAN && HAVE_MPI
     {
       Zoltan zz( Dune::MPIHelper::getCommunicator() );
       alugrid_assert( zz );
