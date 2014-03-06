@@ -304,6 +304,8 @@ namespace ALUGrid
             }
             return true ;
           }
+
+          alugrid_assert( size() == int(elements.size()) );
           return false ;
         }
 
