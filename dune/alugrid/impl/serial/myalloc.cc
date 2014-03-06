@@ -25,13 +25,14 @@ namespace ALUGrid
   // if true objects could be freeed  
   bool MyAlloc::_freeAllowed = true;
 
+  static size_t ALUGridMemSpaceAllocated = 0;
+
 #ifdef ALUGRID_USES_DLMALLOC
 #define ONLY_MSPACES 1 
 #warning "Using DL malloc"
 #include DLMALLOC_SOURCE_INCLUDE
 #undef ONLY_MSPACES  
   static void*  ALUGridMemorySpace = 0;
-  static size_t ALUGridMemSpaceAllocated = 0;
 #else
 
   // class to store items of same size in a stack 
@@ -174,10 +175,11 @@ namespace ALUGrid
   void* MyAlloc::operator new ( size_t s ) throw (OutOfMemoryException) 
   {
 #ifndef DONT_USE_ALUGRID_ALLOC
+    // increase memory usage counter
+    ALUGridMemSpaceAllocated += s ;
 
 #ifdef ALUGRID_USES_DLMALLOC
     alugrid_assert ( s > 0 );
-    ALUGridMemSpaceAllocated += s ;
     return mspace_malloc( ALUGridMemorySpace, s );
 #else
     alugrid_assert (s > 0);
@@ -211,11 +213,12 @@ namespace ALUGrid
   void MyAlloc::operator delete (void *ptr, size_t s) 
   {
 #ifndef DONT_USE_ALUGRID_ALLOC
+   // decrease memory usage counter
+   ALUGridMemSpaceAllocated -= s ;
 
 #ifdef ALUGRID_USES_DLMALLOC
    // defined in dlmalloc.c 
    mspace_free( ALUGridMemorySpace, ptr );
-   ALUGridMemSpaceAllocated -= s ;
 #else  
     // get stack for size s 
     AllocEntry & fs ((*freeStore) [s]);
@@ -259,11 +262,7 @@ namespace ALUGrid
   // operator delete, put pointer to stack 
   size_t MyAlloc::allocatedMemory () 
   {
-#ifdef ALUGRID_USES_DLMALLOC
     return ALUGridMemSpaceAllocated ;
-#else 
-    return 0;
-#endif
   }
 
   MyAlloc::Initializer::Initializer () 
