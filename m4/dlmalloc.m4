@@ -3,7 +3,7 @@ AC_DEFUN([ALUGRID_PATH_DLMALLOC],[
   AC_REQUIRE([AC_PROG_CC])
 
   AC_ARG_WITH(dlmalloc,
-    AC_HELP_STRING([--with-dlmalloc=PATH],[directory with dlmalloc (version >= 2.8.6) inside]))
+    AC_HELP_STRING([--with-dlmalloc=PATH],[directory with Doug Lea's malloc (version >= 2.8.6) inside]))
 
 # store old values
 ac_save_LDFLAGS="$LDFLAGS"
@@ -28,23 +28,23 @@ fi
 
 DLMALLOC_INCLUDE_PATH="$DLMALLOCROOT"
 
-DLSOURCE=$DLMALLOC_INCLUDE_PATH/dlmalloc.c
+DLSOURCE=$DLMALLOC_INCLUDE_PATH/malloc.c
 
 # if not DLMALLOC is used, then check for old DLMALLOC Version
 if ! test -f "$DLSOURCE" ; then
-  AC_MSG_WARN([Could not find dlmalloc.c header file!])
-  if ! test $DLMALLOC_INCLUDE_PATH/malloc*.h ; then 
-    AC_MSG_ERROR([Could not find malloc*.c header file!])
+  AC_MSG_WARN([Could not find malloc.c source file!])
+  if ! test $DLMALLOC_INCLUDE_PATH/malloc*.c ; then 
+    AC_MSG_ERROR([Could not find malloc*.c source file!])
   else 
     DLSOURCE=`ls $DLMALLOC_INCLUDE_PATH/malloc*.c`
   fi
 fi
 
 # check for header
-  AC_LANG_PUSH([C])
-  AC_CHECK_HEADER([$DLSOURCE], 
-   [HAVE_DLMALLOC="1"],
-    AC_MSG_WARN([$DLSOURCE not found in $DLMALLOC_INCLUDE_PATH]))
+AC_LANG_PUSH([C])
+AC_CHECK_HEADER([$DLSOURCE], 
+ [HAVE_DLMALLOC="1"],
+  AC_MSG_WARN([$DLSOURCE not found in $DLMALLOC_INCLUDE_PATH]))
 
 # pop default language 
 AC_LANG_POP([C])
