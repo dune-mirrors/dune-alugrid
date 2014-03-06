@@ -399,8 +399,8 @@ namespace Dune {
 std::vector<double> getMemoryUsage()
 {
   std::vector<double> memUsage;
-#elif HAVE_ALUGRID && defined ALUGRID_USES_DLMALLOC 
-  // dune-grid + alugrid version (1.52) with memory patch 
+#if HAVE_ALUGRID && defined ALUGRID_USES_DLMALLOC 
+  // dune-grid + alugrid version (1.52) with dlmalloc memory patch 
   memUsage.push_back(double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
 #else
   // dune-alugrid version 
