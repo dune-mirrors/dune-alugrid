@@ -1476,15 +1476,9 @@ namespace ALUGrid
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 
   {
-    checkGraphVertexIndices ();
-  }
-
-  void GitterPll::checkGraphVertexIndices () 
-  {
-    if( !  _ldbVerticesComputed ) 
-      computeGraphVertexIndices ();
-    else
-      exchangeStaticState ();
+    // exchanges the ldbVertexIndex for the internal boundaries 
+    // to obtain a consistent numbering 
+    exchangeStaticState ();
   }
 
   void GitterPll::computeGraphVertexIndices () 
@@ -1521,13 +1515,8 @@ namespace ALUGrid
       w.item ().setLoadBalanceVertexIndex ( cnt );
     }
 
-    // exchanges the ldbVertexIndex for the internal boundaries 
-    // to obtain a consistent numbering 
-    exchangeStaticState();
-    
-    // mark unique element indices as computed, if serialPartitioner is used
-    // don't do this computation again for serial partitioning 
-    _ldbVerticesComputed = true; // serialPartitioner(); 
+    // mark unique element indices as computed if there are macro elements 
+    _ldbVerticesComputed = mpAccess().gmax( bool( macroElements > 0 ) );  
     
     // clear graphSize vector since the new numbering leads to different sizes
     std::vector< int >().swap( _graphSizes );
@@ -1550,6 +1539,10 @@ namespace ALUGrid
 
   void GitterPll::notifyMacroGridChanges () 
   {
+    // make sure graph indices are computed before identification is done
+    if( ! _ldbVerticesComputed ) 
+      computeGraphVertexIndices ();
+
     doNotifyMacroGridChanges( true );
   }
 
