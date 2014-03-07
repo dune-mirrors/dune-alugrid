@@ -10,10 +10,11 @@
 // if defined the memory allocation from dlmalloc is used
 #if HAVE_DLMALLOC
 #define ALUGRID_USES_DLMALLOC 
-#endif
-
+#else 
 // if defined, standard C++ new and delete are used
-//#define DONT_USE_ALUGRID_ALLOC 
+// this is the default if dlmalloc is not found 
+#define DONT_USE_ALUGRID_ALLOC 
+#endif
 
 namespace ALUGrid
 {
