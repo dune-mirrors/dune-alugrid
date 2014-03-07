@@ -1,4 +1,6 @@
 // (c) Robert Kloefkorn 2010 
+#include <config.h>
+ 
 #include "gitter_hexa_top_pll.h"
 #include "../serial/gitter_hexa_top.cc"
 
