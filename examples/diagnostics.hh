@@ -240,17 +240,12 @@ namespace Dune {
           {
             const double averageElements = avgTimes[ size - 1 ] / tasks ;
 
-            // get information about communication type 
-            const bool nonBlocking = false ;
-
             file << "# Procs = " << comm_.size() << " * " << maxThreads << " (MPI * threads)" << std::endl ;
-            const char* commType = nonBlocking ? "asynchron" : "standard";
-            file << "# Comm: " << commType << std::endl;
             file << "# Timesteps = " << timesteps_ << std::endl ;
             file << "# Max DoFs (per element): " << maxDofs << std::endl;
             file << "# Elements / timestep: sum    max    min    average  " << std::endl;
             file << avgTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
-            file << "# SOLVE     COMM     ADAPT    LB      TIMESTEP   RUSAGE  ALUGRID" << std::endl ;
+            file << "# SOLVE          COMM         ADAPT            LB         TIMESTEP     MEMORY (MB)" << std::endl ;
 
             // multiply avgTimes with maxThhreads since the sum would be to small otherwise 
             for(size_t i=0; i<size; ++i)
@@ -267,7 +262,7 @@ namespace Dune {
             }
 
             {
-              std::string descr( "( average time / timestep in sec )" );
+              std::string descr( "( time / timestep in sec )" );
               writeVectors( file, descr, avgTimes, maxTimes, minTimes );
             }
           }
