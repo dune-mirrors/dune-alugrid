@@ -106,12 +106,10 @@ namespace ALUGridSFC
   } // end of simple sfc splitting without edges 
 
   template <class vec_t> 
-  void shiftElementCuts( const int me, const int pSize, vec_t& elementCuts ) 
+  void shiftElementCuts( const int me, const int pSize, const int nElem, vec_t& elementCuts ) 
   {
     typedef typename vec_t :: value_type value_type ;
 
-    // get number of elements 
-    const int nElem = elementCuts[ pSize ];
     // only do this if number of procs is smaller then number of elements 
     if( pSize <= nElem ) 
     {
@@ -191,18 +189,24 @@ namespace ALUGridSFC
 
     const int myCut = (maxIdx >= 0 ) ? maxIdx + 1 : -1;
 
+    int nMax = 0 ;
     // if element cuts have not been computed, compute current cuts 
     if( elementCuts.size() == 0 ) 
     {
       //std::cout << "Compute element cuts" << std::endl;
       elementCuts = mpa.gcollect( myCut ); 
-      int nElem = 0 ;
       for( int i=0; i<pSize; ++ i) 
-        nElem = std::max( nElem, elementCuts[ i ] );
-
-      // store number of overall macro elements 
-      elementCuts.push_back( nElem );
+        nMax = std::max( nMax, elementCuts[ i ] );
     }
+    else 
+    {
+      // number of macro elements corresponds to 
+      // last element cut if cuts have been computed 
+      nMax = elementCuts[ pSize-1 ];
+    }
+
+    // number of macro elements corresponds to last element cut
+    const int nElem = nMax ;
 
     long int Wme   = 0;
     long int Wnext = 0;
@@ -281,14 +285,15 @@ namespace ALUGridSFC
     std::vector< int > oldCuts( elementCuts );
 
     elementCuts.clear();
-    elementCuts.resize( pSize+1, 0 );
-    elementCuts[ pSize ] = oldCuts[ pSize ];
+    elementCuts.resize( pSize, 0 );
+    //elementCuts.resize( pSize+1, 0 );
+    //elementCuts[ pSize ] = oldCuts[ pSize ];
 
     // communicate cuts 
     mpa.gmax( &cuts[ 0 ], pSize, &elementCuts[ 0 ] );
 
     // make sure that every process has at least one element
-    shiftElementCuts( me, pSize, elementCuts );
+    shiftElementCuts( me, pSize, nElem, elementCuts );
 
     // get start and end element
     const int wStart = (me == 0) ? 0 : elementCuts[ me-1 ];
@@ -334,6 +339,11 @@ namespace ALUGridSFC
         connect.insert( ALUGrid::MpAccessLocal::sendRank( destination ) );
       }
     }
+
+    //if( me == 0 )
+    //  for( int i=0; i<pSize; ++ i) 
+    //    std::cout << elementCuts[ i ] << std::endl;
+
 
     // check whether the element cuts have changed
     {
