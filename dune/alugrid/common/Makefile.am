@@ -8,6 +8,7 @@ alucommon_HEADERS = alugrid_assert.hh \
 										geostorage.hh \
 										intersectioniteratorwrapper.hh \
 										interfaces.hh \
+                    ldbhandleif.hh \
                     macrogridview.hh \
 										memory.hh \
 										objectfactory.hh \
