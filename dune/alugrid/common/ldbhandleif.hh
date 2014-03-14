@@ -77,5 +77,7 @@ namespace Dune
     }
   }; // end class LoadBalanceDataHandleIF 
 
+  struct LoadBalanceHandleWithReserveAndCompress {};
+
 } // end namespace Dune 
 #endif // #if DUNE_LDBHANDLEIF_HH
