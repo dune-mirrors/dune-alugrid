@@ -257,8 +257,6 @@ inline void LeafAdaptation< Grid, LoadBalanceHandle >::operator() ( Vector &solu
   // re-balance grid 
   DataHandle<Grid,Container> dataHandle( grid_, container ) ;
   grid_.loadBalance( ldb_, dataHandle );
-  // typedef Dune::CommDataHandleIF< DataHandle<Grid,Container>, Container > DataHandleInterface;
-  // grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
 
   // cleanup adaptation markers 
   grid_.postAdapt();
