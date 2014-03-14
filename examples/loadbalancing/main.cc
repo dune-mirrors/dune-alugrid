@@ -5,7 +5,7 @@
 /** standard headers **/
 #include <iostream>
 /** dune (mpi, field-vector and grid type for dgf) **/
-#include <dune/common/mpihelper.hh>     
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
 
@@ -48,11 +48,8 @@ void method ( int startLevel, int maxLevel, const char* outpath )
 #endif
   LoadBalancer ldb(grid);
 
-  {
-    typedef Dune::LoadBalanceHandleIF< LoadBalancer > DataHandleInterface;
-    grid.loadBalance( (DataHandleInterface&)(ldb) );
-    // grid.loadBalance();
-  }
+  grid.loadBalance( ldb );
+  // grid.loadBalance();
 
   const bool verboseRank = grid.comm().rank() == 0 ;
 
