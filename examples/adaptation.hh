@@ -359,10 +359,8 @@ inline void LeafAdaptation< Grid, Vector >::postAdapt()
     grid_.loadBalance() ;
 #else
     // re-balance grid 
-    typedef DataHandle<Grid,Container> DH;
-    DH dataHandle( grid_, container_ ) ;
-    typedef Dune::CommDataHandleIF< DH, Container > DataHandleInterface;
-    grid_.loadBalance( (DataHandleInterface&)(dataHandle) );
+    DataHandle<Grid,Container> dataHandle( grid_, container_ ) ;
+    grid_.loadBalance( dataHandle );
 #endif
     lbTime_ = lbTimer.elapsed();
   }
