@@ -459,6 +459,7 @@ namespace Dune
 
     static bool loadBalance ( Grid &grid )
     {
+      std::cout << "ALUGrid::loadBalance( grid ) " << std::endl;
       if( grid.comm().size() <= 1 )
         return false;
 
@@ -485,6 +486,8 @@ namespace Dune
     template< class DataHandle >
     static bool loadBalance ( Grid &grid, DataHandle &data )
     {
+      std::cout << "ALUGrid::loadBalance( grid, data ) " << std::endl;
+
       if( grid.comm().size() <= 1 )
         return false;
 

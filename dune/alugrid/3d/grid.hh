@@ -734,6 +734,8 @@ namespace Dune
     /** \brief Calculates load of each process and repartition the grid if neccessary. 
         For parameters of the load balancing process see the README file
         of the ALUGrid package.
+
+        \return true if the grid has changed 
      */
     bool loadBalance ();
   
@@ -762,30 +764,62 @@ namespace Dune
           // empty if nothing should be done.
           void compress ();
           \endcode 
+
+         \return true if the grid has changed 
     */
     template <class DataHandle>
     bool loadBalance (DataHandle & data);
 
+    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
+               The specific load balancing algorithm is selected from a file
+               alugrid.cfg. 
+       \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface. 
+
+       \return true if grid has changed 
+    */
     template< class DataHandleImpl, class Data >
-    bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandle )
+    bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
-      typedef ALUGridLoadBalanceDataHandle1< ThisType, DataHandleImpl, Data > LBHandle;
-      LBHandle lbHandle( *this, dataHandle );
-      return loadBalance( lbHandle );
+      typedef ALUGridDataHandleWrapper< ThisType, DataHandleImpl, Data > DataHandle;
+      DataHandle dataHandle( *this, dataHandleIF );
+      // call the above loadBalance method with general DataHandle 
+      return loadBalance( dataHandle );
     }
+
+    /** \brief Calculates load of each process and repartition by using a user specified 
+               load balance handle. This can either define a speparate load balancing
+               algorithm or user defined load weights (see Dune::LoadBalanceHandleIF).
+               No transfer of data data is done since no data handle was passed. 
+       \param  lbHandleIF   load balance handle that implements the Dune::LoadBalanceHandleIF interface.
+
+       \return true if grid has changed 
+    */
     template< class LoadBalanceHandleImpl >
     bool loadBalance ( LoadBalanceHandleIF< LoadBalanceHandleImpl > &lbHandleIF )
     {
-      typedef ALUGridLoadBalanceHandle2< ThisType, LoadBalanceHandleImpl > LBHandle;
+      typedef ALUGridLoadBalanceHandleWrapper< ThisType, LoadBalanceHandleImpl > LBHandle;
       LBHandle lbHandle( *this, lbHandleIF );
+      // call the above loadBalance method with general DataHandle 
       return loadBalance( lbHandle );
     }
+
+    /** \brief Calculates load of each process and repartition by using a user specified 
+               load balance handle. This can either define a speparate load balancing
+               algorithm or user defined load weights (see Dune::LoadBalanceHandleIF).
+               Data transfer is done via the passed data handle. 
+       \param  lbHandleIF   load balance handle that implements the Dune::LoadBalanceHandleIF interface.
+       \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface. 
+
+       \return true if grid has changed 
+    */
     template< class LoadBalanceHandleImpl, class DataHandleImpl, class Data >
-    bool loadBalance ( LoadBalanceHandleImpl &ldbHandle, CommDataHandleIF<DataHandleImpl,Data> &dataHandle )
+    bool loadBalance ( LoadBalanceHandleImpl &ldbHandle, 
+                       CommDataHandleIF<DataHandleImpl,Data> &dataHandle )
     {
-      typedef ALUGridLoadBalanceDataHandle< ThisType, LoadBalanceHandleImpl, DataHandleImpl, Data > LBHandle;
-      LBHandle lbHandle( *this, ldbHandle, dataHandle );
-      return loadBalance( lbHandle );
+      typedef ALUGridLoadBalanceDataHandleWrapper< ThisType, 
+                 LoadBalanceHandleImpl, DataHandleImpl, Data > LBDataHandle;
+      LBDataHandle lbDataHandle( *this, ldbHandle, dataHandle );
+      return loadBalance( lbDataHandle );
     }
 
     /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
