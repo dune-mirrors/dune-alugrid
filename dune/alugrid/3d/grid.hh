@@ -739,6 +739,7 @@ namespace Dune
      */
     bool loadBalance ();
   
+  protected:   
     /** \brief Calculates load of each process and repartition the grid if neccessary.
         For parameters of the load balancing process see the README file
         of the ALUGrid package.
@@ -768,8 +769,9 @@ namespace Dune
          \return true if the grid has changed 
     */
     template <class DataHandle>
-    bool loadBalance (DataHandle & data);
+    bool loadBalanceImpl (DataHandle & data);
 
+  public:  
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
                The specific load balancing algorithm is selected from a file
                alugrid.cfg. 
@@ -783,7 +785,7 @@ namespace Dune
       typedef ALUGridDataHandleWrapper< ThisType, DataHandleImpl, Data > DataHandle;
       DataHandle dataHandle( *this, dataHandleIF );
       // call the above loadBalance method with general DataHandle 
-      return loadBalance( dataHandle );
+      return loadBalanceImpl( dataHandle );
     }
 
     /** \brief Calculates load of each process and repartition by using a user specified 
@@ -800,7 +802,7 @@ namespace Dune
       typedef ALUGridLoadBalanceHandleWrapper< ThisType, LoadBalanceHandleImpl > LBHandle;
       LBHandle lbHandle( *this, lbHandleIF );
       // call the above loadBalance method with general DataHandle 
-      return loadBalance( lbHandle );
+      return loadBalanceImpl( lbHandle );
     }
 
     /** \brief Calculates load of each process and repartition by using a user specified 
@@ -819,7 +821,7 @@ namespace Dune
       typedef ALUGridLoadBalanceDataHandleWrapper< ThisType, 
                  LoadBalanceHandleImpl, DataHandleImpl, Data > LBDataHandle;
       LBDataHandle lbDataHandle( *this, ldbHandle, dataHandle );
-      return loadBalance( lbDataHandle );
+      return loadBalanceImpl( lbDataHandle );
     }
 
     /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */

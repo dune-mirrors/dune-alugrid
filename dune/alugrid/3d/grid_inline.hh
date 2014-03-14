@@ -665,7 +665,7 @@ namespace Dune
   // load balance grid  
   template< ALU3dGridElementType elType, class Comm >
   template< class DataHandle >
-  inline bool ALU3dGrid< elType, Comm >::loadBalance ( DataHandle &data )
+  inline bool ALU3dGrid< elType, Comm >::loadBalanceImpl ( DataHandle &data )
   {
     return ALU3dGridCommHelper< elType, Comm >::loadBalance( *this, data );
   }

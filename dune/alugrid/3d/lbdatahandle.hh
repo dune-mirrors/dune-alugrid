@@ -31,6 +31,36 @@ namespace Dune
     };
 
     typedef typename Codim< 0 > :: Entity Element;
+  protected:
+    template <class DH, bool>
+    struct CompressAndReserve
+    {
+      static DataHandleImpl& asImp( DH& dh ) { return static_cast<DataHandleImpl &> (dh); }
+
+      static void reserveMemory( DH& dataHandle, const size_t newElements )
+      {
+        asImp( dataHandle ).reserveMemory( newElements );
+      }
+      static void compress( DH& dataHandle )
+      {
+        asImp( dataHandle ).compress();
+      }
+    };
+
+    template <class DH>
+    struct CompressAndReserve< DH, false >
+    {
+      static void reserveMemory( DH& dataHandle, const size_t newElements ) {}
+      static void compress( DH& dataHandle ) {}
+    };
+
+    // check whether DataHandleImpl is derived from LoadBalanceHandleWithReserveAndCompress
+    static const bool hasCompressAndReserve =  Conversion< DataHandleImpl,
+                           LoadBalanceHandleWithReserveAndCompress >::exists ;
+    // don't transmit size in case we have special DataHandleImpl
+    static const bool transmitSize = hasCompressAndReserve ;
+
+    typedef CompressAndReserve< DataHandle, hasCompressAndReserve >  CompressAndReserveType;
 
   protected:
     const Grid &grid_;
@@ -57,6 +87,10 @@ namespace Dune
     //! read data from object stream 
     void xtractData ( ObjectStream &stream, const Element &element, size_t newElements )
     {
+      // if data handle provides reserve feature, reserve memory
+      // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress 
+      CompressAndReserveType :: reserveMemory( dataHandle_, newElements );
+
       xtractElementData( stream, element );
 
       const int maxLevel = grid_.maxLevel();
@@ -66,9 +100,13 @@ namespace Dune
     }
 
     //! \brief data compress
-    //! \Note nothing is done since the DataHandleIF does not provide this feature
+    //! \note nothing is done since the DataHandleIF does not provide this feature
     void compress ()
-    {}
+    {
+      // if data handle provides compress, do compress here
+      // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress 
+      CompressAndReserveType :: compress( dataHandle_ );
+    }
 
   private:
     void inlineElementData ( ObjectStream &stream, const Element &element ) const
@@ -135,8 +173,11 @@ namespace Dune
     void inlineEntityData ( ObjectStream &stream,
                             const typename Codim< codim > :: Entity &entity ) const
     {
-      const size_t size = dataHandle_.size( entity );
-      stream.write( size );
+      if( transmitSize ) 
+      {
+        const size_t size = dataHandle_.size( entity );
+        stream.write( size );
+      }
       dataHandle_.gather( stream, entity );
     }
 
@@ -145,7 +186,10 @@ namespace Dune
                             const typename Codim< codim > :: Entity &entity )
     {
       size_t size = 0;
-      stream.read( size );
+      if( transmitSize ) 
+      {
+        stream.read( size );
+      }
       dataHandle_.scatter( stream, entity, size );
     }
   };
