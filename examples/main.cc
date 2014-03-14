@@ -197,11 +197,10 @@ void method ( int problem, int startLvl, int maxLvl, const char* outpath )
       adaptation( solution );
 
     {
-      const size_t maxDofsPerElem = (elements > 0) ? (solution.size()/elements) : 0;
       // write times to run file 
-      diagnostics.write( time, dt,                   // time and time step
+      diagnostics.write( time, dt,                     // time and time step
                          elements,                     // number of elements
-                         maxDofsPerElem,               // number of dofs per element (max)
+                         ModelType::dimRange,          // number of dofs per element (max)
                          solveTime,                    // time for operator evaluation 
                          commTime + adaptation.communicationTime(), // communication time  
                          adaptation.adaptationTime(),  // time for adaptation 
