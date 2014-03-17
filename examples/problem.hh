@@ -88,6 +88,9 @@ struct ProblemData
   /**\brief return number of timestep to pass until load balancing is done again  */
   virtual int balanceStep() const { return 1; }
 
+  /**\brief return maximal number of timesteps to run (for scaling experiment) */
+  virtual unsigned int maxTimeSteps() const { return std::numeric_limits<unsigned int>::max(); }
+
 }; // end class ProblemData
 // Code moved to problem-transport.hh 
 

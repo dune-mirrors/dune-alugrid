@@ -173,10 +173,6 @@ public:
     {
       val[0] = 1;
       val[dimR-1] = 2.5;
-
-      //RangeType prim; 
-      //cons2prim( res, prim );
-      //std::cout << "Primitve outside : "<< prim << "\n";
     }
     return val;
   }
@@ -223,6 +219,8 @@ public:
 
   //! only every 10th timestep we want load balancing 
   int balanceStep() const { return 25; }
+
+  unsigned int maxTimeSteps() const { return (problem_ == 25) ? 50 : Base::maxTimeSteps(); }
 
   private:
   const double gamma;
@@ -370,6 +368,7 @@ struct EulerModel
     case 22:
     case 23:
     case 24:
+    case 25:
       problem_ = new EulerProblemShockBubble< dimDomain >( problem );
       break;
 
