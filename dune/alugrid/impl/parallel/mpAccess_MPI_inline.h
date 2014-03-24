@@ -466,13 +466,9 @@ namespace ALUGrid
     MPI_Request* _sendRequest;
     MPI_Request* _recvRequest;
 
+    const bool _symmetric;
     bool _needToSend ;
 
-    // true if MPI_Irecv/MPI_test should be used 
-    // otherwise MPI_Iprobe/MPI_Recv will be used
-    //static const bool useTestAndIrecv = true ;
-    static const bool useTestAndIrecv = false ;
-    
     //static const bool oldBlockingMethod = true ;
     static const bool oldBlockingMethod = false ;
 
@@ -485,24 +481,26 @@ namespace ALUGrid
       return ( _sendLinks > 0 ) ? new MPI_Request [ _sendLinks ] : 0;
     }
 
-    // return vector of recv requests for number of recv links is positive 
-    // and useTestAndIrecv is true
-    MPI_Request* createRecvRequest() const 
+    // return vector of recv requests when 
+    // number of recv links is positive and symmetric is true
+    MPI_Request* createRecvRequest( const bool symmetric ) const 
     {
-      return ( _recvLinks > 0 && useTestAndIrecv ) ? new MPI_Request [ _recvLinks ] : 0;
+      return ( _recvLinks > 0 && symmetric ) ? new MPI_Request [ _recvLinks ] : 0;
     }
 
   public:
     typedef MpAccessLocal::NonBlockingExchange::DataHandleIF DataHandleIF;
 
     NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
-                            const int tag )
+                            const int tag,
+                            const bool symmetric = false )
       : _mpAccess( mpAccess ),
         _sendLinks( _mpAccess.sendLinks() ),
         _recvLinks( _mpAccess.recvLinks() ),
         _tag( tag ),
         _sendRequest( createSendRequest() ),
-        _recvRequest( createRecvRequest() ),
+        _recvRequest( createRecvRequest( symmetric ) ),
+        _symmetric( symmetric ),
         _needToSend( true )
     {
       // make sure every process has the same tag 
@@ -517,7 +515,8 @@ namespace ALUGrid
         _recvLinks( _mpAccess.recvLinks() ),
         _tag( tag ),
         _sendRequest( createSendRequest() ),
-        _recvRequest( createRecvRequest() ),
+        _recvRequest( createRecvRequest( false ) ),
+        _symmetric( false ),
         _needToSend( false )
     {
       // make sure every process has the same tag 
@@ -525,22 +524,6 @@ namespace ALUGrid
 
       alugrid_assert ( _sendLinks == int( in.size() ) );
       sendImpl( in ); 
-    }
-
-    // constructor for intializing all-to-all non-blocking communication
-    NonBlockingExchangeMPI( const MpAccessMPI& mpAccess,
-                            const int tag,
-                            const int maxMesg )
-      : _mpAccess( mpAccess ),
-        _sendLinks( maxMesg+1 ), // we need one element more 
-        _recvLinks( _sendLinks ),
-        _tag( tag ),
-        _sendRequest( createSendRequest() ),
-        _recvRequest( createRecvRequest() ),
-        _needToSend( false )
-    {
-      // make sure every process has the same tag 
-      alugrid_assert ( tag == mpAccess.gmax( tag ) );
     }
 
     /////////////////////////////////////////
@@ -610,7 +593,7 @@ namespace ALUGrid
       const std::vector< int >& recvSource = _mpAccess.recvSource();
 
       // check whether out vector has more than one stream 
-      const bool useFirstStreamOnly = ! useTestAndIrecv && (out.size() == 1) ;
+      const bool useFirstStreamOnly = (out.size() == 1) ;
 #ifdef ALUGRIDDEBUG
       {
         const int outSize = out.size();
@@ -623,93 +606,31 @@ namespace ALUGrid
       }
 #endif
 
-      // if status is available then post all receives 
-      int numAvailableLinks = _recvLinks ;
-      // if receive request were created we have to post receives 
-      if( _recvRequest ) 
-      {
-        // this is needed for this method of communication 
-        assert( ! useFirstStreamOnly ); 
-
-        // reset numAvailable to count for posted receives
-        int numLinks = 0;
-        while( numLinks < _recvLinks ) 
-        {
-          // post receive msg for all links 
-          for (int link = 0; link < _recvLinks; ++link ) 
-          {
-            ObjectStream& osRecv = out[ link ]; 
-            // if msg not yet available try to post receive 
-            if( osRecv.notReceived() ) 
-            {
-              // returns true if receive was posted 
-              if( postReceive( recvSource[ link ], _tag, osRecv, _recvRequest[ link ], comm ) )
-                ++ numLinks ;
-            }
-          }
-        }
-
-        int numValidLinks = 0;
-        // post receive msg for all links 
-        for (int link = 0; link < _recvLinks; ++link ) 
-        {
-          if( out[ link ].size() > 0 ) 
-            ++numValidLinks ;
-        }
-        // adjust number of available links 
-        numAvailableLinks = numValidLinks;
-      }
-
       // flag vector holding information about received links 
-      std::vector< bool > linkNotReceived;
-      if( ! useTestAndIrecv ) 
-        linkNotReceived.resize( _recvLinks, true );
+      std::vector< bool > linkNotReceived( _recvLinks, true );
 
       // count noumber of received messages 
       int numReceived = 0;
-      while( numReceived < numAvailableLinks ) 
+      while( numReceived < _recvLinks ) 
       {
         // check for all links messages 
         for (int link = 0; link < _recvLinks; ++link ) 
         {
-          // get appropriate object stream 
-          ObjectStream& osRecv = useFirstStreamOnly ? out[ 0 ] : out[ link ];
-
-          const bool notAlreadyReceived = ( useTestAndIrecv ) ? 
-            osRecv.size() > 0 && osRecv.validToRead() : linkNotReceived[ link ] ;
-
           // if message was not received yet, check again 
-          if( notAlreadyReceived ) 
+          if( linkNotReceived[ link ] ) 
           {
-            // at this point _recvRequest should be available when useTestAndIrecv is true
-            assert( ( useTestAndIrecv ) ? _recvRequest != 0 : true );
+            // get appropriate object stream 
+            ObjectStream& osRecv = useFirstStreamOnly ? out[ 0 ] : out[ link ];
 
             // check whether a message was completely received 
-            const bool received = ( useTestAndIrecv ) ? 
-              receivedMessage( _recvRequest[ link ], osRecv ) : 
-              probeAndReceive( comm, recvSource[ link ], _tag, osRecv );
-
             // if message was received the unpack data 
-            if( received )
+            if( probeAndReceive( comm, recvSource[ link ], _tag, osRecv ) )
             {
               // if data handle was given do unpack
-              if( dataHandle ) 
-              {
-                // unpack data 
-                dataHandle->unpack( link, osRecv );
-
-                if( useTestAndIrecv ) 
-                {
-                  // remove buffer memory (not needed anymore)
-                  osRecv.reset();
-                }
-              }
+              if( dataHandle ) dataHandle->unpack( link, osRecv );
               
-              if( ! useTestAndIrecv ) 
-              {
-                // mark link as received  
-                linkNotReceived[ link ] = false ;
-              }
+              // mark link as received  
+              linkNotReceived[ link ] = false ;
 
               // increase number of received messages 
               ++ numReceived;
@@ -725,18 +646,66 @@ namespace ALUGrid
         MY_INT_TEST MPI_Waitall ( _sendLinks, _sendRequest, MPI_STATUSES_IGNORE);
         alugrid_assert (test == MPI_SUCCESS);
       }
+    }
 
-      // if recv request exists then wait for all messages to finish 
-      if( _recvRequest ) 
+    // receive data implementation with given buffers 
+    void unpackSymmetric( std::vector< ObjectStream >& out, DataHandleIF& dataHandle ) 
+    {
+      // do nothing if number of links is zero 
+      if( _recvLinks == 0 ) return; 
+
+      // flag vector holding information about received links 
+      std::vector< bool > linkNotReceived( _recvLinks, true );
+
+      // count noumber of received messages 
+      int numReceived = 0;
+      while( numReceived < _recvLinks ) 
+      {
+        // check for all links messages 
+        for (int link = 0; link < _recvLinks; ++link ) 
+        {
+          // if message was not received yet, check again 
+          if( linkNotReceived[ link ] ) 
+          {
+            int received = 0;
+            assert( _recvRequest );
+            MPI_Request& request = _recvRequest[ link ];
+            // if receive of message is finished, unpack 
+            MPI_Test( &request, &received, MPI_STATUS_IGNORE );
+            if( received ) 
+            {
+              // if data handle was given do unpack
+              dataHandle.unpack( link, out[ link ] );
+
+              // mark link as received  
+              linkNotReceived[ link ] = false ;
+              // increase number of received messages 
+              ++ numReceived;
+            }
+          }
+        }
+      }
+      
+      // if send request exists, i.e. some messages have been sent
+      if( _sendRequest ) 
       {
         // wait until all processes are done with receiving
-        MY_INT_TEST MPI_Waitall ( _recvLinks, _recvRequest, MPI_STATUSES_IGNORE);
+        MY_INT_TEST MPI_Waitall ( _sendLinks, _sendRequest, MPI_STATUSES_IGNORE);
         alugrid_assert (test == MPI_SUCCESS);
       }
     }
 
     // receive data implementation with given buffers 
     void send( std::vector< ObjectStream >& osSend, 
+               DataHandleIF& dataHandle )
+    {
+      std::vector< ObjectStream > osRecv; 
+      send( osSend, osRecv, dataHandle );
+    }
+
+    // receive data implementation with given buffers 
+    void send( std::vector< ObjectStream >& osSend, 
+               std::vector< ObjectStream >& osRecv,
                DataHandleIF& dataHandle )
     {
       if( oldBlockingMethod ) 
@@ -757,6 +726,13 @@ namespace ALUGrid
         // get vector with destinations 
         const std::vector< int >& sendDest = _mpAccess.sendDest();
 
+        // resize receive buffer if in symmetric mode
+        if( _symmetric ) 
+        {
+          assert( _sendLinks == _recvLinks );
+          osRecv.resize( _sendLinks );
+        }
+
         // send data 
         for (int link = 0; link < _sendLinks; ++link) 
         {
@@ -767,7 +743,15 @@ namespace ALUGrid
           }
 
           // send data 
-          sendLink( sendDest[ link ], _tag, osSend[ link ], _sendRequest[ link ], comm );
+          const int bufferSize = sendLink( sendDest[ link ], _tag, osSend[ link ], _sendRequest[ link ], comm );
+
+          // post receive if in symmetric mode
+          if( _symmetric ) 
+          {
+            assert( _recvRequest );
+            assert( &_recvRequest[ link ] );
+            postReceive( sendDest[ link ], _tag, bufferSize, osRecv[ link ], _recvRequest[ link ], comm );
+          }
         }
 
         // set send info 
@@ -780,10 +764,8 @@ namespace ALUGrid
     {
       if( oldBlockingMethod ) 
       {
-        // buffer size differs depending on method used 
-        const int recvBufferSize = ( useTestAndIrecv ) ? _recvLinks : 1 ;
         // create receive message buffers 
-        std::vector< ObjectStream > out( recvBufferSize );
+        std::vector< ObjectStream > out( _recvLinks );
 
         // receive data 
         receiveImpl( out );
@@ -799,10 +781,8 @@ namespace ALUGrid
         // do work that can be done between send and receive 
         dataHandle.meantimeWork() ;
 
-        // buffer size differs depending on method used 
-        const int recvBufferSize = ( useTestAndIrecv ) ? _recvLinks : 1 ;
         // create receive message buffers 
-        std::vector< ObjectStream > out( recvBufferSize );
+        std::vector< ObjectStream > out( 1 );
         // receive data 
         receiveImpl( out, &dataHandle );
       }
@@ -819,6 +799,7 @@ namespace ALUGrid
       // non-blocking send routines, send might not be finished 
       // when we start recieving
       std::vector< ObjectStream > osSend ;
+      std::vector< ObjectStream > osRecv ;
 
       // if data was noy send yet, do it now 
       if( _needToSend ) 
@@ -827,15 +808,18 @@ namespace ALUGrid
         osSend.resize( _sendLinks );
 
         // send data 
-        send( osSend, dataHandle );
+        send( osSend, osRecv, dataHandle );
       }
 
       // now receive data 
-      receive( dataHandle );
+      if( _symmetric ) 
+        unpackSymmetric( osRecv, dataHandle );
+      else 
+        receive( dataHandle );
     }
 
   protected:  
-    void sendLink( const int dest, const int tag, const ObjectStream& os, MPI_Request& request, MPI_Comm& comm ) 
+    int sendLink( const int dest, const int tag, const ObjectStream& os, MPI_Request& request, MPI_Comm& comm ) 
     {
       // get send buffer from object stream 
       char* buffer     = os._buf + os._rb;
@@ -844,44 +828,26 @@ namespace ALUGrid
 
       MY_INT_TEST MPI_Isend ( buffer, bufferSize, MPI_BYTE, dest, tag, comm, &request );
       alugrid_assert (test == MPI_SUCCESS);
+
+      return bufferSize ;
     }
 
-    bool postReceive( const int source, const int tag, ObjectStream& os, MPI_Request& request, MPI_Comm& comm ) 
+    void postReceive( const int source, const int tag, const int bufferSize, 
+                      ObjectStream& os, MPI_Request& request, MPI_Comm& comm ) 
     {
-      // corresponding MPI status 
-      MPI_Status status;
+      // reserve memory 
+      os.reserve( bufferSize );
+      // reset read and write counter
+      os.clear();
 
-      int available = 0 ;
-      // check for any message with tag (nonblocking)
-      MPI_Iprobe( source, tag, comm, &available, &status ); 
+      // set wb of ObjectStream, this also sets notReceived to false 
+      os.seekp( bufferSize );
 
-      if( available ) 
+      // MPI receive (non-blocking)
       {
-        // length of message 
-        int bufferSize = -1;
-
-        // get length of message 
-        {
-          MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bufferSize );
-          alugrid_assert (test == MPI_SUCCESS);
-        }
-
-        // reserve memory 
-        os.reserve( bufferSize );
-        // reset read and write counter
-        os.clear();
-
-        // set wb of ObjectStream, this also sets notReceived to false 
-        os.seekp( bufferSize );
-
-        // MPI receive (non-blocking)
-        {
-          MY_INT_TEST MPI_Irecv ( os._buf, bufferSize, MPI_BYTE, source, tag, comm, & request);
-          alugrid_assert (test == MPI_SUCCESS);
-        }
-        return true ; // message available 
+        MY_INT_TEST MPI_Irecv ( os._buf, bufferSize, MPI_BYTE, source, tag, comm, & request);
+        alugrid_assert (test == MPI_SUCCESS);
       }
-      return false; // message not yet available
     }
 
     // does receive operation for one link 
@@ -985,6 +951,17 @@ namespace ALUGrid
   // --exchange
   inline void MpAccessMPI::exchange ( NonBlockingExchange::DataHandleIF& handle ) const 
   {
+    // note: for the non-blocking exchange the message tag 
+    // should be different each time to avoid MPI problems 
+    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag() );
+    nonBlockingExchange.exchange( handle );
+  }
+
+  // --exchangeSymmetric
+  inline void MpAccessMPI::exchangeSymmetric ( NonBlockingExchange::DataHandleIF& handle ) const 
+  {
+    // this only works with symmetric linkage
+    alugrid_assert( symmetricLinkage() );
     // note: for the non-blocking exchange the message tag 
     // should be different each time to avoid MPI problems 
     NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag() );
