@@ -58,7 +58,7 @@ namespace Dune
     static const bool hasCompressAndReserve =  Conversion< DataHandleImpl,
                            LoadBalanceHandleWithReserveAndCompress >::exists ;
     // don't transmit size in case we have special DataHandleImpl
-    static const bool transmitSize = hasCompressAndReserve ;
+    static const bool transmitSize = ! hasCompressAndReserve ;
 
     typedef CompressAndReserve< DataHandle, hasCompressAndReserve >  CompressAndReserveType;
 
