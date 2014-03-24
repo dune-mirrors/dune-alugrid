@@ -121,7 +121,6 @@ namespace ALUGrid
         virtual std::vector< ObjectStream > receive() = 0;  
         virtual void receive( DataHandleIF& ) = 0;  
         virtual void exchange( DataHandleIF& ) = 0;  
-        virtual void allToAll( DataHandleIF& ) = 0;  
       };
 
       inline MpAccessLocal () ;
@@ -165,7 +164,6 @@ namespace ALUGrid
       virtual std::vector< ObjectStream > exchange (const std::vector< ObjectStream > &) const = 0 ;
       virtual void exchange ( const std::vector< ObjectStream > &, NonBlockingExchange::DataHandleIF& ) const = 0 ;
       virtual void exchange ( NonBlockingExchange::DataHandleIF& ) const = 0 ;
-      virtual void allToAll ( NonBlockingExchange::DataHandleIF& ) const = 0 ;
 
       // return handle for non-blocking exchange and already do send operation
       virtual NonBlockingExchange* nonBlockingExchange ( const int tag, 

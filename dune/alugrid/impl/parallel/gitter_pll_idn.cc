@@ -500,55 +500,36 @@ namespace ALUGrid
   {
     const int np = mpAccess.psize (), me = mpAccess.myrank ();
 
-    static bool useAllgather = true ;
-    if( useAllgather ) 
+    try 
     {
-      try 
-      {
-        ObjectStream os;
-        // data handle 
-        UnpackVertexLinkage data( *this, me, storeLinkageInVertices );
-
-        // pack data 
-        data.pack( me, os );
-
-        // exchange data 
-        std::vector< ObjectStream > osv = mpAccess.gcollect( os );
-
-        // free memory 
-        os.reset();
-
-        for (int link = 0; link < np; ++link ) 
-        {
-          // skip my rank 
-          if( link == me ) continue ;
-
-          // unpack data for link 
-          data.unpack( link, osv[ link ] );
-          // free memory 
-          osv[ link ].reset(); 
-        }
-      }
-      catch( MyAlloc :: OutOfMemoryException ) 
-      {
-        useAllgather = false ;
-        // make sure every process caught an exception 
-        // this needs to be revised since the exception 
-        // might only be caught on a few processes 
-        mpAccess.barrier();
-      }
-    }
-
-    if( ! useAllgather ) 
-    {
+      ObjectStream os;
       // data handle 
       UnpackVertexLinkage data( *this, me, storeLinkageInVertices );
 
-      //std::cout <<"Print first linkage" << std::endl;
-      //data.printVertexLinkage();
-      //std::cout <<"Exchange data " << std::endl;
-      // exchange all-to-all 
-      mpAccess.allToAll( data );
+      // pack data 
+      data.pack( me, os );
+
+      // exchange data 
+      std::vector< ObjectStream > osv = mpAccess.gcollect( os );
+
+      // free memory 
+      os.reset();
+
+      for (int link = 0; link < np; ++link ) 
+      {
+        // skip my rank 
+        if( link == me ) continue ;
+
+        // unpack data for link 
+        data.unpack( link, osv[ link ] );
+        // free memory 
+        osv[ link ].reset(); 
+      }
+    }
+    catch( MyAlloc :: OutOfMemoryException ) 
+    {
+      std::cerr << "MacroGitterPll::vertexLinkageEstimateGCollect: out of memory" << std::endl;
+      abort();
     }
   }
 

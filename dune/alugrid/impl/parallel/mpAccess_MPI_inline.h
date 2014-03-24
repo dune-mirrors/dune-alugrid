@@ -834,107 +834,6 @@ namespace ALUGrid
       receive( dataHandle );
     }
 
-    // all-to-all communication using the pack and unpack of the data handle 
-    void allToAll( DataHandleIF& dataHandle )
-    {
-      // get mpi communicator
-      MPI_Comm comm = _mpAccess.communicator();
-
-      alugrid_assert ( _sendLinks > 0 );
-
-      // create send and recv buffers 
-      std::vector< ObjectStream > sendBuffers( _sendLinks );
-
-      int tag = _tag ;
-
-      const int me = _mpAccess.myrank(); 
-      const int np = _mpAccess.psize();
-      const int totalMesg = np-1 ;
-
-      // write rank from where message originally came at the beginning of the stream 
-      sendBuffers[ 0 ].writeObject( me );
-      // pack own data 
-      dataHandle.pack( me, sendBuffers[ 0 ] );
-
-      // ring structure receive from previous and send to next 
-      const int source = (me == 0)    ? totalMesg : me - 1; 
-      const int dest   = (me == totalMesg) ? 0    : me + 1; 
-
-      // send first message 
-      sendLink( dest, tag, sendBuffers[ 0 ], _sendRequest[ 0 ], comm );
-
-      // we need one receive buffer 
-      ObjectStream recvBuff ;
-
-      // get received vector 
-      std::vector< bool > linkReceived( _sendLinks, false );
-
-      int totalRecv = 0 ; // number of messages already handled  
-      int msgSent   = 1 ; // number of messages already sent 
-      while( totalRecv < totalMesg )
-      {
-        const int nLinks = ( (totalRecv + _sendLinks - 1) <= totalMesg ) ? _sendLinks-1 : totalMesg - totalRecv ;
-        alugrid_assert ( nLinks < _sendLinks );
-
-        int received = 0 ;
-        while( received < nLinks ) 
-        {
-          for( int l=0; l<nLinks; ++ l )
-          {
-            if( ! linkReceived[ l ] ) 
-            {
-              // checks for message and if received also fills osRecv
-              if( probeAndReceive( comm, source, tag+l, recvBuff ) )
-              {
-                // send to next process with increased link number 
-                int link = l+1;
-                // only if we are not the last receiver 
-                if( msgSent < totalMesg ) 
-                {
-                  alugrid_assert ( link < int(sendBuffers.size()) );
-                  ObjectStream& sendBuff = sendBuffers[ link ];
-                  sendBuff.clear();
-                  sendBuff.writeStream( recvBuff );
-                  sendLink( dest, tag+link, sendBuff, _sendRequest[ link ], comm );
-                  ++ msgSent ;
-                }
-
-                int rank; 
-                // read rank from where the message came 
-                recvBuff.readObject( rank );
-
-                // unpack data 
-                dataHandle.unpack( rank, recvBuff );
-                // reset read-write position
-                recvBuff.clear();
-
-                linkReceived[ l ] = true ;
-                // increase counters 
-                ++received ;
-                ++totalRecv ;
-              }
-            }
-          }
-        }
-
-        // wait until all messages have been send and received 
-        alugrid_assert ( _sendRequest );
-        MY_INT_TEST MPI_Waitall ( _sendLinks, _sendRequest, MPI_STATUSES_IGNORE);
-        alugrid_assert (test == MPI_SUCCESS);
-
-        for( int i=0; i<_sendLinks; ++ i ) 
-        {
-          // reset received vector 
-          linkReceived[ i ] = false ;
-          // reset request status 
-          _sendRequest[ i ] = MPI_REQUEST_NULL;
-        }
-
-        // increase msg tags 
-        tag += nLinks ;
-      }
-    }
-
   protected:  
     void sendLink( const int dest, const int tag, const ObjectStream& os, MPI_Request& request, MPI_Comm& comm ) 
     {
@@ -1090,19 +989,6 @@ namespace ALUGrid
     // should be different each time to avoid MPI problems 
     NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag() );
     nonBlockingExchange.exchange( handle );
-  }
-
-  // --all-to-all
-  inline void MpAccessMPI::allToAll ( NonBlockingExchange::DataHandleIF& handle ) const 
-  {
-    // note: for the non-blocking exchange the message tag 
-    // should be different each time to avoid MPI problems 
-    const int maxMsg = psize()-1;
-    // 512 is the max number of simultaneously messages that we allow 
-    // due to memory restrictions 
-    const int links = std::min( 128, maxMsg );
-    NonBlockingExchangeMPI nonBlockingExchange( *this, getMessageTag( maxMsg ), links );
-    nonBlockingExchange.allToAll( handle );
   }
 
 } // namespace ALUGrid
