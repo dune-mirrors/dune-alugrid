@@ -344,6 +344,8 @@ namespace ALUGrid
   {
     char* buffer = inout._buf;
     int size = inout.capacity();
+    // size has to be the same on all processes for bcast operation
+    alugrid_assert( size == gmax( size ) );
     bcast( buffer, size, root );
   }
 
