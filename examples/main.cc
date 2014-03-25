@@ -26,7 +26,8 @@
 
 // method
 // ------
-void method ( int problem, int startLvl, int maxLvl, const char* outpath )
+void method ( int problem, int startLvl, int maxLvl, 
+              const char* outpath, const int mpiSize  )
 {
   typedef Dune::GridSelector::GridType Grid;
 
@@ -41,10 +42,10 @@ void method ( int problem, int startLvl, int maxLvl, const char* outpath )
 #elif EULER
   typedef EulerModel< Grid::dimensionworld > ModelType;
 #endif
-  ModelType model(problem);
+  ModelType model( problem );
 
   /* Grid construction ... */
-  std::string name = model.problem().gridFile( "./" );
+  std::string name = model.problem().gridFile( "./", mpiSize );
   // create grid pointer and release to free memory of GridPtr
   Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
 
@@ -129,6 +130,7 @@ void method ( int problem, int startLvl, int maxLvl, const char* outpath )
   /* now do the time stepping */
   unsigned int step = 0;
   double time = 0.0;
+  const unsigned int maxTimeSteps = model.problem().maxTimeSteps();
   while ( time < endTime ) 
   {
     Dune::Timer overallTimer ;
@@ -209,6 +211,10 @@ void method ( int problem, int startLvl, int maxLvl, const char* outpath )
                          getMemoryUsage() );                   // memory usage
 
     }
+
+    // abort when maximal number of time steps is reached (default is disabled)
+    if( step >= maxTimeSteps ) 
+      break ;
   }           
 
   if( vtkOut ) 
@@ -260,7 +266,7 @@ try
   const int maxLevel = (argc > 3 ? atoi( argv[ 3 ] ) : startLevel);
 
   const char* path = (argc > 4) ? argv[ 4 ] : "./";
-  method( problem, startLevel, maxLevel, path );
+  method( problem, startLevel, maxLevel, path, mpi.size() );
 
 #ifdef HAVE_MPI 
   MPI_Barrier ( MPI_COMM_WORLD );

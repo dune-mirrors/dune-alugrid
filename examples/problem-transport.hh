@@ -37,7 +37,7 @@ public:
     return 0.8;
   }
 
-  std::string gridFile ( const std::string &path ) const
+  std::string gridFile ( const std::string &path, const int mpiSize ) const
   { 
     std::ostringstream dgfFileName;
     dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";

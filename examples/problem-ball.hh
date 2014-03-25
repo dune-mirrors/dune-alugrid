@@ -26,7 +26,7 @@ struct BallData
   {}
 
   //! \copydoc ProblemData::gridFile
-  std::string gridFile ( const std::string &path ) const
+  std::string gridFile ( const std::string &path, const int mpiSize ) const
   { 
     std::ostringstream dgfFileName;
     if( problem_ == 1 ) 
