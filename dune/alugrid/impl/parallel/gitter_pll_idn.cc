@@ -541,6 +541,32 @@ namespace ALUGrid
     const int np = mpAccess.psize ();
     const int me = mpAccess.myrank ();
 
+    typedef Gitter :: ElementPllXIF :: vertexelementlinkage_t vertexelementlinkage_t;
+    typedef vertexelementlinkage_t :: mapped_type  linkageset_t ;
+
+    vertexelementlinkage_t vxElemLinkage;
+
+    // compute vertex linkage locally (only done once)
+    int maxVxElemCount = 0;
+    if( storeLinkageInVertices ) 
+    {
+      AccessIterator < helement_STI >::Handle w ( *this );
+      for (w.first (); ! w.done (); w.next ()) 
+      {
+        w.item().computeVertexLinkage( vxElemLinkage );
+      }
+
+      typedef vertexelementlinkage_t :: iterator iterator ;
+      const iterator end = vxElemLinkage.end();
+      for( iterator it = vxElemLinkage.begin(); it != end; ++ it ) 
+      {
+        // size+1 because the size needs to be stored aswell
+        maxVxElemCount = std::max( maxVxElemCount, int((*it).second.size()) );
+      }
+      ++maxVxElemCount ; // +1 for the size of the linkage 
+    }
+    ++ maxVxElemCount ; // +1 for the vertex id 
+
     // exchange data 
     {
       AccessIterator < vertex_STI >::Handle w (*this);
@@ -560,7 +586,7 @@ namespace ALUGrid
     }
 
     // get max size for all ranks needed in later bcast cycle 
-    const int mysize  = vxmap.size();
+    const int mysize  = vxmap.size() * maxVxElemCount ;
     const int maxSize = mpAccess.gmax( mysize ) + 1; // +1 for the size 
 
     // create buffer 
@@ -574,12 +600,31 @@ namespace ALUGrid
       if( rank == me ) 
       {
         // store the size on first position 
-        borderIds[ 0 ] = mysize;
         int count = 1;
-        for(map_t::const_iterator vx = vxmap.begin(); vx != vxmapEnd; ++vx, ++count )
+        if( storeLinkageInVertices )
         {
-          borderIds[ count ] = (*vx).first;
+          for(map_t::const_iterator vx = vxmap.begin(); vx != vxmapEnd; ++vx, ++count )
+          {
+            borderIds[ count ] = (*vx).first;
+            linkageset_t& linkedElements = vxElemLinkage[ (*vx).second ];
+            typedef linkageset_t::const_iterator set_iterator;
+            const int linkedSize = linkedElements.size();
+            borderIds[ count++ ] = int(-linkedSize-1);
+            const set_iterator endElem = linkedElements.end();
+            for( set_iterator it = linkedElements.begin(); it != endElem; ++it, ++count ) 
+            {
+              borderIds[ count ] = *it;
+            }
+          }
         }
+        else
+        {
+          for(map_t::const_iterator vx = vxmap.begin(); vx != vxmapEnd; ++vx, ++count )
+            borderIds[ count ] = (*vx).first;
+        }
+
+        // store size
+        borderIds[ 0 ] = count;
       }
 
       // send border vertex list to all others 
@@ -588,23 +633,60 @@ namespace ALUGrid
       // check connectivy for receives vertex ids 
       if( rank != me ) 
       {
+        std::vector< int > linkedElements ;
+
         // get size which is the first entry 
         const int idSize = borderIds[ 0 ];
         // loop over all sended vertex ids 
-        for (int j = 1; j <= idSize; ++j ) 
+        for (int j = 1; j < idSize; ++j ) 
         {
           const int id = borderIds[ j ];
           map_t::const_iterator hit = vxmap.find (id);
+
+          if( storeLinkageInVertices )
+          {
+            const int linkedSize = -borderIds[ j++ ]-1 ;
+            alugrid_assert( j < idSize );
+            linkedElements.resize( linkedSize );
+            for( int el=0; el<linkedSize; ++el, ++j ) 
+            {
+              alugrid_assert( j < idSize );
+              linkedElements[ el ] = borderIds[ j ];
+            }
+          }
+
           if( hit != vxmapEnd ) 
           {
-            std::vector< int > s = (*hit).second->estimateLinkage ();
+            vertex_STI* vertex = (*hit).second; 
+            if( storeLinkageInVertices ) 
+            {
+              linkageset_t& vxElemLink = vxElemLinkage[ vertex ];
+              const int linkedSize = linkedElements.size();
+              for( int el=0; el< linkedSize; ++el ) 
+              {
+                vxElemLink.insert( linkedElements[ el ] );
+              }
+            }
+
+            std::vector< int > s = vertex->estimateLinkage ();
             if (find (s.begin (), s.end (), rank) == s.end ()) 
             {
               s.push_back( rank );
-              (*hit).second->setLinkage (s);
+              vertex->setLinkage (s);
             }
           }
         }
+      }
+    }
+
+    if( storeLinkageInVertices ) 
+    {
+      // add computed vertex-element linkage to vertices 
+      AccessIterator < vertex_STI >::Handle w ( *this );
+      for (w.first (); ! w.done (); w.next ()) 
+      {
+        vertex_STI& vertex = w.item();
+        vertex.insertLinkedElements( vxElemLinkage[ &vertex ] );
       }
     }
   }
