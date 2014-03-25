@@ -5,7 +5,6 @@
 /** standard headers **/
 #include <iostream>
 /** dune (mpi, field-vector and grid type for dgf) **/
-#include <dune/common/mpihelper.hh>     
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
 
