@@ -340,6 +340,13 @@ namespace ALUGrid
     MPI_Bcast(buff, length, MPI_DOUBLE, root, _mpiComm);
   }
 
+  inline void MpAccessMPI::bcast ( ObjectStream& inout, int root ) const 
+  {
+    char* buffer = inout._buf;
+    int size = inout.capacity();
+    bcast( buffer, size, root );
+  }
+
   inline int MpAccessMPI::exscan( int myvalue ) const 
   {
     int sum = myvalue;

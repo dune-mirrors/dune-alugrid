@@ -138,6 +138,7 @@ namespace ALUGrid
     void bcast(int*, int, int ) const; 
     void bcast(char*, int, int ) const; 
     void bcast(double*, int, int ) const; 
+    void bcast( ObjectStream&, int ) const; 
     int exscan ( int ) const;
     int scan ( int ) const;
 
