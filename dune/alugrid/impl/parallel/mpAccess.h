@@ -60,6 +60,7 @@ namespace ALUGrid
       virtual void bcast(int*,int, int) const = 0 ;
       virtual void bcast(char*,int, int) const = 0 ;
       virtual void bcast(double*,int, int) const = 0 ;
+      virtual void bcast( ObjectStream&, int ) const = 0 ;
       virtual int exscan( int ) const = 0; 
       virtual int scan( int ) const = 0; 
       virtual std::vector< int > gcollect ( int ) const = 0;
