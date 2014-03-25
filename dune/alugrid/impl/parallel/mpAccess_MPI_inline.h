@@ -726,13 +726,6 @@ namespace ALUGrid
         // get vector with destinations 
         const std::vector< int >& sendDest = _mpAccess.sendDest();
 
-        // resize receive buffer if in symmetric mode
-        if( _symmetric ) 
-        {
-          assert( _sendLinks == _recvLinks );
-          osRecv.resize( _sendLinks );
-        }
-
         // send data 
         for (int link = 0; link < _sendLinks; ++link) 
         {
@@ -743,8 +736,10 @@ namespace ALUGrid
           }
 
           // send data 
-          const int bufferSize = sendLink( sendDest[ link ], _tag, osSend[ link ], _sendRequest[ link ], comm );
+          //const int bufferSize = 
+          sendLink( sendDest[ link ], _tag, osSend[ link ], _sendRequest[ link ], comm );
 
+          /*
           // post receive if in symmetric mode
           if( _symmetric ) 
           {
@@ -752,10 +747,37 @@ namespace ALUGrid
             assert( &_recvRequest[ link ] );
             postReceive( sendDest[ link ], _tag, bufferSize, osRecv[ link ], _recvRequest[ link ], comm );
           }
+          */
         }
 
         // set send info 
         _needToSend = false ;
+      }
+
+      // resize receive buffer if in symmetric mode
+      if( _symmetric ) 
+      {
+        // get mpi communicator
+        MPI_Comm comm = _mpAccess.communicator();
+
+        assert( _sendLinks == _recvLinks );
+        osRecv.resize( _recvLinks );
+
+        // get vector with destinations 
+        const std::vector< int >& recvSource = _mpAccess.recvSource();
+
+        // send data 
+        for (int link = 0; link < _recvLinks; ++link) 
+        {
+          // send data 
+          const int bufferSize = osSend[ link ].size();
+
+          // post receive if in symmetric mode
+          assert( _recvRequest );
+          assert( &_recvRequest[ link ] );
+          std::cout << "Post receive" << std::endl;
+          postReceive( recvSource[ link ], _tag, bufferSize, osRecv[ link ], _recvRequest[ link ], comm );
+        }
       }
     }
 
@@ -843,6 +865,33 @@ namespace ALUGrid
       // set wb of ObjectStream, this also sets notReceived to false 
       os.seekp( bufferSize );
 
+      /*
+      int available = 0;
+      MPI_Status status ;
+
+      while( ! available ) 
+      {
+        available = 0;
+        // check for any message with tag (nonblocking)
+        MPI_Iprobe( source, tag, comm, &available, &status ); 
+      }
+
+      assert( available );
+
+      // length of message 
+      int bSize = -1;
+
+      // get length of message 
+      {
+        MY_INT_TEST MPI_Get_count ( & status, MPI_BYTE, & bSize );
+        alugrid_assert (test == MPI_SUCCESS);
+      }
+
+      if( bSize != bufferSize ) 
+        std::cout << bSize << " " << bufferSize << std::endl;
+      assert( bSize == bufferSize );
+      */
+
       // MPI receive (non-blocking)
       {
         MY_INT_TEST MPI_Irecv ( os._buf, bufferSize, MPI_BYTE, source, tag, comm, & request);
@@ -861,7 +910,6 @@ namespace ALUGrid
       // check for any message with tag (nonblocking)
       MPI_Test( & request, &received, &status ); 
 
-      // if object stream size is 0 then not receive is needed
       return bool(received);
     }
 
@@ -875,7 +923,7 @@ namespace ALUGrid
       MPI_Status status;
 
       // msg available, 0 or 1 
-      // available do not mean already received 
+      // available does not mean already received 
       int available = 0;
 
       // check for any message with tag (nonblocking)
