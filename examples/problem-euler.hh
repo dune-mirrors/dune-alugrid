@@ -32,7 +32,7 @@ public:
   {}
 
   //! \copydoc ProblemData::gridFile
-  std::string gridFile ( const std::string &path ) const
+  std::string gridFile ( const std::string &path, const int mpiSize ) const
   { 
     std::ostringstream dgfFileName;
     if( problem_ < 12 )
@@ -120,7 +120,7 @@ public:
   }
 
   //! \copydoc ProblemData::gridFile
-  std::string gridFile ( const std::string &path ) const
+  std::string gridFile ( const std::string &path, const int mpiSize ) const
   { 
     std::ostringstream dgfFileName;
     if( dimD == 3 ) 
@@ -133,6 +133,8 @@ public:
         dgfFileName << path << "/dgf/cube_hc_32768.dgf";
       else if( problem_ == 24 )
         dgfFileName << path << "/dgf/cube_hc_262144.dgf";
+      else if( problem_ == 25 )
+        dgfFileName << path << "/dgf/sb3d_" << mpiSize << ".dgf";
       else 
         dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
     }

@@ -29,11 +29,12 @@ struct ProblemData
 
   /** \brief obtain the file name of the macro grid for this problem
    *
-   *  \param[in]  path  path to the macro grids
+   *  \param[in]  path     path to the macro grids
+   *  \param[in]  mpiSize  number of MPI tasks
    *
    *  \returns the file name of the macro grid
    */
-  virtual std::string gridFile ( const std::string &path ) const = 0;
+  virtual std::string gridFile ( const std::string &path, const int mpiSize ) const = 0;
 
   /** \brief evaluate the initial data
    *
