@@ -155,7 +155,7 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
                   const int face, const bool neighbor, const bool output ) 
 {
   enum { dim = EntityType :: dimension };
-  typedef typename EntityType :: ctype ctype;
+  typedef typename EntityType :: Geometry :: ctype ctype;
 
   typedef Dune::FaceTopologyMapping< Dune::tetra > SimplexFaceMapping;
   typedef Dune::FaceTopologyMapping< Dune::hexa > CubeFaceMapping;
