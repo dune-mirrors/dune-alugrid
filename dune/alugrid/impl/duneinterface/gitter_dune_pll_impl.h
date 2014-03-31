@@ -81,9 +81,6 @@ namespace ALUGrid
     // postRefinement, no loadBalancing done   
     bool duneAdapt (AdaptRestrictProlongType & arp);
 
-    // return true if grid has to be balanced again 
-    bool duneNotifyNewGrid ();
-
     bool duneLoadBalance (); // call loadBalancer 
     bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ); // call loadBalancer a
 

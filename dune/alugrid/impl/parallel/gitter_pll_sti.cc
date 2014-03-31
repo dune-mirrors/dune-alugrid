@@ -1327,31 +1327,25 @@ namespace ALUGrid
       for (w.first (); ! w.done (); w.next ()) w.item ().ldbUpdateGraphVertex (db, gatherScatter);
     }
 
-    const int np = mpAccess ().psize ();
-    // do a repartitioning in the case that gs is null, otherwise check 
-    bool repartition = ( gs == 0 ) ;
     // check in case repartition is initially false 
-    if( ! repartition ) 
-    {
-      // Criterion, if a repartition has to be done 
-      // 
-      // load    - own load 
-      // mean    - mean load of elements 
-      // minload - minmal load 
-      // maxload - maximal load 
+    const int np = mpAccess ().psize ();
+    // Criterion, if a repartition has to be done 
+    // 
+    // load    - own load 
+    // mean    - mean load of elements 
+    // minload - minmal load 
+    // maxload - maximal load 
 
-      // number of leaf elements 
-      const double myload = db.accVertexLoad ();
+    // number of leaf elements 
+    const double myload = db.accVertexLoad ();
 
-      // get:  min(myload), max(myload), sum(myload)
-      MpAccessLocal::minmaxsum_t load = mpAccess ().minmaxsum( myload ); 
+    // get:  min(myload), max(myload), sum(myload)
+    MpAccessLocal::minmaxsum_t load = mpAccess ().minmaxsum( myload ); 
 
-      // get mean value of leaf elements 
-      const double mean = load.sum / double( np );
+    // get mean value of leaf elements 
+    const double mean = load.sum / double( np );
 
-      if( load.max > (_ldbOver * mean) || load.min < (_ldbUnder * mean) ) 
-        repartition = true;
-    }
+    const bool repartition = ((load.max > (_ldbOver * mean)) || (load.min < (_ldbUnder * mean) )) ? true : false ; 
 
 #ifdef ALUGRIDDEBUG
     // make sure every process has the same value of repartition
@@ -1378,8 +1372,8 @@ namespace ALUGrid
     // check if partioner is provided by used
     const bool userDefinedPartitioning = gs && gs->userDefinedPartitioning();
     // check whether we have to repartition 
-    const bool repartition = (userDefinedPartitioning)? gs->repartition() : 
-                                                        checkPartitioning( db, gs );
+    const bool repartition = (userDefinedPartitioning) ? gs->repartition() : 
+                                                         checkPartitioning( db, gs );
 
     int lap2 = clock ();
     int lap3 = lap2 ;

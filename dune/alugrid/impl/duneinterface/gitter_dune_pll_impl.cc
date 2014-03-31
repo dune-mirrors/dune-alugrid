@@ -24,12 +24,6 @@ namespace ALUGrid
          TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI> > > *) p);
   }
 
-  bool GitterDunePll::duneNotifyNewGrid ()
-  {
-    LoadBalancer::DataBase db;
-    return checkPartitioning( db, (GatherScatter*) 0 );
-  }
-
   // done call notify and loadBalancer  
   bool GitterDunePll::duneAdapt ( AdaptRestrictProlongType &arp )
   {
