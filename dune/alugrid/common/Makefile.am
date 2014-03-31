@@ -6,6 +6,7 @@ alucommon_HEADERS = alugrid_assert.hh \
 										declaration.hh \
 										defaultindexsets.hh \
 										geostorage.hh \
+                    hsfc.hh \
 										intersectioniteratorwrapper.hh \
 										interfaces.hh \
                     ldbhandleif.hh \
