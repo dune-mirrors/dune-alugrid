@@ -1,6 +1,7 @@
 #ifndef DUNE_ALU3DGRID_HSFC_HH 
 #define DUNE_ALU3DGRID_HSFC_HH 
 
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 
