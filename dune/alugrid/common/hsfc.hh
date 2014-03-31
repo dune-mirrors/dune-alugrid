@@ -41,10 +41,11 @@ namespace Dune {
 
   public:
     SpaceFillingCurveOrdering( const Coordinate& lower, 
-                               const Coordinate& upper )
+                               const Coordinate& upper, 
+                               const CollectiveCommunication& comm )
       : lower_( lower ),
         length_( upper ),
-        zz_( MPIHelper::getCommunicator() )
+        zz_( comm )
     {
       // compute length
       length_ -= lower_;
@@ -53,12 +54,12 @@ namespace Dune {
     // return unique hilbert index in interval [0,1] given an element's center
     double hilbertIndex( const Coordinate& point ) const 
     {
-      Coordinate center( point );
       assert( point.size() == dimension );
 
+      Coordinate center ;
       // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
       for( int d=0; d<dimension; ++d )
-        center[ d ] = (center[ d ] - lower_[ d ]) / length_[ d ];
+        center[ d ] = (point[ d ] - lower_[ d ]) / length_[ d ];
 
       return Zoltan_HSFC_InvHilbert3d(zz_.Get_C_Handle(), &center[ 0 ] );
     }
