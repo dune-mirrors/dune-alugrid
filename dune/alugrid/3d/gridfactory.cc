@@ -205,7 +205,7 @@ namespace Dune
       }
      
       // get element's center to hilbert index mapping
-      SpaceFillingCurveOrdering< VertexType > sfc( minCoord, maxCoord );
+      SpaceFillingCurveOrdering< VertexType > sfc( minCoord, maxCoord, comm );
 
       typedef std::map< double, int > hsfc_t;
       hsfc_t hsfc;

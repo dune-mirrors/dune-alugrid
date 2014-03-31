@@ -76,51 +76,20 @@ namespace Dune
 #endif
 
     public:
-      SimplePartitioner ( const GridView &gridView, const CollectiveCommunication& comm )
+      SimplePartitioner ( const GridView &gridView, const CollectiveCommunication& comm,
+                          const VertexType& lowerLeft, const VertexType& upperRight )
       : comm_( comm ),
         gridView_( gridView ),
         indexSet_( gridView_.indexSet() ),
         pSize_( comm_.size() ),
-        elementCuts_( pSize_, -1 ) 
-      {
+        elementCuts_( pSize_, -1 ),
 #ifdef USE_ZOLTAN_HSFC_ORDERING
-        // create the space filling curve iterator 
-        typedef typename GridView::template Codim< 0 >::Iterator Iterator;
-        VertexType maxCoord;
-        VertexType minCoord;
-        const Iterator end = gridView_.template end< 0 > ();
-        Iterator it = gridView_.template begin< 0 > ();
-        if( it != end ) 
-        {
-          const Element &element = *it ;
-          VertexType center = element.geometry().center();
-          maxCoord = center;
-          minCoord = center;
-        }
-
-        for( ; it != end; ++it ) 
-        {
-          const Element &element = *it ;
-          VertexType center = element.geometry().center();
-          for( int d=0; d<dimension; ++d )
-          {
-            maxCoord[ d ] = std::max( maxCoord[ d ], center[ d ] );
-            minCoord[ d ] = std::min( minCoord[ d ], center[ d ] );
-          }
-        }
-
-        sfc_ = new SpaceFillingCurveOrderingType( minCoord, maxCoord );
-        maxIndex_ = double(indexSet_.size(0)-1);
+        sfc_( lowerLeft, upperRight, comm_ ),
 #endif
+        maxIndex_( double(indexSet_.size(0)-1) )
+      {
         // compute decomposition of sfc 
         calculateElementCuts();
-      }
-
-      ~SimplePartitioner () 
-      {
-#ifdef USE_ZOLTAN_HSFC_ORDERING
-        delete sfc_;
-#endif
       }
 
     public:
@@ -132,7 +101,7 @@ namespace Dune
         // get center of entity's geometry 
         VertexType center = entity.geometry().center();
         // get hilbert index in [0,1]
-        const double hidx = sfc_->hilbertIndex( center );
+        const double hidx = sfc_.hilbertIndex( center );
         // transform to element index 
         const long int index = (hidx * maxIndex_);
 #else
@@ -219,10 +188,9 @@ namespace Dune
 
 #ifdef USE_ZOLTAN_HSFC_ORDERING
       // get element to hilbert index mapping
-      SpaceFillingCurveOrdering< VertexType >* sfc_;
-      double maxIndex_ ;
+      SpaceFillingCurveOrdering< VertexType > sfc_;
 #endif
-
+      const double maxIndex_ ;
     };
 
   public:
@@ -347,7 +315,7 @@ namespace Dune
       const IndexSet& indexSet = gridView.indexSet();
 
       // get decompostition of the marco grid 
-      SimplePartitioner< GridView, InteriorBorder_Partition > partitioner( gridView, comm );
+      SimplePartitioner< GridView, InteriorBorder_Partition > partitioner( gridView, comm, lowerLeft, upperRight );
 
       // create ALUGrid GridFactory
       typedef GridFactory< Grid > Factory ;
