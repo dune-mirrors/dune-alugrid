@@ -16,6 +16,8 @@
 #include <dune/alugrid/common/alugrid_assert.hh>
 #include <dune/alugrid/common/declaration.hh>
 
+#include <dune/alugrid/3d/gridfactory.hh>
+
 // include DGF parser implementation for SGrid 
 #include <dune/grid/io/file/dgfparser/dgfs.hh>
 
@@ -62,6 +64,8 @@ namespace Dune
 
       typedef typename Grid::template Codim< 0 >::Entity Element;
       typedef typename Grid::template Codim< 0 >::EntityPointer ElementPointer;
+
+      typedef typename Element::Geometry::GlobalCoordinate VertexType;
 
       // type of communicator 
       typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
@@ -124,6 +128,82 @@ namespace Dune
         const int lastRank = nRanks - 1;
         // create the space filling curve iterator 
         typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+#ifdef USE_ZOLTAN_HSFC_ORDERING
+        {
+          // create Zoltan object
+          Zoltan zz( comm_ );
+
+          typedef std::map< double, size_t > hsfc_t;
+          hsfc_t hsfc;
+
+          VertexType maxCoord;
+          VertexType minCoord;
+          const Iterator end = gridView_.template end< 0 > ();
+          Iterator it = gridView_.template begin< 0 > ();
+          if( it != end ) 
+          {
+            const Element &element = *it ;
+            VertexType center = element.geometry().center();
+            maxCoord = center;
+            minCoord = center;
+          }
+
+          for( ; it != end; ++it ) 
+          {
+            const Element &element = *it ;
+            VertexType center = element.geometry().center();
+            for( int d=0; d<dimension; ++d )
+            {
+              maxCoord[ d ] = std::max( maxCoord[ d ], center[ d ] );
+              minCoord[ d ] = std::min( minCoord[ d ], center[ d ] );
+            }
+          }
+
+          VertexType length( maxCoord );
+          length -= minCoord ;
+
+          for( Iterator it = gridView_.template begin< 0 > (); it != end; ++it ) 
+          {
+            const Element &element = *it ;
+            VertexType center = element.geometry().center();
+
+            // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
+            for( int d=0; d<dimension; ++d )
+              center[ d ] = (center[ d ] - minCoord[ d ]) / length[ d ];
+            // call Zoltan's hilbert curve coordinate mapping 
+           
+            const double hidx = Zoltan_HSFC_InvHilbert3d(zz.Get_C_Handle(), &center[ 0 ] );
+            // store element index 
+            hsfc[ hidx ] = indexSet_.index( element );
+          }
+
+          // iterate over space filling curve 
+          typedef typename hsfc_t :: iterator iterator;
+          const iterator hend = hsfc.end();
+          for( iterator it = hsfc.begin(); it != hend; ++it )
+          {
+            if( localElementNumber >= elementCount ) 
+            {
+              // increase rank 
+              if( rank < lastRank ) ++ rank;
+
+              // reset local number 
+              localElementNumber = 0;
+
+              // switch to smaller number if red line is crossed 
+              if( elementCount == maxPerProc && rank >= percentage ) 
+                elementCount = minPerProc ;
+            }
+
+            alugrid_assert ( rank < nRanks );
+            partition_[ (*it).second ] = rank ;
+
+            // increase counters 
+            ++elementNumber;
+            ++localElementNumber; 
+          }
+        }
+#else
         const Iterator end = gridView_.template end< 0 > ();
         for( Iterator it = gridView_.template begin< 0 > (); it != end; ++it ) 
         {
@@ -149,6 +229,7 @@ namespace Dune
           ++elementNumber;
           ++localElementNumber; 
         }
+#endif
       }
       
       const CollectiveCommunication& comm_;

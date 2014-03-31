@@ -248,7 +248,7 @@ namespace Dune
         for( unsigned int d=0; d<dimension; ++d )
           center[ d ] = (center[ d ] - minCoord[ d ]) / length[ d ];
 
-        // call Zoltan's hilber curve coordinate mapping 
+        // call Zoltan's hilbert curve coordinate mapping 
         const double hidx = Zoltan_HSFC_InvHilbert3d(zz.Get_C_Handle(), &center[ 0 ] );
         // store element index 
         hsfc[ hidx ] = i;
