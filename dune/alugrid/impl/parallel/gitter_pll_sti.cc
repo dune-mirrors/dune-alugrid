@@ -1401,7 +1401,8 @@ namespace ALUGrid
       // if a method was given, perform load balancing
       if (userDefinedPartitioning || ldbMth)
       {
-        const bool storeLinkage = storeLinkageInVertices();
+        // storage of vertex linkage is only done when no user defined partioning is given
+        const bool storeLinkage = storeLinkageInVertices() && ! userDefinedPartitioning ;
 
         // check gather-scatter object and call appropriate method 
         if( gs ) 
@@ -1413,6 +1414,7 @@ namespace ALUGrid
 
         if( storeLinkage ) 
         {
+          // if vertex linkage to element has not been computed, do it now then
           if( ! _vertexLinkageComputed ) 
           {
             containerPll ().identification (mpAccess (), true, storeLinkage );
