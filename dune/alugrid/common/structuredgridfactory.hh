@@ -16,7 +16,7 @@
 #include <dune/alugrid/common/alugrid_assert.hh>
 #include <dune/alugrid/common/declaration.hh>
 
-#include <dune/alugrid/3d/gridfactory.hh>
+#include <dune/alugrid/common/hsfc.hh>
 
 // include DGF parser implementation for SGrid 
 #include <dune/grid/io/file/dgfparser/dgfs.hh>
@@ -130,12 +130,6 @@ namespace Dune
         typedef typename GridView::template Codim< 0 >::Iterator Iterator;
 #ifdef USE_ZOLTAN_HSFC_ORDERING
         {
-          // create Zoltan object
-          Zoltan zz( comm_ );
-
-          typedef std::map< double, size_t > hsfc_t;
-          hsfc_t hsfc;
-
           VertexType maxCoord;
           VertexType minCoord;
           const Iterator end = gridView_.template end< 0 > ();
@@ -159,20 +153,16 @@ namespace Dune
             }
           }
 
-          VertexType length( maxCoord );
-          length -= minCoord ;
+          // get element to hilbert index mapping
+          SpaceFillingCurveOrdering< VertexType > sfc( minCoord, maxCoord );
+
+          typedef std::map< double, size_t > hsfc_t;
+          hsfc_t hsfc;
 
           for( Iterator it = gridView_.template begin< 0 > (); it != end; ++it ) 
           {
             const Element &element = *it ;
-            VertexType center = element.geometry().center();
-
-            // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
-            for( int d=0; d<dimension; ++d )
-              center[ d ] = (center[ d ] - minCoord[ d ]) / length[ d ];
-            // call Zoltan's hilbert curve coordinate mapping 
-           
-            const double hidx = Zoltan_HSFC_InvHilbert3d(zz.Get_C_Handle(), &center[ 0 ] );
+            const double hidx = sfc.hilbertIndex( element.geometry().center() );
             // store element index 
             hsfc[ hidx ] = indexSet_.index( element );
           }
