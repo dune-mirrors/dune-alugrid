@@ -71,17 +71,56 @@ namespace Dune
       typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
 
+#ifdef USE_ZOLTAN_HSFC_ORDERING
+      typedef SpaceFillingCurveOrdering< VertexType >  SpaceFillingCurveOrderingType;
+#endif
+
     public:
       SimplePartitioner ( const GridView &gridView, const CollectiveCommunication& comm )
       : comm_( comm ),
         gridView_( gridView ),
-        indexSet_( gridView_.indexSet() )
+        indexSet_( gridView_.indexSet() ),
+        pSize_( comm_.size() ),
+        elementCuts_( pSize_, -1 ) 
       {
-        // per default every entity is on rank 0 
-        partition_.resize( indexSet_.size( 0 ) );
-        std::fill( partition_.begin(), partition_.end(), 0 );
-        // compute decomposition 
-        calculatePartitioning();
+#ifdef USE_ZOLTAN_HSFC_ORDERING
+        // create the space filling curve iterator 
+        typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+        VertexType maxCoord;
+        VertexType minCoord;
+        const Iterator end = gridView_.template end< 0 > ();
+        Iterator it = gridView_.template begin< 0 > ();
+        if( it != end ) 
+        {
+          const Element &element = *it ;
+          VertexType center = element.geometry().center();
+          maxCoord = center;
+          minCoord = center;
+        }
+
+        for( ; it != end; ++it ) 
+        {
+          const Element &element = *it ;
+          VertexType center = element.geometry().center();
+          for( int d=0; d<dimension; ++d )
+          {
+            maxCoord[ d ] = std::max( maxCoord[ d ], center[ d ] );
+            minCoord[ d ] = std::min( minCoord[ d ], center[ d ] );
+          }
+        }
+
+        sfc_ = new SpaceFillingCurveOrderingType( minCoord, maxCoord );
+        maxIndex_ = double(indexSet_.size(0)-1);
+#endif
+        // compute decomposition of sfc 
+        calculateElementCuts();
+      }
+
+      ~SimplePartitioner () 
+      {
+#ifdef USE_ZOLTAN_HSFC_ORDERING
+        delete sfc_;
+#endif
       }
 
     public:
@@ -89,21 +128,38 @@ namespace Dune
       int rank( const Entity &entity ) const
       {
         alugrid_assert ( Entity::codimension == 0 );
-        return rank( (int)indexSet_.index( entity ) );
+#ifdef USE_ZOLTAN_HSFC_ORDERING
+        // get center of entity's geometry 
+        VertexType center = entity.geometry().center();
+        // get hilbert index in [0,1]
+        const double hidx = sfc_->hilbertIndex( center );
+        // transform to element index 
+        const long int index = (hidx * maxIndex_);
+#else
+        const long int index = indexSet_.index( entity );
+#endif
+        return rank( index );
       }
 
-      int rank( int index ) const
+    protected:  
+      int rank( long int index ) const
       {
-        return partition_[ index ];
+        if( index < elementCuts_[ 0 ] ) return 0;
+        for( int p=1; p<pSize_; ++p )
+        {
+          if( index >= elementCuts_[ p-1 ] && index < elementCuts_[ p ] )
+            return p;
+        }
+        return pSize_-1;
       }
 
     protected:
-      void calculatePartitioning()
+      void calculateElementCuts()
       {
         const size_t nElements = indexSet_.size( 0 );
 
         // get number of MPI processes  
-        const int nRanks = comm_.size();
+        const int nRanks = pSize_;
 
         // get minimal number of entities per process 
         const size_t minPerProc = (double(nElements) / double( nRanks ));
@@ -117,89 +173,19 @@ namespace Dune
         percentage -= minPerProc ;
         percentage *= nRanks ;
 
-        // per default every entity is on rank 0 
-        partition_.resize( indexSet_.size( 0 ) );
-        std::fill( partition_.begin(), partition_.end(), 0 );
-
         int rank = 0;
         size_t elementCount  = maxPerProc ;
         size_t elementNumber = 0;
         size_t localElementNumber = 0;
         const int lastRank = nRanks - 1;
-        // create the space filling curve iterator 
-        typedef typename GridView::template Codim< 0 >::Iterator Iterator;
-#ifdef USE_ZOLTAN_HSFC_ORDERING
+        
+        const size_t size = indexSet_.size( 0 );
+        for( size_t i=0; i<size; ++i ) 
         {
-          VertexType maxCoord;
-          VertexType minCoord;
-          const Iterator end = gridView_.template end< 0 > ();
-          Iterator it = gridView_.template begin< 0 > ();
-          if( it != end ) 
-          {
-            const Element &element = *it ;
-            VertexType center = element.geometry().center();
-            maxCoord = center;
-            minCoord = center;
-          }
-
-          for( ; it != end; ++it ) 
-          {
-            const Element &element = *it ;
-            VertexType center = element.geometry().center();
-            for( int d=0; d<dimension; ++d )
-            {
-              maxCoord[ d ] = std::max( maxCoord[ d ], center[ d ] );
-              minCoord[ d ] = std::min( minCoord[ d ], center[ d ] );
-            }
-          }
-
-          // get element to hilbert index mapping
-          SpaceFillingCurveOrdering< VertexType > sfc( minCoord, maxCoord );
-
-          typedef std::map< double, size_t > hsfc_t;
-          hsfc_t hsfc;
-
-          for( Iterator it = gridView_.template begin< 0 > (); it != end; ++it ) 
-          {
-            const Element &element = *it ;
-            const double hidx = sfc.hilbertIndex( element.geometry().center() );
-            // store element index 
-            hsfc[ hidx ] = indexSet_.index( element );
-          }
-
-          // iterate over space filling curve 
-          typedef typename hsfc_t :: iterator iterator;
-          const iterator hend = hsfc.end();
-          for( iterator it = hsfc.begin(); it != hend; ++it )
-          {
-            if( localElementNumber >= elementCount ) 
-            {
-              // increase rank 
-              if( rank < lastRank ) ++ rank;
-
-              // reset local number 
-              localElementNumber = 0;
-
-              // switch to smaller number if red line is crossed 
-              if( elementCount == maxPerProc && rank >= percentage ) 
-                elementCount = minPerProc ;
-            }
-
-            alugrid_assert ( rank < nRanks );
-            partition_[ (*it).second ] = rank ;
-
-            // increase counters 
-            ++elementNumber;
-            ++localElementNumber; 
-          }
-        }
-#else
-        const Iterator end = gridView_.template end< 0 > ();
-        for( Iterator it = gridView_.template begin< 0 > (); it != end; ++it ) 
-        {
-          const Element &element = *it ;
           if( localElementNumber >= elementCount ) 
           {
+            elementCuts_[ rank ] = i ;
+
             // increase rank 
             if( rank < lastRank ) ++ rank;
 
@@ -211,15 +197,16 @@ namespace Dune
               elementCount = minPerProc ;
           }
 
-          const size_t index = indexSet_.index( element );
-          alugrid_assert ( rank < nRanks );
-          partition_[ index ] = rank ;
-
           // increase counters 
           ++elementNumber;
           ++localElementNumber; 
         }
-#endif
+
+        // set cut for last process
+        elementCuts_[ lastRank ] = size ;
+
+        //for( int p=0; p<pSize_; ++p ) 
+        //  std::cout << "P[ " << p << " ] = " << elementCuts_[ p ] << std::endl;
       }
       
       const CollectiveCommunication& comm_;
@@ -227,8 +214,15 @@ namespace Dune
       const GridView& gridView_;
       const IndexSet &indexSet_;
 
-      // load balancer bounds 
-      std::vector< int > partition_;
+      const int pSize_;
+      std::vector< long int > elementCuts_ ;
+
+#ifdef USE_ZOLTAN_HSFC_ORDERING
+      // get element to hilbert index mapping
+      SpaceFillingCurveOrdering< VertexType >* sfc_;
+      double maxIndex_ ;
+#endif
+
     };
 
   public:
