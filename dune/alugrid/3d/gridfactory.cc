@@ -15,25 +15,7 @@
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
 
-// to disable Zoltans HSFC ordering of the macro elements define 
-// DISABLE_ZOLTAN_HSFC_ORDERING on the command line
-#if HAVE_ZOLTAN && HAVE_MPI 
-#ifndef DISABLE_ZOLTAN_HSFC_ORDERING
-#define USE_ZOLTAN_HSFC_ORDERING
-#else
-#warning "ZOLTAN_HSFC_ORDERING disabled by DISABLE_ZOLTAN_HSFC_ORDERING"
-#endif
-#endif
-
-#ifdef USE_ZOLTAN_HSFC_ORDERING
-#define ZOLTAN_CONFIG_H_INCLUDED
-#include <zoltan_cpp.h>
-
-extern "C" {
-  extern double Zoltan_HSFC_InvHilbert3d (Zoltan_Struct *zz, double *coord);
-}
-
-#endif
+#include <dune/alugrid/common/hsfc.hh>
 
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline 
@@ -203,12 +185,6 @@ namespace Dune
         return ;
       }
 
-      // create Zoltan object
-      Zoltan zz( comm );
-
-      typedef std::map< double, int > hsfc_t;
-      hsfc_t hsfc;
-
       VertexType maxCoord;
       VertexType minCoord;
       const size_t vertexSize = vertices.size();
@@ -227,9 +203,12 @@ namespace Dune
           minCoord[ d ] = std::min( minCoord[ d ], vx[ d ] );
         }
       }
+     
+      // get element's center to hilbert index mapping
+      SpaceFillingCurveOrdering< VertexType > sfc( minCoord, maxCoord );
 
-      VertexType length( maxCoord );
-      length -= minCoord ;
+      typedef std::map< double, int > hsfc_t;
+      hsfc_t hsfc;
 
       for( size_t i=0; i<elemSize; ++i ) 
       {
@@ -244,14 +223,8 @@ namespace Dune
         }
         center /= double(vxSize);
 
-        // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
-        for( unsigned int d=0; d<dimension; ++d )
-          center[ d ] = (center[ d ] - minCoord[ d ]) / length[ d ];
-
-        // call Zoltan's hilbert curve coordinate mapping 
-        const double hidx = Zoltan_HSFC_InvHilbert3d(zz.Get_C_Handle(), &center[ 0 ] );
-        // store element index 
-        hsfc[ hidx ] = i;
+        // generate hilbert index from element's center and store index 
+        hsfc[ sfc.hilbertIndex( center ) ] = i;
       }
 
       typedef typename hsfc_t :: iterator iterator;
