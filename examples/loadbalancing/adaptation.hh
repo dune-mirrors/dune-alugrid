@@ -256,7 +256,11 @@ inline void LeafAdaptation< Grid, LoadBalanceHandle >::operator() ( Vector &solu
   Dune :: Timer lbTimer ;
   // re-balance grid 
   DataHandle<Grid,Container> dataHandle( grid_, container ) ;
-  grid_.loadBalance( ldb_, dataHandle );
+  if ( ldb_.repartition() )
+  {
+    grid_.repartition( ldb_, dataHandle );
+    // grid_.loadBalance( dataHandle );
+  }
 
   // cleanup adaptation markers 
   grid_.postAdapt();
