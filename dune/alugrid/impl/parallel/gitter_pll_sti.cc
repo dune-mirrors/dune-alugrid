@@ -1398,11 +1398,8 @@ namespace ALUGrid
         // storage of vertex linkage is only done when no user defined partioning is given
         const bool storeLinkage = storeLinkageInVertices() && ! userDefinedPartitioning ;
 
-        // check gather-scatter object and call appropriate method 
-        if( gs ) 
-          duneRepartitionMacroGrid( db, *gs );  
-        else   
-          repartitionMacroGrid (db);
+        // call repartition macro grid 
+        repartitionMacroGrid (db, gs);
 
         lap3 = clock();
 
@@ -1423,7 +1420,6 @@ namespace ALUGrid
 
         // calls identification and exchangeDynamicState 
         doNotifyMacroGridChanges ( ! storeLinkage );
-
       }
     }
 
@@ -1481,7 +1477,6 @@ namespace ALUGrid
   {
     // this method computes the globally unique element indices 
     // that are needed for the graph partitioning methods 
-
     alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::computeGraphVertexIndices () " << std::endl, 1) : 1);
     AccessIterator < helement_STI >::Handle w ( containerPll () );
 

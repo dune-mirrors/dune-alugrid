@@ -84,11 +84,7 @@ namespace ALUGrid
     bool duneLoadBalance (); // call loadBalancer 
     bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ); // call loadBalancer a
 
-  protected:  
-    void doRepartitionMacroGrid(LoadBalancer::DataBase &, GatherScatterType* );
   public:  
-    using GitterPll::duneRepartitionMacroGrid;
-    using GitterPll::repartitionMacroGrid;
 
     // communication of border data 
     void borderBorderCommunication (
