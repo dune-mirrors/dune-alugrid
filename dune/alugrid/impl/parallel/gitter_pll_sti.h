@@ -245,12 +245,10 @@ namespace ALUGrid
       virtual void exchangeDynamicState ();
 
     protected:   
-      void doRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
       void computeGraphVertexIndices();
       void doNotifyMacroGridChanges ( bool );
     public:  
-      virtual void repartitionMacroGrid (LoadBalancer::DataBase &);
-      virtual void duneRepartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType& );
+      virtual void repartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
       void setVertexLinkage( LoadBalancer::DataBase & );
       
       virtual bool checkPartitioning(LoadBalancer::DataBase &, GatherScatterType* );
