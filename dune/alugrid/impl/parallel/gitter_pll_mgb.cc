@@ -1018,7 +1018,7 @@ namespace ALUGrid
   };
 
   // method was overloaded because here we use our DuneParallelGridMover 
-  void GitterPll::doRepartitionMacroGrid ( LoadBalancer::DataBase &db, GatherScatterType *gatherScatter )
+  void GitterPll::repartitionMacroGrid ( LoadBalancer::DataBase &db, GatherScatterType *gatherScatter )
   {
     // get communicator 
     MpAccessLocal& mpa = mpAccess();
@@ -1233,20 +1233,6 @@ namespace ALUGrid
       }
     }
     return;
-  }
-
-  void GitterPll::repartitionMacroGrid (LoadBalancer::DataBase & db) 
-  {
-    // call repartition of macro grid without gather-scatter object 
-    doRepartitionMacroGrid( db, (GatherScatterType *) 0 );
-  }
-
-  // dune  version 
-  void GitterPll::
-  duneRepartitionMacroGrid (LoadBalancer::DataBase & db, GatherScatterType & gs) 
-  {
-    // call reparition implementation 
-    doRepartitionMacroGrid( db, &gs );
   }
 
 } // namespace ALUGrid
