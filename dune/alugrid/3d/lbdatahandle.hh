@@ -270,6 +270,7 @@ namespace Dune
   public:
     typedef typename LDBHandleBase  :: LoadBalanceHandle LoadBalanceHandle;
     typedef typename DataHandleBase :: DataHandle        DataHandle ;
+    typedef typename LDBHandleBase::Element Element;
 
     ALUGridLoadBalanceDataHandleWrapper( const Grid &grid, 
                                          LoadBalanceHandleImpl &ldbHandle, 
@@ -278,12 +279,24 @@ namespace Dune
       DataHandleBase( grid, dataHandle )
     {}
 
+#if 0
     // methods inherited from ALUGridLoadBalanceHandleWrapper 
     using LDBHandleBase :: userDefinedPartitioning ;
     using LDBHandleBase :: userDefinedLoadWeights ;
     using LDBHandleBase :: repartition ;
     using LDBHandleBase :: loadWeight ;
     using LDBHandleBase :: destination ; 
+#endif
+    bool userDefinedPartitioning () const 
+    { return LDBHandleBase::userDefinedPartitioning(); }
+    bool userDefinedLoadWeights () const 
+    { return LDBHandleBase::userDefinedLoadWeights(); }
+    bool repartition () const 
+    { return LDBHandleBase::repartition(); }
+    int loadWeight( const Element &element ) const 
+    { return LDBHandleBase::loadWeight(element); }
+    int destination( const Element &element ) const 
+    { return LDBHandleBase::destination(element); }
 
     // methods inherited from ALUGridDataHandleWrapper
     using DataHandleBase :: inlineData ;

@@ -38,6 +38,10 @@ public:
 
   bool userDefinedPartitioning () const
   {
+  /*
+    std::cout << "[" << this->grid_.comm().rank() << "]: " 
+              << "loadbalance.hh:userDefinedPartitioning() -> " << angle_ << std::endl;
+   */
     return true;
   }
   // return true if user defined load balancing weights are provided
@@ -50,6 +54,10 @@ public:
   bool repartition () 
   { 
     angle_ += 2.*M_PI/50.;
+    /*
+    std::cout << "[" << this->grid_.comm().rank() << "]: " 
+              << "loadbalance.hh:repartition() -> " << angle_ << std::endl;
+    */
     return true;
   }
   // return load weight of given element 

@@ -54,7 +54,7 @@ namespace Dune {
     // return unique hilbert index in interval [0,1] given an element's center
     double hilbertIndex( const Coordinate& point ) const 
     {
-      assert( point.size() == dimension );
+      assert( point.size() == (unsigned int)dimension );
 
       Coordinate center ;
       // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
