@@ -48,7 +48,7 @@ void method ( int startLevel, int maxLevel, const char* outpath )
 #endif
   LoadBalancer ldb(grid);
 
-  grid.loadBalance( ldb );
+  grid.repartition( ldb ); 
   // grid.loadBalance();
 
   const bool verboseRank = grid.comm().rank() == 0 ;

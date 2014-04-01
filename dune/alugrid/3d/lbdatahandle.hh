@@ -5,10 +5,10 @@
 
 #include <dune/common/bartonnackmanifcheck.hh>
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/alugrid/common/ldbhandleif.hh>
 
 namespace Dune
 {
+  struct LoadBalanceHandleWithReserveAndCompress {};
 
   template< class Grid, class DataHandleImpl, class Data >
   class ALUGridDataHandleWrapper
@@ -56,7 +56,7 @@ namespace Dune
 
     // check whether DataHandleImpl is derived from LoadBalanceHandleWithReserveAndCompress
     static const bool hasCompressAndReserve =  Conversion< DataHandleImpl,
-                           LoadBalanceHandleWithReserveAndCompress >::exists ;
+                      LoadBalanceHandleWithReserveAndCompress >::exists ;
     // don't transmit size in case we have special DataHandleImpl
     static const bool transmitSize = ! hasCompressAndReserve ;
 
@@ -192,15 +192,35 @@ namespace Dune
       }
       dataHandle_.scatter( stream, entity, size );
     }
+
+  public:
+    bool userDefinedPartitioning () const 
+    {
+      return false;
+    }
+    bool repartition () const 
+    { 
+      return false;
+    }
+    bool userDefinedLoadWeights () const
+    {
+      return false;
+    }
+    double loadWeight( const Element &element ) const 
+    { 
+      return -1;
+    }
+    int destination( const Element &element ) const 
+    { 
+      return -1;
+    }
   };
 
 
-  template< class Grid, class LoadBalanceHandleImpl >
+  template< class Grid, class LoadBalanceHandle, bool internal >
   class ALUGridLoadBalanceHandleWrapper
   {
   public:
-    typedef LoadBalanceHandleIF< LoadBalanceHandleImpl > LoadBalanceHandle;
-    typedef typename Grid :: ObjectStreamType ObjectStream;
     template< int codim >
     struct Codim
     {
@@ -223,57 +243,50 @@ namespace Dune
     // return true if user defined partitioning methods should be used 
     bool userDefinedPartitioning () const 
     {
-      return ldbHandle_.userDefinedPartitioning();
-    }
-    // return true if user defined load balancing weights are provided
-    bool userDefinedLoadWeights () const 
-    { 
-      return ldbHandle_.userDefinedLoadWeights();
+      std::cout << "lbdatahandle.hh:userDefinedPartitioning " << !internal << std::endl;
+      return !internal;
     }
     // returns true if user defined partitioning needs to be readjusted 
     bool repartition () const 
     { 
-      return ldbHandle_.repartition();
-    }
-    // return load weight of given element 
-    int loadWeight( const Element &element ) const 
-    { 
-      return ldbHandle_.loadWeight(element);
+      return true;
     }
 
+    // return true if user defined weights have been provided
+    bool userDefinedLoadWeights () const
+    {
+      return internal;
+    }
+    // return load weight of given element 
+    double loadWeight( const Element &element ) const 
+    { 
+      assert( internal );
+      return ldbHandle_(element);
+    }
     // return destination (i.e. rank) where the given element should be moved to 
     // this needs the methods userDefinedPartitioning to return true
     int destination( const Element &element ) const 
     { 
-      return ldbHandle_.destination(element);
+      std::cout << "lbdatahandle.hh:destination" << std::endl;
+      assert( !internal );
+      return ldbHandle_(element);
     }
-
-    ///////////////////////////////////////////////////////////////
-    //  dummy methods to fullfil the internal ALUGrid interface 
-    ///////////////////////////////////////////////////////////////
-    //! write data to object stream (no data written here)
-    void inlineData ( ObjectStream &stream, const Element &element ) const {}
-    //! read data from object stream (no data read here)
-    void xtractData ( ObjectStream &stream, const Element &element, size_t newElements ) {}
-    // compress (no compress here) 
-    void compress () {} 
   };
 
-  template< class Grid, class LoadBalanceHandleImpl, class DataHandleImpl, class Data >
+  template< class Grid, class LoadBalanceHandle, class DataHandleImpl, class Data, bool internal >
   class ALUGridLoadBalanceDataHandleWrapper 
-    : public ALUGridLoadBalanceHandleWrapper< Grid, LoadBalanceHandleImpl >,
+    : public ALUGridLoadBalanceHandleWrapper< Grid, LoadBalanceHandle, internal >,
       public ALUGridDataHandleWrapper< Grid, DataHandleImpl, Data >
   {
-    typedef ALUGridLoadBalanceHandleWrapper< Grid, LoadBalanceHandleImpl >  LDBHandleBase ;
-    typedef ALUGridDataHandleWrapper< Grid, DataHandleImpl, Data >          DataHandleBase ;
+    typedef ALUGridLoadBalanceHandleWrapper< Grid, LoadBalanceHandle, internal >  LDBHandleBase ;
+    typedef ALUGridDataHandleWrapper< Grid, DataHandleImpl, Data >                DataHandleBase ;
 
   public:
-    typedef typename LDBHandleBase  :: LoadBalanceHandle LoadBalanceHandle;
     typedef typename DataHandleBase :: DataHandle        DataHandle ;
     typedef typename LDBHandleBase::Element Element;
 
     ALUGridLoadBalanceDataHandleWrapper( const Grid &grid, 
-                                         LoadBalanceHandleImpl &ldbHandle, 
+                                         LoadBalanceHandle &ldbHandle, 
                                          DataHandle &dataHandle )
     : LDBHandleBase( grid, ldbHandle ),
       DataHandleBase( grid, dataHandle )
@@ -281,18 +294,9 @@ namespace Dune
 
 #if 0
     // methods inherited from ALUGridLoadBalanceHandleWrapper 
-    using LDBHandleBase :: userDefinedPartitioning ;
-    using LDBHandleBase :: userDefinedLoadWeights ;
-    using LDBHandleBase :: repartition ;
     using LDBHandleBase :: loadWeight ;
     using LDBHandleBase :: destination ; 
 #endif
-    bool userDefinedPartitioning () const 
-    { return LDBHandleBase::userDefinedPartitioning(); }
-    bool userDefinedLoadWeights () const 
-    { return LDBHandleBase::userDefinedLoadWeights(); }
-    bool repartition () const 
-    { return LDBHandleBase::repartition(); }
     int loadWeight( const Element &element ) const 
     { return LDBHandleBase::loadWeight(element); }
     int destination( const Element &element ) const 
