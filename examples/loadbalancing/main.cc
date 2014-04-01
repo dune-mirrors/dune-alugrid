@@ -35,7 +35,7 @@ void method ( int startLevel, int maxLevel, const char* outpath )
 {
   typedef Dune::GridSelector::GridType Grid;
   /* Grid construction ... */
-  std::string name = "../dgf/unitcube3d.dgf" ;
+  std::string name = "../dgf/cube3d.dgf" ;
   // create grid pointer and release to free memory of GridPtr
   Grid* gridPtr = Dune::GridPtr<Grid>(name).release() ;
 
