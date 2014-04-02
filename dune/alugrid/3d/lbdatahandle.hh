@@ -5,11 +5,10 @@
 
 #include <dune/common/bartonnackmanifcheck.hh>
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/alugrid/common/ldbhandleif.hh>
 
 namespace Dune
 {
-  struct LoadBalanceHandleWithReserveAndCompress {};
-
   template< class Grid, class DataHandleImpl, class Data >
   class ALUGridDataHandleWrapper
   {
