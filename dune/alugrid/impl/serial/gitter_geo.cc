@@ -776,109 +776,123 @@ namespace ALUGrid
       os << str[ i ];
     }
 
-    os << vertexListSize << std::endl;
     {
-      size_t index (0);
+      const int size[ 1 ] = { vertexListSize };
+      os << size;
+      int index = 0 ;
       const vertexlist_t::const_iterator end = _vertexList.end ();
       for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i) 
       {
-        os << (*i)->Point ()[0] << " " << (*i)->Point ()[1] << " " << (*i)->Point ()[2] << std::endl;
+        os << (*i)->Point ();
         vm [ *i ] = index ++;
       }
     }
     if (tetraListSize == 0) 
     {
       alugrid_assert (_hbndseg3List.size () == 0);
-      os << hexaListSize << std::endl;
+
       {
+        const int size[ 1 ] = { hexaListSize };
+        os << size ;
+        int v[ 8 ];
         const hexalist_t::const_iterator end = _hexaList.end ();
         for (hexalist_t::const_iterator i = _hexaList.begin (); i != end; ++i ) 
         {
           for (int j = 0; j < 8; ++ j )
           {
-             os << vm [ (*i)->myvertex (j) ];
-             if( j < 7 ) os << " ";
-          };
-          os << std::endl;
+            v[ j ] = vm[ (*i)->myvertex (j) ];
+          }
+          os << v ;
         }
       }
-      os << _hbndseg4List.size () + _periodic4List.size () << std::endl;
       {
+        const int size[ 1 ] = { int(_hbndseg4List.size () + _periodic4List.size ()) };
+        os << size ;
+        int v[ 6 ];
         const hbndseg4list_t::const_iterator end = _hbndseg4List.end ();
         for (hbndseg4list_t::const_iterator i = _hbndseg4List.begin (); i != end; ++i) 
         {
-          os << -(int)(*i)->bndtype () << " " << 4 << " ";
+          v[ 0 ] = -(int)(*i)->bndtype ();
+          v[ 1 ] = 4 ;
           for (int j = 0; j < 4; ++ j ) 
           {
-            os << vm [(*i)->myvertex (0,j)];
-            if( j < 3 ) os << " ";
+            v[ j+2 ] = vm [(*i)->myvertex (0,j)];
           }
-          os << std::endl;
+          os << v;
         }
       }
       {
+        int v[ 10 ];
         const periodic4list_t::const_iterator end = _periodic4List.end ();
         for (periodic4list_t::const_iterator i = _periodic4List.begin (); i != end; ++i) 
         {
-          os << -(int)(hbndseg::periodic) << "  " << 8 << " ";
+          v[ 0 ] = -(int)(hbndseg::periodic);
+          v[ 1 ] = 8;
           for (int j = 0; j < 8; ++j )
           {
-            os << vm [(*i)->myvertex (j)];
-            if( j < 7 ) os << " ";
+            v[ j+2 ] = vm [(*i)->myvertex (j)];
           }
-          os << std::endl;
+          os << v;
         }
       }
     } 
     else if ( hexaListSize == 0 && tetraListSize != 0) 
     {
-      os << tetraListSize << std::endl;
       {
+        const int size[ 1 ] = { tetraListSize };
+        os << size ;
+        int v[ 4 ];
         const tetralist_t::const_iterator end = _tetraList.end ();
         for (tetralist_t::const_iterator i = _tetraList.begin (); i != end; ++i ) 
         {
           for (int j = 0; j < 4; ++ j ) 
           {
-            os << vm [(*i)->myvertex (j)];
-            if( j < 3 ) os << " ";
+            v[ j ] = vm [(*i)->myvertex (j)];
           }
-          os << std::endl;
+          os << v ;
         }
       }
-      os << _hbndseg3List.size () + _periodic3List.size () << std::endl;
       {
+        const int size[ 1 ] = { int(_hbndseg3List.size () + _periodic3List.size ()) };
+        os << size ;
+        int v[ 5 ];
         const hbndseg3list_t::const_iterator end = _hbndseg3List.end ();
         for (hbndseg3list_t::const_iterator i = _hbndseg3List.begin (); i != end; ++i) 
         {
           const hbndseg3_GEO* hbndseg = (*i);
-          os << -(int)hbndseg->bndtype () << " " << 3 << " ";
+          v[ 0 ] = -(int)hbndseg->bndtype ();
+          v[ 1 ] = 3 ;
           for( int j = 0; j < 3; ++ j ) 
           {
-            os << vm [hbndseg->myvertex (0,j)];
-            if( j < 2 ) os << " ";
+            v[ j+2 ] = vm [hbndseg->myvertex (0,j)];
           }
-          os << std::endl;
+          os << v ;
         }
       }
       {
+        int v[ 8 ];
         const periodic3list_t::const_iterator end = _periodic3List.end ();
         for (periodic3list_t::const_iterator i = _periodic3List.begin (); i != end; ++i ) 
         {
-          os << -(int)(hbndseg::periodic) << " " << 6 << " ";
+          v[ 0 ] = -(int)(hbndseg::periodic);
+          v[ 1 ] = 6;
           for (int j = 0; j < 6; ++j ) 
           {
-            os << vm [(*i)->myvertex (j)];
-            if( j < 5 ) os << " ";
+            v[ j+2] = vm [(*i)->myvertex (j)];
           }
-          os << std::endl;
+          os << v;
         }
       }
     }
     {
+      int v[ 2 ] = { 0, -1 };
       // add vertex identifier list at the end 
       const vertexlist_t::const_iterator end = _vertexList.end ();
       for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i)
-        os << (*i)->ident () << " " << -1 << std::endl;
+      {
+        v[ 0 ] = (*i)->ident ();
+        os << v ;
+      }
     }
   }
 
