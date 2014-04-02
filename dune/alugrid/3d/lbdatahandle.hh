@@ -243,7 +243,6 @@ namespace Dune
     // return true if user defined partitioning methods should be used 
     bool userDefinedPartitioning () const 
     {
-      std::cout << "lbdatahandle.hh:userDefinedPartitioning " << !internal << std::endl;
       return !internal;
     }
     // returns true if user defined partitioning needs to be readjusted 
@@ -267,7 +266,6 @@ namespace Dune
     // this needs the methods userDefinedPartitioning to return true
     int destination( const Element &element ) const 
     { 
-      std::cout << "lbdatahandle.hh:destination" << std::endl;
       assert( !internal );
       return ldbHandle_(element);
     }
@@ -292,11 +290,12 @@ namespace Dune
       DataHandleBase( grid, dataHandle )
     {}
 
-#if 0
-    // methods inherited from ALUGridLoadBalanceHandleWrapper 
-    using LDBHandleBase :: loadWeight ;
-    using LDBHandleBase :: destination ; 
-#endif
+    bool userDefinedPartitioning () const 
+    { return LDBHandleBase::userDefinedPartitioning(); }
+    bool userDefinedLoadWeights () const 
+    { return LDBHandleBase::userDefinedLoadWeights(); }
+    bool repartition () const 
+    { return LDBHandleBase::repartition(); }
     int loadWeight( const Element &element ) const 
     { return LDBHandleBase::loadWeight(element); }
     int destination( const Element &element ) const 
