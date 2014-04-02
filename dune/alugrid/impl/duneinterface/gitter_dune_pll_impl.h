@@ -146,7 +146,14 @@ namespace ALUGrid
     // restore grid from std::istream, needed to be overloaded 
     // because before restoring follow faces, index manager has to be
     // restored 
-    virtual void restore(std::istream & in);
+    virtual void restore(std::istream & in) { restoreImpl( in ); }
+    virtual void restore(ObjectStream & in) { restoreImpl( in ); }
+
+  protected:   
+    template <class stream_t>
+    void restoreImpl( stream_t& );  
+   
+  public:  
 
     // write grid to vtk file 
     void tovtk( const std::string &fn);
@@ -178,7 +185,7 @@ namespace ALUGrid
 
     using GitterDuneBasis::restore;
     using GitterDuneBasis::backup;
-   
+
     // rebuild ghost cells by exchanging bounndary info on macro level 
     void rebuildGhostCells();
     
