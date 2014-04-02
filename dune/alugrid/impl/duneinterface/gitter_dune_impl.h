@@ -70,26 +70,30 @@ namespace ALUGrid
   public:
     GitterDuneBasis() : _arp(0), maxlevel_(0) {}
     
+    // done call notify and loadBalancer  
+    bool duneAdapt (AdaptRestrictProlongType & arp);
+
     template <class ostream_t>
     void backupIndices  (ostream_t & out);
 
     template <class istream_t>
     void restoreIndices (istream_t & in );
-
-    // write status of grid  
-    void backup ( std::ostream &out );
-
-    // write status of grid  
-    void backup ( ObjectStream& out );
-
-    // read status of grid 
-    void restore ( std::istream &in );
    
-    // read status of grid 
-    void restore ( ObjectStream &in );
-   
-    // done call notify and loadBalancer  
-    bool duneAdapt (AdaptRestrictProlongType & arp);
+    // write status of grid for ostream 
+    void backup ( std::ostream &out ) { backupImpl( out ); }
+    // write status of grid for ObjectStream
+    void backup ( ObjectStream& out ) { backupImpl( out ); }
+
+    // read status of grid istream
+    void restore ( std::istream &in ) { restoreImpl( in ); }
+    // read status of grid ObjectStream
+    void restore ( ObjectStream &in ) { restoreImpl( in ); }
+  protected:
+    template <class stream_t> 
+    void backupImpl( stream_t& out );
+        
+    template <class stream_t> 
+    void restoreImpl( stream_t& in );
   };
 
   class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis 
@@ -287,7 +291,8 @@ namespace ALUGrid
   }
 
   // wird von Dune verwendet 
-  inline void GitterDuneBasis::backup ( std::ostream &out )
+  template <class stream_t>
+  inline void GitterDuneBasis::backupImpl ( stream_t &out )
   {
     // backup macro grid 
     container ().backup ( out );
@@ -298,18 +303,8 @@ namespace ALUGrid
   }
 
   // wird von Dune verwendet 
-  inline void GitterDuneBasis::backup ( ObjectStream &out )
-  {
-    // backup macro grid 
-    container ().backup ( out );
-    // backup hierarchy 
-    Gitter :: backup ( out );
-    // backup indices 
-    backupIndices ( out );
-  }
-
-  // wird von Dune verwendet 
-  inline void GitterDuneBasis::restore ( std::istream &in )
+  template <class stream_t>
+  inline void GitterDuneBasis::restoreImpl ( stream_t &in )
   {
     // macro grid is created during grid creation
     // restore hierarchy 
@@ -318,18 +313,6 @@ namespace ALUGrid
     // restore indices 
     restoreIndices (in);
   }
-
-  // wird von Dune verwendet 
-  inline void GitterDuneBasis::restore ( ObjectStream &in )
-  {
-    // macro grid is created during grid creation
-    // restore hierarchy 
-    Gitter :: restore (in);
-
-    // restore indices 
-    restoreIndices (in);
-  }
-
 
   template < class A > inline PureElementAccessIterator < A >::
   Handle::Handle (AccessIterator < A > & f) 

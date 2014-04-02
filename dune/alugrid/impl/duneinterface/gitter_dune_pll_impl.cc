@@ -1200,7 +1200,8 @@ namespace ALUGrid
   }
 
   // wird von Dune verwendet 
-  void GitterDunePll::restore ( std::istream &in ) 
+  template <class stream_t>
+  void GitterDunePll::restoreImpl ( stream_t &in ) 
   {
     // false means that bnd faces are not restored 
     Gitter :: restoreImpl( in, false );
