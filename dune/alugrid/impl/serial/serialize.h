@@ -489,6 +489,14 @@ namespace ALUGrid
     return is;
   }
 
+
   } // namespace ALUGrid
+
+  namespace std {
+    inline void getline( ALUGrid::ObjectStream& in, std::string& str )
+    {
+      in >> str;
+    }
+  }
 
 #endif // #ifndef SERIALIZE_H_INCLUDED
