@@ -480,29 +480,29 @@ namespace ALUGrid
     return;
   }
 
-  void MacroGridBuilder::generateRawHexaImage ( std::istream& in, std::ostream &os )
+  void MacroGridBuilder::generateRawHexaImage ( std::istream& in, ObjectStream& os )
   {
     generateRawImage( in, os, HEXA_RAW, PERIODIC4_RAW );
   }
 
-  void MacroGridBuilder::generateRawHexaImage ( ObjectStream& in, std::ostream &os )
+  void MacroGridBuilder::generateRawHexaImage ( ObjectStream& in, ObjectStream& os )
   {
     generateRawImage( in, os, HEXA_RAW, PERIODIC4_RAW );
   }
 
-  void MacroGridBuilder::generateRawTetraImage ( std::istream &in, std::ostream &os )
+  void MacroGridBuilder::generateRawTetraImage ( std::istream &in, ObjectStream& os )
   {
     generateRawImage( in, os, TETRA_RAW, PERIODIC3_RAW );
   }
 
-  void MacroGridBuilder::generateRawTetraImage ( ObjectStream &in, std::ostream &os )
+  void MacroGridBuilder::generateRawTetraImage ( ObjectStream &in, ObjectStream& os )
   {
     generateRawImage( in, os, TETRA_RAW, PERIODIC3_RAW );
   }
 
   template< class istream_t >
   void MacroGridBuilder
-    ::generateRawImage ( istream_t &in, std::ostream &os,
+    ::generateRawImage ( istream_t &in, ObjectStream& os,
                          const ElementRawID elementId, const ElementRawID periodicId )
   {
     // generateRawHexaImage () ist im nur ein Adapter, der aus den 
@@ -625,45 +625,49 @@ namespace ALUGrid
       in.get();
 
     // write vertices 
-    os << nv << std::endl;
+    os.writeObject( nv );
     for (int i = 0; i < nv; ++i )
-      os << pident [i] << " " << coord [i][0] << " " << coord [i][1] << " " << coord [i][2] << std::endl;
+    {
+      os.writeObject( pident [i] );
+      os.writeObject( coord [i][0] );
+      os.writeObject( coord [i][1] );
+      os.writeObject( coord [i][2] );
+    }
 
     // write elements 
-    os << (ne + nper) << std::endl;
+    os.writeObject( int(ne+nper) );
     for (int i = 0; i < ne; ++i)
     {
-      os << elementId << " ";
+      os.writeObject( elementId );
       for( int vx = 0; vx < elementVertices; ++ vx ) 
       {
-        os << pident[ vnum [i][vx] ] << " ";
+        os.writeObject( pident[ vnum [i][vx] ] );
       }
-      os << std::endl;
     }
 
     // write periodic elements 
     for (int i = 0; i < nper; ++i)
     {
-      os << periodicId << " ";
+      os.writeObject( periodicId );
       for( int vx = 0; vx < periodicVertices; ++vx ) 
       {
-        os << pident[ pervec[i][vx] ] << " ";
+        os.writeObject( pident[ pervec[i][vx] ] );
       }
       // write the identification 
-      os << pervec [i][ periodicVertices ] << std::endl;
+      os.writeObject( pervec [i][ periodicVertices ] );
     }
 
     // write boundaries 
-    os << nb << std::endl;
+    os.writeObject( nb );
     for (int i = 0; i < nb; ++i)
     {
-      os << faceVertices << " ";
+      os.writeObject( faceVertices );
       for( int vx = 0; vx < faceVertices; ++vx ) 
       {
-        os << pident[ bvec[i][vx] ] << " ";
+        os.writeObject( pident[ bvec[i][vx] ] );
       }
       // write the identification 
-      os << bvec[i][ faceVertices ] << std::endl;
+      os.writeObject( bvec[i][ faceVertices ] );
     }
 
     // delete temporary memory 
@@ -1100,39 +1104,45 @@ namespace ALUGrid
     return;
   }
 
-  void MacroGridBuilder::inflateMacroGrid ( std::istream &rawInput )
+  void MacroGridBuilder::inflateMacroGrid ( ObjectStream& rawInput )
   {
     const int start = clock ();
     {
       int nv = 0;
-      rawInput >> nv;
-      for (int i = 0; i < nv; i ++ ) {
+      rawInput.readObject( nv );
+      for (int i = 0; i < nv; ++i ) 
+      {
         int id;
-        double x, y, z;
-        rawInput >> id >> x >> y >> z;
-        InsertUniqueVertex (x,y,z,id);
+        double x[ 3 ];
+        rawInput.readObject( id );
+        rawInput.readObject( x[ 0 ] );
+        rawInput.readObject( x[ 1 ] );
+        rawInput.readObject( x[ 2 ] );
+        InsertUniqueVertex (x[ 0 ], x[ 1 ], x[ 2 ], id);
       }
     }
     {
       int ne = 0;
-      rawInput >> ne;
+      rawInput.readObject( ne );
       for (int i = 0; i < ne; i ++ ) 
       {
         int elementType;
-        rawInput >> elementType;
+        rawInput.readObject( elementType );
         switch (elementType) 
         {
         case HEXA_RAW :
           {
             int v [8];
-            rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7];
+            for( int j=0; j<8; ++j )
+              rawInput.readObject( v[ j ] );
             InsertUniqueHexa (v);
           }
           break;
         case TETRA_RAW :
           {
             int v [4];
-            rawInput >> v [0] >> v [1] >> v [2] >> v [3];
+            for( int j=0; j<4; ++j )
+              rawInput.readObject( v[ j ] );
             int orientation = i%2;
             InsertUniqueTetra (v, orientation );
           }
@@ -1140,8 +1150,10 @@ namespace ALUGrid
         case PERIODIC3_RAW :
           {
             int v [6];
+            for( int j=0; j<6; ++j )
+              rawInput.readObject( v[ j ] );
             int bt;
-            rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> bt;
+            rawInput.readObject( bt );
             if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
             {
               std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
@@ -1156,8 +1168,10 @@ namespace ALUGrid
         case PERIODIC4_RAW:
           {
             int v [8];
+            for( int j=0; j<8; ++j )
+              rawInput.readObject( v[ j ] );
             int bt;
-            rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> v [4] >> v [5] >> v [6] >> v [7] >> bt;
+            rawInput.readObject( bt );
             if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
             {
               std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
@@ -1178,15 +1192,18 @@ namespace ALUGrid
     }
     {
       int nb = 0;
-      rawInput >> nb;
-      for (int i = 0; i < nb; i ++) 
+      rawInput.readObject( nb );
+      for (int i = 0; i < nb; ++i) 
       {
         int polygonLen;
-        rawInput >> polygonLen;
+        rawInput.readObject( polygonLen );
         if (polygonLen == 4) 
         {
-          int bt, v [4];
-          rawInput >> v [0] >> v [1] >> v [2] >> v [3] >> bt;
+          int v [4];
+          for( int j=0; j<4; ++j )
+            rawInput.readObject( v[ j ] );
+          int bt;
+          rawInput.readObject( bt );
           if( ! ( Gitter::hbndseg_STI::bndRangeCheck(bt) ) )
           {
             std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
@@ -1196,8 +1213,11 @@ namespace ALUGrid
         } 
         else if (polygonLen == 3) 
         {
-          int bt, v [3];
-          rawInput >> v [0] >> v [1] >> v [2] >> bt;
+          int v [3];
+          for( int j=0; j<3; ++j )
+            rawInput.readObject( v[ j ] );
+          int bt;
+          rawInput.readObject( bt );
           if( ! ( Gitter::hbndseg_STI::bndRangeCheck(bt) ) )
           {
             std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
@@ -1231,12 +1251,9 @@ namespace ALUGrid
   template<class istream_t> 
   void Gitter::Geometric::BuilderIF::macrogridBuilderImpl (istream_t & in) 
   {
-    std::stringstream raw;
+    ObjectStream raw;
     
     // set scientific mode and high precision 
-    raw << std::scientific;
-    raw.precision( ALUGridExternalParameters::precision() );
-
     MacroGridBuilder mm (*this);
 
     std::string firstline;
