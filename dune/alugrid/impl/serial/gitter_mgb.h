@@ -208,18 +208,18 @@ namespace ALUGrid
     public :
       static bool debugOption (int);
 
-      static void generateRawHexaImage ( std::istream &, std::ostream & );
-      static void generateRawHexaImage ( ObjectStream&, std::ostream & );
+      static void generateRawHexaImage ( std::istream&, ObjectStream& );
+      static void generateRawHexaImage ( ObjectStream&, ObjectStream& );
 
-      static void generateRawTetraImage ( std::istream &, std::ostream & );
-      static void generateRawTetraImage ( ObjectStream &, std::ostream & );
+      static void generateRawTetraImage ( std::istream &, ObjectStream& );
+      static void generateRawTetraImage ( ObjectStream &, ObjectStream& );
 
       static void cubeHexaGrid ( int, std::ostream & );
       MacroGridBuilder (BuilderIF &, const bool init = true);
       // deprecated 
       MacroGridBuilder (BuilderIF &, ProjectVertex* );
       virtual ~MacroGridBuilder ();
-      void inflateMacroGrid ( std::istream & );
+      void inflateMacroGrid ( ObjectStream& );
       void backupMacroGrid ( std::ostream & );
 
       // former constructor 
@@ -232,7 +232,7 @@ namespace ALUGrid
 
       // generate raw image of macro grid 
       template<class istream_t> 
-      static void generateRawImage ( istream_t &, std::ostream &, const ElementRawID, const ElementRawID );
+      static void generateRawImage ( istream_t &, ObjectStream&, const ElementRawID, const ElementRawID );
 
       // insert all hexas from elemMap into elemList 
       void hexaMapToList( elementMap_t& elemMap, hexalist_t& elemList, const bool setIndex  );
