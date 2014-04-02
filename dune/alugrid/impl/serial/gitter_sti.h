@@ -1352,11 +1352,9 @@ namespace ALUGrid
     public :
       virtual int iterators_attached () const;
       virtual void backup (std::ostream &) const = 0;
+      virtual void backup (ObjectStream&) const = 0 ;
       virtual void backup (const char*,const char *) const = 0;
 
-      virtual void backupCMode (std::ostream &) const = 0;
-      virtual void backupCMode (const char *,const char *) const = 0;
-    
       // return size of used memory of macro gitter 
       // (size of lists storing the pointers )
       virtual size_t memUsage () = 0;
@@ -2359,18 +2357,15 @@ namespace ALUGrid
         virtual void compressIndexManagers();
         
         virtual void backup (std::ostream &) const;
-        virtual void backup (ObjectStream&) const {};
+        virtual void backup (ObjectStream&) const;
         virtual void backup (const char*,const char *) const;
-        virtual void backupCMode (ObjectStream &) const;
-        virtual void backupCMode (std::ostream &) const;
-        virtual void backupCMode (const char*,const char *) const;
         friend class MacroGridBuilder;
         friend class MacroGhostBuilder;
         friend class ParallelGridMover;
 
       protected:
         template <class ostream_t>
-        void backupCModeImpl (ostream_t &) const;
+        void backupImpl (ostream_t &) const;
       };
     };
   private :
@@ -2438,6 +2433,7 @@ namespace ALUGrid
   protected:  
     // make this method protected to avoid usage 
     virtual bool adapt ();
+
   public:  
     // this method just calls adapt 
     virtual bool adaptWithoutLoadBalancing();
@@ -2448,7 +2444,10 @@ namespace ALUGrid
     virtual void refineRandom (double);
 
     virtual void backup (std::ostream &);
+    virtual void backup (ObjectStream &);
+
     virtual void restore (std::istream &);
+    virtual void restore (ObjectStream &);
 
     // print memory consumption of grid 
     virtual void printMemUsage () = 0;
@@ -2467,7 +2466,11 @@ namespace ALUGrid
     void tovtkImpl( const std::string &fn,
                     const int, const element_t*, const bnd_t* );
 
-    void restoreImpl( std::istream&, const bool restoreBndFaces );
+    template <class stream_t> 
+    void backupImpl( stream_t& );
+
+    template <class stream_t>
+    void restoreImpl( stream_t&, const bool restoreBndFaces );
 
     // these classes are friend because the must call the method iterator on grid 
     friend class LeafIterator < helement_STI >;

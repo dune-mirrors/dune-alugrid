@@ -716,28 +716,25 @@ namespace ALUGrid
     return new Iterator( (*(const Iterator *) w ) );
   }
 
-  void Gitter::Geometric::BuilderIF::backupCMode (ObjectStream & os) const 
+  void Gitter::Geometric::BuilderIF::backup (ObjectStream & os) const 
   {
     // not precision needed here 
     // not working correctly yet
-    // backupCModeImpl( os );
-     
-    std::cerr << "ERROR (fatal): BuilderIF::backupCMode not implemented for ObjectStream." << std::endl;
-    abort();
+    backupImpl( os );
   }
 
-  void Gitter::Geometric::BuilderIF::backupCMode ( std::ostream &os ) const
+  void Gitter::Geometric::BuilderIF::backup ( std::ostream &os ) const
   {
     // set precision for ostreams (different for each stream)
     os.setf( std::ios::fixed, std::ios::floatfield );
     os.precision( ALUGridExternalParameters::precision() );
     os << std::scientific;
     
-    backupCModeImpl( os );
+    backupImpl( os );
   }
 
   template<class ostream_t>
-  void Gitter::Geometric::BuilderIF::backupCModeImpl (ostream_t & os) const 
+  void Gitter::Geometric::BuilderIF::backupImpl (ostream_t & os) const 
   {
     // Das Compatibility Mode Backup sichert das Makrogitter genau
     // dann, wenn es zwischenzeitlich ge"andert wurde, was beim
@@ -749,9 +746,9 @@ namespace ALUGrid
     // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
     // Hexaedernetz vorliegt. Gemischte Netze sind bez"uglich ihres
     // Dateiformats noch nicht spezifiziert.
-    const size_t vertexListSize = _vertexList.size ();
-    const size_t tetraListSize  = _tetraList.size ();
-    const size_t hexaListSize   = _hexaList.size (); 
+    const int vertexListSize = _vertexList.size ();
+    const int tetraListSize  = _tetraList.size ();
+    const int hexaListSize   = _hexaList.size (); 
     
     std::string str; 
     if( tetraListSize == 0 )
@@ -768,7 +765,7 @@ namespace ALUGrid
     } 
     else
     {
-      std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::backupCMode( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
+      std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::backup( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
       abort();
     }
     
@@ -886,30 +883,14 @@ namespace ALUGrid
   }
 
 
-  void Gitter::Geometric::BuilderIF::backupCMode (const char * filePath, const char * fileName) const 
+  void Gitter::Geometric::BuilderIF::backup (const char * filePath, const char * fileName) const 
   {
     std::string name = std::string( filePath ) + std::string( "macro." ) + std::string( fileName );
     std::ofstream out( name.c_str() );
     if( out )
-      backupCMode ( out );
+      backup ( out );
     else
-      std::cerr << "WARNING (ignored): Cannot create file '" << name << "' in Gitter::Geometric::BuilderIF::backupCMode( const char *, const char * )." << std::endl;
-  }
-
-  void Gitter::Geometric::BuilderIF::backup ( std::ostream &os ) const
-  {
-    // Man sollte sich erstmal darauf einigen, wie ein allgemeines Gitterdateiformat 
-    // auszusehen hat f"ur Hexaeder, Tetraeder und alle m"oglichen Pyramiden.
-    // Solange leiten wir die Methodenaufrufe auf backupCMode (..) um.
-    
-    std::cerr << "WARNING (ignored): Gitter::Geometric::BuilderIF::backup( std::ostream & ) rerouted to Gitter::Geometric::BuilderIF::backupCMode( std::ostream & )." << std::endl;
-    backupCMode( os );
-  }
-
-  void Gitter::Geometric::BuilderIF::backup (const char * filePath, const char * fileName) const 
-  {
-    std::cerr << "WARNING (ignored): Gitter::Geometric::BuilderIF::backup( const char *, const char * ) rerouted to Gitter::Geometric::BuilderIF::backupCMode( const char *, const char * )." << std::endl;
-    backupCMode (filePath, fileName);
+      std::cerr << "WARNING (ignored): Cannot create file '" << name << "' in Gitter::Geometric::BuilderIF::backup( const char *, const char * )." << std::endl;
   }
 
   size_t Gitter::Geometric::BuilderIF::memUsage ()
