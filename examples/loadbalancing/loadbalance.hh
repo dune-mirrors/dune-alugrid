@@ -10,10 +10,8 @@
 
 template< class Grid >
 class SimpleLoadBalanceHandle
-: public Dune::LoadBalanceHandleIF< SimpleLoadBalanceHandle<Grid> >
 {
   typedef SimpleLoadBalanceHandle This;
-  typedef Dune::LoadBalanceHandleIF< This > Base;
 
 public:
   static const int dimension = Grid :: dimension;
@@ -38,10 +36,6 @@ public:
 
   bool userDefinedPartitioning () const
   {
-  /*
-    std::cout << "[" << this->grid_.comm().rank() << "]: " 
-              << "loadbalance.hh:userDefinedPartitioning() -> " << angle_ << std::endl;
-   */
     return true;
   }
   // return true if user defined load balancing weights are provided
@@ -54,20 +48,9 @@ public:
   bool repartition () 
   { 
     angle_ += 2.*M_PI/50.;
-    /*
-    std::cout << "[" << this->grid_.comm().rank() << "]: " 
-              << "loadbalance.hh:repartition() -> " << angle_ << std::endl;
-    */
     return true;
   }
-  // return load weight of given element 
-  int loadWeight( const Element &element ) const 
-  { 
-    return 1;
-  }
-  // return destination (i.e. rank) where the given element should be moved to 
-  // this needs the methods userDefinedPartitioning to return true
-  int destination( const Element &element ) const 
+  int operator()( const Element &element ) const 
   { 
     typename Element::Geometry::GlobalCoordinate w = element.geometry().center();
     if (w[0]*w[0]+w[1]*w[1] > 0.2 && this->grid_.comm().size()>0)
@@ -80,7 +63,9 @@ public:
       return p+1;
     }
     else
+    {
       return 0;
+    }
   }
 private:
   double angle_;
@@ -89,10 +74,8 @@ private:
 #if HAVE_ZOLTAN 
 template< class Grid >
 class ZoltanLoadBalanceHandle
-: public Dune::LoadBalanceHandleIF< ZoltanLoadBalanceHandle<Grid> >
 {
   typedef ZoltanLoadBalanceHandle This;
-  typedef Dune::LoadBalanceHandleIF< This > Base;
 
 private:
   typedef typename Grid::GlobalIdSet GlobalIdSet;
@@ -155,11 +138,6 @@ public:
   {
     return true;
   }
-  // return true if user defined load balancing weights are provided
-  bool userDefinedLoadWeights () const
-  {
-    return false;
-  }
 
   // returns true if user defined partitioning needs to be readjusted 
   bool repartition ()
@@ -199,14 +177,10 @@ public:
     first_ = false;
     return (new_partitioning_.changes == 1);
   }
-  // return load weight of given element 
-  int loadWeight( const Element &element ) const 
-  { 
-    return -1; // not used
-  }
+  
   // return destination (i.e. rank) where the given element should be moved to 
   // this needs the methods userDefinedPartitioning to return true
-  int destination( const Element &element ) const 
+  int operator()( const Element &element ) const 
   { 
 	  std::vector<int> elementGID(NUM_GID_ENTRIES);
     // GIdType id = globalIdSet_.id(element);

@@ -580,72 +580,24 @@ namespace ALUGrid
     // return true if user defined partitioning methods should be used 
     bool userDefinedPartitioning () const 
     {
-      const bool v = DataCollectorCaps::HasUserDefinedPartitioning< DataCollectorType >::v;
-      return userDefinedPartitioning ( Dune::integral_constant< bool, v >() );
+      return dc_.userDefinedPartitioning();
     }
 
     // return true if user defined load balancing weights are provided
     bool userDefinedLoadWeights () const
     {
-      const bool v = DataCollectorCaps::HasUserDefinedLoadWeights< DataCollectorType >::v;
-      return userDefinedLoadWeights ( Dune::integral_constant< bool, v >() );
+      return dc_.userDefinedLoadWeights();
     }
 
     // returns true if user defined partitioning needs to be readjusted 
     bool repartition () 
     { 
-      const bool v = DataCollectorCaps::HasUserDefinedPartitioning< DataCollectorType >::v;
-      return repartition( Dune::integral_constant< bool, v >() );
+      return (dc_.userDefinedPartitioning() && dc_.repartition());
     }
 
     // return load weight of given element 
     int loadWeight ( const HElementType &elem ) const
     {
-      const bool v = DataCollectorCaps::HasUserDefinedLoadWeights< DataCollectorType >::v;
-      return loadWeight( elem, Dune::integral_constant< bool, v >() );
-    }
-
-    // return destination (i.e. rank) where the given element should be moved to 
-    // this needs the methods userDefinedPartitioning to return true
-    int destination ( const HElementType &elem ) const
-    { 
-      const bool v = DataCollectorCaps::HasUserDefinedPartitioning< DataCollectorType >::v;
-      return destination( elem, Dune::integral_constant< bool, v >() );
-    }
-
-  private:
-    bool userDefinedPartitioning ( Dune::integral_constant< bool, true > ) const
-    {
-      return dc_.userDefinedPartitioning();
-    }
-
-    bool userDefinedPartitioning ( Dune::integral_constant< bool, false > ) const
-    {
-      return false;
-    }
-
-    bool userDefinedLoadWeights ( Dune::integral_constant< bool, true > ) const
-    {
-      return dc_.userDefinedLoadWeights();
-    }
-
-    bool userDefinedLoadWeights ( Dune::integral_constant< bool, false > ) const
-    {
-      return false;
-    }
-
-    bool repartition ( Dune::integral_constant< bool, true >) const
-    {
-      return (dc_.userDefinedPartitioning() && dc_.repartition());
-    }
-
-    bool repartition ( Dune::integral_constant< bool, false >) const
-    {
-      return false;
-    }
-
-    int loadWeight ( const HElementType &elem, Dune::integral_constant< bool, true > ) const
-    { 
       alugrid_assert ( elem.level() == 0 );
       if( dc_.userDefinedLoadWeights() )
       {
@@ -656,13 +608,9 @@ namespace ALUGrid
         return 1; 
     }
 
-    int loadWeight ( const HElementType &elem, Dune::integral_constant< bool, false > ) const
-    { 
-      alugrid_assert ( elem.level() == 0 );
-      return 1; 
-    }
-
-    int destination ( const HElementType &elem, Dune::integral_constant< bool, true > ) const
+    // return destination (i.e. rank) where the given element should be moved to 
+    // this needs the methods userDefinedPartitioning to return true
+    int destination ( const HElementType &elem ) const
     { 
       alugrid_assert ( elem.level () == 0 );
       if( dc_.userDefinedPartitioning() )
@@ -672,11 +620,6 @@ namespace ALUGrid
       }
       else
         return -1; 
-    }
-
-    int destination ( const HElementType &elem, Dune::integral_constant< bool, false > ) const
-    { 
-      return -1; 
     }
   };
 
