@@ -733,6 +733,18 @@ namespace ALUGrid
     if( debugOption( 20 ) )
       std::cout << "INFO: Gitter::backup ( out = " << out << " )" << std::endl;
 #endif // #ifdef ALUGRIDDEBUG
+    backupImpl( out );
+  }
+
+  // backup taking ObjectStream
+  void Gitter::backup ( ObjectStream &out )
+  {
+    backupImpl( out );
+  }
+
+  template <class stream_t>
+  void Gitter::backupImpl ( stream_t& out )
+  {
     char bisection = char(conformingClosureNeeded());
     // store whether we have bisection refinement 
     out.put( bisection );
@@ -763,7 +775,8 @@ namespace ALUGrid
     }
   }
 
-  void Gitter ::restoreImpl ( std::istream& in, const bool restoreBndFaces ) 
+  template <class stream_t> 
+  void Gitter ::restoreImpl ( stream_t& in, const bool restoreBndFaces ) 
   {
     // store whether we have bisection refinement 
     const char bisection = in.get();
@@ -811,6 +824,12 @@ namespace ALUGrid
     if( debugOption( 20 ) )
       std::cout << "INFO: Gitter::restore ( in = " << in << " )" << std::endl;
 #endif // #ifdef ALUGRIDDEBUG
+    restoreImpl( in, true );
+  }
+
+  // restore taking ObjectStream 
+  void Gitter::restore ( ObjectStream &in )
+  {
     restoreImpl( in, true );
   }
 

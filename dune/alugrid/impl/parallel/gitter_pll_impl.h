@@ -884,6 +884,7 @@ namespace ALUGrid
           using GitterBasis::MacroGitterBasis::iterator;
         public :
           MacroGitterBasisPll (GitterBasisPll *, std::istream & );
+          MacroGitterBasisPll (GitterBasisPll *, ObjectStream & );
           MacroGitterBasisPll (GitterBasisPll * );
          ~MacroGitterBasisPll ();
       }; // end MacroGitterBasisPll 
@@ -906,6 +907,7 @@ namespace ALUGrid
 
       GitterBasisPll ( const std::string &, MpAccessLocal &, ProjectVertex* );
       GitterBasisPll ( std::istream &in, MpAccessLocal &, ProjectVertex* );
+      GitterBasisPll ( ObjectStream &in, MpAccessLocal &, ProjectVertex* );
 
       virtual ~GitterBasisPll ();
 

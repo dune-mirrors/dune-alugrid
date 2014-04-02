@@ -454,7 +454,6 @@ namespace ALUGrid
     return os;
   }
 
-  /*
   typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
   typedef CoutType& (*StandardEndLine)(CoutType&);
 
@@ -462,7 +461,6 @@ namespace ALUGrid
   { 
     return os; 
   }
-  */
 
   // streaming operators for ObjectStream 
   inline ObjectStream &operator<< ( ObjectStream &os, const std::string &s )

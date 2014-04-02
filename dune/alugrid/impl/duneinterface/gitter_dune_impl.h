@@ -79,8 +79,14 @@ namespace ALUGrid
     // write status of grid  
     void backup ( std::ostream &out );
 
+    // write status of grid  
+    void backup ( ObjectStream& out );
+
     // read status of grid 
     void restore ( std::istream &in );
+   
+    // read status of grid 
+    void restore ( ObjectStream &in );
    
     // done call notify and loadBalancer  
     bool duneAdapt (AdaptRestrictProlongType & arp);
@@ -284,7 +290,18 @@ namespace ALUGrid
   inline void GitterDuneBasis::backup ( std::ostream &out )
   {
     // backup macro grid 
-    container ().backupCMode ( out );
+    container ().backup ( out );
+    // backup hierarchy 
+    Gitter :: backup ( out );
+    // backup indices 
+    backupIndices ( out );
+  }
+
+  // wird von Dune verwendet 
+  inline void GitterDuneBasis::backup ( ObjectStream &out )
+  {
+    // backup macro grid 
+    container ().backup ( out );
     // backup hierarchy 
     Gitter :: backup ( out );
     // backup indices 
@@ -293,6 +310,17 @@ namespace ALUGrid
 
   // wird von Dune verwendet 
   inline void GitterDuneBasis::restore ( std::istream &in )
+  {
+    // macro grid is created during grid creation
+    // restore hierarchy 
+    Gitter :: restore (in);
+
+    // restore indices 
+    restoreIndices (in);
+  }
+
+  // wird von Dune verwendet 
+  inline void GitterDuneBasis::restore ( ObjectStream &in )
   {
     // macro grid is created during grid creation
     // restore hierarchy 

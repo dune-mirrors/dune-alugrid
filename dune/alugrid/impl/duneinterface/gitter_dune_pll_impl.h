@@ -62,6 +62,18 @@ namespace ALUGrid
       rebuildGhostCells();
     }
 
+    // constructor taking ObjectStream containing the macro grid
+    GitterDunePll ( ObjectStream &in, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
+    : GitterBasisPll( in, mp, ppv ),
+      balanceGrid_( false )
+    {
+#ifdef ALUGRIDDEBUG
+      __STATIC_myrank = mp.myrank(); 
+#endif
+      // build ghost cells after the macro grid has been assembled 
+      rebuildGhostCells();
+    }
+
     // constructor creating empty grid
     GitterDunePll (MpAccessLocal &mp) 
       : GitterBasisPll ("", mp, 0) 
