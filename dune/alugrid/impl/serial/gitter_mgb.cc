@@ -1243,9 +1243,7 @@ namespace ALUGrid
 
   void Gitter::Geometric::BuilderIF::macrogridBuilder (ObjectStream & in) 
   {
-    // macrogridBuilderImpl( in );
-    std::cerr << "ERROR (fatal): BuilderIF::macrogridBuilder not implemented for ObjectStream." << std::endl;
-    abort();
+    macrogridBuilderImpl( in );
   }
 
   template<class istream_t> 
@@ -1260,7 +1258,7 @@ namespace ALUGrid
     std::getline( in, firstline ); 
 
     // check first character 
-    if ( firstline[ 0 ] == char('!')) 
+    if ( firstline.size() > 0 && firstline[ 0 ] == char('!')) 
     {
       // Das erste Wort nach dem Kommentar steht jetzt in str.
       // Alle weiteren k"onnen noch aus is gelesen werden, das

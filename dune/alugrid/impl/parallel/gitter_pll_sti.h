@@ -336,7 +336,7 @@ namespace ALUGrid
   }
 
   template < class A > inline AccessIteratorTT < A >::~AccessIteratorTT () {
-    alugrid_assert (!ref);
+    //alugrid_assert (!ref);
   }
 
   template < class A > inline AccessIteratorTT < A >::HandleBase::
