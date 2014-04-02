@@ -52,9 +52,6 @@ namespace ALUGrid
       virtual std::pair< IteratorSTI < A > *, IteratorSTI < A > * > iteratorTT (const A *, int) = 0;
       virtual std::pair< IteratorSTI < A > *, IteratorSTI < A > * > iteratorTT (const std::pair< IteratorSTI < A > *, IteratorSTI < A > * > &, int) = 0;
       class HandleBase : public IteratorSTI < A > 
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-                       , public MyAlloc  
-#endif
       {
         AccessIteratorTT < A > & _fac;
         int _l;
@@ -111,9 +108,6 @@ namespace ALUGrid
     // die Iteratorkopien.
 
   template < class A > class listSmartpointer__to__iteratorSTI : public IteratorSTI < A > 
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-                                                               , public MyAlloc 
-#endif
   {
     typedef std::list< A* > container_t ;
     // list to iterate 
@@ -311,9 +305,6 @@ namespace ALUGrid
   };
 
   template < class A > class LeafIteratorTT 
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-    : public MyAlloc 
-#endif
   {
     GitterPll & _grd;
     int _link;
