@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <iostream>
 #include <utility>
 
 #include "myalloc.h"
@@ -437,6 +438,42 @@ namespace ALUGrid
     //    #    #   ##  #          #    #   ##  #
     //    #    #    #  ######     #    #    #  ######
     //
+
+  // streaming operators for ObjectStream 
+  template <int dim>
+  inline ObjectStream& operator << ( ObjectStream& os, const int (&value)[dim] ) 
+  {
+    for( int i=0; i<dim; ++i )
+      os.write( value[dim] );
+    return os;
+  }
+
+  template <int dim>
+  inline std::ostream& operator << ( std::ostream& os, const int (&value)[dim] ) 
+  {
+    for( int i=0; i<dim-1; ++i )
+      os << value[i] << " ";
+    os << value[dim-1] << std::endl;
+    return os;
+  }
+
+  // streaming operators for ObjectStream 
+  template <int dim>
+  inline ObjectStream& operator << ( ObjectStream& os, const double (&value)[dim] ) 
+  {
+    for( int i=0; i<dim; ++i )
+      os.write( value[dim] );
+    return os;
+  }
+
+  template <int dim>
+  inline std::ostream& operator << ( std::ostream& os, const double (&value)[dim] ) 
+  {
+    for( int i=0; i<dim-1; ++i )
+      os << value[i] << " ";
+    os << value[dim-1] << std::endl;
+    return os;
+  }
 
   // streaming operators for ObjectStream 
   template <class T>
