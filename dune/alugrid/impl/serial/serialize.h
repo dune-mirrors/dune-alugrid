@@ -444,7 +444,7 @@ namespace ALUGrid
   inline ObjectStream& operator << ( ObjectStream& os, const int (&value)[dim] ) 
   {
     for( int i=0; i<dim; ++i )
-      os.write( value[dim] );
+      os.write( value[ i ] );
     return os;
   }
 
@@ -462,7 +462,7 @@ namespace ALUGrid
   inline ObjectStream& operator << ( ObjectStream& os, const double (&value)[dim] ) 
   {
     for( int i=0; i<dim; ++i )
-      os.write( value[dim] );
+      os.write( value[ i ] );
     return os;
   }
 
@@ -529,7 +529,8 @@ namespace ALUGrid
 
   } // namespace ALUGrid
 
-  namespace std {
+  namespace std 
+  {
     inline void getline( ALUGrid::ObjectStream& in, std::string& str )
     {
       in >> str;

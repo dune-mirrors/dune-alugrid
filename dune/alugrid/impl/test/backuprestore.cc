@@ -261,8 +261,8 @@ int main (int argc, char ** argv, const char ** envp)
 
   std::stringstream backupname ; 
   backupname << "file." << rank ;
-  std::stringstream databuf;
-  //ALUGrid::ObjectStream databuf ;
+  //std::stringstream databuf;
+  ALUGrid::ObjectStream databuf ;
   {
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
@@ -305,7 +305,6 @@ int main (int argc, char ** argv, const char ** envp)
     file.close();
     //globalRefine(grid, mxl);
     // adapt grid 
-
     grid.backup( databuf );
 
     std::cout << "Grid restored!" << std::endl;
@@ -317,8 +316,8 @@ int main (int argc, char ** argv, const char ** envp)
 
   {
     std::cout << "Try to read stringbuf:" << std::endl;
-    std::cout << "Data Buffer size: " << databuf.str().size() << std::endl;
-    //std::cout << "Data Buffer size: " << databuf.size() << std::endl;
+    //std::cout << "Data Buffer size: " << databuf.str().size() << std::endl;
+    std::cout << "Data Buffer size: " << databuf.size() << std::endl;
     // read grid from file 
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);

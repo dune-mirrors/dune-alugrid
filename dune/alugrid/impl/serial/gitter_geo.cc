@@ -721,6 +721,8 @@ namespace ALUGrid
     // not precision needed here 
     // not working correctly yet
     backupImpl( os );
+    // put one more character because of endl in ascii stream
+    os.put( char(0) );
   }
 
   void Gitter::Geometric::BuilderIF::backup ( std::ostream &os ) const
@@ -770,11 +772,7 @@ namespace ALUGrid
     }
     
     // write header line as vector of characters 
-    const size_t ssize = str.size(); 
-    for( size_t i=0; i<ssize; ++i ) 
-    {
-      os << str[ i ];
-    }
+    os << str; 
 
     {
       const int size[ 1 ] = { vertexListSize };
