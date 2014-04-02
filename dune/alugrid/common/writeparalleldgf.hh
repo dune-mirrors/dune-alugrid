@@ -136,7 +136,7 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
     for( ; it != end; ++it)
     {
       const Element& element = *it ;
-      if( ldb.destination(element)==rank ) // test if element is assigned to this process
+      if( ldb(element)==rank ) // test if element is assigned to this process
       {
         // push element into seed vector
         elementSeeds.push_back( element.seed() ) ;

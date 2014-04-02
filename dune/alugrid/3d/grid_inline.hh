@@ -653,12 +653,13 @@ namespace Dune
     }
   }; // ALU3dGridCommHelper
 
+/*
   template< ALU3dGridElementType elType, class Comm >
   inline bool ALU3dGrid< elType, Comm >::loadBalance ()
   {
     return ALU3dGridCommHelper< elType, Comm >::loadBalance( *this );
   }
-
+*/
 
   // load balance grid  
   template< ALU3dGridElementType elType, class Comm >

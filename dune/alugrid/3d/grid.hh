@@ -43,9 +43,28 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #endif
 
+namespace
+{
+  struct EmptyALUDataHandle
+  : public Dune::CommDataHandleIF< EmptyALUDataHandle, int >
+  {
+    EmptyALUDataHandle() {}
+    bool contains ( int dim, int codim ) const
+    { return false; }
+    bool fixedsize ( int dim, int codim ) const
+    { return true; }
+    template <class E>
+    size_t size ( const E &entity ) const
+    { return 0; }
+    template< class Buffer, class E >
+    void gather ( Buffer &buffer, const E &entity ) const {}
+    template< class Buffer, class E >
+    void scatter ( Buffer &buffer, E &entity, size_t n ) {}
+  };
+}
+
 namespace Dune
 {
-
   // Forward declarations
   template<int cd, int dim, class GridImp> 
   class ALU3dGridEntity;  
@@ -731,14 +750,6 @@ namespace Dune
     //! get level index set of the grid
     const typename Traits :: LevelIndexSet & levelIndexSet (int level) const;
 
-    /** \brief Calculates load of each process and repartition the grid if neccessary. 
-        For parameters of the load balancing process see the README file
-        of the ALUGrid package.
-
-        \return true if the grid has changed 
-     */
-    bool loadBalance ();
-  
   protected:   
     /** \brief Calculates load of each process and repartition the grid if neccessary.
         For parameters of the load balancing process see the README file
@@ -771,58 +782,85 @@ namespace Dune
     template <class DataHandle>
     bool loadBalanceImpl (DataHandle & data);
 
+    // EmptyALUDataHandle emptyDH_;
+
   public:  
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
-               The specific load balancing algorithm is selected from a file
-               alugrid.cfg. 
-       \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface. 
-
-       \return true if grid has changed 
+               The specific load balancing algorithm is selected from a file alugrid.cfg. 
+        \return true if grid has changed 
+    */
+    bool loadBalance ( )
+    {
+      EmptyALUDataHandle dh_;
+      return loadBalance(dh_);
+    }
+    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
+               The specific load balancing algorithm is selected from a file alugrid.cfg. 
+        \param  optional dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include 
+                user data during load balancing
+        \return true if grid has changed 
     */
     template< class DataHandleImpl, class Data >
-    bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
+    bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF ) 
     {
       typedef ALUGridDataHandleWrapper< ThisType, DataHandleImpl, Data > DataHandle;
       DataHandle dataHandle( *this, dataHandleIF );
       // call the above loadBalance method with general DataHandle 
       return loadBalanceImpl( dataHandle );
     }
-
-    /** \brief Calculates load of each process and repartition by using a user specified 
-               load balance handle. This can either define a speparate load balancing
-               algorithm or user defined load weights (see Dune::LoadBalanceHandleIF).
-               No transfer of data data is done since no data handle was passed. 
-       \param  lbHandleIF   load balance handle that implements the Dune::LoadBalanceHandleIF interface.
-
-       \return true if grid has changed 
+    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method,
+               the partitioning can be optimized by providing weights for each element on the macro grid.
+               The specific load balancing algorithm is selected from a file alugrid.cfg. 
+        \param  weights class with double operator()(const Entity<0>&) returning a weight for each element 
+                which the includes in its internal loadbalancing process - for ALUGrid these are all macro elements.
+        \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include 
+                user data during load balancing
+        \return true if grid has changed 
     */
-    template< class LoadBalanceHandleImpl >
-    bool loadBalance ( LoadBalanceHandleIF< LoadBalanceHandleImpl > &lbHandleIF )
-    {
-      typedef ALUGridLoadBalanceHandleWrapper< ThisType, LoadBalanceHandleImpl > LBHandle;
-      LBHandle lbHandle( *this, lbHandleIF );
-      // call the above loadBalance method with general DataHandle 
-      return loadBalanceImpl( lbHandle );
-    }
-
-    /** \brief Calculates load of each process and repartition by using a user specified 
-               load balance handle. This can either define a speparate load balancing
-               algorithm or user defined load weights (see Dune::LoadBalanceHandleIF).
-               Data transfer is done via the passed data handle. 
-       \param  lbHandleIF   load balance handle that implements the Dune::LoadBalanceHandleIF interface.
-       \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface. 
-
-       \return true if grid has changed 
-    */
-    template< class LoadBalanceHandleImpl, class DataHandleImpl, class Data >
-    bool loadBalance ( LoadBalanceHandleImpl &ldbHandle, 
-                       CommDataHandleIF<DataHandleImpl,Data> &dataHandle )
+    template< class LBWeights, class DataHandleImpl, class Data >
+    bool loadBalance ( LBWeights &weights, 
+                       CommDataHandleIF< DataHandleImpl, Data > &dataHandle ) 
     {
       typedef ALUGridLoadBalanceDataHandleWrapper< ThisType, 
-                 LoadBalanceHandleImpl, DataHandleImpl, Data > LBDataHandle;
-      LBDataHandle lbDataHandle( *this, ldbHandle, dataHandle );
+                 LBWeights, DataHandleImpl, Data, true > LBDataHandle;
+      LBDataHandle lbDataHandle( *this, weights, dataHandle );
       return loadBalanceImpl( lbDataHandle );
     }
+    /** \brief Distribute the grid based on a user defined partitioning. 
+        \param  destinations class with int operator()(const Entity<0>&) returning the new owner process
+                of this element. A destination has to be provided for all elements in the grid hierarchy 
+                but depending on the grid implementation it is possibly called on a subset only. 
+                The elements for which the method is called will be moved to the new processor together
+                with all children. ALUGrid requires destinations for all macro elements.
+        \return true if grid has changed 
+    */
+    template< class LBDestinations >
+    bool repartition ( LBDestinations &destinations )
+    {
+      EmptyALUDataHandle dh;
+      return repartition(destinations,dh);
+    }
+    /** \brief Distribute the grid based on a user defined partitioning. 
+        \param  destinations class with int operator()(const Entity<0>&) returning the new owner process
+                of this element. A destination has to be provided for all elements in the grid hierarchy 
+                but depending on the grid implementation it is possibly called on a subset only. 
+                The elements for which the method is called will be moved to the new processor together
+                with all children. ALUGrid requires destinations for all macro elements.
+        \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include 
+                user data during load balancing
+        \return true if grid has changed 
+    */
+    template< class LBDestinations, class DataHandleImpl, class Data >
+    bool repartition ( LBDestinations &destinations, 
+                       CommDataHandleIF< DataHandleImpl, Data > &dataHandle) 
+    {
+      typedef ALUGridLoadBalanceDataHandleWrapper< ThisType, 
+                 LBDestinations, DataHandleImpl, Data,false > LBDataHandle;
+      LBDataHandle lbDataHandle( *this, destinations, dataHandle );
+      return loadBalanceImpl( lbDataHandle );
+    }
+
+
 
     /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
     int ghostSize (int level, int codim) const; 
