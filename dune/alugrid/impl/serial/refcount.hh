@@ -51,12 +51,8 @@ namespace ALUGrid
   };
 
   class IteratorRefcount 
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-  : public Refcount 
-#endif // #ifdef ALUGRID_ITERATORS_WITH_MYALLOC
   {
   public:
-#ifndef ALUGRID_ITERATORS_WITH_MYALLOC
     void reset () { }
     bool positive () const { return false; }
     int operator++ ( int ) const { return 0; }
@@ -65,7 +61,6 @@ namespace ALUGrid
     int operator-- () const { return 0; }  
     bool operator! () const { return false; }
     operator int () const { return 0; }
-#endif // #ifndef ALUGRID_ITERATORS_WITH_MYALLOC
   };
 
 } // namespace ALUGrid

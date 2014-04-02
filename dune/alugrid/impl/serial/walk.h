@@ -220,9 +220,6 @@ namespace ALUGrid
   template < class A >
   class ListIterator
   : public IteratorSTI< A >
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-  , public MyAlloc 
-#endif
   {
     typedef std::vector< A * > ListType;
 
@@ -245,9 +242,6 @@ namespace ALUGrid
   };
 
   template < class A, class B > class TreeIterator : public IteratorSTI < A >
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-       , public MyAlloc 
-#endif
   {
     public :
       typedef B comp_t;
@@ -282,9 +276,6 @@ namespace ALUGrid
   };
 
   template < class A, class B > class Wrapper : public IteratorSTI < typename B :: val_t >
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-       , public MyAlloc 
-#endif
   {
     A _walk;
     public :
@@ -301,9 +292,6 @@ namespace ALUGrid
   };
 
   template < class A, class B, class C > class AlignIterator : public IteratorSTI < C >
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-       , public MyAlloc 
-#endif
   {
     A _walk1;
     B _walk2;
@@ -322,9 +310,6 @@ namespace ALUGrid
   };
 
   template < class A > class VectorAlign : public IteratorSTI < A >
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-       , public MyAlloc 
-#endif
   {
     typedef IteratorSTI < A > * pointer_t;
     std::vector< pointer_t > _it;
@@ -346,9 +331,6 @@ namespace ALUGrid
   };
 
   template < class  A, class B > class Insert : public IteratorSTI < typename B :: val_t >
-#ifdef ALUGRID_ITERATORS_WITH_MYALLOC
-       , public MyAlloc 
-#endif
   {
     public :
       typedef typename B :: comp_t comp_t;
