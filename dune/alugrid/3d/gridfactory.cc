@@ -321,7 +321,7 @@ namespace Dune
         out << std :: endl;
       }
 
-      out << unsigned int(periodicBoundaries_.size()) << " " << unsigned int(boundaryIds_.size()) << std :: endl;
+      out << int(periodicBoundaries_.size()) << " " << int(boundaryIds_.size()) << std :: endl;
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
