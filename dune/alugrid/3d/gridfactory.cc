@@ -296,15 +296,16 @@ namespace Dune
       for( VertexIteratorType it = vertices_.begin(); it != endV; ++it )
       {
         const VertexType &vertex = it->first;
-        out << vertex[ 0 ];
-        for( unsigned int i = 1; i < dimensionworld; ++i )
+        const int globalId = it->second;
+        out << globalId ;
+        for( unsigned int i = 0; i < dimensionworld; ++i )
           out << " " << vertex[ i ];
         out << std :: endl;
       }
 
-      const size_t elemSize = elements_.size();
-      out << elemSize << std :: endl;
-      for( size_t el = 0; el<elemSize; ++el )
+      const unsigned int elemSize = elements_.size();
+      out << elemSize << " " << int(numCorners) << std :: endl;
+      for( unsigned int el = 0; el<elemSize; ++el )
       {
         const size_t elemIndex = ordering[ el ];
         array< unsigned int, numCorners > element;
@@ -320,33 +321,28 @@ namespace Dune
         out << std :: endl;
       }
 
-      out << (boundaryIds_.size() + periodicBoundaries_.size()) << std :: endl;
-      const BoundaryIdIteratorType endB = boundaryIds_.end();
-      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
-      {
-        const std::pair< FaceType, int > &boundaryId = *it;
-        out << (-boundaryId.second) << " " << numFaceCorners;
-
-        for( unsigned int i = 0; i < numFaceCorners; ++i )
-          out << " " << boundaryId.first[ i ];
-        out << std::endl;
-      }
+      out << unsigned int(periodicBoundaries_.size()) << " " << unsigned int(boundaryIds_.size()) << std :: endl;
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
         typedef typename ALU3dBasicImplTraits< MPICommunicatorType >::HBndSegType HBndSegType;
         const std::pair< BndPair, BndPair > &facePair = *it;
-        out << (-HBndSegType::periodic) << " " << (2*numFaceCorners);
-        for( unsigned int i = 0; i < numFaceCorners; ++i )
+        out << facePair.first.first[ 0 ];
+        for( unsigned int i = 1; i < numFaceCorners; ++i )
           out << " " << facePair.first.first[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
         for( unsigned int i = 0; i < numFaceCorners; ++i )
           out << " " << facePair.second.first[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
         out << std::endl;
       }
-
-      // write global vertex ids
-      for( unsigned int i = 0; i < numVertices; ++i )
-        out << globalId( i ) << " -1" << std :: endl;
+      const BoundaryIdIteratorType endB = boundaryIds_.end();
+      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
+      {
+        const std::pair< FaceType, int > &boundaryId = *it;
+        out << boundaryId.second;
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
+          out << " " << boundaryId.first[ i ];
+        out << std::endl;
+      }
       out.close();
     }
 
