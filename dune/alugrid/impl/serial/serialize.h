@@ -430,30 +430,27 @@ namespace ALUGrid
     inline void readObject (int & a)    { this->read(a);  }
   };
 
-    //
-    //    #    #    #  #          #    #    #  ######
-    //    #    ##   #  #          #    ##   #  #
-    //    #    # #  #  #          #    # #  #  #####
-    //    #    #  # #  #          #    #  # #  #
-    //    #    #   ##  #          #    #   ##  #
-    //    #    #    #  ######     #    #    #  ######
-    //
+  //
+  //    #    #    #  #          #    #    #  ######
+  //    #    ##   #  #          #    ##   #  #
+  //    #    # #  #  #          #    # #  #  #####
+  //    #    #  # #  #          #    #  # #  #
+  //    #    #   ##  #          #    #   ##  #
+  //    #    #    #  ######     #    #    #  ######
+  //
 
-  // streaming operators for ObjectStream 
-  template <int dim>
-  inline ObjectStream& operator << ( ObjectStream& os, const int (&value)[dim] ) 
+  struct StandardWhiteSpace_t {};
+
+  // streaming operators for ObjectStream ignoring space 
+  inline ObjectStream& operator << ( ObjectStream& os, const StandardWhiteSpace_t& space )
   {
-    for( int i=0; i<dim; ++i )
-      os.write( value[ i ] );
     return os;
   }
 
-  template <int dim>
-  inline std::ostream& operator << ( std::ostream& os, const int (&value)[dim] ) 
+  // streaming operators for ObjectStream ignoring space 
+  inline std::ostream& operator << ( std::ostream& os, const StandardWhiteSpace_t& space )
   {
-    for( int i=0; i<dim-1; ++i )
-      os << value[i] << " ";
-    os << value[dim-1] << std::endl;
+    os << char(' ');
     return os;
   }
 
@@ -471,7 +468,7 @@ namespace ALUGrid
   {
     for( int i=0; i<dim-1; ++i )
       os << value[i] << " ";
-    os << value[dim-1] << std::endl;
+    os << value[dim-1];
     return os;
   }
 
@@ -526,15 +523,13 @@ namespace ALUGrid
     return is;
   }
 
-
-  } // namespace ALUGrid
-
-  namespace std 
+  inline void getline( ALUGrid::ObjectStream& in, std::string& str )
   {
-    inline void getline( ALUGrid::ObjectStream& in, std::string& str )
-    {
-      in >> str;
-    }
+    in >> str;
   }
+
+  using std::getline ;
+
+} // namespace ALUGrid
 
 #endif // #ifndef SERIALIZE_H_INCLUDED

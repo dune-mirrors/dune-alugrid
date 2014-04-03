@@ -395,291 +395,6 @@ namespace ALUGrid
     return;
   }
 
-  void MacroGridBuilder::cubeHexaGrid ( int n, std::ostream &out )
-  {
-
-    // cubeHexaGrid () ist eine statische Methode, die einen ASCII Strom
-    // mit einem gleichm"assigen Hexaedernetz auf dem Einheitsw"urfel
-    // [0,1]^3 beschreibt, wobei <n> die Aufl"osung der Raumrichtungen
-    // vorgibt: Es entstehen n^3 Hexaederelemente, und (n+1)^3 Knoten.
-    // Es ist als Servicemethode f"ur die 'ball' und 'ball_pll' Test-
-    // programme n"otig und deshalb in der MacrogridBuilder Klasse 
-    // beheimatet.
-
-    const int bndtype = -1;
-    out.setf( std::ios::fixed, std::ios::floatfield );
-    out.precision ( ALUGridExternalParameters::precision() );
-    n = n < 0 ? 0 : n;
-    int npe = n + 1;
-    out << (npe * npe * npe) << std::endl;
-    double delta = 1.0 / (double)(n);
-    {
-      for(int i = 0; i < npe; i ++) {
-        for(int j = 0; j < npe; j ++) {
-          for(int k = 0; k < npe; k ++) {
-            out << double(k * delta) << "  "  << double(j * delta) << "  " << double(i * delta) << "\n";
-          }
-        }
-      }
-    }
-    out << n * n * n << "\n";
-    {
-      for(int i = 0; i < n; i ++) {
-        int ipea = (i + 1) * npe * npe, ia = i * npe * npe;
-        for(int j = 0; j < n; j ++) {
-          int jpea = (j + 1) * npe, ja = j * npe;  
-          for(int k = 0; k < n; k ++) {
-            int kpe = k + 1;  
-            out << k + ia + ja << "  " << kpe + ia + ja << "  "  << kpe + ia + jpea << "  " << k + ia + jpea << "  "         
-                << k + ja + ipea << "  " << kpe + ja + ipea << "  " << kpe + ipea + jpea << "  " << k + ipea + jpea << "\n"; 
-          }  
-        }    
-      }
-      out << std::endl;  
-    }
-    out << 6 * n * n << std::endl;
-    { // unten und oben
-      int l = n * npe * npe;
-      for(int j = 0; j < n; j ++) {
-        int jpea = (j + 1) * npe, ja = j * npe;
-        for(int k = 0; k < n; k ++) {
-          int kpe = k + 1;
-          out << bndtype << "  " << 4 << "  " << (kpe + ja) << "  " << (kpe + jpea) << "  "
-              << (k + jpea) << "  " << (k + ja) << "\n" << bndtype << "  " << 4 << "  "
-              << (k + jpea + l) << "  " << (kpe + jpea + l) << "  " << (kpe + ja + l) << "  " << (k + ja + l) << "\n";
-        }
-      }
-      out << std::endl;
-    }
-    { // links und rechts
-      int l = n * npe;
-      for(int j = 0; j < n; j ++) {
-        int jpea = (j + 1) * npe * npe, ja = j * npe * npe;
-        for(int ka = 0; ka < n; ka ++) {
-          int kpea = (ka + 1);
-          out << bndtype << "  " << 4 << "  " << ka + jpea << "  " << kpea + jpea << "  " 
-              << kpea + ja << "  " << ka + ja << "\n" << bndtype << "  " << 4 << "  " 
-        << kpea + ja + l << "  " << kpea + jpea + l << "  " << ka + jpea + l << "  " << ka + ja + l << "\n";
-        }
-      }
-      out << std::endl;
-    }
-    { // hinten und vorne
-      int l = n;
-      for(int j = 0; j < n; j ++) {
-        int jpea = (j + 1) * npe * npe, ja = j * npe * npe;
-        for(int k = 0; k < n; k ++) {
-          int kpea = (k + 1) * npe, ka = k * npe;
-          out << bndtype << "  " << 4 << "  " << kpea + ja << "  " << kpea + jpea << "  " 
-              << ka + jpea << "  " << ka + ja << "\n" << bndtype << "  " << 4 << "  " 
-              << ka + jpea + l << "  " << kpea + jpea + l << "  " << kpea + ja + l << "  " << ka + ja + l << "\n"; 
-        }
-      }
-      out << std::endl;
-    }
-    return;
-  }
-
-  void MacroGridBuilder::generateRawHexaImage ( std::istream& in, ObjectStream& os )
-  {
-    generateRawImage( in, os, HEXA_RAW, PERIODIC4_RAW );
-  }
-
-  void MacroGridBuilder::generateRawHexaImage ( ObjectStream& in, ObjectStream& os )
-  {
-    generateRawImage( in, os, HEXA_RAW, PERIODIC4_RAW );
-  }
-
-  void MacroGridBuilder::generateRawTetraImage ( std::istream &in, ObjectStream& os )
-  {
-    generateRawImage( in, os, TETRA_RAW, PERIODIC3_RAW );
-  }
-
-  void MacroGridBuilder::generateRawTetraImage ( ObjectStream &in, ObjectStream& os )
-  {
-    generateRawImage( in, os, TETRA_RAW, PERIODIC3_RAW );
-  }
-
-  template< class istream_t >
-  void MacroGridBuilder
-    ::generateRawImage ( istream_t &in, ObjectStream& os,
-                         const ElementRawID elementId, const ElementRawID periodicId )
-  {
-    // generateRawHexaImage () ist im nur ein Adapter, der aus den 
-    // bisherigen Hexaederdateiformaten ein entsprechendes 'rohes'
-    // Dateiformat f"ur den Macrogridinflator erzeugt. Damit bleibt
-    // die Option erhalten das Format der rohen Dateien auf weitere
-    // Elemente auszudehnen und zu modifizieren, ohne die 
-    // Kompatibilit"at zu den alten Hexaederdateien zu verlieren.
-    // Das alte Format sieht im wesentlichen so aus:
-    //
-    // <Anzahl der Knoten : int >     /* 1.Zeile der Datei
-    // <x-Koordinate : float>  <y-Koo. : float>  <z-Koo. : float>
-    // ...            /* f"ur den letzten Knoten
-    // <Anzahl der Elemente : int>
-    // <KnotenNr. 0: int> ... <KnotenNr. 7: int>  /* f"ur das erste Hexaederelement
-    // ...            /* f"ur das letzte Hexaederelement
-    // <Anzahl der Randfl"achen : int>
-    // <Randtyp>  4  <KnotenNr. 0> ... <KnotenNr. 3>/* erste Randfl"ache
-    // ...            /* letzte Randfl"ache
-    // <Identifier f"ur den 0. Knoten : int>  /* Identifierliste ist im seriellen
-    // ...            /* Verfahren oder beim Aufsetzen aus
-    // <Identifier f"ur den letzten Knoten : int> /* einem Gitter optional, sonst muss
-    //            /* jeder Vertex eine eigene Nummer haben
-    
-    const int start = clock ();
-    int nv = 0, ne = 0, nb = 0, nper = 0;
-    int (* vnum)[8] = 0, (* bvec)[5] = 0, (* pervec)[9] = 0, * pident = 0;
-    double (* coord)[3] = 0;
-
-    const int elementVertices = elementId;
-    const int faceVertices = (elementId == TETRA_RAW) ? 3 : 4;
-    const int periodicVertices = (elementId == TETRA_RAW) ? 6 : 8;
-    alugrid_assert ( faceVertices == 4 ? elementId == HEXA_RAW : true );
-    alugrid_assert ( periodicVertices == 8 ? elementId == HEXA_RAW : true );
-    {
-      in >> nv;
-      coord = new double [nv][3];
-      alugrid_assert (coord);
-      for (int i = 0; i < nv; ++i) in >> coord [i][0] >> coord [i][1] >> coord [i][2];
-    }
-
-    {
-      in >> ne;
-      vnum = new int [ne][8];
-      alugrid_assert (vnum);
-      for (int i = 0; i < ne; ++i)
-      {
-        for( int vx = 0; vx < elementVertices; ++ vx ) 
-        {
-          in >> vnum [i][vx];
-        }
-      }
-    }
-    
-    {
-      int temp_nb;
-      in >> temp_nb;
-      bvec = new int [temp_nb][5];
-      pervec = new int [temp_nb][9];
-      alugrid_assert (bvec);
-      alugrid_assert (pervec);
-
-      for (int i = 0; i < temp_nb; ++i) 
-      {
-        int n;
-        int identification;
-        in >> identification >> n;
-        // hexa or tetra element boundary
-        if ( n == faceVertices ) 
-        {
-          for( int vx=0; vx<n; ++ vx) 
-          {
-            in >> bvec [nb][vx];
-          }
-          // use last component for storage of identification 
-          bvec [nb][n] = identification;
-          nb++; 
-        } 
-        // periodic boundary 
-        else if ( n == periodicVertices ) 
-        {
-          for( int vx=0; vx<n; ++ vx) 
-          {
-            in >> pervec [nper][vx];
-          }
-
-          // keep boundary information 
-          // use last component for storage of identification 
-          pervec [nper][n] = identification;
-          nper++;
-        }
-        else
-        {
-          std::cerr << "ERROR (fatal):  " << __FILE__ << " " << __LINE__ << " ... Exiting." << std::endl;
-          abort();
-        }
-      }
-    }
-    
-    if ( !in.good() )
-    {
-      std::cerr << "ERROR (fatal): Unexpected end of file." << std::endl;
-      abort();
-    }
-    pident = new int [nv];
-    {
-      int dummy;
-      for (int i = 0; i < nv; ++ i ) in >> pident [i] >> dummy; 
-    }
-
-    if( !in.good() )
-    {
-      std::cerr << "WARNING (ignored) No parallel identification applied due to incomplete (or non-existent) identifier list." << std::endl;
-      for( int i = 0; i < nv; ++ i )
-        pident[ i ] = i;
-    }
-
-    // get last std::endl character (from backup to make stream consistent)
-    if( !in.eof() )
-      in.get();
-
-    // write vertices 
-    os.writeObject( nv );
-    for (int i = 0; i < nv; ++i )
-    {
-      os.writeObject( pident [i] );
-      os.writeObject( coord [i][0] );
-      os.writeObject( coord [i][1] );
-      os.writeObject( coord [i][2] );
-    }
-
-    // write elements 
-    os.writeObject( int(ne+nper) );
-    for (int i = 0; i < ne; ++i)
-    {
-      os.writeObject( elementId );
-      for( int vx = 0; vx < elementVertices; ++ vx ) 
-      {
-        os.writeObject( pident[ vnum [i][vx] ] );
-      }
-    }
-
-    // write periodic elements 
-    for (int i = 0; i < nper; ++i)
-    {
-      os.writeObject( periodicId );
-      for( int vx = 0; vx < periodicVertices; ++vx ) 
-      {
-        os.writeObject( pident[ pervec[i][vx] ] );
-      }
-      // write the identification 
-      os.writeObject( pervec [i][ periodicVertices ] );
-    }
-
-    // write boundaries 
-    os.writeObject( nb );
-    for (int i = 0; i < nb; ++i)
-    {
-      os.writeObject( faceVertices );
-      for( int vx = 0; vx < faceVertices; ++vx ) 
-      {
-        os.writeObject( pident[ bvec[i][vx] ] );
-      }
-      // write the identification 
-      os.writeObject( bvec[i][ faceVertices ] );
-    }
-
-    // delete temporary memory 
-    delete [] vnum;
-    delete [] coord;
-    delete [] pervec;
-    delete [] bvec;
-    delete [] pident;
-    if( debugOption( 4 ) )
-      std::cout << "INFO: MacroGridBuilder::generateRawHexaImage() used: " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " s." << std::endl;
-  }
-
   // default of init == true
   MacroGridBuilder::MacroGridBuilder (BuilderIF & b, const bool init) 
    : _initialized(false) 
@@ -1104,134 +819,122 @@ namespace ALUGrid
     return;
   }
 
-  void MacroGridBuilder::inflateMacroGrid ( ObjectStream& rawInput )
+  template <class stream_t>
+  void MacroGridBuilder::inflateMacroGrid ( stream_t& in )
   {
     const int start = clock ();
+    int nv = 0;
+    in >> nv;
+    for (int i = 0; i < nv; ++i ) 
     {
-      int nv = 0;
-      rawInput.readObject( nv );
-      for (int i = 0; i < nv; ++i ) 
-      {
-        int id;
-        double x[ 3 ];
-        rawInput.readObject( id );
-        rawInput.readObject( x[ 0 ] );
-        rawInput.readObject( x[ 1 ] );
-        rawInput.readObject( x[ 2 ] );
-        InsertUniqueVertex (x[ 0 ], x[ 1 ], x[ 2 ], id);
-      }
+      int id;
+      double x, y, z;
+      in >> id ;
+      in >> x ;
+      in >> y ;
+      in >> z ;
+      InsertUniqueVertex (x, y, z, id);
     }
+
+    int ne = 0;
+    in >> ne ;
+    int type = -1;
+    in >> type ;
+
+    if( type == HEXA_RAW )
     {
-      int ne = 0;
-      rawInput.readObject( ne );
-      for (int i = 0; i < ne; i ++ ) 
+      int v [8];
+      for (int i = 0; i<ne; ++i ) 
       {
-        int elementType;
-        rawInput.readObject( elementType );
-        switch (elementType) 
+        for( int k=0; k<8; ++k )
         {
-        case HEXA_RAW :
-          {
-            int v [8];
-            for( int j=0; j<8; ++j )
-              rawInput.readObject( v[ j ] );
-            InsertUniqueHexa (v);
-          }
-          break;
-        case TETRA_RAW :
-          {
-            int v [4];
-            for( int j=0; j<4; ++j )
-              rawInput.readObject( v[ j ] );
-            int orientation = i%2;
-            InsertUniqueTetra (v, orientation );
-          }
-          break;
-        case PERIODIC3_RAW :
-          {
-            int v [6];
-            for( int j=0; j<6; ++j )
-              rawInput.readObject( v[ j ] );
-            int bt;
-            rawInput.readObject( bt );
-            if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
-            {
-              std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
-              abort();
-            }
-            Gitter::hbndseg::bnd_t btAbs = (Gitter::hbndseg::bnd_t)(std::abs(bt));
-            Gitter::hbndseg::bnd_t bndId[ 2 ] = { btAbs, btAbs };
-            InsertUniquePeriodic (v, bndId );
-          }
-          break;
-
-        case PERIODIC4_RAW:
-          {
-            int v [8];
-            for( int j=0; j<8; ++j )
-              rawInput.readObject( v[ j ] );
-            int bt;
-            rawInput.readObject( bt );
-            if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
-            {
-              std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
-              abort();
-            }
-            Gitter::hbndseg::bnd_t btAbs = (Gitter::hbndseg::bnd_t)(std::abs(bt));
-            Gitter::hbndseg::bnd_t bndId[ 2 ] = { btAbs, btAbs };
-            InsertUniquePeriodic (v, bndId );
-          }
-          break;
-
-        default:
-          std::cerr << "ERROR (fatal): Unknown ElementID in Rawformat File [" << elementType << "]." << std::endl;
-          abort();
-          break;
+          in >> v[ k ] ;
         }
+        InsertUniqueHexa (v);
       }
     }
+    else if( type == TETRA_RAW )
     {
-      int nb = 0;
-      rawInput.readObject( nb );
-      for (int i = 0; i < nb; ++i) 
+      int v [4];
+      for (int i = 0; i < ne; ++i ) 
       {
-        int polygonLen;
-        rawInput.readObject( polygonLen );
-        if (polygonLen == 4) 
+        for( int j=0; j<4; ++j )
         {
-          int v [4];
-          for( int j=0; j<4; ++j )
-            rawInput.readObject( v[ j ] );
-          int bt;
-          rawInput.readObject( bt );
-          if( ! ( Gitter::hbndseg_STI::bndRangeCheck(bt) ) )
-          {
-            std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
-            abort();
-          }
-          InsertUniqueHbnd4 (v,(Gitter::hbndseg::bnd_t)(std::abs(bt)));
-        } 
-        else if (polygonLen == 3) 
+          in >> v[ j ] ;
+        }
+        int orientation = i%2;
+        InsertUniqueTetra (v, orientation);
+      }
+    }
+
+    // read number of periodic and other boundary elements
+    int nper;
+    in >> nper ;
+    int nb ; 
+    in >> nb ;
+
+    if( type == HEXA_RAW ) 
+    {
+      int vp[ 8 ];
+      for( int i=0; i<nper; ++i ) 
+      {
+        for( int j=0; j<8; ++j )
+          in >> vp[ j ] ;
+
+        Gitter::hbndseg::bnd_t bndId[ 2 ] = { Gitter::hbndseg::periodic, Gitter::hbndseg::periodic };
+        InsertUniquePeriodic (vp, bndId );
+      }
+
+      int bt ;
+      int v[ 4 ];
+      for( int i=0; i<nb ; ++i )
+      {
+        in >> bt ;
+        if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
         {
-          int v [3];
-          for( int j=0; j<3; ++j )
-            rawInput.readObject( v[ j ] );
-          int bt;
-          rawInput.readObject( bt );
-          if( ! ( Gitter::hbndseg_STI::bndRangeCheck(bt) ) )
-          {
-            std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
-            abort();
-          }
-          InsertUniqueHbnd3 (v,(Gitter::hbndseg::bnd_t)(std::abs(bt)));
-        } 
-        else 
-        {
-          std::cerr << "ERROR (fatal): Cannot create boundary segments with polygon length " << polygonLen << "." << std::endl;
+          std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
           abort();
         }
+        for( int k=0; k<4; ++k ) 
+        {
+          in >> v[ k ];
+        }
+        InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t(bt));
       }
     }
+    else if ( type == TETRA_RAW ) 
+    {
+      int vp[ 6 ];
+      for( int i=0; i<nper; ++i ) 
+      {
+        for( int j=0; j<6; ++j )
+          in >> vp[ j ] ;
+
+        Gitter::hbndseg::bnd_t bndId[ 2 ] = { Gitter::hbndseg::periodic, Gitter::hbndseg::periodic };
+        InsertUniquePeriodic (vp, bndId );
+      }
+
+      int bt ;
+      int v[ 3 ];
+      for( int i=0; i<nb ; ++i )
+      {
+        in >> bt ;
+        if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+        {
+          std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
+          abort();
+        }
+        for( int k=0; k<3; ++k ) 
+        {
+          in >> v[ k ];
+        }
+        InsertUniqueHbnd3 (v,Gitter::hbndseg::bnd_t(bt));
+      }
+    }
+
+    // get last std::endl character (from backup to make stream consistent)
+    if( !in.eof() ) in.get();
+
     if( debugOption( 3 ) )
       std::cout << "INFO: MacroGridBuilder::inflateMacroGrid() used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " s." << std::endl;
   }
@@ -1255,36 +958,19 @@ namespace ALUGrid
     MacroGridBuilder mm (*this);
 
     std::string firstline;
-    std::getline( in, firstline ); 
+    getline( in, firstline ); 
 
     // check first character 
     if ( firstline.size() > 0 && firstline[ 0 ] == char('!')) 
     {
-      // Das erste Wort nach dem Kommentar steht jetzt in str.
-      // Alle weiteren k"onnen noch aus is gelesen werden, das
-      // array str ist so lang, wie die gesamte Zeile in 'buf'.
-      if( (firstline.find( "Tetrahedra" ) != std::string::npos) || (firstline.find( "Tetraeder"  ) != std::string::npos) )
-      {
-        // Versuchen wir's mal mit Tetraedern
-        MacroGridBuilder::generateRawTetraImage (in,raw);
-      } 
-      else if( (firstline.find( "Hexahedra" ) != std::string::npos) || (firstline.find( "Hexaeder"  ) != std::string::npos) )
-      {
-        // oder andernfalls mit Hexaedern.
-        MacroGridBuilder::generateRawHexaImage (in,raw);
-      } 
-      else 
+      if( firstline.find( "Tetrahedra" ) == std::string::npos &&
+          firstline.find( "Hexahedra" ) == std::string::npos ) 
       {
         std::cerr << "WARNING (ignored): Unknown comment to file format (" << firstline << ")." << std::endl;
         return;
       }
     }
-    else
-    {
-      std::cerr << "WARNING (ignored) No identifier for file format found. Trying to read as hexahedral grid." << std::endl;
-      MacroGridBuilder::generateRawHexaImage( in,raw );
-    }
-    mm.inflateMacroGrid( raw );
+    mm.inflateMacroGrid( in );
   }
 
 } // namespace ALUGrid

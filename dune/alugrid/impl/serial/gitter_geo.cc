@@ -11,6 +11,7 @@
 #include "mapp_cube_3d.h"
 #include "mapp_tetra_3d.h"
 #include "gitter_sti.h"
+#include "gitter_mgb.h"
 #include "walk.h"
 
 namespace ALUGrid
@@ -722,7 +723,7 @@ namespace ALUGrid
     // not working correctly yet
     backupImpl( os );
     // put one more character because of endl in ascii stream
-    os.put( char(0) );
+    os.put( char(' ') );
   }
 
   void Gitter::Geometric::BuilderIF::backup ( std::ostream &os ) const
@@ -748,18 +749,20 @@ namespace ALUGrid
     // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
     // Hexaedernetz vorliegt. Gemischte Netze sind bez"uglich ihres
     // Dateiformats noch nicht spezifiziert.
-    const int vertexListSize = _vertexList.size ();
+    const int vertexListSize = _vertexList.size();
     const int tetraListSize  = _tetraList.size ();
-    const int hexaListSize   = _hexaList.size (); 
-    
+    const int hexaListSize   = _hexaList.size  (); 
+
+    StandardWhiteSpace_t whiteSpace ;
+
     std::string str; 
-    if( tetraListSize == 0 )
+    if( hexaListSize > 0 )
     {
       std::ostringstream strstr; 
       strstr << "!Hexahedra  ( noVertices = " << vertexListSize << " | noElements = " << hexaListSize << " )" << std::endl;
       str = strstr.str();
     }
-    else if( (hexaListSize == 0) && (tetraListSize != 0) )
+    else if( tetraListSize > 0 )
     {
       std::ostringstream strstr; 
       strstr << "!Tetrahedra  ( noVertices = " << vertexListSize << " | noElements = " << tetraListSize << " )" << std::endl;
@@ -775,125 +778,86 @@ namespace ALUGrid
     os << str; 
 
     {
-      const int size[ 1 ] = { vertexListSize };
-      os << size;
-      int index = 0 ;
+      os << vertexListSize << std::endl;
       const vertexlist_t::const_iterator end = _vertexList.end ();
       for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i) 
       {
-        os << (*i)->Point ();
-        vm [ *i ] = index ++;
+        os << (*i)->ident() << whiteSpace << (*i)->Point() << std::endl;
       }
     }
-    if (tetraListSize == 0) 
+
+    if( hexaListSize > 0 ) 
     {
       alugrid_assert (_hbndseg3List.size () == 0);
 
+      os << hexaListSize << whiteSpace << int(MacroGridBuilder::HEXA_RAW) << std::endl ;
+      const hexalist_t::const_iterator end = _hexaList.end ();
+      for (hexalist_t::const_iterator i = _hexaList.begin (); i != end; ++i ) 
       {
-        const int size[ 1 ] = { hexaListSize };
-        os << size ;
-        int v[ 8 ];
-        const hexalist_t::const_iterator end = _hexaList.end ();
-        for (hexalist_t::const_iterator i = _hexaList.begin (); i != end; ++i ) 
+        for (int j = 0; j < 7; ++ j )
         {
-          for (int j = 0; j < 8; ++ j )
-          {
-            v[ j ] = vm[ (*i)->myvertex (j) ];
-          }
-          os << v ;
+          os << (*i)->myvertex (j)->ident() << whiteSpace ;
         }
+        os << (*i)->myvertex (7)->ident() << std::endl ;
       }
+
+      os << int(_periodic4List.size ()) << whiteSpace << int(_hbndseg4List.size ()) << std::endl;
+      const periodic4list_t::const_iterator pend = _periodic4List.end ();
+      for (periodic4list_t::const_iterator i = _periodic4List.begin (); i != pend; ++i) 
       {
-        const int size[ 1 ] = { int(_hbndseg4List.size () + _periodic4List.size ()) };
-        os << size ;
-        int v[ 6 ];
-        const hbndseg4list_t::const_iterator end = _hbndseg4List.end ();
-        for (hbndseg4list_t::const_iterator i = _hbndseg4List.begin (); i != end; ++i) 
+        for (int j = 0; j < 7; ++j )
         {
-          v[ 0 ] = -(int)(*i)->bndtype ();
-          v[ 1 ] = 4 ;
-          for (int j = 0; j < 4; ++ j ) 
-          {
-            v[ j+2 ] = vm [(*i)->myvertex (0,j)];
-          }
-          os << v;
+          os << (*i)->myvertex (j)->ident() << whiteSpace ;
         }
+        os << (*i)->myvertex (7)->ident() << std::endl;
       }
+      const hbndseg4list_t::const_iterator hend = _hbndseg4List.end ();
+      for (hbndseg4list_t::const_iterator i = _hbndseg4List.begin (); i != hend; ++i) 
       {
-        int v[ 10 ];
-        const periodic4list_t::const_iterator end = _periodic4List.end ();
-        for (periodic4list_t::const_iterator i = _periodic4List.begin (); i != end; ++i) 
+        os <<  (int)(*i)->bndtype () << whiteSpace ;
+        for (int j = 0; j < 3; ++ j ) 
         {
-          v[ 0 ] = -(int)(hbndseg::periodic);
-          v[ 1 ] = 8;
-          for (int j = 0; j < 8; ++j )
-          {
-            v[ j+2 ] = vm [(*i)->myvertex (j)];
-          }
-          os << v;
+          os << (*i)->myvertex (0,j)->ident() << whiteSpace ;
         }
+        os << (*i)->myvertex (0,3)->ident() << std::endl ;
       }
     } 
-    else if ( hexaListSize == 0 && tetraListSize != 0) 
+    else if( tetraListSize > 0 ) 
     {
+      os << tetraListSize << whiteSpace << int(MacroGridBuilder::TETRA_RAW) << std::endl;
+      const tetralist_t::const_iterator end = _tetraList.end ();
+      for (tetralist_t::const_iterator i = _tetraList.begin (); i != end; ++i ) 
       {
-        const int size[ 1 ] = { tetraListSize };
-        os << size ;
-        int v[ 4 ];
-        const tetralist_t::const_iterator end = _tetraList.end ();
-        for (tetralist_t::const_iterator i = _tetraList.begin (); i != end; ++i ) 
+        for (int j = 0; j < 3; ++ j ) 
         {
-          for (int j = 0; j < 4; ++ j ) 
-          {
-            v[ j ] = vm [(*i)->myvertex (j)];
-          }
-          os << v ;
+          os << (*i)->myvertex (j)->ident() << whiteSpace ;
         }
+        os << (*i)->myvertex (3)->ident() << std::endl ;
       }
+
+      os << int(_periodic3List.size ()) << whiteSpace << int(_hbndseg3List.size ()) << std::endl;
+      const periodic3list_t::const_iterator pend = _periodic3List.end ();
+      for (periodic3list_t::const_iterator i = _periodic3List.begin (); i != pend; ++i ) 
       {
-        const int size[ 1 ] = { int(_hbndseg3List.size () + _periodic3List.size ()) };
-        os << size ;
-        int v[ 5 ];
-        const hbndseg3list_t::const_iterator end = _hbndseg3List.end ();
-        for (hbndseg3list_t::const_iterator i = _hbndseg3List.begin (); i != end; ++i) 
+        for (int j = 0; j < 5; ++j ) 
         {
-          const hbndseg3_GEO* hbndseg = (*i);
-          v[ 0 ] = -(int)hbndseg->bndtype ();
-          v[ 1 ] = 3 ;
-          for( int j = 0; j < 3; ++ j ) 
-          {
-            v[ j+2 ] = vm [hbndseg->myvertex (0,j)];
-          }
-          os << v ;
+          os << (*i)->myvertex (j)->ident() << whiteSpace ;
         }
+        os << (*i)->myvertex (5)->ident() << std::endl;
       }
+
+      const hbndseg3list_t::const_iterator hend = _hbndseg3List.end ();
+      for (hbndseg3list_t::const_iterator i = _hbndseg3List.begin (); i != hend; ++i) 
       {
-        int v[ 8 ];
-        const periodic3list_t::const_iterator end = _periodic3List.end ();
-        for (periodic3list_t::const_iterator i = _periodic3List.begin (); i != end; ++i ) 
+        os << (int)(*i)->bndtype () << whiteSpace ;
+        for( int j = 0; j < 2; ++ j ) 
         {
-          v[ 0 ] = -(int)(hbndseg::periodic);
-          v[ 1 ] = 6;
-          for (int j = 0; j < 6; ++j ) 
-          {
-            v[ j+2] = vm [(*i)->myvertex (j)];
-          }
-          os << v;
+          os << (*i)->myvertex(0,j)->ident() << whiteSpace ;
         }
-      }
-    }
-    {
-      int v[ 2 ] = { 0, -1 };
-      // add vertex identifier list at the end 
-      const vertexlist_t::const_iterator end = _vertexList.end ();
-      for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i)
-      {
-        v[ 0 ] = (*i)->ident ();
-        os << v ;
+        os << (*i)->myvertex (0,2)->ident() << std::endl ;
       }
     }
   }
-
 
   void Gitter::Geometric::BuilderIF::backup (const char * filePath, const char * fileName) const 
   {
