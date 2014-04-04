@@ -4,8 +4,12 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <list>
+
+#include <dune/alugrid/impl/serial/serialize.h>
 
 
 // ElementRawID
@@ -98,7 +102,7 @@ template< ElementRawID rawId >
 void readLegacyFormat ( std::istream &input,
                         std::vector< Vertex > &vertices,
                         std::vector< Element< rawId > > &elements,
-                        std::vector< BndSeg< rawId > &bndSegs,
+                        std::vector< BndSeg< rawId > > &bndSegs,
                         std::vector< Periodic< rawId > > &periodics )
 {
   // Das alte Format sieht im wesentlichen so aus:
@@ -133,7 +137,7 @@ void readLegacyFormat ( std::istream &input,
   }
 
   int temp_nb = 0;
-  in >> temp_nb;
+  input >> temp_nb;
   bndSegs.reserve( temp_nb );
   periodics.reserve( temp_nb );
   for( int i = 0; i < temp_nb; ++i )
@@ -142,7 +146,7 @@ void readLegacyFormat ( std::istream &input,
     input >> bndid >> n;
     if( n == BndSeg< rawId >::numVertices )
     {
-      BndSeg seg;
+      BndSeg< rawId > seg;
       seg.bndid = bndid;
       for( int vx = 0; vx < BndSeg< rawId >::numVertices; ++vx )
         input >> seg.vertices[ vx ];
@@ -150,7 +154,7 @@ void readLegacyFormat ( std::istream &input,
     }
     else if( n == Periodic< rawId >::numVertices )
     {
-      Periodic seg;
+      Periodic< rawId > seg;
       seg.bndid = bndid;
       for( int vx = 0; vx < Periodic< rawId >::numVertices; ++vx )
         input >> seg.vertices[ vx ];
@@ -171,7 +175,7 @@ void readLegacyFormat ( std::istream &input,
 
   for( int i = 0; i < nv; ++i )
   {
-    int dummy:
+    int dummy;
     input >> vertices[ i ].id >> dummy;
   }
 
@@ -188,10 +192,10 @@ void readLegacyFormat ( std::istream &input,
 // --------------
 
 template< class stream_t, ElementRawID rawId >
-void writeMacroGrid ( stream_t output,
+void writeMacroGrid ( stream_t &output,
                       const std::vector< Vertex > &vertices,
                       const std::vector< Element< rawId > > &elements,
-                      const std::vector< BndSeg< rawId > &bndSegs,
+                      const std::vector< BndSeg< rawId > > &bndSegs,
                       const std::vector< Periodic< rawId > > &periodics )
 {
   const int vertexListSize = vertices.size();
@@ -199,41 +203,41 @@ void writeMacroGrid ( stream_t output,
   const int bndSegListSize = bndSegs.size();
   const int periodicListSize = periodics.size();
 
-  StandardWhiteSpace_t ws;
+  ALUGrid::StandardWhiteSpace_t ws;
 
   // write header line as vector of characters 
   std::ostringstream firstline;
   firstline << (rawId == HEXA_RAW ? "!Hexahedra" : "!Tetrahedra");
   firstline << "  ( noVertices = " << vertexListSize << " | noElements = " << elementListSize << " )" << std::endl;
-  os << strstr.str();
+  output << firstline.str();
 
-  os << vertexListSize << std::endl;
+  output << vertexListSize << std::endl;
   for( int i = 0; i < vertexListSize; ++i )
-    os << vertices[ i ].id << ws << vertices[ i ].x << ws << vertices[ i ].y << ws << vertices[ i ].z << std::endl;
+    output << vertices[ i ].id << ws << vertices[ i ].x << ws << vertices[ i ].y << ws << vertices[ i ].z << std::endl;
 
-  os << elementListSize << ws << int( rawId ) << std::endl;
+  output << elementListSize << ws << int( rawId ) << std::endl;
   for( int i = 0; i < elementListSize; ++i )
   {
-    os << elements[ i ].vertices[ 0 ];
+    output << elements[ i ].vertices[ 0 ];
     for( int j = 1; j < Element< rawId >::numVertices; ++j )
-      os << ws << elements[ i ].vertices[ j ];
-    os << std::endl;
+      output << ws << elements[ i ].vertices[ j ];
+    output << std::endl;
   }
 
-  os << periodicListSize << ws << bndSegListSize << std::endl;
+  output << periodicListSize << ws << bndSegListSize << std::endl;
   for( int i = 0; i < periodicListSize; ++i )
   {
-    os << periodics[ i ].vertices[ 0 ];
+    output << periodics[ i ].vertices[ 0 ];
     for( int j = 1; j < Periodic< rawId >::numVertices; ++j )
-      os << ws << periodics[ i ].vertices[ j ];
-    os << std::endl;
+      output << ws << periodics[ i ].vertices[ j ];
+    output << std::endl;
   }
   for( int i = 0; i < bndSegListSize; ++i )
   {
-    os << bndSegs[ i ].bndid;
+    output << bndSegs[ i ].bndid;
     for( int j = 0; j < BndSeg< rawId >::numVertices; ++j )
-      os << ws << bndSegs[ i ].vertices[ j ];
-    os << std::endl;
+      output << ws << bndSegs[ i ].vertices[ j ];
+    output << std::endl;
   }
 }
 
@@ -242,11 +246,11 @@ void writeMacroGrid ( stream_t output,
 // -------------------
 
 template< ElementRawID rawId, class stream_t >
-void convertLegacyFormat ( std::istream &input, stream_t output )
+void convertLegacyFormat ( std::istream &input, stream_t &output )
 {
   const clock_t start = clock();
 
-  std::vector< Vertex< rawId > > vertices;
+  std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
   std::vector< BndSeg< rawId > > bndSegs;
   std::vector< Periodic< rawId > > periodics;
@@ -254,17 +258,17 @@ void convertLegacyFormat ( std::istream &input, stream_t output )
   readLegacyFormat( input, vertices, elements, bndSegs, periodics );
   writeMacroGrid( output, vertices, elements, bndSegs, periodics );
 
-  std::cout << "INFO: Conversion of legacy macro grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC ) << " s." << std::endl;
+  std::cout << "INFO: Conversion of legacy macro grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
 }
 
 template< class stream_t >
-void convertLegacyFormat ( std::istream &input, stream_t output )
+void convertLegacyFormat ( std::istream &input, stream_t &output )
 {
   std::string firstline;
   std::getline( input, firstline );
   if( firstline[ 0 ] == char( '!' ) )
   {
-    if( (firstline.find( "Tetrahedra" ) != fistline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
+    if( (firstline.find( "Tetrahedra" ) != firstline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
       convertLegacyFormat< TETRA_RAW >( input, output );
     else if( (firstline.find( "Hexahedra" ) != firstline.npos) || (firstline.find( "Hexaeder" ) != firstline.npos) )
       convertLegacyFormat< HEXA_RAW >( input, output );
@@ -306,16 +310,16 @@ int main ( int argc, char **argv )
 
   if( argc <= 2 )
   {
-    std::cerr << "Usage: " << argv[ 0 ] << " [-b] <input> <output>" << std::endl << std::endl;
+    std::cerr << "Usage: " << argv[ 0 ] << " [-b] <input> <output>" << std::endl;
     std::cerr << "Flags: -b : write binary output" << std::endl;
     return 1;
   }
 
-  std::ifstream input( argc[ 1 ] );
+  std::ifstream input( argv[ 1 ] );
   std::ofstream output( argv[ 2 ] );
   if( writeBinary )
   {
-    ObjectStream os;
+    ALUGrid::ObjectStream os;
     convertLegacyFormat( input, os );
     output.write( os.getBuff( 0 ), os.size() );
   }
