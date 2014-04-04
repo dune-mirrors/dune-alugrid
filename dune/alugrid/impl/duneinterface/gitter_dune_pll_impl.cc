@@ -1199,7 +1199,16 @@ namespace ALUGrid
     } 
   }
 
-  // wird von Dune verwendet 
+  void GitterDunePll::restore ( std::istream &in ) 
+  {
+    restoreImpl( in );
+  }
+
+  void GitterDunePll::restore ( ObjectStream& in )
+  {
+    restoreImpl( in );
+  }
+
   template <class stream_t>
   void GitterDunePll::restoreImpl ( stream_t &in ) 
   {

@@ -146,8 +146,8 @@ namespace ALUGrid
     // restore grid from std::istream, needed to be overloaded 
     // because before restoring follow faces, index manager has to be
     // restored 
-    virtual void restore(std::istream & in) { restoreImpl( in ); }
-    virtual void restore(ObjectStream & in) { restoreImpl( in ); }
+    virtual void restore(std::istream & in); 
+    virtual void restore(ObjectStream & in);
 
   protected:   
     template <class stream_t>
