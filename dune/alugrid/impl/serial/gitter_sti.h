@@ -2470,7 +2470,46 @@ namespace ALUGrid
     void backupImpl( stream_t& );
 
     template <class stream_t>
-    void restoreImpl( stream_t&, const bool restoreBndFaces );
+    void restoreImpl( stream_t& in, const bool restoreBndFaces )
+    {
+      // store whether we have bisection refinement 
+      const char bisection = in.get();
+      if( bisection ) enableConformingClosure();
+
+      // store whether ghost cells are enabled 
+      const char ghostCells = in.get();
+      if( ! ghostCells )
+        disableGhostCells();
+
+      // restore edges 
+      {
+        AccessIterator < hedge_STI >::Handle ew (container ());
+        for (ew.first (); !ew.done (); ew.next ()) ew.item ().restore (in); 
+      }
+      // restore faces 
+      {
+        AccessIterator < hface_STI >:: Handle fw(container());
+        for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); 
+      }
+      // restore elements 
+      {
+        AccessIterator < helement_STI >:: Handle ew(container());
+        for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
+      }
+      // restore periodic elements 
+      {
+        AccessIterator < hperiodic_STI >:: Handle ew(container());
+        for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
+      }
+        
+      // since the faces have been refined before the elements
+      // the boundary faces might not habe benn refined at all
+      if( restoreBndFaces )
+      {
+        AccessIterator < hbndseg_STI >::Handle bw (container ());
+        for (bw.first (); ! bw.done (); bw.next ()) bw.item ().restoreFollowFace (); 
+      }
+    }
 
     // these classes are friend because the must call the method iterator on grid 
     friend class LeafIterator < helement_STI >;
