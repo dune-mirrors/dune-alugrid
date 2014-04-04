@@ -33,6 +33,8 @@ AC_CONFIG_FILES([
   examples/callback/Makefile
   examples/dgf/Makefile
   examples/loadbalancing/Makefile
+  utils/Makefile
+  utils/convert-macrogrid/Makefile
   dune-alugrid.pc
 ])
 
