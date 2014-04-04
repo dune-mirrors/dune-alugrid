@@ -913,4 +913,7 @@ namespace ALUGrid
       std::cerr << "WARNING: (ignored) There are still iterators attached to the grid, remove them before removal of the grid to avoid errors." << std::endl;
   }
 
+  template void Gitter::restoreImpl( std::istream&, const bool);
+  template void Gitter::restoreImpl( ObjectStream&, const bool);
+
 } // namespace ALUGrid
