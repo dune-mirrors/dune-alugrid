@@ -122,7 +122,7 @@ namespace ALUGrid
       int master() const { return _master; }
     };
 
-    protected :
+    public :
       enum ElementRawID {TETRA_RAW=4, HEXA_RAW=8, PERIODIC3_RAW=33, PERIODIC4_RAW=44}; 
     protected :
       typedef BuilderIF::hexalist_t  hexalist_t;
