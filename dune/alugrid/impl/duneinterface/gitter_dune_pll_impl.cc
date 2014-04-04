@@ -1199,6 +1199,49 @@ namespace ALUGrid
     } 
   }
 
+  void GitterDunePll::restore ( std::istream &in ) 
+  {
+    restoreImpl( in );
+  }
+
+  void GitterDunePll::restore ( ObjectStream& in )
+  {
+    restoreImpl( in );
+  }
+
+  template <class stream_t>
+  void GitterDunePll::restoreImpl ( stream_t &in ) 
+  {
+    // false means that bnd faces are not restored 
+    Gitter :: restoreImpl( in, false );
+
+    // restore indices before ghosts are created 
+    // otherwise indices of ghosts will be wrong 
+    this->restoreIndices (in);
+   
+#ifdef ALUGRIDDEBUG 
+    const int maxIndexBefore = this->indexManager(BuilderIF::IM_Elements).getMaxIndex();
+#endif
+
+    // set ghost indices new for level 0 ghosts 
+    checkGhostIndices ();
+
+    // now restore faces and by this ghosts 
+    // will be refined 
+    {
+      AccessIterator < hbndseg_STI >::Handle bw (container ());
+      for (bw.first (); ! bw.done (); bw.next ()) bw.item ().restoreFollowFace ();
+    }
+    
+    // max index should not be largen than before
+    alugrid_assert ( (this->indexManager(BuilderIF::IM_Elements).getMaxIndex() != maxIndexBefore) ?
+        (std::cout << maxIndexBefore << " vor | nach " << this->indexManager(BuilderIF::IM_Elements).getMaxIndex() << "\n",0) : 1);
+
+    // exchange dynamic state after restore 
+    // (i.e. ghost information, since grid has changed after restore)
+    GitterPll::exchangeDynamicState();
+  }
+
   void GitterDunePll::tovtk ( const std::string &fn ) 
   {
     const int myrank = mpAccess ().myrank ();
