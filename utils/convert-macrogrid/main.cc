@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <list>
+#include <vector>
 
 #include <dune/alugrid/impl/serial/serialize.h>
 
