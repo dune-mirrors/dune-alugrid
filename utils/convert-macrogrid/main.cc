@@ -122,20 +122,24 @@ void readLegacyFormat ( std::istream &input,
   // <Identifier f"ur den letzten Knoten : int> /* einem Gitter optional, sonst muss
   //            /* jeder Vertex eine eigene Nummer haben
 
+  std::cout << "Reading legacy format..." << std::endl;
+
   int nv = 0;
   input >> nv;
   vertices.resize( nv );
   for( int i = 0; i < nv; ++i )
     input >> vertices[ i ].x >> vertices[ i ].y >> vertices[ i ].z;
+  std::cout << "  - read " << nv << " vertices." << std::endl;
 
   int ne = 0;
   input >> ne;
   elements.resize( ne );
   for( int i = 0; i < ne; ++i )
   {
-    for( int vx = 0; vx < Element< rawId >::numVertices; ++i )
+    for( int vx = 0; vx < Element< rawId >::numVertices; ++vx )
       input >> elements[ i ].vertices[ vx ];
   }
+  std::cout << "  - read " << ne << " elements." << std::endl;
 
   int temp_nb = 0;
   input >> temp_nb;
@@ -167,6 +171,8 @@ void readLegacyFormat ( std::istream &input,
       std::exit( 1 );
     }
   }
+  std::cout << "  - read " << bndSegs.size() << " boundary segments." << std::endl;
+  std::cout << "  - read " << periodics.size() << " periodic boundary segments." << std::endl;
 
   if( !input )
   {
@@ -267,11 +273,11 @@ void writeMacroGrid ( stream_t &output,
   firstline << "  ( noVertices = " << vertexListSize << " | noElements = " << elementListSize << " )" << std::endl;
   output << firstline.str();
 
-  output << vertexListSize << std::endl;
+  output << std::endl << vertexListSize << std::endl;
   for( int i = 0; i < vertexListSize; ++i )
     output << vertices[ i ].id << ws << vertices[ i ].x << ws << vertices[ i ].y << ws << vertices[ i ].z << std::endl;
 
-  output << elementListSize << ws << int( rawId ) << std::endl;
+  output << std::endl << elementListSize << ws << int( rawId ) << std::endl;
   for( int i = 0; i < elementListSize; ++i )
   {
     output << elements[ i ].vertices[ 0 ];
@@ -280,7 +286,7 @@ void writeMacroGrid ( stream_t &output,
     output << std::endl;
   }
 
-  output << periodicListSize << ws << bndSegListSize << std::endl;
+  output << std::endl << periodicListSize << ws << bndSegListSize << std::endl;
   for( int i = 0; i < periodicListSize; ++i )
   {
     output << periodics[ i ].vertices[ 0 ];
