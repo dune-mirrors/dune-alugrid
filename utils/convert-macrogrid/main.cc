@@ -189,6 +189,61 @@ void readLegacyFormat ( std::istream &input,
 }
 
 
+
+// readMacroGrid
+// -------------
+
+template< class stream_t, ElementRawID rawId >
+void readMacroGrid ( stream_t &input,
+                     std::vector< Vertex > &vertices,
+                     std::vector< Element< rawId > > &elements,
+                     std::vector< BndSeg< rawId > > &bndSegs,
+                     std::vector< Periodic< rawId > > &periodics )
+{
+  // ignore firstline for now; it should have been stripped already
+  std::string firstline;
+  ALUGrid::getline( input, firstline );
+
+  int vertexListSize = 0;
+  input >> vertexListSize;
+  vertices.resize( vertexListSize );
+  for( int i = 0; i < vertexListSize; ++i )
+    input >> vertices[ i ].id >> vertices[ i ].x >> vertices[ i ].y >> vertices[ i ].z;
+
+  int elementListSize = 0, type = -1;
+  input >> elementListSize >> type;
+  if( type != rawId )
+  {
+    std::cerr << "ERROR (fatal): Invalid number of vertices for element (got " << type << ", expected " << rawId << ")." << std::endl;
+    std::exit( 1 );
+  }
+  elements.resize( elementListSize );
+  for( int i = 0; i < elementListSize; ++i )
+  {
+    for( int j = 0; j < Element< rawId >::numVertices; ++j )
+      input >> elements[ i ].vertices[ j ];
+  }
+
+  int bndSegListSize = 0;
+  int periodicListSize = 0;
+  input >> bndSegListSize >> periodicListSize;
+  periodics.resize( periodicListSize );
+  for( int i = 0; i < periodicListSize; ++i )
+  {
+    for( int j = 0; j < Periodic< rawId >::numVertices; ++j )
+      input >> periodics[ i ].vertices[ j ];
+  }
+  bndSegs.resize( bndSegListSize );
+  for( int i = 0; i < bndSegListSize; ++i )
+  {
+    input >> bndSegs[ i ].bndid;
+    for( int j = 0; j < BndSeg< rawId >::numVertices; ++j )
+      input >> bndSegs[ i ].vertices[ j ];
+  }
+}
+
+
+
 // writeMacroGrid
 // --------------
 
