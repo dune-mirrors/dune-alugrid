@@ -7,16 +7,77 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <list>
+#include <map>
 #include <vector>
+#include <utility>
 
 #include <dune/alugrid/impl/serial/serialize.h>
+
+// ByteOrder
+// ---------
+
+enum ByteOrder { bigEndian = 0x12345678, littleEndian = 0x78563412 };
+
+ByteOrder byteOrder ()
+{
+  const unsigned char b[ 4 ] = { 0x12, 0x34, 0x56, 0x78 };
+  union
+  {
+    unsigned char b[ 4 ];
+    int i;
+  } u;
+  std::copy( b, b+4, u.b );
+  ByteOrder byteOrder = ByteOrder( u.i );
+  if( (byteOrder != bigEndian) && (byteOrder != littleEndian) )
+  {
+    std::cerr << "ERROR (fatal): Byte order is neither big endian nor little endian." << std::endl;
+    std::exit( 1 );
+  }
+  return byteOrder;
+}
+
+
+
+// parseFormatOptions
+// ------------------
+
+typedef std::map< std::string, std::string > FormatOptions;
+
+FormatOptions parseFormatOptions ( std::string s )
+{
+  std::istringstream input( s );
+  FormatOptions formatOptions;
+  while( true )
+  {
+    std::string pair;
+    input >> pair;
+    if( !input )
+      break;
+
+    std::size_t pos = pair.find( '=' );
+    if( pos == pair.npos )
+    {
+      std::cerr << "ERROR (fatal): Invalid key/value pair in new format header." << std::endl;
+      std::exit( 1 );
+    }
+
+    const std::string key = pair.substr( 0, pos );
+    const std::string value = pair.substr( pos+1 );
+    if( !formatOptions.insert( std::make_pair( key, value ) ).second )
+    {
+      std::cerr << "ERROR (fatal): Duplicate key in new format header: " << key << std::endl;
+      std::exit( 1 );
+    }
+  }
+  return formatOptions;
+}
 
 
 // ElementRawID
 // ------------
 
 enum ElementRawID { TETRA_RAW = 4, HEXA_RAW = 8 };
+
 
 
 // Vertex
@@ -27,6 +88,7 @@ struct Vertex
   int id;
   double x, y, z;
 };
+
 
 
 // Element
@@ -48,6 +110,7 @@ struct Element< HEXA_RAW >
   static const int numVertices = 8;
   int vertices[ numVertices ];
 };
+
 
 
 // BndSeg
@@ -73,6 +136,7 @@ struct BndSeg< HEXA_RAW >
 };
 
 
+
 // Periodic
 // --------
 
@@ -94,6 +158,7 @@ struct Periodic< HEXA_RAW >
   int bndid;
   int vertices[ numVertices ];
 };
+
 
 
 // readLegacyFormat
@@ -122,14 +187,14 @@ void readLegacyFormat ( std::istream &input,
   // <Identifier f"ur den letzten Knoten : int> /* einem Gitter optional, sonst muss
   //            /* jeder Vertex eine eigene Nummer haben
 
-  std::cout << "Reading legacy format..." << std::endl;
+  std::cout << "Reading legacy " << (rawId == HEXA_RAW ? "hexahedra" : "tetrahedra") << " format..." << std::endl;
 
   int nv = 0;
   input >> nv;
   vertices.resize( nv );
   for( int i = 0; i < nv; ++i )
     input >> vertices[ i ].x >> vertices[ i ].y >> vertices[ i ].z;
-  std::cout << "  - read " << nv << " vertices." << std::endl;
+  std::cout << "  - read " << vertices.size() << " vertices." << std::endl;
 
   int ne = 0;
   input >> ne;
@@ -139,7 +204,7 @@ void readLegacyFormat ( std::istream &input,
     for( int vx = 0; vx < Element< rawId >::numVertices; ++vx )
       input >> elements[ i ].vertices[ vx ];
   }
-  std::cout << "  - read " << ne << " elements." << std::endl;
+  std::cout << "  - read " << elements.size() << " elements." << std::endl;
 
   int temp_nb = 0;
   input >> temp_nb;
@@ -206,33 +271,28 @@ void readMacroGrid ( stream_t &input,
                      std::vector< BndSeg< rawId > > &bndSegs,
                      std::vector< Periodic< rawId > > &periodics )
 {
-  // ignore firstline for now; it should have been stripped already
-  std::string firstline;
-  ALUGrid::getline( input, firstline );
+  std::cout << "Reading new " << (rawId == HEXA_RAW ? "hexahedra" : "tetrahedra") << " format..." << std::endl;
 
   int vertexListSize = 0;
   input >> vertexListSize;
   vertices.resize( vertexListSize );
   for( int i = 0; i < vertexListSize; ++i )
     input >> vertices[ i ].id >> vertices[ i ].x >> vertices[ i ].y >> vertices[ i ].z;
+  std::cout << "  - read " << vertices.size() << " vertices." << std::endl;
 
-  int elementListSize = 0, type = -1;
-  input >> elementListSize >> type;
-  if( type != rawId )
-  {
-    std::cerr << "ERROR (fatal): Invalid number of vertices for element (got " << type << ", expected " << rawId << ")." << std::endl;
-    std::exit( 1 );
-  }
+  int elementListSize = 0;
+  input >> elementListSize;
   elements.resize( elementListSize );
   for( int i = 0; i < elementListSize; ++i )
   {
     for( int j = 0; j < Element< rawId >::numVertices; ++j )
       input >> elements[ i ].vertices[ j ];
   }
+  std::cout << "  - read " << elements.size() << " elements." << std::endl;
 
   int bndSegListSize = 0;
   int periodicListSize = 0;
-  input >> bndSegListSize >> periodicListSize;
+  input >> periodicListSize >> bndSegListSize;
   periodics.resize( periodicListSize );
   for( int i = 0; i < periodicListSize; ++i )
   {
@@ -246,6 +306,8 @@ void readMacroGrid ( stream_t &input,
     for( int j = 0; j < BndSeg< rawId >::numVertices; ++j )
       input >> bndSegs[ i ].vertices[ j ];
   }
+  std::cout << "  - read " << bndSegs.size() << " boundary segments." << std::endl;
+  std::cout << "  - read " << periodics.size() << " periodic boundary segments." << std::endl;
 }
 
 
@@ -267,17 +329,11 @@ void writeMacroGrid ( stream_t &output,
 
   ALUGrid::StandardWhiteSpace_t ws;
 
-  // write header line as vector of characters 
-  std::ostringstream firstline;
-  firstline << (rawId == HEXA_RAW ? "!Hexahedra" : "!Tetrahedra");
-  firstline << "  ( noVertices = " << vertexListSize << " | noElements = " << elementListSize << " )" << std::endl;
-  output << firstline.str();
-
   output << std::endl << vertexListSize << std::endl;
   for( int i = 0; i < vertexListSize; ++i )
     output << vertices[ i ].id << ws << vertices[ i ].x << ws << vertices[ i ].y << ws << vertices[ i ].z << std::endl;
 
-  output << std::endl << elementListSize << ws << int( rawId ) << std::endl;
+  output << std::endl << elementListSize << std::endl;
   for( int i = 0; i < elementListSize; ++i )
   {
     output << elements[ i ].vertices[ 0 ];
@@ -304,36 +360,193 @@ void writeMacroGrid ( stream_t &output,
 }
 
 
+// writeNewFormat
+// --------------
+
+template< ElementRawID rawId >
+void writeNewFormat ( std::ostream &output, bool writeBinary,
+                      const std::vector< Vertex > &vertices,
+                      const std::vector< Element< rawId > > &elements,
+                      const std::vector< BndSeg< rawId > > &bndSegs,
+                      const std::vector< Periodic< rawId > > &periodics )
+{
+  // write header
+  output << "!ALU";
+  output << " type=" << (rawId == HEXA_RAW ? "hexahexdra" : "tetrahedra");
+  output << " format=" << (writeBinary ? "binary" : "ascii");
+
+  if( writeBinary )
+  {
+    ALUGrid::ObjectStream os;
+    writeMacroGrid( os, vertices, elements, bndSegs, periodics );
+
+    output << " byteorder=" << (byteOrder() == bigEndian ? "bigendian" : "littleendian");
+    output << " size=" << os.size();
+    output << std::endl;
+    output.write( os.getBuff( 0 ), os.size() );
+  }
+  else
+  {
+    output << std::endl;
+    writeMacroGrid( output, vertices, elements, bndSegs, periodics );
+  }
+}
+
+
+
 // convertLegacyFormat
 // -------------------
 
-template< ElementRawID rawId, class stream_t >
-void convertLegacyFormat ( std::istream &input, stream_t &output )
+template< ElementRawID rawId >
+void convertLegacyFormat ( std::istream &input, std::ostream &output, bool writeBinary )
 {
-  const clock_t start = clock();
-
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
   std::vector< BndSeg< rawId > > bndSegs;
   std::vector< Periodic< rawId > > periodics;
 
   readLegacyFormat( input, vertices, elements, bndSegs, periodics );
-  writeMacroGrid( output, vertices, elements, bndSegs, periodics );
-
-  std::cout << "INFO: Conversion of legacy macro grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
+  writeNewFormat( output, writeBinary, vertices, elements, bndSegs, periodics );
 }
 
-template< class stream_t >
-void convertLegacyFormat ( std::istream &input, stream_t &output )
+
+
+// readBinaryMacroGrid
+// -------------------
+
+template< ElementRawID rawId >
+void readBinaryMacroGrid ( std::istream &input, const FormatOptions &formatOptions,
+                           std::vector< Vertex > &vertices,
+                           std::vector< Element< rawId > > &elements,
+                           std::vector< BndSeg< rawId > > &bndSegs,
+                           std::vector< Periodic< rawId > > &periodics )
 {
+  FormatOptions::const_iterator pos = formatOptions.find( "size" );
+  if( pos == formatOptions.end() )
+  {
+    std::cerr << "ERROR: Option 'size' missing in new binary macro grid format." << std::endl;
+    std::exit( 1 );
+  }
+
+  std::istringstream sizeInput( pos->second );
+  std::size_t size;
+  sizeInput >> size;
+  if( !sizeInput )
+  {
+    std::cerr << "ERROR: Invalid 'size' in new binary macro grid format: " << pos->second << "." << std::endl;
+    std::exit( 1 );
+  }
+
+  // read file to alugrid stream
+  ALUGrid::ObjectStream os;
+  os.reserve( size );
+  os.clear();
+  input.read( os.getBuff( 0 ), size );
+  os.seekp( size );
+
+  pos = formatOptions.find( "byteorder" );
+  if( pos == formatOptions.end() )
+  {
+    std::cerr << "ERROR: Option 'byteorder' missing in new binary macro grid format." << std::endl;
+    std::exit( 1 );
+  }
+
+  if( pos->second == "bigendian" )
+  {
+    if( byteOrder() != bigEndian )
+    {
+      std::cerr << "ERROR: Currently, only native byte order is supported." << std::endl;
+      std::exit( 1 );
+    }
+  }
+  else if( pos->second == "littleendian" )
+  {
+    if( byteOrder() != littleEndian )
+    {
+      std::cerr << "ERROR: Currently, only native byte order is supported." << std::endl;
+      std::exit( 1 );
+    }
+  }
+  else
+  {
+    std::cerr << "ERROR: Invalid 'byteorder' in new macro grid format: " << pos->second << "." << std::endl;
+    std::exit( 1 );
+  }
+
+  readMacroGrid( os, vertices, elements, bndSegs, periodics );
+}
+
+
+// convertNewFormat
+// ----------------
+
+template< ElementRawID rawId >
+void convertNewFormat ( std::istream &input, std::ostream &output, bool writeBinary, const FormatOptions &formatOptions )
+{
+  std::vector< Vertex > vertices;
+  std::vector< Element< rawId > > elements;
+  std::vector< BndSeg< rawId > > bndSegs;
+  std::vector< Periodic< rawId > > periodics;
+
+  const FormatOptions::const_iterator pos = formatOptions.find( "format" );
+  if( pos == formatOptions.end() )
+  {
+    std::cerr << "ERROR: Option 'format' missing in new macro grid format." << std::endl;
+    std::exit( 1 );
+  }
+
+  if( pos->second == "binary" )
+    readBinaryMacroGrid( input, formatOptions, vertices, elements, bndSegs, periodics );
+  else if( pos->second == "ascii" )
+    readMacroGrid( input, vertices, elements, bndSegs, periodics );
+  else
+  {
+    std::cerr << "ERROR: Invalid 'format' in new macro grid format: " << pos->second << "." << std::endl;
+    std::exit( 1 );
+  }
+
+  writeNewFormat( output, writeBinary, vertices, elements, bndSegs, periodics );
+}
+
+void convertNewFormat ( std::istream &input, std::ostream &output, bool writeBinary, const FormatOptions &formatOptions )
+{
+  const FormatOptions::const_iterator pos = formatOptions.find( "type" );
+  if( pos == formatOptions.end() )
+  {
+    std::cerr << "ERROR: Option 'type' missing in new macro grid format." << std::endl;
+    std::exit( 1 );
+  }
+
+  if( pos->second == "tetrahedra" )
+    convertNewFormat< TETRA_RAW >( input, output, writeBinary, formatOptions );
+  else if( pos->second == "hexahedra" )
+    convertNewFormat< HEXA_RAW >( input, output, writeBinary, formatOptions );
+  else
+  {
+    std::cerr << "ERROR: Invalid 'type' in new macro grid format: " << pos->second << "." << std::endl;
+    std::exit( 1 );
+  }
+}
+
+
+
+// convert
+// -------
+
+void convert ( std::istream &input, std::ostream &output, bool writeBinary )
+{
+  const clock_t start = clock();
+
   std::string firstline;
   std::getline( input, firstline );
   if( firstline[ 0 ] == char( '!' ) )
   {
-    if( (firstline.find( "Tetrahedra" ) != firstline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
-      convertLegacyFormat< TETRA_RAW >( input, output );
+    if( firstline.substr( 1, 3 ) == "ALU" )
+      convertNewFormat( input, output, writeBinary, parseFormatOptions( firstline.substr( 4 ) ) );
+    else if( (firstline.find( "Tetrahedra" ) != firstline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
+      convertLegacyFormat< TETRA_RAW >( input, output, writeBinary );
     else if( (firstline.find( "Hexahedra" ) != firstline.npos) || (firstline.find( "Hexaeder" ) != firstline.npos) )
-      convertLegacyFormat< HEXA_RAW >( input, output );
+      convertLegacyFormat< HEXA_RAW >( input, output, writeBinary );
     else 
     {
       std::cerr << "ERROR: Unknown comment to file format (" << firstline << ")." << std::endl;
@@ -342,10 +555,13 @@ void convertLegacyFormat ( std::istream &input, stream_t &output )
   }
   else
   {
-    std::cerr << "WARNING: No identifier for file format found. Trying to read as hexahedral grid." << std::endl;
-    convertLegacyFormat< HEXA_RAW >( input, output );
+    std::cerr << "WARNING: No identifier for file format found. Trying to read as legacy hexahedral grid." << std::endl;
+    convertLegacyFormat< HEXA_RAW >( input, output, writeBinary );
   }
+
+  std::cout << "INFO: Conversion of macro grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
 }
+
 
 
 // main
@@ -379,12 +595,5 @@ int main ( int argc, char **argv )
 
   std::ifstream input( argv[ 1 ] );
   std::ofstream output( argv[ 2 ] );
-  if( writeBinary )
-  {
-    ALUGrid::ObjectStream os;
-    convertLegacyFormat( input, os );
-    output.write( os.getBuff( 0 ), os.size() );
-  }
-  else
-    convertLegacyFormat( input, output );
+  convert( input, output, writeBinary );
 }
