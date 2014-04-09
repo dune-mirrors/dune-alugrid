@@ -260,7 +260,7 @@ void readLegacyFormat ( std::istream &input,
     if( n == BndSeg< rawId >::numVertices )
     {
       BndSeg< rawId > seg;
-      seg.bndid = bndid;
+      seg.bndid = -bndid;
       for( int vx = 0; vx < BndSeg< rawId >::numVertices; ++vx )
         input >> seg.vertices[ vx ];
       bndSegs.push_back( seg );
@@ -268,7 +268,7 @@ void readLegacyFormat ( std::istream &input,
     else if( n == Periodic< rawId >::numVertices )
     {
       Periodic< rawId > seg;
-      seg.bndid = bndid;
+      seg.bndid = -bndid;
       for( int vx = 0; vx < Periodic< rawId >::numVertices; ++vx )
         input >> seg.vertices[ vx ];
       periodics.push_back( seg );
