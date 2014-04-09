@@ -13,32 +13,8 @@
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
+#include <dune/alugrid/impl/indexstack.h>
 #include <dune/alugrid/impl/serial/serialize.h>
-
-
-// ByteOrder
-// ---------
-
-enum ByteOrder { bigEndian = 0x12345678, littleEndian = 0x78563412 };
-
-ByteOrder byteOrder ()
-{
-  const unsigned char b[ 4 ] = { 0x12, 0x34, 0x56, 0x78 };
-  union
-  {
-    unsigned char b[ 4 ];
-    int i;
-  } u;
-  std::copy( b, b+4, u.b );
-  ByteOrder byteOrder = ByteOrder( u.i );
-  if( (byteOrder != bigEndian) && (byteOrder != littleEndian) )
-  {
-    std::cerr << "ERROR (fatal): Byte order is neither big endian nor little endian." << std::endl;
-    std::exit( 1 );
-  }
-  return byteOrder;
-}
-
 
 
 // parseFormatOptions
@@ -423,7 +399,7 @@ void writeNewFormat ( std::ostream &output, bool writeBinary,
     ALUGrid::ObjectStream os;
     writeMacroGrid( os, vertices, elements, bndSegs, periodics );
 
-    output << " byteorder=" << (byteOrder() == bigEndian ? "bigendian" : "littleendian");
+    output << " byteorder=" << (ALUGrid::RestoreInfo::systemByteOrder() ? "bigendian" : "littleendian");
     output << " size=" << os.size();
     output << std::endl;
     output.write( os.getBuff( 0 ), os.size() );
@@ -511,7 +487,7 @@ void readBinaryMacroGrid ( std::istream &input, const FormatOptions &formatOptio
 
   if( pos->second == "bigendian" )
   {
-    if( byteOrder() != bigEndian )
+    if( !ALUGrid::RestoreInfo::systemByteOrder() )
     {
       std::cerr << "ERROR: Currently, only native byte order is supported." << std::endl;
       std::exit( 1 );
@@ -519,7 +495,7 @@ void readBinaryMacroGrid ( std::istream &input, const FormatOptions &formatOptio
   }
   else if( pos->second == "littleendian" )
   {
-    if( byteOrder() != littleEndian )
+    if( ALUGrid::RestoreInfo::systemByteOrder() )
     {
       std::cerr << "ERROR: Currently, only native byte order is supported." << std::endl;
       std::exit( 1 );
