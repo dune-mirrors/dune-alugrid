@@ -11,7 +11,10 @@
 #include <vector>
 #include <utility>
 
+#include <dune/grid/io/file/dgfparser/parser.hh>
+
 #include <dune/alugrid/impl/serial/serialize.h>
+
 
 // ByteOrder
 // ---------
@@ -157,6 +160,46 @@ struct Periodic< HEXA_RAW >
   static const int numVertices = 8;
   int bndid;
   int vertices[ numVertices ];
+};
+
+
+// DGFParser
+// ---------
+
+class DGFParser
+  : public Dune::DuneGridFormatParser
+{
+  typedef Dune::DuneGridFormatParser Base;
+
+public:
+  typedef typename Base::facemap_t facemap_t;
+
+  DGFParser ( ElementRawID rawId )
+    : Base( 0, 1 )
+  {
+    Base::element = (rawId == HEXA_RAW ? DGFParser::Cube : DGFParser::Simplex);
+    Base::dimgrid = 3;
+    Base::dimw = 3;
+  }
+
+  static bool isDuneGridFormat ( std::istream &input )
+  {
+    const std::streampos pos = input.tellg();
+    const bool isDGF = Base::isDuneGridFormat( input );
+    input.clear();
+    input.seekg( pos );
+    return isDGF;
+  }
+
+  void setOrientation ( int use1, int use2 ) { Base::setOrientation( use1, use2 ); }
+
+  int numVertices () const { return Base::nofvtx; }
+  const std::vector< double > &vertex ( int i ) const { return Base::vtx[ i ]; }
+
+  int numElements () const { return this->nofelements; }
+  const std::vector< unsigned int > element ( int i ) const { return Base::elements[ i ]; }
+
+  const facemap_t &facemap () const { return Base::facemap; }
 };
 
 
@@ -394,6 +437,21 @@ void writeNewFormat ( std::ostream &output, bool writeBinary,
 
 
 
+// ProgramOptions
+// --------------
+
+struct ProgramOptions
+{
+  bool writeBinary;
+  ElementRawID defaultRawId;
+  
+  ProgramOptions ()
+    : writeBinary( false ), defaultRawId( HEXA_RAW )
+  {}
+};
+
+
+
 // convertLegacyFormat
 // -------------------
 
@@ -530,10 +588,99 @@ void convertNewFormat ( std::istream &input, std::ostream &output, bool writeBin
 
 
 
+// readDGF
+// -------
+
+template< class stream_t, ElementRawID rawId >
+void readDGF ( stream_t &input,
+               std::vector< Vertex > &vertices,
+               std::vector< Element< rawId > > &elements,
+               std::vector< BndSeg< rawId > > &bndSegs,
+               std::vector< Periodic< rawId > > &periodics )
+{
+  DGFParser dgf( rawId );
+
+  if( !dgf.readDuneGrid( input, 3, 3 ) )
+  {
+    std::cerr << "ERROR: Invalid DGF file." << std::endl;
+    std::exit( 1 );
+  }
+
+  if( rawId == TETRA_RAW )
+    dgf.setOrientation( 2, 3 );
+
+  vertices.resize( dgf.numVertices() );
+  for( int i = 0; i < dgf.numVertices(); ++i )
+  {
+    vertices[ i ].id = i;
+    vertices[ i ].x = dgf.vertex( i )[ 0 ];
+    vertices[ i ].y = dgf.vertex( i )[ 1 ];
+    vertices[ i ].z = dgf.vertex( i )[ 2 ];
+  }
+
+  typedef Dune::ElementTopologyMapping< rawId == HEXA_RAW ? Dune::hexa : Dune::tetra > DuneTopologyMapping;
+  elements.resize( dgf.numElements() );
+  bndSegs.reserve( dgf.facemap().size() );
+  for( int i = 0; i < dgf.numElements(); ++i )
+  {
+    if( int( dgf.element( i ).size() ) != Element< rawId >::numVertices )
+    {
+      std::cerr << "ERROR: Invalid element constructed by DGF parser (" << dgf.element( i ).size() << " vertices)." << std::endl;
+      std::exit( 1 );
+    }
+    for( int j = 0; j < Element< rawId >::numVertices; ++j )
+      elements[ i ].vertices[ DuneTopologyMapping::dune2aluVertex( j ) ] = dgf.element( i )[ j ];
+    for( int j = 0; j < Dune::ElementFaceUtil::nofFaces( 3, dgf.element( i ) ); ++j )
+    {
+      const DGFParser::facemap_t::const_iterator pos = dgf.facemap().find( Dune::ElementFaceUtil::generateFace( 3, dgf.element( i ), j ) );
+      if( pos != dgf.facemap().end() )
+      {
+        const int jalu = DuneTopologyMapping::generic2aluFace( j );
+        BndSeg< rawId > bndSeg;
+        bndSeg.bndid = pos->second.first;
+        for( int k = 0; k < BndSeg< rawId >::numVertices; ++k )
+          bndSeg.vertices[ k ] = elements[ i ].vertices[ DuneTopologyMapping::faceVertex( jalu, k ) ];
+        bndSegs.push_back( bndSeg );
+      }
+    }
+  }
+}
+
+
+
+// convertDGF
+// ----------
+
+template< ElementRawID rawId >
+void convertDGF ( std::istream &input, std::ostream &output, bool writeBinary )
+{
+  std::vector< Vertex > vertices;
+  std::vector< Element< rawId > > elements;
+  std::vector< BndSeg< rawId > > bndSegs;
+  std::vector< Periodic< rawId > > periodics;
+
+  readDGF( input, vertices, elements, bndSegs, periodics );
+  writeNewFormat( output, writeBinary, vertices, elements, bndSegs, periodics );
+}
+
+void convertDGF ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+{
+  const clock_t start = clock();
+
+  if( options.defaultRawId == HEXA_RAW )
+    convertDGF< HEXA_RAW >( input, output, options.writeBinary );
+  else
+    convertDGF< TETRA_RAW >( input, output, options.writeBinary );
+
+  std::cout << "INFO: Conversion of DUNE grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
+}
+
+
+
 // convert
 // -------
 
-void convert ( std::istream &input, std::ostream &output, bool writeBinary )
+void convert ( std::istream &input, std::ostream &output, const ProgramOptions &options )
 {
   const clock_t start = clock();
 
@@ -542,11 +689,11 @@ void convert ( std::istream &input, std::ostream &output, bool writeBinary )
   if( firstline[ 0 ] == char( '!' ) )
   {
     if( firstline.substr( 1, 3 ) == "ALU" )
-      convertNewFormat( input, output, writeBinary, parseFormatOptions( firstline.substr( 4 ) ) );
+      convertNewFormat( input, output, options.writeBinary, parseFormatOptions( firstline.substr( 4 ) ) );
     else if( (firstline.find( "Tetrahedra" ) != firstline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
-      convertLegacyFormat< TETRA_RAW >( input, output, writeBinary );
+      convertLegacyFormat< TETRA_RAW >( input, output, options.writeBinary );
     else if( (firstline.find( "Hexahedra" ) != firstline.npos) || (firstline.find( "Hexaeder" ) != firstline.npos) )
-      convertLegacyFormat< HEXA_RAW >( input, output, writeBinary );
+      convertLegacyFormat< HEXA_RAW >( input, output, options.writeBinary );
     else 
     {
       std::cerr << "ERROR: Unknown comment to file format (" << firstline << ")." << std::endl;
@@ -555,8 +702,12 @@ void convert ( std::istream &input, std::ostream &output, bool writeBinary )
   }
   else
   {
-    std::cerr << "WARNING: No identifier for file format found. Trying to read as legacy hexahedral grid." << std::endl;
-    convertLegacyFormat< HEXA_RAW >( input, output, writeBinary );
+    std::cerr << "WARNING: No identifier for file format found. Trying to read as legacy "
+              << (options.defaultRawId == HEXA_RAW ? "hexahedral" : "tetrahedral") << " grid." << std::endl;
+    if( options.defaultRawId == HEXA_RAW )
+      convertLegacyFormat< HEXA_RAW >( input, output, options.writeBinary );
+    else
+      convertLegacyFormat< TETRA_RAW >( input, output, options.writeBinary );
   }
 
   std::cout << "INFO: Conversion of macro grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
@@ -569,7 +720,7 @@ void convert ( std::istream &input, std::ostream &output, bool writeBinary )
 
 int main ( int argc, char **argv )
 {
-  bool writeBinary = false;
+  ProgramOptions options;
 
   for( int i = 1; i < argc; ++i )
   {
@@ -578,8 +729,20 @@ int main ( int argc, char **argv )
 
     for( int j = 1; argv[ i ][ j ]; ++j )
     {
-      if( argv[ i ][ j ] == 'b' )
-        writeBinary = true;
+      switch( argv[ i ][ j ] )
+      {
+      case 'b':
+        options.writeBinary = true;
+        break;
+
+      case '4':
+        options.defaultRawId = TETRA_RAW;
+        break;
+
+      case '8':
+        options.defaultRawId = HEXA_RAW;
+        break;
+      }
     }
 
     std::copy( argv + (i+1), argv + argc, argv + i );
@@ -594,6 +757,21 @@ int main ( int argc, char **argv )
   }
 
   std::ifstream input( argv[ 1 ] );
+  if( !input )
+  {
+    std::cerr << "Unable to open input file: " << argv[ 1 ] << "." << std::endl;
+    return 1;
+  }
+
   std::ofstream output( argv[ 2 ] );
-  convert( input, output, writeBinary );
+  if( !output )
+  {
+    std::cerr << "Unable to open output file: " << argv[ 2 ] << "." << std::endl;
+    return 1;
+  }
+
+  if( DGFParser::isDuneGridFormat( input ) )
+    convertDGF( input, output, options );
+  else
+    convert( input, output, options );
 }
