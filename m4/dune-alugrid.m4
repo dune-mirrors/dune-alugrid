@@ -8,6 +8,9 @@ AC_DEFUN([DUNE_ALUGRID_CHECKS],[
   dnl check for the METIS library (check needs to after ParMETIS check)
   AC_REQUIRE([IMMDX_LIB_METIS])
 
+  dnl check for zlib
+  AC_REQUIRE([DUNE_PATH_ZLIB])
+
   dnl check whether ALUGrid was found by the dune-grid module 
   dnl this conflicts with this package
   AS_IF([test "x$ALUGRID_CPPFLAGS" != "x"],
