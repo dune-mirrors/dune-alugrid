@@ -523,7 +523,7 @@ namespace ALUGrid
     return is;
   }
 
-  inline void getline( ALUGrid::ObjectStream& in, std::string& str )
+  inline void getline( ObjectStream& in, std::string& str )
   {
     in >> str;
   }
