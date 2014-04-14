@@ -148,7 +148,7 @@ class DGFParser
   typedef Dune::DuneGridFormatParser Base;
 
 public:
-  typedef typename Base::facemap_t facemap_t;
+  typedef Base::facemap_t facemap_t;
 
   DGFParser ( ElementRawID rawId )
     : Base( 0, 1 )
