@@ -11,6 +11,8 @@
 #include <vector>
 #include <utility>
 
+#include <dune/common/version.hh>
+
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
 #include <dune/alugrid/impl/indexstack.h>
@@ -173,7 +175,7 @@ public:
   const std::vector< double > &vertex ( int i ) const { return Base::vtx[ i ]; }
 
   int numElements () const { return this->nofelements; }
-  const std::vector< unsigned int > element ( int i ) const { return Base::elements[ i ]; }
+  const std::vector< unsigned int > &element ( int i ) const { return Base::elements[ i ]; }
 
   const facemap_t &facemap () const { return Base::facemap; }
 };
@@ -606,7 +608,11 @@ void readDGF ( stream_t &input,
     }
     for( int j = 0; j < Element< rawId >::numVertices; ++j )
       elements[ i ].vertices[ DuneTopologyMapping::dune2aluVertex( j ) ] = dgf.element( i )[ j ];
+#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
     for( int j = 0; j < Dune::ElementFaceUtil::nofFaces( 3, dgf.element( i ) ); ++j )
+#else // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+    for( int j = 0; j < Dune::ElementFaceUtil::nofFaces( 3, const_cast< std::vector< unsigned int > & >( dgf.element( i ) ) ); ++j )
+#endif // #else // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
     {
       const DGFParser::facemap_t::const_iterator pos = dgf.facemap().find( Dune::ElementFaceUtil::generateFace( 3, dgf.element( i ), j ) );
       if( pos != dgf.facemap().end() )
