@@ -393,7 +393,7 @@ void writeNewFormat ( std::ostream &output, bool writeBinary,
 {
   // write header
   output << "!ALU";
-  output << " type=" << (rawId == HEXA_RAW ? "hexahexdra" : "tetrahedra");
+  output << " type=" << (rawId == HEXA_RAW ? "hexahedra" : "tetrahedra");
   output << " format=" << (writeBinary ? "binary" : "ascii");
 
   if( writeBinary )
