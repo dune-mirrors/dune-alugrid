@@ -91,13 +91,13 @@ namespace ALUGrid
     }
 
     // write value to stream 
-    template <class T> 
+    template <class T>
     inline void write (const T & a)
     {
       writeT( a, true );
     }
 
-    template <class T> 
+    template <class T>
     inline void writeUnchecked( const T& a )
     {
       writeT( a, false );
@@ -147,16 +147,14 @@ namespace ALUGrid
       return ;
     }
 
-  public:
-    // read value from stream 
-    template <class T> 
-    inline void read (T & a) throw (EOFException) 
+    template<class T>
+    inline void readT ( T& a, bool checkLength )
     {
       const size_t ap = _rb;
       _rb += sizeof(T);
       
 #ifndef NO_OBJECTSTREAM_DEBUG 
-      if (_rb > _wb) throw EOFException () ;
+      if ( checkLength && _rb > _wb) throw EOFException () ;
 #endif
       alugrid_assert ( _rb <= _wb );
 
@@ -164,6 +162,14 @@ namespace ALUGrid
       a = static_cast<const T &> (*((const T *) getBuff(ap) ));
       return ;
     }
+
+  public:
+    // read value from stream
+    template <class T>
+    inline void read (T & a) { readT( a, true ); }
+
+    template<class T>
+    inline void readUnchecked ( T& a ) { readT( a, false ); }
 
     // read this stream and write to os 
     inline void readStream (ObjectStreamImpl & os) 
