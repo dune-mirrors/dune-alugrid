@@ -15,6 +15,7 @@
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
+#include <dune/alugrid/impl/binaryio.hh>
 #include <dune/alugrid/impl/indexstack.h>
 #include <dune/alugrid/impl/serial/serialize.h>
 
@@ -52,6 +53,25 @@ FormatOptions parseFormatOptions ( std::string s )
   }
   return formatOptions;
 }
+
+
+
+// parseFormat
+// -----------
+
+ALUGrid::BinaryFormat parseFormat ( const std::string &format )
+{
+  if( format == "binary" )
+    return ALUGrid::rawBinary;
+  else if( format == "zbinary" )
+    return ALUGrid::zlibCompressed;
+  else
+  {
+    std::cerr << "ERROR: Invalid binary format: " << format << "." << std::endl;
+    std::exit( 1 );
+  }
+}
+
 
 
 // ElementRawID
@@ -381,11 +401,28 @@ void writeMacroGrid ( stream_t &output,
 }
 
 
+
+// ProgramOptions
+// --------------
+
+struct ProgramOptions
+{
+  ElementRawID defaultRawId;
+  std::string format;
+  std::string byteOrder;
+  
+  ProgramOptions ()
+    : defaultRawId( HEXA_RAW ), format( "ascii" ), byteOrder( "default" )
+  {}
+};
+
+
+
 // writeNewFormat
 // --------------
 
 template< ElementRawID rawId >
-void writeNewFormat ( std::ostream &output, bool writeBinary,
+void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
                       const std::vector< Vertex > &vertices,
                       const std::vector< Element< rawId > > &elements,
                       const std::vector< BndSeg< rawId > > &bndSegs,
@@ -394,9 +431,9 @@ void writeNewFormat ( std::ostream &output, bool writeBinary,
   // write header
   output << "!ALU";
   output << " type=" << (rawId == HEXA_RAW ? "hexahedra" : "tetrahedra");
-  output << " format=" << (writeBinary ? "binary" : "ascii");
+  output << " format=" << options.format;
 
-  if( writeBinary )
+  if( options.format != "ascii" )
   {
     ALUGrid::ObjectStream os;
     writeMacroGrid( os, vertices, elements, bndSegs, periodics );
@@ -404,7 +441,12 @@ void writeNewFormat ( std::ostream &output, bool writeBinary,
     output << " byteorder=" << (ALUGrid::RestoreInfo::systemByteOrder() ? "bigendian" : "littleendian");
     output << " size=" << os.size();
     output << std::endl;
-    output.write( os.getBuff( 0 ), os.size() );
+    ALUGrid::writeBinary( output, os.getBuff( 0 ), os.size(), parseFormat( options.format ) );
+    if( !output )
+    {
+      std::cerr << "ERROR: Unable to write binary output." << std::endl;
+      std::exit( 1 );
+    }
   }
   else
   {
@@ -415,26 +457,11 @@ void writeNewFormat ( std::ostream &output, bool writeBinary,
 
 
 
-// ProgramOptions
-// --------------
-
-struct ProgramOptions
-{
-  bool writeBinary;
-  ElementRawID defaultRawId;
-  
-  ProgramOptions ()
-    : writeBinary( false ), defaultRawId( HEXA_RAW )
-  {}
-};
-
-
-
 // convertLegacyFormat
 // -------------------
 
 template< ElementRawID rawId >
-void convertLegacyFormat ( std::istream &input, std::ostream &output, bool writeBinary )
+void convertLegacyFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -442,7 +469,7 @@ void convertLegacyFormat ( std::istream &input, std::ostream &output, bool write
   std::vector< Periodic< rawId > > periodics;
 
   readLegacyFormat( input, vertices, elements, bndSegs, periodics );
-  writeNewFormat( output, writeBinary, vertices, elements, bndSegs, periodics );
+  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
 }
 
 
@@ -477,7 +504,12 @@ void readBinaryMacroGrid ( std::istream &input, const FormatOptions &formatOptio
   ALUGrid::ObjectStream os;
   os.reserve( size );
   os.clear();
-  input.read( os.getBuff( 0 ), size );
+  ALUGrid::readBinary( input, os.getBuff( 0 ), size, parseFormat( formatOptions.find( "format" )->second ) );
+  if( !input )
+  {
+    std::cerr << "ERROR: Unable to read binary input." << std::endl;
+    std::exit( 1 );
+  }
   os.seekp( size );
 
   pos = formatOptions.find( "byteorder" );
@@ -517,7 +549,7 @@ void readBinaryMacroGrid ( std::istream &input, const FormatOptions &formatOptio
 // ----------------
 
 template< ElementRawID rawId >
-void convertNewFormat ( std::istream &input, std::ostream &output, bool writeBinary, const FormatOptions &formatOptions )
+void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const FormatOptions &formatOptions )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -531,7 +563,7 @@ void convertNewFormat ( std::istream &input, std::ostream &output, bool writeBin
     std::exit( 1 );
   }
 
-  if( pos->second == "binary" )
+  if( (pos->second == "binary") || (pos->second == "zbinary") )
     readBinaryMacroGrid( input, formatOptions, vertices, elements, bndSegs, periodics );
   else if( pos->second == "ascii" )
     readMacroGrid( input, vertices, elements, bndSegs, periodics );
@@ -541,10 +573,10 @@ void convertNewFormat ( std::istream &input, std::ostream &output, bool writeBin
     std::exit( 1 );
   }
 
-  writeNewFormat( output, writeBinary, vertices, elements, bndSegs, periodics );
+  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
 }
 
-void convertNewFormat ( std::istream &input, std::ostream &output, bool writeBinary, const FormatOptions &formatOptions )
+void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const FormatOptions &formatOptions )
 {
   const FormatOptions::const_iterator pos = formatOptions.find( "type" );
   if( pos == formatOptions.end() )
@@ -554,9 +586,9 @@ void convertNewFormat ( std::istream &input, std::ostream &output, bool writeBin
   }
 
   if( pos->second == "tetrahedra" )
-    convertNewFormat< TETRA_RAW >( input, output, writeBinary, formatOptions );
+    convertNewFormat< TETRA_RAW >( input, output, options, formatOptions );
   else if( pos->second == "hexahedra" )
-    convertNewFormat< HEXA_RAW >( input, output, writeBinary, formatOptions );
+    convertNewFormat< HEXA_RAW >( input, output, options, formatOptions );
   else
   {
     std::cerr << "ERROR: Invalid 'type' in new macro grid format: " << pos->second << "." << std::endl;
@@ -634,7 +666,7 @@ void readDGF ( stream_t &input,
 // ----------
 
 template< ElementRawID rawId >
-void convertDGF ( std::istream &input, std::ostream &output, bool writeBinary )
+void convertDGF ( std::istream &input, std::ostream &output, const ProgramOptions &options )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -642,7 +674,7 @@ void convertDGF ( std::istream &input, std::ostream &output, bool writeBinary )
   std::vector< Periodic< rawId > > periodics;
 
   readDGF( input, vertices, elements, bndSegs, periodics );
-  writeNewFormat( output, writeBinary, vertices, elements, bndSegs, periodics );
+  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
 }
 
 void convertDGF ( std::istream &input, std::ostream &output, const ProgramOptions &options )
@@ -650,9 +682,9 @@ void convertDGF ( std::istream &input, std::ostream &output, const ProgramOption
   const clock_t start = clock();
 
   if( options.defaultRawId == HEXA_RAW )
-    convertDGF< HEXA_RAW >( input, output, options.writeBinary );
+    convertDGF< HEXA_RAW >( input, output, options );
   else
-    convertDGF< TETRA_RAW >( input, output, options.writeBinary );
+    convertDGF< TETRA_RAW >( input, output, options );
 
   std::cout << "INFO: Conversion of DUNE grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
 }
@@ -671,11 +703,11 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
   if( firstline[ 0 ] == char( '!' ) )
   {
     if( firstline.substr( 1, 3 ) == "ALU" )
-      convertNewFormat( input, output, options.writeBinary, parseFormatOptions( firstline.substr( 4 ) ) );
+      convertNewFormat( input, output, options, parseFormatOptions( firstline.substr( 4 ) ) );
     else if( (firstline.find( "Tetrahedra" ) != firstline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
-      convertLegacyFormat< TETRA_RAW >( input, output, options.writeBinary );
+      convertLegacyFormat< TETRA_RAW >( input, output, options );
     else if( (firstline.find( "Hexahedra" ) != firstline.npos) || (firstline.find( "Hexaeder" ) != firstline.npos) )
-      convertLegacyFormat< HEXA_RAW >( input, output, options.writeBinary );
+      convertLegacyFormat< HEXA_RAW >( input, output, options );
     else 
     {
       std::cerr << "ERROR: Unknown comment to file format (" << firstline << ")." << std::endl;
@@ -687,9 +719,9 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
     std::cerr << "WARNING: No identifier for file format found. Trying to read as legacy "
               << (options.defaultRawId == HEXA_RAW ? "hexahedral" : "tetrahedral") << " grid." << std::endl;
     if( options.defaultRawId == HEXA_RAW )
-      convertLegacyFormat< HEXA_RAW >( input, output, options.writeBinary );
+      convertLegacyFormat< HEXA_RAW >( input, output, options );
     else
-      convertLegacyFormat< TETRA_RAW >( input, output, options.writeBinary );
+      convertLegacyFormat< TETRA_RAW >( input, output, options );
   }
 
   std::cout << "INFO: Conversion of macro grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
@@ -714,7 +746,7 @@ int main ( int argc, char **argv )
       switch( argv[ i ][ j ] )
       {
       case 'b':
-        options.writeBinary = true;
+        options.format = "binary";
         break;
 
       case '4':
@@ -723,6 +755,38 @@ int main ( int argc, char **argv )
 
       case '8':
         options.defaultRawId = HEXA_RAW;
+        break;
+
+      case 'f':
+        if( i+1 >= argc )
+        {
+          std::cerr << "Missing argument to option -f." << std::endl;
+          return 1;
+        }
+        options.format = argv[ i+1 ];
+        std::copy( argv + (i+2), argv + argc, argv + i+1 );
+        --argc;
+        if( (options.format != "ascii") && (options.format != "binary") && (options.format != "zbinary") )
+        {
+          std::cerr << "Invalid format: " << options.format << "." << std::endl;
+          return 1;
+        }
+        break;
+
+      case 'o':
+        if( i+1 >= argc )
+        {
+          std::cerr << "Missing argument to option -o." << std::endl;
+          return 1;
+        }
+        options.byteOrder = argv[ i+1 ];
+        std::copy( argv + (i+2), argv + argc, argv + i+1 );
+        --argc;
+        if( (options.byteOrder != "native") && (options.byteOrder != "bigendian") && (options.byteOrder != "littleendian") )
+        {
+          std::cerr << "Invalid byte order: " << options.byteOrder << "." << std::endl;
+          return 1;
+        }
         break;
       }
     }
@@ -733,8 +797,12 @@ int main ( int argc, char **argv )
 
   if( argc <= 2 )
   {
-    std::cerr << "Usage: " << argv[ 0 ] << " [-b] <input> <output>" << std::endl;
-    std::cerr << "Flags: -b : write binary output" << std::endl;
+    std::cerr << "Usage: " << argv[ 0 ] << " [-b] [-4|-8] [-o <byteorder>] <input> <output>" << std::endl;
+    std::cerr << "Flags: -4 : read tetrahedral grid, if not determined by input file" << std::endl;
+    std::cerr << "       -8 : read hexahedral grid, if not determined by input file" << std::endl;
+    std::cerr << "       -b : write binary output (alias for -f binary)" << std::endl;
+    std::cerr << "       -f : select output format (one of 'ascii', 'binary', 'zbinary')" << std::endl;
+    std::cerr << "       -o : select output byte order (one of 'native', 'bigendian', 'littleendian')" << std::endl;
     return 1;
   }
 
