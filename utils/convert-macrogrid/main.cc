@@ -17,62 +17,11 @@
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
 #include <dune/alugrid/impl/binaryio.hh>
-#include <dune/alugrid/impl/indexstack.h>
+#include <dune/alugrid/impl/byteorder.hh>
+#include <dune/alugrid/impl/macrofileheader.hh>
 #include <dune/alugrid/impl/serial/serialize.h>
 
-
-// parseFormatOptions
-// ------------------
-
-typedef std::map< std::string, std::string > FormatOptions;
-
-FormatOptions parseFormatOptions ( std::string s )
-{
-  std::istringstream input( s );
-  FormatOptions formatOptions;
-  while( true )
-  {
-    std::string pair;
-    input >> pair;
-    if( !input )
-      break;
-
-    std::size_t pos = pair.find( '=' );
-    if( pos == pair.npos )
-    {
-      std::cerr << "ERROR (fatal): Invalid key/value pair in new format header." << std::endl;
-      std::exit( 1 );
-    }
-
-    const std::string key = pair.substr( 0, pos );
-    const std::string value = pair.substr( pos+1 );
-    if( !formatOptions.insert( std::make_pair( key, value ) ).second )
-    {
-      std::cerr << "ERROR (fatal): Duplicate key in new format header: " << key << std::endl;
-      std::exit( 1 );
-    }
-  }
-  return formatOptions;
-}
-
-
-
-// parseFormat
-// -----------
-
-ALUGrid::BinaryFormat parseFormat ( const std::string &format )
-{
-  if( format == "binary" )
-    return ALUGrid::rawBinary;
-  else if( format == "zbinary" )
-    return ALUGrid::zlibCompressed;
-  else
-  {
-    std::cerr << "ERROR: Invalid binary format: " << format << "." << std::endl;
-    std::exit( 1 );
-  }
-}
-
+using ALUGrid::MacroFileHeader;
 
 
 // ElementRawID
@@ -429,20 +378,29 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
                       const std::vector< BndSeg< rawId > > &bndSegs,
                       const std::vector< Periodic< rawId > > &periodics )
 {
-  // write header
-  output << "!ALU";
-  output << " type=" << (rawId == HEXA_RAW ? "hexahedra" : "tetrahedra");
-  output << " format=" << options.format;
+  MacroFileHeader header;
+  header.setType( rawId == HEXA_RAW ? MacroFileHeader::hexahedra : MacroFileHeader::tetrahedra );
+  header.setFormat( options.format );
 
-  if( options.format != "ascii" )
+  if( options.byteOrder != "default" )
+    header.setByteOrder( options.byteOrder );
+  else
+    header.setSystemByteOrder();
+
+  if( header.isBinary() )
   {
+    if( ((header.byteOrder() == MacroFileHeader::bigendian) && (ALUGrid::systemByteOrder() != ALUGrid::bigEndian))
+        || ((header.byteOrder() == MacroFileHeader::littleendian) && (ALUGrid::systemByteOrder() != ALUGrid::littleEndian)) )
+    {
+      std::cerr << "ERROR: Writing in different byte order not implemented, yet." << std::endl;
+      std::exit( 1 );
+    }
+
     ALUGrid::ObjectStream os;
     writeMacroGrid( os, vertices, elements, bndSegs, periodics );
-
-    output << " byteorder=" << (ALUGrid::RestoreInfo::systemByteOrder() ? "bigendian" : "littleendian");
-    output << " size=" << os.size();
-    output << std::endl;
-    ALUGrid::writeBinary( output, os.getBuff( 0 ), os.size(), parseFormat( options.format ) );
+    header.setSize( os.size() );
+    header.write( output );
+    ALUGrid::writeBinary( output, os.getBuff( 0 ), header.size(), header.binaryFormat() );
     if( !output )
     {
       std::cerr << "ERROR: Unable to write binary output." << std::endl;
@@ -451,7 +409,7 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
   }
   else
   {
-    output << std::endl;
+    header.write( output );
     output << std::scientific << std::setprecision( 16 );
     writeMacroGrid( output, vertices, elements, bndSegs, periodics );
   }
@@ -480,69 +438,30 @@ void convertLegacyFormat ( std::istream &input, std::ostream &output, const Prog
 // -------------------
 
 template< ElementRawID rawId >
-void readBinaryMacroGrid ( std::istream &input, const FormatOptions &formatOptions,
+void readBinaryMacroGrid ( std::istream &input, const MacroFileHeader &header,
                            std::vector< Vertex > &vertices,
                            std::vector< Element< rawId > > &elements,
                            std::vector< BndSeg< rawId > > &bndSegs,
                            std::vector< Periodic< rawId > > &periodics )
 {
-  FormatOptions::const_iterator pos = formatOptions.find( "size" );
-  if( pos == formatOptions.end() )
+  if( ((header.byteOrder() == MacroFileHeader::bigendian) && (ALUGrid::systemByteOrder() != ALUGrid::bigEndian))
+      || ((header.byteOrder() == MacroFileHeader::littleendian) && (ALUGrid::systemByteOrder() != ALUGrid::littleEndian)) )
   {
-    std::cerr << "ERROR: Option 'size' missing in new binary macro grid format." << std::endl;
-    std::exit( 1 );
-  }
-
-  std::istringstream sizeInput( pos->second );
-  std::size_t size;
-  sizeInput >> size;
-  if( !sizeInput )
-  {
-    std::cerr << "ERROR: Invalid 'size' in new binary macro grid format: " << pos->second << "." << std::endl;
+    std::cerr << "ERROR: Writing in different byte order not implemented, yet." << std::endl;
     std::exit( 1 );
   }
 
   // read file to alugrid stream
   ALUGrid::ObjectStream os;
-  os.reserve( size );
+  os.reserve( header.size() );
   os.clear();
-  ALUGrid::readBinary( input, os.getBuff( 0 ), size, parseFormat( formatOptions.find( "format" )->second ) );
+  ALUGrid::readBinary( input, os.getBuff( 0 ), header.size(), header.binaryFormat() );
   if( !input )
   {
     std::cerr << "ERROR: Unable to read binary input." << std::endl;
     std::exit( 1 );
   }
-  os.seekp( size );
-
-  pos = formatOptions.find( "byteorder" );
-  if( pos == formatOptions.end() )
-  {
-    std::cerr << "ERROR: Option 'byteorder' missing in new binary macro grid format." << std::endl;
-    std::exit( 1 );
-  }
-
-  if( pos->second == "bigendian" )
-  {
-    if( !ALUGrid::RestoreInfo::systemByteOrder() )
-    {
-      std::cerr << "ERROR: Currently, only native byte order is supported." << std::endl;
-      std::exit( 1 );
-    }
-  }
-  else if( pos->second == "littleendian" )
-  {
-    if( ALUGrid::RestoreInfo::systemByteOrder() )
-    {
-      std::cerr << "ERROR: Currently, only native byte order is supported." << std::endl;
-      std::exit( 1 );
-    }
-  }
-  else
-  {
-    std::cerr << "ERROR: Invalid 'byteorder' in new macro grid format: " << pos->second << "." << std::endl;
-    std::exit( 1 );
-  }
-
+  os.seekp( header.size() );
   readMacroGrid( os, vertices, elements, bndSegs, periodics );
 }
 
@@ -551,50 +470,30 @@ void readBinaryMacroGrid ( std::istream &input, const FormatOptions &formatOptio
 // ----------------
 
 template< ElementRawID rawId >
-void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const FormatOptions &formatOptions )
+void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const MacroFileHeader &header )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
   std::vector< BndSeg< rawId > > bndSegs;
   std::vector< Periodic< rawId > > periodics;
 
-  const FormatOptions::const_iterator pos = formatOptions.find( "format" );
-  if( pos == formatOptions.end() )
-  {
-    std::cerr << "ERROR: Option 'format' missing in new macro grid format." << std::endl;
-    std::exit( 1 );
-  }
-
-  if( (pos->second == "binary") || (pos->second == "zbinary") )
-    readBinaryMacroGrid( input, formatOptions, vertices, elements, bndSegs, periodics );
-  else if( pos->second == "ascii" )
-    readMacroGrid( input, vertices, elements, bndSegs, periodics );
+  if( header.isBinary() )
+    readBinaryMacroGrid( input, header, vertices, elements, bndSegs, periodics );
   else
-  {
-    std::cerr << "ERROR: Invalid 'format' in new macro grid format: " << pos->second << "." << std::endl;
-    std::exit( 1 );
-  }
+    readMacroGrid( input, vertices, elements, bndSegs, periodics );
 
   writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
 }
 
-void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const FormatOptions &formatOptions )
+void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const MacroFileHeader &header )
 {
-  const FormatOptions::const_iterator pos = formatOptions.find( "type" );
-  if( pos == formatOptions.end() )
+  switch( header.type() )
   {
-    std::cerr << "ERROR: Option 'type' missing in new macro grid format." << std::endl;
-    std::exit( 1 );
-  }
+  case MacroFileHeader::tetrahedra:
+    return convertNewFormat< TETRA_RAW >( input, output, options, header );
 
-  if( pos->second == "tetrahedra" )
-    convertNewFormat< TETRA_RAW >( input, output, options, formatOptions );
-  else if( pos->second == "hexahedra" )
-    convertNewFormat< HEXA_RAW >( input, output, options, formatOptions );
-  else
-  {
-    std::cerr << "ERROR: Invalid 'type' in new macro grid format: " << pos->second << "." << std::endl;
-    std::exit( 1 );
+  case MacroFileHeader::hexahedra:
+    return convertNewFormat< HEXA_RAW >( input, output, options, header );
   }
 }
 
@@ -705,7 +604,7 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
   if( firstline[ 0 ] == char( '!' ) )
   {
     if( firstline.substr( 1, 3 ) == "ALU" )
-      convertNewFormat( input, output, options, parseFormatOptions( firstline.substr( 4 ) ) );
+      convertNewFormat( input, output, options, MacroFileHeader( firstline ) );
     else if( (firstline.find( "Tetrahedra" ) != firstline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
       convertLegacyFormat< TETRA_RAW >( input, output, options );
     else if( (firstline.find( "Hexahedra" ) != firstline.npos) || (firstline.find( "Hexaeder" ) != firstline.npos) )

@@ -13,6 +13,7 @@ libalugrid_2d_la_LIBADD =
 
 libalugrid_serial_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/impl/binaryio.cc \
+	$(top_srcdir)/dune/alugrid/impl/macrofileheader.cc \
 	$(top_srcdir)/dune/alugrid/impl/serial/ghost_info.cc \
 	$(top_srcdir)/dune/alugrid/impl/serial/gitter_geo.cc \
 	$(top_srcdir)/dune/alugrid/impl/serial/gitter_hexa_top.cc \
