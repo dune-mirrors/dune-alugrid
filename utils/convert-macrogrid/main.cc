@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -451,6 +452,7 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
   else
   {
     output << std::endl;
+    output << std::scientific << std::setprecision( 16 );
     writeMacroGrid( output, vertices, elements, bndSegs, periodics );
   }
 }
