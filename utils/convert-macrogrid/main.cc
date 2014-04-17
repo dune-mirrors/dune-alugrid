@@ -368,6 +368,30 @@ struct ProgramOptions
 
 
 
+// writeBinaryFormat
+// -----------------
+
+template< ElementRawID rawId, class ObjectStream >
+void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
+                         const std::vector< Vertex > &vertices,
+                         const std::vector< Element< rawId > > &elements,
+                         const std::vector< BndSeg< rawId > > &bndSegs,
+                         const std::vector< Periodic< rawId > > &periodics )
+{
+  ObjectStream os;
+  writeMacroGrid( os, vertices, elements, bndSegs, periodics );
+  header.setSize( os.size() );
+  header.write( output );
+  ALUGrid::writeBinary( output, os.getBuff( 0 ), header.size(), header.binaryFormat() );
+  if( !output )
+  {
+    std::cerr << "ERROR: Unable to write binary output." << std::endl;
+    std::exit( 1 );
+  }
+}
+
+
+
 // writeNewFormat
 // --------------
 
@@ -389,22 +413,16 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
 
   if( header.isBinary() )
   {
-    if( ((header.byteOrder() == MacroFileHeader::bigendian) && (ALUGrid::systemByteOrder() != ALUGrid::bigEndian))
-        || ((header.byteOrder() == MacroFileHeader::littleendian) && (ALUGrid::systemByteOrder() != ALUGrid::littleEndian)) )
+    switch( header.byteOrder() )
     {
-      std::cerr << "ERROR: Writing in different byte order not implemented, yet." << std::endl;
-      std::exit( 1 );
-    }
+    case MacroFileHeader::native:
+      return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics );
+      
+    case MacroFileHeader::bigendian:
+      return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics );
 
-    ALUGrid::ObjectStream os;
-    writeMacroGrid( os, vertices, elements, bndSegs, periodics );
-    header.setSize( os.size() );
-    header.write( output );
-    ALUGrid::writeBinary( output, os.getBuff( 0 ), header.size(), header.binaryFormat() );
-    if( !output )
-    {
-      std::cerr << "ERROR: Unable to write binary output." << std::endl;
-      std::exit( 1 );
+    case MacroFileHeader::littleendian:
+      return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics );
     }
   }
   else
@@ -437,22 +455,15 @@ void convertLegacyFormat ( std::istream &input, std::ostream &output, const Prog
 // readBinaryMacroGrid
 // -------------------
 
-template< ElementRawID rawId >
+template< ElementRawID rawId, class ObjectStream >
 void readBinaryMacroGrid ( std::istream &input, const MacroFileHeader &header,
                            std::vector< Vertex > &vertices,
                            std::vector< Element< rawId > > &elements,
                            std::vector< BndSeg< rawId > > &bndSegs,
                            std::vector< Periodic< rawId > > &periodics )
 {
-  if( ((header.byteOrder() == MacroFileHeader::bigendian) && (ALUGrid::systemByteOrder() != ALUGrid::bigEndian))
-      || ((header.byteOrder() == MacroFileHeader::littleendian) && (ALUGrid::systemByteOrder() != ALUGrid::littleEndian)) )
-  {
-    std::cerr << "ERROR: Writing in different byte order not implemented, yet." << std::endl;
-    std::exit( 1 );
-  }
-
   // read file to alugrid stream
-  ALUGrid::ObjectStream os;
+  ObjectStream os;
   os.reserve( header.size() );
   os.clear();
   ALUGrid::readBinary( input, os.getBuff( 0 ), header.size(), header.binaryFormat() );
@@ -464,6 +475,27 @@ void readBinaryMacroGrid ( std::istream &input, const MacroFileHeader &header,
   os.seekp( header.size() );
   readMacroGrid( os, vertices, elements, bndSegs, periodics );
 }
+
+template< ElementRawID rawId >
+void readBinaryMacroGrid ( std::istream &input, const MacroFileHeader &header,
+                           std::vector< Vertex > &vertices,
+                           std::vector< Element< rawId > > &elements,
+                           std::vector< BndSeg< rawId > > &bndSegs,
+                           std::vector< Periodic< rawId > > &periodics )
+{
+  switch( header.byteOrder() )
+  {
+  case MacroFileHeader::native:
+    return readBinaryMacroGrid< rawId, ALUGrid::ObjectStream >( input, header, vertices, elements, bndSegs, periodics );
+
+  case MacroFileHeader::bigendian:
+    return readBinaryMacroGrid< rawId, ALUGrid::BigEndianObjectStream >( input, header, vertices, elements, bndSegs, periodics );
+
+  case MacroFileHeader::littleendian:
+    return readBinaryMacroGrid< rawId, ALUGrid::LittleEndianObjectStream >( input, header, vertices, elements, bndSegs, periodics );
+  }
+}
+
 
 
 // convertNewFormat
