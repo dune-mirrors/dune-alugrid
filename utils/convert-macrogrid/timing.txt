@@ -1,0 +1,5 @@
+                    ascii     binary    zbinary
+size                657M      408M      102M
+time (from dgf)     35.4s     8.6s      38.1s
+time (to ascii)     43.8s     27.2s     29.0s
+time (to binary)    16.4s     6.5s      8.2s

@@ -2285,10 +2285,6 @@ namespace ALUGrid
         void generateRawHexaImage (std::istream &, std::ostream &);
         
         virtual void macrogridBuilder (std::istream &);
-        virtual void macrogridBuilder (ObjectStream &);
-
-        template <class istream_t> 
-        void macrogridBuilderImpl( istream_t& );
 
         virtual VertexGeo     * insert_vertex (double, double, double, int) = 0;
         virtual VertexGeo     * insert_ghostvx(double, double, double, int) = 0;

@@ -1984,15 +1984,6 @@ namespace ALUGrid
     indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
   }
 
-  GitterBasisPll::MacroGitterBasisPll::MacroGitterBasisPll ( GitterBasisPll * mygrid, ObjectStream &in )
-    : GitterPll::MacroGitterPll (), 
-      GitterBasis:: MacroGitterBasis (mygrid),
-      _linkagePatterns( indexManagerStorage().linkagePatterns() )
-  {
-    macrogridBuilder (in );
-    indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
-  }
-
   GitterBasisPll::MacroGitterBasisPll::MacroGitterBasisPll (GitterBasisPll * mygrid)
    : GitterPll::MacroGitterPll () , 
      GitterBasis::MacroGitterBasis (mygrid),
@@ -2283,17 +2274,6 @@ namespace ALUGrid
   {
     alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << in << "\" ...)" << std::endl, 1) : 1);
 
-    _macrogitter = new MacroGitterBasisPll (this, in);
-    alugrid_assert ( _macrogitter );
-    notifyMacroGridChanges ();
-  }
-
-  GitterBasisPll::GitterBasisPll ( ObjectStream &in, MpAccessLocal &mpa, ProjectVertex *ppv )
-  : GitterPll( mpa ), 
-    _mpaccess( mpa ), 
-    _macrogitter( 0 ),
-    _ppv( ppv ) 
-  {
     _macrogitter = new MacroGitterBasisPll (this, in);
     alugrid_assert ( _macrogitter );
     notifyMacroGridChanges ();

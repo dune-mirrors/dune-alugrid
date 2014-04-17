@@ -312,7 +312,6 @@ namespace ALUGrid
     public :
       // Gitter is a reference to our grid 
       // constructors creating macro grids from streams 
-      MacroGitterBasis ( Gitter *, ObjectStream & );
       MacroGitterBasis ( Gitter *, std::istream & );
 
       // constructor creating an empty macro grid 
@@ -337,7 +336,6 @@ namespace ALUGrid
     std::size_t numMacroBndSegments() const;
         
     GitterBasisImpl ();
-    GitterBasisImpl ( ObjectStream &, ProjectVertex * );
     GitterBasisImpl ( std::istream &, ProjectVertex * );
     GitterBasisImpl (const char *, ProjectVertex* );
     ~GitterBasisImpl ();
