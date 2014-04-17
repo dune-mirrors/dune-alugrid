@@ -414,15 +414,6 @@ namespace ALUGrid
     return;
   }
 
-  GitterBasisImpl::GitterBasisImpl (ObjectStream& in, ProjectVertex* ppv) 
-    : _macrogitter (0) , _ppv( ppv ) 
-  {
-    _macrogitter = new MacroGitterBasis ( this , in);
-    alugrid_assert (_macrogitter);
-    notifyMacroGridChanges ();
-    return;
-  }
-
   GitterBasisImpl::GitterBasisImpl ( std::istream &in, ProjectVertex *ppv )
   : _macrogitter( 0 ),
     _ppv( ppv )
@@ -450,12 +441,6 @@ namespace ALUGrid
   }
 
   GitterBasisImpl::~GitterBasisImpl () { delete _macrogitter; }
-
-  GitterBasis::MacroGitterBasis::MacroGitterBasis (Gitter *mygrid, ObjectStream & in) 
-  {
-    this->indexManagerStorage().setGrid( mygrid );
-    macrogridBuilder (in);
-  }
 
   GitterBasis::MacroGitterBasis::MacroGitterBasis ( Gitter *mygrid, std::istream &in )
   {

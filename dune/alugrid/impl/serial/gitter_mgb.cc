@@ -5,6 +5,8 @@
 
 #include <sstream>
 
+#include <dune/alugrid/impl/macrofileheader.hh>
+
 #include "gitter_sti.h"
 #include "gitter_mgb.h"
 
@@ -820,7 +822,7 @@ namespace ALUGrid
   }
 
   template <class stream_t>
-  void MacroGridBuilder::inflateMacroGrid ( stream_t& in )
+  void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type )
   {
     const int start = clock ();
     int nv = 0;
@@ -838,8 +840,6 @@ namespace ALUGrid
 
     int ne = 0;
     in >> ne ;
-    int type = -1;
-    in >> type ;
 
     if( type == HEXA_RAW )
     {
@@ -941,36 +941,31 @@ namespace ALUGrid
 
   void Gitter::Geometric::BuilderIF::macrogridBuilder ( std::istream &in )
   {
-    macrogridBuilderImpl( in );
-  }
-
-  void Gitter::Geometric::BuilderIF::macrogridBuilder (ObjectStream & in) 
-  {
-    macrogridBuilderImpl( in );
-  }
-
-  template<class istream_t> 
-  void Gitter::Geometric::BuilderIF::macrogridBuilderImpl (istream_t & in) 
-  {
-    ObjectStream raw;
-    
-    // set scientific mode and high precision 
-    MacroGridBuilder mm (*this);
-
-    std::string firstline;
-    getline( in, firstline ); 
-
-    // check first character 
-    if ( firstline.size() > 0 && firstline[ 0 ] == char('!')) 
+    MacroFileHeader header;
+    if( !header.read( in, true ) )
     {
-      if( firstline.find( "Tetrahedra" ) == std::string::npos &&
-          firstline.find( "Hexahedra" ) == std::string::npos ) 
-      {
-        std::cerr << "WARNING (ignored): Unknown comment to file format (" << firstline << ")." << std::endl;
-        return;
-      }
+      std::cerr << "ERROR (fatal): Unable to read macro grid header." << std::endl;
+      std::abort();
     }
-    mm.inflateMacroGrid( in );
+
+    MacroGridBuilder mm (*this);
+    const int type = (header.type() == MacroFileHeader::tetrahedra ? MacroGridBuilder::TETRA_RAW : MacroGridBuilder::HEXA_RAW);
+    if( header.isBinary() )
+    {
+      ObjectStream os;
+      os.reserve( header.size() );
+      os.clear();
+      ALUGrid::readBinary( in, os.getBuff( 0 ), header.size(), header.binaryFormat() );
+      if( !in )
+      {
+        std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
+        std::abort();
+      }
+      os.seekp( header.size() );
+      mm.inflateMacroGrid( os, type );
+    }
+    else
+      mm.inflateMacroGrid( in, type );
   }
 
 } // namespace ALUGrid
