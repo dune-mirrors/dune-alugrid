@@ -110,11 +110,6 @@ namespace ALUGrid
     : GitterBasisImpl ( in, ppv )
     {}
     
-    //! constructor creating grid from ObjectStream 
-    inline GitterDuneImpl ( ObjectStream& in, ProjectVertex* ppv = 0 ) 
-      : GitterBasisImpl ( in, ppv ) 
-    {}
-    
     //! constructor creating grid from macro grid file 
     inline GitterDuneImpl (const char *filename, ProjectVertex* ppv = 0 ) 
       : GitterBasisImpl (filename, ppv ) 
