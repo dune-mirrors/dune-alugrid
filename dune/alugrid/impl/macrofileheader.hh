@@ -18,20 +18,22 @@ namespace ALUGrid
     enum Format { ascii, binary, zbinary };
     enum ByteOrder { native, bigendian, littleendian };
 
+    static const int currentVersion = 1;
+
     static std::string toString ( Type type ) { return stringType[ type ]; }
     static std::string toString ( Format format ) { return stringFormat[ format ]; }
     static std::string toString ( ByteOrder byteOrder ) { return stringByteOrder[ byteOrder ]; }
 
     MacroFileHeader ()
-      : type_( hexahedra ), format_( ascii ), byteOrder_( native ), size_( 0 )
+      : version_( currentVersion ), type_( hexahedra ), format_( ascii ), byteOrder_( native ), size_( 0 )
     {}
 
     MacroFileHeader ( Type type, Format format )
-      : type_( type ), format_( format )
+      : version_( currentVersion ), type_( type ), format_( format ), byteOrder_( native ), size_( 0 )
     {}
 
     explicit MacroFileHeader ( const std::string &firstLine, bool verbose = false )
-      : type_( hexahedra ), format_( ascii ), byteOrder_( native ), size_( 0 )
+      : version_( currentVersion ), type_( hexahedra ), format_( ascii ), byteOrder_( native ), size_( 0 )
     {
       read( firstLine, verbose );
     }
@@ -41,6 +43,8 @@ namespace ALUGrid
     {
       read( in, verbose );
     }
+
+    int version () const { return version_; }
 
     Type type () const { return type_; }
     void setType ( Type type ) { type_ = type; }
@@ -71,6 +75,7 @@ namespace ALUGrid
     static const char *stringFormat[ 3 ];
     static const char *stringByteOrder[ 3 ];
 
+    int version_;
     Type type_;
     Format format_;
     ByteOrder byteOrder_;
