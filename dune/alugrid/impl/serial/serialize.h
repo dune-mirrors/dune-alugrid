@@ -11,19 +11,20 @@
 #include <iostream>
 #include <utility>
 
+#include <dune/alugrid/impl/byteorder.hh>
+
 #include "myalloc.h"
 
 namespace ALUGrid
 {
 
-  class ObjectStream;
-
   //  'ObjectStream' ist bereits die volle Implementierung eines einfachen
   //  Objektstrommodells auf der Basis der Bibliotheksfunktionen f"ur
   //  den Stringstream (sstream). Die Implemetierung ist eher im Sinne
   //  eines rohen Datenformats mit einigen Testm"oglichkeiten zu sehen.
-    
-  class ObjectStreamImpl 
+
+  template< class Traits >
+  class BasicObjectStreamImpl 
   {
   protected:
     char * _buf ;
@@ -38,12 +39,12 @@ namespace ALUGrid
       virtual std::string what () const { return "EOFException"; }
     };
     class OutOfMemoryException {} ;
-    inline ObjectStreamImpl (size_t chunk) 
+    inline BasicObjectStreamImpl (size_t chunk) 
       : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(chunk) , _owner(true)
     {
     }
     
-    inline ObjectStreamImpl (const ObjectStreamImpl & os)
+    inline BasicObjectStreamImpl (const BasicObjectStreamImpl & os)
       : _buf(0), _rb(0) , _wb(0) , _len (0) , _bufChunk(os._bufChunk) , _owner(true)
     {
       assign(os);
@@ -79,11 +80,11 @@ namespace ALUGrid
     }
 
     // delete stream 
-    inline ~ObjectStreamImpl () { removeObj(); }
+    inline ~BasicObjectStreamImpl () { removeObj(); }
 
     //! assign buffer from os the local buffer, os ownership is false afterwards
-    //inline const ObjectStreamImpl & operator = (const ObjectStreamImpl & os)
-    inline ObjectStreamImpl & operator = (const ObjectStreamImpl & os)
+    //inline const BasicObjectStreamImpl & operator = (const BasicObjectStreamImpl & os)
+    inline BasicObjectStreamImpl & operator = (const BasicObjectStreamImpl & os)
     {
       removeObj();
       assign(os);
@@ -143,7 +144,7 @@ namespace ALUGrid
       alugrid_assert ( _wb <= _len );
 
       // call assignment operator of type T 
-      static_cast<T &> (*((T *) getBuff(ap) )) = a;
+      Traits::copy( static_cast< void * >( getBuff( ap ) ), &a, 1 );
       return ;
     }
 
@@ -159,7 +160,7 @@ namespace ALUGrid
       alugrid_assert ( _rb <= _wb );
 
       // call assignment operator of type T 
-      a = static_cast<const T &> (*((const T *) getBuff(ap) ));
+      Traits::copy( &a, static_cast< const void * >( getBuff( ap ) ), 1 );
       return ;
     }
 
@@ -172,13 +173,13 @@ namespace ALUGrid
     inline void readUnchecked ( T& a ) { readT( a, false ); }
 
     // read this stream and write to os 
-    inline void readStream (ObjectStreamImpl & os) 
+    inline void readStream (BasicObjectStreamImpl & os) 
     {
       readStream(os,_wb);
     }
 
     // read length bytes from this stream and stores it to os 
-    inline void readStream (ObjectStreamImpl & os, const size_t length) 
+    inline void readStream (BasicObjectStreamImpl & os, const size_t length) 
     {
       if( length == 0 ) return ;
       // actual read position 
@@ -187,7 +188,7 @@ namespace ALUGrid
     }
 
     // writes hole stream of os to this stream
-    inline void writeStream (const ObjectStreamImpl & os) 
+    inline void writeStream (const BasicObjectStreamImpl & os) 
     {
       write(os._buf,os._wb);
     }
@@ -286,7 +287,7 @@ namespace ALUGrid
     }
     
     // assign buffer 
-    inline void assign(const ObjectStreamImpl & os) throw (OutOfMemoryException)
+    inline void assign(const BasicObjectStreamImpl & os) throw (OutOfMemoryException)
     {
       alugrid_assert ( _buf == 0 );
       if( os._len > 0 ) 
@@ -326,11 +327,17 @@ namespace ALUGrid
     }
   } ;
 
-  // bufchunk 0.25 Megabyte 
-  class ObjectStream
-  : public ObjectStreamImpl
+
+
+  // BasicObjectStream
+  // -----------------
+
+  // bufchunk 0.25 Megabyte
+  template< class Traits >
+  class BasicObjectStream
+    : public BasicObjectStreamImpl< Traits >
   {
-    typedef ObjectStreamImpl BaseType;
+    typedef BasicObjectStreamImpl< Traits > BaseType;
     
     // default chunk size increase 
     enum { BufChunk = 4096 * sizeof(double) } ;
@@ -344,19 +351,19 @@ namespace ALUGrid
     static const char ENDOFSTREAM = 127;
     
     // create empty object stream 
-    ObjectStream () 
+    BasicObjectStream () 
     : BaseType( BufChunk ),
       notReceived_( true )
     {} 
     
     // create empty object stream with given chunk size 
-    explicit ObjectStream ( const std::size_t chunkSize ) 
+    explicit BasicObjectStream ( const std::size_t chunkSize ) 
       : BaseType( chunkSize ),
         notReceived_( true )
     {} 
     
     // copy constructor 
-    ObjectStream ( const ObjectStream &os )
+    BasicObjectStream ( const BasicObjectStream &os )
     : BaseType( static_cast< const BaseType & >( os ) ),
       notReceived_( true )
     {} 
@@ -364,7 +371,7 @@ namespace ALUGrid
   public:  
     // assigment of streams, owner ship of buffer is 
     // passed from os to this stream to avoid copy of large memory areas 
-    ObjectStream &operator= ( const ObjectStream &os )
+    BasicObjectStream &operator= ( const BasicObjectStream &os )
     {
       static_cast< BaseType & >( *this ) = static_cast< const BaseType & >( os );
       notReceived_ = os.notReceived_;
@@ -392,7 +399,7 @@ namespace ALUGrid
     // assign pair of char buffer and size to this object stream 
     // osvec will contain zeros after that assignment 
     // used by mpAccess_MPI.cc 
-    ObjectStream &operator= ( std::pair< char *, int > &osvec )
+    BasicObjectStream &operator= ( std::pair< char *, int > &osvec )
     {
       BaseType::removeObj();
       BaseType::assign( osvec.first, osvec.second );
@@ -407,12 +414,91 @@ namespace ALUGrid
     friend class MpAccessGlobal ;
     friend class MpAccessMPI ;
     friend class MpAccessSTAR_MPI ;
-  } ;
+  };
+
+
+
+  // ObjectStream
+  // ------------
+
+  struct ObjectStreamTraits
+  {
+    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
+
+    template< class T >
+    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( T *dest, const void *src, std::size_t n )
+    {
+      std::memcpy( dest, src, n*sizeof( T ) );
+    }
+
+    template< class T >
+    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( void *dest, const T *src, std::size_t n )
+    {
+      std::memcpy( dest, src, n*sizeof( T ) );
+    }
+  };
+
+  typedef BasicObjectStreamImpl< ObjectStreamTraits > ObjectStreamImpl;
+  typedef BasicObjectStream< ObjectStreamTraits > ObjectStream;
+
+
+
+  // BigEndianObjectStream
+  // ---------------------
+
+  struct BigEndianObjectStreamTraits
+  {
+    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
+
+    template< class T >
+    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( T *dest, const void *src, std::size_t n )
+    {
+      bufferCopy< bigEndian >( dest, src, n );
+    }
+
+    template< class T >
+    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( void *dest, const T *src, std::size_t n )
+    {
+      bufferCopy< bigEndian >( dest, src, n );
+    }
+  };
+
+  typedef BasicObjectStream< BigEndianObjectStreamTraits > BigEndianObjectStream;
+
+
+
+  // LittleEndianObjectStream
+  // ------------------------
+
+  struct LittleEndianObjectStreamTraits
+  {
+    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
+
+    template< class T >
+    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( T *dest, const void *src, std::size_t n )
+    {
+      bufferCopy< littleEndian >( dest, src, n );
+    }
+
+    template< class T >
+    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( void *dest, const T *src, std::size_t n )
+    {
+      bufferCopy< littleEndian >( dest, src, n );
+    }
+  };
+
+  typedef BasicObjectStream< LittleEndianObjectStreamTraits > LittleEndianObjectStream;
+  
+
+
+  // SmallObjectStream
+  // -----------------
 
   // bufchunk 4 doubles 
-  class SmallObjectStream : public ObjectStreamImpl
+  class SmallObjectStream
+    : public BasicObjectStreamImpl< ObjectStreamTraits >
   {
-    typedef ObjectStreamImpl BaseType;
+    typedef BasicObjectStreamImpl< ObjectStreamTraits > BaseType;
     enum { BufChunk = 4 * sizeof(double) };
   public:  
     // create empty stream 
@@ -448,7 +534,8 @@ namespace ALUGrid
   struct StandardWhiteSpace_t {};
 
   // streaming operators for ObjectStream ignoring space 
-  inline ObjectStream& operator << ( ObjectStream& os, const StandardWhiteSpace_t& space )
+  template< class Traits >
+  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, const StandardWhiteSpace_t& space )
   {
     return os;
   }
@@ -461,8 +548,8 @@ namespace ALUGrid
   }
 
   // streaming operators for ObjectStream 
-  template <int dim>
-  inline ObjectStream& operator << ( ObjectStream& os, const double (&value)[dim] ) 
+  template< class Traits, int dim >
+  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, const double (&value)[dim] ) 
   {
     for( int i=0; i<dim; ++i )
       os.write( value[ i ] );
@@ -479,16 +566,16 @@ namespace ALUGrid
   }
 
   // streaming operators for ObjectStream 
-  template <class T>
-  inline ObjectStream& operator << ( ObjectStream& os, const T& value ) 
+  template< class Traits, class T >
+  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, const T& value )
   {
     os.write( value );
     return os;
   }
 
   // streaming operators for ObjectStream 
-  template <int length>
-  inline ObjectStream& operator << ( ObjectStream& os, const char (&s)[length] ) 
+  template< class Traits, int length >
+  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, const char (&s)[length] ) 
   {
     os.write( &s[0], length );
     return os;
@@ -497,13 +584,15 @@ namespace ALUGrid
   typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
   typedef CoutType& (*StandardEndLine)(CoutType&);
 
-  inline ObjectStream& operator << ( ObjectStream& os, StandardEndLine manip)
+  template< class Traits >
+  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, StandardEndLine manip)
   { 
     return os; 
   }
 
   // streaming operators for ObjectStream 
-  inline ObjectStream &operator<< ( ObjectStream &os, const std::string &s )
+  template< class Traits >
+  inline BasicObjectStream< Traits > &operator<< ( BasicObjectStream< Traits > &os, const std::string &s )
   {
     const size_t size = s.size();
     os.write( size ); 
@@ -512,15 +601,16 @@ namespace ALUGrid
   }
 
   // streaming operators for ObjectStream 
-  template <class T>
-  inline ObjectStream& operator >> ( ObjectStream& is, T& value )
+  template< class Traits, class T >
+  inline BasicObjectStream< Traits > &operator >> ( BasicObjectStream< Traits > &is, T& value )
   {
     is.read( value );
     return is;
   }
 
   // streaming operators for ObjectStream 
-  inline ObjectStream &operator>> ( ObjectStream &is, std::string &s )
+  template< class Traits >
+  inline BasicObjectStream< Traits > &operator>> ( BasicObjectStream< Traits > &is, std::string &s )
   {
     size_t size ;
     is.read( size ); 
@@ -529,7 +619,8 @@ namespace ALUGrid
     return is;
   }
 
-  inline void getline( ObjectStream& in, std::string& str )
+  template< class Traits >
+  inline void getline( BasicObjectStream< Traits > &in, std::string& str )
   {
     in >> str;
   }
