@@ -428,13 +428,15 @@ namespace ALUGrid
     template< class T >
     static typename std::enable_if< std::is_trivial< T >::value >::type copy ( T *dest, const void *src, std::size_t n )
     {
-      std::memcpy( dest, src, n*sizeof( T ) );
+      for( std::size_t i = 0; i < n; ++i )
+        dest[ i ] = static_cast< const T * >( src )[ i ];
     }
 
     template< class T >
     static typename std::enable_if< std::is_trivial< T >::value >::type copy ( void *dest, const T *src, std::size_t n )
     {
-      std::memcpy( dest, src, n*sizeof( T ) );
+      for( std::size_t i = 0; i < n; ++i )
+        static_cast< T * >( dest )[ i ] = src[ i ];
     }
   };
 
