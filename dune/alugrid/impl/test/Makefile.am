@@ -1,6 +1,8 @@
 check_PROGRAMS = sizes backuprestore
 
 ALUSOURCES = \
+  $(top_srcdir)/dune/alugrid/impl/binaryio.cc \
+  $(top_srcdir)/dune/alugrid/impl/macrofileheader.cc \
   $(top_srcdir)/dune/alugrid/impl/serial/gitter_geo.cc \
   $(top_srcdir)/dune/alugrid/impl/serial/gitter_hexa_top.cc \
   $(top_srcdir)/dune/alugrid/impl/serial/gitter_impl.cc \
