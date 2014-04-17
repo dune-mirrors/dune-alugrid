@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <dune/alugrid/impl/macrofileheader.hh>
+
 #include "mapp_cube_3d.h"
 #include "mapp_tetra_3d.h"
 #include "gitter_sti.h"
@@ -728,6 +730,20 @@ namespace ALUGrid
 
   void Gitter::Geometric::BuilderIF::backup ( std::ostream &os ) const
   {
+    MacroFileHeader header;
+    if( _tetraList.size() == 0 )
+      header.setType( MacroFileHeader::hexahedra );
+    else if( _hexaList.size() == 0 )
+      header.setType( MacroFileHeader::tetrahedra );
+    else
+    {
+      std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::backup( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
+      std::abort();
+    }
+    header.setFormat( MacroFileHeader::ascii );
+    header.setSystemByteOrder();
+    header.write( os );
+
     // set precision for ostreams (different for each stream)
     os.setf( std::ios::fixed, std::ios::floatfield );
     os.precision( ALUGridExternalParameters::precision() );
@@ -755,28 +771,6 @@ namespace ALUGrid
 
     StandardWhiteSpace_t whiteSpace ;
 
-    std::string str; 
-    if( hexaListSize > 0 )
-    {
-      std::ostringstream strstr; 
-      strstr << "!Hexahedra  ( noVertices = " << vertexListSize << " | noElements = " << hexaListSize << " )" << std::endl;
-      str = strstr.str();
-    }
-    else if( tetraListSize > 0 )
-    {
-      std::ostringstream strstr; 
-      strstr << "!Tetrahedra  ( noVertices = " << vertexListSize << " | noElements = " << tetraListSize << " )" << std::endl;
-      str = strstr.str();
-    } 
-    else
-    {
-      std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::backup( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
-      abort();
-    }
-    
-    // write header line as vector of characters 
-    os << str; 
-
     {
       os << vertexListSize << std::endl;
       const vertexlist_t::const_iterator end = _vertexList.end ();
@@ -790,7 +784,7 @@ namespace ALUGrid
     {
       alugrid_assert (_hbndseg3List.size () == 0);
 
-      os << hexaListSize << whiteSpace << int(MacroGridBuilder::HEXA_RAW) << std::endl ;
+      os << hexaListSize << std::endl;
       const hexalist_t::const_iterator end = _hexaList.end ();
       for (hexalist_t::const_iterator i = _hexaList.begin (); i != end; ++i ) 
       {
@@ -824,7 +818,7 @@ namespace ALUGrid
     } 
     else if( tetraListSize > 0 ) 
     {
-      os << tetraListSize << whiteSpace << int(MacroGridBuilder::TETRA_RAW) << std::endl;
+      os << tetraListSize << std::endl;
       const tetralist_t::const_iterator end = _tetraList.end ();
       for (tetralist_t::const_iterator i = _tetraList.begin (); i != end; ++i ) 
       {

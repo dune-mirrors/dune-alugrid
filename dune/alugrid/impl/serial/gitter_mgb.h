@@ -214,7 +214,7 @@ namespace ALUGrid
       virtual ~MacroGridBuilder ();
 
       template <class stream_t>
-      void inflateMacroGrid ( stream_t& );
+      void inflateMacroGrid ( stream_t&, int );
 
       // former constructor 
       void initialize ();

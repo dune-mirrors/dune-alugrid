@@ -5,6 +5,8 @@
 
 #include <sstream>
 
+#include <dune/alugrid/impl/macrofileheader.hh>
+
 #include "gitter_sti.h"
 #include "gitter_mgb.h"
 
@@ -13,14 +15,10 @@ namespace ALUGrid
 
   std::pair< Gitter::Geometric::VertexGeo *, bool > MacroGridBuilder::
   InsertUniqueVertex (double x, double y, double z, int i) {
-    vertexMap_t::const_iterator hit = _vertexMap.find (i);
-    if (hit == _vertexMap.end ()) {
-      VertexGeo * v = myBuilder ().insert_vertex (x,y,z,i);
-      _vertexMap [i] = v;
-      return std::pair< VertexGeo *, bool > (v,true);
-    } else {
-      return std::pair< VertexGeo *, bool > ((*hit).second, false);
-    }
+    std::pair< vertexMap_t::iterator, bool > result = _vertexMap.insert( std::make_pair( i, static_cast< VertexGeo * >( 0 ) ) );
+    if( result.second )
+      result.first->second = myBuilder().insert_vertex( x, y, z, i );
+    return std::make_pair( result.first->second, result.second );
   }
    
   std::pair< Gitter::Geometric::hedge1_GEO *, bool > MacroGridBuilder::
@@ -29,46 +27,42 @@ namespace ALUGrid
       int i = l; l = r; r = i;
     }
     edgeKey_t key (l,r);
-    edgeMap_t::const_iterator hit = _edgeMap.find (key);
-    if (hit == _edgeMap.end ()) 
+    std::pair< edgeMap_t::iterator, bool > result = _edgeMap.insert( std::make_pair( key, static_cast< hedge1_GEO * >( 0 ) ) );
+    if( result.second )
     {
       vertexMap_t::const_iterator a = _vertexMap.find (l), b = _vertexMap.find (r);
 
       alugrid_assert ( a != _vertexMap.end() );
       alugrid_assert ( b != _vertexMap.end() );
       
-      hedge1_GEO * h = myBuilder ().insert_hedge1 ((*a).second,(*b).second);
-      _edgeMap [key] = h;
-      return std::pair< hedge1_GEO *, bool > (h,true);
-    } else {
-      return std::pair< hedge1_GEO *, bool > ((*hit).second,false);
+      result.first->second = myBuilder ().insert_hedge1 ((*a).second,(*b).second);
     }
+    return std::make_pair( result.first->second, result.second );
   }
 
   std::pair< Gitter::Geometric::hface3_GEO *, bool > MacroGridBuilder::
   InsertUniqueHface (int (&v)[3]) {
     cyclicReorder (v,v+3);
     faceKey_t key (v[0],v[1],v[2]);
-    faceMap_t::const_iterator hit = _face3Map.find (key);
-    if (hit == _face3Map.end ()) {
+    std::pair< faceMap_t::iterator, bool > result = _face3Map.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
+    if( result.second )
+    {
       hedge1_GEO * edge [3];
       int dire [3] = { 0, 0, 1 };
       edge [0] = InsertUniqueHedge (v[0],v[1]).first;
       edge [1] = InsertUniqueHedge (v[1],v[2]).first;
       edge [2] = InsertUniqueHedge (v[2],v[0]).first;
-      hface3_GEO * f3 = myBuilder ().insert_hface3 (edge,dire);
-      _face3Map [key] = f3;
-      return std::pair< hface3_GEO *, bool > (f3,true);
-    } else {
-      return std::pair< hface3_GEO *, bool > ((hface3_GEO *)(*hit).second,false);
+      result.first->second = myBuilder ().insert_hface3 (edge,dire);
     }
+    return std::make_pair( static_cast< hface3_GEO * >( result.first->second ), result.second );
   }
 
   std::pair< Gitter::Geometric::hface4_GEO *, bool > MacroGridBuilder::InsertUniqueHface (int (&v)[4]) {
     cyclicReorder (v,v+4);
     faceKey_t key (v[0],v[1],v[2]);
-    faceMap_t::const_iterator hit = _face4Map.find (key);
-    if (hit == _face4Map.end ()) {
+    std::pair< faceMap_t::iterator, bool > result = _face4Map.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
+    if( result.second )
+    {
       hedge1_GEO * edge [4];
       int dire [4]; 
       edge [0] = InsertUniqueHedge (v[0],v[1]).first;
@@ -79,20 +73,18 @@ namespace ALUGrid
       dire [1] = v[1] < v[2] ? 0 : 1;
       dire [2] = v[2] < v[3] ? 0 : 1;
       dire [3] = v[3] < v[0] ? 0 : 1;
-      hface4_GEO * f4 = myBuilder ().insert_hface4 (edge,dire);
-      _face4Map [key] = f4;
-      return std::pair< hface4_GEO *, bool > (f4,true);
-    } else {
-      return std::pair< hface4_GEO *, bool > ((hface4_GEO *)(*hit).second,false);
+      result.first->second = myBuilder ().insert_hface4 (edge,dire);
     }
+    return std::make_pair( static_cast< hface4_GEO * >( result.first->second ), result.second );
   }
 
   std::pair< Gitter::Geometric::tetra_GEO *, bool > MacroGridBuilder::
   InsertUniqueTetra (int (&v)[4], int orientation) 
   {
     elementKey_t key (v [0], v [1], v [2], v [3]);
-    elementMap_t::const_iterator hit = _tetraMap.find (key);
-    if (hit == _tetraMap.end ()) {
+    std::pair< elementMap_t::iterator, bool > result = _tetraMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
+    if( result.second )
+    {
       hface3_GEO * face [4];
       int twst [4];
       for (int fce = 0; fce < 4; ++fce ) 
@@ -104,22 +96,18 @@ namespace ALUGrid
         twst [fce] = cyclicReorder (x,x+3);
         face [fce] =  InsertUniqueHface (x).first;
       }
-      tetra_GEO * t = myBuilder ().insert_tetra (face,twst,orientation);
-      alugrid_assert (t);
-      _tetraMap [key] = t;
-      return std::pair< tetra_GEO *, bool > (t,true);
-    } 
-    else 
-    {
-      return std::pair< tetra_GEO *, bool > ((tetra_GEO *)(*hit).second,false);
+      result.first->second = myBuilder ().insert_tetra (face,twst,orientation);
+      alugrid_assert( result.first->second );
     }
+    return std::make_pair( static_cast< tetra_GEO * >( result.first->second ), result.second );
   }
 
   std::pair< Gitter::Geometric::hexa_GEO *, bool > MacroGridBuilder::InsertUniqueHexa (int (&v)[8]) 
   {
     elementKey_t key (v [0], v [1], v [3], v[4]);
-    elementMap_t::const_iterator hit = _hexaMap.find (key);
-    if (hit == _hexaMap.end ()) {
+    std::pair< elementMap_t::iterator, bool > result = _hexaMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
+    if( result.second )
+    {
       hface4_GEO * face [6];
       int twst [6];
       for (int fce = 0; fce < 6; ++fce) 
@@ -132,12 +120,9 @@ namespace ALUGrid
         twst [fce] = cyclicReorder (x,x+4);
         face [fce] =  InsertUniqueHface (x).first;
       }
-      hexa_GEO * hx = myBuilder ().insert_hexa (face,twst);
-      _hexaMap [key] = hx;
-      return std::pair< hexa_GEO *, bool > (hx,true);
-    } else {
-      return std::pair< hexa_GEO *, bool > ((hexa_GEO *)(*hit).second,false);
+      result.first->second = myBuilder ().insert_hexa (face,twst);
     }
+    return std::make_pair( static_cast< hexa_GEO * >( result.first->second ), result.second );
   }
 
   bool MacroGridBuilder::
@@ -820,7 +805,7 @@ namespace ALUGrid
   }
 
   template <class stream_t>
-  void MacroGridBuilder::inflateMacroGrid ( stream_t& in )
+  void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type )
   {
     const int start = clock ();
     int nv = 0;
@@ -838,8 +823,6 @@ namespace ALUGrid
 
     int ne = 0;
     in >> ne ;
-    int type = -1;
-    in >> type ;
 
     if( type == HEXA_RAW )
     {
@@ -941,36 +924,31 @@ namespace ALUGrid
 
   void Gitter::Geometric::BuilderIF::macrogridBuilder ( std::istream &in )
   {
-    macrogridBuilderImpl( in );
-  }
-
-  void Gitter::Geometric::BuilderIF::macrogridBuilder (ObjectStream & in) 
-  {
-    macrogridBuilderImpl( in );
-  }
-
-  template<class istream_t> 
-  void Gitter::Geometric::BuilderIF::macrogridBuilderImpl (istream_t & in) 
-  {
-    ObjectStream raw;
-    
-    // set scientific mode and high precision 
-    MacroGridBuilder mm (*this);
-
-    std::string firstline;
-    getline( in, firstline ); 
-
-    // check first character 
-    if ( firstline.size() > 0 && firstline[ 0 ] == char('!')) 
+    MacroFileHeader header;
+    if( !header.read( in, true ) )
     {
-      if( firstline.find( "Tetrahedra" ) == std::string::npos &&
-          firstline.find( "Hexahedra" ) == std::string::npos ) 
-      {
-        std::cerr << "WARNING (ignored): Unknown comment to file format (" << firstline << ")." << std::endl;
-        return;
-      }
+      std::cerr << "ERROR (fatal): Unable to read macro grid header." << std::endl;
+      std::abort();
     }
-    mm.inflateMacroGrid( in );
+
+    MacroGridBuilder mm (*this);
+    const int type = (header.type() == MacroFileHeader::tetrahedra ? MacroGridBuilder::TETRA_RAW : MacroGridBuilder::HEXA_RAW);
+    if( header.isBinary() )
+    {
+      ObjectStream os;
+      os.reserve( header.size() );
+      os.clear();
+      ALUGrid::readBinary( in, os.getBuff( 0 ), header.size(), header.binaryFormat() );
+      if( !in )
+      {
+        std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
+        std::abort();
+      }
+      os.seekp( header.size() );
+      mm.inflateMacroGrid( os, type );
+    }
+    else
+      mm.inflateMacroGrid( in, type );
   }
 
 } // namespace ALUGrid
