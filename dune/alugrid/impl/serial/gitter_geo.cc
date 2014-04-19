@@ -808,7 +808,10 @@ namespace ALUGrid
       const hbndseg4list_t::const_iterator hend = _hbndseg4List.end ();
       for (hbndseg4list_t::const_iterator i = _hbndseg4List.begin (); i != hend; ++i) 
       {
-        os <<  (int)(*i)->bndtype () << whiteSpace ;
+        const int bndtype = (int)(*i)->bndtype ();
+        // write negative bnd value in case of exterior bnd
+        if( bndtype != hbndseg_STI::closure ) 
+          os << -bndtype << whiteSpace ;
         for (int j = 0; j < 3; ++ j ) 
         {
           os << (*i)->myvertex (0,j)->ident() << whiteSpace ;
@@ -843,7 +846,10 @@ namespace ALUGrid
       const hbndseg3list_t::const_iterator hend = _hbndseg3List.end ();
       for (hbndseg3list_t::const_iterator i = _hbndseg3List.begin (); i != hend; ++i) 
       {
-        os << (int)(*i)->bndtype () << whiteSpace ;
+        const int bndtype = (int)(*i)->bndtype ();
+        // write negative bnd value in case of exterior bnd
+        if( bndtype != hbndseg_STI::closure ) 
+          os << -bndtype << whiteSpace ;
         for( int j = 0; j < 2; ++ j ) 
         {
           os << (*i)->myvertex(0,j)->ident() << whiteSpace ;
