@@ -873,15 +873,28 @@ namespace ALUGrid
       for( int i=0; i<nb ; ++i )
       {
         in >> bt ;
-        if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+        int k = 0 ; 
+        if( bt < 0 ) // exterior bnd 
         {
-          std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
-          abort();
+          bt = -bt; // use positive value 
+          if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+          {
+            std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
+            abort();
+          }
         }
-        for( int k=0; k<4; ++k ) 
+        else // interior parallel bnd
+        {
+          v[ k++ ] = bt ;
+          bt = Gitter::hbndseg_STI::closure ;
+        }
+
+        // read remaining vertices 
+        for( ; k<4; ++k ) 
         {
           in >> v[ k ];
         }
+        // insert bnd object
         InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t(bt));
       }
     }
@@ -902,15 +915,29 @@ namespace ALUGrid
       for( int i=0; i<nb ; ++i )
       {
         in >> bt ;
-        if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+        int k = 0 ;
+
+        if( bt < 0 ) // exterior bnd 
         {
-          std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
-          abort();
+          bt = -bt; // use positive value 
+          if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+          {
+            std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
+            abort();
+          }
         }
-        for( int k=0; k<3; ++k ) 
+        else // interior parallel bnd
+        {
+          v[ k++ ] = bt ;
+          bt = Gitter::hbndseg_STI::closure ;
+        }
+
+        // read remaining vertices
+        for( ; k<3; ++k ) 
         {
           in >> v[ k ];
         }
+        // insert bnd object
         InsertUniqueHbnd3 (v,Gitter::hbndseg::bnd_t(bt));
       }
     }
