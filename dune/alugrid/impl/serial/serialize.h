@@ -423,8 +423,6 @@ namespace ALUGrid
 
   struct ObjectStreamTraits
   {
-    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
-
     template< class T >
     static void copy ( T *dest, const void *src, std::size_t n )
     {
@@ -450,8 +448,6 @@ namespace ALUGrid
 
   struct BigEndianObjectStreamTraits
   {
-    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
-
     template< class T >
     static void copy ( T *dest, const void *src, std::size_t n )
     {
@@ -474,8 +470,6 @@ namespace ALUGrid
 
   struct LittleEndianObjectStreamTraits
   {
-    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
-
     template< class T >
     static void copy ( T *dest, const void *src, std::size_t n )
     {
