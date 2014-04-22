@@ -114,6 +114,29 @@ inline int ALU2dGridEntity<cd,dim,GridImp > :: getIndex() const
     return ElementWrapper<cd, dim, GridImp>::getElemIndex (grid(), *item_, face_);
 }
 
+
+template< int cd, int dim, class GridImp >
+inline int ALU2dGridEntity< cd, dim, GridImp >::subIndex ( int i, unsigned int codim ) const
+{
+  alugrid_assert( item_ );
+  if( codim == cd )
+  {
+    assert( i == 0 );
+    return ElementWrapper< cd, dim, GridImp >::getElemIndex( grid(), *item_, face_ );
+  }
+  else
+  {
+    assert( (cd == 1) && (codim == 2) );
+    assert( (i >= 0) && (i < 2) );
+    const int nv = item_->numVertices();
+    const int s = (((face_ + 2) % nv) & 2) >> 1;
+    const int k = (face_ + 2 + s * (1 - i) + (1 - s) * i) % nv;
+    return ElementWrapper< 2, dim, GridImp >::subIndex( grid(), *item_, k );
+  }
+}
+
+
+
 /**
    \brief Id of the boundary which is associated with
    the entity, returns 0 for inner entities, arbitrary int otherwise
