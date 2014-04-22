@@ -171,6 +171,8 @@ public:
   //! index is unique within the grid hierachie and per codim
   int getIndex () const; 
     
+  int subIndex ( int i, unsigned int codim ) const;
+
 private: 
   //! the factory to create entities 
   const FactoryType& factory_;
