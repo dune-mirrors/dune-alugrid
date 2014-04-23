@@ -40,8 +40,6 @@ namespace ALUGrid
         const ElementLinkage_t& linkedElements = vertex.linkedElements();
         const int elSize = linkedElements.size() ;
         std::set< int > linkage; 
-        _linkage.resize( 0 );
-        _linkage.reserve( elSize ); 
         for( int i=0; i<elSize; ++ i )
         {
           const int dest = _db.destination( linkedElements[ i ] ) ;
@@ -51,6 +49,10 @@ namespace ALUGrid
             linkage.insert( dest );
           }
         }
+
+        // clear current linkage
+        _linkage.clear();
+        _linkage.reserve( elSize ); 
 
         typedef typename std::set< int >::iterator iterator ;
         const iterator end = linkage.end();
