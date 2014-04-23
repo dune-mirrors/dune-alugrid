@@ -954,15 +954,18 @@ namespace ALUGrid
       std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
       for( int i=0; i<linkagePatternSize; ++i )
       {
-        linkagePattern_t& pattern = patterns[ i ];
         int n;
         in >> n; 
-        pattern.resize( n );
-        for( int k=0; k<n; ++k )
+        if( n ) 
         {
-          int rank ;
-          in >> rank ;
-          pattern[ k ] = rank ;
+          linkagePattern_t& pattern = patterns[ i ];
+          pattern.resize( n );
+          for( int k=0; k<n; ++k )
+          {
+            int rank ;
+            in >> rank ;
+            pattern[ k ] = rank ;
+          }
         }
       }
 
@@ -974,8 +977,10 @@ namespace ALUGrid
         int pos; 
         in >> pos; 
         alugrid_assert( pos < int(patterns.size()) );
-        // set vertex linkage
-        (*i).second->setLinkageSorted( patterns[ pos ] );
+
+        // set vertex linkage if not nullPattern
+        if( patterns[ pos ].size() )
+          (*i).second->setLinkageSorted( patterns[ pos ] );
       }
     }
 
