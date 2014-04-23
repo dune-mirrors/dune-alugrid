@@ -39,21 +39,25 @@ namespace ALUGrid
         typedef vertex_STI :: ElementLinkage_t ElementLinkage_t ;
         const ElementLinkage_t& linkedElements = vertex.linkedElements();
         const int elSize = linkedElements.size() ;
-        // clear old content 
+        std::set< int > linkage; 
         _linkage.resize( 0 );
-        _linkage.reserve( elSize );
+        _linkage.reserve( elSize ); 
         for( int i=0; i<elSize; ++ i )
         {
           const int dest = _db.destination( linkedElements[ i ] ) ;
           assert( dest >= 0 );
           if( dest != _me )
           {
-            _linkage.push_back( dest );
+            linkage.insert( dest );
           }
         }
 
-        // sort linkage 
-        std::sort( _linkage.begin(), _linkage.end() );
+        typedef typename std::set< int >::iterator iterator ;
+        const iterator end = linkage.end();
+        // create sorted vector containing each entry only once
+        for( iterator it = linkage.begin(); it != end; ++ it )
+          _linkage.push_back( *it );
+
         // set linkage 
         vertex.setLinkageSorted( _linkage );
       }
