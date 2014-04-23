@@ -127,11 +127,7 @@ inline int ALU2dGridEntity< cd, dim, GridImp >::subIndex ( int i, unsigned int c
   else
   {
     assert( (cd == 1) && (codim == 2) );
-    assert( (i >= 0) && (i < 2) );
-    const int nv = item_->numVertices();
-    const int s = (((face_ + 2) % nv) & 2) >> 1;
-    const int k = (face_ + 2 + s * (1 - i) + (1 - s) * i) % nv;
-    return ElementWrapper< 2, dim, GridImp >::subIndex( grid(), *item_, k );
+    return ElementWrapper< 2, dim, GridImp >::edgeSubIndex( grid(), *item_, face_, i);
   }
 }
 
@@ -674,7 +670,19 @@ struct ElementWrapper<2, dim, GridImp>{
   }  
   static inline bool isTheSame(const VertexType * elem, int face, const VertexType * org, int org_face) {   
     return (elem == org);    
-  }  
+  }
+  static inline int edgeSubIndex (GridImp &grid, const VertexType &elem, int face, int i) 
+  {
+    std::abort();
+  }
+  static inline int edgeSubIndex (GridImp &grid, const HElementType &elem, int face, int i) 
+  {
+    assert( (i >= 0) && (i < 2) );
+    const int nv = elem.numvertices();
+    const int s = (((face + 2) % nv) & 2) >> 1;
+    const int k = (face + 2 + s * (1 - i) + (1 - s) * i) % nv;
+    return subIndex( grid, elem, k );
+  }
 };
 
 //********* end struct ElementWrapper ********************
