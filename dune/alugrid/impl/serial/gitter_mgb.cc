@@ -973,6 +973,7 @@ namespace ALUGrid
         // read position in linkage vector 
         int pos; 
         in >> pos; 
+        alugrid_assert( pos < int(patterns.size()) );
         // set vertex linkage
         (*i).second->setLinkageSorted( patterns[ pos ] );
       }
