@@ -170,9 +170,8 @@ namespace Dune
     template< int cd >
     IdType subId ( const typename GridType::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
     {
-      const int realCodim = cd+codim;
-      assert( hset_.size( realCodim ) < codimMultiplier );
-      return realCodim*codimMultiplier + hset_.subIndex( e, i, codim );
+      assert( hset_.size( codim ) < codimMultiplier );
+      return codim*codimMultiplier + hset_.subIndex( e, i, codim );
     }
 
   private:
