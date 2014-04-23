@@ -944,13 +944,13 @@ namespace ALUGrid
 
     int linkagePatternSize ;
     in >> linkagePatternSize ;
+
+    // if linkage was writte, restore vertex linkage
     if( linkagePatternSize > 0 ) 
     {
       ++linkagePatternSize ; // include null pattern
-      // backup linkage (for parallel backup/restore)
-      //linkagePatternMap_t& linkagePattern = this->indexManagerStorage().linkagePatterns();
-      //linkagePattern.clear();
 
+      // read linkage combinations 
       std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
       for( int i=0; i<linkagePatternSize; ++i )
       {
@@ -966,12 +966,13 @@ namespace ALUGrid
         }
       }
 
-      // store position of vertex linkage in the map
+      // set vertex linkage according to stores position 
       const vertexMap_t::iterator end = _vertexMap.end ();
       for (vertexMap_t::iterator i = _vertexMap.begin (); i != end; ++i)
       {
         // read position in linkage vector 
-        int pos; in >> pos; 
+        int pos; 
+        in >> pos; 
         // set vertex linkage
         (*i).second->setLinkageSorted( patterns[ pos ] );
       }
