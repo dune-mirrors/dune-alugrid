@@ -343,6 +343,10 @@ namespace Dune
           out << " " << boundaryId.first[ i ];
         out << std::endl;
       }
+
+      // no linkage 
+      out << int(0) << std::endl; 
+
       out.close();
     }
 
