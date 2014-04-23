@@ -327,6 +327,7 @@ namespace ALUGrid
       virtual bool setLinkage ( const std::vector< int >& ) = 0;
       virtual bool setLinkageSorted ( const std::vector< int >& ) = 0;
       virtual void clearLinkage () = 0;
+      virtual int linkagePosition () const = 0 ;
 
       typedef ElementLinkage ElementLinkage_t ;
       typedef std::set< int > linkageset_t ;
@@ -342,6 +343,7 @@ namespace ALUGrid
       virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
       virtual bool setLinkageSorted ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
       virtual void clearLinkage () { alugrid_assert (false); abort(); }
+      virtual int linkagePosition () const { alugrid_assert (false); abort(); return -1; }
 
       typedef VertexPllXIF :: linkageset_t  linkageset_t ;
       virtual bool insertLinkedElements( const linkageset_t& ) { alugrid_assert (false); abort(); return false; }

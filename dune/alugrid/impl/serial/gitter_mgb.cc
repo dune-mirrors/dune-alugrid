@@ -942,6 +942,41 @@ namespace ALUGrid
       }
     }
 
+    int linkagePatternSize ;
+    in >> linkagePatternSize ;
+    if( linkagePatternSize > 0 ) 
+    {
+      ++linkagePatternSize ; // include null pattern
+      // backup linkage (for parallel backup/restore)
+      //linkagePatternMap_t& linkagePattern = this->indexManagerStorage().linkagePatterns();
+      //linkagePattern.clear();
+
+      std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
+      for( int i=0; i<linkagePatternSize; ++i )
+      {
+        linkagePattern_t& pattern = patterns[ i ];
+        int n;
+        in >> n; 
+        pattern.resize( n );
+        for( int k=0; k<n; ++k )
+        {
+          int rank ;
+          in >> rank ;
+          pattern[ k ] = rank ;
+        }
+      }
+
+      // store position of vertex linkage in the map
+      const vertexMap_t::iterator end = _vertexMap.end ();
+      for (vertexMap_t::iterator i = _vertexMap.begin (); i != end; ++i)
+      {
+        // read position in linkage vector 
+        int pos; in >> pos; 
+        // set vertex linkage
+        (*i).second->setLinkageSorted( patterns[ pos ] );
+      }
+    }
+
     // get last std::endl character (from backup to make stream consistent)
     if( !in.eof() ) in.get();
 
