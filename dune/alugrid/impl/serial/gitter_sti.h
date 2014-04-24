@@ -302,6 +302,7 @@ namespace ALUGrid
             return true ;
           }
 
+          std::cout << size() << " " << elements.size() << std::endl;
           alugrid_assert( size() == int(elements.size()) );
           return false ;
         }
@@ -341,7 +342,7 @@ namespace ALUGrid
       virtual ~VertexPllXDefault () {}
     public :
       virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
-      virtual bool setLinkageSorted ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
+      virtual bool setLinkageSorted ( const std::vector< int >& ) {}
       virtual void clearLinkage () { alugrid_assert (false); abort(); }
       virtual int linkagePosition () const { alugrid_assert (false); abort(); return -1; }
 

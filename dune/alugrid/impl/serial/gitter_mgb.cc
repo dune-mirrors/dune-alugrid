@@ -969,18 +969,49 @@ namespace ALUGrid
         }
       }
 
+      int hasElementLinkage = 0 ;
+      in >> hasElementLinkage ; 
+
+      int idx = 0;
+      // read position in linkage vector 
+      int vxId; 
+      in >> vxId; 
       // set vertex linkage according to stores position 
       const vertexMap_t::iterator end = _vertexMap.end ();
-      for (vertexMap_t::iterator i = _vertexMap.begin (); i != end; ++i)
+      vertexMap_t::iterator i = _vertexMap.begin ();
+      while( vxId != -1 ) 
       {
-        // read position in linkage vector 
-        int pos; 
-        in >> pos; 
+        // advance iterator until pos is reached
+        while( idx != vxId )
+        {
+          ++i; 
+          ++idx ;
+        }
+
+        int pos;
+        in >> pos;
         alugrid_assert( pos < int(patterns.size()) );
+
+        if( hasElementLinkage ) 
+        {
+          std::set<int> elements; 
+          int size ;
+          in >> size; 
+          for( int k=0; k<size; ++k ) 
+          {
+            int el;
+            in >> el;
+            elements.insert( el );
+          }
+          (*i).second->insertLinkedElements( elements );
+        }
 
         // set vertex linkage if not nullPattern
         if( patterns[ pos ].size() )
           (*i).second->setLinkageSorted( patterns[ pos ] );
+
+        // read position in linkage vector 
+        in >> vxId; 
       }
     }
 
