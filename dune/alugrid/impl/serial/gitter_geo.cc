@@ -770,7 +770,8 @@ namespace ALUGrid
       const vertexlist_t::const_iterator end = _vertexList.end ();
       for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i) 
       {
-        os << (*i)->ident() << ws << (*i)->Point() << std::endl;
+        vertex_GEO* vertex = (*i);
+        os << vertex->ident() << ws << vertex->Point() << std::endl;
       }
     }
 
@@ -860,6 +861,7 @@ namespace ALUGrid
     os << linkPatternSize << std::endl;
     if( linkPatternSize > 0 ) 
     {
+
       std::vector< int > refCount( linkPatternSize+1, -1 );
       typedef linkagePatternMap_t :: iterator iterator ;
       int idx = 0;
@@ -879,12 +881,43 @@ namespace ALUGrid
         os << std::endl;
       }
 
-      // store position of vertex linkage in the map
-      const vertexlist_t::const_iterator end = _vertexList.end ();
-      for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i) 
+      int hasElementLinkage = 0;
       {
-        os << (*i)->linkagePosition() << std::endl; 
+        vertexlist_t::const_iterator i = _vertexList.begin ();
+        if( i != _vertexList.end () ) 
+        {
+          if( (*i)->linkedElements().size() > 0 )
+            hasElementLinkage = 1 ;
+        }
       }
+
+      // write flag for stored element linkage
+      os << hasElementLinkage << std::endl;
+
+      idx = 0 ;
+      // store position of vertex linkage in the map if vertex is border vertex
+      const vertexlist_t::const_iterator end = _vertexList.end ();
+      for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i, ++idx) 
+      {
+        vertex_GEO* vertex = (*i);
+        if( vertex->isBorder() ) 
+        {
+          os << idx << ws << vertex->linkagePosition() << ws; 
+          // the methods linkedElements and linkagePosition will fail for serial vertices 
+          // but for these isBorder should be false anyway
+          if( hasElementLinkage ) 
+          {
+            typedef vertex_GEO :: ElementLinkage_t ElementLinkage_t;
+            const ElementLinkage_t& linkedElements = vertex->linkedElements();
+            const int size = linkedElements.size();
+            os << size << ws ; 
+            for( int i=0; i<size; ++i ) 
+              os << linkedElements[ i ] << ws ;
+          }
+          os << std::endl;
+        }
+      }
+      os << int(-1) << std::endl; // end marker for vertex position list
 
       // restore refcount 
       idx = 0;
