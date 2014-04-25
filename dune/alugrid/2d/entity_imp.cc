@@ -679,8 +679,8 @@ struct ElementWrapper<2, dim, GridImp>{
   {
     assert( (i >= 0) && (i < 2) );
     const int nv = elem.numvertices();
-    const int s = (((face + 2) % nv) & 2) >> 1;
-    const int k = (face + 2 + s * (1 - i) + (1 - s) * i) % nv;
+    const int s = (((face + 1) % nv) & 2) >> 1;
+    const int k = (face + 1 + s * (1 - i) + (1 - s) * i) % nv;
     return subIndex( grid, elem, k );
   }
 };
