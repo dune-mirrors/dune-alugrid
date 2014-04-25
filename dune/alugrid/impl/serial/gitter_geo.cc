@@ -886,9 +886,9 @@ namespace ALUGrid
         vertexlist_t::const_iterator i = _vertexList.begin ();
         if( i != _vertexList.end () ) 
         {
-          if( (*i)->linkedElements().size() > 0 )
-            hasElementLinkage = 1 ;
+          hasElementLinkage = ( (*i)->linkedElements().inactive() ) ? 0 : 1 ;
         }
+        assert( ! hasElementLinkage );
       }
 
       // write flag for stored element linkage
@@ -900,9 +900,10 @@ namespace ALUGrid
       for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i, ++idx) 
       {
         vertex_GEO* vertex = (*i);
+        // linkage info is only needed for border vertices
         if( vertex->isBorder() ) 
         {
-          os << idx << ws << vertex->linkagePosition() << ws; 
+          os << idx << ws << vertex->linkagePosition(); 
           // the methods linkedElements and linkagePosition will fail for serial vertices 
           // but for these isBorder should be false anyway
           if( hasElementLinkage ) 
@@ -910,9 +911,9 @@ namespace ALUGrid
             typedef vertex_GEO :: ElementLinkage_t ElementLinkage_t;
             const ElementLinkage_t& linkedElements = vertex->linkedElements();
             const int size = linkedElements.size();
-            os << size << ws ; 
-            for( int i=0; i<size; ++i ) 
-              os << linkedElements[ i ] << ws ;
+            os << ws << size ; 
+            for( int k=0; k<size; ++k ) 
+              os << ws << linkedElements[ k ];
           }
           os << std::endl;
         }
