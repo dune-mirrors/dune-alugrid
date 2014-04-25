@@ -881,15 +881,9 @@ namespace ALUGrid
         os << std::endl;
       }
 
-      int hasElementLinkage = 0;
-      {
-        vertexlist_t::const_iterator i = _vertexList.begin ();
-        if( i != _vertexList.end () ) 
-        {
-          hasElementLinkage = ( (*i)->linkedElements().inactive() ) ? 0 : 1 ;
-        }
-        assert( ! hasElementLinkage );
-      }
+
+      vertexlist_t::const_iterator i = _vertexList.begin ();
+      const int hasElementLinkage = (i != _vertexList.end() ) ? ! (*i)->linkedElements().inactive() : 0;
 
       // write flag for stored element linkage
       os << hasElementLinkage << std::endl;
