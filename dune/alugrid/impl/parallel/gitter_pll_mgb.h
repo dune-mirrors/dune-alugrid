@@ -54,7 +54,7 @@ namespace ALUGrid
         _linkage.clear();
         _linkage.reserve( elSize ); 
 
-        typedef typename std::set< int >::iterator iterator ;
+        typedef std::set< int >::iterator iterator ;
         const iterator end = linkage.end();
         // create sorted vector containing each entry only once
         for( iterator it = linkage.begin(); it != end; ++ it )
