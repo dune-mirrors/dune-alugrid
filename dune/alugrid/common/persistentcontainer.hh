@@ -52,6 +52,7 @@ namespace Dune
     {}
   };
 
+#if 0
   template< int dim, int dimworld, ALU2DSPACE ElementType elType, class T >
   class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, T >
   : public ALUGridPersistentContainer< ALU2dGrid< dim, dimworld, elType >, T >
@@ -69,6 +70,7 @@ namespace Dune
     : Base( grid, codim, value )
     {}
   };
+#endif  //if 0
 
   template< ALU3dGridElementType elType, class Comm, class T >
   class PersistentContainer< ALU3dGrid< elType, Comm >, T >
