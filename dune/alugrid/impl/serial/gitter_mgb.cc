@@ -952,7 +952,7 @@ namespace ALUGrid
 
       // read linkage combinations 
       std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
-      for( int i=0; i<linkagePatternSize; ++i )
+      for( int i=1; i<linkagePatternSize; ++i )
       {
         int n;
         in >> n; 
