@@ -861,7 +861,6 @@ namespace ALUGrid
     os << linkPatternSize << std::endl;
     if( linkPatternSize > 0 ) 
     {
-
       std::vector< int > refCount( linkPatternSize+1, -1 );
       typedef linkagePatternMap_t :: iterator iterator ;
       int idx = 0;
@@ -872,13 +871,19 @@ namespace ALUGrid
         refCount[ idx ] = (*it).second ;
         // overwrite ref count with position 
         (*it).second = idx ;
+
         // store linkage to backup stream 
         const std::vector<int>& linkage = (*it).first ;
         const int linkageSize = linkage.size();
-        os << linkageSize << ws;
-        for( int i=0; i<linkageSize; ++i ) 
-          os << linkage[ i ] << ws; 
-        os << std::endl;
+        // the null pattern should be the first entry 
+        alugrid_assert( linkageSize == 0 ? idx == 0 : true );
+        if( linkageSize > 0 ) 
+        {
+          os << linkageSize << ws;
+          for( int i=0; i<linkageSize; ++i ) 
+            os << linkage[ i ] << ws; 
+          os << std::endl;
+        }
       }
 
 
