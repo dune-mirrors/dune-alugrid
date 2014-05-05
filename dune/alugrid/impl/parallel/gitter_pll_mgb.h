@@ -12,61 +12,6 @@
 namespace ALUGrid
 {
 
-  class VertexLinkage
-  {
-    typedef Gitter :: vertex_STI vertex_STI ;
-    const LoadBalancer::DataBase& _db;
-    std::vector< int > _linkage;
-    const int _me ;
-    const bool _computeVertexLinkage;
-  public:
-    VertexLinkage( const int me, 
-                   const LoadBalancer::DataBase& db, 
-                   const bool computeVertexLinkage )
-      : _db( db ),
-        _linkage(),
-        _me( me ),
-        _computeVertexLinkage( computeVertexLinkage )
-    {}
-
-    void compute( vertex_STI& vertex ) 
-    {
-      // clear existing vertex linkage 
-      vertex.clearLinkage();
-
-      if( vertex.isBorder() && _computeVertexLinkage )
-      {
-        typedef vertex_STI :: ElementLinkage_t ElementLinkage_t ;
-        const ElementLinkage_t& linkedElements = vertex.linkedElements();
-        const int elSize = linkedElements.size() ;
-        std::set< int > linkage; 
-        for( int i=0; i<elSize; ++ i )
-        {
-          const int dest = _db.destination( linkedElements[ i ] ) ;
-          assert( dest >= 0 );
-          if( dest != _me )
-          {
-            linkage.insert( dest );
-          }
-        }
-
-        // clear current linkage
-        _linkage.clear();
-        _linkage.reserve( elSize ); 
-
-        typedef std::set< int >::iterator iterator ;
-        const iterator end = linkage.end();
-        // create sorted vector containing each entry only once
-        for( iterator it = linkage.begin(); it != end; ++ it )
-          _linkage.push_back( *it );
-
-        // set linkage 
-        vertex.setLinkageSorted( _linkage );
-      }
-    }
-  };
-
-
 
   class ParallelGridMover
   : public MacroGridBuilder
@@ -105,7 +50,7 @@ namespace ALUGrid
       void finalize (); 
 
     public :
-      ParallelGridMover (BuilderIF &, VertexLinkage& vxLinkage );
+      ParallelGridMover (BuilderIF &  );
       // unpack all elements from the stream 
       void unpackAll (ObjectStream &, GatherScatterType*);
       void packAll   (const int link, ObjectStream &, GatherScatterType* );
@@ -114,7 +59,6 @@ namespace ALUGrid
 
       ~ParallelGridMover ();
     protected:
-      VertexLinkage& _vxLinkage ;
       using MacroGridBuilder :: reserve ;
       using MacroGridBuilder :: clear ;
   };

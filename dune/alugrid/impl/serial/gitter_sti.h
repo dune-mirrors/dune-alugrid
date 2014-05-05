@@ -302,7 +302,7 @@ namespace ALUGrid
             return true ;
           }
 
-          std::cout << size() << " " << elements.size() << std::endl;
+          //std::cout << size() << " " << elements.size() << std::endl;
           alugrid_assert( size() == int(elements.size()) );
           return false ;
         }
@@ -2277,7 +2277,10 @@ namespace ALUGrid
         hbndseg4list_t  _hbndseg4List;
 
       protected :
-        BuilderIF () {}
+        BuilderIF () 
+          : _computeLinkage( true ),
+            _vertexElementLinkageComputed( false )
+        {}
 
         virtual ~BuilderIF ();
 
@@ -2313,18 +2316,18 @@ namespace ALUGrid
         virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t, 
                                               MacroGhostInfoHexa* ) = 0;
 
-        IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const;
-        IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const;
-        IteratorSTI < hedge_STI >  * iterator (const hedge_STI *) const;
-        IteratorSTI < hedge_STI >  * iterator (const IteratorSTI < hedge_STI > *) const;
-        IteratorSTI < hface_STI >  * iterator (const hface_STI *) const;
-        IteratorSTI < hface_STI >  * iterator (const IteratorSTI < hface_STI > *) const;
-        IteratorSTI < helement_STI > * iterator (const helement_STI *) const;
-        IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) const;
-        IteratorSTI < hperiodic_STI > * iterator (const hperiodic_STI *) const;
-        IteratorSTI < hperiodic_STI > * iterator (const IteratorSTI < hperiodic_STI > *) const;
-        IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const;
-        IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const;
+        IteratorSTI < vertex_STI >    *iterator (const vertex_STI *) const;
+        IteratorSTI < vertex_STI >    *iterator (const IteratorSTI < vertex_STI > *) const;
+        IteratorSTI < hedge_STI >     *iterator (const hedge_STI *) const;
+        IteratorSTI < hedge_STI >     *iterator (const IteratorSTI < hedge_STI > *) const;
+        IteratorSTI < hface_STI >     *iterator (const hface_STI *) const;
+        IteratorSTI < hface_STI >     *iterator (const IteratorSTI < hface_STI > *) const;
+        IteratorSTI < helement_STI >  *iterator (const helement_STI *) const;
+        IteratorSTI < helement_STI >  *iterator (const IteratorSTI < helement_STI > *) const;
+        IteratorSTI < hperiodic_STI > *iterator (const hperiodic_STI *) const;
+        IteratorSTI < hperiodic_STI > *iterator (const IteratorSTI < hperiodic_STI > *) const;
+        IteratorSTI < hbndseg_STI >   *iterator (const hbndseg_STI *) const;
+        IteratorSTI < hbndseg_STI >   *iterator (const IteratorSTI < hbndseg_STI > *) const;
       public:  
         enum { numOfIndexManager = IndexManagerStorageType::numOfIndexManager };
 
@@ -2343,7 +2346,17 @@ namespace ALUGrid
         // index provider, for every codim one , 4 is for boundary
         IndexManagerStorageType _indexManagerStorage;
 
+        bool _computeLinkage ; // if true vertexLinkageEstimate is done
+        bool _vertexElementLinkageComputed;
+
       public :
+        void notifyLinkageChange() { _computeLinkage = true ; }
+        void linkageComputed() { _computeLinkage = false ; }
+        bool computeLinkage () const { return _computeLinkage; }
+
+        bool vertexElementLinkageComputed() const { return _vertexElementLinkageComputed; }
+        void notifyVertexElementLinkageComputed () { _vertexElementLinkageComputed = true ; }
+
         // return reference to indexManager 
         virtual IndexManagerType& indexManager(int codim);
         // return reference to indexManagerStorage
