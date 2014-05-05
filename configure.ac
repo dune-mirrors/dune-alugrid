@@ -1,6 +1,6 @@
 AC_PREREQ(2.50)
 DUNE_AC_INIT
-AM_INIT_AUTOMAKE([foreign 1.5])
+#AM_INIT_AUTOMAKE([foreign 1.5])
 AC_CONFIG_SRCDIR([dune/alugrid/grid.hh])
 AM_CONFIG_HEADER([config.h])
 

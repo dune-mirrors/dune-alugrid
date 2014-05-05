@@ -6,7 +6,7 @@
 
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/3d/alu3dinclude.hh>
-#include <dune/alugrid/2d/alu2dinclude.hh>
+//#include <dune/alugrid/2d/alu2dinclude.hh>
 
 namespace Dune
 {
