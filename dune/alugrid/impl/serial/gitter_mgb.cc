@@ -948,10 +948,11 @@ namespace ALUGrid
     // if linkage was writte, restore vertex linkage
     if( linkagePatternSize > 0 ) 
     {
-      ++linkagePatternSize ; // include null pattern
+      ++linkagePatternSize ; // include null pattern (which is the first entry)
 
       // read linkage combinations 
       std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
+      // don't read null pattern (i=1)
       for( int i=1; i<linkagePatternSize; ++i )
       {
         int n;

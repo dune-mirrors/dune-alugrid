@@ -14,8 +14,8 @@
 namespace ALUGrid
 {
 
-  ParallelGridMover::ParallelGridMover ( BuilderIF &b, VertexLinkage& vxLinkage )
-    : MacroGridBuilder( b, false ), _vxLinkage( vxLinkage )
+  ParallelGridMover::ParallelGridMover ( BuilderIF &b )
+    : MacroGridBuilder( b, false ) 
   {
     // lock MyAlloc so that objects are not freed  
     // because we want to reuse them  
@@ -28,6 +28,9 @@ namespace ALUGrid
   // overloaded, because here we use the new insertInternal method 
   void ParallelGridMover::initialize ()
   {
+    // notify builder that vertex Linkage might have changed
+    myBuilder().notifyLinkageChange();
+
     {
       BuilderIF::vertexlist_t& _vertexList = myBuilder ()._vertexList;
       const BuilderIF::vertexlist_t::iterator _vertexListend  = _vertexList.end ();
@@ -553,7 +556,6 @@ namespace ALUGrid
         {
           alugrid_assert ( vertex->ref >= 2);
           // compute vertex linkage 
-          // _vxLinkage.compute( *vertex ); 
           _vertexList.push_back ( vertex );
           ++i;
         }
@@ -593,10 +595,6 @@ namespace ALUGrid
     os.readObject (z);
     std::pair< VertexGeo *, bool > p = InsertUniqueVertex (x,y,z,id);
     p.first->unpackSelf (os,p.second);
-
-    // compute vertex linkage if enabled and vertex is new 
-    //if( Gitter :: storeLinkageInVertices && p.second ) 
-    //  _vxLinkage.compute( *p.first );
   }
 
   void ParallelGridMover::unpackHedge1 (ObjectStream & os) {
@@ -966,7 +964,6 @@ namespace ALUGrid
     MpAccessLocal&      _mpa;
     ParallelGridMover*  _pgm;
     GatherScatterType*  _gs; 
-    VertexLinkage _vxLinkage ;
 
     UnpackLBData( const UnpackLBData& );
   public:
@@ -974,14 +971,13 @@ namespace ALUGrid
     UnpackLBData( GitterPll::MacroGitterPll& containerPll, 
                   MpAccessLocal& mpa,
                   GatherScatterType* gs,
-                  LoadBalancer::DataBase& db, 
-                  const bool vertexLinkageComputed ) 
+                  LoadBalancer::DataBase& db ) 
       : _containerPll( containerPll ),
         _mpa( mpa ), 
         _pgm( 0 ),
-        _gs( gs ),
-        _vxLinkage( _mpa.myrank(), db, vertexLinkageComputed )
-    {}
+        _gs( gs )
+    {
+    }
 
     // destructor deleting parallel macro grid mover
     ~UnpackLBData() 
@@ -1002,7 +998,7 @@ namespace ALUGrid
       // create ParallelGridMover when all data was packed, otherwise the link packing
       // will fail since this will modify the macro grid, since the 
       // parallel macro grid mover clears the lists of macro elements 
-      if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll, _vxLinkage );
+      if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll );
 
       // clear linkage patterns 
       // _containerPll.clearLinkagePattern();
@@ -1193,21 +1189,13 @@ namespace ALUGrid
 
       lap2 = clock ();
       
-      // add ld ranks to linkage
-      //for( int l=0; l<mpa.sendLinks(); ++ l ) currentLinkage.insert( mpa.sendDest()[ l ] );
-      //for( int l=0; l<mpa.recvLinks(); ++ l ) currentLinkage.insert( mpa.recvSource()[ l ] );
-
       {
         // data handle  
-        UnpackLBData data( containerPll (), mpa, gatherScatter, db, _vertexLinkageComputed );
+        UnpackLBData data( containerPll (), mpa, gatherScatter, db );
 
         // pack, exchange, and unpack data 
         mpa.exchange ( osv, data );
       }
-
-      // set broader linkage for identification process 
-      //mpa.removeLinkage();
-      //mpa.insertRequestSymmetric( currentLinkage );
 
       lap3 = clock ();
 #ifdef ALUGRIDDEBUG
