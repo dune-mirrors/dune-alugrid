@@ -224,6 +224,9 @@ namespace ALUGrid
       bool _initialized;
       bool _finalized;
 
+      void computeVertexElementLinkage( elementMap_t& elementMap, 
+                                        Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage );
+
       // insert all hexas from elemMap into elemList 
       void hexaMapToList( elementMap_t& elemMap, hexalist_t& elemList, const bool setIndex  );
 

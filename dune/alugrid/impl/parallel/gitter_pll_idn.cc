@@ -350,7 +350,7 @@ namespace ALUGrid
   public: 
     UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, 
                          const int me,
-                         const bool storeLinkageInVertices ) 
+                         const bool storeLinkageInVertices )
       : _vxmap(),
         _vxElemLinkage(),
         _containerPll( containerPll ),
@@ -863,7 +863,7 @@ namespace ALUGrid
 
     clock_t lap1 = clock ();
     // this does not have to be computed every time (depending on partitioning method)
-    //if( computeLinkage() ) 
+    if( computeLinkage() )
     {
       // clear linkage pattern map since it is newly build here
       clearLinkagePattern();
@@ -889,8 +889,9 @@ namespace ALUGrid
         vertexLinkageEstimate ( mpa, storeLinkageInVertices );
       }
 
+      notifyLinkageChange ();
       // mark linkage as computed 
-      //linkageComputed() ; 
+      // linkageComputed() ;
     }
 
     clock_t lap2 = clock ();
@@ -929,6 +930,7 @@ namespace ALUGrid
       std::cout << u2 << " " << u3 << " " << u4 << " sec." << std::endl;
     }
 
+    /*
     if (debugOption (1)) 
     {
       const double nlinks = mpa.nlinks();
@@ -942,6 +944,7 @@ namespace ALUGrid
         std::cout << uMax[ 0 ] << " " << uMax[ 1 ] << " " << uMax[ 2 ] << " sec." << std::endl;
       }
     }
+    */
   }
 
 } // namespace ALUGrid
