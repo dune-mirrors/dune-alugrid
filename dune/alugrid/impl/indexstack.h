@@ -8,6 +8,8 @@
 #include <stack>
 #include <vector>
 
+#include "byteorder.hh"
+
 namespace ALUGrid
 {
 
@@ -17,11 +19,7 @@ namespace ALUGrid
     // return byte order (0 = little endian, 1 = big endian)
     static char systemByteOrder ()
     {
-#if __BYTE_ORDER == __LITTLE_ENDIAN 
-      return 0 ;
-#else
-      return 1 ;
-#endif
+      return ALUGrid :: systemByteOrder() == littleEndian ? 0 : 1;
     }
 
     // return byte order as a string 
