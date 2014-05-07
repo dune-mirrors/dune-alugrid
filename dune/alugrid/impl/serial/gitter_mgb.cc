@@ -1023,6 +1023,9 @@ namespace ALUGrid
         in >> pos;
         alugrid_assert( pos < int(patterns.size()) );
 
+        // vertex pointer 
+        Gitter::vertex_STI* vertex = (*i).second; 
+
         if( hasElementLinkage ) 
         {
           std::set<int> elements; 
@@ -1034,15 +1037,15 @@ namespace ALUGrid
             in >> el;
             elements.insert( el );
           }
-          (*i).second->insertLinkedElements( elements );
+          vertex->insertLinkedElements( elements );
 
           // erase computed linkage to avoid reinsertion 
-          vxElemLinkage.erase( (*i).second );
+          vxElemLinkage.erase( vertex );
         }
 
         // set vertex linkage if not nullPattern
         if( patterns[ pos ].size() )
-          (*i).second->setLinkageSorted( patterns[ pos ] );
+          vertex->setLinkageSorted( patterns[ pos ] );
 
         // read position in linkage vector 
         in >> vxId; 
@@ -1050,6 +1053,7 @@ namespace ALUGrid
 
       if( hasElementLinkage ) 
       {
+        // insert vertex-element linkage for remaining vertices (interior)
         typedef vertexelementlinkage_t :: iterator iterator ;
         const iterator end = vxElemLinkage.end(); 
         for( iterator i = vxElemLinkage.begin(); i != end; ++ i ) 
