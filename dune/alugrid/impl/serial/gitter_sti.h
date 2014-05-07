@@ -302,7 +302,7 @@ namespace ALUGrid
             return true ;
           }
 
-          //std::cout << size() << " " << elements.size() << std::endl;
+          // std::cout << size() << " " << elements.size() << std::endl;
           alugrid_assert( size() == int(elements.size()) );
           return false ;
         }

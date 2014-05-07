@@ -804,6 +804,19 @@ namespace ALUGrid
     return;
   }
 
+  void MacroGridBuilder::
+  computeVertexElementLinkage( elementMap_t& elementMap, 
+                               Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage ) 
+  {
+    typedef typename elementMap_t::iterator  iterator;
+    const iterator elementMapEnd = elementMap.end();
+    for (iterator i = elementMap.begin (); i != elementMapEnd; ++i )
+    {
+      Gitter::helement_STI* elem = (Gitter::helement_STI*) (*i).second;
+      elem->computeVertexLinkage( vxElemLinkage ); 
+    }
+  }
+
   template <class stream_t>
   void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type )
   {
@@ -950,6 +963,9 @@ namespace ALUGrid
     {
       ++linkagePatternSize ; // include null pattern (which is the first entry)
 
+      // make linkage as computed (to avoid costly rebuild)
+      myBuilder().linkageComputed();
+
       // read linkage combinations 
       std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
       // don't read null pattern (i=1)
@@ -970,8 +986,22 @@ namespace ALUGrid
         }
       }
 
-      int hasElementLinkage = 0 ;
-      in >> hasElementLinkage ; 
+      int hasElementLink = 0 ;
+      in >> hasElementLink ; 
+      const bool hasElementLinkage = (hasElementLink == 1);
+
+      typedef Gitter :: ElementPllXIF :: vertexelementlinkage_t vertexelementlinkage_t;
+      vertexelementlinkage_t vxElemLinkage ;
+
+      if( hasElementLinkage ) 
+      {
+        // compuate vertex-element linkage for hexas and tetras
+        computeVertexElementLinkage( _hexaMap,  vxElemLinkage );
+        computeVertexElementLinkage( _tetraMap, vxElemLinkage );
+
+        // mark element linkage as computed (if available)
+        myBuilder().notifyVertexElementLinkageComputed();
+      }
 
       int idx = 0;
       // read position in linkage vector 
@@ -1005,6 +1035,9 @@ namespace ALUGrid
             elements.insert( el );
           }
           (*i).second->insertLinkedElements( elements );
+
+          // erase computed linkage to avoid reinsertion 
+          vxElemLinkage.erase( (*i).second );
         }
 
         // set vertex linkage if not nullPattern
@@ -1013,6 +1046,16 @@ namespace ALUGrid
 
         // read position in linkage vector 
         in >> vxId; 
+      } // end while( vxId != -1 )
+
+      if( hasElementLinkage ) 
+      {
+        typedef vertexelementlinkage_t :: iterator iterator ;
+        const iterator end = vxElemLinkage.end(); 
+        for( iterator i = vxElemLinkage.begin(); i != end; ++ i ) 
+        {
+          (*i).first->insertLinkedElements( (*i).second );
+        }
       }
     }
 
