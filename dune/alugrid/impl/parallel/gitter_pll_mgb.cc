@@ -28,9 +28,6 @@ namespace ALUGrid
   // overloaded, because here we use the new insertInternal method 
   void ParallelGridMover::initialize ()
   {
-    // notify builder that vertex Linkage might have changed
-    myBuilder().notifyLinkageChange();
-
     {
       BuilderIF::vertexlist_t& _vertexList = myBuilder ()._vertexList;
       const BuilderIF::vertexlist_t::iterator _vertexListend  = _vertexList.end ();
