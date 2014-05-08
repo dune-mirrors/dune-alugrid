@@ -12,6 +12,7 @@
 
 namespace ALUGrid
 {
+  static const bool byteOrderIsBigEndian = systemByteOrder() == bigEndian ? true : false;
 
   class RestoreInfo
   {
@@ -19,7 +20,7 @@ namespace ALUGrid
     // return byte order (0 = little endian, 1 = big endian)
     static char systemByteOrder ()
     {
-      return ALUGrid :: systemByteOrder() == littleEndian ? 0 : 1;
+      return char(byteOrderIsBigEndian);
     }
 
     // return byte order as a string 
