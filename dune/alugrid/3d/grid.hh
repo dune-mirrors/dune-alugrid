@@ -134,7 +134,7 @@ namespace Dune
   template < int dimw, class Comm >
   struct ALUGridBaseGrid< 2, dimw, cube, Comm >
   {
-    typedef ALU3dGrid< hexa, Comm >  BaseGrid ;
+    typedef ALU3dGrid< qua, Comm >  BaseGrid ;
   };
 
   template < int dimw, class Comm >
