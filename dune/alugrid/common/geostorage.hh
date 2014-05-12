@@ -33,7 +33,7 @@ namespace Dune
     struct CreateGeometries;
 
     template <int dummy, int dimworld> 
-    struct CreateGeometries<dummy, 2, dimworld, ALU2DSPACE triangle >
+    struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE triangle >
     {
       template <class Storage> 
       static void createGeometries(Storage& storage, 
@@ -78,7 +78,7 @@ namespace Dune
     };
 
     template <int dummy, int dimworld> 
-    struct CreateGeometries<dummy, 2, dimworld, ALU2DSPACE quadrilateral >
+    struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE quadrilateral >
     {
       template <class Storage> 
       static void createGeometries(Storage& storage, 
