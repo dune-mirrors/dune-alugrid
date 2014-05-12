@@ -808,7 +808,7 @@ namespace ALUGrid
   computeVertexElementLinkage( elementMap_t& elementMap, 
                                Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage ) 
   {
-    typedef typename elementMap_t::iterator  iterator;
+    typedef elementMap_t::iterator  iterator;
     const iterator elementMapEnd = elementMap.end();
     for (iterator i = elementMap.begin (); i != elementMapEnd; ++i )
     {
