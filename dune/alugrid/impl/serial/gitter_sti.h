@@ -27,7 +27,7 @@ namespace ALUGrid
   // pair of projection and bnd segment index 
   typedef std::pair< const ProjectVertex *, const int > ProjectVertexPair;
 
-  typedef enum ALUElementType { tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
+  typedef enum ALUElementType {triangle=3, quadrilateral=2, tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
   // forward declaration, see ghost_info.h 
   class MacroGhostInfoHexa;
