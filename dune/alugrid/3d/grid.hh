@@ -130,17 +130,19 @@ namespace Dune
     typedef ALU3dGrid< tetra, Comm >  BaseGrid ; 
   };
 
-  //link the 2d cases to a 3d grid
+  // Internal Forward Declarations
+  // -----------------------------
+
   template < int dimw, class Comm >
   struct ALUGridBaseGrid< 2, dimw, cube, Comm >
   {
-    typedef ALU3dGrid< qua, Comm >  BaseGrid ;
+    typedef ALU3dGrid< hexa, Comm >  BaseGrid ; 
   };
 
   template < int dimw, class Comm >
   struct ALUGridBaseGrid< 2, dimw, simplex, Comm >
   {
-    typedef ALU3dGrid< tetra, Comm >  BaseGrid ;
+    typedef ALU3dGrid< tetra, Comm >  BaseGrid ; 
   };
 
 

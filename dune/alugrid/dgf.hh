@@ -438,7 +438,7 @@ namespace Dune
       double tolerance_;
     };
 
-  }
+  } //end namespace dgf
 
   template < class G > 
   inline bool DGFBaseFactory< G > :: 
@@ -605,11 +605,13 @@ namespace Dune
                        MPICommunicatorType communicator, 
                        const std::string &filename )
   {
-    const int dimgrid = 2;
-    const int dimworld = G :: dimensionworld ; 
+      typedef G DGFGridType ;
+  
+    const int dimgrid = 3;
+    const int dimworld = 3 ; 
     dgf_.element = (eltype == simplex) ? 
         DuneGridFormatParser::Simplex : DuneGridFormatParser::Cube ;
-    dgf_.dimgrid = dimgrid;
+    dgf_.dimgrid = dimgrid-1;
     dgf_.dimw = dimworld;
 
     const bool isDGF = dgf_.isDuneGridFormat( file );
@@ -623,22 +625,35 @@ namespace Dune
 #endif
 
     // set verbosity of factory only for rank = 0 
-    factory_.setVerbosity( (rank == 0) );
+  //  factory_.setVerbosity( (rank == 0) );
 
     // only print warnings of ALU2dGridParameterBlock on rank = 0 
     dgf::ALU2dGridParameterBlock parameter( file, (rank == 0) );
 
-    factory_.setTolerance( parameter.tolerance() );
+  //  factory_.setTolerance( parameter.tolerance() );
 
-    if( !dgf_.readDuneGrid( file, dimgrid, dimworld ) )
+    if( !dgf_.readDuneGrid( file, dimgrid-1, dimworld ) )
       DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
+
+
+   //insert additional (3d)-vertices - 
+   //a single one for all triangles
+   // one for each quadrilateral vertex
+    if(eltype == simplex){
+      FieldVector<double, dimworld> pos(1.);
+      factory_.insertVertex( pos );
+    }
 
     for( int n = 0; n < dgf_.nofvtx; ++n )
     {
+
+    
       FieldVector< double, dimworld > pos;
       for( int i = 0; i < dimworld; ++i )
         pos[ i ] = dgf_.vtx[ n ][ i ];
       factory_.insertVertex( pos );
+      
+      
     }
 
     GeometryType elementType( (eltype == simplex) ? 
@@ -648,13 +663,18 @@ namespace Dune
     const int nFaces = (eltype == simplex) ? dimgrid+1 : 2*dimgrid;
     for( int n = 0; n < dgf_.nofelements; ++n )
     {
-      factory_.insertElement( elementType, dgf_.elements[ n ] );
+      if(eltype == simplex){
+        for(int i=0;i<3;++i){dgf_.elements[n][i]+=1;}
+        dgf_.elements[n].resize(4,0);
+      }
+
+      factory_.insertElement( elementType, dgf_.elements[n] );
       for( int face = 0; face <nFaces; ++face )
       {
         typedef typename DuneGridFormatParser::facemap_t::key_type Key;
         typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
 
-        const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[ n ], face );
+        const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[n], face );
         const Iterator it = dgf_.facemap.find( key );
         if( it != dgf_.facemap.end() )
           factory_.insertBoundary( n, face, it->second.first );
