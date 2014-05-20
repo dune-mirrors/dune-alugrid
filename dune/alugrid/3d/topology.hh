@@ -8,7 +8,7 @@ namespace Dune {
 
   // types of the elementes, 
   // i.e . tetra or hexa, mixed is not implemeneted 
-  enum ALU3dGridElementType {triangle=3, quadrilateral=2, tetra = 4, hexa = 7, mixed, error };
+  enum ALU3dGridElementType {tetra = 4, hexa = 7, mixed, error };
 
   template <ALU3dGridElementType type>
   struct EntityCount {};

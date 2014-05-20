@@ -155,8 +155,7 @@ namespace Dune
      *  \param[in]  id          boundary identifier of the boundary element,
      *                          the default value is 0 (invalid boundary id)
      */
-    virtual void
-    insertBoundary ( const GeometryType &geometry,
+    virtual void insertBoundary ( const GeometryType &geometry,
                      const std::vector< VertexId > &faceVertices,
                      const int id );
 
@@ -339,6 +338,42 @@ namespace Dune
   {
     typedef GridFactory< ALUGrid< 3, 3, eltype, refinementtype, Comm > > ThisType;
     typedef ALU3dGridFactory< ALUGrid< 3, 3, eltype, refinementtype, Comm > > BaseType;
+
+  public:
+    typedef typename BaseType::Grid Grid;
+
+    typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
+
+    /** \brief Default constructor */
+    explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+    : BaseType( communicator )
+    {}
+    
+    /** \brief constructor taking filename */
+    GridFactory ( const std::string &filename, 
+                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+    : BaseType( filename, communicator )
+    {}
+
+  protected:  
+    template< class, class, int > friend class ALULocalGeometryStorage;
+    /** \brief constructor taking verbosity flag */
+    GridFactory ( const bool realGrid, 
+                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+    : BaseType( realGrid, communicator )
+    {}
+  };
+  
+  
+    /** \brief Specialization of the generic GridFactory for ALUCubeGrid<2,dimw>
+   *  \ingroup GridFactory
+   */
+  template<int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype , class Comm >
+  class GridFactory< ALUGrid< 2, dimw, eltype, refinementtype, Comm > >
+  : public ALU3dGridFactory< ALUGrid< 2, dimw, eltype, refinementtype, Comm > >
+  {
+    typedef GridFactory< ALUGrid< 2, dimw, eltype, refinementtype, Comm > > ThisType;
+    typedef ALU3dGridFactory< ALUGrid< 2, dimw, eltype, refinementtype, Comm > > BaseType;
 
   public:
     typedef typename BaseType::Grid Grid;
