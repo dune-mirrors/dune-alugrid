@@ -45,6 +45,7 @@ namespace ALUGrid
       virtual std::vector< int > estimateLinkage () const;
       virtual bool setLinkage ( const std::vector< int >& );
       virtual bool setLinkageSorted ( const std::vector< int >& );
+      virtual int linkagePosition () const { return (*_lpn).second; }
       virtual void clearLinkage ();
       virtual LinkedObject::Identifier getIdentifier () const;
 

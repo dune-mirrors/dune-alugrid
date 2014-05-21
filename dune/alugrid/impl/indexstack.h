@@ -8,8 +8,11 @@
 #include <stack>
 #include <vector>
 
+#include "byteorder.hh"
+
 namespace ALUGrid
 {
+  static const bool byteOrderIsBigEndian = systemByteOrder() == bigEndian ? true : false;
 
   class RestoreInfo
   {
@@ -17,11 +20,7 @@ namespace ALUGrid
     // return byte order (0 = little endian, 1 = big endian)
     static char systemByteOrder ()
     {
-#if __BYTE_ORDER == __LITTLE_ENDIAN 
-      return 0 ;
-#else
-      return 1 ;
-#endif
+      return char(byteOrderIsBigEndian);
     }
 
     // return byte order as a string 

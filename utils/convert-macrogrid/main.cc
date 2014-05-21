@@ -28,7 +28,7 @@ using ALUGrid::MacroFileHeader;
 // ------------
 
 enum ElementRawID { TETRA_RAW = 4, HEXA_RAW = 8 };
-
+static const int ghost_closure = 211 ;
 
 
 // Vertex
@@ -293,8 +293,17 @@ void readMacroGrid ( stream_t &input,
   bndSegs.resize( bndSegListSize );
   for( int i = 0; i < bndSegListSize; ++i )
   {
-    input >> bndSegs[ i ].bndid;
-    for( int j = 0; j < BndSeg< rawId >::numVertices; ++j )
+    int bndid; 
+    input >> bndid ;
+    int j = 0;
+    if( bndid < 0 ) // exterior bnd 
+      bndSegs[ i ].bndid = -bndid ;
+    else // interior bnd 
+    {
+      bndSegs[ i ].vertices[ j++ ] = bndid ;
+      bndSegs[ i ].bndid = ghost_closure ;
+    }
+    for( ; j < BndSeg< rawId >::numVertices; ++j )
       input >> bndSegs[ i ].vertices[ j ];
   }
   std::cout << "  - read " << bndSegs.size() << " boundary segments." << std::endl;
@@ -343,7 +352,9 @@ void writeMacroGrid ( stream_t &output,
   }
   for( int i = 0; i < bndSegListSize; ++i )
   {
-    output << bndSegs[ i ].bndid;
+    if( bndSegs[ i ].bndid != ghost_closure )
+      output << -bndSegs[ i ].bndid;
+
     for( int j = 0; j < BndSeg< rawId >::numVertices; ++j )
       output << ws << bndSegs[ i ].vertices[ j ];
     output << std::endl;

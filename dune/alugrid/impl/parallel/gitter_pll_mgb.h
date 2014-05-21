@@ -12,55 +12,6 @@
 namespace ALUGrid
 {
 
-  class VertexLinkage
-  {
-    typedef Gitter :: vertex_STI vertex_STI ;
-    const LoadBalancer::DataBase& _db;
-    std::vector< int > _linkage;
-    const int _me ;
-    const bool _computeVertexLinkage;
-  public:
-    VertexLinkage( const int me, 
-                   const LoadBalancer::DataBase& db, 
-                   const bool computeVertexLinkage )
-      : _db( db ),
-        _linkage(),
-        _me( me ),
-        _computeVertexLinkage( computeVertexLinkage )
-    {}
-
-    void compute( vertex_STI& vertex ) 
-    {
-      // clear existing vertex linkage 
-      vertex.clearLinkage();
-
-      if( vertex.isBorder() && _computeVertexLinkage )
-      {
-        typedef vertex_STI :: ElementLinkage_t ElementLinkage_t ;
-        const ElementLinkage_t& linkedElements = vertex.linkedElements();
-        const int elSize = linkedElements.size() ;
-        // clear old content 
-        _linkage.resize( 0 );
-        _linkage.reserve( elSize );
-        for( int i=0; i<elSize; ++ i )
-        {
-          const int dest = _db.destination( linkedElements[ i ] ) ;
-          assert( dest >= 0 );
-          if( dest != _me )
-          {
-            _linkage.push_back( dest );
-          }
-        }
-
-        // sort linkage 
-        std::sort( _linkage.begin(), _linkage.end() );
-        // set linkage 
-        vertex.setLinkageSorted( _linkage );
-      }
-    }
-  };
-
-
 
   class ParallelGridMover
   : public MacroGridBuilder
@@ -99,7 +50,7 @@ namespace ALUGrid
       void finalize (); 
 
     public :
-      ParallelGridMover (BuilderIF &, VertexLinkage& vxLinkage );
+      ParallelGridMover (BuilderIF &  );
       // unpack all elements from the stream 
       void unpackAll (ObjectStream &, GatherScatterType*);
       void packAll   (const int link, ObjectStream &, GatherScatterType* );
@@ -108,7 +59,6 @@ namespace ALUGrid
 
       ~ParallelGridMover ();
     protected:
-      VertexLinkage& _vxLinkage ;
       using MacroGridBuilder :: reserve ;
       using MacroGridBuilder :: clear ;
   };

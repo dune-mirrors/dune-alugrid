@@ -423,17 +423,15 @@ namespace ALUGrid
 
   struct ObjectStreamTraits
   {
-    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
-
     template< class T >
-    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( T *dest, const void *src, std::size_t n )
+    static void copy ( T *dest, const void *src, std::size_t n )
     {
       for( std::size_t i = 0; i < n; ++i )
         dest[ i ] = static_cast< const T * >( src )[ i ];
     }
 
     template< class T >
-    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( void *dest, const T *src, std::size_t n )
+    static void copy ( void *dest, const T *src, std::size_t n )
     {
       for( std::size_t i = 0; i < n; ++i )
         static_cast< T * >( dest )[ i ] = src[ i ];
@@ -450,16 +448,14 @@ namespace ALUGrid
 
   struct BigEndianObjectStreamTraits
   {
-    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
-
     template< class T >
-    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( T *dest, const void *src, std::size_t n )
+    static void copy ( T *dest, const void *src, std::size_t n )
     {
       bufferCopy< bigEndian >( dest, src, n );
     }
 
     template< class T >
-    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( void *dest, const T *src, std::size_t n )
+    static void copy ( void *dest, const T *src, std::size_t n )
     {
       bufferCopy< bigEndian >( dest, src, n );
     }
@@ -474,16 +470,14 @@ namespace ALUGrid
 
   struct LittleEndianObjectStreamTraits
   {
-    static constexpr std::size_t defaultChunkSize() { return 4096 * sizeof( double ); }
-
     template< class T >
-    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( T *dest, const void *src, std::size_t n )
+    static void copy ( T *dest, const void *src, std::size_t n )
     {
       bufferCopy< littleEndian >( dest, src, n );
     }
 
     template< class T >
-    static typename std::enable_if< std::is_trivial< T >::value >::type copy ( void *dest, const T *src, std::size_t n )
+    static void copy ( void *dest, const T *src, std::size_t n )
     {
       bufferCopy< littleEndian >( dest, src, n );
     }

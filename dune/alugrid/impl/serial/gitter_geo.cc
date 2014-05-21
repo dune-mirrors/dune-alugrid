@@ -755,12 +755,6 @@ namespace ALUGrid
   template<class ostream_t>
   void Gitter::Geometric::BuilderIF::backupImpl (ostream_t & os) const 
   {
-    // Das Compatibility Mode Backup sichert das Makrogitter genau
-    // dann, wenn es zwischenzeitlich ge"andert wurde, was beim
-    // Neuanlegen und bei der Lastverteilung der Fall ist.
-
-    std::map< VertexGeo *, int > vm;
-
     // Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
     // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
     // Hexaedernetz vorliegt. Gemischte Netze sind bez"uglich ihres
@@ -769,14 +763,15 @@ namespace ALUGrid
     const int tetraListSize  = _tetraList.size ();
     const int hexaListSize   = _hexaList.size  (); 
 
-    StandardWhiteSpace_t whiteSpace ;
+    StandardWhiteSpace_t ws ;
 
     {
       os << vertexListSize << std::endl;
       const vertexlist_t::const_iterator end = _vertexList.end ();
       for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i) 
       {
-        os << (*i)->ident() << whiteSpace << (*i)->Point() << std::endl;
+        vertex_GEO* vertex = (*i);
+        os << vertex->ident() << ws << vertex->Point() << std::endl;
       }
     }
 
@@ -790,28 +785,31 @@ namespace ALUGrid
       {
         for (int j = 0; j < 7; ++ j )
         {
-          os << (*i)->myvertex (j)->ident() << whiteSpace ;
+          os << (*i)->myvertex (j)->ident() << ws ;
         }
         os << (*i)->myvertex (7)->ident() << std::endl ;
       }
 
-      os << int(_periodic4List.size ()) << whiteSpace << int(_hbndseg4List.size ()) << std::endl;
+      os << int(_periodic4List.size ()) << ws << int(_hbndseg4List.size ()) << std::endl;
       const periodic4list_t::const_iterator pend = _periodic4List.end ();
       for (periodic4list_t::const_iterator i = _periodic4List.begin (); i != pend; ++i) 
       {
         for (int j = 0; j < 7; ++j )
         {
-          os << (*i)->myvertex (j)->ident() << whiteSpace ;
+          os << (*i)->myvertex (j)->ident() << ws ;
         }
         os << (*i)->myvertex (7)->ident() << std::endl;
       }
       const hbndseg4list_t::const_iterator hend = _hbndseg4List.end ();
       for (hbndseg4list_t::const_iterator i = _hbndseg4List.begin (); i != hend; ++i) 
       {
-        os <<  (int)(*i)->bndtype () << whiteSpace ;
+        const int bndtype = (int)(*i)->bndtype ();
+        // write negative bnd value in case of exterior bnd
+        if( bndtype != hbndseg_STI::closure ) 
+          os << -bndtype << ws ;
         for (int j = 0; j < 3; ++ j ) 
         {
-          os << (*i)->myvertex (0,j)->ident() << whiteSpace ;
+          os << (*i)->myvertex (0,j)->ident() << ws ;
         }
         os << (*i)->myvertex (0,3)->ident() << std::endl ;
       }
@@ -824,18 +822,18 @@ namespace ALUGrid
       {
         for (int j = 0; j < 3; ++ j ) 
         {
-          os << (*i)->myvertex (j)->ident() << whiteSpace ;
+          os << (*i)->myvertex (j)->ident() << ws ;
         }
         os << (*i)->myvertex (3)->ident() << std::endl ;
       }
 
-      os << int(_periodic3List.size ()) << whiteSpace << int(_hbndseg3List.size ()) << std::endl;
+      os << int(_periodic3List.size ()) << ws << int(_hbndseg3List.size ()) << std::endl;
       const periodic3list_t::const_iterator pend = _periodic3List.end ();
       for (periodic3list_t::const_iterator i = _periodic3List.begin (); i != pend; ++i ) 
       {
         for (int j = 0; j < 5; ++j ) 
         {
-          os << (*i)->myvertex (j)->ident() << whiteSpace ;
+          os << (*i)->myvertex (j)->ident() << ws ;
         }
         os << (*i)->myvertex (5)->ident() << std::endl;
       }
@@ -843,14 +841,92 @@ namespace ALUGrid
       const hbndseg3list_t::const_iterator hend = _hbndseg3List.end ();
       for (hbndseg3list_t::const_iterator i = _hbndseg3List.begin (); i != hend; ++i) 
       {
-        os << (int)(*i)->bndtype () << whiteSpace ;
+        const int bndtype = (int)(*i)->bndtype ();
+        // write negative bnd value in case of exterior bnd
+        if( bndtype != hbndseg_STI::closure ) 
+          os << -bndtype << ws ;
         for( int j = 0; j < 2; ++ j ) 
         {
-          os << (*i)->myvertex(0,j)->ident() << whiteSpace ;
+          os << (*i)->myvertex(0,j)->ident() << ws ;
         }
         os << (*i)->myvertex (0,2)->ident() << std::endl ;
       }
     }
+
+    // backup linkage (for parallel backup/restore)
+    linkagePatternMap_t& linkagePattern = const_cast< BuilderIF * > (this)->indexManagerStorage().linkagePatterns();
+    // write size of pattern, 0 == no patterns 
+    // the null patterns is always there
+    const int linkPatternSize = linkagePattern.size()-1;
+    os << linkPatternSize << std::endl;
+    if( linkPatternSize > 0 ) 
+    {
+      std::vector< int > refCount( linkPatternSize+1, -1 );
+      typedef linkagePatternMap_t :: iterator iterator ;
+      int idx = 0;
+      const iterator endL = linkagePattern.end();
+      for( iterator it = linkagePattern.begin(); it != endL; ++it, ++idx ) 
+      {
+        // save ref count 
+        refCount[ idx ] = (*it).second ;
+        // overwrite ref count with position 
+        (*it).second = idx ;
+
+        // store linkage to backup stream 
+        const std::vector<int>& linkage = (*it).first ;
+        const int linkageSize = linkage.size();
+        // the null pattern should be the first entry 
+        alugrid_assert( linkageSize == 0 ? idx == 0 : true );
+        if( linkageSize > 0 ) 
+        {
+          os << linkageSize << ws;
+          for( int i=0; i<linkageSize; ++i ) 
+            os << linkage[ i ] << ws; 
+          os << std::endl;
+        }
+      }
+
+
+      vertexlist_t::const_iterator i = _vertexList.begin ();
+      const int hasElementLinkage = (i != _vertexList.end() ) ? ! (*i)->linkedElements().inactive() : 0;
+
+      // write flag for stored element linkage
+      os << hasElementLinkage << std::endl;
+
+      idx = 0 ;
+      // store position of vertex linkage in the map if vertex is border vertex
+      const vertexlist_t::const_iterator end = _vertexList.end ();
+      for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i, ++idx) 
+      {
+        vertex_GEO* vertex = (*i);
+        // linkage info is only needed for border vertices
+        if( vertex->isBorder() ) 
+        {
+          os << idx << ws << vertex->linkagePosition(); 
+          // the methods linkedElements and linkagePosition will fail for serial vertices 
+          // but for these isBorder should be false anyway
+          if( hasElementLinkage ) 
+          {
+            typedef vertex_GEO :: ElementLinkage_t ElementLinkage_t;
+            const ElementLinkage_t& linkedElements = vertex->linkedElements();
+            const int size = linkedElements.size();
+            os << ws << size ; 
+            for( int k=0; k<size; ++k ) 
+              os << ws << linkedElements[ k ];
+          }
+          os << std::endl;
+        }
+      }
+      os << int(-1) << std::endl; // end marker for vertex position list
+
+      // restore refcount 
+      idx = 0;
+      for( iterator it = linkagePattern.begin(); it != endL; ++it, ++idx ) 
+      {
+        // restore ref count to map entry
+        (*it).second = refCount[ idx ] ;
+      }
+    } // end linkage backup
   }
 
   void Gitter::Geometric::BuilderIF::backup (const char * filePath, const char * fileName) const 
