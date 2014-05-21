@@ -46,8 +46,6 @@ namespace Dune
     {}
         
   public:
-    typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
-  
     //! return hierarchic index of given entity
     template< int codim >
     int index ( const typename GridType::Traits::template Codim< codim >::Entity &entity ) const
@@ -62,10 +60,18 @@ namespace Dune
       return GridType::getRealImplementation( entity ).getIndex();
     }
 
-    //! return subIndex of given entity for codim sub entity 
-    int subIndex ( const EntityCodim0Type &e, int i, unsigned int codim ) const
+    //! return subIndex of given entity
+    template< class Entity >
+    int subIndex ( const Entity &entity, int i, unsigned int codim ) const
     {
-      return grid_.getRealImplementation( e ).subIndex( i, codim);
+      return subIndex< Entity::codimension >( entity, i, codim );
+    }
+
+    //! return subIndex of given entity
+    template< int cd >
+    int subIndex ( const typename GridType::Traits::template Codim< cd >::Entity &entity, int i, unsigned int codim ) const
+    {
+      return GridType::getRealImplementation( entity ).subIndex( i, codim );
     }
 
     //! return size of indexset, i.e. maxindex+1
@@ -120,7 +126,6 @@ namespace Dune
 
     // this means that only up to 300000000 entities are allowed 
     enum { codimMultiplier = 300000000 };
-    typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
  
     // create local id set , only for the grid allowed 
     ALU2dGridLocalIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet()) 
@@ -135,10 +140,6 @@ namespace Dune
   public:
     //! export type of id 
     typedef int IdType;
-
-    //! import default implementation of subId<cc>
-    //! \todo remove after next release
-    using IdSet < GridType , ALU2dGridLocalIdSet, IdType > :: subId;
 
     //! return global id of given entity
     template <class EntityType>
@@ -159,10 +160,18 @@ namespace Dune
     }
 
     //! return subId of given entity
-    int subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
+    template< class Entity >
+    IdType subId ( const Entity &e, int i, unsigned int codim ) const
     {
-      alugrid_assert ( hset_.size( codim ) < codimMultiplier );
-      return codimStart_[ codim ] + hset_.subIndex( e, i, codim );
+      return subId< Entity::codimension >( e, i, codim );
+    }
+
+    //! return subId of given entity
+    template< int cd >
+    IdType subId ( const typename GridType::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
+    {
+      assert( hset_.size( codim ) < codimMultiplier );
+      return codim*codimMultiplier + hset_.subIndex( e, i, codim );
     }
 
   private:

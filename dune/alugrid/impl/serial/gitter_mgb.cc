@@ -804,6 +804,19 @@ namespace ALUGrid
     return;
   }
 
+  void MacroGridBuilder::
+  computeVertexElementLinkage( elementMap_t& elementMap, 
+                               Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage ) 
+  {
+    typedef elementMap_t::iterator  iterator;
+    const iterator elementMapEnd = elementMap.end();
+    for (iterator i = elementMap.begin (); i != elementMapEnd; ++i )
+    {
+      Gitter::helement_STI* elem = (Gitter::helement_STI*) (*i).second;
+      elem->computeVertexLinkage( vxElemLinkage ); 
+    }
+  }
+
   template <class stream_t>
   void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type )
   {
@@ -873,15 +886,28 @@ namespace ALUGrid
       for( int i=0; i<nb ; ++i )
       {
         in >> bt ;
-        if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+        int k = 0 ; 
+        if( bt < 0 ) // exterior bnd 
         {
-          std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
-          abort();
+          bt = -bt; // use positive value 
+          if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+          {
+            std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
+            abort();
+          }
         }
-        for( int k=0; k<4; ++k ) 
+        else // interior parallel bnd
+        {
+          v[ k++ ] = bt ;
+          bt = Gitter::hbndseg_STI::closure ;
+        }
+
+        // read remaining vertices 
+        for( ; k<4; ++k ) 
         {
           in >> v[ k ];
         }
+        // insert bnd object
         InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t(bt));
       }
     }
@@ -902,16 +928,138 @@ namespace ALUGrid
       for( int i=0; i<nb ; ++i )
       {
         in >> bt ;
-        if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+        int k = 0 ;
+
+        if( bt < 0 ) // exterior bnd 
         {
-          std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
-          abort();
+          bt = -bt; // use positive value 
+          if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
+          {
+            std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
+            abort();
+          }
         }
-        for( int k=0; k<3; ++k ) 
+        else // interior parallel bnd
+        {
+          v[ k++ ] = bt ;
+          bt = Gitter::hbndseg_STI::closure ;
+        }
+
+        // read remaining vertices
+        for( ; k<3; ++k ) 
         {
           in >> v[ k ];
         }
+        // insert bnd object
         InsertUniqueHbnd3 (v,Gitter::hbndseg::bnd_t(bt));
+      }
+    }
+
+    int linkagePatternSize ;
+    in >> linkagePatternSize ;
+
+    // if linkage was writte, restore vertex linkage
+    if( linkagePatternSize > 0 ) 
+    {
+      ++linkagePatternSize ; // include null pattern (which is the first entry)
+
+      // make linkage as computed (to avoid costly rebuild)
+      myBuilder().linkageComputed();
+
+      // read linkage combinations 
+      std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
+      // don't read null pattern (i=1)
+      for( int i=1; i<linkagePatternSize; ++i )
+      {
+        int n;
+        in >> n; 
+        if( n ) 
+        {
+          linkagePattern_t& pattern = patterns[ i ];
+          pattern.resize( n );
+          for( int k=0; k<n; ++k )
+          {
+            int rank ;
+            in >> rank ;
+            pattern[ k ] = rank ;
+          }
+        }
+      }
+
+      int hasElementLink = 0 ;
+      in >> hasElementLink ; 
+      const bool hasElementLinkage = (hasElementLink == 1);
+
+      typedef Gitter :: ElementPllXIF :: vertexelementlinkage_t vertexelementlinkage_t;
+      vertexelementlinkage_t vxElemLinkage ;
+
+      if( hasElementLinkage ) 
+      {
+        // compuate vertex-element linkage for hexas and tetras
+        computeVertexElementLinkage( _hexaMap,  vxElemLinkage );
+        computeVertexElementLinkage( _tetraMap, vxElemLinkage );
+
+        // mark element linkage as computed (if available)
+        myBuilder().notifyVertexElementLinkageComputed();
+      }
+
+      int idx = 0;
+      // read position in linkage vector 
+      int vxId; 
+      in >> vxId; 
+      // set vertex linkage according to stores position 
+      const vertexMap_t::iterator end = _vertexMap.end ();
+      vertexMap_t::iterator i = _vertexMap.begin ();
+      while( vxId != -1 ) 
+      {
+        // advance iterator until pos is reached
+        while( idx != vxId )
+        {
+          ++i; 
+          ++idx ;
+        }
+
+        int pos;
+        in >> pos;
+        alugrid_assert( pos < int(patterns.size()) );
+
+        // vertex pointer 
+        Gitter::vertex_STI* vertex = (*i).second; 
+
+        if( hasElementLinkage ) 
+        {
+          std::set<int> elements; 
+          int size ;
+          in >> size; 
+          for( int k=0; k<size; ++k ) 
+          {
+            int el;
+            in >> el;
+            elements.insert( el );
+          }
+          vertex->insertLinkedElements( elements );
+
+          // erase computed linkage to avoid reinsertion 
+          vxElemLinkage.erase( vertex );
+        }
+
+        // set vertex linkage if not nullPattern
+        if( patterns[ pos ].size() )
+          vertex->setLinkageSorted( patterns[ pos ] );
+
+        // read position in linkage vector 
+        in >> vxId; 
+      } // end while( vxId != -1 )
+
+      if( hasElementLinkage ) 
+      {
+        // insert vertex-element linkage for remaining vertices (interior)
+        typedef vertexelementlinkage_t :: iterator iterator ;
+        const iterator end = vxElemLinkage.end(); 
+        for( iterator i = vxElemLinkage.begin(); i != end; ++ i ) 
+        {
+          (*i).first->insertLinkedElements( (*i).second );
+        }
       }
     }
 

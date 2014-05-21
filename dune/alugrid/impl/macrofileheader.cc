@@ -134,7 +134,15 @@ namespace ALUGrid
 
     MacroFileHeader header;
 
-    std::map< std::string, std::string >::const_iterator pos = options.find( "type" );
+    std::map< std::string, std::string >::const_iterator pos = options.find( "version" );
+    if( pos == options.end() )
+      return fail( verbose, "Option 'version' missing." );
+    if( !parseValue( pos->second, header.version_ ) )
+      return fail( verbose, "Invalid 'version': '" + pos->second + "'." );
+    if( header.version() > currentVersion )
+      return fail( verbose, "File version too recent (" + pos->second + ")." );
+
+    pos = options.find( "type" );
     if( pos == options.end() )
       return fail( verbose, "Option 'type' missing." );
     if( !header.setType( pos->second ) )
@@ -177,6 +185,7 @@ namespace ALUGrid
   void MacroFileHeader::write ( std::ostream &out ) const
   {
     out << "!ALU";
+    out << " version=" << version_;
     out << " type=" << toString( type() );
     out << " format=" << toString( format() );
 
@@ -189,6 +198,8 @@ namespace ALUGrid
     out << std::endl;
   }
 
+
+  const int MacroFileHeader::currentVersion;
 
   const char *MacroFileHeader::stringType[ 2 ] = { "tetrahedra", "hexahedra" };
   const char *MacroFileHeader::stringFormat[ 3 ] = { "ascii", "binary", "zbinary" };

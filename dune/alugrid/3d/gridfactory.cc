@@ -338,11 +338,15 @@ namespace Dune
       for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
       {
         const std::pair< FaceType, int > &boundaryId = *it;
-        out << boundaryId.second;
+        out << -boundaryId.second;
         for( unsigned int i = 0; i < numFaceCorners; ++i )
           out << " " << boundaryId.first[ i ];
         out << std::endl;
       }
+
+      // no linkage 
+      out << int(0) << std::endl; 
+
       out.close();
     }
 

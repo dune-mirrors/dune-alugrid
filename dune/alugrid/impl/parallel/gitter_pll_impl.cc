@@ -175,21 +175,24 @@ namespace ALUGrid
   {
     int elSize;
     os.readObject( elSize );
-    if( _elements.inactive() ) 
+    if( elSize > 0 ) 
     {
-      std::vector< int > elements( elSize ) ;
-      for( int el=0; el<elSize; ++el )
+      if( _elements.inactive() )
       {
-        os.readObject( elements[ el ] );
+        std::vector< int > elements( elSize ) ;
+        for( int el=0; el<elSize; ++el )
+        {
+          os.readObject( elements[ el ] );
+        }
+        _elements.insertElementLinkage( elements );
       }
-      _elements.insertElementLinkage( elements );
-    }
-    else 
-    {
-      alugrid_assert( elSize == _elements.size() );
-      // advance buffer by elsize * sizeof( int ) bytes 
-      os.removeObject( elSize * sizeof( int ) );
-    }
+      else 
+      {
+        alugrid_assert( elSize == _elements.size() );
+        // advance buffer by elsize * sizeof( int ) bytes 
+        os.removeObject( elSize * sizeof( int ) );
+      }
+    } // end elSize > 0
 
     if (i) 
     {

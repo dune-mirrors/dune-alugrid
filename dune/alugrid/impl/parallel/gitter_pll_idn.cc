@@ -350,7 +350,7 @@ namespace ALUGrid
   public: 
     UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, 
                          const int me,
-                         const bool storeLinkageInVertices ) 
+                         const bool storeLinkageInVertices )
       : _vxmap(),
         _vxElemLinkage(),
         _containerPll( containerPll ),
@@ -379,6 +379,9 @@ namespace ALUGrid
           vertex_STI& vertex = w.item();
           vertex.insertLinkedElements( _vxElemLinkage[ &vertex ] );
         }
+
+        // mark vertex-element linkage as computed 
+        _containerPll.notifyVertexElementLinkageComputed();
       }
     }
 
@@ -785,9 +788,64 @@ namespace ALUGrid
   double identU3 = 0.0 ;
   double identU4 = 0.0 ;
 
+  class VertexLinkage
+  {
+    typedef Gitter :: vertex_STI vertex_STI ;
+    const LoadBalancer::DataBase& _db;
+    std::vector< int > _linkage;
+    const int _me ;
+    const bool _computeVertexLinkage;
+  public:
+    VertexLinkage( const int me, 
+                   const LoadBalancer::DataBase& db, 
+                   const bool computeVertexLinkage )
+      : _db( db ),
+        _linkage(),
+        _me( me ),
+        _computeVertexLinkage( computeVertexLinkage )
+    {}
+
+    void compute( vertex_STI& vertex ) 
+    {
+      // clear existing vertex linkage 
+      vertex.clearLinkage();
+
+      if( vertex.isBorder() && _computeVertexLinkage )
+      {
+        typedef vertex_STI :: ElementLinkage_t ElementLinkage_t ;
+        const ElementLinkage_t& linkedElements = vertex.linkedElements();
+        const int elSize = linkedElements.size() ;
+        std::set< int > linkage; 
+        for( int i=0; i<elSize; ++ i )
+        {
+          const int dest = _db.destination( linkedElements[ i ] ) ;
+          assert( dest >= 0 );
+          if( dest != _me )
+          {
+            linkage.insert( dest );
+          }
+        }
+
+        // clear current linkage
+        _linkage.clear();
+        _linkage.reserve( elSize ); 
+
+        typedef std::set< int >::iterator iterator ;
+        const iterator end = linkage.end();
+        // create sorted vector containing each entry only once
+        for( iterator it = linkage.begin(); it != end; ++ it )
+          _linkage.push_back( *it );
+
+        // set linkage 
+        vertex.setLinkageSorted( _linkage );
+      }
+    }
+  };
+
+
   void GitterPll::MacroGitterPll::
   identification (MpAccessLocal & mpa, 
-                  const bool computeVertexLinkage, 
+                  LoadBalancer::DataBase* db,
                   const bool storeLinkageInVertices ) 
   {
     // clear all entries and also clear memory be reassigning 
@@ -805,13 +863,35 @@ namespace ALUGrid
 
     clock_t lap1 = clock ();
     // this does not have to be computed every time (depending on partitioning method)
-    if( computeVertexLinkage ) 
+    if( computeLinkage() )
     {
       // clear linkage pattern map since it is newly build here
       clearLinkagePattern();
 
-      // compute new vertex linkage (does not mean we store the linkage)
-      vertexLinkageEstimate ( mpa, storeLinkageInVertices );
+      // if db was passed vertex linkage can be computed without communication
+      // if the vertex-element linkage has already been computed 
+      if( db && vertexElementLinkageComputed() ) 
+      {
+        // vertex linkage compute object (see above)
+        VertexLinkage vxLinkage( mpa.myrank(), *db, true );
+
+        AccessIterator < Gitter :: vertex_STI >::Handle w ( *this );
+        // set ldb vertex indices to all elements 
+        for (w.first (); ! w.done (); w.next () )
+        {
+          // compute vertex linkage for given vertex (clear linkage in any case)
+          vxLinkage.compute( w.item() );
+        }
+      }
+      else
+      {
+        // compute new vertex linkage (does not mean we store the linkage)
+        vertexLinkageEstimate ( mpa, storeLinkageInVertices );
+      }
+
+      notifyLinkageChange ();
+      // mark linkage as computed 
+      // linkageComputed() ;
     }
 
     clock_t lap2 = clock ();
@@ -850,6 +930,7 @@ namespace ALUGrid
       std::cout << u2 << " " << u3 << " " << u4 << " sec." << std::endl;
     }
 
+    /*
     if (debugOption (1)) 
     {
       const double nlinks = mpa.nlinks();
@@ -863,6 +944,7 @@ namespace ALUGrid
         std::cout << uMax[ 0 ] << " " << uMax[ 1 ] << " " << uMax[ 2 ] << " sec." << std::endl;
       }
     }
+    */
   }
 
 } // namespace ALUGrid

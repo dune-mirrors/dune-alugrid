@@ -784,7 +784,6 @@ namespace ALUGrid
           // post receive if in symmetric mode
           assert( _recvRequest );
           assert( &_recvRequest[ link ] );
-          std::cout << "Post receive" << std::endl;
           postReceive( recvSource[ link ], _tag, bufferSize, osRecv[ link ], _recvRequest[ link ], comm );
         }
       }
