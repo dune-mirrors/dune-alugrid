@@ -1,7 +1,7 @@
 libalugrid_2d_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/impl/2d/grid.cc \
 	$(top_srcdir)/dune/alugrid/impl/2d/handle.cc \
-	$(top_srcdir)/dune/alugrid/impl/2d/hdlrw.cc \
+	$(top_srcdir)/dune/alugrid/impl/2d/hdlrw.h \
 	$(top_srcdir)/dune/alugrid/impl/2d/mknbrs.cc \
 	$(top_srcdir)/dune/alugrid/impl/2d/triang.cc \
 	$(top_srcdir)/dune/alugrid/impl/2d/vmmap.cc \
