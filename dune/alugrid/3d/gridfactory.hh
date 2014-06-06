@@ -379,6 +379,7 @@ namespace Dune
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
+    foundGlobalIndex_( false ),
     communicator_( communicator )
   {}
 
