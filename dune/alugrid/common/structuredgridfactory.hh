@@ -375,7 +375,7 @@ namespace Dune
             EntityPointer outside = intersection.outside();
             if( partitioner.rank( *outside ) != myrank ) 
             {
-              factory.insertProcessBorder( elIndex, face );
+              // factory.insertProcessBorder( elIndex, face );
             }
           }
         }
