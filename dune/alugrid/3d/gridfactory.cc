@@ -267,9 +267,8 @@ namespace Dune
 
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
-    if( 1 || addMissingBoundaries || ! faceTransformations_.empty() )
+    if( addMissingBoundaries || ! faceTransformations_.empty() )
     {
-      std::cout << "calling recreateBoundaryIds in dune/alugrid/3d/gridfactory.cc" << std::endl;
       recreateBoundaryIds();
     }
 
@@ -738,24 +737,28 @@ namespace Dune
       faceMap.erase( pos );
     }
 
-#if 1
     // communicate unidentified boundaries and find process borders)
 
     typedef MPIHelper::MPICommunicator MPICommunicator;
     CollectiveCommunication< MPICommunicator > comm( Dune::MPIHelper::getCommunicator() );
 
-    std::cout << "[" << comm.rank() << "]:" 
-              << "in recreateBoundaryIds (dune/alugrid/3d/gridfactory.cc) new part" << std::endl;
-
     int numBoundariesMine = faceMap.size();
     std::vector< unsigned int > boundariesMine( numFaceCorners * numBoundariesMine );
+    typedef std::map< FaceType, FaceType, FaceLess > GlobalToLocalFaceMap;
+    GlobalToLocalFaceMap globalFaceMap;
     {
       const FaceIterator faceEnd = faceMap.end();
       int idx = 0;
       for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
       {
+        FaceType key;
         for( unsigned int i = 0; i < numFaceCorners; ++i )
-          boundariesMine[ idx++ ] = faceIt->first[ i ];
+          key[ i ] = vertices_[ faceIt->first[ i ] ].second;
+        std::sort( key.begin(), key.end() );
+        globalFaceMap.insert( std::make_pair(key, faceIt->first) );
+        
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
+          boundariesMine[ idx++ ] = key[ i ];
       }
     }
 
@@ -772,9 +775,6 @@ namespace Dune
     comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
                      boundariesEach.data(), 
                      numBoundariesEach.data(), displacements.data() );
-                     // &displacements[ comm.size() ], displacements.data() );
-    std::cout << "[" << comm.rank() << "]:" 
-              << "in recreateBoundaryIds (dune/alugrid/3d/gridfactory.cc) passed allgatherv" << std::endl;
 
     for( int p = 0; p < comm.size(); ++p )
     {
@@ -787,15 +787,16 @@ namespace Dune
         for( unsigned int i = 0; i < numFaceCorners; ++i )
           key[ i ] = boundariesEach[ idx + i ];
 
-        const FaceIterator pos = faceMap.find( key );
-        if( pos != faceMap.end() )
+        const typename GlobalToLocalFaceMap :: const_iterator pos_gl = globalFaceMap.find( key );
+        if( pos_gl != globalFaceMap.end() )
         {
+          const FaceIterator pos = faceMap.find( pos_gl->second );
+          assert( pos != faceMap.end() );
           reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
           faceMap.erase( pos );
         }
       }
     }
-#endif
 
     // add all new boundaries (with defaultId)
     const FaceIterator faceEnd = faceMap.end();

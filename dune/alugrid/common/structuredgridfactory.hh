@@ -370,6 +370,7 @@ namespace Dune
           if( intersection.boundary() )
             factory.insertBoundary( elIndex, face, intersection.boundaryId() );
           // insert process boundary in case the neighboring element has a different rank
+#if 0 // later enable again to quicken grid creation?
           if( intersection.neighbor() ) 
           {
             EntityPointer outside = intersection.outside();
@@ -378,6 +379,7 @@ namespace Dune
               // factory.insertProcessBorder( elIndex, face );
             }
           }
+#endif
         }
         ++elIndex;
       }
