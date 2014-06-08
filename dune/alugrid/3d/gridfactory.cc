@@ -791,9 +791,16 @@ namespace Dune
         if( pos_gl != globalFaceMap.end() )
         {
           const FaceIterator pos = faceMap.find( pos_gl->second );
-          assert( pos != faceMap.end() );
-          reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
-          faceMap.erase( pos );
+          if ( pos != faceMap.end() )
+          {
+            reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
+            faceMap.erase( pos );
+          }
+          else 
+          {
+            // should never get here but does when this method is called to
+            // construct the "reference" elements for alu
+          }
         }
       }
     }
