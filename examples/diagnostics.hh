@@ -5,7 +5,7 @@
 
 #include "threadmanager.hh"
 
-#undef PRINT_IDENTIFICATION_TIMES
+#define PRINT_IDENTIFICATION_TIMES
 
 #ifdef PRINT_IDENTIFICATION_TIMES 
 namespace ALUGrid { 
