@@ -268,9 +268,7 @@ namespace Dune
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
     if( addMissingBoundaries || ! faceTransformations_.empty() )
-    {
       recreateBoundaryIds();
-    }
 
     // if dump file should be written 
     if( allowGridGeneration_ && !temporary )
@@ -771,6 +769,10 @@ namespace Dune
       numBoundariesEach[ p ] *= numFaceCorners;
       displacements[ p+1 ] = displacements[ p ] + numBoundariesEach[ p ];
     }
+    // get out of here, if the face maps on all processors are empty (all boundaries have been inserted)
+    if (displacements[ comm.size() ] == 0)
+      return;
+      
     std::vector< unsigned int > boundariesEach( displacements[ comm.size() ] );
     comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
                      boundariesEach.data(), 
