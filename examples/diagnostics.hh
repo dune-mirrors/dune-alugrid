@@ -16,7 +16,6 @@ namespace ALUGrid {
   extern double ldbTimerU2;
   extern double ldbTimerU3;
   extern double ldbTimerU4;
-  extern double ldbTimerU5;
 }
 #endif
 
@@ -169,8 +168,6 @@ namespace Dune {
       times.push_back( ::ALUGrid::ldbTimerU3 );
       // identification 
       times.push_back( ::ALUGrid::ldbTimerU4 );
-      // notify macro change
-      times.push_back( ::ALUGrid::ldbTimerU5 );
 
       const int timerSize = times.size();
 
