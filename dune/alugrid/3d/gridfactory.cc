@@ -764,9 +764,15 @@ namespace Dune
 
     std::vector< int > displacements( comm.size()+1, 0 );
     for( int p = 0; p < comm.size(); ++p )
-      displacements[ p+1 ] = displacements[ p ] + numFaceCorners * numBoundariesEach[ p ];
+    {
+      numBoundariesEach[ p ] *= numFaceCorners;
+      displacements[ p+1 ] = displacements[ p ] + numBoundariesEach[ p ];
+    }
     std::vector< unsigned int > boundariesEach( displacements[ comm.size() ] );
-    comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, boundariesEach.data(), &displacements[ comm.size() ], displacements.data() );
+    comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
+                     boundariesEach.data(), 
+                     numBoundariesEach.data(), displacements.data() );
+                     // &displacements[ comm.size() ], displacements.data() );
     std::cout << "[" << comm.rank() << "]:" 
               << "in recreateBoundaryIds (dune/alugrid/3d/gridfactory.cc) passed allgatherv" << std::endl;
 
