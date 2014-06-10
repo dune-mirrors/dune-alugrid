@@ -228,7 +228,7 @@ inline double FiniteVolumeScheme< V, Model >
       }
     } // end all intersections            
 
-    // make entity as done 
+    // mark entity as done 
     update.visited( entity );
   } // end grid traversal                     
 
