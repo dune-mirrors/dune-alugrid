@@ -79,7 +79,7 @@ namespace Dune
 
     struct FaceLess;
 
-    typedef std::vector< std::pair< VertexType, size_t > > VertexVector;
+    typedef std::vector< std::pair< VertexType, VertexId > > VertexVector;
     typedef std::vector< ElementType > ElementVector;
     typedef std::pair< FaceType, int > BndPair ;
     typedef std::map< FaceType,  int > BoundaryIdMap;
@@ -130,8 +130,12 @@ namespace Dune
      */
     virtual void insertVertex ( const VertexType &pos );
 
-    // for testing parallel GridFactory
-    VertexId insertVertex ( const VertexType &pos, const size_t globalId );
+    /** \brief insert a vertex into the coarse grid including the vertex's globally unique id  
+     *  
+     *  \param[in]  pos       position of the vertex
+     *  \param[in]  globalId  globally unique id for vertex 
+     */
+    void insertVertex ( const VertexType &pos, const VertexId globalId );
 
     /** \brief insert an element into the coarse grid
      * 

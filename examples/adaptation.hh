@@ -16,124 +16,6 @@ static int adaptationSequenceNumber = 0;
 // interface class for callback adaptation 
 #include <dune/grid/common/adaptcallback.hh>
 
-// GridMarker
-// ----------
-
-/** \class GridMarker
- *  \brief class for marking entities for adaptation.
- *
- *  This class provides some additional strategies for marking elements
- *  which are not so much based on an indicator but more on mere
- *  geometrical and run time considerations. If based on some indicator
- *  an entity is to be marked, this class additionally tests for example
- *  that a maximal or minimal level will not be exceeded. 
- */
-template< class Grid >
-struct GridMarker 
-{
-  typedef typename Grid::template Codim< 0 >::Entity        Entity;
-  typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
-
-  /** \brief constructor
-   *  \param grid     the grid. Here we can not use a grid view since they only
-   *                  a constant reference to the grid and the
-   *                  mark method can not be called.
-   *  \param minLevel the minimum refinement level
-   *  \param maxLevel the maximum refinement level
-   */
-  GridMarker( Grid &grid, int minLevel, int maxLevel )
-  : grid_(grid),
-    minLevel_( minLevel ),
-    maxLevel_( maxLevel ),
-    wasMarked_( 0 ),
-    adaptive_( maxLevel_ > minLevel_ ) 
-  {}
-
-  /** \brief mark an element for refinement 
-   *  \param entity  the entity to mark; it will only be marked if its level is below maxLevel.
-   */
-  void refine ( const Entity &entity )
-  {
-    if( entity.level() < maxLevel_ )
-    {
-      grid_.mark( 1, entity );
-      wasMarked_ = 1;
-    }
-  }
-
-  /** \brief mark all neighbors of a given entity for refinement 
-   *  \param gridView the grid view from which to take the intersection iterator 
-   *  \param entity the corresponding entity
-   */
-  template< class GridView >
-  void refineNeighbors ( const GridView &gridView, const Entity &entity )
-  {
-    return ;
-    typedef typename GridView::IntersectionIterator IntersectionIterator;
-    typedef typename IntersectionIterator::Intersection Intersection;
-
-    const IntersectionIterator end = gridView.iend( entity );
-    for( IntersectionIterator it = gridView.ibegin( entity ); it != end; ++it )
-    {
-      const Intersection &intersection = *it;
-      if( intersection.neighbor() )
-      {
-        EntityPointer ep = intersection.outside() ;
-        const Entity& outside = *ep;
-        refine( outside );
-      }
-    }
-  }
-
-  /** \brief mark an element for coarsening
-   *  \param entity  the entity to mark; it will only be marked if its level is above minLevel.
-   */
-  void coarsen ( const Entity &entity )
-  {
-    if( (get( entity ) <= 0) && (entity.level() > minLevel_) )
-    {
-      grid_.mark( -1, entity );
-      wasMarked_ = 1;
-    }
-  }
-
-  /** \brief get the refinement marker 
-   *  \param entity entity for which the marker is required
-   *  \return value of the marker
-   */
-  int get ( const Entity &entity ) const
-  {
-    if( adaptive_ ) 
-      return grid_.getMark( entity );
-    else
-    {
-      // return so that in scheme.mark we only count the elements
-      return 1;
-    }
-  }
-
-  /** \brief returns true if any entity was marked for refinement 
-   */
-  bool marked() 
-  {
-    if( adaptive_ ) 
-    {
-      wasMarked_ = grid_.comm().max (wasMarked_);
-      return (wasMarked_ != 0);
-    }
-    return false ;
-  }
-
-  void reset() { wasMarked_ = 0 ; }
-
-private:
-  Grid &grid_;
-  const int minLevel_;
-  const int maxLevel_;
-  int wasMarked_;
-  const bool adaptive_ ;
-};
-
 // LeafAdaptation
 // --------------
 
@@ -194,10 +76,8 @@ public:
                        adaptation. This class must conform with the
                        parameter class V in the DataMap class and additional
                        provide a resize and communicate method.
-      \param callback  true if callback adaptation is used, 
-                       otherwise generic adaptation is used
   **/
-  void operator() ( Vector &solution, const bool callback = true);
+  void operator() ( Vector &solution );
 
   //! return time spent for the last adapation in sec 
   double adaptationTime() const { return adaptTime_; }
@@ -206,28 +86,11 @@ public:
   //! return time spent for the last communication in sec
   double communicationTime() const { return commTime_; }
 
-  //--------------------------------------------------
-  //  Interface methods for callback adaptation
-  //--------------------------------------------------
-
   // this is called before the adaptation process starts 
   void preAdapt ( const unsigned int estimateAdditionalElements );
 
   // this is called before after the adaptation process is finished 
   void postAdapt ();
-
-  // called when children of father are going to vanish
-  void preCoarsening ( const Entity &father ) const
-  {
-    Vector::restrictLocal( father, container_ );
-  }
-
-  // called when children of father where newly created
-  void postRefinement ( const Entity &father ) const
-  {
-    container_.resize();
-    Vector::prolongLocal( father, container_ );
-  }
 
 private:
   /** \brief do restriction of data on leafs which might vanish
@@ -264,7 +127,7 @@ private:
 };
 
 template< class Grid, class Vector >
-inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution, const bool callback )
+inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
 {
   if (Dune :: Capabilities :: isCartesian<Grid> :: v)
     return;
@@ -279,47 +142,38 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution, const
   // reset timer 
   adaptTimer_.reset() ; 
 
-  // callback adaptation, see interface methods above 
-  if( callback ) 
+  // check if elements might be removed in next adaptation cycle 
+  const bool mightCoarsen = grid_.preAdapt();
+
+  // copy data to container 
+  preAdapt( 0 );
+
+  // if elements might be removed
+  if( mightCoarsen )
   {
-    grid_.adapt( *this );
+    // restrict data and save leaf level 
+    const LevelIterator end = grid_.template lend< 0, partition >( 0 );
+    for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
+      hierarchicRestrict( *it, container_ );
   }
-  // generic adaptation
-  else
+
+  // adapt grid, returns true if new elements were created 
+  const bool refined = grid_.adapt();
+
+  // interpolate all new cells to leaf level 
+  if( refined )
   {
-    // check if elements might be removed in next adaptation cycle 
-    const bool mightCoarsen = grid_.preAdapt();
-
-    // copy data to container 
-    preAdapt( 0 );
-
-    // if elements might be removed
-    if( mightCoarsen )
-    {
-      // restrict data and save leaf level 
-      const LevelIterator end = grid_.template lend< 0, partition >( 0 );
-      for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
-        hierarchicRestrict( *it, container_ );
-    }
-
-    // adapt grid, returns true if new elements were created 
-    const bool refined = grid_.adapt();
-
-    // interpolate all new cells to leaf level 
-    if( refined )
-    {
-      container_.resize();
-      const LevelIterator end = grid_.template lend< 0, partition >( 0 );
-      for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
-        hierarchicProlong( *it, container_ );
-    }
-
-    // copy data back to solution, load balance, and communication
-    postAdapt();
-
-    // reset adaptation information in grid
-    grid_.postAdapt();
+    container_.resize();
+    const LevelIterator end = grid_.template lend< 0, partition >( 0 );
+    for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
+      hierarchicProlong( *it, container_ );
   }
+
+  // copy data back to solution, load balance, and communication
+  postAdapt();
+
+  // reset adaptation information in grid
+  grid_.postAdapt();
 
   // increase adaptation secuence number 
   ++adaptationSequenceNumber;
