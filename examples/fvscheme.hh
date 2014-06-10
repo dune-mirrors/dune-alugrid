@@ -8,6 +8,100 @@
 
 #include "adaptation.hh"
 
+// GridMarker
+// ----------
+
+/** \class GridMarker
+ *  \brief class for marking entities for adaptation.
+ *
+ *  This class provides some additional strategies for marking elements
+ *  which are not so much based on an indicator but more on mere
+ *  geometrical and run time considerations. If based on some indicator
+ *  an entity is to be marked, this class additionally tests for example
+ *  that a maximal or minimal level will not be exceeded. 
+ */
+template< class Grid >
+struct GridMarker 
+{
+  typedef typename Grid::template Codim< 0 >::Entity        Entity;
+  typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
+
+  /** \brief constructor
+   *  \param grid     the grid. Here we can not use a grid view since they only
+   *                  a constant reference to the grid and the
+   *                  mark method can not be called.
+   *  \param minLevel the minimum refinement level
+   *  \param maxLevel the maximum refinement level
+   */
+  GridMarker( Grid &grid, int minLevel, int maxLevel )
+  : grid_(grid),
+    minLevel_( minLevel ),
+    maxLevel_( maxLevel ),
+    wasMarked_( 0 ),
+    adaptive_( maxLevel_ > minLevel_ ) 
+  {}
+
+  /** \brief mark an element for refinement 
+   *  \param entity  the entity to mark; it will only be marked if its level is below maxLevel.
+   */
+  void refine ( const Entity &entity )
+  {
+    if( entity.level() < maxLevel_ )
+    {
+      grid_.mark( 1, entity );
+      wasMarked_ = 1;
+    }
+  }
+
+  /** \brief mark an element for coarsening
+   *  \param entity  the entity to mark; it will only be marked if its level is above minLevel.
+   */
+  void coarsen ( const Entity &entity )
+  {
+    if( (get( entity ) <= 0) && (entity.level() > minLevel_) )
+    {
+      grid_.mark( -1, entity );
+      wasMarked_ = 1;
+    }
+  }
+
+  /** \brief get the refinement marker 
+   *  \param entity entity for which the marker is required
+   *  \return value of the marker
+   */
+  int get ( const Entity &entity ) const
+  {
+    if( adaptive_ ) 
+      return grid_.getMark( entity );
+    else
+    {
+      // return so that in scheme.mark we only count the elements
+      return 1;
+    }
+  }
+
+  /** \brief returns true if any entity was marked for refinement 
+   */
+  bool marked() 
+  {
+    if( adaptive_ ) 
+    {
+      wasMarked_ = grid_.comm().max (wasMarked_);
+      return (wasMarked_ != 0);
+    }
+    return false ;
+  }
+
+  void reset() { wasMarked_ = 0 ; }
+
+private:
+  Grid &grid_;
+  const int minLevel_;
+  const int maxLevel_;
+  int wasMarked_;
+  const bool adaptive_ ;
+};
+
 // FiniteVolumeScheme
 // ------------------
 /** \class FiniteVolumeScheme
@@ -302,8 +396,6 @@ inline size_t FiniteVolumeScheme< V, Model >
       if( localIndicator > model_.problem().refineTol() )
       {
         marker.refine( entity );
-        // might be a good idea to refine a slightly larger region
-        marker.refineNeighbors( gridView(), entity );
         // we can now continue with next entity
         break;
       }
