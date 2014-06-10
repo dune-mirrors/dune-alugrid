@@ -3,7 +3,7 @@
 
 #include <dune/common/timer.hh>        
 
-#include "threadmanager.hh"
+#include <dune/alugrid/impl/serial/myalloc.h>
 
 #define PRINT_IDENTIFICATION_TIMES
 
@@ -218,7 +218,7 @@ namespace Dune {
 
         if( comm_.rank() == 0 && timesteps_ > 0 ) 
         {
-          const int maxThreads = Fem :: ThreadManager :: maxThreads ();
+          const int maxThreads = 1; 
           const double tasks   = comm_.size() * maxThreads ;
 
           const double ts_1 = 1.0 / double( timesteps_ );
@@ -242,7 +242,7 @@ namespace Dune {
             file << "# Max DoFs (per element): " << maxDofs << std::endl;
             file << "# Elements / timestep: sum    max    min    average  " << std::endl;
             file << avgTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
-            file << "# SOLVE          COMM         ADAPT            LB         TIMESTEP     MEMORY (MB)" << std::endl ;
+            file << "# SOLVE          COMM         ADAPT            LB         TIMESTEP     ALUGrid-MEMORY (MB)" << std::endl ;
 
             // multiply avgTimes with maxThhreads since the sum would be to small otherwise 
             for(size_t i=0; i<size; ++i)
@@ -365,7 +365,7 @@ std::vector<double> getMemoryUsage()
 #if HAVE_ALUGRID && defined ALUGRID_USES_DLMALLOC 
   // dune-grid + alugrid version (1.52) with dlmalloc memory patch 
   memUsage.push_back(double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
-#else
+#else 
   // dune-alugrid version 
   memUsage.push_back(double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
 #endif
