@@ -732,6 +732,78 @@ namespace Dune
       faceMap.erase( pos );
     }
 
+    // communicate unidentified boundaries and find process borders)
+
+    typedef MPIHelper::MPICommunicator MPICommunicator;
+    CollectiveCommunication< MPICommunicator > comm( Dune::MPIHelper::getCommunicator() );
+
+    int numBoundariesMine = faceMap.size();
+    std::vector< unsigned int > boundariesMine( numFaceCorners * numBoundariesMine );
+    typedef std::map< FaceType, FaceType, FaceLess > GlobalToLocalFaceMap;
+    GlobalToLocalFaceMap globalFaceMap;
+    {
+      const FaceIterator faceEnd = faceMap.end();
+      int idx = 0;
+      for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
+      {
+        FaceType key;
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
+          key[ i ] = vertices_[ faceIt->first[ i ] ].second;
+        std::sort( key.begin(), key.end() );
+        globalFaceMap.insert( std::make_pair(key, faceIt->first) );
+        
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
+          boundariesMine[ idx++ ] = key[ i ];
+      }
+    }
+
+    std::vector< int > numBoundariesEach( comm.size(), 0 );
+    comm.allgather( &numBoundariesMine, 1, numBoundariesEach.data() );
+
+    std::vector< int > displacements( comm.size()+1, 0 );
+    for( int p = 0; p < comm.size(); ++p )
+    {
+      numBoundariesEach[ p ] *= numFaceCorners;
+      displacements[ p+1 ] = displacements[ p ] + numBoundariesEach[ p ];
+    }
+    // get out of here, if the face maps on all processors are empty (all boundaries have been inserted)
+    if (displacements[ comm.size() ] == 0)
+      return;
+      
+    std::vector< unsigned int > boundariesEach( displacements[ comm.size() ] );
+    comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
+                     boundariesEach.data(), 
+                     numBoundariesEach.data(), displacements.data() );
+
+    for( int p = 0; p < comm.size(); ++p )
+    {
+      if( p == comm.rank() )
+        continue;
+
+      for( int idx = displacements[ p ]; idx < displacements[ p+1 ]; idx += numFaceCorners )
+      {
+        FaceType key;
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
+          key[ i ] = boundariesEach[ idx + i ];
+
+        const typename GlobalToLocalFaceMap :: const_iterator pos_gl = globalFaceMap.find( key );
+        if( pos_gl != globalFaceMap.end() )
+        {
+          const FaceIterator pos = faceMap.find( pos_gl->second );
+          if ( pos != faceMap.end() )
+          {
+            reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
+            faceMap.erase( pos );
+          }
+          else 
+          {
+            // should never get here but does when this method is called to
+            // construct the "reference" elements for alu
+          }
+        }
+      }
+    }
+
     // add all new boundaries (with defaultId)
     const FaceIterator faceEnd = faceMap.end();
     for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )

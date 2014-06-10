@@ -483,6 +483,12 @@ namespace Dune
       {
         parallelFileExists = true;
         std::ifstream newfile(newfilename.c_str());
+        if ( !newfile )
+        {
+          std::cout << "prozess " << rank << " failed to open file " << newfilename << " ... abort" << std::endl;
+          DUNE_THROW( InvalidStateException, "parallel DGF file could not opend" );
+        }
+        assert( newfile );
         return generateALUGrid(eltype,newfile,communicator,filename);
       }
     }
