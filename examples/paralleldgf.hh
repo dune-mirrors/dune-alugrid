@@ -9,21 +9,23 @@
 namespace Dune 
 {
   template <class Grid> 
-  class CreateParallelGrid ;  
-
-  template < int dim, int dimworld, ALUGridElementType eltype, 
-             ALUGridRefinementType refineType, class Comm > 
-  class CreateParallelGrid< ALUGrid< dim, dimworld, eltype, refineType, Comm > >
+  struct CreateParallelGrid   
   {
-    typedef ALUGrid< dim, dimworld, eltype, refineType, Comm > Grid ;
+    static GridPtr< Grid > create( const std::string& filename ) 
+    {
+      std::cout << "Reading the grid onto a single processor" << std::endl;
+      return GridPtr< Grid >( filename );
+    }
+  };
+
+  template < int dim, int dimworld,  ALUGridRefinementType refineType, class Comm > 
+  class CreateParallelGrid< ALUGrid< dim, dimworld, Dune::cube, refineType, Comm > >
+  {
+    typedef ALUGrid< dim, dimworld, Dune::cube, refineType, Comm > Grid ;
 
   public:  
     static GridPtr< Grid > create( const std::string& filename ) 
     {
-      // this only works for Cartesian grid using DGF's IntervalBlock
-      if( eltype == simplex ) 
-        return GridPtr< Grid >( filename );
-
 #if ! HAVE_ALUGRID
       typedef StructuredGridFactory< Grid > SGF;
       return SGF :: createCubeGrid( filename );
