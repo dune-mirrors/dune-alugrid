@@ -330,6 +330,7 @@ namespace Dune
       const int numVertices = (1 << dim);
       const typename VertexMapType::iterator endVxMap = vertexId.end();
       const ElementIterator end = gridView.template end< 0 >();
+      VertexId localVertexId = 0 ;
       for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
       {
         const Entity &entity = *it;
@@ -339,11 +340,13 @@ namespace Dune
         alugrid_assert ( numVertices == entity.template count< dim >() );
         for( int i = 0; i < numVertices; ++i )
         {
-          const IndexType idx = indexSet.subIndex( entity, i, dim );
-          if( vertexId.find( idx ) == endVxMap ) 
+          const IndexType globalVertexId = indexSet.subIndex( entity, i, dim );
+          if( vertexId.find( globalVertexId ) == endVxMap ) 
           {
-             vertexId[ idx ] = 
-               factory.insertVertex( (*entity.template subEntity< dim > ( i )).geometry().center(), idx );
+            // insert vertex and global vertex id into factory 
+            factory.insertVertex( (*entity.template subEntity< dim > ( i )).geometry().center(), globalVertexId );
+            // store local vertex id for later insertion of elements 
+            vertexId[ globalVertexId ] = localVertexId ++ ;
           }
         }
       }
