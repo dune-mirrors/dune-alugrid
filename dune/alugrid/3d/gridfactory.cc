@@ -44,14 +44,11 @@ namespace Dune
 
 
   template< class ALUGrid >
-  alu_inline
-  typename ALU3dGridFactory< ALUGrid >::VertexId
-  ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexType &pos, const size_t globalId )
+  alu_inline 
+  void ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexType &pos, const VertexId globalId )
   {
     foundGlobalIndex_ = true ;
-    const VertexId vertexId = vertices_.size();
     vertices_.push_back( std::make_pair( pos, globalId ) );
-    return vertexId;
   }
 
   
