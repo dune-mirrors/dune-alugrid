@@ -16,7 +16,7 @@ examplesdir = $(includedir)/examples
 examples_HEADERS = \
   adaptation.hh        diagnostics.hh  piecewisefunction.hh  problem-euler.hh \
   problem-transport.hh datamap.hh      fvscheme.hh           problem-ball.hh \
-  problem.hh           threadmanager.hh paralleldgf.hh
+  problem.hh           paralleldgf.hh
 
 check_PROGRAMS = main_transport main_ball main_euler 
 
