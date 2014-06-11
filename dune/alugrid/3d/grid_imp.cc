@@ -407,25 +407,6 @@ namespace Dune
   }
 
 
-  template< ALU3dGridElementType elType, class Comm >
-  alu_inline 
-  const typename ALU3dGrid< elType, Comm >::Traits::LevelIndexSet &
-  ALU3dGrid< elType, Comm >::levelIndexSet ( int level ) const 
-  {
-    // check if level fits in vector  
-    alugrid_assert ( level >= 0 );
-    alugrid_assert ( level < (int) levelIndexVec_.size() );
-
-    if( levelIndexVec_[level] == 0 )
-      levelIndexVec_[level] = 
-        new LevelIndexSetImp ( *this, 
-                               this->template lbegin<0> (level), 
-                               this->template lend<0> (level), 
-                               level );
-    return *(levelIndexVec_[level]);
-  }
-
-
   // global refine 
   template< ALU3dGridElementType elType, class Comm >
   alu_inline 
