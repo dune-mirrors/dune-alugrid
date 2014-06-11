@@ -771,9 +771,21 @@ namespace Dune
       return;
       
     std::vector< unsigned int > boundariesEach( displacements[ comm.size() ] );
-    comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
-                     boundariesEach.data(), 
-                     numBoundariesEach.data(), displacements.data() );
+
+    // comm.allgatherv is only implemented in > 2.3.1
+//#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,3,1) 
+//    comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
+//                     boundariesEach.data(), 
+//                     numBoundariesEach.data(), displacements.data() );
+//#else 
+    {
+      int  sendlen = numFaceCorners * numBoundariesMine;
+      int *recvlen = numBoundariesEach.data(); 
+      MPI_Allgatherv(boundariesMine.data(), sendlen, MPITraits<unsigned int>::getType(),
+                     boundariesEach.data(), recvlen, displacements.data(), MPITraits<unsigned int>::getType(),
+                     comm );
+    }
+//#endif
 
     for( int p = 0; p < comm.size(); ++p )
     {
