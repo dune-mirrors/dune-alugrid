@@ -3,7 +3,7 @@ GRIDTYPE = ALUGRID_CUBE
 #GRIDTYPE = ALUGRID_CONFORM
 GRIDDIM = 3
 
-SUBDIRS = loadbalancing callback dgf
+SUBDIRS = loadbalance callback dgf
 
 EXTRA_DIST = alugrid.cfg 
 
