@@ -12,6 +12,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <dune/common/version.hh>
+
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
 
@@ -773,11 +775,11 @@ namespace Dune
     std::vector< unsigned int > boundariesEach( displacements[ comm.size() ] );
 
     // comm.allgatherv is only implemented in > 2.3.1
-//#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,3,1) 
-//    comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
-//                     boundariesEach.data(), 
-//                     numBoundariesEach.data(), displacements.data() );
-//#else 
+#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,3,0,0) 
+    comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
+                     boundariesEach.data(), 
+                     numBoundariesEach.data(), displacements.data() );
+#else 
     {
       int  sendlen = numFaceCorners * numBoundariesMine;
       int *recvlen = numBoundariesEach.data(); 
@@ -785,7 +787,7 @@ namespace Dune
                      boundariesEach.data(), recvlen, displacements.data(), MPITraits<unsigned int>::getType(),
                      comm );
     }
-//#endif
+#endif
 
     for( int p = 0; p < comm.size(); ++p )
     {
