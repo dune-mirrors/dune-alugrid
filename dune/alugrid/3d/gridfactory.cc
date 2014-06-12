@@ -767,6 +767,7 @@ namespace Dune
 #if HAVE_MPI
     // collect data from all processes 
     boundariesEach = ALU3DSPACE MpAccessMPI( comm ).gcollect( boundariesMine );
+    boundariesMine.clear();
 #endif
 
     for( int p = 0; p < comm.size(); ++p )
