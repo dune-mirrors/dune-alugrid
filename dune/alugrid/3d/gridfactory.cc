@@ -733,12 +733,11 @@ namespace Dune
     }
 
     // communicate unidentified boundaries and find process borders)
-
     typedef MPIHelper::MPICommunicator MPICommunicator;
     CollectiveCommunication< MPICommunicator > comm( Dune::MPIHelper::getCommunicator() );
 
     int numBoundariesMine = faceMap.size();
-    std::vector< unsigned int > boundariesMine( numFaceCorners * numBoundariesMine );
+    std::vector< int > boundariesMine( numFaceCorners * numBoundariesMine );
     typedef std::map< FaceType, FaceType, FaceLess > GlobalToLocalFaceMap;
     GlobalToLocalFaceMap globalFaceMap;
     {
@@ -757,52 +756,51 @@ namespace Dune
       }
     }
 
-    std::vector< int > numBoundariesEach( comm.size(), 0 );
-    comm.allgather( &numBoundariesMine, 1, numBoundariesEach.data() );
+    const int numBoundariesMax = comm.max( numBoundariesMine );
 
-    std::vector< int > displacements( comm.size()+1, 0 );
-    for( int p = 0; p < comm.size(); ++p )
-    {
-      numBoundariesEach[ p ] *= numFaceCorners;
-      displacements[ p+1 ] = displacements[ p ] + numBoundariesEach[ p ];
-    }
     // get out of here, if the face maps on all processors are empty (all boundaries have been inserted)
-    if (displacements[ comm.size() ] == 0)
-      return;
-      
-    std::vector< unsigned int > boundariesEach( displacements[ comm.size() ] );
-    comm.allgatherv( boundariesMine.data(), numFaceCorners * numBoundariesMine, 
-                     boundariesEach.data(), 
-                     numBoundariesEach.data(), displacements.data() );
+    if( numBoundariesMax == 0 ) return ;
+
+    // get internal boundaries from each process 
+    std::vector< std::vector< int > > boundariesEach;
+
+#if HAVE_MPI
+    // collect data from all processes 
+    boundariesEach = ALU3DSPACE MpAccessMPI( comm ).gcollect( boundariesMine );
+    boundariesMine.clear();
+#endif
 
     for( int p = 0; p < comm.size(); ++p )
     {
-      if( p == comm.rank() )
-        continue;
-
-      for( int idx = displacements[ p ]; idx < displacements[ p+1 ]; idx += numFaceCorners )
+      if( p != comm.rank() )
       {
-        FaceType key;
-        for( unsigned int i = 0; i < numFaceCorners; ++i )
-          key[ i ] = boundariesEach[ idx + i ];
-
-        const typename GlobalToLocalFaceMap :: const_iterator pos_gl = globalFaceMap.find( key );
-        if( pos_gl != globalFaceMap.end() )
+        const std::vector< int >& boundariesRank = boundariesEach[ p ];
+        const int bSize = boundariesRank.size();
+        for( int idx = 0; idx < bSize; idx += numFaceCorners )
         {
-          const FaceIterator pos = faceMap.find( pos_gl->second );
-          if ( pos != faceMap.end() )
+          FaceType key;
+          for( unsigned int i = 0; i < numFaceCorners; ++i )
+            key[ i ] = boundariesRank[ idx + i ];
+
+          const typename GlobalToLocalFaceMap :: const_iterator pos_gl = globalFaceMap.find( key );
+          if( pos_gl != globalFaceMap.end() )
           {
-            reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
-            faceMap.erase( pos );
-          }
-          else 
-          {
-            // should never get here but does when this method is called to
-            // construct the "reference" elements for alu
+            const FaceIterator pos = faceMap.find( pos_gl->second );
+            if ( pos != faceMap.end() )
+            {
+              reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
+              faceMap.erase( pos );
+            }
+            else 
+            {
+              // should never get here but does when this method is called to
+              // construct the "reference" elements for alu
+            }
           }
         }
       }
-    }
+      boundariesEach[ p ].clear();
+    } // end for all p 
 
     // add all new boundaries (with defaultId)
     const FaceIterator faceEnd = faceMap.end();

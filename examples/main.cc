@@ -66,7 +66,7 @@ void method ( int problem, int startLvl, int maxLvl,
 
   /* get view to leaf grid */
   typedef Grid::Partition< Dune::Interior_Partition >::LeafGridView GridView;
-  GridView gridView = grid.leafView< Dune::Interior_Partition >();
+  GridView gridView = grid.leafGridView< Dune::Interior_Partition >();
 
   /* construct data vector for solution */
   typedef PiecewiseFunction< GridView, Dune::FieldVector< double, ModelType::dimRange > > DataType;
