@@ -990,7 +990,7 @@ namespace ALUGrid
 
     // work that can be done between send and receive, 
     // such as the construction of the ParallelGridMover 
-    void meantimeWork () 
+    void localComputation () 
     {
       // create ParallelGridMover when all data was packed, otherwise the link packing
       // will fail since this will modify the macro grid, since the 
