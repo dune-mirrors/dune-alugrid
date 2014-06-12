@@ -626,10 +626,10 @@ namespace ALUGrid
     ~SendRecvElementRankInfo() 
     {
       // insert last received elements
-      meantimeWork();
+      localComputation();
     }
 
-    void meantimeWork() 
+    void localComputation() 
     {
       typedef elrankmap_t :: iterator iterator ;
       const iterator end = _globalMap.end();
