@@ -801,7 +801,7 @@ namespace ALUGrid
         receiveImpl( out );
 
         // do work that can be done between send and receive 
-        dataHandle.meantimeWork() ;
+        dataHandle.localComputation() ;
 
         for( int link=0; link<_recvLinks; ++link ) 
           dataHandle.unpack( link, out[ link ] );
@@ -809,7 +809,7 @@ namespace ALUGrid
       else 
       {
         // do work that can be done between send and receive 
-        dataHandle.meantimeWork() ;
+        dataHandle.localComputation() ;
 
         // create receive message buffers 
         std::vector< ObjectStream > out( 1 );

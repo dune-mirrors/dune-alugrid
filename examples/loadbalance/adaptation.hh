@@ -184,12 +184,15 @@ inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle >
   adaptTime_ = adaptTimer_.elapsed();
 
   Dune :: Timer lbTimer ;
+  DataHandle<Grid,Container> dataHandle( grid_, container_ ) ;
+#if USE_ZOLTANLB || USE_SIMPLELB
   if ( ldb_.repartition() )
   {
-    DataHandle<Grid,Container> dataHandle( grid_, container_ ) ;
     grid_.repartition( ldb_, dataHandle );
-    // grid_.loadBalance( dataHandle );
   }
+#else
+  grid_.loadBalance( dataHandle );
+#endif
   lbTime_ = lbTimer.elapsed();
 
   // reduce size of container, if possible 

@@ -29,7 +29,6 @@ AC_CONFIG_FILES([
   lib/Makefile
   m4/Makefile
   examples/Makefile
-  examples/callback/Makefile
   examples/dgf/Makefile
   examples/loadbalance/Makefile
   utils/Makefile
