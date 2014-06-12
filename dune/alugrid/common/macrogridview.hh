@@ -206,6 +206,11 @@ namespace Dune
       return entity.impl().macroId();
     }
     int
+    weight ( const typename Codim< 0 > :: Entity &entity ) const
+    {
+      return entity.impl().weight();
+    }
+    int
     weight ( const IntersectionIterator &intersectionIterator ) const // should perhaps be intersection but that class a default is used...
     {
       return intersectionIterator.impl().weight();
