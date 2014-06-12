@@ -765,10 +765,8 @@ namespace Dune
     std::vector< std::vector< int > > boundariesEach;
 
 #if HAVE_MPI
-    ALU3DSPACE MpAccessMPI mpa( comm );
-
     // collect data from all processes 
-    boundariesEach = mpa.gcollect( boundariesMine );
+    boundariesEach = ALU3DSPACE MpAccessMPI( comm ).gcollect( boundariesMine );
 #endif
 
     for( int p = 0; p < comm.size(); ++p )
