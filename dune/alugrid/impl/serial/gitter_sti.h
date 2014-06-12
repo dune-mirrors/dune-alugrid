@@ -1823,6 +1823,14 @@ namespace ALUGrid
         virtual grid_t type() const { return tetra; }
         virtual void attachleafs() { abort(); }
         virtual void detachleafs() { abort(); }
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const helement_STI, 
+                                            is_leaf < const helement_STI > > ( this ).size ();
+          return weight;
+        }
+
       private :
         int evalVertexTwist(int, int) const;
         int evalEdgeTwist(int, int) const;
@@ -1912,6 +1920,13 @@ namespace ALUGrid
 
         // return false for vertex projection  
         virtual bool hasVertexProjection() const { return false; }
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const helement_STI, 
+                                            is_leaf < const helement_STI > > ( this ).size ();
+          return weight;
+        }
       private :
         myhface_t * f [2];
         signed char s [2];
@@ -2019,6 +2034,13 @@ namespace ALUGrid
 
         virtual void attachleafs() { abort(); }
         virtual void detachleafs() { abort(); }
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const helement_STI, 
+                                            is_leaf < const helement_STI > > ( this ).size ();
+          return weight;
+        }
       private :
         // original formulas of twist evaluation 
         int originalVertexTwist(int, int) const;
@@ -2104,6 +2126,13 @@ namespace ALUGrid
 
         // returns false because only bnd segments have projections 
         virtual bool hasVertexProjection () const { return false; }
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const helement_STI, 
+                                            is_leaf < const helement_STI > > ( this ).size ();
+          return weight;
+        }
       private :
         myhface_t * f [2];
         signed char s [2];

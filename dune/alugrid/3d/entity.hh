@@ -437,6 +437,14 @@ public:
       return getItem().ldbVertexIndex();
   }
 
+  int weight() const
+  {
+    if (isGhost())
+      return 0; // getGhost().weight();
+    else
+      return getItem().weight();
+  }
+
   int master() const
   {
     if (isGhost())

@@ -34,16 +34,6 @@ public:
     angle_( 0 )
   {}
 
-  bool userDefinedPartitioning () const
-  {
-    return true;
-  }
-  // return true if user defined load balancing weights are provided
-  bool userDefinedLoadWeights () const
-  {
-    return false;
-  }
-
   // returns true if user defined partitioning needs to be readjusted 
   bool repartition () 
   { 
@@ -98,9 +88,9 @@ private:
     int numExport;      // Number of vertices I must send to other processes
     int numImport;      // Number of vertices I must send to other processes
     unsigned int *importLocalGids;  // Global IDs of the vertices I must send 
-    unsigned int *importGlobalGids;  // Global IDs of the vertices I must send 
+    unsigned int *importGlobalGids; // Global IDs of the vertices I must send 
     unsigned int *exportLocalGids;  // Global IDs of the vertices I must send 
-    unsigned int *exportGlobalGids;  // Global IDs of the vertices I must send 
+    unsigned int *exportGlobalGids; // Global IDs of the vertices I must send 
     int *importProcs;    // Process to which I send each of the vertices 
     int *exportProcs;    // Process to which I send each of the vertices 
     int *importToPart;
@@ -112,23 +102,33 @@ private:
     std::vector<int> fixed_Process;
     FixedElements() : fixed_GID(0), fixed_Process(0) {}
   };
-  struct HGraphData {      /* Zoltan will partition vertices, while minimizing edge cuts */
-    int numMyVertices;  /* number of vertices that I own initially */
+  struct HGraphData {              /* Zoltan will partition vertices, while minimizing edge cuts */
+    int numMyVertices;             /* number of vertices that I own initially */
     ZOLTAN_ID_TYPE *vtxGID;        /* global ID of these vertices */
-    int numMyHEdges;    /* number of my hyperedges */
-    int numAllNbors;    /* number of vertices in my hyperedges */
+    float *vtxWEIGHT;              /* weight for each node in the graph */
+    int numMyHEdges;               /* number of my hyperedges */
+    int numAllNbors;               /* number of vertices in my hyperedges */
     ZOLTAN_ID_TYPE *edgeGID;       /* global ID of each of my hyperedges */
-    int *nborIndex;     /* index into nborGID array of edge's vertices */
+    int *nborIndex;                /* index into nborGID array of edge's vertices */
     ZOLTAN_ID_TYPE *nborGID;       /* Vertices of edge edgeGID[i] begin at nborGID[nborIndex[i]] */
+    float *edgeWEIGHT;             /* weight for each edge in the hypergraph */
     FixedElements fixed_elmts;
-    HGraphData() : vtxGID(0), edgeGID(0), nborIndex(0), nborGID(0) {}
+    HGraphData() : vtxGID(0), vtxWEIGHT(0), edgeGID(0), nborIndex(0), nborGID(0), edgeWEIGHT(0) {}
     ~HGraphData() { freeMemory();}
     void freeMemory() 
     {
-      free(nborGID); 
-      free(nborIndex);
-      free(edgeGID);
-      free(vtxGID);
+      if (!edgeWEIGHT)
+        free(edgeWEIGHT);
+      if (!nborGID)
+        free(nborGID); 
+      if (!nborIndex)
+        free(nborIndex);
+      if (!edgeGID)
+        free(edgeGID);
+      if (!vtxWEIGHT)
+        free(vtxWEIGHT);
+      if (!vtxGID)
+        free(vtxGID);
     }
   };
 public:
@@ -217,6 +217,10 @@ private:
   static void get_hypergraph(void *data, int sizeGID, int num_edges, int num_nonzeroes,
                              int format, ZOLTAN_ID_PTR edgeGID, int *vtxPtr,
                              ZOLTAN_ID_PTR vtxGID, int *ierr);
+  static void get_hypergraph_edge_weights_size(void *data, int *num_edges, int *ierr);
+  static void get_hypergraph_edge_weights(void *data, int sizeGID, int sizeLID,
+                                          int num_edges, int edge_weight_dim, ZOLTAN_ID_PTR edgeGID,
+                                          ZOLTAN_ID_PTR edgeLID, float *edgeWeight, int *ierr);
   static int get_num_fixed_obj(void *data, int *ierr);
   static void get_fixed_obj_list(void *data, int num_fixed_obj,
                                  int num_gid_entries, ZOLTAN_ID_PTR fixed_gids, int *fixed_part, int *ierr);

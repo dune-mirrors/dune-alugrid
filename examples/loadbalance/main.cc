@@ -73,11 +73,18 @@ void method ( int problem, int startLvl, int maxLvl,
   /* create adaptation method */
 #if HAVE_ZOLTAN && USE_ZOLTANLB
   typedef ZoltanLoadBalanceHandle<Grid> LoadBalancer;
+  LoadBalancer ldb(grid);
 #else
   typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
-#endif
   LoadBalancer ldb(grid);
-  grid.repartition( ldb ); 
+#endif
+#if USE_ZOLTANLB || USE_SIMPLELB
+  if ( ldb.repartition() )
+    grid.repartition( ldb ); 
+#else
+  grid.loadBalance();
+#endif
+
   typedef LeafAdaptation< Grid, DataType, LoadBalancer > AdaptationType;
   AdaptationType adaptation( grid, ldb );
 
@@ -249,6 +256,16 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
+#if HAVE_ZOLTAN 
+  float version;
+  int rc = Zoltan_Initialize(argc, argv, &version);
+  if (rc != ZOLTAN_OK){
+    printf("sorry zoltan did not initialize successfully...\n");
+    MPI_Finalize();
+    exit(0);
+  }
+#endif
+
   if( argc < 2 )
   {
     /* display usage */
