@@ -9,14 +9,15 @@ ZoltanLoadBalanceHandle(const Grid &grid)
   zz_ = Zoltan_Create(MPI_COMM_WORLD);
 
   // General parameters
-  Zoltan_Set_Param(zz_, "DEBUG_LEVEL", "1");
+  Zoltan_Set_Param(zz_, "DEBUG_LEVEL", "0");
   Zoltan_Set_Param(zz_, "LB_METHOD", "HYPERGRAPH");   /* partitioning method */
   Zoltan_Set_Param(zz_, "HYPERGRAPH_PACKAGE", "PHG"); /* version of method */
   Zoltan_Set_Param(zz_, "NUM_GID_ENTRIES", "1");      /* global IDs are 1 integers */
   Zoltan_Set_Param(zz_, "NUM_LID_ENTRIES", "1");      /* local IDs are 1 integers */
   Zoltan_Set_Param(zz_, "RETURN_LISTS", "ALL");       /* export AND import lists */
-  Zoltan_Set_Param(zz_, "OBJ_WEIGHT_DIM", "0");       /* use Zoltan default vertex weights */
-  Zoltan_Set_Param(zz_, "EDGE_WEIGHT_DIM", "0");      /* use Zoltan default hyperedge weights */
+  Zoltan_Set_Param(zz_, "OBJ_WEIGHT_DIM", "1");       /* provide a weight for graph nodes */
+  Zoltan_Set_Param(zz_, "EDGE_WEIGHT_DIM", "1");      /* provide a weight for graph edge */a
+  Zoltan_Set_Param(zz_,"GRAPH_SYM_WEIGHT","MAX");
 
   /* PHG parameters  - see the Zoltan User's Guide for many more
    * (The "REPARTITION" approach asks Zoltan to create a partitioning that is
@@ -107,9 +108,7 @@ generateHypergraph()
 	  std::vector<int> elementGID(NUM_GID_ENTRIES);
     // use special ALU method that returns a pure integer tuple which is a
     // unique id on the macrolevel
-	  // GIdType id = globalIdSet_.id(entity);
-	  // id.getKey().extractKey(elementGID);
-	  elementGID[0] = gridView.macroId(entity); //   entity.impl().macroID();
+	  elementGID[0] = gridView.macroId(entity); 
 
 	  for (int i=0; i<NUM_GID_ENTRIES; ++i)
 	  {
@@ -118,6 +117,7 @@ generateHypergraph()
 	    tempNborGID.push_back((ZOLTAN_ID_TYPE)elementGID[i] + 1);  // the element is a member of the hyperedge
   	}
 
+    /*
 	  // Find if element is candidate for user-defined partitioning:
     // we keep the center on one process...
 	  typename Entity::Geometry::GlobalCoordinate c = entity.geometry().center();
@@ -131,6 +131,7 @@ generateHypergraph()
 	    }
 	    fixedProcVector.push_back(0);
 	  }
+    */
 
     // now setup the edges
     const IntersectionIterator iend = gridView.iend( entity );
@@ -145,12 +146,8 @@ generateHypergraph()
 		    std::vector<int> neighborGID(NUM_GID_ENTRIES);
         // use special ALU method that returns a pure integer tuple which is a
         // unique id on the macrolevel
-		    // GIdType id = globalIdSet_.id(neighbor);
-		    // id.getKey().extractKey(neighborGID);
-	      neighborGID[0] = gridView.macroId(neighbor); //   entity.impl().macroID();
+	      neighborGID[0] = gridView.macroId(neighbor); 
         int weight = gridView.weight( iit );
-        if (grid_.comm().rank() == 0 && gridView.master(neighbor)!=0)
-          std::cout << weight << " " << gridView.master(neighbor) << std::endl;
 
 		    for (int i=0; i<NUM_GID_ENTRIES; ++i)
 		    {
@@ -166,6 +163,8 @@ generateHypergraph()
 
 	  element_count++;
   }
+
+  assert( tempNumMyVertices >= element_count );
 
   // now copy into hypergraph structure
   hg_.numMyVertices = element_count;    // How many global elements there are

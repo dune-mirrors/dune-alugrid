@@ -51,6 +51,7 @@ void method ( int problem, int startLvl, int maxLvl,
   Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
 
   Grid &grid = *gridPtr;
+  grid.loadBalance();
   const bool verboseRank = grid.comm().rank() == 0 ;
 
   std::string outPath( outpath );
@@ -77,7 +78,9 @@ void method ( int problem, int startLvl, int maxLvl,
   typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
 #endif
   LoadBalancer ldb(grid);
-  grid.repartition( ldb ); 
+  if ( ldb.repartition() )
+    grid.repartition( ldb ); 
+
   typedef LeafAdaptation< Grid, DataType, LoadBalancer > AdaptationType;
   AdaptationType adaptation( grid, ldb );
 
@@ -249,6 +252,16 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
+#if HAVE_ZOLTAN 
+  float version;
+  int rc = Zoltan_Initialize(argc, argv, &version);
+  if (rc != ZOLTAN_OK){
+    printf("sorry zoltan did not initialize successfully...\n");
+    MPI_Finalize();
+    exit(0);
+  }
+#endif
+
   if( argc < 2 )
   {
     /* display usage */
