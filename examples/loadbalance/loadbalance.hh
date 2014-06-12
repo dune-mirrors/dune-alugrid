@@ -34,16 +34,6 @@ public:
     angle_( 0 )
   {}
 
-  bool userDefinedPartitioning () const
-  {
-    return true;
-  }
-  // return true if user defined load balancing weights are provided
-  bool userDefinedLoadWeights () const
-  {
-    return false;
-  }
-
   // returns true if user defined partitioning needs to be readjusted 
   bool repartition () 
   { 

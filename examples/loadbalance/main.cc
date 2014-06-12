@@ -73,12 +73,17 @@ void method ( int problem, int startLvl, int maxLvl,
   /* create adaptation method */
 #if HAVE_ZOLTAN && USE_ZOLTANLB
   typedef ZoltanLoadBalanceHandle<Grid> LoadBalancer;
+  LoadBalancer ldb(grid);
 #else
   typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
-#endif
   LoadBalancer ldb(grid);
+#endif
+#if USE_ZOLTANLB || USE_SIMPLELB
   if ( ldb.repartition() )
     grid.repartition( ldb ); 
+#else
+  grid.loadBalance();
+#endif
 
   typedef LeafAdaptation< Grid, DataType, LoadBalancer > AdaptationType;
   AdaptationType adaptation( grid, ldb );
