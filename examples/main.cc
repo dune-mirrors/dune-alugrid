@@ -119,7 +119,7 @@ void method ( int problem, int startLvl, int maxLvl,
   /* first point where data is saved */
   double saveStep = saveInterval;
   /* cfl number */
-  double cfl = 0.9;
+  double cfl = 0.15;
   /* vector to store update */
   DataType update( gridView );
 
