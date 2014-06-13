@@ -6,7 +6,7 @@ ZoltanLoadBalanceHandle(const Grid &grid)
 , globalIdSet_( grid.globalIdSet() )
 , first_(true)
 , ldbUnder_(0), ldbOver_(1.2)
-, fix_bnd_(false)
+, fix_bnd_(true)
 {
   zz_ = Zoltan_Create(MPI_COMM_WORLD);
 
@@ -136,21 +136,6 @@ generateHypergraph()
     // get weight associated with entity using ALU specific function
     tempVtxWeight[element_count] = gridView.weight(entity);
 
-	  // Find if element is candidate for user-defined partitioning:
-    // we keep the center on one process...
-	  typename Entity::Geometry::GlobalCoordinate c = entity.geometry().center();
-    c -= typename Entity::Geometry::GlobalCoordinate(0.5);
-    double vol = 1./double(this->grid_.comm().size()); // this is the size of the domain for proz zero
-    double R2 = vol/M_PI*0.5; // correct size for the central circle (half the optimal size)
-	  if ( c[0]*c[0]+c[1]*c[1] < R2 )
-	  {
-	    for (int i=0; i<NUM_GID_ENTRIES; ++i)
-	    {
-		    fixedElmtVector.push_back((ZOLTAN_ID_TYPE)elementGID[i]+1);
-	    }
-	    fixedProcVector.push_back(0);
-	  }
-
     // now setup the edges
     const IntersectionIterator iend = gridView.iend( entity );
 	  int num_of_neighbors = 0;
@@ -178,6 +163,19 @@ generateHypergraph()
 
 		    num_of_neighbors++;
 	    }
+      else
+      {
+        // Find if element is candidate for user-defined partitioning:
+        // we keep the left boundary on process 0
+        if ( intersection.centerUnitOuterNormal()[0]<-0.9)
+        {
+          for (int i=0; i<NUM_GID_ENTRIES; ++i)
+          {
+            fixedElmtVector.push_back((ZOLTAN_ID_TYPE)elementGID[i]+1);
+          }
+          fixedProcVector.push_back(0);
+        }
+      }
 
     }
     // add one because not only neighbors are used in graph, but also entity itself
