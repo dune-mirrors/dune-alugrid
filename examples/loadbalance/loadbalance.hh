@@ -189,8 +189,6 @@ public:
           &new_partitioning_.exportProcs,    // Process to which I send each of the vertices 
           &new_partitioning_.exportToPart);  // Partition to which each vertex will belong 
     first_ = false;
-    if (new_partitioning_.changes == 1 && grid_.comm().rank() == 0)
-      std::cout << "repartitioning..." << std::endl;
     return (new_partitioning_.changes == 1);
   }
   
