@@ -293,7 +293,7 @@ inline double FiniteVolumeScheme< V, Model >
           // apply numerical flux
           RangeType flux; 
           double ws = model_.numericalFlux( normal, time, point, uLeft, uRight, flux );
-          waveSpeed += ws * faceVolume;
+          waveSpeed = ws * faceVolume;
 
           // calc update of entity 
           update[ entity ].axpy( -enVolume_1 * faceVolume, flux );
@@ -312,7 +312,7 @@ inline double FiniteVolumeScheme< V, Model >
         // apply boundary flux 
         RangeType flux; 
         double ws = model_.boundaryFlux( intersection.boundaryId(), normal, time, point, uLeft, flux );
-        waveSpeed += ws * faceVolume;
+        waveSpeed = ws * faceVolume;
 
         // calc update on entity
         update[ entity ].axpy( -enVolume_1 * faceVolume, flux );

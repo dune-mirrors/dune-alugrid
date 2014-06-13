@@ -133,7 +133,7 @@ void method ( int problem, int startLvl, int maxLvl,
   /* first point where data is saved */
   double saveStep = saveInterval;
   /* cfl number */
-  double cfl = 0.9;
+  double cfl = 0.15;
   /* vector to store update */
   DataType update( gridView );
 
@@ -157,7 +157,6 @@ void method ( int problem, int startLvl, int maxLvl,
     double dt = scheme( time, solution, update );
     // multiply time step by CFL number
     dt *= cfl;
-    dt = 0.02;
 
     // stop time 
     const double solveTime = solveTimer.elapsed(); 
@@ -181,7 +180,7 @@ void method ( int problem, int startLvl, int maxLvl,
     size_t elements = scheme.mark( time, solution, gridMarker );
 
     /* check if data should be written */
-    if( time >= saveStep || 1) // !!!!
+    if( time >= saveStep )
     {
       if( vtkOut ) 
       {
