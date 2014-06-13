@@ -111,11 +111,10 @@ private:
     ZOLTAN_ID_TYPE *edgeGID;       /* global ID of each of my hyperedges */
     int *nborIndex;                /* index into nborGID array of edge's vertices */
     ZOLTAN_ID_TYPE *nborGID;       /* Vertices of edge edgeGID[i] begin at nborGID[nborIndex[i]] */
-    float *edgeWEIGHT;             /* weight for each edge in the hypergraph */
     float *nborWEIGHT;             /* weight for each graph edge */
     int *nborPROC;                 /* processor for each edge node */
     FixedElements fixed_elmts;
-    HGraphData() : vtxGID(0), vtxWEIGHT(0), edgeGID(0), nborIndex(0), nborGID(0), edgeWEIGHT(0), nborWEIGHT(0), nborPROC(0) {}
+    HGraphData() : vtxGID(0), vtxWEIGHT(0), edgeGID(0), nborIndex(0), nborGID(0), nborWEIGHT(0), nborPROC(0) {}
     ~HGraphData() { freeMemory();}
     void freeMemory() 
     {
@@ -123,8 +122,6 @@ private:
         free(nborWEIGHT);
       if (!nborPROC)
         free(nborPROC);
-      if (!edgeWEIGHT)
-        free(edgeWEIGHT);
       if (!nborGID)
         free(nborGID); 
       if (!nborIndex)
@@ -150,6 +147,15 @@ public:
   // returns true if user defined partitioning needs to be readjusted 
   bool repartition ()
   { 
+    int elements = grid_.size(0);
+    size_t sumElements = grid_.comm().sum( elements );
+    size_t minElements = grid_.comm().min( elements );
+    size_t maxElements = grid_.comm().max( elements );
+    double mean = sumElements / grid_.comm().size();
+    const bool repartition = ((maxElements > (ldbOver_ * mean)) || (minElements < (ldbUnder_ * mean) )) 
+                             ? true : false ; 
+    if (!repartition) 
+      return false;
     if (!first_)
     {
       Zoltan_LB_Free_Part(&(new_partitioning_.importGlobalGids), 
@@ -183,6 +189,8 @@ public:
           &new_partitioning_.exportProcs,    // Process to which I send each of the vertices 
           &new_partitioning_.exportToPart);  // Partition to which each vertex will belong 
     first_ = false;
+    if (new_partitioning_.changes == 1 && grid_.comm().rank() == 0)
+      std::cout << "repartitioning..." << std::endl;
     return (new_partitioning_.changes == 1);
   }
   
@@ -218,15 +226,6 @@ private:
   static void get_vertex_list(void *data, int sizeGID, int sizeLID,
               ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
               int wgt_dim, float *obj_wgts, int *ierr);
-  static void get_hypergraph_size(void *data, int *num_lists, int *num_nonzeroes,
-                                  int *format, int *ierr);
-  static void get_hypergraph(void *data, int sizeGID, int num_edges, int num_nonzeroes,
-                             int format, ZOLTAN_ID_PTR edgeGID, int *vtxPtr,
-                             ZOLTAN_ID_PTR vtxGID, int *ierr);
-  static void get_hypergraph_edge_weights_size(void *data, int *num_edges, int *ierr);
-  static void get_hypergraph_edge_weights(void *data, int sizeGID, int sizeLID,
-                                          int num_edges, int edge_weight_dim, ZOLTAN_ID_PTR edgeGID,
-                                          ZOLTAN_ID_PTR edgeLID, float *edgeWeight, int *ierr);
   static int get_num_fixed_obj(void *data, int *ierr);
   static void get_fixed_obj_list(void *data, int num_fixed_obj,
                                  int num_gid_entries, ZOLTAN_ID_PTR fixed_gids, int *fixed_part, int *ierr);
@@ -247,6 +246,8 @@ private:
   HGraphData hg_;
   ZoltanPartitioning new_partitioning_;
   bool first_;
+  double ldbUnder_, ldbOver_;
+  const bool fix_bnd_;
 };
 #endif // if HAVE_ZOLTAN
 

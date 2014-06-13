@@ -5,13 +5,18 @@ ZoltanLoadBalanceHandle(const Grid &grid)
 : grid_( grid )
 , globalIdSet_( grid.globalIdSet() )
 , first_(true)
+, ldbUnder_(0), ldbOver_(1.2)
+, fix_bnd_(false)
 {
   zz_ = Zoltan_Create(MPI_COMM_WORLD);
 
   // General parameters
   Zoltan_Set_Param(zz_, "DEBUG_LEVEL", "0");
-  Zoltan_Set_Param(zz_, "LB_METHOD", "GRAPH");        /* partitioning method */
-  // Zoltan_Set_Param(zz_, "HYPERGRAPH_PACKAGE", "PHG"); /* version of method */
+  if (!fix_bnd_) // fixing element requires using hypergraph partitioning (which is perhaps better anyway?)
+    Zoltan_Set_Param(zz_, "LB_METHOD", "HYPERGRAPH");        /* partitioning method */
+  else
+    Zoltan_Set_Param(zz_, "LB_METHOD", "HYPERGRAPH");        /* partitioning method */
+  Zoltan_Set_Param(zz_, "HYPERGRAPH_PACKAGE", "PHG"); /* version of method */
   Zoltan_Set_Param(zz_, "NUM_GID_ENTRIES", "1");      /* global IDs are 1 integers */
   Zoltan_Set_Param(zz_, "NUM_LID_ENTRIES", "1");      /* local IDs are 1 integers */
   Zoltan_Set_Param(zz_, "RETURN_LISTS", "ALL");       /* export AND import lists */
@@ -26,24 +31,15 @@ ZoltanLoadBalanceHandle(const Grid &grid)
   /* PHG parameters  - see the Zoltan User's Guide for many more
   */
   Zoltan_Set_Param(zz_, "LB_APPROACH", "REPARTITION");
-  // Zoltan_Set_Param(zz_, "REMAP", "1");
+  Zoltan_Set_Param(zz_, "REMAP", "1");
   Zoltan_Set_Param(zz_, "IMBALANCE_TOL", "1.05" );
 
   /* Application defined query functions */
   Zoltan_Set_Num_Obj_Fn(zz_, get_number_of_vertices, &hg_);
   Zoltan_Set_Obj_List_Fn(zz_, get_vertex_list, &hg_);
-
-#if 0
-  Zoltan_Set_HG_Size_CS_Fn(zz_, get_hypergraph_size, &hg_);
-  Zoltan_Set_HG_CS_Fn(zz_, get_hypergraph, &hg_);
-  Zoltan_Set_HG_Size_Edge_Wts_Fn(zz_, get_hypergraph_edge_weights_size, &hg_);
-  Zoltan_Set_HG_Edge_Wts_Fn(zz_, get_hypergraph_edge_weights, &hg_);
-#endif
-
   Zoltan_Set_Num_Edges_Multi_Fn(zz_, get_num_edges_list, &hg_);
   Zoltan_Set_Edge_List_Multi_Fn(zz_, get_edge_list, &hg_);
 
-#if 0
   /* Register fixed object callback functions */
   if (Zoltan_Set_Fn(zz_, ZOLTAN_NUM_FIXED_OBJ_FN_TYPE,
         (void (*)()) get_num_fixed_obj,
@@ -55,7 +51,6 @@ ZoltanLoadBalanceHandle(const Grid &grid)
         (void *) &hg_) == ZOLTAN_FATAL) {
     return;
   }
-#endif
 
   /******************************************************************
   ** Zoltan can now partition the vertices of hypergraph.
@@ -63,6 +58,14 @@ ZoltanLoadBalanceHandle(const Grid &grid)
   ** equal to the number of processes.  Process rank 0 will own
   ** partition 0, process rank 1 will own partition 1, and so on.
   ******************************************************************/
+
+  // read config file if avaialble
+  std::ifstream in( "alugrid.cfg" );
+  if( in )
+  {
+    in >> ldbUnder_;
+    in >> ldbOver_;
+  }
 }
 template <class Grid>
 ZoltanLoadBalanceHandle<Grid>::
@@ -84,7 +87,7 @@ ZoltanLoadBalanceHandle<Grid>::
 
 /********************************************************************************
  * This method is called in the repartition callback function.
- * It needs to setup the hypergraph and call the zoltan partition function
+ * It needs to setup the graph/hypergraph and call the zoltan partition function
  ********************************************************************************/
 template< class Grid >
 void ZoltanLoadBalanceHandle<Grid>::
@@ -107,14 +110,13 @@ generateHypergraph()
   ZOLTAN_ID_TYPE *tempVtxGID  = (ZOLTAN_ID_TYPE *)malloc(sizeof(ZOLTAN_ID_TYPE) * NUM_GID_ENTRIES * tempNumMyVertices);
   ZOLTAN_ID_TYPE *tempEdgeGID = (ZOLTAN_ID_TYPE *)malloc(sizeof(ZOLTAN_ID_TYPE) * NUM_GID_ENTRIES * tempNumMyVertices);
   float* tempVtxWeight = (float*)malloc(sizeof(float)*tempNumMyVertices);
-  float* tempEdgeWeight = (float*)malloc(sizeof(float)*tempNumMyVertices);
-  int *tempNborIndex = (int *)malloc(sizeof(int) * (tempNumMyVertices + 1));
-  tempNborIndex[0] = 0;
 
   std::vector<ZOLTAN_ID_TYPE> tempNborGID(0);
   std::vector<float> tempNborWeight(0);
   std::vector<int> tempNborProc(0);
   std::vector<int> fixedProcVector(0), fixedElmtVector(0);
+  int *tempNborIndex = (int *)malloc(sizeof(int) * (tempNumMyVertices + 1));
+  tempNborIndex[0] = 0;
 
   unsigned int element_count = 0;
   const Iterator &end = gridView.template end< 0, partition >();
@@ -130,10 +132,7 @@ generateHypergraph()
 	  {
 	    tempVtxGID[element_count*NUM_GID_ENTRIES + i] = (ZOLTAN_ID_TYPE)elementGID[i] + 1;   // global identifier of element    ADD ONE BECAUSE WE START COUNTING AT 0 AND ZOLTAN DOES NOT LIKE IT
 	    tempEdgeGID[element_count*NUM_GID_ENTRIES + i] = (ZOLTAN_ID_TYPE)elementGID[i] + 1;  // global identifier of hyperedge
-	    tempNborGID.push_back((ZOLTAN_ID_TYPE)elementGID[i] + 1);  // the element is a member of the hyperedge
   	}
-    tempNborWeight.push_back( 0 );
-    tempNborProc.push_back( gridView.master( entity ) );
     // get weight associated with entity using ALU specific function
     tempVtxWeight[element_count] = gridView.weight(entity);
 
@@ -181,9 +180,8 @@ generateHypergraph()
 	    }
 
     }
-    tempEdgeWeight[element_count] = weight;
     // add one because not only neighbors are used in graph, but also entity itself
-	  tempNborIndex[element_count+1] = tempNborIndex[element_count] + (1+num_of_neighbors); 
+	  tempNborIndex[element_count+1] = tempNborIndex[element_count] + num_of_neighbors; 
 
 	  element_count++;
   }
@@ -196,7 +194,6 @@ generateHypergraph()
   std::swap(tempVtxGID, hg_.vtxGID);
   std::swap(tempVtxWeight, hg_.vtxWEIGHT);
   std::swap(tempEdgeGID, hg_.edgeGID);
-  std::swap(tempEdgeWeight, hg_.edgeWEIGHT);
   std::swap(tempNborIndex, hg_.nborIndex);
 
   hg_.numAllNbors = tempNborGID.size()/NUM_GID_ENTRIES;
@@ -208,11 +205,14 @@ generateHypergraph()
   std::copy(tempNborProc.begin(), tempNborProc.end(),hg_.nborPROC);
 
   ///////// WRITE THE FIXED ELEMENTS INTO THE PROVIDED STRUCTURE
-  hg_.fixed_elmts.fixed_GID.resize(fixedElmtVector.size());
-  std::copy(fixedElmtVector.begin(), fixedElmtVector.end(), hg_.fixed_elmts.fixed_GID.begin());
-  hg_.fixed_elmts.fixed_Process.resize(fixedProcVector.size());
-  std::copy(fixedProcVector.begin(), fixedProcVector.end(), hg_.fixed_elmts.fixed_Process.begin());
-  hg_.fixed_elmts.fixed_entities = hg_.fixed_elmts.fixed_Process.size();
+  if (fix_bnd_) // fixing element requires using hypergraph partitioning (which is perhaps better anyway?)
+  {
+    hg_.fixed_elmts.fixed_GID.resize(fixedElmtVector.size());
+    std::copy(fixedElmtVector.begin(), fixedElmtVector.end(), hg_.fixed_elmts.fixed_GID.begin());
+    hg_.fixed_elmts.fixed_Process.resize(fixedProcVector.size());
+    std::copy(fixedProcVector.begin(), fixedProcVector.end(), hg_.fixed_elmts.fixed_Process.begin());
+    hg_.fixed_elmts.fixed_entities = hg_.fixed_elmts.fixed_Process.size();
+  }
 }
 
 
@@ -250,7 +250,6 @@ get_number_of_vertices(void *data, int *ierr)
 {
   HGraphData *temphg = (HGraphData *)data;
   *ierr = ZOLTAN_OK;
-  std::cout << "!!! obj size: " << temphg->numMyVertices << std::endl;
   return temphg->numMyVertices;
 }
 
@@ -275,81 +274,9 @@ get_vertex_list(void *data, int sizeGID, int sizeLID,
     localID[i] = i;
     if (wgt_dim == 1)
       obj_wgts[i] = temphg->vtxWEIGHT[i];
-    std::cout << "!!! obj : " << i << " id " << globalID[i] << " , " << obj_wgts[i] << std::endl;
   }
 }
 
-template< class Grid >
-void ZoltanLoadBalanceHandle<Grid>::
-get_hypergraph_size(void *data, int *num_lists, int *num_nonzeroes,
-                    int *format, int *ierr)
-{
-  HGraphData *temphg = (HGraphData *)data;
-  *ierr = ZOLTAN_OK;
-
-  *num_lists = temphg->numMyHEdges;
-  *num_nonzeroes = temphg->numAllNbors;
-
-  *format = ZOLTAN_COMPRESSED_EDGE;
-
-  return;
-}
-
-template< class Grid >
-void ZoltanLoadBalanceHandle<Grid>::
-get_hypergraph(void *data, int sizeGID, int num_edges, int num_nonzeroes,
-               int format, ZOLTAN_ID_PTR edgeGID, int *vtxPtr,
-               ZOLTAN_ID_PTR vtxGID, int *ierr)
-{
-  int i;
-
-  HGraphData *temphg = (HGraphData *)data;
-  *ierr = ZOLTAN_OK;
-
-  if ( (num_edges != temphg->numMyHEdges) || (num_nonzeroes != temphg->numAllNbors) ||
-       (format != ZOLTAN_COMPRESSED_EDGE)) {
-    *ierr = ZOLTAN_FATAL;
-    return;
-  }
-
-  for (i=0; i < num_edges*sizeGID; i++){
-    edgeGID[i] = temphg->edgeGID[i];
-  }
-
-  for (i=0; i < num_edges; i++){
-    vtxPtr[i] = temphg->nborIndex[i];
-  }
-
-  for (i=0; i < num_nonzeroes*sizeGID; i++){
-    vtxGID[i] = temphg->nborGID[i];
-  }
-
-  return;
-}
-template< class Grid >
-void ZoltanLoadBalanceHandle<Grid>::
-get_hypergraph_edge_weights_size(void *data, int *num_edges, int *ierr)
-{
-  HGraphData *temphg = (HGraphData *)data;
-  *ierr = ZOLTAN_OK;
-  *num_edges = temphg->numMyHEdges;
-}
-template< class Grid >
-void ZoltanLoadBalanceHandle<Grid>::
-get_hypergraph_edge_weights(void *data, int sizeGID, int sizeLID,
-           int num_edges, int edge_weight_dim, ZOLTAN_ID_PTR edgeGID,
-           ZOLTAN_ID_PTR edgeLID, float *edgeWeight, int *ierr)
-{
-  HGraphData *temphg = (HGraphData *)data;
-  *ierr = ZOLTAN_OK;
-  if (edge_weight_dim == 1)
-  {
-    for (int i=0; i < num_edges; i++){
-      edgeGID[i] = temphg->edgeGID[i];
-      edgeWeight[i] = temphg->edgeWEIGHT[i];
-    }
-  }
-}
 template< class Grid >
 void ZoltanLoadBalanceHandle<Grid>::
 get_num_edges_list(void *data, int sizeGID, int sizeLID,
@@ -360,11 +287,7 @@ get_num_edges_list(void *data, int sizeGID, int sizeLID,
   HGraphData *temphg = (HGraphData *)data;
   *ierr = ZOLTAN_OK;
   for (int i=0;i<num_obj;++i)
-  {
-    numEdges[i] = temphg->nborIndex[i+1]-(temphg->nborIndex[i]+1); // the first entry is the node itself used for the hyperedge
-    std::cout << "!!! obj : " << i << " id " << globalID[i] << " -> " 
-              << numEdges[i] << std::endl;
-  }
+    numEdges[i] = temphg->nborIndex[i+1]-temphg->nborIndex[i]; 
 }
 template< class Grid >
 void ZoltanLoadBalanceHandle<Grid>::
@@ -379,19 +302,16 @@ get_edge_list(void *data, int sizeGID, int sizeLID,
   int k=0;
   for (int i=0;i<num_obj;++i)
   {
-     std::cout << "!!! obj : " << i << " id " << globalID[i] << " edge: ";
-    int l = temphg->nborIndex[i]+1; // the first entry is the node itself for the hyperedge
+    int l = temphg->nborIndex[i]; 
     for (int j=0;j<num_edges[i];++j)
     {
       nborGID[k]  = temphg->nborGID[l];
       nborProc[k] = temphg->nborPROC[l];
       if (wgt_dim==1)
         ewgts[k] = temphg->nborWEIGHT[l];
-      std::cout << "(" << nborGID[k] << "," << nborProc[k] << "," << ewgts[k] << ") " ;
       ++l;
       ++k;
     }
-    std::cout << std::endl;
   }
 }
 #endif // if HAVE_ZOLTAN
