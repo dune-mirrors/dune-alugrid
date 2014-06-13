@@ -112,11 +112,17 @@ private:
     int *nborIndex;                /* index into nborGID array of edge's vertices */
     ZOLTAN_ID_TYPE *nborGID;       /* Vertices of edge edgeGID[i] begin at nborGID[nborIndex[i]] */
     float *edgeWEIGHT;             /* weight for each edge in the hypergraph */
+    float *nborWEIGHT;             /* weight for each graph edge */
+    int *nborPROC;                 /* processor for each edge node */
     FixedElements fixed_elmts;
-    HGraphData() : vtxGID(0), vtxWEIGHT(0), edgeGID(0), nborIndex(0), nborGID(0), edgeWEIGHT(0) {}
+    HGraphData() : vtxGID(0), vtxWEIGHT(0), edgeGID(0), nborIndex(0), nborGID(0), edgeWEIGHT(0), nborWEIGHT(0), nborPROC(0) {}
     ~HGraphData() { freeMemory();}
     void freeMemory() 
     {
+      if (!nborWEIGHT)
+        free(nborWEIGHT);
+      if (!nborPROC)
+        free(nborPROC);
       if (!edgeWEIGHT)
         free(edgeWEIGHT);
       if (!nborGID)
@@ -224,6 +230,15 @@ private:
   static int get_num_fixed_obj(void *data, int *ierr);
   static void get_fixed_obj_list(void *data, int num_fixed_obj,
                                  int num_gid_entries, ZOLTAN_ID_PTR fixed_gids, int *fixed_part, int *ierr);
+  static void get_num_edges_list(void *data, int sizeGID, int sizeLID,
+                                 int num_obj,
+                                 ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
+                                 int *numEdges, int *ierr);
+  static void get_edge_list(void *data, int sizeGID, int sizeLID,
+                            int num_obj, ZOLTAN_ID_PTR globalID, ZOLTAN_ID_PTR localID,
+                            int *num_edges,
+                            ZOLTAN_ID_PTR nborGID, int *nborProc,
+                            int wgt_dim, float *ewgts, int *ierr);
 
   const Grid &grid_;
   const GlobalIdSet &globalIdSet_;
