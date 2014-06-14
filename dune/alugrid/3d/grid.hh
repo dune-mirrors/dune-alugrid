@@ -727,14 +727,14 @@ namespace Dune
       return *globalIdSet_;
     }
 
-    //! View for a grid level
+    //! View for te macro grid with some alu specific methods
     template<PartitionIteratorType pitype>
     typename Partition<pitype>::MacroGridView macroView() const {
       typedef typename Traits::template Partition<pitype>::MacroGridView View;
       return View(*this);
     }
 
-    //! View for a grid level for All_Partition
+    //! View for te macro grid with some alu specific methods (All_Partition)
     MacroGridView macroView() const {
       typedef MacroGridView View;
       return View(*this);
