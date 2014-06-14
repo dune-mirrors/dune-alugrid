@@ -205,13 +205,14 @@ public:
   /** \brief copy interior cell data to overlap of ghost cells */
   void communicate ();
 
+  const bool visitElement ( const Entity& entity ) const 
+  {
+    return ! dof_[ entity ].visited() ;
+  }
   const bool visitNeighbor ( const Entity& entity, const Entity& neighbor ) const 
   {
-    return (entity.level() > neighbor.level()) ||
-           ((entity.level() == neighbor.level()) 
-            && ! dof_[ neighbor ].visited() );
+    return ! dof_[ neighbor ].visited() ;
   }
-
   void visited( const Entity& entity ) 
   {
     dof_[ entity ].markVisited();
