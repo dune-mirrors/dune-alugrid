@@ -198,6 +198,9 @@ public:
   template <class Arg>
   double
   operator() ( const double time, const Arg &solution, Vector &update ) const;
+  template <class Arg>
+  double
+  border ( const double time, const Arg &solution, Vector &update ) const;
 
   /** \brief set grid marker for refinement / coarsening 
    *
@@ -222,6 +225,9 @@ public:
   }
 
 private:
+  template <class Arg>
+  void apply (const Entity &entiy, const double time, const Arg &solution, Vector &update, double &dt ) const;
+
   const GridView gridView_;
   const Model &model_;
 }; // end FiniteVolumeScheme
@@ -229,105 +235,128 @@ private:
 template< class V, class Model > 
 template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
+  ::border ( const double time, const Arg &solution, Vector &update ) const
+{
+  // time step size (using std:min(.,dt) so set to maximum) 
+  double dt = std::numeric_limits<double>::infinity(); 
+
+  static const Dune :: PartitionIteratorType pghosttype = Dune :: Ghost_Partition ;
+  typedef typename GridView::template Codim< 0 >:: template Partition< pghosttype > :: Iterator  Iterator;
+  // compute update vector and optimum dt in one grid traversal
+  const Iterator endit = gridView().template end< 0, pghosttype >();     
+  for( Iterator it = gridView().template begin< 0, pghosttype >(); it != endit; ++it )
+  {
+    const Entity &entity = *it;
+    const IntersectionIterator iitend = gridView().iend( entity ); 
+    for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
+      apply( *(iit->outside()), time, solution, update, dt );
+  } // end grid traversal                     
+
+  // return time step
+  return  dt;
+}
+
+template< class V, class Model > 
+template< class Arg >
+inline double FiniteVolumeScheme< V, Model >
   ::operator() ( const double time, const Arg &solution, Vector &update ) const
 {
-  if (!Model::hasFlux)
-    return model_.fixedDt();
-  // set update to zero 
-  update.clear();
-
   // time step size (using std:min(.,dt) so set to maximum) 
   double dt = std::numeric_limits<double>::infinity(); 
 
   // compute update vector and optimum dt in one grid traversal
   const Iterator endit = gridView().template end< 0, ptype >();     
   for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it )
-  {
-    // get entity and geometry
-    const Entity &entity = *it;
-    const Geometry &geo = entity.geometry();
-
-    // estimate for wave speed
-    double waveSpeed = 0.0;
-
-    // cell volume
-    const double enVolume = geo.volume(); 
-    
-    // 1 over cell volume
-    const double enVolume_1 = 1.0/enVolume; 
-
-    // run through all intersections with neighbors and boundary
-    const IntersectionIterator iitend = gridView().iend( entity ); 
-    for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
-    {
-      const Intersection &intersection = *iit;
-      /* Fetch the intersection's geometry and reference element */
-      const IntersectionGeometry &intersectionGeometry = intersection.geometry();
-
-      /* Get some geometrical information about the intersection */
-      const GlobalType point = intersectionGeometry.center();
-      const GlobalType normal = intersection.centerUnitOuterNormal();
-      const double faceVolume = intersection.geometry().volume();
-
-      // handle interior face
-      if( intersection.neighbor() )
-      {
-        // access neighbor
-        const EntityPointer outside = intersection.outside();
-        const Entity &neighbor = *outside;
-
-        const bool visitNeighbor = update.visitNeighbor( entity, neighbor );
-        //const bool calculateNeighbor = (enIdx < nbIdx);
-        // compute flux from one side only
-        // this should become easier with the new IntersectionIterator functionality!
-        if( visitNeighbor || 
-            (neighbor.partitionType() != Dune::InteriorEntity) )
-        {
-          // calculate (1 / neighbor volume)
-          const double nbVolume = neighbor.geometry().volume();
-          const double nbVolume_1 = 1.0 / nbVolume;
-
-          // evaluate data
-          const RangeType uLeft  = solution.evaluate( entity, point );
-          const RangeType uRight = solution.evaluate( neighbor, point );
-          // apply numerical flux
-          RangeType flux; 
-          double ws = model_.numericalFlux( normal, time, point, uLeft, uRight, flux );
-          waveSpeed = ws * faceVolume;
-
-          // calc update of entity 
-          update[ entity ].axpy( -enVolume_1 * faceVolume, flux );
-          // calc update of neighbor 
-          update[ neighbor ].axpy( nbVolume_1 * faceVolume, flux );
-
-          // compute dt restriction
-          dt = std::min( dt, std::min( enVolume, nbVolume ) / waveSpeed );
-        }
-      }
-      // handle boundary face
-      else
-      {
-        // evaluate data
-        const RangeType uLeft = solution.evaluate( entity, point );
-        // apply boundary flux 
-        RangeType flux; 
-        double ws = model_.boundaryFlux( intersection.boundaryId(), normal, time, point, uLeft, flux );
-        waveSpeed = ws * faceVolume;
-
-        // calc update on entity
-        update[ entity ].axpy( -enVolume_1 * faceVolume, flux );
-
-        // compute dt restriction
-        dt = std::min( dt, enVolume / waveSpeed );
-      }
-    } // end all intersections            
-
-    // mark entity as done 
-    update.visited( entity );
-  } // end grid traversal                     
+    apply( *it, time, solution, update, dt );
 
   // return time step
   return  dt;
+}
+
+template< class V, class Model > 
+template< class Arg >
+inline void FiniteVolumeScheme< V, Model >
+  ::apply ( const Entity &entity, 
+              const double time, const Arg &solution, Vector &update, double &dt ) const
+{
+  if ( ! update.visitElement( entity ) )
+    return;
+
+  const Geometry &geo = entity.geometry();
+
+  // estimate for wave speed
+  double waveSpeed = 0.0;
+
+  // cell volume
+  const double enVolume = geo.volume(); 
+  
+  // 1 over cell volume
+  const double enVolume_1 = 1.0/enVolume; 
+
+  // run through all intersections with neighbors and boundary
+  const IntersectionIterator iitend = gridView().iend( entity ); 
+  for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
+  {
+    const Intersection &intersection = *iit;
+    /* Fetch the intersection's geometry and reference element */
+    const IntersectionGeometry &intersectionGeometry = intersection.geometry();
+
+    /* Get some geometrical information about the intersection */
+    const GlobalType point = intersectionGeometry.center();
+    const GlobalType normal = intersection.centerUnitOuterNormal();
+    const double faceVolume = intersection.geometry().volume();
+
+    // handle interior face
+    if( intersection.neighbor() )
+    {
+      // access neighbor
+      const EntityPointer outside = intersection.outside();
+      const Entity &neighbor = *outside;
+
+      // compute flux from one side only
+      if( update.visitElement( neighbor ) )
+      {
+        // calculate (1 / neighbor volume)
+        const double nbVolume = neighbor.geometry().volume();
+        const double nbVolume_1 = 1.0 / nbVolume;
+
+        // evaluate data
+        const RangeType uLeft  = solution.evaluate( entity, point );
+        const RangeType uRight = solution.evaluate( neighbor, point );
+        // apply numerical flux
+        RangeType flux; 
+        double ws = model_.numericalFlux( normal, time, point, uLeft, uRight, flux );
+        waveSpeed = ws * faceVolume;
+
+        // calc update of entity 
+        update[ entity ].axpy( -enVolume_1 * faceVolume, flux );
+        // calc update of neighbor 
+        update[ neighbor ].axpy( nbVolume_1 * faceVolume, flux );
+
+        // compute dt restriction
+        dt = std::min( dt, std::min( enVolume, nbVolume ) / waveSpeed );
+      }
+    }
+    // handle boundary face
+    else
+    {
+      // evaluate data
+      const RangeType uLeft = solution.evaluate( entity, point );
+      // apply boundary flux 
+      RangeType flux; 
+      double ws = model_.boundaryFlux( intersection.boundaryId(), normal, time, point, uLeft, flux );
+      waveSpeed = ws * faceVolume;
+
+      // calc update on entity
+      update[ entity ].axpy( -enVolume_1 * faceVolume, flux );
+
+      // compute dt restriction
+      dt = std::min( dt, enVolume / waveSpeed );
+    }
+  } // end all intersections            
+
+  // mark entity as done 
+  update.visited( entity );
 }
 
 template< class V, class Model > 
