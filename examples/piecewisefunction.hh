@@ -71,7 +71,8 @@ public:
   /* vector of all dofs on an codim 0 entity */
   typedef RangeType LocalDofVector;
 
-private:
+// private:
+public:
   struct CommDataHandle;
 
 public:
