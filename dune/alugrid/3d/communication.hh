@@ -238,6 +238,16 @@ namespace Dune
                            InterfaceType iftype, CommunicationDirection dir )
       : Base( grid, new Storage< DataHandle, Data >( grid, data ), iftype, dir )
     {}
+
+    ALULeafCommunication ( ALULeafCommunication &&other )
+      : Base( static_cast< Base && >( other ) )
+    {}
+
+    ALULeafCommunication &operator= ( ALULeafCommunication &&other )
+    {
+      static_cast< Base & >( *this ) = static_cast< Base && >( other );
+      return *this;
+    }
   };
 
 
@@ -301,6 +311,16 @@ namespace Dune
                             InterfaceType iftype, CommunicationDirection dir, int level )
       : Base( grid, new Storage< DataHandle, Data >( grid, level, data ), iftype, dir )
     {}
+
+    ALULevelCommunication ( ALULevelCommunication &&other )
+      : Base( static_cast< Base && >( other ) )
+    {}
+
+    ALULevelCommunication &operator= ( ALULevelCommunication &&other )
+    {
+      static_cast< Base & >( *this ) = static_cast< Base && >( other );
+      return *this;
+    }
   };
 
 } // namespace Dune
