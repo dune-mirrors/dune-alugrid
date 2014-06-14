@@ -12,8 +12,10 @@
 #include "piecewisefunction.hh"
 #include "fvscheme.hh"
 
+/** loadbalancing scheme **/
+#include "loadbalance_simple.hh"
+#include "loadbalance_zoltan.hh"
 /** adaptation scheme **/
-#include "loadbalance.hh"
 #include "adaptation.hh"
 
 /** pde and problem description **/
