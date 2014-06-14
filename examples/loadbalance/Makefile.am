@@ -6,7 +6,7 @@ CLEANFILES = $(DATACLEANFILES)
 
 exampleslbdir = $(includedir)/examples/loadbalanacing
 exampleslb_HEADERS = \
-  adaptation.hh  loadbalance.hh loadbalance_inline.hh
+  adaptation.hh  loadbalance_simple.hh loadbalance_zoltan.hh
 
 headercheck_IGNORE = loadbalance_inline.hh
 
