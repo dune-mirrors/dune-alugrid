@@ -198,6 +198,9 @@ public:
   template <class Arg>
   double
   operator() ( const double time, const Arg &solution, Vector &update ) const;
+  template <class Arg>
+  double
+  border ( const double time, const Arg &solution, Vector &update ) const;
 
   /** \brief set grid marker for refinement / coarsening 
    *
@@ -228,6 +231,30 @@ private:
   const GridView gridView_;
   const Model &model_;
 }; // end FiniteVolumeScheme
+
+template< class V, class Model > 
+template< class Arg >
+inline double FiniteVolumeScheme< V, Model >
+  ::border ( const double time, const Arg &solution, Vector &update ) const
+{
+  // time step size (using std:min(.,dt) so set to maximum) 
+  double dt = std::numeric_limits<double>::infinity(); 
+
+  static const Dune :: PartitionIteratorType pghosttype = Dune :: Ghost_Partition ;
+  typedef typename GridView::template Codim< 0 >:: template Partition< pghosttype > :: Iterator  Iterator;
+  // compute update vector and optimum dt in one grid traversal
+  const Iterator endit = gridView().template end< 0, pghosttype >();     
+  for( Iterator it = gridView().template begin< 0, pghosttype >(); it != endit; ++it )
+  {
+    const Entity &entity = *it;
+    const IntersectionIterator iitend = gridView().iend( entity ); 
+    for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
+      apply( *(iit->outside()), time, solution, update, dt );
+  } // end grid traversal                     
+
+  // return time step
+  return  dt;
+}
 
 template< class V, class Model > 
 template< class Arg >

@@ -5,7 +5,7 @@ GRIDTYPE = ALUGRID_CUBE
 #GRIDTYPE = ALUGRID_CONFORM
 GRIDDIM = 3
 
-SUBDIRS = loadbalance communication dgf
+SUBDIRS = loadbalance dgf
 
 EXTRA_DIST = alugrid.cfg 
 
@@ -14,8 +14,8 @@ CLEANFILES = $(DATACLEANFILES)
 
 #USE_OMP=-fopenmp
 
-examplesdir = $(includedir)/examples
-examples_HEADERS = \
+communicationdir = $(includedir)/examples/communication
+communication_HEADERS = \
   adaptation.hh        diagnostics.hh  piecewisefunction.hh  problem-euler.hh \
   problem-transport.hh datamap.hh      fvscheme.hh           problem-ball.hh \
   problem.hh           paralleldgf.hh
