@@ -167,7 +167,7 @@ void method ( int problem, int startLvl, int maxLvl,
     size_t elements = scheme.mark( time, solution, gridMarker );
 
     /* check if data should be written */
-    if( 0 && time >= saveStep )
+    if( time >= saveStep )
     {
       if( vtkOut ) 
       {
