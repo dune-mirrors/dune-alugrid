@@ -143,7 +143,20 @@ void method ( int problem, int startLvl, int maxLvl,
     double dt;
 
     Dune :: Timer solveTimer ;
-    dt = scheme( time, solution, update ) ;
+    {
+      // apply the spacial operator
+      dt = scheme.border( time, solution, update );
+      // want to have
+      // auto comm = update.communicate();
+      // the following is taken from piecewisefunction.hh to avoid copy constructer...
+      const Dune::InterfaceType interface = Dune::InteriorBorder_All_Interface;
+      const Dune::CommunicationDirection direction = Dune::ForwardCommunication;
+      typename DataType::CommDataHandle handle( update );
+      // auto commObject = grid.communicate( handle, interface, direction );
+      grid.communicate( handle, interface, direction );
+      dt = std::min(dt , scheme( time, solution, update ) );
+      // multiply time step by CFL number
+    }
     dt *= cfl;
     // stop time 
     const double solveTime = solveTimer.elapsed(); 
@@ -152,7 +165,6 @@ void method ( int problem, int startLvl, int maxLvl,
     // minimize time step over all processes
     dt = solution.gridView().comm().min( dt );
     // communicate update
-    update.communicate();
     const double commTime = commTimer.elapsed();
 
     // update solution
