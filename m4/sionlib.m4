@@ -6,11 +6,7 @@ AC_DEFUN([DUNE_PATH_SIONLIB],[
   AC_ARG_WITH(sionlib,
     AC_HELP_STRING([--with-sionlib=PATH],[directory with SIONLIB inside]))
   AC_ARG_WITH(sionlibsuffix,
-    AC_HELP_STRING([--with-sionlibsuffixe=SUFFIX],[suffix to the library name , e.g. gcc or something (default = "_64")]))
-  AC_ARG_WITH(sionlib-includedir,
-    AC_HELP_STRING([--with-sionlib-includedir=PATH],[directory with SIONLIB headers inside]))
-  AC_ARG_WITH(sionlib-libdir,
-    AC_HELP_STRING([--with-sionlib-libdir=PATH],[directory with SIONLIB libraries inside]))
+    AC_HELP_STRING([--with-sionlibsuffixe=SUFFIX],[suffix to the library name , e.g. gcc or something (default = "64")]))
 
 # store old values
 ac_save_LDFLAGS="$LDFLAGS"
@@ -23,7 +19,7 @@ if test x$with_sionlib != x && test x$with_sionlib != xno ; then
   SIONLIBYES=1
 fi
 
-SIONLIBSUFFIX="_64"
+SIONLIBSUFFIX="64"
 ## do nothing if no --with-sionlibnsuffix was supplied
 if test x$with_sionlibsuffix != x ; then
   SIONLIBSUFFIX=$with_sionlibsuffix
@@ -51,26 +47,14 @@ if test x$SIONLIBYES = x1 ; then
 
     SIONLIB_LIB_PATH="$SIONLIBROOT/lib"
     SIONLIB_INCLUDE_PATH="$SIONLIBROOT/include"
-  else 
-    if test "x$with_sionlib_includedir" != x ; then 
-      SIONLIB_INCLUDE_PATH=`cd $with_sionlib_includedir && pwd`
-      if ! test -d $SIONLIB_INCLUDE_PATH;  then
-        AC_MSG_WARN([SIONLIB directory $with_sionlib_includedir does not exist])
-      fi
-    fi
-    if test "x$with_sionlib_libdir" != x ; then 
-      SIONLIB_LIB_PATH=`cd $with_sionlib_libdir && pwd`
-      if ! test -d $SIONLIB_LIB_PATH;  then
-        AC_MSG_WARN([SIONLIB directory $with_sionlib_libdir does not exist])
-      fi
-    fi
-  fi
+    SIONLIB_BIN_PATH="$SIONLIBROOT/bin"
+  fi  
 
   # set variables so that tests can use them
   REM_CPPFLAGS=$CPPFLAGS
 
   LDFLAGS="$LDFLAGS -L$SIONLIB_LIB_PATH"
-  SIONLIB_INC_FLAG="-I$SIONLIB_INCLUDE_PATH -DENABLE_SIONLIB=1"
+  SIONLIB_INC_FLAG="`$SIONLIB_BIN_PATH/sionconfig --cflags` -DENABLE_SIONLIB=1"
   CPPFLAGS="$CPPFLAGS $SIONLIB_INC_FLAG $MPI_CPPFLAGS"
 
   # check for header
@@ -82,30 +66,19 @@ if test x$SIONLIBYES = x1 ; then
    
   CPPFLAGS="$REM_CPPFLAGS"
   REM_CPPFLAGS=
-
   REM_LDFLAGS=$LDFLAGS
 
   # if header is found...
   if test x$HAVE_SIONLIB = x1 ; then
-    FOUND_SIONLIB=1
-    LIBNAME="sion""$SIONLIBSUFFIX"
-    AC_CHECK_LIB($LIBNAME,[main],
-    [SIONLIB_LIBS="-l$LIBNAME"
-           SIONLIB_LDFLAGS="-L$SIONLIB_LIB_PATH"],
-	  [FOUND_SIONLIB="0"
-	  AC_MSG_WARN(lib$LIBNAME not found!)])
-
-    if test x$FOUND_SIONLIB = x0 ; then 
-      LIBLIST="sionser siongen sioncom sionmpi sionomp"
-      for LIBPREF in $LIBLIST ; do
-        LIBNAME="$LIBPREF""$SIONLIBSUFFIX"
-        AC_CHECK_LIB($LIBNAME,[main],
-        [SIONLIB_LIBS="$SIONLIB_LIBS -l$LIBNAME"
-               SIONLIB_LDFLAGS="-L$SIONLIB_LIB_PATH"],
-        [FOUND_SIONLIB="0"
-        AC_MSG_WARN(lib$LIBNAME not found!)])
-      done  
-    fi 
+    LIBLIST="`$SIONLIB_BIN_PATH/sionconfig --libs --mpi --be --$SIONLIBSUFFIX | cut -d " " -f2-`"
+    for LIBPREF in $LIBLIST ; do
+      LIBNAME="`echo "$LIBPREF" | sed 's/-l//'`"
+      AC_CHECK_LIB($LIBNAME,[main],
+      [SIONLIB_LIBS="$SIONLIB_LIBS -l$LIBNAME"
+       SIONLIB_LDFLAGS="-L$SIONLIB_LIB_PATH"],
+      [HAVE_SIONLIB="0"
+      AC_MSG_WARN(lib$LIBNAME not found!)])
+    done  
   fi
 
   LDFLAGS=$REM_LDFLAGS
