@@ -5,7 +5,7 @@ GRIDTYPE = ALUGRID_CUBE
 #GRIDTYPE = ALUGRID_CONFORM
 GRIDDIM = 3
 
-SUBDIRS = loadbalance dgf
+SUBDIRS = loadbalance dgf backuprestore
 
 EXTRA_DIST = alugrid.cfg 
 
