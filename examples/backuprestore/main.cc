@@ -6,27 +6,25 @@
 #include <iostream>
 /** dune (mpi, field-vector and grid type for dgf) **/
 #include <dune/common/fvector.hh>        
-#include <dune/common/timer.hh>        
 
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 /** backup and restore facility */
 #include <dune/grid/common/backuprestore.hh>
 
-/** numerical scheme **/
-//#include "piecewisefunction.hh"
-//#include "fvscheme.hh"
+// include mpi stuff before sionlib header
+#include <dune/common/parallel/mpihelper.hh>
 
-/** adaptation scheme **/
-//#include "adaptation.hh"
-
+// parallel dgf reading 
 #include "paralleldgf.hh"
 
+// SIONlib backup/restore 
+#include "sionlib.hh"
 
 // method
 // ------
 void method ( const std::string& gridFileName, 
-              const int startLvl )
+              const int startLvl, const int rank )
 {
   typedef Dune::GridSelector::GridType Grid;
 
@@ -66,16 +64,30 @@ void method ( const std::string& gridFileName,
 
     // create backup of grid to given outStream 
     std::ostream& out = stream ;
+    // out could also be an appropriate file stream to write to the hard disk
     Dune::BackupRestoreFacility< Grid > :: backup( grid, out );
+
+    // write backup to hard drive using SIONlib 
+    backupSION( "sionfile", rank, stream );
 
     // destroy grid  
     delete gridPtr ;
   }
 
+  const bool useSionLib = false ;
+
   // restore grid from stream and produce output 
   { 
+    std::stringstream restore ;
+
+    if( useSionLib ) 
+    {
+      // write backup to hard drive using SIONlib 
+      restoreSION( "sionfile", rank, restore );
+    }
+
     /* Grid construction using restore method */
-    std::istream& in = stream ;
+    std::istream& in = useSionLib ? restore : stream ;
 
     // the restore method returns an object of type Grid* 
     Grid* gridPtr = Dune::BackupRestoreFacility< Grid > :: restore( in ); 
@@ -121,9 +133,6 @@ try
     std::cout << "WARNING: Using old ALUGrid version from dune-grid." << std::endl;
 #endif
      
-  // meassure program time 
-  Dune::Timer timer ;
-
   /* create problem */
   const char* gridFileName = (argc > 1) ? argv[ 1 ] : "./dgf/unitcube3d.dgf";
 
@@ -131,7 +140,7 @@ try
   const int startLevel = (argc > 2 ? atoi( argv[ 2 ] ) : 0);
 
   // method does a backup and restore of the given grid 
-  method( gridFileName, startLevel );
+  method( gridFileName, startLevel, mpi.rank() );
 
   /* done */
   return 0;

@@ -5,7 +5,7 @@ DATACLEANFILES = dgfparser.log
 CLEANFILES = $(DATACLEANFILES)
 
 exampleslbdir = $(includedir)/examples/backuprestore
-exampleslb_HEADERS = 
+exampleslb_HEADERS = sionlib.hh
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
