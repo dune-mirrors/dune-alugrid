@@ -2,6 +2,9 @@ AC_DEFUN([DUNE_ALUGRID_CHECKS],[
   dnl check for DL malloc files
   AC_REQUIRE([ALUGRID_PATH_DLMALLOC])
 
+  dnl check for sionlib 
+  AC_REQUIRE([DUNE_PATH_SIONLIB])
+
   dnl check for ZOLTAN library 
   AC_REQUIRE([DUNE_PATH_ZOLTAN])
 
