@@ -1086,7 +1086,7 @@ namespace ALUGrid
       ObjectStream os;
       os.reserve( header.size() );
       os.clear();
-      ALUGrid::readBinary( in, os.getBuff( 0 ), header.size(), header.binaryFormat() );
+      ALUGrid::readBinary( in, os.raw(), header.size(), header.binaryFormat() );
       if( !in )
       {
         std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;

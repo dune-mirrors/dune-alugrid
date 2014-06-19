@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <dune/alugrid/impl/macrofileheader.hh>
+#include <dune/alugrid/impl/binaryio.hh>
 
 #include "mapp_cube_3d.h"
 #include "mapp_tetra_3d.h"
@@ -740,16 +741,38 @@ namespace ALUGrid
       std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::backup( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
       std::abort();
     }
-    header.setFormat( MacroFileHeader::ascii );
-    header.setSystemByteOrder();
-    header.write( os );
 
-    // set precision for ostreams (different for each stream)
-    os.setf( std::ios::fixed, std::ios::floatfield );
-    os.precision( ALUGridExternalParameters::precision() );
-    os << std::scientific;
-    
-    backupImpl( os );
+    // default is compressed binary if zlib was found, binary otherwise
+    MacroFileHeader::Format format 
+#if HAVE_ZLIB 
+      = MacroFileHeader::zbinary ;
+#else
+      = MacroFileHeader::binary ;
+#endif
+
+    header.setFormat( format );
+    header.setSystemByteOrder();
+
+    if( format == MacroFileHeader::ascii ) 
+    {
+      // write header, for ascii it's complete here
+      header.write( os );
+      // set precision for ostreams (different for each stream)
+      os.setf( std::ios::fixed, std::ios::floatfield );
+      os.precision( ALUGridExternalParameters::precision() );
+      os << std::scientific;
+      backupImpl( os );
+    }
+    else // binary or zbinary 
+    {
+      ObjectStream data;
+      backupImpl( data );
+      // get data size and then write header
+      header.setSize( data.size() );
+      header.write( os );
+      // write binary data to stream 
+      writeBinary( os, data.raw(), data.size(), header.binaryFormat() );
+    }
   }
 
   template<class ostream_t>
