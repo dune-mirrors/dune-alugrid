@@ -260,6 +260,9 @@ namespace ALUGrid
       memcpy( buff, getBuff(_rb), length );
       _rb = newRb;
     }
+
+    // return pointer to buffer memory 
+    inline char* raw () { return getBuff( 0 ); }
     
     inline char * getBuff (const size_t ap) { return (_buf + ap); }
     inline const char * getBuff (const size_t ap) const { return (_buf + ap); }
