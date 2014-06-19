@@ -12,11 +12,12 @@
 #include <dune/common/parallel/mpihelper.hh>
 
 #if HAVE_SIONLIB
+#define SION_MPI
 #include <sion.h>
 #endif
 
 inline void backupSION( const std::string& filename,          // filename 
-                        int rank,                             // MPI rank 
+                        const int rank,                             // MPI rank 
                         const std::stringstream& datastream ) // data stream 
 {
   // get MPI communicator 
@@ -40,21 +41,23 @@ inline void backupSION( const std::string& filename,          // filename
   int numFiles = 1; // user dependent choice of number of files
 
   // block size of filesystem, -1 use system default 
-  int blockSize = 512 ;
+  int blockSize = -1 ;
 
   // file pointer 
   FILE* file = 0;
 
+  int sRank = rank ;
+
   // open sion file 
   int sid =
     sion_paropen_mpi( (char *) filename.c_str(),
-                      (char *) fileMode,
+                      fileMode,
                       &numFiles, // number of physical files 
                       mpiComm, // global comm 
                       &mpiComm, // local comm 
                       &chunkSize, // maximal size of data to be written 
                       &blockSize, // filesystem block size
-                      &rank, // my rank 
+                      &sRank, // my rank 
                       &file, // file pointer that is set by sion lib
                       NULL
                     );
@@ -67,7 +70,10 @@ inline void backupSION( const std::string& filename,          // filename
   const char* buffer = data.c_str();
   // write data 
   assert( sizeof(char) == 1 );
+  sion_fwrite( &chunkSize, sizeof(sion_int64), 1, sid);
   sion_fwrite( buffer, 1, chunkSize, sid);
+
+  std::cout << chunkSize << " wrote chunk " << std::endl;
 
   // close file 
   sion_parclose_mpi( sid );
@@ -76,7 +82,7 @@ inline void backupSION( const std::string& filename,          // filename
 }
 
 inline void restoreSION( const std::string& filename,    // filename 
-                         int rank,                       // MPI rank 
+                         const int rank,                 // MPI rank 
                          std::stringstream& datastream ) // data stream 
 {
   // get MPI communicator 
@@ -87,11 +93,12 @@ inline void restoreSION( const std::string& filename,    // filename
 #if HAVE_SIONLIB && HAVE_MPI
   // chunkSize is set by sion_paropen_mpi 
   sion_int64 chunkSize = 0;
+
   // file mode is: read byte 
   const char* fileMode = "rb";
 
   // blockSize, is recovered from stored files 
-  int blockSize = 512;
+  int blockSize = -1 ;
 
   // file handle 
   FILE* file = 0;
@@ -99,23 +106,26 @@ inline void restoreSION( const std::string& filename,    // filename
   // number of files, is overwritten by sion_open 
   int numFiles = 1;
 
+  int sRank = rank ;
+
   // open sion file 
   int sid = sion_paropen_mpi( (char *) filename.c_str(),
-                              (char *) fileMode,
+                              fileMode,
                               &numFiles, // numFiles 
                               mpiComm, // global comm 
                               &mpiComm, // local comm 
                               &chunkSize, // is set by library
                               &blockSize, // block size
-                              &rank, // my rank 
+                              &sRank, // my rank 
                               &file, // file pointer that is set by sion lib
                               NULL
                             );
 
-  std::cout << chunkSize << " read chunksize" << std::endl;
-
   if( sid == -1 )
     DUNE_THROW( Dune::IOError, "opening sion_paropen_mpi for reading failed!" << filename );
+
+  // read chunk size that was stored 
+  sion_fread( &chunkSize, sizeof(sion_int64), 1, sid );
 
   // create buffer 
   std::string data; 
@@ -127,9 +137,7 @@ inline void restoreSION( const std::string& filename,    // filename
   assert( sizeof(char) == 1 );
 
   // read data 
-  int nitems = sion_fread( buffer, 1, chunkSize, sid );
-
-  std::cout << "Data read " << nitems << std::endl;
+  sion_fread( buffer, 1, chunkSize, sid );
 
   // write data to stream 
   datastream.write( buffer, chunkSize );

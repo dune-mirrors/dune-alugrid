@@ -62,10 +62,8 @@ void method ( const std::string& gridFileName,
     /* output the restored grid */
     vtk.write( "original" );
 
-    // create backup of grid to given outStream 
-    std::ostream& out = stream ;
-    // out could also be an appropriate file stream to write to the hard disk
-    Dune::BackupRestoreFacility< Grid > :: backup( grid, out );
+    // instead of stringstream we could also use any other std::ostream 
+    Dune::BackupRestoreFacility< Grid > :: backup( grid, stream );
 
     // write backup to hard drive using SIONlib 
     backupSION( "sionfile", rank, stream );
@@ -74,7 +72,7 @@ void method ( const std::string& gridFileName,
     delete gridPtr ;
   }
 
-  const bool useSionLib = false ;
+  const bool useSionLib = true ;
 
   // restore grid from stream and produce output 
   { 
@@ -90,6 +88,7 @@ void method ( const std::string& gridFileName,
     std::istream& in = useSionLib ? restore : stream ;
 
     // the restore method returns an object of type Grid* 
+    // the user takes control of this object 
     Grid* gridPtr = Dune::BackupRestoreFacility< Grid > :: restore( in ); 
 
     // get grid reference 
