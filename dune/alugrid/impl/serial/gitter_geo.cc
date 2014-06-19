@@ -767,8 +767,9 @@ namespace ALUGrid
     {
       ObjectStream data;
       backupImpl( data );
-      // get data size and then write header
+      // get data size and store in header 
       header.setSize( data.size() );
+      // write header and then data 
       header.write( os );
       // write binary data to stream 
       writeBinary( os, data.raw(), data.size(), header.binaryFormat() );
