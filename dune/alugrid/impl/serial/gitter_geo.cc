@@ -742,13 +742,9 @@ namespace ALUGrid
       std::abort();
     }
 
-    // default is compressed binary if zlib was found, binary otherwise
-    MacroFileHeader::Format format 
-#if HAVE_ZLIB 
-      = MacroFileHeader::zbinary ;
-#else
-      = MacroFileHeader::binary ;
-#endif
+    // default is binary 
+    MacroFileHeader::Format format = MacroFileHeader::binary ;
+    //MacroFileHeader::Format format = MacroFileHeader::ascii ;
 
     header.setFormat( format );
     header.setSystemByteOrder();
