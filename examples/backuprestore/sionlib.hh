@@ -68,12 +68,10 @@ inline void backupSION( const std::string& filename,          // filename
 
   // get pointer to buffer 
   const char* buffer = data.c_str();
-  // write data 
-  assert( sizeof(char) == 1 );
+  // write size of data
   sion_fwrite( &chunkSize, sizeof(sion_int64), 1, sid);
-  sion_fwrite( buffer, 1, chunkSize, sid);
-
-  std::cout << chunkSize << " wrote chunk " << std::endl;
+  // write data 
+  sion_fwrite( buffer, sizeof(char), chunkSize, sid);
 
   // close file 
   sion_parclose_mpi( sid );
@@ -127,20 +125,16 @@ inline void restoreSION( const std::string& filename,    // filename
   // read chunk size that was stored 
   sion_fread( &chunkSize, sizeof(sion_int64), 1, sid );
 
-  // create buffer 
-  std::string data; 
-  data.resize( chunkSize );
-  assert( sizeof(char) == 1 );
-
-  // get pointer to buffer 
-  char* buffer = (char *) data.c_str();
-  assert( sizeof(char) == 1 );
+  // create data buffer 
+  char* buffer = new char[ chunkSize ];
 
   // read data 
-  sion_fread( buffer, 1, chunkSize, sid );
+  sion_fread( buffer, sizeof(char), chunkSize, sid );
 
   // write data to stream 
   datastream.write( buffer, chunkSize );
+
+  delete [] buffer ;
 
 #endif // HAVE_SIONLIB && HAVE_MPI
 }
