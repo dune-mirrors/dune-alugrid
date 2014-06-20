@@ -21,6 +21,33 @@
 // SIONlib backup/restore 
 #include "sionlib.hh"
 
+void restoreGrid( const std::string& method, 
+                  std::istream& in )
+{
+  typedef Dune::GridSelector::GridType Grid;
+  typedef Grid::Partition< Dune::Interior_Partition >::LeafGridView GridView;
+
+  /* Grid construction using restore method */
+  // the restore method returns an object of type Grid* 
+  // the user takes control of this object 
+  Grid* gridPtr = Dune::BackupRestoreFacility< Grid > :: restore( in ); 
+
+  // get grid reference 
+  Grid &grid = *gridPtr;
+
+  /* get view to leaf grid */
+  GridView gridView = grid.leafGridView< Dune::Interior_Partition >();
+
+  /* create VTK writer */
+  Dune::VTKWriter< GridView > vtk( gridView );
+
+  /* output the restored grid */
+  vtk.write( method );
+
+  // delete grid 
+  delete gridPtr ;
+}
+
 // method
 // ------
 void method ( const std::string& gridFileName, 
@@ -34,6 +61,7 @@ void method ( const std::string& gridFileName,
 
   // backup and restore stream 
   std::stringstream stream ; 
+  std::string filename;
 
   {
     /* Grid construction ... */
@@ -65,48 +93,57 @@ void method ( const std::string& gridFileName,
     // instead of stringstream we could also use any other std::ostream 
     Dune::BackupRestoreFacility< Grid > :: backup( grid, stream );
 
+    // also write backup to hard disk
+    std::stringstream filenamestr;
+    filenamestr << "checkpoint." << grid.comm().rank();
+    // store file name for restore 
+    filename = filenamestr.str();
+
+    // create checkpoint file 
+    std::ofstream file( filename );
+    // if file was opened 
+    if( file ) 
+    {
+      // write backup to given file 
+      Dune::BackupRestoreFacility< Grid > :: backup( grid, file );
+    }
+
     // write backup to hard drive using SIONlib 
-    backupSION( "sionfile", rank, stream );
+    // (alternative to writing one file per core above)
+    backupSION( "sioncheckpoint", rank, stream );
 
     // destroy grid  
     delete gridPtr ;
+  } 
+  
+  ///////////////////////////////////////////////////////////////
+  //
+  // Now we will recreate the grid using the different backups 
+  //
+  ///////////////////////////////////////////////////////////////
+
+  // restore grid from above stringstream
+  { 
+    restoreGrid( "internalrestore", stream );
   }
 
-  const bool useSionLib = true ;
-
-  // restore grid from stream and produce output 
+  // restore grid from stream sionlib file 
   { 
     std::stringstream restore ;
+    // write backup to hard drive using SIONlib 
+    restoreSION( "sioncheckpoint", rank, restore );
 
-    if( useSionLib ) 
-    {
-      // write backup to hard drive using SIONlib 
-      restoreSION( "sionfile", rank, restore );
-    }
+    restoreGrid( "sionrestore", restore );
+  }
 
-    /* Grid construction using restore method */
-    std::istream& in = useSionLib ? restore : stream ;
-
-    // the restore method returns an object of type Grid* 
-    // the user takes control of this object 
-    Grid* gridPtr = Dune::BackupRestoreFacility< Grid > :: restore( in ); 
-
-    // get grid reference 
-    Grid &grid = *gridPtr;
-
-    /* get view to leaf grid */
-    GridView gridView = grid.leafGridView< Dune::Interior_Partition >();
-
-    /* create VTK writer */
-    Dune::VTKWriter< GridView > vtk( gridView );
-
-    /* output the restored grid */
-    vtk.write( "restored" );
-
-    // delete grid 
-    delete gridPtr ;
+  // restore grid from file stream 
+  std::ifstream file( filename );
+  if( file ) 
+  {
+    restoreGrid( "filerestore", file );
   }
 }
+
 /***************************************************
  ** main program with parameters:                 **
  ** 1) number of problem to use (initial data...) **
