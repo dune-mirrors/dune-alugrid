@@ -153,6 +153,7 @@ void method ( int problem, int startLvl, int maxLvl,
 
     // update vector might not be of the right size if grid has changed
     update.resize();
+    update.clear();
 
     Dune :: Timer solveTimer ;
     // apply the spacial operator
