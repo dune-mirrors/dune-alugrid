@@ -173,6 +173,8 @@ namespace ALUGrid
 
       // return handle for non-blocking exchange 
       virtual NonBlockingExchange* nonBlockingExchange ( const int tag ) const = 0;
+      // return handle for non-blocking exchange
+      virtual NonBlockingExchange *nonBlockingExchange () const = 0;
   } ;
 
 

@@ -986,6 +986,11 @@ namespace ALUGrid
     return new NonBlockingExchangeMPI( *this, tag );
   }
 
+  inline MpAccessMPI::NonBlockingExchange *MpAccessMPI::nonBlockingExchange () const
+  {
+    return new NonBlockingExchangeMPI( *this, getMessageTag() );
+  }
+
   // --exchange
   inline std::vector< ObjectStream > MpAccessMPI::exchange (const std::vector< ObjectStream > & in) const 
   {

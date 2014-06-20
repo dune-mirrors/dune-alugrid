@@ -141,6 +141,8 @@ namespace ALUGrid
     NonBlockingExchange* nonBlockingExchange( const int tag, const std::vector< ObjectStream > & ) const;
     // return handle for non-blocking exchange
     NonBlockingExchange* nonBlockingExchange( const int tag ) const;
+    // return handle for non-blocking exchange
+    NonBlockingExchange *nonBlockingExchange () const;
   };
 
   //
