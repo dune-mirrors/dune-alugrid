@@ -17,7 +17,7 @@
 #endif
 
 inline void backupSION( const std::string& filename,          // filename 
-                        const int rank,                             // MPI rank 
+                        const int rank,                       // MPI rank 
                         const std::stringstream& datastream ) // data stream 
 {
   // get MPI communicator 
@@ -31,7 +31,7 @@ inline void backupSION( const std::string& filename,          // filename
 
   // get chunk size for this process 
   // use sionlib int64 
-  sion_int64 chunkSize = data.size();
+  sion_int64 chunkSize = data.size() + sizeof( sion_int64 );
 
   // file mode is: write byte 
   const char* fileMode = "wb";
@@ -52,13 +52,13 @@ inline void backupSION( const std::string& filename,          // filename
   int sid =
     sion_paropen_mpi( (char *) filename.c_str(),
                       fileMode,
-                      &numFiles, // number of physical files 
-                      mpiComm, // global comm 
-                      &mpiComm, // local comm 
+                      &numFiles,  // number of physical files 
+                      mpiComm,    // global comm 
+                      &mpiComm,   // local comm 
                       &chunkSize, // maximal size of data to be written 
                       &blockSize, // filesystem block size
-                      &sRank, // my rank 
-                      &file, // file pointer that is set by sion lib
+                      &sRank,     // my rank 
+                      &file,      // file pointer that is set by sion lib
                       NULL
                     );
   if( sid == -1 )
@@ -109,13 +109,13 @@ inline void restoreSION( const std::string& filename,    // filename
   // open sion file 
   int sid = sion_paropen_mpi( (char *) filename.c_str(),
                               fileMode,
-                              &numFiles, // numFiles 
-                              mpiComm, // global comm 
-                              &mpiComm, // local comm 
+                              &numFiles,  // numFiles 
+                              mpiComm,    // global comm 
+                              &mpiComm,   // local comm 
                               &chunkSize, // is set by library
                               &blockSize, // block size
-                              &sRank, // my rank 
-                              &file, // file pointer that is set by sion lib
+                              &sRank,     // my rank 
+                              &file,      // file pointer that is set by sion lib
                               NULL
                             );
 
