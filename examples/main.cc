@@ -165,6 +165,7 @@ void method ( int problem, int startLvl, int maxLvl,
     GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
     size_t elements = scheme.mark( time, solution, gridMarker );
 
+#ifndef NO_OUTPUT
     /* check if data should be written */
     if( time >= saveStep )
     {
@@ -193,6 +194,7 @@ void method ( int problem, int startLvl, int maxLvl,
         std::cout << std::endl;
       }
     }
+#endif
 
     /* call adaptation algorithm */
     if( gridMarker.marked() )

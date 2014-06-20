@@ -14,7 +14,10 @@ CLEANFILES = $(DATACLEANFILES)
 
 #USE_OMP=-fopenmp
 
-# AM_CPPFLAGS += -DUSE_VECTOR_FOR_PWF
+# extra flags: -DUSE_VECTOR_FOR_PWF -DNO_OUTPUT
+EXTRAFLAGS = 
+
+AM_CPPFLAGS += $(EXTRAFLAGS)
 
 examplesdir = $(includedir)/examples
 examples_HEADERS = \
