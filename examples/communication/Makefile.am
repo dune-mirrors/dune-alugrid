@@ -14,6 +14,11 @@ CLEANFILES = $(DATACLEANFILES)
 
 #USE_OMP=-fopenmp
 
+# extra flags: -DUSE_VECTOR_FOR_PWF -DNO_OUTPUT
+EXTRAFLAGS = 
+
+AM_CPPFLAGS += $(EXTRAFLAGS)
+
 communicationdir = $(includedir)/examples/communication
 communication_HEADERS = \
   adaptation.hh        diagnostics.hh  piecewisefunction.hh  problem-euler.hh \

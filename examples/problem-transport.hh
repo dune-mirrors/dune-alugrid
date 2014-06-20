@@ -289,7 +289,9 @@ struct TransportModel
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const
   {
-    return indicator( normal,time,xGlobal, uLeft, problem().boundaryValue(xGlobal,time) );
+    DomainType x0( xGlobal );                                                                    
+    x0.axpy( -time, velocity_ );                                                           
+    return indicator( normal,time,xGlobal, uLeft, problem().boundaryValue(x0,time) );
   }
 
 protected:

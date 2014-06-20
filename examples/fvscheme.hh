@@ -388,7 +388,7 @@ inline size_t FiniteVolumeScheme< V, Model >
         const GlobalType point = intersectionGeometry.center();
         GlobalType normal = intersection.centerUnitOuterNormal();
         // compute indicator for this intersection
-        localIndicator  = model_.indicator( normal, time, point, uLeft, uRight );
+        localIndicator = model_.indicator( normal, time, point, uLeft, uRight );
       }
 
       // for coarsening we need maximum indicator over all intersections
