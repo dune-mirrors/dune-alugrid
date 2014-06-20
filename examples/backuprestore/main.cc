@@ -104,11 +104,12 @@ void method ( const std::string& gridFileName,
     // if file was opened 
     if( file ) 
     {
-      // instead of stringstream we could also use any other std::ostream 
+      // write backup to given file 
       Dune::BackupRestoreFacility< Grid > :: backup( grid, file );
     }
 
-    // write backup to hard drive using SIONlib (alternative to writing one file per core)
+    // write backup to hard drive using SIONlib 
+    // (alternative to writing one file per core above)
     backupSION( "sioncheckpoint", rank, stream );
 
     // destroy grid  
@@ -121,6 +122,11 @@ void method ( const std::string& gridFileName,
   //
   ///////////////////////////////////////////////////////////////
 
+  // restore grid from above stringstream
+  { 
+    restoreGrid( "internalrestore", stream );
+  }
+
   // restore grid from stream sionlib file 
   { 
     std::stringstream restore ;
@@ -130,18 +136,11 @@ void method ( const std::string& gridFileName,
     restoreGrid( "sionrestore", restore );
   }
 
-  // restore grid from above stringstream
-  { 
-    restoreGrid( "internalrestore", stream );
-  }
-
   // restore grid from file stream 
-  { 
-    std::ifstream file( filename );
-    if( file ) 
-    {
-      restoreGrid( "checkpointrestore", file );
-    }
+  std::ifstream file( filename );
+  if( file ) 
+  {
+    restoreGrid( "filerestore", file );
   }
 }
 
