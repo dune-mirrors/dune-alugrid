@@ -3,6 +3,7 @@ GRIDDIM = 3
 
 DATACLEANFILES = dgfparser.log
 CLEANFILES = $(DATACLEANFILES)
+# AM_CPPFLAGS += -DUSE_VECTOR_FOR_PWF
 
 exampleslbdir = $(includedir)/examples/loadbalanacing
 exampleslb_HEADERS = \
@@ -20,7 +21,7 @@ partition_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 partition_LDADD = $(LDADD) $(DUNEMPILIBS)
 
 main_internal_SOURCES = main.cc
-main_internal_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS)  -DTRANSPORT 
+main_internal_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DTRANSPORT
 main_internal_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 main_internal_LDADD = $(LDADD) $(DUNEMPILIBS)
 

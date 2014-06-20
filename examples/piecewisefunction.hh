@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 
+#include <dune/common/dynvector.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriter.hh>
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
@@ -46,6 +47,11 @@ public:
       val_ *= scalar; 
       return *this;
     }
+    Data& operator /= ( const typename RangeType :: value_type& scalar ) 
+    {
+      val_ /= scalar; 
+      return *this;
+    }
 
     void axpy( const typename RangeType :: value_type& scalar,
                const RangeType& other ) 
@@ -53,12 +59,18 @@ public:
       val_.axpy( scalar, other );
     }
 
+    Data &operator=(const typename RangeType :: value_type& scalar)
+    {
+      val_ = scalar;
+      return *this;
+    }
+
     bool visited () const { return visited_; }
     void markVisited () { visited_ = true ; }
   };
 
-#ifdef USE_STD_VECTOR_FOR_PWF
-  typedef std::vector< Data > VectorType; 
+#ifdef USE_VECTOR_FOR_PWF
+  typedef Dune :: DynamicVector< Data > VectorType; 
 #else
   typedef Dune :: PersistentContainer< Grid, Data > VectorType;
 #endif
@@ -71,7 +83,8 @@ public:
   /* vector of all dofs on an codim 0 entity */
   typedef RangeType LocalDofVector;
 
-private:
+// private:
+public:
   struct CommDataHandle;
 
 public:
@@ -81,7 +94,7 @@ public:
    */
   PiecewiseFunction( const GridView &gridView )
   : gridView_( gridView ),
-#ifdef USE_STD_VECTOR_FOR_PWF
+#ifdef USE_VECTOR_FOR_PWF
     dof_( gridView.indexSet().size( 0 ) )
 #else
     dof_( gridView.grid(), 0 ) // codim 0
@@ -94,7 +107,10 @@ public:
    *
    *  \returns a reference to the DoFs of the entity
    */
-  const RangeType &operator[] ( const Entity &entity ) const;
+  const RangeType &operator[] ( const Entity &entity ) const
+  {
+    return data(entity);
+  }
 
   /** \brief access the DoFs on one entity (of codimension 0)
    *
@@ -102,7 +118,10 @@ public:
    *
    *  \returns a reference to the DoFs of the entity
    */
-  RangeType &operator[] ( const Entity &entity );
+  RangeType &operator[] ( const Entity &entity )
+  {
+    return data(entity);
+  }
 
   /** \brief evaluate the discrete function at an arbitrary point on the
    *         reference element 
@@ -205,37 +224,44 @@ public:
   /** \brief copy interior cell data to overlap of ghost cells */
   void communicate ();
 
+  const bool visitElement ( const Entity& entity ) const 
+  {
+    return !data(entity).visited();
+  }
   const bool visitNeighbor ( const Entity& entity, const Entity& neighbor ) const 
   {
-    return (entity.level() > neighbor.level()) ||
-           ((entity.level() == neighbor.level()) 
-            && ! dof_[ neighbor ].visited() );
+    return !data(neighbor).visited();
   }
-
   void visited( const Entity& entity ) 
   {
-    dof_[ entity ].markVisited();
+    data(entity).markVisited();
+  }
+  VectorType &container() 
+  {
+    return dof_;
   }
 
 private:  
+  const Data &data ( const Entity &entity ) const
+  {
+#ifdef USE_VECTOR_FOR_PWF
+    return dof_[ gridView().indexSet().index(entity) ];
+#else
+    return dof_[ entity ];
+#endif
+  }
+  Data &data ( const Entity &entity ) 
+  {
+#ifdef USE_VECTOR_FOR_PWF
+    return dof_[ gridView().indexSet().index(entity) ];
+#else
+    return dof_[ entity ];
+#endif
+  }
   GridView gridView_;
   /* storage for dofs */
   VectorType dof_;
 };
-
-template< class View, class Range >
-inline const typename PiecewiseFunction< View, Range >::RangeType &
-PiecewiseFunction< View, Range >::operator[] ( const Entity &entity ) const
-{
-  return dof_[ entity ];
-}
-
-template< class View, class Range >
-inline typename PiecewiseFunction< View, Range >::RangeType &
-PiecewiseFunction< View, Range >::operator[] ( const Entity &entity )
-{
-  return dof_[ entity ];
-}
 
 template< class View, class Range >
 template< class ProblemData >
@@ -311,7 +337,7 @@ inline void PiecewiseFunction< View, Range >::clear ()
 template< class View, class Range >
 inline void PiecewiseFunction< View, Range >::resize ()
 {
-#ifdef USE_STD_VECTOR_FOR_PWF
+#ifdef USE_VECTOR_FOR_PWF
   const size_t newSize = gridView().indexSet().size( 0 );
   if( dof_.capacity() < newSize ) 
   {
@@ -350,7 +376,7 @@ inline void PiecewiseFunction< View, Range >
   const LocalDofMap &clocalDofs = localDofs;
   typedef typename Entity::HierarchicIterator HierarchicIterator;
 
-  LocalDofVector &fatherValue = localDofs[ father ];
+  typename LocalDofMap::Value &fatherValue = localDofs[ father ];
 
   double volume = 0;
   // reset fatherValue to zero 
@@ -379,7 +405,7 @@ inline void PiecewiseFunction< View, Range >
   const LocalDofMap &clocalDofs = localDofs;
   typedef typename Entity::HierarchicIterator HierarchicIterator;
 
-  const LocalDofVector &fatherValue = clocalDofs[ father ];
+  const typename LocalDofMap::Value &fatherValue = clocalDofs[ father ];
 
   const int childLevel = father.level() + 1;
   const HierarchicIterator hend = father.hend( childLevel );

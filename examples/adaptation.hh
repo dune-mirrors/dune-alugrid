@@ -44,8 +44,12 @@ public:
   // types of entity, entity pointer and geometry
   typedef typename Grid::template Codim< 0 >::Entity Entity;
 
+#ifdef USE_VECTOR_FOR_PWF
   // container to keep data save during adaptation and load balancing
   typedef Dune::PersistentContainer<Grid,typename Vector::LocalDofVector> Container;
+#else
+  typedef typename Vector::VectorType Container;
+#endif
 
   // type of grid view used 
   typedef typename Vector :: GridView  GridView;
@@ -59,8 +63,10 @@ public:
    */
   LeafAdaptation ( Grid &grid, const int balanceStep = 1 )
   : grid_( grid ),
+#ifdef USE_VECTOR_FOR_PWF
     // create persistent container for codimension 0
-    container_( grid_, 0 ),
+    container_( grid_, 0 ),     // in this version we need to provide extra storage for the dofs
+#endif
     solution_( 0 ),
     adaptTimer_(),
     balanceStep_( balanceStep ),
@@ -112,7 +118,9 @@ private:
   const Vector& getSolution() const { assert( solution_ ); return *solution_; }
 
   Grid&              grid_;
+#ifdef USE_VECTOR_FOR_PWF
   mutable Container  container_;
+#endif
   Vector*            solution_;
 
   Dune :: Timer      adaptTimer_ ; 
@@ -131,6 +139,10 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
 {
   if (Dune :: Capabilities :: isCartesian<Grid> :: v)
     return;
+
+#ifndef USE_VECTOR_FOR_PWF
+  Container &container_ = solution.container();
+#endif
 
   // set pointer to solution 
   solution_ = & solution ;
@@ -183,6 +195,7 @@ template< class Grid, class Vector >
 inline void LeafAdaptation< Grid, Vector >
   ::preAdapt( const unsigned int estimateAdditionalElements ) 
 {
+#ifdef USE_VECTOR_FOR_PWF
   const Vector& solution = getSolution();
   const GridView &gridView = solution.gridView();
 
@@ -193,11 +206,17 @@ inline void LeafAdaptation< Grid, Vector >
     const Entity &entity = *it;
     solution.getLocalDofVector( entity, container_[ entity ] );
   }
+#endif
 }
 
 template< class Grid, class Vector >
 inline void LeafAdaptation< Grid, Vector >::postAdapt() 
 {
+  Vector& solution = getSolution();
+#ifndef USE_VECTOR_FOR_PWF
+  Container &container_ = solution.container();
+#endif
+
   adaptTime_ = adaptTimer_.elapsed();
 
   bool callBalance = ( (balanceCounter_ >= balanceStep_) && (balanceStep_ > 0) );
@@ -219,19 +238,19 @@ inline void LeafAdaptation< Grid, Vector >::postAdapt()
     lbTime_ = lbTimer.elapsed();
   }
 
+
   // reduce size of container, if possible 
   container_.resize();
 
+#ifdef USE_VECTOR_FOR_PWF
   // reset timer to count again 
   adaptTimer_.reset();
-
-  Vector& solution = getSolution();
-  const GridView &gridView = solution.gridView();
 
   // resize to current grid size 
   solution.resize();
 
   // retrieve data from container and store on new leaf grid
+  const GridView &gridView = solution.gridView();
   const Iterator end = gridView.template end  < 0, partition >();
   for(  Iterator it  = gridView.template begin< 0, partition >(); it != end; ++it )
   {
@@ -241,6 +260,7 @@ inline void LeafAdaptation< Grid, Vector >::postAdapt()
 
   // store adaptation time 
   adaptTime_ += adaptTimer_.elapsed();
+#endif
 
   Dune::Timer commTimer ;
   // copy data to ghost entities
