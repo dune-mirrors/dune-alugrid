@@ -1,7 +1,7 @@
 GRIDTYPE = ALUGRID_CUBE
 GRIDDIM = 3
 
-DATACLEANFILES = dgfparser.log
+DATACLEANFILES = dgfparser.log sioncheckpoint checkpoint.* *.*vtu
 CLEANFILES = $(DATACLEANFILES)
 
 exampleslbdir = $(includedir)/examples/backuprestore
