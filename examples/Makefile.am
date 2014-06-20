@@ -14,6 +14,8 @@ CLEANFILES = $(DATACLEANFILES)
 
 #USE_OMP=-fopenmp
 
+# AM_CPPFLAGS += -DUSE_VECTOR_FOR_PWF
+
 examplesdir = $(includedir)/examples
 examples_HEADERS = \
   adaptation.hh        diagnostics.hh  piecewisefunction.hh  problem-euler.hh \
