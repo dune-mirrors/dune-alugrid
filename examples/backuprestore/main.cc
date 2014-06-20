@@ -96,13 +96,11 @@ void method ( const std::string& gridFileName,
     // also write backup to hard disk
     std::stringstream filenamestr;
     filenamestr << "checkpoint." << grid.comm().rank();
+    // store file name for restore 
     filename = filenamestr.str();
 
     // create checkpoint file 
     std::ofstream file( filename );
-    // instead of stringstream we could also use any other std::ostream 
-    Dune::BackupRestoreFacility< Grid > :: backup( grid, stream );
-
     // if file was opened 
     if( file ) 
     {
@@ -111,7 +109,7 @@ void method ( const std::string& gridFileName,
     }
 
     // write backup to hard drive using SIONlib (alternative to writing one file per core)
-    backupSION( "sionfile", rank, stream );
+    backupSION( "sioncheckpoint", rank, stream );
 
     // destroy grid  
     delete gridPtr ;
@@ -127,7 +125,7 @@ void method ( const std::string& gridFileName,
   { 
     std::stringstream restore ;
     // write backup to hard drive using SIONlib 
-    restoreSION( "sionfile", rank, restore );
+    restoreSION( "sioncheckpoint", rank, restore );
 
     restoreGrid( "sionrestore", restore );
   }
@@ -146,6 +144,7 @@ void method ( const std::string& gridFileName,
     }
   }
 }
+
 /***************************************************
  ** main program with parameters:                 **
  ** 1) number of problem to use (initial data...) **
