@@ -17,7 +17,6 @@
 #include <dune/grid/common/sizecache.hh>
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/grid/common/defaultgridview.hh>
 
 // bnd projection stuff 
 #include <dune/grid/common/boundaryprojection.hh>
@@ -32,6 +31,8 @@
 #include "indexsets.hh"
 #include "datahandle.hh"
 
+#include <dune/alugrid/3d/communication.hh>
+#include <dune/alugrid/3d/gridview.hh>
 #include <dune/alugrid/3d/lbdatahandle.hh>
 
 #include <dune/common/parallel/mpihelper.hh>
@@ -352,8 +353,8 @@ namespace Dune
       template< PartitionIteratorType pitype >
       struct Partition
       {
-        typedef Dune::GridView<DefaultLevelGridViewTraits< const Grid, pitype > > LevelGridView;
-        typedef Dune::GridView<DefaultLeafGridViewTraits< const Grid, pitype > > LeafGridView;
+        typedef Dune::GridView< ALU3dLevelGridViewTraits< const Grid, pitype > > LevelGridView;
+        typedef Dune::GridView< ALU3dLeafGridViewTraits< const Grid, pitype > > LeafGridView;
         typedef Dune::MacroGridView<const Grid, pitype> MacroGridView;
       }; // struct Partition
       typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
@@ -529,6 +530,9 @@ namespace Dune
 
     //! type of collective communication object
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
+
+    typedef ALULeafCommunication< elType, Comm > LeafCommunication;
+    typedef ALULevelCommunication< elType, Comm > LevelCommunication;
 
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject; 
@@ -747,7 +751,10 @@ namespace Dune
     const typename Traits :: LeafIndexSet & leafIndexSet () const; 
 
     //! get level index set of the grid
-    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const;
+    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const
+    {
+      return *(levelIndexVec_[ level ] = getLevelIndexSet( level ).first);
+    }
 
   protected:   
     /** \brief Calculates load of each process and repartition the grid if neccessary.
@@ -874,16 +881,25 @@ namespace Dune
     int overlapSize (int codim) const { return 0; } 
 
     /** \brief @copydoc Dune::Grid::communicate */
-    template<class DataHandleImp,class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, 
-        InterfaceType iftype, CommunicationDirection dir, int level) const;
+    template< class DataHandle, class Data >
+    LevelCommunication communicate ( CommDataHandleIF< DataHandle, Data > &data,
+                                     InterfaceType iftype,
+                                     CommunicationDirection dir,
+                                     int level ) const
+    {
+      return LevelCommunication( *this, data, iftype, dir, level );
+    }
 
     /** \brief Communicate information on distributed entities on the leaf grid.
        Template parameter is a model of Dune::CommDataHandleIF.
-    */
-    template<class DataHandleImp,class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, 
-        InterfaceType iftype, CommunicationDirection dir) const;
+     */
+    template< class DataHandle, class Data >
+    LeafCommunication communicate ( CommDataHandleIF< DataHandle, Data > &data,
+                                    InterfaceType iftype,
+                                    CommunicationDirection dir ) const
+    {
+      return LeafCommunication( *this, data, iftype, dir );
+    }
 
   protected:  
     // load balance and compress memory if possible 
@@ -1116,15 +1132,25 @@ namespace Dune
       return *communications_;
     }
 
-    const GridObjectFactoryType& factory() const { return factory_; }
-
     // geometry in father storage
     typedef ALULocalGeometryStorage< const ThisType, typename Traits::template Codim< 0 >::LocalGeometryImpl, 8 > GeometryInFatherStorage ;
     // return geometryInFather for non-conforming grids 
     const GeometryInFatherStorage& nonConformingGeometryInFatherStorage() const { return nonConformingGeoInFatherStorage_; }
     // initialize geometry types and return correct geometryInFather storage
     const GeometryInFatherStorage& makeGeometries();
-  public:  
+
+  public:
+    const GridObjectFactoryType &factory () const { return factory_; }
+
+    std::pair< LevelIndexSetImp *, bool > getLevelIndexSet ( int level ) const
+    {
+      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
+      std::pair< LevelIndexSetImp *, bool > indexSet( levelIndexVec_[ level ], bool( levelIndexVec_[ level ] ) );
+      if( !indexSet.second )
+        indexSet.first = new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ) );
+      return indexSet;
+    }
+
     // return true if conforming refinement is enabled 
     bool conformingRefinement() const
     {

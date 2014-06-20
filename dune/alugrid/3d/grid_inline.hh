@@ -434,21 +434,6 @@ namespace Dune
 
     template< class DataHandle >
     static bool loadBalance ( Grid &grid, DataHandle &data ) { return false; }
-
-    template< class DataHandle, class DataType >
-    static void communicate ( const Grid &grid, 
-                              const CommDataHandleIF< DataHandle, DataType > &data,
-                              const InterfaceType iftype, 
-                              const CommunicationDirection dir, 
-                              const int level )
-    {}
-
-    template< class DataHandle, class DataType >
-    static void communicate ( const Grid &grid, 
-                              const CommDataHandleIF< DataHandle, DataType > &data,
-                              const InterfaceType iftype, 
-                              const CommunicationDirection dir )
-    {}
   }; // ALU3dGridCommHelper
 
   template< ALU3dGridElementType elType >
@@ -528,129 +513,6 @@ namespace Dune
       }
       return changed;
     }
-
-
-    template< class DataHandle, class DataType >
-    static void communicate ( const Grid &grid, 
-                              CommDataHandleIF< DataHandle, DataType > &data,
-                              const InterfaceType iftype, 
-                              const CommunicationDirection dir, 
-                              const int level )
-    {
-      typedef CommDataHandleIF< DataHandle, DataType > DataHandleType;
-      typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 3 >::Entity > VertexObject;
-      typedef typename VertexObject::ImplementationType VertexImp;
-      typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 2 >::Entity > EdgeObject;
-      typedef typename EdgeObject::ImplementationType EdgeImp;
-      typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 1 >::Entity > FaceObject;
-      typedef typename FaceObject::ImplementationType FaceImp;
-      typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 0 >::Entity> ElementObject;
-      typedef typename ElementObject::ImplementationType ElementImp;
-
-      if( grid.comm().size() > 1 )
-      {
-        // for level communication the level index set is needed. 
-        // if non-existent, then create for communicaton
-        const typename Grid::LevelIndexSetImp *levelISet;
-        if( !grid.levelIndexVec_[ level ] )
-          levelISet = new typename Grid::LevelIndexSetImp(
-              grid, 
-              grid.template lbegin<0>( level ),
-              grid.template lend<0>( level ), level );
-        else 
-          levelISet = grid.levelIndexVec_[ level ];
-        
-        VertexObject vx( VertexImp( grid.factory(), level ) );    
-        ALU3DSPACE GatherScatterLevelData< Grid, DataHandleType, 3 >
-          vertexData( grid, vx, Grid::getRealImplementation( vx ), data, *levelISet, level );
-        
-        EdgeObject edge( EdgeImp( grid.factory(), level ) );
-        ALU3DSPACE GatherScatterLevelData< Grid, DataHandleType, 2 >
-          edgeData( grid, edge, Grid::getRealImplementation( edge ), data, *levelISet, level );
-        
-        FaceObject face( FaceImp( grid.factory(), level ) );
-        ALU3DSPACE GatherScatterLevelData< Grid, DataHandleType, 1 >
-          faceData( grid, face, Grid::getRealImplementation( face ), data, *levelISet, level );
-
-        ElementObject element( ElementImp( grid.factory(), level ) );    
-        ALU3DSPACE GatherScatterLevelData< Grid, DataHandleType, 0 >
-          elementData( grid, element, Grid::getRealImplementation( element ), data, *levelISet, level );
-
-        doCommunication( grid, vertexData, edgeData, faceData, elementData, iftype, dir );
-
-        if( !grid.levelIndexVec_[ level ] )
-          delete levelISet;
-      }
-    }
-
-    template< class DataHandle, class DataType >
-    static void communicate ( const Grid &grid, 
-                              CommDataHandleIF< DataHandle, DataType > &data,
-                              const InterfaceType iftype, 
-                              const CommunicationDirection dir )
-    {
-      typedef CommDataHandleIF< DataHandle, DataType > DataHandleType;
-      typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 3 >::Entity > VertexObject;
-      typedef typename VertexObject::ImplementationType VertexImp;
-      typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 2 >::Entity > EdgeObject;
-      typedef typename EdgeObject::ImplementationType EdgeImp;
-      typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 1 >::Entity > FaceObject;
-      typedef typename FaceObject::ImplementationType FaceImp;
-      typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 0 >::Entity> ElementObject;
-      typedef typename ElementObject::ImplementationType ElementImp;
-
-      if( grid.comm().size() > 1 )
-      {
-        VertexObject vx( VertexImp( grid.factory(), grid.maxLevel() ) );
-        ALU3DSPACE GatherScatterLeafData< Grid, DataHandleType, 3 >
-          vertexData( grid, vx, Grid::getRealImplementation( vx ), data );
-        
-        EdgeObject edge( EdgeImp( grid.factory(), grid.maxLevel() ) );
-        ALU3DSPACE GatherScatterLeafData< Grid, DataHandleType, 2 >
-          edgeData( grid, edge, Grid::getRealImplementation( edge ), data );
-        
-        FaceObject face( FaceImp( grid.factory(), grid.maxLevel()) );    
-        ALU3DSPACE GatherScatterLeafData< Grid, DataHandleType, 1 >
-          faceData( grid, face, Grid::getRealImplementation( face ), data );
-
-        ElementObject element( ElementImp( grid.factory(), grid.maxLevel() ) );
-        ALU3DSPACE GatherScatterLeafData< Grid, DataHandleType, 0 >
-          elementData( grid, element, Grid::getRealImplementation( element ), data );
-
-        doCommunication( grid, vertexData, edgeData, faceData, elementData, iftype, dir );
-      }
-    }
-
-    static void
-    doCommunication ( const Grid &grid,
-                      GatherScatterType &vertexData, GatherScatterType &edgeData,
-                      GatherScatterType &faceData, GatherScatterType &elementData,
-                      InterfaceType iftype, CommunicationDirection dir )
-    {
-      // check interface types 
-      if( (iftype == Overlap_OverlapFront_Interface) || (iftype == Overlap_All_Interface) )
-      {
-        dverb << "ALUGrid contains no overlap, therefore no communication for" << std::endl;
-        dverb << "Overlap_OverlapFront_Interface or Overlap_All_Interface interfaces!" << std::endl;
-      }
-      // communication from border to border 
-      else if( iftype == InteriorBorder_InteriorBorder_Interface )
-        grid.myGrid().borderBorderCommunication(vertexData,edgeData,faceData,elementData);
-      // communication from interior to ghost including border 
-      else if( iftype == InteriorBorder_All_Interface )
-      {
-        if( dir == ForwardCommunication )
-          grid.myGrid().interiorGhostCommunication(vertexData,edgeData,faceData,elementData);
-        // reverse communiction interface (here All_InteriorBorder) 
-        else if( dir == BackwardCommunication )
-          grid.myGrid().ghostInteriorCommunication(vertexData,edgeData,faceData,elementData);
-      }
-      // communication from interior to ghost including border 
-      else if( iftype == All_All_Interface )
-        grid.myGrid().allAllCommunication(vertexData,edgeData,faceData,elementData);
-      else
-        DUNE_THROW( GridError, "Wrong set of parameters in ALUGridCommHelper::doCommunication" );
-    }
   }; // ALU3dGridCommHelper
 
 /*
@@ -683,27 +545,6 @@ namespace Dune
 
     // call post adapt
     postAdapt();
-  }
-
-  // communicate level data   
-  template< ALU3dGridElementType elType, class Comm >
-  template <class DataHandleImp,class DataType> 
-  inline void ALU3dGrid< elType, Comm >::
-  communicate (CommDataHandleIF<DataHandleImp,DataType> &data, 
-               InterfaceType iftype, CommunicationDirection dir, int level ) const
-  {
-    ALU3dGridCommHelper< elType, Comm >::communicate( *this, data, iftype, dir, level );
-  }
-
-
-  // communicate data   
-  template< ALU3dGridElementType elType, class Comm >
-  template <class DataHandleImp, class DataType> 
-  inline void ALU3dGrid< elType, Comm >::
-  communicate (CommDataHandleIF<DataHandleImp,DataType> & data, 
-               InterfaceType iftype, CommunicationDirection dir) const
-  {
-    ALU3dGridCommHelper< elType, Comm >::communicate( *this, data, iftype, dir );
   }
 
 
