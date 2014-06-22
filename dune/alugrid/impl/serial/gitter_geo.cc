@@ -720,16 +720,16 @@ namespace ALUGrid
     return new Iterator( (*(const Iterator *) w ) );
   }
 
-  void Gitter::Geometric::BuilderIF::backup (ObjectStream & os) const 
+  void Gitter::Geometric::BuilderIF::dumpMacroGrid (ObjectStream & os) const 
   {
     // not precision needed here 
     // not working correctly yet
-    backupImpl( os );
+    dumpMacroGridImpl( os );
     // put one more character because of endl in ascii stream
     os.put( char(' ') );
   }
 
-  void Gitter::Geometric::BuilderIF::backup ( std::ostream &os ) const
+  void Gitter::Geometric::BuilderIF::dumpMacroGrid ( std::ostream &os ) const
   {
     MacroFileHeader header;
     if( _tetraList.size() == 0 )
@@ -738,7 +738,7 @@ namespace ALUGrid
       header.setType( MacroFileHeader::tetrahedra );
     else
     {
-      std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::backup( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
+      std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::dumpMacroGrid( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
       std::abort();
     }
 
@@ -757,12 +757,12 @@ namespace ALUGrid
       os.setf( std::ios::fixed, std::ios::floatfield );
       os.precision( ALUGridExternalParameters::precision() );
       os << std::scientific;
-      backupImpl( os );
+      dumpMacroGridImpl( os );
     }
     else // binary or zbinary 
     {
       ObjectStream data;
-      backupImpl( data );
+      dumpMacroGridImpl( data );
       // get data size and store in header 
       header.setSize( data.size() );
       // write header and then data 
@@ -773,7 +773,7 @@ namespace ALUGrid
   }
 
   template<class ostream_t>
-  void Gitter::Geometric::BuilderIF::backupImpl (ostream_t & os) const 
+  void Gitter::Geometric::BuilderIF::dumpMacroGridImpl (ostream_t & os) const 
   {
     // Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
     // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
@@ -947,16 +947,6 @@ namespace ALUGrid
         (*it).second = refCount[ idx ] ;
       }
     } // end linkage backup
-  }
-
-  void Gitter::Geometric::BuilderIF::backup (const char * filePath, const char * fileName) const 
-  {
-    std::string name = std::string( filePath ) + std::string( "macro." ) + std::string( fileName );
-    std::ofstream out( name.c_str() );
-    if( out )
-      backup ( out );
-    else
-      std::cerr << "WARNING (ignored): Cannot create file '" << name << "' in Gitter::Geometric::BuilderIF::backup( const char *, const char * )." << std::endl;
   }
 
   size_t Gitter::Geometric::BuilderIF::memUsage ()
