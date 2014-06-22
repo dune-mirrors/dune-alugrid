@@ -290,7 +290,7 @@ namespace ALUGrid
   inline void GitterDuneBasis::backupImpl ( stream_t &out )
   {
     // backup macro grid 
-    container ().backup ( out );
+    container ().dumpMacroGrid ( out );
     // backup hierarchy 
     Gitter :: backup ( out );
     // backup indices 
