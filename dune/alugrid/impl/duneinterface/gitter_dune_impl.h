@@ -179,6 +179,11 @@ namespace ALUGrid
       ObjectStream data;
       // backup hierarchy
       Gitter :: backupHierarchy ( data );
+      // write data to stream
+      writeBinary( out, data );
+
+      // reset stream before we use it again
+      data.reset();
       // backup hierarchy
       backupIndices ( data );
       // write data to stream
@@ -207,9 +212,13 @@ namespace ALUGrid
       ObjectStream data ;
       // read binary data 
       readBinary( in, data );
-
       // restore hierarchy 
       Gitter :: restoreHierarchy ( data, restoreBndFaces );
+
+      // reset stream before we use it again
+      data.reset();
+      // read binary data 
+      readBinary( in, data );
       // restore indices 
       restoreIndices ( data );
     }
