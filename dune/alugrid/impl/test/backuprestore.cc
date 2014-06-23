@@ -12,6 +12,8 @@
 #include <iostream>
 #include <fstream>
 
+#define ENABLE_ALUGRID_VTK_OUTPUT
+
 // include serial part of ALUGrid 
 #include <dune/alugrid/3d/alu3dinclude.hh>
 
@@ -262,12 +264,13 @@ int main (int argc, char ** argv, const char ** envp)
   std::stringstream backupname ; 
   backupname << "file." << rank ;
   std::stringstream databuf;
-  //ALUGrid::ObjectStream databuf ;
   {
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
     ALUGrid::GitterDunePll grid(macroname.c_str(),a);
     grid.duneLoadBalance() ;
+
+    grid.tovtk( "out" );
 #else 
     std::ifstream infile( macroname.c_str());
     ALUGrid::GitterDuneImpl grid1( infile );
@@ -317,7 +320,6 @@ int main (int argc, char ** argv, const char ** envp)
   {
     std::cout << "Try to read stringbuf:" << std::endl;
     std::cout << "Data Buffer size: " << databuf.str().size() << std::endl;
-    //std::cout << "Data Buffer size: " << databuf.size() << std::endl;
     // read grid from file 
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
