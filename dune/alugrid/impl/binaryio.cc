@@ -62,8 +62,9 @@ namespace ALUGrid
       // return additional bytes in buffer by seeking
       if( stream )
       {
-        unsigned int pos = stream.tellg();
-        stream.seekg( pos-zinfo.avail_in );
+        std::size_t pos = stream.tellg();
+        pos -= zinfo.avail_in ; 
+        stream.seekg( pos );
       }
 
       // finalize inflate algorithm
