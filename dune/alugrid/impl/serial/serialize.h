@@ -263,6 +263,7 @@ namespace ALUGrid
 
     // return pointer to buffer memory 
     inline char* raw () { return getBuff( 0 ); }
+    inline const char* raw () const { return getBuff( 0 ); }
     
     inline char * getBuff (const size_t ap) { return (_buf + ap); }
     inline const char * getBuff (const size_t ap) const { return (_buf + ap); }
@@ -514,8 +515,8 @@ namespace ALUGrid
 
     inline void writeObject (double a)  { this->write(a); }
     inline void readObject (double & a) { this->read(a);  }
-    inline void writeObject (float a)  { this->write(a); }
-    inline void readObject (float & a) { this->read(a);  }
+    inline void writeObject (float a)   { this->write(a); }
+    inline void readObject (float & a)  { this->read(a);  }
     inline void writeObject (int a)     { this->write(a); } 
     inline void readObject (int & a)    { this->read(a);  }
   };
