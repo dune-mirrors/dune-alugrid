@@ -1083,17 +1083,56 @@ namespace ALUGrid
     const int type = (header.type() == MacroFileHeader::tetrahedra ? MacroGridBuilder::TETRA_RAW : MacroGridBuilder::HEXA_RAW);
     if( header.isBinary() )
     {
-      ObjectStream os;
-      os.reserve( header.size() );
-      os.clear();
-      ALUGrid::readBinary( in, os.raw(), header.size(), header.binaryFormat() );
-      if( !in )
+      switch( header.byteOrder() )
       {
-        std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
-        std::abort();
+      case MacroFileHeader::native:
+        {
+          ObjectStream os;
+          os.reserve( header.size() );
+          os.clear();
+          ALUGrid::readBinary( in, os.raw(), header.size(), header.binaryFormat() );
+          if( !in )
+          {
+            std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
+            std::abort();
+          }
+
+          os.seekp( header.size() );
+          mm.inflateMacroGrid( os, type );
+        }
+
+      case MacroFileHeader::bigendian:
+        {
+          BigEndianObjectStream os;
+          os.reserve( header.size() );
+          os.clear();
+          ALUGrid::readBinary( in, os.raw(), header.size(), header.binaryFormat() );
+          if( !in )
+          {
+            std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
+            std::abort();
+          }
+
+          os.seekp( header.size() );
+          mm.inflateMacroGrid( os, type );
+        }
+
+      case MacroFileHeader::littleendian:
+        {
+          LittleEndianObjectStream os;
+          os.reserve( header.size() );
+          os.clear();
+          ALUGrid::readBinary( in, os.raw(), header.size(), header.binaryFormat() );
+          if( !in )
+          {
+            std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
+            std::abort();
+          }
+
+          os.seekp( header.size() );
+          mm.inflateMacroGrid( os, type );
+        }
       }
-      os.seekp( header.size() );
-      mm.inflateMacroGrid( os, type );
     }
     else
       mm.inflateMacroGrid( in, type );
