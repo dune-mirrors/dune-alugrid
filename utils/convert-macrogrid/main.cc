@@ -394,7 +394,7 @@ void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
   writeMacroGrid( os, vertices, elements, bndSegs, periodics );
   header.setSize( os.size() );
   header.write( output );
-  ALUGrid::writeBinary( output, os.getBuff( 0 ), header.size(), header.binaryFormat() );
+  ALUGrid::writeBinary( output, os.raw(), header.size(), header.binaryFormat() );
   if( !output )
   {
     std::cerr << "ERROR: Unable to write binary output." << std::endl;
