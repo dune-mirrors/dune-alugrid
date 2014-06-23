@@ -14,7 +14,7 @@ namespace ALUGrid
   // readBinary
   // ----------
 
-  void readBinary ( std::istream &stream, void *data, std::size_t size, BinaryFormat format )
+  void readBinary ( std::istream &stream, void *data, uint64_t size, BinaryFormat format )
   {
     if( format == rawBinary )
       stream.read( static_cast< char * >( data ), size );
@@ -81,7 +81,7 @@ namespace ALUGrid
   // writeBinary
   // -----------
 
-  void writeBinary ( std::ostream &stream, const void *data, std::size_t size, BinaryFormat format )
+  void writeBinary ( std::ostream &stream, const void *data, uint64_t size, BinaryFormat format )
   {
     if( format == rawBinary )
       stream.write( static_cast< const char * >( data ), size );

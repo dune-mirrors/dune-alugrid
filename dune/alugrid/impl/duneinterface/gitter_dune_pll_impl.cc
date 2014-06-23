@@ -1291,25 +1291,13 @@ namespace ALUGrid
     } 
   }
 
-  void GitterDunePll::restore ( std::istream &in ) 
-  {
-    restoreImpl( in );
-  }
-
-  void GitterDunePll::restore ( ObjectStream& in )
-  {
-    restoreImpl( in );
-  }
-
-  template <class stream_t>
-  void GitterDunePll::restoreImpl ( stream_t &in ) 
+  void GitterDunePll::restore ( std::istream &in )
   {
     // false means that bnd faces are not restored 
-    Gitter :: restoreImpl( in, false );
-
     // restore indices before ghosts are created 
     // otherwise indices of ghosts will be wrong 
-    this->restoreIndices (in);
+    // this is both done in this method
+    GitterDuneBasis::restoreImpl( in, false );
    
 #ifdef ALUGRIDDEBUG 
     const int maxIndexBefore = this->indexManager(BuilderIF::IM_Elements).getMaxIndex();

@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include <dune/alugrid/impl/macrofileheader.hh>
 #include "../serial/gitter_impl.h"
 #include "../serial/lock.h"
 
@@ -80,20 +81,12 @@ namespace ALUGrid
     void restoreIndices (istream_t & in );
    
     // write status of grid for ostream 
-    void backup ( std::ostream &out ) { backupImpl( out ); }
-    // write status of grid for ObjectStream
-    void backup ( ObjectStream& out ) { backupImpl( out ); }
+    virtual void backup ( std::ostream &out );
 
     // read status of grid istream
-    void restore ( std::istream &in ) { restoreImpl( in ); }
-    // read status of grid ObjectStream
-    void restore ( ObjectStream &in ) { restoreImpl( in ); }
-  protected:
-    template <class stream_t> 
-    void backupImpl( stream_t& out );
-        
-    template <class stream_t> 
-    void restoreImpl( stream_t& in );
+    virtual void restore ( std::istream &in ) { restoreImpl(in, true ); }
+  protected:  
+    void restoreImpl( std::istream &in, const bool restoreBndFaces );
   };
 
   class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis 
@@ -286,27 +279,73 @@ namespace ALUGrid
   }
 
   // wird von Dune verwendet 
-  template <class stream_t>
-  inline void GitterDuneBasis::backupImpl ( stream_t &out )
+  inline void GitterDuneBasis::backup ( std::ostream &out )
   {
     // backup macro grid 
-    container ().dumpMacroGrid ( out );
-    // backup hierarchy 
-    Gitter :: backup ( out );
-    // backup indices 
-    backupIndices ( out );
+    MacroFileHeader header = container ().dumpMacroGrid ( out );
+
+    // flag for zbinary format
+    const char zbinaryFlag = header.format() == MacroFileHeader::zbinary ? 1 : 0 ;
+    out.put( zbinaryFlag );
+
+    if( zbinaryFlag )
+    {
+      alugrid_assert( zlibCompressed == header.binaryFormat() );
+
+      ObjectStream data;
+      // backup hierarchy
+      Gitter :: backupHierarchy ( data );
+      // backup hierarchy
+      backupIndices ( data );
+      // get size of data and write
+      uint64_t size = data.size();
+      writeBinary( out, &size, sizeof(uint64_t), header.binaryFormat() );
+      // write data to out stream (compression applied if zlib available)
+      writeBinary( out, data.raw(), size, header.binaryFormat() );
+    }
+    else 
+    {
+      // backup hierarchy 
+      Gitter :: backupHierarchy ( out );
+      // backup indices 
+      backupIndices ( out );
+    }
   }
 
   // wird von Dune verwendet 
-  template <class stream_t>
-  inline void GitterDuneBasis::restoreImpl ( stream_t &in )
+  inline void GitterDuneBasis::restoreImpl ( std::istream &in, const bool restoreBndFaces )
   {
-    // macro grid is created during grid creation
-    // restore hierarchy 
-    Gitter :: restore (in);
+    // NOTE: macro grid is created during grid creation
 
-    // restore indices 
-    restoreIndices (in);
+    // get zbinary flag tpo check whether stored format was zbinary or binary
+    const char zbinaryFlag = in.get();
+
+    // in case compressed binary was found uncompress here
+    if( zbinaryFlag ) 
+    {
+      uint64_t size = 0;
+      readBinary( in, &size, sizeof(uint64_t), zlibCompressed );
+      // read data to data stream for later unpack
+      ObjectStream data;
+      // reserve memory 
+      data.reserve( size );
+      readBinary( in, data.raw(), size, zlibCompressed );
+      // set write position 
+      data.seekp( size );
+
+      // restore hierarchy 
+      Gitter :: restoreHierarchy ( data, restoreBndFaces );
+      // restore indices 
+      restoreIndices ( data );
+    }
+    else 
+    {
+      // restore hierarchy 
+      Gitter :: restoreHierarchy ( in, restoreBndFaces );
+
+      // restore indices 
+      restoreIndices (in);
+    }
   }
 
   template < class A > inline PureElementAccessIterator < A >::

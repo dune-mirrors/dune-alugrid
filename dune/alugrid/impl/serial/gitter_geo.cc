@@ -720,16 +720,7 @@ namespace ALUGrid
     return new Iterator( (*(const Iterator *) w ) );
   }
 
-  void Gitter::Geometric::BuilderIF::dumpMacroGrid (ObjectStream & os) const 
-  {
-    // not precision needed here 
-    // not working correctly yet
-    dumpMacroGridImpl( os );
-    // put one more character because of endl in ascii stream
-    os.put( char(' ') );
-  }
-
-  void Gitter::Geometric::BuilderIF::dumpMacroGrid ( std::ostream &os ) const
+  MacroFileHeader Gitter::Geometric::BuilderIF::dumpMacroGrid ( std::ostream &os ) const
   {
     MacroFileHeader header;
     if( _tetraList.size() == 0 )
@@ -742,8 +733,13 @@ namespace ALUGrid
       std::abort();
     }
 
-    // default is binary 
-    MacroFileHeader::Format format = MacroFileHeader::binary ;
+    // default is zbinary (if zlib found), otherwise binary
+    MacroFileHeader::Format format = 
+#if HAVE_ZLIB
+      MacroFileHeader::zbinary ;
+#else 
+      MacroFileHeader::binary ;
+#endif
     //MacroFileHeader::Format format = MacroFileHeader::ascii ;
 
     header.setFormat( format );
@@ -770,10 +766,13 @@ namespace ALUGrid
       // write binary data to stream 
       writeBinary( os, data.raw(), data.size(), header.binaryFormat() );
     }
+
+    // return header in case of further writing to stream
+    return header;
   }
 
   template<class ostream_t>
-  void Gitter::Geometric::BuilderIF::dumpMacroGridImpl (ostream_t & os) const 
+  void Gitter::Geometric::BuilderIF::dumpMacroGridImpl (ostream_t & os ) const 
   {
     // Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
     // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
