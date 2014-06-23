@@ -528,7 +528,8 @@ namespace Dune
 
   template< ALU3dGridElementType elType, class Comm >
   inline bool ALU3dGrid< elType, Comm >
-    ::writeMacroGrid ( const std::string path, const std::string name ) const
+    ::writeMacroGrid ( const std::string path, const std::string name,
+                       const ALU3DSPACE MacroFileHeader::Format format ) const
   {
     std::stringstream filename;
     filename << path << "/" << name << "." << comm().rank();
@@ -538,7 +539,7 @@ namespace Dune
     if( macro ) 
     {
       // dump distributed macro grid as ascii files 
-      myGrid().container().dumpMacroGrid( macro );
+      myGrid().container().dumpMacroGrid( macro, format );
     }
     else 
       std::cerr << "WARNING: couldn't open file `" <<  filename.str() << "' for writing!" << std::endl;
@@ -548,10 +549,11 @@ namespace Dune
 
   template< ALU3dGridElementType elType, class Comm >
   alu_inline 
-  void ALU3dGrid< elType, Comm >::backup( std::ostream& stream ) const
+  void ALU3dGrid< elType, Comm >::
+  backup( std::ostream& stream, const ALU3DSPACE MacroFileHeader::Format format  ) const
   {
     // backup grid to given stream 
-    myGrid().backup( stream );
+    myGrid().backup( stream, format );
   }
 
   template< ALU3dGridElementType elType, class Comm >

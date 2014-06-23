@@ -939,10 +939,11 @@ namespace Dune
     //**********************************************************
     
     /** \brief write macro grid in ALUGrid macro format to path/filename.rank */
-    bool writeMacroGrid( const std::string path, const std::string filename ) const ;
+    bool writeMacroGrid( const std::string path, const std::string filename,
+                         const ALU3DSPACE MacroFileHeader::Format format = ALU3DSPACE MacroFileHeader::defaultFormat ) const ;
 
     /** \brief backup to ostream */
-    void backup( std::ostream& ) const ;
+    void backup( std::ostream&, const ALU3DSPACE MacroFileHeader::Format format ) const ;
 
     /** \brief restore from istream */
     void restore( std::istream& ) ;
