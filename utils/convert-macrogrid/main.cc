@@ -359,6 +359,7 @@ void writeMacroGrid ( stream_t &output,
       output << ws << bndSegs[ i ].vertices[ j ];
     output << std::endl;
   }
+  output << int(0) << std::endl; // no linkage
 }
 
 
