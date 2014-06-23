@@ -1083,55 +1083,28 @@ namespace ALUGrid
     const int type = (header.type() == MacroFileHeader::tetrahedra ? MacroGridBuilder::TETRA_RAW : MacroGridBuilder::HEXA_RAW);
     if( header.isBinary() )
     {
-      switch( header.byteOrder() )
+      if( header.byteOrder() == MacroFileHeader::native || header.byteOrder() == systemByteOrder() )
       {
-      case MacroFileHeader::native:
-        {
-          ObjectStream os;
-          os.reserve( header.size() );
-          os.clear();
-          ALUGrid::readBinary( in, os.raw(), header.size(), header.binaryFormat() );
-          if( !in )
-          {
-            std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
-            std::abort();
-          }
-
-          os.seekp( header.size() );
-          mm.inflateMacroGrid( os, type );
-        }
-
-      case MacroFileHeader::bigendian:
-        {
-          BigEndianObjectStream os;
-          os.reserve( header.size() );
-          os.clear();
-          ALUGrid::readBinary( in, os.raw(), header.size(), header.binaryFormat() );
-          if( !in )
-          {
-            std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
-            std::abort();
-          }
-
-          os.seekp( header.size() );
-          mm.inflateMacroGrid( os, type );
-        }
-
-      case MacroFileHeader::littleendian:
-        {
-          LittleEndianObjectStream os;
-          os.reserve( header.size() );
-          os.clear();
-          ALUGrid::readBinary( in, os.raw(), header.size(), header.binaryFormat() );
-          if( !in )
-          {
-            std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
-            std::abort();
-          }
-
-          os.seekp( header.size() );
-          mm.inflateMacroGrid( os, type );
-        }
+        ObjectStream os;
+        ALUGrid::readBinary( in, os, header );
+        mm.inflateMacroGrid( os, type );
+      }
+      else if( header.byteOrder() == MacroFileHeader::bigendian ) 
+      {
+        BigEndianObjectStream os;
+        ALUGrid::readBinary( in, os, header );
+        mm.inflateMacroGrid( os, type );
+      }
+      else if ( header.byteOrder() == MacroFileHeader::littleendian )
+      {
+        LittleEndianObjectStream os;
+        ALUGrid::readBinary( in, os, header );
+        mm.inflateMacroGrid( os, type );
+      }
+      else 
+      {
+        std::cerr << "ERROR (fatal): byte order not available" << std::endl;
+        std::abort();
       }
     }
     else

@@ -281,11 +281,11 @@ namespace ALUGrid
   // wird von Dune verwendet 
   inline void GitterDuneBasis::backup ( std::ostream &out )
   {
-    // backup macro grid 
+    // backp macro grid 
     MacroFileHeader header = container ().dumpMacroGrid ( out );
 
     // flag for zbinary format
-    const char zbinaryFlag = header.format() == MacroFileHeader::zbinary ? 1 : 0 ;
+    const char zbinaryFlag = (header.format() == MacroFileHeader::zbinary) ? 1 : 0 ;
     out.put( zbinaryFlag );
 
     if( zbinaryFlag )
@@ -297,11 +297,8 @@ namespace ALUGrid
       Gitter :: backupHierarchy ( data );
       // backup hierarchy
       backupIndices ( data );
-      // get size of data and write
-      uint64_t size = data.size();
-      writeBinary( out, &size, sizeof(uint64_t), header.binaryFormat() );
-      // write data to out stream (compression applied if zlib available)
-      writeBinary( out, data.raw(), size, header.binaryFormat() );
+      // write data to stream
+      writeBinary( out, data );
     }
     else 
     {
@@ -323,15 +320,9 @@ namespace ALUGrid
     // in case compressed binary was found uncompress here
     if( zbinaryFlag ) 
     {
-      uint64_t size = 0;
-      readBinary( in, &size, sizeof(uint64_t), zlibCompressed );
-      // read data to data stream for later unpack
-      ObjectStream data;
-      // reserve memory 
-      data.reserve( size );
-      readBinary( in, data.raw(), size, zlibCompressed );
-      // set write position 
-      data.seekp( size );
+      ObjectStream data ;
+      // read binary data 
+      readBinary( in, data );
 
       // restore hierarchy 
       Gitter :: restoreHierarchy ( data, restoreBndFaces );
