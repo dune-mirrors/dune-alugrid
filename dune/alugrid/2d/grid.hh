@@ -668,19 +668,6 @@ namespace Dune
       return leafMarker_;
     }
     
-    /** \brief write Grid to file in specified FileFormatType 
-     */
-    template <GrapeIOFileFormatType ftype>
-    bool writeGrid( const std::string filename, alu2d_ctype time ) const ;
-
-    bool writeGrid_Xdr( const std::string filename, alu2d_ctype time ) const ;
-    bool writeGrid_Ascii( const std::string filename, alu2d_ctype time ) const ;
-  
-    /** \brief read Grid from file filename and store time of mesh in time 
-     */
-    template <GrapeIOFileFormatType ftype>
-    bool readGrid( const std::string filename, alu2d_ctype & time );
-
     /** \brief backup to ostream */
     void backup( std::ostream& ) const ;
 
