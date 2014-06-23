@@ -18,6 +18,13 @@ namespace ALUGrid
     enum Format { ascii, binary, zbinary };
     enum ByteOrder { native, bigendian, littleendian };
 
+    static const Format defaultFormat = 
+#if HAVE_ZLIB 
+      zbinary ; 
+#else 
+      binary ; 
+#endif
+
     static const int currentVersion = 1;
 
     static std::string toString ( Type type ) { return stringType[ type ]; }

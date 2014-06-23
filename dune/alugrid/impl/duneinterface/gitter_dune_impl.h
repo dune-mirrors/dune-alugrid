@@ -81,7 +81,7 @@ namespace ALUGrid
     void restoreIndices (istream_t & in );
    
     // write status of grid for ostream 
-    virtual void backup ( std::ostream &out );
+    virtual void backup ( std::ostream &out, const MacroFileHeader::Format format = MacroFileHeader::defaultFormat );
 
     // read status of grid istream
     virtual void restore ( std::istream &in ) { restoreImpl(in, true ); }
@@ -161,6 +161,67 @@ namespace ALUGrid
   //    #    #   ##  #          #    #   ##  #
   //    #    #    #  ######     #    #    #  ######
   //
+
+  // backup routing of all grid implementations 
+  inline void GitterDuneBasis::backup ( std::ostream &out, const MacroFileHeader::Format format )
+  {
+    // backp macro grid 
+    MacroFileHeader header = container ().dumpMacroGrid ( out, format );
+
+    // flag for zbinary format
+    const char zbinaryFlag = (header.format() == MacroFileHeader::zbinary) ? 1 : 0 ;
+    out.put( zbinaryFlag );
+
+    if( zbinaryFlag )
+    {
+      alugrid_assert( zlibCompressed == header.binaryFormat() );
+
+      ObjectStream data;
+      // backup hierarchy
+      Gitter :: backupHierarchy ( data );
+      // backup hierarchy
+      backupIndices ( data );
+      // write data to stream
+      writeBinary( out, data );
+    }
+    else 
+    {
+      // backup hierarchy 
+      Gitter :: backupHierarchy ( out );
+      // backup indices 
+      backupIndices ( out );
+    }
+  }
+
+  // restore for serial grid, parallel version = serial + ghosts treatment 
+  inline void GitterDuneBasis::restoreImpl ( std::istream &in, const bool restoreBndFaces )
+  {
+    // NOTE: macro grid is created during grid creation
+
+    // get zbinary flag tpo check whether stored format was zbinary or binary
+    const char zbinaryFlag = in.get();
+
+    // in case compressed binary was found uncompress here
+    if( zbinaryFlag ) 
+    {
+      ObjectStream data ;
+      // read binary data 
+      readBinary( in, data );
+
+      // restore hierarchy 
+      Gitter :: restoreHierarchy ( data, restoreBndFaces );
+      // restore indices 
+      restoreIndices ( data );
+    }
+    else 
+    {
+      // restore hierarchy 
+      Gitter :: restoreHierarchy ( in, restoreBndFaces );
+
+      // restore indices 
+      restoreIndices (in);
+    }
+  }
 
   template <class ostream_t> 
   inline void GitterDuneBasis::backupIndices (ostream_t & out)
@@ -276,67 +337,6 @@ namespace ALUGrid
     }
     else
       std::cerr << "WARNING (ignored): indices (id = " << indices << ") not read in GitterDuneBasis::restoreIndices." << std::endl;
-  }
-
-  // wird von Dune verwendet 
-  inline void GitterDuneBasis::backup ( std::ostream &out )
-  {
-    // backp macro grid 
-    MacroFileHeader header = container ().dumpMacroGrid ( out );
-
-    // flag for zbinary format
-    const char zbinaryFlag = (header.format() == MacroFileHeader::zbinary) ? 1 : 0 ;
-    out.put( zbinaryFlag );
-
-    if( zbinaryFlag )
-    {
-      alugrid_assert( zlibCompressed == header.binaryFormat() );
-
-      ObjectStream data;
-      // backup hierarchy
-      Gitter :: backupHierarchy ( data );
-      // backup hierarchy
-      backupIndices ( data );
-      // write data to stream
-      writeBinary( out, data );
-    }
-    else 
-    {
-      // backup hierarchy 
-      Gitter :: backupHierarchy ( out );
-      // backup indices 
-      backupIndices ( out );
-    }
-  }
-
-  // wird von Dune verwendet 
-  inline void GitterDuneBasis::restoreImpl ( std::istream &in, const bool restoreBndFaces )
-  {
-    // NOTE: macro grid is created during grid creation
-
-    // get zbinary flag tpo check whether stored format was zbinary or binary
-    const char zbinaryFlag = in.get();
-
-    // in case compressed binary was found uncompress here
-    if( zbinaryFlag ) 
-    {
-      ObjectStream data ;
-      // read binary data 
-      readBinary( in, data );
-
-      // restore hierarchy 
-      Gitter :: restoreHierarchy ( data, restoreBndFaces );
-      // restore indices 
-      restoreIndices ( data );
-    }
-    else 
-    {
-      // restore hierarchy 
-      Gitter :: restoreHierarchy ( in, restoreBndFaces );
-
-      // restore indices 
-      restoreIndices (in);
-    }
   }
 
   template < class A > inline PureElementAccessIterator < A >::

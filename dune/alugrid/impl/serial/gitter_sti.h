@@ -1355,7 +1355,7 @@ namespace ALUGrid
       virtual ~Makrogitter ();
     public :
       virtual int iterators_attached () const;
-      virtual MacroFileHeader dumpMacroGrid (std::ostream &) const = 0;
+      virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const = 0;
 
       // return size of used memory of macro gitter 
       // (size of lists storing the pointers )
@@ -2396,7 +2396,7 @@ namespace ALUGrid
         // compress all index manager 
         virtual void compressIndexManagers();
         
-        virtual MacroFileHeader dumpMacroGrid (std::ostream &) const;
+        virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const;
         friend class MacroGridBuilder;
         friend class MacroGhostBuilder;
         friend class ParallelGridMover;

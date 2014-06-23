@@ -720,7 +720,8 @@ namespace ALUGrid
     return new Iterator( (*(const Iterator *) w ) );
   }
 
-  MacroFileHeader Gitter::Geometric::BuilderIF::dumpMacroGrid ( std::ostream &os ) const
+  MacroFileHeader Gitter::Geometric::BuilderIF::
+  dumpMacroGrid ( std::ostream &os, const MacroFileHeader::Format format ) const
   {
     MacroFileHeader header;
     if( _tetraList.size() == 0 )
@@ -732,16 +733,6 @@ namespace ALUGrid
       std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::dumpMacroGrid( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
       std::abort();
     }
-
-    // default is zbinary (if zlib found), otherwise binary
-    MacroFileHeader::Format format = 
-#if HAVE_ZLIB
-      MacroFileHeader::zbinary ;
-#else 
-      MacroFileHeader::binary ;
-#endif
-    // for debugging also ascii is available 
-    // format = MacroFileHeader::ascii ;
 
     header.setFormat( format );
     header.setSystemByteOrder();
