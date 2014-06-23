@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "../macrofileheader.hh"
 #include "../indexstack.h"
 #include "../parallel/gitter_pll_ldb.h"
 #include "../projectvertex.h"
@@ -1354,8 +1355,7 @@ namespace ALUGrid
       virtual ~Makrogitter ();
     public :
       virtual int iterators_attached () const;
-      virtual void dumpMacroGrid (std::ostream &) const = 0;
-      virtual void dumpMacroGrid (ObjectStream&) const = 0 ;
+      virtual MacroFileHeader dumpMacroGrid (std::ostream &) const = 0;
 
       // return size of used memory of macro gitter 
       // (size of lists storing the pointers )
@@ -2396,8 +2396,7 @@ namespace ALUGrid
         // compress all index manager 
         virtual void compressIndexManagers();
         
-        virtual void dumpMacroGrid (std::ostream &) const;
-        virtual void dumpMacroGrid (ObjectStream&) const;
+        virtual MacroFileHeader dumpMacroGrid (std::ostream &) const;
         friend class MacroGridBuilder;
         friend class MacroGhostBuilder;
         friend class ParallelGridMover;
@@ -2482,12 +2481,6 @@ namespace ALUGrid
     virtual void markForBallRefinement(const alucoord_t (&)[3],double,int);
     virtual void refineRandom (double);
 
-    virtual void backup (std::ostream &);
-    virtual void backup (ObjectStream &);
-
-    virtual void restore (std::istream &);
-    virtual void restore (ObjectStream &);
-
     // print memory consumption of grid 
     virtual void printMemUsage () = 0;
 
@@ -2506,10 +2499,10 @@ namespace ALUGrid
                     const int, const element_t*, const bnd_t* );
 
     template <class stream_t> 
-    void backupImpl( stream_t& );
+    void backupHierarchy( stream_t& );
 
     template <class stream_t>
-    void restoreImpl( stream_t&, const bool restoreBndFaces );
+    void restoreHierarchy( stream_t&, const bool restoreBndFaces );
 
     // these classes are friend because the must call the method iterator on grid 
     friend class LeafIterator < helement_STI >;

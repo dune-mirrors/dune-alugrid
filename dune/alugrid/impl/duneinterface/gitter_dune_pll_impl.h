@@ -138,13 +138,8 @@ namespace ALUGrid
     // restore grid from std::istream, needed to be overloaded 
     // because before restoring follow faces, index manager has to be
     // restored 
-    virtual void restore(std::istream & in); 
-    virtual void restore(ObjectStream & in);
+    void restore(std::istream & in); 
 
-  protected:   
-    template <class stream_t>
-    void restoreImpl( stream_t& );  
-   
   public:  
 
     // write grid to vtk file 
