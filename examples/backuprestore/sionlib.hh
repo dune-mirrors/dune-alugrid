@@ -119,7 +119,7 @@ inline void restoreSION( const std::string& filename,    // filename
   if( sid == -1 )
     DUNE_THROW( Dune::IOError, "opening sion_paropen_mpi for reading failed!" << filename );
 
-  // get bytes available for reading (might differ from chunkSize)
+  // get bytes available for reading (might differ from total chunkSize)
   chunkSize = sion_bytes_avail_in_block( sid ); 
 
   // create data buffer 
