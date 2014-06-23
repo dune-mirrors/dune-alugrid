@@ -762,12 +762,8 @@ namespace ALUGrid
       dumpMacroGridImpl( data );
       data.put( char(' ') ); // make consistent with ascii stream
 
-      // get data size and store in header 
-      header.setSize( data.size() );
-      // write header and then data 
-      header.write( os );
       // write binary data to stream 
-      writeBinary( os, data.raw(), data.size(), header.binaryFormat() );
+      writeHeaderAndBinary( os, data, header );
     }
 
     // return header in case of further writing to stream
