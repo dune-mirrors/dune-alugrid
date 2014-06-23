@@ -740,7 +740,8 @@ namespace ALUGrid
 #else 
       MacroFileHeader::binary ;
 #endif
-    //MacroFileHeader::Format format = MacroFileHeader::ascii ;
+    // for debugging also ascii is available 
+    // format = MacroFileHeader::ascii ;
 
     header.setFormat( format );
     header.setSystemByteOrder();
@@ -759,6 +760,8 @@ namespace ALUGrid
     {
       ObjectStream data;
       dumpMacroGridImpl( data );
+      data.put( char(' ') ); // make consistent with ascii stream
+
       // get data size and store in header 
       header.setSize( data.size() );
       // write header and then data 
