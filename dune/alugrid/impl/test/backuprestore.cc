@@ -106,8 +106,8 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
       sum += (diff * diff);
     }
 
-    std::cout << "Got   c = { " << center[ 0 ] << ", " << center[ 1 ] << ", " << center[ 2 ] << " }" << std::endl;
-    std::cout << "Check b = { " << checkCenter[ 0 ] << ", " << checkCenter[ 1 ] << ", " << checkCenter[ 2 ] << " }" << std::endl << std::endl;
+    //std::cout << "Got   c = { " << center[ 0 ] << ", " << center[ 1 ] << ", " << center[ 2 ] << " }" << std::endl;
+    //std::cout << "Check b = { " << checkCenter[ 0 ] << ", " << checkCenter[ 1 ] << ", " << checkCenter[ 2 ] << " }" << std::endl << std::endl;
 
     if( sum > 1e-10 ) 
     {
