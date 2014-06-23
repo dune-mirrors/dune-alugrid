@@ -392,14 +392,7 @@ void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
 {
   ObjectStream os;
   writeMacroGrid( os, vertices, elements, bndSegs, periodics );
-  header.setSize( os.size() );
-  header.write( output );
-  ALUGrid::writeBinary( output, os.raw(), header.size(), header.binaryFormat() );
-  if( !output )
-  {
-    std::cerr << "ERROR: Unable to write binary output." << std::endl;
-    std::exit( 1 );
-  }
+  ALUGrid::writeHeaderAndBinary( output, os, header );
 }
 
 
@@ -476,15 +469,7 @@ void readBinaryMacroGrid ( std::istream &input, const MacroFileHeader &header,
 {
   // read file to alugrid stream
   ObjectStream os;
-  os.reserve( header.size() );
-  os.clear();
-  ALUGrid::readBinary( input, os.getBuff( 0 ), header.size(), header.binaryFormat() );
-  if( !input )
-  {
-    std::cerr << "ERROR: Unable to read binary input." << std::endl;
-    std::exit( 1 );
-  }
-  os.seekp( header.size() );
+  ALUGrid::readBinary( input, os, header );
   readMacroGrid( os, vertices, elements, bndSegs, periodics );
 }
 
