@@ -5,6 +5,7 @@
 #include <fstream>
 
 //- Dune headers 
+#include <dune/alugrid/impl/macrofileheader.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/grid/common/backuprestore.hh>
 #include <dune/alugrid/common/declaration.hh>
@@ -18,6 +19,11 @@ namespace Dune
   {
     // type of grid 
     typedef ALUGrid< dim, dimworld, elType, refineType, Comm > Grid;
+
+    // if zlib was found we use the zlib compressed binary output
+    // otherwise binary output is used
+    static const ALU3DSPACE MacroFileHeader::Format defaultFormat = ALU3DSPACE
+      MacroFileHeader::defaultFormat ; 
 
     static std::string createFilename( const std::string &path, const std::string &fileprefix )
     {
@@ -34,13 +40,14 @@ namespace Dune
     }
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
-    static void backup ( const Grid &grid, const std::string &filename )
+    static void backup ( const Grid &grid, const std::string &filename,
+                         const ALU3DSPACE MacroFileHeader::Format format = defaultFormat )
     {
       std::ofstream file( filename.c_str() );
       if( file ) 
       {
         // call backup on grid 
-        backup( grid, file );
+        backup( grid, file, defaultFormat );
       }
       else 
       {
@@ -49,10 +56,11 @@ namespace Dune
     }
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
-    static void backup ( const Grid &grid, std::ostream &stream )
+    static void backup ( const Grid &grid, std::ostream &stream,
+                         const ALU3DSPACE MacroFileHeader::Format format = defaultFormat )
     {
       // call backup on grid 
-      grid.backup( stream );
+      grid.backup( stream, format );
     }
 
     /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
