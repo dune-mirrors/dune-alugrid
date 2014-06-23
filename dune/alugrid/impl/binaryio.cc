@@ -16,6 +16,7 @@ namespace ALUGrid
 
   void readBinary ( std::istream &stream, void *data, uint64_t size, BinaryFormat format )
   {
+    int pos = stream.tellg();
     if( format == rawBinary )
       stream.read( static_cast< char * >( data ), size );
     else if( format == zlibCompressed )
@@ -57,9 +58,13 @@ namespace ALUGrid
         }
       }
 
+
       // return additional bytes in buffer by seeking
       if( stream )
-        stream.seekg( -zinfo.avail_in, std::ios_base::cur );
+      {
+        unsigned int pos = stream.tellg();
+        stream.seekg( pos-zinfo.avail_in );
+      }
 
       // finalize inflate algorithm
       inflateEnd( &zinfo );
