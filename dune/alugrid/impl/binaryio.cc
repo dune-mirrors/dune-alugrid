@@ -62,7 +62,7 @@ namespace ALUGrid
       // return additional bytes in buffer by seeking
       if( stream )
       {
-        std::size_t pos = stream.tellg();
+        std::istream::streampos pos = stream.tellg();
         pos -= zinfo.avail_in ; 
         stream.seekg( pos );
       }
