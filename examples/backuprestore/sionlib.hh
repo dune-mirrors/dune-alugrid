@@ -31,7 +31,7 @@ inline void backupSION( const std::string& filename,          // filename
 
   // get chunk size for this process 
   // use sionlib int64 
-  sion_int64 chunkSize = data.size() + sizeof( sion_int64 );
+  sion_int64 chunkSize = data.size();
 
   // file mode is: write byte 
   const char* fileMode = "wb";
@@ -46,6 +46,7 @@ inline void backupSION( const std::string& filename,          // filename
   // file pointer 
   FILE* file = 0;
 
+  // my MPI rank, variable might be altered by sionlib
   int sRank = rank ;
 
   // open sion file 
@@ -64,12 +65,8 @@ inline void backupSION( const std::string& filename,          // filename
   if( sid == -1 )
     DUNE_THROW( Dune::IOError, "opening sion_paropen_mpi for writing failed!" << filename );
 
-  assert( file );
-
   // get pointer to buffer 
   const char* buffer = data.c_str();
-  // write size of data
-  sion_fwrite( &chunkSize, sizeof(sion_int64), 1, sid);
   // write data 
   sion_fwrite( buffer, sizeof(char), chunkSize, sid);
 
@@ -122,8 +119,8 @@ inline void restoreSION( const std::string& filename,    // filename
   if( sid == -1 )
     DUNE_THROW( Dune::IOError, "opening sion_paropen_mpi for reading failed!" << filename );
 
-  // read chunk size that was stored 
-  sion_fread( &chunkSize, sizeof(sion_int64), 1, sid );
+  // get bytes available for reading (might differ from chunkSize)
+  chunkSize = sion_bytes_avail_in_block( sid ); 
 
   // create data buffer 
   char* buffer = new char[ chunkSize ];
