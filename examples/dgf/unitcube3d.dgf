@@ -3,7 +3,7 @@ DGF
 Interval
 0   0   0                                 % first corner
 1   1   1                                 % second corner
-20 20  20                                 % number of cells in each direction
+30 30  30                                 % number of cells in each direction
 #
 
 BoundaryDomain

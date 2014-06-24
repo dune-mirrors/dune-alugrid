@@ -146,6 +146,7 @@ private:
 template< class V, class Model > 
 struct FiniteVolumeScheme
 {
+  mutable int fluxcount;
   // first we extract some types
   typedef V Vector;
   typedef typename Vector::GridView GridView;
@@ -234,6 +235,8 @@ template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
   ::operator() ( const double time, const Arg &solution, Vector &update ) const
 {
+  Dune::Timer fluxTimer ;
+  fluxcount = 0;
   // time step size (using std:min(.,dt) so set to maximum) 
   double dt = std::numeric_limits<double>::infinity(); 
 
@@ -242,6 +245,12 @@ inline double FiniteVolumeScheme< V, Model >
   for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it )
     apply( *it, time, solution, update, dt );
 
+  static int count = 1;
+  static double totalTime = 0;
+  const double solveTime = fluxTimer.elapsed(); 
+  totalTime += solveTime;
+  std::cout << "Fluxes: " << fluxcount << " (" << totalTime/count << ")" << std::endl;
+  ++count;
   // return time step
   return  dt;
 }
@@ -250,11 +259,10 @@ template< class V, class Model >
 template< class Arg >
 inline void FiniteVolumeScheme< V, Model >
   ::apply ( const Entity &entity, 
-              const double time, const Arg &solution, Vector &update, double &dt ) const
+            const double time, const Arg &solution, Vector &update, double &dt ) const
 {
-  if ( ! update.visitElement( entity ) )
-    return;
-
+  // if ( ! update.visitElement( entity ) )
+  //   return;
   const Geometry &geo = entity.geometry();
 
   // estimate for wave speed
@@ -298,8 +306,10 @@ inline void FiniteVolumeScheme< V, Model >
         const RangeType uRight = solution.evaluate( neighbor, point );
         // apply numerical flux
         RangeType flux; 
-        double ws = model_.numericalFlux( normal, time, point, uLeft, uRight, flux );
+        double ws = 1.; // model_.numericalFlux( normal, time, point, uLeft, uRight, flux );
         waveSpeed = ws * faceVolume;
+
+        ++fluxcount;
 
         // calc update of entity 
         update[ entity ].axpy( -enVolume_1 * faceVolume, flux );
@@ -317,11 +327,12 @@ inline void FiniteVolumeScheme< V, Model >
       const RangeType uLeft = solution.evaluate( entity, point );
       // apply boundary flux 
       RangeType flux; 
-      double ws = model_.boundaryFlux( intersection.boundaryId(), normal, time, point, uLeft, flux );
+      double ws = 1.; // model_.boundaryFlux( intersection.boundaryId(), normal, time, point, uLeft, flux );
       waveSpeed = ws * faceVolume;
 
       // calc update on entity
       update[ entity ].axpy( -enVolume_1 * faceVolume, flux );
+      ++fluxcount;
 
       // compute dt restriction
       dt = std::min( dt, enVolume / waveSpeed );
