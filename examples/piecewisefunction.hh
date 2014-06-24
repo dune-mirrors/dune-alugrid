@@ -72,6 +72,7 @@ public:
 #ifdef USE_VECTOR_FOR_PWF
   typedef Dune :: DynamicVector< Data > VectorType; 
 #else
+#error DO NOT USE PERSISTENTCONTAINER
   typedef Dune :: PersistentContainer< Grid, Data > VectorType;
 #endif
 
@@ -227,10 +228,6 @@ public:
   const bool visitElement ( const Entity& entity ) const 
   {
     return !data(entity).visited();
-  }
-  const bool visitNeighbor ( const Entity& entity, const Entity& neighbor ) const 
-  {
-    return !data(neighbor).visited();
   }
   void visited( const Entity& entity ) 
   {
