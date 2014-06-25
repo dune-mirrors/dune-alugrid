@@ -13,6 +13,7 @@
 #include <utility>
 
 #include <dune/common/version.hh>
+#include <dune/common/fvector.hh>
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
@@ -36,8 +37,10 @@ static const int ghost_closure = 211 ;
 
 struct Vertex
 {
+  typedef Dune::FieldVector< double, 3 > Coordinate ;
   int id;
-  double x, y, z;
+  Coordinate x ;
+  Vertex () : id( -1 ), x( 0 ) {}
 };
 
 
@@ -109,6 +112,8 @@ struct Periodic< HEXA_RAW >
   int bndid;
   int vertices[ numVertices ];
 };
+
+#include "partition.hh"
 
 
 // DGFParser
@@ -184,7 +189,7 @@ void readLegacyFormat ( std::istream &input,
   input >> nv;
   vertices.resize( nv );
   for( int i = 0; i < nv; ++i )
-    input >> vertices[ i ].x >> vertices[ i ].y >> vertices[ i ].z;
+    input >> vertices[ i ].x[ 0 ] >> vertices[ i ].x[ 1 ] >> vertices[ i ].x[ 2 ];
   std::cout << "  - read " << vertices.size() << " vertices." << std::endl;
 
   int ne = 0;
@@ -268,7 +273,7 @@ void readMacroGrid ( stream_t &input,
   input >> vertexListSize;
   vertices.resize( vertexListSize );
   for( int i = 0; i < vertexListSize; ++i )
-    input >> vertices[ i ].id >> vertices[ i ].x >> vertices[ i ].y >> vertices[ i ].z;
+    input >> vertices[ i ].id >> vertices[ i ].x[ 0 ] >> vertices[ i ].x[ 1 ] >> vertices[ i ].x[ 2 ];
   std::cout << "  - read " << vertices.size() << " vertices." << std::endl;
 
   int elementListSize = 0;
@@ -331,7 +336,7 @@ void writeMacroGrid ( stream_t &output,
 
   output << std::endl << vertexListSize << std::endl;
   for( int i = 0; i < vertexListSize; ++i )
-    output << vertices[ i ].id << ws << vertices[ i ].x << ws << vertices[ i ].y << ws << vertices[ i ].z << std::endl;
+    output << vertices[ i ].id << ws << vertices[ i ].x[ 0 ] << ws << vertices[ i ].x[ 1 ] << ws << vertices[ i ].x[ 2 ] << std::endl;
 
   output << std::endl << elementListSize << std::endl;
   for( int i = 0; i < elementListSize; ++i )
@@ -553,9 +558,8 @@ void readDGF ( stream_t &input,
   for( int i = 0; i < dgf.numVertices(); ++i )
   {
     vertices[ i ].id = i;
-    vertices[ i ].x = dgf.vertex( i )[ 0 ];
-    vertices[ i ].y = dgf.vertex( i )[ 1 ];
-    vertices[ i ].z = dgf.vertex( i )[ 2 ];
+    for( int j=0; j<3; ++j )
+      vertices[ i ].x[ j ] = dgf.vertex( i )[ j ];
   }
 
   typedef Dune::ElementTopologyMapping< rawId == HEXA_RAW ? Dune::hexa : Dune::tetra > DuneTopologyMapping;
