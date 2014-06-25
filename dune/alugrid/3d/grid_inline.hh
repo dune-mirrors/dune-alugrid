@@ -54,7 +54,7 @@ namespace Dune
     dverb << "************************************************" << std::endl;
     checkMacroGrid ();
   
-    postAdapt();
+    clearIsNewMarkers();
     calcExtras();
   } // end constructor
 
@@ -362,17 +362,9 @@ namespace Dune
     EntityObject father( EntityImp( factory(), this->maxLevel() ) );
     EntityObject son   ( EntityImp( factory(), this->maxLevel() ) );
 
-    int defaultChunk = newElementsChunk_;
-    int actChunk     = refineEstimate_ * refineMarked_; 
-
-    // guess how many new elements we get 
-    int newElements = std::max( actChunk , defaultChunk ); 
-
     // true if at least one element was marked for coarsening
     bool mightCoarse = preAdapt();
-    // reserve memory
-    handle.preAdapt( newElements );
-    
+
     bool refined = false ; 
     if(globalIdSet_)
     {
@@ -407,9 +399,6 @@ namespace Dune
       // no need to call postAdapt here, because markers 
       // are cleand during refinement callback
     }
-
-    // check whether we have balance 
-    handle.postAdapt();
 
     // here postAdapt is not called, because 
     // reset of refinedTag is done in preCoarsening and postRefinement
@@ -460,7 +449,7 @@ namespace Dune
           grid.globalIdSet_->updateIdSet();
       
         // unset all leaf markers
-        grid.postAdapt();
+        grid.clearIsNewMarkers();
       }
 
       return changed;
@@ -509,19 +498,12 @@ namespace Dune
         // compress data, wrapper for dof manager
         gs.compress();
 
-        grid.postAdapt();
+        grid.clearIsNewMarkers();
       }
       return changed;
     }
   }; // ALU3dGridCommHelper
 
-/*
-  template< ALU3dGridElementType elType, class Comm >
-  inline bool ALU3dGrid< elType, Comm >::loadBalance ()
-  {
-    return ALU3dGridCommHelper< elType, Comm >::loadBalance( *this );
-  }
-*/
 
   // load balance grid  
   template< ALU3dGridElementType elType, class Comm >
@@ -544,7 +526,7 @@ namespace Dune
     updateStatus();
 
     // call post adapt
-    postAdapt();
+    clearIsNewMarkers();
   }
 
 

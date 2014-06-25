@@ -691,7 +691,7 @@ namespace ALUGrid
       realFather_.setElement( father );
       rp_.postRefinement( reFather_ );
 
-      // resert refinement markers
+      // reset refinement markers
       father.resetRefinedTag();
       for( HElementType *son = father.down(); son ; son = son->next() )
         son->resetRefinedTag();

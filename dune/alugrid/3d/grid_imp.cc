@@ -485,45 +485,55 @@ namespace Dune
   // post process grid  
   template< ALU3dGridElementType elType, class Comm >
   alu_inline 
-  void ALU3dGrid< elType, Comm >::postAdapt ()
+  void ALU3dGrid< elType, Comm >::clearIsNewMarkers ()
   {
-    { 
-      // old fashioned way 
-      typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, All_Partition, Comm > IteratorType;
-      IteratorType w (*this, maxLevel(), nlinks() );
-      
-      typedef typename IteratorType::val_t val_t;
-      typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;  
-      
-      for (w.first () ; ! w.done () ; w.next ())
-      {
-        val_t & item = w.item();
+    // old fashioned way 
+    typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, All_Partition, Comm > IteratorType;
+    IteratorType w (*this, maxLevel(), nlinks() );
+    
+    typedef typename IteratorType::val_t val_t;
+    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;  
+    
+    for (w.first () ; ! w.done () ; w.next ())
+    {
+      val_t & item = w.item();
 
-        alugrid_assert ( item.first || item.second );
-        IMPLElementType * elem = 0; 
-        if( item.first )
-          elem = static_cast<IMPLElementType *> (item.first); 
-        else if( item.second )
+      alugrid_assert ( item.first || item.second );
+      IMPLElementType * elem = 0; 
+      if( item.first )
+        elem = static_cast<IMPLElementType *> (item.first); 
+      else if( item.second )
+      {
+        elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
+        alugrid_assert ( elem );
+      }
+      if (elem->hasBeenRefined())
+      {
+        elem->resetRefinedTag();
+        // on bisected grids its possible that not only leaf elements where added so
+        // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
+        while (elem->up())
         {
-          elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
-          alugrid_assert ( elem );
-        }
-        if (elem->hasBeenRefined())
-        {
+          elem = static_cast<IMPLElementType *>(elem->up());
           elem->resetRefinedTag();
-          // on bisected grids its possible that not only leaf elements where added so
-          // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
-          while (elem->up())
-          {
-            elem = static_cast<IMPLElementType *>(elem->up());
-            elem->resetRefinedTag();
-          }
         }
       }
     }
+  }
 
-    // make that postAdapt has been called
-    lockPostAdapt_ = false;
+  // post process grid  
+  template< ALU3dGridElementType elType, class Comm >
+  alu_inline 
+  void ALU3dGrid< elType, Comm >::postAdapt ()
+  {
+    if( lockPostAdapt_ )
+    { 
+      // call implementation of postAdapt
+      clearIsNewMarkers();
+
+      // make that postAdapt has been called
+      lockPostAdapt_ = false;
+    }
   }
 
   template< ALU3dGridElementType elType, class Comm >
@@ -582,7 +592,7 @@ namespace Dune
     updateStatus();
 
     // reset refinement markers 
-    postAdapt();
+    clearIsNewMarkers();
   }
 
 

@@ -905,6 +905,9 @@ namespace Dune
     // load balance and compress memory if possible 
     void finalizeGridCreation();
  
+    //! clear all entity new markers 
+    void clearIsNewMarkers( );
+
   private:
     typedef ALU3DSPACE GatherScatter GatherScatterType;
 
@@ -915,7 +918,7 @@ namespace Dune
     //! returns if a least one entity was marked for coarsening 
     bool preAdapt ( );
 
-    //! clear all entity new markers 
+    //! clear all entity new markers if lockPostAdapt_ is set
     void postAdapt ( );
 
     /** \brief  @copydoc Dune::Grid::adapt() */
