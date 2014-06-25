@@ -21,6 +21,7 @@
 #include <dune/alugrid/impl/byteorder.hh>
 #include <dune/alugrid/impl/macrofileheader.hh>
 #include <dune/alugrid/impl/serial/serialize.h>
+#include <dune/alugrid/impl/serial/gitter_sti.h>
 
 using ALUGrid::MacroFileHeader;
 
@@ -55,14 +56,32 @@ template<>
 struct Element< TETRA_RAW >
 {
   static const int numVertices = 4;
+  static const int numFaces = 4 ;
+  static const int numVerticesPerFace = 3 ;
   int vertices[ numVertices ];
+  int neighbor[ numFaces ]; 
+  int rank ;
+
+  static int prototype( const int face, const int vx ) 
+  {
+    return ALUGrid::Gitter::Geometric::Tetra::prototype[ face ][ vx ];
+  }
 };
 
 template<>
 struct Element< HEXA_RAW >
 {
   static const int numVertices = 8;
+  static const int numFaces = 6 ;
+  static const int numVerticesPerFace = 4 ;
   int vertices[ numVertices ];
+  int neighbor[ numFaces ]; 
+  int rank ;
+
+  static int prototype( const int face, const int vx ) 
+  {
+    return ALUGrid::Gitter::Geometric::Hexa::prototype[ face ][ vx ];
+  }
 };
 
 
@@ -408,10 +427,13 @@ void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
 template< ElementRawID rawId >
 void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
                       const std::vector< Vertex > &vertices,
-                      const std::vector< Element< rawId > > &elements,
+                      std::vector< Element< rawId > > &elements,
                       const std::vector< BndSeg< rawId > > &bndSegs,
                       const std::vector< Periodic< rawId > > &periodics )
 {
+  // partition might change the element order
+  partition( vertices, elements, 10, 10 );
+
   MacroFileHeader header;
   header.setType( rawId == HEXA_RAW ? MacroFileHeader::hexahedra : MacroFileHeader::tetrahedra );
   header.setFormat( options.format );
