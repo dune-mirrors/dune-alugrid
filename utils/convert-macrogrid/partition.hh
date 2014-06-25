@@ -115,15 +115,19 @@ void partition(const std::vector< Vertex >     &vertices,
                const int nPartitions,
                const int partMethod )
 {
-  // order elements using the Hilbert space filling curve
-  orderElementHSFC( vertices, elements );
-
-  fillNeighbors( vertices, elements );
-
   typedef ALUGrid::LoadBalancer LoadBalancerType;
   typedef typename LoadBalancerType :: DataBase DataBaseType;
    
+  const DataBaseType :: method mth = DataBaseType :: method ( partMethod );
+  // load balancing data base 
   DataBaseType db ;
+
+  // order elements using the Hilbert space filling curve
+  orderElementHSFC( vertices, elements );
+
+  // fill neighbor information (needed for process border detection)
+  fillNeighbors( vertices, elements );
+
 
   const int weight = 1 ;
   const size_t nElements = elements.size();
@@ -134,8 +138,6 @@ void partition(const std::vector< Vertex >     &vertices,
 
   // serial mp access 
   ALUGrid :: MpAccessSerial mpa ;
-
-  DataBaseType :: method mth = DataBaseType :: method ( partMethod );
 
   // obtain partition vector using ALUGrid's serial sfc partitioning 
   std::vector< int > partition = db.repartition( mpa, mth, nPartitions );
