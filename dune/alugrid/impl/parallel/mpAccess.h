@@ -83,6 +83,67 @@ namespace ALUGrid
       }
   } ;
 
+  // class fulfilling the MpAccessGlobal communicator interface
+  // for serial usage (ie for usage of the partitioners in serial)
+  class MpAccessSerial : public MpAccessGlobal
+  {
+  public:  
+    MpAccessSerial() {} 
+    virtual ~MpAccessSerial () {}
+
+    // this features is only available in the newer version 
+    typedef MpAccessGlobal :: minmaxsum_t  minmaxsum_t;
+
+    virtual int psize() const { return 1; }
+    int myrank () const { return 0; }
+
+    virtual int barrier () const { return psize(); }
+    virtual bool gmax (bool value) const { return value; }
+    virtual int gmax (int value) const { return value; }
+    virtual int gmin ( int value ) const { return value; }
+    virtual int gsum ( int value ) const { return value; }
+    virtual long gmax ( long value ) const { return value; }
+    virtual long gmin ( long value ) const { return value; }
+    virtual long gsum ( long value ) const { return value; }
+    virtual double gmax ( double value ) const { return value; }
+    virtual double gmin ( double value ) const { return value; }
+    virtual double gsum ( double value ) const { return value; }
+    virtual void gmax (double* in, int length, double* out) const { std::copy(in, in+length, out ); }
+    virtual void gmin (double* in, int length, double* out) const { std::copy(in, in+length, out ); }
+    virtual void gsum (double* in, int length, double* out) const { std::copy(in, in+length, out ); }
+    virtual void gmax (int*,int,int*) const {  }
+    virtual void gmin (int*,int,int*) const {  }
+    virtual void gsum (int*,int,int*) const {  }
+    virtual minmaxsum_t minmaxsum( double value ) const { return minmaxsum_t( value ); }
+    virtual std::pair<double,double> gmax (std::pair<double,double> value ) const { return value; }
+    virtual std::pair<double,double> gmin (std::pair<double,double> value ) const { return value; }
+    virtual std::pair<double,double> gsum (std::pair<double,double> value ) const { return value; }
+    virtual void bcast(int*,int, int) const { }
+    virtual void bcast(char*,int, int) const { }
+    virtual void bcast(double*,int, int) const { }
+    virtual void bcast ( ObjectStream &, int ) const {}
+    virtual int exscan( int value ) const { return 0; }
+    virtual int scan( int value ) const { return value; }
+    virtual std::vector < int > gcollect ( int value ) const { return std::vector<int> (psize(), value); }
+    virtual std::vector < double > gcollect ( double value ) const { return std::vector<double> (psize(), value); }
+    virtual std::vector < std::vector < int > > gcollect (const std::vector < int > & value) const 
+    { 
+      return std::vector < std::vector < int > > (psize(), value); 
+    }
+    virtual std::vector < ObjectStream > gcollect (const ObjectStream &, const std::vector<int>& ) const
+    {
+      return std::vector < ObjectStream > (psize()); 
+    }
+    virtual std::vector < std::vector < double > > gcollect (const std::vector < double > & value) const 
+    { 
+      return std::vector < std::vector < double > > (psize(), value); 
+    }
+    virtual std::vector < ObjectStream > gcollect (const ObjectStream &os) const { return std::vector < ObjectStream >(psize(),os); }
+  };
+
+
+  // MpAccessLocal is an implementation of MpAccessGlobal but also adding a
+  // point-to-point interface 
   class MpAccessLocal : public MpAccessGlobal 
   {
     typedef std::map< int, int > linkage_t;
