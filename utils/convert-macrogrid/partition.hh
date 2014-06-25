@@ -44,7 +44,7 @@ void orderElementHSFC(const std::vector< Vertex > &vertices,
     CoordinateType center( 0 );
     for( int i=0; i<rawId; ++i )
     {
-      center += vertices[ elements[ i ] ].x; 
+      center += vertices[ elements[ el ].vertices[ i ] ].x; 
     }
     center /= double( rawId );
     // generate hilbert index from element's center and store index 
@@ -64,13 +64,61 @@ void orderElementHSFC(const std::vector< Vertex > &vertices,
 }
 
 template< ElementRawID rawId >
-void partition(const std::vector< Vertex > &vertices,
-               const std::vector< Element< rawId > > &elements,
-               const int nPartitions, 
-               std::vector< int >& partition )
+void fillNeighbors(const std::vector< Vertex > &vertices,
+                   std::vector< Element< rawId > > &elements )
 {
-  // enforce space filling curve ordering
-  orderElementsHSFC( vertices, elements );
+  typedef ALUGrid::LinkedObject::Identifier FaceKeyType;
+  typedef std::pair<int,int> pair_t ;
+  typedef std::map< FaceKeyType, std::vector< pair_t > > FaceMapType ;
+
+  FaceMapType faceMap;
+  const size_t nElements = elements.size();
+  for( size_t el = 0; el<nElements; ++el ) 
+  {
+    for( int fce=0; fce<Element< rawId >::numFaces; ++fce ) 
+    {
+      int vx[ 4 ] = {-1,-1,-1,-1};
+      // get face vertex numbers 
+      for( int j=0; j<Element< rawId >::numVerticesPerFace; ++ j )
+      {
+        vx[ j ] = elements[ el ].vertices[ Element< rawId >::prototype( fce, j ) ];
+      }
+
+      FaceKeyType key( vx[0], vx[1], vx[2], vx[3] );
+      faceMap[ key].push_back( pair_t( el, fce ) );
+
+      // reset neighbor information (-1 is boundary) 
+      elements[ el ].neighbor[ fce ] = -1;
+    }
+  }
+
+  typedef typename FaceMapType :: iterator iterator ;
+  const iterator end = faceMap.end();
+  for( iterator it = faceMap.begin(); it != end; ++it ) 
+  {
+    std::vector< pair_t >& nbs = (*it).second ;
+    // size should be either 2 (interior) or 1 (boundary)
+    assert( nbs.size() == 2 || nbs.size() == 1 );
+    if( nbs.size() == 2 )
+    {
+      // set neighbor information
+      for( int i=0; i<2; ++i )
+        elements[ nbs[ i ].first ].neighbor[ nbs[ i ].second ] = nbs[ 1-i ].first;
+    }
+  }
+}
+
+// we assume that the elements have been ordered by using the above ordering method
+template< ElementRawID rawId >
+void partition(const std::vector< Vertex >     &vertices,
+               std::vector< Element< rawId > > &elements,
+               const int nPartitions,
+               const int partMethod )
+{
+  // order elements using the Hilbert space filling curve
+  orderElementHSFC( vertices, elements );
+
+  fillNeighbors( vertices, elements );
 
   typedef ALUGrid::LoadBalancer LoadBalancerType;
   typedef typename LoadBalancerType :: DataBase DataBaseType;
@@ -87,8 +135,16 @@ void partition(const std::vector< Vertex > &vertices,
   // serial mp access 
   ALUGrid :: MpAccessSerial mpa ;
 
+  DataBaseType :: method mth = DataBaseType :: method ( partMethod );
+
   // obtain partition vector using ALUGrid's serial sfc partitioning 
-  partition = db.repartition( mpa, DataBaseType :: ALUGRID_SpaceFillingCurveSerial, nPartitions );
+  std::vector< int > partition = db.repartition( mpa, mth, nPartitions );
+
+  // set rank information 
+  for( size_t el = 0; el<nElements; ++el )
+  {
+    elements[ el ].rank = partition[ el ];
+  }
 }
 
 #endif // ALUGRID_PARTITION_MACROGRID_HH
