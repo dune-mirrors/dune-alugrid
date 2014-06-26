@@ -344,22 +344,53 @@ void writeMacroGrid ( stream_t &output,
                       const std::vector< Vertex > &vertices,
                       const std::vector< Element< rawId > > &elements,
                       const std::vector< BndSeg< rawId > > &bndSegs,
-                      const std::vector< Periodic< rawId > > &periodics )
+                      const std::vector< Periodic< rawId > > &periodics,
+                      const int rank, 
+                      const int nPartition )
 {
-  const int vertexListSize = vertices.size();
   const int elementListSize = elements.size();
   const int bndSegListSize = bndSegs.size();
   const int periodicListSize = periodics.size();
 
+  const bool writeParallel = nPartition > 1 ; 
+
   ALUGrid::StandardWhiteSpace_t ws;
+  std::set< int > partitionVertexIds;
+  int partitionElements = elementListSize ;
+  if( writeParallel )
+  {
+    // reset partitionElements for new counting
+    partitionElements = 0;
+    for( int i = 0; i < elementListSize; ++i )
+    {
+      // if element is not in current partition continue 
+      if( elements[ i ].rank != rank ) continue ;
 
-  output << std::endl << vertexListSize << std::endl;
+      ++ partitionElements ;
+      for( int j = 0; j < Element< rawId >::numVertices; ++j )
+        partitionVertexIds.insert( elements[ i ].vertices[ j ] );
+    }
+  }
+
+  const int vertexListSize = vertices.size();
+  const int partitionVertexSize = writeParallel ? partitionVertexIds.size() : vertexListSize ;
+  output << std::endl << partitionVertexSize << std::endl;
+  const typename std::set<int>::iterator pVxEnd = partitionVertexIds.end();
   for( int i = 0; i < vertexListSize; ++i )
-    output << vertices[ i ].id << ws << vertices[ i ].x[ 0 ] << ws << vertices[ i ].x[ 1 ] << ws << vertices[ i ].x[ 2 ] << std::endl;
+  {
+    // if vertex is not in partition list continue 
+    if( writeParallel && partitionVertexIds.find( vertices[ i ].id ) == pVxEnd ) continue ;
+    // write vertex id and coordinates 
+    output << vertices[ i ].id << ws 
+           << vertices[ i ].x[ 0 ] << ws << vertices[ i ].x[ 1 ] << ws << vertices[ i ].x[ 2 ] << std::endl;
+  }
 
-  output << std::endl << elementListSize << std::endl;
+  output << std::endl << partitionElements << std::endl;
   for( int i = 0; i < elementListSize; ++i )
   {
+    // if element is not in current partition continue 
+    if( elements[ i ].rank != rank ) continue ;
+
     output << elements[ i ].vertices[ 0 ];
     for( int j = 1; j < Element< rawId >::numVertices; ++j )
       output << ws << elements[ i ].vertices[ j ];
@@ -412,10 +443,12 @@ void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
                          const std::vector< Vertex > &vertices,
                          const std::vector< Element< rawId > > &elements,
                          const std::vector< BndSeg< rawId > > &bndSegs,
-                         const std::vector< Periodic< rawId > > &periodics )
+                         const std::vector< Periodic< rawId > > &periodics,
+                         const int rank,
+                         const int nPartition )
 {
   ObjectStream os;
-  writeMacroGrid( os, vertices, elements, bndSegs, periodics );
+  writeMacroGrid( os, vertices, elements, bndSegs, periodics, rank, nPartition );
   ALUGrid::writeHeaderAndBinary( output, os, header );
 }
 
@@ -431,8 +464,11 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
                       const std::vector< BndSeg< rawId > > &bndSegs,
                       const std::vector< Periodic< rawId > > &periodics )
 {
+  const int rank = 0;
+  const int nPartition = 1;
   // partition might change the element order
-  partition( vertices, elements, 10, 10 );
+  partition( vertices, elements, rank, nPartition );
+
 
   MacroFileHeader header;
   header.setType( rawId == HEXA_RAW ? MacroFileHeader::hexahedra : MacroFileHeader::tetrahedra );
@@ -448,20 +484,20 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
     switch( header.byteOrder() )
     {
     case MacroFileHeader::native:
-      return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics );
+      return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, nPartition );
       
     case MacroFileHeader::bigendian:
-      return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics );
+      return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, nPartition );
 
     case MacroFileHeader::littleendian:
-      return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics );
+      return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, nPartition );
     }
   }
   else
   {
     header.write( output );
     output << std::scientific << std::setprecision( 16 );
-    writeMacroGrid( output, vertices, elements, bndSegs, periodics );
+    writeMacroGrid( output, vertices, elements, bndSegs, periodics, rank, nPartition );
   }
 }
 
