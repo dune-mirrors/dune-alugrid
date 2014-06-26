@@ -33,7 +33,7 @@ using ALUGrid::MacroFileHeader;
 enum ElementRawID { TETRA_RAW = ALUGrid :: MacroGridBuilder :: TETRA_RAW,  // = 4  
                     HEXA_RAW  = ALUGrid :: MacroGridBuilder :: HEXA_RAW    // = 8 
                   };
-static const int ghost_closure = ALUGrid :: Gitter :: hbndseg_STI :: ghost_closure ;
+static const int ghost_closure = ALUGrid :: Gitter :: hbndseg_STI :: ghost_closure ; // = 211 
 
 
 // Vertex
@@ -65,6 +65,12 @@ struct Element< TETRA_RAW >
   int neighbor[ numFaces ]; 
   int rank ;
 
+  Element () : rank( 0 ) 
+  {
+    for( int i=0; i<numVertices; ++ i ) vertices[ i ] = -1;
+    for( int i=0; i<numFaces; ++ i )    neighbor[ i ] = -1;
+  }
+
   static int prototype( const int face, const int vx ) 
   {
     return ALUGrid::Gitter::Geometric::Tetra::prototype[ face ][ vx ];
@@ -81,6 +87,11 @@ struct Element< HEXA_RAW >
   int neighbor[ numFaces ]; 
   int rank ;
 
+  Element () : rank( 0 ) 
+  {
+    for( int i=0; i<numVertices; ++ i ) vertices[ i ] = -1;
+    for( int i=0; i<numFaces; ++ i )    neighbor[ i ] = -1;
+  }
   static int prototype( const int face, const int vx ) 
   {
     return ALUGrid::Gitter::Geometric::Hexa::prototype[ face ][ vx ];
