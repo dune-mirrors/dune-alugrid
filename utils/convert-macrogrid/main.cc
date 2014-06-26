@@ -22,6 +22,7 @@
 #include <dune/alugrid/impl/macrofileheader.hh>
 #include <dune/alugrid/impl/serial/serialize.h>
 #include <dune/alugrid/impl/serial/gitter_sti.h>
+#include <dune/alugrid/impl/serial/gitter_mgb.h>
 
 using ALUGrid::MacroFileHeader;
 
@@ -29,8 +30,10 @@ using ALUGrid::MacroFileHeader;
 // ElementRawID
 // ------------
 
-enum ElementRawID { TETRA_RAW = 4, HEXA_RAW = 8 };
-static const int ghost_closure = 211 ;
+enum ElementRawID { TETRA_RAW = ALUGrid :: MacroGridBuilder :: TETRA_RAW,  // = 4  
+                    HEXA_RAW  = ALUGrid :: MacroGridBuilder :: HEXA_RAW    // = 8 
+                  };
+static const int ghost_closure = ALUGrid :: Gitter :: hbndseg_STI :: ghost_closure ;
 
 
 // Vertex
