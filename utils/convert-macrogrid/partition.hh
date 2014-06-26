@@ -3,7 +3,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/alugrid/common/hsfc.hh>
-#include <dune/alugrid/impl/parallel/gitter_pll_ldb.cc>
+#include <dune/alugrid/impl/parallel/gitter_pll_ldb.h>
 
 template< ElementRawID rawId >
 void orderElementHSFC(const std::vector< Vertex > &vertices,
