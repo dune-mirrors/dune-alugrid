@@ -93,10 +93,10 @@ public:
   double communicationTime() const { return commTime_; }
 
   // this is called before the adaptation process starts 
-  void preAdapt ( const unsigned int estimateAdditionalElements );
+  void initialize ();
 
   // this is called before after the adaptation process is finished 
-  void postAdapt ();
+  void finalize ();
 
 private:
   /** \brief do restriction of data on leafs which might vanish
@@ -154,11 +154,11 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
   // reset timer 
   adaptTimer_.reset() ; 
 
+  // copy data to container 
+  initialize();
+
   // check if elements might be removed in next adaptation cycle 
   const bool mightCoarsen = grid_.preAdapt();
-
-  // copy data to container 
-  preAdapt( 0 );
 
   // if elements might be removed
   if( mightCoarsen )
@@ -181,11 +181,11 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
       hierarchicProlong( *it, container_ );
   }
 
-  // copy data back to solution, load balance, and communication
-  postAdapt();
-
   // reset adaptation information in grid
   grid_.postAdapt();
+
+  // copy data back to solution, load balance, and communication
+  finalize();
 
   // increase adaptation secuence number 
   ++adaptationSequenceNumber;
@@ -193,7 +193,7 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
 
 template< class Grid, class Vector >
 inline void LeafAdaptation< Grid, Vector >
-  ::preAdapt( const unsigned int estimateAdditionalElements ) 
+  ::initialize() 
 {
 #ifdef USE_VECTOR_FOR_PWF
   const Vector& solution = getSolution();
@@ -210,7 +210,7 @@ inline void LeafAdaptation< Grid, Vector >
 }
 
 template< class Grid, class Vector >
-inline void LeafAdaptation< Grid, Vector >::postAdapt() 
+inline void LeafAdaptation< Grid, Vector >::finalize() 
 {
   Vector& solution = getSolution();
 #ifndef USE_VECTOR_FOR_PWF

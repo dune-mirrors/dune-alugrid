@@ -93,31 +93,29 @@ public:
   double communicationTime() const { return commTime_; }
 
   // this is called before the adaptation process starts 
-  void preAdapt ( const unsigned int estimateAdditionalElements );
+  void initialize ();
 
-  // this is called before after the adaptation process is finished 
-  void postAdapt ();
+  // this is called after the adaptation process is finished 
+  void finalize ();
 
   //--------------------------------------------------
   //  Interface methods for callback adaptation
   //--------------------------------------------------
   
   // called when children of father are going to vanish
-  void preCoarsening ( const Entity &father ) const
+  void preCoarsening ( const Entity &father )
   {
 #ifndef USE_VECTOR_FOR_PWF
-    Vector& solution = const_cast<ThisType&>(*this).getSolution();
-    Container &container_ = solution.container();
+    Container &container_ = getSolution().container();
 #endif
     Vector::restrictLocal( father, container_ );
   }
 
   // called when children of father where newly created
-  void postRefinement ( const Entity &father ) const
+  void postRefinement ( const Entity &father )
   {
 #ifndef USE_VECTOR_FOR_PWF
-    Vector& solution = const_cast<ThisType&>(*this).getSolution();
-    Container &container_ = solution.container();
+    Container &container_ = getSolution().container();
 #endif
     container_.resize();
     Vector::prolongLocal( father, container_ );
@@ -156,8 +154,14 @@ inline void LeafAdaptation< Grid, Vector,LoadBalanceHandle >::operator() ( Vecto
   // reset timer 
   adaptTimer_.reset() ; 
 
+  // copy solution to PersistentContainer if necessary 
+  initialize();
+
   // callback adaptation, see interface methods above 
   grid_.adapt( *this );
+
+  // copy solution from PersistentContainer if necessary
+  finalize(); 
 
   // increase adaptation secuence number 
   ++adaptationSequenceNumber;
@@ -165,7 +169,7 @@ inline void LeafAdaptation< Grid, Vector,LoadBalanceHandle >::operator() ( Vecto
 
 template< class Grid, class Vector, class LoadBalanceHandle >
 inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle >
-  ::preAdapt( const unsigned int estimateAdditionalElements ) 
+  ::initialize() 
 {
 #ifdef USE_VECTOR_FOR_PWF
   const Vector& solution = getSolution();
@@ -182,7 +186,7 @@ inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle >
 }
 
 template< class Grid, class Vector, class LoadBalanceHandle >
-inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle > ::postAdapt() 
+inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle > ::finalize() 
 {
   Vector& solution = getSolution();
 #ifndef USE_VECTOR_FOR_PWF
