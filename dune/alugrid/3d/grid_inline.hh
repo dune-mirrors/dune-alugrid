@@ -400,10 +400,6 @@ namespace Dune
       // are cleand during refinement callback
     }
 
-    // here postAdapt is not called, because 
-    // reset of refinedTag is done in preCoarsening and postRefinement
-    // methods of datahandle (see datahandle.hh) 
-    
     return refined;
   }
 
