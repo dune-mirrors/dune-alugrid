@@ -148,7 +148,6 @@ struct Periodic< HEXA_RAW >
 
 #include "partition.hh"
 
-
 // DGFParser
 // ---------
 
@@ -441,9 +440,12 @@ struct ProgramOptions
   ElementRawID defaultRawId;
   std::string format;
   std::string byteOrder;
+  int nPartition ;
+  int partitionMethod ;
   
   ProgramOptions ()
-    : defaultRawId( HEXA_RAW ), format( "ascii" ), byteOrder( "default" )
+    : defaultRawId( HEXA_RAW ), format( "ascii" ), 
+      byteOrder( "default" ), nPartition( 1 ), partitionMethod( 10 )
   {}
 };
 
@@ -478,11 +480,10 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
                       const std::vector< BndSeg< rawId > > &bndSegs,
                       const std::vector< Periodic< rawId > > &periodics )
 {
-  const int rank = 0;
-  const int nPartition = 1;
   // partition might change the element order
-  partition( vertices, elements, rank, nPartition );
+  partition( vertices, elements, options.nPartition, options.partitionMethod );
 
+  const int rank = 0;
 
   MacroFileHeader header;
   header.setType( rawId == HEXA_RAW ? MacroFileHeader::hexahedra : MacroFileHeader::tetrahedra );
@@ -498,20 +499,20 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
     switch( header.byteOrder() )
     {
     case MacroFileHeader::native:
-      return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, nPartition );
+      return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
       
     case MacroFileHeader::bigendian:
-      return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, nPartition );
+      return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
 
     case MacroFileHeader::littleendian:
-      return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, nPartition );
+      return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
     }
   }
   else
   {
     header.write( output );
     output << std::scientific << std::setprecision( 16 );
-    writeMacroGrid( output, vertices, elements, bndSegs, periodics, rank, nPartition );
+    writeMacroGrid( output, vertices, elements, bndSegs, periodics, rank, options.nPartition );
   }
 }
 
@@ -779,6 +780,14 @@ int main ( int argc, char **argv )
         }
         break;
 
+      case 'p':
+        options.nPartition = atoi( argv[ i+1 ] );
+        break ;
+
+      case 'm':
+        options.partitionMethod = atoi( argv[ i+1 ] );
+        break ;
+
       case 'o':
         if( i+1 >= argc )
         {
@@ -803,11 +812,19 @@ int main ( int argc, char **argv )
 
   if( argc <= 2 )
   {
+    typedef ALUGrid::LoadBalancer::DataBase DataBase;
+    const std::string mth[ 3 ] = { DataBase::methodToString( DataBase::ALUGRID_SpaceFillingCurveSerial ),
+                                   DataBase::methodToString( DataBase::METIS_PartGraphKway ),
+                                   DataBase::methodToString( DataBase::METIS_PartGraphRecursive ) };
+
     std::cerr << "Usage: " << argv[ 0 ] << " [-b] [-4|-8] [-o <byteorder>] <input> <output>" << std::endl;
     std::cerr << "Flags: -4 : read tetrahedral grid, if not determined by input file" << std::endl;
     std::cerr << "       -8 : read hexahedral grid, if not determined by input file" << std::endl;
     std::cerr << "       -b : write binary output (alias for -f binary)" << std::endl;
     std::cerr << "       -f : select output format (one of 'ascii', 'binary', 'zbinary')" << std::endl;
+    std::cerr << "       -p : number of partitions (default is 1)" << std::endl;
+    std::cerr << "       -m : partitioning method (default is " << mth[ 0 ] << ")," << std::endl; 
+    std::cerr << "            also valid are " << mth[ 1 ] << " and " << mth[ 2 ] << std::endl;
     std::cerr << "       -o : select output byte order (one of 'native', 'bigendian', 'littleendian')" << std::endl;
     return 1;
   }
