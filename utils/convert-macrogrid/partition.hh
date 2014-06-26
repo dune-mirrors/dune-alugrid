@@ -128,12 +128,28 @@ void partition(const std::vector< Vertex >     &vertices,
   // fill neighbor information (needed for process border detection)
   fillNeighbors( vertices, elements );
 
-
   const int weight = 1 ;
   const size_t nElements = elements.size();
   for( size_t el = 0; el<nElements; ++el )
   {
     db.vertexUpdate( typename LoadBalancerType::GraphVertex( el, weight ) );
+  }
+
+  // if graph partitioning is used 
+  if( mth > DataBaseType :: ALUGRID_SpaceFillingCurveSerial ) 
+  {
+    for( size_t el = 0; el<nElements; ++el )
+    {
+      for( int fce=0; fce<Element< rawId >::numFaces; ++fce ) 
+      {
+        const int nbIdx = elements[ el ].neighbor[ fce ];
+        const int elIdx = el ;
+        if( elIdx < nbIdx ) // this automatically excludes bnd
+        {
+          db.edgeUpdate( typename LoadBalancerType::GraphEdge( elIdx, nbIdx, weight, 0, 0) );
+        }
+      }
+    }
   }
 
   // serial mp access 
