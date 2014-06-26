@@ -119,6 +119,17 @@ void partition(const std::vector< Vertex >     &vertices,
   typedef typename LoadBalancerType :: DataBase DataBaseType;
    
   const DataBaseType :: method mth = DataBaseType :: method ( partMethod );
+
+  if( mth < DataBaseType :: ALUGRID_SpaceFillingCurveSerial || 
+      mth > DataBaseType :: METIS_PartGraphRecursive ) 
+  {
+    std::cerr << "Invalid partitioning method, valid are: " <<
+      DataBaseType :: methodToString(DataBaseType::ALUGRID_SpaceFillingCurveSerial) << ", " <<
+      DataBaseType :: methodToString(DataBaseType::METIS_PartGraphKway) << ", and " <<
+      DataBaseType :: methodToString(DataBaseType::METIS_PartGraphRecursive) << std::endl;
+    std::abort();
+  }
+
   // load balancing data base 
   DataBaseType db ;
 
