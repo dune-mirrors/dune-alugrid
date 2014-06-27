@@ -250,9 +250,17 @@ void partition(const std::vector< Vertex >     &vertices,
           {
             bndSeg.vertices[ vx ] = element.vertices[ Element< rawId >::prototype( fce, vx ) ];
           }
+          // for hexahedrons we have to change the orientation
+          if( rawId == HEXA_RAW ) 
+            std::swap( bndSeg.vertices[ 1 ], bndSeg.vertices[ 3 ] );
+
           // insert interior face for element
           bndSeg.element = el ;
           bndSegs.push_back( bndSeg );
+
+          // switch back for neighboring element 
+          if( rawId == HEXA_RAW ) 
+            std::swap( bndSeg.vertices[ 1 ], bndSeg.vertices[ 3 ] );
 
           // insert interior face for neighbor
           bndSeg.element = nb ;
