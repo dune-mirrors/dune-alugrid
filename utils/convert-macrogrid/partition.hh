@@ -33,13 +33,13 @@ void orderElementHSFC(const std::vector< Vertex > &vertices,
   // get element's center to hilbert index mapping
   Dune::SpaceFillingCurveOrdering< CoordinateType > sfc( minCoord, maxCoord );
 
-  const size_t nElements = elements.size();
+  const int nElements = elements.size();
   std::vector< Element< rawId > > orderedElements( nElements );
 
   typedef std::map< double, int > hsfc_t;
   hsfc_t hsfc;
 
-  for( size_t el = 0; el<nElements; ++el )
+  for( int el = 0; el<nElements; ++el )
   {
     CoordinateType center( 0 );
     for( int i=0; i<rawId; ++i )
@@ -65,15 +65,17 @@ void orderElementHSFC(const std::vector< Vertex > &vertices,
 
 template< ElementRawID rawId >
 void fillNeighbors(const std::vector< Vertex > &vertices,
-                   std::vector< Element< rawId > > &elements )
+                   std::vector< Element< rawId > > &elements,
+                   std::vector< BndSeg< rawId > >& bndSegs,
+                   std::vector< Periodic< rawId > > &periodics )
 {
   typedef ALUGrid::LinkedObject::Identifier FaceKeyType;
   typedef std::pair<int,int> pair_t ;
   typedef std::map< FaceKeyType, std::vector< pair_t > > FaceMapType ;
 
   FaceMapType faceMap;
-  const size_t nElements = elements.size();
-  for( size_t el = 0; el<nElements; ++el ) 
+  const int nElements = elements.size();
+  for( int el = 0; el<nElements; ++el ) 
   {
     for( int fce=0; fce<Element< rawId >::numFaces; ++fce ) 
     {
@@ -84,8 +86,9 @@ void fillNeighbors(const std::vector< Vertex > &vertices,
         vx[ j ] = elements[ el ].vertices[ Element< rawId >::prototype( fce, j ) ];
       }
 
+      std::sort( vx, vx+Element< rawId >::numVerticesPerFace );
       FaceKeyType key( vx[0], vx[1], vx[2], vx[3] );
-      faceMap[ key].push_back( pair_t( el, fce ) );
+      faceMap[ key ].push_back( pair_t( el, fce ) );
 
       // reset neighbor information (-1 is boundary) 
       elements[ el ].neighbor[ fce ] = -1;
@@ -106,12 +109,55 @@ void fillNeighbors(const std::vector< Vertex > &vertices,
         elements[ nbs[ i ].first ].neighbor[ nbs[ i ].second ] = nbs[ 1-i ].first;
     }
   }
+
+  const int bndSegSize = bndSegs.size();
+  for( int i=0; i<bndSegSize; ++i ) 
+  {
+    int vx[ 4 ] = {-1,-1,-1,-1};
+    // get face vertex numbers 
+    for( int j=0; j<BndSeg< rawId >::numVertices; ++ j )
+    {
+      vx[ j ] = bndSegs[ i ].vertices[ j ];
+    }
+
+    std::sort( vx, vx+BndSeg< rawId >::numVertices );
+    FaceKeyType key( vx[0], vx[1], vx[2], vx[3] );
+    std::vector< pair_t >& nbs = faceMap[ key ];
+    assert( nbs.size() == 1 );
+    // set element number for boundary segment
+    bndSegs[ i ].element = nbs[ 0 ].first ;
+  }
+
+  const int periodicsSize = periodics.size();
+  for( int i=0; i<periodicsSize; ++i ) 
+  {
+    int vx[ 4 ] = {-1,-1,-1,-1};
+    const int vxSize = Periodic< rawId >::numVertices/2;
+    int fceVx = 0;
+    for( int fce=0; fce<2; ++fce ) 
+    {
+      // get face vertex numbers 
+      for( int j=0; j<vxSize; ++ j, ++fceVx )
+      {
+        vx[ j ] = periodics[ i ].vertices[ fceVx ];
+      }
+
+      std::sort( vx, vx+vxSize );
+      FaceKeyType key( vx[0], vx[1], vx[2], vx[3] );
+      std::vector< pair_t >& nbs = faceMap[ key ];
+      assert( nbs.size() == 1 );
+      // set element number for boundary segment
+      periodics[ i ].element[ fce ] = nbs[ 0 ].first ;
+    }
+  }
 }
 
 // we assume that the elements have been ordered by using the above ordering method
 template< ElementRawID rawId >
 void partition(const std::vector< Vertex >     &vertices,
                std::vector< Element< rawId > > &elements,
+               std::vector< BndSeg< rawId > >& bndSegs,
+               std::vector< Periodic< rawId > > &periodics,
                const int nPartitions,
                const int partMethod )
 {
@@ -137,11 +183,11 @@ void partition(const std::vector< Vertex >     &vertices,
   orderElementHSFC( vertices, elements );
 
   // fill neighbor information (needed for process border detection)
-  fillNeighbors( vertices, elements );
+  fillNeighbors( vertices, elements, bndSegs, periodics );
 
   const int weight = 1 ;
-  const size_t nElements = elements.size();
-  for( size_t el = 0; el<nElements; ++el )
+  const int nElements = elements.size();
+  for( int el = 0; el<nElements; ++el )
   {
     db.vertexUpdate( typename LoadBalancerType::GraphVertex( el, weight ) );
   }
@@ -149,7 +195,7 @@ void partition(const std::vector< Vertex >     &vertices,
   // if graph partitioning is used 
   if( mth > DataBaseType :: ALUGRID_SpaceFillingCurveSerial ) 
   {
-    for( size_t el = 0; el<nElements; ++el )
+    for( int el = 0; el<nElements; ++el )
     {
       for( int fce=0; fce<Element< rawId >::numFaces; ++fce ) 
       {
@@ -170,9 +216,50 @@ void partition(const std::vector< Vertex >     &vertices,
   std::vector< int > partition = db.repartition( mpa, mth, nPartitions );
 
   // set rank information 
-  for( size_t el = 0; el<nElements; ++el )
+  for( int el = 0; el<nElements; ++el )
   {
     elements[ el ].rank = partition[ el ];
+  }
+
+  // elements on periodic boundary need to be on one process 
+  const int periodicsSize = periodics.size();
+  for( int i=0; i<periodicsSize; ++i ) 
+  {
+    // make element have the same rank, element 0 sets rank of element 1
+    elements[ periodics[ i ].element[ 1 ] ].rank = elements[ periodics[ i ].element[ 0 ] ].rank;
+  }
+
+  bndSegs.reserve( bndSegs.size() * 2 );
+
+  //insert internal boundaries 
+  for( int el = 0; el<nElements; ++el )
+  {
+    Element< rawId >& element = elements[ el ];
+    for( int fce=0; fce<Element< rawId >::numFaces; ++fce )
+    {
+      const int nb = element.neighbor[ fce ];
+      if( nb != -1 && el < nb ) // if neighbor is element and my number is smaller
+      {
+        // if rank of neighboring element differ we have to insert interior boundary
+        if( element.rank != elements[ nb ].rank )
+        {
+          BndSeg< rawId > bndSeg;
+          bndSeg.bndid = closure ; // 211 
+          // get vertex numbers 
+          for( int vx=0; vx<BndSeg< rawId >::numVertices; ++vx ) 
+          {
+            bndSeg.vertices[ vx ] = element.vertices[ Element< rawId >::prototype( fce, vx ) ];
+          }
+          // insert interior face for element
+          bndSeg.element = el ;
+          bndSegs.push_back( bndSeg );
+
+          // insert interior face for neighbor
+          bndSeg.element = nb ;
+          bndSegs.push_back( bndSeg );
+        }
+      }
+    }
   }
 }
 
