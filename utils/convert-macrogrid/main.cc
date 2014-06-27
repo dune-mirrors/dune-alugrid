@@ -484,13 +484,13 @@ struct ProgramOptions
   
   ProgramOptions ()
     : defaultRawId( HEXA_RAW ), format( "ascii" ), 
-      byteOrder( "default" ), nPartition( 2 ), partitionMethod( 10 )
+      byteOrder( "default" ), nPartition( 1 ), partitionMethod( 10 )
   {}
 };
 
 std::string rankFileName( const std::string& filename, const int rank, const int nPartition ) 
 {
-  if( nPartition == 1 ) return filename ;
+  if( nPartition <= 1 ) return filename ;
 
   std::stringstream str; 
   str << filename << "." << rank;
@@ -554,13 +554,16 @@ void writeNewFormat ( const std::string& filename,
       switch( header.byteOrder() )
       {
       case MacroFileHeader::native:
-        return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        break ;
         
       case MacroFileHeader::bigendian:
-        return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        break ;
 
       case MacroFileHeader::littleendian:
-        return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        break ;
       }
     }
     else
@@ -837,12 +840,24 @@ int main ( int argc, char **argv )
         break;
 
       case 'p':
+        if( i+1 >= argc )
+        {
+          std::cerr << "Missing argument to option -p." << std::endl;
+          return 1;
+        }
         options.nPartition = atoi( argv[ i+1 ] );
+        std::copy( argv + (i+2), argv + argc, argv + i+1 );
         --argc;
         break ;
 
       case 'm':
+        if( i+1 >= argc )
+        {
+          std::cerr << "Missing argument to option -m." << std::endl;
+          return 1;
+        }
         options.partitionMethod = atoi( argv[ i+1 ] );
+        std::copy( argv + (i+2), argv + argc, argv + i+1 );
         --argc;
         break ;
 
