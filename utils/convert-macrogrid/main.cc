@@ -400,7 +400,7 @@ void writeMacroGrid ( stream_t &output,
 
   const int vertexListSize = vertices.size();
   const int partitionVertexSize = writeParallel ? partitionVertexIds.size() : vertexListSize ;
-  output << std::endl << partitionVertexSize << std::endl;
+  output << partitionVertexSize << std::endl;
   const typename std::set<int>::iterator pVxEnd = partitionVertexIds.end();
   for( int i = 0; i < vertexListSize; ++i )
   {
@@ -411,7 +411,7 @@ void writeMacroGrid ( stream_t &output,
            << vertices[ i ].x[ 0 ] << ws << vertices[ i ].x[ 1 ] << ws << vertices[ i ].x[ 2 ] << std::endl;
   }
 
-  output << std::endl << partitionElements << std::endl;
+  output << partitionElements << std::endl;
   for( int i = 0; i < elementListSize; ++i )
   {
     // if element is not in current partition continue 
@@ -443,7 +443,7 @@ void writeMacroGrid ( stream_t &output,
     }
   }
 
-  output << std::endl << periodicPartSize << ws << bndSegPartSize << std::endl;
+  output << periodicPartSize << ws << bndSegPartSize << std::endl;
   for( int i = 0; i < periodicListSize; ++i )
   {
     if( writeParallel && elements[ periodics[ i ].element[ 0 ] ].rank != rank ) continue ;
