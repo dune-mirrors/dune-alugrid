@@ -34,7 +34,7 @@ using ALUGrid::MacroFileHeader;
 enum ElementRawID { TETRA_RAW = ALUGrid :: MacroGridBuilder :: TETRA_RAW,  // = 4  
                     HEXA_RAW  = ALUGrid :: MacroGridBuilder :: HEXA_RAW    // = 8 
                   };
-static const int ghost_closure = ALUGrid :: Gitter :: hbndseg_STI :: ghost_closure ; // = 211 
+static const int closure = ALUGrid :: Gitter :: hbndseg_STI :: closure ; // = 211 
 
 
 // Vertex
@@ -112,7 +112,10 @@ struct BndSeg< TETRA_RAW >
 {
   static const int numVertices = 3;
   int bndid;
+  int element; // number of element this segment belongs to
   int vertices[ numVertices ];
+
+  BndSeg() : element( -1 ) {}
 };
 
 template<>
@@ -120,7 +123,10 @@ struct BndSeg< HEXA_RAW >
 {
   static const int numVertices = 4;
   int bndid;
+  int element; // number of element this segment belongs to
   int vertices[ numVertices ];
+
+  BndSeg() : element( -1 ) {}
 };
 
 
@@ -136,7 +142,10 @@ struct Periodic< TETRA_RAW >
 {
   static const int numVertices = 6;
   int bndid;
+  int element[ 2 ]; // number of element this segment belongs to
   int vertices[ numVertices ];
+
+  Periodic() { element[ 0 ] = element[ 1 ] = -1; }
 };
 
 template<>
@@ -144,7 +153,10 @@ struct Periodic< HEXA_RAW >
 {
   static const int numVertices = 8;
   int bndid;
+  int element[ 2 ]; // number of element this segment belongs to
   int vertices[ numVertices ];
+
+  Periodic() { element[ 0 ] = element[ 1 ] = -1; }
 };
 
 #include "partition.hh"
@@ -339,7 +351,7 @@ void readMacroGrid ( stream_t &input,
     else // interior bnd 
     {
       bndSegs[ i ].vertices[ j++ ] = bndid ;
-      bndSegs[ i ].bndid = ghost_closure ;
+      bndSegs[ i ].bndid = closure ;
     }
     for( ; j < BndSeg< rawId >::numVertices; ++j )
       input >> bndSegs[ i ].vertices[ j ];
@@ -411,20 +423,46 @@ void writeMacroGrid ( stream_t &output,
     output << std::endl;
   }
 
-  output << std::endl << periodicListSize << ws << bndSegListSize << std::endl;
+  int bndSegPartSize   = ( writeParallel ) ? 0 : bndSegListSize;
+  int periodicPartSize = ( writeParallel ) ? 0 : periodicListSize;
+
+  // count number of boundary segment for this partition 
+  if( writeParallel )
+  {
+    for( int i = 0; i < periodicListSize; ++i )
+    {
+      assert( periodics[ i ].element[ 0 ] == periodics[ i ].element[ 1 ] );
+      if( elements[ periodics[ i ].element[ 0 ] ].rank == rank ) 
+        ++ periodicPartSize ;
+    }
+
+    for( int i = 0; i < bndSegListSize; ++ i ) 
+    {
+      if( elements[ bndSegs[ i ].element ].rank == rank )
+        ++ bndSegPartSize ;
+    }
+  }
+
+  output << std::endl << periodicPartSize << ws << bndSegPartSize << std::endl;
   for( int i = 0; i < periodicListSize; ++i )
   {
+    if( writeParallel && elements[ periodics[ i ].element[ 0 ] ].rank != rank ) continue ;
+
     output << periodics[ i ].vertices[ 0 ];
     for( int j = 1; j < Periodic< rawId >::numVertices; ++j )
       output << ws << periodics[ i ].vertices[ j ];
     output << std::endl;
   }
+
   for( int i = 0; i < bndSegListSize; ++i )
   {
-    if( bndSegs[ i ].bndid != ghost_closure )
-      output << -bndSegs[ i ].bndid;
+    if( writeParallel && elements[ bndSegs[ i ].element ].rank != rank ) continue ;
 
-    for( int j = 0; j < BndSeg< rawId >::numVertices; ++j )
+    if( bndSegs[ i ].bndid != closure )
+      output << -bndSegs[ i ].bndid << ws;
+
+    output << bndSegs[ i ].vertices[ 0 ];
+    for( int j = 1; j < BndSeg< rawId >::numVertices; ++j )
       output << ws << bndSegs[ i ].vertices[ j ];
     output << std::endl;
   }
@@ -488,11 +526,11 @@ void writeNewFormat ( const std::string& filename,
                       const ProgramOptions &options,
                       std::vector< Vertex > &vertices,
                       std::vector< Element< rawId > > &elements,
-                      const std::vector< BndSeg< rawId > > &bndSegs,
-                      const std::vector< Periodic< rawId > > &periodics )
+                      std::vector< BndSeg< rawId > > &bndSegs,
+                      std::vector< Periodic< rawId > > &periodics )
 {
   // partition might change the order of elements due to space filling curve ordering
-  partition( vertices, elements, options.nPartition, options.partitionMethod );
+  partition( vertices, elements, bndSegs, periodics, options.nPartition, options.partitionMethod );
 
   for( int rank=0; rank<options.nPartition; ++ rank )
   {
