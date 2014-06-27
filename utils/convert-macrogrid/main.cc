@@ -14,6 +14,7 @@
 
 #include <dune/common/version.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
@@ -445,9 +446,18 @@ struct ProgramOptions
   
   ProgramOptions ()
     : defaultRawId( HEXA_RAW ), format( "ascii" ), 
-      byteOrder( "default" ), nPartition( 1 ), partitionMethod( 10 )
+      byteOrder( "default" ), nPartition( 2 ), partitionMethod( 10 )
   {}
 };
+
+std::string rankFileName( const std::string& filename, const int rank, const int nPartition ) 
+{
+  if( nPartition == 1 ) return filename ;
+
+  std::stringstream str; 
+  str << filename << "." << rank;
+  return str.str();
+}
 
 
 
@@ -474,45 +484,53 @@ void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
 // --------------
 
 template< ElementRawID rawId >
-void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
-                      const std::vector< Vertex > &vertices,
+void writeNewFormat ( const std::string& filename, 
+                      const ProgramOptions &options,
+                      std::vector< Vertex > &vertices,
                       std::vector< Element< rawId > > &elements,
                       const std::vector< BndSeg< rawId > > &bndSegs,
                       const std::vector< Periodic< rawId > > &periodics )
 {
-  // partition might change the element order
+  // partition might change the order of elements due to space filling curve ordering
   partition( vertices, elements, options.nPartition, options.partitionMethod );
 
-  const int rank = 0;
-
-  MacroFileHeader header;
-  header.setType( rawId == HEXA_RAW ? MacroFileHeader::hexahedra : MacroFileHeader::tetrahedra );
-  header.setFormat( options.format );
-
-  if( options.byteOrder != "default" )
-    header.setByteOrder( options.byteOrder );
-  else
-    header.setSystemByteOrder();
-
-  if( header.isBinary() )
+  for( int rank=0; rank<options.nPartition; ++ rank )
   {
-    switch( header.byteOrder() )
+    std::ofstream output( rankFileName( filename, rank, options.nPartition ) );
+    if( !output )
     {
-    case MacroFileHeader::native:
-      return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
-      
-    case MacroFileHeader::bigendian:
-      return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
-
-    case MacroFileHeader::littleendian:
-      return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+      std::cerr << "Unable to open output file: " << filename << "." << std::endl;
+      std::abort();
     }
-  }
-  else
-  {
-    header.write( output );
-    output << std::scientific << std::setprecision( 16 );
-    writeMacroGrid( output, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+    MacroFileHeader header;
+    header.setType( rawId == HEXA_RAW ? MacroFileHeader::hexahedra : MacroFileHeader::tetrahedra );
+    header.setFormat( options.format );
+
+    if( options.byteOrder != "default" )
+      header.setByteOrder( options.byteOrder );
+    else
+      header.setSystemByteOrder();
+
+    if( header.isBinary() )
+    {
+      switch( header.byteOrder() )
+      {
+      case MacroFileHeader::native:
+        return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        
+      case MacroFileHeader::bigendian:
+        return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+
+      case MacroFileHeader::littleendian:
+        return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+      }
+    }
+    else
+    {
+      header.write( output );
+      output << std::scientific << std::setprecision( 16 );
+      writeMacroGrid( output, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+    }
   }
 }
 
@@ -522,7 +540,7 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
 // -------------------
 
 template< ElementRawID rawId >
-void convertLegacyFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+void convertLegacyFormat ( std::istream &input, const std::string& filename, const ProgramOptions &options )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -530,7 +548,7 @@ void convertLegacyFormat ( std::istream &input, std::ostream &output, const Prog
   std::vector< Periodic< rawId > > periodics;
 
   readLegacyFormat( input, vertices, elements, bndSegs, periodics );
-  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
+  writeNewFormat( filename, options, vertices, elements, bndSegs, periodics );
 }
 
 
@@ -577,7 +595,7 @@ void readBinaryMacroGrid ( std::istream &input, const MacroFileHeader &header,
 // ----------------
 
 template< ElementRawID rawId >
-void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const MacroFileHeader &header )
+void convertNewFormat ( std::istream &input, const std::string& filename, const ProgramOptions &options, const MacroFileHeader &header )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -588,19 +606,18 @@ void convertNewFormat ( std::istream &input, std::ostream &output, const Program
     readBinaryMacroGrid( input, header, vertices, elements, bndSegs, periodics );
   else
     readMacroGrid( input, vertices, elements, bndSegs, periodics );
-
-  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
+  writeNewFormat( filename, options, vertices, elements, bndSegs, periodics );
 }
 
-void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const MacroFileHeader &header )
+void convertNewFormat ( std::istream &input, const std::string& filename, const ProgramOptions &options, const MacroFileHeader &header )
 {
   switch( header.type() )
   {
   case MacroFileHeader::tetrahedra:
-    return convertNewFormat< TETRA_RAW >( input, output, options, header );
+    return convertNewFormat< TETRA_RAW >( input, filename, options, header );
 
   case MacroFileHeader::hexahedra:
-    return convertNewFormat< HEXA_RAW >( input, output, options, header );
+    return convertNewFormat< HEXA_RAW > ( input, filename, options, header );
   }
 }
 
@@ -671,9 +688,8 @@ void readDGF ( stream_t &input,
 
 // convertDGF
 // ----------
-
 template< ElementRawID rawId >
-void convertDGF ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+void convertDGF ( std::istream &input, const std::string& filename, const ProgramOptions &options )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -681,17 +697,17 @@ void convertDGF ( std::istream &input, std::ostream &output, const ProgramOption
   std::vector< Periodic< rawId > > periodics;
 
   readDGF( input, vertices, elements, bndSegs, periodics );
-  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
+  writeNewFormat( filename, options, vertices, elements, bndSegs, periodics );
 }
 
-void convertDGF ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+void convertDGF ( std::istream &input, const std::string& filename, const ProgramOptions &options )
 {
   const clock_t start = clock();
 
   if( options.defaultRawId == HEXA_RAW )
-    convertDGF< HEXA_RAW >( input, output, options );
+    convertDGF< HEXA_RAW > ( input, filename, options );
   else
-    convertDGF< TETRA_RAW >( input, output, options );
+    convertDGF< TETRA_RAW >( input, filename, options );
 
   std::cout << "INFO: Conversion of DUNE grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
 }
@@ -701,7 +717,7 @@ void convertDGF ( std::istream &input, std::ostream &output, const ProgramOption
 // convert
 // -------
 
-void convert ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+void convert ( std::istream &input, const std::string& filename, const ProgramOptions &options )
 {
   const clock_t start = clock();
 
@@ -710,11 +726,11 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
   if( firstline[ 0 ] == char( '!' ) )
   {
     if( firstline.substr( 1, 3 ) == "ALU" )
-      convertNewFormat( input, output, options, MacroFileHeader( firstline ) );
+      convertNewFormat( input, filename, options, MacroFileHeader( firstline ) );
     else if( (firstline.find( "Tetrahedra" ) != firstline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
-      convertLegacyFormat< TETRA_RAW >( input, output, options );
+      convertLegacyFormat< TETRA_RAW >( input, filename, options );
     else if( (firstline.find( "Hexahedra" ) != firstline.npos) || (firstline.find( "Hexaeder" ) != firstline.npos) )
-      convertLegacyFormat< HEXA_RAW >( input, output, options );
+      convertLegacyFormat< HEXA_RAW >( input, filename, options );
     else 
     {
       std::cerr << "ERROR: Unknown comment to file format (" << firstline << ")." << std::endl;
@@ -726,9 +742,9 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
     std::cerr << "WARNING: No identifier for file format found. Trying to read as legacy "
               << (options.defaultRawId == HEXA_RAW ? "hexahedral" : "tetrahedral") << " grid." << std::endl;
     if( options.defaultRawId == HEXA_RAW )
-      convertLegacyFormat< HEXA_RAW >( input, output, options );
+      convertLegacyFormat< HEXA_RAW >( input, filename, options );
     else
-      convertLegacyFormat< TETRA_RAW >( input, output, options );
+      convertLegacyFormat< TETRA_RAW >( input, filename, options );
   }
 
   std::cout << "INFO: Conversion of macro grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
@@ -741,6 +757,8 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
 
 int main ( int argc, char **argv )
 {
+  Dune::MPIHelper::instance( argc, argv );
+
   ProgramOptions options;
 
   for( int i = 1; i < argc; ++i )
@@ -782,10 +800,12 @@ int main ( int argc, char **argv )
 
       case 'p':
         options.nPartition = atoi( argv[ i+1 ] );
+        --argc;
         break ;
 
       case 'm':
         options.partitionMethod = atoi( argv[ i+1 ] );
+        --argc;
         break ;
 
       case 'o':
@@ -836,15 +856,9 @@ int main ( int argc, char **argv )
     return 1;
   }
 
-  std::ofstream output( argv[ 2 ] );
-  if( !output )
-  {
-    std::cerr << "Unable to open output file: " << argv[ 2 ] << "." << std::endl;
-    return 1;
-  }
-
+  std::string filename( argv[ 2 ] );
   if( DGFParser::isDuneGridFormat( input ) )
-    convertDGF( input, output, options );
+    convertDGF( input, filename, options );
   else
-    convert( input, output, options );
+    convert( input, filename, options );
 }
