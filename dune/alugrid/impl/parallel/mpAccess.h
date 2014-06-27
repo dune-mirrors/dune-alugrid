@@ -276,9 +276,12 @@ namespace ALUGrid
     return (* _sendLinkage.find (i)).second ;
   }
 
-  inline int MpAccessLocal :: recvLink (int i) const {
-    alugrid_assert (_recvLinkage.end () != _recvLinkage.find (i)) ;
-    return (* _recvLinkage.find (i)).second ;
+  inline int MpAccessLocal::recvLink ( int i ) const
+  {
+    alugrid_assert( _currentRecvLinkage );
+    const typename linkage_t::const_iterator pos = _currentRecvLinkage->find( i );
+    alugrid_assert( pos != _currentRecvLinkage->end() );
+    return pos->second;
   }
 
   inline const std::vector<int>& MpAccessLocal :: sendDest() const 
