@@ -1,5 +1,7 @@
 #/bin/bash
 
+MPICALL="mpirun -np $1"
+
 echo "running on $1 procs"
 
 make clean
@@ -14,11 +16,11 @@ mv main_transport transport_overlapcom
 
 cd ..
 
-mpiexec -np $1 ./transport_persistent 2 0 3 >& transport_persistent.$1.out
+$MPICALL ./transport_persistent 2 0 3 >& transport_persistent.$1.out
 mv speedup.1 transport_persistent.speedup.$1
 
 cd communication
-mpiexec -np $1 ./transport_overlapcom 2 0 3 >& transport_overlapcom.$1.out
+$MPICALL ./transport_overlapcom 2 0 3 >& transport_overlapcom.$1.out
 mv speedup.1 transport_overlapcom.speedup.$1
 
 cd ..
