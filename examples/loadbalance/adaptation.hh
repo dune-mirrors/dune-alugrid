@@ -120,6 +120,18 @@ public:
     container_.resize();
     Vector::prolongLocal( father, container_ );
   }
+#if !DUNE_VERSION_NEWER_REV(DUNE_GRID,2,3,2)
+  // called when children of father are going to vanish
+  void preCoarsening ( const Entity &father ) const
+  {
+    const_cast<ThisType&>(*this).preCoarsening(father);
+  }
+  // called when children of father where newly created
+  void postRefinement ( const Entity &father ) const
+  {
+    const_cast<ThisType&>(*this).postRefinement(father);
+  }
+#endif
 private:
   Vector& getSolution()             { assert( solution_ ); return *solution_; }
   const Vector& getSolution() const { assert( solution_ ); return *solution_; }
