@@ -42,7 +42,8 @@ namespace Dune {
   public:
     SpaceFillingCurveOrdering( const Coordinate& lower, 
                                const Coordinate& upper, 
-                               const CollectiveCommunication& comm )
+                               const CollectiveCommunication& comm =
+                               CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
       : lower_( lower ),
         length_( upper ),
         zz_( comm )
