@@ -65,8 +65,7 @@ void method ( const std::string& gridFileName,
 
   {
     /* Grid construction ... */
-    // create grid pointer and release to free memory of GridPtr
-    Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( gridFileName ).release();
+    Dune::GridPtr< Grid > gridPtr( gridFileName );
 
     Grid &grid = *gridPtr;
 
@@ -111,10 +110,7 @@ void method ( const std::string& gridFileName,
     // write backup to hard drive using SIONlib 
     // (alternative to writing one file per core above)
     backupSION( "sioncheckpoint", rank, stream );
-
-    // destroy grid  
-    delete gridPtr ;
-  } 
+  } // here GridPtr is destroyed 
   
   ///////////////////////////////////////////////////////////////
   //
