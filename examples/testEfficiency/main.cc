@@ -142,7 +142,6 @@ void method ( int problem, int startLvl, int maxLvl,
     double dt;
 
     Dune :: Timer solveTimer ;
-#if NON_BLOCKING
     {
       // apply the spacial operator
       dt = scheme.border( time, solution, update );
@@ -157,9 +156,6 @@ void method ( int problem, int startLvl, int maxLvl,
       dt = std::min(dt , scheme( time, solution, update ) );
       // multiply time step by CFL number
     }
-#else
-    dt = scheme( time, solution, update ) ;
-#endif
     dt *= cfl;
     // stop time 
     const double solveTime = solveTimer.elapsed(); 
