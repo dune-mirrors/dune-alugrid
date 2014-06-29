@@ -31,3 +31,9 @@ Makefile.in
 *.o
 *.tmp
 *.swp
+*.out
+*.vtu 
+*.pvtu
+*.pvd
+*.speedup.*
+

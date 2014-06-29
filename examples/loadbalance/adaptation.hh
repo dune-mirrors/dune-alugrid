@@ -101,7 +101,6 @@ public:
   //--------------------------------------------------
   //  Interface methods for callback adaptation
   //--------------------------------------------------
-  
   // called when children of father are going to vanish
   void preCoarsening ( const Entity &father )
   {

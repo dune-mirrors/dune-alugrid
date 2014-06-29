@@ -99,6 +99,39 @@ public:
   // this is called before after the adaptation process is finished 
   void finalize ();
 
+  //--------------------------------------------------
+  //  Interface methods for callback adaptation
+  //--------------------------------------------------
+  // called when children of father are going to vanish
+  void preCoarsening ( const Entity &father )
+  {
+#ifndef USE_VECTOR_FOR_PWF
+    Container &container_ = getSolution().container();
+#endif
+    Vector::restrictLocal( father, container_ );
+  }
+
+  // called when children of father where newly created
+  void postRefinement ( const Entity &father )
+  {
+#ifndef USE_VECTOR_FOR_PWF
+    Container &container_ = getSolution().container();
+#endif
+    container_.resize();
+    Vector::prolongLocal( father, container_ );
+  }
+#if !DUNE_VERSION_NEWER_REV(DUNE_GRID,2,3,2)
+  // called when children of father are going to vanish
+  void preCoarsening ( const Entity &father ) const
+  {
+    const_cast<ThisType&>(*this).preCoarsening(father);
+  }
+  // called when children of father where newly created
+  void postRefinement ( const Entity &father ) const
+  {
+    const_cast<ThisType&>(*this).postRefinement(father);
+  }
+#endif
 private:
   /** \brief do restriction of data on leafs which might vanish
    *         in the grid hierarchy below a given entity
@@ -154,6 +187,7 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
   // copy data to container 
   initialize();
 
+#ifndef CALLBACK_ADAPTATION
 #ifndef USE_VECTOR_FOR_PWF
   Container &container_ = solution.container();
 #endif
@@ -181,6 +215,10 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
     for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
       hierarchicProlong( *it, container_ );
   }
+#else // CALLBACK_ADAPTATION
+  // callback adaptation, see interface methods above 
+  grid_.adapt( *this );
+#endif // CALLBACK_ADAPTATION
 
   // reset adaptation information in grid
   grid_.postAdapt();

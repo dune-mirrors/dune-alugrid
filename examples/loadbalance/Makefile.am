@@ -12,7 +12,8 @@ AM_CPPFLAGS += $(EXTRAFLAGS) $(PROBLEM)
 
 exampleslbdir = $(includedir)/examples/loadbalanacing
 exampleslb_HEADERS = \
-  adaptation.hh  loadbalance_simple.hh loadbalance_zoltan.hh
+    adaptation.hh  diagnostics.hh  loadbalance_simple.hh  paralleldgf.hh        problem-ball.hh   problem-transport.hh \
+    datamap.hh     fvscheme.hh     loadbalance_zoltan.hh  piecewisefunction.hh  problem-euler.hh  problem.hh
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
