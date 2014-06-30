@@ -45,7 +45,30 @@ struct Vertex
   typedef Dune::FieldVector< double, 3 > Coordinate ;
   int id;
   Coordinate x ;
-  Vertex () : id( -1 ), x( 0 ) {}
+
+  std::set< int > linkage ;
+  std::set< int > elements ;
+
+  Vertex () : id( -1 ), x( 0 ), linkage(), elements() {}
+
+  void fillLinkage( std::vector< int >& links, const int rank ) const
+  {
+    links.clear();
+    const size_t lSize = linkage.size() ;
+    if( lSize > 0 ) 
+    {
+      typedef std::set<int> :: iterator iterator ;
+      // convert links to vector 
+      links.reserve( lSize );
+      iterator lend = linkage.end();
+      for( iterator link = linkage.begin(); link != lend; ++link ) 
+      {
+        // insert all ranks except mine 
+        if( *link != rank ) 
+          links.push_back( *link );
+      }
+    }
+  }
 };
 
 
@@ -381,7 +404,10 @@ void writeMacroGrid ( stream_t &output,
   const bool writeParallel = nPartition > 1 ; 
 
   ALUGrid::StandardWhiteSpace_t ws;
-  std::set< int > partitionVertexIds;
+
+  typedef std::set< int > partitionvx_t ;
+  partitionvx_t partitionVertexIds;
+
   int partitionElements = elementListSize ;
   if( writeParallel )
   {
@@ -394,7 +420,9 @@ void writeMacroGrid ( stream_t &output,
 
       ++ partitionElements ;
       for( int j = 0; j < Element< rawId >::numVertices; ++j )
+      {
         partitionVertexIds.insert( elements[ i ].vertices[ j ] );
+      }
     }
   }
 
@@ -466,7 +494,75 @@ void writeMacroGrid ( stream_t &output,
       output << ws << bndSegs[ i ].vertices[ j ];
     output << std::endl;
   }
-  output << int(0) << std::endl; // no linkage
+
+  if( writeParallel ) 
+  {
+    typedef std::vector< int > linkagePattern_t;
+    typedef std::map< linkagePattern_t, int > linkagePatternMap_t;
+
+    // create linkage patterns 
+    linkagePatternMap_t linkage ;
+
+    typedef typename partitionvx_t :: iterator iterator ;
+    const iterator end = partitionVertexIds.end();
+    for( iterator it = partitionVertexIds.begin(); it != end; ++it )
+    {
+      std::vector< int > links ;
+      vertices[ *it ].fillLinkage( links, rank );
+      if( links.size() > 0 ) 
+        linkage[ links ] = 1 ;
+    }
+
+    // write size of linkage patterns 
+    output << linkage.size() << std::endl;
+
+    typedef linkagePatternMap_t :: iterator linkiterator ;
+    const linkiterator linkend = linkage.end();
+    int idx = 0;
+    for( linkiterator it = linkage.begin(); it != linkend ; ++it, ++idx ) 
+    {
+      // store index of linkage entry in list 
+      (*it).second = idx ;
+      const std::vector< int >& ranks = (*it).first ;
+      const int rSize = ranks.size();
+      output << rSize << ws ;
+      for( int i=0; i<rSize; ++i ) 
+        output <<  ranks[ i ] << ws ;
+      output << std::endl;
+    }
+
+    const int hasElementLinkage = 1 ;
+    output << hasElementLinkage << std::endl;
+
+    idx = 0;
+    for( iterator it = partitionVertexIds.begin(); it != end; ++it, ++idx )
+    {
+      std::vector< int > links ;
+      const Vertex& vertex = vertices[ *it ];
+      vertex.fillLinkage( links, rank );
+      // if vertex has linkage we need to write the position
+      if( links.size() > 0 )
+      {
+        output << idx << ws << linkage[ links ];
+        if( hasElementLinkage ) 
+        {
+          const int elsize = vertex.elements.size();
+          output << ws << elsize; 
+          typedef std::set<int> :: const_iterator iterator ;
+          const iterator elend = vertex.elements.end();
+          for( iterator it = vertex.elements.begin(); it != elend; ++it ) 
+          {
+            output << ws << (*it) ;
+          }
+        }
+        output << std::endl;
+      }
+    }
+    output << int(-1) << std::endl; // end marker for vertex position list
+    
+  }
+  else 
+    output << int(0) << std::endl; // no linkage
 }
 
 
@@ -531,6 +627,9 @@ void writeNewFormat ( const std::string& filename,
 {
   // partition might change the order of elements due to space filling curve ordering
   partition( vertices, elements, bndSegs, periodics, options.nPartition, options.partitionMethod );
+
+  // compute vertex linkage 
+  computeLinkage( vertices, elements );
 
   for( int rank=0; rank<options.nPartition; ++ rank )
   {
