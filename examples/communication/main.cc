@@ -141,28 +141,23 @@ void method ( int problem, int startLvl, int maxLvl,
     update.clear();
     double dt;
 
+    // the following is taken from piecewisefunction.hh to avoid copy constructer...
+    const Dune::InterfaceType interface = Dune::InteriorBorder_All_Interface;
+    const Dune::CommunicationDirection direction = Dune::ForwardCommunication;
+    typename DataType::CommDataHandle handle( update );
     Dune :: Timer solveTimer ;
 #ifdef NON_BLOCKING
     {
       // apply the spacial operator
       dt = scheme.border( time, solution, update );
-      // want to have
-      // auto comm = update.communicate();
-      // the following is taken from piecewisefunction.hh to avoid copy constructer...
-      const Dune::InterfaceType interface = Dune::InteriorBorder_All_Interface;
-      const Dune::CommunicationDirection direction = Dune::ForwardCommunication;
-      typename DataType::CommDataHandle handle( update );
       auto commObject = grid.communicate( handle, interface, direction );
       dt = std::min(dt , scheme( time, solution, update ) );
-      // multiply time step by CFL number
     }
 #else
     dt = scheme( time, solution, update ) ;
-    const Dune::InterfaceType interface = Dune::InteriorBorder_All_Interface;
-    const Dune::CommunicationDirection direction = Dune::ForwardCommunication;
-    typename DataType::CommDataHandle handle( update );
     grid.communicate( handle, interface, direction );
 #endif
+    // multiply time step by CFL number
     dt *= cfl;
     // stop time 
     const double solveTime = solveTimer.elapsed(); 
