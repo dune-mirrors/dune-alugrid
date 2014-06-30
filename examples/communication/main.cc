@@ -142,7 +142,7 @@ void method ( int problem, int startLvl, int maxLvl,
     double dt;
 
     Dune :: Timer solveTimer ;
-#if NON_BLOCKING
+#ifdef NON_BLOCKING
     {
       // apply the spacial operator
       dt = scheme.border( time, solution, update );
@@ -152,13 +152,16 @@ void method ( int problem, int startLvl, int maxLvl,
       const Dune::InterfaceType interface = Dune::InteriorBorder_All_Interface;
       const Dune::CommunicationDirection direction = Dune::ForwardCommunication;
       typename DataType::CommDataHandle handle( update );
-      // auto commObject = grid.communicate( handle, interface, direction );
-      grid.communicate( handle, interface, direction );
+      auto commObject = grid.communicate( handle, interface, direction );
       dt = std::min(dt , scheme( time, solution, update ) );
       // multiply time step by CFL number
     }
 #else
     dt = scheme( time, solution, update ) ;
+    const Dune::InterfaceType interface = Dune::InteriorBorder_All_Interface;
+    const Dune::CommunicationDirection direction = Dune::ForwardCommunication;
+    typename DataType::CommDataHandle handle( update );
+    grid.communicate( handle, interface, direction );
 #endif
     dt *= cfl;
     // stop time 
