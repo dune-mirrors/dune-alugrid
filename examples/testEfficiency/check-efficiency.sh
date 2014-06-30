@@ -9,9 +9,10 @@ MPICALL="mpirun"
 PROBLEM="-DEULER"
 # parameters: shock interaction problem with coarse macro grid (21)
 PARAM="21 0 1"
+EXTRAFLAGS="-DNO_OUTPUT -DCALLBACK_ADAPTATION"
 
 make clean
-make EXTRAFLAGS="-DNO_OUTPUT" PROBLEM="$PROBLEM" main
+make EXTRAFLAGS="$EXTRAFLAGS" PROBLEM="$PROBLEM" main
 
 P=1
 while [  $P -le $PROCSPERNODE ]; do
