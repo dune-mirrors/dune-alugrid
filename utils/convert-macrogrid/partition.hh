@@ -152,6 +152,27 @@ void fillNeighbors(const std::vector< Vertex > &vertices,
   }
 }
 
+template < ElementRawID rawId >
+void computeLinkage( std::vector< Vertex >& vertices,
+                     const std::vector< Element< rawId > > &elements ) 
+{
+  // store element-vertex linkage in case this option was selected
+  const int elementListSize = elements.size();
+  // the position in the element list is also the element id
+  for( int i = 0; i < elementListSize; ++i )
+  {
+    for( int j = 0; j < Element< rawId >::numVertices; ++j )
+    {
+      // currently this only works if the vertex id is the same as the position
+      assert( vertices[ elements[ i ].vertices[ j ] ].id == elements[ i ].vertices[ j ] );
+      Vertex& vertex = vertices[ elements[ i ].vertices[ j ] ];
+      vertex.elements.insert( i );
+      vertex.linkage.insert( elements[ i ].rank );
+    }
+  }
+
+}
+
 // we assume that the elements have been ordered by using the above ordering method
 template< ElementRawID rawId >
 void partition(const std::vector< Vertex >     &vertices,
