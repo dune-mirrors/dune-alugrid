@@ -227,9 +227,6 @@ namespace Dune
 
   // next is 3d template specialization
 
-
-
-
   /** 
    (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 

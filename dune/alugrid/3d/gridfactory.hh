@@ -365,7 +365,7 @@ namespace Dune
   };
   
   
-    /** \brief Specialization of the generic GridFactory for ALUCubeGrid<2,dimw>
+   /** \brief Specialization of the generic GridFactory for ALUCubeGrid<2,dimw>
    *  \ingroup GridFactory
    */
   template<int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype , class Comm >

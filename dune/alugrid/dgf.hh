@@ -605,7 +605,6 @@ namespace Dune
                        MPICommunicatorType communicator, 
                        const std::string &filename )
   {
-      typedef G DGFGridType ;
   
     const int dimgrid = 3;
     const int dimworld = 3 ; 
@@ -645,15 +644,11 @@ namespace Dune
     }
 
     for( int n = 0; n < dgf_.nofvtx; ++n )
-    {
-
-    
+    { 
       FieldVector< double, dimworld > pos;
       for( int i = 0; i < dimworld; ++i )
         pos[ i ] = dgf_.vtx[ n ][ i ];
-      factory_.insertVertex( pos );
-      
-      
+      factory_.insertVertex( pos );  
     }
 
     GeometryType elementType( (eltype == simplex) ? 
@@ -674,7 +669,7 @@ namespace Dune
         typedef typename DuneGridFormatParser::facemap_t::key_type Key;
         typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
 
-        const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[n], face );
+        const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[n], face );
         const Iterator it = dgf_.facemap.find( key );
         if( it != dgf_.facemap.end() )
           factory_.insertBoundary( n, face, it->second.first );
