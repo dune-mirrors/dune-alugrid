@@ -80,12 +80,8 @@ public:
   ZoltanLoadBalanceHandle ( const Grid &grid);
   ~ZoltanLoadBalanceHandle();
 
-  bool userDefinedPartitioning () const
-  {
-    return true;
-  }
-
-  // returns true if user defined partitioning needs to be readjusted 
+  // this method is called before invoking the repartition method on the
+  // grid, to check if the user defined partitioning needs to be readjusted
   bool repartition ()
   { 
     int elements = grid_.size(0);
@@ -134,7 +130,6 @@ public:
   }
   
   // return destination (i.e. rank) where the given element should be moved to 
-  // this needs the methods userDefinedPartitioning to return true
   int operator()( const Element &element ) const 
   { 
 	  std::vector<int> elementGID(NUM_GID_ENTRIES);
@@ -156,6 +151,22 @@ public:
       }
     }
     return p;
+  }
+  // This method can simply return false, in which case ALUGrid will
+  // internally compute the required information through some global
+  // communication. To avoid this overhead the user can provide the ranks
+  // of particians from which elements will be moved to the calling partitian.
+  bool importRanks( std::vector<int> &ranks) 
+  {
+    std::set<int> importProcs;
+    importProcs.insert( new_partitioning_.importProcs,
+                        new_partitioning_.importProcs+new_partitioning_.numImport );
+    ranks.resize(importProcs.size());
+    std::copy(importProcs.begin(), importProcs.end(), ranks.begin());
+    // std::ostream_iterator< int > output( cout, " " );
+    // cout << "Import ranks: ";
+    // std::copy( ranks.begin(), ranks.end(), output );
+    return true;
   }
 private:
   void generateHypergraph();
