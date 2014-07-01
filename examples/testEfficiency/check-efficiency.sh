@@ -1,7 +1,7 @@
 #/bin/bash
 
 NODES=3
-PROCSPERNODE=4
+PROCSPERNODE=2
 
 # include a machine file here and other flags
 MPICALL="mpirun"
@@ -16,9 +16,9 @@ make EXTRAFLAGS="$EXTRAFLAGS" PROBLEM="$PROBLEM" clean main
 P=1
 while [  $P -le $PROCSPERNODE ]; do
   echo "running ./main $PARAM with $P processes on one machine"
-  $MPICALL -np $P ./main $PARAM >& main.$P.out
-  echo "# running ./main $PARAM with $P processes on one machine" >> main.$P.out
-  mv speedup.$P transport_persistent.speedup.$P
+  name=$(printf main.%04d.out $P)
+  $MPICALL -np $P ./main $PARAM >& $name
+  echo "# running ./main $PARAM with $P processes on one machine" >> $name
   let "P=2*P"
 done
 
@@ -26,9 +26,9 @@ N=2
 while [  $N -le $NODES ]; do
   let "P=N*PROCSPERNODE"
   echo "running ./main $PARAM with $P processes on $N machine"
-  $MPICALL -np $P ./main $PARAM >& main.$P.out
-  echo "# running ./main $PARAM with $P processes on $N machine" >> main.$P.out
-  mv speedup.$P transport_persistent.speedup.$P
+  name=$(printf main.%04d.out $P)
+  $MPICALL -np $P ./main $PARAM >& $name
+  echo "# running ./main $PARAM with $P processes on $N machine" >> $name
   let "N=N+1"
 done
 
